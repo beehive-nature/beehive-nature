@@ -54,7 +54,7 @@
      once, grouped on the '—' dividers that were already there. Same markup, same
      links, same active state — CSS decides the shape, so there is one nav to
      maintain and not two. */
-  b.style.cssText='position:fixed;bottom:0;left:0;right:0;z-index:9998;display:flex;flex-wrap:nowrap;overflow-x:auto;gap:0 4px;padding:7px 12px;background:#0b0d0c;border-top:1px solid #1c211e;font:500 12px/1 ui-sans-serif,system-ui,sans-serif;-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 34px),transparent);mask-image:linear-gradient(90deg,#000 calc(100% - 34px),transparent)';
+  b.style.cssText='position:fixed;bottom:0;left:0;right:0;max-width:100vw;z-index:9998;display:flex;flex-wrap:nowrap;overflow-x:auto;gap:0 4px;padding:7px 12px;background:#0b0d0c;border-top:1px solid #1c211e;font:500 12px/1 ui-sans-serif,system-ui,sans-serif;-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 34px),transparent);mask-image:linear-gradient(90deg,#000 calc(100% - 34px),transparent)';
   b.innerHTML=L.map(function(x){
     if(x==='—')return '<span class="tsep" style="align-self:stretch;width:1px;background:#333;margin:0 4px;flex-shrink:0"></span>';
     var h=(R+x[1])===location.pathname.replace(/index.html$/,'');

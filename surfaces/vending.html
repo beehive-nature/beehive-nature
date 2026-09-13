@@ -184,22 +184,22 @@ main{max-width:462px;margin:0 auto}
 <body>
 <main>
 <nav class="crumbs" aria-label="you are here">
-  <a href="index.html">beehive nature reserve</a><span>▸</span><span class="here">the vending machine</span>
+  <a href="index.html">beehive nature reserve</a><span>▸</span><span class="here" data-i18n="v.crumb">the vending machine</span>
 </nav>
 
 <header class="hd">
   <div class="r" aria-hidden="true">⚘</div>
   <div>
-    <h1>mint your <span>agent</span></h1>
-    <small>skaists vending · keep what you make</small>
+    <h1><span data-i18n="v.h1a">mint your</span> <span data-i18n="v.h1b">agent</span></h1>
+    <small data-i18n="v.sub">skaists vending · keep what you make</small>
   </div>
 </header>
 
 <!-- ── 1 · NAME IT ─────────────────────────────────────────────── -->
-<div class="step" id="s1">1 · name it</div>
+<div class="step" id="s1" data-i18n="v.s1">1 · name it</div>
 <section class="card" aria-label="name your agent">
   <div class="field">
-    <label for="vname">name</label>
+    <label for="vname" data-i18n="v.l.name">name</label>
     <input id="vname" type="text" value="vendingtest3" maxlength="64"
            autocomplete="off" spellcheck="false" aria-describedby="vnamelaw">
     <span class="sep" aria-hidden="true"></span><span style="color:var(--gold)">a</span>
@@ -207,16 +207,16 @@ main{max-width:462px;margin:0 auto}
   <div class="lawline" id="vnamelaw">pointer row key <b>fnv1a-64</b>: <span id="vnamepk">—</span><span id="vnamechk"></span></div>
   <div class="lawline" id="vcanon" style="display:none">minted as <b id="vcanonform" style="color:var(--gold)"></b><span class="sep" aria-hidden="true"></span>a · <span style="color:var(--amber)">normalized from your input</span></div>
   <div class="field">
-    <label for="vtongue">tongue</label>
+    <label for="vtongue" data-i18n="v.l.tongue">tongue</label>
     <select id="vtongue" aria-describedby="vtonguelaw"></select><span class="chev">▾</span>
   </div>
   <div class="field">
-    <label for="vline">line</label>
+    <label for="vline" data-i18n="v.l.line">line</label>
     <select id="vline" aria-describedby="vlinelaw">
       <option value="bqueenbee-genesis-1" selected>bQueenBee genesis</option>
     </select><span class="chev">▾</span>
   </div>
-  <p class="note">Your agent gets a house on the <b>.a</b> rail, speaks the tongue you
+  <p class="note" data-i18n="v.note1">Your agent gets a house on the <b>.a</b> rail, speaks the tongue you
   pick, and belongs to <b>you</b> — not to us. Any name your tongue writes,
   the rail accepts whole (SPEC-A-NAMES-1 §charset — 27 corpus tongues + sanskrit).
   Names are minted <b>canonical</b>: NFC, trimmed, whitespace folded, lowercased
@@ -224,63 +224,62 @@ main{max-width:462px;margin:0 auto}
 </section>
 
 <!-- ── 2 · THE PRICE, ALL OF IT ────────────────────────────────── -->
-<div class="step">2 · the price, all of it</div>
+<div class="step" data-i18n="v.s2">2 · the price, all of it</div>
 <section class="card" aria-label="the price, all of it">
-  <div class="line"><span id="l-mint">mint<small id="l-mint-sub" class="dotted">reading the law rows…</small></span><b id="v-mint">—</b></div>
-  <div class="line"><span>its room on chain<small id="l-ram-sub" class="dotted">≈ 462 B row · refundable if released</small></span><b id="v-ram">—</b></div>
-  <div class="line"><span id="l-tithe">the tithe<small id="l-tithe-sub" class="dotted">reading the law rows…</small></span><b id="v-tithe">—</b></div>
-  <div class="line"><span>its birth certificate<small>Arweave · permanent · Turbo free tier carries it today</small></span><b>$0.00</b></div>
-  <div class="total"><span class="sub" id="v-total-sub">you pay, once</span><span class="big" id="v-total">—</span></div>
+  <div class="line"><span id="l-mint"><span data-i18n="v.l.mint">mint</span><small id="l-mint-sub" class="dotted">reading the law rows…</small></span><b id="v-mint">—</b></div>
+  <div class="line"><span><span data-i18n="v.l.ram">its room on chain</span><small id="l-ram-sub" class="dotted">≈ 462 B row · refundable if released</small></span><b id="v-ram">—</b></div>
+  <div class="line"><span id="l-tithe"><span data-i18n="v.l.tithe">the tithe</span><small id="l-tithe-sub" class="dotted">reading the law rows…</small></span><b id="v-tithe">—</b></div>
+  <div class="line"><span><span data-i18n="v.l.cert">its birth certificate</span><small data-i18n="v.l.certsub">Arweave · permanent · Turbo free tier carries it today</small></span><b>$0.00</b></div>
+  <div class="total"><span class="sub" id="v-total-sub" data-i18n="v.total">you pay, once</span><span class="big" id="v-total">—</span></div>
   <button class="btn" id="vmintbtn" disabled>Mint — reading the live price…</button>
-  <p class="note">Rehearsal is free today — <b>testnet A, memo-bound</b>. The paid rails
+  <p class="note" data-i18n="v.note2">Rehearsal is free today — <b>testnet A, memo-bound</b>. The paid rails
   (<b>USDC on Base, PYUSD on its official chains</b>) are <b>held</b> until the founder names
   the machine's payment seat. <b>Card and PayPal are not available</b> — no card processor is
   wired, and nothing here touches a PayPal account (PYUSD is PayPal-issued, but it rides its
-  own chains). Nothing moves until you approve the plan on the next screen.</p>
-  <div class="lawline" id="afterplan" style="display:none;margin-top:8px"></div>
+  own chains). Nothing moves until you approve the plan on the next screen.</p>  <div class="lawline" id="afterplan" style="display:none;margin-top:8px"></div>
 </section>
 
 <!-- ── 3 · WATCH IT LAND ───────────────────────────────────────── -->
-<div class="step">3 · watch it land</div>
+<div class="step" data-i18n="v.s3">3 · watch it land</div>
 <section class="card" aria-label="watch it land">
   <div class="comb" id="vcomb" aria-live="polite">
     <div class="cell" id="c-nectar"><div class="hex nectar">nectar</div>
-      <div class="l">sent</div><div class="s" id="c-nectar-s">on its way</div></div>
+      <div class="l" data-i18n="v.c.sent">sent</div><div class="s" id="c-nectar-s" data-i18n="v.c.onitsway">on its way</div></div>
     <div class="arrow" aria-hidden="true">›</div>
     <div class="cell" id="c-honey"><div class="hex honey">honey</div>
-      <div class="l">in a block</div><div class="s" id="c-honey-s">—</div></div>
+      <div class="l" data-i18n="v.c.inablock">in a block</div><div class="s" id="c-honey-s">—</div></div>
     <div class="arrow" aria-hidden="true">›</div>
     <div class="cell" id="c-capped"><div class="hex capped"><span class="seal">⬡</span></div>
-      <div class="l" id="c-capped-l">final</div><div class="s" id="c-capped-s">—</div></div>
+      <div class="l" id="c-capped-l" data-i18n="v.c.final">final</div><div class="s" id="c-capped-s">—</div></div>
   </div>
-  <div class="tx"><span class="k">the mint, on the public chain</span><span id="vtx">reading the machine's recent mints…</span></div>
+  <div class="tx"><span class="k" data-i18n="v.tx">the mint, on the public chain</span><span id="vtx" data-i18n="v.txreading">reading the machine's recent mints…</span></div>
   <div class="checked" id="vchecked"></div>
 </section>
 
 <!-- ── 4 · YOURS TO KEEP ───────────────────────────────────────── -->
-<div class="step">4 · yours to keep</div>
+<div class="step" data-i18n="v.s4">4 · yours to keep</div>
 <section class="card" aria-label="yours to keep">
   <div class="cert">
-    <div class="t" id="vcert-t">birth certificate · agent-birth-certificate v1</div>
+    <div class="t" id="vcert-t"><span data-i18n="v.cert.t">birth certificate</span> · agent-birth-certificate v1</div>
     <h2 id="vcert-name">—<span class="sep" aria-hidden="true"></span>a</h2>
     <div class="q" id="vcert-q">"—"</div>
-    <div class="kv"><span>owner</span><b id="vcert-owner">—</b></div>
-    <div class="kv"><span>certificate</span><b id="vcert-ar">—</b></div>
-    <div class="kv"><span>fingerprint</span><b id="vcert-hash">—</b></div>
-    <div class="kv"><span>memory</span><b>autonomi · your key · deletable</b></div>
-    <button class="btn2" id="vrebuild">Rebuild it without us ↻</button>
+    <div class="kv"><span data-i18n="v.kv.owner">owner</span><b id="vcert-owner">—</b></div>
+    <div class="kv"><span data-i18n="v.kv.certificate">certificate</span><b id="vcert-ar">—</b></div>
+    <div class="kv"><span data-i18n="v.kv.fingerprint">fingerprint</span><b id="vcert-hash">—</b></div>
+    <div class="kv"><span data-i18n="v.kv.memory">memory</span><b><span data-i18n="v.kv.memoryv">autonomi · your key · deletable</span></b></div>
+    <button class="btn2" id="vrebuild" data-i18n="v.rebuild">Rebuild it without us ↻</button>
     <div class="res" id="vres">
-      <div class="head">client-side resurrection · from the name alone · live</div>
+      <div class="head" data-i18n="v.res.head">client-side resurrection · from the name alone · live</div>
       <ul id="vres-list"></ul>
-      <div id="vres-sum" class="lawline">not run yet</div>
+      <div id="vres-sum" class="lawline" data-i18n="v.ressum">not run yet</div>
     </div>
   </div>
-  <p class="note">The certificate carries <b>the recipe</b> — if this site vanished
+  <p class="note" data-i18n="v.note3">The certificate carries <b>the recipe</b> — if this site vanished
   tomorrow, you could stand your agent back up, and so could anyone else.</p>
 </section>
 
 <!-- ── 5 · THE METER'S OWN RECEIPT (x402) ──────────────────────── -->
-<div class="step" id="x402-sec">5 · the meter's own receipt</div>
+<div class="step" id="x402-sec" data-i18n="v.s5">5 · the meter's own receipt</div>
 <section class="card" aria-label="the x402 meter receipt — session 42, audited in your page">
   <p class="note" style="margin:0 0 10px">The machine that charges you is itself metered:
   <b>credit lands only from settled single-use nonces</b> (a replayed payment credits
@@ -296,14 +295,14 @@ main{max-width:462px;margin:0 auto}
 </section>
 
 <footer class="foot">
-  <b>new bee:</b> you just made an AI that's yours. ·
-  <b>raver:</b> it speaks your tongue and lives in the hive. ·
-  <b>cypherpunk:</b> Arweave record, ed25519 owner, sha256 over canonical JSON,
-  pointer derived not stored — <a href="https://monitor.jungletestnet.io/#accountOverview:bnrapolltest">verify it yourself</a>.<br>
+  <b data-i18n="v.care.bee">new bee:</b> <span data-i18n="v.care.bees">you just made an AI that's yours.</span> ·
+  <b data-i18n="v.care.raver">raver:</b> <span data-i18n="v.care.ravers">it speaks your tongue and lives in the hive.</span> ·
+  <b data-i18n="v.care.cypher">cypherpunk:</b> <span data-i18n="v.care.cyphers">Arweave record, ed25519 owner, sha256 over canonical JSON, pointer derived not stored</span> —
+  <a href="https://monitor.jungletestnet.io/#accountOverview:bnrapolltest" data-i18n="v.verify">verify it yourself</a>.<br>
   law rows read live from the vending contract on jungle4 (bnrapolltest · rehearsal
   net) · A price <span id="vpricedate">live</span> · spec
-  <a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/specs/SPEC-VENDING-1.md">SPEC-VENDING-1/2 in the estate tree</a> ·
-  the meter receipt <a href="#x402-sec">audited in your page</a>
+  <a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/specs/SPEC-VENDING-1.md" data-i18n="v.spec">SPEC-VENDING-1/2 in the estate tree</a> ·
+  the meter receipt <a href="#x402-sec" data-i18n="v.audited">audited in your page</a>
 </footer>
 </main>
 

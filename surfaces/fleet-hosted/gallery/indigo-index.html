@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>BN Indigo Index v2.0 — Disease Economics + Creativity + GDP</title>
 <script src="../vendor/chart.js"></script>
 <style>
@@ -19,10 +20,19 @@ body{background:#0a0a14;color:#eee;font-family:Arial,sans-serif}
 .hero-card .sub{font-size:10px;color:#888;margin-top:6px;text-transform:uppercase}
 .red{color:#E74C3C}.green{color:#27AE60}.gold{color:#FFD700}.ind{color:#4B0082}.neu{color:#00CED1}.purple{color:#8E44AD}
 .two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.chart-box{height:280px;margin:8px 0}
+.chart-box{height:280px;margin:8px 0;max-width:100%}
+.chart-box canvas{max-width:100%}
+@media (max-width:760px){
+  .hero-stats{grid-template-columns:1fr}
+  .two-col{grid-template-columns:1fr}
+  .sim-results{grid-template-columns:1fr 1fr}
+  .nutrisec-stats{grid-template-columns:1fr 1fr}
+  .panel{overflow-x:auto}
+  .hero-card .mega{font-size:28px}
+}
 .breakdown-row{display:flex;align-items:center;gap:10px;padding:8px;background:#080820;border-radius:8px;margin-bottom:5px}
 .breakdown-bar{flex:1;height:24px;background:#0a0a14;border-radius:4px;overflow:hidden}
-.breakdown-fill{height:100%;display:flex;align-items:center;padding-left:8px;font-size:10px;font-weight:bold;color:#fff;border-radius:4px;transition:width .5s}
+.breakdown-fill{height:100%;display:flex;align-items:center;overflow:hidden;white-space:nowrap;padding-left:8px;font-size:10px;font-weight:bold;color:#fff;border-radius:4px;transition:width .5s}
 .breakdown-label{width:160px;font-size:11px}
 .breakdown-val{width:80px;text-align:right;font-size:12px;font-weight:bold}
 .slider-container{background:#080820;border-radius:10px;padding:14px;margin:10px 0}
@@ -98,13 +108,13 @@ select{width:100%;background:#080820;border:1px solid #333;color:#eee;padding:6p
 <!-- GDP BREAKDOWN -->
 <div class="panel">
 <h2 class="red">$14.11T Annual Cost Breakdown by GDP Component</h2>
-<div class="breakdown-row"><div class="breakdown-label">Consumption</div><div class="breakdown-bar"><div class="breakdown-fill" style="background:#E74C3C;width:63%">$8.85T</div></div><div class="breakdown-val red">$8.85T</div></div>
+<div class="breakdown-row"><div class="breakdown-label">Consumption</div><div class="breakdown-bar"><div class="breakdown-fill" style="background:#E74C3C;width:63%"></div></div><div class="breakdown-val red">$8.85T</div></div>
 <div style="font-size:9px;color:#555;padding:2px 0 6px 170px">Healthcare $5.19T + Indirect/quality-of-life $3.67T</div>
-<div class="breakdown-row"><div class="breakdown-label">Investment</div><div class="breakdown-bar"><div class="breakdown-fill" style="background:#E67E22;width:19%">$2.75T</div></div><div class="breakdown-val gold">$2.75T</div></div>
+<div class="breakdown-row"><div class="breakdown-label">Investment</div><div class="breakdown-bar"><div class="breakdown-fill" style="background:#E67E22;width:19%"></div></div><div class="breakdown-val gold">$2.75T</div></div>
 <div style="font-size:9px;color:#555;padding:2px 0 6px 170px">Healthcare infrastructure $2.29T + Supporting industries $0.46T</div>
-<div class="breakdown-row"><div class="breakdown-label">Government</div><div class="breakdown-bar"><div class="breakdown-fill" style="background:#8E44AD;width:15%">$2.16T</div></div><div class="breakdown-val purple">$2.16T</div></div>
+<div class="breakdown-row"><div class="breakdown-label">Government</div><div class="breakdown-bar"><div class="breakdown-fill" style="background:#8E44AD;width:15%"></div></div><div class="breakdown-val purple">$2.16T</div></div>
 <div style="font-size:9px;color:#555;padding:2px 0 6px 170px">Medicaid $0.82T + State programs $0.41T + NIH/welfare/judicial $0.93T</div>
-<div class="breakdown-row"><div class="breakdown-label">Additional</div><div class="breakdown-bar"><div class="breakdown-fill" style="background:#666;width:3%">$0.35T</div></div><div class="breakdown-val" style="color:#888">$0.35T</div></div>
+<div class="breakdown-row"><div class="breakdown-label">Additional</div><div class="breakdown-bar"><div class="breakdown-fill" style="background:#666;width:3%"></div></div><div class="breakdown-val" style="color:#888">$0.35T</div></div>
 <div style="font-size:9px;color:#555;padding:2px 0 6px 170px">Banking losses $0.05T + Auxiliary services $0.30T</div>
 <div class="breakdown-row" style="border-top:1px solid #333;margin-top:6px;padding-top:8px"><div class="breakdown-label" style="font-weight:bold">TOTAL</div><div class="breakdown-bar"></div><div class="breakdown-val red" style="font-size:16px">$14.11T</div></div>
 </div>

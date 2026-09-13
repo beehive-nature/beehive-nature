@@ -315,6 +315,17 @@ jobs:
         if: always()
         working-directory: e2e
         run: node profile-i18n.mjs
+      # Surface polish lane (2026-09-13): five public doors (wallet, plur,
+      # vending, or-board, watch) render corpus-exact cells; plur's data-key
+      # twin renderer activates the reserved d.plur.* keys; one-click
+      # recoverable failures show bee/raver the calm line + retry while
+      # cypherpunk keeps diagnostics. watch.html carries an embedded
+      # bnr-language-bundle — scripts/build-watch-languages.mjs must be
+      # re-run whenever its keys change (stale bundles read English).
+      - name: Polish — five-door translation + one-click regression (rendered)
+        if: always()
+        working-directory: e2e
+        run: node polish-i18n.mjs
       # fleet-pixels: every chart-bearing hosted surface must DRAW (pixels
       # read back from the canvas, not merely load). fleet-bus: the
       # localStorage data bus asserted both directions (same origin reads;

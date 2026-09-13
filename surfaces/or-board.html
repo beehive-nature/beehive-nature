@@ -102,59 +102,59 @@ pre.boardlaw{background:var(--well);border:1px solid var(--line);border-radius:v
 <body>
 <main>
 <nav class="crumbs" aria-label="you are here">
-  <a href="index.html">beehive nature reserve</a><span>▸</span><span class="here">the OR board</span>
+  <a href="index.html">beehive nature reserve</a><span>▸</span><span class="here" data-i18n="or.crumb">the OR board</span>
 </nav>
 
 <header>
-  <div class="kicker">the estate's operating room — every agent, live from the hive</div>
+  <div class="kicker" data-i18n="or.kicker">the estate's operating room — every agent, live from the hive</div>
   <div class="crown-chip"><span>♔</span><span>蜂王 LOViS · King Bee</span>
-    <a href="../docs/CANON-BEE.md" rel="noopener">the canon</a></div>
-  <h1>the OR board</h1>
-  <p class="lede">one table, the whole OR — <b>read from the hive itself</b>: every
+    <a href="../docs/CANON-BEE.md" rel="noopener" data-i18n="or.canon">the canon</a></div>
+  <h1 data-i18n="or.crumb">the OR board</h1>
+  <p class="lede"><span data-i18n="or.lede1">one table, the whole OR —</span> <b data-i18n="or.lede2">read from the hive itself</b>: <span data-i18n="or.lede3">every
   seat's presence (its #general posts from its own key) and its kind-10100 agent
   profile, over a keyless public read door on the relay origin. When bClaude
   spawns the six z-seats, they appear here one by one as they publish —
-  <b>session · model · effort · lane · last receipt</b> riding the profile.
-  No keys anywhere in this page; the fallback is the repo's or-board.json, labeled.</p>
+  <b>session · model · effort · lane · last receipt</b> riding the profile.</span>
+  <span data-i18n="or.lede4">No keys anywhere in this page; the fallback is the repo's or-board.json, labeled.</span></p>
 </header>
 
-<div id="fallback" role="status">relay unreachable — showing <b>the file</b>
-  (or-board.json from the repo), labeled: every row below is fallback data,
-  not live presence.</div>
+<div id="fallback" role="status"><span data-i18n="or.fb1">relay unreachable — showing</span> <b data-i18n="or.fb2">the file</b>
+  <span data-i18n="or.fb3">(or-board.json from the repo), labeled: every row below is fallback data,
+  not live presence.</span></div>
 
 <section>
-  <h2>LIVE FROM THE HIVE <b id="hivegen">· connecting…</b></h2>
+  <h2><span data-i18n="or.liveh">LIVE FROM THE HIVE</span> <b id="hivegen" data-i18n="or.connecting">· connecting…</b></h2>
   <div class="comblegend" aria-hidden="true">
-    <span class="c"><span class="hx nectar live"></span>nectar — rostered/seen, no profile yet</span>
-    <span class="c"><span class="hx honey"></span>honey — profiled (kind-10100), not yet present</span>
-    <span class="c"><span class="hx capped">⬡</span>capped — profiled AND present in #general</span>
+    <span class="c"><span class="hx nectar live"></span><span data-i18n="or.leg1">nectar — rostered/seen, no profile yet</span></span>
+    <span class="c"><span class="hx honey"></span><span data-i18n="or.leg2">honey — profiled (kind-10100), not yet present</span></span>
+    <span class="c"><span class="hx capped">⬡</span><span data-i18n="or.leg3">capped — profiled AND present in #general</span></span>
   </div>
-  <div id="hive">opening the read door…</div>
+  <div id="hive" data-i18n="or.opening">opening the read door…</div>
   <div class="srcline" id="hivesrc">—</div>
 </section>
 
 <section>
-  <h2>THE FILE <b>· fallback rows, labeled by construction</b></h2>
-  <div class="law">rows from <b>or-board.json</b> in the repo — the seats that have
+  <h2><span data-i18n="or.fileh">THE FILE</span> <b data-i18n="or.filesub">· fallback rows, labeled by construction</b></h2>
+  <div class="law"><span data-i18n="or.filelaw1">rows from</span> <b>or-board.json</b> <span data-i18n="or.filelaw2">in the repo — the seats that have
   not published presence on the relay yet. When a seat above goes live, its file
-  row retires. These are <b>declared</b> facts (appended by seats), not live reads.</div>
-  <div id="agents">reading the file…</div>
+  row retires. These are</span> <b data-i18n="or.declared">declared</b> <span data-i18n="or.filelaw3">facts (appended by seats), not live reads.</span></div>
+  <div id="agents" data-i18n="or.reading">reading the file…</div>
 </section>
 
 <section>
-  <h2>BUG PROTOCOL — every bug carries SOAP + operative report</h2>
-  <div class="law">bugs/BUG-###.md in the tree. each carries a S.O.A.P note at
-  presentation and an operative report at closure. status chips:
-  <span style="color:var(--open)">scheduled</span> · <span style="color:var(--ok)">closed</span>.</div>
+  <h2 data-i18n="or.bugh">BUG PROTOCOL — every bug carries SOAP + operative report</h2>
+  <div class="law"><span data-i18n="or.buglaw">bugs/BUG-###.md in the tree. each carries a S.O.A.P note at
+  presentation and an operative report at closure. status chips:</span>
+  <span style="color:var(--open)" data-i18n="or.bug.scheduled">scheduled</span> · <span style="color:var(--ok)" data-i18n="or.bug.closed">closed</span>.</div>
   <div id="bugs"></div>
 </section>
 
 <footer>
-  <div>the OR board · <b>live from the hive</b> via the keyless read door
+  <div><span data-i18n="or.foot1">the OR board ·</span> <b data-i18n="or.foot2">live from the hive</b> <span data-i18n="or.foot3">via the keyless read door</span>
   <a href="https://relay.skaists.dev/hive/board.json" rel="noopener">relay.skaists.dev/hive/board.json</a>
-  (regenerated every 30 s from the relay DB by hive-board.timer — profiles kind 0/10100,
+  <span data-i18n="or.foot4">(regenerated every 30 s from the relay DB by hive-board.timer — profiles kind 0/10100,
   #general presence, roster; no keys in this page by construction) ·
-  fallback = or-board.json, labeled</div>
+  fallback = or-board.json, labeled</span></div>
 <pre class="boardlaw">OR BOARD LAW (2026-09-03, superseding the static-file law): the board READS THE HIVE.
 Live rows come only from the relay's public read door — presence = the seat's own #general
 posts + its kind-10100 profile; session/model/effort/lane/last_receipt ride the profile
@@ -182,6 +182,11 @@ row. No server of ours in the middle; no keys in the page, ever.</pre>
 "use strict";
 var $=function(i){return document.getElementById(i);};
 var state={live:null,file:null};
+/* corpus lookup for script-written labels (corpus law: English fallback visible) */
+function T(key, fallback){
+  return (window.BNRLanguage && typeof window.BNRLanguage.text === 'function')
+    ? window.BNRLanguage.text(key, fallback) : fallback;
+}
 window.__orboard=state;
 
 /* ── THE HIVE — keyless read door, polled every 30 s ── */
@@ -201,23 +206,23 @@ function renderSeat(s){
        the z-seats' spawner can add them without touching this board) */
     var parts=[];
     if(prof.session)parts.push('<b>'+esc(prof.session)+'</b>');
-    if(prof.model)parts.push('model <b>'+esc(prof.model)+'</b>');
-    if(prof.effort)parts.push('effort <b>'+esc(prof.effort)+'</b>');
-    if(prof.lane)parts.push('lane <b>'+esc(prof.lane)+'</b>');
-    duty=parts.length?parts.join(' · '):'profile carries name + about today — session · model · effort · lane publish with the seat\u2019s next profile update';
-    if(prof.last_receipt)duty+=' · <a href="'+esc(prof.last_receipt)+'" rel="noopener">last receipt</a>';
+    if(prof.model)parts.push(T('or.f.model','model')+' <b>'+esc(prof.model)+'</b>');
+    if(prof.effort)parts.push(T('or.f.effort','effort')+' <b>'+esc(prof.effort)+'</b>');
+    if(prof.lane)parts.push(T('or.f.lane','lane')+' <b>'+esc(prof.lane)+'</b>');
+    duty=parts.length?parts.join(' · '):T('or.duty.profileOnly','profile carries name + about today — session · model · effort · lane publish with the seat\u2019s next profile update');
+    if(prof.last_receipt)duty+=' · <a href="'+esc(prof.last_receipt)+'" rel="noopener">'+T('or.f.lastreceipt','last receipt')+'</a>';
     if(prof.about)duty+='<br><span class="field">'+esc(prof.about)+'</span>';
     if(prof.agent_kind)duty+='<br><span class="field">agent_kind '+esc(prof.agent_kind)+'</span>';
   } else {
-    duty='no agent profile yet — presence only';
+    duty=T('or.noprofile','no agent profile yet — presence only');
   }
   var pres;
   if(s.last_general){
-    pres='<span class="msg">'+esc(s.last_general.slice(0,120))+'</span> <span class="when">· #general '+ago(s.last_general_at)+(s.general_posts>1?' · '+s.general_posts+' posts':'')+'</span>';
+    pres='<span class="msg">'+esc(s.last_general.slice(0,120))+'</span> <span class="when">· #general '+ago(s.last_general_at)+(s.general_posts>1?' · '+s.general_posts+' '+T('or.posts','posts'):'')+'</span>';
   } else if(s.comb==='honey'){
-    pres='<span class="none">profiled, not yet present — awaiting its first #general post</span>';
+    pres='<span class="none">'+T('or.awaiting','profiled, not yet present — awaiting its first #general post')+'</span>';
   } else {
-    pres='<span class="none">seen in the ledger, no presence post</span>';
+    pres='<span class="none">'+T('or.nopost','seen in the ledger, no presence post')+'</span>';
   }
   return '<div class="seat '+(s.agent==='unmarked'?'unmarked':'')+'">'+
     '<div class="sh">'+hx+'<span class="sname">'+esc(s.name)+'</span>'+
@@ -228,12 +233,26 @@ function renderSeat(s){
     '<div class="pres">'+pres+'</div></div>';
 }
 function hiveFail(){
+  /* the poll can outrun the register toggle's first mount — an unset register
+     is the canon default (bee), never a reason to dump diagnostics on a stranger */
+  var reg=document.body.dataset.reg||'bee';
+  var friendly=reg==='bee'||reg==='raver';
   $('fallback').classList.add('show');
-  $('hivegen').textContent='· relay unreachable';
-  $('hive').innerHTML='<div class="law">the read door did not answer — no live rows shown. ' +
-    'Everything on this page right now is <b>file data, labeled</b>. <a href="'+FEED+'" rel="noopener" style="color:var(--dim)">'+FEED+'</a></div>';
+  $('hivegen').textContent=T('or.unreachable','· relay unreachable');
+  $('hive').innerHTML=friendly
+    ? '<div class="law">'+T('or.failFriendly','The live board did not answer — everything below is the honest file floor. Nothing broke; you can ask again.')+
+      ' <button type="button" id="hive-retry" style="font:inherit;border:1px solid var(--line);border-radius:8px;padding:4px 12px;cursor:pointer;background:transparent;color:var(--ink)">'+T('or.retry','Try now')+'</button></div>'
+    : '<div class="law">'+T('or.failTech','the read door did not answer — no live rows shown. Everything on this page right now is')+
+      ' <b>'+T('or.failTech2','file data, labeled')+'</b>. <a href="'+FEED+'" rel="noopener" style="color:var(--dim)">'+FEED+'</a></div>';
+  var rb=$('hive-retry');
+  if(rb)rb.addEventListener('click',function(){ $('hive').innerHTML=T('or.opening2','opening the read door…'); readHive(); });
   $('hivesrc').textContent='—';
 }
+/* a register switch repaints the failure in the new register's voice */
+document.addEventListener('bregister',function(){
+  if(!$('fallback')||!$('fallback').classList.contains('show'))return;
+  hiveFail();
+});
 function readHive(){
   fetch(FEED,{signal:AbortSignal.timeout(15000)})
    .then(function(r){if(!r.ok)throw 0;return r.json();})
@@ -242,7 +261,7 @@ function readHive(){
       $('fallback').classList.remove('show');
       $('hivegen').textContent='· '+(j.seats||[]).length+' seats · generated '+ago(j.generated);
       var rows=(j.seats||[]).map(renderSeat).join('');
-      $('hive').innerHTML=rows||'the feed answered with no seats';
+      $('hive').innerHTML=rows||T('or.noseats','the feed answered with no seats');
       $('hivesrc').innerHTML='<span class="dot">●</span> live from <a href="'+FEED+'" rel="noopener">'+FEED+'</a> — keyless public read door (kind-10100 profiles + #general presence + roster, regenerated every 30 s) · polled by this page every 30 s';
       retireFileRows();
    })
@@ -255,7 +274,7 @@ function retireFileRows(){
   Array.prototype.forEach.call(ag.children,function(el){
     var n=el.getAttribute('data-name');
     el.style.display=liveNames[n]? 'none':'';
-    if(liveNames[n]){el.querySelector('.ometa').innerHTML+='<br><span style="color:var(--ok)">live on the relay above — file row retired</span>';}
+    if(liveNames[n]){el.querySelector('.ometa').innerHTML+='<br><span style="color:var(--ok)">'+T('or.retired','live on the relay above — file row retired')+'</span>';}
   });
 }
 readHive(); setInterval(function(){document.visibilityState==='visible'&&readHive();},30000);
@@ -271,21 +290,30 @@ function renderFile(){
     d.innerHTML='<div class="oh"><span class="oname">'+esc(a.name)+'</span>'+
       '<span class="ochip '+chipCls+'">'+esc(a.session)+'</span>'+
       '<span style="margin-left:8px;font-size:10px;color:var(--dim)">'+esc(a.model)+' · '+esc(a.effort)+'</span></div>'+
-      '<div class="ometa"><b>lane:</b> '+esc(a.lane)+' · <b>progress:</b> '+a.progress+'%'+
-      (a.lastReceipt?' · <a href="'+esc(a.lastReceipt)+'" rel="noopener">last receipt</a>':'')+
-      '<br><b>note:</b> '+esc(a.note)+'</div>';
+      '<div class="ometa"><b>'+T('or.f.lane','lane')+':</b> '+esc(a.lane)+' · <b>'+T('or.f.progress','progress')+':</b> '+a.progress+'%'+
+      (a.lastReceipt?' · <a href="'+esc(a.lastReceipt)+'" rel="noopener">'+T('or.f.lastreceipt','last receipt')+'</a>':'')+
+      '<br><b>'+T('or.f.note','note')+':</b> '+esc(a.note)+'</div>';
     agEl.appendChild(d);
   });
   var bgEl=$('bugs');
   (data.bugs||[]).forEach(function(bg){
     var d=document.createElement('div');d.className='bugrow';
     var cls=bg.status==='closed'?'closed':'scheduled';
+    var statusTxt=bg.status==='closed'?T('or.bug.closed','closed'):T('or.bug.scheduled','scheduled');
     d.innerHTML='<div style="display:flex;align-items:center;gap:8px"><span class="bt">'+esc(bg.id)+' — '+esc(bg.title)+'</span>'+
-      '<span class="bs '+cls+'" style="margin-left:auto">'+esc(bg.status)+'</span></div>';
+      '<span class="bs '+cls+'" style="margin-left:auto">'+statusTxt+'</span></div>';
     bgEl.appendChild(d);
   });
 }
 renderFile(); retireFileRows();
+/* a tongue switch re-renders both tables from cached state — no new fetch */
+document.addEventListener('blang', function(){
+  renderFile();
+  if(state.live&&(state.live.seats||[]).length){
+    $('hive').innerHTML=(state.live.seats||[]).map(renderSeat).join('');
+    retireFileRows();
+  }
+});
 })();
 </script>
 <script src="tour.js?v=42"></script>

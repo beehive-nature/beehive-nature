@@ -141,12 +141,24 @@ for (const page of pages) {
     if(!existsSync(join(SURF,page))) throw new Error('Requested surface does not exist');
     const response=await p.goto(`${BASE}/${page}`, { waitUntil: 'load' });
     if(!response || !response.ok()) throw new Error('Surface did not load successfully');
-    await p.evaluate(l => { try { localStorage.setItem('blang', l); } catch (e) {} }, LANG);
+    await p.evaluate(l => { try { localStorage.setItem('blang', l); } catch(e){} }, LANG);
     const reloaded=await p.reload({ waitUntil: 'load' });
     if(!reloaded || !reloaded.ok()) throw new Error('Surface reload did not succeed');
-    await p.waitForTimeout(700);
-
-    const m = await p.evaluate(censusScript);
+    /* SETTLE, don't guess: pages that render keyed rows from a door fetch
+       (stack.html's organ board) used to race a fixed 700ms window — the
+       count flapped 106/118 between runs. The census now repeats until two
+       consecutive passes agree, bounded, so a slow page converges upward and
+       a fast one costs nothing extra. Patience only raises counts; floors
+       recorded under the old window stay honest. */
+    await p.waitForTimeout(400);
+    let m = await p.evaluate(censusScript);
+    let settled = false;
+    for(let i=0;i<6 && !settled;i++){
+      await p.waitForTimeout(450);
+      const again = await p.evaluate(censusScript);
+      if(again.visible===m.visible && again.keyed===m.keyed){ settled=true; }
+      m=again;
+    }
 
     /* Of the keyed strings, how many can this tongue actually fill? Split the
        two states the reader cannot tell apart. */
