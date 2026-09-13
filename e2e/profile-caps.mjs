@@ -206,6 +206,80 @@ for (const reg of ['bee', 'raver', 'cypherpunk']) {
   await ctx.close();
 }
 
+// ═══ V — vending: the canonical .a surface, payment copy now tells the truth ═══
+{
+  const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+  const page = await ctx.newPage();
+  const E = errs(page);
+  await page.goto(`${base}/surfaces/vending.html`, { waitUntil: 'load' });
+  await page.waitForTimeout(2500);
+
+  ok('V1a vending loads with zero page errors', E.length === 0, E.join(' | ') || 'clean');
+  const note = (await page.locator('section.card[aria-label="the price, all of it"] .note').first().innerText());
+  ok('V1b card/PayPal marked NOT AVAILABLE', note.includes('Card and PayPal are not available'));
+  ok('V1c USDC/PYUSD marked HELD', note.includes('held') && /USDC on Base/.test(note) && /PYUSD/.test(note));
+  ok('V1d the old unqualified pay line is gone', !note.includes('Pay with your card, PayPal, or any wallet'));
+  const rails = (await page.locator('#vrails').innerText());
+  const heldCount = (rails.match(/held/gi) || []).length;
+  ok('V2 both money rails say held at the label', heldCount >= 2 && rails.includes('until the founder names the seat'));
+  ok('V2b PYUSD not-a-PayPal-checkout wording rides', rails.includes('Not a PayPal checkout'));
+  await page.screenshot({ path: `${SHOTS}/vending-bee-1440.png`, fullPage: true });
+  await ctx.close();
+}
+{
+  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  const page = await ctx.newPage();
+  const E = errs(page);
+  await page.goto(`${base}/surfaces/vending.html`, { waitUntil: 'load' });
+  await page.waitForTimeout(2000);
+  await page.screenshot({ path: `${SHOTS}/vending-bee-390.png`, fullPage: true });
+  ok('V3 vending @390 clean', E.length === 0, E.join(' | '));
+  await ctx.close();
+}
+
+// ═══ P — five separate cards, boundaries and links, on both surfaces ═══
+{
+  const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+  for (const [name, url, vendingHref, bnrPath, ercHref] of [
+    ['dynasty', '/surfaces/profile.html', 'vending.html', '/r/index.html', 'blight/profile.html'],
+    ['holder', '/surfaces/blight/profile.html', '../vending.html', '/r/index.html', null],
+  ]) {
+    const page = await ctx.newPage();
+    const E = errs(page);
+    await page.goto(`${base}${url}`, { waitUntil: 'load' });
+    await page.waitForTimeout(1200);
+    const cards = await page.evaluate(() => [...document.querySelectorAll('.capgrid .cap')].map(c => c.innerText));
+    ok(`P1 ${name}: five separate capability cards`, cards.length === 5, cards.length + ' found');
+    ok(`P1b ${name}: exactly one coming-soon card (SP)`,
+      await page.locator('.capgrid .cap.soon').count() === 1);
+    const aCard = await page.evaluate(() => {
+      const c = [...document.querySelectorAll('.capgrid .cap')].find(x => /\.a\b/.test(x.querySelector('h3').textContent));
+      return { txt: c.innerText, href: c.querySelector('a[href*="vending.html"]')?.getAttribute('href') };
+    });
+    ok(`P2a ${name}: .a card deep-links vending`, aCard.href === vendingHref, aCard.href || 'no link');
+    ok(`P2b ${name}: boundary rides verbatim`, /rehearsal today/.test(aCard.txt) && /testnet money, real law rows/.test(aCard.txt));
+    const bnr = await page.evaluate(() => {
+      const c = [...document.querySelectorAll('.capgrid .cap')].find(x => /bnr:\/\//.test(x.querySelector('h3').textContent));
+      const h = c.querySelector('a[href*="r/index.html"]')?.getAttribute('href');
+      return { path: h ? new URL(h, location.href).pathname : null };
+    });
+    ok(`P3a ${name}: bnr:// card links the resolver`, bnr.path === bnrPath, bnr.path || 'no link');
+    const erc = await page.evaluate(() => {
+      const c = [...document.querySelectorAll('.capgrid .cap')].find(x => /ERC20i/.test(x.querySelector('h3').textContent));
+      /* textContent, not innerText: the JEDI law line lives in the cypherpunk
+         register block, hidden (but present) under the default bee register */
+      return { txt: c.textContent, href: c.querySelector('a')?.getAttribute('href') };
+    });
+    ok(`P3b ${name}: ERC20i card, JEDI law intact`, /ERC20i/.test(erc.txt) && /profile reads; the market sells/.test(erc.txt));
+    if (ercHref) ok(`P3c ${name}: ERC20i card links the holder wall`, erc.href === ercHref, erc.href || 'no link');
+    ok(`P4 ${name}: SP copy never claims (no balance/receipt words in the soon card)`,
+      !/balance|received|confirmed/i.test((await page.locator('.capgrid .cap.soon').innerText())));
+    ok(`P5 ${name}: still zero page errors`, E.length === 0, E.join(' | ') || 'clean');
+    await page.close();
+  }
+  await ctx.close();
+}
+
 await browser.close(); srv.close();
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);
