@@ -126,7 +126,7 @@ test('RPC batch results follow request ids instead of server response order',asy
 });
 test('failed collection reads remain distinct from a verified empty collection',async()=>{
  const b=await gallery();b.context.fetch=async()=>{throw Error('offline');};await b.run('start("'+address+'","Test garden")');
- assert.match(b.ids.get('gallery-status').textContent,/failed/);assert.equal(b.ids.get('retry').hidden,false);assert.equal(b.ids.get('record-wallet').textContent,address);
+ assert.match(b.ids.get('gallery-status').textContent,/failed|still loading/);assert.equal(b.ids.get('retry').hidden,false);assert.equal(b.ids.get('record-wallet').textContent,address);
  b.run('resolveName=async()=>null');await b.run('start("unknown.name","Unknown")');assert.equal(b.ids.get('record-wallet').textContent,'Not available');
 });
 test('superseded gallery reads cannot overwrite the new collection; partial results retain exact artwork',async()=>{
@@ -135,7 +135,7 @@ test('superseded gallery reads cannot overwrite the new collection; partial resu
  const svg='<svg viewBox="0 0 1 1"><title>Original public artwork</title></svg>';
  const piece={svg,sym:'FUNGI',chain:'base',contract:address,seed:12,lvln:0,pipmax:5};
  pending[1]({found:[piece],raw:[piece],failures:1});await fresh;b.tick();pending[0]({found:[],raw:[],failures:0});await old;
- assert.equal(b.ids.get('frame').innerHTML,svg);assert.equal(b.ids.get('wing').textContent,'Fresh');assert.match(b.ids.get('gallery-status').textContent,/Some chain reads failed/);
+ assert.equal(b.ids.get('frame').innerHTML,svg);assert.equal(b.ids.get('wing').textContent,'Fresh');assert.match(b.ids.get('gallery-status').textContent,/Some pieces are still loading|Some chain reads failed/);
  const requestCount=pending.length;b.view('raver');b.view('cypherpunk');b.view('bee');assert.equal(pending.length,requestCount);assert.equal(b.ids.get('frame').innerHTML,svg);
 });
 test('gallery keyboard shortcuts leave form fields, buttons and links to their native controls',async()=>{

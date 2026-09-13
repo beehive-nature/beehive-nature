@@ -111,17 +111,17 @@ test('house archive uses the founder-supplied v2 crest bytes with portable prove
   assert.equal(crestManifest.artifact.license, 'Rights reserved until the holder publishes a license');
   assert.match(archive, /\.\.\/assets\/profile-archive\/house-crest-von-zutphen-DESIGN\.svg/);
   assert.match(archive, /\.\.\/assets\/profile-archive\/house-crest-von-zutphen\.json/);
-  assert.match(archive, /href="\.\.\/assets\/profile-archive\/house-crest-von-zutphen\.json">Open provenance/);
+  assert.match(archive, /href="\.\.\/assets\/profile-archive\/house-crest-von-zutphen\.json" data-i18n="prof\.arch\.prov">Open provenance/);
   assert.doesNotMatch(archive, /house-crest-von-zutphen\.json" target="_blank"/);
-  assert.match(archive, /family-authored interpretation &middot; not a title certificate/);
+  assert.match(archive, /data-i18n="prof\.arch\.claim">◇ family-authored interpretation · not a title certificate/);
   assert.doesNotMatch(crest, /<script\b|<foreignObject\b|\bon\w+\s*=|(?:href|xlink:href)\s*=/i);
 });
 
 test('house archive gives New bee, Raver, and Cypherpunk distinct value at the same record', () => {
   const archive = extractById(page, 'house-archive');
-  assert.match(archive, /data-reg="bee">A family profile can hold more than a name/);
-  assert.match(archive, /data-reg="raver">A house mark made to travel/);
-  assert.match(archive, /data-reg="cypherpunk" id="profile-display-bio">The full ceremonial master is shown here/);
+  assert.match(archive, /data-reg="bee" data-i18n="prof\.arch\.lead\.bee">A family profile can hold more than a name/);
+  assert.match(archive, /data-reg="raver" data-i18n="prof\.arch\.lead\.raver">A house mark made to travel/);
+  assert.match(archive, /data-reg="cypherpunk" id="profile-display-bio" data-i18n="prof\.arch\.lead\.cypher">The full ceremonial master is shown here/);
   assert.match(archive, /data-reg="raver" aria-labelledby="symbol-title"/);
   assert.match(archive, /data-reg="cypherpunk" aria-labelledby="privacy-title"/);
   assert.match(archive, /Privacy seam matrix/);
@@ -160,7 +160,7 @@ test('Cypherpunk receives the full shield achievement and the house carries the 
   assert.ok([...fullCrest.matchAll(/\bhref="([^"]+)"/gi)].every(match => match[1].startsWith('#')), 'full achievement references only its own SVG definitions');
   assert.match(archive, /class="crest-full" data-reg="cypherpunk" src="\.\.\/assets\/seals\/house-crest-von-zutphen-DESIGN\.svg"/);
   assert.match(archive, /shield, nine quarters, supporters, coronet, crest, motto, and compartment/);
-  assert.match(archive, /href="\.\.\/docs\/BLAZON\.md">Read the blazon/);
+  assert.match(archive, /href="\.\.\/docs\/BLAZON\.md" data-i18n="prof\.arch\.blazon">Read the blazon/);
   assert.match(archive, /data="\.\.\/docs\/mvp-walk\/assets\/genesis-3d\/motion\/green-teal-breathing\.svg"/);
   assert.match(archive, /no network or presence signal/);
   assert.match(archive, /reduced-motion preferences show the resting artwork/);
@@ -168,7 +168,7 @@ test('Cypherpunk receives the full shield achievement and the house carries the 
 
 test('profile editor is a bounded local preview with no publication claim', () => {
   const archive = extractById(page, 'house-archive');
-  assert.match(archive, /<summary>Edit your profile<\/summary>/);
+  assert.match(archive, /<summary data-i18n="prof\.arch\.ed\.summary">Edit your profile<\/summary>/);
   assert.match(archive, /Changes remain in this open page, create no account, upload nothing/);
   assert.match(archive, /maxlength="60"/);
   assert.match(archive, /maxlength="120"/);
@@ -276,6 +276,99 @@ test('keyed first-paint English matches the corpus; every tongue has a cell', ()
       assert.ok(corpus.strings[key][language]?.trim(), key+' '+language);
     }
   }
+});
+
+/* The translation lane (2026-09-12): EVERY visible leaf of the house-archive
+   chrome is keyed; the only unkeyed elements are the recorded record-data
+   exceptions (holder name, motto display, and the manifest JSON receipt). */
+test('house-archive chrome is fully keyed; record data stays the record', () => {
+  const archive = extractById(page, 'house-archive');
+  const unkeyed = [];
+  const tag = /<(?<t>[a-z][a-z0-9]*)((?:[^>"](?!data-i18n)|"[^"]*")*?)>(?<text>[^<]*)<\/\k<t>/gi;
+  // leaf elements whose text carries letters but which carry no data-i18n and
+  // no keyed ancestor within one element (rich rows key each leaf directly)
+  const leaves = archive.matchAll(/<(p|h2|strong|span|summary|button|dt|dd|th|td|a)\b([^>]*)>([^<]*)<\/\1>/gi);
+  for (const m of leaves) {
+    const attrs = m[2], text = m[3];
+    if (!/\p{L}/u.test(text.trim())) continue;
+    if (/data-i18n=/.test(attrs)) continue;
+    unkeyed.push(m[1] + '>' + text.trim().slice(0, 40));
+  }
+  const allowed = [
+    'p>Travis Mark Remington',                // profile-display-name: holder record
+    'p>mīlestība ir karalis · ความรักคือราชา · love is king' // profile-display-motto: holder record
+  ];
+  for (const u of unkeyed)
+    assert.ok(allowed.some(a => u.startsWith(a.slice(0, 14))) || /^p>Travis Mark Remington/.test(u) || u.includes('ความรักคือราชา'),
+      'unkeyed archive chrome: ' + u);
+  assert.ok(unkeyed.length <= 2, 'only the two holder-record displays may stay unkeyed, found ' + unkeyed.length);
+});
+
+/* Tranche 2 (founder card feedback, 2026-09-12): every readable line on the
+   seven house cards is keyed; what stays unkeyed is exactly the identifier
+   carve-out — house names, holder names, addresses, mailboxes, glyph names,
+   the bAiGenTiC brand chip, and the tongue-name datum after its label. */
+test('house cards are keyed; only identifiers stay as printed', () => {
+  const instrument = extractById(page, 'instrument');
+  const leaves = instrument.matchAll(/<(p|h2|strong|span|summary|div)\b([^>]*)>([^<]*)<\/\1>/gi);
+  const unkeyed = [];
+  for (const m of leaves) {
+    const [tag, attrs, text] = [m[1], m[2], m[3]];
+    if (!/\p{L}/u.test(text.trim())) continue;
+    if (/data-i18n=/.test(attrs)) continue;
+    // structural holders (houses, bios, metas) legitimately carry bare text
+    // between keyed children; the census only counts element leaves
+    if (/class="(house|holder|bio|bmeta|profile-houses|htype[^"]*)"/.test(attrs)) continue;
+    unkeyed.push(tag + '.' + (attrs.match(/class="([^"]*)"/)?.[1] ?? '') + '>' + text.trim().slice(0, 36));
+  }
+  const allowed = [
+    /^h2\.hname>/,                       // house names (pointer law)
+    /^span\.wallet>/,                    // addresses as printed
+    /^div\.email>/,                      // mailboxes as printed
+    /^span\.badge baigentic>bAiGenTiC$/, // the brand chip
+    /^div\.bname>/                       // holder names (text beside keyed badges)
+  ];
+  const strays = unkeyed.filter(u => !allowed.some(a => a.test(u)));
+  assert.deepEqual(strays, [], 'unkeyed card text outside the identifier carve-out');
+});
+
+/* Corpus law for the lane's 136 keys: en extracted from the page, every tongue
+   non-empty, and en-echo limited to the RECORDED homograph set — a cell that
+   equals English must be a true same-spelling word (fr "art", es "no", da/nl
+   "status"...), never a silent fallback. */
+test('the 136 house-archive keys exist ×28 with recorded homographs only', () => {
+  const JS_KEYS = ['prof.arch.ed.req','prof.arch.ed.applied','prof.arch.ed.resetdone',
+    'prof.arch.aud.note.circle','prof.arch.aud.note.private','prof.arch.share.ok',
+    'prof.arch.share.copied','prof.arch.share.ask','prof.arch.share.cancelled','prof.arch.share.unavailable'];
+  const pageKeys = [...new Set([...page.matchAll(/data-i18n="([^"]+)"/g)].map(m => m[1]))]
+    .filter(k => k.startsWith('prof.') || k.startsWith('experience.'));
+  const HOMOGRAPHS = new Set([
+    'prof.arch.scope.public:fr','prof.arch.kind.agent:cs','prof.arch.kind.agent:nl-be',
+    'prof.arch.kind.agent:nl','prof.arch.kind.agent:fr','prof.arch.schema.person.art:fr',
+    'prof.arch.schema.person.privacy:nl-be','prof.arch.schema.person.privacy:nl',
+    'prof.arch.schema.agent.succession:fr','prof.arch.priv.th.public:fr','prof.arch.priv.v.no:es',
+    'prof.arch.priv.v.source:fr','prof.arch.priv.v.status:cs','prof.arch.priv.v.status:nl-be',
+    'prof.arch.priv.v.status:nl','prof.arch.priv.v.status:da','prof.arch.priv.v.status:nb',
+    'prof.arch.priv.v.status:sv','prof.arch.priv.v.local:es','prof.arch.priv.v.local:fr',
+    'prof.rec.sources:fr'
+  ]);
+  const lane = k => k.startsWith('prof.arch.') || k.startsWith('prof.rec.') || k === 'prof.inst.about' || k === 'prof.foot.keylaw';
+  const keyed = pageKeys.filter(lane);
+  assert.ok(keyed.length >= 165, 'lane page keys present, got ' + keyed.length);
+  const echoes = [];
+  for (const key of [...keyed, ...JS_KEYS]) {
+    const row = corpus.strings[key];
+    assert.ok(row, key + ' in corpus');
+    for (const language of corpus._meta.langs) {
+      assert.ok(typeof row[language] === 'string' && row[language].trim(), key + ' ' + language);
+      if (row[language] === row.en && !HOMOGRAPHS.has(key + ':' + language)) echoes.push(key + ':' + language);
+    }
+  }
+  assert.deepEqual(echoes, [], 'en-echo outside the recorded homograph set');
+  assert.equal(HOMOGRAPHS.size, 21, 'homograph record stays exact');
+  // the dynamic control copy rides the corpus through BNRLanguage.text, not a second glossary
+  assert.match(page, /window\.BNRLanguage&&window\.BNRLanguage\.text/);
+  assert.match(page, /document\.addEventListener\('blang',function\(\)\{/);
 });
 
 test('language-first shell hosts register and language; cypher masthead cannot leak on New bee', () => {
