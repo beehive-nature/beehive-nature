@@ -384,6 +384,11 @@ const REACHABILITY_EXEMPT = [
     reason: 'tinkering fork of the FROZEN orbit renderer — it exists so orbit.html ' +
             'can stay byte-pinned (e2e/forge-freeze.mjs). A working file, not a ' +
             'presented surface; presenting it would invite edits to the frozen one.' },
+  { path: 'jams.html',
+    reason: 'permanent redirect shim to music.html (2026-09-13 rename) — it exists ' +
+            'for saved off-site links and search history, not for in-estate ' +
+            'navigation. Nothing may link it, so it is orphaned on purpose; the ' +
+            'shim itself is proven by e2e/zcode-music-check.mjs.' },
 ];
 
 {

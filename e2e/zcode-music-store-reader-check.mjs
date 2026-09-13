@@ -1,4 +1,4 @@
-// zcode-jams-store-reader-check.mjs — browser proof for the encrypted Store
+// zcode-music-store-reader-check.mjs — browser proof for the encrypted Store
 // read adapter. The local server returns only base64 ciphertext envelopes;
 // the page verifies byte count and SHA-256, then exposes no plaintext path.
 import { createHash } from 'node:crypto';
@@ -77,7 +77,7 @@ page.on('console', message => { if (message.type() === 'error' && !/net::ERR_/.t
 let pass = 0, fail = 0;
 const ok = (label, condition, note='') => { if (condition) { pass++; console.log(`PASS ${label}`); } else { fail++; console.log(`FAIL ${label}${note ? ` — ${note}` : ''}`); } };
 
-const pageUrl = `${base}/surfaces/jams.html?manifest=${encodeURIComponent(`${base}/test-manifest.json`)}&store=${encodeURIComponent(base)}`;
+const pageUrl = `${base}/surfaces/music.html?manifest=${encodeURIComponent(`${base}/test-manifest.json`)}&store=${encodeURIComponent(base)}`;
 await page.goto(pageUrl);
 await page.waitForFunction(() => document.getElementById('status')?.textContent.includes('verified'));
 ok('store: page has no errors', errors.length === 0, errors.join(' | '));

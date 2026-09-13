@@ -1,0 +1,556 @@
+<!doctype html>
+<!-- music.html — SKAISTS mUsiC · PLUR MUSIC ROOM (manifest-backed preview).
+     Born as jams.html 2026-09-11; renamed music.html 2026-09-13 — jams.html
+     stays as a permanent redirect shim so saved links keep working.
+     The room consumes the language-neutral Connect + Store envelope. It does
+     not open x0x, upload to Autonomi, charge a wallet, or start a Trezor
+     flow. Those capabilities belong behind the accepted bounded receiver and
+     an explicit admission lane.
+     THREE VIEWS, ONE SET OF FACTS (founder canon 2026-08-28): New bee, Raver,
+     Cypherpunk render the same manifest, the same gate, the same log. Only
+     the temperature, the imagery, the density and the interaction style
+     change — never a constant. BNR COLOR LAW: purple = humans, teal = Ai,
+     green = biomass; the roles are named in the legend line on the page. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="referrer" content="no-referrer">
+<meta name="color-scheme" content="dark light">
+<title>SKAISTS mUsiC · PLUR</title>
+<link rel="stylesheet" href="tokens.css">
+<style>
+  /* ── shared spine ─────────────────────────────────────────────────────
+     --human / --ai / --biomass are the BNR color law; each view respeaks
+     them at its own contrast (light bee tints, luminous raver hues, the
+     cypherpunk terminal set). --gold stays the estate's caution color. */
+  :root {
+    --human:#9C6FD6; --human-soft:#B79FE0; --ai:#45C2DC; --biomass:#86CC72; --gold:#E8B54B;
+    --bg:#070D0A; --panel:#0F1713; --well:#0B120F; --line:#1E2B25; --line-hi:#31463C;
+    --ink:#E9F2EC; --dim:#8FA79C; --dimmer:#5B7368; --void:#070D0A; --lift:#16211C;
+    --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+    --sans:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  }
+  * { box-sizing:border-box; margin:0; }
+  html { scroll-behavior:smooth; }
+  body { min-height:100vh; color:var(--ink); background:var(--bg); font:14px/1.65 var(--mono);
+    padding-bottom:70px; }
+  a { color:var(--ai); text-decoration:none; }
+  a:hover { color:var(--human-soft); }
+  a:focus-visible, button:focus-visible { outline:3px solid var(--ai); outline-offset:3px; }
+  button { font:600 12px var(--mono); }
+  .wrap { width:min(1100px, calc(100% - 32px)); margin:0 auto; }
+
+  /* ── the opening — shared bones, view-owned temperature ─────────────── */
+  header { position:relative; overflow:hidden; padding:54px 0 34px; border-bottom:1px solid var(--line); }
+  .eyebrow { position:relative; color:var(--human-soft); letter-spacing:.25em; text-transform:uppercase; font-size:10px; }
+  h1 { position:relative; margin-top:10px; font:800 clamp(2.2rem,8vw,5.3rem)/.95 var(--sans);
+    letter-spacing:-.055em; }
+  h1 span { color:var(--human); }
+  .lead { position:relative; max-width:44ch; margin-top:17px; font:600 clamp(1.05rem,2.6vw,1.5rem)/1.35 var(--sans);
+    letter-spacing:-.015em; color:var(--ink); }
+  .intro { position:relative; max-width:66ch; color:var(--dim); margin-top:14px; }
+  .intro b { color:var(--ink); }
+  .intro .lv { color:var(--human-soft); }
+  .nav { position:relative; display:flex; gap:8px; flex-wrap:wrap; margin-top:24px; }
+  .nav a, button.pill { border:1px solid var(--line-hi); border-radius:999px; padding:11px 15px; color:var(--ink);
+    background:var(--panel); font:600 11px var(--mono); cursor:pointer; min-height:44px; display:inline-flex; align-items:center; }
+  .nav a:hover, button.pill:hover { border-color:var(--human); background:var(--lift); }
+  .independent { position:relative; margin-top:14px; padding:10px 12px; border-left:2px solid var(--ai);
+    color:var(--dim); font-size:10px; line-height:1.7; background:rgba(69,194,220,.05); }
+  .independent b { color:var(--ink); }
+  .independent a { color:var(--ai); border-bottom:1px dashed var(--ai); }
+  .statusline { display:flex; align-items:center; gap:9px; flex-wrap:wrap; margin-top:24px; color:var(--dim); font-size:11px; }
+  .dot { width:9px; height:9px; border-radius:50%; background:var(--gold); }
+  .dot.ok { background:var(--biomass); box-shadow:0 0 13px var(--biomass); }
+  .dot.bad { background:#E25822; box-shadow:0 0 13px #E25822; }
+  main { padding-top:24px; }
+  .grid { display:grid; grid-template-columns:repeat(12,1fr); gap:14px; }
+  .card { grid-column:span 12; padding:20px; border:1px solid var(--line); border-radius:14px; background:var(--panel); }
+  .card.half { grid-column:span 6; }
+  .card.third { grid-column:span 4; }
+  .card h2 { color:var(--human-soft); font-size:13px; letter-spacing:.14em; text-transform:uppercase; }
+  .sub { color:var(--dim); font-size:11px; margin-top:6px; }
+  @media(max-width:720px){ .card.half,.card.third { grid-column:span 12; } .wrap { width:min(100% - 22px, 1100px); } }
+
+  /* the room itself — a human act (join) is purple; the machines (visualizer,
+     store read) are teal; the law that holds the room is biomass green */
+  .hero { display:grid; grid-template-columns:minmax(0,1.25fr) minmax(220px,.75fr); gap:20px; align-items:stretch; }
+  @media(max-width:720px){ .hero { grid-template-columns:1fr; } }
+  .room { min-height:225px; display:flex; flex-direction:column; justify-content:space-between; padding:20px;
+    border:1px solid rgba(156,111,214,.45); border-radius:12px;
+    background:linear-gradient(135deg,rgba(156,111,214,.14),rgba(69,194,220,.05)); }
+  .roomtop { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; }
+  .roomtop h2 { color:var(--ink); font:800 22px var(--sans); letter-spacing:-.02em; text-transform:none; }
+  .pill { border:1px solid var(--biomass); border-radius:999px; color:var(--biomass); padding:3px 8px; font-size:9px; letter-spacing:.12em; text-transform:uppercase; white-space:nowrap; }
+  #visualizer { width:100%; height:90px; display:block; margin:20px 0 12px; border-radius:8px; background:rgba(0,0,0,.18); }
+  .roomfoot { display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; }
+  .roomfoot small { color:var(--dim); font-size:10px; }
+  .primary { color:#140B1E; border-color:var(--human); background:var(--human-soft); min-height:44px; }
+  .primary:hover { color:#140B1E; background:var(--human); border-color:var(--human); }
+  .facts { display:grid; grid-template-columns:repeat(2,1fr); gap:8px; }
+  .fact { padding:11px; border:1px solid var(--line); border-radius:9px; background:var(--well); }
+  .fact label { display:block; color:var(--dimmer); font-size:9px; letter-spacing:.14em; text-transform:uppercase; }
+  .fact b { display:block; margin-top:4px; color:var(--ink); font-size:16px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .fact b.accent { color:var(--human-soft); }
+  .items { display:flex; flex-direction:column; gap:7px; margin-top:14px; }
+  .card-head { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; }
+  .store-action { flex:none; padding:8px 12px; color:var(--ai); border-color:var(--ai); font-size:10px; min-height:36px; }
+  .store-action:disabled { cursor:not-allowed; opacity:.55; }
+  .store-state { color:var(--dim); font-size:10px; }
+  .item { display:grid; grid-template-columns:1fr auto; gap:12px; align-items:center; padding:11px 12px; border:1px solid var(--line); border-radius:9px; background:var(--well); }
+  .item b { color:var(--ink); font-size:12px; font-weight:600; }
+  .item small { display:block; color:var(--dim); font-size:10px; }
+  .ready { color:var(--biomass); font-size:10px; }
+  .meta { display:grid; grid-template-columns:repeat(2,1fr); gap:10px; margin-top:14px; }
+  .meta div { padding:12px; border-left:2px solid var(--ai); background:var(--well); }
+  .meta label { display:block; color:var(--dimmer); font-size:9px; text-transform:uppercase; letter-spacing:.13em; }
+  .meta strong { display:block; margin-top:3px; color:var(--ink); font-size:12px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .gate { margin-top:14px; padding:13px; border:1px dashed var(--gold); border-radius:9px; color:var(--dim); font-size:11px; }
+  .gate b { color:var(--gold); }
+  .gate .row { display:flex; justify-content:space-between; gap:10px; margin-top:7px; color:var(--ink); }
+  .gate .off { color:var(--biomass); }
+  .gate .downstream { color:var(--human-soft); }
+  .credit { display:flex; gap:9px; align-items:center; margin-top:14px; }
+  .avatar { width:34px; height:34px; display:grid; place-items:center; border-radius:50%; background:var(--human); color:#140B1E; font-weight:800; }
+  .avatar.ai { background:var(--ai); }
+  .credit small { display:block; color:var(--dim); font-size:10px; }
+  .eventlog { display:flex; flex-direction:column; gap:7px; margin-top:14px; min-height:85px; }
+  .event { display:flex; gap:10px; align-items:baseline; padding:8px 10px; border-left:2px solid var(--ai); background:var(--well); color:var(--dim); font-size:10px; }
+  .event b { color:var(--ai); font-size:9px; letter-spacing:.08em; }
+  .law { margin-top:20px; padding:14px 16px; border:1px solid var(--line); border-left:2px solid var(--biomass); border-radius:10px; color:var(--dim); font-size:10.5px; line-height:1.8; }
+  .law b { color:var(--ink); }
+
+  /* ── the color-law legend — one line, three swatches, every view ────── */
+  .colorlaw { display:flex; align-items:center; gap:14px; flex-wrap:wrap; margin-top:14px;
+    padding:11px 14px; border:1px solid var(--line); border-radius:10px; color:var(--dim); font-size:10.5px; }
+  .colorlaw .sw { display:inline-flex; align-items:center; gap:5px; }
+  .colorlaw .sw i { width:10px; height:10px; border-radius:50%; display:inline-block; }
+  .colorlaw .sw.human i { background:var(--human); } .colorlaw .sw.ai i { background:var(--ai); }
+  .colorlaw .sw.biomass i { background:var(--biomass); }
+
+  footer { width:min(1100px, calc(100% - 32px)); margin:30px auto 0; padding-top:18px; border-top:1px solid var(--line); color:var(--dimmer); font-size:10px; line-height:1.8; }
+  footer a { color:var(--dim); }
+
+  /* ── motion control — visible where motion lives (Raver); the canvas and
+     the artwork both obey it AND prefers-reduced-motion ───────────────── */
+  #motion { display:none; }
+  #motion[aria-pressed="true"] { color:var(--human-soft); border-color:var(--human); }
+
+  /* ═════════════════════════════════════════════════════════════════════
+     NEW BEE — the calm first minute. Light canvas, quiet type, no ambient
+     motion, every control plain and labelled. Same facts, whispered.
+     ═════════════════════════════════════════════════════════════════════ */
+  body[data-reg="bee"] {
+    --human:#65509A; --human-soft:#65509A; --ai:#176879; --biomass:#326b39; --gold:#855b0b;
+    --bg:#f6f7f2; --panel:#fff; --well:#edf2eb; --line:#ccd7cf; --line-hi:#a9bcad;
+    --ink:#18362a; --dim:#435f4e; --dimmer:#52695b; --void:#f6f7f2; --lift:#e2eadf;
+    font-family:var(--sans); font-size:15px; color-scheme:light;
+  }
+  body[data-reg="bee"] header { background:linear-gradient(180deg,#eef2e9,#f6f7f2); }
+  body[data-reg="bee"] h1 span { color:var(--human); }
+  body[data-reg="bee"] .primary { color:#fff; background:var(--human); }
+  body[data-reg="bee"] .primary:hover { background:#54407f; }
+  body[data-reg="bee"] .avatar { color:#fff; }
+  body[data-reg="bee"] .room { background:linear-gradient(135deg,rgba(101,80,154,.08),rgba(23,104,121,.05)); border-color:rgba(101,80,154,.35); }
+  body[data-reg="bee"] .dot.bad { box-shadow:none; }
+  body[data-reg="bee"] .card h2 { color:var(--human); }
+
+  /* ═════════════════════════════════════════════════════════════════════
+     RAVER — the floor at full feeling. This is NOT a recolored bee: a
+     full-bleed opening with authored artwork (speakers, the set as light,
+     the crowd already dancing on a biomass-green horizon), poster type,
+     stat-tile facts, and motion that can be paused — and pauses itself
+     for anyone whose browser asks it to.
+     ═════════════════════════════════════════════════════════════════════ */
+  body[data-reg="raver"] {
+    --human:#9C6FD6; --human-soft:#C9A7F5; --ai:#45C2DC; --biomass:#86CC72; --gold:#E8B54B;
+    --bg:#0E0817; --panel:#1A1226; --well:#140E1F; --line:#3A2C4E; --line-hi:#544070;
+    --ink:#F5EFFA; --dim:#C4B9D5; --dimmer:#9C8FB8; --void:#0E0817; --lift:#241A35;
+  }
+  body[data-reg="raver"] header { padding:0; border-bottom:0; }
+  body[data-reg="raver"] .hero-open { position:relative; min-height:min(88vh,760px); display:flex; flex-direction:column;
+    justify-content:center; padding:84px 0 64px; overflow:hidden;
+    background:
+      radial-gradient(ellipse 62% 48% at 18% 32%, rgba(156,111,214,.28), transparent 62%),
+      radial-gradient(ellipse 55% 45% at 86% 22%, rgba(69,194,220,.16), transparent 60%),
+      radial-gradient(ellipse 80% 40% at 50% 108%, rgba(134,204,114,.14), transparent 66%),
+      linear-gradient(180deg,#0E0817,#150C24 58%,#0E0817); }
+  body[data-reg="raver"] .hero-open .wrap { position:relative; }
+  body[data-reg="raver"] .eyebrow { color:var(--human-soft); }
+  body[data-reg="raver"] h1 { font-size:clamp(3rem,12vw,8.2rem); }
+  body[data-reg="raver"] h1 span {
+    background:linear-gradient(94deg,#C9A7F5,#45C2DC 55%,#86CC72);
+    -webkit-background-clip:text; background-clip:text; color:transparent; }
+  body[data-reg="raver"] .lead { font:500 clamp(1.6rem,4.6vw,3.1rem)/1.12 var(--sans);
+    letter-spacing:-.035em; max-width:17ch; margin-top:22px; text-wrap:balance; }
+  body[data-reg="raver"] .intro { max-width:52ch; font-size:13px; }
+  body[data-reg="raver"] .nav { margin-top:30px; }
+  body[data-reg="raver"] .statusline { margin-top:26px; }
+
+  /* the floor artwork — first-party SVG, aria-hidden, animated only in Raver */
+  .floorart { display:none; }
+  body[data-reg="raver"] .floorart { display:block; position:absolute; inset:auto -4% -2% auto; width:min(62%,660px);
+    pointer-events:none; }
+  .art-ring { transform-box:fill-box; transform-origin:center; animation:ringpulse 5.2s ease-in-out infinite; }
+  .art-ring.r2 { animation-delay:1.4s; } .art-ring.r3 { animation-delay:2.6s; }
+  .art-bar { transform-box:fill-box; transform-origin:50% 100%; animation:barbreathe 2.7s ease-in-out infinite; }
+  .art-head { transform-box:fill-box; transform-origin:50% 100%; animation:crowdsway 6.5s ease-in-out infinite; }
+  @keyframes ringpulse { 0%,100%{transform:scale(.94);opacity:.5} 50%{transform:scale(1.06);opacity:.95} }
+  @keyframes barbreathe { 0%,100%{transform:scaleY(.42)} 50%{transform:scaleY(1)} }
+  @keyframes crowdsway { 0%,100%{transform:rotate(-1.6deg)} 50%{transform:rotate(1.6deg)} }
+
+  body[data-reg="raver"] #motion { display:inline-flex; }
+
+  /* facts become stat tiles — spacious, poster-numeral energy */
+  body[data-reg="raver"] .facts { gap:10px; }
+  body[data-reg="raver"] .fact { padding:14px; border-radius:14px; }
+  body[data-reg="raver"] .fact b { font:800 clamp(1.15rem,2.2vw,1.5rem)/1.1 var(--sans); letter-spacing:-.02em; }
+  body[data-reg="raver"] .fact b.accent { color:var(--human-soft); }
+  body[data-reg="raver"] .room { border-radius:16px; border-color:rgba(201,167,245,.4); }
+  body[data-reg="raver"] .primary { font-size:13px; padding:13px 22px; border-radius:999px; color:#12081F;
+    background-color:#9C6FD6; background-image:linear-gradient(96deg,#C9A7F5,#9C6FD6);
+    box-shadow:0 8px 30px rgba(156,111,214,.35); }
+  body[data-reg="raver"] .card { border-radius:18px; }
+  body[data-reg="raver"] .card h2 { color:var(--human-soft); }
+  body[data-reg="raver"] .plur-strip { display:flex; }
+
+  /* the PLUR strip — the four words under the floor, raver-only flourish */
+  .plur-strip { display:none; gap:8px 18px; flex-wrap:wrap; align-items:baseline; margin-top:20px;
+    color:var(--dim); font-size:10px; }
+  .plur-strip b { font:700 clamp(1.3rem,3.4vw,2.1rem)/1 var(--sans); letter-spacing:-.02em; }
+  .plur-strip b:nth-of-type(1){color:var(--ai)} .plur-strip b:nth-of-type(2){color:var(--human-soft)}
+  .plur-strip b:nth-of-type(3){color:#6FA9E0} .plur-strip b:nth-of-type(4){color:var(--gold)}
+
+  /* ═════════════════════════════════════════════════════════════════════
+     CYPHERPUNK — the terminal read-out. Mono, dense, boundary-first: the
+     evidence map and the admission gate lead; the poster art never loads.
+     ═════════════════════════════════════════════════════════════════════ */
+  body[data-reg="cypherpunk"] {
+    --human:#C9A7F5; --human-soft:#C9A7F5; --ai:#80CDDD; --biomass:#8CD98C; --gold:#E8B54B;
+    --bg:#0E141A; --panel:#151E26; --well:#101820; --line:#3F5260; --line-hi:#58707F;
+    --ink:#D8F0D9; --dim:#A4C0A8; --dimmer:#8AA690; --void:#0E141A; --lift:#1B2833;
+    font-family:ui-monospace,'Cascadia Mono',Consolas,monospace;
+  }
+  body[data-reg="cypherpunk"] header { padding:40px 0 26px; }
+  body[data-reg="cypherpunk"] h1 { font:700 clamp(1.5rem,3.4vw,2.3rem)/1.1 inherit; letter-spacing:-.02em; }
+  body[data-reg="cypherpunk"] h1 span { color:var(--biomass); }
+  body[data-reg="cypherpunk"] .lead { font:600 1rem/1.5 inherit; max-width:78ch; }
+  body[data-reg="cypherpunk"] .nav a, body[data-reg="cypherpunk"] button.pill { border-radius:3px; }
+  body[data-reg="cypherpunk"] .card, body[data-reg="cypherpunk"] .fact, body[data-reg="cypherpunk"] .item,
+  body[data-reg="cypherpunk"] .meta div, body[data-reg="cypherpunk"] .law, body[data-reg="cypherpunk"] .colorlaw { border-radius:3px; }
+  body[data-reg="cypherpunk"] .card h2 { color:var(--ai); }
+  body[data-reg="cypherpunk"] .primary { border-radius:3px; background:var(--human); color:#140B1E; }
+  /* the boundary card leads the reading order in this view */
+  body[data-reg="cypherpunk"] .grid { display:flex; flex-direction:column; }
+  body[data-reg="cypherpunk"] #boundary-card { order:-1; }
+  .boundary-dl { margin-top:12px; display:grid; grid-template-columns:130px 1fr; gap:7px 12px; font-size:10.5px; }
+  .boundary-dl dt { color:var(--ai); }
+  .boundary-dl dd { margin:0; color:var(--dim); overflow-wrap:anywhere; }
+  @media(max-width:720px){ .boundary-dl { grid-template-columns:1fr; gap:2px; } .boundary-dl dd { margin-bottom:8px; } }
+
+  /* ── motion laws ───────────────────────────────────────────────────────
+     Ambient artwork stops for anyone who asks the OS for less motion, and
+     the pause control (Raver) stops it for everyone else. The canvas meter
+     obeys the same switch — see the meter module below. */
+  body[data-motion-paused="true"] .art-ring, body[data-motion-paused="true"] .art-bar,
+  body[data-motion-paused="true"] .art-head { animation-play-state:paused; }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior:auto; }
+    .art-ring, .art-bar, .art-head { animation:none; }
+  }
+</style>
+</head>
+<body data-reg="bee" data-bee-theme="custom">
+
+<header>
+  <div class="hero-open">
+  <div class="wrap">
+    <div class="eyebrow" data-i18n="music.eyebrow">PLUR · the music room</div>
+    <h1>SKAISTS <span>mUsiC</span></h1>
+
+    <!-- one lead per view — same room, three temperatures -->
+    <p class="lead" data-reg="bee" data-i18n="music.beeLead">A calm room. The music is already playing.</p>
+    <p class="lead" data-reg="raver" data-i18n="music.raverLead">The floor is yours.</p>
+    <p class="lead" data-reg="cypherpunk" data-i18n="music.cypherLead">Inspect the manifest, the store read and the gate.</p>
+
+    <p class="intro" data-reg="bee" data-i18n="music.beeIntro">This room plays from a shared, verified manifest. Nothing to sign, nothing to pay — look around, then step in when it feels right.</p>
+    <p class="intro" data-reg="raver" data-i18n="music.raverStory">Thirty years ago, first time on the floor, somebody said <b>come as you are — we accept you</b>. That sentence never left the room. <span class="lv">skaists</span> means beautiful; the LOVErnment writes its law as care — <b>mīlestība ir karalis</b>, love is king — and this floor keeps all of it.</p>
+    <p class="intro" data-reg="cypherpunk" data-i18n="music.cypherIntro">Every claim on this page is read from the shared envelope or refused. Reads are bounded; no second raw transport is opened; admission stays disabled.</p>
+
+    <div class="plur-strip" aria-label="PLUR">
+      <b data-i18n="plur.peace">peace</b><b data-i18n="plur.love">love</b><b data-i18n="plur.unity">unity</b><b data-i18n="plur.respect">respect</b>
+      <span data-i18n="plur.values">peace · love · unity · respect</span>
+    </div>
+
+    <nav class="nav" aria-label="PLUR room links">
+      <a href="plur.html">← PLUR museum</a>
+      <a href="watch.html">watch together</a>
+      <a href="listening.html">listening room</a>
+      <a href="blight/midiroom.html">bMiDi room</a>
+      <button class="pill" id="motion" type="button" hidden aria-pressed="false" data-i18n="ux.pause">Pause motion</button>
+    </nav>
+
+    <div class="independent" aria-label="independent project references">
+      <b>Independent project references.</b> This room is a SKAISTS project. Explore the original
+      <a href="https://jams.community/" target="_blank" rel="noopener noreferrer">JAMS.community ↗</a>
+      and <a href="https://github.com/aautonomicc/Watch-It" target="_blank" rel="noopener noreferrer">W@tch ↗</a>
+      apps as well. They are separate projects; each link opens in a new tab.
+    </div>
+
+    <div class="statusline"><span class="dot" id="status-dot"></span><span id="status">loading the shared room manifest…</span><span id="status-note"></span><span class="store-state" id="store-status">store adapter idle</span></div>
+  </div>
+
+  <!-- the floor at full feeling — speakers breathe, the set moves as light,
+       the crowd sways on a biomass-green horizon. Decorative only; it stops
+       for prefers-reduced-motion and for the pause control. -->
+  <svg class="floorart" viewBox="0 0 720 430" fill="none" aria-hidden="true" focusable="false">
+    <circle class="art-ring" cx="118" cy="238" r="86" stroke="#45C2DC" stroke-opacity=".5" stroke-width="2"/>
+    <circle class="art-ring r2" cx="118" cy="238" r="120" stroke="#45C2DC" stroke-opacity=".3" stroke-width="2"/>
+    <circle class="art-ring r3" cx="118" cy="238" r="156" stroke="#45C2DC" stroke-opacity=".16" stroke-width="2"/>
+    <circle class="art-ring r2" cx="600" cy="210" r="72" stroke="#9C6FD6" stroke-opacity=".5" stroke-width="2"/>
+    <circle class="art-ring" cx="600" cy="210" r="104" stroke="#9C6FD6" stroke-opacity=".28" stroke-width="2"/>
+    <g>
+      <rect class="art-bar" x="212" y="250" width="13" height="96" rx="6" fill="#9C6FD6" fill-opacity=".85" style="animation-delay:.0s"/>
+      <rect class="art-bar" x="232" y="226" width="13" height="120" rx="6" fill="#B79FE0" fill-opacity=".8" style="animation-delay:.22s"/>
+      <rect class="art-bar" x="252" y="258" width="13" height="88" rx="6" fill="#45C2DC" fill-opacity=".85" style="animation-delay:.44s"/>
+      <rect class="art-bar" x="272" y="212" width="13" height="134" rx="6" fill="#9C6FD6" fill-opacity=".9" style="animation-delay:.1s"/>
+      <rect class="art-bar" x="292" y="244" width="13" height="102" rx="6" fill="#86CC72" fill-opacity=".75" style="animation-delay:.55s"/>
+      <rect class="art-bar" x="312" y="232" width="13" height="114" rx="6" fill="#B79FE0" fill-opacity=".8" style="animation-delay:.33s"/>
+      <rect class="art-bar" x="332" y="252" width="13" height="94" rx="6" fill="#45C2DC" fill-opacity=".85" style="animation-delay:.66s"/>
+      <rect class="art-bar" x="352" y="220" width="13" height="126" rx="6" fill="#9C6FD6" fill-opacity=".85" style="animation-delay:.18s"/>
+      <rect class="art-bar" x="372" y="250" width="13" height="96" rx="6" fill="#B79FE0" fill-opacity=".8" style="animation-delay:.48s"/>
+      <rect class="art-bar" x="392" y="236" width="13" height="110" rx="6" fill="#45C2DC" fill-opacity=".85" style="animation-delay:.05s"/>
+      <rect class="art-bar" x="412" y="256" width="13" height="90" rx="6" fill="#86CC72" fill-opacity=".75" style="animation-delay:.4s"/>
+      <rect class="art-bar" x="432" y="224" width="13" height="122" rx="6" fill="#9C6FD6" fill-opacity=".9" style="animation-delay:.28s"/>
+      <rect class="art-bar" x="452" y="248" width="13" height="98" rx="6" fill="#B79FE0" fill-opacity=".8" style="animation-delay:.6s"/>
+      <rect class="art-bar" x="472" y="230" width="13" height="116" rx="6" fill="#45C2DC" fill-opacity=".85" style="animation-delay:.15s"/>
+    </g>
+    <g fill="#9C6FD6">
+      <g class="art-head" fill-opacity=".92">
+        <circle cx="252" cy="392" r="17"/><path d="M222 430c0-19 13-32 30-32s30 13 30 32Z"/>
+      </g>
+      <g class="art-head" fill-opacity=".78" style="animation-delay:.9s">
+        <circle cx="316" cy="398" r="15"/><path d="M289 430c0-17 12-29 27-29s27 12 27 29Z"/>
+      </g>
+      <g class="art-head" fill-opacity=".85" style="animation-delay:1.8s">
+        <circle cx="378" cy="390" r="18"/><path d="M346 430c0-20 14-34 32-34s32 14 32 34Z"/>
+      </g>
+      <g class="art-head" fill-opacity=".7" style="animation-delay:2.7s">
+        <circle cx="440" cy="400" r="14"/><path d="M415 430c0-16 11-27 25-27s25 11 25 27Z"/>
+      </g>
+      <g class="art-head" fill-opacity=".9" style="animation-delay:3.6s">
+        <circle cx="498" cy="394" r="16"/><path d="M470 430c0-18 12-31 28-31s28 13 28 31Z"/>
+      </g>
+    </g>
+    <path d="M40 424h640" stroke="#86CC72" stroke-width="2.5" stroke-opacity=".8"/>
+    <path d="M40 416h640" stroke="#86CC72" stroke-width="1" stroke-opacity=".25"/>
+  </svg>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="card hero" aria-label="music jam room">
+    <div class="room">
+      <div class="roomtop"><div><h2 id="room-title">PLUR room</h2><p class="sub" id="room-sub">waiting for a verified checkpoint</p></div><span class="pill" id="room-state">LOCAL PREVIEW</span></div>
+      <canvas id="visualizer" width="900" height="180" aria-label="local music visualizer"></canvas>
+      <div class="roomfoot"><small id="room-foot">nothing has been joined yet</small><button class="primary" id="join" type="button" disabled data-i18n="music.join">join this jam</button></div>
+    </div>
+    <div class="facts" aria-label="room facts">
+      <div class="fact"><label>channel</label><b class="accent" id="f-channel">—</b></div>
+      <div class="fact"><label>epoch</label><b id="f-epoch">—</b></div>
+      <div class="fact"><label>sequence</label><b id="f-sequence">—</b></div>
+      <div class="fact"><label>items</label><b id="f-items">—</b></div>
+      <div class="fact"><label>receiver</label><b>bounded</b></div>
+      <div class="fact"><label>store</label><b>read-only</b></div>
+    </div>
+  </section>
+
+  <div class="colorlaw" aria-label="the BNR color law">
+    <span class="sw human"><i aria-hidden="true"></i><span data-i18n="music.lawHuman">purple = humans</span></span>
+    <span class="sw ai"><i aria-hidden="true"></i><span data-i18n="music.lawAi">teal = Ai</span></span>
+    <span class="sw biomass"><i aria-hidden="true"></i><span data-i18n="music.lawBiomass">green = biomass</span></span>
+  </div>
+
+  <div class="grid" style="margin-top:14px">
+    <section class="card half">
+      <div class="card-head"><div><h2>the set · encrypted items</h2><p class="sub">References are visible; plaintext and keys stay behind the channel verifier.</p></div><button class="store-action" id="verify-store" type="button" disabled>verify encrypted refs</button></div>
+      <div class="items" id="items"><div class="item"><span><b>loading manifest…</b><small>waiting for the shared envelope</small></span><span>—</span></div></div>
+    </section>
+    <section class="card half">
+      <h2>checkpoint · late join</h2>
+      <p class="sub">The x0x hint is opaque. A reader follows it, fetches the objects, and changes state only after verification.</p>
+      <div class="meta">
+        <div><label>checkpoint id</label><strong id="m-id">—</strong></div>
+        <div><label>policy id</label><strong id="m-policy">—</strong></div>
+        <div><label>storage ref</label><strong id="m-address">—</strong></div>
+        <div><label>checkpoint bytes</label><strong id="m-size">—</strong></div>
+      </div>
+      <div class="gate"><b>admission gate</b><div class="row"><span>payment</span><span class="off" id="g-payment">disabled</span></div><div class="row"><span>approval</span><span class="downstream" id="g-approval">Trezor downstream</span></div><div class="row"><span>complete cost cap</span><span id="g-cap">—</span></div></div>
+    </section>
+
+    <section class="card third" id="boundary-card" data-reg="cypherpunk">
+      <h2>boundary · evidence</h2>
+      <p class="sub">What this page actually opens, named by the code that opens it.</p>
+      <dl class="boundary-dl">
+        <dt>manifest read</dt><dd>surfaces/manifest-reader.js — loadManifest() fetches the shared envelope and verifies it before any state change</dd>
+        <dt>store read</dt><dd>surfaces/store-reader.js — readEncryptedItems() GETs bounded ciphertext objects and hash-checks them; no write path exists on this page</dd>
+        <dt>transport</dt><dd>no raw x0x /ws socket; no relay publish; join records a local event only</dd>
+        <dt>not established</dt><dd>decryption of set items, live room events, provider retention — UNVERIFIED, never claimed</dd>
+      </dl>
+    </section>
+
+    <section class="card third">
+      <h2>creator</h2>
+      <div class="credit"><div class="avatar" aria-hidden="true">LW</div><div><b id="creator">—</b><small id="creator-key">public key hidden until verified</small></div></div>
+    </section>
+    <section class="card third">
+      <h2>source</h2>
+      <div class="credit"><div class="avatar ai" aria-hidden="true">◎</div><div><b id="source-title">—</b><small id="source-uri">—</small></div></div>
+    </section>
+    <section class="card third">
+      <h2>room log</h2>
+      <div class="eventlog" id="eventlog" aria-live="polite"><div class="event"><b>READY</b><span>manifest still loading</span></div></div>
+    </section>
+  </div>
+
+  <div class="law"><b>Room law.</b> This SKAISTS mUsiC preview consumes our language-neutral manifest. Linking to the independent <a href="https://github.com/aautonomicc/Watch-It" target="_blank" rel="noopener noreferrer">W@tch project ↗</a> does not mean its app consumes this manifest. This page never implements a second raw x0x `/ws` path. Joining this preview records only a local event; the accepted receiver, read-only store, complete cost admission, and downstream Trezor approval remain the boundaries for a real room.</div>
+</main>
+
+<footer>SKAISTS mUsiC · PLUR · manifest-backed preview · <a href="plur.html">return to the floor</a> · <a href="../fixtures/connect-store-manifest-envelope-v1.json">inspect the shared envelope</a></footer>
+
+<script type="module">
+'use strict';
+import { loadManifest, shortRef } from './manifest-reader.js';
+import { readEncryptedItems } from './store-reader.js';
+const $ = id => document.getElementById(id);
+const query = new URLSearchParams(location.search);
+/* Query overrides are a same-origin affordance (local fixtures, tests). A
+   cross-origin manifest or store URL is ignored fail-closed — a crafted link
+   must not be able to paint attacker fields under this branding, light the
+   verified chips for attacker bytes, or turn the verify tap into a beacon.
+   Carried forward from the z2.sec S2 hardening (2026-09-12) through the
+   jams.html → music.html rename. */
+function sameOriginOverride(raw) {
+  if (!raw) return undefined;
+  try {
+    const url = new URL(raw, location.href);
+    return url.origin === location.origin ? url : undefined;
+  } catch { return undefined; }
+}
+const manifestOverride = sameOriginOverride(query.get('manifest'));
+const manifestUrl = manifestOverride;
+const storeOverride = sameOriginOverride(query.get('store'));
+const storeEndpoint = storeOverride ? storeOverride.href : '';
+if ((query.get('manifest') && !manifestOverride) || (query.get('store') && !storeOverride)) {
+  const log = document.getElementById('eventlog');
+  if (log) {
+    const row = document.createElement('div'); row.className = 'event';
+    const k = document.createElement('b'); k.textContent = 'REFUSED';
+    const m = document.createElement('span');
+    m.textContent = 'cross-origin manifest/store override ignored · no room state changed';
+    row.append(k, m); log.prepend(row);
+  }
+}
+const state = { manifest:null, joined:false, anim:null, storeEndpoint };
+const eventlog = $('eventlog');
+/* corpus-law helper: script-written labels stay translatable with a visible
+   English fallback (same contract as plur.html's bvoice T()) */
+function T(key, fallback) {
+  return (window.BNRLanguage && typeof window.BNRLanguage.text === 'function')
+    ? window.BNRLanguage.text(key, fallback) : fallback;
+}
+function event(kind, message) {
+  const row = document.createElement('div'); row.className='event';
+  const k = document.createElement('b'); k.textContent=kind;
+  const m = document.createElement('span'); m.textContent=message;
+  row.append(k,m); eventlog.prepend(row);
+  while (eventlog.children.length > 4) eventlog.lastElementChild.remove();
+}
+function paint(envelope) {
+  const m=envelope.manifest, cp=m.checkpoint;
+  state.manifest=envelope;
+  $('status-dot').className='dot ok'; $('status').textContent='shared manifest verified'; $('status-note').textContent='· local preview';
+  $('store-status').textContent=state.storeEndpoint ? 'store adapter ready · endpoint supplied' : 'store adapter idle · endpoint not configured';
+  $('room-title').textContent='PLUR · '+m.channel+' jam'; $('room-sub').textContent='checkpoint '+shortRef(cp.id)+' · ready for a bounded late join';
+  $('f-channel').textContent=m.channel; $('f-epoch').textContent=m.epoch; $('f-sequence').textContent=m.sequence; $('f-items').textContent=m.encrypted_items.length;
+  $('m-id').textContent=shortRef(cp.id); $('m-policy').textContent=shortRef(cp.policy_id); $('m-address').textContent=shortRef(cp.ref.address); $('m-size').textContent=cp.ref.size.toLocaleString()+' B';
+  $('g-payment').textContent=m.admission.payment; $('g-approval').textContent=m.admission.approval === 'trezor' ? 'Trezor downstream' : m.admission.approval; $('g-cap').textContent=m.admission.max_bytes.toLocaleString()+' B · '+m.admission.max_items+' items';
+  $('creator').textContent=m.credits.creator[0]?.display_name || 'unnamed creator'; $('creator-key').textContent='creator credit · key verified by the reader';
+  $('source-title').textContent=m.credits.source[0]?.title || 'source credit'; $('source-uri').textContent=m.credits.source[0]?.uri || '—';
+  $('items').replaceChildren(...m.encrypted_items.map(item => { const row=document.createElement('div'); row.className='item'; const text=document.createElement('span'); const b=document.createElement('b'); b.textContent=item.kind; const s=document.createElement('small'); s.textContent='v'+item.version+' · '+item.ref.size.toLocaleString()+' B · encrypted reference'; text.append(b,s); const ok=document.createElement('span'); ok.className='ready'; ok.dataset.storeState='pending'; ok.textContent='ready'; row.append(text,ok); return row; }));
+  $('verify-store').disabled=!state.storeEndpoint;
+  $('join').disabled=false; event('READY','manifest accepted; no network write opened');
+}
+async function verifyStore() {
+  if (!state.manifest || !state.storeEndpoint) return;
+  const button=$('verify-store'); button.disabled=true; $('store-status').textContent='reading encrypted objects…';
+  document.querySelectorAll('#items .ready').forEach(node => { node.dataset.storeState='checking'; node.textContent='checking'; });
+  try {
+    const results=await readEncryptedItems(state.manifest, { endpoint:state.storeEndpoint, maxItems:state.manifest.manifest.encrypted_items.length });
+    results.forEach((_, index) => { const node=document.querySelectorAll('#items .ready')[index]; if (node) { node.dataset.storeState='verified'; node.textContent='verified'; } });
+    $('store-status').textContent=`${results.length} encrypted objects verified · decryption remains client-side`;
+    event('STORE','ciphertext fetched and hash-checked; no write opened');
+  } catch (error) {
+    document.querySelectorAll('#items .ready').forEach(node => { node.dataset.storeState='refused'; node.textContent='refused'; });
+    $('store-status').textContent='store verification refused · no room state changed';
+    event('REFUSED',`store read refused · ${error.message}`);
+  } finally { button.disabled=false; }
+}
+
+/* ── the meter — one canvas, three temperatures, one motion law ──────────
+   Raver: full amplitude, fast drift. Bee: a slow, low, calm swell.
+   Cypherpunk: a static frame (redrawn on state changes only).
+   prefers-reduced-motion and the pause control stop the loop entirely and
+   leave the last frame standing — motion is a courtesy, never a demand. */
+const motion = { reduced: matchMedia('(prefers-reduced-motion: reduce)'), paused: false };
+function motionOff() { return motion.reduced.matches || motion.paused; }
+function draw() {
+  const c=$('visualizer'), ctx=c.getContext('2d'), w=c.width, h=c.height;
+  const reg=document.body.getAttribute('data-reg')||'bee';
+  ctx.clearRect(0,0,w,h); ctx.fillStyle='rgba(6,10,8,.8)'; ctx.fillRect(0,0,w,h);
+  const t=performance.now()/(reg==='raver'?520:1400), n=48;
+  const base=reg==='raver'?18:10, amp=reg==='raver'?64:26;
+  for(let i=0;i<n;i++){
+    const x=i*(w/n), a=base+Math.abs(Math.sin(t+i*.47))*amp + (state.joined?(reg==='raver'?16:6):0);
+    ctx.fillStyle = i%3===0 ? '#9C6FD6' : (i%3===1 ? '#45C2DC' : '#86CC72');
+    ctx.globalAlpha=.35+Math.abs(Math.sin(t*.7+i*.2))*.55;
+    ctx.fillRect(x,h/2-a/2,Math.max(3,w/n-4),a);
+  }
+  ctx.globalAlpha=1;
+  if (reg!=='cypherpunk' && !motionOff()) state.anim=requestAnimationFrame(draw);
+  else state.anim=null;
+}
+function syncMotion() {
+  document.body.setAttribute('data-motion-paused', String(motionOff()));
+  const b=$('motion');
+  b.hidden=false;
+  b.disabled=motion.reduced.matches;
+  b.setAttribute('aria-pressed', String(motion.reduced.matches || motion.paused));
+  const key=motion.reduced.matches ? 'ux.still' : (motion.paused ? 'ux.resume' : 'ux.pause');
+  const fallback=motion.reduced.matches ? 'Still image' : (motion.paused ? 'Resume motion' : 'Pause motion');
+  b.textContent=T(key, fallback);
+  if (state.anim) cancelAnimationFrame(state.anim);
+  if (motionOff()) { state.anim=null; draw(); }
+  else if (document.body.getAttribute('data-reg')!=='cypherpunk' && state.anim===null) state.anim=requestAnimationFrame(draw);
+}
+try { motion.paused = localStorage.getItem('bnr.motion.paused')==='true'; } catch(e) {}
+motion.reduced.addEventListener('change', syncMotion);
+$('motion').addEventListener('click', () => {
+  motion.paused=!motion.paused;
+  try{ localStorage.setItem('bnr.motion.paused', String(motion.paused)); }catch(e){}
+  syncMotion();
+});
+window.addEventListener('storage', e => { if (e.key==='bnr.motion.paused') { motion.paused=e.newValue==='true'; syncMotion(); } });
+document.addEventListener('bregister', () => { if (state.anim) cancelAnimationFrame(state.anim); state.anim=null; draw(); });
+document.addEventListener('blang', () => { syncMotion(); });
+
+function joinLabel() { $('join').textContent = state.joined ? T('music.leave','leave preview') : T('music.join','join this jam'); }
+$('join').addEventListener('click', () => { if(!state.manifest) return; state.joined=!state.joined; joinLabel(); $('room-foot').textContent=state.joined?'you are in the local room preview · no write was attempted':'nothing has been joined yet'; event(state.joined?'JOIN':'LEAVE',state.joined?'local participant joined; receiver handoff remains pending':'local participant left'); if (document.body.getAttribute('data-reg')==='cypherpunk' && !state.anim) draw(); });
+$('verify-store').addEventListener('click', verifyStore);
+syncMotion(); draw();
+loadManifest(manifestUrl).then(paint).catch(err => { $('status-dot').className='dot bad'; $('status').textContent='manifest unavailable'; $('status-note').textContent='· '+err.message; $('store-status').textContent='store adapter idle'; event('REFUSED','no room state changed'); });
+</script>
+<script src="tour.js?v=42"></script>
+</body>
+</html>
