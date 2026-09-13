@@ -121,6 +121,14 @@ srv.listen(8841, '127.0.0.1', async () => {
     const manifest = await p.evaluate(() => document.querySelector('#profile-manifest')?.textContent ?? '');
     ok('cypher: manifest stays a local JSON receipt', manifest.includes('"skaists.house-disclosure/1"'));
     ok('cypher: instrument law renders ru', await textOf(p, 'h2[data-i18n="prof.inst.h1"]') === cell('prof.inst.h1', 'ru'));
+    // tranche 2 — the house cards speak too; only identifiers stay as printed
+    ok('card: house type line renders ru', await textOf(p, '#name-record-1 .htype span[data-i18n="prof.rec.type.human"]') === cell('prof.rec.type.human', 'ru'));
+    ok('card: human badge renders ru', await textOf(p, '#name-record-1 .bname .badge[data-i18n="prof.rec.badge.human"]') === cell('prof.rec.badge.human', 'ru'));
+    ok('card: founder house prose renders ru', await textOf(p, '#name-record-1 .bdesc') === cell('prof.rec.skaists.desc', 'ru'));
+    ok('card: generation stamp renders ru', await textOf(p, '#name-record-1 .gwho') === cell('prof.rec.g1.who', 'ru'));
+    ok('card: date caution renders ru', await textOf(p, '#name-record-2 .record-caution') === cell('prof.rec.caution', 'ru'));
+    ok('card: tongue badge renders ru', await textOf(p, '#name-record-2 .bname .badge[data-i18n="prof.rec.tongue.lv"]') === cell('prof.rec.tongue.lv', 'ru'));
+    ok('card: bAiGenTiC brand chip stays as printed', await p.evaluate(() => [...document.querySelectorAll('.badge.baigentic')].every(n => n.textContent === 'bAiGenTiC')));
     ok('cypher: honest English record of origin — holder name untranslated', await p.evaluate(() => [...document.querySelectorAll('.bname')].some(n => n.textContent.includes('Travis Mark Remington'))));
     ok('cypher: coverage counter is honest and machine-marked', await p.evaluate(() => /^⚙ \d+\/\d+$/.test(document.querySelector('#blangnote')?.textContent ?? '')));
     ok('cypher: zero page errors', errors.length === 0, errors.join(' | '));

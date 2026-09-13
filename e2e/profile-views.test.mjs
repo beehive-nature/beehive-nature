@@ -304,6 +304,34 @@ test('house-archive chrome is fully keyed; record data stays the record', () => 
   assert.ok(unkeyed.length <= 2, 'only the two holder-record displays may stay unkeyed, found ' + unkeyed.length);
 });
 
+/* Tranche 2 (founder card feedback, 2026-09-12): every readable line on the
+   seven house cards is keyed; what stays unkeyed is exactly the identifier
+   carve-out — house names, holder names, addresses, mailboxes, glyph names,
+   the bAiGenTiC brand chip, and the tongue-name datum after its label. */
+test('house cards are keyed; only identifiers stay as printed', () => {
+  const instrument = extractById(page, 'instrument');
+  const leaves = instrument.matchAll(/<(p|h2|strong|span|summary|div)\b([^>]*)>([^<]*)<\/\1>/gi);
+  const unkeyed = [];
+  for (const m of leaves) {
+    const [tag, attrs, text] = [m[1], m[2], m[3]];
+    if (!/\p{L}/u.test(text.trim())) continue;
+    if (/data-i18n=/.test(attrs)) continue;
+    // structural holders (houses, bios, metas) legitimately carry bare text
+    // between keyed children; the census only counts element leaves
+    if (/class="(house|holder|bio|bmeta|profile-houses|htype[^"]*)"/.test(attrs)) continue;
+    unkeyed.push(tag + '.' + (attrs.match(/class="([^"]*)"/)?.[1] ?? '') + '>' + text.trim().slice(0, 36));
+  }
+  const allowed = [
+    /^h2\.hname>/,                       // house names (pointer law)
+    /^span\.wallet>/,                    // addresses as printed
+    /^div\.email>/,                      // mailboxes as printed
+    /^span\.badge baigentic>bAiGenTiC$/, // the brand chip
+    /^div\.bname>/                       // holder names (text beside keyed badges)
+  ];
+  const strays = unkeyed.filter(u => !allowed.some(a => a.test(u)));
+  assert.deepEqual(strays, [], 'unkeyed card text outside the identifier carve-out');
+});
+
 /* Corpus law for the lane's 136 keys: en extracted from the page, every tongue
    non-empty, and en-echo limited to the RECORDED homograph set — a cell that
    equals English must be a true same-spelling word (fr "art", es "no", da/nl
@@ -321,11 +349,12 @@ test('the 136 house-archive keys exist ×28 with recorded homographs only', () =
     'prof.arch.schema.agent.succession:fr','prof.arch.priv.th.public:fr','prof.arch.priv.v.no:es',
     'prof.arch.priv.v.source:fr','prof.arch.priv.v.status:cs','prof.arch.priv.v.status:nl-be',
     'prof.arch.priv.v.status:nl','prof.arch.priv.v.status:da','prof.arch.priv.v.status:nb',
-    'prof.arch.priv.v.status:sv','prof.arch.priv.v.local:es','prof.arch.priv.v.local:fr'
+    'prof.arch.priv.v.status:sv','prof.arch.priv.v.local:es','prof.arch.priv.v.local:fr',
+    'prof.rec.sources:fr'
   ]);
-  const lane = k => k.startsWith('prof.arch.') || k === 'prof.inst.about' || k === 'prof.foot.keylaw';
+  const lane = k => k.startsWith('prof.arch.') || k.startsWith('prof.rec.') || k === 'prof.inst.about' || k === 'prof.foot.keylaw';
   const keyed = pageKeys.filter(lane);
-  assert.ok(keyed.length >= 120, 'lane page keys present, got ' + keyed.length);
+  assert.ok(keyed.length >= 165, 'lane page keys present, got ' + keyed.length);
   const echoes = [];
   for (const key of [...keyed, ...JS_KEYS]) {
     const row = corpus.strings[key];
@@ -336,7 +365,7 @@ test('the 136 house-archive keys exist ×28 with recorded homographs only', () =
     }
   }
   assert.deepEqual(echoes, [], 'en-echo outside the recorded homograph set');
-  assert.equal(HOMOGRAPHS.size, 20, 'homograph record stays exact');
+  assert.equal(HOMOGRAPHS.size, 21, 'homograph record stays exact');
   // the dynamic control copy rides the corpus through BNRLanguage.text, not a second glossary
   assert.match(page, /window\.BNRLanguage&&window\.BNRLanguage\.text/);
   assert.match(page, /document\.addEventListener\('blang',function\(\)\{/);

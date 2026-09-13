@@ -143,3 +143,41 @@ provenance for this lane rides in the dispatch + tests, not that field.
 Review branch only. Nothing merged, deployed, or pushed to main; no unrelated
 lane touched. Commit: founder author, zCode committer, parsed
 `Co-authored-by: zCode <zcode@skaists.dev>`.
+
+## Tranche 2 — founder card feedback ("this looks amazing except the cards", Thai view)
+
+The founder reviewed the page with the picker on Thai: translated chrome
+everywhere, but the seven house-record cards still read English. Second commit
+on the same branch: every readable line on the cards is now keyed —
+**46 more corpus keys** (type lines, the human badge, primary-tongue badges,
+all house descriptions, root/deed-holder/resident/title meta labels, all
+generation stamps and their prose, the date-reconciliation caution, the guest
+citizen card, the sources summary), each ×29 cells with en extracted from the
+page. Corpus 1,486 → **1,532 keys**; tranche-2 en-echo = 0 after honest fixes
+(cs "rezident/ozdoba", da/nb "beboer", sv "boende" for same-spelling dodges
+that weren't); the homograph record gains one true homograph
+(`prof.rec.sources:fr`, French "sources") → exact set now 21, asserted.
+
+The identifier carve-out stands and is named in the on-page caveat (rewritten
+again to the new truth): house names, holder names, wallet addresses,
+mailboxes, glyph names (蜂王 LOViS, 北方國王之手, Seat-1), the bAiGenTiC brand
+chip, and the "English" tongue datum after its translated label stay printed
+exactly as published.
+
+**AFTER2 measurement** (same seven states): 540 leaves, **495 keyed (92%)**,
+45 unkeyed — all identifiers/manifest receipt. Thai render verified in-DOM:
+`บุคคล · เรือนมุษย์`, Thai founder prose, `รุ่นที่ 1 — ผู้ก่อตั้ง`,
+`ภาษาหลัก: ลัตเวีย`, counter `⚙ 196/217`, wallet/name as printed.
+
+Regression additions: profile-views gains the **card-keyed law** (unkeyed card
+text outside the identifier carve-out fails; 18/18) and the lane corpus law
+now covers `prof.rec.*`; profile-i18n gains seven card assertions including
+the bAiGenTiC-chip-stays-printed proof (53/53). Battery on the final tranche-2
+tree: front-door line **316/316** · estate-source **11/11** (28 tongues cover
+1,532 keys) · i18n selftest + set + floors PASS. Shot:
+`e2e/shots-prof-tx/cypher-th-cards-390.png`.
+
+Instrument note (method, not a defect): probing the page with a static server
+that double-prefixes `surfaces/` starves lang.js of the corpus — the swap
+silently no-ops and everything reads English; the e2e servers strip the prefix
+(matching the real `/surfaces/` deployment route).
