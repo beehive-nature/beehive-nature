@@ -292,12 +292,14 @@ footer{max-width:1020px;margin:22px auto 0;color:var(--faint);font-size:10px;tex
 <script>
 (function(){
   var $=function(id){return document.getElementById(id)};
-  var HOSTS=['https://api.eosn.io','https://eos.api.eosnation.io','https://eos.greymass.com'];
+  /* exactly the two confirmed hosts — the former eosn.io api host went
+   NXDOMAIN (2026-09-12 live receipt; meter.py's rule since 2026-08-29).
+   Adding a third means proving it live first. */
+  var HOSTS=['https://eos.api.eosnation.io','https://eos.greymass.com'];
   var live={rows:[],byName:{},fee:null,days:null,ramCost:null};
   async function post(path,body){
-    var order = location.protocol==='file:' ? [HOSTS[1],HOSTS[2]] : HOSTS;
-    for(var i=0;i<order.length;i++){
-      try{ var r=await fetch(order[i]+path,{method:'POST',body:JSON.stringify(body)});
+    for(var i=0;i<HOSTS.length;i++){
+      try{ var r=await fetch(HOSTS[i]+path,{method:'POST',body:JSON.stringify(body)});
         if(r.ok) return await r.json(); }catch(e){}
     }
     return null;

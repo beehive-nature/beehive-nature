@@ -210,11 +210,44 @@ const browser = await chromium.launch();
   const page = await ctx.newPage();
   const errs = [];
   page.on('pageerror', e => errs.push(e.message));
-  await page.goto(`${base}/bnames.html`, { waitUntil:'load' });
+  await page.goto(`${base}/bnames.html`, { waitUntil: 'load' });
   await settle(page);
   await page.waitForTimeout(600);
   ok('no page errors on load (RPC is null, so no fetch is attempted)',
      errs.length === 0, errs.slice(0,2).join(' | ') || 'none');
+  await ctx.close();
+}
+
+// ── H1 · no dead-host request is ever emitted ───────────────────────
+// api.eosn.io is NXDOMAIN (DoH-confirmed 2026-09-12); HOSTS must not carry
+// it, so the page must never emit a request to it — watched at the network
+// layer, not the source layer. Passes offline: it only counts the forbidden
+// host, it does not require the live hosts to answer.
+{
+  const ctx = await browser.newContext();
+  const page = await ctx.newPage();
+  const dead = [];
+  page.on('request', r => { if (r.url().includes('api.eosn.io')) dead.push(r.url()); });
+  await page.goto(`${base}/bnames.html`, { waitUntil: 'load' });
+  await settle(page);
+  await page.waitForTimeout(600);
+  ok('H1 zero requests to api.eosn.io while the registry loads', dead.length === 0, dead.slice(0,2).join(' | ') || 'none');
+  await ctx.close();
+}
+
+// ── H2 · when every host fails, the unavailable-state copy is truthful ──
+// Fallback preserved by the HOSTS heal: all chain reads aborted → post()
+// returns null → #count must say the chain can't be reached (not hang, not
+// lie with numbers).
+{
+  const ctx = await browser.newContext();
+  const page = await ctx.newPage();
+  await page.route('**/v1/chain/*', r => r.abort());
+  await page.goto(`${base}/bnames.html`, { waitUntil: 'load' });
+  await settle(page);
+  await page.waitForTimeout(400);
+  const t = await page.evaluate(() => (document.getElementById('count')||{}).textContent || '');
+  ok('H2 all hosts unreachable → truthful unavailable copy', /reach the chain/.test(t), JSON.stringify(t).slice(0,72));
   await ctx.close();
 }
 

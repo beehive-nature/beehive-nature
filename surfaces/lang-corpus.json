@@ -91,11 +91,19 @@
     "wl.vc.label.usdc:gd",
     "wl.vc.label.usdc:tt",
     "wl.vc.label.usdc:sa",
-    "wl.vc.tithe.note:gd",
-    "wl.vc.tithe.note:tt",
-    "wl.vc.tithe.note:sa"
-   ]
-  }
+   "wl.vc.tithe.note:gd",
+   "wl.vc.tithe.note:tt",
+   "wl.vc.tithe.note:sa"
+  ],
+  "edu-i18n-recovery": [
+   "bld.cmp.dock:gd",
+   "bld.cmp.dock:lv",
+   "bld.cmp.dock:th",
+   "bld.title:th",
+   "bst.h.set:th",
+   "bst.quote:th"
+  ]
+ }
  },
  "strings": {
   "beta": {
