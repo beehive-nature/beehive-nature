@@ -44,10 +44,10 @@ ok('music: join is enabled only after verification', await page.locator('#join')
 await page.locator('#join').click();
 ok('music: local join changes the room preview', await page.locator('#join').innerText() === 'leave preview' && (await page.locator('#room-foot').innerText()).includes('local room preview'));
 ok('music: join receipt is local only', (await page.locator('#eventlog').innerText()).includes('local participant joined') && !requests.some(r => r.method === 'POST'));
-ok('music: PLUR, watch and listening links are present', await page.locator('a[href="plur.html"]').count() === 2 && await page.locator('a[href="watch.html"]').count() === 1 && await page.locator('a[href="listening.html"]').count() === 1);
+ok('music: PLUR, watch and listening links are present (nav + source panel)', await page.locator('a[href="plur.html"]').count() === 2 && await page.locator('a[href="watch.html"]').count() === 2 && await page.locator('a[href="listening.html"]').count() === 2);
 const jamsRef = page.locator('a[href="https://jams.community/"]');
 const watchRef = page.locator('a[href="https://github.com/aautonomicc/Watch-It"]');
-ok('music: independent references are explicit', await jamsRef.count() === 1 && await watchRef.count() === 2 && (await page.locator('.independent').innerText()).includes('separate projects'));
+ok('music: independent references are explicit (disclosure block + source panel)', await jamsRef.count() === 2 && await watchRef.count() === 2 && (await page.locator('.independent').innerText()).includes('separate projects'));
 const safeExternal = async (locator) => { for (const i of await locator.all()) { if (await i.getAttribute('target') !== '_blank' || await i.getAttribute('rel') !== 'noopener noreferrer') return false; } return true; };
 ok('music: independent references open safely in new tabs', await safeExternal(jamsRef) && await safeExternal(watchRef));
 ok('music: no second raw transport is opened', requests.filter(r => r.url.includes('/ws') || r.method === 'POST').length === 0);
@@ -87,6 +87,22 @@ ok('music: refusal is visible in the room log', (await page.locator('#eventlog')
 ok('music: nothing was fetched from the attacker origin (the crafted URL rides only the document query)',
   !requests.some(r => r.url.includes('attacker.example') && !r.url.startsWith('/surfaces/music.html')));
 ok('music: no-referrer policy rides the page', await page.evaluate(() => !!document.querySelector('meta[name="referrer"][content="no-referrer"]')));
+
+// the source panel — the room is a shell and says so: no playback is implied
+const panel = page.locator('.source-panel');
+ok('music: the source panel is present', await panel.count() === 1);
+ok('music: the honest empty state names itself', (await page.locator('#no-track').innerText()).includes('No track is attached to this room yet'));
+ok('music: the room state pill says no source attached', /no source attached/i.test(await page.locator('#source-state').innerText()));
+ok('music: Play here stays disabled without an authorized audio file', await page.locator('#play-here').isDisabled());
+ok('music: the disabled reason is written beside the button', (await page.locator('.src:has(#play-here) > small').innerText()).includes('no authorized audio file'));
+const panelExternals = panel.locator('a[href^="http"]');
+ok('music: external watching carries named links', await panelExternals.count() === 2);
+for (const a of await panelExternals.all()) {
+  if (await a.getAttribute('target') !== '_blank' || !(await a.getAttribute('rel') || '').includes('noreferrer')) { ok('music: panel externals open safely', false); break; }
+}
+ok('music: YouTube is named honestly unavailable, not linked', (await page.locator('.source-panel .none').innerText()).includes('YouTube') && await panel.locator('a[href*="youtube"]').count() === 0);
+ok('music: the artist note names the attach path', (await panel.locator('.artist-note').innerText()).includes('shared room manifest'));
+ok('music: the visualizer no longer implies playback', await page.evaluate(() => document.getElementById('visualizer').getAttribute('aria-label').includes('plays no audio')));
 
 console.log(`\n${pass} passed, ${fail} failed`);
 await browser.close();
