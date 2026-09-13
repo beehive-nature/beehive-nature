@@ -122,6 +122,20 @@ nav#fleetnav{margin-top:var(--s4);font-size:11.5px;color:var(--ink-dim)}
 .book .take{margin-top:12px;font-size:11px;color:var(--ink-dim)}
 .book .take button{background:none;border:1px solid var(--line);color:var(--ink-dim);border-radius:9px;padding:6px 12px;font:11px var(--font-mono);cursor:pointer;margin-left:8px}
 .book .take button:hover{border-color:var(--you);color:var(--you)}
+/* ── the rails band — .b · .a · silent payments, three registers ── */
+.caps h2{font-size:14px;color:var(--you);margin-bottom:4px}
+.caps .capintro{font-size:12px;color:var(--ink-mut);margin:6px 0 10px;line-height:1.75;max-width:74ch}
+.capgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px}
+.cap{background:var(--bg-well);border:1px solid var(--line);border-left:3px solid var(--sem-science);border-radius:9px;padding:12px 13px}
+.cap.soon{border:1.5px dashed var(--sovereign);border-left:1.5px dashed var(--sovereign)}
+.cap h3{font-size:12.5px;color:var(--ink);margin-bottom:4px;padding-right:58px}
+.cap p{font-size:11px;color:var(--ink-mut);line-height:1.75}
+.cap .tag{float:right;font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;border:1px solid var(--sem-science);color:var(--sem-science);border-radius:99px;padding:2px 8px;margin-left:6px}
+.cap.soon .tag{border-color:var(--sovereign-soft);color:var(--sovereign-soft)}
+.cap .word{color:var(--sem-science)}
+.cap.soon .word{color:var(--sovereign-soft)}
+.cap .honest{font-size:10px;color:var(--ink-dim);margin-top:6px}
+.cap a{color:var(--sovereign-soft)}
 @media (max-width:600px){
   .idrow{align-items:flex-start}
   .stat b{font-size:30px}
@@ -139,7 +153,8 @@ straight from the chain. this is a HUMAN surface: the purple rim is the person,
   <h2 style="font-size:14px;color:var(--you);margin-bottom:4px">your names and addresses — add as many as you like</h2>
   <p class="hint" style="margin-bottom:10px">every entry is three things: <b>what you call it</b>, <b>the name or address</b>, and
   <b>which network</b> it lives on. the network is your say — the same address on two networks is correct, and never an error.
-  a name that carries <code>.eth</code>, <code>.base.eth</code> or <code>.sol</code> can be resolved right here to what it points at.</p>
+  a name that carries <code>.eth</code>, <code>.base.eth</code>, <code>.sol</code> — or our own
+  <code>.b</code> / <code>.a</code> — can be resolved right here to what it points at.</p>
   <div class="row">
     <div><label for="b-label">what you call it — your own words</label>
       <input id="b-label" type="text" spellcheck="false" autocomplete="off" placeholder="my art wallet · cold · phone one"></div>
@@ -148,12 +163,63 @@ straight from the chain. this is a HUMAN surface: the purple rim is the person,
   </div>
   <div class="row full" style="margin-top:8px">
     <div><label for="b-val">the name or address</label>
-      <input id="b-val" type="text" spellcheck="false" autocomplete="off" placeholder="a name ending .eth · .base.eth · .sol, or the address as you use it"></div>
+      <input id="b-val" type="text" spellcheck="false" autocomplete="off" placeholder="a name ending .b · .a · .eth · .base.eth · .sol, or the address as you use it"></div>
   </div>
   <button class="add" id="b-add">add this entry</button>
   <div id="b-list"></div>
   <p class="take">this book lives on <b>this device only</b> — nothing is sent anywhere, and an empty book is a complete profile.
     <button id="b-copy">take your book with you</button></p>
+</section>
+
+<!-- ═══ THE RAILS BAND — .b · .a live, silent payments coming soon ═══ -->
+<section class="panel caps" id="caps">
+  <h2>the rails this profile speaks</h2>
+  <p class="capintro" data-reg="bee">names are addresses here. the book above now reads two more
+  name families straight off our own chain — and one more door, private bitcoin, is on its way.</p>
+  <p class="capintro" data-reg="raver">the rails under this page: being names, agent names, both
+  resolving live right here in the book above — and a private bitcoin door on its way in. the door
+  price stays zero.</p>
+  <p class="capintro" data-reg="cypherpunk">verified capability set on this surface: .b + .a —
+  kingbeelovis/domains via keyless public RPC, resolved in the address book · silent payments —
+  BIP-352, unconfigured, display-only when it lands · the ERC20i read below, unchanged.</p>
+  <div class="capgrid">
+    <div class="cap">
+      <span class="tag">live</span>
+      <h3><span class="word">.b</span> — names for beings</h3>
+      <p data-reg="bee">a name ending <b>.b</b> resolves right in the book above — one name per
+      person on our own registry, read live from the chain. nothing is sent anywhere.</p>
+      <p data-reg="raver">the book just learned <b>.b</b> — paste a being's name and it resolves
+      live from the chain, right here, zero doors, zero keys.</p>
+      <p data-reg="cypherpunk">kingbeelovis/domains, keyless public RPC (eosnation → greymass
+      failover), full-table read + client-side exact match — bounded string queries return empty on
+      these APIs, so the whole walk is the truth. names stored suffixless; .b is display convention.</p>
+    </div>
+    <div class="cap">
+      <span class="tag">live</span>
+      <h3><span class="word">.a</span> — names for agents</h3>
+      <p data-reg="bee">agent names — ending <b>.a</b> — resolve the same way, on the very same
+      registry. a .a name marks an agent house acting for a being, with limits the chain enforces.</p>
+      <p data-reg="raver">agents ride the same rail with their own tag: <b>.a</b> resolves live
+      too — one registry, whole floor, bounded authority.</p>
+      <p data-reg="cypherpunk">same contract, same table (SPEC-A-NAMES-1): domain_name is a plain
+      string, the suffix is resolution-layer. one cached fetch serves both rails.</p>
+    </div>
+    <div class="cap soon">
+      <span class="tag">coming soon</span>
+      <h3><span class="word">Private Bitcoin support</span></h3>
+      <p data-reg="bee">this artist can also receive bitcoin privately. that support isn't set up
+      here yet — when it is, you'll get an address to copy into your own wallet. nothing else
+      changes on this page.</p>
+      <p data-reg="raver">private bitcoin support, coming soon. the door price is zero, the address
+      will be yours to take to whatever wallet you already love, and nobody watching the chain can
+      tell who tipped the artist. PLUR all the way down.</p>
+      <p data-reg="cypherpunk">BIP-352 silent payments: not enabled for this profile. when enabled,
+      this card displays a static sp1q bech32m address (B_scan ‖ B_spend — two public keys) and
+      nothing else: no key material, no scanning, no indexer traffic, no receipt claims.</p>
+      <p class="honest">until the artist brings their own address, this card shows none — this page
+      never invents one, never holds keys, never scans, never confirms.</p>
+    </div>
+  </div>
 </section>
 
 <section class="panel">
@@ -765,9 +831,45 @@ async function visit(v){
     if(onCurve(owner))return b58enc(owner);
     return {heldByProgram:true};
   }
-  /* — name resolution dispatch: .eth · .base.eth · .sol — */
+  /* — the estate's own rails: .b / .a names on kingbeelovis (Vaulta), keyless —
+     Bounded lower_bound/upper_bound string queries return EMPTY on these public
+     APIs even for names that exist (measured 2026-09-12), and an empty bounded
+     answer must never read as "not registered" — so the truthful read is the
+     FULL domains table (one row per name) + an in-browser exact match, cached
+     per page-load. Host list mirrors the healed .b desk (the dead eosn
+     endpoint is
+     NXDOMAIN-dead, dropped). */
+  const VAULTA_HOSTS=['https://eos.api.eosnation.io','https://eos.greymass.com'];
+  let vaultaRowsCache=null;
+  async function vaultaRows(){
+    if(vaultaRowsCache)return vaultaRowsCache;
+    for(const h of VAULTA_HOSTS){
+      try{
+        const r=await fetch(h+'/v1/chain/get_table_rows',{method:'POST',headers:{'content-type':'application/json'},
+          body:JSON.stringify({json:true,code:'kingbeelovis',scope:'kingbeelovis',table:'domains',limit:500})});
+        if(r.ok){const j=await r.json();if(j&&j.rows){vaultaRowsCache=j.rows;return vaultaRowsCache;}}
+      }catch(e){}
+    }
+    return null;
+  }
+  async function resolveVaulta(n){
+    const key=String(n||'').trim().toLowerCase();
+    const rows=await vaultaRows();
+    if(!rows)return{unreachable:true,row:null};
+    return{row:rows.find(x=>x.domain_name===key)||null};
+  }
+  /* — name resolution dispatch: .b · .a · .eth · .base.eth · .sol — */
   async function resolveAny(v){
     v=String(v||'').trim();
+    if(/\.[ab]$/i.test(v)){
+      const rail=/\.a$/i.test(v)?'a':'b';
+      const r=await resolveVaulta(v.replace(/\.[ab]$/i,''));
+      if(r.unreachable)return{addr:null,kind:'',note:'the Vaulta registry could not be reached — kept as written'};
+      if(!r.row)return{addr:null,kind:'',note:'name not on the kingbeelovis registry — kept as written'};
+      return r.row.account
+        ?{addr:r.row.account,kind:'Vaulta '+rail+' name'}
+        :{addr:null,kind:'',note:'registered, resolves to no account yet — kept as written'};
+    }
     if(/\.sol$/i.test(v)){
       const r=await resolveSol(v.replace(/\.sol$/i,''));
       if(r&&r.heldByProgram)return{addr:null,kind:'Solana name',note:'this name is held as a token — the registry points at a program, not a wallet'};
@@ -844,7 +946,7 @@ async function visit(v){
   function addFromForm(){
     const label=el('b-label').value.trim(), value=el('b-val').value.trim(), network=netSel.value;
     if(!value){el('b-val').focus();return}
-    const isName=/\.(sol|(base\.)?eth)$/i.test(value);
+    const isName=/\.(sol|(base\.)?eth|[ab])$/i.test(value);
     book.push({label,value,network,star:false,isName,resolved:null,resolveTried:false});
     save();render();
     el('b-label').value='';el('b-val').value='';
