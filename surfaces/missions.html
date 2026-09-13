@@ -1,0 +1,782 @@
+<!doctype html>
+<!-- missions.html — THE MISSION DESK · LOVErnment DAO (proposal registrar,
+     budget & tithe calculator, independent review, ceilings, human levers).
+     One station of three: the desk files and approves, mission-room.html
+     runs, receipts.html keeps the chain. Shared engine: mission-core.js.
+     Off-chain first rail: proposals + receipts with testnet accounting,
+     local-first over a deterministic seed. The Buzz relay wire and the
+     ERC20i treasury are later, separate rails — nothing here claims them.
+     THREE VIEWS, ONE SET OF FACTS (founder canon 2026-08-28): New bee, Raver,
+     Cypherpunk render the same ledger, the same math, the same states. Only
+     the temperature, density and interaction style change — never a number.
+     BNR COLOR LAW: purple = humans, teal = Ai, green = biomass/law; the
+     roles are named in the legend line on the page. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="referrer" content="no-referrer">
+<meta name="color-scheme" content="dark light">
+<title>the mission desk · LOVErnment</title>
+<link rel="stylesheet" href="tokens.css">
+<style>
+  /* ── shared spine ─────────────────────────────────────────────────────
+     --human / --ai / --biomass are the BNR color law; each view respeaks
+     them at its own contrast. --gold stays the estate's caution color. */
+  :root {
+    --human:#9C6FD6; --human-soft:#B79FE0; --ai:#45C2DC; --biomass:#86CC72; --gold:#E8B54B;
+    --bg:#070D0A; --panel:#0F1713; --well:#0B120F; --line:#1E2B25; --line-hi:#31463C;
+    --ink:#E9F2EC; --dim:#8FA79C; --dimmer:#5B7368; --void:#070D0A; --lift:#16211C;
+    --ember:#E25822;
+    --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+    --sans:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  }
+  * { box-sizing:border-box; margin:0; }
+  html { scroll-behavior:smooth; }
+  body { min-height:100vh; color:var(--ink); background:var(--bg); font:14px/1.65 var(--mono);
+    padding-bottom:70px; }
+  a { color:var(--ai); text-decoration:none; }
+  a:hover { color:var(--human-soft); }
+  a:focus-visible, button:focus-visible { outline:3px solid var(--ai); outline-offset:3px; }
+  button { font:600 12px var(--mono); }
+  .wrap { width:min(1100px, calc(100% - 32px)); margin:0 auto; }
+
+  header { position:relative; overflow:hidden; padding:54px 0 34px; border-bottom:1px solid var(--line); }
+  .eyebrow { position:relative; color:var(--human-soft); letter-spacing:.25em; text-transform:uppercase; font-size:10px; }
+  h1 { position:relative; margin-top:10px; font:800 clamp(2.2rem,8vw,5.3rem)/.95 var(--sans);
+    letter-spacing:-.055em; }
+  h1 span { color:var(--human); }
+  .lead { position:relative; max-width:44ch; margin-top:17px; font:600 clamp(1.05rem,2.6vw,1.5rem)/1.35 var(--sans);
+    letter-spacing:-.015em; color:var(--ink); }
+  .intro { position:relative; max-width:66ch; color:var(--dim); margin-top:14px; }
+  .intro b { color:var(--ink); }
+  .intro .lv { color:var(--human-soft); }
+  .nav { position:relative; display:flex; gap:8px; flex-wrap:wrap; margin-top:24px; }
+  .nav a, button.pill { border:1px solid var(--line-hi); border-radius:999px; padding:11px 15px; color:var(--ink);
+    background:var(--panel); font:600 11px var(--mono); cursor:pointer; min-height:44px; display:inline-flex; align-items:center; }
+  .nav a:hover, button.pill:hover { border-color:var(--human); background:var(--lift); }
+  .statusline { display:flex; align-items:center; gap:9px; flex-wrap:wrap; margin-top:24px; color:var(--dim); font-size:11px; }
+  .dot { width:9px; height:9px; border-radius:50%; background:var(--gold); }
+  .dot.ok { background:var(--biomass); box-shadow:0 0 13px var(--biomass); }
+  .dot.bad { background:var(--ember); box-shadow:0 0 13px var(--ember); }
+  .fx { border:1px dashed var(--gold); border-radius:99px; padding:2px 9px; color:var(--gold); font-size:9px;
+    letter-spacing:.12em; text-transform:uppercase; white-space:nowrap; }
+
+  main { padding-top:24px; }
+  .grid { display:grid; grid-template-columns:repeat(12,1fr); gap:14px; }
+  .card { grid-column:span 12; padding:20px; border:1px solid var(--line); border-radius:14px; background:var(--panel); }
+  .card.half { grid-column:span 6; }
+  .card.third { grid-column:span 4; }
+  .card h2 { color:var(--human-soft); font-size:13px; letter-spacing:.14em; text-transform:uppercase; }
+  .sub { color:var(--dim); font-size:11px; margin-top:6px; }
+  @media(max-width:720px){ .card.half,.card.third { grid-column:span 12; } .wrap { width:min(100% - 22px, 1100px); } }
+
+  /* the loop diagram — shared bones; motion is a raver-only courtesy */
+  .loopart { display:none; }
+  #motion { display:none; }
+  #motion[aria-pressed="true"] { color:var(--human-soft); border-color:var(--human); }
+
+  /* ── the color-law legend — one line, three swatches, every view ────── */
+  .colorlaw { display:flex; align-items:center; gap:14px; flex-wrap:wrap; margin-top:14px;
+    padding:11px 14px; border:1px solid var(--line); border-radius:10px; color:var(--dim); font-size:10.5px; }
+  .colorlaw .sw { display:inline-flex; align-items:center; gap:5px; }
+  .colorlaw .sw i { width:10px; height:10px; border-radius:50%; display:inline-block; }
+  .colorlaw .sw.human i { background:var(--human); } .colorlaw .sw.ai i { background:var(--ai); }
+  .colorlaw .sw.biomass i { background:var(--biomass); }
+
+  /* mission cards */
+  .mrow { display:grid; grid-template-columns:minmax(0,1.6fr) minmax(210px,1fr); gap:14px; align-items:center;
+    padding:15px 16px; border:1px solid var(--line); border-radius:11px; background:var(--well); margin-top:11px; }
+  .mrow:hover { border-color:var(--line-hi); }
+  .mid { color:var(--dimmer); font-size:10px; letter-spacing:.1em; }
+  .mtitle { color:var(--ink); font:650 15px/1.35 var(--sans); margin-top:3px; }
+  .mobj { color:var(--dim); font-size:11px; margin-top:4px; }
+  .chip { display:inline-flex; align-items:center; border-radius:99px; padding:2px 9px; font-size:9px;
+    letter-spacing:.12em; text-transform:uppercase; white-space:nowrap; border:1px solid var(--line-hi); color:var(--dim); }
+  .chip.complete { color:var(--biomass); border-color:rgba(134,204,114,.5); }
+  .chip.active, .chip.funded { color:var(--ai); border-color:rgba(69,194,220,.45); }
+  .chip.review, .chip.paused { color:var(--gold); border-color:rgba(232,181,75,.45); }
+  .chip.escalated, .chip.stopped { color:var(--ember); border-color:rgba(226,88,34,.5); }
+  .chip.approved { color:var(--human-soft); border-color:rgba(156,111,214,.45); }
+  .bar { height:8px; border-radius:99px; background:var(--void); border:1px solid var(--line); overflow:hidden; margin-top:6px; }
+  .bar i { display:block; height:100%; background:var(--ai); }
+  .bar i.hot { background:var(--gold); }
+  .bar i.over { background:var(--ember); }
+  .barlabel { display:flex; justify-content:space-between; color:var(--dimmer); font-size:9.5px; margin-top:4px; }
+  .mnext { color:var(--dim); font-size:10px; margin-top:7px; }
+  .mnext b { color:var(--ink); font-weight:600; }
+
+  /* proposal + tables */
+  pre.proposal { margin-top:12px; padding:13px; border:1px solid var(--line); border-radius:9px; background:var(--well);
+    color:var(--dim); font-size:10.5px; line-height:1.75; white-space:pre-wrap; overflow-wrap:anywhere; }
+  details.yaml summary { cursor:pointer; color:var(--ai); font-size:11px; min-height:32px; display:flex; align-items:center; }
+  table.sheet { width:100%; border-collapse:collapse; margin-top:12px; font-size:11px; }
+  table.sheet th { text-align:start; color:var(--dimmer); font-weight:400; font-size:9px; text-transform:uppercase;
+    letter-spacing:.12em; padding:6px 8px; border-bottom:1px solid var(--line); }
+  table.sheet td { padding:7px 8px; border-bottom:1px solid var(--line); color:var(--dim); }
+  table.sheet td.num { text-align:end; font-variant-numeric:tabular-nums; color:var(--ink); }
+  table.sheet tr.total td { color:var(--ink); font-weight:650; border-bottom:0; }
+  table.sheet td .pos { color:var(--biomass); } table.sheet td .neg { color:var(--ember); }
+
+  /* the calculator */
+  .calc { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; margin-top:13px; }
+  .calc label { display:block; color:var(--dimmer); font-size:9px; letter-spacing:.12em; text-transform:uppercase; }
+  .calc input { width:100%; margin-top:4px; padding:9px 10px; border:1px solid var(--line-hi); border-radius:8px;
+    background:var(--well); color:var(--ink); font:600 12px var(--mono); min-height:40px; }
+  .calc input:focus-visible { outline:2px solid var(--ai); outline-offset:2px; }
+  .finline { display:flex; justify-content:space-between; gap:10px; padding:8px 2px; border-bottom:1px dashed var(--line);
+    color:var(--dim); font-size:11px; }
+  .finline b { color:var(--ink); font-variant-numeric:tabular-nums; }
+  .finline.tithe b { color:var(--gold); }
+  .finline.grand { border-bottom:0; margin-top:4px; }
+  .finline.grand b { font-size:15px; color:var(--human-soft); }
+
+  /* human levers */
+  .levers { display:flex; gap:8px; flex-wrap:wrap; margin-top:14px; }
+  .lever { border:1px solid var(--line-hi); border-radius:99px; padding:9px 14px; background:var(--panel); color:var(--ink);
+    font:600 11px var(--mono); cursor:pointer; min-height:40px; }
+  .lever:hover { border-color:var(--human); }
+  .lever.approve { border-color:var(--biomass); color:var(--biomass); }
+  .lever.approve:hover { background:rgba(134,204,114,.08); }
+  .lever.danger { border-color:rgba(226,88,34,.55); color:var(--ember); }
+  .lever.danger:hover { background:rgba(226,88,34,.08); }
+  .lever:disabled { opacity:.45; cursor:not-allowed; }
+
+  .meta { display:grid; grid-template-columns:repeat(2,1fr); gap:10px; margin-top:14px; }
+  .meta div { padding:12px; border-left:2px solid var(--ai); background:var(--well); }
+  .meta label { display:block; color:var(--dimmer); font-size:9px; text-transform:uppercase; letter-spacing:.13em; }
+  .meta strong { display:block; margin-top:3px; color:var(--ink); font-size:12px; overflow-wrap:anywhere; }
+
+  .law { margin-top:20px; padding:14px 16px; border:1px solid var(--line); border-left:2px solid var(--biomass);
+    border-radius:10px; color:var(--dim); font-size:10.5px; line-height:1.8; }
+  .law b { color:var(--ink); }
+
+  .rep { display:grid; gap:8px; margin-top:12px; }
+  .rep .r { display:grid; grid-template-columns:120px 1fr 44px; align-items:center; gap:10px; font-size:10.5px; color:var(--dim); }
+  .rep .r .track { height:8px; border-radius:99px; background:var(--void); border:1px solid var(--line); overflow:hidden; }
+  .rep .r .track i { display:block; height:100%; background:var(--biomass); }
+  .rep .r b { text-align:end; color:var(--ink); font-variant-numeric:tabular-nums; }
+
+  footer { width:min(1100px, calc(100% - 32px)); margin:30px auto 0; padding-top:18px; border-top:1px solid var(--line);
+    color:var(--dimmer); font-size:10px; line-height:1.8; }
+  footer a { color:var(--dim); }
+
+  .backlink { display:inline-flex; gap:6px; align-items:center; margin-bottom:12px; color:var(--ai); font-size:11px; }
+  .boundary-dl { margin-top:12px; display:grid; grid-template-columns:130px 1fr; gap:7px 12px; font-size:10.5px; }
+  .boundary-dl dt { color:var(--ai); }
+  .boundary-dl dd { margin:0; color:var(--dim); overflow-wrap:anywhere; }
+  @media(max-width:720px){ .boundary-dl { grid-template-columns:1fr; gap:2px; } .boundary-dl dd { margin-bottom:8px; }
+    .mrow { grid-template-columns:1fr; } }
+
+  /* ═════════════════════════════════════════════════════════════════════
+     NEW BEE — the calm first minute. Light canvas, quiet type, no ambient
+     motion, every control plain and labelled. Same facts, whispered.
+     ═════════════════════════════════════════════════════════════════════ */
+  body[data-reg="bee"] {
+    --human:#65509A; --human-soft:#65509A; --ai:#176879; --biomass:#326b39; --gold:#855b0b;
+    --bg:#f6f7f2; --panel:#fff; --well:#edf2eb; --line:#ccd7cf; --line-hi:#a9bcad;
+    --ink:#18362a; --dim:#435f4e; --dimmer:#52695b; --void:#f6f7f2; --lift:#e2eadf; --ember:#9f362c;
+    font-family:var(--sans); font-size:15px; color-scheme:light;
+  }
+  body[data-reg="bee"] header { background:linear-gradient(180deg,#eef2e9,#f6f7f2); }
+  body[data-reg="bee"] h1 span { color:var(--human); }
+  body[data-reg="bee"] .dot.bad { box-shadow:none; }
+  body[data-reg="bee"] .card h2 { color:var(--human); }
+  body[data-reg="bee"] .mtitle { font-family:var(--sans); }
+  body[data-reg="bee"] .steplist { counter-reset:step; display:grid; gap:8px; margin-top:12px; }
+  body[data-reg="bee"] .steplist li { list-style:none; display:flex; gap:10px; align-items:baseline; color:var(--dim);
+    font-size:12.5px; line-height:1.7; }
+  body[data-reg="bee"] .steplist li::before { counter-increment:step; content:counter(step);
+    flex:none; display:grid; place-items:center; width:24px; height:24px; border-radius:50%;
+    background:var(--human); color:#fff; font:650 11px var(--sans); align-self:center; }
+
+  /* ═════════════════════════════════════════════════════════════════════
+     RAVER — the desk at full feeling. Poster type, the loop alive, stat
+     tiles; motion pauses for anyone whose browser asks it to.
+     ═════════════════════════════════════════════════════════════════════ */
+  body[data-reg="raver"] {
+    --human:#9C6FD6; --human-soft:#C9A7F5; --ai:#45C2DC; --biomass:#86CC72; --gold:#E8B54B;
+    --bg:#0E0817; --panel:#1A1226; --well:#140E1F; --line:#3A2C4E; --line-hi:#544070;
+    --ink:#F5EFFA; --dim:#C4B9D5; --dimmer:#9C8FB8; --void:#0E0817; --lift:#241A35;
+  }
+  body[data-reg="raver"] header { padding:0; border-bottom:0; }
+  body[data-reg="raver"] .hero-open { position:relative; min-height:min(66vh,600px); display:flex; flex-direction:column;
+    justify-content:center; padding:84px 0 54px; overflow:hidden;
+    background:
+      radial-gradient(ellipse 62% 48% at 18% 32%, rgba(156,111,214,.28), transparent 62%),
+      radial-gradient(ellipse 55% 45% at 86% 22%, rgba(69,194,220,.16), transparent 60%),
+      radial-gradient(ellipse 80% 40% at 50% 108%, rgba(134,204,114,.14), transparent 66%),
+      linear-gradient(180deg,#0E0817,#150C24 58%,#0E0817); }
+  body[data-reg="raver"] .hero-open .wrap { position:relative; }
+  body[data-reg="raver"] .eyebrow { color:var(--human-soft); }
+  body[data-reg="raver"] h1 { font-size:clamp(2.6rem,10vw,6.8rem); }
+  body[data-reg="raver"] h1 span {
+    background:linear-gradient(94deg,#C9A7F5,#45C2DC 55%,#86CC72);
+    -webkit-background-clip:text; background-clip:text; color:transparent; }
+  body[data-reg="raver"] .lead { font:500 clamp(1.5rem,4.2vw,2.7rem)/1.14 var(--sans);
+    letter-spacing:-.035em; max-width:20ch; margin-top:22px; text-wrap:balance; }
+  body[data-reg="raver"] .intro { max-width:52ch; font-size:13px; }
+  body[data-reg="raver"] .nav { margin-top:30px; }
+  body[data-reg="raver"] .statusline { margin-top:26px; }
+  body[data-reg="raver"] .loopart { display:block; position:absolute; inset:auto -3% -6% auto; width:min(58%,620px);
+    pointer-events:none; }
+  body[data-reg="raver"] #motion { display:inline-flex; }
+  body[data-reg="raver"] .card { border-radius:18px; }
+  body[data-reg="raver"] .card h2 { color:var(--human-soft); }
+  body[data-reg="raver"] .lever.approve { border-radius:999px; }
+  body[data-reg="raver"] .loopspin { animation:loopspin 26s linear infinite; transform-origin:center; }
+  @keyframes loopspin { to { transform:rotate(360deg); } }
+  .loopart .lpulse { animation:lpulse 5.2s ease-in-out infinite; }
+  .loopart .lpulse.l2 { animation-delay:1.3s; } .loopart .lpulse.l3 { animation-delay:2.6s; }
+  @keyframes lpulse { 0%,100%{opacity:.35} 50%{opacity:.95} }
+
+  /* ═════════════════════════════════════════════════════════════════════
+     CYPHERPUNK — the registrar terminal. Mono, dense, boundary-first: the
+     envelope and its gates lead; the poster art never loads.
+     ═════════════════════════════════════════════════════════════════════ */
+  body[data-reg="cypherpunk"] {
+    --human:#C9A7F5; --human-soft:#C9A7F5; --ai:#80CDDD; --biomass:#8CD98C; --gold:#E8B54B;
+    --bg:#0E141A; --panel:#151E26; --well:#101820; --line:#3F5260; --line-hi:#58707F;
+    --ink:#D8F0D9; --dim:#A4C0A8; --dimmer:#8AA690; --void:#0E141A; --lift:#1B2833; --ember:#E25822;
+    font-family:ui-monospace,'Cascadia Mono',Consolas,monospace;
+  }
+  body[data-reg="cypherpunk"] header { padding:40px 0 26px; }
+  body[data-reg="cypherpunk"] h1 { font:700 clamp(1.5rem,3.4vw,2.3rem)/1.1 inherit; letter-spacing:-.02em; }
+  body[data-reg="cypherpunk"] h1 span { color:var(--biomass); }
+  body[data-reg="cypherpunk"] .lead { font:600 1rem/1.5 inherit; max-width:78ch; }
+  body[data-reg="cypherpunk"] .nav a, body[data-reg="cypherpunk"] button.pill { border-radius:3px; }
+  body[data-reg="cypherpunk"] .card, body[data-reg="cypherpunk"] .mrow, body[data-reg="cypherpunk"] .meta div,
+  body[data-reg="cypherpunk"] .law, body[data-reg="cypherpunk"] .colorlaw, body[data-reg="cypherpunk"] .fx { border-radius:3px; }
+  body[data-reg="cypherpunk"] .card h2 { color:var(--ai); }
+  body[data-reg="cypherpunk"] .grid { display:flex; flex-direction:column; }
+  body[data-reg="cypherpunk"] #boundary-card { order:-1; }
+  body[data-reg="cypherpunk"] .levers .lever { border-radius:3px; }
+
+  /* ── motion laws ────────────────────────────────────────────────────────
+     The loop stops for anyone who asks the OS for less motion, and for the
+     pause control. Facts never depend on the animation. */
+  body[data-motion-paused="true"] .loopspin { animation-play-state:paused; }
+  body[data-motion-paused="true"] .lpulse { animation:none; }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior:auto; }
+    .loopspin, .lpulse { animation:none; }
+  }
+</style>
+</head>
+<body data-reg="bee" data-bee-theme="custom">
+
+<header>
+  <div class="hero-open">
+  <div class="wrap">
+    <div class="eyebrow" data-i18n="missions.eyebrow">LOVErnment DAO · supervised autonomy</div>
+    <h1>the mission <span>desk</span></h1>
+
+    <!-- one lead per view — same desk, three temperatures -->
+    <p class="lead" data-reg="bee" data-i18n="missions.beeLead">You set the mission and the limits. The agents work inside them.</p>
+    <p class="lead" data-reg="raver" data-i18n="missions.raverLead">You set the night. The floor runs itself.</p>
+    <p class="lead" data-reg="cypherpunk" data-i18n="missions.cypherLead">Proposals, ceilings, receipts — inspect the whole envelope.</p>
+
+    <p class="intro" data-reg="bee" data-i18n="missions.beeIntro">Every operation here is a supervised mission. You approve the mission and its spending ceiling; the team works in a Buzz room; a separate reviewer verifies; every meaningful action leaves a receipt. Nothing is spent above the ceiling, no scope grows silently, and a stop from you halts everything.</p>
+    <p class="intro" data-reg="raver" data-i18n="missions.raverIntro">The LOVErnment runs care as governance — <b>mīlestība ir karalis</b>, love is king. Missions ride the same floor: the founder holds the faders (approval, ceiling, stop), the crew plays the set, and every act lands in the ledger so the morning after still tells the truth.</p>
+    <p class="intro" data-reg="cypherpunk" data-i18n="missions.cypherIntro">Off-chain first rail: proposals and hash-chained receipts with testnet accounting, local-first over a deterministic seed. The Buzz relay wire and the ERC20i treasury are later rails — named, not claimed. Verify the chain; trust nothing unlabeled.</p>
+
+    <ul class="steplist" data-reg="bee" aria-label="how a mission runs">
+      <li>You state the mission and its constraints.</li>
+      <li>The budget and tithe calculator prices it; independent review checks it.</li>
+      <li>You approve the ceiling. Milestone one is funded; the team works in the open.</li>
+      <li>A separate reviewer verifies; the evaluator continues, pauses, or escalates.</li>
+      <li>The final report compares projections with receipts; reputation follows delivery.</li>
+    </ul>
+
+    <nav class="nav" aria-label="mission desk links">
+      <a href="mission-room.html">the mission room</a>
+      <a href="receipts.html">the receipt ledger</a>
+      <a href="or-board.html" data-i18n="missions.navOr">the OR board, live</a>
+      <a href="dao-dashboard/index.html">the DAO dashboard</a>
+      <button class="pill" id="motion" type="button" hidden aria-pressed="false" data-i18n="ux.pause">Pause motion</button>
+    </nav>
+
+    <div class="statusline"><span class="dot" id="status-dot"></span><span id="status">loading the ledger…</span><span id="status-note"></span><span class="fx" id="fixture-chip" data-i18n="missions.fixture">seed ledger · fixture figures</span></div>
+  </div>
+
+  <!-- the supervised-autonomy loop — stations on one ring, human stop
+       dotted. Decorative-informative; static except in Raver, where it
+       breathes and stops for prefers-reduced-motion and the pause control. -->
+  <svg class="loopart" viewBox="0 0 720 430" fill="none" aria-hidden="true" focusable="false">
+    <g class="loopspin">
+      <ellipse cx="360" cy="215" rx="300" ry="150" stroke="#45C2DC" stroke-opacity=".4" stroke-width="1.6" stroke-dasharray="7 9"/>
+    </g>
+    <g font-family="ui-monospace,Consolas,monospace" font-size="11" letter-spacing="1.4">
+      <g class="lpulse"><circle cx="360" cy="65" r="7" fill="#9C6FD6"/><text x="360" y="46" fill="#C9A7F5" text-anchor="middle">FOUNDER</text></g>
+      <g class="lpulse l2"><circle cx="512" cy="102" r="5.5" fill="#45C2DC"/><text x="524" y="98" fill="#45C2DC">DAO</text></g>
+      <g class="lpulse l3"><circle cx="622" cy="180" r="5.5" fill="#45C2DC"/><text x="634" y="176" fill="#45C2DC">REGISTRAR</text></g>
+      <g class="lpulse"><circle cx="655" cy="262" r="5.5" fill="#86CC72"/><text x="640" y="288" fill="#86CC72">BUDGET</text></g>
+      <g class="lpulse l2"><circle cx="590" cy="335" r="5.5" fill="#86CC72"/><text x="568" y="358" fill="#86CC72">REVIEW</text></g>
+      <g class="lpulse l3"><circle cx="462" cy="372" r="6.5" fill="#9C6FD6"/><text x="462" y="396" fill="#C9A7F5">ROOM</text></g>
+      <g class="lpulse"><circle cx="330" cy="372" r="5.5" fill="#45C2DC"/><text x="318" y="396" fill="#45C2DC">WORK</text></g>
+      <g class="lpulse l2"><circle cx="196" cy="330" r="5.5" fill="#86CC72"/><text x="176" y="352" fill="#86CC72">VERIFY</text></g>
+      <g class="lpulse l3"><circle cx="92" cy="258" r="5.5" fill="#86CC72"/><text x="80" y="284" fill="#86CC72">LEDGER</text></g>
+      <g class="lpulse"><circle cx="66" cy="170" r="6.5" fill="#E8B54B"/><text x="66" y="148" fill="#E8B54B">EVALUATOR</text></g>
+      <g class="lpulse l2"><circle cx="150" cy="98" r="5.5" fill="#45C2DC"/><text x="150" y="78" fill="#45C2DC">TREASURY</text></g>
+      <g class="lpulse l3"><circle cx="252" cy="64" r="5.5" fill="#45C2DC"/><text x="240" y="44" fill="#45C2DC">REPORT</text></g>
+    </g>
+    <path d="M360 65 C 300 200, 420 300, 360 372" stroke="#E8B54B" stroke-opacity=".55" stroke-width="1.4" stroke-dasharray="3 7"/>
+    <text x="404" y="218" font-family="ui-monospace,Consolas,monospace" font-size="9.5" fill="#E8B54B" fill-opacity=".8">stop · change</text>
+    <text x="360" y="222" font-family="ui-monospace,Consolas,monospace" font-size="12" fill="#86CC72" text-anchor="middle" letter-spacing="2">SUPERVISED</text>
+    <text x="360" y="240" font-family="ui-monospace,Consolas,monospace" font-size="12" fill="#86CC72" text-anchor="middle" letter-spacing="2">AUTONOMY</text>
+  </svg>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="colorlaw" aria-label="the BNR color law">
+    <span class="sw human"><i aria-hidden="true"></i><span data-i18n="missions.lawHuman">purple = humans</span></span>
+    <span class="sw ai"><i aria-hidden="true"></i><span data-i18n="missions.lawAi">teal = Ai</span></span>
+    <span class="sw biomass"><i aria-hidden="true"></i><span data-i18n="missions.lawBiomass">green = biomass · the law that holds</span></span>
+  </div>
+
+  <div id="list-view">
+    <section class="card" style="margin-top:14px" aria-label="the docket">
+      <h2>the docket — every mission, one state each</h2>
+      <p class="sub">Approve a ceiling, stop a mission, or open one to read its whole envelope.</p>
+      <div id="mission-list"></div>
+    </section>
+  </div>
+
+  <div id="detail-view" hidden>
+    <a class="backlink" href="#/" id="back">← <span>back to the docket</span></a>
+    <div id="mission-detail"></div>
+  </div>
+
+  <div class="grid" style="margin-top:14px" id="detail-grid">
+    <section class="card third" id="boundary-card" data-reg="cypherpunk">
+      <h2>boundary · what this desk does</h2>
+      <p class="sub">Named by the code that runs it, per the estate's honesty law.</p>
+      <dl class="boundary-dl">
+        <dt>engine</dt><dd>surfaces/mission-core.js — budget(), evaluate(), verifyChain(); the seed is regenerated by scripts/build-missions-seed.mjs from the same engine</dd>
+        <dt>storage</dt><dd>local-first: the deterministic seed in surfaces/mission-seed.js, your edits in this browser's localStorage; export carries the whole ledger</dd>
+        <dt>buzz wire</dt><dd>UNWIRED — the relay event mapping is designed (proposal + receipt envelopes in community rooms), not built; no relay connection exists on this page</dd>
+        <dt>money</dt><dd>testnet accounting — USD-denominated fixture figures; no token, wallet, or chain is touched from this surface</dd>
+        <dt>never</dt><dd>silent scope growth · spend above the approved ceiling · secrets exposure · unverified claims published · irreversible deploys</dd>
+      </dl>
+    </section>
+  </div>
+
+  <div class="law"><b>Desk law.</b> <span>The attending human is not required to direct each action. They supervise: mission approval, spending and permission ceilings, escalation policy, milestone review, emergency stop, final acceptance. Inside that envelope the team continues autonomously — and every meaningful action leaves a machine-readable receipt.</span></div>
+</main>
+
+<footer>the mission desk · LOVErnment · one station of three with the mission room and the receipt ledger · every figure is a testnet-accounting fixture · <a href="receipts.html">verify the chain</a></footer>
+
+<script src="mission-seed.js"></script>
+<script src="mission-core.js"></script>
+<script>
+'use strict';
+(function () {
+  var M = window.BNRMissions, $ = function (i) { return document.getElementById(i); };
+  var state = { ledger: null, ver: null };
+
+  function T(key, fallback) { return M.T(key, fallback); }
+
+  /* ── motion control (shared law with music.html) ───────────────────── */
+  var motion = { reduced: matchMedia('(prefers-reduced-motion: reduce)'), paused: false };
+  try { motion.paused = localStorage.getItem('bnr.motion.paused') === 'true'; } catch (e) {}
+  function motionOff() { return motion.reduced.matches || motion.paused; }
+  function syncMotion() {
+    document.body.setAttribute('data-motion-paused', String(motionOff()));
+    var b = $('motion');
+    b.hidden = false; b.disabled = motion.reduced.matches;
+    b.setAttribute('aria-pressed', String(motion.reduced.matches || motion.paused));
+    var key = motion.reduced.matches ? 'ux.still' : (motion.paused ? 'ux.resume' : 'ux.pause');
+    var fb = motion.reduced.matches ? 'Still image' : (motion.paused ? 'Resume motion' : 'Pause motion');
+    b.textContent = T(key, fb);
+  }
+  $('motion').addEventListener('click', function () {
+    motion.paused = !motion.paused;
+    try { localStorage.setItem('bnr.motion.paused', String(motion.paused)); } catch (e) {}
+    syncMotion();
+  });
+  motion.reduced.addEventListener('change', syncMotion);
+  window.addEventListener('storage', function (e) { if (e.key === 'bnr.motion.paused') { motion.paused = e.newValue === 'true'; syncMotion(); } });
+  document.addEventListener('blang', syncMotion);
+
+  /* ── status line ────────────────────────────────────────────────────── */
+  function paintStatus() {
+    var l = state.ledger, v = state.ver;
+    if (v && v.ok) {
+      $('status-dot').className = 'dot ok';
+      $('status').textContent = T('missions.stOk', 'ledger loaded');
+      $('status-note').textContent = '· ' + l.missions.length + ' missions · ' + v.count + ' receipts · ' + T('missions.chainVerified', 'chain verified');
+    } else {
+      $('status-dot').className = 'dot bad';
+      $('status').textContent = T('missions.stBroken', 'receipt chain broken');
+      $('status-note').textContent = v ? '· ' + T('missions.stAt', 'broken at receipt') + ' #' + v.broken_at : '';
+    }
+    $('fixture-chip').style.display = '';
+  }
+
+  /* ── the docket ─────────────────────────────────────────────────────── */
+  function stateChip(st) {
+    var known = ['complete', 'active', 'funded', 'review', 'paused', 'escalated', 'stopped', 'approved', 'draft', 'budgeted'];
+    var cls = known.indexOf(st) >= 0 ? st : '';
+    var span = document.createElement('span');
+    span.className = 'chip' + (cls ? ' ' + cls : '');
+    span.dataset.missionState = st;
+    span.textContent = st;
+    return span;
+  }
+  function spendBar(ev) {
+    var wrap = document.createElement('div');
+    var bar = document.createElement('div'); bar.className = 'bar';
+    var fill = document.createElement('i');
+    var pct = ev.ceiling > 0 ? Math.min(100, Math.round(ev.spend / ev.ceiling * 100)) : 0;
+    fill.style.width = pct + '%';
+    fill.className = pct > 100 ? 'over' : (pct >= 80 ? 'hot' : '');
+    bar.appendChild(fill);
+    var label = document.createElement('div'); label.className = 'barlabel';
+    var left = document.createElement('span');
+    left.textContent = T('missions.spend', 'spend') + ' ' + M.fmtUSD(ev.spend);
+    var right = document.createElement('span');
+    right.textContent = ev.ceiling > 0 ? T('missions.ceiling', 'ceiling') + ' ' + M.fmtUSD(ev.ceiling) : T('missions.noCeiling', 'no ceiling yet — review pending');
+    label.append(left, right);
+    wrap.append(bar, label);
+    return wrap;
+  }
+  function nextGate(m, ev) {
+    var el = document.createElement('p'); el.className = 'mnext';
+    if (m.state === 'review') el.innerHTML = '<b data-i18n-ignore>' + T('missions.gateReview', 'next gate') + ':</b> ' + T('missions.gateReviewBody', 'independent review — awaiting your ceiling');
+    else if (ev.verdict === 'escalate') el.innerHTML = '<b>' + T('missions.gateEscalated', 'next gate') + ':</b> ' + T('missions.gateEscalatedBody', 'escalated to you — the room is paused for your word');
+    else if (ev.can_release_next && ev.next) el.innerHTML = '<b>' + T('missions.gateRelease', 'next gate') + ':</b> ' + T('missions.gateReleaseBody', 'evaluator may release') + ' ' + ev.next.id + ' (' + M.fmtUSD(ev.next.release_usd) + ')';
+    else if (m.state === 'complete') el.innerHTML = '<b>' + T('missions.finalGate', 'outcome') + ':</b> ' + T('missions.gateCompleteBody', 'complete — final report filed, reputation updated');
+    else if (m.state === 'stopped') el.innerHTML = '<b>' + T('missions.finalGate', 'outcome') + ':</b> ' + T('missions.gateStoppedBody', 'stopped by the attending human');
+    else el.innerHTML = '<b>' + T('missions.gateHold', 'state') + ':</b> ' + m.state;
+    return el;
+  }
+  function renderList() {
+    var host = $('mission-list');
+    host.replaceChildren();
+    state.ledger.missions.forEach(function (m) {
+      var ev = M.evaluate(m, state.ledger.receipts);
+      var row = document.createElement('div'); row.className = 'mrow'; row.setAttribute('data-mission', m.mission.id);
+      var left = document.createElement('div');
+      var id = document.createElement('div'); id.className = 'mid'; id.textContent = m.mission.id + ' · ' + T('missions.leadBy', 'lead') + ' ' + m.team.lead + ' · ' + m.team.agents.length + ' ' + T('missions.agents', 'agents');
+      var title = document.createElement('div'); title.className = 'mtitle'; title.textContent = m.mission.title;
+      var obj = document.createElement('div'); obj.className = 'mobj'; obj.textContent = m.mission.objective;
+      left.append(stateChip(m.state), id, title, obj);
+      var right = document.createElement('div');
+      right.appendChild(spendBar(ev));
+      right.appendChild(nextGate(m, ev));
+      var open = document.createElement('a');
+      open.href = '#/m/' + encodeURIComponent(m.mission.id);
+      open.style.cssText = 'display:inline-flex;margin-top:8px;font-size:10.5px';
+      open.textContent = T('missions.open', 'open the envelope →');
+      right.appendChild(open);
+      row.append(left, right);
+      host.appendChild(row);
+    });
+  }
+
+  /* ── the envelope (detail) ──────────────────────────────────────────── */
+  function sheetRow(name, val, cls) {
+    var tr = document.createElement('tr');
+    var td = document.createElement('td'); td.textContent = name;
+    var tv = document.createElement('td'); tv.className = 'num' + (cls ? ' ' + cls : ''); tv.textContent = val;
+    tr.append(td, tv); return tr;
+  }
+  function calcCard(m) {
+    var card = document.createElement('section'); card.className = 'card half';
+    var h = document.createElement('h2'); h.textContent = T('missions.budget', 'budget & tithe calculator');
+    var sub = document.createElement('p'); sub.className = 'sub';
+    sub.textContent = T('missions.budgetSub', 'fixture rates, testnet accounting — edits re-price locally; they file nothing until a proposal carries them');
+    var w = m.finance._worksheet;
+    var tbl = document.createElement('table'); tbl.className = 'sheet';
+    var thead = document.createElement('thead'); var htr = document.createElement('tr');
+    ['line', 'usd'].forEach(function (x) { var th = document.createElement('th'); th.textContent = x; htr.appendChild(th); });
+    thead.appendChild(htr); tbl.appendChild(thead);
+    var tbody = document.createElement('tbody');
+    Object.keys(w.api_by_model).forEach(function (k) {
+      if (w.api_by_model[k] > 0) tbody.appendChild(sheetRow('api · ' + k, M.fmtUSD(w.api_by_model[k])));
+    });
+    tbody.appendChild(sheetRow('compute · storage · bandwidth', M.fmtUSD(w.compute)));
+    if (w.external > 0) tbody.appendChild(sheetRow('external services', M.fmtUSD(w.external), 'neg'));
+    tbody.appendChild(sheetRow(T('missions.operating', 'operating cost estimate'), M.fmtUSD(w.operating_cost_estimate)));
+    tbl.appendChild(tbody);
+    card.append(h, sub, tbl);
+
+    var calc = document.createElement('div'); calc.className = 'calc';
+    var inputs = [
+      ['missions.cCompute', 'runtime hours', m.resources.compute.runtime_hours, 'compute_hours'],
+      ['missions.cStorage', 'storage gb', m.resources.compute.storage_gb, 'storage_gb'],
+      ['missions.cBand', 'bandwidth gb', m.resources.compute.bandwidth_gb, 'bandwidth_gb'],
+      ['missions.cCont', 'contingency %', m.resources.contingency_percent, 'contingency'],
+      ['missions.cTithe', 'tithe %', m.resources.tithe_percent, 'tithe']
+    ];
+    var fields = {};
+    inputs.forEach(function (def) {
+      var wrap = document.createElement('div');
+      var lab = document.createElement('label'); lab.textContent = T(def[0], def[1]);
+      var inp = document.createElement('input'); inp.type = 'number'; inp.min = '0'; inp.step = 'any';
+      inp.value = def[2]; inp.setAttribute('aria-label', T(def[0], def[1]));
+      wrap.append(lab, inp); calc.appendChild(wrap);
+      fields[def[3]] = inp;
+      inp.addEventListener('input', function () { recompute(); });
+    });
+    card.appendChild(calc);
+
+    var out = document.createElement('div'); out.style.marginTop = '12px';
+    card.appendChild(out);
+    function line(labelKey, labelFb, val, extraCls) {
+      var d = document.createElement('div'); d.className = 'finline' + (extraCls || '');
+      var s = document.createElement('span'); s.textContent = T(labelKey, labelFb);
+      var b = document.createElement('b'); b.textContent = val;
+      d.append(s, b); return d;
+    }
+    function recompute() {
+      var r = JSON.parse(JSON.stringify(m.resources));
+      r.compute.runtime_hours = Number(fields.compute_hours.value) || 0;
+      r.compute.storage_gb = Number(fields.storage_gb.value) || 0;
+      r.compute.bandwidth_gb = Number(fields.bandwidth_gb.value) || 0;
+      r.contingency_percent = Number(fields.contingency.value) || 0;
+      r.tithe_percent = Number(fields.tithe.value) || 0;
+      var b = M.budget(r);
+      out.replaceChildren(
+        line('missions.fOperating', 'operating cost estimate', M.fmtUSD(b.operating_cost_estimate)),
+        line('missions.fContingency', 'contingency reserve', M.fmtUSD(b.contingency_reserve)),
+        line('missions.fTithe', 'bnr tithe (10% by founder law)', M.fmtUSD(b.bnr_tithe), ' tithe'),
+        line('missions.fTotal', 'requested total', M.fmtUSD(b.requested_total), ' grand')
+      );
+    }
+    recompute();
+    return card;
+  }
+  function envelopeCard(m) {
+    var card = document.createElement('section'); card.className = 'card';
+    var head = document.createElement('div'); head.style.cssText = 'display:flex;gap:12px;align-items:center;flex-wrap:wrap';
+    var id = document.createElement('h2'); id.style.cssText = 'text-transform:none;letter-spacing:0;font-size:15px;color:var(--ink)';
+    id.textContent = m.mission.id + ' — ' + m.mission.title;
+    head.append(id, stateChip(m.state));
+    var obj = document.createElement('p'); obj.className = 'sub'; obj.textContent = m.mission.objective;
+    card.append(head, obj);
+
+    /* team */
+    var meta = document.createElement('div'); meta.className = 'meta';
+    function mcell(label, val) {
+      var d = document.createElement('div');
+      var l = document.createElement('label'); l.textContent = label;
+      var s = document.createElement('strong'); s.textContent = val;
+      d.append(l, s); return d;
+    }
+    meta.append(
+      mcell(T('missions.tLead', 'lead'), m.team.lead),
+      mcell(T('missions.tHuman', 'human attending'), m.team.human_attending),
+      mcell(T('missions.tAgents', 'agents'), m.team.agents.map(function (a) { return a.model + ' · ' + a.role; }).join(' / ')),
+      mcell(T('missions.tEscalation', 'escalation required for'), m.controls.human_escalation_required_for.join(' · '))
+    );
+    card.appendChild(meta);
+
+    /* controls */
+    var gate = document.createElement('div'); gate.className = 'gate';
+    gate.style.cssText = 'margin-top:12px;padding:12px;border:1px dashed var(--gold);border-radius:9px;color:var(--dim);font-size:11px';
+    var gb = document.createElement('div'); gb.textContent = T('missions.controls', 'controls — the envelope the agents may not leave'); gb.style.color = 'var(--gold)';
+    gate.appendChild(gb);
+    [['spending_ceiling', m.controls.spending_ceiling > 0 ? M.fmtUSD(m.controls.spending_ceiling) : T('missions.unset', 'unset — review pending')],
+     ['milestone_release', String(m.controls.milestone_release)],
+     ['production_access', String(m.controls.production_access)],
+     ['secrets_access', String(m.controls.secrets_access)]].forEach(function (kv) {
+      var row = document.createElement('div'); row.style.cssText = 'display:flex;justify-content:space-between;margin-top:5px;color:var(--ink)';
+      var k = document.createElement('span'); k.textContent = kv[0];
+      var v = document.createElement('span'); v.textContent = kv[1];
+      if (kv[0].indexOf('access') > -1 && kv[1] === 'true') v.style.color = 'var(--ember)';
+      row.append(k, v); gate.appendChild(row);
+    });
+    card.appendChild(gate);
+
+    /* review verdict */
+    if (m.review) {
+      var rv = document.createElement('p'); rv.className = 'sub'; rv.style.marginTop = '12px';
+      rv.textContent = T('missions.reviewLine', 'independent review') + ' · ' + m.review.reviewer + ' · ' + M.fmtTs(m.review.ts) + ' — ' + m.review.note;
+      card.appendChild(rv);
+    }
+
+    /* the proposal, as YAML — the founder's shape */
+    var det = document.createElement('details'); det.className = 'yaml'; det.style.marginTop = '10px';
+    if (document.body.getAttribute('data-reg') === 'cypherpunk') det.open = true;
+    var sum = document.createElement('summary'); sum.textContent = T('missions.yaml', 'the proposal · YAML');
+    var pre = document.createElement('pre'); pre.className = 'proposal'; pre.textContent = M.proposalYAML(m);
+    det.append(sum, pre); card.appendChild(det);
+    return card;
+  }
+  function milestoneCard(m, ev) {
+    var card = document.createElement('section'); card.className = 'card';
+    var h = document.createElement('h2'); h.textContent = T('missions.milestones', 'milestones · treasury');
+    var sub = document.createElement('p'); sub.className = 'sub';
+    sub.textContent = T('missions.milestonesSub', 'releases ride the evaluator: continue, pause, or escalate — never past the ceiling');
+    var tbl = document.createElement('table'); tbl.className = 'sheet';
+    var tbody = document.createElement('tbody');
+    (m.milestones || []).forEach(function (ms) {
+      var tr = document.createElement('tr');
+      var td = document.createElement('td');
+      var b = document.createElement('b'); b.style.color = 'var(--ink)'; b.textContent = ms.id + ' · ' + ms.title;
+      var sm = document.createElement('div'); sm.style.fontSize = '10px'; sm.textContent = ms.deliverable + ' · ' + ms.state;
+      td.append(b, sm);
+      var tv = document.createElement('td'); tv.className = 'num'; tv.textContent = M.fmtUSD(ms.release_usd);
+      tr.append(td, tv); tbody.appendChild(tr);
+    });
+    tbl.appendChild(tbody);
+    card.append(h, sub, tbl);
+    if (ev) {
+      var sb = spendBar(ev); sb.style.marginTop = '10px';
+      card.appendChild(sb);
+    }
+    return card;
+  }
+  function reportCard(m) {
+    if (!m.final_report) return null;
+    var fr = m.final_report, rep = M.reputation(fr);
+    var card = document.createElement('section'); card.className = 'card';
+    var h = document.createElement('h2'); h.textContent = T('missions.report', 'final outcome report — projected vs actual');
+    var tbl = document.createElement('table'); tbl.className = 'sheet';
+    var tbody = document.createElement('tbody');
+    function row(a, b, cls) { var tr = document.createElement('tr'); var x = document.createElement('td'); x.textContent = a; var y = document.createElement('td'); y.className = 'num' + (cls || ''); y.textContent = b; tr.append(x, y); tbody.appendChild(tr); }
+    row(T('missions.rRequested', 'requested total (projected)'), M.fmtUSD(fr.projected.requested_total));
+    row(T('missions.rSpend', 'actual spend, from receipts'), M.fmtUSD(fr.actual.total_spend), fr.actual.total_spend <= fr.projected.requested_total ? ' pos' : ' neg');
+    row(T('missions.rTithe', 'tithe paid on actuals'), M.fmtUSD(fr.actual.tithe_paid), ' pos');
+    row(T('missions.rCeiling', 'unused ceiling returned'), M.fmtUSD(fr.actual.unused_ceiling), ' pos');
+    tbl.appendChild(tbody);
+    var note = document.createElement('p'); note.className = 'sub'; note.style.marginTop = '10px'; note.textContent = fr.variance_note;
+    card.append(h, tbl, note);
+    var rh = document.createElement('h2'); rh.style.marginTop = '16px'; rh.textContent = T('missions.reputation', 'team reputation — from delivery, not promises');
+    var grid = document.createElement('div'); grid.className = 'rep';
+    [[T('missions.repDelivery', 'delivery'), rep.delivery], [T('missions.repCost', 'cost accuracy'), rep.cost_accuracy], [T('missions.repTruth', 'truthful reporting'), rep.truthful_reporting]].forEach(function (x) {
+      var r = document.createElement('div'); r.className = 'r';
+      var lab = document.createElement('span'); lab.textContent = x[0];
+      var track = document.createElement('div'); track.className = 'track';
+      var fill = document.createElement('i'); fill.style.width = Math.round(x[1] * 100) + '%';
+      track.appendChild(fill);
+      var b = document.createElement('b'); b.textContent = Math.round(x[1] * 100) + '%';
+      r.append(lab, track, b); grid.appendChild(r);
+    });
+    card.append(rh, grid);
+    return card;
+  }
+  function leverBar(m) {
+    var bar = document.createElement('div'); bar.className = 'levers';
+    bar.setAttribute('aria-label', 'founder levers');
+    function lever(labelKey, labelFb, cls, fn, disabled) {
+      var b = document.createElement('button'); b.className = 'lever' + (cls ? ' ' + cls : ''); b.type = 'button';
+      b.textContent = T(labelKey, labelFb);
+      b.disabled = !!disabled;
+      b.addEventListener('click', fn);
+      bar.appendChild(b);
+    }
+    if (m.state === 'review') {
+      lever('missions.lvApprove', 'approve ceiling', 'approve', function () {
+        var req = m.finance.requested_total;
+        var sug = Math.ceil(req);
+        var v = prompt(T('missions.approvePrompt', 'approve the spending ceiling (testnet accounting, USD) — suggested'), String(sug));
+        if (v === null) return;
+        var n = Number(v);
+        if (!(n > 0)) { alert(T('missions.approveBad', 'the ceiling must be a positive number')); return; }
+        act('approve_ceiling', { ceiling: n });
+      });
+    }
+    if (m.state === 'escalated') {
+      lever('missions.lvResume', 'resolve & resume', 'approve', function () {
+        var note = prompt(T('missions.resumePrompt', 'your word resolves the escalation — it rides the receipt'), '');
+        if (note === null) return;
+        act('resume', { note: note });
+      });
+    }
+    lever('missions.lvChange', 'change order', '', function () {
+      var note = prompt(T('missions.changePrompt', 'the change order — the objective is amended, the receipt carries your words'), '');
+      if (!note) return;
+      act('change_order', { note: note });
+    });
+    if (m.state !== 'stopped' && m.state !== 'complete') {
+      lever('missions.lvStop', 'stop mission', 'danger', function () {
+        if (!confirm(T('missions.stopConfirm', 'human stop — all autonomous work halts and no further milestone releases. Leave a note?'))) return;
+        act('stop', { note: '' });
+      });
+    }
+    return bar;
+  }
+  function act(action, payload) {
+    var res = M.applyControl(state.ledger, currentId(), action, payload);
+    if (res.error) { alert(res.error); return; }
+    M.saveLedger(state.ledger);
+    state.ver = M.verifyChain(state.ledger.receipts);
+    route();
+  }
+
+  var current = null;
+  function currentId() { return current; }
+  function renderDetail(id) {
+    var m = M.findMission(state.ledger, id);
+    var host = $('mission-detail');
+    if (!m) { host.textContent = T('missions.noMission', 'no such mission in this ledger'); return; }
+    current = id;
+    var ev = M.evaluate(m, state.ledger.receipts);
+    host.replaceChildren();
+    host.appendChild(leverBar(m));
+    var grid = document.createElement('div'); grid.className = 'grid'; grid.style.marginTop = '12px';
+    grid.append(envelopeCard(m), calcCard(m));
+    host.appendChild(grid);
+    var grid2 = document.createElement('div'); grid2.className = 'grid'; grid2.style.marginTop = '14px';
+    grid2.appendChild(milestoneCard(m, ev));
+    var rep = reportCard(m);
+    if (rep) grid2.appendChild(rep);
+    else {
+      var linkCard = document.createElement('section'); linkCard.className = 'card';
+      var lh = document.createElement('h2'); lh.textContent = T('missions.roomNext', 'where it runs');
+      var lp = document.createElement('p'); lp.className = 'sub';
+      lp.textContent = T('missions.roomNextBody', 'the team works in the Buzz mission room — work units, handoffs, the evaluator and the treasury, all receipted');
+      var la = document.createElement('a'); la.href = 'mission-room.html#/m/' + encodeURIComponent(id); la.style.fontSize = '11px';
+      la.textContent = T('missions.openRoom', 'open the mission room →');
+      linkCard.append(lh, lp, la);
+      grid2.appendChild(linkCard);
+    }
+    host.appendChild(grid2);
+  }
+
+  /* ── hash routing ───────────────────────────────────────────────────── */
+  function route() {
+    var h = location.hash || '#/';
+    var m = h.match(/^#\/m\/(.+)$/);
+    if (m) {
+      var id = decodeURIComponent(m[1]);
+      $('list-view').hidden = true;
+      $('detail-view').hidden = false;
+      renderDetail(id);
+      renderList(); /* keep the docket warm for the back click */
+    } else {
+      $('list-view').hidden = false;
+      $('detail-view').hidden = true;
+      current = null;
+      renderList();
+    }
+    paintStatus();
+  }
+  window.addEventListener('hashchange', route);
+  $('back').addEventListener('click', function (e) { /* let the href work; this keeps keyboard parity */ });
+
+  /* ── boot ───────────────────────────────────────────────────────────── */
+  try {
+    state.ledger = M.loadLedger();
+  } catch (e) {
+    state.ledger = { v: 1, currency: 'unavailable', fixture_note: 'seed unavailable', missions: [], receipts: [] };
+    $('status-dot').className = 'dot bad';
+    $('status').textContent = T('missions.stNoSeed', 'seed ledger unavailable');
+    $('status-note').textContent = '· ' + e.message;
+  }
+  if (state.ledger.receipts.length) state.ver = M.verifyChain(state.ledger.receipts);
+  syncMotion();
+  route();
+  document.addEventListener('bregister', function () {
+    /* YAML opens by default only for the terminal view */
+    var d = document.querySelector('details.yaml');
+    if (d) d.open = document.body.getAttribute('data-reg') === 'cypherpunk';
+  });
+})();
+</script>
+<script src="tour.js?v=42"></script>
+</body>
+</html>
