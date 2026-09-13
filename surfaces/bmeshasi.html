@@ -329,7 +329,7 @@ footer{max-width:940px;margin:22px auto 0;color:var(--dim);font-size:10px;text-a
      Laws inherited from the bANTfarm's cockpit: failover per lane, a dead read
      goes amber and the line simply breaks — nothing stored, nothing sent,
      paused while the tab is hidden. */
-  var VH=['https://api.eosn.io','https://eos.api.eosnation.io','https://eos.greymass.com'];
+  var VH=['https://eos.api.eosnation.io','https://eos.greymass.com'];
   var HH=['https://api.hive.blog','https://api.deathwing.me'];
   var t0=Date.now(), reads=0, lastAt=null;
   function ago(){ return lastAt? Math.round((Date.now()-lastAt)/1000)+'s ago' : '—'; }

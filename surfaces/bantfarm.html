@@ -458,8 +458,8 @@ $('tzdecode').onclick=function(){
   }catch(e){ $('tzout').textContent='could not parse — paste the daemon’s JSON as-is'; $('tzout').style.display='block'; }
 };
 
-/* ---- SKAISTS / Vaulta — the estate's proven three-host failover ---- */
-var VAPI=['https://eos.greymass.com','https://api.eosn.io','https://eos.api.eosnation.io'];
+/* ---- SKAISTS / Vaulta — the estate's proven failover (two confirmed hosts; the third went NXDOMAIN 2026-09-12) ---- */
+var VAPI=['https://eos.greymass.com','https://eos.api.eosnation.io'];
 async function vpost(path,body){
   for(var i=0;i<VAPI.length;i++){
     try{
