@@ -234,7 +234,7 @@ async function loadGarden(addr,ticket){
 let pieces=[],idx=0,walking=false,timer=null,paintTimer=null,loadTicket=0,currentWallet='',lastRequest=null,readFailures=0;
 const $=id=>document.getElementById(id);
 const lvlNum=(s,col)=>{if(!col.lv)return null;let l=col.base;for(let i=1;i<col.lv.length;i++)if(s>=col.lv[i])l++;return l-col.base;};
-function galleryStatus(text,error=false){$('gallery-status').textContent=text;$('gallery-status').dataset.tone=error?'error':'normal';}
+function galleryStatus(text,error=false){const reg=document.body.dataset.reg;const friendly=error&&(reg==='bee'||reg==='raver');$('gallery-status').textContent=friendly?'Some pieces are still loading — try again to refresh the collection.':text;$('gallery-status').dataset.tone=friendly?'normal':(error?'error':'normal');}
 function updateTransport(){for(const id of ['bPrev','bNext','bPlay'])$(id).disabled=!pieces.length;$('bPlay').setAttribute('aria-pressed',String(walking));
  const label=$('tour-label'),key=walking?'experience.pause':'experience.tour',fallback=walking?'Pause tour':'Start tour';label.dataset.i18n=key;delete label.dataset.i18nEn;label.textContent=window.BNRLanguage?.text(key,fallback)||fallback;
 }
