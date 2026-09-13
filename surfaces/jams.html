@@ -1,236 +1,40 @@
 <!doctype html>
-<!-- jams.html — PLUR MUSIC JAM ROOM (manifest-backed preview, 2026-09-11).
-     The room consumes the language-neutral Connect + Store envelope. It does
-     not open x0x, upload to Autonomi, charge a wallet, or start a Trezor
-     flow. Those capabilities belong behind the accepted bounded receiver and
-     an explicit admission lane. -->
+<!-- jams.html — PERMANENT REDIRECT SHIM (2026-09-13).
+     The PLUR music room moved to music.html; this address stays so every
+     saved link keeps working. Query and hash are carried across. Registered
+     in estate.json as the "jams" row with presented:false — counted by the
+     tree, never presented as its own surface on the atlas. -->
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="color-scheme" content="dark">
-<title>SKAISTS mUsiC · PLUR</title>
-<link rel="stylesheet" href="tokens.css">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>SKAISTS mUsiC — this room moved to music.html</title>
+<link rel="canonical" href="music.html">
+<meta http-equiv="refresh" content="0; url=music.html">
 <style>
-  :root { --jam:#D655BB; --jam-soft:#F19BDD; --mint:#86CC72; --cyan:#45C2DC; --gold:#E8B54B; }
-  * { box-sizing:border-box; margin:0; }
-  html { scroll-behavior:smooth; }
-  body { min-height:100vh; color:var(--ink); background:var(--void); font:14px/1.65 var(--mono);
-    padding-bottom:70px; }
-  a { color:var(--cyan); text-decoration:none; }
-  a:hover { color:var(--jam-soft); }
-  .wrap { width:min(1100px, calc(100% - 32px)); margin:0 auto; }
-  header { position:relative; overflow:hidden; padding:54px 0 34px; border-bottom:1px solid var(--line); }
-  header::before { content:""; position:absolute; inset:0; opacity:.18; pointer-events:none;
-    background:radial-gradient(circle at 14% 30%, var(--jam), transparent 34%),
-      radial-gradient(circle at 86% 60%, var(--cyan), transparent 32%); }
-  .eyebrow { position:relative; color:var(--jam-soft); letter-spacing:.25em; text-transform:uppercase; font-size:10px; }
-  h1 { position:relative; margin-top:10px; font:800 clamp(2.2rem,8vw,5.3rem)/.95 ui-sans-serif,system-ui,sans-serif;
-    letter-spacing:-.055em; }
-  h1 span { color:var(--jam); }
-  .lede { position:relative; max-width:66ch; color:var(--dim); margin-top:17px; }
-  .lede b { color:var(--ink); }
-  .nav { position:relative; display:flex; gap:8px; flex-wrap:wrap; margin-top:24px; }
-  .nav a, button { border:1px solid var(--line-hi); border-radius:999px; padding:8px 14px; color:var(--ink);
-    background:var(--panel); font:600 11px var(--mono); cursor:pointer; }
-  .nav a:hover, button:hover { border-color:var(--jam); background:var(--lift); }
-  .independent { position:relative; margin-top:14px; padding:10px 12px; border-left:2px solid var(--cyan);
-    color:var(--dim); font-size:10px; line-height:1.7; background:rgba(69,194,220,.05); }
-  .independent b { color:var(--ink); }
-  .independent a { color:var(--cyan); border-bottom:1px dashed var(--cyan); }
-  .statusline { display:flex; align-items:center; gap:9px; flex-wrap:wrap; margin-top:24px; color:var(--dim); font-size:11px; }
-  .dot { width:9px; height:9px; border-radius:50%; background:var(--gold); }
-  .dot.ok { background:var(--mint); box-shadow:0 0 13px var(--mint); }
-  .dot.bad { background:var(--ember); box-shadow:0 0 13px var(--ember); }
-  main { padding-top:24px; }
-  .grid { display:grid; grid-template-columns:repeat(12,1fr); gap:14px; }
-  .card { grid-column:span 12; padding:20px; border:1px solid var(--line); border-radius:14px; background:var(--panel); }
-  .card.half { grid-column:span 6; }
-  .card.third { grid-column:span 4; }
-  .card h2 { color:var(--jam-soft); font-size:13px; letter-spacing:.14em; text-transform:uppercase; }
-  .sub { color:var(--dim); font-size:11px; margin-top:6px; }
-  @media(max-width:720px){ .card.half,.card.third { grid-column:span 12; } .wrap { width:min(100% - 22px, 1100px); } }
-  .hero { display:grid; grid-template-columns:minmax(0,1.25fr) minmax(220px,.75fr); gap:20px; align-items:stretch; }
-  @media(max-width:720px){ .hero { grid-template-columns:1fr; } }
-  .room { min-height:225px; display:flex; flex-direction:column; justify-content:space-between; padding:20px;
-    border:1px solid rgba(214,85,187,.45); border-radius:12px; background:linear-gradient(135deg,rgba(214,85,187,.12),rgba(69,194,220,.05)); }
-  .roomtop { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; }
-  .roomtop h2 { color:var(--ink); font:800 22px ui-sans-serif,system-ui,sans-serif; letter-spacing:-.02em; }
-  .pill { border:1px solid var(--mint); border-radius:999px; color:var(--mint); padding:3px 8px; font-size:9px; letter-spacing:.12em; text-transform:uppercase; white-space:nowrap; }
-  #visualizer { width:100%; height:90px; display:block; margin:20px 0 12px; border-radius:8px; background:rgba(0,0,0,.18); }
-  .roomfoot { display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; }
-  .roomfoot small { color:var(--dim); font-size:10px; }
-  .primary { color:#1a0716; border-color:var(--jam); background:var(--jam); }
-  .primary:hover { color:#1a0716; background:var(--jam-soft); }
-  .facts { display:grid; grid-template-columns:repeat(2,1fr); gap:8px; }
-  .fact { padding:11px; border:1px solid var(--line); border-radius:9px; background:var(--well); }
-  .fact label { display:block; color:var(--dimmer); font-size:9px; letter-spacing:.14em; text-transform:uppercase; }
-  .fact b { display:block; margin-top:4px; color:var(--ink); font-size:16px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-  .fact b.accent { color:var(--jam-soft); }
-  .items { display:flex; flex-direction:column; gap:7px; margin-top:14px; }
-  .card-head { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; }
-  .store-action { flex:none; padding:6px 10px; color:var(--cyan); border-color:var(--cyan); font-size:10px; }
-  .store-action:disabled { cursor:not-allowed; opacity:.55; }
-  .store-state { color:var(--dim); font-size:10px; }
-  .item { display:grid; grid-template-columns:1fr auto; gap:12px; align-items:center; padding:11px 12px; border:1px solid var(--line); border-radius:9px; background:var(--well); }
-  .item b { color:var(--ink); font-size:12px; font-weight:600; }
-  .item small { display:block; color:var(--dim); font-size:10px; }
-  .ready { color:var(--mint); font-size:10px; }
-  .meta { display:grid; grid-template-columns:repeat(2,1fr); gap:10px; margin-top:14px; }
-  .meta div { padding:12px; border-left:2px solid var(--cyan); background:var(--well); }
-  .meta label { display:block; color:var(--dimmer); font-size:9px; text-transform:uppercase; letter-spacing:.13em; }
-  .meta strong { display:block; margin-top:3px; color:var(--ink); font-size:12px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-  .gate { margin-top:14px; padding:13px; border:1px dashed var(--gold); border-radius:9px; color:var(--dim); font-size:11px; }
-  .gate b { color:var(--gold); }
-  .gate .row { display:flex; justify-content:space-between; gap:10px; margin-top:7px; color:var(--ink); }
-  .gate .off { color:var(--mint); }
-  .gate .downstream { color:var(--jam-soft); }
-  .credit { display:flex; gap:9px; align-items:center; margin-top:14px; }
-  .avatar { width:34px; height:34px; display:grid; place-items:center; border-radius:50%; background:var(--jam); color:#1a0716; font-weight:800; }
-  .credit small { display:block; color:var(--dim); font-size:10px; }
-  .eventlog { display:flex; flex-direction:column; gap:7px; margin-top:14px; min-height:85px; }
-  .event { display:flex; gap:10px; align-items:baseline; padding:8px 10px; border-left:2px solid var(--cyan); background:var(--well); color:var(--dim); font-size:10px; }
-  .event b { color:var(--cyan); font-size:9px; letter-spacing:.08em; }
-  .law { margin-top:20px; padding:14px 16px; border:1px solid var(--line); border-radius:10px; color:var(--dim); font-size:10.5px; line-height:1.8; }
-  .law b { color:var(--ink); }
-  footer { width:min(1100px, calc(100% - 32px)); margin:30px auto 0; padding-top:18px; border-top:1px solid var(--line); color:var(--dimmer); font-size:10px; line-height:1.8; }
-  footer a { color:var(--dim); }
+  body { min-height:100vh; display:grid; place-items:center; margin:0; padding:24px;
+    background:#0E0817; color:#F5EFFA; font:14px/1.7 ui-monospace,"SF Mono",Menlo,Consolas,monospace; }
+  main { max-width:52ch; }
+  .eyebrow { color:#C9A7F5; letter-spacing:.25em; text-transform:uppercase; font-size:10px; }
+  h1 { font:800 clamp(1.5rem,6vw,2.4rem)/1.1 system-ui,sans-serif; margin:12px 0 0; letter-spacing:-.03em; }
+  p { color:#C4B9D5; margin:14px 0 0; }
+  a.go { display:inline-block; margin-top:20px; padding:12px 20px; border-radius:999px;
+    background:linear-gradient(96deg,#C9A7F5,#9C6FD6); color:#12081F; font-weight:700;
+    text-decoration:none; min-height:44px; }
+  a.go:focus-visible { outline:3px solid #45C2DC; outline-offset:3px; }
 </style>
 </head>
 <body>
-<header>
-  <div class="wrap">
-    <div class="eyebrow">PLUR · peace · love · unity · respect</div>
-    <h1>SKAISTS <span>mUsiC</span></h1>
-    <p class="lede"><b>SKAISTS mUsiC</b> is our room for a floor that can hear itself. This preview is prepared for live room events through the bounded Connect receiver; the encrypted set, stems, captions, and recording stay in the shared manifest until a reader verifies them.</p>
-    <nav class="nav" aria-label="PLUR room links">
-      <a href="plur.html">← PLUR museum</a>
-      <a href="watch.html">watch together</a>
-      <a href="listening.html">listening room</a>
-      <a href="blight/midiroom.html">bMiDi room</a>
-    </nav>
-    <div class="independent" aria-label="independent project references">
-      <b>Independent project references.</b> This room is a SKAISTS project. Explore the original
-      <a href="https://jams.community/" target="_blank" rel="noopener noreferrer">JAMS.community ↗</a>
-      and <a href="https://github.com/aautonomicc/Watch-It" target="_blank" rel="noopener noreferrer">W@tch ↗</a>
-      apps as well. They are separate projects; each link opens in a new tab.
-    </div>
-    <div class="statusline"><span class="dot" id="status-dot"></span><span id="status">loading the shared room manifest…</span><span id="status-note"></span><span class="store-state" id="store-status">store adapter idle</span></div>
-  </div>
-</header>
-
-<main class="wrap">
-  <section class="card hero" aria-label="music jam room">
-    <div class="room">
-      <div class="roomtop"><div><h2 id="room-title">PLUR room</h2><p class="sub" id="room-sub">waiting for a verified checkpoint</p></div><span class="pill" id="room-state">LOCAL PREVIEW</span></div>
-      <canvas id="visualizer" width="900" height="180" aria-label="local music visualizer"></canvas>
-      <div class="roomfoot"><small id="room-foot">nothing has been joined yet</small><button class="primary" id="join" type="button" disabled>join this jam</button></div>
-    </div>
-    <div class="facts" aria-label="room facts">
-      <div class="fact"><label>channel</label><b class="accent" id="f-channel">—</b></div>
-      <div class="fact"><label>epoch</label><b id="f-epoch">—</b></div>
-      <div class="fact"><label>sequence</label><b id="f-sequence">—</b></div>
-      <div class="fact"><label>items</label><b id="f-items">—</b></div>
-      <div class="fact"><label>receiver</label><b>bounded</b></div>
-      <div class="fact"><label>store</label><b>read-only</b></div>
-    </div>
-  </section>
-
-  <div class="grid" style="margin-top:14px">
-    <section class="card half">
-      <div class="card-head"><div><h2>the set · encrypted items</h2><p class="sub">References are visible; plaintext and keys stay behind the channel verifier.</p></div><button class="store-action" id="verify-store" type="button" disabled>verify encrypted refs</button></div>
-      <div class="items" id="items"><div class="item"><span><b>loading manifest…</b><small>waiting for the shared envelope</small></span><span>—</span></div></div>
-    </section>
-    <section class="card half">
-      <h2>checkpoint · late join</h2>
-      <p class="sub">The x0x hint is opaque. A reader follows it, fetches the objects, and changes state only after verification.</p>
-      <div class="meta">
-        <div><label>checkpoint id</label><strong id="m-id">—</strong></div>
-        <div><label>policy id</label><strong id="m-policy">—</strong></div>
-        <div><label>storage ref</label><strong id="m-address">—</strong></div>
-        <div><label>checkpoint bytes</label><strong id="m-size">—</strong></div>
-      </div>
-      <div class="gate"><b>admission gate</b><div class="row"><span>payment</span><span class="off" id="g-payment">disabled</span></div><div class="row"><span>approval</span><span class="downstream" id="g-approval">Trezor downstream</span></div><div class="row"><span>complete cost cap</span><span id="g-cap">—</span></div></div>
-    </section>
-
-    <section class="card third">
-      <h2>creator</h2>
-      <div class="credit"><div class="avatar">LW</div><div><b id="creator">—</b><small id="creator-key">public key hidden until verified</small></div></div>
-    </section>
-    <section class="card third">
-      <h2>source</h2>
-      <div class="credit"><div class="avatar" style="background:var(--cyan)">◎</div><div><b id="source-title">—</b><small id="source-uri">—</small></div></div>
-    </section>
-    <section class="card third">
-      <h2>room log</h2>
-      <div class="eventlog" id="eventlog" aria-live="polite"><div class="event"><b>READY</b><span>manifest still loading</span></div></div>
-    </section>
-  </div>
-
-  <div class="law"><b>Room law.</b> This SKAISTS mUsiC preview consumes our language-neutral manifest. Linking to the independent <a href="https://github.com/aautonomicc/Watch-It" target="_blank" rel="noopener noreferrer">W@tch project ↗</a> does not mean its app consumes this manifest. This page never implements a second raw x0x `/ws` path. Joining this preview records only a local event; the accepted receiver, read-only store, complete cost admission, and downstream Trezor approval remain the boundaries for a real room.</div>
+<main>
+  <div class="eyebrow">SKAISTS mUsiC · PLUR</div>
+  <h1>This room moved.</h1>
+  <p>The PLUR music room now lives at <b>music.html</b>. Taking you there now…</p>
+  <p><a class="go" href="music.html">Continue to the music room →</a></p>
 </main>
-
-<footer>SKAISTS mUsiC · PLUR · manifest-backed preview · <a href="plur.html">return to the floor</a> · <a href="../fixtures/connect-store-manifest-envelope-v1.json">inspect the shared envelope</a></footer>
-
-<script type="module">
-'use strict';
-import { loadManifest, shortRef } from './manifest-reader.js';
-import { readEncryptedItems } from './store-reader.js';
-const $ = id => document.getElementById(id);
-const query = new URLSearchParams(location.search);
-const manifestUrl = query.get('manifest') ? new URL(query.get('manifest'), location.href) : undefined;
-const storeEndpoint = query.get('store') || '';
-const state = { manifest:null, joined:false, anim:null, storeEndpoint };
-const eventlog = $('eventlog');
-function event(kind, message) {
-  const row = document.createElement('div'); row.className='event';
-  const k = document.createElement('b'); k.textContent=kind;
-  const m = document.createElement('span'); m.textContent=message;
-  row.append(k,m); eventlog.prepend(row);
-  while (eventlog.children.length > 4) eventlog.lastElementChild.remove();
-}
-function paint(envelope) {
-  const m=envelope.manifest, cp=m.checkpoint;
-  state.manifest=envelope;
-  $('status-dot').className='dot ok'; $('status').textContent='shared manifest verified'; $('status-note').textContent='· local preview';
-  $('store-status').textContent=state.storeEndpoint ? 'store adapter ready · endpoint supplied' : 'store adapter idle · endpoint not configured';
-  $('room-title').textContent='PLUR · '+m.channel+' jam'; $('room-sub').textContent='checkpoint '+shortRef(cp.id)+' · ready for a bounded late join';
-  $('f-channel').textContent=m.channel; $('f-epoch').textContent=m.epoch; $('f-sequence').textContent=m.sequence; $('f-items').textContent=m.encrypted_items.length;
-  $('m-id').textContent=shortRef(cp.id); $('m-policy').textContent=shortRef(cp.policy_id); $('m-address').textContent=shortRef(cp.ref.address); $('m-size').textContent=cp.ref.size.toLocaleString()+' B';
-  $('g-payment').textContent=m.admission.payment; $('g-approval').textContent=m.admission.approval === 'trezor' ? 'Trezor downstream' : m.admission.approval; $('g-cap').textContent=m.admission.max_bytes.toLocaleString()+' B · '+m.admission.max_items+' items';
-  $('creator').textContent=m.credits.creator[0]?.display_name || 'unnamed creator'; $('creator-key').textContent='creator credit · key verified by the reader';
-  $('source-title').textContent=m.credits.source[0]?.title || 'source credit'; $('source-uri').textContent=m.credits.source[0]?.uri || '—';
-  $('items').replaceChildren(...m.encrypted_items.map(item => { const row=document.createElement('div'); row.className='item'; const text=document.createElement('span'); const b=document.createElement('b'); b.textContent=item.kind; const s=document.createElement('small'); s.textContent='v'+item.version+' · '+item.ref.size.toLocaleString()+' B · encrypted reference'; text.append(b,s); const ok=document.createElement('span'); ok.className='ready'; ok.dataset.storeState='pending'; ok.textContent='ready'; row.append(text,ok); return row; }));
-  $('verify-store').disabled=!state.storeEndpoint;
-  $('join').disabled=false; event('READY','manifest accepted; no network write opened');
-}
-async function verifyStore() {
-  if (!state.manifest || !state.storeEndpoint) return;
-  const button=$('verify-store'); button.disabled=true; $('store-status').textContent='reading encrypted objects…';
-  document.querySelectorAll('#items .ready').forEach(node => { node.dataset.storeState='checking'; node.textContent='checking'; });
-  try {
-    const results=await readEncryptedItems(state.manifest, { endpoint:state.storeEndpoint, maxItems:state.manifest.manifest.encrypted_items.length });
-    results.forEach((_, index) => { const node=document.querySelectorAll('#items .ready')[index]; if (node) { node.dataset.storeState='verified'; node.textContent='verified'; } });
-    $('store-status').textContent=`${results.length} encrypted objects verified · decryption remains client-side`;
-    event('STORE','ciphertext fetched and hash-checked; no write opened');
-  } catch (error) {
-    document.querySelectorAll('#items .ready').forEach(node => { node.dataset.storeState='refused'; node.textContent='refused'; });
-    $('store-status').textContent='store verification refused · no room state changed';
-    event('REFUSED',`store read refused · ${error.message}`);
-  } finally { button.disabled=false; }
-}
-function draw() {
-  const c=$('visualizer'), ctx=c.getContext('2d'), d=devicePixelRatio||1, w=c.width, h=c.height;
-  ctx.clearRect(0,0,w,h); ctx.fillStyle='rgba(6,17,12,.8)'; ctx.fillRect(0,0,w,h);
-  const t=performance.now()/800, n=48;
-  for(let i=0;i<n;i++){ const x=i*(w/n), amp=18+Math.abs(Math.sin(t+i*.47))*64 + (state.joined?16:0); ctx.fillStyle=i%3===0?'#D655BB':(i%3===1?'#45C2DC':'#86CC72'); ctx.globalAlpha=.35+Math.abs(Math.sin(t*.7+i*.2))*.55; ctx.fillRect(x,h/2-amp/2,Math.max(3,w/n-4),amp); }
-  ctx.globalAlpha=1; state.anim=requestAnimationFrame(draw); void d;
-}
-$('join').addEventListener('click', () => { if(!state.manifest) return; state.joined=!state.joined; $('join').textContent=state.joined?'leave preview':'join this jam'; $('room-foot').textContent=state.joined?'you are in the local room preview · no write was attempted':'nothing has been joined yet'; event(state.joined?'JOIN':'LEAVE',state.joined?'local participant joined; receiver handoff remains pending':'local participant left'); });
-$('verify-store').addEventListener('click', verifyStore);
-draw();
-loadManifest(manifestUrl).then(paint).catch(err => { $('status-dot').className='dot bad'; $('status').textContent='manifest unavailable'; $('status-note').textContent='· '+err.message; $('store-status').textContent='store adapter idle'; event('REFUSED','no room state changed'); });
+<script>
+/* carry any ?manifest=…&store=… query and #hash across the move */
+try { location.replace('music.html' + location.search + location.hash); } catch (e) {}
 </script>
-<script src="tour.js?v=42"></script>
 </body>
 </html>

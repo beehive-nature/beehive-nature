@@ -150,6 +150,16 @@ const ALLOWLIST = [
       'page (hexfield/room/huddle/orbit must stay 2-hop reachable via forge/index.html), ' +
       'not a pass for I1/design gates, and it ENDS the day orbit-v2 becomes the linked ' +
       'orbit — then it must be reachable like everything else.'
+  },
+  {
+    path: 'surfaces/jams.html',
+    reason: 'deliberately unlinked: the permanent redirect shim to music.html (2026-09-13 ' +
+      'rename). It exists for saved off-site links and search history, never for ' +
+      'in-estate navigation — nothing may link it, so it is orphaned on purpose. The ' +
+      'shim itself is proven by e2e/zcode-music-check.mjs (redirect + query carried).',
+    notCovering: 'exempts REACHABILITY for THIS file only. Not a pass for music.html — the ' +
+      'room itself must stay reachable from the hub — and it ENDS the day the shim is ' +
+      'retired; then the file must be gone from the tree and the registry together.'
   }
 ]; // entries: { path, reason, notCovering }
 if (OVERRIDE) {

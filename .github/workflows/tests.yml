@@ -249,8 +249,9 @@ jobs:
         if: always()
         run: |
           node e2e/plur-views.mjs
-          node e2e/zcode-jams-check.mjs
-          node e2e/zcode-jams-store-reader-check.mjs
+          node e2e/zcode-music-check.mjs
+          node e2e/zcode-music-store-reader-check.mjs
+          node e2e/zcode-music-views-check.mjs
           node e2e/zcode-watch-manifest-check.mjs
       - name: Reading rooms — first actions, view retention and translated layouts
         if: always()

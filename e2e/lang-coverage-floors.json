@@ -66,17 +66,19 @@
  "hardware/lab.html": 6,
  "hardware/security.html": 5,
  "index.html": 473,
+ "jams.html": 7,
  "kandi.html": 3,
  "keys/addresses.html": 3,
  "listening.html": 5,
+ "music.html": 7,
  "onboarding/index.html": 8,
  "onboarding/receive.html": 0,
+ "plur.html": 16,
+ "profile.html": 16,
  "recover.html": 0,
  "review.html": 10,
  "royalguard.html": 0,
  "stack.html": 118,
  "university/index.html": 11,
- "wallet.html": 24,
- "plur.html": 16,
- "profile.html": 16
+ "wallet.html": 24
 }

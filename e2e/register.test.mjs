@@ -152,6 +152,11 @@ test('every current estate HTML has one resolvable shared loader; frozen art sta
   const files=new Set([...listSurfacesOnDisk().map(p=>'surfaces/'+p),...estate.surfaces.map(s=>s.path)]);
   assert.ok(files.size>=102);
   for(const p of files){
+    /* jams.html is the permanent redirect shim to music.html (2026-09-13):
+       it carries no shell on purpose — it exists to hand a saved link across
+       in one hop, and the destination's shell is the one that loads. Proven
+       by e2e/zcode-music-check.mjs, which follows the redirect end to end. */
+    if(p==='surfaces/jams.html')continue;
     const tags=[...read(p).matchAll(/<script\b[^>]*\bsrc=["']([^"']*\b(?:tour|register)\.js(?:\?[^"']*)?)["'][^>]*>/gi)];
     assert.equal(tags.length,1,p+' must load the shared shell once');
     const target=resolve(dirname(resolve(root,p)),tags[0][1].split('?')[0]);
