@@ -105,7 +105,7 @@ async function fresh(viewport = { width: 1280, height: 900 }) {
 try {
   /* ═══ 1. PRIVACY — host census on bare load, desktop + 390px ═══ */
   for (const vw of [{ width: 1280, height: 900 }, { width: 390, height: 800 }]) {
-    for (const surf of ['plur.html', 'watch.html', 'jams.html', 'blanguage.html']) {
+    for (const surf of ['plur.html', 'watch.html', 'music.html', 'blanguage.html']) {
       const page = await fresh(vw);
       const hosts = new Set();
       page.on('request', r => hosts.add(new URL(r.url()).host));
@@ -192,7 +192,7 @@ try {
   {
     attackerHits.length = 0;
     const page = await fresh();
-    await page.goto(`${BASE}/surfaces/jams.html?manifest=${encodeURIComponent(EVIL + '/evil.json')}&store=${encodeURIComponent(EVIL)}`, { waitUntil: 'networkidle' });
+    await page.goto(`${BASE}/surfaces/music.html?manifest=${encodeURIComponent(EVIL + '/evil.json')}&store=${encodeURIComponent(EVIL)}`, { waitUntil: 'networkidle' });
     const roomTitle = await page.textContent('#room-title');
     check('S2 hardened: cross-origin ?manifest= ignored — the committed fixture renders',
       roomTitle.includes('plur'), `title="${roomTitle}"`);
@@ -215,7 +215,7 @@ try {
   {
     evilEnvelope.manifest.encrypted_items[0].ref.sha256 = sha('wrong-bytes');
     const page = await fresh();
-    await page.goto(`${BASE}/surfaces/jams.html?manifest=${encodeURIComponent(BASE + '/z2sec-evil-envelope.json')}&store=${encodeURIComponent(BASE)}`, { waitUntil: 'networkidle' });
+    await page.goto(`${BASE}/surfaces/music.html?manifest=${encodeURIComponent(BASE + '/z2sec-evil-envelope.json')}&store=${encodeURIComponent(BASE)}`, { waitUntil: 'networkidle' });
     await page.waitForTimeout(300);
     const roomTitle = await page.textContent('#room-title');
     check('S2: same-origin manifest override still loads (store-reader battery affordance intact)',
@@ -269,7 +269,7 @@ try {
     blockCorpus = false;
 
     const page2 = await fresh();
-    await page2.goto(`${BASE}/surfaces/jams.html?manifest=${BASE}/no-such.json`, { waitUntil: 'networkidle' });
+    await page2.goto(`${BASE}/surfaces/music.html?manifest=${BASE}/no-such.json`, { waitUntil: 'networkidle' });
     const status = await page2.textContent('#status');
     check('unavailable: jams manifest 404 renders "manifest unavailable" and refuses',
       /unavailable/i.test(status), status);
@@ -287,7 +287,7 @@ try {
 
   /* ═══ 9. NAVIGATION — internal links resolve; external links guarded ═══ */
   {
-    for (const surf of ['plur.html', 'watch.html', 'jams.html', 'blanguage.html']) {
+    for (const surf of ['plur.html', 'watch.html', 'music.html', 'blanguage.html']) {
       const page = await fresh();
       await page.goto(`${BASE}/surfaces/${surf}`, { waitUntil: 'networkidle' });
       const links = await page.evaluate(() => [...document.querySelectorAll('a[href]')].map(a => ({ href: a.getAttribute('href'), rel: a.rel, target: a.target })));
@@ -309,7 +309,7 @@ try {
   }
 
   /* ═══ 10. MOBILE — 390px overflow and control sizes ═══ */
-  for (const surf of ['plur.html', 'watch.html', 'jams.html', 'blanguage.html']) {
+  for (const surf of ['plur.html', 'watch.html', 'music.html', 'blanguage.html']) {
     const page = await fresh({ width: 390, height: 800 });
     await page.goto(`${BASE}/surfaces/${surf}`, { waitUntil: 'networkidle' });
     await page.waitForTimeout(300);
