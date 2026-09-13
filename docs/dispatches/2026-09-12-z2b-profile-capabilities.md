@@ -42,3 +42,17 @@ Per record law the dynasty prose was left untouched (records are never edited in
 1. founder gesture: register `skaists` (and a first `.a` name for bClaude) on kingbeelovis so the dynasty houses carry live rows.
 2. the SP card goes live per-artist only when an artist supplies a real `sp1q…` address — the configured-state acceptance contract sits in [the blueprint dispatch](2026-09-12-bnr-sp-dana-profile-blueprint.md), ready for that day.
 3. silentpayments.xyz remained unreachable from this seat — no change from the research lane.
+
+## rider 2026-09-13 — the main-conflict resolution (recorded where it happened)
+
+Main moved under this PR (#69 translation tranche, #71/#73 gallery work, and the house-profile
+rework of surfaces/profile.html). Resolution shape: main's rewrite taken WHOLE as the base; this
+lane's pieces re-applied on top — the rails band became a proper section OUTSIDE the beat-gated
+#instrument wrapper (default-hidden until "Go deeper"; bee/raver intros failed until moved), the
+checker and agent-dock restored, blight auto-merged clean. Two CI laws learned in the landing:
+the no-dead-host sweep scans LITERALS in surfaces code, so even a comment naming the dead eosn
+endpoint fails it — the comment now says "the dead eosn endpoint" and names nothing; and §7
+computes its range from the push event's before-SHA, which a force-push abandons — the branch
+history was reshaped (single commit on main) and re-pushed incrementally so the range resolves.
+Gates at this state: e2e 30/30 · no-dead-host 11/11 · estate-check 94 · corpus 11/11 ·
+university-smoke 87/87 · no 390px overflow.
