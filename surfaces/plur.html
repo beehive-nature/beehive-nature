@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="referrer" content="no-referrer">
 <title>PLUR — four words, every mouth</title>
 <style>
   :root{
@@ -394,14 +395,14 @@
     d.plur.stone.dock
 ═══════════════════════════════════════════════════════════════════ -->
 
-<section class="roses" id="roses" data-key="d.plur.roses">
-  <h2 data-key="d.plur.roses.h">roses for the <b>crossing</b></h2>
-  <p class="why" data-key="d.plur.roses.why">In Riga the flower shops never close, because you do not arrive
+<section class="roses" id="roses">
+  <h2 data-i18n="d.plur.roses.h">roses for the <b>crossing</b></h2>
+  <p class="why" data-i18n="d.plur.roses.why">In Riga the flower shops never close, because you do not arrive
     empty‑handed. <b>Red roses</b>, always an <b>odd number</b> — in Latvia, even flowers are for the grave.
     The core is frozen; the garden is skin.</p>
   <svg class="bouquet" id="bouquet" viewBox="0 0 640 460" role="img"
        aria-label="a bouquet of red roses, always an odd number"></svg>
-  <div class="oddlaw" data-key="d.plur.roses.oddlaw">odd numbers only · 3 · 5 · 7 · 11 · even is for mourning</div>
+  <div class="oddlaw" data-i18n="d.plur.roses.oddlaw">odd numbers only · 3 · 5 · 7 · 11 · even is for mourning</div>
   <div class="oddpick" id="oddpick" role="group" aria-label="how many roses">
     <button type="button" data-n="3">3 roses</button>
     <button type="button" data-n="5" aria-pressed="true">5 roses</button>
@@ -409,19 +410,19 @@
     <button type="button" data-n="11">11 roses</button>
   </div>
   <div class="roselinks">
-    <a href="qrroses.html" data-key="d.plur.roses.cut">✂ cut this bouquet as a QR rose</a>
-    <a href="qrtree.html">grow the QR tree</a>
-    <a href="blight/museum.html" data-key="d.plur.roses.museum">even roses stand at the Museum of the DeAD ⟶</a>
+    <a href="blight/qrroses.html" data-i18n="d.plur.roses.cut">✂ cut this bouquet as a QR rose</a>
+    <a href="blight/qrtree.html">grow the QR tree</a>
+    <a href="blight/museum.html" data-i18n="d.plur.roses.museum">even roses stand at the Museum of the DeAD ⟶</a>
   </div>
 </section>
 
 <section class="boundary" data-reg="cypherpunk" id="privacy-map"><h2>Data flow / current implementation</h2><div class="flow"><div><b>01 · Browser</b><p>Word cards are embedded in this document. View and UI-language preferences are stored by the shared controls on this origin.</p></div><div><b>02 · Voice engine</b><p>Speech synthesis uses the browser's installed voices. Recognition may use a browser vendor service. Local-only audio processing is not established.</p></div><div><b>03 · AI provider</b><p>Send posts your text, selected languages and this tab's conversation history to api.anthropic.com/v1/messages. The provider receives plaintext; HTTPS is not end-to-end encryption against that provider.</p></div></div><h3>Evidence, not a privacy badge</h3><dl><dt>Source</dt><dd>surfaces/plur.html: ask(), renderHive(), SpeechRecognition; shared register.js and lang.js.</dd><dt>Tutor availability</dt><dd>The current direct request has no configured authentication header. A working authenticated service is not verified. Failed requests must show an unavailable state.</dd><dt>Translation</dt><dd>Interface corpus renderings are machine drafts until attested. English fallback remains visible in the shared coverage counter. Word-card provenance and voice coverage are separate from interface coverage.</dd><dt>Unverified</dt><dd>Provider retention, relay privacy, end-to-end chat encryption, live media performance and network anonymity. No measurements are fabricated here.</dd></dl></section>
-<section class="talk" id="talk" data-key="d.plur.talk">
+<section class="talk" id="talk">
   <div class="wrap">
-    <h2 data-key="d.plur.talk.h">now say it back
-      <span class="who" data-key="d.plur.talk.who">bLOVErAi · Ai tutor · two‑way</span>
+    <h2><span data-i18n="d.plur.talk.h">now say it back</span>
+      <span class="who" data-i18n="d.plur.talk.who">bLOVErAi · Ai tutor · two‑way</span>
     </h2>
-    <p class="sub" data-key="d.plur.talk.sub">Pick the tongue you live in and the one you want to learn.
+    <p class="sub" data-i18n="d.plur.talk.sub">Pick the tongue you live in and the one you want to learn.
       Write or speak — the hive answers in both, and every word it gives you can be tapped and heard.
       This is where a stranger stops reading the estate and starts <b>talking</b> to it.</p>
 
@@ -448,36 +449,36 @@
       <button type="button" class="mic" id="mic" title="hold to speak" aria-label="hold to speak">🎙</button>
       <input id="say" type="text" autocomplete="off" spellcheck="false"
              placeholder="write in your tongue, or hold the mic…" aria-label="your message">
-      <button type="button" class="send" id="send" data-key="d.plur.talk.send">send ↑</button>
+      <button type="button" class="send" id="send" data-i18n="d.plur.talk.send">send ↑</button>
     </div>
     <div class="talkst" id="talkst">—</div>
   </div>
 </section>
 
-<section data-reg="cypherpunk" class="stone" data-key="d.plur.stone">
+<section data-reg="cypherpunk" class="stone">
   <div class="wrap">
-    <h2 data-key="d.plur.stone.h">four words are the whole constitution</h2>
-    <p class="sub" data-key="d.plur.stone.sub">Communication is the cornerstone of this estate.
+    <h2 data-i18n="d.plur.stone.h">four words are the whole constitution</h2>
+    <p class="sub" data-i18n="d.plur.stone.sub">Communication is the cornerstone of this estate.
       Every law we have is one of these four words, written down carefully.</p>
     <div class="pillars">
       <div class="pillar p-peace" style="animation-delay:.05s">
         <div class="word">peace</div><div class="is">→ the guard</div>
-        <p data-key="d.plur.stone.peace">A refusal is not an error. The guard that says no, gently, is peace working — which is why it is never painted alarm‑red.</p>
+        <p data-i18n="d.plur.stone.peace">A refusal is not an error. The guard that says no, gently, is peace working — which is why it is never painted alarm‑red.</p>
       </div>
       <div class="pillar p-love" style="animation-delay:.15s">
         <div class="word">love</div><div class="is">→ the LOVErnment</div>
-        <p data-key="d.plur.stone.love">Law written as care. mīlestība ir karalis — love is king — is not the motto of the governance stack; it is its spec.</p>
+        <p data-i18n="d.plur.stone.love">Law written as care. mīlestība ir karalis — love is king — is not the motto of the governance stack; it is its spec.</p>
       </div>
       <div class="pillar p-unity" style="animation-delay:.25s">
         <div class="word">unity</div><div class="is">→ the hive</div>
-        <p data-key="d.plur.stone.unity">Many mouths, one corpus. Twenty‑seven tongues render every key, and one of them is here because a real person asked for her language.</p>
+        <p data-i18n="d.plur.stone.unity">Many mouths, one corpus. Twenty‑seven tongues render every key, and one of them is here because a real person asked for her language.</p>
       </div>
       <div class="pillar p-respect" style="animation-delay:.35s">
         <div class="word">respect</div><div class="is">→ bRESPECT</div>
-        <p data-key="d.plur.stone.respect">Hebrew keeps the secret: respect means weight. Meetings where every voice is given weight — that is the whole mechanism.</p>
+        <p data-i18n="d.plur.stone.respect">Hebrew keeps the secret: respect means weight. Meetings where every voice is given weight — that is the whole mechanism.</p>
       </div>
     </div>
-    <p class="dock" data-key="d.plur.stone.dock">every word on this page lives in the
+    <p class="dock">every word on this page lives in the
       <a href="blanguage.html">language dock</a> · 27 tongues · one corpus ·
       <a href="index.html">back to the hive</a></p>
   </div>

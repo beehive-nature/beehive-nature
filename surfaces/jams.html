@@ -8,6 +8,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="referrer" content="no-referrer">
 <meta name="color-scheme" content="dark">
 <title>SKAISTS mUsiC · PLUR</title>
 <link rel="stylesheet" href="tokens.css">
@@ -178,8 +179,31 @@ import { loadManifest, shortRef } from './manifest-reader.js';
 import { readEncryptedItems } from './store-reader.js';
 const $ = id => document.getElementById(id);
 const query = new URLSearchParams(location.search);
-const manifestUrl = query.get('manifest') ? new URL(query.get('manifest'), location.href) : undefined;
-const storeEndpoint = query.get('store') || '';
+/* Query overrides are a same-origin affordance (local fixtures, tests). A
+   cross-origin manifest or store URL is ignored fail-closed — a crafted link
+   must not be able to paint attacker fields under this branding, light the
+   verified chips for attacker bytes, or turn the verify tap into a beacon. */
+function sameOriginOverride(raw) {
+  if (!raw) return undefined;
+  try {
+    const url = new URL(raw, location.href);
+    return url.origin === location.origin ? url : undefined;
+  } catch { return undefined; }
+}
+const manifestOverride = sameOriginOverride(query.get('manifest'));
+const manifestUrl = manifestOverride;
+const storeOverride = sameOriginOverride(query.get('store'));
+const storeEndpoint = storeOverride ? storeOverride.href : '';
+if ((query.get('manifest') && !manifestOverride) || (query.get('store') && !storeOverride)) {
+  const log = document.getElementById('eventlog');
+  if (log) {
+    const row = document.createElement('div'); row.className = 'event';
+    const k = document.createElement('b'); k.textContent = 'REFUSED';
+    const m = document.createElement('span');
+    m.textContent = 'cross-origin manifest/store override ignored · no room state changed';
+    row.append(k, m); log.prepend(row);
+  }
+}
 const state = { manifest:null, joined:false, anim:null, storeEndpoint };
 const eventlog = $('eventlog');
 function event(kind, message) {

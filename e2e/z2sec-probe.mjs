@@ -38,6 +38,14 @@ const estate = createServer((req, res) => {
     res.setHeader('content-type', 'application/json');
     res.end(JSON.stringify(fakeSessionBody)); return;
   }
+  if (path === '/z2sec-evil-envelope.json') {
+    res.setHeader('content-type', 'application/json');
+    res.end(JSON.stringify(evilEnvelope)); return;
+  }
+  if (path.startsWith('/v1/data/public/')) {
+    res.setHeader('content-type', 'application/json');
+    res.end(JSON.stringify({ data: attackBytes.toString('base64') })); return;
+  }
   if (blockCorpus && path.includes('lang-corpus.json')) { res.statusCode = 404; res.end(); return; }
   try {
     const file0 = resolve(root, '.' + (path.endsWith('/') ? path + 'index.html' : path));
@@ -162,7 +170,7 @@ try {
     await page.waitForTimeout(600);
     const probed = ['d.plur.talk.h', 'd.plur.roses.h', 'd.plur.stone.h', 'd.plur.talk.send'];
     const live = await page.evaluate(keys => keys.map(k => {
-      const el = document.querySelector(`[data-key="${k}"]`);
+      const el = document.querySelector(`[data-i18n="${k}"]`);
       return [k, el ? el.textContent.trim().slice(0, 60) : '(no element)'];
     }), probed);
     for (const [k, text] of live) {
@@ -180,41 +188,44 @@ try {
     await page.close();
   }
 
-  /* ═══ 5. SPOOFING — jams ?manifest= / ?store= cross-origin override ═══ */
+  /* ═══ 5. SPOOFING — S2 HARDENED: cross-origin overrides ignored ═══ */
   {
-    const page = await fresh();
-    await page.goto(`${BASE}/surfaces/jams.html?manifest=${encodeURIComponent(EVIL + '/evil.json')}`, { waitUntil: 'networkidle' });
-    const roomTitle = await page.textContent('#room-title');
-    const creator = await page.textContent('#creator');
-    check('spoofing: jams accepts a cross-origin ?manifest= and paints attacker fields (content spoof proven)',
-      roomTitle.includes('spoofed-room'), `title="${roomTitle}"`);
-    check('spoofing: payload markup in display_name renders as text, no script executes',
-      creator.includes('<img') && !await page.evaluate(() => window.__pwned), `creator="${creator.slice(0, 50)}" pwned=${await page.evaluate(() => !!window.__pwned)}`);
-    await page.click('#verify-store').catch(() => {}); // store not supplied yet: disabled
-    await page.close();
-
-    const page2 = await fresh();
-    await page2.goto(`${BASE}/surfaces/jams.html?manifest=${encodeURIComponent(EVIL + '/evil.json')}&store=${encodeURIComponent(EVIL)}`, { waitUntil: 'networkidle' });
-    await page2.click('#verify-store');
-    await page2.waitForTimeout(800);
-    check('spoofing/privacy: ?store= drives a GET to the attacker origin on verify (beacon vector)',
-      attackerHits.some(u => u.startsWith('/v1/data/public/')), 'hits=' + attackerHits.join(','));
-    const storeStatus = await page2.textContent('#store-status');
-    check('spoofing: attacker who controls BOTH manifest and store passes the hash gate — "verified" chips light for attacker ciphertext',
-      /verified/i.test(storeStatus) && !/refused/i.test(storeStatus), storeStatus);
-    await page2.close();
-
-    /* mismatched hash: integrity gate stays fail-closed for non-matching bytes */
-    evilEnvelope.manifest.encrypted_items[0].ref.sha256 = sha('wrong-bytes');
     attackerHits.length = 0;
-    const page3 = await fresh();
-    await page3.goto(`${BASE}/surfaces/jams.html?manifest=${encodeURIComponent(EVIL + '/evil.json')}&store=${encodeURIComponent(EVIL)}`, { waitUntil: 'networkidle' });
-    await page3.click('#verify-store');
-    await page3.waitForTimeout(800);
-    const storeStatus3 = await page3.textContent('#store-status');
-    check('spoofing: mismatched sha256 refuses the objects (fail-closed integrity gate)',
-      /refused/i.test(storeStatus3), storeStatus3);
-    await page3.close();
+    const page = await fresh();
+    await page.goto(`${BASE}/surfaces/jams.html?manifest=${encodeURIComponent(EVIL + '/evil.json')}&store=${encodeURIComponent(EVIL)}`, { waitUntil: 'networkidle' });
+    const roomTitle = await page.textContent('#room-title');
+    check('S2 hardened: cross-origin ?manifest= ignored — the committed fixture renders',
+      roomTitle.includes('plur'), `title="${roomTitle}"`);
+    check('S2 hardened: no request reached the attacker origin (beacon closed)',
+      attackerHits.length === 0, JSON.stringify(attackerHits));
+    const log = await page.textContent('#eventlog');
+    check('S2 hardened: the refusal is visible in the room log',
+      /cross-origin manifest\/store override ignored/.test(log), log.slice(0, 90));
+    const verifyDisabled = await page.isDisabled('#verify-store');
+    check('S2 hardened: cross-origin ?store= ignored — verify stays disabled',
+      verifyDisabled === true, 'disabled=' + verifyDisabled);
+    const pwned = await page.evaluate(() => !!window.__pwned);
+    check('S2 hardened: no script execution path from the override',
+      pwned === false, 'pwned=' + pwned);
+    await page.close();
+  }
+
+  /* ═══ 5b. S2 — same-origin override stays usable (battery affordance)
+        and the integrity gate still refuses mismatched bytes ═══ */
+  {
+    evilEnvelope.manifest.encrypted_items[0].ref.sha256 = sha('wrong-bytes');
+    const page = await fresh();
+    await page.goto(`${BASE}/surfaces/jams.html?manifest=${encodeURIComponent(BASE + '/z2sec-evil-envelope.json')}&store=${encodeURIComponent(BASE)}`, { waitUntil: 'networkidle' });
+    await page.waitForTimeout(300);
+    const roomTitle = await page.textContent('#room-title');
+    check('S2: same-origin manifest override still loads (store-reader battery affordance intact)',
+      roomTitle.includes('spoofed-room'), `title="${roomTitle}"`);
+    await page.click('#verify-store');
+    await page.waitForTimeout(800);
+    const storeStatus = await page.textContent('#store-status');
+    check('S2: mismatched sha256 still refuses the objects (fail-closed integrity gate)',
+      /refused/i.test(storeStatus), storeStatus);
+    await page.close();
   }
 
   /* ═══ 6. SPOOFING — watch session fields are data, never HTML ═══ */
@@ -230,7 +241,7 @@ try {
     await page.close();
   }
 
-  /* ═══ 7. SPOOFING — localStorage bnr_soul interpolation in rails badge ═══ */
+  /* ═══ 7. S3 HARDENED — bnr_soul escapes before innerHTML ═══ */
   {
     const page = await fresh();
     await page.addInitScript(() => {
@@ -239,8 +250,9 @@ try {
     await page.goto(`${BASE}/surfaces/plur.html`, { waitUntil: 'networkidle' });
     await page.waitForTimeout(900);
     const pwned = await page.evaluate(() => !!window.__pwned);
-    check('spoofing: bnr_soul markup from storage executes in the rails badge (self-XSS, same-origin write required)',
-      pwned === true, `pwned=${pwned} (documented same-origin trust; latent, LOW)`);
+    const badge = await page.textContent('#railsbadge');
+    check('S3 hardened: stored markup in bnr_soul renders escaped, no execution',
+      pwned === false && badge.includes('.b'), `pwned=${pwned} badge="${badge.slice(0, 40)}"`);
     await page.close();
   }
 
@@ -291,7 +303,7 @@ try {
       check(`navigation: ${surf} internal links all resolve`, bad.length === 0, bad.join(','));
       const unguarded = external.filter(l => !(l.rel || '').includes('noopener') && !(l.rel || '').includes('noreferrer'));
       check(`navigation: ${surf} external links carry noopener statically or ride tour.js click-time law`,
-        true, `${external.length} external, ${unguarded.length} rely on delegation (noopener-only, no noreferrer)`);
+        true, `${external.length} external, ${unguarded.length} rely on delegation (noopener+noreferrer added at click)`);
       await page.close();
     }
   }
