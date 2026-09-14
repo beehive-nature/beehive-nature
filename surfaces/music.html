@@ -129,6 +129,36 @@
   .colorlaw .sw.human i { background:var(--human); } .colorlaw .sw.ai i { background:var(--ai); }
   .colorlaw .sw.biomass i { background:var(--biomass); }
 
+  /* ── the source panel — what "listening" honestly means in this room ──
+     A room shell, not a hosted player: Play here exists only when an
+     authorized audio file is attached (see ROOM_SOURCE in the module);
+     external watching always rides a new tab; the empty state says the
+     empty truth instead of implying playback. */
+  .source-panel { margin-top:14px; }
+  .notrack { margin-top:14px; padding:13px; border:1px dashed var(--gold); border-radius:9px;
+    color:var(--dim); font-size:11px; line-height:1.7; }
+  .notrack b { display:block; color:var(--gold); font-size:12px; margin-bottom:3px; }
+  .sources { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; margin-top:14px; }
+  @media(max-width:720px){ .sources { grid-template-columns:1fr; } }
+  .src { padding:12px; border:1px solid var(--line); border-radius:9px; background:var(--well); min-width:0; }
+  .src label { display:block; color:var(--dimmer); font-size:9px; letter-spacing:.14em; text-transform:uppercase; margin-bottom:8px; }
+  .src .row { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+  .src a { color:var(--ai); border-bottom:1px dashed var(--ai); font-size:11px; min-height:44px;
+    display:inline-flex; align-items:center; }
+  .src a:hover { color:var(--human-soft); border-color:var(--human-soft); }
+  .src .none { color:var(--dimmer); font-size:11px; border-bottom:1px dashed var(--line-hi); }
+  .src small { display:block; color:var(--dim); font-size:10px; margin-top:8px; line-height:1.6; }
+  #play-here { padding:9px 14px; color:var(--dim); border:1px dashed var(--line-hi); border-radius:999px;
+    background:transparent; font-size:11px; min-height:38px; }
+  #play-here:disabled { cursor:not-allowed; }
+  #play-here.ready { color:#140B1E; background:var(--biomass); border-style:solid; border-color:var(--biomass); }
+  .artist-note { margin-top:12px; color:var(--dimmer); font-size:10px; line-height:1.7; }
+  .artist-note b { color:var(--biomass); }
+  body[data-reg="raver"] .source-panel { border-color:rgba(201,167,245,.35); }
+  body[data-reg="raver"] #play-here.ready { background:var(--biomass); color:#0A140B; box-shadow:0 6px 24px rgba(134,204,114,.3); }
+  body[data-reg="cypherpunk"] .notrack, body[data-reg="cypherpunk"] .src, body[data-reg="cypherpunk"] .source-panel { border-radius:3px; }
+
+
   footer { width:min(1100px, calc(100% - 32px)); margin:30px auto 0; padding-top:18px; border-top:1px solid var(--line); color:var(--dimmer); font-size:10px; line-height:1.8; }
   footer a { color:var(--dim); }
 
@@ -353,7 +383,7 @@
   <section class="card hero" aria-label="music jam room">
     <div class="room">
       <div class="roomtop"><div><h2 id="room-title">PLUR room</h2><p class="sub" id="room-sub">waiting for a verified checkpoint</p></div><span class="pill" id="room-state">LOCAL PREVIEW</span></div>
-      <canvas id="visualizer" width="900" height="180" aria-label="local music visualizer"></canvas>
+      <canvas id="visualizer" width="900" height="180" aria-label="decorative room pulse — this page plays no audio"></canvas>
       <div class="roomfoot"><small id="room-foot">nothing has been joined yet</small><button class="primary" id="join" type="button" disabled data-i18n="music.join">join this jam</button></div>
     </div>
     <div class="facts" aria-label="room facts">
@@ -364,6 +394,43 @@
       <div class="fact"><label>receiver</label><b>bounded</b></div>
       <div class="fact"><label>store</label><b>read-only</b></div>
     </div>
+  </section>
+
+  <section class="card source-panel" aria-label="how to listen and watch">
+    <div class="card-head">
+      <div><h2 data-i18n="music.sourceTitle">listen · watch</h2>
+      <p class="sub" data-i18n="music.sourceSub">This room is a shell — the context, the credit, the doors. Playback lives where the work lives.</p></div>
+      <span class="pill" id="source-state" data-i18n="music.stateNone">no source attached</span>
+    </div>
+    <div class="notrack" id="no-track">
+      <b data-i18n="music.noTrack">No track is attached to this room yet.</b>
+      <span data-i18n="music.noTrackHelp">Listening today means opening an external source in its own tab, with this room open beside it for the context, the credit and the company.</span>
+    </div>
+    <div class="sources">
+      <div class="src">
+        <label data-i18n="music.playHere">Play here</label>
+        <div class="row"><button id="play-here" type="button" disabled data-i18n="music.playHere">Play here</button></div>
+        <small data-i18n="music.playHereNo">unavailable — no authorized audio file is attached to this room</small>
+      </div>
+      <div class="src">
+        <label data-i18n="music.watchExternal">Watch externally</label>
+        <div class="row">
+          <a href="https://jams.community/" target="_blank" rel="noopener noreferrer">JAMS.community ↗</a>
+          <a href="https://3speak.tv/" target="_blank" rel="noopener noreferrer">3Speak ↗</a>
+          <span class="none" data-i18n="music.youtubeNone">YouTube · no link attached yet</span>
+        </div>
+        <small data-i18n="watch.newTab">Opens in a new tab</small>
+      </div>
+      <div class="src">
+        <label data-i18n="music.waysTitle">Other ways to listen</label>
+        <div class="row">
+          <a href="listening.html">listening room</a>
+          <a href="watch.html">watch together</a>
+          <a href="blight/midiroom.html">bMiDi room</a>
+        </div>
+      </div>
+    </div>
+    <p class="artist-note" data-i18n="music.artistNote">A work joins this room through the shared room manifest — today it carries encrypted references only. The day an authorized audio file rides it, <b>Play here</b> lights up.</p>
   </section>
 
   <div class="colorlaw" aria-label="the BNR color law">
@@ -454,6 +521,34 @@ if ((query.get('manifest') && !manifestOverride) || (query.get('store') && !stor
 }
 const state = { manifest:null, joined:false, anim:null, storeEndpoint };
 const eventlog = $('eventlog');
+/* ── the source seam — the ONE place an artist's work attaches ──────────
+   The room is a shell by design: it never pretends to host or stream a
+   track it does not have. `audio` stays null until an authorized audio
+   file rides the shared manifest (the bounded receiver's lane, not a
+   field anyone may point at any URL); while it is null, Play here stays
+   honestly disabled and the panel says the empty truth. External watching
+   is always a named link in a new tab — never an embed, never a re-host. */
+const ROOM_SOURCE = {
+  audio: null,                       /* { title, url } — authorized file only */
+  external: [
+    { name:'JAMS.community', href:'https://jams.community/' },
+    { name:'3Speak', href:'https://3speak.tv/' },
+  ],
+};
+function renderSourcePanel() {
+  const button = $('play-here'), note = button.closest('.src').querySelector('small');
+  if (ROOM_SOURCE.audio) {
+    button.disabled = false; button.classList.add('ready');
+    button.textContent = T('music.playHere','Play here') + ' — ' + ROOM_SOURCE.audio.title;
+    note.textContent = T('music.playHereReady','authorized audio file · plays from this room');
+    $('source-state').textContent = T('music.stateAttached','source attached');
+    $('no-track').hidden = true;
+  } else {
+    button.disabled = true; button.classList.remove('ready');
+    /* the disabled label and note keep their keyed defaults — the honest state */
+  }
+}
+ROOM_SOURCE.audio = null;            /* explicit: no authorized audio today */
 /* corpus-law helper: script-written labels stay translatable with a visible
    English fallback (same contract as plur.html's bvoice T()) */
 function T(key, fallback) {
@@ -548,7 +643,7 @@ document.addEventListener('blang', () => { syncMotion(); });
 function joinLabel() { $('join').textContent = state.joined ? T('music.leave','leave preview') : T('music.join','join this jam'); }
 $('join').addEventListener('click', () => { if(!state.manifest) return; state.joined=!state.joined; joinLabel(); $('room-foot').textContent=state.joined?'you are in the local room preview · no write was attempted':'nothing has been joined yet'; event(state.joined?'JOIN':'LEAVE',state.joined?'local participant joined; receiver handoff remains pending':'local participant left'); if (document.body.getAttribute('data-reg')==='cypherpunk' && !state.anim) draw(); });
 $('verify-store').addEventListener('click', verifyStore);
-syncMotion(); draw();
+syncMotion(); draw(); renderSourcePanel();
 loadManifest(manifestUrl).then(paint).catch(err => { $('status-dot').className='dot bad'; $('status').textContent='manifest unavailable'; $('status-note').textContent='· '+err.message; $('store-status').textContent='store adapter idle'; event('REFUSED','no room state changed'); });
 </script>
 <script src="tour.js?v=42"></script>
