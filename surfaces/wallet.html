@@ -180,20 +180,20 @@ var WALLET_PROFILE = {
 </nav>
 <header>
   <div class="kicker" data-i18n="wl.kicker">zero storage · zero custody · first-party, adapter-native</div>
-  <h1><span aria-hidden="true">🗝</span> the BNR wallet <span class="h1-arg">— one soul, every chain</span></h1>
-  <p data-reg="bee">One identity, every chain. Your bzDiD is your wallet — connect it once
+  <h1><span aria-hidden="true">🗝</span> the BNR wallet <span class="h1-arg" data-i18n="wl.h1arg">— one soul, every chain</span></h1>
+  <p data-reg="bee" data-i18n="wl.reg.connect.bee">One identity, every chain. Your bzDiD is your wallet — connect it once
   and see your balances across all your chains, sign transactions, and hold your keys.
   Nothing leaves your browser.</p>
-  <p data-reg="raver">the multi-chain wallet — bzDiD soul connects, keyless reads show every
+  <p data-reg="raver" data-i18n="wl.reg.connect.raver">the multi-chain wallet — bzDiD soul connects, keyless reads show every
   balance, derived keys sign. First-party, adapter-native, zero custody.</p>
-  <p data-reg="cypherpunk">bzDiD masterPRK → near-infinite per-context derived keys
+  <p data-reg="cypherpunk" data-i18n="wl.reg.connect.cypher">bzDiD masterPRK → near-infinite per-context derived keys
   (secp256k1 for Vaulta AND 0x/EVM, ed25519 for bzDiD rails) → client-side eosjs serialization +
   signed here → sent onward via a public door. Your keys stay in this tab's memory — nothing saved, nothing held for you.
   New accounts are forged bzDiD-native — no exports, no imports, no manual keys, ever.</p>
 </header>
 
 <section style="border-color:var(--gold)">
-  <h2>🔗 CONNECT — your bzDiD is the wallet</h2>
+  <h2>🔗 CONNECT — <span data-i18n="wl.h.connect">your bzDiD is the wallet</span></h2>
   <div class="law">Connect your soul (your .b name or account). New here?
   <a href="./onboarding/">Create your bzDiD</a> — the held-hand ceremony takes 2 minutes.</div>
   <div class="row">
@@ -204,7 +204,7 @@ var WALLET_PROFILE = {
 </section>
 
 <section id="kc-sec">
-  <h2>🗝 THE KEYCHAIN — your bzDiD holds every key</h2>
+  <h2>🗝 THE KEYCHAIN — <span data-i18n="wl.h.keychain">your bzDiD holds every key</span></h2>
   <div class="law"><b>Automatic:</b> your first tap or keypress anywhere on this page connects the
   keychain by itself (the WebAuthn ceremony needs one touch of yours — browsers' law, not ours).
   The PRF ceremony re-derives your <b>masterPRK</b> in this tab's memory (never stored, never
@@ -323,7 +323,7 @@ var WALLET_PROFILE = {
 </section>
 
 <section id="vault-sec" style="border-color:var(--cyan)">
-  <h2>🔐 THE VAULT — one keypass, every secret</h2>
+  <h2>🔐 THE VAULT — <span data-i18n="wl.h.vault">one keypass, every secret</span></h2>
   <div class="law">The keys you already hold — <b>seed phrases</b> from any wallet
   (12 · 15 · 18 · 21 · 24 words) and <b>Vaulta ACTIVE private keys</b>
   (5K… · L… · K… · PVT_K1_…) — sealed under a single <b>keypass</b> so you never handle
@@ -468,7 +468,7 @@ var WALLET_PROFILE = {
 </section>
 
 <section id="forge-sec">
-  <h2>♾ THE KEY FORGE — near infinite keys, one soul</h2>
+  <h2>♾ THE KEY FORGE — <span data-i18n="wl.h.forge">near infinite keys, one soul</span></h2>
   <div class="law">Every context derives its own key from your masterPRK: <b>vaulta:names</b> for
   Vaulta account keys, <b>evm:names</b> for 0x addresses, any adapter context you can name.
   Derivation is instant, free, deterministic — the same context always yields the same key on
@@ -488,7 +488,7 @@ var WALLET_PROFILE = {
 </section>
 
 <section>
-  <h2>⚡ BALANCES — every chain, keyless, live</h2>
+  <h2>⚡ BALANCES — <span data-i18n="wl.h.balances">every chain, keyless, live</span></h2>
   <div class="law">Read from public RPCs in your browser. Nothing stored, nothing sent.
   The chain is the source of truth.</div>
   <div class="chains" id="chains">
@@ -548,7 +548,7 @@ var WALLET_PROFILE = {
 </section>
 
 <section id="acct-sec" style="border-color:#2c4a5a">
-  <h2>🏭 THE ACCOUNT FORGE — Vaulta accounts born from your bzDiD</h2>
+  <h2>🏭 THE ACCOUNT FORGE — <span data-i18n="wl.h.acctforge">Vaulta accounts born from your bzDiD</span></h2>
   <div class="law">Your <b>bridged</b> account signs <b>newaccount</b>; the new account's owner and
   active keys derive from your bzDiD (contexts <b>vaulta:&#8203;name/owner</b> and
   <b>vaulta:&#8203;name/active</b>) — no key is exported, written down, or imported, ever.
@@ -567,7 +567,7 @@ var WALLET_PROFILE = {
   <pre id="ac-out" style="display:none"></pre>
 </section>
 <section id="pay-sec" style="border-color:#3a5a2c">
-  <h2>💸 PAY — send · receive · swap</h2>
+  <h2>💸 PAY — <span data-i18n="wl.h.pay">send · receive · swap</span></h2>
   <div class="row" style="margin-top:8px">
     <button id="pay-rx" class="gold">📥 receive</button>
     <button id="pay-tx" class="gold">📤 send</button>
@@ -737,13 +737,13 @@ var WALLET_PROFILE = {
 <!-- ══ THE VOUCHER — prepaid compute, the money engine with a face ══ -->
 <section id="voucher-sec" style="border-color:#2c4a3a">
   <h2>🎟 <span data-i18n="wl.vh2">THE VOUCHER — prepay compute, metered fair</span></h2>
-  <p data-reg="bee">Prepay for compute work — models, vRAM, whatever the estate meters —
+  <p data-reg="bee" data-i18n="wl.reg.voucher.bee">Prepay for compute work — models, vRAM, whatever the estate meters —
   and watch every last drop of it itemized here. Top up from either chain, spend at metered
   rates, and the estate's 10% tithe is always visible, never buried.</p>
-  <p data-reg="raver">Two rails in, one A balance, receipts with the tithe line — the same
+  <p data-reg="raver" data-i18n="wl.reg.voucher.raver">Two rails in, one A balance, receipts with the tithe line — the same
   hash-chained ledger the till meters with, rendered live from the estate oracle
   (skaists.buzz). Refusals read as sentences, not codes.</p>
-  <p data-reg="cypherpunk">voucher_escrow semantics, live: balances DERIVED from a
+  <p data-reg="cypherpunk" data-i18n="wl.reg.voucher.cypher">voucher_escrow semantics, live: balances DERIVED from a
   hash-chained append-only event log (never stored), refuse-before-write enforced at the
   engine, memo-native binding on the A rail (memo = meter key, no binding table), binding
   table on the USDC rail, every deposit cites its tx. This panel is a read-only view over
@@ -808,7 +808,7 @@ var WALLET_PROFILE = {
 
 <!-- ══ RECEIPTS — the public spend record, recomputed here (SPEC-SPEND-RECEIPT-1) ══ -->
 <section id="receipts-sec" style="border-color:var(--gold)">
-  <h2>🧾 THE RECEIPTS — every bill recomputed here</h2>
+  <h2>🧾 THE RECEIPTS — <span data-i18n="wl.h.receipts">every bill recomputed here</span></h2>
   <p class="law">the voucher panel above reads <b>your</b> balance live from the estate oracle; this panel
   reads the estate's <b>public</b> spend-receipt record (SPEC-SPEND-RECEIPT-1, the same shape the b-meter
   writes) and recomputes every bill in-page — <b>price × burned = owed</b>, summed from the line items,
@@ -842,7 +842,7 @@ var WALLET_PROFILE = {
      padding:10px 12px;font-size:11px;margin-top:10px;line-height:1.8}
     @media (prefers-reduced-motion: reduce){#fund-sec .fund-coin{animation:none}}
   </style>
-  <h2>💳 FUND — buy USDC, land it on an address you hold</h2>
+  <h2>💳 FUND — <span data-i18n="wl.h.fund">buy USDC, land it on an address you hold</span></h2>
   <div class="law">The one lane this wallet cannot forge itself: licensed fiat. The buy runs on
   <b>Meld's hosted checkout</b> — it opens in its own tab; this page only builds the link.
   <b>No server of ours:</b> no BNR endpoint sits in this lane; this wallet signs nothing and
@@ -1121,7 +1121,7 @@ var WALLET_PROFILE = {
 
 <!-- ══ PEER FUNNEL — the first mile in: fiat → USDC on Peer's escrow, estate = bare to ══ -->
 <section id="peer-sec" style="border-color:#2c4a3a">
-  <h2>🏧 FIAT IN — the Peer funnel (SPEC-PEER-FUNNEL-1)</h2>
+  <h2>🏧 FIAT IN — <span data-i18n="wl.h.fiat">the Peer funnel</span> (SPEC-PEER-FUNNEL-1)</h2>
   <p class="law">the estate is a <b>seller, not an operator</b>: its Base address below is a bare
   <b>to</b> on Peer's live escrow (EscrowV2 + OrchestratorV3 on Base) — it signs nothing, grants
   no allowance, runs no relayer. a customer's fiat (Venmo &amp; co.) settles as USDC straight
@@ -1258,7 +1258,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
 
 <!-- ══ ARWEAVE — publish & anchor (first-party signer · vault custody) ══ -->
 <section id="arw-sec" style="border-color:#4a3a1d">
-  <h2>📡 ARWEAVE — publish &amp; anchor, no middleman</h2>
+  <h2>📡 ARWEAVE — <span data-i18n="wl.h.arweave">publish &amp; anchor, no middleman</span></h2>
   <div class="law">Another adapter on the wallet shell — balance, receive address, send, and
   one new capability: <b>PUBLISH</b>. The transaction is built and signed <b>in this page</b>
   with WebCrypto (format-2 data tx, RSA-PSS-SHA256, proven byte-equivalent to arweave-js),
@@ -1403,7 +1403,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
 </section>
 
 <section>
-  <h2>✍ COMPOSER — the BNR contract surface, no Unicove</h2>
+  <h2>✍ COMPOSER — <span data-i18n="wl.h.composer">the BNR contract surface, no Unicove</span></h2>
   <div class="law" id="sign-law">Give it contract + action and it fetches the live ABI, renders
   one field per argument, and <b>shows you exactly what you will sign</b> — action, authorization,
   parsed args, signer, endpoint — before anything broadcasts. ABI-driven: the six bnames actions
@@ -1469,7 +1469,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
 </section>
 
 <section>
-  <h2>📤 OUTBOX — signed bytes persist here BEFORE they submit</h2>
+  <h2>📤 OUTBOX — <span data-i18n="wl.h.outbox">signed bytes persist here BEFORE they submit</span></h2>
   <div class="law">The order is law: <b>build → sign → persist → submit → confirm by reading the
   rail</b>. A retry resubmits the identical stored bytes — it never re-signs, never rebuilds.
   Nothing shows "sent" until a block read says so; the receipt names what was read.</div>
@@ -1477,7 +1477,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
 </section>
 
 <section>
-  <h2>🗺 CHAIN MATRIX — the sixteen rails, from data</h2>
+  <h2>🗺 CHAIN MATRIX — <span data-i18n="wl.h.matrix">the sixteen rails, from data</span></h2>
   <div class="law">Every rail the wallet will ever owe you, one row each: <b>how it's read</b>
   (first-party path first), <b>how it's signed</b> (custody tier), and <b>tonight's honest state</b>.
   Rendered from the data block below the fold — never typed prose — and every count you see is
@@ -1488,7 +1488,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
 </section>
 
 <section>
-  <h2>📊 SUMMARY</h2>
+  <h2>📊 <span data-i18n="wl.h.summary">SUMMARY</span></h2>
   <div class="readout">
     <div class="rd"><div class="k">SOUL</div><div class="v" id="sum-soul" style="font-size:13px">—</div></div>
     <div class="rd"><div class="k">CHAINS CONNECTED</div><div class="v" id="sum-chains">0</div></div>
