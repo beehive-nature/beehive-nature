@@ -326,6 +326,14 @@ jobs:
         if: always()
         working-directory: e2e
         run: node polish-i18n.mjs
+      # The orb seat (founder order 2026-09-13): on phones the agent-dock orb
+      # rides reserved chrome rows instead of floating over content — wallet’s
+      # U0001F41C ANT card was 87% covered at first paint. Proofs: seat opens from
+      # every seat, desktop float untouched, rotate both ways.
+      - name: Orb — mobile seat regression (no content covered)
+        if: always()
+        working-directory: e2e
+        run: node --test orb-seat.test.mjs
       # fleet-pixels: every chart-bearing hosted surface must DRAW (pixels
       # read back from the canvas, not merely load). fleet-bus: the
       # localStorage data bus asserted both directions (same origin reads;

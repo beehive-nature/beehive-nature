@@ -52,6 +52,16 @@ The gallery #73 pattern extended to the two real dead-ends the sweep found:
 
 estate-source 11/11 · polish-i18n 25/25 · plur-views PASS · watch-manifest 29/29 · front-door battery 103/103 · no-page-errors 103 surfaces / 0 errors · university smoke 87/0 · coverage selftest PASS · floors PASS (×2 runs) · estate-check PASS · lint-ci-shape 45/45 · live-regression 50/50.
 
+## 5 · The orb order (2026-09-13, later) — the AI icon was covering the ANT card
+
+Founder order: check and repair the entire mobile UI where the agent-dock orb (bottom-left AI icon) covers visible content. NEW TOOL `e2e/orb-coverage.mjs` measured every LIVE surface at 390×844 (top + bottom scroll, candidates clipped to the viewport, reserved chrome rows excluded, three instrument false-positive classes taught out: unclipped containers, the bar’s own row, the orb’s ancestors). Receipt: `e2e/orb-coverage-2026-09-13.json`.
+
+**Found:** the founder’s case exactly — wallet’s chain-matrix 🐜 Autonomi ANT card 87% covered at first paint; royalguard’s 🐜 treasuries card 73%; footers and fold content under the orb on 15 of the 16 orb-mounted pages (the orb only mounts on pages that include agent-dock.js — 16 of 104).
+
+**Repair — THE MOBILE SEAT:** on phones (≤520px) the orb stops floating over the content column and rides reserved chrome: the fixed tour bar’s row as its first item (14 pages, geometry inline, register colors kept), or the directory’s visible summary row on inline-host pages (hub, profile — a float there leaked into following content; the seat is inline-block, contained), with the register bar and a reserved right-float as fallbacks. fitDock reserves scroll-end room when floating. Desktop (>520px) keeps the classic bottom-left float untouched. Seating is wrapped fail-safe — any DOM surprise falls back to the float; it can never break the dock (the agent-dock harness learned the child combinator; 27/27).
+
+**Proofs:** `e2e/orb-seat.test.mjs` 4/4 (CI-wired): opens from every seat, ANT card on screen at 0% overlap, desktop float byte-stable, rotate both ways. Re-sweep: no real coverage on any of 104 surfaces — two residuals (hub/profile) are verified box-brush between adjacent rows, nothing visually under the orb (shots `orb-seat-hub/profile-390.png`; the founder case itself receipted in `wallet-ant-uncovered-390.png`). no-page-errors 104/0.
+
 ## Flags
 
 - privacy-lens measured 0 keyed in the doc regeneration pass — its JS-rendered rows race even the settle window; untouched by this lane, floor not enforced, observed and recorded.
