@@ -163,6 +163,13 @@ jobs:
       - name: AV-4 handle unlinkability battery
         if: always()
         run: python3 scripts/buzz-meter/test_av4_handle_unlinkability.py
+      # AV-11 human-gas surface audit (zCode, 2026-09-16, P1): every rail
+      # classified first-line/last-line, every first-line gas surface
+      # REGISTERED with its R5 remediation, no stale ledger entries — and
+      # the future-rail detector fails on any unregistered human-gas surface
+      - name: AV-11 human-gas surface audit
+        if: always()
+        run: node scripts/audit-human-gas.mjs
       # PEER FUNNEL testnet runner selftest (z3.3 Order C, 2026-09-05): the
       # one-broadcast tool cannot rot — keccak + EIP-155 RLP hash vectors and
       # the sign/recover roundtrip proven every push (key parts skip cleanly
