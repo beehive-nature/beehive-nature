@@ -841,3 +841,106 @@ fixture builder; zero network; live NWC `#[ignore]`.
 
 *Eleventh roll, 2026-09-16. Single-writer discipline stands. Pipeline law unchanged: builder
 proves RED, fixes GREEN, CI arbitrates; zArcheology designs tests only.*
+
+---
+
+## TWELFTH ROLL — delegated authority (2026-09-16)
+
+*Founder law for this roll, verbatim: "a child authorization may only reduce its parent's
+authority; it may never amplify, reinterpret, refresh, or escape it." Completes the authority
+model: MP→RB→AB→RV govern ONE authorization; DG governs authority that begets narrower
+authority. Estate ancestors: the capability crate's exclusive allocation (UCAN-shaped) and the
+corpus Capability law — "a parent capability can allocate a budget to child capabilities only
+through an exclusive reservation/state update. Each child does not inherit the full unspent
+parent budget" (SILENTPAY-V2 §5); "Delegation allocates rather than duplicates budgets"
+(corpus AGENTS.md). RV's tri-state is PRESERVED THROUGHOUT: never-authorized /
+authorized-but-later-reduced / historically-qualified-before-reduction must stay distinct at
+every hop — collapsing them recreates exactly the history-rewriting RV eliminated.*
+
+### SPEC DG — the child is the intersection, never an extension (RED-first)
+
+| # | case | exact pass criterion | fail criterion |
+|---|---|---|---|
+| DG-0 | the delegation object (mechanism) | a child authorization is ITSELF a full AB-law signed authorization PLUS a cryptographic ancestry chain: the child's signature covers its own AB binding AND the parent authorization id + lineage proof; append-only; the parent's record byte-identical on delegation | in-place parent mutation; unsigned ancestry |
+| DG-1a | amount/fee ceilings | child ceiling ≤ parent REMAINING (exclusive reservation — allocation, not duplication); Σ children ≤ parent total | child exceeding, or siblings double-allocating |
+| DG-1b | expiry | child expiry ≤ parent expiry, always | child outliving parent |
+| DG-1c | rail capabilities | child's demanded capability set ⊆ parent's authorized set | child demanding what the parent lacks |
+| DG-1d | destinations/actions | child's allowed set ⊆ parent's | widening |
+| DG-1e | implementation binding | child's manifest hash+version+impl identity == the parent's — a child CANNOT re-bind a newer manifest (RB/AB composed); the only road to h2 is a new root authorization | child binding h2 under an h1 parent |
+| DG-1f | privacy scope | privacy only STRENGTHENS downward: a child may not weaken below the parent's privacy floor (a private parent cannot delegate a public child; public→private is lawful reduction) | privacy downgrade through delegation |
+| DG-2 | delegation after parent revocation/exhaustion | refused typed, carrying the parent's RV tri-state; after partial exhaustion only if parent-remaining ≥ child ask | delegation from dead/exhausted authority |
+| DG-3 | parent revocation while child UNKNOWN or `Settling` | RV-2/3 composed through the chain: child Unknown resolves by EVIDENCE (historically-qualified-before-reduction stands); child Settling runs to evidence; NO new child work; propagation terminates all descendants' future authority without rewriting settled evidence | revocation cascading as history rewrite; or failing to propagate |
+| DG-4 | child newer-manifest trap | (DG-1e's head-on case) child binding a manifest newer than the parent's → typed refusal naming the axis | capability refresh through delegation |
+| DG-5a | chain laundering A→B→C | C's effective authority = A ∩ B ∩ C computed from the SIGNED ANCESTRY at verification — a chain locally lawful at each hop but escaping the root (B re-declares broader than A gave, C narrows from B's inflation) FAILS against A | hop-local checks accepting a composed escape |
+| DG-5b | no budget reset at hops | cumulative consumption across the chain counts against the ROOT ceiling — B's spending never "refreshes" on delegating to C | refresh at hop |
+| DG-5c | no expiry reset | C's effective expiry = chain-min | expiry extension through hops |
+| DG-5d | revoking B mid-chain | B→C future authority terminates; C's already-qualified historical evidence survives byte-exact | C's settled history rewritten by B's revocation |
+| DG-6 | cross-rail delegation | an EVM-authorized parent cannot manufacture LN child authority (nor vice versa) merely because the unified trait supports both — rail is within the parent's authorized set (DG-1c specialized); negative control: a rail-widening child construction DETECTED | rail widening through the unified trait |
+| DG-7 | ancestry without an identity graph (R4) | verifying lineage requires ONLY the authorization-id chain — zero agent-identity data; receipts/logs carry no joinable persona graph across rails or hops (door law-6 hygiene at every level) | delegation becoming a wallet-global identity graph |
+| DG-8 | recovery laws continue | crash/restart: child obligations recover under their own AB/RB laws — evidence resolves already-open child obligations; recovery NEVER mints replacement child authority (the journal cannot fabricate a delegation event — DG-0's signed ancestry); Unknown child + revoked parent → RV-2 applies through the chain | recovery minting child authority |
+| DG-9 | tri-state preserved through delegation | every child-leg outcome distinguishes never-authorized (broken chain/signature) / authorized-then-reduced (self or ancestor revoked) / historically-qualified-before-reduction (evidence stands) — three fixtures × chain shape | any collapse between the three |
+| DG-10 | negative controls | amplification on ANY axis detected; hop-local-lawful chain-unlawful detected (the laundering detector); budget/expiry reset detected; rail-widening detected; identity-graph leakage detected | harness blind on any axis |
+
+**RED expectations:** no signed child-authorization with cryptographic ancestry exists in the
+unified types (the capability crate allocates but does not chain signed delegations) — DG-0 is
+the charter RED; DG-5a (chain-intersection verification) and DG-9 follow. **Harness:** the
+AB/RB fixture set extended with a chain builder (root→child→grandchild signers), per-axis
+violation fixtures, rail-pair (EVM root, LN child) — zero network; live NWC `#[ignore]`.
+
+*Twelfth roll, 2026-09-16. **FOUNDER STOP-DIRECTIVE RECORDED: after DG the abstract authority
+model PAUSES** — a builder consumes MP→RB→AB→RV→DG against the actual signed
+authorization/journal types before any further authority specification, or the spec outruns
+the implementation. Single-writer discipline stands. Pipeline law unchanged: builder proves
+RED, fixes GREEN, CI arbitrates; zArcheology designs tests only.*
+
+---
+
+## TWELFTH ROLL — delegated authority (2026-09-16)
+
+*Founder law for this roll, verbatim: "a child authorization may only reduce its parent's
+authority; it may never amplify, reinterpret, refresh, or escape it." Completes the authority
+model: MP/RB/AB/RV govern ONE authorization; DG governs authority that begets narrower
+authority. Estate ancestors: the capability crate's exclusive allocation (UCAN-shaped) and the
+corpus Capability law — "a parent capability can allocate a budget to child capabilities only
+through an exclusive reservation/state update. Each child does not inherit the full unspent
+parent budget" (SILENTPAY-V2 §5); "Delegation allocates rather than duplicates budgets"
+(corpus AGENTS.md). RV's tri-state is PRESERVED THROUGHOUT: never-authorized /
+authorized-but-later-reduced / historically-qualified-before-reduction stay distinct at every
+hop — collapsing them recreates exactly the history-rewriting RV eliminated.*
+
+### SPEC DG — the child is the intersection, never an extension (RED-first)
+
+| # | case | exact pass criterion | fail criterion |
+|---|---|---|---|
+| DG-0 | the delegation object (mechanism) | a child authorization is ITSELF a full AB-law signed authorization PLUS a cryptographic ancestry chain: the child's signature covers its own AB binding AND the parent authorization id + lineage proof; append-only; the parent's record byte-identical on delegation | in-place parent mutation; unsigned ancestry |
+| DG-1a | amount/fee ceilings | child ceiling <= parent REMAINING (exclusive reservation — allocation, not duplication); sum of children <= parent total | child exceeding, or siblings double-allocating |
+| DG-1b | expiry | child expiry <= parent expiry, always | child outliving parent |
+| DG-1c | rail capabilities | child's demanded capability set is a SUBSET of the parent's authorized set | child demanding what the parent lacks |
+| DG-1d | destinations/actions | child's allowed set is a subset of the parent's | widening |
+| DG-1e | implementation binding | child's manifest hash+version+impl identity EQUALS the parent's — a child CANNOT re-bind a newer manifest (RB/AB composed); the only road to a newer manifest is a new root authorization | child binding h2 under an h1 parent |
+| DG-1f | privacy scope | privacy only STRENGTHENS downward: a child may not weaken below the parent's privacy floor (a private parent cannot delegate a public child; public-to-private is lawful reduction) | privacy downgrade through delegation |
+| DG-2 | delegation after parent revocation/exhaustion | refused typed, carrying the parent's RV tri-state; after partial exhaustion only if parent-remaining covers the child ask | delegation from dead or exhausted authority |
+| DG-3 | parent revocation while child UNKNOWN or Settling | RV-2/3 composed through the chain: child Unknown resolves by EVIDENCE (historically-qualified-before-reduction stands); child Settling runs to evidence; NO new child work; propagation terminates all descendants' future authority without rewriting settled evidence | revocation cascading as history rewrite; or failing to propagate |
+| DG-4 | child newer-manifest trap | DG-1e head-on: child binding a manifest newer than the parent's is a typed refusal naming the axis | capability refresh through delegation |
+| DG-5a | chain laundering A->B->C | C's effective authority = A INTERSECT B INTERSECT C, computed from the SIGNED ANCESTRY at verification — a chain locally lawful at each hop but escaping the root (B re-declares broader than A gave, C narrows from B's inflation) FAILS against A | hop-local checks accepting a composed escape |
+| DG-5b | no budget reset at hops | cumulative consumption across the chain counts against the ROOT ceiling — B's spending never refreshes on delegating to C | refresh at hop |
+| DG-5c | no expiry reset | C's effective expiry = chain-minimum | expiry extension through hops |
+| DG-5d | revoking B mid-chain | B->C future authority terminates; C's already-qualified historical evidence survives byte-exact | C's settled history rewritten by B's revocation |
+| DG-6 | cross-rail delegation | an EVM-authorized parent cannot manufacture LN child authority (nor vice versa) merely because the unified trait supports both — the child's rail must sit inside the parent's authorized rail set; negative control: a rail-widening child construction DETECTED | rail widening through the unified trait |
+| DG-7 | ancestry without an identity graph (R4) | verifying lineage requires ONLY the authorization-id chain — zero agent-identity data; receipts/logs carry no joinable persona graph across rails or hops (door law-6 hygiene at every level) | delegation becoming a wallet-global identity graph |
+| DG-8 | recovery laws continue | crash/restart: child obligations recover under their own AB/RB laws — evidence resolves already-open child obligations; recovery NEVER mints replacement child authority (the journal cannot fabricate a delegation event — DG-0's signed ancestry); Unknown child + revoked parent -> RV-2 applies through the chain | recovery minting child authority |
+| DG-9 | tri-state preserved through delegation | every child-leg outcome distinguishes never-authorized (broken chain/signature) / authorized-then-reduced (self or ancestor revoked) / historically-qualified-before-reduction (evidence stands) — three fixtures across chain shapes | any collapse between the three |
+| DG-10 | negative controls | amplification on ANY axis detected; hop-local-lawful chain-unlawful detected (the laundering detector); budget/expiry reset detected; rail-widening detected; identity-graph leakage detected | harness blind on any axis |
+
+**RED expectations:** no signed child-authorization with cryptographic ancestry exists in the
+unified types (the capability crate allocates but does not chain signed delegations) — DG-0 is
+the charter RED; DG-5a (chain-intersection verification) and DG-9 follow. **Harness:** the
+AB/RB fixture set extended with a chain builder (root/child/grandchild signers), per-axis
+violation fixtures, rail pair (EVM root, LN child) — zero network; live NWC stays ignored and
+env-gated.
+
+*Twelfth roll, 2026-09-16. FOUNDER STOP-DIRECTIVE RECORDED: after DG the abstract authority
+model PAUSES — a builder consumes MP/RB/AB/RV/DG against the actual signed authorization and
+journal types before any further authority specification, or the spec outruns the
+implementation. Single-writer discipline stands. Pipeline law unchanged: builder proves RED,
+fixes GREEN, CI arbitrates; zArcheology designs tests only.*
