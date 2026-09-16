@@ -192,6 +192,11 @@ pub struct Escrow {
     /// of the stored line. `verify_chain` reads only from here, so no
     /// serialiser ever gets a second opinion about what was written.
     bodies: Vec<String>,
+    /// AV-2: conversion quote ids that already credited a deposit. Rebuilt
+    /// by `from_jsonl` from the stored events (the ledger IS the nonce set —
+    /// the same law as the python engine's settle nonces), so single-use
+    /// survives reloads.
+    consumed_quotes: std::collections::HashSet<String>,
 }
 
 impl Escrow {
@@ -366,6 +371,13 @@ impl Escrow {
             };
             let prev_parsed = field("prev")?;
             let hash_parsed = field("hash")?;
+            // AV-2: capture before the move below — the consumed-quote
+            // rebuild reads the same parsed object.
+            let ev_type = obj.get("type").and_then(|v| v.as_str()).map(str::to_string);
+            let quote_id = obj
+                .get("quote_id")
+                .and_then(|v| v.as_str())
+                .map(str::to_string);
 
             let mut body = line.to_string();
             let prev_cut = cut_string_field(&mut body, "prev");
@@ -380,6 +392,13 @@ impl Escrow {
             }
             es.events.push(parsed);
             es.bodies.push(body);
+            // AV-2: the stored event IS the durable nonce record — any
+            // DEPOSIT carrying a quote_id has consumed it.
+            if ev_type.as_deref() == Some("DEPOSIT") {
+                if let Some(id) = quote_id {
+                    es.consumed_quotes.insert(id);
+                }
+            }
         }
         Ok(es)
     }
@@ -490,6 +509,26 @@ impl Escrow {
         if base_tx.is_empty() {
             return Err(VoucherError::MissingRef("a base_tx reference"));
         }
+        // Single use FIRST — independent of staleness (SPEC AV-2 2.4): a
+        // burned id refuses even a fresh-looking resubmission.
+        if self.consumed_quotes.contains(&quote.id) {
+            return Err(VoucherError::QuoteReplay(quote.id.clone()));
+        }
+        // Staleness with an INCLUSIVE boundary (2.2/2.3). A future-dated
+        // quote is malformed, not fresh — same typed refusal (2.2b).
+        if quote.quoted_at > ts {
+            return Err(VoucherError::StaleQuote {
+                age_secs: quote.quoted_at - ts,
+                ttl_secs: QUOTE_TTL_SECS,
+            });
+        }
+        let age = ts - quote.quoted_at;
+        if age >= QUOTE_TTL_SECS {
+            return Err(VoucherError::StaleQuote {
+                age_secs: age,
+                ttl_secs: QUOTE_TTL_SECS,
+            });
+        }
         let rate_fp8 = quote.rate_fp8;
         let rate_ref = quote.rate_ref.as_str();
         // usdc(1e-6) × rate(1e-8) = A at 1e-14 → quatch (1e-4) with half-up
@@ -510,7 +549,10 @@ impl Escrow {
         body.insert("rate_ref".into(), json!(rate_ref));
         body.insert("quote_id".into(), json!(quote.id));
         body.insert("quote_ts".into(), json!(quote.quoted_at));
-        Ok(self.append(body))
+        let ev = self.append(body);
+        // Burn the id only after the append succeeded — refusals never burn.
+        self.consumed_quotes.insert(quote.id.clone());
+        Ok(ev)
     }
 
     /// Meter usage against the voucher; refuses BEFORE writing if the total

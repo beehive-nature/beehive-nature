@@ -2,7 +2,7 @@
 //! `scripts/buzz-meter/test_voucher_escrow.py`. Same laws, same numbers —
 //! the Rust core must agree with the Python engine on every claim.
 
-use voucher_escrow::{Escrow, RateSet, VoucherError};
+use voucher_escrow::{ConversionQuote, Escrow, RateSet, VoucherError};
 
 const Q: u128 = 10_000; // 1.0000 A in quatch
 const IN_RATE: u128 = 200; // 0.000002 A/token  (fp8)

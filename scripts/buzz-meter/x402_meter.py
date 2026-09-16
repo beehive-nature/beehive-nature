@@ -95,6 +95,58 @@ class RefusedQuote(VoucherError):
     for an offer that cannot be served)."""
 
 
+class StaleRateSet(VoucherError):
+    """AV-2 2.5: the serve-side rate book's minted_at attestation is older
+    than the TTL (INCLUSIVE boundary — fail closed) or dated in the future.
+    New sessions refuse; a charge is never derived from a stale rate set."""
+
+
+# ── 0b · rate-set freshness — serve-side mirror of the AV-2 quote TTL ───────
+
+# Fail-closed default 300s per the spec's suggestion. THE NUMBER IS A
+# FOUNDER RULING (the law decision gates the constant, never the tests).
+RATE_SET_TTL_S = 300.0
+
+
+def rate_set_in_force(minted_at: float | None, now: float,
+                      ttl_s: float = RATE_SET_TTL_S) -> None:
+    """The serve bridge loads `rate_set.json`, whose `minted_at` is the
+    operator's freshness attestation for the whole rate book.
+
+    Law (SPEC AV-2 2.5, docs/agents/ADVERSARIAL-BPAY-SPECS.md):
+    - present and stale (`now - minted_at >= ttl_s`, INCLUSIVE) refuses
+      typed; present and future-dated refuses typed (malformed, not fresh);
+    - ABSENT attestation (None) passes: the file is founder-operated and
+      carries no attestation until the serve bridge is taught to require
+      one — unjudgeable, not refused. The serve bridge SHOULD pass the
+      parsed minted_at; see rate_set_minted_at_epoch.
+    """
+    if minted_at is None:
+        return
+    if minted_at > now:
+        raise StaleRateSet(
+            "rate_set minted_at is dated in the future — malformed, refusing")
+    age = now - minted_at
+    if age >= ttl_s:
+        raise StaleRateSet(
+            f"rate_set minted {int(age)}s ago >= TTL {int(ttl_s)}s — refresh "
+            "rate_set.json (inclusive boundary, fail closed)")
+
+
+def rate_set_minted_at_epoch(raw: dict) -> float | None:
+    """Parse rate_set.json's `minted_at` (ISO-8601, Z-suffixed) to epoch
+    seconds. None when absent or unparseable — unjudgeable, see
+    rate_set_in_force."""
+    s = raw.get("minted_at")
+    if not s or not isinstance(s, str):
+        return None
+    try:
+        import datetime as _dt
+        return _dt.datetime.fromisoformat(s.replace("Z", "+00:00")).timestamp()
+    except ValueError:
+        return None
+
+
 # ── 1 · credit-from-settlement ──────────────────────────────────────────────
 
 def credit_from_settlement(escrow: Escrow, voucher: str, declared: dict,
@@ -215,8 +267,16 @@ class Session:
     credits: Decimal = Decimal("0")        # metered seconds this session
     # infra retry book (the infra halt's 2-consecutive law)
     settle_failures: int = 0
+    # AV-2 2.5: the rate book's minted_at attestation (epoch seconds) this
+    # session prices against. None = unjudgeable (older constructions); the
+    # serve bridge passes rate_set_minted_at_epoch(load_rate_set()).
+    rate_set_minted_at: float | None = None
 
-    def open(self) -> "Session":
+    def open(self, now: float | None = None) -> "Session":
+        # New sessions refuse on a stale rate book BEFORE any state moves —
+        # charging derived from a stale file never gets a session to live in.
+        rate_set_in_force(self.rate_set_minted_at,
+                          time.time() if now is None else now)
         if self.state != "OPENING":
             raise VoucherError(f"cannot open from {self.state}")
         self.state = "ACTIVE"
@@ -225,10 +285,15 @@ class Session:
     def _per_second(self) -> Decimal:
         return self.rate_set.rate(self.resource)
 
-    def burn(self, seconds: Decimal | int | str) -> tuple[Decimal, str]:
+    def burn(self, seconds: Decimal | int | str,
+             now: float | None = None) -> tuple[Decimal, str]:
         """Bill `seconds` of the lane. Returns (billed_seconds, state).
         Bills only what the balance covers; at zero → PAUSED, never CLOSED.
-        Never writes a charge the balance cannot pay (refuse-before-write)."""
+        Never writes a charge the balance cannot pay (refuse-before-write).
+
+        AV-2 2.5: open sessions settle only on in-force rates — a burn
+        arriving after the rate book went stale refuses typed with ZERO
+        charge written (the session parks, it is never killed)."""
         want = Decimal(str(seconds))
         if want <= 0:
             raise VoucherError("burn needs positive seconds")
@@ -236,6 +301,8 @@ class Session:
             return Decimal("0"), "PAUSED"          # paused meter bills nothing
         if self.state != "ACTIVE":
             raise VoucherError(f"cannot burn from {self.state}")
+        rate_set_in_force(self.rate_set_minted_at,
+                          time.time() if now is None else now)
         # the per-second all-in (basis + tithe) decides affordability
         unit = _d(self._per_second()) * (Decimal("1") + TITHE_RATE)
         bal = self.escrow.balance(self.voucher)

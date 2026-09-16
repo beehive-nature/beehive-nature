@@ -8,7 +8,7 @@
 //! 2.3 and 2.4 are expected RED on the unfixed crate; their green run is
 //! chartered by the receipted RED in this lane's dispatch.
 
-use voucher_escrow::{ConversionQuote, Escrow, QUOTE_TTL_SECS, VoucherError};
+use voucher_escrow::{ConversionQuote, Escrow, VoucherError, QUOTE_TTL_SECS};
 
 const RATE: u128 = 250_000_000; // 2.5 A per USDC, fp8
 
@@ -19,8 +19,12 @@ fn chain_fp(es: &Escrow) -> String {
     es.to_jsonl().unwrap()
 }
 
+fn quote_with(id: &str, quoted_at: u64) -> ConversionQuote {
+    ConversionQuote::new(id, RATE, "estate-rate-card@v1-demo", quoted_at).unwrap()
+}
+
 fn fresh_quote(quoted_at: u64) -> ConversionQuote {
-    ConversionQuote::new("q-demo-1", RATE, "estate-rate-card@v1-demo", quoted_at).unwrap()
+    quote_with("q-demo-1", quoted_at)
 }
 
 #[test]
@@ -44,9 +48,15 @@ fn case_2_2_stale_quote_refused_zero_mutation() {
     let mut es = Escrow::new();
     // Seed one legitimate deposit so "no row / no partial credit" is provable
     // against a non-empty chain, not just an empty one.
-    let seed = fresh_quote(100);
-    es.deposit_usdc("member-y", 1_000_000, "0xseed", &seed, 100 + (QUOTE_TTL_SECS - 1))
-        .unwrap();
+    let seed = quote_with("q-seed", 100);
+    es.deposit_usdc(
+        "member-y",
+        1_000_000,
+        "0xseed",
+        &seed,
+        100 + (QUOTE_TTL_SECS - 1),
+    )
+    .unwrap();
     let pre_fp = chain_fp(&es);
     let pre_balance = es.balance("member-x");
 
@@ -64,7 +74,11 @@ fn case_2_2_stale_quote_refused_zero_mutation() {
         },
         "typed refusal naming age and TTL"
     );
-    assert_eq!(chain_fp(&es), pre_fp, "zero ledger mutation — chain identical");
+    assert_eq!(
+        chain_fp(&es),
+        pre_fp,
+        "zero ledger mutation — chain identical"
+    );
     assert_eq!(es.balance("member-x"), pre_balance, "no partial credit");
     assert_eq!(es.verify_chain().unwrap(), 1, "no row appended");
 }
@@ -115,14 +129,18 @@ fn case_2_4_quote_replay_refused_independent_of_staleness() {
     // Replay: the SAME quote id, immediately (still fresh), different tx and
     // even a different voucher — single-use is identity-bound, not
     // tx-bound, and staleness is irrelevant to it.
-    let replay = ConversionQuote::new("q-demo-1", RATE, "estate-rate-card@v1-demo", 10_002)
-        .unwrap();
+    let replay =
+        ConversionQuote::new("q-demo-1", RATE, "estate-rate-card@v1-demo", 10_002).unwrap();
     let err = es
         .deposit_usdc("member-z", 10_000_000, "0xsecond", &replay, 10_003)
         .unwrap_err();
     assert_eq!(err, VoucherError::QuoteReplay("q-demo-1".into()));
     assert_eq!(es.balance("member-x"), "25.0000", "first credit untouched");
-    assert_eq!(es.balance("member-z"), "0.0000", "no second credit, any voucher");
+    assert_eq!(
+        es.balance("member-z"),
+        "0.0000",
+        "no second credit, any voucher"
+    );
     assert_eq!(es.verify_chain().unwrap(), 1);
 }
 
