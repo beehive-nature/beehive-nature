@@ -374,6 +374,17 @@ name = "bnr-url"
 version = "0.1.0"
 
 [[package]]
+name = "bpay-rail"
+version = "0.1.0"
+dependencies = [
+ "hex",
+ "serde",
+ "serde_json",
+ "thiserror 2.0.18",
+ "watchpay",
+]
+
+[[package]]
 name = "bsigner"
 version = "0.1.0"
 dependencies = [
