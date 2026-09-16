@@ -167,3 +167,30 @@ AV test demonstrates the gap. — zArcheology seat, 2026-09-16. No implementatio
   `max_failure_charge` (aggregate monetary failure-fee ceiling across
   heterogeneous attempts). Two complementary limits once actual fee evidence
   is available; never infer one from the other.
+- **AV-5 · CONSUMED + GREEN 2026-09-16** (same seat): reorg law at the
+  credit boundary — `ReorgFlagged` (prior evidence verbatim + depth) with
+  the founder's law verbatim in the refusal (`history changed, outcome
+  UNDETERMINED -- replay refused, evidence preserved; the flag never decides
+  refund, debit, or settlement`), human-gated + upto-bounded `resolve_reorg`,
+  history preserved in `Settled.reorg_note`. Landed `f99cd316`; hex-law
+  blocked the first attempt (synthetic 58-hex-char test tx — receipted).
+- **AV-4 · CONSUMED + GREEN 2026-09-16** (same seat): `tests/r4_audit.rs`
+  value-level cross-rail join detector + deliberately leaking fixture;
+  first known-good run FAILED on 18 hits (keys-vs-values + the harness
+  sharing payTo/asset/payer/tx across rails — the real R4 lesson banked:
+  same-bytes-on-two-rails IS the join). Plus a genuine timing flake fixed
+  (LegKey includes valid_before; per-call far_future() made rebuilt legs
+  differ across second boundaries — capture once). Landed `8a94a986`.
+- **AV-11 · CONSUMED + CLEAN VERDICT 2026-09-16** (same seat):
+  `scripts/r5-surface-audit.mjs` (selftest-validated ask-shaped detector;
+  labeled-fallback exemption) — **live scan 113/113 surfaces, ZERO
+  human-gas asks: R5 HOLDS today.** Landed `eeb541d7`; CI-wiring named for
+  the pipeline owner.
+- **P0/P1 RECONCILIATION MATRIX produced 2026-09-16** (founder stop-order):
+  [`2026-09-16-av-matrix-reconciliation.md`](../dispatches/2026-09-16-av-matrix-reconciliation.md)
+  — every landed protection is currently a REPOSITORY LAW, not yet a
+  production protection; per-row live-wiring blockers named (door Sepolia →
+  founder-gated prod; serve-bridge token+rates; TTL ruling; split-brain
+  live drill; flag_reorg notifier wiring; r4-audit on production stores;
+  r5 CI step). **Consumption of new adversarial items is PAUSED for one
+  reconciliation pass per founder order.**
