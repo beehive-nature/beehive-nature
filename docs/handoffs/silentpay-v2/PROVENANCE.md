@@ -4,8 +4,7 @@
 qualification recorded in the 2026-09-15 founder triage: *"if recovered, bank under
 `docs/handoffs/silentpay-v2/` with provenance and original hashes."* The recovery condition
 was met 2026-09-15 (see ARCHITECTURE-RECONCILIATION.md §R). Branch
-`zarchaeology/handoff-banking-2026-09-16` (based on origin/main @`85aa86a4`), **unpushed at
-banking time** — merge/push is a founder/gate gesture.
+`zarchaeology/handoff-banking-2026-09-16` (merged to main 2026-09-16 after green CI — secret-scan, test, static, node — per the Astra disposition "DC-1 merge after normal CI"; rebased onto concurrently-advancing main during the landing race).
 
 ## Recovery chain (all hashes PUBLIC-CONSTANT — public pins, never secrets)
 
