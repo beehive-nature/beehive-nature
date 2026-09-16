@@ -339,6 +339,25 @@ Reuse before invention; no Eddies dependency." Full source-verified recon:*
   Eddies lacked.
 - **Licenses: MIT/Apache/BSD-MIT across the family — zero GPL. Zero Eddies
   dependency.** Post-gate thresholds + verdicts: reuse seat's.
+- **DEEP READ DONE 2026-09-16 (NUT-10/11/24 at source + our x402 door in-tree)
+  →**
+  [`docs/dispatches/2026-09-16-nut10-cdk-deepread-x402-crosswalk.md`](../dispatches/2026-09-16-nut10-cdk-deepread-x402-crosswalk.md):
+  **ADOPT: none** (gate stands) · **ADAPT** the NUT-10/11 condition grammar
+  (locktime+refund+n-of-m Schnorr witnesses) as the projection language for
+  time-bounded delegations in any future offline-bearer adapter — bPay
+  authority stays at signing (capAssert/policy = issuance-time bound);
+  mint conditions are a DOWNSTREAM projection, never the source · **ADAPT**
+  the seam: settlement-ring placement, self-hosted cdk-mintd only, receipts
+  untouched · **WRAP** (declared, not built): a future Cashu rail rides
+  NUT-24 behind the existing `Door`/`FacilitatorSettle` traits ·
+  **crosswalk verdict: NUT-24 × our x402 door = two rails sharing status
+  402** — the shared artifact is the door pattern we already implemented ·
+  **WATCH** cdk ALPHA maturity · **BUILD-rule** (only if ever built):
+  fail-closed on undeclared NUT-06 support; refund-tag mandatory with
+  locktime. Laws banked: *condition declared ≠ condition enforced*
+  (unsupported = anyone-can-spend); *locktime without refund = post-expiry
+  anyone-can-spend*; NUT-10 bounds are per-Proof and redemption-time —
+  never a substitute for issuance-time authority.
 
 ---
 
