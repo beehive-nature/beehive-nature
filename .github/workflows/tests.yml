@@ -178,6 +178,18 @@ jobs:
       - name: AV-11 human-gas surface audit
         if: always()
         run: node scripts/audit-human-gas.mjs
+      # VV-1 vending pricing battery (zCode, 2026-09-16): immutable pricing
+      # semantics for open sessions on contracts/vending — snapshot-or-refuse
+      # under R1→R2, full price-input binding, delete/recreate + pre-settle
+      # mutation + R1→R2→R1 reversion attacks, tithe integer conservation
+      # (truncation law, member leg by subtraction), tithe_bp bounds
+      # refuse-before-mutation, and the negative control that convicts
+      # deliberate live-table settlement. Source-pinned: sha drift or a
+      # fix-shaped structural change fails hard until the battery is
+      # re-derived; registered reds pass and print (docs/agents/VV-SPECS.md)
+      - name: VV-1 vending pricing battery (immutable session pricing)
+        if: always()
+        run: node scripts/vv1-vending-pricing.mjs
       # PEER FUNNEL testnet runner selftest (z3.3 Order C, 2026-09-05): the
       # one-broadcast tool cannot rot — keccak + EIP-155 RLP hash vectors and
       # the sign/recover roundtrip proven every push (key parts skip cleanly
