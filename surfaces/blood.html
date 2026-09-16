@@ -412,8 +412,7 @@ footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint
       if(ring>=RINGS)return;
       var ps=(S.edges[id]||[]).filter(function(x){return S.persons[x];});
       var cby=byr(p.lifespan);
-      var fa=ps.find(function(x){return S.persons[x].gender==='M';})||ps[0];
-      var mo=ps.find(function(x){return S.persons[x].gender==='F';})||ps[1];
+      var sl=parentSlots(ps);var fa=sl[0];var mo=sl[1];
       [[fa,-1],[mo,1]].forEach(function(pair){
         var pid=pair[0],side=pair[1];
         if(!pid)return;
@@ -572,7 +571,7 @@ footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint
         S.recon.current=nv;S.staged.push(nv);
         (S.recon.versions=S.recon.versions||[]).push(nv);
         try{localStorage.setItem('blood-staged',JSON.stringify(S.staged));}catch(e){}
-        drawComb();showRelationship(child,parent);
+        redrawCurrent();showRelationship(child,parent);
       });
     });
     document.getElementById('backperson').addEventListener('click',function(){showDetail(child);});
@@ -637,12 +636,33 @@ footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint
     document.querySelector('.zoombar').style.display=mode==='fan'?'grid':'none';
     document.getElementById('treeview').style.display=mode==='tree'?'block':'none';
     if(mode==='ped')drawPedigree();
+    if(mode==='fan'){drawComb();view.s=Math.max(view.s,0.9);centerOn(0,0,false,view.s);}
     if(mode==='tree')renderTree();
   }
   document.getElementById('viewped').addEventListener('click',function(){setView('ped');});
   document.getElementById('viewfan').addEventListener('click',function(){setView('fan');});
   document.getElementById('viewtree').addEventListener('click',function(){setView('tree');});
-  // ── PEDIGREE MODE — the genealogical truth layer: strict 1→2→4→8 slots per
+  // role-based parent slots: gender roles decide; unknown-gender parents fill
+  // an EMPTY slot only — the same person is never manufactured into both
+  // positions; a missing parent stays a visibly empty slot
+  // redraw whatever view is CURRENTLY selected — interpretation switches and
+  // any other data change must land in the layout the visitor is looking at
+  function redrawCurrent(){
+    if(S.viewMode==='ped')drawPedigree();
+    else if(S.viewMode==='tree')renderTree();
+    else drawComb();
+  }
+  function parentSlots(ps){
+    var fa=null,mo=null,used={};
+    for(var i=0;i<ps.length;i++){var g2=S.persons[ps[i]]&&S.persons[ps[i]].gender;
+      if(g2==='M'&&!fa){fa=ps[i];used[ps[i]]=1;}
+      else if(g2==='F'&&!mo){mo=ps[i];used[ps[i]]=1;}}
+    for(var j=0;j<ps.length;j++){var p2=ps[j];
+      if(used[p2])continue;
+      if(!fa){fa=p2;used[p2]=1;}else if(!mo){mo=p2;used[p2]=1;}}
+    return [fa,mo];
+  }
+  // ── PEDIGREE MODE — the pedigree structure view: strict 1→2→4→8 slots per
   // generation (ahnentafel), hexagonal aesthetic on top, generation labels,
   // repeat ancestors as mirrored cells with the ⊙ marker, never invented.
   function drawPedigree(){
@@ -659,6 +679,7 @@ footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint
       gl.textContent=GEN_LABELS[g]||('gen '+g);
       world.appendChild(gl);
     }
+    var pathSet=new Set(); // current root-path: TRUE cycle detection
     (function slot(id,s,g){
       if(!id||g>=GENS||!S.persons[id])return;
       var p=S.persons[id];
@@ -696,12 +717,23 @@ footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint
         var dm=document.createElementNS(NS,'text');
         dm.setAttribute('x',x);dm.setAttribute('y',y+3);dm.setAttribute('text-anchor','middle');
         dm.setAttribute('class','hextext dupmark');dm.setAttribute('font-size','11');dm.textContent='⊙';
-        world.appendChild(dm);return; // do not recurse a repeat's own ancestry
+        world.appendChild(dm);
+        // a repeated person KEEPS their known ancestry at this occurrence —
+        // one identity, several pedigree positions; only a true cycle
+        // (an ancestor already on the current root-path) stops recursion
+        if(pathSet[id]){
+          var cy=document.createElementNS(NS,'text');
+          cy.setAttribute('x',x);cy.setAttribute('y',y+14);cy.setAttribute('text-anchor','middle');
+          cy.setAttribute('class','hextext');cy.setAttribute('fill','var(--rose)');cy.setAttribute('font-size','7');
+          cy.setAttribute('pointer-events','none');cy.textContent='↻ cycle';
+          world.appendChild(cy);return;
+        }
+        // fall through to recurse (do NOT return here)
       }
       if(g>=GENS-1)return;
       var ps=(S.edges[id]||[]).filter(function(x2){return S.persons[x2];});
-      var fa=ps.find(function(x2){return S.persons[x2].gender==='M';})||ps[0];
-      var mo=ps.find(function(x2){return S.persons[x2].gender==='F';})||ps[1];
+      var sl=parentSlots(ps);var fa=sl[0];var mo=sl[1];
+      pathSet.add(id);
       [[fa,2*s],[mo,2*s+1]].forEach(function(pair2){
         if(!pair2[0])return;
         if(!edgeVisible(id,pair2[0])){
@@ -720,6 +752,7 @@ footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint
         world.appendChild(ln);
         slot(pair2[0],pair2[1],g+1);
       });
+      pathSet.delete(id);
     })(S.curRoot,1,0);
   }
   function renderTree(){
