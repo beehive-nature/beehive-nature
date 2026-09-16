@@ -17,7 +17,14 @@
 - manifest-only (3,614,894 bytes): 37,444,936,280 winston = **$0.094** — the split-route object
 - **QUOTE ONLY. No purchase, no transaction.**
 
-**Autonomi — QUOTE PENDING NODE ROUTE (honest state):**
+**Autonomi — REAL CLIENT-SIDE ESTIMATE OBTAINED (2026-09-16T23:28Z, display-only):** the released client on this seat (ant 0.3.1) implements the no-payment cost command; run on the exact deterministic upload object —
+- **object:** pkg3.tar — 80,998,400 bytes, sha256 fec5fba8…, deterministic (sort=name, fixed mtime), built 23:27:22Z; no zstd on this seat so the UNCOMPRESSED tar is the measured object
+- **raw output (preserved):** chunk_count 23 · storage_cost 3.106827 ANT · gas 0.00015 ETH · payment_mode single · **confidence: priced_sample**
+- **USD:** storage 3.106827 × $0.03466683 = **$0.1077** + gas 0.00015 × $2411.39 = **$0.3617** → **total ≈ $0.4694** (≈ **$1.43/GiB** tar-basis)
+- **qualifications preserved:** display-only (true cost reconciles at payment), sampled confidence, storage/gas separate line items; no spending key, no node migration, no ant update
+- **earlier REST claim withdrawn** as unestablished; the client cost command was the direct route
+
+**Superseded note (kept for the record):**
 - No public pricing REST exists; probed 2026-09-16T22:40:59Z — `api.autonomi.org`, `api.autonomi.network`, `stats.autonomi.org`, `antstats.autonomi.org` all unreachable from this seat.
 - Autonomi prices via a live node's API (network record count, ANT-denominated); the estate's node runs on the **box** (fenced loop; SSH filtered from the laptop this session).
 - **Staged for the box run:** query the node pricing route immediately before purchase, preserve the raw response + network composition, compute actual $/GiB against ANT/USD **$0.03466683** (coingecko, 2026-09-16T22:40Z).
@@ -62,3 +69,14 @@ Manifest-only on AR: **$0.094**. Full archive on AR: **$2.0314**. Both pocket ch
 `blood.html` now carries the receipt card beside the Rockwood demonstration path, rendered from the JSON with the five states shown: today it reads *"Arweave quote to preserve this whole archive: 0.8093 AR ≈ $2.0314 (live) — purchase awaits the approval gate · retrievals tested: 0 · developer egress: serving from our own box until network publication."* The numbers update from the receipt as states advance.
 
 **Public demonstration path:** Albert Perry Rockwood → biography/records/lore → blood fractal → the underlying archived evidence → this receipt.
+
+
+---
+
+## CORRECTIONS + WORKLOAD SPLIT (same-day rider)
+
+- **Timestamps fixed:** the placeholder times (22:40:5xZ) are replaced by honest minute-precision captures (22:40Z, 23:27-23:28Z).
+- **Upload object made real:** the Arweave figure remains a historical size-based estimate on uncompressed content bytes; the ACTUAL deterministic object is pkg3.tar (80,998,400 bytes, sha256 fec5fba8…) and the ANT estimate quotes THAT.
+- **Workloads split — never conflated:** full-archive retrievals at 1M = **62.14 TB** (CloudFront gross $4,919.15 / after 1TB-free $4,840.02; B2 $578.72); assumed 2 MiB page views at 1M = **2.10 TB** (CloudFront gross $166.02 / after free $86.88; B2 $19.53) — a 29.6x difference; the 2 MiB figure stays labeled UNMEASURED until cold/warm journeys are network-traced (the corpus alone is 59 MiB).
+- **Two acceptance outcomes named:** (1) archive retrieved + restored from storage; (2) family experience delivered WITHOUT our box carrying the payload — proven by blocking the estate payload origin in the test browser and repeating the journey through the network-backed route. Both pending.
+- **Approved snapshot stays frozen:** the economics card/receipt are NOT silently added to pkg3 — any newer archived edition gets its own manifest.

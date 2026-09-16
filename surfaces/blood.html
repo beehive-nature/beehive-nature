@@ -12,7 +12,7 @@
 html,body{overflow-x:hidden}
 body{background:radial-gradient(circle at 50% -10%,#12251b 0%,var(--bg) 60%);color:var(--ink);
  font:13px/1.7 'IBM Plex Mono',monospace;min-height:100vh;padding:0 0 110px}
-main{max-width:1100px;margin:0 auto;padding-inline:16px}
+main{max-width:1100px;min-width:0;margin:0 auto;padding-inline:16px}
 .crumbs{display:flex;gap:10px;flex-wrap:wrap;align-items:center;padding:18px 0 9px;border-bottom:1px solid var(--line);
  font-size:11px;letter-spacing:.12em;text-transform:uppercase}
 .crumbs a,.crumbs button{color:var(--dim);background:none;border:0;font:inherit;cursor:pointer;letter-spacing:inherit;text-transform:inherit;padding:0}
@@ -34,6 +34,7 @@ h1{font-size:clamp(22px,4.5vw,34px);line-height:1.15;margin:8px 0 6px;font-weigh
  background:linear-gradient(135deg,rgba(255,215,0,.05),rgba(0,229,255,.04));font-size:11px;color:var(--dim);line-height:1.8}
 .econcard b{color:var(--gold)} .econcard .states{color:var(--faint);font-size:10px}
 .econcard a{color:var(--cyan)}
+.econcard,.econcard *{overflow-wrap:anywhere}
 .entrance a{display:block;text-decoration:none;background:var(--well);border:1px solid var(--line);border-radius:10px;
  padding:10px 12px;color:var(--ink);font-size:11px;cursor:pointer}
 .entrance a:hover{border-color:var(--gold)}
@@ -111,7 +112,7 @@ h1{font-size:clamp(22px,4.5vw,34px);line-height:1.15;margin:8px 0 6px;font-weigh
 .relview .hyp button{margin-top:6px}
 .relview .hyp .trad{color:var(--violet);font-size:10px}
 .relview .verlist{margin-top:10px;font-size:10.5px;color:var(--faint)}
-.listview{margin-top:12px}
+.listview{margin-top:12px;overflow-x:auto;-webkit-overflow-scrolling:touch;max-width:100%}
 .listview summary{cursor:pointer;color:var(--dim);font-size:11px}
 .listview table{width:100%;border-collapse:collapse;margin-top:8px;font-size:10.5px}
 .listview td,.listview th{border-bottom:1px solid var(--line);padding:5px 6px;text-align:left;color:var(--dim)}
@@ -280,15 +281,17 @@ footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint
   function renderEconCard(){
     fetch('../assets/profile-archive/lineage/zblood-storage-economics.json').then(function(r){return r.json();}).then(function(E){
       var card=document.getElementById('econcard');if(!card)return;card.hidden=false;
-      var ar=E.quotes&&E.quotes.arweave, st=E.states||{};
+      var ar=E.quotes&&E.quotes.arweave, an=E.quotes&&E.quotes.autonomi, st=E.states||{};
       var line;
       if(st.uploaded&&ar){line='cost '+ar.computed.fullArchiveAR+' AR / $'+ar.computed.fullArchiveUSD+' to preserve on '+(st.uploadedAt||'—');}
-      else if(ar&&ar.state==='quoted'){line='Arweave quote to preserve this whole archive: <b>'+ar.computed.fullArchiveAR+' AR ≈ $'+ar.computed.fullArchiveUSD+'</b> (live, '+ar.tokenReference.value+' AR/USD @ '+ar.queriedAt.slice(0,10)+') — purchase awaits the approval gate';}
+      else if(ar&&ar.state==='quoted'){line='quotes to preserve this whole archive — <b>Arweave '+ar.computed.fullArchiveAR+' AR ≈ $'+ar.computed.fullArchiveUSD+'</b> (live @ '+ar.queriedAt.slice(0,10)+')';
+        if(an&&an.computed)line+=' · <b>Autonomi ≈ $'+an.computed.totalUSD+'</b> (client estimate, '+an.raw.confidence+', storage $'+an.computed.storageUSD+' + gas $'+an.computed.gasUSD+' @ '+an.queriedAt.slice(0,10)+')';
+        line+=' — purchase awaits the approval gate';}
       else {line='preservation quoted — see the receipt';}
       line+=' · retrievals tested: <b>'+(st.retrievalsTested||0)+'</b> · developer egress bill: <b>'+(st.developerEgressUSD!=null?'$'+st.developerEgressUSD:'serving from our own box until network publication — our egress scales until then')+'</b>';
       document.getElementById('econ-line').innerHTML=line;
       document.getElementById('econ-states').innerHTML='states — prepared:'+(st.prepared?'✓':'✗')+' · approved:'+(st.approved?'✓':'✗')+
-        ' · quoted:'+(st.quoted?'✓ (AR live; ANT pending node route)':'✗')+' · purchased:'+(st.purchased?'✓':'✗')+
+        ' · quoted:'+(st.quoted?'✓':'✗')+' · purchased:'+(st.purchased?'✓':'✗')+
         ' · uploaded:'+(st.uploaded?'✓':'✗')+' · retrieved:'+(st.retrieved?'✓':'✗')+' · hash-verified from storage:'+(st.hashVerifiedFromStorage?'✓':'✗')+
         ' · <a href="../assets/profile-archive/lineage/zblood-storage-economics.json">the full receipt (JSON) ↗</a>';
     }).catch(function(){/* card simply stays hidden if the receipt is absent */});
