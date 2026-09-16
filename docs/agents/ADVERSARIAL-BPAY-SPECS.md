@@ -111,3 +111,106 @@ detector: any future rail demanding human-held gas fails the audit. Deliverable:
 *Consumption order: AV-2 → AV-1 → AV-3 (P0), then P1 top-down. Every spec's RED run is
 receipted in the implementing lane's dispatch; fixes ride the same lane. zArcheology remains
 the adversarial designer — no production code touched here. — 2026-09-16.*
+
+---
+
+## P2/P3 SPECIFICATIONS (second roll, 2026-09-16 — after the x402 door landed @`341c9e1d`)
+
+### SPEC AV-7 — two-route payment/delivery separation (P2; D2-approved corpus port)
+
+**Targets:** watchpay reserve→settle ledger (mainline) + the door journal (`ops/x402-door`) for
+the payment leg + a delivery-state seam that does NOT exist yet (the D2 MINE target — its
+absence is what the RED run proves). **Reference:** banked corpus `core/tests/two_route.rs` +
+ADDENDUM-0.3 §7 (the mandatory two-route acceptance test), byte-readable at
+`docs/handoffs/silentpay-v2/`.
+
+Scenario: ONE approved plan, TWO legs — compute (settles) + storage (times out) — independent
+budgets, unrelated external references, hard plan-level ceiling.
+
+| # | case | exact pass criterion | fail criterion |
+|---|---|---|---|
+| 7.1 | compute leg completes + settles; storage leg then fails | earned compute claim PRESERVED (never reversed, never re-run) | any reversal or re-execution of the paid leg |
+| 7.2 | plan-level double-debit probe | total debits ≤ plan ceiling incl. fees; no second payment for the settled compute leg | any double debit |
+| 7.3 | storage payment reconciliation | exact domain/tx evidence; quoted assurance policy applied; unknown → reconcile the ORIGINAL obligation (couples to AV-8) | fresh-identifier resubmission |
+| 7.4 | state independence **(RED today — the deliverable)** | PaymentState and DeliveryState tracked as independent machines: paid-but-not-delivered is representable and SURFACES (final: payment=confirmed, delivery=failed on storage; both verified on compute) | any coupling (delivery failure auto-reversing payment, or payment state overwriting delivery state) |
+| 7.5 | refund rules | unused storage reservation refunded; NO fee charged for an unused timed-out reservation (corpus sprint03 law) | fee or retention on unused timeout |
+| 7.6 | negative control | a coupled implementation (delivery-fail → auto-refund of settled compute) is DETECTED by 7.1/7.4 | harness blind to coupling |
+
+**Definition of done:** 7.1–7.5 green (7.4 RED first, charters the D2 typed separation), 7.6
+demonstrated. The door's journal laws 2/3/4 already pin the payment-side semantics — this spec
+drives them END-TO-END with a second (storage) leg.
+
+### SPEC AV-8 — settle-UNKNOWN reconciliation (P2)
+
+**Targets:** door journal (Unknown → HumanGate is law-pinned; `ops/x402-door/tests/acceptance.rs`)
++ `scripts/buzz-meter/meter.py` chainpoll. **Reference:** corpus sprint03 recovery planner +
+corpus AGENTS.md law ("Unknown transaction status is not failure and MUST NOT trigger a new
+payment under a fresh identifier").
+
+| # | case | exact pass criterion | fail criterion |
+|---|---|---|---|
+| 8.1 | tx submitted, response lost | poll authoritative chain; outcome = the ORIGINAL obligation's fate; no second tx under a different idempotency key; exactly-once eventually | fresh-key resubmission or permanent stall without flag |
+| 8.2 | delayed inclusion | late confirmation reconciles to confirmed; no re-sign | re-sign after delayed confirm |
+| 8.3 | genuinely lost/expired tx | bounded replacement RETAINS the same logical obligation (same idempotency scope); cannot double-execute; replacement deadline/budget explicit | replacement creating new spending authority |
+| 8.4 | crash-restart across the unknown window | journal replay reaches the same decision (watchpay C1–C4 mechanics verbatim) | divergent post-restart decision |
+| 8.5 | negative control | fresh-key retry implementation DETECTED (assert idempotency-scope equality) | harness cannot detect |
+
+**Definition of done:** 8.1–8.4 green against the door journal and the meter poller; 8.5
+demonstrated. (Workerb 2's receipt already names this as their roll-forward consumer.)
+
+### SPEC AV-9 — proof-root without witness / escape-path loudness (P3; R3's second sentence)
+
+**Targets:** rehearsal privacy notes (`contracts/privacy`, `noteacct4`/`plonknote11` lineage,
+SPEC-PRIVACY-1 §m3/§m4) + M9 anchoring shape.
+
+| # | case | exact pass criterion | fail criterion |
+|---|---|---|---|
+| 9.1 | baseline: deposit → witness present → withdraw | succeeds (regression-keep of §m3 receipts) | any regression |
+| 9.2 | witness LOST after deposit **(RED-or-LOUD today)** | the failure mode is LOUD: explicit error/flag naming witness loss, documented exit options (owner-held disclosure per §m3); no silent lock, no silent success | silent fund-lock with zero surfaced state |
+| 9.3 | witness-retention audit | a written answer to "where do note witnesses live, with what redundancy" (founder question, named by test) | question remains unanswerable |
+| 9.4 | M9 head-anchoring regression | anchored payload contains chain-head commitment and ZERO per-receipt identifiers (root ≠ receipt list — R3 practiced shape) | any receipt-shaped anchoring |
+| 9.5 | negative control | silent-lock variant DETECTED by 9.2 | harness blind |
+
+### SPEC AV-10 — adapter substitution behind the ring (P3; R5 mechanism proof)
+
+**Targets:** the door's law-7 door-swap seam (ALREADY PROVEN with a second impl — the landed
+slice) generalized to the wider ring: storage/chain trait-fronted adapters + a ring-bypass lint.
+
+| # | case | exact pass criterion | fail criterion |
+|---|---|---|---|
+| 10.1 | one trait-fronted adapter swapped for a test double with behavior markers | callers above the ring observe ZERO interface change (same CanonicalEvents, same error taxonomy); only config differs | any caller-visible difference |
+| 10.2 | ring-bypass lint **(RED today — the deliverable)** | CI gate: no direct third-party endpoint import/call above the adapter layer (extend the estate-source/dock-claims pattern) | bypass call passes silently |
+| 10.3 | door-scheme registry extension (when live-wiring lands) | registering a new scheme slug + handler reflects in `supported` with ZERO door-code change (the ADOPTed seam's contract, now CI-guarded) | code change needed |
+| 10.4 | negative control | a ring-bypassing caller is DETECTED by 10.2's gate | gate blind |
+
+## DOOR-SURFACE WATCHLIST — attacks pre-registered against the LANDED door (`ops/x402-door`)
+
+*The door shipped with 8 test-pinned laws + one honest FLAG (live-wiring composition
+default-OFF). These attacks are pre-registered BEFORE the door runs live, per adversarial
+discipline; each becomes a D-spec when its lane opens:*
+
+- **D-1 dual-mode acceptance:** the 8-point contract must run green in BOTH feature modes;
+  live-wiring ON must not weaken any law (first green Linux compile is itself an acceptance point).
+- **D-2 cap-rollover exposure:** FailedKeep RETAINS no-evidence-failure exposure — define-by-test
+  what happens to retained exposure at the daily-cap rollover (no silent double-count, no silent reset).
+- **D-3 settle-time float drain:** float is fail-closed at `/verify`; attack = many reserves, then
+  sequential settles with gas moving — assert no torn states and loud settle-time refusal when
+  the float depletes mid-flight (law 1 extended to settle time).
+- **D-4 release-evidence adversary:** expiry release requires on-chain non-settlement evidence —
+  RPC unavailable → fail-closed HOLD (no silent release); malformed/lying RPC answer → release
+  only on the verified evidence shape.
+- **D-5 journal concurrency:** second door process against the same journal_root refuses NAMED
+  (lock law), never corrupts (torn law 5 covers corruption; concurrent-start refusal is separate).
+- **D-6 journal exfiltration hygiene:** journal_root must be unreachable from any served path
+  (Caddy config review; per-chain dirs + truncated payer tags keep R4 — but mtimes/filenames
+  must not be web-readable).
+- **D-7 HumanGate immutability:** no code path auto-retries Unknown — behavioral (no retry within
+  test horizon) + structural (call-site audit) assertions.
+- **D-8 upto-at-reconcile adversary:** adversarial settle where actual > authorized → refusal
+  with evidence retention (FailedKeep), never a clamped silent settle.
+
+---
+
+*Pipeline law (founder, 2026-09-16): zArcheology attacks → executable RED tests → builder
+proves RED → builder fixes GREEN → CI arbitrates. This seat designs tests only; production
+code untouched. — second roll, 2026-09-16.*
