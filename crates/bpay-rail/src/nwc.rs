@@ -18,7 +18,7 @@
 
 use crate::fee::{FeeClass, FeeReservation};
 use crate::ledger::{LedgerError, LifecycleState, RailLedger};
-use watchpay::types::Atto;
+use crate::units::{FeeEvidence, MilliSatoshi};
 
 /// Typed NIP-47 errors — the full pinned code set, method-specific
 /// ones included. The mapping table (R8 rule 5): transport-ambiguous
@@ -95,7 +95,9 @@ pub trait NwcTransport {
 pub struct NwcRail<T: NwcTransport> {
     transport: T,
     ledger: RailLedger<crate::ln::PaymentHash>,
-    fee_limit_msat: u64,
+    fee_limit_msat: MilliSatoshi,
+    /// LU-8.1 booking record per payment.
+    fee_evidence: std::collections::HashMap<crate::ln::PaymentHash, FeeEvidence>,
     /// LIVE SEND GATE: false this round — a named refusal, flipped
     /// only by explicit authorization.
     send_enabled: bool,
@@ -104,14 +106,15 @@ pub struct NwcRail<T: NwcTransport> {
 impl<T: NwcTransport> NwcRail<T> {
     pub fn new(
         transport: T,
-        window_fee_ceiling_msat: u64,
-        fee_limit_msat: u64,
+        window_fee_ceiling_msat: MilliSatoshi,
+        fee_limit_msat: MilliSatoshi,
         now_unix: u64,
     ) -> Self {
         NwcRail {
             transport,
-            ledger: RailLedger::new(Atto::from_u64(window_fee_ceiling_msat), now_unix),
+            ledger: RailLedger::new(window_fee_ceiling_msat.to_atto(), now_unix),
             fee_limit_msat,
+            fee_evidence: std::collections::HashMap::new(),
             send_enabled: false,
         }
     }
@@ -182,7 +185,7 @@ impl<T: NwcTransport> NwcRail<T> {
             payment_hash,
             FeeReservation {
                 class: FeeClass::LnroutingMsat,
-                worst_case: Atto::from_u64(self.fee_limit_msat),
+                worst_case: self.fee_limit_msat.to_atto(),
             },
             expires_unix,
         )?;
@@ -193,20 +196,28 @@ impl<T: NwcTransport> NwcRail<T> {
             Ok(result) => {
                 self.ledger
                     .transition(&payment_hash, LifecycleState::InFlight)?;
-                // fees_paid OPTIONAL (NIP-47); possibility-checked here
-                let fees = result
-                    .get("fees_paid")
-                    .and_then(|f| f.as_u64())
-                    .unwrap_or(0);
-                if fees > self.fee_limit_msat {
-                    return Err(LedgerError::Refusal {
-                        field: "fees_paid",
-                        reason: format!(
-                            "impossible fee evidence: {fees} msat exceeds fee_limit {} msat (R10-P3)",
-                            self.fee_limit_msat
-                        ),
-                    });
-                }
+                // fees_paid OPTIONAL (NIP-47) — LU-8.1: ABSENT is not
+                // zero. No testimony -> exposure bounded at the limit
+                // (AbsentBounded, reservation retained); testimony ->
+                // possibility-checked then reconciled DOWN (Paid).
+                let (fees_msat, evidence) = match result.get("fees_paid").and_then(|f| f.as_u64()) {
+                    Some(fees) => {
+                        if fees > self.fee_limit_msat.0 {
+                            return Err(LedgerError::Refusal {
+                                field: "fees_paid",
+                                reason: format!(
+                                    "impossible fee evidence: {fees} msat exceeds fee_limit {} msat (field=fees_paid unit=msat, R10-P3)",
+                                    self.fee_limit_msat.0
+                                ),
+                            });
+                        }
+                        (MilliSatoshi(fees), FeeEvidence::Paid(fees))
+                    }
+                    None => (
+                        self.fee_limit_msat,
+                        FeeEvidence::AbsentBounded(self.fee_limit_msat.0),
+                    ),
+                };
                 let _preimage =
                     result
                         .get("preimage")
@@ -219,9 +230,10 @@ impl<T: NwcTransport> NwcRail<T> {
                         })?;
                 let out = self.ledger.reconcile_with_evidence(
                     &payment_hash,
-                    Atto::from_u64(fees),
+                    fees_msat.to_atto(),
                     true,
                 )?;
+                self.fee_evidence.insert(payment_hash, evidence);
                 Ok(out.state)
             }
             Err(NwcError::TransportAmbiguous(note)) => {
@@ -271,6 +283,10 @@ impl<T: NwcTransport> NwcRail<T> {
 
     pub fn state(&self, id: &crate::ln::PaymentHash) -> Option<LifecycleState> {
         self.ledger.state(id)
+    }
+    /// LU-8.1: how fee evidence was BOOKED (absent ≠ zero).
+    pub fn fee_evidence(&self, id: &crate::ln::PaymentHash) -> Option<FeeEvidence> {
+        self.fee_evidence.get(id).copied()
     }
     pub fn reserved_total_msat(&self) -> u64 {
         self.ledger

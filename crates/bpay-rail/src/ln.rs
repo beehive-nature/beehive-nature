@@ -10,7 +10,7 @@
 
 use crate::fee::{FeeClass, FeeReservation};
 use crate::ledger::{LedgerError, LifecycleState, RailLedger};
-use watchpay::types::Atto;
+use crate::units::{FeeEvidence, MilliSatoshi};
 
 /// NIP-47 state vocabulary (pinned): pending | settled | accepted
 /// (hold) | expired (invoices) | failed (payments).
@@ -32,7 +32,7 @@ pub struct PaymentHash(pub [u8; 32]);
 #[derive(Debug, Clone)]
 pub struct LnInvoice {
     pub payment_hash: PaymentHash,
-    pub amount_msat: u64,
+    pub amount_msat: MilliSatoshi,
     pub created_at: u64,
     pub expires_at: u64,
     pub bolt11: String,
@@ -45,7 +45,7 @@ pub struct LnSettlement {
     pub preimage: [u8; 32],
     /// NIP-47 `fees_paid` is OPTIONAL — absence is lawful (reservation
     /// stands); presence must satisfy possibility (≤ fee_limit).
-    pub fees_paid_msat: Option<u64>,
+    pub fees_paid_msat: Option<MilliSatoshi>,
 }
 
 /// MOCK NWC client. Every method mirrors a NIP-47 shape so the adapter
@@ -70,7 +70,7 @@ impl LnMockClient {
     }
 
     /// make_invoice (NIP-47): expiry REQUIRED by our adapter law.
-    pub fn make_invoice(&mut self, amount_msat: u64, expiry_secs: u64) -> LnInvoice {
+    pub fn make_invoice(&mut self, amount_msat: MilliSatoshi, expiry_secs: u64) -> LnInvoice {
         let mut hash = [0u8; 32];
         hash[0] = self.states.len() as u8 + 1;
         let id = PaymentHash(hash);
@@ -91,7 +91,7 @@ impl LnMockClient {
     pub fn pay(
         &mut self,
         invoice: &LnInvoice,
-        fee_limit_msat: u64,
+        fee_limit_msat: MilliSatoshi,
     ) -> Result<PaymentHash, LnMockError> {
         if invoice.expires_at <= self.now_unix {
             return Err(LnMockError::Refused {
@@ -107,7 +107,7 @@ impl LnMockClient {
             return Err(LnMockError::TransportUnknown);
         }
         // Settle immediately with an OPTIONAL fee below the limit.
-        let fees = Some(fee_limit_msat / 4);
+        let fees = Some(MilliSatoshi(fee_limit_msat.0 / 4));
         let mut preimage = invoice.payment_hash.0;
         preimage[31] ^= 0x5a;
         self.states.insert(invoice.payment_hash, NwcState::Settled);
@@ -147,17 +147,25 @@ pub enum LnMockError {
 /// LN-shaped identity, evidence and fee semantics.
 pub struct LnRailAdapter {
     pub client: LnMockClient,
+    /// LU-8.1 booking record: how fee evidence was booked per payment.
+    fee_evidence: std::collections::HashMap<PaymentHash, FeeEvidence>,
     ledger: RailLedger<PaymentHash>,
-    fee_limit_msat: u64,
+    fee_limit_msat: MilliSatoshi,
 }
 
 pub const MSAT_IN_SATS: u64 = 1_000;
 
 impl LnRailAdapter {
-    pub fn new(window_fee_ceiling_msat: u64, fee_limit_msat: u64, now_unix: u64) -> Self {
+    pub fn new(
+        window_fee_ceiling_msat: MilliSatoshi,
+        fee_limit_msat: MilliSatoshi,
+        now_unix: u64,
+    ) -> Self {
         LnRailAdapter {
             client: LnMockClient::new(now_unix),
-            ledger: RailLedger::new(Atto::from_u64(window_fee_ceiling_msat), now_unix),
+            // LU-7.2: the ONE named conversion site.
+            ledger: RailLedger::new(window_fee_ceiling_msat.to_atto(), now_unix),
+            fee_evidence: std::collections::HashMap::new(),
             fee_limit_msat,
         }
     }
@@ -187,7 +195,7 @@ impl LnRailAdapter {
             invoice.payment_hash,
             FeeReservation {
                 class: FeeClass::LnroutingMsat,
-                worst_case: Atto::from_u64(self.fee_limit_msat),
+                worst_case: self.fee_limit_msat.to_atto(),
             },
             invoice.expires_at,
         )?;
@@ -233,23 +241,36 @@ impl LnRailAdapter {
     pub fn reconcile(
         &mut self,
         id: PaymentHash,
-        fees_paid_msat: Option<u64>,
+        fees_paid_msat: Option<MilliSatoshi>,
         preimage: &[u8; 32],
     ) -> Result<LifecycleState, LedgerError> {
-        let fees = fees_paid_msat.unwrap_or(0);
-        if fees > self.fee_limit_msat {
-            return Err(LedgerError::Refusal {
-                field: "fees_paid",
-                reason: format!(
-                    "impossible fee evidence: {} msat exceeds the declared fee_limit {} msat (R10-P3)",
-                    fees, self.fee_limit_msat
-                ),
-            });
-        }
+        // LU-8.1: ABSENT fees are NOT zero fees — the transport gave no
+        // testimony, so exposure stays bounded at the declared limit
+        // (retained reservation, AbsentBounded booking). PRESENT fees
+        // reconcile DOWN to the testified figure (Paid booking).
+        let (fees_msat, evidence) = match fees_paid_msat {
+            Some(ms) => {
+                if ms > self.fee_limit_msat {
+                    return Err(LedgerError::Refusal {
+                        field: "fees_paid",
+                        reason: format!(
+                            "impossible fee evidence: {} msat exceeds the declared fee_limit {} msat (field=fees_paid unit=msat, R10-P3)",
+                            ms.0, self.fee_limit_msat.0
+                        ),
+                    });
+                }
+                (ms, FeeEvidence::Paid(ms.0))
+            }
+            None => (
+                self.fee_limit_msat,
+                FeeEvidence::AbsentBounded(self.fee_limit_msat.0),
+            ),
+        };
         let _ = preimage; // adapter contract validates preimage vs hash at build time
         let outcome = self
             .ledger
-            .reconcile_with_evidence(&id, Atto::from_u64(fees), true)?;
+            .reconcile_with_evidence(&id, fees_msat.to_atto(), true)?;
+        self.fee_evidence.insert(id, evidence);
         Ok(outcome.state)
     }
 
@@ -271,7 +292,7 @@ impl LnRailAdapter {
                 id,
                 FeeReservation {
                     class: FeeClass::LnroutingMsat,
-                    worst_case: Atto::from_u64(self.fee_limit_msat),
+                    worst_case: self.fee_limit_msat.to_atto(),
                 },
                 expires_unix,
             )
@@ -283,6 +304,10 @@ impl LnRailAdapter {
 
     pub fn state(&self, id: &PaymentHash) -> Option<LifecycleState> {
         self.ledger.state(id)
+    }
+    /// LU-8.1: how fee evidence was BOOKED for a payment (absent ≠ zero).
+    pub fn fee_evidence(&self, id: &PaymentHash) -> Option<FeeEvidence> {
+        self.fee_evidence.get(id).copied()
     }
     pub fn reserved_total_msat(&self) -> u64 {
         // msat fits u64 for the skeleton's magnitudes

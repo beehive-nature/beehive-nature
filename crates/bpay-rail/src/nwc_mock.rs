@@ -23,6 +23,8 @@ pub struct MockNwcTransport {
     pub next_pay_ambiguous: bool,
     pub next_pay_fails: bool,
     pub next_rate_limited: bool,
+    /// LU-8.1 probe: next successful pay result OMITS fees_paid.
+    pub next_pay_no_fees: bool,
 }
 
 impl MockNwcTransport {
@@ -35,6 +37,7 @@ impl MockNwcTransport {
             next_pay_ambiguous: false,
             next_pay_fails: false,
             next_rate_limited: false,
+            next_pay_no_fees: false,
         }
     }
 
@@ -91,6 +94,13 @@ impl NwcTransport for MockNwcTransport {
                 let mut preimage = rec.0.clone();
                 preimage[31] ^= 0x5a;
                 rec.1 = MockPay::Settled { fees_msat: fees };
+                // LU-8.1 probe: a pay result with NO fees_paid testimony.
+                if self.next_pay_no_fees {
+                    self.next_pay_no_fees = false;
+                    return Ok(serde_json::json!({
+                        "preimage": hex::encode(preimage),
+                    }));
+                }
                 Ok(serde_json::json!({
                     "preimage": hex::encode(preimage),
                     "fees_paid": fees,

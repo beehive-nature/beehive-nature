@@ -21,6 +21,7 @@ pub mod nwc_crypto;
 pub mod nwc_live;
 pub mod nwc_mock;
 pub mod nwc_reader;
+pub mod units;
 pub mod x402;
 
 pub use evm::{EvmPaymentId, EvmRailAdapter};
@@ -31,4 +32,5 @@ pub use nwc::{NwcError, NwcRail, NwcTransport};
 #[cfg(feature = "live-nwc")]
 pub use nwc_live::{LiveNwcTransport, NwcConnection};
 pub use nwc_mock::MockNwcTransport;
+pub use units::{FeeEvidence, MilliSatoshi};
 pub use x402::{compose_from_offer, gate, offer_id, AllowEntry, OfferPolicy, PinnedOffer};

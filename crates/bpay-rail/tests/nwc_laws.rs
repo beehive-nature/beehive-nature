@@ -18,6 +18,7 @@
 use bpay_rail::ln::PaymentHash;
 use bpay_rail::nwc::{NwcError, NwcRail, NwcTransport};
 use bpay_rail::nwc_mock::MockNwcTransport;
+use bpay_rail::units::MilliSatoshi;
 use bpay_rail::LedgerError;
 use bpay_rail::LifecycleState;
 
@@ -30,8 +31,8 @@ fn refusal_field(e: &LedgerError) -> &'static str {
 fn mk_rail() -> NwcRail<MockNwcTransport> {
     let mut r = NwcRail::new(
         MockNwcTransport::new(1_000_000, 500_000),
-        10_000,
-        1_000,
+        MilliSatoshi(10_000),
+        MilliSatoshi(1_000),
         1_000_000,
     );
     r.enable_sends(); // mock transport — sends lawful in tests
@@ -42,8 +43,8 @@ fn mk_rail() -> NwcRail<MockNwcTransport> {
 fn nwc_read_only_info_and_balance() {
     let mut r = NwcRail::new(
         MockNwcTransport::new(1_000_000, 424_242),
-        10_000,
-        1_000,
+        MilliSatoshi(10_000),
+        MilliSatoshi(1_000),
         1_000_000,
     );
     let info = r.get_info().unwrap();
@@ -56,8 +57,8 @@ fn nwc_read_only_info_and_balance() {
 fn nwc_send_gate_off_by_default_named_refusal() {
     let mut r = NwcRail::new(
         MockNwcTransport::new(1_000_000, 1),
-        10_000,
-        1_000,
+        MilliSatoshi(10_000),
+        MilliSatoshi(1_000),
         1_000_000,
     );
     // sends DISABLED by default this slice — the founder-order gate
@@ -200,8 +201,8 @@ fn nwc_missing_preimage_is_incomplete_evidence() {
     }
     let mut r = NwcRail::new(
         NoPreimage(MockNwcTransport::new(1_000_000, 1)),
-        10_000,
-        1_000,
+        MilliSatoshi(10_000),
+        MilliSatoshi(1_000),
         1_000_000,
     );
     r.enable_sends();
@@ -231,7 +232,12 @@ fn nwc_live_readonly_info_and_balance() {
     #[cfg(feature = "live-nwc")]
     {
         let conn = bpay_rail::nwc_live::NwcConnection::parse(&url).expect("parse connection");
-        let mut r = NwcRail::new(bpay_rail::nwc_live::LiveNwcTransport::new(conn), 1, 1, 0);
+        let mut r = NwcRail::new(
+            bpay_rail::nwc_live::LiveNwcTransport::new(conn),
+            MilliSatoshi(1),
+            MilliSatoshi(1),
+            0,
+        );
         match r.get_info() {
             Ok(info) => println!("LIVE get_info OK: {}", info),
             Err(NwcError::TransportAmbiguous(note)) => {

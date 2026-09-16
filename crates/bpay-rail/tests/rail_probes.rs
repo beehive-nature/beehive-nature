@@ -11,6 +11,7 @@
 
 use bpay_rail::evm::EvmPaymentId;
 use bpay_rail::ln::{LnMockClient, LnRailAdapter, PaymentHash};
+use bpay_rail::units::MilliSatoshi;
 use bpay_rail::{
     EvmRailAdapter, FeeClass, FeeReservation, LedgerError, LifecycleState, RailLedger,
 };
@@ -221,14 +222,14 @@ fn p2_expiry_blocks_new_never_old() {
 // ── LN adapter probes (mock NWC-shaped client) ─────────────────────────
 
 fn ln() -> LnRailAdapter {
-    LnRailAdapter::new(10_000, 1_000, 1_000_000)
+    LnRailAdapter::new(MilliSatoshi(10_000), MilliSatoshi(1_000), 1_000_000)
 }
 
 #[test]
 fn ln_happy_path_settles_with_preimage_evidence() {
     let mut r = ln();
     let mut client = LnMockClient::new(1_000_000);
-    let inv = client.make_invoice(50_000, 3_600);
+    let inv = client.make_invoice(MilliSatoshi(50_000), 3_600);
     let st = r.pay(&inv).unwrap();
     assert_eq!(st, LifecycleState::Settled);
     // reservation reconciled to actual fees (< fee_limit)
@@ -239,7 +240,7 @@ fn ln_happy_path_settles_with_preimage_evidence() {
 fn ln_duplicate_hash_routes_to_lookup_never_repay() {
     let mut r = ln();
     let mut client = LnMockClient::new(1_000_000);
-    let inv = client.make_invoice(50_000, 3_600);
+    let inv = client.make_invoice(MilliSatoshi(50_000), 3_600);
     r.pay(&inv).unwrap();
     let e = r.pay(&inv).unwrap_err();
     assert_eq!(refusal_field(&e), "payment_hash");
@@ -249,9 +250,9 @@ fn ln_duplicate_hash_routes_to_lookup_never_repay() {
 #[test]
 fn ln_expired_invoice_refused_pre_send() {
     let mut client = LnMockClient::new(1_000_000);
-    let inv = client.make_invoice(50_000, 10);
+    let inv = client.make_invoice(MilliSatoshi(50_000), 10);
     // advance the mock clock past expiry
-    let mut r = LnRailAdapter::new(10_000, 1_000, 1_000_100);
+    let mut r = LnRailAdapter::new(MilliSatoshi(10_000), MilliSatoshi(1_000), 1_000_100);
     // rebuild invoice under the ORIGINAL clock, pay under the LATER one
     let _ = &mut r;
     let e = r.pay(&inv).unwrap_err();
@@ -263,7 +264,7 @@ fn ln_expired_invoice_refused_pre_send() {
 fn ln_transport_outage_is_unknown_not_failed() {
     let mut r = ln();
     let mut client = LnMockClient::new(1_000_000);
-    let inv = client.make_invoice(50_000, 3_600);
+    let inv = client.make_invoice(MilliSatoshi(50_000), 3_600);
     r.client.outage_next_pay = true;
     let st = r.pay(&inv).unwrap();
     assert_eq!(
@@ -280,17 +281,17 @@ fn ln_transport_outage_is_unknown_not_failed() {
 fn ln_impossible_fee_evidence_refused() {
     let mut r = ln();
     let mut client = LnMockClient::new(1_000_000);
-    let inv = client.make_invoice(50_000, 3_600);
+    let inv = client.make_invoice(MilliSatoshi(50_000), 3_600);
     r.pay(&inv).unwrap();
     // reconcile the SAME id again is terminal-immutable; instead probe
     // the adapter's fee-evidence law directly on a fresh in-flight id
     let mut client2 = LnMockClient::new(1_000_000);
-    let inv2 = client2.make_invoice(1, 3_600);
+    let inv2 = client2.make_invoice(MilliSatoshi(1), 3_600);
     // hand-craft an in-flight id with a tiny fee_limit adapter
-    let mut small = LnRailAdapter::new(10_000, 100, 1_000_000);
+    let mut small = LnRailAdapter::new(MilliSatoshi(10_000), MilliSatoshi(100), 1_000_000);
     small.ledger_open_probe(inv2.payment_hash, 1_003_600);
     let e = small
-        .reconcile(inv2.payment_hash, Some(101), &[0; 32])
+        .reconcile(inv2.payment_hash, Some(MilliSatoshi(101)), &[0; 32])
         .unwrap_err();
     assert_eq!(refusal_field(&e), "fees_paid");
     assert!(e.to_string().contains("impossible fee evidence"));
@@ -300,7 +301,7 @@ fn ln_impossible_fee_evidence_refused() {
 fn ln_htlc_timeout_fails_never_charges() {
     let mut r = ln();
     let mut client = LnMockClient::new(1_000_000);
-    let inv = client.make_invoice(50_000, 3_600);
+    let inv = client.make_invoice(MilliSatoshi(50_000), 3_600);
     // stage as in-flight without settlement
     r.ledger_open_probe(inv.payment_hash, 1_003_600);
     let st = r.fail_htlc(inv.payment_hash).unwrap();
@@ -308,7 +309,7 @@ fn ln_htlc_timeout_fails_never_charges() {
     // LN routing pays nothing on failure: reservation remains (window
     // discipline) but NO fee evidence may ever arrive for a Failed id
     let e = r
-        .reconcile(inv.payment_hash, Some(0), &[0; 32])
+        .reconcile(inv.payment_hash, Some(MilliSatoshi(0)), &[0; 32])
         .unwrap_err();
     assert_eq!(
         refusal_field(&e),
