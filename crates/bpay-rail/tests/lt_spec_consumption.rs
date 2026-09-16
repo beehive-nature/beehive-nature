@@ -8,6 +8,7 @@
 use bpay_rail::nwc::NwcError;
 use bpay_rail::nwc_crypto::nip44_encrypt;
 use bpay_rail::nwc_reader::{process_ack_frame, process_message, AckVerdict, RequestCtx, Verdict};
+use bpay_rail::units::MilliSatoshi;
 use std::collections::HashSet;
 
 fn ctx_parts() -> ([u8; 32], String, String) {
@@ -281,7 +282,8 @@ fn lt7_1b_single_relay_still_parses() {
 fn lt9_3_lowercase_percent_sequences_decode() {
     #[cfg(feature = "live-nwc")]
     {
-        let url = "nostr+walletconnect://aabb..ccdd?relay=https%3a%2f%2frelay.example&secret=0102gAL"; // synthetic (not a real key)
+        let url =
+            "nostr+walletconnect://aabb..ccdd?relay=https%3a%2f%2frelay.example&secret=0102gAL"; // synthetic (not a real key)
         let conn = bpay_rail::nwc_live::NwcConnection::parse(url)
             .expect("lowercase percent-sequences must decode");
         assert_eq!(conn.relay_url_ws, "wss://relay.example");
@@ -315,7 +317,12 @@ fn lt0_transport_failures_never_mint_identities() {
         }
     }
 
-    let mut rail = NwcRail::new(FailingTransport, 10_000, 1_000, 1_000_000);
+    let mut rail = NwcRail::new(
+        FailingTransport,
+        MilliSatoshi(10_000),
+        MilliSatoshi(1_000),
+        1_000_000,
+    );
     rail.enable_sends();
     let hash = PaymentHash([1; 32]);
     let hash_bytes = hash.0;
