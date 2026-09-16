@@ -51,10 +51,12 @@ export function evidenceClass(person) {
   return "saga";
 }
 
+const PERSON_KNOWN_KEYS = ["id", "name", "lifespan", "gender", "living", "source", "sourceId", "evidence", "note"];
+
 export function addPerson(model, p) {
   if (!p || typeof p.id !== "string" || !p.name) return false;
   const prev = model.persons[p.id];
-  model.persons[p.id] = {
+  const entry = {
     name: p.name,
     lifespan: p.lifespan ?? null,
     gender: p.gender ?? null,
@@ -65,8 +67,12 @@ export function addPerson(model, p) {
       class: evidenceClass(p),
       basis: p.evidence?.basis ?? "era-heuristic",
     },
-    ...(prev?.note || p.note ? { note: prev?.note || p.note } : {}),
+    ...((prev?.note || p.note) ? { note: prev?.note || p.note } : {}),
   };
+  // layer fields ride along untouched: evidencePack, relation, corrected, …
+  for (const k of Object.keys(p))
+    if (!PERSON_KNOWN_KEYS.includes(k) && p[k] !== undefined && p[k] !== null) entry[k] = p[k];
+  model.persons[p.id] = entry;
   return true;
 }
 

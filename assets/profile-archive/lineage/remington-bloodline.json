@@ -58,23 +58,35 @@
    }
   },
   "LNQ5-BSG": {
-   "name": "Living",
-   "lifespan": null,
+   "name": "Don Ray Remington",
+   "lifespan": "1931–Deceased",
    "gender": "MALE",
-   "living": true,
+   "living": false,
+   "source": "familysearch",
+   "sourceId": "LNQ5-BSG",
    "evidence": {
-    "class": "living",
+    "class": "recorded",
     "basis": "era-heuristic"
+   },
+   "corrected": {
+    "attested": "founder order 2026-09-16",
+    "note": "FamilySearch private-space record flags Don Ray Remington living; the founder attests the family line — famous grandpa is not 'Living'. Death year unknown to the archive; no year invented."
    }
   },
   "LNQ5-BSF": {
-   "name": "Living",
-   "lifespan": null,
+   "name": "Marilyn Lowry",
+   "lifespan": "1932–Deceased",
    "gender": "FEMALE",
-   "living": true,
+   "living": false,
+   "source": "familysearch",
+   "sourceId": "LNQ5-BSF",
    "evidence": {
-    "class": "living",
+    "class": "recorded",
     "basis": "era-heuristic"
+   },
+   "corrected": {
+    "attested": "founder order 2026-09-16",
+    "note": "FamilySearch private-space record flags Marilyn Lowry Remington living; she is the founder's deceased grandmother (the tree's co-builder with him, 12 years ago). Death year unknown to the archive; no year invented."
    }
   },
   "L4R4-43N": {
@@ -123064,6 +123076,40 @@
     "class": "medieval",
     "basis": "era-heuristic"
    }
+  },
+  "ovl-sigurd-snake-eye": {
+   "name": "Sigurd Snake-in-the-Eye (Sigurd Ragnarsson)",
+   "lifespan": "mid 9th century–0887? (traditional; possibly the Sigfred killed in West Francia 887)",
+   "gender": "M",
+   "living": false,
+   "evidence": {
+    "class": "unrecorded",
+    "basis": "attested-overlay: tradition carried by Ragnarssona þáttr / Ragnars saga / Saxo"
+   },
+   "evidencePack": "evidence/sigurd-snake-in-eye.json",
+   "relation": "son of Ragnar Loðbrók and Queen Aslaug — KIN BY TRADITION, not blood-proven; the crest's paired serpents honor him"
+  },
+  "ovl-blaeja-of-northumbria": {
+   "name": "Blaeja of Northumbria",
+   "lifespan": "9th century (traditional)",
+   "gender": "F",
+   "living": false,
+   "evidence": {
+    "class": "unrecorded",
+    "basis": "attested-overlay: tradition; daughter of King Ælla — the king who killed Ragnar"
+   },
+   "evidencePack": "evidence/sigurd-snake-in-eye.json"
+  },
+  "ovl-harthacnut-i": {
+   "name": "Harthacnut I of Denmark (Harthacanute)",
+   "lifespan": "late 9th century–0916? (traditional; king of part of Denmark ~916)",
+   "gender": "M",
+   "living": false,
+   "evidence": {
+    "class": "unrecorded",
+    "basis": "attested-overlay: tradition; father of Gorm the Old — the bridge toward documented Danish kings (Adam of Bremen conflicts: names his father 'Sven')"
+   },
+   "evidencePack": "evidence/sigurd-snake-in-eye.json"
   }
  },
  "edges": {
@@ -150882,6 +150928,14 @@
   "LHXS-LRZ": [
    "L6RB-NG5",
    "LTRZ-THW"
+  ],
+  "ovl-sigurd-snake-eye": [
+   "M8WZ-XZY",
+   "LYH3-ZXF"
+  ],
+  "ovl-harthacnut-i": [
+   "ovl-sigurd-snake-eye",
+   "ovl-blaeja-of-northumbria"
   ]
  },
  "couples": {
@@ -170306,17 +170360,25 @@
   "generated": "2026-09-16",
   "source": "FamilySearch Family Tree, walked under the founder's signed-in session (fs-adapter)",
   "stats": {
-   "personsWalked": 18572,
+   "personsWalked": 18575,
    "bloodlinePersons": 10097,
-   "deceasedPublished": 10256,
-   "livingRedacted": 7,
+   "deceasedPublished": 10259,
+   "livingRedacted": 5,
    "spineGenerations": 42,
    "spineReaches": "Randver Radbardson 0670–0730",
-   "livingStubs": 5
+   "livingStubs": 3
   },
   "privacy": "living persons redacted — root-line living survive as anonymous 'Living' stubs (no names, dates, or source ids); all other living dropped",
   "confidenceTiers": "era heuristic (recorded ≥1850 · colonial 1550–1850 · medieval 1000–1550 · saga <1000); basis says era-heuristic until per-person source counts are harvested",
-  "claimPolicy": "every person carries its evidence class; the spine past the colonial era is traditional, not proven"
+  "claimPolicy": "every person carries its evidence class; the spine past the colonial era is traditional, not proven",
+  "packs": {
+   "M8WZ-XZY": "evidence/ragnar-lodbrok.json",
+   "ovl-sigurd-snake-eye": "evidence/sigurd-snake-in-eye.json",
+   "ovl-blaeja-of-northumbria": "evidence/sigurd-snake-in-eye.json",
+   "ovl-harthacnut-i": "evidence/sigurd-snake-in-eye.json"
+  },
+  "correctionsApplied": 2,
+  "overlayPersons": 3
  },
  "spine": [
   {

@@ -52,6 +52,8 @@ h1{font-size:clamp(22px,4.5vw,34px);line-height:1.15;margin:8px 0 6px;font-weigh
 .detail .chip.t{border-color:currentColor}
 .detail .drels{margin-top:10px;display:grid;gap:6px;font-size:11.5px}
 .detail .drels .lab{font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
+.detail .drels .layer{font-size:11px;color:var(--dim);line-height:1.7;padding-left:2px}
+.detail .drels .claim{font-size:10px;color:var(--dim);line-height:1.65;margin:5px 0 0 10px;border-left:2px solid var(--line);padding-left:9px}
 .detail .drels button{background:none;border:0;color:var(--cyan);cursor:pointer;font:11.5px 'IBM Plex Mono',monospace;
  padding:0;text-align:left;text-decoration:underline dotted}
 .detail .dactions{margin-top:12px;display:flex;flex-wrap:wrap;gap:8px}
@@ -105,11 +107,12 @@ footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint
   var TIER_COLOR={recorded:'var(--verified)',colonial:'var(--info)',medieval:'var(--gold)',saga:'var(--violet)',living:'var(--dim)',unrecorded:'var(--dim)'};
   var esc=function(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});};
   function langText(key,fallback){var t=window.BNRLanguage&&window.BNRLanguage.text;return t?t(key,fallback):fallback;}
-  var S={persons:{},edges:{},children:{},spineIds:new Set(),root:null,curRoot:null,spineOn:false,stats:{},packs:{}};
+  var S={persons:{},edges:{},children:{},spineIds:new Set(),root:null,curRoot:null,spineOn:false,stats:{},packs:{},packData:{},corrections:{}};
   function addChild(p,c){(S.children[p]=S.children[p]||[]).push(c);}
   fetch(CORPUS_URL).then(r=>r.json()).then(c=>{
     S.persons=c.persons||{};S.edges=c.edges||{};S.root=c.root;S.curRoot=c.root;
     S.stats=(c.meta&&c.meta.stats)||{};
+    S.packs=Object.assign({},(c.meta&&c.meta.packs)||{});
     (c.spine||[]).forEach(r=>{if(r.f)S.spineIds.add(r.f);});
     for(var e in S.edges)S.edges[e].forEach(p=>addChild(p,e));
     return fetch(OVERLAY_URL).then(r=>r.json()).catch(()=>null);
@@ -117,9 +120,18 @@ footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint
     if(ov&&ov.persons){
       for(var id in ov.persons){S.persons[id]=ov.persons[id];S.packs[id]=ov.persons[id].evidencePack||null;}
       for(var ce in ov.edges){S.edges[ce]=ov.edges[ce];ov.edges[ce].forEach(p=>addChild(p,ce));}
+      S.corrections=ov.corrections||{};
     }
-    renderDyn();drawComb();showRootNote();
-  }).catch(()=>{document.getElementById('stats').textContent='could not load the corpus';});
+    // evidence packs ride alongside: fetch any referenced packs for the detail layers
+    var packUrls=[...new Set(Object.values(S.packs).filter(Boolean))]
+      .map(function(p){return '../assets/profile-archive/lineage/'+p;});
+    return Promise.all(packUrls.map(function(u){return fetch(u).then(function(r){return r.json();}).then(function(j){
+      S.packData[u.split('/').pop()]=j;
+      // a pack may attest a WALKED person too (fsid header) — index both ways
+      if(j&&j.person&&j.person.fsid)S.packs[j.person.fsid]=u.split('/').pop();
+    }).catch(function(){});}));
+  }).then(function(){renderDyn();drawComb();showRootNote();})
+  .catch(()=>{document.getElementById('stats').textContent='could not load the corpus';});
   function renderDyn(){
     document.getElementById('stats').textContent=langText('blood.stats',
       '{w} walked · {d} deceased published · {l} living redacted · spine {g} generations deep')
@@ -189,6 +201,34 @@ footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint
   }
   function nameOf(id){var p=S.persons[id];return p?(p.name||id):id;}
   function tierChip(cls){return '<span class="chip t" style="color:'+TIER_COLOR[cls]+'">'+esc(cls)+'</span>';}
+  // ── evidence layers: a person may participate in several without one
+  // upgrading another — walked record, founder correction, attested overlay,
+  // evidence-pack tradition. Each renders as its own row.
+  function layersHtml(id,p){
+    var out='<div class="drels"><div class="lab">'+esc(langText('blood.layers','evidence layers'))+'</div>';
+    if(/^[A-Z0-9]{4}-[A-Z0-9]{3,4}$/.test(id))
+      out+='<div class="layer">① '+esc(langText('blood.layer.walked','walked record · FamilySearch'))+' <span style="color:var(--faint)">'+esc(id)+'</span></div>';
+    if(p.corrected)
+      out+='<div class="layer">② '+esc(langText('blood.layer.corrected','founder correction'))+' — '+esc(p.corrected.attested||'')+' · <span style="color:var(--faint)">'+esc((p.corrected.note||'').split(';')[0])+'</span></div>';
+    if(/^ovl-/.test(id))
+      out+='<div class="layer">② '+esc(langText('blood.layer.overlay','attested overlay — outside the provider walk'))+'</div>';
+    var pack=S.packs[id];
+    if(pack){
+      var pd=S.packData[pack.split('/').pop()];
+      out+='<div class="layer">③ '+esc(langText('blood.layer.pack','tradition layer — evidence pack'))+' · <a href="../assets/profile-archive/lineage/'+esc(pack)+'">'+esc(pack)+'</a></div>';
+      if(pd&&pd.claims){
+        out+='<details style="margin-top:4px"><summary style="cursor:pointer;color:var(--dim);font-size:10.5px">'+esc(pd.claims.length)+' '+esc(langText('blood.layer.claims','cited claims — read the tradition itself'))+'</summary>';
+        pd.claims.slice(0,8).forEach(function(cl){
+          out+='<div class="claim"><b>'+esc(cl.source)+'</b> — '+esc(cl.claim)+
+            (cl.url?' <a href="'+esc(cl.url)+'">↗</a>':'')+'</div>';});
+        out+='</details>';
+      }
+    }
+    if(p.evidence&&/saga|medieval/.test(p.evidence.class)&&!pack&&!p.corrected)
+      out+='<div class="layer" style="color:var(--violet)">⚠ '+esc(langText('blood.layer.legend','traditional/mythological layer — this record rides legendary genealogy; it does not upgrade to documented'))+'</div>';
+    out+='</div>';
+    return out;
+  }
   function showDetail(id){
     var p=S.persons[id];if(!p)return;
     var body=document.getElementById('dbody'),emp=document.getElementById('dempty');
@@ -211,7 +251,9 @@ footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint
     if(S.spineIds.has(id))chips+='<span class="chip" style="color:var(--gold)">'+esc(langText('blood.onspine','on the spine'))+'</span>';
     body.innerHTML='<div class="dname">'+esc(p.name||id)+'</div>'
       +(p.lifespan?'<div class="dyears">'+esc(p.lifespan)+'</div>':'')
-      +'<div class="dchips">'+chips+'</div>'+rels
+      +'<div class="dchips">'+chips+'</div>'+rels+layersHtml(id,p)
+      +'<div class="drels"><div class="lab">'+esc(langText('blood.bnr','bnr blood address'))+'</div>'
+      +'<div style="color:var(--cyan);font-size:10.5px;word-break:break-all">bnr://skaists.dev/blood/'+esc(id)+'</div></div>'
       +'<div class="dactions"><button id="reroot" data-i18n="blood.reroot">re-root the comb here</button>'
       +(S.packs[id]?'<a class="ghost" style="text-decoration:none;padding:8px 14px;border:1px solid var(--line);border-radius:8px;color:var(--cyan)" href="../assets/profile-archive/lineage/'+esc(S.packs[id])+'">'+esc(langText('blood.pack','open the evidence pack'))+'</a>':'')
       +'</div>';

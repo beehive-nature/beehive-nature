@@ -16,6 +16,55 @@ const raw = JSON.parse(readFileSync(rawPath, "utf8"));
 const model = createModel({ root: raw.root, source: "familysearch" });
 importWalk(model, raw);
 
+// attested overlays: corrections patch walked persons (a LAYER over the
+// provider record — the provider flag survives in note, never silently
+// edited); overlay persons join the corpus directly so the bnr address
+// space is one corpus.
+let overlay = null;
+try {
+  overlay = JSON.parse(readFileSync("assets/profile-archive/lineage/attested-overlays.json", "utf8"));
+} catch (e) { /* overlays optional */ }
+let correctionsApplied = 0, overlayPersons = 0;
+if (overlay) {
+  for (const [id, c] of Object.entries(overlay.corrections || {})) {
+    if (!model.persons[id] || !c?.patch) continue;
+    model.persons[id] = {
+      ...model.persons[id], ...c.patch,
+      corrected: { attested: c.attested || "founder", note: c.note || "" },
+    };
+    correctionsApplied++;
+  }
+  for (const [id, p] of Object.entries(overlay.persons || {})) {
+    if (!p?.name) continue;
+    model.persons[id] = {
+      name: p.name, lifespan: p.lifespan ?? null, gender: p.gender ?? null,
+      living: !!p.living,
+      evidence: p.evidence || { class: "saga", basis: "attested-overlay" },
+      ...(p.evidencePack ? { evidencePack: p.evidencePack } : {}),
+      relation: p.relation || null,
+    };
+    overlayPersons++;
+  }
+  for (const [child, ps] of Object.entries(overlay.edges || {}))
+    if (model.persons[child]) model.edges[child] = ps.filter((p) => model.persons[p] || String(p).startsWith("ovl-"));
+}
+
+// evidence-pack index: which pack attests which person (by fsid for walked
+// persons, by overlay id for overlay persons) — the page fetches packs from
+// this map; it cannot enumerate directories over HTTP
+const packIndex = {};
+try {
+  const { readdirSync } = await import("node:fs");
+  for (const f of readdirSync("assets/profile-archive/lineage/evidence").sort()) {
+    if (!f.endsWith(".json")) continue;
+    const j = JSON.parse(readFileSync("assets/profile-archive/lineage/evidence/" + f, "utf8"));
+    if (j?.person?.fsid) packIndex[j.person.fsid] = "evidence/" + f;
+  }
+} catch (e) { /* evidence dir optional */ }
+if (overlay)
+  for (const [id, p] of Object.entries(overlay.persons || {}))
+    if (p?.evidencePack) packIndex[id] = p.evidencePack;
+
 const problems = validate(model).filter((p) => !p.startsWith("unresolved:"));
 const unresolved = validate(model).length - problems.length;
 if (problems.length) {
@@ -54,6 +103,7 @@ for (const c of Object.values(model.couples)) {
   if (blood.has(c.p1)) publishable.add(c.p2);
   if (blood.has(c.p2)) publishable.add(c.p1);
 }
+if (overlay) for (const id of Object.keys(overlay.persons || {})) publishable.add(id);
 const pub = createModel({ root: model.root, source: model.source });
 let redacted = 0, stubs = 0, livingTotal = 0;
 for (const p of Object.values(model.persons)) if (p.living) livingTotal++;
@@ -109,6 +159,9 @@ pub.meta = {
   privacy: "living persons redacted — root-line living survive as anonymous 'Living' stubs (no names, dates, or source ids); all other living dropped",
   confidenceTiers: "era heuristic (recorded ≥1850 · colonial 1550–1850 · medieval 1000–1550 · saga <1000); basis says era-heuristic until per-person source counts are harvested",
   claimPolicy: "every person carries its evidence class; the spine past the colonial era is traditional, not proven",
+  packs: packIndex,
+  correctionsApplied,
+  overlayPersons,
 };
 const pubProblems = validate(pub, { public: true }).filter((p) => !p.startsWith("unresolved:"));
 if (pubProblems.length) {
