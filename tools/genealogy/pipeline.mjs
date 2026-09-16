@@ -155,29 +155,22 @@ for (const c of Object.values(model.couples)) if (pub.persons[c.p1] && pub.perso
 // re-point a published address at someone else. The PUBLIC registry carries
 // deceased refs only; the living mapping (fsid→founder/liv-N) stays in a
 // PRIVATE registry on estate-local disk, out of public artifacts.
-const { createHash } = await import("node:crypto");
-const internalId = (providerRef) => "p" + createHash("sha1").update(providerRef).digest("hex").slice(0, 10);
 const PUBLIC_REGISTRY = "assets/profile-archive/lineage/identity-registry.json";
 const PRIVATE_REGISTRY = "C:/Users/travi/family-lineage/identity-registry-private.json";
-const loadJson = (p) => { try { return JSON.parse(readFileSync(p, "utf8")); } catch (e) { return null; } };
-const pubRegistry = loadJson(PUBLIC_REGISTRY) || { schema: "skaists.identity-registry/1", issued: {}, aliases: {} };
-const privRegistry = loadJson(PRIVATE_REGISTRY) || { schema: "skaists.identity-registry-private/1", issued: {}, note: "fsid→pseudonym for living persons; NEVER published" };
+const { loadRegistry, assignIdentities } = await import("./identity.mjs");
+// corrupted previously-issued registries are FATAL (never a silent reset);
+// missing ones start fresh — the two states are distinct on purpose
+const pubReg = loadRegistry(PUBLIC_REGISTRY, "skaists.identity-registry/1");
+const privReg = loadRegistry(PRIVATE_REGISTRY, "skaists.identity-registry-private/1");
+const pubRegistry = pubReg.registry;
+const privRegistry = privReg.registry;
+privRegistry.note = "fsid→pseudonym for living persons; NEVER published";
 
-const idmap = {};
-let livN = Math.max(0, ...Object.values(privRegistry.issued).map((v) => /^liv-(\d+)$/.exec(v) ? parseInt(RegExp.$1, 10) : 0));
-for (const id of Object.keys(pub.persons)) {
-  const p = pub.persons[id];
-  if (p.living) {
-    if (id === pub.root) { idmap[id] = "founder"; privRegistry.issued[id] = "founder"; }
-    else { const known = privRegistry.issued[id]; if (known) idmap[id] = known; else { idmap[id] = "liv-" + (++livN); privRegistry.issued[id] = idmap[id]; } }
-  } else if (/^ovl-/.test(id)) idmap[id] = id;
-  else {
-    // registry first (frozen identity); a changed provider reference becomes
-    // an ALIAS of the already-issued id rather than a new person
-    const known = pubRegistry.issued[id];
-    idmap[id] = known || internalId("familysearch:" + id);
-    if (!known) pubRegistry.issued[id] = idmap[id];
-  }
+const { idmap, errors: identityErrors } = assignIdentities({ pubPersons: pub.persons, root: pub.root, pubRegistry, privRegistry });
+if (identityErrors.length) {
+  console.error("IDENTITY ASSIGNMENT FAILED:");
+  identityErrors.forEach((e) => console.error("  - " + e));
+  process.exit(1);
 }
 const remapped = { persons: {}, edges: {} };
 const refsIndex = {};
