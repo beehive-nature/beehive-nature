@@ -91,3 +91,22 @@ throughout the gap (~9 min), meter-gate + meter never dropped.
   BUILD_FAIL marker). Swap procedure once OK: standalone smoke on :8091 with
   the staged model + the NEW binary, then the unit override points at
   `build-new/bin/llama-server` — never overwrite the known-good `build/`.
+
+## SWAP COMPLETE (2026-09-16 ~02:30 UTC)
+
+- llama.cpp REBUILT: tag b10991 → `build-new/bin/llama-server`
+  **0.4.1-dev @930e2fa** — the running binary was 0.3.0-dev (a whole major
+  behind; that was the generation-hang root cause). `--spec-type` menu now
+  includes **draft-mtp**.
+- Standalone smoke (:8091): loads in ~40 s, prompt eval 16.5 tok/s,
+  **eval 5.49 tok/s** on 3 threads.
+- PRODUCTION SWAPPED via drop-in override (rollback = delete
+  `/etc/systemd/system/buzz-compute.service.d/bmeshllm.conf` + daemon-reload
+  + restart): build-new binary + Qwen3.5-4B-UD-Q4_K_XL-MTP + `--spec-type
+  draft-mtp`. Health 200, meter-gate + meter active.
+- **Consumer law — this is a REASONING model:** short `max_tokens` return
+  empty `content` with the tokens in `reasoning_content`. Direct answers:
+  send `"chat_template_kwargs":{"enable_thinking":false}` (verified live:
+  16-token clean answer). Agents that want thinking just raise max_tokens.
+- Timing receipts are CPU-contended (backup tar concurrent); re-measure on
+  an idle box for the acceptance table.
