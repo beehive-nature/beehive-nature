@@ -12,6 +12,7 @@
 //! pre-signature offer gate) stays at the design level — not built.
 
 pub mod capabilities;
+pub mod capability;
 pub mod evm;
 pub mod fee;
 pub mod ledger;
