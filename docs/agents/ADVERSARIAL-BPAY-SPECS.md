@@ -732,3 +732,39 @@ typing). The WS reader slice is the natural carrier for LT-2/3/5.
 
 *Eighth roll, 2026-09-16. Pipeline law unchanged: builder proves RED, fixes GREEN, CI
 arbitrates; zArcheology designs tests only, zero production code, zero network.*
+
+---
+
+## NINTH ROLL — authorization-time capability binding ACROSS RECOVERY (2026-09-16)
+
+*Founder law for this roll, verbatim: "A recovered payment may learn **new evidence**, but it
+may never inherit **new capabilities** without a new authorization." Builds on SPEC MP (seventh
+roll): MP binds the manifest hash+version at authorization; this roll attacks every path that
+could smuggle a different binding back in through recovery. Targets: the durable journal
+persistence of the binding, the reconcile/evidence path (R11 law), the replacement path
+(AV-8.3), and adapter upgrades (ties to DEPLOYMENTS.md R2 identity pinning).*
+
+### SPEC RB — recovery preserves the signed binding (RED-first)
+
+| # | case | exact pass criterion | fail criterion |
+|---|---|---|---|
+| RB-0 | journal round-trip of the binding (mechanism) | the per-leg manifest hash+version is IN the durable record: write → drop handle → reopen → binding byte-equal; never recomputed from the live manifest | binding reconstructed from current state on reopen |
+| RB-1 | crash mid-leg; manifest upgraded to v2/h2 DURING downtime; restart recovers and continues the leg | recovered binding == h1 (asserted from the recovered record); capability lookups for that leg resolve against the BOUND manifest, not the live one; new legs see the typed DRIFT refusal (MP-2) | recovered leg silently carrying h2 |
+| RB-2 | UNKNOWN leg under h1; manifest drifts; settle-evidence arrives whose validity DIFFERS by manifest (h1 declares reorg-depth-12, h2 relaxes to depth-2; evidence at depth-6: passes h2, fails h1) | evidence validated under the BOUND h1 semantics → refused; acceptance via the live h2 = **capability inheritance through the evidence path** | depth-6 evidence accepted for an h1-bound leg |
+| RB-3 | adapter IMPLEMENTATION upgrade declaring the same manifest (code changed, manifest didn't — lying by omission) | manifest must bind implementation identity (crate/version digest or the DEPLOYMENTS.md row hash); CD-4 behavior probes re-run on upgrade catch the divergence | upgraded adapter passes under a stale manifest |
+| RB-4 | version-ONLY bump (v1→v1.1, semantically neutral, additive) | still a typed drift event for unopened legs; opened legs grandfather under v1 EXACTLY — no partial inheritance of "just the new optional stuff"; the version IS the binding | silent version migration |
+| RB-5 | bounded replacement after drift | the replacement carries the ORIGINAL h1 binding and validates under h1 semantics (fees, finality, ceilings); a replacement satisfying only h2 semantics = typed refusal; the lawful path to h2 is a NEW authorization | replacement constructed under live-manifest semantics |
+| RB-6 | lawful re-authorization (positive control) | post-drift, a NEW authorization binds h2: old leg reaches terminal-or-refunded, new leg executes under h2, both coexist without interference — recovery never traps a payer | re-authorization blocked or cross-bound |
+| RB-7 | negative controls | (a) re-binding recovery (journal + live manifest) DETECTED by RB-1; (b) evidence-path inheritance DETECTED by RB-2; (c) replacement inheritance DETECTED by RB-5 | harness blind on any axis |
+
+**RED expectations:** RB-0 (no binding type exists yet — MP-3's RED charters it, RB-0 pins its
+persistence), RB-2/RB-5 (evidence and replacement paths have no manifest-awareness today),
+RB-3 (nothing binds implementation identity). **Harness:** crash/restart via drop-and-reopen of
+the journal handle against a mutated on-disk manifest fixture (deterministic — no real SIGKILL
+needed for the binding question; AV-1 covers process-level crash separately); mutable-version
+manifest fixtures from the seventh roll; zero network; live NWC stays `#[ignore]` env-gated.
+
+*Single-writer discipline (founder order, 2026-09-16): no additional zArcheology writers on
+this artifact — existing sessions finish their rolls; future parallelism goes to DIFFERENT
+workerb lanes, not this file. — Ninth roll, 2026-09-16. Pipeline law unchanged: builder proves
+RED, fixes GREEN, CI arbitrates; zArcheology designs tests only.*
