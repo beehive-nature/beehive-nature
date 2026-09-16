@@ -59,9 +59,10 @@ def _id(kind, obj):
 def append_state(rec):
     with open(STATE_JSONL, "a") as f: f.write(json.dumps(rec) + "\n")
 
-def evidence_record(task, state, observed, lines):
+def evidence_record(task, state, observed, lines, epoch=""):
     rec = {
         "record_id": "", "kind": "delivery-evidence", "task_id": task,
+        "boot_epoch": epoch or None,
         "state": state,                       # PARTIAL/CANCELLED | COMPLETE | ...
         "observed": observed,                 # raw numbers as seen — NOT billable
         "billing": None,                      # THE LAW: no billing decision is made here
@@ -106,12 +107,20 @@ def ingest_gate_verdict(line):
                                {"verdict": code, "phase": phase, "ms": v.get("ms"), "key_id": v.get("key_id")})
     return None
 
-def parse_delivery(text, rate_set, key_ref, seen_tasks, ledger=None):
+MODEL_LOADED_MARKER = "llama_server: model loaded"
+
+def _q(epoch, task):
+    """boot-epoch-qualified ledger key — task ids are PER-PROCESS and repeat
+    after every restart (composite residual #1): '0:2' and '1:2' are two
+    DIFFERENT generations that must each bill exactly once."""
+    return f"{epoch}:{task}" if epoch else str(task)
+
+def parse_delivery(text, rate_set, key_ref, seen_tasks, ledger=None, epoch=""):
     """The four-state parser. COMPLETE reuses the production parse_stream and
     emitter (payment chain); everything else is evidence/failure-side.
-    `ledger` (optional, persisted dict with complete/partial/wedged lists)
-    makes artifact emission WRITE-ONCE per task across restarts, replays and
-    duplicate log input — the replay-safety law."""
+    `ledger` (optional, persisted dict) makes artifact emission WRITE-ONCE per
+    task across restarts, replays and duplicate log input; `epoch` qualifies
+    ledger keys by server boot (empty = legacy raw keys)."""
     led = ledger or {}
     partial_seen = set(led.get("partial", []))
     wedged_seen = set(led.get("wedged", []))
@@ -125,56 +134,68 @@ def parse_delivery(text, rate_set, key_ref, seen_tasks, ledger=None):
         m = RELEASE_RE.search(line)
         if m:
             releases.setdefault(m.group(1), (int(m.group(2)), line)); continue
-    # COMPLETE via the production parser — THE CALLER'S seen/ledger set is the
-    # dedupe set passed INTO parse_stream (composite catch: a fresh set here
-    # re-emitted every task on replayed/duplicated text)
-    before_seen = set(seen_tasks)
-    results["complete"] = meter.parse_stream(text, None, rate_set, key_ref, seen_tasks, live=True)
-    completed_ids = seen_tasks - before_seen
+    # COMPLETE via the production parser — the dedupe set passed INTO it is
+    # the persisted ledger's CURRENT-EPOCH completions (raw ids), so replayed
+    # or duplicated text can never re-emit, and a repeated numeric id in a
+    # NEW boot is a different key and bills independently
+    if ledger is not None:
+        dedupe = {k.split(":", 1)[1] for k in led.get("complete", []) if k.startswith(_q(epoch, ""))}
+        before = set(dedupe)
+        epoch_completed_raw = set(dedupe)   # replay guard: tasks completed in THIS boot at ANY past time
+    else:
+        dedupe = seen_tasks
+        before = set(dedupe)
+        epoch_completed_raw = set()
+    results["complete"] = meter.parse_stream(text, None, rate_set, key_ref, dedupe, live=True)
+    completed_ids = dedupe - before
+    seen_tasks |= completed_ids
     if ledger is not None:                     # persist the write-once set: replay/restart
         ledger.setdefault("complete", [])
-        ledger["complete"] = list(set(ledger["complete"]) | completed_ids)
+        ledger["complete"] = list(set(ledger["complete"]) | {_q(epoch, t) for t in completed_ids})
     for r in results["complete"]:
         emit_payment(r)
     # PARTIAL/CANCELLED: cancelled tasks with a release carrying n_tokens
     for task in cancels:
-        if task in partial_seen: continue
-        if ledger is not None: ledger.setdefault("partial", []).append(task)
+        if _q(epoch, task) in partial_seen: continue
+        if ledger is not None: ledger.setdefault("partial", []).append(_q(epoch, task))
         if task in releases:
             n, line = releases[task]
             results["partial"].append(evidence_record(
                 task, "PARTIAL/CANCELLED",
                 {"n_tokens_at_stop": n, "note": "observed tokens at stop — raw evidence, not billable"},
-                cancels[task] + [line]))
+                cancels[task] + [line], epoch=epoch))
         else:
             results["release_only"].append(evidence_record(
                 task, "PARTIAL/CANCELLED", {"n_tokens_at_stop": None},
-                cancels[task]))
+                cancels[task], epoch=epoch))
     # releases without cancel (server-side stop) — evidence ONLY if the task
     # did NOT complete: llama-server prints a release line for EVERY task,
     # completed ones included (composite battery catch, 2026-09-16)
     for task in releases:
-        if (task not in cancels and task not in partial_seen
-                and task not in completed_ids and task not in seen_tasks):
-            if ledger is not None: ledger.setdefault("partial", []).append(task)
+        if (task not in cancels and _q(epoch, task) not in partial_seen
+                and task not in completed_ids and task not in seen_tasks
+                and task not in epoch_completed_raw):
+            if ledger is not None: ledger.setdefault("partial", []).append(_q(epoch, task))
             n, line = releases[task]
             results["release_only"].append(evidence_record(
                 task, "PARTIAL/CANCELLED",
                 {"n_tokens_at_stop": n, "note": "stopped without client-cancel on record"},
-                [line]))
-    # UNKNOWN/WEDGED: launched, never settled in THIS segment; the persistent
-    # open-task sweep in the watch loop ages cross-segment silence — this
-    # branch only fires for tasks whose whole lifecycle is inside one segment
-    for task in launched:
-        if (task not in cancels and task not in releases and task not in completed_ids
-                and task not in wedged_seen):
-            if ledger is not None: ledger.setdefault("wedged", []).append(task)
-            results["wedged"].append(task)
-            failure_receipt("UNKNOWN/WEDGED", "meter-wedge-detector",
-                            {"task": task, "silence_s": WEDGE_SILENCE_S,
-                             "note": "launched, never settled — timing silence",
-                             "raw_lines": launched[task]})
-            evidence_record(task, "UNKNOWN/WEDGED", {"tokens": None}, launched[task])
+                [line], epoch=epoch))
+    # UNKNOWN/WEDGED, single-segment form: ONLY in the ledger-less (pure
+    # battery) path — the watch path's aging sweep owns cross-segment wedge
+    # detection; firing here on a launch whose settle lands in a LATER poll
+    # double-marked settled tasks (adversarial catch, 2026-09-16)
+    if ledger is None:
+        for task in launched:
+            if (task not in cancels and task not in releases and task not in completed_ids
+                    and task not in epoch_completed_raw
+                    and _q(epoch, task) not in wedged_seen):
+                results["wedged"].append(task)
+                failure_receipt("UNKNOWN/WEDGED", "meter-wedge-detector",
+                                {"task": task, "boot_epoch": epoch or None, "silence_s": WEDGE_SILENCE_S,
+                                 "note": "launched, never settled — timing silence",
+                                 "raw_lines": launched[task]})
+                evidence_record(task, "UNKNOWN/WEDGED", {"tokens": None}, launched[task], epoch=epoch)
     return results
 
 def emit_payment(r):
@@ -185,6 +206,21 @@ def emit_payment(r):
                       "task_ref": r.get("provenance", {}).get("task"), "state": "COMPLETE",
                       "receipt_id": r["receipt_id"], "billing": "payment-receipt-emitted",
                       "ts": time.time()})
+
+def replay(text, rate_set, key_ref, ledger):
+    """Replay a FULL llama log (from its first boot) through the parser with
+    the persisted ledger: boots are re-enumerated from the log's own startup
+    markers, so epoch-qualified keys match the live watch's numbering and
+    REPLAY CREATES NOTHING. Assumes the log starts at boot 0 (backfill
+    semantics — the same assumption the production --backfill makes)."""
+    parts = re.split(r"(?=llama_server: model loaded)", text)
+    counts = []
+    for i, seg in enumerate(parts):
+        if not seg.strip(): continue
+        r = parse_delivery(seg, rate_set, key_ref, set(), ledger, epoch=str(i))
+        counts.append({"epoch": i, "complete": len(r["complete"]),
+                       "partial": len(r["partial"]) + len(r["release_only"]), "wedged": len(r["wedged"])})
+    return counts
 
 if __name__ == "__main__" and len(sys.argv) > 1 and sys.argv[1] == "--watch":
     # composite watch: byte-offset tails + a PERSISTED task ledger (write-once
@@ -197,55 +233,50 @@ if __name__ == "__main__" and len(sys.argv) > 1 and sys.argv[1] == "--watch":
         try:
             with open(p) as f: return json.load(f)
         except Exception: return d
-    ledger = _load(LEDGER_F, {"complete": [], "partial": [], "wedged": [], "gate_seen": []})
+    ledger = _load(LEDGER_F, {"complete": [], "partial": [], "wedged": [], "gate_seen": [], "epoch": 0})
     offs = _load(OFFSET_F, {"llama": 0, "gate": 0})
-    seen = set(ledger["complete"])
-    open_tasks = {}   # task -> first-seen ts (launched, not yet settled)
-    pending_cancel = {}  # task -> cancel lines seen; a release may land in a LATER segment
+    epoch = int(ledger.get("epoch", 0))
+    open_tasks = {}      # epoch-qualified task -> first-seen ts (launched, not yet settled)
+    pending_cancel = {}  # epoch-qualified task -> cancel lines (release may land later)
     while True:
         try:
             with open(LLAMA_LOG, errors="replace") as f:
                 f.seek(offs["llama"]); text = f.read(); offs["llama"] = f.tell()
             if text:
-                # a server restart begins a fresh task-id space (composite
-                # catch: post-SIGKILL ids repeat) — no open-task carryover
-                if "server is listening" in text or "model loaded" in text:
-                    if open_tasks:
-                        open_tasks.clear()
-                # settle-tracking for the sweep: what this segment settles
-                seg_launch, seg_settle = set(), set()
+                # a server restart opens a FRESH task-id space — bump the boot
+                # epoch (ledger keys are epoch-qualified; residual #1 closed)
+                # and carry no open/pending state across the boundary
+                if MODEL_LOADED_MARKER in text:
+                    epoch += 1
+                    ledger["epoch"] = epoch
+                    open_tasks.clear()
+                    pending_cancel.clear()
+                now = time.time()
+                ep = str(epoch)
                 for line in text.splitlines():
                     m = LAUNCH_RE.search(line)
-                    if m: seg_launch.add(m.group(1)); continue
+                    if m: open_tasks.setdefault(_q(ep, m.group(1)), now); continue
                     m = CANCEL_RE.search(line)
-                    if m: seg_settle.add(m.group(1)); continue
+                    if m: pending_cancel.setdefault(_q(ep, m.group(1)), []).append(line); continue
                     m = RELEASE_RE.search(line)
-                    if m: seg_settle.add(m.group(1)); continue
+                    if m:
+                        qk = _q(ep, m.group(1))
+                        open_tasks.pop(qk, None)
+                        # cross-segment cancel/release match (composite catch:
+                        # the two lines can land in different 5s polls)
+                        if qk in pending_cancel:
+                            if qk not in ledger["partial"]:
+                                ledger["partial"].append(qk)
+                                evidence_record(m.group(1), "PARTIAL/CANCELLED",
+                                                {"n_tokens_at_stop": int(m.group(2)),
+                                                 "note": "observed tokens at stop — raw evidence, not billable"},
+                                                pending_cancel[qk] + [line], epoch=ep)
+                            del pending_cancel[qk]
+                        continue
                     if "print_timing" in line:
                         mm = re.search(r"task (\d+)", line)
-                        if mm: seg_settle.add(mm.group(1))
-                now = time.time()
-                for t in seg_launch:
-                    open_tasks.setdefault(t, now)
-                for t in seg_settle:
-                    open_tasks.pop(t, None)
-                # cross-segment cancel/release matching (composite catch: the
-                # cancel line and its n_tokens release can land in different
-                # 5s polls — match them across segments, evidence complete)
-                for line in text.splitlines():
-                    m = CANCEL_RE.search(line)
-                    if m: pending_cancel.setdefault(m.group(1), []).append(line); continue
-                    m = RELEASE_RE.search(line)
-                    if m and m.group(1) in pending_cancel:
-                        t = m.group(1)
-                        if t not in ledger["partial"]:
-                            ledger["partial"].append(t)
-                            evidence_record(t, "PARTIAL/CANCELLED",
-                                            {"n_tokens_at_stop": int(m.group(2)),
-                                             "note": "observed tokens at stop — raw evidence, not billable"},
-                                            pending_cancel[t] + [line])
-                        del pending_cancel[t]
-                parse_delivery(text, meter.load_rate_set(), "estate-compute-key-1", seen, ledger)
+                        if mm: open_tasks.pop(_q(ep, mm.group(1)), None)
+                parse_delivery(text, meter.load_rate_set(), "estate-compute-key-1", set(), ledger, epoch=str(epoch))
             with open(GATE_LOG, errors="replace") as f:
                 f.seek(offs["gate"]); gtext = f.read(); offs["gate"] = f.tell()
             for line in gtext.splitlines():
@@ -254,19 +285,25 @@ if __name__ == "__main__" and len(sys.argv) > 1 and sys.argv[1] == "--watch":
                 if h in ledger["gate_seen"]: continue    # replay-safe: write-once verdicts
                 ledger["gate_seen"].append(h)
                 ingest_gate_verdict(line)
-            # cross-segment wedge sweep: silence beyond the window, still open,
-            # and NOT completed by now (composite catch: a task that completes
-            # just after its window must not be marked wedged)
+            # cross-segment wedge sweep: silence beyond the EVIDENCE-BACKED
+            # window (sweep-bound-evidence.py), still open, not completed by
+            # now, and keyed by boot epoch (residual #2 + #1 closed)
             now = time.time()
-            for t, ts in list(open_tasks.items()):
-                if now - ts > WEDGE_SILENCE_S and t not in ledger["wedged"] and t not in seen:
-                    ledger["wedged"].append(t)
-                    del open_tasks[t]
+            for qk, ts in list(open_tasks.items()):
+                if now - ts > WEDGE_SILENCE_S and qk not in ledger["wedged"]:
+                    done_epochs = {k.split(":", 1)[0] for k in ledger["complete"]}
+                    if qk.split(":", 1)[0] in done_epochs and _raw_of(qk) in {
+                        k.split(":", 1)[1] for k in ledger["complete"] if k.startswith(qk.split(":", 1)[0] + ":")}:
+                        del open_tasks[qk]; continue      # completed this boot: not wedged
+                    ledger["wedged"].append(qk)
+                    del open_tasks[qk]
+                    ep, raw = qk.split(":", 1) if ":" in qk else ("", qk)
                     failure_receipt("UNKNOWN/WEDGED", "meter-wedge-detector",
-                                    {"task": t, "silence_s": WEDGE_SILENCE_S,
+                                    {"task": raw, "boot_epoch": ep or None,
+                                     "silence_s": WEDGE_SILENCE_S,
                                      "note": "open task aged past the silence window (cross-segment sweep)",
                                      "first_seen": ts})
-                    evidence_record(t, "UNKNOWN/WEDGED", {"tokens": None}, [])
+                    evidence_record(raw, "UNKNOWN/WEDGED", {"tokens": None}, [], epoch=ep)
             # persist the ledger + offsets (atomic-ish: write-then-rename)
             for path, obj in ((LEDGER_F, ledger), (OFFSET_F, offs)):
                 tmp = path + ".tmp"
@@ -275,3 +312,6 @@ if __name__ == "__main__" and len(sys.argv) > 1 and sys.argv[1] == "--watch":
         except FileNotFoundError:
             pass
         time.sleep(5)
+
+def _raw_of(qk):
+    return qk.split(":", 1)[1] if ":" in qk else qk

@@ -1,0 +1,23 @@
+09:19:15Z window from evidence: {"boots": 3, "tasks_measured": 4, "max_launch_to_settle_s": 2.311, "top5": [{"boot_task": "2:5", "s": 2.311}, {"boot_task": "0:1", "s": 1.771}, {"boot_task": "1:6", "s": 1.63}, {"boot_task": "2:12", "s": 1.603}], "recommended_wedge_silence_s": 30.0}
+09:19:15Z WEDGE_SILENCE_S = 30s (evidence-derived)
+09:19:15Z components up; waiting for readiness…
+09:19:25Z PASS boot0 ready after 10s
+09:19:27Z PASS A1 boot0 completion
+09:19:39Z PASS A1 payment #1 (boot0 task id will repeat in later boots)
+09:19:39Z A2 SIGKILL #1 (pid 847185, clean — no in-flight task)
+09:19:47Z PASS A2 gap admission refused 503 (no accidental completion during the gap)
+09:20:04Z PASS A2 watchdog detected the dead server
+09:20:04Z PASS A2 boot1 recovered after ~0s
+09:20:06Z PASS A3 boot1 completion (repeated numeric task id)
+09:20:18Z PASS A3 payment #2 — the repeated id billed independently (epoch-qualified)
+09:20:22Z A4 SIGSTOP #2 (pid 848253) mid-generation
+09:20:34Z PASS A4 in-flight bounded (idle-cut 504)
+09:20:59Z PASS A4 watchdog cycle ran
+09:20:59Z PASS A4 boot2 recovered
+09:21:03Z PASS A6 boot2 completion
+09:21:03Z waiting 30s sweep window…
+09:21:45Z PASS A7 exactly 3 payment receipts for 3 true completions across 3 boots
+09:21:57Z PASS A8 meter restart: zero new artifacts
+09:21:57Z PASS A9 epoch-aware full-log replay: ZERO new artifacts
+09:21:57Z PASS A10 INVARIANT AUDIT: epochs qualified, repeated-id collision deterministic (2 receipts for 2 boots same id), restart/replay/cancel/timeout/wedge manufactured ZERO billable receipts
+09:21:57Z === adversarial composite end FAILED=0 ===
