@@ -358,6 +358,27 @@ Reuse before invention; no Eddies dependency." Full source-verified recon:*
   (unsupported = anyone-can-spend); *locktime without refund = post-expiry
   anyone-can-spend*; NUT-10 bounds are per-Proof and redemption-time —
   never a substitute for issuance-time authority.
+- **CDK INTERFACE DEEP READ DONE 2026-09-16 (source at `main`) →**
+  [`docs/dispatches/2026-09-16-cdk-adapter-deepread.md`](../dispatches/2026-09-16-cdk-adapter-deepread.md):
+  **fail-closed chain = 4/5 in CDK** (authoring door
+  `TryFrom<SpendingConditions> for Secret` validate-first; enforcement
+  `Proof::verify_p2pk` + 18-variant error enum; discovery types
+  `MintInfo.nuts.nut10/11.supported`; NUT-07 state) — **the mandatory-refund
+  link and the NUT-06 gate are caller policy** (wrapper rules: locktime ⇒
+  refund_keys ⇒ num_sigs_refund ≥ 1; assert nut10+11+12 before
+  mint/spend/accept; re-validate RECEIVED secrets — wire path skips
+  `Conditions::new`). **NUT-24 ABSENT from CDK at `main`** (no nut24 module
+  despite README ✔ — X-Cashu codec would be adapter-owned). **Capability-drift
+  attack ANSWERED: client-side prevention is impossible against a mutable
+  mint** (NUT-06/07/DLEQ = detection only; `supported:true` is a claim, not a
+  proof) — the "never silently lose condition semantics" law survives only
+  as: version-pinned SELF-HOSTED mint (capability change = our redeploy) +
+  receipt-anchored capability snapshot (drift = detectable breach) + capped
+  exposure as backstop. **Smallest adapter defined, not built:** `cashu` +
+  `cdk-http-client` + one store + swappable self-hosted `cdk-mintd`, four
+  gates (issuance / redemption / X-Cashu codec / drift watch) at the
+  existing Door/FacilitatorSettle seam. Four laws banked (§5 of the
+  dispatch).
 
 ---
 
