@@ -131,6 +131,57 @@ try {
   const sw = await page.evaluate(() => document.documentElement.scrollWidth);
   ok('390px: no horizontal overflow', sw <= 391, 'scrollWidth=' + sw);
 
+  // H11: area-average conversion — a bright thin line survives (center-tap killed it)
+  const line = await page.evaluate(() => {
+    const H = window.__hexart;
+    const off = document.createElement('canvas'); off.width = 96; off.height = 72;
+    const o = off.getContext('2d');
+    o.fillStyle = '#0a0a0a'; o.fillRect(0, 0, 96, 72);
+    o.fillStyle = '#ffe082'; o.fillRect(0, 34, 96, 2);   // 2px horizontal line — sub-cell-width
+    const rec = H.recipe();
+    const src = { data: o.getImageData(0, 0, 96, 72).data, w: 96, h: 72 };
+    const cells = window.HexArtEngines['image-conv'].generate(rec, src);
+    // count bright palette matches in the middle band
+    const mid = cells.slice(Math.floor(rec.rows * .44) * rec.cols, Math.ceil(rec.rows * .56) * rec.cols);
+    const palBright = H.palette.map((p, i) => [p, i]).filter(([p]) => { const n = parseInt(p.slice(1), 16); return ((n >> 16) & 255) > 180; }).map(([, i]) => i);
+    return mid.filter(v => palBright.includes(v)).length;
+  });
+  ok('area-average conversion: thin bright feature survives (' + line + ' cells)', line > 0);
+
+  // H12: shelf round-trip — shelve, wipe, restore → identical cells
+  const shelved = await page.evaluate(async () => {
+    const H = window.__hexart, S = window.__hexartShelf;
+    H.cells[4 * H.cols + 3] = 1; H.edits['3,4'] = 1;      // a hand edit (key is col,row — the battery had it transposed)
+    S.save();
+    const before = H.cells.join(',');
+    H.cells = H.cells.map(() => -1); H.edits = {};         // wipe
+    const list = S.list();
+    if (!list.length) return { ok: false, why: 'empty shelf' };
+    await S.load(list[0].digest);
+    return { ok: H.cells.join(',') === before, edits: Object.keys(H.edits).length };
+  });
+  ok('shelf round-trip: restore regrows identical cells + edits', shelved.ok, JSON.stringify(shelved));
+
+  // H13: image-recipe embed — after a real image-conv run, recipe() carries source+digest
+  const embed = await page.evaluate(() => {
+    const H = window.__hexart;
+    // run image-conv through the page's own path (sets imgData)
+    const off = document.createElement('canvas'); off.width = 64; off.height = 48;
+    const o = off.getContext('2d'); const g = o.createLinearGradient(0, 0, 64, 48);
+    g.addColorStop(0, '#e8b54b'); g.addColorStop(1, '#18362a');
+    o.fillStyle = g; o.fillRect(0, 0, 64, 48);
+    const im = document.createElement('canvas'); im.width = 64; im.height = 48;
+    const ic = im.getContext('2d'); ic.drawImage(off, 0, 0);
+    H.imgCanvas = im; H.imgSrc = true; H.imgData = null; H.engine = 'image-conv';
+    const rec = { ...H.recipe(), cols: H.cols, rows: H.rows, topology: H.topology, palette: H.palette.slice(), threshold: H.threshold, detail: H.detail, dither: H.dither, seed: H.seed };
+    H.imgDataFor(rec);   // cache the source through the page's own path (what regen does)
+    H.cells = window.HexArtEngines['image-conv'].generate(rec, H.imgData);
+    H.cells[10 * H.cols + 10] = 2; H.edits['10,10'] = 2;
+    const full = H.recipe();       // now imgData is cached → embedded
+    return { has: !!(full.image && full.image.data && full.image.digest), digest: full.image ? full.image.digest : null, engine: full.engine };
+  });
+  ok('image-recipe carries embedded source + digest after a real conversion', embed.has && !!embed.digest, JSON.stringify(embed));
+
   ok('battery total: zero page errors across everything', errs.length === 0, errs.slice(0, 2).join('|'));
 } finally {
   await browser?.close();
