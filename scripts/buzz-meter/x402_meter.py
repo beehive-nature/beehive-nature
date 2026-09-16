@@ -274,6 +274,11 @@ class Session:
     # session prices against. None = unjudgeable (older constructions); the
     # serve bridge passes rate_set_minted_at_epoch(load_rate_set()).
     rate_set_minted_at: float | None = None
+    # AV-3: WHY the session parked — "door" (delivery unavailable, resumes
+    # when the door returns) or "balance" (drained to zero, resumes on
+    # credit). None while ACTIVE/OPENING. The reason is what lets recovery
+    # resume the RIGHT way without conflating the two park laws.
+    park_reason: str | None = None
 
     def open(self, now: float | None = None) -> "Session":
         # New sessions refuse on a stale rate book BEFORE any state moves —
@@ -289,10 +294,22 @@ class Session:
         return self.rate_set.rate(self.resource)
 
     def burn(self, seconds: Decimal | int | str,
-             now: float | None = None) -> tuple[Decimal, str]:
+             now: float | None = None,
+             door_reachable: bool = True) -> tuple[Decimal, str]:
         """Bill `seconds` of the lane. Returns (billed_seconds, state).
         Bills only what the balance covers; at zero → PAUSED, never CLOSED.
         Never writes a charge the balance cannot pay (refuse-before-write).
+
+        AV-3 SPLIT-BRAIN LAW: `door_reachable` is the delivery door's health
+        in the CALLER's hand (the seller_can_serve pattern — the engine is
+        pure, production burn sites MUST pass live door health). Unavailable
+        ⇒ accrual PARKS: (0, "PAUSED") with park_reason "door", zero charge
+        written — never a charge for undeliverable service, never a kill.
+        When the door returns, a door-parked session RESUMES on its next
+        burn and bills from the resume-point — the outage window is never
+        retroactively backfilled (nothing accrues while parked, by
+        construction). The default True is the legacy call shape (the naive
+        charger); wiring the signal is the deploy-side law.
 
         AV-2 2.5: open sessions settle only on in-force rates — a burn
         arriving after the rate book went stale refuses typed with ZERO
@@ -301,9 +318,18 @@ class Session:
         if want <= 0:
             raise VoucherError("burn needs positive seconds")
         if self.state == "PAUSED":
-            return Decimal("0"), "PAUSED"          # paused meter bills nothing
+            if door_reachable and self.park_reason == "door":
+                self.state = "ACTIVE"              # the door came back — resume
+                self.park_reason = None
+            else:
+                return Decimal("0"), "PAUSED"      # paused meter bills nothing
         if self.state != "ACTIVE":
             raise VoucherError(f"cannot burn from {self.state}")
+        if not door_reachable:
+            # delivery is down: PARK before any charge — zero delta, no kill
+            self.state = "PAUSED"
+            self.park_reason = "door"
+            return Decimal("0"), self.state
         rate_set_in_force(self.rate_set_minted_at,
                           time.time() if now is None else now)
         # the per-second all-in (basis + tithe) decides affordability
@@ -316,14 +342,18 @@ class Session:
             self.credits += Decimal(billed)
         if billed < int(want):
             self.state = "PAUSED"                  # PAUSE at zero — not kill
+            self.park_reason = "balance"
         return Decimal(billed), self.state
 
     def credit(self, declared: dict, observed: dict) -> dict:
         """A top-up through the settlement law. A credit RESUMES a paused
-        session — that is what pause-not-kill means on the money side."""
+        session — that is what pause-not-kill means on the money side.
+        (Either park reason: a topped-up member with a healthy door is
+        deliverable again.)"""
         ev = credit_from_settlement(self.escrow, self.voucher, declared, observed)
         if self.state == "PAUSED":
             self.state = "ACTIVE"                  # resume on credit
+            self.park_reason = None
         return ev
 
     def begin_settle(self) -> None:

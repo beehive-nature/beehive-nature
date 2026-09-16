@@ -128,6 +128,15 @@ jobs:
       - name: AV-1 serve-bridge battery (crash/concurrency/hostile)
         if: always()
         run: python3 scripts/buzz-meter/test_serve_bridge.py
+      # AV-3 split-brain battery (zCode, 2026-09-16): the meter↔door seam —
+      # PART A receipts the pre-fix gap (accrual during outage) forever;
+      # 3.1 door-down accrual parks (zero delta, ledger identical,
+      # reason=door); 3.2 resume-from-resume-point with zero retroactive
+      # backfill; 3.3 credit-out park-not-kill regression-keep; 3.4 the
+      # naive-charger negative control is detected
+      - name: AV-3 split-brain battery (meter vs delivery door)
+        if: always()
+        run: python3 scripts/buzz-meter/test_av3_split_brain.py
       # PEER FUNNEL testnet runner selftest (z3.3 Order C, 2026-09-05): the
       # one-broadcast tool cannot rot — keccak + EIP-155 RLP hash vectors and
       # the sign/recover roundtrip proven every push (key parts skip cleanly

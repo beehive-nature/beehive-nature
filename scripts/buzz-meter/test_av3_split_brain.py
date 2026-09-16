@@ -165,8 +165,11 @@ def case_3_3():
     billed, state = sess.burn(5_000, door_reachable=True)
     if state != "PAUSED" or billed <= 0:
         fail(f"3.3: credit-out behavior changed — billed {billed}, state {state}")
-    if es.balance(VOUCHER) != Decimal("0.0000"):
-        fail("3.3: balance not drained to zero")
+    # drained for billing purposes: less than one all-in second remains
+    # (affordability floors at whole seconds — a sub-second remainder parks)
+    if es.balance(VOUCHER) >= UNIT_ALL_IN:
+        fail(f"3.3: balance {es.balance(VOUCHER)} still affords a second — "
+             "credit-out did not park at the floor")
     # paused-at-zero bills nothing further (door healthy)
     b2, s2 = sess.burn(5, door_reachable=True)
     if b2 != 0 or s2 != "PAUSED":
