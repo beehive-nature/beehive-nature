@@ -226,3 +226,72 @@ Full source-verified recon: [`docs/dispatches/2026-09-15-protocol-recon-opena2a-
   against our mission system BEFORE any schema is ruled.
 - **Reconciliation gate applies** as to every item; nothing here drives
   implementation.
+
+---
+
+## B · BOUNDARY-FIT EVALUATION — zArcheology input (2026-09-16, post-gate; founder order: landed research only, no integration)
+
+The ten stable bPay boundaries (ARCHITECTURE-RECONCILIATION §12; law at
+docs/RULINGS-2026-09-16.md): CanonicalEvent schema · SpendReceipt wire law · x402 five-law
+set · capAssert signing boundary · suite-keyed crypto-agility seam · adapter-ring rule ·
+bzDiD Layer-0 + capability tiers · vending rate-row shape · Intent primitive semantics ·
+Payment/Delivery state separation.
+
+### B.1 · x402-rs V2 — ADOPT (seam) + ADAPT (scheme set); facilitator DESIGN held as PROPOSAL
+
+Evidence: Workerb 2 deep-read + facilitator DESIGN, in-tree
+`docs/dispatches/2026-09-16-workerb2-x402rs-deep-read-facilitator-design.md` (main @`e97b8bdb`;
+x402-rs@main read at that seat, source ledger inside).
+
+- **ADOPT — the `Facilitator` trait / `SchemeRegistry` seam, verbatim** (boundaries: adapter-ring,
+  x402 law set): registry/trait split with injectable wire types and named test doubles IS the
+  replaceability mechanism R5 asks for — the same law as our trait-fronted fail-closed seams.
+- **ADAPT — the payer-authorization scheme set** (EIP-2612 permit + gas sponsoring, EIP-3009
+  authorization windows, Permit2 proxies, ERC-6492/1271 smart-account validation): exactly the
+  replaceable-settlement-adapter shape; 6492 lets 7702-delegated EOAs compose later with zero
+  facilitator change. capAssert discipline governs our side of the door.
+- **ADAPT — `pending_nonce_manager`** for facilitator-side multi-inflight handling, plus our own
+  idempotent-settle journal keyed by auth nonce (watchpay ledger laws; Payment/Delivery boundary).
+- **DIRECT KINSHIP — the headline:** x402-rs `upto` ≡ vending `upto` ceiling ≡ watchpay
+  approve-ceiling-vs-actual (vending rate-row boundary). These semantics are ALREADY EXECUTED in
+  estate tests — implementation evidence, not aspiration. This is the strongest verdict on the board.
+- **HELD:** the "x402 door" box facilitator DESIGN (spec-grade PROPOSAL: exact + upto, daily gas
+  cap, root-owned key 600, HumanGate no-auto-retry, settle-tx evidence into receipts) awaits
+  founder chartering. No integration per standing order.
+
+### B.2 · OpenA2A / AIM — WATCH (all targets; pattern notes only)
+
+Evidence: `docs/dispatches/2026-09-15-protocol-recon-opena2a-aim-opencompany.md` (@`b5211079`+;
+research verdicts all WATCH; OpenA2A ≠ A2A law — the Google comms standard is a separate object).
+
+- AIM's Ed25519 agent identity is single-algorithm with no rotation law — against the bzDiD
+  Layer-0 + crypto-agility boundary it cannot be adopted; the estate's primitive is ratified and
+  implemented (capability crate, 60 tests).
+- AIM's 8/9-factor trust scoring WRITES a score — collides with the constitution's
+  confidence-from-provenance / reputation-emergent-never-written invariants. Pattern-WATCH only.
+- Its 5-step fine-grained authz overlaps our UCAN-shaped capability tiers (ours live); the heavy
+  server + SIEM adapters sit against the adapter-ring rule.
+
+### B.3 · tinyhumansai/OpenCompany — WATCH + two pattern-ADAPT rows
+
+Evidence: `docs/dispatches/2026-09-15-opencompany-tinyhumans-deep-read.md` (@`bb3856c6`; founder
+rulings banked verbatim: hosted Medulla NOT mandatory; criterion = separable/replaceable behind
+the decentralized adapter/plugin/dApp boundary).
+
+- Pattern-ADAPT: declarative org shape (`company.toml` — roles, ownership, human sign-off points)
+  rhymes with the estate's mission desk/room/ledger rail — pattern reuse only, no dependency
+  (the org-shape candidates touch neither identity nor money, so no identity-boundary conflict).
+- Pattern-ADAPT: runtime-loaded bundles + adapter seams = the adapter-ring rule practiced
+  elsewhere; confirms our boundary shape.
+- WATCH constraints stand: GPL-3.0 (licensing ≠ eval gate per founder, but a future-adoption
+  constraint), "APIs will change without notice" WIP, hosted tier EXCLUDED by the founder's test.
+  zeenie-ai/OpenCompany = name-trap, separate object.
+
+### B.4 · Eddies/antenglement — REMAINS GATED
+
+Item #1 unchanged: the "How Eddies Work" primary artifact is still missing; no evaluation until
+it arrives (founder paste remains the only road in).
+
+*Verdict classes per queue law. The x402-rs rows carry implementation evidence (estate-executed
+`upto` semantics); all other rows are research-class WATCH/pattern notes. No integration
+performed. — zArcheology seat, 2026-09-16.*
