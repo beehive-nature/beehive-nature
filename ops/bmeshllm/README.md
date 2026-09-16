@@ -71,3 +71,23 @@ can go; `/var/log/journal` capped at 1G via vacuum policy; do NOT stage the
 - Weights-on-Autonomi (bMESHLLM/netWORK's storage leg): publish the chosen
   GGUF as a content-addressed archive — plan, unmeasured; ADR-0008 record
   pricing applies (~4 MiB per record, 3× upper-median quote).
+
+## Attempt receipts (2026-09-16 00:38–01:05 UTC, founder "word" go)
+
+Swap attempted per runbook; **rolled back clean** — rail served qwen2.5-3b
+throughout the gap (~9 min), meter-gate + meter never dropped.
+
+- Binary check (step 1 fear CONFIRMED): llama-server 0.3.0-dev @6fe7498
+  (Aug 28) has speculative flags but CANNOT generate on the qwen35 hybrid
+  arch — model LOADS (health 200, ~80 s with `-fa on` + q8_0 KV @ 16K→32K)
+  but generation hangs (8-token request unfinished at 90 s; one earlier
+  40-token call returned empty in 8.9 s).
+- Variant without `-fa`/KV-quant at ctx 32K: fails to finish loading in
+  200+ s (f16 KV pressure) — worse, not better.
+- Rollback = delete `/etc/systemd/system/buzz-compute.service.d/bmeshllm.conf`
+  + daemon-reload + restart: health 200, 30-token smoke in 5.5 s, meters active.
+- **Cure in flight:** llama.cpp rebuilt at tag `b10991` into
+  `/opt/buzz-compute/src/build-new/` (log `/tmp/llama-build.log`, BUILD_OK/
+  BUILD_FAIL marker). Swap procedure once OK: standalone smoke on :8091 with
+  the staged model + the NEW binary, then the unit override points at
+  `build-new/bin/llama-server` — never overwrite the known-good `build/`.
