@@ -79,5 +79,25 @@
   "law": "Businesses, investments, inheritance, and patronage form a SEPARATE overlay connected to people — never confused with parentage, never rendered as blood.",
   "entries": [ { "ref": "rockwood-account", "via": "testimony" } ]
  },
+ "symbolicLinks": [
+  { "id": "crest-serpents-sigurd",
+    "symbol": "the crest's paired serpents",
+    "meaning": "Protection, continuity, renewal — and, in the founder's authorship of the house crest, in conversation with Sigurd Ormr-í-auga (snake-in-the-eye): the meaning and the tradition point at each other without either becoming the other.",
+    "connects": ["ovl-sigurd-snake-eye"],
+    "kind": "meaning",
+    "attribution": "founder-authored symbolism — identified as symbolism, never rendered as a parent-child claim or as verification" },
+  { "id": "crest-bee-house",
+    "symbol": "the crowned bee + heart",
+    "meaning": "Love at the center of the house — the founder's own mark on the estate; the family and the hive it tends.",
+    "connects": ["founder"],
+    "kind": "meaning",
+    "attribution": "founder-authored symbolism" },
+  { "id": "crest-many-tongues",
+    "symbol": "the motto in many tongues",
+    "meaning": "One promise carried across languages — the archive speaks 29 of them; the motto speaks them all.",
+    "connects": ["founder"],
+    "kind": "meaning",
+    "attribution": "founder-authored symbolism" }
+ ],
  "law": "Overlay ids use the ovl- prefix so they can never collide with provider ids. CORRECTIONS patch walked persons by provider id — a correction is a founder attestation layered OVER the provider record, never a silent edit: the walked layer keeps its own flag in provenance and the corpus marks the person corrected. Merging overlays into a rendered view must render the evidence chip on every overlay person."
 }

@@ -17,11 +17,19 @@ const cmd = process.argv[2];
 function sha256(buf) { return createHash("sha256").update(buf).digest("hex"); }
 
 function bundleFiles() {
+  // THE WHOLE PERMITTED EXPERIENCE: corpus + evidence + overlays +
+  // reconstructions + the founder-created crest and its authored meaning +
+  // the two surfaces that carry the interconnected experience. Public
+  // artifacts only — living-family/private material never bundles.
   const files = [
     "remington-bloodline.json",
     "attested-overlays.json",
     "reconstructions.json",
     ...readdirSync(join(LINEAGE, "evidence")).map((f) => "evidence/" + f),
+    "../../house-crest-von-zutphen-DESIGN.svg",
+    "../../house-crest-von-zutphen.json",
+    "../../../surfaces/profile.html",
+    "../../../surfaces/blood.html",
   ];
   return files.filter((f) => existsSync(join(LINEAGE, f)));
 }

@@ -18,6 +18,9 @@ main{max-width:1100px;margin:0 auto;padding-inline:16px}
 .crumbs a,.crumbs button{color:var(--dim);background:none;border:0;font:inherit;cursor:pointer;letter-spacing:inherit;text-transform:inherit;padding:0}
 .crumbs .here{color:var(--ink)} .crumbs .sep{color:var(--faint)}
 .kicker{font-size:10px;letter-spacing:.3em;text-transform:uppercase;color:var(--faint);margin-top:22px}
+.crestanchor{float:right;width:86px;height:86px;margin:6px 0 8px 18px;border:1px solid rgba(255,215,0,.35);border-radius:14px;
+ background:radial-gradient(circle at 30% 25%,rgba(255,215,0,.12),rgba(1,8,4,.7));padding:7px}
+.crestanchor img{width:100%;height:100%;object-fit:contain}
 h1{font-size:clamp(22px,4.5vw,34px);line-height:1.15;margin:8px 0 6px;font-weight:600;
  background-image:linear-gradient(92deg,#e2efdb 40%,#FFD700 95%);-webkit-background-clip:text;background-clip:text;color:transparent}
 .lede{color:var(--dim);font-size:12px;max-width:80ch;line-height:1.9}
@@ -122,6 +125,9 @@ footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint
   <a href="index.html">beehive nature reserve</a><span class="sep">▸</span><a href="profile.html#blood-record">dynasty profile</a><span class="sep">▸</span><span class="here">the blood comb</span>
 </nav>
 <header>
+  <a class="crestanchor" href="profile.html#house-archive" title="the founder-created house crest — part of the work itself">
+    <img src="../assets/profile-archive/house-crest-von-zutphen-DESIGN.svg" alt="the founder-created von Zutphen house crest: paired serpents, crowned bee and heart, sun and star, the motto in many tongues">
+  </a>
   <div class="kicker">bnr genesis · the fractal blood archive</div>
   <h1 data-i18n="blood.h">the blood comb — the eternal hexagonal fan chart</h1>
   <p class="lede" data-i18n="blood.lede">Every cell is an ancestor; the comb is the hive's own shape. Click a cell to read it, re-root to walk that line forever — the fan redraws from any person in the archive. Colors carry evidence eras; saga is never shown as documented. Sigurd Snake-in-the-Eye and the attested kin ride in with their evidence packs.</p>
@@ -139,9 +145,9 @@ footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint
 </div>
 <div class="entrance" id="entrance">
   <a data-ent="family"><b>family</b><span>the founder's house — living redacted, the personal entrance stays on the profile page</span></a>
-  <a data-ent="documents"><b>documents</b><span>evidence packs — the tradition read at source, claims cited</span></a>
-  <a data-ent="places"><b>places</b><span>where the lines ran — place index lane (marriages carry the first places)</span></a>
-  <a data-ent="older"><b>older generations</b><span>the deep lines — discoverable, never compulsory</span></a>
+  <a data-ent="records"><b>records</b><span>documents and evidence packs — claims cited, attribution preserved</span></a>
+  <a data-ent="mythology"><b>mythology</b><span>the sagas and the crest's own symbolism — meaning, equal in standing, distinct in kind</span></a>
+  <a data-ent="older"><b>older generations</b><span>the deep and legendary lines — discoverable, never compulsory</span></a>
 </div>
 <div class="searchout" id="qout"></div>
 <div class="lenses" id="lenses">
@@ -194,7 +200,7 @@ footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint
 
   var S={persons:{},edges:{},children:{},spineIds:new Set(),root:null,curRoot:null,spineOn:false,stats:{},
     packs:{},packData:{},relEvidence:{},testimony:[],recon:null,lenses:{records:true,tradition:true,testimony:true,spiritual:true},
-    trail:[],staged:[],viewMode:"fan",retrieved:null};
+    trail:[],staged:[],viewMode:"fan",retrieved:null,symbolicLinks:[]};
   var OPEN_ROOT="KWJ4-XBD"; // the public entrance person — Albert Perry Rockwood
   function addChild(p,c){(S.children[p]=S.children[p]||[]).push(c);}
   fetch(CORPUS_URL).then(r=>r.json()).then(c=>{
@@ -211,6 +217,7 @@ footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint
       if(ov.edges)for(var ce in ov.edges){S.edges[ce]=ov.edges[ce];ov.edges[ce].forEach(p=>addChild(p,ce));}
       S.relEvidence=ov.relationshipEvidence||{};
       S.testimony=ov.testimony||[];
+      S.symbolicLinks=ov.symbolicLinks||[];
     }
     var packUrls=[...new Set(Object.values(S.packs).filter(Boolean))]
       .map(function(p){return '../assets/profile-archive/lineage/'+p;});
@@ -473,6 +480,13 @@ footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint
       S.testimony.filter(function(t){return t.lens==='spiritual';}).forEach(function(t){
         out+='<div class="layer" style="border-left:2px solid var(--violet);padding-left:8px;color:var(--violet)">✵ '+esc(langText('blood.layer.spiritual','spiritual reflections — attributed, never verification'))+' · '+esc(t.status)+'</div>';});
     }
+    if(S.symbolicLinks){
+      S.symbolicLinks.filter(function(sl){return (sl.connects||[]).indexOf(id)>=0;}).forEach(function(sl){
+        out+='<div class="layer" style="border-left:2px solid var(--gold);padding-left:8px">✦ '+
+          esc(langText('blood.layer.meaning','meaning — founder-authored symbolism'))+' · <b>'+esc(sl.symbol)+'</b> — '+esc(sl.meaning)+
+          '<div class="claim" style="border-color:var(--gold)">'+esc(sl.attribution)+'</div></div>';
+      });
+    }
     if(p.evidence&&/saga|medieval/.test(p.evidence.class)&&!pack&&!p.corrected&&S.lenses.records)
       out+='<div class="layer" style="color:var(--violet)">⚠ '+esc(langText('blood.layer.legend','traditional/mythological layer — this record rides legendary genealogy; it does not upgrade to documented'))+'</div>';
     out+='</div>';
@@ -601,17 +615,27 @@ footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint
     };
     var ul=document.createElement('ul');ul.appendChild(build(S.curRoot,0));host.appendChild(ul);
   }
-  // ── entrance paths: visitors choose their own way in ────────────────────
+  // ── entrance paths: equal standing, no records-first hierarchy ──────────
   document.getElementById('entrance').addEventListener('click',function(e){
     var a=e.target.closest('[data-ent]');if(!a)return;
     var ent=a.getAttribute('data-ent');
     if(ent==='family'){S.trail=[];setRoot(S.root,true);showDetail(S.root);}
-    else if(ent==='older'){setRoot(S.persons['M8WZ-XZY']?'M8WZ-XZY':S.root,true);showDetail('M8WZ-XZY');}
-    else if(ent==='documents'){document.getElementById('detail').scrollIntoView({behavior:'smooth'});
-      var q=document.getElementById('q');q.value='Rockwood';q.dispatchEvent(new Event('input',{bubbles:true}));}
-    else if(ent==='places'){var q2=document.getElementById('q');q2.value='Rockwood';q2.dispatchEvent(new Event('input',{bubbles:true}));
-      document.getElementById('qout').scrollIntoView({behavior:'smooth'});}
+    else if(ent==='mythology'){
+      setRoot(S.persons['M8WZ-XZY']?'M8WZ-XZY':S.root,true);
+      showDetail('M8WZ-XZY');
+      var det=document.querySelector('#dbody details');if(det)det.open=true;
+      document.getElementById('detail').scrollIntoView({behavior:'smooth'});
+    }
+    else if(ent==='records'){
+      var q=document.getElementById('q');q.value='Rockwood';q.dispatchEvent(new Event('input',{bubbles:true}));
+      document.getElementById('qout').scrollIntoView({behavior:'smooth'});
+    }
+    else if(ent==='older'){
+      setRoot(S.persons['LTSB-5WH']?'LTSB-5WH':S.root,true);showDetail('LTSB-5WH');
+    }
   });
+  // profile may send visitors in through the mythology door (#myth)
+  if(/myth/.test(location.hash)){document.querySelector('[data-ent="mythology"]').click();}
   document.getElementById('lenses').addEventListener('change',function(e){
     var l=e.target.getAttribute('data-lens');if(l)S.lenses[l]=e.target.checked;
     if(S.curRoot&&S.persons[S.curRoot])showDetail(S.curRoot);});
