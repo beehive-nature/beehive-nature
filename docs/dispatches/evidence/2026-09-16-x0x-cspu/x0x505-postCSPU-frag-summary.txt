@@ -1,0 +1,36 @@
+# x0x505 POST-CSPU fragment capture distillation (2026-09-16, kernel 6.17.0-1020-oracle, x0xd 0.45.0)
+# companion to the 2026-09-15 round-7 dataset (kernel 6.17.0-1018): same host,
+# same netdev-ingress drop rule, same tcpdump filter `ip[6:2] & 0x3fff != 0`,
+# fresh-restart window. Raw pcap: x0x505-postCSPU-frag.pcap (124,062 B,
+# sha256 01430b9b…541b765) in this directory and on box ~/x0x-cspu-post/.
+
+== window ==
+restart 01:59:01Z · drop active 150 s · peers 27 at final read, status healthy
+drop rule counter: 63 packets / 84,084 bytes (non-initial fragments dropped at ingress)
+
+== totals ==
+87 fragment-bearing packets (v0.41.3-era control on the same filter: 4,007)
+
+== direction (by source address; capture had no direction column) ==
+87 In  — ALL from 217.142.20.211 (customer.lndngbr1.isp.starlink.com), ports 44843/6691
+0  Out — the box emitted ZERO fragments; zero oversized (4,096 B) first-frags outbound
+
+== oversized datagram first-frags (In) by source ==
+17 217.142.20.211.44843
+15 217.142.20.211.6691
+(32 first-frags + 55 tails = 87; the drop counter's 63 tails sit inside this window's set)
+
+== reassembly counters under the drop (nstat deltas, before→after) ==
+IpReasmReqds   21 → 57   (+36)
+IpReasmOKs      7 → 7    (+0)
+IpReasmFails    0 → 28   (+28)
+IpReasmTimeout  0 → 28   (+28)
+
+== verdict ==
+Same law as round 7 on kernel 1018: non-initial fragments dropped at the
+netdev ingress still reassemble-fail (OKs +0, Fails/Timeout climb in lockstep
+with tails dropped); the 0.45.0 sender-side fix holds on 1020 (no outbound
+fragmentation at all); the only fragmented traffic remains the legacy
+Starlink peer's pre-fix 4,096 B flights. The CSPU patch window (kernel
+1018→1020 + patched libc/polkit) did NOT shift fragment-handling behavior —
+pre/post-CSPU datasets are consistent.
