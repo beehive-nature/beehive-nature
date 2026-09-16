@@ -139,7 +139,7 @@ impl<F: SettlementFacilitator> Door<F> {
         leg: &LegKey,
         request: &serde_json::Value,
     ) -> Result<FacilitatorSettle, DoorError> {
-        match self.journal.settle_precheck(leg)? {
+        match self.journal.begin_settle(leg)? {
             // Idempotent: never re-execute a settled nonce.
             Some(ev) => Ok(FacilitatorSettle::Success {
                 payer: leg.payer.clone(),
@@ -163,7 +163,15 @@ impl<F: SettlementFacilitator> Door<F> {
                         tx_hash: transaction.clone(),
                         gas_actual_wei: gas_actual_wei.unwrap_or(self.config.reserved_gas_wei),
                     };
-                    self.journal.settle_with_evidence(leg, &ev)?;
+                    if let Err(e) = self.journal.settle_with_evidence(leg, &ev) {
+                        // Evidence refused (e.g. actual > authorized): the
+                        // on-chain truth is now uncertain -- park as Unknown
+                        // for the human gate, never overwrite silently.
+                        let _ = self
+                            .journal
+                            .settle_unknown(leg, &format!("evidence refused: {e}"));
+                        return Err(DoorError::SettleRefused(e.to_string()));
+                    }
                     Ok(FacilitatorSettle::Success {
                         payer,
                         transaction,

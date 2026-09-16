@@ -62,6 +62,12 @@ pub struct LegKey {
 pub enum ReservationState {
     /// Verify passed, float/budget gates passed; gas exposure reserved.
     Reserved { reserved_gas_wei: u64 },
+    /// Settlement execution IN FLIGHT (the lock-held Reserved->Settling
+    /// transition completed): exactly one caller may execute the
+    /// facilitator; concurrent settles see this and are refused
+    /// in-flight rather than double-executing (the adversarial race fix --
+    /// the on-chain 3009 nonce protects funds, not gas).
+    Settling { reserved_gas_wei: u64 },
     /// Settled with on-chain evidence; exposure reconciled to actual.
     Settled {
         actual_amount: String,
@@ -302,6 +308,9 @@ impl Journal {
                 ReservationState::Settled { .. } => Err(JournalError::Law(
                     "authorization nonce already settled — refusing replay".into(),
                 )),
+                ReservationState::Settling { .. } => Err(JournalError::Law(
+                    "authorization nonce is settling — refusing duplicate reservation".into(),
+                )),
                 ReservationState::FailedKeep { .. } => Err(JournalError::Law(
                     "prior attempt failed without evidence — reservation kept; settle again or expire, never re-reserve"
                         .into(),
@@ -349,36 +358,48 @@ impl Journal {
         })
     }
 
-    /// The settle pre-check: idempotency + lawful state. Returns
-    /// `Ok(Some(evidence))` when the nonce was ALREADY settled (the stored
-    /// evidence replays — never re-execute), `Ok(None)` when the caller
-    /// may proceed to execute.
-    pub fn settle_precheck(&self, leg: &LegKey) -> JResult<Option<SettleEvidence>> {
+    /// BEGIN SETTLE (idempotency + lawful state + the in-flight
+    /// transition). The check AND the Reserved->Settling write are one
+    /// lock-held transition, so exactly one caller ever executes the
+    /// facilitator for a nonce. Returns the stored evidence when the nonce
+    /// was ALREADY settled (idempotent replay -- never re-execute).
+    pub fn begin_settle(&self, leg: &LegKey) -> JResult<Option<SettleEvidence>> {
         let _guard = self.acquire_exclusive()?;
-        match self.get(leg)? {
-            None => Err(JournalError::Law(
-                "no reservation for this authorization nonce — verify first (fail-closed)".into(),
+        let mut rec = self.get(leg)?.ok_or_else(|| {
+            JournalError::Law(
+                "no reservation for this authorization nonce -- verify first (fail-closed)".into(),
+            )
+        })?;
+        let now = now_unix();
+        match rec.state {
+            ReservationState::Settled {
+                actual_amount,
+                tx_hash,
+                gas_actual_wei,
+                ..
+            } => Ok(Some(SettleEvidence {
+                actual_amount,
+                tx_hash,
+                gas_actual_wei,
+            })),
+            ReservationState::Reserved { reserved_gas_wei }
+            | ReservationState::FailedKeep {
+                reserved_gas_wei, ..
+            } => {
+                rec.state = ReservationState::Settling { reserved_gas_wei };
+                rec.updated_unix = now;
+                self.write(&rec)?;
+                Ok(None)
+            }
+            ReservationState::Settling { .. } => Err(JournalError::Law(
+                "settlement in flight -- exactly one executor; retry after completion".into(),
             )),
-            Some(rec) => match rec.state {
-                ReservationState::Settled {
-                    actual_amount,
-                    tx_hash,
-                    gas_actual_wei,
-                    ..
-                } => Ok(Some(SettleEvidence {
-                    actual_amount,
-                    tx_hash,
-                    gas_actual_wei,
-                })),
-                ReservationState::Reserved { .. } => Ok(None),
-                ReservationState::FailedKeep { .. } => Ok(None),
-                ReservationState::Unknown { .. } => Err(JournalError::Law(
-                    "Unknown settlement — never auto-retried; human gate required".into(),
-                )),
-                ReservationState::ExpiredReleased { .. } => Err(JournalError::Law(
-                    "window expired and released — settle refused".into(),
-                )),
-            },
+            ReservationState::Unknown { .. } => Err(JournalError::Law(
+                "Unknown settlement -- never auto-retried; human gate required".into(),
+            )),
+            ReservationState::ExpiredReleased { .. } => Err(JournalError::Law(
+                "window expired and released -- settle refused".into(),
+            )),
         }
     }
 
@@ -420,7 +441,9 @@ impl Journal {
             .ok_or_else(|| JournalError::Law("no reservation (fail-closed)".into()))?;
         if !matches!(
             rec.state,
-            ReservationState::Reserved { .. } | ReservationState::FailedKeep { .. }
+            ReservationState::Reserved { .. }
+                | ReservationState::FailedKeep { .. }
+                | ReservationState::Settling { .. }
         ) {
             return Err(JournalError::Law(
                 "state does not accept a no-evidence failure update".into(),
@@ -428,6 +451,7 @@ impl Journal {
         }
         let retained = match rec.state {
             ReservationState::Reserved { reserved_gas_wei } => reserved_gas_wei,
+            ReservationState::Settling { reserved_gas_wei } => reserved_gas_wei,
             ReservationState::FailedKeep {
                 reserved_gas_wei, ..
             } => reserved_gas_wei,
@@ -447,6 +471,14 @@ impl Journal {
         let mut rec = self
             .get(leg)?
             .ok_or_else(|| JournalError::Law("no reservation (fail-closed)".into()))?;
+        if !matches!(
+            rec.state,
+            ReservationState::Settling { .. } | ReservationState::Unknown { .. }
+        ) {
+            return Err(JournalError::Law(
+                "settle_unknown requires the Settling state (fail-closed)".into(),
+            ));
+        }
         rec.state = ReservationState::Unknown {
             since_unix: now_unix(),
             note: note.to_string(),
@@ -490,6 +522,8 @@ impl Journal {
     }
 
     /// Human-gated resolution of an Unknown settlement (watchpay law).
+    /// The gate is BOUNDED by the same upto law as automated evidence:
+    /// a human records truth, never an impossible over-authorization.
     pub fn resolve_unknown(
         &self,
         leg: &LegKey,
@@ -502,6 +536,20 @@ impl Journal {
             .ok_or_else(|| JournalError::Law("no reservation (fail-closed)".into()))?;
         if !matches!(rec.state, ReservationState::Unknown { .. }) {
             return Err(JournalError::Law("not in Unknown state".into()));
+        }
+        let cap = rec
+            .leg
+            .amount_authorized
+            .parse::<u128>()
+            .unwrap_or(u128::MAX);
+        let actual = ev
+            .actual_amount
+            .parse::<u128>()
+            .map_err(|_| JournalError::Law("actual_amount not numeric".into()))?;
+        if actual > cap {
+            return Err(JournalError::Law(format!(
+                "upto law violated through the human gate: actual {actual} > authorized {cap} — the gate records truth, not the impossible"
+            )));
         }
         rec.state = ReservationState::Settled {
             actual_amount: ev.actual_amount.clone(),

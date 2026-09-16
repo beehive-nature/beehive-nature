@@ -70,10 +70,17 @@ async fn build_registry(rc: &RunConfig) -> Result<x402_types::scheme::SchemeRegi
     >>::from_config(&chain_config)
     .await
     .map_err(|e| format!("provider from config: {e}"))?;
-    let providers = std::collections::HashMap::from([(chain_id.clone(), provider)]);
+    // Upstream's own composition (facilitator/src/chain.rs + schemes.rs,
+    // mirrored): the registry stores a provider ENUM implementing
+    // ChainProviderOps, and the `for<'a> Builder<&'a P>` blueprint bound
+    // is satisfied by hand-written bridge impls that pattern-match the
+    // enum and delegate to the blanket Arc<T> impls. This is THE
+    // documented way the registry composes — not a workaround.
+    let providers = std::collections::HashMap::from([(
+        chain_id.clone(),
+        DoorProvider::Eip155(Arc::new(provider)),
+    )]);
     let chain_registry = x402_types::chain::ChainRegistry::new(providers);
-    // Chartered scope ONLY, constructed in code so the registry cannot grow
-    // by configuration accident: EVM exact + upto on the one configured chain.
     let blueprints = x402_types::scheme::SchemeBlueprints::new()
         .and_register(x402_chain_eip155::V2Eip155Exact)
         .and_register(x402_chain_eip155::V2Eip155Upto);
@@ -214,5 +221,68 @@ mod live_facilitator {
                 })
             })
         }
+    }
+}
+
+/// The registry's provider type — upstream facilitator/src/chain.rs
+/// mirrored. The enum implements ChainProviderOps by delegation, and the
+/// scheme bridges below satisfy the reference-shaped blueprint bound the
+/// same way upstream's schemes.rs does it.
+enum DoorProvider {
+    Eip155(Arc<x402_chain_eip155::chain::Eip155ChainProvider>),
+}
+
+impl x402_types::chain::ChainProviderOps for DoorProvider {
+    fn signer_addresses(&self) -> Vec<String> {
+        match self {
+            DoorProvider::Eip155(p) => {
+                use x402_chain_eip155::chain::Eip155SignerAddresses;
+                p.signer_addresses()
+                    .into_iter()
+                    .map(|a| a.to_string())
+                    .collect()
+            }
+        }
+    }
+    fn chain_id(&self) -> x402_types::chain::ChainId {
+        match self {
+            DoorProvider::Eip155(p) => p.chain_id(),
+        }
+    }
+}
+
+impl x402_types::scheme::X402SchemeFacilitatorBuilder<&DoorProvider>
+    for x402_chain_eip155::V2Eip155Exact
+{
+    fn build(
+        &self,
+        provider: &DoorProvider,
+        config: Option<serde_json::Value>,
+    ) -> Result<Box<dyn x402_types::scheme::X402SchemeFacilitator>, Box<dyn std::error::Error>>
+    {
+        let p = if let DoorProvider::Eip155(p) = provider {
+            Arc::clone(p)
+        } else {
+            return Err("V2Eip155Exact::build: provider must be Eip155".into());
+        };
+        <Self as x402_types::scheme::X402SchemeFacilitatorBuilder<Arc<_>>>::build(self, p, config)
+    }
+}
+
+impl x402_types::scheme::X402SchemeFacilitatorBuilder<&DoorProvider>
+    for x402_chain_eip155::V2Eip155Upto
+{
+    fn build(
+        &self,
+        provider: &DoorProvider,
+        config: Option<serde_json::Value>,
+    ) -> Result<Box<dyn x402_types::scheme::X402SchemeFacilitator>, Box<dyn std::error::Error>>
+    {
+        let p = if let DoorProvider::Eip155(p) = provider {
+            Arc::clone(p)
+        } else {
+            return Err("V2Eip155Upto::build: provider must be Eip155".into());
+        };
+        <Self as x402_types::scheme::X402SchemeFacilitatorBuilder<Arc<_>>>::build(self, p, config)
     }
 }

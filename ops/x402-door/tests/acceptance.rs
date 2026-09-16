@@ -268,7 +268,7 @@ fn acceptance_5_torn_journal_file_fails_closed() {
         "must name torn + refusal: {err}"
     );
     // And operations needing state fail closed rather than guess.
-    assert!(j.settle_precheck(&leg).is_err());
+    assert!(j.begin_settle(&leg).is_err());
 }
 
 // ---------- 6. R4 per-leg log law ----------

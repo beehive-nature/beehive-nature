@@ -38,9 +38,11 @@ jobs:
         run: cargo test --locked --manifest-path rust/bsafe-host/Cargo.toml
       # x402-door (chartered 2026-09-16): the door laws + acceptance contract.
       # Upstream facilitator-local is Unix-only (tokio::signal::unix) — CI is Linux.
-      - name: x402 door (8-point acceptance contract)
+      - name: x402 door (8-point acceptance contract + adversarial battery + live-wiring compile)
         if: always()
-        run: cargo test --locked --manifest-path ops/x402-door/Cargo.toml
+        run: |
+          cargo test --locked --manifest-path ops/x402-door/Cargo.toml
+          cargo build --locked --manifest-path ops/x402-door/Cargo.toml --features live-wiring
       # SPEC-BINDEXER-0: the keyless attestation is a CI-visible receipt
       - name: bindexer keyless attestation (SPEC-BINDEXER-0)
         if: always()
