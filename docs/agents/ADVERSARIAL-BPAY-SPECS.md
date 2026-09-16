@@ -534,3 +534,39 @@ charters its fix.
 
 *Sixth roll, 2026-09-16. Pipeline law unchanged: builder proves RED, fixes GREEN, CI
 arbitrates; zArcheology designs tests only, zero production code.*
+
+---
+
+## SEVENTH ROLL — capability negotiation across MULTI-RAIL plans (2026-09-16; LU/CD taken to the plan boundary; founder-required invariant: authorization-time manifest binding)
+
+*Complements the sixth roll: CD-7/CD-9 cover transport discovery and weakest-link composition
+ALGEBRA — this roll attacks the PLAN layer above the rails. Targets: the plan/intent
+construction layer (corpus IntentPlan slot; today watchpay `ValidatedPlan` + `RailLedger<Id>`),
+the per-rail capability manifest (CD), and the corpus signed-allowlist deployment-manifest law
+(SILENTPAY-V2 §3) as the design-time ancestor of the runtime binding below.*
+
+**The new invariant (founder-required):** a plan binds, per leg, the **capability-manifest
+hash + version AT AUTHORIZATION TIME**, riding the signed authorization material. Later
+capability drift can never silently change an obligation.
+
+### SPEC MP — multirail plan capability attacks (RED-first)
+
+| # | case | exact pass criterion | fail criterion |
+|---|---|---|---|
+| MP-1 | legs advertise incompatible capabilities (plan demands `upto` plan-wide; one leg's rail has upto=false; plan-level replacement semantics where one rail is replacement=false) | construction-time typed refusal naming leg + axis; dropping an OPTIONAL leg for mismatch = explicit renegotiation event, never silent drop (LU-4 generalized to legs) | silent leg drop, or plan built anyway |
+| MP-2 | manifest drift mid-plan (rail manifest version-bumps or axis-flips after authorization, before all legs settle) | already-opened legs execute under the AUTHORIZATION-TIME manifest (grandfather law); not-yet-opened legs get a typed DRIFT refusal requiring explicit renegotiation; **no leg ever executes under a manifest it was not authorized against** | silent execution under the new manifest; silent failure of old legs |
+| MP-3 | the binding itself | plan carries per-leg manifest hash+version; opening a leg validates current-manifest-hash == bound hash, mismatch = typed drift event, zero mutation; changing the binding requires a NEW signed authorization (rail capability data, not payer identity — R4-safe by construction) | unbound manifests; in-place rebind |
+| MP-4 | lying adapters at plan level, per axis: upto-declared/max-charged (LU-1 signature); finality=instant-declared but reorg-depth evidence < declared (EVM lying); failure-fees=false-declared but failure charges appear (RS-4.3 impossibility); partial-declared without MPP/hold semantics (LU-2/LU-5); replacement-declared where replacement creates a NEW idempotency scope instead of same-obligation (AV-8.3) | every lie DETECTED at reconcile, typed refusal naming axis + leg; CD-4 cross-check runs per leg per plan | any lie survives to settlement |
+| MP-5 | LN/EVM distinctness at plan level: per-leg settlement assurance reported DISTINCTLY in the receipt — plan assurance is the WEAKEST leg per domain (composes with CD-9's algebra), never averaged/homogenized (corpus ADDENDUM §7: "Arbitrum sequencer acknowledgement must not be relabeled Vaulta finality") | receipt shows per-leg assurance (LN: instant; EVM: reorg-depth-N); a uniform single "finality" claim on a multirail receipt = conflation signature, refused | homogenized/averaged assurance anywhere |
+| MP-6 | negative controls | silent mid-plan manifest mutation DETECTED (MP-3); lying upto manifest DETECTED at plan level (MP-4); uniform-finality receipt DETECTED (MP-5) | harness blind on any axis |
+
+**RED expectations:** the manifest binding (MP-3) exists nowhere — its RED is the charter for
+the binding's type; MP-2's grandfather law and MP-5's per-leg assurance are the likeliest
+additional REDs. **Harness:** plan-level fixtures above the differential probes
+(`nwc_mock`/`LnMockClient` + watchpay-composed EVM member), per-rail manifest fixtures with
+mutable versions (builder's), zero network; the live NWC leg stays env-gated `#[ignore]` per
+R13 law.
+
+*Seventh roll, 2026-09-16. Pipeline law unchanged. Watch list updates with R13: the live NWC
+leg and any Sepolia smoke add LIVE drift sources for MP-2 drills; the Eddies worker's
+obligation semantics arrive against RS-2 terminal reconciliation and RS-4.3 fee asymmetry.*
