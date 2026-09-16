@@ -26,6 +26,17 @@ attributed source · evidence pointer.
 
 ## 1 · EDDIES / ANTENGLEMENT INVESTIGATION — WATCH (implementation evidence banked 2026-09-16; server-side source still unseen)
 
+*Independent reverse-engineering receipt (2026-09-16, founder-ordered, prior
+interpretations explicitly excluded from method): fresh deployment read
+(bundle `index-Dooy-XIV.js` + 17 chunks), one unauthenticated invoice GET,
+read-only Arbitrum calls —* **an Eddie is a server-database row; ownership
+changes NEVER touch Arbitrum (solely PQ-signed `/api/*`); the only chain leg
+is a client-asserted ETH/ANT payment to a dead hardcoded EOA; the Autonomi
+leg is client-encrypted secret-named persistence; NO decentralized primitive
+beyond ANT + Autonomi storage + an app server.** *Full trace, five-way
+classification, diagram, security observations:*
+[`docs/dispatches/2026-09-16-eddies-reverse-engineering.md`](../dispatches/2026-09-16-eddies-reverse-engineering.md).
+
 *Received 2026-09-15, appended verbatim from the Claude seat's analysis, relayed
 by the founder. Primary-source evidence, provenance chain, and both retrieval
 attempts: [`docs/dispatches/2026-09-15-eddies-antenglement-primary-source.md`](../dispatches/2026-09-15-eddies-antenglement-primary-source.md).
