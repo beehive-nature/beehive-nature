@@ -144,6 +144,34 @@ test('spend-audit engine: register-aware at render time — bee collapses, cyphe
   await bee.ctx.close();
 });
 
+test('stack organ board: walls become disclosures; bee-only walls never show empty to cypherpunk', async () => {
+  const bee = await at('stack.html', 'bee');
+  const stB = await bee.p.evaluate(() => {
+    const ds = [...document.querySelectorAll('details[data-reg-disclose]')];
+    return { total: ds.length, open: ds.filter(d => d.open).length,
+      beeOnly: ds.filter(d => d.dataset.reg === 'bee').length,
+      fullTextKept: ds.every(d => (d.textContent || '').length > 150) };
+  });
+  assert.ok(stB.total >= 7, 'seven disclosures on the organ board, got ' + stB.total);
+  assert.equal(stB.open, 0, 'collapsed for bee');
+  assert.equal(stB.beeOnly, 2, 'the two bee-only walls carry data-reg onto the whole disclosure');
+  assert.ok(stB.fullTextKept, 'full text rides inside');
+  assert.equal(bee.errs.length, 0, bee.errs.join(' | '));
+  await bee.ctx.close();
+  const cp = await at('stack.html', 'cypherpunk');
+  const stC = await cp.p.evaluate(() => {
+    const all = [...document.querySelectorAll('details[data-reg-disclose]')];
+    const visible = all.filter(d => d.dataset.reg !== 'bee');
+    return { total: all.length, visibleToCp: visible.length,
+      open: visible.filter(d => d.open).length,
+      beeOnlyHidden: all.filter(d => d.dataset.reg === 'bee').every(d => getComputedStyle(d).display === 'none') };
+  });
+  assert.ok(stC.beeOnlyHidden, 'bee-only disclosures never render for cypherpunk (no empty summary)');
+  assert.equal(stC.open, stC.visibleToCp, 'cypherpunk sees the rest standing open');
+  assert.equal(cp.errs.length, 0, cp.errs.join(' | '));
+  await cp.ctx.close();
+});
+
 test('blight cluster: midi + workbench + b4b disclosures collapse for bee', async () => {
   for (const page of ['blight/midi.html', 'blight/workbench.html', 'b4b.html']) {
     const { ctx, p, errs } = await at(page, 'bee');
