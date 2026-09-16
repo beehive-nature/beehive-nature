@@ -16,9 +16,11 @@ pub mod fee;
 pub mod ledger;
 pub mod ln;
 pub mod nwc;
+pub mod nwc_crypto;
 #[cfg(feature = "live-nwc")]
 pub mod nwc_live;
 pub mod nwc_mock;
+pub mod nwc_reader;
 pub mod x402;
 
 pub use evm::{EvmPaymentId, EvmRailAdapter};
@@ -27,6 +29,6 @@ pub use ledger::{LedgerError, LifecycleState, RailLedger};
 pub use ln::{LnMockClient, LnRailAdapter, LnSettlement, NwcState, PaymentHash};
 pub use nwc::{NwcError, NwcRail, NwcTransport};
 #[cfg(feature = "live-nwc")]
-pub use nwc_live::{nip44_encrypt, LiveNwcTransport, NwcConnection};
+pub use nwc_live::{LiveNwcTransport, NwcConnection};
 pub use nwc_mock::MockNwcTransport;
 pub use x402::{compose_from_offer, gate, offer_id, AllowEntry, OfferPolicy, PinnedOffer};
