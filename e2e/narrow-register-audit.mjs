@@ -63,7 +63,7 @@ const MEASURE = `(() => {
   document.querySelectorAll('body *').forEach(n=>{
     if(n.children.length)return;
     if(n.closest&&n.closest(CHROME))return;
-    if(['SCRIPT','STYLE','NOSCRIPT','CANVAS','SVG','PATH','OPTION','TEXT','TSPAN','TITLE'].includes(n.tagName))return;
+    if(['SCRIPT','STYLE','NOSCRIPT','CANVAS','SVG','PATH','OPTION','TEXT','TSPAN','TITLE'].includes(n.tagName.toUpperCase()))return; /* svg namespaced tags are lowercase */
     const t=(n.textContent||'').trim();
     if(t.length<3||!/[A-Za-zА-Яа-яЀ-ӿ]/.test(t))return;
     if(!vis(n))return;

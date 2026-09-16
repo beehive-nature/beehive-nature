@@ -18,6 +18,7 @@ body{background:#0a0a14;color:#eee;font-family:Arial,sans-serif}
 .hero{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:14px}
 .hero-card{background:#111122;border-radius:14px;padding:20px;text-align:center;border:1px solid #1a1a3e}
 .hero-card .mega{font-size:32px;font-weight:bold;line-height:1}
+@media (max-width:560px){.hero{grid-template-columns:1fr}.hero-card .mega{font-size:24px}}
 .hero-card .sub{font-size:10px;color:#888;margin-top:6px;text-transform:uppercase}
 .cascade{display:flex;flex-direction:column;gap:6px;padding:10px}
 .cascade-step{display:flex;align-items:center;gap:10px;padding:10px;border-radius:8px;background:#080820}
@@ -33,6 +34,7 @@ body{background:#0a0a14;color:#eee;font-family:Arial,sans-serif}
 .disease-bar{flex:1;height:20px;background:#0a0a14;border-radius:4px;overflow:hidden}
 .disease-fill{height:100%;display:flex;align-items:center;padding-left:6px;font-size:9px;font-weight:bold;color:#fff;border-radius:4px}
 .disease-stat{width:80px;text-align:right;font-size:11px}
+.disease-stat small{display:block;font-size:9px;color:#888;font-weight:normal}
 .compare-row{padding:10px;border-radius:8px;margin-bottom:6px;font-size:11px;line-height:1.6}
 .compare-down{background:#1a0a0a;border-left:3px solid #E74C3C}
 .compare-up{background:#0a1a0a;border-left:3px solid #27AE60}
@@ -134,14 +136,14 @@ body{background:#0a0a14;color:#eee;font-family:Arial,sans-serif}
 <!-- DISEASE STATISTICS -->
 <div class="panel">
 <h2 class="orange">Diseases Downstream of ACiD — US Statistics</h2>
-<div class="disease-row"><div class="disease-name">Heart Disease</div><div class="disease-bar"><div class="disease-fill" style="background:#E74C3C;width:85%">30.3M adults</div></div><div class="disease-stat red">$363B/yr</div></div>
-<div class="disease-row"><div class="disease-name">Cancer</div><div class="disease-bar"><div class="disease-fill" style="background:#E74C3C;width:62%">1.9M new/yr</div></div><div class="disease-stat red">$200B/yr</div></div>
-<div class="disease-row"><div class="disease-name">Diabetes (T2)</div><div class="disease-bar"><div class="disease-fill" style="background:#E67E22;width:75%">37.3M adults</div></div><div class="disease-stat orange">$327B/yr</div></div>
-<div class="disease-row"><div class="disease-name">Obesity</div><div class="disease-bar"><div class="disease-fill" style="background:#E67E22;width:100%">100M+ adults</div></div><div class="disease-stat orange">$173B/yr</div></div>
-<div class="disease-row"><div class="disease-name">Alzheimer's</div><div class="disease-bar"><div class="disease-fill" style="background:#8E44AD;width:28%">6.5M adults</div></div><div class="disease-stat purple">$355B/yr</div></div>
-<div class="disease-row"><div class="disease-name">Autoimmune</div><div class="disease-bar"><div class="disease-fill" style="background:#8E44AD;width:40%">24M adults</div></div><div class="disease-stat purple">$100B/yr</div></div>
-<div class="disease-row"><div class="disease-name">Depression/Anxiety</div><div class="disease-bar"><div class="disease-fill" style="background:#3498DB;width:55%">40M adults</div></div><div class="disease-stat neu">$210B/yr</div></div>
-<div class="disease-row"><div class="disease-name">Chronic Pain</div><div class="disease-bar"><div class="disease-fill" style="background:#3498DB;width:65%">50M adults</div></div><div class="disease-stat neu">$300B/yr</div></div>
+<div class="disease-row"><div class="disease-name">Heart Disease</div><div class="disease-bar"><div class="disease-fill" style="background:#E74C3C;width:85%"></div></div></div><div class="disease-stat red">$363B/yr<small>30.3M adults</small></div></div>
+<div class="disease-row"><div class="disease-name">Cancer</div><div class="disease-bar"><div class="disease-fill" style="background:#E74C3C;width:62%"></div></div></div><div class="disease-stat red">$200B/yr<small>1.9M new/yr</small></div></div>
+<div class="disease-row"><div class="disease-name">Diabetes (T2)</div><div class="disease-bar"><div class="disease-fill" style="background:#E67E22;width:75%"></div></div></div><div class="disease-stat orange">$327B/yr<small>37.3M adults</small></div></div>
+<div class="disease-row"><div class="disease-name">Obesity</div><div class="disease-bar"><div class="disease-fill" style="background:#E67E22;width:100%"></div></div></div><div class="disease-stat orange">$173B/yr<small>100M+ adults</small></div></div>
+<div class="disease-row"><div class="disease-name">Alzheimer's</div><div class="disease-bar"><div class="disease-fill" style="background:#8E44AD;width:28%"></div></div></div><div class="disease-stat purple">$355B/yr<small>6.5M adults</small></div></div>
+<div class="disease-row"><div class="disease-name">Autoimmune</div><div class="disease-bar"><div class="disease-fill" style="background:#8E44AD;width:40%"></div></div></div><div class="disease-stat purple">$100B/yr<small>24M adults</small></div></div>
+<div class="disease-row"><div class="disease-name">Depression/Anxiety</div><div class="disease-bar"><div class="disease-fill" style="background:#3498DB;width:55%"></div></div></div><div class="disease-stat neu">$210B/yr<small>40M adults</small></div></div>
+<div class="disease-row"><div class="disease-name">Chronic Pain</div><div class="disease-bar"><div class="disease-fill" style="background:#3498DB;width:65%"></div></div></div><div class="disease-stat neu">$300B/yr<small>50M adults</small></div></div>
 <div class="disease-row"><div class="disease-name">COPD</div><div class="disease-bar"><div class="disease-fill" style="background:#666;width:22%">16M adults</div></div><div class="disease-stat" style="color:#888">$50B/yr</div></div>
 <div class="disease-row"><div class="disease-name">Kidney Disease</div><div class="disease-bar"><div class="disease-fill" style="background:#666;width:48%">37M adults</div></div><div class="disease-stat" style="color:#888">$87B/yr</div></div>
 <div class="disease-row" style="border-top:1px solid #333;margin-top:6px;padding-top:8px"><div class="disease-name" style="font-weight:bold">TOTAL</div><div class="disease-bar"></div><div class="disease-stat red" style="font-size:14px;font-weight:bold">$14.11T/yr</div></div>

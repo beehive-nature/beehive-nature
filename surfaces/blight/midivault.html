@@ -20,6 +20,7 @@
 *{box-sizing:border-box;margin:0}
 html,body{background:var(--bg)}
 body{font:13px/1.6 ui-sans-serif,system-ui,"Segoe UI",Roboto,sans-serif;color:var(--ink);padding:18px 14px 64px;max-width:920px;margin:0 auto}
+body{overflow-x:hidden} /* the only thing past the right edge is tour-strip scroll internals; a reader gets no sideways wiggle */
 a{color:#B79FE0}
 h1{font-size:clamp(20px,5vw,28px);letter-spacing:-.4px}
 h1.grad{background:linear-gradient(92deg,var(--sovereign),var(--you));-webkit-background-clip:text;background-clip:text;color:transparent}
