@@ -106,11 +106,17 @@ def ingest_gate_verdict(line):
                                {"verdict": code, "phase": phase, "ms": v.get("ms"), "key_id": v.get("key_id")})
     return None
 
-def parse_delivery(text, rate_set, key_ref, seen_tasks):
+def parse_delivery(text, rate_set, key_ref, seen_tasks, ledger=None):
     """The four-state parser. COMPLETE reuses the production parse_stream and
-    emitter (payment chain); everything else is evidence/failure-side."""
+    emitter (payment chain); everything else is evidence/failure-side.
+    `ledger` (optional, persisted dict with complete/partial/wedged lists)
+    makes artifact emission WRITE-ONCE per task across restarts, replays and
+    duplicate log input — the replay-safety law."""
+    led = ledger or {}
+    partial_seen = set(led.get("partial", []))
+    wedged_seen = set(led.get("wedged", []))
     launched, cancels, releases = {}, {}, {}
-    results = {"complete": [], "partial": [], "release_only": []}
+    results = {"complete": [], "partial": [], "release_only": [], "wedged": []}
     for line in text.splitlines():
         m = LAUNCH_RE.search(line)
         if m: launched.setdefault(m.group(1), []).append(line); continue
@@ -119,14 +125,21 @@ def parse_delivery(text, rate_set, key_ref, seen_tasks):
         m = RELEASE_RE.search(line)
         if m:
             releases.setdefault(m.group(1), (int(m.group(2)), line)); continue
-    # COMPLETE via the production parser (its seen-set = exactly the completed task ids)
-    completed_ids = set()
-    results["complete"] = meter.parse_stream(text, None, rate_set, key_ref, completed_ids, live=True)
-    seen_tasks |= completed_ids
+    # COMPLETE via the production parser — THE CALLER'S seen/ledger set is the
+    # dedupe set passed INTO parse_stream (composite catch: a fresh set here
+    # re-emitted every task on replayed/duplicated text)
+    before_seen = set(seen_tasks)
+    results["complete"] = meter.parse_stream(text, None, rate_set, key_ref, seen_tasks, live=True)
+    completed_ids = seen_tasks - before_seen
+    if ledger is not None:                     # persist the write-once set: replay/restart
+        ledger.setdefault("complete", [])
+        ledger["complete"] = list(set(ledger["complete"]) | completed_ids)
     for r in results["complete"]:
         emit_payment(r)
     # PARTIAL/CANCELLED: cancelled tasks with a release carrying n_tokens
     for task in cancels:
+        if task in partial_seen: continue
+        if ledger is not None: ledger.setdefault("partial", []).append(task)
         if task in releases:
             n, line = releases[task]
             results["partial"].append(evidence_record(
@@ -137,25 +150,31 @@ def parse_delivery(text, rate_set, key_ref, seen_tasks):
             results["release_only"].append(evidence_record(
                 task, "PARTIAL/CANCELLED", {"n_tokens_at_stop": None},
                 cancels[task]))
-    # releases without cancel (server-side stop) — evidence too
+    # releases without cancel (server-side stop) — evidence ONLY if the task
+    # did NOT complete: llama-server prints a release line for EVERY task,
+    # completed ones included (composite battery catch, 2026-09-16)
     for task in releases:
-        if task not in cancels:
+        if (task not in cancels and task not in partial_seen
+                and task not in completed_ids and task not in seen_tasks):
+            if ledger is not None: ledger.setdefault("partial", []).append(task)
             n, line = releases[task]
             results["release_only"].append(evidence_record(
                 task, "PARTIAL/CANCELLED",
                 {"n_tokens_at_stop": n, "note": "stopped without client-cancel on record"},
                 [line]))
-    # UNKNOWN/WEDGED: launched, never settled (no timing completion, no release)
-    wedged = []
+    # UNKNOWN/WEDGED: launched, never settled in THIS segment; the persistent
+    # open-task sweep in the watch loop ages cross-segment silence — this
+    # branch only fires for tasks whose whole lifecycle is inside one segment
     for task in launched:
-        if task not in cancels and task not in releases and task not in completed_ids:
-            wedged.append(task)
+        if (task not in cancels and task not in releases and task not in completed_ids
+                and task not in wedged_seen):
+            if ledger is not None: ledger.setdefault("wedged", []).append(task)
+            results["wedged"].append(task)
             failure_receipt("UNKNOWN/WEDGED", "meter-wedge-detector",
                             {"task": task, "silence_s": WEDGE_SILENCE_S,
                              "note": "launched, never settled — timing silence",
                              "raw_lines": launched[task]})
             evidence_record(task, "UNKNOWN/WEDGED", {"tokens": None}, launched[task])
-    results["wedged"] = wedged
     return results
 
 def emit_payment(r):
@@ -168,19 +187,91 @@ def emit_payment(r):
                       "ts": time.time()})
 
 if __name__ == "__main__" and len(sys.argv) > 1 and sys.argv[1] == "--watch":
-    # minimal watch loop for integration (tail the llama log path + gate log)
+    # composite watch: byte-offset tails + a PERSISTED task ledger (write-once
+    # across restarts/replays) + the cross-segment open-task wedge sweep.
     LLAMA_LOG = os.environ.get("PD_LLAMA_LOG", "/dev/null")
     GATE_LOG = os.environ.get("PD_GATE_LOG", "/dev/null")
-    seen, pos, gpos = set(), 0, 0
+    LEDGER_F = os.path.join(PD_ROOT, "state", "tasks-ledger.json")
+    OFFSET_F = os.path.join(PD_ROOT, "state", "offsets.json")
+    def _load(p, d):
+        try:
+            with open(p) as f: return json.load(f)
+        except Exception: return d
+    ledger = _load(LEDGER_F, {"complete": [], "partial": [], "wedged": [], "gate_seen": []})
+    offs = _load(OFFSET_F, {"llama": 0, "gate": 0})
+    seen = set(ledger["complete"])
+    open_tasks = {}   # task -> first-seen ts (launched, not yet settled)
+    pending_cancel = {}  # task -> cancel lines seen; a release may land in a LATER segment
     while True:
         try:
             with open(LLAMA_LOG, errors="replace") as f:
-                f.seek(pos); text = f.read(); pos = f.tell()
-            if text: parse_delivery(text, meter.load_rate_set(), "estate-compute-key-1", seen)
+                f.seek(offs["llama"]); text = f.read(); offs["llama"] = f.tell()
+            if text:
+                # a server restart begins a fresh task-id space (composite
+                # catch: post-SIGKILL ids repeat) — no open-task carryover
+                if "server is listening" in text or "model loaded" in text:
+                    if open_tasks:
+                        open_tasks.clear()
+                # settle-tracking for the sweep: what this segment settles
+                seg_launch, seg_settle = set(), set()
+                for line in text.splitlines():
+                    m = LAUNCH_RE.search(line)
+                    if m: seg_launch.add(m.group(1)); continue
+                    m = CANCEL_RE.search(line)
+                    if m: seg_settle.add(m.group(1)); continue
+                    m = RELEASE_RE.search(line)
+                    if m: seg_settle.add(m.group(1)); continue
+                    if "print_timing" in line:
+                        mm = re.search(r"task (\d+)", line)
+                        if mm: seg_settle.add(mm.group(1))
+                now = time.time()
+                for t in seg_launch:
+                    open_tasks.setdefault(t, now)
+                for t in seg_settle:
+                    open_tasks.pop(t, None)
+                # cross-segment cancel/release matching (composite catch: the
+                # cancel line and its n_tokens release can land in different
+                # 5s polls — match them across segments, evidence complete)
+                for line in text.splitlines():
+                    m = CANCEL_RE.search(line)
+                    if m: pending_cancel.setdefault(m.group(1), []).append(line); continue
+                    m = RELEASE_RE.search(line)
+                    if m and m.group(1) in pending_cancel:
+                        t = m.group(1)
+                        if t not in ledger["partial"]:
+                            ledger["partial"].append(t)
+                            evidence_record(t, "PARTIAL/CANCELLED",
+                                            {"n_tokens_at_stop": int(m.group(2)),
+                                             "note": "observed tokens at stop — raw evidence, not billable"},
+                                            pending_cancel[t] + [line])
+                        del pending_cancel[t]
+                parse_delivery(text, meter.load_rate_set(), "estate-compute-key-1", seen, ledger)
             with open(GATE_LOG, errors="replace") as f:
-                f.seek(gpos); gtext = f.read(); gpos = f.tell()
+                f.seek(offs["gate"]); gtext = f.read(); offs["gate"] = f.tell()
             for line in gtext.splitlines():
-                if line.strip(): ingest_gate_verdict(line)
+                if not line.strip(): continue
+                h = hashlib.sha256(line.encode()).hexdigest()[:16]
+                if h in ledger["gate_seen"]: continue    # replay-safe: write-once verdicts
+                ledger["gate_seen"].append(h)
+                ingest_gate_verdict(line)
+            # cross-segment wedge sweep: silence beyond the window, still open,
+            # and NOT completed by now (composite catch: a task that completes
+            # just after its window must not be marked wedged)
+            now = time.time()
+            for t, ts in list(open_tasks.items()):
+                if now - ts > WEDGE_SILENCE_S and t not in ledger["wedged"] and t not in seen:
+                    ledger["wedged"].append(t)
+                    del open_tasks[t]
+                    failure_receipt("UNKNOWN/WEDGED", "meter-wedge-detector",
+                                    {"task": t, "silence_s": WEDGE_SILENCE_S,
+                                     "note": "open task aged past the silence window (cross-segment sweep)",
+                                     "first_seen": ts})
+                    evidence_record(t, "UNKNOWN/WEDGED", {"tokens": None}, [])
+            # persist the ledger + offsets (atomic-ish: write-then-rename)
+            for path, obj in ((LEDGER_F, ledger), (OFFSET_F, offs)):
+                tmp = path + ".tmp"
+                with open(tmp, "w") as f: json.dump(obj, f)
+                os.replace(tmp, path)
         except FileNotFoundError:
             pass
         time.sleep(5)

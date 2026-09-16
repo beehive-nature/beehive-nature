@@ -1,0 +1,23 @@
+07:27:44Z === composite battery: real llama + watchdog + bounded gate + meter-pd ===
+07:27:44Z components up (watchdog + gate + meter-pd); waiting for llama readiness…
+07:27:54Z PASS C0 admission path ready: gate /readiness 200 after 10s (llama loaded, /slots probed)
+07:27:56Z PASS E1 completion through gate+llama
+07:28:08Z PASS E1 meter emitted EXACTLY 1 payment receipt (COMPLETE)
+07:28:10Z PASS E2 client departure logged at the gate
+07:28:32Z PASS E2 generation completed SERVER-SIDE for the departed client (P-C absent) -> 2nd COMPLETE receipt (honest: the compute happened)
+07:28:46Z PASS E2b direct abort -> PARTIAL/CANCELLED evidence, billing:null, n_tokens observed
+07:28:50Z E3 SIGSTOP injected (pid 630802) mid-generation
+07:29:02Z PASS E3 in-flight request bounded: idle-cut 504 (FAILED/TIMEOUT)
+07:29:02Z PASS E3 admission during wedge: 503 not-ready (bounded, not queued)
+07:29:27Z PASS E3 watchdog detected the wedge via /slots
+07:29:27Z PASS E3 TERM-ignored (stopped) -> SIGKILL escalation -> respawn
+07:29:27Z E3 waiting for respawn + readiness (model reload)…
+07:29:27Z PASS E3 RECOVERY: llama respawned, gate /readiness 200 after ~0s
+07:29:27Z PASS E3 cross-source corroboration: gate 504 FAILED/TIMEOUT + meter UNKNOWN/WEDGED for the same event
+07:29:29Z PASS E4a post-recovery completion through the full path
+07:29:41Z PASS E4a exactly 3 payment receipts (one per true COMPLETE, across the restart)
+07:29:41Z PASS E4b REPLAY of the full log: ZERO new artifacts (write-once ledger holds)
+07:29:53Z PASS E4c meter restart (persisted ledger+offsets): no duplicate artifacts
+07:29:53Z PASS FINAL AUDIT: zero billable shapes outside the payment chain; tips differ; all four states present
+07:29:53Z === composite battery end FAILED=0 ===
+07:29:53Z artifacts: payment=3 failure=5 evidence=5 — P-C never fired upstream destroys only via bounds/watchdog

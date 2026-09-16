@@ -27,11 +27,16 @@ while [ $# -gt 0 ]; do case "$1" in
   --stop-grace) STOP_GRACE=$2; shift 2;;
   --max-restarts) MAX_RESTARTS=$2; shift 2;;
   --start-cmd) START_CMD=$2; shift 2;;
+  --start-grace) START_GRACE=$2; shift 2;;
   --log) LOG=$2; shift 2;;
   --no-supervise) NO_SUPERVISE=1; shift;;
   *) echo "usage error: $1" >&2; exit 3;;
 esac; done
 [ -n "$START_CMD" ] || { echo "--start-cmd is required" >&2; exit 3; }
+START_GRACE=${START_GRACE:-120}   # seconds after spawn before probe failures count:
+                                  # a LOADING server fails /slots innocently (composite
+                                  # battery catch, 2026-09-16 — the watchdog killed a
+                                  # 60-90s model load as if wedged and restart-looped)
 
 log() { printf '%s %s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$*" >>"$LOG"; }
 CHILD=0; RESTARTS=0; RUNNING=1
@@ -71,15 +76,21 @@ probe() {
   case "$t" in 200\ *) return 0;; *) return 1;; esac
 }
 
-log "watchdog up: url=$URL timeout=${TIMEOUT}s interval=${INTERVAL}s max-fails=$MAX_FAILS stop-grace=${STOP_GRACE}s max-restarts=$MAX_RESTARTS supervise=$([ $NO_SUPERVISE = 0 ] && echo yes || echo no)"
+log "watchdog up: url=$URL timeout=${TIMEOUT}s interval=${INTERVAL}s max-fails=$MAX_FAILS stop-grace=${STOP_GRACE}s start-grace=${START_GRACE}s max-restarts=$MAX_RESTARTS supervise=$([ $NO_SUPERVISE = 0 ] && echo yes || echo no)"
 spawn
 FAILS=0
+GRACE_UNTIL=$(( $(date +%s) + START_GRACE ))
 while [ "$RUNNING" = 1 ]; do
   sleep "$INTERVAL"
   [ "$RUNNING" = 1 ] || break
   if probe; then
     FAILS=0
+    GRACE_UNTIL=0                                   # answered once: no longer starting up
   else
+    if [ "$(date +%s)" -lt "$GRACE_UNTIL" ]; then
+      log "probe failed (startup grace active, not counting)"
+      continue
+    fi
     FAILS=$((FAILS+1))
     log "probe failed ($FAILS/$MAX_FAILS)"
     if [ "$FAILS" -ge "$MAX_FAILS" ]; then
@@ -94,7 +105,7 @@ while [ "$RUNNING" = 1 ]; do
       fi
       spawn
       FAILS=0
-      # give the respawn a moment before the next probe cycle
+      GRACE_UNTIL=$(( $(date +%s) + START_GRACE ))  # a respawn earns its own grace
     fi
   fi
 done
