@@ -28,6 +28,7 @@ while [ $# -gt 0 ]; do case "$1" in
   --max-restarts) MAX_RESTARTS=$2; shift 2;;
   --start-cmd) START_CMD=$2; shift 2;;
   --start-grace) START_GRACE=$2; shift 2;;
+  --auth-file) AUTH_FILE=$2; shift 2;;
   --log) LOG=$2; shift 2;;
   --no-supervise) NO_SUPERVISE=1; shift;;
   *) echo "usage error: $1" >&2; exit 3;;
@@ -37,6 +38,7 @@ START_GRACE=${START_GRACE:-120}   # seconds after spawn before probe failures co
                                   # a LOADING server fails /slots innocently (composite
                                   # battery catch, 2026-09-16 — the watchdog killed a
                                   # 60-90s model load as if wedged and restart-looped)
+AUTH_FILE=${AUTH_FILE:-}          # optional bearer-source file for authenticated probes
 
 log() { printf '%s %s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$*" >>"$LOG"; }
 CHILD=0; RESTARTS=0; RUNNING=1
@@ -68,15 +70,42 @@ shutdown_child() {
 on_signal() { RUNNING=0; }
 trap on_signal TERM INT
 
-# probe: success iff HTTP 200 within --timeout
+# probe: success iff HTTP 200 within --timeout (authenticating when
+# --auth-file is given — production llama-server 401s unauthenticated probes,
+# which would read as a wedge: deployment pre-flight catch, 2026-09-16)
+AUTH_ARG=()
+if [ -n "$AUTH_FILE" ]; then
+  KEY=$(cat "$AUTH_FILE")
+  case "$KEY" in *=*) KEY="${KEY#*=}";; esac
+  KEY="${KEY//$'\r'/}"
+  AUTH_ARG=(-H "Authorization: Bearer ${KEY}")
+fi
 probe() {
   local t
-  t=$(curl -s -o /dev/null -w '%{http_code} %{time_total}' --max-time "$TIMEOUT" "$URL" 2>/dev/null) || t="curl-fail -"
+  t=$(curl -s -o /dev/null -w '%{http_code} %{time_total}' --max-time "$TIMEOUT" "${AUTH_ARG[@]}" "$URL" 2>/dev/null) || t="curl-fail -"
   log "probe: $t"
   case "$t" in 200\ *) return 0;; *) return 1;; esac
 }
 
-log "watchdog up: url=$URL timeout=${TIMEOUT}s interval=${INTERVAL}s max-fails=$MAX_FAILS stop-grace=${STOP_GRACE}s start-grace=${START_GRACE}s max-restarts=$MAX_RESTARTS supervise=$([ $NO_SUPERVISE = 0 ] && echo yes || echo no)"
+# --no-supervise = ONE bounded burst per invocation (timer-driven oneshot):
+# probe cycle, healthy → exit 0; max consecutive failures → run --start-cmd
+# once (e.g. systemctl restart) and exit 1. Never loops (the old shape would
+# have re-triggered the restart during the reload window: deployment fix).
+if [ "$NO_SUPERVISE" = 1 ]; then
+  sleep "$INTERVAL"
+  probe && exit 0
+  FAILS=1
+  while [ "$FAILS" -lt "$MAX_FAILS" ]; do
+    sleep "$INTERVAL"
+    probe && exit 0
+    FAILS=$((FAILS+1))
+  done
+  log "WEDGE-DETECTED: $MAX_FAILS consecutive probe failures — issuing start-cmd once"
+  bash -c "$START_CMD"
+  exit 1
+fi
+
+log "watchdog up: url=$URL timeout=${TIMEOUT}s interval=${INTERVAL}s max-fails=$MAX_FAILS stop-grace=${STOP_GRACE}s start-grace=${START_GRACE}s max-restarts=$MAX_RESTARTS supervise=yes auth=$([ -n "$AUTH_FILE" ] && echo file || echo none)"
 spawn
 FAILS=0
 GRACE_UNTIL=$(( $(date +%s) + START_GRACE ))
