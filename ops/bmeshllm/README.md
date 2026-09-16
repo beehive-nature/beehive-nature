@@ -110,3 +110,16 @@ throughout the gap (~9 min), meter-gate + meter never dropped.
   16-token clean answer). Agents that want thinking just raise max_tokens.
 - Timing receipts are CPU-contended (backup tar concurrent); re-measure on
   an idle box for the acceptance table.
+
+## MTP PARKED (2026-09-16 ~03:10 UTC) — stability ruling
+
+With `--spec-type draft-mtp` the rail developed a **slot wedge under use**:
+first requests fine (~1.6 s), then a wedged slot queues everything forever
+(health stays 200 — completions hang). Trigger correlated with interrupted
+clients mid-generation. MTP flag REMOVED from the override; production now
+runs the new binary + model with plain decoding (`-fa on`, q8 KV, 5.49 tok/s
+eval class from the smoke receipt). **Stability battery after removal: 12/12
+answered, including recovery from a deliberately aborted 400-token
+generation.** MTP returns only behind a watchdog or an upstream fix.
+GOTCHA banked: `pgrep -af <pattern>` matches the ssh session's own command
+line — verify flags from unit FILES, never from pgrep through ssh.
