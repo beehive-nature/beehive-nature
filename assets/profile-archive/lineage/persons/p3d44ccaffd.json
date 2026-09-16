@@ -21,11 +21,16 @@
   "class": "recorded"
  },
  "research": {
-  "status": "incomplete",
-  "basis": "per-person source counts not yet harvested"
+  "status": "corrected-attested",
+  "basis": "per-person source counts not yet harvested",
+  "note": "Founder-attested deceased (already deceased in the record — attestation recorded for the set). Paternal grandfather."
  },
  "publication": {
   "status": "public"
+ },
+ "corrected": {
+  "attested": "founder order 2026-09-16: all four grandparents confirmed deceased",
+  "note": "Founder-attested deceased (already deceased in the record — attestation recorded for the set). Paternal grandfather."
  },
  "relationships": {
   "parents": [

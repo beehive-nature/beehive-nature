@@ -36,6 +36,30 @@ function loadModel() {
   return { raw, model };
 }
 
+test("founder grandparent law: the grandparent generation is four distinct NAMED people, none 'Living'", () => {
+  // You → two parents (may be Living stubs) → four NAMED grandparents
+  const rootIid = pub.root;
+  const parents = pub.edges[rootIid] || [];
+  const grandparentSet = new Map(); // iid → name
+  for (const par of parents)
+    for (const gp of (pub.edges[par] || []))
+      if (pub.persons[gp]) grandparentSet.set(gp, pub.persons[gp].name);
+  assert.equal(grandparentSet.size, 4, `expected 4 distinct grandparents, got ${grandparentSet.size}`);
+  const expected = ["Donna Ruth Lawton", "Jack Benedum Sutphen", "Don Ray Remington", "Marilyn Lowry"];
+  const names = [...grandparentSet.values()].sort();
+  for (const nm of expected)
+    assert.ok(names.some((n) => n.includes(nm.split(" ")[0]) && n.includes(nm.split(" ").pop())),
+      `grandparent ${nm} missing — generation: ${names.join(", ")}`);
+  for (const [iid, nm] of grandparentSet) {
+    assert.notEqual(nm, "Living", `grandparent ${iid} rendered as a Living placeholder — the founder's grandparents are named`);
+    assert.equal(pub.persons[iid].living, false, `grandparent ${nm} still flagged living`);
+    assert.ok(!pub.persons[iid].lifespan || !/Living/.test(pub.persons[iid].lifespan), `grandparent ${nm} lifespan still says Living`);
+    // each opens their own archive: staged object + page exist
+    assert.ok(existsSync(LINEAGE + "persons/" + iid + ".json"), `grandparent ${nm} has no staged archive object`);
+    assert.ok(existsSync(LINEAGE + "persons/" + iid + ".html"), `grandparent ${nm} has no archive page`);
+  }
+});
+
 test("family completeness: raw → model → staged object → pub → relationships (local receipt)", { skip: !HAS_RAW }, () => {
   const { raw, model } = loadModel();
   const d = depths(model);

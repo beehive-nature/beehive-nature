@@ -78,6 +78,10 @@
     "basis": "era label from dates; support unsourced until sources are harvested",
     "class": "recorded"
    },
+   "corrected": {
+    "attested": "founder order 2026-09-16: all four grandparents confirmed deceased",
+    "note": "Founder-attested deceased (already deceased in the record — attestation recorded for the set). Paternal grandfather."
+   },
    "refs": [
     {
      "provider": "familysearch",
@@ -85,8 +89,9 @@
     }
    ],
    "research": {
-    "status": "incomplete",
-    "basis": "per-person source counts not yet harvested"
+    "status": "corrected-attested",
+    "basis": "per-person source counts not yet harvested",
+    "note": "Founder-attested deceased (already deceased in the record — attestation recorded for the set). Paternal grandfather."
    },
    "publication": {
     "status": "public"
@@ -104,6 +109,10 @@
     "basis": "era label from dates; support unsourced until sources are harvested",
     "class": "recorded"
    },
+   "corrected": {
+    "attested": "founder order 2026-09-16: all four grandparents confirmed deceased",
+    "note": "Founder-attested deceased (already deceased in the record — attestation recorded for the set). Paternal grandmother; the spine rides her line."
+   },
    "refs": [
     {
      "provider": "familysearch",
@@ -111,8 +120,9 @@
     }
    ],
    "research": {
-    "status": "incomplete",
-    "basis": "per-person source counts not yet harvested"
+    "status": "corrected-attested",
+    "basis": "per-person source counts not yet harvested",
+    "note": "Founder-attested deceased (already deceased in the record — attestation recorded for the set). Paternal grandmother; the spine rides her line."
    },
    "publication": {
     "status": "public"
@@ -131,8 +141,8 @@
     "class": "recorded"
    },
    "corrected": {
-    "attested": "founder order 2026-09-16",
-    "note": "FamilySearch private-space record flags Don Ray Remington living; the founder attests the family line — famous grandpa is not 'Living'. Death year unknown to the archive; no year invented."
+    "attested": "founder order 2026-09-16: all four grandparents confirmed deceased",
+    "note": "FamilySearch private-space record flags Don Ray Remington living; the founder attests the family line — famous grandpa is not 'Living'. Death year unknown to the archive; no year invented. Founder-attested: maternal grandfather."
    },
    "refs": [
     {
@@ -143,7 +153,7 @@
    "research": {
     "status": "corrected-attested",
     "basis": "per-person source counts not yet harvested",
-    "note": "FamilySearch private-space record flags Don Ray Remington living; the founder attests the family line — famous grandpa is not 'Living'. Death year unknown to the archive; no year invented."
+    "note": "FamilySearch private-space record flags Don Ray Remington living; the founder attests the family line — famous grandpa is not 'Living'. Death year unknown to the archive; no year invented. Founder-attested: maternal grandfather."
    },
    "publication": {
     "status": "public"
@@ -162,8 +172,8 @@
     "class": "recorded"
    },
    "corrected": {
-    "attested": "founder order 2026-09-16",
-    "note": "FamilySearch private-space record flags Marilyn Lowry Remington living; she is the founder's deceased grandmother (the tree's co-builder with him, 12 years ago). Death year unknown to the archive; no year invented."
+    "attested": "founder order 2026-09-16: all four grandparents confirmed deceased",
+    "note": "FamilySearch private-space record flags Marilyn Lowry Remington living; she is the founder's deceased grandmother (the tree's co-builder with him, 12 years ago). Death year unknown to the archive; no year invented. Founder-attested: maternal grandmother."
    },
    "refs": [
     {
@@ -174,7 +184,7 @@
    "research": {
     "status": "corrected-attested",
     "basis": "per-person source counts not yet harvested",
-    "note": "FamilySearch private-space record flags Marilyn Lowry Remington living; she is the founder's deceased grandmother (the tree's co-builder with him, 12 years ago). Death year unknown to the archive; no year invented."
+    "note": "FamilySearch private-space record flags Marilyn Lowry Remington living; she is the founder's deceased grandmother (the tree's co-builder with him, 12 years ago). Death year unknown to the archive; no year invented. Founder-attested: maternal grandmother."
    },
    "publication": {
     "status": "public"
@@ -314021,7 +314031,7 @@
     "KWJ4-XBD Albert Perry Rockwood": "published · the public entrance person"
    }
   },
-  "correctionsApplied": 2,
+  "correctionsApplied": 4,
   "overlayPersons": 3,
   "stagedPersons": {
    "store": "assets/profile-archive/lineage/persons/",
@@ -314035,8 +314045,8 @@
     "pf5d40516b8"
    ],
    "researchCounts": {
-    "incomplete": 10252,
-    "corrected-attested": 2,
+    "incomplete": 10250,
+    "corrected-attested": 4,
     "tradition-entered": 5
    },
    "publicationCounts": {

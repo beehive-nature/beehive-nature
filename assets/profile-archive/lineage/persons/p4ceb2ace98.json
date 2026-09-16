@@ -23,14 +23,14 @@
  "research": {
   "status": "corrected-attested",
   "basis": "per-person source counts not yet harvested",
-  "note": "FamilySearch private-space record flags Don Ray Remington living; the founder attests the family line — famous grandpa is not 'Living'. Death year unknown to the archive; no year invented."
+  "note": "FamilySearch private-space record flags Don Ray Remington living; the founder attests the family line — famous grandpa is not 'Living'. Death year unknown to the archive; no year invented. Founder-attested: maternal grandfather."
  },
  "publication": {
   "status": "public"
  },
  "corrected": {
-  "attested": "founder order 2026-09-16",
-  "note": "FamilySearch private-space record flags Don Ray Remington living; the founder attests the family line — famous grandpa is not 'Living'. Death year unknown to the archive; no year invented."
+  "attested": "founder order 2026-09-16: all four grandparents confirmed deceased",
+  "note": "FamilySearch private-space record flags Don Ray Remington living; the founder attests the family line — famous grandpa is not 'Living'. Death year unknown to the archive; no year invented. Founder-attested: maternal grandfather."
  },
  "relationships": {
   "parents": [

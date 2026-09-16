@@ -142,7 +142,8 @@ footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint
 <div class="controls">
   <input id="q" type="text" spellcheck="false" autocomplete="off" placeholder="search ten thousand ancestors — name or FamilySearch id">
   <div class="viewswitch" role="group" aria-label="view">
-    <button id="viewfan" type="button" aria-pressed="true">fan</button>
+    <button id="viewped" type="button" aria-pressed="true">pedigree</button>
+    <button id="viewfan" type="button" aria-pressed="false">fractal</button>
     <button id="viewtree" type="button" aria-pressed="false">tree</button>
   </div>
   <button id="spinebtn" type="button" aria-pressed="false" data-i18n="blood.spine">highlight the spine</button>
@@ -209,7 +210,7 @@ footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint
 
   var S={persons:{},edges:{},children:{},spineIds:new Set(),root:null,curRoot:null,spineOn:false,stats:{},
     packs:{},packData:{},relEvidence:{},testimony:[],recon:null,lenses:{records:true,tradition:true,testimony:true,spiritual:true},
-    trail:[],staged:[],viewMode:"fan",retrieved:null,symbolicLinks:[]};
+    trail:[],staged:[],viewMode:"ped",retrieved:null,symbolicLinks:[]};
   var OPEN_ROOT_FS="KWJ4-XBD"; // provider ref, resolved via refsIndex at load
   function addChild(p,c){(S.children[p]=S.children[p]||[]).push(c);}
   fetch(CORPUS_URL).then(r=>r.json()).then(c=>{
@@ -249,7 +250,7 @@ footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint
     if(pm&&S.persons[pm[1]])S.curRoot=pm[1];
     var RAG=(S.refsIndex&&S.refsIndex['M8WZ-XZY'])||null;
     if(/myth/.test(location.hash)&&RAG)S.curRoot=RAG;
-    drawComb();showRootNote();renderTrail();renderList();
+    drawPedigree();showRootNote();renderTrail();renderList();
     if(pm&&S.persons[pm[1]]){showDetail(pm[1]);document.getElementById("detail").scrollIntoView();}
     else if(/myth/.test(location.hash)&&RAG){showDetail(RAG);var d0=document.querySelector('#dbody details');if(d0)d0.open=true;}
   })
@@ -465,9 +466,10 @@ footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint
     if(!S.persons[id])return;
     if(!noTrail&&S.curRoot&&S.curRoot!==id)S.trail.push(S.curRoot);
     if(S.trail.length>12)S.trail.shift();
-    S.curRoot=id;drawComb();showRootNote();renderTrail();
+    S.curRoot=id;showRootNote();renderTrail();
     if(S.viewMode==='tree')renderTree();
-    else{view.s=Math.max(view.s,0.9);centerOn(0,0,false,view.s);} // animated re-center on the new root
+    else if(S.viewMode==='ped')drawPedigree();
+    else{drawComb();view.s=Math.max(view.s,0.9);centerOn(0,0,false,view.s);} // animated re-center on the new root
   }
   function renderList(){
     var body=document.getElementById('listbody');if(!body)return;body.innerHTML='';
@@ -621,21 +623,105 @@ footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint
     document.getElementById('reroot').addEventListener('click',function(){setRoot(id);});
   }
   document.getElementById('spinebtn').addEventListener('click',function(){
-    S.spineOn=!S.spineOn;this.setAttribute('aria-pressed',String(S.spineOn));drawComb();});
+    S.spineOn=!S.spineOn;this.setAttribute('aria-pressed',String(S.spineOn));
+    if(S.viewMode==='ped')drawPedigree();else drawComb();});
   document.getElementById('resetbtn').addEventListener('click',function(){
     S.trail=[];setRoot(S.root,true);showDetail(S.root);});
-  // ── view switch: fan ↔ tree, both fully interactive ─────────────────────
+  // ── view switch: pedigree (truth) ↔ fractal ↔ tree ───────────────────────
   function setView(mode){
     S.viewMode=mode;
+    document.getElementById('viewped').setAttribute('aria-pressed',String(mode==='ped'));
     document.getElementById('viewfan').setAttribute('aria-pressed',String(mode==='fan'));
     document.getElementById('viewtree').setAttribute('aria-pressed',String(mode==='tree'));
-    document.getElementById('comb').style.display=mode==='fan'?'block':'none';
+    document.getElementById('comb').style.display=mode==='tree'?'none':'block';
     document.querySelector('.zoombar').style.display=mode==='fan'?'grid':'none';
     document.getElementById('treeview').style.display=mode==='tree'?'block':'none';
+    if(mode==='ped')drawPedigree();
     if(mode==='tree')renderTree();
   }
+  document.getElementById('viewped').addEventListener('click',function(){setView('ped');});
   document.getElementById('viewfan').addEventListener('click',function(){setView('fan');});
   document.getElementById('viewtree').addEventListener('click',function(){setView('tree');});
+  // ── PEDIGREE MODE — the genealogical truth layer: strict 1→2→4→8 slots per
+  // generation (ahnentafel), hexagonal aesthetic on top, generation labels,
+  // repeat ancestors as mirrored cells with the ⊙ marker, never invented.
+  function drawPedigree(){
+    world.innerHTML='';
+    var PS=15, PW=SQ3*PS*1.15, PRH=2.4*PS, GENS=5, CXp=540, BASEp=500;
+    var seen={};
+    var GEN_LABELS=['self','parents','grandparents','great-grandparents','2× great-grandparents'];
+    // generation labels down the left edge
+    for(var g=0;g<GENS;g++){
+      var gl=document.createElementNS(NS,'text');
+      gl.setAttribute('x',12);gl.setAttribute('y',BASEp-g*PRH-3*PRH*0.1-PS);
+      gl.setAttribute('class','hextext');gl.setAttribute('fill','var(--faint)');
+      gl.setAttribute('font-size','9');gl.setAttribute('pointer-events','none');
+      gl.textContent=GEN_LABELS[g]||('gen '+g);
+      world.appendChild(gl);
+    }
+    (function slot(id,s,g){
+      if(!id||g>=GENS||!S.persons[id])return;
+      var p=S.persons[id];
+      var inGen=s-(1<<g), width=1<<g;
+      var x=CXp+(inGen-(width-1)/2)*PW, y=BASEp-g*PRH;
+      var isDup=!!seen[id];
+      if(!isDup)seen[id]=1;
+      var hex=document.createElementNS(NS,'polygon');
+      hex.setAttribute('points',hexPts(x,y,PS));
+      hex.setAttribute('class','hexcell'+(isDup?' dup':'')+(S.spineOn&&S.spineIds.has(id)?' spine':''));
+      hex.setAttribute('fill',TIER_COLOR[p.evidence&&p.evidence.class||'unrecorded']);
+      hex.setAttribute('fill-opacity',g===0?'0.95':'0.62');
+      var t=document.createElementNS(NS,'title');
+      t.textContent=(p.name||id)+(p.lifespan?' · '+p.lifespan:'')+(isDup?' — same person, repeated by pedigree collapse (one archive object)':'');
+      hex.appendChild(t);
+      hex.addEventListener('click',function(){showDetail(id);});
+      world.appendChild(hex);
+      // name label inside (fits: these hexes are roomier than the fractal's)
+      var nm=p.living?'Living':(String(p.name||'').trim().split(/\s+/).slice(0,2).join(' ')||'—');
+      var tx=document.createElementNS(NS,'text');
+      tx.setAttribute('x',x);tx.setAttribute('y',y-2);tx.setAttribute('class','hextext');
+      tx.setAttribute('text-anchor','middle');tx.setAttribute('font-size',g===0?'9':'7.5');
+      tx.setAttribute('pointer-events','none');
+      tx.textContent=nm.length>16?nm.slice(0,15)+'…':nm;
+      world.appendChild(tx);
+      var yr=p.lifespan&&!p.living?String(p.lifespan).split('–')[0]:'';
+      if(yr&&g<=2){
+        var ty=document.createElementNS(NS,'text');
+        ty.setAttribute('x',x);ty.setAttribute('y',y+8);ty.setAttribute('class','hextext');
+        ty.setAttribute('text-anchor','middle');ty.setAttribute('font-size','6.5');
+        ty.setAttribute('pointer-events','none');ty.textContent=yr;
+        world.appendChild(ty);
+      }
+      if(isDup){
+        var dm=document.createElementNS(NS,'text');
+        dm.setAttribute('x',x);dm.setAttribute('y',y+3);dm.setAttribute('text-anchor','middle');
+        dm.setAttribute('class','hextext dupmark');dm.setAttribute('font-size','11');dm.textContent='⊙';
+        world.appendChild(dm);return; // do not recurse a repeat's own ancestry
+      }
+      if(g>=GENS-1)return;
+      var ps=(S.edges[id]||[]).filter(function(x2){return S.persons[x2];});
+      var fa=ps.find(function(x2){return S.persons[x2].gender==='M';})||ps[0];
+      var mo=ps.find(function(x2){return S.persons[x2].gender==='F';})||ps[1];
+      [[fa,2*s],[mo,2*s+1]].forEach(function(pair2){
+        if(!pair2[0])return;
+        if(!edgeVisible(id,pair2[0])){
+          var q=document.createElementNS(NS,'text');
+          q.setAttribute('x',CXp+((2*(pair2[1]-(1<<(g+1)))+1)/(2<<(g+1))-0.5)*2*((1<<(g+1))/2)*PW*0.5);
+          q.setAttribute('y',BASEp-(g+1)*PRH);q.setAttribute('text-anchor','middle');
+          q.setAttribute('class','hextext dupmark');q.setAttribute('font-size','12');q.textContent='?';
+          q.style.cursor='pointer';q.addEventListener('click',function(){showDetail(id);});
+          world.appendChild(q);return;
+        }
+        var px=CXp+(((pair2[1]-(1<<(g+1)))-((1<<(g+1))-1)/2)*PW);
+        var ln=document.createElementNS(NS,'line');
+        ln.setAttribute('x1',x);ln.setAttribute('y1',y-PS*0.9);
+        ln.setAttribute('x2',px);ln.setAttribute('y2',BASEp-(g+1)*PRH+PS*0.9);
+        ln.setAttribute('stroke','var(--line)');ln.setAttribute('stroke-width','1');
+        world.appendChild(ln);
+        slot(pair2[0],pair2[1],g+1);
+      });
+    })(S.curRoot,1,0);
+  }
   function renderTree(){
     var host=document.getElementById('treeview');host.innerHTML='';
     var build=function(id,depth){

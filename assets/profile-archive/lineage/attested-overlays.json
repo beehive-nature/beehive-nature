@@ -8,7 +8,10 @@
    "lifespan": "mid 9th century–0887? (traditional; possibly the Sigfred killed in West Francia 887)",
    "gender": "M",
    "living": false,
-   "evidence": { "class": "saga", "basis": "attested-overlay: tradition carried by Ragnarssona þáttr / Ragnars saga / Saxo" },
+   "evidence": {
+    "class": "saga",
+    "basis": "attested-overlay: tradition carried by Ragnarssona þáttr / Ragnars saga / Saxo"
+   },
    "evidencePack": "evidence/sigurd-snake-in-eye.json",
    "relation": "son of Ragnar Loðbrók and Queen Aslaug — KIN BY TRADITION, not blood-proven; the crest's paired serpents honor him"
   },
@@ -17,7 +20,10 @@
    "lifespan": "9th century (traditional)",
    "gender": "F",
    "living": false,
-   "evidence": { "class": "saga", "basis": "attested-overlay: tradition; daughter of King Ælla — the king who killed Ragnar" },
+   "evidence": {
+    "class": "saga",
+    "basis": "attested-overlay: tradition; daughter of King Ælla — the king who killed Ragnar"
+   },
    "evidencePack": "evidence/sigurd-snake-in-eye.json"
   },
   "ovl-harthacnut-i": {
@@ -25,13 +31,22 @@
    "lifespan": "late 9th century–0916? (traditional; king of part of Denmark ~916)",
    "gender": "M",
    "living": false,
-   "evidence": { "class": "saga", "basis": "attested-overlay: tradition; father of Gorm the Old — the bridge toward documented Danish kings (Adam of Bremen conflicts: names his father 'Sven')" },
+   "evidence": {
+    "class": "saga",
+    "basis": "attested-overlay: tradition; father of Gorm the Old — the bridge toward documented Danish kings (Adam of Bremen conflicts: names his father 'Sven')"
+   },
    "evidencePack": "evidence/sigurd-snake-in-eye.json"
   }
  },
  "edges": {
-  "ovl-sigurd-snake-eye": ["M8WZ-XZY", "LYH3-ZXF"],
-  "ovl-harthacnut-i": ["ovl-sigurd-snake-eye", "ovl-blaeja-of-northumbria"]
+  "ovl-sigurd-snake-eye": [
+   "M8WZ-XZY",
+   "LYH3-ZXF"
+  ],
+  "ovl-harthacnut-i": [
+   "ovl-sigurd-snake-eye",
+   "ovl-blaeja-of-northumbria"
+  ]
  },
  "edgeNotes": {
   "ovl-sigurd-snake-eye": "parents per tradition: Ragnar Loðbrók (M8WZ-XZY, walked) + Queen Aslaug Sigurdsdottir (LYH3-ZXF, walked)",
@@ -39,14 +54,36 @@
  },
  "corrections": {
   "LNQ5-BSG": {
-   "patch": { "living": false, "lifespan": "1931–Deceased" },
-   "note": "FamilySearch private-space record flags Don Ray Remington living; the founder attests the family line — famous grandpa is not 'Living'. Death year unknown to the archive; no year invented.",
-   "attested": "founder order 2026-09-16"
+   "patch": {
+    "living": false,
+    "lifespan": "1931–Deceased"
+   },
+   "note": "FamilySearch private-space record flags Don Ray Remington living; the founder attests the family line — famous grandpa is not 'Living'. Death year unknown to the archive; no year invented. Founder-attested: maternal grandfather.",
+   "attested": "founder order 2026-09-16: all four grandparents confirmed deceased"
   },
   "LNQ5-BSF": {
-   "patch": { "living": false, "lifespan": "1932–Deceased" },
-   "note": "FamilySearch private-space record flags Marilyn Lowry Remington living; she is the founder's deceased grandmother (the tree's co-builder with him, 12 years ago). Death year unknown to the archive; no year invented.",
-   "attested": "founder order 2026-09-16"
+   "patch": {
+    "living": false,
+    "lifespan": "1932–Deceased"
+   },
+   "note": "FamilySearch private-space record flags Marilyn Lowry Remington living; she is the founder's deceased grandmother (the tree's co-builder with him, 12 years ago). Death year unknown to the archive; no year invented. Founder-attested: maternal grandmother.",
+   "attested": "founder order 2026-09-16: all four grandparents confirmed deceased"
+  },
+  "KWCL-VNB": {
+   "patch": {
+    "living": false,
+    "lifespan": "1925–1988"
+   },
+   "note": "Founder-attested deceased (already deceased in the record — attestation recorded for the set). Paternal grandmother; the spine rides her line.",
+   "attested": "founder order 2026-09-16: all four grandparents confirmed deceased"
+  },
+  "KWCL-VJ6": {
+   "patch": {
+    "living": false,
+    "lifespan": "1920–1982"
+   },
+   "note": "Founder-attested deceased (already deceased in the record — attestation recorded for the set). Paternal grandfather.",
+   "attested": "founder order 2026-09-16: all four grandparents confirmed deceased"
   }
  },
  "relationshipEvidence": {
@@ -54,50 +91,84 @@
    "claim": "Harthacnut I of Denmark is the son of Sigurd Snake-in-the-Eye and Blaeja of Northumbria.",
    "status": "disputed",
    "hypotheses": [
-    { "id": "sigurd-father", "label": "Sigurd Snake-in-the-Eye is his father",
-      "tradition": "Ragnarssona þáttr / Ragnars saga Loðbrókar (13th-c. Icelandic tradition)",
-      "consequence": "Carries the Danish royal line through Ragnar's son — the line to Gorm the Old and every Danish monarch after 1047." },
-    { "id": "sven-father", "label": "A 'Sven' is his father (Sigurd's role uncertain)",
-      "tradition": "Adam of Bremen, Gesta Hammaburgensis (c. 1075)",
-      "consequence": "The earliest near-contemporary source names Hardegon's father Sven — contradicting the þáttr by a century." }
+    {
+     "id": "sigurd-father",
+     "label": "Sigurd Snake-in-the-Eye is his father",
+     "tradition": "Ragnarssona þáttr / Ragnars saga Loðbrókar (13th-c. Icelandic tradition)",
+     "consequence": "Carries the Danish royal line through Ragnar's son — the line to Gorm the Old and every Danish monarch after 1047."
+    },
+    {
+     "id": "sven-father",
+     "label": "A 'Sven' is his father (Sigurd's role uncertain)",
+     "tradition": "Adam of Bremen, Gesta Hammaburgensis (c. 1075)",
+     "consequence": "The earliest near-contemporary source names Hardegon's father Sven — contradicting the þáttr by a century."
+    }
    ],
    "contradictions": "The þáttr is 13th-century; Adam of Bremen writes c. 1075, closer to the events but hostile to and distant from Danish court genealogy. Both cannot be simply true; neither is contemporary with Harthacnut (~916).",
-   "sources": ["https://en.wikipedia.org/wiki/Sigurd_Snake-in-the_Eye", "https://en.wikipedia.org/wiki/Harthacnut_I_of_Denmark"]
+   "sources": [
+    "https://en.wikipedia.org/wiki/Sigurd_Snake-in-the_Eye",
+    "https://en.wikipedia.org/wiki/Harthacnut_I_of_Denmark"
+   ]
   }
  },
  "testimony": [
-  { "id": "rockwood-account", "lens": "testimony", "subject": "Rockwood line",
+  {
+   "id": "rockwood-account",
+   "lens": "testimony",
+   "subject": "Rockwood line",
    "author": "family testimony, recorded 2026-09-16; corrected the same day by founder order",
    "text": "Family testimony speaks of a Rockwood investment account connected to the Ancestry.com stake. CORRECTION THAT TRAVELS WITH IT: Ancestry's documented 2020 acquisition was by Blackstone-managed funds, NOT the LDS Church. No supporting records attached — this entry stays attributed family testimony and is never presented as independent verification.",
-   "status": "attributed testimony — records pending" },
-  { "id": "seidr-placeholder", "lens": "spiritual", "subject": "founder",
+   "status": "attributed testimony — records pending"
+  },
+  {
+   "id": "seidr-placeholder",
+   "lens": "spiritual",
+   "subject": "founder",
    "author": "founder (reserved — his own words)",
    "text": null,
-   "status": "reserved: personal spiritual reflections (Seiðr-related experiences) will be preserved here in the founder's own words, dated and attributed. Personal importance without biological-descent verification — the lens never upgrades evidence." }
+   "status": "reserved: personal spiritual reflections (Seiðr-related experiences) will be preserved here in the founder's own words, dated and attributed. Personal importance without biological-descent verification — the lens never upgrades evidence."
+  }
  ],
  "moneyHistory": {
   "law": "Businesses, investments, inheritance, and patronage form a SEPARATE overlay connected to people — never confused with parentage, never rendered as blood.",
-  "entries": [ { "ref": "rockwood-account", "via": "testimony" } ]
+  "entries": [
+   {
+    "ref": "rockwood-account",
+    "via": "testimony"
+   }
+  ]
  },
  "symbolicLinks": [
-  { "id": "crest-serpents-sigurd",
-    "symbol": "the crest's paired serpents",
-    "meaning": "Protection, continuity, renewal — and, in the founder's authorship of the house crest, in conversation with Sigurd Ormr-í-auga (snake-in-the-eye): the meaning and the tradition point at each other without either becoming the other.",
-    "connects": ["ovl-sigurd-snake-eye"],
-    "kind": "meaning",
-    "attribution": "founder-authored symbolism — identified as symbolism, never rendered as a parent-child claim or as verification" },
-  { "id": "crest-bee-house",
-    "symbol": "the crowned bee + heart",
-    "meaning": "Love at the center of the house — the founder's own mark on the estate; the family and the hive it tends.",
-    "connects": ["founder"],
-    "kind": "meaning",
-    "attribution": "founder-authored symbolism" },
-  { "id": "crest-many-tongues",
-    "symbol": "the motto in many tongues",
-    "meaning": "One promise carried across languages — the archive speaks 29 of them; the motto speaks them all.",
-    "connects": ["founder"],
-    "kind": "meaning",
-    "attribution": "founder-authored symbolism" }
+  {
+   "id": "crest-serpents-sigurd",
+   "symbol": "the crest's paired serpents",
+   "meaning": "Protection, continuity, renewal — and, in the founder's authorship of the house crest, in conversation with Sigurd Ormr-í-auga (snake-in-the-eye): the meaning and the tradition point at each other without either becoming the other.",
+   "connects": [
+    "ovl-sigurd-snake-eye"
+   ],
+   "kind": "meaning",
+   "attribution": "founder-authored symbolism — identified as symbolism, never rendered as a parent-child claim or as verification"
+  },
+  {
+   "id": "crest-bee-house",
+   "symbol": "the crowned bee + heart",
+   "meaning": "Love at the center of the house — the founder's own mark on the estate; the family and the hive it tends.",
+   "connects": [
+    "founder"
+   ],
+   "kind": "meaning",
+   "attribution": "founder-authored symbolism"
+  },
+  {
+   "id": "crest-many-tongues",
+   "symbol": "the motto in many tongues",
+   "meaning": "One promise carried across languages — the archive speaks 29 of them; the motto speaks them all.",
+   "connects": [
+    "founder"
+   ],
+   "kind": "meaning",
+   "attribution": "founder-authored symbolism"
+  }
  ],
- "law": "Overlay ids use the ovl- prefix so they can never collide with provider ids. CORRECTIONS patch walked persons by provider id — a correction is a founder attestation layered OVER the provider record, never a silent edit: the walked layer keeps its own flag in provenance and the corpus marks the person corrected. Merging overlays into a rendered view must render the evidence chip on every overlay person."
+ "law": "Overlay ids use the ovl- prefix so they can never collide with provider ids. CORRECTIONS patch walked persons by provider id — a correction is a founder attestation layered OVER the provider record, never a silent edit: the walked layer keeps its own flag in provenance and the corpus marks the person corrected. Merging overlays into a rendered view must render the evidence chip on every overlay person. FOUNDER GRANDPARENT LAW: the four grandparents are named, never Living placeholders; unknown death dates stay unknown — never invented, never required."
 }
