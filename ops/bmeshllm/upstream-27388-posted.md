@@ -1,4 +1,7 @@
-# UPSTREAM COMMENT DRAFT — llama.cpp #27388 — **DRAFT ONLY, DO NOT POST**
+# UPSTREAM COMMENT — llama.cpp #27388 — **POSTED 2026-09-16T05:03:25Z** (founder word)
+<https://github.com/ggml-org/llama.cpp/issues/27388#issuecomment-5692308653> (issuecomment-5692308653)
+
+Body below is the exact posted text, kept verbatim for the record.
 
 Prepared per founder ruling 2026-09-16 ("draft, but do not post"). External
 action = founder word. Content check: no private infrastructure detail (no
@@ -59,3 +62,7 @@ suggests a simple in-server detectability hook if a full fix takes a while.
 ---
 
 *(end of draft — not posted)*
+
+## Posting receipt
+
+Posted verbatim as [issuecomment-5692308653](https://github.com/ggml-org/llama.cpp/issues/27388#issuecomment-5692308653), 2026-09-16T05:03:25Z, per founder approval ("Approve posting the upstream #27388 comment"). Production untouched; watchdog stays banked, not wired.
