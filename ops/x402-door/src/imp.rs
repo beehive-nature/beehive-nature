@@ -22,7 +22,7 @@ pub async fn run() -> Result<(), Box<dyn std::error::Error>> {
         rc.daily_gas_cap_wei,
     )?);
     let inner = live_facilitator::build(&rc).await?;
-    let facilitator: Arc<Live> = Arc::new(inner);
+    let facilitator: Arc<live_facilitator::Live> = Arc::new(inner);
     let door = Arc::new(Door::new(
         journal,
         facilitator,
@@ -43,25 +43,35 @@ pub async fn run() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 async fn build_registry(rc: &RunConfig) -> Result<x402_types::scheme::SchemeRegistry, String> {
-    let chains_raw = std::fs::read_to_string(&rc.facilitator_chains_config)
+    // The chains config IS an upstream Eip155ChainConfig (serde): RPC
+    // endpoints + signers. Signers use $ENV references (upstream
+    // LiteralOrEnv) — the ops wallet key rides env only, never files/git.
+    let chains_raw = std::fs::read_to_string(&rc.facilitator_chain_config)
         .map_err(|e| format!("chains config: {e}"))?;
-    let chains_config: serde_json::Value =
+    let chain_config: x402_chain_eip155::chain::Eip155ChainConfig =
         serde_json::from_str(&chains_raw).map_err(|e| format!("chains config json: {e}"))?;
-    let schemes_raw = std::fs::read_to_string(&rc.facilitator_schemes_config)
-        .map_err(|e| format!("schemes config: {e}"))?;
-    let schemes_config: serde_json::Value =
-        serde_json::from_str(&schemes_raw).map_err(|e| format!("schemes config json: {e}"))?;
-    let chain_registry = x402_types::chain::ChainRegistry::from_config(&chains_config)
-        .await
-        .map_err(|e| format!("chain registry: {e}"))?;
-    // Chartered scope only: EVM exact + upto. Nothing more is registered.
+    let chain_id = chain_config.chain_id();
+    use x402_types::chain::FromConfig;
+    let provider = <x402_chain_eip155::chain::Eip155ChainProvider as FromConfig<
+        x402_chain_eip155::chain::Eip155ChainConfig,
+    >>::from_config(&chain_config)
+    .await
+    .map_err(|e| format!("provider from config: {e}"))?;
+    let providers = std::collections::HashMap::from([(chain_id.clone(), provider)]);
+    let chain_registry = x402_types::chain::ChainRegistry::new(providers);
+    // Chartered scope ONLY, constructed in code so the registry cannot grow
+    // by configuration accident: EVM exact + upto on the one configured chain.
     let blueprints = x402_types::scheme::SchemeBlueprints::new()
         .and_register(x402_chain_eip155::V2Eip155Exact)
         .and_register(x402_chain_eip155::V2Eip155Upto);
+    let schemes = vec![
+        x402_types::scheme::SchemeConfig::new(chain_id.clone(), 2, "exact".to_string()),
+        x402_types::scheme::SchemeConfig::new(chain_id.clone(), 2, "upto".to_string()),
+    ];
     Ok(x402_types::scheme::SchemeRegistry::build(
         chain_registry,
         blueprints,
-        &schemes_config,
+        &schemes,
     ))
 }
 

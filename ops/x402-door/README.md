@@ -50,9 +50,10 @@ cargo run   --locked --manifest-path ops/x402-door/Cargo.toml -- ops/x402-door/d
 ```
 
 `door.config.json` shape: `{bind, journal_root, daily_gas_cap_wei,
-reserved_gas_wei, ops_float_available_wei, facilitator_chains_config,
-facilitator_schemes_config}` — the last two are upstream
-`ChainRegistry`/scheme config files (Base + the two chartered schemes).
+reserved_gas_wei, ops_float_available_wei, facilitator_chain_config}` — the last is an
+upstream `Eip155ChainConfig` JSON (Base RPC endpoints + signers as ``
+references per the env-only law); the two chartered schemes are constructed
+in code, not configurable.
 The binary binds loopback only; Caddy fronts the same-origin door
 (`relay.skaists.dev/x402/*`) when the box run is separately chartered.
 

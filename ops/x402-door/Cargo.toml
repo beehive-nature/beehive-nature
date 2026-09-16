@@ -21,4 +21,4 @@ hex = "0.4"
 # the live wiring (main.rs) targets the Linux box/CI. Laws + tests are
 # platform-independent and must stay so.
 x402-facilitator-local = "2.0.2"
-x402-chain-eip155 = "2.0.2"
+x402-chain-eip155 = { version = "2.0.2", features = ["facilitator"] }

@@ -21,8 +21,7 @@ struct RunConfig {
     daily_gas_cap_wei: u64,
     reserved_gas_wei: u64,
     ops_float_available_wei: u64,
-    facilitator_chains_config: PathBuf,
-    facilitator_schemes_config: PathBuf,
+    facilitator_chain_config: PathBuf,
 }
 
 #[cfg(unix)]
