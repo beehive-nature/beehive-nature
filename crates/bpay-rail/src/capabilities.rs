@@ -87,6 +87,15 @@ impl CapabilityManifest {
         if self.sends_enabled && self.response_read == ResponseReadAxis::None {
             return Err(ManifestError::BlindSend);
         }
+        // Founder order 2026-09-16: hold/MPP capabilities are explicitly
+        // MOCK-ONLY until backend support is demonstrated — a Live
+        // transport may not claim mechanisms it cannot provide.
+        let is_live = matches!(self.identity, TransportIdentity::Live { .. });
+        if is_live && (self.mechanisms.hold || self.mechanisms.mpp) {
+            return Err(ManifestError::Other(
+                "hold/MPP mechanisms are MOCK-ONLY until backend support is demonstrated — a Live manifest may not claim them",
+            ));
+        }
         Ok(())
     }
 

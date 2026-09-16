@@ -49,6 +49,8 @@ pub enum NwcError {
     PaymentFailed(String),
     #[error("NWC NOT_FOUND")]
     NotFound,
+    #[error("NWC CLOCK_UNAVAILABLE (LT-8.1): {0} — pre-ledger, nothing sent")]
+    ClockUnavailable(String),
     #[error("NWC OTHER: {0}")]
     Other(String),
     /// Transport-ambiguous: request MAY or MAY NOT have reached the
@@ -124,6 +126,9 @@ impl NwcError {
             NwcError::Internal | NwcError::Unauthorized | NwcError::Other(_) => {
                 LedgerEffect::MarkUnknownHumanGate
             }
+            // A LOCAL clock failure happens before anything is sent:
+            // zero requests, zero mutation, intent stays open (LT-8.1).
+            NwcError::ClockUnavailable(_) => LedgerEffect::LeaveOpenAtIntent,
             NwcError::PaymentFailed(_) => LedgerEffect::TerminalFailedNoFee,
             NwcError::TransportAmbiguous(_) => LedgerEffect::MarkUnknownHumanGate,
         }

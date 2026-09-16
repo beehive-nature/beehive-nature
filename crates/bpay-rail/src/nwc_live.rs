@@ -202,6 +202,9 @@ pub struct LiveNwcTransport {
     conn: NwcConnection,
     policy: ReadPolicy,
     clock: ClockFn,
+    /// LT-8.1 test seam: records every relay-connect ATTEMPT (None =
+    /// inert). Proves zero-published-requests without any network.
+    connect_log: Option<std::rc::Rc<std::cell::RefCell<Vec<String>>>>,
 }
 
 impl LiveNwcTransport {
@@ -210,12 +213,19 @@ impl LiveNwcTransport {
             conn,
             policy: ReadPolicy::default(),
             clock: std::rc::Rc::new(system_clock),
+            connect_log: None,
         }
     }
 
     /// LT-8: inject a deterministic clock for testing.
     pub fn with_clock(mut self, clock: ClockFn) -> Self {
         self.clock = clock;
+        self
+    }
+
+    /// LT-8.1 test seam: every relay-connect attempt is recorded.
+    pub fn with_connect_log(mut self, log: std::rc::Rc<std::cell::RefCell<Vec<String>>>) -> Self {
+        self.connect_log = Some(log);
         self
     }
 
@@ -257,8 +267,16 @@ impl crate::nwc::NwcTransport for LiveNwcTransport {
         method: &str,
         params: serde_json::Value,
     ) -> Result<serde_json::Value, NwcError> {
-        let now = (self.clock)()
-            .map_err(|e| NwcError::Other(format!("LT-8.1 clock failure (pre-ledger): {e}")))?;
+        let now = (self.clock)().map_err(|e| {
+            NwcError::ClockUnavailable(format!("clock failure (pre-ledger, nothing sent): {e}"))
+        })?;
+        // LT-8.1: an epoch-0 reading is the dead fallback — refuse it as
+        // a clock failure BEFORE building any event (never created_at=0).
+        if now == 0 {
+            return Err(NwcError::ClockUnavailable(
+                "epoch-0 clock reading refused (pre-ledger, nothing sent)".into(),
+            ));
+        }
         let content = nip44_encrypt(
             &self.conn.secret(),
             &self.conn.wallet_pubkey_hex,
@@ -282,6 +300,9 @@ impl crate::nwc::NwcTransport for LiveNwcTransport {
 
         let relay = self.conn.relay_url_ws.clone();
         let relay_for_reopen = relay.clone();
+        if let Some(log) = &self.connect_log {
+            log.borrow_mut().push(relay.clone());
+        }
         let mut socket = TungsteniteSocket::connect(&relay)
             .map_err(|e| NwcError::TransportAmbiguous(format!("{e:?}")))?;
         socket

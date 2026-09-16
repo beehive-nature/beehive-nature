@@ -166,22 +166,6 @@ fn lt9_2_official_encrypt_decrypt_vectors() {
 // clock exists only at the live transport edge.
 
 #[test]
-fn lt8_1_clock_failure_is_typed_pre_ledger_refusal() {
-    // A clock that returns Err — the transport must refuse BEFORE any
-    // ledger effect (LT-8.1: no epoch-0 events)
-    // (The clock seam type is in nwc_live; this test proves the
-    // PRINCIPLE via the reader: since_unix derives from the injected
-    // clock; a failure there is pre-ledger by construction.)
-    let ok: Result<u64, String> = Err("clock source unavailable".into());
-    assert!(
-        ok.is_err(),
-        "clock failure must be a typed refusal, not epoch-0"
-    );
-    // epoch-0 events are structurally impossible: the transport now
-    // routes all time through the clock fn which returns Result
-}
-
-#[test]
 fn lt8_3_deterministic_time_in_tests() {
     // The injectable clock lets tests freeze/advance time — the reader
     // freshness checks respond to TEST-SUPPLIED time, not system time.
