@@ -173,7 +173,7 @@ Full source-verified recon: [`docs/dispatches/2026-09-15-protocol-recon-opena2a-
   v1.0 spec pages (task-state enum, auth, Agent Card URL) for the name-trap's
   other side.
 
-## 3 · OPENCOMPANY — OPEN · AMBIGUOUS REFERENT · WATCH (research-class)
+## 3 · OPENCOMPANY — OPEN · REFERENT RESOLVED: `tinyhumansai/opencompany` · WATCH (research-class)
 
 *Same order and recon receipt as item #2.*
 
@@ -188,7 +188,13 @@ Full source-verified recon: [`docs/dispatches/2026-09-15-protocol-recon-opena2a-
   Also-rans: useopencompany workspace (MIT), opencompanybot.com (commercial
   company-registration-for-agents), the archived pre-AI open-company Clojure
   family (the pure name-trap).
-- **Blocked on founder disambiguation** — which referent did the charter mean?
-  Until then no candidate gets deeper than pattern-study.
+- **Referent RESOLVED by founder, 2026-09-15:** *"OpenCompany disambiguation
+  resolved: `tinyhumansai/opencompany` is our intended target. Bank that
+  identification, but keep WATCH/research-only until the reconciliation gate
+  opens protocol evaluation."* The target is the Rust "hive mind of agents"
+  project — its two ruling-class constraints stand as banked (GPL-3.0 vs our
+  licensing posture; the hosted Medulla orchestrator vs the adapter-ring rule);
+  zeenie-ai and the other candidates revert to name-traps for our purposes.
+  No deeper reading performed — the gate decides when.
 - **Reconciliation gate applies** as to every item; nothing here drives
   implementation.

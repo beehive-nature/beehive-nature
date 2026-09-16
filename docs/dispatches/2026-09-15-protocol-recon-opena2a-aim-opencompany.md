@@ -182,3 +182,16 @@ Queue items #2 (OpenA2A/AIM) and #3 (OpenCompany, ambiguous referent) appended
 to `docs/agents/PROTOCOL-REUSE-QUEUE.md` with pointers here. Commit lands via
 `../wt-zcode-recon`, branch `zcode/recon-opena2a-aim-opencompany-2026-09-15`,
 cut from `b20d4477`, §7 seat shape, four pre-push checks. Eddies untouched.
+
+## Follow-up 2026-09-15 — OpenCompany referent RESOLVED (founder)
+
+Founder ruling relayed to this seat: *"OpenCompany disambiguation resolved:
+`tinyhumansai/opencompany` is our intended target. Bank that identification,
+but keep WATCH/research-only until the reconciliation gate opens protocol
+evaluation."* §4's open item is answered — the target is the Rust
+"hive-mind-of-agents" company runtime, whose two standing ruling-class
+constraints remain as banked (GPL-3.0 against our licensing posture; the
+hosted Medulla orchestrator behind `TINYHUMANS_API_KEY` against the
+adapter-ring rule). zeenie-ai and the remaining candidates are name-traps for
+our purposes from here on. Identification banked in queue item #3; no deeper
+reading performed — the gate decides when.
