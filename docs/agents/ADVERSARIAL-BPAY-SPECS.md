@@ -768,3 +768,40 @@ manifest fixtures from the seventh roll; zero network; live NWC stays `#[ignore]
 this artifact — existing sessions finish their rolls; future parallelism goes to DIFFERENT
 workerb lanes, not this file. — Ninth roll, 2026-09-16. Pipeline law unchanged: builder proves
 RED, fixes GREEN, CI arbitrates; zArcheology designs tests only.*
+
+---
+
+## TENTH ROLL — the authorization object itself (2026-09-16)
+
+*Founder law for this roll, verbatim: "the journal may preserve an authorization binding, but
+it may never create or strengthen one." RB closed recovery-time capability inheritance; this
+roll ensures the ORIGINAL authorization actually committed to those capabilities in the first
+place — the binding must be CRYPTOGRAPHICALLY inside the signed material, not copied into the
+journal afterward. Targets: the signed-authorization construction (watchpay `ValidatedPlan`
+sealing, bsigner member's-hand verification, `capAssert`), the canonical serializer (RS-3.3
+discipline), and the journal (RB-0's durable record — now demoted to PRESERVER, never
+source). Verification runs through the estate's existing signature verification (bsigner
+organ), never a bespoke re-check.*
+
+### SPEC AB — the binding is signature-authoritative (RED-first)
+
+| # | case | exact pass criterion | fail criterion |
+|---|---|---|---|
+| AB-0 | signed-scope proof (mechanism): authorization signed WITH per-leg manifest hash+version+implementation identity | verification re-derives the signed bytes from the leg INCLUDING the binding — strip the binding from the signed material and the signature FAILS; the journal record's binding is compared against the signed one, and the SIGNED one wins | verification reading the journal's binding as ground truth |
+| AB-1 | journal-insertion attack (the core invariant) | a journal record claiming a binding the signed authorization does NOT contain → verification fails, named; the journal PRESERVES, never CREATES | journal-authoritative binding accepted |
+| AB-2 | omission, both directions | auth signed WITHOUT a binding + journal later carrying one → refused (a leg cannot gain capabilities the signature never committed to); auth signed WITH a binding + journal dropping it → the leg REFUSES to execute unbound (an unbound leg cannot detect drift — no unbound leg executes at all) | either direction silently accepted |
+| AB-3 | leg swapping | auth signs leg A under h1, leg B under h2 (both individually lawful); journal swaps them (leg A carrying h2) | per-leg signature verification FAILS on the swapped assignment — each leg's signed material binds ITS OWN manifest | swap verifies |
+| AB-4 | manifest-hash substitution | same version string, different content (h1 vs h1′); and manifest content mutated while version kept | binding is by CONTENT HASH: substitution breaks the signature; stored manifest snapshots must hash to the bound value; live-manifest lookups resolve through the signed hash | version-string-only binding passes |
+| AB-5 | implementation-identity substitution | same manifest hash, DIFFERENT adapter implementation digest | implementation identity is INSIDE the signed scope (RB-3's pin made cryptographic); substitution breaks the signature. RED-note: if impl identity lives only in the journal today, this RED charters moving it into the signed material | undetectable swap |
+| AB-6 | mixed old/new bindings in ONE plan (the lawful RB-6 shape attacked) | plan with leg A under h1, leg B under h2 (post-drift re-authorization) | each leg verifies against ITS OWN binding — mixed bindings coexist lawfully; any plan-level "current manifest" homogenization applied to both legs = substitution, refused. Generalized: merging legs across two authorizations (A's leg under B's signature) FAILS per-leg verification | homogenized or cross-signed assignment verifies |
+| AB-7 | canonicalization of the signed material | field-order/whitespace variants of one authorization verify IDENTICALLY (same canonical form → same signature); ANY binding-field mutation changes it; canonical form pinned with cross-implementation vectors (corpus fixture law; RS-3.3) | ambiguous canonical form survives |
+| AB-8 | negative controls | journal-authoritative implementation DETECTED (AB-1); unbound-leg execution DETECTED (AB-2); cross-leg/cross-authorization assignment DETECTED (AB-3/AB-6) | harness blind on any axis |
+
+**RED expectations:** AB-0/AB-1/AB-5 are near-certain RED (no binding exists in any signed
+scope today — MP-3/RB charters the type, THIS roll forces it into the SIGNATURE); AB-4's
+snapshot-hash pin and AB-6's per-leg mixed verification follow. **Harness:** deterministic
+test signer from the estate's existing crypto (capability crate's real ed25519), canonical
+serializer fixtures, journal with tamper injection points; zero network; live NWC `#[ignore]`.
+
+*Tenth roll, 2026-09-16. Single-writer discipline stands. Pipeline law unchanged: builder
+proves RED, fixes GREEN, CI arbitrates; zArcheology designs tests only.*

@@ -37,26 +37,33 @@ th{color:var(--violet);font-weight:400;font-size:9.5px} td.n{color:var(--ink)}
 .mstone .mw{color:var(--dim);font-size:9.5px}
 footer{max-width:920px;margin:22px auto 0;color:var(--dim);font-size:10px;text-align:center;line-height:1.8}
 @media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
+
+/* comprehension touch floor (2026-09-16): 44px canon on phones */
+@media(max-width:520px){button,select,input,a.btn{min-height:44px}}
 </style>
 </head>
 <body>
 <header>
   <h1>🛰 BNR × Base — the application appendix</h1>
+  <details class="tnote" data-reg-disclose><summary data-i18n="bb.d.how">This page is not a pitch deck — it is the product working</summary>
   <p>this page is not a pitch deck. <b style="color:var(--ink)">it is our product doing its job on your chain:</b>
   every claim below is a receipt — a pasted command, real output, re-runnable by any stranger —
   and the three strongest of them are <b style="color:var(--gold)">measurements of Base's own contracts,
   taken on two operator-diverse oracles, before we ever applied.</b></p>
+  </details>
 </header>
 <main>
 
 <section>
   <h2>1 · <span data-i18n="h.001">THE ONE BREATH</span></h2>
+  <details class="tnote" data-reg-disclose><summary data-i18n="bb.d.what">What the reserve builds — receipts first, agents second</summary>
   <div class="law" style="font-size:11.5px;color:var(--ink);line-height:1.9">Beehive Nature Reserve builds the
   <b>receipts-first evidence and agent layer</b> for onchain ecosystems: an open (AGPL) organism of
   <b>40 live, keyless, static surfaces</b> plus Rust instrumentation whose standing law is
   <i>every claim carries a receipt · every absence is honest · a failed fetch is never a value</i>.
   For Batch 004's <b>agents</b> vertical we bring the read-and-trust infrastructure ERC-8004 needs
   and nobody has shipped — measured first, on Base.</div>
+  </details>
 </section>
 
 <section>
@@ -107,7 +114,9 @@ footer{max-width:920px;margin:22px auto 0;color:var(--dim);font-size:10px;text-a
 
 <section>
   <h2>4 · <span data-i18n="h.004">THE 8-WEEK PLAN — every milestone a receipt</span></h2>
+  <details class="tnote" data-reg-disclose><summary data-i18n="bb.d.road">The roadmap — what is live, what comes next</summary>
   <div class="mstone"><span class="mw">weeks 1–2</span> — the agent read layer live on Base's public rails (sovereign first; the free-tier oracle never default, never sole)<br><span class="mw">weeks 3–4</span> — reputation rendered as evidence with the integrity grammar; feedback as receipts<br><span class="mw">weeks 5–6</span> — one real agent-counterpart integration (we know the registered token ids — we read them)<br><span class="mw">weeks 7–8</span> — the Demo Day artifact: a live registry view whose every number carries its source</div>
+  </details>
 </section>
 
 <section>
