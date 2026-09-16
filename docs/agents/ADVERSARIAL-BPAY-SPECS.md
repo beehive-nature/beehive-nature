@@ -214,3 +214,108 @@ discipline; each becomes a D-spec when its lane opens:*
 *Pipeline law (founder, 2026-09-16): zArcheology attacks → executable RED tests → builder
 proves RED → builder fixes GREEN → CI arbitrates. This seat designs tests only; production
 code untouched. — second roll, 2026-09-16.*
+
+---
+
+## D-SPECS — the door watchlist made executable (third roll, 2026-09-16; targets verified against the landed crate)
+
+**Harness (all D-specs):** extend `ops/x402-door/tests/` with `adversarial_d.rs`; reuse the
+existing `tmp_root()` / `door()` / `request()` helpers and the test-facilitator double pattern
+from `tests/acceptance.rs` (second impl at :329). Pure-journal cases need no facilitator.
+Targets named from source: `Journal::{open, get, reserve, settle_precheck, settle_with_evidence,
+settle_failed_no_evidence, settle_unknown, expire_released, resolve_unknown,
+exposure_for_test}`, `SettleEvidence`, `ReservationState`, `HumanGate::explicit_human_approval`,
+`DoorState<F>` (`src/journal.rs`, `src/imp.rs`, `src/wire.rs`). **Priority order per founder:
+D-3, D-4, D-5, D-8 first — money-safety exposures.**
+
+### SPEC D-3 — settle-time float drain (P0-class: money safety)
+
+**Target:** the settle path (`imp.rs` settle orchestration + `DoorState` config
+`ops_float_available_wei`). Law 1 pins float fail-closed at `/verify` ONLY — the attack is
+drain-at-settle-time.
+
+| # | case | exact pass criterion | fail criterion |
+|---|---|---|---|
+| 3.1 | reserve K legs under a float funding exactly ONE settlement's gas | first settle succeeds; second settle → LOUD typed refusal NAMING the shortfall (mirroring law-1's cap+exposure refusal shape) | silent success, torn state, or untyped panic |
+| 3.2 | refused-settle state integrity | journal record for the refused leg byte-identical pre/post (`get()` equality); state remains valid `ReservationState` | mutation or corruption from the refusal path |
+| 3.3 | float recovery | after float top-up, the refused settle proceeds under the SAME nonce — exactly-once preserved | fresh nonce / double settle |
+| 3.4 | negative control | a float-ignoring settle path is DETECTED (test asserts the refusal occurred) | harness blind |
+
+**RED expectation:** settle-time float check likely absent (law 1 is verify-time) — the RED run
+charters the settle-time float law.
+
+### SPEC D-4 — lying-RPC release evidence (P0-class: money safety)
+
+**Target:** `Journal::expire_released(leg, chain_says_unspent: bool)` — the caller's RPC verdict
+arrives as a bare `bool`; the journal must defend itself.
+
+| # | case | exact pass criterion | fail criterion |
+|---|---|---|---|
+| 4.1 | RPC unavailable at release time | door HOLDS (typed hold state, retry path); `expire_released` not called on absent evidence | silent release or crash |
+| 4.2 | **contradiction attack:** journal holds `SettleEvidence` for the leg, caller claims `chain_says_unspent=true` | `expire_released(true)` REFUSED as contradictory (evidence-present ⇒ never release); conflict surfaced | release honored despite journal evidence — the double-spend window |
+| 4.3 | control: expired window, no evidence, genuine unspent | release proceeds exactly once; double-release refused (terminal state) | second release accepted |
+| 4.4 | negative control | blind-bool implementation (releases on caller's word) DETECTED by 4.2 | harness blind |
+
+**RED expectation:** the contradiction check (4.2) is a pure-journal assertion — if absent
+today, RED charters it. This is the sharpest money-safety item on the board: releasing a
+settled leg reopens spent authority.
+
+### SPEC D-5 — concurrent journal start (P0-class: integrity)
+
+**Target:** `Journal::open(root, cap)` + the exclusive-writer OS lock (watchpay mechanics).
+
+| # | case | exact pass criterion | fail criterion |
+|---|---|---|---|
+| 5.1 | second `open` on a locked root | typed refusal NAMING the lock holder path; no journal mutation | second handle silently granted |
+| 5.2 | lock released on process death | after kill/scoped drop, reopen succeeds and journal verifies | stale lock wedges the door |
+| 5.3 | mutation attempt from any second handle | refused; file intact (torn law 5 regression holds) | interleaved corruption |
+| 5.4 | negative control | no-lock variant DETECTED (torn detection fires on interleaved writes) | harness blind |
+
+### SPEC D-8 — `upto` reconciliation adversary (P0-class: money safety)
+
+**Target:** `settle_with_evidence` reconcile path (acceptance_2 pins the happy reconcile-DOWN).
+
+| # | case | exact pass criterion | fail criterion |
+|---|---|---|---|
+| 8.1 | adversarial evidence with actual > authorized | typed REFUSAL — never a clamp, never acceptance | clamped silent settle (overspend hidden) |
+| 8.2 | boundary actual == authorized | accepted once | refused or double-accepted |
+| 8.3 | tampered evidence binding | one mutated evidence field (leg/nonce/amount) → refusal; evidence binds the `LegKey` + nonce | settle under foreign evidence |
+| 8.4 | refusal retains exposure (FailedKeep law) | after 8.1's refusal, `exposure_for_test` reflects retained exposure / leg state names failure-with-exposure | refusal silently drops exposure |
+| 8.4b | after 8.1, a VALID in-range evidence arrives for the same leg | settles correctly — the refusal did not poison the leg | leg wedged by the earlier refusal |
+| 8.5 | negative control | clamp-silently implementation DETECTED | harness blind |
+
+### SPEC D-1 — dual-mode acceptance (lean)
+
+CI matrix: the full 8-point acceptance suite runs green in BOTH feature modes
+(`--features live-wiring` on/off); identical test names both modes. **RED today by the door's
+own FLAG** (live-wiring composition does not compile yet) — the RED IS the charter for the
+flag's resolution; when green, the suite pins that live wiring weakened no law.
+
+### SPEC D-2 — FailedKeep exposure at cap rollover (lean)
+
+Cases: (2.1) exposure accrued day N with no-evidence failures; at rollover to day N+1 the
+daily-cap report must show per-day breakdown — prior-day retained exposure neither silently
+vanishes (free cap) nor double-counts into day N+1's cap; (2.2) refusals name BOTH days'
+exposure when overlap exists. Pass = defined-by-test rollover semantics; fail = silent reset.
+RED decides the current `now_unix` day-math behavior.
+
+### SPEC D-6 — journal web-unreachability (lean)
+
+Cases: (6.1) config validation REFUSES a `journal_root` located under any served/static root
+(executable now); (6.2) box-side checklist row: no Caddy route can reach `journal_root`
+(per-chain dirs + truncated payer tags keep R4 — mtimes/filenames must never be web-readable)
+— SRE seat consumes this as a config review item, not a unit test.
+
+### SPEC D-7 — HumanGate immutability (lean)
+
+Cases: (7.1) behavioral — after `settle_unknown`, no resolution within the test horizon absent
+`HumanGate::explicit_human_approval()`; `resolve_unknown` without the token refuses typed;
+(7.2) with the token, resolves once, terminal after; (7.3) structural — no production code
+path constructs `HumanGate` other than the explicit-approval constructor (call-site audit,
+grep-gate shape).
+
+---
+
+*Consumption: D-3/D-4/D-5/D-8 first (money safety), then D-1/D-2/D-6/D-7. Same protocol —
+builder writes RED, receipts the gap, fixes GREEN in-lane; CI arbitrates. zArcheology designs
+tests only. — third roll, 2026-09-16.*
