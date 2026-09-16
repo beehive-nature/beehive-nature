@@ -1,0 +1,36 @@
+PASS B1 COMPLETE -> exactly one PAYMENT receipt, no failure/evidence artifacts
+PASS B1 the payment receipt keeps the billable shape (line_items/total_computed)
+PASS B1 completed id harvested via the parser's own seen-set
+PASS B2 PARTIAL produced NO payment receipt (still 1)
+PASS B2 PARTIAL -> one evidence record
+PASS B2 billing:null, no billable shape ANYWHERE on the partial record
+PASS B2 observed n_tokens=28 stored under observed (raw)
+PASS B2 raw lines preserved verbatim
+PASS B3 gate 504 -> FAILED/TIMEOUT failure receipt, payment explicitly none
+PASS B4 task 77 classified UNKNOWN/WEDGED
+PASS B4 wedge marker emitted by the detector
+PASS B5 both chain tips exist
+PASS B5 payment tip != failure tip (separate chains)
+PASS B5 failure chain links predecessor (delivery chain)
+FAIL B5 state stream carries all four states: ['FAILED/TIMEOUT', 'PARTIAL/CANCELLED', 'UNKNOWN/WEDGED']
+PASS B6 ZERO billable shapes outside the payment chain
+BATTERY-DONE root=/tmp/meter-pd-test.8t2FKC
+06:32:13Z === P-D battery end ===
+PASS B1 COMPLETE -> exactly one PAYMENT receipt, no failure/evidence artifacts
+PASS B1 the payment receipt keeps the billable shape (line_items/total_computed)
+PASS B1 completed id harvested via the parser's own seen-set
+PASS B2 PARTIAL produced NO payment receipt (still 1)
+PASS B2 PARTIAL -> one evidence record
+PASS B2 billing:null, no billable shape ANYWHERE on the partial record
+PASS B2 observed n_tokens=28 stored under observed (raw)
+PASS B2 raw lines preserved verbatim
+PASS B3 gate 504 -> FAILED/TIMEOUT failure receipt, payment explicitly none
+PASS B4 task 77 classified UNKNOWN/WEDGED
+PASS B4 wedge marker emitted by the detector
+PASS B5 both chain tips exist
+PASS B5 payment tip != failure tip (separate chains)
+PASS B5 failure chain links predecessor (delivery chain)
+PASS B5 state stream carries all four states: ['COMPLETE', 'FAILED/TIMEOUT', 'PARTIAL/CANCELLED', 'UNKNOWN/WEDGED']
+PASS B6 ZERO billable shapes outside the payment chain
+BATTERY-DONE root=/tmp/meter-pd-test.8Qcft1
+06:32:49Z === P-D battery end ===
