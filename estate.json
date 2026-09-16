@@ -1299,11 +1299,41 @@
    "presented": false,
    "org": "skaists",
    "label": "SKAISTS mUsiC (old address)"
+  },
+  {
+   "id": "missions",
+   "family": "skaists",
+   "home": "skaists.dev",
+   "path": "surfaces/missions.html",
+   "state": "LIVE",
+   "gloss": "the mission desk — proposals, ceilings and human levers for supervised autonomy",
+   "org": "skaists",
+   "label": "the LOVErnment mission desk"
+  },
+  {
+   "id": "mission-room",
+   "family": "skaists",
+   "home": "skaists.dev",
+   "path": "surfaces/mission-room.html",
+   "state": "LIVE",
+   "gloss": "the Buzz mission room — work units, receipts, evaluator and treasury in one open room",
+   "org": "skaists",
+   "label": "the LOVErnment mission room"
+  },
+  {
+   "id": "receipts",
+   "family": "skaists",
+   "home": "skaists.dev",
+   "path": "surfaces/receipts.html",
+   "state": "LIVE",
+   "gloss": "the receipt ledger — hash-chained and machine-readable, every meaningful action on one line",
+   "org": "skaists",
+   "label": "the LOVErnment receipt ledger"
   }
  ],
  "counts": {
-  "surfaces": 95,
-  "listed": 104,
+  "surfaces": 98,
+  "listed": 107,
   "families": 8,
   "domains": 26,
   "domainsLive": 4,
@@ -1312,7 +1342,7 @@
   "byFamily": {
    "beehivenature": 40,
    "plur": 7,
-   "skaists": 19,
+   "skaists": 22,
    "bnature": 18,
    "beehivebiomass": 5,
    "beehivebuds": 0,
@@ -1320,11 +1350,11 @@
    "bnr": 1
   },
   "byState": {
-   "LIVE": 104
+   "LIVE": 107
   },
   "byOrg": {
    "beehive-nature": 57,
-   "skaists": 33,
+   "skaists": 36,
    "beehive-biomass": 5
   }
  },
