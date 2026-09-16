@@ -93,6 +93,13 @@ pub struct Reservation {
     pub record_version: u32,
     pub leg: LegKey,
     pub state: ReservationState,
+    /// AV-6: lifetime count of this leg's no-evidence settle failures —
+    /// the retry-ceiling input. Leg-lifetime data, deliberately OUTSIDE
+    /// the state enum: at failure-record time the state is `Settling`
+    /// (begin_settle already transitioned), so a state-sourced counter
+    /// would reset every cycle. Serde-defaulted: pre-AV-6 records read 0.
+    #[serde(default)]
+    pub settle_attempts: u32,
     pub updated_unix: u64,
 }
 
@@ -100,11 +107,21 @@ pub struct Journal {
     root: PathBuf,
     /// Daily gas cap in wei (operations budget — the ops wallet class).
     pub daily_gas_cap_wei: u64,
+    /// AV-6 retry ceiling: the maximum number of no-evidence settle
+    /// attempts ONE leg may make before the door refuses further retries
+    /// LOUD (the corpus FeePlan names failure-charge + retry ceilings; the
+    /// number is config, the ceiling is law). Applies per leg — other legs
+    /// are unaffected.
+    pub max_settle_attempts_per_leg: u32,
     /// When opened exclusively (D-5), the instance holds the OS lock for
     /// its lifetime — kernel-released on process death, so a crashed
     /// opener can never strand the root.
     _held: Option<File>,
 }
+
+/// Default per-leg retry ceiling (AV-6). The value is an operations
+/// choice; the CEILING itself is the law.
+pub const DEFAULT_MAX_SETTLE_ATTEMPTS_PER_LEG: u32 = 3;
 
 /// The typed on-chain verdict for an expiry release (D-4): a bare bool
 /// invited the lying-RPC contradiction attack — the journal now demands
@@ -190,8 +207,16 @@ impl Journal {
         Ok(Journal {
             root: root.to_path_buf(),
             daily_gas_cap_wei,
+            max_settle_attempts_per_leg: DEFAULT_MAX_SETTLE_ATTEMPTS_PER_LEG,
             _held: None,
         })
+    }
+
+    /// AV-6: override the per-leg retry ceiling (operations config; the
+    /// ceiling itself is law).
+    pub fn with_max_settle_attempts(mut self, n: u32) -> Self {
+        self.max_settle_attempts_per_leg = n;
+        self
     }
 
     /// D-5 concurrent journal start: acquire the EXCLUSIVE OS lock and
@@ -214,6 +239,7 @@ impl Journal {
         Ok(Journal {
             root: root.to_path_buf(),
             daily_gas_cap_wei,
+            max_settle_attempts_per_leg: DEFAULT_MAX_SETTLE_ATTEMPTS_PER_LEG,
             _held: Some(lock),
         })
     }
@@ -415,6 +441,7 @@ impl Journal {
             record_version: RECORD_VERSION,
             leg: leg.clone(),
             state: ReservationState::Reserved { reserved_gas_wei },
+            settle_attempts: 0,
             updated_unix: now,
         })
     }
@@ -518,6 +545,7 @@ impl Journal {
             } => reserved_gas_wei,
             _ => 0,
         };
+        rec.settle_attempts += 1;
         rec.state = ReservationState::FailedKeep {
             reason: reason.to_string(),
             reserved_gas_wei: retained,

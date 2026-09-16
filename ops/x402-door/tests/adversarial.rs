@@ -408,6 +408,77 @@ fn adv_retained_failures_exhaust_the_budget_by_number() {
     );
 }
 
+// ---------- AV-6: same-leg retry storm / per-leg retry ceiling ----------
+
+/// A3/AV-6: a leg that fails N times must never charge unbounded failure
+/// attempts. The daily gas cap counts RETAINED exposure per leg (one slot
+/// however many retries), so a same-leg storm hits the real facilitator
+/// once per attempt with nothing tightening. The corpus FeePlan names
+/// failure-charge + retry ceilings; this battery pins the retry ceiling:
+/// bounded attempts with a LOUD refusal naming the number, while other
+/// legs stay live (per-leg ceiling, not a global freeze).
+#[test]
+fn adv_av6_same_leg_retry_storm_hits_the_retry_ceiling_loud() {
+    struct Fail;
+    impl SettlementFacilitator for Fail {
+        fn verify(&self, _r: &serde_json::Value) -> Result<(), String> {
+            Ok(())
+        }
+        fn settle(&self, _r: &serde_json::Value) -> FacilitatorSettle {
+            FacilitatorSettle::Error {
+                reason: "reverted".into(),
+                network: "eip155:8453".into(),
+            }
+        }
+    }
+    let gas = 1_000u64;
+    let d = Door::new(
+        Arc::new(Journal::open(&tmp_root("av6-storm"), 5 * gas).unwrap()),
+        Arc::new(Fail),
+        DoorConfig {
+            reserved_gas_wei: gas,
+            ops_float_available_wei: 1_000_000,
+        },
+        Arc::new(StaticFloat(1_000_000_000_000)),
+    );
+    let req = request("eip155:8453", "exact", "0xA6", "1", far_future());
+    let leg = extract_leg(&req).unwrap();
+    d.verify(&leg, &req).unwrap();
+
+    // Up to the ceiling, retries are lawful (no free without evidence).
+    let ceiling = 3u32; // DEFAULT_MAX_SETTLE_ATTEMPTS_PER_LEG (journal.rs)
+    for i in 1..=ceiling {
+        match d.settle(&leg, &req) {
+            Ok(FacilitatorSettle::Error { .. }) => {}
+            other => panic!("attempt {i} below ceiling must be an Error, got {other:?}"),
+        }
+    }
+
+    // The attempt AFTER the ceiling is refused LOUD, naming the number —
+    // never another facilitator round-trip.
+    let storm = d.settle(&leg, &req).unwrap_err().to_string();
+    assert!(
+        storm.contains("retry ceiling"),
+        "refusal names the ceiling: {storm}"
+    );
+    assert!(
+        storm.contains(&ceiling.to_string()),
+        "refusal names the attempt count: {storm}"
+    );
+
+    // Per-leg, not global: a different leg still verifies and settles.
+    let other_req = request("eip155:8453", "exact", "0xB7", "1", far_future());
+    let other_leg = extract_leg(&other_req).unwrap();
+    d.verify(&other_leg, &other_req).unwrap();
+    assert!(
+        matches!(
+            d.settle(&other_leg, &other_req),
+            Ok(FacilitatorSettle::Error { .. })
+        ),
+        "a fresh leg is unaffected by another leg's exhausted ceiling"
+    );
+}
+
 // ---------- R4: hostile chain strings + cross-leg isolation ----------
 
 #[test]

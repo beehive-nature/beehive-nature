@@ -194,6 +194,21 @@ impl<F: SettlementFacilitator> Door<F> {
                     )));
                 }
             }
+            // AV-6 retry ceiling: a leg must not storm the facilitator with
+            // unbounded no-evidence attempts — each attempt is a fresh
+            // chance to burn real gas while the retained-exposure budget
+            // counts the leg only ONCE. Bounded attempts with a loud
+            // refusal naming the number (the corpus FeePlan names
+            // failure-charge + retry ceilings); never neither. Gated on
+            // FailedKeep so settled legs keep their idempotent replay.
+            if let crate::journal::ReservationState::FailedKeep { .. } = rec.state {
+                if rec.settle_attempts >= self.journal.max_settle_attempts_per_leg {
+                    return Err(DoorError::SettleRefused(format!(
+                        "retry ceiling: leg has {} no-evidence settle attempts (ceiling {}) — REFUSED LOUD (AV-6); human gate or expiry release, never an unbounded attempt storm",
+                        rec.settle_attempts, self.journal.max_settle_attempts_per_leg
+                    )));
+                }
+            }
         }
         match self.journal.begin_settle(leg)? {
             // Idempotent: never re-execute a settled nonce.
