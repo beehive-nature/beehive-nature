@@ -46,6 +46,7 @@ Zero dependencies beyond the standard library. Python 3.10+.
 from __future__ import annotations
 
 import hashlib
+import secrets
 import time
 from dataclasses import dataclass, field
 from decimal import Decimal
@@ -234,8 +235,13 @@ class QuotingDesk:
 
     def quote(self, lane: str, max_amount_a: str, now: float | None = None) -> Quote:
         t = time.time() if now is None else now
-        self._n += 1
-        qid = f"q-{lane}-{t:.0f}-{self._n:06d}"
+        # AV-4 4.2: the handle is PURE ENTROPY (secrets, 128 bits) — no lane,
+        # no timestamp, no counter. The pre-fix shape q-{lane}-{t}-{n:06d}
+        # made same-principal handles correlatable by prefix and ORDER (the
+        # counter a wallet-global sequence in miniature); proven live by the
+        # AV-4 battery's PART A. `_n` stays for the battery's sequential
+        # replica (the negative-control minter) — it is not read here.
+        qid = "q-" + secrets.token_hex(16)
         q = Quote(quote_id=qid, lane=lane, max_amount_a=str(max_amount_a),
                   signed_max_a=str(max_amount_a),   # advertised == signed at birth
                   created_at=t, expires_at=t + self.ttl_s)

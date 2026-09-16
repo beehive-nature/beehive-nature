@@ -155,6 +155,14 @@ jobs:
       - name: AV-5 reorg drill (flag-not-credit)
         if: always()
         run: python3 scripts/buzz-meter/test_av5_reorg_drill.py
+      # AV-4 handle unlinkability (zCode, 2026-09-16, P1): PART A receipts
+      # forever that the old sequential minter was session-linkable; 4.2
+      # proves pure-entropy handles (no lane/timestamp/counter, zero reuse
+      # over 10k mints); the sequential minter is detected. The door-side
+      # disjointness half rides cargo: ops/x402-door av4_disjointness
+      - name: AV-4 handle unlinkability battery
+        if: always()
+        run: python3 scripts/buzz-meter/test_av4_handle_unlinkability.py
       # PEER FUNNEL testnet runner selftest (z3.3 Order C, 2026-09-05): the
       # one-broadcast tool cannot rot — keccak + EIP-155 RLP hash vectors and
       # the sign/recover roundtrip proven every push (key parts skip cleanly

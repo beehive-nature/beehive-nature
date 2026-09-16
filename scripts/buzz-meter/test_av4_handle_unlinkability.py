@@ -129,7 +129,7 @@ def negative_control():
     while shared_prefix < len(h1) and shared_prefix < len(h2) \
             and h1[shared_prefix] == h2[shared_prefix]:
         shared_prefix += 1
-    if shared_prefix < 20 or "mesh" in h1 or "1800000000" in h1:
+    if shared_prefix < 20 or "mesh" not in h1 or "1800000000" not in h1:
         fail("negative control: the sequential minter is NOT correlatable — "
              "the harness can no longer demonstrate detection of the class")
     ok(f"negative control: the sequential minter shares a {shared_prefix}-char "
