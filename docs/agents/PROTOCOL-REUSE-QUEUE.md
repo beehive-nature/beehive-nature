@@ -24,7 +24,7 @@ attributed source · evidence pointer.
 
 ---
 
-## 1 · EDDIES / ANTENGLEMENT INVESTIGATION — WATCH / INVESTIGATE (open; zCode seat stopped 2026-09-15, bounded mission complete)
+## 1 · EDDIES / ANTENGLEMENT INVESTIGATION — WATCH (implementation evidence banked 2026-09-16; server-side source still unseen)
 
 *Received 2026-09-15, appended verbatim from the Claude seat's analysis, relayed
 by the founder. Primary-source evidence, provenance chain, and both retrieval
@@ -148,6 +148,50 @@ Next evidence threshold:
 
 Seat stopped here by founder order 2026-09-15 — bounded mission complete at
 `5b445216`; no Eddies speculation beyond this marker until the threshold is met.
+
+**STATUS REFRESH (2026-09-16) — wake condition (1) FIRED: implementation evidence banked.**
+Full investigation: [`docs/dispatches/2026-09-16-eddies-workerb-wake-investigation.md`](../dispatches/2026-09-16-eddies-workerb-wake-investigation.md).
+
+```text
+EDDIES / ANTENGLEMENT — 2026-09-16 refresh
+
+Evidence state:
+  How Eddies Work artifact               STILL MISSING (superseded in practice)
+  Implementation source                  PARTIAL — public frontends read:
+                                         eddiesexchange.com + dweb.eddiesexchange.com
+                                         (Vite SPAs, 53 JS/WASM assets fetched static-only,
+                                         incl. Farm/escrow/loans/market chunks + Rust DBC
+                                         wasm wallet); SERVER code not public (no repo found)
+  Live invoice object                    FETCHED (founder-supplied payment URL →
+                                         GET /api/payment-requests/<id>, unauthenticated
+                                         200 JSON; sender "eddde"; no signature/hash on object)
+  28-question brief                      WORKED — 16 FACT / 9 partial / 3 INFERENCE-leaning;
+                                         binding question answered: NOTHING cryptographic
+                                         binds the Eddie obligation to ANT or scratchpad state
+
+Artifact contents status: the "How Eddies Work" artifact itself never arrived;
+its implementation is public instead. eddde claims: 2 graduated (in shape),
+1 partially resolved, 1 contradicted-for-token-leg ("SAFE Network native"),
+1 graduated-as-naming ("antenglement" = feature tag, no quantum mechanics).
+
+Founder ruling adopted (2026-09-16): hybrid application — official ANT ERC-20
+on Arbitrum One (reference + merkle-day purchase only; no lock/bridge/escrow;
+treasury constant dead on-chain) + Autonomi scratchpad persistence (encrypted
+client vaults + public registries; site content pinned by shard address) +
+clearnet server-authoritative ledger. NOT an Autonomi-native monetary rail.
+
+Architecture state:
+  NOT ADOPTED — operator-centered authority fails verifier separability
+  NOT AN ANT SETTLEMENT RAIL (ANT moves only to buy merkle-days, to an EOA)
+
+Current classification:
+  WATCH (upgraded from WATCH/INVESTIGATE; evidence bar met for classification,
+  not for adoption — ADOPT/ADAPT/WRAP all rejected at this evidence state)
+
+Next evidence threshold (if anyone resumes): server-side source or operator
+disclosure — settles Q12/Q13/Q14/Q26 (expiry, repudiation, double-spend,
+conservation) definitively; plus the real-euro settlement leg of loans.
+```
 
 ## 2 · OPENA2A / AIM (+ org standards family) — OPEN · recon receipted 2026-09-15, WATCH (research-class)
 
