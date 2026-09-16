@@ -1,0 +1,41 @@
+{
+ "schema": "skaists.lineage-overlay/1",
+ "purpose": "ETERNALIZATION MECHANISM: persons added to the estate's genealogy record OUTSIDE any provider walk. Every overlay person MUST reference an evidence pack (assets/profile-archive/lineage/evidence/); overlay persons never inherit a better evidence class than 'saga' or 'medieval' unless their pack cites contemporary records. The corpus (remington-bloodline.json) remains the walked record; overlays are the attested additions layer the founder authorizes.",
+ "authorizedBy": "founder order 2026-09-16 — first eternalizations: Ragnar Loðbrók and his son Sigurd Snake-in-the-Eye",
+ "persons": {
+  "ovl-sigurd-snake-eye": {
+   "name": "Sigurd Snake-in-the-Eye (Sigurd Ragnarsson)",
+   "lifespan": "mid 9th century–0887? (traditional; possibly the Sigfred killed in West Francia 887)",
+   "gender": "M",
+   "living": false,
+   "evidence": { "class": "saga", "basis": "attested-overlay: tradition carried by Ragnarssona þáttr / Ragnars saga / Saxo" },
+   "evidencePack": "evidence/sigurd-snake-in-eye.json",
+   "relation": "son of Ragnar Loðbrók and Queen Aslaug — KIN BY TRADITION, not blood-proven; the crest's paired serpents honor him"
+  },
+  "ovl-blaeja-of-northumbria": {
+   "name": "Blaeja of Northumbria",
+   "lifespan": "9th century (traditional)",
+   "gender": "F",
+   "living": false,
+   "evidence": { "class": "saga", "basis": "attested-overlay: tradition; daughter of King Ælla — the king who killed Ragnar" },
+   "evidencePack": "evidence/sigurd-snake-in-eye.json"
+  },
+  "ovl-harthacnut-i": {
+   "name": "Harthacnut I of Denmark (Harthacanute)",
+   "lifespan": "late 9th century–0916? (traditional; king of part of Denmark ~916)",
+   "gender": "M",
+   "living": false,
+   "evidence": { "class": "saga", "basis": "attested-overlay: tradition; father of Gorm the Old — the bridge toward documented Danish kings (Adam of Bremen conflicts: names his father 'Sven')" },
+   "evidencePack": "evidence/sigurd-snake-in-eye.json"
+  }
+ },
+ "edges": {
+  "ovl-sigurd-snake-eye": ["M8WZ-XZY", "LYH3-ZXF"],
+  "ovl-harthacnut-i": ["ovl-sigurd-snake-eye", "ovl-blaeja-of-northumbria"]
+ },
+ "edgeNotes": {
+  "ovl-sigurd-snake-eye": "parents per tradition: Ragnar Loðbrók (M8WZ-XZY, walked) + Queen Aslaug Sigurdsdottir (LYH3-ZXF, walked)",
+  "ovl-harthacnut-i": "parents per tradition: Sigurd Snake-in-the-Eye + Blaeja"
+ },
+ "law": "Overlay ids use the ovl- prefix so they can never collide with provider ids. Merging overlays into a rendered view must render the evidence chip on every overlay person."
+}

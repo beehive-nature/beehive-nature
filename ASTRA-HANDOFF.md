@@ -39,6 +39,43 @@
 4. Page: replace inline payload with corpus fetch + build step; add zoom/pan for deep fans if the founder wants more than 7 rings.
 5. GEDCOM: day-precision dates + PLAC structures when a consumer needs them.
 
+## Eternalization + BNR staging (founder order 2026-09-16, second wave)
+
+**First eternalizations shipped:** Ragnar Loðbrók and Sigurd Snake-in-the-Eye —
+`assets/profile-archive/lineage/evidence/{ragnar-lodbrok,sigurd-snake-in-eye}.json`
+(`skaists.evidence/1`: per-claim sources, conflicts retained, laws stating what the
+pack does NOT upgrade) + `attested-overlays.json` (`skaists.lineage-overlay/1`): the
+mechanism for persons entering the record OUTSIDE any provider walk — every overlay
+person must reference an evidence pack, carries `ovl-` ids (collision-proof), and can
+never inherit a class above saga/medieval without contemporary sources. Overlay seeds:
+Sigurd (parents Ragnar M8WZ-XZY + Aslaug LYH3-ZXF per tradition), Blaeja of
+Northumbria, Harthacnut I (the bridge toward Gorm the Old and documented Danish kings;
+Adam of Bremen's conflicting 'Sven' retained, not smoothed).
+
+**Eternalization law going forward:** walked record (corpus) + attested additions
+(overlays with evidence packs) + evidence basis upgrade (source harvest) are three
+SEPARATE layers. Never fold them silently.
+
+**BNR staging for the 7K+ blood relatives — recommendation: NO per-person
+registrations.** Each `bnr://` tier-1 name is a kingbeelovis registry row: a chain
+transaction plus yearly renewal — absurd at 10K-scale for the dead, and it would
+couple the corpus to chain economics. The scalable staging that works TODAY with the
+live tier-1 rail:
+
+1. **One registered root carries the many** — `bnr://skaists.dev` (already live)
+   gains path routing: `bnr://skaists.dev/blood/<source-id>` resolves through the
+   existing tier-1 resolver into a person card served from the corpus (a `/blood/`
+   route: static page + corpus fetch, or door-generated). Zero new registrations.
+2. **Overlay persons** address as `/blood/ovl-<name>` — same router, evidence chip
+   rendered on the card by law.
+3. **Future tamper-evidence lane (build only if the founder asks):** ONE on-chain
+   anchor — a merkle commitment of the corpus digest committed via a single
+   transaction at each walk snapshot. One row, not ten thousand.
+
+**iq.wiki framing:** the estate's wiki-layer is the evidence packs + overlays + the
+profile page — first-party, no dependency on external wiki platforms. External
+encyclopedias are CITED, never load-bearing.
+
 ## Where the receipts live
 
 - `docs/dispatches/2026-09-16-family-lineage-extraction.md` — the extraction receipt.
