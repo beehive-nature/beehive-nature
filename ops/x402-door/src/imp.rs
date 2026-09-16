@@ -235,13 +235,7 @@ enum DoorProvider {
 impl x402_types::chain::ChainProviderOps for DoorProvider {
     fn signer_addresses(&self) -> Vec<String> {
         match self {
-            DoorProvider::Eip155(p) => {
-                use x402_chain_eip155::chain::Eip155SignerAddresses;
-                p.signer_addresses()
-                    .into_iter()
-                    .map(|a| a.to_string())
-                    .collect()
-            }
+            DoorProvider::Eip155(p) => x402_types::chain::ChainProviderOps::signer_addresses(p),
         }
     }
     fn chain_id(&self) -> x402_types::chain::ChainId {
