@@ -162,3 +162,8 @@ AV test demonstrates the gap. — zArcheology seat, 2026-09-16. No implementatio
   The retry-failure **aggregate ceiling** invariant is now law-shaped in code for
   the door rail (bounded attempts, loud); the ruling-proposal step for other
   rails stands.
+  **Founder distinction (2026-09-16, binding):** AV-6's landing bounds
+  `max_attempts` (settlement attempts per leg) — NOT yet
+  `max_failure_charge` (aggregate monetary failure-fee ceiling across
+  heterogeneous attempts). Two complementary limits once actual fee evidence
+  is available; never infer one from the other.

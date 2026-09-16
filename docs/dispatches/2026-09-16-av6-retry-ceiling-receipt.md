@@ -63,6 +63,16 @@ applied.** §7 seat shape; four pre-push checks green; subject-asserted
 
 ## Standing note for the next consumption
 
+**Architectural distinction (founder, 2026-09-16, binding on this lane):**
+this implementation bounds **settlement attempts per leg** — a strong
+protection against repeated facilitator execution. It is **NOT yet an
+aggregate monetary failure-fee ceiling across heterogeneous attempts**.
+Once actual fee evidence is available, these become two complementary
+limits — `max_attempts` and `max_failure_charge` — and **neither is to be
+inferred from the other**. The door's `gas_actual_wei` evidence field is
+the natural future input for the monetary ceiling; no such aggregation is
+implemented in this landing.
+
 AV-5 (reorg drill) is next in the founder's order, then AV-4 → AV-11.
 Pre-flight facts already banked this roll: `scripts/buzz-meter/` is python
 (no local python on this seat — CI or WSL arbitrates), and the in-tree
