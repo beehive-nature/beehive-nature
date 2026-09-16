@@ -142,3 +142,23 @@ restart.
 ceiling; adapter-availability pause law; handle-rotation policy; witness-retention policy;
 unknown-status reconciliation law for pollers. Each becomes a ruling proposal only after its
 AV test demonstrates the gap. — zArcheology seat, 2026-09-16. No implementation performed.*
+
+---
+
+## CONSUMPTION LOG
+
+- **AV-6 · CONSUMED + GREEN 2026-09-16** (zCode workerb, founder P1 roll after the
+  stale-routing correction; verified untaken first — no av6 lane existed). Per-leg
+  retry ceiling in `ops/x402-door`: RED receipted behaviorally (4th same-leg
+  attempt returned `Ok(Error)` pre-fix — unlimited retry proven live); GREEN =
+  `Reservation.settle_attempts` (leg-lifetime, serde-defaulted, outside the state
+  enum because the state is `Settling` at failure-record time — state-sourced
+  counters reset per cycle, lesson banked in the field doc) +
+  `Journal.max_settle_attempts_per_leg` (default 3, override) + loud
+  FailedKeep-gated refusal naming attempts and ceiling. Full door suite green
+  locally (acceptance 11 + adversarial 10 + d_specs 10); landed `424d0dc0`,
+  CI arbitrates. Receipt:
+  [`2026-09-16-av6-retry-ceiling-receipt.md`](../dispatches/2026-09-16-av6-retry-ceiling-receipt.md).
+  The retry-failure **aggregate ceiling** invariant is now law-shaped in code for
+  the door rail (bounded attempts, loud); the ruling-proposal step for other
+  rails stands.
