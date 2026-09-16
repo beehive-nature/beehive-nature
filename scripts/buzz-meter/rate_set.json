@@ -2,17 +2,17 @@
  "_license": {
   "spdx": "BUSL-1.1",
   "licensor": "Travis Mark Remington <lovis@skaists.dev>",
-  "notice": "Business Source License 1.1 — see LICENSE in this directory. Change Date: August 29, 2030. Change License: GPL-2.0-or-later."
+  "notice": "Business Source License 1.1 \u2014 see LICENSE in this directory. Change Date: August 29, 2030. Change License: GPL-2.0-or-later."
  },
  "version": "rateset-v2",
- "minted_at": "2026-08-29T00:00:00Z",
+ "minted_at": "2026-09-16T22:49:54Z",
  "unit": "A",
  "tithe": {
   "percent": 10,
-  "law": "FOUNDER LAW (Lane M rider, 2026-08-29): the Claude-agents API lane prices at PROVIDER COST BASIS + 10% TITHE in A — a distinct visible TITHE line on every receipt, never buried in the rate. The tithe percentage changes by founder word ALONE; rate_set versions track cost basis only. This number is law, not a parameter."
+  "law": "FOUNDER LAW (Lane M rider, 2026-08-29): the Claude-agents API lane prices at PROVIDER COST BASIS + 10% TITHE in A \u2014 a distinct visible TITHE line on every receipt, never buried in the rate. The tithe percentage changes by founder word ALONE; rate_set versions track cost basis only. This number is law, not a parameter."
  },
  "lanes": {
-  "law": "x402-RAID-Z33 (pinout compute/rates.json + lanePricing, read at source): a lane rate is COST BASIS x (1 + margin); in the estate the margin IS the 10% tithe and rides as its OWN line, never inside the rate. 1 credit = 1 second. A lane whose basis is unset or stale is NOT OFFERED (NotPriced) — the option disappears rather than mis-prices (the xorv stale-rate rule). Versions track cost basis only: no lane below carries a basis yet, so the version does not move.",
+  "law": "x402-RAID-Z33 (pinout compute/rates.json + lanePricing, read at source): a lane rate is COST BASIS x (1 + margin); in the estate the margin IS the 10% tithe and rides as its OWN line, never inside the rate. 1 credit = 1 second. A lane whose basis is unset or stale is NOT OFFERED (NotPriced) \u2014 the option disappears rather than mis-prices (the xorv stale-rate rule). Versions track cost basis only: no lane below carries a basis yet, so the version does not move.",
   "compute_edge": {
    "lane": "compute_edge",
    "unit": "second (1 credit = 1 second)",
@@ -26,7 +26,7 @@
  },
  "tiers": {
   "free_qwen": {
-   "tier": "FREE (founder tier-ladder ruling, 2026-08-29): the box/qwen compute lane — guest keys, no charge, capped fairly (the Lane-H service caps are the fair cap)",
+   "tier": "FREE (founder tier-ladder ruling, 2026-08-29): the box/qwen compute lane \u2014 guest keys, no charge, capped fairly (the Lane-H service caps are the fair cap)",
    "rates": {
     "prefill_token": {
      "value": 0,
@@ -39,15 +39,15 @@
    }
   },
   "paid_claude": {
-   "tier": "PAID (founder tier-ladder ruling): the Claude-agents lane — A-metered at provider cost basis + the 10% tithe",
-   "status": "CLOSED_UNTIL_FUNDED — basis disclosed as reference",
+   "tier": "PAID (founder tier-ladder ruling): the Claude-agents lane \u2014 A-metered at provider cost basis + the 10% tithe",
+   "status": "CLOSED_UNTIL_FUNDED \u2014 basis disclosed as reference",
    "cost_basis": {
-    "note": "Anthropic POSTED API pricing as the DISCLOSED REFERENCE BASIS while credits are unfunded (founder P3-GO option B). Receipts on this lane, when it opens, bill at these posted rates converted to A via the a_conversion_reference, plus THE TITHE (10%, separate line, founder law). Until the founder funds API credits the lane stays CLOSED — nothing bills.",
+    "note": "Anthropic POSTED API pricing as the DISCLOSED REFERENCE BASIS while credits are unfunded (founder P3-GO option B). Receipts on this lane, when it opens, bill at these posted rates converted to A via the a_conversion_reference, plus THE TITHE (10%, separate line, founder law). Until the founder funds API credits the lane stays CLOSED \u2014 nothing bills.",
     "model_class": "sonnet-class (named per-model at lane open)",
     "prefill_token_per_million_usd": 3,
     "decode_token_per_million_usd": 15,
     "a_conversion_reference": null,
-    "basis": "POSTED-REFERENCE (rate_set_ref carries this word — not a billed rate until the lane opens)"
+    "basis": "POSTED-REFERENCE (rate_set_ref carries this word \u2014 not a billed rate until the lane opens)"
    },
    "tithe_on_top": "the 10% tithe is ON TOP of the anthropic bill, never inside it"
   }
