@@ -401,6 +401,25 @@ Reuse before invention; no Eddies dependency." Full source-verified recon:*
   commit 7246ea2e renamed nut24.rs → nut25.rs ("bolt12 is nut25") — X-Cashu
   HTTP-402 was NEVER implemented in CDK; README ✔24 is stale pre-renumber
   documentation.
+- **ADVERSARIAL TEST CONTRACT DESIGNED 2026-09-16 (CA-1..CA-7, red-first,
+  zero implementation) →**
+  [`docs/dispatches/2026-09-16-cashu-adversarial-contract.md`](../dispatches/2026-09-16-cashu-adversarial-contract.md):
+  the seven founder-named vectors (lying NUT-06 / enforcement vanishes /
+  keyset retirement / signatory change / RPC drift / unreachable mint /
+  snapshot-reality disagreement), each with setup→stimulus→expectation→
+  RED-when, in the estate's AV/D shape. **Reuse verdict: a future Cashu
+  adapter invents ZERO new state machines** — CA-2/3/6 run on AV-8's
+  original-obstruction/no-fresh-key law transposed to proofs (reconcile the
+  original PROOF, never re-blind to paper over drift) + flag-not-credit +
+  terminal-state; CA-4 reuses HumanGate with one named extension
+  (signing-lineage succession = RED-class); CA-5 reuses the fee-cap family
+  (fee drift = cap drift) + bounded exposure as the standing backstop;
+  CA-7 reuses the door's torn-journal corruption modes verbatim for the
+  snapshot store; CA-1 extends CD-4/D-4 to a LIVE counterparty (the
+  behavioral probe). Harness prerequisite named, not built: one
+  mutable-mint fixture (cdk-fake-wallet seed + lying/laxer-enforcement
+  stubs) = the FIRST build item if ever chartered, per the red-first
+  pipeline law (specs seat attacks → builder proves RED → CI arbitrates).
 
 ---
 
