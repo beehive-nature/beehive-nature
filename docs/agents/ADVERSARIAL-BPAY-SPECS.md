@@ -570,3 +570,165 @@ R13 law.
 *Seventh roll, 2026-09-16. Pipeline law unchanged. Watch list updates with R13: the live NWC
 leg and any Sepolia smoke add LIVE drift sources for MP-2 drills; the Eddies worker's
 obligation semantics arrive against RS-2 terminal reconciliation and RS-4.3 fee asymmetry.*
+
+---
+
+## EIGHTH ROLL — the R13 live NWC transport boundary attacked (2026-09-16)
+
+*Founder order (verbatim): "Attack the R13 live NWC transport boundary itself. Design
+RED-first specs for WebSocket reader/reconnect, duplicate 23195 responses, stale/wrong
+request correlation, wrong `p` tag, replayed response, relay disconnect between send and
+response, and conflicting responses from multiple relays." **The key law, verbatim and
+binding on every row below: "transport ambiguity can only reconcile the existing
+`payment_hash`; it can never create a new payment identity."** Then roll directly into
+capability-manifest attacks (CD-7…CD-10). Complements the seventh roll (MP binds manifests
+to plans at authorization; LT binds the wire that carries the evidence those plans settle).*
+
+**Targets read at full source depth this roll:** `crates/bpay-rail/src/nwc_live.rs` (395
+lines, ALL) + `nwc.rs` request path + `NwcConnection::parse` on `codex/z2b-bpay-rail`
+@`0ff70217`.
+
+**Verified observations — the RED anchors (cited):**
+- **Relay-rejection conflation (the strongest find):** the acknowledgement check is a
+  SUBSTRING test — `if !resp.contains("true") && !resp.contains("OK")` (nwc_live.rs:378) —
+  so a relay REJECTION `["OK", <id>, false, "error: …"]` PASSES as acceptance (it contains
+  "OK"; the message may even contain "true"). A refused event then times out at read and
+  returns `TransportAmbiguous` — **rejected-at-relay is silently classified as
+  in-flight-unknown**. For value-carrying requests this is the exact conflation the key law
+  exists to prevent (nothing is in flight; the event never entered the network).
+- **No request↔response correlation:** `read_response` issues `limit: 1` and parses the
+  FIRST brace-delimited object (nwc_live.rs:331, :344-353); nothing binds the returned
+  23195 to the request that spawned it (decrypt + correlation are future work — the
+  content is read then discarded, nwc_live.rs:384-393). A stale first-match response to a
+  DIFFERENT request is structurally indistinguishable today.
+- **Response sender never authenticated:** the response event's `pubkey` is never checked
+  against `wallet_pubkey_hex` and its schnorr signature is never verified — only
+  `.content` is touched (nwc_live.rs:384-387).
+- **Multi-relay silent last-wins:** `NwcConnection::parse` overwrites `relay` on every
+  `relay=` query pair (nwc_live.rs:65-77) — a `relay=wss://a&relay=wss://b` URL keeps only
+  `b`, silently; the type is single-relay (`relay_url: String`, nwc_live.rs:46).
+- **One-shot read, no reconnect:** POST event → single REQ-over-POST attempt
+  (nwc_live.rs:376-383); a disconnect between send and response returns
+  `TransportAmbiguous` with no retry/re-read loop (the WS reader is the named next slice).
+- **Clock handling:** `now_secs()` returns 0 on clock failure (nwc_live.rs:263-268) →
+  epoch-0 events with a 60s expiry; request expiration is HARDCODED `now+60`
+  (nwc_live.rs:369).
+- **NIP-44 nonce:** documented-deviation DRBG `sha256(secret ‖ nanos)` → ChaCha20
+  (nwc_live.rs:200-216); the clock is NOT injectable, so same-instant encryption is not
+  testable as built. Uniqueness rests on nanosecond collision-freedom.
+- **URL decoding:** `urldecode` handles exactly five UPPERCASE sequences (nwc_live.rs:87-93);
+  legal lowercase percent-encoding (`%3a`) passes through undecoded.
+
+### SPEC LT-0 — the identity law (this roll's constitution; pinned before every probe)
+
+| # | case | exact pass criterion | fail criterion |
+|---|---|---|---|
+| LT-0.1 | ANY transport-layer outcome (ambiguity, disconnect, timeout, reconnect, duplicate, replay, conflict) feeding the ledger | the outcome may ONLY reconcile/lookup an EXISTING `payment_hash`; no transport event constructs, derives, or re-keys a payment identity | any path where transport state mints or rotates an identity (incl. "retry with a fresh payment_hash") |
+
+### SPEC LT-1 — relay acknowledgement truth (rejected ≠ ambiguous) — P0-class
+
+| # | case | exact pass criterion | fail criterion |
+|---|---|---|---|
+| LT-1.1 | relay replies `["OK", id, false, "…"]` (rejection) to a request event | TYPED pre-ledger refusal ("relay refused the event", message surfaced); nothing is in flight; no TransportAmbiguous | rejection classified ambiguous/unknown (CURRENT — the substring check at :378 passes `OK false`) |
+| LT-1.2 | relay replies `["OK", id, true, …]` then closes before any response | TransportAmbiguous (the event IS in flight); reconcile-by-lookup only, per LT-0 | force-fail or auto-retry |
+| LT-1.3 | relay replies a body containing the literal word "OK"/"true" but is NOT an OK frame (e.g., an error JSON) | parsed as a FRAME, not a substring — unknown frame shape = typed unknown-frame refusal | substring acceptance (CURRENT shape) |
+| LT-1.4 | negative control | a mutated (substring-only) validator must be DETECTED by the LT-1.1/1.3 probes | harness blind |
+
+### SPEC LT-2 — WS reader / reconnect / disconnect-between-send-and-response
+
+| # | case | exact pass criterion | fail criterion |
+|---|---|---|---|
+| LT-2.1 | disconnect between EVENT-accept and response arrival | bounded reconnect + re-read loop (WS subscription with resume); every retry reconciles the SAME payment_hash (LT-0); the leg never exceeds its declared evidence window | single-shot read then permanent Unknown (CURRENT — one REQ-over-POST attempt); fresh payment_hash on retry |
+| LT-2.2 | reconnect storm (relay flapping) | bounded backoff; retry count/telemetry observable; window expiry still governs | infinite retry; retries past the evidence window |
+| LT-2.3 | REQ-over-POST unsupported (the named capability gap) | the transport DECLARES `response-read: none|ws-required` for this relay and refuses value-carrying construction (CD-7.1); read-only ops still lawful | send-then-blind (CURRENT for such relays — sends are gated off today, the spec pins the law for when the gate lifts) |
+
+### SPEC LT-3 — response↔request correlation (stale / wrong response)
+
+| # | case | exact pass criterion | fail criterion |
+|---|---|---|---|
+| LT-3.1 | the relay returns a 23195 answering a DIFFERENT (earlier) request | correlation binds response→request: decrypted `result_type` matches the pending method; response freshness ≥ request dispatch; mismatch = typed stale-response refusal, zero ledger effect | first-match accepted (CURRENT — `limit:1` + first-brace parse, :331/:344) |
+| LT-3.2 | response arrives for an UNKNOWN method (never requested) | typed refusal naming method; never routed into any open intent | routed into the newest open leg |
+| LT-3.3 | correlation survives process restart (response read after restart) | correlation state persisted with the intent (ledger-side), not transport memory only | in-memory-only correlation |
+
+### SPEC LT-4 — response sender authentication (wrong `p` / wrong sender)
+
+| # | case | exact pass criterion | fail criterion |
+|---|---|---|---|
+| LT-4.1 | a 23195 whose event `pubkey` ≠ `wallet_pubkey_hex` | typed wrong-sender refusal BEFORE any decrypt attempt (cheap check first); zero ledger effect | sender unchecked (CURRENT — only `.content` is read, :384-387) |
+| LT-4.2 | a 23195 with a forged/invalid schnorr signature over its event id | signature verified (sha256 canonical array → BIP-340 verify); invalid = typed bad-signature refusal | unverified event content consumed |
+| LT-4.3 | request-side p-tag tampering: `wallet_pubkey_hex` altered in the URL | the request is encrypted to the altered key (ECDH) — a WRONG-wallet request must be detectable at parse (validation) or the first response mismatch is typed, never silent | silently paying a wrong wallet (boundary row with LU-3/LU-7) |
+| LT-4.4 | response p-tag points at the client but content decrypts under a different conversation | decrypt failure = typed not-for-us refusal, DISTINCT from wrong-sender and from corrupt | all decrypt failures one error class |
+
+### SPEC LT-5 — duplicate 23195 redelivery
+
+| # | case | exact pass criterion | fail criterion |
+|---|---|---|---|
+| LT-5.1 | the same response event delivered twice (relay redelivery / reconnect replays the subscription) | dedup by event `id`; second delivery routes to lookup, exactly one effect (LU-6.2 through the live path) | second effect; second ledger mutation |
+| LT-5.2 | two DISTINCT response events for ONE request (relay quirk) | first AUTHENTICATED response wins; the second recorded as a divergence flag, never applied | last-writer-wins; both applied |
+
+### SPEC LT-6 — replayed response + clock skew
+
+| # | case | exact pass criterion | fail criterion |
+|---|---|---|---|
+| LT-6.1 | an OLD stored 23195 served despite the `since` filter (relay ignores filters) | client-side freshness check: response `created_at` ≥ request dispatch (bounded skew tolerance); older = typed stale refusal | `since` trusted as the only freshness gate (CURRENT — filter-only) |
+| LT-6.2 | a VALID old response replayed to reconcile a NEWER intent of the same shape | the decrypted payload's `payment_hash` must match the open intent EXACTLY (LT-0 law); evidence for a different hash = typed mismatch, routed nowhere | replay settles a new leg |
+| LT-6.3 | client clock skewed vs relay (response appears "from the future"/"past") | skew-tolerance is a DECLARED bound; outside it = typed clock-skew refusal (feeds LT-8) | silent acceptance at arbitrary skew |
+
+### SPEC LT-7 — multi-relay: typing + conflicting responses
+
+| # | case | exact pass criterion | fail criterion |
+|---|---|---|---|
+| LT-7.1 | connection URL carries multiple `relay=` params | typed `Vec<relay>` (or typed refusal until multi-relay is built); NEVER silent last-wins (CURRENT: parse overwrites, :65-77) | silent last-wins (CURRENT, the named RED) |
+| LT-7.2 | two relays return CONFLICTING authenticated 23195s (e.g., one preimage-valid settle, one failure) for one request | first-authenticated wins provisionally; conflict ESCALATES to a divergence flag + Unknown reconciliation, never silent pick; the ledger effect stays reversible-by-evidence | first-received-wins silently; both applied |
+| LT-7.3 | one relay dead, another alive (partial availability) | failover lawful per LT-2 reconnect rules; the composite transport's capability derives per CD-9 (weakest read path) | composite claims a dead relay's read capability |
+
+### SPEC LT-8 — clock failure + expiration policy
+
+| # | case | exact pass criterion | fail criterion |
+|---|---|---|---|
+| LT-8.1 | system clock unavailable before build/sign | typed clock-unavailable refusal, pre-ledger | epoch-0 events (CURRENT `now_secs()` fallback → 0, :263-268) |
+| LT-8.2 | request expiration policy | per-request TTL from the intent's declared window (LU-6/RS-5.1 law), not a hardcoded 60s (CURRENT, :369); TTL ≥ the leg's evidence window | hardcoded expiry shorter than the declared window |
+| LT-8.3 | clock seam testability | the transport takes an INJECTABLE clock (pure-Rust core, host clock at the edge) — required by LT-6.3/LT-8.1 probes | `SystemTime::now()` called mid-construction (CURRENT — not testable as built) |
+
+### SPEC LT-9 — NIP-44 v2 nonce uniqueness + official vectors (external anchor law)
+
+| # | case | exact pass criterion | fail criterion |
+|---|---|---|---|
+| LT-9.1 | two encryptions in the SAME conversation under an injected FROZEN clock | nonces MUST differ (uniqueness by construction, not by nanosecond luck); the documented DRBG deviation (":200-216") is retired or fenced by test | identical nonce → identical message keys → keystream reuse across plaintexts |
+| LT-9.2 | the full NIP-44 v2 construction (pad len, conversation key, payload framing) | pinned byte-exact against the OFFICIAL nip44 v2 test vectors (external ground-truth anchor — never memory-derived) | construction greens only against its own implementation |
+| LT-9.3 | URL percent-decoding case sensitivity | case-insensitive hex decoding (`%3a` == `%3A`); unknown sequences per RFC; NWC URL shape pinned with vectors | uppercase-only five-sequence table (CURRENT `urldecode`, :87-93) |
+
+### CD-7…CD-10 SHARPENED by the live-transport attack (the roll-into, founder-directed)
+
+- **CD-7⁺ (response-read gains guarantee dimensions):** the axis is not one boolean —
+  `response-read` must carry *correlation* (binds response→request, LT-3), *freshness*
+  (client-side check vs filter-trust, LT-6.1), and *dedup* (event-id, LT-5.1) guarantees.
+  A relay that reads but does not correlate is `response-read: weak` and value-carrying
+  construction refuses on it. The REQ-over-POST probe result is itself a capability
+  receipt (CD-4 input). Composes with MP-3: the authorization-time manifest binding rides
+  a manifest whose transport axes these dimensions define.
+- **CD-9⁺ (composition gains a conflict dimension):** multi-relay composition is not plain
+  intersection — read capability is per-relay UNION with a CONFLICT rule (LT-7.2/7.3); the
+  derived composite manifest must express `read: any-relay, conflict: escalate-unknown`.
+- **CD-10⁺ (the mock must speak RELAY vocabulary, not just NIP-47 result vocabulary):**
+  `nwc_mock` today models result shapes; the transport battery needs a relay-simulator
+  tier — OK-false acknowledgements, duplicate EVENT delivery, since-ignoring filters,
+  multi-event bodies, flapping disconnects, conflicting second responses (builder's;
+  feeds every LT row).
+- **CD-8⁺:** the send gate composes with `response-read` — a send-enabled construction on
+  a `response-read: none` transport is a manifest-level contradiction refused at CD-8.1
+  even before LT-2.3's runtime check.
+
+**RED expectations (verified this roll at `0ff70217`):** LT-1.1/1.3 (substring ack),
+LT-2.1/2.3 (no reader loop; gap unnamed to the manifest), LT-3.1 (no correlation), LT-4.1/4.2
+(sender unauthenticated), LT-5.1 (no dedup — no reader at all), LT-6.1 (filter-only
+freshness), LT-7.1 (silent last-wins), LT-8.1/8.2/8.3 (epoch-0 fallback; hardcoded TTL;
+non-injectable clock), LT-9.1/9.3 (frozen-clock nonce; case-sensitive decode) are RED now;
+LT-9.2 is UNPROVEN (no vector pin exists); LT-0 is the standing law every RED run must
+charter against. **Builder consumption order:** LT-1 (money-safety, tiny) → LT-4 (sender
+auth before any decrypt lands) → LT-3/LT-5 (correlation + dedup with the reader slice) →
+LT-2 (reconnect loop) → LT-8/LT-9 (clock seam + nonce retirement) → LT-7 (multi-relay
+typing). The WS reader slice is the natural carrier for LT-2/3/5.
+
+*Eighth roll, 2026-09-16. Pipeline law unchanged: builder proves RED, fixes GREEN, CI
+arbitrates; zArcheology designs tests only, zero production code, zero network.*
