@@ -29,6 +29,68 @@ pub trait WsSocket {
     fn recv_text(&mut self) -> Result<Option<String>, WsError>;
 }
 
+/// LT-1: relay ACK truth — a structural parse of the ["OK", id, bool, msg"]
+/// frame. Rejected ≠ ambiguous: an OK-false means the event NEVER entered
+/// the network (a typed pre-ledger refusal), while OK-true-then-close is
+/// genuinely in-flight (TransportAmbiguous through the read loop).
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum AckVerdict {
+    Accepted,
+    /// OK for a different event id (a concurrent request's ack).
+    NotOurs,
+    /// The relay REFUSED our event — typed, the reason surfaced.
+    Rejected(String),
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct AckError {
+    pub reason: String,
+}
+
+impl std::fmt::Display for AckError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "unknown frame: {}", self.reason)
+    }
+}
+
+/// LT-1: STRUCTURAL frame parse — never substrings.
+pub fn process_ack_frame(frame: &str, our_event_id: &str) -> Result<AckVerdict, AckError> {
+    let v: serde_json::Value = serde_json::from_str(frame).map_err(|e| AckError {
+        reason: format!("not JSON: {e}"),
+    })?;
+    let arr = v.as_array().ok_or_else(|| AckError {
+        reason: "not an array frame".into(),
+    })?;
+    match arr.first().and_then(|t| t.as_str()) {
+        Some("OK") => {
+            let id = arr.get(1).and_then(|i| i.as_str()).unwrap_or("");
+            if id != our_event_id {
+                return Ok(AckVerdict::NotOurs);
+            }
+            match arr.get(2).and_then(|b| b.as_bool()) {
+                Some(true) => Ok(AckVerdict::Accepted),
+                Some(false) => {
+                    let msg = arr
+                        .get(3)
+                        .and_then(|m| m.as_str())
+                        .unwrap_or("no reason given");
+                    Ok(AckVerdict::Rejected(msg.to_string()))
+                }
+                None => Err(AckError {
+                    reason: "OK frame with non-bool third element".into(),
+                }),
+            }
+        }
+        Some("EVENT") | Some("EOSE") | Some("NOTICE") | Some("CLOSED") => Ok(AckVerdict::NotOurs),
+        _ => Err(AckError {
+            reason: format!(
+                "unknown frame type: {}",
+                arr.first().and_then(|t| t.as_str()).unwrap_or("?")
+            ),
+        }),
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum WsError {
     /// Connection lost mid-operation — the reconnect policy's trigger.
@@ -107,6 +169,45 @@ pub fn process_message(ctx: &RequestCtx, msg: &str, seen: &mut HashSet<String>) 
                 .to_string();
             if !seen.insert(id) {
                 return Verdict::NotOurs("duplicate");
+            }
+            // LT-4.1: sender authentication — the event pubkey must be the wallet
+            let sender = ev
+                .get("pubkey")
+                .and_then(|p| p.as_str())
+                .unwrap_or_default();
+            if sender != ctx.wallet_pubkey_hex {
+                return Verdict::NotOurs("wrong sender pubkey");
+            }
+            // LT-4.2: schnorr signature verification over the event id
+            {
+                let sig_hex = ev.get("sig").and_then(|s| s.as_str()).unwrap_or_default();
+                let sig_bytes = match hex::decode(sig_hex) {
+                    Ok(b) if b.len() == 64 => b,
+                    _ => return Verdict::NotOurs("bad signature (malformed)"),
+                };
+                let sig = match <k256::schnorr::Signature as TryFrom<&[u8]>>::try_from(
+                    sig_bytes.as_slice(),
+                ) {
+                    Ok(s) => s,
+                    Err(_) => return Verdict::NotOurs("bad signature (parse)"),
+                };
+                let id_hex = ev.get("id").and_then(|i| i.as_str()).unwrap_or_default();
+                let id_bytes = match hex::decode(id_hex) {
+                    Ok(b) if b.len() == 32 => b,
+                    _ => return Verdict::NotOurs("bad signature (event id malformed)"),
+                };
+                let sender_bytes = match hex::decode(&ctx.wallet_pubkey_hex) {
+                    Ok(b) if b.len() == 32 => b,
+                    _ => return Verdict::NotOurs("bad signature (sender malformed)"),
+                };
+                let vk = match k256::schnorr::VerifyingKey::from_bytes(&sender_bytes) {
+                    Ok(v) => v,
+                    Err(_) => return Verdict::NotOurs("bad signature (sender key)"),
+                };
+                let id_arr: [u8; 32] = id_bytes.try_into().expect("len checked");
+                if vk.verify_raw(&id_arr, &sig).is_err() {
+                    return Verdict::NotOurs("bad signature (verify failed)");
+                }
             }
             // ownership: NIP-44 MAC must verify against OUR key
             let content = ev

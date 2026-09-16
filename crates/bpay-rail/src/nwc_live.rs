@@ -48,7 +48,7 @@ impl NwcConnection {
         let (pk, query) = rest
             .split_once('?')
             .ok_or_else(|| NwcError::Other("connection URL lacks query".into()))?;
-        let mut relay = None;
+        let mut relays: Vec<String> = Vec::new();
         let mut secret_bytes: Option<Vec<u8>> = None;
         for kv in query.split('&') {
             let (k, v) = kv
@@ -56,7 +56,7 @@ impl NwcConnection {
                 .ok_or_else(|| NwcError::Other(format!("malformed query pair {kv:?}")))?;
             let v = urldecode(v);
             match k {
-                "relay" => relay = Some(v),
+                "relay" => relays.push(v),
                 "secret" => {
                     let mut bytes = hex::decode(&v).map_err(|e| NwcError::Other(e.to_string()))?;
                     if bytes.len() != 32 {
@@ -74,7 +74,18 @@ impl NwcConnection {
         raw.zeroize();
         // relays in connection URLs are commonly https:// — nostr WS
         // wants wss://; scheme conversion only, never a different host.
-        let relay = relay.ok_or_else(|| NwcError::Other("relay param missing".into()))?;
+        // LT-7.1: multiple relay= params are a TYPED refusal — never
+        // silent last-wins (multi-relay composition is its own slice).
+        if relays.len() > 1 {
+            return Err(NwcError::Other(format!(
+                "multiple relays in connection URL ({} found) — multi-relay composition is not built;                  the connection must name exactly one relay (LT-7.1)",
+                relays.len()
+            )));
+        }
+        let relay = relays
+            .into_iter()
+            .next()
+            .ok_or_else(|| NwcError::Other("relay param missing".into()))?;
         let relay_ws = if relay.starts_with("wss://") || relay.starts_with("ws://") {
             relay
         } else if let Some(rest) = relay.strip_prefix("https://") {
@@ -133,12 +144,38 @@ impl WsSocket for TungsteniteSocket {
     }
 }
 
+/// LT-9.3: case-insensitive percent-decoding — any hex case decodes;
+/// unknown sequences are preserved verbatim (RFC 3986 consumer).
 fn urldecode(s: &str) -> String {
-    s.replace("%3A", ":")
-        .replace("%2F", "/")
-        .replace("%3F", "?")
-        .replace("%3D", "=")
-        .replace("%26", "&")
+    let mut out = String::with_capacity(s.len());
+    let bytes = s.as_bytes();
+    let mut i = 0;
+    while i < bytes.len() {
+        if bytes[i] == b'%' && i + 3 <= bytes.len() {
+            let hi = hex_val(bytes[i + 1]);
+            let lo = hex_val(bytes[i + 2]);
+            if let (Some(h), Some(l)) = (hi, lo) {
+                out.push(((h << 4) | l) as char);
+                i += 3;
+            } else {
+                out.push(bytes[i] as char);
+                i += 1;
+            }
+        } else {
+            out.push(bytes[i] as char);
+            i += 1;
+        }
+    }
+    out
+}
+
+fn hex_val(c: u8) -> Option<u8> {
+    match c {
+        b'0'..=b'9' => Some(c - b'0'),
+        b'a'..=b'f' => Some(c - b'a' + 10),
+        b'A'..=b'F' => Some(c - b'A' + 10),
+        _ => None,
+    }
 }
 
 pub struct LiveNwcTransport {

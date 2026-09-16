@@ -7,7 +7,7 @@
 //! budget-exhaustion law (TransportAmbiguous, never a false Failed).
 
 use bpay_rail::nwc::NwcError;
-use bpay_rail::nwc_crypto::{nip44_decrypt, nip44_encrypt};
+use bpay_rail::nwc_crypto::nip44_encrypt;
 use bpay_rail::nwc_reader::{
     process_message, read_response, ReadPolicy, RequestCtx, Verdict, WsError, WsSocket,
 };
@@ -36,16 +36,17 @@ fn make_ctx() -> RequestCtx {
 }
 
 /// Build a kind-23195 EVENT frame addressed (or misaddressed) at will.
+/// LT-4 era: properly signed by the wallet key (unless p_tag is
+/// deliberately wrong, in which case the event is still signed — the
+/// p-tag is what misaddresses it).
 fn response_frame(
     ctx: &RequestCtx,
-    id: &str,
+    _id: &str,
     created_at: u64,
     p_tag: Option<&str>, // None = use the right p tag
     method_answered: &str,
 ) -> String {
     let (sk, _client, wallet_pub) = ctx_parts();
-    // NIP-44 conversation is symmetric: encrypt with the CLIENT secret
-    // against the WALLET pubkey — decryptable by the client side.
     let envelope = serde_json::json!({
         "result_type": format!("{method_answered}_response"),
         "result": { "alias": "hub" },
@@ -54,16 +55,26 @@ fn response_frame(
     let p = p_tag
         .map(|s| s.to_string())
         .unwrap_or(ctx.client_pubkey_hex.clone());
+    // sign the event: id = sha256 of [0, wallet_pub, created_at, 23195, tags, content]
+    let tags = serde_json::json!([["p", p]]);
+    let serialized =
+        serde_json::json!([0, wallet_pub, created_at, 23195, tags, content]).to_string();
+    let id_bytes: [u8; 32] = {
+        use sha2::Digest;
+        sha2::Sha256::digest(serialized.as_bytes()).into()
+    };
+    let wallet_sk = k256::schnorr::SigningKey::from_bytes(&[9u8; 32]).unwrap();
+    let sig = wallet_sk.sign_raw(&id_bytes, &[0u8; 32]).unwrap();
     serde_json::json!([
         "EVENT", "sub",
         {
-            "id": id,
-            "pubkey": ctx.wallet_pubkey_hex,
+            "id": hex::encode(id_bytes),
+            "pubkey": wallet_pub,
             "created_at": created_at,
             "kind": 23195,
-            "tags": [["p", p]],
+            "tags": tags,
             "content": content,
-            "sig": "00"
+            "sig": hex::encode(sig.to_bytes()),
         }
     ])
     .to_string()
@@ -253,10 +264,25 @@ fn attack_error_envelope_is_typed_not_ambiguous() {
         "error": { "code": "QUOTA_EXCEEDED", "message": "budget" },
     });
     let content = nip44_encrypt(&sk, &wallet_pub, &envelope.to_string()).unwrap();
+    let serialized = serde_json::json!([
+        0,
+        wallet_pub,
+        1001,
+        23195,
+        serde_json::json!([["p", client_pub]]),
+        content
+    ])
+    .to_string();
+    let id_bytes: [u8; 32] = {
+        use sha2::Digest;
+        sha2::Sha256::digest(serialized.as_bytes()).into()
+    };
+    let wallet_sk = k256::schnorr::SigningKey::from_bytes(&[9u8; 32]).unwrap();
+    let sig = wallet_sk.sign_raw(&id_bytes, &[0u8; 32]).unwrap();
     let frame = serde_json::json!([
         "EVENT", "sub",
-        { "id": "err-1", "pubkey": wallet_pub, "created_at": 1001, "kind": 23195,
-          "tags": [["p", client_pub]], "content": content, "sig": "00" }
+        { "id": hex::encode(id_bytes), "pubkey": wallet_pub, "created_at": 1001, "kind": 23195,
+          "tags": [["p", client_pub]], "content": content, "sig": hex::encode(sig.to_bytes()) }
     ])
     .to_string();
     let mut seen = HashSet::new();
@@ -266,7 +292,7 @@ fn attack_error_envelope_is_typed_not_ambiguous() {
         }
         other => panic!("error envelope must be OURS: {other:?}"),
     }
-    let _ = nip44_decrypt; // silence unused when feature-off
+    // decrypt not needed in default tests (covered in nwc_crypto unit tests)
 }
 
 #[test]
