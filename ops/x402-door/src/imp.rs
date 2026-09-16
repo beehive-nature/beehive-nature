@@ -13,8 +13,8 @@
 //! this module only translates at the door's JSON seam and maps ambiguous
 //! transport outcomes to the door's Unknown law.
 
-use crate::RunConfig;
 use std::sync::Arc;
+use x402_door::config::RunConfig;
 use x402_door::journal::Journal;
 use x402_door::orchestrator::{Door, DoorConfig, FacilitatorSettle, SettlementFacilitator};
 use x402_door::wire;
@@ -25,8 +25,11 @@ pub async fn run() -> Result<(), Box<dyn std::error::Error>> {
         .unwrap_or_else(|| "ops/x402-door/door.config.json".to_string());
     let raw = std::fs::read_to_string(&cfg_path)?;
     let rc: RunConfig = serde_json::from_str(&raw)?;
+    rc.validate().map_err(|e| format!("door config: {e}"))?;
 
-    let journal = Arc::new(Journal::open(
+    // D-5: the binary opens the journal EXCLUSIVELY — a second live door
+    // instance on this root refuses by name instead of split-braining.
+    let journal = Arc::new(Journal::open_exclusive(
         std::path::PathBuf::from(&rc.journal_root).as_path(),
         rc.daily_gas_cap_wei,
     )?);
@@ -39,7 +42,24 @@ pub async fn run() -> Result<(), Box<dyn std::error::Error>> {
             reserved_gas_wei: rc.reserved_gas_wei,
             ops_float_available_wei: rc.ops_float_available_wei,
         },
+        // D-3: verify-time float stays the configured figure until a live
+        // wallet reader is wired in the testnet slice; the settle-time
+        // check reads it dynamically through the seam either way.
+        Arc::new(x402_door::orchestrator::StaticFloat(
+            rc.ops_float_available_wei,
+        )),
     ));
+
+    // Founder order: crash-while-Settling recovery — park stranded
+    // executions to Unknown BEFORE serving, so no restart can leave
+    // permanently stranded authority behind the Settling invariant.
+    let stranded = door.journal.recover_stranded_settling()?;
+    if !stranded.is_empty() {
+        eprintln!(
+            "x402-door restart: {} stranded Settling reservation(s) parked to Unknown for the human gate",
+            stranded.len()
+        );
+    }
 
     let app = wire::router(wire::DoorState { door });
     let listener = tokio::net::TcpListener::bind(&rc.bind).await?;

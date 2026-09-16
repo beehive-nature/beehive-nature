@@ -11,9 +11,10 @@
 
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::{Arc, Barrier, Mutex};
+use x402_door::journal::ReleaseVerdict;
 use x402_door::journal::{HumanGate, Journal, ReservationState, SettleEvidence};
 use x402_door::orchestrator::{
-    Door, DoorConfig, FacilitatorSettle, SettlementFacilitator, VerifyOutcome,
+    Door, DoorConfig, FacilitatorSettle, SettlementFacilitator, StaticFloat, VerifyOutcome,
 };
 use x402_door::wire::{extract_leg, leg_tag};
 
@@ -106,11 +107,12 @@ fn adv_duplicate_concurrent_settle_executes_exactly_once() {
     let make_door = || {
         Door::new(
             journal.clone(),
-            faci.clone(),
+            Arc::new(faci.clone()),
             DoorConfig {
                 reserved_gas_wei: 100_000,
                 ops_float_available_wei: 10_000_000,
             },
+            Arc::new(StaticFloat(1_000_000_000_000)),
         )
     };
     let req = request("eip155:8453", "exact", "0xR1", "9", far_future());
@@ -207,6 +209,7 @@ fn adv_av7_two_route_acceptance_no_double_debit() {
             reserved_gas_wei: 1_000,
             ops_float_available_wei: 1_000_000,
         },
+        Arc::new(StaticFloat(1_000_000_000_000)),
     );
     let db = Door::new(
         journal.clone(),
@@ -215,6 +218,7 @@ fn adv_av7_two_route_acceptance_no_double_debit() {
             reserved_gas_wei: 1_000,
             ops_float_available_wei: 1_000_000,
         },
+        Arc::new(StaticFloat(1_000_000_000_000)),
     );
     let req = request("eip155:8453", "upto", "0xR2", "100", far_future());
     let leg = extract_leg(&req).unwrap();
@@ -265,6 +269,7 @@ fn adv_av8_unknown_never_auto_retries_and_gate_is_bounded() {
             reserved_gas_wei: 1_000,
             ops_float_available_wei: 1_000_000,
         },
+        Arc::new(StaticFloat(1_000_000_000_000)),
     );
     let req = request("eip155:8453", "exact", "0xR4", "4", far_future());
     let leg = extract_leg(&req).unwrap();
@@ -315,6 +320,7 @@ fn adv_replay_with_mutated_amount_is_refused() {
             reserved_gas_wei: 1_000,
             ops_float_available_wei: 1_000_000,
         },
+        Arc::new(StaticFloat(1_000_000_000_000)),
     );
     let req = request("eip155:8453", "exact", "0xR6", "6", far_future());
     let leg = extract_leg(&req).unwrap();
@@ -361,6 +367,7 @@ fn adv_retained_failures_exhaust_the_budget_by_number() {
             reserved_gas_wei: gas,
             ops_float_available_wei: 1_000_000,
         },
+        Arc::new(StaticFloat(1_000_000_000_000)),
     );
     for i in 0..5u32 {
         let req = request(
@@ -489,11 +496,12 @@ fn adv_gas_cap_concurrent_reserve_race_admits_exactly_cap() {
     for i in 0..6u32 {
         let d = Door::new(
             journal.clone(),
-            faci.clone(),
+            Arc::new(faci.clone()),
             DoorConfig {
                 reserved_gas_wei: 1_000,
                 ops_float_available_wei: 1_000_000,
             },
+            Arc::new(StaticFloat(1_000_000_000_000)),
         );
         let req = request(
             "eip155:8453",
@@ -535,6 +543,7 @@ fn adv_expire_release_then_rereserve_refused() {
             reserved_gas_wei: 1_000,
             ops_float_available_wei: 1_000_000,
         },
+        Arc::new(StaticFloat(1_000_000_000_000)),
     );
     let past = x402_door::journal::now_unix() - 10;
     let req = request("eip155:8453", "exact", "0xE1", "1", far_future());
@@ -545,7 +554,10 @@ fn adv_expire_release_then_rereserve_refused() {
     rec.leg.valid_before_unix = past;
     d.journal.write_for_test(&rec).unwrap();
     let expired_leg = extract_leg(&request("eip155:8453", "exact", "0xE1", "1", past)).unwrap();
-    assert!(d.journal.expire_released(&expired_leg, true).is_ok());
+    assert!(d
+        .journal
+        .expire_released(&expired_leg, ReleaseVerdict::UnspentOnChain)
+        .is_ok());
     // Re-reserving the same (expired) nonce is refused — terminal state.
     let again = request("eip155:8453", "exact", "0xE1", "1", far_future());
     let again_leg = extract_leg(&again).unwrap();

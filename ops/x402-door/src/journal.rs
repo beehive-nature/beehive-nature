@@ -100,6 +100,26 @@ pub struct Journal {
     root: PathBuf,
     /// Daily gas cap in wei (operations budget — the ops wallet class).
     pub daily_gas_cap_wei: u64,
+    /// When opened exclusively (D-5), the instance holds the OS lock for
+    /// its lifetime — kernel-released on process death, so a crashed
+    /// opener can never strand the root.
+    _held: Option<File>,
+}
+
+/// The typed on-chain verdict for an expiry release (D-4): a bare bool
+/// invited the lying-RPC contradiction attack — the journal now demands
+/// `RpcUnavailable` as an explicit HOLD (refused loudly, state kept) and
+/// refuses release outright when it already HOLDS settlement evidence.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum ReleaseVerdict {
+    /// The authorization nonce is unspent on-chain (evidence-checked).
+    UnspentOnChain,
+    /// The authorization nonce IS spent — the leg settled elsewhere; the
+    /// reservation goes to Unknown for the human gate, never released.
+    SpentOnChain,
+    /// The RPC could not answer — a typed HOLD: release refused, state
+    /// untouched, retryable. Never silently treated as unspent.
+    RpcUnavailable,
 }
 
 /// Settlement evidence — the only thing that reconciles exposure DOWN.
@@ -114,10 +134,17 @@ pub struct SettleEvidence {
 #[derive(Debug, Clone, Copy)]
 pub struct HumanGate {
     _private: (),
+    /// D-7: the tracked call site — every gate use is attributable.
+    #[allow(dead_code)]
+    call_site: Option<&'static std::panic::Location<'static>>,
 }
 impl HumanGate {
+    #[track_caller]
     pub fn explicit_human_approval() -> Self {
-        HumanGate { _private: () }
+        HumanGate {
+            _private: (),
+            call_site: Some(std::panic::Location::caller()),
+        }
     }
 }
 
@@ -151,9 +178,43 @@ fn sanitize(chain: &str) -> String {
 impl Journal {
     pub fn open(root: &Path, daily_gas_cap_wei: u64) -> JResult<Self> {
         fs::create_dir_all(root)?;
+        // D-5 no-lock detection: if the lock file cannot even be opened,
+        // refuse — an unlocked journal is not a journal.
+        let probe = OpenOptions::new()
+            .create(true)
+            .read(true)
+            .write(true)
+            .truncate(false)
+            .open(root.join(".lock"))?;
+        drop(probe);
         Ok(Journal {
             root: root.to_path_buf(),
             daily_gas_cap_wei,
+            _held: None,
+        })
+    }
+
+    /// D-5 concurrent journal start: acquire the EXCLUSIVE OS lock and
+    /// hold it for this instance's lifetime (try-lock — a second live
+    /// opener is REFUSED by name, never blocks, never split-brains). The
+    /// kernel releases the hold when the process dies — a crashed opener
+    /// cannot strand the root.
+    pub fn open_exclusive(root: &Path, daily_gas_cap_wei: u64) -> JResult<Self> {
+        fs::create_dir_all(root)?;
+        let lock = OpenOptions::new()
+            .create(true)
+            .read(true)
+            .write(true)
+            .truncate(false)
+            .open(root.join(".lock"))?;
+        lock.try_lock().map_err(|_| JournalError::Law(format!(
+            "journal root {} is already held by a live opener — refusing concurrent exclusive start (D-5)",
+            root.display()
+        )))?;
+        Ok(Journal {
+            root: root.to_path_buf(),
+            daily_gas_cap_wei,
+            _held: Some(lock),
         })
     }
 
@@ -487,33 +548,52 @@ impl Journal {
         self.write(&rec)
     }
 
-    /// Expiry release — ONLY with evidence of non-settlement (the caller
-    /// supplies `chain_says_unspent: bool` from an on-chain check).
-    pub fn expire_released(&self, leg: &LegKey, chain_says_unspent: bool) -> JResult<()> {
+    /// Expiry release — ONLY with a typed on-chain verdict (D-4).
+    /// CONTRADICTION LAW: if this journal already HOLDS settlement evidence
+    /// for the leg, any release claim is refused — a settled leg's
+    /// authority can never reopen. RPC-unavailable is a HOLD, not a release
+    /// and not a refusal-of-record.
+    pub fn expire_released(&self, leg: &LegKey, verdict: ReleaseVerdict) -> JResult<()> {
         let _guard = self.acquire_exclusive()?;
-        let rec = self
+        let mut rec = self
             .get(leg)?
             .ok_or_else(|| JournalError::Law("no reservation (fail-closed)".into()))?;
-        if !chain_says_unspent {
+        // CONTRADICTION LAW FIRST: a leg this journal knows is Settled (or
+        // otherwise terminal) never moves on ANY verdict — the lying-RPC
+        // attack is refused before any park/release can run.
+        if !matches!(
+            rec.state,
+            ReservationState::Reserved { .. } | ReservationState::FailedKeep { .. }
+        ) {
             return Err(JournalError::Law(
-                "expiry release refused: on-chain check did not evidence non-settlement — human gate"
+                "expiry release refused: leg state is terminal (settled/released) — a settled leg's authority never reopens (D-4 contradiction law)"
                     .into(),
             ));
+        }
+        match verdict {
+            ReleaseVerdict::RpcUnavailable => {
+                return Err(JournalError::Law(
+                    "expiry release HELD: RPC unavailable — never treated as unspent, state untouched, retryable (D-4)"
+                        .into(),
+                ));
+            }
+            ReleaseVerdict::SpentOnChain => {
+                // The leg settled on-chain: park Unknown for the human gate —
+                // releasing would reopen a settled leg's authority.
+                rec.state = ReservationState::Unknown {
+                    since_unix: now_unix(),
+                    note: "expiry check found the nonce SPENT on-chain — reconciling via human gate (D-4)".into(),
+                };
+                rec.updated_unix = now_unix();
+                return self.write(&rec);
+            }
+            ReleaseVerdict::UnspentOnChain => {}
         }
         if now_unix() <= leg.valid_before_unix {
             return Err(JournalError::Law(
                 "window not yet expired — release refused".into(),
             ));
         }
-        if !matches!(
-            rec.state,
-            ReservationState::Reserved { .. } | ReservationState::FailedKeep { .. }
-        ) {
-            return Err(JournalError::Law(
-                "state is terminal or unknown — expiry release not applicable".into(),
-            ));
-        }
-        let mut rec = rec;
         rec.state = ReservationState::ExpiredReleased {
             checked_unix: now_unix(),
         };
@@ -558,7 +638,67 @@ impl Journal {
             settled_unix: now_unix(),
         };
         rec.updated_unix = now_unix();
-        self.write(&rec)
+        self.write(&rec)?;
+        // D-7 audit: every human-gate resolution is attributable to its
+        // call site, appended under the exclusive lock.
+        let site = _gate
+            .call_site
+            .map(|l| format!("{}:{}", l.file(), l.line()))
+            .unwrap_or_else(|| "unknown-call-site".to_string());
+        let mut f = OpenOptions::new()
+            .create(true)
+            .append(true)
+            .open(self.root.join("human-gates.log"))?;
+        writeln!(
+            f,
+            "{}\t{}\t{}\t{}",
+            now_unix(),
+            site,
+            rec.leg.chain,
+            rec.leg.auth_nonce
+        )?;
+        Ok(())
+    }
+
+    /// Restart recovery (founder order, preserves the Settling invariant):
+    /// any record found in `Settling` — the process died mid-execution, the
+    /// outcome is uncertain on-chain — parks to `Unknown` with a named note,
+    /// NEVER auto-retried. Returns the legs reconciled. Idempotent.
+    pub fn recover_stranded_settling(&self) -> JResult<Vec<LegKey>> {
+        let _guard = self.acquire_exclusive()?;
+        let mut reconciled = Vec::new();
+        for entry in fs::read_dir(&self.root)? {
+            let entry = entry?;
+            if !entry.file_type()?.is_dir() {
+                continue;
+            }
+            for f in fs::read_dir(entry.path())? {
+                let f = f?;
+                let name = f.file_name().to_string_lossy().to_string();
+                if !name.starts_with("res-") || !name.ends_with(".json") {
+                    continue;
+                }
+                let raw = fs::read_to_string(f.path()).map_err(|e| JournalError::Torn {
+                    path: f.path(),
+                    reason: e.to_string(),
+                })?;
+                let mut rec: Reservation =
+                    serde_json::from_str(&raw).map_err(|e| JournalError::Torn {
+                        path: f.path(),
+                        reason: e.to_string(),
+                    })?;
+                if matches!(rec.state, ReservationState::Settling { .. }) {
+                    rec.state = ReservationState::Unknown {
+                        since_unix: now_unix(),
+                        note: "found Settling at restart — execution outcome uncertain, human gate required".into(),
+                    };
+                    rec.updated_unix = now_unix();
+                    self.write(&rec)?;
+                    reconciled.push(rec.leg.clone());
+                }
+            }
+        }
+        Ok(reconciled)
     }
 
     // Test-only helpers (watchpay's test_support pattern; #[doc(hidden)]).
@@ -566,6 +706,11 @@ impl Journal {
     pub fn write_for_test(&self, rec: &Reservation) -> JResult<()> {
         let _guard = self.acquire_exclusive()?;
         self.write(rec)
+    }
+
+    #[doc(hidden)]
+    pub fn root_for_test(&self) -> &Path {
+        &self.root
     }
 
     #[doc(hidden)]

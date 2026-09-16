@@ -22,6 +22,16 @@ use std::sync::Arc;
 /// `x402_facilitator_local::FacilitatorLocal` (see main.rs) and the test
 /// double (tests/acceptance.rs). `request` is the verbatim x402 verify/
 /// settle request JSON.
+/// Shared facilitators (the door holds one behind an Arc; tests swap).
+impl<T: SettlementFacilitator + ?Sized> SettlementFacilitator for std::sync::Arc<T> {
+    fn verify(&self, request: &serde_json::Value) -> Result<(), String> {
+        (**self).verify(request)
+    }
+    fn settle(&self, request: &serde_json::Value) -> FacilitatorSettle {
+        (**self).settle(request)
+    }
+}
+
 pub trait SettlementFacilitator: Send + Sync {
     fn verify(&self, request: &serde_json::Value) -> Result<(), String>;
     fn settle(&self, request: &serde_json::Value) -> FacilitatorSettle;
@@ -58,6 +68,21 @@ pub enum DoorError {
     Law(String),
 }
 
+/// D-3: the ops wallet float is DYNAMIC — drained wallets must refuse at
+/// SETTLE time, not only verify time. The door reads the live figure
+/// through this seam (tests inject; the live adapter reads the wallet).
+pub trait FloatSource: Send + Sync {
+    fn available_wei(&self) -> u64;
+}
+
+/// The static fallback: the configured float figure.
+pub struct StaticFloat(pub u64);
+impl FloatSource for StaticFloat {
+    fn available_wei(&self) -> u64 {
+        self.0
+    }
+}
+
 /// Gas estimate for a settlement class (wei). Kept as a supplied constant
 /// per scheme — the door does not query gas prices (that is the live
 /// adapter's concern; here the budget law needs a bound, not a quote).
@@ -71,6 +96,7 @@ pub struct Door<F: SettlementFacilitator> {
     pub journal: Arc<Journal>,
     pub facilitator: Arc<F>,
     pub config: DoorConfig,
+    pub float_source: Arc<dyn FloatSource>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
@@ -85,11 +111,17 @@ pub enum VerifyOutcome {
 }
 
 impl<F: SettlementFacilitator> Door<F> {
-    pub fn new(journal: Arc<Journal>, facilitator: Arc<F>, config: DoorConfig) -> Self {
+    pub fn new(
+        journal: Arc<Journal>,
+        facilitator: Arc<F>,
+        config: DoorConfig,
+        float_source: Arc<dyn FloatSource>,
+    ) -> Self {
         Door {
             journal,
             facilitator,
             config,
+            float_source,
         }
     }
 
@@ -139,6 +171,30 @@ impl<F: SettlementFacilitator> Door<F> {
         leg: &LegKey,
         request: &serde_json::Value,
     ) -> Result<FacilitatorSettle, DoorError> {
+        // D-3 settle-time float drain: check the LIVE float BEFORE the
+        // Settling transition — a shortfall refuses LOUD naming the numbers
+        // and leaves the record byte-identical; float recovery preserves
+        // the same nonce (nothing transitioned, nothing consumed).
+        if let Some(rec) = self.journal.get(leg)? {
+            let required = match rec.state {
+                crate::journal::ReservationState::Reserved { reserved_gas_wei }
+                | crate::journal::ReservationState::FailedKeep {
+                    reserved_gas_wei, ..
+                }
+                | crate::journal::ReservationState::Settling { reserved_gas_wei } => {
+                    reserved_gas_wei
+                }
+                _ => 0,
+            };
+            if required > 0 {
+                let available = self.float_source.available_wei();
+                if available < required {
+                    return Err(DoorError::SettleRefused(format!(
+                        "settle-time float shortfall: ops wallet {available} wei cannot fund this settlement's reserved gas {required} wei — REFUSED LOUD (D-3); state untouched, nonce preserved"
+                    )));
+                }
+            }
+        }
         match self.journal.begin_settle(leg)? {
             // Idempotent: never re-execute a settled nonce.
             Some(ev) => Ok(FacilitatorSettle::Success {
@@ -192,10 +248,14 @@ impl<F: SettlementFacilitator> Door<F> {
         }
     }
 
-    /// Expiry release with an on-chain non-settlement check.
-    pub fn expire(&self, leg: &LegKey, chain_says_unspent: bool) -> Result<(), DoorError> {
+    /// Expiry release with a typed on-chain verdict (D-4).
+    pub fn expire(
+        &self,
+        leg: &LegKey,
+        verdict: crate::journal::ReleaseVerdict,
+    ) -> Result<(), DoorError> {
         self.journal
-            .expire_released(leg, chain_says_unspent)
+            .expire_released(leg, verdict)
             .map_err(|e| DoorError::Law(e.to_string()))
     }
 
