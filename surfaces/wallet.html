@@ -278,7 +278,8 @@ var WALLET_PROFILE = {
         <div id="dm-body" style="margin-top:8px"></div>
         <div class="law" id="dm-stat" style="margin-top:6px">— registry not loaded —</div>
       </div>
-      <div class="law" style="margin-top:4px">The passkey must live in a <b>PRF-capable authenticator</b>:
+      <details class="tnote" data-reg-disclose><summary data-i18n="wl.d.passkey">Which devices and keys can make your bzDiD — the full compatibility check</summary>
+  <div class="law" style="margin-top:4px">The passkey must live in a <b>PRF-capable authenticator</b>:
       platform ones (Windows Hello, the Chrome profile, Google Password Manager, iCloud Keychain) work;
       most third-party managers (Bitwarden, 1Password &amp; friends) don't yet. <b>Create never takes a
       manager's word for it:</b> after the "confirmed" the wallet immediately re-touches the exact
@@ -297,6 +298,7 @@ var WALLET_PROFILE = {
       key still bridges you in: paste it once below.
       <b>Already hold a bzDiD elsewhere? Don't create a second — import it with your recovery phrase
       instead (a new passkey = a new soul).</b></div>
+  </details>
       <div class="row">
         <input id="kc-rec" class="small" type="password" placeholder="…or paste your 24-word recovery phrase / bdidrec code" spellcheck="false" autocomplete="off">
         <button id="kc-recgo">recover</button>
@@ -324,6 +326,7 @@ var WALLET_PROFILE = {
 
 <section id="vault-sec" style="border-color:var(--cyan)">
   <h2>🔐 THE VAULT — <span data-i18n="wl.h.vault">one keypass, every secret</span></h2>
+  <details class="tnote" data-reg-disclose><summary data-i18n="wl.d.import">Bringing keys you already hold — formats, and how they get sealed</summary>
   <div class="law">The keys you already hold — <b>seed phrases</b> from any wallet
   (12 · 15 · 18 · 21 · 24 words) and <b>Vaulta ACTIVE private keys</b>
   (5K… · L… · K… · PVT_K1_…) — sealed under a single <b>keypass</b> so you never handle
@@ -335,6 +338,7 @@ var WALLET_PROFILE = {
   plaintext juggling; it does not turn a browser key into a cold one, and it cannot protect you
   from a page that has been tampered with. For balances you would not accept losing, the answer
   is still a signing device.</div>
+  </details>
 
   <!-- ── state A: no vault on this browser ─────────────────────────────── -->
   <div id="vlt-new" style="display:none">
@@ -809,6 +813,7 @@ var WALLET_PROFILE = {
 <!-- ══ RECEIPTS — the public spend record, recomputed here (SPEC-SPEND-RECEIPT-1) ══ -->
 <section id="receipts-sec" style="border-color:var(--gold)">
   <h2>🧾 THE RECEIPTS — <span data-i18n="wl.h.receipts">every bill recomputed here</span></h2>
+  <details class="tnote" data-reg-disclose><summary data-i18n="wl.d.receipts">How this panel checks every bill — recomputed here, never trusted</summary>
   <p class="law">the voucher panel above reads <b>your</b> balance live from the estate oracle; this panel
   reads the estate's <b>public</b> spend-receipt record (SPEC-SPEND-RECEIPT-1, the same shape the b-meter
   writes) and recomputes every bill in-page — <b>price × burned = owed</b>, summed from the line items,
@@ -818,6 +823,7 @@ var WALLET_PROFILE = {
   <b>no keys</b>: content hash, exact arithmetic and the forward-only chain are checked from the public
   record alone. private receipts never appear here — visibility is storage law (§3a): only rows marked
   public live in a public store. paste any receipt and the same auditor checks yours.</p>
+  </details>
   <div id="receiptsBody" style="margin-top:12px"></div>
 </section>
 
@@ -841,8 +847,14 @@ var WALLET_PROFILE = {
     #fund-sec .fund-nojs{border:1px dashed var(--amber);color:var(--amber);border-radius:8px;
      padding:10px 12px;font-size:11px;margin-top:10px;line-height:1.8}
     @media (prefers-reduced-motion: reduce){#fund-sec .fund-coin{animation:none}}
-  </style>
+  
+/* comprehension touch floor (2026-09-16): the estate’s own 44px canon on phones */
+@media(max-width:520px){section :is(button,select,input){min-height:44px !important}
+  #cap-set,#cap-clear,#vc-go{min-height:44px}
+  #vcomb .cell{min-height:44px}}
+</style>
   <h2>💳 FUND — <span data-i18n="wl.h.fund">buy USDC, land it on an address you hold</span></h2>
+  <details class="tnote" data-reg-disclose><summary data-i18n="wl.d.fiat">How the card checkout works — who holds what at each step</summary>
   <div class="law">The one lane this wallet cannot forge itself: licensed fiat. The buy runs on
   <b>Meld's hosted checkout</b> — it opens in its own tab; this page only builds the link.
   <b>No server of ours:</b> no BNR endpoint sits in this lane; this wallet signs nothing and
@@ -855,6 +867,7 @@ var WALLET_PROFILE = {
   operator profiles who funds what. Honest limit: whichever provider you land on <b>can see
   the lookup</b> — your IP plus the name you asked about. <b>Pasting a raw 0x address skips
   resolution entirely</b> — if you'd rather not be seen asking, that is a real choice.</div>
+  </details>
   <noscript><div class="fund-nojs">💳 funding needs JavaScript — this panel builds the checkout
   link in your browser, so with scripting off it stays right here, asleep. Everything else on
   this page renders fine.</div></noscript>
@@ -1122,6 +1135,7 @@ var WALLET_PROFILE = {
 <!-- ══ PEER FUNNEL — the first mile in: fiat → USDC on Peer's escrow, estate = bare to ══ -->
 <section id="peer-sec" style="border-color:#2c4a3a">
   <h2>🏧 FIAT IN — <span data-i18n="wl.h.fiat">the Peer funnel</span> (SPEC-PEER-FUNNEL-1)</h2>
+  <details class="tnote" data-reg-disclose><summary data-i18n="wl.d.funnel">The fiat funnel’s role — the estate sells, it never operates</summary>
   <p class="law">the estate is a <b>seller, not an operator</b>: its Base address below is a bare
   <b>to</b> on Peer's live escrow (EscrowV2 + OrchestratorV3 on Base) — it signs nothing, grants
   no allowance, runs no relayer. a customer's fiat (Venmo &amp; co.) settles as USDC straight
@@ -1132,6 +1146,7 @@ var WALLET_PROFILE = {
   was attached, the split still happens as ONE estate-side exact-multi instruction (seller +
   tithe in a single payment — the fallback, SPEC §receive). settlement finality is one vendor
   signature until the estate's own witness set exists — priced as such, never hidden.</p>
+  </details>
   <div class="row" style="align-items:center;flex-wrap:wrap;gap:8px">
     <span class="law">receive address (bare <b>to</b>):</span>
     <code style="word-break:break-all">0x89881F83A8C9CE06E34cbDD50A612909a784d7C6</code>
@@ -1259,6 +1274,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
 <!-- ══ ARWEAVE — publish & anchor (first-party signer · vault custody) ══ -->
 <section id="arw-sec" style="border-color:#4a3a1d">
   <h2>📡 ARWEAVE — <span data-i18n="wl.h.arweave">publish &amp; anchor, no middleman</span></h2>
+  <details class="tnote" data-reg-disclose><summary data-i18n="wl.d.arweave">The Arweave lane — built and signed inside this page</summary>
   <div class="law">Another adapter on the wallet shell — balance, receive address, send, and
   one new capability: <b>PUBLISH</b>. The transaction is built and signed <b>in this page</b>
   with WebCrypto (format-2 data tx, RSA-PSS-SHA256, proven byte-equivalent to arweave-js),
@@ -1267,6 +1283,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   the free tier to keep the rail first-party. The JWK lives in <b>the vault</b> — sealed
   under your keypass, structurally verified before sealing, revealed only into the signing
   call. Reads are keyless; the gateway sees what any Arweave read sees.</div>
+  </details>
   <noscript><div class="fund-nojs">📡 publishing needs JavaScript — the tx is built and signed in
   your browser; with scripting off this panel stays asleep.</div></noscript>
   <div id="arw-js" hidden>
@@ -1404,6 +1421,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
 
 <section>
   <h2>✍ COMPOSER — <span data-i18n="wl.h.composer">the BNR contract surface, no Unicove</span></h2>
+  <details class="tnote" data-reg-disclose><summary data-i18n="wl.d.composer">What the composer shows you before anything is signed</summary>
   <div class="law" id="sign-law">Give it contract + action and it fetches the live ABI, renders
   one field per argument, and <b>shows you exactly what you will sign</b> — action, authorization,
   parsed args, signer, endpoint — before anything broadcasts. ABI-driven: the six bnames actions
@@ -1411,6 +1429,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   the Jungle4 lane rehearses with a test key you paste (TESTNET-ONLY, memory-only). The Unicove
   dependency is dead — this is ours, on the adapter contract: the worker builds, the vault signs,
   the outbox persists, and nothing is called "sent" until the rail is read back.</div>
+  </details>
   <div class="ladder" id="receipt-ladder" aria-label="the receipt ladder — the order is law">
     <div class="lcap" data-i18n="wl.ld.cap">the receipt ladder — every state is a first-class visual · the order is law</div>
     <div class="lrow"><div class="ltrack"><span class="ldot">1</span><span class="ltail"></span></div>

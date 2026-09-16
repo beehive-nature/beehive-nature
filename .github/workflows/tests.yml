@@ -341,6 +341,14 @@ jobs:
         if: always()
         working-directory: e2e
         run: node --test orb-seat.test.mjs
+      # The comprehension law (founder order 2026-09-16): dense technical
+      # walls collapse to keyed summaries for bee/raver, stand open for
+      # cypherpunk, a reader’s own tap survives register switches, the full
+      # text is never removed, ru renders corpus-exact, 44px touch floor.
+      - name: Comprehension — disclosure + touch regression (rendered)
+        if: always()
+        working-directory: e2e
+        run: node --test comprehension.test.mjs
       # fleet-pixels: every chart-bearing hosted surface must DRAW (pixels
       # read back from the canvas, not merely load). fleet-bus: the
       # localStorage data bus asserted both directions (same origin reads;
