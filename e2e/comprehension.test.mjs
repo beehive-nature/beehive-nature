@@ -172,6 +172,51 @@ test('stack organ board: walls become disclosures; bee-only walls never show emp
   await cp.ctx.close();
 });
 
+test('wave-3 classification: genuine walls fold; narrative and operational prose stay visible for bee', async () => {
+  // museum: the two technical notes fold; thesis, exhibit ledes, Autoglyph
+  // interpretation and corrections culture STAY in the reading flow
+  const mu = await at('blight/museum.html', 'bee');
+  const muSt = await mu.p.evaluate(() => {
+    const ds = [...document.querySelectorAll('details[data-reg-disclose]')];
+    const vis = s => { const el = [...document.querySelectorAll('body *')].find(n => n.children.length === 0 && (n.textContent || '').trim().startsWith(s)); if (!el) return false; const r = el.getBoundingClientRect(); return r.width > 0 && r.height > 0; };
+    return { open: ds.filter(d => d.open).length,
+      thesisVisible: [...document.querySelectorAll('.note.panel,.lede')].some(n => (n.textContent || '').includes('more on-chain than most people think') && n.getBoundingClientRect().height > 0),
+      autoglyphVisible: [...document.querySelectorAll('.lede')].some(n => (n.textContent || '').includes("There isn't one") && n.getBoundingClientRect().height > 0),
+      bitcoinLedeVisible: [...document.querySelectorAll('.lede')].some(n => (n.textContent || '').includes('Counterparty, 2014') && n.getBoundingClientRect().height > 0) };
+  });
+  assert.equal(muSt.open, 0, 'museum disclosures collapsed for bee');
+  assert.ok(muSt.thesisVisible, 'the museum thesis stays visible');
+  assert.ok(muSt.autoglyphVisible, 'the Autoglyph interpretation stays visible');
+  assert.ok(muSt.bitcoinLedeVisible, 'the Bitcoin exhibit lede stays visible');
+  assert.equal(mu.errs.length, 0, mu.errs.join(' | '));
+  await mu.ctx.close();
+  // midivault: provenance folds; the SIMULATED banner and share-mode flow STAY
+  const mv = await at('blight/midivault.html', 'bee');
+  const mvSt = await mv.p.evaluate(() => {
+    const b = document.getElementById('bmsg');
+    return { open: [...document.querySelectorAll('details[data-reg-disclose]')].filter(d => d.open).length,
+      simVisible: b && b.getBoundingClientRect().height > 0 && /SIMULATED/.test(b.textContent),
+      modesVisible: [...document.querySelectorAll('p.law')].some(n => (n.textContent || '').includes('share it three ways') && n.getBoundingClientRect().height > 0) };
+  });
+  assert.equal(mvSt.open, 0, 'midivault disclosure collapsed for bee');
+  assert.ok(mvSt.simVisible, 'the SIMULATED operational banner stays visible');
+  assert.ok(mvSt.modesVisible, 'the share-mode flow explanation stays visible');
+  assert.equal(mv.errs.length, 0, mv.errs.join(' | '));
+  await mv.ctx.close();
+  // c1-aid: the recap folds; the lede and the two-numbers lesson STAY
+  const c1 = await at('blight/c1-aid.html', 'bee');
+  const c1St = await c1.p.evaluate(() => {
+    return { open: [...document.querySelectorAll('details[data-reg-disclose]')].filter(d => d.open).length,
+      ledeVisible: [...document.querySelectorAll('.lede')].some(n => (n.textContent || '').includes("founder's bar") && n.getBoundingClientRect().height > 0),
+      lessonVisible: [...document.querySelectorAll('.note')].some(n => (n.textContent || '').includes('Two numbers, both true') && n.getBoundingClientRect().height > 0) };
+  });
+  assert.equal(c1St.open, 0, 'c1-aid disclosure collapsed for bee');
+  assert.ok(c1St.ledeVisible, 'the c1-aid lede stays visible');
+  assert.ok(c1St.lessonVisible, 'the two-numbers lesson stays visible');
+  assert.equal(c1.errs.length, 0, c1.errs.join(' | '));
+  await c1.ctx.close();
+});
+
 test('blight cluster: midi + workbench + b4b disclosures collapse for bee', async () => {
   for (const page of ['blight/midi.html', 'blight/workbench.html', 'b4b.html']) {
     const { ctx, p, errs } = await at(page, 'bee');

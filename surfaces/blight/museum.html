@@ -190,7 +190,8 @@
   <tr><td>FROGGI (Base)</td><td><code>0x88A7…22FE</code></td><td id="szR">reading…</td></tr>
   <tr><td><b>v2 − v1</b></td><td></td><td id="szDiff" class="warn">—</td></tr>
 </table></div>
-<div class="note" style="margin-top:8px" id="pw1408note">
+<details class="tnote" data-reg-disclose><summary data-i18n="mu.d.v2">What the 1,408 extra bytes bought — measured from the verified ABIs</summary>
+  <div class="note" style="margin-top:8px" id="pw1408note">
   The v2 deployment is larger by <b id="pw1408">—</b> bytes, and the verified
   ABIs say precisely what that bought: <b>one</b> new external function,
   <code>getHolderIndex</code> — a holder-enumeration view (37 functions → 38).
@@ -198,6 +199,7 @@
   <code>eth_getCode</code> and Sourcify-v2 verified ABIs; if the table above
   says "reading…" the chain is unreachable and <b>no number is invented</b>.
 </div>
+  </details>
 </div>
 
 <h2><span data-i18n="h.080">Exhibit 7 · The process wall — a revert, performed live</span></h2>
@@ -250,7 +252,8 @@
       the same <code>(lvl,file)</code> wipes the first; there is no append-mode
       setter on any of the seven reference contracts</td></tr>
 </table></div>
-<div class="note" style="margin-top:8px">
+<details class="tnote" data-reg-disclose><summary data-i18n="mu.d.gate">The rehearsal gate — why upload order is checked on deploy day</summary>
+  <div class="note" style="margin-top:8px">
   Hence the rehearsal gate: <b>upload order is a deploy-day check</b>
   (<code>evmcheck.py</code> exists; the testnet rehearsal does not, and the
   exSat testnet lane is frozen). And still open on the wall, founder testimony
@@ -259,6 +262,7 @@
   (<code>SPEC-ERC20I-MECHANICS-1</code> §10). The museum shows the question,
   not a settled answer.
 </div>
+  </details>
 </div>
 
 <h2><span data-i18n="h.082">Exhibit 9 · Bitcoin's answer — a whole-block inscription, and the asymmetry</span></h2>
