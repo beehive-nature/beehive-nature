@@ -388,6 +388,109 @@ def read_transfers(account, num=100):
                      "amount": q[0] if q else "0", "symbol": q[1] if len(q) > 1 else ""})
     return rows
 
+# ── AV-5: the poller's credit decision, pure and REORG-AWARE ────────────────
+# The :423 law ("action read failed — nothing written") covered read failures;
+# the reorg leg did not exist (receipted live by test_av5_reorg_drill.py PART
+# A: a consumed-seq row MUTATED behind the watermark was skipped with zero
+# evidence). The law here: a reorged round flags LOUDLY and credits NOTHING —
+# watermark and head-map park (the whole round is suspect), the flag carries
+# the evidence, and clean rounds behave exactly as before. The verdict
+# vocabulary is the reversibility crate's (crates/reversibility): NoQuorum /
+# Reorg{depth} ⇒ flag-and-park, never credit.
+
+HEAD_WINDOW = 64   # remembered seq→trx pairs (the reorg detection window)
+
+def _remember_head(st, rows):
+    hm = st.setdefault("head_map", {})
+    for r in rows:
+        if r.get("seq") is not None:
+            hm[str(r["seq"])] = r.get("trx_id")
+    if len(hm) > HEAD_WINDOW:
+        for k in sorted(hm, key=int)[:-HEAD_WINDOW]:
+            del hm[k]
+
+def _detect_reorg(rows, st):
+    """Fork evidence in the poller's view, or None. Two shapes:
+    (a) seq→trx SWAP — a remembered seq now carries a different trx_id
+        (history rewrote behind the watermark);
+    (b) head ROLLBACK — the best seq receded below the watermark."""
+    hm = st.get("head_map", {})
+    for r in rows:
+        k = str(r["seq"]) if r.get("seq") is not None else None
+        if k is not None and k in hm and hm[k] != r.get("trx_id"):
+            return {"shape": "seq-trx-swap", "seq": r["seq"],
+                    "remembered_trx": hm[k], "seen_trx": r.get("trx_id"),
+                    "amount": r.get("amount"), "from": r.get("from")}
+    seqs = [r["seq"] for r in rows if r.get("seq") is not None]
+    if seqs and st.get("last_seq") is not None and max(seqs) < st["last_seq"]:
+        return {"shape": "head-rollback", "watermark": st["last_seq"],
+                "head": max(seqs)}
+    return None
+
+def process_transfers(es, rows, st, meter_keys, flag_writer=None,
+                      detect_reorgs=True):
+    """AV-5: the chainpoll credit loop as a PURE seam (no I/O — flags leave
+    through `flag_writer`, unbound rows come back to the caller to emit).
+    Returns {credited, unbound, flagged, checkpoint, credit_events,
+    unbound_rows, flag?}. Laws: first read checkpoints without crediting
+    (today's law verbatim); a REORGED round (see _detect_reorg) flags with
+    evidence and credits NOTHING — watermark and head-map PARK (fail
+    closed); clean rounds credit exactly as today. `detect_reorgs=False`
+    is today's crediting poller — the negative-control shape only."""
+    if st.get("last_seq") is None:
+        st["last_seq"] = max((r["seq"] for r in rows if r.get("seq") is not None),
+                             default=None)
+        _remember_head(st, rows)
+        return {"credited": 0, "unbound": 0, "flagged": False,
+                "checkpoint": True, "credit_events": [], "unbound_rows": []}
+    if detect_reorgs:
+        evidence = _detect_reorg(rows, st)
+        if evidence is not None:
+            flag = {"kind": "reorg-flag",
+                    "ts": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+                    "watermark": st["last_seq"], "evidence": evidence}
+            st.setdefault("reorg_flags", []).append(flag)
+            del st["reorg_flags"][:-8]   # bounded: the newest eight
+            if flag_writer is not None:
+                try:
+                    flag_writer(flag)
+                except Exception:
+                    pass   # a flag that cannot be written must never break the poller
+            return {"credited": 0, "unbound": 0, "flagged": True,
+                    "checkpoint": False, "credit_events": [],
+                    "unbound_rows": [], "flag": flag}
+    credit_events, unbound_rows = [], []
+    for r in sorted(rows, key=lambda x: x["seq"] if x.get("seq") is not None else 0):
+        if r.get("seq") is None or r["seq"] <= st["last_seq"]:
+            continue
+        if r["memo"] in meter_keys:
+            credit_events.append(
+                es.deposit(r["memo"], r["amount"], vaulta_tx=r["trx_id"],
+                           sender=r.get("from", ""), memo=r["memo"]))
+        else:
+            unbound_rows.append(r)
+        st["last_seq"] = r["seq"]
+    _remember_head(st, rows)
+    return {"credited": len(credit_events), "unbound": len(unbound_rows),
+            "flagged": False, "checkpoint": False,
+            "credit_events": credit_events, "unbound_rows": unbound_rows}
+
+def _write_reorg_flag(flag):
+    """The production flag_writer: an instruction-style flag file, same
+    directory law as settlement instructions — evidence for the founder,
+    written by the meter, never acted on by it."""
+    os.makedirs(SETTLEMENT_DIR, exist_ok=True)
+    path = os.path.join(
+        SETTLEMENT_DIR,
+        time.strftime("reorg-%Y%m%dT%H%M%SZ-")
+        + hashlib.sha256(json.dumps(flag, sort_keys=True).encode()).hexdigest()[:8]
+        + ".json")
+    with open(path, "w") as f:
+        json.dump({**flag,
+                   "note": "REORG FLAG — nothing credited this round; the "
+                           "watermark parked. Human reads, meter never acts "
+                           "(baton fence)"}, f, indent=1)
+
 def cmd_chainpoll(args):
     led = load_ledger()
     acct = os.environ.get("CHAINPOLL_ACCOUNT") or led.get("meta", {}).get("watch_account")
@@ -402,27 +505,30 @@ def cmd_chainpoll(args):
         rows = read_transfers(acct)
     except Exception as e:
         print(f"chainpoll: action read failed ({e}) — nothing written"); return
-    if st.get("last_seq") is None:
-        st["last_seq"] = max((r["seq"] for r in rows if r["seq"] is not None), default=None)
+    # AV-5: the credit decision rides the pure, reorg-aware seam. Clean
+    # rounds behave exactly as before; a reorged round flags and credits
+    # nothing (the watermark parks — see process_transfers).
+    r = process_transfers(escrow(), rows, st, meter_keys,
+                          flag_writer=_write_reorg_flag)
+    if r["checkpoint"]:
         save_chain_state(st)
         print(f"chainpoll: memo-native checkpoint initialized at action seq {st['last_seq']} (no credit on first read)")
         return
-    credited = 0
-    for r in sorted(rows, key=lambda x: x["seq"] if x["seq"] is not None else 0):
-        if r["seq"] is None or r["seq"] <= st["last_seq"]: continue
-        if r["memo"] in meter_keys:
-            ev = escrow().deposit(r["memo"], r["amount"], vaulta_tx=r["trx_id"],
-                                  sender=r["from"], memo=r["memo"])
-            print(f"chainpoll: +{r['amount']} {r.get('symbol') or 'A'} → key {r['memo']} "
-                  f"(from {r['from']}, memo-routed, tx {r['trx_id'][:16]}…) — event {ev['hash'][:12]}…")
-            credited += 1
-        else:
-            emit_settlement_instruction(
-                f"A {r['amount']} from {r['from']} tx {r['trx_id']} — memo "
-                f"'{r['memo'][:40]}' is not a meter key; no auto-credit, founder word decides")
-            print(f"chainpoll: {r['amount']} from {r['from']} — UNBOUND memo, settlement instruction written")
-            credited += 1
-        st["last_seq"] = r["seq"]
+    if r["flagged"]:
+        ev = r["flag"]["evidence"]
+        save_chain_state(st)
+        print(f"chainpoll: REORG FLAGGED ({ev.get('shape')}) — ZERO credit this "
+              f"round, watermark parked at {r['flag']['watermark']}; evidence "
+              f"file written for the founder")
+        return
+    for ev_ in r["credit_events"]:
+        print(f"chainpoll: credited event {ev_['hash'][:12]}… → {ev_['voucher']}")
+    for u in r["unbound_rows"]:
+        emit_settlement_instruction(
+            f"A {u['amount']} from {u['from']} tx {u['trx_id']} — memo "
+            f"'{u['memo'][:40]}' is not a meter key; no auto-credit, founder word decides")
+        print(f"chainpoll: {u['amount']} from {u['from']} — UNBOUND memo, settlement instruction written")
+    credited = r["credited"] + r["unbound"]
     # DELTA CROSS-CHECK — never the binder (ruling 2026-08-29): two-host confirmed
     # balance, logged for reconciliation; a mismatch is a flag, not a credit.
     bal = chain_read_balance(acct)

@@ -146,6 +146,15 @@ jobs:
       - name: AV-6 retry-storm battery (failure-charge ceiling)
         if: always()
         run: python3 scripts/buzz-meter/test_av6_retry_storm.py
+      # AV-5 reorg drill (zCode, 2026-09-16, P1): the poller's reorg leg —
+      # PART A receipts forever that consumed-seq mutations were skipped
+      # silently; 5.1 fork + rollback shapes ⇒ zero credit, evidence-carrying
+      # flag, parked watermark, identical ledger bytes; 5.3 the crediting
+      # poller detected. The Rust half (reversibility quorum verdicts for
+      # the fork) rides cargo test: crates/reversibility/tests/reorg_drill.rs
+      - name: AV-5 reorg drill (flag-not-credit)
+        if: always()
+        run: python3 scripts/buzz-meter/test_av5_reorg_drill.py
       # PEER FUNNEL testnet runner selftest (z3.3 Order C, 2026-09-05): the
       # one-broadcast tool cannot rot — keccak + EIP-155 RLP hash vectors and
       # the sign/recover roundtrip proven every push (key parts skip cleanly
