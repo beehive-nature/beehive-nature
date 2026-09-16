@@ -24,7 +24,35 @@ attributed source · evidence pointer.
 
 ---
 
-## 1 · EDDIES / ANTENGLEMENT INVESTIGATION — WATCH / INVESTIGATE (open; zCode seat stopped 2026-09-15, bounded mission complete)
+## 1 · EDDIES / ANTENGLEMENT INVESTIGATION — **CLOSED 2026-09-16 (founder verdict + two dispatches; no further capacity)**
+
+**Closure record:** the founder accepted the reverse-engineering verdict and
+CLOSED Eddies as a bPay protocol-reuse candidate ("the authoritative Eddie
+state is server-side; ANT/Arbitrum and Autonomi storage are adjacent
+components rather than cryptographic authorities"). The one roll-forward —
+`/api/dbc/*` — was examined and **CLOSED the same way**: DBC *signature*
+verification is client-side and server-independent (wasm, standalone
+verifiers, signer pubkey as parameter, ed25519-dalek/blake3/bloom), but
+*value* authority reduces to the same server (client-side genesis self-mint
+of 10^19 units with only a local guard; user minting explicitly "after the
+server has deducted"; redemption via /api/dbc/* only), and the Rust source
+is unpublished — nothing adoptable. One design-pattern note carried for the
+reuse seat (window-classed self-signed bearer notes + signed transfer
+receipts + bloom-gossip spentbook; open-source e-cash kin is where reusable
+versions live). Evidence:
+[`2026-09-16-eddies-reverse-engineering.md`](../dispatches/2026-09-16-eddies-reverse-engineering.md)
+· [`2026-09-16-eddies-dbc-rollforward.md`](../dispatches/2026-09-16-eddies-dbc-rollforward.md).
+
+*Independent reverse-engineering receipt (2026-09-16, founder-ordered, prior
+interpretations explicitly excluded from method): fresh deployment read
+(bundle `index-Dooy-XIV.js` + 17 chunks), one unauthenticated invoice GET,
+read-only Arbitrum calls —* **an Eddie is a server-database row; ownership
+changes NEVER touch Arbitrum (solely PQ-signed `/api/*`); the only chain leg
+is a client-asserted ETH/ANT payment to a dead hardcoded EOA; the Autonomi
+leg is client-encrypted secret-named persistence; NO decentralized primitive
+beyond ANT + Autonomi storage + an app server.** *Full trace, five-way
+classification, diagram, security observations:*
+[`docs/dispatches/2026-09-16-eddies-reverse-engineering.md`](../dispatches/2026-09-16-eddies-reverse-engineering.md).
 
 *Received 2026-09-15, appended verbatim from the Claude seat's analysis, relayed
 by the founder. Primary-source evidence, provenance chain, and both retrieval
@@ -149,6 +177,50 @@ Next evidence threshold:
 Seat stopped here by founder order 2026-09-15 — bounded mission complete at
 `5b445216`; no Eddies speculation beyond this marker until the threshold is met.
 
+**STATUS REFRESH (2026-09-16) — wake condition (1) FIRED: implementation evidence banked.**
+Full investigation: [`docs/dispatches/2026-09-16-eddies-workerb-wake-investigation.md`](../dispatches/2026-09-16-eddies-workerb-wake-investigation.md).
+
+```text
+EDDIES / ANTENGLEMENT — 2026-09-16 refresh
+
+Evidence state:
+  How Eddies Work artifact               STILL MISSING (superseded in practice)
+  Implementation source                  PARTIAL — public frontends read:
+                                         eddiesexchange.com + dweb.eddiesexchange.com
+                                         (Vite SPAs, 53 JS/WASM assets fetched static-only,
+                                         incl. Farm/escrow/loans/market chunks + Rust DBC
+                                         wasm wallet); SERVER code not public (no repo found)
+  Live invoice object                    FETCHED (founder-supplied payment URL →
+                                         GET /api/payment-requests/<id>, unauthenticated
+                                         200 JSON; sender "eddde"; no signature/hash on object)
+  28-question brief                      WORKED — 16 FACT / 9 partial / 3 INFERENCE-leaning;
+                                         binding question answered: NOTHING cryptographic
+                                         binds the Eddie obligation to ANT or scratchpad state
+
+Artifact contents status: the "How Eddies Work" artifact itself never arrived;
+its implementation is public instead. eddde claims: 2 graduated (in shape),
+1 partially resolved, 1 contradicted-for-token-leg ("SAFE Network native"),
+1 graduated-as-naming ("antenglement" = feature tag, no quantum mechanics).
+
+Founder ruling adopted (2026-09-16): hybrid application — official ANT ERC-20
+on Arbitrum One (reference + merkle-day purchase only; no lock/bridge/escrow;
+treasury constant dead on-chain) + Autonomi scratchpad persistence (encrypted
+client vaults + public registries; site content pinned by shard address) +
+clearnet server-authoritative ledger. NOT an Autonomi-native monetary rail.
+
+Architecture state:
+  NOT ADOPTED — operator-centered authority fails verifier separability
+  NOT AN ANT SETTLEMENT RAIL (ANT moves only to buy merkle-days, to an EOA)
+
+Current classification:
+  WATCH (upgraded from WATCH/INVESTIGATE; evidence bar met for classification,
+  not for adoption — ADOPT/ADAPT/WRAP all rejected at this evidence state)
+
+Next evidence threshold (if anyone resumes): server-side source or operator
+disclosure — settles Q12/Q13/Q14/Q26 (expiry, repudiation, double-spend,
+conservation) definitively; plus the real-euro settlement leg of loans.
+```
+
 ## 2 · OPENA2A / AIM (+ org standards family) — OPEN · recon receipted 2026-09-15, WATCH (research-class)
 
 *Received 2026-09-15, founder re-task order: "switch from parked Eddies to
@@ -226,6 +298,109 @@ Full source-verified recon: [`docs/dispatches/2026-09-15-protocol-recon-opena2a-
   against our mission system BEFORE any schema is ruled.
 - **Reconciliation gate applies** as to every item; nothing here drives
   implementation.
+
+## 4 · OPEN-SOURCE E-CASH FAMILY — OPEN · recon receipted 2026-09-16, reuse-first class (research-only)
+
+*Received 2026-09-16, founder roll-forward order (Eddies workerb): "identify
+existing open implementations of the useful DBC ideas—offline bearer notes,
+acceptance windows, signed transfer receipts, double-spend detection—then
+compare them against bPay's bounded-authority/private-receipt architecture.
+Reuse before invention; no Eddies dependency." Full source-verified recon:*
+[`docs/dispatches/2026-09-16-ecash-family-recon.md`](../dispatches/2026-09-16-ecash-family-recon.md).
+
+- **Candidates verified at source:** **CDK** (cashubtc/cdk — Rust wallet AND
+  mint crates, Apache-2.0/MIT, ALPHA-but-real-sats, NUT-00–30 near-full incl.
+  NUT-24 HTTP 402 + NUT-27 Nostr backup) = **REUSE-FIRST**; **Cashu
+  protocol** (MIT; Blind-DH Chaumian blinding; NUT-12 DLEQ offline proofs) =
+  ADAPT-STUDY; **Fedimint** (MIT; federated threshold-blind-sig mints) and
+  **GNU Taler** (GNU exchange+auditor model, headline-verified only) = WATCH;
+  **sn_dbc** (maidsafe; BSD/MIT dual; distributed sharded spentbook, BLS,
+  stealth addresses; SAFE-era dormant) = WATCH with Autonomi-lineage note —
+  almost certainly the vocabulary ancestor of Eddies' DBC naming.
+  dan-gould DBC line = dead pointer (404; author now leads PDK).
+- **The four ideas:** offline bearer notes = fully solved open (Cashu
+  strings + DLEQ); **acceptance windows = NO open spec analog** (NUT-02 is
+  keysets-and-fees, not validity; nearest kin = our invoice/expiry laws +
+  Taler contract deadlines, unread at depth); signed transfer receipts =
+  nobody needs them in bearer world (the note IS the transfer — our
+  SpendReceipt keeps its own slot); double-spend = four open answers
+  (mint-check / federation / exchange+auditor / distributed spentbook);
+  Eddies' bloom-gossip offline-probabilistic variant has NO open
+  implementation — structural reason recorded (soundness requires an
+  online/federated/anchored checkpoint).
+- **bPay fit:** e-cash occupies the offline-bearer slot bPay deliberately
+  leaves open (never replaces SpendReceipt); NUT-10 spending conditions are
+  the nearest open kin to capAssert — THAT comparison is the load-bearing
+  threshold; mints/exchanges are third-party endpoints → adapter-mediated
+  only (self-hosted cdk-mintd the only ring-compatible shape); NUT-24 ↔ our
+  five x402 laws = convergence check before any meter extension; every
+  family answers "what backs the note" by construction (sats peg /
+  federation / reserves+auditor / network-native) — exactly the property
+  Eddies lacked.
+- **Licenses: MIT/Apache/BSD-MIT across the family — zero GPL. Zero Eddies
+  dependency.** Post-gate thresholds + verdicts: reuse seat's.
+- **DEEP READ DONE 2026-09-16 (NUT-10/11/24 at source + our x402 door in-tree)
+  →**
+  [`docs/dispatches/2026-09-16-nut10-cdk-deepread-x402-crosswalk.md`](../dispatches/2026-09-16-nut10-cdk-deepread-x402-crosswalk.md):
+  **ADOPT: none** (gate stands) · **ADAPT** the NUT-10/11 condition grammar
+  (locktime+refund+n-of-m Schnorr witnesses) as the projection language for
+  time-bounded delegations in any future offline-bearer adapter — bPay
+  authority stays at signing (capAssert/policy = issuance-time bound);
+  mint conditions are a DOWNSTREAM projection, never the source · **ADAPT**
+  the seam: settlement-ring placement, self-hosted cdk-mintd only, receipts
+  untouched · **WRAP** (declared, not built): a future Cashu rail rides
+  NUT-24 behind the existing `Door`/`FacilitatorSettle` traits ·
+  **crosswalk verdict: NUT-24 × our x402 door = two rails sharing status
+  402** — the shared artifact is the door pattern we already implemented ·
+  **WATCH** cdk ALPHA maturity · **BUILD-rule** (only if ever built):
+  fail-closed on undeclared NUT-06 support; refund-tag mandatory with
+  locktime. Laws banked: *condition declared ≠ condition enforced*
+  (unsupported = anyone-can-spend); *locktime without refund = post-expiry
+  anyone-can-spend*; NUT-10 bounds are per-Proof and redemption-time —
+  never a substitute for issuance-time authority.
+- **CDK INTERFACE DEEP READ DONE 2026-09-16 (source at `main`) →**
+  [`docs/dispatches/2026-09-16-cdk-adapter-deepread.md`](../dispatches/2026-09-16-cdk-adapter-deepread.md):
+  **fail-closed chain = 4/5 in CDK** (authoring door
+  `TryFrom<SpendingConditions> for Secret` validate-first; enforcement
+  `Proof::verify_p2pk` + 18-variant error enum; discovery types
+  `MintInfo.nuts.nut10/11.supported`; NUT-07 state) — **the mandatory-refund
+  link and the NUT-06 gate are caller policy** (wrapper rules: locktime ⇒
+  refund_keys ⇒ num_sigs_refund ≥ 1; assert nut10+11+12 before
+  mint/spend/accept; re-validate RECEIVED secrets — wire path skips
+  `Conditions::new`). **NUT-24 ABSENT from CDK at `main`** (no nut24 module
+  despite README ✔ — X-Cashu codec would be adapter-owned). **Capability-drift
+  attack ANSWERED: client-side prevention is impossible against a mutable
+  mint** (NUT-06/07/DLEQ = detection only; `supported:true` is a claim, not a
+  proof) — the "never silently lose condition semantics" law survives only
+  as: version-pinned SELF-HOSTED mint (capability change = our redeploy) +
+  receipt-anchored capability snapshot (drift = detectable breach) + capped
+  exposure as backstop. **Smallest adapter defined, not built:** `cashu` +
+  `cdk-http-client` + one store + swappable self-hosted `cdk-mintd`, four
+  gates (issuance / redemption / X-Cashu codec / drift watch) at the
+  existing Door/FacilitatorSettle seam. Four laws banked (§5 of the
+  dispatch).
+- **SELF-HOSTED-MINT ASSAULT + SNAPSHOT CONTRACT DESIGNED 2026-09-16 →**
+  [`docs/dispatches/2026-09-16-mintd-assault-snapshot-contract.md`](../dispatches/2026-09-16-mintd-assault-snapshot-contract.md):
+  "self-hosted ⇒ capability changes only on redeploy" is **FALSE** — three
+  live mutation channels (binary; management-RPC/DB via
+  `reconcile_canonical_configuration`; config), plus a **remote-signatory
+  custody channel** whose v0.17 migration silently NULLS local
+  seed/mnemonic when a legacy signatory existed; runtime keyset rotation =
+  fake-wallet test scaffolding only. **CapabilitySnapshot v1 + drift-watch
+  state machine DESIGNED (nothing built):** receipt-anchored snapshot
+  (verbatim NUT-06 + MintVersion binary pin, keyset public-key hashes,
+  fees/limits, cap-policy hash) whose core is a **behavioral probe at
+  issuance** (mint a dust condition-carrying proof, wrong-witness swap,
+  EXPECT typed refusal — CD-4 executed live); drift classified
+  BENIGN/SEMANTIC/HARD/SILENT with fail-closed defaults; upgrade protocol
+  = **pin → probe → carry-or-drain** with the invariant `note semantics =
+  secret bytes × keyset keys (byte-equal) × enforcement (re-probe equal)`.
+  Honest concession: the contract makes drift DETECTED + ATTRIBUTED, not
+  prevented — prevention stays physical (deploy boundary, RPC access,
+  signatory continuity, capped exposure). **NUT-24 RESOLVED mechanically:**
+  commit 7246ea2e renamed nut24.rs → nut25.rs ("bolt12 is nut25") — X-Cashu
+  HTTP-402 was NEVER implemented in CDK; README ✔24 is stale pre-renumber
+  documentation.
 
 ---
 

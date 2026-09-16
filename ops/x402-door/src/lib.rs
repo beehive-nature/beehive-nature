@@ -13,6 +13,7 @@
 //! flow + the replaceable facilitator seam), [`wire`] (leg extraction, R4
 //! logging, the HTTP surface).
 
+pub mod config;
 pub mod journal;
 pub mod orchestrator;
 pub mod wire;

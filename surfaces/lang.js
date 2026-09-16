@@ -15,7 +15,7 @@
 /* One census for the reader and CI. Node imports only this dependency-free API;
    the UI bootstrap below runs only in a document. No extra browser request. */
 (function(root){
-  function measureVisibleText(doc) {
+  function measureVisibleText(doc, strings) {
     // The unit remains a laid-out leaf with lettered text, including short labels.
     // This is not a census of attributes, canvas/iframe content or direct text
     // alongside child elements. Do not turn this scoped count into a full-page claim.
@@ -29,8 +29,16 @@
       var rect=n.getBoundingClientRect();
       if(rect.width===0 && rect.height===0) return;
       out.visible++;
-      var holder=n.closest('[data-i18n]');
-      if(holder){out.keyed++;out.keys.push(holder.getAttribute('data-i18n'));}
+      var holder=n.closest('[data-i18n],[data-key]');
+      if(holder){
+        var hk=holder.getAttribute('data-i18n')||holder.getAttribute('data-key');
+        /* data-key is data-i18n's twin, but plur-style section containers carry
+           RESERVED keys the corpus never filled — a leaf inside them is keyed
+           only when the row actually exists; counting reserved-but-empty
+           holders as keyed would green a page no tongue can reach. */
+        if(holder.hasAttribute('data-i18n')||(strings&&Object.prototype.hasOwnProperty.call(strings,hk))){out.keyed++;out.keys.push(hk);}
+        else if(out.unkeyedSamples.length<3) out.unkeyedSamples.push(text.slice(0,60));
+      }
       else if(out.unkeyedSamples.length<3) out.unkeyedSamples.push(text.slice(0,60));
     });
     return out;
@@ -116,10 +124,14 @@ if(typeof document!=='undefined') (function(){
     currentCode=code;
     document.documentElement.lang=code;
     document.documentElement.dir=RTL[code]?'rtl':'ltr';
-    var nodes=document.querySelectorAll('[data-i18n]');
+    var nodes=document.querySelectorAll('[data-i18n],[data-key]');
     var hit=0,total=0;
     nodes.forEach(function(el){
-      var k=el.getAttribute('data-i18n'); total++;
+      var k=el.getAttribute('data-i18n')||el.getAttribute('data-key'); total++;
+      /* data-key twin (plur's reserved-key manifest): a holder whose key the
+         corpus never filled is LEFT UNTOUCHED — restoring its innerHTML would
+         re-write whole sections and kill page listeners for nothing. */
+      if(!el.hasAttribute('data-i18n') && !(corpus&&corpus.strings&&Object.prototype.hasOwnProperty.call(corpus.strings,k))) return;
       /* MARKUP-AWARE SWAP (founder order: rich paragraphs ARE the argument).
          If the English carries inline markup (links, emphasis), capture the
          innerHTML once and restore it; a corpus rendering containing '<' is
@@ -148,7 +160,7 @@ if(typeof document!=='undefined') (function(){
        sits inside a data-i18n holder whose cell for this tongue is non-empty
        (English counts keyed as covered — it is the source). */
     var measure=window.BNRLanguageCoverage;
-    var coverage=measure.summarizeCoverage(measure.measureVisibleText(document),corpus&&corpus.strings,code);
+    var coverage=measure.summarizeCoverage(measure.measureVisibleText(document,corpus&&corpus.strings),corpus&&corpus.strings,code);
     var vis=coverage.visible, cov=coverage.filled;
     var sel=document.getElementById('blangsel');
     if(sel){ sel.value=code;
@@ -232,7 +244,7 @@ if(typeof document!=='undefined') (function(){
         if(bundled&&bundled.strings&&bundled._meta){acceptCorpus(bundled,cb);return;}
       }catch(e){} // malformed bundle uses the normal loader/fallback
     }
-    fetch(R+'lang-corpus.json?v=19').then(function(r){return r.json()})
+    fetch(R+'lang-corpus.json?v=20').then(function(r){return r.json()})
       .then(function(j){ acceptCorpus(j,cb); })
       .catch(function(){ corpus={strings:{}}; cb(); }); /* fetch failure = full English fallback, counter shows 0/N */
   }

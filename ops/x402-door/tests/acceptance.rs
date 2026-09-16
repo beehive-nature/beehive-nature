@@ -16,7 +16,8 @@
 
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::Arc;
-use x402_door::journal::{HumanGate, Journal, ReservationState, SettleEvidence};
+use x402_door::journal::{HumanGate, Journal, ReleaseVerdict, ReservationState, SettleEvidence};
+use x402_door::orchestrator::StaticFloat;
 use x402_door::orchestrator::{
     Door, DoorConfig, FacilitatorSettle, SettlementFacilitator, VerifyOutcome,
 };
@@ -121,6 +122,9 @@ fn door<F: SettlementFacilitator>(
             reserved_gas_wei: reserved_gas,
             ops_float_available_wei: float,
         },
+        // Static float at the configured figure — the D-3 dynamic source
+        // is exercised in the d_specs suite.
+        Arc::new(StaticFloat(float.max(reserved_gas))),
     )
 }
 
@@ -236,19 +240,53 @@ fn acceptance_4_expired_window_never_settles_release_needs_evidence() {
     let live_req = request("eip155:8453", "exact", "0x06", "6", far_future());
     let live_leg = extract_leg(&live_req).unwrap();
     d.journal.reserve(&live_leg, 100_000, 1_000_000).unwrap();
-    assert!(d.journal.expire_released(&live_leg, true).is_err()); // window not expired
-                                                                  // Expired + evidenced -> released; expired + NOT evidenced -> refused.
-    assert!(d.expire(&leg6, false).is_err());
-    assert!(d.expire(&leg6, true).is_err()); // no reservation exists — lawful refusal
-                                             // The real release path on a live-turned-expired leg: rewrite window.
+    assert!(d
+        .journal
+        .expire_released(&live_leg, ReleaseVerdict::RpcUnavailable)
+        .is_err()); // window not expired
+                    // Expired + evidenced -> released; expired + NOT evidenced -> refused.
+    assert!(d.expire(&leg6, ReleaseVerdict::SpentOnChain).is_err());
+    assert!(d.expire(&leg6, ReleaseVerdict::UnspentOnChain).is_err()); // no reservation exists — lawful refusal
+                                                                       // The real release path on a live-turned-expired leg: rewrite window.
     let mut rec = d.journal.get(&live_leg).unwrap().unwrap();
     rec.leg.valid_before_unix = past;
     d.journal.write_for_test(&rec).unwrap();
     let expired_leg = extract_leg(&req6).unwrap(); // identity now carries the past window
-    assert!(d.journal.expire_released(&expired_leg, false).is_err()); // no evidence
-    assert!(d.journal.expire_released(&expired_leg, true).is_ok()); // evidenced
-                                                                    // Settle on the released leg is refused.
-    assert!(d.settle(&expired_leg, &live_req).is_err());
+                                                   // D-4 semantics: a SPENT verdict parks the leg to Unknown (lawful Ok)
+                                                   // — it NEVER releases; only UnspentOnChain releases.
+    d.journal
+        .expire_released(&expired_leg, ReleaseVerdict::SpentOnChain)
+        .unwrap();
+    assert!(matches!(
+        d.journal.get(&expired_leg).unwrap().unwrap().state,
+        ReservationState::Unknown { .. }
+    ));
+    // The Unknown leg then resolves through the human gate (evidence law).
+    let ev = SettleEvidence {
+        actual_amount: "6".into(),
+        tx_hash: "0xd4".into(),
+        gas_actual_wei: 1,
+    };
+    d.resolve_unknown(&expired_leg, HumanGate::explicit_human_approval(), &ev)
+        .unwrap();
+    // A FRESH leg releases only on UnspentOnChain.
+    let fresh_req = request("eip155:8453", "exact", "0x0E2", "6", far_future());
+    let fresh_leg = extract_leg(&fresh_req).unwrap();
+    d.journal.reserve(&fresh_leg, 1_000, 1_000_000).unwrap();
+    let mut frec = d.journal.get(&fresh_leg).unwrap().unwrap();
+    frec.leg.valid_before_unix = past;
+    d.journal.write_for_test(&frec).unwrap();
+    let fresh_expired = extract_leg(&request("eip155:8453", "exact", "0x0E2", "6", past)).unwrap();
+    assert!(d
+        .journal
+        .expire_released(&fresh_expired, ReleaseVerdict::RpcUnavailable)
+        .is_err()); // typed HOLD
+    assert!(d
+        .journal
+        .expire_released(&fresh_expired, ReleaseVerdict::UnspentOnChain)
+        .is_ok()); // evidenced release
+                   // Settle on the RELEASED leg is refused (terminal state).
+    assert!(d.settle(&fresh_expired, &fresh_req).is_err());
 }
 
 // ---------- 5. torn file fails closed ----------
@@ -268,7 +306,7 @@ fn acceptance_5_torn_journal_file_fails_closed() {
         "must name torn + refusal: {err}"
     );
     // And operations needing state fail closed rather than guess.
-    assert!(j.settle_precheck(&leg).is_err());
+    assert!(j.begin_settle(&leg).is_err());
 }
 
 // ---------- 6. R4 per-leg log law ----------

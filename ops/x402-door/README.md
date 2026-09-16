@@ -38,7 +38,7 @@ Plus watchpay's ledger mechanics verbatim: exclusive-writer OS file lock
 across every mutation, kernel-released on death; temp-file + fsync + rename
 durability; `Unknown` never auto-retries (HumanGate only).
 
-## live-wiring FLAG (open compile item)
+## live-wiring (upstream-composition mirror; CI-compiled)
 
 `SchemeRegistry::build` composition lives behind `--features live-wiring`
 (default OFF). Upstream 2.0.2 ships no public example composing the

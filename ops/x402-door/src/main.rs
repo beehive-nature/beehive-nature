@@ -11,20 +11,6 @@
 //! platform-independent. All Unix code lives in `imp` (own imports, so
 //! Windows-side lint passes cannot strip them as unused).
 
-use std::path::PathBuf;
-
-#[derive(serde::Deserialize)]
-#[cfg_attr(windows, allow(dead_code))]
-struct RunConfig {
-    bind: String,
-    journal_root: String,
-    daily_gas_cap_wei: u64,
-    reserved_gas_wei: u64,
-    ops_float_available_wei: u64,
-    chain: u64,
-    facilitator_chain_config: PathBuf,
-}
-
 #[cfg(all(unix, feature = "live-wiring"))]
 mod imp;
 

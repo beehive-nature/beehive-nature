@@ -182,12 +182,77 @@
     var viewport=window.visualViewport,vh=viewport?viewport.height:window.innerHeight,keyboard=viewport?Math.max(0,window.innerHeight-vh-viewport.offsetTop):0;
     var bar=$('tbar'),rect=bar&&getComputedStyle(bar).position==='fixed'?bar.getBoundingClientRect():null;
     var h=rect&&rect.height>0&&rect.bottom>0&&rect.top<window.innerHeight?Math.ceil(window.innerHeight-Math.max(0,rect.top)):0;
-    var bottom=Math.min(Math.max(bar?18:66,h+10-keyboard),Math.max(12,vh-64));orb.style.bottom=(keyboard+bottom)+'px';
+    var bottom=Math.min(Math.max(bar?18:66,h+10-keyboard),Math.max(12,vh-64));
+    if(!seated)orb.style.bottom=(keyboard+bottom)+'px';
     var tight=window.innerWidth<=520||vh<=600,dialogBottom=expanded||tight?8:Math.min(bottom+64,Math.max(12,vh*.25));
     win.style.bottom=(keyboard+dialogBottom)+'px';win.style.height=Math.max(0,Math.min(expanded?vh:680,vh-dialogBottom-12))+'px';
-    if(h){var need=h+22,cur=parseFloat(getComputedStyle(document.body).paddingBottom)||0;if(cur<need)document.body.style.paddingBottom=need+'px';}
+    var need=h?h+22:0;
+    /* floating on a phone with no fixed bar: reserve the orb's corner zone so
+       the last content can always scroll clear of it */
+    if(!h&&window.innerWidth<=520&&!seated)need=Math.max(need,140);
+    if(need){var cur=parseFloat(getComputedStyle(document.body).paddingBottom)||0;if(cur<need)document.body.style.paddingBottom=need+'px';}
   };
+  /* THE MOBILE SEAT (founder order 2026-09-13): the floating orb covered the
+     bottom-left corner of the content column on phones — wallet's chain
+     matrix had its 🐜 Autonomi ANT card 87% hidden at first paint. On mobile
+     the orb now RIDES the fixed tour bar's reserved row (geometry inline,
+     colors keep the register stylesheet) — it covers nothing and stays one
+     tap away. Where the bar is inline (hub, profile: a closed directory),
+     the orb floats bottom-RIGHT and fitDock reserves scroll-end room.
+     Desktop keeps the classic bottom-left float. */
+  var seatMq=window.matchMedia?matchMedia('(max-width:520px)'):null,seated=null;
+  function unseat(){
+    if(seated){orb.style.cssText='';if(orb.parentElement!==document.body)document.body.appendChild(orb);}
+    seated=null;
+  }
+  function seatOrb(){
+    var mobile=!!(seatMq&&seatMq.matches);
+    var bar=$('tbar');
+    var barFixed=!!(bar&&getComputedStyle(bar).position==='fixed');
+    if(mobile&&barFixed){
+      if(seated!=='bar'){
+        unseat();seated='bar';
+        orb.style.cssText='position:static;width:44px;height:44px;min-width:44px;min-height:44px;flex:0 0 44px;margin:0 6px 0 0;font:22px/1 system-ui;box-sizing:border-box';
+        bar.insertBefore(orb,bar.firstChild);
+      }
+    }else if(mobile){
+      /* inline tour host (hub, profile): the closed directory cannot host the
+         orb, so it rides the directory's VISIBLE summary row — in-flow chrome,
+         covers nothing. The register bar is the fallback; a bare right-float
+         with the fitDock reservation is the last resort. */
+      var host=document.querySelector('[data-tour-host]');
+      var sum=host&&host.closest('details')?host.closest('details').querySelector('summary'):document.querySelector('details.room-navigation>summary');
+      if(sum){
+        if(seated!=='summary'){
+          unseat();seated='summary';
+          orb.style.cssText='position:relative;z-index:3;display:inline-block;vertical-align:middle;width:44px;height:44px;min-width:44px;min-height:44px;margin:0 0 0 10px;font:22px/1 system-ui;box-sizing:border-box';
+          sum.insertBefore(orb,sum.firstChild);
+        }
+      }else{
+        var regbar=document.getElementById('bregbar')||document.querySelector('[data-register-host]');
+        if(regbar){
+          if(seated!=='reg'){
+            unseat();seated='reg';
+            orb.style.cssText='position:relative;z-index:3;width:44px;height:44px;min-width:44px;min-height:44px;margin:8px 0 0 2px;font:22px/1 system-ui;box-sizing:border-box';
+            regbar.appendChild(orb);
+          }
+        }else{
+          unseat();
+          orb.style.left='auto';orb.style.right='16px';
+        }
+      }
+    }else{
+      unseat();
+      orb.style.left='';orb.style.right='';
+    }
+    fitDock();
+  }
   fitDock();addEventListener('resize',fitDock);if(window.visualViewport){window.visualViewport.addEventListener('resize',fitDock);window.visualViewport.addEventListener('scroll',fitDock);}
   var bar=$('tbar');if(bar&&window.ResizeObserver)new ResizeObserver(fitDock).observe(bar);
-  if(!bar){var mo=new MutationObserver(function(){var b=$('tbar');if(b){mo.disconnect();fitDock();if(window.ResizeObserver)new ResizeObserver(fitDock).observe(b);}});mo.observe(document.documentElement,{childList:true,subtree:true});}
+  if(!bar){var mo=new MutationObserver(function(){var b=$('tbar');if(b){mo.disconnect();seatOrb();if(window.ResizeObserver)new ResizeObserver(fitDock).observe(b);}});mo.observe(document.documentElement,{childList:true,subtree:true});}
+  /* seating is chrome comfort, never load-bearing: any DOM surprise falls
+     back to the classic float rather than breaking the dock */
+  var seatSafe=function(){try{seatOrb();}catch(e){}};
+  seatSafe();if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',seatSafe);setTimeout(seatSafe,700);setTimeout(seatSafe,1800);
+  if(seatMq){try{seatMq.addEventListener('change',seatSafe);}catch(e){try{seatMq.addListener(seatSafe);}catch(e2){}}}
 })();

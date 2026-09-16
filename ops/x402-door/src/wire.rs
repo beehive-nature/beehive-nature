@@ -70,6 +70,24 @@ pub fn extract_leg(request: &serde_json::Value) -> Result<LegKey, ExtractError> 
         "/payment_requirements/network",
     )?
     .to_string();
+    // R4 boundary: the network MUST be one well-formed CAIP-2 id — a
+    // hostile string embedding a second namespace (path separators, extra
+    // colons, uppercase) is a correlation vector, refused fail-closed.
+    {
+        let parts: Vec<&str> = chain.split(':').collect();
+        let ok = parts.len() == 2
+            && parts.iter().all(|p| {
+                !p.is_empty()
+                    && p.chars()
+                        .all(|c| c.is_ascii_lowercase() || c.is_ascii_digit() || c == '-')
+            });
+        if !ok {
+            return Err(ExtractError::Bad {
+                path: "/paymentRequirements/network",
+                reason: format!("not a well-formed single CAIP-2 chain id: {chain}"),
+            });
+        }
+    }
     let scheme = as_str(
         request,
         "/paymentRequirements/scheme",

@@ -13,8 +13,8 @@
 //! this module only translates at the door's JSON seam and maps ambiguous
 //! transport outcomes to the door's Unknown law.
 
-use crate::RunConfig;
 use std::sync::Arc;
+use x402_door::config::RunConfig;
 use x402_door::journal::Journal;
 use x402_door::orchestrator::{Door, DoorConfig, FacilitatorSettle, SettlementFacilitator};
 use x402_door::wire;
@@ -25,8 +25,11 @@ pub async fn run() -> Result<(), Box<dyn std::error::Error>> {
         .unwrap_or_else(|| "ops/x402-door/door.config.json".to_string());
     let raw = std::fs::read_to_string(&cfg_path)?;
     let rc: RunConfig = serde_json::from_str(&raw)?;
+    rc.validate().map_err(|e| format!("door config: {e}"))?;
 
-    let journal = Arc::new(Journal::open(
+    // D-5: the binary opens the journal EXCLUSIVELY — a second live door
+    // instance on this root refuses by name instead of split-braining.
+    let journal = Arc::new(Journal::open_exclusive(
         std::path::PathBuf::from(&rc.journal_root).as_path(),
         rc.daily_gas_cap_wei,
     )?);
@@ -39,7 +42,24 @@ pub async fn run() -> Result<(), Box<dyn std::error::Error>> {
             reserved_gas_wei: rc.reserved_gas_wei,
             ops_float_available_wei: rc.ops_float_available_wei,
         },
+        // D-3: verify-time float stays the configured figure until a live
+        // wallet reader is wired in the testnet slice; the settle-time
+        // check reads it dynamically through the seam either way.
+        Arc::new(x402_door::orchestrator::StaticFloat(
+            rc.ops_float_available_wei,
+        )),
     ));
+
+    // Founder order: crash-while-Settling recovery — park stranded
+    // executions to Unknown BEFORE serving, so no restart can leave
+    // permanently stranded authority behind the Settling invariant.
+    let stranded = door.journal.recover_stranded_settling()?;
+    if !stranded.is_empty() {
+        eprintln!(
+            "x402-door restart: {} stranded Settling reservation(s) parked to Unknown for the human gate",
+            stranded.len()
+        );
+    }
 
     let app = wire::router(wire::DoorState { door });
     let listener = tokio::net::TcpListener::bind(&rc.bind).await?;
@@ -55,8 +75,12 @@ async fn build_registry(rc: &RunConfig) -> Result<x402_types::scheme::SchemeRegi
     // The chains config IS an upstream Eip155ChainConfig (serde): RPC
     // endpoints + signers. Signers use $ENV references (upstream
     // LiteralOrEnv) — the ops wallet key rides env only, never files/git.
-    let chains_raw = std::fs::read_to_string(&rc.facilitator_chain_config)
-        .map_err(|e| format!("chains config: {e}"))?;
+    let chain_cfg_path = rc
+        .facilitator_chain_config
+        .as_ref()
+        .ok_or_else(|| "chains config path missing (facilitator_chain_config)".to_string())?;
+    let chains_raw =
+        std::fs::read_to_string(chain_cfg_path).map_err(|e| format!("chains config: {e}"))?;
     let inner_cfg: x402_chain_eip155::chain::config::Eip155ChainConfigInner =
         serde_json::from_str(&chains_raw).map_err(|e| format!("chains config json: {e}"))?;
     let chain_config = x402_chain_eip155::chain::config::Eip155ChainConfig {
@@ -70,10 +94,17 @@ async fn build_registry(rc: &RunConfig) -> Result<x402_types::scheme::SchemeRegi
     >>::from_config(&chain_config)
     .await
     .map_err(|e| format!("provider from config: {e}"))?;
-    let providers = std::collections::HashMap::from([(chain_id.clone(), provider)]);
+    // Upstream's own composition (facilitator/src/chain.rs + schemes.rs,
+    // mirrored): the registry stores a provider ENUM implementing
+    // ChainProviderOps, and the `for<'a> Builder<&'a P>` blueprint bound
+    // is satisfied by hand-written bridge impls that pattern-match the
+    // enum and delegate to the blanket Arc<T> impls. This is THE
+    // documented way the registry composes — not a workaround.
+    let providers = std::collections::HashMap::from([(
+        chain_id.clone(),
+        DoorProvider::Eip155(Arc::new(provider)),
+    )]);
     let chain_registry = x402_types::chain::ChainRegistry::new(providers);
-    // Chartered scope ONLY, constructed in code so the registry cannot grow
-    // by configuration accident: EVM exact + upto on the one configured chain.
     let blueprints = x402_types::scheme::SchemeBlueprints::new()
         .and_register(x402_chain_eip155::V2Eip155Exact)
         .and_register(x402_chain_eip155::V2Eip155Upto);
@@ -214,5 +245,62 @@ mod live_facilitator {
                 })
             })
         }
+    }
+}
+
+/// The registry's provider type — upstream facilitator/src/chain.rs
+/// mirrored. The enum implements ChainProviderOps by delegation, and the
+/// scheme bridges below satisfy the reference-shaped blueprint bound the
+/// same way upstream's schemes.rs does it.
+enum DoorProvider {
+    Eip155(Arc<x402_chain_eip155::chain::Eip155ChainProvider>),
+}
+
+impl x402_types::chain::ChainProviderOps for DoorProvider {
+    fn signer_addresses(&self) -> Vec<String> {
+        match self {
+            DoorProvider::Eip155(p) => x402_types::chain::ChainProviderOps::signer_addresses(p),
+        }
+    }
+    fn chain_id(&self) -> x402_types::chain::ChainId {
+        match self {
+            DoorProvider::Eip155(p) => p.chain_id(),
+        }
+    }
+}
+
+impl x402_types::scheme::X402SchemeFacilitatorBuilder<&DoorProvider>
+    for x402_chain_eip155::V2Eip155Exact
+{
+    fn build(
+        &self,
+        provider: &DoorProvider,
+        config: Option<serde_json::Value>,
+    ) -> Result<Box<dyn x402_types::scheme::X402SchemeFacilitator>, Box<dyn std::error::Error>>
+    {
+        let p = if let DoorProvider::Eip155(p) = provider {
+            Arc::clone(p)
+        } else {
+            return Err("V2Eip155Exact::build: provider must be Eip155".into());
+        };
+        <Self as x402_types::scheme::X402SchemeFacilitatorBuilder<Arc<_>>>::build(self, p, config)
+    }
+}
+
+impl x402_types::scheme::X402SchemeFacilitatorBuilder<&DoorProvider>
+    for x402_chain_eip155::V2Eip155Upto
+{
+    fn build(
+        &self,
+        provider: &DoorProvider,
+        config: Option<serde_json::Value>,
+    ) -> Result<Box<dyn x402_types::scheme::X402SchemeFacilitator>, Box<dyn std::error::Error>>
+    {
+        let p = if let DoorProvider::Eip155(p) = provider {
+            Arc::clone(p)
+        } else {
+            return Err("V2Eip155Upto::build: provider must be Eip155".into());
+        };
+        <Self as x402_types::scheme::X402SchemeFacilitatorBuilder<Arc<_>>>::build(self, p, config)
     }
 }

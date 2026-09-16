@@ -62,6 +62,12 @@ pub struct LegKey {
 pub enum ReservationState {
     /// Verify passed, float/budget gates passed; gas exposure reserved.
     Reserved { reserved_gas_wei: u64 },
+    /// Settlement execution IN FLIGHT (the lock-held Reserved->Settling
+    /// transition completed): exactly one caller may execute the
+    /// facilitator; concurrent settles see this and are refused
+    /// in-flight rather than double-executing (the adversarial race fix --
+    /// the on-chain 3009 nonce protects funds, not gas).
+    Settling { reserved_gas_wei: u64 },
     /// Settled with on-chain evidence; exposure reconciled to actual.
     Settled {
         actual_amount: String,
@@ -94,6 +100,26 @@ pub struct Journal {
     root: PathBuf,
     /// Daily gas cap in wei (operations budget — the ops wallet class).
     pub daily_gas_cap_wei: u64,
+    /// When opened exclusively (D-5), the instance holds the OS lock for
+    /// its lifetime — kernel-released on process death, so a crashed
+    /// opener can never strand the root.
+    _held: Option<File>,
+}
+
+/// The typed on-chain verdict for an expiry release (D-4): a bare bool
+/// invited the lying-RPC contradiction attack — the journal now demands
+/// `RpcUnavailable` as an explicit HOLD (refused loudly, state kept) and
+/// refuses release outright when it already HOLDS settlement evidence.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum ReleaseVerdict {
+    /// The authorization nonce is unspent on-chain (evidence-checked).
+    UnspentOnChain,
+    /// The authorization nonce IS spent — the leg settled elsewhere; the
+    /// reservation goes to Unknown for the human gate, never released.
+    SpentOnChain,
+    /// The RPC could not answer — a typed HOLD: release refused, state
+    /// untouched, retryable. Never silently treated as unspent.
+    RpcUnavailable,
 }
 
 /// Settlement evidence — the only thing that reconciles exposure DOWN.
@@ -108,10 +134,17 @@ pub struct SettleEvidence {
 #[derive(Debug, Clone, Copy)]
 pub struct HumanGate {
     _private: (),
+    /// D-7: the tracked call site — every gate use is attributable.
+    #[allow(dead_code)]
+    call_site: Option<&'static std::panic::Location<'static>>,
 }
 impl HumanGate {
+    #[track_caller]
     pub fn explicit_human_approval() -> Self {
-        HumanGate { _private: () }
+        HumanGate {
+            _private: (),
+            call_site: Some(std::panic::Location::caller()),
+        }
     }
 }
 
@@ -145,9 +178,43 @@ fn sanitize(chain: &str) -> String {
 impl Journal {
     pub fn open(root: &Path, daily_gas_cap_wei: u64) -> JResult<Self> {
         fs::create_dir_all(root)?;
+        // D-5 no-lock detection: if the lock file cannot even be opened,
+        // refuse — an unlocked journal is not a journal.
+        let probe = OpenOptions::new()
+            .create(true)
+            .read(true)
+            .write(true)
+            .truncate(false)
+            .open(root.join(".lock"))?;
+        drop(probe);
         Ok(Journal {
             root: root.to_path_buf(),
             daily_gas_cap_wei,
+            _held: None,
+        })
+    }
+
+    /// D-5 concurrent journal start: acquire the EXCLUSIVE OS lock and
+    /// hold it for this instance's lifetime (try-lock — a second live
+    /// opener is REFUSED by name, never blocks, never split-brains). The
+    /// kernel releases the hold when the process dies — a crashed opener
+    /// cannot strand the root.
+    pub fn open_exclusive(root: &Path, daily_gas_cap_wei: u64) -> JResult<Self> {
+        fs::create_dir_all(root)?;
+        let lock = OpenOptions::new()
+            .create(true)
+            .read(true)
+            .write(true)
+            .truncate(false)
+            .open(root.join(".lock"))?;
+        lock.try_lock().map_err(|_| JournalError::Law(format!(
+            "journal root {} is already held by a live opener — refusing concurrent exclusive start (D-5)",
+            root.display()
+        )))?;
+        Ok(Journal {
+            root: root.to_path_buf(),
+            daily_gas_cap_wei,
+            _held: Some(lock),
         })
     }
 
@@ -302,6 +369,9 @@ impl Journal {
                 ReservationState::Settled { .. } => Err(JournalError::Law(
                     "authorization nonce already settled — refusing replay".into(),
                 )),
+                ReservationState::Settling { .. } => Err(JournalError::Law(
+                    "authorization nonce is settling — refusing duplicate reservation".into(),
+                )),
                 ReservationState::FailedKeep { .. } => Err(JournalError::Law(
                     "prior attempt failed without evidence — reservation kept; settle again or expire, never re-reserve"
                         .into(),
@@ -349,36 +419,48 @@ impl Journal {
         })
     }
 
-    /// The settle pre-check: idempotency + lawful state. Returns
-    /// `Ok(Some(evidence))` when the nonce was ALREADY settled (the stored
-    /// evidence replays — never re-execute), `Ok(None)` when the caller
-    /// may proceed to execute.
-    pub fn settle_precheck(&self, leg: &LegKey) -> JResult<Option<SettleEvidence>> {
+    /// BEGIN SETTLE (idempotency + lawful state + the in-flight
+    /// transition). The check AND the Reserved->Settling write are one
+    /// lock-held transition, so exactly one caller ever executes the
+    /// facilitator for a nonce. Returns the stored evidence when the nonce
+    /// was ALREADY settled (idempotent replay -- never re-execute).
+    pub fn begin_settle(&self, leg: &LegKey) -> JResult<Option<SettleEvidence>> {
         let _guard = self.acquire_exclusive()?;
-        match self.get(leg)? {
-            None => Err(JournalError::Law(
-                "no reservation for this authorization nonce — verify first (fail-closed)".into(),
+        let mut rec = self.get(leg)?.ok_or_else(|| {
+            JournalError::Law(
+                "no reservation for this authorization nonce -- verify first (fail-closed)".into(),
+            )
+        })?;
+        let now = now_unix();
+        match rec.state {
+            ReservationState::Settled {
+                actual_amount,
+                tx_hash,
+                gas_actual_wei,
+                ..
+            } => Ok(Some(SettleEvidence {
+                actual_amount,
+                tx_hash,
+                gas_actual_wei,
+            })),
+            ReservationState::Reserved { reserved_gas_wei }
+            | ReservationState::FailedKeep {
+                reserved_gas_wei, ..
+            } => {
+                rec.state = ReservationState::Settling { reserved_gas_wei };
+                rec.updated_unix = now;
+                self.write(&rec)?;
+                Ok(None)
+            }
+            ReservationState::Settling { .. } => Err(JournalError::Law(
+                "settlement in flight -- exactly one executor; retry after completion".into(),
             )),
-            Some(rec) => match rec.state {
-                ReservationState::Settled {
-                    actual_amount,
-                    tx_hash,
-                    gas_actual_wei,
-                    ..
-                } => Ok(Some(SettleEvidence {
-                    actual_amount,
-                    tx_hash,
-                    gas_actual_wei,
-                })),
-                ReservationState::Reserved { .. } => Ok(None),
-                ReservationState::FailedKeep { .. } => Ok(None),
-                ReservationState::Unknown { .. } => Err(JournalError::Law(
-                    "Unknown settlement — never auto-retried; human gate required".into(),
-                )),
-                ReservationState::ExpiredReleased { .. } => Err(JournalError::Law(
-                    "window expired and released — settle refused".into(),
-                )),
-            },
+            ReservationState::Unknown { .. } => Err(JournalError::Law(
+                "Unknown settlement -- never auto-retried; human gate required".into(),
+            )),
+            ReservationState::ExpiredReleased { .. } => Err(JournalError::Law(
+                "window expired and released -- settle refused".into(),
+            )),
         }
     }
 
@@ -420,7 +502,9 @@ impl Journal {
             .ok_or_else(|| JournalError::Law("no reservation (fail-closed)".into()))?;
         if !matches!(
             rec.state,
-            ReservationState::Reserved { .. } | ReservationState::FailedKeep { .. }
+            ReservationState::Reserved { .. }
+                | ReservationState::FailedKeep { .. }
+                | ReservationState::Settling { .. }
         ) {
             return Err(JournalError::Law(
                 "state does not accept a no-evidence failure update".into(),
@@ -428,6 +512,7 @@ impl Journal {
         }
         let retained = match rec.state {
             ReservationState::Reserved { reserved_gas_wei } => reserved_gas_wei,
+            ReservationState::Settling { reserved_gas_wei } => reserved_gas_wei,
             ReservationState::FailedKeep {
                 reserved_gas_wei, ..
             } => reserved_gas_wei,
@@ -447,6 +532,14 @@ impl Journal {
         let mut rec = self
             .get(leg)?
             .ok_or_else(|| JournalError::Law("no reservation (fail-closed)".into()))?;
+        if !matches!(
+            rec.state,
+            ReservationState::Settling { .. } | ReservationState::Unknown { .. }
+        ) {
+            return Err(JournalError::Law(
+                "settle_unknown requires the Settling state (fail-closed)".into(),
+            ));
+        }
         rec.state = ReservationState::Unknown {
             since_unix: now_unix(),
             note: note.to_string(),
@@ -455,33 +548,52 @@ impl Journal {
         self.write(&rec)
     }
 
-    /// Expiry release — ONLY with evidence of non-settlement (the caller
-    /// supplies `chain_says_unspent: bool` from an on-chain check).
-    pub fn expire_released(&self, leg: &LegKey, chain_says_unspent: bool) -> JResult<()> {
+    /// Expiry release — ONLY with a typed on-chain verdict (D-4).
+    /// CONTRADICTION LAW: if this journal already HOLDS settlement evidence
+    /// for the leg, any release claim is refused — a settled leg's
+    /// authority can never reopen. RPC-unavailable is a HOLD, not a release
+    /// and not a refusal-of-record.
+    pub fn expire_released(&self, leg: &LegKey, verdict: ReleaseVerdict) -> JResult<()> {
         let _guard = self.acquire_exclusive()?;
-        let rec = self
+        let mut rec = self
             .get(leg)?
             .ok_or_else(|| JournalError::Law("no reservation (fail-closed)".into()))?;
-        if !chain_says_unspent {
+        // CONTRADICTION LAW FIRST: a leg this journal knows is Settled (or
+        // otherwise terminal) never moves on ANY verdict — the lying-RPC
+        // attack is refused before any park/release can run.
+        if !matches!(
+            rec.state,
+            ReservationState::Reserved { .. } | ReservationState::FailedKeep { .. }
+        ) {
             return Err(JournalError::Law(
-                "expiry release refused: on-chain check did not evidence non-settlement — human gate"
+                "expiry release refused: leg state is terminal (settled/released) — a settled leg's authority never reopens (D-4 contradiction law)"
                     .into(),
             ));
+        }
+        match verdict {
+            ReleaseVerdict::RpcUnavailable => {
+                return Err(JournalError::Law(
+                    "expiry release HELD: RPC unavailable — never treated as unspent, state untouched, retryable (D-4)"
+                        .into(),
+                ));
+            }
+            ReleaseVerdict::SpentOnChain => {
+                // The leg settled on-chain: park Unknown for the human gate —
+                // releasing would reopen a settled leg's authority.
+                rec.state = ReservationState::Unknown {
+                    since_unix: now_unix(),
+                    note: "expiry check found the nonce SPENT on-chain — reconciling via human gate (D-4)".into(),
+                };
+                rec.updated_unix = now_unix();
+                return self.write(&rec);
+            }
+            ReleaseVerdict::UnspentOnChain => {}
         }
         if now_unix() <= leg.valid_before_unix {
             return Err(JournalError::Law(
                 "window not yet expired — release refused".into(),
             ));
         }
-        if !matches!(
-            rec.state,
-            ReservationState::Reserved { .. } | ReservationState::FailedKeep { .. }
-        ) {
-            return Err(JournalError::Law(
-                "state is terminal or unknown — expiry release not applicable".into(),
-            ));
-        }
-        let mut rec = rec;
         rec.state = ReservationState::ExpiredReleased {
             checked_unix: now_unix(),
         };
@@ -490,6 +602,8 @@ impl Journal {
     }
 
     /// Human-gated resolution of an Unknown settlement (watchpay law).
+    /// The gate is BOUNDED by the same upto law as automated evidence:
+    /// a human records truth, never an impossible over-authorization.
     pub fn resolve_unknown(
         &self,
         leg: &LegKey,
@@ -503,6 +617,20 @@ impl Journal {
         if !matches!(rec.state, ReservationState::Unknown { .. }) {
             return Err(JournalError::Law("not in Unknown state".into()));
         }
+        let cap = rec
+            .leg
+            .amount_authorized
+            .parse::<u128>()
+            .unwrap_or(u128::MAX);
+        let actual = ev
+            .actual_amount
+            .parse::<u128>()
+            .map_err(|_| JournalError::Law("actual_amount not numeric".into()))?;
+        if actual > cap {
+            return Err(JournalError::Law(format!(
+                "upto law violated through the human gate: actual {actual} > authorized {cap} — the gate records truth, not the impossible"
+            )));
+        }
         rec.state = ReservationState::Settled {
             actual_amount: ev.actual_amount.clone(),
             tx_hash: ev.tx_hash.clone(),
@@ -510,7 +638,67 @@ impl Journal {
             settled_unix: now_unix(),
         };
         rec.updated_unix = now_unix();
-        self.write(&rec)
+        self.write(&rec)?;
+        // D-7 audit: every human-gate resolution is attributable to its
+        // call site, appended under the exclusive lock.
+        let site = _gate
+            .call_site
+            .map(|l| format!("{}:{}", l.file(), l.line()))
+            .unwrap_or_else(|| "unknown-call-site".to_string());
+        let mut f = OpenOptions::new()
+            .create(true)
+            .append(true)
+            .open(self.root.join("human-gates.log"))?;
+        writeln!(
+            f,
+            "{}\t{}\t{}\t{}",
+            now_unix(),
+            site,
+            rec.leg.chain,
+            rec.leg.auth_nonce
+        )?;
+        Ok(())
+    }
+
+    /// Restart recovery (founder order, preserves the Settling invariant):
+    /// any record found in `Settling` — the process died mid-execution, the
+    /// outcome is uncertain on-chain — parks to `Unknown` with a named note,
+    /// NEVER auto-retried. Returns the legs reconciled. Idempotent.
+    pub fn recover_stranded_settling(&self) -> JResult<Vec<LegKey>> {
+        let _guard = self.acquire_exclusive()?;
+        let mut reconciled = Vec::new();
+        for entry in fs::read_dir(&self.root)? {
+            let entry = entry?;
+            if !entry.file_type()?.is_dir() {
+                continue;
+            }
+            for f in fs::read_dir(entry.path())? {
+                let f = f?;
+                let name = f.file_name().to_string_lossy().to_string();
+                if !name.starts_with("res-") || !name.ends_with(".json") {
+                    continue;
+                }
+                let raw = fs::read_to_string(f.path()).map_err(|e| JournalError::Torn {
+                    path: f.path(),
+                    reason: e.to_string(),
+                })?;
+                let mut rec: Reservation =
+                    serde_json::from_str(&raw).map_err(|e| JournalError::Torn {
+                        path: f.path(),
+                        reason: e.to_string(),
+                    })?;
+                if matches!(rec.state, ReservationState::Settling { .. }) {
+                    rec.state = ReservationState::Unknown {
+                        since_unix: now_unix(),
+                        note: "found Settling at restart — execution outcome uncertain, human gate required".into(),
+                    };
+                    rec.updated_unix = now_unix();
+                    self.write(&rec)?;
+                    reconciled.push(rec.leg.clone());
+                }
+            }
+        }
+        Ok(reconciled)
     }
 
     // Test-only helpers (watchpay's test_support pattern; #[doc(hidden)]).
@@ -518,6 +706,11 @@ impl Journal {
     pub fn write_for_test(&self, rec: &Reservation) -> JResult<()> {
         let _guard = self.acquire_exclusive()?;
         self.write(rec)
+    }
+
+    #[doc(hidden)]
+    pub fn root_for_test(&self) -> &Path {
+        &self.root
     }
 
     #[doc(hidden)]
