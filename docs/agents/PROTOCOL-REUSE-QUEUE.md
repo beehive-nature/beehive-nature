@@ -148,3 +148,47 @@ Next evidence threshold:
 
 Seat stopped here by founder order 2026-09-15 — bounded mission complete at
 `5b445216`; no Eddies speculation beyond this marker until the threshold is met.
+
+## 2 · OPENA2A / AIM (+ org standards family) — OPEN · recon receipted 2026-09-15, WATCH (research-class)
+
+*Received 2026-09-15, founder re-task order: "switch from parked Eddies to
+OpenA2A/AIM + OpenCompany reconnaissance. Research only; no integration yet."
+Full source-verified recon: [`docs/dispatches/2026-09-15-protocol-recon-opena2a-aim-opencompany.md`](../dispatches/2026-09-15-protocol-recon-opena2a-aim-opencompany.md) (seat zCode, baseline `b20d4477`).*
+
+- **Resolved:** OpenA2A = agent-SECURITY org (opena2a.org, Apache-2.0), NOT the
+  A2A communication protocol — citation law banked. AIM = its
+  agent-identity-management tool: Ed25519 identity, 5-step FGA
+  (Capability→Attribute→Context→Chain→Intent, NanoMind classifier),
+  deny-before-execute at tool-call boundaries, append-only audit (JSONL/PG),
+  8+9-factor trust scoring; Go server, Python/Java/TS SDKs; cloud / self-host /
+  local modes. The charter's AIP/AAP/ATX resolve as OpenA2A-internal standards
+  (names only, unread).
+- **Adjacency (FACT-level; boundary evaluation DEFERRED to this seat, post
+  reconciliation gate):** same object family as bzDiD Layer-0 + capability
+  crate + dispatch-receipt discipline (§12 boundaries #4/#7); cloud/server
+  shapes sit against the adapter-ring rule (#6) and first-party-only law —
+  only local/self-hosted shapes are even candidates.
+- **Next evidence threshold:** code-level read of FGA enforcement points,
+  audit-event schema, trust-score inputs; the `did:opena2a` method spec; A2A
+  v1.0 spec pages (task-state enum, auth, Agent Card URL) for the name-trap's
+  other side.
+
+## 3 · OPENCOMPANY — OPEN · AMBIGUOUS REFERENT · WATCH (research-class)
+
+*Same order and recon receipt as item #2.*
+
+- **Premise correction:** "OpenCompany" does not resolve to one project —
+  five-plus live referents banked in the dispatch (citation law: never travel
+  unqualified). Dominant = zeenie-ai/OpenCompany (905★, MIT, local-first "OS
+  for AI employees", team-of-agents per employee, 148 tools, no MCP/A2A
+  claim). Closest-to-our-shape = tinyhumansai/opencompany (169★, Rust,
+  `company.toml` + human sign-off points, ~22 example companies) but carries
+  **GPL-3.0** and a **hosted Medulla orchestrator** (`TINYHUMANS_API_KEY`) —
+  both estate-law ruling questions (licensing posture; adapter-ring).
+  Also-rans: useopencompany workspace (MIT), opencompanybot.com (commercial
+  company-registration-for-agents), the archived pre-AI open-company Clojure
+  family (the pure name-trap).
+- **Blocked on founder disambiguation** — which referent did the charter mean?
+  Until then no candidate gets deeper than pattern-study.
+- **Reconciliation gate applies** as to every item; nothing here drives
+  implementation.
