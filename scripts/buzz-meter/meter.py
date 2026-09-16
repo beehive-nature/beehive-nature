@@ -811,6 +811,24 @@ def cmd_basepoll(args):
 #   GET /v1/voucher/<key>/afford?amount=X plain-sentence afford check
 
 VOUCHER_PORT = int(os.environ.get("VOUCHER_PORT", "8092"))
+
+# AV-3 door health (M-REPAIR): the charging site's live signal for the
+# compute delivery door (the gate). ANY HTTP response — even a 401 — proves
+# reachability; only connection-refused/timeout means down. Short timeout:
+# the probe must never become an availability liability itself.
+GATE_PROBE_URL = os.environ.get(
+    "GATE_PROBE_URL", "http://172.18.0.1:8091/readiness")
+
+def gate_door_health(timeout_s: float = 0.8):
+    """(down, note) — down=False means the door answered SOMETHING."""
+    import urllib.request, urllib.error
+    try:
+        with urllib.request.urlopen(GATE_PROBE_URL, timeout=timeout_s):
+            return False, "probe answered"
+    except urllib.error.HTTPError as e:
+        return False, f"probe answered HTTP {e.code}"
+    except Exception as e:
+        return True, f"unreachable: {type(e).__name__}"
 VOUCHER_ORIGINS = os.environ.get("VOUCHER_ORIGINS", "https://skaists.dev,https://beehivenature.com").split(",")
 
 # ── P6 (AV-1): the ADMIN rail — idempotent write verbs for the serve bridge.
@@ -1096,6 +1114,22 @@ def cmd_serve(args):
                             "different charge — conflict, nothing written"})
                     return self._send_admin(200, {"event": found,
                                                    "idempotent_replay": True})
+            # AV-3 identified-seam wiring (M-REPAIR): the charging site OWNS
+            # live door health (the av3 lane's law — burn sites must pass
+            # door_reachable; the admin rail is the real deployed charging
+            # caller). Compute delivery door unreachable ⇒ the charge PARKS:
+            # typed response, zero writes, idempotency key NOT consumed.
+            try:
+                door_down, door_note = gate_door_health()
+            except Exception as e:  # probe itself must never kill the rail
+                door_down, door_note = True, f"probe error: {e}"
+            if door_down:
+                return self._send_admin(200, {
+                    "parked": True, "park_reason": "door",
+                    "door_note": door_note, "retry": True,
+                    "message": "delivery door unreachable — charge PARKED "
+                               "(park-not-kill); nothing written, idempotency "
+                               "key unconsumed; retry when the door returns"})
             try:
                 rs = till_rate_set(classes)
                 ev = escrow().charge(voucher, pairs, rs, idempotency_key=key)
@@ -1109,6 +1143,35 @@ def cmd_serve(args):
         def do_GET(self):
             u = urlparse(self.path)
             parts = [p for p in u.path.split("/") if p]
+            # AV-2 shared admission seam (M-REPAIR): the ONE freshness law
+            # (x402_meter.rate_set_in_force — the same law the x402 session
+            # path uses), served for every operation that creates new
+            # rate-dependent exposure. The compute gate consumes this; no
+            # second TTL implementation exists anywhere. Public like the
+            # voucher views (pricing rows are public; freshness is the gate).
+            if parts == ["v1", "pricing", "admit"]:
+                from x402_meter import (rate_set_in_force, StaleRateSet,
+                                        RATE_SET_TTL_S,
+                                        rate_set_minted_at_epoch)
+                rs = load_rate_set()
+                minted = rate_set_minted_at_epoch(rs.get("minted_at"))
+                try:
+                    rate_set_in_force(minted, time.time())
+                except StaleRateSet:
+                    age = (time.time() - minted) if minted else None
+                    return self._send(503, {
+                        "ok": False, "stale": True,
+                        "minted_at": rs.get("minted_at"),
+                        "age_s": round(age, 1) if age is not None else None,
+                        "ttl_s": RATE_SET_TTL_S,
+                        "message": "rate set stale — new exposure refused "
+                                   "until a fresh mint"})
+                except VoucherError as e:
+                    return self._send(503, {"ok": False, "malformed": True,
+                                            "message": str(e)})
+                return self._send(200, {
+                    "ok": True, "minted_at": rs.get("minted_at"),
+                    "ttl_s": RATE_SET_TTL_S, "version": rs.get("version")})
             if len(parts) == 4 and parts[0] == "v1" and parts[1] == "voucher":
                 key = parts[2]
                 if not re.fullmatch(r"[a-z0-9._-]{1,64}", key):
