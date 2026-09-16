@@ -1,0 +1,8 @@
+06:18:56Z === gate-semantics battery (throwaway gate :8095) ===
+06:18:58Z PASS T1 keyless request 401 at the gate (auth before upstream)
+06:18:58Z PASS T1 upstream never saw it
+06:19:03Z T2 FINDING: gate did NOT close upstream after client abort (cancellation swallowed — generation runs to completion for a departed client)
+06:19:16Z T3 FINDING: gate verdict=000client-timeout after 8s (some bound exists?)
+06:19:16Z T3 FINDING: upstream socket still open ~8s+ after client departed (wedged slot held indefinitely through the gate)
+06:19:19Z PASS T4 false-ready through the front path: keyed /health=200 while /slots=000hang hangs
+06:19:19Z === battery end FAILED=0 ===

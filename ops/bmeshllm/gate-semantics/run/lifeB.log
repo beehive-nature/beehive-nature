@@ -1,0 +1,4 @@
+2026-09-16T06:18:58.312Z B conn open
+2026-09-16T06:18:58.313Z B req POST /v1/chat/completions from gate
+2026-09-16T06:19:01.318Z B B response socket closed early (client/gate aborted the response)
+2026-09-16T06:19:03.316Z B conn CLOSED (upstream socket ended — the gate let go)
