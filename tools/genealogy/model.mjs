@@ -102,13 +102,14 @@ export function bloodline(model) {
   return out;
 }
 
-export function depths(model) {
-  const d = model.root && model.persons[model.root] ? { [model.root]: 0 } : {};
-  let frontier = model.root ? [model.root] : [];
+export function depths(model, fromId) {
+  const start = fromId && model.persons[fromId] ? fromId : model.root;
+  const d = start ? { [start]: 0 } : {};
+  let frontier = start ? [start] : [];
   while (frontier.length) {
     const next = [];
     for (const id of frontier)
-      for (const p of model.edges[id] || [])
+      for (const p of (model.edges[id] || []))
         if (d[p] === undefined && model.persons[p]) { d[p] = d[id] + 1; next.push(p); }
     frontier = next;
   }
@@ -116,12 +117,34 @@ export function depths(model) {
 }
 
 // shortest root→target parent-chain (ids, root first). Null when unreachable.
-export function spine(model, targetId) {
-  const d = depths(model);
+// viaIds: optional waypoint chain — each via must be an ancestor of the next —
+// pinning the route when the collapsed medieval web offers several
+// equal-length shortest paths (the founder's canonical line is a CHOICE).
+export function spine(model, targetId, viaIds) {
+  const vias = Array.isArray(viaIds) ? viaIds.filter((v) => model.persons[v]) : [];
+  const waypoints = [...vias, targetId];
+  const segments = [];
+  let covered = [model.root];
+  for (let i = 0; i < waypoints.length; i++) {
+    const seg = segment(model, waypoints[i], i === 0 ? model.root : waypoints[i - 1]);
+    if (!seg) return null;
+    segments.push(seg);
+    covered = covered.concat(seg);
+  }
+  // stitch: root + [root..W1) + (W1..W2] + … — each segment excludes its start
+  return [model.root, ...segments.flat()];
+}
+function segment(model, targetId, startId) {
+  const d = depths(model, startId);
   if (d[targetId] === undefined) return null;
+  if (targetId === startId) return [];
   const chain = [];
   let cur = targetId;
-  while (cur !== undefined) { chain.push(cur); cur = towardRoot(model, d, cur); }
+  while (cur !== startId) {
+    chain.push(cur);
+    cur = towardRoot(model, d, cur);
+    if (cur === undefined) return null;
+  }
   return chain.reverse();
 }
 // edges point child→parents, so one step toward root = the child (depth-1)
@@ -132,29 +155,40 @@ function towardRoot(model, d, id) {
   return undefined;
 }
 
-// ── privacy: redact the living. Public corpus DROPS living persons entirely —
-// with ONE exception: the root itself survives as an anonymous "Living" stub
-// (the corpus needs its anchor; the root's identity is the page's subject and
-// the stub carries no dates and no source id).
+// ── privacy: redact the living. In a PUBLIC artifact, living persons on the
+// ROOT'S OWN LINE survive as anonymous "Living" stubs (name only — no dates,
+// no source ids) so the bloodline remains climbable from the founder to the
+// deceased generations; living persons OFF the root line are dropped entirely.
 export function privatize(model) {
   const out = createModel({ root: model.root, source: model.source });
-  out.meta = { ...model.meta, privacy: "living redacted: no names, no dates, no source ids (root kept as anonymous anchor)" };
+  out.meta = { ...model.meta, privacy: "living redacted to anonymous stubs on the root line; all other living dropped — no names, dates, or source ids" };
+  const onRootLine = new Set();
+  if (model.root) {
+    let frontier = [model.root];
+    while (frontier.length) {
+      const next = [];
+      for (const id of frontier) {
+        if (onRootLine.has(id)) continue;
+        onRootLine.add(id);
+        for (const p of (model.edges[id] || [])) if (model.persons[p]) next.push(p);
+      }
+      frontier = next;
+    }
+  }
   let redacted = 0;
   for (const [id, p] of Object.entries(model.persons)) {
-    if (p.living) { redacted++; continue; }
-    addPerson(out, { ...p, id });
-  }
-  if (model.root && model.persons[model.root]?.living) {
-    out.persons[model.root] = {
-      name: "Living", lifespan: null, gender: null, living: true,
-      evidence: { class: "living", basis: "era-heuristic" },
-    };
+    if (!p.living) { addPerson(out, { ...p, id }); continue; }
+    if (onRootLine.has(id)) {
+      out.persons[id] = { name: "Living", lifespan: null, gender: p.gender ?? null,
+        living: true, evidence: { class: "living", basis: "era-heuristic" } };
+    } else redacted++;
   }
   for (const [child, ps] of Object.entries(edgesWithin(model, out)))
     addEdge(out, child, ps);
   for (const [k, c] of Object.entries(model.couples))
     if (out.persons[c.p1] && out.persons[c.p2]) addCouple(out, c.p1, c.p2, c.marriage);
   out.meta.livingRedacted = redacted;
+  out.meta.livingStubs = [...onRootLine].filter((id) => model.persons[id]?.living).length;
   return out;
 }
 function edgesWithin(model, filtered) {
@@ -177,8 +211,8 @@ export function validate(model, { public: isPublic = false } = {}) {
   for (const [id, p] of Object.entries(P)) {
     if (!p.name) problems.push(`person ${id}: no name`);
     if (!p.evidence?.class) problems.push(`person ${id}: no evidence class`);
-    if (isPublic && p.living && id !== model.root) problems.push(`person ${id}: LIVING in a public artifact (privacy)`);
-    if (isPublic && p.living && id === model.root && (p.sourceId || p.lifespan)) problems.push(`person ${id}: living root stub must carry no dates or source id`);
+    if (isPublic && p.living && (p.name !== "Living" || p.lifespan || p.sourceId))
+      problems.push(`person ${id}: living in a public artifact must be an anonymous root-line stub (no dates, no source id)`);
   }
   for (const [child, ps] of Object.entries(model.edges)) {
     if (!P[child]) problems.push(`edge from non-person ${child}`);

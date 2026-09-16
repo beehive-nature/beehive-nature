@@ -6,7 +6,7 @@ import { readFileSync, writeFileSync } from "node:fs";
 import { createModel, addPerson, addEdge, addCouple, bloodline, spine, depths, validate, birthYear } from "./model.mjs";
 import { importWalk } from "./fs-adapter.mjs";
 
-const [rawPath, corpusOut, pageOut, spineRx] = process.argv.slice(2);
+const [rawPath, corpusOut, pageOut, spineRx, viaRx] = process.argv.slice(2);
 if (!rawPath || !corpusOut) {
   console.error("usage: node pipeline.mjs <raw-walk.json> <out-corpus.json> [out-page-data.json]");
   process.exit(1);
@@ -28,7 +28,9 @@ const blood = bloodline(model);
 const d = depths(model);
 
 // spine: pinned target when a regex is given, else the earliest-birth
-// BLOODLINE person (in-law ancestry never defines the house line)
+// BLOODLINE person (in-law ancestry never defines the house line).
+// viaRx (comma list) pins WAYPOINTS — the collapsed medieval web offers
+// several equal-length shortest paths; the founder's canonical line is chosen.
 const bloodEntries = [...blood].map((id) => ({ id, ...model.persons[id] }));
 let terminus;
 if (spineRx) {
@@ -39,7 +41,10 @@ if (spineRx) {
     .filter((p) => !p.living && p.name !== "Living")
     .reduce((a, b) => (birthYear(b.lifespan ?? "") ?? 9999) <= (birthYear(a.lifespan ?? "") ?? 9999) ? b : a, undefined);
 }
-const spineChain = terminus ? (spine(model, terminus.id) || []) : [];
+const viaIds = viaRx ? viaRx.split(",").map((s) => s.trim()).filter(Boolean)
+  .map((rxSrc) => bloodEntries.find((p) => !p.living && new RegExp(rxSrc, "i").test(p.name || ""))?.id)
+  .filter(Boolean) : [];
+const spineChain = terminus ? (spine(model, terminus.id, viaIds) || []) : [];
 
 // public corpus (privatized)
 // public set = deceased bloodline ∪ deceased spouses-of-bloodline (in-law
@@ -50,16 +55,34 @@ for (const c of Object.values(model.couples)) {
   if (blood.has(c.p2)) publishable.add(c.p1);
 }
 const pub = createModel({ root: model.root, source: model.source });
-let redacted = 0;
-for (const [id, p] of Object.entries(model.persons)) {
-  if (p.living) { redacted++; continue; }
-  if (!publishable.has(id)) continue;
-  addPerson(pub, { ...p, id });
+let redacted = 0, stubs = 0, livingTotal = 0;
+for (const p of Object.values(model.persons)) if (p.living) livingTotal++;
+// living bloodline persons → anonymous "Living" stubs (the comb must climb
+// from the founder); living off the root line → dropped entirely
+const onRootLine = new Set();
+{
+  let frontier = [model.root];
+  while (frontier.length) {
+    const next = [];
+    for (const id of frontier) {
+      if (onRootLine.has(id)) continue;
+      onRootLine.add(id);
+      for (const p of (model.edges[id] || [])) if (model.persons[p]) next.push(p);
+    }
+    frontier = next;
+  }
 }
-// the one living survivor: the root, as an anonymous anchor stub
-if (model.root && model.persons[model.root]?.living) {
-  pub.persons[model.root] = { name: "Living", lifespan: null, gender: null, living: true,
-    evidence: { class: "living", basis: "era-heuristic" } };
+for (const [id, p] of Object.entries(model.persons)) {
+  if (!publishable.has(id)) continue;
+  if (p.living) {
+    if (onRootLine.has(id)) {
+      pub.persons[id] = { name: "Living", lifespan: null, gender: p.gender ?? null,
+        living: true, evidence: { class: "living", basis: "era-heuristic" } };
+      stubs++;
+    } else redacted++;
+    continue;
+  }
+  addPerson(pub, { ...p, id });
 }
 for (const [child, ps] of Object.entries(model.edges)) if (pub.persons[child]) addEdge(pub, child, ps);
 for (const c of Object.values(model.couples)) if (pub.persons[c.p1] && pub.persons[c.p2]) addCouple(pub, c.p1, c.p2, c.marriage);
@@ -80,8 +103,10 @@ pub.meta = {
     livingRedacted: redacted,
     spineGenerations: spineChain.length,
     spineReaches: terminus ? `${terminus.name} ${terminus.lifespan ?? ""}`.trim() : "(no spine target found)",
+    livingRedacted: livingTotal, // every living person loses its details; `livingStubs` survive anonymously on the root line
+    livingStubs: stubs,
   },
-  privacy: "living persons redacted — no names, dates, or source ids",
+  privacy: "living persons redacted — root-line living survive as anonymous 'Living' stubs (no names, dates, or source ids); all other living dropped",
   confidenceTiers: "era heuristic (recorded ≥1850 · colonial 1550–1850 · medieval 1000–1550 · saga <1000); basis says era-heuristic until per-person source counts are harvested",
   claimPolicy: "every person carries its evidence class; the spine past the colonial era is traditional, not proven",
 };
@@ -121,7 +146,8 @@ console.log(JSON.stringify({
   walked: Object.keys(model.persons).length,
   bloodline: blood.size,
   published: Object.keys(pub.persons).length,
-  livingRedacted: redacted,
+  livingRedacted: livingTotal,
+  livingStubs: stubs,
   spine: spineChain.length,
   spineReaches: pub.meta.stats.spineReaches,
   wrote: [corpusOut, pageOut].filter(Boolean),

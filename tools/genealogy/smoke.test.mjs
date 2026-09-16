@@ -33,27 +33,28 @@ test("model validation catches structure breaks and privacy leaks", () => {
   const m = fixtureModel();
   // raw scope: living person WITH a source id is legal (full fidelity, local only)
   assert.deepEqual(validate(m).filter((p) => !p.startsWith("unresolved:")), []);
-  // public scope: any living person is a violation
+  // public scope: living persons must be anonymous root-line stubs
   const pubProblems = validate(m, { public: true });
-  assert.ok(pubProblems.some((p) => p.includes("LIVING in a public artifact")));
+  assert.ok(pubProblems.some((p) => p.includes("must be an anonymous root-line stub")));
   const pub = privatize(m);
   assert.deepEqual(validate(pub, { public: true }).filter((p) => !p.startsWith("unresolved:")), []);
 });
 
-test("privatize drops the living — root survives only as an anonymous anchor", () => {
+test("privatize — living bloodline become anonymous stubs, off-line living dropped", () => {
   const m = fixtureModel();
   const pub = privatize(m);
-  // living non-root: gone entirely
-  assert.equal(pub.persons.P2, undefined);
-  // living root: anonymous stub — no real name, no dates, no source id
+  // living root-line (P1 root + P2 mother) survive as anonymous stubs
   assert.deepEqual(pub.persons.P1, {
-    name: "Living", lifespan: null, gender: null, living: true,
+    name: "Living", lifespan: null, gender: "M", living: true,
     evidence: { class: "living", basis: "era-heuristic" },
   });
+  assert.equal(pub.persons.P2.name, "Living");
+  assert.equal(pub.persons.P2.lifespan, null);
   assert.equal(JSON.stringify(pub).includes("Founder Living"), false);
   assert.equal(JSON.stringify(pub).includes("1977"), false);
   assert.ok(pub.persons.P3);
-  assert.equal(pub.meta.livingRedacted, 2);
+  assert.equal(pub.meta.livingStubs, 2);
+  assert.deepEqual(validate(pub, { public: true }).filter((p) => !p.startsWith("unresolved:")), []);
 });
 
 test("bloodline, depths, spine reach the deep ancestor", () => {
@@ -96,7 +97,7 @@ test("GEDCOM round-trip: export → parse → same persons, edges, evidence", ()
 
   const back = createModel({ source: "gedcom-import" });
   const { persons } = fromGedcom(back, ged);
-  assert.equal(persons, 4); // 3 deceased + the anonymous "Living" root stub
+  assert.equal(persons, 5); // 3 deceased + 2 anonymous "Living" root-line stubs
   assert.equal(back.persons.P3.name, "Father Deceased");
   assert.equal(back.persons.P3.evidence.class, "recorded"); // 1925 birth = recorded era
   assert.equal(back.persons.P4.evidence.class, "colonial"); // 1701 = colonial era

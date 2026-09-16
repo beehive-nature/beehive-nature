@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta name="color-scheme" content="dark">
+<title>the blood comb — BNR genesis · interactive eternal hexagonal fan chart</title>
+<style>
+:root{--bg:#0d1410;--panel:#111a14;--well:#0a0f0b;--ink:#e2efdb;--dim:#8a9a8a;--faint:#5f6f61;--line:#243026;
+--cyan:#00E5FF;--gold:#FFD700;--violet:#c9a0ff;--verified:#86CC72;--info:#6FA9E0;--guard:#B7A8F7;--rose:#C41E3A}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{overflow-x:hidden}
+body{background:radial-gradient(circle at 50% -10%,#12251b 0%,var(--bg) 60%);color:var(--ink);
+ font:13px/1.7 'IBM Plex Mono',monospace;min-height:100vh;padding:0 0 110px}
+main{max-width:1100px;margin:0 auto;padding-inline:16px}
+.crumbs{display:flex;gap:10px;flex-wrap:wrap;padding:18px 0 9px;border-bottom:1px solid var(--line);
+ font-size:11px;letter-spacing:.12em;text-transform:uppercase}
+.crumbs a{color:var(--dim)} .crumbs .here{color:var(--ink)}
+.kicker{font-size:10px;letter-spacing:.3em;text-transform:uppercase;color:var(--faint);margin-top:22px}
+h1{font-size:clamp(22px,4.5vw,34px);line-height:1.15;margin:8px 0 6px;font-weight:600;
+ background-image:linear-gradient(92deg,#e2efdb 40%,#FFD700 95%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.lede{color:var(--dim);font-size:12px;max-width:78ch;line-height:1.9}
+.statsbar{margin-top:12px;font-size:.78rem;color:var(--gold);letter-spacing:.02em}
+.controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:14px}
+.controls input{flex:1;min-width:200px;max-width:380px;background:var(--well);border:1px solid var(--line);
+ border-radius:8px;color:var(--ink);font:12.5px 'IBM Plex Mono',monospace;padding:9px 12px;min-height:40px}
+.controls input:focus{outline:none;border-color:var(--cyan)}
+.controls button{background:var(--well);border:1px solid var(--line);color:var(--ink);border-radius:8px;
+ padding:9px 14px;font:11.5px 'IBM Plex Mono',monospace;cursor:pointer;min-height:40px}
+.controls button:hover{border-color:var(--gold)}
+.controls button[aria-pressed="true"]{border-color:var(--gold);color:var(--gold)}
+.searchout{margin-top:8px;display:grid;gap:4px}
+.searchout button{justify-self:start;background:none;border:1px dashed var(--line);border-radius:7px;color:var(--dim);
+ padding:5px 10px;cursor:pointer;font-size:11px}
+.searchout button:hover{color:var(--ink);border-color:var(--cyan)}
+.legend{display:flex;flex-wrap:wrap;gap:7px 13px;justify-content:flex-start;margin-top:12px;font-size:.68rem;color:var(--dim)}
+.legend .tk{display:inline-flex;align-items:center;gap:5px}
+.legend .tk i{width:10px;height:10px;background:var(--well);clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);display:inline-block}
+.combwrap{margin-top:16px;border:1px solid var(--line);border-radius:14px;background:
+ radial-gradient(circle at 50% 120%,rgba(255,215,0,.05),transparent 55%),var(--panel);padding:10px}
+.combwrap svg{width:100%;height:auto;display:block}
+.hexcell{cursor:pointer;stroke:var(--bg);stroke-width:1.6;transition:filter .15s}
+.hexcell:hover{filter:brightness(1.35)}
+.hexcell.spine{stroke:var(--gold);stroke-width:2.4}
+.hextext{pointer-events:none;font-family:'IBM Plex Mono',monospace}
+.detail{margin-top:14px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+.detail .dname{font-size:15px;color:var(--ink);font-weight:600}
+.detail .dyears{color:var(--dim);font-size:11px;margin-top:2px}
+.detail .dchips{margin-top:8px;display:flex;flex-wrap:wrap;gap:6px}
+.detail .chip{display:inline-flex;align-items:center;gap:5px;font-size:9.5px;padding:2px 9px;border-radius:99px;
+ border:1px solid var(--line);color:var(--dim)}
+.detail .chip.t{border-color:currentColor}
+.detail .drels{margin-top:10px;display:grid;gap:6px;font-size:11.5px}
+.detail .drels .lab{font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
+.detail .drels button{background:none;border:0;color:var(--cyan);cursor:pointer;font:11.5px 'IBM Plex Mono',monospace;
+ padding:0;text-align:left;text-decoration:underline dotted}
+.detail .dactions{margin-top:12px;display:flex;flex-wrap:wrap;gap:8px}
+.detail .dactions button{background:var(--gold);border:0;color:#152016;border-radius:8px;padding:8px 14px;
+ font:600 11.5px 'IBM Plex Mono',monospace;cursor:pointer}
+.detail .dactions button.ghost{background:none;border:1px solid var(--line);color:var(--ink)}
+.detail a{color:var(--cyan)}
+.rootnote{margin-top:10px;font-size:10.5px;color:var(--dim)}
+.empty{color:var(--dim);font-size:11.5px;margin-top:10px}
+footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint);font-size:10px;text-align:center;line-height:1.9}
+@media(max-width:640px){.combwrap{padding:6px}.detail{padding:12px}}
+</style>
+</head>
+<body>
+<main>
+<nav class="crumbs" aria-label="you are here">
+  <a href="index.html">beehive nature reserve</a><span>▸</span><a href="profile.html#blood-record">dynasty profile</a><span>▸</span><span class="here">the blood comb</span>
+</nav>
+<header>
+  <div class="kicker">bnr genesis · the blood archive</div>
+  <h1 data-i18n="blood.h">the blood comb — the eternal hexagonal fan chart</h1>
+  <p class="lede" data-i18n="blood.lede">Every cell is an ancestor; the comb is the hive's own shape. Click a cell to read it, re-root to walk that line forever — the fan redraws from any person in the archive. Colors carry evidence eras; saga is never shown as documented. Sigurd Snake-in-the-Eye and the attested kin ride in with their evidence packs.</p>
+  <p class="statsbar" id="stats"></p>
+</header>
+
+<div class="controls">
+  <input id="q" type="text" spellcheck="false" autocomplete="off" placeholder="search ten thousand ancestors — name or FamilySearch id">
+  <button id="spinebtn" type="button" aria-pressed="false" data-i18n="blood.spine">highlight the spine</button>
+  <button id="resetbtn" type="button" data-i18n="blood.reset">back to the founder</button>
+</div>
+<div class="searchout" id="qout"></div>
+<div class="legend" id="legend"></div>
+
+<div class="combwrap"><svg id="comb" viewBox="0 0 1080 560" role="application" aria-label="interactive hexagonal fan chart of ancestors"></svg></div>
+
+<section class="detail" id="detail" aria-live="polite">
+  <p class="empty" id="dempty" data-i18n="blood.pick">click a cell — or search a name — to read an ancestor.</p>
+  <div id="dbody" hidden></div>
+</section>
+
+<p class="rootnote" id="rootnote"></p>
+</main>
+<footer>
+  <div data-i18n="blood.foot">the blood comb · walked from FamilySearch under the founder's own session · living redacted · evidence eras are labels, never proofs</div>
+  <div><a href="../assets/profile-archive/lineage/remington-bloodline.json">lineage corpus (JSON)</a> · <a href="profile.html#blood-record">the crest bio record</a> · <a href="index.html">the hive</a></div>
+</footer>
+<script>
+(function(){
+  var CORPUS_URL='../assets/profile-archive/lineage/remington-bloodline.json';
+  var OVERLAY_URL='../assets/profile-archive/lineage/attested-overlays.json';
+  var TIER_COLOR={recorded:'var(--verified)',colonial:'var(--info)',medieval:'var(--gold)',saga:'var(--violet)',living:'var(--dim)',unrecorded:'var(--dim)'};
+  var esc=function(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});};
+  function langText(key,fallback){var t=window.BNRLanguage&&window.BNRLanguage.text;return t?t(key,fallback):fallback;}
+  var S={persons:{},edges:{},children:{},spineIds:new Set(),root:null,curRoot:null,spineOn:false,stats:{},packs:{}};
+  function addChild(p,c){(S.children[p]=S.children[p]||[]).push(c);}
+  fetch(CORPUS_URL).then(r=>r.json()).then(c=>{
+    S.persons=c.persons||{};S.edges=c.edges||{};S.root=c.root;S.curRoot=c.root;
+    S.stats=(c.meta&&c.meta.stats)||{};
+    (c.spine||[]).forEach(r=>{if(r.f)S.spineIds.add(r.f);});
+    for(var e in S.edges)S.edges[e].forEach(p=>addChild(p,e));
+    return fetch(OVERLAY_URL).then(r=>r.json()).catch(()=>null);
+  }).then(ov=>{
+    if(ov&&ov.persons){
+      for(var id in ov.persons){S.persons[id]=ov.persons[id];S.packs[id]=ov.persons[id].evidencePack||null;}
+      for(var ce in ov.edges){S.edges[ce]=ov.edges[ce];ov.edges[ce].forEach(p=>addChild(p,ce));}
+    }
+    renderDyn();drawComb();showRootNote();
+  }).catch(()=>{document.getElementById('stats').textContent='could not load the corpus';});
+  function renderDyn(){
+    document.getElementById('stats').textContent=langText('blood.stats',
+      '{w} walked · {d} deceased published · {l} living redacted · spine {g} generations deep')
+      .replace('{w}',S.stats.personsWalked).replace('{d}',S.stats.deceasedPublished)
+      .replace('{l}',S.stats.livingRedacted).replace('{g}',S.stats.spineGenerations);
+    var lg=document.getElementById('legend');
+    lg.innerHTML='';
+    [['recorded','prof.arch.blood.tier.recorded','recorded · born 1850+'],
+     ['colonial','prof.arch.blood.tier.colonial','colonial · 1550–1850'],
+     ['medieval','prof.arch.blood.tier.medieval','medieval · 1000–1550'],
+     ['saga','prof.arch.blood.tier.saga','saga · before 1000'],
+     ['living','prof.arch.blood.tier.living','living · redacted']].forEach(function(t){
+      var k=document.createElement('span');k.className='tk';
+      var i=document.createElement('i');i.style.background=TIER_COLOR[t[0]];k.appendChild(i);
+      var s=document.createElement('span');s.textContent=langText(t[1],t[2]);k.appendChild(s);
+      lg.appendChild(k);});
+    var cap=document.createElement('span');cap.className='tk';
+    cap.textContent=langText('prof.arch.blood.tier','era labels, not verdicts');lg.appendChild(cap);
+  }
+  document.addEventListener('blang',renderDyn);
+  // ── hex geometry: flat-top, child (x,y) → parents (x±w/2, y−1.5s)
+  var SQ3=Math.sqrt(3);
+  function hexPts(cx,cy,s){var p=[];for(var a=0;a<6;a++){var r=a*Math.PI/3;p.push((cx+s*Math.cos(r)).toFixed(1)+','+(cy+s*Math.sin(r)).toFixed(1));}return p.join(' ');}
+  function drawComb(){
+    var svg=document.getElementById('comb');svg.innerHTML='';
+    var NS='http://www.w3.org/2000/svg';
+    var s=17,W=SQ3*s,CX=540,BASEY=520,RINGS=5;
+    var seen={},placed=0;
+    function cell(id,x,y,ring){
+      if(!id||seen[id]||placed>130)return;seen[id]=1;placed++;
+      var p=S.persons[id];if(!p)return;
+      var g=document.createElementNS(NS,'polygon');
+      g.setAttribute('points',hexPts(x,y,s));
+      g.setAttribute('class','hexcell'+(S.spineOn&&S.spineIds.has(id)?' spine':''));
+      g.setAttribute('fill',TIER_COLOR[(p.evidence&&p.evidence.class)||'unrecorded']||TIER_COLOR.unrecorded);
+      g.setAttribute('fill-opacity',ring===0?'0.95':'0.62');
+      var t=document.createElementNS(NS,'title');
+      t.textContent=(p.name||id)+(p.lifespan?' · '+p.lifespan:'');g.appendChild(t);
+      g.addEventListener('click',function(){showDetail(id);});
+      svg.appendChild(g);
+      if(ring<=2){
+        var tx=document.createElementNS(NS,'text');
+        tx.setAttribute('x',x);tx.setAttribute('y',y+3);tx.setAttribute('class','hextext');
+        tx.setAttribute('text-anchor','middle');tx.setAttribute('font-size',ring===0?'10':'8');
+        tx.setAttribute('fill','#0d1410');tx.setAttribute('pointer-events','none');
+        var nm=String(p.name||'').trim().split(/\s+/).pop()||'—';
+        tx.textContent=nm.length>13?nm.slice(0,12)+'…':nm;
+        svg.appendChild(tx);
+      }
+      if(ring>=RINGS)return;
+      var ps=S.edges[id]||[];
+      var fa=ps.find(function(x){return S.persons[x]&&S.persons[x].gender==='M';})||ps[0];
+      var mo=ps.find(function(x){return S.persons[x]&&S.persons[x].gender==='F';})||ps[1];
+      if(fa)cell(fa,x-W/2,y-1.5*s,ring+1);
+      if(mo)cell(mo,x+W/2,y-1.5*s,ring+1);
+    }
+    cell(S.curRoot,CX,BASEY,0);
+    if(!placed){var e=document.createElementNS(NS,'text');e.setAttribute('x',CX);e.setAttribute('y',BASEY);
+      e.setAttribute('text-anchor','middle');e.setAttribute('fill','var(--dim)');e.textContent='no persons at this root';
+      svg.appendChild(e);}
+  }
+  function showRootNote(){
+    var n=document.getElementById('rootnote');
+    n.textContent=S.curRoot&&S.curRoot!==S.root
+      ?langText('blood.exploring','exploring from: {n} — the founder is one tap away').replace('{n}',nameOf(S.curRoot))
+      :'';
+  }
+  function nameOf(id){var p=S.persons[id];return p?(p.name||id):id;}
+  function tierChip(cls){return '<span class="chip t" style="color:'+TIER_COLOR[cls]+'">'+esc(cls)+'</span>';}
+  function showDetail(id){
+    var p=S.persons[id];if(!p)return;
+    var body=document.getElementById('dbody'),emp=document.getElementById('dempty');
+    emp.hidden=true;body.hidden=false;
+    var cls=(p.evidence&&p.evidence.class)||'unrecorded';
+    var rels='';
+    var ps=S.edges[id]||[];
+    if(ps.length){rels+='<div class="drels"><div class="lab" data-i18n="blood.parents">parents</div>';
+      ps.forEach(function(x){if(S.persons[x])rels+='<button data-go="'+esc(x)+'">↑ '+esc(nameOf(x))+(S.persons[x].lifespan?' · '+esc(S.persons[x].lifespan):'')+'</button>';});
+      rels+='</div>';}
+    var ch=S.children[id]||[];
+    if(ch.length){rels+='<div class="drels"><div class="lab" data-i18n="blood.children">children</div>';
+      ch.slice(0,12).forEach(function(x){if(S.persons[x])rels+='<button data-go="'+esc(x)+'">↓ '+esc(nameOf(x))+'</button>';});
+      if(ch.length>12)rels+='<span style="color:var(--faint)">… '+(ch.length-12)+' more</span>';
+      rels+='</div>';}
+    var chips=tierChip(cls);
+    if(p.living&&id===S.root)chips+='<span class="chip">'+esc(langText('blood.rootchip','the founder — living, redacted'))+'</span>';
+    if(S.packs[id])chips+='<span class="chip" style="color:var(--violet)">'+esc(langText('blood.attested','attested overlay — evidence pack'))+'</span>';
+    if(!p.living&&/^[A-Z0-9]{4}-[A-Z0-9]{3,4}$/.test(id))chips+='<span class="chip">'+esc('FS '+id)+'</span>';
+    if(S.spineIds.has(id))chips+='<span class="chip" style="color:var(--gold)">'+esc(langText('blood.onspine','on the spine'))+'</span>';
+    body.innerHTML='<div class="dname">'+esc(p.name||id)+'</div>'
+      +(p.lifespan?'<div class="dyears">'+esc(p.lifespan)+'</div>':'')
+      +'<div class="dchips">'+chips+'</div>'+rels
+      +'<div class="dactions"><button id="reroot" data-i18n="blood.reroot">re-root the comb here</button>'
+      +(S.packs[id]?'<a class="ghost" style="text-decoration:none;padding:8px 14px;border:1px solid var(--line);border-radius:8px;color:var(--cyan)" href="../assets/profile-archive/lineage/'+esc(S.packs[id])+'">'+esc(langText('blood.pack','open the evidence pack'))+'</a>':'')
+      +'</div>';
+    body.querySelectorAll('[data-go]').forEach(function(b){b.addEventListener('click',function(){showDetail(b.getAttribute('data-go'));});});
+    document.getElementById('reroot').addEventListener('click',function(){S.curRoot=id;drawComb();showRootNote();});
+  }
+  document.getElementById('spinebtn').addEventListener('click',function(){
+    S.spineOn=!S.spineOn;this.setAttribute('aria-pressed',String(S.spineOn));drawComb();});
+  document.getElementById('resetbtn').addEventListener('click',function(){S.curRoot=S.root;drawComb();showRootNote();showDetail(S.root);});
+  document.getElementById('q').addEventListener('input',function(){
+    var v=this.value.trim().toLowerCase(),out=document.getElementById('qout');out.innerHTML='';
+    if(v.length<2)return;
+    var hits=[];
+    for(var id in S.persons){var p=S.persons[id];
+      if((p.name||'').toLowerCase().indexOf(v)>=0||id.toLowerCase()===v){hits.push(id);if(hits.length>=8)break;}}
+    hits.forEach(function(hid){
+      var b=document.createElement('button');
+      b.textContent=(S.persons[hid].name||hid)+(S.persons[hid].lifespan?' · '+S.persons[hid].lifespan:'');
+      b.addEventListener('click',function(){showDetail(hid);});
+      out.appendChild(b);});
+    if(!hits.length){var e=document.createElement('button');e.disabled=true;
+      e.textContent=langText('blood.notfound','no ancestor by that name in the archive');e.style.opacity=.6;out.appendChild(e);}
+  });
+})();
+</script>
+<script src="tour.js?v=42"></script>
+</body>
+</html>

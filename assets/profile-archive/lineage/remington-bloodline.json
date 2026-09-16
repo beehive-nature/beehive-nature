@@ -3,6 +3,36 @@
  "root": "L627-FH9",
  "source": "familysearch",
  "persons": {
+  "L627-FH9": {
+   "name": "Living",
+   "lifespan": null,
+   "gender": "MALE",
+   "living": true,
+   "evidence": {
+    "class": "living",
+    "basis": "era-heuristic"
+   }
+  },
+  "LNQ5-BS7": {
+   "name": "Living",
+   "lifespan": null,
+   "gender": "MALE",
+   "living": true,
+   "evidence": {
+    "class": "living",
+    "basis": "era-heuristic"
+   }
+  },
+  "LNQ5-BSB": {
+   "name": "Living",
+   "lifespan": null,
+   "gender": "FEMALE",
+   "living": true,
+   "evidence": {
+    "class": "living",
+    "basis": "era-heuristic"
+   }
+  },
   "KWCL-VJ6": {
    "name": "Jack Benedum Sutphen",
    "lifespan": "1920–1982",
@@ -24,6 +54,26 @@
    "sourceId": "KWCL-VNB",
    "evidence": {
     "class": "recorded",
+    "basis": "era-heuristic"
+   }
+  },
+  "LNQ5-BSG": {
+   "name": "Living",
+   "lifespan": null,
+   "gender": "MALE",
+   "living": true,
+   "evidence": {
+    "class": "living",
+    "basis": "era-heuristic"
+   }
+  },
+  "LNQ5-BSF": {
+   "name": "Living",
+   "lifespan": null,
+   "gender": "FEMALE",
+   "living": true,
+   "evidence": {
+    "class": "living",
     "basis": "era-heuristic"
    }
   },
@@ -123014,22 +123064,20 @@
     "class": "medieval",
     "basis": "era-heuristic"
    }
-  },
-  "L627-FH9": {
-   "name": "Living",
-   "lifespan": null,
-   "gender": null,
-   "living": true,
-   "evidence": {
-    "class": "living",
-    "basis": "era-heuristic"
-   }
   }
  },
  "edges": {
   "L627-FH9": [
    "LNQ5-BS7",
    "LNQ5-BSB"
+  ],
+  "LNQ5-BS7": [
+   "KWCL-VJ6",
+   "KWCL-VNB"
+  ],
+  "LNQ5-BSB": [
+   "LNQ5-BSG",
+   "LNQ5-BSF"
   ],
   "KWCL-VJ6": [
    "L4R4-43N",
@@ -123038,6 +123086,14 @@
   "KWCL-VNB": [
    "KWCL-VJS",
    "KWCL-VJ7"
+  ],
+  "LNQ5-BSG": [
+   "KWCL-B8V",
+   "KWCL-B8K"
+  ],
+  "LNQ5-BSF": [
+   "KWZ2-6DC",
+   "KWZ2-6DZ"
   ],
   "L4R4-43N": [
    "L4R4-43V",
@@ -150829,9 +150885,17 @@
   ]
  },
  "couples": {
+  "LNQ5-BS7|LNQ5-BSB": {
+   "p1": "LNQ5-BS7",
+   "p2": "LNQ5-BSB"
+  },
   "KWCL-VJ6|KWCL-VNB": {
    "p1": "KWCL-VJ6",
    "p2": "KWCL-VNB"
+  },
+  "LNQ5-BSF|LNQ5-BSG": {
+   "p1": "LNQ5-BSG",
+   "p2": "LNQ5-BSF"
   },
   "L4R4-43N|LWBJ-MJ8": {
    "p1": "L4R4-43N",
@@ -170244,12 +170308,13 @@
   "stats": {
    "personsWalked": 18572,
    "bloodlinePersons": 10097,
-   "deceasedPublished": 10252,
+   "deceasedPublished": 10256,
    "livingRedacted": 7,
-   "spineGenerations": 45,
-   "spineReaches": "Sigurd Ring de Trondheim 0600–Deceased"
+   "spineGenerations": 42,
+   "spineReaches": "Randver Radbardson 0670–0730",
+   "livingStubs": 5
   },
-  "privacy": "living persons redacted — no names, dates, or source ids",
+  "privacy": "living persons redacted — root-line living survive as anonymous 'Living' stubs (no names, dates, or source ids); all other living dropped",
   "confidenceTiers": "era heuristic (recorded ≥1850 · colonial 1550–1850 · medieval 1000–1550 · saga <1000); basis says era-heuristic until per-person source counts are harvested",
   "claimPolicy": "every person carries its evidence class; the spine past the colonial era is traditional, not proven"
  },
@@ -170359,213 +170424,192 @@
   },
   {
    "i": 15,
-   "n": "Edward Courtenay II Of Landrake",
-   "l": "1495–1539",
+   "n": "Margaret Trethurfee",
+   "l": "1504–1576",
    "t": "medieval",
-   "f": "LBCS-24P"
+   "f": "MKZF-8M6"
   },
   {
    "i": 16,
-   "n": "Edward de Courtenay I of Powderham",
-   "l": "1451–1510",
+   "n": "Thomas Trethurffe",
+   "l": "1477–1529",
    "t": "medieval",
-   "f": "LHK1-F1W"
+   "f": "LZ71-8P3"
   },
   {
    "i": 17,
-   "n": "Lady Margaret Bonville",
-   "l": "1425–1487",
+   "n": "Elizabeth de Courtenay",
+   "l": "1447–1510",
    "t": "medieval",
-   "f": "K1KM-T5N"
+   "f": "L1W2-LWW"
   },
   {
    "i": 18,
-   "n": "Lady Margaret Grey",
-   "l": "1380–1427",
+   "n": "Margaret Carminow",
+   "l": "1425–1512",
    "t": "medieval",
-   "f": "GNYV-XJ6"
+   "f": "LD5L-CW8"
   },
   {
    "i": 19,
-   "n": "Margaret de Ros",
-   "l": "1360–1414",
+   "n": "Thomas Carminow of Boconnoc",
+   "l": "1396–1442",
    "t": "medieval",
-   "f": "GD7C-9XG"
+   "f": "GY4B-Q49"
   },
   {
    "i": 20,
-   "n": "Thomas de Ros 4th Baron of Helmsley",
-   "l": "1336–1384",
+   "n": "Sir William de Carminow",
+   "l": "1377–1406",
    "t": "medieval",
-   "f": "L83H-NSR"
+   "f": "GW9P-WV8"
   },
   {
    "i": 21,
-   "n": "William de Ros 2nd Baron Helmsley",
-   "l": "1285–1343",
+   "n": "Alice Tynten",
+   "l": "1324–1356",
    "t": "medieval",
-   "f": "LYLZ-R8T"
+   "f": "G83C-16X"
   },
   {
    "i": 22,
-   "n": "William de Ros 1st Baron Helmsley",
-   "l": "1255–1316",
+   "n": "Elizabeth Bloyou",
+   "l": "1301–1371",
    "t": "medieval",
-   "f": "LBJC-C2N"
+   "f": "GQ8Q-T5Y"
   },
   {
    "i": 23,
-   "n": "Sir Robert de Ros of Belvoir",
-   "l": "1230–1285",
+   "n": "Joan de Bodrugan",
+   "l": "1284–1331",
    "t": "medieval",
-   "f": "LY96-J4K"
+   "f": "K8MX-JWD"
   },
   {
    "i": 24,
-   "n": "Sir William de Ros of Helmsley",
-   "l": "1191–1264",
+   "n": "Sybil de Mandeville",
+   "l": "1264–1307",
    "t": "medieval",
-   "f": "9HZG-9Q4"
+   "f": "G94Q-PV8"
   },
   {
    "i": 25,
-   "n": "Isabella Mac  William",
-   "l": "1175–1242",
+   "n": "Walter of Manderville",
+   "l": "1220–1267",
    "t": "medieval",
-   "f": "9CMJ-BLF"
+   "f": "P4F1-9PS"
   },
   {
    "i": 26,
-   "n": "William 'The Lion' King of Scotland",
-   "l": "1143–1214",
+   "n": "Christine FitzRobert Countess Of Essex",
+   "l": "1187–1232",
    "t": "medieval",
-   "f": "L8YY-5PB"
+   "f": "G8TV-DFB"
   },
   {
    "i": 27,
-   "n": "Henry of Scotland Earl of Huntingdon",
-   "l": "1114–1152",
+   "n": "Gunnora de Valognes",
+   "l": "1166–1212",
    "t": "medieval",
-   "f": "LZB4-2C7"
+   "f": "GM5J-515"
   },
   {
    "i": 28,
-   "n": "Matilda of Huntingdon",
-   "l": "1074–1130",
+   "n": "Robert de Valognes",
+   "l": "1136–1184",
    "t": "medieval",
-   "f": "L8M6-YWJ"
+   "f": "GD7X-BMF"
   },
   {
    "i": 29,
-   "n": "Judith de Lens",
-   "l": "1054–1090",
+   "n": "Sir Roger de Valognes",
+   "l": "1081–1141",
    "t": "medieval",
-   "f": "LDSS-ZMD"
+   "f": "G3PR-QC5"
   },
   {
    "i": 30,
-   "n": "Lambert II de Boulogne comte de Lens",
-   "l": "1022–1054",
+   "n": "Albreda De Ryes-Gifford De Bolbec",
+   "l": "1052–1096",
    "t": "medieval",
-   "f": "LRHH-9JN"
+   "f": "G95Q-XJK"
   },
   {
    "i": 31,
-   "n": "Mathilde , gravin van Leuven",
-   "l": "1006–1049",
+   "n": "Albérade Gifford de Bolbec-de la Hayes Dame des Préaux",
+   "l": "1024–1055",
    "t": "medieval",
-   "f": "LDSS-KHY"
+   "f": "PF9D-HBL"
   },
   {
    "i": 32,
-   "n": "Gerberge de Basse-Lotharingie",
-   "l": "0975–1018",
+   "n": "Honfroi Humfridum de Veulles du Ponteaudemer",
+   "l": "0980–1044",
    "t": "saga",
-   "f": "LDSS-KKV"
+   "f": "99Y7-MCD"
   },
   {
    "i": 33,
-   "n": "Charles, Duc de Basse-Lotharingie",
-   "l": "0953–0992",
+   "n": "Wevia de Crépon",
+   "l": "0952–0990",
    "t": "saga",
-   "f": "LZLQ-664"
+   "f": "PHDB-7QL"
   },
   {
    "i": 34,
-   "n": "Gerberga von Sachsen Fränkische Königin",
-   "l": "0913–0984",
+   "n": "Princess Gynrithe Olafsdottir Of Denmark",
+   "l": "0923–1002",
    "t": "saga",
-   "f": "KFX1-BZD"
+   "f": "KLXB-KTC"
   },
   {
    "i": 35,
-   "n": "Mathilde von Ringelheim",
-   "l": "0894–0968",
+   "n": "King Olof Björnsson",
+   "l": "0885–0964",
    "t": "saga",
-   "f": "9CZV-2KJ"
+   "f": "L7N5-6KK"
   },
   {
    "i": 36,
-   "n": "Reginhild",
-   "l": "0860–0917",
+   "n": "Prince of Sweden Bjorn III Eriksson",
+   "l": "0872–0956",
    "t": "saga",
-   "f": "G88G-V6W"
+   "f": "PHG3-Q1P"
   },
   {
    "i": 37,
-   "n": "Gottfried von Friesland",
-   "l": "0826–0885",
+   "n": "Eric Edmundsson",
+   "l": "0849–0900",
    "t": "saga",
-   "f": "LRPY-5XF"
+   "f": "G8KQ-J2R"
   },
   {
    "i": 38,
-   "n": "Harald Klak Halfdansson",
-   "l": "0785–0852",
+   "n": "Alof Ragnarsdottír",
+   "l": "0837–0871",
    "t": "saga",
-   "f": "LDHS-886"
+   "f": "GNB9-NC5"
   },
   {
    "i": 39,
-   "n": "Helga Dagsdottir",
-   "l": "0760–0815",
+   "n": "Ragnar Sigurdsson",
+   "l": "0740–0845",
    "t": "saga",
-   "f": "GJ38-Z5C"
+   "f": "M8WZ-XZY"
   },
   {
    "i": 40,
-   "n": "Dag Hognasson King of Vestmare",
-   "l": "0720–0786",
+   "n": "Sigurd Ring Randversson",
+   "l": "0715–0810",
    "t": "saga",
-   "f": "GNLY-W15"
+   "f": "LTSB-5WH"
   },
   {
    "i": 41,
-   "n": "Earl of Throndheim Hogne Eysteinsson",
-   "l": "0700–0737",
+   "n": "Randver Radbardson",
+   "l": "0670–0730",
    "t": "saga",
-   "f": "G3ST-CT1"
-  },
-  {
-   "i": 42,
-   "n": "Eystein 'Hardråde, the Severe' Trondsson Petty King of Hedmark, Norway",
-   "l": "0660–0710",
-   "t": "saga",
-   "f": "KLVW-6CR"
-  },
-  {
-   "i": 43,
-   "n": "Ragnhild Sigurdsdatter of Ring",
-   "l": "0625–0687",
-   "t": "saga",
-   "f": "G5ZQ-G3J"
-  },
-  {
-   "i": 44,
-   "n": "Sigurd Ring de Trondheim",
-   "l": "0600–Deceased",
-   "t": "saga",
-   "f": "P7ZQ-LGY"
+   "f": "LZ2F-W87"
   }
  ]
 }
