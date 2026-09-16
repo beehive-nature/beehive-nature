@@ -5,6 +5,13 @@ edition = "2021"
 license = "MIT"
 description = "OFFLINE-first x402 door for the box: wraps x402-facilitator-local behind a reserve-settle journal with watchpay's proven reservation/recovery laws and R4 per-leg unlinkability. Base + EIP-3009 exact + upto to start. No production deployment; testnet runbook in README."
 
+[features]
+# live-wiring: compile the FacilitatorLocal composition (Linux). Off by
+# default: the chartered bar (laws + acceptance) is platform-independent;
+# the wiring has one named open compile item (see README) — never shipped as
+# claimed-working until it compiles.
+live-wiring = []
+
 [dependencies]
 x402-types = "2.0.2"
 axum = "0.8"

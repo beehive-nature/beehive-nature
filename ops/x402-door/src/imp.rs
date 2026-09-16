@@ -1,5 +1,14 @@
-//! The Unix implementation: config -> journal -> LIVE facilitator wiring ->
-//! loopback HTTP. Every protocol concern (signature validation, on-chain
+//! The Unix live-wiring implementation: config -> journal -> LIVE facilitator
+//! composition -> loopback HTTP. FEATURE `live-wiring` (off by default).
+//!
+//! FLAG (open compile item, do not claim working until green): upstream
+//! 2.0.2 publishes NO public composition of SchemeRegistry::build with a
+//! real provider — `X402SchemeBlueprint<P>` requires
+//! `for<'a> X402SchemeFacilitatorBuilder<&'a P>` while the provider traits
+//! are implemented for `Eip155ChainProvider` and blanket `Arc<T>` (not
+//! references), so the P to store in `ChainRegistry` must be settled by a
+//! real Linux compile (box) or upstream guidance. Everything else in this
+//! module is shape-verified at source. Every protocol concern (signature validation, on-chain
 //! settlement, nonce management) is upstream `x402-facilitator-local`'s;
 //! this module only translates at the door's JSON seam and maps ambiguous
 //! transport outcomes to the door's Unknown law.

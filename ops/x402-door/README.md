@@ -38,6 +38,16 @@ Plus watchpay's ledger mechanics verbatim: exclusive-writer OS file lock
 across every mutation, kernel-released on death; temp-file + fsync + rename
 durability; `Unknown` never auto-retries (HumanGate only).
 
+## live-wiring FLAG (open compile item)
+
+`SchemeRegistry::build` composition lives behind `--features live-wiring`
+(default OFF). Upstream 2.0.2 ships no public example composing the
+registry with a real provider, and the provider-trait impl topology
+(`Arc<T>` blankets, no reference impls) leaves the stored provider type to
+be settled by a real Linux compile (the box) or upstream guidance. The
+door's LAWS and acceptance contract do not depend on it (door-swap seam);
+nothing here is claimed working until it compiles green.
+
 ## Run (Linux — box/CI)
 
 Upstream `x402-facilitator-local` uses `tokio::signal::unix`: the live binary

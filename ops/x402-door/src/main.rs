@@ -25,10 +25,10 @@ struct RunConfig {
     facilitator_chain_config: PathBuf,
 }
 
-#[cfg(unix)]
+#[cfg(all(unix, feature = "live-wiring"))]
 mod imp;
 
-#[cfg(unix)]
+#[cfg(all(unix, feature = "live-wiring"))]
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     imp::run().await
