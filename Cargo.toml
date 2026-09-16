@@ -59,6 +59,7 @@ members = [
     "crates/reversibility",
     "crates/banchor",
     "crates/btrezor",
+    "crates/watchpay",
 ]
 
 [workspace.metadata]
