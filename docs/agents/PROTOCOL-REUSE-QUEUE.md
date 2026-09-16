@@ -192,9 +192,37 @@ Full source-verified recon: [`docs/dispatches/2026-09-15-protocol-recon-opena2a-
   resolved: `tinyhumansai/opencompany` is our intended target. Bank that
   identification, but keep WATCH/research-only until the reconciliation gate
   opens protocol evaluation."* The target is the Rust "hive mind of agents"
-  project — its two ruling-class constraints stand as banked (GPL-3.0 vs our
-  licensing posture; the hosted Medulla orchestrator vs the adapter-ring rule);
-  zeenie-ai and the other candidates revert to name-traps for our purposes.
-  No deeper reading performed — the gate decides when.
+  project — zeenie-ai and the other candidates revert to name-traps for our
+  purposes.
+- **Gate CLARIFIED by founder, 2026-09-15 (verbatim):** *"Evaluate
+  `tinyhumansai/opencompany` for reusable open protocols, interfaces and
+  primitives compatible with our fully decentralized adapter/plugin/dApp
+  architecture. Treat hosted Medulla as non-core/non-required; do not redesign
+  Beehive around it. Record GPL-3.0 as a licensing constraint, not a founder
+  decision request. Resume research."*
+- **Gate REFINED by founder, same day (verbatim):** *"Licensing is not an
+  evaluation gate for this reconnaissance. Evaluate tinyhumansai/opencompany
+  strictly for reusable protocols, interfaces, primitives, and patterns that
+  can be operated within Beehive's decentralized adapter/plugin/dApp
+  architecture. A mandatory hosted Medulla dependency is incompatible; useful
+  components must be separable/replaceable."* — the recon's criterion is
+  architectural separability; GPL-3.0 rides as recorded fact, never as the
+  gate.
+- **DEEP READ DONE 2026-09-15** →
+  [`docs/dispatches/2026-09-15-opencompany-tinyhumans-deep-read.md`](../dispatches/2026-09-15-opencompany-tinyhumans-deep-read.md):
+  Medulla resolved NON-CORE at source (zero mentions in AGENTS.md's
+  architecture; core = local Axum host on 127.0.0.1:8080, self-hosted
+  "reports nothing"; hosted tier = separate opencompany-microservices control
+  plane) · GPL-3.0-only org-wide incl. vendored OpenHuman submodule →
+  **recorded fact, NOT an evaluation gate — separability/replaceability is
+  the criterion (founder refinement)** · six reusable candidates mapped
+  (org-as-config company bundles; append-only ledger with
+  fold; storage port traits; runtime-loaded bundles; toml-declared human
+  sign-off points ≈ our GREEN/YELLOW/RED; OpenHuman harness as separate
+  WATCH) · one residual UNKNOWN (local deep-orchestration quality) flagged.
+- **Next thresholds (reuse seat, post-gate):** read `docs/spec/runtime/`
+  (ports/ledgers/hivemind/orchestration) + company-as-agent + security specs;
+  code-level read of `src/ledger/` fold semantics; compare org-as-config
+  against our mission system BEFORE any schema is ruled.
 - **Reconciliation gate applies** as to every item; nothing here drives
   implementation.
