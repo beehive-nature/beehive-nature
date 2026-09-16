@@ -135,8 +135,11 @@ kbd{font:11px ui-monospace,monospace;background:#0a120d;border:1px solid var(--l
   <h2 style="margin-top:18px" data-i18n="hexart.recipe">recipe</h2>
   <div class="row">
     <button class="small" id="shelfSave" data-i18n="hexart.shelve">⬡ shelve piece</button>
+    <button class="small" id="exportPortable" data-i18n="hexart.exportObj">⬡ export .hexart.json</button>
+    <button class="small" id="importPortable" data-i18n="hexart.importObj">import piece</button>
     <button class="small" id="saveRecipe" data-i18n="hexart.saveRecipe">save recipe</button>
     <button class="small" id="loadRecipe" data-i18n="hexart.loadRecipe">load recipe</button>
+    <input type="file" id="importFile" accept=".json,application/json" hidden>
     <input type="file" id="recipeFile" accept="application/json" hidden>
   </div>
   <div id="status" role="status">—</div>
@@ -446,6 +449,61 @@ $('palFromImage').addEventListener('click', () => {
 
 /* ══════════ recipe save / load (determinism's proof) ══════════ */
 function download(blob, name){ const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href), 4000); }
+$('exportPortable').addEventListener('click', () => {
+  const obj = toPortable();
+  download(new Blob([JSON.stringify(obj, null, 1)], { type: 'application/json' }),
+    'hexart-' + (obj.prompt ? obj.prompt.slice(0, 16).replace(/[^a-z0-9]+/gi, '-') : obj.seed.toString(16)) + '.hexart.json');
+  say('piece exported — recipe_digest ' + obj.recipe_digest.slice(0, 14) + ' · render_digest ' + obj.render_digest.slice(0, 14));
+});
+$('importPortable').addEventListener('click', () => $('importFile').click());
+$('importFile').addEventListener('change', ev => {
+  const f = ev.target.files[0]; if (!f) return;
+  if (f.size > 5 * 1024 * 1024) { say('import refused: file > 5MB'); return; }   // pre-parse guard
+  const fr = new FileReader();
+  fr.onload = async () => {
+    // snapshot the current state — refusal mutates nothing
+    const snap = JSON.stringify({ t: state.topology, c: state.cols, r: state.rows, s: state.seed,
+      p: state.palette, e: state.edits, eng: state.engine, cells: state.cells.join(',') });
+    const verdict = importPortable(String(fr.result));
+    if (!verdict.ok) { say('import refused: ' + verdict.err + (verdict.detail ? ' (' + verdict.detail + ')' : '')); return; }
+    const obj = verdict.obj;
+    try {
+      state.topology = obj.topology; state.cols = obj.cols; state.rows = obj.rows; state.seed = obj.seed;
+      state.palette = obj.palette.slice(); state.palName = obj.palName || 'custom';
+      state.threshold = obj.threshold; state.detail = obj.detail; state.dither = obj.dither;
+      state.edits = obj.edits || {};
+      state.engine = obj.engine;
+      $('prompt').value = obj.prompt || ''; $('cols').value = obj.cols; $('colsV').textContent = obj.cols;
+      $('thr').value = obj.threshold; $('thrV').textContent = obj.threshold + '%';
+      $('oct').value = obj.detail; $('octV').textContent = obj.detail; $('dither').checked = obj.dither;
+      setTopoUI(obj.topology); selectSwatch(0);
+      let src = null;
+      if (obj.image && obj.image.data) {
+        const im2 = new Image();
+        await new Promise(res => { im2.onload = res; im2.onerror = res; im2.src = obj.image.data; });
+        if (!im2.width) { throw new Error('embedded image failed to decode'); }
+        state.imgCanvas = im2; state.imgSrc = true; state.imgData = null; src = imgDataFor({ ...obj });
+      } else { state.imgSrc = false; state.imgData = null; }
+      state.cells = window.HexArtEngines[state.engine].generate(obj, src);
+      applyEdits(); render();
+      const rendered = renderDigestOf(state.cells);
+      if (obj.render_digest && rendered !== obj.render_digest) {
+        say('import WARNING: render_digest mismatch (expected ' + obj.render_digest.slice(0, 14) + ', produced ' + rendered.slice(0, 14) + ') — the piece rendered but differs from the export');
+      } else {
+        say('piece imported' + (obj.migrated_from ? ' (migrated from v' + obj.migrated_from + ')' : '') + ' — render_digest verified: ' + rendered.slice(0, 14));
+      }
+    } catch (e) {
+      // restore the snapshot — the promise of zero mutation on failure
+      const p = JSON.parse(snap);
+      state.topology = p.t; state.cols = p.c; state.rows = p.r; state.seed = p.s;
+      state.palette = p.p; state.edits = p.e; state.engine = p.eng;
+      state.cells = p.cells.split(',').map(Number);
+      render();
+      say('import refused: ' + e.message + ' — canvas and shelf untouched');
+    }
+  };
+  fr.readAsText(f);
+});
 $('shelfSave').addEventListener('click', shelfSave);
 $('saveRecipe').addEventListener('click', () => {
   download(new Blob([JSON.stringify(recipe(), null, 1)], { type: 'application/json' }), 'hexart-recipe-' + state.seed.toString(16) + '.json');
@@ -531,6 +589,85 @@ document.querySelectorAll('.tool').forEach(b => b.addEventListener('click', () =
 }));
 addEventListener('resize', () => render());
 
+/* ══════════ portability: the canonical .hexart.json object ══════════
+   A piece is portable between humans/devices as ONE JSON file. The object
+   carries: schema version, engine id, topology, dims, palette, seed, prompt,
+   embedded source (image-conv only), deterministic edits, and TWO digests —
+   recipe_digest (proves the instructions) and render_digest (proves what
+   those instructions produced). Import either reproduces the same artwork
+   or REFUSES with a named incompatibility; refusal mutates neither shelf
+   nor canvas. MIGRATION LAW: v1 recipes (no schema field) migrate
+   deterministically to v2 by adding schema and computing digests fresh;
+   unknown schema versions are refused loudly, never silently reinterpreted. */
+const HEXART_SCHEMA = 2;
+const MAX_EMBED_BYTES = 3 * 1024 * 1024;   // 3MB dataURL ceiling — hostile-import guard
+function recipeDigestOf(rec) { let h = 2166136261; const j = JSON.stringify(rec);
+  for (let i = 0; i < j.length; i += 7) { h ^= j.charCodeAt(i); h = Math.imul(h, 16777619) >>> 0; } return 'rd-' + h.toString(36) + '-' + j.length.toString(36); }
+function renderDigestOf(cells) { let h = 2166136261;
+  for (let i = 0; i < cells.length; i++) { h ^= (cells[i] + 2) * (i + 1); h = Math.imul(h, 16777619) >>> 0; }
+  return 'xd-' + h.toString(36) + '-' + cells.length; }
+function toPortable() {
+  const rec = recipe();
+  // THE EFFECTIVE SEED: regen() mixes the prompt hash into the seed before
+  // generating; the live cells were made with THAT number. A portable object
+  // carries the effective seed so import regrows byte-identically without
+  // needing to re-derive the mixing (the recipe on disk IS the instructions).
+  const p = $('prompt').value.trim();
+  rec.seed = p ? (hashStr(p) ^ state.seed) >>> 0 : state.seed;
+  const cells = state.cells.slice();
+  const obj = { schema: HEXART_SCHEMA, engine: rec.engine, engine_version: '1',
+    topology: rec.topology, cols: rec.cols, rows: rec.rows, palette: rec.palette.slice(), palName: rec.palName,
+    seed: rec.seed, prompt: rec.prompt, threshold: rec.threshold, detail: rec.detail, dither: rec.dither,
+    edits: { ...rec.edits }, ...(rec.image ? { image: rec.image } : {}),
+    recipe_digest: recipeDigestOf(rec), render_digest: renderDigestOf(cells) };
+  return obj;
+}
+/* Import: validate everything hostile-input-first; refuse named; zero mutation on refusal */
+function importPortable(text) {
+  let obj;
+  try { obj = JSON.parse(text); } catch (e) { return { ok: false, err: 'json-parse-refused' }; }
+  if (typeof obj !== 'object' || obj === null || Array.isArray(obj)) return { ok: false, err: 'not-an-object' };
+  if (obj.schema === undefined) obj.schema = 1;   // v1 migration (round-1/2 shape)
+  if (obj.schema === 1) {
+    obj.schema = 2; obj.engine_version = obj.engine_version || '1';
+    const rec1 = { v: 1, engine: obj.engine, topology: obj.topology, cols: obj.cols, rows: obj.rows,
+      seed: obj.seed, prompt: obj.prompt || '', palette: obj.palette, palName: obj.palName || 'custom',
+      threshold: obj.threshold, detail: obj.detail, dither: obj.dither, transparent: true, edits: obj.edits || {} };
+    obj.recipe_digest = recipeDigestOf(rec1);
+    obj.migrated_from = 1;
+    if (!obj.render_digest) obj.render_digest = null;   // cannot know before render
+  }
+  if (obj.schema !== HEXART_SCHEMA) return { ok: false, err: 'schema-unknown-refused', detail: 'schema ' + obj.schema + ' > ' + HEXART_SCHEMA };
+  if (!TOPO[obj.topology]) return { ok: false, err: 'topology-refused', detail: String(obj.topology) };
+  if (!Number.isSafeInteger(obj.cols) || obj.cols < 4 || obj.cols > 512) return { ok: false, err: 'cols-refused' };
+  if (!Number.isSafeInteger(obj.rows) || obj.rows < 4 || obj.rows > 512) return { ok: false, err: 'rows-refused' };
+  if (!Array.isArray(obj.palette) || obj.palette.length < 1 || obj.palette.length > 64) return { ok: false, err: 'palette-refused' };
+  for (const p of obj.palette) if (!/^#[0-9a-fA-F]{3,8}$/.test(p)) return { ok: false, err: 'palette-color-refused', detail: p };
+  if (!Number.isSafeInteger(obj.seed)) return { ok: false, err: 'seed-refused' };
+  if (typeof obj.prompt !== 'string' || obj.prompt.length > 512) return { ok: false, err: 'prompt-refused' };
+  if (obj.image) {
+    if (typeof obj.image.data !== 'string' || !obj.image.data.startsWith('data:image/')) return { ok: false, err: 'image-format-refused' };
+    if (obj.image.data.length > MAX_EMBED_BYTES) return { ok: false, err: 'image-oversized-refused', detail: obj.image.data.length + ' > ' + MAX_EMBED_BYTES };
+  }
+  if (obj.edits !== undefined && obj.edits !== null) {
+    if (typeof obj.edits !== 'object' || Array.isArray(obj.edits)) return { ok: false, err: 'edits-refused' };
+    let count = 0;
+    for (const k of Object.keys(obj.edits)) {
+      count++; if (count > 5000) return { ok: false, err: 'edits-count-refused' };
+      const m = k.match(/^(\d+),(\d+)$/); if (!m) return { ok: false, err: 'edit-key-refused', detail: k };
+      const c = +m[1], r = +m[2];
+      if (c >= obj.cols || r >= obj.rows) return { ok: false, err: 'edit-bounds-refused', detail: k };
+      const v = obj.edits[k];
+      if (v !== -1 && !(Number.isSafeInteger(v) && v >= 0 && v < obj.palette.length)) return { ok: false, err: 'edit-value-refused', detail: k + '=' + v };
+    }
+  }
+  if (obj.engine !== 'comb-field' && obj.engine !== 'image-conv') return { ok: false, err: 'engine-refused', detail: String(obj.engine) };
+  if (obj.engine === 'image-conv' && !obj.image) return { ok: false, err: 'image-missing-refused' };
+  if (obj.recipe_digest !== undefined && typeof obj.recipe_digest !== 'string') return { ok: false, err: 'digest-refused' };
+  if (obj.render_digest !== null && obj.render_digest !== undefined && typeof obj.render_digest !== 'string') return { ok: false, err: 'render-digest-refused' };
+  return { ok: true, obj };
+}
+
 /* ══════════ the shelf: recipe persistence in localStorage ════════
    A piece is its recipe. The shelf stores up to 12 recipes keyed by digest;
    thumbnails render from the recipe itself (regrow at tiny scale) — the
@@ -613,6 +750,7 @@ function renderShelf() {
 state.selected = 3; drawSwatches(); regen(false);
 window.__hexart = state; state.recipe = recipe; state.imgDataFor = imgDataFor;   // the e2e reads its numbers here (watch.html precedent)
 window.__hexartShelf = { save: shelfSave, list: shelfRead, load: shelfLoad, digest: recipeDigest };
+window.__hexartPort = { toPortable, importPortable, recipeDigestOf, renderDigestOf, SCHEMA: HEXART_SCHEMA };
 renderShelf();
 </script>
 </body>
