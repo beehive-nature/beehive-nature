@@ -92,17 +92,22 @@ footer{max-width:960px;margin:22px auto 0;color:var(--faint);font-size:10px;text
 .stamp{margin-left:10px;font-size:9.5px;color:var(--faint)}
 @media (max-width:600px){body{padding:16px 10px 80px}section{padding:13px 12px}
  .organ .oword{margin-left:0;width:100%} .legend .lw{width:auto}}
+
+/* comprehension touch floor (2026-09-16): 44px canon on phones */
+@media(max-width:520px){button,select,input{min-height:44px !important}}
 </style>
 </head>
 <body>
 <main>
 <header>
   <h1>⚙ <span data-i18n="stack.h1">the Engine Room</span></h1>
+  <details class="tnote" data-reg-disclose data-reg="bee"><summary data-i18n="stk.d.visitor">A visitor asked the best possible question — and the answer</summary>
   <div class="sub" data-reg="bee"><span data-i18n="st.bee.1">A visitor asked the best possible question:</span> <i><span data-i18n="st.bee.2">"there's a lot
   going on — which part shows me Autonomi?"</span></i> <span data-i18n="st.bee.3">This page is the answer. One picture of what
   actually runs under every door on the hub, in plain words, with the honest parts included.</span>
   <i><span data-i18n="st.bee.4">(He came back: "I like the use of multiple systems together, and the split between Arweave
   & Autonomi based on size of file." — the page did its job, and the loop is on the record.)</span></i></div>
+  </details>
   <div class="sub" data-reg="raver"><span data-i18n="st.rav.1">The whole estate, one engine diagram: the identity root, the
   rust kernel, the rails that carry data and value, and which door runs on what — measured, not
   claimed. Born from a stranger's question:</span> <i><span data-i18n="st.rav.2">"which part should I look at to see an
@@ -116,7 +121,9 @@ footer{max-width:960px;margin:22px auto 0;color:var(--faint);font-size:10px;text
 <section id="organboard">
   <h2><span data-i18n="st.b.h2">THE ORGANS — live status, read from where you sit</span></h2>
   <div class="herofig"><span class="num" id="organCount" data-hero-number>…</span><span class="cap" data-hero-caption data-i18n="st.hero.cap">organs · read live from your network, just now</span></div>
+  <details class="tnote" data-reg-disclose><summary data-i18n="stk.d.statuslaw">The status law — what each status means and does not</summary>
   <div class="law" style="margin-top:9px" data-i18n="st.b.law">every status on this board says what it means AND what it does not mean — a status board must never confuse "this is broken" with "I can't see it from here". these reads come from YOUR network, your browser, just now: a status here is a fact about the road as much as the organ.</div>
+  </details>
   <div class="law" style="margin-top:6px" data-reg="raver" data-i18n="st.b.raver">the estate's heartbeats, drawn live — green when a road answers, lilac when a road goes quiet. never red for silence: silence is a guard, not a scream.</div>
   <div class="law" style="margin-top:6px" data-reg="cypherpunk" data-i18n="st.b.cypher">probes: no-cors reach per road · NIP-11 identity (Accept: application/nostr+json) on each hive · the compute gate's 401 as the lock's own pulse. observer = your browser; every result is a path-relative fact.</div>
   <div id="organBoard" style="margin-top:4px"></div>
@@ -144,7 +151,9 @@ footer{max-width:960px;margin:22px auto 0;color:var(--faint);font-size:10px;text
       load-bearing for identity.</span> <a href="https://github.com/beehive-nature/beehive-nature" rel="noopener"><span data-i18n="st.t2.2">source</span></a></div></div>
     <div class="down">▼</div>
     <div class="tier"><div class="t"><span data-i18n="stack.t3">the adapter rails — storage, value, relays</span></div>
-      <div class="d"><b><span data-i18n="st.route.head">Storage routes by measured economics:</span></b> <span class="chip c-ar">◈ Arweave</span><span data-i18n="st.route.ar">carries small public immutable data — priced per byte, one endowment.</span> <span class="chip c-ant">⬢ Autonomi</span><span data-i18n="st.route.ant">carries large public and all private immutable data — priced per RECORD by node fullness, then ×3: ADR-0008 (PROPOSED, 2026-07-28, WithAutonomi/ant-node) sets a calibrated quadratic in the node's COMMITTED key count — price_per_record(n) = 0.00390625 + 0.03515625×(n/6000)² ANT, per its signed storage commitment, not raw files — and the client pays 3× the median quote; one record is up to 4 MiB, so a ~100 kB file is one record; merkle batches (64+ chunks) pad to a power of two, so 65 chunks pay as 128.</span><a href="https://github.com/WithAutonomi/ant-node/blob/main/docs/adr/ADR-0008-storage-economics-and-payment-protocol.md" rel="noopener"> read at source</a>. <span data-i18n="st.route.move">The crossover between the two is therefore a FUNCTION, not a constant — it moves with the ANT price and with network fullness — so the estate measures per job and lets the receipts keep the history.</span> <b><span data-i18n="st.route.priv">Private immutable data always routes to Autonomi</span></b><span> (self-encrypted).</span> The routing law exists for one person — the poor starving artist:</span></b><span data-i18n="st.t3.7"> an inscription-sized artwork must cost cents to keep forever, and a lifetime's archive must not cost a lifetime. The split is not cleverness; it is who this was built for.</span> <b><span data-i18n="st.t3.8">Value and state:</span></b> <span class="chip c-vaulta">▣ Vaulta</span>
+      <div class="d"><b><span data-i18n="st.route.head">Storage routes by measured economics:</span></b> <span class="chip c-ar">◈ Arweave</span><span data-i18n="st.route.ar">carries small public immutable data — priced per byte, one endowment.</span> <span class="chip c-ant">⬢ Autonomi</span><details class="tnote" data-reg-disclose><summary data-i18n="stk.d.routes">How storage routes are chosen — measured economics, not habit</summary>
+  <span data-i18n="st.route.ant">carries large public and all private immutable data — priced per RECORD by node fullness, then ×3: ADR-0008 (PROPOSED, 2026-07-28, WithAutonomi/ant-node) sets a calibrated quadratic in the node's COMMITTED key count — price_per_record(n) = 0.00390625 + 0.03515625×(n/6000)² ANT, per its signed storage commitment, not raw files — and the client pays 3× the median quote; one record is up to 4 MiB, so a ~100 kB file is one record; merkle batches (64+ chunks) pad to a power of two, so 65 chunks pay as 128.</span>
+  </details><a href="https://github.com/WithAutonomi/ant-node/blob/main/docs/adr/ADR-0008-storage-economics-and-payment-protocol.md" rel="noopener"> read at source</a>. <span data-i18n="st.route.move">The crossover between the two is therefore a FUNCTION, not a constant — it moves with the ANT price and with network fullness — so the estate measures per job and lets the receipts keep the history.</span> <b><span data-i18n="st.route.priv">Private immutable data always routes to Autonomi</span></b><span> (self-encrypted).</span> The routing law exists for one person — the poor starving artist:</span></b><span data-i18n="st.t3.7"> an inscription-sized artwork must cost cents to keep forever, and a lifetime's archive must not cost a lifetime. The split is not cleverness; it is who this was built for.</span> <b><span data-i18n="st.t3.8">Value and state:</span></b> <span class="chip c-vaulta">▣ Vaulta</span>
       <span data-i18n="st.t3.9">(RAM/CPU/NET resource model — the .b registry lives here)</span> ·
       <span class="chip c-evm">⟠ Base + Ethereum</span><span data-i18n="st.t3.10">(the on-chain art the gallery reads
       keylessly)</span> · <span class="chip c-btc">₿ Bitcoin</span><span data-i18n="st.t3.11">(read via Esplora in the
@@ -156,12 +165,14 @@ footer{max-width:960px;margin:22px auto 0;color:var(--faint);font-size:10px;text
       <div class="d"><span data-i18n="st.t4.1">static, keyless pages. No logins, no custody, nothing to breach — each one a
       read-and-compose window over the rails below it.</span> <a href="index.html"><span data-i18n="st.t4.2">back to the hub</span></a></div></div>
   </div>
+  <details class="tnote" data-reg-disclose><summary data-i18n="stk.d.honest">The honest parts — stated before anyone asks</summary>
   <div class="law" style="margin-top:11px"><b><span data-i18n="st.hon.1">The honest parts, stated before anyone asks:</span></b>
   <span data-i18n="st.hon.2">GitHub Pages currently serves these pages — a</span> <b><span data-i18n="st.hon.3">temporary bootstrap crutch</span></b><span data-i18n="st.hon.4">, and any small
   server you might find behind a feature is the same. The mirror lane already hashes and stages
   the evidence corpus for permanent storage, and the</span> <b><span data-i18n="st.hon.5">bSky/Nostr relays are the last planned
   migration</span></b><span data-i18n="st.hon.6"> — once anchored to the chains and ANT/AR, redeploying relays and nodes becomes
   autonomous. A page that hid its scaffolding would be advertising; this one is a receipt.</span></div>
+  </details>
 </section>
 
 <section>
@@ -188,11 +199,13 @@ footer{max-width:960px;margin:22px auto 0;color:var(--faint);font-size:10px;text
 
 <section>
   <h2><span data-i18n="h.172">WHICH DOOR RUNS ON WHAT — measured 2026-08-21, not self-reported</span></h2>
+  <details class="tnote" data-reg-disclose><summary data-i18n="stk.d.sweep">Where each row comes from — a sweep of the page’s actual code</summary>
   <div class="law">Each row is from an endpoint-and-content sweep of the page's actual code on
   the date shown — a surface earns a chip by carrying the rail, not by claiming it.
   <b>No chips at all is its own achievement:</b> the science surfaces (bFood, bEarth, the
   symposium, the university) are <span class="chip c-zero">∅ zero-rail</span> — pure static
   computation over cited records, recomputable by any stranger with no network at all.</div>
+  </details>
   <div class="scroll"><table>
     <tr><th>door</th><th>rails under it</th><th>what the rails do there</th></tr>
     <tr><td class="n"><a href="blight/gallery.html">gallery</a> · <a href="blight/inscription-explorer.html">explorer</a> · <a href="blight/market.html">market</a> · <a href="blight/midi-organ.html">organ</a> · <a href="blight/studio-music.html">studio</a></td>
@@ -221,6 +234,7 @@ footer{max-width:960px;margin:22px auto 0;color:var(--faint);font-size:10px;text
 
 <section>
   <h2><span data-i18n="stack.lic.h2">LICENSING — fenced engine, open rails (the estate shows its own reasoning, 2026-08-29)</span></h2>
+  <details class="tnote" data-reg-disclose data-reg="bee"><summary data-i18n="stk.d.license">Why we license this way — in plain words</summary>
   <div class="law" data-reg="bee"><b>Why we license this way, in plain words:</b> the part of this
   estate that handles money — the meter that bills, the vouchers you prepay, the gate that
   checks keys — is fully <b>readable by anyone, today</b>, but its commercial use waits behind
@@ -228,6 +242,7 @@ footer{max-width:960px;margin:22px auto 0;color:var(--faint);font-size:10px;text
   everyone can read every line of it, audit it, and learn from it. The parts you'd want to
   <b>build on</b> — the wallet, the chain adapters, the Arweave signer — are open from day one,
   free for anyone to use, copy, and fold into their own work. Fenced engine, open rails.</div>
+  </details>
   <div class="law" data-reg="raver">One sentence per side: the money machinery is readable now,
   forkable-for-profit never (four years protected, then it opens to GPL); the rails everyone
   interoperates through are Apache-2.0 open from the first minute. Adoption wants the rails
@@ -259,6 +274,7 @@ footer{max-width:960px;margin:22px auto 0;color:var(--faint);font-size:10px;text
       <td><span class="chip c-evm">Apache-2.0</span></td>
       <td><span data-i18n="stack.lic.open.apache">day one — use, copy, modify, fold into your own work</span></td></tr>
   </table></div>
+  <details class="tnote" data-reg-disclose><summary data-i18n="stk.d.precedent">The precedent — every line below reads at source</summary>
   <div class="law" style="margin-top:9px"><b>The precedent, verified at source 2026-08-29 (every
   line below read from the project's own license file, not recalled):</b>
   <b>Uniswap v4-core</b> ships <span class="chip c-vaulta">BUSL-1.1</span> — Change Date the
@@ -271,6 +287,7 @@ footer{max-width:960px;margin:22px auto 0;color:var(--faint);font-size:10px;text
   parameters only, terms unmodified (mariadb.com/bsl11, read at source). The pattern —
   protected core, open periphery, automatic conversion — is now standard open-core practice;
   we did not invent it, we measured it and followed it.</div>
+  </details>
 </section>
 
 <section>
