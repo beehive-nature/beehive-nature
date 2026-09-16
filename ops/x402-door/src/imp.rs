@@ -48,12 +48,16 @@ async fn build_registry(rc: &RunConfig) -> Result<x402_types::scheme::SchemeRegi
     // LiteralOrEnv) — the ops wallet key rides env only, never files/git.
     let chains_raw = std::fs::read_to_string(&rc.facilitator_chain_config)
         .map_err(|e| format!("chains config: {e}"))?;
-    let chain_config: x402_chain_eip155::chain::config::Eip155ChainConfig =
+    let inner_cfg: x402_chain_eip155::chain::config::Eip155ChainConfigInner =
         serde_json::from_str(&chains_raw).map_err(|e| format!("chains config json: {e}"))?;
+    let chain_config = x402_chain_eip155::chain::config::Eip155ChainConfig {
+        chain_reference: x402_chain_eip155::chain::Eip155ChainReference::new(rc.chain),
+        inner: inner_cfg,
+    };
     let chain_id = chain_config.chain_id();
     use x402_types::chain::FromConfig;
     let provider = <x402_chain_eip155::chain::Eip155ChainProvider as FromConfig<
-        x402_chain_eip155::chain::Eip155ChainConfig,
+        x402_chain_eip155::chain::config::Eip155ChainConfig,
     >>::from_config(&chain_config)
     .await
     .map_err(|e| format!("provider from config: {e}"))?;

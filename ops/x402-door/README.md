@@ -50,7 +50,7 @@ cargo run   --locked --manifest-path ops/x402-door/Cargo.toml -- ops/x402-door/d
 ```
 
 `door.config.json` shape: `{bind, journal_root, daily_gas_cap_wei,
-reserved_gas_wei, ops_float_available_wei, facilitator_chain_config}` — the last is an
+reserved_gas_wei, ops_float_available_wei, chain, facilitator_chain_config}` — the last is an
 upstream `Eip155ChainConfig` JSON (Base RPC endpoints + signers as ``
 references per the env-only law); the two chartered schemes are constructed
 in code, not configurable.
