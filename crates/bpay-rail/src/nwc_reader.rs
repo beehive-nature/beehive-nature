@@ -283,6 +283,7 @@ pub fn read_response<S, F>(
     req_frame: &str,
     policy: &ReadPolicy,
     ctx: &RequestCtx,
+    our_event_id: &str,
 ) -> Result<serde_json::Value, NwcError>
 where
     S: WsSocket,
@@ -322,6 +323,16 @@ where
                         "response window exhausted before our answer arrived (no state touched)"
                             .into(),
                     ));
+                }
+                // The ACK frame decides publication: OK-false for OUR id
+                // is a DEFINITIVE refusal (the event never entered the
+                // network — pre-send class), never ambiguity.
+                match process_ack_frame(&msg, our_event_id) {
+                    Ok(AckVerdict::Rejected(reason)) => {
+                        return Err(NwcError::RelayRejected(reason));
+                    }
+                    Ok(_) => {}  // Accepted / NotOurs: fall through
+                    Err(_) => {} // not an OK frame: fall through
                 }
                 match process_message(ctx, &msg, &mut seen) {
                     Verdict::Response(env) => return Ok(env),

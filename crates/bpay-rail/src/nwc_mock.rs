@@ -29,6 +29,9 @@ pub struct MockNwcTransport {
     pub next_pay_error_code: Option<String>,
     /// LU-5 probe: next successful pay result carries this released msat.
     pub next_pay_release_msat: Option<u64>,
+    /// BOUNDARY-AUDIT probe: next pay is REFUSED BY THE RELAY (the
+    /// event never entered the network — pre-send class).
+    pub next_pay_relay_rejected: bool,
 }
 
 impl MockNwcTransport {
@@ -44,6 +47,7 @@ impl MockNwcTransport {
             next_pay_no_fees: false,
             next_pay_error_code: None,
             next_pay_release_msat: None,
+            next_pay_relay_rejected: false,
         }
     }
 
@@ -85,6 +89,12 @@ impl NwcTransport for MockNwcTransport {
                     .and_then(|i| i.as_str())
                     .ok_or_else(|| NwcError::Other("invoice param missing".into()))?;
                 let rec = self.invoices.get_mut(invoice).ok_or(NwcError::NotFound)?;
+                if self.next_pay_relay_rejected {
+                    self.next_pay_relay_rejected = false;
+                    return Err(NwcError::RelayRejected(
+                        "relay refused the event (mock): duplicate/evicted".into(),
+                    ));
+                }
                 if let Some(code) = self.next_pay_error_code.take() {
                     return Err(NwcError::from_code(&code, format!("mock injected {code}")));
                 }

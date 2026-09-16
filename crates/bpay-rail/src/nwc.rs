@@ -51,6 +51,12 @@ pub enum NwcError {
     NotFound,
     #[error("NWC CLOCK_UNAVAILABLE (LT-8.1): {0} — pre-ledger, nothing sent")]
     ClockUnavailable(String),
+    #[error("NWC CONNECT_FAILED (pre-send): {0} — DNS/socket/TLS; no application byte reached any relay")]
+    ConnectFailed(String),
+    #[error("NWC LOCAL_CONSTRUCTION (pre-send): {0} — CSPRNG/serialization/signature construction failed before any send")]
+    LocalConstruction(String),
+    #[error("NWC RELAY_REJECTED (pre-send): {0} — the relay refused the event; it never entered the network")]
+    RelayRejected(String),
     #[error("NWC OTHER: {0}")]
     Other(String),
     /// Transport-ambiguous: request MAY or MAY NOT have reached the
@@ -60,6 +66,33 @@ pub enum NwcError {
 }
 
 impl NwcError {
+    /// The furthest irreversible boundary this failure actually
+    /// crossed (the provenance law's classification).
+    pub fn boundary(&self) -> FailureBoundary {
+        match self {
+            NwcError::ClockUnavailable(_)
+            | NwcError::ConnectFailed(_)
+            | NwcError::LocalConstruction(_)
+            | NwcError::RelayRejected(_) => FailureBoundary::LocalPreSend,
+            // The wire was written but unacknowledged.
+            NwcError::TransportAmbiguous(_) => FailureBoundary::SubmittedUnacknowledged,
+            // Authenticated wallet answers: the counterparty saw us.
+            NwcError::RateLimited
+            | NwcError::NotImplemented(_)
+            | NwcError::InsufficientBalance
+            | NwcError::QuotaExceeded
+            | NwcError::Restricted
+            | NwcError::Unauthorized
+            | NwcError::Internal
+            | NwcError::UnsupportedEncryption
+            | NwcError::PaymentFailed(_)
+            | NwcError::NotFound => FailureBoundary::CounterpartyObserved,
+            // Unknown codes arrive through the wallet's channel; assume
+            // the counterparty boundary was reached (never local).
+            NwcError::Other(_) => FailureBoundary::CounterpartyObserved,
+        }
+    }
+
     /// Parse the pinned NIP-47 `error.code` vocabulary.
     pub fn from_code(code: &str, message: impl Into<String>) -> NwcError {
         let msg = message.into();
@@ -77,6 +110,27 @@ impl NwcError {
             _ => NwcError::Other(msg),
         }
     }
+}
+
+/// THE PROVENANCE LAW (founder order 2026-09-16, R17 class generalized):
+/// uncertainty begins only after an IRREVERSIBLE EXTERNAL BOUNDARY has
+/// actually been crossed. A local failure leaves the existing intent
+/// open; it cannot manufacture Unknown — and HumanGate is not a generic
+/// error bucket: it is for operations that MAY have escaped our control
+/// with insufficient evidence to determine the outcome.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum FailureBoundary {
+    /// Nothing of ours escaped (clock, CSPRNG, construction, connect,
+    /// relay refusal of publication). Intent stays open.
+    LocalPreSend,
+    /// Bytes were written; no relay ACK observed.
+    SubmittedUnacknowledged,
+    /// The relay accepted our event; the response is outstanding.
+    RelayAcknowledged,
+    /// The wallet processed the request (authenticated NIP-47 result).
+    CounterpartyObserved,
+    /// On-chain/settlement evidence exists for the operation.
+    SettlementEvidenced,
 }
 
 /// LU-6: the TOTAL NIP-47 error → ledger-effect map. Every pinned code
@@ -126,9 +180,14 @@ impl NwcError {
             NwcError::Internal | NwcError::Unauthorized | NwcError::Other(_) => {
                 LedgerEffect::MarkUnknownHumanGate
             }
-            // A LOCAL clock failure happens before anything is sent:
-            // zero requests, zero mutation, intent stays open (LT-8.1).
-            NwcError::ClockUnavailable(_) => LedgerEffect::LeaveOpenAtIntent,
+            // LOCAL failures happen before anything is sent:
+            // zero requests, zero mutation, intent stays open (LT-8.1
+            // + the boundary audit: connect, construction, relay
+            // refusal of publication are all pre-send).
+            NwcError::ClockUnavailable(_)
+            | NwcError::ConnectFailed(_)
+            | NwcError::LocalConstruction(_)
+            | NwcError::RelayRejected(_) => LedgerEffect::LeaveOpenAtIntent,
             NwcError::PaymentFailed(_) => LedgerEffect::TerminalFailedNoFee,
             NwcError::TransportAmbiguous(_) => LedgerEffect::MarkUnknownHumanGate,
         }

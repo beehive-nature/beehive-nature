@@ -204,7 +204,15 @@ fn attack_relay_disconnect_then_recovery_succeeds() {
             pos: 0,
         })
     };
-    let out = read_response(&mut sock, reopen, "REQ", &policy, &ctx).unwrap();
+    let out = read_response(
+        &mut sock,
+        reopen,
+        "REQ",
+        &policy,
+        &ctx,
+        "00".repeat(32).as_str(),
+    )
+    .unwrap();
     assert_eq!(out["result"]["alias"], "hub");
 }
 
@@ -226,7 +234,15 @@ fn attack_reconnect_budget_exhaustion_is_ambiguous_not_failed() {
             pos: 0,
         })
     };
-    let e = read_response(&mut sock, reopen, "REQ", &policy, &ctx).unwrap_err();
+    let e = read_response(
+        &mut sock,
+        reopen,
+        "REQ",
+        &policy,
+        &ctx,
+        "00".repeat(32).as_str(),
+    )
+    .unwrap_err();
     match e {
         NwcError::TransportAmbiguous(why) => {
             assert!(why.contains("exhausted"), "{why}");
@@ -327,6 +343,14 @@ fn attack_window_exhaustion_is_ambiguous() {
             pos: 0,
         })
     };
-    let e = read_response(&mut sock, reopen, "REQ", &policy, &ctx).unwrap_err();
+    let e = read_response(
+        &mut sock,
+        reopen,
+        "REQ",
+        &policy,
+        &ctx,
+        "00".repeat(32).as_str(),
+    )
+    .unwrap_err();
     assert!(matches!(e, NwcError::TransportAmbiguous(_)));
 }

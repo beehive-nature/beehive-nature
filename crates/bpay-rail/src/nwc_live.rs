@@ -205,6 +205,14 @@ pub struct LiveNwcTransport {
     /// LT-8.1 test seam: records every relay-connect ATTEMPT (None =
     /// inert). Proves zero-published-requests without any network.
     connect_log: Option<std::rc::Rc<std::cell::RefCell<Vec<String>>>>,
+    /// BOUNDARY-AUDIT seams (inert by default; each fails AT its named
+    /// boundary so the audit proves provenance, not plumbing):
+    /// fail BEFORE any connect (DNS/socket/TLS class);
+    pub connect_fail_next: bool,
+    /// fail at LOCAL construction (CSPRNG/encrypt, pre-send);
+    pub encrypt_fail_next: bool,
+    /// fail AFTER connect at the event write (submitted class).
+    pub send_fail_next: bool,
 }
 
 impl LiveNwcTransport {
@@ -214,6 +222,9 @@ impl LiveNwcTransport {
             policy: ReadPolicy::default(),
             clock: std::rc::Rc::new(system_clock),
             connect_log: None,
+            connect_fail_next: false,
+            encrypt_fail_next: false,
+            send_fail_next: false,
         }
     }
 
@@ -277,11 +288,22 @@ impl crate::nwc::NwcTransport for LiveNwcTransport {
                 "epoch-0 clock reading refused (pre-ledger, nothing sent)".into(),
             ));
         }
+        if self.encrypt_fail_next {
+            self.encrypt_fail_next = false;
+            return Err(NwcError::LocalConstruction(
+                "CSPRNG/encrypt failure (injected probe, pre-send)".into(),
+            ));
+        }
         let content = nip44_encrypt(
             &self.conn.secret(),
             &self.conn.wallet_pubkey_hex,
             &serde_json::json!({ "method": method, "params": params }).to_string(),
-        )?;
+        )
+        .map_err(|e| {
+            // CSPRNG/serialization/key-material construction happens
+            // before any send — LOCAL, never Unknown.
+            NwcError::LocalConstruction(format!("encryption construction (pre-send): {e}"))
+        })?;
         let client_pub = self.client_pubkey_hex();
         let expiration = now + 60; // LT-8.2: per-request TTL (60s is the NIP-47 recommended); the intent's declared evidence window governs at the ledger
         let tags = serde_json::json!([
@@ -289,6 +311,10 @@ impl crate::nwc::NwcTransport for LiveNwcTransport {
             ["expiration", expiration]
         ]);
         let event = self.build_signed_event(now, 23194, &content, tags);
+        let our_event_id: String = serde_json::from_str::<serde_json::Value>(&event)
+            .ok()
+            .and_then(|ev| ev.get("id").and_then(|i| i.as_str()).map(str::to_string))
+            .unwrap_or_default();
 
         let since = now;
         let sub = format!("bpay-{since}");
@@ -300,11 +326,29 @@ impl crate::nwc::NwcTransport for LiveNwcTransport {
 
         let relay = self.conn.relay_url_ws.clone();
         let relay_for_reopen = relay.clone();
+        if self.connect_fail_next {
+            self.connect_fail_next = false;
+            return Err(NwcError::ConnectFailed(
+                "ws connect failure (injected probe, pre-send)".into(),
+            ));
+        }
         if let Some(log) = &self.connect_log {
             log.borrow_mut().push(relay.clone());
         }
-        let mut socket = TungsteniteSocket::connect(&relay)
-            .map_err(|e| NwcError::TransportAmbiguous(format!("{e:?}")))?;
+        if self.send_fail_next {
+            // Model connect-succeeded-then-write-failed WITHOUT network:
+            // the attempt is recorded (the boundary WAS crossed) and the
+            // write fails — the submitted/unacknowledged class.
+            self.send_fail_next = false;
+            return Err(NwcError::TransportAmbiguous(
+                "event write failed after connect (submitted, unacknowledged)".into(),
+            ));
+        }
+        let mut socket = TungsteniteSocket::connect(&relay).map_err(|e| {
+            // DNS/socket/TLS: no application byte reached any relay —
+            // a PRE-SEND failure, never ambiguity (the boundary audit).
+            NwcError::ConnectFailed(format!("{e:?}"))
+        })?;
         socket
             .send_text(&format!(r#"["EVENT",{event}]"#))
             .map_err(|e| NwcError::TransportAmbiguous(format!("send event: {e:?}")))?;
@@ -323,7 +367,14 @@ impl crate::nwc::NwcTransport for LiveNwcTransport {
         };
         let envelope = {
             let reopen = move |_attempt: usize| TungsteniteSocket::connect(&relay_for_reopen);
-            read_response(&mut socket, reopen, &req_frame, &self.policy, &ctx)?
+            read_response(
+                &mut socket,
+                reopen,
+                &req_frame,
+                &self.policy,
+                &ctx,
+                &our_event_id,
+            )?
         };
         // NIP-47 envelope: { result_type, result?, error? }
         if let Some(err) = envelope.get("error").filter(|e| !e.is_null()) {
