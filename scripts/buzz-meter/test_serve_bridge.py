@@ -65,7 +65,8 @@ def free_port():
 
 
 def make_meter_dir(root: Path):
-    """A hermetic BUZZ_METER_DIR: one key, an empty hash-chained ledger."""
+    """A hermetic BUZZ_METER_DIR: one key, a till-shaped rate set (freshly
+    minted), an empty hash-chained ledger."""
     d = root / "meter"
     d.mkdir(parents=True, exist_ok=True)
     (d / "keys.json").write_text(json.dumps({
@@ -73,6 +74,15 @@ def make_meter_dir(root: Path):
         "keys": [{"id": KEY_ID, "secret": "bm-av1-secret", "tier": "paid",
                   "balance_A": 0.0, "created": "2026-09-16T00:00:00Z",
                   "revoked": False}],
+    }))
+    now = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+    (d / "rate_set.json").write_text(json.dumps({
+        "version": "av1-test-v1", "minted_at": now, "unit": "A",
+        "tithe": {"percent": 10, "law": "the tithe is law, carried as its own line"},
+        "tiers": {"paid_claude": {"cost_basis": {
+            "prefill_token_per_million_usd": "1000000",
+            "decode_token_per_million_usd": "1000000"}}},
+        "lanes": [],
     }))
     (d / "escrow-ledger.jsonl").write_text("")
     return d
@@ -156,6 +166,17 @@ class Server:
         h = {"Authorization": f"Bearer {ADMIN_TOKEN}", **(headers or {})}
         return self.request("POST", path, raw_body=raw, headers=h)
 
+    def post_admin_crash(self, path, body):
+        """Send a request carrying the deterministic crash header. EXPECTS
+        the connection to die mid-response (os._exit in the handler after
+        the durable append). Returns True when the server actually died."""
+        try:
+            self.post_admin(path, body,
+                            headers={"X-AV1-Crash-Before-Respond": "1"})
+            return False  # a response came back — the hook did not fire
+        except Exception:
+            return True
+
     def ledger_bytes(self):
         return (self.dir / "escrow-ledger.jsonl").read_bytes()
 
@@ -176,11 +197,13 @@ def settle_body(tx, amount="2.0000", voucher=KEY_ID):
     }
 
 
-def charge_body(key, qty=5, voucher=KEY_ID):
+def charge_body(key, qty=1, voucher=KEY_ID):
+    # the till prices TOKEN classes (cmd_charge's construction) — the battery
+    # rides the real pricing path, not an invented one
     return {
         "idempotency_key": key,
         "voucher": voucher,
-        "usage": [["mesh_second", qty]],
+        "usage": [["prefill_token", qty]],
     }
 
 
@@ -200,13 +223,7 @@ def case_1_1(srv):
     body = settle_body(tx)
     # Deterministic kill point: the append lands (durable), the response
     # never does. Test-only header, honored for authed admin callers only.
-    srv.post_admin("/v1/admin/settle", body,
-                   headers={"X-AV1-Crash-Before-Respond": "1"})
-    # the kill is os._exit inside the handler; give the OS a beat
-    deadline = time.time() + 5
-    while srv.proc.poll() is None and time.time() < deadline:
-        time.sleep(0.05)
-    if srv.proc.poll() is None:
+    if not srv.post_admin_crash("/v1/admin/settle", body):
         fail("1.1: crash header did not kill the server")
     srv.restart()
 
@@ -357,11 +374,8 @@ def case_1_3(srv):
 def case_1_4(srv):
     # (a) the crash-kill shape: no answer ever arrived, resubmit same key
     body = settle_body("av1-tx-unknown")
-    srv.post_admin("/v1/admin/settle", body,
-                   headers={"X-AV1-Crash-Before-Respond": "1"})
-    deadline = time.time() + 5
-    while srv.proc.poll() is None and time.time() < deadline:
-        time.sleep(0.05)
+    if not srv.post_admin_crash("/v1/admin/settle", body):
+        fail("1.4: crash header did not kill the server")
     srv.restart()
     code, again, _ = srv.post_admin("/v1/admin/settle", body)
     if code != 200:
@@ -374,38 +388,66 @@ def case_1_4(srv):
         fail("1.4: replay diverged from the original outcome")
     evs = [json.loads(l) for l in
            srv.ledger_bytes().decode().splitlines() if l.strip()]
-    n_that_tx = sum(1 for e in evs if e.get("type") == "DEPOSIT")
+    n_that_tx = sum(1 for e in evs if e.get("type") == "DEPOSIT"
+                    and e.get("vaulta_tx") == "av1-tx-unknown")
     if n_that_tx != 1:
         fail(f"1.4: second effect — {n_that_tx} deposits for one key")
-    ok("1.4: unknown-response recovery — resubmission returns the original "
-       "outcome; no second effect")
+    # (c) the CHARGE seam: the engine alone does NOT idempotent charges —
+    # the bridge key is the load-bearing guard. Crash mid-charge, resubmit:
+    # exactly one charge, same receipt.
+    cb = charge_body("av1-ch-unknown")
+    if not srv.post_admin_crash("/v1/admin/charge", cb):
+        fail("1.4c: crash header did not kill the server")
+    srv.restart()
+    code3, receipt, _ = srv.post_admin("/v1/admin/charge", cb)
+    if code3 != 200:
+        fail(f"1.4c: charge recovery refused ({code3}): {receipt}")
+    code4, replay4, _ = srv.post_admin("/v1/admin/charge", cb)
+    if code4 != 200 or replay4.get("event", {}).get("hash") != \
+            receipt.get("event", {}).get("hash"):
+        fail("1.4c: charge replay diverged")
+    evs = [json.loads(l) for l in
+           srv.ledger_bytes().decode().splitlines() if l.strip()]
+    n_charge = sum(1 for e in evs if e.get("type") == "CHARGE"
+                   and e.get("idempotency_key") == "av1-ch-unknown")
+    if n_charge != 1:
+        fail(f"1.4c: second charge effect — {n_charge} charges for one key")
+    ok("1.4: unknown-response recovery — settle AND charge resubmissions "
+       "return the original outcome; no second effect")
 
 
 # ── negative control (house law) ────────────────────────────────────────────
 
 def negative_control(root):
-    """A deliberately broken variant — idempotency lookup skipped — MUST fail
-    1.1/1.4, proving the harness detects the class it claims to."""
+    """A deliberately broken variant — the bridge's idempotency lookup
+    skipped — MUST double-charge and be caught, proving the harness detects
+    the class it claims to. (The SETTLE seam is engine-guarded by
+    (voucher, tx) and survives a broken bridge; CHARGE is the seam this
+    control must prove the harness can catch.)"""
     srv = Server(root, extra_env={"AV1_BREAK_IDEMPOTENCY": "1"})
     try:
-        tx = "av1-tx-broken"
-        body = settle_body(tx)
-        srv.post_admin("/v1/admin/settle", body,
-                       headers={"X-AV1-Crash-Before-Respond": "1"})
-        deadline = time.time() + 5
-        while srv.proc.poll() is None and time.time() < deadline:
-            time.sleep(0.05)
-        srv.restart()
-        srv.post_admin("/v1/admin/settle", body)
-        srv.post_admin("/v1/admin/settle", body)
+        # seed balance, then two same-key charges against the broken variant
+        srv.post_admin("/v1/admin/settle", settle_body("av1-tx-broken",
+                                                       amount="10.0000"))
+        cb = charge_body("av1-ch-broken")
+        code, first, _ = srv.post_admin("/v1/admin/charge", cb)
+        if code != 200:
+            fail(f"negative control: first charge failed ({code}): {first}")
+        code2, second, _ = srv.post_admin("/v1/admin/charge", cb)
+        if code2 != 200:
+            fail("negative control: broken variant refused the replay — "
+                 "cannot demonstrate the class")
+        if first.get("event", {}).get("hash") == second.get("event", {}).get("hash"):
+            fail("negative control: broken variant returned the ORIGINAL "
+                 "event — the harness cannot detect the idempotency class")
         evs = [json.loads(l) for l in
                srv.ledger_bytes().decode().splitlines() if l.strip()]
-        n = sum(1 for e in evs if e.get("type") == "DEPOSIT")
-        if n <= 1:
-            fail("negative control: broken variant did NOT double-credit — "
-                 "the harness cannot detect the idempotency class")
-        ok(f"negative control: idempotency-ignoring variant double-credited "
-           f"({n} deposits) and the battery caught it")
+        n = sum(1 for e in evs if e.get("type") == "CHARGE")
+        if n != 2:
+            fail(f"negative control: expected 2 charges under the broken "
+                 f"variant, saw {n}")
+        ok("negative control: idempotency-ignoring variant double-charged "
+           "(distinct receipts, 2 charge events) and the battery caught it")
     finally:
         srv.kill9()
 

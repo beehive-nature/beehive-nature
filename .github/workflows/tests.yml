@@ -119,6 +119,15 @@ jobs:
       - name: x402 meter battery (x402-RAID-Z33)
         if: always()
         run: python3 scripts/buzz-meter/test_x402_meter.py
+      # AV-1 serve-bridge battery (zCode, 2026-09-16): meter.py serve under a
+      # temp BUZZ_METER_DIR on an ephemeral port — SIGKILL-mid-settle
+      # exactly-once, concurrent mixed load (chain + conservation + coherent
+      # responses), hostile-input battery (typed 4xx, zero mutation),
+      # unknown-response recovery, and the negative control that proves the
+      # harness catches a broken idempotency seam
+      - name: AV-1 serve-bridge battery (crash/concurrency/hostile)
+        if: always()
+        run: python3 scripts/buzz-meter/test_serve_bridge.py
       # PEER FUNNEL testnet runner selftest (z3.3 Order C, 2026-09-05): the
       # one-broadcast tool cannot rot — keccak + EIP-155 RLP hash vectors and
       # the sign/recover roundtrip proven every push (key parts skip cleanly

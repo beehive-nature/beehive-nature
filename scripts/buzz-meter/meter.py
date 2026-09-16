@@ -38,12 +38,16 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from voucher_escrow import Escrow, RateSet, InsufficientVoucher, VoucherError, TITHE_RATE  # noqa: E402
 
 LOG = "/opt/buzz-compute/logs/usage.log"
-OUT = "/opt/buzz-meter/receipts"
-STATE = "/opt/buzz-meter/state/offset"
-RATE_SET = "/opt/buzz-meter/rate_set.json"
-ESCROW_LEDGER = "/opt/buzz-meter/escrow-ledger.jsonl"
-SETTLEMENT_DIR = "/opt/buzz-meter/settlement"
-RECEIPT_CHAIN = "/opt/buzz-meter/state/receipt-chain-tip"   # P1 receipts chain here too
+# AV-1: the whole meter state tree derives from BUZZ_METER_DIR so the serve
+# bridge can run hermetically (temp dir, ephemeral port) under the AV-1
+# harness and any future box-side staging. Default unchanged.
+METER_DIR = os.environ.get("BUZZ_METER_DIR", "/opt/buzz-meter")
+OUT = f"{METER_DIR}/receipts"
+STATE = f"{METER_DIR}/state/offset"
+RATE_SET = f"{METER_DIR}/rate_set.json"
+ESCROW_LEDGER = f"{METER_DIR}/escrow-ledger.jsonl"
+SETTLEMENT_DIR = f"{METER_DIR}/settlement"
+RECEIPT_CHAIN = f"{METER_DIR}/state/receipt-chain-tip"   # P1 receipts chain here too
 SERVICE = "buzz-compute.service"
 
 SCHEMA_VERSION = "1.0.0-draft"
@@ -285,8 +289,8 @@ def main():
 # (baton fence). History APIs are 410-gone on public nodes, so attribution of
 # incoming transfers to keys is by founder instruction, not memo parsing.
 
-KEYS_FILE = "/opt/buzz-meter/keys.json"
-CHAIN_STATE = "/opt/buzz-meter/state/chain.json"
+KEYS_FILE = f"{METER_DIR}/keys.json"
+CHAIN_STATE = f"{METER_DIR}/state/chain.json"
 VAULTA_HOSTS = ["https://eos.api.eosnation.io", "https://eos.greymass.com"]  # api.eosn.io DNS-dead 2026-08-29; two confirmed hosts = the rule
 WATCH_ACCOUNT = None                    # designated estate account (set in keys.json.meta)
 
@@ -463,8 +467,8 @@ def cmd_allocate(args):
 # prepaid voucher for compute (alloy ruling); allocation emits voucher-framed
 # INSTRUCTIONS only. The tithe (10%, founder law) accrues in a computed book.
 
-BINDINGS = "/opt/buzz-meter/bindings.json"
-ALLOWLIST = "/opt/buzz-meter/bclaude-allowlist.txt"
+BINDINGS = f"{METER_DIR}/bindings.json"
+ALLOWLIST = f"{METER_DIR}/bclaude-allowlist.txt"
 FOUNDER_PUBKEY = "d44163340ce7dd9df1cfe14505ebe1112fb6819eb215b0169e166d3d47ef19bf"  # PUBLIC-CONSTANT: founder's hive key (the owner gate)
 
 def load_bindings():
@@ -601,7 +605,7 @@ def cmd_tithebook(args):
 # ALL CONFIG CONFIG-FILLABLE AT FLIP-TIME: base_receive_address unset ⇒
 # basepoll idles (paid lane is HOLD; nothing blocks on it).
 
-BASE_BINDINGS = "/opt/buzz-meter/base-bindings.json"
+BASE_BINDINGS = f"{METER_DIR}/base-bindings.json"
 BASE_STATE = "/opt/buzz-meter/state/base-chain.json"
 BASE_RPC = "https://mainnet.base.org"                 # keyless, proven in-tree
 USDC_BASE = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"  # PUBLIC-CONSTANT: native USDC on Base
@@ -703,6 +707,65 @@ def cmd_basepoll(args):
 VOUCHER_PORT = int(os.environ.get("VOUCHER_PORT", "8092"))
 VOUCHER_ORIGINS = os.environ.get("VOUCHER_ORIGINS", "https://skaists.dev,https://beehivenature.com").split(",")
 
+# ── P6 (AV-1): the ADMIN rail — idempotent write verbs for the serve bridge.
+# Bearer-gated by VOUCHER_ADMIN_TOKEN; when the token is unset every write is
+# REFUSED typed (a bridge deployed read-only stays read-only — fail closed).
+# The rail is for loopback/box-internal callers (the pollers, the doors); it
+# is never CORS-reflected, so browsers cannot drive it cross-origin.
+#
+#   POST /v1/admin/settle   {idempotency_key, voucher, declared, observed}
+#   POST /v1/admin/charge   {idempotency_key, voucher, usage: [[class, qty], …]}
+#
+# Laws (SPEC AV-1, docs/agents/ADVERSARIAL-BPAY-SPECS.md):
+# - every refusal is a TYPED 4xx naming the field; zero writes on refusal;
+# - a request's idempotency_key credits/charges EXACTLY ONCE: a replay
+#   returns the ORIGINAL event (idempotent_replay: true); the same key with
+#   a DIFFERENT payload is a 409 conflict, never a second effect;
+# - the engine's own (voucher, tx) settle idempotency stays in force UNDER
+#   the bridge law (belt and half-belt, two seams, one outcome);
+# - the durable append (single O_APPEND write + fsync) lands BEFORE the
+#   response — a SIGKILL anywhere around a request leaves "done-with-
+#   receipt" or "never happened", both lawful exactly-once outcomes.
+
+ADMIN_TOKEN = os.environ.get("VOUCHER_ADMIN_TOKEN", "")
+ADMIN_BODY_CAP = 65_536          # bytes; larger is refused 413 typed
+ADMIN_QTY_MAX = 2 ** 48          # generous far above any real metered quantity
+ADMIN_KEY_RE = re.compile(r"^[A-Za-z0-9._-]{1,128}$")
+VOUCHER_RE = re.compile(r"^[a-z0-9._-]{1,64}$")
+AMOUNT_RE = re.compile(r"^[0-9]+(\.[0-9]{1,8})?$")
+_BREAK_IDEMPOTENCY = os.environ.get("AV1_BREAK_IDEMPOTENCY") == "1"  # negative-control hook, test batteries only
+
+def _json_loads_strict(raw: bytes):
+    """JSON parse that REFUSES duplicate keys (the hostile-input battery's
+    dup-key shape) and non-UTF-8. Returns (obj, None) | (None, why)."""
+    def no_dups(pairs):
+        seen = set()
+        for k, _ in pairs:
+            if k in seen:
+                raise ValueError(f"duplicate JSON key: {k}")
+            seen.add(k)
+        return dict(pairs)
+    try:
+        return json.loads(raw.decode("utf-8", "strict"), object_pairs_hook=no_dups), None
+    except (ValueError, UnicodeDecodeError) as e:
+        return None, f"body is not strict JSON: {e}"
+
+def till_rate_set(classes):
+    """The till's own pricing construction (cmd_charge's), as a RateSet for
+    the requested resource classes."""
+    from decimal import Decimal
+    rate_set = load_rate_set()
+    tier = rate_set["tiers"]["paid_claude"]["cost_basis"]
+    per_million = {"prefill_token": Decimal(str(tier["prefill_token_per_million_usd"])),
+                   "decode_token": Decimal(str(tier["decode_token_per_million_usd"]))}
+    rates = {}
+    for c in classes:
+        if c not in per_million:
+            raise VoucherError(f"no till pricing for resource class: {c}")
+        rates[c] = per_million[c] / Decimal(1_000_000)
+    return RateSet(version=rate_set["version"], cost_basis_ref="anthropic-posted-2026-08",
+                   rates=rates)
+
 def voucher_view(key_id):
     from decimal import Decimal as _D
     led = load_ledger()
@@ -759,6 +822,184 @@ def cmd_serve(args):
             self.send_header("Cache-Control", "no-store")
             self.end_headers()
             self.wfile.write(body)
+
+        def _send_admin(self, code, obj):
+            # admin rail: no CORS reflection — loopback callers only, never browsers
+            body = json.dumps(obj).encode()
+            self.send_response(code)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Cache-Control", "no-store")
+            self.end_headers()
+            self.wfile.write(body)
+
+        # ── the admin write rail (AV-1) ─────────────────────────────────────
+        def do_POST(self):
+            u = urlparse(self.path)
+            if u.path in ("/v1/admin/settle", "/v1/admin/charge"):
+                return self._admin(u.path)
+            self._send_admin(404, {"message": "unknown path"})
+
+        def _admin(self, path):
+            if not ADMIN_TOKEN:
+                return self._send_admin(503, {"message":
+                    "admin rail not configured (VOUCHER_ADMIN_TOKEN unset) — "
+                    "refused typed, nothing written"})
+            auth = self.headers.get("Authorization", "")
+            if auth != f"Bearer {ADMIN_TOKEN}":
+                return self._send_admin(401, {"message":
+                    "admin rail: wrong or missing bearer token"})
+            length = self.headers.get("Content-Length", "")
+            try:
+                n = int(length)
+            except ValueError:
+                return self._send_admin(411, {"message":
+                    "admin rail requires an integer Content-Length"})
+            if n < 0:
+                return self._send_admin(411, {"message":
+                    "admin rail requires a non-negative Content-Length"})
+            if n > ADMIN_BODY_CAP:
+                return self._send_admin(413, {"message":
+                    f"body of {n} bytes exceeds the admin cap of {ADMIN_BODY_CAP}"})
+            raw = self.rfile.read(n)
+            obj, err = _json_loads_strict(raw)
+            if err:
+                return self._send_admin(400, {"message": err})
+            if not isinstance(obj, dict):
+                return self._send_admin(400, {"message": "body must be a JSON object"})
+            if path == "/v1/admin/settle":
+                return self._admin_settle(obj)
+            return self._admin_charge(obj)
+
+        def _crash_hook(self):
+            # AV-1 TEST SEAM — deterministic kill AFTER the durable append,
+            # BEFORE the response, so the harness can prove exactly-once
+            # across SIGKILL+restart. Only reachable past the admin token
+            # check; production callers never send this header.
+            if self.headers.get("X-AV1-Crash-Before-Respond") == "1":
+                os._exit(137)
+
+        @staticmethod
+        def _check_common(obj):
+            """idempotency_key + voucher — the shared typed validations.
+            Returns (key, voucher, None) or (None, None, error-message)."""
+            key = obj.get("idempotency_key")
+            if not isinstance(key, str) or not ADMIN_KEY_RE.fullmatch(key):
+                return None, None, ("idempotency_key must match "
+                                    f"{ADMIN_KEY_RE.pattern}")
+            voucher = obj.get("voucher")
+            if not isinstance(voucher, str) or not VOUCHER_RE.fullmatch(voucher):
+                return None, None, ("voucher must match "
+                                    f"{VOUCHER_RE.pattern}")
+            return key, voucher, None
+
+        def _admin_settle(self, obj):
+            allowed = {"idempotency_key", "voucher", "declared", "observed"}
+            unknown = sorted(set(obj) - allowed)
+            if unknown:
+                return self._send_admin(400, {"message":
+                    f"unknown field(s): {unknown}"})
+            key, voucher, err = self._check_common(obj)
+            if err:
+                return self._send_admin(400, {"message": err})
+            declared, observed = obj.get("declared"), obj.get("observed")
+            if not isinstance(declared, dict) or not isinstance(observed, dict):
+                return self._send_admin(400, {"message":
+                    "declared and observed must both be objects"})
+            for name, d, req in (("declared", declared, {"rail", "tx", "sender", "amount"}),
+                                 ("observed", observed, {"rail", "tx", "from", "amount"})):
+                missing = sorted(req - set(d))
+                if missing:
+                    return self._send_admin(400, {"message":
+                        f"{name} missing field(s): {missing}"})
+                extra = sorted(set(d) - req - {"memo"})
+                if extra:
+                    return self._send_admin(400, {"message":
+                        f"{name} carries unknown field(s): {extra}"})
+                for f in ("rail", "tx"):
+                    if not isinstance(d[f], str) or not (1 <= len(d[f]) <= 128):
+                        return self._send_admin(400, {"message":
+                            f"{name}.{f} must be a 1..128-char string"})
+                if d.get("rail") not in RAILS:
+                    return self._send_admin(400, {"message":
+                        f"{name}.rail {d.get('rail')!r} is not a known rail"})
+                if not isinstance(d["amount"], str) or not AMOUNT_RE.fullmatch(d["amount"]):
+                    return self._send_admin(400, {"message":
+                        f"{name}.amount must be a plain non-negative decimal "
+                        f"string like 2.0000 (got {d['amount']!r})"})
+            if not _BREAK_IDEMPOTENCY:
+                found = escrow().find_idempotent("DEPOSIT", key)
+                if found is not None:
+                    recorded_tx = found.get("vaulta_tx") or found.get("base_tx") or ""
+                    if recorded_tx != declared["tx"] or found.get("voucher") != voucher:
+                        return self._send_admin(409, {"message":
+                            f"idempotency key {key!r} already used by a "
+                            "different settlement — conflict, nothing written"})
+                    return self._send_admin(200, {"event": found,
+                                                   "idempotent_replay": True})
+            from x402_meter import credit_from_settlement, SettlementMismatch
+            try:
+                ev = credit_from_settlement(escrow(), voucher, declared, observed,
+                                            idempotency_key=key)
+            except SettlementMismatch as e:
+                return self._send_admin(409, {"message": str(e)})
+            except VoucherError as e:
+                return self._send_admin(400, {"message": str(e)})
+            self._crash_hook()
+            return self._send_admin(200, {"event": ev})
+
+        def _admin_charge(self, obj):
+            allowed = {"idempotency_key", "voucher", "usage"}
+            unknown = sorted(set(obj) - allowed)
+            if unknown:
+                return self._send_admin(400, {"message":
+                    f"unknown field(s): {unknown}"})
+            key, voucher, err = self._check_common(obj)
+            if err:
+                return self._send_admin(400, {"message": err})
+            usage = obj.get("usage")
+            if not isinstance(usage, list) or not (1 <= len(usage) <= 32):
+                return self._send_admin(400, {"message":
+                    "usage must be a non-empty list (max 32 pairs)"})
+            pairs = []
+            classes = set()
+            for pair in usage:
+                if not isinstance(pair, list) or len(pair) != 2:
+                    return self._send_admin(400, {"message":
+                        "each usage entry must be [resource_class, quantity]"})
+                cls, qty = pair
+                if not isinstance(cls, str) or cls not in RESOURCE_CLASSES:
+                    return self._send_admin(400, {"message":
+                        f"unknown resource class: {cls!r}"})
+                if isinstance(qty, bool) or not isinstance(qty, int) \
+                        or not (0 < qty <= ADMIN_QTY_MAX):
+                    return self._send_admin(400, {"message":
+                        f"quantity for {cls} must be a positive integer "
+                        f"<= {ADMIN_QTY_MAX}"})
+                pairs.append((cls, qty))
+                classes.add(cls)
+            if not _BREAK_IDEMPOTENCY:
+                found = escrow().find_idempotent("CHARGE", key)
+                if found is not None:
+                    if found.get("voucher") != voucher or \
+                            sorted((li["resource"], li["quantity"])
+                                   for li in found["line_items"]
+                                   if li["resource"] != "tithe.founder") != \
+                            sorted((c, str(q)) for c, q in pairs):
+                        return self._send_admin(409, {"message":
+                            f"idempotency key {key!r} already used by a "
+                            "different charge — conflict, nothing written"})
+                    return self._send_admin(200, {"event": found,
+                                                   "idempotent_replay": True})
+            try:
+                rs = till_rate_set(classes)
+                ev = escrow().charge(voucher, pairs, rs, idempotency_key=key)
+            except InsufficientVoucher as e:
+                return self._send_admin(402, {"message": str(e), "refused": True})
+            except VoucherError as e:
+                return self._send_admin(400, {"message": str(e)})
+            self._crash_hook()
+            return self._send_admin(200, {"event": ev})
+
         def do_GET(self):
             u = urlparse(self.path)
             parts = [p for p in u.path.split("/") if p]

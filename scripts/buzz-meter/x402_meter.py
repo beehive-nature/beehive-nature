@@ -150,7 +150,7 @@ def rate_set_minted_at_epoch(raw: dict) -> float | None:
 # ── 1 · credit-from-settlement ──────────────────────────────────────────────
 
 def credit_from_settlement(escrow: Escrow, voucher: str, declared: dict,
-                           observed: dict) -> dict:
+                           observed: dict, idempotency_key: str | None = None) -> dict:
     """
     pinout server.mjs:paymentContext / creditFromPayment, estate-shaped.
 
@@ -164,7 +164,9 @@ def credit_from_settlement(escrow: Escrow, voucher: str, declared: dict,
     - any mismatch (rail, tx id, sender, or declared amount != settled
       amount) → SettlementMismatch, NOTHING credited;
     - a replayed settlement (same tx) credits once — idempotent, the
-      (voucher, tx) key lives in voucher_escrow.deposit.
+      (voucher, tx) key lives in voucher_escrow.deposit;
+    - AV-1: an optional serve-bridge idempotency_key is recorded on the
+      credit event (additive field) for bridge-level resubmission lookup.
     """
     for key in ("rail", "tx"):
         if declared.get(key) != observed.get(key):
@@ -188,7 +190,8 @@ def credit_from_settlement(escrow: Escrow, voucher: str, declared: dict,
             rate_a_per_usdc=declared["rate_a_per_usdc"], rate_ref=declared["rate_ref"])
     return escrow.deposit(voucher, observed["amount"], vaulta_tx=observed["tx"],
                           sender=observed.get("from", ""),
-                          memo=observed.get("memo", ""))
+                          memo=observed.get("memo", ""),
+                          idempotency_key=idempotency_key)
 
 
 # ── 2 · the quote — a commitment (xorv createQuote) ─────────────────────────
