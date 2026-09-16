@@ -30,6 +30,10 @@ h1{font-size:clamp(22px,4.5vw,34px);line-height:1.15;margin:8px 0 6px;font-weigh
 .viewswitch button{border:0;border-radius:0;min-height:40px}
 .viewswitch button[aria-pressed="true"]{background:var(--gold);color:#152016;font-weight:650}
 .entrance{margin-top:12px;display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px}
+.econcard{margin-top:12px;border:1px solid rgba(255,215,0,.3);border-radius:12px;padding:12px 14px;
+ background:linear-gradient(135deg,rgba(255,215,0,.05),rgba(0,229,255,.04));font-size:11px;color:var(--dim);line-height:1.8}
+.econcard b{color:var(--gold)} .econcard .states{color:var(--faint);font-size:10px}
+.econcard a{color:var(--cyan)}
 .entrance a{display:block;text-decoration:none;background:var(--well);border:1px solid var(--line);border-radius:10px;
  padding:10px 12px;color:var(--ink);font-size:11px;cursor:pointer}
 .entrance a:hover{border-color:var(--gold)}
@@ -149,6 +153,10 @@ footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint
   <a data-ent="mythology"><b>mythology</b><span>the sagas and the crest's own symbolism — meaning, equal in standing, distinct in kind</span></a>
   <a data-ent="older"><b>older generations</b><span>the deep and legendary lines — discoverable, never compulsory</span></a>
 </div>
+<div class="econcard" id="econcard" hidden>
+  <b>⬡ this family archive's storage receipt</b> — <span id="econ-line">…</span><br>
+  <span class="states" id="econ-states">…</span>
+</div>
 <div class="searchout" id="qout"></div>
 <div class="lenses" id="lenses">
   <label><input type="checkbox" checked data-lens="records"> <span data-i18n="blood.lens.records">records</span></label>
@@ -229,6 +237,7 @@ footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint
     ]));
   }).then(function(){
     S.retrieved=(S.corpusMeta&&S.corpusMeta.retrieved)||null;
+    renderEconCard();
     renderDyn();
     // public entrance: Albert Perry Rockwood when present, else the founder
     var OPEN_ROOT=(S.refsIndex&&S.refsIndex[OPEN_ROOT_FS])||S.root;
@@ -267,6 +276,23 @@ footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint
     return true;
   }
 
+  // ── the live storage receipt card: states honest, five-way distinct ─────
+  function renderEconCard(){
+    fetch('../assets/profile-archive/lineage/zblood-storage-economics.json').then(function(r){return r.json();}).then(function(E){
+      var card=document.getElementById('econcard');if(!card)return;card.hidden=false;
+      var ar=E.quotes&&E.quotes.arweave, st=E.states||{};
+      var line;
+      if(st.uploaded&&ar){line='cost '+ar.computed.fullArchiveAR+' AR / $'+ar.computed.fullArchiveUSD+' to preserve on '+(st.uploadedAt||'—');}
+      else if(ar&&ar.state==='quoted'){line='Arweave quote to preserve this whole archive: <b>'+ar.computed.fullArchiveAR+' AR ≈ $'+ar.computed.fullArchiveUSD+'</b> (live, '+ar.tokenReference.value+' AR/USD @ '+ar.queriedAt.slice(0,10)+') — purchase awaits the approval gate';}
+      else {line='preservation quoted — see the receipt';}
+      line+=' · retrievals tested: <b>'+(st.retrievalsTested||0)+'</b> · developer egress bill: <b>'+(st.developerEgressUSD!=null?'$'+st.developerEgressUSD:'serving from our own box until network publication — our egress scales until then')+'</b>';
+      document.getElementById('econ-line').innerHTML=line;
+      document.getElementById('econ-states').innerHTML='states — prepared:'+(st.prepared?'✓':'✗')+' · approved:'+(st.approved?'✓':'✗')+
+        ' · quoted:'+(st.quoted?'✓ (AR live; ANT pending node route)':'✗')+' · purchased:'+(st.purchased?'✓':'✗')+
+        ' · uploaded:'+(st.uploaded?'✓':'✗')+' · retrieved:'+(st.retrieved?'✓':'✗')+' · hash-verified from storage:'+(st.hashVerifiedFromStorage?'✓':'✗')+
+        ' · <a href="../assets/profile-archive/lineage/zblood-storage-economics.json">the full receipt (JSON) ↗</a>';
+    }).catch(function(){/* card simply stays hidden if the receipt is absent */});
+  }
   function renderDyn(){
     document.getElementById('stats').textContent=langText('blood.stats',
       '{w} walked · {d} deceased published · {l} living redacted · spine {g} generations deep')

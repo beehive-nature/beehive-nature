@@ -1,0 +1,101 @@
+{
+ "schema": "zblood.storage-economics/1",
+ "law": "FIVE DISTINCT STATES, never conflated: quoted ≠ purchased ≠ uploaded ≠ retrieved ≠ hash-verified. No synthetic projection may be labeled measured. Every price carries its timestamp and raw source.",
+ "artifact": {
+  "name": "zBlood first approved public preservation snapshot",
+  "manifestSha256": "440b502a6e1ac2dc086902f743f9f750437e7079040dfd5e76c8dd42c7de4389",
+  "preparedAt": "2026-09-16T22:35:14.111Z",
+  "approvedAt": "2026-09-16T22:36:15.152Z",
+  "approvedBy": "founder (bounded preservation repair acceptance)",
+  "approvedDestination": "bnr genesis — skaists.dev blood archive (ANT/AR pending adapter receipt)",
+  "bindingIntact": true,
+  "files": 20537,
+  "bytes": 62139972,
+  "GiB": 0.057872,
+  "personObjects": 10259,
+  "evidencePacks": 3,
+  "uploadForm": "NOT YET UPLOADED. Planned: tar+zstd single immutable object; all quotes below are measured on the UNCOMPRESSED byte count and labeled so. When the compressed form is adopted, a new timestamped quote is required — quotes do not transfer across forms."
+ },
+ "quotes": {
+  "arweave": {
+   "state": "quoted",
+   "route": "https://arweave.net/price/{bytes} (public Arweave price route)",
+   "queriedAt": "2026-09-16T22:40:5xZ",
+   "raw": [
+    { "bytes": 62139972, "winston": 809313015684 },
+    { "bytes": 621399720, "winston": 8062152722158, "note": "10x sanity point — near-linear, quote consistent" },
+    { "bytes": 3614894, "winston": 37444936280, "note": "manifest-only (the compact provenance/root object for the split-route analysis)" }
+   ],
+   "tokenReference": { "pair": "AR/USD", "value": 2.51, "source": "coingecko simple/price", "queriedAt": "2026-09-16T22:40:5xZ" },
+   "computed": {
+    "fullArchiveUSD": 2.0314,
+    "fullArchiveAR": 0.8093,
+    "manifestOnlyUSD": 0.094,
+    "formula": "winston / 1e12 × AR/USD"
+   },
+   "note": "QUOTE ONLY — no purchase, no upload, no transaction. Arweave is a one-time endowment: storage is prepaid at upload; retrievals are served by the network at no marginal cost to the uploader."
+  },
+  "autonomi": {
+   "state": "quote-pending-node-route",
+   "why": "Autonomi pricing is computed via a live node's API (network record count, ANT-denominated). No public pricing REST route exists; probed 2026-09-16T22:40:59Z: api.autonomi.org, api.autonomi.network, stats.autonomi.org, antstats.autonomi.org — all unreachable from this seat. The estate's node runs on the box (fenced 6GiB loop; SSH filtered from the laptop this session).",
+   "stagedCommand": "query the box node's pricing route immediately before purchase, preserve the raw quote response + network composition, compute actual $/GiB with the ANT/USD reference below",
+   "tokenReference": { "pair": "ANT/USD", "value": 0.03466683, "source": "coingecko simple/price", "queriedAt": "2026-09-16T22:40:5xZ" },
+   "priorVerifiedFinding": "estate research (banked, NOT a live quote): Autonomi storage pricing is quadratic in node RECORD count, ANT-denominated; per-byte pricing was rejected at source. A live quote at upload time supersedes any model."
+  }
+ },
+ "economicsExperiment": {
+  "question": "Does Beehive Nature's marginal storage/egress obligation for this already-purchased immutable archive remain effectively unchanged as independent retrieval count rises?",
+  "headline": "STRUCTURALLY YES for ANT/AR routes (one-time prepaid immutable storage; the network, not Beehive infrastructure, serves retrievals; uploader egress does not scale with reads) — but UNMEASURED until a real upload + retrieval series exists; and TODAY the archive is served from estate-operated infrastructure (the box/relay), where OUR egress DOES scale with views until the network publication happens.",
+  "retrievalSeries": [1, 10, 100, 1000, 1000000],
+  "modelPerRetrieval": {
+   "assumption": "one retrieval = full-archive fetch (62,139,972 bytes) — worst case; a realistic page view fetches ~2 MB",
+   "arweaveUploader": { "storage": "0 (prepaid once)", "egress": "0 (network-served)", "renewal": "0 (endowment)" },
+   "autonomiUploader": { "storage": "0 after upload (prepaid)", "renewal": "subject to live network pricing law — unmeasured until quoted/purchased", "egress": "0 (network-served)" },
+   "estateOperatedToday": { "egress": "scales with every retrieval while skaists.dev/box serves the archive", "note": "the experiment's honest baseline: publishing to ANT/AR is what DETACHES retrieval load from estate infrastructure" }
+  },
+  "comparisons": {
+   "assumption": true,
+   "note": "public list prices documented 2026-09-16, explicitly NOT measured this session; retrieval/egress separated from storage; archive = 0.057872 GiB, realistic page view = 2 MiB",
+   "rows": [
+    { "route": "S3 Standard + CloudFront", "storageMonthlyUSD": 0.001331, "egressPerFullRetrievalUSD": 0.004919, "egressPerPageViewUSD": 0.000166 },
+    { "route": "Backblaze B2", "storageMonthlyUSD": 0.000347, "egressPerFullRetrievalUSD": 0.000579, "egressPerPageViewUSD": 0.0000195 },
+    { "route": "Cloudflare R2", "storageMonthlyUSD": 0.000868, "egressPerFullRetrievalUSD": 0, "egressPerPageViewUSD": 0, "note": "zero egress fees; storage still recurring" },
+    { "route": "Arweave (quoted)", "storageMonthlyUSD": 0, "egressPerFullRetrievalUSD": 0, "egressPerPageViewUSD": 0, "oneTimeUSD": 2.0314 },
+    { "route": "Autonomi (pending quote)", "storageMonthlyUSD": null, "egressPerFullRetrievalUSD": 0, "egressPerPageViewUSD": 0, "oneTimeUSD": null }
+   ],
+   "atOneMillionPageViews": {
+    "cloudfrontEgressUSD": 166.02,
+    "b2EgressUSD": 19.53,
+    "r2EgressUSD": 0,
+    "arweaveUploaderUSD": 0,
+    "note": "the Discord argument in numbers: at 1M realistic page views, egress-billed routes cost real money, endowment routes cost the uploader nothing — while our TODAY-operated serving costs our box the same egress until publication"
+   }
+  }
+ },
+ "arSplitRouteAnalysis": {
+  "question": "Is Arweave better used for the compact permanent provenance/root manifest while ANT carries the archive payload?",
+  "measured": { "manifestOnlyARUSD": 0.094, "fullArchiveARUSD": 2.0314 },
+  "finding": "BOTH are within pocket change at this archive's size; the split becomes meaningful at scale (a 60 GB archive would cost ~$1,966 on AR vs a ~$0.09 manifest root + ANT payload at its own rate). Recommendation: quote BOTH routes at upload time and decide with live numbers; AR's manifest-root pattern (permanent, tiny, address-stable) pairs naturally with ANT's payload economics — but no duplication happens until both live quotes exist and the founder rules."
+ },
+ "states": {
+  "prepared": true,
+  "approved": "manifest 440b502a… + destination bound",
+  "quoted": "Arweave YES (live, timestamped); Autonomi PENDING node route",
+  "purchased": false,
+  "uploaded": false,
+  "retrieved": false,
+  "hashVerifiedFromStorage": false
+ },
+ "reproducibility": {
+  "formulae": [
+   "winston→AR: winston / 1e12",
+   "AR→USD: AR × tokenReference.value",
+   "S3-family storage: listUSD_per_GiB_month × (bytes / 1024^3)",
+   "egress: listUSD_per_GiB × (bytes_fetched / 1024^3)"
+  ],
+  "rawInputsPreserved": true,
+  "noHardcodedPerTBClaims": "none present; the old $747/TB Discord number is deliberately absent — every figure here is either a timestamped quote or an explicitly-labeled list-price assumption"
+ },
+ "demonstrationPath": "Albert Perry Rockwood (public entrance) → biography/records/lore → blood fractal → underlying archived evidence — the receipt's card rides beside this path in surfaces/blood.html",
+ "generatedAt": "2026-09-16T22:5xZ"
+}
