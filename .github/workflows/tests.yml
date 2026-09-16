@@ -137,6 +137,15 @@ jobs:
       - name: AV-3 split-brain battery (meter vs delivery door)
         if: always()
         run: python3 scripts/buzz-meter/test_av3_split_brain.py
+      # AV-6 retry-storm battery (zCode, 2026-09-16, P1): PART A receipts
+      # forever that the 2-consecutive law cannot bound an alternating
+      # retry storm; 6.1/6.2 assert the aggregate failure-charge ceiling
+      # (inclusive bound, typed loud refusal past it, per-attempt evidence
+      # rows kept incl. refused attempts); the unbounded-policy negative
+      # control is detected
+      - name: AV-6 retry-storm battery (failure-charge ceiling)
+        if: always()
+        run: python3 scripts/buzz-meter/test_av6_retry_storm.py
       # PEER FUNNEL testnet runner selftest (z3.3 Order C, 2026-09-05): the
       # one-broadcast tool cannot rot — keccak + EIP-155 RLP hash vectors and
       # the sign/recover roundtrip proven every push (key parts skip cleanly

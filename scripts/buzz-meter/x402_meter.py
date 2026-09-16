@@ -279,6 +279,12 @@ class Session:
     # credit). None while ACTIVE/OPENING. The reason is what lets recovery
     # resume the RIGHT way without conflating the two park laws.
     park_reason: str | None = None
+    # AV-6: the failure-charge book — per-obligation aggregate bound on what
+    # the retry loop may ever book for failed attempts (None policy = today's
+    # unbounded world; wiring a policy is the caller's law, see book_failure).
+    failure_policy: "FailureChargePolicy | None" = None
+    failure_fees_a: Decimal = Decimal("0")
+    failure_rows: list = field(default_factory=list)
 
     def open(self, now: float | None = None) -> "Session":
         # New sessions refuse on a stale rate book BEFORE any state moves —
@@ -498,13 +504,86 @@ def halt_on_fraud(state: str, failed_checks: list) -> None:
 
 def halt_on_infra(session: Session, settle_error: Exception) -> Halt:
     """A settle failure is infra: PAUSE and retry once; two CONSECUTIVE
-    failures halt the loop for a human (Tally: halt after 2 consecutive)."""
+    failures halt the loop for a human (Tally: halt after 2 consecutive).
+
+    AV-6 note: this law counts CONSECUTIVE failures only — an alternating
+    fail/success loop defeats it (proven live by the AV-6 battery's PART A).
+    The aggregate bound lives in book_failure below; two laws, one book."""
     session.settle_failures += 1
     session.state = "PAUSED"
     if session.settle_failures >= 2:
         return Halt(HALT_INFRA, "KILL",
                     f"2 consecutive settle failures ({settle_error}) — halt for a human")
     return Halt(HALT_INFRA, "PAUSE", f"settle failed once ({settle_error}) — retry")
+
+
+# ── 5b · the failure-charge ceiling (AV-6) ──────────────────────────────────
+
+class FailureFeeCeiling(VoucherError):
+    """The obligation's retry loop has reached its AGGREGATE failure-charge
+    ceiling — further accrual is a HARD typed refusal (loud; the loop halts
+    for a human). Per-attempt evidence rows remain intact for every attempt,
+    including the refused ones."""
+
+
+@dataclass
+class FailureChargePolicy:
+    """AV-6: the explicit bound on what one obligation's retry loop may ever
+    book as failure cost.
+
+    - `per_attempt_fee_a` — the failure-fee shape per failed attempt (the
+      chain_fee lineage; on gas-paying rails gas burns on failure — the R7
+      asymmetry — and the policy book must see it to bound it);
+    - `ceiling_a` — the aggregate bound, INCLUSIVE: reaching it exactly is
+      lawful; booking past it raises FailureFeeCeiling. None = explicitly
+      unbounded (today's world; the negative-control shape only — a
+      production policy with None is the leak this law exists to close).
+
+    The ceiling bounds the POLICY book. Translating booked failure fees
+    into member-facing escrow charges (the chain_fee rate shape) is
+    deploy-side rate-book work — an implemented invariant is not a
+    live-wired one."""
+    per_attempt_fee_a: Decimal
+    ceiling_a: Decimal | None = None
+
+
+def book_failure(session: Session, error: Exception,
+                 ts: float | None = None) -> dict:
+    """AV-6: book ONE failed attempt of the obligation's retry loop.
+
+    Evidence FIRST — every attempt leaves its row (attempt number, ts, the
+    error itself, the fee) so per-attempt truth is never weakened by the
+    bound. Then the aggregate law: when the next fee would take the running
+    total PAST the ceiling, the row lands with fee 0.0000 / booked False and
+    FailureFeeCeiling raises naming total, ceiling, and fee — loud, never
+    silent, never a silent absorb. Composes with halt_on_infra (the caller
+    catches the refusal and halts for a human; the consecutive law keeps
+    its own behavior untouched)."""
+    p = session.failure_policy
+    if p is None:
+        raise VoucherError(
+            "book_failure: no FailureChargePolicy wired on this session — "
+            "refuse rather than book unbounded")
+    t = time.time() if ts is None else ts
+    attempt_no = len(session.failure_rows) + 1
+    new_total = session.failure_fees_a + p.per_attempt_fee_a
+    ceiling = p.ceiling_a
+    if ceiling is not None and new_total > ceiling:
+        row = {"attempt_no": attempt_no, "ts": t, "error": str(error)[:200],
+               "fee_a": "0.0000", "booked": False,
+               "refused": f"failure-fee ceiling {ceiling} A would be passed "
+                          f"({session.failure_fees_a} + {p.per_attempt_fee_a} A)"}
+        session.failure_rows.append(row)
+        raise FailureFeeCeiling(
+            f"failure-fee ceiling: total {session.failure_fees_a} A + next "
+            f"{p.per_attempt_fee_a} A would pass the {ceiling} A aggregate "
+            f"ceiling — halt the retry loop for a human (attempt "
+            f"{attempt_no} evidenced, not charged)")
+    session.failure_fees_a = new_total
+    row = {"attempt_no": attempt_no, "ts": t, "error": str(error)[:200],
+           "fee_a": str(p.per_attempt_fee_a), "booked": True}
+    session.failure_rows.append(row)
+    return row
 
 
 def _d(x) -> Decimal:
