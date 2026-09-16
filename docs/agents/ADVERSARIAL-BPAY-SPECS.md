@@ -433,3 +433,104 @@ zero network.
 
 *Fifth roll, 2026-09-16. Pipeline law unchanged: builder proves RED, fixes GREEN, CI
 arbitrates; zArcheology designs tests only.*
+
+---
+
+## SIXTH ROLL — LU/CD continued through the R13 transport seam (2026-09-16)
+
+*Founder state correction (verbatim): "Resume the current zArcheology roll-forward from
+ADVERSARIAL-BPAY-SPECS: continue RS-5.4 and rail-capability discovery RED-first specs
+against bpay-rail. No architecture waiting gate remains." Targets RE-BOUND to
+`codex/z2b-bpay-rail` @`0ff70217` (R13 + its dock rider): `src/{nwc,nwc_live,nwc_mock,ln,
+ledger,fee,evm,x402}.rs` + `tests/{rail_probes,surcharge_x402,nwc_laws}.rs`. The founder law
+"the unified trait must unify laws, not erase rail semantics" now extends THROUGH the
+transport seam R13 introduced — conflation must be attacked at the NIP-47 boundary too.*
+
+**GREEN accounting (R13 vs prior specs — do NOT re-prove):** preimage-REQUIRED settlement
+incl. the preimage-stripping transport probe (RS-5.3 LN direction), duplicate payment_hash →
+route-to-lookup, expiry-blocks-new-never-old (RS-5.1 LN pre-send direction),
+unknown-never-auto-retry, and the fees_paid IMPOSSIBILITY check (bound+1 refused pre-mutation)
+are GREEN per R13 receipts and `tests/nwc_laws.rs`.
+
+**REDs verified at `0ff70217` this roll (cited):** no MPP/hold symbols anywhere in `src/`
+(LU-2, LU-5); `LnInvoice.amount_msat: u64` is a BARE int while identity is newtyped
+(`PaymentHash`, ln.rs:30 vs ln.rs:35 — LU-3/LU-7); msat→Atto conversion scattered over TWO
+sites (ln.rs:160, ln.rs:190 — LU-7.2); `reconcile` coerces absent fees to zero
+(`unwrap_or(0)`, ln.rs:239 — LU-8); no negotiation-event type (LU-4); no capability or
+manifest type exists (all of CD).
+
+### SPEC LU-5 — hold-invoice modeled-upto (the OTHER lawful LN upto path; LU-2 covers MPP)
+
+| # | case | exact pass criterion | fail criterion |
+|---|---|---|---|
+| LU-5.1 | hold-invoice settle-on-release: preimage withheld by the receiver until release; hold-timeout claws back | settlement ONLY on a released preimage (RS-5.3 law); hold-timeout = terminal Failed, ZERO fee, no replacement (RS-5.2 LN law) | hold force-settled at the ceiling; hold-timeout charged |
+| LU-5.2 | multi-hold partial release inside the window | Σ released ≤ declared ceiling at reconcile; unreleased parts roll to the LU-5.1 timeout law, non-terminal until then | partial release exceeds ceiling; early terminal |
+| LU-5.3 | mechanism-named upto: a rail declaring `upto` must name its mechanism (`mpp` \| `hold` \| `both`) in the CD manifest | distinct CD-3 rows per mechanism; MPP and HOLD probed separately | mechanism-agnostic "upto=true" |
+
+### SPEC LU-6 — NIP-47 error vocabulary → ledger-state mapping (transport-boundary conflation)
+
+R13 pinned the full typed `NwcError` vocabulary + `TransportAmbiguous` → Unknown class. Attack
+the MAP, not the vocabulary:
+
+| # | case | exact pass criterion | fail criterion |
+|---|---|---|---|
+| LU-6.1 | every NIP-47 error class maps to exactly ONE lawful ledger outcome, pinned as a total map: RATE_LIMITED → intent stays OPEN at `Intent`, nothing further; NOT_ENOUGH_FUNDS-style → typed refusal PRE-send; PAYMENT_FAILED vs INTERNAL_ERROR distinctness observable; an UNMAPPED code = typed unmapped-class refusal, never a guess | total mapping pinned by a parameterized probe over the vocabulary | rate-limited coerced to Failed; vocabulary collapsed into one state |
+| LU-6.2 | `TransportAmbiguous` → Unknown: never auto-retried; the original obligation reconciles only by later lookup (AV-8's law THROUGH the transport) | reconcile-by-lookup only, original payment_hash | auto-retry under a fresh payment_hash (identity laundering) |
+| LU-6.3 | live-gate refusal (`send_enabled=false`, named "LIVE SENDS DISABLED this slice") leaves ZERO ledger residue | refusal pre-ledger: no intent row, no reservation, zero mutation | half-open intent at the gate |
+
+### SPEC LU-7 — typed rail units at the transport boundary (LU-3 extended through R13)
+
+| # | case | exact pass criterion | fail criterion |
+|---|---|---|---|
+| LU-7.1 | NIP-47 JSON msat integers cross into the typed layer by TYPED construction only — a `MilliSatoshi` newtype (or equivalent); a bare-int constructor for money must not exist | typed everywhere; bare-int money path refuses to compile/construct | unit-confusable bare `u64` from JSON to ledger (CURRENT STATE — ln.rs:35, the named RED) |
+| LU-7.2 | cross-rail amount passage (msat → `Atto` for the unified fee window) goes through ONE named conversion site with cross-checked vectors | single site, vector-tested | scattered conversions (CURRENT: ln.rs:160 + ln.rs:190) |
+| LU-7.3 | invoice-amount mismatch refusal names the field AND the unit pair | refusal text carries both units | unitless refusal |
+
+### SPEC LU-8 — `fees_paid` absent-vs-zero at BOOKING (RS-4.2 finished through R13)
+
+| # | case | exact pass criterion | fail criterion |
+|---|---|---|---|
+| LU-8.1 | reconcile BOOKING distinguishes not-reported (field absent) from charged-zero (present `0`) — today `unwrap_or(0)` (ln.rs:239) coerces absent→zero for the bound check; the probe pins the RS-4.2 law end-state: absent books as a DISTINCT observable state (own log/balance line) or is refused as forgery — never silently equal to zero | distinction observable in end state; lawful-distinct OR refused | absent==zero indistinguishable (CURRENT — the named RED) |
+| LU-8.2 | mock fidelity: `nwc_mock` models optionality (CAN omit the field); a mock that always emits `fees_paid` must be caught by a live/mock differential — mocks may not silently be stronger than the protocol | differential green only on faithful optionality | mock drift greens a lying battery |
+
+### SPEC CD-7 — transport capability discovery (the reader-door lesson made law)
+
+R13's live transport DISCOVERED mid-flight that some relays need WS for kind-23195 responses
+(REQ-over-POST named honestly as a capability gap). CD-7 makes that a BEFORE-construction axis:
+
+| # | case | exact pass criterion | fail criterion |
+|---|---|---|---|
+| CD-7.1 | evidence-channel readability (`response-read: post-req \| ws-required \| none`) is a declared capability; constructing a SEND intent when the transport cannot read responses refuses at construction naming the axis — send-then-blind is the permanent-Unknown trap | refuse-before-send, typed, names the axis | broadcast into an unreadable evidence channel, discover after |
+| CD-7.2 | read-only ops (get_info/get_balance) stay lawful on a read-only transport — the refusal binds only value-carrying construction (R13's env-gated read-only live leg is the lawful shape) | read path works | over-blocking: reads also refused |
+
+### SPEC CD-8 — the live-send gate as a capability axis
+
+| # | case | exact pass criterion | fail criterion |
+|---|---|---|---|
+| CD-8.1 | `send` is a manifest axis, off-by-default; intent construction demanding send with `send:off` refuses naming the gate (LU-6.3, manifest-shaped) | typed construction-time refusal | settle-time surprise |
+| CD-8.2 | `enable_sends()` mutates the manifest ADDITIVELY with a version bump (CD-5 law reaches gates) | versioned, additive | silent capability flip |
+
+### SPEC CD-9 — capability composition algebra (weakest link)
+
+| # | case | exact pass criterion | fail criterion |
+|---|---|---|---|
+| CD-9.1 | composed stack (rail × transport) capability = INTERSECTION: `NwcRail<T>` over a `ws-required` transport caps LN's evidence semantics accordingly; the composed manifest is DERIVED, never hand-written per stack | derived intersection pinned by probe | composed manifest claims more than any component |
+| CD-9.2 | the watchpay-composed EVM member's manifest derives from watchpay's PROVEN behavior (65/65 mainline), not a hand-written row — behavior-derived truth feeding CD-4 | derivation pinned | hand-written row diverges from watchpay behavior |
+
+### SPEC CD-10 — mock-vs-live manifest truth (batteries may not green against a lying mock)
+
+| # | case | exact pass criterion | fail criterion |
+|---|---|---|---|
+| CD-10.1 | the MOCK declares itself in its manifest (identity: mock) and an EXPLICIT divergence table lists every row where mock ≠ live | explicit divergence data | mock silently stronger/weaker than live |
+| CD-10.2 | negative control: a battery that would green against a mock whose manifest lies (declares `upto`) MUST fail via CD-4 | detected | lying mock passes the suite |
+
+**Harness notes:** LU-6/CD-7 need `nwc_mock` extension (per-class error injection +
+response-readability modes — builder's); LU-5 needs hold-invoice injection (builder's); CD
+probes stay pure data-vs-behavior, zero network. The live leg stays env-gated read-only
+(`BPAY_NWC_URL`, `#[ignore]`) per R13 law. **RED expectations:** LU-2, LU-3/LU-7, LU-4,
+LU-5, LU-8.1, and all of CD are RED today at `0ff70217` (citations above); LU-6.1 is
+PARTIALLY green (the vocabulary maps, the total-map pin does not exist). Each RED run
+charters its fix.
+
+*Sixth roll, 2026-09-16. Pipeline law unchanged: builder proves RED, fixes GREEN, CI
+arbitrates; zArcheology designs tests only, zero production code.*
