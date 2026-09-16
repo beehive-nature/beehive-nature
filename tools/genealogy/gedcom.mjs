@@ -131,7 +131,7 @@ export function fromGedcom(model, text) {
       // parsed evidence wins; otherwise the era heuristic labels it honestly
       evidence: p.evidence
         ? { ...p.evidence }
-        : { class: evidenceClass({ living, lifespan }), basis: "era-heuristic" },
+        : { era: evidenceClass({ living, lifespan }), support: "unsourced-entry", class: evidenceClass({ living, lifespan }), basis: "era label from dates; support unsourced" },
     };
   }
   for (const f of Object.values(fams)) {

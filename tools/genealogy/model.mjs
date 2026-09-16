@@ -6,15 +6,18 @@
 //
 // Person:  { name, lifespan, gender:"M"|"F"|null, living:boolean,
 //            source?:string, sourceId?:string,
-//            evidence:{ class:"recorded"|"colonial"|"medieval"|"saga"|"living"|"unrecorded",
-//                       basis:"era-heuristic"|"sourced"|"unsourced-entry" } }
+//            evidence:{ era:"recorded"|"colonial"|"medieval"|"saga"|"living"|"unrecorded",
+//                       support:"sourced"|"attested"|"unsourced-entry",
+//                       basis:string } }
 // Edges:   childId -> [parent1Id, parent2Id?]   (blood-parent links only)
 // Couples: "p1|p2" -> { marriage?:string }
 //
-// EVIDENCE LAW: era-heuristic classes are LABELS derived from birth year, never
-// claims of proof. When per-person source counts are harvested (next walk),
-// `basis` upgrades to "sourced"/"unsourced-entry" and the class can be
-// recomputed — until then every tier says so in `basis:"era-heuristic"`.
+// EVIDENCE LAW v2.1 — era and support are SEPARATE AXES:
+//  · era is a historical-period label (derived from dates) — descriptive only;
+//  · support is evidential standing — NEVER derived from a date. It upgrades
+//    only when sources are actually harvested ("sourced") or the founder
+//    attests ("attested"). Default "unsourced-entry" says so honestly.
+// A date or source count must not silently become a confidence verdict.
 
 export const SCHEMA = "skaists.lineage/2";
 export const FSID = /^[A-Z0-9]{4}-[A-Z0-9]{3,4}$/;
@@ -56,6 +59,7 @@ const PERSON_KNOWN_KEYS = ["id", "name", "lifespan", "gender", "living", "source
 export function addPerson(model, p) {
   if (!p || typeof p.id !== "string" || !p.name) return false;
   const prev = model.persons[p.id];
+  const ev = p.evidence || {};
   const entry = {
     name: p.name,
     lifespan: p.lifespan ?? null,
@@ -64,8 +68,12 @@ export function addPerson(model, p) {
     ...(p.source ? { source: p.source } : {}),
     ...(p.sourceId ? { sourceId: p.sourceId } : {}),
     evidence: {
-      class: evidenceClass(p),
-      basis: p.evidence?.basis ?? "era-heuristic",
+      era: ev.era || evidenceClass(p),           // historical-period label
+      support: ev.support || "unsourced-entry",  // evidential standing — never date-derived
+      basis: ev.basis || "era label from dates; support unsourced until sources are harvested",
+      // `class` kept as a read-only alias of era for existing renderers
+      class: ev.era || evidenceClass(p),
+      ...(ev.upgradedBy ? { upgradedBy: ev.upgradedBy } : {}),
     },
     ...((prev?.note || p.note) ? { note: prev?.note || p.note } : {}),
   };
@@ -186,7 +194,7 @@ export function privatize(model) {
     if (!p.living) { addPerson(out, { ...p, id }); continue; }
     if (onRootLine.has(id)) {
       out.persons[id] = { name: "Living", lifespan: null, gender: p.gender ?? null,
-        living: true, evidence: { class: "living", basis: "era-heuristic" } };
+        living: true, evidence: { era: "living", support: "unsourced-entry", class: "living", basis: "redacted stub" } };
     } else redacted++;
   }
   for (const [child, ps] of Object.entries(edgesWithin(model, out)))
@@ -216,9 +224,12 @@ export function validate(model, { public: isPublic = false } = {}) {
   else if (!P[model.root]) problems.push(`root ${model.root} missing from persons`);
   for (const [id, p] of Object.entries(P)) {
     if (!p.name) problems.push(`person ${id}: no name`);
-    if (!p.evidence?.class) problems.push(`person ${id}: no evidence class`);
+    if (!p.evidence?.era && !p.evidence?.class) problems.push(`person ${id}: no evidence era`);
+    if (!p.evidence?.support) problems.push(`person ${id}: no evidence support`);
     if (isPublic && p.living && (p.name !== "Living" || p.lifespan || p.sourceId))
       problems.push(`person ${id}: living in a public artifact must be an anonymous root-line stub (no dates, no source id)`);
+    if (isPublic && p.living && FSID.test(id))
+      problems.push(`person ${id}: living stub retains a provider identifier (leak)`);
   }
   for (const [child, ps] of Object.entries(model.edges)) {
     if (!P[child]) problems.push(`edge from non-person ${child}`);

@@ -21,12 +21,28 @@ function fixtureModel() {
   return m;
 }
 
-test("evidence classes separate eras — saga is never 'recorded'", () => {
+test("evidence classes separate eras — saga is never 'recorded'; era and support are separate axes", () => {
   assert.equal(evidenceClass({ lifespan: "1900–1970" }), "recorded");
   assert.equal(evidenceClass({ lifespan: "1701–1744" }), "colonial");
   assert.equal(evidenceClass({ lifespan: "1200–1260" }), "medieval");
   assert.equal(evidenceClass({ lifespan: "0740–0845" }), "saga");
   assert.equal(evidenceClass({ living: true }), "living");
+  // a date NEVER confers support: era stays a label, support stays unsourced
+  const m = fixtureModel();
+  for (const p of Object.values(m.persons)) {
+    assert.equal(p.evidence.support, "unsourced-entry");
+    assert.equal(p.evidence.era, p.evidence.class);
+  }
+});
+
+test("public identifier leakage: living stubs must not carry provider ids", () => {
+  const m = fixtureModel();
+  const pub = privatize(m);
+  const leaked = JSON.parse(JSON.stringify(pub));
+  leaked.persons["ABCD-123"] = leaked.persons["P2"]; // living stub under an FSID-shaped key
+  const problems = validate(leaked, { public: true });
+  assert.ok(problems.some((p) => p.includes("retains a provider identifier")));
+  assert.deepEqual(validate(pub, { public: true }).filter((p) => !p.startsWith("unresolved:")), []);
 });
 
 test("model validation catches structure breaks and privacy leaks", () => {
@@ -46,7 +62,7 @@ test("privatize — living bloodline become anonymous stubs, off-line living dro
   // living root-line (P1 root + P2 mother) survive as anonymous stubs
   assert.deepEqual(pub.persons.P1, {
     name: "Living", lifespan: null, gender: "M", living: true,
-    evidence: { class: "living", basis: "era-heuristic" },
+    evidence: { era: "living", support: "unsourced-entry", class: "living", basis: "redacted stub" },
   });
   assert.equal(pub.persons.P2.name, "Living");
   assert.equal(pub.persons.P2.lifespan, null);
@@ -93,7 +109,7 @@ test("GEDCOM round-trip: export → parse → same persons, edges, evidence", ()
   assert.ok(ged.includes("1 NAME Father /Deceased/"));
   assert.ok(!ged.includes("Founder Living"));
   assert.ok(ged.includes("1 NOTE source familysearch:P3"));
-  assert.ok(ged.includes("1 NOTE evidence colonial (era-heuristic)"));
+  assert.ok(ged.includes("1 NOTE evidence colonial (era label from dates; support unsourced until sources are harvested)"));
 
   const back = createModel({ source: "gedcom-import" });
   const { persons } = fromGedcom(back, ged);

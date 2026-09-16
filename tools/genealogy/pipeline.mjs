@@ -36,10 +36,16 @@ if (overlay) {
   }
   for (const [id, p] of Object.entries(overlay.persons || {})) {
     if (!p?.name) continue;
+    const ev = p.evidence || {};
     model.persons[id] = {
       name: p.name, lifespan: p.lifespan ?? null, gender: p.gender ?? null,
       living: !!p.living,
-      evidence: p.evidence || { class: "saga", basis: "attested-overlay" },
+      evidence: {
+        era: ev.era || ev.class || "saga",
+        support: ev.support || "attested",
+        class: ev.class || ev.era || "saga",
+        basis: ev.basis || "attested overlay — evidence pack required",
+      },
       ...(p.evidencePack ? { evidencePack: p.evidencePack } : {}),
       relation: p.relation || null,
     };
@@ -127,7 +133,7 @@ for (const [id, p] of Object.entries(model.persons)) {
   if (p.living) {
     if (onRootLine.has(id)) {
       pub.persons[id] = { name: "Living", lifespan: null, gender: p.gender ?? null,
-        living: true, evidence: { class: "living", basis: "era-heuristic" } };
+        living: true, evidence: { era: "living", support: "unsourced-entry", class: "living", basis: "redacted stub" } };
       stubs++;
     } else redacted++;
     continue;
@@ -136,12 +142,42 @@ for (const [id, p] of Object.entries(model.persons)) {
 }
 for (const [child, ps] of Object.entries(model.edges)) if (pub.persons[child]) addEdge(pub, child, ps);
 for (const c of Object.values(model.couples)) if (pub.persons[c.p1] && pub.persons[c.p2]) addCouple(pub, c.p1, c.p2, c.marriage);
+
+// ── identifier pseudonymization: living persons must not carry provider ids
+// in a PUBLIC artifact (the id itself identifies a living person). Root
+// becomes "founder" (the page's public subject); other living become liv-N.
+const idmap = {};
+let livN = 0;
+for (const id of Object.keys(pub.persons)) {
+  const p = pub.persons[id];
+  if (!p.living) continue;
+  idmap[id] = id === pub.root ? "founder" : "liv-" + (++livN);
+}
+const remapped = { persons: {}, edges: {} };
+for (const [id, p] of Object.entries(pub.persons)) {
+  remapped.persons[idmap[id] || id] = p;
+}
+for (const [child, ps] of Object.entries(pub.edges)) {
+  if (!pub.persons[child]) continue;
+  remapped.edges[idmap[child] || child] = ps.map((p) => idmap[p] || p);
+}
+pub.persons = remapped.persons;
+pub.edges = remapped.edges;
+if (pub.root && idmap[pub.root]) pub.root = idmap[pub.root];
+pub.couples = Object.fromEntries(Object.entries(pub.couples)
+  .filter(([k, c]) => pub.persons[idmap[c.p1] || c.p1] && pub.persons[idmap[c.p2] || c.p2])
+  .map(([k, c]) => {
+    const p1 = idmap[c.p1] || c.p1, p2 = idmap[c.p2] || c.p2;
+    return [[p1, p2].sort().join("|"), { p1, p2, ...(c.marriage ? { marriage: c.marriage } : {}) }];
+  }));
+for (const k of Object.keys(packIndex)) if (idmap[k]) { delete packIndex[k]; }
 const spineRows = spineChain.map((id, i) => {
   const p = model.persons[id];
   return p.living
     ? { i, n: "Living", l: null, t: "living" }
-    : { i, n: p.name, l: p.lifespan, t: p.evidence.class, ...(p.sourceId ? { f: p.sourceId } : {}) };
+    : { i, n: p.name, l: p.lifespan, t: p.evidence.class || p.evidence.era, ...(p.sourceId ? { f: p.sourceId } : {}) };
 });
+// living spine rows carry no f already; deceased ids never remapped — safe as-is
 pub.spine = spineRows; // the spine travels with the corpus for data consumers
 pub.meta = {
   ...model.meta,
@@ -150,13 +186,12 @@ pub.meta = {
     personsWalked: Object.keys(model.persons).length,
     bloodlinePersons: blood.size,
     deceasedPublished: Object.keys(pub.persons).length,
-    livingRedacted: redacted,
-    spineGenerations: spineChain.length,
-    spineReaches: terminus ? `${terminus.name} ${terminus.lifespan ?? ""}`.trim() : "(no spine target found)",
     livingRedacted: livingTotal, // every living person loses its details; `livingStubs` survive anonymously on the root line
     livingStubs: stubs,
+    spineGenerations: spineChain.length,
+    spineReaches: terminus ? `${terminus.name} ${terminus.lifespan ?? ""}`.trim() : "(no spine target found)",
   },
-  privacy: "living persons redacted — root-line living survive as anonymous 'Living' stubs (no names, dates, or source ids); all other living dropped",
+  privacy: "living persons redacted — root-line living survive as anonymous 'Living' stubs with PSEUDONYMIZED ids (root='founder', others liv-N; provider ids never published); all other living dropped. Relationship-leakage review: couples and edges touching dropped living persons are removed with them.",
   confidenceTiers: "era heuristic (recorded ≥1850 · colonial 1550–1850 · medieval 1000–1550 · saga <1000); basis says era-heuristic until per-person source counts are harvested",
   claimPolicy: "every person carries its evidence class; the spine past the colonial era is traditional, not proven",
   packs: packIndex,

@@ -49,5 +49,35 @@
    "attested": "founder order 2026-09-16"
   }
  },
+ "relationshipEvidence": {
+  "ovl-harthacnut-i|ovl-sigurd-snake-eye": {
+   "claim": "Harthacnut I of Denmark is the son of Sigurd Snake-in-the-Eye and Blaeja of Northumbria.",
+   "status": "disputed",
+   "hypotheses": [
+    { "id": "sigurd-father", "label": "Sigurd Snake-in-the-Eye is his father",
+      "tradition": "Ragnarssona þáttr / Ragnars saga Loðbrókar (13th-c. Icelandic tradition)",
+      "consequence": "Carries the Danish royal line through Ragnar's son — the line to Gorm the Old and every Danish monarch after 1047." },
+    { "id": "sven-father", "label": "A 'Sven' is his father (Sigurd's role uncertain)",
+      "tradition": "Adam of Bremen, Gesta Hammaburgensis (c. 1075)",
+      "consequence": "The earliest near-contemporary source names Hardegon's father Sven — contradicting the þáttr by a century." }
+   ],
+   "contradictions": "The þáttr is 13th-century; Adam of Bremen writes c. 1075, closer to the events but hostile to and distant from Danish court genealogy. Both cannot be simply true; neither is contemporary with Harthacnut (~916).",
+   "sources": ["https://en.wikipedia.org/wiki/Sigurd_Snake-in-the_Eye", "https://en.wikipedia.org/wiki/Harthacnut_I_of_Denmark"]
+  }
+ },
+ "testimony": [
+  { "id": "rockwood-account", "lens": "testimony", "subject": "Rockwood line",
+   "author": "family testimony, recorded 2026-09-16; corrected the same day by founder order",
+   "text": "Family testimony speaks of a Rockwood investment account connected to the Ancestry.com stake. CORRECTION THAT TRAVELS WITH IT: Ancestry's documented 2020 acquisition was by Blackstone-managed funds, NOT the LDS Church. No supporting records attached — this entry stays attributed family testimony and is never presented as independent verification.",
+   "status": "attributed testimony — records pending" },
+  { "id": "seidr-placeholder", "lens": "spiritual", "subject": "founder",
+   "author": "founder (reserved — his own words)",
+   "text": null,
+   "status": "reserved: personal spiritual reflections (Seiðr-related experiences) will be preserved here in the founder's own words, dated and attributed. Personal importance without biological-descent verification — the lens never upgrades evidence." }
+ ],
+ "moneyHistory": {
+  "law": "Businesses, investments, inheritance, and patronage form a SEPARATE overlay connected to people — never confused with parentage, never rendered as blood.",
+  "entries": [ { "ref": "rockwood-account", "via": "testimony" } ]
+ },
  "law": "Overlay ids use the ovl- prefix so they can never collide with provider ids. CORRECTIONS patch walked persons by provider id — a correction is a founder attestation layered OVER the provider record, never a silent edit: the walked layer keeps its own flag in provenance and the corpus marks the person corrected. Merging overlays into a rendered view must render the evidence chip on every overlay person."
 }
