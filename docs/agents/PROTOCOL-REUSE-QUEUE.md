@@ -299,6 +299,47 @@ Full source-verified recon: [`docs/dispatches/2026-09-15-protocol-recon-opena2a-
 - **Reconciliation gate applies** as to every item; nothing here drives
   implementation.
 
+## 4 · OPEN-SOURCE E-CASH FAMILY — OPEN · recon receipted 2026-09-16, reuse-first class (research-only)
+
+*Received 2026-09-16, founder roll-forward order (Eddies workerb): "identify
+existing open implementations of the useful DBC ideas—offline bearer notes,
+acceptance windows, signed transfer receipts, double-spend detection—then
+compare them against bPay's bounded-authority/private-receipt architecture.
+Reuse before invention; no Eddies dependency." Full source-verified recon:*
+[`docs/dispatches/2026-09-16-ecash-family-recon.md`](../dispatches/2026-09-16-ecash-family-recon.md).
+
+- **Candidates verified at source:** **CDK** (cashubtc/cdk — Rust wallet AND
+  mint crates, Apache-2.0/MIT, ALPHA-but-real-sats, NUT-00–30 near-full incl.
+  NUT-24 HTTP 402 + NUT-27 Nostr backup) = **REUSE-FIRST**; **Cashu
+  protocol** (MIT; Blind-DH Chaumian blinding; NUT-12 DLEQ offline proofs) =
+  ADAPT-STUDY; **Fedimint** (MIT; federated threshold-blind-sig mints) and
+  **GNU Taler** (GNU exchange+auditor model, headline-verified only) = WATCH;
+  **sn_dbc** (maidsafe; BSD/MIT dual; distributed sharded spentbook, BLS,
+  stealth addresses; SAFE-era dormant) = WATCH with Autonomi-lineage note —
+  almost certainly the vocabulary ancestor of Eddies' DBC naming.
+  dan-gould DBC line = dead pointer (404; author now leads PDK).
+- **The four ideas:** offline bearer notes = fully solved open (Cashu
+  strings + DLEQ); **acceptance windows = NO open spec analog** (NUT-02 is
+  keysets-and-fees, not validity; nearest kin = our invoice/expiry laws +
+  Taler contract deadlines, unread at depth); signed transfer receipts =
+  nobody needs them in bearer world (the note IS the transfer — our
+  SpendReceipt keeps its own slot); double-spend = four open answers
+  (mint-check / federation / exchange+auditor / distributed spentbook);
+  Eddies' bloom-gossip offline-probabilistic variant has NO open
+  implementation — structural reason recorded (soundness requires an
+  online/federated/anchored checkpoint).
+- **bPay fit:** e-cash occupies the offline-bearer slot bPay deliberately
+  leaves open (never replaces SpendReceipt); NUT-10 spending conditions are
+  the nearest open kin to capAssert — THAT comparison is the load-bearing
+  threshold; mints/exchanges are third-party endpoints → adapter-mediated
+  only (self-hosted cdk-mintd the only ring-compatible shape); NUT-24 ↔ our
+  five x402 laws = convergence check before any meter extension; every
+  family answers "what backs the note" by construction (sats peg /
+  federation / reserves+auditor / network-native) — exactly the property
+  Eddies lacked.
+- **Licenses: MIT/Apache/BSD-MIT across the family — zero GPL. Zero Eddies
+  dependency.** Post-gate thresholds + verdicts: reuse seat's.
+
 ---
 
 ## B · BOUNDARY-FIT EVALUATION — zArcheology input (2026-09-16, post-gate; founder order: landed research only, no integration)
