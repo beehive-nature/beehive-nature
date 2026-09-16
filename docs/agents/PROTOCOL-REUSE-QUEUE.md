@@ -24,7 +24,24 @@ attributed source · evidence pointer.
 
 ---
 
-## 1 · EDDIES / ANTENGLEMENT INVESTIGATION — WATCH (implementation evidence banked 2026-09-16; server-side source still unseen)
+## 1 · EDDIES / ANTENGLEMENT INVESTIGATION — **CLOSED 2026-09-16 (founder verdict + two dispatches; no further capacity)**
+
+**Closure record:** the founder accepted the reverse-engineering verdict and
+CLOSED Eddies as a bPay protocol-reuse candidate ("the authoritative Eddie
+state is server-side; ANT/Arbitrum and Autonomi storage are adjacent
+components rather than cryptographic authorities"). The one roll-forward —
+`/api/dbc/*` — was examined and **CLOSED the same way**: DBC *signature*
+verification is client-side and server-independent (wasm, standalone
+verifiers, signer pubkey as parameter, ed25519-dalek/blake3/bloom), but
+*value* authority reduces to the same server (client-side genesis self-mint
+of 10^19 units with only a local guard; user minting explicitly "after the
+server has deducted"; redemption via /api/dbc/* only), and the Rust source
+is unpublished — nothing adoptable. One design-pattern note carried for the
+reuse seat (window-classed self-signed bearer notes + signed transfer
+receipts + bloom-gossip spentbook; open-source e-cash kin is where reusable
+versions live). Evidence:
+[`2026-09-16-eddies-reverse-engineering.md`](../dispatches/2026-09-16-eddies-reverse-engineering.md)
+· [`2026-09-16-eddies-dbc-rollforward.md`](../dispatches/2026-09-16-eddies-dbc-rollforward.md).
 
 *Independent reverse-engineering receipt (2026-09-16, founder-ordered, prior
 interpretations explicitly excluded from method): fresh deployment read
