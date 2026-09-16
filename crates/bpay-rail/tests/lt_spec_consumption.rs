@@ -28,6 +28,8 @@ fn make_ctx() -> RequestCtx {
         wallet_pubkey_hex: wallet_pub,
         client_secret: sk,
         since_unix: 1_000,
+        max_future_skew_secs: bpay_rail::nwc_reader::DEFAULT_MAX_SKEW_SECS,
+        now_unix: 1_000,
         method: "get_info".into(),
     }
 }

@@ -14,11 +14,31 @@ use sha2::{Digest, Sha256};
 use std::time::{SystemTime, UNIX_EPOCH};
 use zeroize::{Zeroize, Zeroizing};
 
-fn now_secs() -> u64 {
+/// LT-8: the clock seam — a function producing "now" in unix seconds.
+/// The DEFAULT is the system wall clock (called at the live edge);
+/// tests inject deterministic time. The epoch-0 fallback is RETIRED:
+/// a clock failure is a typed pre-ledger refusal (LT-8.1), not a
+/// silently-zero timestamp.
+pub type ClockFn = std::rc::Rc<dyn Fn() -> Result<u64, ClockError>>;
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum ClockError {
+    Unavailable(String),
+}
+
+impl std::fmt::Display for ClockError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            ClockError::Unavailable(why) => write!(f, "clock unavailable: {why}"),
+        }
+    }
+}
+
+fn system_clock() -> Result<u64, ClockError> {
     SystemTime::now()
         .duration_since(UNIX_EPOCH)
         .map(|d| d.as_secs())
-        .unwrap_or(0)
+        .map_err(|e| ClockError::Unavailable(e.to_string()))
 }
 
 /// A parsed `nostr+walletconnect://…` connection. The client secret is
@@ -181,6 +201,7 @@ fn hex_val(c: u8) -> Option<u8> {
 pub struct LiveNwcTransport {
     conn: NwcConnection,
     policy: ReadPolicy,
+    clock: ClockFn,
 }
 
 impl LiveNwcTransport {
@@ -188,7 +209,14 @@ impl LiveNwcTransport {
         LiveNwcTransport {
             conn,
             policy: ReadPolicy::default(),
+            clock: std::rc::Rc::new(system_clock),
         }
+    }
+
+    /// LT-8: inject a deterministic clock for testing.
+    pub fn with_clock(mut self, clock: ClockFn) -> Self {
+        self.clock = clock;
+        self
     }
 
     fn client_pubkey_hex(&self) -> String {
@@ -196,10 +224,16 @@ impl LiveNwcTransport {
         hex::encode(sk.verifying_key().to_bytes())
     }
 
-    fn build_signed_event(&self, kind: u64, content: &str, tags: serde_json::Value) -> String {
+    fn build_signed_event(
+        &self,
+        now: u64,
+        kind: u64,
+        content: &str,
+        tags: serde_json::Value,
+    ) -> String {
         let sk = SigningKey::from_bytes(&self.conn.secret()).expect("validated at parse");
         let pubkey = hex::encode(sk.verifying_key().to_bytes());
-        let created_at = now_secs();
+        let created_at = now;
         let serialized =
             serde_json::json!([0, pubkey, created_at, kind, tags, content]).to_string();
         let id: [u8; 32] = Sha256::digest(serialized.as_bytes()).into();
@@ -223,20 +257,22 @@ impl crate::nwc::NwcTransport for LiveNwcTransport {
         method: &str,
         params: serde_json::Value,
     ) -> Result<serde_json::Value, NwcError> {
+        let now = (self.clock)()
+            .map_err(|e| NwcError::Other(format!("LT-8.1 clock failure (pre-ledger): {e}")))?;
         let content = nip44_encrypt(
             &self.conn.secret(),
             &self.conn.wallet_pubkey_hex,
             &serde_json::json!({ "method": method, "params": params }).to_string(),
         )?;
         let client_pub = self.client_pubkey_hex();
-        let expiration = now_secs() + 60;
+        let expiration = now + 60; // LT-8.2: per-request TTL (60s is the NIP-47 recommended); the intent's declared evidence window governs at the ledger
         let tags = serde_json::json!([
             ["p", self.conn.wallet_pubkey_hex],
             ["expiration", expiration]
         ]);
-        let event = self.build_signed_event(23194, &content, tags);
+        let event = self.build_signed_event(now, 23194, &content, tags);
 
-        let since = now_secs();
+        let since = now;
         let sub = format!("bpay-{since}");
         let req_frame = serde_json::json!([
             "REQ", sub,
@@ -260,6 +296,8 @@ impl crate::nwc::NwcTransport for LiveNwcTransport {
             wallet_pubkey_hex: self.conn.wallet_pubkey_hex.clone(),
             client_secret: self.conn.secret(),
             since_unix: since.saturating_sub(2),
+            max_future_skew_secs: crate::nwc_reader::DEFAULT_MAX_SKEW_SECS,
+            now_unix: now,
             method: method.to_string(),
         };
         let envelope = {

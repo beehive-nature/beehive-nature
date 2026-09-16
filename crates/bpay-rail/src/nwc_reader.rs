@@ -118,9 +118,22 @@ pub struct RequestCtx {
     pub client_secret: [u8; 32],
     /// Requests are only answered by events created after this.
     pub since_unix: u64,
+    /// LT-6.3: DECLARED clock-skew tolerance (seconds). Responses whose
+    /// `created_at` exceeds `since_unix + max_future_skew_secs` are
+    /// from a misaligned clock — typed as clock-skew, never silently
+    /// accepted. The bound is per-deployment policy, not guessed.
+    pub max_future_skew_secs: u64,
+    /// LT-8: the request-dispatch time, INJECTED (not system-clocked).
+    /// Freshness checks use this; the live transport supplies the
+    /// wall clock at its edge, tests supply deterministic time.
+    pub now_unix: u64,
     /// The NIP-47 method we called (correlation via result_type).
     pub method: String,
 }
+
+/// Default skew tolerance (300s = 5 minutes; NIP-47's own request
+/// expiration is 60s, so 5 min covers relay/network latency generously).
+pub const DEFAULT_MAX_SKEW_SECS: u64 = 300;
 
 /// Process one relay message against the request context.
 /// `seen` dedupes event ids (duplicate responses collapse).
@@ -160,6 +173,12 @@ pub fn process_message(ctx: &RequestCtx, msg: &str, seen: &mut HashSet<String>) 
             let created = ev.get("created_at").and_then(|c| c.as_u64()).unwrap_or(0);
             if created < ctx.since_unix {
                 return Verdict::NotOurs("stale");
+            }
+            // LT-6.3: clock-skew — a response dated BEYOND our
+            // tolerance into the future is from a misaligned clock;
+            // typed, never silently accepted at arbitrary skew.
+            if created > ctx.now_unix.saturating_add(ctx.max_future_skew_secs) {
+                return Verdict::NotOurs("clock skew (future-dated beyond tolerance)");
             }
             // duplicates collapse by event id
             let id = ev

@@ -79,14 +79,20 @@ pub fn ecdh_shared_x(
     Ok(x)
 }
 
-fn conversation_key(secret: &[u8; 32], peer_hex: &str) -> Result<Zeroizing<[u8; 32]>, NwcError> {
+/// PUBLIC for LT-9.2 vector pinning (the official nip44.vectors.json
+/// carries conversation_key test cases).
+pub fn conversation_key(
+    secret: &[u8; 32],
+    peer_hex: &str,
+) -> Result<Zeroizing<[u8; 32]>, NwcError> {
     let shared_x = ecdh_shared_x(secret, peer_hex)?;
     Ok(hkdf_extract(shared_x.as_slice(), b"nip44-v2"))
 }
 
 /// The spec's calcPaddedLen (power-of-two rounding; min 32; cap 8192).
-fn calc_padded_len(unpadded: usize) -> usize {
-    if unpadded < 32 {
+/// PUBLIC for LT-9.2 vector pinning.
+pub fn calc_padded_len(unpadded: usize) -> usize {
+    if unpadded <= 32 {
         return 32;
     }
     let next_pow2 = ((unpadded - 1).next_power_of_two().max(2)) * 2;
@@ -196,6 +202,32 @@ fn csprng_nonce() -> Result<[u8; 32], NwcError> {
 
 fn message_keys(ck: &[u8], nonce: &[u8]) -> Zeroizing<Vec<u8>> {
     hkdf_expand(ck, nonce, 76)
+}
+
+/// Deterministic-nonce encrypt — for LT-9.2 official-vector pinning
+/// ONLY (the vectors carry fixed nonce+payload pairs). Production code
+/// always uses the CSPRNG path.
+#[doc(hidden)]
+pub fn nip44_encrypt_with_nonce(
+    secret: &[u8; 32],
+    peer_hex: &str,
+    plaintext: &str,
+    nonce: &[u8; 32],
+) -> Result<String, NwcError> {
+    let ck = conversation_key(secret, peer_hex)?;
+    let keys = message_keys(ck.as_slice(), nonce);
+    let mut ct = pad(plaintext.as_bytes());
+    let mut cipher = ChaCha20::new_from_slices(&keys[0..32], &keys[32..44]).expect("32+12 slices");
+    cipher.apply_keystream(&mut ct);
+    let mut mac = <HmacSha256 as Mac>::new_from_slice(&keys[44..76]).expect("any key");
+    mac.update(nonce);
+    mac.update(&ct);
+    let tag = mac.finalize().into_bytes();
+    let mut payload = vec![0x02u8];
+    payload.extend_from_slice(nonce);
+    payload.extend_from_slice(&ct);
+    payload.extend_from_slice(&tag);
+    Ok(b64_encode(&payload))
 }
 
 /// NIP-44 v2 encrypt (spec-exact; CSPRNG nonce; keys zeroized).
