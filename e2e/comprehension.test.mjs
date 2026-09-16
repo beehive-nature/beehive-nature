@@ -116,6 +116,34 @@ test('touch floor: wallet controls meet the 44px canon at 390px', async () => {
   await ctx.close();
 });
 
+test('spend-audit engine: register-aware at render time — bee collapses, cypherpunk opens, headline stays', async () => {
+  const bee = await at('wallet.html', 'bee');
+  await bee.p.waitForFunction(() => window.__spendAuditStats, null, { timeout: 15000 });
+  await bee.p.waitForTimeout(400);
+  const stB = await bee.p.evaluate(() => {
+    const eng = document.getElementById('receiptsBody');
+    const ds = [...eng.querySelectorAll('details[data-reg-disclose]')];
+    return { total: ds.length, open: ds.filter(d => d.open).length,
+      headline: !!eng.querySelector('span[style*="26px"]'),
+      lead: (eng.querySelector('div[style*="11.5px"]') || {}).textContent || '' };
+  });
+  assert.equal(stB.total, 2, 'engine renders its two disclosures');
+  assert.equal(stB.open, 0, 'collapsed for bee at mount time');
+  assert.ok(stB.headline, 'the recomputed total headline stays visible for every register');
+  assert.match(stB.lead, /browser|браузер/i, 'the friendly lead renders');
+  await bee.p.locator('#receiptsBody details[data-reg-disclose] > summary').first().click();
+  await bee.p.waitForTimeout(250);
+  await bee.p.locator('#breg-cypherpunk').click();
+  await bee.p.waitForTimeout(500);
+  const stC = await bee.p.evaluate(() => {
+    const ds = [...document.getElementById('receiptsBody').querySelectorAll('details[data-reg-disclose]')];
+    return { open: ds.filter(d => d.open).length, total: ds.length };
+  });
+  assert.equal(stC.open, stC.total, 'cypherpunk opens all (tapped one stayed, rest opened)');
+  assert.equal(bee.errs.length, 0, bee.errs.join(' | '));
+  await bee.ctx.close();
+});
+
 test('blight cluster: midi + workbench + b4b disclosures collapse for bee', async () => {
   for (const page of ['blight/midi.html', 'blight/workbench.html', 'b4b.html']) {
     const { ctx, p, errs } = await at(page, 'bee');

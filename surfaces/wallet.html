@@ -342,11 +342,13 @@ var WALLET_PROFILE = {
 
   <!-- ── state A: no vault on this browser ─────────────────────────────── -->
   <div id="vlt-new" style="display:none">
-    <div class="law" style="margin-top:12px;color:var(--ink)"><b>① Choose your keypass.</b>
+    <details class="tnote" data-reg-disclose><summary data-i18n="wl.d.keypass">Choosing your keypass — the one decision to take slowly</summary>
+  <div class="law" style="margin-top:12px;color:var(--ink)"><b>① Choose your keypass.</b>
     This is the only thing standing between anyone with this browser and every secret inside.
     Generate one — eight words from the BIP-39 list is 88 bits of real entropy, which no one
     is brute-forcing. Write it on paper. <b style="color:var(--amber)">There is no reset:</b>
     lose the keypass and the vault is unrecoverable by design.</div>
+  </details>
     <div class="row">
       <button id="vlt-gen" class="gold">⚄ generate a keypass</button>
       <select id="vlt-genlen" style="background:var(--well);color:var(--ink);border:1px solid var(--line);border-radius:7px;padding:10px 12px;font:12px 'IBM Plex Mono',monospace">
@@ -473,11 +475,13 @@ var WALLET_PROFILE = {
 
 <section id="forge-sec">
   <h2>♾ THE KEY FORGE — <span data-i18n="wl.h.forge">near infinite keys, one soul</span></h2>
+  <details class="tnote" data-reg-disclose><summary data-i18n="wl.d.forge2">How each context gets its own key — derivation, on demand</summary>
   <div class="law">Every context derives its own key from your masterPRK: <b>vaulta:names</b> for
   Vaulta account keys, <b>evm:names</b> for 0x addresses, any adapter context you can name.
   Derivation is instant, free, deterministic — the same context always yields the same key on
   every device. We persist <b>only the context list</b> (this browser), never a key; keys exist
   only while your keychain is connected. Tap a key to copy it.</div>
+  </details>
   <div class="chips" id="forge-chips">
     <div class="law">connect your keychain above to see your derived keys — or forge new ones below</div>
   </div>
@@ -553,12 +557,14 @@ var WALLET_PROFILE = {
 
 <section id="acct-sec" style="border-color:#2c4a5a">
   <h2>🏭 THE ACCOUNT FORGE — <span data-i18n="wl.h.acctforge">Vaulta accounts born from your bzDiD</span></h2>
+  <details class="tnote" data-reg-disclose><summary data-i18n="wl.d.acct">How a new account is born — your bridged key signs it into being</summary>
   <div class="law">Your <b>bridged</b> account signs <b>newaccount</b>; the new account's owner and
   active keys derive from your bzDiD (contexts <b>vaulta:&#8203;name/owner</b> and
   <b>vaulta:&#8203;name/active</b>) — no key is exported, written down, or imported, ever.
   Vaulta economics, stated honestly: <b>broadcasting draws on staked CPU/NET, not liquid</b>
   (a 0.0000 liquid balance does not block transactions); the <b>RAM purchase draws from liquid</b>
   (live price below). Near infinite: every account born this way signs with your keychain.</div>
+  </details>
   <div class="row">
     <input id="ac-name" placeholder="new account name — exactly 12 chars: a-z 1-5, starts with a letter" spellcheck="false" style="font-family:'IBM Plex Mono',monospace">
     <button id="ac-go" class="gold" style="background:#0e2d3a;color:var(--cyan);border-color:#1d4655">🏭 FORGE ACCOUNT</button>
@@ -1497,11 +1503,13 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
 
 <section>
   <h2>🗺 CHAIN MATRIX — <span data-i18n="wl.h.matrix">the sixteen rails, from data</span></h2>
+  <details class="tnote" data-reg-disclose><summary data-i18n="wl.d.rails">Every rail, one row each — how it is read and signed</summary>
   <div class="law">Every rail the wallet will ever owe you, one row each: <b>how it's read</b>
   (first-party path first), <b>how it's signed</b> (custody tier), and <b>tonight's honest state</b>.
   Rendered from the data block below the fold — never typed prose — and every count you see is
   computed from it at render. The doctrine: PROTOCOL paths may be core, SERVICE degrades
   gracefully, gaps say they are gaps.</div>
+  </details>
   <div id="matrix-summary" style="display:flex;gap:8px;flex-wrap:wrap;margin:10px 0"></div>
   <div id="matrix-body"></div>
 </section>
@@ -5305,7 +5313,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   prfNote();
 })();
 </script>
-<script src="spend-audit.js?v=1"></script>
+<script src="spend-audit.js?v=2"></script>
 <script>if (window.SpendAudit) SpendAudit.mountPanel(document.getElementById('receiptsBody'));</script>
 </body>
 </html>
