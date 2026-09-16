@@ -61,3 +61,42 @@ FAIL lines in the raw log are this artifact, not server behavior.
   founder word, per the addendum.
 - MTP: parked, per ruling.
 - Upstream: `upstream-27388-draft.md` ready; posting = founder word.
+
+## Addendum — the real-wedge soak (2026-09-16 05:28–06:03Z, off-production)
+
+Mission continuation per the founder's roll-into-next-mission rule: a
+20-minute-budget soak (driver `watchdog/soak.sh`) with the exact #27604
+trigger shape — one long generation always in flight + a streaming client
+aborted every ~10 s — against a throwaway `--spec-type draft-mtp` instance
+on 127.0.0.1:8091 under the watchdog. Ground-truth receipt = the
+watchdog's own probe log (`~/watchdog-test/wd-soak.log` on the box, sha256
+prefix 81159468…):
+
+- **~34 minutes of clean `/slots` answers** (window 05:28:12Z → 06:02:48Z —
+  the budget ended 05:48, but a stuck teardown left the load running and
+  the server kept answering; force-cleaned after collection): ~410 probes,
+  every one 200 at sub-millisecond latency.
+- **175 abort cancellations** processed with clean
+  `stop: cancel task → slot release` in the server log; the long-generation
+  worker never starved.
+- **Exactly one probe failure in the whole window — a 503 during model
+  load** (05:28:12Z), correctly counted 1/2 and absorbed WITHOUT a
+  restart: the 2-consecutive-failure threshold law proven against a real
+  transient, not just the synthetic tier.
+- **Wedge NOT reproduced.** 0 WEDGE-DETECTED. Honest reading (INFERENCE):
+  the production wedge of 02:30–02:50Z needed a confluence this synthetic
+  shape didn't reach in 34 min (agent-client mix, meter-gate front, longer
+  horizon). The soak therefore upgrades the watchdog's no-false-positive
+  evidence under sustained real load, while the real-wedge heal stays
+  proven by proxy (tier 2, identical hang signature). The driver's summary
+  lines were lost in the stuck teardown — the watchdog log is the receipt.
+
+Production integrity re-verified after the soak: override sha identical
+(3e365e40…), service active, prod `/slots` 200 at 0.6 ms, :8091 down.
+
+## Deployment posture (unchanged, now one-paste)
+
+`watchdog/PRODUCTION-WIRING.md` stages the complete systemd wiring (drop-in
+`TimeoutStopSec=30`, `--no-supervise` oneshot timer, rollback) — NOT
+INSTALLED. Deploy triggers per founder ruling: the rail demonstrates the
+hang again, or MTP approaches re-entry.
