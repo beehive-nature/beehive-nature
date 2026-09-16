@@ -48,7 +48,7 @@ async fn build_registry(rc: &RunConfig) -> Result<x402_types::scheme::SchemeRegi
     // LiteralOrEnv) — the ops wallet key rides env only, never files/git.
     let chains_raw = std::fs::read_to_string(&rc.facilitator_chain_config)
         .map_err(|e| format!("chains config: {e}"))?;
-    let chain_config: x402_chain_eip155::chain::Eip155ChainConfig =
+    let chain_config: x402_chain_eip155::chain::config::Eip155ChainConfig =
         serde_json::from_str(&chains_raw).map_err(|e| format!("chains config json: {e}"))?;
     let chain_id = chain_config.chain_id();
     use x402_types::chain::FromConfig;
@@ -64,9 +64,26 @@ async fn build_registry(rc: &RunConfig) -> Result<x402_types::scheme::SchemeRegi
     let blueprints = x402_types::scheme::SchemeBlueprints::new()
         .and_register(x402_chain_eip155::V2Eip155Exact)
         .and_register(x402_chain_eip155::V2Eip155Upto);
+    // Scheme ids are upstream's own composition (v{version}-{namespace}-
+    // {scheme}); the chain pattern is the EXACT configured chain — no
+    // wildcard, the door serves what it configured and nothing else.
+    let pattern: x402_types::chain::ChainIdPattern = chain_id
+        .to_string()
+        .parse()
+        .map_err(|e| format!("chain id pattern: {e:?}"))?;
     let schemes = vec![
-        x402_types::scheme::SchemeConfig::new(chain_id.clone(), 2, "exact".to_string()),
-        x402_types::scheme::SchemeConfig::new(chain_id.clone(), 2, "upto".to_string()),
+        x402_types::scheme::SchemeConfig {
+            enabled: true,
+            id: "v2-eip155-exact".to_string(),
+            chains: pattern.clone(),
+            config: None,
+        },
+        x402_types::scheme::SchemeConfig {
+            enabled: true,
+            id: "v2-eip155-upto".to_string(),
+            chains: pattern,
+            config: None,
+        },
     ];
     Ok(x402_types::scheme::SchemeRegistry::build(
         chain_registry,
