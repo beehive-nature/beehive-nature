@@ -390,3 +390,46 @@ is the charter for its fix.
 zArcheology designs tests only, zero production code. Cross-lane note: Workerb 2's door
 adversarial pass (three real defects caught: concurrent-settle race, unbounded HumanGate,
 hostile chain strings) validates the method — keep both batteries running.*
+
+---
+
+## FIFTH ROLL — LN `upto` conflation made impossible to miss + capability discovery attacked (2026-09-16)
+
+*Founder law for this roll, verbatim: "the unified trait must unify laws, not erase rail
+semantics." Targets: `crates/bpay-rail` (`ln.rs`, `evm.rs`, `ledger.rs`, `fee.rs`) +
+`tests/rail_probes.rs` on `codex/z2b-bpay-rail`; `LnMockClient` extension is the builder's.*
+
+### SPEC LU — LN `upto`→exact-ceiling conflation (RS-5.4 expanded; RED-first)
+
+| # | case | exact pass criterion | fail criterion |
+|---|---|---|---|
+| LU-1 | partial usage on an upto-shaped charge, rail without modeled upto | construction-time typed capability refusal (see CD) — and if any path executes: the settled amount == usage-priced charge, NEVER the ceiling; **charged==max while usage<max is the conflation signature and MUST be detected** | silent exact-max settlement |
+| LU-2 | MPP as the modeled upto mechanism: N parts under ONE `payment_hash` | all parts = ONE obligation: idempotency by payment_hash ACROSS parts (part replay → lookup, not a new leg); Σparts ≤ declared ceiling enforced at reconcile; a failed part is NOT terminal until all parts resolve or the window closes; partial-parts delivery inside the window reconciles per MPP law | parts becoming separate legs; part replay double-charging; early terminal on one part |
+| LU-3 | invoice amount mismatch: settled invoice amount ≠ ledger's declared charge (off-by-one, rounding, **msat-vs-wei unit confusion**) | typed refusal pre-mutation naming the field; exactly-equal boundary passes; amounts are TYPED with rail units — bare-int amounts structurally refuse to compile/construct | unit-confused acceptance; coercion |
+| LU-4 | capability negotiation outcome observability | caller asked `upto`, rail offers `exact` → REFUSAL or an explicit renegotiation event — never a silent substitution (corpus §4 law: "a client MUST NOT silently substitute transparent exact/upto when the requested profile is unavailable") | silent downgrade |
+
+### SPEC CD — rail capability discovery attacked (know before you construct)
+
+**The six axes (founder-named):** `exact` · `upto` · `replacement` · `failure-fees` ·
+`finality/reorg` · `partial-settlement`. The capability set is a per-rail manifest the caller
+reads BEFORE constructing an intent.
+
+| # | case | exact pass criterion | fail criterion |
+|---|---|---|---|
+| CD-1 | manifest completeness | every member declares ALL six axes; an undeclared axis defaults to REFUSE-ALL (fail closed — the proof-router law: unlisted suites reject) | missing axis silently treated as supported |
+| CD-2 | discovery-before-intent | NO code path constructs an intent whose demanded capabilities exceed the declared set — construction-time typed refusal naming the axis (mirrors `base_gate`'s missing-bound refusal shape) | settle-time surprise |
+| CD-3 | truth table pinned as data | LN: upto=false (unless MPP modeled), replacement=false, failure-fees=false, finality=instant/no-reorg, partial=per-MPP. EVM(Base): exact=true, upto=true, replacement=true(bounded), failure-fees=true (gas on revert), finality=reorg-depth-parameterized, partial=false. Probes assert the DECLARED table equals this | a member declaring LN upto=true without MPP, or EVM finality=instant (lying manifest) |
+| CD-4 | manifest↔behavior cross-check | run the LU/RS/RS-4.3 probes; every behavioral outcome must MATCH the declaration — divergence = lying manifest, caught | declared-vs-behavioral gap survives |
+| CD-5 | capability versioning | capabilities carry a version; a rail gaining upto changes its manifest version additively (CONSTITUTION Art. VI: additive evolution, deprecation windows) — old manifests never silently mutate | silent manifest change |
+| CD-6 | negative controls | lying manifest (declares upto, charges max) DETECTED by CD-4; silent-downgrade caller DETECTED by LU-4 | harness blind |
+
+**RED expectations:** LU-2 (MPP semantics likely absent in `LnMockClient`), LU-3's typed-units
+requirement, and the entire CD manifest (no capability type exists yet on the branch) are the
+likeliest REDs — each RED run charters its fix. **Harness:** extend `LnMockClient` with
+multi-part + amount-unit variants (builder's); CD probes are pure data-vs-behavior and need
+zero network.
+
+---
+
+*Fifth roll, 2026-09-16. Pipeline law unchanged: builder proves RED, fixes GREEN, CI
+arbitrates; zArcheology designs tests only.*
