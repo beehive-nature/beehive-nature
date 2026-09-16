@@ -285,4 +285,24 @@ impl<F: SettlementFacilitator> Door<F> {
             .resolve_unknown(leg, gate, ev)
             .map_err(|e| DoorError::Law(e.to_string()))
     }
+
+    /// AV-5: flag a settled leg for a chain reorg (history changed —
+    /// stops/flags credit, decides nothing).
+    pub fn flag_reorg(&self, leg: &LegKey, reorg_depth: u32) -> Result<(), DoorError> {
+        self.journal
+            .flag_reorg(leg, reorg_depth)
+            .map_err(|e| DoorError::Law(e.to_string()))
+    }
+
+    /// AV-5: human-gated reorg resolution with NEW evidence.
+    pub fn resolve_reorg(
+        &self,
+        leg: &LegKey,
+        gate: crate::journal::HumanGate,
+        ev: &SettleEvidence,
+    ) -> Result<(), DoorError> {
+        self.journal
+            .resolve_reorg(leg, gate, ev)
+            .map_err(|e| DoorError::Law(e.to_string()))
+    }
 }

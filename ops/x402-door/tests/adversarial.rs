@@ -651,3 +651,132 @@ fn adv_expire_release_then_rereserve_refused() {
     );
     assert!(err2.contains("expired") || err2.contains("released") || err2.contains("torn"));
 }
+
+// ---------- AV-5: reorg at the confirmation/credit boundary ----------
+
+/// A2/AV-5 + founder law: `Reorg{depth}` means HISTORY CHANGED — it stops
+/// and flags credit but never itself decides refund, debit, or settlement.
+/// The flag preserves the prior evidence verbatim (RV-1 family: evidence
+/// survives); replay and release are refused while flagged; the ONLY way
+/// out is human-gated resolution with NEW on-chain evidence (which itself
+/// obeys the upto law).
+#[test]
+fn adv_av5_reorg_flags_history_but_never_decides_outcome() {
+    struct Good;
+    impl SettlementFacilitator for Good {
+        fn verify(&self, _r: &serde_json::Value) -> Result<(), String> {
+            Ok(())
+        }
+        fn settle(&self, _r: &serde_json::Value) -> FacilitatorSettle {
+            FacilitatorSettle::Success {
+                payer: "0xaaaa000000000000000000000000000000000aaa".into(),
+                transaction: "tx-av5-original"
+                    .into(),
+                network: "eip155:8453".into(),
+                actual_amount: Some("7".into()),
+                gas_actual_wei: Some(90_000),
+            }
+        }
+    }
+    let gas = 1_000u64;
+    let d = Door::new(
+        Arc::new(Journal::open(&tmp_root("av5-reorg"), 5 * gas).unwrap()),
+        Arc::new(Good),
+        DoorConfig {
+            reserved_gas_wei: gas,
+            ops_float_available_wei: 1_000_000,
+        },
+        Arc::new(StaticFloat(1_000_000_000_000)),
+    );
+    let req = request("eip155:8453", "exact", "0xA5", "7", far_future());
+    let leg = extract_leg(&req).unwrap();
+    d.verify(&leg, &req).unwrap();
+    assert!(matches!(
+        d.settle(&leg, &req).unwrap(),
+        FacilitatorSettle::Success { .. }
+    ));
+
+    // History changed underneath the confirmation: flag it at depth 2.
+    d.flag_reorg(&leg, 2).unwrap();
+    match d.journal.get(&leg).unwrap().unwrap().state {
+        ReservationState::ReorgFlagged {
+            tx_hash,
+            reorg_depth,
+            ..
+        } => {
+            assert!(tx_hash.contains("av5-original"), "prior evidence preserved");
+            assert_eq!(reorg_depth, 2, "depth carried");
+        }
+        other => panic!("expected ReorgFlagged, got {other:?}"),
+    }
+
+    // The flag DECIDES NOTHING: idempotent replay is refused (returning the
+    // stale Success would credit history that changed), loud and named.
+    let replay = d.settle(&leg, &req).unwrap_err().to_string();
+    assert!(
+        replay.contains("reorg-flagged"),
+        "replay refused naming the reorg: {replay}"
+    );
+
+    // Expiry release is refused too — outcome undetermined is not
+    // non-settlement (D-4 contradiction law extended to the flag).
+    assert!(d
+        .journal
+        .expire_released(&leg, ReleaseVerdict::UnspentOnChain)
+        .is_err());
+
+    // Resolution is the ONLY door out, and it is human-gated with NEW
+    // evidence; upto law holds through the gate.
+    let over = SettleEvidence {
+        actual_amount: "8".into(), // > authorized 7
+        tx_hash: "tx-av5-resolved".into(),
+        gas_actual_wei: 1,
+    };
+    assert!(d
+        .resolve_reorg(&leg, HumanGate::explicit_human_approval(), &over)
+        .is_err());
+    let fresh = SettleEvidence {
+        actual_amount: "7".into(),
+        tx_hash: "tx-av5-resolved".into(),
+        gas_actual_wei: 1,
+    };
+    d.resolve_reorg(&leg, HumanGate::explicit_human_approval(), &fresh)
+        .unwrap();
+    match d.journal.get(&leg).unwrap().unwrap().state {
+        ReservationState::Settled {
+            tx_hash,
+            reorg_note,
+            ..
+        } => {
+            assert!(tx_hash.contains("av5-resolved"), "new evidence live");
+            let note = reorg_note.expect("reorg_note preserves the prior history");
+            assert!(
+                note.contains("av5-original") && note.contains("depth 2"),
+                "prior tx + depth preserved in the note: {note}"
+            );
+        }
+        other => panic!("expected Settled after resolution, got {other:?}"),
+    }
+
+    // After resolution, the ordinary idempotent replay is lawful again and
+    // returns the NEW evidence.
+    assert!(matches!(
+        d.settle(&leg, &req).unwrap(),
+        FacilitatorSettle::Success { .. }
+    ));
+
+    // The gate shape is enforced: flag_reorg on a non-settled leg and
+    // resolve_reorg on a non-flagged leg are both Law refusals.
+    let req2 = request("eip155:8453", "exact", "0xA5b", "7", far_future());
+    let leg2 = extract_leg(&req2).unwrap();
+    d.verify(&leg2, &req2).unwrap();
+    assert!(
+        d.flag_reorg(&leg2, 1).is_err(),
+        "flag requires settled evidence"
+    );
+    assert!(
+        d.resolve_reorg(&leg2, HumanGate::explicit_human_approval(), &fresh)
+            .is_err(),
+        "resolve requires the reorg flag"
+    );
+}

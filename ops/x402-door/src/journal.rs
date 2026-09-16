@@ -69,11 +69,28 @@ pub enum ReservationState {
     /// the on-chain 3009 nonce protects funds, not gas).
     Settling { reserved_gas_wei: u64 },
     /// Settled with on-chain evidence; exposure reconciled to actual.
+    /// `reorg_note` (AV-5) preserves prior evidence textually when a reorg
+    /// was flagged and later resolved — history is never erased.
     Settled {
         actual_amount: String,
         tx_hash: String,
         gas_actual_wei: u64,
         settled_unix: u64,
+        #[serde(default)]
+        reorg_note: Option<String>,
+    },
+    /// AV-5: a reorg changed HISTORY underneath a confirmed settlement.
+    /// The flag preserves the prior evidence verbatim and STOPS credit —
+    /// it decides NOTHING (no refund, no debit, no re-settlement).
+    /// Replay and expiry release are refused while flagged; the only exit
+    /// is human-gated resolution with NEW evidence (upto law holds).
+    ReorgFlagged {
+        actual_amount: String,
+        tx_hash: String,
+        gas_actual_wei: u64,
+        settled_unix: u64,
+        reorg_depth: u32,
+        flagged_unix: u64,
     },
     /// Settlement failed WITHOUT evidence — the reservation stays (law:
     /// no free without evidence); a later settle may retry the attempt.
@@ -341,6 +358,9 @@ impl Journal {
                 ReservationState::FailedKeep {
                     reserved_gas_wei, ..
                 } => total += reserved_gas_wei,
+                // AV-5: a reorg flag re-retains the ACTUAL gas as exposure
+                // (outcome undetermined — fail-closed for the budget).
+                ReservationState::ReorgFlagged { gas_actual_wei, .. } => total += gas_actual_wei,
                 _ => {}
             }
         }
@@ -405,6 +425,9 @@ impl Journal {
                 ReservationState::Unknown { .. } => Err(JournalError::Law(
                     "authorization nonce is Unknown — human gate required before any new action"
                         .into(),
+                )),
+                ReservationState::ReorgFlagged { .. } => Err(JournalError::Law(
+                    "prior settlement is reorg-flagged — outcome undetermined; resolve before any new reservation (AV-5)".into(),
                 )),
                 ReservationState::ExpiredReleased { .. } => Err(JournalError::Law(
                     "authorization window expired and was released — cannot reserve".into(),
@@ -482,6 +505,11 @@ impl Journal {
             ReservationState::Settling { .. } => Err(JournalError::Law(
                 "settlement in flight -- exactly one executor; retry after completion".into(),
             )),
+            ReservationState::ReorgFlagged { reorg_depth, .. } => Err(JournalError::Law(
+                format!(
+                    "reorg-flagged (depth {reorg_depth}): history changed, outcome UNDETERMINED -- replay refused, evidence preserved; resolve with new evidence through the human gate (AV-5); the flag never decides refund, debit, or settlement"
+                ),
+            )),
             ReservationState::Unknown { .. } => Err(JournalError::Law(
                 "Unknown settlement -- never auto-retried; human gate required".into(),
             )),
@@ -491,12 +519,19 @@ impl Journal {
         }
     }
 
-    /// SETTLE with evidence — exposure reconciles DOWN to actual.
+    /// SETTLE with evidence — exposure reconciles DOWN to actual. A
+    /// ReorgFlagged leg refuses here: `resolve_reorg` is the only door out
+    /// of a reorg flag (AV-5).
     pub fn settle_with_evidence(&self, leg: &LegKey, ev: &SettleEvidence) -> JResult<()> {
         let _guard = self.acquire_exclusive()?;
         let mut rec = self
             .get(leg)?
             .ok_or_else(|| JournalError::Law("no reservation (fail-closed)".into()))?;
+        if matches!(rec.state, ReservationState::ReorgFlagged { .. }) {
+            return Err(JournalError::Law(
+                "reorg-flagged: settle_with_evidence refused — resolve_reorg is the only door out (AV-5)".into(),
+            ));
+        }
         let cap = rec
             .leg
             .amount_authorized
@@ -516,6 +551,7 @@ impl Journal {
             tx_hash: ev.tx_hash.clone(),
             gas_actual_wei: ev.gas_actual_wei,
             settled_unix: now_unix(),
+            reorg_note: None,
         };
         rec.updated_unix = now_unix();
         self.write(&rec)
@@ -629,6 +665,103 @@ impl Journal {
         self.write(&rec)
     }
 
+    /// AV-5: flag a settled leg for a chain reorg. HISTORY CHANGED — the
+    /// flag stops/flags credit and DECIDES NOTHING (no refund, no debit,
+    /// no re-settlement); prior evidence is preserved verbatim. Lawful
+    /// only from Settled (a leg without confirmed evidence has no history
+    /// to flag).
+    pub fn flag_reorg(&self, leg: &LegKey, reorg_depth: u32) -> JResult<()> {
+        let _guard = self.acquire_exclusive()?;
+        let mut rec = self
+            .get(leg)?
+            .ok_or_else(|| JournalError::Law("no reservation (fail-closed)".into()))?;
+        rec.state = match rec.state {
+            ReservationState::Settled {
+                actual_amount,
+                tx_hash,
+                gas_actual_wei,
+                settled_unix,
+                ..
+            } => ReservationState::ReorgFlagged {
+                actual_amount,
+                tx_hash,
+                gas_actual_wei,
+                settled_unix,
+                reorg_depth,
+                flagged_unix: now_unix(),
+            },
+            _ => {
+                return Err(JournalError::Law(
+                    "reorg flag requires a Settled leg — no confirmed evidence, no history to flag (AV-5)".into(),
+                ))
+            }
+        };
+        rec.updated_unix = now_unix();
+        self.write(&rec)
+    }
+
+    /// AV-5: human-gated resolution of a reorg flag with NEW on-chain
+    /// evidence. The gate is BOUNDED by the same upto law as every other
+    /// evidence door; the PRIOR evidence survives textually in
+    /// `reorg_note` (RV-1 family: history is never erased).
+    pub fn resolve_reorg(
+        &self,
+        leg: &LegKey,
+        _gate: HumanGate,
+        ev: &SettleEvidence,
+    ) -> JResult<()> {
+        let _guard = self.acquire_exclusive()?;
+        let mut rec = self
+            .get(leg)?
+            .ok_or_else(|| JournalError::Law("no reservation (fail-closed)".into()))?;
+        let (prior_amount, prior_tx, prior_gas, prior_settled, depth) = match rec.state {
+            ReservationState::ReorgFlagged {
+                actual_amount,
+                tx_hash,
+                gas_actual_wei,
+                settled_unix,
+                reorg_depth,
+                ..
+            } => (
+                actual_amount,
+                tx_hash,
+                gas_actual_wei,
+                settled_unix,
+                reorg_depth,
+            ),
+            _ => {
+                return Err(JournalError::Law(
+                    "resolve_reorg requires the ReorgFlagged state (AV-5)".into(),
+                ))
+            }
+        };
+        let cap = rec
+            .leg
+            .amount_authorized
+            .parse::<u128>()
+            .unwrap_or(u128::MAX);
+        let actual = ev
+            .actual_amount
+            .parse::<u128>()
+            .map_err(|_| JournalError::Law("actual_amount not numeric".into()))?;
+        if actual > cap {
+            return Err(JournalError::Law(format!(
+                "upto law violated through the reorg gate: actual {actual} > authorized {cap} — the gate records truth, not the impossible"
+            )));
+        }
+        rec.state = ReservationState::Settled {
+            actual_amount: ev.actual_amount.clone(),
+            tx_hash: ev.tx_hash.clone(),
+            gas_actual_wei: ev.gas_actual_wei,
+            settled_unix: now_unix(),
+            reorg_note: Some(format!(
+                "reorg depth {depth} resolved; prior evidence tx {prior_tx} amount {prior_amount} gas {prior_gas} settled_unix {prior_settled}"
+            )),
+        };
+        rec.updated_unix = now_unix();
+        self.write(&rec)
+    }
+
     /// Human-gated resolution of an Unknown settlement (watchpay law).
     /// The gate is BOUNDED by the same upto law as automated evidence:
     /// a human records truth, never an impossible over-authorization.
@@ -664,6 +797,7 @@ impl Journal {
             tx_hash: ev.tx_hash.clone(),
             gas_actual_wei: ev.gas_actual_wei,
             settled_unix: now_unix(),
+            reorg_note: None,
         };
         rec.updated_unix = now_unix();
         self.write(&rec)?;
