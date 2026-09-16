@@ -15,6 +15,7 @@ use bpay_rail::nwc_mock::MockNwcTransport;
 use bpay_rail::units::MilliSatoshi;
 use bpay_rail::{LedgerError, LifecycleState};
 
+#[allow(dead_code)]
 fn refusal_field(e: &LedgerError) -> &'static str {
     match e {
         LedgerError::Refusal { field, .. } => field,

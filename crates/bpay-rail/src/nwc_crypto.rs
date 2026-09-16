@@ -89,44 +89,52 @@ pub fn conversation_key(
     Ok(hkdf_extract(shared_x.as_slice(), b"nip44-v2"))
 }
 
-/// The spec's calcPaddedLen (power-of-two rounding; min 32; cap 8192).
-/// PUBLIC for LT-9.2 vector pinning.
-pub fn calc_padded_len(unpadded: usize) -> usize {
-    if unpadded <= 32 {
+/// NIP-44 v2 min/max plaintext sizes (the reference: 1 to 65535 bytes).
+pub const MIN_PLAINTEXT_SIZE: usize = 1;
+pub const MAX_PLAINTEXT_SIZE: usize = 65535;
+
+/// The reference calcPaddedLen (chunk-rounding, from paulmillr/nip44):
+/// `chunk * ceil(len / chunk)` where chunk = 32 for small inputs, then
+/// nextPower/8 for larger. NOT power-of-2 rounding.
+/// PUBLIC for vector pinning.
+pub fn calc_padded_len(len: usize) -> usize {
+    if len <= 32 {
         return 32;
     }
-    let next_pow2 = ((unpadded - 1).next_power_of_two().max(2)) * 2;
-    let chunk = if next_pow2 <= 256 {
+    // nextPower = 1 << (floor(log2(len - 1)) + 1) = the next power of 2
+    // at-or-above len
+    let next_power = (len - 1).next_power_of_two();
+    let chunk = if next_power <= 256 {
         32
-    } else if next_pow2 <= 4096 {
-        64
     } else {
-        128
+        next_power / 8
     };
-    if next_pow2 - chunk <= unpadded && unpadded <= next_pow2 {
-        next_pow2
-    } else {
-        unpadded.next_power_of_two()
-    }
+    // chunk * ceil(len / chunk) = chunk * (floor((len-1)/chunk) + 1)
+    chunk * ((len - 1) / chunk + 1)
 }
 
-fn pad(plaintext: &[u8]) -> Vec<u8> {
-    // LT-9.2 fix (caught by the official vectors): the length prefix is
-    // prepended AFTER padding — the padded BODY is calcPaddedLen(plaintext),
-    // then the 2-byte prefix rides outside it. The old code called
-    // calcPaddedLen(prefix.len + plaintext.len) which produced shorter
-    // bodies (32 instead of 34 for 1-byte plaintexts).
-    let body_len = calc_padded_len(plaintext.len()).min(8192);
-    let mut out = Vec::with_capacity(2 + body_len);
-    if plaintext.len() < 65536 {
-        out.extend_from_slice(&(plaintext.len() as u16).to_be_bytes());
-    } else {
-        out.extend_from_slice(&[0u8, 0u8]);
-        out.extend_from_slice(&(plaintext.len() as u32).to_be_bytes());
+/// NIP-44 v2 pad: prefix(2) + plaintext + suffix(calcPaddedLen(len) - len).
+/// The prefix rides OUTSIDE the padded body. Refuses oversize input
+/// (> 65535) with a typed error — never silently truncates.
+fn pad(plaintext: &[u8]) -> Result<Vec<u8>, NwcError> {
+    let len = plaintext.len();
+    if len < MIN_PLAINTEXT_SIZE {
+        return Err(NwcError::Other(format!(
+            "plaintext too short: {len} bytes (minimum {MIN_PLAINTEXT_SIZE})"
+        )));
     }
+    if len > MAX_PLAINTEXT_SIZE {
+        return Err(NwcError::Other(format!(
+            "plaintext too long: {len} bytes (maximum {MAX_PLAINTEXT_SIZE}) — \
+             refusing, never truncating"
+        )));
+    }
+    let body_len = calc_padded_len(len);
+    let mut out = Vec::with_capacity(2 + body_len);
+    out.extend_from_slice(&(len as u16).to_be_bytes());
     out.extend_from_slice(plaintext);
     out.resize(2 + body_len, 0);
-    out
+    Ok(out)
 }
 
 fn unpad(padded: &[u8]) -> Result<Vec<u8>, NwcError> {
@@ -134,8 +142,23 @@ fn unpad(padded: &[u8]) -> Result<Vec<u8>, NwcError> {
         return Err(NwcError::Other("padded payload too short".into()));
     }
     let len = u16::from_be_bytes([padded[0], padded[1]]) as usize;
-    if len + 2 > padded.len() {
+    // Full validation: size bounds + length prefix + exact padded length
+    if !(MIN_PLAINTEXT_SIZE..=MAX_PLAINTEXT_SIZE).contains(&len) {
+        return Err(NwcError::Other(format!(
+            "invalid plaintext size: {len} (must be {MIN_PLAINTEXT_SIZE}..={MAX_PLAINTEXT_SIZE})"
+        )));
+    }
+    if 2 + len > padded.len() {
         return Err(NwcError::Other("length prefix exceeds payload".into()));
+    }
+    let expected_total = 2 + calc_padded_len(len);
+    if padded.len() != expected_total {
+        return Err(NwcError::Other(format!(
+            "invalid padding: total {} bytes, expected {} (2 + calcPaddedLen({}))",
+            padded.len(),
+            expected_total,
+            len
+        )));
     }
     Ok(padded[2..2 + len].to_vec())
 }
@@ -220,7 +243,7 @@ pub fn nip44_encrypt_with_nonce(
 ) -> Result<String, NwcError> {
     let ck = conversation_key(secret, peer_hex)?;
     let keys = message_keys(ck.as_slice(), nonce);
-    let mut ct = pad(plaintext.as_bytes());
+    let mut ct = pad(plaintext.as_bytes())?;
     let mut cipher = ChaCha20::new_from_slices(&keys[0..32], &keys[32..44]).expect("32+12 slices");
     cipher.apply_keystream(&mut ct);
     let mut mac = <HmacSha256 as Mac>::new_from_slice(&keys[44..76]).expect("any key");
@@ -243,7 +266,7 @@ pub fn nip44_encrypt(
     let ck = conversation_key(secret, peer_hex)?;
     let nonce = csprng_nonce()?;
     let keys = message_keys(ck.as_slice(), nonce.as_slice());
-    let mut ct = pad(plaintext.as_bytes());
+    let mut ct = pad(plaintext.as_bytes())?;
     let mut cipher = ChaCha20::new_from_slices(&keys[0..32], &keys[32..44]).expect("32+12 slices");
     cipher.apply_keystream(&mut ct);
     let mut mac = <HmacSha256 as Mac>::new_from_slice(&keys[44..76]).expect("any key");
