@@ -369,19 +369,18 @@ fn adv_retained_failures_exhaust_the_budget_by_number() {
         },
         Arc::new(StaticFloat(1_000_000_000_000)),
     );
+    // ONE far_future for the whole test: LegKey includes valid_before, so
+    // per-call far_future() makes the rebuilt leg0 a DIFFERENT leg when the
+    // test straddles a second boundary — the journal's identity law then
+    // (correctly) reads it as Torn. Captured once, the leg is stable.
+    let vb = far_future();
     for i in 0..5u32 {
-        let req = request(
-            "eip155:8453",
-            "exact",
-            &format!("0xF{i}"),
-            "1",
-            far_future(),
-        );
+        let req = request("eip155:8453", "exact", &format!("0xF{i}"), "1", vb);
         let leg = extract_leg(&req).unwrap();
         d.verify(&leg, &req).unwrap();
         d.settle(&leg, &req).unwrap(); // each failure RETAINS its exposure
     }
-    let sixth = request("eip155:8453", "exact", "0xF5", "1", far_future());
+    let sixth = request("eip155:8453", "exact", "0xF5", "1", vb);
     let leg6 = extract_leg(&sixth).unwrap();
     let err = d.verify(&leg6, &sixth).unwrap_err().to_string();
     assert!(
@@ -389,7 +388,7 @@ fn adv_retained_failures_exhaust_the_budget_by_number() {
         "cap named: {err}"
     );
     // Evidence on ONE of them reconciles it down and reopens budget.
-    let req0 = request("eip155:8453", "exact", "0xF0", "1", far_future());
+    let req0 = request("eip155:8453", "exact", "0xF0", "1", vb);
     let leg0 = extract_leg(&req0).unwrap();
     d.journal.begin_settle(&leg0).unwrap();
     d.journal
@@ -670,8 +669,7 @@ fn adv_av5_reorg_flags_history_but_never_decides_outcome() {
         fn settle(&self, _r: &serde_json::Value) -> FacilitatorSettle {
             FacilitatorSettle::Success {
                 payer: "0xaaaa000000000000000000000000000000000aaa".into(),
-                transaction: "tx-av5-original"
-                    .into(),
+                transaction: "tx-av5-original".into(),
                 network: "eip155:8453".into(),
                 actual_amount: Some("7".into()),
                 gas_actual_wei: Some(90_000),
