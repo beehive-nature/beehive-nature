@@ -299,7 +299,7 @@ Full source-verified recon: [`docs/dispatches/2026-09-15-protocol-recon-opena2a-
 - **Reconciliation gate applies** as to every item; nothing here drives
   implementation.
 
-## 4 · OPEN-SOURCE E-CASH FAMILY — OPEN · recon receipted 2026-09-16, reuse-first class (research-only)
+## 4 · OPEN-SOURCE E-CASH FAMILY — **CLOSED 2026-09-16 (pre-build spec complete; broad recon closed by founder order — further motion = chartered builder + MMF-1)**
 
 *Received 2026-09-16, founder roll-forward order (Eddies workerb): "identify
 existing open implementations of the useful DBC ideas—offline bearer notes,
@@ -420,6 +420,25 @@ Reuse before invention; no Eddies dependency." Full source-verified recon:*
   mutable-mint fixture (cdk-fake-wallet seed + lying/laxer-enforcement
   stubs) = the FIRST build item if ever chartered, per the red-first
   pipeline law (specs seat attacks → builder proves RED → CI arbitrates).
+- **MMF-1 FINAL PRE-BUILD SPEC + LANE CLOSED (2026-09-16) →**
+  [`docs/dispatches/2026-09-16-mmf1-fixture-spec.md`](../dispatches/2026-09-16-mmf1-fixture-spec.md):
+  the mutable-mint fixture specified so a builder makes ZERO architecture
+  decisions — one in-process binary, ephemeral ports, real e-cash crypto
+  (fake JUDGMENT only: `Enforcement::{Full, Lax(holes), None}` DELEGATES to
+  the real `verify_p2pk` or bypasses it), two planes (cashu wire + control),
+  `dump()/load()` state transfer for restart arms; controls C1–C8
+  (nut06-claims / enforcement / keysets incl. same-id key mutation /
+  two-seed signatory lineages / fees-limits / per-connection
+  drop-hang-garbage / per-Y NUT-07 overrides incl. Flaky / thirteen named
+  presets); the control→CA→AV/D map as the contract spine; fixture
+  self-tests F-1–F-5 (independence matrix, preset goldens, Full≡reference
+  conformance, round-trip, plane separation) as landable-or-not gates;
+  out-of-scope list to prevent drift. **Standing lane conclusions:** Cashu
+  = projection language + adapter seam; ZERO new recovery state machines;
+  declared≠enforced, drift = detected+attributed never silently prevented;
+  prevention stays physical (self-hosted pinned mint + human-gated
+  succession + capped exposure). Arc: c91c9051 → 1aa2cc49 → 4523c0b8 →
+  efbe56d9 → 4d199a23 → MMF-1.
 
 ---
 
