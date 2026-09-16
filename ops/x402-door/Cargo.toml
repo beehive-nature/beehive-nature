@@ -1,0 +1,24 @@
+[package]
+name = "x402-door"
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+description = "OFFLINE-first x402 door for the box: wraps x402-facilitator-local behind a reserve-settle journal with watchpay's proven reservation/recovery laws and R4 per-leg unlinkability. Base + EIP-3009 exact + upto to start. No production deployment; testnet runbook in README."
+
+[dependencies]
+x402-types = "2.0.2"
+axum = "0.8"
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "net"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+thiserror = "2"
+hex = "0.4"
+
+[workspace]
+
+[target.'cfg(unix)'.dependencies]
+# Upstream x402-facilitator-local uses tokio::signal::unix (Linux-only);
+# the live wiring (main.rs) targets the Linux box/CI. Laws + tests are
+# platform-independent and must stay so.
+x402-facilitator-local = "2.0.2"
+x402-chain-eip155 = "2.0.2"
