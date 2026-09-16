@@ -1154,7 +1154,7 @@ def cmd_serve(args):
                                         RATE_SET_TTL_S,
                                         rate_set_minted_at_epoch)
                 rs = load_rate_set()
-                minted = rate_set_minted_at_epoch(rs.get("minted_at"))
+                minted = rate_set_minted_at_epoch(rs)
                 try:
                     rate_set_in_force(minted, time.time())
                 except StaleRateSet:
