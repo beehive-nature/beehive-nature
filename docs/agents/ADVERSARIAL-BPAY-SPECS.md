@@ -319,3 +319,74 @@ grep-gate shape).
 *Consumption: D-3/D-4/D-5/D-8 first (money safety), then D-1/D-2/D-6/D-7. Same protocol —
 builder writes RED, receipts the gap, fixes GREEN in-lane; CI arbitrates. zArcheology designs
 tests only. — third roll, 2026-09-16.*
+
+---
+
+## RS-SPECS — the unified `bpay-rail` trait attacked (fourth roll, 2026-09-16; targets bound to the branch `codex/z2b-bpay-rail` @`aa47b04b`, R11+R12 receipts)
+
+**Targets (from the landed receipts):** `crates/bpay-rail/src/{fee,ledger,evm,ln}.rs` +
+`tests/rail_probes.rs` (P-probe harness) + `tests/surcharge_x402.rs`. Symbols:
+`RailLedger<Id>` (idempotency-by-identity, forward-only, terminal immutability, worst-case
+fee-window, possibility-checked evidence, expiry-blocks-new-never-old, Unknown→terminal-only),
+`FeeClass` ×5 incl. `L1Surcharge` with `pays_on_failure` (gas pays on revert; LN routing does
+not), `EvmPaymentId = nonce+tx_hash`, `LnMockClient` (NIP-47 vocabulary, payment_hash
+idempotency, preimage settlement, OPTIONAL `fees_paid`), `open_base_intent` /
+`reconcile_base` / `compose_from_offer` (identity = keccak256 of canonical offer bytes),
+`base_gate`. **Founder priority: attack abstractions that make LN behave like EVM or EVM like
+LN.** Already-pinned by R11/R12 (do not re-spec): the terminal-Failed evidence bug fix, the
+four R12 surcharge probes, duplicate-hash→lookup, htlc-never-charges.
+
+### SPEC RS-1 — L1Surcharge beyond the delivered harness
+
+| # | case | exact pass criterion | fail criterion |
+|---|---|---|---|
+| 1.1 | L1 price spike mid-flight (receipt l1_fee > reserved COMBINED worst case) | refusal pre-mutation, leg NOT wedged (mirrors D-8.4b); the only path onward is a NEW intent with re-declared bound — in-place bound raise refused | in-place raise, or poisoned leg |
+| 1.2 | bound-split integrity: gas underspends + surcharge overspends, SUM ≤ combined | EACH component validated against ITS OWN bound — no cross-component slack transfer | sum-only validation passes |
+| 1.3 | evidence arriving after window expiry | reconciles under the OLD declared bound (expiry blocks new, never old) — no fresh infinite bound | post-expiry re-bound accepted |
+| 1.4 | negative control | sum-only validator DETECTED by 1.2 | harness blind |
+
+### SPEC RS-2 — terminal-state reconciliation, exhaustively
+
+| # | case | exact pass criterion | fail criterion |
+|---|---|---|---|
+| 2.1 | ALL terminal→terminal transitions (Settled/Failed/Refunded/Expired × each other, both rails) | refused, zero mutation — the R11-caught bug generalized to the full matrix (parameterized probe) | any terminal→terminal accepted |
+| 2.2 | Unknown + settle-evidence whose window already expired | precedence PINNED BY TEST (evidence-vs-expiry rule is a named law, not emergent behavior) | undocumented precedence flip between runs/rails |
+| 2.3 | replayed OLD evidence after terminal | routes to lookup, zero mutation | second effect |
+
+### SPEC RS-3 — cross-rail identity separation at the unified ledger (R4/R1)
+
+| # | case | exact pass criterion | fail criterion |
+|---|---|---|---|
+| 3.1 | namespace collision: identical id VALUE on two rails (EvmPaymentId fields vs LN payment_hash serialized equal) | TWO independent legs — `RailLedger<Id>` keys by (rail, id), never bare id; state never bleeds across rails | one leg shadowing the other |
+| 3.2 | unified-ledger log hygiene | no record/log line joins payer identity across rails (door law-6 pattern generalized to exactly the place correlation could regress) | cross-rail join key in any emitted line |
+| 3.3 | canonicalization attack on `compose_from_offer` (keccak256 of canonical offer bytes): whitespace/field-order variants of ONE obligation; vs two genuinely different obligations | same obligation → same id (no double-pay via re-canonicalization); different obligations → different ids (no collision via ambiguity); canonical form pinned with cross-implementation vectors (corpus fixture law) | either failure mode |
+
+### SPEC RS-4 — fee-evidence impossibility (FeeClass ×5, `pays_on_failure`)
+
+| # | case | exact pass criterion | fail criterion |
+|---|---|---|---|
+| 4.1 | boundary battery, all rails: fees at exactly the declared bound pass; bound+1 (smallest unit) refuses pre-mutation | typed refusal naming the class + field | acceptance at bound+1 |
+| 4.2 | LN `fees_paid` OPTIONAL: absent vs present-zero are DISTINCT typed states (not-reported ≠ charged-nothing); fabricating zero where the rail reported absent = evidence forgery, refused | distinction observable; forgery refused | omission-vs-zero conflation |
+| 4.3 | `pays_on_failure` asymmetry, both directions: Failed EVM leg + in-bound gas evidence → gas CHARGED (lawful); Failed LN leg + ANY fee charge → refused (impossible per R8); a rail-agnostic caller applying EVM fee law to LN (or vice versa) DETECTED | asymmetry enforced per rail | **the core LN-behaves-like-EVM fee conflation** |
+
+### SPEC RS-5 — LN↔EVM semantic conflation (founder headline)
+
+| # | conflation trap | exact pass criterion | fail criterion |
+|---|---|---|---|
+| 5.1 | timeout semantics: LN invoice expiry is PRE-SEND (no in-flight expiry); EVM deadline can pass in-flight | expired-invoice send refused pre-send; EVM in-flight past window reconciles Unknown→terminal via evidence; a unified `expire()` that force-fails an in-flight LN payment refused | LN in-flight force-failed (EVM semantics smuggled in) |
+| 5.2 | failure finality: EVM Failed-under-window may take bounded replacement (same obligation, AV-8.3); LN Failed (HTLC timeout) is terminal, no fee, no replacement | replacement path rail-capability-gated; LN replacement refused typed | generic retry applied to LN |
+| 5.3 | settlement proof shape: LN = preimage bound to payment_hash (instant, no reorg); EVM = receipt bound to nonce+tx_hash WITH finality policy | LN settle requires preimage (tx_hash-style evidence refused); EVM requires receipt+finality (preimage-only refused); **EVM treated as instant like LN refused** — reorg depth must be a field, not a default | either direction of proof-shape conflation |
+| 5.4 | `upto` semantics: LN invoice amount is FIXED — no native upto | upto-request on LN without explicit modeled support (MPP/hold) → typed capability refusal | **silent conversion to an exact invoice of the MAXIMUM (charges the ceiling as the amount — the worst conflation)**; negative control: charged==max when usage<max DETECTED |
+
+**Harness:** extend `tests/rail_probes.rs` parameterized pattern — RS-2.1, RS-4.1, RS-4.3 run
+per-rail; RS-3/RS-5 are differential (need both members in one fixture; `LnMockClient` +
+watchpay-composed EVM member suffice, zero network). RED expectations: the conflation traps
+(4.3, 5.1–5.4) and namespace keying (3.1) are the likeliest REDs on first run — each RED run
+is the charter for its fix.
+
+---
+
+*Fourth roll, 2026-09-16. Same pipeline law: builder proves RED, fixes GREEN, CI arbitrates;
+zArcheology designs tests only, zero production code. Cross-lane note: Workerb 2's door
+adversarial pass (three real defects caught: concurrent-settle race, unbounded HumanGate,
+hostile chain strings) validates the method — keep both batteries running.*
