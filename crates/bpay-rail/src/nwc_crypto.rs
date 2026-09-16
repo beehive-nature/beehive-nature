@@ -111,17 +111,21 @@ pub fn calc_padded_len(unpadded: usize) -> usize {
 }
 
 fn pad(plaintext: &[u8]) -> Vec<u8> {
-    let mut len_prefix = Vec::new();
+    // LT-9.2 fix (caught by the official vectors): the length prefix is
+    // prepended AFTER padding — the padded BODY is calcPaddedLen(plaintext),
+    // then the 2-byte prefix rides outside it. The old code called
+    // calcPaddedLen(prefix.len + plaintext.len) which produced shorter
+    // bodies (32 instead of 34 for 1-byte plaintexts).
+    let body_len = calc_padded_len(plaintext.len()).min(8192);
+    let mut out = Vec::with_capacity(2 + body_len);
     if plaintext.len() < 65536 {
-        len_prefix.extend_from_slice(&(plaintext.len() as u16).to_be_bytes());
+        out.extend_from_slice(&(plaintext.len() as u16).to_be_bytes());
     } else {
-        len_prefix.extend_from_slice(&[0u8, 0u8]);
-        len_prefix.extend_from_slice(&(plaintext.len() as u32).to_be_bytes());
+        out.extend_from_slice(&[0u8, 0u8]);
+        out.extend_from_slice(&(plaintext.len() as u32).to_be_bytes());
     }
-    let unpadded = [&len_prefix, plaintext].concat();
-    let padded_len = calc_padded_len(unpadded.len()).min(8192);
-    let mut out = vec![0u8; padded_len];
-    out[..unpadded.len()].copy_from_slice(&unpadded);
+    out.extend_from_slice(plaintext);
+    out.resize(2 + body_len, 0);
     out
 }
 
