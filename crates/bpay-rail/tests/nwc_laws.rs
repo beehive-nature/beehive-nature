@@ -224,6 +224,7 @@ fn nwc_missing_preimage_is_incomplete_evidence() {
 
 #[test]
 #[ignore = "env-gated: set BPAY_NWC_URL to run the LIVE read-only leg"]
+#[allow(unused_variables)]
 fn nwc_live_readonly_info_and_balance() {
     let Ok(url) = std::env::var("BPAY_NWC_URL") else {
         eprintln!("BPAY_NWC_URL not set — live leg skipped");

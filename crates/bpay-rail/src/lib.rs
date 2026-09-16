@@ -11,6 +11,7 @@
 //! node, no deployment. The x402 first-line door (bsigner's
 //! pre-signature offer gate) stays at the design level — not built.
 
+pub mod capabilities;
 pub mod evm;
 pub mod fee;
 pub mod ledger;

@@ -25,6 +25,10 @@ pub struct MockNwcTransport {
     pub next_rate_limited: bool,
     /// LU-8.1 probe: next successful pay result OMITS fees_paid.
     pub next_pay_no_fees: bool,
+    /// LU-6 probe: next pay returns this NIP-47 error CODE (envelope).
+    pub next_pay_error_code: Option<String>,
+    /// LU-5 probe: next successful pay result carries this released msat.
+    pub next_pay_release_msat: Option<u64>,
 }
 
 impl MockNwcTransport {
@@ -38,6 +42,8 @@ impl MockNwcTransport {
             next_pay_fails: false,
             next_rate_limited: false,
             next_pay_no_fees: false,
+            next_pay_error_code: None,
+            next_pay_release_msat: None,
         }
     }
 
@@ -79,6 +85,9 @@ impl NwcTransport for MockNwcTransport {
                     .and_then(|i| i.as_str())
                     .ok_or_else(|| NwcError::Other("invoice param missing".into()))?;
                 let rec = self.invoices.get_mut(invoice).ok_or(NwcError::NotFound)?;
+                if let Some(code) = self.next_pay_error_code.take() {
+                    return Err(NwcError::from_code(&code, format!("mock injected {code}")));
+                }
                 if self.next_pay_ambiguous {
                     self.next_pay_ambiguous = false;
                     return Err(NwcError::TransportAmbiguous(
@@ -101,10 +110,14 @@ impl NwcTransport for MockNwcTransport {
                         "preimage": hex::encode(preimage),
                     }));
                 }
-                Ok(serde_json::json!({
+                let mut result = serde_json::json!({
                     "preimage": hex::encode(preimage),
                     "fees_paid": fees,
-                }))
+                });
+                if let Some(released) = self.next_pay_release_msat.take() {
+                    result["released_msat"] = serde_json::json!(released);
+                }
+                Ok(result)
             }
             "lookup_invoice" => {
                 let hash_hex = params

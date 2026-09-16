@@ -127,7 +127,6 @@ fn lu7_one_conversion_site_atto_only_through_to_atto() {
 
 #[test]
 fn lu7_fee_refusals_name_field_and_unit() {
-    let mut r = adapter();
     let mut client = LnMockClient::new(1_000_000);
     let inv = client.make_invoice(MilliSatoshi(1), 3_600);
     let mut small = LnRailAdapter::new(MilliSatoshi(10_000), MilliSatoshi(100), 1_000_000);

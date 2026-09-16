@@ -43,9 +43,32 @@ pub struct LnSettlement {
     /// The payment secret — the strongest settlement evidence class
     /// (knowledge only the payee could have released).
     pub preimage: [u8; 32],
+    /// LU-5: the RELEASED amount for upto mechanisms (None for exact
+    /// invoices — absence on an upto is incomplete evidence).
+    pub released_msat: Option<MilliSatoshi>,
     /// NIP-47 `fees_paid` is OPTIONAL — absence is lawful (reservation
     /// stands); presence must satisfy possibility (≤ fee_limit).
     pub fees_paid_msat: Option<MilliSatoshi>,
+}
+
+/// LU-5: how an upto (hold/MPP) payment was BOOKED — the maximum and the
+/// actual BOTH survive; LN never silently turns a maximum into an exact
+/// charge.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct UptoBooking {
+    pub authorized: MilliSatoshi,
+    pub released: MilliSatoshi,
+}
+
+/// A hold/MPP offer: the payer authorizes a MAXIMUM; the actual is set
+/// at release (settle-on-release only).
+#[derive(Debug, Clone)]
+pub struct LnOffer {
+    pub payment_hash: PaymentHash,
+    pub authorized_msat: MilliSatoshi,
+    pub mechanism: crate::capabilities::LnUptoMechanism,
+    pub created_at: u64,
+    pub expires_at: u64,
 }
 
 /// MOCK NWC client. Every method mirrors a NIP-47 shape so the adapter
@@ -115,6 +138,7 @@ impl LnMockClient {
             invoice.payment_hash,
             LnSettlement {
                 preimage,
+                released_msat: None,
                 fees_paid_msat: fees,
             },
         );
@@ -124,6 +148,88 @@ impl LnMockClient {
     /// HTLC-timeout failure injection (surfaces as Failed, never a fee).
     pub fn inject_htlc_timeout(&mut self, id: PaymentHash) {
         self.states.insert(id, NwcState::Failed);
+    }
+
+    /// LU-5: mint a hold/MPP OFFER — the payer-side maximum, settle on
+    /// release only.
+    pub fn make_hold_offer(
+        &mut self,
+        authorized_msat: MilliSatoshi,
+        mechanism: crate::capabilities::LnUptoMechanism,
+        expiry_secs: u64,
+    ) -> LnOffer {
+        let mut hash = [0u8; 32];
+        hash[0] = 0xF0;
+        hash[1] = self.states.len() as u8 + 1;
+        let id = PaymentHash(hash);
+        self.states.insert(id, NwcState::Pending);
+        LnOffer {
+            payment_hash: id,
+            authorized_msat,
+            mechanism,
+            created_at: self.now_unix,
+            expires_at: self.now_unix + expiry_secs,
+        }
+    }
+
+    /// LU-5: release an offer at an actual — the only lawful settle path.
+    /// A release above the authorized maximum is recorded and REFUSED by
+    /// the adapter's evidence law (the law lives rail-side).
+    pub fn release_payment(
+        &mut self,
+        offer: &LnOffer,
+        released: MilliSatoshi,
+    ) -> Result<(), LnMockError> {
+        if self.states.get(&offer.payment_hash) != Some(&NwcState::Pending) {
+            return Err(LnMockError::Refused {
+                field: "release",
+                reason: "offer is not open (timed out or already released)".into(),
+            });
+        }
+        let mut preimage = offer.payment_hash.0;
+        preimage[31] ^= 0x5a;
+        self.states.insert(offer.payment_hash, NwcState::Settled);
+        self.settlements.insert(
+            offer.payment_hash,
+            LnSettlement {
+                preimage,
+                released_msat: Some(released),
+                fees_paid_msat: Some(MilliSatoshi(25)),
+            },
+        );
+        Ok(())
+    }
+
+    /// LU-5: hold-timeout — the offer dies; terminal Failed rail-side.
+    pub fn hold_timeout(&mut self, id: PaymentHash) {
+        self.states.insert(id, NwcState::Failed);
+    }
+
+    /// pay an OFFER: settles ONLY if released first (settle-on-release).
+    pub fn pay_offer(
+        &mut self,
+        offer: &LnOffer,
+        _fee_limit_msat: MilliSatoshi,
+    ) -> Result<PaymentHash, LnMockError> {
+        if offer.expires_at <= self.now_unix {
+            return Err(LnMockError::Refused {
+                field: "expires_at",
+                reason: "offer expired — pre-send refusal (LU-5)".into(),
+            });
+        }
+        if self.outage_next_pay {
+            self.outage_next_pay = false;
+            return Err(LnMockError::TransportUnknown);
+        }
+        match self.states.get(&offer.payment_hash) {
+            Some(NwcState::Settled) => Ok(offer.payment_hash),
+            _ => Err(LnMockError::Refused {
+                field: "released_msat",
+                reason:
+                    "upto settles on release ONLY — released amount is required evidence (LU-5)"
+                        .into(),
+            }),
+        }
     }
 
     pub fn lookup(&self, id: PaymentHash) -> Option<(NwcState, Option<&LnSettlement>)> {
@@ -149,11 +255,19 @@ pub struct LnRailAdapter {
     pub client: LnMockClient,
     /// LU-8.1 booking record: how fee evidence was booked per payment.
     fee_evidence: std::collections::HashMap<PaymentHash, FeeEvidence>,
+    /// LU-5 booking record: authorized vs released for upto payments.
+    upto_bookings: std::collections::HashMap<PaymentHash, UptoBooking>,
+    /// CD: the mechanisms this adapter claims (bound before intents).
+    pub mechanisms: crate::capabilities::MechanismSet,
     ledger: RailLedger<PaymentHash>,
     fee_limit_msat: MilliSatoshi,
 }
 
 pub const MSAT_IN_SATS: u64 = 1_000;
+
+fn id_of(offer: &LnOffer) -> PaymentHash {
+    offer.payment_hash
+}
 
 impl LnRailAdapter {
     pub fn new(
@@ -166,6 +280,8 @@ impl LnRailAdapter {
             // LU-7.2: the ONE named conversion site.
             ledger: RailLedger::new(window_fee_ceiling_msat.to_atto(), now_unix),
             fee_evidence: std::collections::HashMap::new(),
+            upto_bookings: std::collections::HashMap::new(),
+            mechanisms: crate::capabilities::MechanismSet::BOTH,
             fee_limit_msat,
         }
     }
@@ -305,6 +421,121 @@ impl LnRailAdapter {
     pub fn state(&self, id: &PaymentHash) -> Option<LifecycleState> {
         self.ledger.state(id)
     }
+    /// LU-5: pay an upto OFFER through a named mechanism. Settle on
+    /// release only; the released amount is required evidence bounded by
+    /// the authorized maximum; the booking carries BOTH figures.
+    pub fn pay_upto(
+        &mut self,
+        offer: &LnOffer,
+        mechanism: crate::capabilities::LnUptoMechanism,
+    ) -> Result<LifecycleState, LedgerError> {
+        if !self.mechanisms.supports(mechanism) {
+            return Err(LedgerError::Refusal {
+                field: "manifest",
+                reason: format!(
+                    "mechanism {mechanism:?} not bound on this adapter — capabilities are explicit before intent construction (CD)"
+                ),
+            });
+        }
+        if self.ledger.state(&offer.payment_hash).is_some() {
+            return Err(LedgerError::Refusal {
+                field: "payment_hash",
+                reason: "duplicate intent — route to lookup/reconcile, never a second payment"
+                    .into(),
+            });
+        }
+        if offer.expires_at <= self.client.now_unix {
+            return Err(LedgerError::Refusal {
+                field: "expires_at",
+                reason: "offer expired — new intents refused (LU-5)".into(),
+            });
+        }
+        self.ledger.open_intent(
+            offer.payment_hash,
+            FeeReservation {
+                class: FeeClass::LnroutingMsat,
+                worst_case: self.fee_limit_msat.to_atto(),
+            },
+            offer.expires_at,
+        )?;
+        let id = match self.client.pay_offer(offer, self.fee_limit_msat) {
+            Ok(id) => id,
+            Err(LnMockError::TransportUnknown) => {
+                self.ledger
+                    .transition(&id_of(offer), LifecycleState::InFlight)?;
+                self.ledger
+                    .mark_unknown(&id_of(offer), "transport unknown mid-upto")?;
+                return Ok(LifecycleState::Unknown);
+            }
+            Err(LnMockError::Refused { field, reason }) => {
+                return Err(LedgerError::Refusal { field, reason });
+            }
+        };
+        self.ledger.transition(&id, LifecycleState::InFlight)?;
+        let (_, settlement) = self.client.lookup(id).expect("settled");
+        let settlement = settlement.expect("settlement on release");
+        let released = settlement
+            .released_msat
+            .ok_or_else(|| LedgerError::Refusal {
+                field: "released_msat",
+                reason:
+                    "upto settles on release ONLY — released amount is required evidence (LU-5)"
+                        .into(),
+            })?;
+        if released > offer.authorized_msat {
+            return Err(LedgerError::Refusal {
+                field: "released_msat",
+                reason: format!(
+                    "upto law violated: released {} msat > authorized {} msat — the maximum is never an exact charge (LU-5)",
+                    released.0, offer.authorized_msat.0
+                ),
+            });
+        }
+        // fee booking rides the LU-8.1 law
+        let (fees_msat, evidence) = match settlement.fees_paid_msat {
+            Some(ms) => {
+                if ms > self.fee_limit_msat {
+                    return Err(LedgerError::Refusal {
+                        field: "fees_paid",
+                        reason: format!(
+                            "impossible fee evidence: {} msat exceeds the declared fee_limit {} msat (field=fees_paid unit=msat, R10-P3)",
+                            ms.0, self.fee_limit_msat.0
+                        ),
+                    });
+                }
+                (ms, FeeEvidence::Paid(ms.0))
+            }
+            None => (
+                self.fee_limit_msat,
+                FeeEvidence::AbsentBounded(self.fee_limit_msat.0),
+            ),
+        };
+        let out = self
+            .ledger
+            .reconcile_with_evidence(&id, fees_msat.to_atto(), true)?;
+        self.fee_evidence.insert(id, evidence);
+        self.upto_bookings.insert(
+            id,
+            UptoBooking {
+                authorized: offer.authorized_msat,
+                released,
+            },
+        );
+        Ok(out.state)
+    }
+
+    /// LU-5: hold-timeout — terminal Failed, ZERO fee, no replacement.
+    pub fn fail_hold_timeout(&mut self, id: PaymentHash) -> Result<LifecycleState, LedgerError> {
+        self.client.hold_timeout(id);
+        self.ledger.transition(&id, LifecycleState::Failed)?;
+        Ok(LifecycleState::Failed)
+    }
+
+    /// LU-5: the upto booking (authorized vs released), if any.
+    pub fn upto_booking(&self, id: &PaymentHash) -> Option<UptoBooking> {
+        self.upto_bookings.get(id).copied()
+    }
+
     /// LU-8.1: how fee evidence was BOOKED for a payment (absent ≠ zero).
     pub fn fee_evidence(&self, id: &PaymentHash) -> Option<FeeEvidence> {
         self.fee_evidence.get(id).copied()
