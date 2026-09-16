@@ -239,7 +239,7 @@ fn lt4_3_right_sender_and_valid_sig_accepted() {
 
 #[test]
 fn lt7_1_multi_relay_urls_typed_refusal() {
-    let url = "nostr+walletconnect://abcd?relay=wss://one&relay=wss://two&secret=0102gALLOP"; // synthetic shape probe (not a real key)
+    let url = "nostr+walletconnect://0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f20?relay=wss://one&relay=wss://two&secret=0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f20"; // synthetic shape probe (not a real key) // PUBLIC-CONSTANT: synthetic ascending-bytes test token (not a real key)
     #[cfg(feature = "live-nwc")]
     {
         match bpay_rail::nwc_live::NwcConnection::parse(url) {
@@ -267,7 +267,7 @@ fn lt7_1b_single_relay_still_parses() {
     // healthy control
     #[cfg(feature = "live-nwc")]
     {
-        let url = "nostr+walletconnect://aabb..ccdd?relay=wss://relay.example&secret=0102gAL"; // synthetic (not a real key)
+        let url = "nostr+walletconnect://0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f20?relay=wss://relay.example&secret=0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f20"; // synthetic (not a real key) // PUBLIC-CONSTANT: synthetic ascending-bytes test token (not a real key)
         let conn =
             bpay_rail::nwc_live::NwcConnection::parse(url).expect("single relay parses fine");
         assert_eq!(conn.relay_url_ws, "wss://relay.example");
@@ -283,7 +283,7 @@ fn lt9_3_lowercase_percent_sequences_decode() {
     #[cfg(feature = "live-nwc")]
     {
         let url =
-            "nostr+walletconnect://aabb..ccdd?relay=https%3a%2f%2frelay.example&secret=0102gAL"; // synthetic (not a real key)
+            "nostr+walletconnect://0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f20?relay=https%3a%2f%2frelay.example&secret=0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f20"; // synthetic (not a real key) // PUBLIC-CONSTANT: synthetic ascending-bytes test token (not a real key)
         let conn = bpay_rail::nwc_live::NwcConnection::parse(url)
             .expect("lowercase percent-sequences must decode");
         assert_eq!(conn.relay_url_ws, "wss://relay.example");
