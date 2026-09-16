@@ -194,3 +194,13 @@ AV test demonstrates the gap. — zArcheology seat, 2026-09-16. No implementatio
   live drill; flag_reorg notifier wiring; r4-audit on production stores;
   r5 CI step). **Consumption of new adversarial items is PAUSED for one
   reconciliation pass per founder order.**
+- **CONTROL SURFACE MOVED 2026-09-16 →** [`ASSURANCE-LEDGER.md`](ASSURANCE-LEDGER.md)
+  (absorbs the matrix): A/B/C/D per row with producer→signal→enforcement→
+  state→recovery→probe; **two ceremonies** (M: one meter window promoting
+  AV-1/2/3 with three drills; D: one Sepolia pass promoting AV-4/5/6a/7/8
+  with five drills); AV-6 keeps independent future columns
+  (`max_attempts` implemented; `max_failure_charge` awaiting monetary
+  failure-fee evidence, never inferred); **AV-11 wired into CI** (49/49
+  shape-guarded standing step — the one zero-decision gesture). Zero
+  production changes. **Workerb PAUSED — next human decision is a
+  deployment gesture, not an architecture question.**

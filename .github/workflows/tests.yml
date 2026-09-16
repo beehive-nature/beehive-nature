@@ -32,6 +32,14 @@ jobs:
       - name: Shell chain lint
         if: always()
         run: sh scripts/lint-shell-chains.sh
+      # AV-11/R5 (2026-09-16): standing future-rail detector — every
+      # first-line human payment surface is censused on every push; a
+      # surface that asks the human for native gas fails here. Ask-shaped
+      # patterns only (educational mentions pass); labeled last-line
+      # fallback zones exempt (data-r5-fallback).
+      - name: R5 surface audit — no human gas asks
+        if: always()
+        run: node scripts/r5-surface-audit.mjs
       # bSAFE host lives outside the kernel workspace (own members list + lockfile)
       - name: bSAFE host workspace (THP codec + Noise XX)
         if: always()
