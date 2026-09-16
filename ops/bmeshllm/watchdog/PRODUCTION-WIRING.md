@@ -84,3 +84,14 @@ llama-server unit itself; with the timer off it is inert.
 - Probe law: `/slots`, never `/health` — upstream #27388's mutex analysis,
   corroborated by our SIGKILL journal receipt (posted upstream as
   issuecomment-5692308653).
+
+---
+
+## AS DEPLOYED (2026-09-16 ~10:55Z) — see DEPLOYMENT-2026-09-16.md
+
+This file's original staging is superseded by the live deployment: gate
+drop-in + oneshot timer + meter-pd service, acceptance 13/13. Two pre-flight
+fixes changed the shape from this staging: the watchdog probes WITH
+`--auth-file` (production /slots 401s unauthenticated) and `--no-supervise`
+is a single bounded burst per timer tick. Rollback one-paste lives in the
+deployment receipt.
