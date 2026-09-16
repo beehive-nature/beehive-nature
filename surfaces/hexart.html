@@ -1,0 +1,495 @@
+<!doctype html>
+<!-- hexart.html — the hive's generative art surface (2026-09-16).
+     BeehiveNature.buzz feature, not a SaaS: ONE self-contained file, zero
+     outbound requests, everything client-side (the SWEEP law).
+     HOUSE VISUAL LAW: the default primitive is the HEXAGON — honeycomb-
+     native generative art. Square pixels are an option, never the default.
+     THE REPRESENTATION (future-proof core): a piece = {topology, cols, rows,
+     cells[], palette[], recipe}. Animation = frames[] of cell-grids sharing
+     one topology+palette; sprites = a bounds subset; rotations = a topology-
+     aware transform on cell coords; tiles/maps = a wrap flag on sampling;
+     UI assets = export scale + padding rules. None of those need the core
+     rebuilt — they are consumers of the grid, and the grid is done.
+     ENGINES ARE ADAPTERS: window.HexArtEngines maps id → {label, generate}.
+     'comb-field' (seeded value-noise + ordered dither) is the zero-dep
+     default; 'image-conv' rides the same seam from an image source. A future
+     'local-llm' adapter (bMESHLLM compute rail behind a key) or any open
+     model drops in beside them without touching the renderer, the editor,
+     or the recipe format.
+     DETERMINISM LAW: same recipe → same art. The engine never touches
+     Math.random/Date; the seed and every parameter live in the recipe, and
+     manual edits ride as an overlay so reproduction includes the hand. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="referrer" content="no-referrer">
+<title>hexart — the hive’s own pixels</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230d1410'/%3E%3Cpath d='M16 5l9 5.5v11L16 27l-9-5.5v-11Z' fill='none' stroke='%23E8B54B' stroke-width='2'/%3E%3Cpath d='M16 11l4.5 2.75v5.5L16 22l-4.5-2.75v-5.5Z' fill='%23E8B54B'/%3E%3C/svg%3E">
+<script>const tokens=document.createElement('link');tokens.rel='stylesheet';tokens.href=location.protocol==='file:'?'tokens.css':'/tokens.css';document.head.append(tokens);</script>
+<style>
+:root{
+  --honey:#E8B54B; --honey-deep:#8a6420; --wax:#2a2008;
+  --bg:#0d1410; --panel:#111a14; --line:#243026; --ink:#e9f2ec; --mut:#8fa79c;
+  --accent:var(--leaf,#7ddf8f);
+}
+*{box-sizing:border-box;margin:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--ink);font:14px/1.6 system-ui,-apple-system,'Segoe UI',sans-serif;
+  padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+a{color:var(--honey)}
+.wrap{max-width:1180px;margin:0 auto;padding:18px 20px 90px}
+header h1{font-size:clamp(1.7rem,5vw,2.6rem);letter-spacing:-.03em}
+header h1 .hex{color:var(--honey)}
+header .lede{color:var(--mut);max-width:64ch;margin-top:8px}
+main{display:grid;grid-template-columns:300px minmax(0,1fr);gap:18px;margin-top:18px}
+@media(max-width:860px){main{grid-template-columns:1fr}}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+.panel h2{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--mut);margin-bottom:10px}
+label.f{display:block;font-size:12px;color:var(--mut);margin:10px 0 4px}
+input[type=text],input[type=number],select{width:100%;background:#0a120d;color:var(--ink);border:1px solid var(--line);
+  border-radius:8px;padding:8px 10px;font:inherit}
+input[type=range]{width:100%;accent-color:var(--honey)}
+button{font:inherit;background:#0a120d;color:var(--ink);border:1px solid var(--line);border-radius:9px;
+  padding:9px 14px;cursor:pointer;min-height:42px}
+button:hover{border-color:var(--honey)}
+button.primary{background:var(--honey);border-color:var(--honey);color:#1a1206;font-weight:700}
+button.small{padding:5px 10px;min-height:34px;font-size:12px}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.seg{display:flex;gap:4px;flex-wrap:wrap}
+.seg button{flex:1;min-width:64px;font-size:12px;padding:7px 4px}
+.seg button[aria-pressed="true"]{border-color:var(--honey);color:var(--honey);background:rgba(232,181,75,.09)}
+#swatches{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px}
+.sw{width:26px;height:26px;border-radius:7px;border:1px solid #0006;cursor:pointer;position:relative}
+.sw.editing{outline:2px solid var(--honey);outline-offset:1px}
+.sw input{position:absolute;inset:0;opacity:0;width:100%;height:100%;cursor:pointer}
+.stage{position:relative}
+#cv{width:100%;display:block;border:1px solid var(--line);border-radius:14px;background:
+  repeating-conic-gradient(#101812 0 25%, #0b110d 0 50%) 0 0/22px 22px;touch-action:none;cursor:crosshair}
+.toolrow{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:10px}
+#status{font:11px/1.5 ui-monospace,monospace;color:var(--mut);margin-top:8px;min-height:16px}
+footer{margin-top:26px;color:var(--mut);font-size:12px}
+footer a{color:var(--honey);text-decoration:none;border-bottom:1px dashed}
+details.spec{margin-top:14px;color:var(--mut);font-size:12px}
+details.spec summary{cursor:pointer;color:var(--honey)}
+details.spec p{margin-top:6px;max-width:80ch}
+kbd{font:11px ui-monospace,monospace;background:#0a120d;border:1px solid var(--line);border-radius:5px;padding:1px 5px}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1><span class="hex">⬡</span> hexart <span data-i18n="hexart.tag">— the hive’s own pixels</span></h1>
+  <p class="lede" data-i18n="hexart.lede">Generative art in honeycomb-native pixels: hexagons by default, polygons beside them, squares only by choice. Text becomes fields of wax; images become comb. Every piece carries its recipe and regrows exactly.</p>
+</header>
+
+<main>
+<section class="panel" aria-label="generation controls">
+  <h2 data-i18n="hexart.generate">generate</h2>
+  <label class="f" for="prompt" data-i18n="hexart.prompt">prompt (shapes the field)</label>
+  <input type="text" id="prompt" placeholder="amber light through wax…" autocomplete="off" spellcheck="false">
+  <div class="row">
+    <button class="primary" id="go" style="flex:1" data-i18n="hexart.go">⬡ comb it</button>
+    <button id="reseed" title="new seed" data-i18n="hexart.reseed">🎲 reseed</button>
+  </div>
+
+  <h2 style="margin-top:18px" data-i18n="hexart.medium">medium</h2>
+  <div class="seg" role="group" aria-label="topology">
+    <button data-topo="hex-pointy" aria-pressed="true" data-i18n="hexart.hexPointy">⬢ hex</button>
+    <button data-topo="hex-flat" aria-pressed="false" data-i18n="hexart.hexFlat">⬡ flat</button>
+    <button data-topo="tri" aria-pressed="false" data-i18n="hexart.tri">▲ tri</button>
+    <button data-topo="square" aria-pressed="false" data-i18n="hexart.square">□ square</button>
+  </div>
+  <label class="f"><span data-i18n="hexart.size">comb width (cells)</span> <span id="colsV">48</span></label>
+  <input type="range" id="cols" min="16" max="96" value="48">
+  <label class="f"><span data-i18n="hexart.detail">detail</span> <span id="octV">3</span></label>
+  <input type="range" id="oct" min="1" max="4" value="3">
+  <label class="f"><span data-i18n="hexart.threshold">open cells (transparent)</span> <span id="thrV">18%</span></label>
+  <input type="range" id="thr" min="0" max="60" value="18">
+  <label class="f"><span data-i18n="hexart.dither">comb dither</span></label>
+  <input type="checkbox" id="dither" checked>
+
+  <h2 style="margin-top:18px" data-i18n="hexart.palette">palette</h2>
+  <select id="pal" aria-label="palette preset">
+    <option value="honey" selected>honeycomb</option>
+    <option value="estate">estate tokens</option>
+    <option value="ember">ember</option>
+    <option value="verdant">verdant</option>
+    <option value="mono">wax mono</option>
+    <option value="custom" data-i18n="hexart.custom">custom…</option>
+  </select>
+  <div id="swatches" aria-label="palette swatches"></div>
+
+  <h2 style="margin-top:18px" data-i18n="hexart.source">image → comb</h2>
+  <input type="file" id="img" accept="image/*" style="font-size:12px">
+  <div class="row">
+    <button class="small" id="fromImage" data-i18n="hexart.convert">refine image into cells</button>
+    <button class="small" id="palFromImage" data-i18n="hexart.pickPalette">palette from image</button>
+  </div>
+
+  <h2 style="margin-top:18px" data-i18n="hexart.recipe">recipe</h2>
+  <div class="row">
+    <button class="small" id="saveRecipe" data-i18n="hexart.saveRecipe">save recipe</button>
+    <button class="small" id="loadRecipe" data-i18n="hexart.loadRecipe">load recipe</button>
+    <input type="file" id="recipeFile" accept="application/json" hidden>
+  </div>
+  <div id="status" role="status">—</div>
+</section>
+
+<section class="stage" aria-label="canvas">
+  <canvas id="cv" width="960" height="720"></canvas>
+  <div class="toolrow panel" style="border-radius:12px">
+    <span style="font-size:12px;color:var(--mut)" data-i18n="hexart.hand">hand:</span>
+    <button class="small tool" data-tool="paint" aria-pressed="true" data-i18n="hexart.paint">paint</button>
+    <button class="small tool" data-tool="erase" aria-pressed="false" data-i18n="hexart.erase">erase</button>
+    <button class="small tool" data-tool="pick" aria-pressed="false" data-i18n="hexart.picker">pick</button>
+    <span style="flex:1"></span>
+    <span style="font-size:12px;color:var(--mut)"><span data-i18n="hexart.export">export</span></span>
+    <button class="small" id="expPng">PNG</button>
+    <button class="small" id="expWebp">WebP</button>
+  </div>
+  <details class="spec">
+    <summary data-i18n="hexart.spec">how this is built (the honest spec)</summary>
+    <p data-i18n="hexart.specBody">Everything runs in this page — no uploads, no accounts, no network. The default engine is a seeded value-noise field quantized onto the cells with an ordered comb dither; the same seed and parameters always regrow the same piece, and your hand edits ride inside the recipe as an overlay. The hexagon grid is the estate’s visual fingerprint: you can look at a piece and know it came out of the hive. Engines are replaceable adapters — a local model can grow the field one day without changing the recipe, the editor, or the export. The cell-grid representation is ready for animation, sprites, rotations and tilesets without a core rebuild; those are future doors, stated here so they are not silent.</p>
+  </details>
+</section>
+</main>
+
+<footer>
+  hexart · <a href="index.html">the estate</a> · <a href="blight/pixelrefiner.html">pixelrefiner (the square-pixel kin)</a> ·
+  <span data-i18n="hexart.foot">hexagons first; the hive signs its own pictures.</span>
+</footer>
+</div>
+
+<script src="tour.js?v=42"></script>
+<script>
+'use strict';
+/* ══════════ topology: the cell as the primitive ══════════
+   A topology maps (col,row) → center + polygon. Offset rows for hexes;
+   triangles tile the same rhythm in up/down pairs; square is the guest. */
+const SQ3 = Math.sqrt(3);
+const TOPO = {
+  'hex-pointy': {
+    label: 'hex', parity: true,
+    center: (c, r, s) => [s * SQ3 * (c + (r & 1 ? .5 : 0)), s * 1.5 * r],
+    poly: (cx, cy, s) => { const p = []; for (let k = 0; k < 6; k++) { const a = Math.PI / 180 * (60 * k + 30); p.push([cx + s * Math.cos(a), cy + s * Math.sin(a)]); } return p; },
+    aspect: (cols, rows, s) => [s * SQ3 * (cols + .5), s * (1.5 * rows + .5)]
+  },
+  'hex-flat': {
+    label: 'flat hex', parity: true,
+    center: (c, r, s) => [s * 1.5 * c, s * SQ3 * (r + (c & 1 ? .5 : 0))],
+    poly: (cx, cy, s) => { const p = []; for (let k = 0; k < 6; k++) { const a = Math.PI / 180 * 60 * k; p.push([cx + s * Math.cos(a), cy + s * Math.sin(a)]); } return p; },
+    aspect: (cols, rows, s) => [s * (1.5 * cols + .5), s * SQ3 * (rows + .5)]
+  },
+  'tri': {
+    label: 'triangles', parity: false,
+    center: (c, r, s) => [s * (c * 0.5), s * r],   // two triangles per cell step
+    poly: (cx, cy, s, c, r) => { const up = ((c + r) & 1) === 0; const h = s * 0.577;
+      return up ? [[cx, cy - s * .5], [cx + s * .5, cy + s * .5], [cx - s * .5, cy + s * .5]]
+                : [[cx - s * .5, cy - s * .5], [cx + s * .5, cy - s * .5], [cx, cy + s * .5]]; },
+    aspect: (cols, rows, s) => [s * (cols * .5 + .5), s * (rows + 1)]
+  },
+  'square': {
+    label: 'squares (guest mode)', parity: false,
+    center: (c, r, s) => [s * c, s * r],
+    poly: (cx, cy, s) => [[cx - s * .5, cy - s * .5], [cx + s * .5, cy - s * .5], [cx + s * .5, cy + s * .5], [cx - s * .5, cy + s * .5]],
+    aspect: (cols, rows, s) => [s * cols, s * rows]
+  }
+};
+
+/* ══════════ deterministic core ══════════ */
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;var t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function hashStr(s){let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return h>>>0}
+function hash2(ix,iy,seed){let h=seed^Math.imul(ix,374761393)^Math.imul(iy,668265263);h=Math.imul(h^(h>>>13),1274126177);return((h^(h>>>16))>>>0)/4294967296}
+function smooth(t){return t*t*(3-2*t)}
+function vnoise(x,y,seed){const ix=Math.floor(x),iy=Math.floor(y),fx=smooth(x-ix),fy=smooth(y-iy);
+  const a=hash2(ix,iy,seed),b=hash2(ix+1,iy,seed),c=hash2(ix,iy+1,seed),d=hash2(ix+1,iy+1,seed);
+  return a+(b-a)*fx+(c-a)*fy+(a-b-c+d)*fx*fy}
+function field(x,y,seed,oct){let v=0,amp=.5,f=1,tot=0;for(let o=0;o<oct;o++){v+=amp*vnoise(x*f,y*f,seed+o*101);tot+=amp;amp*=.5;f*=2}return v/tot}
+const BAYER=[[0,8,2,10],[12,4,14,6],[3,11,1,9],[15,7,13,5]].flat().map(v=>(v+.5)/16);
+
+/* ══════════ palettes ══════════ */
+const PRESETS = {
+  honey: ['#120d04','#3d2c0c','#7a5a1a','#b98a2c','#e8b54b','#f6d98a','#fdf3d0'],
+  estate:['#0d1410','#18362a','#2f6d43','#7ddf8f','#45c2dc','#d655bb','#9c6fd6'],
+  ember: ['#0c0705','#3b1207','#7a2508','#c2450f','#ee7a2b','#f7b267','#ffe3bd'],
+  verdant:['#06110a','#0d2b1a','#155c37','#2f8f57','#63c07f','#a7df9c','#e4f6d9'],
+  mono:  ['#0a0a0a','#2e2e2e','#5c5c5c','#9a9a9a','#d4d4d4','#f5f5f5']
+};
+
+/* ══════════ engines (adapters) ══════════
+   contract: {id, label, generate(recipe) → cells (Array of palette idx | -1)}
+   The comb-field engine is the zero-dependency default. A future local-model
+   adapter implements the same contract; nothing else changes. */
+window.HexArtEngines = {
+  'comb-field': {
+    label: 'comb field (seeded noise)',
+    generate(rec) {
+      const seed = rec.seed >>> 0, oct = rec.detail || 3, dith = !!rec.dither;
+      const n = rec.cols * rec.rows, cells = new Array(n).fill(-1);
+      const hueShift = (seed % 360) / 360; // the prompt's fingerprint bends the field
+      for (let r = 0; r < rec.rows; r++) for (let c = 0; c < rec.cols; c++) {
+        const t = TOPO[rec.topology];
+        const [x, y] = t.center(c, r, 1);
+        let v = field(x / rec.cols * 3.1 + hueShift, y / rec.rows * 3.1, seed, oct);
+        if (dith) v = (v + (BAYER[(r & 3) * 4 + (c & 3)] - .5) * .18);
+        const pn = rec.palette.length;
+        if (v < rec.threshold / 100) { cells[r * rec.cols + c] = -1; continue; }
+        cells[r * rec.cols + c] = Math.max(0, Math.min(pn - 1, Math.floor(v * pn * 1.15)));
+      }
+      return cells;
+    }
+  },
+  'image-conv': {
+    label: 'image → cells (from a loaded source)',
+    generate(rec, src) { // src = {data:Uint8ClampedArray,w,h}
+      const n = rec.cols * rec.rows, cells = new Array(n).fill(-1);
+      const t = TOPO[rec.topology];
+      const pal = rec.palette.map(hexRGB);
+      for (let r = 0; r < rec.rows; r++) for (let c = 0; c < rec.cols; c++) {
+        const [x, y] = t.center(c, r, 1);
+        const px = Math.min(src.w - 1, Math.max(0, Math.round(x / t.aspect(rec.cols, rec.rows, 1)[0] * src.w)));
+        const py = Math.min(src.h - 1, Math.max(0, Math.round(y / t.aspect(rec.cols, rec.rows, 1)[1] * src.h)));
+        const i = (py * src.w + px) * 4;
+        const [cr, cg, cb, ca] = [src.data[i], src.data[i + 1], src.data[i + 2], src.data[i + 3]];
+        if (ca < 40) { cells[r * rec.cols + c] = -1; continue; }
+        const lum = (cr * .299 + cg * .587 + cb * .114) / 255;
+        if (lum < rec.threshold / 100 * .45) { cells[r * rec.cols + c] = -1; continue; }
+        let best = 0, bd = 1e9;
+        for (let k = 0; k < pal.length; k++) { const d = dist2(pal[k], [cr, cg, cb]); if (d < bd) { bd = d; best = k; } }
+        cells[r * rec.cols + c] = best;
+      }
+      return cells;
+    }
+  }
+};
+function hexRGB(h){const n=parseInt(h.slice(1),16);return[(n>>16)&255,(n>>8)&255,n&255]}
+function dist2(a,b){const dr=a[0]-b[0],dg=a[1]-b[1],db=a[2]-b[2];return dr*dr+dg*dg+db*db}
+
+/* ══════════ the piece: grid + recipe + edits ══════════ */
+const $ = id => document.getElementById(id);
+const cv = $('cv'), ctx = cv.getContext('2d');
+const state = {
+  topology: 'hex-pointy', cols: 48, rows: 36, seed: (Math.random() * 1e9) >>> 0,
+  palette: PRESETS.honey.slice(), palName: 'honey', threshold: 18, detail: 3, dither: true,
+  engine: 'comb-field', cells: [], edits: {}, tool: 'paint', brush: 1, imgSrc: null
+};
+function say(t){ $('status').textContent = t; }
+
+function rebuild(){ // rows from canvas aspect at current cols (approx 4:3)
+  state.rows = Math.max(12, Math.round(state.cols * 0.75));
+}
+function regen(freshSeed){
+  if (freshSeed) state.seed = (Math.random() * 1e9) >>> 0;
+  const p = $('prompt').value.trim();
+  const seed = p ? (hashStr(p) ^ state.seed) >>> 0 : state.seed;
+  rebuild();
+  const rec = recipe(seed);
+  state.edits = {};                       // a regen starts a new hand
+  state.cells = window.HexArtEngines[state.engine].generate(rec, state.imgSrc ? imgDataFor(rec) : null);
+  render(); say('⬡ ' + state.cells.filter(v=>v>=0).length + ' cells · seed ' + seed.toString(16) + (p?' · prompt-locked':''));
+}
+function recipe(seed){
+  return { v:1, engine: state.engine, topology: state.topology, cols: state.cols,
+    rows: state.rows, seed: (seed===undefined?state.seed:seed)>>>0, prompt: $('prompt').value.trim(),
+    palette: state.palette.slice(), palName: state.palName,
+    threshold: state.threshold, detail: state.detail, dither: state.dither,
+    transparent: true, edits: state.edits };
+}
+function applyEdits(){ for (const k in state.edits) { const [c,r]=k.split(',').map(Number); if(r<state.rows&&c<state.cols) state.cells[r*state.cols+c]=state.edits[k]; } }
+
+/* ══════════ render ══════════ */
+function render(){
+  const t = TOPO[state.topology], s = displayScale();
+  const [W,H] = t.aspect(state.cols, state.rows, s);
+  cv.width = Math.round(W); cv.height = Math.round(H);
+  ctx.clearRect(0,0,cv.width,cv.height);
+  for (let r = 0; r < state.rows; r++) for (let c = 0; c < state.cols; c++) {
+    const v = state.cells[r * state.cols + c]; if (v < 0) continue;
+    const [cx, cy] = t.center(c, r, s);
+    const poly = t.poly(cx, cy, s, c, r);
+    ctx.beginPath(); ctx.moveTo(poly[0][0], poly[0][1]);
+    for (let k = 1; k < poly.length; k++) ctx.lineTo(poly[k][0], poly[k][1]);
+    ctx.closePath();
+    ctx.fillStyle = state.palette[v] || '#888';
+    ctx.fill();
+    if (state.topoStroke !== false) { ctx.strokeStyle = 'rgba(0,0,0,.28)'; ctx.lineWidth = Math.max(.5, s*.04); ctx.stroke(); }
+  }
+}
+function displayScale(){
+  const t = TOPO[state.topology];
+  const [W] = t.aspect(state.cols, state.rows, 1);
+  return Math.max(4, cv.clientWidth / W);
+}
+
+/* ══════════ hand: paint / erase / pick (the inpaint primitive) ══════════ */
+function cellAt(ev){
+  const rect = cv.getBoundingClientRect();
+  const x = (ev.clientX - rect.left) * (cv.width / rect.width);
+  const y = (ev.clientY - rect.top) * (cv.height / rect.height);
+  const t = TOPO[state.topology], s = displayScale();
+  let best = -1, bd = 1e18;
+  for (let r = 0; r < state.rows; r++) for (let c = 0; c < state.cols; c++) {
+    const [cx, cy] = t.center(c, r, s);
+    const d = (cx - x) * (cx - x) + (cy - y) * (cy - y);
+    if (d < bd) { bd = d; best = r * state.cols + c; }
+  }
+  return bd < (s * s * 1.2) ? best : -1;
+}
+let painting = false;
+cv.addEventListener('pointerdown', ev => {
+  const i = cellAt(ev); if (i < 0) return;
+  const c = i % state.cols, r = (i / state.cols) | 0;
+  if (state.tool === 'pick') { const v = state.cells[i]; if (v >= 0) { selectSwatch(v); say('picked ' + state.palette[v]); } return; }
+  painting = true; cv.setPointerCapture(ev.pointerId); applyTool(c, r);
+});
+cv.addEventListener('pointermove', ev => { if (!painting) return; const i = cellAt(ev); if (i < 0) return; applyTool(i % state.cols, (i / state.cols) | 0); });
+addEventListener('pointerup', () => painting = false);
+function applyTool(c, r){
+  const B = state.brush;
+  for (let dr = -(B-1); dr <= B-1; dr++) for (let dc = -(B-1); dc <= B-1; dc++) {
+    if (dc*dc + dr*dr > (B-.2)*(B-.2)) continue;
+    const cc = c + dc, rr = r + dr;
+    if (cc < 0 || rr < 0 || cc >= state.cols || rr >= state.rows) continue;
+    const key = cc + ',' + rr;
+    const v = state.tool === 'erase' ? -1 : (state.selected ?? 0);
+    state.cells[rr * state.cols + cc] = v;
+    state.edits[key] = v;                 // the hand rides the recipe
+  }
+  render();
+}
+
+/* ══════════ palette UI ══════════ */
+function drawSwatches(){
+  const box = $('swatches'); box.innerHTML = '';
+  state.palette.forEach((col, i) => {
+    const d = document.createElement('div');
+    d.className = 'sw' + (i === state.selected ? ' editing' : '');
+    d.style.background = col; d.title = col;
+    const inp = document.createElement('input'); inp.type = 'color'; inp.value = col;
+    inp.addEventListener('input', () => { state.palette[i] = inp.value; state.palName = 'custom'; $('pal').value = 'custom'; d.style.background = inp.value; render(); });
+    d.appendChild(inp);
+    d.addEventListener('click', e => { if (e.target === d) selectSwatch(i); });
+    box.appendChild(d);
+  });
+}
+function selectSwatch(i){ state.selected = i; drawSwatches(); }
+
+/* ══════════ image source ══════════ */
+function imgDataFor(rec){
+  if (!state.imgSrc) return null;
+  const t = TOPO[rec.topology];
+  const im = state.imgCanvas;
+  const off = document.createElement('canvas');
+  off.width = Math.min(360, im.naturalWidth); off.height = Math.round(off.width * im.naturalHeight / im.naturalWidth);
+  const octx = off.getContext('2d'); octx.drawImage(im, 0, 0, off.width, off.height);
+  return { data: octx.getImageData(0, 0, off.width, off.height).data, w: off.width, h: off.height };
+}
+$('img').addEventListener('change', ev => {
+  const f = ev.target.files[0]; if (!f) return;
+  const url = URL.createObjectURL(f);
+  const im = new Image();
+  im.onload = () => { state.imgSrc = true; state.imgCanvas = im; URL.revokeObjectURL(url);
+    state.engine = 'image-conv'; say('image loaded — refine it into cells, or pick a palette from it first'); };
+  im.src = url;
+});
+$('palFromImage').addEventListener('click', () => {
+  const src = imgDataFor(recipe()); if (!src) { say('load an image first'); return; }
+  // greedy farthest-point palette from sampled pixels (deterministic order)
+  const pts = [];
+  for (let i = 0; i < src.data.length; i += 4 * 97) pts.push([src.data[i], src.data[i+1], src.data[i+2]]);
+  const pal = [pts[0] || [0,0,0]];
+  while (pal.length < Math.min(7, Math.max(3, pts.length))) {
+    let best = null, bd = -1;
+    for (const p of pts) { let d = 1e18; for (const q of pal) d = Math.min(d, dist2(p, q)); if (d > bd) { bd = d; best = p; } }
+    if (bd <= 0) break; pal.push(best);
+  }
+  state.palette = pal.map(p => '#' + p.map(v => v.toString(16).padStart(2, '0')).join(''));
+  state.palName = 'custom'; $('pal').value = 'custom'; state.selected = 0; drawSwatches(); render();
+  say('palette distilled from the image (' + state.palette.length + ' dyes)');
+});
+
+/* ══════════ recipe save / load (determinism's proof) ══════════ */
+function download(blob, name){ const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href), 4000); }
+$('saveRecipe').addEventListener('click', () => {
+  download(new Blob([JSON.stringify(recipe(), null, 1)], { type: 'application/json' }), 'hexart-recipe-' + state.seed.toString(16) + '.json');
+  say('recipe saved — same recipe, same comb, forever');
+});
+$('loadRecipe').addEventListener('click', () => $('recipeFile').click());
+$('recipeFile').addEventListener('change', ev => {
+  const f = ev.target.files[0]; if (!f) return;
+  const fr = new FileReader();
+  fr.onload = () => {
+    try {
+      const rec = JSON.parse(fr.result);
+      if (rec.v !== 1) throw new Error('unknown recipe version');
+      state.topology = rec.topology; state.cols = rec.cols; state.rows = rec.rows;
+      state.seed = rec.seed; state.palette = rec.palette.slice(); state.palName = rec.palName || 'custom';
+      state.threshold = rec.threshold; state.detail = rec.detail; state.dither = rec.dither;
+      state.engine = rec.engine in window.HexArtEngines ? rec.engine : 'comb-field';
+      state.edits = rec.edits || {};
+      $('prompt').value = rec.prompt || ''; $('cols').value = rec.cols; $('colsV').textContent = rec.cols;
+      $('thr').value = rec.threshold; $('thrV').textContent = rec.threshold + '%';
+      $('oct').value = rec.detail; $('octV').textContent = rec.detail; $('dither').checked = rec.dither;
+      setTopoUI(rec.topology); selectSwatch(0);
+      const seed = rec.prompt ? (hashStr(rec.prompt) ^ rec.seed) >>> 0 : rec.seed;
+      state.cells = window.HexArtEngines[state.engine].generate(rec, null);
+      applyEdits(); render();
+      say('recipe regrown — ' + Object.keys(state.edits).length + ' hand edits included');
+    } catch (e) { say('recipe refused: ' + e.message); }
+  };
+  fr.readAsText(f);
+});
+
+/* ══════════ export ══════════ */
+function exportAt(scale, type, name){
+  const t = TOPO[state.topology];
+  const [W, H] = t.aspect(state.cols, state.rows, scale);
+  const off = document.createElement('canvas'); off.width = Math.round(W); off.height = Math.round(H);
+  const o = off.getContext('2d');
+  const keep = [cv.width, cv.height]; const sKeep = displayScale;
+  // render fresh at export scale (transparent background — alpha is the art's)
+  for (let r = 0; r < state.rows; r++) for (let c = 0; c < state.cols; c++) {
+    const v = state.cells[r * state.cols + c]; if (v < 0) continue;
+    const [cx, cy] = t.center(c, r, scale);
+    const poly = t.poly(cx, cy, scale, c, r);
+    o.beginPath(); o.moveTo(poly[0][0], poly[0][1]);
+    for (let k = 1; k < poly.length; k++) o.lineTo(poly[k][0], poly[k][1]);
+    o.closePath(); o.fillStyle = state.palette[v]; o.fill();
+  }
+  off.toBlob(b => { if (b) { download(b, name); say('exported ' + name + ' (' + (b.size/1024).toFixed(1) + ' kB' + (type==='image/webp'?', alpha kept':'') + ')'); } }, type);
+}
+$('expPng').addEventListener('click', () => exportAt(16, 'image/png', 'hexart-' + state.seed.toString(16) + '.png'));
+$('expWebp').addEventListener('click', () => exportAt(16, 'image/webp', 'hexart-' + state.seed.toString(16) + '.webp'));
+
+/* ══════════ controls wiring ══════════ */
+function setTopoUI(topo){ document.querySelectorAll('.seg [data-topo]').forEach(b => b.setAttribute('aria-pressed', b.dataset.topo === topo ? 'true' : 'false')); }
+document.querySelectorAll('.seg [data-topo]').forEach(b => b.addEventListener('click', () => {
+  state.topology = b.dataset.topo; setTopoUI(state.topology); regen(false);
+}));
+$('go').addEventListener('click', () => { state.engine = 'comb-field'; regen(false); });
+$('reseed').addEventListener('click', () => { state.engine = 'comb-field'; regen(true); });
+$('fromImage').addEventListener('click', () => { if (!state.imgSrc) { say('load an image first'); return; } state.engine = 'image-conv'; regen(false); });
+$('cols').addEventListener('input', e => { state.cols = +e.target.value; $('colsV').textContent = state.cols; });
+$('cols').addEventListener('change', () => regen(false));
+$('oct').addEventListener('input', e => { state.detail = +e.target.value; $('octV').textContent = state.detail; });
+$('oct').addEventListener('change', () => regen(false));
+$('thr').addEventListener('input', e => { state.threshold = +e.target.value; $('thrV').textContent = state.threshold + '%'; });
+$('thr').addEventListener('change', () => regen(false));
+$('dither').addEventListener('change', e => { state.dither = e.target.checked; regen(false); });
+$('pal').addEventListener('change', e => {
+  if (PRESETS[e.target.value]) { state.palette = PRESETS[e.target.value].slice(); state.palName = e.target.value; state.selected = 0; drawSwatches(); render(); }
+});
+document.querySelectorAll('.tool').forEach(b => b.addEventListener('click', () => {
+  state.tool = b.dataset.tool;
+  document.querySelectorAll('.tool').forEach(x => x.setAttribute('aria-pressed', x === b ? 'true' : 'false'));
+}));
+addEventListener('resize', () => render());
+
+/* first paint */
+state.selected = 3; drawSwatches(); regen(false);
+window.__hexart = state; state.recipe = recipe;   // the e2e reads its numbers here (watch.html precedent)
+</script>
+</body>
+</html>

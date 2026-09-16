@@ -253,6 +253,13 @@
       "i18n": "s.university-index"
     },
     {
+      "file": "hexart.html",
+      "domain": "nature",
+      "name": "the hive’s visual fingerprint — hex-native generative art",
+      "state": "working",
+      "i18n": "s.hexart"
+    },
+    {
       "file": "bantfarm.html",
       "domain": "biomass",
       "name": "two treasuries and the node farm, live",

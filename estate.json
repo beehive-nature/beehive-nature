@@ -1299,18 +1299,28 @@
    "presented": false,
    "org": "skaists",
    "label": "SKAISTS mUsiC (old address)"
+  },
+  {
+   "id": "hexart",
+   "family": "beehivenature",
+   "home": "beehivenature.buzz",
+   "path": "surfaces/hexart.html",
+   "state": "LIVE",
+   "gloss": "hex-native generative art — the hive’s visual fingerprint",
+   "org": "beehive-nature",
+   "label": "hexart"
   }
  ],
  "counts": {
-  "surfaces": 95,
-  "listed": 104,
+  "surfaces": 96,
+  "listed": 105,
   "families": 8,
   "domains": 26,
   "domainsLive": 4,
   "domainsPending": 17,
   "domainsSeatOpen": 5,
   "byFamily": {
-   "beehivenature": 40,
+   "beehivenature": 41,
    "plur": 7,
    "skaists": 19,
    "bnature": 18,
@@ -1320,10 +1330,10 @@
    "bnr": 1
   },
   "byState": {
-   "LIVE": 104
+   "LIVE": 105
   },
   "byOrg": {
-   "beehive-nature": 57,
+   "beehive-nature": 58,
    "skaists": 33,
    "beehive-biomass": 5
   }
