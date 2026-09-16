@@ -944,3 +944,57 @@ model PAUSES — a builder consumes MP/RB/AB/RV/DG against the actual signed aut
 journal types before any further authority specification, or the spec outruns the
 implementation. Single-writer discipline stands. Pipeline law unchanged: builder proves RED,
 fixes GREEN, CI arbitrates; zArcheology designs tests only.*
+
+---
+
+## IMPLEMENTATION FEEDBACK @ 69c55be6 — MP/RB/AB reconciled against the implementation (2026-09-16; the promised return-trigger pass)
+
+*Method: source-read of `crates/bpay-rail/src/capability.rs` + `tests/capability_binding.rs` at
+`69c55be6` (9 named `#[test]` attacks + positive control — count verified in source), CI receipt
+run `35158917693` (tests, success, 6m07s, branch `codex/z2b-bpay-rail`). Classifications per
+founder taxonomy: CONFIRMED / WRONG / UNDERSPECIFIED / IMPLEMENTATION-CHOICE.*
+
+| inspected assumption | verdict | evidence |
+|---|---|---|
+| canonical manifest serialization + domain separation | **UNDERSPECIFIED — genuine gap, amend before RV** (F1 below) | `SignedAuthorization::canonical_bytes` = `auth_id ‖ per-leg (leg_id ‖ 0x00 ‖ manifest_hash ‖ 0x00 ‖ manifest_version ‖ 0x00 ‖ implementation_id)` — NO type/domain tag, and the SAME k256 BIP-340 key path signs nostr events for the NWC adapter |
+| canonical-form uniqueness (AB-7) | **UNDERSPECIFIED — genuine gap, amend before RV** (F2 below) | NUL-separator concatenation with NO length prefixes: fields containing 0x00 bytes can collide (leg_id/hash/version/impl are unconstrained Strings) — two DISTINCT bindings can serialize to IDENTICAL bytes |
+| content-hash vs version semantics | **CONFIRMED** | `content_hash() = keccak256(canonical_bytes)`; version explicitly "metadata — informational only" (capability.rs:142-145,163) |
+| implementation identity inside the signed commitment | **CONFIRMED** | `implementation_id` in BOTH the hashed manifest and the signed `LegBinding` (double-covered) |
+| per-leg, not plan-global, bindings | **CONFIRMED** | each leg binds its own manifest; attacks 3/8 green |
+| durable snapshot requirements | **CONFIRMED** | `JournalAuthRecord` preserves bindings + manifest snapshots; `bound_manifest()` resolves per-leg (capability.rs:318) |
+| evidence evaluated under the HISTORICAL bound manifest | **CONFIRMED** | `validate_evidence_under_binding()` (capability.rs:345); attacks 4/5 green (RB-2 named) |
+| replacement preserving the original binding | **CONFIRMED** | attack 7 green |
+| legitimate mixed-version plans | **CONFIRMED** | attack 8 green — mixed h1/h2 coexist, cross-verification fails |
+| crash/restart without consulting the live manifest | **CONFIRMED** | attack 6 — recovered binding byte-equal under drifted live manifest |
+| manifest axes set | **IMPLEMENTATION-CHOICE** (consistent with spec lineage) | axes = schema_version, rail, implementation_id, payment Exact/Upto, hold_mpp, replacement, response_read, finality InstantPreimage/ReorgDepth(N), failure_fees, send_enabled — CD's six axes + the sixth roll's response_read/send_enabled + LU-5's hold_mpp, as named enums |
+| signer = the NWC adapter's k256 BIP-340 path | **IMPLEMENTATION-CHOICE** (satisfies "no bespoke verifier") — but it is WHY F1 is urgent | same machinery as nostr event signing |
+| signed-object scope | **UNDERSPECIFIED for DG** (not needed by MP/RB/AB; required by DG) | the preimage carries capability IDENTITY only — no amounts/ceilings, no expiry, no destinations, no privacy floor |
+
+**F1 — domain tag amendment (AB-0/AB-7):** a stable type/domain tag belongs INSIDE the signed
+preimage before any further signed object types arrive: e.g. the fixed prefix
+`"bpay/authz/v1"` (and later `"bpay/revocation/v1"`, `"bpay/delegation/v1"`), so a capability
+authorization can never verify as — or be constructed from — a nostr event or any other estate
+signed object with compatible fields. Schema evolution rides the tag version, per Art. VI.
+
+**F2 — canonical encoding amendment (AB-7):** replace bare NUL-separator concatenation with
+length-prefixed fields (or constrain alphabets and enforce at construction) so distinct
+bindings cannot serialize identically; pin with cross-implementation vectors per the corpus
+fixture law.
+
+### RV/DG READINESS VERDICT
+
+- **RV: READY — after F1+F2 land (small, prelude-sized).** The concrete revocable types exist:
+  `SignedAuthorization {auth_id, leg_bindings, signature, signer_pubkey}` (the revocation event
+  binds `auth_id`, append-only), `JournalAuthRecord` (snapshots preserved, never synthesized),
+  and the `RailLedger` state machine (Unknown/Settling laws already R11-pinned). RV needs NO
+  new signed fields.
+- **DG: NOT READY.** DG-1's intersection needs a SIGNED PARENT SCOPE — child ceiling, expiry,
+  destinations, privacy floor must be inside the parent's signed bytes before any child can be
+  their intersection. Today's preimage carries capability identity only; DG would intersect
+  nothing. Builder order: F1+F2 → RV + full restart/recovery battery → scope-field extension →
+  DG + full ancestry/intersection battery → the lifecycle trace
+  (H1 signed → child reserved → UNKNOWN → parent revoked → evidence resolves the qualified
+  child → future refused → restart → identical history).
+
+*Feedback pass, 2026-09-16. Amendment-only as ordered — no new authority family. The freeze
+holds after this section; the builder consumes the verdict.*
