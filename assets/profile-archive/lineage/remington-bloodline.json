@@ -190876,6 +190876,7 @@
  },
  "meta": {
   "generated": "2026-09-16",
+  "retrieved": "2026-09-16T17:59:16.202Z",
   "source": "FamilySearch Family Tree, walked under the founder's signed-in session (fs-adapter)",
   "stats": {
    "personsWalked": 18575,
@@ -190890,10 +190891,31 @@
   "confidenceTiers": "era heuristic (recorded ≥1850 · colonial 1550–1850 · medieval 1000–1550 · saga <1000); basis says era-heuristic until per-person source counts are harvested",
   "claimPolicy": "every person carries its evidence class; the spine past the colonial era is traditional, not proven",
   "packs": {
+   "KWJ4-XBD": "evidence/albert-perry-rockwood.json",
    "M8WZ-XZY": "evidence/ragnar-lodbrok.json",
    "ovl-sigurd-snake-eye": "evidence/sigurd-snake-in-eye.json",
    "ovl-blaeja-of-northumbria": "evidence/sigurd-snake-in-eye.json",
    "ovl-harthacnut-i": "evidence/sigurd-snake-in-eye.json"
+  },
+  "reconciliation": {
+   "rawPersons": 18575,
+   "published": 10259,
+   "excluded": {
+    "living, off the root line — privacy": {
+     "count": 2
+    },
+    "off-bloodline ancestry (in-law lines beyond the first spouse of a bloodline person) — scope: the house line is ancestry, in-law deep ancestry stays private-side": {
+     "count": 8314
+    }
+   },
+   "pseudonymizedStubs": 3,
+   "retainedPrivatelyNote": "ALL persons, including living and off-line, are retained at full fidelity in the private raw walk JSON and GEDCOM exports on the estate's local disk (never committed); the public corpus publishes the bloodline + first spouses + attested overlays only.",
+   "named": {
+    "KWCL-VNB Donna Ruth Lawton": "published · spine row 2 (the Lawton canon)",
+    "LNQ5-BSF Marilyn Lowry": "published · founder-corrected living flag",
+    "LNQ5-BSG Don Ray Remington": "published · founder-corrected living flag",
+    "KWJ4-XBD Albert Perry Rockwood": "published · the public entrance person"
+   }
   },
   "correctionsApplied": 2,
   "overlayPersons": 3

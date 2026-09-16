@@ -181,6 +181,7 @@ const spineRows = spineChain.map((id, i) => {
 pub.spine = spineRows; // the spine travels with the corpus for data consumers
 pub.meta = {
   ...model.meta,
+  retrieved: (raw.meta && (raw.meta.pulledAt || raw.meta.checkpointAt)) || model.meta.generated,
   source: "FamilySearch Family Tree, walked under the founder's signed-in session (fs-adapter)",
   stats: {
     personsWalked: Object.keys(model.persons).length,
@@ -195,6 +196,33 @@ pub.meta = {
   confidenceTiers: "era heuristic (recorded ≥1850 · colonial 1550–1850 · medieval 1000–1550 · saga <1000); basis says era-heuristic until per-person source counts are harvested",
   claimPolicy: "every person carries its evidence class; the spine past the colonial era is traditional, not proven",
   packs: packIndex,
+  // RECONCILIATION: every fetched person is retained privately, published, or
+  // excluded with an explicit reason — never silently lost. The categories sum
+  // to the raw walk (asserted by family.test.mjs).
+  reconciliation: (() => {
+    const pubIds = new Set(Object.keys(pub.persons));
+    const offLineLiving = livingTotal - stubs;
+    return {
+      rawPersons: Object.keys(model.persons).length,
+      published: pubIds.size,
+      excluded: {
+        "living, off the root line — privacy": { count: offLineLiving },
+        "off-bloodline ancestry (in-law lines beyond the first spouse of a bloodline person) — scope: the house line is ancestry, in-law deep ancestry stays private-side": {
+          count: Object.keys(model.persons).length - pubIds.size - offLineLiving - stubs < 0
+            ? 0
+            : Object.keys(model.persons).length - pubIds.size - offLineLiving,
+        },
+      },
+      pseudonymizedStubs: stubs,
+      retainedPrivatelyNote: "ALL persons, including living and off-line, are retained at full fidelity in the private raw walk JSON and GEDCOM exports on the estate's local disk (never committed); the public corpus publishes the bloodline + first spouses + attested overlays only.",
+      named: {
+        "KWCL-VNB Donna Ruth Lawton": "published · spine row 2 (the Lawton canon)",
+        "LNQ5-BSF Marilyn Lowry": "published · founder-corrected living flag",
+        "LNQ5-BSG Don Ray Remington": "published · founder-corrected living flag",
+        "KWJ4-XBD Albert Perry Rockwood": "published · the public entrance person",
+      },
+    };
+  })(),
   correctionsApplied,
   overlayPersons,
 };

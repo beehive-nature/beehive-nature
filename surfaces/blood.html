@@ -23,6 +23,24 @@ h1{font-size:clamp(22px,4.5vw,34px);line-height:1.15;margin:8px 0 6px;font-weigh
 .lede{color:var(--dim);font-size:12px;max-width:80ch;line-height:1.9}
 .statsbar{margin-top:12px;font-size:.78rem;color:var(--gold);letter-spacing:.02em}
 .controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:14px}
+.viewswitch{display:inline-flex;border:1px solid var(--line);border-radius:9px;overflow:hidden}
+.viewswitch button{border:0;border-radius:0;min-height:40px}
+.viewswitch button[aria-pressed="true"]{background:var(--gold);color:#152016;font-weight:650}
+.entrance{margin-top:12px;display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px}
+.entrance a{display:block;text-decoration:none;background:var(--well);border:1px solid var(--line);border-radius:10px;
+ padding:10px 12px;color:var(--ink);font-size:11px;cursor:pointer}
+.entrance a:hover{border-color:var(--gold)}
+.entrance a b{display:block;color:var(--gold);font-size:10px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:3px}
+.entrance a span{color:var(--dim);line-height:1.6;font-size:10.5px}
+#treeview{margin-top:8px;display:none;padding:6px 10px}
+#treeview ul{list-style:none;padding-left:18px;border-left:1px dashed var(--line)}
+#treeview>ul{border-left:0;padding-left:0}
+#treeview li{margin:3px 0}
+#treeview button{background:none;border:0;color:var(--ink);cursor:pointer;font:11.5px 'IBM Plex Mono',monospace;padding:1px 4px;text-align:left}
+#treeview button .yrs{color:var(--dim)} #treeview button .era{font-size:9px;padding:0 5px;border-radius:99px;border:1px solid var(--line)}
+#treeview details>summary{cursor:pointer;list-style:none}
+#treeview details>summary::before{content:"▸ ";color:var(--faint)}
+#treeview details[open]>summary::before{content:"▾ "}
 .controls input{flex:1;min-width:180px;max-width:340px;background:var(--well);border:1px solid var(--line);
  border-radius:8px;color:var(--ink);font:12.5px 'IBM Plex Mono',monospace;padding:9px 12px;min-height:40px}
 .controls input:focus{outline:none;border-color:var(--cyan)}
@@ -112,8 +130,18 @@ footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint
 
 <div class="controls">
   <input id="q" type="text" spellcheck="false" autocomplete="off" placeholder="search ten thousand ancestors — name or FamilySearch id">
+  <div class="viewswitch" role="group" aria-label="view">
+    <button id="viewfan" type="button" aria-pressed="true">fan</button>
+    <button id="viewtree" type="button" aria-pressed="false">tree</button>
+  </div>
   <button id="spinebtn" type="button" aria-pressed="false" data-i18n="blood.spine">highlight the spine</button>
   <button id="resetbtn" type="button" data-i18n="blood.reset">back to the founder</button>
+</div>
+<div class="entrance" id="entrance">
+  <a data-ent="family"><b>family</b><span>the founder's house — living redacted, the personal entrance stays on the profile page</span></a>
+  <a data-ent="documents"><b>documents</b><span>evidence packs — the tradition read at source, claims cited</span></a>
+  <a data-ent="places"><b>places</b><span>where the lines ran — place index lane (marriages carry the first places)</span></a>
+  <a data-ent="older"><b>older generations</b><span>the deep lines — discoverable, never compulsory</span></a>
 </div>
 <div class="searchout" id="qout"></div>
 <div class="lenses" id="lenses">
@@ -128,6 +156,7 @@ footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint
   <svg id="comb" viewBox="0 0 1080 560" role="application" aria-label="fractal hexagonal fan chart — zoom, pan, click cells; list view below">
     <g id="world"></g>
   </svg>
+  <div id="treeview" aria-label="ancestor tree view"></div>
   <div class="zoombar">
     <button id="zin" type="button" aria-label="zoom in">+</button>
     <button id="zout" type="button" aria-label="zoom out">−</button>
@@ -165,11 +194,13 @@ footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint
 
   var S={persons:{},edges:{},children:{},spineIds:new Set(),root:null,curRoot:null,spineOn:false,stats:{},
     packs:{},packData:{},relEvidence:{},testimony:[],recon:null,lenses:{records:true,tradition:true,testimony:true,spiritual:true},
-    trail:[],staged:[]};
+    trail:[],staged:[],viewMode:"fan",retrieved:null};
+  var OPEN_ROOT="KWJ4-XBD"; // the public entrance person — Albert Perry Rockwood
   function addChild(p,c){(S.children[p]=S.children[p]||[]).push(c);}
   fetch(CORPUS_URL).then(r=>r.json()).then(c=>{
     S.persons=c.persons||{};S.edges=c.edges||{};S.root=c.root;S.curRoot=c.root;
     S.stats=(c.meta&&c.meta.stats)||{};
+    S.corpusMeta=c.meta||{};
     S.packs=Object.assign({},(c.meta&&c.meta.packs)||{});
     (c.spine||[]).forEach(r=>{if(r.f)S.spineIds.add(r.f);});
     for(var e in S.edges)S.edges[e].forEach(p=>addChild(p,e));
@@ -189,7 +220,13 @@ footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint
     }).catch(function(){});}).concat([
       fetch(RECON_URL).then(function(r){return r.json();}).then(function(j){S.recon=j;}).catch(function(){})
     ]));
-  }).then(function(){renderDyn();drawComb();showRootNote();renderList();})
+  }).then(function(){
+    S.retrieved=(S.corpusMeta&&S.corpusMeta.retrieved)||null;
+    renderDyn();
+    // public entrance: Albert Perry Rockwood when present, else the founder
+    S.curRoot=S.persons[OPEN_ROOT]?OPEN_ROOT:S.root;
+    drawComb();showRootNote();renderTrail();renderList();
+  })
   .catch(()=>{document.getElementById('stats').textContent='could not load the corpus';});
 
   // ── reconstruction: which parent-edge does the current view assert? ─────
@@ -384,7 +421,8 @@ footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint
     if(!noTrail&&S.curRoot&&S.curRoot!==id)S.trail.push(S.curRoot);
     if(S.trail.length>12)S.trail.shift();
     S.curRoot=id;drawComb();showRootNote();renderTrail();
-    view.s=Math.max(view.s,0.9);centerOn(0,0,false,view.s); // animated re-center on the new root
+    if(S.viewMode==='tree')renderTree();
+    else{view.s=Math.max(view.s,0.9);centerOn(0,0,false,view.s);} // animated re-center on the new root
   }
   function renderList(){
     var body=document.getElementById('listbody');if(!body)return;body.innerHTML='';
@@ -514,6 +552,11 @@ footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint
       +'<div class="dchips">'+chips+'</div>'+rels+layersHtml(id,p)
       +'<div class="drels"><div class="lab">'+esc(langText('blood.bnr','bnr blood address'))+'</div>'
       +'<div style="color:var(--cyan);font-size:10.5px;word-break:break-all">bnr://skaists.dev/blood/'+esc(id)+'</div></div>'
+      +(!p.living&&/^[A-Z0-9]{4}-[A-Z0-9]{3,4}$/.test(id)
+        ?'<div class="drels"><div class="lab">'+esc(langText('blood.fsrec','source record'))+'</div>'
+        +'<div><a href="https://www.familysearch.org/tree/person/details/'+esc(id)+'" target="_blank" rel="noopener">FamilySearch record '+esc(id)+' ↗</a>'
+        +(S.retrieved?' <span style="color:var(--faint)">· retrieved '+esc(S.retrieved)+'</span>':'')+'</div></div>'
+        :'')
       +'<div class="dactions"><button id="reroot" data-i18n="blood.reroot">re-root the comb here</button>'
       +(S.packs[id]?'<a class="ghost" style="text-decoration:none;padding:8px 14px;border:1px solid var(--line);border-radius:8px;color:var(--cyan)" href="../assets/profile-archive/lineage/'+esc(S.packs[id])+'">'+esc(langText('blood.pack','open the evidence pack'))+'</a>':'')
       +'</div>';
@@ -527,6 +570,48 @@ footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint
     S.spineOn=!S.spineOn;this.setAttribute('aria-pressed',String(S.spineOn));drawComb();});
   document.getElementById('resetbtn').addEventListener('click',function(){
     S.trail=[];setRoot(S.root,true);showDetail(S.root);});
+  // ── view switch: fan ↔ tree, both fully interactive ─────────────────────
+  function setView(mode){
+    S.viewMode=mode;
+    document.getElementById('viewfan').setAttribute('aria-pressed',String(mode==='fan'));
+    document.getElementById('viewtree').setAttribute('aria-pressed',String(mode==='tree'));
+    document.getElementById('comb').style.display=mode==='fan'?'block':'none';
+    document.querySelector('.zoombar').style.display=mode==='fan'?'grid':'none';
+    document.getElementById('treeview').style.display=mode==='tree'?'block':'none';
+    if(mode==='tree')renderTree();
+  }
+  document.getElementById('viewfan').addEventListener('click',function(){setView('fan');});
+  document.getElementById('viewtree').addEventListener('click',function(){setView('tree');});
+  function renderTree(){
+    var host=document.getElementById('treeview');host.innerHTML='';
+    var build=function(id,depth){
+      var li=document.createElement('li'),p=S.persons[id];
+      if(!p)return li;
+      var b=document.createElement('button');
+      b.innerHTML=esc(p.name||id)+' <span class="yrs">'+esc(p.lifespan||'')+'</span> '+
+        '<span class="era" style="color:'+TIER_COLOR[p.evidence&&p.evidence.class||'unrecorded']+'">'+esc(p.evidence?p.evidence.class:'?')+'</span>';
+      b.addEventListener('click',function(){showDetail(id);});
+      var ps=(S.edges[id]||[]).filter(function(x){return S.persons[x]&&edgeVisible(id,x);});
+      if(!ps.length||depth>=6){li.appendChild(b);return li;}
+      var det=document.createElement('details');if(depth<3)det.open=true;
+      var sum=document.createElement('summary');sum.appendChild(b);det.appendChild(sum);
+      var ul=document.createElement('ul');
+      ps.forEach(function(x){ul.appendChild(build(x,depth+1));});
+      det.appendChild(ul);li.appendChild(det);return li;
+    };
+    var ul=document.createElement('ul');ul.appendChild(build(S.curRoot,0));host.appendChild(ul);
+  }
+  // ── entrance paths: visitors choose their own way in ────────────────────
+  document.getElementById('entrance').addEventListener('click',function(e){
+    var a=e.target.closest('[data-ent]');if(!a)return;
+    var ent=a.getAttribute('data-ent');
+    if(ent==='family'){S.trail=[];setRoot(S.root,true);showDetail(S.root);}
+    else if(ent==='older'){setRoot(S.persons['M8WZ-XZY']?'M8WZ-XZY':S.root,true);showDetail('M8WZ-XZY');}
+    else if(ent==='documents'){document.getElementById('detail').scrollIntoView({behavior:'smooth'});
+      var q=document.getElementById('q');q.value='Rockwood';q.dispatchEvent(new Event('input',{bubbles:true}));}
+    else if(ent==='places'){var q2=document.getElementById('q');q2.value='Rockwood';q2.dispatchEvent(new Event('input',{bubbles:true}));
+      document.getElementById('qout').scrollIntoView({behavior:'smooth'});}
+  });
   document.getElementById('lenses').addEventListener('change',function(e){
     var l=e.target.getAttribute('data-lens');if(l)S.lenses[l]=e.target.checked;
     if(S.curRoot&&S.persons[S.curRoot])showDetail(S.curRoot);});
