@@ -1,0 +1,17 @@
+{"ts":"2026-09-16T06:27:30.569Z","key_id":"test-key-1","path":"/v1/chat/completions","verdict":200,"phase":"upstream-status","ms":8}
+{"ts":"2026-09-16T06:27:33.073Z","key_id":"test-key-1","path":"/v1/chat/completions","verdict":200,"phase":"complete","ms":2511,"queue_ms":0}
+{"ts":"2026-09-16T06:27:35.343Z","key_id":"test-key-1","path":"/v1/chat/completions","verdict":200,"phase":"upstream-status","ms":7}
+{"ts":"2026-09-16T06:27:37.347Z","key_id":"test-key-1","path":"/v1/chat/completions","verdict":504,"phase":"stream-idle-cut","ms":2011,"queue_ms":0}
+{"ts":"2026-09-16T06:27:39.615Z","key_id":"test-key-1","path":"/v1/chat/completions","verdict":503,"phase":"not-ready"}
+{"ts":"2026-09-16T06:27:44.902Z","key_id":"test-key-1","path":"/v1/chat/completions","verdict":504,"phase":"header-timeout","ms":3003,"queue_ms":0}
+{"ts":"2026-09-16T06:27:47.175Z","key_id":"test-key-1","path":"/v1/chat/completions","verdict":200,"phase":"upstream-status","ms":7}
+{"ts":"2026-09-16T06:27:48.760Z","key_id":"test-key-1","path":"/v1/chat/completions","verdict":503,"phase":"queue-full"}
+{"ts":"2026-09-16T06:27:48.774Z","key_id":"test-key-1","path":"/v1/chat/completions","verdict":"client-departed","phase":"res-close","ms":1605,"queue_ms":0}
+{"ts":"2026-09-16T06:27:48.778Z","key_id":"test-key-1","path":"/v1/chat/completions","verdict":200,"phase":"upstream-status","ms":3}
+{"ts":"2026-09-16T06:27:51.043Z","key_id":"test-key-1","path":"/v1/chat/completions","verdict":200,"phase":"upstream-status","ms":6}
+{"ts":"2026-09-16T06:27:52.524Z","key_id":"test-key-1","path":"/v1/chat/completions","verdict":"client-departed","phase":"res-close","ms":1487,"queue_ms":0}
+{"ts":"2026-09-16T06:27:52.536Z","key_id":"test-key-1","path":"/v1/chat/completions","verdict":200,"phase":"upstream-status","ms":2}
+{"ts":"2026-09-16T06:27:54.538Z","key_id":"test-key-1","path":"/v1/chat/completions","verdict":504,"phase":"stream-idle-cut","ms":2004,"queue_ms":0}
+{"ts":"2026-09-16T06:28:02.805Z","key_id":"test-key-1","path":"/v1/chat/completions","verdict":503,"phase":"not-ready"}
+{"ts":"2026-09-16T06:28:06.946Z","key_id":"test-key-1","path":"/v1/chat/completions","verdict":200,"phase":"upstream-status","ms":5}
+{"ts":"2026-09-16T06:28:09.449Z","key_id":"test-key-1","path":"/v1/chat/completions","verdict":200,"phase":"complete","ms":2508,"queue_ms":0}

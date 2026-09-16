@@ -1,0 +1,120 @@
+2026-09-16T06:24:35.327Z normal listening :8098 normal
+2026-09-16T06:24:36.511Z normal conn open
+2026-09-16T06:24:36.512Z normal req GET /slots
+2026-09-16T06:24:36.519Z normal conn open
+2026-09-16T06:24:36.521Z normal req POST /v1/chat/completions
+2026-09-16T06:24:39.527Z normal POST finished naturally
+2026-09-16T06:24:39.527Z normal response socket closed EARLY
+2026-09-16T06:24:39.555Z normal conn CLOSED (natural or gate let go)
+2026-09-16T06:24:39.555Z normal conn CLOSED (natural or gate let go)
+2026-09-16T06:24:40.603Z slowchunks listening :8098 slowchunks
+2026-09-16T06:24:41.787Z slowchunks conn open
+2026-09-16T06:24:41.788Z slowchunks req GET /slots
+2026-09-16T06:24:41.792Z slowchunks conn open
+2026-09-16T06:24:41.795Z slowchunks req POST /v1/chat/completions
+2026-09-16T06:24:44.795Z slowchunks conn CLOSED (natural or gate let go)
+2026-09-16T06:24:44.795Z slowchunks response socket closed EARLY
+2026-09-16T06:24:44.828Z slowchunks conn CLOSED (natural or gate let go)
+2026-09-16T06:24:45.880Z wedgeslots listening :8098 wedgeslots
+2026-09-16T06:24:47.064Z wedgeslots conn open
+2026-09-16T06:24:47.065Z wedgeslots req GET /slots
+2026-09-16T06:24:47.110Z wedgeslots conn CLOSED (natural or gate let go)
+2026-09-16T06:24:48.156Z headerhang listening :8098 headerhang
+2026-09-16T06:24:49.343Z headerhang conn open
+2026-09-16T06:24:49.344Z headerhang req GET /slots
+2026-09-16T06:24:49.349Z headerhang conn open
+2026-09-16T06:24:49.352Z headerhang req POST /v1/chat/completions
+2026-09-16T06:24:49.352Z headerhang HANGING-POST /v1/chat/completions
+2026-09-16T06:24:52.352Z headerhang conn CLOSED (natural or gate let go)
+2026-09-16T06:24:52.383Z headerhang conn CLOSED (natural or gate let go)
+2026-09-16T06:24:53.432Z slowchunks listening :8098 slowchunks
+2026-09-16T06:24:54.615Z slowchunks conn open
+2026-09-16T06:24:54.616Z slowchunks req GET /slots
+2026-09-16T06:24:54.621Z slowchunks conn open
+2026-09-16T06:24:54.625Z slowchunks req POST /v1/chat/completions
+2026-09-16T06:24:56.238Z slowchunks conn CLOSED (natural or gate let go)
+2026-09-16T06:24:56.238Z slowchunks conn CLOSED (natural or gate let go)
+2026-09-16T06:24:56.238Z slowchunks response socket closed EARLY
+2026-09-16T06:24:57.289Z slowchunks listening :8098 slowchunks
+2026-09-16T06:24:58.471Z slowchunks conn open
+2026-09-16T06:24:58.473Z slowchunks req GET /slots
+2026-09-16T06:24:58.479Z slowchunks conn open
+2026-09-16T06:24:58.482Z slowchunks req POST /v1/chat/completions
+2026-09-16T06:25:01.480Z slowchunks conn CLOSED (natural or gate let go)
+2026-09-16T06:25:01.480Z slowchunks response socket closed EARLY
+2026-09-16T06:25:01.480Z slowchunks req POST /v1/chat/completions
+2026-09-16T06:25:04.482Z slowchunks conn CLOSED (natural or gate let go)
+2026-09-16T06:25:04.482Z slowchunks response socket closed EARLY
+2026-09-16T06:25:10.569Z wedgeslots listening :8098 wedgeslots
+2026-09-16T06:25:11.756Z wedgeslots conn open
+2026-09-16T06:25:11.757Z wedgeslots req GET /slots
+2026-09-16T06:25:12.320Z normal listening :8098 normal
+2026-09-16T06:25:15.898Z normal conn open
+2026-09-16T06:25:15.900Z normal req GET /slots
+2026-09-16T06:25:15.904Z normal conn open
+2026-09-16T06:25:15.905Z normal req POST /v1/chat/completions
+2026-09-16T06:25:18.912Z normal POST finished naturally
+2026-09-16T06:25:18.912Z normal response socket closed EARLY
+2026-09-16T06:25:18.937Z normal conn CLOSED (natural or gate let go)
+2026-09-16T06:25:18.937Z normal conn CLOSED (natural or gate let go)
+2026-09-16T06:27:29.379Z normal listening :8098 normal
+2026-09-16T06:27:30.558Z normal conn open
+2026-09-16T06:27:30.559Z normal req GET /slots
+2026-09-16T06:27:30.565Z normal conn open
+2026-09-16T06:27:30.567Z normal req POST /v1/chat/completions
+2026-09-16T06:27:33.072Z normal POST finished naturally
+2026-09-16T06:27:33.072Z normal response socket closed EARLY
+2026-09-16T06:27:33.101Z normal conn CLOSED (natural or gate let go)
+2026-09-16T06:27:33.101Z normal conn CLOSED (natural or gate let go)
+2026-09-16T06:27:34.145Z slowchunks listening :8098 slowchunks
+2026-09-16T06:27:35.333Z slowchunks conn open
+2026-09-16T06:27:35.334Z slowchunks req GET /slots
+2026-09-16T06:27:35.338Z slowchunks conn open
+2026-09-16T06:27:35.341Z slowchunks req POST /v1/chat/completions
+2026-09-16T06:27:37.349Z slowchunks conn CLOSED (natural or gate let go)
+2026-09-16T06:27:37.349Z slowchunks response socket closed EARLY
+2026-09-16T06:27:37.377Z slowchunks conn CLOSED (natural or gate let go)
+2026-09-16T06:27:38.426Z wedgeslots listening :8098 wedgeslots
+2026-09-16T06:27:39.612Z wedgeslots conn open
+2026-09-16T06:27:39.614Z wedgeslots req GET /slots
+2026-09-16T06:27:39.661Z wedgeslots conn CLOSED (natural or gate let go)
+2026-09-16T06:27:40.712Z headerhang listening :8098 headerhang
+2026-09-16T06:27:41.895Z headerhang conn open
+2026-09-16T06:27:41.897Z headerhang req GET /slots
+2026-09-16T06:27:41.901Z headerhang conn open
+2026-09-16T06:27:41.904Z headerhang req POST /v1/chat/completions
+2026-09-16T06:27:41.904Z headerhang HANGING-POST /v1/chat/completions
+2026-09-16T06:27:44.905Z headerhang conn CLOSED (natural or gate let go)
+2026-09-16T06:27:44.932Z headerhang conn CLOSED (natural or gate let go)
+2026-09-16T06:27:45.986Z slowchunks listening :8098 slowchunks
+2026-09-16T06:27:47.166Z slowchunks conn open
+2026-09-16T06:27:47.167Z slowchunks req GET /slots
+2026-09-16T06:27:47.171Z slowchunks conn open
+2026-09-16T06:27:47.174Z slowchunks req POST /v1/chat/completions
+2026-09-16T06:27:48.777Z slowchunks req POST /v1/chat/completions
+2026-09-16T06:27:48.799Z slowchunks conn CLOSED (natural or gate let go)
+2026-09-16T06:27:48.800Z slowchunks response socket closed EARLY
+2026-09-16T06:27:48.800Z slowchunks conn CLOSED (natural or gate let go)
+2026-09-16T06:27:48.800Z slowchunks response socket closed EARLY
+2026-09-16T06:27:49.843Z slowchunks listening :8098 slowchunks
+2026-09-16T06:27:51.032Z slowchunks conn open
+2026-09-16T06:27:51.034Z slowchunks req GET /slots
+2026-09-16T06:27:51.039Z slowchunks conn open
+2026-09-16T06:27:51.042Z slowchunks req POST /v1/chat/completions
+2026-09-16T06:27:52.535Z slowchunks req POST /v1/chat/completions
+2026-09-16T06:27:54.540Z slowchunks conn CLOSED (natural or gate let go)
+2026-09-16T06:27:54.540Z slowchunks response socket closed EARLY
+2026-09-16T06:28:00.565Z slowchunks conn CLOSED (natural or gate let go)
+2026-09-16T06:28:00.565Z slowchunks response socket closed EARLY
+2026-09-16T06:28:01.620Z wedgeslots listening :8098 wedgeslots
+2026-09-16T06:28:02.800Z wedgeslots conn open
+2026-09-16T06:28:02.803Z wedgeslots req GET /slots
+2026-09-16T06:28:03.357Z normal listening :8098 normal
+2026-09-16T06:28:06.937Z normal conn open
+2026-09-16T06:28:06.939Z normal req GET /slots
+2026-09-16T06:28:06.943Z normal conn open
+2026-09-16T06:28:06.944Z normal req POST /v1/chat/completions
+2026-09-16T06:28:09.449Z normal POST finished naturally
+2026-09-16T06:28:09.449Z normal response socket closed EARLY
+2026-09-16T06:28:09.474Z normal conn CLOSED (natural or gate let go)
+2026-09-16T06:28:09.474Z normal conn CLOSED (natural or gate let go)

@@ -1,0 +1,38 @@
+06:24:35Z === P-A+P-B bounded-gate battery (header=3s idle=2s perkey=1 queue=1 readyTTL=2.5s) ===
+06:24:39Z PASS S1 normal generation: full stream delivered
+06:24:39Z PASS S1 verdict complete
+06:24:44Z PASS S2 slow generation: stream CUT (no DONE)
+06:24:44Z FAIL S2 no idle-cut verdict
+06:24:44Z PASS S2 upstream stream destroyed on idle cut
+06:24:47Z PASS S3 wedged /slots: generation refused 503 before proxying
+06:24:47Z PASS S3 verdict not-ready
+06:24:47Z PASS S3 keyless /readiness = 503 (monitors see the truth, no 401)
+06:24:47Z PASS S3 upstream never saw the refused generation
+06:24:52Z PASS S4 wedged generation: 504 after 3026ms (was: infinite hold)
+06:24:52Z PASS S4 bounded within header timeout
+06:24:52Z PASS S4 verdict header-timeout
+06:24:56Z PASS S5 queue saturation: third request refused 503 (was: infinite queue)
+06:24:56Z PASS S5 verdict queue-full
+06:24:59Z FAIL S6 no client-departed verdict
+06:25:04Z FAIL S6 next request waited 4516ms (slot not released)
+06:25:18Z PASS S7 recovery: 503 during wedge → 200 after heal + cache expiry (no gate restart needed)
+06:25:19Z === battery end FAILED=1 ===
+06:27:29Z === P-A+P-B bounded-gate battery (header=3s idle=2s perkey=1 queue=1 readyTTL=2.5s) ===
+06:27:33Z PASS S1 normal generation: full stream delivered
+06:27:33Z PASS S1 verdict complete
+06:27:37Z PASS S2 slow generation: stream CUT (no DONE)
+06:27:37Z PASS S2 verdict stream-idle-cut
+06:27:37Z PASS S2 upstream stream destroyed on idle cut
+06:27:39Z PASS S3 wedged /slots: generation refused 503 before proxying
+06:27:39Z PASS S3 verdict not-ready
+06:27:39Z PASS S3 keyless /readiness = 503 (monitors see the truth, no 401)
+06:27:39Z PASS S3 upstream never saw the refused generation
+06:27:44Z PASS S4 wedged generation: 504 after 3026ms (was: infinite hold)
+06:27:44Z PASS S4 bounded within header timeout
+06:27:44Z PASS S4 verdict header-timeout
+06:27:48Z PASS S5 queue saturation: third request refused 503 (was: infinite queue)
+06:27:48Z PASS S5 verdict queue-full
+06:27:52Z PASS S6 client departure logged (verdict client-departed)
+06:27:54Z PASS S6 recovery: next request admitted immediately (ttfb=0.003719s — slot was released)
+06:28:09Z PASS S7 recovery: 503 during wedge → 200 after heal + cache expiry (no gate restart needed)
+06:28:10Z === battery end FAILED=0 ===
