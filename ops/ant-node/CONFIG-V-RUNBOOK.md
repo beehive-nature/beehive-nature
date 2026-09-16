@@ -78,3 +78,84 @@ line in one step either way.
 With the volume live: free-inside ≈ 14.9G ≥ 8.5G trigger — **ANT 0.19.0
 upgrade becomes a plain YELLOW gate** (no storage prerequisite), per
 `2026-09-16-ant-019-migration-verification.md`.
+
+---
+
+## HOT UPDATE 2026-09-16 ~19:00Z — official v0.19.0 rollout incorporated
+
+**Release state (verified at source):** `ant-node 0.19.0` on crates.io
+(published 2026-09-16T00:29Z, normal release); `ant-cli 0.3.7` crate exists
+(downloadable, Cargo.toml confirms). **`ant update` is NOT run** — the order
+stands: Config V cutover first, v0.19.0 immediately after.
+
+### The official completion signal (replaces any status-based check)
+
+**Migration is complete when `chunks.mdb` is GONE and a `chunks/` directory
+IS present.** Do NOT use `ant node status` as the migration-complete or
+enough-space signal — the operator guidance is explicit on this.
+
+### Official operator thresholds (banked as MINIMUM guidance)
+
+| state | free space |
+|---|---|
+| generally okay | > ~3 GB |
+| stalled (migration pauses) | < ~3 GB |
+| minimum freeing target | ~3.5 GB |
+| working margin | 2.5 GB |
+
+**Our box-specific trigger stays STRICTER** (free-inside ≥ 8.5G / fence
+13.5G+): our `mdb_stat` showed the 5 GB LMDB is essentially all live payload
+(6 free pages, 99.94%), which is exactly Rusty's "more if a node has a lot
+left to move" case. The bare 3.5 GB minimum is NOT our planning target.
+
+### Migration is self-pausing, not catastrophic
+
+The v0.19.0 migration **stops and waits** when disk gets tight
+(`stopped_for_space` in the source) — it does not fill the disk. If someone
+accidentally upgraded early, it would stall rather than crash. But on our
+box that's still needless downtime; Config V prevents it entirely.
+
+### The `ant update` sequence (after Config V cutover passes)
+
+```bash
+# 1. Pre-update receipts (preserved)
+ant-node --version                              # expect: ant-node 0.18.1
+sudo md5sum /mnt/ant-store/data/node-2/node_identity.key   # identity hash
+df -B1M /mnt/ant-store | tail -1                # fence free baseline
+sudo stat -c '%s' /mnt/ant-store/data/node-2/chunks.mdb/data.mdb   # mdb size
+# 2. Update (separate receipt from the node migration — see below)
+ant update
+ant-node --version                              # new version receipt
+# 3. Migration receipts (during migration, log every 60s):
+#    df /mnt/ant-store (free space over time)
+#    stat chunks.mdb/data.mdb (size)
+#    ls chunks/ | wc -l && du -s chunks/ (file count + bytes)
+#    node health/peer count (from logs)
+#    grep for stop-for-space events
+#    exact timestamp when chunks.mdb disappears
+# 4. Post-migration reclaim measurement:
+df -B1M /mnt/ant-store | tail -1                # actual free after
+#    DO NOT ASSUME the beta's 1/3-1/2 reclaim — Rusty says newer/full nodes
+#    can reclaim almost nothing. Our LMDB is ~fully live; expect minimal
+#    reclaim and record it as evidence.
+```
+
+### Separate receipts: node vs client
+
+**`ant-node` v0.19.0** (the migration) and **`ant` CLI** (the client) are
+**separate binaries with separate receipts** — `ant update` may update both;
+do not let it blur which changed what. Record each binary's version before
+and after independently.
+
+### zBlood convergence (noted, separate lane)
+
+Once the zBlood preservation adversarial gate is green, **`ant` CLI becomes
+the fresh client baseline for the first real quote/upload/retrieval
+receipt**. Keep that separate from the node migration, but timestamp both
+into the same 2026-09-16 network-state record.
+
+### Rollback material timeline (unchanged)
+
+The old loop image + the volume's pre-update state are rollback for the
+existing **≥24 h verification window** before any deletion. No change to
+Config V's own rollback procedure.
