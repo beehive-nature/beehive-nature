@@ -26,6 +26,7 @@ function bundleFiles() {
     "attested-overlays.json",
     "reconstructions.json",
     ...readdirSync(join(LINEAGE, "evidence")).map((f) => "evidence/" + f),
+    ...readdirSync(join(LINEAGE, "persons")).map((f) => "persons/" + f),
     "../../house-crest-von-zutphen-DESIGN.svg",
     "../../house-crest-von-zutphen.json",
     "../../../surfaces/profile.html",
@@ -54,6 +55,17 @@ if (cmd === "prepare") {
   writeFileSync(join(out, "manifest.json"), JSON.stringify(manifest, null, 2));
   console.log(JSON.stringify({ status: "prepared", out, files: Object.keys(manifest.files).length, totalBytes: manifest.totalBytes,
     next: "upload via the estate's Autonomi member-write or Arweave adapter, then paste the adapter receipt into manifest.uploads and set status:'uploaded'" }, null, 2));
+} else if (cmd === "approve") {
+  // the founder's approval gesture: prepared → approved (dated, attributed)
+  const dir = process.argv[3];
+  const manifestPath = join(dir, "manifest.json");
+  const manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
+  if (manifest.status !== "prepared") { console.error("only prepared packages can be approved (status: " + manifest.status + ")"); process.exit(1); }
+  manifest.status = "approved";
+  manifest.approvedAt = new Date().toISOString();
+  manifest.approvedBy = process.argv[4] || "founder";
+  writeFileSync(manifestPath, JSON.stringify(manifest, null, 2));
+  console.log(JSON.stringify({ status: "approved", dir, files: Object.keys(manifest.files).length }, null, 2));
 } else if (cmd === "verify") {
   const dir = process.argv[3], manifestPath = process.argv[4] || join(dir, "manifest.json");
   const manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
@@ -64,7 +76,8 @@ if (cmd === "prepare") {
     const h = sha256(readFileSync(p));
     if (h === meta.sha256) ok++; else bad.push([f, "hash mismatch"]);
   }
-  console.log(JSON.stringify({ status: bad.length ? "RETRIEVAL-FAILED" : "retrieval-verified", ok, bad, against: manifestPath }, null, 2));
+  console.log(JSON.stringify({ status: bad.length ? "RETRIEVAL-FAILED" : "retrieval-verified", ok, bad, against: manifestPath,
+    packageStatus: manifest.status }, null, 2));
   process.exit(bad.length ? 1 : 0);
 } else {
   console.error("usage: node preserve.mjs prepare [outdir] | verify <dir> [manifest]");

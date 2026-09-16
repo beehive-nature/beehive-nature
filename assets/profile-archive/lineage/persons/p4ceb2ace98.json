@@ -1,0 +1,74 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p4ceb2ace98",
+ "bnr": "bnr://skaists.dev/blood/p4ceb2ace98",
+ "identity": {
+  "name": "Don Ray Remington",
+  "lifespan": "1931–Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LNQ5-BSG"
+  }
+ ],
+ "evidence": {
+  "era": "living",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "living"
+ },
+ "research": {
+  "status": "corrected-attested",
+  "basis": "per-person source counts not yet harvested",
+  "note": "FamilySearch private-space record flags Don Ray Remington living; the founder attests the family line — famous grandpa is not 'Living'. Death year unknown to the archive; no year invented."
+ },
+ "publication": {
+  "status": "public"
+ },
+ "corrected": {
+  "attested": "founder order 2026-09-16",
+  "note": "FamilySearch private-space record flags Don Ray Remington living; the founder attests the family line — famous grandpa is not 'Living'. Death year unknown to the archive; no year invented."
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pc7ab6a6a1f",
+    "name": "Fuller Rasmussen Remington",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p599af0d21a",
+    "name": "Edith Leoma Hadlock",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "liv-2",
+    "name": "Living"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p455afa9256",
+    "name": "Marilyn Lowry",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LNQ5-BSG",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -143,19 +143,41 @@ for (const [id, p] of Object.entries(model.persons)) {
 for (const [child, ps] of Object.entries(model.edges)) if (pub.persons[child]) addEdge(pub, child, ps);
 for (const c of Object.values(model.couples)) if (pub.persons[c.p1] && pub.persons[c.p2]) addCouple(pub, c.p1, c.p2, c.marriage);
 
-// ── identifier pseudonymization: living persons must not carry provider ids
-// in a PUBLIC artifact (the id itself identifies a living person). Root
-// becomes "founder" (the page's public subject); other living become liv-N.
+// ── FIRST-CLASS STAGED OBJECTS: every person gets a stable INTERNAL identity;
+// provider ids (FamilySearch, …) are retained as REFERENCES, never as the
+// identity. Living root-line persons keep pseudonymous internal ids (founder,
+// liv-N — never derived from provider ids, so nothing leaks); overlay persons
+// keep their ovl- ids (they were born internal); walked deceased get
+// deterministic ids hashed from their provider reference.
+const { createHash } = await import("node:crypto");
+const internalId = (providerRef) => "p" + createHash("sha1").update(providerRef).digest("hex").slice(0, 10);
+
 const idmap = {};
 let livN = 0;
 for (const id of Object.keys(pub.persons)) {
   const p = pub.persons[id];
-  if (!p.living) continue;
-  idmap[id] = id === pub.root ? "founder" : "liv-" + (++livN);
+  if (p.living) idmap[id] = id === pub.root ? "founder" : "liv-" + (++livN);
+  else if (/^ovl-/.test(id)) idmap[id] = id;
+  else idmap[id] = internalId("familysearch:" + id);
 }
 const remapped = { persons: {}, edges: {} };
+const refsIndex = {};
 for (const [id, p] of Object.entries(pub.persons)) {
-  remapped.persons[idmap[id] || id] = p;
+  const iid = idmap[id] || id;
+  const entry = { ...p };
+  // references: provider ids retained, demoted from identity
+  entry.refs = p.living ? [] : (/^ovl-/.test(id) ? [{ provider: "attested-overlay", id }] : [{ provider: "familysearch", id }]);
+  if (!p.living && !/^ovl-/.test(id)) refsIndex[id] = iid;
+  // research status (what we know) — tracked separately from publication
+  entry.research = { status: p.corrected ? "corrected-attested" : packIndex[id] ? "tradition-entered" : /^ovl-/.test(id) ? "attested" : "incomplete", basis: "per-person source counts not yet harvested" };
+  if (p.corrected) entry.research.note = p.corrected.note;
+  // publication status (what we show) — 'private'/'incomplete'/'disputed' are
+  // never silently missing: the stub says why it is a stub
+  entry.publication = p.living
+    ? { status: "private-stub", reason: id === pub.root ? "living — the founder, anonymous anchor" : "living — anonymous root-line stub; provider id withheld" }
+    : { status: "public" };
+  delete entry.sourceId; // provider id lives in refs now
+  remapped.persons[iid] = entry;
 }
 for (const [child, ps] of Object.entries(pub.edges)) {
   if (!pub.persons[child]) continue;
@@ -170,15 +192,19 @@ pub.couples = Object.fromEntries(Object.entries(pub.couples)
     const p1 = idmap[c.p1] || c.p1, p2 = idmap[c.p2] || c.p2;
     return [[p1, p2].sort().join("|"), { p1, p2, ...(c.marriage ? { marriage: c.marriage } : {}) }];
   }));
-for (const k of Object.keys(packIndex)) if (idmap[k]) { delete packIndex[k]; }
+const packIndexInternal = {};
+for (const [k, v] of Object.entries(packIndex)) if (!idmap[k] || !pub.persons[idmap[k]]?.living) packIndexInternal[idmap[k] || k] = v;
+for (const k of Object.keys(packIndex)) delete packIndex[k];
+Object.assign(packIndex, packIndexInternal);
 const spineRows = spineChain.map((id, i) => {
   const p = model.persons[id];
   return p.living
     ? { i, n: "Living", l: null, t: "living" }
-    : { i, n: p.name, l: p.lifespan, t: p.evidence.class || p.evidence.era, ...(p.sourceId ? { f: p.sourceId } : {}) };
+    : { i, n: p.name, l: p.lifespan, t: p.evidence.class || p.evidence.era, f: idmap[id] || id };
 });
 // living spine rows carry no f already; deceased ids never remapped — safe as-is
 pub.spine = spineRows; // the spine travels with the corpus for data consumers
+pub.refsIndex = refsIndex; // fsid → internal id (deceased only; lookup for tests/tools)
 pub.meta = {
   ...model.meta,
   retrieved: (raw.meta && (raw.meta.pulledAt || raw.meta.checkpointAt)) || model.meta.generated,
@@ -233,6 +259,59 @@ if (pubProblems.length) {
   process.exit(1);
 }
 writeFileSync(corpusOut, JSON.stringify(pub, null, 1) + "\n", "utf8");
+
+// ── staged person objects: every relative is a first-class archive object;
+// profile pages, fractal views, and manifests generate from this shared
+// object. The four canonical souls prove the path (Donna, Marilyn, Rockwood,
+// the Ragnar tradition entry); the same emitter serves any internal id.
+const CANONICAL = [
+  /Donna Ruth Lawton/i, /Marilyn Lowry/i, /Don Ray Remington/i, /Albert Perry Rockwood/i, /Ragnar Sigurdsson/i,
+];
+function personObject(iid) {
+  const p = pub.persons[iid];
+  if (!p) return null;
+  const parents = (pub.edges[iid] || []).map((pid) => ({
+    id: pid, name: pub.persons[pid]?.name, evidence: pub.edges[iid] && overlay?.relationshipEvidence?.[iid + "|" + pid] ? "disputed — inspect in the comb" : "walked provider link",
+  }));
+  const children = Object.entries(pub.edges).filter(([, ps]) => ps.includes(iid)).map(([cid]) => ({ id: cid, name: pub.persons[cid]?.name }));
+  const spouses = Object.values(pub.couples).filter((c) => c.p1 === iid || c.p2 === iid)
+    .map((c) => ({ id: c.p1 === iid ? c.p2 : c.p1, name: pub.persons[c.p1 === iid ? c.p2 : c.p1]?.name, marriage: c.marriage || null }));
+  return {
+    schema: "skaists.person/1",
+    internalId: iid,
+    bnr: "bnr://skaists.dev/blood/" + iid,
+    identity: { name: p.name, lifespan: p.lifespan, gender: p.gender, living: !!p.living },
+    refs: p.refs || [],
+    evidence: p.evidence,
+    research: p.research,
+    publication: p.publication,
+    ...(p.corrected ? { corrected: p.corrected } : {}),
+    relationships: { parents, children, spouses },
+    layers: {
+      records: p.refs?.some((r) => r.provider === "familysearch")
+        ? { provider: "familysearch", recordUrl: "https://www.familysearch.org/tree/person/details/" + p.refs.find((r) => r.provider === "familysearch").id, retrieved: pub.meta.retrieved }
+        : null,
+      tradition: packIndex[iid] ? { pack: packIndex[iid] } : null,
+      testimony: (overlay?.testimony || []).filter((t) => t.text && /rockwood/i.test(p.name || "") && /rockwood/i.test(t.subject || "")) || [],
+      meaning: (overlay?.symbolicLinks || []).filter((sl) => (sl.connects || []).includes(iid)),
+    },
+    onSpine: spineRows.some((r) => r.f === iid),
+    generatedFrom: "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this",
+  };
+}
+try {
+  const { mkdirSync: mkd } = await import("node:fs");
+  mkd("assets/profile-archive/lineage/persons", { recursive: true });
+  let emitted = 0;
+  for (const rx of CANONICAL) {
+    const iid = Object.keys(pub.persons).find((k) => rx.test(pub.persons[k].name || "") && !pub.persons[k].living);
+    if (!iid) continue;
+    writeFileSync("assets/profile-archive/lineage/persons/" + iid + ".json", JSON.stringify(personObject(iid), null, 1) + "\n", "utf8");
+    emitted++;
+  }
+  pub.meta.stagedPersons = { store: "assets/profile-archive/lineage/persons/", canonicalEmitted: emitted };
+  writeFileSync(corpusOut, JSON.stringify(pub, null, 1) + "\n", "utf8"); // rewrite with the staging note
+} catch (e) { console.error("person staging skipped: " + e.message); }
 
 // page-data: fan (7 rings) + spine + stats
 function fanOf(id, gen, maxGen) {

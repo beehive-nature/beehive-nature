@@ -201,12 +201,12 @@ footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint
   var S={persons:{},edges:{},children:{},spineIds:new Set(),root:null,curRoot:null,spineOn:false,stats:{},
     packs:{},packData:{},relEvidence:{},testimony:[],recon:null,lenses:{records:true,tradition:true,testimony:true,spiritual:true},
     trail:[],staged:[],viewMode:"fan",retrieved:null,symbolicLinks:[]};
-  var OPEN_ROOT="KWJ4-XBD"; // the public entrance person — Albert Perry Rockwood
+  var OPEN_ROOT_FS="KWJ4-XBD"; // provider ref, resolved via refsIndex at load
   function addChild(p,c){(S.children[p]=S.children[p]||[]).push(c);}
   fetch(CORPUS_URL).then(r=>r.json()).then(c=>{
     S.persons=c.persons||{};S.edges=c.edges||{};S.root=c.root;S.curRoot=c.root;
     S.stats=(c.meta&&c.meta.stats)||{};
-    S.corpusMeta=c.meta||{};
+    S.corpusMeta=c.meta||{};S.refsIndex=(c.refsIndex||{});
     S.packs=Object.assign({},(c.meta&&c.meta.packs)||{});
     (c.spine||[]).forEach(r=>{if(r.f)S.spineIds.add(r.f);});
     for(var e in S.edges)S.edges[e].forEach(p=>addChild(p,e));
@@ -231,8 +231,17 @@ footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint
     S.retrieved=(S.corpusMeta&&S.corpusMeta.retrieved)||null;
     renderDyn();
     // public entrance: Albert Perry Rockwood when present, else the founder
+    var OPEN_ROOT=(S.refsIndex&&S.refsIndex[OPEN_ROOT_FS])||S.root;
     S.curRoot=S.persons[OPEN_ROOT]?OPEN_ROOT:S.root;
+    // landing doors (evaluated AFTER the corpus is resident):
+    // #p=<internal-id> from person pages; #myth from the profile doorway
+    var pm=location.hash.match(/p=([\w-]+)/);
+    if(pm&&S.persons[pm[1]])S.curRoot=pm[1];
+    var RAG=(S.refsIndex&&S.refsIndex['M8WZ-XZY'])||null;
+    if(/myth/.test(location.hash)&&RAG)S.curRoot=RAG;
     drawComb();showRootNote();renderTrail();renderList();
+    if(pm&&S.persons[pm[1]]){showDetail(pm[1]);document.getElementById("detail").scrollIntoView();}
+    else if(/myth/.test(location.hash)&&RAG){showDetail(RAG);var d0=document.querySelector('#dbody details');if(d0)d0.open=true;}
   })
   .catch(()=>{document.getElementById('stats').textContent='could not load the corpus';});
 
@@ -454,9 +463,10 @@ footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint
   function nameOf(id){var p=S.persons[id];return p?(p.name||id):id;}
   function tierChip(cls){return '<span class="chip t" style="color:'+TIER_COLOR[cls]+'">'+esc(cls)+'</span>';}
   function layersHtml(id,p){
+    var fsrefL=p&&p.refs&&p.refs.find(function(r){return r.provider==='familysearch';});
     var out='<div class="drels"><div class="lab">'+esc(langText('blood.layers','evidence layers'))+'</div>';
-    if(/^[A-Z0-9]{4}-[A-Z0-9]{3,4}$/.test(id)&&S.lenses.records)
-      out+='<div class="layer">① '+esc(langText('blood.layer.walked','walked record · FamilySearch'))+' <span style="color:var(--faint)">'+esc(id)+'</span></div>';
+    if(fsrefL&&S.lenses.records)
+      out+='<div class="layer">① '+esc(langText('blood.layer.walked','walked record · FamilySearch'))+' <span style="color:var(--faint)">'+esc(fsrefL.id)+'</span></div>';
     if(p.corrected)
       out+='<div class="layer">② '+esc(langText('blood.layer.corrected','founder correction'))+' — '+esc(p.corrected.attested||'')+' · <span style="color:var(--faint)">'+esc((p.corrected.note||'').split(';')[0])+'</span></div>';
     if(/^ovl-/.test(id))
@@ -556,7 +566,8 @@ footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint
     var chips=tierChip(cls)+'<span class="chip">support: '+esc(sup)+'</span>';
     if(p.living&&id===S.root)chips+='<span class="chip">'+esc(langText('blood.rootchip','the founder — living, redacted'))+'</span>';
     if(S.packs[id])chips+='<span class="chip" style="color:var(--violet)">'+esc(langText('blood.attested','attested overlay — evidence pack'))+'</span>';
-    if(!p.living&&/^[A-Z0-9]{4}-[A-Z0-9]{3,4}$/.test(id))chips+='<span class="chip">'+esc('FS '+id)+'</span>';
+    var fsref=p.refs&&p.refs.find(function(r){return r.provider==='familysearch';});
+    if(!p.living&&fsref)chips+='<span class="chip">'+esc('FS '+fsref.id)+'</span>';
     if(S.spineIds.has(id))chips+='<span class="chip" style="color:var(--gold)">'+esc(langText('blood.onspine','on the spine'))+'</span>';
     var cby=byr(p.lifespan);
     if(cby)(S.edges[id]||[]).forEach(function(x){var pb=byr(S.persons[x]&&S.persons[x].lifespan);
@@ -566,9 +577,9 @@ footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint
       +'<div class="dchips">'+chips+'</div>'+rels+layersHtml(id,p)
       +'<div class="drels"><div class="lab">'+esc(langText('blood.bnr','bnr blood address'))+'</div>'
       +'<div style="color:var(--cyan);font-size:10.5px;word-break:break-all">bnr://skaists.dev/blood/'+esc(id)+'</div></div>'
-      +(!p.living&&/^[A-Z0-9]{4}-[A-Z0-9]{3,4}$/.test(id)
+      +(!p.living&&fsref
         ?'<div class="drels"><div class="lab">'+esc(langText('blood.fsrec','source record'))+'</div>'
-        +'<div><a href="https://www.familysearch.org/tree/person/details/'+esc(id)+'" target="_blank" rel="noopener">FamilySearch record '+esc(id)+' ↗</a>'
+        +'<div><a href="https://www.familysearch.org/tree/person/details/'+esc(fsref.id)+'" target="_blank" rel="noopener">FamilySearch record '+esc(fsref.id)+' ↗</a>'
         +(S.retrieved?' <span style="color:var(--faint)">· retrieved '+esc(S.retrieved)+'</span>':'')+'</div></div>'
         :'')
       +'<div class="dactions"><button id="reroot" data-i18n="blood.reroot">re-root the comb here</button>'
@@ -621,8 +632,9 @@ footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint
     var ent=a.getAttribute('data-ent');
     if(ent==='family'){S.trail=[];setRoot(S.root,true);showDetail(S.root);}
     else if(ent==='mythology'){
-      setRoot(S.persons['M8WZ-XZY']?'M8WZ-XZY':S.root,true);
-      showDetail('M8WZ-XZY');
+      var R=(S.refsIndex&&S.refsIndex['M8WZ-XZY'])||S.root;
+      setRoot(R,true);
+      showDetail(R);
       var det=document.querySelector('#dbody details');if(det)det.open=true;
       document.getElementById('detail').scrollIntoView({behavior:'smooth'});
     }
@@ -631,11 +643,10 @@ footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint
       document.getElementById('qout').scrollIntoView({behavior:'smooth'});
     }
     else if(ent==='older'){
-      setRoot(S.persons['LTSB-5WH']?'LTSB-5WH':S.root,true);showDetail('LTSB-5WH');
+      var SR=(S.refsIndex&&S.refsIndex['LTSB-5WH'])||S.root;
+      setRoot(SR,true);showDetail(SR);
     }
   });
-  // profile may send visitors in through the mythology door (#myth)
-  if(/myth/.test(location.hash)){document.querySelector('[data-ent="mythology"]').click();}
   document.getElementById('lenses').addEventListener('change',function(e){
     var l=e.target.getAttribute('data-lens');if(l)S.lenses[l]=e.target.checked;
     if(S.curRoot&&S.persons[S.curRoot])showDetail(S.curRoot);});
@@ -644,7 +655,7 @@ footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint
     if(v.length<2)return;
     var hits=[];
     for(var id in S.persons){var p=S.persons[id];
-      if((p.name||'').toLowerCase().indexOf(v)>=0||id.toLowerCase()===v){hits.push(id);if(hits.length>=8)break;}}
+      if((p.name||'').toLowerCase().indexOf(v)>=0||id.toLowerCase()===v||S.refsIndex[v.toUpperCase()]===id){hits.push(id);if(hits.length>=8)break;}}
     hits.forEach(function(hid){
       var b=document.createElement('button');
       b.textContent=(S.persons[hid].name||hid)+(S.persons[hid].lifespan?' · '+S.persons[hid].lifespan:'');
