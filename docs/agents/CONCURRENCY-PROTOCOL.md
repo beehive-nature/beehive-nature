@@ -70,3 +70,25 @@ worker must be able to say:
 
 FACT / SPECIFIED / INFERENCE / UNKNOWN, pinned to an explicit SHA, with
 receipts.
+
+### The full epistemic ladder (founder amendment 2026-09-16)
+
+Two families, never mixed — the ladder exists so evidence is never confused
+with design intent:
+
+**Evidence states** (what the repository/field demonstrably supports):
+- **FACT** — files/tests/receipts at the pinned SHA demonstrate it.
+- **SPECIFIED** — written as spec/law in-tree, whether or not implemented.
+- **INFERENCE** — reasoned from evidence, not itself demonstrated; cite the
+  evidence it rests on.
+- **UNKNOWN** — no evidence either way; an open hole, stated as such.
+
+**Design-intent states** (what agents/humans propose for the future):
+- **PROPOSAL** — a design direction advanced by a seat; may cite evidence
+  states, carries none of their authority by itself.
+- **DECISION CANDIDATE** — a proposal that has survived its review gate and
+  awaits founder/Astra ratification; on ratification it becomes SPECIFIED.
+
+A finding may carry one evidence state AND be the subject of a PROPOSAL —
+the states label different things (what is, vs what someone suggests), which
+is exactly why both families exist.
