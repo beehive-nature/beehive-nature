@@ -805,3 +805,39 @@ serializer fixtures, journal with tamper injection points; zero network; live NW
 
 *Tenth roll, 2026-09-16. Single-writer discipline stands. Pipeline law unchanged: builder
 proves RED, fixes GREEN, CI arbitrates; zArcheology designs tests only.*
+
+---
+
+## ELEVENTH ROLL — revocation without mutation (2026-09-16)
+
+*Founder law for this roll, verbatim: "revocation may reduce future authority; it may never
+rewrite historical authorization, erase settlement evidence, or manufacture a new
+authorization." Completes the AB side of the chain: MP (plan binds) → RB (recovery preserves)
+→ AB (signature commits) → RV (authority safely REDUCED without rewriting history). Estate
+ancestors: capAssert caps (exhaustion analog), Jungle4 linkauth/unlinkauth (bounded-authority
+revocation), the corpus's own contract shape — "pause new authority: stop new exposure,
+preserve qualified claims/exits"; "registered accepted obligations survive revocation and
+timeout" (SILENTPAY-V2 §6).*
+
+### SPEC RV — revocation is append-only, bound, and tri-state (RED-first)
+
+| # | case | exact pass criterion | fail criterion |
+|---|---|---|---|
+| RV-0 | the revocation object (mechanism) | revocation is a SEPARATE signed event bound to the authorization id (+ leg ids for partial revocation), stored APPEND-ONLY; the authorization's own journal record is byte-identical pre/post revocation | in-place status flip on the authorization record |
+| RV-1 | replay after revocation | settled-leg evidence replayed → idempotency routes to lookup, zero new effect (settlement evidence survives revocation); NEW spend attempt under the revoked authorization → typed refusal carrying the **authorized-and-revoked** distinction | settled history erased/unreplayable; or new spend accepted |
+| RV-2 | revocation during UNKNOWN | Unknown + revoke + settle-evidence → resolves Settled (EVIDENCE wins for historical work); + proof-of-non-settlement → Expired/Refunded; + NO evidence → stays Unknown under HumanGate — **revocation never auto-resolves an Unknown** (that would manufacture an outcome) | revoke forcing Unknown→failed (history rewrite) or auto-settle |
+| RV-3 | revocation during `Settling` | an already-STARTED settle runs to evidence (aborting mid-flight burns gas without record — worse); not-yet-started settles refuse; concurrent race (revocation vs Settling transition) has a deterministic winner with no double effect and no lost evidence, either order | mid-flight abort losing evidence; double effect |
+| RV-4 | replacement after revocation | bounded replacement under the revoked authorization → typed refusal (replacement is derived spending authority; revocation kills it); replacement under a NEW authorization → lawful (RB-6/AB-6 path), coexists | replacement executes under dead authority |
+| RV-5 | partial multirail revocation | (a) plan-level: unopened legs reduced, opened legs grandfather (RB/MP), their evidence preserved; (b) leg-level: revocation of leg A leaves leg B's record byte-identical — each revocation bound to its own leg identity | leg A's revocation touching B; plan revocation rewriting opened-leg history |
+| RV-6 | crash/restart with a revoked authorization | crash AFTER the revocation is recorded → revocation survives, authorization record still byte-identical, tri-state intact; crash BEFORE recording → NO phantom revocation on recovery — the journal may not manufacture authorizations OR revocations (a revocation is itself signed evidence) | phantom revocation; lost revocation |
+| RV-7 | the tri-state distinction (founder-required) | verification/recovery distinguishes **never-authorized** (AB invalid — no valid signature ever) / **authorized-and-active** (executes) / **authorized-and-revoked** (refuses new work, preserves history) — three fixtures, three distinct typed outcomes, surviving restart | revoked conflated with never-authorized (erases history) or with active (fails to reduce) |
+| RV-8 | exhaustion + supersession (the sibling reduction paths) | exhaustion: budget fully consumed behaves as natural revocation (ceiling math is the bound; replay routes to lookup; nothing rewritten); supersession: a new authorization carries an append-only supersession event referencing the old id — old becomes revoked-shaped, history preserved, new binding per AB | exhaustion or supersession implemented as deletion/rewrite |
+| RV-9 | negative controls | in-place mutation DETECTED (RV-0); revoked↔never-authorized conflation DETECTED (RV-7); Unknown auto-resolution DETECTED (RV-2); settle-evidence erasure DETECTED (RV-1) | harness blind on any axis |
+
+**RED expectations:** no revocation object exists anywhere today — RV-0 is the charter RED;
+the tri-state (RV-7) and Unknown-preservation (RV-2) follow. **Harness:** same fixtures as
+AB/RB (test signer, canonical serializer, tamper-injectable journal) + a revocation-event
+fixture builder; zero network; live NWC `#[ignore]`.
+
+*Eleventh roll, 2026-09-16. Single-writer discipline stands. Pipeline law unchanged: builder
+proves RED, fixes GREEN, CI arbitrates; zArcheology designs tests only.*
