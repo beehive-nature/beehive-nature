@@ -1,0 +1,8 @@
+Start implementing bMESHasi / Silent Pay Sprint 01 in this project folder.
+Read START-HERE.md, AGENTS.md, docs/DECISIONS.md and docs/SPRINT-01.md, then inspect the baseline code and rerun its tests.
+
+Preserve the approved design. exSat is our primary implementation reference for qualifying the native Vaulta/EVM boundary, not a mandatory BTC custody dependency. Use Rust for the shared off-chain core. Keep A as the PoC reference, b as the eventual product interface, and ANT/Arbitrum plus Autonomi as the second independent payment/delivery route.
+
+Implement the bounded Rust accounting/state-machine reference and deterministic two-leg simulation described in Sprint 01. Do not begin with another general architecture essay. Produce changed files, actual test/command output, and an explicit implemented/mocked/missing report. Keep proofs fail-closed and use test assets only. Do not deploy contracts, spend funds, publish code, access unrelated folders, or place raw biometrics/keys in the workspace.
+
+For the exSat integration spike, pin official source/version and verify the actual native/EVM callback and rollback behavior before claiming that the composition works. Do not substitute a mocked success for an integration result.
