@@ -49,6 +49,8 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
+import threading
 import time
 from dataclasses import dataclass
 from decimal import Decimal, ROUND_HALF_UP, getcontext
@@ -60,6 +62,16 @@ Q4 = Decimal("0.0001")
 
 TITHE_RATE = Decimal("0.10")  # 10% — founder-ruled, never moves without his word
 GENESIS_HASH = "0" * 64
+
+# AV-1: one in-process append lock. Appends are single fsync'd O_APPEND writes
+# (atomic against other appends at the syscall level), but charge's
+# read-balance-then-append must be atomic against OTHER charges or two
+# concurrent charges can both pass the affordability check against the same
+# stale balance. Cross-PROCESS appends are not lock-protected: the box runs a
+# single-writer discipline (the serve bridge or a poller, never both writing
+# the same ledger concurrently) — a cross-process lockfile is a ruled
+# follow-up, not assumed away.
+_APPEND_LOCK = threading.Lock()
 
 # THE closed resource enum — the estate's one set (SPEC-SPEND-RECEIPT-1 + the
 # Lane M dispatch ruling). An unlisted class is added BY RULING, never by a caller.
@@ -165,13 +177,14 @@ class Escrow:
         canon = json.dumps(ev_body, sort_keys=True, separators=(",", ":"))
         return hashlib.sha256((prev + canon).encode()).hexdigest()
 
-    def _append(self, ev_body: dict) -> dict:
-        prev = self._tip()
-        h = self._hash(ev_body, prev)
-        ev = {**ev_body, "prev": prev, "hash": h}
-        with self.path.open("a") as f:
-            f.write(json.dumps(ev, sort_keys=True, separators=(",", ":")) + "\n")
-        return ev
+    def find_idempotent(self, kind: str, idempotency_key: str) -> dict | None:
+        """AV-1: the event carrying (type=kind, idempotency_key) if one was
+        written — the durable half of the serve bridge's exactly-once law.
+        The ledger IS the key registry (same law as the settle nonces)."""
+        for ev in self._events():
+            if ev.get("type") == kind and ev.get("idempotency_key") == idempotency_key:
+                return ev
+        return None
 
     def verify_chain(self) -> int:
         """Walk the chain; raise TamperError on any break. Returns event count."""
@@ -186,7 +199,8 @@ class Escrow:
     # ---------- voucher operations ----------
 
     def deposit(self, voucher: str, amount_a, vaulta_tx: str,
-                sender: str = "", memo: str = "") -> dict:
+                sender: str = "", memo: str = "",
+                idempotency_key: str | None = None) -> dict:
         """Top-up read back from the watch_account: every deposit cites its tx.
         The ref may be a chain tx id or the read-back evidence trail (the P2
         checkpoint/instruction id) where history APIs are 410-gone — cited
@@ -195,6 +209,10 @@ class Escrow:
         x402-RAID-Z33: the (voucher, vaulta_tx) pair IS the settlement key —
         a replayed settlement returns the ORIGINAL event and credits once
         (pinout: idempotent credit keyed on sha256 of the settled transfer).
+
+        AV-1: an optional serve-bridge idempotency_key is RECORDED on the
+        event (additive field) so bridge-level resubmission can find its
+        original outcome by key alone.
 
         A-RAIL RIDER (founder, 2026-08-29): the Vaulta rail is GASLESS and
         MEMO-NATIVE — a proper Vaulta account sends with memo = the meter key,
@@ -214,6 +232,8 @@ class Escrow:
             "amount": str(amt), "vaulta_tx": vaulta_tx,
             "currency_in": "A", "chain_in": "vaulta",
         }
+        if idempotency_key:
+            ev["idempotency_key"] = idempotency_key
         if sender:
             ev["sender"] = sender
         if memo:
@@ -269,11 +289,18 @@ class Escrow:
         return _a(bal)
 
     def charge(self, voucher: str, usage: list[tuple[str, Decimal | int | str]],
-               rate_set: RateSet) -> dict:
+               rate_set: RateSet, idempotency_key: str | None = None) -> dict:
         """
         Meter usage against the voucher. usage = [(resource_class, quantity), ...].
         Refuses BEFORE writing if the total (incl. tithe) exceeds balance.
         Returns the receipt event. Total is computed by receipt_total(), never stored.
+
+        AV-1: an optional serve-bridge idempotency_key is RECORDED on the
+        receipt (additive field) — the bridge finds its original outcome on
+        resubmission; the engine itself stays single-shot (the lookup is the
+        CALLER's duty, one law at the bridge). The affordability check and
+        the append run under the module append lock so two concurrent
+        charges cannot both pass against the same stale balance.
         """
         if not usage:
             raise VoucherError("empty usage")
@@ -299,16 +326,57 @@ class Escrow:
             "charged": str(tithe),
         })
         total = subtotal + tithe
-        bal = self.balance(voucher)
-        if total > bal:
-            raise InsufficientVoucher(
-                f"charge {total} A exceeds voucher balance {bal} A — refused, nothing written"
+        with _APPEND_LOCK:
+            bal = self.balance(voucher)
+            if total > bal:
+                raise InsufficientVoucher(
+                    f"charge {total} A exceeds voucher balance {bal} A — refused, nothing written"
             )
-        return self._append({
-            "type": "CHARGE", "voucher": voucher, "ts": time.time(),
-            "cost_basis_ref": rate_set.cost_basis_ref,
-            "line_items": line_items,
-        })
+            body = {
+                "type": "CHARGE", "voucher": voucher, "ts": time.time(),
+                "cost_basis_ref": rate_set.cost_basis_ref,
+                "line_items": line_items,
+            }
+            if idempotency_key:
+                body["idempotency_key"] = idempotency_key
+            # threading.Lock is not reentrant — append via the locked-variant
+            # core so check + append stay one critical section.
+            return self._append_locked(body)
+
+    def _seal(self, ev_body: dict) -> dict:
+        """Chain prev/hash over the body — the event in stored form."""
+        prev = self._tip()
+        h = self._hash(ev_body, prev)
+        return {**ev_body, "prev": prev, "hash": h}
+
+    @staticmethod
+    def _write_line_durable(path, data: bytes) -> None:
+        """AV-1 crash law: the line is ONE write loop to an O_APPEND fd,
+        fsync'd before the caller can respond — a SIGKILL after this point
+        leaves the event durable; before it, the event never existed. Either
+        side of the crash is a lawful exactly-once outcome."""
+        fd = os.open(path, os.O_WRONLY | os.O_APPEND | os.O_CREAT, 0o600)
+        try:
+            written = 0
+            while written < len(data):
+                written += os.write(fd, data[written:])
+            os.fsync(fd)
+        finally:
+            os.close(fd)
+
+    def _append(self, ev_body: dict) -> dict:
+        # seal + write are ONE critical section: the tip read in _seal and
+        # the append must be atomic or two writers can both seal against the
+        # same tip and fork the chain (found live by the AV-1 battery).
+        with _APPEND_LOCK:
+            return self._append_locked(ev_body)
+
+    def _append_locked(self, ev_body: dict) -> dict:
+        """seal+write for a caller that already holds _APPEND_LOCK."""
+        ev = self._seal(ev_body)
+        data = (json.dumps(ev, sort_keys=True, separators=(",", ":")) + "\n").encode()
+        self._write_line_durable(self.path, data)
+        return ev
 
     def settle_upto(self, voucher: str, quote_id: str, advertised_max_a,
                     signed_max_a, usage: list[tuple[str, Decimal | int | str]],

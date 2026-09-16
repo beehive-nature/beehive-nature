@@ -46,6 +46,7 @@ Zero dependencies beyond the standard library. Python 3.10+.
 from __future__ import annotations
 
 import hashlib
+import secrets
 import time
 from dataclasses import dataclass, field
 from decimal import Decimal
@@ -95,10 +96,62 @@ class RefusedQuote(VoucherError):
     for an offer that cannot be served)."""
 
 
+class StaleRateSet(VoucherError):
+    """AV-2 2.5: the serve-side rate book's minted_at attestation is older
+    than the TTL (INCLUSIVE boundary — fail closed) or dated in the future.
+    New sessions refuse; a charge is never derived from a stale rate set."""
+
+
+# ── 0b · rate-set freshness — serve-side mirror of the AV-2 quote TTL ───────
+
+# Fail-closed default 300s per the spec's suggestion. THE NUMBER IS A
+# FOUNDER RULING (the law decision gates the constant, never the tests).
+RATE_SET_TTL_S = 300.0
+
+
+def rate_set_in_force(minted_at: float | None, now: float,
+                      ttl_s: float = RATE_SET_TTL_S) -> None:
+    """The serve bridge loads `rate_set.json`, whose `minted_at` is the
+    operator's freshness attestation for the whole rate book.
+
+    Law (SPEC AV-2 2.5, docs/agents/ADVERSARIAL-BPAY-SPECS.md):
+    - present and stale (`now - minted_at >= ttl_s`, INCLUSIVE) refuses
+      typed; present and future-dated refuses typed (malformed, not fresh);
+    - ABSENT attestation (None) passes: the file is founder-operated and
+      carries no attestation until the serve bridge is taught to require
+      one — unjudgeable, not refused. The serve bridge SHOULD pass the
+      parsed minted_at; see rate_set_minted_at_epoch.
+    """
+    if minted_at is None:
+        return
+    if minted_at > now:
+        raise StaleRateSet(
+            "rate_set minted_at is dated in the future — malformed, refusing")
+    age = now - minted_at
+    if age >= ttl_s:
+        raise StaleRateSet(
+            f"rate_set minted {int(age)}s ago >= TTL {int(ttl_s)}s — refresh "
+            "rate_set.json (inclusive boundary, fail closed)")
+
+
+def rate_set_minted_at_epoch(raw: dict) -> float | None:
+    """Parse rate_set.json's `minted_at` (ISO-8601, Z-suffixed) to epoch
+    seconds. None when absent or unparseable — unjudgeable, see
+    rate_set_in_force."""
+    s = raw.get("minted_at")
+    if not s or not isinstance(s, str):
+        return None
+    try:
+        import datetime as _dt
+        return _dt.datetime.fromisoformat(s.replace("Z", "+00:00")).timestamp()
+    except ValueError:
+        return None
+
+
 # ── 1 · credit-from-settlement ──────────────────────────────────────────────
 
 def credit_from_settlement(escrow: Escrow, voucher: str, declared: dict,
-                           observed: dict) -> dict:
+                           observed: dict, idempotency_key: str | None = None) -> dict:
     """
     pinout server.mjs:paymentContext / creditFromPayment, estate-shaped.
 
@@ -112,7 +165,9 @@ def credit_from_settlement(escrow: Escrow, voucher: str, declared: dict,
     - any mismatch (rail, tx id, sender, or declared amount != settled
       amount) → SettlementMismatch, NOTHING credited;
     - a replayed settlement (same tx) credits once — idempotent, the
-      (voucher, tx) key lives in voucher_escrow.deposit.
+      (voucher, tx) key lives in voucher_escrow.deposit;
+    - AV-1: an optional serve-bridge idempotency_key is recorded on the
+      credit event (additive field) for bridge-level resubmission lookup.
     """
     for key in ("rail", "tx"):
         if declared.get(key) != observed.get(key):
@@ -136,7 +191,8 @@ def credit_from_settlement(escrow: Escrow, voucher: str, declared: dict,
             rate_a_per_usdc=declared["rate_a_per_usdc"], rate_ref=declared["rate_ref"])
     return escrow.deposit(voucher, observed["amount"], vaulta_tx=observed["tx"],
                           sender=observed.get("from", ""),
-                          memo=observed.get("memo", ""))
+                          memo=observed.get("memo", ""),
+                          idempotency_key=idempotency_key)
 
 
 # ── 2 · the quote — a commitment (xorv createQuote) ─────────────────────────
@@ -179,8 +235,13 @@ class QuotingDesk:
 
     def quote(self, lane: str, max_amount_a: str, now: float | None = None) -> Quote:
         t = time.time() if now is None else now
-        self._n += 1
-        qid = f"q-{lane}-{t:.0f}-{self._n:06d}"
+        # AV-4 4.2: the handle is PURE ENTROPY (secrets, 128 bits) — no lane,
+        # no timestamp, no counter. The pre-fix shape q-{lane}-{t}-{n:06d}
+        # made same-principal handles correlatable by prefix and ORDER (the
+        # counter a wallet-global sequence in miniature); proven live by the
+        # AV-4 battery's PART A. `_n` stays for the battery's sequential
+        # replica (the negative-control minter) — it is not read here.
+        qid = "q-" + secrets.token_hex(16)
         q = Quote(quote_id=qid, lane=lane, max_amount_a=str(max_amount_a),
                   signed_max_a=str(max_amount_a),   # advertised == signed at birth
                   created_at=t, expires_at=t + self.ttl_s)
@@ -215,8 +276,27 @@ class Session:
     credits: Decimal = Decimal("0")        # metered seconds this session
     # infra retry book (the infra halt's 2-consecutive law)
     settle_failures: int = 0
+    # AV-2 2.5: the rate book's minted_at attestation (epoch seconds) this
+    # session prices against. None = unjudgeable (older constructions); the
+    # serve bridge passes rate_set_minted_at_epoch(load_rate_set()).
+    rate_set_minted_at: float | None = None
+    # AV-3: WHY the session parked — "door" (delivery unavailable, resumes
+    # when the door returns) or "balance" (drained to zero, resumes on
+    # credit). None while ACTIVE/OPENING. The reason is what lets recovery
+    # resume the RIGHT way without conflating the two park laws.
+    park_reason: str | None = None
+    # AV-6: the failure-charge book — per-obligation aggregate bound on what
+    # the retry loop may ever book for failed attempts (None policy = today's
+    # unbounded world; wiring a policy is the caller's law, see book_failure).
+    failure_policy: "FailureChargePolicy | None" = None
+    failure_fees_a: Decimal = Decimal("0")
+    failure_rows: list = field(default_factory=list)
 
-    def open(self) -> "Session":
+    def open(self, now: float | None = None) -> "Session":
+        # New sessions refuse on a stale rate book BEFORE any state moves —
+        # charging derived from a stale file never gets a session to live in.
+        rate_set_in_force(self.rate_set_minted_at,
+                          time.time() if now is None else now)
         if self.state != "OPENING":
             raise VoucherError(f"cannot open from {self.state}")
         self.state = "ACTIVE"
@@ -225,17 +305,45 @@ class Session:
     def _per_second(self) -> Decimal:
         return self.rate_set.rate(self.resource)
 
-    def burn(self, seconds: Decimal | int | str) -> tuple[Decimal, str]:
+    def burn(self, seconds: Decimal | int | str,
+             now: float | None = None,
+             door_reachable: bool = True) -> tuple[Decimal, str]:
         """Bill `seconds` of the lane. Returns (billed_seconds, state).
         Bills only what the balance covers; at zero → PAUSED, never CLOSED.
-        Never writes a charge the balance cannot pay (refuse-before-write)."""
+        Never writes a charge the balance cannot pay (refuse-before-write).
+
+        AV-3 SPLIT-BRAIN LAW: `door_reachable` is the delivery door's health
+        in the CALLER's hand (the seller_can_serve pattern — the engine is
+        pure, production burn sites MUST pass live door health). Unavailable
+        ⇒ accrual PARKS: (0, "PAUSED") with park_reason "door", zero charge
+        written — never a charge for undeliverable service, never a kill.
+        When the door returns, a door-parked session RESUMES on its next
+        burn and bills from the resume-point — the outage window is never
+        retroactively backfilled (nothing accrues while parked, by
+        construction). The default True is the legacy call shape (the naive
+        charger); wiring the signal is the deploy-side law.
+
+        AV-2 2.5: open sessions settle only on in-force rates — a burn
+        arriving after the rate book went stale refuses typed with ZERO
+        charge written (the session parks, it is never killed)."""
         want = Decimal(str(seconds))
         if want <= 0:
             raise VoucherError("burn needs positive seconds")
         if self.state == "PAUSED":
-            return Decimal("0"), "PAUSED"          # paused meter bills nothing
+            if door_reachable and self.park_reason == "door":
+                self.state = "ACTIVE"              # the door came back — resume
+                self.park_reason = None
+            else:
+                return Decimal("0"), "PAUSED"      # paused meter bills nothing
         if self.state != "ACTIVE":
             raise VoucherError(f"cannot burn from {self.state}")
+        if not door_reachable:
+            # delivery is down: PARK before any charge — zero delta, no kill
+            self.state = "PAUSED"
+            self.park_reason = "door"
+            return Decimal("0"), self.state
+        rate_set_in_force(self.rate_set_minted_at,
+                          time.time() if now is None else now)
         # the per-second all-in (basis + tithe) decides affordability
         unit = _d(self._per_second()) * (Decimal("1") + TITHE_RATE)
         bal = self.escrow.balance(self.voucher)
@@ -246,14 +354,18 @@ class Session:
             self.credits += Decimal(billed)
         if billed < int(want):
             self.state = "PAUSED"                  # PAUSE at zero — not kill
+            self.park_reason = "balance"
         return Decimal(billed), self.state
 
     def credit(self, declared: dict, observed: dict) -> dict:
         """A top-up through the settlement law. A credit RESUMES a paused
-        session — that is what pause-not-kill means on the money side."""
+        session — that is what pause-not-kill means on the money side.
+        (Either park reason: a topped-up member with a healthy door is
+        deliverable again.)"""
         ev = credit_from_settlement(self.escrow, self.voucher, declared, observed)
         if self.state == "PAUSED":
             self.state = "ACTIVE"                  # resume on credit
+            self.park_reason = None
         return ev
 
     def begin_settle(self) -> None:
@@ -398,13 +510,86 @@ def halt_on_fraud(state: str, failed_checks: list) -> None:
 
 def halt_on_infra(session: Session, settle_error: Exception) -> Halt:
     """A settle failure is infra: PAUSE and retry once; two CONSECUTIVE
-    failures halt the loop for a human (Tally: halt after 2 consecutive)."""
+    failures halt the loop for a human (Tally: halt after 2 consecutive).
+
+    AV-6 note: this law counts CONSECUTIVE failures only — an alternating
+    fail/success loop defeats it (proven live by the AV-6 battery's PART A).
+    The aggregate bound lives in book_failure below; two laws, one book."""
     session.settle_failures += 1
     session.state = "PAUSED"
     if session.settle_failures >= 2:
         return Halt(HALT_INFRA, "KILL",
                     f"2 consecutive settle failures ({settle_error}) — halt for a human")
     return Halt(HALT_INFRA, "PAUSE", f"settle failed once ({settle_error}) — retry")
+
+
+# ── 5b · the failure-charge ceiling (AV-6) ──────────────────────────────────
+
+class FailureFeeCeiling(VoucherError):
+    """The obligation's retry loop has reached its AGGREGATE failure-charge
+    ceiling — further accrual is a HARD typed refusal (loud; the loop halts
+    for a human). Per-attempt evidence rows remain intact for every attempt,
+    including the refused ones."""
+
+
+@dataclass
+class FailureChargePolicy:
+    """AV-6: the explicit bound on what one obligation's retry loop may ever
+    book as failure cost.
+
+    - `per_attempt_fee_a` — the failure-fee shape per failed attempt (the
+      chain_fee lineage; on gas-paying rails gas burns on failure — the R7
+      asymmetry — and the policy book must see it to bound it);
+    - `ceiling_a` — the aggregate bound, INCLUSIVE: reaching it exactly is
+      lawful; booking past it raises FailureFeeCeiling. None = explicitly
+      unbounded (today's world; the negative-control shape only — a
+      production policy with None is the leak this law exists to close).
+
+    The ceiling bounds the POLICY book. Translating booked failure fees
+    into member-facing escrow charges (the chain_fee rate shape) is
+    deploy-side rate-book work — an implemented invariant is not a
+    live-wired one."""
+    per_attempt_fee_a: Decimal
+    ceiling_a: Decimal | None = None
+
+
+def book_failure(session: Session, error: Exception,
+                 ts: float | None = None) -> dict:
+    """AV-6: book ONE failed attempt of the obligation's retry loop.
+
+    Evidence FIRST — every attempt leaves its row (attempt number, ts, the
+    error itself, the fee) so per-attempt truth is never weakened by the
+    bound. Then the aggregate law: when the next fee would take the running
+    total PAST the ceiling, the row lands with fee 0.0000 / booked False and
+    FailureFeeCeiling raises naming total, ceiling, and fee — loud, never
+    silent, never a silent absorb. Composes with halt_on_infra (the caller
+    catches the refusal and halts for a human; the consecutive law keeps
+    its own behavior untouched)."""
+    p = session.failure_policy
+    if p is None:
+        raise VoucherError(
+            "book_failure: no FailureChargePolicy wired on this session — "
+            "refuse rather than book unbounded")
+    t = time.time() if ts is None else ts
+    attempt_no = len(session.failure_rows) + 1
+    new_total = session.failure_fees_a + p.per_attempt_fee_a
+    ceiling = p.ceiling_a
+    if ceiling is not None and new_total > ceiling:
+        row = {"attempt_no": attempt_no, "ts": t, "error": str(error)[:200],
+               "fee_a": "0.0000", "booked": False,
+               "refused": f"failure-fee ceiling {ceiling} A would be passed "
+                          f"({session.failure_fees_a} + {p.per_attempt_fee_a} A)"}
+        session.failure_rows.append(row)
+        raise FailureFeeCeiling(
+            f"failure-fee ceiling: total {session.failure_fees_a} A + next "
+            f"{p.per_attempt_fee_a} A would pass the {ceiling} A aggregate "
+            f"ceiling — halt the retry loop for a human (attempt "
+            f"{attempt_no} evidenced, not charged)")
+    session.failure_fees_a = new_total
+    row = {"attempt_no": attempt_no, "ts": t, "error": str(error)[:200],
+           "fee_a": str(p.per_attempt_fee_a), "booked": True}
+    session.failure_rows.append(row)
+    return row
 
 
 def _d(x) -> Decimal:

@@ -127,6 +127,57 @@ jobs:
       - name: x402 meter battery (x402-RAID-Z33)
         if: always()
         run: python3 scripts/buzz-meter/test_x402_meter.py
+      # AV-1 serve-bridge battery (zCode, 2026-09-16): meter.py serve under a
+      # temp BUZZ_METER_DIR on an ephemeral port — SIGKILL-mid-settle
+      # exactly-once, concurrent mixed load (chain + conservation + coherent
+      # responses), hostile-input battery (typed 4xx, zero mutation),
+      # unknown-response recovery, and the negative control that proves the
+      # harness catches a broken idempotency seam
+      - name: AV-1 serve-bridge battery (crash/concurrency/hostile)
+        if: always()
+        run: python3 scripts/buzz-meter/test_serve_bridge.py
+      # AV-3 split-brain battery (zCode, 2026-09-16): the meter↔door seam —
+      # PART A receipts the pre-fix gap (accrual during outage) forever;
+      # 3.1 door-down accrual parks (zero delta, ledger identical,
+      # reason=door); 3.2 resume-from-resume-point with zero retroactive
+      # backfill; 3.3 credit-out park-not-kill regression-keep; 3.4 the
+      # naive-charger negative control is detected
+      - name: AV-3 split-brain battery (meter vs delivery door)
+        if: always()
+        run: python3 scripts/buzz-meter/test_av3_split_brain.py
+      # AV-6 retry-storm battery (zCode, 2026-09-16, P1): PART A receipts
+      # forever that the 2-consecutive law cannot bound an alternating
+      # retry storm; 6.1/6.2 assert the aggregate failure-charge ceiling
+      # (inclusive bound, typed loud refusal past it, per-attempt evidence
+      # rows kept incl. refused attempts); the unbounded-policy negative
+      # control is detected
+      - name: AV-6 retry-storm battery (failure-charge ceiling)
+        if: always()
+        run: python3 scripts/buzz-meter/test_av6_retry_storm.py
+      # AV-5 reorg drill (zCode, 2026-09-16, P1): the poller's reorg leg —
+      # PART A receipts forever that consumed-seq mutations were skipped
+      # silently; 5.1 fork + rollback shapes ⇒ zero credit, evidence-carrying
+      # flag, parked watermark, identical ledger bytes; 5.3 the crediting
+      # poller detected. The Rust half (reversibility quorum verdicts for
+      # the fork) rides cargo test: crates/reversibility/tests/reorg_drill.rs
+      - name: AV-5 reorg drill (flag-not-credit)
+        if: always()
+        run: python3 scripts/buzz-meter/test_av5_reorg_drill.py
+      # AV-4 handle unlinkability (zCode, 2026-09-16, P1): PART A receipts
+      # forever that the old sequential minter was session-linkable; 4.2
+      # proves pure-entropy handles (no lane/timestamp/counter, zero reuse
+      # over 10k mints); the sequential minter is detected. The door-side
+      # disjointness half rides cargo: ops/x402-door av4_disjointness
+      - name: AV-4 handle unlinkability battery
+        if: always()
+        run: python3 scripts/buzz-meter/test_av4_handle_unlinkability.py
+      # AV-11 human-gas surface audit (zCode, 2026-09-16, P1): every rail
+      # classified first-line/last-line, every first-line gas surface
+      # REGISTERED with its R5 remediation, no stale ledger entries — and
+      # the future-rail detector fails on any unregistered human-gas surface
+      - name: AV-11 human-gas surface audit
+        if: always()
+        run: node scripts/audit-human-gas.mjs
       # PEER FUNNEL testnet runner selftest (z3.3 Order C, 2026-09-05): the
       # one-broadcast tool cannot rot — keccak + EIP-155 RLP hash vectors and
       # the sign/recover roundtrip proven every push (key parts skip cleanly
