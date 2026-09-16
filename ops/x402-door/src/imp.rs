@@ -75,8 +75,12 @@ async fn build_registry(rc: &RunConfig) -> Result<x402_types::scheme::SchemeRegi
     // The chains config IS an upstream Eip155ChainConfig (serde): RPC
     // endpoints + signers. Signers use $ENV references (upstream
     // LiteralOrEnv) — the ops wallet key rides env only, never files/git.
-    let chains_raw = std::fs::read_to_string(&rc.facilitator_chain_config)
-        .map_err(|e| format!("chains config: {e}"))?;
+    let chain_cfg_path = rc
+        .facilitator_chain_config
+        .as_ref()
+        .ok_or_else(|| "chains config path missing (facilitator_chain_config)".to_string())?;
+    let chains_raw =
+        std::fs::read_to_string(chain_cfg_path).map_err(|e| format!("chains config: {e}"))?;
     let inner_cfg: x402_chain_eip155::chain::config::Eip155ChainConfigInner =
         serde_json::from_str(&chains_raw).map_err(|e| format!("chains config json: {e}"))?;
     let chain_config = x402_chain_eip155::chain::config::Eip155ChainConfig {
