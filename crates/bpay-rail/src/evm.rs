@@ -30,11 +30,28 @@ pub struct EvmPaymentId {
     pub tx_hash_hex: String,
 }
 
+/// OP-stack receipt fee evidence (fields pinned: op-geth extends
+/// types.Receipt with L1GasUsed/L1GasPrice/L1Fee/L1FeeScalar; JSON
+/// l1_gas_used/l1_gas_price/l1_fee/l1_fee_scalar, hex quantities,
+/// OP-stack-only). l1_fee is the TOTAL L1 data fee — the surcharge
+/// outside the EIP-1559 bid (R11).
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct OpStackReceiptFee {
+    pub l1_gas_used: u128,
+    pub l1_gas_price: u128,
+    pub l1_fee_wei: Atto,
+    pub l1_fee_scalar_hex: String,
+}
+
 pub struct EvmRailAdapter {
     ledger: RailLedger<EvmPaymentId>,
     /// The sealed plan this adapter serves (identity-bound per R1 law;
     /// the watchpay Ledger enforces that at its own boundary).
     plan: ValidatedPlan,
+    /// Per-payment Base/OP-stack split bounds: (gas_worst, surcharge_worst).
+    /// The ledger reserves the COMBINED worst case (class L1Surcharge);
+    /// the adapter validates the split at evidence time (R12).
+    base_bounds: std::collections::HashMap<EvmPaymentId, (Atto, Atto)>,
 }
 
 impl EvmRailAdapter {
@@ -45,6 +62,7 @@ impl EvmRailAdapter {
         EvmRailAdapter {
             ledger: RailLedger::new(ceiling, now_unix),
             plan,
+            base_bounds: std::collections::HashMap::new(),
         }
     }
 
@@ -118,5 +136,99 @@ impl EvmRailAdapter {
     }
     pub fn reserved_total(&self) -> Atto {
         self.ledger.reserved_total()
+    }
+    pub fn reservation(&self, id: &EvmPaymentId) -> Option<&crate::fee::FeeReservation> {
+        self.ledger.reservation(id)
+    }
+
+    /// Open a Base/OP-stack payment intent: REQUIRES a declared L1
+    /// surcharge worst case (the R11 gate — missing bound refused),
+    /// reserves the COMBINED gas+surcharge worst case, keeps the split.
+    pub fn open_base_intent(
+        &mut self,
+        id: EvmPaymentId,
+        surcharge_worst: Atto,
+        expires_unix: u64,
+    ) -> Result<(), LedgerError> {
+        let surcharge = self.base_gate(Some(surcharge_worst))?;
+        let gas_worst = self.fee_reservation(false).worst_case;
+        let combined =
+            gas_worst
+                .checked_add(surcharge.worst_case)
+                .ok_or_else(|| LedgerError::Refusal {
+                    field: "L1Surcharge",
+                    reason: "combined gas+surcharge worst case overflows".into(),
+                })?;
+        self.ledger.open_intent(
+            id.clone(),
+            FeeReservation {
+                class: FeeClass::L1Surcharge,
+                worst_case: combined,
+            },
+            expires_unix,
+        )?;
+        self.base_bounds.insert(id, (gas_worst, surcharge_worst));
+        Ok(())
+    }
+
+    /// Stage a Base intent in-flight (submitted to mempool).
+    pub fn stage_base_inflight(&mut self, id: &EvmPaymentId) -> Result<(), LedgerError> {
+        self.ledger.transition(id, LifecycleState::InFlight)
+    }
+
+    /// Evidence-path unknown (R10-P6/P7 class): result unavailable —
+    /// human gate; reconciliation stays possible afterward.
+    pub fn mark_base_unknown(&mut self, id: &EvmPaymentId, note: &str) -> Result<(), LedgerError> {
+        self.ledger.mark_unknown(id, note)
+    }
+
+    /// Reconcile a Base payment with SPLIT evidence: validates each
+    /// component against its declared bound BEFORE any mutation
+    /// (underestimated surcharge bound => named refusal), then hands
+    /// the combined actual to the unified ledger (which re-checks
+    /// possibility against the combined worst case and reconciles DOWN).
+    pub fn reconcile_base(
+        &mut self,
+        id: &EvmPaymentId,
+        receipt: &OpStackReceiptFee,
+        gas_paid: Atto,
+    ) -> Result<LifecycleState, LedgerError> {
+        let (gas_worst, surcharge_worst) =
+            self.base_bounds
+                .get(id)
+                .cloned()
+                .ok_or_else(|| LedgerError::Refusal {
+                    field: "payment_id",
+                    reason: "no Base split bounds on record — was this a Base intent?".into(),
+                })?;
+        if gas_paid > gas_worst {
+            return Err(LedgerError::Refusal {
+                field: "gas_paid",
+                reason: format!(
+                    "impossible gas evidence: {} exceeds the declared gas worst case {} (R12)",
+                    gas_paid, gas_worst
+                ),
+            });
+        }
+        if receipt.l1_fee_wei > surcharge_worst {
+            return Err(LedgerError::Refusal {
+                field: "L1Surcharge",
+                reason: format!(
+                    "UNDERESTIMATED L1 SURCHARGE BOUND: receipt l1Fee {} exceeds the declared worst case {} — the OP-stack surcharge is outside the EIP-1559 bid, so only this declared bound protects the window (R11/R12)",
+                    receipt.l1_fee_wei, surcharge_worst
+                ),
+            });
+        }
+        let combined_actual =
+            gas_paid
+                .checked_add(receipt.l1_fee_wei)
+                .ok_or_else(|| LedgerError::Refusal {
+                    field: "evidence",
+                    reason: "combined actuals overflow".into(),
+                })?;
+        let out = self
+            .ledger
+            .reconcile_with_evidence(id, combined_actual, true)?;
+        Ok(out.state)
     }
 }

@@ -15,8 +15,10 @@ pub mod evm;
 pub mod fee;
 pub mod ledger;
 pub mod ln;
+pub mod x402;
 
 pub use evm::{EvmPaymentId, EvmRailAdapter};
 pub use fee::{FeeClass, FeeReservation};
 pub use ledger::{LedgerError, LifecycleState, RailLedger};
 pub use ln::{LnMockClient, LnRailAdapter, LnSettlement, NwcState, PaymentHash};
+pub use x402::{compose_from_offer, gate, offer_id, AllowEntry, OfferPolicy, PinnedOffer};
