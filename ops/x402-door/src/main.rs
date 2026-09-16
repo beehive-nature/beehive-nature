@@ -34,7 +34,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     imp::run().await
 }
 
-#[cfg(windows)]
+#[cfg(not(all(unix, feature = "live-wiring")))]
 fn main() {
     eprintln!(
         "x402-door: the live facilitator wiring targets Unix (upstream uses \
