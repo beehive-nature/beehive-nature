@@ -379,6 +379,28 @@ Reuse before invention; no Eddies dependency." Full source-verified recon:*
   gates (issuance / redemption / X-Cashu codec / drift watch) at the
   existing Door/FacilitatorSettle seam. Four laws banked (§5 of the
   dispatch).
+- **SELF-HOSTED-MINT ASSAULT + SNAPSHOT CONTRACT DESIGNED 2026-09-16 →**
+  [`docs/dispatches/2026-09-16-mintd-assault-snapshot-contract.md`](../dispatches/2026-09-16-mintd-assault-snapshot-contract.md):
+  "self-hosted ⇒ capability changes only on redeploy" is **FALSE** — three
+  live mutation channels (binary; management-RPC/DB via
+  `reconcile_canonical_configuration`; config), plus a **remote-signatory
+  custody channel** whose v0.17 migration silently NULLS local
+  seed/mnemonic when a legacy signatory existed; runtime keyset rotation =
+  fake-wallet test scaffolding only. **CapabilitySnapshot v1 + drift-watch
+  state machine DESIGNED (nothing built):** receipt-anchored snapshot
+  (verbatim NUT-06 + MintVersion binary pin, keyset public-key hashes,
+  fees/limits, cap-policy hash) whose core is a **behavioral probe at
+  issuance** (mint a dust condition-carrying proof, wrong-witness swap,
+  EXPECT typed refusal — CD-4 executed live); drift classified
+  BENIGN/SEMANTIC/HARD/SILENT with fail-closed defaults; upgrade protocol
+  = **pin → probe → carry-or-drain** with the invariant `note semantics =
+  secret bytes × keyset keys (byte-equal) × enforcement (re-probe equal)`.
+  Honest concession: the contract makes drift DETECTED + ATTRIBUTED, not
+  prevented — prevention stays physical (deploy boundary, RPC access,
+  signatory continuity, capped exposure). **NUT-24 RESOLVED mechanically:**
+  commit 7246ea2e renamed nut24.rs → nut25.rs ("bolt12 is nut25") — X-Cashu
+  HTTP-402 was NEVER implemented in CDK; README ✔24 is stale pre-renumber
+  documentation.
 
 ---
 
