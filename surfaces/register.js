@@ -22,12 +22,36 @@
       var b=document.getElementById('breg-'+R[0]);
       if(b) b.setAttribute('aria-pressed',String(R[0]===r));
     });
+    /* THE COMPREHENSION LAW (founder order 2026-09-16): dense technical
+       blocks wrapped as <details data-reg-disclose> collapse to their
+       plain-language summary for bee and raver, and stand open for
+       cypherpunk — the register canon as progressive disclosure. Nothing is
+       removed; the technical text is one tap away for every register. A
+       reader's own taps always win: we only set the default on register
+       CHANGE, never fight the reader. */
+    (document.querySelectorAll?document.querySelectorAll('details[data-reg-disclose]'):[]).forEach(function(d){
+      if(!d.dataset.userTouched) d.open=(r==='cypherpunk');
+    });
     document.dispatchEvent(new CustomEvent('bregister',{detail:{reg:r}}));
   }
+  /* a reader's own tap on a disclosure summary pins it — later register
+     switches leave it alone (captured here before the toggle fires) */
+  document.addEventListener('click',function(e){
+    var s=e.target.closest&&e.target.closest('details[data-reg-disclose] > summary');
+    if(s)s.parentNode.dataset.userTouched='1';
+  },true);
   var css=document.createElement('style'); css.id='bregstyle';
   /* Scope colors to chrome, not page data encodings. Pin element properties:
      the estate has many bare button/span/a rules. */
   css.textContent=`
+    /* tech-note disclosures (founder comprehension order 2026-09-16): dense
+       technical blocks collapse to a 44px tappable summary row; +/− marker,
+       inherit-only colors — no page palette is imposed */
+    details[data-reg-disclose]>summary{cursor:pointer;min-height:44px;display:flex;align-items:center;gap:8px;list-style:none;font-size:12.5px;opacity:.92}
+    details[data-reg-disclose]>summary::-webkit-details-marker{display:none}
+    details[data-reg-disclose]>summary:before{content:"+";font-family:ui-monospace,monospace;width:20px;height:20px;display:inline-flex;align-items:center;justify-content:center;border:1px solid currentColor;border-radius:5px;opacity:.6;flex:none;font-size:13px}
+    details[data-reg-disclose][open]>summary:before{content:"−"}
+
     [data-reg]:not(body){display:none}
     body[data-reg="bee"] [data-reg="bee"],body[data-reg="raver"] [data-reg="raver"],body[data-reg="cypherpunk"] [data-reg="cypherpunk"]{display:revert}
     #bregbar,#bregctl{--reg-bg:#f6f7f2;--reg-ink:#18362a;--reg-line:#8a9e90;--reg-active:#326b39;--reg-on:#fff;--reg-font:system-ui,-apple-system,'Segoe UI',sans-serif;color-scheme:light}
