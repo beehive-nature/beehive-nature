@@ -1,0 +1,58 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p22aa057c0a",
+ "bnr": "bnr://skaists.dev/blood/p22aa057c0a",
+ "identity": {
+  "name": "Roger de Longchamps II",
+  "lifespan": "1175–Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GTLY-M48"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pc40a42db45",
+    "name": "Roger de Longchamps I",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p0f6e8aa833",
+    "name": "Sybil de Longchamps"
+   }
+  ],
+  "spouses": []
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GTLY-M48",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

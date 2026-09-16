@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p1733598038",
+ "bnr": "bnr://skaists.dev/blood/p1733598038",
+ "identity": {
+  "name": "Karomat (Karomama) III  (897? BC - ?)",
+  "lifespan": "Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PSLS-KSW"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p8144d54dbb",
+    "name": "Harsiese (Rival King) the LIBYAN  (900? BC - ?)",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p14c493ecb0",
+    "name": "Karomat II",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pb32ea04c7e",
+    "name": "Shoshenq III High Priest of Ptah, 7th Pharaoh 22nd Dynasty"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pc20c69706b",
+    "name": "Osorkon II 6th Pharaoh 22nd Dynasty",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PSLS-KSW",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p8d030b2310",
+ "bnr": "bnr://skaists.dev/blood/p8d030b2310",
+ "identity": {
+  "name": "Agnes Bishop",
+  "lifespan": "1502–1555",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L195-7FN"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "L679-7KB",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "PFHY-X4P",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p6b24ef5517",
+    "name": "Thomas Chandler"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p2925ebf7a3",
+    "name": "Thomas Chandler",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L195-7FN",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

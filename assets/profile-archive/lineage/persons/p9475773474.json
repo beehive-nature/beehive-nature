@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p9475773474",
+ "bnr": "bnr://skaists.dev/blood/p9475773474",
+ "identity": {
+  "name": "Thomas Wyberd",
+  "lifespan": "1530–1603",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GPCF-GFT"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pa7b51726cd",
+    "name": "Robert Wyburd",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p31128c84fc",
+    "name": "Joyce Palmor",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pb8d87771e5",
+    "name": "Mary Wyburd"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p0ca3da276a",
+    "name": "Anne Rochester",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GPCF-GFT",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p7c46a6cfb5",
+ "bnr": "bnr://skaists.dev/blood/p7c46a6cfb5",
+ "identity": {
+  "name": "Adélaïde de Normandie",
+  "lifespan": "1026–1090",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LZGK-6BD"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p190e2c4372",
+    "name": "Robert Ier 'le Magnifique' Duc de Normandie",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pac35639b34",
+    "name": "maîtresse I",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p97345143ca",
+    "name": "Judith de Lens"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p5fba27cc4e",
+    "name": "Lambert II de Boulogne comte de Lens",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LZGK-6BD",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p43e48e5110",
+ "bnr": "bnr://skaists.dev/blood/p43e48e5110",
+ "identity": {
+  "name": "Gershon ben Levi",
+  "lifespan": "1895BC–1795BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "27J9-JHV"
+  }
+ ],
+ "evidence": {
+  "era": "recorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "recorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p1af3978ecb",
+    "name": "Lawi ibn Yaʿqūb",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p4b7b002560",
+    "name": "Milkah bint Aram",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pf2a54a0996",
+    "name": "Libni ben Gershon"
+   },
+   {
+    "id": "pb2b1bf0a83",
+    "name": "Libni ben Gershon"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pa35374c2c3",
+    "name": "Mrs Gershon ben Levi",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/27J9-JHV",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

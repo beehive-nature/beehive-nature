@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pc11ae7d87d",
+ "bnr": "bnr://skaists.dev/blood/pc11ae7d87d",
+ "identity": {
+  "name": "Stephen Procter",
+  "lifespan": "1534–1588",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GPMF-VBF"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p0e53452ac9",
+    "name": "William Proctor",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p0adf6abad3",
+    "name": "Isabel Lilburn",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pd4d109e840",
+    "name": "Thomas Proctor"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pa42e71f6e8",
+    "name": "Mrs Stephen Procter",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GPMF-VBF",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

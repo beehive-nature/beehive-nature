@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p8bc95aeb27",
+ "bnr": "bnr://skaists.dev/blood/p8bc95aeb27",
+ "identity": {
+  "name": "Persenet",
+  "lifespan": "–2532BC",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GMNW-V52"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p3e5232489f",
+    "name": "Setka",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p1e3e85b468",
+    "name": "Hetepheres B",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p8ac5da4b76",
+    "name": "Menkaura Menkaure, Mykerinos, Mycerinus 6th Pharaoh of the 4th Dynasty"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pa39d77a357",
+    "name": "Pharaoh Khafre",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GMNW-V52",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

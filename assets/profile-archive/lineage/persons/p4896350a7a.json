@@ -1,0 +1,58 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p4896350a7a",
+ "bnr": "bnr://skaists.dev/blood/p4896350a7a",
+ "identity": {
+  "name": "Anna Engen",
+  "lifespan": "1565–1675",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GZ7L-LVL"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [],
+  "children": [
+   {
+    "id": "pefebe61787",
+    "name": "Anna Engen Mettel"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p9048b98255",
+    "name": "Heilman Mettel",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GZ7L-LVL",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

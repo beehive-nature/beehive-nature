@@ -15,10 +15,10 @@
   }
  ],
  "evidence": {
-  "era": "living",
+  "era": "recorded",
   "support": "unsourced-entry",
   "basis": "era label from dates; support unsourced until sources are harvested",
-  "class": "living"
+  "class": "recorded"
  },
  "research": {
   "status": "corrected-attested",

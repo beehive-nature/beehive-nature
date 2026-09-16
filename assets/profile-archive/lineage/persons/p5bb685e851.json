@@ -1,0 +1,58 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p5bb685e851",
+ "bnr": "bnr://skaists.dev/blood/p5bb685e851",
+ "identity": {
+  "name": "Burislaw Ier von RUGEN, De Rugen",
+  "lifespan": "0046BC–0004BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GYN7-SZT"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [],
+  "children": [
+   {
+    "id": "p2172691f0a",
+    "name": "Ida von Rügen"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p1eaedc0049",
+    "name": "Mrs. Burislaw Ist von Rugen, De Rugen",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GYN7-SZT",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

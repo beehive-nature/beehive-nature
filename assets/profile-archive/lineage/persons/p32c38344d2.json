@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p32c38344d2",
+ "bnr": "bnr://skaists.dev/blood/p32c38344d2",
+ "identity": {
+  "name": "Garnier De Treves II de Bourgogne",
+  "lifespan": "0574–0642",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GXKF-LXS"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p63f231b99e",
+    "name": "Garnier de Bourgogne I de Treves, Mayor of the Palace",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p42bca073d6",
+    "name": "Ermengarde d'Austrasie Merovingen",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pa91d791a72",
+    "name": "Bodilon Odon Warin de Poitiers et Trèves"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p04290ccb77",
+    "name": "Adele de Meaux",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GXKF-LXS",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

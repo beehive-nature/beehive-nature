@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pf8cf78e519",
+ "bnr": "bnr://skaists.dev/blood/pf8cf78e519",
+ "identity": {
+  "name": "Abb Yehezqiyah Ha-David",
+  "lifespan": "0400BC–Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GKZR-JLR"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p294cbb981c",
+    "name": "Gid Di Yehezqiyah Ha-David",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p9bdff4f61b",
+    "name": "Mrs Gid Di Yehezqiyah Ha-David",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p08eed23ebd",
+    "name": "Yehezqiyah ben Nuri ha-David"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p664a94fc1f",
+    "name": "Mrs Abb Yehezqiyah",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GKZR-JLR",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

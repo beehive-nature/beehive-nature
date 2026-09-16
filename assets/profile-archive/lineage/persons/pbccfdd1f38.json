@@ -1,0 +1,58 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pbccfdd1f38",
+ "bnr": "bnr://skaists.dev/blood/pbccfdd1f38",
+ "identity": {
+  "name": "Mrs. Er",
+  "lifespan": "0725BC–Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "9QQL-JJP"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [],
+  "children": [
+   {
+    "id": "p108ef7fdd2",
+    "name": "Elmodam ben Er"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p00bc96f798",
+    "name": "Er ben Jose",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/9QQL-JJP",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

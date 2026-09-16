@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pd00a110ed1",
+ "bnr": "bnr://skaists.dev/blood/pd00a110ed1",
+ "identity": {
+  "name": "Alice Blake",
+  "lifespan": "1535–1615",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LJ2M-8YK"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p49275d82d1",
+    "name": "Humphrey Blake",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p8112d1a71d",
+    "name": "Agnes",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p9386a411c1",
+    "name": "Richard Slocombe"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p36252ed95a",
+    "name": "George Slocombe",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LJ2M-8YK",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

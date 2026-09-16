@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p6c24d2cb9b",
+ "bnr": "bnr://skaists.dev/blood/p6c24d2cb9b",
+ "identity": {
+  "name": "Susannah Pierce",
+  "lifespan": "1734–1808",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LCR1-RKK"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "LZDZ-655",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "LC8B-X1Z",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p4d8921d437",
+    "name": "Pierce James Bradley"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p8f1ccb2ef4",
+    "name": "George Bradley",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LCR1-RKK",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

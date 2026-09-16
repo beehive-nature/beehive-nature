@@ -1,0 +1,78 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p8641658f41",
+ "bnr": "bnr://skaists.dev/blood/p8641658f41",
+ "identity": {
+  "name": "Matilda de Clare II",
+  "lifespan": "1175–1213",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L6FQ-C1W"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pe8d7ea877c",
+    "name": "Richard de Clare, 3rd Earl of Hertford",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "paa68f48f88",
+    "name": "Amice of Gloucester",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pf35a4c1c68",
+    "name": "Sir John de Lacy, 2nd Earl of Lincoln"
+   },
+   {
+    "id": "pb1f029f724",
+    "name": "John de Braose"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pe4b572f214",
+    "name": "Roger de Lacy",
+    "marriage": null
+   },
+   {
+    "id": "p0c561a853d",
+    "name": "William de Braose IV",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L6FQ-C1W",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

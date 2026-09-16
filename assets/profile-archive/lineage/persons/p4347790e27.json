@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p4347790e27",
+ "bnr": "bnr://skaists.dev/blood/p4347790e27",
+ "identity": {
+  "name": "Hastilde der Rugen",
+  "lifespan": "0122–0179",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LCFW-RB5"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p27b43faa31",
+    "name": "King Nicanor Rugij",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pf1304322c8",
+    "name": "Quadi des Quades",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p04e5685636",
+    "name": "Octavius de Menapie, King of the Morini"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p838e18c043",
+    "name": "Koning der Morieniërs Julius de Menapie",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LCFW-RB5",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

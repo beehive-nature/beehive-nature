@@ -1,0 +1,63 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p7623b39d83",
+ "bnr": "bnr://skaists.dev/blood/p7623b39d83",
+ "identity": {
+  "name": "Marion Little",
+  "lifespan": "1545–1576",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GQFK-947"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "G8MJ-LB2",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p93f52b3bb7",
+    "name": "Andrew Denholme"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p8baa102983",
+    "name": "Robert Denholme",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GQFK-947",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p01bde836e3",
+ "bnr": "bnr://skaists.dev/blood/p01bde836e3",
+ "identity": {
+  "name": "William Beaser",
+  "lifespan": "1568–1632",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LCTJ-GK6"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p40e80fda02",
+    "name": "George Bezer",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pe2e975d1fd",
+    "name": "Alice",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pc897e23a29",
+    "name": "Edward Bezer Sr"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p7152e18931",
+    "name": "Joan",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LCTJ-GK6",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

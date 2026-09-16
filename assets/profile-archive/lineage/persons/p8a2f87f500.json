@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p8a2f87f500",
+ "bnr": "bnr://skaists.dev/blood/p8a2f87f500",
+ "identity": {
+  "name": "Heilwig abbesse de Chelles",
+  "lifespan": "0778–0833",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "9HXY-TD8"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pc791c7b964",
+    "name": "Isanbart Graf im Thurgau",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pdf715718f8",
+    "name": "Theodrada Äbtissin des Marienklosters in Soissons",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pc5de640b9b",
+    "name": "Judith von Altdorf Fränkische Königin und Römische Kaiserin"
+   },
+   {
+    "id": "p5d0d56270f",
+    "name": "Konrad I. Graf im Argen- und Linzgau und von Auxerre"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p2cfe8b2d6a",
+    "name": "Welf I. Graf in Bayern und Schwaben",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/9HXY-TD8",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

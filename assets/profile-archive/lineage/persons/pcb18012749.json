@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pcb18012749",
+ "bnr": "bnr://skaists.dev/blood/pcb18012749",
+ "identity": {
+  "name": "Emma Fitz Orm",
+  "lifespan": "1150–1203",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "KPWY-8VS"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p6a4ecfcd53",
+    "name": "Robert Fitz Orm",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p9a02e5394a",
+    "name": "Mabel Pierrepont",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p1e8290e72c",
+    "name": "Henry of  Aldithley"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pe90fc32fd8",
+    "name": "Adam of Aldithley",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/KPWY-8VS",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

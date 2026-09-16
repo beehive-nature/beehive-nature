@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p90cc687511",
+ "bnr": "bnr://skaists.dev/blood/p90cc687511",
+ "identity": {
+  "name": "Queen Argentaël de Vannes",
+  "lifespan": "0795–0851",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LZ6F-PDK"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p3b0e49d4cb",
+    "name": "Argant de Cornouaille",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pb14a15c53a",
+    "name": "Berilie de Rennes",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p8d1e97d293",
+    "name": "Duke Erispoë rex Brittonum and  I Earl of Poher."
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p599766bfe9",
+    "name": "Nominoe King of Brittany",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LZ6F-PDK",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

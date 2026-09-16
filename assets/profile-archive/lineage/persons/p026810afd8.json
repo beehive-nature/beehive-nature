@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p026810afd8",
+ "bnr": "bnr://skaists.dev/blood/p026810afd8",
+ "identity": {
+  "name": "Gwendolin verch Gruffud",
+  "lifespan": "1120BC–Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GPTY-1RR"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p5335c27b20",
+    "name": "Gruffudd ap Cynan the king of Gwynedd",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p38500759d3",
+    "name": "Mrs Gruffudd ap Cynan",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p661c68cdc9",
+    "name": "Duke Dyfnwal Hen ap Gorwynyawn of Cornwall"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p8b9f55c993",
+    "name": "King Camber Cymryw ap Brutus de Cambria",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GPTY-1RR",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

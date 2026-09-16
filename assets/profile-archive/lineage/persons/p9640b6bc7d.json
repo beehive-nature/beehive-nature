@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p9640b6bc7d",
+ "bnr": "bnr://skaists.dev/blood/p9640b6bc7d",
+ "identity": {
+  "name": "Margaret Durie",
+  "lifespan": "1592–1633",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GL9B-MVT"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p126f3eefc7",
+    "name": "Robert Durie",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p5c3c3e60b3",
+    "name": "Elizabeth Ramsay",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p1b841f34ef",
+    "name": "Joan Boswell"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pe8187722ed",
+    "name": "Richard Boswell",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GL9B-MVT",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

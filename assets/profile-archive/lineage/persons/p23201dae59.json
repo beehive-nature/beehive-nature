@@ -1,0 +1,82 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p23201dae59",
+ "bnr": "bnr://skaists.dev/blood/p23201dae59",
+ "identity": {
+  "name": "Octavia Thurina Minor 'the Younger'",
+  "lifespan": "0067BC–0010BC",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LDS3-975"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p270c64914f",
+    "name": "Gaius Octavius Thurinius van Rome",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pb37bc81e29",
+    "name": "Atia Balba Caesonia Secunda",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pdf112b9acf",
+    "name": "Antonia Minor De Roma"
+   },
+   {
+    "id": "pad948405ee",
+    "name": "Claudia Marcella Major"
+   },
+   {
+    "id": "p09171267b9",
+    "name": "Antonia Major Augusta"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p2efcc8ec59",
+    "name": "Marcus Claudius Marcellus of Rome",
+    "marriage": null
+   },
+   {
+    "id": "pde1f9191a0",
+    "name": "General of Rome under Julius Caesar and Roman Pharaoh and lord general Marc Marcus Antonius III",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LDS3-975",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

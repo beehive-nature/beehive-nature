@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p0f9e85383b",
+ "bnr": "bnr://skaists.dev/blood/p0f9e85383b",
+ "identity": {
+  "name": "Jane Hill",
+  "lifespan": "1402–1442",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GWSQ-K88"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pf8ca8797e1",
+    "name": "Robert Hill Of Shilston",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pc6a74f36f8",
+    "name": "Isabella Wadham",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p0163d915eb",
+    "name": "Margaret Carminow"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p5c5ea1cec7",
+    "name": "Thomas Carminow of Boconnoc",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GWSQ-K88",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p3786fb3ba7",
+ "bnr": "bnr://skaists.dev/blood/p3786fb3ba7",
+ "identity": {
+  "name": "Sir James Clarke",
+  "lifespan": "1475–1554",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L415-1S9"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "L14R-1VT",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "L2MP-G2G",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "paa0fc0c080",
+    "name": "John Clarke"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pb2b606e8df",
+    "name": "Elizabeth Ferrers",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L415-1S9",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p0ebf993547",
+ "bnr": "bnr://skaists.dev/blood/p0ebf993547",
+ "identity": {
+  "name": "William Jennings",
+  "lifespan": "1515–1567",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L23P-KCV"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p7266b394ef",
+    "name": "Philip Jennings",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p3197a2ed9e",
+    "name": "Sarah Spencer",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p39ba657cce",
+    "name": "Robert Jenynges"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "peed78cd0d5",
+    "name": "Alice Epouse",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L23P-KCV",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

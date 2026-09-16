@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p805a739c7d",
+ "bnr": "bnr://skaists.dev/blood/p805a739c7d",
+ "identity": {
+  "name": "Peter Potter",
+  "lifespan": "1535–Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "KC2W-9MQ"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p2232038410",
+    "name": "Roger Potter",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pc1b07760e5",
+    "name": "Joan",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p5122560cf6",
+    "name": "George Potter"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p10153543d4",
+    "name": "Grace",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/KC2W-9MQ",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

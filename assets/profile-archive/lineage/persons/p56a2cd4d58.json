@@ -1,0 +1,58 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p56a2cd4d58",
+ "bnr": "bnr://skaists.dev/blood/p56a2cd4d58",
+ "identity": {
+  "name": "Mrs. Amuram",
+  "lifespan": "Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LYXJ-QN1"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [],
+  "children": [
+   {
+    "id": "p440441e058",
+    "name": "Merimah bat Amuram"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pbd3b1ffd90",
+    "name": "Amuram ben Uz",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LYXJ-QN1",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

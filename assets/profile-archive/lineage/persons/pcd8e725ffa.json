@@ -1,0 +1,82 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pcd8e725ffa",
+ "bnr": "bnr://skaists.dev/blood/pcd8e725ffa",
+ "identity": {
+  "name": "Hazibah 'Estha' bat Levi",
+  "lifespan": "0091BC–0039BC",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L5FY-ZH2"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pc4c769f7c5",
+    "name": "Levi ben Melchi",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p46c04f17f8",
+    "name": "Pailine bint Eleazar",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pd573859a15",
+    "name": "Hezekiah ben Matthan"
+   },
+   {
+    "id": "pb188c65143",
+    "name": "Saint Joachim ben Matthat ha-David"
+   },
+   {
+    "id": "p2889423ed8",
+    "name": "Heli ben Matthat"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p496f28c8a1",
+    "name": "Matthat ben Levi",
+    "marriage": null
+   },
+   {
+    "id": "p4a1e6af78a",
+    "name": "Matthan ben Eleazar",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L5FY-ZH2",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

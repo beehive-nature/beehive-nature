@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p1dc8a230a5",
+ "bnr": "bnr://skaists.dev/blood/p1dc8a230a5",
+ "identity": {
+  "name": "Æthelhelm, Ealdorman of Wiltshire",
+  "lifespan": "0865–0897",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "9CNZ-V67"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pabaf75a68c",
+    "name": "Æthelred I of Wessex",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pde01828687",
+    "name": "Queen Wulfthryth of Wessex",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p76c37856e8",
+    "name": "Ælfflæd of Wiltshire"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pde8b982897",
+    "name": "Spouse Aethelhelm, Ealdorman of Wiltshire",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/9CNZ-V67",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p3ee3df6381",
+ "bnr": "bnr://skaists.dev/blood/p3ee3df6381",
+ "identity": {
+  "name": "Flandrine D'ANTOING",
+  "lifespan": "0795–0851",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PSX8-1QW"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p0885ef0e8e",
+    "name": "Richard D'ANTOING",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p63203ee23c",
+    "name": "Mrs. Richard D'Antoing",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p8ef5f2850e",
+    "name": "Odacre comte de Flandre"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p5aad090656",
+    "name": "Ingelram van Harlebeek Governor of Flanders",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PSX8-1QW",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

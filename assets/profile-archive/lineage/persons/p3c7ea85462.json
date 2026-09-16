@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p3c7ea85462",
+ "bnr": "bnr://skaists.dev/blood/p3c7ea85462",
+ "identity": {
+  "name": "Guillaume I de Montreuil",
+  "lifespan": "0945–0979",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "P9FW-GV6"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p55f6089de8",
+    "name": "Roger de Montreuil, count de Ponthieu",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pea548467c5",
+    "name": "Bertha de Boulogne",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p40076bd4ba",
+    "name": "Bernard Ier DE MONTREUIL-SUR-MER"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pf4cde83ea5",
+    "name": "Mathilde de Normandie Countess of Ponthieu",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/P9FW-GV6",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

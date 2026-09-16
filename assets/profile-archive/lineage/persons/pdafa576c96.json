@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pdafa576c96",
+ "bnr": "bnr://skaists.dev/blood/pdafa576c96",
+ "identity": {
+  "name": "Gerald de Hesdin",
+  "lifespan": "1015–1065",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G8KM-JF3"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pfec32bffa1",
+    "name": "Bellay de Vismes de Montreuil",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pfafabc5d0f",
+    "name": "Grécie du Plessis",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pba2482084b",
+    "name": "Adélaïde de Hesdin"
+   },
+   {
+    "id": "p817a534a48",
+    "name": "Gérard de Hesdin II"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p4001860d72",
+    "name": "Havoise de Wamin",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G8KM-JF3",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -76,6 +76,17 @@ live tier-1 rail:
 profile page — first-party, no dependency on external wiki platforms. External
 encyclopedias are CITED, never load-bearing.
 
+## Preservation milestones — named accurately (founder correction 2026-09-16)
+
+- **prepared / approved / restored / local-verification** are the working states today. `verify` reads LOCAL files: its success is a local copy-integrity check and now says so (`scope: local copy-integrity only`). **"retrieval-verified" is reserved** for a fresh fetch over an actual storage route after an adapter upload receipt exists in `manifest.uploads`.
+- **Approval binds the exact package**: `approve <dir> <by> <destination>` stamps `manifestSha256` + intended destination; no default attribution.
+- **Mandatory artifacts are fatal**: crest + authored meaning + both surfaces + their runtime dependencies (tour/lang/corpus/agent-dock/register, breathing signature, separators) + corpus/overlays/reconstructions/registry/inventory — a missing one fails preparation naming the file. (The founder caught the original bundler silently filtering missing files AND resolving the crest one directory wrong — both dead.)
+- **restore** reconstructs the real repo-relative tree; the restoration acceptance passed in-browser from the served package alone (person page → fractal landing → crest pixel-true → profile with both doors + 42-row spine, port 8792 receipt).
+
+## Research backlog — corrected framing (founder 2026-09-16)
+
+Harvesting source counts improves **inventory**, not confidence by itself. The useful research step is **attaching actual citations and materials to the claims they support**, with family memories, traditions, and the crest's authored meaning preserved alongside — attribution distinguishes, never ranks.
+
 ## Where the receipts live
 
 - `docs/dispatches/2026-09-16-family-lineage-extraction.md` — the extraction receipt.

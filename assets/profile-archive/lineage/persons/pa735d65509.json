@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pa735d65509",
+ "bnr": "bnr://skaists.dev/blood/pa735d65509",
+ "identity": {
+  "name": "Princess Esemkhebe Isiemkheb Istemkheb Egypt",
+  "lifespan": "1052BC–1000BC",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GWLD-HP2"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p5649ca0367",
+    "name": "Pharoah Ramesse Psusennes I of Egypt",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p3f62d7be23",
+    "name": "Wiay of Egypt",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p9ea381ad74",
+    "name": "Duathathor-Henuttawy"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p30321c799c",
+    "name": "MenKheperre' , High Priest of Amun",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GWLD-HP2",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

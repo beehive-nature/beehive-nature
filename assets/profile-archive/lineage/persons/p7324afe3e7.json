@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p7324afe3e7",
+ "bnr": "bnr://skaists.dev/blood/p7324afe3e7",
+ "identity": {
+  "name": "Alice Kinge",
+  "lifespan": "1535–1626",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L7NY-MWF"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p6b64fa2d99",
+    "name": "Mr King",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p232f6b0fc8",
+    "name": "Mrs Kynge",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p082d9d7391",
+    "name": "Sylvester Baldwin"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p7d878ffcbc",
+    "name": "Henry Baldwin",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L7NY-MWF",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

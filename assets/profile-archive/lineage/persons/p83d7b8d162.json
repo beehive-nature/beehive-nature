@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p83d7b8d162",
+ "bnr": "bnr://skaists.dev/blood/p83d7b8d162",
+ "identity": {
+  "name": "Stratonice De Macédoine princesse de Macédoine, reine de Syrie",
+  "lifespan": "0320BC–0268BC",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L627-GZS"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p9e60178fac",
+    "name": "King Demetrius I Poliorcetes of Macedon “Mesopotamia”",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p33151274a6",
+    "name": "Phila I kóri tou Antipater of Macedonia",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pdf4a705e9c",
+    "name": "Apama II of Macedonia"
+   },
+   {
+    "id": "p01562b8245",
+    "name": "Antiochus II Theos Basileus of the Seleucid Empire"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p2d2bfbe89f",
+    "name": "Antiochus I Soter Basileus of the Seleucid Empire",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L627-GZS",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,64 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p47e36ce020",
+ "bnr": "bnr://skaists.dev/blood/p47e36ce020",
+ "identity": {
+  "name": "Priapatius 3rd King of Parthia",
+  "lifespan": "0230BC–0175BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LZTV-S9Q"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p04513b7a8b",
+    "name": "Artabanus I King of Parthia",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p4368e6c23f",
+    "name": "Arsaces I"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p5acba21d3b",
+    "name": "Mrs Priapatius or Phriapatius of PARTHIA",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LZTV-S9Q",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

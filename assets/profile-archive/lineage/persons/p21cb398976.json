@@ -1,0 +1,64 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p21cb398976",
+ "bnr": "bnr://skaists.dev/blood/p21cb398976",
+ "identity": {
+  "name": "Rey Asurnasirpal II de Asiria",
+  "lifespan": "0910BC–0859BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G7M7-B4M"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p46e9e90949",
+    "name": "Tukulti-Ninurta II,",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pdc20e07ac0",
+    "name": "Rey Salmanasar III de Asiria"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p9fe45fc251",
+    "name": "Mullissu-mukannishat-Ninua",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G7M7-B4M",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

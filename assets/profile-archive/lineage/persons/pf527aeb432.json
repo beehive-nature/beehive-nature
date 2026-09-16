@@ -1,0 +1,58 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pf527aeb432",
+ "bnr": "bnr://skaists.dev/blood/pf527aeb432",
+ "identity": {
+  "name": "Mrs Gaius Calpurnius Glabrio",
+  "lifespan": "Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PHVV-MWV"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [],
+  "children": [
+   {
+    "id": "p6df28ab28d",
+    "name": "Manius Acilius Memmius Glabrio"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pdc5dbeb19d",
+    "name": "Gaius Calpurnius Glabrio",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PHVV-MWV",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

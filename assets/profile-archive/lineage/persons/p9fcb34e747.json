@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p9fcb34e747",
+ "bnr": "bnr://skaists.dev/blood/p9fcb34e747",
+ "identity": {
+  "name": "Anthony Kneisley",
+  "lifespan": "1657–1733",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L8SW-SQK"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pe44e24e31a",
+    "name": "Hans Knüessli",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p4b9aae26b3",
+    "name": "Maria Elsbeth Müller",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pa7dbeea33e",
+    "name": "Barbara Kneisly"
+   },
+   {
+    "id": "p6786d2906d",
+    "name": "Anna Kneisley"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pc8038db208",
+    "name": "Magdalena Hiestand",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L8SW-SQK",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

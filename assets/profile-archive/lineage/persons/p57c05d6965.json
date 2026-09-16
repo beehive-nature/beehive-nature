@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p57c05d6965",
+ "bnr": "bnr://skaists.dev/blood/p57c05d6965",
+ "identity": {
+  "name": "Béatrice de Faucigny",
+  "lifespan": "1138–1230",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LRCT-LRB"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p3db971bf50",
+    "name": "Count Aymon I De Faucigny Seigneur De Faucigny",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p9b977321d7",
+    "name": "Clemencia de Bourgogne",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pdcca98f17e",
+    "name": "Marguerite Béatrice de Genève Comtesse de Savoie"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p29b35bfb5f",
+    "name": "Guillaume Ier de Genève",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LRCT-LRB",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

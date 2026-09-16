@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p36252ed95a",
+ "bnr": "bnr://skaists.dev/blood/p36252ed95a",
+ "identity": {
+  "name": "George Slocombe",
+  "lifespan": "1530–1600",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LJ2M-825"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p6009ee84aa",
+    "name": "John Henry Slocombe",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p30254a6a78",
+    "name": "Alice Eclestone",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p9386a411c1",
+    "name": "Richard Slocombe"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pd00a110ed1",
+    "name": "Alice Blake",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LJ2M-825",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

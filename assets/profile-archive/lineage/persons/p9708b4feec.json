@@ -1,0 +1,64 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p9708b4feec",
+ "bnr": "bnr://skaists.dev/blood/p9708b4feec",
+ "identity": {
+  "name": "Ur Ningirsur DE LAGASH-?",
+  "lifespan": "2150BC–Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GKXQ-RSQ"
+  }
+ ],
+ "evidence": {
+  "era": "recorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "recorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p79e1e9e650",
+    "name": "Kabu DE LAGASH",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p265fe9d37a",
+    "name": "Ur Zabada DE LAGASH-D'OUROUK"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pa6160c63c5",
+    "name": "Ur Nanna D'OUROUK-DE BABYLONE",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GKXQ-RSQ",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

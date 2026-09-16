@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p55ee1d9bfb",
+ "bnr": "bnr://skaists.dev/blood/p55ee1d9bfb",
+ "identity": {
+  "name": "Claudia Tyndareus",
+  "lifespan": "29–Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L2TT-BNJ"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "PMKY-CSV",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "P63F-QRK",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p4e98e34611",
+    "name": "Claudia Tisamenis De Sparte"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pccc306500f",
+    "name": "Claudius Tisamenus de Sparte",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L2TT-BNJ",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

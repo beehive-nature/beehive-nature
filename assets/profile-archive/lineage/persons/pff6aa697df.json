@@ -1,0 +1,58 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pff6aa697df",
+ "bnr": "bnr://skaists.dev/blood/pff6aa697df",
+ "identity": {
+  "name": "Isha ha Obadiah",
+  "lifespan": "0360BC–Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "9CX7-F5N"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [],
+  "children": [
+   {
+    "id": "pec47237381",
+    "name": "Shechani'ah ben Obadiah 12th Exilarch"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p31ee98e19d",
+    "name": "Obadiah ben Arnan ben Rephaiah",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/9CX7-F5N",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

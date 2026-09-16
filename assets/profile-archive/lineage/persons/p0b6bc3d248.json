@@ -1,0 +1,64 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p0b6bc3d248",
+ "bnr": "bnr://skaists.dev/blood/p0b6bc3d248",
+ "identity": {
+  "name": "Julanthe von den Obotriten Königin der Sachsen",
+  "lifespan": "0620–0675",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G15Q-S82"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p02e2f794c3",
+    "name": "Mrs Goswin of the Obotrites",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p628f0aed79",
+    "name": "Dietrich Theoderich von Asseburg-Wettin King of the Saxons"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pddf1bdb8c5",
+    "name": "King Sieghard oder Sigismund König von Ripuarien of the Saxons",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G15Q-S82",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

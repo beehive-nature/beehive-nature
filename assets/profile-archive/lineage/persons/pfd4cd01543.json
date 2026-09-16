@@ -1,0 +1,64 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pfd4cd01543",
+ "bnr": "bnr://skaists.dev/blood/pfd4cd01543",
+ "identity": {
+  "name": "Maria WEBER",
+  "lifespan": "1658–Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "MRXP-72N"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p4984396a43",
+    "name": "Jörg Weber",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pcc69843bb9",
+    "name": "Maria Elisabeth HEILMANN"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p9ed71d90f8",
+    "name": "Hanß Wendel HEILMANN",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/MRXP-72N",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

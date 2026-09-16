@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pb6964a9ef9",
+ "bnr": "bnr://skaists.dev/blood/pb6964a9ef9",
+ "identity": {
+  "name": "Gilduin Le Danois",
+  "lifespan": "0885–Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GZ5Z-LS2"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p1e65a2c6e6",
+    "name": "Gildoin Le Danois",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p7fe0ab2a52",
+    "name": "Adèle De Montreuil",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p521b508e70",
+    "name": "Gildoin Le Danois"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pb29152737d",
+    "name": "Unknown",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GZ5Z-LS2",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

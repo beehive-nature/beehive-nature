@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pd476c50fda",
+ "bnr": "bnr://skaists.dev/blood/pd476c50fda",
+ "identity": {
+  "name": "Margaret d'Aumarle",
+  "lifespan": "1343–1399",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "M2TY-JR4"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "LR92-KXG",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "MMFH-QJW",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pc9c626475f",
+    "name": "Sir John Bonville"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pe5272173d3",
+    "name": "William de Bonville",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/M2TY-JR4",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

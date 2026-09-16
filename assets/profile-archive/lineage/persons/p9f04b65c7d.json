@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p9f04b65c7d",
+ "bnr": "bnr://skaists.dev/blood/p9f04b65c7d",
+ "identity": {
+  "name": "Paschasius de Glyn",
+  "lifespan": "1220–1270",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LXSC-BDN"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pe030953ed6",
+    "name": "Thomas de Glynn",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pe18069a5b9",
+    "name": "Unknown",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p1a6f19323b",
+    "name": "Sir John Glynn"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p77df8d1d45",
+    "name": "Olivia Powater",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LXSC-BDN",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

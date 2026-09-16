@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p3d7a4aa2ef",
+ "bnr": "bnr://skaists.dev/blood/p3d7a4aa2ef",
+ "identity": {
+  "name": "Postumius Festius DE ROME",
+  "lifespan": "95–Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PM4D-R7R"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pd29c3844ae",
+    "name": "Postumius Minor di Rome",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pfce5dd1b66",
+    "name": "Kalendae di Rome",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p19d71181d2",
+    "name": "Postumia Festus de Rome"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p06e4588232",
+    "name": "Alba Adriatica Minor Postumius di Rome",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PM4D-R7R",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

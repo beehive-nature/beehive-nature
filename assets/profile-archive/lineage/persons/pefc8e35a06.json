@@ -1,0 +1,77 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pefc8e35a06",
+ "bnr": "bnr://skaists.dev/blood/pefc8e35a06",
+ "identity": {
+  "name": "King of the Catuvellauni Caradog vel Caractacus Gweridd ap Bran of Siluria",
+  "lifespan": "6–Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "KZWK-3W3"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pbd2b0645ae",
+    "name": "King Bran \"The Blessed\" of the Britons",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pe6dd7fdd54",
+    "name": "Anna I Enygeus bat Joseph of Arimathea",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p907c08fb30",
+    "name": "King Cyllin I ap Caradoc of Ewyas"
+   },
+   {
+    "id": "p99d89ad2f7",
+    "name": "Saint Eigen ap Caratacus of Britain"
+   },
+   {
+    "id": "pc1e8e41968",
+    "name": "King Cyllin Marius Vel Meurig ap Caradog"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p6b7f3f393d",
+    "name": "Queen Genuissa of Siluria",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/KZWK-3W3",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pa8bccbbb7b",
+ "bnr": "bnr://skaists.dev/blood/pa8bccbbb7b",
+ "identity": {
+  "name": "John Randall I",
+  "lifespan": "1640–1684",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L1X1-9X3"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p5344e40060",
+    "name": "Vicar Matthew Randall II",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pce963846da",
+    "name": "Margaret Trevisa",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pfb46de5293",
+    "name": "Matthew Randall"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p1aaee2c7af",
+    "name": "Elizabeth Torrey",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L1X1-9X3",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": true,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

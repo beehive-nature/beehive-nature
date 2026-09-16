@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pb63ca588b1",
+ "bnr": "bnr://skaists.dev/blood/pb63ca588b1",
+ "identity": {
+  "name": "Robert de Quincy the Younger",
+  "lifespan": "1188–1217",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G8Y5-Y7S"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p7979a7c5f9",
+    "name": "Saher de Quincy 1st Earl of Winchester",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p5ed190b3e4",
+    "name": "Margaret de Beaumont Countess Of Winchester",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p7739cf99bb",
+    "name": "Margaret de Quincy"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p10e2d31e02",
+    "name": "Hawise of Chester",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G8Y5-Y7S",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

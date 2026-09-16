@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pc2fc548470",
+ "bnr": "bnr://skaists.dev/blood/pc2fc548470",
+ "identity": {
+  "name": "Jonan ben Eliakim",
+  "lifespan": "0960BC–0912BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "9WQ7-JL3"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p328bc62773",
+    "name": "Eliakim ben Melea",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pff30c529ab",
+    "name": "Eliakim",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p3acc096b47",
+    "name": "Joseph ben Jonan"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p8c77215bf2",
+    "name": "Anna Achim de Just",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/9WQ7-JL3",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,77 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pe260657df8",
+ "bnr": "bnr://skaists.dev/blood/pe260657df8",
+ "identity": {
+  "name": "Abar, Queen Consort of Nubia and Egypt",
+  "lifespan": "Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LYZ4-8N6"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p00137b6dc9",
+    "name": "1st Kushote King Alara Of Napata, Nubia",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p475f02f65e",
+    "name": "Kasaqa, Queen of Napata",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p9e3df6af97",
+    "name": "Tabekenamun"
+   },
+   {
+    "id": "p6532017b7b",
+    "name": "Taharqa, bint Piye 4th Pharaoh, 25th Dynasty"
+   },
+   {
+    "id": "p3d9d8e9a6f",
+    "name": "Takahatenamun bint Piye, Great Queen"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p02d108d474",
+    "name": "Piye 1st Pharaoh Of 25th Dynasty",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LYZ4-8N6",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p22d1f630b0",
+ "bnr": "bnr://skaists.dev/blood/p22d1f630b0",
+ "identity": {
+  "name": "Hezekiah ben Neariah 21st Exilarch",
+  "lifespan": "0264BC–Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G9RM-3MY"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p86cf726113",
+    "name": "Neariah ben Shemaiah 18th Exilarch",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p95b3ea0024",
+    "name": "Mrs Neariah ben Shemaiah",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p43c1508133",
+    "name": "bat Hezekiah"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pa3fb7319f3",
+    "name": "bat Shahanya bar Obadya",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G9RM-3MY",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

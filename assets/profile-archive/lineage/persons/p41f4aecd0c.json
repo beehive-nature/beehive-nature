@@ -1,0 +1,58 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p41f4aecd0c",
+ "bnr": "bnr://skaists.dev/blood/p41f4aecd0c",
+ "identity": {
+  "name": "Hathwagat",
+  "lifespan": "Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PHNK-TDW"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p39c75233f3",
+    "name": "Hulderic",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p4ea20078d1",
+    "name": "Heremond des Saxons"
+   }
+  ],
+  "spouses": []
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PHNK-TDW",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

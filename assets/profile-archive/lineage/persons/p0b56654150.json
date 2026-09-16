@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p0b56654150",
+ "bnr": "bnr://skaists.dev/blood/p0b56654150",
+ "identity": {
+  "name": "Geoffrey Dinham",
+  "lifespan": "1200–1258",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "9Q7D-ZGT"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pbecddc8b0c",
+    "name": "Olivier de Dinan III",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pdd435bdef3",
+    "name": "Elizabeth de Jugan",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pcbb24d5872",
+    "name": "Joanna Dinham"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pf3db997c8b",
+    "name": "Sarah de Hornicote",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/9Q7D-ZGT",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

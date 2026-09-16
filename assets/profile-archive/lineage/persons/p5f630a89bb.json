@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p5f630a89bb",
+ "bnr": "bnr://skaists.dev/blood/p5f630a89bb",
+ "identity": {
+  "name": "Ostrogotha King of the Greuthungi",
+  "lifespan": "0171–0250",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L58G-PNB"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pc2315b9357",
+    "name": "Hisarna \"the Iron One\" of the Greuthengi Goths",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pb17b3cfbce",
+    "name": "Skjjold Skjald des Asgard des Ases",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pd0ca9aeb23",
+    "name": "Hunuil King of the Greuthungi Goths"
+   },
+   {
+    "id": "p34d4453083",
+    "name": "Rei dos Visigodos Cniva des Goths"
+   }
+  ],
+  "spouses": []
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L58G-PNB",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p30721000d5",
+ "bnr": "bnr://skaists.dev/blood/p30721000d5",
+ "identity": {
+  "name": "Archelaus III Sisines, King of Cappadocia",
+  "lifespan": "0060BC–17",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "9CXH-Q7H"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p5b73cba1fb",
+    "name": "Archelaus I ben Archealus High Priest of Comana",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p3fea307295",
+    "name": "Berenice IV. Epiphaneia",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pcc49f2720a",
+    "name": "Glaphyra bat Archealaus"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pf5bda4e5eb",
+    "name": "Pythodorida bat Pythodoros of Smyrna",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/9CXH-Q7H",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

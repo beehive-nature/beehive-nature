@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p035a839067",
+ "bnr": "bnr://skaists.dev/blood/p035a839067",
+ "identity": {
+  "name": "Thomas Freebody",
+  "lifespan": "1404–1437",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GZ41-MVP"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p45fc16aff0",
+    "name": "John Freebody",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p81f3e41920",
+    "name": "Mary Ovenden",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pae2ac1a6fa",
+    "name": "Thomas Freebody"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p7660ec80e6",
+    "name": "Anne Matilda Benton",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GZ41-MVP",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

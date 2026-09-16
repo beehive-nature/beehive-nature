@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p9e6bf5b61e",
+ "bnr": "bnr://skaists.dev/blood/p9e6bf5b61e",
+ "identity": {
+  "name": "Naasson ben Aminadab",
+  "lifespan": "1505BC–1406BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L6Y9-86B"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pb5042fafd7",
+    "name": "Amminadab ben ram",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p1d74c7edeb",
+    "name": "Kiya-Tasherit XVIII Dynasty of Egypt",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p0207c83976",
+    "name": "Elimelec ben Nahshun"
+   },
+   {
+    "id": "pc09de138c5",
+    "name": "Hareph ben Naasson"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pa804b3af09",
+    "name": "Miriam bint Imram 'the Prophetess'",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L6Y9-86B",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

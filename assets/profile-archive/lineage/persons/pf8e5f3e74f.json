@@ -1,0 +1,58 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pf8e5f3e74f",
+ "bnr": "bnr://skaists.dev/blood/pf8e5f3e74f",
+ "identity": {
+  "name": "Elizabeth Thomas",
+  "lifespan": "1669–1709",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G2JN-YQR"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [],
+  "children": [
+   {
+    "id": "p9eb0f0af99",
+    "name": "Dorcas Matthews"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p732459927d",
+    "name": "Oliver Matthews",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G2JN-YQR",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

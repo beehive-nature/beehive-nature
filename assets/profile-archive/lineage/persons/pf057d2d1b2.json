@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pf057d2d1b2",
+ "bnr": "bnr://skaists.dev/blood/pf057d2d1b2",
+ "identity": {
+  "name": "Sety I Merenptah Setymeramen Twosret",
+  "lifespan": "1319BC–1278BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "KG6R-GKG"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p7c1ef2b076",
+    "name": "Menpehtyre Ramesses I pharaoh Of Egypt",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p4fcd36a539",
+    "name": "Sitre Meryamun Twosret Setepenmut",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pd69d747cb1",
+    "name": "Ramesses II , 3rd Pharaoh of 19th Dynasty"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p092384cd4a",
+    "name": "Muat Tuya",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/KG6R-GKG",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

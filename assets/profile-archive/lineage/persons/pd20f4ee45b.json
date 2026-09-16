@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pd20f4ee45b",
+ "bnr": "bnr://skaists.dev/blood/pd20f4ee45b",
+ "identity": {
+  "name": "Adobogiona bat  Mithradates VI",
+  "lifespan": "0070BC–0030BC",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LYTS-C64"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pa1dc9b7283",
+    "name": "Mithridatis Eupator",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pec552d30a8",
+    "name": "Mrs Mithridatis Eupator",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p5eff166ebf",
+    "name": "Princess M bat Castor of the Tectosagi"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p1db283eab0",
+    "name": "Castor II de Galatie King of Galatia",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LYTS-C64",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

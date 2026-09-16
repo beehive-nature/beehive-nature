@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pcb8b877869",
+ "bnr": "bnr://skaists.dev/blood/pcb8b877869",
+ "identity": {
+  "name": "Aedia Servilia de Rome",
+  "lifespan": "30–56",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GVQ6-QPX"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p559eb5532c",
+    "name": "Marcus Aedius de Rome",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p29f4066636",
+    "name": "Servilia de Rome",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pce8a44ff49",
+    "name": "Manlius Acilius Glabrio I"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p6df28ab28d",
+    "name": "Manius Acilius Memmius Glabrio",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GVQ6-QPX",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

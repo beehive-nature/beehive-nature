@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p58f3d915c1",
+ "bnr": "bnr://skaists.dev/blood/p58f3d915c1",
+ "identity": {
+  "name": "Joses ben Joseph",
+  "lifespan": "1–62",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GFG9-V4G"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pfa88893386",
+    "name": "Joseph ben Heli of Nazareth",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p6ba1177c45",
+    "name": "St. Mary bat Joachim",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p97b30ed729",
+    "name": "Jasna 'the Philistine' Ben Joseph Desposyni"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p0f84edaa47",
+    "name": "Silurian Princess",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GFG9-V4G",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "paeb7ef351b",
+ "bnr": "bnr://skaists.dev/blood/paeb7ef351b",
+ "identity": {
+  "name": "Berthilde de Crepy en Artois",
+  "lifespan": "0977–1040",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GLY1-KRX"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p291ced9f41",
+    "name": "Nestor de Ruisseauville",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pf5fae81385",
+    "name": "Gertrude de Laon",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p4001860d72",
+    "name": "Havoise de Wamin"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p9ad64d8ff3",
+    "name": "Nocher de Wamin",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GLY1-KRX",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,63 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p010300e895",
+ "bnr": "bnr://skaists.dev/blood/p010300e895",
+ "identity": {
+  "name": "Ashur-Rabi I, King of Assyria",
+  "lifespan": "1505BC–1451BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G7MW-MNS"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pa4d36469f0",
+    "name": "Enlil-nasir I, King of Assyria",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pf6034e6f81",
+    "name": "MRS Enlil-nasir I OF ASSYRIA",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pde0e09b34b",
+    "name": "Enlil-Nasir II King of Assur"
+   }
+  ],
+  "spouses": []
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G7MW-MNS",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p15906264bd",
+ "bnr": "bnr://skaists.dev/blood/p15906264bd",
+ "identity": {
+  "name": "Jacob Ormsby",
+  "lifespan": "1647–1677",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LX35-RQ7"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pb81e89c29e",
+    "name": "Richard Ormsby",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pf33745d300",
+    "name": "Sarah Upham",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pfd6edfb7fd",
+    "name": "Mary Ormsby"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p46abe55e4e",
+    "name": "Mary Perrin",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LX35-RQ7",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

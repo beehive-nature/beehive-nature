@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p8c03fd33f3",
+ "bnr": "bnr://skaists.dev/blood/p8c03fd33f3",
+ "identity": {
+  "name": "Togarmah ben Gomer",
+  "lifespan": "2308BC–2181BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LJGJ-FB9"
+  }
+ ],
+ "evidence": {
+  "era": "recorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "recorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p58d2bfe755",
+    "name": "Gomer ben Japheth",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pe17e0db5aa",
+    "name": "Goyong bint Sa'am",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p0ce5aa57c3",
+    "name": "Kavkas ben Togarmah"
+   },
+   {
+    "id": "p422ebd47de",
+    "name": "Kartlos ben Togarmah"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p4d96fc9c15",
+    "name": "Mrs Togarmah",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LJGJ-FB9",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

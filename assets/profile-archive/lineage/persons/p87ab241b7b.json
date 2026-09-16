@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p87ab241b7b",
+ "bnr": "bnr://skaists.dev/blood/p87ab241b7b",
+ "identity": {
+  "name": "Engeltrude von Friaul",
+  "lifespan": "0836–0870",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L8MS-M3H"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pe24c94b278",
+    "name": "Eberhard von Friaul",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pe4def2fc1e",
+    "name": "Gisela Markgräfin von Friaul",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pd3982d8b0b",
+    "name": "Hadwig von Babenberg"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pfadd5dadad",
+    "name": "Heinrich I. von Babenberg Markgraf in Friesland",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L8MS-M3H",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

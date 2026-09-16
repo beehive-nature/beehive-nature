@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p74d2804f6e",
+ "bnr": "bnr://skaists.dev/blood/p74d2804f6e",
+ "identity": {
+  "name": "Sir Robert Francis",
+  "lifespan": "1286–1317",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PCTV-1RD"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p8a66670de4",
+    "name": "John Fraunceys",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p6148bfb76c",
+    "name": "Margery de Beaufoy",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p000fdcbcbd",
+    "name": "John Francis"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p51cfa90af5",
+    "name": "Cecily Francis",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PCTV-1RD",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

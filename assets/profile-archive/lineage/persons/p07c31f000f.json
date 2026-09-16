@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p07c31f000f",
+ "bnr": "bnr://skaists.dev/blood/p07c31f000f",
+ "identity": {
+  "name": "Isaac Warner I",
+  "lifespan": "1645–1691",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "M18D-NMS"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pce1be34107",
+    "name": "Deacon Andrew Warner",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p990e9e5624",
+    "name": "Mary Humphrey",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p1dfcb287c5",
+    "name": "Lydia Warner"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p8268591ae9",
+    "name": "Sarah Boltwood",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/M18D-NMS",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

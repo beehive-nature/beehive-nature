@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p951fc462be",
+ "bnr": "bnr://skaists.dev/blood/p951fc462be",
+ "identity": {
+  "name": "Hanoch ibn Qābīl",
+  "lifespan": "3916BC–3570BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "93KT-YW9"
+  }
+ ],
+ "evidence": {
+  "era": "recorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "recorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pbb29dbf013",
+    "name": "Cain Qabil ben Adam",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p330393ddf2",
+    "name": "Iqlimah bint Adam",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p2ba39f2cf3",
+    "name": "Mara bint Hanoch bat Qābīl"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p3908f7815e",
+    "name": "Niba bint Šayṯ",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/93KT-YW9",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

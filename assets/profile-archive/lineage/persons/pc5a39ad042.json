@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pc5a39ad042",
+ "bnr": "bnr://skaists.dev/blood/pc5a39ad042",
+ "identity": {
+  "name": "George Denison II",
+  "lifespan": "1653–1711",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LTX4-D9S"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pa6c60f36fc",
+    "name": "George Denison",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p8c4cb708d7",
+    "name": "Ann Borodell",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p8987e51d18",
+    "name": "Thankful Denison"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p43113dcee3",
+    "name": "Mercy Gorham",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LTX4-D9S",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

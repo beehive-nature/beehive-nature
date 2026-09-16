@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p4e0cc3b493",
+ "bnr": "bnr://skaists.dev/blood/p4e0cc3b493",
+ "identity": {
+  "name": "Lucy Chaffin",
+  "lifespan": "1815–1855",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L4PS-BFK"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p3ef37ce66d",
+    "name": "Jonas Chaffin",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pd5b7d066fe",
+    "name": "Jerusha Dodd",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p79dd05f2e1",
+    "name": "Jonas Willard Humes"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pe7f8934051",
+    "name": "Manning Humes",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L4PS-BFK",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

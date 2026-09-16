@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p0222fb209c",
+ "bnr": "bnr://skaists.dev/blood/p0222fb209c",
+ "identity": {
+  "name": "Maria Catharine Waldman",
+  "lifespan": "1773–1816",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "MRZT-2MT"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pf9f67d1e90",
+    "name": "John Ludwig Waldman",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p614c13c8a9",
+    "name": "Anna Catharine Fellebahn",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pff1b4894a4",
+    "name": "Elizabeth Ann Kroll"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p602523e724",
+    "name": "Jacob Kroll",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/MRZT-2MT",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

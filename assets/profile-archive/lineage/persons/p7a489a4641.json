@@ -1,0 +1,87 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p7a489a4641",
+ "bnr": "bnr://skaists.dev/blood/p7a489a4641",
+ "identity": {
+  "name": "King Josiah ben Amon",
+  "lifespan": "0660BC–0609",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L69C-8JY"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p06b2e28c64",
+    "name": "King Amon ben Manasseh",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p57548f616d",
+    "name": "Jedidah bat Adaiah",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p24bf076927",
+    "name": "Heiress Tamar Bint Josias Of The Davidic Dynasty"
+   },
+   {
+    "id": "p4d5c10e87b",
+    "name": "Crown Prince Johanan ben Josiah"
+   },
+   {
+    "id": "p50251186de",
+    "name": "King Eliakim Jehoiakim ben Josiah"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p4127e4c0d9",
+    "name": "Zebudah bat Pedaiah",
+    "marriage": null
+   },
+   {
+    "id": "p436d37853c",
+    "name": "Dalilah bint Kermias",
+    "marriage": null
+   },
+   {
+    "id": "p65a9712c81",
+    "name": "Hamutal bat Jeremiah of Libnah",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L69C-8JY",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

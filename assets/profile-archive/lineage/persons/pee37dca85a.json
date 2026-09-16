@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pee37dca85a",
+ "bnr": "bnr://skaists.dev/blood/pee37dca85a",
+ "identity": {
+  "name": "Amenirdis II bint Taharqa, God's Wife of Amun",
+  "lifespan": "–0640BC",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "KN19-QWG"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p6532017b7b",
+    "name": "Taharqa, bint Piye 4th Pharaoh, 25th Dynasty",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p3d9d8e9a6f",
+    "name": "Takahatenamun bint Piye, Great Queen",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p977765dce8",
+    "name": "Psamtik I Wahibre 1st Pharaoh 26th Dynasty"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p5f7669feca",
+    "name": "Necho I Memkheperre , Pharaoh during the Proto-Saite Dynasty",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/KN19-QWG",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

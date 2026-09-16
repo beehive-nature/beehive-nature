@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p0811e72dd3",
+ "bnr": "bnr://skaists.dev/blood/p0811e72dd3",
+ "identity": {
+  "name": "Sigarde d'Alemania",
+  "lifespan": "0250–Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PCZG-G72"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "PCZ5-X6N",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "PC8F-R85",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pe319803b89",
+    "name": "Queen Athildis of the Sicambrian Franks"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p064e792eb2",
+    "name": "Marcomir Chrocus I de Toxandrie",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PCZG-G72",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

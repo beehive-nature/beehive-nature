@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pe4b572f214",
+ "bnr": "bnr://skaists.dev/blood/pe4b572f214",
+ "identity": {
+  "name": "Roger de Lacy",
+  "lifespan": "1171–1211",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "M3DW-6QG"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p3ca916d91e",
+    "name": "John FitzRichard",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p7fec08b5ad",
+    "name": "Alice of Essex II",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pf35a4c1c68",
+    "name": "Sir John de Lacy, 2nd Earl of Lincoln"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p8641658f41",
+    "name": "Matilda de Clare II",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/M3DW-6QG",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

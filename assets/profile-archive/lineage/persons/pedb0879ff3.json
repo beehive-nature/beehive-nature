@@ -1,0 +1,58 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pedb0879ff3",
+ "bnr": "bnr://skaists.dev/blood/pedb0879ff3",
+ "identity": {
+  "name": "Mrs Tanhumeth al Nethopath Levi",
+  "lifespan": "Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PD5N-5N1"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [],
+  "children": [
+   {
+    "id": "p2d1214e85b",
+    "name": "Daughter Of Tanhumeth"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p10785fb8b0",
+    "name": "Tanhumeth al Nethopath Levi",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PD5N-5N1",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

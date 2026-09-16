@@ -1,0 +1,58 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pf0ef6ad803",
+ "bnr": "bnr://skaists.dev/blood/pf0ef6ad803",
+ "identity": {
+  "name": "Ur-Pabilsag ben A-Imdugud 2nd King of Ur",
+  "lifespan": "–2591BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G331-4V9"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p8df2852b74",
+    "name": "A-Imdugud 1st King of Ur",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p824d41f7ed",
+    "name": "Meskalamdug 3rd King of Ur, King of Kish"
+   }
+  ],
+  "spouses": []
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G331-4V9",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

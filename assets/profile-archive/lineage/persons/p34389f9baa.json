@@ -1,0 +1,78 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p34389f9baa",
+ "bnr": "bnr://skaists.dev/blood/p34389f9baa",
+ "identity": {
+  "name": "Leah bint Laban",
+  "lifespan": "1820BC–Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LZGK-NJ9"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pc767dead38",
+    "name": "Laban ben Bethuel",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pd15e35cb9c",
+    "name": "Adinah bint Haran",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p79f1bafe4e",
+    "name": "Judah ben Israel ,King of Goshen"
+   },
+   {
+    "id": "p9da63e0b13",
+    "name": "Issachar ben Jacob"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "ped0bf54e8f",
+    "name": "Jacob \"Israel\" ben Isaac",
+    "marriage": null
+   },
+   {
+    "id": "p9b3a4664e9",
+    "name": "ʾĀv: Yaʿaqōv 'Yīšrāʾēl' Bən-Yiṣḥāq",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LZGK-NJ9",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

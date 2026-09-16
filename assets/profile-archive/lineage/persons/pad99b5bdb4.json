@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pad99b5bdb4",
+ "bnr": "bnr://skaists.dev/blood/pad99b5bdb4",
+ "identity": {
+  "name": "King of Macedon Amyntas III Argead",
+  "lifespan": "0410BC–0370BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G29N-Y8R"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p0626b0b210",
+    "name": "Prince of Macedon Arrhidaeus III Argead",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p2c1f6c78e9",
+    "name": "Cleopatra Alexandrou De'Orestis",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pb5c2635271",
+    "name": "King of Macedon Philip Argead II"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p22b2d0ddfa",
+    "name": "Queen of Macedon Eurydice Lyncestis I",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G29N-Y8R",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

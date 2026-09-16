@@ -1,0 +1,63 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p48bfe5a8e0",
+ "bnr": "bnr://skaists.dev/blood/p48bfe5a8e0",
+ "identity": {
+  "name": "King Awa’a  Agaua BINT MOSES Of Kush",
+  "lifespan": "1424BC–1349BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PQF9-K18"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pfe1a809fb1",
+    "name": "Kikianus ben Neber, King of Cush",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pf68afeab5f",
+    "name": "Tharbis bat Piori II",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p6ac277ec32",
+    "name": "Utererses BEN AWAWA"
+   }
+  ],
+  "spouses": []
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PQF9-K18",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

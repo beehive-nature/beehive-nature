@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p8225ec9bd6",
+ "bnr": "bnr://skaists.dev/blood/p8225ec9bd6",
+ "identity": {
+  "name": "Curtilla Mancia di Rome",
+  "lifespan": "35–0106",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PWTX-ZMW"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p93449b9687",
+    "name": "Titus Curtilius Mancia",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pbcc8cb44f4",
+    "name": "Domitia Laenus",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pfce5dd1b66",
+    "name": "Kalendae di Rome"
+   },
+   {
+    "id": "pceb49d5053",
+    "name": "Domicia Lucilla Maior DE ROME"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p2579bacc1e",
+    "name": "CNAEUS DOMITIUS CURVIUS LUCANUS OF ROME",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PWTX-ZMW",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

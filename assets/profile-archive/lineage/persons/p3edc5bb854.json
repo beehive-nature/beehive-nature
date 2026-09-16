@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p3edc5bb854",
+ "bnr": "bnr://skaists.dev/blood/p3edc5bb854",
+ "identity": {
+  "name": "Muak bat Cainán ibn Arfakhsad",
+  "lifespan": "2285BC–1800BC",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "9HJJ-FJS"
+  }
+ ],
+ "evidence": {
+  "era": "recorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "recorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p8f5f9b2f77",
+    "name": "Patriarch Cainan ben Arphaxad",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p04bee54733",
+    "name": "Melka bint Madai",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p08e9f1231b",
+    "name": "Abir ibn Shalikh"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p17fd823540",
+    "name": "Hazrat Shalikh ibn Arfakhsad 5th Prophet of Islam",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/9HJJ-FJS",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

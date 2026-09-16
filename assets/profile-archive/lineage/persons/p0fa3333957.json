@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p0fa3333957",
+ "bnr": "bnr://skaists.dev/blood/p0fa3333957",
+ "identity": {
+  "name": "'Ûr-Nammu ibn Kesed King of the Neo-Sumerian Empire",
+  "lifespan": "2239BC–1894BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LCF8-241"
+  }
+ ],
+ "evidence": {
+  "era": "recorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "recorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p00da0902f1",
+    "name": "Kesed ibn Arfakhsad",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p357e0c6834",
+    "name": "Asshar bint Assur",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p8e19f8e30b",
+    "name": "Ora bint Ur of Babylon"
+   },
+   {
+    "id": "pb08006a3b4",
+    "name": "King Shulgi D'UR-DE LAGASH Of Sumer And Akkad"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pd8b51e8c97",
+    "name": "Watartum bint Utu-Hengal",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LCF8-241",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

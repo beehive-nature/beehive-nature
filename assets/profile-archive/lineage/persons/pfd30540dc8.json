@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pfd30540dc8",
+ "bnr": "bnr://skaists.dev/blood/pfd30540dc8",
+ "identity": {
+  "name": "Graaf Gerulf van Friesland I, the Old",
+  "lifespan": "0780–0855",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PWQ4-YFW"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p65d329c228",
+    "name": "Graaf Nordalah van Friesland",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pe27a5c9df3",
+    "name": "Westrichgouw",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p3821cef266",
+    "name": "Graaf Gerulf van Friesland II"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p8cb6254f6e",
+    "name": "van Westergo De Saint-Quentin",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PWQ4-YFW",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

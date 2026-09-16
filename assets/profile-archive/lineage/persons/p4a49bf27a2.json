@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p4a49bf27a2",
+ "bnr": "bnr://skaists.dev/blood/p4a49bf27a2",
+ "identity": {
+  "name": "Basilia de Riddlesford",
+  "lifespan": "1150–1237",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L2X4-PP8"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "GVHJ-T82",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "GH2Q-DLR",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p59c6ff20ad",
+    "name": "Sir, Lord John de Cogan"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pcf8c7c8aed",
+    "name": "Richard de Cogan",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L2X4-PP8",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

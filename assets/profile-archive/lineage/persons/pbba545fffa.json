@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pbba545fffa",
+ "bnr": "bnr://skaists.dev/blood/pbba545fffa",
+ "identity": {
+  "name": "Marduk Zakir Schumi",
+  "lifespan": "Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GPX1-YBD"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p60bfca4bb9",
+    "name": "Nabû Shuma Ukin 1er Souverain de Babylone",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pfc33f2888a",
+    "name": "Mrs Nabû Shuma Ukin 1er Souverain D'Assyrie",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p4d5eb07eb8",
+    "name": "Shammu ramat Semiramis"
+   },
+   {
+    "id": "pd644538fbb",
+    "name": "Marduk Balatsu Iqbi De Babylone Souverain de Babylone"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p64e1673631",
+    "name": "Shuma Damqa Assyria",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GPX1-YBD",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

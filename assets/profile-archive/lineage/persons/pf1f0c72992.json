@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pf1f0c72992",
+ "bnr": "bnr://skaists.dev/blood/pf1f0c72992",
+ "identity": {
+  "name": "Hugo I. vom Nordgau",
+  "lifespan": "0875–0940",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LCR2-MMW"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pde943737ea",
+    "name": "Gräf Eberhard im Nordgau III",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p030f79cb20",
+    "name": "Adalind de Vermandois",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p9bd5043efa",
+    "name": "Eberhard IV. Graf im elsässischen Nordgau"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pded1d3d2b5",
+    "name": "Hildegarde de Ferrette",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LCR2-MMW",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

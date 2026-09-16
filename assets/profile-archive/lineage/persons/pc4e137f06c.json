@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pc4e137f06c",
+ "bnr": "bnr://skaists.dev/blood/pc4e137f06c",
+ "identity": {
+  "name": "King Tigranes VI ben Alexander",
+  "lifespan": "25–68",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L2RZ-BHN"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pea5bf09d05",
+    "name": "Caius Julius Alexander of Judea",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p46a5ebd26e",
+    "name": "unnamed bat Pheroras",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pa5e82d81b0",
+    "name": "King Gaius Julius Alexander son of Tigranes VI by Julia Of Cilician Cetis"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p8734ffff33",
+    "name": "Julia of Chalcis",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L2RZ-BHN",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

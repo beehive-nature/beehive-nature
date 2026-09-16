@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p18c4a50b05",
+ "bnr": "bnr://skaists.dev/blood/p18c4a50b05",
+ "identity": {
+  "name": "Lucius Ceionius Commodus Verus Caesar",
+  "lifespan": "0101–0138",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LKYZ-3T1"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p7a22068398",
+    "name": "Lucius Ceionius Commodus Verus Consul In 78",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p542b130ac7",
+    "name": "Plautia Plautius Maior",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p592ea52aa1",
+    "name": "Ceionia Fabia"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p5de9b87f25",
+    "name": "Avidia",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LKYZ-3T1",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

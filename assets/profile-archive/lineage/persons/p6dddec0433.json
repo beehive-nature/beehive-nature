@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p6dddec0433",
+ "bnr": "bnr://skaists.dev/blood/p6dddec0433",
+ "identity": {
+  "name": "Servius Cornelius Scipio Orfitus Scipio Salvidenus Orfitus",
+  "lifespan": "0145–Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LV3Y-LX1"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pcafc004b4f",
+    "name": "Lucius Junius Rufinus Proculianus",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p0d34633591",
+    "name": "Arria Sextia Paulina",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p12d2585277",
+    "name": "Cornelia Orfita Salvidiena Subinianus"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p671a3ce556",
+    "name": "Arria Cornelius",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LV3Y-LX1",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

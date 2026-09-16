@@ -1,0 +1,58 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p2c072a6e2d",
+ "bnr": "bnr://skaists.dev/blood/p2c072a6e2d",
+ "identity": {
+  "name": "Torstein Torsteinsen Kuse på Hvalby",
+  "lifespan": "1435–1510",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PM8N-24R"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [],
+  "children": [
+   {
+    "id": "p54abfb5265",
+    "name": "Angjerd 'Anngerd' Torsteinsdatter Kuse Brønnøy"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p3d005f3f1a",
+    "name": "Anngerd Arnesdatter Aspa",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PM8N-24R",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

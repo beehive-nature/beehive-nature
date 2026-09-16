@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pb9a54b37ea",
+ "bnr": "bnr://skaists.dev/blood/pb9a54b37ea",
+ "identity": {
+  "name": "Fannia",
+  "lifespan": "Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G3Q3-9BT"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pbac6e8f02a",
+    "name": "Publius Claudius Thrasea Paetus van Rome",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pab14610dd8",
+    "name": "Caesina Arria",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pd4c5f1436b",
+    "name": "Gaius Helvidius PRISCUS"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pb523eef2ad",
+    "name": "Helvidius Priscus",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G3Q3-9BT",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

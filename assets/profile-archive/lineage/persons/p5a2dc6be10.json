@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p5a2dc6be10",
+ "bnr": "bnr://skaists.dev/blood/p5a2dc6be10",
+ "identity": {
+  "name": "Alov Olafsdotter Princess of Närke, Sweden",
+  "lifespan": "0630–0664",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LRPH-B8H"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p1a2f325272",
+    "name": "Olof the Clear-Sighted King of Nerike",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p09536e9424",
+    "name": "Solva Queen Of Naeriki",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pb8b4c3849d",
+    "name": "Gauthild Algautsdotter Queen of Sweden"
+   },
+   {
+    "id": "pd6ae68a5d1",
+    "name": "Algaut Gautreksdottir"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p1d44aebf58",
+    "name": "Algaut Gautreksson Petty Kingdom of Götaland, Sweden",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LRPH-B8H",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

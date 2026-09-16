@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p9973921ae0",
+ "bnr": "bnr://skaists.dev/blood/p9973921ae0",
+ "identity": {
+  "name": "Jacquelyn Marie Bygote",
+  "lifespan": "1540–1620",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "KF4K-7Y6"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pcf09f6a857",
+    "name": "Charles Done Bygote",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pbdcb484390",
+    "name": "Jacque Marie Quxeuil",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pdebc3d5101",
+    "name": "Jean Johannes Brunel"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pa509c3b90b",
+    "name": "Thomas Pearce Bunnill II",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/KF4K-7Y6",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

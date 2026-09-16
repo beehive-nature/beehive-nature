@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p557624b086",
+ "bnr": "bnr://skaists.dev/blood/p557624b086",
+ "identity": {
+  "name": "Marcus Peducaeus Plautius Quintillus - Epidii",
+  "lifespan": "0140–0205",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G6RP-QST"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p15b4cc0a19",
+    "name": "Lucius Titius Plautius Quintillus - Epidii",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p592ea52aa1",
+    "name": "Ceionia Fabia",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pe40d9839ea",
+    "name": "Plautia Servilla Plautii"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pce46652b34",
+    "name": "Servilla",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G6RP-QST",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

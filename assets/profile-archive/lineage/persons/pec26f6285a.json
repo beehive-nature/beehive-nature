@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pec26f6285a",
+ "bnr": "bnr://skaists.dev/blood/pec26f6285a",
+ "identity": {
+  "name": "Samuel A Frampton",
+  "lifespan": "1746–1798",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LCXB-ZM2"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "KPSS-V31",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "2DXT-G8X",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p851068a016",
+    "name": "David Frampton"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p7ada3c30cb",
+    "name": "Nancy Agnes Elizabeth Kelley",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LCXB-ZM2",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

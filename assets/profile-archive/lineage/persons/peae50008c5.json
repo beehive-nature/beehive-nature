@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "peae50008c5",
+ "bnr": "bnr://skaists.dev/blood/peae50008c5",
+ "identity": {
+  "name": "Pieter Jansz",
+  "lifespan": "1588–1650",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LZ8W-ZQJ"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pde2c47e844",
+    "name": "Jan Gerritsz Maddelienen",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pe135ca42a0",
+    "name": "Janneke Van Langendyck",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p5f949519a2",
+    "name": "Magdalena Pieterse"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p67b1af2de7",
+    "name": "Adriaentgen Arentsz",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LZ8W-ZQJ",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

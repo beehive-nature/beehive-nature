@@ -1,0 +1,64 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pd4ae64429e",
+ "bnr": "bnr://skaists.dev/blood/pd4ae64429e",
+ "identity": {
+  "name": "? (dite La Perle de Kish) D'UR-?",
+  "lifespan": "2490BC–Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GQM2-4D4"
+  }
+ ],
+ "evidence": {
+  "era": "recorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "recorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p5299932621",
+    "name": "Mes-Anne-pada 5th King of Ur, King of Uruk",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p1dadff3612",
+    "name": "Mamagal 'the boatman' 3rd King of Kish 2nd Dynasty"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pcc9b53adbf",
+    "name": "Susuda 1st King of Kish 2nd Dynasty",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GQM2-4D4",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

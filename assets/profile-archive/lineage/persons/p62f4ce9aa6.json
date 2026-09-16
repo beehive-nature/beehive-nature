@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p62f4ce9aa6",
+ "bnr": "bnr://skaists.dev/blood/p62f4ce9aa6",
+ "identity": {
+  "name": "Cuthbeorht of Mercia",
+  "lifespan": "0735–0796",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "9HYW-4HV"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "GY5P-RD5",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "GYSZ-FPB",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pdbde98c628",
+    "name": "Coenwulf King of Mercia"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pa76fe480f0",
+    "name": "Queen Eanburg of Mercia",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/9HYW-4HV",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p64da7cfa3b",
+ "bnr": "bnr://skaists.dev/blood/p64da7cfa3b",
+ "identity": {
+  "name": "George Thomas Smith",
+  "lifespan": "1741–1834",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LZ6S-MBX"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "LLM9-9MQ",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "K8SW-RYJ",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p58ecde24c7",
+    "name": "Richard Smith"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p0c7ff1b2e8",
+    "name": "Leah Agee",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LZ6S-MBX",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

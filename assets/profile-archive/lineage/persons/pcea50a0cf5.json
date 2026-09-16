@@ -1,0 +1,64 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pcea50a0cf5",
+ "bnr": "bnr://skaists.dev/blood/pcea50a0cf5",
+ "identity": {
+  "name": "Lucius Cornelius Scipio of Rome II",
+  "lifespan": "0290BC–0250BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GZYQ-DG4"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pee98c7c6f9",
+    "name": "Lucius Cornelius Scipio Barbatus",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p65c21fbb40",
+    "name": "Gnaeus Cornelius Scipio Calvus Consul in 222 BC"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pf426887bd0",
+    "name": "Lucius Calvus",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GZYQ-DG4",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

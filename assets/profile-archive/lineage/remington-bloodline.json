@@ -125,10 +125,10 @@
    "living": false,
    "source": "familysearch",
    "evidence": {
-    "era": "living",
+    "era": "recorded",
     "support": "unsourced-entry",
     "basis": "era label from dates; support unsourced until sources are harvested",
-    "class": "living"
+    "class": "recorded"
    },
    "corrected": {
     "attested": "founder order 2026-09-16",
@@ -156,10 +156,10 @@
    "living": false,
    "source": "familysearch",
    "evidence": {
-    "era": "living",
+    "era": "recorded",
     "support": "unsourced-entry",
     "basis": "era label from dates; support unsourced until sources are harvested",
-    "class": "living"
+    "class": "recorded"
    },
    "corrected": {
     "attested": "founder order 2026-09-16",
@@ -314025,7 +314025,25 @@
   "overlayPersons": 3,
   "stagedPersons": {
    "store": "assets/profile-archive/lineage/persons/",
-   "canonicalEmitted": 5
+   "publicStaged": 10259,
+   "privateStagedLocal": "C:/Users/travi/family-lineage/staging-private/",
+   "fixtures": [
+    "p7b1078c886",
+    "p455afa9256",
+    "p4ceb2ace98",
+    "p72d226cedf",
+    "pf5d40516b8"
+   ],
+   "researchCounts": {
+    "incomplete": 10252,
+    "corrected-attested": 2,
+    "tradition-entered": 5
+   },
+   "publicationCounts": {
+    "private-stub": 3,
+    "public": 10256
+   },
+   "pages": "generated on demand: node tools/genealogy/personpage.mjs [id…]; the five fixtures' pages are committed"
   }
  },
  "spine": [

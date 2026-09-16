@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p2b331722fd",
+ "bnr": "bnr://skaists.dev/blood/p2b331722fd",
+ "identity": {
+  "name": "Agnes Burton",
+  "lifespan": "1489–1535",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PMZ6-N97"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p11db778fe8",
+    "name": "Edward Burton",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pd7f31a9080",
+    "name": "Jocosa Joyce Cressett",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p1d228abc97",
+    "name": "Elizabeth Revel"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p6e0ea9504a",
+    "name": "John Richard Revell",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PMZ6-N97",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

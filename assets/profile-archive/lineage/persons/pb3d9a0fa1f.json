@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pb3d9a0fa1f",
+ "bnr": "bnr://skaists.dev/blood/pb3d9a0fa1f",
+ "identity": {
+  "name": "Sjarel Huysman",
+  "lifespan": "1646–1703",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LX79-382"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pdbebaf576c",
+    "name": "Geerart Jaspersen Huysman",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pedab767a3c",
+    "name": "Maritje Pietersz",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p66a8c95967",
+    "name": "Magdalena Huysman"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p17a041bd40",
+    "name": "Ariaentje Dirckse",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LX79-382",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

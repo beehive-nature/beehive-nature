@@ -1,0 +1,53 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p1d8aff98c7",
+ "bnr": "bnr://skaists.dev/blood/p1d8aff98c7",
+ "identity": {
+  "name": "Abijah ben Rehoboam 2nd King of Judah",
+  "lifespan": "0950–0902",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GMC2-L4G"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [],
+  "children": [],
+  "spouses": [
+   {
+    "id": "p49afa19173",
+    "name": "Arkyaten Bint Ahimaz",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GMC2-L4G",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

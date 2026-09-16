@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p58845ed3bd",
+ "bnr": "bnr://skaists.dev/blood/p58845ed3bd",
+ "identity": {
+  "name": "Cnaeus Hosidius Geta I de Rome",
+  "lifespan": "20–55",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GZL5-KFC"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "GZL5-KX5",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "P4PJ-2DG",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p9ab0d9f1c6",
+    "name": "Uxor Hosidia Geta Marci Vitorii Marcelli"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pdf6fe89bcb",
+    "name": "Uxor Cnaeus Hosidius Geta I",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GZL5-KFC",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

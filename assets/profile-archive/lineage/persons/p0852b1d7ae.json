@@ -1,0 +1,108 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p0852b1d7ae",
+ "bnr": "bnr://skaists.dev/blood/p0852b1d7ae",
+ "identity": {
+  "name": "Amenemhat II Nubkaure Kheperkare Egypt 3rd King of 12th Dynasty",
+  "lifespan": "1975BC–1895BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L5YQ-443"
+  }
+ ],
+ "evidence": {
+  "era": "recorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "recorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p3ebe05ab0a",
+    "name": "Senusret I Kheperkare 2nd Pharaoh 12th Dynasty",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pc36b0f97b9",
+    "name": "Neferoushery D'Egypte  Neferoushery D'Egypte",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p3980555868",
+    "name": "Senusret II Khakheperre 4th Pharaoh 12th Dynasty"
+   },
+   {
+    "id": "pcea2a6c0ac",
+    "name": "Khenemetneferhedjet III, King's Wife, Member of the Elite, Mistress of the Two Countries"
+   },
+   {
+    "id": "p8f71777f65",
+    "name": "Nofret II, Kings Daughter"
+   },
+   {
+    "id": "p4ec69752ec",
+    "name": "Itaweret"
+   },
+   {
+    "id": "pf9f21ed19f",
+    "name": "Khnemet"
+   },
+   {
+    "id": "pd297b8f814",
+    "name": "Neferet II"
+   },
+   {
+    "id": "p341822898a",
+    "name": "Nofret D'Egypte"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p7a82a7b519",
+    "name": "Meryet-Amun",
+    "marriage": null
+   },
+   {
+    "id": "pb25ae9f5cb",
+    "name": "Senet D'Egypte",
+    "marriage": null
+   },
+   {
+    "id": "pb49838c4be",
+    "name": "Hotepti D'Egypte Reine de l'Egypte Nub-hetepty-chrod",
+    "marriage": null
+   },
+   {
+    "id": "p96b0dc44b3",
+    "name": "Keminnub D'Egypte Keminebou",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L5YQ-443",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

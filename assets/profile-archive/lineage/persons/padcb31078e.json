@@ -1,0 +1,58 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "padcb31078e",
+ "bnr": "bnr://skaists.dev/blood/padcb31078e",
+ "identity": {
+  "name": "Hod Visbursson",
+  "lifespan": "42–Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GFKS-HJP"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [],
+  "children": [
+   {
+    "id": "p70d9a85a3a",
+    "name": "Bodvid Hodsdatter"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pd6f86fce66",
+    "name": "Dana of Vingulmark of Suede",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GFKS-HJP",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

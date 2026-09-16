@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p82c95a350f",
+ "bnr": "bnr://skaists.dev/blood/p82c95a350f",
+ "identity": {
+  "name": "Eleanor Beauchamp",
+  "lifespan": "1408–1467",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LT1Q-Z8C"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "paa730fa64f",
+    "name": "Richard Beauchamp 13th Earl of Warwick",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p811dc2d2a4",
+    "name": "Elizabeth Berkeley",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pab490a2a3f",
+    "name": "Henry Beaufort 3rd Duke of Somerset"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pea3685448b",
+    "name": "Sir Edmund Beaufort Somerset CIE-19M",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LT1Q-Z8C",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

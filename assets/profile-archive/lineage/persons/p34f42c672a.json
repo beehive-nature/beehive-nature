@@ -1,0 +1,64 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p34f42c672a",
+ "bnr": "bnr://skaists.dev/blood/p34f42c672a",
+ "identity": {
+  "name": "Jumella  Balbira bint-Adam",
+  "lifespan": "3949BC–3875BC",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G3JR-3JX"
+  }
+ ],
+ "evidence": {
+  "era": "recorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "recorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pd0ff9cc915",
+    "name": "Adam ben Elohim 1st Patriarch",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p65ca477791",
+    "name": "Eve bat Elohim",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [],
+  "spouses": [
+   {
+    "id": "pbb29dbf013",
+    "name": "Cain Qabil ben Adam",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G3JR-3JX",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

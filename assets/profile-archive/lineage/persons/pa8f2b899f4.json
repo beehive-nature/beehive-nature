@@ -1,0 +1,87 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pa8f2b899f4",
+ "bnr": "bnr://skaists.dev/blood/pa8f2b899f4",
+ "identity": {
+  "name": "Flavius Valerius Aurelio Constantinus Emperor of Rome",
+  "lifespan": "0272–0337",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LH26-C81"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pc85501692d",
+    "name": "Marcus Flavius Valerius Constantius Constantius",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pe871fb53ec",
+    "name": "Saint Flavia Julia Helena",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pad50ab07cd",
+    "name": "Flavius Julius Crispus"
+   },
+   {
+    "id": "p74d94c3a2d",
+    "name": "Saint Flavia Valeria Constantina"
+   },
+   {
+    "id": "p9a766b4fa5",
+    "name": "Flavius Magnus Maximus"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p75d7473cd3",
+    "name": "Minervina",
+    "marriage": null
+   },
+   {
+    "id": "p1dcc1a76cd",
+    "name": "Valeria Fausta Maximina",
+    "marriage": null
+   },
+   {
+    "id": "p83f6d061e4",
+    "name": "Empress Flavia Maxima Fausta \"Fausta\"",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LH26-C81",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

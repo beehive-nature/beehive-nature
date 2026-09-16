@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p6f6e08c48f",
+ "bnr": "bnr://skaists.dev/blood/p6f6e08c48f",
+ "identity": {
+  "name": "Thomas Herman Jacob BREMS",
+  "lifespan": "1501–1577",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "KNH8-3BL"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pea08e28921",
+    "name": "Nicholaus Peter Jacob BREMS",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pf7630e4cbd",
+    "name": "Saria Margaretha HOLTZ",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p356a952243",
+    "name": "Elisabeth Margaret Brems"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pe146a7747b",
+    "name": "Elisabetha Maria LEIS",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/KNH8-3BL",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

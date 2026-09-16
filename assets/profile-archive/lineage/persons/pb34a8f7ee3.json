@@ -1,0 +1,62 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pb34a8f7ee3",
+ "bnr": "bnr://skaists.dev/blood/pb34a8f7ee3",
+ "identity": {
+  "name": "Margery Houghton",
+  "lifespan": "1605–1651",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LJLJ-9G3"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [],
+  "children": [
+   {
+    "id": "pc4d7bc7e59",
+    "name": "Margaret Acres"
+   },
+   {
+    "id": "pc93f40f459",
+    "name": "John Acres"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pc8b42dd0a1",
+    "name": "Thomas Acres",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LJLJ-9G3",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

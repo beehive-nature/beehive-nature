@@ -1,0 +1,64 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pda302c57fe",
+ "bnr": "bnr://skaists.dev/blood/pda302c57fe",
+ "identity": {
+  "name": "Poppilia",
+  "lifespan": "0057BC–Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GZPB-L13"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pb0b5c6f55c",
+    "name": "Marcus Poppilius",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pef886929c2",
+    "name": "Lucius Calpurnius Piso the augur"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pad9ea47f2a",
+    "name": "Gnaeus Calpurnius Piso II",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GZPB-L13",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

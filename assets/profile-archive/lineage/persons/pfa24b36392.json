@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pfa24b36392",
+ "bnr": "bnr://skaists.dev/blood/pfa24b36392",
+ "identity": {
+  "name": "Iah III de Thebes , Queen of Egypt",
+  "lifespan": "2098BC–Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "9QQJ-M6D"
+  }
+ ],
+ "evidence": {
+  "era": "recorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "recorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p4cd9e3506f",
+    "name": "Intef II Wahankh 4th Pharaoh 11th Dynasty",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p82a37cb901",
+    "name": "Neferukayeth",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p7b4feff402",
+    "name": "Mentuhotep II Nebhepetre"
+   },
+   {
+    "id": "p6fa331cd07",
+    "name": "Queen, XI Dynasty Ancient Neferu II Egypt"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p55ce2ef7d1",
+    "name": "Intef III Nakhtnebtepnefer 5th Pharaoh 11th Dynasty",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/9QQJ-M6D",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

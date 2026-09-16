@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pc6be39394f",
+ "bnr": "bnr://skaists.dev/blood/pc6be39394f",
+ "identity": {
+  "name": "Warin Ier d'Auvergne comte de Chalon et de Mâcon",
+  "lifespan": "0780–0861",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GD36-N3X"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "G1WJ-NRW",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "G882-TSV",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pd716590362",
+    "name": "Warin de Chalon II"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p545c2a3c15",
+    "name": "Aiga DE BOURGES",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GD36-N3X",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pba79910d0a",
+ "bnr": "bnr://skaists.dev/blood/pba79910d0a",
+ "identity": {
+  "name": "Jolente Von Kleves",
+  "lifespan": "0805–0875",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G54W-T13"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "G544-Q3S",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "G54W-5WX",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p010d73d934",
+    "name": "Arnould Ier DE CREQUY"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p9ca2c00524",
+    "name": "Odoacre De Créquy",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G54W-T13",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

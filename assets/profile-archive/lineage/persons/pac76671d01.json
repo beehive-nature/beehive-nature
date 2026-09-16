@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pac76671d01",
+ "bnr": "bnr://skaists.dev/blood/pac76671d01",
+ "identity": {
+  "name": "Aulus Gallus Larcius de Rome",
+  "lifespan": "26–59",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G73Y-SLH"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p3b3cadc2ca",
+    "name": "Publius Aelius Hadrianus Marullinus Roman Senator",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pfbd7030911",
+    "name": "Ulpia Plotina",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p55b944ed55",
+    "name": "Aelius Quardronius Versus de Rome"
+   },
+   {
+    "id": "pf27c6b19f1",
+    "name": "Atilla Sabina de Rome"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pc5626e4e7f",
+    "name": "Sulpicia Kelero De ROME",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G73Y-SLH",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

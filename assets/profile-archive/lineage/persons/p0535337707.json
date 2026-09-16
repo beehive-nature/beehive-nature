@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p0535337707",
+ "bnr": "bnr://skaists.dev/blood/p0535337707",
+ "identity": {
+  "name": "Julia Octavius Laenas Paula of Rome Princess of House Iulia",
+  "lifespan": "0014BC–59",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GX69-V2M"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p365e6fec84",
+    "name": "Lucius Aemilius Paulus",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pfe105dca4a",
+    "name": "Vipsania Iulia Minor Agrippina",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p83f74d4862",
+    "name": "Gaius Lucius Octavius Laenas"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p0273e101ca",
+    "name": "Octavius Laenas de Rome",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GX69-V2M",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

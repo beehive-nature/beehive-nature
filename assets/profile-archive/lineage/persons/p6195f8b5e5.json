@@ -1,0 +1,64 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p6195f8b5e5",
+ "bnr": "bnr://skaists.dev/blood/p6195f8b5e5",
+ "identity": {
+  "name": "Elisara Bint-Adam",
+  "lifespan": "3993BC–Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PC5F-M25"
+  }
+ ],
+ "evidence": {
+  "era": "recorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "recorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p2273b271a4",
+    "name": "Adam",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pb3c62d4c7d",
+    "name": "Eve",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [],
+  "spouses": [
+   {
+    "id": "p0fc13f89b9",
+    "name": "Suris ben Adam",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PC5F-M25",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

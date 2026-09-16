@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p52eeff5551",
+ "bnr": "bnr://skaists.dev/blood/p52eeff5551",
+ "identity": {
+  "name": "Aldegonde de Saint-Pol",
+  "lifespan": "0978–1032",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G1KG-H1L"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pe4e5872de8",
+    "name": "Gaultier de SAINT-POL",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p4a8ab36f56",
+    "name": "Hilde de BROUEUCQ",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pb6f3c46b24",
+    "name": "Rosella de Saint Pôl"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pbf03b83957",
+    "name": "Hugues de Saint-Pol comte de Saint-Pol et de Ternois",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G1KG-H1L",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

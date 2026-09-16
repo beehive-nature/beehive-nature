@@ -1,0 +1,62 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p05f1fb8c2c",
+ "bnr": "bnr://skaists.dev/blood/p05f1fb8c2c",
+ "identity": {
+  "name": "Anac Anakim",
+  "lifespan": "1470BC–1407BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PFR6-W42"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pa35ca54756",
+    "name": "Arba Anakim",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p06ce2d8a4a",
+    "name": "Ahimán Anakim"
+   },
+   {
+    "id": "p34531d6c0c",
+    "name": "Talmai Anakim"
+   }
+  ],
+  "spouses": []
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PFR6-W42",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p1dfcb287c5",
+ "bnr": "bnr://skaists.dev/blood/p1dfcb287c5",
+ "identity": {
+  "name": "Lydia Warner",
+  "lifespan": "1679–1711",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L2N3-56M"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p07c31f000f",
+    "name": "Isaac Warner I",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p8268591ae9",
+    "name": "Sarah Boltwood",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p4f74e5b29a",
+    "name": "Silence Brooks"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p34b4e55667",
+    "name": "Joseph Brooks",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L2N3-56M",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

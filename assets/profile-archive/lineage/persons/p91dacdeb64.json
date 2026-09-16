@@ -1,0 +1,64 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p91dacdeb64",
+ "bnr": "bnr://skaists.dev/blood/p91dacdeb64",
+ "identity": {
+  "name": "Noemi bint Hareph",
+  "lifespan": "1292BC–Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L7LP-NJX"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pc09de138c5",
+    "name": "Hareph ben Naasson",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p205dd6952b",
+    "name": "Quelion ben Elimelech"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p0207c83976",
+    "name": "Elimelec ben Nahshun",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L7LP-NJX",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

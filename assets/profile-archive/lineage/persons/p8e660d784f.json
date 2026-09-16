@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p8e660d784f",
+ "bnr": "bnr://skaists.dev/blood/p8e660d784f",
+ "identity": {
+  "name": "Edwin Fuller",
+  "lifespan": "1809–1875",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "K64P-5TN"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p929eb18e41",
+    "name": "Elijah Fuller",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p76d3e87b13",
+    "name": "Abigail Gilbert",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pa022511737",
+    "name": "Harriet Phylena Fuller"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p799319273f",
+    "name": "Eunice L. Maxson",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/K64P-5TN",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

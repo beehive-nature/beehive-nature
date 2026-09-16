@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pf28ece3d72",
+ "bnr": "bnr://skaists.dev/blood/pf28ece3d72",
+ "identity": {
+  "name": "Jeshaiah ben Hananiah 8th Exilarch in Babylon",
+  "lifespan": "0469BC–Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "9SBM-SDB"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p613e28637f",
+    "name": "Hananiah ben Zorobabel 5th Exilarch in Babylon",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pf9ba36c9cb",
+    "name": "Mrs Hananiah ben Zorobabel",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p9b14894494",
+    "name": "Rephaiah ben Jeshaiah 10th Exilarch"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pbb48c3c6ad",
+    "name": "Mrs Jeshaiah",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/9SBM-SDB",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

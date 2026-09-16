@@ -1,0 +1,61 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p2035f11ce0",
+ "bnr": "bnr://skaists.dev/blood/p2035f11ce0",
+ "identity": {
+  "name": "Sir Paon de Roët Knt.",
+  "lifespan": "1310–1351",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LDW4-XKY"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "L5VG-LZ1",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "G7DH-HFC",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pdc2d64a29a",
+    "name": "Katherine de Roët"
+   }
+  ],
+  "spouses": []
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LDW4-XKY",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

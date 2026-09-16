@@ -1,0 +1,63 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pe060ad8129",
+ "bnr": "bnr://skaists.dev/blood/pe060ad8129",
+ "identity": {
+  "name": "Jakob Schweißfurth",
+  "lifespan": "1450–1500",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LFY2-D8Z"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "LR9S-S1P",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p8234660f42",
+    "name": "Hans Schweißfurth"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pf184e42190",
+    "name": "Gertha",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LFY2-D8Z",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

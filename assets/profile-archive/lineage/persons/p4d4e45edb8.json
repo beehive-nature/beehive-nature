@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p4d4e45edb8",
+ "bnr": "bnr://skaists.dev/blood/p4d4e45edb8",
+ "identity": {
+  "name": "Thomas Smythe Knight III, Vicar of Witney",
+  "lifespan": "1536–1612",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LZ4K-29C"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p33b434a8aa",
+    "name": "Thomas Knight II",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pa0e4e7f3cd",
+    "name": "Lady Agnes de Legh",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pd73293ad47",
+    "name": "Alice Knight"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pd3f4074cee",
+    "name": "Katherine Westbrome",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LZ4K-29C",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,64 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p13f145e0f0",
+ "bnr": "bnr://skaists.dev/blood/p13f145e0f0",
+ "identity": {
+  "name": "Menkare 1st Pharaoh 7th Dynasty",
+  "lifespan": "–2181BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GKZ5-C63"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p02bf4b5a19",
+    "name": "Merenre II Nemtyemsaf 6th Pharaoh 6th Dynasty",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p41e853380c",
+    "name": "Netikereti D'EGYPTE-D'EGYPTE",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [],
+  "spouses": [
+   {
+    "id": "p41e853380c",
+    "name": "Netikereti D'EGYPTE-D'EGYPTE",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GKZ5-C63",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

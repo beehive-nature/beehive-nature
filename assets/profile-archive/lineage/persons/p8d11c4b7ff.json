@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p8d11c4b7ff",
+ "bnr": "bnr://skaists.dev/blood/p8d11c4b7ff",
+ "identity": {
+  "name": "Governor Sanballat The Horonite",
+  "lifespan": "0445BC–Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LBWB-32T"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pb5230316a1",
+    "name": "missing link to Moab",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p6366f19fb7",
+    "name": "Wife of Discendenti Moabiti",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pa7ac81e628",
+    "name": "daughter of Sanballat the Horonite"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p1e6ec77348",
+    "name": "Mrs Sanballat the Horonite",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LBWB-32T",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

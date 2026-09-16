@@ -1,0 +1,78 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pc20c69706b",
+ "bnr": "bnr://skaists.dev/blood/pc20c69706b",
+ "identity": {
+  "name": "Osorkon II 6th Pharaoh 22nd Dynasty",
+  "lifespan": "0905BC–0837BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LBJC-MTM"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pf75bdba665",
+    "name": "Takélot I Méryemen, 4th Pharaoh 22nd Dynasty",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pe60738fefe",
+    "name": "Kapes",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p482c81bd77",
+    "name": "Sheshonq III, 6th Pharaoh 22nd Dynasty"
+   },
+   {
+    "id": "pb32ea04c7e",
+    "name": "Shoshenq III High Priest of Ptah, 7th Pharaoh 22nd Dynasty"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p41a8ce0d62",
+    "name": "Djedmutesankh IV",
+    "marriage": null
+   },
+   {
+    "id": "p1733598038",
+    "name": "Karomat (Karomama) III  (897? BC - ?)",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LBJC-MTM",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

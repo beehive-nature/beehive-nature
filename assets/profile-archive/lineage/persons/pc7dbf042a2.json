@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pc7dbf042a2",
+ "bnr": "bnr://skaists.dev/blood/pc7dbf042a2",
+ "identity": {
+  "name": "Rey de Pontos Pharnaces I ben Mithridates III",
+  "lifespan": "0229BC–0170BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L68N-7ZR"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p3836857b70",
+    "name": "King Mitridates II Of Pontus",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p46373562b4",
+    "name": "Princesa Seleucida Leodice",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p09c5271394",
+    "name": "Mithradates V ben Pharnaces I"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pf0dcbce159",
+    "name": "Nysa",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L68N-7ZR",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

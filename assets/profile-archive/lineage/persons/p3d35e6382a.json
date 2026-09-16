@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p3d35e6382a",
+ "bnr": "bnr://skaists.dev/blood/p3d35e6382a",
+ "identity": {
+  "name": "Menares of Sparta",
+  "lifespan": "0560BC–Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G7T1-X6V"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p223d8a8a3a",
+    "name": "Archidamus I of Sparta",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p4ee068421c",
+    "name": "Mrs Archidamus I of Sparta",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pb1343b2ec8",
+    "name": "Léotychidas II King Of Sparta"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p08722d1972",
+    "name": "Cydippe Terillis",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G7T1-X6V",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

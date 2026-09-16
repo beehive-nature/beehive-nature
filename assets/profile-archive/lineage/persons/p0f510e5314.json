@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p0f510e5314",
+ "bnr": "bnr://skaists.dev/blood/p0f510e5314",
+ "identity": {
+  "name": "Iddina",
+  "lifespan": "1100BC–Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GQC8-JNZ"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p8a08cf22d5",
+    "name": "Adad-apla-iddina, 8th Isin King of Babylon",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p1e0273a1d0",
+    "name": "DESCONOCIDA D'Assyrie",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p5f45238453",
+    "name": "Ashurnasirpal I D'Assyrie"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p0921751ac8",
+    "name": "Shamshi-Adad IV D'Assyrie",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GQC8-JNZ",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

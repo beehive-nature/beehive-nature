@@ -1,0 +1,63 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p7bcc257e26",
+ "bnr": "bnr://skaists.dev/blood/p7bcc257e26",
+ "identity": {
+  "name": "Aurelia Vera",
+  "lifespan": "Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PFQW-NPR"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pb04d5270e4",
+    "name": "Lucius Verua",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p41778456a0",
+    "name": "Rustilia Faustina",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p3a1f647738",
+    "name": "Quintus Servilius \" The Younger\" Caepio"
+   }
+  ],
+  "spouses": []
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PFQW-NPR",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

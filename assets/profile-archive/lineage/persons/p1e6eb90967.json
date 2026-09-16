@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p1e6eb90967",
+ "bnr": "bnr://skaists.dev/blood/p1e6eb90967",
+ "identity": {
+  "name": "SCRIBONIUS LIBO DE ROME",
+  "lifespan": "0135BC–0084BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "P7H3-JCL"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pc33b629a08",
+    "name": "Consul of Rome Lucius Scribonius Libo IV",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p915671b461",
+    "name": "The Dudet Ruler Of Italy Aurelia IV",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p1851b9e7a5",
+    "name": "Lucius Scribonius Libo II."
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pf5310cff5e",
+    "name": "DYNANIS DE ROME",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/P7H3-JCL",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

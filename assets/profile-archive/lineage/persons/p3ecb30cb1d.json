@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p3ecb30cb1d",
+ "bnr": "bnr://skaists.dev/blood/p3ecb30cb1d",
+ "identity": {
+  "name": "Aulus Julius Claudius Charax Caius",
+  "lifespan": "0120–0156",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LVZM-FV3"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p52e905e84a",
+    "name": "Gaius Julius Quadratus Bassus",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "paef82006e4",
+    "name": "Queen Julia Iotapa of Cilican",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pb672d753f1",
+    "name": "Julia Quatratilla de Rome"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p80b080d8f9",
+    "name": "Julia Cillicia",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LVZM-FV3",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

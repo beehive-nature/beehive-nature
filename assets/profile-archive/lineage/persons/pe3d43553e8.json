@@ -1,0 +1,63 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pe3d43553e8",
+ "bnr": "bnr://skaists.dev/blood/pe3d43553e8",
+ "identity": {
+  "name": "Intef the Elder , 1st Pharaoh 11th Dynasty",
+  "lifespan": "2180BC–2135BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GTLN-673"
+  }
+ ],
+ "evidence": {
+  "era": "recorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "recorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pd66ba87753",
+    "name": "Inyotef II",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pefc6796a8f",
+    "name": "iku",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p42f5548c17",
+    "name": "Mentuhotep I 'the Great' , 2nd Pharaoh 11th Dynasty"
+   }
+  ],
+  "spouses": []
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GTLN-673",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

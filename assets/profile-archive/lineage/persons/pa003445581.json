@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pa003445581",
+ "bnr": "bnr://skaists.dev/blood/pa003445581",
+ "identity": {
+  "name": "Balamirdes des Huns Rois Huns Occidentaux",
+  "lifespan": "0278–Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "P4R8-55Q"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p7a6cd6ecbe",
+    "name": "Bendemir des Huns Roi des Huns occidentaux en Ukraine",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pb73e28a897",
+    "name": "Mrs Bendemir Des Huns en Ukraine",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p42d2fd6d6e",
+    "name": "Atela des Huns"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pf391967e39",
+    "name": "Vadamerca des Vandales",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/P4R8-55Q",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

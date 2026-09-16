@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p78d112ba93",
+ "bnr": "bnr://skaists.dev/blood/p78d112ba93",
+ "identity": {
+  "name": "Isabelle Ivy de los Francos",
+  "lifespan": "0300–0350",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PZQF-7YH"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pc5b8959e69",
+    "name": "King Ragaise Merogais de Toxandrie I",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pe319803b89",
+    "name": "Queen Athildis of the Sicambrian Franks",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p84d02f91ae",
+    "name": "Nebiogaste De Los Suevos"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p25cb0260fa",
+    "name": "Gundomar de Alemania",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PZQF-7YH",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

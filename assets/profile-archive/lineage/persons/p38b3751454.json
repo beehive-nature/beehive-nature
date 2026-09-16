@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p38b3751454",
+ "bnr": "bnr://skaists.dev/blood/p38b3751454",
+ "identity": {
+  "name": "Sarah Bullard",
+  "lifespan": "1718–1794",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "K2L6-LVS"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "LZ2G-Y8S",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "LDQM-BCZ",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pbb878af203",
+    "name": "Sarah Littlefield"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pca4d08ef30",
+    "name": "Ephraim Littlefield",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/K2L6-LVS",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

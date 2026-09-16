@@ -1,0 +1,63 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p7b20dd8ad1",
+ "bnr": "bnr://skaists.dev/blood/p7b20dd8ad1",
+ "identity": {
+  "name": "Claudia Capitolina of Rome",
+  "lifespan": "99–Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L584-8QS"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pbaf35a63a0",
+    "name": "Claudius Capolinus Capitilinus de Roma",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p03ff91981c",
+    "name": "Macrinia de Roma",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "paac3a2d3a8",
+    "name": "Sabinus Julia Sabinus of Rome"
+   }
+  ],
+  "spouses": []
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L584-8QS",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

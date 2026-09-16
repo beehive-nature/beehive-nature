@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p4c80e6ba17",
+ "bnr": "bnr://skaists.dev/blood/p4c80e6ba17",
+ "identity": {
+  "name": "Gregorius de Autun",
+  "lifespan": "0420–Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G3M6-7G4"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pce303c5701",
+    "name": "Attale II Attalide",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p071641f987",
+    "name": "spouse Attale II Attalide",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p3b0a1fa0fa",
+    "name": "Grégoire de Langres"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pa1525d4f7d",
+    "name": "spouse Gregorius de Autun",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G3M6-7G4",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p400f903bcb",
+ "bnr": "bnr://skaists.dev/blood/p400f903bcb",
+ "identity": {
+  "name": "Saint Anne bat Yehoshua",
+  "lifespan": "0050BC–12",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LD84-QG2"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pd573859a15",
+    "name": "Hezekiah ben Matthan",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p4c390d387f",
+    "name": "St. Bianca Emerentia bat Matthat",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p6ba1177c45",
+    "name": "St. Mary bat Joachim"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pb188c65143",
+    "name": "Saint Joachim ben Matthat ha-David",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LD84-QG2",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

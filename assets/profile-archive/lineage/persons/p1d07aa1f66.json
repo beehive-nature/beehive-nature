@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p1d07aa1f66",
+ "bnr": "bnr://skaists.dev/blood/p1d07aa1f66",
+ "identity": {
+  "name": "Beukel Joost Aemsz van der Burch",
+  "lifespan": "1487–Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "M5CG-VQV"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "G4D7-MBG",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "PXRQ-RQM",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pc1032bcca4",
+    "name": "Elijsbeth Beukelsdr van der Burch"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p2bb05f09cb",
+    "name": "Catharina Sasbout",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/M5CG-VQV",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

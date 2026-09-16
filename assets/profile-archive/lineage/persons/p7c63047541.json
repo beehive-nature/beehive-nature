@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p7c63047541",
+ "bnr": "bnr://skaists.dev/blood/p7c63047541",
+ "identity": {
+  "name": "Flavia Claudia Crispina",
+  "lifespan": "0232–0261",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LD9G-YQZ"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p97c4183da0",
+    "name": "Claudius II, Marcus Aurelius Flavius Claudius Gothicus Emperor",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p3a79d04020",
+    "name": "Claudia Crispina Julia of Illyria",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pf3e86f259d",
+    "name": "Emperatriz Eutropia Augusta de Roma"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pa28d2b5bed",
+    "name": "Eutropius Markus Crispina",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LD9G-YQZ",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

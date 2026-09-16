@@ -1,0 +1,64 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p4899d3dac6",
+ "bnr": "bnr://skaists.dev/blood/p4899d3dac6",
+ "identity": {
+  "name": "John Hyrcanus",
+  "lifespan": "Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "P6QN-JQC"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p6eff353fc9",
+    "name": "The King Of The Ruler Makrobios The Taminer Long Life",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p915671b461",
+    "name": "The Dudet Ruler Of Italy Aurelia IV"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p4c3f6f7695",
+    "name": "Mrs Hyrcanus",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/P6QN-JQC",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

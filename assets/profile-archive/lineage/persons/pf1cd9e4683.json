@@ -1,0 +1,78 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pf1cd9e4683",
+ "bnr": "bnr://skaists.dev/blood/pf1cd9e4683",
+ "identity": {
+  "name": "Thomas Bliss",
+  "lifespan": "1583–1650",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LTFL-C9R"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pe3790890d3",
+    "name": "John Blisse",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pa9ee42b2e2",
+    "name": "Agnes Henning",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p486c007b71",
+    "name": "Ann Bliss"
+   },
+   {
+    "id": "pc58af810fe",
+    "name": "Mary Polly Bliss"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p78a19a6ded",
+    "name": "Margaret Snowe",
+    "marriage": null
+   },
+   {
+    "id": "p49855c010d",
+    "name": "Margaret Hulings",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LTFL-C9R",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

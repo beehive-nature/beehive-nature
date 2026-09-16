@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pc0711ab2b2",
+ "bnr": "bnr://skaists.dev/blood/pc0711ab2b2",
+ "identity": {
+  "name": "Mary Brownell",
+  "lifespan": "1683–1776",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LCPB-7YG"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pac00a7ec76",
+    "name": "George Brownell",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p6f0f66d962",
+    "name": "Susanna Pearce",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p6fbcc6e6fd",
+    "name": "George Hall"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pa60d5d75cb",
+    "name": "William Hall",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LCPB-7YG",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

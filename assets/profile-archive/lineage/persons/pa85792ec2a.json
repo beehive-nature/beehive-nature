@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pa85792ec2a",
+ "bnr": "bnr://skaists.dev/blood/pa85792ec2a",
+ "identity": {
+  "name": "Stephen Arnold",
+  "lifespan": "1622–1699",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "KN8L-T42"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pfad902db9c",
+    "name": "William Arnold",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p706c05f5e7",
+    "name": "Christian Peake",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p4209ef67d3",
+    "name": "Phebe Arnold"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p35c33c336c",
+    "name": "Sarah Smith",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/KN8L-T42",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

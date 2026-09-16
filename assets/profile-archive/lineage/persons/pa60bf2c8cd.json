@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pa60bf2c8cd",
+ "bnr": "bnr://skaists.dev/blood/pa60bf2c8cd",
+ "identity": {
+  "name": "Edward Wilmott",
+  "lifespan": "1490–1544",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "MZWS-2C4"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "PH8D-LXC",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "GSGS-RZ2",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pbe2a75674a",
+    "name": "Michael Willmote"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p6dca4eed53",
+    "name": "Christiana Bustard",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/MZWS-2C4",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

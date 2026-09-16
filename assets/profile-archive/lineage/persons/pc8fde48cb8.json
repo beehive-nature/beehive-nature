@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pc8fde48cb8",
+ "bnr": "bnr://skaists.dev/blood/pc8fde48cb8",
+ "identity": {
+  "name": "Braut Onund Ingvarsson",
+  "lifespan": "0636–0674",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LDW7-CYF"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pbe1e72434f",
+    "name": "Ingvar Eysteinsson",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p602056d902",
+    "name": "Gauthildr Gautreksdottir",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p2a4a3ef708",
+    "name": "Ingjald Yngling the Evil-Ruler Anundsson King of Sweden"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pd6ae68a5d1",
+    "name": "Algaut Gautreksdottir",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LDW7-CYF",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

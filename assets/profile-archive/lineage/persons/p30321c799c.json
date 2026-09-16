@@ -1,0 +1,82 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p30321c799c",
+ "bnr": "bnr://skaists.dev/blood/p30321c799c",
+ "identity": {
+  "name": "MenKheperre' , High Priest of Amun",
+  "lifespan": "1065BC–0992BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "9WCX-KK9"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pc90470ea26",
+    "name": "Pinudjem I EGYPT",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pb23564fe3f",
+    "name": "Tayu HERAT",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p9ea381ad74",
+    "name": "Duathathor-Henuttawy"
+   },
+   {
+    "id": "peb392ed601",
+    "name": "Isetemkheb D bint Menkheperre"
+   },
+   {
+    "id": "pa6b372a62a",
+    "name": "Smendes II , High Priest of Amun"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pa735d65509",
+    "name": "Princess Esemkhebe Isiemkheb Istemkheb Egypt",
+    "marriage": null
+   },
+   {
+    "id": "p4e939dfe47",
+    "name": "Istemkheb C of Lower Egypt",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/9WCX-KK9",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

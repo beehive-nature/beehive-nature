@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pf5ec93d687",
+ "bnr": "bnr://skaists.dev/blood/pf5ec93d687",
+ "identity": {
+  "name": "Sir Piers Legh",
+  "lifespan": "1514–1589",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GB9Y-DDZ"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "LDMS-TBJ",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "LZKL-D8V",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p40689587ac",
+    "name": "Ellen Leigh"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pff317755c0",
+    "name": "Lady Margaret Gerard",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GB9Y-DDZ",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

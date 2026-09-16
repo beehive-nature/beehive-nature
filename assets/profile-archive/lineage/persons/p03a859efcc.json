@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p03a859efcc",
+ "bnr": "bnr://skaists.dev/blood/p03a859efcc",
+ "identity": {
+  "name": "Guillaume de Guines seigneur de Bournonville",
+  "lifespan": "1040–1071",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G6PH-CW6"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p6a9c64000e",
+    "name": "Eustache Ier de GUÎNES",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pf847985b29",
+    "name": "Suzanne de Gramines",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p39cf9bdc5b",
+    "name": "Gérard de Bournonville"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pba2482084b",
+    "name": "Adélaïde de Hesdin",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G6PH-CW6",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

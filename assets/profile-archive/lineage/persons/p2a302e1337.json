@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p2a302e1337",
+ "bnr": "bnr://skaists.dev/blood/p2a302e1337",
+ "identity": {
+  "name": "spouse Dietrich D'Ostphalie De Varmland-Gutreksson",
+  "lifespan": "Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "P9DZ-783"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pf548c9aa5e",
+    "name": "Adalbert d'Alsace",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p36fda548cb",
+    "name": "Gerlinde , Duchess d'Alsace",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pc9f902c731",
+    "name": "Princess Svana von Asseburg von Sachsen"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pb1356e6169",
+    "name": "King Dieterick Theodoric Webrecht of Saxony",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/P9DZ-783",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

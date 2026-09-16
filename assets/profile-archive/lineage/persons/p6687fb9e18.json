@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p6687fb9e18",
+ "bnr": "bnr://skaists.dev/blood/p6687fb9e18",
+ "identity": {
+  "name": "Rhyfedel",
+  "lifespan": "0155BC–Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GY4L-PGZ"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p8d0e3e9753",
+    "name": "Rhifedel ap Ryderyn",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p57b461c5b9",
+    "name": "Wledin verch Ryhyseyrn",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p6bc495b677",
+    "name": "Gwenllian Verch Rhyfede"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p6a9a40824e",
+    "name": "Lleuver",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GY4L-PGZ",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

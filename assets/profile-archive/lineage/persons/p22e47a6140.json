@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p22e47a6140",
+ "bnr": "bnr://skaists.dev/blood/p22e47a6140",
+ "identity": {
+  "name": "Edward Darby",
+  "lifespan": "–1610",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G6XK-HR5"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p902054d326",
+    "name": "Peter Darbye",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pf80453cbe4",
+    "name": "Margaret",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p8727e3ddfd",
+    "name": "Frances Brown Darby"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p96a85030f0",
+    "name": "Lady Frances Brown",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G6XK-HR5",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p4caeb6306d",
+ "bnr": "bnr://skaists.dev/blood/p4caeb6306d",
+ "identity": {
+  "name": "Gerrit van Nes",
+  "lifespan": "1465–1508",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G3TV-ND7"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "G3TV-T38",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "G3TV-PXZ",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pef01c44314",
+    "name": "Hendrick Gerritzen van Ness"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "paccf178b21",
+    "name": "Catalyntie Forest",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G3TV-ND7",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p4bfcff924c",
+ "bnr": "bnr://skaists.dev/blood/p4bfcff924c",
+ "identity": {
+  "name": "Titus Flavius Vespasianus",
+  "lifespan": "70–96",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G7M6-PKZ"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pf6b329ffec",
+    "name": "Titus Flavius Vespasianus",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p6cc8b31348",
+    "name": "Marcia Furnilla",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p3ef28ceab2",
+    "name": "Titus Flavius Sulpicianus Dorion de Rome"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p8b880d85a4",
+    "name": "Saint Flavia Domitilla",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G7M6-PKZ",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

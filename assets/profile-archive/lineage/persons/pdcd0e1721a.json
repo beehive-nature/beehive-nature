@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pdcd0e1721a",
+ "bnr": "bnr://skaists.dev/blood/pdcd0e1721a",
+ "identity": {
+  "name": "Stateira Queen of Persia",
+  "lifespan": "Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PSLZ-NH7"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pe147420c44",
+    "name": "Hydarnes III 'Idernes', Satrap of Armenia",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p4a4c154f7c",
+    "name": "Mrs Hydarnes III Satrap of Armenia",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p68a5788623",
+    "name": "Apama"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pf0c8a2db70",
+    "name": "Artaxerxes II",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PSLZ-NH7",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

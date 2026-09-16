@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p40029ace2a",
+ "bnr": "bnr://skaists.dev/blood/p40029ace2a",
+ "identity": {
+  "name": "King Arvirargus ap Cunobelin of Britain",
+  "lifespan": "4–74",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "941L-RL9"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p49026c938e",
+    "name": "King Cymbeline ap Tenuantius",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pd690997ff2",
+    "name": "Anna Genvissa Cartismuanda of Wales",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p888dc0213b",
+    "name": "Marius King Marius of the Britons"
+   },
+   {
+    "id": "pf61c445852",
+    "name": "Cartismandua verch Arvirargus"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p0601d4065e",
+    "name": "Queen Genuissa Venessa Venus Julia Claudia of Siluria, Wales",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/941L-RL9",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p283a9606be",
+ "bnr": "bnr://skaists.dev/blood/p283a9606be",
+ "identity": {
+  "name": "Elnathan ben Achbor of Jerusalem",
+  "lifespan": "0655BC–Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LCVV-9KC"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "peda0f4625a",
+    "name": "Achbor ben Michaiah",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p0970f49cd6",
+    "name": "Mrs Achbor ben Michaiah",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p195dd71972",
+    "name": "Nehushta bat Elnathan"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p0e1b36c206",
+    "name": "Mrs. Elnathan",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LCVV-9KC",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,62 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p524621dbec",
+ "bnr": "bnr://skaists.dev/blood/p524621dbec",
+ "identity": {
+  "name": "N.N. Hija de Nabopolasar Princesa de Babilonia",
+  "lifespan": "Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PWMQ-MQG"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [],
+  "children": [
+   {
+    "id": "pa5de907c4a",
+    "name": "Amytis dokhtar az Cyaxares Princess of Media, Queen of Babylon"
+   },
+   {
+    "id": "p66f881477b",
+    "name": "King Astyages of Media"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p836dddef40",
+    "name": "King Cyaxares Of Medes",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PWMQ-MQG",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

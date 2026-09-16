@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p5286e0a044",
+ "bnr": "bnr://skaists.dev/blood/p5286e0a044",
+ "identity": {
+  "name": "Louis VIII 'le Lion' Roi de France",
+  "lifespan": "1187–1226",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LZPK-PLF"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p314f08e783",
+    "name": "Philippe II Auguste Roi de France",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p68c9144597",
+    "name": "Isabelle de Hainaut Reine des Francs",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p7f15f46e1b",
+    "name": "Robert I \"le Bon\" Comte d'Artois"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pc2f999d132",
+    "name": "Blanca de Castilla Regina Consort de France",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LZPK-PLF",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

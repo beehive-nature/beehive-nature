@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p799319273f",
+ "bnr": "bnr://skaists.dev/blood/p799319273f",
+ "identity": {
+  "name": "Eunice L. Maxson",
+  "lifespan": "1812–1873",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "K6HN-GB2"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p97c8521f42",
+    "name": "Jared Maxson",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pfcc3f7f5f3",
+    "name": "Amie Moon",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pa022511737",
+    "name": "Harriet Phylena Fuller"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p8e660d784f",
+    "name": "Edwin Fuller",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/K6HN-GB2",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": true,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

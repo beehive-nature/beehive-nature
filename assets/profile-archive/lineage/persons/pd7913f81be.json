@@ -1,0 +1,64 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pd7913f81be",
+ "bnr": "bnr://skaists.dev/blood/pd7913f81be",
+ "identity": {
+  "name": "Jane Elizabeth Sykes",
+  "lifespan": "1529–1597",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L8Q7-X7P"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pdd19f9ba3c",
+    "name": "John Willmot Sykes",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p65ca7e0e12",
+    "name": "Catherine Marsden"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pdeb163a7a4",
+    "name": "James Howarth Marsden",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L8Q7-X7P",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

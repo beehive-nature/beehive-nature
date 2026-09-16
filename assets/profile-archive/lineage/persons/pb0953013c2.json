@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pb0953013c2",
+ "bnr": "bnr://skaists.dev/blood/pb0953013c2",
+ "identity": {
+  "name": "Jeanne de Montfort-Castres",
+  "lifespan": "1255–1295",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G38V-CNX"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p8beb4f8b7e",
+    "name": "Philippe de Montfort II",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p25d6321dc9",
+    "name": "Jeanne de Lévis-Mirepoix",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p8ff10678aa",
+    "name": "Blanche de Savoie-Vaud"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p338d5f7056",
+    "name": "Louis de Savoie I, Baron de Vaud",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G38V-CNX",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

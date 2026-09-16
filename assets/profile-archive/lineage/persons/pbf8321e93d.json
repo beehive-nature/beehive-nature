@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pbf8321e93d",
+ "bnr": "bnr://skaists.dev/blood/pbf8321e93d",
+ "identity": {
+  "name": "Matthieu d'Alsace comte de Boulogne,",
+  "lifespan": "1137–1173",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "94BN-P8D"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "LBW5-7NC",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "KZ48-P15",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p1712d18f78",
+    "name": "Mathilde de Boulogne-Alsace"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p73afb800b0",
+    "name": "Marie de Boulogne-Blois",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/94BN-P8D",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

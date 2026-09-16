@@ -1,0 +1,78 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p2f48308c81",
+ "bnr": "bnr://skaists.dev/blood/p2f48308c81",
+ "identity": {
+  "name": "Arrius Antonius Calpurnius Piso",
+  "lifespan": "34–97",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LK73-52V"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p569ff3551a",
+    "name": "Gaius Calpurnius Piso",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p1d75f9c9ca",
+    "name": "Mariamne Caecina Arria Sabinus",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pc9869d893a",
+    "name": "Arria Antonina Piso"
+   },
+   {
+    "id": "pa22fb41668",
+    "name": "Arria Fadilla Minor"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p3751829af6",
+    "name": "Boionia Procilla Servilia",
+    "marriage": null
+   },
+   {
+    "id": "pf223c0d6d4",
+    "name": "Plotia Isaurica Plotius",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LK73-52V",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

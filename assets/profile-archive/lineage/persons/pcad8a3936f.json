@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pcad8a3936f",
+ "bnr": "bnr://skaists.dev/blood/pcad8a3936f",
+ "identity": {
+  "name": "Hans Sprenger",
+  "lifespan": "1520–1590",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LWY6-8WT"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pa4a675e071",
+    "name": "Matthias Theis Sprenger",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p9b7f8c6054",
+    "name": "Grete Busch",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pc9bf8ed3fb",
+    "name": "Anna Sprenger"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p7ed03b9c23",
+    "name": "Hilla",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LWY6-8WT",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

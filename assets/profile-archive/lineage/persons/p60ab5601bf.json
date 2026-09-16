@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p60ab5601bf",
+ "bnr": "bnr://skaists.dev/blood/p60ab5601bf",
+ "identity": {
+  "name": "King Hwala Bedwigsson of The Goths",
+  "lifespan": "0155BC–Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GRGK-GJN"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p6342fafe32",
+    "name": "Bedvig of Sceaf",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p5bca9e2be4",
+    "name": "Spouse of Bedwig",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p66c673aadf",
+    "name": "King Hathra Hwalasson of the Ostragoths"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p70d9a85a3a",
+    "name": "Bodvid Hodsdatter",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GRGK-GJN",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

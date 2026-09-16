@@ -1,0 +1,77 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p5a92550888",
+ "bnr": "bnr://skaists.dev/blood/p5a92550888",
+ "identity": {
+  "name": "Menwi of Egypt",
+  "lifespan": "Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GTKL-V3V"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pbef5a9a639",
+    "name": "Thutmose III Menkheperenre 6th Pharaoh 18th Dynasty",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pb5d99125d2",
+    "name": "Satiah , Great Royal Wife",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p9140ab1ff4",
+    "name": "Yuya High Priest"
+   },
+   {
+    "id": "p6163f0c4f7",
+    "name": "Yuya d'Ugarit ben Artatama I Commander of Chariotry"
+   },
+   {
+    "id": "p5375175e03",
+    "name": "Queen Mutemwiya d'Égypte"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p539d133270",
+    "name": "Artatama I",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GTKL-V3V",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

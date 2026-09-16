@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p092384cd4a",
+ "bnr": "bnr://skaists.dev/blood/p092384cd4a",
+ "identity": {
+  "name": "Muat Tuya",
+  "lifespan": "1324BC–1256BC",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "9HB1-27X"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p6237c556e5",
+    "name": "Raia \"Rʿjȝ\"",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p3683161a94",
+    "name": "Ruya",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pd69d747cb1",
+    "name": "Ramesses II , 3rd Pharaoh of 19th Dynasty"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pf057d2d1b2",
+    "name": "Sety I Merenptah Setymeramen Twosret",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/9HB1-27X",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

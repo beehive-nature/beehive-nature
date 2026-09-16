@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p35cc2bd1f4",
+ "bnr": "bnr://skaists.dev/blood/p35cc2bd1f4",
+ "identity": {
+  "name": "Eliab ben Jesse",
+  "lifespan": "1056BC–Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LJYK-6BV"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p33c16c6d5a",
+    "name": "Jesse ben Obed",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pb64b70f67e",
+    "name": "Nitzevet bat Adael of Geshur",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pebf81c4ef8",
+    "name": "Abihail bat Eliab"
+   },
+   {
+    "id": "p7c9266b0a3",
+    "name": "Unknown wives or concubines"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p20ca4d232a",
+    "name": "Ascaviana Sempronianaeris Pustilius",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LJYK-6BV",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

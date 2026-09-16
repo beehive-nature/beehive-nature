@@ -1,0 +1,71 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p3e4360abec",
+ "bnr": "bnr://skaists.dev/blood/p3e4360abec",
+ "identity": {
+  "name": "Baudouin de Hainaut V",
+  "lifespan": "1150–1195",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L1Q2-6Z7"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "LB5Q-GYR",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "9ZZS-VVC",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p68c9144597",
+    "name": "Isabelle de Hainaut Reine des Francs"
+   },
+   {
+    "id": "pde79e8496e",
+    "name": "Yolande de Hainaut Impératrice latine de Constantinople, Comtesse de Namur"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p9ce14a9a9b",
+    "name": "Marguerite d'Alsace",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L1Q2-6Z7",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p5e022ad7e2",
+ "bnr": "bnr://skaists.dev/blood/p5e022ad7e2",
+ "identity": {
+  "name": "Gerberge de Basse-Lotharingie",
+  "lifespan": "0975–1018",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LDSS-KKV"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pa8a2ea9b9c",
+    "name": "Charles, Duc de Basse-Lotharingie",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p109638a715",
+    "name": "Adelaïs de Troyes-Vermandois",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p25d99a6672",
+    "name": "Mathilde , gravin van Leuven"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p4433635ac6",
+    "name": "Lambert I met de Baard, graaf van Leuven-Henegouwen",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LDSS-KKV",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

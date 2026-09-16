@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p4bf9bd25ef",
+ "bnr": "bnr://skaists.dev/blood/p4bf9bd25ef",
+ "identity": {
+  "name": "Furia Sabina Tranquillina de Rome",
+  "lifespan": "0225–0244",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L7GM-LP3"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p7a94a3bce5",
+    "name": "Gaius Furius Sabinus Aquila Timesitheus",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pf96a5ec486",
+    "name": "Fura de Rome",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p0c07110dde",
+    "name": "Faustina Furia de Rome"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p5033fd4e8e",
+    "name": "Marcus Antonius Gordian Gordianus III",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L7GM-LP3",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

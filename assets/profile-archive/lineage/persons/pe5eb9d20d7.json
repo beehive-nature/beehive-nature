@@ -1,0 +1,53 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pe5eb9d20d7",
+ "bnr": "bnr://skaists.dev/blood/pe5eb9d20d7",
+ "identity": {
+  "name": "Merti the Syrian , King's Wife",
+  "lifespan": "1485BC–Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GT51-Z1H"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [],
+  "children": [],
+  "spouses": [
+   {
+    "id": "pbef5a9a639",
+    "name": "Thutmose III Menkheperenre 6th Pharaoh 18th Dynasty",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GT51-Z1H",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

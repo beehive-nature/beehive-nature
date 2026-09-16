@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pf8ae86eea6",
+ "bnr": "bnr://skaists.dev/blood/pf8ae86eea6",
+ "identity": {
+  "name": "Rasu’aya ibn Qaynan",
+  "lifespan": "3602BC–3583BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LVZ5-JSQ"
+  }
+ ],
+ "evidence": {
+  "era": "recorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "recorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p4011b92810",
+    "name": "Qaynan ibn Anwas",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pb1751d2a73",
+    "name": "Mûalêlêth bint Anwas",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p1997443ea9",
+    "name": "Baraka bint Rasu’aya"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pd076cd0094",
+    "name": "Tecia bint Mahūjāʾil",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LVZ5-JSQ",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

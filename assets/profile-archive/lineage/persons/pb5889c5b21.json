@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pb5889c5b21",
+ "bnr": "bnr://skaists.dev/blood/pb5889c5b21",
+ "identity": {
+  "name": "Graaf Alfbard van Friesland",
+  "lifespan": "0734–0795",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PWQ4-PLX"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p649efac9ef",
+    "name": "Graaf Poppo I de Friesland",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p824fceda85",
+    "name": "Geva Van aquitanië",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p65d329c228",
+    "name": "Graaf Nordalah van Friesland"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pd38959bd66",
+    "name": "Austrasie de Friesland",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PWQ4-PLX",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

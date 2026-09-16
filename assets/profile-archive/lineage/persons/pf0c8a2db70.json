@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pf0c8a2db70",
+ "bnr": "bnr://skaists.dev/blood/pf0c8a2db70",
+ "identity": {
+  "name": "Artaxerxes II",
+  "lifespan": "0456BC–0358BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G5TX-R26"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p4108bc602b",
+    "name": "Darius II",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p5b1bdc7c2d",
+    "name": "Parysatis Achaemenid of Babylon",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p68a5788623",
+    "name": "Apama"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pdcd0e1721a",
+    "name": "Stateira Queen of Persia",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G5TX-R26",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

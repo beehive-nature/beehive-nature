@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p54fbb00914",
+ "bnr": "bnr://skaists.dev/blood/p54fbb00914",
+ "identity": {
+  "name": "Saba bint Azrial",
+  "lifespan": "3199BC–2779BC",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LD57-BS6"
+  }
+ ],
+ "evidence": {
+  "era": "recorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "recorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pc03038a270",
+    "name": "Azrial ibn Yarid Prince de Sippa",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pd0436af6ce",
+    "name": "Baraka bat  Mahla'il",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p83df6c7a77",
+    "name": "Edna bint Dan'el ibn Mahla'il"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p870bb78abf",
+    "name": "Dan'el ibn Mahla'il",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LD57-BS6",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

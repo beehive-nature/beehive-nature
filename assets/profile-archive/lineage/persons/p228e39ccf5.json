@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p228e39ccf5",
+ "bnr": "bnr://skaists.dev/blood/p228e39ccf5",
+ "identity": {
+  "name": "Mary Paine",
+  "lifespan": "1611–1687",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LK5N-8P1"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p7b2f47ca7a",
+    "name": "Anthony Paine",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p85e1addac6",
+    "name": "Alice Potter",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p418aff477a",
+    "name": "Elizabeth Tripp"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pf4160aa1b3",
+    "name": "John Tripp III",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LK5N-8P1",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

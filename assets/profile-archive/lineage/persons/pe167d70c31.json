@@ -1,0 +1,62 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pe167d70c31",
+ "bnr": "bnr://skaists.dev/blood/pe167d70c31",
+ "identity": {
+  "name": "Egee de Lydie",
+  "lifespan": "20–Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "P3CX-H1V"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [],
+  "children": [
+   {
+    "id": "p4f8bd38ca9",
+    "name": "Consul Senateur Marcus Asinuis Marcellus de Rome"
+   },
+   {
+    "id": "p7bb921b695",
+    "name": "Gaius Asinus Frugi de Rome"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p4a480ac600",
+    "name": "Marcus Asinuis Marcellus de Rome",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/P3CX-H1V",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

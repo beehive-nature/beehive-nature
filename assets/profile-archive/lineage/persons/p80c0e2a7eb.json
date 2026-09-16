@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p80c0e2a7eb",
+ "bnr": "bnr://skaists.dev/blood/p80c0e2a7eb",
+ "identity": {
+  "name": "Ano the Egyptian",
+  "lifespan": "0965BC–Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LK53-QV1"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p550421adf4",
+    "name": "Chéchang l'Ancien d'Égypte",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p940f373573",
+    "name": "méhousekh DE LYBIE",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p4e9b94fc8d",
+    "name": "Shilhi ibn Yeroboam al-ʾEfrayim"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pf9733e9896",
+    "name": "Yeraboam ibn Neba'at 1st King of Northern Israel",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LK53-QV1",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

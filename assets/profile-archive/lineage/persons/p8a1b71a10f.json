@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p8a1b71a10f",
+ "bnr": "bnr://skaists.dev/blood/p8a1b71a10f",
+ "identity": {
+  "name": "Marcus Fabius Ambustus",
+  "lifespan": "0425BC–0364BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GGN8-HT9"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p69bfd0a48c",
+    "name": "Caeso Fabius Ambustus",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p46d4db1580",
+    "name": "Mrs Caeso Fabius Ambustus",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p230ed07cae",
+    "name": "Fabia Minor"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p719e7bbc2b",
+    "name": "Mrs Marcus Fabius Ambustus",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GGN8-HT9",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

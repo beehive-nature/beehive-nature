@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p964eed450b",
+ "bnr": "bnr://skaists.dev/blood/p964eed450b",
+ "identity": {
+  "name": "Julia Iotape Orontid",
+  "lifespan": "–80",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LVDP-SMJ"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pf2899808ae",
+    "name": "King Antiochus The Great III",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pf7c6e2b9f3",
+    "name": "Queen Iotapa Orontid de Medie",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p9178184fc3",
+    "name": "Itoapa II Komagene"
+   },
+   {
+    "id": "pc98d6075a6",
+    "name": "Queen Julia Iotopa of Cetis Cilicia"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p60e8b6c26c",
+    "name": "King Antiochus Epiphanes IV son of Antiochus III   of Commangene",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LVDP-SMJ",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

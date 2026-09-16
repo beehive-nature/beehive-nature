@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p3e7821aaed",
+ "bnr": "bnr://skaists.dev/blood/p3e7821aaed",
+ "identity": {
+  "name": "King Farabert Magnus de Toxandrie",
+  "lifespan": "0120–0186",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LZC5-NKY"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pf95e3d2845",
+    "name": "King Clodomir IV Magnus of the Salian Franks",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p16f628826e",
+    "name": "Princess Hafilda de Moselle Queens of the Franks of the Rugij",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p9bcbadafdb",
+    "name": "King Sunno of Saxony"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pc5a79e50e4",
+    "name": "Basila van de Rugi",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LZC5-NKY",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

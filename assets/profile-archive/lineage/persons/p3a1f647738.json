@@ -1,0 +1,64 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p3a1f647738",
+ "bnr": "bnr://skaists.dev/blood/p3a1f647738",
+ "identity": {
+  "name": "Quintus Servilius \" The Younger\" Caepio",
+  "lifespan": "0105BC–0059BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LVDX-4K7"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p7bcc257e26",
+    "name": "Aurelia Vera",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p029a2fef0d",
+    "name": "Clavaria de Rome"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p62bf6b59ef",
+    "name": "Livia Drusilla Julia Augusta Empress of the Roman Empire",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LVDX-4K7",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

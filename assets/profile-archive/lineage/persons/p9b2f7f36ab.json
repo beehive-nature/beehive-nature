@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p9b2f7f36ab",
+ "bnr": "bnr://skaists.dev/blood/p9b2f7f36ab",
+ "identity": {
+  "name": "Nahor ben Serug",
+  "lifespan": "2050BC–2002BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LDLP-LVR"
+  }
+ ],
+ "evidence": {
+  "era": "recorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "recorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pe2772e2c15",
+    "name": "Governor Serug",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p1608239ead",
+    "name": "Melka bint Kaber",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p9c3efa04cb",
+    "name": "Terah ben Nahor"
+   },
+   {
+    "id": "pfc0f1546d9",
+    "name": "Emtelai Of Agade"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pc38646c229",
+    "name": "Iyaska bint Nestag Chaldees",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LDLP-LVR",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

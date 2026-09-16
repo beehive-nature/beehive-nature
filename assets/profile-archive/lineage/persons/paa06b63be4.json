@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "paa06b63be4",
+ "bnr": "bnr://skaists.dev/blood/paa06b63be4",
+ "identity": {
+  "name": "John Whitbread Sr",
+  "lifespan": "1548–1598",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LC2Y-YSV"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pb01ef4fc8c",
+    "name": "Thomas Whitbread",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pe1092f86bf",
+    "name": "Mrs. Thomas Whitbread",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p19f8130e6c",
+    "name": "Alice Whitbread"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p05351921cb",
+    "name": "Eleanor Hill",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LC2Y-YSV",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

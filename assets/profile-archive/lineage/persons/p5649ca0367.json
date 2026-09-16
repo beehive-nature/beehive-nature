@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p5649ca0367",
+ "bnr": "bnr://skaists.dev/blood/p5649ca0367",
+ "identity": {
+  "name": "Pharoah Ramesse Psusennes I of Egypt",
+  "lifespan": "1074BC–0992BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GWL6-MVW"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p5a5b41df23",
+    "name": "Smendes I , 1st Pharaoh of the 21st Dynasty",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p9ea381ad74",
+    "name": "Duathathor-Henuttawy",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pa735d65509",
+    "name": "Princess Esemkhebe Isiemkheb Istemkheb Egypt"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p3f62d7be23",
+    "name": "Wiay of Egypt",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GWL6-MVW",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,71 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "founder",
+ "bnr": "bnr://skaists.dev/blood/founder",
+ "identity": {
+  "name": "Living",
+  "lifespan": null,
+  "gender": "MALE",
+  "living": true
+ },
+ "refs": [],
+ "evidence": {
+  "era": "living",
+  "support": "unsourced-entry",
+  "class": "living",
+  "basis": "redacted stub"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "private-stub",
+  "reason": "living — the founder, anonymous anchor"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "liv-1",
+    "name": "Living",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "liv-2",
+    "name": "Living",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [],
+  "spouses": []
+ },
+ "layers": {
+  "records": null,
+  "tradition": null,
+  "testimony": [],
+  "meaning": [
+   {
+    "id": "crest-bee-house",
+    "symbol": "the crowned bee + heart",
+    "meaning": "Love at the center of the house — the founder's own mark on the estate; the family and the hive it tends.",
+    "connects": [
+     "founder"
+    ],
+    "kind": "meaning",
+    "attribution": "founder-authored symbolism"
+   },
+   {
+    "id": "crest-many-tongues",
+    "symbol": "the motto in many tongues",
+    "meaning": "One promise carried across languages — the archive speaks 29 of them; the motto speaks them all.",
+    "connects": [
+     "founder"
+    ],
+    "kind": "meaning",
+    "attribution": "founder-authored symbolism"
+   }
+  ]
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

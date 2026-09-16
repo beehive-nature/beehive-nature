@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pdc43f84df5",
+ "bnr": "bnr://skaists.dev/blood/pdc43f84df5",
+ "identity": {
+  "name": "Robert Isham",
+  "lifespan": "1402–1475",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LJ29-6YP"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pe90dfbe434",
+    "name": "Robert de Isham Sr.",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p2c6c8b5210",
+    "name": "Julian Bradfield Of Northamptonshire",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p9ac52174a7",
+    "name": "Richard Isham"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p8798becc5c",
+    "name": "Elizabeth Margaret Knutson",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LJ29-6YP",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

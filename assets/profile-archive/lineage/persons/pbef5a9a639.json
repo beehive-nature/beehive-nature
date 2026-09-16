@@ -1,0 +1,79 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pbef5a9a639",
+ "bnr": "bnr://skaists.dev/blood/pbef5a9a639",
+ "identity": {
+  "name": "Thutmose III Menkheperenre 6th Pharaoh 18th Dynasty",
+  "lifespan": "1481BC–1425BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "94BJ-LW8"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p72f8996aaf",
+    "name": "Thutmose II Aakheperenre 4th Pharaoh 18th Dynasty",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pe3d6f9fc28",
+    "name": "Iset , Queen Consort of Egypt",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p5a92550888",
+    "name": "Menwi of Egypt"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pb5d99125d2",
+    "name": "Satiah , Great Royal Wife",
+    "marriage": null
+   },
+   {
+    "id": "pac3c898506",
+    "name": "Merytre-Hatshepsut",
+    "marriage": null
+   },
+   {
+    "id": "pe5eb9d20d7",
+    "name": "Merti the Syrian , King's Wife",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/94BJ-LW8",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

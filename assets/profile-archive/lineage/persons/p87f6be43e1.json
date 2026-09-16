@@ -1,0 +1,62 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p87f6be43e1",
+ "bnr": "bnr://skaists.dev/blood/p87f6be43e1",
+ "identity": {
+  "name": "Elizabeth Brancepeth",
+  "lifespan": "1380–1422",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GN3F-2PS"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [],
+  "children": [
+   {
+    "id": "p8798becc5c",
+    "name": "Elizabeth Margaret Knutson"
+   },
+   {
+    "id": "p29346ff162",
+    "name": "Camercon Knutson"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pf632768708",
+    "name": "Aston Knutson",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GN3F-2PS",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

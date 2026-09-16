@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p674d1ddbdf",
+ "bnr": "bnr://skaists.dev/blood/p674d1ddbdf",
+ "identity": {
+  "name": "Yoel ibn  Bart",
+  "lifespan": "3727BC–Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LB6W-VJY"
+  }
+ ],
+ "evidence": {
+  "era": "recorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "recorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pc3e113b2e1",
+    "name": "Bart ibn Qābīl",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "paa9f36d462",
+    "name": "Beth bint Qābīl",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pb141f17242",
+    "name": "Lia bint Yoel"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p2ba39f2cf3",
+    "name": "Mara bint Hanoch bat Qābīl",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LB6W-VJY",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

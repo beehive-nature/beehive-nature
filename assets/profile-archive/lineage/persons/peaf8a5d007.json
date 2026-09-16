@@ -1,0 +1,64 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "peaf8a5d007",
+ "bnr": "bnr://skaists.dev/blood/peaf8a5d007",
+ "identity": {
+  "name": "N.N. de Tebas",
+  "lifespan": "Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "P41P-Q34"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p78ca29c3c7",
+    "name": "Nekhire Khamoudy de los Hyksos de Tebas",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pc08df42cfe",
+    "name": "N.N. de los Hyksos de Tebas"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p6b14e75a0a",
+    "name": "N.N. de los Hyksos de Tebas",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/P41P-Q34",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

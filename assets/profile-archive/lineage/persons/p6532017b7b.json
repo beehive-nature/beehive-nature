@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p6532017b7b",
+ "bnr": "bnr://skaists.dev/blood/p6532017b7b",
+ "identity": {
+  "name": "Taharqa, bint Piye 4th Pharaoh, 25th Dynasty",
+  "lifespan": "0722BC–0664BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "9C42-HQG"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p02d108d474",
+    "name": "Piye 1st Pharaoh Of 25th Dynasty",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pe260657df8",
+    "name": "Abar, Queen Consort of Nubia and Egypt",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pee37dca85a",
+    "name": "Amenirdis II bint Taharqa, God's Wife of Amun"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p3d9d8e9a6f",
+    "name": "Takahatenamun bint Piye, Great Queen",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/9C42-HQG",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

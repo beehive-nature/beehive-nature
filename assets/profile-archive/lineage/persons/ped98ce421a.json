@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "ped98ce421a",
+ "bnr": "bnr://skaists.dev/blood/ped98ce421a",
+ "identity": {
+  "name": "Lucinia Terentiana DE ROME",
+  "lifespan": "0230–0300",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "P9XB-3C8"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "PMGJ-TXK",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "PMGJ-6TS",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p5dd9b340b4",
+    "name": "Pompeius Probus de Rome"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p05a44af465",
+    "name": "Faltonius Piniaus Probus",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/P9XB-3C8",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

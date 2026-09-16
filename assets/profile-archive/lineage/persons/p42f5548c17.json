@@ -1,0 +1,72 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p42f5548c17",
+ "bnr": "bnr://skaists.dev/blood/p42f5548c17",
+ "identity": {
+  "name": "Mentuhotep I 'the Great' , 2nd Pharaoh 11th Dynasty",
+  "lifespan": "2150BC–2133BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GTLN-XWJ"
+  }
+ ],
+ "evidence": {
+  "era": "recorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "recorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pe3d43553e8",
+    "name": "Intef the Elder , 1st Pharaoh 11th Dynasty",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p4cd9e3506f",
+    "name": "Intef II Wahankh 4th Pharaoh 11th Dynasty"
+   },
+   {
+    "id": "p8c31116d58",
+    "name": "Intef I Sehertawy 3rd Pharaoh 11th Dynasty"
+   },
+   {
+    "id": "p875213cbe3",
+    "name": "Akhtiphi"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pdc1b21e3e7",
+    "name": "Neferu I Queen of Egypt",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GTLN-XWJ",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

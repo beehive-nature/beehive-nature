@@ -1,0 +1,64 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p4faa350cf0",
+ "bnr": "bnr://skaists.dev/blood/p4faa350cf0",
+ "identity": {
+  "name": "Queen Beleazaios BAT ASHTART Of Tyre",
+  "lifespan": "0925BC–Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "9QQJ-38T"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p92f5f9f6dd",
+    "name": "Astarymus",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p18c25440f2",
+    "name": "Jezebel bat Ethbaal Ha-Israel de Tyr ou de Sidón"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pc3c28b9e5a",
+    "name": "Ithbaal ben Ahiram King of Tyre",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/9QQJ-38T",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

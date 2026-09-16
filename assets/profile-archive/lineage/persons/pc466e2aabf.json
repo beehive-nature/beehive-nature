@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pc466e2aabf",
+ "bnr": "bnr://skaists.dev/blood/pc466e2aabf",
+ "identity": {
+  "name": "Ahaz ben Micah",
+  "lifespan": "1040BC–Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G2MJ-SN9"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "paaf7dd41f9",
+    "name": "Micah ben Mephibosheth Merib-baal",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p1858444dc7",
+    "name": "Mrs Micah",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p3c075ba0f5",
+    "name": "Jehoadah ben Ahaz"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pfe853c66b2",
+    "name": "Mrs Ahaz",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G2MJ-SN9",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pc98d6075a6",
+ "bnr": "bnr://skaists.dev/blood/pc98d6075a6",
+ "identity": {
+  "name": "Queen Julia Iotopa of Cetis Cilicia",
+  "lifespan": "40–Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L6QM-RD8"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p60e8b6c26c",
+    "name": "King Antiochus Epiphanes IV son of Antiochus III   of Commangene",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p964eed450b",
+    "name": "Julia Iotape Orontid",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "paef82006e4",
+    "name": "Queen Julia Iotapa of Cilican"
+   },
+   {
+    "id": "p489ba783a4",
+    "name": "Gaius Julius Alexander Berenicianus"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pa5e82d81b0",
+    "name": "King Gaius Julius Alexander son of Tigranes VI by Julia Of Cilician Cetis",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L6QM-RD8",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

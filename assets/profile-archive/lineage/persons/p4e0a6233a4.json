@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p4e0a6233a4",
+ "bnr": "bnr://skaists.dev/blood/p4e0a6233a4",
+ "identity": {
+  "name": "Elizabeth Ann Hamilton",
+  "lifespan": "1850–1916",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "KWNV-B37"
+  }
+ ],
+ "evidence": {
+  "era": "recorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "recorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pe049efdb18",
+    "name": "James Lang Hamilton",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p51c0fdce55",
+    "name": "Mary Ann Campbell",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p86f89f2f72",
+    "name": "Mary Ellen Hill"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p43ce1fc7ee",
+    "name": "William Hood Hill",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/KWNV-B37",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

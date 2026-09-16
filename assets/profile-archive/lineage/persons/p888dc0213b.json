@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p888dc0213b",
+ "bnr": "bnr://skaists.dev/blood/p888dc0213b",
+ "identity": {
+  "name": "Marius King Marius of the Britons",
+  "lifespan": "40–0125",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L6XZ-D85"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p40029ace2a",
+    "name": "King Arvirargus ap Cunobelin of Britain",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p0601d4065e",
+    "name": "Queen Genuissa Venessa Venus Julia Claudia of Siluria, Wales",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p3e5a5ee0bb",
+    "name": "King Coel I ap Marius de Camu-Lot de Silurie"
+   },
+   {
+    "id": "pf40fa9bf8d",
+    "name": "King Eugein ap Marius of Siluria"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pc2ea982150",
+    "name": "Julia Victoria Panardun verch Prasutigas",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L6XZ-D85",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p357e0c6834",
+ "bnr": "bnr://skaists.dev/blood/p357e0c6834",
+ "identity": {
+  "name": "Asshar bint Assur",
+  "lifespan": "2314BC–Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L6QP-9VD"
+  }
+ ],
+ "evidence": {
+  "era": "recorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "recorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p9dcfb3192e",
+    "name": "Asshur ben Shem",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p6ae5f66411",
+    "name": "Mullissu Ninlil bint Japheth",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p0fa3333957",
+    "name": "'Ûr-Nammu ibn Kesed King of the Neo-Sumerian Empire"
+   },
+   {
+    "id": "pc9a5a235da",
+    "name": "Ahar ibn Kesed"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p00da0902f1",
+    "name": "Kesed ibn Arfakhsad",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L6QP-9VD",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

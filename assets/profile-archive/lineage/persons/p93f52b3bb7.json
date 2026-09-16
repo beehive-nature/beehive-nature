@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p93f52b3bb7",
+ "bnr": "bnr://skaists.dev/blood/p93f52b3bb7",
+ "identity": {
+  "name": "Andrew Denholme",
+  "lifespan": "1566–1623",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "P6C6-LTP"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p8baa102983",
+    "name": "Robert Denholme",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p7623b39d83",
+    "name": "Marion Little",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p81f8537243",
+    "name": "Johnne Denholm"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pd39d6d44f0",
+    "name": "Elizabeth Purdy Denholm",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/P6C6-LTP",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -3,7 +3,7 @@
 // The spine terminus defaults to the earliest-birth bloodline person; pass a
 // name regex to pin it (e.g. "Sigurd Ring de Trondheim").
 import { readFileSync, writeFileSync } from "node:fs";
-import { createModel, addPerson, addEdge, addCouple, bloodline, spine, depths, validate, birthYear } from "./model.mjs";
+import { createModel, addPerson, addEdge, addCouple, bloodline, spine, depths, validate, birthYear, evidenceClass } from "./model.mjs";
 import { importWalk } from "./fs-adapter.mjs";
 
 const [rawPath, corpusOut, pageOut, spineRx, viaRx] = process.argv.slice(2);
@@ -32,6 +32,11 @@ if (overlay) {
       ...model.persons[id], ...c.patch,
       corrected: { attested: c.attested || "founder", note: c.note || "" },
     };
+    // corrections recompute DERIVED metadata: a founder-attested death moves
+    // the era off 'living' — stale era on a corrected person is a bug
+    const fixed = model.persons[id];
+    const era = evidenceClass({ living: fixed.living, lifespan: fixed.lifespan });
+    fixed.evidence = { ...(fixed.evidence || {}), era, class: era };
     correctionsApplied++;
   }
   for (const [id, p] of Object.entries(overlay.persons || {})) {
@@ -145,20 +150,34 @@ for (const c of Object.values(model.couples)) if (pub.persons[c.p1] && pub.perso
 
 // ── FIRST-CLASS STAGED OBJECTS: every person gets a stable INTERNAL identity;
 // provider ids (FamilySearch, …) are retained as REFERENCES, never as the
-// identity. Living root-line persons keep pseudonymous internal ids (founder,
-// liv-N — never derived from provider ids, so nothing leaks); overlay persons
-// keep their ovl- ids (they were born internal); walked deceased get
-// deterministic ids hashed from their provider reference.
+// identity. IDENTITY FREEZE: issued ids live in a registry and are REUSED —
+// re-imports, provider-reference changes, and reordered input must never
+// re-point a published address at someone else. The PUBLIC registry carries
+// deceased refs only; the living mapping (fsid→founder/liv-N) stays in a
+// PRIVATE registry on estate-local disk, out of public artifacts.
 const { createHash } = await import("node:crypto");
 const internalId = (providerRef) => "p" + createHash("sha1").update(providerRef).digest("hex").slice(0, 10);
+const PUBLIC_REGISTRY = "assets/profile-archive/lineage/identity-registry.json";
+const PRIVATE_REGISTRY = "C:/Users/travi/family-lineage/identity-registry-private.json";
+const loadJson = (p) => { try { return JSON.parse(readFileSync(p, "utf8")); } catch (e) { return null; } };
+const pubRegistry = loadJson(PUBLIC_REGISTRY) || { schema: "skaists.identity-registry/1", issued: {}, aliases: {} };
+const privRegistry = loadJson(PRIVATE_REGISTRY) || { schema: "skaists.identity-registry-private/1", issued: {}, note: "fsid→pseudonym for living persons; NEVER published" };
 
 const idmap = {};
-let livN = 0;
+let livN = Math.max(0, ...Object.values(privRegistry.issued).map((v) => /^liv-(\d+)$/.exec(v) ? parseInt(RegExp.$1, 10) : 0));
 for (const id of Object.keys(pub.persons)) {
   const p = pub.persons[id];
-  if (p.living) idmap[id] = id === pub.root ? "founder" : "liv-" + (++livN);
-  else if (/^ovl-/.test(id)) idmap[id] = id;
-  else idmap[id] = internalId("familysearch:" + id);
+  if (p.living) {
+    if (id === pub.root) { idmap[id] = "founder"; privRegistry.issued[id] = "founder"; }
+    else { const known = privRegistry.issued[id]; if (known) idmap[id] = known; else { idmap[id] = "liv-" + (++livN); privRegistry.issued[id] = idmap[id]; } }
+  } else if (/^ovl-/.test(id)) idmap[id] = id;
+  else {
+    // registry first (frozen identity); a changed provider reference becomes
+    // an ALIAS of the already-issued id rather than a new person
+    const known = pubRegistry.issued[id];
+    idmap[id] = known || internalId("familysearch:" + id);
+    if (!known) pubRegistry.issued[id] = idmap[id];
+  }
 }
 const remapped = { persons: {}, edges: {} };
 const refsIndex = {};
@@ -262,11 +281,7 @@ writeFileSync(corpusOut, JSON.stringify(pub, null, 1) + "\n", "utf8");
 
 // ── staged person objects: every relative is a first-class archive object;
 // profile pages, fractal views, and manifests generate from this shared
-// object. The four canonical souls prove the path (Donna, Marilyn, Rockwood,
-// the Ragnar tradition entry); the same emitter serves any internal id.
-const CANONICAL = [
-  /Donna Ruth Lawton/i, /Marilyn Lowry/i, /Don Ray Remington/i, /Albert Perry Rockwood/i, /Ragnar Sigurdsson/i,
-];
+// object. The canonical five prove the path as permanent fixtures.
 function personObject(iid) {
   const p = pub.persons[iid];
   if (!p) return null;
@@ -299,19 +314,70 @@ function personObject(iid) {
     generatedFrom: "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this",
   };
 }
+// ── WHOLE-COHORT STAGING: every relative is a first-class archive object —
+// not a five-name pilot. Public persons stage into the repo; protected persons
+// (living, off-line) stage at FULL FIDELITY into PRIVATE staging on local
+// disk, never committed. The five canonical souls stay as permanent regression
+// fixtures. Staging failures FAIL the build and name the records — a
+// successful-looking run with silent gaps is the bug this whole lane kills.
+const FIXTURES = [
+  /Donna Ruth Lawton/i, /Marilyn Lowry/i, /Don Ray Remington/i, /Albert Perry Rockwood/i, /Ragnar Sigurdsson/i,
+];
+const PUBLIC_STAGING = "assets/profile-archive/lineage/persons";
+const PRIVATE_STAGING = "C:/Users/travi/family-lineage/staging-private";
+const stagingFailures = [];
 try {
   const { mkdirSync: mkd } = await import("node:fs");
-  mkd("assets/profile-archive/lineage/persons", { recursive: true });
-  let emitted = 0;
-  for (const rx of CANONICAL) {
-    const iid = Object.keys(pub.persons).find((k) => rx.test(pub.persons[k].name || "") && !pub.persons[k].living);
-    if (!iid) continue;
-    writeFileSync("assets/profile-archive/lineage/persons/" + iid + ".json", JSON.stringify(personObject(iid), null, 1) + "\n", "utf8");
-    emitted++;
+  mkd(PUBLIC_STAGING, { recursive: true });
+  mkd(PRIVATE_STAGING, { recursive: true });
+  let publicStaged = 0, privateStaged = 0;
+  const researchCounts = {}, publicationCounts = {};
+  for (const [iid, p] of Object.entries(pub.persons)) {
+    try {
+      writeFileSync(PUBLIC_STAGING + "/" + iid + ".json", JSON.stringify(personObject(iid), null, 1) + "\n", "utf8");
+      publicStaged++;
+      researchCounts[p.research?.status || "?"] = (researchCounts[p.research?.status || "?"] || 0) + 1;
+      publicationCounts[p.publication?.status || "?"] = (publicationCounts[p.publication?.status || "?"] || 0) + 1;
+    } catch (e) { stagingFailures.push(iid + " (public): " + e.message); }
   }
-  pub.meta.stagedPersons = { store: "assets/profile-archive/lineage/persons/", canonicalEmitted: emitted };
+  // private staging: every model person NOT in the public corpus, full fidelity
+  const pubIids = new Set(Object.values(idmap));
+  for (const [mid, p] of Object.entries(model.persons)) {
+    if (pubIids.has(idmap[mid] || mid) && pub.persons[idmap[mid] || mid]) continue;
+    try {
+      writeFileSync(PRIVATE_STAGING + "/" + (idmap[mid] || mid) + ".json",
+        JSON.stringify({ schema: "skaists.person-private/1", internalId: idmap[mid] || mid, providerRef: mid, ...p,
+          publication: { status: "private", reason: p.living ? "living — full fidelity stays local" : "off-bloodline ancestry — scope stays private-side" } }, null, 1) + "\n", "utf8");
+      privateStaged++;
+    } catch (e) { stagingFailures.push(mid + " (private): " + e.message); }
+  }
+  // inventories: public committed, private local-only
+  pub.meta.stagedPersons = {
+    store: PUBLIC_STAGING + "/",
+    publicStaged, privateStagedLocal: PRIVATE_STAGING + "/",
+    fixtures: FIXTURES.map((rx) => Object.keys(pub.persons).find((k) => rx.test(pub.persons[k].name || "") && !pub.persons[k].living)).filter(Boolean),
+    researchCounts, publicationCounts,
+    pages: "generated on demand: node tools/genealogy/personpage.mjs [id…]; the five fixtures' pages are committed",
+  };
+  writeFileSync(PUBLIC_STAGING + "/../staging-inventory.json", JSON.stringify({
+    schema: "skaists.staging-inventory/1", generated: pub.meta.generated,
+    walkedCohort: pub.meta.reconciliation.rawPersons,
+    publicStaged, privateStaged,
+    sumCheck: publicStaged + privateStaged === pub.meta.reconciliation.rawPersons,
+    privateStaging: { location: "estate-local disk (never committed)", count: privateStaged,
+      reasons: pub.meta.reconciliation.excluded },
+    note: "nobody silently disappears: PUBLIC staged + PRIVATE staged = the walked cohort (sumCheck asserts it); the reconciliation reasons explain WHY each private person is not public",
+  }, null, 1) + "\n", "utf8");
   writeFileSync(corpusOut, JSON.stringify(pub, null, 1) + "\n", "utf8"); // rewrite with the staging note
-} catch (e) { console.error("person staging skipped: " + e.message); }
+} catch (e) { stagingFailures.push("(staging setup): " + e.message); }
+if (stagingFailures.length) {
+  console.error("STAGING FAILED (" + stagingFailures.length + ") — records named, build fails:");
+  stagingFailures.slice(0, 20).forEach((f) => console.error("  - " + f));
+  process.exit(1);
+}
+// persist the identity registries (public: deceased; private: living mapping)
+writeFileSync(PUBLIC_REGISTRY, JSON.stringify(pubRegistry, null, 1) + "\n", "utf8");
+writeFileSync(PRIVATE_REGISTRY, JSON.stringify(privRegistry, null, 1) + "\n", "utf8");
 
 // page-data: fan (7 rings) + spine + stats
 function fanOf(id, gen, maxGen) {

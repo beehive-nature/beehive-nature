@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pdee653204c",
+ "bnr": "bnr://skaists.dev/blood/pdee653204c",
+ "identity": {
+  "name": "Helen bat-Benjamin",
+  "lifespan": "3521BC–Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G4TJ-5BM"
+  }
+ ],
+ "evidence": {
+  "era": "recorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "recorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p47f4eb7cc8",
+    "name": "Benjaman ben Lectar",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pb24f1f9e5c",
+    "name": "Lassie bat-Lectar",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p15f6acb7d7",
+    "name": "Samual ben Lectar"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pabd9e531be",
+    "name": "Lectar BEN KENNAH",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G4TJ-5BM",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

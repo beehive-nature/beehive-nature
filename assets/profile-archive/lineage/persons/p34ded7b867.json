@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p34ded7b867",
+ "bnr": "bnr://skaists.dev/blood/p34ded7b867",
+ "identity": {
+  "name": "Lady Sarah Julia Neale",
+  "lifespan": "1545–1644",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G4XY-MTH"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p5623e9ee83",
+    "name": "Cristopher Tinker",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p33beb2518a",
+    "name": "Pearl Neale",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p58b67c21bf",
+    "name": "Robert Tinker"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pe33965b9b2",
+    "name": "Randall Tinker",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G4XY-MTH",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

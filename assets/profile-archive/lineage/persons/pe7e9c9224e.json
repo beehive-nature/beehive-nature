@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pe7e9c9224e",
+ "bnr": "bnr://skaists.dev/blood/pe7e9c9224e",
+ "identity": {
+  "name": "Dorthe Nielsdatter",
+  "lifespan": "1779–1835",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "KHZL-643"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p10fc387dee",
+    "name": "Niels Hansen",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pa278950f46",
+    "name": "Johanne Hansdatter",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p2599dc506e",
+    "name": "Mette Larsdatter"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pb0e90c77b4",
+    "name": "Lars Madsen",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/KHZL-643",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

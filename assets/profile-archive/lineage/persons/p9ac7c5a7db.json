@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p9ac7c5a7db",
+ "bnr": "bnr://skaists.dev/blood/p9ac7c5a7db",
+ "identity": {
+  "name": "William Ball",
+  "lifespan": "1736–1811",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "MN28-JT6"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "L7GH-F43",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "KG13-DF5",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p2204498036",
+    "name": "Mary Ball"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pbd8831c18a",
+    "name": "Ann Garlick",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/MN28-JT6",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

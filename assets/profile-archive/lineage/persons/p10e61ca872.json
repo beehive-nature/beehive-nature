@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p10e61ca872",
+ "bnr": "bnr://skaists.dev/blood/p10e61ca872",
+ "identity": {
+  "name": "EMPEROR Naram-Sin 4TH EMPEROR OF THE AKKADIAN EMPIRE",
+  "lifespan": "2280BC–2218BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GQJL-MHZ"
+  }
+ ],
+ "evidence": {
+  "era": "recorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "recorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p5bbf1a0a4d",
+    "name": "Manishtushu",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p3086fd5b8e",
+    "name": "N.N. DAUGHTER OF KA-KUG OF UR",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p61d349ffae",
+    "name": "King Shar-Kali-Sharri, Akkad"
+   },
+   {
+    "id": "p0885665506",
+    "name": "Bin-Kali-Sharri ben Naram-Sin"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p1c9a8af4d3",
+    "name": "Summarrat, Princess of Awan",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GQJL-MHZ",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

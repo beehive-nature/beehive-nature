@@ -1,0 +1,64 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p15a0a0d2e0",
+ "bnr": "bnr://skaists.dev/blood/p15a0a0d2e0",
+ "identity": {
+  "name": "Coelia Vibulia Balbina",
+  "lifespan": "–0213",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LYG1-64W"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pc262fc7549",
+    "name": "Marcus Aquilius Publius Coelius Apollinaris",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pa14b77033f",
+    "name": "Lucius Valerius Claudius Acilius Maximus"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p9e4a8819cb",
+    "name": "Lucius Valerius Priscillianus Thrasea Maximus",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LYG1-64W",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

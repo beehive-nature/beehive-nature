@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p361e177685",
+ "bnr": "bnr://skaists.dev/blood/p361e177685",
+ "identity": {
+  "name": "Egrilla de Rome",
+  "lifespan": "88–0160",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GNBH-SHS"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pe3404a9ec8",
+    "name": "Aulus Egrillius Rufius De Rome",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "paec188e175",
+    "name": "Plavis Vera de Rome",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p93e2d638f9",
+    "name": "Aulus Lunius Rufi de Rome"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p26b5dbec18",
+    "name": "Aulius Larcius Quirinus Priscus DE ROME",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GNBH-SHS",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pe7434c7284",
+ "bnr": "bnr://skaists.dev/blood/pe7434c7284",
+ "identity": {
+  "name": "Alexander ben Herod",
+  "lifespan": "0031BC–0002BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LV78-STY"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pbdbc98aaee",
+    "name": "King Herod ben Antipater",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pab31c04e78",
+    "name": "Mariamne I bat Alexander",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p2e07f3b4bf",
+    "name": "Tigranes V ben Alexander by Glaphyra"
+   },
+   {
+    "id": "pea5bf09d05",
+    "name": "Caius Julius Alexander of Judea"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pcc49f2720a",
+    "name": "Glaphyra bat Archealaus",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LV78-STY",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p0cb376aefd",
+ "bnr": "bnr://skaists.dev/blood/p0cb376aefd",
+ "identity": {
+  "name": "William Abraham",
+  "lifespan": "1543–1569",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L6BF-V9N"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "P9WB-HDC",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "G8C9-YWJ",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pccad044fa9",
+    "name": "Margaret Abraham"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pe2b9d582c4",
+    "name": "Elizabeth Crowborn",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L6BF-V9N",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

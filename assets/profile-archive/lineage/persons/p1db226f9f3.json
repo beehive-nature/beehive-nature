@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p1db226f9f3",
+ "bnr": "bnr://skaists.dev/blood/p1db226f9f3",
+ "identity": {
+  "name": "Aristomachos HERACLIDE Of Thebes",
+  "lifespan": "Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G8XD-SLW"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p22fe7b7afe",
+    "name": "Merops Heraclid",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pab98678838",
+    "name": "RACL",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p7999f23eca",
+    "name": "Aristomachos Heraclid"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p330ab75261",
+    "name": "Princess DE TIRHYNTHE",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G8XD-SLW",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "paf11a19e2c",
+ "bnr": "bnr://skaists.dev/blood/paf11a19e2c",
+ "identity": {
+  "name": "Eystein 'Hardråde, the Severe' Trondsson Petty King of Hedmark, Norway",
+  "lifespan": "0660–0710",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "KLVW-6CR"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pffef13ac1c",
+    "name": "Thrond Haraldsson de Heidmark",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p30c97e5c56",
+    "name": "Ragnhild Sigurdsdatter of Ring",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pc18f172632",
+    "name": "Earl of Throndheim Hogne Eysteinsson"
+   },
+   {
+    "id": "p4212bbf31d",
+    "name": "Åsa Eysteinsdotter Queen of Vestfold"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pe198c11a73",
+    "name": "Solveig Halfdansdatter de Solor",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/KLVW-6CR",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

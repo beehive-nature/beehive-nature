@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pe513881e3a",
+ "bnr": "bnr://skaists.dev/blood/pe513881e3a",
+ "identity": {
+  "name": "Marcus Gavius Squilla Gallicanus",
+  "lifespan": "0117–0177",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GVHW-WJ2"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p6df6932558",
+    "name": "Marcus Gavius Squilla Gallicanus",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p6375fa5db9",
+    "name": "Cornelia Cethegilla Minor di Rome",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p9cc17af8db",
+    "name": "Cornélia Cethegilla Gavii Di Roma"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p6461bb6558",
+    "name": "Pompeia Agrippinilla",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GVHW-WJ2",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

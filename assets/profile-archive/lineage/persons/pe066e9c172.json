@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pe066e9c172",
+ "bnr": "bnr://skaists.dev/blood/pe066e9c172",
+ "identity": {
+  "name": "Margaret Brown",
+  "lifespan": "1539–Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "KZL1-82K"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p19d91bcd68",
+    "name": "Frederick William Brown",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p46abecc8b1",
+    "name": "Janet Mure",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p82782b27a8",
+    "name": "Margaret Wardlaw"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pc936b1e9fa",
+    "name": "Robert Wardlaw",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/KZL1-82K",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

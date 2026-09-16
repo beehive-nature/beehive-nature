@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "paff09dedde",
+ "bnr": "bnr://skaists.dev/blood/paff09dedde",
+ "identity": {
+  "name": "Plautius Lateranus",
+  "lifespan": "20–Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LYG1-Y4K"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p981dfc038f",
+    "name": "Quintus Plautius DE ROME-DE ROME",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pefcb6fcf62",
+    "name": "Sextia DE ROME",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pdd0d50a9c5",
+    "name": "Aulus Plautius"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p1f95bfdf0e",
+    "name": "Quinctilia Varia",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LYG1-Y4K",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

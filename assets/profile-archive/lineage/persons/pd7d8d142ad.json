@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pd7d8d142ad",
+ "bnr": "bnr://skaists.dev/blood/pd7d8d142ad",
+ "identity": {
+  "name": "Marguerite de Rie",
+  "lifespan": "1075–1119",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "M9QY-6V5"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p21b3c68418",
+    "name": "Eudo Dapifer",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pb1bf61adb8",
+    "name": "Rohese de Clare",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pf1faf50233",
+    "name": "Geoffrey de Mandeville Domesday Book"
+   },
+   {
+    "id": "pf07361539b",
+    "name": "Béatrix de Mandeville"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pe4070e7f2d",
+    "name": "William de Mandeville",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/M9QY-6V5",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

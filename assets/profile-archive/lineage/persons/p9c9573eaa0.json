@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p9c9573eaa0",
+ "bnr": "bnr://skaists.dev/blood/p9c9573eaa0",
+ "identity": {
+  "name": "Capt John Taylor III",
+  "lifespan": "1641–1704",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LR2G-W1K"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pc0379af56c",
+    "name": "John Taylor",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pda76f7767d",
+    "name": "Rhoda Tinker",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pbf8b588ddc",
+    "name": "Rhoda Taylor"
+   },
+   {
+    "id": "pce317718df",
+    "name": "Thankful Taylor"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pfc41683e81",
+    "name": "Thankful Woodward",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LR2G-W1K",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

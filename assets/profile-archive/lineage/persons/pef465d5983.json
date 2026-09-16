@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pef465d5983",
+ "bnr": "bnr://skaists.dev/blood/pef465d5983",
+ "identity": {
+  "name": "Jacob Nüssli",
+  "lifespan": "1544–1630",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "P7MN-MZ5"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p38cde346e1",
+    "name": "Martin Nüssli",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p6bce6f16d9",
+    "name": "Anna Elisabeth Wolfensberger",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p5cc55654cd",
+    "name": "Conradt Nüssli"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pbe1c696227",
+    "name": "Eva Koblett",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/P7MN-MZ5",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

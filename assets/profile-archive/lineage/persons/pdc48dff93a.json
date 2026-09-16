@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pdc48dff93a",
+ "bnr": "bnr://skaists.dev/blood/pdc48dff93a",
+ "identity": {
+  "name": "Methusael ibn Mahūjāʾil",
+  "lifespan": "3339BC–2370BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "9CHW-NLX"
+  }
+ ],
+ "evidence": {
+  "era": "recorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "recorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pa74ce86930",
+    "name": "Mehujael ben Irad",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pb141f17242",
+    "name": "Lia bint Yoel",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p9523499d81",
+    "name": "Lamech ibn Methusael ibn Mahūjāʾil"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p6b678b6fce",
+    "name": "Naamah \"Edna\"",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/9CHW-NLX",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

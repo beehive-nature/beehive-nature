@@ -1,0 +1,78 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p1acb741bb0",
+ "bnr": "bnr://skaists.dev/blood/p1acb741bb0",
+ "identity": {
+  "name": "Isah Azarías ben Ahimaas",
+  "lifespan": "1000BC–Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GYKM-KMY"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pcd009b87d2",
+    "name": "Ahimaas",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pc2149399de",
+    "name": "Daughter of JOSHUA",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p51f8772573",
+    "name": "High Priest Johanan ben Azariah I"
+   },
+   {
+    "id": "p680ecc471d",
+    "name": "Amariah ibn Ǎzaryāh I"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pe9df7775e3",
+    "name": "High Priest Azariah ben Ahimaaz",
+    "marriage": null
+   },
+   {
+    "id": "p3420212131",
+    "name": "Azariah III ben Zadok II",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GYKM-KMY",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

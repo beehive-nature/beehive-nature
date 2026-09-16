@@ -1,0 +1,87 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pa39d77a357",
+ "bnr": "bnr://skaists.dev/blood/pa39d77a357",
+ "identity": {
+  "name": "Pharaoh Khafre",
+  "lifespan": "2580BC–2532BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LRXC-557"
+  }
+ ],
+ "evidence": {
+  "era": "recorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "recorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pa9b16ad3fe",
+    "name": "Djedefre \"Kheper\", 3rd Pharaoh, 4th Dynasty",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p11f9aecb9c",
+    "name": "Priestess Hetepheres II bint Khufu, Queen of Egypt 4th Dynasty",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p8ac5da4b76",
+    "name": "Menkaura Menkaure, Mykerinos, Mycerinus 6th Pharaoh of the 4th Dynasty"
+   },
+   {
+    "id": "p0599a75afa",
+    "name": "Rekhetre , Queen of Egypt"
+   },
+   {
+    "id": "p6453f9d687",
+    "name": "Queen Khamerernebty II of Egypt"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p8bc95aeb27",
+    "name": "Persenet",
+    "marriage": null
+   },
+   {
+    "id": "pe429d03e2e",
+    "name": "Hekenuhedjet",
+    "marriage": null
+   },
+   {
+    "id": "pe4701d2cbf",
+    "name": "Queen Khamerernebty I of Egypt",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LRXC-557",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

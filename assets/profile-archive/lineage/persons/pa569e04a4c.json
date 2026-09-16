@@ -1,0 +1,64 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pa569e04a4c",
+ "bnr": "bnr://skaists.dev/blood/pa569e04a4c",
+ "identity": {
+  "name": "R. Yohanan ibn Joazar",
+  "lifespan": "0220BC–0150BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GXSR-XH1"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pe5eb232650",
+    "name": "Joazar ben Zeredah",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p793c8ffd39",
+    "name": "Yossei ibn Yohanan"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pe0a15add3e",
+    "name": "Mrs Yohanan ben Joazar",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GXSR-XH1",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

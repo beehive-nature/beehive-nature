@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pa43a9f46f3",
+ "bnr": "bnr://skaists.dev/blood/pa43a9f46f3",
+ "identity": {
+  "name": "Lucius Arrius Plarianus Aufidius Turbo",
+  "lifespan": "38–65",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GSVY-CC3"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p5decc93736",
+    "name": "Lucius Arrius",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p9730da9d9c",
+    "name": "Plaria Vera",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p2f846cebbd",
+    "name": "Arria Plaria Vera Priscilla"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pf27c6b19f1",
+    "name": "Atilla Sabina de Rome",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GSVY-CC3",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

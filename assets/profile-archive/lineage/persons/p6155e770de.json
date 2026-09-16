@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p6155e770de",
+ "bnr": "bnr://skaists.dev/blood/p6155e770de",
+ "identity": {
+  "name": "Henry of Lancaster",
+  "lifespan": "1280–1345",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LD91-Q66"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p9728c2339c",
+    "name": "Edmund Crouchback 1st Earl of Leicester and  Lancaster",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p06cd914332",
+    "name": "Blanche d'Artois",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p6eb8b251f3",
+    "name": "Eleanor of Lancaster"
+   },
+   {
+    "id": "p9b4fc300e2",
+    "name": "Joan of Lancaster"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "paaeaee899d",
+    "name": "Matilda de Chaworth",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LD91-Q66",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

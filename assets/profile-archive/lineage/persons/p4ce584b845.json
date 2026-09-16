@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p4ce584b845",
+ "bnr": "bnr://skaists.dev/blood/p4ce584b845",
+ "identity": {
+  "name": "Robert Swane",
+  "lifespan": "1550–1615",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LHGC-ZK3"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p525db6a6d7",
+    "name": "Laurence Swaine",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pc97cfe08ff",
+    "name": "Margaret Palind",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pa42148c883",
+    "name": "Millicent Swayne"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p5ce1e21be5",
+    "name": "Elizabeth Bond",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LHGC-ZK3",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

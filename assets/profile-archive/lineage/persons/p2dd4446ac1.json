@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p2dd4446ac1",
+ "bnr": "bnr://skaists.dev/blood/p2dd4446ac1",
+ "identity": {
+  "name": "Jeanne de Guines",
+  "lifespan": "0923–Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GLBM-QZG"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p03cc17c04f",
+    "name": "Harald II DE GUINES DE FRIES",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pcbdea5cd50",
+    "name": "Elfrude van Gent",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p2917abed13",
+    "name": "Alphonse Desvres seigneur de Desvres"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pa71cfcc978",
+    "name": "Wallerand de Desvres",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GLBM-QZG",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

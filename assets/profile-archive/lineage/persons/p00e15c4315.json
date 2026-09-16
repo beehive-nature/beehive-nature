@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p00e15c4315",
+ "bnr": "bnr://skaists.dev/blood/p00e15c4315",
+ "identity": {
+  "name": "Sibylla FitzWilliam",
+  "lifespan": "1140–1203",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LKYB-MTY"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "PDBM-VN2",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "PXFV-1FK",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p18dc4759a3",
+    "name": "William de London"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pf64caef6cd",
+    "name": "William de London II",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LKYB-MTY",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

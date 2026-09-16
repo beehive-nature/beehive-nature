@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p2cf23f59fb",
+ "bnr": "bnr://skaists.dev/blood/p2cf23f59fb",
+ "identity": {
+  "name": "John Reskimer Esquire",
+  "lifespan": "1459–1504",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LHPC-K7X"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pd8dfe70fb1",
+    "name": "William Reskimer",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p004ffdca84",
+    "name": "Elizabeth Arundell",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p0a71a28087",
+    "name": "William Reskimer"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p1ed4349b32",
+    "name": "Catherine Trethurffe",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LHPC-K7X",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

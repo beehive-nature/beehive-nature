@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pa6160c63c5",
+ "bnr": "bnr://skaists.dev/blood/pa6160c63c5",
+ "identity": {
+  "name": "Ur Nanna D'OUROUK-DE BABYLONE",
+  "lifespan": "2145BC–Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GKXD-PJX"
+  }
+ ],
+ "evidence": {
+  "era": "recorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "recorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p37ef8e6051",
+    "name": "Ur Uttuh D'OUROUK-?",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p7a69d38b70",
+    "name": "? DE BABYLONE-?",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p265fe9d37a",
+    "name": "Ur Zabada DE LAGASH-D'OUROUK"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p9708b4feec",
+    "name": "Ur Ningirsur DE LAGASH-?",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GKXD-PJX",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pcbb8fee89a",
+ "bnr": "bnr://skaists.dev/blood/pcbb8fee89a",
+ "identity": {
+  "name": "King Eunomus of Sparta",
+  "lifespan": "0805BC–0775BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G7T1-6DF"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pc4ff70eab1",
+    "name": "Eurypon of Sparta",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p74798c0b18",
+    "name": "NN",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p42f52ff3e5",
+    "name": "Charilaus of Sparta"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pa4ca7b6a3e",
+    "name": "NN",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G7T1-6DF",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

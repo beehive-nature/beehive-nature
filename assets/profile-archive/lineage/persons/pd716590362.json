@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pd716590362",
+ "bnr": "bnr://skaists.dev/blood/pd716590362",
+ "identity": {
+  "name": "Warin de Chalon II",
+  "lifespan": "0822–0885",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "27S1-JS9"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pc6be39394f",
+    "name": "Warin Ier d'Auvergne comte de Chalon et de Mâcon",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p545c2a3c15",
+    "name": "Aiga DE BOURGES",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p3f3428976a",
+    "name": "Aube Ermengarde D'ORLEANS Abbess Of Sauxillanges"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pcf9f84e2c0",
+    "name": "Alba D'Autun",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/27S1-JS9",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

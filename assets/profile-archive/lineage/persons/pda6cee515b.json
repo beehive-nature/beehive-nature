@@ -1,0 +1,77 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pda6cee515b",
+ "bnr": "bnr://skaists.dev/blood/pda6cee515b",
+ "identity": {
+  "name": "Augusta Annia Galeria Major Faustina Vera",
+  "lifespan": "97–0141",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LJB7-2RJ"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p7584fb9e78",
+    "name": "Marcus Annius Verus II",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pef9771ed26",
+    "name": "Rupilia Faustina Licinii Crassi",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pd9fad25e03",
+    "name": "Aurelia Fadilla Aurelier"
+   },
+   {
+    "id": "p5e5ab925b2",
+    "name": "Pontius PONTII"
+   },
+   {
+    "id": "p3ba6362d4d",
+    "name": "Flava de Rome"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p1516336c7f",
+    "name": "Titus Aurelius Fulvus Boionius Arrius Antoninus Pius",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LJB7-2RJ",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

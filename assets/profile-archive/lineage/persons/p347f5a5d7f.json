@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p347f5a5d7f",
+ "bnr": "bnr://skaists.dev/blood/p347f5a5d7f",
+ "identity": {
+  "name": "William Button",
+  "lifespan": "1526–1590",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LCVP-FSX"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p99e85d7e4d",
+    "name": "Sir William Button I, Knight of Alton",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p982751e9c5",
+    "name": "Lady Anne Agnes Carter",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p24d3e0c94b",
+    "name": "John Button"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p69a7db84ac",
+    "name": "Mary Kellwey",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LCVP-FSX",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

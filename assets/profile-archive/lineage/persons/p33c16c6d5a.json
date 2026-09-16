@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p33c16c6d5a",
+ "bnr": "bnr://skaists.dev/blood/p33c16c6d5a",
+ "identity": {
+  "name": "Jesse ben Obed",
+  "lifespan": "1143BC–1025BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LDRZ-S92"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p0ff9e638fc",
+    "name": "Obed ben Boaz",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p2c69bc19b7",
+    "name": "Abalit bint Sonas",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p8e8870340b",
+    "name": "King David of Israel"
+   },
+   {
+    "id": "p35cc2bd1f4",
+    "name": "Eliab ben Jesse"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pb64b70f67e",
+    "name": "Nitzevet bat Adael of Geshur",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LDRZ-S92",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

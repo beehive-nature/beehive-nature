@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p4cc8d1e522",
+ "bnr": "bnr://skaists.dev/blood/p4cc8d1e522",
+ "identity": {
+  "name": "Lucius Sergius Paullus de Pisidian Antioch IV",
+  "lifespan": "0120–0216",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L2RK-WY9"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p03bd3e0d99",
+    "name": "Sergius Octavius Laenas Pontianus",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p52ea69f97d",
+    "name": "Paulla de Rome",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p45c39d06e8",
+    "name": "Julia Quadratilla de Rome"
+   },
+   {
+    "id": "pb9d045de8e",
+    "name": "Sergia Paulla Lucia of Rome"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p2d7a176b9a",
+    "name": "Julia Minor IV Vipsania",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L2RK-WY9",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

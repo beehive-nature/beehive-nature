@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pf7673b9f3c",
+ "bnr": "bnr://skaists.dev/blood/pf7673b9f3c",
+ "identity": {
+  "name": "Cunedagius ap Henwin 14th King of Britain",
+  "lifespan": "0870BC–0772BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LLCR-S9C"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pf1a0510687",
+    "name": "King, Duke, Governor Henwyin ap Bleiddid de Cambria",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p2c02ca12a0",
+    "name": "Rhagaw verch Llyr de Bretagne",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p780abc9d9a",
+    "name": "Rivallo ap Cunedda 15th King of Britain"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pf3ca3d1d19",
+    "name": "Mrs Cunedagius ap Henwin",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LLCR-S9C",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

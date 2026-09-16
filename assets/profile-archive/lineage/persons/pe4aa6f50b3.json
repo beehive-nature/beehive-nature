@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pe4aa6f50b3",
+ "bnr": "bnr://skaists.dev/blood/pe4aa6f50b3",
+ "identity": {
+  "name": "Sarah Scott",
+  "lifespan": "1701–Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LZKV-7WD"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pa73f819c21",
+    "name": "Josiah Scott",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pad3bcd9733",
+    "name": "Sarah Barrett",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p51e3e01697",
+    "name": "Benjamin Fuller"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pc24ad702f3",
+    "name": "Shubael Fuller Sr.",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LZKV-7WD",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

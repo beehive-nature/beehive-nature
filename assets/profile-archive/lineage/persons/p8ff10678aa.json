@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p8ff10678aa",
+ "bnr": "bnr://skaists.dev/blood/p8ff10678aa",
+ "identity": {
+  "name": "Blanche de Savoie-Vaud",
+  "lifespan": "1267–1334",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G44R-JYT"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p338d5f7056",
+    "name": "Louis de Savoie I, Baron de Vaud",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pb0953013c2",
+    "name": "Jeanne de Montfort-Castres",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p408f216585",
+    "name": "Catherine de Grandison"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p7cb88b173c",
+    "name": "William de Grandison, 1st Lord Grandison",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G44R-JYT",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p3f37f85d48",
+ "bnr": "bnr://skaists.dev/blood/p3f37f85d48",
+ "identity": {
+  "name": "Tiberius Claudius Nero II",
+  "lifespan": "0082BC–0033BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "9VTW-MDS"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p09c7c89be6",
+    "name": "Drusus Claudius Nero De Roma",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p328ccb549f",
+    "name": "NN",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p4172da14da",
+    "name": "Nero Claudius Drusus Germanicus of Rome"
+   },
+   {
+    "id": "p0ca1c67bbf",
+    "name": "Tiberius Julius Caesar Augustus"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pa8fb15dde3",
+    "name": "Livia Drusilla Iulia Augusta",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/9VTW-MDS",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p129466f9a9",
+ "bnr": "bnr://skaists.dev/blood/p129466f9a9",
+ "identity": {
+  "name": "John Gulley",
+  "lifespan": "1510–1591",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LZGV-JQZ"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pcdd0033064",
+    "name": "John Gulley Jollie",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p7e27dc8af9",
+    "name": "Elizabeth de Roache",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p2745db4dd3",
+    "name": "Alice Gulley"
+   },
+   {
+    "id": "p4595ec9fd9",
+    "name": "Grace Gulley"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p97457f5161",
+    "name": "Lady Alice Maude Frost de Northover",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LZGV-JQZ",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

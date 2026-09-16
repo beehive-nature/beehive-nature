@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p5d042f173f",
+ "bnr": "bnr://skaists.dev/blood/p5d042f173f",
+ "identity": {
+  "name": "Hans Niclaus Stauffer",
+  "lifespan": "1500–1555",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PSMH-P8B"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p38c0c793b1",
+    "name": "Peter Stauffer I",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p942f835764",
+    "name": "Barbara Anna Rytz",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p976a7612c6",
+    "name": "Johann Ulrich Stauffer"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p4fc9264bc4",
+    "name": "Maria Anna Bruder",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PSMH-P8B",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

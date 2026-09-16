@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p9178184fc3",
+ "bnr": "bnr://skaists.dev/blood/p9178184fc3",
+ "identity": {
+  "name": "Itoapa II Komagene",
+  "lifespan": "34–79",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PMF1-HYS"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p60e8b6c26c",
+    "name": "King Antiochus Epiphanes IV son of Antiochus III   of Commangene",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p964eed450b",
+    "name": "Julia Iotape Orontid",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pbaf35a63a0",
+    "name": "Claudius Capolinus Capitilinus de Roma"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pfc194fe65e",
+    "name": "Tiberius Claudius Balbillus Thrasyllus",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PMF1-HYS",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

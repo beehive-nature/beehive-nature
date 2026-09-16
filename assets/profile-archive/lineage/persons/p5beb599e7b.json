@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p5beb599e7b",
+ "bnr": "bnr://skaists.dev/blood/p5beb599e7b",
+ "identity": {
+  "name": "Maecia Proba Cethegilla",
+  "lifespan": "0265–0300",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "P39F-YFH"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pbb33cba563",
+    "name": "Marcus Maecius Orfitus",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p0c07110dde",
+    "name": "Faustina Furia de Rome",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pc4b17bcb29",
+    "name": "Placidia Maecia of Rome"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p164c367847",
+    "name": "Gaius Memmius Caelinus II Placidus De Rome-De Rome",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/P39F-YFH",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

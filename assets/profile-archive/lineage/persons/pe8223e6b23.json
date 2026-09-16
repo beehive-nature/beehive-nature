@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pe8223e6b23",
+ "bnr": "bnr://skaists.dev/blood/pe8223e6b23",
+ "identity": {
+  "name": "Joan Lady of Wales",
+  "lifespan": "1188–1237",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "9HFS-GG1"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p42f4f5576a",
+    "name": "King John of England",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pf84950325b",
+    "name": "Clemence",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p53a92fecda",
+    "name": "Marared ferch Llywelyn"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p882dd322c4",
+    "name": "Llywelyn ap Iorwerth",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/9HFS-GG1",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

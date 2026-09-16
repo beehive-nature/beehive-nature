@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p36d66c0bc2",
+ "bnr": "bnr://skaists.dev/blood/p36d66c0bc2",
+ "identity": {
+  "name": "Gilbert Brooks",
+  "lifespan": "1621–1695",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LT39-571"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "peeeccee089",
+    "name": "Gilbert Brooke",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pfa11de9a74",
+    "name": "Dorothie Prestons",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p1aa614022a",
+    "name": "Bathsheba Brooks"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p7188a1d427",
+    "name": "Elizabeth Simmons",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LT39-571",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

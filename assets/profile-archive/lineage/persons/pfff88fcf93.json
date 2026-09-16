@@ -1,0 +1,77 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pfff88fcf93",
+ "bnr": "bnr://skaists.dev/blood/pfff88fcf93",
+ "identity": {
+  "name": "Titus Sextius Ælius Cornelius Africanus",
+  "lifespan": "84–0150",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GTT4-1T1"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p698ee4fa0a",
+    "name": "Titus Sextius Magnus Lateranus",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p7b9603035a",
+    "name": "Volusia Torquata De ROME",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pb3c08ba0f1",
+    "name": "Sextia Cornelia"
+   },
+   {
+    "id": "pd9ae784ed2",
+    "name": "Titus Sextius Marcus Vibius Ovinius Secundus Lucius Volusius Toquatus Vestinus Lateranus De ROME"
+   },
+   {
+    "id": "pb57d77b0cf",
+    "name": "Titus Secundus Lubius Volusius Torquatus Vestinus LATERANUS"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p8f64c128be",
+    "name": "Vivia Major De ROME",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GTT4-1T1",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

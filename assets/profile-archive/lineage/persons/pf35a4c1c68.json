@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pf35a4c1c68",
+ "bnr": "bnr://skaists.dev/blood/pf35a4c1c68",
+ "identity": {
+  "name": "Sir John de Lacy, 2nd Earl of Lincoln",
+  "lifespan": "1191–1240",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LB88-FWT"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pe4b572f214",
+    "name": "Roger de Lacy",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p8641658f41",
+    "name": "Matilda de Clare II",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pa209b0bdba",
+    "name": "Maud de Lacy"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p7739cf99bb",
+    "name": "Margaret de Quincy",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LB88-FWT",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

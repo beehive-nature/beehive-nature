@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p96a780940a",
+ "bnr": "bnr://skaists.dev/blood/p96a780940a",
+ "identity": {
+  "name": "Justin ap Constantine de Cornouaille",
+  "lifespan": "0790–0840",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PW31-LQY"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p47770ab755",
+    "name": "Prince de Cornouaille Constantine ap Judon de Cornouaille,",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p59a69941d9",
+    "name": "Bérile de Domnonia",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pabcb3f86c0",
+    "name": "Alfrond de Cornouaille"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p3450506522",
+    "name": "Mrs Barilis De Bretagne",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PW31-LQY",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

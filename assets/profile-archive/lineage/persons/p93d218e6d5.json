@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p93d218e6d5",
+ "bnr": "bnr://skaists.dev/blood/p93d218e6d5",
+ "identity": {
+  "name": "Willemtje Gÿsberts",
+  "lifespan": "1642–1679",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LW1Y-9TL"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p202eb4fb1a",
+    "name": "Gijsbert Teunissen",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p8c0e6719b5",
+    "name": "Aeltgen Wouters Verschuer",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "ped3a76a3fd",
+    "name": "Geertje  Cornelissen Comegys"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p64f009b614",
+    "name": "Cornelius Cornelszen Comegys",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LW1Y-9TL",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

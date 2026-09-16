@@ -1,0 +1,78 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p7a45c84534",
+ "bnr": "bnr://skaists.dev/blood/p7a45c84534",
+ "identity": {
+  "name": "Antonius Afranius MARCELLINUS",
+  "lifespan": "0260–0349",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GVPN-DD8"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pf2c1d0441a",
+    "name": "Consul Hilarius Afranius Hannibalianus de Roma de Galatie",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pdbf0dd3d57",
+    "name": "Eutropia Augusta de Galatie de Roma",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p3d9141bb22",
+    "name": "Antonius Afranius DE ROME-DE ROME"
+   },
+   {
+    "id": "p021cc4702f",
+    "name": "Antonia Marcianilla"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p1eb2d5a1a6",
+    "name": "Amantia Marina di Rome",
+    "marriage": null
+   },
+   {
+    "id": "p901226f1bd",
+    "name": "Pontia Privata Paulina",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GVPN-DD8",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

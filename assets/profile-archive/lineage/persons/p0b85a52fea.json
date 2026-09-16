@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p0b85a52fea",
+ "bnr": "bnr://skaists.dev/blood/p0b85a52fea",
+ "identity": {
+  "name": "Priapus de Morinie Roi des Morins",
+  "lifespan": "73–0113",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LZVD-NP1"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p769511172b",
+    "name": "King Carolus I de Ménapie",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p477112c266",
+    "name": "Suriente De Menappes",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p15d3ca49bf",
+    "name": "King Carolus II of the Menapii"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pc34ca94473",
+    "name": "Suriente de Morinie",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LZVD-NP1",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

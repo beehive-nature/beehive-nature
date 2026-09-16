@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pd032250777",
+ "bnr": "bnr://skaists.dev/blood/pd032250777",
+ "identity": {
+  "name": "Yūkābid bint Lawi",
+  "lifespan": "1653BC–Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LV8W-93K"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p1af3978ecb",
+    "name": "Lawi ibn Yaʿqūb",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p4b7b002560",
+    "name": "Milkah bint Aram",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p97a5025344",
+    "name": "Hārūn ibn ʿImrān 16th Prophet of Islam"
+   },
+   {
+    "id": "pa804b3af09",
+    "name": "Miriam bint Imram 'the Prophetess'"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p0c6235bcb3",
+    "name": "Imram ibn Kehath",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LV8W-93K",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pb237056a93",
+ "bnr": "bnr://skaists.dev/blood/pb237056a93",
+ "identity": {
+  "name": "Timna bint Seir",
+  "lifespan": "1966BC–Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GZDT-1VG"
+  }
+ ],
+ "evidence": {
+  "era": "recorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "recorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p131888221d",
+    "name": "Lotan ibn Seir",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pdf828201e5",
+    "name": "Mrs. Lothan",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pef913a44b3",
+    "name": "Cenaz ,hijo de Elifaz hijo de Esaú"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pe5b4846fd5",
+    "name": "Eliphaz ben Esau",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GZDT-1VG",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p104f6bfd36",
+ "bnr": "bnr://skaists.dev/blood/p104f6bfd36",
+ "identity": {
+  "name": "Moab ibn Hazrat Lūṭ",
+  "lifespan": "2065BC–Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "9WP8-K47"
+  }
+ ],
+ "evidence": {
+  "era": "recorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "recorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p29a444c4fd",
+    "name": "Hazrat Lūṭ ibn Harán 7th Prophet of Islam",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p72eb0b0b26",
+    "name": "Wā'ila",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p597b0b7eb5",
+    "name": "Mayon ibn Moab"
+   },
+   {
+    "id": "pb5230316a1",
+    "name": "missing link to Moab"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p9cac30a6dd",
+    "name": "unnamed a Canaanite",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/9WP8-K47",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

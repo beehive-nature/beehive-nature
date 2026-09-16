@@ -1,0 +1,63 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pb24d05f698",
+ "bnr": "bnr://skaists.dev/blood/pb24d05f698",
+ "identity": {
+  "name": "Pépin Ier de Vermandois seigneur de Senlis, Péronne et de St. Quentin",
+  "lifespan": "0817–0855",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LCZN-T6T"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pa2e8ca1f6f",
+    "name": "Bernhard König von Italien und König der Langobarden",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p0f4a342f9c",
+    "name": "Kunigunde, Königin von Italien",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pa9a5d43259",
+    "name": "Herbert Ier de Vermandois comte de Soissons et de Meaux"
+   }
+  ],
+  "spouses": []
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LCZN-T6T",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

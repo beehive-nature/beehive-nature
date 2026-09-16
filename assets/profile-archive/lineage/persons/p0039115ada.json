@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p0039115ada",
+ "bnr": "bnr://skaists.dev/blood/p0039115ada",
+ "identity": {
+  "name": "Caeonius II de Rome Le Jeune",
+  "lifespan": "0207–Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GVCC-ZB5"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p52bee2ebdc",
+    "name": "Caeionius dit Le Vieux DE ROME-",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p9c280911cf",
+    "name": "Flavia Postumia Varia",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pcd4bc10d8b",
+    "name": "Marcus Silvanus Caeionius Varus"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pa5e1c0b975",
+    "name": "Flavia Postumia Varia",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GVCC-ZB5",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

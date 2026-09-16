@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pae77e289cd",
+ "bnr": "bnr://skaists.dev/blood/pae77e289cd",
+ "identity": {
+  "name": "Publius Aelius Hadrianus Marullinus d´Hispania",
+  "lifespan": "47–0100",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GMNF-HXN"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p20f9ca8d1d",
+    "name": "Publius Aelius Hadrianus Marullinus",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pe3e84a917d",
+    "name": "Ulpia De Rome",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p3b3cadc2ca",
+    "name": "Publius Aelius Hadrianus Marullinus Roman Senator"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p8c949c61e8",
+    "name": "Ulpia Aelia De Rome Plotina",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GMNF-HXN",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}
