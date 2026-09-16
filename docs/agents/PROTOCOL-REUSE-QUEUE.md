@@ -13,13 +13,18 @@ provenance; the reuse seat works items top-down.
   else. A verdict without implementation evidence is not a verdict.
 - Crypto-language + citation law: claims cite sources; no overclaiming.
 - Fresh receipts only; a worked item links its evidence dispatch.
+- **Reconciliation gate (founder direction, 2026-09-15):** internal architecture
+  is reconciled FIRST — after the Work/review seat verifies `GLM-ARCHAEOLOGY.md` —
+  before ANY item here drives implementation; candidates (Eddies, OpenA2A/AIM,
+  OpenCompany, …) are evaluated against stable, reconciled Beehive interface
+  boundaries, not whichever design document an agent happened to encounter first.
 
 **Item shape:** status (OPEN / IN WORK / DONE-VERDICT) · received date ·
 attributed source · evidence pointer.
 
 ---
 
-## 1 · EDDIES / ANTENGLEMENT INVESTIGATION — OPEN
+## 1 · EDDIES / ANTENGLEMENT INVESTIGATION — WATCH / INVESTIGATE (open; zCode seat stopped 2026-09-15, bounded mission complete)
 
 *Received 2026-09-15, appended verbatim from the Claude seat's analysis, relayed
 by the founder. Primary-source evidence, provenance chain, and both retrieval
@@ -113,3 +118,33 @@ settlement** against our **funding authority → usage/metering → receipt →
 settlement** (Silent Pay v2 / FeePlan / b-meter). The interesting reuse
 candidate, IF soundness is established, is an obligation/receivable
 representation for machine economies — not "another currency" behind `b`.
+
+**STATUS (2026-09-15, founder-approved marker):**
+
+```text
+EDDIES / ANTENGLEMENT
+
+Evidence state:
+  Discord primary-source material       HAVE — in-tree as relayed transcription;
+                                        verbatim originals in founder/Claude-seat custody
+  Screenshot                            HAVE — clue list in-tree; file in founder custody
+  Independent public search             DONE — no useful specification found (two seats)
+  How Eddies Work artifact              MISSING
+  Source code                           UNKNOWN
+  Protocol specification                UNKNOWN
+
+Architecture state:
+  NOT ADOPTED
+  NOT AN ANT SETTLEMENT RAIL YET
+  NOT ASSUMED TO BE MONEY/STABLECOIN
+  NOT ASSUMED TO COLLATERALIZE ANT
+
+Current classification:
+  WATCH / INVESTIGATE
+
+Next evidence threshold:
+  Obtain How Eddies Work artifact and/or implementation source.
+```
+
+Seat stopped here by founder order 2026-09-15 — bounded mission complete at
+`5b445216`; no Eddies speculation beyond this marker until the threshold is met.

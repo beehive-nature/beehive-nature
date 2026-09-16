@@ -115,3 +115,24 @@ similarity; the 28-question brief in the queue is the gate.
    to be banked byte-true here when relayed; dates re-confirmed against them.
 3. Then the reuse seat works queue item #1's 28 questions against
    code/specification only.
+
+## Follow-up 2026-09-15 (later same day) — status marker landed; seat stopped
+
+- Founder-approved status block recorded in queue item #1 (classification
+  **WATCH / INVESTIGATE**; artifact MISSING; source code and protocol
+  specification UNKNOWN; next threshold = the artifact's contents and/or
+  implementation source).
+- Provenance refinements from the status relay: the channel is **Discord**
+  (supersedes this dispatch's earlier "channel NOT on our record"); the
+  verbatim originals + screenshot file remain in founder/Claude-seat custody —
+  the tree holds the relayed transcription + clue list, and per founder
+  direction NO re-paste of those is needed. The only missing evidence is the
+  **contents of the "How Eddies Work" artifact** — a browser copy of its text
+  or screenshots of its pages both suffice.
+- The queue also gained the founder's **reconciliation gate**: no queue item
+  drives implementation until internal architecture is reconciled (Work/review
+  seat verifies `GLM-ARCHAEOLOGY.md` first); candidates evaluate against
+  stable, reconciled interface boundaries.
+- Seat stopped by founder order — the bounded mission (bank evidence, seed the
+  queue, land `5b445216`) is complete; no investigation or speculation
+  continues from this seat until the evidence threshold is met.
