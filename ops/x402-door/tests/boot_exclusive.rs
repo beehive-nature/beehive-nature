@@ -18,9 +18,10 @@ use x402_door::journal::{Journal, ReservationState};
 use x402_door::wire::extract_leg;
 
 fn tmp_root(tag: &str) -> std::path::PathBuf {
-    let d = std::env::temp_dir()
-        .join("x402-door-boot")
-        .join(format!("{}-{}", tag, std::process::id()));
+    let d =
+        std::env::temp_dir()
+            .join("x402-door-boot")
+            .join(format!("{}-{}", tag, std::process::id()));
     let _ = std::fs::remove_dir_all(&d);
     std::fs::create_dir_all(&d).unwrap();
     d
@@ -123,10 +124,9 @@ fn boot_restart_recovers_stranded_settling_under_exclusive_ownership() {
     assert_eq!(parked.len(), 1, "exactly the stranded leg reconciled");
     assert!(again.is_empty(), "second recovery pass finds nothing");
     match parked_state {
-        Some(ReservationState::Unknown { note, .. }) => assert!(
-            note.contains("Settling at restart"),
-            "named note: {note}"
-        ),
+        Some(ReservationState::Unknown { note, .. }) => {
+            assert!(note.contains("Settling at restart"), "named note: {note}")
+        }
         other => panic!("stranded leg must park to Unknown, got {other:?}"),
     }
     assert!(
