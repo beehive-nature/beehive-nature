@@ -241,6 +241,26 @@ jobs:
       - name: RECON-1 primitive builder proof (vs frozen oracle)
         if: always()
         run: node scripts/recon1-primitive.mjs
+      # RECON-1 INDEPENDENT ORACLE VERIFIER (economic/oracle seat, 2026-09-17):
+      # written against the mission text + frozen oracle bytes ONLY (the
+      # builder battery is not imported; its 23/23 is not evidence here).
+      # Frozen cases reproduced via the seat's OWN extraction; adversarial
+      # lattice A1-A10 (finality fail-closed, class-upgrade dressings,
+      # duplicate arithmetic, 24-permutation ordering, restart under
+      # mutated/absent pricing, void/supersession matrix, overpay finality,
+      # multi-asset no-FX/no-cross-netting, human-gesture SURFACE_MISSING
+      # projection with independent tree scan, rail-certainty non-upgrade).
+      - name: RECON-1 oracle independent verifier
+        if: always()
+        run: node scripts/recon1-oracle-verify.mjs
+      # Sabotage control: the oracle seat's OWN seductive reconciler
+      # (scripts/fixtures/recon1-seductive.mjs — cross-netting, duplicate-
+      # counting, finality-blind, refund-manufacturing, SURFACE_READY-
+      # claiming) must be CONVICTED on all five named seductions; a green
+      # run here would mean the verifier lost its teeth.
+      - name: RECON-1 oracle sabotage selftest (teeth)
+        if: always()
+        run: node scripts/recon1-oracle-verify.mjs --sabotage-selftest
       # PEER FUNNEL testnet runner selftest (z3.3 Order C, 2026-09-05): the
       # one-broadcast tool cannot rot — keccak + EIP-155 RLP hash vectors and
       # the sign/recover roundtrip proven every push (key parts skip cleanly
