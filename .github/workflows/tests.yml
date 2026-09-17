@@ -211,6 +211,15 @@ jobs:
       - name: INVOICE-1 oracle verifier (independent 13-attack)
         if: always()
         run: node scripts/inv1-oracle-verify.mjs
+      # VOCAB-1 settlement-outcome crosswalk battery (economic seat, 2026-09-17):
+      # the naive generic status enum is a REGISTERED RED (information-loss
+      # detector fires — normalization must not manufacture certainty); the
+      # lossless predicate crosswalk is green; seven founder distinctions as
+      # invariants; sabotage negative control proves the detector teeth
+      # (docs/agents/VOCAB-1-CROSSWALK.md).
+      - name: VOCAB-1 crosswalk battery (lossless outcome predicates)
+        if: always()
+        run: node scripts/vocab1-crosswalk.mjs
       # PEER FUNNEL testnet runner selftest (z3.3 Order C, 2026-09-05): the
       # one-broadcast tool cannot rot — keccak + EIP-155 RLP hash vectors and
       # the sign/recover roundtrip proven every push (key parts skip cleanly
