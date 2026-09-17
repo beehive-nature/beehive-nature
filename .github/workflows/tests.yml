@@ -190,6 +190,17 @@ jobs:
       - name: INVOICE-1 bPay invoice battery (generic law vs reference consumer)
         if: always()
         run: node scripts/inv1-bpay-invoice.mjs
+      # INVOICE-1 builder proof battery (zCode builder lane, 2026-09-17): the
+      # generic implementation closes the three registered reds on ITS side —
+      # the frozen battery above stays byte-unchanged as the record of the
+      # reference's gaps; this proves closure: canonical determinism, content
+      # identity, offline commitment re-derivation (incl. the committed
+      # attacker with a recomputed digest), evidenced void terminality incl.
+      # anchor-caught re-forge + lawful supersession, fresh-process restart
+      # with pricing drift, R20/signature fence.
+      - name: INVOICE-1 builder proofs (generic implementation)
+        if: always()
+        run: node scripts/inv1-generic-builder.mjs
       # PEER FUNNEL testnet runner selftest (z3.3 Order C, 2026-09-05): the
       # one-broadcast tool cannot rot — keccak + EIP-155 RLP hash vectors and
       # the sign/recover roundtrip proven every push (key parts skip cleanly
