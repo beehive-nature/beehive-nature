@@ -37,21 +37,36 @@
     var h = '<div class="card" data-bdata-object="bux-try-autonomi">';
     h += '<div class="row" style="justify-content:space-between"><div><b>' + esc((d.media&&d.media.title)||a.name) + '</b><div style="font-size:11px;color:var(--dim)">' + esc((d.media&&d.media.creator)||'') + '</div></div><span class="tag">' + T('bd.registered','registered intake') + '</span></div>';
     h += '<div class="row" style="margin-top:8px;gap:6px 18px;font-size:12px;flex-wrap:wrap"><span>' + esc(a.name) + ' · <span data-bdata-bytes="' + a.bytes + '">' + a.bytes.toLocaleString('en-US') + '</span> bytes</span><span class="mono" style="opacity:.7">sha256 ' + esc(String(a.sha256).slice(0,16)) + '…</span></div>';
-    /* who can get this — the resolved audience; adjustment is lawful, and after
-       commitment it SUPPLANTS (new quote) rather than mutating history */
+    /* who can get this — THE ORIGIN (advisor law, 2026-09-17): the desire to
+       make something public belongs HERE, in My Data; bPay receives the
+       already-resolved operation. Selecting Public is the founder gesture —
+       recorded in the SHARED policy key the wallet panel reads at boot, so
+       the choice ORIGINATES in My Data and the wallet merely renders it.
+       Because a commitment exists, a (re)selection SUPPLANTS — the note below
+       states the new-quote law; nothing history-shaped is mutated. */
+    var shared = {};
+    try { shared = JSON.parse(localStorage.getItem('bpay-policy-v1')||'{}') || {}; } catch(e){}
+    var chosenHere = !!(shared.audience === 'public' && shared.selectedAt);
     h += '<div style="margin-top:10px;font-size:12px"><b>' + T('wl.bpay.who','Who can get this?') + '</b> ' + esc(aud.access || pol.access || '') + '</div>';
     h += '<div class="row" style="margin-top:6px;gap:6px">';
-    h += '<button type="button" class="on" data-bdata-aud="public" disabled title="as bound by the carried-quote-set commitment">🌐 ' + T('wl.bpay.aud.public','Public') + '</button>';
+    h += '<button type="button" data-bdata-aud="public" class="' + (chosenHere?'on':'') + '" style="' + (chosenHere?'':'background:transparent;color:inherit;') + '">🌐 ' + T('wl.bpay.aud.public','Public') + '</button>';
     UNAVAIL.forEach(function(u){
       h += '<button type="button" class="off" data-bdata-aud="' + u.id + '" data-bdata-unavailable="' + u.id + '" disabled title="' + esc(u.reason) + '">🔒 ' + (u.id==='only-me'?T('wl.bpay.aud.onlyme','Only me'):T('wl.bpay.aud.selected','Selected people')) + '</button>';
     });
     h += '</div>';
+    if (chosenHere) {
+      h += '<div style="margin-top:6px;font-size:12px">' + T('wl.bpay.youchose','You chose') + ' <b>🌐 ' + T('wl.bpay.aud.public','Public') + '</b> <span style="opacity:.65;font-size:10px">· ' + T('wl.bpay.selectedat','chosen at') + ' ' + String(shared.selectedAt).replace('T',' ').replace(/\.\d+Z$/,' UTC') + '</span> — ' + esc(T('bd.origin.note','this choice originated in My Data; bPay receives the resolved plan and asks only about its economics')) + '</div>';
+    } else {
+      h += '<div class="law" style="margin-top:6px">' + T('bd.origin.choose','the current binding is the machine reference; choosing Public yourself makes the policy YOURS — the selection is yours to make, here') + '</div>';
+    }
     if (committed) h += '<div class="law" style="margin-top:6px" data-bdata-supersede-note="1">' + T('bd.supersede','a carried-quote-set commitment exists — changing the audience changes the preservation plan and requires a new quote; the old plan remains as history') + '</div>';
     else h += '<div class="law" style="margin-top:6px">' + T('bd.freely','no commitment yet — audience is freely adjustable') + '</div>';
-    /* the bPay handoff: economics invoked only when preservation needs value */
+    /* the bPay handoff: economics invoked only when preservation needs value.
+       When the founder has chosen HERE, the handoff carries the RESOLVED plan —
+       the wallet receives the operation and asks only about its economics. */
     if (line) {
-      h += '<div style="margin-top:12px;padding:10px 12px;border:1px dashed #2c4a5a;border-radius:10px">';
-      h += '<div style="font-size:12px">' + T('bd.handoff','Preserve on Autonomi — economics live in bPay') + '</div>';
+      h += '<div style="margin-top:12px;padding:10px 12px;border:1px dashed #2c4a5a;border-radius:10px"' + (chosenHere ? ' data-bdata-preserve-ready="1"' : '') + '>';
+      h += '<div style="font-size:12px">' + (chosenHere ? '♡ ' : '') + T('bd.handoff','Preserve on Autonomi — economics live in bPay') + '</div>';
       h += '<div class="row" style="margin-top:6px;gap:6px 20px;flex-wrap:wrap;font-size:13px"><span>⬡ <b data-bdata-ceiling-atto="' + line.amountAtto + '">' + ant(line.amountAtto) + ' ANT</b> ' + T('bd.ceiling','ceiling') + '</span><span>⛽ ' + T('wl.bpay.gasside','separate') + ' · Arbitrum ETH</span></div>';
       h += '<div class="law" style="margin-top:4px" data-bdata-nothing-paid="1">' + T('wl.bpay.nothingpaid','Nothing has been paid.') + ' ' + T('bd.handoff.note','the wallet carries the authorization surface; when it is earned, your press alone crosses it') + '</div>';
       h += '<a href="wallet.html" style="display:inline-block;margin-top:8px;font-size:13px" data-bdata-open-bpay="1">→ ' + T('bd.openbpay','open the wallet (bPay panel)') + '</a>';
@@ -113,6 +128,23 @@
   function bind(){
     document.querySelectorAll('[data-bdata-insp]').forEach(function(b){
       b.addEventListener('click', function(){ st.inspection = b.dataset.bdataInsp; save(); render(); });
+    });
+    /* THE ORIGIN GESTURE — selecting Public in My Data. The click records the
+       resolved policy in the SHARED key (the wallet panel reads it at boot and
+       renders "You chose Public" — the choice originates here, never there)
+       and appends a policy edition to this surface's history. No quote, no
+       prepare, no spend: the economics stay bPay's to propose. */
+    document.querySelectorAll('[data-bdata-aud="public"]').forEach(function(b){
+      b.addEventListener('click', function(){
+        var shared = {};
+        try { shared = JSON.parse(localStorage.getItem('bpay-policy-v1')||'{}') || {}; } catch(e){}
+        if (shared.audience === 'public' && shared.selectedAt) return; // already chosen — no re-record
+        shared.audience = 'public';
+        shared.selectedAt = new Date().toISOString();
+        try { localStorage.setItem('bpay-policy-v1', JSON.stringify(shared)); } catch(e){}
+        note(T('bd.hist.audience','audience policy: chosen 🌐 Public by the founder — originated in My Data; supersedes the machine reference binding (new quote required); the reference plan remains as history'));
+        render();
+      });
     });
     document.querySelectorAll('[data-bdata-auto]').forEach(function(b){
       b.addEventListener('click', function(){
