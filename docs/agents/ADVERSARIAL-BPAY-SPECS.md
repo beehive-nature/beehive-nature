@@ -998,3 +998,58 @@ fixture law.
 
 *Feedback pass, 2026-09-16. Amendment-only as ordered — no new authority family. The freeze
 holds after this section; the builder consumes the verdict.*
+
+---
+
+## FEEDBACK CORRECTION + R20 CHARTER (founder reconciliation of the two reports, 2026-09-16)
+
+*The return report's "RV: READY" was overcalled — corrected at founder order, verified at
+source this pass: attack_6's "crash/restart" is an in-memory `auth.clone()` whose comment
+CLAIMS durability ("the binding is in the durable record, not in adapter memory") while
+performing zero disk I/O; the capability binding is not yet wired through the real RailLedger
+lifecycle. Declaring RV ready because the structs happen to exist was the exact trap.*
+
+**Corrected verdicts (supersede the readiness block above):**
+- **R19 cryptographic binding: GREEN** with F1/F2 defects identified.
+- **R19 durable historical binding: NOT YET PROVEN.**
+- **RV: specified and type-ready; implementation GATED BY R20.**
+- **DG: additionally blocked on signed scope fields.**
+
+**The authority chain now reads: R19 signed semantics proven -> R20 historical semantics
+proven -> only then RV: reduction.**
+
+### R20 BUILD CHARTER (builder; then STOP again — NO RV or DG in this build)
+
+- **F1:** domain-separated signed preimage (e.g. `bpay/authz/v1`). Founder nuance recorded:
+  not because BIP-340 and nostr signatures are interchangeable (they sign different message
+  constructions already) — the tag exists because OUR VERIFIER needs an unambiguous statement
+  of what kind and version of object the bytes represent; the tag makes that invariant
+  structural and future-proof.
+- **F2:** unambiguous canonical encoding — explicit length-prefixing preferred; byte-level
+  golden vectors pinned; ADVERSARIAL NUL-containing fields proving two distinct objects
+  cannot share a preimage.
+- **DURABILITY:** persist the EXACT signed authorization bytes, signature, manifest snapshot,
+  binding, hash, and implementation identity. Drop all process objects; reopen through a
+  fresh FILE-BACKED instance. Historical bytes — not reconstruction under current code — are
+  authoritative.
+- **LIFECYCLE:** wire the historical binding into the actual `RailLedger`; execute one real
+  golden trace: `H1 signed -> opened -> Unknown -> disk -> process state discarded -> H2
+  becomes live -> fresh reopen -> H2-only evidence REFUSED -> H1-valid evidence settles the
+  same PaymentHash -> a genuinely new authorization binds H2`. Add torn/cross-paired disk
+  cases and prove fail-closed behavior BEFORE execution.
+- **The ACTUAL production authorization organ:** use it. If it is not bsigner, NAME what it is
+  and why — do not blur "shared k256" into "bsigner."
+- **Preserve:** R18, LT-0, `MilliSatoshi`, `Paid(0) != AbsentBounded`, full NIP-44
+  conformance, live sends OFF.
+
+### DG DIRECTION (recorded, not built)
+
+Do NOT bolt delegation fields onto `LegBinding` merely because DG needs them. First define the
+signed **AUTHORITY SCOPE** as a coherent object — ceilings, expiry, permitted
+destinations/rails, privacy floor, and whatever other ALREADY-RATIFIED dimensions constrain
+authority — then attack that object independently (a future spec roll's target) before
+delegation computes intersections over it.
+
+*Correction pass, 2026-09-16. The authority-spec writer re-freezes here; the vending lane
+(ADVERSARIAL-VENDING-SPECS.md) remains this seat's active attack domain until the next return
+trigger (R20's report).*
