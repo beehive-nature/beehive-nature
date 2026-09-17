@@ -3,7 +3,13 @@
 //! LAWS (each tested in tests/acceptance.rs):
 //! - EXCLUSIVE-WRITER: every public mutation holds `File::lock` on
 //!   `<root>/.lock` across its entire read/check/write sequence (std lock:
-//!   flock/LockFileEx — kernel-released on process death).
+//!   flock/LockFileEx — kernel-released on process death). An
+//!   exclusively-opened instance (D-5) holds that lock for its process
+//!   lifetime — its mutations run UNDER that hold and serialize on the
+//!   instance's in-process mutex, because a second OS acquire on a fresh
+//!   handle would wait on our own lifetime hold (std file locks conflict
+//!   per open file description, same process included — the boot
+//!   self-deadlock of 2026-09-17, tests/boot_exclusive.rs).
 //! - TORN FAILS CLOSED: an unparseable reservation file refuses every
 //!   operation that must read it, naming the file. Never guess state.
 //! - EVIDENCE-GATED RECONCILE DOWN: a reservation's gas exposure
@@ -134,6 +140,13 @@ pub struct Journal {
     /// its lifetime — kernel-released on process death, so a crashed
     /// opener can never strand the root.
     _held: Option<File>,
+    /// In-process mutation serialization for the exclusive shape: when
+    /// `_held` owns the OS lock process-lifetime, mutations cannot take a
+    /// second OS acquire (self-deadlock) and must not run unlocked either
+    /// — they serialize HERE instead (the EXCLUSIVE-WRITER law's
+    /// no-interleaved-read/check/write guarantee, held open file
+    /// description in place of a per-call one).
+    mutation_lock: std::sync::Mutex<()>,
 }
 
 /// Default per-leg retry ceiling (AV-6). The value is an operations
@@ -182,10 +195,27 @@ impl HumanGate {
     }
 }
 
-struct LockGuard(File);
-impl Drop for LockGuard {
+/// The mutation authority (EXCLUSIVE-WRITER), in two shapes:
+/// - `Os`: a per-call OS lock on `.lock`, kernel-released — the only
+///   shape a non-exclusive instance ever uses.
+/// - `Held`: the OS lock ALREADY OWNED process-lifetime by this
+///   exclusive instance (D-5). A second OS acquire on a fresh handle
+///   would wait on our own hold — std file locks conflict per open file
+///   description, same process included — so the mutation instead
+///   serializes on the in-process mutex. The OS hold itself is never
+///   touched by this guard: it lives and dies with the instance.
+enum LockGuard<'a> {
+    Os(File),
+    /// RAII-only payload: held so the in-process mutex stays locked until
+    /// the guard drops, never read.
+    #[allow(dead_code)]
+    Held(std::sync::MutexGuard<'a, ()>),
+}
+impl Drop for LockGuard<'_> {
     fn drop(&mut self) {
-        let _ = self.0.unlock();
+        if let LockGuard::Os(f) = self {
+            let _ = f.unlock();
+        }
     }
 }
 
@@ -226,6 +256,7 @@ impl Journal {
             daily_gas_cap_wei,
             max_settle_attempts_per_leg: DEFAULT_MAX_SETTLE_ATTEMPTS_PER_LEG,
             _held: None,
+            mutation_lock: std::sync::Mutex::new(()),
         })
     }
 
@@ -240,7 +271,8 @@ impl Journal {
     /// hold it for this instance's lifetime (try-lock — a second live
     /// opener is REFUSED by name, never blocks, never split-brains). The
     /// kernel releases the hold when the process dies — a crashed opener
-    /// cannot strand the root.
+    /// cannot strand the root. Mutations through this instance run UNDER
+    /// the hold (see `acquire_exclusive`), never by re-acquiring it.
     pub fn open_exclusive(root: &Path, daily_gas_cap_wei: u64) -> JResult<Self> {
         fs::create_dir_all(root)?;
         let lock = OpenOptions::new()
@@ -258,6 +290,7 @@ impl Journal {
             daily_gas_cap_wei,
             max_settle_attempts_per_leg: DEFAULT_MAX_SETTLE_ATTEMPTS_PER_LEG,
             _held: Some(lock),
+            mutation_lock: std::sync::Mutex::new(()),
         })
     }
 
@@ -265,7 +298,27 @@ impl Journal {
         self.root.join(".lock")
     }
 
-    fn acquire_exclusive(&self) -> JResult<LockGuard> {
+    fn acquire_exclusive(&self) -> JResult<LockGuard<'_>> {
+        if self._held.is_some() {
+            // The boot law (2026-09-17, gesture-D F1): this instance
+            // already owns the exclusive OS lock on `.lock` for the
+            // process lifetime. Re-acquiring on a fresh handle would
+            // block against our own hold forever — recovery, reserve,
+            // settle, every mutation runs UNDER the authority already
+            // held, serialized in-process. Exclusivity is not weakened:
+            // no other opener can hold the OS lock while we live (D-5
+            // try-refusal), and no two mutations of this instance
+            // interleave (the mutex).
+            return Ok(LockGuard::Held(
+                self.mutation_lock
+                    .lock()
+                    // Poison-tolerant BY DESIGN to mirror OS-flock
+                    // semantics: the kernel has no poisoned state — a
+                    // thread that dies mid-mutation simply releases,
+                    // and record writes are atomic (tmp+rename).
+                    .unwrap_or_else(|e| e.into_inner()),
+            ));
+        }
         let f = OpenOptions::new()
             .create(true)
             .read(true)
@@ -273,7 +326,7 @@ impl Journal {
             .truncate(false)
             .open(self.lock_path())?;
         f.lock().map_err(JournalError::Io)?;
-        Ok(LockGuard(f))
+        Ok(LockGuard::Os(f))
     }
 
     fn leg_path(&self, leg: &LegKey) -> PathBuf {
