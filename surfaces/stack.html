@@ -64,6 +64,40 @@ td.n{color:var(--ink)}
 .door:hover{border-color:var(--cyan)}
 .door .dt{font-size:12px;color:var(--cyan)}
 .door .dd{font-size:10px;color:var(--dim);margin-top:2px;line-height:1.6}
+/* the data loop — follow one file (2026-09-17). stages are native buttons
+   (keyboard for free, 44px floor inherited); circuit glyphs ●◆◇○ carry the
+   meaning WITH the legend words, so the loop reads in greyscale too (D-1) */
+.fstage{display:flex;align-items:center;gap:11px;width:100%;text-align:left;background:var(--well);
+ border:1px solid var(--line);border-radius:10px;padding:10px 13px;margin-top:8px;cursor:pointer;
+ color:var(--ink);font:12px/1.6 'IBM Plex Mono',monospace}
+.fstage:hover{border-color:var(--cyan)}
+.fstage:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
+.fstage .fname{flex:1;min-width:0}
+.fstage .fc{flex:none;font-size:10px;letter-spacing:.08em;white-space:nowrap}
+.fstage[aria-pressed="true"]{border-color:var(--cyan)}
+.fc-payload{color:var(--info)} .fc-authority{color:var(--guard)}
+.fc-evidence{color:var(--verified)} .fc-value{color:var(--sem-value)}
+.floopback{margin-top:10px;text-align:center;font-size:10px;color:var(--dim);line-height:1.7;
+ animation:flooppulse 5.2s ease-in-out infinite}
+@keyframes flooppulse{0%,100%{opacity:.55}50%{opacity:1}}
+@media (prefers-reduced-motion: reduce){.floopback{animation:none}}
+.fdetail{margin-top:12px;background:var(--well);border:1px solid var(--line);border-radius:10px;padding:12px 13px}
+.fdetail .freg{font-size:11.5px;color:var(--ink);line-height:1.8;margin-bottom:2px}
+.frow{display:flex;gap:9px;flex-wrap:wrap;margin-top:8px;font-size:10.5px;line-height:1.7}
+.frow .fl{flex:none;width:150px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);padding-top:1px}
+.frow .fv{flex:1;min-width:220px;color:var(--dim)}
+.fnext{margin-top:10px;border-top:1px solid var(--line);padding-top:9px;font-size:10.5px;color:var(--dim)}
+.fnext a{font-size:11px}
+.fex{margin-top:14px;background:var(--well);border:1px solid var(--line);border-radius:10px;padding:12px 13px}
+.fex h3{font-size:11px;color:var(--violet);font-weight:400;letter-spacing:.07em;margin-bottom:8px}
+.fexgrid{display:flex;flex-wrap:wrap;gap:5px 16px;font-size:10.5px;color:var(--dim);line-height:1.8}
+.fexgrid b{color:var(--ink);font-weight:400}
+.fexboard{display:flex;flex-wrap:wrap;gap:5px;margin-top:10px}
+.fexboard .fbs{display:inline-flex;gap:6px;align-items:baseline;border:1px solid var(--line);border-radius:5px;
+ padding:2px 8px;font-size:9.5px;color:var(--dim);background:var(--panel)}
+.w-verified{color:var(--verified)} .w-review{color:var(--info)}
+.w-notyet{color:var(--faint)} .w-design{color:var(--guard)}
+.fex .fprov{margin-top:10px;font-size:9.5px;color:var(--faint);line-height:1.7}
 footer{max-width:960px;margin:22px auto 0;color:var(--faint);font-size:10px;text-align:center;line-height:2}
 /* the organ board */
 .organ{background:var(--well);border:1px solid var(--line);border-radius:10px;padding:12px 13px;margin-top:10px}
@@ -173,6 +207,37 @@ footer{max-width:960px;margin:22px auto 0;color:var(--faint);font-size:10px;text
   migration</span></b><span data-i18n="st.hon.6"> — once anchored to the chains and ANT/AR, redeploying relays and nodes becomes
   autonomous. A page that hid its scaffolding would be advertising; this one is a receipt.</span></div>
   </details>
+</section>
+
+<section id="dataflow">
+  <h2><span data-i18n="flow.h2">FOLLOW ONE FILE — the data loop, one journey, three depths</span></h2>
+  <div class="law" data-reg="bee" data-i18n="flow.intro.bee">where is my data, who can see it, what happens next? this loop answers the three questions for any file you bring. tap a stage to look inside — nothing is sent, nothing changes; this is a map, not a machine.</div>
+  <div class="law" data-reg="raver" data-i18n="flow.intro.rav">the estate as a living system: data enters like breath, crosses selective membranes, becomes useful work, leaves evidence behind, and the result feeds the next decision. homeostasis, not hustle — a healthy loop knows how to wait.</div>
+  <div class="law" data-reg="cypherpunk" data-i18n="flow.intro.cy">one control loop over four circuits — payload, authority, evidence, value — each stage expandable to real components, policy boundaries and implementation status. proposed architecture is labeled as such; only receipts claim verified.</div>
+  <div class="law" style="margin-top:8px" data-i18n="flow.const">choosing a depth changes the explanation only — never permission, privacy, or payment. this picture is a recorded explanation, not live telemetry: nothing here is watching anything right now.</div>
+  <div class="legend">
+    <div class="li"><span class="lw" style="width:auto;letter-spacing:.04em;text-transform:none" data-i18n="flow.leg.title">four circuits, never confused:</span>
+      <span class="lm"><span class="fc fc-payload" data-i18n="flow.leg.payload">● payload — what is being worked on</span> · <span class="fc fc-authority" data-i18n="flow.leg.authority">◆ authority — what is permitted</span> · <span class="fc fc-evidence" data-i18n="flow.leg.evidence">◇ evidence — what actually happened, and how we know</span> · <span class="fc fc-value" data-i18n="flow.leg.value">○ value — resources, charges, settlement</span></span></div>
+  </div>
+  <div id="flowLoop" role="group" aria-label="the data loop — eight stages">
+    <button type="button" class="fstage" data-stage="intake" aria-pressed="false"><span class="fname" data-i18n="flow.s.intake">1 · intake — what actually arrived?</span><span class="fc fc-payload fc-evidence" aria-hidden="true">●◇</span></button><div class="down" aria-hidden="true">▼</div>
+    <button type="button" class="fstage" data-stage="boundary" aria-pressed="false"><span class="fname" data-i18n="flow.s.boundary">2 · the boundary — who may cross?</span><span class="fc fc-payload fc-authority" aria-hidden="true">●◆</span></button><div class="down" aria-hidden="true">▼</div>
+    <button type="button" class="fstage" data-stage="state" aria-pressed="false"><span class="fname" data-i18n="flow.s.state">3 · working state — where it waits</span><span class="fc fc-payload fc-evidence" aria-hidden="true">●◇</span></button><div class="down" aria-hidden="true">▼</div>
+    <button type="button" class="fstage" data-stage="quote" aria-pressed="false"><span class="fname" data-i18n="flow.s.quote">4 · plan + quote — what would it cost?</span><span class="fc fc-payload fc-value" aria-hidden="true">●○</span></button><div class="down" aria-hidden="true">▼</div>
+    <button type="button" class="fstage" data-stage="authority" aria-pressed="false"><span class="fname" data-i18n="flow.s.authority">5 · authority — the human yes</span><span class="fc fc-authority fc-value" aria-hidden="true">◆○</span></button><div class="down" aria-hidden="true">▼</div>
+    <button type="button" class="fstage" data-stage="work" aria-pressed="false"><span class="fname" data-i18n="flow.s.work">6 · the work — pay, store, compute</span><span class="fc fc-payload fc-evidence fc-value" aria-hidden="true">●◇○</span></button><div class="down" aria-hidden="true">▼</div>
+    <button type="button" class="fstage" data-stage="evidence" aria-pressed="false"><span class="fname" data-i18n="flow.s.evidence">7 · evidence — what actually happened</span><span class="fc fc-evidence fc-value" aria-hidden="true">◇○</span></button><div class="down" aria-hidden="true">▼</div>
+    <button type="button" class="fstage" data-stage="release" aria-pressed="false"><span class="fname" data-i18n="flow.s.release">8 · retain, release, feed back</span><span class="fc fc-payload fc-authority fc-evidence fc-value" aria-hidden="true">●◆◇○</span></button>
+    <div class="floopback" data-i18n="flow.loopback">↺ the loop closes — the result feeds the next decision, and waiting is a healthy state here, not a failure</div>
+  </div>
+  <div id="flowDetail" class="fdetail" role="region" aria-live="polite" aria-label="stage detail">
+    <div class="law" id="flowSelect" data-i18n="flow.select">select a stage above to inspect it</div>
+  </div>
+  <div class="fex" id="flowExample">
+    <h3 data-i18n="flow.ex.h2">ONE REAL FILE — the first source-backed example</h3>
+    <div id="flowExBody" class="law"></div>
+    <div class="fprov" data-i18n="flow.ex.prov">every number on this card is read mechanically from the intake and quote receipts, never re-typed by hand; a source that is absent says so instead of guessing</div>
+  </div>
 </section>
 
 <section>
@@ -474,6 +539,167 @@ function read(){
 var rb=document.getElementById('reread');
 if(rb) rb.addEventListener('click',read);
 read();
+})();
+</script>
+
+<script>
+/* the data loop — presentation only (2026-09-17). this block renders stage
+   detail and the evidence card; it sends nothing, stores nothing, and grants
+   nothing. Register switches re-render prose depth; the factual rows are the
+   same constants in every register (register law: prose changes, numbers
+   never). Strings ride the corpus through the same EN-map + data-i18n
+   pattern as the organ board above. */
+(function(){
+"use strict";
+var EN={
+ 'flow.door.watch':'the W@tch room','flow.door.wallet':'the wallet — bPay',
+ 'flow.door.lens':'the privacy lens','flow.door.ant':'the Autonomi door',
+ 'flow.door.record':'the record','flow.door.comb':'the canon comb',
+ 'flow.st.verified':'verified','flow.st.review':'in review',
+ 'flow.st.notyet':'not yet','flow.st.design':'by design',
+ 'flow.ex.file':'file','flow.ex.bytes':'bytes','flow.ex.sha':'sha256',
+ 'flow.ex.shape':'shape','flow.ex.dur':'duration','flow.ex.play':'browser playback',
+ 'flow.ex.board':'journey state board','flow.ex.link':'read the intake receipt',
+ 'flow.ex.degrade':'the evidence card is unavailable right now — the numbers stay unwritten rather than guessed. the intake receipt itself remains readable:',
+ 'flow.ex.quote':'quoted',
+ 'flow.b.intake':'intake','flow.b.play':'browser playback','flow.b.tv':'TV playback',
+ 'flow.b.quote':'ANT quote','flow.b.upload':'ANT upload + address',
+ 'flow.b.playable':'W@tch playable','flow.b.retrieval':'independent retrieval',
+ 'flow.b.boundary':'sharing choice','flow.b.authority':'payment authority',
+ 'flow.r.intake.in':'the bytes, the source, the timestamp, the container shape — what was received, not yet what it means',
+ 'flow.r.intake.who':'you bring the file; the app records what arrived — interpretation is a later, separate act',
+ 'flow.r.intake.ev':'a sha256 of the exact bytes plus a codec probe, retained forever in the intake receipt',
+ 'flow.r.intake.fail':'a hash binds bytes, not truth — authorship, accuracy and permission are separate claims',
+ 'flow.p.intake.bee':'your file arrives and gets a fingerprint. the estate writes down exactly what came in — how many bytes, from where, in what shape — before anyone tries to understand it.',
+ 'flow.p.intake.rav':'sensing is not believing. the loop\u2019s first organ records the raw signal and refuses to interpret at the door — a lab report is not a diagnosis, and a pretty printout does not cure a mislabeled specimen.',
+ 'flow.p.intake.cy':'components: W@tch intake draft (schema-validated) + ffprobe forensics + sha256 pin. the Bux receipt — 214,091,829 bytes, playback PASS 7/7 — is the worked example; attribution rides as relayed credits, not verified content.',
+ 'flow.r.boundary.in':'the bytes cross together with the sharing decision — public, private, or named recipients',
+ 'flow.r.boundary.who':'the owner chooses; agents may prepare and explain, never infer the choice',
+ 'flow.r.boundary.ev':'the resolved policy object rides into the receipt — never a button label',
+ 'flow.r.boundary.fail':'choosing after payment re-forges the commitment: storage, addressing and economics all change with the audience',
+ 'flow.p.boundary.bee':'before anything is priced or stored, you say who may see it: everyone, only you, or people you name. that choice is yours alone — the estate will not guess it for you.',
+ 'flow.p.boundary.rav':'the selective membrane. nothing crosses by default; the receptor is the owner\u2019s own choice, made before the cost is even sensed. one operation can birth both a public artifact and a private one.',
+ 'flow.p.boundary.cy':'components: one policy object under Public / Private / Cypherpunk presets (merged rider 8758028e); the chooser itself is PR #114 (merged) on the wallet. bData = public chunks, zbData = private encrypted bytes (docs/CONTRACT.md); no implicit private-to-public promotion — sharing between agents stays zbData.',
+ 'flow.r.state.in':'private things rest as zbData, encrypted; public things are bData, released on purpose',
+ 'flow.r.state.who':'every read is scoped by the owner\u2019s grant — a worker sees only what its capability allows',
+ 'flow.r.state.ev':'grant boundaries and edition manifests; an intake draft is never a playable object until a network address exists',
+ 'flow.r.state.fail':'public does not mean unencrypted in transit, and private does not mean zero-knowledge — different mechanisms, different jobs',
+ 'flow.p.state.bee':'while decisions are pending, your file rests in clearly named places: private things stay encrypted and yours; public things are deliberate releases. nothing drifts between them by itself.',
+ 'flow.p.state.rav':'the compartments of the cell. zbData is the protected interior — memory, drafts, receipts; bData is deliberate secretion. the membrane between them never opens by accident, only by an explicit release.',
+ 'flow.p.state.cy':'components: device-only intake draft (never playable until credits are re-keyed onto an address); private immutable data routes to Autonomi self-encrypted. three identities stay separate: logical object ≠ content digest ≠ storage address.',
+ 'flow.r.quote.in':'the actual chosen plan — file, audience, destination, bounds — priced as one commitment',
+ 'flow.r.quote.who':'the storage meter quotes the real plan; a quote authorizes nothing',
+ 'flow.r.quote.ev':'carried quotes with hashes + a PricingCommitment digest; quote ≠ authorization ≠ payment',
+ 'flow.r.quote.fail':'quotes expire; a changed file or plan needs a fresh review, never silent substitution',
+ 'flow.p.quote.bee':'the estate asks the network what this would cost, for the exact plan you chose. a number comes back, with an expiry. asking costs nothing and commits no one.',
+ 'flow.p.quote.rav':'metabolic sensing. the loop samples the world\u2019s price — per record, by network fullness — before spending anything. the number is a sensed value, not a verdict, and it has a half-life.',
+ 'flow.p.quote.cy':'components: live keyless ANT quote → INVOICE-1 artifact (PR #113, merged 5e1f3cf6). price is a calibrated quadratic in committed node records (ADR-0008); the commitment digest covers the priced plan, so privacy resolution must come before it.',
+ 'flow.r.authority.in':'one displayed decision — this commitment, this ceiling, this expiry — nothing spendable until the surface passes review',
+ 'flow.r.authority.who':'the founder\u2019s product gesture alone; agents prepare, explain, verify — never substitute',
+ 'flow.r.authority.ev':'the authorization binds the exact invoice displayed; wallet and hardware confirmation stay independently meaningful',
+ 'flow.r.authority.fail':'chat approval is not authorization, and a button that misstates its commitment is the bug',
+ 'flow.p.authority.bee':'when real money is about to move, the estate shows you exactly what you would pay for — and waits for your yes, in the product, with your wallet. no agent may say yes for you.',
+ 'flow.p.authority.rav':'the gate on the reflex arc. voluntary by construction: the gesture is a human hand on a product surface, binding the displayed commitment. nothing crosses this membrane on enthusiasm.',
+ 'flow.p.authority.cy':'components: the review-and-pay step (Phase C/D chartered, deliberately not enabled — no UI route exists today; an estate tripwire guards the day one appears); Trezor lane per SPEC-AUTONOMI-TREZOR-1; the A9c tripwire forces a re-ruling when the surface goes live. today the invoice renders — and refuses to move.',
+ 'flow.r.work.in':'authorized operations only: pay through the wallet lane, store through the storage adapters',
+ 'flow.r.work.who':'adapters execute inside the granted bounds and ceilings',
+ 'flow.r.work.ev':'payment evidence and storage evidence are observed separately — one can succeed while the other needs recovery',
+ 'flow.r.work.fail':'payment ≠ upload ≠ retrieval: three conclusions, never reported as one',
+ 'flow.p.work.bee':'after your yes, the machinery moves: the payment goes one way, the storage another. each is watched on its own — money arriving is not the file arriving.',
+ 'flow.p.work.rav':'the effectors fire — and neurovascular coupling keeps the circuits distinct: the instruction, the fuel, the work and the measurement travel together but are never confused.',
+ 'flow.p.work.cy':'components: bPay adapters + Autonomi self-encrypting upload. for the Bux file this stage is NOT YET: the quote is banked and the spend boundary held, per the measured-states law (quote ≠ purchased ≠ uploaded).',
+ 'flow.r.evidence.in':'raw observations — usage rows, hashes, receipts, chain and relay readback',
+ 'flow.r.evidence.who':'verifiers derive conclusions; they never upgrade the evidence class they were handed',
+ 'flow.r.evidence.ev':'VOCAB-1 keeps what each observation means; RECON-1 compares commitment against evidence; the receipt is the record',
+ 'flow.r.evidence.fail':'a live probe is not end-to-end health, and writing verified on an input does not calibrate the sensor',
+ 'flow.p.evidence.bee':'everything that happened left a trace: what was spent, what was stored, what came back. separate checks compare promises with traces — and unknown stays unknown, said plainly.',
+ 'flow.p.evidence.rav':'the senses close the loop. observation meets expectation, and uncertainty is preserved rather than laundered into confidence; a settled verdict is only as good as its evidence.',
+ 'flow.p.evidence.cy':'components: the receipt corpus + VOCAB-1 crosswalk + RECON-1 closure (a pure derivation over invoice and classified evidence; acquisition stays upstream). for Bux: browser playback verified 7/7 on the original bytes; TV playback unverified.',
+ 'flow.r.release.in':'private state is retained; approved output leaves as a new, deliberate artifact',
+ 'flow.r.release.who':'release is an owner operation — an edition is published, a flag is never flipped',
+ 'flow.r.release.ev':'stable pointer → edition manifest → immutable objects; a payment binds the resolved edition',
+ 'flow.r.release.fail':'a slow pointer selects editions, it is not a live job state; and forgetting means revocation and deletion requests — never a promise that every copy vanished',
+ 'flow.p.release.bee':'when the work is done, your private records are kept — and only if you said so, a public artifact is born as its own new thing. publishing never rewrites history.',
+ 'flow.p.release.rav':'memory has time scales — fast coordination, recoverable work, slow published memory. then the loop rests: reservations released, result recorded, no endless checking of what already settled.',
+ 'flow.p.release.cy':'components: append-only manifests + the edition law (canon comb); the W@tch playable entry is the release target and requires a network address. WAIT, BLOCKED and FINALITY-PENDING are healthy states that protect later recovery.'
+};
+function T(k){ var b=window.BNRLanguage&&window.BNRLanguage.text; var s=b?b(k,EN[k]):null; return (s&&s.trim())?s:EN[k]; }
+var STAGES=[
+ {id:'intake', door:{href:'watch.html',k:'flow.door.watch'},
+  rows:{in:'flow.r.intake.in',who:'flow.r.intake.who',ev:'flow.r.intake.ev',fail:'flow.r.intake.fail'},
+  p:{bee:'flow.p.intake.bee',raver:'flow.p.intake.rav',cypherpunk:'flow.p.intake.cy'}},
+ {id:'boundary', door:{href:'wallet.html',k:'flow.door.wallet'},
+  rows:{in:'flow.r.boundary.in',who:'flow.r.boundary.who',ev:'flow.r.boundary.ev',fail:'flow.r.boundary.fail'},
+  p:{bee:'flow.p.boundary.bee',raver:'flow.p.boundary.rav',cypherpunk:'flow.p.boundary.cy'}},
+ {id:'state', door:{href:'privacy-lens.html',k:'flow.door.lens'},
+  rows:{in:'flow.r.state.in',who:'flow.r.state.who',ev:'flow.r.state.ev',fail:'flow.r.state.fail'},
+  p:{bee:'flow.p.state.bee',raver:'flow.p.state.rav',cypherpunk:'flow.p.state.cy'}},
+ {id:'quote', door:{href:'wallet.html',k:'flow.door.wallet'},
+  rows:{in:'flow.r.quote.in',who:'flow.r.quote.who',ev:'flow.r.quote.ev',fail:'flow.r.quote.fail'},
+  p:{bee:'flow.p.quote.bee',raver:'flow.p.quote.rav',cypherpunk:'flow.p.quote.cy'}},
+ {id:'authority', door:{href:'wallet.html',k:'flow.door.wallet'},
+  rows:{in:'flow.r.authority.in',who:'flow.r.authority.who',ev:'flow.r.authority.ev',fail:'flow.r.authority.fail'},
+  p:{bee:'flow.p.authority.bee',raver:'flow.p.authority.rav',cypherpunk:'flow.p.authority.cy'}},
+ {id:'work', door:{href:'ant-door.html',k:'flow.door.ant'},
+  rows:{in:'flow.r.work.in',who:'flow.r.work.who',ev:'flow.r.work.ev',fail:'flow.r.work.fail'},
+  p:{bee:'flow.p.work.bee',raver:'flow.p.work.rav',cypherpunk:'flow.p.work.cy'}},
+ {id:'evidence', door:{href:'record.html',k:'flow.door.record'},
+  rows:{in:'flow.r.evidence.in',who:'flow.r.evidence.who',ev:'flow.r.evidence.ev',fail:'flow.r.evidence.fail'},
+  p:{bee:'flow.p.evidence.bee',raver:'flow.p.evidence.rav',cypherpunk:'flow.p.evidence.cy'}},
+ {id:'release', door:{href:'comb.html',k:'flow.door.comb'},
+  rows:{in:'flow.r.release.in',who:'flow.r.release.who',ev:'flow.r.release.ev',fail:'flow.r.release.fail'},
+  p:{bee:'flow.p.release.bee',raver:'flow.p.release.rav',cypherpunk:'flow.p.release.cy'}}
+];
+function A(k){ return 'data-i18n=' + k; }
+function reg(){ var r=document.body.getAttribute('data-reg'); return (r==='raver'||r==='cypherpunk')?r:'bee'; }
+var selected=null;
+function frow(lbl,val){ return '<div class="frow"><span class="fl" ' + A(lbl) + '>' + T(lbl) + '</span><span class="fv" ' + A(val) + '>' + T(val) + '</span></div>'; }
+function renderDetail(st){
+  var d=document.getElementById('flowDetail'); if(!d) return;
+  var pk=st.p[reg()]||st.p.bee;
+  d.innerHTML='<div class="freg" ' + A(pk) + '>' + T(pk) + '</div>' +
+    frow('flow.lbl.in',st.rows.in)+frow('flow.lbl.who',st.rows.who)+
+    frow('flow.lbl.ev',st.rows.ev)+frow('flow.lbl.fail',st.rows.fail)+
+    '<div class="fnext"><span ' + A('flow.lbl.next') + '>' + T('flow.lbl.next') + '</span> <a href="' + st.door.href + '"><span ' + A(st.door.k) + '>' + T(st.door.k) + '</span></a></div>';
+}
+document.querySelectorAll('#flowLoop .fstage').forEach(function(b){
+  b.addEventListener('click',function(){
+    selected=STAGES.filter(function(s){return s.id===b.getAttribute('data-stage')})[0]||null;
+    document.querySelectorAll('#flowLoop .fstage').forEach(function(x){ x.setAttribute('aria-pressed',String(x===b)); });
+    renderDetail(selected);
+  });
+});
+/* a register switch re-renders the open stage at the new depth; the factual
+   rows are the same constants by construction (same keys, same corpus cells) */
+document.addEventListener('bregister',function(){ if(selected) renderDetail(selected); });
+
+/* the evidence card — fetched, never embedded; absence renders the honest
+   degrade line with a link to the receipt itself. numbers without letters are
+   exactly what they are: values read from the generated artifact. */
+var WORD={verified:'w-verified',review:'w-review',notyet:'w-notyet',design:'w-design'};
+function chip(lblKey,status){ return '<span class="fbs"><span ' + A(lblKey) + '>' + T(lblKey) + '</span><span class="' + (WORD[status]||'w-notyet') + '" ' + A('flow.st.'+status) + '>' + T('flow.st.'+status) + '</span></span>'; }
+function exPair(lblKey,val){ return '<span><b ' + A(lblKey) + '>' + T(lblKey) + ':</b> ' + val + '</span>'; }
+var RECEIPT_URL='https://github.com/beehive-nature/beehive-nature/blob/main/docs/dispatches/2026-09-17-watch-try-autonomi-intake.md';
+function renderExample(j){
+  var el=document.getElementById('flowExBody'); if(!el) return;
+  if(!j||!j.file){
+    el.innerHTML='<span ' + A('flow.ex.degrade') + '>' + T('flow.ex.degrade') + '</span> <a href="' + RECEIPT_URL + '" rel="noopener"><span ' + A('flow.ex.link') + '>' + T('flow.ex.link') + '</span></a>';
+    return;
+  }
+  var f=j.file;
+  var grid=exPair('flow.ex.file',f.name||'—')+exPair('flow.ex.bytes',String(f.bytes))+
+    exPair('flow.ex.sha',f.sha256Short||'—')+exPair('flow.ex.shape',(f.shape||'—'))+
+    exPair('flow.ex.dur',(f.durationSec||'—')+' s')+
+    exPair('flow.ex.play',((f.playback&&f.playback.verdict)||'—')+' ('+((f.playback&&f.playback.checks)||'—')+')');
+  var q='';
+  if(j.quote) q='<div class="frow"><span class="fl" ' + A('flow.ex.quote') + '>' + T('flow.ex.quote') + ':</span><span class="fv">' + String(j.quote.amountAnt) + ' ANT · ' + String(j.quote.quotes) + ' ' + (j.quote.paymentType||'') + '</span></div>';
+  var board=(j.stateBoard||[]).map(function(s){ return chip(s.k,s.status); }).join('');
+  el.innerHTML='<div class="fexgrid">' + grid + '</div>' + q +
+    '<div class="frow" style="margin-top:10px"><span class="fl" ' + A('flow.ex.board') + '>' + T('flow.ex.board') + '</span></div>' +
+    '<div class="fexboard">' + board + '</div>';
+}
+fetch('stack-dataflow-example.json',{cache:'no-store'}).then(function(r){ return r.ok?r.json():null; })
+ .then(renderExample).catch(function(){ renderExample(null); });
 })();
 </script>
 
