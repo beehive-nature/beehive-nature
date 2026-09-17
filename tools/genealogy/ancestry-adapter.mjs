@@ -26,63 +26,66 @@ export const isAncestryRef = (ref) => String(ref).startsWith("ancestry:");
 export function harvestResponse(model, json, { treeId } = {}) {
   const tid = treeId || inferTreeId(json);
   if (!tid || !Array.isArray(json.Persons)) return { added: 0 };
-  // pass 1: persons under namespaced ids
-  const idOf = new Map(); // ancestry pid -> namespaced ref
+  // pass 1: persons under namespaced ids — idOf records ONLY successfully
+  // inserted persons, so relationship resolution can never reference a
+  // nameless/skipped record
+  let added = 0;
+  const idOf = new Map(); // ancestry pid -> namespaced ref (inserted only)
   for (const p of json.Persons) {
     const pid = String(p.gid?.v || "").split(":")[0];
     if (!pid) continue;
     const ref = ancestryRef(tid, pid);
-    idOf.set(pid, ref);
     const nm = p.Names?.[0] || {};
     const name = `${nm.g || ""} ${nm.s || ""}`.trim();
     if (!name) continue;
     const birth = p.Events?.find((e) => e.t === "Birth");
     const death = p.Events?.find((e) => e.t === "Death");
-    // preserve the provider's OWN living signal: Ancestry flags living in the
-    // UI; the payload has no explicit flag — absence of a Death event with a
-    // modern birth is the observable signal, recorded as providerObservation
-    const livingObserved = !death && !!birth;
-    const lifespan = birth?.p || death?.p
-      ? null // dates live in events (places in this payload shape); no fake years
-      : null;
+    // OBSERVATION LAW: absence of a death event is NEVER equivalent to
+    // "living" — the payload carries no explicit living flag, so we record
+    // only what was actually observed. The UI's Living label (a separate
+    // Ancestry behavior) is recorded only if separately observed and receipted.
     if (addPerson(model, {
       id: ref, name,
-      lifespan,
+      lifespan: null,
       gender: p.Genders?.[0]?.g === "f" ? "F" : p.Genders?.[0]?.g === "m" ? "M" : null,
-      living: false, // the adapter NEVER redacts or asserts living here; the
-                     // observation is carried in providerObservation below
+      living: false, // the adapter never asserts living — observation only
       source: "ancestry", sourceId: ref,
       evidence: { era: "unrecorded", support: "unsourced-entry",
         basis: "provider observation (Ancestry) — source independence not yet assessed" },
     })) {
+      added++;
+      idOf.set(pid, ref); // only NOW is the ref usable as a relationship target
       model.persons[ref].providerObservation = {
         provider: "ancestry", treeId: tid, pid,
         nameOriginal: name,
-        livingObserved,
+        hasDeathEvent: !!death,            // what the payload carries
+        livingFlagObserved: null,          // payload has NO explicit flag
+        uiLivingLabelObserved: null,       // set ONLY from a separate UI receipt
         birthPlace: birth?.p || null,
         deathPlace: death?.p || null,
-        hasDeathEvent: !!death,
         hints: "hints and ThruLines are research leads, never verified parentage",
       };
     }
   }
   // pass 2: relationships — collect ALL parents per child first (addEdge
-  // replaces, so per-family single calls would overwrite each other)
+  // replaces, so per-family single calls would overwrite each other); targets
+  // resolve ONLY against persons actually inserted into the model — a
+  // nameless/skipped provider record must never leave a dangling parent ref
   for (const p of json.Persons) {
     const pid = String(p.gid?.v || "").split(":")[0];
     const myRef = idOf.get(pid);
-    if (!myRef) continue;
+    if (!myRef || !model.persons[myRef]) continue;
     const parents = [];
     for (const f of p.Family || []) {
       const tpid = String(f.tgid?.v || "").split(":")[0];
       const tRef = idOf.get(tpid);
-      if (!tRef) continue;
+      if (!tRef || !model.persons[tRef]) continue; // skipped target → no edge
       if (f.t === "F" || f.t === "M") parents.push(tRef);
       if (f.t === "H" || f.t === "W") addCouple(model, myRef, tRef);
     }
     if (parents.length) addEdge(model, myRef, parents);
   }
-  return { added: idOf.size };
+  return { added };
 }
 
 function inferTreeId(json) {

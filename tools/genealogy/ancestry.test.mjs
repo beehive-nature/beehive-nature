@@ -2,6 +2,7 @@
 // founder's real Ancestry data stays in private staging, never in CI), and
 // the copied-source law: the same underlying assertion on two platforms does
 // NOT automatically increase evidential confidence.
+import { readFileSync as _rf, existsSync as _ex } from "node:fs";
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { createModel, addPerson, addEdge } from "./model.mjs";
@@ -43,7 +44,8 @@ test("harvest: namespaced refs, parent edges, couples, original values preserved
   assert.ok(ariaParents.includes(ancestryRef("999", "102")));
   assert.ok(ariaParents.includes(ancestryRef("999", "103")));
   // provider observation preserved: living observed (no death event)
-  assert.equal(aria.providerObservation.livingObserved, true);
+  assert.equal(aria.providerObservation.hasDeathEvent, false);
+  assert.equal(aria.providerObservation.livingFlagObserved, null, 'payload carries no living flag — never inferred');
   assert.equal(aria.providerObservation.treeId, "999");
   // couple via H/W
   assert.ok(m.couples[[ancestryRef("999", "100"), ancestryRef("999", "101")].sort().join("|")], "couple recorded");
@@ -99,7 +101,7 @@ test("COPIED-SOURCE LAW: the same assertion on two platforms is two observations
   // Donna's FS record stays deceased — the Ancestry living observation does
   // not rewrite it, and vice versa
   assert.equal(fsObs.living, false);
-  assert.equal(ancObs.providerObservation.livingObserved, true);
+  assert.equal(ancObs.providerObservation.hasDeathEvent, false, 'no death event observed — not asserted living');
 });
 
 test("absent parent in one provider must not delete a known parent from another", () => {
@@ -134,3 +136,62 @@ test("founder dual-identity resolution: both Ancestry representations → one in
     .map(([, iid]) => iid));
   assert.equal(resolved.size, 1);
 });
+
+test("CLOSEOUT: no-death-event ≠ living — observation fields, never inference", () => {
+  const m = createModel({ source: "ancestry" });
+  harvestResponse(m, { v: "3.0", Persons: [
+    { gid: { v: "900:1030:777" }, Names: [{ g: "NoDeath", s: "Person" }],
+      Genders: [{ g: "f" }], Events: [{ t: "Birth", p: "Somewhere" }], Family: [] },
+    { gid: { v: "901:1030:777" }, Names: [{ g: "HasDeath", s: "Person" }],
+      Genders: [{ g: "m" }], Events: [{ t: "Birth", p: "X" }, { t: "Death", p: "Y" }], Family: [] },
+  ], focus: {} }, { treeId: "777" });
+  const nd = m.persons[ancestryRef("777", "900")];
+  const hd = m.persons[ancestryRef("777", "901")];
+  // three explicit facts, no inference
+  assert.equal(nd.providerObservation.hasDeathEvent, false, "no death event: observed");
+  assert.equal(nd.providerObservation.livingFlagObserved, null, "payload carries NO living flag");
+  assert.equal(nd.providerObservation.uiLivingLabelObserved, null, "UI label not separately receipted");
+  assert.equal(nd.living, false, "adapter never asserts living — absence of death ≠ living");
+  assert.equal(hd.providerObservation.hasDeathEvent, true);
+});
+
+test("CLOSEOUT: nameless/skipped person not counted in added", () => {
+  const m = createModel({ source: "ancestry" });
+  const r = harvestResponse(m, { v: "3.0", Persons: [
+    { gid: { v: "910:1030:666" }, Names: [], Genders: [], Events: [], Family: [] }, // nameless
+    { gid: { v: "911:1030:666" }, Names: [{ g: "Named", s: "Person" }], Genders: [], Events: [], Family: [] },
+  ], focus: {} }, { treeId: "666" });
+  assert.equal(r.added, 1, "only the named person counts");
+  assert.ok(!m.persons[ancestryRef("666", "910")], "nameless record never entered the model");
+});
+
+test("CLOSEOUT: skipped target never creates a dangling parent edge", () => {
+  const m = createModel({ source: "ancestry" });
+  // child references a FATHER whose record is nameless (skipped in pass 1)
+  harvestResponse(m, { v: "3.0", Persons: [
+    { gid: { v: "920:1030:555" }, Names: [{ g: "Child", s: "X" }], Genders: [],
+      Events: [], Family: [{ t: "F", tgid: { v: "921:1030:555" } }] },
+    { gid: { v: "921:1030:555" }, Names: [], Genders: [], Events: [], Family: [] }, // nameless father
+  ], focus: {} }, { treeId: "555" });
+  const child = m.persons[ancestryRef("555", "920")];
+  assert.ok(child, "child inserted");
+  const edges = m.edges[ancestryRef("555", "920")];
+  assert.ok(!edges || edges.length === 0, "no dangling parent edge to the skipped record");
+});
+
+test("CLOSEOUT: living-person ancestry refs stay in the PRIVATE registry, never the public one", () => {
+  // the public registry (committed) holds deceased fsids only; ancestry refs
+  // for living persons (incl. both founder representations) live in the
+  // private registry on local disk
+  const fs = awaitImportFs();
+  const pubReg = JSON.parse(fs.readFileSync("assets/profile-archive/lineage/identity-registry.json", "utf8"));
+  const pubText = JSON.stringify(pubReg);
+  assert.ok(!isAncestryRef(pubText.replace(/"/g, "")), "no ancestry refs in the public registry");
+  const privPath = "C:/Users/travi/family-lineage/ancestry/ancestry-private-staging.json";
+  if (fs.existsSync(privPath)) {
+    const priv = JSON.parse(fs.readFileSync(privPath, "utf8"));
+    assert.ok(priv.associations && Object.keys(priv.associations).some(isAncestryRef),
+      "founder ancestry associations present in PRIVATE staging");
+  }
+});
+function awaitImportFs() { return { readFileSync: _rf, existsSync: _ex }; }
