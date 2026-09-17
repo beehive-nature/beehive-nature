@@ -882,11 +882,14 @@ name = "antd-bridge"
 version = "0.1.0"
 dependencies = [
  "ant-core",
+ "ant-protocol",
  "axum 0.7.9",
  "hex",
  "serde",
  "serde_json",
+ "sha2",
  "tokio",
+ "tower-http",
 ]
 
 [[package]]

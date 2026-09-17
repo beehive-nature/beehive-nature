@@ -81,7 +81,7 @@ createServer(async (req, res) => {
       const { createHash } = await import("node:crypto");
       const tarBuf = readFileSync(TAR);
       const sha = createHash("sha256").update(tarBuf).digest("hex");
-      if (sha !== "fec5fba8360d9de211c3b6c5966e93bc2462133099f651891d500b6a2ea98b9b") {
+      if (sha !== "fec5fba8360d9de211c3b6c5966e93bc2462133099f651891d500b6a2ea98b9b") { // PUBLIC-CONSTANT public chain data
         return json(res, 409, { error: "ARTIFACT CHANGED", sha, expected: "fec5fba8…", action: "STOP — changed bytes require fresh approval" });
       }
       // fresh quote immediately before upload; enforce bounds again

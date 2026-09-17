@@ -169,19 +169,23 @@ footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint
       <div><span id="pv-edition"></span> · public edition · living family protected</div>
       <div><span id="pv-chunks"></span> encrypted network chunks</div>
       <div style="margin-top:6px"><b style="color:var(--gold);font-size:16px" id="pv-cost"></b></div>
-      <div style="color:var(--faint);font-size:10px">within your authorized maximum of <span id="pv-bound"></span> ANT</div>
-      <details style="margin-top:6px"><summary style="cursor:pointer;color:var(--faint);font-size:10px">cypherpunk: payment detail</summary>
+      <div style="color:var(--faint);font-size:10px">within your authorized maximum of <span id="pv-bound"></span> ANT + <span id="pv-gasbound"></span> ETH gas — two assets, two bounds, never one dollar figure</div>
+      <div id="pv-bpay" style="margin-top:6px;font-size:9.5px;color:var(--faint);letter-spacing:.03em"></div>
+      <div style="margin-top:4px"><button id="pv-dlinv" type="button" style="background:none;border:1px dashed var(--line);color:var(--cyan);border-radius:7px;padding:5px 10px;font:10.5px 'IBM Plex Mono',monospace;cursor:pointer">↓ download invoice</button>
+        <button id="pv-dlrec" type="button" disabled style="margin-left:6px;background:none;border:1px dashed var(--line);color:var(--faint);border-radius:7px;padding:5px 10px;font:10.5px 'IBM Plex Mono',monospace;cursor:not-allowed" title="receipts are issued from settlement evidence only — no settlement has occurred">↓ download receipt (awaiting settlement)</button></div>
+      <details style="margin-top:6px"><summary style="cursor:pointer;color:var(--faint);font-size:10px">cypherpunk: payment detail + evidence chain</summary>
         <div id="pv-detail" style="margin-top:6px;font-size:9.5px;color:var(--faint);line-height:1.7"></div>
       </details>
     </div>
     <button id="pv-approve" type="button" style="margin-top:12px;background:var(--gold);border:0;color:#152016;border-radius:8px;padding:10px 18px;font:650 12px 'IBM Plex Mono',monospace;cursor:pointer">review with wallet →</button>
-    <button id="pv-cancel" type="button" style="margin-left:8px;background:none;border:1px solid var(--line);color:var(--dim);border-radius:8px;padding:10px 14px;font:11px 'IBM Plex Mono',monospace;cursor:pointer">cancel</button>
+    <button id="pv-cancel" type="button" style="margin-left:8px;background:none;border:1px solid var(--line);color:var(--dim);border-radius:8px;padding:10px 14px;font:11px 'IBM Plex Mono',monospace;cursor:pointer">cancel (voids this plan)</button>
   </div>
   <div id="preserve-progress" hidden style="margin-top:12px;color:var(--dim);font-size:11px">
     <span style="color:var(--gold)">⬡</span> uploading to the Autonomi network… <span id="pv-upload-note" style="color:var(--faint)">(the service handles the transaction; no terminal, no manual steps)</span>
   </div>
   <div id="preserve-receipt" hidden style="margin-top:12px">
     <div style="color:var(--verified);font-size:12px;font-weight:600">⬡ your family archive survived the machine</div>
+    <div id="pv-settled" hidden style="margin-top:8px;border:1px solid rgba(134,204,114,.4);border-radius:10px;padding:10px 12px;font-size:11px;color:var(--dim);line-height:1.8"></div>
     <div id="pv-receipt-body" style="margin-top:6px;font-size:10.5px;color:var(--dim);line-height:1.8"></div>
   </div>
   <div id="preserve-error" hidden style="margin-top:12px;color:var(--rose);font-size:11px"></div>
@@ -307,11 +311,97 @@ footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint
 
   // ── the live storage receipt card: states honest, five-way distinct ─────
   // ── the preserve flow: review → approve → upload → receipt, all in the UI ─
+  // ── the bPay document layer underneath: QUOTE → INVOICE → AUTHORIZATION →
+  //    SETTLEMENT → RECEIPT → RECONCILIATION, each state distinct and honest —
+  //    the invoice is the authorized expectation (real at quote time), the
+  //    receipt exists ONLY from settlement evidence (tools/genealogy/bpay.mjs
+  //    is the canonical builder; this in-page mirror renders the ceremony) ──
   var PV = { service: "http://127.0.0.1:8798" };
   function pvShow(id) {
     ["preserve-step", "preserve-review", "preserve-progress", "preserve-receipt", "preserve-error"].forEach(function(s) {
       document.getElementById(s).hidden = s !== id;
     });
+  }
+  async function pvPlanDigest(plan) {
+    var hashes = (plan.payments || []).map(function(p){return p.quote_hash;}).sort();
+    var buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(hashes.join("\n")));
+    return "sha256:" + [...new Uint8Array(buf)].map(function(b){return b.toString(16).padStart(2,"0");}).join("");
+  }
+  async function pvBuildInvoice(plan) {
+    // mirrors tools/genealogy/bpay.mjs buildInvoice — same schema, same laws
+    var d = await pvPlanDigest(plan);
+    var ceilingAntAtto = 32 * 10 ** 17; // 3.2 ANT
+    if (parseInt(plan.total_amount_atto) > ceilingAntAtto) return null; // the bridge already refused; belt+braces
+    return {
+      schema: "skaists.bpay-invoice/1",
+      invoiceId: "inv-" + plan.upload_id,
+      issuedAt: new Date().toISOString(),
+      issuer: { service: "antd-bridge (keyless prepare)", planSource: "live Autonomi network prepare" },
+      buyer: { role: "founder (Trezor custody)", note: "the paying address is never embedded in artifacts" },
+      subject: { archive: {
+        name: "zBlood first public preservation snapshot",
+        manifestSha256: "440b502a6e1ac2dc086902f743f9f750437e7079040dfd5e76c8dd42c7de4389", // PUBLIC-CONSTANT public chain data
+        files: 20537, contentBytes: 62139972,
+        uploadObject: { name: "pkg3.tar", bytes: 80998400,
+          sha256: "fec5fba8360d9de211c3b6c5966e93bc2462133099f651891d500b6a2ea98b9b" } }, // PUBLIC-CONSTANT public chain data
+        encryptedChunks: plan.total_chunks, alreadyStoredChunks: plan.already_stored || 0 },
+      service: { network: "Autonomi", route: "ANT", visibility: "public",
+        destination: "Autonomi network storage — public DataMap address " + (plan.data_map_address || "(pending)") },
+      quote: { state: "quoted (live node quotes — not purchased)",
+        lineItems: [
+          { kind: "network storage", asset: "ANT", amountAtto: plan.total_amount_atto, payments: (plan.payments||[]).length, paymentType: plan.payment_type },
+          { kind: "gas (authorized ceiling, settled at payment)", asset: "ETH", ceilingAtto: "200000000000000" } ],
+        planIdentity: { uploadId: plan.upload_id, dataMapAddress: plan.data_map_address || null,
+          digest: d, artifactSha256: plan.artifact_sha256, artifactBytes: plan.artifact_bytes },
+        persistence: plan.recovered_from
+          ? { law: "RECOVERED — identical quote hashes to the original prepare (bridge-death proof)", recoveredFrom: plan.recovered_from }
+          : { law: "persisted at prepare; survives bridge death (P1 recovery)" },
+        expiration: { model: "job-bound, not clock-bound",
+          note: "the plan is bound to upload_id and persisted by the bridge; a force_fresh re-quote is a NEW plan" } },
+      authorization: { ceiling: { maxStorageANT: "3.2", maxGasETH: "0.0002" },
+        authorizedBy: "founder order 2026-09-17 (separated bounds)",
+        stopConditions: ["sha256(pkg3.tar) ≠ fec5fba8… at upload time","actual storage charge > 3.2 ANT","actual gas > 0.0002 ETH","different artifact or chunk count"],
+        quoteWithinCeiling: true },
+      walletAction: { requested: [
+          { tx: "ERC-20 approve", token: "ANT", spender: "Autonomi payment vault" },
+          { tx: "payForQuotes", contract: "Autonomi payment vault" } ],
+        signer: "founder Trezor — device custody; neither blood.html nor antd-bridge ever holds a key",
+        clearSigning: { erc20Approve: "likely covered — not yet device-observed",
+          payForQuotes: "UNVERIFIED — do NOT claim clear signing until device-tested" } },
+      states: { quote: plan.recovered_from ? "quoted (recovered original)" : "quoted", invoice: "issued",
+        authorization: "ceiling-recorded", settlement: "not-yet", receipt: "not-yet", reconciliation: "not-yet" },
+      state: "issued"
+    };
+  }
+  function pvDownload(name, obj) {
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([JSON.stringify(obj, null, 1)], { type: "application/json" }));
+    a.download = name; a.click(); URL.revokeObjectURL(a.href);
+  }
+  // the SETTLED / PRESERVED presentation — rendered ONLY from a receipt
+  // artifact (settlement evidence); until the Trezor lane lands, nothing calls
+  // it with data, and that honesty is the point
+  function pvRenderSettledPresentation(receipt, invoice) {
+    var host = document.getElementById("pv-settled");
+    var ant = (BigInt(receipt.paid.totalSettledAtto) / 1000000000000000000n).toString();
+    host.innerHTML =
+      '<div style="color:var(--verified);font-weight:650;font-size:12px">Family Archive Preserved</div>' +
+      '<div>20,537 files · 62.1 MB · paid ' + ant + ' ANT · ' + receipt.settledAt + '</div>' +
+      '<div style="color:var(--faint);font-size:10px">reference ' + receipt.archive.dataMapAddress + ' · ' + receipt.paid.route + '</div>' +
+      '<div style="margin-top:6px;display:flex;gap:8px;flex-wrap:wrap">' +
+      '<button id="pv-viewpay" type="button">View payment details</button>' +
+      '<button id="pv-dlinv2" type="button">Download invoice</button>' +
+      '<button id="pv-dlrec2" type="button">Download receipt</button></div>' +
+      '<details id="pv-paydetails" hidden style="margin-top:8px;font-size:9.5px;color:var(--faint);line-height:1.7">' +
+      'tx refs: ' + receipt.paid.txRefs.map(function(t){return t.hash + ' (' + t.chain + ')';}).join(', ') +
+      ' · gas ' + receipt.fees.gasUsedWei + ' wei · finality: ' + receipt.finality +
+      ' · reconciliation: ' + (receipt.reconciliation ? receipt.reconciliation.verdict : 'pending') + '</details>';
+    host.hidden = false;
+    document.getElementById("pv-viewpay").addEventListener("click", function() {
+      var d = document.getElementById("pv-paydetails"); d.hidden = !d.hidden;
+    });
+    document.getElementById("pv-dlinv2").addEventListener("click", function() { if (invoice) pvDownload(invoice.invoiceId + ".json", invoice); });
+    document.getElementById("pv-dlrec2").addEventListener("click", function() { pvDownload(receipt.receiptId + ".json", receipt); });
   }
   document.getElementById("preservebtn").addEventListener("click", async function() {
     document.getElementById("preservepanel").hidden = false;
@@ -338,12 +428,23 @@ footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint
       const antAmt = (parseInt(plan.total_amount_atto) / 1e18).toFixed(6);
       document.getElementById("pv-cost").textContent = antAmt + " ANT";
       document.getElementById("pv-bound").textContent = "3.2";
+      document.getElementById("pv-gasbound").textContent = "0.0002";
+      PV.invoice = await pvBuildInvoice(plan);
+      var d = PV.invoice ? PV.invoice.quote.planIdentity.digest.slice(0, 26) + "…" : "—";
+      document.getElementById("pv-bpay").innerHTML =
+        "bPay evidence chain — <span style='color:var(--verified)'>QUOTE ✓</span> · " +
+        "<span style='color:var(--verified)'>INVOICE issued</span> · <span style='color:var(--verified)'>AUTHORIZATION ≤3.2 ANT / ≤0.0002 ETH</span> · " +
+        "SETTLEMENT not-yet · RECEIPT not-yet · RECONCILIATION not-yet" +
+        (plan.recovered_from ? "<br><span style='color:var(--gold)'>recovered plan — the original authorization survived the bridge (fresh quotes discarded)</span>" : "");
       document.getElementById("pv-detail").innerHTML =
         "upload_id: " + plan.upload_id + "<br>" +
         "data_map_address: " + (plan.data_map_address || "pending") + "<br>" +
         "payment_type: " + plan.payment_type + " · " + (plan.payments ? plan.payments.length : 0) + " node payments<br>" +
+        "plan digest: " + d + "<br>" +
+        "artifact: " + (plan.artifact_sha256 || "?").slice(0, 24) + "… (" + plan.artifact_bytes + " bytes)<br>" +
+        "persistence: " + (PV.invoice ? PV.invoice.quote.persistence.law : "—") + "<br>" +
         "already_stored: " + plan.already_stored + "<br>" +
-        "<em>no key was used to produce this plan</em>";
+        "<em>no key was used to produce this plan; neither this page nor the bridge can ever hold one</em>";
       PV.plan = plan;
       pvShow("preserve-review");
     } catch (e) {
@@ -351,7 +452,17 @@ footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint
         "the antd-bridge is not running.<br><span style='color:var(--faint)'>it runs keylessly on this machine: tools/antd-bridge/target/release/antd-bridge.exe</span>";
     }
   });
+  document.getElementById("pv-dlinv").addEventListener("click", function() {
+    if (PV.invoice) pvDownload(PV.invoice.invoiceId + ".json", PV.invoice);
+  });
   document.getElementById("pv-cancel").addEventListener("click", function() {
+    // void the open plan so the next preserve quotes fresh (the escape hatch)
+    if (PV.plan && PV.plan.upload_id) {
+      fetch(PV.service + "/v1/upload/abandon", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ upload_id: PV.plan.upload_id })
+      }).catch(function() {});
+    }
     document.getElementById("preservepanel").hidden = true;
   });
   document.getElementById("pv-approve").addEventListener("click", function() {
@@ -366,7 +477,7 @@ footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint
     // For now, honestly show what comes next
     setTimeout(function() {
       document.getElementById("pv-upload-note").innerHTML +=
-        "<br><br><b style='color:var(--gold)'>→ wallet integration is the active build</b> — the payment plan is real and ready; the device signing is the remaining wire";
+        "<br><br><b style='color:var(--gold)'>→ wallet integration is the active build</b> — the payment plan is real, persisted, and downloadable as an invoice; the device signing is the remaining wire";
     }, 2000);
   });
   function renderEconCard(){

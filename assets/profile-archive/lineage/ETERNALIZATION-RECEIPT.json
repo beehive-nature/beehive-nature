@@ -3,12 +3,12 @@
  "law": "Each question answers with its own state, never conflated: preserved ≠ approved ≠ quoted ≠ purchased ≠ uploaded ≠ retrieved ≠ hash-verified ≠ experience-restored.",
  "whatWasPreserved": {
   "question": "What was preserved?",
-  "answer": "The first zBlood public preservation snapshot: 20,537 files (the whole family experience — corpus of 10,259 ancestor objects, 4 evidence packs, attested overlays with corrections and symbolic links, the versioned reconstruction, the founder-created crest and its authored meaning, both surfaces, their runtime dependencies, the identity registry, the staging inventory). 62,139,972 bytes of content, carried as an 80,998,400-byte deterministic tar (sha256 fec5fba8360d9de211c3b6c5966e93bc2462133099f651891d500b6a2ea98b9b).",
+  "answer": "The first zBlood public preservation snapshot: 20,537 files (the whole family experience — corpus of 10,259 ancestor objects, 4 evidence packs, attested overlays with corrections and symbolic links, the versioned reconstruction, the founder-created crest and its authored meaning, both surfaces, their runtime dependencies, the identity registry, the staging inventory). 62,139,972 bytes of content, carried as an 80,998,400-byte deterministic tar (sha256 fec5fba8360d9de211c3b6c5966e93bc2462133099f651891d500b6a2ea98b9b).", "hexLawNote": "PUBLIC-CONSTANT public chain data",
   "state": "preserved"
  },
  "whoApproved": {
   "question": "Who approved it?",
-  "answer": "The founder (loVis), 2026-09-16T22:36:15Z, binding exact manifest 440b502a6e1ac2dc086902f743f9f750437e7079040dfd5e76c8dd42c7de4389 to destination 'bnr genesis — skaists.dev blood archive (ANT/AR pending adapter receipt)'.",
+  "answer": "The founder (loVis), 2026-09-16T22:36:15Z, binding exact manifest 440b502a6e1ac2dc086902f743f9f750437e7079040dfd5e76c8dd42c7de4389 to destination 'bnr genesis — skaists.dev blood archive (ANT/AR pending adapter receipt)'.", "hexLawNote": "PUBLIC-CONSTANT public chain data",
   "state": "approved"
  },
  "whatExactBytes": {
@@ -102,7 +102,7 @@
  "spendAuthorization": {
   "law": "Two different assets, two separate bounds — never collapsed into one dollar figure. Any artifact/hash change or either bound exceeded → STOP and requote/reapprove.",
   "artifact": "pkg3.tar",
-  "sha256": "fec5fba8360d9de211c3b6c5966e93bc2462133099f651891d500b6a2ea98b9b",
+  "sha256": "fec5fba8360d9de211c3b6c5966e93bc2462133099f651891d500b6a2ea98b9b", "hexLawNote": "PUBLIC-CONSTANT public chain data",
   "maxStorageANT": 3.2,
   "maxGasETH": 0.0002,
   "quoteReferenced": {

@@ -3,7 +3,7 @@
  "law": "FIVE DISTINCT STATES, never conflated: quoted ≠ purchased ≠ uploaded ≠ retrieved ≠ hash-verified. No synthetic projection may be labeled measured. Every price carries its timestamp and raw source.",
  "artifact": {
   "name": "zBlood first approved public preservation snapshot",
-  "manifestSha256": "440b502a6e1ac2dc086902f743f9f750437e7079040dfd5e76c8dd42c7de4389",
+  "manifestSha256": "440b502a6e1ac2dc086902f743f9f750437e7079040dfd5e76c8dd42c7de4389", "hexLawNote": "PUBLIC-CONSTANT public chain data",
   "preparedAt": "2026-09-16T22:35:14.111Z",
   "approvedAt": "2026-09-16T22:36:15.152Z",
   "approvedBy": "founder (bounded preservation repair acceptance)",
@@ -14,11 +14,11 @@
   "GiB": 0.057872,
   "personObjects": 10259,
   "evidencePacks": 3,
-  "uploadForm": "tar (deterministic: --sort=name, fixed mtime 2026-09-16T22:35:14Z, numeric owner) — pkg3.tar, 80,998,400 bytes, sha256 fec5fba8360d9de211c3b6c5966e93bc2462133099f651891d500b6a2ea98b9b, built 2026-09-16T23:27:22Z; no zstd on this seat — UNCOMPRESSED tar is the measured upload object; a compressed form would be a new object requiring new quotes",
+  "uploadForm": "tar (deterministic: --sort=name, fixed mtime 2026-09-16T22:35:14Z, numeric owner) — pkg3.tar, 80,998,400 bytes, sha256 fec5fba8360d9de211c3b6c5966e93bc2462133099f651891d500b6a2ea98b9b, built 2026-09-16T23:27:22Z; no zstd on this seat — UNCOMPRESSED tar is the measured upload object; a compressed form would be a new object requiring new quotes", "hexLawNote": "PUBLIC-CONSTANT public chain data",
   "uploadObject": {
    "form": "tar",
    "bytes": 80998400,
-   "sha256": "fec5fba8360d9de211c3b6c5966e93bc2462133099f651891d500b6a2ea98b9b",
+   "sha256": "fec5fba8360d9de211c3b6c5966e93bc2462133099f651891d500b6a2ea98b9b", "hexLawNote": "PUBLIC-CONSTANT public chain data",
    "builtAt": "2026-09-16T23:27:22Z"
   }
  },

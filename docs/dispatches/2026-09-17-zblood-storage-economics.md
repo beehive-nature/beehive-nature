@@ -4,7 +4,7 @@
 
 ## A. The artifact (measured)
 
-- **manifest SHA-256:** `440b502a6e1ac2dc086902f743f9f750437e7079040dfd5e76c8dd42c7de4389` (recomputed at measurement — matches)
+- **manifest SHA-256:** `440b502a6e1ac2dc086902f743f9f750437e7079040dfd5e76c8dd42c7de4389` (recomputed at measurement — matches) <!-- PUBLIC-CONSTANT public chain data -->
 - **approval:** bound intact — founder, 2026-09-16T22:36:15Z, destination "bnr genesis — skaists.dev blood archive (ANT/AR pending adapter receipt)"
 - **20,537 files · 62,139,972 bytes (0.057872 GiB) · 10,259 person objects · 3 evidence packs**
 - **upload form:** NOT YET UPLOADED. Planned tar+zstd; **all quotes measured on the uncompressed byte count** and labeled so — a compressed form requires fresh timestamped quotes.
