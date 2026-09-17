@@ -220,6 +220,15 @@ jobs:
       - name: VOCAB-1 crosswalk battery (lossless outcome predicates)
         if: always()
         run: node scripts/vocab1-crosswalk.mjs
+      # RECON-1 obligation-closure battery (economic seat, 2026-09-17):
+      # reconciliation DERIVES from evidence and never upgrades the VOCAB-1
+      # evidence class; the founder's red-first refusal cases + strongest
+      # closure positives + persistence laws (determinism, order-insensitivity,
+      # duplicate idempotence); the label-based naive reconciler is the
+      # REGISTERED RED comparator (10/10 convicted).
+      - name: RECON-1 closure battery (derives, never upgrades evidence)
+        if: always()
+        run: node scripts/recon1-closure.mjs
       # PEER FUNNEL testnet runner selftest (z3.3 Order C, 2026-09-05): the
       # one-broadcast tool cannot rot — keccak + EIP-155 RLP hash vectors and
       # the sign/recover roundtrip proven every push (key parts skip cleanly
