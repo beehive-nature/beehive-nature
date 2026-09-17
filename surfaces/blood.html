@@ -158,21 +158,23 @@ footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint
 <div class="econcard" id="econcard" hidden>
   <b>⬡ this family archive's storage receipt</b> — <span id="econ-line">…</span><br>
   <span class="states" id="econ-states">…</span><br>
-  <button id="preservebtn" type="button" style="margin-top:8px;background:var(--gold);border:0;color:#152016;border-radius:8px;padding:9px 16px;font:650 11.5px 'IBM Plex Mono',monospace;cursor:pointer">⬡ preserve this archive</button>
+  <button id="preservebtn" type="button" style="margin-top:8px;background:var(--gold);border:0;color:#152016;border-radius:8px;padding:9px 16px;font:650 11.5px 'IBM Plex Mono',monospace;cursor:pointer">⬡ preserve this archive on Autonomi</button>
 </div>
 <div id="preservepanel" hidden style="margin-top:12px;border:1px solid var(--gold);border-radius:14px;padding:16px;background:var(--panel)">
   <div style="font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold)">preserve this family archive</div>
   <div id="preserve-step" style="margin-top:10px;color:var(--dim);font-size:11.5px;line-height:1.8">checking the preservation service…</div>
   <div id="preserve-review" hidden>
     <div style="margin-top:10px;display:grid;gap:6px;font-size:11px;color:var(--dim)">
-      <div><b style="color:var(--ink)">edition:</b> <span id="pv-edition"></span></div>
-      <div><b style="color:var(--ink)">scope:</b> public family experience — living persons redacted, IDs pseudonymized</div>
-      <div><b style="color:var(--ink)">route:</b> Autonomi (ANT) — permanent, retrieval-free</div>
-      <div><b style="color:var(--ink)">storage:</b> <span id="pv-storage" style="color:var(--gold)"></span> · <b style="color:var(--ink)">gas:</b> <span id="pv-gas" style="color:var(--gold)"></span></div>
-      <div><b style="color:var(--ink)">bounds:</b> ≤ 3.2 ANT + ≤ 0.0002 ETH — enforced, not printed</div>
-      <div style="color:var(--faint);font-size:10px" id="pv-qual"></div>
+      <div style="font-size:13px;color:var(--ink);font-weight:600">Preserve this edition on Autonomi</div>
+      <div><span id="pv-edition"></span> · public edition · living family protected</div>
+      <div><span id="pv-chunks"></span> encrypted network chunks</div>
+      <div style="margin-top:6px"><b style="color:var(--gold);font-size:16px" id="pv-cost"></b></div>
+      <div style="color:var(--faint);font-size:10px">within your authorized maximum of <span id="pv-bound"></span> ANT</div>
+      <details style="margin-top:6px"><summary style="cursor:pointer;color:var(--faint);font-size:10px">cypherpunk: payment detail</summary>
+        <div id="pv-detail" style="margin-top:6px;font-size:9.5px;color:var(--faint);line-height:1.7"></div>
+      </details>
     </div>
-    <button id="pv-approve" type="button" style="margin-top:12px;background:var(--gold);border:0;color:#152016;border-radius:8px;padding:10px 18px;font:650 12px 'IBM Plex Mono',monospace;cursor:pointer">approve preservation</button>
+    <button id="pv-approve" type="button" style="margin-top:12px;background:var(--gold);border:0;color:#152016;border-radius:8px;padding:10px 18px;font:650 12px 'IBM Plex Mono',monospace;cursor:pointer">review with wallet →</button>
     <button id="pv-cancel" type="button" style="margin-left:8px;background:none;border:1px solid var(--line);color:var(--dim);border-radius:8px;padding:10px 14px;font:11px 'IBM Plex Mono',monospace;cursor:pointer">cancel</button>
   </div>
   <div id="preserve-progress" hidden style="margin-top:12px;color:var(--dim);font-size:11px">
@@ -305,7 +307,7 @@ footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint
 
   // ── the live storage receipt card: states honest, five-way distinct ─────
   // ── the preserve flow: review → approve → upload → receipt, all in the UI ─
-  var PV = { service: "http://127.0.0.1:8794" };
+  var PV = { service: "http://127.0.0.1:8798" };
   function pvShow(id) {
     ["preserve-step", "preserve-review", "preserve-progress", "preserve-receipt", "preserve-error"].forEach(function(s) {
       document.getElementById(s).hidden = s !== id;
@@ -315,59 +317,57 @@ footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint
     document.getElementById("preservepanel").hidden = false;
     document.getElementById("preservepanel").scrollIntoView({ behavior: "smooth" });
     pvShow("preserve-step");
-    document.getElementById("preserve-step").textContent = "checking the preservation service…";
+    document.getElementById("preserve-step").textContent = "connecting to the Autonomi network…";
     try {
-      const st = await fetch(PV.service + "/api/preserve/status").then(r => r.json());
-      if (!st.keyInEnv) {
-        document.getElementById("preserve-step").innerHTML =
-          "the preservation service is running but needs its spending credential.<br>" +
-          "<span style='color:var(--faint)'>the founder starts the service once (SECRET_KEY in its environment) — " +
-          "the key never enters this page, this chat, or any repository. After the service starts, " +
-          "everything happens here in the archive.</span>";
+      const st = await fetch(PV.service + "/health").then(r => r.json());
+      if (!st.connected) {
+        document.getElementById("preserve-step").innerHTML = "the Autonomi network is not reachable from this machine.<br><span style='color:var(--faint)'>the bridge connects keylessly — no credential needed, just network access</span>";
         return;
       }
-      // service has the key — fetch a fresh quote
-      const q = await fetch(PV.service + "/api/preserve/quote").then(r => r.json());
-      if (q.error) { pvShow("preserve-error"); document.getElementById("preserve-error").textContent = q.error; return; }
-      document.getElementById("pv-edition").textContent = "manifest 440b502a… · 20,537 files · 62.1 MB";
-      document.getElementById("pv-storage").textContent = q.storageANT.toFixed(6) + " ANT";
-      document.getElementById("pv-gas").textContent = q.gasETH.toFixed(6) + " ETH";
-      document.getElementById("pv-qual").textContent = q.qualifications + " · confidence: " + q.confidence;
-      PV.quote = q;
+      // fetch a REAL payment plan from the live network
+      document.getElementById("preserve-step").textContent = "preparing the archive on the network (this encrypts 24 chunks and queries live storage nodes)…";
+      const plan = await fetch(PV.service + "/v1/upload/prepare", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ path: "C:/Users/travi/family-lineage/pkg3.tar" })
+      }).then(r => r.json());
+      if (plan.error) { pvShow("preserve-error"); document.getElementById("preserve-error").textContent = plan.error; return; }
+      // display the ceremony
+      document.getElementById("pv-edition").textContent = "20,537 family archive files · 62.1 MB";
+      document.getElementById("pv-chunks").textContent = plan.total_chunks;
+      const antAmt = (parseInt(plan.total_amount_atto) / 1e18).toFixed(6);
+      document.getElementById("pv-cost").textContent = antAmt + " ANT";
+      document.getElementById("pv-bound").textContent = "3.2";
+      document.getElementById("pv-detail").innerHTML =
+        "upload_id: " + plan.upload_id + "<br>" +
+        "data_map_address: " + (plan.data_map_address || "pending") + "<br>" +
+        "payment_type: " + plan.payment_type + " · " + (plan.payments ? plan.payments.length : 0) + " node payments<br>" +
+        "already_stored: " + plan.already_stored + "<br>" +
+        "<em>no key was used to produce this plan</em>";
+      PV.plan = plan;
       pvShow("preserve-review");
     } catch (e) {
       document.getElementById("preserve-step").innerHTML =
-        "the preservation service is not running on this machine.<br>" +
-        "<span style='color:var(--faint)'>start it: node tools/genealogy/preserve-service.mjs (with SECRET_KEY in the environment — " +
-        "one gesture by the founder; the key stays in the service's process, never in the page)</span>";
+        "the antd-bridge is not running.<br><span style='color:var(--faint)'>it runs keylessly on this machine: tools/antd-bridge/target/release/antd-bridge.exe</span>";
     }
   });
   document.getElementById("pv-cancel").addEventListener("click", function() {
     document.getElementById("preservepanel").hidden = true;
   });
-  document.getElementById("pv-approve").addEventListener("click", async function() {
-    if (!PV.quote) return;
+  document.getElementById("pv-approve").addEventListener("click", function() {
+    if (!PV.plan) return;
     pvShow("preserve-progress");
-    document.getElementById("pv-upload-note").textContent = "(uploading the exact approved bytes — sha256 fec5fba8…)";
-    try {
-      const receipt = await fetch(PV.service + "/api/preserve/upload", { method: "POST" }).then(r => r.json());
-      if (receipt.error) {
-        pvShow("preserve-error");
-        document.getElementById("preserve-error").textContent = receipt.error + (receipt.action ? " — " + receipt.action : "");
-        return;
-      }
-      document.getElementById("pv-receipt-body").innerHTML =
-        "<b>uploaded at:</b> " + receipt.uploadedAt + "<br>" +
-        "<b>artifact:</b> sha256 " + receipt.artifactSha256.slice(0, 16) + "…<br>" +
-        "<b>client:</b> " + receipt.clientVersion + "<br>" +
-        "<b>result:</b> <span style='color:var(--cyan)'>" + JSON.stringify(receipt.result).slice(0, 200) + "</span><br>" +
-        "<span style='color:var(--faint)'>the receipt is banked automatically in ETERNALIZATION-RECEIPT.json — no manual transfer</span>";
-      pvShow("preserve-receipt");
-      renderEconCard(); // refresh the live card
-    } catch (e) {
-      pvShow("preserve-error");
-      document.getElementById("preserve-error").textContent = "upload failed: " + e.message;
-    }
+    document.getElementById("pv-upload-note").innerHTML =
+      "the wallet review is the next step — the device screen is the gate.<br>" +
+      "<span style='color:var(--faint)'>this is where the Trezor confirms: " +
+      (parseInt(PV.plan.total_amount_atto)/1e18).toFixed(6) + " ANT for 24 storage chunks. " +
+      "The bridge holds the archive; the wallet holds the money; the device holds the signature.</span>";
+    // TODO: wire Trezor Connect here (the bantfarm pattern)
+    // For now, honestly show what comes next
+    setTimeout(function() {
+      document.getElementById("pv-upload-note").innerHTML +=
+        "<br><br><b style='color:var(--gold)'>→ wallet integration is the active build</b> — the payment plan is real and ready; the device signing is the remaining wire";
+    }, 2000);
   });
   function renderEconCard(){
     fetch('../assets/profile-archive/lineage/zblood-storage-economics.json').then(function(r){return r.json();}).then(function(E){

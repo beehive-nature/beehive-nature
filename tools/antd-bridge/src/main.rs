@@ -10,6 +10,7 @@
 // receives the payment structure; the bridge holds the chunks for finalization.
 
 use axum::{extract::State, http::StatusCode, routing::{get, post}, Json, Router};
+use tower_http::cors::CorsLayer;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::path::PathBuf;
@@ -220,7 +221,8 @@ async fn main() {
         .route("/health", get(health))
         .route("/v1/upload/prepare", post(prepare))
         .route("/v1/upload/finalize", post(finalize))
-        .with_state(state);
+        .with_state(state)
+        .layer(CorsLayer::permissive());
 
     let port: u16 = std::env::args()
         .nth(1)
