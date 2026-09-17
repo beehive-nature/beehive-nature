@@ -157,7 +157,32 @@ footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint
 </div>
 <div class="econcard" id="econcard" hidden>
   <b>⬡ this family archive's storage receipt</b> — <span id="econ-line">…</span><br>
-  <span class="states" id="econ-states">…</span>
+  <span class="states" id="econ-states">…</span><br>
+  <button id="preservebtn" type="button" style="margin-top:8px;background:var(--gold);border:0;color:#152016;border-radius:8px;padding:9px 16px;font:650 11.5px 'IBM Plex Mono',monospace;cursor:pointer">⬡ preserve this archive</button>
+</div>
+<div id="preservepanel" hidden style="margin-top:12px;border:1px solid var(--gold);border-radius:14px;padding:16px;background:var(--panel)">
+  <div style="font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold)">preserve this family archive</div>
+  <div id="preserve-step" style="margin-top:10px;color:var(--dim);font-size:11.5px;line-height:1.8">checking the preservation service…</div>
+  <div id="preserve-review" hidden>
+    <div style="margin-top:10px;display:grid;gap:6px;font-size:11px;color:var(--dim)">
+      <div><b style="color:var(--ink)">edition:</b> <span id="pv-edition"></span></div>
+      <div><b style="color:var(--ink)">scope:</b> public family experience — living persons redacted, IDs pseudonymized</div>
+      <div><b style="color:var(--ink)">route:</b> Autonomi (ANT) — permanent, retrieval-free</div>
+      <div><b style="color:var(--ink)">storage:</b> <span id="pv-storage" style="color:var(--gold)"></span> · <b style="color:var(--ink)">gas:</b> <span id="pv-gas" style="color:var(--gold)"></span></div>
+      <div><b style="color:var(--ink)">bounds:</b> ≤ 3.2 ANT + ≤ 0.0002 ETH — enforced, not printed</div>
+      <div style="color:var(--faint);font-size:10px" id="pv-qual"></div>
+    </div>
+    <button id="pv-approve" type="button" style="margin-top:12px;background:var(--gold);border:0;color:#152016;border-radius:8px;padding:10px 18px;font:650 12px 'IBM Plex Mono',monospace;cursor:pointer">approve preservation</button>
+    <button id="pv-cancel" type="button" style="margin-left:8px;background:none;border:1px solid var(--line);color:var(--dim);border-radius:8px;padding:10px 14px;font:11px 'IBM Plex Mono',monospace;cursor:pointer">cancel</button>
+  </div>
+  <div id="preserve-progress" hidden style="margin-top:12px;color:var(--dim);font-size:11px">
+    <span style="color:var(--gold)">⬡</span> uploading to the Autonomi network… <span id="pv-upload-note" style="color:var(--faint)">(the service handles the transaction; no terminal, no manual steps)</span>
+  </div>
+  <div id="preserve-receipt" hidden style="margin-top:12px">
+    <div style="color:var(--verified);font-size:12px;font-weight:600">✓ preservation receipt</div>
+    <div id="pv-receipt-body" style="margin-top:6px;font-size:10.5px;color:var(--dim);line-height:1.8"></div>
+  </div>
+  <div id="preserve-error" hidden style="margin-top:12px;color:var(--rose);font-size:11px"></div>
 </div>
 <div class="searchout" id="qout"></div>
 <div class="lenses" id="lenses">
@@ -279,6 +304,71 @@ footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint
   }
 
   // ── the live storage receipt card: states honest, five-way distinct ─────
+  // ── the preserve flow: review → approve → upload → receipt, all in the UI ─
+  var PV = { service: "http://127.0.0.1:8794" };
+  function pvShow(id) {
+    ["preserve-step", "preserve-review", "preserve-progress", "preserve-receipt", "preserve-error"].forEach(function(s) {
+      document.getElementById(s).hidden = s !== id;
+    });
+  }
+  document.getElementById("preservebtn").addEventListener("click", async function() {
+    document.getElementById("preservepanel").hidden = false;
+    document.getElementById("preservepanel").scrollIntoView({ behavior: "smooth" });
+    pvShow("preserve-step");
+    document.getElementById("preserve-step").textContent = "checking the preservation service…";
+    try {
+      const st = await fetch(PV.service + "/api/preserve/status").then(r => r.json());
+      if (!st.keyInEnv) {
+        document.getElementById("preserve-step").innerHTML =
+          "the preservation service is running but needs its spending credential.<br>" +
+          "<span style='color:var(--faint)'>the founder starts the service once (SECRET_KEY in its environment) — " +
+          "the key never enters this page, this chat, or any repository. After the service starts, " +
+          "everything happens here in the archive.</span>";
+        return;
+      }
+      // service has the key — fetch a fresh quote
+      const q = await fetch(PV.service + "/api/preserve/quote").then(r => r.json());
+      if (q.error) { pvShow("preserve-error"); document.getElementById("preserve-error").textContent = q.error; return; }
+      document.getElementById("pv-edition").textContent = "manifest 440b502a… · 20,537 files · 62.1 MB";
+      document.getElementById("pv-storage").textContent = q.storageANT.toFixed(6) + " ANT";
+      document.getElementById("pv-gas").textContent = q.gasETH.toFixed(6) + " ETH";
+      document.getElementById("pv-qual").textContent = q.qualifications + " · confidence: " + q.confidence;
+      PV.quote = q;
+      pvShow("preserve-review");
+    } catch (e) {
+      document.getElementById("preserve-step").innerHTML =
+        "the preservation service is not running on this machine.<br>" +
+        "<span style='color:var(--faint)'>start it: node tools/genealogy/preserve-service.mjs (with SECRET_KEY in the environment — " +
+        "one gesture by the founder; the key stays in the service's process, never in the page)</span>";
+    }
+  });
+  document.getElementById("pv-cancel").addEventListener("click", function() {
+    document.getElementById("preservepanel").hidden = true;
+  });
+  document.getElementById("pv-approve").addEventListener("click", async function() {
+    if (!PV.quote) return;
+    pvShow("preserve-progress");
+    document.getElementById("pv-upload-note").textContent = "(uploading the exact approved bytes — sha256 fec5fba8…)";
+    try {
+      const receipt = await fetch(PV.service + "/api/preserve/upload", { method: "POST" }).then(r => r.json());
+      if (receipt.error) {
+        pvShow("preserve-error");
+        document.getElementById("preserve-error").textContent = receipt.error + (receipt.action ? " — " + receipt.action : "");
+        return;
+      }
+      document.getElementById("pv-receipt-body").innerHTML =
+        "<b>uploaded at:</b> " + receipt.uploadedAt + "<br>" +
+        "<b>artifact:</b> sha256 " + receipt.artifactSha256.slice(0, 16) + "…<br>" +
+        "<b>client:</b> " + receipt.clientVersion + "<br>" +
+        "<b>result:</b> <span style='color:var(--cyan)'>" + JSON.stringify(receipt.result).slice(0, 200) + "</span><br>" +
+        "<span style='color:var(--faint)'>the receipt is banked automatically in ETERNALIZATION-RECEIPT.json — no manual transfer</span>";
+      pvShow("preserve-receipt");
+      renderEconCard(); // refresh the live card
+    } catch (e) {
+      pvShow("preserve-error");
+      document.getElementById("preserve-error").textContent = "upload failed: " + e.message;
+    }
+  });
   function renderEconCard(){
     fetch('../assets/profile-archive/lineage/zblood-storage-economics.json').then(function(r){return r.json();}).then(function(E){
       var card=document.getElementById('econcard');if(!card)return;card.hidden=false;
