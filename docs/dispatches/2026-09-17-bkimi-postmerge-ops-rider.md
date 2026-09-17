@@ -57,3 +57,49 @@ harness publishes final text vs. defers to a self-posting tool call.
    (non-trivial) turn replies → kill manual 1036 → supervised path canonical.
 2. Kimi hallucinated-receipt lane: needs its own claim (likely: purge/rotate the poisoned
    session memory; test with a concrete work prompt, not "reply once").
+
+## PUBLICATION-CONTRACT INVESTIGATION (foundation laid, advisor-framed)
+
+**The law (founder/advisor ruling, standing): an agent may REPORT that it published
+something, but only relay/network evidence may promote the publication claim.**
+`model says "sent"` ≠ `kind:9 constructed` ≠ `relay accepted` ≠ `relay persisted` ≠
+`client rendered`. An event ID invented by a model has zero evidentiary weight until
+the relay proves the event exists. (Same discipline as claim-evidence-boundary and the
+bPay invoice≠settlement≠receipt ladder.)
+
+**Causal-wording discipline (banked):** both observed hallucinated-receipt/no-publication
+cases OCCURRED ON trivial reply-only prompts — triviality is NOT established as the cause;
+candidate seams: tool availability, context/session state, kimi behavior, harness output
+suppression, or an interaction.
+
+**Trace foundation (from DEBUG harness logs + wires, no model prose accepted as evidence):**
+- 1.3-second turn (19:18:12.07 claim → 19:18:13.36 return ok): ZERO publication-decision
+  lines, ZERO observer-frames, ZERO NIP-AM metric warns between claim and return — the
+  harness completed a turn with no publishable assistant output at all. Relay window
+  confirms: ping + 👀/💬 + kind:5 cleanup, nothing else.
+- 2-minute turn (18:56 claim → 18:58:27 return ok; kimi session 946f919c): kimi wire
+  carries think+text final whose text NARRATES a self-post ("my reply: e40f6e76…") —
+  that event does not exist on the relay. kimi's own `turn.ended outcome="failed"` while
+  the harness logged `agent_returned outcome="ok"` — an ACP-level classification mismatch.
+- Source structure (buzz-acp @c1e7df61): the harness owns publication —
+  `buzz_sdk::build_message` → sign → `RestClient::submit_event` (POST /events) is the
+  canonical reply path; there is no model-driven suppression of the final text in code
+  found so far. Both failures look like "harness never received a publishable final"
+  (instant empty return; errored ACP turn misclassified ok), not "decided not to publish".
+
+**Contract answer (provisional, for the bounded claim):** single-owner —
+`model returns text → harness publishes`. A model claiming "I posted via CLI" is merely
+content (and in the observed case, false content). If self-publishing tools are ever
+intended, the harness must require tool-evidenced publication before suppressing its own
+final output. The open work for the claim: (a) why the ACP error was classified ok;
+(b) why kimi short-circuited/errored (workspace/runtime lane — STOP rule: if
+`runtime.not_found` recurs on the supervised instance, do not cycle processes; diagnose);
+(c) rstan251's loud-silence ask applies verbatim: a turn ending with zero kind:9 and no
+error should WARN.
+
+**Supervised acceptance gate (restated, advisor form):** Desktop-supervised harness on
+e7f4d1e2 → healthy kimi runtime → ONE normal substantive turn from an existing legitimate
+bounded read-only obligation (not a synthetic ping) → harness obtains final text → exactly
+one canonical kind:9 → relay event exists → no fabricated receipt accepted → observer
+warn-free → client renders → THEN retire manual pid 1036. Key custody: env-only handoff is
+INTERIM; durable target is keystore/capability custody with no raw key transport.
