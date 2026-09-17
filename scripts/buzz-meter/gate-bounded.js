@@ -63,7 +63,7 @@ function admitFresh(cb) {
   if (admitSnap && (Date.now() - admitSnap.fetchedAtMs) < (admitSnap.ttl_s * 1000) - margin) {
     return cb(null, admitSnap);
   }
-  const req = http.get({ host: SERVE_HOST, port: SERVE_PORT, path: '/v1/pricing/admit', timeout: ADMIT_TIMEOUT_MS }, (r) => {
+  const req = http.get({ host: SERVE_HOST, port: SERVE_PORT, path: '/v1/pricing/admit', timeout: ADMIT_TIMEOUT_MS, agent: false }, (r) => {
     let b = '';
     r.on('data', (c) => { b += c; });
     r.on('end', () => {
