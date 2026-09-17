@@ -14,8 +14,8 @@
 import { spawnSync } from "node:child_process";
 import { mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { createHash } from "node:crypto";
-import { pathToFileURL } from "node:url";
-const MOD = process.argv[2] || new URL("../lib/bpay-invoice-generic.mjs", import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, "$1");
+import { pathToFileURL, fileURLToPath } from "node:url";
+const MOD = process.argv[2] || fileURLToPath(new URL("./lib/bpay-invoice-generic.mjs", import.meta.url));
 const TMP = process.argv[3] || "./tmp-inv1-oracle";
 const {
   buildGenericInvoice, validateGenericInvoice, voidGenericInvoice,
@@ -157,7 +157,7 @@ const art = TMP + "/invoice.json";
 writeFileSync(art, JSON.stringify(doc));
 const child = spawnSync(process.execPath, ["--input-type=module", "-e", `
   import { readFileSync, writeFileSync, unlinkSync } from "node:fs";
-  import { pathToFileURL } from "node:url";
+  import { pathToFileURL, fileURLToPath } from "node:url";
   const { validateGenericInvoice } = await import(pathToFileURL(process.argv[1]).href);
   const rates = process.argv[3] + "/rates.json";
   writeFileSync(rates, JSON.stringify({ ant: "9.9", mutated: true }));
