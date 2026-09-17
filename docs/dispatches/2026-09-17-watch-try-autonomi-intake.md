@@ -28,15 +28,22 @@ prepared to the app's real schema, actual playback verified, acceptance receipt 
 ## 1. Original file — identity & forensics
 
 - `try_autonomi.mp4` — 214,091,829 bytes (204 MiB), unchanged in Downloads; no copy,
-  no derivative, no transcode produced (H.264+AAC MP4 is the native browser/TV baseline —
-  "transcode only if needed" resolves to NOT NEEDED).
+  no derivative, no transcode produced ("transcode only if needed" resolves to NOT NEEDED
+  NOW). FOUNDER-CORRECTED WORDING (2026-09-17): the container/codecs are broadly
+  supported and BROWSER playback is proven — Google TV / W@tch DEVICE playback remains
+  UNVERIFIED for this unusual source (3318×2132 ~60 fps H.264 Main@L5.1; clean hardware
+  decode must not be assumed anywhere). If the Streamer refuses it or performs poorly,
+  the cure is a DERIVED COMPATIBILITY RENDITION with the original kept canonical —
+  never a replacement, never a re-encode of the provenance anchor.
 - SHA-256: `338b486874f6a8f86afe6537143548fb99594038b9ee7de918794db9e744207e` <!-- PUBLIC-CONSTANT: sha256 content pin, community video intake -->
 - Container: MP4 (`isom`/`iso2`/`avc1`/`mp41`, probe_score 100).
 - Video: H.264 Main profile @ L5.1, 3318×2132, yuv420p, BT.709, 60 fps nominal
   (avg 59.96), 3147 frames declared, ~32.5 Mbps.
 - Audio: AAC-LC 48 kHz MONO 127 kb/s (2495 frames).
-- Duration 52.488 s; overall ~32.6 Mbps; `Core Media` handlers on both streams →
-  recorded with Apple's capture stack (consistent with a desktop browser-demo recording).
+- Duration 52.488 s; overall ~32.6 Mbps; `Core Media` handlers on both streams —
+  metadata is CONSISTENT WITH an Apple/Core Media-produced screen recording; no more
+  definitive origin identifier (device/software) is present in the file
+  (founder-corrected wording).
 - Decode integrity: `ffmpeg -v error -xerror -map 0:v:0 -f null -` → **exit 0, zero
   error lines** — every declared frame decodes.
 
@@ -144,3 +151,46 @@ original Bux MP4 (Downloads, byte-exact, §1 hash) → **[DONE]** browser playba
 (§2) → **[STAGED]** W@tch intake draft on the Streamer (§5; schema-valid payload ready
 in §3) → **[NOT STARTED]** ANT storage → derived address → playable W@tch entry with
 credits re-keyed (§6).
+
+## 8. Founder review 2026-09-17 — corrections applied + STATE BOARD banked
+
+Review verdict: good execution, two wordings tightened (both applied in §1 above,
+fix-forward — history unrewritten):
+
+1. "natively playable everywhere" → **"container/codecs broadly supported + browser
+   playback proven; Google TV/W@tch device playback UNVERIFIED"** — this exact source
+   (3318×2132 ~60 fps Main@L5.1) is unusual; hardware decode on the Streamer is a
+   separate future claim. No transcode now; a DERIVED COMPATIBILITY RENDITION (original
+   stays canonical) is the cure only if the device refuses or performs poorly.
+2. "Core Media handlers mean an Apple screen recording" → **"metadata CONSISTENT WITH an
+   Apple/Core Media-produced screen recording"** — no definitive origin identifier
+   exists in the file.
+
+Architecture discovery ratified by the founder (the lane's key finding):
+
+> **W@tch intake draft ≠ playable media object. Playable W@tch media requires an
+> Autonomi address.**
+
+The Bux video is thereby a clean real-world test of the full designed chain:
+
+source media → provenance/hash → W@tch intake → Autonomi quote → PricingCommitment /
+invoice → bounded authorization → ANT upload → DataMap/address → W@tch playable object →
+independent retrieval → playback verification
+
+STATE BOARD (founder-banked 2026-09-17, supersedes the chain line above as the lane's
+claim register):
+
+- W@tch Bux demo — INTAKE/PREPARATION: **GREEN**
+- browser playback: **GREEN**
+- TV playback: **NOT YET**
+- ANT quote: **NEXT** (QUOTE ONLY — order docketed at
+  `docs/dispatches/2026-09-17-zblood-quote-order-try-autonomi.md`)
+- ANT upload/address: **NOT YET**
+- W@tch playable library item: **NOT YET**
+- independent ANT retrieval/playback: **NOT YET**
+
+Acceptance ceremony the board sets up (founder's words): W@tch on Google TV fetches from
+ANT and plays Bux's demo while we verify actual bytes/content — "a video demonstrating
+direct browser access to Autonomi, itself preserved on Autonomi and played through
+W@tch." When WebRTC Direct ships, the SAME media object can run W@tch-gateway route vs
+direct browser/network route without changing content identity.
