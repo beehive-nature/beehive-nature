@@ -90,6 +90,48 @@ proof("P3 mutation changes identity", mutated.identity.contentDigest !== a.ident
 proof("P7 job vs content identity", a.invoiceId === mutated.invoiceId && a.identity.jobId === mutated.identity.jobId && a.identity.contentDigest !== mutated.identity.contentDigest,
   `job-bound id stays constant across versions (${a.invoiceId}) for routing/recovery; content identity distinguishes them — additive, never a replacement`);
 
+// ── A2q repair evidence (oracle return, 2026-09-17): quotes are a SET ──────
+// Semantic law: canonicalize sorts quote collections by quote_hash before
+// identity derivation; duplicates are unlawful (unique keys — a repeated
+// quote would inflate Σ owed). Both digests agree on set semantics.
+const permInput = () => ({ ...input(), lines: [
+  { kind: "storage", asset: "ANT", quotes: [
+    { quote_hash: "qh-d", amount_atto: "1000000000000001" },
+    { quote_hash: "qh-a", amount_atto: "1000000000000002" },
+    { quote_hash: "qh-c", amount_atto: "1000000000000003" },
+    { quote_hash: "qh-b", amount_atto: "1000000000000004" } ] },
+  input().lines[1],
+] });
+const perms = (arr) => arr.length <= 1 ? [arr] : arr.flatMap((x, i) => perms([...arr.slice(0, i), ...arr.slice(i + 1)]).map((p) => [x, ...p]));
+const allPerms = perms(permInput().lines[0].quotes); // 4! = 24 exhaustive
+const permDigests = new Set(allPerms.map((q) => buildGenericInvoice({ ...permInput(), lines: [{ ...permInput().lines[0], quotes: q }, permInput().lines[1]] }).identity.contentDigest));
+proof("A2q-1 permutation stability", permDigests.size === 1 && [...permDigests][0] === buildGenericInvoice(permInput()).identity.contentDigest,
+  `all 24 permutations of the same 4-quote set derive ONE canonical content identity (${[...permDigests][0].slice(0, 17)}…) — set semantics at identity derivation`);
+const permDoc = buildGenericInvoice(permInput());
+const shuffledQuotes = JSON.parse(JSON.stringify(permDoc));
+shuffledQuotes.lines[0].quotes = [...shuffledQuotes.lines[0].quotes].reverse();
+proof("A2q-4 digest agreement", contentDigest(shuffledQuotes) === permDoc.identity.contentDigest
+  && (() => { const m = JSON.parse(JSON.stringify(permDoc)); m.lines[0].quotes = [...m.lines[0].quotes].reverse(); return true; })(),
+  "a document received with quotes enumerated differently re-derives the SAME contentDigest (canonicalize sorts) and its commitmentDigest was already order-free — the two digests now agree on collection semantics");
+const valueChanged = buildGenericInvoice({ ...permInput(), lines: [
+  { ...permInput().lines[0], quotes: permInput().lines[0].quotes.map((q) => q.quote_hash === "qh-b" ? { ...q, amount_atto: "9999999999999999" } : q) },
+  permInput().lines[1],
+] });
+proof("A2q-2 value sensitivity", valueChanged.identity.contentDigest !== permDoc.identity.contentDigest,
+  "same quote hashes with one economically meaningful amount changed → DIFFERENT identity (set semantics did not blunt mutation sensitivity)");
+const dupSame = attempt(() => buildGenericInvoice({ ...permInput(), lines: [
+  { ...permInput().lines[0], quotes: [...permInput().lines[0].quotes, { quote_hash: "qh-a", amount_atto: "1000000000000002" }] }, permInput().lines[1],
+] }) && true);
+const dupDiff = attempt(() => buildGenericInvoice({ ...permInput(), lines: [
+  { ...permInput().lines[0], quotes: [...permInput().lines[0].quotes, { quote_hash: "qh-a", amount_atto: "7" }] }, permInput().lines[1],
+] }) && true);
+const dupValidate = JSON.parse(JSON.stringify(permDoc));
+dupValidate.lines[0].quotes.push({ quote_hash: dupValidate.lines[0].quotes[0].quote_hash, amount_atto: "0" });
+dupValidate.identity = { ...dupValidate.identity, contentDigest: contentDigest(dupValidate) };
+const dupValidatePasses = attempt(() => validateGenericInvoice(dupValidate) && true);
+proof("A2q-3 duplicate law explicit", !dupSame.ok && !dupDiff.ok && !dupValidatePasses.ok,
+  `duplicates refused at build (same-amount: ${!dupSame.ok}; different-amount: ${!dupDiff.ok}) AND at validation even with the content digest recomputed (${!dupValidatePasses.ok ? dupValidatePasses.err.slice(0, 70) : "ACCEPTED — DEFECT"}) — a quote set has unique keys`);
+
 // INV-1.5-B probe shape (the frozen battery's law, on this impl; the frozen
 // probe's literal `!sameIdDiffBytes` clause encoded "the id is a content
 // function" — the charter keeps the job-bound id BY DESIGN and moves

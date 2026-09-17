@@ -27,14 +27,34 @@ export const LINE_STATES = ["issued", "void", "settled"];
 
 // ── canonical serialization (INV-1.5) ───────────────────────────────────────
 // Deterministic by construction: objects serialize with lexicographically
-// sorted keys, recursively; arrays preserve order (order is content); no
-// whitespace; numbers are NOT canonicalized (monetary fields MUST be strings
-// — validated below — so JSON number formatting never enters canonical bytes).
-export function canonicalize(value) {
-  if (Array.isArray(value)) return value.map(canonicalize);
+// sorted keys, recursively; arrays preserve order (order is content) with
+// ONE documented class exception; no whitespace; numbers are NOT
+// canonicalized (monetary fields MUST be strings — validated below — so
+// JSON number formatting never enters canonical bytes).
+//
+// SEMANTIC LAW (A2q ruling, 2026-09-17): a QUOTE COLLECTION is economically
+// a SET. The reference's planDigest sorts quote hashes; the P1 recovery
+// proof compares quote SETS across bridge death; no law assigns meaning to
+// enumeration order. Therefore any array under a `quotes` key whose entries
+// carry `quote_hash` is canonicalized SORTED by quote_hash (lexicographic)
+// BEFORE identity is derived — every permutation of the same quote set
+// yields identical canonical bytes and identity. Corollary (the duplicate
+// law): a set has unique keys — a line's quotes must carry PAIRWISE-DISTINCT
+// quote_hash; duplicates are refused at build AND validation (a repeated
+// quote would inflate Σ owed — never a lawful set).
+export function canonicalize(value, key = null) {
+  if (Array.isArray(value)) {
+    const items = value.map((v) => canonicalize(v));
+    if (key === "quotes"
+      && items.length
+      && items.every((v) => v && typeof v === "object" && typeof v.quote_hash === "string")) {
+      items.sort((x, y) => (x.quote_hash < y.quote_hash ? -1 : x.quote_hash > y.quote_hash ? 1 : 0));
+    }
+    return items;
+  }
   if (value && typeof value === "object") {
     const out = {};
-    for (const k of Object.keys(value).sort()) out[k] = canonicalize(value[k]);
+    for (const k of Object.keys(value).sort()) out[k] = canonicalize(value[k], k);
     return out;
   }
   return value;
@@ -93,12 +113,20 @@ export function buildGenericInvoice(input) {
     if (!l.asset || typeof l.asset !== "string") throw new Error("each line names exactly one asset");
     if (!Array.isArray(l.quotes) || !l.quotes.length)
       throw new Error(`line ${l.asset}: the quote set must be CARRIED (INV-1.1) — local-only job state is not a commitment`);
+    const seenHashes = new Set();
     for (const q of l.quotes) {
       if (!q.quote_hash || !ATTO_RE.test(String(q.amount_atto)))
         throw new Error(`line ${l.asset}: quotes carry {quote_hash, amount_atto} (amount a decimal string)`);
+      if (seenHashes.has(q.quote_hash))
+        throw new Error(`line ${l.asset}: duplicate quote_hash ${q.quote_hash} — a quote set has unique keys (A2q duplicate law)`);
+      seenHashes.add(q.quote_hash);
     }
     const amountAtto = sumAtto(l.quotes).toString();
-    const out = { kind: l.kind || "service", asset: l.asset, amountAtto, quotes: l.quotes.map((q) => ({ quote_hash: q.quote_hash, amount_atto: String(q.amount_atto) })) };
+    // stored SORTED by quote_hash: set semantics at rest as well as at
+    // identity-derivation (canonicalize also sorts — storage sorting keeps
+    // the serialized artifact itself permutation-stable)
+    const sortedQuotes = [...l.quotes].sort((x, y) => (x.quote_hash < y.quote_hash ? -1 : x.quote_hash > y.quote_hash ? 1 : 0));
+    const out = { kind: l.kind || "service", asset: l.asset, amountAtto, quotes: sortedQuotes.map((q) => ({ quote_hash: q.quote_hash, amount_atto: String(q.amount_atto) })) };
     if (l.ceilingAtto !== undefined) out.ceilingAtto = String(l.ceilingAtto);
     return out;
   });
@@ -195,6 +223,13 @@ export function validateGenericInvoice(doc, opts = {}) {
     need(Array.isArray(line.quotes) && line.quotes.length >= 1,
       `line ${line.asset}: the quote set must be CARRIED in the canonical bytes — a commitment living only on the issuing machine is not retrievable (INV-1.1)`);
     if (Array.isArray(line.quotes) && line.quotes.length) {
+      const seenHashes = new Set();
+      let dup = null;
+      for (const q of line.quotes) {
+        if (seenHashes.has(q.quote_hash)) { dup = q.quote_hash; break; }
+        seenHashes.add(q.quote_hash);
+      }
+      need(dup === null, `line ${line.asset}: duplicate quote_hash ${dup} — a quote set has unique keys (A2q duplicate law; survives digest recomputation)`);
       const derived = sumAtto(line.quotes).toString();
       need(line.amountAtto === derived,
         `line ${line.asset}: owed ${line.amountAtto} ≠ Σ carried quotes ${derived} — the amount does not re-derive from the commitment (INV-1.1)`);
