@@ -44,3 +44,16 @@ Person shape: `gid` ("pid:dbid:treeId"), `Names[{g, s}]`, `Genders[{g}]`, `Event
 - the corrections layer (founder attestations override provider flags — Donna's living-flag is already corrected in BNR while still wrong in BOTH providers)
 
 **Next step when the founder calls it:** `ancestry-adapter.mjs` — the same harvest/walk/import triple, tested against the wire shapes recorded here.
+
+
+---
+
+## DATED CORRECTION · 2026-09-17 (founder review — original preserved above, five statements corrected)
+
+1. **OWNERSHIP:** the 'church owns this site' framing is corrected — FamilySearch is a service of the Church of Jesus Christ of Latter-day Saints; Ancestry is a separate company whose 2020 acquisition was by Blackstone-managed funds. The genuine connection is collaboration and data exchange, not shared Church ownership. The founder's phrase reflected family shorthand, not a corporate fact.
+2. **INDEPENDENCE:** 'two independent attestations' is corrected to **two provider observations** — they may originate from the same family research, copied tree, or historical document. FamilySearch explicitly supports importing/comparing with Ancestry; duplication across platforms is expected, not proof of independence. The honest label: **'Appears in FamilySearch and Ancestry · underlying source independence not yet assessed.'** Marilyn's research represented in two places stays Marilyn's contribution, not two confirmations.
+3. **NAME AUTHORITY:** 'the accurate name' is corrected — a provider's name field does not decide the founder's identity. All observed name forms are preserved with spelling, source, and context; the founder's chosen display name is his to specify. The Ancestry surname ordering (Sutphen last) is an observation, not a ruling.
+4. **DONNA PROVENANCE:** the survey's 'same wrong living flag in both providers' is corrected — the committed correction record states Donna was **already deceased in the FamilySearch record** (1925–1988); the founder attestation for her was confirmatory. The Ancestry discrepancy (donna flagged Living there) is a SEPARATE observation recorded independently; it does not rewrite what FamilySearch supplied. The founder's confirmation that all four grandparents are deceased stands.
+5. **COVERAGE:** 'complementary halves' and 'Ancestry is shallow' are corrected to **'complementary coverage in the inspected family-view windows'** (14 and 7 persons in the sampled views) — not established as the complete trees; 'no structural conflict' means **none observed among the sampled shared relationships**.
+
+Also carried from the same review: hints and ThruLines are research leads, not verified parentage (Ancestry itself warns inaccurate trees produce inaccurate ThruLines); a ThruLines field in a response never promotes a relationship.
