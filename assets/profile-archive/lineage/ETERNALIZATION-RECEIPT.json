@@ -22,12 +22,48 @@
    "state": "quoted (display-only, priced_sample)",
    "client": "ant 0.3.1 on the founder's seat",
    "queriedAt": "2026-09-17T00:14:10Z",
-   "raw": { "file_size": 80998400, "chunk_count": 23, "storage_cost_atto": "3106827489257812500", "estimated_gas_cost_wei": "150000000000000", "payment_mode": "single", "confidence": "priced_sample" },
-   "computed": { "storageANT": 3.106827, "storageUSD": 0.1081, "gasETH": 0.00015, "gasUSD": 0.3628, "totalUSD": 0.4710 },
-   "tokenReferences": { "ANT/USD": 0.03480868, "ETH/USD": 2418.98, "at": "2026-09-17T00:15:43Z", "source": "coingecko" },
-   "qualifications": ["display-only — true cost reconciles at payment", "sampled confidence class", "storage and gas are separate line items"]
+   "raw": {
+    "file_size": 80998400,
+    "chunk_count": 23,
+    "storage_cost_atto": "3106827489257812500",
+    "estimated_gas_cost_wei": "150000000000000",
+    "payment_mode": "single",
+    "confidence": "priced_sample"
+   },
+   "computed": {
+    "storageANT": 3.106827,
+    "storageUSD": 0.1081,
+    "gasETH": 0.00015,
+    "gasUSD": 0.3628,
+    "totalUSD": 0.471
+   },
+   "tokenReferences": {
+    "ANT/USD": 0.03480868,
+    "ETH/USD": 2418.98,
+    "at": "2026-09-17T00:15:43Z",
+    "source": "coingecko"
+   },
+   "qualifications": [
+    "display-only — true cost reconciles at payment",
+    "sampled confidence class",
+    "storage and gas are separate line items"
+   ]
   },
-  "purchase": { "state": "BLOCKED — spending credential required", "blocker": "the ant client needs SECRET_KEY (the spending key); the founder supplies it at the box or exports it to this seat", "command": "SECRET_KEY=<key> ant --json file upload C:/Users/travi/family-lineage/pkg3.tar" },
+  "purchase": {
+   "state": "BLOCKED — spending credential required",
+   "blocker": "the ant client needs SECRET_KEY (the spending key); the founder supplies it at the box or exports it to this seat",
+   "command": "In the FOUNDER'S OWN TERMINAL (key never in chat, never in the repo, never given to an agent): set SECRET_KEY without shell history, verify wallet address + balance, then: ant --json file upload C:/Users/travi/family-lineage/pkg3.tar",
+   "expectedSafeOutput": [
+    "transaction/payment receipt",
+    "resulting ANT address/reference (the content address)",
+    "actual ANT charged",
+    "actual gas charged",
+    "client version",
+    "timestamp",
+    "confidence/finality information"
+   ],
+   "scrubLaw": "Scrub anything resembling a private key before sharing — zBlood receives ONLY the non-secret output"
+  },
   "state": "quoted-not-purchased"
  },
  "whereIsIt": {
@@ -62,5 +98,69 @@
  },
  "theReusablePattern": "This receipt is the seed of 'immortalize your own family archive': preserve → approve → quote → purchase → upload → retrieve fresh → hash-verify → restore-and-prove. Each state is distinct; each transition is receipted; the family's experience, not just the data, must grow back.",
  "generatedAt": "2026-09-17T00:20Z",
- "generatedBy": "zBlood seat (lane/zcode-lineage-import @20cc777b)"
+ "generatedBy": "zBlood seat (lane/zcode-lineage-import @20cc777b)",
+ "spendAuthorization": {
+  "law": "Two different assets, two separate bounds — never collapsed into one dollar figure. Any artifact/hash change or either bound exceeded → STOP and requote/reapprove.",
+  "artifact": "pkg3.tar",
+  "sha256": "fec5fba8360d9de211c3b6c5966e93bc2462133099f651891d500b6a2ea98b9b",
+  "maxStorageANT": 3.2,
+  "maxGasETH": 0.0002,
+  "quoteReferenced": {
+   "storageANT": 3.106827,
+   "gasETH": 0.00015,
+   "at": "2026-09-17T00:14:10Z",
+   "confidence": "priced_sample"
+  },
+  "authorizedBy": "founder order 2026-09-17 (this message)",
+  "stopConditions": [
+   "sha256(pkg3.tar) ≠ fec5fba8… at upload time",
+   "actual storage charge > 3.2 ANT",
+   "actual gas > 0.0002 ETH",
+   "client reports a different artifact or chunk count (23 expected)"
+  ]
+ },
+ "progression": [
+  {
+   "state": "preserved",
+   "at": "2026-09-16T22:35:14Z"
+  },
+  {
+   "state": "approved",
+   "at": "2026-09-16T22:36:15Z",
+   "by": "founder",
+   "manifest": "440b502a…"
+  },
+  {
+   "state": "quoted",
+   "at": "2026-09-17T00:14:10Z",
+   "client": "ant 0.3.1",
+   "confidence": "priced_sample"
+  },
+  {
+   "state": "spend-authorized",
+   "at": "2026-09-17T00:30Z",
+   "by": "founder order (separated bounds: ≤3.2 ANT + ≤0.0002 ETH)"
+  },
+  {
+   "state": "purchased",
+   "at": null,
+   "note": "PENDING — founder performs the single signing gesture in his own terminal; zBlood receives only the non-secret output"
+  },
+  {
+   "state": "uploaded",
+   "at": null
+  },
+  {
+   "state": "retrieved",
+   "at": null
+  },
+  {
+   "state": "hash-verified",
+   "at": null
+  },
+  {
+   "state": "restoration-verified",
+   "at": null
+  }
+ ]
 }
