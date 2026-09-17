@@ -491,6 +491,15 @@ jobs:
         if: always()
         working-directory: e2e
         run: node --test comprehension.test.mjs
+      # The Engine Room data loop (zCode, 2026-09-17): follow-one-file at three
+      # depths on stack.html. Proves register switches are presentation-only
+      # (ZERO network/storage side-effects, same factual constants), keyboard +
+      # reduced-motion paths, mechanically-derived evidence card vs the intake
+      # receipt, honest degrade, ru corpus render, 390px + touch floor.
+      - name: Engineflow — data-loop register inertness + evidence card (rendered)
+        if: always()
+        working-directory: e2e
+        run: node engineflow.browser.mjs
       # fleet-pixels: every chart-bearing hosted surface must DRAW (pixels
       # read back from the canvas, not merely load). fleet-bus: the
       # localStorage data bus asserted both directions (same origin reads;
