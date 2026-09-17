@@ -461,6 +461,19 @@ jobs:
         if: always()
         working-directory: e2e
         run: node bpay-phase-b-chooser.mjs
+      # bData (My Data) gate (UX architecture correction, founder 2026-09-17):
+      # the organism-level data surface — mechanical identity from the
+      # reference invoice; resolved audience + VISIBLY unavailable private
+      # modes; the supersede law (commitment exists → change requires a new
+      # quote, old plan stays history); the bPay handoff (ceiling recomputed
+      # by this test, gas separate, nothing paid, wallet link); automation as
+      # a first-class policy (Ask me / within limits / Never) with
+      # append-only policy editions; the cypherpunk anatomy (8 sections)
+      # toggled by inspection depth WITHOUT touching policy; A9c held.
+      - name: bData gate — My Data owns policy, bPay holds the economics
+        if: always()
+        working-directory: e2e
+        run: node bdata-surface.mjs
       - name: Onboarding e2e (Chromium + virtual authenticator w/ PRF)
         if: always()
         working-directory: e2e
