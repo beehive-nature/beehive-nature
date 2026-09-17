@@ -21,8 +21,18 @@ crash header, honored only for authed admin callers); restart reuses the
 SAME ledger dir. Observable behavior only — no assumption about the
 process's threading model.
 
+M-REPAIR harness law (2026-09-17): the admin charge path gates on live
+door health (meter.py gate_door_health, the AV-3 seam) BEFORE the crash
+hook — a battery that never supplies a reachable door tests an impossible
+precondition and fails 1.4c without any product defect. The harness
+therefore OWNS a stub readiness door and passes it to every server it
+spawns (GATE_PROBE_URL); case 1.5 then proves the door-down arm ON
+PURPOSE: typed park, zero writes, idempotency key unconsumed, and the
+crash seam unreachable behind admission.
+
 Run:  python3 scripts/buzz-meter/test_serve_bridge.py   (exit 0 = green)
 """
+import http.server
 import json
 import os
 import socket
@@ -64,6 +74,39 @@ def free_port():
     return p
 
 
+# ── the M-REPAIR door-health precondition ───────────────────────────────────
+
+class DoorStub:
+    """A harness-owned readiness door. meter.py's probe counts ANY HTTP
+    answer (even an error status) as reachable, so this stub always
+    answering 200 makes the admission gate pass; a REFUSED port (nothing
+    listening) makes it park. Every server the battery spawns gets its
+    door state explicitly — no case rides ambient environment."""
+    def __init__(self):
+        self.httpd = None
+        self.url = None
+
+    def start(self):
+        class Handler(http.server.BaseHTTPRequestHandler):
+            def do_GET(self):
+                self.send_response(200)
+                self.end_headers()
+                self.wfile.write(b"ok")
+
+            def log_message(self, *args):
+                pass
+
+        self.httpd = http.server.HTTPServer(("127.0.0.1", 0), Handler)
+        self.url = f"http://127.0.0.1:{self.httpd.server_address[1]}/readiness"
+        threading.Thread(target=self.httpd.serve_forever, daemon=True).start()
+
+    def stop(self):
+        if self.httpd is not None:
+            self.httpd.shutdown()
+            self.httpd.server_close()
+            self.httpd = None
+
+
 def make_meter_dir(root: Path):
     """A hermetic BUZZ_METER_DIR: one key, a till-shaped rate set (freshly
     minted), an empty hash-chained ledger."""
@@ -89,7 +132,7 @@ def make_meter_dir(root: Path):
 
 
 class Server:
-    def __init__(self, root: Path, extra_env=None):
+    def __init__(self, root: Path, extra_env=None, door_url=None):
         self.root = root
         self.dir = make_meter_dir(root)
         self.port = free_port()
@@ -100,6 +143,8 @@ class Server:
             "VOUCHER_PORT": str(self.port),
             "VOUCHER_ADMIN_TOKEN": ADMIN_TOKEN,
         }
+        if door_url is not None:
+            self.env["GATE_PROBE_URL"] = door_url
         if extra_env:
             self.env.update(extra_env)
         self.proc = None
@@ -416,15 +461,77 @@ def case_1_4(srv):
        "return the original outcome; no second effect")
 
 
+# ── 1.5 door-health admission law (M-REPAIR, on purpose) ────────────────────
+
+def case_1_5(root, door):
+    """The crash hook sits DOWNSTREAM of door admission (meter.py
+    _admin_charge: gate_door_health first, _crash_hook only after the
+    durable append). A battery that never supplies a reachable door
+    therefore tests an impossible precondition — that was the 2026-09-17
+    main-red 1.4c class, reproduced here as an ASSERTION instead of an
+    accident. Door REFUSED ⇒ the charge PARKS: typed parked body, zero
+    writes, ledger bytes identical, the idempotency key UNCONSUMED (proven
+    by spending it once the door returns), and a crash-header request
+    kills NOTHING — admission runs before the crash seam. Door BACK on
+    the same ledger ⇒ the once-parked key charges for real: exactly one
+    CHARGE."""
+    refused = f"http://127.0.0.1:{free_port()}/readiness"
+    srv = Server(root, door_url=refused)
+    try:
+        srv.post_admin("/v1/admin/settle", settle_body("av1-tx-door",
+                                                       amount="5.0000"))
+        pre = srv.ledger_bytes()
+        cb = charge_body("av1-ch-parked")
+        code, body, _ = srv.post_admin("/v1/admin/charge", cb)
+        if code != 200 or not body.get("parked") \
+                or body.get("park_reason") != "door":
+            fail(f"1.5: door-down charge did not PARK typed ({code}): {body}")
+        if srv.ledger_bytes() != pre:
+            fail("1.5: parked charge mutated the ledger")
+        # the pre-repair 1.4c shape, asserted as law: a crash-header charge
+        # behind a refused door gets the PARKED answer and the process
+        # LIVES — admission precedes the crash seam, so no kill is expected
+        code, body, _ = srv.post_admin(
+            "/v1/admin/charge", charge_body("av1-ch-parked-crash"),
+            headers={"X-AV1-Crash-Before-Respond": "1"})
+        if code != 200 or not body.get("parked"):
+            fail("1.5: crash seam answered wrong with the door down — "
+                 f"admission ordering broken ({code}): {body}")
+        code, _, _ = srv.get(f"/v1/voucher/{KEY_ID}/view")
+        if code != 200:
+            fail("1.5: process unhealthy after the door-down battery")
+        # the door returns on the SAME ledger: the parked key was never
+        # consumed, so it now charges for real — exactly once
+        srv.env["GATE_PROBE_URL"] = door.url
+        srv.restart()
+        code, body, _ = srv.post_admin("/v1/admin/charge", cb)
+        if code != 200 or body.get("parked") or "event" not in body:
+            fail(f"1.5: once-parked key refused after the door returned "
+                 f"({code}): {body}")
+        evs = [json.loads(l) for l in
+               srv.ledger_bytes().decode().splitlines() if l.strip()]
+        n = sum(1 for e in evs if e.get("type") == "CHARGE"
+                and e.get("idempotency_key") == "av1-ch-parked")
+        if n != 1:
+            fail(f"1.5: {n} charges for the once-parked key — the park "
+                 "consumed the key or double-fired it")
+        ok("1.5: door-health admission law — refused door ⇒ typed park, "
+           "zero writes, key UNCONSUMED, crash seam unreachable behind "
+           "admission; door back ⇒ the same key charges exactly once")
+    finally:
+        srv.kill9()
+
+
 # ── negative control (house law) ────────────────────────────────────────────
 
-def negative_control(root):
+def negative_control(root, door):
     """A deliberately broken variant — the bridge's idempotency lookup
     skipped — MUST double-charge and be caught, proving the harness detects
     the class it claims to. (The SETTLE seam is engine-guarded by
     (voucher, tx) and survives a broken bridge; CHARGE is the seam this
     control must prove the harness can catch.)"""
-    srv = Server(root, extra_env={"AV1_BREAK_IDEMPOTENCY": "1"})
+    srv = Server(root, extra_env={"AV1_BREAK_IDEMPOTENCY": "1"},
+                 door_url=door.url)
     try:
         # seed balance, then two same-key charges against the broken variant
         srv.post_admin("/v1/admin/settle", settle_body("av1-tx-broken",
@@ -456,15 +563,21 @@ def negative_control(root):
 
 def main():
     root = Path(tempfile.mkdtemp(prefix="av1-serve-"))
-    srv = Server(root)
+    door = DoorStub()
+    door.start()
     try:
-        case_1_1(srv)
-        case_1_2(srv)
-        case_1_3(srv)
-        case_1_4(srv)
+        srv = Server(root, door_url=door.url)
+        try:
+            case_1_1(srv)
+            case_1_2(srv)
+            case_1_3(srv)
+            case_1_4(srv)
+        finally:
+            srv.kill9()
+        case_1_5(root, door)
+        negative_control(root, door)
     finally:
-        srv.kill9()
-    negative_control(root)
+        door.stop()
 
     print("\n=== AV-1 SERVE-BRIDGE — ALL PROOFS PASS ===")
     for i, p in enumerate(PASS, 1):
