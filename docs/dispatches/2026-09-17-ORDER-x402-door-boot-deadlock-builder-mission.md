@@ -68,3 +68,31 @@ ceremony order unchanged (multi-leg → AV-6a → AV-5 → AV-8 → AV-4 →
 reconciliation) using the kit/driver already on the box — grading F2/F3/F5
 bars honestly as structurally unmet on the current build unless the
 architecture seat has re-ruled them first.
+
+---
+
+## SYNC 2026-09-17 (pre-launch frontier check — do not assume, re-verify)
+
+Checked from the Gesture-D seat before this order was handed off:
+
+- **PR #93** (this order + IF-1..4 queue + ledger board): OPEN, no review
+  yet, MERGEABLE/UNSTABLE — the routing artifacts are readable on branch
+  `zcode/gesture-d-disposition-2026-09-17` but NOT yet on main. If still
+  unmerged when you start, read this order from that branch and treat the
+  IF queue as binding regardless of merge state.
+- **PR #90** (`bkimi/av1-harness-door-precondition`): OPEN, unmerged —
+  bKiMi's repair of the main-red **1.4c** ("AV-1 harness supplies the
+  M-REPAIR door-health precondition"). Main's `tests` workflow is failing
+  at `22af64fb` (and `0e1c22ec`) on exactly that inherited red. Your CI will
+  show the same `static` failure until #90 merges: rebase after it lands, or
+  document the inherited red the way PR #91/#93 did — never "fix" it from
+  your seat (bKiMi owns it; R20 charter routing).
+- **Main tip at check time:** `22af64fb` (merge of PR #91, the stop
+  receipt). The door source you repair is `ops/x402-door` on main; the
+  staged ceremony binary provenance (sha `830b0613c35545709e8859fa6d2ea877e0ec6e25360202ca762faa7b2a6dfc71` PUBLIC-CONSTANT)
+  and the box state (journal pristine, kit/driver staged under
+  `~/x402-ceremony/`) are described in the receipt §7–8.
+- **Your scope fence, once more:** the deadlock RED→GREEN only. IF-1..IF-4
+  stay with the architecture/reconciliation seat (Astra) — no upto wire
+  changes, no imp amount/gas changes, no error-classification changes in
+  this mission.
