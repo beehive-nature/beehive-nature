@@ -178,6 +178,18 @@ jobs:
       - name: AV-11 human-gas surface audit
         if: always()
         run: node scripts/audit-human-gas.mjs
+      # INVOICE-1 bPay invoice battery (zCode economic seat, 2026-09-17):
+      # the generic invoice attacked against the FIRST REFERENCE CONSUMER —
+      # zGenealogy's bpay.mjs + skaists.bpay-invoice/1, vendored byte-exact
+      # and sha-pinned from lane/zcode-lineage-import @68fdae20. Proves the
+      # transportable laws (per-asset separation / receipt-from-evidence-only /
+      # measured-states labeling) and registers the generic advance (commitment
+      # retrievability offline, evidenced void terminality, content-addressed
+      # identity). Registered reds pass and print; pin drift or an unregistered
+      # red fails (docs/agents/BPAY-ECONOMIC-LIFECYCLE.md §INVOICE-1)
+      - name: INVOICE-1 bPay invoice battery (generic law vs reference consumer)
+        if: always()
+        run: node scripts/inv1-bpay-invoice.mjs
       # PEER FUNNEL testnet runner selftest (z3.3 Order C, 2026-09-05): the
       # one-broadcast tool cannot rot — keccak + EIP-155 RLP hash vectors and
       # the sign/recover roundtrip proven every push (key parts skip cleanly

@@ -101,10 +101,8 @@ to compose: voucher view (`meter.py:893-950`) vs hash-chain verification
 
 ## The next smallest builds (queue — specified, NOT implemented)
 
-1. **INVOICE-1**: the invoice object — commitment-derived, line-itemed,
-   lexicon-family (`com.beehivenature.invoice` beside the receipt docket),
-   friendly + evidence layers, distinct from receipt by construction
-   (pre-settlement statement vs post-settlement evidence).
+1. **INVOICE-1** — ✅ CLAIMED 2026-09-17, RED-first battery landed (§INVOICE-1
+   below); builder lane pending.
 2. **VOCAB-1**: the settlement-outcome crosswalk (voucher/RailLedger/
    watchpay states → one receipt vocabulary) — a table artifact first.
 3. **RECON-1**: the closure predicate spec — the reconciliation verdict as
@@ -113,3 +111,99 @@ to compose: voucher view (`meter.py:893-950`) vs hash-chain verification
 
 Each is a bounded order in the ATTACK→RULE→FREEZE→CLAIM→BUILD→VERIFY→
 ADVANCE shape when claimed.
+
+---
+
+## INVOICE-1 — the reconciliation with the zGenealogy reference + the red-first law
+
+**Founder order (2026-09-17)**: reconcile the reference implementation at
+`lane/zcode-lineage-import` @`68fdae20` (`tools/genealogy/bpay.mjs`, the
+`skaists.bpay-invoice/1` artifact) BEFORE implementing; zGenealogy = first
+reference consumer, NEVER canonical generic law; do not refactor it. Battery:
+`scripts/inv1-bpay-invoice.mjs` (CI-wired), attacking the reference VENDORED
+BYTE-EXACT (`fixtures/inv1/bpay-reference.mjs` +
+`fixtures/inv1/invoice-real.json`, sha-pinned — drift fails hard). If the
+lane's originals change, the pin forces re-reconciliation.
+
+### The five identifications
+
+**1. Fields/invariants that belong in generic bPay INVOICE-1** — everything
+the reference PROVES transportable (acquitted green in the battery):
+per-asset line items with independent bounds ("never one dollar figure" as
+structure: INV-1.2); receipt-from-evidence-only, no code path mints a
+receipt from an invoice (INV-1.3, the measured-states law as code);
+versioned schema id; identity bound to the underlying priced job;
+issuer-provenance incl. keyless quoting; buyer role WITHOUT a paying
+address (privacy law); measured-states labels inside the artifact
+(quote ≠ purchased; settlement not-yet; token-native units, no fiat fields:
+INV-1.6); declared persistence law + expiration model; embedded ceiling +
+authorizedBy + stopConditions; conflation-refusing validators;
+reconcile-as-comparison (never assumes equality).
+
+**2. Fields that remain genealogy/Autonomi-specific** (stay in zGenealogy;
+the generic object carries them as an opaque domain-extension block):
+ARCHIVE_CONTEXT (edition/manifest/files/tar details), `data_map_address`,
+the Autonomi payment vault + `payForQuotes` + ERC-20 approve wallet
+actions, Trezor custody + ERC-7730 Clear-Signing assessment (UNVERIFIED
+stays labeled), chunk counts / `already_stored`, the job-bound expiration
+semantics (`upload_id`), the specific stop-condition texts, and
+`planDigest`'s exact inputs (the per-chunk Autonomi quote-hash list — the
+SHAPE is generic: a digest over the priced plan; the inputs are domain).
+
+**3. Binding an immutable PricingCommitment WITHOUT duplicating R20** —
+separation of authority from economics. The invoice binds ECONOMICS by
+value + content digest (VV-1's self-sufficiency law: verifiable with the
+rate table thrown away); R20 binds AUTHORITY by signature (capability
+manifests, LegBinding, domain tags — untouched, their lane). The reference
+is one-way: an authorization NAMES its invoice (scope ⊇ invoice id +
+ceilings); the invoice never signs anything, never carries permissions,
+never mentions rail capabilities. Invoice immutability comes from
+content-addressing, not cryptography — an invoice that needs a signature
+to be believed has failed content-addressing; an authorization that cannot
+name its invoice is unbound. No LegBinding/BIP-340/domain-tag work here.
+
+**4. Referencing multiple assets/ceilings without a misleading aggregate** —
+one priced asset per line item; every ceiling per-asset per-line; NO
+cross-asset total field in the canonical object; aggregates only within
+one (asset, unit); fiat-reference fields forbidden in token-native
+artifacts; display layers may render convenience figures but they NEVER
+enter canonical bytes or digests. The reference ACQUITTED this law
+(ANT storage line + ETH gas line, separate bounds — INV-1.2 green, the
+battery's aggregate/unit detectors enforcing it structurally).
+
+**5. The persistence/restart invariant — "yesterday's invoice still means
+yesterday's promise"** — three legs: (a) content-addressed identity:
+canonical serialization + self-digest over the bytes INCLUDING the
+commitment digest, so re-derivation from different content yields a
+DIFFERENT identity — detected as a new invoice, never silently "the same
+one"; (b) offline verifiability: the commitment (quote set or pricing
+inputs) carried in the artifact or durably content-addressed beyond the
+issuing machine, so reopen-verify works without the machine or any live
+table; (c) evidenced terminality: issued/settled/void each carry evidence,
+each irreversible across restart — void→settled is conflation. The
+reference's P1 recovery proof (24/24 identical quote hashes across bridge
+death, persisted plan swapped in, fresh quotes discarded) proves the
+BRIDGE-MACHINE leg; legs (a)-(c) are the generic advance.
+
+### Battery verdict @ pin (2026-09-17) — 3 registered reds, 4 greens
+
+| probe | law | verdict |
+|---|---|---|
+| INV-1.1 | commitment retrievability — owed figure verifiable offline | **RED** — amount tampered WITHIN the ceiling and a fabricated plan digest both pass validateInvoice; the artifact carries neither the 24 quote hashes nor pricing inputs — the commitment's evidence lives only in the issuing bridge's local, never-committed job state |
+| INV-1.2 | multi-asset separation, no misleading aggregate | GREEN (reference acquitted) |
+| INV-1.3 | receipt-from-evidence-only | GREEN (reference acquitted) |
+| INV-1.4 | void path = evidenced terminal | **RED** — state:"void" passes unchecked; a voided invoice resurrects to settled with a fabricated receipt id; no void evidence class, while the UI really voids plans via /v1/upload/abandon — document layer disagrees with operational layer |
+| INV-1.5 | canonical content-addressed identity | **RED** — same invoiceId across different bytes (issuedAt varies); no canonical serialization, no self-digest; ADDITIVE charter: keep the job-bound id (P1 proof stands on it), ADD content digest |
+| INV-1.6 | measured-states labeling, token-native | GREEN (reference acquitted) |
+| INV-1.7 | negative control — aggregate smuggler / weakened validator / id-reuser all convicted; reference acquitted | GREEN (oracle calibrated) |
+
+Charters bind the generic INVOICE-1 builder lane (see battery LEDGER).
+Battery failure paths (pin drift / unregistered red / stale row) drilled
+with named causes before landing.
+
+### Standing fences (unchanged)
+
+zGenealogy not refactored (vendored copies only); bpay-rail/R20 untouched;
+**quote TTLs observed, NOT normalized** — the three regimes (600s desk /
+300s gate / 86400s lane) are three regimes, difference is not defect; IF-1..IF-4
+not implemented; VV-2 not opened; Jungle4 untouched.
