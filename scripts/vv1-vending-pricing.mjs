@@ -21,6 +21,16 @@
 // and 10000 are boundary controls. A negative control proves the battery
 // convicts deliberate live-table settlement.
 //
+// FOUNDER RULING on the VV-1 result (2026-09-16): the six reds are ONE
+// missing primitive — an opened session binds an immutable PricingCommitment
+// and settlement NEVER derives historical price semantics from the mutable
+// governance table. Governance table = the price offered to NEW sessions;
+// session commitment = the price authorized for THIS session. SNAPSHOT
+// EXECUTION is the ruled charge semantics — refusal is reserved for an
+// absent/corrupt/unverifiable commitment, never merely because today's
+// table differs (that bricks legitimately opened sessions). The oracle
+// below enforces the ruled bar, in both directions.
+//
 // MAPPING: the order's "settle the original session" is the meter's PRICED
 // CONSUMPTION action — `charge` (vending.cpp:272-292), the only action whose
 // semantics the governed rate row enters. `settle` (:254-266) is the credit
@@ -91,9 +101,11 @@ class Refused extends Error {}
 const check = (c, msg) => { if (!c) throw new Refused(msg); };
 
 // Pricing source of a consumption: 'live' (the transcribed contract), or the
-// two lawful references — 'snapshot' (price only the open-time committed
-// inputs) and 'snapshot-refuse' (snapshot; refuse when the live row can no
-// longer PROVE the open-time commitment by content digest).
+// ruled law 'snapshot' (price only the open-time committed inputs; a session
+// with NO recorded commitment — a legacy/pre-fix row — refuses as unprovable,
+// never falls back to the live table), or 'drift-refuse' (the CONVICTED
+// calibration: stores the commitment but refuses when today's table differs —
+// the brick shape the founder ruling excludes).
 class VendingModel {
   constructor(pricing = 'live') {
     this.pricing = pricing;
@@ -150,15 +162,17 @@ class VendingModel {
   }
 
   // ── the meter ────────────────────────────────────────────────────────────
-  opensess(sess, owner, agentName, rail, ceiling) {        // :235-249
+  opensess(sess, owner, agentName, rail, ceiling, legacy = false) {  // :235-249
     check(this.rates.has(rail), 'no such rail rate');
     check(!this.sessions.has(sess), 'session id exists');
     // THE BINDING QUESTION (VV-1.2): what the session row records about the
     // pricing it was opened under. The transcription binds ONLY the key —
     // exactly what the struct at :67-81 carries. The law references bind the
-    // full price-affecting input set + a content digest over it.
+    // full price-affecting input set + a content digest over it. `legacy`
+    // fabricates a pre-commitment row (the migration case: no provable
+    // historical pricing — the refusal leg's fuel, never a live fallback).
     let bound = { rail };                                  // the contract's row
-    if (this.pricing !== 'live') {
+    if (this.pricing !== 'live' && !legacy) {
       const row = this.rates.get(rail);
       bound = { rail, basis: row.basis, tithe_bp: row.tithe_bp,
                 commitment: digestPricing({ rail, basis: row.basis, tithe_bp: row.tithe_bp }) };
@@ -194,15 +208,24 @@ class VendingModel {
       const r = this.rates.get(s.rail);
       check(r !== undefined, 'rate row vanished');
       perUnit = r.basis; titheBp = r.tithe_bp;
-    } else {
+    } else if (this.pricing === 'drift-refuse') {
+      // the CONVICTED calibration: commitment stored, but today's table
+      // decides whether the session may consume — the brick shape
       const b = s._bound;
+      if (b.basis === undefined)
+        throw new Refused('historical pricing commitment cannot be proven — this session records no open-time pricing commitment');
       const r = this.rates.get(s.rail);
-      if (this.pricing === 'snapshot-refuse') {
-        check(r !== undefined, 'rate row vanished');
-        const now = digestPricing({ rail: s.rail, basis: r.basis, tithe_bp: r.tithe_bp });
-        check(now === b.commitment,
-              'historical pricing commitment cannot be proven — the governed row no longer matches the open-time pricing this session authorized');
-      }
+      check(r !== undefined, 'governed row vanished while the session pricing commitment stands');
+      const now = digestPricing({ rail: s.rail, basis: r.basis, tithe_bp: r.tithe_bp });
+      check(now === b.commitment, 'governed row drifted from the session pricing commitment — refusing');
+      perUnit = b.basis; titheBp = b.tithe_bp;
+    } else {
+      // 'snapshot' — THE RULED LAW: price only the open-time commitment; a
+      // session with NO recorded commitment cannot prove its historical
+      // pricing — refusal, never a live-table fallback
+      const b = s._bound;
+      if (b.basis === undefined)
+        throw new Refused('historical pricing commitment cannot be proven — this session records no open-time pricing commitment');
       perUnit = b.basis; titheBp = b.tithe_bp;
     }
     check(perUnit > 0n, 'rate basis is zero');
@@ -250,18 +273,30 @@ export function splitTithe(total, bp) {
 }
 
 // ── 4. the oracles ──────────────────────────────────────────────────────────
-// VV-1 oracle: a priced consumption on session `open` (the inputs in force at
-// opensess) is lawful IFF it priced the open-time inputs, OR refused while
-// NAMING the historical-pricing commitment. Silent use of any other figure
-// (including the current table's) is a defect.
-function judgePricedConsumption(openInputs, result) {
+// VV-1 oracle, at the FOUNDER-RULED bar (snapshot execution). Two scenario
+// classes, wording-robust:
+//   commitmentIntact (default): the session's open-time commitment exists and
+//     is sound — the ONLY lawful outcome is pricing at that commitment. ANY
+//     refusal is a defect: a stored commitment is self-contained, so table
+//     drift/deletion cannot make it unprovable, and refusing merely because
+//     today's table differs bricks legitimately opened sessions.
+//   commitmentIntact: false (legacy/corrupt row — no provable commitment):
+//     the ONLY lawful outcome is a refusal NAMING the unprovable commitment;
+//     pricing is a defect (pricing authority cannot appear from the live
+//     table — the migration trap).
+function judgePricedConsumption(openInputs, result, { commitmentIntact = true } = {}) {
   if (result.refused) {
-    const names = /historical pricing commitment|open-time pricing/i.test(result.refusal || '');
-    return { ok: names, why: names
-      ? `lawful refusal naming the commitment: "${result.refusal}"`
-      : `refused without naming the historical pricing commitment ("${result.refusal}") — a refusal must prove it is THE pricing refusal, not an unrelated check` };
+    if (!commitmentIntact) {
+      const names = /historical pricing commitment/i.test(result.refusal || '');
+      return { ok: names, why: names
+        ? `lawful refusal: "${result.refusal}" — the session records no provable commitment`
+        : `refused ("${result.refusal}") without naming the unprovable historical pricing commitment` };
+    }
+    return { ok: false, why: `refused although the session's open-time commitment is intact ("${result.refusal}") — SNAPSHOT EXECUTION is the ruled law: the governance table prices NEW sessions, an open session prices its own commitment, and refusal is reserved for an absent/corrupt/unverifiable commitment — never table drift or deletion, which brick legitimately opened sessions` };
   }
   const expected = openInputs.basis * result.units;
+  if (!commitmentIntact)
+    return { ok: false, why: `priced ${result.burnDelta} on a session whose commitment is not provable — pricing authority cannot be derived from the live table (the migration trap: legacy sessions refuse, never fall back)` };
   if (result.burnDelta !== expected)
     return { ok: false, why: `silent repricing: burned ${result.burnDelta} smallest-units; the open-time committed price was ${expected} (basis ${openInputs.basis} × ${result.units} units) — the current governed row was consumed, not the session's authorization` };
   return { ok: true, why: `priced at the open-time commitment (${expected})` };
@@ -347,15 +382,20 @@ function probe_1_3() {
     : `post-mutation session did not price at R2 (${r.refused ? `refused: ${r.refusal}` : `burned ${delta}`})` };
 }
 
-// VV-1.4a — delete/recreate of the same rate key, two legs.
+// VV-1.4a — delete/recreate of the same rate key, three legs.
 function probe_1_4a() {
   const m = freshContract();
   m.setrate('vaulta', R1, 1000, 'compute');
   m.opensess(1, 'alice', 'agent', 'vaulta', CEIL);
   credit(m, 1, 103n, CEIL);
   m.rmrate('vaulta');
-  const midRefusal = attempt(() => m.charge(1, 1n));
-  const midOk = midRefusal.refused && /rate row vanished/.test(midRefusal.refusal);
+  // leg 1: mid-delete charge — under the ruled law the commitment is
+  // self-contained, so deletion must NOT strand the session; the only lawful
+  // outcome is snapshot pricing at R1
+  const preMid = m.sessions.get(1).burned;
+  const mid = attempt(() => m.charge(1, 1n));
+  const midJ = judgePricedConsumption({ basis: R1 }, { ...mid, units: 1n,
+    burnDelta: mid.refused ? null : m.sessions.get(1).burned - preMid });
   // leg 2: recreate at R3 — the open session must not silently adopt it
   m.setrate('vaulta', R3, 1000, 'compute');
   const before = m.sessions.get(1).burned;
@@ -370,13 +410,13 @@ function probe_1_4a() {
   m2.rmrate('vaulta');
   m2.setrate('vaulta', R1, 1000, 'compute');             // byte-equal values, NEW provenance
   const bindJudge = judgeBinding(m2, 1);
-  const verdict = (midOk && j.ok && bindJudge.ok) ? 'GREEN' : 'RED';
+  const verdict = (midJ.ok && j.ok && bindJudge.ok) ? 'GREEN' : 'RED';
   const fails = [];
-  if (!midOk) fails.push('delete-phase charge did not produce the lawful "rate row vanished" refusal');
+  if (!midJ.ok) fails.push(`mid-delete: ${midJ.why} — rmrate strands an open session whose commitment is self-contained (governed rows price NEW sessions only)`);
   if (!j.ok) fails.push(j.why);
   if (!bindJudge.ok) fails.push(`same-values recreate: ${bindJudge.why}`);
   return { verdict, why: fails.join('; ') || 'all three legs lawful',
-    evidence: `mid-delete: ${midRefusal.refused ? `"${midRefusal.refusal}"` : 'NOT refused'}; after R3 recreate: ${r.refused ? `"${r.refusal}"` : `burned ${m.sessions.get(1).burned - before} (R3 = ${R3}, open-time R1 = ${R1})`}; same-values recreate: outcome would equal R1 with no attestation` };
+    evidence: `mid-delete: ${mid.refused ? `"${mid.refusal}"` : `priced ${m.sessions.get(1).burned - preMid}`}; after R3 recreate: ${r.refused ? `"${r.refusal}"` : `burned ${m.sessions.get(1).burned - before} (R3 = ${R3}, open-time R1 = ${R1})`}; same-values recreate: outcome would equal R1 with no attestation` };
 }
 
 // VV-1.4b — mutation immediately before settlement (the governance race).
@@ -528,31 +568,37 @@ function probe_1_6() {
         !boundsConserve && 'boundary conservation failed' ].filter(Boolean).join('; ') };
 }
 
-// VV-1.7 — the negative control / oracle self-test: deliberately settle
-// against the live mutable table and prove the battery CONVICTS it; prove the
-// two lawful references are ACQUITTED. This can never be ledger-able — a fail
-// here means the battery itself is broken (vacuous or indiscriminate).
+// VV-1.7 — the negative control / oracle self-test, at the ruled bar: prove
+// the battery CONVICTS every unlawful shape and ACQUITS every lawful one,
+// across both scenario classes. Five calibrations — can never be ledger-able;
+// a fail here means the battery itself is broken (vacuous or indiscriminate).
 function probe_1_7() {
-  const run = (pricing) => {
+  const run = (pricing, legacy = false) => {
     const m = new VendingModel(pricing);
     m.init('admin', 100);
     m.setrate('vaulta', R1, 1000, 'compute');
-    m.opensess(1, 'alice', 'agent', 'vaulta', CEIL);
+    m.opensess(1, 'alice', 'agent', 'vaulta', CEIL, legacy);
     m.settle(1, 'alice', 109n, CEIL);
     m.setrate('vaulta', R2, 1000, 'compute');
     const before = m.sessions.get(1).burned;
     const r = attempt(() => m.charge(1, 1n));
     return judgePricedConsumption({ basis: R1 }, { ...r, units: 1n,
-      burnDelta: r.refused ? null : m.sessions.get(1).burned - before });
+      burnDelta: r.refused ? null : m.sessions.get(1).burned - before },
+      { commitmentIntact: !legacy });
   };
-  const sabotage = run('live');            // settles against the live mutable table
-  const lawSnap = run('snapshot');
-  const lawRefuse = run('snapshot-refuse');
-  const convicts = !sabotage.ok, acquitsSnap = lawSnap.ok, acquitsRefuse = lawRefuse.ok;
-  const ok = convicts && acquitsSnap && acquitsRefuse;
+  const calib = {
+    sabotage:    { want: 'convict', j: run('live') },                    // live-table settlement
+    law:         { want: 'acquit',  j: run('snapshot') },                // the ruled law
+    brick:       { want: 'convict', j: run('drift-refuse') },            // stores commitment, refuses on table drift
+    lawfulRefusal: { want: 'acquit', j: run('snapshot', true) },         // legacy row: refuse naming the unprovable commitment
+    migrationTrap: { want: 'convict', j: run('live', true) },            // legacy row: prices from the live table anyway
+  };
+  const bad = Object.entries(calib).filter(([n, c]) =>
+    (c.want === 'convict' && c.j.ok) || (c.want === 'acquit' && !c.j.ok));
+  const ok = bad.length === 0;
   return { verdict: ok ? 'GREEN' : 'RED', why: ok
-    ? `oracle calibrated: live-table settlement CONVICTED (${sabotage.why.match(/burned \d+/)?.[0]} ≠ open ${R1}); snapshot reference acquitted (${lawSnap.why}); refuse-on-unprovable reference acquitted (${lawRefuse.why})`
-    : `ORACLE BROKEN: ${!convicts ? 'failed to convict deliberate live-table settlement — the battery is vacuous; ' : ''}${!acquitsSnap ? 'failed to acquit the lawful snapshot semantics; ' : ''}${!acquitsRefuse ? 'failed to acquit the lawful refusal semantics' : ''}` };
+    ? `oracle calibrated at the ruled bar — CONVICTED: live-table settlement (${calib.sabotage.j.why.match(/burned \d+/)?.[0]} ≠ open ${R1}), drift-refusal brick ("${calib.brick.j.why.match(/"([^"]+)"/)?.[1]?.slice(0, 60)}…"), legacy live-fallback; ACQUITTED: snapshot execution (${calib.law.j.why}), legacy refusal naming the unprovable commitment`
+    : `ORACLE BROKEN: ${bad.map(([n, c]) => `${n} expected ${c.want}`).join('; ')}` };
 }
 
 // ── 6. the red ledger (registered defects; AV-11 discipline) ────────────────
@@ -561,17 +607,17 @@ function probe_1_7() {
 // recorded in the spec) — silently keeping it fails as STALE.
 const LEDGER = [
   { probe: 'VV-1.1', name: 'live-read pricing — no open-time commitment',
-    charter: 'opensess must commit the session\'s pricing inputs (basis + tithe_bp of the priced row, or a content digest over them) into the session row; charge must price ONLY that commitment, or refuse naming the historical pricing commitment — vending.cpp:279-280 must stop consulting the live row for an open session' },
+    charter: 'FOUNDER-RULED: an opened session binds an immutable PricingCommitment (every field that can change the economic result — basis, asset/unit semantics, tithe_bp, and a deterministic hash over the complete pricing input); charge prices ONLY that commitment (snapshot execution); refusal is reserved for absent/corrupt/unverifiable commitments, never table drift — vending.cpp:279-280 must stop consulting the live row for an open session' },
   { probe: 'VV-1.2', name: 'session binds only the rail key — price-affecting inputs unattestable',
-    charter: 'the session row must attest every price-affecting input required for settlement (rail, basis, tithe_bp), so an adjacent governance mutation (same key, same basis, different tithe_bp) cannot shift the authorized inputs with zero session delta — vending.cpp:67-81' },
-  { probe: 'VV-1.4a', name: 'delete/recreate of the rate key reprices or de-provens an open session',
-    charter: 'rmrate+setrate(R3) must not be silently adopted by a pre-existing session (snapshot prices R1 / refusal names the commitment); recreate-with-same-values must be distinguishable from never-mutated by the session\'s recorded commitment, not by outcome coincidence' },
+    charter: 'the session row must attest every price-affecting input required for settlement (rail, basis, tithe_bp), so an adjacent governance mutation (same key, same basis, different tithe_bp) cannot shift the authorized inputs with zero session delta — tithe_bp INCLUDED, or governance changes who receives value without touching the headline rate — vending.cpp:67-81' },
+  { probe: 'VV-1.4a', name: 'delete/recreate of the rate key reprices or strands an open session',
+    charter: 'governed rows price NEW sessions only: rmrate must not strand an open session (the commitment is self-contained), recreate at R3 must not be adopted, and recreate-with-same-values must be distinguishable from never-mutated by the recorded commitment, not by outcome coincidence' },
   { probe: 'VV-1.4b', name: 'governance mutation immediately before settlement lands silently',
     charter: 'a setrate in the action immediately preceding charge must not change that charge\'s price for a session opened earlier — same root as VV-1.1, registered separately because it is the realistic race shape' },
-  { probe: 'VV-1.4c', name: 'R1→R2→R1 reversion — outcome equality without provenance',
-    charter: 'equality of the final table with the open-time table must not acquit a consumption: the session must PROVE it priced its authorization (snapshot or content-digest match), and a session that consumed across two rate regimes must carry per-consumption pricing evidence — vending.cpp records neither' },
+  { probe: 'VV-1.4c', name: 'R1→R2→R1 reversion — outcome equality without provenance (PERMANENT probe per founder order)',
+    charter: 'same final state ≠ same history: equality of the final table with the open-time table must not acquit a consumption — each charge must be attributable to the session\'s committed pricing semantics, and a session that consumed across two rate regimes must carry per-consumption pricing evidence — vending.cpp records neither' },
   { probe: 'VV-1.5', name: 'tithe leg absent — conservation unprovable',
-    charter: 'settlement must split total into member + tithe legs using the integer law above (tithe = trunc(total×bp/10000), member by subtraction, smallest-unit BigInt), conserving exactly; the two governed tithe knobs (rate_row.tithe_bp and the tithe singleton) need a precedence law, and whichever settlement consults must be inside the VV-1.2 bound' },
+    charter: 'FOUNDER-PINNED equation: total_charge = member_amount + tithe_amount, with tithe_amount = floor(total_charge × tithe_bp / 10_000) and member_amount = total_charge − tithe_amount — the split computed ONCE from the committed total, never two independently rounded legs; 0 and 10_000 lawful boundaries, >10_000 refuses before mutation; tithe_bp rides inside the VV-1.2 commitment; the two governed tithe knobs (rate_row.tithe_bp and the tithe singleton) need a precedence law, and whichever settlement consults must be inside the bound' },
 ];
 
 // ── 7. the run ──────────────────────────────────────────────────────────────
