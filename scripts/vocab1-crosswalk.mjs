@@ -7,12 +7,12 @@
 // sabotages the predicate mapping to prove the detector's teeth. The seven
 // founder distinctions run as invariants over BOTH mappings.
 // Run: node scripts/vocab1-crosswalk.mjs   (exit 0 = structure sound)
-const AXES = ["value_attempted", "value_observed", "finality", "retryability", "refund_path", "closes_obligation"];
+const AXES = ["value_attempted", "value_observed", "finality", "retryability", "refund_path", "closes_rail_obligation"];
 
 // ── the inventory: rail, state, axis-tuple (condensed from the source reads;
 //    full prose in docs/agents/VOCAB-1-CROSSWALK.md) ─────────────────────────
-const S = (value_attempted, value_observed, finality, retryability, refund_path, closes_obligation) =>
-  ({ value_attempted, value_observed, finality, retryability, refund_path, closes_obligation });
+const S = (value_attempted, value_observed, finality, retryability, refund_path, closes_rail_obligation) =>
+  ({ value_attempted, value_observed, finality, retryability, refund_path, closes_rail_obligation });
 const STATES = [
   ["x402-door", "Reserved",            S("never",     "none",                     "none",        "capped",      "none",         "no")],
   ["x402-door", "Settled",             S("submitted", "tx-receipt",               "terminal",    "never",       "none",         "yes")],
@@ -74,6 +74,11 @@ const lossless = (rail, state) => {
 
 // ── the information-loss detector ───────────────────────────────────────────
 // A mapping is lossy iff two states sharing a mapped label differ on any
+// NOTE (founder review gate): closes_rail_obligation means THE RAIL'S OWN
+// tracked obligation closes at this state — NEVER "the customer's invoice
+// is satisfied"; that conclusion belongs to RECON-1. refund_path names the
+// AVAILABLE correction path in that layer — whether a refund is OWED is
+// RECON-1's predicate (refund_owed), not this axis.
 // load-bearing axis — the label then manufactures certainty one of the pair
 // never had.
 function lossyPairs(mapping) {

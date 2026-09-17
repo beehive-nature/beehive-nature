@@ -30,8 +30,8 @@ applies to outcome evidence.
 self-reported / tx-hash / tx-receipt / event-log+readback / derived-balance) ·
 `amount_observed` (figure or null) · `finality` (none / as-reported-N /
 terminal / reorg-flagged) · `retryability` (unbounded / capped / human-gate /
-never) · `refund_path` (none / credit-note / rail-native) ·
-`closes_obligation` (no / partial-amount / yes).
+never) · `refund_path` (none / credit-note / rail-native) — the AVAILABLE correction path in that layer, never a promise that a refund is owed ·
+`closes_rail_obligation` (no / partial-amount / yes) — **rail-scoped by law**: the rail's OWN tracked obligation closes at this state; whether the CUSTOMER's committed invoice is thereby satisfied is RECON-1's derivation, never this axis.
 
 ## THE SEVEN DISTINCTIONS (founder law, encoded as battery invariants)
 
@@ -49,7 +49,9 @@ differences. A common `SUCCESS` label exists ONLY where the full tuple agrees
 (watch the battery prove the naive enum violates this). Gateway predicates
 RECON-1 will need: `closes_exactly(amount)`, `closes_partially()`,
 `needs_human_gate()`, `finality_pending(depth)`, `never_charged()`,
-`refund_owed()`.
+`refund_owed()`. **Ownership boundary (founder review, 2026-09-17):** VOCAB-1 owns only
+what the rail evidence SUPPORTS; the closure decision, `refund_owed`, and
+"does this close THIS committed invoice" belong wholly to RECON-1.
 
 ## UNMAPPABLE/AMBIGUOUS STATES (no honest generic equivalent — stay native)
 
