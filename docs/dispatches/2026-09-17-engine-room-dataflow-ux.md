@@ -74,6 +74,17 @@ sha pin is deliberately short — 12+6 hex, under the 48-run law, no marker owed
 NOT TOUCHED: main's AV-1 serve-bridge static red (buzz-meter territory, per the AV-1.4c
 fence — this lane's diff reaches none of it).
 
+## THE A9c NEAR-TRIP (banked, fix-forward)
+
+The first push tripped RECON-1's A9c tripwire: any `surfaces/*.html` carrying the literal
+route string forces a SURFACE_READY re-ruling — and my cypherpunk authority paragraph NAMED
+the chartered step in prose. The tripwire is deliberately blind to intent, and that is its
+value; the cure was not to argue but to stop impersonating the route name in a surfaces file:
+the copy now says "the review-and-pay step (… no UI route exists today; an estate tripwire
+guards the day one appears)" — the fact stands, the landmine stays armed for the real surface
+(the bPay UI seat's, not this page's). recon1-oracle-verify GREEN again; lesson banked: prose
+under surfaces/ names steps, never route strings guarded by tripwires.
+
 ## BOUNDARY NOT CROSSED
 
 No edits to PR #113's files (wallet.html, bpay-invoice.*, its dispatch/receipt/e2e) — the

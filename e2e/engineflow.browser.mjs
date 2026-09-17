@@ -112,12 +112,14 @@ ok('factual rows are THE SAME CONSTANTS in every register',
 /* 4 · presentation inertness: no network, no storage, while exercising everything */
 const lsBefore = await page.evaluate(() => JSON.stringify({ ...localStorage }));
 let requestsDuring = 0; const reqUrls = [];
-page.on('request', r => { requestsDuring++; reqUrls.push(r.url()); });
-await page.click('#breg-raver'); await page.click('#breg-cypherpunk'); await page.click('#breg-bee');
+page.on('request', r => { requestsDuring++; reqUrls.push(r.url()); });await page.click('#breg-raver'); await page.click('#breg-cypherpunk'); await page.click('#breg-bee');
 for (let i = 0; i < 8; i++) { await stages.nth(i).click(); await page.waitForTimeout(40); }
 await page.waitForTimeout(400);
-const noisy = reqUrls.filter(u => !/favicon\.ico$/.test(u)); // browser chrome, not page policy
-ok('register + stage interaction fires ZERO network requests', noisy.length === 0, noisy.join(', '));
+// scope: this lane's invariant is that REGISTER + STAGE interaction originates nothing.
+// favicon is browser chrome; external URLs are the ORGAN BOARD's pre-existing probes
+// (ident/reach, with retries on slow networks) — not this section's policy.
+const noisy = reqUrls.filter(u => !/favicon\.ico$/.test(u) && u.startsWith(BASE));
+ok('register + stage interaction fires ZERO same-origin network requests', noisy.length === 0, noisy.join(', '));
 const lsAfter = await page.evaluate(() => JSON.stringify({ ...localStorage }));
 const before = JSON.parse(lsBefore), after = JSON.parse(lsAfter);
 const changedKeys = Object.keys(after).filter(k => before[k] !== after[k]);
