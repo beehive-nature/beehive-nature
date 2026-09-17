@@ -103,3 +103,44 @@ bounded read-only obligation (not a synthetic ping) → harness obtains final te
 one canonical kind:9 → relay event exists → no fabricated receipt accepted → observer
 warn-free → client renders → THEN retire manual pid 1036. Key custody: env-only handoff is
 INTERIM; durable target is keystore/capability custody with no raw key transport.
+
+## FINAL-OUTPUT-1 — claim framed (advisor-closed; this seat stops here)
+
+**Claim name:** FINAL-OUTPUT-1 — ACP terminal outcome and publication evidence.
+Three independent questions for the builder:
+1. **Outcome fidelity:** can `failed` ever become `ok` across the Kimi→ACP→Buzz boundary?
+   (Observed: kimi wire `turn.ended outcome="failed"` vs harness `agent_returned
+   outcome="ok"` — a concrete contract seam, stronger evidence than the hallucinated ID.)
+2. **Output fidelity:** if a turn returns `ok`, what exact assistant output must exist
+   before that classification is legitimate?
+3. **Publication fidelity:** if a response is required, does Buzz hold relay evidence for
+   the resulting kind:9 — or an explicit typed failure explaining why none exists?
+
+**Invariant for the builder:** *Success requires evidence at every boundary it claims
+crossed.* MODEL_COMPLETED (actual terminal model outcome) → ASSISTANT_OUTPUT_AVAILABLE
+(actual returned content — not a think block, not prose claiming an external action) →
+PUBLICATION_SUBMITTED (signed event submitted by the publishing owner) →
+PUBLICATION_ACCEPTED (relay ACK) → PUBLICATION_PERSISTED (readback where persistence is
+claimed) → CLIENT_RENDERED (client-side evidence where rendering is claimed). A lower
+rung is never inferred from a higher-level story the model tells. **Never fix missing
+replies by synthesizing publication from model narration.**
+
+**Loud silence is CONDITIONAL, not blanket:** zero-kind:9 alone must not WARN (legitimate
+non-publication ends exist: explicit WAIT, intentional tool-only work, cancellation,
+no-reply contracts). The rule: *if the dispatch contract requires a user/agent reply and
+the turn terminates with neither publication evidence nor an explicit typed
+non-publication outcome → loud invariant violation.* Typed states for today's cases:
+`TURN_TERMINATED_WITHOUT_REQUIRED_OUTPUT` (the 1.3-second case) and `UPSTREAM_AGENT_FAILED`
+(the failed→ok mismatch).
+
+**PID-provenance correction (supersedes this rider's earlier state-at-rest lines):**
+bFUzZ's later process-level re-SYNC showed the supervised/manual topology had already
+shifted again — no PID in these reports is current truth. Standing rule: *re-SYNC live
+process state immediately before any supervision action; never act on a PID copied from an
+earlier receipt* (same provenance law as everywhere else).
+
+**bPay parallel (the general law):** `agent says "I posted event abc"` ≠ relay proves abc
+exists; `agent says "payment settled"` ≠ settlement evidence exists. **prose → claim;
+receipt/network/chain evidence → promotion.** Kept separate from observer/fairness/quota/
+runtime-not-found lanes. Next supervision acceptance: legitimate substantive obligation,
+runtime identity established EXTERNALLY (never by asking bKiMi which instance it is).
