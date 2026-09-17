@@ -166,3 +166,46 @@ serialized_len + payload shape (debug build), reproduce one real failure, and fi
 in `fit_observer_event_to_budget`'s assumptions (candidate: a serialization mismatch between
 `serialized_len`'s measurement and the bytes handed to nip44, or a non-string-leaf structure).
 No redesign without that claim.
+
+## FOLLOW-UP CLAIM CLOSED — the 1/411 escape captured, fixed, re-accepted live
+
+**Root cause (read from the deployed dependency, not instrumentation):** buzz-core's
+`OBSERVER_MAX_PLAINTEXT_LEN = 65_535` vs nostr 0.44.7 nip44 **v2's true plaintext bound
+`MAX_SUPPORTED_PLAINTEXT_SIZE = 65_536 − 128 = 65_408`** (v2.rs:334 → `MessageTooLong`).
+The 127-byte window (65,409..=65,535) let a frame pass `fit_observer_event_to_budget`'s
+under-budget short-circuit byte-identical, pass the pre-check, and die inside
+`nip44::encrypt`. A 0.2% window — exactly the observed 1/411 rate on the real turn
+(and why every synthetic ASCII shape missed it: none landed in the window).
+
+**Deterministic RED:** `test_in_window_frame_fits_and_encrypts_within_nip44_bound` sizes
+a frame to exactly 65,535 serialized bytes → fit leaves it untouched (before 65535,
+after 65535) → encrypt fails with `message too long`.
+
+**Smallest repair:** one constant — `OBSERVER_MAX_PLAINTEXT_LEN = 65_536 − 128` in
+buzz-core/src/observer.rs, with the rationale in its doc comment. All consumers (fit
+target, enqueue pre-trim accounting, batch-envelope packer, encrypt/decrypt pre-checks)
+cohere to the true bound. Commit `c1e7df61` on `zcode/observer-green-2026-09-17`
+(pushed to skaists/buzz). Observer suite 36/36; full buzz-acp 781/784 (3 failures all
+POSIX-shell-script tests — the 2 known steer captures + `keepalive_resets_idle_past_deadline`,
+proven pre-existing by rerunning it with the constant reverted; unrelated to the diff).
+
+**Deployed:** `buzz-acp.exe` sha256 `e7f4d1e22d6ada937d8bcb4690deb41d62710f2ef0e05d9c2e9e1576234e6833` PUBLIC-CONSTANT (our own build).
+Rollback chain: `.bak-20260917-observerfix` (original Sep-13 image) →
+`.bak-20260917-observerfix-r1` (the 777aa0a6 interim build). bKiMi's manual instance
+restarted on the fixed binary at 18:16:26Z (AUTH ok, observer enabled, both channels).
+
+**Final live acceptance (single controlled mention, per disposition):** Bumble → bKiMi
+(`55b8e060…`, "@bKiMi final observer acceptance after the nip44 bound fix…"). Mid-turn,
+bFUzZ delivered a REAL evidence drop to bKiMi (event `03d36d9e…`, the bSpark lane) —
+steer cancel+merge fired (known non-steerable-runtime behavior, separate lane), the merged
+turn carried both prompts. Results: **653 observer frames published + relay-accepted;
+ZERO message-too-long; ZERO byte-budget/queue warnings; final turn `outcome=ok`**; two
+kind:9 replies persisted and relay-received (18:24:57.784, 269 chars; 18:28:02.519,
+2,050 chars — "@Bumble — healthy. Observer acceptance: …"). Founder-side UI visibility of
+the second reply is his datum to confirm (the prior turn's identical-path reply rendered).
+
+**Matrix:** chat delivery GREEN · client rendering GREEN (prior turn; pending founder
+glance for this one) · observer backpressure bounded GREEN · observer completeness
+**GREEN (0 warns / 653 frames — was 1/411)** · encryption/audience posture unchanged.
+Starvation-fairness under artificial sustained overload remains a SEPARATE open finding
+(upstream-worthy; unchanged by this fix, unchanged scope).
