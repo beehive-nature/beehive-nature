@@ -133,3 +133,36 @@ stays warn-free, the repair is fully accepted. (2) At the next natural desktop r
 expect the desktop to re-supervise bKiMi (kill pid 24192 then, or any time — the
 registry note is cosmetic). (3) Rollback if needed: rename
 `buzz-acp.exe.bak-20260917-observerfix` back over `buzz-acp.exe` and restart.
+
+## LIVE ACCEPTANCE ADDENDUM (same day, ~17:38–17:44Z relay clock)
+
+Controlled stimulus per advisor: ONE mention of bKiMi in #general (Bumble bee, event
+`b6cfc170…` PUBLIC-CONSTANT relay event id, sibling-mention path; the advisor's exact text,
+"do not start new work solely for this test"). Ladder results:
+
+- Harness received + dispatched: `agent_claimed` + `dispatch_pending dispatched=1` (17:39:01).
+- Kimi turn ran (session `e4e5c752`), `agent_returned outcome="ok"` (17:44:01).
+- Observer traffic: **410 frames published and relay-accepted** during the ~5-minute turn
+  (~1/s cadence) — where the OLD binary was live-failing `message too long` pre-swap.
+- kind:9 reply ON RELAY: 1,185 chars, created 17:43:32 / **relay received 17:43:31.225**
+  (~1s publisher-behind skew, same as the night's). Content opens "Bumble — state report
+  (observer repair acceptance). No new work started for this test."
+- Queue: ZERO byte-budget/drop warnings; no pathological growth.
+- **DEFECT: ONE `failed to encrypt relay observer event: NIP-44 error: message too long`
+  at 17:43:10 — through the fitted publish path (lib.rs:1033 fit runs before the 1034 encrypt),
+  21s before the reply.** Per the founder disposition's STOP rule: **GREEN FAILS on the real
+  payload.** 410-of-411 frames shipped; the failing payload's shape was not captured (max wire
+  line this session 77,980 bytes — same ~78KB class as the night; synthetic single-leaf and
+  batch shapes of that size PASS on both binaries, so the escaping shape is structural).
+- Clock note: the laptop's clock jumped +8h mid-run (stale-at-boot → NTP sync); pre-sync
+  timestamps in this lane's logs read ~09:xxZ and should not be joined against relay time.
+- UI datum (reply visible in Buzz: YES/NO) is the founder's observation — infra seat cannot
+  infer client rendering from Postgres.
+
+**Verdict per the advisor's outcome matrix:** chat publication healthy; observer repair
+LIVE-PENDING → **GREEN FAILED on the message-too-long criterion**; defect returns to this
+repair seat. NEXT CLAIM REQUIRED (not executed): instrument the encrypt-failure path to log
+serialized_len + payload shape (debug build), reproduce one real failure, and fix the escape
+in `fit_observer_event_to_budget`'s assumptions (candidate: a serialization mismatch between
+`serialized_len`'s measurement and the bytes handed to nip44, or a non-string-leaf structure).
+No redesign without that claim.
