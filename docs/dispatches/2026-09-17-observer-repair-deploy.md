@@ -174,8 +174,10 @@ No redesign without that claim.
 `MAX_SUPPORTED_PLAINTEXT_SIZE = 65_536 − 128 = 65_408`** (v2.rs:334 → `MessageTooLong`).
 The 127-byte window (65,409..=65,535) let a frame pass `fit_observer_event_to_budget`'s
 under-budget short-circuit byte-identical, pass the pre-check, and die inside
-`nip44::encrypt`. A 0.2% window — exactly the observed 1/411 rate on the real turn
-(and why every synthetic ASCII shape missed it: none landed in the window).
+`nip44::encrypt`. The narrow 127-byte rejection window explains why the defect was rare
+and why synthetic cases repeatedly missed it; the observed 1/411 live failure is
+CONSISTENT with a narrow boundary defect, not a predicted probability (real observer-frame
+sizes are not uniformly distributed across the range — advisor wording ruling, banked).
 
 **Deterministic RED:** `test_in_window_frame_fits_and_encrypts_within_nip44_bound` sizes
 a frame to exactly 65,535 serialized bytes → fit leaves it untouched (before 65535,
@@ -209,3 +211,25 @@ glance for this one) · observer backpressure bounded GREEN · observer complete
 **GREEN (0 warns / 653 frames — was 1/411)** · encryption/audience posture unchanged.
 Starvation-fairness under artificial sustained overload remains a SEPARATE open finding
 (upstream-worthy; unchanged by this fix, unchanged scope).
+
+## Open-lane ledger at close (advisor split, 2026-09-17)
+
+- Observer size/encryption boundary → **CLOSED/GREEN** (this lane).
+- Observer starvation/fairness under sustained overload → OPEN, separate (upstream-worthy;
+  did not recur in either real acceptance turn).
+- Kimi cancel+merge wasted-work behavior (non-steerable runtime under meh=Steer) → OPEN,
+  separate (capability-aware queue/coalescing preference on record; explicit user
+  cancellation must still stop work).
+- bSpark/bLuNa `-32603` crash-loop → OPEN, separate.
+- Fleet publish quota (block/buzz #5723 family) → OPEN, separate.
+- **Manual argv private-key exposure → OPEN, separate**: the manual spawn ritual passes
+  `--private-key` on the command line (visible in process listings). The `BUZZ_PRIVATE_KEY`
+  env var exists and MUST be the canonical hand-off for any future manual spawns; the env
+  var was also set in this lane's spawns, but argv carried it redundantly — retire the argv
+  form. Also retire the manual harness once the Desktop-supervised bKiMi instance is
+  verified on the repaired binary (make the boring supervised path canonical).
+
+Superseded-theory history PRESERVED per ruling: (1) "chat replies dropped" → disproven by
+relay readback; (2) "deployed/source generation skew" → disproven behaviorally; (3) "one
+fitted real frame still exceeds NIP-44" → root-caused to 65,535 vs 65,408. The record keeps
+all three deaths visible.
