@@ -286,17 +286,33 @@
   },
   "data_map_address": "0x7c4f61ed1c7b950a3043b8a2d1aa9974a24ac6ca274c330e4da1b3a6a61bbb78", "scan": "PUBLIC-CONSTANT: public self-encrypted data-map address",
   "policy": {
-   "preset": "public",
-   "resolved_by": "antd-bridge prepare (Visibility::Public) — quoted plan",
-   "selector": "founder UI gesture — chooser surface chartered Phase B; not yet exercised",
+   "object": "one-policy-object",
+   "audience": {
+    "selected": "public",
+    "selected_by": "antd-bridge prepare (Visibility::Public) — the founder's chooser gesture is Phase B, never agent-inferred",
+    "available": ["public"],
+    "unavailable": [
+     {
+     "id": "only-me",
+     "reason": "private-DataMap custody path not yet wired or tested through this bridge"
+    },
+     {
+     "id": "selected-people",
+     "reason": "recipient-key granting not yet wired or tested through this bridge"
+    }
+    ]
+   },
+   "inspection": {
+    "advanced": "opens inspection depth over this same policy object — never alters policy by itself"
+   },
    "access": "anyone who obtains the Autonomi address can retrieve the artifact",
    "encryption": "network self-encryption at rest is storage mechanics, not owner-controlled privacy; in public mode the address itself is the capability",
    "forgettability": "immutable once stored — deletion cannot honestly be promised"
   },
   "trezor_ux": {
    "shape": "wave_batch",
-   "expected_confirmations": 56,
-   "note": "wave mode is hostile to hardware wallets (per-quote confirmations); the surface must print the shape + exact count before any signing"
+   "quote_obligations": 56,
+   "expected_confirmations": null
   }
  },
  "states": {
@@ -307,6 +323,6 @@
  "identity": {
   "jobId": "bux-try-autonomi-2026-09-17",
   "priorDigest": null,
-  "contentDigest": "sha256:3df7c234381ce477140d1fc43e616f433862bb30d11e07730beffcd7c64f7954", "scan": "PUBLIC-CONSTANT: public content-addressed identity digest"
+  "contentDigest": "sha256:8337bc8308d253be5eac2e2d53ab1d0e6f22ff42ec03f453a0c66daef6449c9a", "scan": "PUBLIC-CONSTANT: public content-addressed identity digest"
  }
 }

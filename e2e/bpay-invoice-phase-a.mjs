@@ -92,6 +92,17 @@ if (invoice) {
   // waiting state, honestly
   const stateText = (await page.$('#bpay-sec [data-bpay-state]')) ? await page.$eval('#bpay-sec [data-bpay-state]', e => e.innerText) : '';
   check('waiting state rendered', /await/i.test(stateText), stateText.slice(0, 60));
+
+  // founder corrections 2026-09-17 — Phase E: obligations ≠ confirmations
+  const tux = invoice.domain?.trezor_ux || {};
+  check('artifact claims NO confirmation count (obligations only)', tux.expected_confirmations == null && tux.quote_obligations === (invoice.lines.find(l=>l.asset==='ANT')?.quotes?.length ?? -1), `quote_obligations=${tux.quote_obligations} expected_confirmations=${tux.expected_confirmations}`);
+  check('page claims no numeric confirmation count', !/\d+\s+confirmation/i.test(fullHtml));
+
+  // founder corrections 2026-09-17 — Phase B: audience axis, one policy object, unavailable modes VISIBLY unavailable
+  const aud = invoice.domain?.policy?.audience || {};
+  check('artifact carries the audience axis (one policy object)', aud.selected === 'public' && Array.isArray(aud.available) && Array.isArray(aud.unavailable) && !!invoice.domain?.policy?.inspection?.advanced, `selected=${aud.selected} available=${(aud.available||[]).join(',')} unavailable=${(aud.unavailable||[]).map(u=>u.id).join(',')}`);
+  const unavailRendered = (await page.$$eval('#bpay-sec [data-bpay-unavailable]', els => els.map(e => e.dataset.bpayUnavailable))) || [];
+  check('unavailable audience modes rendered visibly (never promised)', (aud.unavailable || []).every(u => unavailRendered.includes(u.id)), `rendered=${unavailRendered.join(',')}`);
 } else {
   check('invoice artifact exists (surfaces/bpay-invoice.json)', false, 'absent — run scripts/bpay-mvp/invoice-from-quote.mjs');
 }

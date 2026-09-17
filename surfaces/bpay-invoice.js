@@ -38,13 +38,20 @@
      h +=   '<span><span data-i18n="wl.bpay.size">' + T('wl.bpay.size','size') + '</span>: <b data-bpay-bytes="' + a.bytes + '">' + a.bytes.toLocaleString('en-US') + ' bytes</b></span>';
      h += '</div>';
      h += '<div style="font-size:10px;font-family:monospace;opacity:.75;margin-top:2px" title="' + sha + '">sha256 ' + sha.slice(0,16) + '…' + sha.slice(-8) + '</div>';
-     /* sharing policy — the resolved policy the quote bound, "who can get this?" in plain words */
-     if(p.preset){
+     /* audience — ONE policy object; the quote's binding is a machine fact,
+        unavailable modes stay VISIBLY unavailable with reasons (never promised),
+        and Advanced is inspection depth over this same object, never a policy change */
+     var aud = p.audience || {};
+     if(aud.selected){
        h += '<div class="row" style="margin-top:10px;gap:6px 18px;font-size:12px;flex-wrap:wrap">';
-       h +=   '<span>🌐 <span data-i18n="wl.bpay.share">' + T('wl.bpay.share','sharing') + '</span>: <b>' + p.preset + '</b></span>';
+       h +=   '<span>🌐 <span data-i18n="wl.bpay.audience">' + T('wl.bpay.audience','audience') + '</span>: <b>' + aud.selected + '</b></span>';
        h += '</div>';
        h += '<div style="font-size:11px;opacity:.85;margin-top:2px"><b>' + T('wl.bpay.who','Who can get this?') + '</b> ' + (p.access||'') + '</div>';
-       h += '<div style="font-size:10px;opacity:.6;margin-top:2px">' + T('wl.bpay.sharenote','your sharing choice is made in the chooser before quoting — never silently inferred') + '</div>';
+       var un = aud.unavailable || [];
+       for(var i=0;i<un.length;i++){
+         h += '<div style="font-size:11px;opacity:.55;margin-top:2px;text-decoration:line-through" data-bpay-unavailable="' + un[i].id + '">🔒 ' + un[i].id + ' — ' + T('wl.bpay.unavailable','unavailable') + ': ' + (un[i].reason||'') + '</div>';
+       }
+       h += '<div style="font-size:10px;opacity:.6;margin-top:2px">' + T('wl.bpay.advanced','advanced inspection opens the full policy — it never changes it') + ' · ' + T('wl.bpay.sharenote','your sharing choice is made in the chooser before quoting — never silently inferred') + '</div>';
      }
      h += '<div class="row" style="margin-top:12px;gap:6px 24px;flex-wrap:wrap;font-size:13px">';
      h +=   '<span>⬡ <span data-i18n="wl.bpay.owed">' + T('wl.bpay.owed','storage') + '</span>: <b data-bpay-owed-atto="' + sum + '">' + ant(sum) + ' ANT</b></span>';
@@ -55,8 +62,10 @@
      h +=   '<span>' + (line.quotes.length) + ' × ' + T('wl.bpay.quotes','chunk quotes') + ' · ' + d.payment_type + '</span>';
      h +=   '<span><span data-i18n="wl.bpay.fresh">' + T('wl.bpay.fresh','quote obtained') + '</span> ' + (q.obtained_at||'').replace('T',' ').replace(/\.\d+Z$/,' UTC') + '</span>';
      h += '</div>';
-     if(d.trezor_ux && d.trezor_ux.shape === 'wave_batch'){
-       h += '<div style="font-size:10px;opacity:.7;margin-top:2px">' + T('wl.bpay.shape','wave mode: one device confirmation per quote — the surface will print the exact count before any signing') + '</div>';
+     if(d.trezor_ux){
+       /* founder correction: the quote proves OBLIGATIONS + shape; the confirmation
+          count belongs to the payment adapter's transaction plan — never the quote count */
+       h += '<div style="font-size:10px;opacity:.7;margin-top:2px" data-bpay-quote-obligations="' + (d.trezor_ux.quote_obligations||0) + '" data-bpay-expected-confirmations="' + (d.trezor_ux.expected_confirmations==null?'':d.trezor_ux.expected_confirmations) + '">' + T('wl.bpay.shape','payment shape on record; device confirmations will be shown from the transaction plan produced by the payment adapter — never inferred from the quote count') + '</div>';
      }
      h += '<div style="font-size:10px;font-family:monospace;opacity:.7;margin-top:4px">' + T('wl.bpay.commit','commitment') + ' ' + (inv.commitment&&inv.commitment.digest||'') + '</div>';
      h += '<div style="margin-top:10px;padding:8px 10px;border:1px solid #1d4655;border-radius:8px;font-size:12px">';

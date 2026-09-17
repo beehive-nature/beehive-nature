@@ -126,3 +126,30 @@ path exemption may be ruled by the founder later; none was self-granted.
 No payment. No wallet authorization. No Trezor ceremony. No upload/finalize. No
 pointer. No rendition. No W@tch mutation. The founder's authorization gesture
 remains unexercised — by design, it does not exist yet.
+
+## CORRECTION RIDER — founder, 2026-09-17 (post-landing, pre-merge; applied same branch)
+
+Two corrections, both accepted and applied to every artifact on this branch:
+
+1. **Phase-B — audience ≠ inspection depth.** One policy object stands, but the
+   axes are SEPARATE: **audience** (Public / Only me / Selected people) is the
+   policy; **Cypherpunk/Advanced** is an inspection depth over that same object —
+   opening Advanced never alters policy by itself. Unsupported private modes
+   remain **visibly unavailable with reasons** (`only-me`, `selected-people`:
+   not yet wired/tested through this bridge), never promised. The artifact's
+   `domain.policy` now carries `{object, audience:{selected, selected_by,
+   available, unavailable[]}, inspection, access, encryption, forgettability}`;
+   the panel renders the audience row, "Who can get this?", the struck-through
+   unavailable modes, and the advanced-never-alters note.
+2. **Phase-E — obligations ≠ confirmations.** The live quote proves **56 quote
+   obligations and the wave_batch payment shape — nothing about device
+   confirmations.** The wallet/Trezor confirmation count derives from the
+   **transaction plan produced by the payment adapter** and is displayed from
+   that evidence (Phase E). The original finding #1 below ("one Trezor
+   confirmation per quote (56)") is RETIRED as inference dressed as evidence;
+   `domain.trezor_ux` now reads `{shape: wave_batch, quote_obligations: 56,
+   expected_confirmations: null}`, and the gate asserts the artifact claims no
+   count and the page renders none.
+
+Gate grows 14 → **18/18** (no claimed count; audience axis; unavailable modes
+rendered; A9c still held). Family batteries re-green; scans clean.

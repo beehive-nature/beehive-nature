@@ -73,3 +73,12 @@ uploaded ≠ retrieved ≠ hash-verified; this receipt records a QUOTE.
 No payment. No wallet authorization. No Trezor ceremony. No upload/finalize. No
 pointer creation. No derived rendition. No W@tch mutation. The original media object
 was read (hashed), never moved, never re-encoded.
+
+## CORRECTION (founder, 2026-09-17)
+
+Finding 1 above overstated the evidence: the quote proves **56 quote obligations
+and the wave_batch payment shape** — it does NOT prove a Trezor confirmation
+count. The confirmation count derives from the **transaction plan produced by
+the payment adapter** (Phase E) and will be displayed from that evidence. The
+invoice artifact now carries `trezor_ux.expected_confirmations: null` with
+`quote_obligations: 56`.

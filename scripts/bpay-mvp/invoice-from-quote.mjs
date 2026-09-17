@@ -103,23 +103,34 @@ export function invoiceFromPrepare(prepare, obtainedAt) {
       },
       data_map_address: prepare.data_map_address || null,
       policy: {
-        // founder rider 2026-09-17: sharing choice is FIRST-CLASS, before quote.
-        // This block records the policy the quote ACTUALLY bound (machine fact:
-        // the bridge prepared with Visibility::Public) — it is the resolved
-        // policy on the receipt, never a button label. The founder's selection
-        // gesture belongs to the chooser surface (Phase B); an agent never
-        // infers it. Presets (public/private/cypherpunk) are one policy object.
-        preset: "public",
-        resolved_by: "antd-bridge prepare (Visibility::Public) — quoted plan",
-        selector: "founder UI gesture — chooser surface chartered Phase B; not yet exercised",
+        // founder corrections 2026-09-17 (Phase B law): ONE policy object, with
+        // AUDIENCE (public / only-me / selected-people) as the policy axis and
+        // Cypherpunk/Advanced as an INSPECTION DEPTH over that same object —
+        // opening Advanced never alters policy by itself. Unsupported private
+        // modes stay VISIBLY UNAVAILABLE with reasons, never promised. This
+        // block records what the quote ACTUALLY bound (machine fact) + the
+        // chooser's status; the founder's selection gesture is Phase B.
+        object: "one-policy-object",
+        audience: {
+          selected: "public", // as bound: the bridge prepared with Visibility::Public
+          selected_by: "antd-bridge prepare (Visibility::Public) — the founder's chooser gesture is Phase B, never agent-inferred",
+          available: ["public"],
+          unavailable: [
+            { id: "only-me", reason: "private-DataMap custody path not yet wired or tested through this bridge" },
+            { id: "selected-people", reason: "recipient-key granting not yet wired or tested through this bridge" },
+          ],
+        },
+        inspection: {
+          advanced: "opens inspection depth over this same policy object — never alters policy by itself",
+        },
         access: "anyone who obtains the Autonomi address can retrieve the artifact",
         encryption: "network self-encryption at rest is storage mechanics, not owner-controlled privacy; in public mode the address itself is the capability",
         forgettability: "immutable once stored — deletion cannot honestly be promised",
       },
       trezor_ux: {
         shape: prepare.payment_type,
-        expected_confirmations: quotes.length, // wave: one confirmation per quote — printed per SPEC-AUTONOMI-TREZOR-1 §1
-        note: "wave mode is hostile to hardware wallets (per-quote confirmations); the surface must print the shape + exact count before any signing",
+        quote_obligations: quotes.length,
+        expected_confirmations: null, // founder correction 2026-09-17: the quote proves quote OBLIGATIONS + payment shape ONLY — the wallet/Trezor confirmation count derives from the TRANSACTION PLAN produced by the payment adapter and is displayed from that evidence (Phase E law), never inferred from the quote count
       },
     },
   });
