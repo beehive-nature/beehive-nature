@@ -71,6 +71,19 @@ check('unavailable audience modes visible (never promised)', unavail.includes('o
 // 3 · supersede law visible
 check('supersede note: commitment exists, change requires a new quote', !!(await page.$('[data-bdata-supersede-note]')) && /requires a new quote/i.test(text));
 
+// 3b · THE ORIGIN LOOP (advisor law): the Public selection originates HERE —
+// recorded in the SHARED policy key the wallet's bPay panel reads at boot;
+// bData history appends the policy edition; the handoff becomes ready
+check('origin prompt present before the gesture (machine reference named)', /machine reference|current binding/i.test(text));
+await page.click('[data-bdata-aud="public"]');
+await page.waitForTimeout(300);
+const shared = await page.evaluate(() => JSON.parse(localStorage.getItem('bpay-policy-v1') || 'null'));
+check('the gesture records in the SHARED policy key (origin: My Data)', !!(shared && shared.audience === 'public' && shared.selectedAt), JSON.stringify(shared || 'absent'));
+check('bData history appends the audience policy edition', (await page.$$eval('[data-bdata-history]', els => els.length)) === 1);
+check('origin attribution rendered ("originated in My Data")', /originated in My Data/i.test(await page.innerText('#shelf')));
+check('preserve handoff becomes ready', !!(await page.$('[data-bdata-preserve-ready]')));
+check('supersede note still present after the gesture', !!(await page.$('[data-bdata-supersede-note]')));
+
 // 4 · the bPay handoff
 const ceilingAttr = await page.$$eval('[data-bdata-ceiling-atto]', els => els.map(e => e.dataset.bdataCeilingAtto).join(','));
 check('handoff ceiling = recomputed carried quotes', ceilingAttr === recomputedCeiling, `${ceilingAttr.slice(0, 12)}… atto`);
@@ -79,18 +92,19 @@ check('nothing-paid line present', /Nothing has been paid/i.test(text));
 check('wallet link present', !!(await page.$('[data-bdata-open-bpay]')));
 
 // 5 · automation — first-class, persisted, supersede-not-mutate
+// (history already carries edition 1 = the ORIGIN audience gesture above)
 check('automation default Ask me', (await page.$eval('[data-bdata-auto-mode]', e => e.dataset.bdataAutoMode)) === 'ask');
 await page.click('[data-bdata-auto="never"]');
 await page.waitForTimeout(200);
 let hist = await page.$$eval('[data-bdata-history]', els => els.length);
-check('policy change appends history (1 edition)', hist === 1, `history=${hist}`);
+check('policy change appends history (2 editions: origin + automation)', hist === 2, `history=${hist}`);
 const lsMode = await page.evaluate(() => JSON.parse(localStorage.getItem('bdata-v1')).automation.mode);
 check('automation persists (localStorage)', lsMode === 'never', lsMode);
 await page.click('[data-bdata-auto="ask"]');
 await page.waitForTimeout(200);
 hist = await page.$$eval('[data-bdata-history]', els => els.length);
-const firstEdition = (await page.$$eval('[data-bdata-history]', els => els.map(e => e.innerText)))[1] || '';
-check('second change appends, first edition intact (2 editions)', hist === 2 && /ask → never|never/.test(firstEdition), `history=${hist}`);
+const editions = await page.$$eval('[data-bdata-history]', els => els.map(e => e.innerText));
+check('second change appends, origin edition intact (3 editions)', hist === 3 && editions.some(t => /Public/.test(t)) && editions.some(t => /never/i.test(t)), `history=${hist}`);
 
 // 6 · inspection depth — anatomy without authority
 await page.click('[data-bdata-insp="cypherpunk"]');
