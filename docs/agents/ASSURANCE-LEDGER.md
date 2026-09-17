@@ -48,6 +48,22 @@ unknown-reconcile → r4 audit over the resulting journal. One deployment,
 five receipts. Production placement of the door is a LATER, separately
 ratified gesture (it has no ratified deployment today).
 
+**Attempt record (2026-09-17):** the ordered pass ran credential-boundary
+first, took the full pre-flight GREEN (Base Sepolia 84532; USDC verified
+against Circle's published address and the live DOMAIN_SEPARATOR
+{USDC,2,84532}; funded test identity `0xb43b…37af`; binary sha unchanged;
+journal pristine; zero production surfaces), restructured the signer to the
+env-backed `$X402_OPS_WALLET_KEY` reference (no secret-bearing file; zero-secret
+scan clean), and then **STOPPED AT BOOT**: the door binary self-deadlocks in
+live startup (exclusive journal hold + blocking re-acquire on a second open of
+`.lock`, same process — kernel-stack evidenced and reproduced at library
+level, exit 124 under a 10s timeout). No drill ran; no row changes; nothing
+promoted. Four further structural findings banked (upto legs wire-unreachable;
+imp drops actual amounts and fills gas at reserve-rate; chains-config
+example-vs-imp shape mismatch; AV-6a retry ceiling unreachable at the live
+seam). Full evidence:
+[receipt](../dispatches/2026-09-17-gesture-d-stop-at-boot-receipt.md).
+
 **Standing (no ceremony):** AV-11's CI step — live now.
 
 ## 3 · Smallest ordered plan
