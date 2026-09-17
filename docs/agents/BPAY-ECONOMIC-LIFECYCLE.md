@@ -201,6 +201,46 @@ Charters bind the generic INVOICE-1 builder lane (see battery LEDGER).
 Battery failure paths (pin drift / unregistered red / stale row) drilled
 with named causes before landing.
 
+### Builder closure (2026-09-17, zCode builder lane — GREEN, awaiting the economic seat's independent verification)
+
+The three charters are closed by a GENERIC implementation,
+`scripts/lib/bpay-invoice-generic.mjs` (schema `bpay.invoice-generic/1`),
+proven by `scripts/inv1-generic-builder.mjs` (CI-wired beside the frozen
+battery, which runs BYTE-UNCHANGED — its registered reds remain the record of
+the reference's gaps; closure is proven on the generic side, never by
+touching the oracle). 9/9 proofs:
+
+- **INV-1.1** — the quote set is CARRIED in the canonical bytes
+  (`line.quotes[]`); the owed figure is DERIVED as Σ quotes at build and
+  re-derived at validation; `commitment.digest` re-derives from the carried
+  set (the planDigest SHAPE with generic inputs). Attacks: amount tampered
+  within the ceiling → refused; the same tamper WITH the content digest
+  recomputed (canonical integrity green) → refused by the Σ-law
+  (`owed ≠ Σ carried quotes`); fabricated commitment digest → refused.
+  VV-1 self-sufficiency held live: a fresh child process validates the
+  persisted artifact against its durable digest while today's rates file is
+  mutated underneath — no pricing state is consulted.
+- **INV-1.4** — void is an evidenced terminal: bare `state:"void"` refused;
+  `voidEvidence {kind:"abandon"|"superseded", ref, at}` required;
+  supersession stays LAWFUL (`successorJobId` named; the successor carries
+  `identity.priorDigest`). Resurrection: state-flip keeping evidence →
+  refused (evidence-conflict law); a stripped re-forge (evidence removed,
+  digest recomputed) passes ONLY unanchored and is REFUSED against
+  `validateGenericInvoice(doc, {expectedDigest})` — the which/who separation
+  exactly: content identity proves WHICH invoice; authority/anchoring proves
+  WHO stands behind it (signature binding stays R20's lane — this module
+  contains no signing primitives, asserted structurally).
+- **INV-1.5** — canonical serialization is deterministic (recursive
+  lexicographic keys, no whitespace, monetary fields string-only);
+  `identity.contentDigest` covers the whole document minus itself
+  (contradiction-free), INCLUDING the commitment; ADDITIVE charter held:
+  `identity.jobId` + `invoiceId` stay job-bound for routing/recovery, and
+  wherever bytes differ the content identity differs.
+
+Lifecycle transitions are explicit version-producing operations
+(`voidGenericInvoice` / `settleGenericInvoice`) carrying `priorDigest`
+lineage — append-only correction, never in-place mutation.
+
 ### Standing fences (unchanged)
 
 zGenealogy not refactored (vendored copies only); bpay-rail/R20 untouched;
