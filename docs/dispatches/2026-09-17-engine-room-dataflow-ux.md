@@ -122,6 +122,18 @@ cells) · surfaces/lang.js (v25) · scripts/build-stack-dataflow.mjs (new) ·
 scripts/stack-dataflow-corpus.mjs (new) · e2e/engineflow.browser.mjs (new, 28 proofs) ·
 e2e/shots-engineflow/ (4 shots) · .github/workflows/tests.yml (+1 step) · this dispatch.
 
-STATE: complete on branch `zcode/engine-room-dataflow-2026-09-17`, PR open, all local gates
-green. NEXT OWNER: authorized merger (after #113 or before it — independent either way).
-HUMAN INTERACTION: NONE.
+STATE: MERGED @d3f9d65a (PR #116, ordinary authorized merge; three sync rounds as #113/#114/#115
+landed during review — corpus main-then-rewrite each time, bust v27, hub regenerated against the
+merged registry). THE BEE IS IN WAIT (founder order 2026-09-17: no next feature; the observability
+surface must not race the organism). WAKE TRIGGERS, founder words preserved: (1) CONSUMED AT MERGE —
+'#113/Phase B lands → Engine Room learns about the real quote/policy evidence' (the card now parses
+the landed quote receipt: 4.245934921875 ANT · 56 quotes · wave_batch; the resolved-policy half of
+this trigger — the chooser's evidence — remains open for the next wake); (2) 'Private storage earns
+qualification → Private unavailable becomes an evidence-backed transition'; (3) 'Memory isolation
+gets repaired → Engine Room gains a real memory-compartment organ'; (4) 'bAiGenT vending matures →
+Engine Room can show agent identity/runtime/memory/value physiology'. Morsel for the next wake: the
+quote receipt's data_map_address (deterministic, planned-not-stored) wants a stage-6/8 slot.
+NEXT OWNER: whoever's physiology lands first (the wakers above). HUMAN INTERACTION: NONE.
+HONESTY LEDGER: one false-green commit message was pushed during sync round 2 (claimed gates green
+while the hub-drift gate was red — the gate itself had restored HEAD's hub before the add); cured
+fix-forward in 3333d629 with the mechanism named, history unrewritten.
