@@ -724,6 +724,26 @@ var WALLET_PROFILE = {
   <div class="law" id="pay-stat" style="margin-top:6px;min-height:20px">— choose a lane above —</div>
 </section>
 
+<!-- ══ bPAY — the preservation invoice (Phase A: render-only; the carried quote
+     set is the commitment, native gas stays separate, and the authorization
+     route does not exist yet — recon1-oracle A9c owns that string until the
+     Phase C re-ruling). Policy rider 2026-09-17: the sharing choice is
+     first-class BEFORE quote; this panel records the policy the quote actually
+     bound — the founder's chooser gesture is chartered, never agent-inferred. ══ -->
+<section id="bpay-sec" style="border-color:#2c4a5a">
+  <h2>🧾 <span data-i18n="wl.bpay.h">bPay — the preservation invoice</span></h2>
+  <details class="tnote" data-reg-disclose><summary data-i18n="wl.bpay.law">Phase A — every figure is carried from a live, keyless network quote; this panel renders, it cannot spend</summary>
+  <p class="law">no ANT figure here is typed by anyone: a keyless prepare on the Autonomi mainnet
+  hashed the exact file, quoted every chunk, and those quotes — each a <b>quote hash + amount</b>
+  pair — are the carried commitment (INVOICE-1 law: owed is <b>derived</b> from the carried quote
+  set, never asserted). native gas is a <b>separate</b> wallet-side obligation, never folded into
+  storage. when the authorization surface is earned, the founder's own button press — and only
+  that — crosses the waiting state; no chat text, no terminal, no agent receipt substitutes
+  for it.</p></details>
+  <div id="bpay-card" class="law" style="margin-top:10px;min-height:24px">…</div>
+</section>
+<script src="bpay-invoice.js?v=1"></script>
+
 <!-- ══ INSCRIPTIONS — the garden, drawn on-chain. The art is the hero: the
      piece leads, the numbers stand beside it. Every SVG here is fetched from
      the collection's own contract at read time; nothing is cached, stored, or

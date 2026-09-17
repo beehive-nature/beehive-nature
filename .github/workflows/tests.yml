@@ -261,6 +261,15 @@ jobs:
       - name: RECON-1 oracle sabotage selftest (teeth)
         if: always()
         run: node scripts/recon1-oracle-verify.mjs --sabotage-selftest
+      # bPay MVP Phase A builder selftest (UI seat, 2026-09-17): the quote→
+      # invoice mechanical binding — a prepare response for the pinned Bux
+      # artifact builds a valid INVOICE-1 invoice (owed derived from the
+      # carried quote set, exact ceiling), and REFUSES wrong-artifact sha /
+      # wrong byte count / quote-sum mismatch (synthetic selftest fixture,
+      # labelled; the real quote receipt is docs/receipts/).
+      - name: bPay Phase A — quote→invoice builder selftest (refusal gates)
+        if: always()
+        run: node scripts/bpay-mvp/invoice-from-quote.mjs --selftest
       # PEER FUNNEL testnet runner selftest (z3.3 Order C, 2026-09-05): the
       # one-broadcast tool cannot rot — keccak + EIP-155 RLP hash vectors and
       # the sign/recover roundtrip proven every push (key parts skip cleanly
@@ -426,6 +435,18 @@ jobs:
         if: always()
         working-directory: e2e
         run: node kandi-thread.mjs
+      # bPay Phase A gate (UI seat, 2026-09-17): the REAL machine-bound
+      # invoice renders in the wallet surface — identity (name/bytes/sha256),
+      # owed recomputed from the carried quote set by the TEST, native gas
+      # separate, freshness, commitment, honest waiting state — and the page
+      # carries NO authorization route (recon1-oracle A9c law holds until the
+      # Phase C SURFACE_READY re-ruling). Serves surfaces/ from the tree;
+      # the artifact is surfaces/bpay-invoice.json (built from the banked
+      # live quote receipt, never hand-typed).
+      - name: bPay Phase A gate — real invoice rendered, nothing spendable
+        if: always()
+        working-directory: e2e
+        run: node bpay-invoice-phase-a.mjs
       - name: Onboarding e2e (Chromium + virtual authenticator w/ PRF)
         if: always()
         working-directory: e2e
