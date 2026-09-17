@@ -161,8 +161,14 @@ ok('card shows the receipt\u2019s duration', card.includes(dur), dur);
 ok('card shows the receipt\u2019s playback verdict', card.includes(verdict[1] + ' (' + verdict[2] + '/' + verdict[3] + ')'));
 ok('card\u2019s short sha pin matches the receipt\u2019s digest', card.includes(sha.slice(0, 12)) && card.includes(sha.slice(-6)));
 ok('card shows the receipt\u2019s dimensions', card.includes(shape[1] + '×' + shape[2]));
-ok('quote stage says in review — and NO ANT amount is invented',
-  card.includes('in review') && !/\d[\d.]*\s+ANT/.test(card), card.slice(0, 60));
+/* 7b · the quote row is mechanical too — re-derived from the landed quote receipt */
+const qmd = readFileSync(join(ROOT, 'docs/receipts/bpay-quote-try-autonomi-2026-09-17.md'), 'utf8');
+const qAmount = qmd.match(/total ANT \|\s*\*\*[\d,]+ atto = ([\d.]+) ANT\*\*/)[1];
+const qChunks = qmd.match(/\| chunks \| (\d+) total/)[1];
+const qType = qmd.match(/\| payment_type \|\s*\*\*(\w+)\*\*/)[1];
+ok('quote row shows the receipt\u2019s REAL ANT figure', card.includes(qAmount), qAmount);
+ok('quote row shows chunk count and payment type from the receipt', card.includes(qChunks) && card.includes(qType));
+ok('quote chip is verified — no stale in-review remains', card.includes('verified') && !card.includes('in review'));
 
 /* 8 · honest degrade when the artifact is unreachable */
 {

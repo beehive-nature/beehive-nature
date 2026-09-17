@@ -85,6 +85,24 @@ guards the day one appears)" — the fact stands, the landmine stays armed for t
 (the bPay UI seat's, not this page's). recon1-oracle-verify GREEN again; lesson banked: prose
 under surfaces/ names steps, never route strings guarded by tripwires.
 
+## MERGE-SYNC (2026-09-17, before merge — the first wake trigger fired DURING review)
+
+While this PR sat, #113 (Phase A invoice) AND #114 (Phase B chooser) merged — main moved to
+ac4a783d and this branch conflicted on exactly the predicted shared file (lang-corpus.json).
+Sync performed under the ordinary discipline: corpus conflict resolved by taking main's
+corpus and re-running this lane's writer (1789 + 112 = 1901 keys, both sides intact);
+lang-corpus bust bumped v25→v26 (both sides changed the corpus). And the founder's FIRST
+listed wake trigger — "#113/Phase B lands → Engine Room learns about the real quote/policy
+evidence" — is already satisfied: `scripts/build-stack-dataflow.mjs` now parses the LANDED
+quote receipt (markdown table, read at source: total ANT row, chunks row, payment_type row),
+the card renders the REAL figure (4.245934921875 ANT · 56 quotes · wave_batch) and the
+ANT-quote chip upgraded NEXT→verified (newer evidence upgrades the RENDER, never the frozen
+intake record). Stale prose retired: "(PR #113, in review…)" → "(PR #113, merged 5e1f3cf6)"
+and "the chooser … Phase B" → "PR #114 (merged)" — tongue-neutral reference tokens, names
+never translated. e2e assertions FLIPPED from no-invented-figure to
+mechanical-from-quote-receipt (30/30). A9c re-checked on the merged tree: GREEN, no
+surfaces/*.html carries the route string — the landmine stays armed for the real surface.
+
 ## BOUNDARY NOT CROSSED
 
 No edits to PR #113's files (wallet.html, bpay-invoice.*, its dispatch/receipt/e2e) — the

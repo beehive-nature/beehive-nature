@@ -52,6 +52,7 @@ for (const [needle, [key, expect]] of Object.entries(boardMap)) {
   if (!raw.startsWith(expect)) miss.push('state board ' + needle + ': expected ' + expect + ', read ' + raw);
   board.push({ k: key, status: STATUS[expect] });
 }
+// (the quote-chip upgrade lives after the quote block below, where quote is in scope)
 
 // The two doctrine stages are charter facts, not receipt rows: the privacy chooser
 // is Phase B by the merged rider (8758028e) and spending stays disabled until the
@@ -66,18 +67,23 @@ const stateBoard = [
 ];
 if (stateBoard.some(s => !s)) miss.push('state board assembly lost a row');
 
-// Optional source: the quote receipt lands with PR #113 — absent here means
-// quote:null and the page renders "in review", never an invented figure.
+// Optional source: the quote receipt landed with PR #113 — when present the quote row
+// carries the REAL figure and the board chip flips to verified (receipt-backed); when
+// absent the page renders "in review", never an invented number.
 let quote = null;
 if (existsSync(QUOTE)) {
   const q = readFileSync(QUOTE, 'utf8');
-  const mAmt = must('quote amount', /([\d.]+)\s*ANT/, q);
-  const mChunks = must('quote chunks', /(\d+) chunks/, q);
-  const mType = must('quote payment_type', /payment_type (\w+)/, q);
+  // the receipt carries its facts as a markdown table — parse rows at source, anchored
+  const mAmt = must('quote amount', /total ANT \|\s*\*\*[\d,]+ atto = ([\d.]+) ANT\*\*/, q);
+  const mChunks = must('quote chunks', /\| chunks \| (\d+) total/, q);
+  const mType = must('quote payment_type', /\| payment_type \|\s*\*\*(\w+)\*\*/, q);
   if (mAmt && mChunks && mType) {
     quote = { amountAnt: mAmt[1], quotes: Number(mChunks[1]), paymentType: mType[1], source: 'docs/receipts/bpay-quote-try-autonomi-2026-09-17.md' };
   }
 }
+// the frozen intake board said the quote was NEXT; a landed quote receipt upgrades the
+// RENDERED chip to verified (newer evidence upgrades the render, never the record itself)
+if (quote) { const qc = board.find(b => b.k === 'flow.b.quote'); if (qc) qc.status = 'verified'; }
 
 if (miss.length) {
   console.error('build-stack-dataflow: REFUSING — could not mechanically derive:');

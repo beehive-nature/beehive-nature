@@ -724,6 +724,29 @@ var WALLET_PROFILE = {
   <div class="law" id="pay-stat" style="margin-top:6px;min-height:20px">— choose a lane above —</div>
 </section>
 
+<!-- ══ bPAY — the preservation invoice (Phase A: render-only; the carried quote
+     set is the commitment, native gas stays separate, and the authorization
+     route does not exist yet — recon1-oracle A9c owns that string until the
+     Phase C re-ruling). Policy rider 2026-09-17: the sharing choice is
+     first-class BEFORE quote; this panel records the policy the quote actually
+     bound — the founder's chooser gesture is chartered, never agent-inferred. ══ -->
+<section id="bpay-sec" style="border-color:#2c4a5a">
+  <h2>🧾 <span data-i18n="wl.bpay.h">bPay — the preservation invoice</span></h2>
+  <details class="tnote" data-reg-disclose><summary data-i18n="wl.bpay.law">the chooser comes first — every figure is carried from a live, keyless network quote; this panel renders, it cannot spend</summary>
+  <p class="law">the audience choice is yours, in the chooser, before any quote; selecting 🌐 Public and
+  asking for a fresh quote sends your resolved policy to the keyless bridge — no hidden network
+  default gets promoted into a choice. 🔒 private audiences stay visibly unavailable until their
+  paths are qualified. the view toggle (newbee / raver / cypherpunk) only changes what you can
+  inspect — never the audience, never your authority. no ANT figure is typed by anyone: the bridge
+  hashed the exact file and quoted every chunk; those quotes — each a <b>quote hash + amount</b>
+  pair — are the carried commitment (INVOICE-1 law: owed is <b>derived</b>, never asserted). native
+  gas is a <b>separate</b> wallet-side obligation. when the authorization surface is earned, your own
+  button press — and only that — crosses the waiting state; no chat text, no terminal, no agent
+  receipt substitutes for it.</p></details>
+  <div id="bpay-card" class="law" style="margin-top:10px;min-height:24px;overflow-wrap:anywhere">…</div>
+</section>
+<script src="bpay-invoice.js?v=2" defer></script>
+
 <!-- ══ INSCRIPTIONS — the garden, drawn on-chain. The art is the hero: the
      piece leads, the numbers stand beside it. Every SVG here is fetched from
      the collection's own contract at read time; nothing is cached, stored, or
