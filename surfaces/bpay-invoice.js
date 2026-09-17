@@ -67,7 +67,7 @@
           count belongs to the payment adapter's transaction plan — never the quote count */
        h += '<div style="font-size:10px;opacity:.7;margin-top:2px" data-bpay-quote-obligations="' + (d.trezor_ux.quote_obligations||0) + '" data-bpay-expected-confirmations="' + (d.trezor_ux.expected_confirmations==null?'':d.trezor_ux.expected_confirmations) + '">' + T('wl.bpay.shape','payment shape on record; device confirmations will be shown from the transaction plan produced by the payment adapter — never inferred from the quote count') + '</div>';
      }
-     h += '<div style="font-size:10px;font-family:monospace;opacity:.7;margin-top:4px">' + T('wl.bpay.commit','commitment') + ' ' + (inv.commitment&&inv.commitment.digest||'') + '</div>';
+     h += '<div style="font-size:10px;font-family:monospace;opacity:.7;margin-top:4px;overflow-wrap:anywhere">' + T('wl.bpay.commit','commitment') + ' ' + (inv.commitment&&inv.commitment.digest||'') + '</div>';
      h += '<div style="margin-top:10px;padding:8px 10px;border:1px solid #1d4655;border-radius:8px;font-size:12px">';
      h +=   '<span style="color:var(--amber)">⏳</span> <b data-bpay-state="awaiting">' + T('wl.bpay.state','awaiting your authorization') + '</b>';
      h +=   '<div style="font-size:10px;opacity:.7;margin-top:2px">' + T('wl.bpay.statenote','the authorization surface is not built yet — this panel renders; it cannot spend') + '</div>';
