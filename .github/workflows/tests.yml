@@ -229,6 +229,18 @@ jobs:
       - name: RECON-1 closure battery (derives, never upgrades evidence)
         if: always()
         run: node scripts/recon1-closure.mjs
+      # RECON-1 BUILDER PROOF (zCode builder lane, 2026-09-17): the production
+      # primitive scripts/lib/recon-reconcile.mjs proven against the FROZEN
+      # closure battery — its case table extracted at runtime from the
+      # sha256-pinned frozen bytes (the spec cannot be silently weakened),
+      # cross-checked against the frozen inline reference, naive comparator
+      # re-convicted through the same harness; mission behaviors (carried-quote
+      # owed, fail-closed finality, multi-asset, supersession), human-gesture
+      # surface law, persistence through a fresh child process, and source
+      # fences (no rail imports, pure derivation).
+      - name: RECON-1 primitive builder proof (vs frozen oracle)
+        if: always()
+        run: node scripts/recon1-primitive.mjs
       # PEER FUNNEL testnet runner selftest (z3.3 Order C, 2026-09-05): the
       # one-broadcast tool cannot rot — keccak + EIP-155 RLP hash vectors and
       # the sign/recover roundtrip proven every push (key parts skip cleanly
