@@ -122,6 +122,33 @@ h1{font-size:clamp(22px,4.5vw,34px);line-height:1.15;margin:8px 0 6px;font-weigh
 .empty{color:var(--dim);font-size:11.5px;margin-top:10px}
 footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint);font-size:10px;text-align:center;line-height:1.9}
 @media(max-width:640px){.combwrap{padding:5px}.detail{padding:12px}.zoombar{top:8px;right:8px}}
+/* ?? GUX-01 zGeneUI navigation layer (blood-nav.mjs) — selection, LOD, drawer */
+.hexcell.sel,button.sel{stroke:var(--gold);stroke-width:2.4px;filter:drop-shadow(0 0 6px rgba(255,215,0,.45))}
+#comb:focus-visible{outline:2px solid var(--cyan);outline-offset:4px}
+.navhint{margin-top:10px;font-size:10.5px;color:var(--gold);border:1px dashed var(--gold);border-radius:8px;padding:7px 10px}
+#world.lod-far .hextext:not(.dupmark){display:none}
+#world.lod-mid .hextext:not(.dupmark){display:none}
+#world.lod-mid .hextext:not(.dupmark)[data-ring="0"],#world.lod-mid .hextext:not(.dupmark)[data-ring="1"],
+#world.lod-mid .hextext:not(.dupmark)[data-ring="2"]{display:block}
+.drawerbar{display:none}
+@media(max-width:640px){
+ .detail{position:fixed;left:0;right:0;bottom:0;z-index:40;max-height:64vh;overflow-y:auto;
+ border-radius:16px 16px 0 0;border-bottom:0;box-shadow:0 -8px 30px rgba(0,0,0,.5);
+ transform:translateY(calc(100% - 58px));transition:transform .28s ease}
+ .detail.open{transform:none}
+ .drawerbar{display:flex;align-items:center;justify-content:space-between;gap:10px;
+ position:sticky;top:0;background:var(--panel);border-bottom:1px solid var(--line);
+ padding:8px 12px;margin:-12px -12px 10px;cursor:default}
+ .drawerbar span{font:600 12px 'IBM Plex Mono',monospace;color:var(--gold);
+ white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+ .drawerbar button{background:none;border:1px solid var(--line);border-radius:7px;color:var(--dim);
+ width:30px;height:30px;flex:0 0 30px;cursor:pointer;font-size:13px;line-height:1}
+ .drawerbar button:hover{border-color:var(--gold);color:var(--gold)}
+}
+@media(prefers-reduced-motion:reduce){
+ #world{transition:none!important}
+ *{scroll-behavior:auto!important}
+}
 </style>
 </head>
 <body>
@@ -200,7 +227,7 @@ footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint
 <div class="legend" id="legend"></div>
 
 <div class="combwrap">
-  <svg id="comb" viewBox="0 0 1080 560" role="application" aria-label="fractal hexagonal fan chart — zoom, pan, click cells; list view below">
+  <svg id="comb" tabindex="0" viewBox="0 0 1080 560" role="application" aria-label="fractal hexagonal fan chart — zoom, pan, click cells; list view below">
     <g id="world"></g>
   </svg>
   <div id="treeview" aria-label="ancestor tree view"></div>
@@ -284,6 +311,11 @@ footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint
     drawPedigree();showRootNote();renderTrail();renderList();
     if(pm&&S.persons[pm[1]]){showDetail(pm[1]);document.getElementById("detail").scrollIntoView();}
     else if(/myth/.test(location.hash)&&RAG){showDetail(RAG);var d0=document.querySelector('#dbody details');if(d0)d0.open=true;}
+    // GUX-01 zGeneUI: hand the booted comb to the navigation module (the
+    // deferred type=module loads after this classic script; both load orders
+    // converge on wire()+onReady())
+    globalThis.__bloodReady=true;
+    if(globalThis.BloodNav&&BloodNav.wire){BloodNav.wire(globalThis.BloodComb);BloodNav.onReady();}
   })
   .catch(()=>{document.getElementById('stats').textContent='could not load the corpus';});
 
@@ -526,6 +558,7 @@ footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint
   function applyView(instant){
     if(instant)world.classList.add('instant');else world.classList.remove('instant');
     world.setAttribute('transform','translate('+view.tx+' '+view.ty+') scale('+view.s+')');
+    if(globalThis.BloodNav&&BloodNav.onZoom)BloodNav.onZoom(view.s);
     if(instant)requestAnimationFrame(function(){world.classList.remove('instant');});
   }
   function centerOn(x,y,instant,keepScale){
@@ -581,7 +614,7 @@ footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint
       var p=S.persons[id];
       if(placed[id]){ // repeated ancestor: connected view of ONE person, not a duplicate
         var d=document.createElementNS(NS,'polygon');
-        d.setAttribute('points',hexPts(x,y,HS));d.setAttribute('class','hexcell dup');
+        d.setAttribute('points',hexPts(x,y,HS));d.setAttribute('class','hexcell dup');d.setAttribute('data-pid',id);
         d.setAttribute('fill',TIER_COLOR[(p&&p.evidence&&p.evidence.class)||'unrecorded']);
         var t=document.createElementNS(NS,'title');
         t.textContent=(p?p.name:id)+' — same person, also placed nearer the root (pedigree collapse)';
@@ -597,6 +630,7 @@ footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint
       g.setAttribute('points',hexPts(x,y,HS));
       var chrono=false;
       g.setAttribute('class','hexcell'+(S.spineOn&&S.spineIds.has(id)?' spine':''));
+      g.setAttribute('data-pid',id);
       g.setAttribute('fill',TIER_COLOR[p.evidence&&p.evidence.class||'unrecorded']);
       g.setAttribute('fill-opacity',ring===0?'0.95':'0.62');
       var t=document.createElementNS(NS,'title');
@@ -608,6 +642,7 @@ footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint
       tx.setAttribute('x',x);tx.setAttribute('y',y+3);tx.setAttribute('class','hextext');
       tx.setAttribute('text-anchor','middle');tx.setAttribute('font-size',ring<=1?'10':'8.5');
       tx.setAttribute('pointer-events','none');
+      tx.setAttribute('data-ring',String(ring));
       tx.textContent=nm.length>14?nm.slice(0,13)+'…':nm;
       world.appendChild(tx);
       if(ring>=RINGS)return;
@@ -633,6 +668,7 @@ footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint
           var c=document.createElementNS(NS,'polygon');
           c.setAttribute('points',hexPts(x+side*HW/2,y-1.5*HS,HS));
           c.setAttribute('class','hexcell chrono');
+          c.setAttribute('data-pid',pid);
           c.setAttribute('fill',TIER_COLOR[S.persons[pid].evidence&&S.persons[pid].evidence.class||'unrecorded']);
           var ct=document.createElementNS(NS,'title');
           ct.textContent='IMPOSSIBLE CHRONOLOGY — parent born '+pby+', child born '+cby;
@@ -670,6 +706,7 @@ footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint
     if(S.viewMode==='tree')renderTree();
     else if(S.viewMode==='ped')drawPedigree();
     else{drawComb();view.s=Math.max(view.s,0.9);centerOn(0,0,false,view.s);} // animated re-center on the new root
+    if(globalThis.BloodNav&&BloodNav.onRoot)BloodNav.onRoot(id);
   }
   function renderList(){
     var body=document.getElementById('listbody');if(!body)return;body.innerHTML='';
@@ -779,6 +816,8 @@ footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint
   }
   function showDetail(id){
     var p=S.persons[id];if(!p)return;
+    S.sel=id;
+    if(globalThis.BloodNav&&BloodNav.onSelect)BloodNav.onSelect(id);
     var body=document.getElementById('dbody'),emp=document.getElementById('dempty');
     emp.hidden=true;body.hidden=false;
     var cls=(p.evidence&&p.evidence.class)||'unrecorded';
@@ -814,6 +853,7 @@ footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint
         +(S.retrieved?' <span style="color:var(--faint)">· retrieved '+esc(S.retrieved)+'</span>':'')+'</div></div>'
         :'')
       +'<div class="dactions"><button id="reroot" data-i18n="blood.reroot">re-root the comb here</button>'
+      +'<a class="ghost" id="openarchive" style="text-decoration:none;padding:8px 14px;border:1px solid var(--line);border-radius:8px;color:var(--cyan)" href="../assets/profile-archive/lineage/persons/'+esc(id)+'.html">open the archive</a>'
       +(S.packs[id]?'<a class="ghost" style="text-decoration:none;padding:8px 14px;border:1px solid var(--line);border-radius:8px;color:var(--cyan)" href="../assets/profile-archive/lineage/'+esc(S.packs[id])+'">'+esc(langText('blood.pack','open the evidence pack'))+'</a>':'')
       +'</div>';
     body.querySelectorAll('[data-rel]').forEach(function(b){
@@ -839,6 +879,7 @@ footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint
     if(mode==='ped')drawPedigree();
     if(mode==='fan'){drawComb();view.s=Math.max(view.s,0.9);centerOn(0,0,false,view.s);}
     if(mode==='tree')renderTree();
+    if(globalThis.BloodNav&&BloodNav.onView)BloodNav.onView(mode);
   }
   document.getElementById('viewped').addEventListener('click',function(){setView('ped');});
   document.getElementById('viewfan').addEventListener('click',function(){setView('fan');});
@@ -891,6 +932,7 @@ footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint
       var hex=document.createElementNS(NS,'polygon');
       hex.setAttribute('points',hexPts(x,y,PS));
       hex.setAttribute('class','hexcell'+(isDup?' dup':'')+(S.spineOn&&S.spineIds.has(id)?' spine':''));
+hex.setAttribute('data-pid',id);
       hex.setAttribute('fill',TIER_COLOR[p.evidence&&p.evidence.class||'unrecorded']);
       hex.setAttribute('fill-opacity',g===0?'0.95':'0.62');
       var t=document.createElementNS(NS,'title');
@@ -903,7 +945,7 @@ footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint
       var tx=document.createElementNS(NS,'text');
       tx.setAttribute('x',x);tx.setAttribute('y',y-2);tx.setAttribute('class','hextext');
       tx.setAttribute('text-anchor','middle');tx.setAttribute('font-size',g===0?'9':'7.5');
-      tx.setAttribute('pointer-events','none');
+      tx.setAttribute('pointer-events','none');tx.setAttribute('data-ring',String(g));
       tx.textContent=nm.length>16?nm.slice(0,15)+'…':nm;
       world.appendChild(tx);
       var yr=p.lifespan&&!p.living?String(p.lifespan).split('–')[0]:'';
@@ -962,6 +1004,7 @@ footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint
       var li=document.createElement('li'),p=S.persons[id];
       if(!p)return li;
       var b=document.createElement('button');
+      b.setAttribute('data-pid',id);
       b.innerHTML=esc(p.name||id)+' <span class="yrs">'+esc(p.lifespan||'')+'</span> '+
         '<span class="era" style="color:'+TIER_COLOR[p.evidence&&p.evidence.class||'unrecorded']+'">'+esc(p.evidence?p.evidence.class:'?')+'</span>';
       b.addEventListener('click',function(){showDetail(id);});
@@ -1004,7 +1047,7 @@ footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint
     if(v.length<2)return;
     var hits=[];
     for(var id in S.persons){var p=S.persons[id];
-      if((p.name||'').toLowerCase().indexOf(v)>=0||id.toLowerCase()===v||S.refsIndex[v.toUpperCase()]===id){hits.push(id);if(hits.length>=8)break;}}
+      if((p.name||'').toLowerCase().indexOf(v)>=0||id.toLowerCase()===v||S.refsIndex[v.toUpperCase()]===id){hits.push(id);if(hits.length>=12)break;}}
     hits.forEach(function(hid){
       var b=document.createElement('button');
       b.textContent=(S.persons[hid].name||hid)+(S.persons[hid].lifespan?' · '+S.persons[hid].lifespan:'');
@@ -1013,9 +1056,17 @@ footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint
     if(!hits.length){var e2=document.createElement('button');e2.disabled=true;
       e2.textContent=langText('blood.notfound','no ancestor by that name in the archive');e2.style.opacity=.6;out.appendChild(e2);}
   });
+  // GUX-01 zGeneUI: the stable seam blood-nav.mjs wires against. Rendering
+  // stays here; navigation state (selection, keyboard, hash context, LOD,
+  // drawer, drag-safety) lives in the module, unit-tested in tools/genealogy.
+  globalThis.BloodComb={S:S,view:view,doc:document,
+    setRoot:setRoot,showDetail:showDetail,setView:setView,
+    redrawCurrent:redrawCurrent,centerOn:centerOn,
+    applyViewInstant:function(){applyView(true);},esc:esc,langText:langText};
   try{var st=JSON.parse(localStorage.getItem('blood-staged')||'[]');if(st.length)S.staged=st;}catch(e){}
 })();
 </script>
+<script type="module" src="./blood-nav.mjs?v=1"></script>
 <script src="tour.js?v=42"></script>
 </body>
 </html>
