@@ -80,3 +80,15 @@ hand-patched buzz-acp.exe observer fix + canonical-auth build).
 Seat-hygiene notes: sherpa .a aliases + gnu-named sidecar binary copies are
 untracked local build aids in the wt; stash `pre-rebase-assess` (fork Cargo.lock
 tweak) left in place.
+
+## ADDENDUM 2026-09-18 (~12:20 local) — BUG-A UI ACCEPTANCE: QR RENDERS
+
+Driven from this seat through the app itself (computer-use, element-precise):
+Buzz (0.5.21, relaunched via buzz-desktop-mesh.cmd) → profile menu → Settings
+→ Mobile. Result: URL `#/settings?section=mobile`, accessibility exposes
+`image "Mobile pairing QR code"` at 360×360 beside the three-step list
+(Scan QR code / Confirm mobile code / Pair your mobile app) + "Copy pairing
+code" button. Visual receipt (no red banner, real QR module pattern, finder
+patterns present): e2e/shots-pair-qr-2026-09-18/settings-mobile-qr.jpg.
+Remaining beat for a human hand: scan with the phone and confirm the
+six-digit code — that completes the pairing ceremony end to end.
