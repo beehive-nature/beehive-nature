@@ -114,6 +114,234 @@ export const PAGE_WALKER_SOURCE = String.raw`
   return "walker installed — call __rwStep() until queue=0, then __rwDump()";
 })`;
 
+// ── THIRD half (2026-09-18): the SOURCE/EVIDENCE harvest ────────────────────
+// The 8-dead-generations material-evidence walk. Same laws as the pedigree
+// half: pure parsers are unit-testable without a session; the page runner
+// speaks ONLY the same-origin wires the person page itself uses:
+//   GET /service/tree/tree-data/v8/person/{pid}/details
+//       -> person summary + sourceCount + parents[] (family objects)
+//   GET /service/tree/tf/person/{pid}/entityref?version=2
+//       -> entityRefs[]; value.type==="SOURCE" carries value.uri = source id,
+//          attribution (who attached, when, changeMessage) and the conclusion
+//          types the source supports (affectedConclusionTypes)
+//   GET /service/tree/links/sources/{id,id,…}?readExternalData=true
+//       -> full source records: citation line, ark record URL, title, event,
+//          evidence.facts (field-level transcription of the record)
+// The runner repairs the walk's depth-9 frontier first (the original 8-gen
+// windows stopped one generation short), then harvests per-person refs, then
+// batches the source descriptions. Checkpoints to localStorage (persons/refs
+// only — source descriptions are deterministically re-fetchable).
+
+// pure: one tf entityref response → staged source references.
+// Keeps the attribution and WHICH conclusions each source supports (the
+// evidence-layer law: evidence belongs on claims, not just people).
+export function parseEntityRefs(json) {
+  const out = { sources: [], typeCounts: {}, refsTotal: 0 };
+  const refs = Array.isArray(json?.entityRefs) ? json.entityRefs : [];
+  out.refsTotal = refs.length;
+  for (const e of refs) {
+    const ty = e?.value?.type || "UNKNOWN";
+    out.typeCounts[ty] = (out.typeCounts[ty] || 0) + 1;
+    if (ty === "SOURCE") {
+      out.sources.push({
+        id: e.value.uri,
+        modified: e.attribution?.modified ?? null,
+        contributor: e.attribution?.contributorCisId ?? e.attribution?.contributor?.id ?? null,
+        affected: (e.affectedConclusionTypes || []).map((x) => String(x).split("/").pop()),
+        originallyAttachedTo: e.originallyAttachedTo ?? null,
+        changeMessage: e.attribution?.changeMessage ?? null,
+      });
+    }
+  }
+  return out;
+}
+
+// pure: one links/sources response → staged source records (full fidelity;
+// PUBLIC projection is built by publicSourceRecord, never by omission here).
+export function parseSourceDescriptions(json) {
+  const out = [];
+  for (const s of Array.isArray(json?.sources) ? json.sources : []) {
+    if (!s || typeof s.id !== "string") continue;
+    out.push({
+      id: s.id,
+      title: s.title ?? null,
+      citation: s.citation ?? null,
+      citationSubmittedBy: s.citationSubmittedBy ?? null,
+      createdOn: s.createdOn ?? null,
+      createdBy: s.createdBy ?? null,
+      urls: Array.isArray(s.urls) ? s.urls.map((u) => ({ ...u })) : [],
+      event: s.event ? { factType: s.event.factType ?? null, place: s.event.eventPlace ?? null } : null,
+      evidence: s.evidence && Array.isArray(s.evidence.facts)
+        ? s.evidence.facts.map((f) => ({ factType: f.factType ?? null, fieldType: f.fieldType ?? null, value: f.value ?? f.fieldValue ?? null }))
+        : [],
+      notes: Array.isArray(s.notes) ? s.notes.map((n) => n.text ?? n) : [],
+      about: s.about ?? null,
+      retrieved: new Date().toISOString().slice(0, 10),
+      provider: "familysearch",
+    });
+  }
+  return out;
+}
+
+// pure: the PUBLIC projection of a source record. Living-name redaction is the
+// caller's list; anything matching is dropped/redacted with the reason kept.
+export function publicSourceRecord(record, { redactNames = [] } = {}) {
+  const names = redactNames.filter((n) => n && n.length > 2);
+  const hits = (text) => (typeof text === "string"
+    ? names.filter((n) => text.toLowerCase().includes(n.toLowerCase())) : []);
+  const scrub = (text) => {
+    const h = hits(text);
+    if (!h.length) return { text, redacted: false };
+    let t = text;
+    for (const n of h) t = t.replace(new RegExp(n.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "gi"), "[redacted-living]");
+    return { text: t, redacted: true };
+  };
+  const citation = scrub(record.citation);
+  const title = scrub(record.title);
+  const evidence = record.evidence.map((f) => {
+    const v = scrub(f.value);
+    return v.redacted ? { ...f, value: v.text, redacted: true } : f;
+  });
+  return {
+    id: record.id,
+    title: title.text,
+    citation: citation.text,
+    redactedLiving: !!(title.redacted || citation.redacted || evidence.some((f) => f.redacted)),
+    urls: record.urls.filter((u) => !u.requiresLogin).map((u) => u.url ?? u),
+    event: record.event,
+    evidence,
+    retrieved: record.retrieved,
+    provider: record.provider,
+    // public projection drops: notes, changeMessages, contributor cis ids stay
+    // only as opaque attribution already embedded in the citation line.
+  };
+}
+
+// node-side: fold a raw source walk (the PAGE_SOURCE_WALKER dump) into a model.
+// Upgrades the SUPPORT axis exactly as the model law promises: "sourced" when
+// sources are actually harvested — never touching era, never downgrading
+// founder-attested standing, recording the basis string honestly.
+export function importSourceWalk(model, raw, { date = null } = {}) {
+  const day = date || new Date().toISOString().slice(0, 10);
+  let upgraded = 0;
+  for (const [fsid, r] of Object.entries(raw.refs || {})) {
+    const p = model.persons[fsid];
+    if (!p) continue;
+    const n = Array.isArray(r.sources) ? r.sources.length : 0;
+    if (!n) continue;
+    if (!p.evidence || p.evidence.support === "unsourced-entry") {
+      p.evidence = { ...(p.evidence || {}), support: "sourced", basis: `${n} FamilySearch source${n === 1 ? "" : "s"} (harvested ${day})` };
+      upgraded++;
+    } else if (p.evidence.support === "attested" || p.evidence.support === "sourced") {
+      p.evidence.basis = `${p.evidence.basis ?? ""}; ${n} FamilySearch source${n === 1 ? "" : "s"} (harvested ${day})`.replace(/^; /, "");
+    }
+    p.sources = { count: n, harvested: day, provider: "familysearch" };
+  }
+  return { upgraded };
+}
+
+// browser-side source walker (string — runs inside the signed-in tab; the
+// agent passes the payload JSON: { cohort:[{pid,dep}], danglers:[{pid,dep}],
+// known:[fsid…] }). State on window.__zb; poll it; pull with __zbDump().
+// Runner as executed 2026-09-18 (template literals flattened for embedding).
+export const PAGE_SOURCE_WALKER_SOURCE = String.raw`
+(function installSourceWalker(payloadJson){
+  const payload=JSON.parse(payloadJson);
+  const LS_KEY="__zb_source_walk_v1";
+  const S=(window.__zb=window.__zb||{startedAt:Date.now(),phase:"repair",depth:{},persons:{},refs:{},src:{},errs:{},stats:{fetched:0,ok:0,retries:0,authStreak:0},done:false,paused:null});
+  if(S.running)return{alreadyRunning:true,phase:S.phase};
+  S.running=true;
+  try{const cp=JSON.parse(localStorage.getItem(LS_KEY)||"null");
+    if(cp&&cp.persons){Object.assign(S.persons,cp.persons);Object.assign(S.refs,cp.refs||{});Object.assign(S.depth,cp.depth||{});S.resumed=true;}
+  }catch(e){S.cpErr=String(e);}
+  const known=new Set(payload.known);
+  for(const p of payload.danglers)S.depth[p.pid]=p.dep;
+  for(const p of payload.cohort)S.depth[p.pid]=p.dep;
+  const queues={repair:[],evidence:[]};
+  const repairQueued=new Set(),evidenceQueued=new Set();
+  const qRepair=(pid,dep)=>{if(dep>9||S.persons[pid]||repairQueued.has(pid))return;repairQueued.add(pid);S.depth[pid]=Math.min(S.depth[pid]??dep,dep);queues.repair.push({pid,dep});};
+  const qEvidence=(pid)=>{if(evidenceQueued.has(pid)||S.refs[pid])return;evidenceQueued.add(pid);queues.evidence.push(pid);};
+  for(const p of payload.danglers)qRepair(p.pid,p.dep);
+  for(const p of payload.cohort)qEvidence(p.pid);
+  let lastStart=0;
+  const gate=()=>new Promise((r)=>{const w=Math.max(0,160-(Date.now()-lastStart));setTimeout(()=>{lastStart=Date.now();r();},w);});
+  const fetchJ=async(url,tries=2)=>{for(let i=0;;i++){await gate();S.stats.fetched++;
+    try{const r=await fetch(url,{credentials:"include",headers:{Accept:"application/json"}});
+      if(r.status===401||r.status===403){S.stats.authStreak++;if(S.stats.authStreak>=6){S.paused="auth";throw new Error("auth-lost");}}
+      else S.stats.authStreak=0;
+      if(r.status===429||r.status>=500){if(i<tries){S.stats.retries++;await new Promise((x)=>setTimeout(x,900*(i+1)));continue;}}
+      const text=await r.text();let body=null;try{body=text?JSON.parse(text):null;}catch(e){body={_raw:text.slice(0,200)};}
+      return{status:r.status,body};
+    }catch(e){if(String(e.message)==="auth-lost")throw e;
+      if(i<tries){S.stats.retries++;await new Promise((x)=>setTimeout(x,900*(i+1)));continue;}
+      return{status:0,body:null,err:String(e)};}}};
+  const personSummary=(p,dep,edge)=>p&&{id:p.id,name:p.name||(p.nameConclusion&&p.nameConclusion.details&&p.nameConclusion.details.fullText)||null,
+    lifespan:p.lifespan||null,living:!!p.living,gender:p.gender||null,depth:dep,
+    sourceCount:typeof p.sourceCount==="number"?p.sourceCount:null,edge:edge};
+  const absorbV8=(pid,dep)=>{const v=S.persons[pid];if(!v||v.missing)return;
+    for(const fam of(v.__parents||[])){for(const key of["parent1","parent2"]){const par=fam&&fam[key];
+      if(!par||!par.id)continue;const pdep=dep+1;
+      if(pdep<=9&&!known.has(par.id))qRepair(par.id,pdep);
+      if(!S.persons[par.id])S.persons[par.id]=personSummary(par,pdep,"v8-parents-of:"+pid);
+      else if(S.persons[par.id].depth===undefined)S.persons[par.id].depth=pdep;}}};
+  const doRepair=async(item)=>{const pid=item.pid,dep=item.dep;
+    if(S.persons[pid]&&!S.persons[pid].missing&&S.persons[pid].edge==="dangling-repaired")return;
+    const r=await fetchJ("/service/tree/tree-data/v8/person/"+pid+"/details");
+    if(r.status===200&&r.body){const rec=personSummary(r.body,dep,"dangling-repaired")||{id:pid,missing:true};
+      rec.__parents=Array.isArray(r.body.parents)?r.body.parents:[];S.persons[pid]=rec;absorbV8(pid,dep);
+      S.stats.ok++;if(dep<=9)qEvidence(pid);}
+    else{S.persons[pid]={id:pid,depth:dep,missing:true,reason:"v8:"+r.status};S.errs["v8:"+pid]={status:r.status};}};
+  const doEvidence=async(pid)=>{const dep=S.depth[pid]??9;
+    if(S.persons[pid]&&S.persons[pid].__parents)absorbV8(pid,dep);
+    else{const r=await fetchJ("/service/tree/tree-data/v8/person/"+pid+"/details");
+      if(r.status===200&&r.body){const rec=personSummary(r.body,dep,"walked")||{id:pid,missing:true};
+        rec.__parents=Array.isArray(r.body.parents)?r.body.parents:[];
+        S.persons[pid]=Object.assign({},S.persons[pid],rec);absorbV8(pid,dep);S.stats.ok++;}
+      else if(!S.persons[pid]){S.persons[pid]={id:pid,depth:dep,missing:true,reason:"v8:"+r.status};S.errs["v8:"+pid]={status:r.status};}}
+    const t=await fetchJ("/service/tree/tf/person/"+pid+"/entityref?version=2");
+    if(t.status===200&&t.body&&Array.isArray(t.body.entityRefs)){const typeCounts={};const sources=[];
+      for(const e of t.body.entityRefs){const ty=(e.value&&e.value.type)||"UNKNOWN";typeCounts[ty]=(typeCounts[ty]||0)+1;
+        if(ty==="SOURCE"){sources.push({id:e.value.uri,modified:(e.attribution&&e.attribution.modified)||null,
+          contributor:(e.attribution&&(e.attribution.contributorCisId||(e.attribution.contributor&&e.attribution.contributor.id)))||null,
+          affected:(e.affectedConclusionTypes||[]).map((x)=>String(x).split("/").pop()),
+          originallyAttachedTo:e.originallyAttachedTo||pid,
+          changeMessage:(e.attribution&&e.attribution.changeMessage)||null});}}
+      S.refs[pid]={sources:sources,typeCounts:typeCounts,refsTotal:t.body.entityRefs.length};S.stats.ok++;}
+    else{S.refs[pid]={sources:[],typeCounts:{},refsTotal:0,err:"tf:"+t.status};S.errs["tf:"+pid]={status:t.status};}};
+  let cpCount=0;
+  const checkpoint=()=>{if(++cpCount%25!==0)return;
+    try{const persons={};for(const[k,v]of Object.entries(S.persons)){const{__parents,...rest}=v;persons[k]=rest;}
+      localStorage.setItem(LS_KEY,JSON.stringify({persons:persons,refs:S.refs,depth:S.depth}));}catch(e){S.cpErr=String(e);}};
+  const srcQueue=[];
+  const planSources=()=>{const ids=new Set();
+    for(const r of Object.values(S.refs))for(const s of r.sources){
+      if(/^[A-Z0-9]{4}-[A-Z0-9]{3}(:[0-9]+)?$/.test(s.id))ids.add(s.id);else s.nonBatchable=true;}
+    const all=[...ids].filter((i)=>!S.src[i]);
+    for(let i=0;i<all.length;i+=15)srcQueue.push(all.slice(i,i+15));
+    S.stats.sourceIdsTotal=ids.size;};
+  const doSourceBatch=async(batch)=>{if(batch.every((i)=>S.src[i]))return;
+    const r=await fetchJ("/service/tree/links/sources/"+batch.join(",")+"?readExternalData=true");
+    if(r.status===200&&r.body&&Array.isArray(r.body.sources)){for(const s of r.body.sources)if(s&&s.id)S.src[s.id]=s;S.stats.ok++;}
+    else S.errs["src:"+batch[0]]={status:r.status};};
+  (async()=>{try{
+    while(queues.repair.length){const item=queues.repair.shift();await doRepair(item);checkpoint();}
+    S.phase="evidence";let guard=0;
+    while(queues.evidence.length||queues.repair.length){if(guard++>20000)break;
+      while(queues.repair.length){const it=queues.repair.shift();await doRepair(it);checkpoint();}
+      const pid=queues.evidence.shift();if(pid){await doEvidence(pid);checkpoint();}}
+    S.phase="sources";planSources();S.stats.sourceBatches=srcQueue.length;
+    while(srcQueue.length){const b=srcQueue.shift();await doSourceBatch(b);checkpoint();}
+    S.phase="done";S.done=true;S.finishedAt=Date.now();checkpoint();
+  }catch(e){S.paused=S.paused||String(e.message||e);}finally{S.running=false;}})();
+  window.__zbDump=function(){const payload={persons:{},refs:S.refs,src:S.src,depth:S.depth,errs:S.errs,
+    meta:{startedAt:S.startedAt,finishedAt:S.finishedAt||null,stats:S.stats,phase:S.phase,method:"fs-adapter PAGE_SOURCE_WALKER (v8 details + tf entityref + links/sources), cookie session"}};
+    for(const[k,v]of Object.entries(S.persons)){const{__parents,...rest}=v;payload.persons[k]=rest;}
+    const s=JSON.stringify(payload);const CH=900000,n=Math.ceil(s.length/CH);
+    window.__zbDumpChunks=Array.from({length:n},(_,i)=>s.slice(i*CH,(i+1)*CH));
+    return{bytes:s.length,chunks:n};};
+  return{started:true,resumed:!!S.resumed,repairQueued:queues.repair.length,evidenceQueued:queues.evidence.length,phase:S.phase};
+})`;
+
 // node-side: fold a full raw walk JSON (the __rwDump output) into a model
 export function importWalk(model, raw) {
   let n = 0;

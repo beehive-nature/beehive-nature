@@ -1,0 +1,51 @@
+{
+ "schema": "skaists.sources-manifest/1",
+ "generated": "2026-09-18T23:04:15.892Z",
+ "scope": "material evidence (source references + record citations) for 8 deceased blood generations, grandparents on",
+ "root": "L627-FH9",
+ "provider": "familysearch.org (founder's signed-in session, site's own wire)",
+ "wires": [
+  "/service/tree/tree-data/v8/person/{pid}/details",
+  "/service/tree/tf/person/{pid}/entityref?version=2",
+  "/service/tree/links/sources/{ids}?readExternalData=true"
+ ],
+ "harvestMeta": {
+  "startedAt": 1789771520766,
+  "finishedAt": 1789772472077,
+  "stats": {
+   "fetched": 2502,
+   "ok": 2502,
+   "retries": 0,
+   "authStreak": 0,
+   "sourceIdsTotal": 13249,
+   "sourceBatches": 884
+  },
+  "phase": "done",
+  "method": "fs-adapter PAGE_SOURCE_WALKER (v8 details + tf entityref + links/sources), cookie session",
+  "pulledAt": "2026-09-18T23:02:52.059Z"
+ },
+ "cohortPersons": 809,
+ "byDepth": {
+  "2": 4,
+  "3": 8,
+  "4": 16,
+  "5": 32,
+  "6": 60,
+  "7": 112,
+  "8": 203,
+  "9": 374
+ },
+ "sourceRefsTotal": 23673,
+ "sourcesAttached": 13589,
+ "uniqueRecords": 13249,
+ "recordsMissingDetail": 0,
+ "nonBatchableRefs": 0,
+ "redactedLiving": 0,
+ "reconciliation": {
+  "counted": 809,
+  "ok": 809,
+  "providerRefused": 0,
+  "noRefs": 0
+ },
+ "privacy": "living-flagged non-attested persons unnamed + unkeyed; citation/fact redaction by living-name list; raw transcription facts private-only"
+}
