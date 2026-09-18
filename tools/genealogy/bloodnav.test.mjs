@@ -206,3 +206,28 @@ test("wiring: search cap raised to twelve", () => {
   assert.ok(page.includes("hits.length>=12"));
   assert.ok(!page.includes("hits.length>=8"));
 });
+
+/* ---------- atlas honesty: the three counts, derived and locked to the corpus ---------- */
+
+test("atlas honesty: the page derives the three published-corpus counts", () => {
+  assert.ok(page.includes('id="atlasstats"'));
+  assert.ok(page.includes("blood.atlasstats"));
+  assert.ok(page.includes("S.atlas={"));
+});
+
+test("atlas honesty: the numbers hold on the actual corpus (10,259 / 10,097 / 1,959)", () => {
+  const c = JSON.parse(readFileSync(join(here, "../../assets/profile-archive/lineage/remington-bloodline.json"), "utf8"));
+  const published = Object.keys(c.persons || {}).length;
+  const seen = new Set([c.root]); const st = [c.root];
+  while (st.length) {
+    const id = st.pop();
+    for (const p of (c.edges[id] || [])) if (!seen.has(p)) { seen.add(p); st.push(p); }
+  }
+  let bloodline = 0; seen.forEach((id) => { if (c.persons[id]) bloodline++; });
+  let frontier = 0;
+  for (const k in (c.edges || {})) for (const p of c.edges[k]) if (!c.persons[p]) frontier++;
+  assert.equal(published, 10259);
+  assert.equal(bloodline, 10097);
+  assert.equal(bloodline, c.meta.stats.bloodlinePersons); // derivation agrees with the corpus's own receipt
+  assert.equal(frontier, 1959);
+});

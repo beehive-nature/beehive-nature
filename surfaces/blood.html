@@ -164,6 +164,7 @@ footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint
   <h1 data-i18n="blood.h">the blood comb — the eternal hexagonal fan chart</h1>
   <p class="lede" data-i18n="blood.lede">Every cell is an ancestor; the comb is the hive's own shape. Click a cell to read it, re-root to walk that line forever — the fan redraws from any person in the archive. Colors carry evidence eras; saga is never shown as documented. Sigurd Snake-in-the-Eye and the attested kin ride in with their evidence packs.</p>
   <p class="statsbar" id="stats"></p>
+<p class="statsbar" id="atlasstats"></p>
 </header>
 
 <div class="controls">
@@ -275,6 +276,16 @@ footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint
     S.persons=c.persons||{};S.edges=c.edges||{};S.root=c.root;S.curRoot=c.root;
     S.stats=(c.meta&&c.meta.stats)||{};
     S.corpusMeta=c.meta||{};S.refsIndex=(c.refsIndex||{});
+    // GUX-01 atlas honesty (founder order 996e9b6c): three counts derived from
+    // the PUBLISHED corpus itself, before overlays — the UI never casually
+    // says "your family tree has N people"; the raw-walk receipt stays separate.
+    S.atlas={
+      published:Object.keys(c.persons||{}).length,
+      bloodline:(function(){var seen=new Set([c.root]),st=[c.root];
+        while(st.length){var id=st.pop();(c.edges[id]||[]).forEach(function(p){if(!seen.has(p)){seen.add(p);st.push(p);}});}
+        var n=0;seen.forEach(function(id2){if(c.persons[id2])n++;});return n;})(),
+      frontier:(function(){var n=0;for(var k in (c.edges||{}))(c.edges[k]||[]).forEach(function(p){if(!c.persons[p])n++;});return n;})()
+    };
     S.packs=Object.assign({},(c.meta&&c.meta.packs)||{});
     (c.spine||[]).forEach(r=>{if(r.f)S.spineIds.add(r.f);});
     for(var e in S.edges)S.edges[e].forEach(p=>addChild(p,e));
@@ -535,6 +546,9 @@ footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint
       '{w} walked · {d} deceased published · {l} living redacted · spine {g} generations deep')
       .replace('{w}',S.stats.personsWalked).replace('{d}',S.stats.deceasedPublished)
       .replace('{l}',S.stats.livingRedacted).replace('{g}',S.stats.spineGenerations);
+    if(S.atlas)document.getElementById('atlasstats').textContent=langText('blood.atlasstats',
+      'atlas honesty: {p} people in this published atlas · {b} parentward bloodline members represented · {f} frontier references where ancestry continues beyond the published archive')
+      .replace('{p}',S.atlas.published).replace('{b}',S.atlas.bloodline).replace('{f}',S.atlas.frontier);
     var lg=document.getElementById('legend');lg.innerHTML='';
     [['recorded','prof.arch.blood.tier.recorded','recorded · born 1850+'],
      ['colonial','prof.arch.blood.tier.colonial','colonial · 1550–1850'],
