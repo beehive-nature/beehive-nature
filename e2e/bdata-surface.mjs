@@ -38,7 +38,32 @@ const ant = refInvoice.lines.find(l => l.asset === 'ANT');
 const recomputedCeiling = ant.quotes.reduce((s, q) => s + BigInt(q.amount_atto), 0n).toString();
 
 const server = createServer(async (req, res) => {
-  const p = (req.url === '/' ? '/bdata.html' : req.url).split('?')[0];
+  const url = (req.url || '/').split('?')[0];
+  // MOCK quote service — the founder-shaped request asserted server-side; the
+  // REAL bridge and the REAL acceptance belong to the founder alone
+  if (url === '/mock-bridge/v1/upload/prepare') {
+    let body = '';
+    for await (const chunk of req) body += chunk;
+    const parsed = JSON.parse(body);
+    if (parsed.audience !== 'public' || parsed.force_fresh !== true || parsed.artifact_sha256 !== refInvoice.domain.artifact.sha256) {
+      res.writeHead(400); res.end('MOCK: request must carry {artifact pin, audience:public, force_fresh}'); return;
+    }
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({
+      upload_id: 'up-MOCK', artifact_sha256: refInvoice.domain.artifact.sha256, artifact_bytes: refInvoice.domain.artifact.bytes,
+      total_chunks: 3, already_stored: 0, payment_type: 'wave_batch',
+      total_amount_atto: '4200000000000000000',
+      payments: [
+        { quote_hash: '0xaaaa00000000000000000000000000000000000000000000000000000000c001', amount_atto: '1500000000000000000' }, // PUBLIC-CONSTANT: synthetic mock quote id (test fixture, never a network quote)
+        { quote_hash: '0xbbbb00000000000000000000000000000000000000000000000000000000c002', amount_atto: '1400000000000000000' }, // PUBLIC-CONSTANT: synthetic mock quote id (test fixture, never a network quote)
+        { quote_hash: '0xcccc00000000000000000000000000000000000000000000000000000000c003', amount_atto: '1300000000000000000' }, // PUBLIC-CONSTANT: synthetic mock quote id (test fixture, never a network quote)
+      ],
+      policy: { audience: 'public', binding: 'founder-selected:public' },
+      note: 'MOCK-SYNTHETIC — never a network quote',
+    }));
+    return;
+  }
+  const p = (url === '/' ? '/bdata.html' : url);
   try {
     const body = await readFile(join(SURFACES, ...p.split('/').filter(Boolean)));
     res.writeHead(200, { 'content-type': MIME[extname(p)] || 'application/octet-stream' });
@@ -50,6 +75,11 @@ const origin = `http://127.0.0.1:${server.address().port}`;
 
 const browser = await chromium.launch();
 const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
+// seed the mock quote service BEFORE any page script runs (the near-miss law:
+// a post-hoc poke can miss in-memory state and fire the real bridge)
+await page.addInitScript(bridge => {
+  localStorage.setItem('bdata-v1', JSON.stringify({ inspection: 'newbee', automation: { mode: 'ask', boundAnt: '0.5' }, history: [], bridge, freshQuote: null }));
+}, origin + '/mock-bridge');
 const pageErrors = [];
 page.on('pageerror', e => pageErrors.push(String(e)));
 
@@ -82,15 +112,22 @@ const shared = await page.evaluate(() => JSON.parse(localStorage.getItem('bpay-p
 check('the gesture records in the SHARED policy key (origin: My Data)', !!(shared && shared.audience === 'public' && shared.selectedAt), JSON.stringify(shared || 'absent'));
 check('bData history appends the audience policy edition', (await page.$$eval('[data-bdata-history]', els => els.length)) === 1);
 check('origin attribution rendered ("originated in My Data")', /originated in My Data/i.test(await page.innerText('#shelf')));
-check('preserve handoff becomes ready', !!(await page.$('[data-bdata-preserve-ready]')));
-check('ONE primary affordance: the ready preserve button navigates to the wallet', await page.$$eval('[data-bdata-open-bpay]', els => els.length === 1 && els[0].tagName === 'A' && els[0].getAttribute('href') === 'wallet.html' && els[0].dataset.bdataPreserveReady === '1'));
+check('preserve handoff becomes ready', !!(await page.$('[data-bdata-quote-go]')));
+check('ONE primary affordance: Get the storage price (no navigation away)', await page.$$eval('[data-bdata-quote-go]', els => els.length === 1) && !(await page.$('[data-bdata-open-bpay]')));
 check('supersede note still present after the gesture', !!(await page.$('[data-bdata-supersede-note]')));
-// post-gesture economics block (fresh body text — the pre-gesture snapshot predates the render)
-const postText = await page.innerText('body');
-const ceilingAttr = await page.$$eval('[data-bdata-ceiling-atto]', els => els.map(e => e.dataset.bdataCeilingAtto).join(','));
-check('handoff ceiling = recomputed carried quotes', ceilingAttr === recomputedCeiling, `${ceilingAttr.slice(0, 12)}… atto`);
-check('gas separate in handoff', /Arbitrum ETH/.test(postText));
-check('nothing-paid line present', /Nothing has been paid/i.test(postText));
+check('authorize step visibly locked (payment absent by law)', !!(await page.$('[data-bdata-authorize-next]')));
+// THE PRICE, IN PLACE — bPay invoked behind the button; the mock bridge
+// (seeded pre-boot, the near-miss law) asserts the founder-shaped request
+// server-side; the observation renders on THIS page (URL never changes)
+const urlBefore = page.url();
+await page.click('[data-bdata-quote-go]');
+await page.waitForTimeout(900);
+const MOCK_TOTAL = '4200000000000000000';
+const freshAtto = await page.$$eval('[data-bdata-fresh-atto]', els => els.map(e => e.dataset.bdataFreshAtto).join(','));
+check('fresh price rendered IN PLACE (mock total, recomputed sum)', freshAtto === MOCK_TOTAL, `fresh=${freshAtto}`);
+check('page never navigated (one page, one concept)', page.url() === urlBefore, page.url());
+check('caused-by-your-choice line present', /caused by your choice/i.test(await page.innerText('body')));
+check('nothing-paid line present', /Nothing has been paid/i.test(await page.innerText('body')));
 
 // 5 · automation — first-class, persisted, supersede-not-mutate
 // (history already carries edition 1 = the ORIGIN audience gesture above)
