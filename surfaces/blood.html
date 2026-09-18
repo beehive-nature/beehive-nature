@@ -286,6 +286,15 @@ footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint
         var n=0;seen.forEach(function(id2){if(c.persons[id2])n++;});return n;})(),
       frontier:(function(){var n=0;for(var k in (c.edges||{}))(c.edges[k]||[]).forEach(function(p){if(!c.persons[p])n++;});return n;})()
     };
+    // spouse index from the corpus's own couples map (skaists.lineage/2):
+    // a spouse step is AFFINITY, never described as blood (the corpus law)
+    S.spouses={};
+    for(var ck in (c.couples||{})){var cu=c.couples[ck];
+      if(!cu||!cu.p1||!cu.p2)continue;
+      (S.spouses[cu.p1]=S.spouses[cu.p1]||[]).push(cu.p2);
+      (S.spouses[cu.p2]=S.spouses[cu.p2]||[]).push(cu.p1);}
+    // lowercase search index precomputed once (F5: no per-keystroke scan cost)
+    S.qnames={};for(var qid in (c.persons||{}))S.qnames[qid]=String(c.persons[qid].name||'').toLowerCase();
     S.packs=Object.assign({},(c.meta&&c.meta.packs)||{});
     (c.spine||[]).forEach(r=>{if(r.f)S.spineIds.add(r.f);});
     for(var e in S.edges)S.edges[e].forEach(p=>addChild(p,e));
@@ -297,6 +306,8 @@ footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint
       S.relEvidence=ov.relationshipEvidence||{};
       S.testimony=ov.testimony||[];
       S.symbolicLinks=ov.symbolicLinks||[];
+      // overlay persons join the search index too (attested overlays are people)
+      for(var qid2 in S.persons){if(!(qid2 in S.qnames))S.qnames[qid2]=String(S.persons[qid2].name||'').toLowerCase();}
     }
     var packUrls=[...new Set(Object.values(S.packs).filter(Boolean))]
       .map(function(p){return '../assets/profile-archive/lineage/'+p;});
@@ -848,6 +859,29 @@ footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint
       if(ch.length>12)rels+='<span style="color:var(--faint)">… '+(ch.length-12)+' more</span>';
       rels+='</div>';}
     var chips=tierChip(cls)+'<span class="chip">support: '+esc(sup)+'</span>';
+    var sp=(S.spouses[id]||[]).filter(function(x){return S.persons[x];});
+    if(sp.length){rels+='<div class="drels"><div class="lab">spouses & partners</div>';
+      sp.slice(0,6).forEach(function(x){rels+='<div class="layer"><button data-go="'+esc(x)+'">⚭ '+esc(nameOf(x))+(S.persons[x].lifespan?' · '+esc(S.persons[x].lifespan):'')+'</button> <span class="evtag">[marriage — affinity, never described as blood]</span></div>';});
+      if(sp.length>6)rels+='<span style="color:var(--faint)">… '+(sp.length-6)+' more</span>';
+      rels+='</div>';}
+    if(id!==S.curRoot){
+      var rr=(globalThis.BloodNav&&BloodNav.relToRoot)?BloodNav.relToRoot(id,{curRoot:S.curRoot,edges:S.edges,persons:S.persons}):null;
+      if(rr&&rr.kind==='below'){
+        rels+='<div class="drels"><div class="lab">relationship to the current root — '+esc(String(rr.generations))+' generation'+(rr.generations===1?'':'s')+' down this line</div><div class="layer">';
+        rr.steps.forEach(function(st,i){
+          if(i>0)rels+=' <span class="dim">↑'+esc(st.hop)+'→</span> ';
+          rels+='<button data-go="'+esc(st.id)+'">'+esc(st.name)+'</button>';});
+        rels+='<div class="claim">parent steps from '+esc(nameOf(id))+' up to the root '+esc(nameOf(S.curRoot))+' — sideways and downward hops render once the corrected path API lands</div></div></div>';
+      } else if(rr&&rr.kind==='above'){
+        rels+='<div class="drels"><div class="lab">relationship to the current root — '+esc(String(rr.generations))+' generation'+(rr.generations===1?'':'s')+' up: an ancestor of the current root</div><div class="layer">';
+        rr.steps.forEach(function(st,i){
+          if(i>0)rels+=' <span class="dim">↑'+esc(st.hop)+'→</span> ';
+          rels+='<button data-go="'+esc(st.id)+'">'+esc(st.name)+'</button>';});
+        rels+='<div class="claim">parent steps from the root '+esc(nameOf(S.curRoot))+' up to '+esc(nameOf(id))+' — follow the names to walk the line</div></div></div>';
+      } else if(rr&&rr.kind==='none'){
+        rels+='<div class="drels"><div class="lab">relationship to the current root</div><div class="layer" style="color:var(--dim)">no parent-step line between here and '+esc(nameOf(S.curRoot))+' in this published atlas — a different branch (or ancestry continuing beyond the published archive); press R to re-root and walk from this person; sideways hops render once the corrected path API lands</div></div>';
+      }
+    }
     if(p.living&&id===S.root)chips+='<span class="chip">'+esc(langText('blood.rootchip','the founder — living, redacted'))+'</span>';
     if(S.packs[id])chips+='<span class="chip" style="color:var(--violet)">'+esc(langText('blood.attested','attested overlay — evidence pack'))+'</span>';
     var fsref=p.refs&&p.refs.find(function(r){return r.provider==='familysearch';});
@@ -1059,12 +1093,18 @@ hex.setAttribute('data-pid',id);
   document.getElementById('q').addEventListener('input',function(){
     var v=this.value.trim().toLowerCase(),out=document.getElementById('qout');out.innerHTML='';
     if(v.length<2)return;
-    var hits=[];
-    for(var id in S.persons){var p=S.persons[id];
-      if((p.name||'').toLowerCase().indexOf(v)>=0||id.toLowerCase()===v||S.refsIndex[v.toUpperCase()]===id){hits.push(id);if(hits.length>=12)break;}}
+    var hits=[],nameHits={};
+    for(var id in S.persons){
+      if((S.qnames[id]||'').indexOf(v)>=0||id.toLowerCase()===v||S.refsIndex[v.toUpperCase()]===id){hits.push(id);var nm=S.persons[id].name||id;nameHits[nm]=(nameHits[nm]||0)+1;if(hits.length>=12)break;}}
     hits.forEach(function(hid){
       var b=document.createElement('button');
-      b.textContent=(S.persons[hid].name||hid)+(S.persons[hid].lifespan?' · '+S.persons[hid].lifespan:'');
+      var p=S.persons[hid];
+      var ctx2=(p.lifespan?' · '+p.lifespan:'')+' · '+(p.evidence?p.evidence.class:'?');
+      if((nameHits[p.name||hid]||0)>1){ // ambiguous name: distinguishing context, never a silent first-pick
+        var gc=(globalThis.BloodNav&&BloodNav.generationContext)?BloodNav.generationContext(hid,{curRoot:S.curRoot,edges:S.edges}):null;
+        ctx2+=' · '+(gc||'not on the current line');
+      }
+      b.textContent=(p.name||hid)+ctx2;
       b.addEventListener('click',function(){showDetail(hid);});
       out.appendChild(b);});
     if(!hits.length){var e2=document.createElement('button');e2.disabled=true;

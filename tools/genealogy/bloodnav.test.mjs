@@ -12,10 +12,12 @@ import { fileURLToPath } from "node:url";
 import {
   encodeCtx, decodeHash, lodFor, shouldSuppressClick,
   siblingsOf, siblingRing, stepSelection, archiveUrl, applyPlan,
+  upPath, hopLabel, relToRoot, generationContext,
 } from "../../surfaces/blood-nav.mjs";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const page = readFileSync(join(here, "../../surfaces/blood.html"), "utf8");
+const corpus = JSON.parse(readFileSync(join(here, "../../assets/profile-archive/lineage/remington-bloodline.json"), "utf8"));
 
 /* ---------- hash context ---------- */
 
@@ -230,4 +232,83 @@ test("atlas honesty: the numbers hold on the actual corpus (10,259 / 10,097 / 1,
   assert.equal(bloodline, 10097);
   assert.equal(bloodline, c.meta.stats.bloodlinePersons); // derivation agrees with the corpus's own receipt
   assert.equal(frontier, 1959);
+});
+
+/* ---------- the safe-direction relationship mount (founder order f6320450) ---------- */
+
+test("upPath: minimum-hop parent chains, cycle-safe, self, unreachable", () => {
+  const edges = { A: ["F"], F: ["G"], B: ["H"], H: ["G"], X: [] };
+  assert.deepEqual(upPath("A", "G", edges), ["A", "F", "G"]);
+  assert.deepEqual(upPath("A", "A", edges), ["A"]);
+  assert.equal(upPath("G", "A", edges), null);  // an ancestor is never reached downward
+  assert.equal(upPath("X", "G", edges), null);  // unrelated
+  assert.equal(upPath(null, "G", edges), null);
+  const cyc = { P: ["Q"], Q: ["R"], R: ["P"], S: ["P"] };
+  assert.equal(upPath("S", "Z", cyc), null);                      // no infinite loop
+  assert.deepEqual(upPath("S", "R", cyc), ["S", "P", "Q", "R"]);  // shortest way around the cycle
+});
+
+test("hopLabel follows the parent's recorded gender, unknown stays 'parent'", () => {
+  const persons = { F: { gender: "FEMALE" }, M: { gender: "MALE" }, U: {} };
+  assert.equal(hopLabel("F", persons), "mother");
+  assert.equal(hopLabel("M", persons), "father");
+  assert.equal(hopLabel("U", persons), "parent");
+  assert.equal(hopLabel("ghost", persons), "parent");
+});
+
+test("relToRoot: below / above / none / self, hops labeled", () => {
+  const edges = { root: ["M1", "F1"], M1: ["GM", "GF"], F1: [], off: [] };
+  const persons = { root: { name: "Root", gender: "MALE" }, M1: { name: "Mum", gender: "FEMALE" }, F1: { name: "Dad", gender: "MALE" }, GM: { name: "Gran", gender: "FEMALE" }, GF: {}, off: {} };
+  const below = relToRoot("root", { curRoot: "M1", edges, persons }); // root's parent is M1
+  assert.equal(below.kind, "below");
+  assert.equal(below.generations, 1);
+  assert.equal(below.steps[1].hop, "mother");
+  const above = relToRoot("GM", { curRoot: "root", edges, persons }); // GM is root's grandmother
+  assert.equal(above.kind, "above");
+  assert.equal(above.generations, 2);
+  assert.equal(above.steps[0].id, "root");
+  assert.equal(above.steps[2].id, "GM");
+  assert.equal(above.steps[2].hop, "mother");
+  assert.equal(relToRoot("off", { curRoot: "root", edges, persons }).kind, "none");
+  assert.equal(relToRoot("root", { curRoot: "root", edges, persons }).kind, "none");
+});
+
+test("generationContext: below/above/root/off the line", () => {
+  const edges = { root: ["A"], A: ["B"], B: [], off: [] };
+  const ctx = { curRoot: "root", edges };
+  assert.equal(generationContext("root", ctx), "the current root");
+  assert.equal(generationContext("A", ctx), "1 generations above the current root");
+  assert.equal(generationContext("B", ctx), "2 generations above the current root");
+  assert.equal(generationContext("off", ctx), null);
+});
+
+test("corpus: the founder journey — Donna above the founder root, off APR's line, honestly", () => {
+  const donna = corpus.refsIndex["KWCL-VNB"];
+  const apr = corpus.refsIndex["KWJ4-XBD"];
+  assert.ok(donna && apr);
+  const above = relToRoot(donna, { curRoot: corpus.root, edges: corpus.edges, persons: corpus.persons });
+  assert.equal(above.kind, "above"); // Donna is an ancestor of the founder
+  assert.equal(above.steps[above.steps.length - 1].id, donna);
+  for (const st of above.steps.slice(1)) assert.ok(["mother", "father", "parent"].includes(st.hop));
+  const below = relToRoot(corpus.root, { curRoot: apr, edges: corpus.edges, persons: corpus.persons });
+  assert.equal(below.kind, "below"); // the founder hangs off the public APR entrance
+  assert.equal(below.steps[below.steps.length - 1].id, apr);
+  assert.equal(relToRoot(donna, { curRoot: apr, edges: corpus.edges, persons: corpus.persons }).kind, "none"); // different branch — an honest boundary, not an implied empty family
+});
+
+test("corpus: the living stub pair is spouse-only — no parent line either way, affinity never blood", () => {
+  assert.equal(upPath("liv-1", "liv-2", corpus.edges), null);
+  assert.equal(upPath("liv-2", "liv-1", corpus.edges), null);
+  assert.ok(corpus.couples && Object.keys(corpus.couples).length > 4000, "couples map present for the spouse index");
+});
+
+test("wiring: the mount renders — relationship-to-root panel, spouse affinity wording, ambiguity context, spouse + search indexes", () => {
+  assert.ok(page.includes("relationship to the current root"));
+  assert.ok(page.includes("affinity, never described as blood"));
+  assert.ok(page.includes("S.spouses="));
+  assert.ok(page.includes("S.qnames="));
+  assert.ok(page.includes("BloodNav.relToRoot"));
+  assert.ok(page.includes("BloodNav.generationContext"));
+  assert.ok(page.includes("corrected path API"));
+  assert.ok(page.includes("nameHits")); // duplicate-name detection in search
 });

@@ -52,11 +52,23 @@ Tests: `tools/genealogy/bloodnav.test.mjs` — 22 tests. Pure helpers (hash enco
 - **archive.mjs not yet mounted** — per the founder order it lands as bFUzZ's committed slice first; this branch deliberately carries zero dependency on uncommitted bytes. Mount step (search index / relationship labels cross-checked through the archive API) is the next slice.
 - The "best tree" spatial design challenge (`03174e6c`) is the next slice's territory; this slice is the correctness floor it stands on.
 
+## Rider: the first mounted journey (founder orders `996e9b6c` + `f6320450`)
+
+The mount proceeded on the SAFE parent-step direction, without waiting for Archive 1.1, exactly as ordered:
+
+- **Relationship-to-root panel** (every detail panel): `relToRoot` computes a minimum-hop parent-edge chain and labels every hop (`↑mother→`, `↑father→`, `↑parent→`). Three honest outcomes: **below** (the root is an ancestor of the selection — e.g. the founder hangs 5 generations off the public Albert Perry Rockwood entrance), **above** (the selection is an ancestor of the root — e.g. Donna, 2 generations above the founder root), **none** (a different branch or ancestry beyond the published archive — rendered as an honest boundary with `R` re-root affordance, never as an implied empty family). Sideways/downward hops are NOT shipped as accepted behavior; the direction constraint lives in ONE adapter (`upPath`) to be replaced when Archive 1.1's corrected `relationshipPath` lands — no sprinkled workarounds.
+- **Spouse rows** from the corpus's own couples map: `⚭ name · lifespan [marriage — affinity, never described as blood]`. The living-stub pair (liv-1/liv-2) is corpus-test-locked as having NO parent line either way.
+- **Search ambiguity is visible** (281 ambiguous names is a feature): duplicate names among hits get distinguishing context — lifespan, era class, and generation position relative to the current focus (`N generations above/below the current root` or `not on the current line`). The UI never silently picks the first Joseph Hadlock; provider IDs stay deterministic direct identifiers; names are discovery terms.
+- **Indexes**: `S.spouses` from `couples`; `S.qnames` lowercase name index built at corpus load AND extended after overlay merge (attested overlay people stay searchable — caught in self-review before commit); duplicate-name detection over the displayed hit set only.
+- **Immutability contract honored**: the module consumes corpus/archive objects read-only; presentation derives state, never modifies archive truth.
+
+Corpus-verified at commit: Donna (KWCL-VNB) is `above` the founder root with labeled parent hops; the founder is `below` APR (5 generations); Donna vs APR-root is `none` (different branches — the honest boundary case in the founder's own journey). Suite 81/81 (50 pre-existing + 31); law checks CR=0, hex≥48 added 0; estate-check PASS.
+
 ## Next executable actions
 
-1. bFUzZ: commit the verified two-file Archive Slice 1 (founder order `03174e6c`).
-2. LoVis bee-laborer: fresh-eyes review of that committed API.
-3. zGeneUI (this seat): rebase onto the archive commit, mount the API, then the spatial tree slice.
-4. Browser seat: journey verification per above.
+1. bFUzZ: exact Slice-1 commit → byte verification → Slice 1.1 (F1/F2/F3).
+2. LoVis bee-laborer: byte-check the Slice-1 commit, then attack 1.1's path invariants with pathological apex/duplicate/cycle cases.
+3. zGeneUI (this seat): when 1.1 lands, replace the `upPath` adapter with the corrected `relationshipPath` (one place), add sideways/downward labeled hops, then the spatial "best tree" visual form.
+4. Browser seat: journey verification per the checklist posted in thread `fcd6a2fc`.
 
 *Commit authorship per the founder ruling `03174e6c`: executing seat as author, provenance in trailers, no founder impersonation, no machine Signed-off-by.*

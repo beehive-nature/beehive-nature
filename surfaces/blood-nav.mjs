@@ -127,6 +127,85 @@ export function archiveUrl(id) {
   return '../assets/profile-archive/lineage/persons/' + encodeURIComponent(id) + '.html';
 }
 
+/* ---------- the safe-direction relationship adapter (founder order f6320450) ---------- */
+
+// Minimum-hop upward chain [from, ..., to] through PARENT edges only, or
+// null when `to` is not reachable upward from `from`. Every hop is a
+// child->parent step, so co-parenthood and collateral confusion are
+// impossible by construction. THE ONLY relationship traversal zGeneUI ships
+// until Archive Slice 1.1's corrected relationshipPath lands — when it does,
+// this adapter is replaced in one place, never sprinkled around the surface.
+// (archive objects are consumed read-only: presentation derives state, it
+// never modifies archive truth.)
+export function upPath(from, to, edges) {
+  if (!from || !to || !edges) return null;
+  if (from === to) return [from];
+  var prev = {}; prev[from] = null;
+  var queue = [from];
+  while (queue.length) {
+    var id = queue.shift();
+    var ps = edges[id] || [];
+    for (var i = 0; i < ps.length; i++) {
+      var p = ps[i];
+      if (p in prev) continue;
+      prev[p] = id;
+      if (p === to) {
+        var chain = [to], cur = to;
+        while (prev[cur] !== null) { cur = prev[cur]; chain.push(cur); }
+        return chain.reverse();
+      }
+      queue.push(p);
+    }
+  }
+  return null;
+}
+
+// the step label for one child->parent hop, from the parent's recorded gender
+export function hopLabel(parentId, persons) {
+  var g = persons && persons[parentId] && persons[parentId].gender;
+  if (g === 'F' || g === 'FEMALE') return 'mother';
+  if (g === 'M' || g === 'MALE') return 'father';
+  return 'parent';
+}
+
+// the relationship-to-current-root read model for the detail panel. Both
+// directions are PARENT-STEP ONLY (safe by construction, founder order
+// f6320450): 'below' = the current root is an ancestor of the selection
+// (chain sel -> ... -> root); 'above' = the selection is an ancestor of the
+// current root (chain root -> ... -> sel); hops are labeled mother/father/
+// parent. 'none' renders as an honest boundary — never an empty family,
+// never a guessed sideways/downward claim (those wait for Archive 1.1).
+export function relToRoot(selId, ctx) {
+  ctx = ctx || {};
+  if (!selId || selId === ctx.curRoot) return { kind: 'none', self: true };
+  var below = upPath(selId, ctx.curRoot, ctx.edges);
+  var above = below ? null : upPath(ctx.curRoot, selId, ctx.edges);
+  var chain = below || above;
+  if (!chain) return { kind: 'none' };
+  var steps = [];
+  for (var i = 0; i < chain.length; i++) {
+    var p = ctx.persons && ctx.persons[chain[i]];
+    steps.push({
+      id: chain[i],
+      name: p && (p.name || chain[i]) || chain[i],
+      hop: i === 0 ? null : hopLabel(chain[i], ctx.persons),
+    });
+  }
+  return { kind: below ? 'below' : 'above', steps: steps, generations: chain.length - 1 };
+}
+
+// generation context for ambiguous-name disambiguation in search: where a
+// candidate sits relative to the current focus, or null when off the line.
+export function generationContext(selId, ctx) {
+  ctx = ctx || {};
+  if (selId === ctx.curRoot) return 'the current root';
+  var down = upPath(selId, ctx.curRoot, ctx.edges); // sel is below root
+  if (down) return (down.length - 1) + ' generations below the current root';
+  var up = upPath(ctx.curRoot, selId, ctx.edges);   // sel is above root
+  if (up) return (up.length - 1) + ' generations above the current root';
+  return null;
+}
+
 // turn a decoded context into an application plan against state S:
 // what to set first, what to skip when unknown. Zoom only applies to the
 // fractal view (pedigree/tree are not zoomable worlds).
@@ -379,7 +458,7 @@ export function wire(apiRef) {
 }
 
 /* ---------- module side effects: expose for blood.html's classic script ---------- */
-var BloodNav = { wire: wire, onReady: onReady, onSelect: onSelect, onRoot: onRoot, onView: onView, onZoom: onZoom, focusInView: focusInView };
+var BloodNav = { wire: wire, onReady: onReady, onSelect: onSelect, onRoot: onRoot, onView: onView, onZoom: onZoom, focusInView: focusInView, relToRoot: relToRoot, generationContext: generationContext };
 if (typeof globalThis !== 'undefined') {
   globalThis.BloodNav = BloodNav;
   // blood.html's classic script may have finished booting before this
