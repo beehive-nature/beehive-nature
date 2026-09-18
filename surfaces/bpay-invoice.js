@@ -24,7 +24,18 @@
   var LS = 'bpay-policy-v1';
   var st = { audience:null, selectedAt:null, inspection:'newbee', bridge:BRIDGE_DEFAULT };
   try { var saved = JSON.parse(localStorage.getItem(LS)||'null'); if (saved && typeof saved==='object') st = Object.assign(st, saved); } catch(e){}
-  function save(){ try { localStorage.setItem(LS, JSON.stringify(st)); } catch(e){} }
+  /* SHARED-POLICY FIELD OWNERSHIP (ceremony-blocking repair, 2026-09-17):
+     this tab NEVER writes its whole local snapshot back — a stale tab must
+     not erase newer founder policy. Presentation/service writes carry ONLY
+     {inspection, bridge}; an explicit founder gesture writes ONLY its policy
+     fields. Every write merges with the LATEST stored object, so a View
+     change can never alter Policy (the orthogonality law). */
+  function save(fields){
+    try {
+      var latest = JSON.parse(localStorage.getItem(LS)||'null')||{};
+      localStorage.setItem(LS, JSON.stringify(Object.assign({}, latest, fields||{})));
+    } catch(e){}
+  }
   function ant(atto){ try{ var n=BigInt(atto), w=n/10n**18n, f=(n%10n**18n).toString().padStart(18,'0').replace(/0+$/,''); return f? w+'.'+f : String(w); }catch(e){ return '?'; } }
   function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;'); }
 
@@ -134,14 +145,16 @@
       b.addEventListener('click', function(){
         if (b.disabled) return;
         if (b.dataset.audience !== 'public') return; // unavailable modes are never selectable
-        st.audience = 'public'; st.selectedAt = new Date().toISOString(); save(); render();
+        st.audience = 'public'; st.selectedAt = new Date().toISOString();
+        save({ audience: 'public', selectedAt: st.selectedAt }); // policy-owned merge write — service fields of other tabs survive
+        render();
       });
     });
     card.querySelectorAll('[data-inspection]').forEach(function(b){
-      b.addEventListener('click', function(){ st.inspection = b.dataset.inspection; save(); render(); });
+      b.addEventListener('click', function(){ st.inspection = b.dataset.inspection; save({ inspection: st.inspection }); render(); });
     });
     var bridgeInput = document.getElementById('bpay-bridge');
-    if (bridgeInput) bridgeInput.addEventListener('change', function(){ st.bridge = bridgeInput.value.trim() || BRIDGE_DEFAULT; save(); });
+    if (bridgeInput) bridgeInput.addEventListener('change', function(){ st.bridge = bridgeInput.value.trim() || BRIDGE_DEFAULT; save({ bridge: st.bridge }); });
     var go = document.getElementById('bpay-quote-go');
     if (go) go.addEventListener('click', freshQuote);
   }

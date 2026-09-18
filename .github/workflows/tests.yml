@@ -531,6 +531,21 @@ jobs:
         if: always()
         working-directory: e2e
         run: node --test orb-seat.test.mjs
+      # SHARED-POLICY FIELD OWNERSHIP (ceremony-blocking repair, 2026-09-17):
+      # a View change in a stale wallet tab must NEVER erase newer founder
+      # policy from the shared key — every writer merges with the latest
+      # stored object and owns only its fields (presentation/service vs the
+      # founder-gesture policy fields audience/selectedAt). Two tabs opened
+      # BEFORE the gesture: My Data chooses Public; the stale wallet toggles
+      # its view; the shared state stays Public with the SAME selectedAt;
+      # reload — both surfaces render the founder's choice, agreeing. The
+      # wallet's own gesture path still records (merged, preserving service
+      # fields). Orthogonality law, proven in the product — not by tab
+      # discipline.
+      - name: bPay/bData — shared-policy field ownership (stale-tab repair)
+        if: always()
+        working-directory: e2e
+        run: node --test bpay-policy-ownership.test.mjs
       # The comprehension law (founder order 2026-09-16): dense technical
       # walls collapse to keyed summaries for bee/raver, stand open for
       # cypherpunk, a reader’s own tap survives register switches, the full
