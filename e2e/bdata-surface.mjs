@@ -75,6 +75,7 @@ check('supersede note: commitment exists, change requires a new quote', !!(await
 // recorded in the SHARED policy key the wallet's bPay panel reads at boot;
 // bData history appends the policy edition; the handoff becomes ready
 check('origin prompt present before the gesture (machine reference named)', /machine reference|current binding/i.test(text));
+check('pre-choice: preserve shows the waiting step (no dead hearts)', !!(await page.$('[data-bdata-preserve-waiting]')) && !(await page.$('[data-bdata-open-bpay]')));
 await page.click('[data-bdata-aud="public"]');
 await page.waitForTimeout(300);
 const shared = await page.evaluate(() => JSON.parse(localStorage.getItem('bpay-policy-v1') || 'null'));
@@ -82,14 +83,14 @@ check('the gesture records in the SHARED policy key (origin: My Data)', !!(share
 check('bData history appends the audience policy edition', (await page.$$eval('[data-bdata-history]', els => els.length)) === 1);
 check('origin attribution rendered ("originated in My Data")', /originated in My Data/i.test(await page.innerText('#shelf')));
 check('preserve handoff becomes ready', !!(await page.$('[data-bdata-preserve-ready]')));
+check('ONE primary affordance: the ready preserve button navigates to the wallet', await page.$$eval('[data-bdata-open-bpay]', els => els.length === 1 && els[0].tagName === 'A' && els[0].getAttribute('href') === 'wallet.html' && els[0].dataset.bdataPreserveReady === '1'));
 check('supersede note still present after the gesture', !!(await page.$('[data-bdata-supersede-note]')));
-
-// 4 · the bPay handoff
+// post-gesture economics block (fresh body text — the pre-gesture snapshot predates the render)
+const postText = await page.innerText('body');
 const ceilingAttr = await page.$$eval('[data-bdata-ceiling-atto]', els => els.map(e => e.dataset.bdataCeilingAtto).join(','));
 check('handoff ceiling = recomputed carried quotes', ceilingAttr === recomputedCeiling, `${ceilingAttr.slice(0, 12)}… atto`);
-check('gas separate in handoff', /Arbitrum ETH/.test(text));
-check('nothing-paid line present', /Nothing has been paid/i.test(text));
-check('wallet link present', !!(await page.$('[data-bdata-open-bpay]')));
+check('gas separate in handoff', /Arbitrum ETH/.test(postText));
+check('nothing-paid line present', /Nothing has been paid/i.test(postText));
 
 // 5 · automation — first-class, persisted, supersede-not-mutate
 // (history already carries edition 1 = the ORIGIN audience gesture above)
