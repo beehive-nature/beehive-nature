@@ -122,6 +122,47 @@ cells) · surfaces/lang.js (v25) · scripts/build-stack-dataflow.mjs (new) ·
 scripts/stack-dataflow-corpus.mjs (new) · e2e/engineflow.browser.mjs (new, 28 proofs) ·
 e2e/shots-engineflow/ (4 shots) · .github/workflows/tests.yml (+1 step) · this dispatch.
 
-STATE: complete on branch `zcode/engine-room-dataflow-2026-09-17`, PR open, all local gates
-green. NEXT OWNER: authorized merger (after #113 or before it — independent either way).
-HUMAN INTERACTION: NONE.
+STATE: MERGED @d3f9d65a (PR #116, ordinary authorized merge; three sync rounds as #113/#114/#115
+landed during review — corpus main-then-rewrite each time, bust v27, hub regenerated against the
+merged registry). THE BEE IS IN WAIT (founder order 2026-09-17: no next feature; the observability
+surface must not race the organism). WAKE TRIGGERS, founder words preserved: (1) CONSUMED AT MERGE —
+'#113/Phase B lands → Engine Room learns about the real quote/policy evidence' (the card now parses
+the landed quote receipt: 4.245934921875 ANT · 56 quotes · wave_batch; the resolved-policy half of
+this trigger — the chooser's evidence — remains open for the next wake); (2) 'Private storage earns
+qualification → Private unavailable becomes an evidence-backed transition'; (3) 'Memory isolation
+gets repaired → Engine Room gains a real memory-compartment organ'; (4) 'bAiGenT vending matures →
+Engine Room can show agent identity/runtime/memory/value physiology'. Morsel for the next wake: the
+quote receipt's data_map_address (deterministic, planned-not-stored) wants a stage-6/8 slot.
+NEXT OWNER: whoever's physiology lands first (the wakers above). HUMAN INTERACTION: NONE.
+HONESTY LEDGER: one false-green commit message was pushed during sync round 2 (claimed gates green
+while the hub-drift gate was red — the gate itself had restored HEAD's hub before the add); cured
+fix-forward in 3333d629 with the mechanism named, history unrewritten.
+
+## WAIT RATIFIED + WAKE SEMANTICS (founder ruling, second closeout 2026-09-17)
+
+WAIT confirmed; the ruling's operative words banked for whoever wakes this organ next:
+
+- **`verified` MEANS REFERENCE EVIDENCE, NOT AUTHORIZATION.** The card's 4.245934921875 ANT
+  · 56 quotes · wave_batch is the machine-selected historical quote, evidenced by its
+  receipt — it is NOT the founder-selected preservation plan. The founder-operated Phase-B
+  loop still owes: *loVis selects Public → prepare from that resolved policy → fresh
+  production quote.* A named wake trigger now exists for exactly that: "founder-selected
+  policy evidence lands → replace/reference the current machine-selected quote state
+  appropriately."
+- **OBSERVATION NEVER GROWS ACTUATORS.** The organ may read "Authority:
+  AWAITING-AUTHORIZATION → next legitimate surface: bPay" and carry you there; it must
+  never become a second place capable of authorizing payment. Same law for every RED it
+  shows (e.g. memory isolation): observation until the owning repair lane changes reality.
+- **FINDINGS ≠ CHANGED PHYSIOLOGY.** Goose-memory and Fable discoveries do not wake the
+  organ. Memory-isolation going GREEN does — and only then does the cypherpunk anatomy
+  flip its membrane ✕→✓ with hive-shared compartment and provenance-labelled injection.
+- **TOPOLOGY HELD** (founder words): Engine Room → WAIT · bFUzZ → HOLD · bFabLeAPi →
+  PARKED/BLOCKED_BALANCE · Fable subscription experiment → available when deliberately
+  opened · economic primitives → infrastructure · My Data → canonical data-management
+  organ · Max → active founder-operated preservation journey.
+- **The false-green specimen is retained, not erased** (command was run ≠ desired state
+  persisted ≠ claim is true) — cured fix-forward in 3333d629; the lesson is part of the
+  estate's evidence discipline now.
+
+The next genuinely new evidence remains the founder's hand on the product. Everything
+else can WAIT.
