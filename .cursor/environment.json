@@ -1,0 +1,17 @@
+{
+  "name": "Beehive Nature Reserve Kernel",
+  "install": "bash .cursor/install.sh",
+  "terminals": [
+    {
+      "name": "surfaces-hub",
+      "command": "python3 -m http.server 8080 --bind 0.0.0.0",
+      "description": "Serves the static estate (front door / surfaces hub). Open http://localhost:8080/ (redirects to /surfaces/index.html)."
+    }
+  ],
+  "ports": [
+    {
+      "name": "surfaces-hub",
+      "port": 8080
+    }
+  ]
+}
