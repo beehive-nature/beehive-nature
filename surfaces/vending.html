@@ -4,21 +4,35 @@
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="color-scheme" content="dark">
 <meta name="theme-color" content="#07090b">
-<title>mint your agent · skaists vending</title>
+<title>choose your bee · skaists vending</title>
 <link rel="stylesheet" href="tokens.css">
 <style>
-/* THE VENDING-CUSTOMER SURFACE — reference: the founder's vending-customer-mock.
-   One file, vanilla, tokens.css only. Every hue reads from the estate sheet;
-   the comb strip follows CANON-COMB (nectar translucent cyan -> honey amber ->
+/* THE bAiGenT CONSOLE — the vending-customer surface grown into the console
+   the founder ordered 2026-09-17: the primary action is "choose the bee
+   that does my work", never "configure a model API". Three areas — choose ·
+   my bees · work & receipts — over the same live machinery (mint, plan,
+   comb, certificate, x402 audit) that already ran receipted on jungle4.
+   One file, vanilla, tokens.css only.
+
+   SEMANTIC COLOUR — meanings picked first, every hue on this page reads one
+   meaning from the estate treaty (never reused for looks):
+     --sem-harm     var(--flag)   red    — a refusal, a failed gate, a forgery
+     --sem-solution var(--ok)     green  — a landed truth, a passed check, a live route
+     --sem-value    var(--gold)   gold   — price, the thing you keep, the machine's seal
+     --sem-system   var(--cyan)   cyan   — chain plumbing: sends, blocks, finality
+     --sem-science  var(--violet) violet — verification, hashing, the inspect layer
+   The comb strip follows CANON-COMB (nectar translucent cyan -> honey amber ->
    capped gold, one direction); FAILED renders --flag, never a new red.
    Live truth only: rate + tithe + certs + finality read from the public
    jungle4 API at load; nothing on this page is a stored snapshot. */
+:root{--sem-harm:var(--flag);--sem-solution:var(--ok);--sem-value:var(--gold);
+  --sem-system:var(--cyan);--sem-science:var(--violet)}
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{overflow-x:hidden}
 body{background:var(--bg0);color:var(--ink);
   font:13px/1.65 'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;
   padding:14px 14px 40px}
-main{max-width:462px;margin:0 auto}
+main{max-width:940px;margin:0 auto}
 .crumbs{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:10px;
   letter-spacing:.12em;text-transform:uppercase;color:var(--faint);
   padding-bottom:10px;border-bottom:1px solid var(--line)}
@@ -27,14 +41,59 @@ main{max-width:462px;margin:0 auto}
 .hd{display:flex;align-items:center;gap:12px;padding:18px 2px 8px}
 .hd .r{width:38px;height:38px;flex:none;border-radius:50%;border:1.5px solid var(--gold);
   display:grid;place-items:center;color:var(--gold);font-size:17px}
-.hd h1{font-size:var(--t-display);font-weight:600;letter-spacing:.02em;line-height:1.15}
-.hd h1 span{color:var(--gold)}
+.hd h1{font-size:clamp(21px,4.6vw,30px);font-weight:600;letter-spacing:.02em;line-height:1.18;
+  background:linear-gradient(100deg,var(--gold) 0%,var(--cyan) 58%,var(--ok) 100%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  background-color:var(--gold)}
+.hd h1 span{-webkit-background-clip:text;background-clip:text}
 .hd small{display:block;font-size:10px;color:var(--faint);letter-spacing:.14em;
   text-transform:uppercase;margin-top:3px}
+/* the console's three areas + the five working steps that never left */
+.area{padding:22px 2px 4px;font-size:var(--t-small);letter-spacing:.16em;
+  color:var(--ink);text-transform:uppercase;display:flex;align-items:center;gap:10px}
+.area::after{content:"";flex:1;border-top:1px solid var(--line)}
 .step{padding:16px 2px 6px;font-size:var(--t-small);letter-spacing:.16em;
   color:var(--dim);text-transform:uppercase}
 .card{background:var(--bg2);border:1px solid var(--line);border-radius:var(--r-lg);
   padding:14px 14px 12px}
+.panel{background:var(--bg2);border:1px solid var(--line);border-radius:var(--r-lg);
+  padding:14px 14px 12px}
+.promise{font-size:12px;color:var(--dim);line-height:1.7;margin:0 0 12px;padding:10px 12px;
+  background:var(--well);border:1px solid var(--line);border-radius:var(--r-md)}
+.promise b{color:var(--ink)}
+/* the catalog — bee cards; visible is not a promise: an unavailable bee
+   stays on the shelf, says why, and never becomes purchasable */
+.cats{display:grid;grid-template-columns:1fr;gap:10px}
+@media(min-width:721px){.cats{grid-template-columns:1fr 1fr}}
+.bcard{background:var(--bg1);border:1px solid var(--line);border-radius:var(--r-lg);
+  padding:12px 13px;cursor:pointer;transition:border-color var(--dur) var(--ease)}
+.bcard:hover{border-color:var(--dim)}
+.bcard.pick{border-color:var(--gold);box-shadow:var(--glow-gold)}
+.bcard.off{cursor:default}
+.bcard .bh{display:flex;align-items:center;gap:9px;margin-bottom:7px}
+.bcard .glyph{width:30px;height:33px;flex:none;display:grid;place-items:center;font-size:14px;
+  color:var(--gold);background:rgba(255,179,71,.10);
+  clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%)}
+.bcard.off .glyph{color:var(--faint);background:rgba(255,255,255,.04)}
+.bcard .bn{font-size:13px;font-weight:600;color:var(--ink)}
+.bcard .chip{margin-left:auto;flex:none;font-size:9px;letter-spacing:.08em;
+  text-transform:uppercase;padding:4px 8px;border-radius:99px;border:1px solid}
+.chip.live{color:var(--sem-solution);border-color:var(--sem-solution)}
+.chip.off{color:var(--faint);border-color:var(--line)}
+.chip.held{color:var(--amber);border-color:var(--amber)}
+.bcard .bq{font-size:10.5px;color:var(--faint);line-height:1.55}
+.bcard .bq b{color:var(--dim);font-weight:600}
+.bcard .bq em{color:var(--ink);font-style:normal}
+.bnote{grid-column:1/-1;font-size:11px;color:var(--dim);line-height:1.6;
+  border:1px dashed var(--line);border-radius:var(--r-md);padding:10px 12px;display:none}
+.bnote.show{display:block}
+.bnote b{color:var(--ink)}
+/* configure */
+.cfg{display:grid;grid-template-columns:1fr;gap:10px;margin-top:10px}
+.cfgtitle{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);
+  margin:12px 0 6px;display:flex;align-items:baseline;gap:8px}
+.cfgtitle:first-child{margin-top:0}
+.cfgtitle small{color:var(--faint);letter-spacing:.06em;text-transform:none;margin-left:auto}
 .field{display:flex;align-items:center;gap:8px;background:var(--well);
   border:1px solid var(--line);border-radius:var(--r-md);padding:11px 12px;margin-bottom:10px}
 .field:focus-within{border-color:var(--gold)}
@@ -44,6 +103,74 @@ main{max-width:462px;margin:0 auto}
   color:var(--gold);font:600 15px 'IBM Plex Mono',ui-monospace,monospace}
 .field select{color:var(--ink);font-weight:400;font-size:13px;appearance:none;cursor:pointer}
 .field .chev{color:var(--dim);font-size:12px;flex:none}
+.opt{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);
+  border-radius:var(--r-md);padding:9px 11px;cursor:pointer;background:var(--well);
+  margin-bottom:7px}
+.opt input{margin-top:3px;accent-color:var(--gold)}
+.opt .on{font-size:12px;color:var(--ink);font-weight:600}
+.opt .od{font-size:10px;color:var(--faint);line-height:1.6;margin-top:2px}
+.opt .od b{color:var(--dim)}
+.opt.pick{border-color:var(--gold);box-shadow:var(--glow-gold)}
+.limits{display:none;gap:8px;margin:2px 0 8px}
+.limits.show{display:flex}
+.limits .field{margin-bottom:0;flex:1}
+.limits .field label{width:64px}
+.datrow{display:flex;justify-content:space-between;gap:12px;font-size:11px;
+  padding:6px 0;border-bottom:1px dashed var(--line);line-height:1.55}
+.datrow:last-of-type{border-bottom:none}
+.datrow span{color:var(--faint)}
+.datrow b{color:var(--ink);font-weight:500;text-align:right}
+.datrow b .st{font-size:9px;letter-spacing:.08em;text-transform:uppercase;margin-left:6px}
+.st.ok{color:var(--sem-solution)} .st.hold{color:var(--amber)} .st.no{color:var(--faint)}
+.strike{text-decoration:line-through;text-decoration-color:var(--flag)}
+/* audience — permissions are never buried behind a disclosure */
+.audrow{display:flex;justify-content:space-between;gap:12px;font-size:11.5px;
+  padding:7px 0;border-bottom:1px dashed var(--line);align-items:baseline}
+.audrow:last-of-type{border-bottom:none}
+.audrow span{color:var(--dim)}
+.audrow b{color:var(--ink);font-weight:600;text-align:right;overflow-wrap:anywhere}
+.audrow b.ok{color:var(--sem-solution)}
+.audrow b.no{color:var(--faint)}
+.orth{font-size:10.5px;color:var(--faint);line-height:1.6;margin-top:8px}
+.orth b{color:var(--dim)}
+/* the storefront grid: config left, the live price sticky right on wide screens */
+.storefront{display:grid;grid-template-columns:1fr;gap:0}
+@media(min-width:721px){
+  .storefront{grid-template-columns:minmax(0,1fr) 318px;gap:16px;align-items:start}
+  .col-price{position:sticky;top:12px}
+}
+/* price + hero */
+.line{display:flex;justify-content:space-between;align-items:baseline;gap:10px;
+  font-size:13px;padding:7px 0;border-bottom:1px dashed var(--line)}
+.line:last-of-type{border-bottom:none}
+.line span small{display:block;font-size:10px;color:var(--faint);margin-top:1px}
+.line b{color:var(--ink-hi);font-weight:600;white-space:nowrap}
+.line b .a{color:var(--faint);font-size:10.5px}
+.grouplbl{font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);
+  margin:10px 0 2px}
+.total{display:flex;flex-direction:column;gap:2px;margin-top:10px;padding:10px 12px;
+  background:var(--well);border:1px solid var(--line);border-radius:var(--r-md)}
+.total .big{font-size:clamp(32px,7vw,40px);font-weight:600;color:var(--gold);
+  font-variant-numeric:tabular-nums;line-height:1.05}
+.total .l{font-size:10px;color:var(--faint);letter-spacing:.14em;text-transform:uppercase}
+.total .usd{font-size:11px;color:var(--dim);margin-top:2px}
+.total .usd b{color:var(--ink)}
+/* the pre-launch checklist */
+.avlist{margin-top:10px;border:1px solid var(--line);border-radius:var(--r-md);
+  overflow:hidden}
+.avrow{display:flex;align-items:baseline;gap:9px;padding:7px 11px;font-size:11px;
+  background:var(--well);border-bottom:1px dashed var(--line)}
+.avrow:last-child{border-bottom:none}
+.avrow .k{width:64px;flex:none;color:var(--faint);text-transform:uppercase;
+  letter-spacing:.08em;font-size:9.5px}
+.avrow .v{flex:1;color:var(--dim);line-height:1.5;min-width:0;overflow-wrap:anywhere}
+.avrow .m{flex:none;font-size:10px;font-weight:600}
+.avrow .m.ok{color:var(--sem-solution)} .avrow .m.no{color:var(--amber)}
+.avstate{margin-top:8px;font-size:11.5px;line-height:1.6;color:var(--dim)}
+.avstate.held{border:1px dashed var(--amber);border-radius:var(--r-md);padding:9px 11px}
+.avstate.held b{color:var(--amber)}
+[data-reg="cypherpunk"]:not(body){display:none}
+body[data-reg="cypherpunk"] [data-reg="cypherpunk"]:not(body){display:block}
 .sep{display:inline-block;width:10px;height:10px;background:var(--gold);
   clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);
   vertical-align:-1px;margin:0 3px;animation:seppulse 3.2s var(--ease) infinite}
@@ -54,16 +181,6 @@ main{max-width:462px;margin:0 auto}
 .lawline .good{color:var(--ok)}
 .note{font-size:11.5px;color:var(--dim);line-height:1.55;margin-top:8px}
 .note b{color:var(--ink);font-weight:600}
-.line{display:flex;justify-content:space-between;align-items:baseline;gap:10px;
-  font-size:13px;padding:7px 0;border-bottom:1px dashed var(--line)}
-.line:last-of-type{border-bottom:none}
-.line span small{display:block;font-size:10px;color:var(--faint);margin-top:1px}
-.line b{color:var(--ink-hi);font-weight:600;white-space:nowrap}
-.line b .a{color:var(--faint);font-size:10.5px}
-.total{display:flex;justify-content:space-between;align-items:baseline;margin-top:6px}
-.total .big{font-size:clamp(26px,7vw,32px);font-weight:600;color:var(--gold);
-  font-variant-numeric:tabular-nums}
-.total .sub{font-size:11px;color:var(--faint)}
 .btn{display:block;width:100%;margin-top:12px;background:var(--gold);color:var(--bg0);
   border:none;border-radius:var(--r-lg);padding:15px;font:600 15px 'IBM Plex Mono',monospace;
   text-align:center;cursor:pointer;box-shadow:var(--glow-gold)}
@@ -103,6 +220,29 @@ main{max-width:462px;margin:0 auto}
   font-variant-numeric:tabular-nums}
 #afterplan.show{display:block;color:var(--dim)}
 .checked.nm{border-bottom:1px dashed var(--faint);display:inline-block}
+/* my bees */
+.bees{display:flex;flex-direction:column;gap:8px}
+.bee{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;font-size:11.5px;
+  background:var(--well);border:1px solid var(--line);border-radius:var(--r-md);
+  padding:9px 11px}
+.bee .nm{font-weight:600;color:var(--ink);font-size:12.5px;overflow-wrap:anywhere}
+.bee .nm .a{color:var(--gold)}
+.bee .meta{color:var(--faint);font-size:10px}
+.bee .fin{color:var(--ok);font-weight:600;font-size:10px;margin-left:auto}
+.bee a{color:var(--gold);text-decoration:none;border-bottom:1px dashed var(--gold);
+  font-size:10.5px}
+.bee .warn{color:var(--amber)}
+/* receipts */
+.rcpt{display:flex;flex-direction:column;gap:7px}
+.rrow{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;font-size:10.5px;
+  color:var(--dim);background:var(--well);border:1px solid var(--line);
+  border-radius:var(--r-md);padding:8px 11px;line-height:1.5}
+.rrow a{color:var(--gold);text-decoration:none;border-bottom:1px dashed var(--gold);
+  word-break:break-all}
+.rrow .tag{flex:none;font-size:9px;letter-spacing:.1em;text-transform:uppercase;
+  border:1px solid var(--line);border-radius:99px;padding:2px 8px;color:var(--faint)}
+.rrow .tag.ok{color:var(--ok);border-color:var(--ok)}
+.rrow .tag.hold{color:var(--amber);border-color:var(--amber)}
 /* the certificate */
 .cert{border:1.5px solid var(--gold);border-radius:var(--r-lg);padding:14px;background:var(--bg1)}
 .cert .t{font-size:9.5px;letter-spacing:.16em;color:var(--dim);text-transform:uppercase}
@@ -152,6 +292,7 @@ main{max-width:462px;margin:0 auto}
 #plan .what div::before{content:counter(what);position:absolute;left:2px;top:3px;
   width:17px;height:17px;border:1px solid var(--gold);border-radius:50%;
   color:var(--gold);font-size:9.5px;display:grid;place-items:center}
+#plan .what .strike{text-decoration:line-through;text-decoration-color:var(--flag)}
 .rails{display:flex;flex-direction:column;gap:7px}
 .rail{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);
   border-radius:var(--r-md);padding:9px 11px;cursor:pointer;background:var(--well)}
@@ -177,7 +318,20 @@ main{max-width:462px;margin:0 auto}
 #doorstate .held{color:var(--amber);font-weight:600}
 #doorstate code{color:var(--gold);word-break:break-all;font-size:10.5px}
 .dotted{border-bottom:1px dashed var(--faint)}
-@media (max-width:390px){.cell .s{font-size:9px}}
+details[data-reg-disclose]{border:1px dashed var(--line);border-radius:var(--r-md);
+  padding:0 11px;margin-top:8px;background:var(--well)}
+details[data-reg-disclose]>summary{list-style:none}
+details[data-reg-disclose] .dbody{padding:2px 0 10px;font-size:10.5px;color:var(--faint);
+  line-height:1.65}
+details[data-reg-disclose] .dbody b{color:var(--dim)}
+@media (max-width:600px){
+  .hd{gap:10px}
+  .cats{grid-template-columns:1fr}
+  .bcard .chip{margin-left:0;flex-basis:100%}
+  .bcard .bh{flex-wrap:wrap}
+  .cell .s{font-size:9px}
+  .bee .fin{margin-left:0;flex-basis:100%}
+}
 @media (prefers-reduced-motion:reduce){.hex.nectar.live,.hex.honey.live,.sep{animation:none}}
 </style>
 </head>
@@ -190,12 +344,91 @@ main{max-width:462px;margin:0 auto}
 <header class="hd">
   <div class="r" aria-hidden="true">⚘</div>
   <div>
-    <h1><span data-i18n="v.h1a">mint your</span> <span data-i18n="v.h1b">agent</span></h1>
+    <h1><span data-i18n="v.h1a">choose the bee that</span> <span data-i18n="v.h1b">does your work</span></h1>
     <small data-i18n="v.sub">skaists vending · keep what you make</small>
   </div>
 </header>
 
-<!-- ── 1 · NAME IT ─────────────────────────────────────────────── -->
+<div class="storefront">
+<div class="col-left">
+
+<!-- ══ AREA 1 · CHOOSE YOUR bAiGenT ═════════════════════════════ -->
+<div class="area" id="area-choose"><span data-i18n="v2.area1">choose your bAiGenT</span></div>
+<section class="panel" id="catalog" aria-label="choose your agent">
+  <p class="promise" data-i18n="v2.promise">Choose your bee. Tell it what it may do. See the full price. Keep your work.</p>
+  <div class="cats">
+    <article class="bcard pick" id="bee-genesis" role="button" tabindex="0" aria-pressed="true">
+      <div class="bh"><span class="glyph" aria-hidden="true">⚘</span>
+        <span class="bn" data-i18n="v2.b1">the genesis bee</span>
+        <span class="chip live" id="bee-genesis-chip" data-i18n="v2.av.live">available to mint</span></div>
+      <div class="bq"><b data-i18n="v2.q.does">what it does</b> — <em>stands your agent up: a house on the
+        .a rail, a birth certificate on Arweave, memory on autonomi under your key, in your tongue.</em><br>
+        <b data-i18n="v2.q.needs">what it needs access to</b> — <em>nothing of yours; the mint sends no data
+        of yours anywhere.</em><br>
+        <b data-i18n="v2.q.delivers">what it delivers</b> — <em>the agent, its certificate, and the recipe —
+        yours forever, rebuildable without us.</em><br>
+        <b data-i18n="v2.q.cost">what it may cost</b> — <em>one-time setup read live below; running usage is
+        metered per session, never auto-charged.</em><br>
+        <b data-i18n="v2.av.work">work seat not yet open</b> — <em>what is live today is the mint itself
+        (identity, house, certificate, resurrection); giving this bee work arrives with the first
+        qualified runtime.</em></div>
+    </article>
+    <article class="bcard off" id="bee-genealogy" role="button" tabindex="0" aria-pressed="false">
+      <div class="bh"><span class="glyph" aria-hidden="true">✶</span>
+        <span class="bn" data-i18n="v2.b2">the genealogy bee</span>
+        <span class="chip off" data-i18n="v2.av.notrun">not currently runnable</span></div>
+      <div class="bq"><b data-i18n="v2.q.does">what it does</b> — <em>builds source-backed family dossiers
+        and names conflicting relationships.</em><br>
+        <b data-i18n="v2.q.needs">what it needs access to</b> — <em>the archives you point it at.</em><br>
+        <b data-i18n="v2.q.delivers">what it delivers</b> — <em>dossiers with citations, layers kept
+        distinct (era ≠ support).</em><br>
+        <b data-i18n="v2.q.cost">what it may cost</b> — <em>not quotable while it is not runnable — the
+        ceremony is proven in the estate (zBlood), the service is not open.</em></div>
+    </article>
+    <article class="bcard off" id="bee-review" role="button" tabindex="0" aria-pressed="false">
+      <div class="bh"><span class="glyph" aria-hidden="true">⚖</span>
+        <span class="bn" data-i18n="v2.b3">the adversarial review bee</span>
+        <span class="chip off" data-i18n="v2.av.notrun">not currently runnable</span></div>
+      <div class="bq"><b data-i18n="v2.q.does">what it does</b> — <em>challenges claims, code and evidence
+        without silently repairing the thing under review.</em><br>
+        <b data-i18n="v2.q.needs">what it needs access to</b> — <em>the artifact to attack, read-only.</em><br>
+        <b data-i18n="v2.q.delivers">what it delivers</b> — <em>convictions and acquittals with line
+        citations.</em><br>
+        <b data-i18n="v2.q.cost">what it may cost</b> — <em>practiced inside the estate (red-first
+        batteries), not yet offered.</em></div>
+    </article>
+    <article class="bcard off" id="bee-archive" role="button" tabindex="0" aria-pressed="false">
+      <div class="bh"><span class="glyph" aria-hidden="true">⬢</span>
+        <span class="bn" data-i18n="v2.b4">the archive &amp; media bee</span>
+        <span class="chip off" data-i18n="v2.av.notrun">not currently runnable</span></div>
+      <div class="bq"><b data-i18n="v2.q.does">what it does</b> — <em>prepares, preserves, retrieves and
+        verifies approved files.</em><br>
+        <b data-i18n="v2.q.needs">what it needs access to</b> — <em>the files you hand it, under the
+        sharing policy you choose.</em><br>
+        <b data-i18n="v2.q.delivers">what it delivers</b> — <em>stored bytes plus the evidence trail:
+        quote → commitment → upload → independent retrieval → hash equality.</em><br>
+        <b data-i18n="v2.q.cost">what it may cost</b> — <em>the preservation road is live on the wallet
+        surface today; vending carries it when its Phase C earns it.</em></div>
+    </article>
+    <article class="bcard off" id="bee-builder" role="button" tabindex="0" aria-pressed="false">
+      <div class="bh"><span class="glyph" aria-hidden="true">⚒</span>
+        <span class="bn" data-i18n="v2.b5">the builder bee</span>
+        <span class="chip off" data-i18n="v2.av.notrun">not currently runnable</span></div>
+      <div class="bq"><b data-i18n="v2.q.does">what it does</b> — <em>works a bounded software task and
+        returns tested artifacts.</em><br>
+        <b data-i18n="v2.q.needs">what it needs access to</b> — <em>the one workspace you bound to the
+        task.</em><br>
+        <b data-i18n="v2.q.delivers">what it delivers</b> — <em>the change and its proofs.</em><br>
+        <b data-i18n="v2.q.cost">what it may cost</b> — <em>bounded authority rails exist (the .a law:
+        linkauth, spend caps); the work seat does not.</em></div>
+    </article>
+    <div class="bnote" id="bnote">This bee is not currently runnable. It stays on the shelf so the catalog
+      stays honest — <b>visible is not a promise</b>. When it earns its route, your work and any unused
+      allowance carry over; nothing you keep is deleted for its absence.</div>
+  </div>
+</section>
+
+<!-- ── 1 · NAME IT — the job's identity ─────────────────────────── -->
 <div class="step" id="s1" data-i18n="v.s1">1 · name it</div>
 <section class="card" aria-label="name your agent">
   <div class="field">
@@ -223,21 +456,102 @@ main{max-width:462px;margin:0 auto}
   per your tongue — and invisible look-alike characters are refused, never stripped.</p>
 </section>
 
+<!-- ── TAILOR IT — data · autonomy · resources · audience ──────── -->
+<div class="area" id="area-tailor"><span data-i18n="v2.area4">tailor it</span></div>
+<section class="panel" aria-label="tailor the work">
+  <div class="cfgtitle" data-i18n="v2.cfg.data">the permitted data</div>
+  <div class="datrow"><span>the mint itself</span><b>sends none of your data anywhere <span class="st ok">truth</span></b></div>
+  <div class="datrow"><span>its memory</span><b>autonomi · your key · deletable <span class="st ok">yours</span></b></div>
+  <div class="datrow"><span>selected people</span><b><span class="strike">not yet wired</span> <span class="st no">held</span></b></div>
+  <details data-reg-disclose>
+    <summary>where its work may run, when work begins</summary>
+    <div class="dbody">
+      <div class="datrow"><span>the estate's own box rail</span><b>Qwen3.5-4B · llama.cpp <span class="st ok">rail exists</span></b></div>
+      <div class="datrow"><span>in-pocket (W-1)</span><b>SmolLM2-360M · loads on your click, stays on your device <span class="st ok">exists</span></b></div>
+      <div class="datrow"><span>a hosted provider</span><b>sends your task to an outside provider <span class="st hold">held — not wired</span></b></div>
+      The hosted lesson is standing: a route with no credit is <b>not</b> a launchable
+      route, and discovering that after onboarding is the customer's bill, not ours.
+      A bee goes on the shelf as runnable only when its route is qualified.
+    </div>
+  </details>
+
+  <div class="cfgtitle" data-i18n="v2.cfg.aut">autonomy</div>
+  <div class="opt pick" id="aut-ask"><input type="radio" name="vaut" value="ask" checked>
+    <span><span class="on" data-i18n="v2.aut.ask">ask each time</span>
+    <span class="od">every work session asks you first — <b>no standing authority</b> is granted by this mint.</span></span></div>
+  <div class="opt" id="aut-auto"><input type="radio" name="vaut" value="auto">
+    <span><span class="on" data-i18n="v2.aut.auto">automatic within limits</span>
+    <span class="od">routine permitted work runs without asking, under the ceiling and expiry you set —
+    <b>expanding it takes a new decision from you.</b> Recorded as <b>policy now</b>: the one bound
+    enforced on-chain today is the meter's ceiling (x402, receipted below); the may-do envelope
+    (may · max_spend · max_turns · expires · human_gate) binds when the work seat opens.</span></span></div>
+  <div class="limits" id="aut-limits">
+    <div class="field"><label for="vceiling">ceiling</label>
+      <input id="vceiling" type="number" min="0.01" step="0.01" value="1.00" inputmode="decimal">
+      <span style="color:var(--faint);font-size:11px">b</span></div>
+    <div class="field"><label for="vexpiry">expires</label>
+      <select id="vexpiry"><option value="24h" selected>24 h</option>
+        <option value="7d">7 d</option><option value="30d">30 d</option></select>
+      <span class="chev">▾</span></div>
+  </div>
+  <div class="opt" id="aut-paused"><input type="radio" name="vaut" value="paused">
+    <span><span class="on" data-i18n="v2.aut.paused">paused</span>
+    <span class="od">the bee stands but starts nothing; <b>a session that cannot pay is paused,
+    never killed</b> — the meter's own law, receipted below.</span></span></div>
+
+  <div class="cfgtitle" data-i18n="v2.cfg.res">resources</div>
+  <div class="datrow"><span>one-time setup</span><b id="res-once">read live beside →</b></div>
+  <div class="datrow"><span data-i18n="v2.run">running usage</span><b>metered per session · under a ceiling signed once <span class="st hold">later</span></b></div>
+  <div class="datrow"><span>storage · network</span><b>memory writes quoted when you first store · never priced $0 <span class="st hold">later</span></b></div>
+  <div class="datrow"><span data-i18n="v2.maxauth">max authorized spend</span><b id="res-maxauth">just this mint — no standing spend</b></div>
+
+  <div class="cfgtitle" data-i18n="v2.aud.title">who can get what?</div>
+  <div class="audrow"><span data-i18n="v2.aud.cert">birth certificate</span><b class="ok" data-i18n="v2.aud.pub">public by construction</b></div>
+  <div class="audrow"><span data-i18n="v2.aud.mem">persistent memory</span><b class="ok" data-i18n="v2.aud.only">your key · deletable</b></div>
+  <div class="audrow"><span>private path</span><b class="no" data-i18n="v2.aud.priv">by design · not yet qualified</b></div>
+  <div class="audrow"><span>runtime context</span><b class="no" data-i18n="v2.aud.rt">none — until the work seat opens</b></div>
+  <div class="audrow"><span>selected people</span><b class="no"><span class="strike" data-i18n="v2.aud.sel">selected people — not yet wired</span></b></div>
+  <p class="orth" data-i18n="v2.view">views change how much you see — never what your bee may do. The audience above is settled by the architecture of the mint; the chooser (like the wallet’s) arrives with the first bee whose work product is shareable.</p>
+</section>
+</div><!-- /col-left -->
+
+<div class="col-price">
 <!-- ── 2 · THE PRICE, ALL OF IT ────────────────────────────────── -->
 <div class="step" data-i18n="v.s2">2 · the price, all of it</div>
 <section class="card" aria-label="the price, all of it">
+  <div class="grouplbl">one-time setup</div>
   <div class="line"><span id="l-mint"><span data-i18n="v.l.mint">mint</span><small id="l-mint-sub" class="dotted">reading the law rows…</small></span><b id="v-mint">—</b></div>
   <div class="line"><span><span data-i18n="v.l.ram">its room on chain</span><small id="l-ram-sub" class="dotted">≈ 462 B row · refundable if released</small></span><b id="v-ram">—</b></div>
   <div class="line"><span id="l-tithe"><span data-i18n="v.l.tithe">the tithe</span><small id="l-tithe-sub" class="dotted">reading the law rows…</small></span><b id="v-tithe">—</b></div>
   <div class="line"><span><span data-i18n="v.l.cert">its birth certificate</span><small data-i18n="v.l.certsub">Arweave · permanent · Turbo free tier carries it today</small></span><b>$0.00</b></div>
-  <div class="total"><span class="sub" id="v-total-sub" data-i18n="v.total">you pay, once</span><span class="big" id="v-total">—</span></div>
-  <button class="btn" id="vmintbtn" disabled>Mint — reading the live price…</button>
+  <div class="total pstat"><span class="l" id="v-total-sub" data-hero-caption><span data-i18n="v2.hero">once · then it’s yours · b</span> · <span id="v-total-count">machine holds —</span></span>
+    <span class="big" id="v-total" data-hero-number>—</span>
+    <span class="usd" id="v-total-usd">≈ $— reference</span></div>
+  <div class="avlist" id="avlist" aria-live="polite"></div>
+  <div class="avstate" id="avstate"></div>
+  <button class="btn" id="vmintbtn" disabled>Ready to launch — reading the live price…</button>
   <p class="note" data-i18n="v.note2">Rehearsal is free today — <b>testnet A, memo-bound</b>. The paid rails
   (<b>USDC on Base, PYUSD on its official chains</b>) are <b>held</b> until the founder names
   the machine's payment seat. <b>Card and PayPal are not available</b> — no card processor is
   wired, and nothing here touches a PayPal account (PYUSD is PayPal-issued, but it rides its
   own chains). Nothing moves until you approve the plan on the next screen.</p>  <div class="lawline" id="afterplan" style="display:none;margin-top:8px"></div>
+  <details data-reg-disclose>
+    <summary>settlement details</summary>
+    <div class="dbody">
+      <b>b</b> is this rail's counter for you: on the rehearsal rail today <b>1 b = 1 A</b>
+      (testnet). The $ figure is a reference only — live A→USD from CoinGecko, or the labeled
+      measured fallback; settlement itself is A on jungle4 to the machine's public seat
+      <b>bnrapolltest</b>, law rows read live (rate row updated <span class="lawdate">—</span>).
+      Its room on chain rides the SPEC-VENDING-2 §sizing basis (≈462 B row ≈ 0.16 A,
+      read 2026-09-01 — storage moves; the basis is cited, never silent).
+    </div>
+  </details>
 </section>
+</div><!-- /col-price -->
+</div><!-- /storefront -->
+
+<!-- ══ AREA 2 · MY BEES ═════════════════════════════════════════ -->
+<div class="area" id="area-mybees"><span data-i18n="v2.area2">my bees</span></div>
 
 <!-- ── 3 · WATCH IT LAND ───────────────────────────────────────── -->
 <div class="step" data-i18n="v.s3">3 · watch it land</div>
@@ -254,6 +568,14 @@ main{max-width:462px;margin:0 auto}
   </div>
   <div class="tx"><span class="k" data-i18n="v.tx">the mint, on the public chain</span><span id="vtx" data-i18n="v.txreading">reading the machine's recent mints…</span></div>
   <div class="checked" id="vchecked"></div>
+</section>
+
+<section class="panel" id="mybees" aria-label="my bees">
+  <div class="bees" id="bee-list"><div class="bee"><span class="nm">—</span></div></div>
+  <p class="note"><span data-i18n="v2.myb.key">yours, by key — the key road below finds your whole mint history</span>.
+  Launching means giving a bee work: the first metered session opens when the work seat exists.
+  Your bee itself <b>cannot be killed by the machine</b> — pausing is a property of sessions,
+  never of what you keep; the certificate and the recipe ride outside this estate.</p>
 </section>
 
 <!-- ── 4 · YOURS TO KEEP ───────────────────────────────────────── -->
@@ -278,19 +600,34 @@ main{max-width:462px;margin:0 auto}
   tomorrow, you could stand your agent back up, and so could anyone else.</p>
 </section>
 
+<!-- ══ AREA 3 · WORK, USAGE & RECEIPTS ══════════════════════════ -->
+<div class="area" id="area-work"><span data-i18n="v2.area3">work, usage &amp; receipts</span></div>
+<section class="panel" id="receipts" aria-label="work usage and receipts">
+  <div class="cfgtitle" data-i18n="v2.rcpt">the receipts — every line a landed transaction</div>
+  <div class="rcpt" id="rcpt-list"></div>
+  <p class="note" style="margin-bottom:0">What needs attention, honestly: the money rails are <b>held</b>
+  (the founder names the payment seat at the first paid mint — until then nothing can charge
+  you), and an unreadable route renders the shelf <b>temporarily unavailable, never deleted</b>.
+  Charges reconcile from settled evidence only — the meter's own receipt is audited in your
+  page just below.</p>
+</section>
+
 <!-- ── 5 · THE METER'S OWN RECEIPT (x402) ──────────────────────── -->
 <div class="step" id="x402-sec" data-i18n="v.s5">5 · the meter's own receipt</div>
 <section class="card" aria-label="the x402 meter receipt — session 42, audited in your page">
-  <p class="note" style="margin:0 0 10px">The machine that charges you is itself metered:
-  <b>credit lands only from settled single-use nonces</b> (a replayed payment credits
-  exactly once — and a settle burns its nonce <b>even at zero</b>) · charges clamp under a
-  <b>ceiling signed once</b> at open · a session that cannot pay is <b>paused, never
-  killed</b> · the tithe rides every rate row and is audited as its own split. Session 42 —
-  one metered rehearsal session on jungle4, every step a landed transaction — is re-audited
-  <b>here, in your page</b>, by the same pure 9-check law the contract pins
-  (<a href="https://github.com/beehive-nature/beehive-nature/blob/main/contracts/vending/tool/x402audit.mjs">tool/x402audit.mjs</a>,
-  held to this page's engine by a parity gate). Tap a cell to see each of the four
-  verifier states demonstrated, not asserted.</p>
+  <details data-reg-disclose open>
+    <summary>the four laws of the meter</summary>
+    <p class="note" style="margin:8px 0 10px">The machine that charges you is itself metered:
+    <b>credit lands only from settled single-use nonces</b> (a replayed payment credits
+    exactly once — and a settle burns its nonce <b>even at zero</b>) · charges clamp under a
+    <b>ceiling signed once</b> at open · a session that cannot pay is <b>paused, never
+    killed</b> · the tithe rides every rate row and is audited as its own split. Session 42 —
+    one metered rehearsal session on jungle4, every step a landed transaction — is re-audited
+    <b>here, in your page</b>, by the same pure 9-check law the contract pins
+    (<a href="https://github.com/beehive-nature/beehive-nature/blob/main/contracts/vending/tool/x402audit.mjs">tool/x402audit.mjs</a>,
+    held to this page's engine by a parity gate). Tap a cell to see each of the four
+    verifier states demonstrated, not asserted.</p>
+  </details>
   <div id="x402body" aria-live="polite" style="color:var(--dim);font-size:11px">reading the meter session…</div>
 </section>
 
@@ -313,17 +650,44 @@ main{max-width:462px;margin:0 auto}
     <div class="in">
       <h3>what you asked for</h3>
       <div class="what">
-        <div>one agent named <b id="p-name" style="color:var(--gold)">—</b>,
+        <div>the <b style="color:var(--gold)">genesis bee</b> — one agent named
+        <b id="p-name" style="color:var(--gold)">—</b>,
         house on the .a rail, speaking <span id="p-tongue">—</span>
         (<span id="p-line">—</span> line)</div>
         <div id="p-canon" style="display:none">minted as <b id="p-canonform" style="color:var(--gold)">—</b>
         — <span style="color:var(--amber)">normalized from your input</span></div>
+      </div>
+      <h3>the authority you grant</h3>
+      <div class="what">
+        <div id="p-auth-line">ask each time — every work session asks you first;
+        this mint grants no standing authority</div>
+        <div id="p-auth-limits" style="display:none">automatic within limits — sessions clamp under
+        <b id="p-ceiling" style="color:var(--gold)">—</b> b, expiring in
+        <b id="p-expiry" style="color:var(--gold)">—</b>; expanding it takes a new decision from you —
+        <b>recorded as policy</b>: the enforced bound on-chain today is the meter's ceiling, and the
+        may-do envelope binds when the work seat opens</div>
+        <div>a session that cannot pay is <b>paused, never killed</b> — your bee and your
+        work survive any gap in funding</div>
+        <div>the view pills (new bee · raver · cypherpunk) change how much you see —
+        <b>never what your bee may do</b></div>
+      </div>
+      <h3>who can get what</h3>
+      <div class="what">
+        <div>the birth certificate — <b>public by construction</b> (Arweave, permanent,
+        anyone can verify the fingerprint)</div>
+        <div>persistent memory — <b>your key, deletable</b>; its private path is by design,
+        not yet qualified</div>
+        <div>runtime context — <b>none until the work seat opens</b>; the day a runtime
+        serves work, its memory isolation renders here: VERIFIED / NOT VERIFIED</div>
+        <div><span class="strike">selected people — not yet wired</span>; the chooser arrives
+        with the first bee whose work product is shareable</div>
       </div>
       <h3>the price, all of it — itemized</h3>
       <div class="line"><span>mint<small id="p-mint-sub">—</small></span><b id="p-mint">—</b></div>
       <div class="line"><span>its room on chain<small>≈ 462 B row · refundable if released</small></span><b id="p-ram">—</b></div>
       <div class="line"><span id="p-tithe">the tithe<small id="p-tithe-sub">—</small></span><b id="p-tithe-v">—</b></div>
       <div class="line"><span>its birth certificate<small>Arweave · permanent · carried free today</small></span><b>$0.00</b></div>
+      <div class="line"><span>running usage<small>metered per session, under a ceiling signed once — nothing auto-charges</small></span><b>later</b></div>
       <div class="total"><span class="sub">you pay, once</span><span class="big" id="p-total">—</span></div>
       <h3>what happens after you approve</h3>
       <div class="what">
@@ -396,9 +760,35 @@ const post = (path, body) => fetchJSON(RPC + path, { method: 'POST',
 const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const fmt$ = x => x == null ? '$—' : (x >= 0.1 ? '$' + x.toFixed(2) : '$' + x.toFixed(3));
 
-const state = { law: null, price: null, priceKind: null, certs: [], mints: [],
-  cert: null, mint: null, info: null, ran: false, canonName: '', nameChanged: false };
+const state = { law: null, lawFailed: false, price: null, priceKind: null, certs: [], mints: [],
+  cert: null, mint: null, info: null, ran: false, canonName: '', nameChanged: false,
+  autonomy: { mode: 'ask', ceiling: 1.00, expiry: '24h' }, bee: 'genesis' };
 window.__vending = state;   // e2e readback hook
+
+/* ── the catalog — visible is not a promise; only a qualified route
+   earns "selectable". The genesis bee is the one runnable offering
+   today (rehearsal rail); every other bee stays on the shelf, says
+   why, and never becomes purchasable. ── */
+const pickBee = id => {
+  if (id !== 'genesis') {
+    const n = $('bnote'); n.classList.add('show');
+    n.setAttribute('data-bee', id);
+    return;
+  }
+  document.querySelectorAll('.bcard').forEach(b => {
+    const isG = b.id === 'bee-genesis';
+    b.classList.toggle('pick', isG);
+    b.classList.toggle('off', !isG);
+    b.setAttribute('aria-pressed', String(isG));
+  });
+  $('bnote').classList.remove('show');
+  state.bee = 'genesis';
+};
+document.querySelectorAll('.bcard').forEach(b => {
+  const id = b.id.replace('bee-', '');
+  b.addEventListener('click', () => pickBee(id));
+  b.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pickBee(id); } });
+});
 
 /* ── the tongues: the corpus, founder-priority first, native names ── */
 const TONGUES = [
@@ -442,14 +832,18 @@ async function readPrice() {
     ? 'read live (CoinGecko)' : 'unreachable — ' + state.priceKind + ' basis, labeled';
   renderPrice();
 }
+/* b is the customer's counter: on this rail today 1 b = 1 A (testnet).
+   The $ line is a reference only — settlement stays A on jungle4. */
+const totB = () => state.law ? state.law.basisA + RAM_BASIS_A + state.law.basisA * state.law.titheBp / 10000 : null;
 function renderPrice() {
   if (!state.law) { $('l-mint-sub').textContent = $('l-tithe-sub').textContent =
-    'chain unread — shown not-measured, never faked'; return; }
+    'chain unread — shown not-measured, never faked'; renderAvailability(); return; }
   const L = state.law, p = state.price;
   const mintU = p != null ? L.basisA * p : null;
   const ramU  = p != null ? RAM_BASIS_A * p : null;
   const titU  = mintU != null ? mintU * L.titheBp / 10000 : null;
   const totU  = mintU != null ? mintU + ramU + titU : null;
+  const b = totB();
   $('l-mint-sub').classList.remove('dotted'); $('l-tithe-sub').classList.remove('dotted');
   $('l-mint-sub').textContent = `rate ${L.basisTxt} A · Vaulta · read live ${L.updated.slice(0, 10)}`;
   $('v-mint').innerHTML = mintU == null ? 'n/m' : `${fmt$(mintU)} <span class="a">${L.basisTxt} A</span>`;
@@ -457,16 +851,22 @@ function renderPrice() {
   $('v-ram').innerHTML = ramU == null ? 'n/m' : `${fmt$(ramU)} <span class="a">0.16 A</span>`;
   $('l-tithe-sub').textContent = `${(L.titheBp / 100).toFixed(2)}% → ${L.titheDest} · keeps the machine running · read live`;
   $('v-tithe').innerHTML = titU == null ? 'n/m' : `${fmt$(titU)} <span class="a">${(L.basisA * L.titheBp / 10000).toFixed(4)} A</span>`;
-  $('v-total').textContent = totU == null ? '—' : '$' + totU.toFixed(2);
-  $('vmintbtn').textContent = totU == null ? 'Mint — price unread' : `Mint for $${totU.toFixed(2)} →`;
-  $('vmintbtn').disabled = totU == null || !state.canonName || nameTaken();
-  $('v-total-sub').textContent = `you pay, once · machine holds ${L.count}/${L.max} (cap = 6⁵)`;
+  $('v-total').textContent = b == null ? '—' : b.toFixed(2) + ' b';
+  $('v-total-usd').innerHTML = totU == null ? '≈ $— reference'
+    : `≈ <b>$${totU.toFixed(2)}</b> reference · 1 b = 1 A on this rail`;
+  $('vmintbtn').textContent = totU == null ? 'Mint — price unread'
+    : `Mint — ${b.toFixed(2)} b (≈$${totU.toFixed(2)}) →`;
+  $('vmintbtn').disabled = totU == null || !state.canonName || nameTaken() || state.bee !== 'genesis';
+  $('v-total-count').textContent = `machine holds ${L.count}/${L.max} (cap = 6⁵)`;
+  document.querySelectorAll('.lawdate').forEach(el => el.textContent = L.updated.slice(0, 10));
+  renderResources();
+  renderAvailability();
 }
 async function readCerts() {
   const r = await post('/v1/chain/get_table_rows', { json: true, code: CONTRACT, scope: CONTRACT, table: 'certs', limit: 100 });
   state.certs = r.rows || [];
   state.cert = [...state.certs].sort((a, b) => (b.minted || '').localeCompare(a.minted || ''))[0] || null;
-  checkName(); renderCert();
+  checkName(); renderCert(); renderMyBees();
 }
 /* walk the machine's public action history for landed mints (bounded: the
    account is small; the walk stops at the first empty page) */
@@ -481,7 +881,7 @@ async function walkMints() {
     pos = acts[acts.length - 1].account_action_seq + 1; pages++;
   }
   state.mints = found;
-  renderLand();
+  renderLand(); renderMyBees(); renderReceipts();
 }
 async function tickInfo() {
   try { const i = await post('/v1/chain/get_info', {});
@@ -544,6 +944,75 @@ function checkName() {
 $('vname').addEventListener('input', checkName);
 $('vtongue').addEventListener('change', checkName);
 
+/* ── autonomy: ask each time · automatic within limits · paused.
+   A real authority mode, not decoration — it rides the plan you approve;
+   the chain row today binds the name-key, the authority grant is your
+   record, kept with your certificate copy. ── */
+function setAutonomy(mode) {
+  state.autonomy.mode = mode;
+  ['ask','auto','paused'].forEach(m => $('aut-' + m).classList.toggle('pick', m === mode));
+  $('aut-limits').classList.toggle('show', mode === 'auto');
+  renderResources();
+}
+document.querySelectorAll('input[name=vaut]').forEach(r =>
+  r.addEventListener('change', () => setAutonomy(document.querySelector('input[name=vaut]:checked').value)));
+$('vceiling').addEventListener('input', () => { state.autonomy.ceiling = Math.max(0.01, parseFloat($('vceiling').value) || 0); renderResources(); });
+$('vexpiry').addEventListener('change', () => { state.autonomy.expiry = $('vexpiry').value; renderResources(); });
+function renderResources() {
+  const b = totB();
+  $('res-once').textContent = b == null ? 'reading…' : b.toFixed(2) + ' b, once';
+  const a = state.autonomy;
+  $('res-maxauth').textContent = a.mode === 'ask' ? 'just this mint — no standing spend'
+    : a.mode === 'paused' ? 'this mint only — sessions start paused'
+    : `this mint + sessions up to ${a.ceiling.toFixed(2)} b / ${a.expiry}`;
+}
+
+/* ── the pre-launch availability gate — a recent check is honest, a
+   failed one is named. Customer copy first; the operator line stays in
+   the cypherpunk view where the plumbing lives.
+   THE MINT/WORK SPLIT (founder review 2026-09-17): the four live checks
+   qualify THE MINT, never the work — the work row renders as its own
+   held state so "available to mint" can never read as "available to
+   work". ── */
+function renderAvailability() {
+  const avRow = ([k, ok, v]) =>
+    `<div class="avrow"><span class="k">${k}</span><span class="v">${esc(v)}</span>` +
+    `<span class="m ${ok ? 'ok' : 'no'}">${ok ? '✓' : '—'}</span></div>`;
+  const rows = [
+    ['route', !!state.law, state.law ? `law rows live · updated ${state.law.updated.slice(0, 10)}`
+      : (state.lawFailed ? 'the rehearsal chain did not answer' : 'reading the law rows…')],
+    ['access', true, 'none needed — the mint sends none of your data anywhere'],
+    ['tools', !!state.canonName && !nameTaken(), state.canonName
+      ? (nameTaken() ? 'name taken — the contract refuses collisions' : 'name canonicalized · collision-free')
+      : 'waiting on a lawful name'],
+    ['funding', state.price != null, 'rehearsal rail — testnet money, free today · paid rails held'],
+  ];
+  /* the work seat: deliberately OUTSIDE the gate — it is not a failing
+     check, it is a product state (not yet open), shown as its own line */
+  const workRow = ['work', false, 'the work seat is not yet open — what is qualified today is the mint; giving a bee work arrives with the first qualified runtime'];
+  $('avlist').innerHTML = rows.map(avRow).join('') + avRow(workRow);
+  const gate = rows.every(r => r[1]);
+  const av = $('avstate'), chip = $('bee-genesis-chip');
+  if (gate) {
+    av.className = 'avstate';
+    av.textContent = 'all four live — ready to mint; the work seat opens with the first qualified runtime.';
+    chip.className = 'chip live'; chip.textContent = 'available to mint';
+  } else if (state.lawFailed || (state.law === null && !state.canonName)) {
+    /* the bFabLeAPi lesson in customer language: never let onboarding end
+       at a wall the operator knew about */
+    av.className = 'avstate held';
+    av.innerHTML = '<b>This bee is temporarily unavailable.</b> Your work and unused allowance are preserved — nothing is lost while the route is unreadable.';
+    chip.className = 'chip held'; chip.textContent = 'temporarily unavailable — preserved';
+    av.insertAdjacentHTML('beforeend',
+      '<span data-reg="cypherpunk" style="font-size:10px;color:var(--faint)">operator: route unread — ' +
+      esc(RPC) + ' /v1/chain/get_table_rows (rates·tithe·config); page degrades to named n/m states, never a fake verdict</span>');
+  } else {
+    av.className = 'avstate';
+    av.textContent = 'waiting on the checks above before the mint unlocks.';
+    chip.className = 'chip held'; chip.textContent = 'checking the route…';
+  }
+}
+
 /* ── step 3: the comb strip, driven by real tx status ── */
 function renderLand() {
   /* newest landed mint of the machine; if the customer's own name just landed,
@@ -570,6 +1039,39 @@ function renderLand() {
   const when = (m.when || '').replace('T', ' ').slice(0, 19) + ' UTC';
   $('vtx').innerHTML = `<a href="${MONITOR_TX}${esc(m.trx)}" target="_blank" rel="noopener">${esc(m.trx)}</a>` +
     ` <span class="when">· ${esc(m.name)} · ${esc(when)}</span>`;
+}
+
+/* ── area 2 · my bees — the public ledger's rows, finality from the
+   walk; no session invented, no status faked ── */
+function renderMyBees() {
+  const host = $('bee-list');
+  if (!state.certs.length) {
+    host.innerHTML = '<div class="bee"><span class="nm">no bees on this machine yet</span>' +
+      '<span class="meta">the ledger reads empty — mint the first one above</span></div>';
+    return;
+  }
+  host.innerHTML = state.certs.map(c => {
+    const m = state.mints.find(x => x.name === c.agent_name);
+    const when = (c.minted || '').replace('T', ' ').slice(0, 10);
+    return `<div class="bee"><span class="nm">${esc(c.agent_name)}<span class="a">⚘a</span></span>` +
+      `<span class="meta">${esc(c.tongue || '')} · ${esc(c.template || '')} · minted ${esc(when)}</span>` +
+      (m ? (m.irrev ? '<span class="fin">final ✓</span>' : '<span class="warn">sealing…</span>') : '') +
+      ` <a href="${MONITOR_TX}${esc(m?.trx || '')}" target="_blank" rel="noopener">tx</a>` +
+      '<span class="meta">sessions: none on record</span></div>';
+  }).join('');
+}
+
+/* ── area 3 · receipts — every landed mint plus the honest held doors ── */
+function renderReceipts() {
+  const rows = state.mints.map(m =>
+    `<div class="rrow"><span class="tag ${m.irrev ? 'ok' : 'hold'}">${m.irrev ? 'final' : 'sealing'}</span>` +
+    `<a href="${MONITOR_TX}${esc(m.trx)}" target="_blank" rel="noopener">${esc(m.trx.slice(0, 10))}…${esc(m.trx.slice(-6))}</a>` +
+    `<span>mint · ${esc(m.name)} · block ${(m.block || 0).toLocaleString('en-US')} · ${esc((m.when || '').replace('T', ' ').slice(0, 16))} UTC</span></div>`);
+  rows.push('<div class="rrow"><span class="tag hold">held</span>' +
+    '<span>money rails — the founder names the payment seat at the first paid mint; until then nothing can charge you</span></div>');
+  if (state.lawFailed) rows.unshift('<div class="rrow"><span class="tag hold">route</span>' +
+    '<span>rehearsal chain unreadable at load — the shelf held, your allowance preserved</span></div>');
+  $('rcpt-list').innerHTML = rows.join('');
 }
 
 /* ── step 4: the certificate, then the client-side resurrection ── */
@@ -689,6 +1191,16 @@ function openPlan() {
   $('p-canonform').textContent = n;
   $('p-tongue').textContent = TONGUES.find(t => t[0] === $('vtongue').value)?.[1] || $('vtongue').value;
   $('p-line').textContent = $('vline').selectedOptions[0].textContent;
+  const a = state.autonomy;
+  $('p-auth-line').style.display = a.mode === 'ask' ? '' : 'none';
+  $('p-auth-limits').style.display = a.mode === 'auto' ? '' : 'none';
+  if (a.mode === 'paused') $('p-auth-line').style.display = '';
+  if (a.mode === 'paused') $('p-auth-line').textContent =
+    'paused — the bee stands but starts nothing; a session that cannot pay is paused, never killed';
+  else $('p-auth-line').textContent =
+    'ask each time — every work session asks you first; this mint grants no standing authority';
+  $('p-ceiling').textContent = a.ceiling.toFixed(2);
+  $('p-expiry').textContent = a.expiry;
   $('p-mint-sub').textContent = `rate ${L.basisTxt} A · read live`;
   $('p-mint').innerHTML = p != null ? `${fmt$(L.basisA * p)} <span class="a">${L.basisTxt} A</span>` : 'n/m';
   $('p-ram').innerHTML = p != null ? `${fmt$(RAM_BASIS_A * p)} <span class="a">0.16 A</span>` : 'n/m';
@@ -767,10 +1279,11 @@ $('papprove').addEventListener('click', async () => {
 (async () => {
   tickInfo(); setInterval(tickInfo, 15000);
   readPrice().catch(() => {});
-  try { await readLaw(); } catch { renderPrice(); }
+  try { await readLaw(); } catch { state.lawFailed = true; renderPrice(); }
   readCerts().catch(() => { checkName(); });
   walkMints().catch(() => renderLand());
   setInterval(() => { document.visibilityState === 'visible' && walkMints().catch(() => {}); }, 45000);
+  renderAvailability();
 })();
 
 /* ── 5 · the x402 meter receipt — the audit recomputed in this page.

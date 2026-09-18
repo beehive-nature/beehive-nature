@@ -145,9 +145,139 @@ const priceTxt = await page.locator('.card').nth(1).innerText();
 ok('rate line carries the live basis', priceTxt.includes('0.6000 A'), priceTxt.split('\n')[0]);
 ok('tithe line carries the live percent + destination', priceTxt.includes('10.00%') && priceTxt.includes('kingbeelovis'));
 ok('no not-measured leaks while live', !priceTxt.includes('n/m'));
-ok('total is a real number', /^\$0\.\d/.test(await page.locator('#v-total').innerText()), await page.locator('#v-total').innerText());
+const totTxt = await page.locator('#v-total').innerText();
+const stlaw = (await st()).law;
+const wantB = (stlaw.basisA + 0.16 + stlaw.basisA * stlaw.titheBp / 10000).toFixed(2);
+ok('hero total is b-denominated and law-true', new RegExp('^' + wantB + ' b$').test(totTxt), totTxt + ' (law says ' + wantB + ')');
+ok('the $ figure rides as a labeled reference', /\$0\.\d/.test(await page.locator('#v-total-usd').innerText()), await page.locator('#v-total-usd').innerText());
+ok('payment copy truth stands — card and PayPal named unavailable',
+  priceTxt.includes('Card and PayPal are not available') && !priceTxt.includes('one tap, no network switch'), '');
 await page.locator('#s2, .step').nth(1).scrollIntoViewIfNeeded();
 await page.screenshot({ path: join(OUT, 'vending-2-price.png'), fullPage: true });
+
+/* ── THE CONSOLE (founder order 2026-09-17): choose the bee that does my
+   work — catalog honesty, autonomy, audience truth, availability gate,
+   audience⊥view orthogonality, my bees, receipts ── */
+const cards = page.locator('.bcard');
+ok('the catalog shelves five bees', (await cards.count()) === 5, String(await cards.count()));
+const cardTxts = await cards.allInnerTexts();
+ok('four bees honestly say not currently runnable',
+  cardTxts.filter(t => /not currently runnable/i.test(t)).length === 4, '');
+ok('only the genesis bee is selectable — visible is not a promise',
+  (await page.locator('.bcard.pick').count()) === 1
+  && (await page.locator('#bee-genesis').getAttribute('aria-pressed')) === 'true', '');
+await page.locator('#bee-genealogy').click();
+ok('an unavailable bee explains itself and never becomes the purchase',
+  (await page.locator('#bnote').isVisible())
+  && (await page.locator('#bnote').innerText()).includes('visible is not a promise')
+  && (await page.evaluate(() => window.__vending.bee)) === 'genesis'
+  && (await page.locator('.bcard.pick').count()) === 1, '');
+ok('clicking an unavailable bee does not select it',
+  (await page.locator('#bee-genealogy').getAttribute('aria-pressed')) === 'false', '');
+await page.locator('#bee-genesis').click();
+ok('the genesis bee re-selects', (await page.locator('#bee-genesis').getAttribute('aria-pressed')) === 'true', '');
+await page.screenshot({ path: join(OUT, 'console-1-catalog.png'), fullPage: true });
+
+/* autonomy — a real authority mode, default ask-each-time */
+ok('autonomy defaults to ask each time — no standing authority',
+  (await page.locator('#aut-ask').getAttribute('class')).includes('pick')
+  && (await page.locator('#aut-limits').isVisible()) === false, '');
+await page.check('input[name=vaut][value=auto]');
+ok('automatic-within-limits reveals the ceiling + expiry controls',
+  (await page.locator('#aut-limits').isVisible())
+  && (await page.locator('#aut-limits').getAttribute('class')).includes('show'), '');
+await page.fill('#vceiling', '2.50');
+await page.waitForFunction(() => document.getElementById('res-maxauth').innerText.includes('2.50'));
+ok('max authorized spend carries the ceiling', (await page.locator('#res-maxauth').innerText()).includes('2.50 b / 24h'),
+  await page.locator('#res-maxauth').innerText());
+await page.locator('#vmintbtn').click();
+await page.waitForSelector('#plan.open');
+ok('the plan carries the granted authority (limits verbatim)',
+  (await page.locator('#p-auth-limits').isVisible())
+  && (await page.locator('#p-ceiling').innerText()) === '2.50'
+  && (await page.locator('#p-expiry').innerText()) === '24h'
+  && (await page.locator('#plan').innerText()).includes('expanding it takes a new decision from you'), '');
+ok('POLICY ≠ ENFORCEMENT — the plan names the grant as recorded policy, the ceiling as the one enforced bound',
+  (await page.locator('#p-auth-limits').innerText()).includes('recorded as policy')
+  && (await page.locator('#p-auth-limits').innerText()).includes("meter's ceiling"), '');
+ok('the plan splits persistent memory from runtime context (never one lock icon)',
+  (await page.locator('#plan').innerText()).includes('persistent memory')
+  && (await page.locator('#plan').innerText()).includes('not yet qualified')
+  && (await page.locator('#plan').innerText()).includes('runtime context')
+  && (await page.locator('#plan').innerText()).includes('VERIFIED / NOT VERIFIED'), '');
+ok('the plan states pause-not-kill and view-never-authority',
+  (await page.locator('#plan').innerText()).includes('paused, never killed')
+  && (await page.locator('#plan').innerText()).includes('never what your bee may do'), '');
+await page.locator('#prefuse').click();
+await page.waitForFunction(() => !document.getElementById('plan').classList.contains('open'));
+await page.check('input[name=vaut][value=ask]');
+await page.waitForFunction(() => document.getElementById('res-maxauth').innerText.includes('no standing spend'));
+
+/* audience — per-layer truth, visibly-unavailable where unwired; the two
+   memory compartments are NEVER one claim (persistent ≠ runtime — the
+   Goose shared-store lesson rendered as law) */
+const audTxt = await page.locator('.audrow').allInnerTexts();
+ok('audience truth: certificate public by construction', audTxt.some(t => t.includes('public by construction')), JSON.stringify(audTxt));
+ok('audience truth: persistent memory — your key, deletable (never "only you")',
+  audTxt.some(t => /persistent memory/i.test(t) && t.includes('your key · deletable'))
+  && !audTxt.some(t => t.includes('only you')), '');
+ok('audience truth: private path by design, not yet qualified',
+  audTxt.some(t => t.includes('by design · not yet qualified')), '');
+ok('audience truth: runtime context — none until the work seat opens',
+  audTxt.some(t => /runtime context/i.test(t) && t.includes('until the work seat opens')), '');
+ok('audience truth: selected people visibly unwired (struck, never promised)',
+  audTxt.some(t => t.includes('not yet wired'))
+  && (await page.locator('.audrow .strike').count()) >= 1, '');
+
+/* the pre-launch availability gate — four live checks that qualify THE MINT,
+   plus the work-seat row rendered as its own held state (mintable ≠ workable) */
+const avrows = await page.locator('.avrow').allInnerTexts();
+ok('availability gate shows route·access·tools·funding + work', avrows.length === 5, JSON.stringify(avrows.map(t => t.split('\n')[0])));
+ok('the four mint checks pass live', (await page.locator('.avrow .m.ok').count()) === 4, '');
+ok('MINTABLE ≠ WORKABLE — the work row is its own held state, outside the gate',
+  avrows.some(t => /^WORK/i.test(t) && t.includes('work seat is not yet open') && t.includes('—')),
+  avrows.find(t => /^WORK/i.test(t)) || '');
+ok('gate says ready to MINT, and names the work seat separately',
+  (await page.locator('#avstate').innerText()).includes('ready to mint')
+  && (await page.locator('#avstate').innerText()).includes('work seat'),
+  await page.locator('#avstate').innerText());
+ok('the genesis chip is mint-scoped — AVAILABLE TO MINT, never bee-level "live"',
+  /available to mint/i.test(await page.locator('#bee-genesis-chip').innerText()),
+  await page.locator('#bee-genesis-chip').innerText());
+await page.screenshot({ path: join(OUT, 'console-2-availability.png'), fullPage: true });
+
+/* audience ⊥ view — the tour-bar register pills change presentation,
+   NEVER price, audience, or authority (the orthogonality law, mechanical) */
+const beforeTotal = await page.locator('#v-total').innerText();
+const beforeAud = await page.locator('.audrow').allInnerTexts();
+await page.locator('#breg-cypherpunk').click();
+await page.waitForFunction(() => document.body.getAttribute('data-reg') === 'cypherpunk');
+ok('cypherpunk view stands the disclosures open by default',
+  await page.locator('details[data-reg-disclose]').first().evaluate(d => d.open), '');
+ok('ORTHOGONAL: view change never touches the price',
+  (await page.locator('#v-total').innerText()) === beforeTotal, beforeTotal + ' → ' + (await page.locator('#v-total').innerText()));
+ok('ORTHOGONAL: view change never touches the audience rows',
+  JSON.stringify((await page.locator('.audrow').allInnerTexts()).map(t => t.replace(/\s+/g, ' ')))
+  === JSON.stringify(beforeAud.map(t => t.replace(/\s+/g, ' '))), '');
+await page.locator('#breg-bee').click();
+await page.waitForFunction(() => document.body.getAttribute('data-reg') === 'bee');
+ok('back on new bee view, the price is unchanged',
+  (await page.locator('#v-total').innerText()) === beforeTotal, '');
+
+/* my bees — the ledger's own rows, nothing invented */
+const certsN = (await st()).certs.length;
+ok('my bees renders every ledger row', (await page.locator('#bee-list .bee').count()) === certsN,
+  certsN + ' certs / ' + (await page.locator('#bee-list .bee').count()) + ' bees');
+const beeTxts = await page.locator('#bee-list .bee').allInnerTexts();
+ok('each bee carries finality honestly (final or sealing, from the walk)',
+  beeTxts.every(t => t.includes('final') || t.includes('sealing') || t.includes('none on record')), '');
+
+/* receipts — every landed mint plus the held doors */
+const rcpt = await page.locator('.rrow').allInnerTexts();
+ok('receipts list every landed mint', rcpt.filter(t => t.includes('mint ·')).length === (await st()).mints.length, '');
+ok('the held money-rail is named as the actionable block',
+  rcpt.some(t => /held/i.test(t) && t.includes('payment seat')), '');
+await page.screenshot({ path: join(OUT, 'console-3-mybees-receipts.png'), fullPage: true });
 
 /* 3 · WATCH IT LAND — shot FIRST, in its canonical landed state, before the
    door tests arm the watcher and write their own status lines */
@@ -169,7 +299,9 @@ await page.locator('#vmintbtn').click();
 await page.waitForSelector('#plan.open');
 const planTxt = await page.locator('#plan').innerText();
 ok('plan shows the itemized price again', planTxt.includes('0.6000 A') && planTxt.includes('10.00%') && planTxt.includes('the tithe'));
-ok('plan shows the full total', (await page.locator('#p-total').innerText()) === (await page.locator('#v-total').innerText()));
+ok('plan shows the full total — same number the hero references',
+  (await page.locator('#p-total').innerText()) === (await page.locator('#v-total-usd').innerText()).match(/\$0\.\d+/)[0],
+  (await page.locator('#p-total').innerText()) + ' vs ' + (await page.locator('#v-total-usd').innerText()));
 ok('plan names what you asked for', planTxt.includes('vendingtest3') && planTxt.includes('latviešu'));
 await page.screenshot({ path: join(OUT, 'vending-2b-plan.png') });
 await page.locator('#papprove').scrollIntoViewIfNeeded();   /* the sticky bar — approval in frame */
@@ -255,6 +387,32 @@ ok('the one tap is an ERC-20 transfer of the exact total to the seat',
 ok('the door reports the live link + sent state',
   (await wpage.locator('#doorstate').innerText()).includes('open USDC on Base in your wallet'));
 await wpage.screenshot({ path: join(OUT, 'vending-2e-one-tap-sent.png') });
+
+/* ── the route-blocked state — the bFabLeAPi acceptance case: a customer
+   must never finish onboarding into a wall. Route dead ⇒ the shelf says
+   temporarily unavailable + preserved, the launch stays locked, the
+   operator line stays in the cypherpunk view, and nothing fakes a price. */
+{
+  const bctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  await bctx.route('**jungle4.greymass.com/**', r => r.abort());
+  const bpage = await bctx.newPage();
+  const berr = [];
+  bpage.on('pageerror', e => berr.push(String(e).slice(0, 120)));
+  await bpage.goto(BASE + '/surfaces/vending.html', { waitUntil: 'load' });
+  await bpage.waitForFunction(() => document.getElementById('avstate').innerText.includes('temporarily unavailable'), null, { timeout: 30000 });
+  const avt = await bpage.locator('#avstate').innerText();
+  ok('route dead ⇒ "temporarily unavailable" + work and allowance preserved',
+    avt.includes('temporarily unavailable') && avt.includes('preserved'), avt.slice(0, 90));
+  ok('launch stays locked while the route is unreadable', await bpage.locator('#vmintbtn').isDisabled(), '');
+  ok('the genesis chip holds honestly', /temporarily unavailable/i.test(await bpage.locator('#bee-genesis-chip').innerText()),
+    await bpage.locator('#bee-genesis-chip').innerText());
+  ok('no fake verdict — the price hero rests on a dash, n/m named',
+    (await bpage.locator('#v-total').innerText()).includes('—')
+    && (await bpage.locator('#l-mint-sub').innerText()).includes('never faked'), '');
+  await bpage.screenshot({ path: join(OUT, 'console-4-route-blocked.png'), fullPage: true });
+  ok('zero page errors under route failure', berr.length === 0, berr.join(' | '));
+  await bctx.close();
+}
 
 /* ── the monitor deep-link, rendered and read back ── */
 const mctx = await browser.newContext({ viewport: { width: 1280, height: 900 } });

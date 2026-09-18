@@ -78,6 +78,13 @@ const RIDER_ALLOWLIST = [
      own public spot endpoint for the ETH-USD leg — the one new off-origin host
      the fix adds; the per-token leg stays on the Base RPC hosts above */
   /^https:\/\/api\.coinbase\.com\/v2\/prices\//,
+  /* the vending console's live reads (2026-09-17, bAiGenT console lane): the
+     rehearsal chain's public RPC (law rows, ledger, finality — CORS-open,
+     verified 2026-09-03) and the A→USD reference price. The surface's own law
+     is "nothing on this page is a stored snapshot" — page-open live reads are
+     the design, the same class as market's RPCs; itemized by exact host */
+  /^https:\/\/jungle4\.greymass\.com\//,
+  /^https:\/\/api\.coingecko\.com\/api\/v3\/simple\/price/,
   /* the museum's live art reads from base.org's own Basenames API (the
      archived byte-true fallback rides in the tree — MUSEUM LAW) */
   /^https:\/\/www\.base\.org\/api\//,
