@@ -71,3 +71,12 @@ Windows mixed-separator runtime-load fix — plus everything upstream through
 Reinstall the 0.5.21 fork build + restore `buzz-desktop-mesh.cmd` as the launch
 path. The relay-side pair-relay sidecar + Caddy `/pair*` route are independent
 of the desktop version and stay.
+
+## Cross-lane note (2026-09-18, post-Astra-handoff)
+
+WF-08 (fork PR #1, `fdd63fe2` per the Astra handoff, receipt `f188c648`) landed
+a migration renumber. Any fork-side migration numbering must clear upstream's
+already-taken slots **0029–0046** (see the map above): a fork migration filed
+into that range collides at realignment time. Before integration, recheck the
+slot against upstream main's `migrations/` tail — which as of today ends at
+`0046_storage_accounting_snapshots.sql`.
