@@ -1,6 +1,6 @@
 {
  "schema": "skaists.sources/1",
- "generated": "2026-09-18T23:04:15.846Z",
+ "generated": "2026-09-18T23:14:46.873Z",
  "scope": "8 blood generations from grandparents (depth 2-9 from root L627-FH9)",
  "root": "L627-FH9",
  "persons": {
@@ -311,7 +311,7 @@
    "iid": "p4ceb2ace98",
    "depth": 2,
    "name": "Don Ray Remington",
-   "lifespan": "1931–Deceased",
+   "lifespan": "1931–2025",
    "fsid": "LNQ5-BSG",
    "providerSourceCount": 0,
    "sources": []
@@ -320,7 +320,7 @@
    "iid": "p455afa9256",
    "depth": 2,
    "name": "Marilyn Lowry",
-   "lifespan": "1932–Deceased",
+   "lifespan": "1932–2023",
    "fsid": "LNQ5-BSF",
    "providerSourceCount": 0,
    "sources": []

@@ -56,18 +56,40 @@
   "LNQ5-BSG": {
    "patch": {
     "living": false,
-    "lifespan": "1931–Deceased"
+    "lifespan": "1931–2025",
+    "birth": {
+     "date": "24 June 1931",
+     "place": "Vernal, Utah, United States",
+     "basis": "record: GenealogyBank obit + Find a Grave X3TK-D49C + 1935/1940 church census"
+    },
+    "death": {
+     "date": "27 May 2025",
+     "place": null,
+     "burial": "Millcreek, Salt Lake, Utah, United States",
+     "basis": "record: Find a Grave X3TK-D49C + GenealogyBank obituaries X3JC-YY2X/X3J8-NKKT (obit published 11 June 2025, Salt Lake City)"
+    }
    },
-   "note": "FamilySearch private-space record flags Don Ray Remington living; the founder attests the family line — famous grandpa is not 'Living'. Death year unknown to the archive; no year invented. Founder-attested: maternal grandfather.",
-   "attested": "founder order 2026-09-16: all four grandparents confirmed deceased"
+   "note": "FamilySearch private-space record flags Don Ray Remington living; the founder attests the family line — famous grandpa is not 'Living'. Death year unknown to the archive; no year invented. Founder-attested: maternal grandfather. Founder update 2026-09-18: 'grandpa don died last June ish (we have the date somewhere)' — year recorded as attested-approximate; exact date never invented. RECORD CORRECTION 2026-09-18: the records-search pass (hr/v2 personas) returned documentary dates — born 24 June 1931 Vernal Utah, died 27 May 2025, obituary published 11 June 2025 (the founder's 'June-ish' matched the obituary publication, not the death date). Founder attestation of death STANDS CONFIRMED by record; recall-replaced-by-record documented, nothing silently rewritten.",
+   "attested": "founder order 2026-09-16: all four grandparents confirmed deceased · death timing attested 2026-09-18"
   },
   "LNQ5-BSF": {
    "patch": {
     "living": false,
-    "lifespan": "1932–Deceased"
+    "lifespan": "1932–2023",
+    "birth": {
+     "date": "16 March 1932",
+     "place": null,
+     "basis": "record: GenealogyBank obit 6VR2-NWV3/6VRJ-QMHX + Find a Grave 6K1Y-RH56"
+    },
+    "death": {
+     "date": "9 January 2023",
+     "place": null,
+     "burial": "Millcreek, Salt Lake, Utah, United States",
+     "basis": "record: Find a Grave 6K1Y-RH56 + obituaries 6VR2-NWV3/6VRJ-QMHX (GenealogyBank, obit 11 Jan 2023 SLC) + XM26-X62M (US Obituary Records 2014-2023, obit 10 Jan 2023 Millcreek)"
+    }
    },
-   "note": "FamilySearch private-space record flags Marilyn Lowry Remington living; she is the founder's deceased grandmother (the tree's co-builder with him, 12 years ago). Death year unknown to the archive; no year invented. Founder-attested: maternal grandmother.",
-   "attested": "founder order 2026-09-16: all four grandparents confirmed deceased"
+   "note": "FamilySearch private-space record flags Marilyn Lowry Remington living; she is the founder's deceased grandmother (the tree's co-builder with him, 12 years ago). Death year unknown to the archive; no year invented. Founder-attested: maternal grandmother. Founder update 2026-09-18: 'grandma marilyn died a year decemberish before that' — the church matriarch and master genealogist who co-built this tree; year recorded as attested-approximate; exact date never invented. RECORD CORRECTION 2026-09-18: documentary dates from the records-search pass — born 16 March 1932, died 9 January 2023, buried Millcreek beside Don (the founder's recall 'a year decemberish before' Don pointed at ~Dec 2024; the record says 9 Jan 2023 — recall corrected by record, both layers preserved). Founder attestation of death STANDS CONFIRMED by record.",
+   "attested": "founder order 2026-09-16: all four grandparents confirmed deceased · death timing attested 2026-09-18"
   },
   "KWCL-VNB": {
    "patch": {

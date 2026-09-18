@@ -62,3 +62,24 @@ The person page's own same-origin wire, cookie session, no credentials touched:
 - Session: founder-signed-in familysearch.org tab (IAB), founder's own account, his own family tree — the same wire the site's own UI uses.
 - Runner: `PAGE_SOURCE_WALKER_SOURCE` in `tools/genealogy/fs-adapter.mjs` (verbatim the executed code, backticks flattened for embedding).
 - Raw receipt: `C:/Users/travi/family-lineage/sources-harvest/raw-dump.json` (private).
+
+## Rider — founder follow-up order (same day): grandparent deaths attested + Lowry/Rockwood emphasis + the records-search pass
+
+**Founder word:** "grandpa don died last June ish (we have the date somewhere) and grandma marilyn died a year decemberish before that. definitely dead and grandma was the church matriarch and master genealogist so definitely need to scrape everything especially that bloodline lowry/rockwood."
+
+**The dates the family had "somewhere" — found IN THE RECORDS during this pass (recall corrected by record, both layers preserved in attested-overlays.json):**
+
+| grandparent | documentary dates | record basis |
+|---|---|---|
+| Don Ray Remington | b. **24 June 1931**, Vernal, Utah · d. **27 May 2025** · burial Millcreek, Salt Lake, Utah | Find a Grave `X3TK-D49C` + GenealogyBank obituaries `X3JC-YY2X`/`X3J8-NKKT` (obit published 11 June 2025 — the founder's "June-ish" matched the obituary publication) |
+| Marilyn Lowry Remington | b. **16 March 1932** · d. **9 January 2023** · burial Millcreek, Salt Lake, Utah (beside Don) | Find a Grave `6K1Y-RH56` + GenealogyBank obituaries `6VR2-NWV3`/`6VRJ-QMHX` + US Obituary Records `XM26-X62M` |
+
+**Search-evidence layer (new, `skaists.search-evidence/1`** at `assets/profile-archive/lineage/sources/search-evidence.json): the two profiles carry zero ATTACHED sources on FS, so a historical-records search pass (the site's own `service/search/hr/v2/personas` wire, keyed to name + birth year + father-head household match) built a SEARCH-DERIVED layer — distinct from the attached-source layer per the evidence doctrine, never merged silently. Don: 7 records (2 obits, Find a Grave, 1940 census, 2 LDS church censuses 1935/1940, one flagged possible-variant misindex "Dawn R"). Marilyn: 6 records (3 obits, Find a Grave, 1940 + 1950 censuses in father Hyrum D Lowry's household). Honest not-founds named (Don's 1950 census, marriage records). **Privacy:** obituary/census households name living children/grandchildren — those arrays live in the PRIVATE tier only (`sources-harvest/search-evidence-private.json`), never in the public file.
+
+**The Lowry/Rockwood bloodline (Marilyn's dual ancestry) — what the harvest carries:**
+
+- Marilyn = **Hyrum Deronda Lowry** (1903–1985, 27 sources) × **Ardella Rockwood** (1904–1990, 30 sources)
+- Rockwood line: **Julius Apollus Rockwood** (1878–1943, **105 sources**) → **Albert Perry Rockwood** (1805–1879, **108 sources** — the blood.html public entrance person, one of the best-documented ancestors in the whole cohort)
+- Lowry line: John Hyrum Lowry (1870–1914, 38) → Abner Lowry (1831–1900, 57) → **John Lowry** (1799–1867, **84 sources**) → William Lowry (1762–1808, 12) → John Lowry (1724–1790, 3)
+
+The church matriarch's own line is the archive's deepest-evidenced branch — 443 attached sources on the six-generation chain above, before her search-evidence layer.
