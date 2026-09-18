@@ -312,3 +312,23 @@ test("wiring: the mount renders — relationship-to-root panel, spouse affinity 
   assert.ok(page.includes("corrected path API"));
   assert.ok(page.includes("nameHits")); // duplicate-name detection in search
 });
+
+/* ---------- ghost frontier: coverage, never an empty family ---------- */
+
+test("corpus: ghost-parent counts sum to the 1,959 frontier across all persons", () => {
+  let total = 0; let personsWithGhosts = 0;
+  for (const k in (corpus.edges || {})) {
+    let n = 0;
+    for (const p of corpus.edges[k]) if (!corpus.persons[p]) n++;
+    if (n) { total += n; personsWithGhosts++; }
+  }
+  assert.equal(total, 1959);
+  assert.ok(personsWithGhosts > 1000, "the frontier is distributed, not one broken branch");
+});
+
+test("wiring: ghost slots + the frontier affordance render honestly", () => {
+  assert.ok(page.includes("S.ghostCount"));
+  assert.ok(page.includes("ancestry continues beyond the published archive"));
+  assert.ok(page.includes("hexcell ghostslot"));
+  assert.ok(page.includes("coverage of the walk, not an empty family"));
+});

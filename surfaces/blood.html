@@ -126,6 +126,7 @@ footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint
 .hexcell.sel,button.sel{stroke:var(--gold);stroke-width:2.4px;filter:drop-shadow(0 0 6px rgba(255,215,0,.45))}
 #comb:focus-visible{outline:2px solid var(--cyan);outline-offset:4px}
 .navhint{margin-top:10px;font-size:10.5px;color:var(--gold);border:1px dashed var(--gold);border-radius:8px;padding:7px 10px}
+.hexcell.ghostslot{fill:none;stroke:var(--faint);stroke-width:1.2;stroke-dasharray:3 3;cursor:pointer}
 #world.lod-far .hextext:not(.dupmark){display:none}
 #world.lod-mid .hextext:not(.dupmark){display:none}
 #world.lod-mid .hextext:not(.dupmark)[data-ring="0"],#world.lod-mid .hextext:not(.dupmark)[data-ring="1"],
@@ -319,6 +320,11 @@ footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint
     ]));
   }).then(function(){
     S.retrieved=(S.corpusMeta&&S.corpusMeta.retrieved)||null;
+    // ghost frontier: parent references pointing beyond the published corpus,
+    // counted per person AFTER the overlay merge; surfaced as coverage,
+    // never as an empty family, never as a privacy finding (the archive law)
+    S.ghostCount={};
+    for(var gk in S.edges){var gn=0;(S.edges[gk]||[]).forEach(function(p){if(!S.persons[p])gn++;});if(gn)S.ghostCount[gk]=gn;}
     renderEconCard();
     renderDyn();
     // public entrance: Albert Perry Rockwood when present, else the founder
@@ -676,7 +682,17 @@ footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint
       var sl=parentSlots(ps);var fa=sl[0];var mo=sl[1];
       [[fa,-1],[mo,1]].forEach(function(pair){
         var pid=pair[0],side=pair[1];
-        if(!pid)return;
+        if(!pid){
+          if(S.ghostCount&&S.ghostCount[id]){ // ghost parent slot: coverage, honestly drawn
+            var gh=document.createElementNS(NS,'polygon');
+            gh.setAttribute('points',hexPts(x+side*HW/2,y-1.5*HS,HS*0.72));
+            gh.setAttribute('class','hexcell ghostslot');
+            var ght=document.createElementNS(NS,'title');
+            ght.textContent='ancestry continues beyond the published archive — further parent references here are not yet published; coverage, not an empty family';
+            gh.appendChild(ght);gh.addEventListener('click',function(){showDetail(id);});world.appendChild(gh);
+          }
+          return;
+        }
         if(!edgeVisible(id,pid)){
           // disputed & rejected by current reconstruction: empty geometry, visible dispute
           var q=document.createElementNS(NS,'text');
@@ -853,6 +869,7 @@ footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint
       ps.forEach(function(x){rels+='<button data-rel="'+esc(x)+'">↑ '+esc(nameOf(x))+(S.persons[x].lifespan?' · '+esc(S.persons[x].lifespan):'')+
         (S.relEvidence[relKey(id,x)]?' <span class="evtag">['+esc(langText('blood.rel.disputed','disputed — inspect'))+']</span>':' <span class="evtag">[walked link]</span>')+'</button>';});
       rels+='</div>';}
+    if(S.ghostCount&&S.ghostCount[id]){rels+='<div class="drels"><div class="lab">the frontier</div><div class="layer" style="border-left:2px dashed var(--faint);padding-left:8px;color:var(--dim)">ancestry continues beyond the published archive — '+esc(String(S.ghostCount[id]))+' further parent reference'+(S.ghostCount[id]===1?'':'s')+' on this person not yet published here. This is coverage of the walk, not an empty family and not a finding about anyone.</div></div>';}
     var ch=S.children[id]||[];
     if(ch.length){rels+='<div class="drels"><div class="lab" data-i18n="blood.children">children</div>';
       ch.slice(0,12).forEach(function(x){if(S.persons[x])rels+='<button data-go="'+esc(x)+'">↓ '+esc(nameOf(x))+'</button>';});
@@ -1026,7 +1043,18 @@ hex.setAttribute('data-pid',id);
       var sl=parentSlots(ps);var fa=sl[0];var mo=sl[1];
       pathSet.add(id);
       [[fa,2*s],[mo,2*s+1]].forEach(function(pair2){
-        if(!pair2[0])return;
+        if(!pair2[0]){
+          if(S.ghostCount&&S.ghostCount[id]){ // ghost parent slot in the ahnentafel too
+            var gpx=CXp+(((pair2[1]-(1<<(g+1)))-((1<<(g+1))-1)/2)*PW);
+            var ghex=document.createElementNS(NS,'polygon');
+            ghex.setAttribute('points',hexPts(gpx,BASEp-(g+1)*PRH,PS*0.72));
+            ghex.setAttribute('class','hexcell ghostslot');
+            var gtitle=document.createElementNS(NS,'title');
+            gtitle.textContent='ancestry continues beyond the published archive — coverage, not an empty family';
+            ghex.appendChild(gtitle);ghex.addEventListener('click',function(){showDetail(id);});world.appendChild(ghex);
+          }
+          return;
+        }
         if(!edgeVisible(id,pair2[0])){
           var q=document.createElementNS(NS,'text');
           q.setAttribute('x',CXp+((2*(pair2[1]-(1<<(g+1)))+1)/(2<<(g+1))-0.5)*2*((1<<(g+1))/2)*PW*0.5);
