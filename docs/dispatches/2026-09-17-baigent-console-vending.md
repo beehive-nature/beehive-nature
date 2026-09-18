@@ -30,3 +30,13 @@
 ## Boundaries held
 
 No new surface (vending.html keeps its registration; no estate.json/atlas/review-deck ritual owed). No second invoice system — the plan screen remains the one commitment gesture; bPay's chooser vocabulary is reused, not forked. The VV-1 PricingCommitment lane is untouched (its builder order stands; the console's plan screen is where a commitment will render when that primitive lands). No Jungle4 mutation, no payment wiring, no founder ceremony crossed.
+
+## Pre-merge semantic rider (founder review, same day — fixed in this PR, no new architecture)
+
+The founder's three checks, each now law on the surface AND in the battery:
+
+1. **MINTABLE ≠ WORKABLE** — the genesis chip re-scoped from "rehearsal-live today" to **AVAILABLE TO MINT**; the card carries a keyed work-state line ("work seat not yet open — what is live is the mint itself"); the availability gate keeps its four live checks qualifying THE MINT while the work seat renders as its own held row *outside* the gate; the button says **Mint — 0.82 b**, never "launch"; avstate says "ready to mint; the work seat opens with the first qualified runtime."
+2. **POLICY ≠ ENFORCEMENT** — "automatic within limits" now states it is **recorded as policy**: the one bound enforced on-chain today is the meter's ceiling (x402, receipted in-page); the may-do envelope (may · max_spend · max_turns · expires · human_gate) binds when the work seat opens. Same sentence in the plan screen's authority block.
+3. **PERSISTENT ≠ RUNTIME MEMORY** — the audience block splits "memory only you" into **persistent memory** (your key · deletable), **private path** (by design · not yet qualified), and **runtime context** (none — until the work seat opens; the day a runtime serves work its isolation renders VERIFIED / NOT VERIFIED). The Goose shared-store incident is the reason two compartments must never be one lock icon. Plan screen carries the same split.
+
+Battery grows to assert all three mechanically (75 → 82 checks). Corpus: v2.av.live/v2.aud.mem/v2.aud.only re-authored, v2.av.work/v2.aud.priv/v2.aud.rt added (×28, corpus 1,969 keys, cache-buster v29).

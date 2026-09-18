@@ -360,7 +360,7 @@ details[data-reg-disclose] .dbody b{color:var(--dim)}
     <article class="bcard pick" id="bee-genesis" role="button" tabindex="0" aria-pressed="true">
       <div class="bh"><span class="glyph" aria-hidden="true">⚘</span>
         <span class="bn" data-i18n="v2.b1">the genesis bee</span>
-        <span class="chip live" id="bee-genesis-chip" data-i18n="v2.av.live">rehearsal-live today</span></div>
+        <span class="chip live" id="bee-genesis-chip" data-i18n="v2.av.live">available to mint</span></div>
       <div class="bq"><b data-i18n="v2.q.does">what it does</b> — <em>stands your agent up: a house on the
         .a rail, a birth certificate on Arweave, memory on autonomi under your key, in your tongue.</em><br>
         <b data-i18n="v2.q.needs">what it needs access to</b> — <em>nothing of yours; the mint sends no data
@@ -368,7 +368,10 @@ details[data-reg-disclose] .dbody b{color:var(--dim)}
         <b data-i18n="v2.q.delivers">what it delivers</b> — <em>the agent, its certificate, and the recipe —
         yours forever, rebuildable without us.</em><br>
         <b data-i18n="v2.q.cost">what it may cost</b> — <em>one-time setup read live below; running usage is
-        metered per session, never auto-charged.</em></div>
+        metered per session, never auto-charged.</em><br>
+        <b data-i18n="v2.av.work">work seat not yet open</b> — <em>what is live today is the mint itself
+        (identity, house, certificate, resurrection); giving this bee work arrives with the first
+        qualified runtime.</em></div>
     </article>
     <article class="bcard off" id="bee-genealogy" role="button" tabindex="0" aria-pressed="false">
       <div class="bh"><span class="glyph" aria-hidden="true">✶</span>
@@ -479,7 +482,9 @@ details[data-reg-disclose] .dbody b{color:var(--dim)}
   <div class="opt" id="aut-auto"><input type="radio" name="vaut" value="auto">
     <span><span class="on" data-i18n="v2.aut.auto">automatic within limits</span>
     <span class="od">routine permitted work runs without asking, under the ceiling and expiry you set —
-    <b>expanding it takes a new decision from you.</b></span></span></div>
+    <b>expanding it takes a new decision from you.</b> Recorded as <b>policy now</b>: the one bound
+    enforced on-chain today is the meter's ceiling (x402, receipted below); the may-do envelope
+    (may · max_spend · max_turns · expires · human_gate) binds when the work seat opens.</span></span></div>
   <div class="limits" id="aut-limits">
     <div class="field"><label for="vceiling">ceiling</label>
       <input id="vceiling" type="number" min="0.01" step="0.01" value="1.00" inputmode="decimal">
@@ -502,7 +507,9 @@ details[data-reg-disclose] .dbody b{color:var(--dim)}
 
   <div class="cfgtitle" data-i18n="v2.aud.title">who can get what?</div>
   <div class="audrow"><span data-i18n="v2.aud.cert">birth certificate</span><b class="ok" data-i18n="v2.aud.pub">public by construction</b></div>
-  <div class="audrow"><span data-i18n="v2.aud.mem">memory</span><b class="ok" data-i18n="v2.aud.only">only you — your key</b></div>
+  <div class="audrow"><span data-i18n="v2.aud.mem">persistent memory</span><b class="ok" data-i18n="v2.aud.only">your key · deletable</b></div>
+  <div class="audrow"><span>private path</span><b class="no" data-i18n="v2.aud.priv">by design · not yet qualified</b></div>
+  <div class="audrow"><span>runtime context</span><b class="no" data-i18n="v2.aud.rt">none — until the work seat opens</b></div>
   <div class="audrow"><span>selected people</span><b class="no"><span class="strike" data-i18n="v2.aud.sel">selected people — not yet wired</span></b></div>
   <p class="orth" data-i18n="v2.view">views change how much you see — never what your bee may do. The audience above is settled by the architecture of the mint; the chooser (like the wallet’s) arrives with the first bee whose work product is shareable.</p>
 </section>
@@ -656,7 +663,9 @@ details[data-reg-disclose] .dbody b{color:var(--dim)}
         this mint grants no standing authority</div>
         <div id="p-auth-limits" style="display:none">automatic within limits — sessions clamp under
         <b id="p-ceiling" style="color:var(--gold)">—</b> b, expiring in
-        <b id="p-expiry" style="color:var(--gold)">—</b>; expanding it takes a new decision from you</div>
+        <b id="p-expiry" style="color:var(--gold)">—</b>; expanding it takes a new decision from you —
+        <b>recorded as policy</b>: the enforced bound on-chain today is the meter's ceiling, and the
+        may-do envelope binds when the work seat opens</div>
         <div>a session that cannot pay is <b>paused, never killed</b> — your bee and your
         work survive any gap in funding</div>
         <div>the view pills (new bee · raver · cypherpunk) change how much you see —
@@ -666,7 +675,10 @@ details[data-reg-disclose] .dbody b{color:var(--dim)}
       <div class="what">
         <div>the birth certificate — <b>public by construction</b> (Arweave, permanent,
         anyone can verify the fingerprint)</div>
-        <div>its memory — <b>only you</b>: autonomi under your key, deletable</div>
+        <div>persistent memory — <b>your key, deletable</b>; its private path is by design,
+        not yet qualified</div>
+        <div>runtime context — <b>none until the work seat opens</b>; the day a runtime
+        serves work, its memory isolation renders here: VERIFIED / NOT VERIFIED</div>
         <div><span class="strike">selected people — not yet wired</span>; the chooser arrives
         with the first bee whose work product is shareable</div>
       </div>
@@ -842,8 +854,8 @@ function renderPrice() {
   $('v-total').textContent = b == null ? '—' : b.toFixed(2) + ' b';
   $('v-total-usd').innerHTML = totU == null ? '≈ $— reference'
     : `≈ <b>$${totU.toFixed(2)}</b> reference · 1 b = 1 A on this rail`;
-  $('vmintbtn').textContent = totU == null ? 'Launch — price unread'
-    : `Ready to launch — ${b.toFixed(2)} b (≈$${totU.toFixed(2)}) →`;
+  $('vmintbtn').textContent = totU == null ? 'Mint — price unread'
+    : `Mint — ${b.toFixed(2)} b (≈$${totU.toFixed(2)}) →`;
   $('vmintbtn').disabled = totU == null || !state.canonName || nameTaken() || state.bee !== 'genesis';
   $('v-total-count').textContent = `machine holds ${L.count}/${L.max} (cap = 6⁵)`;
   document.querySelectorAll('.lawdate').forEach(el => el.textContent = L.updated.slice(0, 10));
@@ -957,8 +969,15 @@ function renderResources() {
 
 /* ── the pre-launch availability gate — a recent check is honest, a
    failed one is named. Customer copy first; the operator line stays in
-   the cypherpunk view where the plumbing lives. ── */
+   the cypherpunk view where the plumbing lives.
+   THE MINT/WORK SPLIT (founder review 2026-09-17): the four live checks
+   qualify THE MINT, never the work — the work row renders as its own
+   held state so "available to mint" can never read as "available to
+   work". ── */
 function renderAvailability() {
+  const avRow = ([k, ok, v]) =>
+    `<div class="avrow"><span class="k">${k}</span><span class="v">${esc(v)}</span>` +
+    `<span class="m ${ok ? 'ok' : 'no'}">${ok ? '✓' : '—'}</span></div>`;
   const rows = [
     ['route', !!state.law, state.law ? `law rows live · updated ${state.law.updated.slice(0, 10)}`
       : (state.lawFailed ? 'the rehearsal chain did not answer' : 'reading the law rows…')],
@@ -968,15 +987,16 @@ function renderAvailability() {
       : 'waiting on a lawful name'],
     ['funding', state.price != null, 'rehearsal rail — testnet money, free today · paid rails held'],
   ];
-  $('avlist').innerHTML = rows.map(([k, ok, v]) =>
-    `<div class="avrow"><span class="k">${k}</span><span class="v">${esc(v)}</span>` +
-    `<span class="m ${ok ? 'ok' : 'no'}">${ok ? '✓' : '—'}</span></div>`).join('');
+  /* the work seat: deliberately OUTSIDE the gate — it is not a failing
+     check, it is a product state (not yet open), shown as its own line */
+  const workRow = ['work', false, 'the work seat is not yet open — what is qualified today is the mint; giving a bee work arrives with the first qualified runtime'];
+  $('avlist').innerHTML = rows.map(avRow).join('') + avRow(workRow);
   const gate = rows.every(r => r[1]);
   const av = $('avstate'), chip = $('bee-genesis-chip');
   if (gate) {
     av.className = 'avstate';
-    av.textContent = 'all four live — ready to launch when you are.';
-    chip.className = 'chip live'; chip.textContent = 'rehearsal-live today';
+    av.textContent = 'all four live — ready to mint; the work seat opens with the first qualified runtime.';
+    chip.className = 'chip live'; chip.textContent = 'available to mint';
   } else if (state.lawFailed || (state.law === null && !state.canonName)) {
     /* the bFabLeAPi lesson in customer language: never let onboarding end
        at a wall the operator knew about */
@@ -988,7 +1008,7 @@ function renderAvailability() {
       esc(RPC) + ' /v1/chain/get_table_rows (rates·tithe·config); page degrades to named n/m states, never a fake verdict</span>');
   } else {
     av.className = 'avstate';
-    av.textContent = 'waiting on the checks above before launch unlocks.';
+    av.textContent = 'waiting on the checks above before the mint unlocks.';
     chip.className = 'chip held'; chip.textContent = 'checking the route…';
   }
 }

@@ -197,6 +197,14 @@ ok('the plan carries the granted authority (limits verbatim)',
   && (await page.locator('#p-ceiling').innerText()) === '2.50'
   && (await page.locator('#p-expiry').innerText()) === '24h'
   && (await page.locator('#plan').innerText()).includes('expanding it takes a new decision from you'), '');
+ok('POLICY ≠ ENFORCEMENT — the plan names the grant as recorded policy, the ceiling as the one enforced bound',
+  (await page.locator('#p-auth-limits').innerText()).includes('recorded as policy')
+  && (await page.locator('#p-auth-limits').innerText()).includes("meter's ceiling"), '');
+ok('the plan splits persistent memory from runtime context (never one lock icon)',
+  (await page.locator('#plan').innerText()).includes('persistent memory')
+  && (await page.locator('#plan').innerText()).includes('not yet qualified')
+  && (await page.locator('#plan').innerText()).includes('runtime context')
+  && (await page.locator('#plan').innerText()).includes('VERIFIED / NOT VERIFIED'), '');
 ok('the plan states pause-not-kill and view-never-authority',
   (await page.locator('#plan').innerText()).includes('paused, never killed')
   && (await page.locator('#plan').innerText()).includes('never what your bee may do'), '');
@@ -205,20 +213,37 @@ await page.waitForFunction(() => !document.getElementById('plan').classList.cont
 await page.check('input[name=vaut][value=ask]');
 await page.waitForFunction(() => document.getElementById('res-maxauth').innerText.includes('no standing spend'));
 
-/* audience — per-layer truth, visibly-unavailable where unwired */
+/* audience — per-layer truth, visibly-unavailable where unwired; the two
+   memory compartments are NEVER one claim (persistent ≠ runtime — the
+   Goose shared-store lesson rendered as law) */
 const audTxt = await page.locator('.audrow').allInnerTexts();
 ok('audience truth: certificate public by construction', audTxt.some(t => t.includes('public by construction')), JSON.stringify(audTxt));
-ok('audience truth: memory only you', audTxt.some(t => t.includes('only you')), '');
+ok('audience truth: persistent memory — your key, deletable (never "only you")',
+  audTxt.some(t => /persistent memory/i.test(t) && t.includes('your key · deletable'))
+  && !audTxt.some(t => t.includes('only you')), '');
+ok('audience truth: private path by design, not yet qualified',
+  audTxt.some(t => t.includes('by design · not yet qualified')), '');
+ok('audience truth: runtime context — none until the work seat opens',
+  audTxt.some(t => /runtime context/i.test(t) && t.includes('until the work seat opens')), '');
 ok('audience truth: selected people visibly unwired (struck, never promised)',
   audTxt.some(t => t.includes('not yet wired'))
   && (await page.locator('.audrow .strike').count()) >= 1, '');
 
-/* the pre-launch availability gate — four live checks */
+/* the pre-launch availability gate — four live checks that qualify THE MINT,
+   plus the work-seat row rendered as its own held state (mintable ≠ workable) */
 const avrows = await page.locator('.avrow').allInnerTexts();
-ok('availability gate shows route·access·tools·funding', avrows.length === 4, JSON.stringify(avrows));
-ok('all four checks pass live', (await page.locator('.avrow .m.ok').count()) === 4, '');
-ok('gate says ready to launch', (await page.locator('#avstate').innerText()).includes('ready to launch'),
+ok('availability gate shows route·access·tools·funding + work', avrows.length === 5, JSON.stringify(avrows.map(t => t.split('\n')[0])));
+ok('the four mint checks pass live', (await page.locator('.avrow .m.ok').count()) === 4, '');
+ok('MINTABLE ≠ WORKABLE — the work row is its own held state, outside the gate',
+  avrows.some(t => /^WORK/i.test(t) && t.includes('work seat is not yet open') && t.includes('—')),
+  avrows.find(t => /^WORK/i.test(t)) || '');
+ok('gate says ready to MINT, and names the work seat separately',
+  (await page.locator('#avstate').innerText()).includes('ready to mint')
+  && (await page.locator('#avstate').innerText()).includes('work seat'),
   await page.locator('#avstate').innerText());
+ok('the genesis chip is mint-scoped — AVAILABLE TO MINT, never bee-level "live"',
+  /available to mint/i.test(await page.locator('#bee-genesis-chip').innerText()),
+  await page.locator('#bee-genesis-chip').innerText());
 await page.screenshot({ path: join(OUT, 'console-2-availability.png'), fullPage: true });
 
 /* audience ⊥ view — the tour-bar register pills change presentation,
