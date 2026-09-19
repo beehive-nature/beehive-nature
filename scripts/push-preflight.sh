@@ -81,6 +81,18 @@ locate() {
 #   P4 known-GOOD  token present in tree  -> locate() MUST call it a real hit
 if [ "${1:-}" = "--selftest" ]; then
   SELF=$(cd "$(dirname "$0")" && pwd)/$(basename "$0")
+  # P2 and P4 read a repository: P2 needs HEAD to resolve and P4 needs git grep.
+  # Run them in the work tree this script sits in, not the caller's cwd, so an
+  # invocation from outside the repo tests the checker instead of the caller's
+  # directory. A copy with no work tree around it cannot run them: say so and
+  # exit 2, which is neither "ok" (0) nor a checker defect (1).
+  cd "$(dirname "$SELF")" || exit 2
+  if [ "$(git rev-parse --is-inside-work-tree 2>/dev/null)" != "true" ]; then
+    echo "push-preflight selftest NOT RUN — $SELF is not inside a git work tree."
+    echo "  P2 and P4 read the repository, so outside one they would report the"
+    echo "  missing repo as a checker defect. Run the selftest from a checkout."
+    exit 2
+  fi
   st=0
   echo "push-preflight selftest — known-BAD and known-GOOD:"
   sh "$SELF" refs/heads/__no_such_ref__ >/tmp/ps1 2>&1; r=$?
