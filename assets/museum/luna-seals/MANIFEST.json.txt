@@ -1,6 +1,7 @@
 {
   "archived": "2026-08-28",
   "law": "byte-true archival — every exhibit carries its chain-read fallback in the tree",
+  "strip": "the hex-law hook adds a same-line PUBLIC-CONSTANT comment, so these files are not JSON as tracked; sed 's| /\\* PUBLIC-CONSTANT[^*]*\\*/||' <file>.json.txt gives the archived bytes, and meta_sha256/meta_bytes are of those stripped bytes",
   "items": [
     {
       "name": "luni.base.eth",
