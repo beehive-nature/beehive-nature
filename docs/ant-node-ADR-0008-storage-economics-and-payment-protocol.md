@@ -1,3 +1,5 @@
+> **Provenance:** verbatim copy of `docs/adr/ADR-0008-storage-economics-and-payment-protocol.md` from https://github.com/WithAutonomi/ant-node (blob `509f7cc5`, last upstream change `1e4f5787` 2026-08-06), authored by Anselme (@grumbach) and contributors, licensed MIT OR Apache-2.0 (upstream `Cargo.toml:7`, `LICENSE-MIT`, `LICENSE-APACHE`); the only change is this header.
+
 # ADR-0008: Storage economics and the quoting + payment protocol
 
 - **Status:** Proposed
