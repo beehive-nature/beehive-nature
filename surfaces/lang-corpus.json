@@ -62912,6 +62912,37 @@
    "tr": "üret ve tanış",
    "hu": "alkoss és találkozz",
    "sa": "रचयत मिलत च"
+  },
+  "watch.noRoom": {
+   "en": "No room is hosted at this address yet. This page is a preview.",
+   "ru": "По этому адресу комната пока не размещена. Эта страница — предпросмотр.",
+   "lv": "Šajā adresē istaba vēl netiek uzturēta. Šī lapa ir priekšskatījums.",
+   "th": "ยังไม่มีห้องเปิดให้บริการที่ที่อยู่นี้ หน้านี้เป็นเพียงตัวอย่าง",
+   "gd": "Chan eil seòmar air aoigheachd aig an t-seòladh seo fhathast. ’S e ro-shealladh a tha san duilleig seo.",
+   "tt": "Бу адреста бүлмә әлегә урнаштырылмаган. Бу бит — алдан карау.",
+   "uk": "За цією адресою кімнату ще не розміщено. Ця сторінка — попередній перегляд.",
+   "cs": "Na této adrese zatím žádná místnost neběží. Tato stránka je náhled.",
+   "zh": "此地址尚未托管房间。本页面仅为预览。",
+   "ko": "이 주소에는 아직 호스팅된 방이 없습니다. 이 페이지는 미리보기입니다.",
+   "ar": "لا توجد غرفة مستضافة على هذا العنوان بعد. هذه الصفحة معاينة.",
+   "nl-be": "Op dit adres wordt nog geen kamer gehost. Deze pagina is een voorbeeld.",
+   "es": "Aún no hay ninguna sala alojada en esta dirección. Esta página es una vista previa.",
+   "nl": "Op dit adres wordt nog geen kamer gehost. Deze pagina is een voorbeeld.",
+   "de": "Unter dieser Adresse wird noch kein Raum gehostet. Diese Seite ist eine Vorschau.",
+   "fr": "Aucune salle n’est encore hébergée à cette adresse. Cette page est un aperçu.",
+   "he": "עדיין לא מתארח חדר בכתובת הזו. הדף הזה הוא תצוגה מקדימה.",
+   "hi": "इस पते पर अभी कोई कमरा होस्ट नहीं है। यह पृष्ठ एक पूर्वावलोकन है।",
+   "bn": "এই ঠিকানায় এখনও কোনো রুম হোস্ট করা হয়নি। এই পৃষ্ঠাটি একটি প্রিভিউ।",
+   "fa": "هنوز اتاقی در این نشانی میزبانی نمی‌شود. این صفحه یک پیش‌نمایش است.",
+   "ur": "اس پتے پر ابھی کوئی کمرہ ہوسٹ نہیں ہے۔ یہ صفحہ ایک پیش منظر ہے۔",
+   "ja": "このアドレスでは、まだルームがホストされていません。このページはプレビューです。",
+   "da": "Der hostes endnu ikke noget rum på denne adresse. Denne side er en forhåndsvisning.",
+   "nb": "Det er ennå ikke noe rom som hostes på denne adressen. Denne siden er en forhåndsvisning.",
+   "sv": "Inget rum hostas på den här adressen ännu. Den här sidan är en förhandsvisning.",
+   "fi": "Tässä osoitteessa ei vielä isännöidä huonetta. Tämä sivu on esikatselu.",
+   "tr": "Bu adreste henüz barındırılan bir oda yok. Bu sayfa bir önizlemedir.",
+   "hu": "Ezen a címen még nem fut szoba. Ez az oldal előnézet.",
+   "sa": "अस्मिन् सङ्केते अद्यापि कक्षः न आतिथ्यते। एतत् पृष्ठं पूर्वदर्शनम् अस्ति।"
   }
  }
 }
