@@ -192,13 +192,22 @@ def build_transport(key_hex, channel_config=None, node="node"):
     """Transport seam wiring. None (no key, or no channel config) = the
     candidate's DISABLED seam: every notification parks at the durable
     signer_unprovisioned hold. Activation = provision the service key AND
-    the relay-signed private-room channel descriptor; both are founder-
-    gated gestures, neither exists in this candidate."""
+    the per-recipient channel descriptors; both are founder-gated
+    gestures, neither exists in this candidate.
+
+    channel_config is a PROTECTED, EXPLICIT per-recipient map (R2b):
+    {"channels": {"<recipient_hex>": {id, relay_signer, metadata_event,
+    membership_event, binding_citation}}} — each native DM room carries
+    only the signer and one recipient, so every verified binding gets its
+    own separately-signed descriptor."""
     if key_hex is None or channel_config is None:
         return None
     import json as _json
-    channel = _json.loads(Path(channel_config).read_text(encoding="utf-8"))
-    return notify_mod.NodeAdapterTransport(key_hex, channel, node=node)
+    raw = _json.loads(Path(channel_config).read_text(encoding="utf-8"))
+    channels = raw.get("channels") if isinstance(raw, dict) else None
+    if not channels:
+        raise ValueError("channel config must carry a per-recipient 'channels' map (R2b)")
+    return notify_mod.RoutedTransport(key_hex, channels, node=node)
 
 def scan(root, state_dir, transport=None, publisher=None, resolved_roster=None,
          call=None, limit=2, daily_limit=24, now=None, epoch=None, spool=None):
@@ -223,15 +232,19 @@ def scan(root, state_dir, transport=None, publisher=None, resolved_roster=None,
                 paths = sorted(p for folder in ("new", "cur") for p in (maildir / folder).glob("*"))
                 for path in paths:
                     try:
-                        if path.stat().st_mtime < cutoff:
-                            counts["skipped"] += 1
-                            continue
                         raw = read_mail(path)
                         digest = hashlib.sha256(raw).hexdigest()
                     except (OSError, ValueError):
                         counts["skipped"] += 1
                         continue
                     row = store.mail_row(local, digest)
+                    # R2a (3f8101cb): the backfill/epoch exclusion applies
+                    # ONLY to UNKNOWN mail — a file with a ledger row
+                    # (imported pending work, in-flight rows, held rows) is
+                    # never epoch-skipped, no matter how old its mtime is.
+                    if row is None and path.stat().st_mtime < cutoff:
+                        counts["skipped"] += 1
+                        continue
                     # TERMINAL only when BOTH halves are done: notification
                     # acked (or the deliberate cutover hold) AND drafting is
                     # not pending (row classification not 'received', or no
@@ -286,6 +299,8 @@ def scan(root, state_dir, transport=None, publisher=None, resolved_roster=None,
                                 counts["notified"] += 1
                             elif outcome == "spooled":
                                 counts["spooled"] = counts.get("spooled", 0) + 1
+                            elif outcome == "destination_unconfigured":
+                                counts["destination_unconfigured"] = counts.get("destination_unconfigured", 0) + 1
                             elif outcome == "binding_unverified":
                                 counts["binding_unverified"] += 1
                             elif outcome == "signer_unprovisioned":

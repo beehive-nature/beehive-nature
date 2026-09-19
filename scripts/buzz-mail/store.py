@@ -10,6 +10,15 @@ Ported law from the hash-verified triage baseline (d9ff30d6):
     bytes live under state/drafts/ as files with 0600.
   - state directory is 0700, db file 0600.
 
+PRIVATE AT-REST STATE, DESCRIBED HONESTLY (R2b small fix, 3f8101cb — the
+earlier "holds NO mail content" claim was FALSE and is deleted, not
+softened): this db stores digests, statuses, counts, pointers AND, for
+rows that reached the optional drafting stage, the model's RESULT JSON
+(summary + proposed draft text — the ported triage baseline's own at-rest
+shape) in `mail.result`. Raw message bytes never enter the db — they live
+only in the Maildir; outbound draft bodies live only as 0600 .eml files
+under state/drafts/. The state directory is 0700 and the db file 0600.
+
 DEDUPE HORIZON (coordinator correction 1e18cbf8 #1): the mail table is
 keyed on (mailbox, digest) — the same CONTENT delivered to the same
 RECIPIENT local is one row forever; the same content delivered to two

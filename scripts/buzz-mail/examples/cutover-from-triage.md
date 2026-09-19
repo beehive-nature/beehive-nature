@@ -23,27 +23,24 @@ Never a window where both read, never a mailbox read by two consumers.
 
 ## State carryover — every row crosses, nothing reprocessed, nothing dropped
 
-The deployed triage state (`/var/lib/buzz-mail-triage/triage.sqlite3`)
-rows are `digest PRIMARY KEY` (bclaude only) with statuses drafted /
-sensitive_review / format_review / failed / retry / processing. The gate's
-schema keys on `(mailbox, digest)`. One-shot import before the first gate
-run:
+The carryover is now CODE: `scripts/buzz-mail/import_from_triage.py`
+(one-shot, offline, digests+state only — no bodies moved, read or
+emitted; synthetic proof in `test_import_from_triage.py`). The queue
+mapping, exact:
 
-| triage row (digest, status) | gate row (mailbox='bclaude', digest, …) |
+| queue at the boundary | gate row after `import_from_triage.py` |
 |---|---|
-| drafted / sensitive_review / format_review / failed | status mapped as-is, **notify='legacy_pre_cutover'** — finished or held work: the gate never re-drafts it and never backfills a notification |
-| retry / processing (IN FLIGHT) | status='received', **notify='none'** — the gate RESUMES these as incomplete rows (crash-law path: re-derived, re-notified if a binding is verified, drafted under budget caps) |
+| CLAIMED, terminal (drafted / sensitive_review / format_review / failed) | status as-is, **notify='legacy_pre_cutover'** — never re-drafted, never backfill-notified |
+| CLAIMED, in flight (retry / processing) | status='received', **notify='none'**, `attempts` + `next_attempt` PRESERVED — resumes under the gate's backoff and three-attempt cap |
+| UNCLAIMED pre-boundary **bclaude** mail (the old reader checked budget caps BEFORE inserting a claim row, so its queue can hold mail with no ledger row at all) | status='received', **notify='legacy_pre_cutover'** — pending DRAFT work: never discarded as backfill, never retroactively notified |
+| pre-boundary mail in the OTHER mailboxes | never that reader's queue — keeps the explicit no-backfill policy (unknown rows stay epoch-skipped) |
+| INTERVAL mail (arrived during the pause, mtime >= boundary) | fully eligible — the importer sets the gate's epoch to the boundary |
 
-- Finished mail is never re-drafted: `legacy_pre_cutover` is a terminal
-  notify state in the scanner, and drafting is additionally gated on
-  classification status.
-- In-flight work is not lost: retry/processing rows cross as incomplete
-  and complete under the gate's own claim/backoff laws.
-- The mail row's `epoch` marker: after the import, allow the gate's
-  first-run epoch to stand — the import above covers the triage-visible
-  corpus explicitly; anything older than epoch is skipped as backfill.
-- Triage's model outputs (`result` JSON) stay in the OLD db; the gate does
-  not copy draft text into its own state (the no-content-in-db law).
+The boundary timestamp is captured BEFORE the old reader stops. The
+current-day budget row carries over unchanged (same-day model calls are
+not re-granted). The import is idempotent (INSERT OR IGNORE + epoch set
+only if absent): running it twice changes nothing. Exactly one reader
+ever runs — this tool is offline bookkeeping between step 2 and step 4.
 
 ## Drafting continuity
 

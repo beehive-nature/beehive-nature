@@ -51,6 +51,7 @@ behind the seam):
   same delivery.
 """
 import json
+import os
 import subprocess
 import time
 from pathlib import Path
@@ -61,6 +62,11 @@ ADAPTER = Path(__file__).resolve().parent / "notify-transport.mjs"
 
 class SeamDisabled(Exception):
     """The transport seam is intentionally not configured in this candidate."""
+
+
+class DestinationUnconfigured(Exception):
+    """No channel descriptor exists for this recipient — the notice is HELD
+    (never guessed, never routed to another agent's room)."""
 
 
 class Transport:
@@ -125,10 +131,20 @@ class NodeAdapterTransport(Transport):
         }
         proc = subprocess.run([self.node, str(ADAPTER)], input=json.dumps(request).encode(),
                               capture_output=True, cwd=self.cwd,
-                              env={"BUZZ_MAILGATE_KEY": self.key_hex, "PATH": "/usr/bin:/bin"})
+                              env=_adapter_env(self.key_hex))
         if proc.returncode != 0:
             raise RuntimeError(f"notify adapter refused (exit {proc.returncode}): {proc.stderr.decode(errors='replace').strip()}")
         return proc.stdout.strip()
+
+
+def _adapter_env(key_hex: str) -> dict:
+    """Minimal child environment for the node adapter: the key plus PATH,
+    and SystemRoot ONLY on Windows — without it Node's CSPRNG cannot
+    initialize (3f8101cb small fix). Nothing else is inherited."""
+    env = {"BUZZ_MAILGATE_KEY": key_hex, "PATH": os.environ.get("PATH", "/usr/bin:/bin")}
+    if os.name == "nt":
+        env["SystemRoot"] = os.environ.get("SystemRoot", r"C:\Windows")
+    return env
 
 
 class SpoolLogPublisher:
@@ -146,6 +162,32 @@ class SpoolLogPublisher:
         with open(self.spool_path, "ab") as spool:
             spool.write(event_bytes + b"\n")
         return "spooled"
+
+
+class RoutedTransport(Transport):
+    """Per-recipient channel routing (R2b, 3f8101cb): a native DM room
+    carries only the signer and ONE recipient, so a single shared channel
+    descriptor can never serve a second agent. This transport holds a
+    protected, explicit per-recipient descriptor map — {recipient_hex:
+    channel descriptor} — and selects a route ONLY after the notifier has
+    verified the roster binding (the binding check happens before the
+    transport is ever called). An unknown or mismatched destination raises
+    DestinationUnconfigured and the mail row parks at the durable
+    destination_unconfigured hold — never a guess, never another agent's
+    room."""
+
+    def __init__(self, key_hex: str, channels: dict, node="node"):
+        self._routes = {}
+        for recipient, channel in (channels or {}).items():
+            citation = channel.get("binding_citation", "") if isinstance(channel, dict) else ""
+            self._routes[str(recipient).lower()] = NodeAdapterTransport(
+                key_hex, channel, node=node, binding_citation=citation)
+
+    def sign_and_seal(self, recipient_hex, payload_json):
+        route = self._routes.get(recipient_hex.hex().lower())
+        if route is None:
+            raise DestinationUnconfigured("no channel descriptor for this recipient")
+        return route.sign_and_seal(recipient_hex, payload_json)
 
 
 class Notifier:
@@ -197,7 +239,10 @@ class Notifier:
         }
         assert set(payload) == PAYLOAD_KEYS  # opacity whitelist — no mail content can ride along
         payload_json = json.dumps(payload, ensure_ascii=False, separators=(",", ":"))
-        signed_bytes = self.transport.sign_and_seal(binding_hex, payload_json)
+        try:
+            signed_bytes = self.transport.sign_and_seal(binding_hex, payload_json)
+        except DestinationUnconfigured:
+            return "destination_unconfigured"  # durable hold: route the descriptor later, never guess
         # COMMIT the signed bytes before any publish attempt (uncertain-publish law)
         event = json.loads(signed_bytes.decode("utf-8"))
         self.store.enqueue_event(event, mailbox, binding_hex.hex(), digest, now=now)

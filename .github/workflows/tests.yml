@@ -138,6 +138,7 @@ jobs:
           python3 scripts/buzz-mail/test_roster.py
           python3 scripts/buzz-mail/test_outbound.py
           python3 scripts/buzz-mail/test_bech32id.py
+          python3 scripts/buzz-mail/test_import_from_triage.py
       - name: bMAILroom native notice adapter (pinned nostr-tools, disabled seam)
         if: always()
         run: |

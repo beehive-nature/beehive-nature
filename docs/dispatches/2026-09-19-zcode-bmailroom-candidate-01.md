@@ -49,6 +49,53 @@
 > reviewer `{"ok": true}`, lint-ci-shape 71/71, secret-scan diff+tree
 > clean.
 
+> **ADDENDUM 2 — the R2 fix-forward head (3f8101cb + 0b0b58cf).**
+> F1, F2 transport-shape, F3, F4, F6 were confirmed closed; the items
+> below landed as one ordinary fix-forward commit on
+> `zcode/bmailroom-candidate-02` (#141):
+>
+> - **R2a** the epoch/backfill exclusion now applies ONLY to UNKNOWN mail
+>   — the ledger is consulted BEFORE the mtime check, so an imported
+>   pending row older than the cutoff resumes (reproducer
+>   `imported pending row older than cutoff resumes` passes). The cutover
+>   is now CODE: `scripts/buzz-mail/import_from_triage.py` (one-shot,
+>   offline, digests+state only) implements the exact queue mapping —
+>   claimed-terminal → `legacy_pre_cutover`; claimed-in-flight → pending
+>   with attempts/next_attempt PRESERVED; unclaimed pre-boundary bclaude
+>   mail → pending DRAFT work, no retroactive notice (the old reader
+>   checked budget caps BEFORE claiming, so unclaimed mail exists);
+>   other-mailbox pre-boundary mail keeps the no-backfill policy; the
+>   boundary is captured before the stop and becomes the gate epoch so
+>   interval mail stays eligible; the same-day budget carries; the import
+>   is idempotent. Synthetic proof `test_import_from_triage.py` (4/4)
+>   covers all five laws + the addendum fixture.
+> - **R2b** per-recipient channel routing: a native DM room carries only
+>   the signer and ONE recipient, so the transport is now a protected,
+>   explicit per-recipient descriptor map (`RoutedTransport`), selected
+>   only AFTER a verified roster binding; an unknown or mismatched
+>   destination parks at the durable `destination_unconfigured` hold.
+>   Proven through the REAL Python→Node adapter with two distinct
+>   recipients and separately relay-signed synthetic DMs (each event's
+>   `h` is its own room; a deliberately swapped room is refused by the
+>   membership check).
+> - **Windows portability:** the adapter child env keeps the minimal
+>   key-only set plus PATH and adds `SystemRoot` ONLY on Windows (Node's
+>   CSPRNG needs it); the node executable is an explicit parameter.
+> - **False claim deleted** (not softened): `store.py`'s header now
+>   describes the real private at-rest state — digests/status/pointers
+>   AND the drafting stage's model result JSON in `mail.result` (the
+>   ported baseline's own shape); raw bytes never enter the db.
+>
+> Evidence at this head: python battery 47/47 (sink 4 + mailgate 12 +
+> notify 5 + roster 7 + outbound 7 + bech32 4 + importer 4 + adapter-cli 4
+> via the node step), adapter selftest 21 rejection rules, transport CLI
+> 11/11, Astra's `review-mail-ledger.py` **8/8** AND her
+> `review-mail-cutover.py` **2/2** (`imported pending row older than
+> cutoff resumes` + `hard crash respects persisted backoff and
+> three-attempt cap`), her python-adapter reviewer `{"ok": true}`,
+> lint-ci-shape 71/71, secret-scan diff+tree clean.
+
+
 
 **STATE** · Candidate complete on branch `zcode/bmailroom-candidate-01`, cut
 from `origin/main` @ `d7b9b2c6`. Nothing merged, nothing deployed, no key
