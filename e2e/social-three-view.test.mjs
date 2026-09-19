@@ -4,33 +4,15 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import vm from 'node:vm';
-import { readFileSync } from 'node:fs';
 import { extractKeyedText } from './i18n-extract.mjs';
+import { read, extractById } from './surface-source.mjs';
 
-const read = path => readFileSync(new URL('../'+path, import.meta.url), 'utf8');
 const social = read('surfaces/doors/bnature-social.html');
 const register = read('surfaces/register.js');
 const tour = read('surfaces/tour.js');
 const gallery = read('surfaces/blight/gallery.html');
 const studio = read('surfaces/blight/studio-music.html');
 const directory = read('surfaces/buzz-directory.html');
-
-function extractById(html, id) {
-  const open = html.match(new RegExp(`<(?<tag>[a-z][a-z0-9]*)([^>]*\\sid="${id}"[^>]*)>`, 'i'));
-  assert.ok(open, '#'+id+' must exist');
-  const tag = open.groups.tag;
-  const start = open.index;
-  let depth = 1, cursor = start + open[0].length;
-  const finder = new RegExp('<'+tag+'\\b[^>]*>|</'+tag+'>', 'gi');
-  finder.lastIndex = cursor;
-  let next;
-  while ((next = finder.exec(html))) {
-    if (next[0].startsWith('</')) depth--;
-    else depth++;
-    if (depth === 0) return html.slice(start, next.index + next[0].length);
-  }
-  return html.slice(start);
-}
 
 function hrefs(html) {
   return [...html.matchAll(/<a\b[^>]*href="([^"]+)"/g)].map(m => m[1]);

@@ -4,30 +4,12 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import vm from 'node:vm';
-import { readFileSync } from 'node:fs';
+import { read, extractById } from './surface-source.mjs';
 
-const read = path => readFileSync(new URL('../'+path, import.meta.url), 'utf8');
 const room = read('surfaces/forge/room.html');
 const register = read('surfaces/register.js');
 const tour = read('surfaces/tour.js');
 const hexfield = read('surfaces/forge/hexfield.html');
-
-function extractById(html, id) {
-  const open = html.match(new RegExp(`<(?<tag>[a-z][a-z0-9]*)([^>]*\\sid="${id}"[^>]*)>`, 'i'));
-  assert.ok(open, '#'+id+' must exist');
-  const tag = open.groups.tag;
-  const start = open.index;
-  let depth = 1, cursor = start + open[0].length;
-  const finder = new RegExp('<'+tag+'\\b[^>]*>|</'+tag+'>', 'gi');
-  finder.lastIndex = cursor;
-  let next;
-  while ((next = finder.exec(html))) {
-    if (next[0].startsWith('</')) depth--;
-    else depth++;
-    if (depth === 0) return html.slice(start, next.index + next[0].length);
-  }
-  return html.slice(start);
-}
 
 function inline(html) {
   return [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].map(m => m[1]).join('\n');

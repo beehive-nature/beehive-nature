@@ -5,9 +5,9 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { read, extractById } from './surface-source.mjs';
 
 const root = resolve(import.meta.dirname, '..');
-const read = p => readFileSync(resolve(root, p), 'utf8');
 const bin = p => readFileSync(resolve(root, p));
 
 const work = read('docs/mvp-walk/works/bloom-genesis.html');
@@ -23,23 +23,6 @@ const receiveJs = read('docs/mvp-walk/assets/first-work/receive.js');
 const collection = read('docs/mvp-walk/assets/artist-audio/collection.js');
 const register = read('surfaces/register.js');
 const CANONICAL = '../first-work.html#work=bnr-genesis-bloom-v1';
-
-function extractById(html, id) {
-  const open = html.match(new RegExp(`<(?<tag>[a-z][a-z0-9]*)([^>]*\\sid="${id}"[^>]*)>`, 'i'));
-  assert.ok(open, '#' + id + ' must exist');
-  const tag = open.groups.tag;
-  const start = open.index;
-  let depth = 1;
-  const finder = new RegExp('<' + tag + '\\b[^>]*>|</' + tag + '>', 'gi');
-  finder.lastIndex = start + open[0].length;
-  let next;
-  while ((next = finder.exec(html))) {
-    if (next[0].startsWith('</')) depth--;
-    else depth++;
-    if (depth === 0) return html.slice(start, next.index + next[0].length);
-  }
-  return html.slice(start);
-}
 
 function firstScreen(html) {
   const details = html.indexOf('<details');

@@ -2,32 +2,14 @@
    Gift identity lives in one engine — views change prose/density, not rules. */
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
 import { extractKeyedText } from './i18n-extract.mjs';
+import { read, extractById } from './surface-source.mjs';
 
-const read = path => readFileSync(new URL('../'+path, import.meta.url), 'utf8');
 const page = read('surfaces/kandi.html');
 const register = read('surfaces/register.js');
 const tour = read('surfaces/tour.js');
 const pointers = read('surfaces/blight/pointers.js');
 const corpus = JSON.parse(read('surfaces/lang-corpus.json'));
-
-function extractById(html, id) {
-  const open = html.match(new RegExp(`<(?<tag>[a-z][a-z0-9]*)([^>]*\\sid="${id}"[^>]*)>`, 'i'));
-  assert.ok(open, '#'+id+' must exist');
-  const tag = open.groups.tag;
-  const start = open.index;
-  let depth = 1, cursor = start + open[0].length;
-  const finder = new RegExp('<'+tag+'\\b[^>]*>|</'+tag+'>', 'gi');
-  finder.lastIndex = cursor;
-  let next;
-  while ((next = finder.exec(html))) {
-    if (next[0].startsWith('</')) depth--;
-    else depth++;
-    if (depth === 0) return html.slice(start, next.index + next[0].length);
-  }
-  return html.slice(start);
-}
 
 test('New bee uses the shared light canvas; raver and cypherpunk keep this page\'s dark reading', () => {
   assert.match(page, /<body data-reg="bee" data-bee-theme="shared">/);
