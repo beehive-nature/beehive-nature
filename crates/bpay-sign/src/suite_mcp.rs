@@ -256,6 +256,28 @@ impl watchpay::connect::ConnectTransport for SuiteMcpTransport {
 
 // ───────────── the harmless preflight primitives (Observation A) ─────────────
 
+/// The Connect-bPay-Wallet device leg (the UX seat's frozen UI
+/// contract): address export WITH the physical device prompt
+/// (`showOnTrezor:true`) — the founder APPROVES the export or
+/// REJECTS it (the deliberate-rejection receipt). Returns the device's
+/// address string exactly as returned (EIP-55 checksummed display
+/// form); identity checks happen at the binding layer.
+pub fn connect_address(mcp: &mut SuiteMcp, path: &str) -> Result<String> {
+    match mcp.call_tool(
+        "trezor_get_address",
+        json!({ "coin": "eth", "path": path, "showOnTrezor": true }),
+    )? {
+        ToolReply::Ok(payload) => payload
+            .get("address")
+            .and_then(|a| a.as_str())
+            .map(String::from)
+            .ok_or_else(|| Error::Malformed(format!("connect payload has no address: {payload}"))),
+        ToolReply::ToolError(why) => Err(Error::Malformed(format!(
+            "DEVICE REFUSED the address export — connection refused on the Safe 7: {why}"
+        ))),
+    }
+}
+
 /// `trezor_get_address` (ethereumGetAddress, silent — no device button
 /// when `show_on_trezor` is false). Returns the device-derived address.
 pub fn get_address(mcp: &mut SuiteMcp, path: &str, show_on_trezor: bool) -> Result<EthAddr> {

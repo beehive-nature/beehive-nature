@@ -90,15 +90,88 @@ fn now_secs() -> u64 {
         .as_secs()
 }
 
+// ─────────────── the WALLET routes (Connect bPay Wallet, step 0) ───────────────
+// Contract: the UX seat's frozen UI surface (@987bf1c2). Connecting
+// proves identity ONLY — it authorizes nothing; fields are public-only.
+
+#[derive(Deserialize, Default)]
+struct WalletConnectBody {
+    #[serde(default)]
+    path: Option<String>,
+}
+
+async fn wallet_connect(
+    axum::extract::State(state): axum::extract::State<Shared>,
+    body: Option<Json<WalletConnectBody>>,
+) -> Response {
+    let Some(cfg) = state.safe7.as_ref().map(|c| Safe7Cfg {
+        bridge: c.bridge.clone(),
+        rpc: c.rpc.clone(),
+        mcp_url: c.mcp_url.clone(),
+        mcp_token: c.mcp_token.clone(),
+        mcp_timeout_secs: c.mcp_timeout_secs,
+        payer: c.payer,
+    }) else {
+        return refusal(
+            503,
+            "transport",
+            "no Suite-MCP transport wired (the wallet ceremony rides safe7 mode — set \
+             BPAY_SIGN_MODE=safe7 + BPAY_MCP_TOKEN)"
+                .into(),
+        );
+    };
+    let path = body
+        .and_then(|Json(b)| b.path)
+        .unwrap_or_else(|| "m/44'/60'/0'/0/0".to_string());
+    match bpay_sign::wallet::connect_wallet(&cfg, &path) {
+        bpay_sign::wallet::ConnectOutcome::Connected(w) => {
+            if !bpay_sign::wallet::persist(&state.state_dir, &w) {
+                return refusal(500, "wallet", "could not persist the binding".into());
+            }
+            (
+                axum::http::StatusCode::OK,
+                Json(serde_json::json!({ "ok": true, "binding": w })),
+            )
+                .into_response()
+        }
+        bpay_sign::wallet::ConnectOutcome::Failed { rejected, why } => (
+            axum::http::StatusCode::OK,
+            Json(serde_json::json!({
+                "ok": false,
+                "rejected": rejected,
+                "why": why,
+                "note": "Connection rejected — nothing changed",
+            })),
+        )
+            .into_response(),
+    }
+}
+
+async fn wallet_get(axum::extract::State(state): axum::extract::State<Shared>) -> Response {
+    match bpay_sign::wallet::load_wallet(&state.state_dir) {
+        Some(w) => Json(serde_json::json!({ "ok": true, "binding": w })).into_response(),
+        None => {
+            Json(serde_json::json!({ "ok": false, "why": "no wallet connected" })).into_response()
+        }
+    }
+}
+
+async fn wallet_disconnect(axum::extract::State(state): axum::extract::State<Shared>) -> Response {
+    match bpay_sign::wallet::disconnect(&state.state_dir) {
+        Some(w) => Json(serde_json::json!({ "ok": true, "binding": w })).into_response(),
+        None => refusal(404, "wallet", "no wallet connected".into()),
+    }
+}
+
 // ─────────────── binding inputs: demo memory vs LIVE bridge ───────────────
 
-/// The payer this service binds and the wall demands. Demo: the hot
-/// testnet key's address. Safe7: the Observation-A-proven device
-/// address (LAW 14 — a device signing from any other key is refused at
-/// the wall).
+/// The payer this service binds and the wall demands, under the
+/// PAYER-PRECEDENCE law: a CONNECTED wallet binding > the expected
+/// payer (safe7; the connect ceremony already cross-checked the device
+/// address against it) > the demo hot key.
 fn payer_of(state: &AppState) -> EthAddr {
     match &state.safe7 {
-        Some(cfg) => cfg.payer,
+        Some(cfg) => bpay_sign::wallet::connected_payer(&state.state_dir).unwrap_or(cfg.payer),
         None => hot_payer(
             state
                 .hot_key
@@ -973,12 +1046,16 @@ fn main() {
         }
     };
     // the DEMO vending endpoints exist ONLY in demo mode — safe7 reads
-    // the REAL bridge and never serves synthetic records.
+    // the REAL bridge and never serves synthetic records. The wallet
+    // routes exist in BOTH modes (they refuse honestly without safe7).
     let mut app = Router::new()
         .route("/v1/sign/state", post(sign_state))
         .route("/v1/sign/begin", post(sign_begin))
         .route("/v1/sign/receipt", get(sign_receipt_get))
-        .route("/v1/testnet/settle", post(testnet_settle));
+        .route("/v1/testnet/settle", post(testnet_settle))
+        .route("/v1/wallet/connect", post(wallet_connect))
+        .route("/v1/wallet", get(wallet_get))
+        .route("/v1/wallet/disconnect", post(wallet_disconnect));
     if state.demo {
         app = app.route("/v1/upload/prepare", post(demo_prepare)).route(
             "/v1/authorization",

@@ -17,3 +17,4 @@
 pub mod bridge;
 pub mod rlp;
 pub mod suite_mcp;
+pub mod wallet;
