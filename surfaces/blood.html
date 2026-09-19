@@ -305,14 +305,14 @@ body[data-reg="cypherpunk"] [data-reg="cypherpunk"]:not(body){display:block}
     <div class="t" data-i18n="genealogy.l.living">the living are roles until they consent</div>
     <div class="d">named never Living — a grandparent slot renders as a role, not an identity, until the person consents; DNA and health data never default public.</div></div></div>
   <div class="layer"><div class="g" aria-hidden="true">⌗</div><div>
-    <div class="t" data-i18n="genealogy.l.counts">source counts = inventory · citations = confidence</div>
-    <div class="d">how many records exist and how many claims they support are <b>two numbers</b>, reported separately, never averaged into one badge.</div></div></div>
+    <div class="t" data-i18n="genealogy.l.counts">citations connect claims to evidence · support is assessed per claim</div>
+    <div class="d">how many records exist stays inventory; a citation <b>connects a claim to its evidence</b> — support is assessed per claim, never scored into one badge.</div></div></div>
 </section>
 
 <!-- ── THE PUBLIC DEMONSTRATION PATH ───────────────────────────── -->
 <div class="area"><span data-i18n="genealogy.area.demo">the public demonstration path</span></div>
 <section class="card" aria-label="public demonstration path">
-  <p class="note" style="margin:0 0 8px">A stranger opens a real ancestor — <b>Albert Perry Rockwood</b>, with <b>Donna</b> beside him — reads the biography, inspects the records, meets the lore <b>labeled as lore</b>, traverses the fractal, and retrieves the underlying archived evidence from the network itself. That is the case study that makes this understandable to a stranger.</p>
+  <p class="note" style="margin:0 0 8px">A stranger opens a real ancestor — <b>Albert Perry Rockwood</b>, with <b>Donna</b> beside him — reads the biography, inspects the records, meets the lore <b>labeled as lore</b>, traverses the fractal, and retrieves the underlying archived evidence from the network itself. That is the case study that makes this understandable to a stranger. Browsing what is already available never waits on preservation — the archive’s purchase is the estate’s affair, never the reader’s gate.</p>
   <div class="line"><span>biography · records · lore<small>person archive, staged with the zBlood seat</small></span><b class="chip staged" style="border:none">staged</b></div>
   <div class="line"><span>the fractal traversal<small>rendered on this page from math; person nodes attach when the archive opens</small></span><b class="chip live" style="border:none">shape ready</b></div>
   <div class="line"><span>archived evidence retrieval<small>the five states above — opens the day they turn verified</small></span><b class="chip notyet" style="border:none">not yet</b></div>
@@ -383,8 +383,8 @@ function renderFractal(){
     out += `<text x="8" y="${y + 4}" fill="var(--faint)" font-size="10">g${g}</text>`;
   }
   svg.innerHTML = out;
-  const total = Math.pow(2, gens) - 1, last = Math.pow(2, gens);
-  $('frmath').innerHTML = `<b>${gens} generations</b> → <b>${last.toLocaleString('en-US')}</b> slots in the last row · <b>${total.toLocaleString('en-US')}</b> ancestor slots beside you (2<sup>${gens}</sup>−1) — real people fewer: pedigrees collapse, and the collapse is evidence's work, not the chart's`;
+  const last = Math.pow(2, gens), ancestors = Math.pow(2, gens + 1) - 2, total = ancestors + 1;
+  $('frmath').innerHTML = `<b>${gens} generations</b> → <b>${last.toLocaleString('en-US')}</b> slots in the last row · <b>${ancestors.toLocaleString('en-US')}</b> ancestor positions beside you (2<sup>${gens + 1}</sup>−2) · <b>${total.toLocaleString('en-US')}</b> nodes drawn in all, root included — real people fewer: pedigrees collapse, and the collapse is evidence's work, not the chart's`;
   document.querySelectorAll('#gens button').forEach(b =>
     b.classList.toggle('pick', +b.dataset.g === gens));
 }
@@ -400,19 +400,59 @@ window.__blood = { gens: () => FRG };   // e2e readback hook
 $('readeco').addEventListener('click', async () => {
   const box = $('ecores'); box.style.display = 'block';
   box.innerHTML = '<span class="hold">reading…</span>';
-  try {
-    const r = await fetch('blood-economics.json', { signal: AbortSignal.timeout(10000) });
-    if (!r.ok) throw new Error('HTTP ' + r.status);
-    const j = await r.json();
-    if (!j || typeof j !== 'object') throw new Error('shape');
-    const done = ['quoted','purchased','uploaded','retrieved','hash_verified']
-      .filter(k => j.states && j.states[k] === true).length;
-    $('hero-states').textContent = done + ' / 5';
-    box.innerHTML = `<span class="ok">receipt read.</span> states ${done}/5 — the table above fills from this file; the live card carries its numbers verbatim.`;
-    window.dispatchEvent(new CustomEvent('blood-eco', { detail: j }));
-  } catch (e) {
-    box.innerHTML = '<span class="hold">no receipt yet.</span> The economics card and the table stay empty rather than guess — the first preservation receipt writes <b>blood-economics.json</b>, and this button reads it. Nothing on this page is a projection.';
+  /* the incumbent receipt first (the genealogy lane's own artifact); the
+     consolidated name stays a fallback — a missing filename is never
+     evidence that nothing was measured */
+  const CANDIDATES = ['assets/profile-archive/lineage/zblood-storage-economics.json', 'blood-economics.json'];
+  let j = null, unreachable = false, invalid = null;
+  for (const path of CANDIDATES) {
+    try {
+      const r = await fetch(path, { signal: AbortSignal.timeout(10000) });
+      if (!r.ok) continue;                     /* try the next name */
+      const text = await r.text();
+      try { const p = JSON.parse(text); if (p && typeof p === 'object' && (p.states || p.quotes)) { j = p; } else { invalid = path + ' — shape not recognized'; } }
+      catch { invalid = path + ' — not valid JSON'; }
+      break;
+    } catch { unreachable = true; }
   }
+  const done = what => { box.innerHTML = what; };
+  if (!j) {
+    if (unreachable) return done('<span class="hold">receipt unreachable.</span> The read timed out or the server did not answer — this says nothing about the archive\u2019s measurements; try again.');
+    if (invalid) return done('<span class="hold">receipt invalid.</span> ' + invalid + ' — a malformed receipt is named, never smoothed over.');
+    return done('<span class="hold">receipt absent here.</span> The archive\u2019s economics live in <b>assets/profile-archive/lineage/zblood-storage-economics.json</b> on the genealogy lane (lane/zcode-lineage-import, zblood.storage-economics/1) — a dated Arweave quote and a qualified Autonomi estimate are already recorded there. This page will not pretend nothing was measured; it fills the moment its owner lands the artifact.');
+  }
+  /* schema-tolerant five-state derivation — the incumbent's 'quoted' is a
+     QUALIFIED TEXT (counts as measured, shown verbatim); the rest are
+     booleans; hash-verification answers to either key name */
+  const st = j.states || {};
+  const five = [
+    ['quoted',    !!st.quoted,                                   typeof st.quoted === 'string' ? st.quoted : ''],
+    ['purchased', st.purchased === true,                          ''],
+    ['uploaded',  st.uploaded === true,                           ''],
+    ['retrieved', st.retrieved === true,                          ''],
+    ['verified',  st.hashVerifiedFromStorage === true || st.hash_verified === true, ''],
+  ];
+  const measured = five.filter(f => f[1]).length;
+  five.forEach(([k, is, detail]) => {
+    const chip = $('st-' + k); if (!chip) return;
+    chip.textContent = is ? 'measured' : 'not yet';
+    chip.className = is ? 'chip live' : 'chip notyet';
+    if (chip.style) chip.style.border = 'none';
+    if (is && detail) chip.title = detail;   /* the qualified text rides verbatim */
+  });
+  $('hero-states').textContent = measured + ' / 5';
+  /* the live card fills from the receipt's own computed numbers, verbatim */
+  const ar = j.quotes && j.quotes.arweave, c = ar && ar.computed;
+  if (c && c.fullArchiveAR != null) {
+    const when = (ar.queriedAt || '').replace('T', ' ').slice(0, 16);
+    document.querySelector('.livecard').innerHTML =
+      '\u2b21 <b>This family archive quoted ' + c.fullArchiveAR + ' AR \u2248 $' + c.fullArchiveUSD +
+      ' to preserve on Arweave (' + when + ' UTC)</b> \u2014 QUOTE ONLY, not yet paid<br>' +
+      'retrievals tested: <span class="blank">___</span> \u00b7 developer egress bill: <span class="blank">___</span><br>' +
+      '<span style="font-size:10.5px">filled verbatim from zblood-storage-economics.json; the not-paid states stay not-paid until their receipts exist</span>';
+  }
+  done('<span class="ok">receipt read.</span> ' + measured + ' of 5 states measured \u2014 the qualified detail rides each chip verbatim; the retrieval-scale legs stay awaiting until the purchased archive exists. Nothing on this page is a projection.');
+  window.dispatchEvent(new CustomEvent('blood-eco', { detail: j }));
 });
 </script>
 <script src="tour.js?v=42"></script>

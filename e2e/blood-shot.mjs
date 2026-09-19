@@ -46,7 +46,7 @@ page.on('pageerror', e => errors.push(String(e).slice(0, 120)));
 page.on('console', m => { if (m.type() === 'error') errors.push(m.text().slice(0, 120)); });
 /* the receipt reader's handled 404 (file honestly absent) is named in-page — not a page defect */
 const notFound = []; page.on('response', r => { if (r.status() === 404) notFound.push(r.url()); });
-const isLawful404 = t => t.includes('404') && notFound.every(u => u.includes('blood-economics.json')) && notFound.length > 0;
+const isLawful404 = t => t.includes('404') && notFound.length > 0 && notFound.every(u => u.includes('economics.json'));
 await page.goto(BASE + '/surfaces/blood.html', { waitUntil: 'load' });
 
 /* 1 · THE HERO — the honest state number */
@@ -75,12 +75,13 @@ ok('staged persons say not yet public — privacy before opening',
 let nodes = await page.locator('#fractal polygon').count();
 ok('fractal draws every slot cumulatively: 2^7−1 = 127 nodes at six generations', nodes === 127, String(nodes));
 const mathTxt = await page.locator('#frmath').innerText();
-ok('fractal math is exact: 64 in the last row · 63 ancestor slots', mathTxt.includes('64') && mathTxt.includes('63'), mathTxt.slice(0, 60));
+ok('fractal math is exact: 64 last row · 126 ancestor positions · 127 total nodes (root included)',
+  mathTxt.includes('64') && mathTxt.includes('126') && mathTxt.includes('127'), mathTxt.slice(0, 90));
 ok('pedigree collapse is stated where the shape is drawn',
   (await page.locator('.frwrap details[data-reg-disclose] .dbody').textContent()).includes('collapse'), '');
 await page.locator('#gens button[data-g="10"]').click();
 await page.waitForFunction(() => document.querySelectorAll('#fractal polygon').length === 2047);
-ok('ten generations draw 2,047 slots total (1,023 beside you in the last two rows alone)', true,
+ok('ten generations draw 2,046 ancestor positions + the root = 2,047 total', true,
   (await page.locator('#fractal polygon').count()) + ' nodes');
 ok('the era labels render generations, not identities',
   await page.evaluate(() => [...document.querySelectorAll('#fractal text')]
@@ -109,21 +110,72 @@ ok('the live card carries the mission\u2019s honest blanks',
 const ecoCells = await page.locator('table.eco td.await').count();
 ok('every economics cell awaits its receipt', ecoCells >= 15, String(ecoCells) + ' cells');
 
-/* 6 · THE RECEIPT READER — gesture-gated, honest when absent */
+/* 6 · THE RECEIPT READER — gesture-gated; three failure/success truths.
+   The incumbent artifact (assets/profile-archive/lineage/…) does not exist
+   on THIS branch — that is absence, and absence must NAME the genealogy
+   lane, never claim "nothing was measured". */
 const ecoReq = [];
-page.on('request', r => { if (r.url().includes('blood-economics.json')) ecoReq.push(r.url()); });
+page.on('request', r => { if (r.url().includes('economics.json')) ecoReq.push(r.url()); });
 await page.locator('#readeco').click();
-await page.waitForFunction(() => document.getElementById('ecores').innerText.includes('no receipt yet'));
-ok('no receipt exists — the reader says so, never guesses',
-  (await page.locator('#ecores').innerText()).includes('no receipt yet'), '');
-ok('the economics fetch is gesture-gated (exactly one, only after the press)', ecoReq.length === 1, JSON.stringify(ecoReq.length));
+await page.waitForFunction(() => document.getElementById('ecores').innerText.includes('receipt absent here'));
+ok('ABSENT: the reader names the genealogy lane as the receipt\u2019s home, never infers "nothing measured"',
+  (await page.locator('#ecores').innerText()).includes('receipt absent here')
+  && (await page.locator('#ecores').innerText()).includes('lane/zcode-lineage-import'), '');
+ok('the economics fetch is gesture-gated (only after the press)', ecoReq.length >= 1, JSON.stringify(ecoReq.length));
+
+/* SUCCESS: a receipt in the INCUMBENT schema populates rows, hero, and live
+   card — the qualified textual 'quoted' counts as measured, verbatim */
+{
+  const ctx2 = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  const FIXTURE = JSON.stringify({
+    schema: 'zblood.storage-economics/1',
+    states: { prepared: true, approved: 'manifest bound',
+      quoted: 'Arweave YES (live 22:40Z); Autonomi YES client-side estimate 23:28Z (display-only, priced_sample)',
+      purchased: false, uploaded: false, retrieved: false, hashVerifiedFromStorage: false },
+    quotes: { arweave: { queriedAt: '2026-09-16T22:40Z',
+      computed: { fullArchiveUSD: 2.0314, fullArchiveAR: 0.8093 } } } });
+  await ctx2.route('**/assets/profile-archive/lineage/zblood-storage-economics.json',
+    r => r.fulfill({ contentType: 'application/json', body: FIXTURE }));
+  const p2 = await ctx2.newPage();
+  await p2.goto(BASE + '/surfaces/blood.html', { waitUntil: 'load' });
+  await p2.locator('#readeco').click();
+  await p2.waitForFunction(() => document.getElementById('ecores').innerText.includes('receipt read'));
+  ok('SUCCESS: the incumbent schema (textual quoted · hashVerifiedFromStorage) drives the hero to 1 / 5',
+    (await p2.locator('#hero-states').innerText()).trim() === '1 / 5',
+    await p2.locator('#hero-states').innerText());
+  ok('SUCCESS: the quoted chip flips to measured, its qualified text riding verbatim',
+    /measured/i.test(await p2.locator('#st-quoted').innerText())
+    && (await p2.locator('#st-quoted').evaluate(e => e.title)).includes('display-only'), '');
+  ok('SUCCESS: the four unmeasured states stay not yet — nothing promoted',
+    ['purchased','uploaded','retrieved','verified'].every(async k =>
+      /not yet/i.test(await p2.locator('#st-' + k).innerText())), '');
+  ok('SUCCESS: the live card fills verbatim from the receipt (0.8093 AR ≈ $2.03, QUOTE ONLY named)',
+    (await p2.locator('.livecard').innerText()).includes('0.8093')
+    && (await p2.locator('.livecard').innerText()).includes('QUOTE ONLY'), '');
+  await ctx2.close();
+}
+/* INVALID: a malformed receipt is named, never smoothed */
+{
+  const ctx3 = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  await ctx3.route('**/assets/profile-archive/lineage/zblood-storage-economics.json',
+    r => r.fulfill({ contentType: 'application/json', body: 'not json {' }));
+  await ctx3.route('**/blood-economics.json', r => r.fulfill({ status: 404 }));
+  const p3 = await ctx3.newPage();
+  await p3.goto(BASE + '/surfaces/blood.html', { waitUntil: 'load' });
+  await p3.locator('#readeco').click();
+  await p3.waitForFunction(() => document.getElementById('ecores').innerText.includes('receipt invalid'));
+  ok('INVALID: malformed JSON is named as invalid — distinct from absent and unreachable',
+    (await p3.locator('#ecores').innerText()).includes('receipt invalid'), '');
+  await ctx3.close();
+}
 
 /* 7 · THE EVIDENCE LAYERS — distinct axes, never merged */
 const layers = await page.locator('.layer .t').allInnerTexts();
 ok('the five layer laws render', layers.length === 5
   && layers.some(t => t.includes('≠ support')) && layers.some(t => t.includes('≠ tradition')), JSON.stringify(layers));
-ok('source counts and citations stay two numbers',
-  layers.some(t => t.includes('inventory') && t.includes('confidence')), '');
+ok('citations CONNECT claims to evidence; support is assessed per claim (never a confidence verdict)',
+  layers.some(t => t.includes('connect claims to evidence') && t.includes('per claim'))
+  && !layers.some(t => t.includes('= confidence')), '');
 
 /* 8 · THE LIVING-PRIVACY LAW */
 ok('the living-privacy law is visible beside the fractal',
