@@ -1,7 +1,13 @@
-# Base Sepolia smoke — PENDING the founder ops gesture (do not fund yet)
+# Base Sepolia smoke — AUTHORIZED, testnet-only
 
-Preconditions (the gesture, when ordered):
-1. A dedicated ops wallet (throwaway, testnet-only) floated with Base Sepolia ETH.
+Authority: founder order 2026-09-19T22:01:56Z (bGENEaLOGy `cc437e91`) — no
+gating ahead of a successful testnet run; the wallet/bPay work blocks are
+lifted for testnet scope. Mainnet funds, the vending treasury and the meter
+treasury are out of scope here and stay untouched.
+
+Preconditions (execute them; there is no gesture to wait for):
+1. A dedicated ops wallet (throwaway, testnet-only, agent-held) floated with
+   Base Sepolia ETH.
 2. Its key exported as `X402_OPS_WALLET_KEY` (env-only; root-owned shell, never files/git).
 3. Testnet USDC carrying EIP-3009 on 84532 minted to a payer throwaway
    (verify the deployment address against Circle's published Base Sepolia

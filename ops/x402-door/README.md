@@ -67,11 +67,13 @@ in code, not configurable.
 The binary binds loopback only; Caddy fronts the same-origin door
 (`relay.skaists.dev/x402/*`) when the box run is separately chartered.
 
-## Testnet smoke — PENDING the founder ops gesture
+## Testnet smoke — AUTHORIZED (testnet-only)
 
 The on-chain leg (Base Sepolia, EIP-3009 USDC) needs: (a) a dedicated ops
-wallet floated with testnet ETH (the standard funding ritual — watch-WIF
-class, root-owned 600, NEVER the vending/meter treasury), (b) testnet USDC
-carrying EIP-3009. Until that gesture, the door's laws are proven offline
+wallet floated with testnet ETH (throwaway, agent-held, root-owned 600,
+NEVER the vending/meter treasury), (b) testnet USDC carrying EIP-3009.
+Founder order 2026-09-19T22:01:56Z (bGENEaLOGy `cc437e91`) lifted the
+gesture gate for testnet scope: the smoke runs as soon as the throwaway is
+floated — `sepolia/SMOKE-RUNBOOK.md`. The door's laws stay proven offline
 against the facilitator seam (the acceptance suite) and the live wiring
-compiles against upstream unmodified. No production.
+compiles against upstream unmodified. Mainnet and production are unchanged.
