@@ -1,4 +1,4 @@
-/* doors.mjs — THE SIX FRONT DOORS.
+/* doors.mjs — THE SIX FRONT DOORS, plus the two relay doors.
    Founder order, 2026-08-26: each door renders at 390px, no link under the 32px
    tap floor, footer clearance passes the 12px real-room check, zero page errors
    — plus the new one: EVERY LINK A DOOR LISTS RESOLVES 200 AND RENDERS BODY
@@ -6,7 +6,16 @@
    form, which is the defect this estate is least willing to ship.
 
    Served from the repo root so relative rider paths resolve exactly as Pages
-   serves them (same shape as estate-review.mjs). */
+   serves them (same shape as estate-review.mjs).
+
+   THE RELAY DOORS (be2ac575, 2026-08-31): skaists-buzz and beehivenature-buzz
+   are the landing pages the two .buzz relays serve on their own hosts. Their one
+   thing to do is the invite (an a.btn to a /invite/v2.… path on the relay),
+   and their status line fetches the same-origin relay endpoint /api/join-policy.
+   This local server is not a relay, so that one endpoint is answered with the
+   shape the live relays return (200 application/json {} — measured on
+   skaists.buzz, beehivenature.buzz and relay.skaists.dev, 2026-09-19). Any other
+   failed request on a relay door still fails the gate. */
 import { createServer } from 'node:http';
 import { readFile, readdir } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
@@ -45,10 +54,14 @@ const ok = (name, cond, note = '') => {
 
 const TAP_FLOOR = 32;   // px — the estate's design floor, not an invented 40
 const CLEAR = 12;       // px the fixed bar must leave under the footer
+const DOORS_LISTED = ['beehivebiomass.html', 'beehivenature-buzz.html', 'beehivenature.html', 'bnature-bio.html',
+  'bnature-social.html', 'index.html', 'plur.html', 'skaists-buzz.html', 'skaists.html'];
+const RELAY_DOORS = ['beehivenature-buzz.html', 'skaists-buzz.html'];
 
 const browser = await chromium.launch();
 const files = (await readdir(DOORS)).filter(f => f.endsWith('.html')).sort();
-ok('the six doors exist, plus their index', files.length === 7, files.join(', '));
+ok('the six doors and the two relay doors exist, plus their index — no more, no fewer',
+  files.join() === DOORS_LISTED.join(), files.join(', '));
 
 const allLinks = new Set();
 
@@ -57,6 +70,8 @@ for (const f of files) {
   const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
   page.on('pageerror', e => errs.push('pageerror: ' + e.message));
   page.on('console', m => { if (m.type() === 'error') errs.push('console: ' + m.text().slice(0, 120)); });
+  const relay = RELAY_DOORS.includes(f);
+  if (relay) await page.route('**/api/join-policy', r => r.fulfill({ status: 200, contentType: 'application/json', body: '{}' }));
   await page.goto(`${BASE}/surfaces/doors/${f}`, { waitUntil: 'load' });
   await page.waitForTimeout(900);
 
@@ -82,6 +97,7 @@ for (const f of files) {
       over: document.documentElement.scrollWidth - document.documentElement.clientWidth,
       h1: (document.querySelector('h1') || {}).textContent || null,
       oneThing: !!document.querySelector('.act'),
+      invite: (document.querySelector('a.btn[href^="/invite/v2."]') || { getAttribute: () => '' }).getAttribute('href'),
       clearance: (tb && foot) ? Math.round(tb.getBoundingClientRect().top - foot.getBoundingClientRect().bottom) : null,
       small,
       links: [...document.querySelectorAll('a[href^="../"]')].map(a => a.getAttribute('href')),
@@ -90,7 +106,7 @@ for (const f of files) {
 
   const d = f.replace('.html', '');
   ok(`${d}: renders at 390px with no horizontal overflow`, m.over === 0, `overflow=${m.over}px`);
-  ok(`${d}: has a headline and one thing to do`, !!m.h1 && (f === 'index.html' || m.oneThing), `h1=${m.h1}`);
+  ok(`${d}: has a headline and one thing to do`, !!m.h1 && (f === 'index.html' || (relay ? /^\/invite\/v2\.[\w-]+$/.test(m.invite) : m.oneThing)), `h1=${m.h1}${relay ? ' invite=' + m.invite : ''}`);
   ok(`${d}: every link clears the ${TAP_FLOOR}px tap floor`, m.small.length === 0, m.small.join(' | '));
   ok(`${d}: the bar leaves the footer ${CLEAR}px of room`, m.clearance === null || m.clearance >= CLEAR, `clearance=${m.clearance}px`);
   ok(`${d}: zero page errors`, errs.length === 0, errs.slice(0, 2).join(' | '));
