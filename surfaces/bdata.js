@@ -81,6 +81,7 @@
           h += '<div class="law" style="margin-top:2px;text-align:center">' + T('bd.price.caused','current price — caused by your choice') + ' · ' + T('wl.bpay.fresh','quote obtained') + ' ' + String(fq.obtainedAt).replace('T',' ').replace(/\.\d+Z$/,' UTC') + '</div>';
           h += '<div class="row" style="margin-top:6px;gap:6px 18px;flex-wrap:wrap;font-size:11px;justify-content:center;opacity:.85"><span data-bdata-quote-obligations="' + fq.count + '">' + fq.count + ' × ' + T('wl.bpay.quotes','chunk quotes') + ' · ' + esc(fq.shape) + '</span><span>⛽ ' + T('wl.bpay.gasside','separate') + ' · Arbitrum ETH</span></div>';
           h += '<div class="law" style="margin-top:4px;text-align:center" data-bdata-nothing-paid="1"><b>' + T('wl.bpay.nothingpaid','Nothing has been paid.') + '</b></div>';
+          h += '<div style="margin-top:6px;text-align:center"><button type="button" data-bdata-price-refresh="1" style="padding:5px 12px;border:1px solid #1d4655;border-radius:8px;background:transparent;color:inherit;cursor:pointer;font-size:11px">↻ ' + T('bd.price.refresh','refresh the price') + '</button> <span style="font-size:10px;opacity:.55">' + T('bd.price.cached','cached — shown instantly; a refresh asks the network again') + '</span></div>';
         }
         h += '<div class="law" style="margin-top:8px;text-align:center" id="bdata-price-stat"></div>';
         h += '<div style="margin-top:8px;padding:8px 10px;border:1px dashed #1d4655;border-radius:8px;font-size:11px;color:var(--dim);text-align:center" data-bdata-authorize-next="1">🔒 ' + T('bd.price.next','Authorize — the payment step is not built yet; nothing can be paid from this page') + '</div>';
@@ -149,10 +150,14 @@
   }
 
   /* THE PRICE, IN PLACE — bPay invoked behind the button (one concept, one
-     click, one page). The request carries the founder's resolved policy by
-     pin + audience; the network answers; the observation renders HERE. No
-     navigation, no spend, no authorization (that step is absent by law). */
-  function fetchPrice(){
+     click, one page). LATENCY LAW (founder, 2026-09-19: "needs to get close
+     to 200ms"): choosing Public IS the trigger — the network ask starts the
+     instant the gesture lands, so the ~40-60s physics of re-encrypting and
+     re-quoting 204 MB hides behind the decision instead of behind a second
+     press; the obtained price is CACHED (renders instantly on every revisit);
+     a network flake auto-retries ONCE, honestly labelled, then surfaces the
+     manual retry. No spend, no authorization (absent by law). */
+  function fetchPrice(isAutoRetry){
     var stat = document.getElementById('bdata-price-stat');
     var pin = INV && INV.domain && INV.domain.artifact ? INV.domain.artifact.sha256 : null;
     if (!pin) { if (stat) stat.textContent = '⚠ ' + T('wl.bpay.loadfail','no invoice loaded'); return; }
@@ -181,7 +186,15 @@
       };
       save(); render();
     }).catch(function(e){
-      if (stat) stat.textContent = '⚠ ' + T('bd.price.fail','Autonomi did not answer') + ': ' + (e && e.message ? String(e.message).slice(0,140) : 'error');
+      var msg = e && e.message ? String(e.message) : 'error';
+      // one honest auto-retry on network-shaped failures (the 502/insufficient-peers
+      // class the founder hit live); never loops, never hides the failure
+      if (!isAutoRetry && /HTTP 5|insufficient peers|network|Failed to fetch/i.test(msg)) {
+        if (stat) stat.textContent = '↻ ' + T('bd.price.retry','the network flaked — retrying once…');
+        setTimeout(function(){ fetchPrice(true); }, 3000);
+        return;
+      }
+      if (stat) stat.textContent = '⚠ ' + T('bd.price.fail','Autonomi did not answer') + ': ' + msg.slice(0,140);
       var again = document.querySelector('[data-bdata-quote-go]');
       if (again) again.disabled = false;
     });
@@ -192,7 +205,9 @@
       b.addEventListener('click', function(){ st.inspection = b.dataset.bdataInsp; save(); render(); });
     });
     var quoteGo = document.querySelector('[data-bdata-quote-go]');
-    if (quoteGo) quoteGo.addEventListener('click', fetchPrice);
+    if (quoteGo) quoteGo.addEventListener('click', function(){ fetchPrice(); });
+    var priceRefresh = document.querySelector('[data-bdata-price-refresh]');
+    if (priceRefresh) priceRefresh.addEventListener('click', function(){ fetchPrice(); });
     var bridgeInput = document.getElementById('bdata-bridge');
     if (bridgeInput) bridgeInput.addEventListener('change', function(){ st.bridge = bridgeInput.value.trim() || 'http://127.0.0.1:8807'; save(); });
     /* THE ORIGIN GESTURE — selecting Public in My Data. The click records the
@@ -210,6 +225,9 @@
         try { localStorage.setItem('bpay-policy-v1', JSON.stringify(shared)); } catch(e){}
         note(T('bd.hist.audience','audience policy: chosen 🌐 Public by the founder — originated in My Data; supersedes the machine reference binding (new quote required); the reference plan remains as history'));
         render();
+        // LATENCY LAW: the gesture IS the trigger — the network ask starts now,
+        // hiding the ~40-60s physics behind the decision instead of a second press
+        if (!st.freshQuote) fetchPrice();
       });
     });
     document.querySelectorAll('[data-bdata-auto]').forEach(function(b){
