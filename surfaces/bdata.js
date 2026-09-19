@@ -16,7 +16,7 @@
 (function(){
   var T = (window.BNRLanguage && window.BNRLanguage.text) ? window.BNRLanguage.text.bind(window.BNRLanguage) : function(k,f){return f;};
   var LS = 'bdata-v1';
-  var st = { inspection:'newbee', automation:{ mode:'ask', boundAnt:'0.5' }, history:[] };
+  var st = { inspection:'newbee', automation:{ mode:'ask', boundAnt:'0.5' }, history:[], bridge:'http://127.0.0.1:8807', freshQuote:null };
   try { var sv = JSON.parse(localStorage.getItem(LS)||'null'); if (sv && typeof sv==='object') st = Object.assign(st, sv); if(!Array.isArray(st.history)) st.history=[]; } catch(e){}
   function save(){ try { localStorage.setItem(LS, JSON.stringify(st)); } catch(e){} }
   function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;'); }
@@ -61,16 +61,37 @@
     }
     if (committed) h += '<div class="law" style="margin-top:6px" data-bdata-supersede-note="1">' + T('bd.supersede','a carried-quote-set commitment exists — changing the audience changes the preservation plan and requires a new quote; the old plan remains as history') + '</div>';
     else h += '<div class="law" style="margin-top:6px">' + T('bd.freely','no commitment yet — audience is freely adjustable') + '</div>';
-    /* the bPay handoff: economics invoked only when preservation needs value.
-       When the founder has chosen HERE, the handoff carries the RESOLVED plan —
-       the wallet receives the operation and asks only about its economics. */
+    /* ONE PAGE, ONE CONCEPT, ONE CLICK AT A TIME (founder ruling, 2026-09-18:
+       'having a clicked button take me to wallet.html is the wrong approach.
+       we need simple one concept/click at a time'). The ceremony never leaves
+       My Data: choose WHO → ask the PRICE (bPay invoked in place behind the
+       button; the answer renders here) → AUTHORIZE later (Phase C, absent by
+       law). No navigation. The wallet remains the economics VIEW, not a
+       destination. */
     if (line) {
-      h += '<div style="margin-top:12px;padding:10px 12px;border:1px dashed #2c4a5a;border-radius:10px"' + (chosenHere ? ' data-bdata-preserve-ready="1"' : '') + '>';
-      h += '<div style="font-size:12px">' + (chosenHere ? '♡ ' : '') + T('bd.handoff','Preserve on Autonomi — economics live in bPay') + '</div>';
-      h += '<div class="row" style="margin-top:6px;gap:6px 20px;flex-wrap:wrap;font-size:13px"><span>⬡ <b data-bdata-ceiling-atto="' + line.amountAtto + '">' + ant(line.amountAtto) + ' ANT</b> ' + T('bd.ceiling','ceiling') + '</span><span>⛽ ' + T('wl.bpay.gasside','separate') + ' · Arbitrum ETH</span></div>';
-      h += '<div class="law" style="margin-top:4px" data-bdata-nothing-paid="1">' + T('wl.bpay.nothingpaid','Nothing has been paid.') + ' ' + T('bd.handoff.note','the wallet carries the authorization surface; when it is earned, your press alone crosses it') + '</div>';
-      h += '<a href="wallet.html" style="display:inline-block;margin-top:8px;font-size:13px" data-bdata-open-bpay="1">→ ' + T('bd.openbpay','open the wallet (bPay panel)') + '</a>';
-      h += '</div>';
+      if (chosenHere) {
+        var fq = st.freshQuote;
+        h += '<div style="margin-top:14px;padding:14px 16px;border:1px solid #2c4a5a;border-radius:12px">';
+        h += '<div style="font-size:13px;font-weight:600;text-align:center">' + T('bd.price.h','What does it cost now?') + '</div>';
+        if (!fq) {
+          h += '<button type="button" data-bdata-quote-go="1" style="display:block;width:100%;margin-top:10px;padding:14px 16px;border:1px solid #2c4a5a;border-radius:12px;background:#0e2d3a;color:var(--cyan);font-size:16px;font-weight:600;cursor:pointer">➜ ' + T('bd.price.go','Get the storage price') + '</button>';
+          h += '<div class="law" style="margin-top:6px;text-align:center" data-bdata-price-hint="1">' + T('bd.price.askingnote','one press asks the live network; it can take up to a minute') + '</div>';
+        } else {
+          h += '<div style="margin-top:10px;text-align:center"><span style="font-size:26px;font-weight:700" data-bdata-fresh-atto="' + fq.totalAtto + '">' + ant(fq.totalAtto) + ' ANT</span></div>';
+          h += '<div class="law" style="margin-top:2px;text-align:center">' + T('bd.price.caused','current price — caused by your choice') + ' · ' + T('wl.bpay.fresh','quote obtained') + ' ' + String(fq.obtainedAt).replace('T',' ').replace(/\.\d+Z$/,' UTC') + '</div>';
+          h += '<div class="row" style="margin-top:6px;gap:6px 18px;flex-wrap:wrap;font-size:11px;justify-content:center;opacity:.85"><span data-bdata-quote-obligations="' + fq.count + '">' + fq.count + ' × ' + T('wl.bpay.quotes','chunk quotes') + ' · ' + esc(fq.shape) + '</span><span>⛽ ' + T('wl.bpay.gasside','separate') + ' · Arbitrum ETH</span></div>';
+          h += '<div class="law" style="margin-top:4px;text-align:center" data-bdata-nothing-paid="1"><b>' + T('wl.bpay.nothingpaid','Nothing has been paid.') + '</b></div>';
+        }
+        h += '<div class="law" style="margin-top:8px;text-align:center" id="bdata-price-stat"></div>';
+        h += '<div style="margin-top:8px;padding:8px 10px;border:1px dashed #1d4655;border-radius:8px;font-size:11px;color:var(--dim);text-align:center" data-bdata-authorize-next="1">🔒 ' + T('bd.price.next','Authorize — the payment step is not built yet; nothing can be paid from this page') + '</div>';
+        h += '<div class="row" style="margin-top:8px;gap:6px 18px;flex-wrap:wrap;font-size:11px;justify-content:center;opacity:.7"><span>' + T('bd.price.reference','reference (machine, not chosen by you)') + ': ' + ant(line.amountAtto) + ' ANT</span></div>';
+        h += '</div>';
+        h += '<div class="row" data-bdata-bridge-row style="margin-top:6px;gap:8px;align-items:center;display:none"><span style="font-size:11px;opacity:.8">' + T('wl.bpay.bridge','quote service') + ':</span><input id="bdata-bridge" value="' + esc(st.bridge) + '" style="background:#0b1e26;border:1px solid #1d4655;color:inherit;border-radius:6px;padding:3px 8px;font-size:11px;font-family:monospace" /></div>';
+      } else {
+        h += '<div style="margin-top:14px;padding:14px 16px;border:1px dashed #2c4a5a;border-radius:12px;text-align:center" data-bdata-preserve-waiting="1">';
+        h += '<div style="font-size:14px;opacity:.75">' + T('bd.preserve.first','first choose who can get this — then the price is one press away') + '</div>';
+        h += '</div>';
+      }
     }
     h += '</div>';
     return h;
@@ -120,15 +141,60 @@
     }).join(' ');
     document.getElementById('cyber').innerHTML = cyber();
     document.getElementById('cyber').style.display = (st.inspection==='cypherpunk') ? '' : 'none';
+    var bridgeRow = document.querySelector('[data-bdata-bridge-row]');
+    if (bridgeRow) bridgeRow.style.display = (st.inspection==='cypherpunk') ? '' : 'none';
     /* the Raver band: object summary is always visible; raver adds nothing yet —
        the anatomy lives in cypherpunk (honest: two useful depths today) */
     bind();
+  }
+
+  /* THE PRICE, IN PLACE — bPay invoked behind the button (one concept, one
+     click, one page). The request carries the founder's resolved policy by
+     pin + audience; the network answers; the observation renders HERE. No
+     navigation, no spend, no authorization (that step is absent by law). */
+  function fetchPrice(){
+    var stat = document.getElementById('bdata-price-stat');
+    var pin = INV && INV.domain && INV.domain.artifact ? INV.domain.artifact.sha256 : null;
+    if (!pin) { if (stat) stat.textContent = '⚠ ' + T('wl.bpay.loadfail','no invoice loaded'); return; }
+    if (stat) stat.textContent = '… ' + T('bd.price.asking','asking Autonomi — up to a minute');
+    var go = document.querySelector('[data-bdata-quote-go]');
+    if (go) go.disabled = true;
+    fetch(st.bridge.replace(/\/$/,'') + '/v1/upload/prepare', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ artifact_sha256: pin, audience: 'public', force_fresh: true })
+    }).then(function(r){
+      if (!r.ok) return r.text().then(function(t){ throw new Error('HTTP ' + r.status + (t ? ' — ' + t.slice(0,160) : '')); });
+      return r.json();
+    }).then(function(prepare){
+      if (!prepare.policy || prepare.policy.binding.indexOf('founder-selected') !== 0)
+        throw new Error(T('bd.price.nobind','the quote service did not bind your selected policy — refused'));
+      if (prepare.artifact_sha256 !== pin) throw new Error('artifact mismatch — refused');
+      var sum = (prepare.payments||[]).reduce(function(s,p){ return s + BigInt(p.amount_atto); }, 0n).toString();
+      if (prepare.total_amount_atto && prepare.total_amount_atto !== sum) throw new Error('quote sum mismatch');
+      st.freshQuote = {
+        obtainedAt: new Date().toISOString(),
+        totalAtto: sum,
+        count: (prepare.payments||[]).length,
+        shape: prepare.payment_type,
+        uploadId: prepare.upload_id
+      };
+      save(); render();
+    }).catch(function(e){
+      if (stat) stat.textContent = '⚠ ' + T('bd.price.fail','Autonomi did not answer') + ': ' + (e && e.message ? String(e.message).slice(0,140) : 'error');
+      var again = document.querySelector('[data-bdata-quote-go]');
+      if (again) again.disabled = false;
+    });
   }
 
   function bind(){
     document.querySelectorAll('[data-bdata-insp]').forEach(function(b){
       b.addEventListener('click', function(){ st.inspection = b.dataset.bdataInsp; save(); render(); });
     });
+    var quoteGo = document.querySelector('[data-bdata-quote-go]');
+    if (quoteGo) quoteGo.addEventListener('click', fetchPrice);
+    var bridgeInput = document.getElementById('bdata-bridge');
+    if (bridgeInput) bridgeInput.addEventListener('change', function(){ st.bridge = bridgeInput.value.trim() || 'http://127.0.0.1:8807'; save(); });
     /* THE ORIGIN GESTURE — selecting Public in My Data. The click records the
        resolved policy in the SHARED key (the wallet panel reads it at boot and
        renders "You chose Public" — the choice originates here, never there)
