@@ -1,6 +1,6 @@
 // shoot.mjs — 390px receipt screenshots for the hex demo (square vs hex).
 // Uses the estate's playwright from beehive-nature/e2e (on-disk, zero install).
-import { chromium } from "file:///C:/Users/travi/beehive-nature/e2e/node_modules/playwright/index.mjs";
+import { chromium } from "../../e2e/node_modules/playwright/index.mjs";
 import { mkdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";

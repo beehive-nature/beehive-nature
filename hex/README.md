@@ -31,7 +31,7 @@ rank permutation proven).
 ## Working on this lane
 
 ```sh
-node tools/build.mjs        # verbatim vendor-ref copy + tsc emit to dist/
+PIXELREFINER_MIRROR=<PixelRefiner checkout> node tools/build.mjs   # verbatim vendor-ref copy + tsc emit to dist/
 node tests/run.mjs          # 51 assertions, every one prints its raw values
 node tools/gen-voidcluster.mjs   # regenerate the blue-noise mask (offline)
 node tools/serve.mjs        # demo at http://127.0.0.1:8944/demo/

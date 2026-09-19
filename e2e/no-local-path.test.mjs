@@ -1,8 +1,8 @@
 /* No machine-local paths in tracked tooling (Refill 4 S2, 2026-09-19).
    A default pointing into one seat's home folder makes a gate run against
    whatever that folder holds on one laptop: bnames-gate.mjs reported 21/21
-   for a worktree 887 commits behind main. Rule: no tracked e2e/ or scripts/
-   executable (.mjs .js .sh .py) may contain a user-home path.
+   for a worktree 887 commits behind main. Rule: no tracked e2e/, scripts/,
+   hex/, tools/ or ops/ executable (.mjs .js .sh .py) may contain a user-home path.
    Exemptions are rows with an owner; each row asserts its file still has a
    hit, so the row must be deleted in the change that fixes the file. */
 import test from 'node:test';
@@ -27,14 +27,15 @@ const EXEMPT = new Map([
   ['scripts/mirror-harvest.mjs', 'SPEC-MIRROR-COMMONS-1:33'],
   ['scripts/x0x-622/test_runner.py', 'x0x #622 lane'],
   ['scripts/thp_pair_receipt.py', 'goose device lane'],
+  ['ops/observer-redgreen/run.mjs', 'ZcODe observer lane (key handling)'],
 ]);
 
-const files = execFileSync('git', ['ls-files', '-z', '--', 'e2e', 'scripts'], { cwd: ROOT, encoding: 'utf8' })
+const files = execFileSync('git', ['ls-files', '-z', '--', 'e2e', 'scripts', 'hex', 'tools', 'ops'], { cwd: ROOT, encoding: 'utf8' })
   .split('\0').filter(p => /\.(mjs|js|sh|py)$/.test(p));
 const hits = p => LOCAL.some(re => re.test(readFileSync(join(ROOT, p), 'utf8')));
 
 test('git ls-files is actually listing the tooling', () => {
-  assert.ok(files.length > 100, `only ${files.length} tracked e2e/scripts executables — wrong cwd?`);
+  assert.ok(files.length > 100, `only ${files.length} tracked tooling executables — wrong cwd?`);
 });
 
 test('no machine-local path outside the exemption rows', () => {

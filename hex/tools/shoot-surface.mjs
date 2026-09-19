@@ -1,6 +1,6 @@
 // shoot-surface.mjs — drive the LIVE pixelrefiner surface at 390px: FUNGI
 // sheet → square refine → hex refine. Screenshots both. Estate playwright rail.
-import { chromium } from "file:///C:/Users/travi/beehive-nature/e2e/node_modules/playwright/index.mjs";
+import { chromium } from "../../e2e/node_modules/playwright/index.mjs";
 import { mkdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
