@@ -28,11 +28,6 @@ fn u64le(out: &mut Vec<u8>, v: u64) {
     out.extend_from_slice(&v.to_le_bytes());
 }
 
-#[allow(dead_code)]
-fn u128le(out: &mut Vec<u8>, v: u128) {
-    out.extend_from_slice(&v.to_le_bytes());
-}
-
 fn u8raw(out: &mut Vec<u8>, v: u8) {
     out.push(v);
 }
