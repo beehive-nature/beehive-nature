@@ -488,6 +488,149 @@ export function buildArchive ({ corpus, overlay, packs }) {
 
   function coupleOf (aId, bId) { return coupleKeys.has(aId + '|' + bId); }
 
+  /* ── discovery hooks (OPTIONAL archive methods, contract v1.1) ───────────
+   * Curiosity-first law: every hook is COMPUTED from this archive at run
+   * time — counts, exemplars, and depths derive from the corpus; nothing is
+   * hardcoded, nothing is invented, and each hook opens a real person or a
+   * real pair. The panel degrades gracefully when an archive omits them. */
+
+  const spineArr = corpus.spine || [];
+  const spinePos = new Map();
+  spineArr.forEach((r, i) => { if (r.f) spinePos.set(r.f, r.i != null ? r.i : i); });
+
+  function spineIndex (id) { return spinePos.has(id) ? spinePos.get(id) : null; }
+
+  /* how many published people share this exact (normalized) name */
+  const nameBuckets = (() => {
+    const m = new Map();
+    for (const id of allIds) {
+      const n = normName(persons[id].name);
+      if (!n) continue;
+      if (!m.has(n)) m.set(n, []);
+      m.get(n).push(id);
+    }
+    return m;
+  })();
+  function nameShares (name) {
+    const b = nameBuckets.get(normName(name));
+    return b ? b.length : 0;
+  }
+  function nameHolders (name) {
+    const b = nameBuckets.get(normName(name));
+    return b ? b.slice() : [];
+  }
+
+  /* pedigree occurrence map: who occupies how many of the 2^gens-1 ahnentafel
+   * slots of root's pedigree (bounded expansion — missing parents stay
+   * empty, never invented). Pedigree collapse = occurrences > 1. */
+  const pedCache = new Map();
+  function pedigreeOccurrences (rootId, gens) {
+    const G = gens == null ? 12 : gens;
+    const key = rootId + '|' + G;
+    if (pedCache.has(key)) return pedCache.get(key);
+    const occ = {};
+    let layer = [rootId];
+    for (let g = 0; g < G; g++) {
+      const next = [];
+      for (const id of layer) {
+        for (const p of (edges[id] || [])) {
+          if (!persons[p]) continue;
+          occ[p] = (occ[p] || 0) + 1;
+          next.push(p);
+        }
+      }
+      layer = next;
+    }
+    const out = deepFreeze({ root: rootId, gens: G, occurrences: occ });
+    if (pedCache.size > 16) pedCache.clear();
+    pedCache.set(key, out);
+    return out;
+  }
+
+  /* bounded ancestor set for cousin detection (honest about its bound) */
+  function ancBounded (id, maxDepth) {
+    const m = new Set();
+    const q = [[id, 0]];
+    while (q.length) {
+      const f = q.shift();
+      if (f[1] >= maxDepth) continue;
+      for (const p of (edges[f[0]] || [])) {
+        if (!persons[p] || m.has(p)) continue;
+        m.add(p);
+        q.push([p, f[1] + 1]);
+      }
+    }
+    return m;
+  }
+
+  let cousinMemo = null;
+  function cousinCouples () {
+    if (cousinMemo) return cousinMemo;
+    const bound = 16;
+    const hits = [];
+    for (const k of Object.keys(couples)) {
+      const c = couples[k];
+      if (!persons[c.p1] || !persons[c.p2]) continue;
+      const A = ancBounded(c.p1, bound);
+      const B = ancBounded(c.p2, bound);
+      if (A.has(c.p2) || B.has(c.p1)) continue; /* direct-line marriage is a different (and rarer) claim */
+      let hit = false;
+      for (const x of A) if (B.has(x)) { hit = true; break; }
+      if (hit) hits.push({ a: c.p1, b: c.p2 });
+    }
+    cousinMemo = deepFreeze({ count: hits.length, bound, exemplar: hits[0] || null, pairs: hits });
+    return cousinMemo;
+  }
+
+  /* climb the standing root's first-parent line to where the published
+   * record stops — the frontier told as the entrance's own story */
+  function entranceStop (rootId) {
+    let cur = rootId, steps = 0;
+    while (cur && steps < 64) {
+      const ps = (edges[cur] || []).filter(x => persons[x]);
+      if (!ps.length) {
+        return { stopId: (edges[cur] && edges[cur].length) ? cur : cur, steps, atFrontier: !!(edges[cur] && edges[cur].length) };
+      }
+      cur = ps[0];
+      steps++;
+    }
+    return null;
+  }
+
+  let discMemo = null;
+  function discoveries (rootId) {
+    if (discMemo && discMemo.rootId === rootId) return discMemo;
+    /* deepest published line from the corpus root (the archive's own anchor) */
+    const anchor = corpus.root || rootId || allIds[0];
+    const up = upMap(anchor);
+    let deepId = null, deepD = -1;
+    for (const [id, rec] of up) { if (rec.depth > deepD) { deepD = rec.depth; deepId = id; } }
+    /* pedigree collapse from the same anchor */
+    const ped = pedigreeOccurrences(anchor, 12);
+    const repeaters = Object.keys(ped.occurrences)
+      .filter(id => ped.occurrences[id] > 1)
+      .sort((a, b) => (ped.occurrences[b] - ped.occurrences[a]) || ((birthYear(persons[a].lifespan) || 9999) - (birthYear(persons[b].lifespan) || 9999)) || (a < b ? -1 : 1));
+    const cc = cousinCouples();
+    const cycleMembers = [...inCycle].sort();
+    const ambiguous = [...nameBuckets.entries()].filter(e => e[1].length > 1);
+    const topName = ambiguous.slice().sort((a, b) => b[1].length - a[1].length || (a[0] < b[0] ? -1 : 1))[0] || null;
+    let terminus = null;
+    for (let i = spineArr.length - 1; i >= 0; i--) { if (spineArr[i].f) { terminus = spineArr[i].f; break; } }
+    const stop = rootId ? entranceStop(rootId) : null;
+    discMemo = deepFreeze({
+      rootId: rootId || null,
+      personsCount: allIds.length,
+      spine: { gens: spineArr.length, terminus: terminus },
+      deepest: { id: deepId, depth: deepD, from: anchor },
+      collapse: { gens: ped.gens, repeaters: repeaters.length, top: repeaters[0] ? { id: repeaters[0], n: ped.occurrences[repeaters[0]] } : null },
+      cousins: { count: cc.count, bound: cc.bound, exemplar: cc.exemplar },
+      cycles: { count: cycleMembers.length, exemplar: cycleMembers[0] || null },
+      frontier: { total: frontierTotal, entrance: stop },
+      ambiguousNames: { count: ambiguous.length, topName: topName ? { name: topName[0], holders: topName[1].length } : null }
+    });
+    return discMemo;
+  }
+
   return Object.freeze({
     getPerson: personView,
     resolve,
@@ -495,7 +638,13 @@ export function buildArchive ({ corpus, overlay, packs }) {
     relationship, /* TEMPORARY pre-Archive-1.1 — see the seam note above */
     genContext,
     coupleOf,
-    frontierTotal: () => frontierTotal
+    frontierTotal: () => frontierTotal,
+    /* OPTIONAL v1.1 — curiosity hooks; panel degrades gracefully without them */
+    discoveries,
+    pedigreeOccurrences,
+    spineIndex,
+    nameShares,
+    nameHolders
   });
 }
 

@@ -58,7 +58,20 @@
        it adds no names, ids, or URLs of its own; it logs nothing
 */
 
-export const PP_VERSION = 'person-panel/1';
+export const PP_VERSION = 'person-panel/1.1';
+
+/* v1.1 — curiosity-first (founder guidance 2026-09-18: "the graph is not the
+ * product; the graph is the instrument for discovering people"):
+ *   + archive.discoveries(rootId)  OPTIONAL — computed hooks for the opening
+ *     strip (counts, deepest line, pedigree collapse, cousin marriages,
+ *     cyclic records, the frontier, shared names). Every value is derived
+ *     from the archive at run time; the panel renders nothing it was not
+ *     given, and degrades to the plain search prompt when absent.
+ *   + archive.pedigreeOccurrences(rootId, gens) OPTIONAL — ahnentafel-slot
+ *     occupancy; occurrences > 1 = pedigree collapse (one person, several
+ *     positions — never two people).
+ *   + archive.spineIndex(id) / archive.nameShares(name) OPTIONAL.
+ *   + panel.home() — return to the discovery strip.
 
 /* ── pure helpers (the laws that read) ───────────────────────────────────── */
 
@@ -104,6 +117,32 @@ export function hopArrow (hop) {
   if (hop.dir === 'up') return '↑';
   if (hop.dir === 'down') return '↓';
   return '⚭';
+}
+
+/* "one more ancestor" teasers — PURE, derived ONLY from archive-supplied
+ * facts (never invented): a cousin marriage, a pedigree-collapse repeat,
+ * shared namesakes, a spine position. The panel renders whatever the
+ * archive proves; absence of a fact = absence of a teaser. */
+export function buildTeasers (view, ctx) {
+  const out = [];
+  if (!view || !ctx) return out;
+  if (ctx.cousinSpouses && ctx.cousinSpouses.length) {
+    const sp = ctx.cousinSpouses[0];
+    out.push({ kind: 'cousins', a: view.id, b: sp.id, text: '⚭ ' + sp.name + ' — married cousins; blood and affinity both hold. Open both lines.' });
+    if (ctx.cousinSpouses.length > 1) {
+      out.push({ kind: 'cousins-more', a: view.id, b: ctx.cousinSpouses[1].id, text: '… and ' + (ctx.cousinSpouses.length - 1) + ' more cousin marriage(s) on this person' });
+    }
+  }
+  if (ctx.pedigreeN && ctx.pedigreeN > 1) {
+    out.push({ kind: 'collapse', id: view.id, text: 'appears ' + ctx.pedigreeN + '× in the ' + ctx.pedigreeGens + '-generation pedigree from ' + ctx.rootShort + ' — pedigree collapse: one person, several positions.' });
+  }
+  if (ctx.nameShareCount && ctx.nameShareCount > 1) {
+    out.push({ kind: 'namesakes', query: view.name, text: ctx.nameShareCount + ' people in the archive share this exact name — see them all; the archive never picks for you.' });
+  }
+  if (ctx.spineIdx != null) {
+    out.push({ kind: 'spine', id: view.id, text: 'generation ' + ctx.spineIdx + ' on the spine — one of the named waypoints the published line runs through.' });
+  }
+  return out;
 }
 
 /* attribution line per layer — attribution distinguishes, never ranks */
@@ -471,6 +510,96 @@ export function mountPersonPanel (host, archive, opts) {
     return h;
   }
 
+  /* ── the discovery strip — real people and real discoveries, not controls ─
+   * every hook computed by the archive (discoveries()); each opens a person,
+   * a pair, or a resolve. Absent methods degrade to the plain prompt. */
+  function discoveriesHtml () {
+    if (!archive.discoveries) {
+      return '<div class="pp-empty">' + esc(T('pp.empty', 'search a name — or walk from the standing root — to read a person. Blood and marriage are labeled separately; same-name people are never silently chosen.')) + '</div>';
+    }
+    const D = archive.discoveries(curRoot);
+    const nm = id => { const p = archive.getPerson(id); return p ? (p.name + (p.lifespan ? ' · ' + p.lifespan : '')) : id; };
+    let h = '<div class="pp-strip">';
+    h += '<div class="pp-strip-head">' + esc(T('pp.disc.head', 'this published family archive, in one breath — every line below opens a real person')) + '</div>';
+    const hooks = [];
+    if (D.spine && D.spine.terminus) {
+      hooks.push({ go: D.spine.terminus, label: D.personsCount.toLocaleString() + ' ' + esc(T('pp.disc.people', 'people')) + ' · ' + esc(T('pp.disc.spine', 'the spine runs {g} generations to {t}').replace('{g}', String(D.spine.gens)).replace('{t}', esc(nm(D.spine.terminus)))) });
+    }
+    if (D.deepest && D.deepest.id) {
+      hooks.push({ go: D.deepest.id, label: esc(T('pp.disc.deep', 'the deepest published line runs {d} generations — {n} (published, not verified)').replace('{d}', String(D.deepest.depth)).replace('{n}', esc(nm(D.deepest.id)))) });
+    }
+    if (D.collapse && D.collapse.top) {
+      hooks.push({ go: D.collapse.top.id, label: esc(T('pp.disc.collapse', '{r} ancestors repeat in the 12-generation pedigree — pedigree collapse; {n} appears {k}×').replace('{r}', String(D.collapse.repeaters)).replace('{n}', esc(nm(D.collapse.top.id))).replace('{k}', String(D.collapse.top.n))) });
+    }
+    if (D.cousins && D.cousins.exemplar) {
+      hooks.push({ rel: [D.cousins.exemplar.a, D.cousins.exemplar.b], label: esc(T('pp.disc.cousins', '{c} couples were cousins as well as spouses (within {b} generations) — e.g. {a} ⚭ {b2}').replace('{c}', String(D.cousins.count)).replace('{b}', String(D.cousins.bound)).replace('{a}', esc(nm(D.cousins.exemplar.a))).replace('{b2}', esc(nm(D.cousins.exemplar.b)))) });
+    }
+    if (D.cycles && D.cycles.count && D.cycles.exemplar) {
+      hooks.push({ go: D.cycles.exemplar, label: esc(T('pp.disc.cycles', '{c} records loop — the medieval web repeats people as their own ancestors — {n}').replace('{c}', String(D.cycles.count)).replace('{n}', esc(nm(D.cycles.exemplar)))) });
+    }
+    if (D.frontier && D.frontier.entrance && D.frontier.entrance.stopId) {
+      hooks.push({ go: D.frontier.entrance.stopId, label: esc(T('pp.disc.frontier', 'the frontier: {t} parent references continue beyond the published archive — even here: the line from the standing root stops at {n} ({s} generations up)').replace('{t}', D.frontier.total.toLocaleString()).replace('{n}', esc(nm(D.frontier.entrance.stopId))).replace('{s}', String(D.frontier.entrance.steps))) });
+    }
+    if (D.ambiguousNames && D.ambiguousNames.topName) {
+      hooks.push({ q: D.ambiguousNames.topName.name, label: esc(T('pp.disc.names', '{c} names belong to more than one person — {n} belongs to {k}. The archive never picks for you.').replace('{c}', String(D.ambiguousNames.count)).replace('{n}', esc(D.ambiguousNames.topName.name)).replace('{k}', String(D.ambiguousNames.topName.holders))) });
+    }
+    for (const hk of hooks) {
+      if (hk.rel) {
+        h += '<button type="button" class="pp-hook" data-pprel="' + esc(hk.rel[0]) + '|' + esc(hk.rel[1]) + '">' + hk.label + ' <span class="pp-hook-open">' + esc(T('pp.disc.open', 'open ↗')) + '</span></button>';
+      } else if (hk.q != null) {
+        h += '<button type="button" class="pp-hook" data-ppq="' + esc(hk.q) + '">' + hk.label + ' <span class="pp-hook-open">' + esc(T('pp.disc.open', 'open ↗')) + '</span></button>';
+      } else if (hk.go) {
+        h += '<button type="button" class="pp-hook" data-ppgo="' + esc(hk.go) + '">' + hk.label + ' <span class="pp-hook-open">' + esc(T('pp.disc.open', 'open ↗')) + '</span></button>';
+      }
+    }
+    h += '<div class="pp-strip-note">' + esc(T('pp.disc.note', 'or search a name — blood and marriage are labeled separately; same-name people are never silently chosen')) + '</div>';
+    h += '</div>';
+    return h;
+  }
+
+  /* ── "keep exploring" — the next curious click, derived not invented ───── */
+  function teaserContext (p) {
+    const ctx = {};
+    try {
+      if (archive.relationship) {
+        ctx.cousinSpouses = p.spouses
+          .map(sid => {
+            const r = archive.relationship(p.id, sid);
+            return (r && r.blood && r.affinity) ? { id: sid, name: (archive.getPerson(sid) || {}).name || sid } : null;
+          })
+          .filter(Boolean);
+      }
+      if (archive.pedigreeOccurrences && curRoot) {
+        const ped = archive.pedigreeOccurrences(curRoot, 12);
+        const n = ped.occurrences[p.id];
+        if (n > 1) { ctx.pedigreeN = n; ctx.pedigreeGens = ped.gens; ctx.rootShort = shortName(curRoot); }
+      }
+      if (archive.nameShares) {
+        const c = archive.nameShares(p.name);
+        if (c > 1) ctx.nameShareCount = c;
+      }
+      if (archive.spineIndex && p.onSpine) ctx.spineIdx = archive.spineIndex(p.id);
+    } catch (e) { /* optional methods never break the person view */ }
+    return ctx;
+  }
+
+  function teasersHtml (p) {
+    const teasers = buildTeasers(p, teaserContext(p));
+    if (!teasers.length) return '';
+    let h = '<section class="pp-sec pp-teasers"><h3 class="pp-h">' + esc(T('pp.teasers', 'keep exploring — one more ancestor')) + '</h3>';
+    for (const t of teasers) {
+      if (t.kind === 'cousins' || t.kind === 'cousins-more') {
+        h += '<button type="button" class="pp-teaser" data-pprel="' + esc(t.a) + '|' + esc(t.b) + '">⚭ ' + esc(t.text) + '</button>';
+      } else if (t.kind === 'namesakes') {
+        h += '<button type="button" class="pp-teaser" data-ppq="' + esc(t.query) + '">⧉ ' + esc(t.text) + '</button>';
+      } else {
+        h += '<div class="pp-teaser pp-teaser-fact">⊙ ' + esc(t.text) + '</div>';
+      }
+    }
+    h += '</section>';
+    return h;
+  }
+
   function personHtml (id) {
     const p = archive.getPerson(id);
     if (!p) return '<div class="pp-none">unknown person</div>';
@@ -482,6 +611,7 @@ export function mountPersonPanel (host, archive, opts) {
     h += familyHtml(p);
     h += frontierHtml(p);
     h += layersHtml(p);
+    h += teasersHtml(p);
     h += '<section class="pp-sec"><h3 class="pp-h">' + esc(T('pp.bnr', 'blood address')) + '</h3>' +
       '<div class="pp-bnr">' + esc(p.bnr) + '</div></section>';
     h += '<div class="pp-actions">' +
@@ -534,17 +664,43 @@ export function mountPersonPanel (host, archive, opts) {
     else if (view.type === 'relationship') viewEl.innerHTML = relationshipHtml(view.a, view.b);
     else if (view.type === 'ambiguity') viewEl.innerHTML = ambiguityHtml(view);
     else if (view.type === 'empty-search') {
-      viewEl.innerHTML = '<div class="pp-none">' + esc(T('pp.search.nullview', '“{q}” matches no one in the published archive — the walk has a frontier.').replace('{q}', view.query)) + '</div>';
+      /* search as discovery, not database: a miss offers the surname's people */
+      let rescue = '';
+      const last = String(view.query || '').trim().split(/\s+/).pop() || '';
+      if (last.length >= 3 && archive.search) {
+        const near = archive.search(last, 3).filter(r => r.person.name !== view.query);
+        if (near.length) {
+          rescue = '<div class="pp-rescue">' + esc(T('pp.search.rescue', 'but {n} people carry the name “{last}”:').replace('{n}', String(archive.search(last, 12).length)).replace('{last}', esc(last))) + '</div><div class="pp-cands">';
+          for (const r of near) {
+            const ctx = archive.genContext ? archive.genContext(r.person.id, curRoot) : null;
+            rescue += '<button type="button" class="pp-res" data-ppgo="' + esc(r.person.id) + '">' +
+              '<span class="pp-res-name">' + esc(r.person.name) + '</span>' +
+              '<span class="pp-res-sub">' + esc(r.person.lifespan || 'lifespan unknown') + ' · ' + esc(r.person.era || r.person.tier) + '</span>' +
+              '<span class="pp-res-ctx">' + esc(genContextText(ctx, curRoot ? shortName(curRoot) : '')) + '</span></button>';
+          }
+          rescue += '</div>';
+        }
+      }
+      viewEl.innerHTML = '<div class="pp-none">' + esc(T('pp.search.nullview', '“{q}” matches no one in the published archive — the walk has a frontier.').replace('{q}', view.query)) + '</div>' + rescue;
     } else {
-      viewEl.innerHTML = '<div class="pp-empty">' + esc(T('pp.empty', 'search a name — or walk from the standing root — to read a person. Blood and marriage are labeled separately; same-name people are never silently chosen.')) + '</div>';
+      viewEl.innerHTML = discoveriesHtml();
     }
   }
 
   function onHostClick (e) {
-    const t = e.target.closest('[data-ppgo],[data-pprel],[data-pproot],[data-pparchive],.pp-back');
+    const t = e.target.closest('[data-ppgo],[data-pprel],[data-pproot],[data-pparchive],[data-ppq],.pp-back');
     if (!t) return;
     if (t === backBtn || t.classList.contains('pp-back')) { back(); return; }
     if (t.hasAttribute('data-ppgo')) { choosePerson(t.getAttribute('data-ppgo')); return; }
+    if (t.hasAttribute('data-ppq')) {
+      resultsEl.hidden = true;
+      pushContext();
+      const r = archive.resolve(t.getAttribute('data-ppq'));
+      if (r.status === 'hit') setView({ type: 'person', id: r.person.id, fromQuery: r.query });
+      else if (r.status === 'ambiguous') setView({ type: 'ambiguity', query: r.query, exact: r.exact, candidates: r.candidates.map(c => c.id) });
+      else setView({ type: 'empty-search', query: r.query });
+      return;
+    }
     if (t.hasAttribute('data-pprel')) {
       const pair = t.getAttribute('data-pprel').split('|');
       pushContext();
@@ -606,6 +762,7 @@ export function mountPersonPanel (host, archive, opts) {
     search (q) { qEl.value = q; onQInput(); },
     setRoot (id) { setRoot(id); },
     back,
+    home () { pushContext(); setView({ type: 'empty' }); },
     state: publicState,
     get root () { return curRoot; },
     destroy () {

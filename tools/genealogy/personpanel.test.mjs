@@ -24,7 +24,7 @@ import { fileURLToPath } from 'node:url';
 import { join, dirname } from 'node:path';
 
 import { buildArchive, upLabel, downLabel } from '../../surfaces/person-panel-corpus.mjs';
-import { genContextText, ambiguityHeadline, relationshipSummary, hopArrow, layerAttributionLines, esc } from '../../surfaces/person-panel.mjs';
+import { genContextText, ambiguityHeadline, relationshipSummary, hopArrow, layerAttributionLines, buildTeasers, esc } from '../../surfaces/person-panel.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(HERE, '..', '..');
@@ -469,4 +469,111 @@ test('H7 hopArrow maps directions to arrows', () => {
   assert.equal(hopArrow({ dir: 'up' }), '↑');
   assert.equal(hopArrow({ dir: 'down' }), '↓');
   assert.equal(hopArrow({ dir: 'spouse' }), '⚭');
+});
+
+/* ── I. curiosity layer — discovery hooks + teasers (v1.1) ─────────────────
+   The founder's grading criterion: whether someone wants to click another
+   ancestor after the first one. Every hook below is COMPUTED from the real
+   corpus at run time and locked to the numbers measured at this pin. */
+
+test('I1 discoveries() — every hook computed, locked to the pin corpus', () => {
+  const D = archive.discoveries(APR);
+  assert.ok(Object.isFrozen(D));
+  assert.equal(D.personsCount, 10259);
+  assert.deepEqual(D.spine, { gens: 42, terminus: 'p980ac0fa0b' });
+  assert.equal(archive.getPerson(D.spine.terminus).name, 'Randver Radbardson');
+  assert.deepEqual(D.deepest, { id: 'pc996e1efee', depth: 143, from: 'founder' });
+  assert.equal(archive.getPerson(D.deepest.id).name, 'E Anna Tum DE LAGASH');
+  assert.deepEqual(D.collapse, { gens: 12, repeaters: 50, top: { id: 'p240410e903', n: 3 } });
+  assert.equal(archive.getPerson(D.collapse.top.id).name, 'Tacy Cooper');
+  /* the first cousin couple in corpus order is the founder's own grandparents */
+  assert.deepEqual(D.cousins.exemplar, { a: 'p3d44ccaffd', b: 'p7b1078c886' });
+  assert.equal(archive.getPerson(D.cousins.exemplar.a).name, 'Jack Benedum Sutphen');
+  assert.equal(D.cousins.count, 593);
+  assert.equal(D.cousins.bound, 16, 'the cousin count states its generation bound honestly');
+  assert.equal(D.cycles.count, 44);
+  assert.equal(archive.getPerson(D.cycles.exemplar).name, 'Lucius Munatius Plancus De Rome');
+  assert.equal(D.frontier.total, 1959);
+  assert.deepEqual(D.frontier.entrance, { stopId: 'p92dc6be4f8', steps: 3, atFrontier: true });
+  assert.equal(archive.getPerson(D.frontier.entrance.stopId).name, 'Samuel Rockwood I');
+  assert.deepEqual(D.ambiguousNames, { count: 281, topName: { name: 'margaret', holders: 16 } });
+});
+
+test('I2 pedigreeOccurrences — collapse measured, bounded, frozen', () => {
+  const ped = archive.pedigreeOccurrences(FOUNDER, 12);
+  assert.ok(Object.isFrozen(ped));
+  let rep = 0;
+  for (const k of Object.keys(ped.occurrences)) if (ped.occurrences[k] > 1) rep++;
+  assert.equal(rep, 50, '50 ancestors repeat in the founder-root 12-generation pedigree');
+  assert.equal(ped.occurrences[JH[8]], 3, 'the 1700–1744 Joseph Hadlock occupies three slots');
+  const apr = archive.pedigreeOccurrences(APR, 8);
+  let repA = 0;
+  for (const k of Object.keys(apr.occurrences)) if (apr.occurrences[k] > 1) repA++;
+  assert.equal(repA, 0, 'the Rockwood entrance pedigree holds no collapse within 8 generations');
+});
+
+test('I3 nameShares / nameHolders — the shared-name discovery law', () => {
+  assert.equal(archive.nameShares('Joseph Hadlock'), 3);
+  assert.equal(archive.nameHolders('Joseph Hadlock').length, 3);
+  assert.equal(archive.nameShares('joseph   hadlock'), 3, 'normalized');
+  assert.equal(archive.nameShares('Margaret'), 16);
+  assert.equal(archive.nameShares('Donna Ruth Lawton'), 1);
+  assert.equal(archive.nameShares('Nobody Qux'), 0);
+});
+
+test('I4 buildTeasers — derived only from archive-proved facts (real corpus)', () => {
+  /* Jack Sutphen: spouse Donna is ALSO blood — the cousins teaser must fire */
+  const jack = archive.getPerson('p3d44ccaffd');
+  const ctxJ = {
+    cousinSpouses: [{ id: DONNA, name: 'Donna Ruth Lawton' }],
+    pedigreeN: 1, pedigreeGens: 12, rootShort: 'Living', nameShareCount: 1
+  };
+  const tj = buildTeasers(jack, ctxJ);
+  assert.ok(tj.some(t => t.kind === 'cousins' && /married cousins/.test(t.text)));
+  /* the 1700–1744 Joseph: collapse ×3 + namesakes ×3 */
+  const tjh = buildTeasers(archive.getPerson(JH[8]), {
+    pedigreeN: 3, pedigreeGens: 12, rootShort: 'Living', nameShareCount: 3
+  });
+  assert.ok(tjh.some(t => t.kind === 'collapse' && /appears 3×/.test(t.text) && /pedigree collapse/.test(t.text)));
+  assert.ok(tjh.some(t => t.kind === 'namesakes' && /3 people/.test(t.text)));
+  /* Donna: spine position */
+  const td = buildTeasers(archive.getPerson(DONNA), { spineIdx: 2 });
+  assert.ok(td.some(t => t.kind === 'spine' && /generation 2 on the spine/.test(t.text)));
+});
+
+test('I5 buildTeasers never invents — absence of a fact is absence of a teaser', () => {
+  assert.deepEqual(buildTeasers(archive.getPerson(DONNA), {}), []);
+  assert.deepEqual(buildTeasers(archive.getPerson(DONNA), null), []);
+  const one = buildTeasers(archive.getPerson(DONNA), { pedigreeN: 1, nameShareCount: 1 });
+  assert.equal(one.length, 0, 'n=1 and one-holder names carry no teaser');
+  assert.deepEqual(buildTeasers(null, { pedigreeN: 3 }), []);
+});
+
+test('I6 the corpus stays byte-identical after the full curiosity battery', () => {
+  const pristine = JSON.parse(corpusRaw);
+  archive.discoveries(FOUNDER);
+  archive.discoveries(APR);
+  archive.pedigreeOccurrences(FOUNDER, 12);
+  archive.pedigreeOccurrences(APR, 8);
+  archive.nameShares('Joseph Hadlock');
+  archive.nameHolders('Margaret');
+  archive.spineIndex(DONNA);
+  assert.deepEqual(JSON.parse(JSON.stringify(corpus)), pristine);
+});
+
+test('I7 curiosity wiring — strip, teasers, rescue, and home() exist as text law', () => {
+  const src = readFileSync(join(ROOT, 'surfaces', 'person-panel.mjs'), 'utf8');
+  for (const marker of [
+    'discoveriesHtml', 'teasersHtml', 'buildTeasers',
+    'keep exploring — one more ancestor', 'data-ppq',
+    'home ()', "archive.discoveries", 'pp-strip', 'pp-hook', 'pp-teaser', 'pp-rescue',
+    'published, not verified', 'pedigree collapse: one person, several positions',
+    "people carry the name"
+  ]) {
+    assert.ok(src.includes(marker), 'missing curiosity marker: ' + marker);
+  }
+  const css = readFileSync(join(ROOT, 'surfaces', 'person-panel.css'), 'utf8');
+  for (const cls of ['.pp-strip', '.pp-hook', '.pp-teasers', '.pp-teaser', '.pp-rescue']) {
+    assert.ok(css.includes(cls), 'missing css: ' + cls);
+  }
 });

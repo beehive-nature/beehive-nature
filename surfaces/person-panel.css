@@ -126,6 +126,28 @@
 .pp-ambig-head{margin:8px 0 10px;color:var(--gold,#d4a94e);font-size:12px}
 .pp-cands{display:grid;gap:4px}
 
+/* ── discovery strip (curiosity-first open) ─────────────────────────────── */
+.pp-strip{display:grid;gap:6px}
+.pp-strip-head{color:var(--gold,#d4a94e);font-size:12px;font-weight:650}
+.pp-hook{display:block;text-align:left;background:var(--panel,#101610);border:1px solid var(--line,#24352a);
+  border-radius:10px;padding:10px 12px;cursor:pointer;color:var(--ink,#cfe3d2);
+  font:11.5px/1.6 'IBM Plex Mono',monospace}
+.pp-hook:hover{border-color:var(--cyan,#39d2c0)}
+.pp-hook-open{color:var(--cyan,#39d2c0);font-size:10px;white-space:nowrap;float:right}
+.pp-strip-note{color:var(--faint,#5c7263);font-size:10px;margin-top:2px}
+
+/* ── keep exploring teasers ─────────────────────────────────────────────── */
+.pp-teasers{border-style:dashed}
+.pp-teaser{display:block;width:100%;text-align:left;background:none;border:0;border-left:2px solid var(--gold,#d4a94e);
+  border-radius:0 8px 8px 0;padding:7px 10px;margin-top:6px;cursor:pointer;color:var(--ink,#cfe3d2);
+  font:11.5px/1.6 'IBM Plex Mono',monospace}
+.pp-teaser:hover{color:var(--cyan,#39d2c0);border-left-color:var(--cyan,#39d2c0)}
+.pp-teaser-fact{color:var(--dim,#7d9486);cursor:default}
+.pp-teaser-fact:hover{color:var(--dim,#7d9486);border-left-color:var(--gold,#d4a94e)}
+
+/* ── null-search surname rescue ─────────────────────────────────────────── */
+.pp-rescue{margin:10px 0 6px;color:var(--gold,#d4a94e);font-size:11px}
+
 /* ── focus + motion + mobile ────────────────────────────────────────────── */
 .pp *:focus-visible{outline:2px solid var(--cyan,#39d2c0);outline-offset:1px}
 @media (prefers-reduced-motion: reduce){.pp *{transition:none !important;scroll-behavior:auto !important}}

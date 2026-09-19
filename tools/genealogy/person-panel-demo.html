@@ -52,6 +52,7 @@ const panel = mountPersonPanel(document.getElementById('panel'), archive, {
 
 /* the required cases — each button drives the controller exactly as a host would */
 const CASES = [
+  ['the discovery strip (home)', () => panel.home()],
   ['search “Joseph Hadlock” (ambiguity, never a silent pick)', () => panel.resolveAndOpen('Joseph Hadlock')],
   ['Donna Ruth Lawton (relationship to root)', () => panel.resolveAndOpen('Donna Ruth Lawton')],
   ['Albert Perry Rockwood (public entrance · tradition + testimony layers)', () => panel.openPerson('p72d226cedf')],
