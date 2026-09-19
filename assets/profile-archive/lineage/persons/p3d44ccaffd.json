@@ -65,7 +65,9 @@
    "recordUrl": "https://www.familysearch.org/tree/person/details/KWCL-VJ6",
    "retrieved": "2026-09-16T17:59:16.202Z"
   },
-  "tradition": null,
+  "tradition": {
+   "pack": "evidence/jack-sutphen.json"
+  },
   "testimony": [],
   "meaning": []
  },

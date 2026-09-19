@@ -1,0 +1,39 @@
+{
+ "schema": "skaists.evidence/1",
+ "person": {
+  "name": "Jack Benedum Sutphen",
+  "lifespan": "1920–1982",
+  "fsid": "KWCL-VJ6",
+  "tier": "recorded",
+  "tierBasis": "documented-era walked record, founder-attested (the grandparent law: all four grandparents NAMED, never Living placeholders — founder order 2026-09-16)"
+ },
+ "summary": "The founder's paternal grandfather — the DUTCH/GERMAN trunk of the family. Within ten generations up from him the walked record carries 896 ancestors, overwhelmingly colonial-class, with the New Netherland Dutch settler generation (Sutven/Sutphen with van Pelt, the Voorhees with Vander Voort, the Quick family) at the seventh generation and the German colonial lines (Benadum, Zeller with Schmidt, Brumbach, Eder) beside them. The founder's order of 2026-09-18 named him for this lane: 'dead grandpa Jack Sutphen for my dutch/german ancestry.'",
+ "claims": [
+  {
+   "claim": "Jack Benedum Sutphen, 1920–1982, the founder's paternal grandfather; deceased in the walked record and founder-attested for the set of four grandparents.",
+   "source": "the estate's walked record + founder attestation (overlay corrections, key KWCL-VJ6, founder order 2026-09-16)",
+   "url": "assets/profile-archive/lineage/remington-bloodline.json"
+  },
+  {
+   "claim": "Parents: Henry Miller Sutphen and Frances Belle Benidum (both carried as recorded-era persons in the walked record).",
+   "source": "the estate's walked record (records retrieved 2026-09-16T17:59:16.202Z)",
+   "url": "assets/profile-archive/lineage/remington-bloodline.json"
+  },
+  {
+   "claim": "THE DUTCH LINE (New Netherland settler generation, as walked, seventh generation up): Guisbert Sutven m. Margaret Geertruyd van Pelt; their line descends through Jacobus James Sutphen m. Elisabeth Voorhees, Albert Jacobus Sutphen, and John Boggs Sutphen to Captain John Melanchton Sutphen. Beside it: Albert Jansen Voorhees m. Ariantje Vander Voort, and the Quick family (Theunis Quick, Tunis Quick, Tunis T. Quick) — Dutch colonial families of the New Netherland settlements. Surname-form study (Sutven→Sutphen and variants) is named future work; this pack records the names EXACTLY as the record carries them.",
+   "source": "the estate's walked record, Sutphen-line ancestor edges (records retrieved 2026-09-16T17:59:16.202Z)",
+   "url": "assets/profile-archive/lineage/remington-bloodline.json"
+  },
+  {
+   "claim": "THE GERMAN LINE (as walked): Benadum/Benidum (Joseph Benadum; Charles C Benadum; Frances Belle Benidum, Jack's mother); Zeller/Zellers (John Peter Zeller m. Maria Schmidt); Brumbach (Elizabeth Brumbach m. Abraham Miller); Eder (John Eder m. Sarah Jane Spotts) — German-origin families in the colonial record.",
+   "source": "the estate's walked record, Benadum/Zeller/Brumbach/Eder ancestor edges (records retrieved 2026-09-16T17:59:16.202Z)",
+   "url": "assets/profile-archive/lineage/remington-bloodline.json"
+  },
+  {
+   "claim": "Coverage shape under Jack (estate derivation, dated 2026-09-18, locked by test): within TEN generations up, the walked record carries 896 ancestors — 6 recorded · 841 colonial · 19 medieval · 30 unrecorded — the Dutch settler generation sitting at the seventh. No single unbounded 'total ancestors' number is stated: deeper closure crosses into the shared medieval web, where totals are depth-dependent by construction (the corpus's collapsed-web law), and none is invented here.",
+   "source": "the estate's walked record; bounded-closure derivation in tools/genealogy/charlemagne.test.mjs",
+   "url": "assets/profile-archive/lineage/remington-bloodline.json"
+  }
+ ],
+ "law": "This pack indexes the walked record's own claims with their retrieval stamp; it invents no dates, no surname normalizations, and no origins beyond what the record carries. The FS walk establishes every link. The founder's 2026-09-18 order is quoted as founder words, not as evidence."
+}
