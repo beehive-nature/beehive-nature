@@ -101,7 +101,7 @@ function testimonyAttaches (subject, name) {
  * packs   — { 'evidence/ragnar-lodbrok.json': parsedPack, ... } (skaists.evidence/1)
  * All three are consumed READ-ONLY; nothing in them is modified or frozen. */
 
-export function buildArchive ({ corpus, overlay, packs }) {
+export function buildArchive ({ corpus, overlay, packs, broader }) {
   if (!corpus || !corpus.persons) throw new Error('buildArchive: corpus.persons missing');
 
   /* merged copies — the corpus object itself is never touched */
@@ -148,6 +148,15 @@ export function buildArchive ({ corpus, overlay, packs }) {
     coupleKeys.add(c.p1 + '|' + c.p2);
     coupleKeys.add(c.p2 + '|' + c.p1);
   }
+
+  /* DESCENDANT-SIDE FRONTIER (contract v1.3, optional input): `broader` maps
+   * personId → { spousesTotal, childrenTotal, attribution } — KNOWN family
+   * breadth beyond the walked line (family testimony, cited biography…).
+   * The adapter only CARRIES these attributed numbers; it never derives or
+   * invents them, and the corpus/overlay files themselves are untouched —
+   * the canonical home for this data is the zBlood attested-overlays lane;
+   * hosts may stage it here until that lane records it. */
+  const broaderMap = broader || {};
 
   const spineIds = new Set();
   for (const r of (corpus.spine || [])) if (r.f) spineIds.add(r.f);
@@ -284,6 +293,15 @@ export function buildArchive ({ corpus, overlay, packs }) {
       supportBasis: (p.evidence && p.evidence.basis) || null,
       onSpine: spineIds.has(id),
       isCorpusRoot: id === (corpus.root || null),
+      inCycle: inCycle.has(id),
+      /* descendant-side frontier — attributed known breadth, carried only */
+      broaderFamily: broaderMap[id]
+        ? {
+            spousesTotal: broaderMap[id].spousesTotal,
+            childrenTotal: broaderMap[id].childrenTotal,
+            attribution: broaderMap[id].attribution || 'attributed family knowledge — staged via the archive host'
+          }
+        : null,
       refs: living ? [] : (p.refs || []).slice(),
       corrected: p.corrected ? { attested: p.corrected.attested || '', note: p.corrected.note || '' } : null,
       overlay: /^ovl-/.test(id),
@@ -600,17 +618,50 @@ export function buildArchive ({ corpus, overlay, packs }) {
   let discMemo = null;
   function discoveries (rootId) {
     if (discMemo && discMemo.rootId === rootId) return discMemo;
-    /* deepest published line from the corpus root (the archive's own anchor) */
-    const anchor = corpus.root || rootId || allIds[0];
+    /* v1.2 — discoveries are CONTEXTUAL to wherever the visitor stands:
+     * deepest line, collapse, tier composition, and the cousin exemplar are
+     * computed FROM the standing root (re-rooting teaches itself); spine,
+     * cycles, frontier total, and shared names stay archive-level. */
+    const anchor = rootId || corpus.root || allIds[0];
     const up = upMap(anchor);
-    let deepId = null, deepD = -1;
-    for (const [id, rec] of up) { if (rec.depth > deepD) { deepD = rec.depth; deepId = id; } }
-    /* pedigree collapse from the same anchor */
+    let deepId = null, deepD = -1, deepBirth = Infinity;
+    for (const [id, rec] of up) {
+      const b = birthYear(persons[id].lifespan) || 9999;
+      if (rec.depth > deepD || (rec.depth === deepD && b < deepBirth)) { deepD = rec.depth; deepId = id; deepBirth = b; }
+    }
+    /* the epistemic descent: the tier transitions the deepest line ACTUALLY
+     * walks — CONSECUTIVE dedup (a return to earlier ground is itself
+     * texture), never global first-appearance, never a verdict */
+    const descent = (() => {
+      const seq = [];
+      let cur = deepId;
+      const chain = [];
+      while (cur && cur !== anchor) { chain.push(cur); const r = up.get(cur); if (!r || r.prev == null) break; cur = r.prev; }
+      chain.reverse();
+      const push = (t) => { if (t != null && seq[seq.length - 1] !== t) seq.push(t); };
+      push(persons[anchor] && persons[anchor].evidence ? persons[anchor].evidence.class : null);
+      for (const id of chain) push(persons[id].evidence ? persons[id].evidence.class : null);
+      return seq;
+    })();
+    /* tier composition of everything reachable from the standing root */
+    const tierCounts = {};
+    for (const id of up.keys()) {
+      const t = persons[id].evidence ? persons[id].evidence.class : 'unrecorded';
+      tierCounts[t] = (tierCounts[t] || 0) + 1;
+    }
+    const tiers = Object.keys(tierCounts).sort((a, b) => tierCounts[b] - tierCounts[a] || (a < b ? -1 : 1));
+    /* pedigree collapse from the standing root */
     const ped = pedigreeOccurrences(anchor, 12);
     const repeaters = Object.keys(ped.occurrences)
       .filter(id => ped.occurrences[id] > 1)
       .sort((a, b) => (ped.occurrences[b] - ped.occurrences[a]) || ((birthYear(persons[a].lifespan) || 9999) - (birthYear(persons[b].lifespan) || 9999)) || (a < b ? -1 : 1));
+    /* the cousin exemplar must live in THIS root's family (both members
+     * ancestors of the standing root) — or the hook honestly hides */
     const cc = cousinCouples();
+    let rootExemplar = null;
+    for (const pair of cc.pairs) {
+      if (up.has(pair.a) && up.has(pair.b)) { rootExemplar = pair; break; }
+    }
     const cycleMembers = [...inCycle].sort();
     const ambiguous = [...nameBuckets.entries()].filter(e => e[1].length > 1);
     const topName = ambiguous.slice().sort((a, b) => b[1].length - a[1].length || (a[0] < b[0] ? -1 : 1))[0] || null;
@@ -619,11 +670,13 @@ export function buildArchive ({ corpus, overlay, packs }) {
     const stop = rootId ? entranceStop(rootId) : null;
     discMemo = deepFreeze({
       rootId: rootId || null,
+      rootIsCorpusRoot: rootId === corpus.root,
       personsCount: allIds.length,
       spine: { gens: spineArr.length, terminus: terminus },
-      deepest: { id: deepId, depth: deepD, from: anchor },
+      deepest: { id: deepId, depth: deepD, from: anchor, descent },
+      tiers: { total: up.size, counts: tierCounts, order: tiers },
       collapse: { gens: ped.gens, repeaters: repeaters.length, top: repeaters[0] ? { id: repeaters[0], n: ped.occurrences[repeaters[0]] } : null },
-      cousins: { count: cc.count, bound: cc.bound, exemplar: cc.exemplar },
+      cousins: { count: cc.count, bound: cc.bound, exemplar: rootExemplar },
       cycles: { count: cycleMembers.length, exemplar: cycleMembers[0] || null },
       frontier: { total: frontierTotal, entrance: stop },
       ambiguousNames: { count: ambiguous.length, topName: topName ? { name: topName[0], holders: topName[1].length } : null }
@@ -650,7 +703,7 @@ export function buildArchive ({ corpus, overlay, packs }) {
 
 /* ── browser loader — same truth blood.html loads, same-origin ──────────── */
 /* base: path prefix ending in '/' that resolves to assets/profile-archive/lineage/ */
-export async function fetchArchive (base) {
+export async function fetchArchive (base, broader) {
   const j = (u) => fetch(u).then(r => { if (!r.ok) throw new Error(u + ' ' + r.status); return r.json(); });
   const corpus = await j(base + 'remington-bloodline.json');
   let overlay = null;
@@ -661,5 +714,5 @@ export async function fetchArchive (base) {
     for (const id of Object.keys(overlay.persons)) if (overlay.persons[id].evidencePack) packPaths.add(overlay.persons[id].evidencePack);
   }
   await Promise.all([...packPaths].map(p => j(base + p).then(d => { packs[p] = d; }).catch(() => {})));
-  return { archive: buildArchive({ corpus, overlay, packs }), corpus, overlay, packs };
+  return { archive: buildArchive({ corpus, overlay, packs, broader }), corpus, overlay, packs };
 }

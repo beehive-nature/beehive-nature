@@ -148,6 +148,26 @@
 /* ── null-search surname rescue ─────────────────────────────────────────── */
 .pp-rescue{margin:10px 0 6px;color:var(--gold,#d4a94e);font-size:11px}
 
+/* ── epistemic descent (v1.3) ───────────────────────────────────────────── */
+.pp-hopnode.pp-t-recorded{border-bottom-color:var(--verified,#7bd88f)}
+.pp-hopnode.pp-t-colonial{border-bottom-color:var(--info,#6fb3d9)}
+.pp-hopnode.pp-t-medieval{border-bottom-color:var(--gold,#d4a94e)}
+.pp-hopnode.pp-t-saga{border-bottom-color:var(--violet,#b18cfe)}
+.pp-hopnode.pp-t-living,.pp-hopnode.pp-t-unrecorded{border-bottom-color:var(--faint,#5c7263)}
+.pp-descent{margin-top:8px;font-size:10.5px;color:var(--gold,#d4a94e);border:1px dashed var(--gold,#d4a94e);border-radius:8px;padding:6px 9px}
+.pp-hop-ellipsis{color:var(--faint,#5c7263);font-size:10px;font-style:italic}
+.pp-kinship{margin-top:7px;font-size:11px;color:var(--cyan,#39d2c0)}
+
+/* ── descendant-side frontier (v1.3) ────────────────────────────────────── */
+.pp-coverage{margin-top:8px;font-size:10px;color:var(--faint,#5c7263);border-top:1px dashed var(--line,#24352a);padding-top:6px}
+.pp-broader{margin-top:8px;border:1px solid var(--gold,#d4a94e);border-radius:10px;padding:9px 11px}
+.pp-broader-lab{font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--gold,#d4a94e)}
+.pp-broader-line{font-size:11.5px;color:var(--ink,#cfe3d2);margin-top:4px}
+.pp-broader-att{font-size:9.5px;color:var(--faint,#5c7263);margin-top:5px}
+.pp-locked{margin-top:7px;font-size:10.5px;color:var(--dim,#7d9486);border:1px dashed var(--line,#24352a);border-radius:8px;padding:6px 9px;cursor:not-allowed;opacity:.85}
+.pp-hook-fact{cursor:default;color:var(--dim,#7d9486)}
+.pp-hook-fact:hover{border-color:var(--line,#24352a)}
+
 /* ── focus + motion + mobile ────────────────────────────────────────────── */
 .pp *:focus-visible{outline:2px solid var(--cyan,#39d2c0);outline-offset:1px}
 @media (prefers-reduced-motion: reduce){.pp *{transition:none !important;scroll-behavior:auto !important}}

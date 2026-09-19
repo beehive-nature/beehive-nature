@@ -39,7 +39,23 @@ the required cases ride as buttons below — or search “Joseph Hadlock” your
 import { mountPersonPanel } from '../../surfaces/person-panel.mjs';
 import { fetchArchive } from '../../surfaces/person-panel-corpus.mjs';
 
-const { archive } = await fetchArchive('../../assets/profile-archive/lineage/');
+/* KNOWN BROADER FAMILY — demonstration staging of attributed archive data
+ * (contract v1.3 `broader` input). The numbers come from the founder's own
+ * testimony (2026-09-18: "my grandpa AP rockwood had five wifes and 22
+ * children") corroborated by the cited public biography
+ * (https://en.wikipedia.org/wiki/Albert_P._Rockwood — five wives named,
+ * 22 children). The panel never invents these; the CANONICAL home is the
+ * zBlood attested-overlays / evidence-pack lane — this demo-side staging
+ * shows the descendant-side frontier state until that lane records it. */
+const BROADER = {
+  'p72d226cedf': { /* Albert Perry Rockwood 1805–1879 */
+    spousesTotal: 5,
+    childrenTotal: 22,
+    attribution: 'family testimony (founder, 2026-09-18) + cited public biography (Wikipedia, tertiary) — demonstration staging; canonical home: attested overlay'
+  }
+};
+
+const { archive } = await fetchArchive('../../assets/profile-archive/lineage/', BROADER);
 
 /* the public entrance: Albert Perry Rockwood (visitors start at Rockwood) */
 const panel = mountPersonPanel(document.getElementById('panel'), archive, {
@@ -55,7 +71,8 @@ const CASES = [
   ['the discovery strip (home)', () => panel.home()],
   ['search “Joseph Hadlock” (ambiguity, never a silent pick)', () => panel.resolveAndOpen('Joseph Hadlock')],
   ['Donna Ruth Lawton (relationship to root)', () => panel.resolveAndOpen('Donna Ruth Lawton')],
-  ['Albert Perry Rockwood (public entrance · tradition + testimony layers)', () => panel.openPerson('p72d226cedf')],
+  ['Albert Perry Rockwood (public entrance · broader family · layers)', () => panel.openPerson('p72d226cedf')],
+  ['Ardella Rockwood (Julius’s daughter — your line to Albert)', () => panel.openPerson('p0c99dde639')],
   ['spouse-only pair (liv-1 ⚭ liv-2 — affinity, never blood)', () => panel.openRelationship('liv-2', 'liv-1')],
   ['married cousins (Samuel ⚭ Miriam — blood AND affinity)', () => panel.openRelationship('pccc17e8c97', 'pb8e0a7cd75')],
   ['cyclic person (Emma de Bois-l’Evêque — shortest way around the loop)', () => panel.openPerson('pcc15e1f57e')],

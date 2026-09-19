@@ -24,7 +24,7 @@ import { fileURLToPath } from 'node:url';
 import { join, dirname } from 'node:path';
 
 import { buildArchive, upLabel, downLabel } from '../../surfaces/person-panel-corpus.mjs';
-import { genContextText, ambiguityHeadline, relationshipSummary, hopArrow, layerAttributionLines, buildTeasers, esc } from '../../surfaces/person-panel.mjs';
+import { genContextText, ambiguityHeadline, relationshipSummary, hopArrow, layerAttributionLines, buildTeasers, kinshipTerm, descentTiers, hopWindow, esc } from '../../surfaces/person-panel.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(HERE, '..', '..');
@@ -476,17 +476,18 @@ test('H7 hopArrow maps directions to arrows', () => {
    ancestor after the first one. Every hook below is COMPUTED from the real
    corpus at run time and locked to the numbers measured at this pin. */
 
-test('I1 discoveries() — every hook computed, locked to the pin corpus', () => {
-  const D = archive.discoveries(APR);
+test('I1 discoveries() — every hook computed, locked to the pin corpus (founder root)', () => {
+  const D = archive.discoveries(FOUNDER);
   assert.ok(Object.isFrozen(D));
   assert.equal(D.personsCount, 10259);
   assert.deepEqual(D.spine, { gens: 42, terminus: 'p980ac0fa0b' });
   assert.equal(archive.getPerson(D.spine.terminus).name, 'Randver Radbardson');
-  assert.deepEqual(D.deepest, { id: 'pc996e1efee', depth: 143, from: 'founder' });
+  assert.deepEqual(D.deepest, { id: 'pc996e1efee', depth: 143, from: 'founder', descent: ['living', 'recorded', 'colonial', 'medieval', 'saga', 'unrecorded', 'saga', 'unrecorded', 'saga', 'unrecorded', 'saga', 'unrecorded', 'medieval', 'colonial', 'recorded', 'unrecorded', 'recorded', 'unrecorded', 'recorded'] });
   assert.equal(archive.getPerson(D.deepest.id).name, 'E Anna Tum DE LAGASH');
   assert.deepEqual(D.collapse, { gens: 12, repeaters: 50, top: { id: 'p240410e903', n: 3 } });
   assert.equal(archive.getPerson(D.collapse.top.id).name, 'Tacy Cooper');
-  /* the first cousin couple in corpus order is the founder's own grandparents */
+  /* the first cousin couple in corpus order whose members are BOTH ancestors
+   * of the standing root — the founder's own grandparents */
   assert.deepEqual(D.cousins.exemplar, { a: 'p3d44ccaffd', b: 'p7b1078c886' });
   assert.equal(archive.getPerson(D.cousins.exemplar.a).name, 'Jack Benedum Sutphen');
   assert.equal(D.cousins.count, 593);
@@ -494,8 +495,7 @@ test('I1 discoveries() — every hook computed, locked to the pin corpus', () =>
   assert.equal(D.cycles.count, 44);
   assert.equal(archive.getPerson(D.cycles.exemplar).name, 'Lucius Munatius Plancus De Rome');
   assert.equal(D.frontier.total, 1959);
-  assert.deepEqual(D.frontier.entrance, { stopId: 'p92dc6be4f8', steps: 3, atFrontier: true });
-  assert.equal(archive.getPerson(D.frontier.entrance.stopId).name, 'Samuel Rockwood I');
+  assert.deepEqual(D.frontier.entrance, { stopId: 'pbcdbe03844', steps: 13, atFrontier: false }); /* the founder's father-line simply ends at depth 13 — no parents at all */
   assert.deepEqual(D.ambiguousNames, { count: 281, topName: { name: 'margaret', holders: 16 } });
 });
 
@@ -576,4 +576,131 @@ test('I7 curiosity wiring — strip, teasers, rescue, and home() exist as text l
   for (const cls of ['.pp-strip', '.pp-hook', '.pp-teasers', '.pp-teaser', '.pp-rescue']) {
     assert.ok(css.includes(cls), 'missing css: ' + cls);
   }
+});
+
+/* ── J. rider 2+3 — contextual discoveries, epistemic descent, formal
+   kinship, and the descendant-side frontier ─────────────────────────────── */
+
+test('J1 formal kinship naming — computed, never prose (the founder’s correction locked)', () => {
+  assert.equal(kinshipTerm(5, 'up', 'MALE'), '3rd-great-grandfather'); /* Albert Perry Rockwood — THE correction */
+  assert.equal(kinshipTerm(5, 'up', 'FEMALE'), '3rd-great-grandmother'); /* Juliane Sophie Olsen */
+  assert.equal(kinshipTerm(2, 'up', 'FEMALE'), 'grandmother'); /* Donna at the founder root */
+  assert.equal(kinshipTerm(1, 'up', 'M'), 'father');
+  assert.equal(kinshipTerm(3, 'up', 'F'), 'great-grandmother'); /* Ardella from the founder */
+  assert.equal(kinshipTerm(4, 'up', 'M'), '2nd-great-grandfather'); /* Julius from the founder */
+  assert.equal(kinshipTerm(5, 'down', 'FEMALE'), '3rd-great-granddaughter');
+  assert.equal(kinshipTerm(1, 'down', 'M'), 'son');
+  assert.equal(kinshipTerm(2, 'down', null), 'grandchild'); /* uncertain gender stays generic */
+  assert.equal(kinshipTerm(0, 'up', 'M'), null);
+  assert.equal(kinshipTerm(2, 'sideways', 'M'), null);
+  /* the ordinal law (rider-3 fix): 11/12/13 exception + mod-10 suffixing —
+   * a millennia-scale archive must never ship 21th-great- */
+  assert.equal(kinshipTerm(13, 'up', 'M'), '11th-great-grandfather');
+  assert.equal(kinshipTerm(14, 'up', 'M'), '12th-great-grandfather');
+  assert.equal(kinshipTerm(15, 'up', 'M'), '13th-great-grandfather');
+  assert.equal(kinshipTerm(23, 'up', 'M'), '21st-great-grandfather');
+  assert.equal(kinshipTerm(24, 'up', 'M'), '22nd-great-grandfather');
+  assert.equal(kinshipTerm(25, 'up', 'M'), '23rd-great-grandfather');
+  assert.equal(kinshipTerm(103, 'up', 'M'), '101st-great-grandfather');
+  assert.equal(kinshipTerm(111, 'up', 'M'), '109th-great-grandfather');
+  assert.equal(kinshipTerm(113, 'up', 'M'), '111th-great-grandfather'); /* the 11-13 exception holds past 100 */
+  assert.equal(kinshipTerm(123, 'up', 'M'), '121st-great-grandfather');
+  assert.equal(kinshipTerm(143, 'up', 'M'), '141st-great-grandfather'); /* the Lagash depth */
+});
+
+test('J2 descentTiers — CONSECUTIVE transitions, the texture the line actually walks', () => {
+  /* a return to earlier ground is itself texture — kept, not erased */
+  assert.deepEqual(descentTiers(['living', 'living', 'recorded', 'colonial', 'medieval', 'colonial', 'saga', 'saga']), ['living', 'recorded', 'colonial', 'medieval', 'colonial', 'saga']);
+  assert.deepEqual(descentTiers([null, '', 'saga']), ['saga']);
+  assert.deepEqual(descentTiers([]), []);
+  assert.deepEqual(descentTiers(['recorded', 'recorded']), ['recorded']); /* uniform runs collapse */
+});
+
+test('J3 hopWindow — long chains compress with the elided count stated', () => {
+  const mk = n => Array.from({ length: n }, (_, i) => ({ to: 'p' + i, dir: 'up', label: 'parent', evidence: 'walked provider link' }));
+  const short = hopWindow(mk(5), 10, 3);
+  assert.equal(short.elided, 0);
+  assert.equal(short.render.length, 5);
+  assert.equal(short.total, 5);
+  const deep = hopWindow(mk(143), 10, 3);
+  assert.equal(deep.total, 143);
+  assert.equal(deep.elided, 130);
+  assert.equal(deep.render.length, 14); /* 10 head + 1 ellipsis + 3 tail */
+  assert.equal(deep.render[10], null, 'the ellipsis sentinel rides at the seam');
+});
+
+test('J4 discoveries are CONTEXTUAL — the same archive tells a different story per standing root', () => {
+  const Df = archive.discoveries(FOUNDER);
+  const Da = archive.discoveries(APR);
+  /* founder root: the whole medieval web */
+  assert.equal(Df.deepest.depth, 143);
+  assert.equal(Df.tiers.total, 10097);
+  assert.deepEqual(Df.tiers.order, ['saga', 'medieval', 'colonial', 'unrecorded', 'recorded', 'living']);
+  assert.equal(Df.tiers.counts.saga, 3153, 'more saga-tier than recorded-tier — the thinning is countable');
+  /* Rockwood root: a small colonial world with its own frontier story */
+  assert.equal(Da.deepest.depth, 3);
+  assert.equal(Da.deepest.id, 'p92dc6be4f8');
+  assert.equal(archive.getPerson(Da.deepest.id).name, 'Samuel Rockwood I');
+  assert.deepEqual(Da.tiers, { total: 15, counts: { colonial: 15 }, order: ['colonial'] });
+  assert.equal(Da.cousins.exemplar, null, 'no cousin couple lives inside the Rockwood root’s family — the hook honestly hides');
+  assert.equal(Da.collapse.repeaters, 0);
+  assert.deepEqual(Da.frontier.entrance, { stopId: 'p92dc6be4f8', steps: 3, atFrontier: true });
+});
+
+test('J5 descendant-side frontier — broader family renders ONLY from attributed archive data', () => {
+  /* without the `broader` input: no numbers, ever */
+  const apr = archive.getPerson(APR);
+  assert.equal(apr.broaderFamily, null);
+  /* with attributed staging: carried, frozen, attributed */
+  const a2 = buildArchive({ corpus, overlay, packs, broader: { [APR]: { spousesTotal: 5, childrenTotal: 22, attribution: 'family testimony + cited biography (test)' } } });
+  const v = a2.getPerson(APR);
+  assert.ok(Object.isFrozen(v.broaderFamily));
+  assert.deepEqual(v.broaderFamily, { spousesTotal: 5, childrenTotal: 22, attribution: 'family testimony + cited biography (test)' });
+  /* the staged numbers are NOT written back into any corpus structure */
+  assert.equal(JSON.parse(corpusRaw).persons[APR].name, 'Albert Perry Rockwood');
+  assert.equal(a2.getPerson(APR).children.length, 1, 'the walked record still carries exactly one child on the line');
+});
+
+test('J6 teasers v2 — the medieval experience speaks its own texture', () => {
+  /* cyclic */
+  const emma = archive.getPerson(EMMA);
+  const te = buildTeasers(emma, {});
+  assert.ok(te.some(t => t.kind === 'cyclic' && /participates in a loop/.test(t.text)));
+  /* disputed parent-link */
+  const hc = archive.getPerson('ovl-harthacnut-i');
+  const th = buildTeasers(hc, {});
+  assert.ok(th.some(t => t.kind === 'disputed' && /disputed/.test(t.text)));
+  /* legendary tier */
+  const rag = archive.getPerson('pf5d40516b8');
+  const tr = buildTeasers(rag, {});
+  assert.ok(tr.some(t => t.kind === 'legendary' && /does not upgrade to documented/.test(t.text)));
+  /* none of these fire on plain modern persons */
+  const donna = buildTeasers(archive.getPerson(DONNA), {});
+  assert.ok(!donna.some(t => t.kind === 'cyclic' || t.kind === 'disputed' || t.kind === 'legendary'));
+});
+
+test('J7 wiring v1.3 — descent, kinship, coverage, broader, locked rows exist as text law', () => {
+  const src = readFileSync(join(ROOT, 'surfaces', 'person-panel.mjs'), 'utf8');
+  for (const marker of [
+    'kinshipTerm', 'descentTiers', 'hopWindow', 'the evidence texture changes as the line climbs',
+    'pp-t-', 'pp-kinship', 'formally:', 'known broader family', 'archive coverage:',
+    'fan sideways into the rest of the family', 'locked, not hidden',
+    'coverage, not contradiction', 'standing at {r}'
+  ]) {
+    assert.ok(src.includes(marker), 'missing v1.3 marker: ' + marker);
+  }
+  const css = readFileSync(join(ROOT, 'surfaces', 'person-panel.css'), 'utf8');
+  for (const cls of ['.pp-t-recorded', '.pp-t-colonial', '.pp-t-medieval', '.pp-t-saga', '.pp-descent', '.pp-kinship', '.pp-coverage', '.pp-broader', '.pp-locked']) {
+    assert.ok(css.includes(cls), 'missing css: ' + cls);
+  }
+});
+
+test('J8 the corpus stays byte-identical after the v1.3 battery', () => {
+  const pristine = JSON.parse(corpusRaw);
+  archive.discoveries(FOUNDER);
+  archive.discoveries(APR);
+  archive.getPerson(EMMA);
+  archive.getPerson('ovl-harthacnut-i');
+  archive.relationship('pc996e1efee', FOUNDER); /* the 143-hop line compresses, never corrupts */
+  assert.deepEqual(JSON.parse(JSON.stringify(corpus)), pristine);
 });

@@ -58,7 +58,7 @@
        it adds no names, ids, or URLs of its own; it logs nothing
 */
 
-export const PP_VERSION = 'person-panel/1.1';
+export const PP_VERSION = 'person-panel/1.3';
 
 /* v1.1 — curiosity-first (founder guidance 2026-09-18: "the graph is not the
  * product; the graph is the instrument for discovering people"):
@@ -72,6 +72,17 @@ export const PP_VERSION = 'person-panel/1.1';
  *     positions — never two people).
  *   + archive.spineIndex(id) / archive.nameShares(name) OPTIONAL.
  *   + panel.home() — return to the discovery strip.
+ * v1.3 — discoveries are CONTEXTUAL to the standing root (re-rooting teaches
+ *   itself); the epistemic descent is VISIBLE (tier-classed hops + the tier
+ *   sequence a line walks + the tier composition of everything from the
+ *   root); FORMAL kinship naming is computed (depth 5 up = 3rd-great-
+ *   grandfather — never hand-written); and the DESCENDANT-SIDE FRONTIER is a
+ *   first-class state: family sections state the walk's coverage law, and a
+ *   person's KNOWN broader family (wives/children totals beyond the walk)
+ *   renders ONLY from attributed archive data (buildArchive's optional
+ *   `broader` input — testimony/cited-biography numbers the archive owner
+ *   stages; the panel never invents them), with the sideways fan locked,
+ *   not hidden.
 
 /* ── pure helpers (the laws that read) ───────────────────────────────────── */
 
@@ -119,6 +130,61 @@ export function hopArrow (hop) {
   return '⚭';
 }
 
+/* ── formal kinship naming (the founder's genealogical correction, made
+   structural): depth 5 up = "3rd-great-grandfather" — computed, never
+   hand-written. depth 1..2 plain, 3 = great-, n>=4 = (n-2)th-great-. */
+/* proper ordinal: the 11/12/13 exception plus mod-10 suffixing — this
+ * archive reaches 141st-great- territory, 21th- never ships */
+const ORD = n => {
+  const s = ['th', 'st', 'nd', 'rd'];
+  const v = n % 100;
+  return n + (s[(v - 20) % 10] || s[v] || s[0]);
+};
+export function kinshipTerm (depth, dir, gender) {
+  const g = gender === 'F' || gender === 'FEMALE' ? 'F' : (gender === 'M' || gender === 'MALE' ? 'M' : null);
+  if (depth < 1) return null;
+  if (dir === 'up') {
+    const base = g === 'F' ? 'grandmother' : (g === 'M' ? 'grandfather' : 'grandparent');
+    const parent = g === 'F' ? 'mother' : (g === 'M' ? 'father' : 'parent');
+    if (depth === 1) return parent;
+    if (depth === 2) return base;
+    if (depth === 3) return 'great-' + base;
+    return ORD(depth - 2) + '-great-' + base;
+  }
+  if (dir === 'down') {
+    const base = g === 'F' ? 'granddaughter' : (g === 'M' ? 'grandson' : 'grandchild');
+    const child = g === 'F' ? 'daughter' : (g === 'M' ? 'son' : 'child');
+    if (depth === 1) return child;
+    if (depth === 2) return base;
+    if (depth === 3) return 'great-' + base;
+    return ORD(depth - 2) + '-great-' + base;
+  }
+  return null;
+}
+
+/* ── the epistemic descent: the tier transitions a line actually walks —
+   CONSECUTIVE deduplication, not global: a route that re-enters colonial
+   ground after medieval keeps that second colonial, because that return
+   is part of the texture. Nulls skipped; runs collapse; nothing invented. */
+export function descentTiers (tiers) {
+  const out = [];
+  for (const t of tiers) {
+    if (t == null || t === '') continue;
+    if (out.length && out[out.length - 1] === t) continue;
+    out.push(t);
+  }
+  return out;
+}
+
+/* long chains compress honestly: head + ellipsis + tail; the elided count
+   is stated, the full length is never hidden */
+export function hopWindow (hops, head, tail) {
+  const H = head == null ? 10 : head;
+  const T = tail == null ? 3 : tail;
+  if (hops.length <= H + T + 1) return { render: hops, elided: 0, total: hops.length };
+  return { render: hops.slice(0, H).concat([null]).concat(hops.slice(hops.length - T)), elided: hops.length - H - T, total: hops.length };
+}
+
 /* "one more ancestor" teasers — PURE, derived ONLY from archive-supplied
  * facts (never invented): a cousin marriage, a pedigree-collapse repeat,
  * shared namesakes, a spine position. The panel renders whatever the
@@ -141,6 +207,16 @@ export function buildTeasers (view, ctx) {
   }
   if (ctx.spineIdx != null) {
     out.push({ kind: 'spine', id: view.id, text: 'generation ' + ctx.spineIdx + ' on the spine — one of the named waypoints the published line runs through.' });
+  }
+  /* the medieval experience — deeper ground speaks its own texture */
+  if (view.inCycle) {
+    out.push({ kind: 'cyclic', id: view.id, text: 'this record participates in a loop — the medieval web repeats people as their own ancestors; the shortest honest line is what renders.' });
+  }
+  if ((view.parents || []).some(x => /disputed/.test(x.evidence || ''))) {
+    out.push({ kind: 'disputed', id: view.id, text: 'a parent-link here is disputed — competing reconstructions exist; open the parent row to inspect the evidence.' });
+  }
+  if (view.tier === 'saga' || view.tier === 'medieval') {
+    out.push({ kind: 'legendary', id: view.id, text: 'this person rides traditional genealogy (' + view.tier + ' tier) — it does not upgrade to documented; the chips carry the distinction.' });
   }
   return out;
 }
@@ -333,7 +409,9 @@ export function mountPersonPanel (host, archive, opts) {
   }
 
   /* chains render from an explicit start id — works for the standing root
-   * AND for arbitrary pairs opened from a parent/spouse row */
+   * AND for arbitrary pairs opened from a parent/spouse row. Long chains
+   * compress honestly (head + stated ellipsis + tail); hop nodes carry their
+   * evidence-tier class so the epistemic descent is VISIBLE. */
   function relChainsHtml (rel) {
     if (!rel || rel.kind === 'self') return '';
     let h = '';
@@ -351,6 +429,17 @@ export function mountPersonPanel (host, archive, opts) {
       } else {
         h += '<div class="pp-chain">' + chainHtml(B.hopsFromRoot, rel.b) + '</div>';
         h += '<div class="pp-ca-line">' + esc(T('pp.rel.endpoint', 'the common ancestor is the line’s upper endpoint — no intermediate meeting point is claimed')) + '</div>';
+        /* formal kinship — computed from depth + recorded gender, never prose */
+        const personP = archive.getPerson(rel.a);
+        const rootP = archive.getPerson(rel.b);
+        if (personP && rootP) {
+          const term = rel.blood.mode === 'ancestor-of-root'
+            ? kinshipTerm(B.hopsFromRoot.length, 'up', personP.gender)
+            : kinshipTerm(B.hopsFromRoot.length, 'down', personP.gender);
+          if (term) {
+            h += '<div class="pp-kinship">' + esc(T('pp.rel.kinship', 'formally: {a} is {b}’s {t} — {n} generations').replace('{a}', esc(personP.name)).replace('{b}', esc(rootP.name)).replace('{t}', esc(term)).replace('{n}', String(B.hopsFromRoot.length))) + '</div>';
+          }
+        }
       }
     }
     if (rel.affinity) {
@@ -359,6 +448,16 @@ export function mountPersonPanel (host, archive, opts) {
     }
     if (rel.kind === 'blood-and-affinity') {
       h += '<div class="pp-coexist">' + esc(T('pp.rel.coexist', 'blood AND affinity coexist for this pair — married cousins; both are true and separately labeled')) + '</div>';
+    }
+    /* the epistemic descent: when the blood line's evidence texture changes,
+     * the change itself is shown — era labels date the evidence; support is
+     * assessed per person; the panel renders no verdict of its own */
+    if (rel.blood) {
+      const tiers = [tierOf(rel.b)].concat(rel.blood.hopsFromRoot.map(x => tierOf(x.to)));
+      const seq = descentTiers(tiers);
+      if (seq.length >= 2) {
+        h += '<div class="pp-descent">◇ ' + esc(T('pp.rel.descent', 'the evidence texture changes as the line climbs: {s} — era labels date the evidence; support is assessed per person').replace('{s}', esc(seq.join(' → ')))) + '</div>';
+      }
     }
     if (rel.cyclic) {
       h += '<div class="pp-cyclic">↻ ' + esc(T('pp.rel.cyclic', 'the shortest recorded line passes through a cyclic record (the medieval web loops) — the archive shows the shortest honest way, never an invented cleaner one')) + '</div>';
@@ -369,17 +468,34 @@ export function mountPersonPanel (host, archive, opts) {
     return h;
   }
 
-  /* a chain of labeled, clickable hops starting at startId */
-  function chainHtml (hops, startId) {
+  function tierOf (id) {
+    const p = archive.getPerson(id);
+    return p ? p.tier : null;
+  }
+
+  /* a chain of labeled, clickable hops starting at startId; null hop = the
+   * honest ellipsis for a compressed middle */
+  function chainHtml (hopsRaw, startId) {
+    const w = hopWindow(hopsRaw, 10, 3);
     const start = archive.getPerson(startId);
-    let h = '<span class="pp-hopnode" data-ppgo="' + esc(startId) + '" role="button" tabindex="0">' + esc(start ? (start.living ? start.name : shortName(startId)) : startId) + '</span>';
-    for (const hop of hops) {
+    let h = nodeHtml(startId, start);
+    for (const hop of w.render) {
+      if (hop == null) {
+        h += ' <span class="pp-hop-ellipsis">… ' + w.elided + ' ' + esc(T('pp.rel.morehops', 'more hops — ' + w.total + ' in total, every one carried in the archive')) + ' …</span> ';
+        continue;
+      }
       const p = archive.getPerson(hop.to);
       h += ' <span class="pp-hop" title="' + esc(hop.evidence) + '">' + hopArrow(hop) + esc(hop.label) + '</span> ';
-      h += '<span class="pp-hopnode" data-ppgo="' + esc(hop.to) + '" role="button" tabindex="0">' +
-        esc(p ? (p.living ? p.name : shortName(hop.to)) : hop.to) + '</span>';
+      h += nodeHtml(hop.to, p);
     }
     return h;
+  }
+
+  function nodeHtml (id, p) {
+    const tier = p ? p.tier : null;
+    return '<span class="pp-hopnode' + (tier ? ' pp-t-' + esc(tier) : '') + '" data-ppgo="' + esc(id) + '" role="button" tabindex="0" title="' +
+      esc(T('pp.node.tier', 'era tier: {t}').replace('{t}', tier || '—')) + '">' +
+      esc(p ? (p.living ? p.name : shortName(id)) : id) + '</span>';
   }
 
   function relToRootHtml (p) {
@@ -436,6 +552,24 @@ export function mountPersonPanel (host, archive, opts) {
     }
     if (!p.parents.length && !p.children.length && !p.spouses.length) {
       h += '<div class="pp-none">' + esc(T('pp.family.empty', 'no recorded family links inside the published archive — coverage of the walk, not a finding about anyone')) + '</div>';
+    } else {
+      /* descendant-side frontier — the generic coverage law: a PARTIAL family
+       * must never read as the whole family (the founder's Albert Rockwood
+       * finding: “children (1)” ≠ “had one child”) */
+      h += '<div class="pp-coverage">' + esc(T('pp.family.coverage', 'this edition follows the founder’s blood line — siblings, other marriages, and descendants of people on the line largely live beyond the published record (coverage, not contradiction)')) + '</div>';
+    }
+    /* known broader family — attributed numbers carried by the archive
+     * (family testimony / cited biography); never invented by the panel */
+    if (p.broaderFamily) {
+      const bf = p.broaderFamily;
+      const spousesHere = p.spouses.length;
+      const childrenHere = p.children.length;
+      h += '<div class="pp-broader"><div class="pp-broader-lab">' + esc(T('pp.broader.known', 'known broader family')) + '</div>' +
+        '<div class="pp-broader-line">' + esc(T('pp.broader.line', '{w} wives · {c} children (known)').replace('{w}', String(bf.spousesTotal)).replace('{c}', String(bf.childrenTotal))) + '</div>' +
+        '<div class="pp-broader-line">' + esc(T('pp.broader.coverage', 'archive coverage: this edition follows {x} of {w} wives + {y} of {c} children on the direct line').replace('{x}', String(spousesHere)).replace('{w}', String(bf.spousesTotal)).replace('{y}', String(childrenHere)).replace('{c}', String(bf.childrenTotal))) + '</div>' +
+        '<div class="pp-broader-att">' + esc(bf.attribution) + '</div>' +
+        '<div class="pp-locked" title="' + esc(T('pp.broader.lockednote', 'future records — locked, not hidden')) + '">🔒 ' +
+        esc(T('pp.broader.explore', 'fan sideways into the rest of the family — enters when the attested overlay stages those records (locked, not hidden)')) + '</div></div>';
     }
     h += '</div></section>';
     return h;
@@ -520,13 +654,20 @@ export function mountPersonPanel (host, archive, opts) {
     const D = archive.discoveries(curRoot);
     const nm = id => { const p = archive.getPerson(id); return p ? (p.name + (p.lifespan ? ' · ' + p.lifespan : '')) : id; };
     let h = '<div class="pp-strip">';
-    h += '<div class="pp-strip-head">' + esc(T('pp.disc.head', 'this published family archive, in one breath — every line below opens a real person')) + '</div>';
+    h += '<div class="pp-strip-head">' + esc(T('pp.disc.head', 'standing at {r} — discoveries from here (every line opens a real person)').replace('{r}', esc(curRoot ? shortName(curRoot) : 'the archive'))) + '</div>';
     const hooks = [];
+    if (D.tiers && D.tiers.total > 1 && D.tiers.order.length) {
+      const parts = D.tiers.order.slice(0, 4).map(t => D.tiers.counts[t].toLocaleString() + ' ' + t);
+      hooks.push({ kind: 'tiers', label: esc(T('pp.disc.tiers', '{n} ancestors from here — {p}{more}: the deeper ground thins, and the era names say how').replace('{n}', D.tiers.total.toLocaleString()).replace('{p}', parts.join(' · ')).replace('{more}', D.tiers.order.length > 4 ? ' · …' : '')) });
+    }
     if (D.spine && D.spine.terminus) {
       hooks.push({ go: D.spine.terminus, label: D.personsCount.toLocaleString() + ' ' + esc(T('pp.disc.people', 'people')) + ' · ' + esc(T('pp.disc.spine', 'the spine runs {g} generations to {t}').replace('{g}', String(D.spine.gens)).replace('{t}', esc(nm(D.spine.terminus)))) });
     }
     if (D.deepest && D.deepest.id) {
-      hooks.push({ go: D.deepest.id, label: esc(T('pp.disc.deep', 'the deepest published line runs {d} generations — {n} (published, not verified)').replace('{d}', String(D.deepest.depth)).replace('{n}', esc(nm(D.deepest.id)))) });
+      const descentClause = (D.deepest.descent && D.deepest.descent.length >= 2)
+        ? ' ' + esc(T('pp.disc.descent', '— the ground changes underfoot: {s}').replace('{s}', esc(D.deepest.descent.join(' → '))))
+        : '';
+      hooks.push({ go: D.deepest.id, label: esc(T('pp.disc.deep', 'the deepest published line from here runs {d} generations — {n} (published, not verified)').replace('{d}', String(D.deepest.depth)).replace('{n}', esc(nm(D.deepest.id)))) + descentClause });
     }
     if (D.collapse && D.collapse.top) {
       hooks.push({ go: D.collapse.top.id, label: esc(T('pp.disc.collapse', '{r} ancestors repeat in the 12-generation pedigree — pedigree collapse; {n} appears {k}×').replace('{r}', String(D.collapse.repeaters)).replace('{n}', esc(nm(D.collapse.top.id))).replace('{k}', String(D.collapse.top.n))) });
@@ -544,7 +685,9 @@ export function mountPersonPanel (host, archive, opts) {
       hooks.push({ q: D.ambiguousNames.topName.name, label: esc(T('pp.disc.names', '{c} names belong to more than one person — {n} belongs to {k}. The archive never picks for you.').replace('{c}', String(D.ambiguousNames.count)).replace('{n}', esc(D.ambiguousNames.topName.name)).replace('{k}', String(D.ambiguousNames.topName.holders))) });
     }
     for (const hk of hooks) {
-      if (hk.rel) {
+      if (hk.kind === 'tiers') {
+        h += '<div class="pp-hook pp-hook-fact">' + hk.label + '</div>';
+      } else if (hk.rel) {
         h += '<button type="button" class="pp-hook" data-pprel="' + esc(hk.rel[0]) + '|' + esc(hk.rel[1]) + '">' + hk.label + ' <span class="pp-hook-open">' + esc(T('pp.disc.open', 'open ↗')) + '</span></button>';
       } else if (hk.q != null) {
         h += '<button type="button" class="pp-hook" data-ppq="' + esc(hk.q) + '">' + hk.label + ' <span class="pp-hook-open">' + esc(T('pp.disc.open', 'open ↗')) + '</span></button>';
