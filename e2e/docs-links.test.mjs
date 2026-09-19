@@ -11,6 +11,11 @@
         or `?query` suffix is trimmed before resolution.
      3. A directory target resolves when any tracked path sits under it —
         `git` tracks files, not directories.
+     4. The match anchors on `](target)`, not on a well-formed `[text](…)`.
+        An image-badge link — `[![alt](img)](./LICENSE)`, README.md:11 — has
+        a `]` inside its own link text, so a pattern that forbids that
+        character silently drops the target. That miss is what made this
+        gate count 164 relative links where the Refill 6 census counted 165.
 
    EXEMPT rows: the silentpay-v2 handoff corpus (ed099888, 2026-09-16; the
    RULINGS-2026-09-16:16 durable pointer) landed with `verification/status.json`
@@ -40,7 +45,7 @@ const trackedSet = new Set(tracked);
 const OUT_OF_SCAN = ['docs/dispatches/', 'docs/receipts/'];
 const docs = tracked.filter(p => p.endsWith('.md') && !OUT_OF_SCAN.some(d => p.startsWith(d)));
 
-const LINK = /\[[^\]]*\]\(([^)\s]+)(?:\s+"[^"]*")?\)/g;
+const LINK = /\]\(([^)\s]+)(?:\s+"[^"]*")?\)/g;
 const isExternal = t => /^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(t) || t.startsWith('//');
 
 // A tracked directory prefix — `git ls-files` lists files, so a link to a
@@ -50,6 +55,12 @@ for (const p of tracked) {
   const parts = p.split('/');
   for (let i = 1; i < parts.length; i++) dirPrefixes.add(parts.slice(0, i).join('/'));
 }
+
+const targetsIn = doc => {
+  const out = [];
+  for (const m of readFileSync(ROOT + doc, 'utf8').matchAll(LINK)) out.push(m[1].trim());
+  return out;
+};
 
 const unresolvedIn = doc => {
   const dir = posix.dirname(doc);
@@ -96,6 +107,23 @@ test('the scanner actually reaches the estate docs', () => {
   assert.ok(docs.length > 300, `only ${docs.length} tracked docs in scan — scanner is broken`);
   const links = docs.reduce((n, d) => n + (readFileSync(ROOT + d, 'utf8').match(LINK) || []).length, 0);
   assert.ok(links > 100, `only ${links} markdown links seen — scanner is broken`);
+});
+
+test('the scanner sees image-badge link targets (coverage pin)', () => {
+  // README.md:11 is `[![license: …](badge-url)](./LICENSE)` — the target sits
+  // behind a `]` inside the link text. A pattern anchored on a well-formed
+  // `[text](…)` drops it silently, which is how this gate first counted 164
+  // relative links against the Refill 6 census's 165. Pin the coverage so a
+  // narrowing of LINK fails here instead of going quiet.
+  // README.md carries ./LICENSE twice: the badge at :11 and the plain link
+  // at :126. A narrowed pattern still finds :126, so presence is not enough —
+  // the count is what proves the badge form is covered.
+  const seen = targetsIn('README.md').filter(t => t === './LICENSE');
+  assert.equal(
+    seen.length,
+    2,
+    'LINK no longer matches image-badge links — README.md:11 target is invisible',
+  );
 });
 
 test('every relative link outside the exempt corpus resolves', () => {
