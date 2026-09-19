@@ -10,11 +10,12 @@
 //     absent so the suite stays runnable outside the repo.
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { existsSync, mkdtempSync, writeFileSync } from "node:fs";
+import { existsSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { createModel, addPerson, addEdge, addCouple } from "./model.mjs";
 import { loadArchive } from "./archive.mjs";
+import { createArchiveCore, ARCHIVE_CORE_SCHEMA } from "../../surfaces/archive-core.mjs";
 
 function build({ root = "r", persons = [], edges = {}, couples = [] }) {
   const m = createModel({ root });
@@ -434,4 +435,35 @@ test("1.1 F3: a provider ref resolving to two persons fails the load, not last-w
   });
   const a2 = loadArchive({ model: m2 });
   assert.equal(a2.resolve("OK-REF").id, "solo");
+});
+
+// ── 4. Archive core — one resolver, two environments (founder ruling bdf59735) ─
+
+test("core: ZERO imports — the resolver is browser-consumable by construction", () => {
+  const src = readFileSync(new URL("../../surfaces/archive-core.mjs", import.meta.url), "utf8");
+  assert.equal(/^import[\s{"']/m.test(src), false, "no static import statements of any kind (law: zero imports)");
+  assert.equal(/\bimport\s*\(/.test(src), false, "no dynamic import either");
+  assert.equal(/\brequire\s*\(/.test(src), false, "no require");
+  assert.equal(/\bfrom\s+["']/.test(src), false, "no module specifier anywhere in code");
+});
+
+test("core-direct: the founder contract on a bare parsed model, no fs wrapper", () => {
+  const m = build({
+    root: "r",
+    persons: [per("r"), per("g"), per("h1"), per("h2"), per("w1"), per("w2")],
+    edges: { r: ["w1"], h1: ["g"], h2: ["g"], w1: ["h1"], w2: ["h2"] },
+  });
+  const core = createArchiveCore(m);
+  assert.equal(core.schema, ARCHIVE_CORE_SCHEMA);
+  const path = core.relationshipPath("w1", "w2");
+  assert.equal(path.kind, "blood");
+  assert.equal(path.commonAncestor, "g");
+  assert.deepEqual(path.path.map((h) => h.id), ["w1", "h1", "g", "h2", "w2"], "collateral shape survives extraction byte-for-behavior");
+  assert.equal(core.resolve("w1").id, "w1", "canonical lookup by id");
+  const bl = core.bloodlineSet();
+  for (const id of ["r", "w1", "h1", "g"]) assert.equal(bl.has(id), true, `${id} is on the parentward bloodline`);
+  assert.equal(bl.has("w2"), false, "the collateral cousin is off it");
+  const s = core.searchNames("w2");
+  assert.ok(s.results.some((x) => x.id === "w2"), "search over the person table the core already owns");
+  assert.equal(core.cyclicAncestryOf("w1"), null, "no cycle, no disputed state");
 });
