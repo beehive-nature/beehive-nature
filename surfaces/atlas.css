@@ -192,8 +192,8 @@ body[data-reg] .keep-plain strong.bgene{font-size:1.75rem;font-weight:400;letter
 .tree-key b{font-weight:400;color:var(--ink)}
 
 /* the register track: one row, a pressed pill, and the ✓ still says it without colour */
-body[data-experience=home] #bregctl{flex-wrap:nowrap;gap:2px;padding:4px;border-radius:999px;background:var(--inset)}
-body[data-experience=home] #bregctl button{flex:1 1 auto;border:0;border-radius:999px;background:transparent;color:var(--ink);padding:8px 14px;white-space:nowrap;gap:6px}
+body[data-experience=home] #bregctl{flex-wrap:wrap;gap:2px;padding:4px;border-radius:26px;background:var(--inset)}
+body[data-experience=home] #bregctl button{flex:1 1 auto;border:0;border-radius:999px;background:transparent;color:var(--ink);padding:8px 14px;white-space:normal;overflow-wrap:anywhere;gap:6px}
 body[data-experience=home] #bregctl button>span[aria-hidden=true]{display:none}
 body[data-experience=home] #bregctl button::before{display:none}
 body[data-experience=home] #bregctl button[aria-pressed=true]::before{display:inline-block}

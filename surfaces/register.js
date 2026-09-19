@@ -66,10 +66,10 @@
     #bregctl button::before{content:'✓';display:inline-block;visibility:hidden;font:inherit}
     #bregctl button[aria-pressed="true"]::before{visibility:visible}
     #bregctl button:hover{border-color:var(--reg-active);text-decoration:underline;text-underline-offset:3px}
-    /* THE RULED FACE (2026-09-19): one row, a pill track, the pressed pill filled;
+    /* THE RULED FACE (2026-09-19): one row where the words fit (it wraps for long tongues, never overflows), a pill track, the pressed pill filled;
        the check mark still says "pressed" without colour. Emoji give way to words. */
-    #bregctl{flex-wrap:nowrap;gap:2px;padding:4px;border-radius:var(--reg-radius,999px);background:var(--reg-track)}
-    #bregctl button{border-color:transparent;border-radius:var(--reg-radius,999px);background:transparent;padding:8px 12px;white-space:nowrap;gap:6px}
+    #bregctl{flex-wrap:wrap;gap:2px;padding:4px;border-radius:var(--reg-radius,26px);background:var(--reg-track)}
+    #bregctl button{border-color:transparent;border-radius:var(--reg-radius,999px);background:transparent;padding:8px 12px;white-space:normal;overflow-wrap:anywhere;gap:6px}
     #bregctl button>span[aria-hidden="true"]{display:none}
     #bregctl button::before{display:none}
     #bregctl button[aria-pressed="true"]::before{display:inline-block}
