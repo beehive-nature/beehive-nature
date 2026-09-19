@@ -63,10 +63,10 @@ try {
     ok(`${vp}: route strip reveals the whole journey`, +stripLen >= 30, stripLen + " hops");
     const panelText = await page.locator("#panel").innerText();
     ok(`${vp}: person panel opens alongside the traveler`, panelText.length > 200, "");
-    // rider-3: the route strip's alternates line is DERIVED, never boilerplate
+    // rider-3: the route strip's alternates line is DERIVED and QUALIFIED, never boilerplate
     const stripNote = await page.locator("#atlas-route").innerText();
-    ok(`${vp}: route strip alternates clause is derived (one of the three measured states)`,
-      /exactly one route|equal-shortest routes|near-equal alternates one hop longer/.test(stripNote) && !/not the only one/.test(stripNote));
+    ok(`${vp}: route strip alternates clause is derived and qualified (never boilerplate, never global-uniqueness)`,
+      /equal-length routes|routes one hop longer|not assessed beyond one hop longer/.test(stripNote) && !/not the only one/.test(stripNote) && !/exactly one route/.test(stripNote));
     await page.screenshot({ path: join(SHOTS, `combined-02-travel-${vp}.png`), fullPage: vp === "390" });
 
     // 3. teaser → atlas follows WITHOUT camera/root/history reset.

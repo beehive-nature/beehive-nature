@@ -459,13 +459,15 @@ export function routeAlternates(model, from, to) {
 }
 
 // the disclosure clause says only what the measurement proved — three states,
-// never a universal alternates claim
+// never a universal alternates claim, never global-uniqueness (a bounded
+// alternate search cannot establish it). Wording aligned to the canonical
+// route-alternates law (atlas lane 9d9c3234, as imported by zGeneUI PR #125).
 export function routeAltClause(model, from, to) {
   const alt = routeAlternates(model, from, to);
-  if (alt.equal === "many") return "the archive records hundreds of equal-shortest routes through the collapsed web — this card shows one";
-  if (alt.equal >= 2) return "the archive records " + alt.equal + " equal-shortest routes through the collapsed web — this card shows one";
-  if (alt.near) return "one shortest route · near-equal alternates one hop longer exist in the collapsed web";
-  return "the archive records exactly one route here within the published edges";
+  if (alt.equal === "many") return "hundreds of equal-length routes computed — this card shows one";
+  if (alt.equal >= 2) return alt.equal + " more equal-length routes computed — this card shows one";
+  if (alt.near) return "routes one hop longer also computed";
+  return "alternate routes not assessed beyond one hop longer; other routes may exist — this view has not exhaustively enumerated them";
 }
 
 const NON_FAMILY = new Set(["Sr", "Jr", "I", "II", "III", "IV", "V", "?", "De", "Van"]);
