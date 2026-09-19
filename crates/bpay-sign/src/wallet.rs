@@ -86,7 +86,7 @@ pub async fn wallet_connect(
     let path = body
         .and_then(|Json(b)| b.path)
         .unwrap_or_else(|| "m/44'/60'/0'/0/0".to_string());
-    match suite.connect_address(&path) {
+    match suite.connect_address(&path).await {
         Ok(address) => {
             if let Some(exp) = state.expected_payer {
                 if address.to_lowercase() != exp.to_lower_hex() {

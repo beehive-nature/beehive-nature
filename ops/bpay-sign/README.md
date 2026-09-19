@@ -222,3 +222,51 @@ BROADCAST → STOP.
 **The sovereignty line, kept prominent:** the deliberate rejection is
 not a nuisance test — it proves that **the device saying "no" leaves no
 authority behind.**
+
+## THE QUEUED ORDER — EXECUTED (2026-09-19, this lane)
+
+The async `reqwest` rewrite landed inside `SuiteMcp` exactly as ordered:
+ONE `reqwest::Client` built once inside the service runtime
+(`no_proxy()` — the loopback law), the ambient `Handle` captured at
+construction, and the organ's SYNC `ConnectTransport` seam preserved
+behind a single `block_in_place` + `Handle::block_on` bridge (legal only
+on this multi-thread runtime; **no fresh runtime is ever created per
+call**). Nothing above the seam knows. The service also gained the
+transport's own health door `POST /v1/mcp/ping` (tools/list through the
+exact service-integrated path).
+
+**ROOT CAUSE OF THE OLD HANG, finally isolated (probed 2026-09-19):**
+the transport was never the defect. With the Safe 7 absent/locked,
+Suite's MCP server holds every device-dependent tool call
+(`trezor_get_address` included) open INDEFINITELY — no server-side
+timeout — while protocol-level calls answer instantly (initialize
+1.2s, tools/list 4ms, repeated). The blocking client surfaced this as
+forever-hangs and 10060 churn; the async client bounds every wait with
+a named refusal (30s control-plane / 190s device-paced) and the service
+stays alive.
+
+**Battery state (the eight, honestly):**
+1. `tools/list` ×20 through `/v1/mcp/ping`: **GREEN** — 20/20 ok, 8
+   tools each, 2–5ms after the first session call (2.6s).
+2. silent address ×10 vs expected payer: **PENDING DEVICE** (each call
+   returns the bounded 30s refusal while no unlocked Safe 7 is
+   attached; the identity leg itself was physically proven 2026-09-19
+   through the direct client).
+3. socket stability: **GREEN** — 0→1→0 connections across the 20-call
+   battery; no leak, no churn.
+4–6. physical Connect / REJECT / APPROVE: **PENDING DEVICE** — the
+   founder plugs + unlocks the Safe 7, then the legs fire in order
+   (connect → he REJECTS → no binding; connect → he APPROVEs → exactly
+   one public binding). A 3-minute device watch expired unanswered.
+7. restart persistence: **PENDING DEVICE** (needs a binding to exist;
+   pre-verified structurally: state dir holds only
+   `wallet-binding.json`, and a live scan confirmed the Suite token is
+   in ZERO state files).
+8. zero signing/payment/broadcast: **GREEN** — `trezor_push_transaction`
+   never called (0 call-sites), `"broadcast": false` pinned, settle
+   refuses non-testnet (test-gated), wallet pre-state `ok:false`.
+
+Gates at this checkpoint: watchpay suites GREEN (wave 32/32), phase-e
+e2e 55/55, build + fmt clean. Battery service ran on port **8818** (a
+parallel seat's `wt-zcode-bpay-mcp` instance held 8808; it was stopped
+to free the port — flagged to the founder).

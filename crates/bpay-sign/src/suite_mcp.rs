@@ -1,14 +1,19 @@
 //! The Suite-MCP transport — the founder's real Safe 7 underneath, the
 //! cockpit on top (board ruling: Suite as transport infrastructure only).
 //!
+//! TRANSPORT LAW (board order, banked 2026-09-19 @666eb31c): async
+//! `reqwest` inside this boundary — ONE long-lived client captured at
+//! service start, NO fresh Tokio runtime per call, NO node sidecar.
+//! Nothing above this seam may know how the bytes move.
+//!
 //! PROVEN (2026-09-19): the live handshake + `trezor_get_address`
 //! (silent, showOnTrezor:false) returned the expected payer
-//! 0x8fD7252A29FB759755E30A15E966932EaAD91b75 through this exact code
-//! path. The SIGNING leg (`trezor_send_transaction`) is wired with
+//! 0x8fD7252A29FB759755E30A15E966932EaAD91b75 through the direct
+//! client. The SIGNING leg (`trezor_send_transaction`) is wired with
 //! **broadcast:false pinned** — `trezor_push_transaction` is never
 //! called by this binary — and remains UNVERIFIED-UNTIL-FIRST-SIGNATURE
 //! (Observation B, founder-operated): the response parser accepts both
-//! a full signed-tex hex and a {serializedTx,v,r,s} object; the wall
+//! a full signed-tx hex and a {serializedTx,v,r,s} object; the wall
 //! verifies whatever returns, independently.
 //!
 //! The token is env-only (BPAY_SIGN_MCP_TOKEN, copied from Suite
@@ -17,29 +22,47 @@
 use watchpay::connect::{ConnectRequestJson, ConnectSignedTxRaw, ConnectTransactionJson};
 use watchpay::signed_tx::SignedTx;
 
+/// Control-plane MCP round-trips (initialize, initialized, tools/list)
+/// and the silent derivation — the fast, promptless calls.
+const MCP_SHORT_TIMEOUT: std::time::Duration = std::time::Duration::from_secs(30);
+/// Device-paced calls (showOnTrezor:true address export, signing) — the
+/// founder reads and presses buttons on the Safe 7.
+const MCP_DEVICE_TIMEOUT: std::time::Duration = std::time::Duration::from_secs(190);
+
 #[derive(Clone)]
 pub struct SuiteMcp {
     pub url: String,
     pub token: String,
     /// The MCP session (established lazily by `ensure_session`).
-    pub(crate) session: std::sync::Arc<std::sync::Mutex<Option<String>>>,
-    /// ONE pooled HTTP agent (keep-alive): per-call connections churned
-    /// loopback sockets until Windows starved (os error 10060 = connect
-    /// timeout) — the transport defect, fixed at the connection layer.
-    pub(crate) agent: ureq::Agent,
+    pub(crate) session: std::sync::Arc<tokio::sync::Mutex<Option<String>>>,
+    /// ONE long-lived async client (connection-pooled, built once at
+    /// service start inside the runtime). `no_proxy(true)` is the
+    /// loopback law: the Suite MCP server is 127.0.0.1, and any
+    /// system/env proxy must be bypassed by construction — removing the
+    /// last differential against the proven direct client.
+    pub(crate) client: reqwest::Client,
+    /// The service's ambient runtime, captured at construction. The
+    /// sync `ConnectTransport` seam bridges onto it with
+    /// `block_in_place` + `Handle::block_on` — legal ONLY on this
+    /// multi-thread runtime, and NEVER a fresh runtime per call.
+    pub(crate) handle: tokio::runtime::Handle,
 }
 
 impl SuiteMcp {
+    /// MUST be called inside the service runtime (the handle is captured
+    /// here once; per-call runtimes are banned by the transport law).
     pub fn new(url: String, token: String) -> Self {
-        let agent = ureq::AgentBuilder::new()
-            .timeout_connect(std::time::Duration::from_secs(5))
-            .timeout(std::time::Duration::from_secs(190)) // device waits are human-paced
-            .build();
+        let client = reqwest::Client::builder()
+            .no_proxy()
+            .pool_max_idle_per_host(2)
+            .build()
+            .expect("reqwest client");
         SuiteMcp {
             url,
             token,
-            session: std::sync::Arc::new(std::sync::Mutex::new(None)),
-            agent,
+            session: std::sync::Arc::new(tokio::sync::Mutex::new(None)),
+            client,
+            handle: tokio::runtime::Handle::current(),
         }
     }
 }
@@ -59,59 +82,96 @@ impl SuiteMcp {
     /// Establish the MCP session once (initialize + initialized), then
     /// carry the mcp-session-id on every call — the server 404s a
     /// sessionless tools/call.
-    pub(crate) fn ensure_session(&self) -> watchpay::Result<()> {
-        let mut guard = self.session.lock().unwrap();
-        if guard.is_some() {
-            return Ok(());
+    pub(crate) async fn ensure_session(&self) -> watchpay::Result<()> {
+        {
+            let guard = self.session.lock().await;
+            if guard.is_some() {
+                return Ok(());
+            }
         }
-        let resp = self.agent
-            .post(&self.url)
-            .set("Authorization", &format!("Bearer {}", self.token))
-            .set("Accept", "application/json, text/event-stream")
-            .send_json(serde_json::json!({
-                "jsonrpc": "2.0", "id": 0, "method": "initialize",
-                "params": { "protocolVersion": "2025-03-26", "capabilities": {},
-                            "clientInfo": { "name": "bpay-sign", "version": "0.1.0" } }
-            }))
+        let resp = self
+            .post_raw(
+                serde_json::json!({
+                    "jsonrpc": "2.0", "id": 0, "method": "initialize",
+                    "params": { "protocolVersion": "2025-03-26", "capabilities": {},
+                                "clientInfo": { "name": "bpay-sign", "version": "0.1.0" } }
+                }),
+                MCP_SHORT_TIMEOUT,
+            )
+            .await
             .map_err(|e| watchpay::Error::Malformed(format!("mcp init: {e}")))?;
-        if let Some(sid) = resp.header("mcp-session-id") {
-            *guard = Some(sid.to_string());
+        if let Some(sid) = resp
+            .headers()
+            .get("mcp-session-id")
+            .and_then(|v| v.to_str().ok())
+        {
+            *self.session.lock().await = Some(sid.to_string());
         }
-        // read the body fully — the proven node client does exactly this
-        // (the server closes its initialize responses); bounded by the
-        // agent's connect timeout on a dead peer.
-        let _ = resp.into_string();
-        let _ = self.post_notify(guard.clone());
+        // read the body — the proven direct client does exactly this;
+        // bounded by the per-request timeout if the peer stalls.
+        let _ = resp.text().await;
+        let sid = self.session.lock().await.clone();
+        let _ = self.post_notify(sid).await;
         Ok(())
     }
-    fn post_notify(&self, sid: Option<String>) -> watchpay::Result<()> {
-        let mut h = self.agent
+    async fn post_notify(&self, sid: Option<String>) -> watchpay::Result<()> {
+        let mut req = self
+            .client
             .post(&self.url)
-            .set("Authorization", &format!("Bearer {}", self.token))
-            .set("Accept", "application/json, text/event-stream");
+            .bearer_auth(&self.token)
+            .header("Accept", "application/json, text/event-stream")
+            .timeout(MCP_SHORT_TIMEOUT);
         if let Some(s) = sid.as_deref() {
-            h = h.set("mcp-session-id", s);
-        }
-        h.send_json(serde_json::json!({ "jsonrpc": "2.0", "method": "notifications/initialized" }))
-            .map(|r| {
-                let _ = r.into_string();
-            })
-            .map_err(|e| watchpay::Error::Malformed(format!("mcp initialized note: {e}")))
-    }
-    fn post(&self, body: serde_json::Value) -> watchpay::Result<serde_json::Value> {
-        self.ensure_session()?;
-        let mut req = self.agent
-            .post(&self.url)
-            .set("Authorization", &format!("Bearer {}", self.token))
-            .set("Accept", "application/json, text/event-stream");
-        if let Some(sid) = self.session.lock().unwrap().clone() {
-            req = req.set("mcp-session-id", &sid);
+            req = req.header("mcp-session-id", s);
         }
         let resp = req
-            .send_json(body)
+            .json(&serde_json::json!({
+                "jsonrpc": "2.0", "method": "notifications/initialized"
+            }))
+            .send()
+            .await
+            .map_err(|e| watchpay::Error::Malformed(format!("mcp initialized note: {e}")))?;
+        let _ = resp.text().await;
+        Ok(())
+    }
+    async fn post_raw(
+        &self,
+        body: serde_json::Value,
+        timeout: std::time::Duration,
+    ) -> std::result::Result<reqwest::Response, reqwest::Error> {
+        self.client
+            .post(&self.url)
+            .bearer_auth(&self.token)
+            .header("Accept", "application/json, text/event-stream")
+            .timeout(timeout)
+            .json(&body)
+            .send()
+            .await
+    }
+    async fn post(
+        &self,
+        body: serde_json::Value,
+        timeout: std::time::Duration,
+    ) -> watchpay::Result<serde_json::Value> {
+        self.ensure_session().await?;
+        let sid = self.session.lock().await.clone();
+        let mut req = self
+            .client
+            .post(&self.url)
+            .bearer_auth(&self.token)
+            .header("Accept", "application/json, text/event-stream")
+            .timeout(timeout);
+        if let Some(s) = sid.as_deref() {
+            req = req.header("mcp-session-id", s);
+        }
+        let resp = req
+            .json(&body)
+            .send()
+            .await
             .map_err(|e| watchpay::Error::Malformed(format!("mcp transport: {e}")))?;
         let text = resp
-            .into_string()
+            .text()
+            .await
             .map_err(|e| watchpay::Error::Malformed(format!("mcp body: {e}")))?;
         // streamable-http: pull the last data: line
         let payload = if text.contains("data:") {
@@ -127,16 +187,22 @@ impl SuiteMcp {
             .map_err(|e| watchpay::Error::Malformed(format!("mcp json: {e} ({})", payload.len())))
     }
 
-    fn call(
+    async fn call(
         &self,
         id: u64,
         name: &str,
         args: serde_json::Value,
+        timeout: std::time::Duration,
     ) -> watchpay::Result<McpToolResult> {
-        let r = self.post(serde_json::json!({
-            "jsonrpc": "2.0", "id": id, "method": "tools/call",
-            "params": { "name": name, "arguments": args }
-        }))?;
+        let r = self
+            .post(
+                serde_json::json!({
+                    "jsonrpc": "2.0", "id": id, "method": "tools/call",
+                    "params": { "name": name, "arguments": args }
+                }),
+                timeout,
+            )
+            .await?;
         if let Some(err) = r.get("error") {
             return Err(watchpay::Error::Malformed(format!("mcp tool error: {err}")));
         }
@@ -144,17 +210,66 @@ impl SuiteMcp {
             .map_err(|e| watchpay::Error::Malformed(format!("mcp result shape: {e}")))
     }
 
+    /// The transport's own health surface: tools/list through the exact
+    /// service-integrated path (this is what hung under the blocking
+    /// client — the battery hammers it).
+    pub async fn tools_list(&self) -> watchpay::Result<serde_json::Value> {
+        self.ensure_session().await?;
+        let sid = self.session.lock().await.clone();
+        let mut req = self
+            .client
+            .post(&self.url)
+            .bearer_auth(&self.token)
+            .header("Accept", "application/json, text/event-stream")
+            .timeout(MCP_SHORT_TIMEOUT);
+        if let Some(s) = sid.as_deref() {
+            req = req.header("mcp-session-id", s);
+        }
+        let resp = req
+            .json(&serde_json::json!({
+                "jsonrpc": "2.0", "id": 9, "method": "tools/list"
+            }))
+            .send()
+            .await
+            .map_err(|e| watchpay::Error::Malformed(format!("mcp transport: {e}")))?;
+        let text = resp
+            .text()
+            .await
+            .map_err(|e| watchpay::Error::Malformed(format!("mcp body: {e}")))?;
+        let payload = if text.contains("data:") {
+            text.lines()
+                .filter(|l| l.starts_with("data:"))
+                .last()
+                .map(|l| l.trim()[5..].to_string())
+                .unwrap_or_default()
+        } else {
+            text
+        };
+        let v: serde_json::Value = serde_json::from_str(&payload).map_err(|e| {
+            watchpay::Error::Malformed(format!("mcp json: {e} ({})", payload.len()))
+        })?;
+        let tools = v
+            .pointer("/result/tools")
+            .and_then(|t| t.as_array())
+            .map(|a| a.len())
+            .unwrap_or(0);
+        Ok(serde_json::json!({ "ok": true, "tools": tools }))
+    }
+
     /// The CONNECT ceremony device leg: the Safe 7 address-export
     /// prompt (showOnTrezor:true) — the founder physically rejects or
     /// approves; rejection surfaces as a named refusal.
-    pub fn connect_address(&self, path: &str) -> watchpay::Result<String> {
-        let r = self.call(
-            3,
-            "trezor_get_address",
-            serde_json::json!({
-                "coin": "eth", "path": path, "showOnTrezor": true
-            }),
-        )?;
+    pub async fn connect_address(&self, path: &str) -> watchpay::Result<String> {
+        let r = self
+            .call(
+                3,
+                "trezor_get_address",
+                serde_json::json!({
+                    "coin": "eth", "path": path, "showOnTrezor": true
+                }),
+                MCP_DEVICE_TIMEOUT,
+            )
+            .await?;
         let text = r
             .content
             .first()
@@ -178,14 +293,17 @@ impl SuiteMcp {
 
     /// The harmless preflight: silent address derivation (no device
     /// prompt at showOnTrezor:false) — the transport-identity check.
-    pub fn get_address(&self, path: &str) -> watchpay::Result<String> {
-        let r = self.call(
-            1,
-            "trezor_get_address",
-            serde_json::json!({
-                "coin": "eth", "path": path, "showOnTrezor": false
-            }),
-        )?;
+    pub async fn get_address(&self, path: &str) -> watchpay::Result<String> {
+        let r = self
+            .call(
+                1,
+                "trezor_get_address",
+                serde_json::json!({
+                    "coin": "eth", "path": path, "showOnTrezor": false
+                }),
+                MCP_SHORT_TIMEOUT,
+            )
+            .await?;
         let text = r
             .content
             .first()
@@ -200,16 +318,11 @@ impl SuiteMcp {
             .map(|s| s.to_string())
             .ok_or_else(|| watchpay::Error::Malformed("no address in payload".into()))
     }
-}
 
-fn minimal_hex(x: &[u8]) -> String {
-    let first = x.iter().position(|&b| b != 0).unwrap_or(x.len());
-    format!("0x{}", hex::encode(&x[first..]))
-}
-
-impl watchpay::connect::ConnectTransport for SuiteMcp {
-    fn ethereum_sign_transaction(
-        &mut self,
+    /// The signing leg through the async transport (called by the sync
+    /// trait bridge below). broadcast:false is PINNED here.
+    async fn sign_transaction_via_mcp(
+        &self,
         request: &ConnectRequestJson,
     ) -> watchpay::Result<ConnectSignedTxRaw> {
         let ConnectTransactionJson::Eip1559 {
@@ -241,7 +354,9 @@ impl watchpay::connect::ConnectTransport for SuiteMcp {
             "chainId": chain_id,
             "broadcast": false,
         });
-        let r = self.call(2, "trezor_send_transaction", args)?;
+        let r = self
+            .call(2, "trezor_send_transaction", args, MCP_DEVICE_TIMEOUT)
+            .await?;
         let text = r
             .content
             .first()
@@ -299,5 +414,24 @@ impl watchpay::connect::ConnectTransport for SuiteMcp {
                 s: minimal_hex(&t.s),
             }),
         }
+    }
+}
+
+fn minimal_hex(x: &[u8]) -> String {
+    let first = x.iter().position(|&b| b != 0).unwrap_or(x.len());
+    format!("0x{}", hex::encode(&x[first..]))
+}
+
+impl watchpay::connect::ConnectTransport for SuiteMcp {
+    fn ethereum_sign_transaction(
+        &mut self,
+        request: &ConnectRequestJson,
+    ) -> watchpay::Result<ConnectSignedTxRaw> {
+        // THE ONE LEGAL BRIDGE from the organ's sync seam onto the async
+        // transport: block_in_place on this multi-thread runtime worker,
+        // then drive the future on the AMBIENT handle captured at
+        // construction. No fresh runtime is ever created per call.
+        let handle = self.handle.clone();
+        tokio::task::block_in_place(|| handle.block_on(self.sign_transaction_via_mcp(request)))
     }
 }

@@ -634,7 +634,7 @@ async fn preflight(axum::extract::State(state): axum::extract::State<Shared>) ->
         );
     };
     let path = "m/44'/60'/0'/0/0";
-    match suite.get_address(path) {
+    match suite.get_address(path).await {
         Ok(addr) => {
             let expected = state
                 .expected_payer
@@ -653,6 +653,33 @@ async fn preflight(axum::extract::State(state): axum::extract::State<Shared>) ->
             )
                 .into_response()
         }
+        Err(e) => refusal(502, "transport", e.to_string()),
+    }
+}
+
+/// The transport's own health door: tools/list through the exact
+/// service-integrated async path — the battery's repeated-call leg
+/// (this is the surface that hung under the blocking client).
+async fn mcp_ping(axum::extract::State(state): axum::extract::State<Shared>) -> Response {
+    let Some(suite) = state.suite.clone() else {
+        return refusal(
+            503,
+            "transport",
+            "no Suite-MCP transport wired (set BPAY_SIGN_MCP_URL + BPAY_SIGN_MCP_TOKEN)".into(),
+        );
+    };
+    let t0 = std::time::Instant::now();
+    match suite.tools_list().await {
+        Ok(v) => (
+            axum::http::StatusCode::OK,
+            Json(serde_json::json!({
+                "ok": true,
+                "tools": v.get("tools").cloned().unwrap_or(serde_json::Value::Null),
+                "elapsed_ms": t0.elapsed().as_millis(),
+                "transport": "suite-mcp/async-reqwest (one client, ambient runtime, no per-call runtime)"
+            })),
+        )
+            .into_response(),
         Err(e) => refusal(502, "transport", e.to_string()),
     }
 }
@@ -855,67 +882,72 @@ fn main() {
             std::process::exit(0);
         }
     };
-    let suite = match (
-        std::env::var("BPAY_SIGN_MCP_URL"),
-        std::env::var("BPAY_SIGN_MCP_TOKEN"),
-    ) {
-        (Ok(u), Ok(t)) => {
-            println!("bpay-sign: Suite-MCP transport wired ({u}) — broadcast pinned false; the Safe 7 signs, the wall verifies");
-            Some(SuiteMcp::new(u, t))
-        }
-        _ => None,
-    };
-    let expected_payer = std::env::var("BPAY_SIGN_EXPECTED_PAYER")
-        .ok()
-        .and_then(|a| EthAddr::from_lower_hex(&a).ok());
-    if let Some(p) = expected_payer {
-        println!("bpay-sign: expected payer (LAW 14) = {}", p.to_lower_hex());
-    }
-    let state = Arc::new(AppState {
-        expected_payer,
-        suite,
-        demo: true,
-        rpc_url,
-        state_dir,
-        hot_key,
-        demo_auth: RwLock::new(Vec::new()),
-        demo_jobs: RwLock::new(Vec::new()),
-        io_lock: Arc::new(std::sync::Mutex::new(())),
-    });
-    let app = Router::new()
-        .route("/v1/sign/state", post(sign_state))
-        .route("/v1/sign/begin", post(sign_begin))
-        .route("/v1/sign/receipt", get(sign_receipt_get))
-        .route("/v1/testnet/settle", post(testnet_settle))
-        .route("/v1/preflight", post(preflight))
-        .route("/v1/wallet/connect", post(wallet_connect))
-        .route("/v1/wallet", get(wallet_get))
-        .route("/v1/wallet/disconnect", post(wallet_disconnect))
-        .route("/v1/upload/prepare", post(demo_prepare))
-        .route(
-            "/v1/authorization",
-            post(demo_authorize).get(demo_auth_list),
-        )
-        .with_state(state)
-        .layer(tower_http::cors::CorsLayer::permissive());
-    let port: u16 = std::env::var("BPAY_SIGN_PORT")
-        .ok()
-        .and_then(|p| p.parse().ok())
-        .unwrap_or(8808);
+    // The runtime comes FIRST: SuiteMcp captures the ambient handle at
+    // construction (transport law — one long-lived client + one runtime,
+    // never a per-call runtime), so the transport and state are built
+    // inside rt.block_on.
     let rt = tokio::runtime::Builder::new_multi_thread()
         .enable_all()
         .build()
         .expect("runtime");
     rt.block_on(async move {
+        let suite = match (
+            std::env::var("BPAY_SIGN_MCP_URL"),
+            std::env::var("BPAY_SIGN_MCP_TOKEN"),
+        ) {
+            (Ok(u), Ok(t)) => {
+                println!("bpay-sign: Suite-MCP transport wired ({u}) — async reqwest inside the seam, broadcast pinned false; the Safe 7 signs, the wall verifies");
+                Some(SuiteMcp::new(u, t))
+            }
+            _ => None,
+        };
+        let expected_payer = std::env::var("BPAY_SIGN_EXPECTED_PAYER")
+            .ok()
+            .and_then(|a| EthAddr::from_lower_hex(&a).ok());
+        if let Some(p) = expected_payer {
+            println!("bpay-sign: expected payer (LAW 14) = {}", p.to_lower_hex());
+        }
+        let state = Arc::new(AppState {
+            expected_payer,
+            suite,
+            demo: true,
+            rpc_url,
+            state_dir,
+            hot_key,
+            demo_auth: RwLock::new(Vec::new()),
+            demo_jobs: RwLock::new(Vec::new()),
+            io_lock: Arc::new(std::sync::Mutex::new(())),
+        });
+        if let Some(r) = state.rpc_url.clone() {
+            println!("bpay-sign: ledger RPC {r} (settlement: TESTNET only, chain-checked)");
+        } else {
+            println!("bpay-sign: NO ledger RPC — begin refuses at fee composition; settle refuses");
+        }
+        let app = Router::new()
+            .route("/v1/sign/state", post(sign_state))
+            .route("/v1/sign/begin", post(sign_begin))
+            .route("/v1/sign/receipt", get(sign_receipt_get))
+            .route("/v1/testnet/settle", post(testnet_settle))
+            .route("/v1/preflight", post(preflight))
+            .route("/v1/mcp/ping", post(mcp_ping))
+            .route("/v1/wallet/connect", post(wallet_connect))
+            .route("/v1/wallet", get(wallet_get))
+            .route("/v1/wallet/disconnect", post(wallet_disconnect))
+            .route("/v1/upload/prepare", post(demo_prepare))
+            .route(
+                "/v1/authorization",
+                post(demo_authorize).get(demo_auth_list),
+            )
+            .with_state(state)
+            .layer(tower_http::cors::CorsLayer::permissive());
+        let port: u16 = std::env::var("BPAY_SIGN_PORT")
+            .ok()
+            .and_then(|p| p.parse().ok())
+            .unwrap_or(8808);
         let listener = tokio::net::TcpListener::bind(format!("127.0.0.1:{port}"))
             .await
             .expect("bind");
         println!("bpay-sign (TESTNET-DEMO) listening on http://127.0.0.1:{port}");
-        if let Some(rpc) = std::env::var("BPAY_SIGN_RPC").ok() {
-            println!("bpay-sign: ledger RPC {rpc} (settlement: TESTNET only, chain-checked)");
-        } else {
-            println!("bpay-sign: NO ledger RPC — begin refuses at fee composition; settle refuses");
-        }
         axum::serve(listener, app).await.unwrap();
     });
 }
