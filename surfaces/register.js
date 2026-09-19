@@ -87,6 +87,13 @@
     body[data-experience] #tbarMore{background:var(--panel,#0e1b19)!important;color:var(--ink,#e9f2ec)!important;border-color:var(--line,#42574a)!important;min-width:44px!important;min-height:44px!important;font-size:1rem!important}
     body[data-experience][data-reg="bee"] #tbar,body[data-experience][data-reg="bee"] #tbarMore{background:#f6f7f2!important;color:#18362a!important;border-color:#ccd7cf!important}
     body[data-experience][data-reg="bee"] #tbar a{color:#18362a!important}
+    /* the bar follows the LIGHT canvas wherever New bee is light (data-bee-theme
+       shared/custom) — not only on data-experience pages: a dark strip under a
+       light page was the last dark thing on My Data */
+    html[data-bee-light="true"] #tbar,html[data-bee-light="true"] #tbarMore{background:#f6f7f2!important;color:#18362a!important;border-color:#ccd7cf!important}
+    html[data-bee-light="true"] #tbar a{color:#18362a!important}
+    html[data-bee-light="true"] #tbar a[aria-current="page"]{background:#e2f0ee!important;box-shadow:inset 0 0 0 1px #176879!important;font-weight:700}
+    html[data-bee-light="true"] #tbar .tsep{background:#ccd7cf!important}
     body[data-experience] #tbar :is(a,button):focus-visible,body[data-experience] #tbarMore:focus-visible{outline:3px solid currentColor!important;outline-offset:-3px}
     body[data-experience] [data-view]{display:none}
     body[data-experience][data-reg="bee"] [data-view="bee"],body[data-experience][data-reg="raver"] [data-view="raver"],body[data-experience][data-reg="cypherpunk"] [data-view="cypherpunk"]{display:revert}

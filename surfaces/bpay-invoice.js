@@ -43,16 +43,22 @@
   // (Phase A) — the page never retypes identity
   var PIN = null, refInvoice = null;
 
-  function audBtn(id, icon, labelKey, labelFallback, available, reason){
-    var dis = available ? '' : ' disabled';
-    var cls = 'bpay-aud' + ((st.audience===id && available) ? ' bpay-aud-on' : '') + (available ? '' : ' bpay-aud-off');
-    var h = '<button type="button" class="' + cls + '" data-audience="' + id + '"' + (available ? '' : ' data-bpay-unavailable="' + id + '"') + dis + ' style="display:block;width:100%;text-align:left;margin-top:6px;padding:8px 10px;border:1px solid #1d4655;border-radius:8px;background:transparent;color:inherit;cursor:' + (available?'pointer':'not-allowed') + (available?'':';opacity:.55;text-decoration:line-through') + '">';
-    h += icon + ' <b data-i18n="' + labelKey + '">' + T(labelKey,labelFallback) + '</b>';
-    if (available) {
-      h += ' <span style="opacity:.7;font-size:11px">— ' + T('wl.bpay.aud.public.desc','anyone with the address can retrieve it') + '</span>';
-    } else {
-      h += ' <span style="opacity:.75;font-size:11px">— ' + T('wl.bpay.unavailable','unavailable') + ': ' + esc(reason) + '</span>';
+  // The ONE live choice is a button. What cannot be chosen yet is a PLAIN ROW
+  // with its reasons in sight — the plain one first, the technical one after —
+  // never a disabled, struck button (dead affordances are banned; same law and
+  // same words as My Data, so the two surfaces cannot drift).
+  function audBtn(id, icon, labelKey, labelFallback, available, why, tech){
+    var box = 'display:block;width:100%;box-sizing:border-box;text-align:left;margin-top:6px;padding:8px 10px;border-radius:8px;color:inherit;';
+    if (!available) {
+      return '<div class="bpay-aud bpay-aud-off" role="radio" aria-checked="false" aria-disabled="true" data-audience="' + id + '" data-bpay-unavailable="' + id + '" style="' + box + 'border:1px dashed #1d4655;cursor:default">'
+        + icon + ' <b data-i18n="' + labelKey + '">' + T(labelKey,labelFallback) + '</b>'
+        + ' <span style="font-size:11px;opacity:.85">· ' + T('bd.aud.notyet','Not available yet') + '</span>'
+        + '<div style="font-size:12px;opacity:.85;margin-top:2px">' + T(why[0],why[1]) + '</div>'
+        + '<div style="font-size:11px;opacity:.65;margin-top:1px">' + T(tech[0],tech[1]) + '</div></div>';
     }
+    var h = '<button type="button" class="bpay-aud' + (st.audience===id ? ' bpay-aud-on' : '') + '" role="radio" aria-checked="' + (st.audience===id ? 'true' : 'false') + '" data-audience="' + id + '" style="' + box + 'border:1px solid #1d4655;background:transparent;cursor:pointer">';
+    h += icon + ' <b data-i18n="' + labelKey + '">' + T(labelKey,labelFallback) + '</b>';
+    h += ' <span style="opacity:.7;font-size:11px">— ' + T('wl.bpay.aud.public.desc','anyone with the address can retrieve it') + '</span>';
     h += '</button>';
     return h;
   }
@@ -60,9 +66,9 @@
   function renderChooser(){
     var h = '';
     h += '<div style="font-size:13px;font-weight:bold;margin-top:2px">' + T('wl.bpay.choose','Choose how this is shared') + '</div>';
-    h += audBtn('public','🌐','wl.bpay.aud.public','Public',true,'');
-    h += audBtn('only-me','🔒','wl.bpay.aud.onlyme','Only me',false,'private-DataMap custody path not yet qualified');
-    h += audBtn('selected-people','👥','wl.bpay.aud.selected','Selected people',false,'recipient capability/key granting not yet qualified');
+    h += audBtn('public','🌐','wl.bpay.aud.public','Public',true);
+    h += audBtn('only-me','🔒','wl.bpay.aud.onlyme','Only me',false,['bd.aud.onlyme.why','Private storage for your eyes only is not ready.'],['bd.aud.onlyme.tech','private-DataMap custody path not yet qualified']);
+    h += audBtn('selected-people','👥','wl.bpay.aud.selected','Selected people',false,['bd.aud.selected.why','Sharing with people you pick is not ready.'],['bd.aud.selected.tech','recipient capability/key granting not yet qualified']);
     h += '<div style="font-size:10px;opacity:.6;margin-top:6px">' + T('wl.bpay.sharenote','your sharing choice is made in the chooser before quoting — never silently inferred') + '</div>';
     // inspection depth — a SEPARATE axis; never alters audience or authority
     h += '<div class="row" style="margin-top:12px;gap:8px;align-items:center;flex-wrap:wrap">';
@@ -140,10 +146,10 @@
     card.innerHTML = h;
     applyInspection();
     // audience selection — the ONE available choice; unavailable rows are
-    // visibly struck, disabled, and carry their reasons (never promised)
+    // plain prose with their reasons (never promised, never pressable)
     card.querySelectorAll('[data-audience]').forEach(function(b){
       b.addEventListener('click', function(){
-        if (b.disabled) return;
+        if (b.getAttribute('aria-disabled') === 'true') return;
         if (b.dataset.audience !== 'public') return; // unavailable modes are never selectable
         st.audience = 'public'; st.selectedAt = new Date().toISOString();
         save({ audience: 'public', selectedAt: st.selectedAt }); // policy-owned merge write — service fields of other tabs survive
