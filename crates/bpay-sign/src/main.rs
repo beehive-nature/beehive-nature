@@ -861,11 +861,7 @@ fn main() {
     ) {
         (Ok(u), Ok(t)) => {
             println!("bpay-sign: Suite-MCP transport wired ({u}) — broadcast pinned false; the Safe 7 signs, the wall verifies");
-            Some(SuiteMcp {
-                url: u,
-                token: t,
-                session: std::sync::Arc::new(std::sync::Mutex::new(None)),
-            })
+            Some(SuiteMcp::new(u, t))
         }
         _ => None,
     };

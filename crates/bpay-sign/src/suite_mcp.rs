@@ -23,6 +23,25 @@ pub struct SuiteMcp {
     pub token: String,
     /// The MCP session (established lazily by `ensure_session`).
     pub(crate) session: std::sync::Arc<std::sync::Mutex<Option<String>>>,
+    /// ONE pooled HTTP agent (keep-alive): per-call connections churned
+    /// loopback sockets until Windows starved (os error 10060 = connect
+    /// timeout) — the transport defect, fixed at the connection layer.
+    pub(crate) agent: ureq::Agent,
+}
+
+impl SuiteMcp {
+    pub fn new(url: String, token: String) -> Self {
+        let agent = ureq::AgentBuilder::new()
+            .timeout_connect(std::time::Duration::from_secs(5))
+            .timeout(std::time::Duration::from_secs(190)) // device waits are human-paced
+            .build();
+        SuiteMcp {
+            url,
+            token,
+            session: std::sync::Arc::new(std::sync::Mutex::new(None)),
+            agent,
+        }
+    }
 }
 
 #[derive(serde::Deserialize)]
@@ -45,10 +64,10 @@ impl SuiteMcp {
         if guard.is_some() {
             return Ok(());
         }
-        let resp = ureq::post(&self.url)
+        let resp = self.agent
+            .post(&self.url)
             .set("Authorization", &format!("Bearer {}", self.token))
             .set("Accept", "application/json, text/event-stream")
-            .timeout(std::time::Duration::from_secs(5))
             .send_json(serde_json::json!({
                 "jsonrpc": "2.0", "id": 0, "method": "initialize",
                 "params": { "protocolVersion": "2025-03-26", "capabilities": {},
@@ -58,35 +77,33 @@ impl SuiteMcp {
         if let Some(sid) = resp.header("mcp-session-id") {
             *guard = Some(sid.to_string());
         }
-        // the body is an SSE stream that may stay open — take the header
-        // (the session id) and never read it; the notification is sent
-        // with a hard timeout for the same reason.
-        let _ = std::io::copy(&mut resp.into_reader(), &mut std::io::sink());
+        // read the body fully — the proven node client does exactly this
+        // (the server closes its initialize responses); bounded by the
+        // agent's connect timeout on a dead peer.
+        let _ = resp.into_string();
         let _ = self.post_notify(guard.clone());
         Ok(())
     }
     fn post_notify(&self, sid: Option<String>) -> watchpay::Result<()> {
-        let mut h = ureq::post(&self.url)
+        let mut h = self.agent
+            .post(&self.url)
             .set("Authorization", &format!("Bearer {}", self.token))
             .set("Accept", "application/json, text/event-stream");
         if let Some(s) = sid.as_deref() {
             h = h.set("mcp-session-id", s);
         }
-        h.timeout(std::time::Duration::from_secs(5))
-            .send_json(
-                serde_json::json!({ "jsonrpc": "2.0", "method": "notifications/initialized" }),
-            )
+        h.send_json(serde_json::json!({ "jsonrpc": "2.0", "method": "notifications/initialized" }))
             .map(|r| {
-                let _ = std::io::copy(&mut r.into_reader(), &mut std::io::sink());
+                let _ = r.into_string();
             })
             .map_err(|e| watchpay::Error::Malformed(format!("mcp initialized note: {e}")))
     }
     fn post(&self, body: serde_json::Value) -> watchpay::Result<serde_json::Value> {
         self.ensure_session()?;
-        let mut req = ureq::post(&self.url)
+        let mut req = self.agent
+            .post(&self.url)
             .set("Authorization", &format!("Bearer {}", self.token))
-            .set("Accept", "application/json, text/event-stream")
-            .timeout(std::time::Duration::from_secs(180)); // device waits are human-paced
+            .set("Accept", "application/json, text/event-stream");
         if let Some(sid) = self.session.lock().unwrap().clone() {
             req = req.set("mcp-session-id", &sid);
         }
