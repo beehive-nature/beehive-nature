@@ -23,7 +23,6 @@ const LOCAL = [
 
 const EXEMPT = new Map([
   ['e2e/watch-room-shot.mjs', 'watch lane'],
-  ['e2e/build-midi-blue.mjs', 'S4 triage'],
   ['e2e/ceb9-probe.mjs', 'O3 DELETE-CANDIDATE'],
   ['scripts/mirror-harvest.mjs', 'SPEC-MIRROR-COMMONS-1:33'],
   ['scripts/x0x-622/test_runner.py', 'x0x #622 lane'],
