@@ -122,7 +122,62 @@ h1{font-size:clamp(22px,4.5vw,34px);line-height:1.15;margin:8px 0 6px;font-weigh
 .empty{color:var(--dim);font-size:11.5px;margin-top:10px}
 footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint);font-size:10px;text-align:center;line-height:1.9}
 @media(max-width:640px){.combwrap{padding:5px}.detail{padding:12px}.zoombar{top:8px;right:8px}}
+/* GUX-01 beat 2b — the mounted composition (engine world + person panel +
+   discovery rail). blood.html owns composition and presentation state only;
+   truth stays in the corpus; the atlas derives space; the panel derives
+   explanation; blood-nav keeps the one navigation/history grammar. */
+#cards{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 2px}
+#cards:empty{display:none}
+#routestrip{margin:4px 0 8px;overflow-x:auto;padding-bottom:4px}
+#routestrip:empty{display:none}
+.atlashop{font-size:11px;padding:3px 8px;white-space:nowrap}
+.atlashop.ev-recorded{border-color:#3fa66a;background:#14231a;font-weight:600}
+.atlashop.ev-colonial{border-color:#4d8fd1;background:#131c26;font-family:Georgia,serif;font-style:italic}
+.atlashop.ev-medieval{border-color:#c9a13b;background:transparent;border-style:dashed;opacity:.92}
+.atlashop.ev-saga{border-color:#8d6fc9;background:#191327;font-variant:small-caps;letter-spacing:.06em}
+body.gux #comb,body.gux #treeview,body.gux #trail,body.gux #spinebtn{display:none!important}
+body.gux .zoombar{z-index:30} /* above the engine's tree listview (journey-caught) */
+body.gux #atlas{display:block}
+/* one search box (the page's #q) and ONE history (the atlas's back): the
+   panel's own search + back affordances are structurally retired here */
+#ppanel .pp-search{display:none!important}
+#ppanel .pp-backbar{display:none!important}
+body.gux #dempty,body.gux #dbody{display:none!important} /* one explanation surface: the panel */
+body.gux #lenses,body.gux .listview,body.gux #rootnote{display:none!important} /* incumbent-only affordances retire under gux (review d6ca5958): lens filters re-selected the root; the comb's list table + root note showed the INCUMBENT root while the engine stood elsewhere */
+#cards button{text-align:left;background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:9px 12px;cursor:pointer;font:inherit;flex:1 1 220px;max-width:250px;line-height:1.45}
+#cards button:hover{border-color:var(--cyan)}
+#routestrip button{background:var(--well);color:var(--ink);border:1px solid var(--line);border-radius:8px;cursor:pointer;font:inherit;font-size:11px;padding:3px 8px;white-space:nowrap}
+/* ?? GUX-01 zGeneUI navigation layer (blood-nav.mjs) — selection, LOD, drawer */
+.hexcell.sel,button.sel{stroke:var(--gold);stroke-width:2.4px;filter:drop-shadow(0 0 6px rgba(255,215,0,.45))}
+#comb:focus-visible{outline:2px solid var(--cyan);outline-offset:4px}
+.navhint{margin-top:10px;font-size:10.5px;color:var(--gold);border:1px dashed var(--gold);border-radius:8px;padding:7px 10px}
+.hexcell.ghostslot{fill:none;stroke:var(--faint);stroke-width:1.2;stroke-dasharray:3 3;cursor:pointer}
+#world.lod-far .hextext:not(.dupmark){display:none}
+#world.lod-mid .hextext:not(.dupmark){display:none}
+#world.lod-mid .hextext:not(.dupmark)[data-ring="0"],#world.lod-mid .hextext:not(.dupmark)[data-ring="1"],
+#world.lod-mid .hextext:not(.dupmark)[data-ring="2"]{display:block}
+.drawerbar{display:none}
+@media(max-width:640px){
+ .detail{position:fixed;left:0;right:0;bottom:0;z-index:40;max-height:64vh;overflow-y:auto;
+ border-radius:16px 16px 0 0;border-bottom:0;box-shadow:0 -8px 30px rgba(0,0,0,.5);
+ transform:translateY(calc(100% - 58px));transition:transform .28s ease}
+ .detail.open{transform:none}
+ .drawerbar{display:flex;align-items:center;justify-content:space-between;gap:10px;
+ position:sticky;top:0;background:var(--panel);border-bottom:1px solid var(--line);
+ padding:8px 12px;margin:-12px -12px 10px;cursor:default}
+ .drawerbar span{font:600 12px 'IBM Plex Mono',monospace;color:var(--gold);
+ white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+ .drawerbar button{background:none;border:1px solid var(--line);border-radius:7px;color:var(--dim);
+ width:30px;height:30px;flex:0 0 30px;cursor:pointer;font-size:13px;line-height:1}
+ .drawerbar button:hover{border-color:var(--gold);color:var(--gold)}
+}
+@media(prefers-reduced-motion:reduce){
+ #world{transition:none!important}
+ *{scroll-behavior:auto!important}
+}
 </style>
+<link rel="stylesheet" href="blood-atlas.css?v=1">
+<link rel="stylesheet" href="person-panel.css?v=1">
 </head>
 <body>
 <main>
@@ -137,6 +192,7 @@ footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint
   <h1 data-i18n="blood.h">the blood comb — the eternal hexagonal fan chart</h1>
   <p class="lede" data-i18n="blood.lede">Every cell is an ancestor; the comb is the hive's own shape. Click a cell to read it, re-root to walk that line forever — the fan redraws from any person in the archive. Colors carry evidence eras; saga is never shown as documented. Sigurd Snake-in-the-Eye and the attested kin ride in with their evidence packs.</p>
   <p class="statsbar" id="stats"></p>
+<p class="statsbar" id="atlasstats"></p>
 </header>
 
 <div class="controls">
@@ -199,8 +255,11 @@ footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint
 </div>
 <div class="legend" id="legend"></div>
 
+<div id="cards" class="guxrail" hidden aria-label="discovery — what this archive can show you"></div>
+<div id="routestrip" class="guxroute" hidden aria-label="the route this card walks"></div>
 <div class="combwrap">
-  <svg id="comb" viewBox="0 0 1080 560" role="application" aria-label="fractal hexagonal fan chart — zoom, pan, click cells; list view below">
+  <div id="atlas" hidden></div>
+  <svg id="comb" tabindex="0" viewBox="0 0 1080 560" role="application" aria-label="fractal hexagonal fan chart — zoom, pan, click cells; list view below">
     <g id="world"></g>
   </svg>
   <div id="treeview" aria-label="ancestor tree view"></div>
@@ -219,6 +278,7 @@ footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint
 </details>
 
 <section class="detail" id="detail" aria-live="polite">
+  <div id="ppanel" hidden></div>
   <p class="empty" id="dempty" data-i18n="blood.pick">click a cell — or search a name — to read an ancestor.</p>
   <div id="dbody" hidden></div>
 </section>
@@ -243,11 +303,31 @@ footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint
     packs:{},packData:{},relEvidence:{},testimony:[],recon:null,lenses:{records:true,tradition:true,testimony:true,spiritual:true},
     trail:[],staged:[],viewMode:"ped",retrieved:null,symbolicLinks:[]};
   var OPEN_ROOT_FS="KWJ4-XBD"; // provider ref, resolved via refsIndex at load
-  function addChild(p,c){(S.children[p]=S.children[p]||[]).push(c);}
+  function addChild(p,c){var a=S.children[p]=S.children[p]||[];if(a.indexOf(c)<0)a.push(c);} // dedup: corpus pass + overlay pass both feed this (ORDER5-R2 item 2)
   fetch(CORPUS_URL).then(r=>r.json()).then(c=>{
     S.persons=c.persons||{};S.edges=c.edges||{};S.root=c.root;S.curRoot=c.root;
     S.stats=(c.meta&&c.meta.stats)||{};
     S.corpusMeta=c.meta||{};S.refsIndex=(c.refsIndex||{});
+    S.couples=c.couples||{}; // kept whole for the shared archive resolver (one resolver, two environments)
+    // GUX-01 atlas honesty (founder order 996e9b6c): three counts derived from
+    // the PUBLISHED corpus itself, before overlays — the UI never casually
+    // says "your family tree has N people"; the raw-walk receipt stays separate.
+    S.atlas={
+      published:Object.keys(c.persons||{}).length,
+      bloodline:(function(){var seen=new Set([c.root]),st=[c.root];
+        while(st.length){var id=st.pop();(c.edges[id]||[]).forEach(function(p){if(!seen.has(p)){seen.add(p);st.push(p);}});}
+        var n=0;seen.forEach(function(id2){if(c.persons[id2])n++;});return n;})(),
+      frontier:(function(){var n=0;for(var k in (c.edges||{}))(c.edges[k]||[]).forEach(function(p){if(!c.persons[p])n++;});return n;})()
+    };
+    // spouse index from the corpus's own couples map (skaists.lineage/2):
+    // a spouse step is AFFINITY, never described as blood (the corpus law)
+    S.spouses={};
+    for(var ck in (c.couples||{})){var cu=c.couples[ck];
+      if(!cu||!cu.p1||!cu.p2)continue;
+      (S.spouses[cu.p1]=S.spouses[cu.p1]||[]).push(cu.p2);
+      (S.spouses[cu.p2]=S.spouses[cu.p2]||[]).push(cu.p1);}
+    // lowercase search index precomputed once (F5: no per-keystroke scan cost)
+    S.qnames={};for(var qid in (c.persons||{}))S.qnames[qid]=String(c.persons[qid].name||'').toLowerCase();
     S.packs=Object.assign({},(c.meta&&c.meta.packs)||{});
     (c.spine||[]).forEach(r=>{if(r.f)S.spineIds.add(r.f);});
     for(var e in S.edges)S.edges[e].forEach(p=>addChild(p,e));
@@ -255,11 +335,21 @@ footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint
   }).then(ov=>{
     if(ov){
       if(ov.persons)for(var id in ov.persons){S.persons[id]=ov.persons[id];if(ov.persons[id].evidencePack)S.packs[id]=ov.persons[id].evidencePack;}
-      if(ov.edges)for(var ce in ov.edges){S.edges[ce]=ov.edges[ce];ov.edges[ce].forEach(p=>addChild(p,ce));}
+      if(ov.edges)for(var ce in ov.edges){S.edges[ce]=ov.edges[ce].map(function(p){return S.persons[p]?p:(S.refsIndex[p]||p);});S.edges[ce].forEach(function(p){addChild(p,ce);});}
       S.relEvidence=ov.relationshipEvidence||{};
       S.testimony=ov.testimony||[];
       S.symbolicLinks=ov.symbolicLinks||[];
+      // overlay persons join the search index too (attested overlays are people)
+      for(var qid2 in S.persons){if(!(qid2 in S.qnames))S.qnames[qid2]=String(S.persons[qid2].name||'').toLowerCase();}
     }
+    // Archive 1.1 (founder ruling bdf59735: one resolver, two environments):
+    // the shared relationship resolver boots on the MERGED model — corpus +
+    // attested overlays — created once here, consumed read-only by the
+    // relationship-to-root section and search disambiguation in BOTH modes.
+    // Fail-soft: without it the boundary renders honestly, never a guess.
+    import('./archive-core.mjs').then(function(m){
+      S.archive=m.createArchiveCore({persons:S.persons,edges:S.edges,couples:S.couples,refsIndex:S.refsIndex});
+    }).catch(function(){S.archive=null;});
     var packUrls=[...new Set(Object.values(S.packs).filter(Boolean))]
       .map(function(p){return '../assets/profile-archive/lineage/'+p;});
     return Promise.all(packUrls.map(function(u){return fetch(u).then(function(r){return r.json();}).then(function(j){
@@ -270,6 +360,11 @@ footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint
     ]));
   }).then(function(){
     S.retrieved=(S.corpusMeta&&S.corpusMeta.retrieved)||null;
+    // ghost frontier: parent references pointing beyond the published corpus,
+    // counted per person AFTER the overlay merge; surfaced as coverage,
+    // never as an empty family, never as a privacy finding (the archive law)
+    S.ghostCount={};
+    for(var gk in S.edges){var gn=0;(S.edges[gk]||[]).forEach(function(p){if(!S.persons[p])gn++;});if(gn)S.ghostCount[gk]=gn;}
     renderEconCard();
     renderDyn();
     // public entrance: Albert Perry Rockwood when present, else the founder
@@ -284,6 +379,17 @@ footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint
     drawPedigree();showRootNote();renderTrail();renderList();
     if(pm&&S.persons[pm[1]]){showDetail(pm[1]);document.getElementById("detail").scrollIntoView();}
     else if(/myth/.test(location.hash)&&RAG){showDetail(RAG);var d0=document.querySelector('#dbody details');if(d0)d0.open=true;}
+    // GUX-01 zGeneUI: hand the booted comb to the navigation module (the
+    // deferred type=module loads after this classic script; both load orders
+    // converge on wire()+onReady())
+    globalThis.__bloodReady=true;
+    // GUX-01 beat 2b — the composition mount's boot payload, published BEFORE
+    // BloodNav.onReady() so the nav layer's legacy applyCtx sees the pending
+    // mount and does NOT rewrite the URL hash in the old vocabulary (the
+    // mount boots from the arriving hash itself; one truth, one applier).
+    globalThis.__guxBoot={S:S,apr:OPEN_ROOT,founder:S.root,deepP:(pm&&S.persons[pm[1]])?pm[1]:null,mythRoot:(/myth/.test(location.hash)&&RAG)?RAG:null};
+    document.dispatchEvent(new Event('gux:boot'));
+    if(globalThis.BloodNav&&BloodNav.wire){BloodNav.wire(globalThis.BloodComb);BloodNav.onReady();}
   })
   .catch(()=>{document.getElementById('stats').textContent='could not load the corpus';});
 
@@ -503,6 +609,9 @@ footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint
       '{w} walked · {d} deceased published · {l} living redacted · spine {g} generations deep')
       .replace('{w}',S.stats.personsWalked).replace('{d}',S.stats.deceasedPublished)
       .replace('{l}',S.stats.livingRedacted).replace('{g}',S.stats.spineGenerations);
+    if(S.atlas)document.getElementById('atlasstats').textContent=langText('blood.atlasstats',
+      'atlas honesty: {p} people in this published atlas · {b} parentward bloodline members represented · {f} frontier references where ancestry continues beyond the published archive')
+      .replace('{p}',S.atlas.published).replace('{b}',S.atlas.bloodline).replace('{f}',S.atlas.frontier);
     var lg=document.getElementById('legend');lg.innerHTML='';
     [['recorded','prof.arch.blood.tier.recorded','recorded · born 1850+'],
      ['colonial','prof.arch.blood.tier.colonial','colonial · 1550–1850'],
@@ -526,6 +635,7 @@ footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint
   function applyView(instant){
     if(instant)world.classList.add('instant');else world.classList.remove('instant');
     world.setAttribute('transform','translate('+view.tx+' '+view.ty+') scale('+view.s+')');
+    if(globalThis.BloodNav&&BloodNav.onZoom)BloodNav.onZoom(view.s);
     if(instant)requestAnimationFrame(function(){world.classList.remove('instant');});
   }
   function centerOn(x,y,instant,keepScale){
@@ -566,11 +676,11 @@ footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint
   });
   function endPointer(e){pointers.delete(e.pointerId);if(pointers.size<2)pinch=null;if(pointers.size===0)drag=null;}
   svg.addEventListener('pointerup',endPointer);svg.addEventListener('pointercancel',endPointer);
-  document.getElementById('zin').addEventListener('click',function(){var p={x:CX,y:BASEY};
+  document.getElementById('zin').addEventListener('click',function(){if(globalThis.__guxAtlas){try{__guxAtlas.zoomBy(1.3);}catch(e){}return;}var p={x:CX,y:BASEY};
     view.tx=p.x-(p.x-view.tx)*1.3;view.ty=p.y-(p.y-view.ty)*1.3;view.s=Math.min(4,view.s*1.3);applyView();});
-  document.getElementById('zout').addEventListener('click',function(){var p={x:CX,y:BASEY};
+  document.getElementById('zout').addEventListener('click',function(){if(globalThis.__guxAtlas){try{__guxAtlas.zoomBy(1/1.3);}catch(e){}return;}var p={x:CX,y:BASEY};
     view.tx=p.x-(p.x-view.tx)/1.3;view.ty=p.y-(p.y-view.ty)/1.3;view.s=Math.max(0.3,view.s/1.3);applyView();});
-  document.getElementById('zfit').addEventListener('click',function(){view.s=1;centerOn(0,0,true,1);});
+  document.getElementById('zfit').addEventListener('click',function(){if(globalThis.__guxAtlas){try{__guxAtlas.resetView();}catch(e){}return;}view.s=1;centerOn(0,0,true,1);});
 
   function hexPts(cx,cy,s){var p=[];for(var a=0;a<6;a++){var r=a*Math.PI/3;p.push((cx+s*Math.cos(r)).toFixed(1)+','+(cy+s*Math.sin(r)).toFixed(1));}return p.join(' ');}
   var placed={};
@@ -581,7 +691,7 @@ footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint
       var p=S.persons[id];
       if(placed[id]){ // repeated ancestor: connected view of ONE person, not a duplicate
         var d=document.createElementNS(NS,'polygon');
-        d.setAttribute('points',hexPts(x,y,HS));d.setAttribute('class','hexcell dup');
+        d.setAttribute('points',hexPts(x,y,HS));d.setAttribute('class','hexcell dup');d.setAttribute('data-pid',id);
         d.setAttribute('fill',TIER_COLOR[(p&&p.evidence&&p.evidence.class)||'unrecorded']);
         var t=document.createElementNS(NS,'title');
         t.textContent=(p?p.name:id)+' — same person, also placed nearer the root (pedigree collapse)';
@@ -597,6 +707,7 @@ footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint
       g.setAttribute('points',hexPts(x,y,HS));
       var chrono=false;
       g.setAttribute('class','hexcell'+(S.spineOn&&S.spineIds.has(id)?' spine':''));
+      g.setAttribute('data-pid',id);
       g.setAttribute('fill',TIER_COLOR[p.evidence&&p.evidence.class||'unrecorded']);
       g.setAttribute('fill-opacity',ring===0?'0.95':'0.62');
       var t=document.createElementNS(NS,'title');
@@ -608,6 +719,7 @@ footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint
       tx.setAttribute('x',x);tx.setAttribute('y',y+3);tx.setAttribute('class','hextext');
       tx.setAttribute('text-anchor','middle');tx.setAttribute('font-size',ring<=1?'10':'8.5');
       tx.setAttribute('pointer-events','none');
+      tx.setAttribute('data-ring',String(ring));
       tx.textContent=nm.length>14?nm.slice(0,13)+'…':nm;
       world.appendChild(tx);
       if(ring>=RINGS)return;
@@ -616,7 +728,17 @@ footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint
       var sl=parentSlots(ps);var fa=sl[0];var mo=sl[1];
       [[fa,-1],[mo,1]].forEach(function(pair){
         var pid=pair[0],side=pair[1];
-        if(!pid)return;
+        if(!pid){
+          if(S.ghostCount&&S.ghostCount[id]){ // ghost parent slot: coverage, honestly drawn
+            var gh=document.createElementNS(NS,'polygon');
+            gh.setAttribute('points',hexPts(x+side*HW/2,y-1.5*HS,HS*0.72));
+            gh.setAttribute('class','hexcell ghostslot');
+            var ght=document.createElementNS(NS,'title');
+            ght.textContent='ancestry continues beyond the published archive — further parent references here are not yet published; coverage, not an empty family';
+            gh.appendChild(ght);gh.addEventListener('click',function(){showDetail(id);});world.appendChild(gh);
+          }
+          return;
+        }
         if(!edgeVisible(id,pid)){
           // disputed & rejected by current reconstruction: empty geometry, visible dispute
           var q=document.createElementNS(NS,'text');
@@ -633,6 +755,7 @@ footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint
           var c=document.createElementNS(NS,'polygon');
           c.setAttribute('points',hexPts(x+side*HW/2,y-1.5*HS,HS));
           c.setAttribute('class','hexcell chrono');
+          c.setAttribute('data-pid',pid);
           c.setAttribute('fill',TIER_COLOR[S.persons[pid].evidence&&S.persons[pid].evidence.class||'unrecorded']);
           var ct=document.createElementNS(NS,'title');
           ct.textContent='IMPOSSIBLE CHRONOLOGY — parent born '+pby+', child born '+cby;
@@ -663,6 +786,7 @@ footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint
     }
   }
   function setRoot(id,noTrail){
+    if(globalThis.__guxAtlas){try{__guxAtlas.reroot(id);}catch(e){}return;} // engine owns the world; re-root is the engine's explicit act
     if(!S.persons[id])return;
     if(!noTrail&&S.curRoot&&S.curRoot!==id)S.trail.push(S.curRoot);
     if(S.trail.length>12)S.trail.shift();
@@ -670,6 +794,7 @@ footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint
     if(S.viewMode==='tree')renderTree();
     else if(S.viewMode==='ped')drawPedigree();
     else{drawComb();view.s=Math.max(view.s,0.9);centerOn(0,0,false,view.s);} // animated re-center on the new root
+    if(globalThis.BloodNav&&BloodNav.onRoot)BloodNav.onRoot(id);
   }
   function renderList(){
     var body=document.getElementById('listbody');if(!body)return;body.innerHTML='';
@@ -778,7 +903,13 @@ footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint
     document.getElementById('backperson').addEventListener('click',function(){showDetail(child);});
   }
   function showDetail(id){
+    if(globalThis.__guxAtlas){ // engine mode: the person panel is THE explanation surface (one-explanation law); relToRoot retires with the incumbent path
+      S.sel=id;try{__guxAtlas.select(id);}catch(e){}
+      return;
+    }
     var p=S.persons[id];if(!p)return;
+    S.sel=id;
+    if(globalThis.BloodNav&&BloodNav.onSelect)BloodNav.onSelect(id);
     var body=document.getElementById('dbody'),emp=document.getElementById('dempty');
     emp.hidden=true;body.hidden=false;
     var cls=(p.evidence&&p.evidence.class)||'unrecorded';
@@ -789,12 +920,45 @@ footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint
       ps.forEach(function(x){rels+='<button data-rel="'+esc(x)+'">↑ '+esc(nameOf(x))+(S.persons[x].lifespan?' · '+esc(S.persons[x].lifespan):'')+
         (S.relEvidence[relKey(id,x)]?' <span class="evtag">['+esc(langText('blood.rel.disputed','disputed — inspect'))+']</span>':' <span class="evtag">[walked link]</span>')+'</button>';});
       rels+='</div>';}
+    if(S.ghostCount&&S.ghostCount[id]){rels+='<div class="drels"><div class="lab">the frontier</div><div class="layer" style="border-left:2px dashed var(--faint);padding-left:8px;color:var(--dim)">ancestry continues beyond the published archive — '+esc(String(S.ghostCount[id]))+' further parent reference'+(S.ghostCount[id]===1?'':'s')+' on this person not yet published here. This is coverage of the walk, not an empty family and not a finding about anyone.</div></div>';}
     var ch=S.children[id]||[];
     if(ch.length){rels+='<div class="drels"><div class="lab" data-i18n="blood.children">children</div>';
       ch.slice(0,12).forEach(function(x){if(S.persons[x])rels+='<button data-go="'+esc(x)+'">↓ '+esc(nameOf(x))+'</button>';});
       if(ch.length>12)rels+='<span style="color:var(--faint)">… '+(ch.length-12)+' more</span>';
       rels+='</div>';}
     var chips=tierChip(cls)+'<span class="chip">support: '+esc(sup)+'</span>';
+    var sp=(S.spouses[id]||[]).filter(function(x){return S.persons[x];});
+    if(sp.length){rels+='<div class="drels"><div class="lab">spouses & partners</div>';
+      sp.slice(0,6).forEach(function(x){rels+='<div class="layer"><button data-go="'+esc(x)+'">⚭ '+esc(nameOf(x))+(S.persons[x].lifespan?' · '+esc(S.persons[x].lifespan):'')+'</button> <span class="evtag">[marriage — affinity, never described as blood]</span></div>';});
+      if(sp.length>6)rels+='<span style="color:var(--faint)">… '+(sp.length-6)+' more</span>';
+      rels+='</div>';}
+    if(id!==S.curRoot){
+      var rr=(globalThis.BloodNav&&BloodNav.relToRoot)?BloodNav.relToRoot(id,{curRoot:S.curRoot,archive:S.archive,persons:S.persons}):null;
+      var hopArrow=function(st){return st.via==='child'?'↓':st.via==='spouse'?'≈':'↑';};
+      var stepsHtml=function(){var h='';rr.steps.forEach(function(st,i){
+          if(i>0)h+=' <span class="dim">'+hopArrow(st)+esc(st.hop)+'→</span> ';
+          h+='<button data-go="'+esc(st.id)+'">'+esc(st.name)+'</button>';});return h;};
+      var dis=rr&&rr.disputed?' <span class="evtag">[disputed — this path crosses a cyclic ancestry component]</span>':'';
+      if(rr&&rr.kind==='below'){
+        rels+='<div class="drels"><div class="lab">relationship to the current root — '+esc(String(rr.generations))+' generation'+(rr.generations===1?'':'s')+' down this line'+dis+'</div><div class="layer">';
+        rels+=stepsHtml();
+        rels+='<div class="claim">parent steps from '+esc(nameOf(id))+' up to the root '+esc(nameOf(S.curRoot))+' — follow the names to walk the line</div></div></div>';
+      } else if(rr&&rr.kind==='above'){
+        rels+='<div class="drels"><div class="lab">relationship to the current root — '+esc(String(rr.generations))+' generation'+(rr.generations===1?'':'s')+' up: an ancestor of the current root'+dis+'</div><div class="layer">';
+        rels+=stepsHtml();
+        rels+='<div class="claim">child steps down from '+esc(nameOf(id))+' to the root '+esc(nameOf(S.curRoot))+' — an ancestor of where you are standing</div></div></div>';
+      } else if(rr&&rr.kind==='collateral'){
+        rels+='<div class="drels"><div class="lab">relationship to the current root — blood through a shared ancestor'+dis+'</div><div class="layer">';
+        rels+=stepsHtml();
+        rels+='<div class="claim">'+esc(String(rr.upHops))+' generation'+(rr.upHops===1?'':'s')+' up and '+esc(String(rr.downHops))+' down — you share '+esc(nameOf(rr.commonAncestor))+'</div></div></div>';
+      } else if(rr&&rr.kind==='affinity'){
+        rels+='<div class="drels"><div class="lab">relationship to the current root — family by marriage'+dis+'</div><div class="layer">';
+        rels+=stepsHtml();
+        rels+='<div class="claim">connected by marriage/partnership — NOT a blood relationship'+(rr.sharedDescendant?'; you share descendants (co-parents)':'')+'</div></div></div>';
+      } else if(rr&&rr.kind==='none'){
+        rels+='<div class="drels"><div class="lab">relationship to the current root</div><div class="layer" style="color:var(--dim)">no line between here and '+esc(nameOf(S.curRoot))+' in this published atlas — a different branch, or ancestry continuing beyond the published archive; press R to re-root and walk from this person</div></div>';
+      }
+    }
     if(p.living&&id===S.root)chips+='<span class="chip">'+esc(langText('blood.rootchip','the founder — living, redacted'))+'</span>';
     if(S.packs[id])chips+='<span class="chip" style="color:var(--violet)">'+esc(langText('blood.attested','attested overlay — evidence pack'))+'</span>';
     var fsref=p.refs&&p.refs.find(function(r){return r.provider==='familysearch';});
@@ -814,6 +978,7 @@ footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint
         +(S.retrieved?' <span style="color:var(--faint)">· retrieved '+esc(S.retrieved)+'</span>':'')+'</div></div>'
         :'')
       +'<div class="dactions"><button id="reroot" data-i18n="blood.reroot">re-root the comb here</button>'
+      +'<a class="ghost" id="openarchive" style="text-decoration:none;padding:8px 14px;border:1px solid var(--line);border-radius:8px;color:var(--cyan)" href="../assets/profile-archive/lineage/persons/'+esc(id)+'.html">open the archive</a>'
       +(S.packs[id]?'<a class="ghost" style="text-decoration:none;padding:8px 14px;border:1px solid var(--line);border-radius:8px;color:var(--cyan)" href="../assets/profile-archive/lineage/'+esc(S.packs[id])+'">'+esc(langText('blood.pack','open the evidence pack'))+'</a>':'')
       +'</div>';
     body.querySelectorAll('[data-rel]').forEach(function(b){
@@ -826,9 +991,11 @@ footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint
     S.spineOn=!S.spineOn;this.setAttribute('aria-pressed',String(S.spineOn));
     if(S.viewMode==='ped')drawPedigree();else drawComb();});
   document.getElementById('resetbtn').addEventListener('click',function(){
+    if(globalThis.__guxAtlas){try{__guxAtlas.home();}catch(e){}return;} // back to the beginning = the URL-derived initial context
     S.trail=[];setRoot(S.root,true);showDetail(S.root);});
   // ── view switch: pedigree (truth) ↔ fractal ↔ tree ───────────────────────
   function setView(mode){
+    if(globalThis.__guxAtlas){try{__guxAtlas.setView(mode==='ped'?'pedigree':mode==='fan'?'fractal':'tree');}catch(e){}return;}
     S.viewMode=mode;
     document.getElementById('viewped').setAttribute('aria-pressed',String(mode==='ped'));
     document.getElementById('viewfan').setAttribute('aria-pressed',String(mode==='fan'));
@@ -839,6 +1006,7 @@ footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint
     if(mode==='ped')drawPedigree();
     if(mode==='fan'){drawComb();view.s=Math.max(view.s,0.9);centerOn(0,0,false,view.s);}
     if(mode==='tree')renderTree();
+    if(globalThis.BloodNav&&BloodNav.onView)BloodNav.onView(mode);
   }
   document.getElementById('viewped').addEventListener('click',function(){setView('ped');});
   document.getElementById('viewfan').addEventListener('click',function(){setView('fan');});
@@ -849,6 +1017,7 @@ footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint
   // redraw whatever view is CURRENTLY selected — interpretation switches and
   // any other data change must land in the layout the visitor is looking at
   function redrawCurrent(){
+    if(globalThis.__guxAtlas)return; // the engine paints its own world
     if(S.viewMode==='ped')drawPedigree();
     else if(S.viewMode==='tree')renderTree();
     else drawComb();
@@ -891,6 +1060,7 @@ footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint
       var hex=document.createElementNS(NS,'polygon');
       hex.setAttribute('points',hexPts(x,y,PS));
       hex.setAttribute('class','hexcell'+(isDup?' dup':'')+(S.spineOn&&S.spineIds.has(id)?' spine':''));
+hex.setAttribute('data-pid',id);
       hex.setAttribute('fill',TIER_COLOR[p.evidence&&p.evidence.class||'unrecorded']);
       hex.setAttribute('fill-opacity',g===0?'0.95':'0.62');
       var t=document.createElementNS(NS,'title');
@@ -903,7 +1073,7 @@ footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint
       var tx=document.createElementNS(NS,'text');
       tx.setAttribute('x',x);tx.setAttribute('y',y-2);tx.setAttribute('class','hextext');
       tx.setAttribute('text-anchor','middle');tx.setAttribute('font-size',g===0?'9':'7.5');
-      tx.setAttribute('pointer-events','none');
+      tx.setAttribute('pointer-events','none');tx.setAttribute('data-ring',String(g));
       tx.textContent=nm.length>16?nm.slice(0,15)+'…':nm;
       world.appendChild(tx);
       var yr=p.lifespan&&!p.living?String(p.lifespan).split('–')[0]:'';
@@ -936,7 +1106,18 @@ footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint
       var sl=parentSlots(ps);var fa=sl[0];var mo=sl[1];
       pathSet.add(id);
       [[fa,2*s],[mo,2*s+1]].forEach(function(pair2){
-        if(!pair2[0])return;
+        if(!pair2[0]){
+          if(S.ghostCount&&S.ghostCount[id]){ // ghost parent slot in the ahnentafel too
+            var gpx=CXp+(((pair2[1]-(1<<(g+1)))-((1<<(g+1))-1)/2)*PW);
+            var ghex=document.createElementNS(NS,'polygon');
+            ghex.setAttribute('points',hexPts(gpx,BASEp-(g+1)*PRH,PS*0.72));
+            ghex.setAttribute('class','hexcell ghostslot');
+            var gtitle=document.createElementNS(NS,'title');
+            gtitle.textContent='ancestry continues beyond the published archive — coverage, not an empty family';
+            ghex.appendChild(gtitle);ghex.addEventListener('click',function(){showDetail(id);});world.appendChild(ghex);
+          }
+          return;
+        }
         if(!edgeVisible(id,pair2[0])){
           var q=document.createElementNS(NS,'text');
           q.setAttribute('x',CXp+((2*(pair2[1]-(1<<(g+1)))+1)/(2<<(g+1))-0.5)*2*((1<<(g+1))/2)*PW*0.5);
@@ -962,6 +1143,7 @@ footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint
       var li=document.createElement('li'),p=S.persons[id];
       if(!p)return li;
       var b=document.createElement('button');
+      b.setAttribute('data-pid',id);
       b.innerHTML=esc(p.name||id)+' <span class="yrs">'+esc(p.lifespan||'')+'</span> '+
         '<span class="era" style="color:'+TIER_COLOR[p.evidence&&p.evidence.class||'unrecorded']+'">'+esc(p.evidence?p.evidence.class:'?')+'</span>';
       b.addEventListener('click',function(){showDetail(id);});
@@ -998,23 +1180,226 @@ footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint
   });
   document.getElementById('lenses').addEventListener('change',function(e){
     var l=e.target.getAttribute('data-lens');if(l)S.lenses[l]=e.target.checked;
+    if(globalThis.__guxAtlas)return; // engine mode: lenses are retired (hidden) and NEVER re-select the root (review d6ca5958)
     if(S.curRoot&&S.persons[S.curRoot])showDetail(S.curRoot);});
   document.getElementById('q').addEventListener('input',function(){
     var v=this.value.trim().toLowerCase(),out=document.getElementById('qout');out.innerHTML='';
     if(v.length<2)return;
-    var hits=[];
-    for(var id in S.persons){var p=S.persons[id];
-      if((p.name||'').toLowerCase().indexOf(v)>=0||id.toLowerCase()===v||S.refsIndex[v.toUpperCase()]===id){hits.push(id);if(hits.length>=8)break;}}
+    var hits=[],nameHits={};
+    for(var id in S.persons){
+      if((S.qnames[id]||'').indexOf(v)>=0||id.toLowerCase()===v||S.refsIndex[v.toUpperCase()]===id){hits.push(id);var nm=S.persons[id].name||id;nameHits[nm]=(nameHits[nm]||0)+1;if(hits.length>=12)break;}}
     hits.forEach(function(hid){
       var b=document.createElement('button');
-      b.textContent=(S.persons[hid].name||hid)+(S.persons[hid].lifespan?' · '+S.persons[hid].lifespan:'');
+      var p=S.persons[hid];
+      var ctx2=(p.lifespan?' · '+p.lifespan:'')+' · '+(p.evidence?p.evidence.class:'?');
+      if((nameHits[p.name||hid]||0)>1){ // ambiguous name: distinguishing context, never a silent first-pick
+        var gc=(globalThis.BloodNav&&BloodNav.generationContext)?BloodNav.generationContext(hid,{curRoot:S.curRoot,archive:S.archive}):null;
+        ctx2+=' · '+(gc||'not on the current line');
+      }
+      b.textContent=(p.name||hid)+ctx2;
       b.addEventListener('click',function(){showDetail(hid);});
       out.appendChild(b);});
     if(!hits.length){var e2=document.createElement('button');e2.disabled=true;
       e2.textContent=langText('blood.notfound','no ancestor by that name in the archive');e2.style.opacity=.6;out.appendChild(e2);}
   });
+  // GUX-01 zGeneUI: the stable seam blood-nav.mjs wires against. Rendering
+  // stays here; navigation state (selection, keyboard, hash context, LOD,
+  // drawer, drag-safety) lives in the module, unit-tested in tools/genealogy.
+  globalThis.BloodComb={S:S,view:view,doc:document,
+    setRoot:setRoot,showDetail:showDetail,setView:setView,
+    redrawCurrent:redrawCurrent,centerOn:centerOn,
+    applyViewInstant:function(){applyView(true);},esc:esc,langText:langText};
   try{var st=JSON.parse(localStorage.getItem('blood-staged')||'[]');if(st.length)S.staged=st;}catch(e){}
 })();
+</script>
+<script type="module">
+// GUX-01 beat 2b — THE COMPOSITION MOUNT (zGeneUI). blood.html owns
+// composition and presentation state only: truth stays in the corpus; the
+// atlas engine derives spatial state; the person panel derives explanation;
+// blood-nav owns the one navigation/history grammar (hash + session).
+// One corpus truth -> one atlas world -> one person explanation -> one
+// history -> one URL grammar. If ANYTHING here throws, the incumbent comb
+// path stays fully functional (the engine gates all read __guxAtlas).
+import { createAtlas, discoveries, bloodRoute, routeAlternates, routeAlternatesPhrase, ingest } from "./blood-atlas.mjs";
+import { mountPersonPanel, esc as ppEsc } from "./person-panel.mjs";
+import { fetchArchive } from "./person-panel-corpus.mjs";
+import { decodeHash, initialFromCtx, syncHash, syncEngineHash, setEngineSeam, mapView, RETURN_KEY, archiveUrl } from "./blood-nav.mjs";
+
+const $ = (id) => document.getElementById(id);
+const esc = (v) => ppEsc(v);
+const BASE = "../assets/profile-archive/lineage/";
+function bootPayload() {
+  if (globalThis.__guxBoot) return Promise.resolve(globalThis.__guxBoot);
+  return new Promise((res) => document.addEventListener("gux:boot", () => res(globalThis.__guxBoot), { once: true }));
+}
+function failQuiet(msg) { try { console.warn("gux mount: " + msg); } catch (e) {} }
+
+try {
+  const boot = await bootPayload();
+  if (!boot || !boot.S) throw new Error("boot payload missing");
+
+  // ONE truth source for the mount: the same corpus JSON the incumbent reads.
+  const corpus = await fetch(BASE + "remington-bloodline.json").then((r) => r.json());
+  const overlay = await fetch(BASE + "attested-overlays.json").then((r) => r.json()).catch(() => null);
+
+  // initial context = URL hash merged with the one-shot session return
+  // (blood-nav's grammar) — a deep link NEVER becomes a founder default.
+  let hctx = decodeHash(location.hash);
+  try {
+    const saved = sessionStorage.getItem(RETURN_KEY);
+    if (saved) {
+      const sctx = decodeHash(saved);
+      if (!hctx.p || hctx.p === sctx.p) { sessionStorage.removeItem(RETURN_KEY); hctx = sctx; }
+    }
+  } catch (e) { /* private mode: hash context still applies */ }
+  const init = initialFromCtx(hctx, boot.apr);
+  if (hctx.myth && boot.mythRoot && !hctx.r) init.root = boot.mythRoot; // #myth doorway keeps its meaning
+
+  let syncing = false;   // loop guard: one wiring echo per gesture
+  let panelAt = null;    // the person the panel is showing
+  let railRoot = init.root;   // the root the discovery rail was last derived for
+  let panelRoot = init.root;  // the root the PANEL last stood on (kept equal to the engine root - ONE root on screen)
+  let atlas = null;
+
+  // the panel (zGenePerson's organ) — the ONE explanation surface
+  const { archive } = await fetchArchive(BASE);
+  const panel = mountPersonPanel($("ppanel"), archive, {
+    root: init.root,
+    onreroot(id) {
+      // "stand here (re-root)" - the panel ASKS, the engine re-roots (one
+      // world, one root on screen; review d6ca5958 finding 5). Loop-guarded:
+      // the onContext(reroot) echo re-syncs panel + rail while syncing holds.
+      if (syncing || !atlas || !id) return;
+      syncing = true; try { atlas.reroot(id); } finally { syncing = false; }
+    },
+    onnavigate(s) {
+      if (syncing || !atlas) return;
+      const id = s.view === "person" ? s.id : s.view === "relationship" ? s.a : null;
+      if (id && id !== panelAt) { panelAt = id; syncing = true; atlas.select(id); syncing = false; }
+    },
+    openPersonPage(id) {
+      try { sessionStorage.setItem(RETURN_KEY, syncHash(atlas ? atlas.getContext() : null)); } catch (e) {}
+      window.location.href = archiveUrl(id); // same-origin stays in tab; the one-shot return brings the context back
+    }
+  });
+
+  function openPanelPerson(id) {
+    if (syncing || !panel || !id || panelAt === id) return;
+    syncing = true; panelAt = id; panel.openPerson(id); syncing = false;
+    const d = $("detail"); if (d) d.classList.add("open");
+  }
+
+  // discovery rail — CONTEXTUAL per standing root (the advisor's invariant):
+  // the engine's pure-core ingest on OUR corpus copy with the root overridden;
+  // engine bytes are never touched or mutated.
+  function renderRail(rootId) {
+    const rail = $("cards");
+    if (!rail) return;
+    try {
+      const m = ingest(Object.assign({}, corpus, { root: rootId }), overlay);
+      rail.innerHTML = "";
+      for (const c of discoveries(m)) {
+        const b = document.createElement("button");
+        b.type = "button"; b.dataset.card = c.kind;
+        b.innerHTML = "<div><b>" + esc(c.title) + "</b></div>" +
+          "<div style='color:var(--dim);font-size:11px'>" + esc(c.hook || "") + "</div>" +
+          (c.count != null ? "<div style='color:var(--info);font-size:11px'>&#9662; " + esc(String(c.count)) + " — " + esc(c.depthNote || "counted across the whole published archive") + "</div>" : "") +
+          "<div style='color:var(--faint);font-size:10px;margin-top:3px'>" + esc(c.disclosure || "") + "</div>";
+        b.addEventListener("click", () => {
+          const a = c.action; if (!a || !atlas) return;
+          if (a.type === "show-route") { showRoute(a.from, a.to); atlas.reroot(a.to); atlas.select(a.to); }
+          else if (a.type === "enter-branch" || a.type === "reroot") { atlas.reroot(a.iid); atlas.select(a.iid); }
+          else if (a.type === "select") atlas.select(a.iid);
+        });
+        rail.appendChild(b);
+      }
+      rail.setAttribute("data-cards", String(rail.children.length));
+      rail.setAttribute("data-rail-root", String(rootId)); // the contextuality marker (invariant test)
+      rail.hidden = rail.children.length === 0;
+    } catch (e) { failQuiet("rail " + (e && e.message)); }
+  }
+  function showRoute(from, to) {
+    const strip = $("routestrip"); if (!strip || !atlas) return;
+    const route = bloodRoute(atlas.model, from, to);
+    if (!route) { strip.hidden = true; strip.innerHTML = ""; return; }
+    strip.hidden = false;
+    strip.setAttribute("data-route-len", String(route.length - 1));
+    strip.innerHTML = "<div style='color:var(--dim);font-size:11px;margin-bottom:4px'>follow the blood — " + (route.length - 1) +
+      " hops · <span style='color:var(--faint)'>" + esc(routeAlternatesPhrase(routeAlternates(atlas.model, from, to))) + "</span></div>" +
+      route.map((iid, i) => {
+        const p = atlas.person(iid) || {};
+        return "<button type='button' class='atlashop ev-" + ((p.evidence || {}).class || "none") + "' data-hop=\"" + esc(iid) +
+          "\" title=\"" + esc(p.name || "") + "\">" + (i === 0 ? "&#9678; " : "") + esc(p.name || "Living") + "</button>";
+      }).join("<span style='color:var(--info)'> &#8594; </span>");
+    for (const hb of strip.querySelectorAll("[data-hop]")) hb.addEventListener("click", () => atlas.select(hb.dataset.hop));
+    strip.scrollLeft = 0;
+  }
+
+  // the atlas (zGeneAtlas's organ) — ONE world, ONE history
+  atlas = await createAtlas({
+    mount: $("atlas"),
+    corpus, overlay,
+    initial: init,
+    onContext(ctx, reason) {
+      syncEngineHash(ctx, reason); // blood-nav's ONE-history law: push fresh navigations, echo engine walks, replace selects (review d6ca5958 finding 1)
+      const vb = { viewped: "pedigree", viewfan: "fractal", viewtree: "tree" };
+      for (const id in vb) { const el = $(id); if (el) el.setAttribute("aria-pressed", String(ctx.view === vb[id])); }
+      try { boot.S.curRoot = ctx.root; if (ctx.selection) boot.S.sel = ctx.selection; } catch (e) {}
+      if (railRoot !== ctx.root) {
+        railRoot = ctx.root;
+        renderRail(ctx.root); // contextual per root on EVERY path — reroot, back, home, restore (review d6ca5958 finding 2)
+      }
+      if (panelRoot !== ctx.root) {
+        // ONE root on screen, every path: the panel re-stands whenever the
+        // ENGINE root moves - including back/home/restore, where the panel's
+        // internal curRoot used to desync and mute its own stand-here button
+        // (review d6ca5958 finding 5). syncing holds: panel.setRoot fires
+        // onreroot, and this re-stand is an echo, never a fresh re-root.
+        panelRoot = ctx.root;
+        syncing = true; panel.setRoot(ctx.root); syncing = false;
+      }
+      if (reason === "reroot") {
+        panelAt = ctx.root; syncing = true; panel.openPerson(ctx.root); syncing = false;
+      } else if (!syncing && (reason === "select" || reason === "back" || reason === "restore" || reason === "home")) {
+        openPanelPerson(ctx.selection);
+        if (reason === "home" && !ctx.selection && panelAt !== ctx.root) { panelAt = ctx.root; syncing = true; panel.openPerson(ctx.root); syncing = false; }
+      }
+    }
+  });
+  globalThis.__guxAtlas = atlas;
+  setEngineSeam(atlas, init); // blood-nav's popstate restores through this seam (one history, mirrored — review d6ca5958)
+  globalThis.__guxInit = init; // journey seam: the URL-derived initial context
+  document.body.classList.add("gux");
+  // ONE history, one visible affordance: back joins the zoombar (B on the
+  // engine stage does the same); the incumbent trail is retired under gux.
+  // Back walks the stack; at the bottom, back returns EXACTLY home — the
+  // engine's home() restores the URL-derived initial context including
+  // selection and camera (it pushes first, so one-history semantics hold).
+  try {
+    const zb = document.querySelector(".zoombar");
+    if (zb) {
+      const bb = document.createElement("button");
+      bb.type = "button"; bb.id = "guxback"; bb.title = "back — one history (B)";
+      bb.setAttribute("aria-label", "back — one history");
+      bb.textContent = "\u2190";
+      const atInitial = (c) => c.root === init.root && (c.selection || null) === (init.selection || null) && c.view === init.view;
+      bb.addEventListener("click", () => {
+        const d = atlas.core.historyDepth();
+        if (d === 0 && !atInitial(atlas.getContext())) atlas.home();
+        else atlas.back();
+      });
+      zb.insertBefore(bb, zb.firstChild);
+    }
+  } catch (e) { failQuiet("back button " + (e && e.message)); }
+  $("atlas").hidden = false;
+  $("ppanel").hidden = false;
+  $("ppanel").setAttribute("data-pp-mounted", "1");
+  renderRail(atlas.getContext().root);
+  if (atlas.getContext().selection) openPanelPerson(atlas.getContext().selection);
+  else if (init.root) { panelAt = init.root; panel.openPerson(init.root); }
+} catch (e) {
+  failQuiet("engine mount failed — incumbent comb path remains active (" + (e && e.message) + ")");
+}
 </script>
 <script src="tour.js?v=42"></script>
 </body>
