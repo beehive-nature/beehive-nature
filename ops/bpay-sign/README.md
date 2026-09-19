@@ -170,3 +170,22 @@ UNCOMMITTED for the backend seat's own commit). UX lane state: **GREEN /
 PARKED awaiting hardware contract — no further UX implementation until
 actual Observation A data arrives.** The Observation A SIMULATED-rehearsal
 label flips to a real device receipt ONLY when the Safe 7 receipt exists.
+
+## THE FOUNDER'S TREZOR ACCOUNT (banked 2026-09-19, founder-provided; read-only verified on-chain)
+
+**`0x8fD7252A29FB759755E30A15E966932EaAD91b75`** — the Safe 7 EVM account
+that holds ANT. This is the **expected payer** for Observation A (the
+transport-identity check: the recovered signer MUST equal this address)
+and for Observation B (the plan's LAW 14 payer binding).
+
+Read-only chain state at banking time:
+- **Arbitrum One (mainnet): 48.632711 ANT** ✓ (the storage obligation is
+  ~4.07–4.22 ANT — the account holds >10× the obligation) · ETH 0.000161
+  (gas — sufficient for SIGNING-phase needs; thin for a future mainnet
+  broadcast, which is a later founder-authorized phase and can be topped
+  up at leisure) · nonce 2.
+- **Arbitrum Sepolia (testnet): 0 ANT, 0 ETH** — the public-testnet path
+  still needs the faucet drip; the replica path needs nothing.
+
+A public address is freely recordable (SPEC-AUTONOMI-TREZOR-1 §3 key
+map); the account's KEY never exists outside the device.
