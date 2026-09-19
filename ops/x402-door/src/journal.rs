@@ -182,7 +182,6 @@ pub struct SettleEvidence {
 pub struct HumanGate {
     _private: (),
     /// D-7: the tracked call site — every gate use is attributable.
-    #[allow(dead_code)]
     call_site: Option<&'static std::panic::Location<'static>>,
 }
 impl HumanGate {
@@ -208,8 +207,9 @@ enum LockGuard<'a> {
     Os(File),
     /// RAII-only payload: held so the in-process mutex stays locked until
     /// the guard drops, never read.
-    #[allow(dead_code)]
-    Held(std::sync::MutexGuard<'a, ()>),
+    Held {
+        _guard: std::sync::MutexGuard<'a, ()>,
+    },
 }
 impl Drop for LockGuard<'_> {
     fn drop(&mut self) {
@@ -309,15 +309,16 @@ impl Journal {
             // no other opener can hold the OS lock while we live (D-5
             // try-refusal), and no two mutations of this instance
             // interleave (the mutex).
-            return Ok(LockGuard::Held(
-                self.mutation_lock
+            return Ok(LockGuard::Held {
+                _guard: self
+                    .mutation_lock
                     .lock()
                     // Poison-tolerant BY DESIGN to mirror OS-flock
                     // semantics: the kernel has no poisoned state — a
                     // thread that dies mid-mutation simply releases,
                     // and record writes are atomic (tmp+rename).
                     .unwrap_or_else(|e| e.into_inner()),
-            ));
+            });
         }
         let f = OpenOptions::new()
             .create(true)
