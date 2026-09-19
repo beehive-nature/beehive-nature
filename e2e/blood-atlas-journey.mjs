@@ -11,7 +11,7 @@ import { createServer } from "node:http";
 import { readFile, writeFile, mkdir } from "node:fs/promises";
 import { dirname, join, extname } from "node:path";
 import { fileURLToPath } from "node:url";
-import { chromium } from "./node_modules/playwright/index.mjs";
+import { chromium } from "playwright"; // machine-level resolution (~/node_modules walk-up);
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(HERE, "..");

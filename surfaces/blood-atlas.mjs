@@ -406,6 +406,68 @@ function card(fields) {
   return Object.freeze(fields);
 }
 
+// DERIVED route-alternates (rider-3 item 5 — no universal boilerplate):
+// counts equal-shortest parent-edge routes (DP over the shortest-path DAG,
+// capped to "many" past a thousand) and detects whether a monotone route one
+// hop longer exists. The disclosure says only what this measurement says.
+export function routeAlternates(model, from, to) {
+  if (!model.person(from) || !model.person(to)) return { equal: 0, near: 0 };
+  const dist = new Map([[from, 0]]);
+  const q = [from];
+  const order = [from];
+  while (q.length) {
+    const cur = q.shift();
+    for (const p of model.parentOf(cur)) if (!dist.has(p)) { dist.set(p, dist.get(cur) + 1); q.push(p); order.push(p); }
+  }
+  if (!dist.has(to)) return { equal: 0, near: 0 };
+  const L = dist.get(to);
+  let capped = false;
+  const ways = new Map([[from, 1]]);
+  for (const u of order) {
+    const d = dist.get(u);
+    if (d >= L) continue;
+    const wu = ways.get(u) || 0;
+    if (!wu) continue;
+    for (const p of model.parentOf(u)) {
+      if (dist.get(p) !== d + 1) continue;
+      const w = (ways.get(p) || 0) + wu;
+      ways.set(p, w > 1000 ? 1001 : w);
+      if (w > 1000) capped = true;
+    }
+  }
+  const equal = capped && (ways.get(to) || 0) > 1000 ? "many" : (ways.get(to) || 0);
+  // existence of a monotone route one hop longer (exactly one same-level edge)
+  const r0 = new Set([from]), r1 = new Set();
+  let changed = true, passes = 0;
+  while (changed && passes <= 2 * L + 4) {
+    changed = false; passes++;
+    for (const u of order) {
+      const d = dist.get(u);
+      if (d > L) continue;
+      for (const p of model.parentOf(u)) {
+        if (!dist.has(p) || dist.get(p) > L) continue;
+        const dp = dist.get(p);
+        if (r0.has(u) && dp === d + 1 && !r0.has(p)) { r0.add(p); changed = true; }
+        if (r0.has(u) && dp === d && !r1.has(p)) { r1.add(p); changed = true; }
+        if (r1.has(u) && dp === d + 1 && !r1.has(p)) { r1.add(p); changed = true; }
+        /* r1 + same-level edge = two flat steps — not a one-hop-longer route */
+      }
+    }
+  }
+  const near = (equal !== 1 && equal !== 0) || r1.has(to) ? 1 : 0;
+  return { equal, near };
+}
+
+// the disclosure clause says only what the measurement proved — three states,
+// never a universal alternates claim
+export function routeAltClause(model, from, to) {
+  const alt = routeAlternates(model, from, to);
+  if (alt.equal === "many") return "the archive records hundreds of equal-shortest routes through the collapsed web — this card shows one";
+  if (alt.equal >= 2) return "the archive records " + alt.equal + " equal-shortest routes through the collapsed web — this card shows one";
+  if (alt.near) return "one shortest route · near-equal alternates one hop longer exist in the collapsed web";
+  return "the archive records exactly one route here within the published edges";
+}
+
 const NON_FAMILY = new Set(["Sr", "Jr", "I", "II", "III", "IV", "V", "?", "De", "Van"]);
 function familyNameClusters(model, iid, withinGen, top = 4) {
   const counts = {};
@@ -459,7 +521,7 @@ export function discoveries(model, opts) {
       hook: "follow every ancestor between you.",
       count: gen[iid], depthNote: "within " + gen[iid] + " generations (shortest parent path)",
       action: { type: "show-route", from: root, to: iid },
-      disclosure: "shortest published parent-edge path · one available route, not the only one — near-equal alternates exist in the collapsed web · evidence pack " + model.packs[iid] + " · records retrieved " + (model.stats && model.stats.retrieved ? model.stats.retrieved : "with the corpus"),
+      disclosure: "shortest published parent-edge path · " + routeAltClause(model, root, iid) + " · evidence pack " + model.packs[iid] + " · records retrieved " + (model.stats && model.stats.retrieved ? model.stats.retrieved : "with the corpus"),
     }));
   }
   let deepest = null;
@@ -471,7 +533,7 @@ export function discoveries(model, opts) {
       hook: "travel it and watch the evidence change character.",
       count: gen[deepest], depthNote: "within " + gen[deepest] + " generations (shortest parent path)",
       action: { type: "show-route", from: root, to: deepest },
-      disclosure: "shortest published parent-edge path · pure corpus derivation (upward BFS) · published, not verified — era≠support chips carry the honesty along the way",
+      disclosure: "shortest published parent-edge path · " + routeAltClause(model, root, deepest) + " · pure corpus derivation (upward BFS) · published, not verified — era≠support chips carry the honesty along the way",
     }));
   }
   // BRANCH cards — the named grandparents, bounded counts + family names

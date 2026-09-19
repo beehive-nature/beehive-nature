@@ -7,7 +7,7 @@ import { createServer } from "node:http";
 import { readFile, mkdir } from "node:fs/promises";
 import { dirname, join, extname } from "node:path";
 import { fileURLToPath } from "node:url";
-import { chromium } from "./node_modules/playwright/index.mjs";
+import { chromium } from "playwright"; // machine-level resolution (~/node_modules walk-up) — no worktree-local junction dependency
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(HERE, "..");
@@ -63,6 +63,10 @@ try {
     ok(`${vp}: route strip reveals the whole journey`, +stripLen >= 30, stripLen + " hops");
     const panelText = await page.locator("#panel").innerText();
     ok(`${vp}: person panel opens alongside the traveler`, panelText.length > 200, "");
+    // rider-3: the route strip's alternates line is DERIVED, never boilerplate
+    const stripNote = await page.locator("#atlas-route").innerText();
+    ok(`${vp}: route strip alternates clause is derived (one of the three measured states)`,
+      /exactly one route|equal-shortest routes|near-equal alternates one hop longer/.test(stripNote) && !/not the only one/.test(stripNote));
     await page.screenshot({ path: join(SHOTS, `combined-02-travel-${vp}.png`), fullPage: vp === "390" });
 
     // 3. teaser → atlas follows WITHOUT camera/root/history reset.
@@ -106,6 +110,51 @@ try {
     await page.screenshot({ path: join(SHOTS, `combined-04-back-${vp}.png`), fullPage: vp === "390" });
 
     ok(`${vp}: zero page errors across the combined journey`, errors.length === 0, errors.join(";").slice(0, 150));
+
+    // 5. THE UNPROMPTED SECOND-PERSON CLICK (rider-3 item 6 — the A-gate
+    // behavioral test, honestly labeled a simulation): a fresh stranger who
+    // receives NO instructions follows only what is visibly clickable —
+    // first click on the most salient affordance, then reads the person
+    // view, then clicks ONE more ancestor with no search, no typing, no
+    // scripted ids. The second click must be available and rewarded.
+    console.log(`== ${vp} unprompted second click (stranger simulation) ==`);
+    const page2 = await ctx.newPage();
+    const errors2 = [];
+    page2.on("pageerror", (e) => errors2.push(String(e)));
+    await page2.goto(`http://127.0.0.1:${PORT}/tools/genealogy/gux01-combined-demo.html`);
+    await page2.waitForSelector('#atlas-mount[data-atlas-ready="1"]', { timeout: 30000 });
+    await page2.waitForSelector("#atlas-cards [data-card]", { timeout: 10000 });
+    const affordBefore = await page2.locator("#atlas-cards [data-card], #panel .pp-hook[data-ppgo], #panel .pp-hook[data-pprel]").count();
+    ok(`${vp}: stranger lands with visible affordances (cards + panel hooks), zero instructions`, affordBefore >= 10, affordBefore + " visible");
+    // first click: the most salient affordance — the first route card
+    await page2.locator("#atlas-cards [data-card='route']").first().click();
+    await page2.waitForSelector("#atlas-route[data-route-len]", { timeout: 10000 });
+    await page2.waitForTimeout(400);
+    const landed = await page2.evaluate(() => (document.querySelector(".pp-person") || {}).getAttribute ? document.querySelector(".pp-person").getAttribute("data-ppid") : null);
+    ok(`${vp}: first unprompted click landed on a real person`, !!landed, `person=${landed}`);
+    // the person view must offer next-clicks WITHOUT any instruction
+    const nexts = await page2.locator(".pp-teaser[data-ppq], .pp-teaser[data-pprel], .pp-row[data-ppgo], .pp-row[data-pprel], .pp-hopnode").count();
+    ok(`${vp}: the person view offers unprompted next-clicks (teasers/family/hops)`, nexts >= 3, nexts + " affordances visible");
+    // THE SECOND CLICK: the first clickable curiosity affordance — no typing, no search
+    const teaser2 = page2.locator(".pp-teaser[data-ppq], .pp-teaser[data-pprel]").first();
+    const secondTarget = (await teaser2.count()) ? teaser2 : page2.locator(".pp-row[data-ppgo], .pp-row[data-pprel]").first();
+    const before2 = await ctxOf(page2);
+    await secondTarget.click();
+    await page2.waitForTimeout(400);
+    const after2 = await ctxOf(page2);
+    const secondOutcome = await page2.evaluate(() => {
+      const p = document.querySelector(".pp-person");
+      if (p) return { kind: "person", id: p.getAttribute("data-ppid") };
+      const r = document.querySelector(".pp-relview");
+      if (r) return { kind: "relationship", id: r.getAttribute("data-pprelview") };
+      return null;
+    });
+    ok(`${vp}: the SECOND person click happened unprompted and was rewarded`,
+      !!secondOutcome && (secondOutcome.kind === "relationship" || secondOutcome.id !== landed || after2.selection !== before2.selection),
+      secondOutcome ? `${landed} → ${secondOutcome.kind}:${secondOutcome.id}` : `${landed} → nothing`);
+    ok(`${vp}: stranger run — zero page errors`, errors2.length === 0, errors2.join(";").slice(0, 150));
+    await page2.screenshot({ path: join(SHOTS, `combined-05-stranger-second-click-${vp}.png`), fullPage: vp === "390" });
+    await page2.close();
     await ctx.close();
   }
 } finally {

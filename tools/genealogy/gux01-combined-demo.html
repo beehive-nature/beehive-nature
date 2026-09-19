@@ -67,7 +67,7 @@
   <div id="panel"></div>
 </main>
 <script type="module">
-  import { createAtlas, discoveries, bloodRoute, GHOST_TITLE, ATLAS_VERSION } from "../../surfaces/blood-atlas.mjs";
+  import { createAtlas, discoveries, bloodRoute, routeAltClause, GHOST_TITLE, ATLAS_VERSION } from "../../surfaces/blood-atlas.mjs";
   import { mountPersonPanel } from "../../surfaces/person-panel.mjs";
   import { fetchArchive } from "../../surfaces/person-panel-corpus.mjs";
 
@@ -135,7 +135,7 @@
     strip.style.display = "block";
     strip.setAttribute("data-route-len", String(route.length - 1));
     strip.innerHTML = "<div style='color:#8a8578;font-size:11px;margin-bottom:4px'>follow the blood — " + (route.length - 1) +
-      " hops · <span style='color:#5f6f61'>shortest published parent-edge path · one available route, not the only one</span></div>" +
+      " hops · <span style='color:#5f6f61'>shortest published parent-edge path · " + routeAltClause(atlas.model, from, to) + "</span></div>" +
       route.map((iid, i) => {
         const p = atlas.person(iid);
         return "<button class='atlas-hop ev-" + ((p.evidence || {}).class || "none") + "' data-hop=\"" + iid +

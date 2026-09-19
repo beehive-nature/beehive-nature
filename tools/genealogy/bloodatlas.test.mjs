@@ -527,7 +527,47 @@ test("wiring: the harness mounts the engine, links the stylesheet, exposes the j
 // UI LAW: whenever a count depends on traversal depth, the depth rides beside
 // the count. Enforced structurally: a card with `count` must carry depthNote
 // OR corpusWide:true — the builder refuses otherwise.
-import { bloodRoute, discoveries } from "../../surfaces/blood-atlas.mjs";
+import { bloodRoute, discoveries, routeAlternates, routeAltClause } from "../../surfaces/blood-atlas.mjs";
+
+test("ROUTE-ALTERNATES DERIVED LAW (rider-3): the disclosure states what the measurement proved — never universal boilerplate", () => {
+  const model = ingest(readJson(CORPUS_PATH));
+  const cards = discoveries(model).filter((c) => c.kind === "route");
+  assert.ok(cards.length >= 1, "route cards exist");
+  for (const c of cards) {
+    assert.ok(!/not the only one/.test(c.disclosure), "the universal alternates boilerplate is retired: " + c.id);
+    assert.match(c.disclosure, /exactly one route|equal-shortest routes|near-equal alternates one hop longer/, "a DERIVED alternates clause rides every route: " + c.id);
+    assert.match(c.disclosure, /shortest published parent-edge path/, "graph + status still named: " + c.id);
+  }
+  /* the clause must AGREE with the measurement for every route card */
+  for (const c of cards) {
+    const alt = routeAlternates(model, c.action.from, c.action.to);
+    if (alt.equal === "many" || alt.equal >= 2) assert.match(c.disclosure, /equal-shortest routes/, "measurement says alternates exist: " + c.id);
+    else if (alt.near) assert.match(c.disclosure, /near-equal alternates one hop longer/, "measurement says a longer alternate exists: " + c.id);
+    else assert.match(c.disclosure, /exactly one route here/, "measurement says one route only: " + c.id);
+  }
+});
+
+test("routeAlternates unit law: diamond, one-hop-longer, and single-chain graphs", () => {
+  const stub = (edges, persons) => ({
+    person: (id) => persons[id],
+    parentOf: (c) => (edges[c] || []).filter((p) => persons[p])
+  });
+  const P = { a: {}, b: {}, c: {}, d: {}, x: {}, y: {} };
+  /* diamond: two equal-shortest routes a→d */
+  const diamond = stub({ a: ["b", "c"], b: ["d"], c: ["d"] }, P);
+  assert.deepEqual(routeAlternates(diamond, "a", "d"), { equal: 2, near: 1 });
+  assert.match(routeAltClause(diamond, "a", "d"), /2 equal-shortest routes/);
+  /* chain plus a one-hop-longer alternate: a→b→d and a→x→y→d */
+  const nearCase = stub({ a: ["b", "x"], b: ["d"], x: ["y"], y: ["d"] }, P);
+  assert.deepEqual(routeAlternates(nearCase, "a", "d"), { equal: 1, near: 1 });
+  assert.match(routeAltClause(nearCase, "a", "d"), /near-equal alternates one hop longer/);
+  /* single chain: exactly one route, honestly said */
+  const chain = stub({ a: ["b"], b: ["d"] }, P);
+  assert.deepEqual(routeAlternates(chain, "a", "d"), { equal: 1, near: 0 });
+  assert.match(routeAltClause(chain, "a", "d"), /exactly one route here/);
+  /* unreachable */
+  assert.deepEqual(routeAlternates(chain, "d", "a"), { equal: 0, near: 0 });
+});
 
 test("bloodRoute: shortest parent-path founder→Ragnar derived from the corpus", () => {
   const model = ingest(readJson(CORPUS_PATH));
