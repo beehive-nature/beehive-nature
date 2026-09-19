@@ -5,6 +5,9 @@
 //   second-person navigation -> Back returns exactly home
 // plus the deep-link -> explore -> Back cases (BOTH starting conditions) and
 // the mount invariants: one world, one explanation, one history, one grammar.
+// Review beat d6ca5958 (LoVis bee-laborer fresh-eyes): browser Back restores
+// (popstate), the post-Back rail + panel re-derive, the panel's stand-here
+// re-roots the ENGINE, and the phone's system Back never exits the tree.
 // Run: node e2e/gux01-blood-journey.mjs   (from the lane worktree root)
 import { createServer } from "node:http";
 import { readFile, writeFile, mkdir } from "node:fs/promises";
@@ -181,6 +184,46 @@ try {
     try { await ctx.close(); } catch (e) {}
   }
 
+  console.log("== review beat d6ca5958: browser Back + post-Back rail/panel + panel stand-here ==");
+  {
+    const { ctx, page, errors } = await openJourney(1280, 800);
+    const bootSt = await state(page);
+    // the exploration a person does: select (replace) then re-root (push)
+    const pid1 = await paintedPid(page, bootSt.root);
+    await clickPerson(page, pid1);
+    await page.evaluate((id) => globalThis.__guxAtlas.reroot(id), pid1);
+    const sr = await state(page);
+    ok("review precondition: re-rooted before Back", sr.root === pid1, "root=" + sr.root);
+
+    // BROWSER Back (the phone's system-Back path): popstate must restore,
+    // never leave the page (review finding 1 + spec invariant 4)
+    await page.evaluate(() => history.back());
+    await page.waitForFunction((r) => globalThis.__guxAtlas.getContext().root === r, bootSt.root);
+    const sb = await state(page);
+    ok("browser Back restores the exploration (popstate - one history mirrored)", sb.root === bootSt.root && sb.view === bootSt.view && (sb.selection || null) === pid1, JSON.stringify({ r: sb.root, s: sb.selection, v: sb.view }) + " vs boot " + JSON.stringify({ r: bootSt.root, v: bootSt.view }));
+    ok("browser Back: URL grammar mirrors the restored context", await page.evaluate((st) => location.hash.includes("r=" + st.root) && location.hash.includes("p=" + (st.selection || "")), sb));
+    ok("browser Back: rail re-derives to the RESTORED root (finding 2)", await page.getAttribute("#cards", "data-rail-root") === bootSt.root);
+    const nm1 = await page.evaluate((id) => globalThis.__guxAtlas.person(id).name, pid1);
+    ok("browser Back: the panel follows the restored selection (post-Back panel)", (await page.innerText("#ppanel .pp-view")).includes(String(nm1).split(" ")[0]));
+    ok("browser Back stays ON the page (never a real navigation away)", page.url().includes("/surfaces/blood.html"));
+
+    // panel stand-here (finding 5): the re-root button must re-root the ENGINE.
+    // pid2 must differ from pid1 AND from the standing root — a stand-here on
+    // the current root is the panel's own no-op and proves nothing.
+    const pid2 = await page.evaluate((x) => {
+      const els = Array.from(document.querySelectorAll('#atlas [data-pid]'));
+      const el = els.find((e) => { const id = e.getAttribute('data-pid'); return id !== x.a && id !== x.b; });
+      return el ? el.getAttribute('data-pid') : null;
+    }, { a: pid1, b: bootSt.root });
+    ok("review: stand-here target differs from the first re-root AND the standing root", !!pid2 && pid2 !== pid1 && pid2 !== bootSt.root, "pid1=" + pid1 + " pid2=" + pid2 + " root=" + bootSt.root);
+    await clickPerson(page, pid2); // select pid2 -> the panel explains pid2
+    await page.click("#ppanel [data-pproot]"); // "stand here (re-root)"
+    const sp = await state(page);
+    ok("panel stand-here re-roots the ENGINE - one root on screen: atlas + hash + rail all follow", sp.root === pid2 && (await page.evaluate(() => location.hash)).includes("r=" + pid2) && await page.getAttribute("#cards", "data-rail-root") === pid2, "root=" + sp.root + " sel=" + sp.selection + " rail=" + (await page.getAttribute("#cards", "data-rail-root")));
+    ok("zero page errors (review beat)", errors.length === 0, errors[0] || "");
+    try { await ctx.close(); } catch (e) {}
+  }
+
   console.log("== 390px: the phone pass ==");
   {
     const { ctx, page, errors } = await openJourney(390, 844, "#p=" + DONNA);
@@ -191,6 +234,12 @@ try {
     ok("390: selecting a person opens the drawer (panel reachable by thumb)", await page.evaluate(() => document.getElementById("detail").classList.contains("open")));
     ok("390: the ONE back affordance is visible", await page.isVisible("#guxback"));
     await shot(page, "person-390");
+    // review beat d6ca5958: the phone's SYSTEM Back walks the exploration
+    await page.evaluate((id) => globalThis.__guxAtlas.reroot(id), pid);
+    await page.evaluate(() => history.back());
+    await page.waitForFunction((r) => globalThis.__guxAtlas.getContext().root === r, s0.root);
+    const sb390 = await state(page);
+    ok("390 system Back: restores the pre-re-root context (never exits the tree)", sb390.root === s0.root && (sb390.selection || null) === pid && sb390.view === s0.view, JSON.stringify(sb390));
     await backHome(page);
     const f = await state(page);
     ok("390: Back returns home: root · selection · view EXACT", f.root === s0.root && (f.selection || null) === (s0.selection || null) && f.view === s0.view);

@@ -143,6 +143,7 @@ body.gux #atlas{display:block}
 #ppanel .pp-search{display:none!important}
 #ppanel .pp-backbar{display:none!important}
 body.gux #dempty,body.gux #dbody{display:none!important} /* one explanation surface: the panel */
+body.gux #lenses,body.gux .listview,body.gux #rootnote{display:none!important} /* incumbent-only affordances retire under gux (review d6ca5958): lens filters re-selected the root; the comb's list table + root note showed the INCUMBENT root while the engine stood elsewhere */
 #cards button{text-align:left;background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:9px 12px;cursor:pointer;font:inherit;flex:1 1 220px;max-width:250px;line-height:1.45}
 #cards button:hover{border-color:var(--cyan)}
 #routestrip button{background:var(--well);color:var(--ink);border:1px solid var(--line);border-radius:8px;cursor:pointer;font:inherit;font-size:11px;padding:3px 8px;white-space:nowrap}
@@ -1179,6 +1180,7 @@ hex.setAttribute('data-pid',id);
   });
   document.getElementById('lenses').addEventListener('change',function(e){
     var l=e.target.getAttribute('data-lens');if(l)S.lenses[l]=e.target.checked;
+    if(globalThis.__guxAtlas)return; // engine mode: lenses are retired (hidden) and NEVER re-select the root (review d6ca5958)
     if(S.curRoot&&S.persons[S.curRoot])showDetail(S.curRoot);});
   document.getElementById('q').addEventListener('input',function(){
     var v=this.value.trim().toLowerCase(),out=document.getElementById('qout');out.innerHTML='';
@@ -1221,7 +1223,7 @@ hex.setAttribute('data-pid',id);
 import { createAtlas, discoveries, bloodRoute, routeAlternates, routeAlternatesPhrase, ingest } from "./blood-atlas.mjs";
 import { mountPersonPanel, esc as ppEsc } from "./person-panel.mjs";
 import { fetchArchive } from "./person-panel-corpus.mjs";
-import { decodeHash, initialFromCtx, syncHash, mapView, RETURN_KEY, archiveUrl } from "./blood-nav.mjs";
+import { decodeHash, initialFromCtx, syncHash, syncEngineHash, setEngineSeam, mapView, RETURN_KEY, archiveUrl } from "./blood-nav.mjs";
 
 const $ = (id) => document.getElementById(id);
 const esc = (v) => ppEsc(v);
@@ -1255,12 +1257,21 @@ try {
 
   let syncing = false;   // loop guard: one wiring echo per gesture
   let panelAt = null;    // the person the panel is showing
+  let railRoot = init.root;   // the root the discovery rail was last derived for
+  let panelRoot = init.root;  // the root the PANEL last stood on (kept equal to the engine root - ONE root on screen)
   let atlas = null;
 
   // the panel (zGenePerson's organ) — the ONE explanation surface
   const { archive } = await fetchArchive(BASE);
   const panel = mountPersonPanel($("ppanel"), archive, {
     root: init.root,
+    onreroot(id) {
+      // "stand here (re-root)" - the panel ASKS, the engine re-roots (one
+      // world, one root on screen; review d6ca5958 finding 5). Loop-guarded:
+      // the onContext(reroot) echo re-syncs panel + rail while syncing holds.
+      if (syncing || !atlas || !id) return;
+      syncing = true; try { atlas.reroot(id); } finally { syncing = false; }
+    },
     onnavigate(s) {
       if (syncing || !atlas) return;
       const id = s.view === "person" ? s.id : s.view === "relationship" ? s.a : null;
@@ -1330,13 +1341,25 @@ try {
     corpus, overlay,
     initial: init,
     onContext(ctx, reason) {
-      syncHash(ctx); // blood-nav's grammar; replaceState only — the URL is derived state
+      syncEngineHash(ctx, reason); // blood-nav's ONE-history law: push fresh navigations, echo engine walks, replace selects (review d6ca5958 finding 1)
       const vb = { viewped: "pedigree", viewfan: "fractal", viewtree: "tree" };
       for (const id in vb) { const el = $(id); if (el) el.setAttribute("aria-pressed", String(ctx.view === vb[id])); }
       try { boot.S.curRoot = ctx.root; if (ctx.selection) boot.S.sel = ctx.selection; } catch (e) {}
+      if (railRoot !== ctx.root) {
+        railRoot = ctx.root;
+        renderRail(ctx.root); // contextual per root on EVERY path — reroot, back, home, restore (review d6ca5958 finding 2)
+      }
+      if (panelRoot !== ctx.root) {
+        // ONE root on screen, every path: the panel re-stands whenever the
+        // ENGINE root moves - including back/home/restore, where the panel's
+        // internal curRoot used to desync and mute its own stand-here button
+        // (review d6ca5958 finding 5). syncing holds: panel.setRoot fires
+        // onreroot, and this re-stand is an echo, never a fresh re-root.
+        panelRoot = ctx.root;
+        syncing = true; panel.setRoot(ctx.root); syncing = false;
+      }
       if (reason === "reroot") {
-        renderRail(ctx.root);
-        panelAt = ctx.root; syncing = true; panel.setRoot(ctx.root); panel.openPerson(ctx.root); syncing = false;
+        panelAt = ctx.root; syncing = true; panel.openPerson(ctx.root); syncing = false;
       } else if (!syncing && (reason === "select" || reason === "back" || reason === "restore" || reason === "home")) {
         openPanelPerson(ctx.selection);
         if (reason === "home" && !ctx.selection && panelAt !== ctx.root) { panelAt = ctx.root; syncing = true; panel.openPerson(ctx.root); syncing = false; }
@@ -1344,6 +1367,7 @@ try {
     }
   });
   globalThis.__guxAtlas = atlas;
+  setEngineSeam(atlas, init); // blood-nav's popstate restores through this seam (one history, mirrored — review d6ca5958)
   globalThis.__guxInit = init; // journey seam: the URL-derived initial context
   document.body.classList.add("gux");
   // ONE history, one visible affordance: back joins the zoombar (B on the
@@ -1377,7 +1401,6 @@ try {
   failQuiet("engine mount failed — incumbent comb path remains active (" + (e && e.message) + ")");
 }
 </script>
-<script type="module" src="./blood-nav.mjs?v=2"></script>
 <script src="tour.js?v=42"></script>
 </body>
 </html>

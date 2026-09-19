@@ -116,6 +116,51 @@
  ],
  [
   "PASS",
+  "review precondition: re-rooted before Back",
+  "root=p55eb2f15c6"
+ ],
+ [
+  "PASS",
+  "browser Back restores the exploration (popstate - one history mirrored)",
+  "{\"r\":\"p72d226cedf\",\"s\":\"p55eb2f15c6\",\"v\":\"pedigree\"} vs boot {\"r\":\"p72d226cedf\",\"v\":\"pedigree\"}"
+ ],
+ [
+  "PASS",
+  "browser Back: URL grammar mirrors the restored context",
+  ""
+ ],
+ [
+  "PASS",
+  "browser Back: rail re-derives to the RESTORED root (finding 2)",
+  ""
+ ],
+ [
+  "PASS",
+  "browser Back: the panel follows the restored selection (post-Back panel)",
+  ""
+ ],
+ [
+  "PASS",
+  "browser Back stays ON the page (never a real navigation away)",
+  ""
+ ],
+ [
+  "PASS",
+  "review: stand-here target differs from the first re-root AND the standing root",
+  "pid1=p55eb2f15c6 pid2=p58ec9cc83d root=p72d226cedf"
+ ],
+ [
+  "PASS",
+  "panel stand-here re-roots the ENGINE - one root on screen: atlas + hash + rail all follow",
+  "root=p58ec9cc83d sel=p58ec9cc83d rail=p58ec9cc83d"
+ ],
+ [
+  "PASS",
+  "zero page errors (review beat)",
+  ""
+ ],
+ [
+  "PASS",
   "390 cold: deep-linked person opens on the default root",
   ""
  ],
@@ -128,6 +173,11 @@
   "PASS",
   "390: the ONE back affordance is visible",
   ""
+ ],
+ [
+  "PASS",
+  "390 system Back: restores the pre-re-root context (never exits the tree)",
+  "{\"root\":\"p72d226cedf\",\"selection\":\"p55eb2f15c6\",\"view\":\"pedigree\",\"k\":1,\"x\":0,\"y\":-192}"
  ],
  [
   "PASS",

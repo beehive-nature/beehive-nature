@@ -52,3 +52,102 @@ No corpus writes; no archive.mjs/model.mjs/personpage.mjs edits; engine and pane
 - When Archive 1.1 (bFUzZ) lands: blood-nav's `upPath` adapter gets replaced whole; the panel's own corpus adapter (person-panel-corpus.mjs) direction semantics should be checked by its owner against 1.1's corrected `relationshipPath`.
 
 — ZcODe5.3max (zGeneUI), 2026-09-19
+---
+
+## RIDER (same day, later): the fresh-eyes review cures - event d6ca5958
+
+Review: LoVis bee-laborer fresh-eyes mount review against 4532efb6 (log
+WORK_LOGS/2026-09-19_LOVISBEE_GUX01_MOUNT_REVIEW.md, founder auth-tagged).
+This rider lands on top of 4532efb6 and cures the confirmed findings plus the
+verified subset of the unverified list. It resets the 4532efb6 bFUzZ GREEN
+pin BY DESIGN - the review ordered the fixes and the re-PROVE.
+
+CURED - the review's browser-pass blockers first:
+1. Browser Back left the page (finding 1). The ONE-history law now lives in
+   blood-nav.mjs: fresh engine navigations (reroot/view/home - exactly the
+   reasons the engine core pushes) PUSH the browser stack; every other
+   reason (select/back/restore) REPLACES in place; popstate RESTORES the
+   URL context into the engine through atlas.core.restoreContext (+ the
+   boot seam: a popped entry without r/v restores the boot root/view; no
+   camera in the hash = the boot framing home() itself uses, never a bare
+   identity). An earlier draft echoed history.back() on engine back - the
+   journey caught it popping PAST the boot entry into a real navigation at
+   390px; the echo is gone and a stub test forbids any history.back() call.
+2. Rail stale after Back/home (finding 2). renderRail keys on
+   railRoot !== ctx.root - EVERY path (reroot/back/home/restore) re-derives.
+3. blood-nav loaded twice (finding 3). The ?v=2 tag is deleted; the mount's
+   import is the single instance (self-wiring via __bloodReady); a wiring
+   test pins its absence.
+4. Serialized zoom 0.18..0.29 was dropped (finding 4). decodeHash floor is
+   now the ENGINE's floor (0.18, blood-atlas.mjs zoom clamp) - round-trip
+   test added.
+5. Panel stand-here re-rooted only the panel (finding 5) - TWO cures: (a)
+   the mount passes onreroot -> atlas.reroot (loop-guarded); (b) the
+   DEEPER half the probe exposed: the panel's curRoot desynced from the
+   engine root on every restore/back/home path, which muted its own
+   stand-here button (setRoot early-returns on id===curRoot) - the mount
+   now mirrors the engine root into panel.setRoot on EVERY root change
+   (panelRoot !== ctx.root). ONE root on screen, every path.
+6. (verified from the unverified list) Lens toggles re-selected the root:
+   the incumbent lens handler called showDetail(S.curRoot), which under gux
+   re-selects the INCUMBENT root into the engine. Guarded under gux AND
+   #lenses retired with .listview + #rootnote via a new body.gux hide rule
+   (the stale incumbent list table + root note showed the incumbent root
+   while the engine stood elsewhere).
+7. (verified) The O-key archive doorway saved a MIXED context (engine
+   selection over incumbent view/camera). openArchive is engine-aware: it
+   saves the ENGINE's whole context through the one grammar.
+
+VERIFIED, NOT DEFECTS (per the review's check-before-acting):
+- home() pushes: consistent with the ledger design (Back walks to it; the
+  page never exits prematurely).
+- #q keeps the incumbent matcher, but its result clicks route through the
+  engine-aware showDetail (blood.html:905) - one search box, behaviorally
+  intact under gux; rewiring the matcher is out of scope for this rider.
+- bloodnav.test.mjs:340 pins the incumbent FALLBACK path wiring (the mount
+  fails closed to the incumbent comb when the engine throws); the
+  one-explanation law carries its own locks (the :453 test). Not a defect.
+
+RECEIPT CORRECTIONS (the review's stale-claims item, named):
+- 186/186 (beat 2b receipt above) - superseded by 212/212 (beat 2f),
+  218/218 (D1 rider), now 223/223 at this rider.
+- 20/24 journey - superseded by 29/29 (beats 2f/D1), now 39/39 at this
+  rider (10 review beats added: browser-Back restore at desktop + 390px
+  system Back, post-Back hash/rail/panel, stays-on-page, non-vacuous
+  stand-here, precondition beats).
+- upPath replaced when 1.1 lands - ALREADY DONE at beats 2e/2f (e962b6eb,
+  24c64060): upPath replaced whole by archive-core @ 54462935.
+- gated at every state entry - now literally true: the lens toggle, the one
+  ungated semantic entry, is guarded under gux.
+
+EVIDENCE at this rider's head:
+- node --test tools/genealogy/*.test.mjs = 223/223 PASS 0 fail 0 skipped
+  (218 + 5 review tests: zoom-floor round-trip, the historyAction law,
+  sameCtx at grammar precision, the syncEngineHash stub, review wiring
+  pins incl. the panelRoot mirror and the ?v=2 ban).
+- node e2e/gux01-blood-journey.mjs = 39/39 beats PASS GREEN zero page
+  errors, run twice consecutively (a railRoot-assignment bug was caught by
+  this very beat going red on the second run and cured before landing; the
+  stand-here beat was hardened to a non-vacuous target after a vacuous
+  pass was caught - pid2 must differ from pid1 AND the standing root).
+- Camera beats unchanged and exact: cold {k:1,x:0,y:-176}; deep-link 2
+  {k:1.6,x:-100,y:80} at boot AND Back-home.
+
+BOUNDARIES: engine bytes (blood-atlas.mjs) and panel bytes
+(person-panel.mjs) untouched - every cure lives in blood.html wiring,
+blood-nav.mjs (the grammar owner), and tests. No corpus writes. The
+incumbent fallback path stays fully functional (all gates read __guxAtlas).
+Production delta: surfaces/blood.html + surfaces/blood-nav.mjs +
+tools/genealogy/bloodnav.test.mjs + e2e/gux01-blood-journey.mjs (+ shots).
+
+QUEUED (Refill 3 mapping, founder-auth-tagged bcfdddbb, for the Z3 family -
+NOT part of this rider): blight/midi.html triple-wrapped disclosures
+(md.d.compose L110-112, md.d.balance L170-172) fixed inside Z3, then delete
+R3's midi exemption rows; blight/demo.html + onboarding/receive.html inline
+all 16 bcomb.js functions byte-identical - banked as a future Z slice.
+
+NEXT: bFUzZ re-PROVE at this rider's head with the expanded attack set the
+review named (browser Back, post-Back rail + panel root, panel re-root
+button); then the founder browser-seat pass (thread fcd6a2fc, checklist
+d5219a59) -> #125 merge review.
+

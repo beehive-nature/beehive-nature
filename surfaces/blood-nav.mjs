@@ -53,7 +53,10 @@ export function decodeHash(hash) {
   m = h.match(/r=([A-Za-z0-9_-]+)/);
   if (m) out.r = m[1];
   m = h.match(/s=([0-9.]+)/);
-  if (m) { var s = parseFloat(m[1]); if (s >= 0.3 && s <= 4) out.s = s; }
+  // GUX-01 review beat (d6ca5958 finding 4): the camera floor is the ENGINE's
+  // zoom floor (0.18, blood-atlas.mjs) - a serialized 0.18..0.29 zoom must
+  // round-trip or zoomed-out deep links boot at the default camera.
+  if (m) { var s = parseFloat(m[1]); if (s >= 0.18 && s <= 4) out.s = s; }
   m = h.match(/x=(-?[0-9.]+)/); if (m) out.x = parseFloat(m[1]);
   m = h.match(/y=(-?[0-9.]+)/); if (m) out.y = parseFloat(m[1]);
   return out;
@@ -113,6 +116,81 @@ export function syncHash(ctx, winRef) {
 // the one-shot return-from-archive session key (shared with the mounted panel's
 // openPersonPage so both doorways return to the SAME context grammar).
 export var RETURN_KEY = 'blood.ctx';
+
+/* ---------- GUX-01 review beat (LoVis bee-laborer d6ca5958): ONE history, mirrored ----------
+ * Spec invariant 4: the engine's history is THE history; the URL is derived
+ * state; popstate RESTORES. Fresh engine navigations (reroot/view/home -
+ * exactly the reasons the engine's core pushes) PUSH the browser stack too,
+ * so a phone's system Back walks the exploration instead of leaving the
+ * page; every other reason (select, back, restore) REPLACES in place. The
+ * browser stack is the append-only URL ledger; the engine's own stack stays
+ * THE back affordance (#guxback / B key); popstate decodes the ledger entry
+ * and restores it into the engine - the two can never disagree fatally
+ * because no engine action ever pops the browser stack. */
+
+// which history operation does this onContext reason imply? Engine-initiated
+// walks (back) REPLACE, never history.back(): after a user browser-Back the
+// two stacks sit at different depths, and an echoed back would pop past the
+// boot entry into a REAL navigation (journey-caught at 390px). The browser
+// stack is the append-only URL ledger; popstate restores from it; the engine
+// stack stays the one BACK affordance.
+export function historyAction(reason) {
+  if (reason === 'reroot' || reason === 'view' || reason === 'home') return 'push';
+  return 'replace';
+}
+
+// engine ctx -> the one grammar's field names (pure; no history touched)
+export function navOf(ctx) {
+  if (!ctx) return null;
+  return {
+    p: ctx.selection || null,
+    v: mapView(ctx.view) || null,
+    r: ctx.root || null,
+    s: ctx.transform && typeof ctx.transform.k === 'number' && isFinite(ctx.transform.k) ? ctx.transform.k : null,
+    x: ctx.transform && typeof ctx.transform.x === 'number' && isFinite(ctx.transform.x) ? Math.round(ctx.transform.x) : null,
+    y: ctx.transform && typeof ctx.transform.y === 'number' && isFinite(ctx.transform.y) ? Math.round(ctx.transform.y) : null
+  };
+}
+
+// do two contexts agree AT GRAMMAR PRECISION (2dp scale, integer pan)? The
+// echo guard: a popstate that lands where the engine already sits is our own
+// mirrored walk, not a user Back. Accepts engine-shaped or nav-shaped ctx.
+export function sameCtx(a, b) {
+  var ka = encodeCtx(a && a.selection !== undefined ? navOf(a) : a);
+  var kb = encodeCtx(b && b.selection !== undefined ? navOf(b) : b);
+  return ka === kb;
+}
+
+var engineSeam = null;       // {atlas, init} - registered by the mount when the engine is live
+var engineRestoring = false; // loop guard: a popstate-driven restore must not push
+
+// the mount registers the seam right after createAtlas succeeds; engine-mode
+// history fails closed (incumbent wiring) when unregistered.
+export function setEngineSeam(atlasRef, initRef) {
+  engineSeam = atlasRef && typeof atlasRef.getContext === 'function'
+    ? { atlas: atlasRef, init: initRef || null }
+    : null;
+}
+
+// the mount's onContext calls this INSTEAD of syncHash in engine mode: it
+// applies the one-history law above. Returns the encoded hash.
+export function syncEngineHash(ctx, reason, winRef) {
+  var w = winRef || (typeof window !== 'undefined' ? window : null);
+  var h = encodeCtx(navOf(ctx));
+  if (!w || !w.history) return h;
+  var url = h || (w.location ? w.location.pathname + w.location.search : '');
+  try {
+    if (engineRestoring) {
+      // popstate-driven: the URL is already at the target; replace canonicalizes
+      w.history.replaceState(null, '', url);
+    } else if (historyAction(reason) === 'push') {
+      w.history.pushState(null, '', url);
+    } else {
+      w.history.replaceState(null, '', url);
+    }
+  } catch (e) { /* hashless environments */ }
+  return h;
+}
 
 // semantic zoom: which reading level does this scale show?
 export function lodFor(scale) {
@@ -372,8 +450,18 @@ function focusInView(id) {
 
 function openArchive(id) {
   var a = api(); if (!a || !id) return;
-  persistCtxNow();
-  try { sessionStorage.setItem(SESSION_KEY, currentCtxString()); } catch (e) {}
+  // engine mode: save the ENGINE's whole context (view + camera included),
+  // not the incumbent's - the O doorway used to persist a mixed context
+  // (engine selection over incumbent view/camera; review d6ca5958).
+  var gx = globalThis.__guxAtlas;
+  try {
+    if (gx && typeof gx.getContext === 'function') {
+      sessionStorage.setItem(SESSION_KEY, encodeCtx(navOf(gx.getContext())));
+    } else {
+      persistCtxNow();
+      sessionStorage.setItem(SESSION_KEY, currentCtxString());
+    }
+  } catch (e) { /* private mode: the archive doorway still opens */ }
   var u = archiveUrl(id);
   if (a.doc && a.doc.defaultView) a.doc.defaultView.location.href = u;
 }
@@ -514,7 +602,34 @@ function wireHashAndSession() {
     }
   } catch (e) { /* private mode: the URL hash context still applies */ }
   win.addEventListener('popstate', function () {
-    if (globalThis.__guxAtlas) return; // engine mode: the URL is derived state, replaced not pushed
+    var es = engineSeam || (globalThis.__guxAtlas && typeof globalThis.__guxAtlas.getContext === 'function'
+      ? { atlas: globalThis.__guxAtlas, init: null } : null);
+    if (es) {
+      // engine mode: popstate RESTORES the URL context into the engine
+      // (spec invariant 4; review d6ca5958 finding 1 - browser Back must
+      // walk the exploration, never leave the page). Our own echoed walks
+      // land where the engine already sits and no-op (sameCtx).
+      var d = decodeHash(win.location.hash);
+      if (sameCtx(es.atlas.getContext(), d)) return;
+      var t = null;
+      if (d.s != null || d.x != null || d.y != null) {
+        t = { k: d.s != null ? d.s : 1, x: d.x != null ? d.x : 0, y: d.y != null ? d.y : 0 };
+      }
+      engineRestoring = true;
+      try {
+        es.atlas.core.restoreContext({
+          root: d.r || (es.init && es.init.root) || null, // a boot entry without r restores the boot root (never a founder default)
+          selection: d.p || null,
+          view: mapView(d.v) || (es.init && es.init.view) || null,
+          transform: t
+        });
+        // no camera in the hash = auto-framing boot: aim at the boot framing
+        // home() itself uses (camera law 81e9ded8), never a bare identity
+        if (!t && es.atlas.resetView) es.atlas.resetView();
+      } catch (err) { /* unknown person in a stale hash: the engine keeps its context */ }
+      finally { engineRestoring = false; }
+      return;
+    }
     applyCtx(decodeHash(win.location.hash));
   });
 }
@@ -545,7 +660,7 @@ export function wire(apiRef) {
 }
 
 /* ---------- module side effects: expose for blood.html's classic script ---------- */
-var BloodNav = { wire: wire, onReady: onReady, onSelect: onSelect, onRoot: onRoot, onView: onView, onZoom: onZoom, focusInView: focusInView, relToRoot: relToRoot, generationContext: generationContext };
+var BloodNav = { wire: wire, onReady: onReady, onSelect: onSelect, onRoot: onRoot, onView: onView, onZoom: onZoom, focusInView: focusInView, relToRoot: relToRoot, generationContext: generationContext, historyAction: historyAction, sameCtx: sameCtx, navOf: navOf, syncEngineHash: syncEngineHash, setEngineSeam: setEngineSeam };
 if (typeof globalThis !== 'undefined') {
   globalThis.BloodNav = BloodNav;
   // blood.html's classic script may have finished booting before this

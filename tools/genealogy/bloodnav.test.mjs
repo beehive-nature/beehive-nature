@@ -14,6 +14,7 @@ import {
   siblingsOf, siblingRing, stepSelection, archiveUrl, applyPlan,
   stepLabel, relToRoot, generationContext,
   mapView, initialFromCtx, syncHash,
+  historyAction, sameCtx, navOf, syncEngineHash,
 } from "../../surfaces/blood-nav.mjs";
 import { createArchiveCore } from "../../surfaces/archive-core.mjs";
 
@@ -54,9 +55,16 @@ test("#myth doorway flag survives alongside extended params", () => {
 test("decode tolerates junk and out-of-range values", () => {
   const c = decodeHash("#garbage&s=99&v=bogus&x=abc");
   assert.equal(c.p, null);
-  assert.equal(c.s, null); // outside 0.3..4 is dropped, never trusted
+  assert.equal(c.s, null); // outside the camera range is dropped, never trusted
   assert.equal(c.v, null);
   assert.equal(c.x, null);
+});
+
+test("decode keeps the engine's zoom floor — serialized 0.18..0.29 round-trips (review d6ca5958 finding 4)", () => {
+  assert.equal(decodeHash("#s=0.18").s, 0.18); // the engine's floor (blood-atlas.mjs zoom clamp)
+  assert.equal(decodeHash("#s=0.20").s, 0.2);
+  assert.equal(decodeHash("#s=0.1").s, null);  // below the engine floor is still dropped
+  assert.equal(decodeHash("#s=4.1").s, null);  // above the engine ceiling is still dropped
 });
 
 test("encode skips missing fields instead of writing nulls", () => {
@@ -170,10 +178,9 @@ test("applyPlan: unknown ids and junk are skipped, not guessed", () => {
 
 /* ---------- wiring contract: blood.html <-> blood-nav.mjs seam ---------- */
 
-test("wiring: the page loads the nav module before tour.js", () => {
-  const m = page.indexOf('blood-nav.mjs?v=2');
-  const t = page.indexOf('tour.js?v=42');
-  assert.ok(m > 0 && t > 0 && m < t, "module script must precede tour.js");
+test("wiring: the nav module loads ONCE — the mount's import is the only instance (review d6ca5958 finding 3)", () => {
+  assert.ok(page.includes('from "./blood-nav.mjs"'), "the mount imports the module (self-wiring via __bloodReady)");
+  assert.ok(!page.includes('blood-nav.mjs?v=2'), "no second module instance - two instances double-wire keyboard/popstate with separate state");
 });
 
 test("wiring: the page exposes the BloodComb seam and the ready handshake", () => {
@@ -428,6 +435,42 @@ test("syncHash: the URL is DERIVED state — engine ctx encodes through the one 
   assert.equal(back.y, 118);
 });
 
+/* ---------- GUX-01 review beat d6ca5958: ONE history, mirrored ---------- */
+
+test("one-history law: historyAction — push fresh engine navigations; walks and selects replace in place", () => {
+  assert.equal(historyAction("reroot"), "push");
+  assert.equal(historyAction("view"), "push");
+  assert.equal(historyAction("home"), "push");
+  assert.equal(historyAction("back"), "replace"); // an echoed history.back() would pop past the boot entry after a user Back (journey-caught)
+  assert.equal(historyAction("select"), "replace");
+  assert.equal(historyAction("restore"), "replace");
+});
+
+test("one-history law: sameCtx at grammar precision — camera rounding never splits an echo", () => {
+  const eng = { root: "pR", selection: "pX", view: "fractal", transform: { k: 1.604, x: -99.7, y: 80.2 } };
+  assert.ok(sameCtx(eng, decodeHash("#p=pX&v=fractal&r=pR&s=1.60&x=-100&y=80")), "2dp scale + integer pan agreement is the same context");
+  assert.ok(!sameCtx(eng, decodeHash("#p=pX&v=fractal&r=pOther&s=1.60&x=-100&y=80")), "a different root is a different context");
+  assert.ok(!sameCtx(eng, decodeHash("#p=pOther&v=fractal&r=pR&s=1.60&x=-100&y=80")), "a different selection is a different context");
+  assert.ok(sameCtx(navOf(eng), decodeHash("#p=pX&v=fractal&r=pR&s=1.60&x=-100&y=80")), "navOf-normalized compares equal to the raw engine ctx");
+});
+
+test("one-history law: syncEngineHash drives a stub history exactly (push/replace)", () => {
+  const calls = [];
+  const win = { history: {
+    pushState: (a, b, u) => calls.push(["push", u]),
+    replaceState: (a, b, u) => calls.push(["replace", u]),
+    back: () => calls.push(["FATAL-back"]),
+  }, location: { pathname: "/x", search: "" } };
+  const ctx = { root: "pR", selection: "pX", view: "tree", transform: { k: 2, x: -40, y: 118 } };
+  syncEngineHash(ctx, "reroot", win);
+  syncEngineHash(ctx, "view", win);
+  syncEngineHash(ctx, "select", win);
+  syncEngineHash(ctx, "back", win);
+  assert.deepEqual(calls.map((c) => c[0]), ["push", "push", "replace", "replace"], "no code path may call history.back - the engine stack is the back affordance");
+  assert.ok(calls[0][1].includes("#p=pX"), calls[0][1]);
+  assert.ok(calls[0][1].includes("v=tree"), calls[0][1]);
+});
+
 test("mount wiring: the composition mount exists with all organs (engine, panel, rail, hosts)", () => {
   assert.ok(page.includes('from "./blood-atlas.mjs"'));
   assert.ok(page.includes('from "./person-panel.mjs"'));
@@ -460,6 +503,17 @@ test("contextual rail: the mount re-derives discovery per standing root and mark
   assert.ok(page.includes("renderRail(ctx.root);"));
   assert.ok(page.includes('setAttribute("data-rail-root"'));
   assert.ok(page.includes("ingest(Object.assign({}, corpus, { root: rootId }), overlay)"));
+});
+
+test("review beat d6ca5958: browser Back owns one history — the mirror, the panel re-root, the rail on every path", () => {
+  assert.ok(page.includes("syncEngineHash(ctx, reason);"), "onContext applies the one-history law (finding 1)");
+  assert.ok(page.includes("setEngineSeam(atlas, init);"), "the popstate restore seam is registered (finding 1)");
+  assert.ok(page.includes("onreroot(id) {"), "the panel's stand-here re-roots the ENGINE, not just the panel (finding 5)");
+  assert.ok(page.includes("railRoot !== ctx.root"), "the rail re-derives on EVERY root change — back/home/restore included (finding 2)");
+  assert.ok(page.includes("panelRoot !== ctx.root"), "the panel re-stands on EVERY root change — its curRoot can never desync from the engine root (finding 5, the deeper half)");
+  assert.ok(page.includes("body.gux #lenses,body.gux .listview,body.gux #rootnote{display:none!important}"), "incumbent-only affordances retire under gux (findings: lens re-select, stale list/root note)");
+  assert.ok(page.includes("if(globalThis.__guxAtlas)return; // engine mode: lenses are retired"), "a lens toggle never re-selects the root into the engine");
+  assert.ok(!page.includes("syncHash(ctx); // blood-nav"), "the old replaceState-only sync is gone from the mount");
 });
 
 test("route strip: computed/qualified alternates only — the universal boilerplate is banned from the mount", () => {
