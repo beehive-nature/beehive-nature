@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p6899433ea9",
+ "bnr": "bnr://skaists.dev/blood/p6899433ea9",
+ "identity": {
+  "name": "Elizabeth “Isabel” Thurston",
+  "lifespan": "1702–1744",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "MSZ8-HK5"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "sourced",
+  "basis": "3 FamilySearch sources (harvested 2026-09-18)",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "3 attached FamilySearch sources (harvested 2026-09-18)"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p200c352138",
+    "name": "Thomas Thurston",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p135babe935",
+    "name": "Martha Cooper",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p0d80099220",
+    "name": "Sarah Patterson"
+   }
+  ],
+  "spouses": []
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/MSZ8-HK5",
+   "retrieved": "2026-09-16T17:59:16.202Z",
+   "sources": {
+    "count": 3,
+    "harvested": "2026-09-18"
+   }
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

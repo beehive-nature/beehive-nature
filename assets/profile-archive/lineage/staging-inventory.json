@@ -1,19 +1,19 @@
 {
  "schema": "skaists.staging-inventory/1",
- "generated": "2026-09-16",
- "walkedCohort": 18575,
- "publicStaged": 10259,
- "privateStaged": 8316,
+ "generated": "2026-09-19",
+ "walkedCohort": 19351,
+ "publicStaged": 10988,
+ "privateStaged": 8363,
  "sumCheck": true,
  "privateStaging": {
   "location": "estate-local disk (never committed)",
-  "count": 8316,
+  "count": 8363,
   "reasons": {
    "living, off the root line — privacy": {
     "count": 2
    },
    "off-bloodline ancestry (in-law lines beyond the first spouse of a bloodline person) — scope: the house line is ancestry, in-law deep ancestry stays private-side": {
-    "count": 8314
+    "count": 8361
    }
   }
  },

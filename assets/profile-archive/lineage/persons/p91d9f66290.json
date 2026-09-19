@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p91d9f66290",
+ "bnr": "bnr://skaists.dev/blood/p91d9f66290",
+ "identity": {
+  "name": "Johann Adam Fellenbaum",
+  "lifespan": "1717–1782",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G9L4-VFV"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "sourced",
+  "basis": "3 FamilySearch sources (harvested 2026-09-18)",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "3 attached FamilySearch sources (harvested 2026-09-18)"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pc0043acd6e",
+    "name": "Joehan Conrad Philabaum",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pfa9637732b",
+    "name": "Anna Maria Meyer",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p614c13c8a9",
+    "name": "Anna Catharine Fellebahn"
+   }
+  ],
+  "spouses": []
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G9L4-VFV",
+   "retrieved": "2026-09-16T17:59:16.202Z",
+   "sources": {
+    "count": 3,
+    "harvested": "2026-09-18"
+   }
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

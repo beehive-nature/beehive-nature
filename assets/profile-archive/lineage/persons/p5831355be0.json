@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p5831355be0",
+ "bnr": "bnr://skaists.dev/blood/p5831355be0",
+ "identity": {
+  "name": "Mary Richardson",
+  "lifespan": "1729–1815",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "KZHL-8Z3"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "sourced",
+  "basis": "16 FamilySearch sources (harvested 2026-09-18)",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "16 attached FamilySearch sources (harvested 2026-09-18)"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p3b5e76d4aa",
+    "name": "Pierson Richardson Jr",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pf02c801132",
+    "name": "Elizabeth Nichols",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p6c228874e9",
+    "name": "Judith Richardson"
+   }
+  ],
+  "spouses": []
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/KZHL-8Z3",
+   "retrieved": "2026-09-16T17:59:16.202Z",
+   "sources": {
+    "count": 16,
+    "harvested": "2026-09-18"
+   }
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

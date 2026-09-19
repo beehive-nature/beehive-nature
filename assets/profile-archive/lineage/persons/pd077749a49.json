@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pd077749a49",
+ "bnr": "bnr://skaists.dev/blood/pd077749a49",
+ "identity": {
+  "name": "Ralph Shepard Jr.",
+  "lifespan": "1700–1765",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "24R6-4HZ"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "sourced",
+  "basis": "8 FamilySearch sources (harvested 2026-09-18)",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "8 attached FamilySearch sources (harvested 2026-09-18)"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p5970357263",
+    "name": "Ralph Shepard",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pfa2d4e648c",
+    "name": "Mary Wilder",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p55fa3c74f8",
+    "name": "Miriam Shepard"
+   }
+  ],
+  "spouses": []
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/24R6-4HZ",
+   "retrieved": "2026-09-16T17:59:16.202Z",
+   "sources": {
+    "count": 8,
+    "harvested": "2026-09-18"
+   }
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

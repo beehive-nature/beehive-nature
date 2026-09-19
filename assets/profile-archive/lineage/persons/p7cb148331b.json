@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p7cb148331b",
+ "bnr": "bnr://skaists.dev/blood/p7cb148331b",
+ "identity": {
+  "name": "Ruth Lovell",
+  "lifespan": "1723–1815",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LCQ3-FVC"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "sourced",
+  "basis": "18 FamilySearch sources (harvested 2026-09-18)",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "18 attached FamilySearch sources (harvested 2026-09-18)"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pc17a6d5a62",
+    "name": "Thomas Lovell",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pc27d56e960",
+    "name": "Martha Herrick",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p51198e7718",
+    "name": "Ruth Waite"
+   }
+  ],
+  "spouses": []
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LCQ3-FVC",
+   "retrieved": "2026-09-16T17:59:16.202Z",
+   "sources": {
+    "count": 18,
+    "harvested": "2026-09-18"
+   }
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,12 +1,12 @@
 // ── pipeline: raw walk JSON → model → public artifacts ──────────────────────
-//   node pipeline.mjs <raw-walk.json> <out-corpus.json> [out-page-data.json] [spine-target-regex]
+//   node pipeline.mjs <raw-walk.json> <out-corpus.json> [out-page-data.json] [spine-target-regex] [via-regexes] [sources-raw-dump.json]
 // The spine terminus defaults to the earliest-birth bloodline person; pass a
 // name regex to pin it (e.g. "Sigurd Ring de Trondheim").
 import { readFileSync, writeFileSync } from "node:fs";
 import { createModel, addPerson, addEdge, addCouple, bloodline, spine, depths, validate, birthYear, evidenceClass } from "./model.mjs";
-import { importWalk } from "./fs-adapter.mjs";
+import { importWalk, importSourceWalk } from "./fs-adapter.mjs";
 
-const [rawPath, corpusOut, pageOut, spineRx, viaRx] = process.argv.slice(2);
+const [rawPath, corpusOut, pageOut, spineRx, viaRx, sourcesPath] = process.argv.slice(2);
 if (!rawPath || !corpusOut) {
   console.error("usage: node pipeline.mjs <raw-walk.json> <out-corpus.json> [out-page-data.json]");
   process.exit(1);
@@ -58,6 +58,17 @@ if (overlay) {
   }
   for (const [child, ps] of Object.entries(overlay.edges || {}))
     if (model.persons[child]) model.edges[child] = ps.filter((p) => model.persons[p] || String(p).startsWith("ovl-"));
+}
+
+// sources fold (2026-09-18 harvest): importSourceWalk upgrades the evidence
+// SUPPORT axis from the harvested refs — unsourced→sourced with an honest
+// basis, era untouched, attested never downgraded. Runs AFTER overlays so the
+// correction layer's evidence fields are the ones augmented.
+let sourceFold = null;
+if (sourcesPath) {
+  const srcRaw = JSON.parse(readFileSync(sourcesPath, "utf8"));
+  const day = (srcRaw.meta?.pulledAt || "").slice(0, 10) || null;
+  sourceFold = importSourceWalk(model, srcRaw, { date: day });
 }
 
 // evidence-pack index: which pack attests which person (by fsid for walked
@@ -181,7 +192,7 @@ for (const [id, p] of Object.entries(pub.persons)) {
   entry.refs = p.living ? [] : (/^ovl-/.test(id) ? [{ provider: "attested-overlay", id }] : [{ provider: "familysearch", id }]);
   if (!p.living && !/^ovl-/.test(id)) refsIndex[id] = iid;
   // research status (what we know) — tracked separately from publication
-  entry.research = { status: p.corrected ? "corrected-attested" : packIndex[id] ? "tradition-entered" : /^ovl-/.test(id) ? "attested" : "incomplete", basis: "per-person source counts not yet harvested" };
+  entry.research = { status: p.corrected ? "corrected-attested" : packIndex[id] ? "tradition-entered" : /^ovl-/.test(id) ? "attested" : "incomplete", basis: p.sources ? `${p.sources.count} attached FamilySearch source${p.sources.count === 1 ? "" : "s"} (harvested ${p.sources.harvested})` : "no attached sources harvested for this person; era-heuristic only" };
   if (p.corrected) entry.research.note = p.corrected.note;
   // publication status (what we show) — 'private'/'incomplete'/'disputed' are
   // never silently missing: the stub says why it is a stub
@@ -231,7 +242,7 @@ pub.meta = {
     spineReaches: terminus ? `${terminus.name} ${terminus.lifespan ?? ""}`.trim() : "(no spine target found)",
   },
   privacy: "living persons redacted — root-line living survive as anonymous 'Living' stubs with PSEUDONYMIZED ids (root='founder', others liv-N; provider ids never published); all other living dropped. Relationship-leakage review: couples and edges touching dropped living persons are removed with them.",
-  confidenceTiers: "era heuristic (recorded ≥1850 · colonial 1550–1850 · medieval 1000–1550 · saga <1000); basis says era-heuristic until per-person source counts are harvested",
+  confidenceTiers: "era heuristic (recorded ≥1850 · colonial 1550–1850 · medieval 1000–1550 · saga <1000); per-person source counts harvested 2026-09-18 for the 8-generation cohort (grandparents on) — counts are inventory, citations attach to claims",
   claimPolicy: "every person carries its evidence class; the spine past the colonial era is traditional, not proven",
   packs: packIndex,
   // RECONCILIATION: every fetched person is retained privately, published, or
@@ -263,6 +274,7 @@ pub.meta = {
   })(),
   correctionsApplied,
   overlayPersons,
+  ...(sourceFold ? { sourceFold: { ...sourceFold, provider: "familysearch", method: "importSourceWalk — support axis only; era untouched" } } : {}),
 };
 const pubProblems = validate(pub, { public: true }).filter((p) => !p.startsWith("unresolved:"));
 if (pubProblems.length) {
@@ -297,7 +309,12 @@ function personObject(iid) {
     relationships: { parents, children, spouses },
     layers: {
       records: p.refs?.some((r) => r.provider === "familysearch")
-        ? { provider: "familysearch", recordUrl: "https://www.familysearch.org/tree/person/details/" + p.refs.find((r) => r.provider === "familysearch").id, retrieved: pub.meta.retrieved }
+        ? {
+            provider: "familysearch",
+            recordUrl: "https://www.familysearch.org/tree/person/details/" + p.refs.find((r) => r.provider === "familysearch").id,
+            retrieved: pub.meta.retrieved,
+            ...(p.sources ? { sources: { count: p.sources.count, harvested: p.sources.harvested } } : {}),
+          }
         : null,
       tradition: packIndex[iid] ? { pack: packIndex[iid] } : null,
       testimony: (overlay?.testimony || []).filter((t) => t.text && /rockwood/i.test(p.name || "") && /rockwood/i.test(t.subject || "")) || [],

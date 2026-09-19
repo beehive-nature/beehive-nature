@@ -4,7 +4,7 @@
  "bnr": "bnr://skaists.dev/blood/p4ceb2ace98",
  "identity": {
   "name": "Don Ray Remington",
-  "lifespan": "1931–Deceased",
+  "lifespan": "1931–2025",
   "gender": "MALE",
   "living": false
  },
@@ -22,15 +22,15 @@
  },
  "research": {
   "status": "corrected-attested",
-  "basis": "per-person source counts not yet harvested",
-  "note": "FamilySearch private-space record flags Don Ray Remington living; the founder attests the family line — famous grandpa is not 'Living'. Death year unknown to the archive; no year invented. Founder-attested: maternal grandfather."
+  "basis": "no attached sources harvested for this person; era-heuristic only",
+  "note": "FamilySearch private-space record flags Don Ray Remington living; the founder attests the family line — famous grandpa is not 'Living'. Death year unknown to the archive; no year invented. Founder-attested: maternal grandfather. Founder update 2026-09-18: 'grandpa don died last June ish (we have the date somewhere)' — year recorded as attested-approximate; exact date never invented. RECORD CORRECTION 2026-09-18: the records-search pass (hr/v2 personas) returned documentary dates — born 24 June 1931 Vernal Utah, died 27 May 2025, obituary published 11 June 2025 (the founder's 'June-ish' matched the obituary publication, not the death date). Founder attestation of death STANDS CONFIRMED by record; recall-replaced-by-record documented, nothing silently rewritten."
  },
  "publication": {
   "status": "public"
  },
  "corrected": {
-  "attested": "founder order 2026-09-16: all four grandparents confirmed deceased",
-  "note": "FamilySearch private-space record flags Don Ray Remington living; the founder attests the family line — famous grandpa is not 'Living'. Death year unknown to the archive; no year invented. Founder-attested: maternal grandfather."
+  "attested": "founder order 2026-09-16: all four grandparents confirmed deceased · death timing attested 2026-09-18",
+  "note": "FamilySearch private-space record flags Don Ray Remington living; the founder attests the family line — famous grandpa is not 'Living'. Death year unknown to the archive; no year invented. Founder-attested: maternal grandfather. Founder update 2026-09-18: 'grandpa don died last June ish (we have the date somewhere)' — year recorded as attested-approximate; exact date never invented. RECORD CORRECTION 2026-09-18: the records-search pass (hr/v2 personas) returned documentary dates — born 24 June 1931 Vernal Utah, died 27 May 2025, obituary published 11 June 2025 (the founder's 'June-ish' matched the obituary publication, not the death date). Founder attestation of death STANDS CONFIRMED by record; recall-replaced-by-record documented, nothing silently rewritten."
  },
  "relationships": {
   "parents": [

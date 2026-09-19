@@ -4,7 +4,7 @@
  "bnr": "bnr://skaists.dev/blood/p455afa9256",
  "identity": {
   "name": "Marilyn Lowry",
-  "lifespan": "1932–Deceased",
+  "lifespan": "1932–2023",
   "gender": "FEMALE",
   "living": false
  },
@@ -22,15 +22,15 @@
  },
  "research": {
   "status": "corrected-attested",
-  "basis": "per-person source counts not yet harvested",
-  "note": "FamilySearch private-space record flags Marilyn Lowry Remington living; she is the founder's deceased grandmother (the tree's co-builder with him, 12 years ago). Death year unknown to the archive; no year invented. Founder-attested: maternal grandmother."
+  "basis": "no attached sources harvested for this person; era-heuristic only",
+  "note": "FamilySearch private-space record flags Marilyn Lowry Remington living; she is the founder's deceased grandmother (the tree's co-builder with him, 12 years ago). Death year unknown to the archive; no year invented. Founder-attested: maternal grandmother. Founder update 2026-09-18: 'grandma marilyn died a year decemberish before that' — the church matriarch and master genealogist who co-built this tree; year recorded as attested-approximate; exact date never invented. RECORD CORRECTION 2026-09-18: documentary dates from the records-search pass — born 16 March 1932, died 9 January 2023, buried Millcreek beside Don (the founder's recall 'a year decemberish before' Don pointed at ~Dec 2024; the record says 9 Jan 2023 — recall corrected by record, both layers preserved). Founder attestation of death STANDS CONFIRMED by record."
  },
  "publication": {
   "status": "public"
  },
  "corrected": {
-  "attested": "founder order 2026-09-16: all four grandparents confirmed deceased",
-  "note": "FamilySearch private-space record flags Marilyn Lowry Remington living; she is the founder's deceased grandmother (the tree's co-builder with him, 12 years ago). Death year unknown to the archive; no year invented. Founder-attested: maternal grandmother."
+  "attested": "founder order 2026-09-16: all four grandparents confirmed deceased · death timing attested 2026-09-18",
+  "note": "FamilySearch private-space record flags Marilyn Lowry Remington living; she is the founder's deceased grandmother (the tree's co-builder with him, 12 years ago). Death year unknown to the archive; no year invented. Founder-attested: maternal grandmother. Founder update 2026-09-18: 'grandma marilyn died a year decemberish before that' — the church matriarch and master genealogist who co-built this tree; year recorded as attested-approximate; exact date never invented. RECORD CORRECTION 2026-09-18: documentary dates from the records-search pass — born 16 March 1932, died 9 January 2023, buried Millcreek beside Don (the founder's recall 'a year decemberish before' Don pointed at ~Dec 2024; the record says 9 Jan 2023 — recall corrected by record, both layers preserved). Founder attestation of death STANDS CONFIRMED by record."
  },
  "relationships": {
   "parents": [

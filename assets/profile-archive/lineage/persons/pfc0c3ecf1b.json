@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pfc0c3ecf1b",
+ "bnr": "bnr://skaists.dev/blood/pfc0c3ecf1b",
+ "identity": {
+  "name": "William John Dennison",
+  "lifespan": "1722–1798",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GFX9-6BB"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "sourced",
+  "basis": "2 FamilySearch sources (harvested 2026-09-18)",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "2 attached FamilySearch sources (harvested 2026-09-18)"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p6cc2873f24",
+    "name": "William Dennison",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p5584244c6f",
+    "name": "Eliza Collinder",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p2e69d8efbb",
+    "name": "John Dennison"
+   }
+  ],
+  "spouses": []
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GFX9-6BB",
+   "retrieved": "2026-09-16T17:59:16.202Z",
+   "sources": {
+    "count": 2,
+    "harvested": "2026-09-18"
+   }
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p1d7db8e754",
+ "bnr": "bnr://skaists.dev/blood/p1d7db8e754",
+ "identity": {
+  "name": "Thomas Williams",
+  "lifespan": "1697–1761",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GVX4-LV1"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "sourced",
+  "basis": "5 FamilySearch sources (harvested 2026-09-18)",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "5 attached FamilySearch sources (harvested 2026-09-18)"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p1ebddc9690",
+    "name": "Thomas Williams Sr",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p636212acea",
+    "name": "Mary Blackmar",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p0998836893",
+    "name": "Captain Daniel Williams"
+   }
+  ],
+  "spouses": []
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GVX4-LV1",
+   "retrieved": "2026-09-16T17:59:16.202Z",
+   "sources": {
+    "count": 5,
+    "harvested": "2026-09-18"
+   }
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

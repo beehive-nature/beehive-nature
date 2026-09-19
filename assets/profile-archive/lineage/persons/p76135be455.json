@@ -22,7 +22,7 @@
  },
  "research": {
   "status": "incomplete",
-  "basis": "per-person source counts not yet harvested"
+  "basis": "no attached sources harvested for this person; era-heuristic only"
  },
  "publication": {
   "status": "public"
@@ -30,11 +30,13 @@
  "relationships": {
   "parents": [
    {
-    "id": "MVKY-QZK",
+    "id": "p8d6ee07fdc",
+    "name": "Moses Hayden",
     "evidence": "walked provider link"
    },
    {
-    "id": "GB9Z-939",
+    "id": "pd3450d812d",
+    "name": "Eunice Haroon",
     "evidence": "walked provider link"
    }
   ],

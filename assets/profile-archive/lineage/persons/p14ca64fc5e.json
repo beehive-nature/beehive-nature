@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p14ca64fc5e",
+ "bnr": "bnr://skaists.dev/blood/p14ca64fc5e",
+ "identity": {
+  "name": "Elizabeth Maier",
+  "lifespan": "1711–1782",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "K8SW-RYJ"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "sourced",
+  "basis": "8 FamilySearch sources (harvested 2026-09-18)",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "8 attached FamilySearch sources (harvested 2026-09-18)"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p9bdd089554",
+    "name": "Mr Maier",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p2d3ba63feb",
+    "name": "Mrs. Maier",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p64da7cfa3b",
+    "name": "George Thomas Smith"
+   }
+  ],
+  "spouses": []
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/K8SW-RYJ",
+   "retrieved": "2026-09-16T17:59:16.202Z",
+   "sources": {
+    "count": 8,
+    "harvested": "2026-09-18"
+   }
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p158e6617c2",
+ "bnr": "bnr://skaists.dev/blood/p158e6617c2",
+ "identity": {
+  "name": "Thomas Nicholson",
+  "lifespan": "1750–1809",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LHCY-MLB"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "sourced",
+  "basis": "1 FamilySearch source (harvested 2026-09-18)",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "1 attached FamilySearch source (harvested 2026-09-18)"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p8f32f71e0c",
+    "name": "John Nicholson",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p37a877f2c5",
+    "name": "Rachael Chadeayne",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p03fd9a9e6e",
+    "name": "Eunice Nicholson"
+   }
+  ],
+  "spouses": []
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LHCY-MLB",
+   "retrieved": "2026-09-16T17:59:16.202Z",
+   "sources": {
+    "count": 1,
+    "harvested": "2026-09-18"
+   }
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

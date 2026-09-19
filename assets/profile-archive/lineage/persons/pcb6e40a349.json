@@ -16,13 +16,13 @@
  ],
  "evidence": {
   "era": "colonial",
-  "support": "unsourced-entry",
-  "basis": "era label from dates; support unsourced until sources are harvested",
+  "support": "sourced",
+  "basis": "1 FamilySearch source (harvested 2026-09-18)",
   "class": "colonial"
  },
  "research": {
   "status": "incomplete",
-  "basis": "per-person source counts not yet harvested"
+  "basis": "1 attached FamilySearch source (harvested 2026-09-18)"
  },
  "publication": {
   "status": "public"
@@ -30,7 +30,8 @@
  "relationships": {
   "parents": [
    {
-    "id": "LBGW-7QH",
+    "id": "p202688efe3",
+    "name": "Simon Hollier",
     "evidence": "walked provider link"
    }
   ],
@@ -52,7 +53,11 @@
   "records": {
    "provider": "familysearch",
    "recordUrl": "https://www.familysearch.org/tree/person/details/L5VC-3SS",
-   "retrieved": "2026-09-16T17:59:16.202Z"
+   "retrieved": "2026-09-16T17:59:16.202Z",
+   "sources": {
+    "count": 1,
+    "harvested": "2026-09-18"
+   }
   },
   "tradition": null,
   "testimony": [],

@@ -342,6 +342,81 @@ export const PAGE_SOURCE_WALKER_SOURCE = String.raw`
   return{started:true,resumed:!!S.resumed,repairQueued:queues.repair.length,evidenceQueued:queues.evidence.length,phase:S.phase};
 })`;
 
+// ── STAGED 2026-09-19, NOT YET EXECUTED (needs the founder's signed-in      ──
+// session; the 2026-09-19 seat probed the tab and got 401 — everything below
+// runs when the founder signs in to familysearch.org in the IAB pane). Two
+// pieces: the PARENT-CLOSURE recovery (v8 wire, already proven by the source
+// walker — recovers the child→parent edges the source walker did not persist
+// for already-known parents, i.e. the 28 unlinked danglers) and the image-pass
+// DISCOVERY probe (the image-resolution wire is genuinely unknown; observe the
+// record page's own requests, then codify the sweep — never guess URLs).
+export const PAGE_PARENT_CLOSURE_SOURCE = String.raw`
+(function installParentClosure(payloadJson){
+  const payload=JSON.parse(payloadJson); // { pids:[fsid...] } — depth-8 cohort
+  const LS_KEY="__zb_parent_closure_v1";
+  const S=(window.__zpc=window.__zpc||{startedAt:Date.now(),phase:"run",parents:{},errs:{},stats:{fetched:0,ok:0,retries:0,authStreak:0},done:false,paused:null});
+  if(S.running)return{alreadyRunning:true,phase:S.phase};
+  S.running=true;
+  try{const cp=JSON.parse(localStorage.getItem(LS_KEY)||"null");
+    if(cp&&cp.parents){Object.assign(S.parents,cp.parents);S.resumed=true;}}catch(e){S.cpErr=String(e);}
+  let lastStart=0;
+  const gate=()=>new Promise((r)=>{const w=Math.max(0,160-(Date.now()-lastStart));setTimeout(()=>{lastStart=Date.now();r();},w);});
+  const fetchJ=async(url,tries=2)=>{for(let i=0;;i++){await gate();S.stats.fetched++;
+    try{const r=await fetch(url,{credentials:"include",headers:{Accept:"application/json"}});
+      if(r.status===401||r.status===403){S.stats.authStreak++;if(S.stats.authStreak>=6){S.paused="auth";throw new Error("auth-lost");}}
+      else S.stats.authStreak=0;
+      if(r.status===429||r.status>=500){if(i<tries){S.stats.retries++;await new Promise((x)=>setTimeout(x,900*(i+1)));continue;}}
+      const text=await r.text();let body=null;try{body=text?JSON.parse(text):null;}catch(e){body=null;}
+      return{status:r.status,body};
+    }catch(e){if(String(e.message)==="auth-lost")throw e;
+      if(i<tries){S.stats.retries++;await new Promise((x)=>setTimeout(x,900*(i+1)));continue;}
+      return{status:0,body:null,err:String(e)};}}};
+  const checkpoint=()=>{try{localStorage.setItem(LS_KEY,JSON.stringify({parents:S.parents}));}catch(e){}};
+  (async()=>{try{
+    for(const pid of payload.pids){
+      if(S.parents[pid])continue;
+      const r=await fetchJ("/service/tree/tree-data/v8/person/"+pid+"/details");
+      if(r.status===200&&r.body){
+        // persist the FULL parents[] (id + name + lifespan per family) — the
+        // edge the source walker dropped for already-known parents
+        S.parents[pid]=(Array.isArray(r.body.parents)?r.body.parents:[]).map((f)=>{
+          const row={};for(const k of["parent1","parent2"])if(f&&f[k])row[k]={id:f[k].id,name:f[k].name||null,lifespan:f[k].lifespan||null};
+          return row;});
+        S.stats.ok++;
+      } else S.errs[pid]={status:r.status};
+      checkpoint();
+    }
+    S.phase="done";S.done=true;S.finishedAt=Date.now();checkpoint();
+  }catch(e){S.paused=S.paused||String(e.message||e);}finally{S.running=false;}})();
+  window.__zpcDump=function(){const s=JSON.stringify({parents:S.parents,errs:S.errs,meta:{stats:S.stats,phase:S.phase,method:"fs-adapter PAGE_PARENT_CLOSURE (v8 parents[] full persistence), cookie session"}});
+    const CH=900000,n=Math.ceil(s.length/CH);
+    window.__zpcDumpChunks=Array.from({length:n},(_,i)=>s.slice(i*CH,(i+1)*CH));
+    return{bytes:s.length,chunks:n};};
+  return{started:true,resumed:!!S.resumed,pids:payload.pids.length,phase:S.phase};
+})`;
+
+// image-pass step 1 — DISCOVERY (one record, observe the page's own requests;
+// the sweep gets codified FROM this observation, per the never-guess-URLs law).
+// Run in the signed-in tab: pass DISCOVER_RECORD_WIRE_SOURCE through evaluate
+// with the record's ark suffix (e.g. "1:1:6KWG-ZBHL").
+export const DISCOVER_RECORD_WIRE_SOURCE = String.raw`
+(async function discoverRecordWire(arkSuffix){
+  const mark=performance.now();
+  const before=new Set(performance.getEntriesByType("resource").map((e)=>e.name));
+  const r=await fetch("https://www.familysearch.org/ark:/61903/"+arkSuffix,{credentials:"include"});
+  const html=await r.text();
+  const doc=new DOMParser().parseFromString(html,"text/html");
+  // settle: collect requests the page itself makes after load
+  await new Promise((x)=>setTimeout(x,4000));
+  const after=performance.getEntriesByType("resource").filter((e)=>e.startTime>=mark)
+    .map((e)=>({name:e.name,initiatorType:e.initiatorType,transferSize:e.transferSize}));
+  const imageHints=[...doc.querySelectorAll('a[href*="/ark:/61903/3:1:"]')].map((a)=>a.getAttribute("href"));
+  const ogImage=[...doc.querySelectorAll('meta[property="og:image"]')].map((m)=>m.getAttribute("content"));
+  return{status:r.status,finalUrl:r.url,title:doc.title,imageArks:imageHints,ogImage,
+    resourceCalls:after.filter((e)=>/familysearch\.org/.test(e.name)).slice(0,60),htmlBytes:html.length};
+})
+`;
+
 // node-side: fold a full raw walk JSON (the __rwDump output) into a model
 export function importWalk(model, raw) {
   let n = 0;

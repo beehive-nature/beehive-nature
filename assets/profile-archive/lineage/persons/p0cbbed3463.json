@@ -22,7 +22,7 @@
  },
  "research": {
   "status": "incomplete",
-  "basis": "per-person source counts not yet harvested"
+  "basis": "no attached sources harvested for this person; era-heuristic only"
  },
  "publication": {
   "status": "public"
@@ -30,11 +30,13 @@
  "relationships": {
   "parents": [
    {
-    "id": "LC1T-L3Z",
+    "id": "p01146c481a",
+    "name": "Capt. Jesse Sawyer Jr.",
     "evidence": "walked provider link"
    },
    {
-    "id": "LQRT-6WW",
+    "id": "p3561ad70fc",
+    "name": "Catherine White",
     "evidence": "walked provider link"
    }
   ],

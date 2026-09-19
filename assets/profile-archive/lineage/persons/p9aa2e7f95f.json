@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p9aa2e7f95f",
+ "bnr": "bnr://skaists.dev/blood/p9aa2e7f95f",
+ "identity": {
+  "name": "Anna Olofsdotter",
+  "lifespan": "1704–1762",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L7NQ-5Z1"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "sourced",
+  "basis": "13 FamilySearch sources (harvested 2026-09-18)",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "13 attached FamilySearch sources (harvested 2026-09-18)"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p2c6c857f8f",
+    "name": "Olof Matsson",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p585b55b09e",
+    "name": "Gertrud Olofsdotter",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pae24145864",
+    "name": "Hedvig Joransson"
+   }
+  ],
+  "spouses": []
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L7NQ-5Z1",
+   "retrieved": "2026-09-16T17:59:16.202Z",
+   "sources": {
+    "count": 13,
+    "harvested": "2026-09-18"
+   }
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

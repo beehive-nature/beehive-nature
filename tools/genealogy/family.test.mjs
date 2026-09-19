@@ -21,9 +21,9 @@ const resolve = (fsid) => pub.refsIndex[fsid];
 const FAMILY = [
   { name: "Donna Ruth Lawton", fsid: "KWCL-VNB", lifespan: "1925–1988", living: false, spineRow: 2,
     relation: "paternal grandmother — the spine rides her line" },
-  { name: "Marilyn Lowry", fsid: "LNQ5-BSF", lifespan: "1932–Deceased", living: false, corrected: true,
+  { name: "Marilyn Lowry", fsid: "LNQ5-BSF", lifespan: "1932–2023", living: false, corrected: true,
     relation: "maternal grandmother — co-builder of the tree; FS living-flag corrected by founder attestation" },
-  { name: "Don Ray Remington", fsid: "LNQ5-BSG", lifespan: "1931–Deceased", living: false, corrected: true,
+  { name: "Don Ray Remington", fsid: "LNQ5-BSG", lifespan: "1931–2025", living: false, corrected: true,
     relation: "maternal grandfather — FS living-flag corrected by founder attestation" },
   { name: "Albert Perry Rockwood", fsid: "KWJ4-XBD", lifespan: "1805–1879", living: false,
     relation: "the Rockwood line's public entrance person" },

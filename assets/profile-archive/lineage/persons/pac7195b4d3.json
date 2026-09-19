@@ -1,0 +1,56 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pac7195b4d3",
+ "bnr": "bnr://skaists.dev/blood/pac7195b4d3",
+ "identity": {
+  "name": "Rasmus Nielsen",
+  "lifespan": "1687–1741",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LHWH-18P"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "sourced",
+  "basis": "13 FamilySearch sources (harvested 2026-09-18)",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "13 attached FamilySearch sources (harvested 2026-09-18)"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [],
+  "children": [
+   {
+    "id": "p28b096e795",
+    "name": "Jeppe Rasmussen"
+   }
+  ],
+  "spouses": []
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LHWH-18P",
+   "retrieved": "2026-09-16T17:59:16.202Z",
+   "sources": {
+    "count": 13,
+    "harvested": "2026-09-18"
+   }
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

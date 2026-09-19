@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pa0e370ced4",
+ "bnr": "bnr://skaists.dev/blood/pa0e370ced4",
+ "identity": {
+  "name": "Sarah Spurr",
+  "lifespan": "1710–1779",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LQ5W-R7J"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "sourced",
+  "basis": "9 FamilySearch sources (harvested 2026-09-18)",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "9 attached FamilySearch sources (harvested 2026-09-18)"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pb0e04c8910",
+    "name": "Thomas Spurr",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p44ed482dd3",
+    "name": "Elizabeth Kinsley",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p55fa3c74f8",
+    "name": "Miriam Shepard"
+   }
+  ],
+  "spouses": []
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LQ5W-R7J",
+   "retrieved": "2026-09-16T17:59:16.202Z",
+   "sources": {
+    "count": 9,
+    "harvested": "2026-09-18"
+   }
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

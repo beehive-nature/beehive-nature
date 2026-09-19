@@ -22,7 +22,7 @@
  },
  "research": {
   "status": "incomplete",
-  "basis": "per-person source counts not yet harvested"
+  "basis": "no attached sources harvested for this person; era-heuristic only"
  },
  "publication": {
   "status": "public"
@@ -30,11 +30,13 @@
  "relationships": {
   "parents": [
    {
-    "id": "947S-5XB",
+    "id": "p5c24d640a9",
+    "name": "William Campbell",
     "evidence": "walked provider link"
    },
    {
-    "id": "LH75-1MK",
+    "id": "pebdd094903",
+    "name": "Lydia Moore",
     "evidence": "walked provider link"
    }
   ],

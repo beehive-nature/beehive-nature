@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p5a6c99af69",
+ "bnr": "bnr://skaists.dev/blood/p5a6c99af69",
+ "identity": {
+  "name": "Joshua Kendall",
+  "lifespan": "1689–1773",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L8RL-HT5"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "sourced",
+  "basis": "39 FamilySearch sources (harvested 2026-09-18)",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "39 attached FamilySearch sources (harvested 2026-09-18)"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p9f31c5c03d",
+    "name": "Samuel Kendall",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p45a8cf5637",
+    "name": "Rebecca Mixer",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pfb93786641",
+    "name": "Susannah Kendall"
+   }
+  ],
+  "spouses": []
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L8RL-HT5",
+   "retrieved": "2026-09-16T17:59:16.202Z",
+   "sources": {
+    "count": 39,
+    "harvested": "2026-09-18"
+   }
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

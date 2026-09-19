@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p8d6ee07fdc",
+ "bnr": "bnr://skaists.dev/blood/p8d6ee07fdc",
+ "identity": {
+  "name": "Moses Hayden",
+  "lifespan": "1725–Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "MVKY-QZK"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "sourced",
+  "basis": "1 FamilySearch source (harvested 2026-09-18)",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "1 attached FamilySearch source (harvested 2026-09-18)"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p2fb5a574cb",
+    "name": "Moses Hayden",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pa13ef2ea9f",
+    "name": "Joan Hunt",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p76135be455",
+    "name": "Lucresh Hayden"
+   }
+  ],
+  "spouses": []
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/MVKY-QZK",
+   "retrieved": "2026-09-16T17:59:16.202Z",
+   "sources": {
+    "count": 1,
+    "harvested": "2026-09-18"
+   }
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}
