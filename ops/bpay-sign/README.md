@@ -189,3 +189,36 @@ Read-only chain state at banking time:
 
 A public address is freely recordable (SPEC-AUTONOMI-TREZOR-1 §3 key
 map); the account's KEY never exists outside the device.
+
+## THE QUEUED ORDER (board, banked on 4908f7c0 — the lane's ONLY task on wake)
+
+> Replace the blocking HTTP implementation inside `SuiteMcp` with async
+> `reqwest`; preserve the existing `SuiteMcpTransport` interface and
+> every higher-level contract. Nothing above that seam may know the
+> implementation changed.
+
+**Implementation constraint:** do NOT create a fresh Tokio runtime per
+MCP call — one long-lived async client/runtime (or an async-native
+service path where practical). Do not trade TCP connection churn for
+runtime/thread churn.
+
+**Acceptance (brutally small, all eight):**
+1. `tools/list` repeatedly succeeds through the service-integrated client.
+2. silent `trezor_get_address` repeatedly returns the expected payer.
+3. no socket growth/leak across a repeated-call battery.
+4. Connect through `/v1/wallet/connect` reaches the physical Safe 7.
+5. **REJECT** → no binding.
+6. second Connect → **APPROVE** → exactly one public wallet binding.
+7. restart service → binding survives; secrets do not.
+8. no signing/payment/broadcast occurs during any of this.
+
+Only then does the lane advance from *architecture LANDED / identity
+PHYSICALLY PROVEN / ceremony BLOCKED* to **Connect bPay Wallet —
+PHYSICALLY PROVEN END-TO-END.** After that, Observation A's laws become
+regression coverage and the human flow is: CONNECTED → authorize current
+job → review exactly 2 signatures → Safe 7 ×2 → wall → SIGNED / NOT
+BROADCAST → STOP.
+
+**The sovereignty line, kept prominent:** the deliberate rejection is
+not a nuisance test — it proves that **the device saying "no" leaves no
+authority behind.**
