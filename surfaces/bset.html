@@ -43,6 +43,12 @@ button{background:#26123a;color:var(--violet);border:1px solid var(--line);borde
 button:hover{background:var(--violet);color:#000}
 pre{background:var(--well);border:1px solid var(--line);border-radius:8px;padding:10px;margin-top:8px;
  font-size:9.5px;line-height:1.6;overflow-x:auto;color:var(--dim);white-space:pre-wrap;word-break:break-word}
+/* views change density, never the set: the composer and the law block are
+   <details data-reg-disclose> (collapsed for bee/raver, open for cypherpunk,
+   per register.js); raver gives the sigil art more room */
+details[data-reg-disclose]>summary h2{margin-bottom:0}
+details[data-reg-disclose][open]>summary{margin-bottom:9px}
+body[data-reg="raver"] .track svg{width:78px;height:69px}
 footer{max-width:900px;margin:22px auto 0;color:var(--faint);font-size:10px;text-align:center;line-height:2}
 @media (prefers-reduced-motion: no-preference){
  .track svg polygon{transition:opacity .6s ease}
@@ -86,7 +92,8 @@ footer{max-width:900px;margin:22px auto 0;color:var(--faint);font-size:10px;text
 </section>
 
 <section>
-  <h2 data-i18n="bst.h.drop">DROP THE SET — the one-paste composer</h2>
+ <details data-reg-disclose>
+  <summary><h2 data-i18n="bst.h.drop">DROP THE SET — the one-paste composer</h2></summary>
   <div class="law" data-i18n="bst.drop.law">One track per line: <code>Artist — Title — url</code> (url optional; ru-language
   tracks get auto-detected by Cyrillic, or force with <code>[ru]</code>). The composer renders a
   live preview above and emits the <code>bset.json</code> fragment for the commit — <b>this page
@@ -99,10 +106,12 @@ footer{max-width:900px;margin:22px auto 0;color:var(--faint);font-size:10px;text
     <button id="share" data-i18n="bst.share">📋 share as text</button>
   </div>
   <pre id="out" style="display:none"></pre>
+ </details>
 </section>
 
 <section>
-  <h2 data-i18n="bst.h.details">THE DETAILS USUALLY CUT — shipped first here, on purpose</h2>
+ <details data-reg-disclose>
+  <summary><h2 data-i18n="bst.h.details">THE DETAILS USUALLY CUT — shipped first here, on purpose</h2></summary>
   <div class="law" data-i18n="bst.details">The founder's order, verbatim: <i>"buildout those details that are valuable for
   end users but left to the end of funded development and get missed or a gross compromise."</i>
   So this page ships them on day one, as a demonstration that the stack affords them:<br>
@@ -118,6 +127,7 @@ footer{max-width:900px;margin:22px auto 0;color:var(--faint);font-size:10px;text
   <b>· works after load</b> — static page, local data; the music links need the world, the page
   doesn't.<br>
   <b>· speaks every corpus-docked tongue</b> — the 🌐 picker below carries this page like every other.</div>
+ </details>
 </section>
 </main>
 <footer>
