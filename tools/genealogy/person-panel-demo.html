@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>person panel — GUX-01 mount demo (zGenePerson)</title>
+<!-- Dev harness, NOT an estate surface: lives outside surfaces/ on purpose so
+     the atlas count is untouched. zGeneUI mounts surfaces/person-panel.mjs
+     into blood.html per the contract in that file's header. -->
+<style>
+/* the estate's own token block (surfaces/blood.html :root) — palette law */
+:root{--bg:#0d1410;--panel:#111a14;--well:#0a0f0b;--ink:#e2efdb;--dim:#8a9a8a;--faint:#5f6f61;--line:#243026;
+  --cyan:#39d2c0;--gold:#d4a94e;--violet:#b18cfe;--rose:#e8748c;--info:#6fb3d9;--verified:#7bd88f}
+body{background:radial-gradient(circle at 50% -10%,#12251b 0%,var(--bg) 60%);color:var(--ink);
+  font:12.5px/1.55 'IBM Plex Mono',ui-monospace,monospace;margin:0;padding:18px 14px 40px;max-width:860px;margin-inline:auto}
+h1{font-size:15px;margin:0 0 2px}
+.sub{color:var(--faint);font-size:10.5px;margin-bottom:14px}
+.cases{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 4px}
+.cases button{background:none;border:1px dashed var(--line);border-radius:7px;color:var(--dim);
+  font:10.5px 'IBM Plex Mono',monospace;padding:5px 9px;cursor:pointer}
+.cases button:hover{color:var(--ink);border-color:var(--cyan)}
+.mirror{margin-top:14px;color:var(--faint);font-size:10px;word-break:break-all;
+  border-top:1px dashed var(--line);padding-top:8px}
+#panel{margin-top:6px}
+a{color:var(--cyan)}
+</style>
+<link rel="stylesheet" href="../../surfaces/person-panel.css">
+</head>
+<body>
+<h1>⬡ person panel — GUX-01 mount demo</h1>
+<div class="sub">the isolated component zGeneUI mounts · corpus: the public lineage archive at the pin (read-only) ·
+the required cases ride as buttons below — or search “Joseph Hadlock” yourself and feel the ambiguity</div>
+
+<div class="cases" id="cases" aria-label="required cases"></div>
+<div id="panel"></div>
+<div class="mirror" id="mirror">state: (host onnavigate hook — mirrors exactly what zGeneUI would write to its URL)</div>
+
+<script type="module">
+import { mountPersonPanel } from '../../surfaces/person-panel.mjs';
+import { fetchArchive } from '../../surfaces/person-panel-corpus.mjs';
+
+const { archive } = await fetchArchive('../../assets/profile-archive/lineage/');
+
+/* the public entrance: Albert Perry Rockwood (visitors start at Rockwood) */
+const panel = mountPersonPanel(document.getElementById('panel'), archive, {
+  root: 'p72d226cedf',
+  onnavigate (s) {
+    document.getElementById('mirror').textContent = 'state: ' + JSON.stringify(s);
+  },
+  openPersonPage (id) { window.location.href = '../../assets/profile-archive/lineage/persons/' + encodeURIComponent(id) + '.html'; }
+});
+
+/* the required cases — each button drives the controller exactly as a host would */
+const CASES = [
+  ['search “Joseph Hadlock” (ambiguity, never a silent pick)', () => panel.resolveAndOpen('Joseph Hadlock')],
+  ['Donna Ruth Lawton (relationship to root)', () => panel.resolveAndOpen('Donna Ruth Lawton')],
+  ['Albert Perry Rockwood (public entrance · tradition + testimony layers)', () => panel.openPerson('p72d226cedf')],
+  ['spouse-only pair (liv-1 ⚭ liv-2 — affinity, never blood)', () => panel.openRelationship('liv-2', 'liv-1')],
+  ['married cousins (Samuel ⚭ Miriam — blood AND affinity)', () => panel.openRelationship('pccc17e8c97', 'pb8e0a7cd75')],
+  ['cyclic person (Emma de Bois-l’Evêque — shortest way around the loop)', () => panel.openPerson('pcc15e1f57e')],
+  ['ghost frontier (a person whose ancestry continues beyond the published archive)', () => panel.openPerson('p5af0281cfd')],
+  ['no match (resolve → null, honest)', () => panel.resolveAndOpen('Zzzz Qux Nobody')]
+];
+const casesEl = document.getElementById('cases');
+for (const [label, fn] of CASES) {
+  const b = document.createElement('button');
+  b.type = 'button';
+  b.textContent = label;
+  b.addEventListener('click', fn);
+  casesEl.appendChild(b);
+}
+
+/* host-side debug affordances (the controller IS the mount contract) */
+window.ppPanel = panel;
+window.ppArchive = archive;
+</script>
+</body>
+</html>
