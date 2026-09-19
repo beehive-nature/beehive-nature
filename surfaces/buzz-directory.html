@@ -4,7 +4,7 @@
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta name="color-scheme" content="light dark">
-<meta name="theme-color" content="#f6f7f2">
+<meta name="theme-color" content="#fbf7f0">
 <title>buzz directory — community doors, hand-checked</title>
 <style>
 
@@ -96,17 +96,17 @@ body[data-reg="cypherpunk"] #instrument{display:block}
 body[data-reg="raver"][data-dir-beat="arrival"] #masthead,
 body[data-reg="raver"][data-prof-beat="arrival"] #masthead{display:none}
 body[data-reg="bee"]{
-  --bg:#f6f7f2;--panel:#fff;--well:#edf2eb;--ink:#18362a;--dim:#435f4e;--faint:#52695b;
-  --line:#ccd7cf;--gold:#855b0b;--violet:#65509a;--cyan:#176879;--leaf:#326b39;--amber:#9f362c;
+  --bg:#fbf7f0;--panel:#fff;--well:#efe9dd;--ink:#0c1412;--dim:#4a5f55;--faint:#5a645e;
+  --line:#e6dfd2;--gold:#855b0b;--violet:#65509a;--cyan:#176879;--leaf:#326b39;--amber:#9f362c;
   --verified:#326b39;--guard:#65509a;--info:#29628f;
-  color-scheme:light;background:#f6f7f2;color:#18362a;font:1.125rem/1.65 var(--bee-font);
+  color-scheme:light;background:#fbf7f0;color:#0c1412;font:1.125rem/1.65 var(--bee-font);
 }
 body[data-reg="bee"] h1{color:var(--ink);letter-spacing:-.03em}
 body[data-reg="bee"] .take{color:#326b39}
-body[data-reg="bee"] .door{font:500 1rem/1.4 var(--bee-font);border-radius:16px;min-width:11rem;background:#fff;border-color:#8a9e90}
+body[data-reg="bee"] .door{font:500 1rem/1.4 var(--bee-font);border-radius:16px;min-width:11rem;background:#fff;border-color:#857d70}
 body[data-reg="bee"] .door.primary{background:#326b39;color:#fff;border-color:#326b39}
-body[data-reg="bee"] #tbar{background:#f6f7f2!important;border-top-color:#ccd7cf!important}
-body[data-reg="bee"] #tbar a{color:#18362a!important}
+body[data-reg="bee"] #tbar{background:#fbf7f0!important;border-top-color:#e6dfd2!important}
+body[data-reg="bee"] #tbar a{color:#0c1412!important}
 body[data-reg="bee"] section,.house{background:#fff;border-color:var(--line)}
 /* F4 (z1.a release patch): routine New bee labels read at ≥14px — relay lines
    and status chips. Bee-scoped only; Cypherpunk keeps its compact instrument. */
@@ -579,7 +579,7 @@ function restoreVisibleFocus(focus){
     });
     document.body.setAttribute(ATTR, reading==='cypherpunk' ? 'deeper' : (beatChoices.get(reading)||defaultBeat(reading)));
     var theme=document.querySelector('meta[name="theme-color"]');
-    if(theme) theme.content=reading==='bee'?'#f6f7f2':reading==='raver'?'#0c1412':'#0d1410';
+    if(theme) theme.content=reading==='bee'?'#fbf7f0':reading==='raver'?'#0c1412':'#0d1410';
     restoreVisibleFocus(focus);
     lastReading=reading;
   }
