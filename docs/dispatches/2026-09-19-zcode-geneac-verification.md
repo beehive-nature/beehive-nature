@@ -123,3 +123,34 @@ No edits to bFUzZ's lane branch or PR #125's stopped branch. Harness stayed in
 Executed-by: zCode (GLM 5.3)
 Seat: zCode verification pass on dispatch "end / Genealogy Archive Core"
 Base: `e1948156` (branch `zcode/geneac-verify-2026-09-19`)
+
+## Addendum (same day, later relay): the closure is BANKED — ruling received
+
+Relayed ruling received by this seat after the verification above (founder/helm
+relay, 2026-09-19):
+
+> **Do not assign another backend extraction task. That work is done and
+> independently verified.**
+
+- The earlier "Archive core extraction → kill upPath" order is **STALE — both
+  steps complete** (`e1948156` extraction; `e962b6eb` consumption). No agent
+  should reopen either. This receipt is the in-tree banking of that state.
+- Genealogy critical path is now **integration/acceptance**: consume the
+  already-proven state, run the current real-surface regression, then the
+  browser-seat inspection and the PR #125 merge review. No further
+  architectural implementation is ordered.
+
+### Fresh acceptance evidence at the CONSUMED tip `e962b6eb` (this seat, this session)
+
+- `node --test tools/genealogy/*.test.mjs` = **192/192** (three-shape contract
+  tests, corpus locks, wiring markers, retired-promise test-locked absent).
+- Real-surface journey `node e2e/gux01-blood-journey.mjs` = **29/29 beats PASS,
+  GREEN, zero page errors** — cold load → fact → person → relationship →
+  re-root → view change → second-person navigation → Back-exact-home, deep-link
+  cases 1+2 (state + camera law `81e9ded8` honored), and the 390px phone pass.
+
+The verification receipt and the acceptance re-run together close the loop:
+core proven at the extraction tip (`e1948156`), journey proven at the
+consumption tip (`e962b6eb`). What remains is human: the founder's
+browser-seat pass on PR #125 and the merge reviews — never this seat's to
+self-award.
