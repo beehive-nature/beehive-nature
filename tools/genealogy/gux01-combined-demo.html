@@ -67,7 +67,7 @@
   <div id="panel"></div>
 </main>
 <script type="module">
-  import { createAtlas, discoveries, bloodRoute, GHOST_TITLE, ATLAS_VERSION } from "../../surfaces/blood-atlas.mjs";
+  import { createAtlas, discoveries, bloodRoute, routeAlternates, routeAlternatesPhrase, GHOST_TITLE, ATLAS_VERSION } from "../../surfaces/blood-atlas.mjs";
   import { mountPersonPanel } from "../../surfaces/person-panel.mjs";
   import { fetchArchive } from "../../surfaces/person-panel-corpus.mjs";
 
@@ -90,6 +90,7 @@
   function openPanelPerson(id) {
     if (syncing || !panel || !id || panelAt === id) return;
     syncing = true; panelAt = id; panel.openPerson(id); syncing = false;
+    window.studyLog("person-open", { iid: id, name: atlas.person(id) ? atlas.person(id).name : "" });
   }
 
   const { archive } = await fetchArchive("../../assets/profile-archive/lineage/");
@@ -102,6 +103,7 @@
       if (s.view === "person" && s.id && s.id !== panelAt) {
         panelAt = s.id;
         syncing = true; atlas.select(s.id); syncing = false;
+        window.studyLog("panel-nav", { iid: s.id, name: atlas.person(s.id) ? atlas.person(s.id).name : "" });
         $("sync-note").textContent = "panel → atlas: selection followed (root + camera held) · " + nameOf(s.id);
       } else if (s.view === "relationship" && s.a && s.a !== panelAt) {
         panelAt = s.a;
@@ -127,6 +129,36 @@
   syncCtx(atlas.getContext(), "init");
   window.__gux01 = { atlas, panel }; // journey hook — dev harness only
 
+  // ── curiosity study (?study=1): the human A-gate receipt ─────────────────
+  // Records ONLY navigation events (type + corpus ids/kinds + ms timestamps)
+  // — never typed search text, never browsing content. The founder's own
+  // unprompted session is the first receipt: cold open → no coaching → first
+  // discovery click → second distinct-person click.
+  const studyOn = qs.get("study") === "1";
+  const study = studyOn ? { t0: Date.now(), events: [] } : null;
+  window.studyLog = (type, detail) => {
+    if (!study) return;
+    study.events.push(Object.assign({ t: Date.now() - study.t0, type }, detail || {}));
+    const chip = document.getElementById("study-chip");
+    if (chip) chip.textContent = "curiosity receipt · " + study.events.length + " events · download";
+  };
+  if (studyOn) {
+    const chip = document.createElement("div");
+    chip.id = "study-chip";
+    chip.style.cssText = "position:fixed;bottom:10px;right:10px;z-index:99;background:#1b2027;border:1px solid #4d8fd1;border-radius:8px;padding:6px 10px;font-size:11px;cursor:pointer;color:#e6e1d5";
+    chip.textContent = "curiosity receipt · 0 events · download";
+    chip.addEventListener("click", () => {
+      const blob = new Blob([JSON.stringify({ startedAt: new Date(study.t0).toISOString(), note: "navigation events only — no typed queries, no browsing content", events: study.events }, null, 1)], { type: "application/json" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "gux01-curiosity-receipt.json";
+      a.click();
+    });
+    document.body.appendChild(chip);
+    window.__study = study;
+    window.studyLog("cold", { root: atlas.getContext().root });
+  }
+
   // discovery rail + route strip (the atlas's own curiosity surface)
   const rail = $("atlas-cards"), strip = $("atlas-route");
   function showRoute(from, to) {
@@ -135,7 +167,7 @@
     strip.style.display = "block";
     strip.setAttribute("data-route-len", String(route.length - 1));
     strip.innerHTML = "<div style='color:#8a8578;font-size:11px;margin-bottom:4px'>follow the blood — " + (route.length - 1) +
-      " hops · <span style='color:#5f6f61'>shortest published parent-edge path · one available route, not the only one</span></div>" +
+      " hops · <span style='color:#5f6f61'>" + routeAlternatesPhrase(routeAlternates(atlas.model, from, to)) + "</span></div>" +
       route.map((iid, i) => {
         const p = atlas.person(iid);
         return "<button class='atlas-hop ev-" + ((p.evidence || {}).class || "none") + "' data-hop=\"" + iid +
@@ -152,6 +184,7 @@
       (c.count != null ? "<div style='color:#4d8fd1;font-size:11px'>▾ " + c.count + " — " + (c.depthNote || "counted across the whole published archive") + "</div>" : "") +
       "<div style='color:#5f6f61;font-size:10px;margin-top:3px'>" + c.disclosure + "</div>";
     b.addEventListener("click", () => {
+      window.studyLog("card", { kind: c.kind, title: c.title });
       const a = c.action;
       if (a.type === "show-route") { showRoute(a.from, a.to); atlas.reroot(a.to); atlas.select(a.to); }
       else if (a.type === "enter-branch" || a.type === "reroot") { atlas.reroot(a.iid); atlas.select(a.iid); }
@@ -169,6 +202,7 @@
   $("atlas-zout").addEventListener("click", () => atlas.zoomBy(1 / 1.3));
   $("atlas-zreset").addEventListener("click", () => atlas.resetView());
   $("atlas-q").addEventListener("input", (e) => {
+    if (e.target.value.trim() && window.studyLog) window.studyLog("search-submit", { results: (atlas.search(e.target.value.trim(), 10) || []).length });
     const hits = e.target.value.trim() ? atlas.search(e.target.value.trim(), 10) : [];
     rail.querySelectorAll("[data-searchhit]").forEach((n) => n.remove());
     for (const h of hits.slice(0, 6)) {

@@ -49,11 +49,11 @@ try {
     const hops = await page.locator("#atlas-route [data-hop]").count();
     ok(`${vp}: route reveal draws every hop as a published person`, +len >= 5 && hops === +len + 1, len + " hops");
     await page.screenshot({ path: join(SHOTS, `route-reveal-${vp}.png`), fullPage: false });
-    // clicking a hop selects
+    // clicking a hop selects (off-view selections stay honest — no root move)
     await page.locator("#atlas-route [data-hop]").nth(2).click();
-    await page.waitForSelector(".atlas-cell.atlas-sel, .atlas-row.atlas-sel", { timeout: 5000 });
-    const t = await page.locator("#atlas-ctx").innerText();
-    ok(`${vp}: hop click selects (navigation into the story)`, t.includes("selection:"), t.replace(/\s+/g, " ").slice(0, 90));
+    await page.waitForTimeout(300);
+    const hopSel = await page.evaluate(() => window.__atlas.getContext().selection);
+    ok(`${vp}: hop click selects (navigation into the story)`, !!hopSel, "selection=" + hopSel);
     // frontier card reroots to the nearest edge
     await page.locator("#atlas-cards [data-card='frontier']").click();
     await page.waitForSelector(".atlas-cell.atlas-ghost", { timeout: 10000 });
