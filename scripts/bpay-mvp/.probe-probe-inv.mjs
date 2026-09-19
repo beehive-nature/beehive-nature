@@ -172,23 +172,8 @@ function decorate(doc) {
   markAfter(doc.domain?.artifact || {}, 'sha256', 'public content sha256 pin');
   markAfter(doc.domain || {}, 'data_map_address', 'public self-encrypted data-map address');
   markAfter(doc.commitment || {}, 'digest', 'public commitment digest over the carried quote set');
-  // identity carries up to two hex fields (priorDigest?, contentDigest) — each
-  // gets its OWN immediately-following marker key (scan / scan_prior; an object
-  // cannot hold duplicate keys, so multi-hex objects use distinct scan* names)
-  (function(){
-    const id = doc.identity;
-    if (!id) return;
-    const rebuilt = {};
-    for (const [k, v] of Object.entries(id)) {
-      rebuilt[k] = v;
-      if (k === 'priorDigest' && typeof v === 'string' && SCAN_HEX.test(v))
-        rebuilt.scan_prior = `${SCAN_MARK}: public prior-version content digest (successor lineage — history superseded, never rewritten)`;
-      if (k === 'contentDigest' && typeof v === 'string' && SCAN_HEX.test(v))
-        rebuilt.scan = `${SCAN_MARK}: public content-addressed identity digest`;
-    }
-    for (const k of Object.keys(id)) delete id[k];
-    Object.assign(id, rebuilt);
-  })();
+  markAfter(doc.identity || {}, 'contentDigest', 'public content-addressed identity digest');
+  markAfter(doc.identity || {}, 'priorDigest', 'public prior-version content digest (successor lineage — history superseded, never rewritten)');
   return doc;
 }
 
@@ -207,9 +192,9 @@ function serialize(doc) {
       const [k, x] = entries[i];
       if (typeof x === 'string' && SCAN_HEX.test(x)) {
         const next = entries[i + 1];
-        if (!(next && /^scan/.test(next[0]) && typeof next[1] === 'string' && next[1].startsWith(SCAN_MARK)))
+        if (!(next && next[0] === 'scan' && typeof next[1] === 'string' && next[1].startsWith(SCAN_MARK)))
           throw new Error(`hex key "${k}" has no in-object scan marker — refuse to serialize (digest consistency law)`);
-        out.push(`"${k}": ${JSON.stringify(x)}, "${next[0]}": ${JSON.stringify(next[1])}`); // the marker rides the hex's own line
+        out.push(`"${k}": ${JSON.stringify(x)}, "scan": ${JSON.stringify(next[1])}`); // the marker rides the hex's own line
         i++;
       } else {
         out.push(`"${k}": ${val(x, pad + ' ')}`);
@@ -316,4 +301,4 @@ async function selftest() {
   process.exit(failed ? 1 : 0);
 }
 
-await main();
+export { invoiceFromPrepare, decorate, serialize };

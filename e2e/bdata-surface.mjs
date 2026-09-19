@@ -32,6 +32,8 @@ const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.
 
 const results = [];
 const check = (name, ok, detail = '') => { results.push({ name, ok, detail }); console.log(`${ok ? '✓' : '✗'} ${name}${detail ? ' — ' + detail : ''}`); };
+let lastMockCount = 0; // the mock's request counter, mirrored for assertions
+let mockRequests = 0; // module scope: one counter for the server's lifetime (a per-request `let` made every request "#1" — every response a 502)
 
 const refInvoice = JSON.parse(await readFile(join(SURFACES, 'bpay-invoice.json'), 'utf8'));
 const ant = refInvoice.lines.find(l => l.asset === 'ANT');
@@ -40,14 +42,19 @@ const recomputedCeiling = ant.quotes.reduce((s, q) => s + BigInt(q.amount_atto),
 const server = createServer(async (req, res) => {
   const url = (req.url || '/').split('?')[0];
   // MOCK quote service — the founder-shaped request asserted server-side; the
-  // REAL bridge and the REAL acceptance belong to the founder alone
+  // REAL bridge and the REAL acceptance belong to the founder alone. The FIRST
+  // prepare 502s (the flake class the founder hit live) so the gate proves the
+  // honest auto-retry; every request after succeeds.
   if (url === '/mock-bridge/v1/upload/prepare') {
     let body = '';
     for await (const chunk of req) body += chunk;
     const parsed = JSON.parse(body);
+    mockRequests++;
+    lastMockCount = mockRequests;
     if (parsed.audience !== 'public' || parsed.force_fresh !== true || parsed.artifact_sha256 !== refInvoice.domain.artifact.sha256) {
       res.writeHead(400); res.end('MOCK: request must carry {artifact pin, audience:public, force_fresh}'); return;
     }
+    if (mockRequests === 1) { res.writeHead(502); res.end('insufficient peers: Got 0 quotes (MOCK flake)'); return; }
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({
       upload_id: 'up-MOCK', artifact_sha256: refInvoice.domain.artifact.sha256, artifact_bytes: refInvoice.domain.artifact.bytes,
@@ -82,6 +89,7 @@ await page.addInitScript(bridge => {
 }, origin + '/mock-bridge');
 const pageErrors = [];
 page.on('pageerror', e => pageErrors.push(String(e)));
+page.on('console', m => { if (m.type() === 'error') console.log(`  [page-console-error] ${m.text()}`); });
 
 await page.goto(origin + '/bdata.html', { waitUntil: 'load' });
 await page.waitForTimeout(1400);
@@ -116,18 +124,26 @@ check('preserve handoff becomes ready', !!(await page.$('[data-bdata-quote-go]')
 check('ONE primary affordance: Get the storage price (no navigation away)', await page.$$eval('[data-bdata-quote-go]', els => els.length === 1) && !(await page.$('[data-bdata-open-bpay]')));
 check('supersede note still present after the gesture', !!(await page.$('[data-bdata-supersede-note]')));
 check('authorize step visibly locked (payment absent by law)', !!(await page.$('[data-bdata-authorize-next]')));
-// THE PRICE, IN PLACE — bPay invoked behind the button; the mock bridge
-// (seeded pre-boot, the near-miss law) asserts the founder-shaped request
-// server-side; the observation renders on THIS page (URL never changes)
+// THE PRICE, IN PLACE — the gesture IS the trigger (latency law): choosing
+// Public auto-starts the network ask; the first mock response 502s (the flake
+// class the founder hit live) and the honest auto-retry recovers; the price
+// renders on THIS page (URL never changes); a refresh asks again on demand
 const urlBefore = page.url();
-await page.click('[data-bdata-quote-go]');
-await page.waitForTimeout(900);
+await page.waitForTimeout(500);
+check('price ask started automatically with the gesture (no second press)', lastMockCount >= 1, `requests=${lastMockCount}`);
+await page.waitForSelector('[data-bdata-fresh-atto]', { timeout: 12000 });
 const MOCK_TOTAL = '4200000000000000000';
 const freshAtto = await page.$$eval('[data-bdata-fresh-atto]', els => els.map(e => e.dataset.bdataFreshAtto).join(','));
-check('fresh price rendered IN PLACE (mock total, recomputed sum)', freshAtto === MOCK_TOTAL, `fresh=${freshAtto}`);
+check('fresh price rendered IN PLACE after the auto-retry recovered the flake', freshAtto === MOCK_TOTAL, `fresh=${freshAtto} requests=${lastMockCount}`);
+check('the flake auto-retried exactly once (2 requests, not a loop)', lastMockCount === 2, `requests=${lastMockCount}`);
 check('page never navigated (one page, one concept)', page.url() === urlBefore, page.url());
 check('caused-by-your-choice line present', /caused by your choice/i.test(await page.innerText('body')));
 check('nothing-paid line present', /Nothing has been paid/i.test(await page.innerText('body')));
+check('cached refresh affordance present', !!(await page.$('[data-bdata-price-refresh]')));
+const beforeRefresh = lastMockCount;
+await page.click('[data-bdata-price-refresh]');
+await page.waitForTimeout(600);
+check('refresh asks the network again on demand', lastMockCount === beforeRefresh + 1, `${beforeRefresh}→${lastMockCount}`);
 
 // 5 · automation — first-class, persisted, supersede-not-mutate
 // (history already carries edition 1 = the ORIGIN audience gesture above)
