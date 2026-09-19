@@ -40,6 +40,12 @@ button.gold{background:#2a230a;color:var(--gold)} button.gold:hover{background:v
 .out{background:#0a0f0b;border:1px dashed var(--line);border-radius:8px;padding:11px 13px;margin-top:10px;font-size:11px;white-space:pre-wrap;word-break:break-word;display:none}
 .never{border:1px dashed #3d3410;background:#141207;border-radius:8px;padding:9px 12px;font-size:10.5px;color:var(--gold);line-height:1.7;margin-top:10px}
 footer{max-width:860px;margin:22px auto 0;color:var(--dim);font-size:10px;text-align:center;line-height:1.8}
+/* views change density, never the composer: section 1 (the before-composing
+   check) is <details data-reg-disclose> (collapsed for bee/raver, open for
+   cypherpunk, per register.js); the why, every composer step and the draft
+   stay open */
+details[data-reg-disclose]>summary h2{margin-bottom:0}
+details[data-reg-disclose][open]>summary{margin-bottom:8px}
 </style>
 </head>
 <body>
@@ -71,7 +77,8 @@ footer{max-width:860px;margin:22px auto 0;color:var(--dim);font-size:10px;text-a
 </section>
 
 <section>
-  <h2>1 · <span data-i18n="h.045">BEFORE COMPOSING — has an entry already landed?</span></h2>
+ <details data-reg-disclose>
+  <summary><h2>1 · <span data-i18n="h.045">BEFORE COMPOSING — has an entry already landed?</span></h2></summary>
   <div class="law">the order's standing rule: check before composing. this seat probed
   IQ.wiki's search server-side on 2026-08-20 — <b>both probe paths returned HTTP 404</b>
   (the search is a JavaScript client route; a failed fetch is a failure, never "no entry
@@ -79,6 +86,7 @@ footer{max-width:860px;margin:22px auto 0;color:var(--dim);font-size:10px;text-a
   <a href="https://iq.wiki/" rel="noopener">iq.wiki</a>, search the subject, and only
   propose what is absent — a correction to an existing entry is a different, smaller
   submission than a new wiki.</div>
+ </details>
 </section>
 
 <section>
