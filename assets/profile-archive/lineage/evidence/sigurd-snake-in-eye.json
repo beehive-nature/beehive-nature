@@ -1,0 +1,28 @@
+{
+ "schema": "skaists.evidence/1",
+ "person": {
+  "name": "Sigurd Snake-in-the-Eye (Sigurd Ragnarsson, Sigurd Ormr-í-auga)",
+  "lifespan": "mid–late 9th century (traditional)",
+  "fsid": null,
+  "tier": "saga",
+  "tierBasis": "not in the walked FamilySearch record — enters ONLY via this evidence pack and the attested overlay"
+ },
+ "summary": "The crest's serpent king. Semi-legendary Viking warrior and Danish king; son of Ragnar Loðbrók and Aslaug; born with the image of the ouroboros — a snake biting its own tail — in his left eye. He is NOT in the walked FamilySearch record (Ragnar's children there: Alof — our blood — and Björn Ironside); he enters the estate's record through the attested overlay, always labeled saga. The estate's house crest carries paired serpents; this is the founder's stated symbolism tie.",
+ "claims": [
+  {"claim": "Semi-legendary Viking warrior and Danish king, mid-to-late 9th century; might have been the Danish King Sigfred who ruled briefly in the 870s.",
+   "source": "Wikipedia (tertiary index)", "url": "https://en.wikipedia.org/wiki/Sigurd_Snake-in-the_Eye"},
+  {"claim": "Son of Ragnar Lodbrok and Aslaug; born with a mark in his left eye described as the image of the ouroboros — hence the name.",
+   "source": "Wikipedia", "url": "https://en.wikipedia.org/wiki/Sigurd_Snake-in-the_Eye"},
+  {"claim": "Sources carrying him: Ragnarssona þáttr (Tale of Ragnar's Sons), Ragnars saga Loðbrókar, Saxo Grammaticus; Adam of Bremen names Hardegon's father as 'Sven' — a CONFLICT retained, not smoothed; Frankish annals place Sigfred/Halfdan ruling 873.",
+   "source": "Wikipedia source survey", "url": "https://en.wikipedia.org/wiki/Sigurd_Snake-in-the_Eye"},
+  {"claim": "On hearing of Ragnar's death in Ælla's snake pit, he cut himself to the bone with a knife; joined the Great Heathen Army (865–866); York taken, Ælla executed by blood eagle under Ivar's strategy.",
+   "source": "Wikipedia", "url": "https://en.wikipedia.org/wiki/Sigurd_Snake-in-the_Eye"},
+  {"claim": "Inherited Zealand, Scania, Halland, the Danish islands, and Viken; possibly co-ruled Denmark with Halfdan (~873), sole king ~877 after Halfdan's death.",
+   "source": "Wikipedia", "url": "https://en.wikipedia.org/wiki/Sigurd_Snake-in-the_Eye"},
+  {"claim": "Married Blaeja, daughter of King Ælla of Northumbria (the king who killed his father). Children: Harthacanute (king of part of Denmark ~916; father of Gorm the Old; grandfather of Harald Bluetooth; ancestor of Sweyn Forkbeard, Cnut the Great, and every Danish monarch after 1047 via Estrid); Áslaug Sigurðardóttir (m. Helge of the Dagling line; their son Sigurd Hart's daughter Ragnhild connects to Norwegian royal genealogies).",
+   "source": "Wikipedia", "url": "https://en.wikipedia.org/wiki/Sigurd_Snake-in-the_Eye"},
+  {"claim": "DEATH: no medieval source has Ivar the Boneless killing him — that scene is a television invention (Vikings S4E20). A landless Viking king named Sigfred, 'quite possibly the same person', was killed in West Francia in 887.",
+   "source": "Wikipedia + Vikings Wiki (for the invented scene)", "url": "https://en.wikipedia.org/wiki/Sigurd_Snake-in-the_Eye"}
+ ],
+ "law": "This pack indexes SECONDARY/TERTIARY scholarship about PRIMARY tradition. Sigurd's evidence class stays 'saga' — kin by tradition, blood unproven. The overlay link to Ragnar and Aslaug is the tradition's own claim, carried with its source."
+}
