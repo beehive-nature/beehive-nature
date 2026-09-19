@@ -129,7 +129,9 @@ await page.waitForSelector('[data-bdata-settled]', { timeout: 30000 });
 await page.waitForTimeout(300);
 await shot('7-settled-testnet');
 const settledText = await page.$eval('[data-bdata-settled]', e => e.innerText);
-say('7. SETTLED ON TESTNET: ' + (/SETTLED ON TESTNET/i.test(settledText) ? '✓' : 'MISSING'));
+say('7. settled banner: ' + (/SETTLED ON (THE )?TESTNET/i.test(settledText) ? '✓' : 'MISSING'));
+say('   REPLICA named on the settled banner: ' + (/REPLICA/i.test(settledText) ? '✓' : 'MISSING'));
+say('   REPLICA named on the receipt (signed panel): ' + ((await page.$eval('[data-bdata-receipt-testnet]', e => e.innerText)).includes('REPLICA') ? '✓' : 'MISSING'));
 say('   hashes on screen: ' + (settledText.match(/0x[0-9a-f]{64}/g) || []).length);
 
 say('page errors: ' + (errs.length ? errs.join(' | ').slice(0, 200) : 'none'));

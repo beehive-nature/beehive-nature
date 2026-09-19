@@ -118,3 +118,29 @@ browser UI — prepare → authorize → binding gate (15 laws) → sign ×2
 The Safe 7 replaces the hot key when a hardware transport lands (Suite
 experimental MCP is the live candidate); everything else — bindings,
 composer, wall, receipts, UI — is unchanged by construction.
+
+## BOARD RULINGS BANKED (2026-09-19, post-proof review of f3962879)
+
+1. **THE MEASURED GAS LAW is now an organ law + fixture**: composition
+   REFUSES a payForQuotes gas ceiling below `600k + 50k × payments`
+   (56 → ≥3.4M; measured burn 3,117,489; the 3M ceiling that reverted
+   on-chain is a named, test-pinned refusal — `the_measured_gas_law_
+   refuses_the_oog_ceiling_forever`).
+2. **The permanent label**: "Arbitrum-Sepolia-shaped TESTNET-REPLICA
+   using real Autonomi contract artifacts" — banner-strength in the
+   signing review, named on the receipt panel, named in the settled
+   banner, replica-conditional in the service's settle response. Never
+   "proven on Arb's testnet" without the REPLICA word while on the local
+   ledger. Public Sepolia is a SEPARATE receipt when the same code runs
+   against the public network.
+3. **The first Safe 7 ceremony splits into two observations** (bank the
+   device receipt before any settlement): **A** — harmless
+   preflight/rejection/approval → recovered signer matches the expected
+   address; inspect; then **B** — the two real bPay transactions signed
+   → watchpay verifies → **SIGNED / NOT BROADCAST**, and the receipt is
+   inspected BEFORE any public-testnet settlement gesture. Suite 26.9.2
+   experimental MCP is the transport candidate (My Data the cockpit,
+   watchpay the verifier, Suite merely the pipe); do NOT build native
+   Rust THP before banking the real Safe 7 receipt.
+4. Mainnet stays deliberately untouched until the hardware transport is
+   real AND the founder re-authorizes against a current job.

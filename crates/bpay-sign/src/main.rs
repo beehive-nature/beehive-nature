@@ -520,8 +520,8 @@ async fn testnet_settle(
         axum::http::StatusCode::OK,
         Json(serde_json::json!({
             "ok": true,
-            "settled": "TESTNET",
-            "note": "settled on the Arbitrum Sepolia TESTNET ledger (or its labeled fork) — never mainnet; proof-of-pipeline only",
+            "settled": if receipt.replica { "TESTNET-REPLICA" } else { "TESTNET" },
+            "note": if receipt.replica { "settled on the Arbitrum-Sepolia-shaped TESTNET-REPLICA ledger (real Autonomi contract artifacts, local chain 421614 — NOT public Arbitrum Sepolia); never mainnet; proof-of-pipeline only" } else { "settled on the PUBLIC Arbitrum Sepolia testnet — never mainnet; proof-of-pipeline only" },
             "transactions": sent,
         })),
     )

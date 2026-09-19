@@ -87,6 +87,19 @@ pub const ARBITRUM_SEPOLIA_ANT_TOKEN: &str = "0x4bc1ace0e66170375462cb4e6af42ad4
 pub const ARBITRUM_SEPOLIA_PAYMENT_VAULT: &str = "0xd742e8cfef27a9a884f3effa239ee2f39c276522";
 pub const MAX_TRANSFERS_PER_TRANSACTION: usize = 256;
 
+/// THE MEASURED GAS LAW (board ruling 2026-09-19, made permanent — the
+/// OOG lesson): executed on the TESTNET-REPLICA with the REAL Autonomi
+/// artifacts, a 56-payment payForQuotes consumed 3,117,489 gas — an
+/// "apparently generous" generic 3M ceiling REVERTED out-of-gas. Each
+/// ERC20Votes transferFrom (checkpoints + votes bookkeeping) costs
+/// ~55.7k gas. Composition therefore REFUSES a payForQuotes gas ceiling
+/// below the measured envelope: base + per-payment × count.
+pub const PAY_FOR_QUOTES_BASE_GAS: u64 = 600_000;
+pub const PAY_FOR_QUOTES_GAS_PER_PAYMENT: u64 = 50_000;
+/// Approve floor (ERC20 approve measures ~46k; 100k is the reviewed
+/// floor with headroom).
+pub const APPROVE_MIN_GAS: u64 = 100_000;
+
 /// One quote payment exactly as the bridge persists it: (quote hash,
 /// rewards address, amount atto). Field order matches the bridge tuple;
 /// the ABI order differs (see [`pay_for_quotes_calldata`]).
@@ -434,6 +447,25 @@ impl WaveSignRequest {
             return Err(Error::field(
                 "gas",
                 "zero gas limit or fee ceiling refuses composition (not a lawful review figure)",
+            ));
+        }
+        // THE MEASURED GAS LAW: per-destination floors. A payForQuotes
+        // ceiling under the measured envelope is the OOG lesson relived.
+        let min_gas = match dest {
+            WaveDestination::PayForQuotes { .. } => {
+                PAY_FOR_QUOTES_BASE_GAS
+                    + PAY_FOR_QUOTES_GAS_PER_PAYMENT * binding.payments.len() as u64
+            }
+            WaveDestination::Approve => APPROVE_MIN_GAS,
+        };
+        if fees.gas_limit < min_gas {
+            return Err(Error::field(
+                "gas_limit",
+                format!(
+                    "THE MEASURED GAS LAW: {} for {} needs gas ≥ {min_gas} (measured on                      the TESTNET-REPLICA: 56 payments burned 3,117,489 — a \"generous\" 3M                      ceiling REVERTED out-of-gas; ERC20Votes transfers cost ~55.7k each);                      refused at composition, never at the chain",
+                    dest.describe(),
+                    binding.payments.len()
+                ),
             ));
         }
         Ok(WaveSignRequest {

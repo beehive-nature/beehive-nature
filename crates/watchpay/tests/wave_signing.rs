@@ -506,9 +506,9 @@ fn pay_for_quotes_golden_calldata_vector() {
 fn fees(nonce: u64) -> WaveFeeCeilings {
     WaveFeeCeilings {
         nonce,
-        gas_limit: 400_000,
+        gas_limit: 6_000_000, // the measured-gas law envelope (56 payments need ≥3.4M)
         max_fee_per_gas_wei: 100_000_000_000, // 100 gwei
-        max_priority_fee_wei: 1_000_000_000,  // 1 gwei
+        max_priority_fee_wei: 1_000_000_000, // 1 gwei
     }
 }
 
@@ -562,6 +562,36 @@ fn compose_pay_for_quotes_binds_vault_destination_and_slot2() {
     assert_eq!(req.to().to_lower_hex(), ARBITRUM_ONE_PAYMENT_VAULT);
     assert_eq!(req.data(), &pay_for_quotes_calldata(b.payments()).unwrap());
     assert_eq!(req.dest().slot(), 2);
+}
+
+#[test]
+fn the_measured_gas_law_refuses_the_oog_ceiling_forever() {
+    // The OOG lesson as a permanent fixture (board ruling 2026-09-19):
+    // the REAL vault burned 3,117,489 gas for 56 payments — a "generous"
+    // generic 3M ceiling REVERTED out-of-gas. Composition must refuse
+    // BEFORE the chain ever sees it.
+    let b = sealed56();
+    let mut f = fees(8);
+    f.gas_limit = 3_000_000; // the exact ceiling that reverted on-chain
+    let err = WaveSignRequest::compose(&b, WaveDestination::PayForQuotes { part: 0 }, f, path())
+        .unwrap_err();
+    assert!(
+        err.to_string().contains("MEASURED GAS LAW") && err.to_string().contains("3,117,489"),
+        "{err}"
+    );
+    // the computed minimum itself is lawful (3.4M for 56 passes)
+    let mut ok_f = fees(8);
+    ok_f.gas_limit = 600_000 + 50_000 * 56;
+    assert!(
+        WaveSignRequest::compose(&b, WaveDestination::PayForQuotes { part: 0 }, ok_f, path())
+            .is_ok()
+    );
+    // the approve floor law
+    let mut low_approve = fees(7);
+    low_approve.gas_limit = 99_999;
+    let err =
+        WaveSignRequest::compose(&b, WaveDestination::Approve, low_approve, path()).unwrap_err();
+    assert!(err.to_string().contains("MEASURED GAS LAW"), "{err}");
 }
 
 #[test]
