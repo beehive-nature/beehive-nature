@@ -93,3 +93,19 @@ either case and nsec-shaped strings; this is not a general sensitive-data scanne
 Mention keys and reply IDs receive syntax validation, not provenance verification.
 Any failed write may already have published; inspect the room before retrying.
 The hardened helper passed syntax checking and a fresh authenticated room read.
+
+## First work routed through the connection
+
+The coordinator received both bounded packets and recorded them in
+`WORK_LOGS/2026-09-19_BUI_MUSIC_SOUND_LANE.md`: Music/Listening recovery with Watch
+held for its owner, and the separate OpenHarness compatibility/design reference.
+It proposed the existing GLM writer and independent reviewer for the media lane,
+and the existing design-docket seat for architecture, subject to their acceptance
+and capacity. No competing agent or duplicate implementation was launched here.
+
+Coordinator routing receipt:
+`0496a9f60706de78dcc5f0a4ef6382ef6505ce51bca2e46ed14cdc72ddaac127`. PUBLIC-CONSTANT
+
+A follow-up supplied the independently checked shared-key constraint so the Music
+writer can preserve Watch's ownership and bundle gate. This is a delivery receipt;
+candidate completion, independent review and founder integration remain separate.

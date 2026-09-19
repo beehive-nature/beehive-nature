@@ -132,3 +132,30 @@ message. Do not infer a dispatched job from this brief.
 Subsequent authorized bridge setup is recorded separately in
 `2026-09-19-codex-buzz-bridge.md`. It supersedes the CLI-authentication limitation
 above; this paragraph preserves the earlier intake's delivery state.
+
+## Verified routing and the Watch ownership dependency
+
+The bridge subsequently delivered the packet directly to LoVis bee-laborer. The
+coordinator recorded it in `WORK_LOGS/2026-09-19_BUI_MUSIC_SOUND_LANE.md` and proposed
+ZcODe5.3max as recovery writer, bFUzZ as behavioral reviewer and Astra as journey
+reviewer. This records routing, not an implementation acceptance. #137 stays held.
+
+The coordinator checked both Cowork Watch branches as integrated through #138,
+but Cowork's stated ownership of `watch.html` and shared register CSS has not been
+released. Until it is, the permitted subset is **Music + Listening**. Watch markup,
+its invitation and its embedded language bundle remain outside that subset.
+
+An independent source check caught a coupled translation dependency before edits:
+`music.beeLead` is used in Watch's fallback and embedded bundle. Changing that key
+while freezing Watch would fail bundle `--check`; an English mismatch also fails
+estate-source. The boundary-preserving option is to give Music's truthful lead a
+new Music-only key (for example `music.roomPreviewLead`) with all language cells
+and draft provenance. `music.beeIntro` is not embedded by Watch and may be corrected
+in place together with Music's fallback. Preserve corpus metadata, including
+`law`, `langs`, `rtl`, `attested` and `withdrawn`, which the bundle builder embeds.
+
+Read-only in-memory checks confirmed that the proposed new Music-only key and
+the intro correction leave Watch's generated bundle unchanged. Keep the Watch
+bundle gate active. The scoped candidate must explicitly disclose that Watch's
+false playback invitation remains unresolved behind the ownership dependency;
+it must not claim the full cross-surface journey repaired.
