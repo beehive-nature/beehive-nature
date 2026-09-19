@@ -79,6 +79,13 @@ footer{max-width:900px;margin:22px auto 0;color:var(--dim);font-size:10px;text-a
   #pipe{height:150px}
 }
 @media(prefers-reduced-motion:reduce){#pipe{animation:none}}
+/* views change density, never the design: §2 and §3 are
+   <details data-reg-disclose> (collapsed for bee/raver, open for cypherpunk,
+   per register.js); the pipeline and the articles stay open, and the three
+   article drafts keep their own plain <details> */
+details[data-reg-disclose]{margin-top:0;border-top:0;padding-top:0}
+details[data-reg-disclose]>summary h2{margin-bottom:0}
+details[data-reg-disclose][open]>summary{margin-bottom:8px}
 </style>
 </head>
 <body>
@@ -278,7 +285,8 @@ from the Beehive Nature Relay community diagnostics of 2026-08 (AntTP findings b
 </section>
 
 <section>
-  <h2>2 · THE FINDINGS LEDGER — their finding, our write-up</h2>
+ <details data-reg-disclose>
+  <summary><h2>2 · THE FINDINGS LEDGER — their finding, our write-up</h2></summary>
   <div class="law">credit is not a citation. these people found the things; the write-ups above are
   ours. iq.wiki's evidentiary bar (official docs, primary sources, reputable publications) is a
   <b>different register</b> — the ledger records who found what, the articles will cite the
@@ -301,10 +309,12 @@ from the Beehive Nature Relay community diagnostics of 2026-08 (AntTP findings b
   this repo yet</b> — the articles rest on the landed probe thresholds (bmesh-hwfit, 2026-08-23) plus
   the finders' attributions. when the raw outputs land, articles ① and ② cite their measured values
   with dates.</div>
+ </details>
 </section>
 
 <section>
-  <h2>3 · THE SOPHIA GATE — what iq.wiki requires, and the fork we're standing at</h2>
+ <details data-reg-disclose>
+  <summary><h2>3 · THE SOPHIA GATE — what iq.wiki requires, and the fork we're standing at</h2></summary>
   <div class="tablewrap"><table>
     <tr><th>requirement (their words)</th><th>our state</th></tr>
     <tr><td class="n">"Subject must be meaningfully connected to crypto"</td><td>as-written, our articles are generic Linux diagnostics — <b style="color:var(--amber)">out of scope</b>. the honest bridge: these are the failure modes of running <i>node software</i> on ARM64 Linux. a reframe, founder's word.</td></tr>
@@ -317,6 +327,7 @@ from the Beehive Nature Relay community diagnostics of 2026-08 (AntTP findings b
   scope-eligible, needs the reframe + citation pass; or (b) keep them here on the estate where no
   scope rule applies, and reference them from iq.wiki articles that <i>do</i> meet scope. full brief with
   sources: <a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/wiki/IQWIKI-SUBMISSION-BRIEF.md">docs/wiki/IQWIKI-SUBMISSION-BRIEF.md</a>. founder's word picks the lane.</div>
+ </details>
 </section>
 
 </main>
