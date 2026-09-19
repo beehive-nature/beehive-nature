@@ -166,7 +166,7 @@ check('bytes machine-exact', bytesAttr === String(refInvoice.domain.artifact.byt
 
 // 2 · the canvas — New bee is light and readable; controls are thumb-sized
 const canvas = await page.evaluate(() => ({ reg: document.body.dataset.reg, bg: getComputedStyle(document.body).backgroundColor, size: parseFloat(getComputedStyle(document.body).fontSize), theme: document.body.dataset.beeTheme }));
-check('New bee renders the hub\'s light canvas (no dark page under a light toolbar)', canvas.reg === 'bee' && canvas.bg === 'rgb(246, 247, 242)' && canvas.theme === 'shared', JSON.stringify(canvas));
+check('New bee renders the hub\'s light canvas (no dark page under a light toolbar)', canvas.reg === 'bee' && canvas.bg === 'rgb(251, 247, 240)' && canvas.theme === 'shared', JSON.stringify(canvas));
 check('reading text is at least 16px', canvas.size >= 16, `${canvas.size}px`);
 const smallType = p => p.$$eval('main *', els => els.filter(e => e.children.length === 0 && e.textContent.trim() && e.checkVisibility({ contentVisibilityAuto: true }) && parseFloat(getComputedStyle(e).fontSize) < 13.9).map(e => e.textContent.trim().slice(0, 30) + '=' + getComputedStyle(e).fontSize));
 let tiny = await smallType(page);

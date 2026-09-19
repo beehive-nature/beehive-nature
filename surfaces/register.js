@@ -54,9 +54,9 @@
 
     [data-reg]:not(body){display:none}
     body[data-reg="bee"] [data-reg="bee"],body[data-reg="raver"] [data-reg="raver"],body[data-reg="cypherpunk"] [data-reg="cypherpunk"]{display:revert}
-    #bregbar,#bregctl{--reg-bg:#f6f7f2;--reg-ink:#18362a;--reg-line:#8a9e90;--reg-active:#326b39;--reg-on:#fff;--reg-font:system-ui,-apple-system,'Segoe UI',sans-serif;color-scheme:light}
-    body[data-reg="raver"] #bregbar,body[data-reg="raver"] #bregctl{--reg-bg:#0e1b19;--reg-ink:#e9f2ec;--reg-line:#729889;--reg-active:#b7a8f7;--reg-on:#101724;color-scheme:dark}
-    body[data-reg="cypherpunk"] #bregbar,body[data-reg="cypherpunk"] #bregctl{--reg-bg:#06110c;--reg-ink:#e9f2ec;--reg-line:#729889;--reg-active:#86cc72;--reg-on:#06110c;--reg-font:ui-monospace,'Cascadia Mono',Consolas,monospace;color-scheme:dark}
+    #bregbar,#bregctl{--reg-bg:#fbf7f0;--reg-ink:#0c1412;--reg-track:#efe9dd;--reg-line:#857d70;--reg-active:#0c1412;--reg-on:#fbf7f0;--reg-font:system-ui,-apple-system,'Segoe UI',sans-serif;color-scheme:light}
+    body[data-reg="raver"] #bregbar,body[data-reg="raver"] #bregctl{--reg-track:#15241f;--reg-bg:#0e1b19;--reg-ink:#e9f2ec;--reg-line:#729889;--reg-active:#d655bb;--reg-on:#06110c;color-scheme:dark}
+    body[data-reg="cypherpunk"] #bregbar,body[data-reg="cypherpunk"] #bregctl{--reg-track:#0c1412;--reg-radius:4px;--reg-bg:#06110c;--reg-ink:#e9f2ec;--reg-line:#729889;--reg-active:#45c2dc;--reg-on:#06110c;--reg-font:ui-monospace,'Cascadia Mono',Consolas,monospace;color-scheme:dark}
     #bregbar{position:relative;inset:auto;z-index:auto;display:flex;flex:0 0 auto;order:-1;grid-column:1/-1;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;box-sizing:border-box;width:100%;min-width:0;max-width:none;height:auto;min-height:68px;margin:0 0 16px;padding:12px clamp(12px,3vw,40px);border:0;border-bottom:1px solid var(--reg-line);background:var(--reg-bg);color:var(--reg-ink);font:1rem/1.5 var(--reg-font);text-align:start}
     #bregbar [data-register-host]{display:block;flex:0 1 auto;min-width:0;max-width:100%;margin:0;padding:0}
     #bregctl{position:static;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:6px;box-sizing:border-box;min-width:0;max-width:100%;height:auto;min-height:0;margin:0;padding:0;border:0;background:var(--reg-bg);color:var(--reg-ink);font:1rem/1.5 var(--reg-font)}
@@ -66,6 +66,14 @@
     #bregctl button::before{content:'✓';display:inline-block;visibility:hidden;font:inherit}
     #bregctl button[aria-pressed="true"]::before{visibility:visible}
     #bregctl button:hover{border-color:var(--reg-active);text-decoration:underline;text-underline-offset:3px}
+    /* THE RULED FACE (2026-09-19): one row where the words fit (it wraps for long tongues, never overflows), a pill track, the pressed pill filled;
+       the check mark still says "pressed" without colour. Emoji give way to words. */
+    #bregctl{flex-wrap:wrap;gap:2px;padding:4px;border-radius:var(--reg-radius,26px);background:var(--reg-track)}
+    #bregctl button{border-color:transparent;border-radius:var(--reg-radius,999px);background:transparent;padding:8px 12px;white-space:normal;overflow-wrap:anywhere;gap:6px}
+    #bregctl button>span[aria-hidden="true"]{display:none}
+    #bregctl button::before{display:none}
+    #bregctl button[aria-pressed="true"]::before{display:inline-block}
+    #bregctl button:focus-visible{outline:2px solid var(--reg-ink);outline-offset:3px}
     #bregctl button:focus-visible,#bregbar a:focus-visible{outline:2px solid var(--reg-active);outline-offset:3px}
     #bregbar .breg-home{position:static;display:inline-flex;flex:0 0 auto;align-items:center;box-sizing:border-box;min-height:44px;width:auto;height:auto;margin:0;padding:6px 8px;border:0;border-radius:6px;background:transparent;color:var(--reg-ink);font:600 1rem/1.5 var(--reg-font);text-transform:none;letter-spacing:normal;text-decoration:none}
     #bregbar .breg-home:hover{text-decoration:underline}
@@ -85,15 +93,15 @@
     body[data-experience] #tbar a{color:var(--ink,#e9f2ec)!important;min-height:44px!important;box-shadow:none!important;background:transparent!important}
     body[data-experience] #tbar a[aria-current="page"]{font-weight:700;text-decoration:underline!important;text-underline-offset:4px}
     body[data-experience] #tbarMore{background:var(--panel,#0e1b19)!important;color:var(--ink,#e9f2ec)!important;border-color:var(--line,#42574a)!important;min-width:44px!important;min-height:44px!important;font-size:1rem!important}
-    body[data-experience][data-reg="bee"] #tbar,body[data-experience][data-reg="bee"] #tbarMore{background:#f6f7f2!important;color:#18362a!important;border-color:#ccd7cf!important}
-    body[data-experience][data-reg="bee"] #tbar a{color:#18362a!important}
+    body[data-experience][data-reg="bee"] #tbar,body[data-experience][data-reg="bee"] #tbarMore{background:#fbf7f0!important;color:#0c1412!important;border-color:#e6dfd2!important}
+    body[data-experience][data-reg="bee"] #tbar a{color:#0c1412!important}
     /* the bar follows the LIGHT canvas wherever New bee is light (data-bee-theme
        shared/custom) — not only on data-experience pages: a dark strip under a
        light page was the last dark thing on My Data */
-    html[data-bee-light="true"] #tbar,html[data-bee-light="true"] #tbarMore{background:#f6f7f2!important;color:#18362a!important;border-color:#ccd7cf!important}
-    html[data-bee-light="true"] #tbar a{color:#18362a!important}
+    html[data-bee-light="true"] #tbar,html[data-bee-light="true"] #tbarMore{background:#fbf7f0!important;color:#0c1412!important;border-color:#e6dfd2!important}
+    html[data-bee-light="true"] #tbar a{color:#0c1412!important}
     html[data-bee-light="true"] #tbar a[aria-current="page"]{background:#e2f0ee!important;box-shadow:inset 0 0 0 1px #176879!important;font-weight:700}
-    html[data-bee-light="true"] #tbar .tsep{background:#ccd7cf!important}
+    html[data-bee-light="true"] #tbar .tsep{background:#e6dfd2!important}
     body[data-experience] #tbar :is(a,button):focus-visible,body[data-experience] #tbarMore:focus-visible{outline:3px solid currentColor!important;outline-offset:-3px}
     body[data-experience] [data-view]{display:none}
     body[data-experience][data-reg="bee"] [data-view="bee"],body[data-experience][data-reg="raver"] [data-view="raver"],body[data-experience][data-reg="cypherpunk"] [data-view="cypherpunk"]{display:revert}
@@ -101,17 +109,17 @@
     /* New bee's page canvas. Neutral aliases bridge the older page families;
        categorical/semantic tokens, charts, images and canvas paint stay owned
        by their page. The hub already has its approved custom treatment. */
-    html[data-bee-light="true"]{background:#f6f7f2;color-scheme:light}
+    html[data-bee-light="true"]{background:#fbf7f0;color-scheme:light}
     body[data-reg="bee"][data-bee-theme="shared"]{
-      --bg:#f6f7f2;--bg0:#f6f7f2;--void:#f6f7f2;
+      --bg:#fbf7f0;--bg0:#fbf7f0;--void:#fbf7f0;
       --panel:#fff;--bg1:#fff;--bg-card:#fff;--tile:#fff;
-      --well:#edf2eb;--inset:#edf2eb;--bg2:#edf2eb;--bg-well:#edf2eb;--panel2:#edf2eb;
-      --bg3:#e2eadf;--lift:#e2eadf;--line:#ccd7cf;
-      --ink:#18362a;--ink-hi:#18362a;--fg:#18362a;
-      --dim:#435f4e;--dimmer:#52695b;--faint:#52695b;--mut:#52695b;--ink-dim:#52695b;--ink-mut:#52695b;
+      --well:#efe9dd;--inset:#efe9dd;--bg2:#efe9dd;--bg-well:#efe9dd;--panel2:#efe9dd;
+      --bg3:#e9e2d5;--lift:#e9e2d5;--line:#e6dfd2;
+      --ink:#0c1412;--ink-hi:#0c1412;--fg:#0c1412;
+      --dim:#4a5f55;--dimmer:#5a645e;--faint:#5a645e;--mut:#5a645e;--ink-dim:#5a645e;--ink-mut:#5a645e;
       --bee-font:system-ui,-apple-system,'Segoe UI',sans-serif;--sans:var(--bee-font);--font-ui:var(--bee-font);
       --t-body:1.125rem;--t-small:.875rem;--t-law:.875rem;--t-micro:.875rem;--t-h2:1.25rem;
-      background:#f6f7f2;color:#18362a;color-scheme:light;font-family:var(--bee-font);font-size:1.125rem;line-height:1.65;
+      background:#fbf7f0;color:#0c1412;color-scheme:light;font-family:var(--bee-font);font-size:1.125rem;line-height:1.65;
     }
     body[data-reg="bee"][data-bee-theme="shared"] :where(h1){background:none;color:var(--ink);-webkit-text-fill-color:currentColor;font-family:var(--bee-font);letter-spacing:-.035em;line-height:1.15}
     body[data-reg="bee"][data-bee-theme="shared"] :where(p,li,dt,dd,label,summary,.lede,.lead,.sub,.law,.intro,.bdesc,.gdesc,.seat-note){font-family:var(--bee-font);font-size:max(1rem,1em);line-height:1.65}
@@ -122,7 +130,7 @@
 
     /* Reviewed document adapters. These pages have prose, links and status
        labels rather than chart palettes. Deeper stops keep their hue roles. */
-    body[data-reg="bee"][data-bee-theme="shared"][data-bee-adapter="door"]{--green:#326b39;--magenta:#9e327f;--cyan:#176879;--lilac:#65509a;--blue:#29628f;--gold:#855b0b;--ember:#9f362c;--accent:var(--magenta);--hot:#8a9e90}
+    body[data-reg="bee"][data-bee-theme="shared"][data-bee-adapter="door"]{--green:#326b39;--magenta:#9e327f;--cyan:#176879;--lilac:#65509a;--blue:#29628f;--gold:#855b0b;--ember:#9f362c;--accent:var(--magenta);--hot:#857d70}
     body[data-reg="bee"][data-bee-theme="shared"][data-bee-accent="green"]{--accent:#326b39}
     body[data-reg="bee"][data-bee-theme="shared"][data-bee-accent="blue"]{--accent:#29628f}
     body[data-reg="bee"][data-bee-theme="shared"][data-bee-accent="cyan"]{--accent:#176879}
@@ -150,7 +158,7 @@
     body[data-reg="bee"][data-bee-theme="shared"][data-bee-adapter="relay"][data-bee-accent="green"] :where(h1 span){color:#326b39}
     body[data-reg="bee"][data-bee-theme="shared"][data-bee-adapter="relay"] :where(.state,.state b){color:var(--ink);font-size:1rem}
     body[data-reg="bee"][data-bee-theme="shared"][data-bee-adapter="relay"] code.join{background:var(--well);border-color:var(--line);color:#855b0b;font-size:1rem}
-    body[data-reg="bee"][data-bee-theme="shared"][data-bee-adapter="relay"] button[data-copy]{background:var(--panel);color:#326b39;border-color:#8a9e90;min-height:44px;font:500 1rem/1.5 var(--bee-font)}
+    body[data-reg="bee"][data-bee-theme="shared"][data-bee-adapter="relay"] button[data-copy]{background:var(--panel);color:#326b39;border-color:#857d70;min-height:44px;font:500 1rem/1.5 var(--bee-font)}
     body[data-reg="bee"][data-bee-theme="shared"][data-bee-adapter="relay"] button[data-copy]:hover{background:var(--well);border-color:#326b39}
     body[data-reg="bee"][data-bee-theme="shared"][data-bee-adapter="relay"] a.btn{background:#326b39;color:#fff;min-height:44px}
     body[data-reg="bee"][data-bee-theme="shared"][data-bee-adapter="relay"] :where(a,button):focus-visible{outline:2px solid #326b39;outline-offset:4px}
@@ -164,9 +172,9 @@
     body[data-reading-room][data-reg="bee"] #first-bee{gap:12px 48px;text-align:start;align-content:center;padding:12px 0 40px;min-height:420px;max-width:none}
     body[data-reading-room][data-reg="bee"][data-room-arrival="true"] #first-bee{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr)}
     body[data-reading-room][data-reg="bee"] #first-bee>:not(.room-art){grid-column:1;max-width:36rem;margin:0}
-    body[data-reading-room][data-reg="bee"] #first-bee .take{grid-row:1;font:600 clamp(2rem,3.5vw,3.4rem)/1.14 system-ui,sans-serif;letter-spacing:-.04em;color:#18362a;text-wrap:balance;overflow-wrap:anywhere}
-    body[data-reading-room][data-reg="bee"] #first-bee .calm{grid-row:2;margin-top:12px;font-size:1.125rem;line-height:1.65;color:#435f4e}
-    body[data-reading-room][data-reg="bee"] #first-bee .support{font-size:.9375rem;color:#52695b}
+    body[data-reading-room][data-reg="bee"] #first-bee .take{grid-row:1;font:600 clamp(2rem,3.5vw,3.4rem)/1.14 system-ui,sans-serif;letter-spacing:-.04em;color:#0c1412;text-wrap:balance;overflow-wrap:anywhere}
+    body[data-reading-room][data-reg="bee"] #first-bee .calm{grid-row:2;margin-top:12px;font-size:1.125rem;line-height:1.65;color:#4a5f55}
+    body[data-reading-room][data-reg="bee"] #first-bee .support{font-size:.9375rem;color:#5a645e}
     body[data-reading-room][data-reg="bee"] #first-bee .choices{margin-top:20px;justify-content:start;gap:10px}
     body[data-reading-room] .room-art{grid-column:2;grid-row:1/span 7;align-self:stretch;min-width:0;max-height:510px;border-radius:32px;overflow:hidden;background:#e8ede2;margin:0;display:flex;align-items:center;justify-content:center}
     body[data-reading-room] .room-art svg{display:block;width:100%;height:100%;max-height:510px;min-height:360px;object-fit:cover}
