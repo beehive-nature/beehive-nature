@@ -16,10 +16,15 @@
 //   G1 named reason    A dead button with three causes must say WHICH one.
 import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
-import { join, extname } from 'node:path';
+import { join, extname, resolve, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright';
 
-const ROOT = process.env.SURFACES || 'C:/Users/travi/wt-cD/surfaces';
+// Default: this checkout's own surfaces/. SURFACES overrides it; the served
+// root is printed so a run against another tree is visible in its output.
+const HERE = dirname(fileURLToPath(import.meta.url));
+const ROOT = process.env.SURFACES ? resolve(process.env.SURFACES) : resolve(HERE, '../surfaces');
+console.log(`serving ${ROOT}`);
 const TYPES = { '.html':'text/html', '.js':'text/javascript', '.css':'text/css', '.json':'application/json' };
 const srv = createServer(async (req,res) => {
   try {
