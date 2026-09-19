@@ -417,6 +417,64 @@ export const DISCOVER_RECORD_WIRE_SOURCE = String.raw`
 })
 `;
 
+// ── IMAGE WIRE — PROVEN 2026-09-19 under the founder's live session (the     ──
+// discovery concluded; this is the executed path, banked verbatim in shape):
+//   1. /ark:/61903/1:1:{record} SPA page → DOM "View Original Document" href
+//      carries the image ark 3:1:{imageArk}. The record DATA wire itself
+//      (/ark:/61903/1:1:{id}?useSLS=true) 401s outside the SPA — headers-only
+//      discovery failed (User-Agent is stripped from page fetches; the
+//      orchestration service demands one) — so the SPA page is the oracle.
+//   2. The image VIEWER page (/ark:/61903/3:1:{imageArk}?view=index) fires
+//      sg30p0.familysearch.org/service/records/volunteer/orchestration/sls/image/3:1:{ark}
+//      → resolves the deepzoom storage id (apid:TH-…-…); READ the apid from
+//      the viewer page's own performance resource log (cross-origin fetch of
+//      orchestration is impossible: CORS + the UA-header gate).
+//   3. Park the tab on sg30p0 (any storage URL — e.g. the image.xml itself)
+//      and SAME-ORIGIN fetch: …/deepzoomcloud/dz/v1/{apid}/image.xml
+//      (TileSize 256, Overlap 1, Size W×H) + …/image_files/{level}/{x}_{y}.jpg
+//      tiles. Stitch on an HTML-namespace canvas (an XML document's
+//      createElement needs createElementNS), toDataURL jpeg ~0.82.
+//      Level policy: smallest level with width ≥2400 (labeled in the manifest
+//      as level L/maxLevel — NOT claimed as the maximum pyramid fidelity).
+//   4. Bytes ride the PRIVATE tier only (archive copyright); the public layer
+//      carries counts + sha256 + ark pointers.
+// Executed results: C:/Users/travi/family-lineage/images-harvest/images-manifest.json.
+// OPEN FRONTIER (named honestly): record→image-ark mapping at 13k scale — the
+// person-keyed hr/v2 search wire (entry.id IS the 1:1 ark suffix; entry
+// gedcomx sourceDescriptions carry the 3:1 Persistent ark) joins to our
+// citations at only ~2% (search surfaces different records); the reliable
+// per-record mapping is the record SPA page's own DOM (one load per record).
+export const PAGE_IMAGE_STITCHER_SOURCE = String.raw`
+(async function stitchImage(apid, targetWidth){
+  const target=targetWidth||2400;
+  const BASE="https://sg30p0.familysearch.org/service/records/storage/deepzoomcloud/dz/v1/"+apid;
+  const r2=await fetch(BASE+"/image.xml",{credentials:"include"});
+  if(r2.status!==200)return{state:"xml-"+r2.status};
+  const xt=await r2.text();
+  const W=+xt.match(/Width="(\d+)"/)[1],H=+xt.match(/Height="(\d+)"/)[1];
+  let maxL=0;while(Math.pow(2,maxL+1)<=Math.max(W,H))maxL++;
+  let L=0;while(L<maxL&&Math.pow(2,L+1)<=target)L++;
+  const ts=256,dim=Math.pow(2,L);
+  const nx=Math.ceil(dim/ts),ny=Math.ceil(dim/ts);
+  const canvas=document.createElementNS("http://www.w3.org/1999/xhtml","canvas");
+  const r2s=dim/Math.max(W,H);
+  canvas.width=Math.max(1,Math.round(W<=dim?W:W*r2s));
+  canvas.height=Math.max(1,Math.round(H<=dim?H:H*r2s));
+  const ctx=canvas.getContext("2d");
+  const sx=canvas.width/dim,sy=canvas.height/dim;
+  let tiles=0,skipped=0;
+  for(let x=0;x<nx;x++)for(let y=0;y<ny;y++){
+    const r3=await fetch(BASE+"/image_files/"+L+"/"+x+"_"+y+".jpg",{credentials:"include"});
+    if(r3.status!==200){skipped++;continue;}
+    const bmp=await createImageBitmap(await r3.blob());
+    ctx.drawImage(bmp,x*ts*sx,y*ts*sy,bmp.width*sx,bmp.height*sy);
+    tiles++;}
+  if(!tiles)return{state:"no-tiles"};
+  const dataUrl=canvas.toDataURL("image/jpeg",0.82);
+  return{state:"ok",w:canvas.width,h:canvas.height,level:L,maxLevel:maxL,tiles,skipped,b64:dataUrl.slice(dataUrl.indexOf(",")+1)};
+})
+`;
+
 // node-side: fold a full raw walk JSON (the __rwDump output) into a model
 export function importWalk(model, raw) {
   let n = 0;
