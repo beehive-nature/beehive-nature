@@ -40,6 +40,11 @@ button.gold:hover{background:var(--gold);color:#000}
 table{width:100%;border-collapse:collapse;margin-top:8px;font-size:10.5px}
 td,th{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;color:var(--dim);vertical-align:top}
 th{color:var(--violet);font-weight:400;font-size:9.5px} td.n{color:var(--ink)}
+/* views change density, never the piece: the provenance card and the doctrine
+   are <details data-reg-disclose> (collapsed for bee/raver, open for
+   cypherpunk, per register.js); the seed, player and fork stay open */
+details[data-reg-disclose]>summary h2{margin-bottom:0}
+details[data-reg-disclose][open]>summary{margin-bottom:8px}
 footer{max-width:920px;margin:22px auto 0;color:var(--dim);font-size:10px;text-align:center;line-height:1.8}
 </style>
 </head>
@@ -76,7 +81,8 @@ footer{max-width:920px;margin:22px auto 0;color:var(--dim);font-size:10px;text-a
 </section>
 
 <section>
-  <h2>3 · <span data-i18n="h.150">WHAT A REAL INSCRIPTION CARRIES (the provenance card, DB-1's ruled shape)</span></h2>
+ <details data-reg-disclose>
+  <summary><h2>3 · <span data-i18n="h.150">WHAT A REAL INSCRIPTION CARRIES (the provenance card, DB-1's ruled shape)</span></h2></summary>
   <table>
     <tr><th>field</th><th>carries</th><th>v0 status</th></tr>
     <tr><td class="n">seed</td><td>the generative origin — drives sound and sight identically</td><td class="n">live above</td></tr>
@@ -85,10 +91,12 @@ footer{max-width:920px;margin:22px auto 0;color:var(--dim);font-size:10px;text-a
     <tr><td class="n">lineage</td><td>parent pointer + divergence receipt for every fork</td><td class="n">live above</td></tr>
     <tr><td class="n">home</td><td>exSat, ERC-20i discipline — art never crosses a bridge</td><td>the art law, standing</td></tr>
   </table>
+ </details>
 </section>
 
 <section>
-  <h2>4 · <span data-i18n="h.151">WHO CREATES HERE — humans + AI, around the clock, with the walls</span></h2>
+ <details data-reg-disclose>
+  <summary><h2>4 · <span data-i18n="h.151">WHO CREATES HERE — humans + AI, around the clock, with the walls</span></h2></summary>
   <div class="law"><b>The creation doctrine in four lines:</b> (1) <b>humans and AI co-create, badges
   honest</b> — every AI-touched piece carries ⚙ like everything else in this house; the world-around-the-
   clock output is a feature only if each piece says what it is. (2) <b>the self-art process stays
@@ -99,6 +107,7 @@ footer{max-width:920px;margin:22px auto 0;color:var(--dim);font-size:10px;text-a
   lane), performances sync over the mesh when towers choke (bMeshAi), and the tokens are the receipts:
   <b>ERC-20i inscriptions for the art, never bridged; NFT-class only where tier-2 id-addressing exists</b>
   (the §10 boundary, measured). Full doctrine: SPEC-DJBUZZ-1 §7.</div>
+ </details>
 </section>
 
 </main>
