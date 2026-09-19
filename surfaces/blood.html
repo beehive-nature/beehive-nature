@@ -302,7 +302,7 @@ body.gux #dempty,body.gux #dbody{display:none!important} /* one explanation surf
     packs:{},packData:{},relEvidence:{},testimony:[],recon:null,lenses:{records:true,tradition:true,testimony:true,spiritual:true},
     trail:[],staged:[],viewMode:"ped",retrieved:null,symbolicLinks:[]};
   var OPEN_ROOT_FS="KWJ4-XBD"; // provider ref, resolved via refsIndex at load
-  function addChild(p,c){(S.children[p]=S.children[p]||[]).push(c);}
+  function addChild(p,c){var a=S.children[p]=S.children[p]||[];if(a.indexOf(c)<0)a.push(c);} // dedup: corpus pass + overlay pass both feed this (ORDER5-R2 item 2)
   fetch(CORPUS_URL).then(r=>r.json()).then(c=>{
     S.persons=c.persons||{};S.edges=c.edges||{};S.root=c.root;S.curRoot=c.root;
     S.stats=(c.meta&&c.meta.stats)||{};
@@ -334,7 +334,7 @@ body.gux #dempty,body.gux #dbody{display:none!important} /* one explanation surf
   }).then(ov=>{
     if(ov){
       if(ov.persons)for(var id in ov.persons){S.persons[id]=ov.persons[id];if(ov.persons[id].evidencePack)S.packs[id]=ov.persons[id].evidencePack;}
-      if(ov.edges)for(var ce in ov.edges){S.edges[ce]=ov.edges[ce];ov.edges[ce].forEach(p=>addChild(p,ce));}
+      if(ov.edges)for(var ce in ov.edges){S.edges[ce]=ov.edges[ce].map(function(p){return S.persons[p]?p:(S.refsIndex[p]||p);});S.edges[ce].forEach(function(p){addChild(p,ce);});}
       S.relEvidence=ov.relationshipEvidence||{};
       S.testimony=ov.testimony||[];
       S.symbolicLinks=ov.symbolicLinks||[];

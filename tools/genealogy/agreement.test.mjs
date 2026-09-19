@@ -218,3 +218,89 @@ test('delegation lock: panel.relationship delegates to the ONE resolver', () => 
     assert.equal(VOCAB[p.kind] || p.kind, c.kind, `${nameOf(a)} -> ${nameOf(b)}: panel ${p.kind} vs core ${c.kind}`);
   }
 });
+
+/* ==================================================================
+ * D1-lock (ORDER5-R2 finding by bFUzZ, verified by own zGeneUI probe at
+ * 24c64060): the PAGE'S overlay merge must resolve provider refs through
+ * refsIndex exactly as buildArchive does. The raw assign that lived at
+ * blood.html:337 orphaned the Norse island (ovl-sigurd-snake-eye,
+ * ovl-blaeja-of-northumbria, ovl-harthacnut-i): page model TWO components
+ * [10,256+3] vs resolved ONE [10,259]; 3,078/3,078 sampled islander pairs
+ * page-core none vs panel truth (16 blood / 3,062 affinity). The corpus
+ * itself already carried the RESOLVED row - the raw assign destroyed a
+ * working corpus link in the page model only. One merge law, two sites.
+ * ================================================================== */
+
+test('D1-lock: blood.html overlay merge resolves parent refs (no raw assign)', () => {
+  const page = readFileSync(join(ROOT, 'surfaces', 'blood.html'), 'utf8');
+  assert.ok(/S\.edges\[ce\]=ov\.edges\[ce\]\.map\(/.test(page), 'the page merge must map overlay parent refs, not assign raw rows');
+  assert.ok(page.includes('S.refsIndex[p]||p'), 'resolution vocabulary present: S.persons[p]?p:(S.refsIndex[p]||p)');
+  assert.ok(!/S\.edges\[ce\]=ov\.edges\[ce\];/.test(page), 'D1: the raw overlay-row assign must not return');
+  assert.ok(!/ov\.edges\[ce\]\.forEach\(p=>addChild/.test(page), 'addChild must receive RESOLVED parents, never raw fsids');
+});
+
+test('D1-lock: one merge law, two sites (page merge == battery/adapter merge)', () => {
+  const adapterSrc = readFileSync(join(ROOT, 'surfaces', 'person-panel-corpus.mjs'), 'utf8');
+  assert.ok(adapterSrc.includes('refsIndex[p] || p'), 'adapter merge law vocabulary unchanged (person-panel-corpus.mjs:142)');
+  /* replicate the FIXED page merge exactly as blood.html:337 now does it */
+  const pageEdges = Object.assign({}, corpus.edges);
+  for (const ce of Object.keys(overlay.edges || {})) pageEdges[ce] = overlay.edges[ce].map((p) => (persons[p] ? p : (refsIndex[p] || p)));
+  assert.deepEqual(pageEdges, edges, 'the page merge and the battery merge must produce the same tables');
+});
+
+test('D1-lock: the Norse island stays connected (D1 regression lock)', () => {
+  const KINDS = {
+    'ovl-sigurd-snake-eye': 'blood',
+    'ovl-blaeja-of-northumbria': 'affinity',
+    'ovl-harthacnut-i': 'blood',
+  };
+  for (const [id, want] of Object.entries(KINDS)) {
+    const r = core.relationshipPath(id, FOUNDER);
+    assert.equal(r && r.kind, want, `${nameOf(id)} vs root: expected ${want}, got ${r && r.kind} (D1 orphan regression)`);
+  }
+});
+
+test('D1-lock: every overlay parent ref resolves on the shipping corpus pair', () => {
+  for (const [ce, ps] of Object.entries(overlay.edges || {})) {
+    for (const p of ps) {
+      assert.ok(persons[p] || refsIndex[p], `${ce}: parent ref ${p} must resolve (persons or refsIndex) - an unresolved ref is the D1 class`);
+    }
+  }
+});
+
+/* ==================================================================
+ * ORDER5-R2 pre-attack fold-in (bFUzZ items 1-3, verified by own
+ * boot-sim .scratch/d1verify/probe3.mjs):
+ *  - item 2: corpus pass (:332) and overlay pass (:337) BOTH feed
+ *    addChild with the same ovl rows -> duplicate children (head:
+ *    Harthacnut x2 under Sigurd/Blaeja; naive resolve fix extends it:
+ *    Sigurd x2 under Ragnar/Aslaug). addChild now dedups; the lock
+ *    simulates the page boot and asserts ZERO dup parents tree-wide.
+ *  - item 3: ghostCount (blood.html:365-366, computed post-merge) must
+ *    not carry a FALSE frontier for the Norse island - Ragnar/Aslaug
+ *    ARE published; the raw assign ghosted them (head: ghostCount
+ *    [ovl-sigurd-snake-eye]=2 -> ghost slots :731/:1109 + the ":922
+ *    N further parent references" line). Post-fix: absent.
+ * ================================================================== */
+
+test('D1-lock: children lists unique per parent (addChild dedup, page-boot sim)', () => {
+  const page = readFileSync(join(ROOT, 'surfaces', 'blood.html'), 'utf8');
+  assert.ok(page.includes('if(a.indexOf(c)<0)a.push(c)'), 'addChild must dedup: both merge passes feed it');
+  /* replicate the page boot exactly: corpus pass, then the resolved overlay pass */
+  const children = {};
+  const addChild = (p, c) => { const a = (children[p] = children[p] || []); if (a.indexOf(c) < 0) a.push(c); };
+  for (const e of Object.keys(corpus.edges)) corpus.edges[e].forEach((p) => addChild(p, e));
+  for (const ce of Object.keys(overlay.edges || {})) overlay.edges[ce].map((p) => (persons[p] ? p : (refsIndex[p] || p))).forEach((p) => addChild(p, ce));
+  let dupParents = 0; const named = [];
+  for (const [p, l] of Object.entries(children)) { if (new Set(l).size !== l.length) { dupParents++; if (named.length < 4) named.push(`${nameOf(p)}: ${l.filter((x, i) => l.indexOf(x) !== i).join(',')}`); } }
+  assert.equal(dupParents, 0, `parents with duplicate children: ${dupParents} (${named.join(' | ')}) - head had 2 (Harthacnut x2), a naive resolve fix has 4`);
+});
+
+test('D1-lock: no false ghost frontier for the Norse island (ghostCount sim)', () => {
+  /* replicate blood.html:365-366 on the FIXED merge (edges is the resolved merge) */
+  const ghostCount = {};
+  for (const gk of Object.keys(edges)) { let gn = 0; (edges[gk] || []).forEach((p) => { if (!persons[p]) gn++; }); if (gn) ghostCount[gk] = gn; }
+  for (const id of ['ovl-sigurd-snake-eye', 'ovl-blaeja-of-northumbria', 'ovl-harthacnut-i']) {
+    assert.equal(ghostCount[id], undefined, `${nameOf(id)} must carry no ghost frontier - Ragnar/Aslaug ARE published (head: ghostCount=2 -> false ':922 not yet published' claim + ghost slots :731/:1109)`);
+  }
+});
