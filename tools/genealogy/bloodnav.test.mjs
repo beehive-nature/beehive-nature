@@ -365,7 +365,7 @@ test("deep-link case 1: #p=<person> boots SELECTION on the DEFAULT root — neve
   assert.equal(init.root, "APR");
   assert.equal(init.selection, "pX");
   assert.equal(init.view, "pedigree");
-  assert.equal(init.transform.k, 1);
+  assert.equal(init.transform, null, "no camera in the hash = auto-framing boot (the engine reframes; camera law 81e9ded8)");
 });
 
 test("deep-link case 2: a full serialized hash boots root+selection+view+camera exactly as written", () => {

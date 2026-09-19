@@ -74,11 +74,15 @@ export function mapView(v) {
 // (#p=&v=&r=&s=&x=&y=) boots root+selection+view+camera exactly as written.
 export function initialFromCtx(ctx, defaultRoot) {
   ctx = ctx || {};
-  var t = {
+  // The camera rides ONLY when the hash/session actually carries s/x/y: an
+  // explicit transform is the AUTHORITATIVE boot camera in the engine (never
+  // reframed at first paint); absent camera params = auto-framing boot.
+  var hasCam = ctx.s != null || ctx.x != null || ctx.y != null;
+  var t = hasCam ? {
     k: (typeof ctx.s === 'number' && isFinite(ctx.s)) ? ctx.s : 1,
     x: (typeof ctx.x === 'number' && isFinite(ctx.x)) ? ctx.x : 0,
     y: (typeof ctx.y === 'number' && isFinite(ctx.y)) ? ctx.y : 0
-  };
+  } : null;
   return {
     root: ctx.r || defaultRoot || null,
     selection: ctx.p || null,

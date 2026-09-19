@@ -139,7 +139,7 @@ try {
     const final = await state(page);
     const coreEq = (a, b) => a.root === b.root && (a.selection || null) === (b.selection || null) && a.view === b.view;
     ok("Back returns home: root · selection · view EXACT", coreEq(final, ctx0), "final=" + JSON.stringify({ r: final.root, s: final.selection, v: final.view }) + " depth=" + depth);
-    ok("Back returns home: the actual camera too [ENGINE FINDING — home() restores the raw initial transform while first-paint reframe owns the boot framing; zGeneAtlas fix pending]", JSON.stringify(norm(final)) === JSON.stringify(norm(ctx0)), "final=" + JSON.stringify(norm(final)) + " vs cold=" + JSON.stringify(norm(ctx0)));
+    ok("Back returns home: the actual camera too [camera law 81e9ded8 — home returns to the boot framing]", JSON.stringify(norm(final)) === JSON.stringify(norm(ctx0)), "final=" + JSON.stringify(norm(final)) + " vs cold=" + JSON.stringify(norm(ctx0)));
     ok("URL grammar: hash mirrors the terminal state", await page.evaluate((st) => location.hash.includes("r=" + st.root), final));
     ok("zero page errors (desktop pass)", errors.length === 0, errors[0] || "");
 
@@ -157,7 +157,7 @@ try {
     const f1 = await state(p1);
     const coreEq1 = (a, b) => a.root === b.root && (a.selection || null) === (b.selection || null) && a.view === b.view;
     ok("deep-link 1 terminal: root · selection · view IS the deep-linked context (not founder home)", coreEq1(f1, d1), "final=" + JSON.stringify({ r: f1.root, s: f1.selection, v: f1.view }));
-    ok("deep-link 1 terminal: camera too [ENGINE FINDING — same initial-transform/reframe asymmetry]", JSON.stringify(norm(f1)) === JSON.stringify(norm(d1)), "final=" + JSON.stringify(norm(f1)) + " vs boot=" + JSON.stringify(norm(d1)));
+    ok("deep-link 1 terminal: camera too [camera law 81e9ded8 — home returns to the boot framing]", JSON.stringify(norm(f1)) === JSON.stringify(norm(d1)), "final=" + JSON.stringify(norm(f1)) + " vs boot=" + JSON.stringify(norm(d1)));
     ok("zero page errors (deep-link 1)", e1.length === 0, e1[0] || "");
 
     console.log("== deep-link case 2: serialized hash = non-default root + selection + view + camera ==");
@@ -174,7 +174,7 @@ try {
     const f2 = await state(p2);
     const coreEq2 = (a, b) => a.root === b.root && (a.selection || null) === (b.selection || null) && a.view === b.view;
     ok("deep-link 2 terminal: root · selection · view IS the serialized context", coreEq2(f2, d2), "final=" + JSON.stringify({ r: f2.root, s: f2.selection, v: f2.view }));
-    ok("deep-link 2 terminal: camera IS the serialized context [ENGINE FINDING — boot's first-paint reframe discards serialized x/y; home() restores them raw; the two asymmetries meet here]", JSON.stringify(norm(f2)) === JSON.stringify(norm(d2)), "final=" + JSON.stringify(norm(f2)) + " vs boot=" + JSON.stringify(norm(d2)));
+    ok("deep-link 2 terminal: camera IS the serialized context [camera law 81e9ded8 — serialized camera honored at boot, restored by home]", JSON.stringify(norm(f2)) === JSON.stringify(norm(d2)), "final=" + JSON.stringify(norm(f2)) + " vs boot=" + JSON.stringify(norm(d2)));
     ok("zero page errors (deep-link 2)", e2.length === 0, e2[0] || "");
     try { await c1.close(); } catch (e) {}
     try { await c2.close(); } catch (e) {}
@@ -194,9 +194,9 @@ try {
     await backHome(page);
     const f = await state(page);
     ok("390: Back returns home: root · selection · view EXACT", f.root === s0.root && (f.selection || null) === (s0.selection || null) && f.view === s0.view);
-    ok("390: Back returns home: camera too [ENGINE FINDING — same asymmetry]", JSON.stringify(norm(f)) === JSON.stringify(norm(s0)));
+    ok("390: Back returns home: camera too [camera law 81e9ded8 — home returns to the boot framing]", JSON.stringify(norm(f)) === JSON.stringify(norm(s0)));
     ok("zero page errors (390 pass)", errors.length === 0, errors[0] || "");
-    ctx.close();
+    try { await ctx.close(); } catch (e) {}
   }
 } finally {
   try { await browser.close(); } catch (e) {}
