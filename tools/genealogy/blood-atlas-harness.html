@@ -1,0 +1,141 @@
+<!doctype html>
+<!-- GUX-01 blood-atlas acceptance harness — a TEST FILE, not an estate surface.
+     It mounts surfaces/blood-atlas.mjs against the real corpus+overlay so the
+     first-acceptance journey (cold load → focus → bounded render → select w/o
+     re-root → explicit re-root → view change → survival → back) can be driven
+     and screenshotted (390px + desktop). zGeneUI integrates the SAME engine
+     API into surfaces/blood.html; this harness documents the mount contract by
+     doing it once, honestly. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>blood-atlas harness (GUX-01)</title>
+<link rel="stylesheet" href="../../surfaces/blood-atlas.css">
+<style>
+  body { margin: 0; background: #0d1117; color: #e6e1d5; font: 14px/1.5 system-ui, sans-serif; }
+  header { padding: 10px 14px; border-bottom: 1px solid #2a2f36; }
+  #atlas-ctx { font: 12px/1.6 ui-monospace, Consolas, monospace; color: #8a8578; }
+  #atlas-ctx b { color: #e6e1d5; font-weight: 500; }
+  .bar { display: flex; flex-wrap: wrap; gap: 8px; padding: 10px 14px; align-items: center; }
+  button { background: #1b2027; color: #e6e1d5; border: 1px solid #2a2f36; border-radius: 8px;
+    padding: 7px 12px; cursor: pointer; font: inherit; }
+  button[aria-pressed="true"] { border-color: #4d8fd1; color: #4d8fd1; }
+  #atlas-q { background: #1b2027; color: #e6e1d5; border: 1px solid #2a2f36; border-radius: 8px;
+    padding: 7px 10px; min-width: 180px; flex: 1; max-width: 300px; }
+  #atlas-hits { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 14px; }
+  #atlas-hits button { padding: 4px 9px; font-size: 12px; }
+  main { padding: 0 14px 20px; }
+  #atlas-panel { border: 1px solid #2a2f36; border-radius: 10px; padding: 10px 14px; margin-top: 12px;
+    max-width: 720px; background: #10141a; }
+  #atlas-panel .chips { display: flex; gap: 6px; flex-wrap: wrap; margin: 6px 0; }
+  #atlas-panel .chip { font: 11px ui-monospace, monospace; border: 1px solid #2a2f36; border-radius: 5px;
+    padding: 2px 7px; color: #8a8578; }
+  #atlas-ghostlog { color: #8a8578; font-size: 12px; margin-top: 6px; }
+  .offview { color: #c9a13b; }
+</style>
+</head>
+<body>
+<header>
+  <div id="atlas-ctx">loading the corpus…</div>
+</header>
+<div class="bar">
+  <button data-atlas-view="pedigree" aria-pressed="true">pedigree</button>
+  <button data-atlas-view="fractal">fractal</button>
+  <button data-atlas-view="tree">tree</button>
+  <button id="atlas-back" title="back (B)">← back</button>
+  <button id="atlas-home">home</button>
+  <button id="atlas-zin">＋</button>
+  <button id="atlas-zout">－</button>
+  <button id="atlas-zreset">reset view</button>
+  <input id="atlas-q" type="search" placeholder="search people… (living stay anonymous)">
+</div>
+<div id="atlas-hits"></div>
+<main>
+  <div id="atlas-mount"></div>
+  <div id="atlas-panel"><em>select a person (click a cell / row, or search)</em></div>
+  <div id="atlas-ghostlog"></div>
+</main>
+<script type="module">
+  import { createAtlas, GHOST_TITLE, ATLAS_VERSION } from "../../surfaces/blood-atlas.mjs";
+  const $ = (id) => document.getElementById(id);
+  const qs = new URLSearchParams(location.search);
+  const ctxLine = $("atlas-ctx"), panel = $("atlas-panel"), ghostLog = $("atlas-ghostlog");
+  let atlas = null;
+
+  function nameOf(iid) { const p = iid && atlas.person(iid); return p ? (p.name + (p.lifespan ? " · " + p.lifespan : "")) : "—"; }
+
+  function renderPanel(sel) {
+    if (!sel) { panel.innerHTML = "<em>select a person (click a cell / row, or search)</em>"; return; }
+    const p = atlas.person(sel);
+    const ev = p.evidence || {};
+    const drawn = !!document.querySelector('[data-pid="' + CSS.escape(sel) + '"]');
+    const ghosts = atlas.ghostCount(sel);
+    panel.innerHTML =
+      "<strong>" + (p.name || "Living") + "</strong> <span style='color:#8a8578'>" + (p.lifespan || "") + "</span>" +
+      " <button id='panel-reroot' style='margin-left:10px'>re-root here (R)</button>" +
+      "<div class='chips'>" +
+        "<span class='chip'>era: " + (ev.era || "—") + "</span>" +
+        "<span class='chip'>support: " + (ev.support || "—") + "</span>" +
+        "<span class='chip'>class: " + (ev.class || "—") + "</span>" +
+        "<span class='chip'>evidence shown verbatim — no score is invented</span>" +
+      "</div>" +
+      (ghosts ? "<div class='offview'>◌ " + ghosts + " further parent " + (ghosts === 1 ? "reference" : "references") + " — " + GHOST_TITLE + "</div>" : "") +
+      (drawn ? "" : "<div class='offview'>not drawn in the current view — re-root here to walk from this person</div>");
+    $("panel-reroot").addEventListener("click", () => atlas.reroot(sel));
+  }
+
+  function syncCtx(ctx, reason) {
+    const world = document.querySelector(".atlas-world");
+    ctxLine.innerHTML =
+      "root: <b>" + nameOf(ctx.root) + "</b> · selection: <b>" + (ctx.selection ? nameOf(ctx.selection) : "—") + "</b>" +
+      " · view: <b>" + ctx.view + "</b> · history: <b>" + atlas.core.historyDepth() + "</b>" +
+      " · painted: <b>" + (world ? world.getAttribute("data-painted") : "—") + "</b>" +
+      " · lod: <b>" + (world ? world.getAttribute("data-lod") : "—") + "</b>" +
+      " · last reason: <b>" + reason + "</b> · engine " + ATLAS_VERSION;
+    renderPanel(ctx.selection);
+    for (const b of document.querySelectorAll("[data-atlas-view]"))
+      b.setAttribute("aria-pressed", String(b.dataset.atlasView === ctx.view));
+  }
+
+  const atlas0 = await createAtlas({
+    mount: $("atlas-mount"),
+    corpusUrl: "../../assets/profile-archive/lineage/remington-bloodline.json",
+    overlayUrl: "../../assets/profile-archive/lineage/attested-overlays.json",
+    initial: {
+      root: qs.get("p") || undefined,
+      view: ["pedigree", "fractal", "tree"].includes(qs.get("v")) ? qs.get("v") : "pedigree",
+    },
+    onContext: syncCtx,
+  });
+  atlas = atlas0;
+  $("atlas-mount").setAttribute("data-atlas-ready", "1");
+  syncCtx(atlas.getContext(), "init"); // no event fires until first interaction — paint the cold context once
+
+  for (const b of document.querySelectorAll("[data-atlas-view]"))
+    b.addEventListener("click", () => atlas.setView(b.dataset.atlasView));
+  $("atlas-back").addEventListener("click", () => atlas.back());
+  $("atlas-home").addEventListener("click", () => atlas.home());
+  $("atlas-zin").addEventListener("click", () => atlas.zoomBy(1.3));
+  $("atlas-zout").addEventListener("click", () => atlas.zoomBy(1 / 1.3));
+  $("atlas-zreset").addEventListener("click", () => atlas.resetView());
+  $("atlas-mount").addEventListener("atlas-ghost", (e) => {
+    ghostLog.innerHTML = "◌ ghost slot clicked — child: <b>" + nameOf(e.detail.child) + "</b>, " +
+      e.detail.ghosts + " further parent " + (e.detail.ghosts === 1 ? "reference" : "references") +
+      " — " + GHOST_TITLE;
+  });
+
+  $("atlas-q").addEventListener("input", (e) => {
+    const q = e.target.value.trim();
+    const hits = q ? atlas.search(q, 12) : [];
+    $("atlas-hits").innerHTML = "";
+    for (const h of hits) {
+      const b = document.createElement("button");
+      b.textContent = h.name + (h.lifespan ? " · " + h.lifespan : "");
+      b.addEventListener("click", () => atlas.select(h.iid));
+      $("atlas-hits").appendChild(b);
+    }
+  });
+</script>
+</body>
+</html>
