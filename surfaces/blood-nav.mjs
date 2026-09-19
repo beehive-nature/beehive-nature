@@ -184,82 +184,92 @@ export function archiveUrl(id) {
   return '../assets/profile-archive/lineage/persons/' + encodeURIComponent(id) + '.html';
 }
 
-/* ---------- the safe-direction relationship adapter (founder order f6320450) ---------- */
+/* ---------- the relationship read model (one resolver, two environments) ---------- */
 
-// Minimum-hop upward chain [from, ..., to] through PARENT edges only, or
-// null when `to` is not reachable upward from `from`. Every hop is a
-// child->parent step, so co-parenthood and collateral confusion are
-// impossible by construction. THE ONLY relationship traversal zGeneUI ships
-// until Archive Slice 1.1's corrected relationshipPath lands — when it does,
-// this adapter is replaced in one place, never sprinkled around the surface.
-// (archive objects are consumed read-only: presentation derives state, it
-// never modifies archive truth.)
-export function upPath(from, to, edges) {
-  if (!from || !to || !edges) return null;
-  if (from === to) return [from];
-  var prev = {}; prev[from] = null;
-  var queue = [from];
-  while (queue.length) {
-    var id = queue.shift();
-    var ps = edges[id] || [];
-    for (var i = 0; i < ps.length; i++) {
-      var p = ps[i];
-      if (p in prev) continue;
-      prev[p] = id;
-      if (p === to) {
-        var chain = [to], cur = to;
-        while (prev[cur] !== null) { cur = prev[cur]; chain.push(cur); }
-        return chain.reverse();
-      }
-      queue.push(p);
-    }
+// Archive 1.1 landed: the safe-direction adapter (upPath, founder order
+// f6320450) is DEAD, replaced whole by the corrected archive resolver
+// (surfaces/archive-core.mjs @ the named tip, composed verbatim — founder
+// ruling bdf59735: ONE relationship resolver, two environments). This module
+// consumes the resolver read-only through ctx.archive and derives
+// presentation state; archive truth is never modified (the F6 contract).
+// Step labels are presentation: parent hops say mother/father/parent, child
+// hops say son/daughter/child (each from the step target's recorded gender),
+// spouse steps say spouse.
+export function stepLabel(via, id, persons) {
+  var g = persons && persons[id] && persons[id].gender;
+  var fem = g === 'F' || g === 'FEMALE', male = g === 'M' || g === 'MALE';
+  if (via === 'parent') return fem ? 'mother' : male ? 'father' : 'parent';
+  if (via === 'child') return fem ? 'daughter' : male ? 'son' : 'child';
+  if (via === 'spouse') return 'spouse';
+  return 'relative';
+}
+
+// map a resolver path [{id, via}] to renderable steps [{id, name, hop, via}]
+function stepsOf(path, persons) {
+  var out = [];
+  for (var i = 0; i < (path ? path.length : 0); i++) {
+    var st = path[i];
+    var p = persons && persons[st.id];
+    out.push({
+      id: st.id,
+      name: (p && p.name) || st.id,
+      hop: i === 0 ? null : stepLabel(st.via, st.id, persons),
+      via: st.via
+    });
   }
-  return null;
+  return out;
 }
 
-// the step label for one child->parent hop, from the parent's recorded gender
-export function hopLabel(parentId, persons) {
-  var g = persons && persons[parentId] && persons[parentId].gender;
-  if (g === 'F' || g === 'FEMALE') return 'mother';
-  if (g === 'M' || g === 'MALE') return 'father';
-  return 'parent';
-}
-
-// the relationship-to-current-root read model for the detail panel. Both
-// directions are PARENT-STEP ONLY (safe by construction, founder order
-// f6320450): 'below' = the current root is an ancestor of the selection
-// (chain sel -> ... -> root); 'above' = the selection is an ancestor of the
-// current root (chain root -> ... -> sel); hops are labeled mother/father/
-// parent. 'none' renders as an honest boundary — never an empty family,
-// never a guessed sideways/downward claim (those wait for Archive 1.1).
+// the relationship-to-current-root read model for the detail panel, on the
+// corrected resolver: 'below' = the current root is an ancestor of the
+// selection (apex IS the root); 'above' = the selection is an ancestor of
+// the current root (apex IS the selection); 'collateral' = blood through a
+// NAMED shared ancestor (up then down); 'affinity' = connected by marriage,
+// never described as blood; 'none' = the honest boundary. Disputed flags
+// (paths crossing a cyclic ancestry component) surface, never settle silently.
 export function relToRoot(selId, ctx) {
   ctx = ctx || {};
   if (!selId || selId === ctx.curRoot) return { kind: 'none', self: true };
-  var below = upPath(selId, ctx.curRoot, ctx.edges);
-  var above = below ? null : upPath(ctx.curRoot, selId, ctx.edges);
-  var chain = below || above;
-  if (!chain) return { kind: 'none' };
-  var steps = [];
-  for (var i = 0; i < chain.length; i++) {
-    var p = ctx.persons && ctx.persons[chain[i]];
-    steps.push({
-      id: chain[i],
-      name: p && (p.name || chain[i]) || chain[i],
-      hop: i === 0 ? null : hopLabel(chain[i], ctx.persons),
-    });
+  var a = ctx.archive;
+  if (!a || typeof a.relationshipPath !== 'function') return { kind: 'none' };
+  var r = a.relationshipPath(selId, ctx.curRoot);
+  if (!r || r.kind === 'unknown-person') return { kind: 'none' };
+  var steps = stepsOf(r.path, ctx.persons);
+  if (r.kind === 'none') {
+    return { kind: 'none', note: r.note, ghostFrontier: r.ghostFrontier };
   }
-  return { kind: below ? 'below' : 'above', steps: steps, generations: chain.length - 1 };
+  if (r.kind === 'affinity') {
+    return { kind: 'affinity', steps: steps, spouseSteps: r.spouseSteps,
+      sharedDescendant: !!r.sharedDescendant, disputed: !!r.disputed, note: r.note };
+  }
+  var apex = r.commonAncestor;
+  if (apex === ctx.curRoot) {
+    return { kind: 'below', steps: steps, generations: steps.length - 1, disputed: !!r.disputed };
+  }
+  if (apex === selId) {
+    return { kind: 'above', steps: steps, generations: steps.length - 1, disputed: !!r.disputed };
+  }
+  var up = 0, down = 0;
+  for (var i = 1; i < steps.length; i++) { if (steps[i].via === 'parent') up++; else down++; }
+  return { kind: 'collateral', steps: steps, commonAncestor: apex,
+    upHops: up, downHops: down, disputed: !!r.disputed, note: r.note };
 }
 
 // generation context for ambiguous-name disambiguation in search: where a
 // candidate sits relative to the current focus, or null when off the line.
+// Collateral blood says so honestly ("related through a shared ancestor");
+// affinity and none stay off-line (honest, simple).
 export function generationContext(selId, ctx) {
   ctx = ctx || {};
   if (selId === ctx.curRoot) return 'the current root';
-  var down = upPath(selId, ctx.curRoot, ctx.edges); // sel is below root
-  if (down) return (down.length - 1) + ' generations below the current root';
-  var up = upPath(ctx.curRoot, selId, ctx.edges);   // sel is above root
-  if (up) return (up.length - 1) + ' generations above the current root';
+  var a = ctx.archive;
+  if (!a || typeof a.relationshipPath !== 'function') return null;
+  var r = a.relationshipPath(selId, ctx.curRoot);
+  if (r && r.kind === 'blood') {
+    if (r.commonAncestor === ctx.curRoot) return (r.path.length - 1) + ' generations below the current root';
+    if (r.commonAncestor === selId) return (r.path.length - 1) + ' generations above the current root';
+    return 'related through a shared ancestor';
+  }
   return null;
 }
 

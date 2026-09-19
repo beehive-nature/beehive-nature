@@ -12,9 +12,10 @@ import { fileURLToPath } from "node:url";
 import {
   encodeCtx, decodeHash, lodFor, shouldSuppressClick,
   siblingsOf, siblingRing, stepSelection, archiveUrl, applyPlan,
-  upPath, hopLabel, relToRoot, generationContext,
+  stepLabel, relToRoot, generationContext,
   mapView, initialFromCtx, syncHash,
 } from "../../surfaces/blood-nav.mjs";
+import { createArchiveCore } from "../../surfaces/archive-core.mjs";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const page = readFileSync(join(here, "../../surfaces/blood.html"), "utf8");
@@ -235,82 +236,119 @@ test("atlas honesty: the numbers hold on the actual corpus (10,259 / 10,097 / 1,
   assert.equal(frontier, 1959);
 });
 
-/* ---------- the safe-direction relationship mount (founder order f6320450) ---------- */
+/* ---------- the relationship mount (one resolver, two environments — Archive 1.1) ---------- */
 
-test("upPath: minimum-hop parent chains, cycle-safe, self, unreachable", () => {
-  const edges = { A: ["F"], F: ["G"], B: ["H"], H: ["G"], X: [] };
-  assert.deepEqual(upPath("A", "G", edges), ["A", "F", "G"]);
-  assert.deepEqual(upPath("A", "A", edges), ["A"]);
-  assert.equal(upPath("G", "A", edges), null);  // an ancestor is never reached downward
-  assert.equal(upPath("X", "G", edges), null);  // unrelated
-  assert.equal(upPath(null, "G", edges), null);
-  const cyc = { P: ["Q"], Q: ["R"], R: ["P"], S: ["P"] };
-  assert.equal(upPath("S", "Z", cyc), null);                      // no infinite loop
-  assert.deepEqual(upPath("S", "R", cyc), ["S", "P", "Q", "R"]);  // shortest way around the cycle
-});
+const famModel = {
+  persons: {
+    root: { name: "Root", gender: "MALE" }, M1: { name: "Mum", gender: "FEMALE" }, F1: { name: "Dad", gender: "MALE" },
+    GM: { name: "Gran", gender: "FEMALE" }, GF: {}, off: {},
+    C1: { name: "Sibling One", gender: "FEMALE" }, C2: { name: "Sibling Two", gender: "MALE" }, A: { name: "Shared Ancestor", gender: "MALE" },
+    H: { name: "Husband", gender: "MALE" }, W: { name: "Wife", gender: "FEMALE" },
+    S: { name: "Cycle Edge", gender: "FEMALE" }, P: {}, Q: {}, R: {},
+  },
+  edges: { root: ["M1", "F1"], M1: ["GM", "GF"], F1: [], off: [], C1: ["A"], C2: ["A"], A: [], H: [], W: [], S: ["P"], P: ["Q"], Q: ["R"], R: ["P"] },
+  couples: { hw: { p1: "H", p2: "W" } },
+};
+const famArchive = createArchiveCore(famModel);
+const famCtx = (curRoot) => ({ curRoot, archive: famArchive, persons: famModel.persons });
 
-test("hopLabel follows the parent's recorded gender, unknown stays 'parent'", () => {
+test("stepLabel: parent/child/spouse hops follow the step target's recorded gender", () => {
   const persons = { F: { gender: "FEMALE" }, M: { gender: "MALE" }, U: {} };
-  assert.equal(hopLabel("F", persons), "mother");
-  assert.equal(hopLabel("M", persons), "father");
-  assert.equal(hopLabel("U", persons), "parent");
-  assert.equal(hopLabel("ghost", persons), "parent");
+  assert.equal(stepLabel("parent", "F", persons), "mother");
+  assert.equal(stepLabel("parent", "M", persons), "father");
+  assert.equal(stepLabel("parent", "U", persons), "parent");
+  assert.equal(stepLabel("child", "F", persons), "daughter");
+  assert.equal(stepLabel("child", "M", persons), "son");
+  assert.equal(stepLabel("child", "U", persons), "child");
+  assert.equal(stepLabel("spouse", "F", persons), "spouse");
+  assert.equal(stepLabel("parent", "ghost", persons), "parent");
 });
 
-test("relToRoot: below / above / none / self, hops labeled", () => {
-  const edges = { root: ["M1", "F1"], M1: ["GM", "GF"], F1: [], off: [] };
-  const persons = { root: { name: "Root", gender: "MALE" }, M1: { name: "Mum", gender: "FEMALE" }, F1: { name: "Dad", gender: "MALE" }, GM: { name: "Gran", gender: "FEMALE" }, GF: {}, off: {} };
-  const below = relToRoot("root", { curRoot: "M1", edges, persons }); // root's parent is M1
+test("relToRoot: below / above / collateral / affinity / none / self — the three resolver shapes, symmetric", () => {
+  const below = relToRoot("root", famCtx("M1")); // root's parent is M1
   assert.equal(below.kind, "below");
   assert.equal(below.generations, 1);
+  assert.equal(below.steps[0].id, "root");
+  assert.equal(below.steps[below.steps.length - 1].id, "M1");
   assert.equal(below.steps[1].hop, "mother");
-  const above = relToRoot("GM", { curRoot: "root", edges, persons }); // GM is root's grandmother
+  const above = relToRoot("GM", famCtx("root")); // GM is root's grandmother
   assert.equal(above.kind, "above");
   assert.equal(above.generations, 2);
-  assert.equal(above.steps[0].id, "root");
-  assert.equal(above.steps[2].id, "GM");
-  assert.equal(above.steps[2].hop, "mother");
-  assert.equal(relToRoot("off", { curRoot: "root", edges, persons }).kind, "none");
-  assert.equal(relToRoot("root", { curRoot: "root", edges, persons }).kind, "none");
+  assert.equal(above.steps[0].id, "GM");        // the path STARTS at the selection
+  assert.equal(above.steps[above.steps.length - 1].id, "root");
+  assert.ok(above.steps.slice(1).every((st) => ["son", "daughter", "child"].includes(st.hop)), "downward hops labeled as child steps");
+  const col = relToRoot("C1", famCtx("C2")); // siblings: blood through the shared ancestor
+  assert.equal(col.kind, "collateral");
+  assert.equal(col.commonAncestor, "A");
+  assert.equal(col.upHops, 1);
+  assert.equal(col.downHops, 1);
+  assert.equal(col.steps[0].id, "C1");
+  assert.equal(col.steps[col.steps.length - 1].id, "C2");
+  const aff = relToRoot("H", famCtx("W")); // spouses: affinity, never blood
+  assert.equal(aff.kind, "affinity");
+  assert.equal(aff.spouseSteps, 1);
+  assert.ok(/NOT a blood relationship/.test(aff.note), aff.note);
+  assert.equal(relToRoot("off", famCtx("root")).kind, "none");
+  assert.equal(relToRoot("root", famCtx("root")).kind, "none");
+  const cyc = relToRoot("S", famCtx("R")); // a path through a cyclic component
+  assert.equal(cyc.kind, "collateral");
+  assert.equal(cyc.disputed, true, "cycle-crossing paths carry the disputed flag, never silent settlement");
 });
 
-test("generationContext: below/above/root/off the line", () => {
-  const edges = { root: ["A"], A: ["B"], B: [], off: [] };
-  const ctx = { curRoot: "root", edges };
+test("relToRoot without a resolver: the honest boundary, never a guess", () => {
+  assert.equal(relToRoot("root", { curRoot: "M1", persons: famModel.persons }).kind, "none");
+  assert.equal(relToRoot("root", { curRoot: "M1", archive: null, persons: famModel.persons }).kind, "none");
+});
+
+test("generationContext: below/above/root/collateral/off the line", () => {
+  const lineModel = { persons: { root: {}, A: {}, B: {}, C1: {}, C2: {}, X: {} }, edges: { root: ["A"], A: ["B"], B: [], C1: ["X"], C2: ["X"], X: ["B"] }, couples: {} };
+  const ctx = { curRoot: "root", archive: createArchiveCore(lineModel) };
   assert.equal(generationContext("root", ctx), "the current root");
   assert.equal(generationContext("A", ctx), "1 generations above the current root");
   assert.equal(generationContext("B", ctx), "2 generations above the current root");
+  assert.equal(generationContext("C1", ctx), "related through a shared ancestor");
   assert.equal(generationContext("off", ctx), null);
 });
+
+const corpusArchive = createArchiveCore(corpus);
 
 test("corpus: the founder journey — Donna above the founder root, off APR's line, honestly", () => {
   const donna = corpus.refsIndex["KWCL-VNB"];
   const apr = corpus.refsIndex["KWJ4-XBD"];
   assert.ok(donna && apr);
-  const above = relToRoot(donna, { curRoot: corpus.root, edges: corpus.edges, persons: corpus.persons });
+  const above = relToRoot(donna, { curRoot: corpus.root, archive: corpusArchive, persons: corpus.persons });
   assert.equal(above.kind, "above"); // Donna is an ancestor of the founder
-  assert.equal(above.steps[above.steps.length - 1].id, donna);
-  for (const st of above.steps.slice(1)) assert.ok(["mother", "father", "parent"].includes(st.hop));
-  const below = relToRoot(corpus.root, { curRoot: apr, edges: corpus.edges, persons: corpus.persons });
+  assert.equal(above.steps[0].id, donna);
+  assert.equal(above.steps[above.steps.length - 1].id, corpus.root);
+  assert.ok(above.steps.slice(1).every((st) => ["son", "daughter", "child"].includes(st.hop)), "descents labeled as child steps");
+  const below = relToRoot(corpus.root, { curRoot: apr, archive: corpusArchive, persons: corpus.persons });
   assert.equal(below.kind, "below"); // the founder hangs off the public APR entrance
   assert.equal(below.steps[below.steps.length - 1].id, apr);
-  assert.equal(relToRoot(donna, { curRoot: apr, edges: corpus.edges, persons: corpus.persons }).kind, "none"); // different branch — an honest boundary, not an implied empty family
+  assert.ok(below.steps.slice(1).every((st) => ["mother", "father", "parent"].includes(st.hop)), "climbs labeled as parent steps");
+  const offApr = relToRoot(donna, { curRoot: apr, archive: corpusArchive, persons: corpus.persons });
+  assert.ok(offApr.kind === "none" || offApr.kind === "affinity", "no blood line Donna→APR — a different branch; any connection is marriage, rendered honestly as affinity");
+  if (offApr.kind === "affinity") assert.ok(/NOT a blood relationship/.test(offApr.note));
 });
 
-test("corpus: the living stub pair is spouse-only — no parent line either way, affinity never blood", () => {
-  assert.equal(upPath("liv-1", "liv-2", corpus.edges), null);
-  assert.equal(upPath("liv-2", "liv-1", corpus.edges), null);
+test("corpus: the living stub pair is spouse-only — affinity, never blood", () => {
+  const pair = relToRoot("liv-1", { curRoot: "liv-2", archive: corpusArchive, persons: corpus.persons });
+  assert.equal(pair.kind, "affinity", "the resolver sees the marriage and calls it affinity — never a blood claim");
+  assert.equal(pair.spouseSteps, 1);
   assert.ok(corpus.couples && Object.keys(corpus.couples).length > 4000, "couples map present for the spouse index");
 });
 
-test("wiring: the mount renders — relationship-to-root panel, spouse affinity wording, ambiguity context, spouse + search indexes", () => {
+test("wiring: the mount renders — relationship-to-root panel, three-shape relationship, ambiguity context, shared resolver", () => {
   assert.ok(page.includes("relationship to the current root"));
   assert.ok(page.includes("affinity, never described as blood"));
   assert.ok(page.includes("S.spouses="));
   assert.ok(page.includes("S.qnames="));
   assert.ok(page.includes("BloodNav.relToRoot"));
   assert.ok(page.includes("BloodNav.generationContext"));
-  assert.ok(page.includes("corrected path API"));
+  assert.ok(page.includes("archive-core.mjs"), "the shared resolver boots on the merged model");
+  assert.ok(page.includes("createArchiveCore"));
+  assert.ok(page.includes("blood through a shared ancestor"), "collateral renders");
+  assert.ok(page.includes("family by marriage"), "affinity renders");
+  assert.ok(!page.includes("corrected path API lands"), "the old promise sentence is retired — the corrected API is consumed");
   assert.ok(page.includes("nameHits")); // duplicate-name detection in search
 });
 

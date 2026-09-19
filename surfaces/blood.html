@@ -307,6 +307,7 @@ body.gux #dempty,body.gux #dbody{display:none!important} /* one explanation surf
     S.persons=c.persons||{};S.edges=c.edges||{};S.root=c.root;S.curRoot=c.root;
     S.stats=(c.meta&&c.meta.stats)||{};
     S.corpusMeta=c.meta||{};S.refsIndex=(c.refsIndex||{});
+    S.couples=c.couples||{}; // kept whole for the shared archive resolver (one resolver, two environments)
     // GUX-01 atlas honesty (founder order 996e9b6c): three counts derived from
     // the PUBLISHED corpus itself, before overlays — the UI never casually
     // says "your family tree has N people"; the raw-walk receipt stays separate.
@@ -340,6 +341,14 @@ body.gux #dempty,body.gux #dbody{display:none!important} /* one explanation surf
       // overlay persons join the search index too (attested overlays are people)
       for(var qid2 in S.persons){if(!(qid2 in S.qnames))S.qnames[qid2]=String(S.persons[qid2].name||'').toLowerCase();}
     }
+    // Archive 1.1 (founder ruling bdf59735: one resolver, two environments):
+    // the shared relationship resolver boots on the MERGED model — corpus +
+    // attested overlays — created once here, consumed read-only by the
+    // relationship-to-root section and search disambiguation in BOTH modes.
+    // Fail-soft: without it the boundary renders honestly, never a guess.
+    import('./archive-core.mjs').then(function(m){
+      S.archive=m.createArchiveCore({persons:S.persons,edges:S.edges,couples:S.couples,refsIndex:S.refsIndex});
+    }).catch(function(){S.archive=null;});
     var packUrls=[...new Set(Object.values(S.packs).filter(Boolean))]
       .map(function(p){return '../assets/profile-archive/lineage/'+p;});
     return Promise.all(packUrls.map(function(u){return fetch(u).then(function(r){return r.json();}).then(function(j){
@@ -923,21 +932,30 @@ body.gux #dempty,body.gux #dbody{display:none!important} /* one explanation surf
       if(sp.length>6)rels+='<span style="color:var(--faint)">… '+(sp.length-6)+' more</span>';
       rels+='</div>';}
     if(id!==S.curRoot){
-      var rr=(globalThis.BloodNav&&BloodNav.relToRoot)?BloodNav.relToRoot(id,{curRoot:S.curRoot,edges:S.edges,persons:S.persons}):null;
+      var rr=(globalThis.BloodNav&&BloodNav.relToRoot)?BloodNav.relToRoot(id,{curRoot:S.curRoot,archive:S.archive,persons:S.persons}):null;
+      var hopArrow=function(st){return st.via==='child'?'↓':st.via==='spouse'?'≈':'↑';};
+      var stepsHtml=function(){var h='';rr.steps.forEach(function(st,i){
+          if(i>0)h+=' <span class="dim">'+hopArrow(st)+esc(st.hop)+'→</span> ';
+          h+='<button data-go="'+esc(st.id)+'">'+esc(st.name)+'</button>';});return h;};
+      var dis=rr&&rr.disputed?' <span class="evtag">[disputed — this path crosses a cyclic ancestry component]</span>':'';
       if(rr&&rr.kind==='below'){
-        rels+='<div class="drels"><div class="lab">relationship to the current root — '+esc(String(rr.generations))+' generation'+(rr.generations===1?'':'s')+' down this line</div><div class="layer">';
-        rr.steps.forEach(function(st,i){
-          if(i>0)rels+=' <span class="dim">↑'+esc(st.hop)+'→</span> ';
-          rels+='<button data-go="'+esc(st.id)+'">'+esc(st.name)+'</button>';});
-        rels+='<div class="claim">parent steps from '+esc(nameOf(id))+' up to the root '+esc(nameOf(S.curRoot))+' — sideways and downward hops render once the corrected path API lands</div></div></div>';
+        rels+='<div class="drels"><div class="lab">relationship to the current root — '+esc(String(rr.generations))+' generation'+(rr.generations===1?'':'s')+' down this line'+dis+'</div><div class="layer">';
+        rels+=stepsHtml();
+        rels+='<div class="claim">parent steps from '+esc(nameOf(id))+' up to the root '+esc(nameOf(S.curRoot))+' — follow the names to walk the line</div></div></div>';
       } else if(rr&&rr.kind==='above'){
-        rels+='<div class="drels"><div class="lab">relationship to the current root — '+esc(String(rr.generations))+' generation'+(rr.generations===1?'':'s')+' up: an ancestor of the current root</div><div class="layer">';
-        rr.steps.forEach(function(st,i){
-          if(i>0)rels+=' <span class="dim">↑'+esc(st.hop)+'→</span> ';
-          rels+='<button data-go="'+esc(st.id)+'">'+esc(st.name)+'</button>';});
-        rels+='<div class="claim">parent steps from the root '+esc(nameOf(S.curRoot))+' up to '+esc(nameOf(id))+' — follow the names to walk the line</div></div></div>';
+        rels+='<div class="drels"><div class="lab">relationship to the current root — '+esc(String(rr.generations))+' generation'+(rr.generations===1?'':'s')+' up: an ancestor of the current root'+dis+'</div><div class="layer">';
+        rels+=stepsHtml();
+        rels+='<div class="claim">child steps down from '+esc(nameOf(id))+' to the root '+esc(nameOf(S.curRoot))+' — an ancestor of where you are standing</div></div></div>';
+      } else if(rr&&rr.kind==='collateral'){
+        rels+='<div class="drels"><div class="lab">relationship to the current root — blood through a shared ancestor'+dis+'</div><div class="layer">';
+        rels+=stepsHtml();
+        rels+='<div class="claim">'+esc(String(rr.upHops))+' generation'+(rr.upHops===1?'':'s')+' up and '+esc(String(rr.downHops))+' down — you share '+esc(nameOf(rr.commonAncestor))+'</div></div></div>';
+      } else if(rr&&rr.kind==='affinity'){
+        rels+='<div class="drels"><div class="lab">relationship to the current root — family by marriage'+dis+'</div><div class="layer">';
+        rels+=stepsHtml();
+        rels+='<div class="claim">connected by marriage/partnership — NOT a blood relationship'+(rr.sharedDescendant?'; you share descendants (co-parents)':'')+'</div></div></div>';
       } else if(rr&&rr.kind==='none'){
-        rels+='<div class="drels"><div class="lab">relationship to the current root</div><div class="layer" style="color:var(--dim)">no parent-step line between here and '+esc(nameOf(S.curRoot))+' in this published atlas — a different branch (or ancestry continuing beyond the published archive); press R to re-root and walk from this person; sideways hops render once the corrected path API lands</div></div>';
+        rels+='<div class="drels"><div class="lab">relationship to the current root</div><div class="layer" style="color:var(--dim)">no line between here and '+esc(nameOf(S.curRoot))+' in this published atlas — a different branch, or ancestry continuing beyond the published archive; press R to re-root and walk from this person</div></div>';
       }
     }
     if(p.living&&id===S.root)chips+='<span class="chip">'+esc(langText('blood.rootchip','the founder — living, redacted'))+'</span>';
@@ -1173,7 +1191,7 @@ hex.setAttribute('data-pid',id);
       var p=S.persons[hid];
       var ctx2=(p.lifespan?' · '+p.lifespan:'')+' · '+(p.evidence?p.evidence.class:'?');
       if((nameHits[p.name||hid]||0)>1){ // ambiguous name: distinguishing context, never a silent first-pick
-        var gc=(globalThis.BloodNav&&BloodNav.generationContext)?BloodNav.generationContext(hid,{curRoot:S.curRoot,edges:S.edges}):null;
+        var gc=(globalThis.BloodNav&&BloodNav.generationContext)?BloodNav.generationContext(hid,{curRoot:S.curRoot,archive:S.archive}):null;
         ctx2+=' · '+(gc||'not on the current line');
       }
       b.textContent=(p.name||hid)+ctx2;
