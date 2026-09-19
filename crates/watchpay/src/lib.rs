@@ -93,6 +93,7 @@ pub mod receipt;
 pub mod signed_tx;
 pub mod tx;
 pub mod types;
+pub mod wave;
 
 #[doc(hidden)]
 pub mod test_support;

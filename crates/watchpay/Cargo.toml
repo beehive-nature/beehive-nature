@@ -7,6 +7,10 @@ description = "OFFLINE Merkle payment-contract slice for the watch lane: pure pl
 
 [dependencies]
 sha3 = { workspace = true }
+# wave slice (Phase E): the authorization commitment wall re-derives the
+# antd-bridge sha256-family digest — same RustCrypto digest family the
+# workspace already pins.
+sha2 = { workspace = true }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 hex = "0.4"

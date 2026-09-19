@@ -16,7 +16,7 @@
 (function(){
   var T = (window.BNRLanguage && window.BNRLanguage.text) ? window.BNRLanguage.text.bind(window.BNRLanguage) : function(k,f){return f;};
   var LS = 'bdata-v1';
-  var st = { inspection:'newbee', automation:{ mode:'ask', boundAnt:'0.5' }, history:[], bridge:'http://127.0.0.1:8807', freshQuote:null, authorization:null };
+  var st = { inspection:'newbee', automation:{ mode:'ask', boundAnt:'0.5' }, history:[], bridge:'http://127.0.0.1:8807', freshQuote:null, authorization:null, signing:{ service:'http://127.0.0.1:8808', phase:null, review:null, receipt:null, refusal:null, error:null } };
   try { var sv = JSON.parse(localStorage.getItem(LS)||'null'); if (sv && typeof sv==='object') st = Object.assign(st, sv); if(!Array.isArray(st.history)) st.history=[]; } catch(e){}
   function save(){ try { localStorage.setItem(LS, JSON.stringify(st)); } catch(e){} }
   window.__bdata = st; // test hook: the gate reads live state directly
@@ -184,7 +184,8 @@
         totalAtto: sum,
         count: (prepare.payments||[]).length,
         shape: prepare.payment_type,
-        uploadId: prepare.upload_id
+        uploadId: prepare.upload_id,
+        payments: (prepare.payments||[]).map(function(p){ return { quote_hash:p.quote_hash, rewards_address:p.rewards_address, amount_atto:p.amount_atto }; })
       };
       save(); render();
     }).catch(function(e){
@@ -219,6 +220,10 @@
     });
     var authCancel = document.querySelector('[data-bdata-auth-cancel]');
     if (authCancel) authCancel.addEventListener('click', cancelPress);
+    var signOpenBtn = document.querySelector('[data-bdata-sign-open]');
+    if (signOpenBtn) signOpenBtn.addEventListener('click', signOpen);
+    var signGoBtn = document.querySelector('[data-bdata-sign-go]');
+    if (signGoBtn) signGoBtn.addEventListener('click', signGo);
     var bridgeInput = document.getElementById('bdata-bridge');
     if (bridgeInput) bridgeInput.addEventListener('change', function(){ st.bridge = bridgeInput.value.trim() || 'http://127.0.0.1:8807'; save(); });
     /* THE ORIGIN GESTURE — selecting Public in My Data. The click records the
@@ -283,6 +288,7 @@
     if (auth && auth.state === 'authorized-for-signing') {
       h += '<div style="font-size:13px;text-align:center">🔑 ' + T('bd.auth.done','Authorized for signing — nothing signed, nothing paid; signing arrives with Phase E') + '</div>';
       h += '<div class="law" style="text-align:center;margin-top:2px">auth <span class="mono">' + esc(auth.id) + '</span> · ' + T('bd.auth.cancelnote','cancellation is always lawful before a signature exists') + '</div>';
+      h += signingStep();
       h += '<div style="margin-top:8px;text-align:center"><button type="button" data-bdata-auth-cancel="1" style="padding:8px 16px;border:1px solid #1d4655;border-radius:8px;background:transparent;color:inherit;cursor:pointer;font-size:13px">✕ ' + T('bd.auth.cancel','Cancel authorization') + '</button></div>';
       h += '</div>';
       return h;
@@ -368,6 +374,123 @@
       console.error('bdata cancel error', e && e.message); // surfaced, never swallowed
       var stat = document.getElementById('bdata-auth-stat');
       if (stat) stat.textContent = '⚠ ' + String(e && e.message || e).slice(0,160);
+    });
+  }
+
+  /* ── THE SIGNING STEP (Phase E) ────────────────────────────────────────────
+     From the completed authorization to a LOCALLY VERIFIED signature on the
+     founder's Trezor — and a hard STOP. The signing cockpit service (local,
+     default :8808) enforces every binding BEFORE the device is asked, and
+     verifies every device result through the watchpay wall before the UI may
+     say SIGNED. Signing does NOT broadcast, does NOT pay, does NOT upload.
+     The one-press law: exactly one primary affordance at each moment; a
+     refusal names its law; there is no automatic retry after dispatch. */
+  function signPayments(){
+    var fq = st.freshQuote;
+    if (!fq || !fq.payments || !fq.payments.length) return null;
+    return fq.payments;
+  }
+  function signingStep(){
+    var auth = st.authorization, sg = st.signing;
+    if (!auth || auth.state !== 'authorized-for-signing') return '';
+    // TERMINAL: SIGNED — the phase's success state; nothing further is offered
+    if (sg.receipt && sg.receipt.state === 'signed') {
+      var r = sg.receipt;
+      var h = '<div style="margin-top:10px;padding:12px;border:1px solid var(--gold);border-radius:12px" data-bdata-signed="1">';
+      h += '<div style="font-size:14px;font-weight:700;text-align:center;color:var(--gold)">✍ ' + T('bd.sign.signed','SIGNED — verified locally') + '</div>';
+      (r.slots||[]).forEach(function(s){
+        h += '<div class="row" style="margin-top:6px;gap:8px;font-size:12px;flex-wrap:wrap"><span style="min-width:110px;color:var(--dim)">' + s.slot + ' · ' + esc(s.operation) + '</span><span class="mono" style="flex:1;min-width:200px;overflow-wrap:anywhere">' + esc(s.tx_hash) + '</span></div>';
+      });
+      h += '<div class="row" style="margin-top:6px;gap:8px;font-size:12px"><span style="min-width:110px;color:var(--dim)">' + T('bd.sign.signer','verified signer') + '</span><span class="mono" style="overflow-wrap:anywhere">' + esc((r.slots&&r.slots[0]&&r.slots[0].signer)||'') + '</span></div>';
+      h += '<div class="law" style="margin-top:8px;text-align:center"><b>' + T('bd.sign.stops','NOT BROADCAST · NOT PAID · NOT UPLOADED.') + '</b> ' + T('bd.sign.stopsnote','Signing ends here. Broadcast is a separate founder-authorized phase — locked, not hidden.') + '</div>';
+      h += '</div>';
+      return h;
+    }
+    // A refusal names its law and stays explicit (no retry button — the law
+    // that refused says what must change)
+    if (sg.refusal) {
+      return '<div style="margin-top:10px;padding:10px 12px;border:1px dashed #5a2c2c;border-radius:12px;font-size:12px;color:var(--amber)" data-bdata-sign-refused="1">⛔ ' + T('bd.sign.refused','Signing refused') + ' — <span class="mono">' + esc(sg.refusal.law) + '</span>: ' + esc(String(sg.refusal.why).slice(0,200)) + '</div>';
+    }
+    if (sg.error) {
+      return '<div style="margin-top:10px;padding:10px 12px;border:1px dashed #5a2c2c;border-radius:12px;font-size:12px;color:var(--amber)" data-bdata-sign-error="1">⚠ ' + T('bd.sign.err','Device session ended without a verified signature') + ': ' + esc(String(sg.error).slice(0,180)) + '<div class="law" style="margin-top:4px">' + T('bd.sign.errlaw','No automatic retry — an uncertain device outcome stays explicit; begin again only from your own decision.') + '</div></div>';
+    }
+    // REVIEW (in place, one primary press)
+    if (sg.phase === 'review' && sg.review) {
+      var v = sg.review;
+      var rh = '<div style="margin-top:10px;padding:12px;border:1px solid var(--gold);border-radius:12px" data-bdata-sign-review="1">';
+      rh += '<div style="font-size:13px;font-weight:600;text-align:center">' + T('bd.sign.h','What the Trezor will sign') + '</div>';
+      function rrow(k, vv){ return '<div class="row" style="margin-top:6px;gap:8px;font-size:12px;flex-wrap:wrap"><span style="min-width:110px;color:var(--dim)">' + k + '</span><span class="mono" style="flex:1;min-width:200px;overflow-wrap:anywhere">' + vv + '</span></div>'; }
+      rh += rrow('artifact', esc(String(v.artifact_sha256).slice(0,16)) + '… · ' + Number(v.artifact_bytes).toLocaleString('en-US') + ' B');
+      rh += rrow(T('wl.bpay.audience','audience'), '🌐 ' + esc(v.audience) + ' — ' + T('bd.auth.binding','founder-selected, origin My Data'));
+      rh += rrow(T('bd.auth.invoice','invoice'), esc(String(v.invoice_digest).slice(0,23)) + '…');
+      rh += rrow(T('bd.sign.job','job / quotes'), esc(v.upload_id) + ' · ' + v.quote_count + ' ' + T('bd.sign.quotes','quotes'));
+      rh += rrow(T('bd.auth.ceiling','ANT ceiling'), '<b>' + ant(v.ant_ceiling_atto) + ' ANT</b> — ' + T('bd.auth.exact','exact, never above'));
+      rh += rrow(T('bd.auth.gas','gas'), '⛽ ' + T('bd.sign.gasnote','separate — Arbitrum ETH, worst case per transaction shown at the device'));
+      rh += rrow(T('bd.sign.contracts','contracts'), 'ANT <span style="overflow-wrap:anywhere">' + esc(v.token) + '</span> · vault <span style="overflow-wrap:anywhere">' + esc(v.vault) + '</span> · chain ' + v.chain_id);
+      rh += rrow(T('bd.sign.payer','payer'), v.payer ? '<span style="overflow-wrap:anywhere">' + esc(v.payer) + '</span> · ' + esc(v.path||'') : T('bd.sign.payerpending','derived from your Trezor at the harmless preflight — the device proves it before anything signs'));
+      rh += rrow(T('bd.sign.count','transactions'), '<b>' + v.transaction_count + ' ' + T('bd.sign.expected','expected') + '</b> — ' + (v.transaction_count === 2 ? T('bd.sign.two','1 ERC-20 approve (the vault may spend the exact ANT total) + 1 payForQuotes carrying all quotes') : T('bd.sign.N','see slot list')));
+      rh += '<div class="law" style="margin-top:8px;text-align:center"><b>' + T('bd.sign.nobroadcast','SIGNING DOES NOT BROADCAST OR PAY.') + '</b> ' + T('bd.sign.nobroadcastnote','Each transaction appears on the Safe 7 screen; confirm only what matches this review. A refusal is a normal outcome.') + '</div>';
+      rh += '<div style="margin-top:8px;text-align:center"><button type="button" data-bdata-sign-go="1" style="padding:12px 20px;border:1px solid var(--gold);border-radius:10px;background:#0e2d3a;color:var(--gold);font-size:15px;font-weight:700;cursor:pointer">✍ ' + T('bd.sign.go','Begin device signing') + '</button></div>';
+      rh += '<div class="law" style="margin-top:4px;text-align:center" id="bdata-sign-stat"></div>';
+      rh += '</div>';
+      return rh;
+    }
+    if (sg.phase === 'dispatching') {
+      return '<div style="margin-top:10px;padding:10px 12px;border:1px solid var(--gold);border-radius:12px;font-size:12px;text-align:center" data-bdata-sign-dispatching="1">✍ ' + T('bd.sign.working','Device session live — watch the Safe 7 screen; this page waits for the verified result') + ' <span id="bdata-sign-stat">…</span></div>';
+    }
+    return '<div style="margin-top:8px;text-align:center"><button type="button" data-bdata-sign-open="1" style="padding:12px 16px;border:1px solid #2c4a5a;border-radius:10px;background:#0e2d3a;color:var(--gold);font-size:15px;font-weight:600;cursor:pointer">✍ ' + T('bd.sign.open','Sign with Trezor') + '</button></div>';
+  }
+
+  function signBody(){
+    var fq = st.freshQuote, ps = signPayments();
+    if (!ps) return null;
+    return {
+      authorization_id: st.authorization && st.authorization.id,
+      upload_id: fq.uploadId,
+      payments: ps
+    };
+  }
+
+  function signOpen(){
+    var body = signBody();
+    if (!body) { render(); return; }
+    st.signing.phase = 'loading'; st.signing.refusal = null; st.signing.error = null;
+    fetch(st.signing.service.replace(/\/$/,'') + '/v1/sign/state', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    }).then(function(r){ return r.json().then(function(j){ return { ok:r.ok, j:j }; }); })
+    .then(function(o){
+      st.signing.phase = null;
+      if (!o.ok) { st.signing.refusal = (o.j && o.j.refusal) || { law:'service', why:'signing service refused' }; }
+      else { st.signing.review = o.j.review; st.signing.phase = 'review'; }
+      save(); render();
+    }).catch(function(e){
+      st.signing.phase = null; st.signing.error = 'signing service unreachable — ' + String(e && e.message || e).slice(0,120);
+      save(); render();
+    });
+  }
+
+  function signGo(){
+    var stat = document.getElementById('bdata-sign-stat');
+    var body = signBody();
+    if (!body) return;
+    if (stat) stat.textContent = '…';
+    st.signing.phase = 'dispatching'; render();
+    fetch(st.signing.service.replace(/\/$/,'') + '/v1/sign/begin', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(Object.assign({}, body, { path: "m/44'/60'/0'/0/0" }))
+    }).then(function(r){ return r.json().then(function(j){ return { ok:r.ok, j:j }; }); })
+    .then(function(o){
+      st.signing.phase = null;
+      if (o.ok && o.j.receipt && o.j.receipt.state === 'signed') { st.signing.receipt = o.j.receipt; note(T('bd.hist.signed','SIGNED on Trezor — verified locally; ') + (o.j.receipt.slots||[]).length + ' tx · NOT broadcast/paid/uploaded'); }
+      else if (!o.ok && o.j.refusal) { st.signing.refusal = o.j.refusal; }
+      else { st.signing.error = (o.j && o.j.why) || 'device session ended without a verified signature'; }
+      save(); render();
+    }).catch(function(e){
+      st.signing.phase = null;
+      st.signing.error = String(e && e.message || e).slice(0,160);
+      console.error('bdata sign error', st.signing.error); // surfaced, never swallowed
+      save(); render();
     });
   }
 

@@ -596,6 +596,28 @@ fn decode_hex_quantity(s: &str, field: &'static str, max_bytes: usize) -> Result
     Ok(bytes)
 }
 
+// ── Public decode boundaries (wave slice reuse, z2.c strictness) ────────
+// The private functions above are the z2.c adapter's internal names; the
+// wave slice (crate::wave) reuses the SAME strict decoders through these
+// pub aliases — one implementation, two callers, no drift possible.
+
+/// Public alias of the strict 0x-hex BYTE STRING decoder (wave: the
+/// serialized transaction).
+pub fn decode_hex_bytes_pub(s: &str, field: &'static str, max_bytes: usize) -> Result<Vec<u8>> {
+    decode_hex_bytes(s, field, max_bytes)
+}
+
+/// Public alias of the strict 0x-hex QUANTITY → u64 decoder (wave: `v`).
+pub fn decode_hex_quantity_u64_pub(s: &str, field: &'static str) -> Result<u64> {
+    hex_quantity_to_u64(s, field)
+}
+
+/// Public alias of the strict 0x-hex QUANTITY → 32-byte scalar decoder
+/// (wave: `r`/`s`).
+pub fn decode_hex_quantity_scalar_pub(s: &str, field: &'static str) -> Result<[u8; 32]> {
+    hex_quantity_to_scalar(s, field)
+}
+
 /// Hex quantity → u64 (for `v`).
 fn hex_quantity_to_u64(s: &str, field: &'static str) -> Result<u64> {
     let bytes = decode_hex_quantity(s, field, 8)?;
@@ -986,7 +1008,7 @@ pub fn record_verified_signed(
     match verified.request_operation() {
         TxDestination::BatchPayment {
             batch_index: verified_batch,
-        } if verified_batch as usize == batch_index => {}
+        } if verified_batch == batch_index => {}
         other => {
             return Err(Error::field(
                 "batch_index",

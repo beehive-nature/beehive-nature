@@ -474,6 +474,16 @@ jobs:
         if: always()
         working-directory: e2e
         run: node bdata-surface.mjs
+      # Phase E (2026-09-19): the Trezor signing step behind the completed
+      # authorization — reviewed transaction count (2: approve + payForQuotes
+      # over the 56 carried quotes) BEFORE device interaction; ONE press;
+      # locally verified SIGNED state; HARD STOP (no broadcast affordance);
+      # the LAW 1 refusal (today's live machine state) renders as a law;
+      # device rejection ends explicitly with zero retries.
+      - name: bData Phase E gate — signing ends at a verified signature
+        if: always()
+        working-directory: e2e
+        run: node bdata-phase-e.mjs
       - name: Onboarding e2e (Chromium + virtual authenticator w/ PRF)
         if: always()
         working-directory: e2e
