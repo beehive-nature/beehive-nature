@@ -65,3 +65,22 @@ e2e/). Then the founder judges the three readings in the UI.
 
 ## Post-commit verification addendum
 (to be appended after the commit lands: estate-source drift row re-run)
+
+## Addendum 2 — PROVE matrix additions adopted (bFUzZ 41ea55f1, bFaBLe5.1 Erratum 2)
+- Base re-pinned to `cf825a57` (rebase; PRs #133 paper-and-ink + #134 action-hue
+  landed mid-build). `estate.json` byte-identical `c617e042`→`cf825a57`, so the
+  baked state root `4f84f5e9…` is unchanged across all three bases.
+- **Fixed-skeleton render** (structure/art separation attack): the overlay now
+  carries a constant element skeleton every day/mode/width (3 ellipses + 4 rects
+  + 12 lines + 40 circles + the emphasis ring, always present); ALL daily
+  variation is attribute-level (geometry, opacity, stroke, animation). The
+  engine already consumed `atlas-tree.mjs`'s presentation (layered over the
+  existing tree in the `data-art` slot; no second tree drawn) per Erratum 2.
+- **T4 TREE DRIFT** wired in every cell: per-bough `data-tree-count` ==
+  `estate.json` byFamily, boughs sum to the door number/hero count.
+- Structure check scoped honestly: masthead structure is identical ACROSS DATES
+  per (mode,width); the bee/cypherpunk structural split is the register.js
+  comprehension disclosure law — verified pre-existing with `daily-art.js`
+  blocked (same split without the art module). Gate now 25/25.
+- Post-commit: `estate-source` drift row re-run green (committed hub ==
+  regeneration at the new base).

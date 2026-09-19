@@ -305,6 +305,15 @@
     return families[p % families.length];
   }
 
+  /* FIXED-SKELETON render (PROVE structure/art separation attack, bFUzZ
+     41ea55f1): the masthead node tree is structurally identical on every day,
+     mode and width - the overlay always carries the SAME element skeleton
+     (3 ellipses, 4 rects, 12 lines, 40 circles, in fixed order, plus the
+     emphasis ring div). ALL daily variation is attribute-level (geometry,
+     opacity, stroke-width, animation). Variant selects which subset is
+     visible; density selects how many; nothing structural ever changes. */
+  var N_ELL = 3, N_RECT = 4, N_LINE = 12, N_CIRC = 40;
+
   function render(manifest, mode) {
     var host = document.querySelector('header.mast');
     if (!host) return null;
@@ -312,48 +321,54 @@
     var oldRing = host.querySelector('.bui-ring'); if (oldRing) oldRing.remove();
     var params = manifest.params, pal = paletteOf(params.palette);
     var modeDensity = mode === 'cypherpunk' ? 0.6 : mode === 'raver' ? 1.3 : 1.0;
-    var n = Math.max(8, Math.round(params.starN * (params.densityPct / 100) * modeDensity));
+    var nVisible = Math.max(8, Math.round(params.starN * (params.densityPct / 100) * modeDensity));
     var next = prng(seedFrom(manifest.manifest_hash));
-    var svg = ['<svg viewBox="0 0 390 480" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">'];
-    var i, x, y, r, o;
-    if (params.variant === 2 || (mode === 'cypherpunk' && params.variant !== 5)) {
-      /* constellation: points + thin lines, technical reading */
-      var pts = [];
-      for (i = 0; i < n; i++) pts.push([next() % 390, next() % 480]);
-      for (i = 2; i < pts.length; i += 3) svg.push('<line x1="' + pts[i - 1][0] + '" y1="' + pts[i - 1][1] + '" x2="' + pts[i][0] + '" y2="' + pts[i][1] + '" stroke="currentColor" stroke-width="0.4" opacity="' + (pal.o * 0.6).toFixed(3) + '"/>');
-      for (i = 0; i < pts.length; i++) svg.push('<circle cx="' + pts[i][0] + '" cy="' + pts[i][1] + '" r="' + (1 + next() % 2) + '" fill="currentColor" opacity="' + pal.o.toFixed(3) + '"/>');
-    } else if (params.variant === 3) {
-      /* bloom: concentric soft rings from the tree's heart */
-      for (i = 0; i < Math.min(n, 9); i++) { r = 30 + i * (18 + (next() % 20)); svg.push('<circle cx="195" cy="240" r="' + r + '" fill="none" stroke="currentColor" stroke-width="' + (pal.w * 0.8).toFixed(2) + '" opacity="' + (pal.o * (1 - i / 10)).toFixed(3) + '"/>'); }
-    } else if (params.variant === 4) {
-      /* fall: gentle vertical pollen drift */
-      for (i = 0; i < n; i++) { x = next() % 390; y = next() % 480; r = 1 + next() % 3; o = pal.o * (0.5 + (next() % 50) / 100); svg.push('<circle cx="' + x + '" cy="' + y + '" r="' + r + '" fill="currentColor" opacity="' + o.toFixed(3) + '"/>'); }
-    } else if (params.variant === 5) {
-      /* weave: quiet diagonal lattice */
-      for (i = -12; i < 24; i++) { svg.push('<line x1="' + (i * 34) + '" y1="0" x2="' + (i * 34 + 200) + '" y2="480" stroke="currentColor" stroke-width="' + pal.w.toFixed(2) + '" opacity="' + (pal.o * 0.4).toFixed(3) + '"/>'); }
-      for (i = 0; i < Math.min(n, 14); i++) svg.push('<circle cx="' + (next() % 390) + '" cy="' + (next() % 480) + '" r="1.5" fill="currentColor" opacity="' + pal.o.toFixed(3) + '"/>');
-    } else if (params.variant === 6) {
-      /* aurora: soft horizontal bands */
-      for (i = 0; i < Math.min(n / 2, 8); i++) { y = next() % 480; svg.push('<rect x="0" y="' + y + '" width="390" height="' + (6 + next() % 26) + '" fill="currentColor" opacity="' + (pal.o * 0.35).toFixed(3) + '"/>'); }
-    } else {
-      /* variant 1: motes - the default soft field */
-      for (i = 0; i < n; i++) { x = next() % 390; y = next() % 480; r = 1 + next() % 3; o = pal.o * (0.4 + (next() % 60) / 100); svg.push('<circle cx="' + x + '" cy="' + y + '" r="' + r + '" fill="currentColor" opacity="' + o.toFixed(3) + '"/>'); }
+    var parts = ['<svg viewBox="0 0 390 480" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">'];
+    var i, j, x, y, vis;
+    /* 3 ellipses - bloom rings (v3) / soft halos otherwise */
+    for (i = 0; i < N_ELL; i++) {
+      var r = 30 + i * (18 + (next() % 20));
+      vis = params.variant === 3 && i < Math.min(nVisible, 9) ? 1 : 0;
+      parts.push('<ellipse class="bui-ell" cx="195" cy="240" rx="' + r + '" ry="' + r + '" fill="none" stroke="currentColor" stroke-width="' + (pal.w * 0.8).toFixed(2) + '" opacity="' + (vis ? (pal.o * (1 - i / 10)).toFixed(3) : '0') + '"/>');
     }
-    svg.push('</svg>');
+    /* 4 rects - aurora bands (v6) */
+    for (i = 0; i < N_RECT; i++) {
+      y = next() % 480; vis = params.variant === 6 && i < Math.min(Math.ceil(nVisible / 2), 8) ? 1 : 0;
+      parts.push('<rect class="bui-rect" x="0" y="' + y + '" width="390" height="' + (6 + next() % 26) + '" fill="currentColor" opacity="' + (vis ? (pal.o * 0.35).toFixed(3) : '0') + '"/>');
+    }
+    /* 12 lines - constellation edges (v2) / weave lattice (v5) */
+    var px = [], py = [];
+    for (i = 0; i < N_CIRC; i++) { px.push(next() % 390); py.push(next() % 480); }
+    for (i = 0; i < N_LINE; i++) {
+      var x1 = 0, y1 = 0, x2 = 0, y2 = 0, lo = 0;
+      if (params.variant === 5) { x1 = -12 + i * 34; y1 = 0; x2 = x1 + 200; y2 = 480; lo = pal.o * 0.4; }
+      else if (params.variant === 2 || (mode === 'cypherpunk' && params.variant !== 5)) {
+        var a = (i * 3 + 1) % N_CIRC, bIdx = (i * 3 + 2) % N_CIRC;
+        x1 = px[a]; y1 = py[a]; x2 = px[bIdx]; y2 = py[bIdx]; lo = pal.o * 0.6;
+      }
+      parts.push('<line class="bui-line" x1="' + x1 + '" y1="' + y1 + '" x2="' + x2 + '" y2="' + y2 + '" stroke="currentColor" stroke-width="0.4" opacity="' + (lo ? lo.toFixed(3) : '0') + '"/>');
+    }
+    /* 40 circles - motes (v1/v4) / stars (v2) / accents (v3/v5/v6) */
+    var circleCap = params.variant === 1 || params.variant === 4 ? N_CIRC : Math.min(N_CIRC, Math.max(14, Math.ceil(nVisible * 0.5)));
+    for (i = 0; i < N_CIRC; i++) {
+      var rr = 1 + next() % 3, o = 0;
+      if (i < circleCap) o = pal.o * (0.4 + (next() % 60) / 100);
+      parts.push('<circle class="bui-dot" cx="' + px[i] + '" cy="' + py[i] + '" r="' + rr + '" fill="currentColor" opacity="' + (o ? o.toFixed(3) : '0') + '"/>');
+    }
+    parts.push('</svg>');
     var overlay = document.createElement('div');
     overlay.className = 'bui-overlay bui-anim';
     overlay.setAttribute('data-bui-variant', String(params.variant));
     overlay.setAttribute('data-bui-mode', mode);
-    overlay.innerHTML = svg.join('');
-    /* decorative emphasis ring around the tree figure (art "emphasis", never a fact) */
-    if (params.ringEmph > 0) {
-      var ring = document.createElement('div');
-      ring.className = 'bui-ring';
-      ring.setAttribute('aria-hidden', 'true');
-      var emph = params.ringEmph === 2;
-      ring.style.cssText = 'left:50%;top:38%;width:210px;height:210px;transform:translate(-50%,-50%);border:' + (emph ? 1.5 : 1) + 'px solid currentColor;opacity:' + (emph ? 0.20 : 0.10) + ';z-index:0';
-      host.appendChild(ring);
-    }
+    overlay.innerHTML = parts.join('');
+    /* decorative emphasis ring around the tree figure (art "emphasis", never a
+       fact) - ALWAYS PRESENT structurally; ringEmph varies only its style */
+    var ring = document.createElement('div');
+    ring.className = 'bui-ring';
+    ring.setAttribute('aria-hidden', 'true');
+    var emph = params.ringEmph === 2;
+    ring.style.cssText = 'left:50%;top:38%;width:210px;height:210px;transform:translate(-50%,-50%);border:' + (emph ? 1.5 : 1) + 'px solid currentColor;opacity:' + (params.ringEmph > 0 ? (emph ? 0.20 : 0.10) : 0) + ';z-index:0';
+    host.appendChild(ring);
     host.appendChild(overlay);
     if (!motionPaused() && !state.degraded) {
       var dur = params.swayMs, dx = (params.drift % 5 - 2), key = 'buisway' + (params.drift % 3);
