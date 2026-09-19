@@ -87,7 +87,8 @@
         }
         h += '<div class="law" style="margin-top:8px;text-align:center" id="bdata-price-stat"></div>';
         h += ceremonyRail();
-        h += authorizeStep(st.freshQuote);
+        h += walletPanel();
+    h += authorizeStep(st.freshQuote);
         h += '<div class="row" style="margin-top:8px;gap:6px 18px;flex-wrap:wrap;font-size:11px;justify-content:center;opacity:.7"><span>' + T('bd.price.reference','reference (machine, not chosen by you)') + ': ' + ant(line.amountAtto) + ' ANT</span></div>';
         h += '</div>';
         h += '<div class="row" data-bdata-bridge-row style="margin-top:6px;gap:8px;align-items:center;display:none"><span style="font-size:11px;opacity:.8">' + T('wl.bpay.bridge','quote service') + ':</span><input id="bdata-bridge" value="' + esc(st.bridge) + '" style="background:#0b1e26;border:1px solid #1d4655;color:inherit;border-radius:6px;padding:3px 8px;font-size:11px;font-family:monospace" /></div>';
@@ -226,6 +227,10 @@
     if (signGoBtn) signGoBtn.addEventListener('click', signGo);
     var settleBtn = document.querySelector('[data-bdata-settle-go]');
     if (settleBtn) settleBtn.addEventListener('click', settleGo);
+    var wConnect = document.querySelector('[data-bdata-wallet-connect]');
+    if (wConnect) wConnect.addEventListener('click', walletGo);
+    var wOff = document.querySelector('[data-bdata-wallet-disconnect]');
+    if (wOff) wOff.addEventListener('click', walletOff);
     var bridgeInput = document.getElementById('bdata-bridge');
     if (bridgeInput) bridgeInput.addEventListener('change', function(){ st.bridge = bridgeInput.value.trim() || 'http://127.0.0.1:8807'; save(); });
     /* THE ORIGIN GESTURE — selecting Public in My Data. The click records the
@@ -400,6 +405,49 @@
     h += '<div class="law" style="margin-top:4px;text-align:center" id="bdata-sign-stat"></div>';
     h += '</div>';
     return h;
+  }
+
+  /* ── THE WALLET STEP (Connect bPay Wallet — step 0) ──────────────────────
+     Connecting proves identity/control and NOTHING else: no approval, no
+     allowance, no payment, no broadcast, no permission for future
+     unattended signing. The device leg is the Safe 7's own address-export
+     prompt — a rejection is a normal outcome ("nothing changed"). */
+  function walletPanel(){
+    var w = st.wallet;
+    var h = '<div style="margin-top:10px;padding:10px 12px;border:1px solid #2c4a5a;border-radius:12px" data-bdata-wallet="1">';
+    if (w && w.state === 'connected') {
+      h += '<div style="font-size:12px"><b>bPay</b> · ' + T('bd.w.wallet','Wallet') + ': Trezor Safe 7 · <b style="color:var(--cyan)">✓ ' + T('bd.w.connected','Connected') + '</b></div>';
+      h += '<div class="mono" style="font-size:11px;margin-top:2px;overflow-wrap:anywhere">' + esc(w.address) + '</div>';
+      h += '<div style="font-size:10px;color:var(--dim);margin-top:2px">' + esc(w.path) + ' · ' + T('bd.w.authority','signing only — no spending authority granted') + '</div>';
+      h += '<div style="margin-top:6px;font-size:11px"><button type="button" data-bdata-wallet-disconnect="1" style="padding:4px 10px;border:1px solid #1d4655;border-radius:6px;background:transparent;color:inherit;cursor:pointer">' + T('bd.w.disconnect','Disconnect') + '</button> · <button type="button" data-bdata-wallet-connect="1" style="padding:4px 10px;border:1px solid #1d4655;border-radius:6px;background:transparent;color:inherit;cursor:pointer">' + T('bd.w.verify','Verify again') + '</button></div>';
+    } else {
+      h += '<div style="font-size:12px"><b>bPay</b> · ' + T('bd.w.none','Wallet: none connected') + '</div>';
+      h += '<div style="margin-top:6px;text-align:center"><button type="button" data-bdata-wallet-connect="1" style="padding:10px 16px;border:1px solid #2c4a5a;border-radius:10px;background:#0e2d3a;color:var(--cyan);font-size:14px;font-weight:600;cursor:pointer">🔌 ' + T('bd.w.connect','Connect bPay Wallet') + '</button></div>';
+      h += '<div style="font-size:10px;color:var(--dim);margin-top:4px;text-align:center">' + T('bd.w.law','connects your Trezor (device prompt); proves identity only — it authorizes no transaction') + '</div>';
+    }
+    if (st.walletNote) h += '<div style="margin-top:4px;font-size:11px;color:var(--amber)" data-bdata-wallet-note="1">' + esc(st.walletNote) + '</div>';
+    h += '</div>';
+    return h;
+  }
+  function walletGo(){
+    st.walletNote = '… ' + T('bd.w.prompt','watch the Safe 7 — approve or reject the address export');
+    render();
+    fetch(st.signing.service.replace(/\/$/,'') + '/v1/wallet/connect', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}'
+    }).then(function(r){ return r.json(); })
+    .then(function(j){
+      st.walletNote = null;
+      if (j.ok && j.binding) { st.wallet = j.binding; note(T('bd.hist.wc','bPay wallet CONNECTED — Trezor Safe 7, device-proven payer; signing authority only')); }
+      else { st.walletNote = (j.note || j.why || 'connection failed').slice(0,160); }
+      save(); render();
+    }).catch(function(e){ st.walletNote = String(e && e.message || e).slice(0,140); save(); render(); console.error('bdata wallet error', e); });
+  }
+  function walletOff(){
+    fetch(st.signing.service.replace(/\/$/,'') + '/v1/wallet/disconnect', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}'
+    }).then(function(r){ return r.json(); })
+    .then(function(j){ if (j.ok && j.binding) { st.wallet = j.binding; note(T('bd.hist.wd','bPay wallet disconnected — no paid or uploaded state exists')); } save(); render(); })
+    .catch(function(e){ st.walletNote = String(e && e.message || e).slice(0,140); save(); render(); });
   }
 
   /* ── THE AUTHORIZATION STEP (Phase C) ──────────────────────────────────────

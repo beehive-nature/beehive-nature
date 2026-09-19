@@ -44,6 +44,12 @@ use watchpay::wave::{
 // ─────────────────────────── shared state ───────────────────────────
 
 struct AppState {
+    /// The Safe 7 expected payer (Observation A's identity target,
+    /// LAW 14's binding). None = the demo hot key.
+    expected_payer: Option<EthAddr>,
+    /// The wired Suite-MCP transport (env BPAY_SIGN_MCP_URL/TOKEN);
+    /// absent = the hot TESTNET key.
+    suite: Option<SuiteMcp>,
     /// TESTNET-DEMO mode: vends the synthetic bridge-shaped pair and
     /// signs with the hot testnet key. The ONLY mode this binary ships.
     demo: bool,
@@ -246,7 +252,10 @@ async fn sign_state(
         .find(|a| a.authorization_id == body.authorization_id)
         .cloned();
     let jobs: Vec<WaveJobSummary> = state.demo_jobs.read().unwrap().clone();
-    let payer = hot_payer(&state.hot_key);
+    let payer = crate::wallet::connected_payer(&state)
+        .and_then(|a| EthAddr::from_lower_hex(&a).ok())
+        .or(state.expected_payer)
+        .unwrap_or_else(|| hot_payer(&state.hot_key));
     let binding = match bind_authorization(
         auth.as_ref(),
         &jobs,
@@ -278,7 +287,7 @@ async fn sign_state(
             "token": binding.network().token.to_lower_hex(),
             "vault": binding.network().vault.to_lower_hex(),
             "chain_id": binding.network().chain_id,
-            "payer": hot_payer(&state.hot_key).to_lower_hex(),
+            "payer": state.expected_payer.map(|p| p.to_lower_hex()).unwrap_or_else(|| hot_payer(&state.hot_key).to_lower_hex()),
             "path": "m/44'/60'/0'/0/0 (hot TESTNET key in demo mode — the Safe 7 arrives with the hardware transport)",
             "transaction_count": binding.transaction_count(),
             "plan_hash": binding.plan_hash().to_lower_hex(),
@@ -312,7 +321,10 @@ async fn sign_begin(
         .find(|a| a.authorization_id == body.authorization_id)
         .cloned();
     let jobs: Vec<WaveJobSummary> = state.demo_jobs.read().unwrap().clone();
-    let payer = hot_payer(&state.hot_key);
+    let payer = crate::wallet::connected_payer(&state)
+        .and_then(|a| EthAddr::from_lower_hex(&a).ok())
+        .or(state.expected_payer)
+        .unwrap_or_else(|| hot_payer(&state.hot_key));
     let net = match demo_network() {
         Ok(n) => n,
         Err(e) => return refusal(500, "network", e.to_string()),
@@ -345,9 +357,31 @@ async fn sign_begin(
         Err(why) => return refusal(502, "rpc", why),
     };
     let mut clock = WallClock;
-    let mut transport = HotTestnetTransport {
-        key: state.hot_key.clone(),
-        chain_id: ARBITRUM_SEPOLIA_CHAIN_ID,
+    // THE TRANSPORT LAW: when the Safe 7 is wired it signs — the hot
+    // testnet key is the fallback only. broadcast:false is pinned
+    // inside the Suite transport; trezor_push_transaction is never called.
+    enum AnyTransport {
+        Suite(std::mem::ManuallyDrop<SuiteMcp>),
+        Hot(HotTestnetTransport),
+    }
+    impl watchpay::connect::ConnectTransport for AnyTransport {
+        fn ethereum_sign_transaction(
+            &mut self,
+            request: &ConnectRequestJson,
+        ) -> watchpay::Result<ConnectSignedTxRaw> {
+            match self {
+                AnyTransport::Suite(s) => (**s).ethereum_sign_transaction(request),
+                AnyTransport::Hot(h) => h.ethereum_sign_transaction(request),
+            }
+        }
+    }
+    let mut transport: AnyTransport = if let Some(suite) = state.suite.clone() {
+        AnyTransport::Suite(std::mem::ManuallyDrop::new(suite))
+    } else {
+        AnyTransport::Hot(HotTestnetTransport {
+            key: state.hot_key.clone(),
+            chain_id: ARBITRUM_SEPOLIA_CHAIN_ID,
+        })
     };
     let slots = [
         (WaveDestination::Approve, nonce0),
@@ -588,6 +622,41 @@ struct DemoPrepareBody {
     audience: String,
 }
 
+/// The harmless preflight (Observation A's wired leg): silent Safe 7
+/// derivation through the cockpit's OWN transport + the identity check
+/// against the expected payer. No value, no broadcast, no device prompt.
+async fn preflight(axum::extract::State(state): axum::extract::State<Shared>) -> Response {
+    let Some(suite) = state.suite.clone() else {
+        return refusal(
+            503,
+            "transport",
+            "no Suite-MCP transport wired (set BPAY_SIGN_MCP_URL + BPAY_SIGN_MCP_TOKEN)".into(),
+        );
+    };
+    let path = "m/44'/60'/0'/0/0";
+    match suite.get_address(path) {
+        Ok(addr) => {
+            let expected = state
+                .expected_payer
+                .map(|p| p.to_lower_hex())
+                .unwrap_or_default();
+            let ok = addr.to_lowercase() == expected;
+            (
+                axum::http::StatusCode::OK,
+                Json(serde_json::json!({
+                    "ok": ok,
+                    "derived": addr, "path": path,
+                    "expected_payer": expected,
+                    "verdict": if ok { "MATCH — the Safe 7 recovered the expected founder address through the cockpit seam (silent read; the deliberate-rejection leg remains the founder's device gesture)" } else { "MISMATCH — do NOT sign; surface this" },
+                    "transport": "Suite-MCP (broadcast pinned false)",
+                })),
+            )
+                .into_response()
+        }
+        Err(e) => refusal(502, "transport", e.to_string()),
+    }
+}
+
 async fn demo_prepare(
     axum::extract::State(state): axum::extract::State<Shared>,
     Json(body): Json<DemoPrepareBody>,
@@ -751,6 +820,11 @@ async fn sign_receipt_get(
 // ─────────────────────────────── main ───────────────────────────────
 
 mod rlp;
+mod suite_mcp;
+mod wallet;
+
+use suite_mcp::SuiteMcp;
+use wallet::{connected_payer, wallet_connect, wallet_disconnect, wallet_get};
 
 fn main() {
     let mode = std::env::var("BPAY_SIGN_MODE").unwrap_or_default();
@@ -781,7 +855,29 @@ fn main() {
             std::process::exit(0);
         }
     };
+    let suite = match (
+        std::env::var("BPAY_SIGN_MCP_URL"),
+        std::env::var("BPAY_SIGN_MCP_TOKEN"),
+    ) {
+        (Ok(u), Ok(t)) => {
+            println!("bpay-sign: Suite-MCP transport wired ({u}) — broadcast pinned false; the Safe 7 signs, the wall verifies");
+            Some(SuiteMcp {
+                url: u,
+                token: t,
+                session: std::sync::Arc::new(std::sync::Mutex::new(None)),
+            })
+        }
+        _ => None,
+    };
+    let expected_payer = std::env::var("BPAY_SIGN_EXPECTED_PAYER")
+        .ok()
+        .and_then(|a| EthAddr::from_lower_hex(&a).ok());
+    if let Some(p) = expected_payer {
+        println!("bpay-sign: expected payer (LAW 14) = {}", p.to_lower_hex());
+    }
     let state = Arc::new(AppState {
+        expected_payer,
+        suite,
         demo: true,
         rpc_url,
         state_dir,
@@ -795,6 +891,10 @@ fn main() {
         .route("/v1/sign/begin", post(sign_begin))
         .route("/v1/sign/receipt", get(sign_receipt_get))
         .route("/v1/testnet/settle", post(testnet_settle))
+        .route("/v1/preflight", post(preflight))
+        .route("/v1/wallet/connect", post(wallet_connect))
+        .route("/v1/wallet", get(wallet_get))
+        .route("/v1/wallet/disconnect", post(wallet_disconnect))
         .route("/v1/upload/prepare", post(demo_prepare))
         .route(
             "/v1/authorization",
@@ -806,7 +906,7 @@ fn main() {
         .ok()
         .and_then(|p| p.parse().ok())
         .unwrap_or(8808);
-    let rt = tokio::runtime::Builder::new_current_thread()
+    let rt = tokio::runtime::Builder::new_multi_thread()
         .enable_all()
         .build()
         .expect("runtime");
