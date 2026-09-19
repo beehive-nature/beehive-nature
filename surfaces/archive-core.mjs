@@ -12,6 +12,9 @@
 //   relationshipPath(a, b) — blood = monotone climb-then-descend through a
 //     COMMON ANCESTOR; co-parent V-shapes are affinity, never blood; spouse
 //     steps are affinity by definition; cycle-crossing paths carry disputed.
+//     blood + direct-spouse pairs (married cousins) classify blood-and-
+//     affinity: the blood shape whole, plus an optional spouse facet -- both
+//     truths, one shape (founder ruling 32e28d07, Rule A).
 //   bloodlineSet() — the parentward bloodline from the model root (memoized).
 //   resolve(query) — canonical lookup by internal id, provider ref, registry
 //     alias, or exact name; ambiguity reported with candidates, never silent.
@@ -28,7 +31,10 @@
 // cannot import it, so the law is ported, not reinvented). Read-only: nothing
 // here writes, nothing here re-issues identity, no provider name lives here.
 
-export const ARCHIVE_CORE_SCHEMA = "skaists.archive-core/1";
+// 1.1 (founder ruling 32e28d07, Rule A): relationshipPath grew the optional
+// spouse facet + blood-and-affinity classification for married-cousin pairs.
+// Single-kind outputs are unchanged -- the facet is simply absent there.
+export const ARCHIVE_CORE_SCHEMA = "skaists.archive-core/1.1";
 
 export function createArchiveCore(model, opts = {}) {
   if (!model || !model.persons) throw new Error("createArchiveCore: no lineage model (parsed model object required)");
@@ -74,6 +80,17 @@ export function createArchiveCore(model, opts = {}) {
     }
   }
 
+  // G3 (founder ruling 32e28d07, Rule A): direct-spouse pair index from the
+  // SAME model.couples the affinity walk reads -- both key orders, so the
+  // marriage facet is order-independent. Self/malformed entries are skipped,
+  // never invented into kinship.
+  const coupleJoin = new Map(); // "aId|bId" (both orders) -> coupleKey
+  for (const [k, cp] of Object.entries(C)) {
+    if (!cp || !cp.p1 || !cp.p2 || cp.p1 === cp.p2) continue;
+    coupleJoin.set(cp.p1 + "|" + cp.p2, k);
+    coupleJoin.set(cp.p2 + "|" + cp.p1, k);
+  }
+
   const cyclic = cyclicComponents(model); // [[ids]] — own Tarjan, cycle-safe
   const cycleMember = new Map(); // id -> component index
   cyclic.forEach((comp, i) => comp.forEach((id) => cycleMember.set(id, i)));
@@ -116,7 +133,22 @@ export function createArchiveCore(model, opts = {}) {
   function relationshipPath(aId, bId) {
     if (!P[aId] || !P[bId]) return { kind: "unknown-person", a: aId, b: bId };
     const blood = bloodPath(aId, bId);
-    if (blood) return blood;
+    if (blood) {
+      // G3 (founder ruling 32e28d07, Rule A): a blood path never suppresses a
+      // real second facet. When the SAME two people are direct spouses in the
+      // couples map, the canonical truth is blood PLUS direct-spouse affinity
+      // -- classified honestly in ONE shape so no consumer can silently drop
+      // the marriage. Blood-only pairs return the blood shape untouched.
+      const ck = coupleJoin.get(aId + "|" + bId);
+      if (ck) {
+        return {
+          ...blood,
+          kind: "blood-and-affinity",
+          spouse: { couple: ck, note: "direct spouses (model.couples) in addition to the blood path -- affinity, never blood" },
+        };
+      }
+      return blood;
+    }
     const aff = bfs(aId, bId, true);
     if (aff) {
       const spouseSteps = aff.filter((s) => s.via === "spouse").length;

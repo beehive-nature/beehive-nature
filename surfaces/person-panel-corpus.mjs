@@ -20,19 +20,23 @@
    archive.search(query, cap)       → frozen [{person, exact:boolean}] (cap default 12)
    archive.relationship(aId, bId)   → frozen Relationship (endpoints + common
                                       ancestor + labeled hops; blood and affinity
-                                      computed SEPARATELY so both can coexist)
+                                      carried SEPARATELY so both can coexist)
    archive.genContext(id, rootId)   → frozen {rel:'self'|'above'|'below'|'off', depth}
    archive.coupleOf(aId, bId)       → true when the corpus couples map joins them
    archive.frontierTotal()          → number of unpublished parent refs (counts only)
 
-   ARCHIVE 1.1 SEAM — THE QUARANTINE LAW
-   ─────────────────
-   relationship() below is the TEMPORARY pre-Archive-1.1 implementation:
-   parent-edge BFS (cycle-safe, shortest way around the corpus's cyclic
-   components) plus spouse hops for affinity. When Archive 1.1's corrected
-   relationshipPath lands, THIS ONE FUNCTION is replaced; the panel and the
-   tests consume only the Relationship shape and never re-derive paths. The
-   temporary selected→root direction handling lives here and nowhere else.
+   ARCHIVE 1.1 RESOLVER LAW (Rule A, founder ruling 2026-09-19)
+   ................................................................
+   relationship() below DELEGATES to the composed archive core
+   (surfaces/archive-core.mjs - one resolver, two environments). The
+   pre-1.1 parent-edge BFS it carried is REPLACED WHOLE: no path, kind,
+   apex, cycle, or spouse facet is derived here. The adapter maps the
+   canonical shape onto the panel's frozen Relationship vocabulary
+   (kinds, blood.mode, hop labels/evidence) and renders; married cousins
+   classify blood-and-affinity because the core's spouse facet says so -
+   never a second composition. Cycles come from the core's
+   cyclicAncestryOf (the adapter's own Tarjan is dead). The selected
+   root direction handling lives here and nowhere else.
 
    LAWS ENCODED HERE
    ─────────────────
@@ -47,7 +51,12 @@
    - citations connect claims to evidence; support is assessed per claim:
      a source on a tradition claim is rendered as the connection it is — a
      citation count is never a confidence verdict.
-*/
+ */
+
+/* Archive 1.1 (Rule A, founder ruling 2026-09-19): the ONE resolver is
+   composed verbatim from the organ tip (bFUzZ, bfuzz/gux01-archive-graph)
+   and mounted inside buildArchive on this adapter's own merged tables. */
+import { createArchiveCore } from './archive-core.mjs';
 
 /* ── tiny utils ─────────────────────────────────────────────────────────── */
 
@@ -172,48 +181,16 @@ export function buildArchive ({ corpus, overlay, packs, broader }) {
     if (n) { ghostCount[c] = n; frontierTotal += n; }
   }
 
-  /* persons that sit inside a cycle of the parent graph (the medieval web
-   * loops; e.g. Emma de Bois-l'Evêque's record appears as an ancestor of her
-   * own son's record). Membership = strongly connected components of size > 1
-   * (or a self parent-edge) — iterative Tarjan, no recursion (chains run 60+). */
-  const inCycle = new Set();
-  {
-    const nodes = Object.keys(persons);
-    const index = new Map(), low = new Map(), onstk = new Set(), stk = [];
-    let counter = 0;
-    for (const root of nodes) {
-      if (index.has(root)) continue;
-      const work = [[root, 0]];
-      while (work.length) {
-        const f = work[work.length - 1];
-        const v = f[0];
-        if (f[1] === 0) { index.set(v, counter); low.set(v, counter); counter++; stk.push(v); onstk.add(v); }
-        const es = (edges[v] || []).filter(x => persons[x]);
-        let advanced = false;
-        while (f[1] < es.length) {
-          const w = es[f[1]++];
-          if (!index.has(w)) { work.push([w, 0]); advanced = true; break; }
-          else if (onstk.has(w)) { low.set(v, Math.min(low.get(v), index.get(w))); }
-        }
-        if (advanced) continue;
-        if (low.get(v) === index.get(v)) {
-          const comp = [];
-          for (;;) {
-            const w = stk.pop(); onstk.delete(w); comp.push(w);
-            if (w === v) break;
-          }
-          if (comp.length > 1) for (const w of comp) inCycle.add(w);
-        }
-        work.pop();
-        if (work.length) {
-          const parentFrame = work[work.length - 1];
-          low.set(parentFrame[0], Math.min(low.get(parentFrame[0]), low.get(v)));
-        }
-      }
-    }
-    /* self parent-edge = a cycle of one */
-    for (const c of Object.keys(edges)) for (const p of edges[c]) if (p === c) inCycle.add(c);
-  }
+  /* ARCHIVE 1.1 (Rule A): the ONE resolver, mounted once on this
+   * adapter's own merged tables - after the overlay merge (the 20d5c74a
+   * lesson), same truth blood.html boots. The core derives paths, kinds,
+   * apexes, cycle membership, and the married-cousin spouse facet; this
+   * adapter renders. G4: cyclicAncestryOf is the only cycle authority -
+   * the second Tarjan that lived here is dead. */
+  const core = createArchiveCore({ persons, edges, couples, refsIndex: corpus.refsIndex, root: corpus.root });
+  const inCyclicAncestry = (id) => core.cyclicAncestryOf(id) != null;
+  let _cyclicMembers = null;
+  const cyclicMembers = () => (_cyclicMembers ??= Object.keys(persons).filter(inCyclicAncestry).sort());
 
   /* upward BFS map: id → {depth, prev(childId)} — cycle-safe by visited set */
   const upCache = new Map();
@@ -239,27 +216,6 @@ export function buildArchive ({ corpus, overlay, packs, broader }) {
     if (relEvidence[child + '|' + parent]) return 'disputed — inspect';
     if (overlayEdgeChildren.has(child)) return 'overlay — tradition-carried';
     return 'walked provider link';
-  }
-
-  /* reconstruct from → … → to as up-hops (to must be an ancestor of from in m) */
-  function chainUpReal (m, from, to) {
-    /* walk prev links from `to` back to `from`, emitting hops child→parent */
-    const seq = [];
-    let cur = to;
-    while (cur !== from) {
-      const rec = m.get(cur);
-      if (!rec || rec.prev == null) return null; /* not connected — never invent */
-      seq.push(cur);
-      cur = rec.prev;
-    }
-    seq.reverse(); /* nearest-to-root … person-end */
-    const hops = [];
-    let child = from;
-    for (const node of seq) {
-      hops.push({ to: node, dir: 'up', label: upLabel(persons[node] && persons[node].gender), evidence: edgeEvidence(child, node) });
-      child = node;
-    }
-    return hops;
   }
 
   /* ── PersonView projection (frozen; never the corpus row) ─────────────── */
@@ -293,7 +249,7 @@ export function buildArchive ({ corpus, overlay, packs, broader }) {
       supportBasis: (p.evidence && p.evidence.basis) || null,
       onSpine: spineIds.has(id),
       isCorpusRoot: id === (corpus.root || null),
-      inCycle: inCycle.has(id),
+      inCycle: inCyclicAncestry(id),
       /* descendant-side frontier — attributed known breadth, carried only */
       broaderFamily: broaderMap[id]
         ? {
@@ -395,10 +351,10 @@ export function buildArchive ({ corpus, overlay, packs, broader }) {
     return deepFreeze({ rel: 'off', depth: null });
   }
 
-  /* ── relationship(a, b) — TEMPORARY PRE-ARCHIVE-1.1 IMPLEMENTATION ──────
-   * parent-edge BFS + spouse hops; cycle-safe (visited sets); the shortest
-   * way around cyclic components. Replaced whole by Archive 1.1's corrected
-   * relationshipPath — the panel never re-derives any of this. */
+  /* relationship(a, b) - ARCHIVE 1.1: the ONE resolver, rendered only.
+   * a = the person, b = the standing root. The core derives; this maps
+   * the canonical shape onto the panel's frozen Relationship vocabulary
+   * and never re-derives a path, kind, apex, cycle, or spouse facet. */
   function relationship (aId, bId) {
     if (!persons[aId] || !persons[bId]) {
       return deepFreeze({ a: aId, b: bId, kind: 'none', blood: null, affinity: null, cyclic: false, note: 'unknown person' });
@@ -407,101 +363,60 @@ export function buildArchive ({ corpus, overlay, packs, broader }) {
       return deepFreeze({ a: aId, b: bId, kind: 'self', blood: null, affinity: null, cyclic: false, note: null });
     }
 
-    const upB = upMap(bId); /* ancestors of b (b = the standing root) */
-    const upA = upMap(aId);
+    const c = core.relationshipPath(aId, bId);
+    const genderOf = (id) => (persons[id] && persons[id].gender) || null;
+    const spouseHop = (to) => ({ to, dir: 'spouse', label: 'spouse ⚭', evidence: 'corpus couples map — affinity, never blood' });
+    const cyclicOnPath = (path) => path.some((s) => inCyclicAncestry(s.id));
 
-    let blood = null;
-    let cyclic = false;
-
-    if (upB.has(aId)) {
-      /* a is an ancestor of b — the line itself is the relationship; the
-       * common ancestor is the ancestor ENDPOINT, stated as an endpoint */
-      const hops = chainUpReal(upB, bId, aId) || [];
-      cyclic = hops.some(h => inCycle.has(h.to));
-      blood = { mode: 'ancestor-of-root', commonAncestor: aId, commonAncestorIsEndpoint: true, hopsFromRoot: hops, hopsFromPerson: [] };
-    } else if (upA.has(bId)) {
-      /* b is an ancestor of a — hops run root → down → person; each down-hop
-       * is labeled by the CHILD's gender (son/daughter/child). The prev chain
-       * points childward, so walk it from the ancestor b DOWN to person a. */
-      const seq = [];
-      let cur = bId;
-      while (cur !== aId) {
-        const rec = upA.get(cur);
-        if (!rec || rec.prev == null) break; /* not connected — never invent */
-        seq.push(cur);
-        cur = rec.prev;
-      }
-      seq.push(aId); /* [b, …, a] in root→person order */
-      const dhops = [];
-      for (let i = 0; i + 1 < seq.length; i++) {
-        dhops.push({
-          to: seq[i + 1], dir: 'down',
-          label: downLabel(persons[seq[i + 1]] && persons[seq[i + 1]].gender),
-          evidence: edgeEvidence(seq[i + 1], seq[i])
-        });
-      }
-      cyclic = dhops.some(h => inCycle.has(h.to));
-      blood = { mode: 'descendant-of-root', commonAncestor: bId, commonAncestorIsEndpoint: true, hopsFromRoot: dhops, hopsFromPerson: [] };
-    } else {
-      /* shared ancestor: meet at the minimal-total-depth common node */
-      let meet = null, best = Infinity;
-      const byDepth = [...upA.entries()].sort((x, y) => x[1].depth - y[1].depth);
-      for (const [id, rec] of byDepth) {
-        if (!upB.has(id)) continue;
-        const tot = rec.depth + upB.get(id).depth;
-        if (tot < best) { best = tot; meet = id; }
-      }
-      if (meet) {
-        const hopsR = chainUpReal(upB, bId, meet) || [];
-        const hopsP = chainUpReal(upA, aId, meet) || [];
-        cyclic = hopsR.some(h => inCycle.has(h.to)) || hopsP.some(h => inCycle.has(h.to));
-        blood = { mode: 'cousin-line', commonAncestor: meet, commonAncestorIsEndpoint: false, hopsFromRoot: hopsR, hopsFromPerson: hopsP };
-      }
-    }
-
-    /* affinity — marriage, never blood. Direct spouse first; when no blood
-     * exists, one spouse hop onto the line makes an affinity-only path.
-     * When blood ALSO exists for a direct-spouse pair (married cousins) both
-     * are carried — kind 'blood-and-affinity'. */
-    let affinity = null;
-    if ((spousesOf[aId] || []).indexOf(bId) >= 0) {
-      affinity = { hopsFromRoot: [{ to: aId, dir: 'spouse', label: 'spouse ⚭', evidence: 'corpus couples map — affinity, never blood' }] };
-    } else if (!blood) {
-      const seen = new Set([bId]);
-      const q = [{ id: bId, hops: [] }];
-      let found = null;
-      while (q.length && !found) {
-        const f = q.shift();
-        if (f.hops.length > 30 || seen.size > 40000) break;
-        for (const p of (edges[f.id] || [])) {
-          if (!persons[p] || seen.has(p)) continue;
-          seen.add(p);
-          const hops = f.hops.concat([{ to: p, dir: 'up', label: upLabel(persons[p] && persons[p].gender), evidence: edgeEvidence(f.id, p) }]);
-          if (p === aId) { found = hops; break; }
-          q.push({ id: p, hops });
+    if (c.kind === 'blood' || c.kind === 'blood-and-affinity') {
+      /* core path: a -> (up-hops) -> apex -> (down-hops) -> b */
+      const path = c.path;
+      const apex = c.commonAncestor;
+      const k = path.findIndex((s) => s.id === apex);
+      const mode = apex === aId ? 'ancestor-of-root' : (apex === bId ? 'descendant-of-root' : 'cousin-line');
+      let hopsFromRoot = [], hopsFromPerson = [];
+      if (mode === 'ancestor-of-root') {
+        /* a IS an ancestor of the root: the chain runs root -> a, up-hops */
+        for (let i = path.length - 1; i >= 1; i--) {
+          hopsFromRoot.push({ to: path[i - 1].id, dir: 'up', label: upLabel(genderOf(path[i - 1].id)), evidence: edgeEvidence(path[i].id, path[i - 1].id) });
         }
-        if (found) break;
-        for (const s of (spousesOf[f.id] || [])) {
-          if (!persons[s] || seen.has(s)) continue;
-          seen.add(s);
-          const hops = f.hops.concat([{ to: s, dir: 'spouse', label: 'spouse ⚭', evidence: 'corpus couples map — affinity, never blood' }]);
-          if (s === aId) { found = hops; break; }
-          q.push({ id: s, hops });
+      } else if (mode === 'descendant-of-root') {
+        /* the root IS an ancestor of a: the chain runs root -> a, down-hops */
+        for (let i = k - 1; i >= 0; i--) {
+          hopsFromRoot.push({ to: path[i].id, dir: 'down', label: downLabel(genderOf(path[i].id)), evidence: edgeEvidence(path[i].id, path[i + 1].id) });
+        }
+      } else {
+        /* cousin line: both sides climb to the NAMED common ancestor */
+        for (let i = 1; i <= k; i++) {
+          hopsFromPerson.push({ to: path[i].id, dir: 'up', label: upLabel(genderOf(path[i].id)), evidence: edgeEvidence(path[i - 1].id, path[i].id) });
+        }
+        for (let i = path.length - 1; i >= k + 1; i--) {
+          hopsFromRoot.push({ to: path[i - 1].id, dir: 'up', label: upLabel(genderOf(path[i - 1].id)), evidence: edgeEvidence(path[i].id, path[i - 1].id) });
         }
       }
-      if (found) affinity = { hopsFromRoot: found };
+      const blood = { mode, commonAncestor: apex, commonAncestorIsEndpoint: mode !== 'cousin-line', hopsFromRoot, hopsFromPerson };
+      const kind = c.kind === 'blood-and-affinity' ? 'blood-and-affinity' : (mode === 'cousin-line' ? 'shared' : 'direct');
+      /* Rule A: the core's spouse facet carries the marriage truth; the
+       * panel renders its existing direct-spouse hop - no recomposition */
+      const affinity = c.kind === 'blood-and-affinity' ? { hopsFromRoot: [spouseHop(aId)] } : null;
+      return deepFreeze({ a: aId, b: bId, kind, blood, affinity, cyclic: cyclicOnPath(path), note: null });
     }
 
-    let kind, note = null;
-    if (blood && affinity) kind = 'blood-and-affinity';
-    else if (blood) kind = blood.mode === 'cousin-line' ? 'shared' : 'direct';
-    else if (affinity) kind = 'affinity';
-    else {
-      kind = 'none';
-      note = 'no shared line within the published archive — a different branch, or the connection rides beyond the published frontier (coverage of the walk, not a finding about anyone)';
+    if (c.kind === 'affinity') {
+      /* core path a -> b (parent/child/spouse steps); the panel renders
+       * hopsFromRoot starting AT the standing root - walk it reversed */
+      const hops = [];
+      for (let i = c.path.length - 1; i >= 1; i--) {
+        const from = c.path[i - 1].id, to = c.path[i].id, via = c.path[i].via;
+        if (via === 'spouse') hops.push(spouseHop(from));
+        else if (via === 'parent') hops.push({ to: from, dir: 'down', label: downLabel(genderOf(from)), evidence: edgeEvidence(from, to) });
+        else hops.push({ to: from, dir: 'up', label: upLabel(genderOf(from)), evidence: edgeEvidence(to, from) });
+      }
+      return deepFreeze({ a: aId, b: bId, kind: 'affinity', blood: null, affinity: { hopsFromRoot: hops }, cyclic: cyclicOnPath(c.path), note: null });
     }
 
-    return deepFreeze({ a: aId, b: bId, kind, blood, affinity, cyclic, note });
+    /* none: the honest bounded boundary - the panel's own wording, verbatim */
+    return deepFreeze({ a: aId, b: bId, kind: 'none', blood: null, affinity: null, cyclic: false, note: 'no shared line within the published archive — a different branch, or the connection rides beyond the published frontier (coverage of the walk, not a finding about anyone)' });
   }
 
   function coupleOf (aId, bId) { return coupleKeys.has(aId + '|' + bId); }
@@ -662,7 +577,7 @@ export function buildArchive ({ corpus, overlay, packs, broader }) {
     for (const pair of cc.pairs) {
       if (up.has(pair.a) && up.has(pair.b)) { rootExemplar = pair; break; }
     }
-    const cycleMembers = [...inCycle].sort();
+    const cycleMembers = cyclicMembers();
     const ambiguous = [...nameBuckets.entries()].filter(e => e[1].length > 1);
     const topName = ambiguous.slice().sort((a, b) => b[1].length - a[1].length || (a[0] < b[0] ? -1 : 1))[0] || null;
     let terminus = null;
@@ -688,7 +603,7 @@ export function buildArchive ({ corpus, overlay, packs, broader }) {
     getPerson: personView,
     resolve,
     search,
-    relationship, /* TEMPORARY pre-Archive-1.1 — see the seam note above */
+    relationship, /* Archive 1.1 delegation to the ONE core - see the resolver-law note above */
     genContext,
     coupleOf,
     frontierTotal: () => frontierTotal,

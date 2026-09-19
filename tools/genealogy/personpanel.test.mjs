@@ -195,8 +195,28 @@ test('C2 Albert Perry Rockwood: the public entrance, evidence-pack tradition, no
   assert.equal(rel.kind, 'direct');
   assert.equal(rel.blood.mode, 'descendant-of-root');
   assert.equal(rel.blood.hopsFromRoot.length, 5);
-  /* Donna vs APR-root = none — the honest boundary in the founder's own journey */
-  const none = archive.relationship(DONNA, APR);
+  /* Donna vs APR-root = AFFINITY (Archive 1.1 truth flip, G1: the old BFS
+   * said 'none'; the resolver sees the Lowry-Rockwood marriage, never blood) */
+  const aff = archive.relationship(DONNA, APR);
+  assert.equal(aff.kind, 'affinity');
+  assert.equal(aff.blood, null);
+  assert.ok(aff.affinity && aff.affinity.hopsFromRoot.length >= 1, 'the marriage line renders');
+  /* the honest 'none' boundary and its bounded wording survive as LAW: at
+   * this pin the merged public projection is ONE connected component
+   * (resolved overlay marriages included - measured), so no published pair
+   * reads 'none' any more; the wording locks on a two-island corpus */
+  const isl = buildArchive({
+    corpus: {
+      schema: 'x', root: 'i1',
+      persons: {
+        i1: { name: 'Island One', living: false, evidence: { class: 'unrecorded' }, refs: [] },
+        i2: { name: 'Island Two', living: false, evidence: { class: 'unrecorded' }, refs: [] }
+      },
+      edges: {}, couples: {}, spine: [], refsIndex: {}
+    },
+    overlay: null, packs: {}
+  });
+  const none = isl.relationship('i1', 'i2');
   assert.equal(none.kind, 'none');
   assert.match(none.note, /beyond the published frontier/);
   assert.match(none.note, /not a finding about anyone/);
@@ -219,16 +239,16 @@ test('C4 married cousins: Samuel ⚭ Miriam — blood AND affinity coexist via J
   const rel = archive.relationship(MIRIAM, SAMUEL);
   assert.equal(rel.kind, 'blood-and-affinity');
   assert.ok(rel.blood && rel.blood.mode === 'cousin-line');
-  assert.equal(rel.blood.commonAncestor, JH[8]); /* the 1700–1744 Joseph — one of the three ambiguous namesakes */
+  assert.equal(rel.blood.commonAncestor, 'p9db65dd807'); /* Prudence Thurlow - the ONE resolver's canonical apex */
   const ca = archive.getPerson(rel.blood.commonAncestor);
-  assert.equal(ca.name, 'Joseph Hadlock');
-  assert.equal(ca.lifespan, '1700–1744');
+  assert.equal(ca.name, 'Prudence Thurlow');
+  assert.equal(ca.lifespan, '1701–1744');
   assert.ok(rel.affinity, 'the marriage is ALSO carried — both true, separately labeled');
   assert.equal(rel.blood.commonAncestorIsEndpoint, false);
   /* both chains reach the CA and are non-empty */
   assert.ok(rel.blood.hopsFromRoot.length >= 1 && rel.blood.hopsFromPerson.length >= 1);
-  assert.equal(rel.blood.hopsFromRoot[rel.blood.hopsFromRoot.length - 1].to, JH[8]);
-  assert.equal(rel.blood.hopsFromPerson[rel.blood.hopsFromPerson.length - 1].to, JH[8]);
+  assert.equal(rel.blood.hopsFromRoot[rel.blood.hopsFromRoot.length - 1].to, 'p9db65dd807');
+  assert.equal(rel.blood.hopsFromPerson[rel.blood.hopsFromPerson.length - 1].to, 'p9db65dd807');
 });
 
 test('C5 ghost frontier: counts only, total locked at the published number, no raw ghost ids in views', () => {
@@ -350,9 +370,10 @@ test('G1 the panel never re-derives paths — no BFS/edges inside person-panel.m
   assert.match(src, /archive\.relationship\(/, 'all relationship text flows through the injected archive');
 });
 
-test('G2 the temporary implementation is quarantined in ONE adapter function, marked for Archive 1.1', () => {
+test('G2 the resolver law is wired in ONE adapter function delegating to Archive 1.1', () => {
   const src = readFileSync(join(ROOT, 'surfaces', 'person-panel-corpus.mjs'), 'utf8');
-  assert.match(src, /TEMPORARY PRE-ARCHIVE-1\.1 IMPLEMENTATION/);
+  assert.match(src, /ARCHIVE 1\.1 RESOLVER LAW/);
+  assert.doesNotMatch(src, /TEMPORARY PRE-ARCHIVE-1\.1/);
   assert.match(src, /relationshipPath/);
   const relIdx = src.indexOf('function relationship (aId, bId)');
   assert.ok(relIdx > 0);
