@@ -28,6 +28,9 @@
 //      so home() never restores a computed-but-never-displayed transform.
 //      Restored contexts (back/home/restoreContext) keep their own camera:
 //      only FRESH navigations (reroot/setView/repaint) reframe.
+//      atlas.zoomBy(f) / atlas.resetView() — camera affordances; resetView
+//      returns the camera to the SAME boot framing home() uses (the two
+//      camera-return affordances can never disagree).
 //      atlas.getContext()         — frozen {root, selection, view, transform}
 //      atlas.search(q, cap) / atlas.ghostCount(iid) / atlas.person(iid)
 //      atlas.destroy()            — removes listeners, clears the mount
@@ -613,6 +616,7 @@ export function createCore(model, opts) {
   };
   let initial = Object.assign({}, state);
   let bootAdopted = false;
+  const bootTransform = () => Object.assign({}, initial.transform);
   let history = [];
   const emit = (reason) => { if (o.onContext) o.onContext(snapshot(), reason); };
   const snapshot = () => Object.freeze({
@@ -670,6 +674,9 @@ export function createCore(model, opts) {
       bootAdopted = true;
       return true;
     },
+    // the framing boot showed (post-adoption). resetView() aims here so the
+    // two camera-return affordances can never disagree (V1).
+    bootTransform() { return bootTransform(); },
     restoreContext(ctx) {
       if (!ctx) return false;
       if (ctx.root != null && !model.person(ctx.root)) return false;
@@ -729,7 +736,9 @@ export async function createAtlas(opts) {
   // An explicitly provided initial.transform is the AUTHORITATIVE boot
   // camera (deep link / session return): the first paint renders through it
   // and never reframes it away. Omit initial.transform for auto-framing.
-  const hasBootCamera = !!(o.initial && o.initial.transform);
+  // An EMPTY transform object counts as absent (V2): a grammar-side bug
+  // passing {} would otherwise silently boot at {1,0,0} with no reframe.
+  const hasBootCamera = !!(o.initial && o.initial.transform && Object.keys(o.initial.transform).length > 0);
   // framing: pedigree anchors near the stage top (ancestors flow DOWN into
   // view — at 390px a center anchor pushed generations 2+ under the fold);
   // fractal anchors at the center (rings radiate). Reframe on view/root change.
@@ -999,7 +1008,7 @@ export async function createAtlas(opts) {
     back: () => core.back(),
     home: () => core.home(),
     zoomBy: (f) => { zoomBy(f, 0, 0); },
-    resetView: () => { transform = { k: 1, x: 0, y: 0 }; applyTransform(); },
+    resetView: () => { transform = core.bootTransform(); applyTransform(); },
     search: (q, cap) => search(model, q, cap),
     person: (iid) => model.person(iid),
     ghostCount: (iid) => model.ghostCount(iid),
