@@ -29,6 +29,7 @@
 //   node e2e/bui-daily-art-gate.mjs
 import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
+import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join, extname } from 'node:path';
 import { createRequire } from 'node:module';
@@ -93,7 +94,10 @@ async function openCell(date, mode, width, opts = {}) {
       animName: b ? getComputedStyle(b).animationName : '',
       degraded: s.degraded, deriveMs: s.render ? s.render.deriveMs : null,
       scrollWidth: document.documentElement.scrollWidth,
-      facts: JSON.stringify({ counts, hrefs, band, navLinks })
+      facts: JSON.stringify({ counts, hrefs, band, navLinks }),
+      mastSig: (() => { const sig = (el) => el ? el.tagName + (el.classList && el.classList.length ? '.' + [...el.classList].sort().join('.') : '') + '(' + [...el.children].map(sig).join(',') + ')' : ''; return sig(document.querySelector('header.mast')); })(),
+      treeFams: (() => { const fams = {}; document.querySelectorAll('[data-tree-family]').forEach(g => { const f = g.getAttribute('data-tree-family'); const n = +g.getAttribute('data-tree-count'); if (!(f in fams)) fams[f] = n; else if (fams[f] !== n) fams[f] = -1; }); return fams; })(),
+      hero: document.querySelector('[data-hero-number]') ? +document.querySelector('[data-hero-number]').textContent : null
     };
   });
   cell.errors = errors;
@@ -123,6 +127,29 @@ for (const date of DATES) {
 }
 const allFacts = [...new Set(Object.values(cells).map(c => c.facts))];
 check('facts byte-identical across all 18 cells (3 dates x 3 modes x 2 widths)', allFacts.length === 1 && factsOK, allFacts.length + ' distinct fact-sets');
+/* structure/art separation (bFUzZ attack 41ea55f1), scoped honestly: the
+   masthead node tree must be structurally identical ACROSS DATES for every
+   (mode, width) - daily mutation is attribute-level only. The MODE axis DOES
+   restructure the masthead (register.js comprehension disclosure law:
+   bee/raver collapse dense blocks, cypherpunk stands open) - verified
+   pre-existing: the same bee!=cypherpunk split appears with daily-art.js
+   blocked entirely. */
+let structOK = true;
+for (const mode of MODES) for (const width of WIDTHS) {
+  const sigs = new Set(DATES.map(d => cells[`${d}|${mode}|${width}`].mastSig));
+  if (sigs.size !== 1) { structOK = false; console.log('  structure drift across dates at ' + mode + '/' + width); }
+}
+check('structure/art separation: masthead node tree identical across all 3 dates for every mode+width (daily mutation is attribute-level only)', structOK);
+/* T4 TREE DRIFT (bFUzZ matrix addition): the tree's boughs ARE the registry -
+   per-bough == estate.json byFamily, boughs sum to the door number, every cell */
+const estate = JSON.parse(readFileSync(join(here, '..', 'estate.json'), 'utf8'));
+let t4ok = true;
+for (const [key, c] of Object.entries(cells)) {
+  const sum = Object.values(c.treeFams).reduce((a, b) => a + b, 0);
+  if (sum !== c.hero || sum !== estate.counts.surfaces) { t4ok = false; console.log('  T4 sum mismatch in ' + key + ': ' + sum + ' vs hero ' + c.hero); }
+  for (const [f, n] of Object.entries(c.treeFams)) if (estate.counts.byFamily[f] !== n) { t4ok = false; console.log('  T4 bough mismatch in ' + key + ': ' + f + '=' + n + ' vs registry ' + estate.counts.byFamily[f]); }
+}
+check('T4 TREE DRIFT: per-bough == registry byFamily, boughs sum to the door number (' + estate.counts.surfaces + '), every cell', t4ok);
 check('zero page errors across all cells', zeroErrorOK);
 check('overlay painted in every cell (P5 shape)', paintOK);
 check('390px: no horizontal overflow in any cell', widthOK);
@@ -154,6 +181,9 @@ for (const mode of MODES) for (const width of WIDTHS) {
   if (!still) { reducedOK = false; console.log('  reduced-motion cell animated: ' + mode + '/' + width + ' anim=' + c.animName); }
   if (c.errors.length) { reducedOK = false; console.log('  reduced-motion page errors: ' + c.errors.join(' | ')); }
   if (c.hash !== cells[`2026-10-31|${mode}|${width}`].hash) { reducedOK = false; console.log('  reduced-motion manifest drift'); }
+  if (c.mastSig !== cells[`2026-10-31|${mode}|${width}`].mastSig) { reducedOK = false; console.log('  reduced-motion structure drift'); }
+  const sum = Object.values(c.treeFams).reduce((a, b) => a + b, 0);
+  if (sum !== c.hero || sum !== estate.counts.surfaces) { reducedOK = false; console.log('  reduced-motion T4 drift'); }
   await c.ctx.close();
 }
 check('reduced-motion: static render, same manifest, no animation (24/24 cells)', reducedOK);
