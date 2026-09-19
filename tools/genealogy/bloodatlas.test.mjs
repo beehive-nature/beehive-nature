@@ -565,12 +565,19 @@ test("discoveries: five derived kinds, no hardcoded names, on the real corpus", 
   // correction cards: persons whose records carry the founder attestation
   const corrections = cards.filter((c) => c.kind === "correction");
   assert.equal(corrections.length, 4, "the four corrected grandparents");
-  assert.ok(corrections.every((c) => /see what changed|corrected/i.test(c.subtitle)));
+  assert.ok(corrections.every((c) => /see what changed/i.test(c.hook)), "human hook carries the invitation");
   // frontier card: corpus-wide ghost refs + the nearest edge generation
   const frontier = cards.find((c) => c.kind === "frontier");
   assert.equal(frontier.count, model.ghostTotal);
   assert.ok(frontier.corpusWide === true, "frontier count is corpus-wide, not depth-bounded — basis stated");
   assert.match(frontier.title, /beyond the published archive/);
+  // TWO-LAYER GRAMMAR: human surface clean of engineering language; disclosure carries it
+  const ENG = /test-locked|derived from the corpus|parent-edge|BFS|ahnentafel|closure|derivation|canonical person id/i;
+  for (const c of cards) {
+    assert.ok(!ENG.test(c.title + " " + (c.hook || "")), "human layer stays human: " + c.title);
+    assert.ok(c.disclosure && c.disclosure.length > 30, "every card carries its evidence disclosure: " + c.id);
+  }
+  for (const c of routeCards) assert.match(c.disclosure, /shortest published parent-edge path/, "route-meta law: the route says what graph it traversed and its status");
 });
 
 test("UI LAW enforced: a counted card without depthNote or corpusWide is REFUSED", () => {

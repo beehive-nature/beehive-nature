@@ -1,0 +1,184 @@
+<!doctype html>
+<!-- GUX-01 COMBINED PROTOTYPE — the A-gate experiment (founder order
+     2026-09-18): "click a discovery card → atlas animates to the actual
+     branch/person → zGenePerson opens alongside it → click one of its 'one
+     more ancestor' teasers → atlas visibly travels to that person WITHOUT
+     resetting the camera/root/history unnecessarily → Back returns to
+     precisely where the curiosity journey began."
+     Dev harness in tools/, NOT an estate surface: zGeneAtlas's engine
+     (surfaces/blood-atlas.mjs) + zGenePerson's panel (surfaces/person-panel.mjs,
+     merged from its own lane) mounted side by side. zGeneUI owns the real
+     blood.html mount; this page is the reference integration. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GUX-01 combined prototype — atlas × person</title>
+<link rel="stylesheet" href="../../surfaces/blood-atlas.css">
+<link rel="stylesheet" href="../../surfaces/person-panel.css">
+<style>
+  :root { --bg:#0d1410; --ink:#e6e1d5; --dim:#8a8578; --faint:#5f6f61; --line:#2a2f36; --cyan:#39d2c0; --gold:#d4a94e; }
+  body { margin: 0; background: radial-gradient(circle at 50% -10%, #12251b 0%, #0d1410 60%); color: var(--ink);
+    font: 13px/1.55 'IBM Plex Mono', ui-monospace, monospace; }
+  header { padding: 10px 14px; border-bottom: 1px solid var(--line); }
+  #atlas-ctx { font-size: 11px; color: var(--dim); }
+  #atlas-ctx b { color: var(--ink); font-weight: 500; }
+  .bar { display: flex; flex-wrap: wrap; gap: 8px; padding: 10px 14px; align-items: center; }
+  button { background: #1b2027; color: var(--ink); border: 1px solid var(--line); border-radius: 8px;
+    padding: 7px 12px; cursor: pointer; font: inherit; }
+  button:hover { border-color: var(--cyan); }
+  #atlas-q { background: #1b2027; color: var(--ink); border: 1px solid var(--line); border-radius: 8px; padding: 7px 10px; flex: 1; max-width: 260px; }
+  #atlas-cards { display: flex; gap: 8px; flex-wrap: wrap; padding: 4px 14px 10px; }
+  #atlas-cards button { text-align: left; max-width: 250px; flex: 1 1 220px; padding: 9px 12px; line-height: 1.45; }
+  #atlas-route { display: none; padding: 0 14px 6px; overflow-x: auto; }
+  .atlas-hop { font-size: 11px; padding: 3px 8px; white-space: nowrap; }
+  .atlas-hop.ev-recorded { border-color: #3fa66a; background: #14231a; font-weight: 600; }
+  .atlas-hop.ev-colonial { border-color: #4d8fd1; background: #131c26; font-family: Georgia, serif; font-style: italic; }
+  .atlas-hop.ev-medieval { border-color: #c9a13b; background: transparent; border-style: dashed; opacity: .92; }
+  .atlas-hop.ev-saga { border-color: #8d6fc9; background: #191327; font-variant: small-caps; letter-spacing: .06em; }
+  .combo { display: grid; grid-template-columns: minmax(0, 1fr) 400px; gap: 14px; padding: 0 14px 30px; align-items: start; }
+  #panel { border: 1px solid var(--line); border-radius: 12px; padding: 6px 10px; max-height: 78vh; overflow: auto; }
+  @media (max-width: 900px) { .combo { grid-template-columns: 1fr; } }
+  .syncflag { color: var(--faint); font-size: 10px; }
+</style>
+</head>
+<body>
+<header>
+  <div id="atlas-ctx">loading the corpus…</div>
+</header>
+<div class="bar">
+  <button data-atlas-view="pedigree" aria-pressed="true">pedigree</button>
+  <button data-atlas-view="fractal">fractal</button>
+  <button data-atlas-view="tree">tree</button>
+  <button id="atlas-back" title="back (B)">← back</button>
+  <button id="atlas-home">home</button>
+  <button id="atlas-zin">＋</button>
+  <button id="atlas-zout">－</button>
+  <button id="atlas-zreset">reset view</button>
+  <input id="atlas-q" type="search" placeholder="search people…">
+</div>
+<div id="atlas-cards"></div>
+<div id="atlas-route"></div>
+<main class="combo">
+  <div>
+    <div id="atlas-mount"></div>
+    <div class="syncflag" id="sync-note">atlas and panel share one curiosity journey — teasers travel the atlas without moving your camera</div>
+  </div>
+  <div id="panel"></div>
+</main>
+<script type="module">
+  import { createAtlas, discoveries, bloodRoute, GHOST_TITLE, ATLAS_VERSION } from "../../surfaces/blood-atlas.mjs";
+  import { mountPersonPanel } from "../../surfaces/person-panel.mjs";
+  import { fetchArchive } from "../../surfaces/person-panel-corpus.mjs";
+
+  const $ = (id) => document.getElementById(id);
+  const qs = new URLSearchParams(location.search);
+  const ctxLine = $("atlas-ctx");
+  let atlas = null, panel = null;
+  let syncing = false; // cross-seat loop guard: one wiring echo per gesture
+  let panelAt = null;
+
+  function nameOf(iid) { const p = iid && atlas.person(iid); return p ? (p.name + (p.lifespan ? " · " + p.lifespan : "")) : "—"; }
+  function syncCtx(ctx, reason) {
+    ctxLine.innerHTML = "root: <b>" + nameOf(ctx.root) + "</b> · selection: <b>" + (ctx.selection ? nameOf(ctx.selection) : "—") +
+      "</b> · view: <b>" + ctx.view + "</b> · history: <b>" + atlas.core.historyDepth() +
+      "</b> · painted: <b>" + (document.querySelector(".atlas-world") || {}).getAttribute?.("data-painted") +
+      "</b> · <span class='syncflag'>last: " + reason + " · engine " + ATLAS_VERSION + "</span>";
+    for (const b of document.querySelectorAll("[data-atlas-view]"))
+      b.setAttribute("aria-pressed", String(b.dataset.atlasView === ctx.view));
+  }
+  function openPanelPerson(id) {
+    if (syncing || !panel || !id || panelAt === id) return;
+    syncing = true; panelAt = id; panel.openPerson(id); syncing = false;
+  }
+
+  const { archive } = await fetchArchive("../../assets/profile-archive/lineage/");
+  panel = mountPersonPanel($("panel"), archive, {
+    root: "p72d226cedf", // the public entrance — zGenePerson's standing root
+    onnavigate(s) {
+      // the panel moved (teaser, search, …): the atlas FOLLOWS as selection
+      // only — camera, root, and history untouched (the no-reset law)
+      if (syncing) return;
+      if (s.view === "person" && s.id && s.id !== panelAt) {
+        panelAt = s.id;
+        syncing = true; atlas.select(s.id); syncing = false;
+        $("sync-note").textContent = "panel → atlas: selection followed (root + camera held) · " + nameOf(s.id);
+      } else if (s.view === "relationship" && s.a && s.a !== panelAt) {
+        panelAt = s.a;
+        syncing = true; atlas.select(s.a); syncing = false;
+        $("sync-note").textContent = "panel → atlas: selection followed (root + camera held) · " + nameOf(s.a);
+      }
+    },
+    openPersonPage(id) { window.location.href = "../../assets/profile-archive/lineage/persons/" + encodeURIComponent(id) + ".html"; },
+  });
+
+  atlas = await createAtlas({
+    mount: $("atlas-mount"),
+    corpusUrl: "../../assets/profile-archive/lineage/remington-bloodline.json",
+    overlayUrl: "../../assets/profile-archive/lineage/attested-overlays.json",
+    initial: { root: qs.get("p") || undefined, view: ["pedigree", "fractal", "tree"].includes(qs.get("v")) ? qs.get("v") : "pedigree" },
+    onContext(ctx, reason) {
+      syncCtx(ctx, reason);
+      if (!syncing && (reason === "select" || reason === "back" || reason === "restore")) openPanelPerson(ctx.selection);
+      if (reason === "reroot") { panelAt = ctx.root; syncing = true; panel.setRoot(ctx.root); panel.openPerson(ctx.root); syncing = false; }
+    },
+  });
+  $("atlas-mount").setAttribute("data-atlas-ready", "1");
+  syncCtx(atlas.getContext(), "init");
+  window.__gux01 = { atlas, panel }; // journey hook — dev harness only
+
+  // discovery rail + route strip (the atlas's own curiosity surface)
+  const rail = $("atlas-cards"), strip = $("atlas-route");
+  function showRoute(from, to) {
+    const route = bloodRoute(atlas.model, from, to);
+    if (!route) { strip.style.display = "none"; return; }
+    strip.style.display = "block";
+    strip.setAttribute("data-route-len", String(route.length - 1));
+    strip.innerHTML = "<div style='color:#8a8578;font-size:11px;margin-bottom:4px'>follow the blood — " + (route.length - 1) +
+      " hops · <span style='color:#5f6f61'>shortest published parent-edge path · one available route, not the only one</span></div>" +
+      route.map((iid, i) => {
+        const p = atlas.person(iid);
+        return "<button class='atlas-hop ev-" + ((p.evidence || {}).class || "none") + "' data-hop=\"" + iid +
+          "\" title=\"" + (p.name || "") + "\">" + (i === 0 ? "◎ " : "") + (p.name || "Living") + "</button>";
+      }).join("<span style='color:#4d8fd1'> → </span>");
+    for (const b of strip.querySelectorAll("[data-hop]")) b.addEventListener("click", () => atlas.select(b.dataset.hop));
+    strip.scrollLeft = 0;
+  }
+  for (const c of discoveries(atlas.model)) {
+    const b = document.createElement("button");
+    b.dataset.card = c.kind;
+    b.innerHTML = "<div style='color:#e6e1d5;font-size:13px'><b>" + c.title + "</b></div>" +
+      "<div style='color:#8a8578;font-size:11px'>" + (c.hook || "") + "</div>" +
+      (c.count != null ? "<div style='color:#4d8fd1;font-size:11px'>▾ " + c.count + " — " + (c.depthNote || "counted across the whole published archive") + "</div>" : "") +
+      "<div style='color:#5f6f61;font-size:10px;margin-top:3px'>" + c.disclosure + "</div>";
+    b.addEventListener("click", () => {
+      const a = c.action;
+      if (a.type === "show-route") { showRoute(a.from, a.to); atlas.reroot(a.to); atlas.select(a.to); }
+      else if (a.type === "enter-branch" || a.type === "reroot") { atlas.reroot(a.iid); atlas.select(a.iid); }
+      else if (a.type === "select") atlas.select(a.iid);
+      $("sync-note").textContent = "discovery card → atlas travel + panel opens alongside · " + c.title;
+    });
+    rail.appendChild(b);
+  }
+  rail.setAttribute("data-cards", String(rail.children.length));
+
+  for (const b of document.querySelectorAll("[data-atlas-view]")) b.addEventListener("click", () => atlas.setView(b.dataset.atlasView));
+  $("atlas-back").addEventListener("click", () => atlas.back());
+  $("atlas-home").addEventListener("click", () => atlas.home());
+  $("atlas-zin").addEventListener("click", () => atlas.zoomBy(1.3));
+  $("atlas-zout").addEventListener("click", () => atlas.zoomBy(1 / 1.3));
+  $("atlas-zreset").addEventListener("click", () => atlas.resetView());
+  $("atlas-q").addEventListener("input", (e) => {
+    const hits = e.target.value.trim() ? atlas.search(e.target.value.trim(), 10) : [];
+    rail.querySelectorAll("[data-searchhit]").forEach((n) => n.remove());
+    for (const h of hits.slice(0, 6)) {
+      const b = document.createElement("button");
+      b.dataset.searchhit = "1";
+      b.innerHTML = "<div style='font-size:12px'>" + h.name + (h.lifespan ? " · " + h.lifespan : "") + "</div>";
+      b.addEventListener("click", () => atlas.select(h.iid));
+      rail.appendChild(b);
+    }
+  });
+</script>
+</body>
+</html>
