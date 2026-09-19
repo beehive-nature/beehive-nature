@@ -26,7 +26,7 @@ class Sink:
     async def handle_RCPT(self, server, session, envelope, address, rcpt_options):
         if address.lower() not in KNOWN:
             return "550 no such agent here"          # unknown addresses refused, not dropped silently
-        if not envelope.rcpt_tos:
+        if address not in envelope.rcpt_tos:         # multi-RCPT fix (was: `if not envelope.rcpt_tos` — only the FIRST recipient was ever recorded; every later RCPT TO got a 250 but no delivery)
             envelope.rcpt_tos.append(address)
         return "250 OK"
 
