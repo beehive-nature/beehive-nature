@@ -565,12 +565,19 @@ test("discoveries: five derived kinds, no hardcoded names, on the real corpus", 
   // correction cards: persons whose records carry the founder attestation
   const corrections = cards.filter((c) => c.kind === "correction");
   assert.equal(corrections.length, 4, "the four corrected grandparents");
-  assert.ok(corrections.every((c) => /see what changed|corrected/i.test(c.subtitle)));
+  assert.ok(corrections.every((c) => /see what changed/i.test(c.hook)), "human hook carries the invitation");
   // frontier card: corpus-wide ghost refs + the nearest edge generation
   const frontier = cards.find((c) => c.kind === "frontier");
   assert.equal(frontier.count, model.ghostTotal);
   assert.ok(frontier.corpusWide === true, "frontier count is corpus-wide, not depth-bounded — basis stated");
   assert.match(frontier.title, /beyond the published archive/);
+  // TWO-LAYER GRAMMAR: human surface clean of engineering language; disclosure carries it
+  const ENG = /test-locked|derived from the corpus|parent-edge|BFS|ahnentafel|closure|derivation|canonical person id/i;
+  for (const c of cards) {
+    assert.ok(!ENG.test(c.title + " " + (c.hook || "")), "human layer stays human: " + c.title);
+    assert.ok(c.disclosure && c.disclosure.length > 30, "every card carries its evidence disclosure: " + c.id);
+  }
+  for (const c of routeCards) assert.match(c.disclosure, /shortest published parent-edge route/, "route-meta law: the route says what graph it traversed and its status");
 });
 
 test("UI LAW enforced: a counted card without depthNote or corpusWide is REFUSED", () => {
@@ -584,4 +591,50 @@ test("discoveries are deterministic and bounded", () => {
   const b = discoveries(model).map((c) => c.id).join(",");
   assert.equal(a, b);
   assert.ok(discoveries(model).length <= 24, "bounded card set");
+});
+
+// ─── route-alternates law (founder order: computed, never universal) ───────
+import { routeAlternates, routeAlternatesPhrase } from "../../surfaces/blood-atlas.mjs";
+
+test("routeAlternates DP: equal-shortest and one-longer counts on a synthetic web", () => {
+  // g0 has f1+m1; both reach ff2 (two equal shortest); m1 also reaches ff2 via mx (one hop longer)
+  const persons = {
+    g0: { name: "G", gender: "MALE", living: false, evidence: { class: "recorded" } },
+    f1: { name: "F", gender: "MALE", living: false, evidence: { class: "recorded" } },
+    m1: { name: "M", gender: "FEMALE", living: false, evidence: { class: "recorded" } },
+    mx: { name: "X", gender: "FEMALE", living: false, evidence: { class: "recorded" } },
+    ff2: { name: "R", gender: "MALE", living: false, evidence: { class: "recorded" } },
+  };
+  const edges = { g0: ["f1", "m1"], f1: ["ff2"], m1: ["ff2", "mx"], mx: ["ff2"] };
+  const model = ingest({ schema: "f", root: "g0", persons, edges, couples: {}, spine: [], meta: {} });
+  const a = routeAlternates(model, "g0", "ff2");
+  assert.deepEqual(a, { shortestLen: 2, shortestCount: 2, plusOneCount: 1 });
+});
+
+test("routeAlternatesPhrase: three qualified states, computed objects only", () => {
+  assert.match(routeAlternatesPhrase({ shortestLen: 39, shortestCount: 3, plusOneCount: 0 }), /2 more equal-length routes at 39 hops computed/);
+  assert.match(routeAlternatesPhrase({ shortestLen: 5, shortestCount: 1, plusOneCount: 7 }), /7 routes one hop longer \(6\) also computed/);
+  assert.match(routeAlternatesPhrase({ shortestLen: 5, shortestCount: 1, plusOneCount: 0 }), /not assessed beyond one hop longer/);
+  assert.match(routeAlternatesPhrase({ shortestLen: 5, shortestCount: 1, plusOneCount: 0 }), /has not exhaustively enumerated/);
+  assert.throws(() => routeAlternatesPhrase(null), /route-meta law/, "uncomputed alternates claims are REFUSED");
+  assert.throws(() => routeAlternatesPhrase({}), /route-meta law/, "partial objects are REFUSED too");
+});
+
+test("route-meta law on the real corpus: alternates claims are per-route computed facts", () => {
+  const model = ingest(readJson(CORPUS_PATH));
+  assert.deepEqual(routeAlternates(model, "founder", "pf5d40516b8"), { shortestLen: 39, shortestCount: 2, plusOneCount: 2 },
+    "Ragnar: two equal-shortest 39-hop routes and two at 40 — computed");
+  const apr = model.persons && Object.keys(model.persons).length; // rockwood via refsIndex below
+  const corpus = readJson(CORPUS_PATH);
+  const rock = corpus.refsIndex["KWJ4-XBD"];
+  assert.deepEqual(routeAlternates(model, "founder", rock), { shortestLen: 5, shortestCount: 1, plusOneCount: 0 },
+    "Rockwood: one shortest, none one-longer — the honest not-assessed state");
+  const cards = discoveries(model);
+  for (const c of cards.filter((x) => x.kind === "route")) {
+    assert.match(c.disclosure, /shortest published parent-edge route · \d+ hops · /, "graph + status + count always derived: " + c.id);
+    assert.ok(/equal-length route|one hop longer|not assessed beyond one hop longer/.test(c.disclosure),
+      "the alternates claim is one of the three qualified states: " + c.id);
+    assert.doesNotMatch(c.disclosure, /near-equal alternates exist in the collapsed web/,
+      "the universal boilerplate is BANNED (founder evidence-law bug, fixed)");
+  }
 });

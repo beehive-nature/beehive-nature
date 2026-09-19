@@ -35,10 +35,15 @@
   .offview { color: #c9a13b; }
   #atlas-cards button:hover { border-color: #4d8fd1; }
   .atlas-hop { font-size: 11px; padding: 3px 8px; white-space: nowrap; }
-  .atlas-hop.ev-saga { border-color: #8d6fc9; color: #c9b6ec; }
-  .atlas-hop.ev-medieval { border-color: #c9a13b; }
-  .atlas-hop.ev-colonial { border-color: #4d8fd1; }
-  .atlas-hop.ev-recorded { border-color: #3fa66a; }
+  /* evidence CHARACTER changes with the archive — texture, not confidence:
+     recorded = dense + concrete; colonial = archival; medieval = provisional;
+     saga/ancient = mythic */
+  .atlas-hop.ev-recorded { border-color: #3fa66a; background: #14231a; font-weight: 600; }
+  .atlas-hop.ev-colonial { border-color: #4d8fd1; background: #131c26; font-family: Georgia, 'Times New Roman', serif; font-style: italic; }
+  .atlas-hop.ev-medieval { border-color: #c9a13b; background: transparent; border-style: dashed; opacity: 0.92; }
+  .atlas-hop.ev-saga { border-color: #8d6fc9; background: #191327; font-variant: small-caps; letter-spacing: 0.06em; }
+  .atlas-hop.ev-unrecorded, .atlas-hop.ev-living { border-style: dotted; color: #8a8578; }
+  .atlas-hop:hover { border-width: 2px; }
 </style>
 </head>
 <body>
@@ -65,7 +70,7 @@
   <div id="atlas-ghostlog"></div>
 </main>
 <script type="module">
-  import { createAtlas, discoveries, bloodRoute, GHOST_TITLE, ATLAS_VERSION } from "../../surfaces/blood-atlas.mjs";
+  import { createAtlas, discoveries, bloodRoute, routeAlternates, routeAlternatesPhrase, GHOST_TITLE, ATLAS_VERSION } from "../../surfaces/blood-atlas.mjs";
   const $ = (id) => document.getElementById(id);
   const qs = new URLSearchParams(location.search);
   const ctxLine = $("atlas-ctx"), panel = $("atlas-panel"), ghostLog = $("atlas-ghostlog");
@@ -119,6 +124,7 @@
   atlas = atlas0;
   $("atlas-mount").setAttribute("data-atlas-ready", "1");
   syncCtx(atlas.getContext(), "init"); // no event fires until first interaction — paint the cold context once
+  window.__atlas = atlas; // journey hook — dev harness only
 
   // discovery rail: derived first-load cards (founder order 2026-09-18) —
   // the corpus answers before the user ever touches zoom
@@ -128,8 +134,8 @@
     if (!route) { strip.style.display = "none"; return; }
     strip.style.display = "block";
     strip.setAttribute("data-route-len", String(route.length - 1));
-    strip.innerHTML = "<div style='color:#8a8578;font-size:11px;margin-bottom:4px'>blood route — " + (route.length - 1) +
-      " hops, every one a published person · click a hop to select</div>" +
+    strip.innerHTML = "<div style='color:#8a8578;font-size:11px;margin-bottom:4px'>follow the blood — " + (route.length - 1) +
+      " hops, every one a published person · <span style='color:#5f6f61'>" + routeAlternatesPhrase(routeAlternates(atlas.model, from, to)) + "</span></div>" +
       route.map((iid, i) => {
         const p = atlas.person(iid);
         return "<button class='atlas-hop ev-" + ((p.evidence || {}).class || "none") + "'" +
@@ -146,12 +152,13 @@
     b.dataset.card = c.kind;
     b.style.cssText = "text-align:left;max-width:250px;flex:1 1 220px;padding:9px 12px;line-height:1.45";
     b.innerHTML = "<div style='color:#e6e1d5;font-size:13px'><b>" + c.title + "</b></div>" +
-      "<div style='color:#8a8578;font-size:11px'>" + c.subtitle + "</div>" +
-      (c.count != null ? "<div style='color:#4d8fd1;font-size:11px'>▾ " + c.count + " — " + (c.depthNote || "counted across the whole published archive") + "</div>" : "");
+      "<div style='color:#8a8578;font-size:11px'>" + (c.hook || "") + "</div>" +
+      (c.count != null ? "<div style='color:#4d8fd1;font-size:11px'>▾ " + c.count + " — " + (c.depthNote || "counted across the whole published archive") + "</div>" : "") +
+      "<div style='color:#5f6f61;font-size:10px;margin-top:3px'>" + c.disclosure + "</div>";
     b.addEventListener("click", () => {
       const a = c.action;
-      if (a.type === "show-route") showRoute(a.from, a.to);
-      else if (a.type === "enter-branch" || a.type === "reroot") atlas.reroot(a.iid);
+      if (a.type === "show-route") { showRoute(a.from, a.to); atlas.reroot(a.to); atlas.select(a.to); }
+      else if (a.type === "enter-branch" || a.type === "reroot") { atlas.reroot(a.iid); atlas.select(a.iid); }
       else if (a.type === "select") atlas.select(a.iid);
     });
     rail.appendChild(b);

@@ -399,6 +399,65 @@ export function bloodRoute(model, from, to) {
   return route.reverse();
 }
 
+// ─── route-alternates law (founder order 2026-09-18) ───────────────────────
+// Alternate-route claims are COMPUTED, never universal boilerplate. This
+// counts, over the published parent-edge graph: the shortest length, how many
+// DISTINCT shortest routes exist, and how many routes exactly one hop longer
+// exist (a two-pass layered DP over the ancestor DAG — same-level reads only
+// after the level's shortest counts are complete). ~12 ms at depth 143.
+export function routeAlternates(model, from, to) {
+  if (!model.person(from) || !model.person(to)) return null;
+  const dist = { [from]: 0 };
+  const kids = new Map();
+  const q = [from];
+  while (q.length) {
+    const cur = q.shift();
+    for (const p of model.parentOf(cur)) {
+      if (!kids.has(p)) kids.set(p, []);
+      kids.get(p).push(cur);
+      if (dist[p] === undefined) { dist[p] = dist[cur] + 1; q.push(p); }
+    }
+  }
+  if (dist[to] === undefined) return null;
+  const L = dist[to];
+  const byLevel = new Map();
+  for (const v in dist) {
+    const l = dist[v];
+    if (l > L + 1) continue;
+    if (!byLevel.has(l)) byLevel.set(l, []);
+    byLevel.get(l).push(v);
+  }
+  const sc = {}, po = {};
+  sc[from] = 1; po[from] = 0;
+  for (let l = 1; l <= L + 1; l++) {
+    const lvl = byLevel.get(l) || [];
+    for (const v of lvl) sc[v] = 0;
+    for (const v of lvl) for (const ch of kids.get(v) || []) if (dist[ch] === l - 1) sc[v] += sc[ch] || 0;
+    for (const v of lvl) po[v] = 0;
+    for (const v of lvl) for (const ch of kids.get(v) || []) {
+      if (dist[ch] === l - 1) po[v] += po[ch] || 0;
+      else if (dist[ch] === l) po[v] += sc[ch] || 0;
+    }
+  }
+  return { shortestLen: L, shortestCount: sc[to] || 0, plusOneCount: po[to] || 0 };
+}
+
+// The phrase builder REFUSES uncomputed claims: it accepts only the derived
+// object and emits one of the three qualified states — proven alternates
+// (equal-length), proven alternates (one hop longer), or an honest
+// not-assessed statement. "Alternates exist because collapse exists somewhere"
+// is unconstructible.
+export function routeAlternatesPhrase(a) {
+  if (!a || typeof a.shortestLen !== "number" || typeof a.shortestCount !== "number" || typeof a.plusOneCount !== "number") {
+    throw new Error("atlas routeAlternatesPhrase: alternates claims require the computed routeAlternates object — never universal boilerplate (the route-meta law)");
+  }
+  const parts = [];
+  if (a.shortestCount > 1) parts.push((a.shortestCount - 1) + " more equal-length route" + (a.shortestCount - 1 === 1 ? "" : "s") + " at " + a.shortestLen + " hops computed");
+  if (a.plusOneCount > 0) parts.push(a.plusOneCount + " route" + (a.plusOneCount === 1 ? "" : "s") + " one hop longer (" + (a.shortestLen + 1) + ") also computed");
+  if (!parts.length) parts.push("alternate routes not assessed beyond one hop longer; other routes may exist — this view has not exhaustively enumerated them");
+  return parts.join(" · ");
+}
+
 function card(fields) {
   if (fields.count != null && !fields.depthNote && fields.corpusWide !== true) {
     throw new Error("atlas discoveries: a count without its depth is refused — attach depthNote or corpusWide (the UI law)");
@@ -445,7 +504,9 @@ export function discoveries(model, opts) {
   }
   const cards = [];
   // ROUTE cards — from pack registration (the estate's cited souls) + the
-  // deepest published line (pure derivation); every count carries its depth
+  // deepest published line (pure derivation); every count carries its depth.
+  // TWO-LAYER GRAMMAR: title+hook speak human; disclosure carries the
+  // engineering facts (graph, status, retrieval) — never mixed.
   const packTargets = Object.keys(model.packs)
     .filter((iid) => model.person(iid) && gen[iid] !== undefined)
     .sort((a, b) => gen[b] - gen[a]);
@@ -454,10 +515,10 @@ export function discoveries(model, opts) {
     cards.push(card({
       id: "route-" + iid, kind: "route", iid,
       title: gen[iid] + " generations to " + p.name,
-      subtitle: "show the route — test-locked shortest blood path over parent edges",
+      hook: "follow every ancestor between you.",
       count: gen[iid], depthNote: "within " + gen[iid] + " generations (shortest parent path)",
       action: { type: "show-route", from: root, to: iid },
-      basis: "derived from the corpus; " + (model.packs[iid] || "") + " carries the cited claims",
+      disclosure: "shortest published parent-edge route · " + gen[iid] + " hops · " + routeAlternatesPhrase(routeAlternates(model, root, iid)) + " · evidence pack " + model.packs[iid] + " · records retrieved " + (model.stats && model.stats.retrieved ? model.stats.retrieved : "with the corpus"),
     }));
   }
   let deepest = null;
@@ -465,11 +526,11 @@ export function discoveries(model, opts) {
   if (deepest) {
     cards.push(card({
       id: "route-deepest", kind: "route", iid: deepest,
-      title: "the deepest published line reaches " + gen[deepest] + " generations",
-      subtitle: model.person(deepest).name + " — the walked record's longest parent chain; show the route",
+      title: "the deepest published line runs " + gen[deepest] + " generations",
+      hook: "travel it and watch the evidence change character.",
       count: gen[deepest], depthNote: "within " + gen[deepest] + " generations (shortest parent path)",
       action: { type: "show-route", from: root, to: deepest },
-      basis: "pure corpus derivation (upward BFS)",
+      disclosure: "shortest published parent-edge route · " + gen[deepest] + " hops · " + routeAlternatesPhrase(routeAlternates(model, root, deepest)) + " · pure corpus derivation (upward BFS) · published, not verified — era≠support chips carry the honesty along the way",
     }));
   }
   // BRANCH cards — the named grandparents, bounded counts + family names
@@ -481,12 +542,12 @@ export function discoveries(model, opts) {
       const names = familyNameClusters(model, gp, o.branchDepth);
       cards.push(card({
         id: "branch-" + gp, kind: "branch", iid: gp,
-        title: p.name,
-        subtitle: "mapped branch — " + names.slice(0, 3).join(" · ") + " — enter the branch",
+        title: "the " + (String(p.name || "").split(" ").slice(-1)[0] || p.name) + " branch — " + p.name,
+        hook: "a whole mapped branch of the family: " + names.slice(0, 3).join(" · ") + ".",
         count: n, depthNote: "within " + o.branchDepth + " generations",
         familyNames: Object.freeze(names),
         action: { type: "enter-branch", iid: gp },
-        basis: "bounded ancestor closure of the corpus; totals beyond this depth are depth-dependent by construction (the collapsed-web law)",
+        disclosure: "bounded ancestor closure · " + n + " ancestors within " + o.branchDepth + " generations · totals beyond this depth are depth-dependent by construction (the collapsed-web law) · derived from the corpus",
       }));
     }
   }
@@ -496,11 +557,11 @@ export function discoveries(model, opts) {
     const m = mirrors[0];
     cards.push(card({
       id: "collapse-" + m.iid, kind: "collapse", iid: m.iid,
-      title: "pedigree collapse: " + m.name + " reaches you more than one way",
-      subtitle: "show the repeated ancestor — one identity, marked at every position",
+      title: m.name + " reaches you more than one way",
+      hook: "one person, more than one path — meet them once.",
       count: mirrors.length, depthNote: "within " + o.collapseDepth + " generations",
       action: { type: "select", iid: m.iid },
-      basis: "derived from the ahnentafel walk (mirrors are repeats of one canonical identity)",
+      disclosure: "pedigree collapse · " + mirrors.length + " repeated positions within " + o.collapseDepth + " generations · one canonical person id (" + m.iid + ") · ahnentafel walk over the corpus",
     }));
   }
   // CORRECTION cards — records carrying the founder attestation
@@ -510,9 +571,9 @@ export function discoveries(model, opts) {
     cards.push(card({
       id: "corrected-" + iid, kind: "correction", iid,
       title: p.name,
-      subtitle: "record corrected — see what changed",
+      hook: "the record said one thing — your family said another. See what changed.",
       action: { type: "select", iid },
-      basis: p.corrected.attested + " — " + p.corrected.note,
+      disclosure: "founder attestation on the walked record · " + p.corrected.attested + " · " + p.corrected.note,
     }));
   }
   // FRONTIER card — corpus-wide ghost refs + the nearest edge
@@ -522,10 +583,10 @@ export function discoveries(model, opts) {
     cards.push(card({
       id: "frontier", kind: "frontier", iid: nearest,
       title: "ancestry continues beyond the published archive",
-      subtitle: "the nearest edge sits at generation " + gen[nearest] + " — " + model.person(nearest).name + "'s parents are referenced but not yet published here. Coverage of the walk, not an empty family.",
+      hook: "walk to the edge — generation " + gen[nearest] + ", where the references keep going.",
       count: model.ghostTotal, corpusWide: true,
       action: { type: "reroot", iid: nearest },
-      basis: "frontier references counted across the whole published corpus (not depth-bounded)",
+      disclosure: model.ghostTotal + " frontier references counted across the whole published corpus (not depth-bounded) · nearest edge: " + model.person(nearest).name + ", generation " + gen[nearest] + " · coverage of the walk, never an empty family",
     }));
   }
   return Object.freeze(cards.slice(0, o.maxCards));
