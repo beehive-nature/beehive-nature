@@ -130,8 +130,8 @@
   .colorlaw .sw.biomass i { background:var(--biomass); }
 
   /* ── the source panel — what "listening" honestly means in this room ──
-     A room shell, not a hosted player: Play here exists only when an
-     authorized audio file is attached (see ROOM_SOURCE in the module);
+     A room shell, not a hosted player: Play here stays disabled - no authorized audio file
+     is attached and none is promised;
      external watching always rides a new tab; the empty state says the
      empty truth instead of implying playback. */
   .source-panel { margin-top:14px; }
@@ -151,11 +151,8 @@
   #play-here { padding:9px 14px; color:var(--dim); border:1px dashed var(--line-hi); border-radius:999px;
     background:transparent; font-size:11px; min-height:38px; }
   #play-here:disabled { cursor:not-allowed; }
-  #play-here.ready { color:#140B1E; background:var(--biomass); border-style:solid; border-color:var(--biomass); }
   .artist-note { margin-top:12px; color:var(--dimmer); font-size:10px; line-height:1.7; }
-  .artist-note b { color:var(--biomass); }
   body[data-reg="raver"] .source-panel { border-color:rgba(201,167,245,.35); }
-  body[data-reg="raver"] #play-here.ready { background:var(--biomass); color:#0A140B; box-shadow:0 6px 24px rgba(134,204,114,.3); }
   body[data-reg="cypherpunk"] .notrack, body[data-reg="cypherpunk"] .src, body[data-reg="cypherpunk"] .source-panel { border-radius:3px; }
 
 
@@ -300,11 +297,11 @@
     <h1>SKAISTS <span>mUsiC</span></h1>
 
     <!-- one lead per view — same room, three temperatures -->
-    <p class="lead" data-reg="bee" data-i18n="music.beeLead">A calm room. The music is already playing.</p>
+    <p class="lead" data-reg="bee" data-i18n="music.roomPreviewLead">A calm room. Nothing plays here yet - the ways to listen are just below.</p>
     <p class="lead" data-reg="raver" data-i18n="music.raverLead">The floor is yours.</p>
     <p class="lead" data-reg="cypherpunk" data-i18n="music.cypherLead">Inspect the manifest, the store read and the gate.</p>
 
-    <p class="intro" data-reg="bee" data-i18n="music.beeIntro">This room plays from a shared, verified manifest. Nothing to sign, nothing to pay — look around, then step in when it feels right.</p>
+    <p class="intro" data-reg="bee" data-i18n="music.beeIntro">This room reads from a shared, verified manifest - no track is attached, nothing plays here. Nothing to sign, nothing to pay — look around, then step in when it feels right.</p>
     <p class="intro" data-reg="raver" data-i18n="music.raverStory">Thirty years ago, first time on the floor, somebody said <b>come as you are — we accept you</b>. That sentence never left the room. <span class="lv">skaists</span> means beautiful; the LOVErnment writes its law as care — <b>mīlestība ir karalis</b>, love is king — and this floor keeps all of it.</p>
     <p class="intro" data-reg="cypherpunk" data-i18n="music.cypherIntro">Every claim on this page is read from the shared envelope or refused. Reads are bounded; no second raw transport is opened; admission stays disabled.</p>
 
@@ -430,7 +427,7 @@
         </div>
       </div>
     </div>
-    <p class="artist-note" data-i18n="music.artistNote">A work joins this room through the shared room manifest — today it carries encrypted references only. The day an authorized audio file rides it, <b>Play here</b> lights up.</p>
+    <p class="artist-note" data-i18n="music.artistNote">A work joins this room through the shared room manifest — today it carries encrypted references only. The day an authorized audio file rides it, this panel will say so here.</p>
   </section>
 
   <div class="colorlaw" aria-label="the BNR color law">
@@ -528,27 +525,11 @@ const eventlog = $('eventlog');
    field anyone may point at any URL); while it is null, Play here stays
    honestly disabled and the panel says the empty truth. External watching
    is always a named link in a new tab — never an embed, never a re-host. */
-const ROOM_SOURCE = {
-  audio: null,                       /* { title, url } — authorized file only */
-  external: [
-    { name:'JAMS.community', href:'https://jams.community/' },
-    { name:'3Speak', href:'https://3speak.tv/' },
-  ],
-};
-function renderSourcePanel() {
-  const button = $('play-here'), note = button.closest('.src').querySelector('small');
-  if (ROOM_SOURCE.audio) {
-    button.disabled = false; button.classList.add('ready');
-    button.textContent = T('music.playHere','Play here') + ' — ' + ROOM_SOURCE.audio.title;
-    note.textContent = T('music.playHereReady','authorized audio file · plays from this room');
-    $('source-state').textContent = T('music.stateAttached','source attached');
-    $('no-track').hidden = true;
-  } else {
-    button.disabled = true; button.classList.remove('ready');
-    /* the disabled label and note keep their keyed defaults — the honest state */
-  }
-}
-ROOM_SOURCE.audio = null;            /* explicit: no authorized audio today */
+/* the source panel states the truth and only the truth: no authorized
+     audio file is attached, Play here stays disabled with its reason, and
+     external watching rides named new-tab links. The day an authorized
+     file arrives, it arrives through the shared room manifest - never a
+     URL pointed from this page - and the panel says so here. */
 /* corpus-law helper: script-written labels stay translatable with a visible
    English fallback (same contract as plur.html's bvoice T()) */
 function T(key, fallback) {
@@ -643,7 +624,7 @@ document.addEventListener('blang', () => { syncMotion(); });
 function joinLabel() { $('join').textContent = state.joined ? T('music.leave','leave preview') : T('music.join','join this jam'); }
 $('join').addEventListener('click', () => { if(!state.manifest) return; state.joined=!state.joined; joinLabel(); $('room-foot').textContent=state.joined?'you are in the local room preview · no write was attempted':'nothing has been joined yet'; event(state.joined?'JOIN':'LEAVE',state.joined?'local participant joined; receiver handoff remains pending':'local participant left'); if (document.body.getAttribute('data-reg')==='cypherpunk' && !state.anim) draw(); });
 $('verify-store').addEventListener('click', verifyStore);
-syncMotion(); draw(); renderSourcePanel();
+syncMotion(); draw();
 loadManifest(manifestUrl).then(paint).catch(err => { $('status-dot').className='dot bad'; $('status').textContent='manifest unavailable'; $('status-note').textContent='· '+err.message; $('store-status').textContent='store adapter idle'; event('REFUSED','no room state changed'); });
 </script>
 <script src="tour.js?v=42"></script>

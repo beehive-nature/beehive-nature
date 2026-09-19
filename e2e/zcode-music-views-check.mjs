@@ -120,7 +120,7 @@ try {
   await page.goto(`${base}/surfaces/music.html`);
   await page.locator('#breg-bee').click();
   await page.locator('#blangsel').selectOption('lv');
-  await page.getByText('Mierīga istaba. Mūzika jau skan.', { exact: true }).waitFor();
+  await page.getByText('Mierīga istaba. Šeit vēl nekas skan - klausīšanās veidi nedaudz zemāk.', { exact: true }).waitFor();
   await page.locator('#breg-raver').click();
   await page.getByText('Deju grīda ir tava.', { exact: true }).waitFor();
   assert((await page.locator('.colorlaw').innerText()).includes('violets = cilvēki'), 'raver/lv: color law renders in Latvian');
