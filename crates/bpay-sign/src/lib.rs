@@ -10,6 +10,10 @@
 //! - [`rlp`] — the minimal 1559 RLP encoder used by the hot-key transport
 //!   (the device path needs no local RLP: the device/Connect side
 //!   serializes).
+//! - [`bridge`] — the antd-bridge read side + the Safe 7 ceremony
+//!   configuration (Observation B wiring): live authorization/job
+//!   records, never regenerated.
 
+pub mod bridge;
 pub mod rlp;
 pub mod suite_mcp;

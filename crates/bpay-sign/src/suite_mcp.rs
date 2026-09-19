@@ -272,8 +272,7 @@ pub fn get_address(mcp: &mut SuiteMcp, path: &str, show_on_trezor: bool) -> Resu
                 })?;
             // the device returns the EIP-55 checksummed form; the estate's
             // EthAddr carries lowercase-only identity
-            EthAddr::from_lower_hex(&addr.to_lowercase())
-                .map_err(|e| Error::field("address", e))
+            EthAddr::from_lower_hex(&addr.to_lowercase()).map_err(|e| Error::field("address", e))
         }
         ToolReply::ToolError(why) => Err(Error::Malformed(format!("get_address refused: {why}"))),
     }

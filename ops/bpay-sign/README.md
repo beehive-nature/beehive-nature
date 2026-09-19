@@ -187,3 +187,45 @@ Operational laws learned live:
    v forms are accepted and recorded.
 6. The MCP token once leaked through a ureq error string (the URL embeds
    it) — the adapter redacts by construction now; keep it that way.
+
+## OBSERVATION B — WIRED + GATED 2026-09-19 (board GO; ends at SIGNED)
+
+The service gained `BPAY_SIGN_MODE=safe7`: authorization + jobs are read
+LIVE from the REAL antd-bridge (`GET /v1/authorization`, `/v1/jobs` —
+never cached, never regenerated; a missing founder press stays missing
+and LAW 1 refuses, live-proven); the binding gate runs unchanged
+(zero watchpay bytes); `/v1/sign/begin` signs through
+`SuiteMcpTransport` (the SAME injected boundary as the hot key;
+`broadcast:false` structural; a tool failure is a refusal the driver
+NEVER retries — an ambiguous timeout is an UNKNOWN outcome for
+inspection, never another signature prompt); the mode law refuses any
+chain but Arbitrum One 42161; the settle route refuses outright in this
+mode ("the Safe 7 ceremony ends at SIGNED"); nonce/fees compose from
+the READ-ONLY public Arbitrum One RPC (no send code exists); the payer
+is the Observation-A-proven device address (LAW 14 — any other
+recovered signer refuses at the wall).
+
+### Run it yourself (the founder's whole ceremony)
+
+```sh
+# 1. the service (safe7 mode; token from Suite's config, never printed)
+TOK=$(node -e "console.log(JSON.parse(require('fs').readFileSync(process.env.APPDATA+'/@trezor/suite-desktop/config.json','utf8')).mcpSettings.token)")
+BPAY_SIGN_MODE=safe7 BPAY_MCP_TOKEN="$TOK" BPAY_SIGN_STATE=./sign-state \
+  ./target/debug/bpay-sign.exe          # :8808
+
+# 2. the founder's press (bData): price current → Review → 🔑 I authorize this
+
+# 3. the driver — prints the reconfirm manifest, requires typing SIGN,
+#    then the two device approvals; ENDS AT SIGNED, settles nothing
+node ops/bpay-sign/safe7-ceremony.mjs
+```
+
+The driver REFUSES (exit 2, LAW 1) when no current authorization
+exists — that refusal was live-proven on the wiring day (the bridge
+held zero records; nothing was refreshed, regenerated, or repaired).
+
+### Live stack of the wiring session (dies with its session — restart above)
+
+bridge :8807 (founder-owned) · safe7 service :8808 · bData door
+http://127.0.0.1:8899/bdata.html · read-only RPC https://arb1.arbitrum.io/rpc
+(chain 42161 ✓, payer nonce 2, gas 20 Mwei at wiring time).

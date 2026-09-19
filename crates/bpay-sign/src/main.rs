@@ -38,25 +38,33 @@ use watchpay::types::{Atto, EthAddr, Hex32};
 use watchpay::wave::{
     bind_authorization, sign_wave_slot, WaveAuthorization, WaveAuthorizationEvent, WaveDestination,
     WaveFeeCeilings, WaveJobSummary, WaveLedger, WaveNetwork, WaveQuotePayment, WaveSignReceipt,
-    ARBITRUM_SEPOLIA_CHAIN_ID,
+    ARBITRUM_ONE_CHAIN_ID, ARBITRUM_SEPOLIA_CHAIN_ID,
 };
 
+use bpay_sign::bridge::{self, Safe7Cfg};
 use bpay_sign::rlp;
+use bpay_sign::suite_mcp::{SuiteMcp, SuiteMcpTransport};
 
 // ─────────────────────────── shared state ───────────────────────────
 
 struct AppState {
     /// TESTNET-DEMO mode: vends the synthetic bridge-shaped pair and
-    /// signs with the hot testnet key. The ONLY mode this binary ships.
+    /// signs with the hot testnet key.
     demo: bool,
-    /// The RPC the settle route may talk to (Arbitrum-Sepolia-shaped
-    /// ONLY — verified by chain id before anything is sent).
+    /// SAFE7 mode (Observation B): reads the REAL antd-bridge live and
+    /// signs through the Suite-MCP Safe 7 transport — ends at SIGNED,
+    /// structurally never settles.
+    safe7: Option<Safe7Cfg>,
+    /// The RPC the compose path reads (nonce/gas) and the settle route
+    /// may talk to (Arbitrum-Sepolia-shaped ONLY — verified by chain id
+    /// before anything is sent; in safe7 mode the RPC is the READ-ONLY
+    /// Arbitrum One public endpoint).
     rpc_url: Option<String>,
     state_dir: PathBuf,
-    /// The hot TESTNET throwaway key (demo mode only). Never a mainnet
-    /// key; generated on first run and printed ONCE for the founder's
-    /// faucet drip.
-    hot_key: SigningKey,
+    /// The hot TESTNET throwaway key (demo mode only; None in safe7
+    /// mode). Never a mainnet key; generated on first run and printed
+    /// ONCE for the founder's faucet drip.
+    hot_key: Option<SigningKey>,
     /// demo-mode synthetic records (server-lifetime, module scope)
     demo_auth: RwLock<Vec<WaveAuthorization>>,
     demo_jobs: RwLock<Vec<WaveJobSummary>>,
@@ -80,6 +88,50 @@ fn now_secs() -> u64 {
         .duration_since(std::time::UNIX_EPOCH)
         .unwrap_or_default()
         .as_secs()
+}
+
+// ─────────────── binding inputs: demo memory vs LIVE bridge ───────────────
+
+/// The payer this service binds and the wall demands. Demo: the hot
+/// testnet key's address. Safe7: the Observation-A-proven device
+/// address (LAW 14 — a device signing from any other key is refused at
+/// the wall).
+fn payer_of(state: &AppState) -> EthAddr {
+    match &state.safe7 {
+        Some(cfg) => cfg.payer,
+        None => hot_payer(
+            state
+                .hot_key
+                .as_ref()
+                .expect("demo mode always has the hot key"),
+        ),
+    }
+}
+
+/// Authorization + job records for the binding gate. Demo: the
+/// synthetic in-memory pair. Safe7: the LIVE antd-bridge — read fresh
+/// on every request, never cached, never regenerated (a missing
+/// founder press stays missing and LAW 1 refuses at the organ).
+fn binding_inputs(
+    state: &AppState,
+) -> Result<(Vec<WaveAuthorization>, Vec<WaveJobSummary>, WaveNetwork), (u16, &'static str, String)>
+{
+    if let Some(cfg) = &state.safe7 {
+        let auths = bridge::http_get_json(&format!("{}/v1/authorization", cfg.bridge), 15)
+            .and_then(|v| bridge::parse_bridge_authorizations(&v))
+            .map_err(|e| (502u16, "bridge", e.to_string()))?;
+        let jobs = bridge::http_get_json(&format!("{}/v1/jobs", cfg.bridge), 15)
+            .and_then(|v| bridge::parse_bridge_jobs(&v))
+            .map_err(|e| (502u16, "bridge", e.to_string()))?;
+        let net = WaveNetwork::arbitrum_one().map_err(|e| (500u16, "network", e.to_string()))?;
+        Ok((auths, jobs, net))
+    } else {
+        Ok((
+            state.demo_auth.read().unwrap().clone(),
+            state.demo_jobs.read().unwrap().clone(),
+            demo_network().map_err(|e| (500u16, "network", e.to_string()))?,
+        ))
+    }
 }
 
 // ─────────────────── the hot TESTNET transport (demo) ───────────────────
@@ -240,32 +292,36 @@ async fn sign_state(
         Ok(p) => p,
         Err(e) => return refusal(400, "payments", e.to_string()),
     };
-    let auth = state
-        .demo_auth
-        .read()
-        .unwrap()
+    let (auths, jobs, net) = match binding_inputs(&state) {
+        Ok(v) => v,
+        Err((code, law, why)) => return refusal(code, law, why),
+    };
+    let auth = auths
         .iter()
         .find(|a| a.authorization_id == body.authorization_id)
         .cloned();
-    let jobs: Vec<WaveJobSummary> = state.demo_jobs.read().unwrap().clone();
-    let payer = hot_payer(&state.hot_key);
-    let binding = match bind_authorization(
-        auth.as_ref(),
-        &jobs,
-        &payments,
-        payer,
-        &match demo_network() {
-            Ok(n) => n,
-            Err(e) => return refusal(500, "network", e.to_string()),
-        },
-    ) {
+    let payer = payer_of(&state);
+    let binding = match bind_authorization(auth.as_ref(), &jobs, &payments, payer, &net) {
         Ok(b) => b,
         Err(e) => return refusal(409, "binding-gate", e.to_string()),
     };
-    (
-        axum::http::StatusCode::OK,
-        Json(serde_json::json!({ "ok": true, "review": {
-            "mode": if binding.replica() { "TESTNET-REPLICA-DEMO" } else if binding.testnet() { "TESTNET-DEMO" } else { "MAINNET" },
+    // THE MODE LAW: the Safe 7 ceremony signs the REAL bPay shape only
+    // (Arbitrum One 42161, pinned contracts) — a misconfigured mode can
+    // never aim the device at a testnet/replica shape.
+    if state.safe7.is_some() && binding.network().chain_id != ARBITRUM_ONE_CHAIN_ID {
+        return refusal(
+            403,
+            "safe7-mode",
+            format!(
+                "safe7 mode refuses chain {} — the ceremony signs the real Arbitrum One shape \
+                 ({ARBITRUM_ONE_CHAIN_ID}) only",
+                binding.network().chain_id
+            ),
+        );
+    }
+    let mut review = serde_json::json!({
+        "ok": true, "review": {
+            "mode": if state.safe7.is_some() { "SAFE7-REAL" } else if binding.replica() { "TESTNET-REPLICA-DEMO" } else if binding.testnet() { "TESTNET-DEMO" } else { "MAINNET" },
             "testnet": binding.testnet(),
             "replica": binding.replica(),
             "authorization_id": binding.authorization_id(),
@@ -280,13 +336,32 @@ async fn sign_state(
             "token": binding.network().token.to_lower_hex(),
             "vault": binding.network().vault.to_lower_hex(),
             "chain_id": binding.network().chain_id,
-            "payer": hot_payer(&state.hot_key).to_lower_hex(),
-            "path": "m/44'/60'/0'/0/0 (hot TESTNET key in demo mode — the Safe 7 arrives with the hardware transport)",
+            "payer": payer.to_lower_hex(),
+            "path": if state.safe7.is_some() {
+                "m/44'/60'/0'/0/0 (Safe 7 — Observation-A-proven path)"
+            } else {
+                "m/44'/60'/0'/0/0 (hot TESTNET key in demo mode — the Safe 7 arrives with the hardware transport)"
+            },
             "transaction_count": binding.transaction_count(),
             "plan_hash": binding.plan_hash().to_lower_hex(),
-        }})),
-    )
-        .into_response()
+        }
+    });
+    if state.safe7.is_some() {
+        // the pre-device RECONFIRM manifest (board order 2026-09-19:
+        // displayed before any device prompt)
+        let n = binding.payments().len();
+        review["review"]["transport"] = serde_json::json!({
+            "kind": "safe7-suite-mcp",
+            "device": "Trezor Safe 7 · Suite 26.9.2 experimental MCP",
+            "broadcast": false,
+            "slot_manifest": [
+                format!("1/{} — ERC-20 approve(vault, EXACT ANT total) on the ANT token", binding.transaction_count()),
+                format!("2/{} — payForQuotes: ONE call carrying ALL {n} quote payments", binding.transaction_count()),
+            ],
+            "stop": "SIGNED · NOT BROADCAST · NOT PAID · NOT UPLOADED — no settlement exists in this mode",
+        });
+    }
+    (axum::http::StatusCode::OK, Json(review)).into_response()
 }
 
 fn hot_payer(key: &SigningKey) -> EthAddr {
@@ -306,23 +381,30 @@ async fn sign_begin(
         Ok(p) => p,
         Err(e) => return refusal(400, "payments", e.to_string()),
     };
-    let auth = state
-        .demo_auth
-        .read()
-        .unwrap()
+    let (auths, jobs, net) = match binding_inputs(&state) {
+        Ok(v) => v,
+        Err((code, law, why)) => return refusal(code, law, why),
+    };
+    let auth = auths
         .iter()
         .find(|a| a.authorization_id == body.authorization_id)
         .cloned();
-    let jobs: Vec<WaveJobSummary> = state.demo_jobs.read().unwrap().clone();
-    let payer = hot_payer(&state.hot_key);
-    let net = match demo_network() {
-        Ok(n) => n,
-        Err(e) => return refusal(500, "network", e.to_string()),
-    };
+    let payer = payer_of(&state);
     let binding = match bind_authorization(auth.as_ref(), &jobs, &payments, payer, &net) {
         Ok(b) => b,
         Err(e) => return refusal(409, "binding-gate", e.to_string()),
     };
+    if state.safe7.is_some() && binding.network().chain_id != ARBITRUM_ONE_CHAIN_ID {
+        return refusal(
+            403,
+            "safe7-mode",
+            format!(
+                "safe7 mode refuses chain {} — the ceremony signs the real Arbitrum One shape \
+                 ({ARBITRUM_ONE_CHAIN_ID}) only",
+                binding.network().chain_id
+            ),
+        );
+    }
     let ledger = match WaveLedger::open(&state.state_dir) {
         Ok(l) => l,
         Err(e) => return refusal(500, "ledger", e.to_string()),
@@ -340,16 +422,31 @@ async fn sign_begin(
         }
         Err(e) => return refusal(500, "ledger", e.to_string()),
     };
-    // NONCE + FEES at composition (chain-sourced when a ledger is
+    // NONCE + FEES at composition (chain-sourced when an RPC is
     // configured; lawful fixed ceilings otherwise)
     let (nonce0, fees) = match compose_fees(&state, &payer) {
         Ok(v) => v,
         Err(why) => return refusal(502, "rpc", why),
     };
     let mut clock = WallClock;
-    let mut transport = HotTestnetTransport {
-        key: state.hot_key.clone(),
-        chain_id: ARBITRUM_SEPOLIA_CHAIN_ID,
+    // THE TRANSPORT BOUNDARY: the SAME injected trait both modes ride.
+    // Demo: the hot testnet key. Safe7: the Suite-MCP Safe 7 transport
+    // (broadcast:false structural; a tool failure is a refusal the
+    // driver NEVER retries — an ambiguous timeout stays an unknown
+    // outcome for inspection, never another signature prompt).
+    let mut transport: Box<dyn ConnectTransport> = match &state.safe7 {
+        Some(cfg) => Box::new(SuiteMcpTransport::new(SuiteMcp::new(
+            &cfg.mcp_url,
+            &cfg.mcp_token,
+            cfg.mcp_timeout_secs,
+        ))),
+        None => Box::new(HotTestnetTransport {
+            key: state
+                .hot_key
+                .clone()
+                .expect("demo mode always has the hot key"),
+            chain_id: ARBITRUM_SEPOLIA_CHAIN_ID,
+        }),
     };
     let slots = [
         (WaveDestination::Approve, nonce0),
@@ -378,7 +475,7 @@ async fn sign_begin(
             },
             &path,
             &mut clock,
-            &mut transport,
+            &mut *transport,
         ) {
             Ok(_) => {}
             Err(watchpay::connect::SignAttemptError::AfterDispatch(e))
@@ -423,7 +520,7 @@ fn compose_fees(
     payer: &EthAddr,
 ) -> std::result::Result<(u64, WaveFeeCeilings), String> {
     let rpc = state.rpc_url.as_ref().ok_or(
-        "no ledger RPC configured — set BPAY_SIGN_RPC to the Arbitrum-Sepolia-shaped ledger",
+        "no RPC configured — set BPAY_SIGN_RPC (demo: the Arbitrum-Sepolia-shaped ledger; safe7: the read-only Arbitrum One public RPC)",
     )?;
     let nonce = rpc_u64(
         rpc,
@@ -456,6 +553,18 @@ async fn testnet_settle(
     axum::extract::State(state): axum::extract::State<Shared>,
     Json(body): Json<SettleBody>,
 ) -> Response {
+    // THE SAFE7 MODE LAW, stated first: the Safe 7 ceremony ENDS at
+    // SIGNED. No settlement exists in this mode, for any receipt —
+    // belt-and-braces over the structural testnet-only checks below.
+    if state.safe7.is_some() {
+        return refusal(
+            403,
+            "safe7-sign-only",
+            "the Safe 7 ceremony ends at SIGNED · NOT BROADCAST · NOT PAID · NOT UPLOADED — \
+             settlement does not exist in this mode"
+                .into(),
+        );
+    }
     let ledger = match WaveLedger::open(&state.state_dir) {
         Ok(l) => l,
         Err(e) => return refusal(500, "ledger", e.to_string()),
@@ -754,58 +863,131 @@ async fn sign_receipt_get(
 
 fn main() {
     let mode = std::env::var("BPAY_SIGN_MODE").unwrap_or_default();
-    if mode != "testnet-demo" {
-        eprintln!(
-            "bpay-sign: refusing to start without BPAY_SIGN_MODE=testnet-demo — this binary \
-             ships the TESTNET proof only (founder order 2026-09-19); a mainnet signing \
-             service is a separate reviewed slice"
-        );
-        std::process::exit(2);
-    }
-    let rpc_url = std::env::var("BPAY_SIGN_RPC").ok();
     let state_dir = PathBuf::from(
         std::env::var("BPAY_SIGN_STATE").unwrap_or_else(|_| "bpay-sign-state".into()),
     );
     std::fs::create_dir_all(&state_dir).expect("state dir");
-    // hot testnet key: env (persisted by the runner) or fresh throwaway
-    let hot_key = match std::env::var("BPAY_SIGN_TESTNET_KEY") {
-        Ok(hexkey) => {
-            let mut b = [0u8; 32];
-            hex::decode_to_slice(hexkey.trim_start_matches("0x"), &mut b).expect("key hex");
-            SigningKey::from_slice(&b).expect("key")
-        }
-        Err(_) => {
-            let (_, hexkey) = new_key();
-            println!("BPAY_SIGN_TESTNET_KEY={hexkey}");
-            println!("bpay-sign: fresh TESTNET throwaway key printed above — rerun with it set to persist (never written to disk here)");
-            std::process::exit(0);
-        }
-    };
-    let state = Arc::new(AppState {
-        demo: true,
-        rpc_url,
-        state_dir,
-        hot_key,
-        demo_auth: RwLock::new(Vec::new()),
-        demo_jobs: RwLock::new(Vec::new()),
-        io_lock: Arc::new(std::sync::Mutex::new(())),
-    });
-    let app = Router::new()
-        .route("/v1/sign/state", post(sign_state))
-        .route("/v1/sign/begin", post(sign_begin))
-        .route("/v1/sign/receipt", get(sign_receipt_get))
-        .route("/v1/testnet/settle", post(testnet_settle))
-        .route("/v1/upload/prepare", post(demo_prepare))
-        .route(
-            "/v1/authorization",
-            post(demo_authorize).get(demo_auth_list),
-        )
-        .with_state(state)
-        .layer(tower_http::cors::CorsLayer::permissive());
     let port: u16 = std::env::var("BPAY_SIGN_PORT")
         .ok()
         .and_then(|p| p.parse().ok())
         .unwrap_or(8808);
+    let (state, banner) = match mode.as_str() {
+        // ── SAFE7 (Observation B, board GO 2026-09-19): the REAL bridge
+        //    records + the REAL Safe 7 through Suite MCP; ends at
+        //    SIGNED — settlement is structurally refused in this mode.
+        "safe7" => {
+            let mcp_token = match std::env::var("BPAY_MCP_TOKEN") {
+                Ok(t) if !t.trim().is_empty() => t.trim().to_string(),
+                _ => {
+                    eprintln!(
+                        "bpay-sign: BPAY_SIGN_MODE=safe7 requires BPAY_MCP_TOKEN (Suite \
+                         config.json → mcpSettings.token); it is never printed or committed"
+                    );
+                    std::process::exit(2);
+                }
+            };
+            let cfg = Safe7Cfg {
+                bridge: std::env::var("BPAY_SIGN_BRIDGE")
+                    .unwrap_or_else(|_| "http://127.0.0.1:8807".into()),
+                rpc: std::env::var("BPAY_SIGN_RPC")
+                    .unwrap_or_else(|_| "https://arb1.arbitrum.io/rpc".into()),
+                mcp_url: std::env::var("BPAY_MCP_URL")
+                    .unwrap_or_else(|_| bpay_sign::suite_mcp::DEFAULT_MCP_URL.into()),
+                mcp_token,
+                mcp_timeout_secs: std::env::var("BPAY_MCP_TIMEOUT_SECS")
+                    .ok()
+                    .and_then(|v| v.parse().ok())
+                    .unwrap_or(300),
+                // the Observation-A-proven device account (LAW 14 — the
+                // wall refuses any other recovered signer) // PUBLIC-CONSTANT: Safe 7 m/44'/60'/0'/0/0 address, receipted
+                payer: EthAddr::from_lower_hex("0x8fd7252a29fb759755e30a15e966932eaad91b75")
+                    .expect("proven address constant"),
+            };
+            let rpc_print = cfg.rpc.clone();
+            let bridge_print = cfg.bridge.clone();
+            (
+                Arc::new(AppState {
+                    demo: false,
+                    safe7: Some(cfg),
+                    rpc_url: Some(rpc_print.clone()),
+                    state_dir,
+                    hot_key: None,
+                    demo_auth: RwLock::new(Vec::new()),
+                    demo_jobs: RwLock::new(Vec::new()),
+                    io_lock: Arc::new(std::sync::Mutex::new(())),
+                }),
+                format!(
+                    "bpay-sign (SAFE7 — REAL bridge {bridge_print} · Suite-MCP transport · \
+                     read-only RPC {rpc_print} · ceremony ends at SIGNED, settle refused) \
+                     listening on http://127.0.0.1:{port}"
+                ),
+            )
+        }
+        // ── TESTNET-DEMO (founder order 2026-09-19): unchanged law.
+        "testnet-demo" => {
+            let rpc_url = std::env::var("BPAY_SIGN_RPC").ok();
+            // hot testnet key: env (persisted by the runner) or fresh throwaway
+            let hot_key = match std::env::var("BPAY_SIGN_TESTNET_KEY") {
+                Ok(hexkey) => {
+                    let mut b = [0u8; 32];
+                    hex::decode_to_slice(hexkey.trim_start_matches("0x"), &mut b).expect("key hex");
+                    SigningKey::from_slice(&b).expect("key")
+                }
+                Err(_) => {
+                    let (_, hexkey) = new_key();
+                    println!("BPAY_SIGN_TESTNET_KEY={hexkey}");
+                    println!("bpay-sign: fresh TESTNET throwaway key printed above — rerun with it set to persist (never written to disk here)");
+                    std::process::exit(0);
+                }
+            };
+            let banner = format!(
+                "bpay-sign (TESTNET-DEMO) listening on http://127.0.0.1:{port}{}",
+                match std::env::var("BPAY_SIGN_RPC") {
+                    Ok(rpc) =>
+                        format!(" — ledger RPC {rpc} (settlement: TESTNET only, chain-checked)"),
+                    Err(_) =>
+                        " — NO ledger RPC: begin refuses at fee composition; settle refuses".into(),
+                }
+            );
+            (
+                Arc::new(AppState {
+                    demo: true,
+                    safe7: None,
+                    rpc_url,
+                    state_dir,
+                    hot_key: Some(hot_key),
+                    demo_auth: RwLock::new(Vec::new()),
+                    demo_jobs: RwLock::new(Vec::new()),
+                    io_lock: Arc::new(std::sync::Mutex::new(())),
+                }),
+                banner,
+            )
+        }
+        other => {
+            eprintln!(
+                "bpay-sign: refusing to start with BPAY_SIGN_MODE={other:?} — lawful modes are \
+                 'testnet-demo' (the settled pipeline proof) and 'safe7' (the Observation-B \
+                 Safe 7 signing ceremony, ends at SIGNED; founder/board GO 2026-09-19)"
+            );
+            std::process::exit(2);
+        }
+    };
+    // the DEMO vending endpoints exist ONLY in demo mode — safe7 reads
+    // the REAL bridge and never serves synthetic records.
+    let mut app = Router::new()
+        .route("/v1/sign/state", post(sign_state))
+        .route("/v1/sign/begin", post(sign_begin))
+        .route("/v1/sign/receipt", get(sign_receipt_get))
+        .route("/v1/testnet/settle", post(testnet_settle));
+    if state.demo {
+        app = app.route("/v1/upload/prepare", post(demo_prepare)).route(
+            "/v1/authorization",
+            post(demo_authorize).get(demo_auth_list),
+        );
+    }
+    let app = app
+        .with_state(state)
+        .layer(tower_http::cors::CorsLayer::permissive());
     let rt = tokio::runtime::Builder::new_current_thread()
         .enable_all()
         .build()
@@ -814,12 +996,7 @@ fn main() {
         let listener = tokio::net::TcpListener::bind(format!("127.0.0.1:{port}"))
             .await
             .expect("bind");
-        println!("bpay-sign (TESTNET-DEMO) listening on http://127.0.0.1:{port}");
-        if let Some(rpc) = std::env::var("BPAY_SIGN_RPC").ok() {
-            println!("bpay-sign: ledger RPC {rpc} (settlement: TESTNET only, chain-checked)");
-        } else {
-            println!("bpay-sign: NO ledger RPC — begin refuses at fee composition; settle refuses");
-        }
+        println!("{banner}");
         axum::serve(listener, app).await.unwrap();
     });
 }
