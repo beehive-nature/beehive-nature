@@ -106,6 +106,35 @@ pathspec; their files remain in the worktree untouched). No backend
 semantics, no crate bytes, no transport code were read beyond
 identification or modified by this lane.
 
+## BOARD RULING ON THIS LANE (2026-09-19, on af02247b — banked verbatim in substance)
+
+1. **`af02247b` stands as-is. No rewrite.** The pathspec commit was the
+   right containment; verified by the board: zero `crates/watchpay` /
+   `crates/bpay-sign` bytes in the commit.
+2. **One writer per worktree** (the safer extension of one writer per file
+   family): backend and UX must not share a worktree while coding
+   concurrently. The concurrent-worktree incident is **a coordination
+   hazard discovered and contained before contamination — not a code
+   defect.**
+3. **Board state:** bPay UX lane **GREEN / PARKED awaiting hardware
+   contract**; the Backend Suite-MCP lane **continues, in its own
+   worktree**; **no further UX implementation until actual Observation A
+   data arrives** (the real Safe 7 receipt).
+4. **The SIMULATED-rehearsal wording in Observation A flips only when the
+   Safe 7 receipt actually exists** — the preflight panel's honesty label
+   is load-bearing and must not be softened before then.
+5. **The move is STAGED, not executed**: at banking time the backend
+   writer was still LIVE in `wt-zcode-bpay-e` (`suite_mcp.rs` mtime
+   04:02:53, ~100s before this check — a second write after the first
+   sighting at 03:55:56). Moving files under a live writer would recreate
+   the hazard inverted, so the fix ships as
+   **`ops/bpay-sign/stage-backend-worktree.sh`** — a one-paste run with a
+   LIVE-WRITER GUARD (refuses if any backend file changed in the last
+   10 minutes), cut from the parked base `8a58e31a` into
+   `wt-zcode-bpay-mcp` (branch `zcode/bpay-suite-mcp-2026-09-19`), work
+   left uncommitted for the backend seat to commit as its own lane.
+   Run it when the backend session closes.
+
 ## BOUNDARY NOT CROSSED
 
 No edits to `crates/watchpay`, `crates/bpay-sign` logic, or any Trezor

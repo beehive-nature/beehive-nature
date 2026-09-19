@@ -158,3 +158,15 @@ composer, wall, receipts, UI — is unchanged by construction.
   interesting; native THP is a replacement-transport project, never a
   prerequisite; mainnet stays boringly untouched — a feature, not
   unfinished business.
+
+## BOARD RULING 5 — one writer per worktree (2026-09-19, on af02247b)
+
+Backend and UX do not share a worktree while coding concurrently. The
+Suite-MCP transport seat's uncommitted work moves to its OWN worktree
+(`bash ops/bpay-sign/stage-backend-worktree.sh` — LIVE-WRITER GUARDED: it
+refuses to run while the backend files were touched in the last 10
+minutes; run it only after that session closes; the moved work stays
+UNCOMMITTED for the backend seat's own commit). UX lane state: **GREEN /
+PARKED awaiting hardware contract — no further UX implementation until
+actual Observation A data arrives.** The Observation A SIMULATED-rehearsal
+label flips to a real device receipt ONLY when the Safe 7 receipt exists.
