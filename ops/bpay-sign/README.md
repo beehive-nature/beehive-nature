@@ -84,3 +84,37 @@ the transport that actually worked gets recorded in the receipt.
 Receipts persist under the service state dir (`sign-receipts/*.json`,
 schema `bpay.sign-receipt/1`) — nonsecret fields only; never seed, keys,
 PINs, passphrases, or pairing secrets (the organ holds none).
+
+## THE TESTNET PROOF (2026-09-19, founder order: "just use ARB's testnet to prove it all first")
+
+**PROVEN END TO END**, twice through the CLI driver and once through the
+browser UI — prepare → authorize → binding gate (15 laws) → sign ×2
+(wall-verified) → **SETTLE (both transactions MINED, status 1)**:
+
+- Ledger: ganache at **chain 421614** (the Arbitrum Sepolia chain id)
+  carrying **the REAL Autonomi contract artifacts** (evmlib 0.9.1's own
+  `AutonomiNetworkToken` + `PaymentVaultV2` bytecode, deployed fresh —
+  token minted 2.5M ANT to the hot key). Labeled **TESTNET-REPLICA** in
+  every review/receipt (LAW 13's third shape: `replica: true`); public
+  Sepolia needs only a funded key (faucets are human-gated — a 30-second
+  founder drip moves the whole ceremony to the public testnet by deleting
+  `BPAY_SIGN_REPLICA_*` from the service env).
+- Confirmed on-chain: `payForQuotes` mined with **gasUsed 3,117,489 and
+  exactly 56 ERC-20 Transfer events** — every payment distributed by the
+  real vault code. The organ's selector `0xb6c2141b` matches the vendor
+  artifact's own `methodIdentifiers` table.
+- The organ receipt stays `broadcast:false paid:false uploaded:false` —
+  settlement is a SERVICE-layer, structurally-testnet-only act
+  (`/v1/testnet/settle` refuses any non-testnet receipt and any RPC not
+  answering chain 421614; no mainnet settlement code exists in the binary).
+
+### Run it yourself
+
+1. `node /c/Users/travi/bpay-testnet/deploy-replica.mjs` (ledger on :8545 must be up: `npx ganache --chain.chainId 421614 --port 8545 --wallet.accounts "<testnet key>,10000000eth"`)
+2. `bpay-sign` with `BPAY_SIGN_MODE=testnet-demo BPAY_SIGN_RPC=http://127.0.0.1:8545 BPAY_SIGN_REPLICA_TOKEN=<deployed token> BPAY_SIGN_REPLICA_VAULT=<deployed vault>` (:8808)
+3. **Founder's hands: http://127.0.0.1:8899/bdata.html** (door running) — 🌐 Public → price → review → I authorize this → Sign with Trezor → Begin device signing (hot TESTNET key in this proof) → SIGNED → Settle on TESTNET.
+4. CLI driver: `node ops/bpay-sign/testnet-ceremony.mjs` · browser presentation: `node ops/bpay-sign/present-testnet.mjs` (captures e2e/shots-bdata/bpay-e-{1..7}-390.png).
+
+The Safe 7 replaces the hot key when a hardware transport lands (Suite
+experimental MCP is the live candidate); everything else — bindings,
+composer, wall, receipts, UI — is unchanged by construction.

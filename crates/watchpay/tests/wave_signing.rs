@@ -299,6 +299,39 @@ fn law12_missing_invoice_digest_refuses() {
 }
 
 #[test]
+fn sepolia_testnet_twin_binds_with_its_own_contracts_and_badges_the_receipt() {
+    let ps = payments(56);
+    let jobs = vec![job_for(&ps, "up-1", "open", 100)];
+    let a = auth_for(&ps, "up-1");
+    let net = WaveNetwork::arbitrum_sepolia_test().unwrap();
+    let b = bind_authorization(Some(&a), &jobs, &ps, payer(), &net)
+        .expect("the Sepolia twin seals with the same laws");
+    assert!(b.testnet());
+    assert_eq!(b.network().chain_id, 421614);
+    // the review/receipt contracts differ from mainnet — never confusable
+    assert_ne!(
+        b.network().token,
+        WaveNetwork::arbitrum_one().unwrap().token
+    );
+    assert_ne!(
+        b.network().vault,
+        WaveNetwork::arbitrum_one().unwrap().vault
+    );
+    let receipt = WaveSignReceipt::opening_intent(&b, &path(), 1_000);
+    assert!(receipt.testnet, "the TESTNET name rides the receipt");
+    // a mainnet network claiming Sepolia's chain (or vice versa) refuses
+    let mut franken = WaveNetwork::arbitrum_one().unwrap();
+    franken.chain_id = 421614;
+    let err = bind_authorization(Some(&a), &jobs, &ps, payer(), &franken).unwrap_err();
+    assert!(err.to_string().contains("LAW 13"), "{err}");
+    // unknown chain refuses
+    let mut unknown = WaveNetwork::arbitrum_sepolia_test().unwrap();
+    unknown.chain_id = 111;
+    let err = bind_authorization(Some(&a), &jobs, &ps, payer(), &unknown).unwrap_err();
+    assert!(err.to_string().contains("LAW 13"), "{err}");
+}
+
+#[test]
 fn law13_wrong_chain_token_vault_refuse() {
     let ps = payments(56);
     let jobs = vec![job_for(&ps, "up-1", "open", 100)];
@@ -405,11 +438,9 @@ fn pay_for_quotes_calldata_length_and_layout_law() {
             &32u32.to_be_bytes(),
             "offset word low 4 bytes = 0x20"
         );
-        assert_eq!(
-            &cd[36..68],
-            &(n as u64).to_be_bytes(),
-            "array length word for n={n}"
-        );
+        let mut len_word = [0u8; 32];
+        len_word[24..].copy_from_slice(&(n as u64).to_be_bytes());
+        assert_eq!(cd[36..68], len_word, "array length word for n={n}");
         // tuple layout: rewards (left-padded), amount, quote hash — in
         // ABI order, NOT bridge persistence order.
         let base = 68;
@@ -874,11 +905,11 @@ fn wall_refuses_field_mutations_with_named_fields() {
     let cases: Vec<(WMutation, &'static str)> = vec![
         (WMutation::Chain(42161 - 1), "tx chain"),
         (WMutation::Nonce(99), "nonce"),
-        (WMutation::To(EthAddr([9u8; 20])), "to"),
+        (WMutation::To(EthAddr([9u8; 20])), "destination"),
         (WMutation::Value1, "value"),
-        (WMutation::FlipCalldata, "input"),
-        (WMutation::GasLimit(111_111), "gas_limit"),
-        (WMutation::FeeCap(1_000_000), "maxFeePerGas"),
+        (WMutation::FlipCalldata, "calldata"),
+        (WMutation::GasLimit(111_111), "tx gas limit"),
+        (WMutation::FeeCap(1_000_000), "tx fee"),
         (WMutation::WrongSigner, "recovered signer"),
         (WMutation::HighSMirror, "s"),
         (WMutation::RespVTamper, "v"),

@@ -16,7 +16,7 @@
 (function(){
   var T = (window.BNRLanguage && window.BNRLanguage.text) ? window.BNRLanguage.text.bind(window.BNRLanguage) : function(k,f){return f;};
   var LS = 'bdata-v1';
-  var st = { inspection:'newbee', automation:{ mode:'ask', boundAnt:'0.5' }, history:[], bridge:'http://127.0.0.1:8807', freshQuote:null, authorization:null, signing:{ service:'http://127.0.0.1:8808', phase:null, review:null, receipt:null, refusal:null, error:null } };
+  var st = { inspection:'newbee', automation:{ mode:'ask', boundAnt:'0.5' }, history:[], bridge:'http://127.0.0.1:8807', freshQuote:null, authorization:null, signing:{ service:'http://127.0.0.1:8808', phase:null, review:null, receipt:null, refusal:null, error:null, settled:null } };
   try { var sv = JSON.parse(localStorage.getItem(LS)||'null'); if (sv && typeof sv==='object') st = Object.assign(st, sv); if(!Array.isArray(st.history)) st.history=[]; } catch(e){}
   function save(){ try { localStorage.setItem(LS, JSON.stringify(st)); } catch(e){} }
   window.__bdata = st; // test hook: the gate reads live state directly
@@ -224,6 +224,8 @@
     if (signOpenBtn) signOpenBtn.addEventListener('click', signOpen);
     var signGoBtn = document.querySelector('[data-bdata-sign-go]');
     if (signGoBtn) signGoBtn.addEventListener('click', signGo);
+    var settleBtn = document.querySelector('[data-bdata-settle-go]');
+    if (settleBtn) settleBtn.addEventListener('click', settleGo);
     var bridgeInput = document.getElementById('bdata-bridge');
     if (bridgeInput) bridgeInput.addEventListener('change', function(){ st.bridge = bridgeInput.value.trim() || 'http://127.0.0.1:8807'; save(); });
     /* THE ORIGIN GESTURE — selecting Public in My Data. The click records the
@@ -403,6 +405,13 @@
       });
       h += '<div class="row" style="margin-top:6px;gap:8px;font-size:12px"><span style="min-width:110px;color:var(--dim)">' + T('bd.sign.signer','verified signer') + '</span><span class="mono" style="overflow-wrap:anywhere">' + esc((r.slots&&r.slots[0]&&r.slots[0].signer)||'') + '</span></div>';
       h += '<div class="law" style="margin-top:8px;text-align:center"><b>' + T('bd.sign.stops','NOT BROADCAST · NOT PAID · NOT UPLOADED.') + '</b> ' + T('bd.sign.stopsnote','Signing ends here. Broadcast is a separate founder-authorized phase — locked, not hidden.') + '</div>';
+      if (r.testnet) {
+        if (sg.settled) {
+          h += '<div style="margin-top:8px;padding:8px;border:1px solid var(--gold);border-radius:8px;font-size:12px" data-bdata-settled="1">🧪 <b>' + T('bd.sign.settled','SETTLED ON TESTNET') + '</b> — ' + T('bd.sign.settlednote','both transactions confirmed on the Arbitrum Sepolia TESTNET ledger; the pipeline is proven end to end; MAINNET UNTOUCHED') + '<div class="mono" style="margin-top:4px;overflow-wrap:anywhere">' + (sg.settled.transactions||[]).map(function(t){return t.tx_hash;}).join('<br>') + '</div></div>';
+        } else {
+          h += '<div style="margin-top:8px;text-align:center"><button type="button" data-bdata-settle-go="1" style="padding:10px 16px;border:1px solid var(--gold);border-radius:10px;background:#0e2d3a;color:var(--gold);font-size:13px;font-weight:600;cursor:pointer">🧪 ' + T('bd.sign.settle','Settle on TESTNET (pipeline proof)') + '</button><div class="law" style="margin-top:4px" id="bdata-settle-stat"></div></div>';
+        }
+      }
       h += '</div>';
       return h;
     }
@@ -419,6 +428,7 @@
       var v = sg.review;
       var rh = '<div style="margin-top:10px;padding:12px;border:1px solid var(--gold);border-radius:12px" data-bdata-sign-review="1">';
       rh += '<div style="font-size:13px;font-weight:600;text-align:center">' + T('bd.sign.h','What the Trezor will sign') + '</div>';
+      if (v.testnet) rh += '<div style="margin-top:4px;text-align:center;font-size:11px;font-weight:700;color:var(--gold)" data-bdata-sign-testnet="1">🧪 ' + (v.replica ? 'TESTNET-REPLICA' : 'TESTNET') + ' — ' + T('bd.sign.tnnote','this ceremony rides the Arbitrum Sepolia TESTNET ledger (no real value); the Safe 7 arrives with the hardware transport — a hot TESTNET key signs in this proof') + '</div>';
       function rrow(k, vv){ return '<div class="row" style="margin-top:6px;gap:8px;font-size:12px;flex-wrap:wrap"><span style="min-width:110px;color:var(--dim)">' + k + '</span><span class="mono" style="flex:1;min-width:200px;overflow-wrap:anywhere">' + vv + '</span></div>'; }
       rh += rrow('artifact', esc(String(v.artifact_sha256).slice(0,16)) + '… · ' + Number(v.artifact_bytes).toLocaleString('en-US') + ' B');
       rh += rrow(T('wl.bpay.audience','audience'), '🌐 ' + esc(v.audience) + ' — ' + T('bd.auth.binding','founder-selected, origin My Data'));
@@ -491,6 +501,32 @@
       st.signing.error = String(e && e.message || e).slice(0,160);
       console.error('bdata sign error', st.signing.error); // surfaced, never swallowed
       save(); render();
+    });
+  }
+
+  /* Settle on TESTNET — the founder-ordered pipeline proof. Structurally
+     testnet-only: the button exists ONLY under a testnet receipt, the
+     service refuses any non-testnet receipt, and the organ's receipt
+     forever records broadcast:false (this settle is a service-layer
+     proof, never an organ act). Mainnet settlement does not exist. */
+  function settleGo(){
+    var stat = document.getElementById('bdata-settle-stat');
+    if (stat) stat.textContent = '… ' + T('bd.sign.settling','sending to the TESTNET ledger — waiting for confirmations');
+    fetch(st.signing.service.replace(/\/$/,'') + '/v1/testnet/settle', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ authorization_id: st.authorization && st.authorization.id })
+    }).then(function(r){ return r.json().then(function(j){ return { ok:r.ok, j:j }; }); })
+    .then(function(o){
+      if (o.ok && o.j.transactions) {
+        st.signing.settled = o.j;
+        note(T('bd.hist.settled','SETTLED on TESTNET — pipeline proven end to end; mainnet untouched'));
+      } else if (stat) {
+        stat.textContent = '⛔ ' + String((o.j && o.j.refusal && (o.j.refusal.law + ': ' + o.j.refusal.why)) || o.j.why || 'settled refused').slice(0,180);
+      }
+      save(); render();
+    }).catch(function(e){
+      if (stat) stat.textContent = '⚠ ' + String(e && e.message || e).slice(0,140);
+      console.error('bdata settle error', e); // surfaced, never swallowed
     });
   }
 

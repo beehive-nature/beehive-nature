@@ -198,6 +198,7 @@ async function walkToAuthorized(page) {
   check('A12 verified signer shown (recovered, synthetic)', /0x35defbea2aad6323726fed45dc3388010ea85f9c/i.test(signed));
   check('A13 NOT BROADCAST · NOT PAID · NOT UPLOADED', /NOT BROADCAST/i.test(signed) && /NOT PAID/i.test(signed) && /NOT UPLOADED/i.test(signed));
   check('A14 HARD STOP — no further affordance of any kind (no sign buttons remain)', !(await page.$('[data-bdata-sign-go]')) && !(await page.$('[data-bdata-sign-open]')));
+  check('A14b MAINNET-shaped receipt NEVER offers settlement (testnet-only law)', !(await page.$('[data-bdata-settle-go]')) && !(await page.$('[data-bdata-settled]')));
   check('A16 zero page errors (scenario A)', errs.length === 0, errs.slice(0, 2).join(' | ').slice(0, 140));
 
   await page.screenshot({ path: join(here, 'shots-bdata', 'bdata-phase-e-signed-390.png') });

@@ -76,6 +76,15 @@ pub const ARBITRUM_ONE_PAYMENT_VAULT: &str = "0x9a3ecac693b699fc0b2b6a50b5549e50
 /// evmlib 0.9.1 `MAX_TRANSFERS_PER_TRANSACTION` — one payForQuotes call
 /// carries at most this many payments (the installed client's own split
 /// law; the founder job's 56 rides one call).
+/// Arbitrum Sepolia chain id — the TESTNET proof ledger (founder order
+/// 2026-09-19: prove it all on ARB testnet first).
+pub const ARBITRUM_SEPOLIA_CHAIN_ID: u64 = 421614;
+
+/// ANT on Arbitrum Sepolia (evmlib 0.9.1 testnet token constant). // PUBLIC-CONSTANT: deployed testnet contract address, public chain data
+pub const ARBITRUM_SEPOLIA_ANT_TOKEN: &str = "0x4bc1ace0e66170375462cb4e6af42ad4d5ec689c";
+
+/// Unified PaymentVault on Arbitrum Sepolia (evmlib 0.9.1, proxy). // PUBLIC-CONSTANT: deployed testnet contract address, public chain data
+pub const ARBITRUM_SEPOLIA_PAYMENT_VAULT: &str = "0xd742e8cfef27a9a884f3effa239ee2f39c276522";
 pub const MAX_TRANSFERS_PER_TRANSACTION: usize = 256;
 
 /// One quote payment exactly as the bridge persists it: (quote hash,
@@ -137,6 +146,16 @@ pub struct WaveNetwork {
     pub chain_id: u64,
     pub token: EthAddr,
     pub vault: EthAddr,
+    /// True ONLY on Arbitrum Sepolia (the founder-ordered testnet proof
+    /// ledger). Rides the sealed binding into every review and receipt —
+    /// a testnet ceremony can never present as a mainnet one.
+    pub testnet: bool,
+    /// True ONLY for the labeled LOCAL REPLICA of the Sepolia ledger: a
+    /// local chain answering chain id 421614 carrying the REAL Autonomi
+    /// contract artifacts deployed fresh (evmlib's own artifacts). The
+    /// addresses differ from public Sepolia by construction and the
+    /// receipt says REPLICA — never presentable as the public testnet.
+    pub replica: bool,
 }
 
 impl WaveNetwork {
@@ -147,7 +166,52 @@ impl WaveNetwork {
                 .map_err(|e| Error::field("token", e))?,
             vault: EthAddr::from_lower_hex(ARBITRUM_ONE_PAYMENT_VAULT)
                 .map_err(|e| Error::field("vault", e))?,
+            testnet: false,
+            replica: false,
         })
+    }
+
+    /// The TESTNET twin — same laws, same wall, Sepolia contracts and
+    /// chain id (founder order 2026-09-19: prove it all on ARB's testnet
+    /// first; the UI and receipts carry the TESTNET name at every step).
+    pub fn arbitrum_sepolia_test() -> Result<Self> {
+        Ok(WaveNetwork {
+            chain_id: ARBITRUM_SEPOLIA_CHAIN_ID,
+            token: EthAddr::from_lower_hex(ARBITRUM_SEPOLIA_ANT_TOKEN)
+                .map_err(|e| Error::field("token", e))?,
+            vault: EthAddr::from_lower_hex(ARBITRUM_SEPOLIA_PAYMENT_VAULT)
+                .map_err(|e| Error::field("vault", e))?,
+            testnet: true,
+            replica: false,
+        })
+    }
+
+    /// The labeled LOCAL REPLICA (founder-ordered testnet proof when no
+    /// public-testnet funding exists): chain 421614, testnet-named, with
+    /// freshly-deployed REAL Autonomi artifacts at explicit addresses.
+    pub fn arbitrum_sepolia_replica(token: EthAddr, vault: EthAddr) -> Result<Self> {
+        Ok(WaveNetwork {
+            chain_id: ARBITRUM_SEPOLIA_CHAIN_ID,
+            token,
+            vault,
+            testnet: true,
+            replica: true,
+        })
+    }
+
+    /// The pinned network for a chain id — exactly one of the two lawful
+    /// ledgers; anything else refuses (LAW 13).
+    pub fn pinned_for_chain(chain_id: u64) -> Result<Self> {
+        match chain_id {
+            ARBITRUM_ONE_CHAIN_ID => Self::arbitrum_one(),
+            ARBITRUM_SEPOLIA_CHAIN_ID => Self::arbitrum_sepolia_test(),
+            other => Err(Error::field(
+                "chain_id",
+                format!(
+                    "LAW 13 (chain): chain id {other} is neither Arbitrum One                      ({ARBITRUM_ONE_CHAIN_ID}) nor its Sepolia testnet                      ({ARBITRUM_SEPOLIA_CHAIN_ID})"
+                ),
+            )),
+        }
     }
 }
 
@@ -177,6 +241,17 @@ pub struct WaveBinding {
     /// 1 approve + ceil(payments / MAX_TRANSFERS_PER_TRANSACTION) calls.
     transaction_count: u64,
     payer: EthAddr,
+}
+
+impl WaveBinding {
+    /// True when this ceremony rides the Sepolia TESTNET ledger.
+    pub fn testnet(&self) -> bool {
+        self.network.testnet
+    }
+    /// True when the ledger is the labeled LOCAL REPLICA.
+    pub fn replica(&self) -> bool {
+        self.network.replica
+    }
 }
 
 /// Commitment digest over the quote set — the bridge's EXACT derivation
@@ -698,21 +773,27 @@ pub fn bind_authorization(
              lineage document the founder reviewed is missing",
         ));
     }
-    let pinned = WaveNetwork::arbitrum_one()?;
-    if network.chain_id != ARBITRUM_ONE_CHAIN_ID {
-        return Err(Error::field(
-            "chain_id",
-            format!(
-                "LAW 13 (chain): network chain id {} != Arbitrum One {ARBITRUM_ONE_CHAIN_ID}",
-                network.chain_id
-            ),
-        ));
-    }
-    if network.token != pinned.token || network.vault != pinned.vault {
+    let pinned = WaveNetwork::pinned_for_chain(network.chain_id)?;
+    if network.replica {
+        // the labeled local replica: chain MUST be the Sepolia shape and
+        // the testnet name MUST be on; the addresses are the fresh
+        // deployment's own (recorded, never confusable with public).
+        if network.chain_id != ARBITRUM_SEPOLIA_CHAIN_ID || !network.testnet {
+            return Err(Error::field(
+                "contracts",
+                "LAW 13 (replica): a replica network must be chain 421614 and testnet-named",
+            ));
+        }
+    } else if network.token != pinned.token
+        || network.vault != pinned.vault
+        || network.testnet != pinned.testnet
+    {
         return Err(Error::field(
             "contracts",
-            "LAW 13 (contracts): token/vault are not the installed client's Arbitrum One \
-             constants — refusing to sign against unknown contracts",
+            format!(
+                "LAW 13 (contracts): token/vault/testnet-flag do not match the installed                  client's pinned contracts for chain {} — refusing to sign against unknown                  contracts",
+                network.chain_id
+            ),
         ));
     }
     if payer.is_zero() {
@@ -978,6 +1059,11 @@ pub struct WaveSignReceipt {
     pub artifact_bytes: u64,
     pub audience: String,
     pub chain_id: u64,
+    /// True when the ceremony rode the Sepolia TESTNET ledger.
+    pub testnet: bool,
+    /// True when the ledger was the labeled LOCAL REPLICA (real
+    /// artifacts, fresh deployment, chain 421614).
+    pub replica: bool,
     pub plan_hash: Hex32,
     pub ant_ceiling_atto: String,
     pub gas_ceiling: String,
@@ -1009,6 +1095,8 @@ impl WaveSignReceipt {
             artifact_bytes: binding.artifact_bytes(),
             audience: binding.audience().to_string(),
             chain_id: binding.network().chain_id,
+            testnet: binding.network().testnet,
+            replica: binding.network().replica,
             plan_hash: binding.plan_hash(),
             ant_ceiling_atto: binding.ant_ceiling().to_decimal(),
             gas_ceiling: binding.gas_ceiling().to_string(),
