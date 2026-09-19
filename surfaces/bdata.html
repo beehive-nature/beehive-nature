@@ -6,53 +6,148 @@
 <title>My Data · bData</title>
 <meta name="description" content="bData — the organism-level data surface: what you have, who can get it, what is happening to it, and what your bees may do with it. Economics live in bPay.">
 <style>
-:root{--bg:#0b0d0c;--well:#101613;--line:#1c211e;--line2:#243029;--ink:#d8e5da;--dim:#8fa398;--faint:#5f7168;--cyan:#7fd4c1;--amber:#e8b968;--gold:#c9a227}
+/* TOKENS. Dark is the raver/cypherpunk canvas. New bee is the hub's light canvas
+   (founder continuation 2026-09-07: no dark 9-13px reading surface under a light
+   New bee toolbar; 16px reading text, 14px secondary). The bee values repeat
+   register.js's shared theme so the FIRST paint already matches — register.js
+   re-asserts the same values when it mounts. */
+:root{--bg:#0b0d0c;--panel:#101613;--well:#0c1210;--line:#2a3a31;--ink:#dfeae1;--dim:#a3b5aa;--accent:#7fd4c1;--accent-soft:#11302f;--on-accent:#06110c;--bad:#f2a79b}
+body[data-reg="bee"]{--bg:#f6f7f2;--panel:#fff;--well:#edf2eb;--line:#ccd7cf;--ink:#18362a;--dim:#435f4e;--accent:#176879;--accent-soft:#e2f0ee;--on-accent:#fff;--bad:#9f362c}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.65 ui-sans-serif,system-ui,sans-serif}
-main{max-width:860px;margin:0 auto;padding:18px 16px 90px}
-a{color:var(--cyan)}
-h1{font-size:19px;margin:0 0 2px}
-h2{font-size:15px;margin:26px 0 8px}
-.kicker{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--cyan)}
-.law{color:var(--dim);font-size:11px;line-height:1.85}
+html{background:#0b0d0c}
+html[data-bee-light="true"]{background:#f6f7f2}
+body{margin:0;background:var(--bg);color:var(--ink);font:1rem/1.6 system-ui,-apple-system,'Segoe UI',sans-serif}
+main{max-width:720px;margin:0 auto;padding:20px 16px 24px}
+h1{font-size:1.75rem;line-height:1.15;margin:2px 0 6px;letter-spacing:-.02em}
+h2{font-size:1.25rem;line-height:1.3;margin:0}
+h3{font-size:1.0625rem;line-height:1.3;margin:0}
+p{margin:0}
+.kicker{font-size:.875rem;letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+/* secondary labels are 14px in EVERY register (the shared New-bee theme would lift them to reading size) */
+.sub,body[data-bee-theme] main .sub{font-size:.875rem;line-height:1.6;color:var(--dim)}
+.dim{color:var(--dim)}
+.law{font-size:1rem;line-height:1.6;color:var(--dim)}
 .law b{color:var(--ink)}
-.card{background:var(--well);border:1px solid var(--line2);border-radius:12px;padding:14px 16px;margin-top:12px}
-.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-button{background:#0e2d3a;color:var(--cyan);border:1px solid #1d4655;border-radius:8px;padding:8px 14px;cursor:pointer;font-size:13px}
-button.off{opacity:.55;text-decoration:line-through;cursor:not-allowed;background:transparent;color:inherit}
-.on{border-color:var(--cyan);background:#0e2d3a}
-.mono{font-family:'IBM Plex Mono',monospace;font-size:11px;overflow-wrap:anywhere}
-.tag{display:inline-block;font-size:10px;border:1px solid var(--line2);border-radius:10px;padding:1px 9px;color:var(--dim)}
-.sect{border-top:1px solid var(--line);padding:8px 0 2px;font-size:12px}
+.law+.law{margin-top:8px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px;margin-top:16px}
+.head{display:flex;flex-wrap:wrap-reverse;gap:8px 12px;align-items:flex-start;justify-content:space-between}
+.head>div{flex:1 1 260px;min-width:0}
+.tag{flex:none;font-size:.875rem;border:1px solid var(--line);border-radius:999px;padding:2px 12px;color:var(--dim)}
+.meta{margin-top:8px;display:flex;flex-wrap:wrap;gap:2px 14px}
+.mono{font-family:ui-monospace,'Cascadia Mono',Consolas,monospace;font-size:.875rem;overflow-wrap:anywhere;direction:ltr;unicode-bidi:isolate}
+.step{margin-top:20px;padding-top:18px;border-top:1px solid var(--line)}
+.step-h{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.num{flex:none;display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;background:var(--accent-soft);color:var(--ink);font-size:.875rem;font-weight:700}
+
+/* every control: a 44px floor, a visible press, a visible focus, a visible "not now" */
+button,input{font:inherit;color:inherit}
+.btn{appearance:none;display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:10px 16px;border:1px solid var(--line);border-radius:12px;background:transparent;color:var(--ink);cursor:pointer;text-align:center;transition:transform .08s ease,border-color .12s ease}
+.btn:hover,button.opt:hover{border-color:var(--accent)}
+.btn:active,button.opt:active{transform:scale(.985)}
+.btn:focus-visible,button.opt:focus-visible,summary:focus-visible,input:focus-visible,[tabindex="-1"]:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.btn.primary{width:100%;min-height:52px;background:var(--accent);border-color:var(--accent);color:var(--on-accent);font-weight:650;font-size:1.0625rem}
+.btn.quiet{border-color:transparent;color:var(--accent);text-decoration:underline;text-underline-offset:3px;padding-inline:0}
+.btn[aria-checked="true"]{border-color:var(--accent);background:var(--accent-soft);font-weight:600}
+.btn[aria-checked="true"]::before{content:'✓';content:'✓' / ''}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.seg{display:flex;flex-wrap:wrap;gap:8px}
+.seg .btn{flex:1 1 auto}
+
+.opts{display:grid;gap:8px}
+.opt{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:2px 12px;width:100%;min-height:56px;margin:0;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:transparent;color:var(--ink);text-align:start;line-height:1.4}
+button.opt{appearance:none;cursor:pointer;transition:transform .08s ease,border-color .12s ease}
+.opt[aria-checked="true"]{border-color:var(--accent);background:var(--accent-soft);box-shadow:inset 0 0 0 1px var(--accent)}
+.opt .ico{font-size:1.25rem}
+.opt .name{font-weight:600}
+.opt .desc{grid-column:2/-1;font-size:.875rem;color:var(--dim);font-weight:400}
+.opt .mark{font-weight:700;color:var(--accent)}
+/* not available yet = prose, never a button: no pointer, no press, the reason in plain sight */
+.opt.na{border-style:dashed;color:var(--dim)}
+.opt.na .name{font-weight:500}
+.opt.na .soon{font-size:.875rem}
+.chose{display:flex;flex-wrap:wrap;align-items:center;gap:4px 12px;margin-top:10px}
+
+.amount{display:block;font-size:2rem;font-weight:700;line-height:1.25;letter-spacing:-.01em;overflow-wrap:anywhere}
+.amount.small{font-size:1.25rem}
+.amount.small .tail,.amount.small .unit{font-size:.875rem}
+.amount .tail{font-size:.5em;font-weight:500;color:var(--dim);letter-spacing:0}
+.amount .unit{font-size:.6em;font-weight:600}
+.facts{margin-top:8px;display:flex;flex-wrap:wrap;gap:2px 16px}
+.review{margin-top:4px;border:1px solid var(--line);border-radius:12px;padding:4px 14px;background:var(--well)}
+.rv{display:grid;gap:2px;padding:10px 0;overflow-wrap:anywhere}
+.rv+.rv{border-top:1px solid var(--line)}
+.badge{display:inline-flex;align-items:center;min-height:32px;margin-top:12px;padding:4px 14px;border-radius:999px;background:var(--accent-soft);color:var(--ink);font-size:.875rem;font-weight:600}
+.actions{margin-top:12px;display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px}
+.busy{display:flex;align-items:flex-start;gap:12px}
+.busy .spin{margin-top:3px}
+.busy b{font-weight:600}
+.spin{flex:none;width:22px;height:22px;border-radius:50%;border:3px solid var(--line);border-top-color:var(--accent);animation:bd-spin 1s linear infinite}
+.bar{height:4px;margin-top:12px;border-radius:2px;background:var(--line);overflow:hidden}
+.bar i{display:block;width:35%;height:100%;border-radius:2px;background:var(--accent);animation:bd-slide 1.8s ease-in-out infinite}
+@keyframes bd-spin{to{transform:rotate(360deg)}}
+@keyframes bd-slide{0%{transform:translateX(-100%)}100%{transform:translateX(290%)}}
+@media (prefers-reduced-motion:reduce){.spin{animation:none;border-color:var(--accent)}.bar i{animation:none;width:100%;opacity:.35}.btn,button.opt{transition:none}.btn:active,button.opt:active{transform:none}}
+.alert{border:1px solid var(--bad);border-radius:12px;padding:12px 14px}
+.alert b{color:var(--bad)}
+.alert .mono{display:block;margin-top:6px;color:var(--dim)}
+.locked{display:flex;gap:10px;align-items:flex-start;color:var(--dim)}
+.while{margin-top:14px}
+.field{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;margin-top:12px}
+.field input{min-height:44px;padding:8px 12px;border:1px solid var(--line);border-radius:10px;background:var(--well);min-width:0}
+.field input[aria-invalid="true"]{border-color:var(--bad)}
+.err{color:var(--bad);font-size:.875rem;flex-basis:100%}
+.note{margin-top:10px}
+.skel{height:120px;border-radius:12px;background:var(--well)}
+
+/* one-tap depth (the comprehension law): register.js styles + opens these per register */
+details.more{margin-top:12px}
+details.more>summary,main details.more>summary{cursor:pointer;min-height:44px;display:flex;align-items:center;color:var(--dim);font-size:1rem}
+details.more>.law,details.more>div{margin-top:4px}
+details.card>summary{color:var(--ink);font-weight:600}
+.sect{border-top:1px solid var(--line);padding:10px 0 4px;font-size:.875rem;line-height:1.6}
 .sect b{color:var(--ink)}
-.hist{font-size:11px;color:var(--dim);border-left:2px solid var(--line2);padding:2px 0 2px 10px;margin-top:6px}
-input[type=number]{background:#0b1e26;border:1px solid #1d4655;color:inherit;border-radius:6px;padding:4px 8px;font-size:12px;width:110px}
-details{margin-top:8px}summary{cursor:pointer;color:var(--dim);font-size:12px}
+.hist{font-size:.875rem;color:var(--dim);border-inline-start:2px solid var(--line);padding-block:2px;padding-inline-start:10px;margin-top:6px}
+/* register scoping before register.js lands (same two rules it ships) */
+[data-reg]:not(body){display:none}
+body[data-reg="bee"] [data-reg="bee"],body[data-reg="raver"] [data-reg="raver"],body[data-reg="cypherpunk"] [data-reg="cypherpunk"]{display:revert}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0}
 </style>
 </head>
-<body>
-<main id="first-bee">
+<body data-bee-theme="shared">
+<script>
+/* first paint in the reader's own register — register.js re-asserts on mount */
+(function(){var r='bee';try{var v=localStorage.getItem('bregister');if(v==='raver'||v==='cypherpunk')r=v;}catch(e){}
+document.body.setAttribute('data-reg',r);document.documentElement.setAttribute('data-bee-light',String(r==='bee'));})();
+</script>
+<main id="bdata">
   <div class="kicker" data-i18n="bd.kicker">bData — the organism-level data surface</div>
-  <h1><span data-i18n="bd.h1">My Data</span></h1>
-  <div class="law" data-i18n="bd.law">what you have · who can get it · what is happening to it · what your bees may do with it — economics live in bPay, invoked only when a data operation needs value, and the evidence returns here.</div>
+  <h1 data-i18n="bd.h1">My Data</h1>
+  <p data-i18n="bd.lead">Your files — who can get them, and what it costs to keep them.</p>
+  <details class="more" data-reg-disclose>
+    <summary data-i18n="bd.how.sum">How My Data works</summary>
+    <div class="law" data-i18n="bd.law">what you have · who can get it · what is happening to it · what your bees may do with it — economics live in bPay, invoked only when a data operation needs value, and the evidence returns here.</div>
+    <div class="law" data-i18n="bd.viewnote">changes what you can inspect — never the audience, never your authority</div>
+  </details>
 
-  <div id="shelf"></div>
+  <div id="shelf" aria-busy="true"><div class="card"><div class="skel"></div></div></div>
 
-  <h2>🤖 <span data-i18n="bd.auto.h">Action policy — what may happen without asking</span></h2>
-  <div class="law" data-i18n="bd.auto.law">a first-class policy dimension: autonomous actions are constrained by capability (only qualified paths) and by the economic bound you set. Changing it governs future decisions — yesterday's legitimate operations stay legitimate.</div>
-  <div class="card" id="auto-card"></div>
+  <section class="card" aria-labelledby="auto-h">
+    <h2 id="auto-h">🤖 <span data-i18n="bd.auto.h">Action policy — what may happen without asking</span></h2>
+    <div id="auto-card" style="margin-top:14px"></div>
+    <details class="more" data-reg-disclose>
+      <summary data-i18n="bd.rules.sum">The rules behind this</summary>
+      <div class="law" data-i18n="bd.auto.law">a first-class policy dimension: autonomous actions are constrained by capability (only qualified paths) and by the economic bound you set. Changing it governs future decisions — yesterday's legitimate operations stay legitimate.</div>
+    </details>
+  </section>
 
-  <div class="row" style="margin-top:22px;gap:8px;align-items:center">
-    <span style="font-size:11px;opacity:.8" data-i18n="bd.view">view</span>
-    <span id="insp"></span>
-  </div>
-  <div class="law" data-i18n="bd.viewnote">changes what you can inspect — never the audience, never your authority</div>
+  <details class="card more" data-reg-disclose id="anatomy">
+    <summary><span aria-hidden="true">🔬&nbsp;</span><span data-i18n="bd.cyber.h">Cypherpunk view — the whole anatomy</span></summary>
+    <div id="cyber"></div>
+  </details>
 
-  <h2>🔬 <span data-i18n="bd.cyber.h">Cypherpunk view — the whole anatomy</span></h2>
-  <div id="cyber" style="display:none"></div>
+  <div id="bdata-live" class="sr-only" role="status" aria-live="polite"></div>
 </main>
-<script src="lang.js"></script>
 <script src="tour.js?v=42"></script>
-<script src="bdata.js?v=1" defer></script>
+<script src="bdata.js?v=3" defer></script>
 </body>
 </html>
