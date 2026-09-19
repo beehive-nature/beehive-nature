@@ -153,15 +153,15 @@
     body[data-reg="bee"][data-bee-theme="shared"][data-bee-adapter="directory"] a:focus-visible{outline:2px solid var(--info);outline-offset:4px}
 
     body[data-reg="bee"][data-bee-theme="shared"][data-bee-adapter="relay"] :where(.sub,.note,footer,.card h2){color:var(--dim);font-size:1rem;letter-spacing:normal;line-height:1.65}
-    body[data-reg="bee"][data-bee-theme="shared"][data-bee-adapter="relay"] :where(.hex){color:#326b39;font-size:.875rem;letter-spacing:normal}
+    body[data-reg="bee"][data-bee-theme="shared"][data-bee-adapter="relay"] :where(.hex){color:#6e3fb8;font-size:.875rem;letter-spacing:normal}
     body[data-reg="bee"][data-bee-theme="shared"][data-bee-adapter="relay"] :where(h1 span){color:#855b0b}
     body[data-reg="bee"][data-bee-theme="shared"][data-bee-adapter="relay"][data-bee-accent="green"] :where(h1 span){color:#326b39}
     body[data-reg="bee"][data-bee-theme="shared"][data-bee-adapter="relay"] :where(.state,.state b){color:var(--ink);font-size:1rem}
     body[data-reg="bee"][data-bee-theme="shared"][data-bee-adapter="relay"] code.join{background:var(--well);border-color:var(--line);color:#855b0b;font-size:1rem}
-    body[data-reg="bee"][data-bee-theme="shared"][data-bee-adapter="relay"] button[data-copy]{background:var(--panel);color:#326b39;border-color:#857d70;min-height:44px;font:500 1rem/1.5 var(--bee-font)}
-    body[data-reg="bee"][data-bee-theme="shared"][data-bee-adapter="relay"] button[data-copy]:hover{background:var(--well);border-color:#326b39}
-    body[data-reg="bee"][data-bee-theme="shared"][data-bee-adapter="relay"] a.btn{background:#326b39;color:#fff;min-height:44px}
-    body[data-reg="bee"][data-bee-theme="shared"][data-bee-adapter="relay"] :where(a,button):focus-visible{outline:2px solid #326b39;outline-offset:4px}
+    body[data-reg="bee"][data-bee-theme="shared"][data-bee-adapter="relay"] button[data-copy]{background:var(--panel);color:#6e3fb8;border-color:#857d70;min-height:44px;font:500 1rem/1.5 var(--bee-font)}
+    body[data-reg="bee"][data-bee-theme="shared"][data-bee-adapter="relay"] button[data-copy]:hover{background:var(--well);border-color:#0c1412}
+    body[data-reg="bee"][data-bee-theme="shared"][data-bee-adapter="relay"] a.btn{background:#a8238c;color:#fff;min-height:44px}
+    body[data-reg="bee"][data-bee-theme="shared"][data-bee-adapter="relay"] :where(a,button):focus-visible{outline:2px solid #0c1412;outline-offset:4px}
     /* Authored reading rooms. Opt in only where the two arrival compositions
        and page-owned stages exist. Scientific palettes stay page-owned. */
     body[data-reading-room]:not([data-reg="cypherpunk"]){padding:0 0 32px!important;font-family:system-ui,-apple-system,'Segoe UI',sans-serif;font-size:1.0625rem;line-height:1.65}
