@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#07090b">
+<title>every blood relative, for millennia · bGenealogy</title>
+<link rel="stylesheet" href="tokens.css">
+<style>
+/* THE bGenealogy SURFACE — blood.html, named by the zBlood mission order
+   (docs/orders/2026-09-16-zblood-storage-economics-mission.md §public
+   demonstration path). One file, vanilla, tokens.css only. The surface
+   renders the acceptance journey (profile → crest → Rockwood/Donna →
+   person archive → blood fractal → evidence/lore) in capability-truth
+   states, and the storage economics in the five measured states —
+   quote ≠ purchased ≠ uploaded ≠ retrieved ≠ hash-verified. Nothing on
+   this page is a stored snapshot of money: every economic cell renders
+   NOT YET until its receipt lands (measured-states law).
+
+   SEMANTIC COLOUR — meanings picked first, every hue reads one meaning
+   from the estate treaty (never reused for looks):
+     --sem-harm     var(--flag)   red    — a fabrication, a privacy breach
+     --sem-solution var(--ok)     green  — the living, a landed truth
+     --sem-value    var(--gold)   gold   — the blood line, the archive's worth
+     --sem-system   var(--cyan)   cyan   — the chain/evidence plumbing
+     --sem-science  var(--violet) violet — attribution, Seiðr, the inspect layer
+   The fractal is the SHAPE of the desire ("every blood relative, for
+   millennia"), never a census claim — pedigree collapse is stated where
+   the fractal is drawn. */
+:root{--sem-harm:var(--flag);--sem-solution:var(--ok);--sem-value:var(--gold);
+  --sem-system:var(--cyan);--sem-science:var(--violet)}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{overflow-x:hidden}
+body{background:var(--bg0);color:var(--ink);
+  font:13px/1.65 'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;
+  padding:14px 14px 40px}
+main{max-width:940px;margin:0 auto}
+.crumbs{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:10px;
+  letter-spacing:.12em;text-transform:uppercase;color:var(--faint);
+  padding-bottom:10px;border-bottom:1px solid var(--line)}
+.crumbs a{color:var(--dim);text-decoration:none}
+.crumbs .here{color:var(--ink)}
+.hd{display:flex;align-items:center;gap:12px;padding:18px 2px 8px}
+.hd .r{width:38px;height:38px;flex:none;border-radius:50%;border:1.5px solid var(--gold);
+  display:grid;place-items:center;color:var(--gold);font-size:17px}
+.hd h1{font-size:clamp(21px,4.6vw,30px);font-weight:600;letter-spacing:.02em;line-height:1.18;
+  background:linear-gradient(100deg,var(--gold) 0%,var(--ok) 58%,var(--cyan) 100%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  background-color:var(--gold)}
+.hd h1 span{-webkit-background-clip:text;background-clip:text}
+.hd small{display:block;font-size:10px;color:var(--faint);letter-spacing:.14em;
+  text-transform:uppercase;margin-top:3px}
+.area{padding:22px 2px 4px;font-size:var(--t-small);letter-spacing:.16em;
+  color:var(--ink);text-transform:uppercase;display:flex;align-items:center;gap:10px}
+.area::after{content:"";flex:1;border-top:1px solid var(--line)}
+.card,.panel{background:var(--bg2);border:1px solid var(--line);border-radius:var(--r-lg);
+  padding:14px 14px 12px}
+/* the hero — the honest state number, filled only by receipts */
+.hero{display:flex;flex-direction:column;gap:2px;margin:12px 2px 0;padding:12px 14px;
+  background:var(--well);border:1px solid var(--line);border-radius:var(--r-md)}
+.hero .big{font-size:clamp(34px,8vw,44px);font-weight:600;color:var(--gold);
+  font-variant-numeric:tabular-nums;line-height:1.02}
+.hero .l{font-size:10px;color:var(--faint);letter-spacing:.14em;text-transform:uppercase}
+.hero .sub{font-size:11px;color:var(--dim);margin-top:3px}
+/* journey stations */
+.stn{display:flex;gap:12px;align-items:flex-start;padding:10px 0;border-bottom:1px dashed var(--line)}
+.stn:last-of-type{border-bottom:none}
+.stn .n{flex:none;width:26px;height:29px;display:grid;place-items:center;font-size:11px;
+  color:var(--gold);background:rgba(255,179,71,.10);
+  clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%)}
+.stn .b{flex:1;min-width:0}
+.stn .t{font-size:13px;font-weight:600;color:var(--ink)}
+.stn .t a{color:var(--gold);text-decoration:none;border-bottom:1px dashed var(--gold)}
+.stn .d{font-size:10.5px;color:var(--faint);line-height:1.6;margin-top:2px}
+.stn .d b{color:var(--dim)}
+.chip{flex:none;font-size:9px;letter-spacing:.08em;text-transform:uppercase;
+  padding:4px 8px;border-radius:99px;border:1px solid;margin-top:2px}
+.chip.live{color:var(--sem-solution);border-color:var(--sem-solution)}
+.chip.staged{color:var(--amber);border-color:var(--amber)}
+.chip.notyet{color:var(--faint);border-color:var(--line)}
+.crest{width:64px;height:auto;flex:none;border-radius:8px;border:1px solid var(--line)}
+/* the fractal */
+.frwrap{display:grid;grid-template-columns:1fr;gap:12px}
+@media(min-width:721px){.frwrap{grid-template-columns:minmax(0,1fr) 250px}}
+.frbox{background:var(--well);border:1px solid var(--line);border-radius:var(--r-md);
+  padding:8px;overflow:hidden}
+.frbox svg{display:block;width:100%;height:auto}
+.gens{display:flex;gap:6px;flex-wrap:wrap}
+.gens button{flex:1;min-width:52px;background:var(--well);color:var(--dim);
+  border:1px solid var(--line);border-radius:var(--r-md);padding:10px 6px;
+  font:600 12px 'IBM Plex Mono',monospace;cursor:pointer}
+.gens button:hover{color:var(--ink);border-color:var(--dim)}
+.gens button.pick{color:var(--gold);border-color:var(--gold);box-shadow:var(--glow-gold)}
+.math{font-size:11px;color:var(--dim);line-height:1.7;margin-top:10px}
+.math b{color:var(--ink)}
+/* rows (states, economics, layers) */
+.line{display:flex;justify-content:space-between;align-items:baseline;gap:10px;
+  font-size:13px;padding:7px 0;border-bottom:1px dashed var(--line)}
+.line:last-of-type{border-bottom:none}
+.line span small{display:block;font-size:10px;color:var(--faint);margin-top:1px}
+.line b{color:var(--ink-hi);font-weight:600;white-space:nowrap}
+.grouplbl{font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);
+  margin:10px 0 2px}
+.livecard{margin-top:10px;border:1px dashed var(--gold);border-radius:var(--r-md);
+  padding:11px 13px;font-size:12.5px;line-height:1.75;color:var(--dim)}
+.livecard b{color:var(--gold)}
+table.eco{width:100%;border-collapse:collapse;margin-top:10px;font-size:11px}
+table.eco th{font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);
+  text-align:right;padding:6px 4px;border-bottom:1px solid var(--line);font-weight:600}
+table.eco th:first-child{text-align:left}
+table.eco td{padding:6px 4px;text-align:right;color:var(--dim);border-bottom:1px dashed var(--line);
+  font-variant-numeric:tabular-nums}
+table.eco td:first-child{text-align:left;color:var(--ink);font-weight:600}
+table.eco td.await{color:var(--faint)}
+/* layers */
+.layer{display:flex;gap:10px;align-items:flex-start;padding:9px 0;border-bottom:1px dashed var(--line)}
+.layer:last-of-type{border-bottom:none}
+.layer .g{flex:none;width:30px;height:33px;display:grid;place-items:center;font-size:13px;
+  color:var(--violet);background:rgba(139,92,246,.08);
+  clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%)}
+.layer .t{font-size:12.5px;font-weight:600;color:var(--ink)}
+.layer .d{font-size:10.5px;color:var(--faint);line-height:1.6;margin-top:2px}
+.layer .d b{color:var(--dim)}
+.note{font-size:11.5px;color:var(--dim);line-height:1.55;margin-top:8px}
+.note b{color:var(--ink);font-weight:600}
+.btn2{display:block;width:100%;margin-top:12px;background:transparent;color:var(--gold);
+  border:1.5px solid var(--gold);border-radius:var(--r-lg);padding:12px;
+  font:600 13.5px 'IBM Plex Mono',monospace;text-align:center;cursor:pointer}
+.btn2:hover{color:var(--ink-hi);border-color:var(--ink-hi)}
+.res{margin-top:10px;background:var(--well);border:1px solid var(--line);
+  border-radius:var(--r-md);padding:10px 12px;font-size:11.5px;line-height:1.6;color:var(--dim)}
+.res .ok{color:var(--ok);font-weight:600}
+.res .hold{color:var(--amber);font-weight:600}
+.foot{padding:18px 2px 6px;font-size:10.5px;color:var(--faint);line-height:1.7;
+  border-top:1px solid var(--line);margin-top:18px}
+.foot b{color:var(--dim)}
+.foot a{color:var(--dim)}
+details[data-reg-disclose]{border:1px dashed var(--line);border-radius:var(--r-md);
+  padding:0 11px;margin-top:8px;background:var(--well)}
+details[data-reg-disclose]>summary{list-style:none}
+details[data-reg-disclose] .dbody{padding:2px 0 10px;font-size:10.5px;color:var(--faint);
+  line-height:1.65}
+details[data-reg-disclose] .dbody b{color:var(--dim)}
+[data-reg="cypherpunk"]:not(body){display:none}
+body[data-reg="cypherpunk"] [data-reg="cypherpunk"]:not(body){display:block}
+@media (max-width:600px){
+  .hd{gap:10px}
+  .stn{flex-wrap:wrap}
+  .stn .chip{flex-basis:100%;margin-top:6px}
+  table.eco th:nth-child(4),table.eco td:nth-child(4){display:none}
+}
+@media (prefers-reduced-motion:reduce){.sep{animation:none}}
+</style>
+</head>
+<body>
+<main>
+<nav class="crumbs" aria-label="you are here">
+  <a href="index.html">beehive nature reserve</a><span>▸</span><span class="here" data-i18n="genealogy.crumb">the bloodline</span>
+</nav>
+
+<header class="hd">
+  <div class="r" aria-hidden="true">⬡</div>
+  <div>
+    <h1><span data-i18n="genealogy.h1a">every blood relative,</span> <span data-i18n="genealogy.h1b">for millennia</span></h1>
+    <small data-i18n="genealogy.sub">bgenealogy · the blood fractal</small>
+  </div>
+</header>
+
+<!-- ── THE HONEST HERO ─────────────────────────────────────────── -->
+<section class="panel" aria-label="preservation state">
+  <div class="hero pstat"><span class="l" data-hero-caption data-i18n="genealogy.hero">measured preservation states · nothing synthetic</span>
+    <span class="big" id="hero-states" data-hero-number>0 / 5</span>
+    <span class="sub" id="hero-sub">quote · purchase · upload · retrieval · hash-verification — <b>none measured yet</b>. This number is filled by receipts, never by projection.</span></div>
+</section>
+
+<!-- ── THE JOURNEY — six stations ──────────────────────────────── -->
+<div class="area"><span data-i18n="genealogy.area.journey">the journey · six stations</span></div>
+<section class="panel" aria-label="the acceptance journey">
+  <div class="stn"><div class="n">1</div><div class="b">
+    <div class="t"><a href="profile.html" target="_blank" rel="noopener" data-i18n="genealogy.st1">the house profile</a></div>
+    <div class="d">the .b person profile already carries the house archive — crest, symbolism, consent-first lineage</div></div>
+    <span class="chip live">live</span></div>
+  <div class="stn"><div class="n">2</div><div class="b">
+    <div class="t" data-i18n="genealogy.st2">the crest</div>
+    <div class="d">von Zutphen, founder-supplied, byte-pinned in the estate tree — the blueprint record for .b houses</div></div>
+    <span class="chip live">byte-pinned</span></div>
+  <div class="stn"><div class="n">3</div><div class="b">
+    <div class="t" data-i18n="genealogy.st3">Albert Perry Rockwood · Donna</div>
+    <div class="d">the founder-designated <b>public demonstration path</b> — the case study a stranger can follow; staged with the zBlood seat, opening only after preservation and privacy review</div></div>
+    <span class="chip staged">staged · not yet public</span></div>
+  <div class="stn"><div class="n">4</div><div class="b">
+    <div class="t" data-i18n="genealogy.st4">the person archive</div>
+    <div class="d">person objects, evidence packs, biography · records · lore — owned by the zBlood seat; never published while anyone in them is living without consent</div></div>
+    <span class="chip staged">staged · not yet public</span></div>
+  <div class="stn"><div class="n">5</div><div class="b">
+    <div class="t" data-i18n="genealogy.st5">the blood fractal</div>
+    <div class="d">drawn below, live, from pure math — the shape of the search, in your page</div></div>
+    <span class="chip live">rendered live</span></div>
+  <div class="stn"><div class="n">6</div><div class="b">
+    <div class="t" data-i18n="genealogy.st6">evidence &amp; lore</div>
+    <div class="d">the layer that makes the fractal true — every node a citable source or an honest gap; waits on preservation</div></div>
+    <span class="chip notyet">waits on preservation</span></div>
+  <img class="crest" src="../assets/seals/house-crest-von-zutphen-DESIGN.svg" alt="the von Zutphen house crest — full achievement" loading="lazy" width="64" height="72">
+  <details data-reg-disclose>
+    <summary>crest digests (cypherpunk)</summary>
+    <div class="dbody">
+      profile archive mark sha256 <b>6303A842…E579088</b> · ceremonial master
+      sha256 <b>F9B2CE84…A331F40</b> — both PUBLIC-CONSTANT pins living in
+      <b>assets/profile-archive/house-crest-von-zutphen.json</b> with source,
+      rights (reserved until the holder publishes a license), and the
+      holder-authored-interpretation boundary. The crest certifies nothing:
+      interpretations are the holder's, historical claims carry sources or
+      stay unverified.
+    </div>
+  </details>
+</section>
+
+<!-- ── THE BLOOD FRACTAL ───────────────────────────────────────── -->
+<div class="area"><span data-i18n="genealogy.area.fractal">the blood fractal</span></div>
+<section class="panel" aria-label="the blood fractal">
+  <div class="frwrap">
+    <div class="frbox"><svg id="fractal" viewBox="0 0 900 460" role="img"
+      aria-label="an ancestor fan: one living node at the root, doubling every generation upward"></svg></div>
+    <div>
+      <div class="gens" id="gens">
+        <button data-g="4">4 gen</button>
+        <button data-g="6" class="pick">6 gen</button>
+        <button data-g="8">8 gen</button>
+        <button data-g="10">10 gen</button>
+      </div>
+      <p class="math" id="frmath">—</p>
+      <details data-reg-disclose>
+        <summary>why a fractal, not a census</summary>
+        <div class="dbody">
+          The doubling is the <b>shape of the desire</b> — every blood
+          relative, for millennia. Real pedigrees <b>collapse</b>: at ten
+          generations the 1,023 slots are fewer real people, because
+          ancestors repeat. The collapse is not an embarrassment — it is
+          exactly why the evidence layers exist: a repeated ancestor is a
+          claim to verify, not a node to double-count.
+        </div>
+      </details>
+      <p class="note" style="margin-top:10px"><b data-i18n="genealogy.fr.note">the living stay roles until they consent.</b> Named never Living — dates and places default private, DNA and health never default public. The fractal renders positions, not identities.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ── THE LAW OF FIVE STATES ──────────────────────────────────── -->
+<div class="area"><span data-i18n="genealogy.area.states">the law of five states</span></div>
+<section class="card" aria-label="preservation measured states">
+  <div class="line"><span><span data-i18n="genealogy.s.quoted">quoted</span><small>a live production price, timestamped, raw response preserved</small></span><b id="st-quoted" class="chip notyet" style="border:none">not yet</b></div>
+  <div class="line"><span><span data-i18n="genealogy.s.purchased">purchased</span><small>only after the approval gate binds exact manifest + destination</small></span><b id="st-purchased" class="chip notyet" style="border:none">not yet</b></div>
+  <div class="line"><span><span data-i18n="genealogy.s.uploaded">uploaded</span><small>to ANT, transaction and content addresses banked</small></span><b id="st-uploaded" class="chip notyet" style="border:none">not yet</b></div>
+  <div class="line"><span><span data-i18n="genealogy.s.retrieved">retrieved</span><small>from a fresh destination, not the upload cache</small></span><b id="st-retrieved" class="chip notyet" style="border:none">not yet</b></div>
+  <div class="line"><span><span data-i18n="genealogy.s.verified">hash-verified</span><small>every artifact against the approved manifest — only then: verified</small></span><b id="st-verified" class="chip notyet" style="border:none">not yet</b></div>
+  <p class="note"><b data-i18n="genealogy.s.gate">The gate, verbatim intent:</b> no purchase, no upload — until the preservation adversarial fixes are green and the founder binds the exact manifest and destination. Quote collection may start any time; money and publication follow the gate.</p>
+  <button class="btn2" id="readeco">Read the economics receipt ↻</button>
+  <div class="res" id="ecores" style="display:none"></div>
+  <details data-reg-disclose>
+    <summary>the one measured figure in the estate today (a different artifact, labeled)</summary>
+    <div class="dbody">
+      The Bux video quote (2026-09-17): <b>4.245934921875 ANT</b> for
+      <b>214,091,829 bytes</b>, 56 chunks, wave_batch — production Autonomi,
+      live keyless quote, receipted at
+      <b>docs/receipts/bpay-quote-try-autonomi-2026-09-17.md</b>. It is a
+      204 MiB <b>video</b>, not this family archive — quoted here only as
+      the proof that the quote machinery is real. Never mixed into this
+      archive's states.
+    </div>
+  </details>
+</section>
+
+<!-- ── THE STORAGE-ECONOMICS EXPERIMENT ────────────────────────── -->
+<div class="area"><span data-i18n="genealogy.area.eco">the storage-economics experiment</span></div>
+<section class="panel" aria-label="storage economics experiment">
+  <div class="livecard">⬡ <b>This family archive cost <span class="blank">___</span> ANT / <span class="blank">$___</span> to preserve on <span class="blank">___</span></b><br>
+  retrievals tested: <span class="blank">___</span> · developer egress bill: <span class="blank">___</span><br>
+  <span style="font-size:10.5px">populated by the first receipt — never a projection; the headline is not predetermined</span></div>
+  <table class="eco">
+    <thead><tr><th>retrievals</th><th>initial ANT</th><th>renewal</th><th>retrieval · egress</th><th>our infra</th></tr></thead>
+    <tbody id="ecotbody">
+      <tr><td>1</td><td class="await">awaiting receipt</td><td class="await">—</td><td class="await">—</td><td class="await">—</td></tr>
+      <tr><td>10</td><td class="await">same archive</td><td class="await">—</td><td class="await">—</td><td class="await">—</td></tr>
+      <tr><td>100</td><td class="await">same archive</td><td class="await">—</td><td class="await">—</td><td class="await">—</td></tr>
+      <tr><td>1,000</td><td class="await">same archive</td><td class="await">—</td><td class="await">—</td><td class="await">—</td></tr>
+      <tr><td>1,000,000</td><td class="await">same archive</td><td class="await">—</td><td class="await">—</td><td class="await">—</td></tr>
+    </tbody>
+  </table>
+  <p class="note">The question under test: does the estate's marginal obligation for an already-purchased immutable archive stay effectively unchanged as independent retrievals rise? <b>If reality disagrees, reality is reported.</b> The AR comparison quotes the identical manifest separately — compact permanent provenance on Arweave, payload on ANT, never an automatic duplicate.</p>
+</section>
+
+<!-- ── THE EVIDENCE LAYERS ─────────────────────────────────────── -->
+<div class="area"><span data-i18n="genealogy.area.layers">the evidence layers</span></div>
+<section class="panel" aria-label="the evidence layer laws">
+  <div class="layer"><div class="g" aria-hidden="true">⧗</div><div>
+    <div class="t" data-i18n="genealogy.l.era">era ≠ support</div>
+    <div class="d">when a claim was made and what backs it are <b>two different axes</b> — an old claim with a weak source is old, not strong; they never merge into one score.</div></div></div>
+  <div class="layer"><div class="g" aria-hidden="true">✶</div><div>
+    <div class="t" data-i18n="genealogy.l.myth">mythology ≠ tradition</div>
+    <div class="d">Seiðr and family lore are rendered as <b>holder-attributed interpretation</b> — attribution is never verification; a story stays a story until a source says otherwise.</div></div></div>
+  <div class="layer"><div class="g" aria-hidden="true">⎔</div><div>
+    <div class="t" data-i18n="genealogy.l.ver">reconstructions are versioned</div>
+    <div class="d">a new edition of the tree <b>never erases the last</b> — every revision stays reachable, superseded ≠ deleted.</div></div></div>
+  <div class="layer"><div class="g" aria-hidden="true">⚘</div><div>
+    <div class="t" data-i18n="genealogy.l.living">the living are roles until they consent</div>
+    <div class="d">named never Living — a grandparent slot renders as a role, not an identity, until the person consents; DNA and health data never default public.</div></div></div>
+  <div class="layer"><div class="g" aria-hidden="true">⌗</div><div>
+    <div class="t" data-i18n="genealogy.l.counts">citations connect claims to evidence · support is assessed per claim</div>
+    <div class="d">how many records exist stays inventory; a citation <b>connects a claim to its evidence</b> — support is assessed per claim, never scored into one badge.</div></div></div>
+</section>
+
+<!-- ── THE PUBLIC DEMONSTRATION PATH ───────────────────────────── -->
+<div class="area"><span data-i18n="genealogy.area.demo">the public demonstration path</span></div>
+<section class="card" aria-label="public demonstration path">
+  <p class="note" style="margin:0 0 8px">A stranger opens a real ancestor — <b>Albert Perry Rockwood</b>, with <b>Donna</b> beside him — reads the biography, inspects the records, meets the lore <b>labeled as lore</b>, traverses the fractal, and retrieves the underlying archived evidence from the network itself. That is the case study that makes this understandable to a stranger. Browsing what is already available never waits on preservation — the archive’s purchase is the estate’s affair, never the reader’s gate.</p>
+  <div class="line"><span>biography · records · lore<small>person archive, staged with the zBlood seat</small></span><b class="chip staged" style="border:none">staged</b></div>
+  <div class="line"><span>the fractal traversal<small>rendered on this page from math; person nodes attach when the archive opens</small></span><b class="chip live" style="border:none">shape ready</b></div>
+  <div class="line"><span>archived evidence retrieval<small>the five states above — opens the day they turn verified</small></span><b class="chip notyet" style="border:none">not yet</b></div>
+</section>
+
+<footer class="foot">
+  <b data-i18n="genealogy.f.bee">new bee:</b> <span>follow one real ancestor and see the whole idea.</span> ·
+  <b data-i18n="genealogy.f.raver">raver:</b> <span>a thousand ancestors fan out from you — that's the shape of the search.</span> ·
+  <b data-i18n="genealogy.f.cypher">cypherpunk:</b> <span>five measured states, evidence layers kept distinct, digests pinned, living privacy by construction</span> —
+  <a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/orders/2026-09-16-zblood-storage-economics-mission.md">the mission order</a> ·
+  <a href="profile.html">the house profile</a><br>
+  quote ≠ purchased ≠ uploaded ≠ retrieved ≠ hash-verified — five states, never collapsed ·
+  economics filled by <a href="blood-economics.json">blood-economics.json</a> when the first receipt exists, and never before
+</footer>
+</main>
+
+<script>
+/* ════════════════════════════════════════════════════════════════
+   THE BLOOD FRACTAL — pure local SVG, zero requests, honest math.
+   The fan: one living node at the root, doubling every generation
+   upward. Slot counts are exact (2^g per generation, 2^n−1 total);
+   real ancestor counts are FEWER (pedigree collapse) and the page
+   says so where it draws the shape. */
+'use strict';
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const GOLD = '255,179,71', GREEN = getComputedStyle(document.documentElement).getPropertyValue('--ok').trim() || '5,200,120';
+function hexPoints(cx, cy, r){ const p = [];
+  for (let i = 0; i < 6; i++) { const a = Math.PI / 180 * (60 * i - 90);
+    p.push((cx + r * Math.cos(a)).toFixed(1) + ',' + (cy + r * Math.sin(a)).toFixed(1)); }
+  return p.join(' '); }
+let FRG = 6;
+function renderFractal(){
+  const svg = $('fractal'), W = 900, H = 460, gens = FRG;
+  const rootY = H - 26, topY = 30;
+  const rows = [];
+  let out = '';
+  /* the living root — green, the only living node on the chart */
+  const rootX = W / 2;
+  out += `<polygon points="${hexPoints(rootX, rootY, 13)}" fill="rgba(${GREEN},.9)"/>`;
+  out += `<line x1="${rootX}" y1="${rootY - 13}" x2="${rootX}" y2="${rootY - 26}" stroke="rgba(${GOLD},.35)" stroke-width="1"/>`;
+  out += `<text x="${rootX}" y="${rootY + 26}" fill="var(--ok)" font-size="11" text-anchor="middle">you · living</text>`;
+  /* generations fan upward: gen g (1..gens) has 2^g slots */
+  const gapY = (rootY - 40 - topY) / Math.max(1, gens - 1);
+  for (let g = 1; g <= gens; g++) {
+    const n = Math.pow(2, g);
+    const y = rootY - 40 - (g - 1) * gapY;
+    const spread = Math.min(W - 40, 90 * Math.pow(g, 1.35));
+    const r = Math.max(2.2, 7 - g * 0.45);
+    const alpha = Math.max(.22, .85 - g * 0.075);
+    const step = spread / Math.max(1, n - 1);
+    const x0 = rootX - spread / 2;
+    for (let i = 0; i < n; i++) {
+      const x = n === 1 ? rootX : x0 + i * step;
+      /* parent line: slot i in gen g descends from floor(i/2) in gen g-1 */
+      if (g === 1) out += `<line x1="${x}" y1="${y + r}" x2="${rootX}" y2="${rootY - 13}" stroke="rgba(${GOLD},${alpha * .5})" stroke-width=".7"/>`;
+      else {
+        const pm = rows[g - 2], pn = Math.pow(2, g - 1);
+        const pspread = Math.min(W - 40, 90 * Math.pow(g - 1, 1.35));
+        const pstep = pspread / Math.max(1, pn - 1);
+        const px = pn === 1 ? rootX : (rootX - pspread / 2) + Math.floor(i / 2) * pstep;
+        out += `<line x1="${x}" y1="${y + r}" x2="${px.toFixed(1)}" y2="${(pm.y - r).toFixed(1)}" stroke="rgba(${GOLD},${alpha * .35})" stroke-width=".5"/>`;
+      }
+      out += `<polygon points="${hexPoints(x, y, r)}" fill="rgba(${GOLD},${alpha})"/>`;
+    }
+    rows.push({ y });
+    /* era label on the left margin — generation, not identity */
+    out += `<text x="8" y="${y + 4}" fill="var(--faint)" font-size="10">g${g}</text>`;
+  }
+  svg.innerHTML = out;
+  const last = Math.pow(2, gens), ancestors = Math.pow(2, gens + 1) - 2, total = ancestors + 1;
+  $('frmath').innerHTML = `<b>${gens} generations</b> → <b>${last.toLocaleString('en-US')}</b> slots in the last row · <b>${ancestors.toLocaleString('en-US')}</b> ancestor positions beside you (2<sup>${gens + 1}</sup>−2) · <b>${total.toLocaleString('en-US')}</b> nodes drawn in all, root included — real people fewer: pedigrees collapse, and the collapse is evidence's work, not the chart's`;
+  document.querySelectorAll('#gens button').forEach(b =>
+    b.classList.toggle('pick', +b.dataset.g === gens));
+}
+document.querySelectorAll('#gens button').forEach(b =>
+  b.addEventListener('click', () => { FRG = +b.dataset.g; renderFractal(); }));
+renderFractal();
+window.__blood = { gens: () => FRG };   // e2e readback hook
+
+/* ── the economics receipt reader — gesture-gated, honest when absent.
+   Nothing auto-fetches at page-open (instant-at-rest); the button reads
+   blood-economics.json only when a stranger asks, and an absent receipt
+   renders a named empty state, never a guess. */
+$('readeco').addEventListener('click', async () => {
+  const box = $('ecores'); box.style.display = 'block';
+  box.innerHTML = '<span class="hold">reading…</span>';
+  /* the incumbent receipt first (the genealogy lane's own artifact); the
+     consolidated name stays a fallback — a missing filename is never
+     evidence that nothing was measured */
+  const CANDIDATES = ['assets/profile-archive/lineage/zblood-storage-economics.json', 'blood-economics.json'];
+  let j = null, unreachable = false, invalid = null;
+  for (const path of CANDIDATES) {
+    try {
+      const r = await fetch(path, { signal: AbortSignal.timeout(10000) });
+      if (!r.ok) continue;                     /* try the next name */
+      const text = await r.text();
+      try { const p = JSON.parse(text); if (p && typeof p === 'object' && (p.states || p.quotes)) { j = p; } else { invalid = path + ' — shape not recognized'; } }
+      catch { invalid = path + ' — not valid JSON'; }
+      break;
+    } catch { unreachable = true; }
+  }
+  const done = what => { box.innerHTML = what; };
+  if (!j) {
+    if (unreachable) return done('<span class="hold">receipt unreachable.</span> The read timed out or the server did not answer — this says nothing about the archive\u2019s measurements; try again.');
+    if (invalid) return done('<span class="hold">receipt invalid.</span> ' + invalid + ' — a malformed receipt is named, never smoothed over.');
+    return done('<span class="hold">receipt absent here.</span> The archive\u2019s economics live in <b>assets/profile-archive/lineage/zblood-storage-economics.json</b> on the genealogy lane (lane/zcode-lineage-import, zblood.storage-economics/1) — a dated Arweave quote and a qualified Autonomi estimate are already recorded there. This page will not pretend nothing was measured; it fills the moment its owner lands the artifact.');
+  }
+  /* schema-tolerant five-state derivation — the incumbent's 'quoted' is a
+     QUALIFIED TEXT (counts as measured, shown verbatim); the rest are
+     booleans; hash-verification answers to either key name */
+  const st = j.states || {};
+  const five = [
+    ['quoted',    !!st.quoted,                                   typeof st.quoted === 'string' ? st.quoted : ''],
+    ['purchased', st.purchased === true,                          ''],
+    ['uploaded',  st.uploaded === true,                           ''],
+    ['retrieved', st.retrieved === true,                          ''],
+    ['verified',  st.hashVerifiedFromStorage === true || st.hash_verified === true, ''],
+  ];
+  const measured = five.filter(f => f[1]).length;
+  five.forEach(([k, is, detail]) => {
+    const chip = $('st-' + k); if (!chip) return;
+    chip.textContent = is ? 'measured' : 'not yet';
+    chip.className = is ? 'chip live' : 'chip notyet';
+    if (chip.style) chip.style.border = 'none';
+    if (is && detail) chip.title = detail;   /* the qualified text rides verbatim */
+  });
+  $('hero-states').textContent = measured + ' / 5';
+  /* the live card fills from the receipt's own computed numbers, verbatim */
+  const ar = j.quotes && j.quotes.arweave, c = ar && ar.computed;
+  if (c && c.fullArchiveAR != null) {
+    const when = (ar.queriedAt || '').replace('T', ' ').slice(0, 16);
+    document.querySelector('.livecard').innerHTML =
+      '\u2b21 <b>This family archive quoted ' + c.fullArchiveAR + ' AR \u2248 $' + c.fullArchiveUSD +
+      ' to preserve on Arweave (' + when + ' UTC)</b> \u2014 QUOTE ONLY, not yet paid<br>' +
+      'retrievals tested: <span class="blank">___</span> \u00b7 developer egress bill: <span class="blank">___</span><br>' +
+      '<span style="font-size:10.5px">filled verbatim from zblood-storage-economics.json; the not-paid states stay not-paid until their receipts exist</span>';
+  }
+  done('<span class="ok">receipt read.</span> ' + measured + ' of 5 states measured \u2014 the qualified detail rides each chip verbatim; the retrieval-scale legs stay awaiting until the purchased archive exists. Nothing on this page is a projection.');
+  window.dispatchEvent(new CustomEvent('blood-eco', { detail: j }));
+});
+</script>
+<script src="tour.js?v=42"></script>
+</body>
+</html>

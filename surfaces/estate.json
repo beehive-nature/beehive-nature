@@ -751,6 +751,13 @@
    "name": "two tabs, one shared field",
    "state": "working",
    "i18n": "s.forge-room"
+  },
+  {
+   "file": "blood.html",
+   "domain": "nature",
+   "name": "every blood relative, for millennia",
+   "state": "partly",
+   "i18n": "s.blood"
   }
  ]
 }
