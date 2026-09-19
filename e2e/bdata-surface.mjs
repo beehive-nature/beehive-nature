@@ -34,6 +34,7 @@ const results = [];
 const check = (name, ok, detail = '') => { results.push({ name, ok, detail }); console.log(`${ok ? '✓' : '✗'} ${name}${detail ? ' — ' + detail : ''}`); };
 let lastMockCount = 0; // the mock's request counter, mirrored for assertions
 let mockRequests = 0; // module scope: one counter for the server's lifetime (a per-request `let` made every request "#1" — every response a 502)
+let authRecords = []; // module scope too — same law: server-lifetime state never lives inside the request handler
 
 const refInvoice = JSON.parse(await readFile(join(SURFACES, 'bpay-invoice.json'), 'utf8'));
 const ant = refInvoice.lines.find(l => l.asset === 'ANT');
@@ -55,19 +56,49 @@ const server = createServer(async (req, res) => {
       res.writeHead(400); res.end('MOCK: request must carry {artifact pin, audience:public, force_fresh}'); return;
     }
     if (mockRequests === 1) { res.writeHead(502); res.end('insufficient peers: Got 0 quotes (MOCK flake)'); return; }
+    // the mock speaks the CURRENT founder invoice's language (same totals, same
+    // carried quotes) so the gate exercises the REAL cross-checks end to end
+    const founderInv = JSON.parse(await readFile(join(SURFACES, 'bpay-invoice-founder.json'), 'utf8'));
+    const fl = founderInv.lines.find(l => l.asset === 'ANT');
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({
-      upload_id: 'up-MOCK', artifact_sha256: refInvoice.domain.artifact.sha256, artifact_bytes: refInvoice.domain.artifact.bytes,
+      upload_id: 'up-MOCK', artifact_sha256: founderInv.domain.artifact.sha256, artifact_bytes: founderInv.domain.artifact.bytes,
       total_chunks: 3, already_stored: 0, payment_type: 'wave_batch',
-      total_amount_atto: '4200000000000000000',
-      payments: [
-        { quote_hash: '0xaaaa00000000000000000000000000000000000000000000000000000000c001', amount_atto: '1500000000000000000' }, // PUBLIC-CONSTANT: synthetic mock quote id (test fixture, never a network quote)
-        { quote_hash: '0xbbbb00000000000000000000000000000000000000000000000000000000c002', amount_atto: '1400000000000000000' }, // PUBLIC-CONSTANT: synthetic mock quote id (test fixture, never a network quote)
-        { quote_hash: '0xcccc00000000000000000000000000000000000000000000000000000000c003', amount_atto: '1300000000000000000' }, // PUBLIC-CONSTANT: synthetic mock quote id (test fixture, never a network quote)
-      ],
+      total_amount_atto: fl.amountAtto,
+      payments: fl.quotes.map(q => ({ quote_hash: q.quote_hash, amount_atto: q.amount_atto })),
       policy: { audience: 'public', binding: 'founder-selected:public' },
       note: 'MOCK-SYNTHETIC — never a network quote',
     }));
+    return;
+  }
+  // MOCK authorization organ — validates the founder-shaped request server-side:
+  // digest lineage, exact ceiling, audience binding, gas separation; NO silent
+  // requote (a second create with a stale digest is refused); cancel is clean.
+  if (url === '/mock-bridge/v1/authorization' && req.method === 'POST') {
+    let body = '';
+    for await (const chunk of req) body += chunk;
+    const a = JSON.parse(body);
+    const founderInv = JSON.parse(await readFile(join(SURFACES, 'bpay-invoice-founder.json'), 'utf8'));
+    const fl = founderInv.lines.find(l => l.asset === 'ANT');
+    if (a.audience !== 'public' || !String(a.gesture || '').includes('founder press')) { res.writeHead(400); res.end('MOCK: gesture/audience malformed'); return; }
+    if (a.invoice_digest !== founderInv.identity.contentDigest || a.commitment_digest !== founderInv.commitment.digest) { res.writeHead(409); res.end('MOCK: digest mismatch — stale lineage refused'); return; }
+    if (a.ant_ceiling_atto !== fl.amountAtto) { res.writeHead(409); res.end('MOCK: ceiling must be exact'); return; }
+    const rec = { authorization_id: 'auth-MOCK-1', state: 'authorized-for-signing', invoice_digest: a.invoice_digest, ant_ceiling_atto: a.ant_ceiling_atto, events: [{ kind: 'authorized-for-signing' }] };
+    authRecords.push(rec);
+    res.writeHead(201, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify(rec));
+    return;
+  }
+  if (url === '/mock-bridge/v1/authorization/cancel' && req.method === 'POST') {
+    let body = '';
+    for await (const chunk of req) body += chunk;
+    const { authorization_id } = JSON.parse(body);
+    const rec = authRecords.find(r => r.authorization_id === authorization_id);
+    if (!rec) { res.writeHead(404); res.end('unknown'); return; }
+    rec.state = 'cancelled';
+    rec.events.push({ kind: 'cancelled' });
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify(rec));
     return;
   }
   const p = (url === '/' ? '/bdata.html' : url);
@@ -132,7 +163,8 @@ const urlBefore = page.url();
 await page.waitForTimeout(500);
 check('price ask started automatically with the gesture (no second press)', lastMockCount >= 1, `requests=${lastMockCount}`);
 await page.waitForSelector('[data-bdata-fresh-atto]', { timeout: 12000 });
-const MOCK_TOTAL = '4200000000000000000';
+const founderInvDoc = JSON.parse(await readFile(join(SURFACES, 'bpay-invoice-founder.json'), 'utf8'));
+const MOCK_TOTAL = founderInvDoc.lines.find(l => l.asset === 'ANT').amountAtto;
 const freshAtto = await page.$$eval('[data-bdata-fresh-atto]', els => els.map(e => e.dataset.bdataFreshAtto).join(','));
 check('fresh price rendered IN PLACE after the auto-retry recovered the flake', freshAtto === MOCK_TOTAL, `fresh=${freshAtto} requests=${lastMockCount}`);
 check('the flake auto-retried exactly once (2 requests, not a loop)', lastMockCount === 2, `requests=${lastMockCount}`);
@@ -145,20 +177,48 @@ await page.click('[data-bdata-price-refresh]');
 await page.waitForTimeout(600);
 check('refresh asks the network again on demand', lastMockCount === beforeRefresh + 1, `${beforeRefresh}→${lastMockCount}`);
 
+// 6 · THE AUTHORIZATION STEP (Phase C) — one founder-reviewed object, bound to
+// the exact invoice lineage; the press creates intent only; cancel is clean.
+// NOTE: the mock's prepare returns totals from the COMMITTED founder invoice so
+// the gate exercises the REAL cross-check (cached price vs current invoice).
+check('review affordance present after the price', !!(await page.$('[data-bdata-review-open]')));
+await page.click('[data-bdata-review-open]');
+await page.waitForTimeout(300);
+const panelText = await page.$$eval('[data-bdata-review-panel]', els => els.length ? els[0].innerText : '');
+check('review panel shows the invoice digest + lineage', /invoice/i.test(panelText) && /sha256:/i.test(panelText));
+check('review panel binds the exact artifact identity', panelText.includes('try_autonomi.mp4') && panelText.includes('214,091,829'));
+check('review panel shows audience = founder-selected, origin My Data', /founder-selected/i.test(panelText) && /My Data/i.test(panelText));
+check('review panel: ANT ceiling exact, never above', /ceiling/i.test(panelText) && /exact, never above/i.test(panelText));
+check('review panel: gas separate', /separate/i.test(panelText) && /Arbitrum/i.test(panelText));
+check('review panel: freshness + single-use (digest wall)', /single-use/i.test(panelText) && /re-quote voids/i.test(panelText));
+check('review panel: nothing paid + intent cannot move value', /Nothing has been paid/i.test(panelText) && /cannot move value/i.test(panelText));
+check('NO signing path exposed (no pay route strings)', !/Review & Pay|review-pay|bpay-invoice-review-pay/i.test(panelText));
+await page.click('[data-bdata-auth-go]');
+await page.waitForTimeout(700);
+const authText = await page.innerText('body');
+check('the press creates the authorization record (authorized-for-signing)', /Authorized for signing/i.test(authText) && /auth-MOCK-1/.test(authText));
+check('history appends the authorization edition', (await page.$$eval('[data-bdata-history]', els => els.length)) === 2,
+  `editions so far: origin + authorization`);
+await page.$eval('[data-bdata-auth-cancel]', el => el.click()); // DOM-native click on the live node (render-rebuild races lose Playwright clicks)
+await page.waitForTimeout(600);
+const cancelText = await page.innerText('body');
+check('cancellation is clean — no paid or uploaded state exists', /Cancelled/i.test(cancelText) && /no paid or uploaded state/i.test(cancelText),
+  `live-auth=${JSON.stringify(await page.evaluate(() => window.__bdata.authorization))} snippet=${JSON.stringify((await page.$$eval('[data-bdata-review]', els => els.map(e => e.innerText.slice(0, 90)))).join(' || '))}`);
+
 // 5 · automation — first-class, persisted, supersede-not-mutate
-// (history already carries edition 1 = the ORIGIN audience gesture above)
+// (history already carries: edition 1 = origin gesture, edition 2 = authorization)
 check('automation default Ask me', (await page.$eval('[data-bdata-auto-mode]', e => e.dataset.bdataAutoMode)) === 'ask');
 await page.click('[data-bdata-auto="never"]');
 await page.waitForTimeout(200);
 let hist = await page.$$eval('[data-bdata-history]', els => els.length);
-check('policy change appends history (2 editions: origin + automation)', hist === 2, `history=${hist}`);
+check('policy change appends history (4 editions: origin + auth + authcancel + automation)', hist === 4, `history=${hist}`);
 const lsMode = await page.evaluate(() => JSON.parse(localStorage.getItem('bdata-v1')).automation.mode);
 check('automation persists (localStorage)', lsMode === 'never', lsMode);
 await page.click('[data-bdata-auto="ask"]');
 await page.waitForTimeout(200);
 hist = await page.$$eval('[data-bdata-history]', els => els.length);
 const editions = await page.$$eval('[data-bdata-history]', els => els.map(e => e.innerText));
-check('second change appends, origin edition intact (3 editions)', hist === 3 && editions.some(t => /Public/.test(t)) && editions.some(t => /never/i.test(t)), `history=${hist}`);
+check('second change appends, all editions intact (5)', hist === 5 && editions.some(t => /Public/.test(t)) && editions.some(t => /never/i.test(t)) && editions.some(t => /authorization/i.test(t)), `history=${hist}`);
 
 // 6 · inspection depth — anatomy without authority
 await page.click('[data-bdata-insp="cypherpunk"]');

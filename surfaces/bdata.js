@@ -16,14 +16,16 @@
 (function(){
   var T = (window.BNRLanguage && window.BNRLanguage.text) ? window.BNRLanguage.text.bind(window.BNRLanguage) : function(k,f){return f;};
   var LS = 'bdata-v1';
-  var st = { inspection:'newbee', automation:{ mode:'ask', boundAnt:'0.5' }, history:[], bridge:'http://127.0.0.1:8807', freshQuote:null };
+  var st = { inspection:'newbee', automation:{ mode:'ask', boundAnt:'0.5' }, history:[], bridge:'http://127.0.0.1:8807', freshQuote:null, authorization:null };
   try { var sv = JSON.parse(localStorage.getItem(LS)||'null'); if (sv && typeof sv==='object') st = Object.assign(st, sv); if(!Array.isArray(st.history)) st.history=[]; } catch(e){}
   function save(){ try { localStorage.setItem(LS, JSON.stringify(st)); } catch(e){} }
+  window.__bdata = st; // test hook: the gate reads live state directly
   function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;'); }
   function ant(atto){ try{ var n=BigInt(atto), w=n/10n**18n, f=(n%10n**18n).toString().padStart(18,'0').replace(/0+$/,''); return f? w+'.'+f : String(w); }catch(e){ return '?'; } }
   function note(what){ st.history.unshift({ at: new Date().toISOString(), what }); if (st.history.length > 40) st.history.length = 40; save(); }
 
-  var INV = null; // the reference commitment — fetched mechanically, never retyped
+  var INV = null;    // the reference commitment (machine) — fetched mechanically, never retyped
+  var FINV = null;   // the CURRENT founder invoice — the authorization binds THIS lineage
 
   var UNAVAIL = [
     { id:'only-me', reason:'private-DataMap custody path not yet qualified' },
@@ -84,7 +86,7 @@
           h += '<div style="margin-top:6px;text-align:center"><button type="button" data-bdata-price-refresh="1" style="padding:5px 12px;border:1px solid #1d4655;border-radius:8px;background:transparent;color:inherit;cursor:pointer;font-size:11px">↻ ' + T('bd.price.refresh','refresh the price') + '</button> <span style="font-size:10px;opacity:.55">' + T('bd.price.cached','cached — shown instantly; a refresh asks the network again') + '</span></div>';
         }
         h += '<div class="law" style="margin-top:8px;text-align:center" id="bdata-price-stat"></div>';
-        h += '<div style="margin-top:8px;padding:8px 10px;border:1px dashed #1d4655;border-radius:8px;font-size:11px;color:var(--dim);text-align:center" data-bdata-authorize-next="1">🔒 ' + T('bd.price.next','Authorize — the payment step is not built yet; nothing can be paid from this page') + '</div>';
+        h += authorizeStep(st.freshQuote);
         h += '<div class="row" style="margin-top:8px;gap:6px 18px;flex-wrap:wrap;font-size:11px;justify-content:center;opacity:.7"><span>' + T('bd.price.reference','reference (machine, not chosen by you)') + ': ' + ant(line.amountAtto) + ' ANT</span></div>';
         h += '</div>';
         h += '<div class="row" data-bdata-bridge-row style="margin-top:6px;gap:8px;align-items:center;display:none"><span style="font-size:11px;opacity:.8">' + T('wl.bpay.bridge','quote service') + ':</span><input id="bdata-bridge" value="' + esc(st.bridge) + '" style="background:#0b1e26;border:1px solid #1d4655;color:inherit;border-radius:6px;padding:3px 8px;font-size:11px;font-family:monospace" /></div>';
@@ -208,6 +210,15 @@
     if (quoteGo) quoteGo.addEventListener('click', function(){ fetchPrice(); });
     var priceRefresh = document.querySelector('[data-bdata-price-refresh]');
     if (priceRefresh) priceRefresh.addEventListener('click', function(){ fetchPrice(); });
+    var reviewOpen = document.querySelector('[data-bdata-review-open]');
+    if (reviewOpen) reviewOpen.addEventListener('click', function(){
+      var host = document.querySelector('[data-bdata-review]');
+      if (host) host.innerHTML = reviewPanel();
+      var go = document.querySelector('[data-bdata-auth-go]');
+      if (go) go.addEventListener('click', authorizePress);
+    });
+    var authCancel = document.querySelector('[data-bdata-auth-cancel]');
+    if (authCancel) authCancel.addEventListener('click', cancelPress);
     var bridgeInput = document.getElementById('bdata-bridge');
     if (bridgeInput) bridgeInput.addEventListener('change', function(){ st.bridge = bridgeInput.value.trim() || 'http://127.0.0.1:8807'; save(); });
     /* THE ORIGIN GESTURE — selecting Public in My Data. The click records the
@@ -253,7 +264,117 @@
     });
   }
 
+  /* ── THE AUTHORIZATION STEP (Phase C) ──────────────────────────────────────
+     One founder-reviewed authorization object, bound to the exact open job and
+     invoice lineage, BEFORE any signing path exists. The press creates intent
+     only: nothing is signed, nothing is paid, nothing is uploaded — signing is
+     Phase E, and it may not begin until a signature succeeds. The bridge
+     enforces every binding at creation (digest wall = no silent requote; the
+     ceiling is exact; the audience must be the founder-selected one). */
+  function authorizeStep(fq){
+    if (!fq) return '<div style="margin-top:8px;padding:8px 10px;border:1px dashed #1d4655;border-radius:8px;font-size:11px;color:var(--dim);text-align:center" data-bdata-authorize-next="1">🔒 ' + T('bd.price.next','Authorize — the payment step is not built yet; nothing can be paid from this page') + '</div>';
+    var fl = FINV && (FINV.lines||[]).filter(function(l){return l.asset==='ANT';})[0];
+    if (!fl || fl.amountAtto !== fq.totalAtto) {
+      return '<div style="margin-top:8px;padding:8px 10px;border:1px dashed #1d4655;border-radius:8px;font-size:11px;color:var(--amber);text-align:center" data-bdata-review-stale="1">⚠ ' + T('bd.auth.warncache','your cached price does not match the current invoice — refresh the price first; the authorization binds the live quote, never a stale one') + '</div>';
+    }
+    var d = FINV.domain||{}, a = d.artifact||{}, aud = d.policy&&d.policy.audience||{};
+    var auth = st.authorization;
+    var h = '<div style="margin-top:10px;padding:12px;border:1px solid #2c4a5a;border-radius:12px" data-bdata-review="1">';
+    if (auth && auth.state === 'authorized-for-signing') {
+      h += '<div style="font-size:13px;text-align:center">🔑 ' + T('bd.auth.done','Authorized for signing — nothing signed, nothing paid; signing arrives with Phase E') + '</div>';
+      h += '<div class="law" style="text-align:center;margin-top:2px">auth <span class="mono">' + esc(auth.id) + '</span> · ' + T('bd.auth.cancelnote','cancellation is always lawful before a signature exists') + '</div>';
+      h += '<div style="margin-top:8px;text-align:center"><button type="button" data-bdata-auth-cancel="1" style="padding:8px 16px;border:1px solid #1d4655;border-radius:8px;background:transparent;color:inherit;cursor:pointer;font-size:13px">✕ ' + T('bd.auth.cancel','Cancel authorization') + '</button></div>';
+      h += '</div>';
+      return h;
+    }
+    if (auth && auth.state === 'cancelled') {
+      h += '<div style="font-size:12px;text-align:center;color:var(--dim)">✕ ' + T('bd.auth.cancelled','Cancelled — no paid or uploaded state exists') + '</div>';
+      h += '<div style="margin-top:6px;text-align:center"><button type="button" data-bdata-review-open="1" style="padding:8px 16px;border:1px solid #1d4655;border-radius:8px;background:transparent;color:inherit;cursor:pointer;font-size:12px">' + T('bd.auth.review','Review what you are authorizing') + '</button></div>';
+      h += '</div>';
+      return h;
+    }
+    h += '<div style="margin-top:8px;text-align:center"><button type="button" data-bdata-review-open="1" style="padding:12px 16px;border:1px solid #2c4a5a;border-radius:10px;background:#0e2d3a;color:var(--cyan);font-size:15px;font-weight:600;cursor:pointer">➜ ' + T('bd.auth.review','Review what you are authorizing') + '</button></div>';
+    h += '</div>';
+    return h;
+  }
+
+  function reviewPanel(){
+    var fq = st.freshQuote; if (!fq || !FINV) return;
+    var d = FINV.domain||{}, a = d.artifact||{}, aud = d.policy&&d.policy.audience||{};
+    var line = (FINV.lines||[]).filter(function(l){return l.asset==='ANT';})[0];
+    var h = '<div style="margin-top:10px;padding:12px;border:1px solid var(--gold);border-radius:12px" data-bdata-review-panel="1">';
+    h += '<div style="font-size:13px;font-weight:600;text-align:center">' + T('bd.auth.h','What you are authorizing') + '</div>';
+    function row(k, v){ return '<div class="row" style="margin-top:6px;gap:8px;font-size:12px;flex-wrap:wrap"><span style="min-width:110px;color:var(--dim)">' + k + '</span><span class="mono" style="flex:1;min-width:200px">' + v + '</span></div>'; }
+    h += row(T('bd.auth.invoice','invoice'), esc((FINV.identity&&FINV.identity.contentDigest)||'') + ' <span style="opacity:.6">(' + T('bd.auth.lineage','lineage') + ': ' + esc(String((FINV.identity&&FINV.identity.priorDigest)||'').slice(0,23)) + '…)</span>');
+    h += row('artifact', esc(a.name) + ' · ' + a.bytes.toLocaleString('en-US') + ' B · sha256 ' + esc(String(a.sha256).slice(0,12)) + '…');
+    h += row(T('wl.bpay.audience','audience'), '🌐 public — <b>' + T('bd.auth.binding','founder-selected, origin My Data') + '</b>');
+    h += row(T('bd.auth.ceiling','ANT ceiling'), '<b>' + ant(line.amountAtto) + ' ANT</b> — ' + T('bd.auth.exact','exact, never above'));
+    h += row(T('bd.auth.gas','gas'), '⛽ ' + T('bd.auth.gasnote','separate — Arbitrum ETH, wallet-side at signing; never folded into storage'));
+    h += row(T('bd.auth.fresh','freshness'), T('wl.bpay.fresh','quote obtained') + ' ' + String(fq.obtainedAt).replace('T',' ').replace(/\.\d+Z$/,' UTC') + ' · ' + T('bd.auth.singleuse','single-use — a re-quote voids this authorization automatically (the digest wall)'));
+    h += '<div style="margin-top:8px;font-size:11px;color:var(--dim)">' + T('bd.auth.stops','stop conditions') + ': ' + ((FINV.authorization&&FINV.authorization.stopConditions)||[T('bd.auth.stopquote','quote set superseded or consumed'),T('bd.auth.stopartifact','artifact identity mismatch')]).map(esc).join(' · ') + '</div>';
+    h += '<div class="law" style="margin-top:8px;text-align:center"><b>' + T('wl.bpay.nothingpaid','Nothing has been paid.') + '</b> ' + T('bd.auth.noroute','This press creates a bounded intent to sign — it cannot move value; signing is Phase E and starts only from this authorization.') + '</div>';
+    h += '<div style="margin-top:8px;text-align:center"><button type="button" data-bdata-auth-go="1" style="padding:12px 20px;border:1px solid var(--gold);border-radius:10px;background:#0e2d3a;color:var(--gold);font-size:15px;font-weight:700;cursor:pointer">🔑 ' + T('bd.auth.go','I authorize this') + '</button></div>';
+    h += '<div class="law" style="margin-top:4px;text-align:center" id="bdata-auth-stat"></div>';
+    h += '</div>';
+    return h;
+  }
+
+  function authorizePress(){
+    var stat = document.getElementById('bdata-auth-stat');
+    var fq = st.freshQuote; if (!fq || !FINV) return;
+    if (stat) stat.textContent = '…';
+    var fl = (FINV.lines||[]).filter(function(l){return l.asset==='ANT';})[0];
+    fetch(st.bridge.replace(/\/$/,'') + '/v1/authorization', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        upload_id: fq.uploadId,
+        invoice_digest: FINV.identity.contentDigest,
+        commitment_digest: FINV.commitment.digest,
+        artifact_sha256: FINV.domain.artifact.sha256,
+        artifact_bytes: FINV.domain.artifact.bytes,
+        audience: 'public',
+        ant_ceiling_atto: fl.amountAtto,
+        gas_ceiling: 'separate — wallet-side at signing',
+        stop_conditions: (FINV.authorization && FINV.authorization.stopConditions) || [],
+        gesture: 'founder press in My Data @ ' + new Date().toISOString()
+      })
+    }).then(function(r){
+      if (!r.ok) return r.text().then(function(t){ throw new Error('HTTP ' + r.status + (t ? ' — ' + t.slice(0,180) : '')); });
+      return r.json();
+    }).then(function(rec){
+      st.authorization = { id: rec.authorization_id, state: rec.state };
+      save();
+      note(T('bd.hist.auth','authorization ') + rec.authorization_id + ' — ' + T('bd.hist.authnote','founder press in My Data; authorized-for-signing; nothing signed/paid/uploaded'));
+      render();
+    }).catch(function(e){
+      if (stat) stat.textContent = '⚠ ' + (e && e.message ? String(e.message).slice(0,180) : 'error');
+    });
+  }
+
+  function cancelPress(){
+    if (!st.authorization || !st.authorization.id) return;
+    fetch(st.bridge.replace(/\/$/,'') + '/v1/authorization/cancel', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ authorization_id: st.authorization.id })
+    }).then(function(r){ if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+   .then(function(rec){
+      st.authorization = { id: rec.authorization_id, state: rec.state };
+      save();
+      note(T('bd.hist.authcancel','authorization ') + rec.authorization_id + ' — ' + T('bd.hist.authcancelnote','cancelled by the founder before any signature existed; no paid or uploaded state exists'));
+      render();
+    }).catch(function(e){
+      console.error('bdata cancel error', e && e.message); // surfaced, never swallowed
+      var stat = document.getElementById('bdata-auth-stat');
+      if (stat) stat.textContent = '⚠ ' + String(e && e.message || e).slice(0,160);
+    });
+  }
+
   fetch('bpay-invoice.json').then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
    .then(function(inv){ INV = inv; render(); })
    .catch(function(){ render(); });
+  fetch('bpay-invoice-founder.json').then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
+   .then(function(finv){ FINV = finv; render(); })
+   .catch(function(){ /* the authorization step stays locked without the current founder invoice */ render(); });
 })();
