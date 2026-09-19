@@ -427,6 +427,24 @@ test("core: home() before any paint restores the raw initial (documented pre-ado
   assert.deepEqual(core.getContext().transform, { k: 1, x: 0, y: 0 });
 });
 
+test("core: bootTransform() exposes the home target — raw before adoption, adopted after (the V1 seam)", () => {
+  const core = coreOf(ingest(fixtureTiny()));
+  assert.deepEqual(core.bootTransform(), { k: 1, x: 0, y: 0 });
+  core.setTransform({ k: 1, x: 0, y: -330 });
+  core.adoptBootTransform({ k: 1, x: 0, y: -330 });
+  assert.deepEqual(core.bootTransform(), { k: 1, x: 0, y: -330 });
+  const mut = core.bootTransform(); mut.x = 999;
+  assert.deepEqual(core.bootTransform(), { k: 1, x: 0, y: -330 }, "the getter returns a copy — never the live home target");
+});
+
+test("source contract: resetView aims at the boot framing; an empty initial.transform counts as absent (V1/V2 rider)", () => {
+  const src = readFileSync(join(HERE, "../../surfaces/blood-atlas.mjs"), "utf8");
+  assert.ok(/resetView:\s*\(\)\s*=>\s*\{\s*transform\s*=\s*core\.bootTransform\(\);/.test(src),
+    "resetView aims at the adopted boot framing — never a raw {k:1,x:0,y:0} teleport");
+  assert.ok(/Object\.keys\(o\.initial\.transform\)\.length > 0/.test(src),
+    "the boot-camera discriminator treats an empty object as absent (a grammar-side {} cannot fake a deep-link boot)");
+});
+
 // ─── semantic zoom (L2) ─────────────────────────────────────────────────────
 
 test("lodFor: far = structure, mid = people, near = reading (L2)", () => {
