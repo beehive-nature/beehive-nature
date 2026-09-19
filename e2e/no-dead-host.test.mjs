@@ -62,7 +62,6 @@ const SITES = [
   { file: 'surfaces/blight/workbench.html', decl: /const VAPI=\[([^\]]*)\]/, expect: ['https://eos.greymass.com', 'https://eos.api.eosnation.io'] },
   { file: 'surfaces/blight/vaulta-reader.html', decl: /const VAPI=\[([^\]]*)\]/, expect: ['https://eos.greymass.com', 'https://eos.api.eosnation.io'] },
   { file: 'crates/bmesh-serve/assets/page.html', decl: /var VH=\[([^\]]*)\]/, expect: ['https://eos.api.eosnation.io', 'https://eos.greymass.com'] },
-  { file: 'surfaces/workbench.tmp', decl: /const VAPI=\[([^\]]*)\]/, expect: ['https://eos.greymass.com', 'https://eos.api.eosnation.io'] },
 ];
 
 for (const s of SITES) {
