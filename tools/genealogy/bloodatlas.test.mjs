@@ -522,3 +522,66 @@ test("wiring: the harness mounts the engine, links the stylesheet, exposes the j
   }
   assert.ok(html.includes("atlas-back"), "back button present for the history beat");
 });
+
+// ─── discovery layer (founder order 2026-09-18: derived first-load cards) ──
+// UI LAW: whenever a count depends on traversal depth, the depth rides beside
+// the count. Enforced structurally: a card with `count` must carry depthNote
+// OR corpusWide:true — the builder refuses otherwise.
+import { bloodRoute, discoveries } from "../../surfaces/blood-atlas.mjs";
+
+test("bloodRoute: shortest parent-path founder→Ragnar derived from the corpus", () => {
+  const model = ingest(readJson(CORPUS_PATH));
+  const r = bloodRoute(model, "founder", "pf5d40516b8");
+  assert.ok(r, "route exists");
+  assert.ok(r.length >= 30, `deep medieval route (${r.length - 1} hops)`);
+  assert.equal(r[0], "founder");
+  assert.equal(r[r.length - 1], "pf5d40516b8");
+  for (const iid of r) assert.ok(model.person(iid), "every hop is a published person");
+});
+
+test("discoveries: five derived kinds, no hardcoded names, on the real corpus", () => {
+  const model = ingest(readJson(CORPUS_PATH));
+  const cards = discoveries(model);
+  const kinds = new Set(cards.map((c) => c.kind));
+  for (const k of ["route", "branch", "collapse", "correction", "frontier"]) {
+    assert.ok(kinds.has(k), k + " card derived");
+  }
+  // route cards derive from PACK registration (corpus.meta.packs) — nothing hardcoded
+  const routeCards = cards.filter((c) => c.kind === "route");
+  assert.ok(routeCards.some((c) => /Ragnar/.test(c.title)), "Ragnar route card from his pack");
+  assert.ok(routeCards.some((c) => /Rockwood/.test(c.title)), "Rockwood route card from his pack");
+  for (const c of routeCards) assert.ok(c.count >= 1 && /generation/i.test(c.depthNote), "route count carries its depth");
+  // branch cards: the four NAMED grandparents, bounded count + depth note + family names
+  const branch = cards.filter((c) => c.kind === "branch");
+  assert.equal(branch.length, 4, "the grandparent law as discovery surfaces");
+  const jackCard = branch.find((c) => /Jack Benedum Sutphen/.test(c.title));
+  assert.equal(jackCard.count, 896, "the bounded, reproducible number");
+  assert.match(jackCard.depthNote, /within 10 generations/);
+  assert.ok(jackCard.familyNames.length >= 3, "derived family-name clusters ride the card");
+  assert.ok(!jackCard.familyNames.includes("Sr") && !jackCard.familyNames.includes("II"), "generational suffixes are not family names");
+  // collapse card: the REAL pedigree collapse at default depth
+  const collapse = cards.find((c) => c.kind === "collapse");
+  assert.ok(/Betty Petty|Jonathan Hadlock/.test(collapse.title), "derived from the corpus's own mirrors");
+  // correction cards: persons whose records carry the founder attestation
+  const corrections = cards.filter((c) => c.kind === "correction");
+  assert.equal(corrections.length, 4, "the four corrected grandparents");
+  assert.ok(corrections.every((c) => /see what changed|corrected/i.test(c.subtitle)));
+  // frontier card: corpus-wide ghost refs + the nearest edge generation
+  const frontier = cards.find((c) => c.kind === "frontier");
+  assert.equal(frontier.count, model.ghostTotal);
+  assert.ok(frontier.corpusWide === true, "frontier count is corpus-wide, not depth-bounded — basis stated");
+  assert.match(frontier.title, /beyond the published archive/);
+});
+
+test("UI LAW enforced: a counted card without depthNote or corpusWide is REFUSED", () => {
+  const model = ingest(fixtureTiny());
+  assert.throws(() => discoveries(model, { _testBadCard: true }), /depth/i, "the builder refuses depthless counts");
+});
+
+test("discoveries are deterministic and bounded", () => {
+  const model = ingest(readJson(CORPUS_PATH));
+  const a = discoveries(model).map((c) => c.id).join(",");
+  const b = discoveries(model).map((c) => c.id).join(",");
+  assert.equal(a, b);
+  assert.ok(discoveries(model).length <= 24, "bounded card set");
+});

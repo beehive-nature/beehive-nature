@@ -33,6 +33,12 @@
     padding: 2px 7px; color: #8a8578; }
   #atlas-ghostlog { color: #8a8578; font-size: 12px; margin-top: 6px; }
   .offview { color: #c9a13b; }
+  #atlas-cards button:hover { border-color: #4d8fd1; }
+  .atlas-hop { font-size: 11px; padding: 3px 8px; white-space: nowrap; }
+  .atlas-hop.ev-saga { border-color: #8d6fc9; color: #c9b6ec; }
+  .atlas-hop.ev-medieval { border-color: #c9a13b; }
+  .atlas-hop.ev-colonial { border-color: #4d8fd1; }
+  .atlas-hop.ev-recorded { border-color: #3fa66a; }
 </style>
 </head>
 <body>
@@ -51,13 +57,15 @@
   <input id="atlas-q" type="search" placeholder="search people… (living stay anonymous)">
 </div>
 <div id="atlas-hits"></div>
+<div id="atlas-cards" style="display:flex;gap:8px;flex-wrap:wrap;padding:4px 14px 10px"></div>
+<div id="atlas-route" style="display:none;padding:0 14px 6px;overflow-x:auto"></div>
 <main>
   <div id="atlas-mount"></div>
   <div id="atlas-panel"><em>select a person (click a cell / row, or search)</em></div>
   <div id="atlas-ghostlog"></div>
 </main>
 <script type="module">
-  import { createAtlas, GHOST_TITLE, ATLAS_VERSION } from "../../surfaces/blood-atlas.mjs";
+  import { createAtlas, discoveries, bloodRoute, GHOST_TITLE, ATLAS_VERSION } from "../../surfaces/blood-atlas.mjs";
   const $ = (id) => document.getElementById(id);
   const qs = new URLSearchParams(location.search);
   const ctxLine = $("atlas-ctx"), panel = $("atlas-panel"), ghostLog = $("atlas-ghostlog");
@@ -111,6 +119,44 @@
   atlas = atlas0;
   $("atlas-mount").setAttribute("data-atlas-ready", "1");
   syncCtx(atlas.getContext(), "init"); // no event fires until first interaction — paint the cold context once
+
+  // discovery rail: derived first-load cards (founder order 2026-09-18) —
+  // the corpus answers before the user ever touches zoom
+  const rail = $("atlas-cards"), strip = $("atlas-route");
+  function showRoute(from, to) {
+    const route = bloodRoute(atlas.model, from, to);
+    if (!route) { strip.style.display = "none"; return; }
+    strip.style.display = "block";
+    strip.setAttribute("data-route-len", String(route.length - 1));
+    strip.innerHTML = "<div style='color:#8a8578;font-size:11px;margin-bottom:4px'>blood route — " + (route.length - 1) +
+      " hops, every one a published person · click a hop to select</div>" +
+      route.map((iid, i) => {
+        const p = atlas.person(iid);
+        return "<button class='atlas-hop ev-" + ((p.evidence || {}).class || "none") + "'" +
+          " data-hop=\"" + iid + "\" title=\"" + (p.name || "") + " · " + ((p.evidence || {}).class || "") + "\">" +
+          (i === 0 ? "◎ " : "") + (p.name || "Living") + "</button>";
+      }).join("<span style='color:#4d8fd1'> → </span>");
+    for (const b of strip.querySelectorAll("[data-hop]")) {
+      b.addEventListener("click", () => atlas.select(b.dataset.hop));
+    }
+    strip.scrollLeft = 0;
+  }
+  for (const c of discoveries(atlas.model)) {
+    const b = document.createElement("button");
+    b.dataset.card = c.kind;
+    b.style.cssText = "text-align:left;max-width:250px;flex:1 1 220px;padding:9px 12px;line-height:1.45";
+    b.innerHTML = "<div style='color:#e6e1d5;font-size:13px'><b>" + c.title + "</b></div>" +
+      "<div style='color:#8a8578;font-size:11px'>" + c.subtitle + "</div>" +
+      (c.count != null ? "<div style='color:#4d8fd1;font-size:11px'>▾ " + c.count + " — " + (c.depthNote || "counted across the whole published archive") + "</div>" : "");
+    b.addEventListener("click", () => {
+      const a = c.action;
+      if (a.type === "show-route") showRoute(a.from, a.to);
+      else if (a.type === "enter-branch" || a.type === "reroot") atlas.reroot(a.iid);
+      else if (a.type === "select") atlas.select(a.iid);
+    });
+    rail.appendChild(b);
+  }
+  rail.setAttribute("data-cards", String(rail.children.length));
 
   for (const b of document.querySelectorAll("[data-atlas-view]"))
     b.addEventListener("click", () => atlas.setView(b.dataset.atlasView));

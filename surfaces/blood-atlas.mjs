@@ -116,6 +116,7 @@ export function ingest(corpus, overlay, opts) {
     root: corpus.root || null,
     persons: Object.freeze(persons),
     stats: (corpus.meta && corpus.meta.stats) || {},
+    packs: Object.freeze(Object.assign({}, ((corpus.meta || {}).packs) || {})),
     spineLength: (corpus.spine || []).length,
     ghostTotal,
     coupleCount,
@@ -373,6 +374,163 @@ export function search(model, q, cap = 12) {
 }
 
 // ─── core state machine: selection ≠ re-root; history = exploration context ─
+// ─── discovery layer (founder order 2026-09-18): derived first-load cards ──
+// The surface must answer on first load — who is this, how am I related, why
+// is it interesting, why believe it, what happens if I keep exploring — from
+// hooks the CORPUS declares (packs, spine, corrections, frontier, bounded
+// counts), never from hardcoded celebrity tiles.
+// UI LAW, enforced structurally: whenever a count depends on traversal depth,
+// the depth rides beside the count (depthNote); a corpus-wide count states
+// corpusWide instead. The builder refuses a depthless count.
+
+// shortest blood route over parent edges: `to` must be an ancestor of `from`
+export function bloodRoute(model, from, to) {
+  if (!model.person(from) || !model.person(to)) return null;
+  const prev = new Map([[from, null]]);
+  const q = [from];
+  while (q.length) {
+    const cur = q.shift();
+    if (cur === to) break;
+    for (const p of model.parentOf(cur)) if (!prev.has(p)) { prev.set(p, cur); q.push(p); }
+  }
+  if (!prev.has(to)) return null;
+  const route = [];
+  for (let n = to; n; n = prev.get(n)) route.push(n);
+  return route.reverse();
+}
+
+function card(fields) {
+  if (fields.count != null && !fields.depthNote && fields.corpusWide !== true) {
+    throw new Error("atlas discoveries: a count without its depth is refused — attach depthNote or corpusWide (the UI law)");
+  }
+  return Object.freeze(fields);
+}
+
+const NON_FAMILY = new Set(["Sr", "Jr", "I", "II", "III", "IV", "V", "?", "De", "Van"]);
+function familyNameClusters(model, iid, withinGen, top = 4) {
+  const counts = {};
+  const seen = new Set([iid]);
+  (function walk(cur, depth) {
+    if (depth > withinGen) return;
+    for (const p of model.parentOf(cur)) {
+      if (seen.has(p)) continue;
+      seen.add(p);
+      const parts = String(model.person(p).name || "").trim().split(/\s+/);
+      const last = parts[parts.length - 1];
+      if (last && last.length > 2 && !NON_FAMILY.has(last)) counts[last] = (counts[last] || 0) + 1;
+      walk(p, depth + 1);
+    }
+  })(iid, 0);
+  return Object.entries(counts).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).slice(0, top).map(([n]) => n);
+}
+function countWithin(model, iid, withinGen) {
+  const seen = new Set([iid]);
+  (function walk(cur, depth) {
+    if (depth > withinGen) return;
+    for (const p of model.parentOf(cur)) { if (!seen.has(p)) { seen.add(p); walk(p, depth + 1); } }
+  })(iid, 0);
+  return seen.size - 1;
+}
+
+export function discoveries(model, opts) {
+  const o = Object.assign({ branchDepth: 10, collapseDepth: 7, maxCards: 24 }, opts || {});
+  if (o._testBadCard) return [card({ kind: "test", title: "bad", count: 123 })]; // refused — proof of the law
+  const root = model.root;
+  // generations above the root (upward BFS over published parent edges)
+  const gen = { [root]: 0 };
+  const q = [root];
+  while (q.length) {
+    const cur = q.shift();
+    for (const p of model.parentOf(cur)) if (gen[p] === undefined) { gen[p] = gen[cur] + 1; q.push(p); }
+  }
+  const cards = [];
+  // ROUTE cards — from pack registration (the estate's cited souls) + the
+  // deepest published line (pure derivation); every count carries its depth
+  const packTargets = Object.keys(model.packs)
+    .filter((iid) => model.person(iid) && gen[iid] !== undefined)
+    .sort((a, b) => gen[b] - gen[a]);
+  for (const iid of packTargets.slice(0, 4)) {
+    const p = model.person(iid);
+    cards.push(card({
+      id: "route-" + iid, kind: "route", iid,
+      title: gen[iid] + " generations to " + p.name,
+      subtitle: "show the route — test-locked shortest blood path over parent edges",
+      count: gen[iid], depthNote: "within " + gen[iid] + " generations (shortest parent path)",
+      action: { type: "show-route", from: root, to: iid },
+      basis: "derived from the corpus; " + (model.packs[iid] || "") + " carries the cited claims",
+    }));
+  }
+  let deepest = null;
+  for (const iid in gen) if (gen[iid] > (deepest ? gen[deepest] : -1)) deepest = iid;
+  if (deepest) {
+    cards.push(card({
+      id: "route-deepest", kind: "route", iid: deepest,
+      title: "the deepest published line reaches " + gen[deepest] + " generations",
+      subtitle: model.person(deepest).name + " — the walked record's longest parent chain; show the route",
+      count: gen[deepest], depthNote: "within " + gen[deepest] + " generations (shortest parent path)",
+      action: { type: "show-route", from: root, to: deepest },
+      basis: "pure corpus derivation (upward BFS)",
+    }));
+  }
+  // BRANCH cards — the named grandparents, bounded counts + family names
+  for (const parent of model.parentOf(root)) {
+    for (const gp of model.parentOf(parent)) {
+      const p = model.person(gp);
+      if (!p || p.living || p.name === "Living") continue;
+      const n = countWithin(model, gp, o.branchDepth);
+      const names = familyNameClusters(model, gp, o.branchDepth);
+      cards.push(card({
+        id: "branch-" + gp, kind: "branch", iid: gp,
+        title: p.name,
+        subtitle: "mapped branch — " + names.slice(0, 3).join(" · ") + " — enter the branch",
+        count: n, depthNote: "within " + o.branchDepth + " generations",
+        familyNames: Object.freeze(names),
+        action: { type: "enter-branch", iid: gp },
+        basis: "bounded ancestor closure of the corpus; totals beyond this depth are depth-dependent by construction (the collapsed-web law)",
+      }));
+    }
+  }
+  // COLLAPSE card — the corpus's own pedigree collapse at the default depth
+  const mirrors = buildPedigree(model, { root, ancDepth: o.collapseDepth }).cells.filter((c) => c.kind === "mirror");
+  if (mirrors.length) {
+    const m = mirrors[0];
+    cards.push(card({
+      id: "collapse-" + m.iid, kind: "collapse", iid: m.iid,
+      title: "pedigree collapse: " + m.name + " reaches you more than one way",
+      subtitle: "show the repeated ancestor — one identity, marked at every position",
+      count: mirrors.length, depthNote: "within " + o.collapseDepth + " generations",
+      action: { type: "select", iid: m.iid },
+      basis: "derived from the ahnentafel walk (mirrors are repeats of one canonical identity)",
+    }));
+  }
+  // CORRECTION cards — records carrying the founder attestation
+  for (const iid of Object.keys(model.persons)) {
+    const p = model.person(iid);
+    if (!p.corrected || gen[iid] === undefined || gen[iid] > 4) continue;
+    cards.push(card({
+      id: "corrected-" + iid, kind: "correction", iid,
+      title: p.name,
+      subtitle: "record corrected — see what changed",
+      action: { type: "select", iid },
+      basis: p.corrected.attested + " — " + p.corrected.note,
+    }));
+  }
+  // FRONTIER card — corpus-wide ghost refs + the nearest edge
+  let nearest = null;
+  for (const iid in gen) if (model.ghostCount(iid) > 0 && (!nearest || gen[iid] < gen[nearest])) nearest = iid;
+  if (nearest) {
+    cards.push(card({
+      id: "frontier", kind: "frontier", iid: nearest,
+      title: "ancestry continues beyond the published archive",
+      subtitle: "the nearest edge sits at generation " + gen[nearest] + " — " + model.person(nearest).name + "'s parents are referenced but not yet published here. Coverage of the walk, not an empty family.",
+      count: model.ghostTotal, corpusWide: true,
+      action: { type: "reroot", iid: nearest },
+      basis: "frontier references counted across the whole published corpus (not depth-bounded)",
+    }));
+  }
+  return Object.freeze(cards.slice(0, o.maxCards));
+}
+
 export function createCore(model, opts) {
   const o = opts || {};
   const historyCap = o.historyCap || 100;
