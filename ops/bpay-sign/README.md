@@ -144,3 +144,17 @@ composer, wall, receipts, UI — is unchanged by construction.
    Rust THP before banking the real Safe 7 receipt.
 4. Mainnet stays deliberately untouched until the hardware transport is
    real AND the founder re-authorizes against a current job.
+
+## POST-RIDER RULING (board, on fedb2095): the lane is PARKED at the device experiment
+
+- **The distinction, kept explicit forever: 3,117,489 gas is the MEASURED
+  FACT; `600k + 50k×N` is the current ENGINEERING POLICY derived from
+  it.** If Autonomi changes the vault/token implementation, revalidate
+  the policy against a fresh measurement — it is not a protocol constant.
+- **No more code riders before the device experiment.** The next useful
+  evidence cannot come from another unit test; it comes from the actual
+  Safe 7 transport. Lane: enable Suite MCP → Observation A → inspect →
+  Observation B → inspect the SIGNED receipt. Only then is public Sepolia
+  interesting; native THP is a replacement-transport project, never a
+  prerequisite; mainnet stays boringly untouched — a feature, not
+  unfinished business.
