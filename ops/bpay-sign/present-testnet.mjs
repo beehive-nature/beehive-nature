@@ -110,7 +110,12 @@ await page.waitForSelector('[data-bdata-sign-open]', { timeout: 5000 });
 await shot('4-authorized');
 say('4. authorized-for-signing — SIGN WITH TREZOR visible');
 
+// the two-observation ceremony: OBSERVATION A (harmless preflight) must
+// confirm before OBSERVATION B (the real review) opens
 await page.click('[data-bdata-sign-open]');
+await page.waitForSelector('[data-bdata-obs-a]', { timeout: 5000 });
+await page.click('[data-bdata-preflight-go]');
+await page.waitForSelector('[data-bdata-preflight-confirmed]', { timeout: 5000 });
 await page.waitForSelector('[data-bdata-sign-review]', { timeout: 5000 });
 await page.waitForTimeout(300);
 await shot('5-sign-review');
