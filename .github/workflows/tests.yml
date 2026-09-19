@@ -465,11 +465,18 @@ jobs:
       # the organism-level data surface — mechanical identity from the
       # reference invoice; resolved audience + VISIBLY unavailable private
       # modes; the supersede law (commitment exists → change requires a new
-      # quote, old plan stays history); the bPay handoff (ceiling recomputed
-      # by this test, gas separate, nothing paid, wallet link); automation as
-      # a first-class policy (Ask me / within limits / Never) with
-      # append-only policy editions; the cypherpunk anatomy (8 sections)
-      # toggled by inspection depth WITHOUT touching policy; A9c held.
+      # quote, old plan stays history); the price IN PLACE (gas separate,
+      # nothing paid, no navigation); automation as a first-class policy
+      # (Ask me / within limits / Never) with append-only editions; A9c held.
+      # THE A+ REBUILD (founder 2026-09-18, "D+ — buttons don't even work"):
+      # the checks are TRANSITIONS, so a dead, decoy or double-firing control
+      # FAILS — New bee's light 16px canvas + 44px floor; unavailable modes are
+      # prose with reasons, never buttons; the wait is visible with NO price
+      # button while asking; single-flight asks; Stop waiting / Undo; honest
+      # failure classes; a second tab follows without reload; the TOP-BAR
+      # register opens the anatomy (8 sections) and the language select
+      # re-words the JS-drawn page. No context can reach the live quote
+      # service (:8807 aborted at the browser, touches asserted zero).
       - name: bData gate — My Data owns policy, bPay holds the economics
         if: always()
         working-directory: e2e

@@ -22,6 +22,13 @@
 //   Plus: the wallet's OWN gesture path still records (merged), and bData's
 //   gesture preserves wallet-side fields.
 //
+// THE NEAR-MISS LAW (2026-09-18): since the latency law, bData's Public press
+// ALSO starts a price ask — and this gate never seeded a quote service, so on
+// the founder's machine it could POST audience:public at the LIVE keyless
+// bridge (a forged founder-selected job). Every context here now aborts :8807
+// at the browser and counts the touches; the count must stay zero. (bData also
+// refuses, by itself, to let an automated browser reach its default bridge.)
+//
 //   node --test e2e/bpay-policy-ownership.test.mjs
 import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
@@ -35,7 +42,8 @@ const here = dirname(fileURLToPath(import.meta.url));
 const SURFACES = join(here, '..', 'surfaces');
 const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.json': 'application/json', '.css': 'text/css', '.png': 'image/png', '.svg': 'image/svg+xml', '.wasm': 'application/wasm' };
 
-let browser, server, origin;
+let browser, server, origin, liveBridgeTouches = 0;
+const guarded = async (ctx) => { await ctx.route('http://127.0.0.1:8807/**', route => { liveBridgeTouches++; route.abort(); }); return ctx; };
 before(async () => {
   server = createServer(async (req, res) => {
     const p = (req.url === '/' ? '/bdata.html' : req.url).split('?')[0];
@@ -54,7 +62,7 @@ after(async () => { if (browser) await browser.close(); if (server) server.close
 const readKey = (page) => page.evaluate(() => JSON.parse(localStorage.getItem('bpay-policy-v1') || 'null'));
 
 test('a View change in a stale wallet tab cannot erase newer founder policy (the ceremony-blocking defect)', async () => {
-  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  const ctx = await guarded(await browser.newContext({ viewport: { width: 390, height: 844 } }));
   // Tab B FIRST — the wallet, booted with pristine (audience:null) state
   const tabB = await ctx.newPage();
   await tabB.goto(origin + '/wallet.html', { waitUntil: 'load' });
@@ -93,12 +101,13 @@ test('a View change in a stale wallet tab cannot erase newer founder policy (the
   assert.match(textA, /You chose .*Public/i, 'My Data renders the founder choice after reload');
   const textB = await tabB.innerText('#bpay-sec');
   assert.match(textB, /You chose .*Public/i, 'the wallet panel RECEIVES the resolved operation (no re-ask)');
+  assert.equal(liveBridgeTouches, 0, 'no automated press ever reached for the live quote service');
 
   await ctx.close();
 });
 
 test('the wallet\'s OWN gesture path still records policy — merged, never clobbering wallet-side fields', async () => {
-  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  const ctx = await guarded(await browser.newContext({ viewport: { width: 390, height: 844 } }));
   const page = await ctx.newPage();
   // pre-seed wallet-side service state the gesture must preserve
   await page.addInitScript(() => {
