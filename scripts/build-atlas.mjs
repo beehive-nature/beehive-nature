@@ -14,6 +14,7 @@
    (new bee), a wheel of light (raver), a graph you can check (cypherpunk).
    The keep rows reuse their destinations' own words (bd.*, watch.*). */
 import { readFileSync, writeFileSync, readdirSync } from 'node:fs';
+import { createHash } from 'node:crypto';
 import { countSurfacesOnDisk, listSurfacesOnDisk, recomputeCounts } from './surface-count.mjs';
 import { treeBee, treeRaver, treeCypher } from './atlas-tree.mjs';
 
@@ -49,6 +50,14 @@ if (countsBefore !== JSON.stringify(E.counts)) {
   console.log('counts block re-derived from tree+rows — surfaces: ' + recomputed.surfaces + ' (was ' + JSON.parse(countsBefore).surfaces + ')');
 }
 const c = E.counts;
+
+/* bui Slice 01 (queen order 1822fa54, writer zCode): the state root the daily
+   art derives from - sha256 over the estate.json bytes AS SERVED. Computed
+   after the counts rewrite so it is always the final registry bytes; the
+   browser never fetches estate.json, this baked digest is the runtime truth a
+   day commits to (an intraday deploy forks explicitly - every manifest
+   records the root it derived from). Asserted by estate-check. */
+const stateRoot = createHash('sha256').update(readFileSync('estate.json')).digest('hex');
 
 /* ── the preservation lift: the doors' hex band, byte-true ─────────────────
    The band markup and its CSS are READ from surfaces/doors/index.html and
@@ -180,7 +189,7 @@ const page = `<!doctype html>
 ${bandCss}
 </style>
 </head>
-<body data-reg="bee" data-experience="home">
+<body data-reg="bee" data-experience="home" data-state-root="${stateRoot}" data-state-root-src="estate.json v${E.v}"> <!-- PUBLIC-CONSTANT: sha256(estate.json) baked at build - recomputed every build, estate-check-asserted -->
 <a class="skip" href="#explore">${text('atlas.browse','Explore the estate')}</a>
 <div class="mode-bar"><div class="wrap mode-inner"><a class="mode-home" href="index.html" aria-label="skaists home">⬡ <span>skaists</span></a><div data-register-host aria-describedby="view-explainer"></div><a class="mode-proof" href="#explore">${text('atlas.everything','Explore everything')} ↓</a></div><p class="sr-only" id="view-explainer">${text('atlas.view','Choose how this page speaks to you')}. ${text('atlas.canonical','Same facts. Three ways to read them.')}</p></div>
 <nav data-experience-nav aria-label="Explore skaists"><a href="index.html" data-i18n="social.arrival.home" aria-current="page">Home</a><a href="blight/gallery.html" data-i18n="experience.gallery">Art gallery</a><a href="blight/studio-music.html" data-i18n="experience.music">Music studio</a><a href="buzz-directory.html" data-i18n="atlas.peopleAction">Meet the hive</a><a href="profile.html" data-i18n="experience.profile">People and names</a></nav>
@@ -229,6 +238,7 @@ ${JSON.stringify(E)}
 </script>
 <script src="atlas-search.js?v=1" defer></script>
 <script src="atlas.js?v=4" defer></script>
+<script src="daily-art.js?v=1" defer></script>
 <script src="agent-dock.js?v=9"></script>
 <script src="tour.js?v=42"></script>
 </body>
@@ -236,4 +246,4 @@ ${JSON.stringify(E)}
 `;
 // Whitespace-only template slots should not become dirty generated lines.
 writeFileSync('surfaces/index.html', page.replace(/^ +$/gm, ''));
-console.log('atlas built — '+E.surfaces.length+' listed · '+c.surfaces+' counted · preserved doors artwork · '+page.length+' bytes');
+console.log('atlas built — '+E.surfaces.length+' listed · '+c.surfaces+' counted · preserved doors artwork · '+page.length+' bytes - state-root '+stateRoot.slice(0,8));
