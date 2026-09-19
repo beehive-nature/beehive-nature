@@ -482,7 +482,7 @@ test('I1 discoveries() — every hook computed, locked to the pin corpus (founde
   assert.equal(D.personsCount, 10259);
   assert.deepEqual(D.spine, { gens: 42, terminus: 'p980ac0fa0b' });
   assert.equal(archive.getPerson(D.spine.terminus).name, 'Randver Radbardson');
-  assert.deepEqual(D.deepest, { id: 'pc996e1efee', depth: 143, from: 'founder', descent: ['living', 'recorded', 'colonial', 'medieval', 'saga', 'unrecorded'] });
+  assert.deepEqual(D.deepest, { id: 'pc996e1efee', depth: 143, from: 'founder', descent: ['living', 'recorded', 'colonial', 'medieval', 'saga', 'unrecorded', 'saga', 'unrecorded', 'saga', 'unrecorded', 'saga', 'unrecorded', 'medieval', 'colonial', 'recorded', 'unrecorded', 'recorded', 'unrecorded', 'recorded'] });
   assert.equal(archive.getPerson(D.deepest.id).name, 'E Anna Tum DE LAGASH');
   assert.deepEqual(D.collapse, { gens: 12, repeaters: 50, top: { id: 'p240410e903', n: 3 } });
   assert.equal(archive.getPerson(D.collapse.top.id).name, 'Tacy Cooper');
@@ -593,13 +593,27 @@ test('J1 formal kinship naming — computed, never prose (the founder’s correc
   assert.equal(kinshipTerm(2, 'down', null), 'grandchild'); /* uncertain gender stays generic */
   assert.equal(kinshipTerm(0, 'up', 'M'), null);
   assert.equal(kinshipTerm(2, 'sideways', 'M'), null);
+  /* the ordinal law (rider-3 fix): 11/12/13 exception + mod-10 suffixing —
+   * a millennia-scale archive must never ship 21th-great- */
+  assert.equal(kinshipTerm(13, 'up', 'M'), '11th-great-grandfather');
+  assert.equal(kinshipTerm(14, 'up', 'M'), '12th-great-grandfather');
+  assert.equal(kinshipTerm(15, 'up', 'M'), '13th-great-grandfather');
+  assert.equal(kinshipTerm(23, 'up', 'M'), '21st-great-grandfather');
+  assert.equal(kinshipTerm(24, 'up', 'M'), '22nd-great-grandfather');
+  assert.equal(kinshipTerm(25, 'up', 'M'), '23rd-great-grandfather');
+  assert.equal(kinshipTerm(103, 'up', 'M'), '101st-great-grandfather');
+  assert.equal(kinshipTerm(111, 'up', 'M'), '109th-great-grandfather');
+  assert.equal(kinshipTerm(113, 'up', 'M'), '111th-great-grandfather'); /* the 11-13 exception holds past 100 */
+  assert.equal(kinshipTerm(123, 'up', 'M'), '121st-great-grandfather');
+  assert.equal(kinshipTerm(143, 'up', 'M'), '141st-great-grandfather'); /* the Lagash depth */
 });
 
-test('J2 descentTiers — first-appearance tier order, nulls skipped, no verdict', () => {
-  assert.deepEqual(descentTiers(['living', 'living', 'recorded', 'colonial', 'recorded', 'medieval']), ['living', 'recorded', 'colonial', 'medieval']);
+test('J2 descentTiers — CONSECUTIVE transitions, the texture the line actually walks', () => {
+  /* a return to earlier ground is itself texture — kept, not erased */
+  assert.deepEqual(descentTiers(['living', 'living', 'recorded', 'colonial', 'medieval', 'colonial', 'saga', 'saga']), ['living', 'recorded', 'colonial', 'medieval', 'colonial', 'saga']);
   assert.deepEqual(descentTiers([null, '', 'saga']), ['saga']);
   assert.deepEqual(descentTiers([]), []);
-  assert.deepEqual(descentTiers(['recorded', 'recorded']), ['recorded']); /* uniform texture stays single */
+  assert.deepEqual(descentTiers(['recorded', 'recorded']), ['recorded']); /* uniform runs collapse */
 });
 
 test('J3 hopWindow — long chains compress with the elided count stated', () => {

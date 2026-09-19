@@ -133,7 +133,13 @@ export function hopArrow (hop) {
 /* ── formal kinship naming (the founder's genealogical correction, made
    structural): depth 5 up = "3rd-great-grandfather" — computed, never
    hand-written. depth 1..2 plain, 3 = great-, n>=4 = (n-2)th-great-. */
-const ORD = n => n + (n === 1 ? 'st' : n === 2 ? 'nd' : n === 3 ? 'rd' : 'th');
+/* proper ordinal: the 11/12/13 exception plus mod-10 suffixing — this
+ * archive reaches 141st-great- territory, 21th- never ships */
+const ORD = n => {
+  const s = ['th', 'st', 'nd', 'rd'];
+  const v = n % 100;
+  return n + (s[(v - 20) % 10] || s[v] || s[0]);
+};
 export function kinshipTerm (depth, dir, gender) {
   const g = gender === 'F' || gender === 'FEMALE' ? 'F' : (gender === 'M' || gender === 'MALE' ? 'M' : null);
   if (depth < 1) return null;
@@ -156,15 +162,15 @@ export function kinshipTerm (depth, dir, gender) {
   return null;
 }
 
-/* ── the epistemic descent: the tier sequence a line walks through, in
-   first-appearance order — the texture change itself, never a verdict.
-   tiers: [tierOf(start), tierOf(hop1.to), ...] */
+/* ── the epistemic descent: the tier transitions a line actually walks —
+   CONSECUTIVE deduplication, not global: a route that re-enters colonial
+   ground after medieval keeps that second colonial, because that return
+   is part of the texture. Nulls skipped; runs collapse; nothing invented. */
 export function descentTiers (tiers) {
   const out = [];
-  const seen = new Set();
   for (const t of tiers) {
-    if (t == null || t === '' || seen.has(t)) continue;
-    seen.add(t);
+    if (t == null || t === '') continue;
+    if (out.length && out[out.length - 1] === t) continue;
     out.push(t);
   }
   return out;
@@ -488,7 +494,7 @@ export function mountPersonPanel (host, archive, opts) {
   function nodeHtml (id, p) {
     const tier = p ? p.tier : null;
     return '<span class="pp-hopnode' + (tier ? ' pp-t-' + esc(tier) : '') + '" data-ppgo="' + esc(id) + '" role="button" tabindex="0" title="' +
-      esc(T('pp.node.tier', 'evidence tier: {t}').replace('{t}', tier || '—')) + '">' +
+      esc(T('pp.node.tier', 'era tier: {t}').replace('{t}', tier || '—')) + '">' +
       esc(p ? (p.living ? p.name : shortName(id)) : id) + '</span>';
   }
 
@@ -652,7 +658,7 @@ export function mountPersonPanel (host, archive, opts) {
     const hooks = [];
     if (D.tiers && D.tiers.total > 1 && D.tiers.order.length) {
       const parts = D.tiers.order.slice(0, 4).map(t => D.tiers.counts[t].toLocaleString() + ' ' + t);
-      hooks.push({ kind: 'tiers', label: esc(T('pp.disc.tiers', '{n} ancestors from here — {p}{more}: the deeper ground thins, and the tier names say how').replace('{n}', D.tiers.total.toLocaleString()).replace('{p}', parts.join(' · ')).replace('{more}', D.tiers.order.length > 4 ? ' · …' : '')) });
+      hooks.push({ kind: 'tiers', label: esc(T('pp.disc.tiers', '{n} ancestors from here — {p}{more}: the deeper ground thins, and the era names say how').replace('{n}', D.tiers.total.toLocaleString()).replace('{p}', parts.join(' · ')).replace('{more}', D.tiers.order.length > 4 ? ' · …' : '')) });
     }
     if (D.spine && D.spine.terminus) {
       hooks.push({ go: D.spine.terminus, label: D.personsCount.toLocaleString() + ' ' + esc(T('pp.disc.people', 'people')) + ' · ' + esc(T('pp.disc.spine', 'the spine runs {g} generations to {t}').replace('{g}', String(D.spine.gens)).replace('{t}', esc(nm(D.spine.terminus)))) });

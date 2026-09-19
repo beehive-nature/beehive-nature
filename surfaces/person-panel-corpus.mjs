@@ -629,21 +629,18 @@ export function buildArchive ({ corpus, overlay, packs, broader }) {
       const b = birthYear(persons[id].lifespan) || 9999;
       if (rec.depth > deepD || (rec.depth === deepD && b < deepBirth)) { deepD = rec.depth; deepId = id; deepBirth = b; }
     }
-    /* the epistemic descent: the tier sequence the deepest line walks through
-     * (first-appearance order) — the texture change itself, never a verdict */
+    /* the epistemic descent: the tier transitions the deepest line ACTUALLY
+     * walks — CONSECUTIVE dedup (a return to earlier ground is itself
+     * texture), never global first-appearance, never a verdict */
     const descent = (() => {
       const seq = [];
       let cur = deepId;
       const chain = [];
       while (cur && cur !== anchor) { chain.push(cur); const r = up.get(cur); if (!r || r.prev == null) break; cur = r.prev; }
       chain.reverse();
-      const seenT = new Set();
-      const t0 = persons[anchor] && persons[anchor].evidence ? persons[anchor].evidence.class : null;
-      if (t0 != null) { seq.push(t0); seenT.add(t0); }
-      for (const id of chain) {
-        const t = persons[id].evidence ? persons[id].evidence.class : null;
-        if (t != null && !seenT.has(t)) { seq.push(t); seenT.add(t); }
-      }
+      const push = (t) => { if (t != null && seq[seq.length - 1] !== t) seq.push(t); };
+      push(persons[anchor] && persons[anchor].evidence ? persons[anchor].evidence.class : null);
+      for (const id of chain) push(persons[id].evidence ? persons[id].evidence.class : null);
       return seq;
     })();
     /* tier composition of everything reachable from the standing root */
