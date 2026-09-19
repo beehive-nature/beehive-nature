@@ -128,3 +128,7 @@ PR state and the visible design/Buzz interfaces. No application suites were reru
 because no product code changed. No new Buzz assignment was delivered: this seat's
 CLI is unauthenticated, and native composer interaction did not produce a verified
 message. Do not infer a dispatched job from this brief.
+
+Subsequent authorized bridge setup is recorded separately in
+`2026-09-19-codex-buzz-bridge.md`. It supersedes the CLI-authentication limitation
+above; this paragraph preserves the earlier intake's delivery state.
