@@ -446,6 +446,7 @@ dependencies = [
  "axum 0.7.9",
  "hex",
  "k256",
+ "reqwest",
  "serde",
  "serde_json",
  "tokio",
