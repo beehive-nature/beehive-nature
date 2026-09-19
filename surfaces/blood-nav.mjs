@@ -39,6 +39,8 @@ export function encodeCtx(ctx) {
 
 // decode a hash into a context object. Tolerant: junk is ignored, not thrown.
 // Legacy forms preserved: '#p=<id>' (person deep link), '#myth' (doorway).
+// GUX-01 beat 2b: the ONE view vocabulary is the engine's (pedigree|fractal|tree);
+// legacy short forms (ped|fan) normalize into it on decode.
 export function decodeHash(hash) {
   var out = { p: null, v: null, r: null, s: null, x: null, y: null, myth: false };
   var h = String(hash || '');
@@ -46,8 +48,8 @@ export function decodeHash(hash) {
   if (/myth/.test(h)) out.myth = true;
   var m = h.match(/p=([A-Za-z0-9_-]+)/);
   if (m) out.p = m[1];
-  m = h.match(/v=(ped|fan|tree)/);
-  if (m) out.v = m[1];
+  m = h.match(/v=(pedigree|fractal|tree|ped|fan)/);
+  if (m) out.v = mapView(m[1]);
   m = h.match(/r=([A-Za-z0-9_-]+)/);
   if (m) out.r = m[1];
   m = h.match(/s=([0-9.]+)/);
@@ -56,6 +58,57 @@ export function decodeHash(hash) {
   m = h.match(/y=(-?[0-9.]+)/); if (m) out.y = parseFloat(m[1]);
   return out;
 }
+
+// the ONE view vocabulary mapper: legacy incumbent short names and the engine's
+// full names converge; anything else is null (never a guess).
+export function mapView(v) {
+  if (v === 'ped' || v === 'pedigree') return 'pedigree';
+  if (v === 'fan' || v === 'fractal') return 'fractal';
+  if (v === 'tree') return 'tree';
+  return null;
+}
+
+// derive the engine's createAtlas initial context from a decoded hash.
+// The URL-derived state is the HISTORY BASE (advisor law): a deep link with
+// only #p=<person> boots selection=person on the DEFAULT root; a full hash
+// (#p=&v=&r=&s=&x=&y=) boots root+selection+view+camera exactly as written.
+export function initialFromCtx(ctx, defaultRoot) {
+  ctx = ctx || {};
+  var t = {
+    k: (typeof ctx.s === 'number' && isFinite(ctx.s)) ? ctx.s : 1,
+    x: (typeof ctx.x === 'number' && isFinite(ctx.x)) ? ctx.x : 0,
+    y: (typeof ctx.y === 'number' && isFinite(ctx.y)) ? ctx.y : 0
+  };
+  return {
+    root: ctx.r || defaultRoot || null,
+    selection: ctx.p || null,
+    view: mapView(ctx.v) || 'pedigree',
+    transform: t
+  };
+}
+
+// hash sync for the mounted engine: blood-nav owns the ONE grammar; the
+// surface calls this from the engine's onContext. replaceState only — the
+// URL is derived state, never a second history stack.
+export function syncHash(ctx, winRef) {
+  var w = winRef || (typeof window !== 'undefined' ? window : null);
+  var h = encodeCtx(ctx ? {
+    p: ctx.selection || null,
+    v: mapView(ctx.view) || null,
+    r: ctx.root || null,
+    s: ctx.transform && typeof ctx.transform.k === 'number' ? ctx.transform.k : null,
+    x: ctx.transform && typeof ctx.transform.x === 'number' ? Math.round(ctx.transform.x) : null,
+    y: ctx.transform && typeof ctx.transform.y === 'number' ? Math.round(ctx.transform.y) : null
+  } : null);
+  if (w && w.history && w.history.replaceState) {
+    try { w.history.replaceState(null, '', h || w.location.pathname + w.location.search); } catch (e) { /* hashless environments */ }
+  }
+  return h;
+}
+
+// the one-shot return-from-archive session key (shared with the mounted panel's
+// openPersonPage so both doorways return to the SAME context grammar).
+export var RETURN_KEY = 'blood.ctx';
 
 // semantic zoom: which reading level does this scale show?
 export function lodFor(scale) {
@@ -224,7 +277,7 @@ export function applyPlan(ctx, persons, fallbackRoot) {
 
 /* ---------- browser wiring (guarded; inert under Node) ---------- */
 
-var SESSION_KEY = 'blood.ctx';
+var SESSION_KEY = RETURN_KEY;
 var nav = {
   api: null,
   lod: null,
@@ -397,15 +450,25 @@ function wireKeyboard() {
     var t = e.target;
     if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT' || t.isContentEditable)) return;
     if (e.metaKey || e.ctrlKey || e.altKey) return;
-    var S = a.S;
     var key = e.key;
     if (key === '/') { var q = doc.getElementById('q'); if (q) { q.focus(); e.preventDefault(); } return; }
-    if (key === 'Home') { var rb = doc.getElementById('resetbtn'); if (rb) { rb.click(); e.preventDefault(); } return; }
     if (key === 'Escape') {
       var detail = doc.getElementById('detail');
       if (detail) { detail.classList.remove('open'); e.preventDefault(); }
       return;
     }
+    // GUX-01 beat 2b — engine-mounted mode: the atlas owns arrows/R/Home/B
+    // inside its stage; blood-nav keeps only the page-level grammar keys
+    // (Esc drawer, / search focus, O archive doorway for the engine's
+    // selection). One keyboard law, split by ownership, never duplicated.
+    if (globalThis.__guxAtlas) {
+      var actx = null;
+      try { actx = globalThis.__guxAtlas.getContext(); } catch (err) { actx = null; }
+      if ((key === 'o' || key === 'O') && actx && actx.selection) { openArchive(actx.selection); e.preventDefault(); }
+      return;
+    }
+    var S = a.S;
+    if (key === 'Home') { var rb = doc.getElementById('resetbtn'); if (rb) { rb.click(); e.preventDefault(); } return; }
     if (!S.sel) return;
     if (key === 'r' || key === 'R') { a.setRoot(S.sel); e.preventDefault(); return; }
     if (key === 'o' || key === 'O') { openArchive(S.sel); e.preventDefault(); return; }
@@ -422,9 +485,14 @@ function wireHashAndSession() {
   // one-shot session restore: returning from a person archive page lands the
   // visitor where they were. Only fires when the arriving hash agrees (or is
   // empty), so a shared deep link still opens clean.
+  // GUX-01 beat 2b — when the engine is (or becomes) mounted, the ENGINE boots
+  // from this same session-merged hash (blood-nav stays the grammar owner;
+  // the incumbent restore below must not fight it), so the saved context is
+  // left in place for the mount to consume and no incumbent apply runs.
   try {
     var saved = sessionStorage.getItem(SESSION_KEY);
-    if (saved) {
+    var guxPending = !!globalThis.__guxAtlas || !!globalThis.__guxBoot;
+    if (saved && !guxPending) {
       sessionStorage.removeItem(SESSION_KEY);
       var sctx = decodeHash(saved);
       var hctx = decodeHash(win.location.hash);
@@ -432,6 +500,7 @@ function wireHashAndSession() {
     }
   } catch (e) { /* private mode: the URL hash context still applies */ }
   win.addEventListener('popstate', function () {
+    if (globalThis.__guxAtlas) return; // engine mode: the URL is derived state, replaced not pushed
     applyCtx(decodeHash(win.location.hash));
   });
 }
@@ -444,8 +513,12 @@ function onReady() {
   wirePointerSafety();
   wireKeyboard();
   wireHashAndSession();
-  // respect an incoming context (legacy #p= and the extended form alike)
-  applyCtx(decodeHash((nav.api.doc && nav.api.doc.defaultView ? nav.api.doc.defaultView.location : window.location).hash));
+  // respect an incoming context (legacy #p= and the extended form alike) —
+  // skipped when the gux mount is pending: the engine will boot from the
+  // same hash and session context instead (one truth, one applier).
+  if (!globalThis.__guxAtlas && !globalThis.__guxBoot) {
+    applyCtx(decodeHash((nav.api.doc && nav.api.doc.defaultView ? nav.api.doc.defaultView.location : window.location).hash));
+  }
 }
 
 export function wire(apiRef) {

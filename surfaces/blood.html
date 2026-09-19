@@ -122,6 +122,30 @@ h1{font-size:clamp(22px,4.5vw,34px);line-height:1.15;margin:8px 0 6px;font-weigh
 .empty{color:var(--dim);font-size:11.5px;margin-top:10px}
 footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint);font-size:10px;text-align:center;line-height:1.9}
 @media(max-width:640px){.combwrap{padding:5px}.detail{padding:12px}.zoombar{top:8px;right:8px}}
+/* GUX-01 beat 2b — the mounted composition (engine world + person panel +
+   discovery rail). blood.html owns composition and presentation state only;
+   truth stays in the corpus; the atlas derives space; the panel derives
+   explanation; blood-nav keeps the one navigation/history grammar. */
+#cards{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 2px}
+#cards:empty{display:none}
+#routestrip{margin:4px 0 8px;overflow-x:auto;padding-bottom:4px}
+#routestrip:empty{display:none}
+.atlashop{font-size:11px;padding:3px 8px;white-space:nowrap}
+.atlashop.ev-recorded{border-color:#3fa66a;background:#14231a;font-weight:600}
+.atlashop.ev-colonial{border-color:#4d8fd1;background:#131c26;font-family:Georgia,serif;font-style:italic}
+.atlashop.ev-medieval{border-color:#c9a13b;background:transparent;border-style:dashed;opacity:.92}
+.atlashop.ev-saga{border-color:#8d6fc9;background:#191327;font-variant:small-caps;letter-spacing:.06em}
+body.gux #comb,body.gux #treeview,body.gux #trail,body.gux #spinebtn{display:none!important}
+body.gux .zoombar{z-index:30} /* above the engine's tree listview (journey-caught) */
+body.gux #atlas{display:block}
+/* one search box (the page's #q) and ONE history (the atlas's back): the
+   panel's own search + back affordances are structurally retired here */
+#ppanel .pp-search{display:none!important}
+#ppanel .pp-backbar{display:none!important}
+body.gux #dempty,body.gux #dbody{display:none!important} /* one explanation surface: the panel */
+#cards button{text-align:left;background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:9px 12px;cursor:pointer;font:inherit;flex:1 1 220px;max-width:250px;line-height:1.45}
+#cards button:hover{border-color:var(--cyan)}
+#routestrip button{background:var(--well);color:var(--ink);border:1px solid var(--line);border-radius:8px;cursor:pointer;font:inherit;font-size:11px;padding:3px 8px;white-space:nowrap}
 /* ?? GUX-01 zGeneUI navigation layer (blood-nav.mjs) — selection, LOD, drawer */
 .hexcell.sel,button.sel{stroke:var(--gold);stroke-width:2.4px;filter:drop-shadow(0 0 6px rgba(255,215,0,.45))}
 #comb:focus-visible{outline:2px solid var(--cyan);outline-offset:4px}
@@ -151,6 +175,8 @@ footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint
  *{scroll-behavior:auto!important}
 }
 </style>
+<link rel="stylesheet" href="blood-atlas.css?v=1">
+<link rel="stylesheet" href="person-panel.css?v=1">
 </head>
 <body>
 <main>
@@ -228,7 +254,10 @@ footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint
 </div>
 <div class="legend" id="legend"></div>
 
+<div id="cards" class="guxrail" hidden aria-label="discovery — what this archive can show you"></div>
+<div id="routestrip" class="guxroute" hidden aria-label="the route this card walks"></div>
 <div class="combwrap">
+  <div id="atlas" hidden></div>
   <svg id="comb" tabindex="0" viewBox="0 0 1080 560" role="application" aria-label="fractal hexagonal fan chart — zoom, pan, click cells; list view below">
     <g id="world"></g>
   </svg>
@@ -248,6 +277,7 @@ footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint
 </details>
 
 <section class="detail" id="detail" aria-live="polite">
+  <div id="ppanel" hidden></div>
   <p class="empty" id="dempty" data-i18n="blood.pick">click a cell — or search a name — to read an ancestor.</p>
   <div id="dbody" hidden></div>
 </section>
@@ -343,6 +373,12 @@ footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint
     // deferred type=module loads after this classic script; both load orders
     // converge on wire()+onReady())
     globalThis.__bloodReady=true;
+    // GUX-01 beat 2b — the composition mount's boot payload, published BEFORE
+    // BloodNav.onReady() so the nav layer's legacy applyCtx sees the pending
+    // mount and does NOT rewrite the URL hash in the old vocabulary (the
+    // mount boots from the arriving hash itself; one truth, one applier).
+    globalThis.__guxBoot={S:S,apr:OPEN_ROOT,founder:S.root,deepP:(pm&&S.persons[pm[1]])?pm[1]:null,mythRoot:(/myth/.test(location.hash)&&RAG)?RAG:null};
+    document.dispatchEvent(new Event('gux:boot'));
     if(globalThis.BloodNav&&BloodNav.wire){BloodNav.wire(globalThis.BloodComb);BloodNav.onReady();}
   })
   .catch(()=>{document.getElementById('stats').textContent='could not load the corpus';});
@@ -630,11 +666,11 @@ footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint
   });
   function endPointer(e){pointers.delete(e.pointerId);if(pointers.size<2)pinch=null;if(pointers.size===0)drag=null;}
   svg.addEventListener('pointerup',endPointer);svg.addEventListener('pointercancel',endPointer);
-  document.getElementById('zin').addEventListener('click',function(){var p={x:CX,y:BASEY};
+  document.getElementById('zin').addEventListener('click',function(){if(globalThis.__guxAtlas){try{__guxAtlas.zoomBy(1.3);}catch(e){}return;}var p={x:CX,y:BASEY};
     view.tx=p.x-(p.x-view.tx)*1.3;view.ty=p.y-(p.y-view.ty)*1.3;view.s=Math.min(4,view.s*1.3);applyView();});
-  document.getElementById('zout').addEventListener('click',function(){var p={x:CX,y:BASEY};
+  document.getElementById('zout').addEventListener('click',function(){if(globalThis.__guxAtlas){try{__guxAtlas.zoomBy(1/1.3);}catch(e){}return;}var p={x:CX,y:BASEY};
     view.tx=p.x-(p.x-view.tx)/1.3;view.ty=p.y-(p.y-view.ty)/1.3;view.s=Math.max(0.3,view.s/1.3);applyView();});
-  document.getElementById('zfit').addEventListener('click',function(){view.s=1;centerOn(0,0,true,1);});
+  document.getElementById('zfit').addEventListener('click',function(){if(globalThis.__guxAtlas){try{__guxAtlas.resetView();}catch(e){}return;}view.s=1;centerOn(0,0,true,1);});
 
   function hexPts(cx,cy,s){var p=[];for(var a=0;a<6;a++){var r=a*Math.PI/3;p.push((cx+s*Math.cos(r)).toFixed(1)+','+(cy+s*Math.sin(r)).toFixed(1));}return p.join(' ');}
   var placed={};
@@ -740,6 +776,7 @@ footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint
     }
   }
   function setRoot(id,noTrail){
+    if(globalThis.__guxAtlas){try{__guxAtlas.reroot(id);}catch(e){}return;} // engine owns the world; re-root is the engine's explicit act
     if(!S.persons[id])return;
     if(!noTrail&&S.curRoot&&S.curRoot!==id)S.trail.push(S.curRoot);
     if(S.trail.length>12)S.trail.shift();
@@ -856,6 +893,10 @@ footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint
     document.getElementById('backperson').addEventListener('click',function(){showDetail(child);});
   }
   function showDetail(id){
+    if(globalThis.__guxAtlas){ // engine mode: the person panel is THE explanation surface (one-explanation law); relToRoot retires with the incumbent path
+      S.sel=id;try{__guxAtlas.select(id);}catch(e){}
+      return;
+    }
     var p=S.persons[id];if(!p)return;
     S.sel=id;
     if(globalThis.BloodNav&&BloodNav.onSelect)BloodNav.onSelect(id);
@@ -931,9 +972,11 @@ footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint
     S.spineOn=!S.spineOn;this.setAttribute('aria-pressed',String(S.spineOn));
     if(S.viewMode==='ped')drawPedigree();else drawComb();});
   document.getElementById('resetbtn').addEventListener('click',function(){
+    if(globalThis.__guxAtlas){try{__guxAtlas.home();}catch(e){}return;} // back to the beginning = the URL-derived initial context
     S.trail=[];setRoot(S.root,true);showDetail(S.root);});
   // ── view switch: pedigree (truth) ↔ fractal ↔ tree ───────────────────────
   function setView(mode){
+    if(globalThis.__guxAtlas){try{__guxAtlas.setView(mode==='ped'?'pedigree':mode==='fan'?'fractal':'tree');}catch(e){}return;}
     S.viewMode=mode;
     document.getElementById('viewped').setAttribute('aria-pressed',String(mode==='ped'));
     document.getElementById('viewfan').setAttribute('aria-pressed',String(mode==='fan'));
@@ -955,6 +998,7 @@ footer{max-width:1100px;margin:24px auto 0;padding-inline:16px;color:var(--faint
   // redraw whatever view is CURRENTLY selected — interpretation switches and
   // any other data change must land in the layout the visitor is looking at
   function redrawCurrent(){
+    if(globalThis.__guxAtlas)return; // the engine paints its own world
     if(S.viewMode==='ped')drawPedigree();
     else if(S.viewMode==='tree')renderTree();
     else drawComb();
@@ -1148,7 +1192,174 @@ hex.setAttribute('data-pid',id);
   try{var st=JSON.parse(localStorage.getItem('blood-staged')||'[]');if(st.length)S.staged=st;}catch(e){}
 })();
 </script>
-<script type="module" src="./blood-nav.mjs?v=1"></script>
+<script type="module">
+// GUX-01 beat 2b — THE COMPOSITION MOUNT (zGeneUI). blood.html owns
+// composition and presentation state only: truth stays in the corpus; the
+// atlas engine derives spatial state; the person panel derives explanation;
+// blood-nav owns the one navigation/history grammar (hash + session).
+// One corpus truth -> one atlas world -> one person explanation -> one
+// history -> one URL grammar. If ANYTHING here throws, the incumbent comb
+// path stays fully functional (the engine gates all read __guxAtlas).
+import { createAtlas, discoveries, bloodRoute, routeAlternates, routeAlternatesPhrase, ingest } from "./blood-atlas.mjs";
+import { mountPersonPanel, esc as ppEsc } from "./person-panel.mjs";
+import { fetchArchive } from "./person-panel-corpus.mjs";
+import { decodeHash, initialFromCtx, syncHash, mapView, RETURN_KEY, archiveUrl } from "./blood-nav.mjs";
+
+const $ = (id) => document.getElementById(id);
+const esc = (v) => ppEsc(v);
+const BASE = "../assets/profile-archive/lineage/";
+function bootPayload() {
+  if (globalThis.__guxBoot) return Promise.resolve(globalThis.__guxBoot);
+  return new Promise((res) => document.addEventListener("gux:boot", () => res(globalThis.__guxBoot), { once: true }));
+}
+function failQuiet(msg) { try { console.warn("gux mount: " + msg); } catch (e) {} }
+
+try {
+  const boot = await bootPayload();
+  if (!boot || !boot.S) throw new Error("boot payload missing");
+
+  // ONE truth source for the mount: the same corpus JSON the incumbent reads.
+  const corpus = await fetch(BASE + "remington-bloodline.json").then((r) => r.json());
+  const overlay = await fetch(BASE + "attested-overlays.json").then((r) => r.json()).catch(() => null);
+
+  // initial context = URL hash merged with the one-shot session return
+  // (blood-nav's grammar) — a deep link NEVER becomes a founder default.
+  let hctx = decodeHash(location.hash);
+  try {
+    const saved = sessionStorage.getItem(RETURN_KEY);
+    if (saved) {
+      const sctx = decodeHash(saved);
+      if (!hctx.p || hctx.p === sctx.p) { sessionStorage.removeItem(RETURN_KEY); hctx = sctx; }
+    }
+  } catch (e) { /* private mode: hash context still applies */ }
+  const init = initialFromCtx(hctx, boot.apr);
+  if (hctx.myth && boot.mythRoot && !hctx.r) init.root = boot.mythRoot; // #myth doorway keeps its meaning
+
+  let syncing = false;   // loop guard: one wiring echo per gesture
+  let panelAt = null;    // the person the panel is showing
+  let atlas = null;
+
+  // the panel (zGenePerson's organ) — the ONE explanation surface
+  const { archive } = await fetchArchive(BASE);
+  const panel = mountPersonPanel($("ppanel"), archive, {
+    root: init.root,
+    onnavigate(s) {
+      if (syncing || !atlas) return;
+      const id = s.view === "person" ? s.id : s.view === "relationship" ? s.a : null;
+      if (id && id !== panelAt) { panelAt = id; syncing = true; atlas.select(id); syncing = false; }
+    },
+    openPersonPage(id) {
+      try { sessionStorage.setItem(RETURN_KEY, syncHash(atlas ? atlas.getContext() : null)); } catch (e) {}
+      window.location.href = archiveUrl(id); // same-origin stays in tab; the one-shot return brings the context back
+    }
+  });
+
+  function openPanelPerson(id) {
+    if (syncing || !panel || !id || panelAt === id) return;
+    syncing = true; panelAt = id; panel.openPerson(id); syncing = false;
+    const d = $("detail"); if (d) d.classList.add("open");
+  }
+
+  // discovery rail — CONTEXTUAL per standing root (the advisor's invariant):
+  // the engine's pure-core ingest on OUR corpus copy with the root overridden;
+  // engine bytes are never touched or mutated.
+  function renderRail(rootId) {
+    const rail = $("cards");
+    if (!rail) return;
+    try {
+      const m = ingest(Object.assign({}, corpus, { root: rootId }), overlay);
+      rail.innerHTML = "";
+      for (const c of discoveries(m)) {
+        const b = document.createElement("button");
+        b.type = "button"; b.dataset.card = c.kind;
+        b.innerHTML = "<div><b>" + esc(c.title) + "</b></div>" +
+          "<div style='color:var(--dim);font-size:11px'>" + esc(c.hook || "") + "</div>" +
+          (c.count != null ? "<div style='color:var(--info);font-size:11px'>&#9662; " + esc(String(c.count)) + " — " + esc(c.depthNote || "counted across the whole published archive") + "</div>" : "") +
+          "<div style='color:var(--faint);font-size:10px;margin-top:3px'>" + esc(c.disclosure || "") + "</div>";
+        b.addEventListener("click", () => {
+          const a = c.action; if (!a || !atlas) return;
+          if (a.type === "show-route") { showRoute(a.from, a.to); atlas.reroot(a.to); atlas.select(a.to); }
+          else if (a.type === "enter-branch" || a.type === "reroot") { atlas.reroot(a.iid); atlas.select(a.iid); }
+          else if (a.type === "select") atlas.select(a.iid);
+        });
+        rail.appendChild(b);
+      }
+      rail.setAttribute("data-cards", String(rail.children.length));
+      rail.setAttribute("data-rail-root", String(rootId)); // the contextuality marker (invariant test)
+      rail.hidden = rail.children.length === 0;
+    } catch (e) { failQuiet("rail " + (e && e.message)); }
+  }
+  function showRoute(from, to) {
+    const strip = $("routestrip"); if (!strip || !atlas) return;
+    const route = bloodRoute(atlas.model, from, to);
+    if (!route) { strip.hidden = true; strip.innerHTML = ""; return; }
+    strip.hidden = false;
+    strip.setAttribute("data-route-len", String(route.length - 1));
+    strip.innerHTML = "<div style='color:var(--dim);font-size:11px;margin-bottom:4px'>follow the blood — " + (route.length - 1) +
+      " hops · <span style='color:var(--faint)'>" + esc(routeAlternatesPhrase(routeAlternates(atlas.model, from, to))) + "</span></div>" +
+      route.map((iid, i) => {
+        const p = atlas.person(iid) || {};
+        return "<button type='button' class='atlashop ev-" + ((p.evidence || {}).class || "none") + "' data-hop=\"" + esc(iid) +
+          "\" title=\"" + esc(p.name || "") + "\">" + (i === 0 ? "&#9678; " : "") + esc(p.name || "Living") + "</button>";
+      }).join("<span style='color:var(--info)'> &#8594; </span>");
+    for (const hb of strip.querySelectorAll("[data-hop]")) hb.addEventListener("click", () => atlas.select(hb.dataset.hop));
+    strip.scrollLeft = 0;
+  }
+
+  // the atlas (zGeneAtlas's organ) — ONE world, ONE history
+  atlas = await createAtlas({
+    mount: $("atlas"),
+    corpus, overlay,
+    initial: init,
+    onContext(ctx, reason) {
+      syncHash(ctx); // blood-nav's grammar; replaceState only — the URL is derived state
+      const vb = { viewped: "pedigree", viewfan: "fractal", viewtree: "tree" };
+      for (const id in vb) { const el = $(id); if (el) el.setAttribute("aria-pressed", String(ctx.view === vb[id])); }
+      try { boot.S.curRoot = ctx.root; if (ctx.selection) boot.S.sel = ctx.selection; } catch (e) {}
+      if (reason === "reroot") {
+        renderRail(ctx.root);
+        panelAt = ctx.root; syncing = true; panel.setRoot(ctx.root); panel.openPerson(ctx.root); syncing = false;
+      } else if (!syncing && (reason === "select" || reason === "back" || reason === "restore" || reason === "home")) {
+        openPanelPerson(ctx.selection);
+        if (reason === "home" && !ctx.selection && panelAt !== ctx.root) { panelAt = ctx.root; syncing = true; panel.openPerson(ctx.root); syncing = false; }
+      }
+    }
+  });
+  globalThis.__guxAtlas = atlas;
+  globalThis.__guxInit = init; // journey seam: the URL-derived initial context
+  document.body.classList.add("gux");
+  // ONE history, one visible affordance: back joins the zoombar (B on the
+  // engine stage does the same); the incumbent trail is retired under gux.
+  // Back walks the stack; at the bottom, back returns EXACTLY home — the
+  // engine's home() restores the URL-derived initial context including
+  // selection and camera (it pushes first, so one-history semantics hold).
+  try {
+    const zb = document.querySelector(".zoombar");
+    if (zb) {
+      const bb = document.createElement("button");
+      bb.type = "button"; bb.id = "guxback"; bb.title = "back — one history (B)";
+      bb.setAttribute("aria-label", "back — one history");
+      bb.textContent = "\u2190";
+      const atInitial = (c) => c.root === init.root && (c.selection || null) === (init.selection || null) && c.view === init.view;
+      bb.addEventListener("click", () => {
+        const d = atlas.core.historyDepth();
+        if (d === 0 && !atInitial(atlas.getContext())) atlas.home();
+        else atlas.back();
+      });
+      zb.insertBefore(bb, zb.firstChild);
+    }
+  } catch (e) { failQuiet("back button " + (e && e.message)); }
+  $("atlas").hidden = false;
+  $("ppanel").hidden = false;
+  $("ppanel").setAttribute("data-pp-mounted", "1");
+  renderRail(atlas.getContext().root);
+  if (atlas.getContext().selection) openPanelPerson(atlas.getContext().selection);
+  else if (init.root) { panelAt = init.root; panel.openPerson(init.root); }
+} catch (e) {
+  failQuiet("engine mount failed — incumbent comb path remains active (" + (e && e.message) + ")");
+}
+</script>
+<script type="module" src="./blood-nav.mjs?v=2"></script>
 <script src="tour.js?v=42"></script>
 </body>
 </html>

@@ -13,6 +13,7 @@ import {
   encodeCtx, decodeHash, lodFor, shouldSuppressClick,
   siblingsOf, siblingRing, stepSelection, archiveUrl, applyPlan,
   upPath, hopLabel, relToRoot, generationContext,
+  mapView, initialFromCtx, syncHash,
 } from "../../surfaces/blood-nav.mjs";
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -22,10 +23,10 @@ const corpus = JSON.parse(readFileSync(join(here, "../../assets/profile-archive/
 /* ---------- hash context ---------- */
 
 test("ctx round-trips through encode/decode", () => {
-  const ctx = { p: "p72d226cedf", v: "fan", r: "p455afa9256", s: 1.3, x: -240, y: 118 };
+  const ctx = { p: "p72d226cedf", v: "fractal", r: "p455afa9256", s: 1.3, x: -240, y: 118 };
   const again = decodeHash(encodeCtx(ctx));
   assert.equal(again.p, ctx.p);
-  assert.equal(again.v, "fan");
+  assert.equal(again.v, "fractal");
   assert.equal(again.r, ctx.r);
   assert.equal(again.s, 1.3);
   assert.equal(again.x, -240);
@@ -34,7 +35,7 @@ test("ctx round-trips through encode/decode", () => {
   assert.equal(decodeHash(encodeCtx({ p: "p1", x: -240.5 })).x, -240);
 });
 
-test("legacy #p=<id> deep link keeps its exact old meaning", () => {
+test("legacy #p=<id> decodes as the person field (beat 2b: the mount boots it as SELECTION on the default root, not a founder default)", () => {
   const c = decodeHash("#p=KWJ4-XBD");
   assert.equal(c.p, "KWJ4-XBD");
   assert.equal(c.v, null);
@@ -169,7 +170,7 @@ test("applyPlan: unknown ids and junk are skipped, not guessed", () => {
 /* ---------- wiring contract: blood.html <-> blood-nav.mjs seam ---------- */
 
 test("wiring: the page loads the nav module before tour.js", () => {
-  const m = page.indexOf('blood-nav.mjs?v=1');
+  const m = page.indexOf('blood-nav.mjs?v=2');
   const t = page.indexOf('tour.js?v=42');
   assert.ok(m > 0 && t > 0 && m < t, "module script must precede tour.js");
 });
@@ -331,4 +332,99 @@ test("wiring: ghost slots + the frontier affordance render honestly", () => {
   assert.ok(page.includes("ancestry continues beyond the published archive"));
   assert.ok(page.includes("hexcell ghostslot"));
   assert.ok(page.includes("coverage of the walk, not an empty family"));
+});
+
+/* ---------- GUX-01 beat 2b: the composition mount contract ----------
+ * Spec: PLANS/GUX01_BLOODHTML_MOUNT_SPEC.md (advisor steering 9777a08e +
+ * d5faf191 + 5c02255d). One corpus truth -> one atlas world -> one person
+ * explanation -> one history -> one URL grammar. The experiential beats and
+ * the deep-link->explore->Back cases are proven by e2e/gux01-blood-journey.mjs
+ * against the REAL page; what follows pins the grammar and the wiring. */
+
+test("mapView: the ONE view vocabulary — legacy short forms normalize, junk is null", () => {
+  assert.equal(mapView("ped"), "pedigree");
+  assert.equal(mapView("fan"), "fractal");
+  assert.equal(mapView("pedigree"), "pedigree");
+  assert.equal(mapView("fractal"), "fractal");
+  assert.equal(mapView("tree"), "tree");
+  assert.equal(mapView("bogus"), null);
+  assert.equal(mapView(null), null);
+});
+
+test("decodeHash: v= speaks the engine vocabulary; legacy forms normalize into it", () => {
+  assert.equal(decodeHash("#v=pedigree").v, "pedigree");
+  assert.equal(decodeHash("#v=fractal").v, "fractal");
+  assert.equal(decodeHash("#v=tree").v, "tree");
+  assert.equal(decodeHash("#v=ped").v, "pedigree");
+  assert.equal(decodeHash("#v=fan").v, "fractal");
+  assert.equal(decodeHash("#v=bogus").v, null);
+});
+
+test("deep-link case 1: #p=<person> boots SELECTION on the DEFAULT root — never a synthesized founder default", () => {
+  const init = initialFromCtx({ p: "pX", v: null, r: null, s: null, x: null, y: null }, "APR");
+  assert.equal(init.root, "APR");
+  assert.equal(init.selection, "pX");
+  assert.equal(init.view, "pedigree");
+  assert.equal(init.transform.k, 1);
+});
+
+test("deep-link case 2: a full serialized hash boots root+selection+view+camera exactly as written", () => {
+  const init = initialFromCtx({ p: "pX", v: "fan", r: "pR", s: 2.1, x: -40, y: 120 }, "APR");
+  assert.equal(init.root, "pR");
+  assert.equal(init.selection, "pX");
+  assert.equal(init.view, "fractal");
+  assert.deepEqual(init.transform, { k: 2.1, x: -40, y: 120 });
+});
+
+test("syncHash: the URL is DERIVED state — engine ctx encodes through the one grammar and back", () => {
+  const h = syncHash({ root: "pR", selection: "pX", view: "fractal", transform: { k: 2, x: -40, y: 118 } }, null);
+  assert.ok(h.includes("p=pX"), h);
+  assert.ok(h.includes("r=pR"), h);
+  assert.ok(h.includes("v=fractal"), h);
+  const back = decodeHash(h);
+  assert.equal(back.p, "pX");
+  assert.equal(back.r, "pR");
+  assert.equal(back.v, "fractal");
+  assert.equal(back.s, 2);
+  assert.equal(back.x, -40);
+  assert.equal(back.y, 118);
+});
+
+test("mount wiring: the composition mount exists with all organs (engine, panel, rail, hosts)", () => {
+  assert.ok(page.includes('from "./blood-atlas.mjs"'));
+  assert.ok(page.includes('from "./person-panel.mjs"'));
+  assert.ok(page.includes('from "./person-panel-corpus.mjs"'));
+  assert.ok(page.includes('from "./blood-nav.mjs"'));
+  assert.ok(page.includes('id="atlas"'));
+  assert.ok(page.includes('id="ppanel"'));
+  assert.ok(page.includes('id="cards"'));
+  assert.ok(page.includes('id="routestrip"'));
+  assert.ok(page.includes("createAtlas("));
+  assert.ok(page.includes("mountPersonPanel("));
+  assert.ok(page.includes("gux:boot"));
+});
+
+test("mount wiring: engine gates at every incumbent state entry — one world, one history", () => {
+  assert.ok(page.includes("if(globalThis.__guxAtlas){try{__guxAtlas.reroot(id);}catch(e){}return;}"));
+  assert.ok(page.includes("S.sel=id;try{__guxAtlas.select(id);}catch(e){}"));
+  assert.ok(page.includes("__guxAtlas.setView(mode==='ped'?'pedigree':mode==='fan'?'fractal':'tree')"));
+  assert.ok(page.includes("if(globalThis.__guxAtlas)return;"));
+  assert.ok(page.includes("__guxAtlas.home();"));
+});
+
+test("one-explanation law: incumbent detail internals hide under engine mode; the panel's own search+back are retired", () => {
+  assert.ok(page.includes("body.gux #dempty,body.gux #dbody{display:none!important}"));
+  assert.ok(page.includes("#ppanel .pp-search{display:none!important}"));
+  assert.ok(page.includes("#ppanel .pp-backbar{display:none!important}"));
+});
+
+test("contextual rail: the mount re-derives discovery per standing root and marks it for the journey", () => {
+  assert.ok(page.includes("renderRail(ctx.root);"));
+  assert.ok(page.includes('setAttribute("data-rail-root"'));
+  assert.ok(page.includes("ingest(Object.assign({}, corpus, { root: rootId }), overlay)"));
+});
+
+test("route strip: computed/qualified alternates only — the universal boilerplate is banned from the mount", () => {
+  assert.ok(page.includes("routeAlternatesPhrase(routeAlternates("));
+  assert.ok(!page.includes("near-equal alternates exist"));
 });
