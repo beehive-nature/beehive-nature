@@ -41,6 +41,8 @@ use watchpay::wave::{
     ARBITRUM_SEPOLIA_CHAIN_ID,
 };
 
+use bpay_sign::rlp;
+
 // ─────────────────────────── shared state ───────────────────────────
 
 struct AppState {
@@ -131,7 +133,7 @@ impl ConnectTransport for HotTestnetTransport {
                 ),
             ));
         }
-        let unsigned = crate::rlp::unsigned_1559(
+        let unsigned = rlp::unsigned_1559(
             chain_id,
             q(nonce)?,
             q(max_priority_fee_per_gas)?,
@@ -149,7 +151,7 @@ impl ConnectTransport for HotTestnetTransport {
         let (r, s): ([u8; 32], [u8; 32]) =
             (b[..32].try_into().unwrap(), b[32..].try_into().unwrap());
         let y_parity = rid.to_byte() as u64;
-        let signed = crate::rlp::signed_1559(
+        let signed = rlp::signed_1559(
             chain_id,
             q(nonce)?,
             q(max_priority_fee_per_gas)?,
@@ -749,8 +751,6 @@ async fn sign_receipt_get(
 }
 
 // ─────────────────────────────── main ───────────────────────────────
-
-mod rlp;
 
 fn main() {
     let mode = std::env::var("BPAY_SIGN_MODE").unwrap_or_default();

@@ -158,3 +158,32 @@ composer, wall, receipts, UI — is unchanged by construction.
   interesting; native THP is a replacement-transport project, never a
   prerequisite; mainnet stays boringly untouched — a feature, not
   unfinished business.
+
+## OBSERVATION A — DONE 2026-09-19 (receipt: docs/receipts/bpay-safe7-preflight-2026-09-19.md)
+
+**The Safe 7 spoke through Suite MCP and the recovered signer matches.**
+Device address at `m/44'/60'/0'/0/0`: `0x8fd7252a29fb759755e30a15e966932eaad91b75`;
+message signature recovered locally → the SAME address (v=28). Deliberate
+rejection NOT exercised (the founder approved both passes — recorded);
+Observation B NOT attempted (stop-for-inspection holds). Adapter:
+`crates/bpay-sign/src/suite_mcp.rs` implements the SAME `ConnectTransport`
+boundary as the hot key, `broadcast:false` structural; driver:
+`cargo run -p bpay-sign --bin safe7_preflight` with `BPAY_MCP_TOKEN` env
+(read from Suite's config.json; never printed or committed).
+
+Operational laws learned live:
+1. **A wedged MCP queue needs a Suite restart.** An unanswered device call
+   (e.g. its permission modal never confirmed) parks the server's device
+   lane: `tools/list` answers, every device call hangs until TCP timeout.
+   Restart Suite, re-run.
+2. **Fresh Suite boots gate the first device call** behind a "Select your
+   Trezor — Connected to: MCP Agent" modal (device pick + consent).
+3. **The device returns EIP-55 checksummed addresses** — lowercase before
+   strict parsing.
+4. **Message signatures are deterministic** (identical message → identical
+   signature; RFC 6979-family nonce) — a re-run reproduces, it does not
+   independently re-prove.
+5. **`v` arrives in EIP-155 form (27/28)** for `ethereumSignMessage` — both
+   v forms are accepted and recorded.
+6. The MCP token once leaked through a ureq error string (the URL embeds
+   it) — the adapter redacts by construction now; keep it that way.
