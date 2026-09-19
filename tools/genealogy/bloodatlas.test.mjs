@@ -380,6 +380,53 @@ test("core: selecting an unknown person is a no-op that says so, never a guess",
   assert.equal(core.getContext().root, "g0");
 });
 
+// ─────────── boot framing / home() contract (the camera-fix law) ───────────
+
+test("core: explicit initial camera is the boot state verbatim (deep-link contract)", () => {
+  const core = createCore(ingest(fixtureTiny()), {
+    initial: { root: "g0", selection: null, view: "fractal", transform: { k: 1.6, x: -100, y: 80 } },
+  });
+  assert.deepEqual(core.getContext().transform, { k: 1.6, x: -100, y: 80 });
+});
+
+test("core: adoptBootTransform is one-shot; home() returns to the ADOPTED boot framing, never the raw initial", () => {
+  const core = coreOf(ingest(fixtureTiny())); // cold boot, no explicit camera
+  // first paint reframes the cold camera (simulated headless: the DOM layer
+  // syncs its computed framing back through setTransform, then adopts it)
+  core.setTransform({ k: 1, x: 0, y: -330 });
+  assert.equal(core.adoptBootTransform({ k: 1, x: 0, y: -330 }), true);
+  assert.equal(core.adoptBootTransform({ k: 9, x: 9, y: 9 }), false, "one-shot: a second report is refused");
+  core.setTransform({ k: 2.2, x: 51, y: -7 }); // the user explores
+  core.reroot("m1");
+  core.home();
+  assert.deepEqual(core.getContext().transform, { k: 1, x: 0, y: -330 },
+    "home() restores the framing boot SHOWED — the adopted first-paint camera — never the raw {k:1,x:0,y:0}");
+  assert.equal(core.getContext().root, "g0");
+  assert.equal(core.getContext().view, "pedigree");
+});
+
+test("core: with an honored serialized camera, home() restores THAT camera and the whole deep-linked context", () => {
+  const core = createCore(ingest(fixtureTiny()), {
+    initial: { root: "g0", selection: "m1", view: "fractal", transform: { k: 1.6, x: -100, y: 80 } },
+  });
+  core.adoptBootTransform({ k: 1.6, x: -100, y: 80 }); // first paint rendered through the serialized camera
+  core.setTransform({ k: 1.1, x: 12, y: 30 }); // the user pans/zooms away
+  core.reroot("f1");
+  core.home();
+  const ctx = core.getContext();
+  assert.deepEqual(ctx.transform, { k: 1.6, x: -100, y: 80 });
+  assert.equal(ctx.root, "g0");
+  assert.equal(ctx.selection, "m1");
+  assert.equal(ctx.view, "fractal", "root · selection · view · camera all round-trip exactly");
+});
+
+test("core: home() before any paint restores the raw initial (documented pre-adoption behavior)", () => {
+  const core = coreOf(ingest(fixtureTiny()));
+  core.setTransform({ k: 2, x: 9, y: 9 });
+  core.home();
+  assert.deepEqual(core.getContext().transform, { k: 1, x: 0, y: 0 });
+});
+
 // ─── semantic zoom (L2) ─────────────────────────────────────────────────────
 
 test("lodFor: far = structure, mid = people, near = reading (L2)", () => {

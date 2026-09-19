@@ -10,7 +10,11 @@
 //        mount:   document.getElementById("world"),        // any element
 //        corpus:  mergedCorpusObject,                      // OR corpusUrl (fetched same-origin)
 //        overlay: overlayObject,                           // OR overlayUrl; merged by ingest()
-//        initial: { root, selection, view },               // optional; defaults corpus.root / "pedigree"
+//        initial: { root, selection, view, transform },  // optional; defaults corpus.root / "pedigree";
+//        //                                            transform, when PRESENT, is the AUTHORITATIVE
+//        //                                            boot camera: the first paint renders through it
+//        //                                            and never reframes it away (deep link / session
+//        //                                            return). Omit it for auto-framing boot.
 //        bounds:  { ancDepth, descDepth, descNodeCap, sibCap, spouseCap },
 //        onContext(ctx, reason) { /* sync #p=&v=&r=&s= hash here */ },
 //      });
@@ -18,6 +22,12 @@
 //      atlas.reroot(iid)          — explicit re-root, pushes history
 //      atlas.setView("pedigree"|"fractal"|"tree") — pushes history, keeps root+selection
 //      atlas.back() / atlas.home() — restore prior exploration context
+//      atlas.home() returns EXACTLY to the boot framing: the first paint's
+//      camera (an explicit initial.transform when provided, else the first
+//      reframe) — the mount reports it once via core.adoptBootTransform(),
+//      so home() never restores a computed-but-never-displayed transform.
+//      Restored contexts (back/home/restoreContext) keep their own camera:
+//      only FRESH navigations (reroot/setView/repaint) reframe.
 //      atlas.getContext()         — frozen {root, selection, view, transform}
 //      atlas.search(q, cap) / atlas.ghostCount(iid) / atlas.person(iid)
 //      atlas.destroy()            — removes listeners, clears the mount
@@ -601,7 +611,8 @@ export function createCore(model, opts) {
     view: (o.initial && o.initial.view) || "pedigree",
     transform: Object.assign({ k: 1, x: 0, y: 0 }, (o.initial && o.initial.transform) || {}),
   };
-  const initial = Object.assign({}, state);
+  let initial = Object.assign({}, state);
+  let bootAdopted = false;
   let history = [];
   const emit = (reason) => { if (o.onContext) o.onContext(snapshot(), reason); };
   const snapshot = () => Object.freeze({
@@ -649,6 +660,16 @@ export function createCore(model, opts) {
       emit("home");
       return snapshot();
     },
+    // One-shot: the mount reports the transform the FIRST paint actually
+    // rendered — the honored explicit boot camera, or the first reframe.
+    // home() must return to the framing boot SHOWED, never to a camera that
+    // was computed and then discarded, or never displayed at all.
+    adoptBootTransform(t) {
+      if (bootAdopted) return false;
+      if (t && typeof t === "object") initial = Object.assign({}, initial, { transform: Object.assign({ k: 1, x: 0, y: 0 }, t) });
+      bootAdopted = true;
+      return true;
+    },
     restoreContext(ctx) {
       if (!ctx) return false;
       if (ctx.root != null && !model.person(ctx.root)) return false;
@@ -684,8 +705,8 @@ export async function createAtlas(opts) {
   const model = ingest(corpus, overlay, o);
   const bounds = Object.assign({}, DEFAULT_BOUNDS, o.bounds || {});
   const core = createCore(model, { initial: o.initial, historyCap: o.historyCap, onContext: (ctx, reason) => {
-    paint();
-    if (o.onContext) o.onContext(core.getContext(), reason); // fresh — paint may reframe
+    paint(reason);
+    if (o.onContext) o.onContext(core.getContext(), reason); // fresh — restored paints keep their own camera
   } });
 
   const mount = o.mount;
@@ -704,6 +725,11 @@ export async function createAtlas(opts) {
   let transform = { k: 1, x: 0, y: 0 };
   let lastScene = null;
   let lastViewRoot = "";
+  let firstPaint = true;
+  // An explicitly provided initial.transform is the AUTHORITATIVE boot
+  // camera (deep link / session return): the first paint renders through it
+  // and never reframes it away. Omit initial.transform for auto-framing.
+  const hasBootCamera = !!(o.initial && o.initial.transform);
   // framing: pedigree anchors near the stage top (ancestors flow DOWN into
   // view — at 390px a center anchor pushed generations 2+ under the fold);
   // fractal anchors at the center (rings radiate). Reframe on view/root change.
@@ -735,7 +761,7 @@ export async function createAtlas(opts) {
     return { x: c.x * CELL, y: c.y * CELL * 1.35, r: 46 };
   }
 
-  function paint() {
+  function paint(reason) {
     const ctx = core.getContext();
     transform = Object.assign({}, ctx.transform); // snapshot is frozen — keep a live copy
     const scene = ctx.view === "tree"
@@ -745,8 +771,16 @@ export async function createAtlas(opts) {
         : buildPedigree(model, { root: ctx.root, ancDepth: bounds.ancDepth });
     lastScene = scene;
     const vr = scene.view + "|" + ctx.root;
-    if (vr !== lastViewRoot) reframe(scene.view);
+    // Reframe only FRESH navigations (reroot/setView/repaint). Restored
+    // contexts (back/home/restore) carry their own camera — reframing them
+    // would discard the exact context being restored; and an explicit boot
+    // camera is honored on the first paint, never reframed away.
+    const restored = reason === "back" || reason === "home" || reason === "restore";
+    if (vr !== lastViewRoot && !restored && !(firstPaint && hasBootCamera)) reframe(scene.view);
     lastViewRoot = vr;
+    // the boot framing is what home() returns to: adopt it exactly once,
+    // after the first paint's camera decision (honored or reframed).
+    if (firstPaint) { firstPaint = false; core.adoptBootTransform(transform); }
     const isTree = scene.view === "tree";
     world.style.display = isTree ? "none" : "";
     listview.style.display = isTree ? "" : "none";
