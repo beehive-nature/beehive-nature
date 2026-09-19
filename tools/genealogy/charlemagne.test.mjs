@@ -184,3 +184,44 @@ test("regeneration determinism: personpage output matches the committed bytes", 
   // after commit this is clean; before commit both modified once — the assertion is that regen didn't DRIFT beyond the sync
   assert.ok(!/persons.*(M.*M.*)/.test(st) || true); // shape guard: regeneration is idempotent because inputs are staged objects
 });
+
+// ─── rider (2026-09-18, second correction): computed alternates, no conflation ──
+test("RIDER: route claims are computed — the 40-hop conflation is withdrawn, the duplicate node stated", () => {
+  const pack = readJson(join(LINEAGE, "evidence/charlemagne.json"));
+  assert.match(pack.summary, /TWO equal-shortest 39-hop routes/);
+  assert.match(pack.summary, /Karl der Große/);
+  assert.match(pack.summary, /withdrawn/);
+  assert.ok(!/second documented route \(40 hops\)/.test(JSON.stringify(pack)),
+    "the uncomputed 40-hop route claim is gone from the pack entirely");
+  // computed on this corpus: this node {39,2,0}; the German node {39,2,13} with 2 ghost parents
+  const CH = {};
+  for (const child in corpus.edges) for (const p of corpus.edges[child]) if (corpus.persons[p]) (CH[p] = CH[p] || []).push(child);
+  function countPaths(to, len) { // count distinct shortest + one-longer up-paths founder→to
+    const dist = { founder: 0 };
+    const q = ["founder"];
+    const kids = new Map();
+    while (q.length) { const cur = q.shift(); for (const p of corpus.edges[cur] || []) if (corpus.persons[p]) { if (!kids.has(p)) kids.set(p, []); kids.get(p).push(cur); if (dist[p] === undefined) { dist[p] = dist[cur] + 1; q.push(p); } } }
+    if (dist[to] === undefined) return null;
+    const L = dist[to];
+    const sc = { founder: 1 }, po = { founder: 0 };
+    // per-level TWO-pass: all shortest counts for a level complete before any
+    // one-longer count reads them (a same-level single-pass undercounts — the
+    // exact bug the engine's routeAlternates fixed; this copy must not reintroduce it)
+    const byLevel = new Map();
+    for (const [v, l] of Object.entries(dist)) { if (!byLevel.has(l)) byLevel.set(l, []); byLevel.get(l).push(v); }
+    const levels = [...byLevel.keys()].sort((a, b) => a - b);
+    for (const l of levels) {
+      for (const v of byLevel.get(l)) { if (v === "founder") continue; sc[v] = 0; }
+      for (const v of byLevel.get(l)) { if (v === "founder") continue; for (const ch of kids.get(v) || []) if (dist[ch] === l - 1) sc[v] += sc[ch] || 0; }
+      for (const v of byLevel.get(l)) { if (v === "founder") continue; po[v] = 0; }
+      for (const v of byLevel.get(l)) { if (v === "founder") continue; for (const ch of kids.get(v) || []) { if (dist[ch] === l - 1) po[v] += po[ch] || 0; else if (dist[ch] === l) po[v] += sc[ch] || 0; } }
+    }
+    return { L, sc: sc[to] || 0, po: po[to] || 0 };
+  }
+  const en = countPaths(CHAR, 39);
+  assert.deepEqual([en.L, en.sc, en.po], [39, 2, 0], "English node: two equal-shortest, none one-longer");
+  const karl = Object.entries(corpus.persons).find(([i, p]) => /^Karl der Große/.test(p.name || ""))[0];
+  const de = countPaths(karl, 39);
+  assert.deepEqual([de.L, de.sc, de.po], [39, 2, 13], "German node: two equal-shortest, thirteen one-longer");
+  assert.equal((corpus.edges[karl] || []).filter((p) => !corpus.persons[p]).length, 2, "the German node's own frontier: two unpublished parent refs");
+});
