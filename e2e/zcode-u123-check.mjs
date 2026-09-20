@@ -56,7 +56,8 @@ const px = v => Math.round(parseFloat(v));
   const lb = await box(page, 'nav.back a');
   ok('u3: it is a 44px target', lb && lb.height >= 44, lb ? `height ${lb.height}` : 'no box');
   const nb = await box(page, 'nav.back');
-  ok('u3: it sits on the first screen (under the register bar)', nb && nb.y + nb.height <= 844, nb ? `bottom ${Math.round(nb.y + nb.height)}` : 'no box');
+  const ih1 = await page.evaluate(() => window.innerHeight);
+  ok('u3: it sits on the first screen (under the register bar)', nb && nb.y + nb.height <= ih1, nb ? `bottom ${Math.round(nb.y + nb.height)}` : 'no box');
   ok('u3: the register bar mounted (sibling chrome intact)', await page.locator('#bregctl').count() === 1);
   await page.waitForSelector('#bregbar');
   const order = await page.evaluate(() => {
@@ -91,18 +92,35 @@ const px = v => Math.round(parseFloat(v));
 // standing condition (laborer 0f8d72f1): at 390x844 the provenance summary
 // row is FULLY visible without scrolling, in all three registers. the old
 // threshold (<1000px) passed 890px green - it never encoded the claim.
+// v2 (laborer 653ebede): "fully visible" = clear of the BAR CHROME, and the
+// limit is COMPUTED - innerHeight - tbar-h, read from the variable tour.js
+// publishes (#159). an unpublished variable fails CLOSED, never || 0.
 {
   const regs = [['bee', null], ['raver', 'raver'], ['cypherpunk', 'cypherpunk']];
   for (const [name, reg] of regs) {
     const { context, page } = await fresh(reg);
+    const ih = await page.evaluate(() => window.innerHeight);
     const pb = await box(page, '#play');
-    ok(`u1: play sits above the fold (${name})`, pb && pb.y < 844, pb ? `y ${Math.round(pb.y)}` : 'no box');
+    ok(`u1: play sits above the fold (${name})`, pb && pb.y < ih, pb ? `y ${Math.round(pb.y)}` : 'no box');
     const details = page.locator('details[data-reg-disclose]');
     ok(`u1: provenance and doctrine ride the estate disclosure (two blocks, ${name})`, await details.count() === 2);
     const sums = await details.evaluateAll(ds => ds.map(d => d.querySelector('summary').getBoundingClientRect().height));
     ok(`u1: each summary is a 44px row (${name})`, sums.every(h => h >= 44), JSON.stringify(sums));
-    const sumBottom = await details.first().evaluate(d => Math.round(d.querySelector('summary').getBoundingClientRect().bottom + window.scrollY));
-    ok(`u1: the provenance summary row is FULLY on the first screen at 390x844 (${name})`, sumBottom <= 844, `${sumBottom}px`);
+    const m = await page.evaluate(() => ({
+      raw: getComputedStyle(document.documentElement).getPropertyValue('--tbar-h').trim(),
+      ih: window.innerHeight,
+      sy: window.scrollY,
+      bottom: document.querySelector('details[data-reg-disclose] > summary').getBoundingClientRect().bottom,
+    }));
+    const tbarH = parseFloat(m.raw);
+    if (m.raw === '' || !Number.isFinite(tbarH)) {
+      ok(`u1: the tour bar publishes --tbar-h (${name})`, false, `raw '${m.raw}' - gate fails closed, no || 0 shortcut`);
+    } else {
+      ok(`u1: the tour bar publishes --tbar-h (${name})`, true, m.raw);
+      const sumBottom = Math.round(m.bottom + m.sy);
+      const limit = m.ih - tbarH;
+      ok(`u1: the provenance summary clears the bar chrome at 390x844 (${name})`, sumBottom <= limit, `bottom ${sumBottom}px <= innerHeight ${m.ih} - tbar-h ${tbarH} = ${Math.round(limit)}px`);
+    }
     if (!reg) {
       const open = await details.evaluateAll(ds => ds.map(d => d.open));
       ok('u1: both collapse for the default register (bee)', open.every(o => o === false), JSON.stringify(open));
