@@ -1,0 +1,8 @@
+{
+  "ok": true,
+  "peers": 26,
+  "send_ready_peers": 26,
+  "status": "healthy",
+  "uptime_secs": 255,
+  "version": "0.45.0"
+}

@@ -20,6 +20,7 @@
 *{box-sizing:border-box;margin:0}
 html,body{background:var(--bg)}
 body{font:13px/1.6 ui-sans-serif,system-ui,"Segoe UI",Roboto,sans-serif;color:var(--ink);padding:18px 14px 64px;max-width:920px;margin:0 auto}
+body{overflow-x:hidden} /* the only thing past the right edge is tour-strip scroll internals; a reader gets no sideways wiggle */
 a{color:#B79FE0}
 h1{font-size:clamp(20px,5vw,28px);letter-spacing:-.4px}
 h1.grad{background:linear-gradient(92deg,var(--sovereign),var(--you));-webkit-background-clip:text;background-clip:text;color:transparent}
@@ -31,7 +32,7 @@ h3{font-size:11px;text-transform:uppercase;letter-spacing:1.2px;color:var(--ink-
 .stats{display:flex;gap:10px;margin-top:10px;flex-wrap:wrap}
 .stat{flex:1;min-width:110px;background:var(--bg-card);border:1px solid var(--line);border-radius:var(--radius);padding:10px 14px}
 .stat.pstat{background:var(--bg-well)}
-.stat b{display:block;font-size:32px;line-height:1.1;font-family:ui-monospace,Menlo,Consolas,monospace;color:#B79FE0}
+.stat b{display:block;font-size:clamp(17px,7.5vw,32px);line-height:1.1;font-family:ui-monospace,Menlo,Consolas,monospace;color:#B79FE0}
 .stat b.seed{color:var(--sem-value);font-size:32px;word-break:break-all}
 .stat.science b{color:var(--sem-science);font-size:18px;padding-top:6px}
 .stat .l{display:block;font-size:9.5px;color:var(--ink-dim);text-transform:uppercase;letter-spacing:.9px;margin-top:2px}
@@ -125,12 +126,14 @@ chunks; the keys never leave your device unless you send them.</p>
   artifacts changes: same bytes, same keys, same manifest.</p>
 </section>
 
-<p class="foot"><b>provenance.</b> one self-contained file · encryption is WebCrypto AES-GCM in your browser
+<details class="tnote" data-reg-disclose><summary data-i18n="mv.d.prov">Provenance — one self-contained file, encrypted in your browser</summary>
+  <p class="foot"><b>provenance.</b> one self-contained file · encryption is WebCrypto AES-GCM in your browser
 (per-item random keys; the manifest IS the private vault — export it or lose it, the network will not remember
 your keys) · addresses are content-derived · <b>delete is honest</b>: it removes your manifest entry — address
 and key vanish from your device, and without the key the stored chunks are noise to anyone, but the network may
 keep the bytes · "send" produces a capability line (address+key) — the room's relay lane will carry it signed ·
 simulation backend labelled SIMULATED, never faked as live · no CDN, no build step, zero off-origin.</p>
+  </details>
 
 <script>
 "use strict";

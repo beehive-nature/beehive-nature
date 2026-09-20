@@ -19,7 +19,7 @@
     #adWin button{appearance:none;position:static;display:inline-flex;align-items:center;justify-content:center;gap:6px;min-width:44px;min-height:44px;width:auto;height:auto;margin:0;padding:8px 12px;border:1px solid var(--ad-line);border-radius:9px;background:var(--ad-panel);color:var(--ad-ink);text-align:center;cursor:pointer;white-space:normal;transform:none;opacity:1}
     #adWin button:disabled{opacity:.55;cursor:default}#adWin button:hover:not(:disabled){border-color:var(--ad-accent)}
     #adWin a{color:var(--ad-ink);text-decoration:underline;text-underline-offset:3px;overflow-wrap:anywhere}
-    #adWin button:focus-visible,#adWin a:focus-visible,#adWin summary:focus-visible,#adWin textarea:focus-visible,#adOrb:focus-visible{outline:3px solid var(--ad-accent,#326b39);outline-offset:-3px}
+    #adWin button:focus-visible,#adWin a:focus-visible,#adWin summary:focus-visible,#adWin textarea:focus-visible,#adOrb:focus-visible{outline:3px solid var(--ad-accent,#6e3fb8);outline-offset:-3px}
     #adHead{display:flex;align-items:center;gap:6px;padding:8px 12px;flex:none;border-bottom:1px solid var(--ad-line);background:var(--ad-panel)}
     #adTitle{font:600 1rem/1.4 var(--ad-font);margin:0 auto 0 0;color:var(--ad-ink)}#adHead button{font-size:.875rem;padding:6px 8px;background:transparent}
     #adAgents{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;padding:10px 12px;flex:none}
@@ -35,8 +35,8 @@
     #adPrompt{flex:1;min-width:0;width:100%;min-height:52px;max-height:120px;margin:0;padding:10px 12px;resize:vertical;background:var(--ad-panel);color:var(--ad-ink);border:1px solid var(--ad-line);border-radius:10px;font:16px/1.4 var(--ad-font)}#adPrompt::placeholder{color:var(--ad-dim);opacity:1}
     #adWin #adSend{background:var(--ad-accent);color:var(--ad-on);border-color:var(--ad-accent);min-height:48px}
     #adStatus{margin:0;padding:4px 12px 10px;min-height:32px;flex:none;font:.75rem/1.4 var(--ad-font);color:var(--ad-dim)}#adStatus[data-error=true]{color:var(--ad-ink);font-weight:600}
-    body[data-reg=bee] #adOrb{background:#fff;color:#326b39;border-color:#ccd7cf}
-    body[data-reg=bee] #adWin{--ad-bg:#f6f7f2;--ad-panel:#fff;--ad-ink:#18362a;--ad-dim:#435f4e;--ad-line:#bdcec3;--ad-accent:#326b39;--ad-on:#fff;color-scheme:light}
+    body[data-reg=bee] #adOrb{background:#fff;color:#6e3fb8;border-color:#e6dfd2}
+    body[data-reg=bee] #adWin{--ad-bg:#fbf7f0;--ad-panel:#fff;--ad-ink:#0c1412;--ad-dim:#4a5f55;--ad-line:#bdcec3;--ad-accent:#6e3fb8;--ad-on:#fff;color-scheme:light}
     body[data-reg=raver] #adHead{background:linear-gradient(110deg,#302045,#123339 70%,#19352c)}
     body[data-reg=cypherpunk] #adWin{--ad-bg:#0e141a;--ad-panel:#151e26;--ad-ink:#e4f2f4;--ad-dim:#adbecb;--ad-line:#526b7c;--ad-accent:#80cddd;--ad-on:#0e141a;--ad-font:ui-monospace,Consolas,monospace;border-radius:5px;font-size:14px}body[data-reg=cypherpunk] #adWin button{border-radius:3px}
     @media(max-width:520px){#adWin{left:8px;width:calc(100% - 16px);border-radius:12px}#adWin.is-expanded{width:calc(100% - 16px)}#adAgents{padding:6px 8px;gap:4px}#adHead,#adContext{padding-inline:8px}#adFoot{padding-inline:8px}#adContext{font-size:.6875rem}#adWin .adAg{padding:6px 8px}#adTitle{font-size:.9375rem}}
@@ -73,7 +73,7 @@
   }
   var frameCss=`
     html.ad-embedded{--bg:#10191c;--ink:#eef7f2;--dim:#b8ccc7;--line:#526e72;--gold:#b9a4f5;--cyan:#8cdae0;--violet:#cbb4ff;--amber:#f4c897;--ad-panel:#18252a;color-scheme:dark}
-    html.ad-embedded[data-ad-view=bee]{--bg:#f6f7f2;--ink:#18362a;--dim:#435f4e;--line:#bdcec3;--gold:#326b39;--cyan:#29628f;--violet:#65509a;--amber:#876119;--ad-panel:#fff;color-scheme:light}
+    html.ad-embedded[data-ad-view=bee]{--bg:#fbf7f0;--ink:#0c1412;--dim:#4a5f55;--line:#bdcec3;--gold:#326b39;--cyan:#29628f;--violet:#65509a;--amber:#876119;--ad-panel:#fff;color-scheme:light}
     html.ad-embedded[data-ad-view=cypherpunk]{--bg:#0e141a;--ink:#e4f2f4;--dim:#adbecb;--line:#526b7c;--gold:#80cddd;--cyan:#80cddd;--ad-panel:#151e26}
     html.ad-embedded body{min-height:0!important;margin:0!important;padding:12px!important;background:var(--bg)!important;color:var(--ink)!important;font:16px/1.65 system-ui,-apple-system,'Segoe UI',sans-serif!important;overflow-wrap:anywhere}
     html.ad-embedded[data-ad-view=cypherpunk] body{font:14px/1.6 ui-monospace,Consolas,monospace!important}
@@ -182,12 +182,77 @@
     var viewport=window.visualViewport,vh=viewport?viewport.height:window.innerHeight,keyboard=viewport?Math.max(0,window.innerHeight-vh-viewport.offsetTop):0;
     var bar=$('tbar'),rect=bar&&getComputedStyle(bar).position==='fixed'?bar.getBoundingClientRect():null;
     var h=rect&&rect.height>0&&rect.bottom>0&&rect.top<window.innerHeight?Math.ceil(window.innerHeight-Math.max(0,rect.top)):0;
-    var bottom=Math.min(Math.max(bar?18:66,h+10-keyboard),Math.max(12,vh-64));orb.style.bottom=(keyboard+bottom)+'px';
+    var bottom=Math.min(Math.max(bar?18:66,h+10-keyboard),Math.max(12,vh-64));
+    if(!seated)orb.style.bottom=(keyboard+bottom)+'px';
     var tight=window.innerWidth<=520||vh<=600,dialogBottom=expanded||tight?8:Math.min(bottom+64,Math.max(12,vh*.25));
     win.style.bottom=(keyboard+dialogBottom)+'px';win.style.height=Math.max(0,Math.min(expanded?vh:680,vh-dialogBottom-12))+'px';
-    if(h){var need=h+22,cur=parseFloat(getComputedStyle(document.body).paddingBottom)||0;if(cur<need)document.body.style.paddingBottom=need+'px';}
+    var need=h?h+22:0;
+    /* floating on a phone with no fixed bar: reserve the orb's corner zone so
+       the last content can always scroll clear of it */
+    if(!h&&window.innerWidth<=520&&!seated)need=Math.max(need,140);
+    if(need){var cur=parseFloat(getComputedStyle(document.body).paddingBottom)||0;if(cur<need)document.body.style.paddingBottom=need+'px';}
   };
+  /* THE MOBILE SEAT (founder order 2026-09-13): the floating orb covered the
+     bottom-left corner of the content column on phones — wallet's chain
+     matrix had its 🐜 Autonomi ANT card 87% hidden at first paint. On mobile
+     the orb now RIDES the fixed tour bar's reserved row (geometry inline,
+     colors keep the register stylesheet) — it covers nothing and stays one
+     tap away. Where the bar is inline (hub, profile: a closed directory),
+     the orb floats bottom-RIGHT and fitDock reserves scroll-end room.
+     Desktop keeps the classic bottom-left float. */
+  var seatMq=window.matchMedia?matchMedia('(max-width:520px)'):null,seated=null;
+  function unseat(){
+    if(seated){orb.style.cssText='';if(orb.parentElement!==document.body)document.body.appendChild(orb);}
+    seated=null;
+  }
+  function seatOrb(){
+    var mobile=!!(seatMq&&seatMq.matches);
+    var bar=$('tbar');
+    var barFixed=!!(bar&&getComputedStyle(bar).position==='fixed');
+    if(mobile&&barFixed){
+      if(seated!=='bar'){
+        unseat();seated='bar';
+        orb.style.cssText='position:static;width:44px;height:44px;min-width:44px;min-height:44px;flex:0 0 44px;margin:0 6px 0 0;font:22px/1 system-ui;box-sizing:border-box';
+        bar.insertBefore(orb,bar.firstChild);
+      }
+    }else if(mobile){
+      /* inline tour host (hub, profile): the closed directory cannot host the
+         orb, so it rides the directory's VISIBLE summary row — in-flow chrome,
+         covers nothing. The register bar is the fallback; a bare right-float
+         with the fitDock reservation is the last resort. */
+      var host=document.querySelector('[data-tour-host]');
+      var sum=host&&host.closest('details')?host.closest('details').querySelector('summary'):document.querySelector('details.room-navigation>summary');
+      if(sum){
+        if(seated!=='summary'){
+          unseat();seated='summary';
+          orb.style.cssText='position:relative;z-index:3;display:inline-block;vertical-align:middle;width:44px;height:44px;min-width:44px;min-height:44px;margin:0 0 0 10px;font:22px/1 system-ui;box-sizing:border-box';
+          sum.insertBefore(orb,sum.firstChild);
+        }
+      }else{
+        var regbar=document.getElementById('bregbar')||document.querySelector('[data-register-host]');
+        if(regbar){
+          if(seated!=='reg'){
+            unseat();seated='reg';
+            orb.style.cssText='position:relative;z-index:3;width:44px;height:44px;min-width:44px;min-height:44px;margin:8px 0 0 2px;font:22px/1 system-ui;box-sizing:border-box';
+            regbar.appendChild(orb);
+          }
+        }else{
+          unseat();
+          orb.style.left='auto';orb.style.right='16px';
+        }
+      }
+    }else{
+      unseat();
+      orb.style.left='';orb.style.right='';
+    }
+    fitDock();
+  }
   fitDock();addEventListener('resize',fitDock);if(window.visualViewport){window.visualViewport.addEventListener('resize',fitDock);window.visualViewport.addEventListener('scroll',fitDock);}
   var bar=$('tbar');if(bar&&window.ResizeObserver)new ResizeObserver(fitDock).observe(bar);
-  if(!bar){var mo=new MutationObserver(function(){var b=$('tbar');if(b){mo.disconnect();fitDock();if(window.ResizeObserver)new ResizeObserver(fitDock).observe(b);}});mo.observe(document.documentElement,{childList:true,subtree:true});}
+  if(!bar){var mo=new MutationObserver(function(){var b=$('tbar');if(b){mo.disconnect();seatOrb();if(window.ResizeObserver)new ResizeObserver(fitDock).observe(b);}});mo.observe(document.documentElement,{childList:true,subtree:true});}
+  /* seating is chrome comfort, never load-bearing: any DOM surprise falls
+     back to the classic float rather than breaking the dock */
+  var seatSafe=function(){try{seatOrb();}catch(e){}};
+  seatSafe();if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',seatSafe);setTimeout(seatSafe,700);setTimeout(seatSafe,1800);
+  if(seatMq){try{seatMq.addEventListener('change',seatSafe);}catch(e){try{seatMq.addListener(seatSafe);}catch(e2){}}}
 })();

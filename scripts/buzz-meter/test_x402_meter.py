@@ -324,6 +324,89 @@ test_halt_budget()
 test_halt_fraud()
 test_halt_infra()
 
+# ── 8 · AV-2 2.5 — serve-side rate_set staleness (red-test-first: these
+# proofs were written before Session.open/burn enforced the TTL; the pre-fix
+# run receipt is in the AV-2 lane dispatch) ─────────────────────────────────
+from x402_meter import (  # noqa: E402
+    RATE_SET_TTL_S, StaleRateSet, rate_set_in_force, rate_set_minted_at_epoch,
+)
+
+NOW = 1_800_000_000.0
+es_rs = Escrow(TMP / "ledger-rs.jsonl")
+credit_from_settlement(
+    es_rs, "member-rs",
+    {"rail": "vaulta", "tx": "rs-seed", "sender": "member.r",
+     "amount": "2.0000"},
+    {"rail": "vaulta", "tx": "rs-seed", "from": "member.r",
+     "amount": "2.0000", "memo": "member-rs"})
+
+# 2.5a fresh rate book opens and bills unchanged
+s_fresh = Session(voucher="member-rs", escrow=es_rs, rate_set=RS,
+                  rate_set_minted_at=NOW - 10).open(now=NOW)
+billed, state = s_fresh.burn(5, now=NOW + 1)
+assert billed == 5 and state == "ACTIVE"
+ok("AV-2 2.5a: fresh rate_set opens and bills (pause-not-kill math unchanged)")
+
+# 2.5b stale rate book refuses NEW sessions, typed
+try:
+    Session(voucher="member-rs", escrow=es_rs, rate_set=RS,
+            rate_set_minted_at=NOW - (RATE_SET_TTL_S + 1)).open(now=NOW)
+    raise SystemExit("FAIL: stale rate_set opened a session")
+except StaleRateSet as e:
+    ok(f"AV-2 2.5b: stale rate_set refuses new sessions typed ({e})")
+
+# 2.5c boundary: age == TTL refuses (inclusive, fail closed)
+try:
+    Session(voucher="member-rs", escrow=es_rs, rate_set=RS,
+            rate_set_minted_at=NOW - RATE_SET_TTL_S).open(now=NOW)
+    raise SystemExit("FAIL: boundary-age rate_set opened a session")
+except StaleRateSet:
+    ok("AV-2 2.5c: age == TTL refuses (inclusive boundary)")
+
+# 2.5c2 future-dated minted_at refuses (malformed, not fresh)
+try:
+    Session(voucher="member-rs", escrow=es_rs, rate_set=RS,
+            rate_set_minted_at=NOW + 60).open(now=NOW)
+    raise SystemExit("FAIL: future-dated rate_set opened a session")
+except StaleRateSet:
+    ok("AV-2 2.5c2: future-dated minted_at refuses typed")
+
+# 2.5d OPEN session, rates go stale mid-life: burn refuses typed, ZERO
+# charge, session parks (never killed)
+s_mid = Session(voucher="member-rs", escrow=es_rs, rate_set=RS,
+                rate_set_minted_at=NOW - 10).open(now=NOW)
+bal_pre = es_rs.balance("member-rs")
+try:
+    s_mid.burn(5, now=NOW + RATE_SET_TTL_S + 5)
+    raise SystemExit("FAIL: stale-rate burn charged")
+except StaleRateSet:
+    assert es_rs.balance("member-rs") == bal_pre
+    assert s_mid.state == "ACTIVE"
+    ok("AV-2 2.5d: open session burn on stale rates refuses typed, zero "
+       "charge, session alive")
+
+# 2.5d2 credit is NEVER blocked by rate staleness — money-in is not pricing
+ev_credit = s_mid.credit(
+    {"rail": "vaulta", "tx": "rs-topup", "sender": "member.r",
+     "amount": "1.0000"},
+    {"rail": "vaulta", "tx": "rs-topup", "from": "member.r",
+     "amount": "1.0000", "memo": "member-rs"})
+assert ev_credit["amount"] == "1.0000"
+ok("AV-2 2.5d2: credit not blocked by stale rates (money-in ≠ pricing)")
+
+# 2.5e absent attestation passes (unjudgeable — the documented fail-open for
+# constructions that predate the attestation field)
+rate_set_in_force(None, NOW)
+s_legacy = Session(voucher="member-rs", escrow=es_rs, rate_set=RS).open(now=NOW)
+ok("AV-2 2.5e: absent minted_at passes (unjudgeable, documented)")
+
+# 2.5f the serve-bridge parse: ISO minted_at → epoch; absent/unparseable → None
+# (anchor: 2026-01-01T00:00:00Z = 1767225600; +240 days to Aug 29)
+assert rate_set_minted_at_epoch({"minted_at": "2026-08-29T00:00:00Z"}) == 1787961600.0
+assert rate_set_minted_at_epoch({}) is None
+assert rate_set_minted_at_epoch({"minted_at": "not-a-date"}) is None
+ok("AV-2 2.5f: minted_at ISO parse (absent/unparseable → None)")
+
 # ── the chain carries every new event shape ─────────────────────────────────
 for e, name in ((es, "settlement/session ledger"), (es2, "upto ledger")):
     n = e.verify_chain()

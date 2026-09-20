@@ -4,7 +4,9 @@
 [`LAPTOP-NETWORK.md`](LAPTOP-NETWORK.md) documents the shared-network outage,
 measurements and replacement helper. `x0x-tunnel.ps1 up` now uses scoped SSH
 forwarding and starts no laptop mesh daemon. The tailnet walkthroughs below
-are historical receipts. Box x0x stays on 0.41.3 with its identity and ACLs.
+are historical receipts. Box x0x was upgraded **0.41.3 → v0.45.0 on
+2026-09-15** (identity, hive-porch seat and ACLs preserved; see the dated
+section at the bottom).
 
 **One canonical, leashed path:** `x0x-tunnel.ps1` delegates to WSL
 `box-tunnel.sh`; its `_watch` loop supplies the **10-minute auto-down**.
@@ -15,8 +17,11 @@ tailnet-forward recipe below, for laptop startup.
 
 **What runs on the box** (verbatim in-tree: `x0x.service` + `x0xd.toml`):
 
-- `x0xd` v0.41.2 (saorsa-labs/x0x, pre-built linux-arm64-gnu, option A) at
-  `/usr/local/bin/{x0xd,x0x}`; system user `x0x` (`/var/lib/x0x`, nologin).
+- `x0xd` **v0.45.0** since 2026-09-15 (saorsa-labs/x0x, pre-built
+  linux-arm64-gnu, option A; carries ant-quic 0.27.52 — the #505 fragment fix)
+  at `/usr/local/bin/{x0xd,x0x}`; system user `x0x` (`/var/lib/x0x`, nologin).
+  Kept-good backups on the box: `x0xd-0.41.3.bak` and the earlier
+  `x0xd-0.41.2.bak`.
 - systemd `x0x.service`: MemoryMax 512M · MemoryHigh 384M · CPUQuota 100% ·
   TasksMax 64 · IPAccounting=yes · ProtectSystem=strict · empty capability
   bounding set · StateDirectory=x0x. `ExecStartPre` = `x0xd --check`.
@@ -164,3 +169,65 @@ retired-until-needed) → `…down`.
 `e2e/x0x-gui-shot.mjs` (token-from-file screenshotter), `e2e/x0x-gui-proxy.mjs`
 (one-char-fix proxy), `e2e/shots-x0x/` (4 shots: shell as-shipped, one-char-fix
 live, public-group chat, box GUI over SSH tunnel).
+
+## 2026-09-15 — v0.45.0 upgrade + upstream field evidence (#505 re-run, #504 capture)
+
+**Upgrade (founder order: "get it done" on the upstream-help plan):** tarball
+swap per the runbook pattern — v0.45.0 assets sha256-verified against the
+release `.sha256`, GPG good signature from the same David Irvine code-signing
+key (TOFU note stands), `.0.41.3.bak` kept, `x0xd --check` clean. SAME agent
+`1ca00a42…8df66367` (hive-box), machine `5e9ace67…`, hive-porch still seated,
+exec still disabled (`enabled:false`). Mesh re-converged to 26-27 peers within
+~2 min of restart.
+
+**#505 re-run (comment saorsa-labs/x0x#505 issuecomment-5684603878):** the
+fragment-dropping path was reproduced ON THE HOST with a netdev-ingress rule
+(`nft add rule netdev fragdrop ingress ip frag-off & 0x1fff != 0 counter drop`
+on enp0s6) — non-initial fragments dropped BEFORE kernel reassembly, the same
+tails a stateful OCI port rule discards. A/B receipts:
+
+- v0.41.3 (old): 1,179 oversized 4,096 B handshake datagrams OUT in 100 s
+  (4,004 fragment packets) incl. to bootstraps (:443/:6483); 0 inbound
+  fragments — today's bootstraps (0.42+) already send ≤MTU, so even the old
+  binary reconnected (the fix is sender-side).
+- v0.45.0 under the same drop: handshakes complete (4/4 dialled bootstraps,
+  26 peers), ZERO outbound fragments, drop counter 45 pkts active, host
+  reassembly signature `Reqds +26 / OKs +0 / Fails +17 / Timeout +17` — all
+  from ONE legacy Starlink peer still shipping 4,096 B flights (residual
+  ecosystem risk: pre-fix senders stay unreachable through fragment filters).
+
+**LAWS banked (each one measured today):**
+1. `iptables -A INPUT -f -j DROP` is INERT for locally-delivered fragments —
+   with conntrack loaded, `nf_defrag_ipv4` reassembles BEFORE the INPUT hook
+   (proven: peers kept connecting with the rule in place). Same for raw-table
+   PREROUTING on this kernel. Only a **netdev ingress** chain (or an upstream
+   network device like the OCI SL) actually drops tails pre-reassembly.
+2. tcpdump taps BEFORE netfilter — pcaps show tails that iptables/nft dropped.
+3. `nft list chain <table> <chain>` (NOT `nft list rule …`).
+4. The OCI any/any ingress RETIRE-TRIGGER is now field-satisfied (release
+   shipped + verified on the fragment-dropping path). Tightening any/any →
+   scoped stateful rules is the founder's console gesture, still PENDING;
+   legacy-peer inbound fragments (Starlink) would break under port rules.
+
+**#504 capture (comment issuecomment-5684632472):** accepted 300 s
+default-Leaf idle window via upstream `scripts/capture-egress.py` on the box
+(python3 + `pip3 install --break-system-packages blake3`; venv fails — no
+ensurepip). `mode=leaf, reason=default_leaf`. epidemic_forward 1,405 KiB/s =
+**86.33 MB/min**; top topics: caps/response 28.4%, announce/v3/blob 25.8%,
+machine.announce 11.8%, dm/bus 9.4% — consistent with #656's ML-DSA envelope
+accounting. Raw JSONs + pcaps: box `~/x0x-evidence-20260915/`, distilled set
+in-tree `docs/dispatches/evidence/2026-09-15-x0x-505-504/`.
+
+**Capture-script hardening:** branch `zcode/capture-egress-guard-evidence`
+pushed to the fork (guards: occupied `--out-dir` refused pre-write;
+`--window-secs < 300` rejected pre-collection; unittest 4/4, no blake3/daemon
+needed). **ANOMALY:** PR creation against saorsa-labs/x0x returns FORBIDDEN
+(GraphQL) / 404 (REST) for the loviswaternakamoto token while issue COMMENTS
+work — compare link delivered in the #504 comment instead; needs founder eyes
+(account flag? org OAuth restriction?).
+
+**Laptop profile correction:** `x0xd-laptop.toml` no longer sets
+`active_view_size`/`passive_view_size` — parsed-but-IGNORED at runtime
+(dirvine's 2026-09-14 note; confirmed in src/gossip/config.rs). The only
+fan-out knob is `leaf_max_eager_degree` (default 2); the soft/hard
+`leaf_egress_*_bytes_per_sec` thresholds are OBSERVE-ONLY, not a cap.

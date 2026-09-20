@@ -16,7 +16,7 @@
 | 1 | Surgeon Fellow | Fable | Claude Fable 5 (claude.ai) | — top of judgment chain | Anthropic Max |
 | 2 | Resident Surgeon | zResident | GLM 5.2 (chat) | defers to Seat 1 at window-open | GLM Pro |
 | 3 | Chief Surgical Code Tech I | Claude Code | Opus 4.8 (primary) | — | Anthropic Max |
-| 4 | Surgical Code Tech II | Lovis Lobster | GLM Code 5.2 via openclaw | — | GLM Pro |
+| 4 | Surgical Code Tech II | Lovis Lobster | GLM Code 5.3 via openclaw | — | GLM Pro |
 | 5 | Chief Surgical Nurse | Cowork | app default (Fable-class) | — | Anthropic Max |
 | 6 | Pathologist | zPATH | GLM 5.2 | — | GLM Pro |
 | 7 | Anesthesiologist | Design | app default | — | Anthropic Max — slack-only, art direction |
