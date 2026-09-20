@@ -61,7 +61,10 @@
   .file .name { font-weight: 650; font-size: 18px; overflow-wrap: anywhere; }
   .file .meta { margin-top: 4px; font-size: 14px; color: var(--dim); }
   .file .why { margin-top: 8px; font-size: 16px; }
-  .file .hash { margin-top: 8px; font: 13px/1.45 ui-monospace, Consolas, monospace; color: var(--dim); overflow-wrap: anywhere; }
+  .file .hash { margin-top: 8px; font: 13px/1.45 ui-monospace, Consolas, monospace; color: var(--dim); overflow-wrap: anywhere; white-space: pre-line; }
+  .file .hash .prov { display: none; }
+  body[data-reg="cypherpunk"] .file .hash .prov { display: block; }
+  .file .hash .left { display: block; color: var(--warn); }
   .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
   .actions.three { grid-template-columns: 1fr 1fr 1fr; }
   .badge {
@@ -148,7 +151,7 @@
 
   <button class="primary has-file" type="button" data-attach="1" data-reg-copy="attach">Add a file</button>
 
-  <div class="modes" role="group" aria-label="who can open it">
+  <div class="modes empty-only" role="group" aria-label="who can open it">
     <button class="mode" type="button" id="modePublic" aria-pressed="false">
       <b data-reg-copy="pub-title">Public</b>
       <span data-reg-copy="pub-body">Hive members with the link. A stranger joins in one tap, then it opens.</span>

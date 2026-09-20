@@ -420,6 +420,7 @@
       'badge-pub': 'anyone with the link', 'badge-priv': 'only this phone',
       'why-pub': 'An open copy sits in the hive at its hash.',
       'why-priv': 'Locked on this phone. It never left.',
+      copy: 'Copy link',
       locking: 'Locking it on this phone…', locked: 'Locked. Nothing left this phone.',
       sharing: 'Putting an open copy in the hive…', shared: 'In the hive. Copy the link to share it.',
       flipping: 'Changing who can open it…',
@@ -441,6 +442,7 @@
       'badge-pub': 'link opens it', 'badge-priv': 'this phone only',
       'why-pub': 'an open copy is in the hive, at its hash.',
       'why-priv': 'sealed here. it never left.',
+      copy: 'copy link',
       locking: 'sealing…', locked: 'sealed. nothing left this phone.',
       sharing: 'sending an open copy…', shared: 'in the hive. grab the link.',
       flipping: 'switching…',
@@ -462,6 +464,7 @@
       'badge-pub': 'PUBLIC', 'badge-priv': 'PRIVATE',
       'why-pub': 'plaintext blob on the rail at its sha256.',
       'why-priv': 'ciphertext in local store. no rail record exists.',
+      copy: 'copy URL',
       locking: 'AES-GCM encrypt -> IndexedDB blobs…', locked: 'sealed local. zero bytes on the wire.',
       sharing: 'PUT /upload…', shared: 'PUT 200. blob addressed by sha256.',
       flipping: 're-addressing…',
@@ -484,6 +487,10 @@
      into one would be the lie this page exists not to tell. */
   function deleteSentence(row) {
     if (row.mode === 'private') {
+      if (row.oldSha) {
+        return 'The locked bytes and the key are both on this phone, and both go. The open copy you shared earlier is still in the hive at ' +
+          row.oldSha.slice(0, 12) + '…, and this cannot reach it.';
+      }
       return 'The locked bytes and the key are both on this phone, and both go. Nothing about this file exists anywhere else.';
     }
     return 'This phone forgets the file. The copy in the hive’s store stays at its hash, and anyone who already has the link still has it.';
@@ -554,10 +561,20 @@
 
       var h = document.createElement('p');
       h.className = 'hash';
-      h.textContent = (row.sha ? ('sha256 ' + row.sha) : 'no rail record — these bytes are only here') +
+      var prov = document.createElement('span');
+      prov.className = 'prov';
+      prov.textContent = (row.sha ? ('sha256 ' + row.sha) : 'no rail record — these bytes are only here') +
         (row.keyref ? ('\nkeyref ' + row.keyref) : '') +
-        (row.oldSha ? ('\nstill in the hive at ' + row.oldSha) : '') +
         '\nts ' + new Date(row.ts).toISOString().replace(/\.\d+Z$/, 'Z');
+      h.appendChild(prov);
+      /* This one is never a register's choice. A copy the visitor cannot pull back is said
+         in every register, in words, next to the file it belongs to. */
+      if (row.oldSha) {
+        var left = document.createElement('span');
+        left.className = 'left';
+        left.textContent = 'An open copy you shared earlier is still in the hive at ' + row.oldSha.slice(0, 12) + '…';
+        h.appendChild(left);
+      }
       art.appendChild(h);
 
       var actions = document.createElement('div');
@@ -567,7 +584,7 @@
         var share = document.createElement('button');
         share.type = 'button';
         share.className = 'ghost';
-        share.textContent = 'Copy link';
+        share.textContent = t('copy');
         share.onclick = function () {
           var link = location.origin + location.pathname + '?f=' + row.sha + '&n=' + encodeURIComponent(row.name);
           navigator.clipboard.writeText(link).then(function () {
@@ -649,6 +666,7 @@
       row.local = true;
       await putRow(row);
       setStatus(t('locked'));
+      pendingMode = 'private';
       await render();
       return;
     }
@@ -669,6 +687,7 @@
       await putRow(row);
       setStatus('The hive did not take it (' + (e.message || 'error') + '), so nothing left this phone. It is here, locked, and you can try to share it again.', true);
     }
+    pendingMode = 'private';
     await render();
   }
 
@@ -730,7 +749,9 @@
     if (row.mode === 'private') { await dropKey(row.id); await dropBlob(row.id); }
     await dropRow(row.id);
     setStatus(row.mode === 'private'
-      ? 'Key destroyed. That copy cannot be read again by anyone.'
+      ? (row.oldSha
+          ? 'Gone from this phone. The open copy you shared earlier is still in the hive at ' + row.oldSha.slice(0, 12) + '\u2026.'
+          : 'Gone. The bytes and the key were both here, and this file existed nowhere else.')
       : 'Gone from this phone. The copy in the hive stays at its hash.');
     closeSheet();
   }
