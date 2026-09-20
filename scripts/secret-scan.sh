@@ -99,7 +99,7 @@ MARK2='PUBLIC-CONSTANT'
 PROPTEST_RE='(^|[+:])cc [0-9a-fA-F]{64}([^0-9a-fA-F]|$)'
 
 case "$mode" in
-selftest)
+selftest|--selftest)
     # The founder law (a checker is not landed until known-BAD and known-GOOD
     # both appear in its report) + the P11 law carried across the file
     # boundary: the rows run THIS script's own body over a real throwaway
@@ -126,12 +126,19 @@ selftest)
       printf 'fixture: marked\n%s  TESTNET-ONLY: runtime-minted selftest fixture\n' "$M" > fx-marked.txt
       printf 'fixture: shape-only noise\n%s\n' "$NOISE" > fx-noise.txt
       printf 'fixture: public id\n%s\n' "$NP" > fx-npub.txt
+      # N2 (bOPus5 2026-09-20): the diff row stages ONLY the VALID fixture.
+      # The old shared staging let a swapped diff arm block fx-noise in the
+      # key's place while the row stayed green on the static header's bytes -
+      # a row satisfied by the wrong token is not a row. Tree and diff rows
+      # now stage separately, mirroring how each mode meets the world.
       git add fx-unmarked.txt fx-marked.txt fx-noise.txt 2>/dev/null
       sh scripts/secret-scan.sh tree > "$T/t1" 2>&1; echo "$?" > "$T/r1"
+      git rm -q --cached fx-unmarked.txt fx-marked.txt fx-noise.txt 2>/dev/null
+      git add fx-unmarked.txt 2>/dev/null
       sh scripts/secret-scan.sh diff > "$T/t2" 2>&1; echo "$?" > "$T/r2"
       git rm -q --cached fx-unmarked.txt 2>/dev/null
       rm -f fx-unmarked.txt
-      git add fx-npub.txt 2>/dev/null
+      git add fx-marked.txt fx-noise.txt fx-npub.txt 2>/dev/null
       sh scripts/secret-scan.sh tree > "$T/t3" 2>&1; echo "$?" > "$T/r3"
     )
     r1=$(cat "$T/r1" 2>/dev/null || echo 99)
@@ -140,9 +147,9 @@ selftest)
     if [ "$r1" -eq 1 ] && grep -qF "fx-unmarked.txt" "$T/t1" && ! grep -qF "fx-marked.txt" "$T/t1" && ! grep -qF "fx-noise.txt" "$T/t1"; then
       echo "  S1 known-BAD  unmarked VALID WIF, tree mode -> BLOCKED, location named, marked+noise silent (correct)"
     else echo "  S1 known-BAD  tree wiring broken (rc=$r1)"; st=1; fi
-    if [ "$r2" -eq 1 ] && grep -qF "key-shaped checksum-VALID" "$T/t2"; then
-      echo "  S2 known-BAD  unmarked VALID WIF, diff mode (the pre-commit path) -> BLOCKED (correct)"
-    else echo "  S2 known-BAD  diff wiring broken (rc=$r2)"; st=1; fi
+    if [ "$r2" -eq 1 ] && grep -qF "added-line 2: [REDACTED key-shaped checksum-VALID]" "$T/t2"; then
+      echo "  S2 known-BAD  unmarked VALID WIF ALONE staged, diff mode (the pre-commit path) -> BLOCKED naming ITS line (correct)"
+    else echo "  S2 known-BAD  diff wiring broken or wrong token named (rc=$r2)"; st=1; fi
     if [ "$r3" -eq 0 ] && grep -q "clean" "$T/t3"; then
       echo "  S3 known-GOOD marked + noise + npub only -> clean (correct)"
     else echo "  S3 known-GOOD  false positive on marked/noise/npub (rc=$r3)"; st=1; fi
@@ -206,7 +213,7 @@ tree)
       done)
     ;;
 *)
-    echo "usage: $0 {diff|tree|selftest}" >&2
+    echo "usage: $0 {diff|tree|selftest}   # --selftest accepted (estate form, cf. identity-check.sh --selftest)" >&2
     exit 2
     ;;
 esac

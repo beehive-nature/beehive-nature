@@ -407,6 +407,103 @@ fn adv_retained_failures_exhaust_the_budget_by_number() {
     );
 }
 
+// ---------- deterministic clock-boundary law (slice 7083c5a2) ----------
+//
+// The flake class of adv_retained_failures_exhaust_the_budget_by_number,
+// made DETERMINISTIC: LegKey includes valid_before, so a rebuilt request
+// whose valid_before differs by even ONE second is a DIFFERENT leg. The
+// production identity-mismatch refusal (journal.rs, begin_settle's Torn
+// arm) is LAW and is untouched — these two tests pin it from the test
+// side, positively and negatively, with no sleep and no race:
+//   positive — the SAME captured valid_before rebuilds the SAME leg and
+//              evidence reconciles it;
+//   negative — a one-second-later rebuild is a different leg and the
+//              journal refuses it as an identity mismatch.
+
+#[test]
+fn adv_clock_boundary_same_valid_before_rebuilds_the_same_leg() {
+    struct Fail;
+    impl SettlementFacilitator for Fail {
+        fn verify(&self, _r: &serde_json::Value) -> Result<(), String> {
+            Ok(())
+        }
+        fn settle(&self, _r: &serde_json::Value) -> FacilitatorSettle {
+            FacilitatorSettle::Error {
+                reason: "reverted".into(),
+                network: "eip155:8453".into(),
+            }
+        }
+    }
+    let gas = 1_000u64;
+    let d = Door::new(
+        Arc::new(Journal::open(&tmp_root("adv-clk-pos"), 5 * gas).unwrap()),
+        Arc::new(Fail),
+        DoorConfig {
+            reserved_gas_wei: gas,
+            ops_float_available_wei: 1_000_000,
+        },
+        Arc::new(StaticFloat(1_000_000_000_000)),
+    );
+    // capture ONCE — the caller law the flake taught (8a94a986)
+    let vb = far_future();
+    let req = request("eip155:8453", "exact", "0xCLK1", "1", vb);
+    let leg = extract_leg(&req).unwrap();
+    d.verify(&leg, &req).unwrap();
+    d.settle(&leg, &req).unwrap(); // FailedKeep: exposure retained
+    let rebuilt = request("eip155:8453", "exact", "0xCLK1", "1", vb);
+    let rebuilt_leg = extract_leg(&rebuilt).unwrap();
+    d.journal.begin_settle(&rebuilt_leg).unwrap();
+    d.journal
+        .settle_with_evidence(
+            &rebuilt_leg,
+            &SettleEvidence {
+                actual_amount: "1".into(),
+                tx_hash: "0xclk-pos".into(),
+                gas_actual_wei: 0,
+            },
+        )
+        .unwrap();
+}
+
+#[test]
+fn adv_clock_boundary_one_second_later_is_a_different_leg() {
+    struct Fail;
+    impl SettlementFacilitator for Fail {
+        fn verify(&self, _r: &serde_json::Value) -> Result<(), String> {
+            Ok(())
+        }
+        fn settle(&self, _r: &serde_json::Value) -> FacilitatorSettle {
+            FacilitatorSettle::Error {
+                reason: "reverted".into(),
+                network: "eip155:8453".into(),
+            }
+        }
+    }
+    let gas = 1_000u64;
+    let d = Door::new(
+        Arc::new(Journal::open(&tmp_root("adv-clk-neg"), 5 * gas).unwrap()),
+        Arc::new(Fail),
+        DoorConfig {
+            reserved_gas_wei: gas,
+            ops_float_available_wei: 1_000_000,
+        },
+        Arc::new(StaticFloat(1_000_000_000_000)),
+    );
+    let vb = far_future();
+    let req = request("eip155:8453", "exact", "0xCLK2", "1", vb);
+    let leg = extract_leg(&req).unwrap();
+    d.verify(&leg, &req).unwrap();
+    d.settle(&leg, &req).unwrap(); // retained failure under vb
+                                   // deterministic "boundary crossed": one second later, no sleep involved
+    let later = request("eip155:8453", "exact", "0xCLK2", "1", vb + 1);
+    let later_leg = extract_leg(&later).unwrap();
+    let err = d.journal.begin_settle(&later_leg).unwrap_err().to_string();
+    assert!(
+        err.contains("identity mismatch"),
+        "the journal's identity law must name the mismatch: {err}"
+    );
+}
+
 // ---------- AV-6: same-leg retry storm / per-leg retry ceiling ----------
 
 /// A3/AV-6: a leg that fails N times must never charge unbounded failure
