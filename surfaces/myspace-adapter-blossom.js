@@ -329,7 +329,26 @@ var METHODS = {
       contract_version: '1',
       capabilities: ['x.beginPut', 'x.submitPut', 'x.beginGet', 'x.submitGet', 'x.beginJoin', 'x.submitJoin'],
       networks: [RELAY_HOST],
-      units: []
+      units: [],
+      /* Slice 03. The founder's four questions, answered BY THE RAIL. Slice 02
+         left these in `myspace.js` and wrote down why they could not move yet:
+         one rail cannot exercise a per-rail answer, so the shell's own words
+         were indistinguishable from a rail's. Two rails that answer differently
+         now exist, so they move here and the shell renders what it is told.
+
+         `deletable: false` is this rail's hard fact and the reason the page has
+         to say an open copy cannot be pulled back: the store answers DELETE with
+         405 and its own header reads `Allow: GET,HEAD` (measured 2026-09-20,
+         WORK_LOGS/2026-09-20_BOPUS5_MYSPACE01_STEP0_BLOSSOM.md). `readers` is
+         `link-holders` and not `everyone`: anonymous GET is 401, so a stranger
+         claims the standing invite first — one tap, and the page says so. */
+      x_terms: {
+        deletable: false,
+        readers: 'link-holders',
+        lifetime: 'while-the-store-keeps-it',
+        survives_reload: true,
+        payer: 'the-hive'
+      }
     };
   },
 
