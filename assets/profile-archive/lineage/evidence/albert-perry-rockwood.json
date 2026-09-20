@@ -1,0 +1,20 @@
+{
+ "schema": "skaists.evidence/1",
+ "person": {
+  "name": "Albert Perry Rockwood",
+  "lifespan": "1805–1879",
+  "fsid": "KWJ4-XBD",
+  "tier": "recorded",
+  "tierBasis": "era label (19th century) + provider record; per-person source counts not yet harvested — support stays 'unsourced-entry' honestly"
+ },
+ "summary": "The public entrance person of the blood comb. The Rockwood line — Samuel Rockwood I (1695–1754) and forward through Luther, Timothy, Julius Apollus, and Ardella — rides this branch into the founder's line by marriage. The family testimony concerning a Rockwood investment account is carried separately in the testimony lens with its correction (Ancestry's 2020 acquisition: Blackstone-managed funds, not the LDS Church) and never presented as verification.",
+ "claims": [
+  {"claim": "Record: Albert Perry Rockwood, 1805–1879, FamilySearch person KWJ4-XBD, retrieved 2026-09-16 from the founder's own signed-in session during the r9 walk (attribution preserved in the corpus meta).",
+   "source": "FamilySearch Family Tree record", "url": "https://www.familysearch.org/tree/person/details/KWJ4-XBD"},
+  {"claim": "Relationships: parent-child connections for this person are walked provider links (parentIds chain); each connection is inspectable in the comb as its own evidence object, and none upgrades to 'sourced' until per-person source counts are harvested.",
+   "source": "walked corpus (fs-adapter)", "url": "../remington-bloodline.json"},
+  {"claim": "The Rockwood name in this tree reaches Samuel Rockwood I (1695–1754), Massachusetts — the colonial era of the line; 15 Rockwood-named persons walked.",
+   "source": "walked corpus", "url": "../remington-bloodline.json"}
+ ],
+ "law": "This pack ATTRIBUTES the provider record (id, retrieval date, link). It does not assert independent verification; support remains unsourced-entry until records are harvested. The testimony-lens entry about the Rockwood investment account is not evidence of descent and never will be."
+}
