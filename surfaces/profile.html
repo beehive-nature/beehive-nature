@@ -477,6 +477,41 @@ body[data-reg="cypherpunk"] .claim-stamp{border-radius:2px}
     </div>
   </section>
 
+  <!-- ── the bloodline record — walked FamilySearch data (zCode lineage import, 2026-09-16) ── -->
+  <section class="archive-panel" id="blood-record" aria-labelledby="blood-title">
+    <h2 id="blood-title" data-i18n="prof.arch.blood.h">the bloodline record — walked from FamilySearch</h2>
+    <p data-i18n="prof.arch.blood.p">The founder’s line, lifted 2026-09-16 out of the FamilySearch tree his grandmother Marilyn Lowry Remington built with him twelve years ago. Deceased ancestors publish here with era labels; every living person stays redacted. Past the colonial era the spine is traditional, not proven — the ring color says which.</p>
+    <p class="blood-stats" id="blood-stats"></p>
+    <div class="fanwrap">
+      <svg id="blood-fan" viewBox="0 0 720 436" role="img" aria-label="fan chart of seven generations, colored by evidence era"></svg>
+      <p class="fancap" data-i18n="prof.arch.blood.fan.cap">seven generations from the founder · color = evidence era</p>
+    </div>
+    <div class="tierlegend" id="blood-legend" role="list"></div>
+    <details class="spinedetails">
+      <summary data-i18n="prof.arch.blood.spine.sum">the spine — the founder through Ragnar Loðbrók to the deep ancestors</summary>
+      <ol class="spinerail" id="blood-spine"></ol>
+    </details>
+    <div class="sagaring" id="blood-saga">
+      <h3 data-i18n="prof.arch.blood.saga.h">the saga generation — the crest’s kin</h3>
+      <p data-i18n="prof.arch.blood.saga.p">Ragnar Loðbrók (0740–0845) is the walked ancestor; the blood rides through his daughter Alof by Queen Thora. By saga, Ragnar and Queen Aslaug also bore the sons this house honors — Björn Ironside, whose line the tree carries to the kings of Sweden, and Sigurd Snake-in-the-Eye, the serpent of the house mark.</p>
+      <ol class="spinerail sagarows">
+        <li class="saga"><span class="tdot"></span><span class="who">Ragnar Loðbrók (Ragnar Sigurdsson)</span><span class="yrs">0740–0845</span></li>
+        <li class="saga"><span class="tdot"></span><span class="who">Queen Thora Herraudrsdottír of Sweden</span><span class="yrs">0765–Deceased</span><span class="chip ok" data-i18n="prof.arch.blood.saga.ourblood">our blood</span></li>
+        <li class="saga"><span class="tdot"></span><span class="who">Queen Aslaug Sigurdsdottir of Norway, Sweden and Denmark</span><span class="yrs">0755–0867</span></li>
+        <li class="saga"><span class="tdot"></span><span class="who">Alof Ragnarsdottír → Eric Edmundsson</span><span class="yrs">0837–0871</span><span class="chip ok" data-i18n="prof.arch.blood.saga.ourblood">our blood</span></li>
+        <li class="saga"><span class="tdot"></span><span class="who">Björn Ironside (Björn Ragnarsson) — the kings of Sweden ride his line</span><span class="yrs">0794–0891</span></li>
+        <li class="saga"><span class="tdot"></span><span class="who">Sigurd Snake-in-the-Eye (Orm-í-auga) — the crest’s serpent</span><span class="yrs">saga only</span><span class="chip bad" data-i18n="prof.arch.blood.saga.kin">saga kin — not in the walked record</span></li>
+      </ol>
+      <p class="translation-caveat" data-i18n="prof.arch.blood.saga.q">"first king of sweden?" — in this tree the Swedish crown enters through Björn Ironside’s line (Björn III Eriksson → King Olof Björnsson → Gynrithe), while the sagas seat Sigurd Snake-in-the-Eye in Denmark; every name before ~970 is saga, not documented history.</p>
+    </div>
+    <p class="translation-caveat" data-reg="cypherpunk" data-i18n="prof.arch.blood.cypher">Corpus JSON carries FamilySearch IDs for deceased persons only; the walk ran under the founder’s own signed-in session; tiers are era heuristics until the source-based confidence lane replaces them.</p>
+    <div class="archive-actions">
+      <a class="door" href="../assets/profile-archive/lineage/remington-bloodline.json" data-i18n="prof.arch.blood.prov">open the lineage corpus (JSON)</a>
+      <a class="door primary" href="blood.html" data-i18n="prof.arch.blood.enter">enter the blood comb — the fractal archive →</a>
+      <a class="door" href="blood.html#myth" data-i18n="prof.arch.blood.myth">enter through the mythology — the sagas and the crest's own meaning →</a>
+    </div>
+  </section>
+
   <section class="archive-panel" aria-labelledby="rails-title">
     <h2 id="rails-title" data-i18n="prof.arch.rails.h">Two profile rails, two honest kinds of lineage</h2>
     <p data-i18n="prof.arch.rails.p">A person and an agent may share a house archive. Their records do not pretend to be the same thing.</p>

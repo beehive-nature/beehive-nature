@@ -1,0 +1,197 @@
+[
+ [
+  "PASS",
+  "cold load: engine world + rail + panel mounted, incumbent comb retired",
+  ""
+ ],
+ [
+  "PASS",
+  "cold: standing root is the public entrance (never a synthesized default)",
+  "root=p72d226cedf"
+ ],
+ [
+  "PASS",
+  "contextual rail: derives from the standing root",
+  ""
+ ],
+ [
+  "PASS",
+  "one explanation: incumbent detail internals hidden, panel speaks",
+  ""
+ ],
+ [
+  "PASS",
+  "click person: selection moves, root HELD (selection != re-root)",
+  "sel=p55eb2f15c6"
+ ],
+ [
+  "PASS",
+  "atlas -> person: the panel explains the selected person",
+  ""
+ ],
+ [
+  "PASS",
+  "deliberate re-root: root moves to the selection",
+  ""
+ ],
+ [
+  "PASS",
+  "contextual rail re-derives after re-root",
+  ""
+ ],
+ [
+  "PASS",
+  "change representation: fractal, root+selection survive",
+  ""
+ ],
+ [
+  "PASS",
+  "curiosity causes second-person navigation (root held)",
+  ""
+ ],
+ [
+  "PASS",
+  "Back returns home: root · selection · view EXACT",
+  "final={\"r\":\"p72d226cedf\",\"s\":null,\"v\":\"pedigree\"} depth=1"
+ ],
+ [
+  "PASS",
+  "Back returns home: the actual camera too [camera law 81e9ded8 — home returns to the boot framing]",
+  "final={\"root\":\"p72d226cedf\",\"selection\":null,\"view\":\"pedigree\",\"k\":1,\"x\":0,\"y\":-176} vs cold={\"root\":\"p72d226cedf\",\"selection\":null,\"view\":\"pedigree\",\"k\":1,\"x\":0,\"y\":-176}"
+ ],
+ [
+  "PASS",
+  "URL grammar: hash mirrors the terminal state",
+  ""
+ ],
+ [
+  "PASS",
+  "zero page errors (desktop pass)",
+  ""
+ ],
+ [
+  "PASS",
+  "deep-link 1 boots SELECTION on the DEFAULT root",
+  "sel=p7b1078c886 root=p72d226cedf"
+ ],
+ [
+  "PASS",
+  "deep-link 1: the panel explains the deep-linked person",
+  ""
+ ],
+ [
+  "PASS",
+  "deep-link 1 terminal: root · selection · view IS the deep-linked context (not founder home)",
+  "final={\"r\":\"p72d226cedf\",\"s\":\"p7b1078c886\",\"v\":\"pedigree\"}"
+ ],
+ [
+  "PASS",
+  "deep-link 1 terminal: camera too [camera law 81e9ded8 — home returns to the boot framing]",
+  "final={\"root\":\"p72d226cedf\",\"selection\":\"p7b1078c886\",\"view\":\"pedigree\",\"k\":1,\"x\":0,\"y\":-176} vs boot={\"root\":\"p72d226cedf\",\"selection\":\"p7b1078c886\",\"view\":\"pedigree\",\"k\":1,\"x\":0,\"y\":-176}"
+ ],
+ [
+  "PASS",
+  "zero page errors (deep-link 1)",
+  ""
+ ],
+ [
+  "PASS",
+  "deep-link 2 boots the SERIALIZED context exactly (state level)",
+  "{\"root\":\"p55eb2f15c6\",\"selection\":\"p7b1078c886\",\"view\":\"fractal\",\"k\":1.6,\"x\":-100,\"y\":80}"
+ ],
+ [
+  "PASS",
+  "deep-link 2 terminal: root · selection · view IS the serialized context",
+  "final={\"r\":\"p55eb2f15c6\",\"s\":\"p7b1078c886\",\"v\":\"fractal\"}"
+ ],
+ [
+  "PASS",
+  "deep-link 2 terminal: camera IS the serialized context [camera law 81e9ded8 — serialized camera honored at boot, restored by home]",
+  "final={\"root\":\"p55eb2f15c6\",\"selection\":\"p7b1078c886\",\"view\":\"fractal\",\"k\":1.6,\"x\":-100,\"y\":80} vs boot={\"root\":\"p55eb2f15c6\",\"selection\":\"p7b1078c886\",\"view\":\"fractal\",\"k\":1.6,\"x\":-100,\"y\":80}"
+ ],
+ [
+  "PASS",
+  "zero page errors (deep-link 2)",
+  ""
+ ],
+ [
+  "PASS",
+  "review precondition: re-rooted before Back",
+  "root=p55eb2f15c6"
+ ],
+ [
+  "PASS",
+  "browser Back restores the exploration (popstate - one history mirrored)",
+  "{\"r\":\"p72d226cedf\",\"s\":\"p55eb2f15c6\",\"v\":\"pedigree\"} vs boot {\"r\":\"p72d226cedf\",\"v\":\"pedigree\"}"
+ ],
+ [
+  "PASS",
+  "browser Back: URL grammar mirrors the restored context",
+  ""
+ ],
+ [
+  "PASS",
+  "browser Back: rail re-derives to the RESTORED root (finding 2)",
+  ""
+ ],
+ [
+  "PASS",
+  "browser Back: the panel follows the restored selection (post-Back panel)",
+  ""
+ ],
+ [
+  "PASS",
+  "browser Back stays ON the page (never a real navigation away)",
+  ""
+ ],
+ [
+  "PASS",
+  "review: stand-here target differs from the first re-root AND the standing root",
+  "pid1=p55eb2f15c6 pid2=p58ec9cc83d root=p72d226cedf"
+ ],
+ [
+  "PASS",
+  "panel stand-here re-roots the ENGINE - one root on screen: atlas + hash + rail all follow",
+  "root=p58ec9cc83d sel=p58ec9cc83d rail=p58ec9cc83d"
+ ],
+ [
+  "PASS",
+  "zero page errors (review beat)",
+  ""
+ ],
+ [
+  "PASS",
+  "390 cold: deep-linked person opens on the default root",
+  ""
+ ],
+ [
+  "PASS",
+  "390: selecting a person opens the drawer (panel reachable by thumb)",
+  ""
+ ],
+ [
+  "PASS",
+  "390: the ONE back affordance is visible",
+  ""
+ ],
+ [
+  "PASS",
+  "390 system Back: restores the pre-re-root context (never exits the tree)",
+  "{\"root\":\"p72d226cedf\",\"selection\":\"p55eb2f15c6\",\"view\":\"pedigree\",\"k\":1,\"x\":0,\"y\":-192}"
+ ],
+ [
+  "PASS",
+  "390: Back returns home: root · selection · view EXACT",
+  ""
+ ],
+ [
+  "PASS",
+  "390: Back returns home: camera too [camera law 81e9ded8 — home returns to the boot framing]",
+  ""
+ ],
+ [
+  "PASS",
+  "zero page errors (390 pass)",
+  ""
+ ]
+]
