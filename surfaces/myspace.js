@@ -186,7 +186,8 @@
   /* No tEXt marker chunk. The relay refuses any PNG carrying metadata —
      `422 media contains metadata or a non-canonical metadata channel`, measured — so the
      wrapper is recognised by its IHDR shape instead: one row, 8-bit grayscale, width =
-     payload length. Our own rows also carry `wrapped` in the device index. */
+     payload length. Only bytes that ride the rail are wrapped; a private file is raw
+     ciphertext in IndexedDB and never goes through here. */
   function wrapAsPng(payload) {
     var ihdr = new Uint8Array(13);
     var dv = new DataView(ihdr.buffer);
@@ -653,7 +654,7 @@
     var mode = pendingMode;
     var row = {
       id: id, name: file.name || 'file', size: plain.length, type: file.type || '',
-      mode: mode, ts: Date.now(), sha: null, keyref: null, wrapped: true
+      mode: mode, ts: Date.now(), sha: null, keyref: null
     };
 
     if (mode === 'private') {
