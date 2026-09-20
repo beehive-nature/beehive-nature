@@ -35,6 +35,13 @@ async function fresh(reg) {
   page.on('pageerror', error => errors.push(error.message));
   page.on('console', message => { if (message.type() === 'error' && !/net::ERR_/.test(message.text())) errors.push(message.text()); });
   await page.goto(`${base}/surfaces/listening.html`);
+  // settled state, or the number is a lie: register bar mounted (it lands
+  // after load via tour.js), fonts ready, one paint beat for the i18n swap.
+  // earned 2026-09-20: the delivery-time ~790px was read pre-settle; live
+  // read 889px. the instrument must agree with the live page.
+  await page.waitForSelector('#bregbar', { timeout: 20000 });
+  await page.evaluate(() => document.fonts.ready);
+  await page.waitForTimeout(300);
   return { context, page, errors };
 }
 const box = (page, sel) => page.locator(sel).boundingBox();
@@ -80,29 +87,37 @@ const px = v => Math.round(parseFloat(v));
   await context.close();
 }
 
-// 3 · U1 - play first, disclosures carry the depth, nothing removed
+// 3 · U1 - play first, disclosures carry the depth, nothing removed.
+// standing condition (laborer 0f8d72f1): at 390x844 the provenance summary
+// row is FULLY visible without scrolling, in all three registers. the old
+// threshold (<1000px) passed 890px green - it never encoded the claim.
 {
-  const { context, page } = await fresh();
-  const pb = await box(page, '#play');
-  ok('u1: play sits above the fold', pb && pb.y < 844, pb ? `y ${Math.round(pb.y)}` : 'no box');
-  const details = page.locator('details[data-reg-disclose]');
-  ok('u1: provenance and doctrine ride the estate disclosure (two blocks)', await details.count() === 2);
-  const open = await details.evaluateAll(ds => ds.map(d => d.open));
-  ok('u1: both collapse for the default register (bee)', open.every(o => o === false), JSON.stringify(open));
-  const sums = await details.evaluateAll(ds => ds.map(d => d.querySelector('summary').getBoundingClientRect().height));
-  ok('u1: each summary is a 44px row', sums.every(h => h >= 44), JSON.stringify(sums));
-  const firstSum = await details.first().evaluate(d => d.querySelector('summary').getBoundingClientRect().top + window.scrollY);
-  ok('u1: the provenance summary is near the fold, not 1027px down', firstSum < 1000, `${Math.round(firstSum)}px`);
-  const kept = await page.evaluate(() => ({
-    table: !!document.querySelector('details[data-reg-disclose] table'),
-    doctrine: document.body.textContent.includes('The creation doctrine in four lines'),
-    inscription: document.body.textContent.includes('a sound inscription IS an on-chain seed + renderer'),
-    statuses: document.body.textContent.includes('pins on first founder upload'),
-  }));
-  ok('u1: nothing removed - table, doctrine, statuses all still in the page', kept.table && kept.doctrine && kept.inscription && kept.statuses, JSON.stringify(kept));
-  await details.first().click();
-  ok('u1: one tap opens the block', await details.first().evaluate(d => d.open === true));
-  await context.close();
+  const regs = [['bee', null], ['raver', 'raver'], ['cypherpunk', 'cypherpunk']];
+  for (const [name, reg] of regs) {
+    const { context, page } = await fresh(reg);
+    const pb = await box(page, '#play');
+    ok(`u1: play sits above the fold (${name})`, pb && pb.y < 844, pb ? `y ${Math.round(pb.y)}` : 'no box');
+    const details = page.locator('details[data-reg-disclose]');
+    ok(`u1: provenance and doctrine ride the estate disclosure (two blocks, ${name})`, await details.count() === 2);
+    const sums = await details.evaluateAll(ds => ds.map(d => d.querySelector('summary').getBoundingClientRect().height));
+    ok(`u1: each summary is a 44px row (${name})`, sums.every(h => h >= 44), JSON.stringify(sums));
+    const sumBottom = await details.first().evaluate(d => Math.round(d.querySelector('summary').getBoundingClientRect().bottom + window.scrollY));
+    ok(`u1: the provenance summary row is FULLY on the first screen at 390x844 (${name})`, sumBottom <= 844, `${sumBottom}px`);
+    if (!reg) {
+      const open = await details.evaluateAll(ds => ds.map(d => d.open));
+      ok('u1: both collapse for the default register (bee)', open.every(o => o === false), JSON.stringify(open));
+      const kept = await page.evaluate(() => ({
+        table: !!document.querySelector('details[data-reg-disclose] table'),
+        doctrine: document.body.textContent.includes('The creation doctrine in four lines'),
+        inscription: document.body.textContent.includes('a sound inscription IS an on-chain seed + renderer'),
+        statuses: document.body.textContent.includes('pins on first founder upload'),
+      }));
+      ok('u1: nothing removed - table, doctrine, statuses all still in the page', kept.table && kept.doctrine && kept.inscription && kept.statuses, JSON.stringify(kept));
+      await details.first().click();
+      ok('u1: one tap opens the block', await details.first().evaluate(d => d.open === true));
+    }
+    await context.close();
+  }
 }
 
 // 4 · register canon + engine wiring intact through the new layout
