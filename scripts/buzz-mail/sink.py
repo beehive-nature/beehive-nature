@@ -18,7 +18,7 @@ from aiosmtpd.smtp import SMTP, Envelope, Session
 
 DOMAIN = "agents.skaists.buzz"
 MAILROOT = Path("/var/mail-agents")
-KNOWN = {f"{a}@{DOMAIN}" for a in ("claude-code", "bzcode", "bclaude", "bfuzz", "honeybee", "bqueenbee", "bgrokbot", "bfable", "bee-laborer", "bopus5")}   # provisioned roster (Lane Mail rider)
+KNOWN = {f"{a}@{DOMAIN}" for a in ("claude-code", "bzcode", "bclaude", "bfuzz", "honeybee", "bqueenbee", "bgrokbot", "bfable", "bee-laborer", "bopus5", "bcodexastra")}   # provisioned roster (Lane Mail rider)
 CERT = "/opt/buzz-mail/agents-cert.pem"
 KEY = "/opt/buzz-mail/agents-key.pem"
 
