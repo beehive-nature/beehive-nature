@@ -50,6 +50,7 @@ header p{color:var(--dim);font-size:11px;margin-top:6px}
 <div class="note">the deterministic hearth: today it composes from the fleet's own engines (organ, gallery, vault,
 toll) — every artifact addressable, honest, chain-backed. the living model docks behind this same window.</div>
 <script src="./pointers.js?v=2"></script>
+<script src="../level-truth.js?v=2"></script> <!-- Z5: one svgCallData law (7e530f28) - market precedent -->
 <script>
 var HEARTH_SUSPENDED=false,HEARTH_AUDIO=new Set();
 window.bnrDockSuspend=function(inactive){
@@ -61,22 +62,13 @@ window.bnrDockSuspend=function(inactive){
    real engines and returns real artifacts with addresses. No backend — the
    seams are laid where the living model will sit: one route() function.
    Nature's model: the hearth is the warm center; the hive's organs feed it. */
-const W=v=>BigInt(v).toString(16).padStart(64,'0');
 const AD=a=>'0'.repeat(24)+a.replace(/^0x/,'').toLowerCase();
 const HOSTS=['https://base-rpc.publicnode.com','https://base.drpc.org'];
 const COLS={
  fungi:{sym:'FUNGI',c:'0x7d9ce55d54ff3feddb611fc63ff63ec01f26d15f',sel:'422b9e23',lv:[0,21000,525000,1050000,1575000,2100000]},
- pepi:{sym:'PEPI v2',c:'0x28a5e71bfc02723eac17e39c84c5190415c0de9f',sel:'a435130b',lv:[0,11,22,33,44,56]},
+ pepi:{sym:'PEPI v2',c:'0x28a5e71bfc02723eac17e39c84c5190415c0de9f',sel:'a435130b',fields:3,lv:[0,11,22,33,44,56]},
 };
-function decodeString(hex){
-  const h=hex.replace(/^0x/,'');
-  const off=parseInt(h.slice(0,64),16); if(!(off===0x20)) throw 0;
-  const len=parseInt(h.slice(off*2,off*2+64),16); if(!(len>=0&&len<=16384)) throw 0;
-  let out='';
-  for(let i=0;i<len;i++){ const b=parseInt(h.slice((off+32+i)*2,(off+32+i)*2+2),16);
-    if(Number.isNaN(b)) throw 0; out+=String.fromCharCode(b); }
-  try{ return decodeURIComponent(escape(out)); }catch(e){ return out; }
-}
+
 async function rpc(calls){
   for(const h of HOSTS){
     const ctl=new AbortController(); const kill=setTimeout(()=>ctl.abort(),8000);
@@ -115,10 +107,10 @@ async function respond(q){
   const say=document.createElement('div'); say.textContent=r.say;
   m.appendChild(say);
   if(r.kind==='art'){
-    const res=await rpc([{to:r.col.c,data:r.col.sel+W(0x20)+W(r.seed)+W(0)}]);
+    const res=await rpc([{to:r.col.c,data:LevelTruth.svgCallData(r.col,r.seed,0)}]);
     if(res&&res[0]&&res[0].length>200){
       try{
-        const svg=decodeString(res[0]);
+        const svg=LevelTruth.decodeString(res[0]);
         const art=document.createElement('div'); art.className='art'; art.innerHTML=svg;
         m.appendChild(art);
       }catch(e){}
