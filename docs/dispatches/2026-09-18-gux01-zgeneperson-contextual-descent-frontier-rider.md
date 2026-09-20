@@ -1,0 +1,36 @@
+# GUX-01 zGenePerson — rider 2/3: contextual discoveries, the epistemic descent, formal kinship, and the descendant-side frontier
+
+**Seat:** zGenePerson (GLM 5.3, zCode session). **Base:** the person-panel lane @`a1375ca4` (pin `97f18945`). **Branch:** `zcode/gux01-geneperson-2026-09-18`. Contract now `person-panel/1.3`.
+
+## The founder's corrections this rider answers (all three, structural)
+
+1. **The Lagash guard:** "the deeper you travel, the evidence texture changes — make that epistemic descent visible as part of the adventure." → **DONE**: hop nodes carry their evidence-tier class (estate tier colors); every blood relationship renders the tier SEQUENCE the line walks through in first-appearance order ("the evidence texture changes as the line climbs: living → recorded → colonial → medieval → saga → unrecorded — era labels date the evidence; support is assessed per person"); the deepest-line strip hook names the ground it crosses; the 143-hop chain compresses honestly (10 head + stated ellipsis + 3 tail — "…130 more hops — 143 in total, every one carried in the archive"). The panel renders the texture change; it never issues a verdict of its own.
+2. **The genealogical correction:** five generations up is formally a **3rd-great-grandfather** (my earlier "great-great" prose was one short — owned). → **DONE**: `kinshipTerm(depth, dir, gender)` computes the formal term on every direct line ("formally: Albert Perry Rockwood is Living's 3rd-great-grandfather — 5 generations"); the term is derived from hop depth + recorded gender, never hand-written again (uncertain gender stays generic — grandparent/grandchild).
+3. **The major UI/data law:** "children (1)" must never read as "had one child." → **DONE, first-class**: the DESCENDANT-SIDE FRONTIER now sits beside the upward ghost frontier. Every non-empty family section carries the coverage law ("this edition follows the founder's blood line — siblings, other marriages, and descendants largely live beyond the published record (coverage, not contradiction)"), and a person's KNOWN broader family renders ONLY from attributed archive data — the founder's own attested fact for Albert ("five wives and 22 children", corroborated by the cited public biography) stages through the adapter's new optional `broader` input and renders exactly as the founder mock ordered: **known broader family: 5 wives · 22 children · archive coverage: this edition follows 1 of 5 wives + 1 of 22 children on the direct line** — attribution line included (family testimony + cited biography), the sideways fan **locked, not hidden**. The panel NEVER invents these numbers: without the `broader` input there are no numbers, only the coverage law (test J5). The canonical home for the data is the zBlood attested-overlays lane; the demo's staging carries the honest "demonstration staging; canonical home: attested overlay" attribution.
+
+Plus the founder's contextual-discoveries order: **re-rooting now teaches itself.** `discoveries(rootId)` is computed FROM the standing root — deepest line, tier composition, pedigree collapse, cousin exemplar (only when both members are ancestors of the standing root — otherwise the hook honestly hides), and the frontier entrance story. At the Rockwood public entrance the strip tells the entrance's own story: *"15 ancestors from here — 15 colonial: the deeper ground thins, and the tier names say how"* and *"the frontier: 1,959 parent references — even here: the line stops at Samuel Rockwood I (3 generations up)"* — with NO cousin and NO collapse hook, because none live there. Re-root to the founder and the same panel tells the whole-archive story: 10,097 ancestors (3,153 saga · 2,797 medieval · 1,981 colonial · 1,744 unrecorded · 419 recorded), the 143-generation line to E Anna Tum de Lagash with the ground named underfoot, the founder's own grandparents as the cousin exemplar. The tier-composition hook makes the thinning COUNTABLE — more saga-tier ancestors than recorded-tier.
+
+Teasers v2 — the medieval experience speaks its own texture: a cyclic record ("this record participates in a loop"), a disputed parent-link ("competing reconstructions exist"), a traditional-tier person ("does not upgrade to documented").
+
+## The Albert Perry Rockwood anchor (the family facts this lane verified, for the record)
+
+The founder's testimony 2026-09-18 — "my grandpa AP rockwood had five wifes and 22 children, olsen is my grandmother" — verified against BOTH the walked corpus and the cited public biography (en.wikipedia.org/wiki/Albert_P._Rockwood): the article names the same five wives (Nancy Ruth Haven, Elvira Teeples, Angelina Horn, **Julianne Sophie Olsen**, Susannah Cornwall) and 22 children; the corpus walks the founder's direct line through exactly one of each (Juliane ⚭ Albert → Julius Apollus 1878–1943 → Ardella 1904–1990 → Marilyn → the founder) — Albert 5 generations up, formally the **3rd-great-grandfather**; Juliane likewise **3rd-great-grandmother**. The transcript's earlier mother-name thread resolved: Ardella's recorded mother is Mary Ellen Hill (1879–1955); "Juliane" is Julius's mother (Ardella's grandmother) — the founder's memory held the right names, one generation apart, and the panel's kinship naming now makes exactly that kind of relationship precise. Albert's public life (First Seven Presidents of the Seventy; first pioneer company 1847, present at "this is the right place") is a future evidence-pack claim, cited tertiary — the zBlood lane's file.
+
+## Evidence (at the commit)
+
+```
+$ node --test tools/genealogy/personpanel.test.mjs     tests 52 · pass 52
+$ node --test tools/genealogy/*.test.mjs               tests 102 · pass 102 · fail 0
+                                                       (50 pre-existing + 52, zero regressions)
+$ node scripts/estate-check.mjs                        PASS 96/105 (atlas untouched)
+```
+
+Browser acceptance **twice-stable, zero page errors, zero failed requests**: the contextual strip (Rockwood story vs founder story, hooks that honestly hide), the Lagash descent line + compressed chain + tier classes, kinship on Albert and Ardella, the broader-family block with the locked sideways fan, the coverage law on every non-empty family section, plus the whole prior journey. New shots: `01a-contextual-strip-founder-root`, `15-albert-kinship-broader-family`, `16-ardella-line-to-albert` (and refreshed set + 390px). Visual floor re-proven: 0px overflow at 390/640/900. CR=0, hex≥48=0 in touched files.
+
+## Boundaries held
+
+Same fences: no blood.html / archive.mjs / corpus / model / profile edits; the attested-overlays JSON untouched (the `broader` input is host-staged until the zBlood lane records it canonically); corpus byte-identity re-proven after the v1.3 battery (tests I6+J8); views frozen; living/private leakage laws unchanged; the Archive-1.1 quarantine untouched.
+
+## For zGeneAtlas (the continuous-place challenge)
+
+The panel now changes its whole discovery surface with the standing root — so a hook click can fly the atlas to a person while the STRIP quietly retells the story from there; kinship naming gives every direct line its human sentence; the broader-family block is the sideways-fan affordance, locked until records land. Contract v1.3 in the module header; everything degrades gracefully when optional methods are absent.
