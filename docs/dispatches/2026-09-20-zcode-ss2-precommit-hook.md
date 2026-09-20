@@ -18,6 +18,16 @@ Measured 2026-09-20: bFUzZ's SS-1 PROVE found `.git/hooks` = sample
 stubs, `core.hooksPath` unset; ZcODe5.3max reproduced it live (a planted
 64-hex line committed clean, scratch commit destroyed after).
 
+## Coverage today - read before assuming you are protected
+
+The hook delegates to `scripts/secret-scan.sh` **in the worktree you are
+committing in**. Until SS-1/SS-2 reach `main`, worktrees still based on
+older trees carry the older scanner: your commit runs the hook, but with
+the weaker engine (no rename coverage, no refusal semantics). Full,
+uniform protection arrives when SS-1/SS-2 land on `main` and your
+worktree carries them. Until then, a full-strength scan is one command:
+`sh /path/to/an/ss2-tree/scripts/secret-scan.sh diff`.
+
 ## What you will see when you commit
 
 - **Clean commit**: `secret-scan: clean - diff mode, N added lines scanned`
