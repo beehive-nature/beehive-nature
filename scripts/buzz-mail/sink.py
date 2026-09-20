@@ -26,7 +26,7 @@ class Sink:
     async def handle_RCPT(self, server, session, envelope, address, rcpt_options):
         if address.lower() not in KNOWN:
             return "550 no such agent here"          # unknown addresses refused, not dropped silently
-        if not envelope.rcpt_tos:
+        if address not in envelope.rcpt_tos:
             envelope.rcpt_tos.append(address)
         return "250 OK"
 
@@ -34,9 +34,13 @@ class Sink:
         for rcpt in envelope.rcpt_tos:
             local = rcpt.split("@")[0].lower()
             md = MAILROOT / local
-            (md / "cur").mkdir(parents=True, exist_ok=True)
-            (md / "new").mkdir(parents=True, exist_ok=True)
-            (md / "tmp").mkdir(parents=True, exist_ok=True)
+            # mailbox privacy is enforced, never inherited from the process umask
+            # (live defect 2026-09-20: auto-created Maildirs landed 0755 under Umask=0022)
+            md.mkdir(parents=True, exist_ok=True, mode=0o700)
+            os.chmod(md, 0o700)  # mkdir mode is umask-masked and skipped when existing; chmod is neither
+            for sub in ("cur", "new", "tmp"):
+                (md / sub).mkdir(parents=True, exist_ok=True, mode=0o700)
+                os.chmod(md / sub, 0o700)
             # Maildir write-through-tmp, then 0600, root-owned
             import time, secrets
             uniq = f"{int(time.time())}.M{secrets.token_hex(6)}P{os.getpid()}Q1"
