@@ -71,107 +71,14 @@ locate() {
 
 
 # ---- key-shape arms + checksum classifier (2026-09-20 WIF/nsec slice) ------
-# Three shape arms, ACCOUNTING class (the 64-hex model below), never a block:
-#   arm1  uncompressed Bitcoin WIF: 5 + [HJK] + 49 base58 chars = 51
-#   arm2  compressed Bitcoin WIF: [KL] + 51 base58 chars        = 52
-#   arm3  nostr secret, the estate's own format: literal nsec1 prefix +
-#         bech32 (real shape is 58 chars after the prefix; the floor is 50 so
-#         the near-shape fixtures already in this tree route through the
-#         classifier instead of escaping the arm entirely)
-# npub1, the PUBLIC identifier, can never match: arm3 anchors on the nsec1
-# prefix and no other arm can start a match at an n.
-# The arms are shape-only; keyshape() below separates real key material
-# (base58check / bech32 checksum VALID) from the base64-asset noise class
-# (checksum INVALID), which collapses to one count line instead of an
-# accounting row per embedded asset. Measured on the tree at the slice base:
-# 12 checksum-VALID public test vectors across 7 files stay committable as
-# accounting rows; the one in-tree INVALID shape hit (a 173 KB SVG base64
-# payload) and every synthetic nsec fixture land in the collapsed count.
-WIF_RE='\b5[HJK][1-9A-HJ-NP-Za-km-z]{49}\b|\b[KL][1-9A-HJ-NP-Za-km-z]{51}\b|\bnsec1[qpzry9x8gf2tvdw0s3jn54khce6mua7l]{50,}'
+# WIF_RE and keyshape() live in scripts/keyshape.sh, sourced here since the
+# second enforcer arrived (secret-scan.sh, diff + tree modes - the class must
+# be guarded where no seat runs: web edit, web merge, hookless clone). One
+# implementation, two enforcers - the standing law. Check 3 below is the
+# ACCOUNTING consumer; secret-scan.sh is the BLOCK consumer. Selftests P5-P11
+# exercise the sourced implementation unchanged.
 
-# keyshape classify <string> -> "VALID <detail>" | INVALID | ERR
-# keyshape mint <unc|cmp|nsec|npub> -> a checksum-minted fixture | ERR
-# Fixtures mint from 32x 0x11, a documented non-secret constant: a VALID
-# checksum is what makes a fixture exercise the whole gate, and minting at
-# runtime keeps the literal out of this file so preflight never blocks its
-# own commit. ERR (node unavailable or broken) degrades check 3 toward
-# LISTING every shape hit instead of collapsing any.
-keyshape() {
-  KEYSHAPE_MODE=$1 KEYSHAPE_ARG=$2 node -e '
-    const crypto = require("crypto");
-    const sha256 = (b) => crypto.createHash("sha256").update(b).digest();
-    const B58A = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
-    const BECH = "qpzry9x8gf2tvdw0s3jn54khce6mua7l";
-    function b58decode(s) {
-      let n = 0n;
-      for (const ch of s) { const i = B58A.indexOf(ch); if (i < 0) return null; n = n * 58n + BigInt(i); }
-      const out = [];
-      while (n > 0n) { out.unshift(Number(n & 0xffn)); n >>= 8n; }
-      for (const ch of s) { if (ch === "1") out.unshift(0); else break; }
-      return Uint8Array.from(out);
-    }
-    function b58check(bytes) {
-      const c = sha256(sha256(bytes)).subarray(0, 4);
-      const full = Buffer.concat([Buffer.from(bytes), c]);
-      let n = 0n; for (const b of full) n = (n << 8n) | BigInt(b);
-      let s = "";
-      while (n > 0n) { s = B58A[Number(n % 58n)] + s; n /= 58n; }
-      for (const b of full) { if (b === 0) s = "1" + s; else break; }
-      return s;
-    }
-    const GEN = [0x3b07a, 0x1b, 0x3d0e, 0x2b];
-    function polymod(values) {
-      let chk = 1;
-      for (const value of values) {
-        const top = chk >> 25;
-        chk = ((chk & 0x1ffffff) << 5) ^ value;
-        for (let i = 0; i < 5; i++) if ((top >> i) & 1) chk ^= GEN[i];
-      }
-      return chk >>> 0;
-    }
-    const hrpExpand = (hrp) => [...hrp].map((c) => c.charCodeAt(0) >> 5).concat([0]).concat([...hrp].map((c) => c.charCodeAt(0) & 31));
-    function to5bit(bytes) {
-      let acc = 0, bits = 0; const out = [];
-      for (const b of bytes) { acc = (acc << 8) | b; bits += 8; while (bits >= 5) { out.push((acc >> (bits - 5)) & 31); bits -= 5; } }
-      if (bits > 0) out.push((acc << (5 - bits)) & 31);
-      return out;
-    }
-    function bech32Encode(hrp, data5) {
-      const values = hrpExpand(hrp).concat(data5).concat([0, 0, 0, 0, 0, 0]);
-      const mod = polymod(values) ^ 1;
-      const cs = [];
-      for (let i = 0; i < 6; i++) cs.push((mod >> (5 * (5 - i))) & 31);
-      return hrp + "1" + data5.concat(cs).map((v) => BECH[v]).join("");
-    }
-    function bech32Verify(s) {
-      const pos = s.lastIndexOf("1");
-      if (pos < 1 || pos + 7 > s.length) return false;
-      const hrp = s.slice(0, pos).toLowerCase();
-      const idx = [...s.slice(pos + 1)].map((c) => BECH.indexOf(c));
-      if (idx.some((v) => v < 0)) return false;
-      return polymod(hrpExpand(hrp).concat(idx)) === 1;
-    }
-    const mode = process.env.KEYSHAPE_MODE || "";
-    const arg = process.env.KEYSHAPE_ARG || "";
-    if (mode === "mint") {
-      const key = new Uint8Array(32).fill(0x11);
-      if (arg === "unc") console.log(b58check(new Uint8Array([0x80, ...key])));
-      else if (arg === "cmp") console.log(b58check(new Uint8Array([0x80, ...key, 0x01])));
-      else if (arg === "nsec") console.log(bech32Encode("nsec", to5bit(key)));
-      else if (arg === "npub") console.log(bech32Encode("npub", to5bit(key)));
-      else { console.log("ERR"); process.exit(1); }
-    } else if (mode === "classify") {
-      if (/^nsec1[qpzry9x8gf2tvdw0s3jn54khce6mua7l]+$/.test(arg)) {
-        console.log(bech32Verify(arg) ? "VALID bech32(nsec)" : "INVALID");
-      } else {
-        const raw = b58decode(arg);
-        const ok = raw && (raw.length === 37 || raw.length === 38) && raw[0] === 0x80 &&
-          Buffer.compare(sha256(sha256(raw.subarray(0, raw.length - 4))).subarray(0, 4), raw.subarray(raw.length - 4)) === 0;
-        console.log(ok ? "VALID ver=0x80 paylen=" + (raw.length - 4) : "INVALID");
-      }
-    } else { console.log("ERR"); process.exit(1); }
-  ' 2>/dev/null || echo ERR
-}
+. "$(dirname "$0")/keyshape.sh"
 
 # zpad n -> n z chars (selftest fixture assembly; runtime-built so no literal
 # in this file is ever key-shaped)
@@ -256,11 +163,12 @@ if [ "${1:-}" = "--selftest" ]; then
       cd "$T" && git init -q repo 2>/dev/null && cd repo && mkdir -p scripts || exit 1
       cp "$SELF" scripts/push-preflight.sh
       cp "$(dirname "$SELF")/secret-scan.sh" scripts/secret-scan.sh 2>/dev/null || true
+      cp "$(dirname "$SELF")/keyshape.sh" scripts/keyshape.sh 2>/dev/null || true
       git add scripts 2>/dev/null
       GIT_AUTHOR_NAME=probe GIT_AUTHOR_EMAIL=probe@invalid \
       GIT_COMMITTER_NAME=probe GIT_COMMITTER_EMAIL=probe@invalid \
         git commit -q -m base 2>/dev/null || exit 1
-      printf 'demo fixture: one checksum-VALID uncompressed WIF and one shape-only run\n%s\n%s\n' "$M_UNC" "$NOISE" > demo.txt
+      printf 'demo fixture: one checksum-VALID uncompressed WIF and one shape-only run\n%s TESTNET-ONLY: runtime-minted check-3 fixture\n%s\n' "$M_UNC" "$NOISE" > demo.txt
       git add demo.txt 2>/dev/null
       GIT_AUTHOR_NAME=probe GIT_AUTHOR_EMAIL=probe@invalid \
       GIT_COMMITTER_NAME=probe GIT_COMMITTER_EMAIL=probe@invalid \

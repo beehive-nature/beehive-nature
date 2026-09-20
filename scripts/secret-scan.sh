@@ -6,6 +6,13 @@
 #   1. secret-bearing file names (.seed/.key/.pem/.secret, secrets/, .env*)
 #   2. hex runs of 48+ chars in content (key/seed/vector-shaped)
 #   3. PEM private-key blocks
+#   4. base58/bech32 key-shaped strings (Bitcoin WIF both forms, nostr nsec1),
+#      shared with push-preflight.sh via scripts/keyshape.sh - one
+#      implementation, two enforcers. Checksum-INVALID shape runs (the
+#      base64/asset noise class) are collapsed, not flagged; checksum-VALID
+#      unmarked strings BLOCK under the same marker law as hex. npub1, the
+#      public identifier, can never match (the arm anchors on the nsec1
+#      prefix).
 #
 # Exemptions:
 #   - Cargo.lock: its sha256 checksums are 64-char hex and public by nature
@@ -65,6 +72,10 @@
 mode="$1"
 fail=0
 
+# Shared key-shape implementation (WIF_RE + keyshape classify/mint): one
+# implementation, two enforcers - this file and push-preflight.sh.
+. "$(dirname "$0")/keyshape.sh"
+
 NAME_RE='\.(seed|key|pem|secret)$|(^|/)secrets/|(^|/)\.env(\.|$)'
 HEX_RE='[0-9a-fA-F]{48,}'
 PEM_RE='BEGIN .*PRIVATE KE[Y]'   # [Y] bracket trick: never matches this file itself
@@ -101,11 +112,33 @@ diff)
         grep '^+' | grep -v '^+++')
     hex=$(printf '%s\n' "$added" | grep -vF -e "$MARK" -e "$MARK2" | grep -vE "$PROPTEST_RE" | grep -nE "$HEX_RE")
     pem=$(printf '%s\n' "$added" | grep -nE "$PEM_RE")
+    wif=$(printf '%s\n' "$added" | grep -vF -e "$MARK" -e "$MARK2" | grep -nE "$WIF_RE" | while IFS= read -r lh; do
+        aln=${lh%%:*}; acontent=${lh#*:}
+        for tok in $(printf '%s\n' "$acontent" | grep -oE "$WIF_RE"); do
+          cls=$(keyshape classify "$tok")
+          case "$cls" in
+            VALID*) echo "added-line $aln: [REDACTED key-shaped checksum-VALID]" ;;
+            INVALID) : ;;
+            *) echo "added-line $aln: [CLASSIFIER UNAVAILABLE - treat as key-shaped]" ;;
+          esac
+        done
+      done)
     ;;
 tree)
     names=$(git ls-files | grep -Ei "$NAME_RE")
     hex=$(git grep -InE "$HEX_RE" -- ':(exclude)Cargo.lock' ':(exclude)*/Cargo.lock' ':(exclude)fixtures/' ':(exclude)docs/audits/' ':(exclude)dockets/*/receipt-*.json' ':(exclude)surfaces/blight/bnri-art/' ':(exclude)crates/voucher-escrow/fixtures/' ':(exclude)docs/handoffs/silentpay-v2/' | grep -vF -e "$MARK" -e "$MARK2" | grep -vE "$PROPTEST_RE")
     pem=$(git grep -InE "$PEM_RE")
+    wif=$(git grep -InE "$WIF_RE" -- ':(exclude)Cargo.lock' ':(exclude)*/Cargo.lock' ':(exclude)fixtures/' ':(exclude)docs/audits/' ':(exclude)dockets/*/receipt-*.json' ':(exclude)surfaces/blight/bnri-art/' ':(exclude)crates/voucher-escrow/fixtures/' ':(exclude)docs/handoffs/silentpay-v2/' | grep -vF -e "$MARK" -e "$MARK2" | while IFS= read -r thit; do
+        tf=${thit%%:*}; trest=${thit#*:}; tln=${trest%%:*}; tcontent=${trest#*:}
+        for tok in $(printf '%s\n' "$tcontent" | grep -oE "$WIF_RE"); do
+          cls=$(keyshape classify "$tok")
+          case "$cls" in
+            VALID*) echo "$tf:$tln: [REDACTED key-shaped checksum-VALID]" ;;
+            INVALID) : ;;
+            *) echo "$tf:$tln: [CLASSIFIER UNAVAILABLE - treat as key-shaped]" ;;
+          esac
+        done
+      done)
     ;;
 *)
     echo "usage: $0 {diff|tree}" >&2
@@ -140,6 +173,12 @@ if [ -n "$hex" ]; then
     # Report locations only. A scanner must not copy the suspected secret
     # into terminal/CI logs while refusing it (AGENTS.md secrets law).
     printf '%s\n' "$hex" | head -10 | awk -F: -v mode="$mode" '{ if (mode == "tree") print $1 ":" $2 ": [REDACTED matching content]"; else print "added-line " $1 ": [REDACTED matching content]" }' >&2
+    fail=1
+fi
+if [ -n "$wif" ]; then
+    echo "BLOCKED: key-shaped checksum-VALID string(s) - WIF (base58) or nsec (bech32)." >&2
+    echo "Deliberate testnet/test vector? Same-line $MARK. Public documented constant? Same-line $MARK2." >&2
+    printf '%s\n' "$wif" | head -10 >&2
     fail=1
 fi
 if [ -n "$pem" ]; then

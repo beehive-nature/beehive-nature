@@ -22,7 +22,7 @@ wrong-field edge cases, replay. File+function cited in every finding.
     --plugin eosio::trace_api_plugin --trace-no-abis \
     --access-control-allow-origin='*' --http-validate-host=false \
     --http-server-address=127.0.0.1:8888 \
-    --signature-provider=EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV=KEY:5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3 \
+    --signature-provider=EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV=KEY:5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3 \ <!-- PUBLIC-CONSTANT: eosio documented dev key -->
     --data-dir /tmp/nd/data --config-dir /tmp/nd/config
   ```
   (Spring dev WIF derives EOS6MRyAjQ… — NOT the old EOS6MRy39 doc key.)

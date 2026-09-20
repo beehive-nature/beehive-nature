@@ -199,8 +199,8 @@ try {
   const wallVerdicts = await p1.evaluate(() => {
     const t = v => { try { window.BnrSeam.wall(v); return 'through'; } catch (e) { return e.wall ? 'walled' : 'threw'; } };
     return {
-      wif: t({ x: '5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3' }),
-      wifCompressed: t({ x: 'L1aW4aubDFB7yfras2S1mN3bqg9nwySY8nkoLmJebSLD5BWv3ENZ' }),
+      wif: t({ x: '5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3' }), // TESTNET-ONLY: eosio documented dev key (wall-test fixture)
+      wifCompressed: t({ x: 'L1aW4aubDFB7yfras2S1mN3bqg9nwySY8nkoLmJebSLD5BWv3ENZ' }), // TESTNET-ONLY: published compressed WIF vector (wall-test fixture)
       // BIP-32 extended private key, its own published test vector. Both this
       // and the PEM below are split at their marker so the file cannot be read
       // as carrying the thing it exists to test for — the estate scanners match
