@@ -118,3 +118,23 @@ surface and was missing from my delivery list.
 - The reclaim — `@media (max-width:600px)` ONLY, desktop untouched, nothing removed, uniform across registers (CHOICES.md law): body pad-top 24→12 · nav margin 18→8 · header padding-bottom 14→10 + margin 12→8 + lede leading 1.7→1.55 · section margin 16→10 + padding 16→12 · h2 margin 10→6 · buttons `flex:1 1 calc(50% - 4px)` (row 203→148) · viz 150→112 · now margin 10→6 · details margin 16→10 · summary padding 12/16→10/14.
 - Measured after (all three registers identical): **details top 737, summary top 738, bottom 821 — 23px inside the fold.** row 148, viz 112, bar 117 untouched.
 - Gates: zcode-u123-check **34/0** (U1 block rewritten: fold assertion ×3 registers + settled wait in `fresh()`) · zcode-listening-check **18/0** (desktop viewport — the repair is scoped ≤600px) · university-smoke **87/0** including the reworked `:296` disclosure line. `measure_u1.mjs` diagnostic left worktree-local (untracked); its numbers are this section.
+
+
+## U1 v2 — first screen = window minus bar chrome (21:33Z cut, same day)
+
+The v1 gate encoded "fully on the first screen" as `bottom <= 844` while the tour bar overlays 797-844 at 390x844: the row was on screen and 24px under chrome. The laborer re-cut the condition (653ebede) and took his own share of the miss - he wrote the words, accepted the gate, merged it.
+
+CONDITION v2 (adopted verbatim): at 390x844, LIVE, settled, every register: `summary.bottom <= innerHeight - tbarH` with `tbarH = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--tbar-h'))`. No hand-encoded 844/797 anywhere. Fail-closed: absent/empty `--tbar-h` FAILS the gate - `parseFloat('') || 0` reads zero and passes exactly in the case the gate exists for.
+
+MECHANISM, measured before editing: tour.js?v=42 is loaded on the live page; fitPad() publishes `--tbar-h` on <html> and re-measures on bregister/resize (#159, 02a25a5c). The summary is in-flow (details[data-reg-disclose]>summary), so tour.js's body padding (h+22) only clears the bar at scroll end - at scroll 0 a row at doc-offset 821 sat under the 797-844 overlay. The estate published the answer two hours before v1 needed it; v1 wrote its own number.
+
+RECLAIM: mobile-only, same family as v1, nothing removed: body pad-top 12->8, nav margin 8->6, header pad/margin 10/8->8/6, section margin/pad 10/12->8/10, viz 112->102 (2px spare - a boundary-exact 797==797 is the flaky class in new clothes), #now margin 6->4. Desktop untouched. U2/U3/one-tap untouched, re-confirmed green.
+
+MEASURED (settled local page, 390x844, all three registers identical): `--tbar-h` = 47px; summary top/bottom 712/795; limit 844-47 = 797. Was 738/821 with the bar at 797-844.
+
+GATES: zcode-u123-check 37/0 (was 34: +3 publication assertions, one per register, each fail-closed on absence; the two remaining hard-coded 844s - u3 first-screen, u1 play-above-fold - now read live innerHeight) · zcode-listening-check 18/0 · university-smoke 87/0.
+
+BOUNDARY: no merge ask before a BgrOKbot re-eye on LIVE under condition v2.
+
+LAW (generalized from 653ebede): every "first screen" assertion measures the window MINUS chrome, never bare innerHeight; this page/gate pair is the first use of --tbar-h and the pattern for the rest.
+

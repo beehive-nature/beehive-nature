@@ -53,22 +53,25 @@ button.gold:hover{background:var(--gold);color:#000}
 table{width:100%;border-collapse:collapse;margin-top:8px;font-size:14px}
 td,th{border-bottom:1px solid var(--line);padding:8px;text-align:left;color:var(--dim);vertical-align:top}
 th{color:var(--violet);font-weight:400;font-size:13px} td.n{color:var(--ink)}
-/* U1 fold repair (mobile only): the provenance summary row must sit fully on
-   the first screen at 390x844 in every register - measured live at 889px top
-   after the register bar settles, so the mobile stack compacts. Desktop
-   untouched. Nothing is removed: every fact stays, depth behind the same
-   single tap. */
+/* U1 fold repair v2 (mobile only): "fully on the first screen" means CLEAR OF
+   the register bar's chrome, not merely inside the viewport - the tour bar
+   (#tbar) overlays 797-844 at 390x844 and publishes its height as --tbar-h on
+   <html> (#159, tour.js fitPad). The reclaim below recovers the measured 24px
+   overlap (summary bottom 821 -> <=797, 2px spare); the gate computes its
+   limit as innerHeight - tbar-h from the variable, never a hand number.
+   Desktop untouched. Nothing is removed: every fact stays, depth behind the
+   same single tap. */
 @media (max-width:600px){
-  body{padding-top:12px}
-  nav.back{margin-bottom:8px}
-  header{padding-bottom:10px;margin-bottom:8px}
+  body{padding-top:8px}
+  nav.back{margin-bottom:6px}
+  header{padding-bottom:8px;margin-bottom:6px}
   header p{line-height:1.55}
-  section{margin-top:10px;padding:12px}
+  section{margin-top:8px;padding:10px}
   section h2{margin-bottom:6px}
   .row{margin-top:8px}
   .row button{flex:1 1 calc(50% - 4px);padding:10px 12px}
-  #viz{height:112px}
-  #now{margin-top:6px}
+  #viz{height:102px}
+  #now{margin-top:4px}
   details[data-reg-disclose]{margin-top:10px}
   body details[data-reg-disclose]>summary{padding:10px 14px}
 }
