@@ -53,6 +53,25 @@ button.gold:hover{background:var(--gold);color:#000}
 table{width:100%;border-collapse:collapse;margin-top:8px;font-size:14px}
 td,th{border-bottom:1px solid var(--line);padding:8px;text-align:left;color:var(--dim);vertical-align:top}
 th{color:var(--violet);font-weight:400;font-size:13px} td.n{color:var(--ink)}
+/* U1 fold repair (mobile only): the provenance summary row must sit fully on
+   the first screen at 390x844 in every register - measured live at 889px top
+   after the register bar settles, so the mobile stack compacts. Desktop
+   untouched. Nothing is removed: every fact stays, depth behind the same
+   single tap. */
+@media (max-width:600px){
+  body{padding-top:12px}
+  nav.back{margin-bottom:8px}
+  header{padding-bottom:10px;margin-bottom:8px}
+  header p{line-height:1.55}
+  section{margin-top:10px;padding:12px}
+  section h2{margin-bottom:6px}
+  .row{margin-top:8px}
+  .row button{flex:1 1 calc(50% - 4px);padding:10px 12px}
+  #viz{height:112px}
+  #now{margin-top:6px}
+  details[data-reg-disclose]{margin-top:10px}
+  body details[data-reg-disclose]>summary{padding:10px 14px}
+}
 footer{max-width:920px;margin:22px auto 0;color:var(--dim);font-size:12.5px;text-align:center;line-height:1.8}
 </style>
 </head>

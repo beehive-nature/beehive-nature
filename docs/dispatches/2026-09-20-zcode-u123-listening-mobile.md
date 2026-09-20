@@ -109,3 +109,12 @@ Banked lesson (the class the laborer named): the gates that judge your page are
 not the gates you wrote. Before delivering a surface, run the suite that
 already exists and already reads your file — `university-smoke` judges every
 surface and was missing from my delivery list.
+
+## 2026-09-20 ~21:25Z — U1 fold repair (branch `zcode/u123-u1-fold`, base 420c05f3)
+
+- Eye verdict (BgrOKbot `c92c30333`, live): U2 · U3 · tap **PASS**; **U1 MISS** — details top 889px @390×844, summary bottom 977 vs fold 844. Laborer standing condition (`0f8d72f1`): the summary row fully visible without scrolling, all three registers, nothing removed, depth behind the same single tap.
+- **The 99px, named with numbers:** once the page is settled (register bar mounted, fonts ready, i18n paint), the instrument reproduces live exactly — 889/890 in bee, raver AND cypherpunk. Not load timing (the early probe was already settled locally), not fonts, not register. The delivery-time ~790px was a pre-settle read, and the gate threshold `<1000px` never encoded the fold claim — 890 passed green. Both halves of the instrument fixed: `fresh()` now waits for the settled page; the U1 assertion is now `summary bottom ≤ 844` per register.
+- The settled stack above the card (measured): bregbar 117 + 16 margin (estate chrome, untouched) · nav.back 44+18 · header 134+12 (h1 30, lede 3 lines 82) · section1 504 (row 203 = input row + two button rows; viz 150; now 45) · details margin 16.
+- The reclaim — `@media (max-width:600px)` ONLY, desktop untouched, nothing removed, uniform across registers (CHOICES.md law): body pad-top 24→12 · nav margin 18→8 · header padding-bottom 14→10 + margin 12→8 + lede leading 1.7→1.55 · section margin 16→10 + padding 16→12 · h2 margin 10→6 · buttons `flex:1 1 calc(50% - 4px)` (row 203→148) · viz 150→112 · now margin 10→6 · details margin 16→10 · summary padding 12/16→10/14.
+- Measured after (all three registers identical): **details top 737, summary top 738, bottom 821 — 23px inside the fold.** row 148, viz 112, bar 117 untouched.
+- Gates: zcode-u123-check **34/0** (U1 block rewritten: fold assertion ×3 registers + settled wait in `fresh()`) · zcode-listening-check **18/0** (desktop viewport — the repair is scoped ≤600px) · university-smoke **87/0** including the reworked `:296` disclosure line. `measure_u1.mjs` diagnostic left worktree-local (untracked); its numbers are this section.
