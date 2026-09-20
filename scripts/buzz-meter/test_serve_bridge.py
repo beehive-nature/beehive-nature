@@ -21,6 +21,14 @@ crash header, honored only for authed admin callers); restart reuses the
 SAME ledger dir. Observable behavior only — no assumption about the
 process's threading model.
 
+The AV-3 door seam (f065f76f) gates every admin CHARGE on live delivery-
+door health (gate_door_health → park-not-kill). The harness wires
+GATE_PROBE_URL to the bridge's own public view — a real round trip, ANY
+HTTP answer counts as reachable — so the charge path is genuinely
+exercised; without it every charge parks vacuously (1.2 read "Σcharges 0"
+and 1.4c's crash hook never fired: that was main's standing red). Case 1.5
+pins the door-DOWN law itself: typed park, zero writes, key unconsumed.
+
 Run:  python3 scripts/buzz-meter/test_serve_bridge.py   (exit 0 = green)
 """
 import json
@@ -99,6 +107,12 @@ class Server:
             "VOUCHER_BIND": "127.0.0.1",
             "VOUCHER_PORT": str(self.port),
             "VOUCHER_ADMIN_TOKEN": ADMIN_TOKEN,
+            # AV-3 door seam (f065f76f): a charge requires a REACHABLE
+            # delivery door or it PARKS. The battery points the probe at the
+            # bridge's own public view — a real round trip on this port, and
+            # stable across restart since the port never changes.
+            "GATE_PROBE_URL":
+                f"http://127.0.0.1:{self.port}/v1/voucher/{KEY_ID}/view",
         }
         if extra_env:
             self.env.update(extra_env)
@@ -127,8 +141,13 @@ class Server:
             self.proc.kill()
             self.proc.wait()
 
-    def restart(self):
+    def restart(self, extra_env=None):
+        # extra_env patches the subprocess env for THIS restart onward
+        # (GATE_PROBE_URL is read at process start) — how 1.5 raises the
+        # door back up on the SAME ledger dir.
         self.kill9()
+        if extra_env:
+            self.env.update(extra_env)
         self.start()
 
     # scripted HTTP client — returns (status, parsed-or-raw-body, headers)
@@ -416,6 +435,47 @@ def case_1_4(srv):
        "return the original outcome; no second effect")
 
 
+# ── 1.5 the AV-3 door seam: door DOWN parks, door back recovers ─────────────
+
+def case_1_5(root):
+    """The seam that de-fanged this battery once (main's standing red):
+    charges gate on live door health. Door DOWN ⇒ the charge PARKS — typed
+    200 {parked, park_reason:door}, ZERO writes, idempotency key
+    UNCONSUMED. Door back on the same ledger ⇒ the SAME key charges
+    exactly once."""
+    dead = free_port()  # bound-0-then-closed: nothing listens, loopback refuses
+    srv = Server(root, extra_env={
+        "GATE_PROBE_URL": f"http://127.0.0.1:{dead}/readiness"})
+    try:
+        srv.post_admin("/v1/admin/settle", settle_body("av1-tx-park",
+                                                       amount="10.0000"))
+        pre = srv.ledger_bytes()
+        cb = charge_body("av1-ch-park")
+        code, body, _ = srv.post_admin("/v1/admin/charge", cb)
+        if code != 200 or not isinstance(body, dict) \
+                or not body.get("parked") or body.get("park_reason") != "door" \
+                or "event" in body:
+            fail(f"1.5: door-down charge did not park typed ({code}): {body}")
+        if srv.ledger_bytes() != pre:
+            fail("1.5: parked charge wrote to the ledger")
+        srv.restart(extra_env={
+            "GATE_PROBE_URL":
+                f"http://127.0.0.1:{srv.port}/v1/voucher/{KEY_ID}/view"})
+        code2, receipt, _ = srv.post_admin("/v1/admin/charge", cb)
+        if code2 != 200:
+            fail(f"1.5: post-recovery charge refused ({code2}): {receipt}")
+        evs = [json.loads(l) for l in
+               srv.ledger_bytes().decode().splitlines() if l.strip()]
+        n = sum(1 for e in evs if e.get("type") == "CHARGE"
+                and e.get("idempotency_key") == "av1-ch-park")
+        if n != 1:
+            fail(f"1.5: {n} charge events for one key across park+recovery")
+        ok("1.5: door-down charge PARKS typed (zero writes, idempotency key "
+           "unconsumed); door back → the SAME key charges exactly once")
+    finally:
+        srv.kill9()
+
+
 # ── negative control (house law) ────────────────────────────────────────────
 
 def negative_control(root):
@@ -464,6 +524,7 @@ def main():
         case_1_4(srv)
     finally:
         srv.kill9()
+    case_1_5(root)
     negative_control(root)
 
     print("\n=== AV-1 SERVE-BRIDGE — ALL PROOFS PASS ===")

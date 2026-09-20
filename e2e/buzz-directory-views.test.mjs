@@ -252,7 +252,7 @@ test('beats and connection disclosure remember per view instead of resetting', (
   document.activeElement = document.body;
   const theme = element('meta');
   theme.attrs.name = 'theme-color';
-  theme.content = '#f6f7f2';
+  theme.content = '#fbf7f0';
   const connection = element('details');
   connection.dataset.viewDisclosure = 'connection';
   connection.appendChild(element('summary'));

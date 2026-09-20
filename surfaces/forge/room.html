@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#f6f7f2">
+<meta name="theme-color" content="#fbf7f0">
 <meta name="color-scheme" content="light dark">
 <title>the two-tab room — forge multiplayer you can feel (fleet)</title>
 <style>
@@ -54,21 +54,21 @@ details.tool[open]>summary:before{content:"− "}
 
 /* New bee — Music-studio calm: cream canvas, readable type, few primary controls. */
 body[data-reg=bee]{
-  --danger:#8b3654;--bg:#f6f7f2;--panel:#fff;--well:#edf2eb;--ink:#18362a;--dim:#435f4e;--line:#ccd7cf;
-  --accent:#326b39;--hot:#65509a;--on:#fff;color-scheme:light;background:#f6f7f2;color:#18362a;
+  --danger:#8b3654;--bg:#fbf7f0;--panel:#fff;--well:#efe9dd;--ink:#0c1412;--dim:#4a5f55;--line:#e6dfd2;
+  --accent:#6e3fb8;--hot:#65509a;--on:#fff;color-scheme:light;background:#fbf7f0;color:#0c1412;
   font:1.125rem/1.65 var(--font)}
-body[data-reg=bee] h1{color:#18362a}
-body[data-reg=bee] .lead{font-size:1.125rem;color:#435f4e}
+body[data-reg=bee] h1{color:#0c1412}
+body[data-reg=bee] .lead{font-size:1.125rem;color:#4a5f55}
 body[data-reg=bee] input,body[data-reg=bee] button{min-height:44px;font-size:1rem}
-body[data-reg=bee] input[type=range]{min-height:44px;accent-color:#326b39}
-body[data-reg=bee] canvas#stage{box-shadow:0 8px 28px #18362a16;border-radius:18px}
+body[data-reg=bee] input[type=range]{min-height:44px;accent-color:#6e3fb8}
+body[data-reg=bee] canvas#stage{box-shadow:0 8px 28px #0c141216;border-radius:18px}
 body[data-reg=bee] .knobs{gap:18px}
-body[data-reg=bee] #tbar{background:#f6f7f2!important;border-top-color:#ccd7cf!important;
-  color:#18362a!important;-webkit-mask-image:none!important;mask-image:none!important;
+body[data-reg=bee] #tbar{background:#fbf7f0!important;border-top-color:#e6dfd2!important;
+  color:#0c1412!important;-webkit-mask-image:none!important;mask-image:none!important;
   font:500 1rem/1.4 system-ui,-apple-system,"Segoe UI",sans-serif!important}
-body[data-reg=bee] #tbar a{min-height:44px!important;color:#18362a!important;background:#fff!important;box-shadow:inset 0 0 0 1px #ccd7cf!important}
-body[data-reg=bee] #tbar .tsep{background:#ccd7cf!important}
-body[data-reg=bee] #tbarMore{min-height:44px!important;background:#fff!important;color:#326b39!important;border-color:#ccd7cf!important}
+body[data-reg=bee] #tbar a{min-height:44px!important;color:#0c1412!important;background:#fff!important;box-shadow:inset 0 0 0 1px #e6dfd2!important}
+body[data-reg=bee] #tbar .tsep{background:#e6dfd2!important}
+body[data-reg=bee] #tbarMore{min-height:44px!important;background:#fff!important;color:#6e3fb8!important;border-color:#e6dfd2!important}
 
 
 /* Raver — instrument / art floor; same knobs, vivid accents. */
@@ -177,7 +177,7 @@ function applyReading(event){
   const previous=readingChoices.get(reading);
   details.forEach((d,i)=>d.open=previous?previous[i]:defaultOpen(reading,d.dataset.viewDisclosure));
   const theme=document.querySelector('meta[name="theme-color"]');
-  if(theme) theme.content=reading==='bee'?'#f6f7f2':reading==='raver'?'#111018':'#0e141a';
+  if(theme) theme.content=reading==='bee'?'#fbf7f0':reading==='raver'?'#111018':'#0e141a';
   restoreVisibleFocus(focus);
   lastReading=reading;
 }

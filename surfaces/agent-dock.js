@@ -19,7 +19,7 @@
     #adWin button{appearance:none;position:static;display:inline-flex;align-items:center;justify-content:center;gap:6px;min-width:44px;min-height:44px;width:auto;height:auto;margin:0;padding:8px 12px;border:1px solid var(--ad-line);border-radius:9px;background:var(--ad-panel);color:var(--ad-ink);text-align:center;cursor:pointer;white-space:normal;transform:none;opacity:1}
     #adWin button:disabled{opacity:.55;cursor:default}#adWin button:hover:not(:disabled){border-color:var(--ad-accent)}
     #adWin a{color:var(--ad-ink);text-decoration:underline;text-underline-offset:3px;overflow-wrap:anywhere}
-    #adWin button:focus-visible,#adWin a:focus-visible,#adWin summary:focus-visible,#adWin textarea:focus-visible,#adOrb:focus-visible{outline:3px solid var(--ad-accent,#326b39);outline-offset:-3px}
+    #adWin button:focus-visible,#adWin a:focus-visible,#adWin summary:focus-visible,#adWin textarea:focus-visible,#adOrb:focus-visible{outline:3px solid var(--ad-accent,#6e3fb8);outline-offset:-3px}
     #adHead{display:flex;align-items:center;gap:6px;padding:8px 12px;flex:none;border-bottom:1px solid var(--ad-line);background:var(--ad-panel)}
     #adTitle{font:600 1rem/1.4 var(--ad-font);margin:0 auto 0 0;color:var(--ad-ink)}#adHead button{font-size:.875rem;padding:6px 8px;background:transparent}
     #adAgents{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;padding:10px 12px;flex:none}
@@ -35,8 +35,8 @@
     #adPrompt{flex:1;min-width:0;width:100%;min-height:52px;max-height:120px;margin:0;padding:10px 12px;resize:vertical;background:var(--ad-panel);color:var(--ad-ink);border:1px solid var(--ad-line);border-radius:10px;font:16px/1.4 var(--ad-font)}#adPrompt::placeholder{color:var(--ad-dim);opacity:1}
     #adWin #adSend{background:var(--ad-accent);color:var(--ad-on);border-color:var(--ad-accent);min-height:48px}
     #adStatus{margin:0;padding:4px 12px 10px;min-height:32px;flex:none;font:.75rem/1.4 var(--ad-font);color:var(--ad-dim)}#adStatus[data-error=true]{color:var(--ad-ink);font-weight:600}
-    body[data-reg=bee] #adOrb{background:#fff;color:#326b39;border-color:#ccd7cf}
-    body[data-reg=bee] #adWin{--ad-bg:#f6f7f2;--ad-panel:#fff;--ad-ink:#18362a;--ad-dim:#435f4e;--ad-line:#bdcec3;--ad-accent:#326b39;--ad-on:#fff;color-scheme:light}
+    body[data-reg=bee] #adOrb{background:#fff;color:#6e3fb8;border-color:#e6dfd2}
+    body[data-reg=bee] #adWin{--ad-bg:#fbf7f0;--ad-panel:#fff;--ad-ink:#0c1412;--ad-dim:#4a5f55;--ad-line:#bdcec3;--ad-accent:#6e3fb8;--ad-on:#fff;color-scheme:light}
     body[data-reg=raver] #adHead{background:linear-gradient(110deg,#302045,#123339 70%,#19352c)}
     body[data-reg=cypherpunk] #adWin{--ad-bg:#0e141a;--ad-panel:#151e26;--ad-ink:#e4f2f4;--ad-dim:#adbecb;--ad-line:#526b7c;--ad-accent:#80cddd;--ad-on:#0e141a;--ad-font:ui-monospace,Consolas,monospace;border-radius:5px;font-size:14px}body[data-reg=cypherpunk] #adWin button{border-radius:3px}
     @media(max-width:520px){#adWin{left:8px;width:calc(100% - 16px);border-radius:12px}#adWin.is-expanded{width:calc(100% - 16px)}#adAgents{padding:6px 8px;gap:4px}#adHead,#adContext{padding-inline:8px}#adFoot{padding-inline:8px}#adContext{font-size:.6875rem}#adWin .adAg{padding:6px 8px}#adTitle{font-size:.9375rem}}
@@ -73,7 +73,7 @@
   }
   var frameCss=`
     html.ad-embedded{--bg:#10191c;--ink:#eef7f2;--dim:#b8ccc7;--line:#526e72;--gold:#b9a4f5;--cyan:#8cdae0;--violet:#cbb4ff;--amber:#f4c897;--ad-panel:#18252a;color-scheme:dark}
-    html.ad-embedded[data-ad-view=bee]{--bg:#f6f7f2;--ink:#18362a;--dim:#435f4e;--line:#bdcec3;--gold:#326b39;--cyan:#29628f;--violet:#65509a;--amber:#876119;--ad-panel:#fff;color-scheme:light}
+    html.ad-embedded[data-ad-view=bee]{--bg:#fbf7f0;--ink:#0c1412;--dim:#4a5f55;--line:#bdcec3;--gold:#326b39;--cyan:#29628f;--violet:#65509a;--amber:#876119;--ad-panel:#fff;color-scheme:light}
     html.ad-embedded[data-ad-view=cypherpunk]{--bg:#0e141a;--ink:#e4f2f4;--dim:#adbecb;--line:#526b7c;--gold:#80cddd;--cyan:#80cddd;--ad-panel:#151e26}
     html.ad-embedded body{min-height:0!important;margin:0!important;padding:12px!important;background:var(--bg)!important;color:var(--ink)!important;font:16px/1.65 system-ui,-apple-system,'Segoe UI',sans-serif!important;overflow-wrap:anywhere}
     html.ad-embedded[data-ad-view=cypherpunk] body{font:14px/1.6 ui-monospace,Consolas,monospace!important}

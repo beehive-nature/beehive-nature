@@ -8,7 +8,7 @@
 //
 // Proves in chromium (390px):
 //   1. the chooser renders: 🌐 Public selectable; 🔒 Only me / 👥 Selected
-//      people visibly unavailable (disabled + struck + reason) — never promised;
+//      people visibly unavailable as PLAIN ROWS with reasons — never buttons, never promised;
 //   2. clicking an unavailable mode changes NOTHING (policy stays unset);
 //   3. selecting Public records the gesture (page shows "You chose Public" +
 //      chosen-at; localStorage carries the resolved policy);
@@ -101,14 +101,17 @@ await page.waitForTimeout(1200);
 const sec = () => page.$('#bpay-sec');
 
 check('chooser renders (Choose how this is shared)', !!(await sec()) && (await (await sec()).innerText()).includes('Public'));
-const unavail = await page.$$eval('#bpay-sec [data-bpay-unavailable]', els => els.map(e => ({ id: e.dataset.bpayUnavailable, disabled: e.disabled, struck: (e.getAttribute('style') || '').includes('line-through') })));
-check('unavailable audience modes visible + disabled + struck (never promised)',
-  unavail.length === 2 && unavail.every(u => u.disabled && u.struck && ['only-me', 'selected-people'].includes(u.id)),
-  unavail.map(u => u.id).join(','));
+const unavail = await page.$$eval('#bpay-sec [data-bpay-unavailable]', els => els.map(e => ({ id: e.dataset.bpayUnavailable, tag: e.tagName, cursor: getComputedStyle(e).cursor, struck: getComputedStyle(e).textDecorationLine.includes('line-through'), aria: e.getAttribute('aria-disabled'), text: e.innerText.replace(/\s+/g, ' ') })));
+check('unavailable audience modes are PLAIN ROWS — never buttons, never struck (dead affordances are banned)',
+  unavail.length === 2 && unavail.every(u => u.tag !== 'BUTTON' && u.cursor !== 'pointer' && !u.struck && u.aria === 'true' && ['only-me', 'selected-people'].includes(u.id)),
+  unavail.map(u => `${u.id}:${u.tag}/${u.cursor}`).join(','));
+check('each row carries its reasons in plain sight (plain + technical)',
+  unavail.every(u => /not available yet/i.test(u.text) && /not ready/i.test(u.text) && /not yet qualified/i.test(u.text)),
+  unavail.map(u => u.text).join(' | ').slice(0, 200));
+check('no disabled buttons remain in the bPay panel', (await page.$$('#bpay-sec button[disabled]')).length === 0);
 
-// clicking an unavailable mode must change nothing — a FORCED click
-// (dispatchEvent ignores the browser's own disabled-guard) proves the
-// panel's handler refuses too, not just the native button state
+// clicking an unavailable row must change nothing — a dispatched click
+// proves the panel's own handler refuses (a row has no native guard)
 await page.$eval('[data-audience="only-me"]', el => el.dispatchEvent(new MouseEvent('click', { bubbles: true })));
 let choseText = (await (await sec()).innerText());
 check('clicking an unavailable mode changes nothing', !/You chose|ви обрали/i.test(choseText));

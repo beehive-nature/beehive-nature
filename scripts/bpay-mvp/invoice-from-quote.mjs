@@ -36,7 +36,7 @@ function attoToAnt(atto) {
   return frac ? `${whole}.${frac}` : `${whole}`;
 }
 
-export function invoiceFromPrepare(prepare, obtainedAt) {
+export function invoiceFromPrepare(prepare, obtainedAt, priorDigest) {
   if (!prepare || typeof prepare !== 'object') fail("prepare response required");
   if (prepare.artifact_sha256 !== PIN_SHA256) fail(`artifact_sha256 ${prepare.artifact_sha256} is not the pinned intake artifact`);
   if (prepare.artifact_bytes !== PIN_BYTES) fail(`artifact_bytes ${prepare.artifact_bytes} ≠ pinned ${PIN_BYTES}`);
@@ -63,6 +63,7 @@ export function invoiceFromPrepare(prepare, obtainedAt) {
   const invoice = buildGenericInvoice({
     jobId: "bux-try-autonomi-2026-09-17",
     issuedAt: obtainedAt,
+    priorDigest: priorDigest || null, // successor lineage (INV-1.4): the prior version's contentDigest rides forward; history is superseded, never rewritten
     lines: [{
       kind: "storage",
       asset: "ANT",
@@ -113,7 +114,9 @@ export function invoiceFromPrepare(prepare, obtainedAt) {
         object: "one-policy-object",
         audience: {
           selected: "public", // as bound: the bridge prepared with Visibility::Public
-          selected_by: "antd-bridge prepare (Visibility::Public) — the founder's chooser gesture is Phase B, never agent-inferred",
+          selected_by: (prepare.policy && prepare.policy.binding && prepare.policy.binding.indexOf('founder-selected') === 0)
+            ? ('founder product gesture → bridge binding ' + prepare.policy.binding)
+            : "antd-bridge prepare (Visibility::Public) — the founder's chooser gesture is the origin, never agent-inferred",
           available: ["public"],
           unavailable: [
             { id: "only-me", reason: "private-DataMap custody path not yet wired or tested through this bridge" },
@@ -155,8 +158,10 @@ const SCAN_MARK = 'PUBLIC-CONSTANT';
 
 function markAfter(o, hexKey, why) {
   if (!o || typeof o[hexKey] !== 'string' || !SCAN_HEX.test(o[hexKey])) return;
-  const entries = Object.entries(o).filter(([k]) => k !== 'scan');
+  const entries = Object.entries(o); // insert-only: existing scan markers stay (multiple hex keys may live in one object)
   const idx = entries.findIndex(([k]) => k === hexKey);
+  const next = entries[idx + 1];
+  if (next && next[0] === 'scan' && typeof next[1] === 'string' && next[1].startsWith(SCAN_MARK)) return; // already marked
   entries.splice(idx + 1, 0, ['scan', `${SCAN_MARK}: ${why}`]);
   for (const k of Object.keys(o)) delete o[k];
   Object.assign(o, Object.fromEntries(entries));
@@ -167,7 +172,23 @@ function decorate(doc) {
   markAfter(doc.domain?.artifact || {}, 'sha256', 'public content sha256 pin');
   markAfter(doc.domain || {}, 'data_map_address', 'public self-encrypted data-map address');
   markAfter(doc.commitment || {}, 'digest', 'public commitment digest over the carried quote set');
-  markAfter(doc.identity || {}, 'contentDigest', 'public content-addressed identity digest');
+  // identity carries up to two hex fields (priorDigest?, contentDigest) — each
+  // gets its OWN immediately-following marker key (scan / scan_prior; an object
+  // cannot hold duplicate keys, so multi-hex objects use distinct scan* names)
+  (function(){
+    const id = doc.identity;
+    if (!id) return;
+    const rebuilt = {};
+    for (const [k, v] of Object.entries(id)) {
+      rebuilt[k] = v;
+      if (k === 'priorDigest' && typeof v === 'string' && SCAN_HEX.test(v))
+        rebuilt.scan_prior = `${SCAN_MARK}: public prior-version content digest (successor lineage — history superseded, never rewritten)`;
+      if (k === 'contentDigest' && typeof v === 'string' && SCAN_HEX.test(v))
+        rebuilt.scan = `${SCAN_MARK}: public content-addressed identity digest`;
+    }
+    for (const k of Object.keys(id)) delete id[k];
+    Object.assign(id, rebuilt);
+  })();
   return doc;
 }
 
@@ -186,9 +207,9 @@ function serialize(doc) {
       const [k, x] = entries[i];
       if (typeof x === 'string' && SCAN_HEX.test(x)) {
         const next = entries[i + 1];
-        if (!(next && next[0] === 'scan' && typeof next[1] === 'string' && next[1].startsWith(SCAN_MARK)))
+        if (!(next && /^scan/.test(next[0]) && typeof next[1] === 'string' && next[1].startsWith(SCAN_MARK)))
           throw new Error(`hex key "${k}" has no in-object scan marker — refuse to serialize (digest consistency law)`);
-        out.push(`"${k}": ${JSON.stringify(x)}, "scan": ${JSON.stringify(next[1])}`); // the marker rides the hex's own line
+        out.push(`"${k}": ${JSON.stringify(x)}, "${next[0]}": ${JSON.stringify(next[1])}`); // the marker rides the hex's own line
         i++;
       } else {
         out.push(`"${k}": ${val(x, pad + ' ')}`);
@@ -204,9 +225,18 @@ async function main() {
   if (argv.includes('--selftest')) { try { return await selftest(); } catch (e) { console.error(e.message); process.exit(1); } }
 
   const input = argv.find(a => !a.startsWith('--'));
-  if (!input) { console.error("usage: invoice-from-quote.mjs <prepare-response.json> [--out <path>]"); process.exit(1); }
+  if (!input) { console.error("usage: invoice-from-quote.mjs <prepare-response.json> [--out <path>] [--prior <invoice.json>]"); process.exit(1); }
   const outIdx = argv.indexOf('--out');
   const out = outIdx >= 0 ? argv[outIdx + 1] : join(HERE, '..', '..', 'surfaces', 'bpay-invoice.json');
+  // --prior: the SUCCESSOR lineage (INV-1.4 append-only) — the new invoice
+  // carries the prior version's contentDigest; history is superseded, never rewritten
+  let priorDigest = null;
+  const priorIdx = argv.indexOf('--prior');
+  if (priorIdx >= 0) {
+    const prior = JSON.parse(await readFile(argv[priorIdx + 1], 'utf8'));
+    if (!prior.identity || !prior.identity.contentDigest) { console.error("invoice-from-quote: REFUSED — --prior invoice has no identity.contentDigest"); process.exit(1); }
+    priorDigest = prior.identity.contentDigest;
+  }
 
   let prepare, obtainedAt, invoice;
   try {
@@ -214,7 +244,7 @@ async function main() {
     // machine timestamp: the prepare response file's own mtime — the moment the
     // network answered. Never retyped.
     obtainedAt = (await stat(input)).mtime.toISOString();
-    invoice = invoiceFromPrepare(prepare, obtainedAt);
+    invoice = invoiceFromPrepare(prepare, obtainedAt, priorDigest);
   } catch (e) { console.error(e.message); process.exit(1); }
   // hex-law pass: scan markers join the object BEFORE the digest is recomputed
   // (the digest covers them; a file-only marker would break re-verification)
