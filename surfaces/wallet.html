@@ -2396,7 +2396,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
      witness). NOT estate config: these stay out of WALLET_PROFILE. ══ */
   var EVM_RAILS={
     base:{
-      chainId:8453, label:'Base', explorer:'https://basescan.org/tx/',
+      chainId:8453, label:'Base', explorer:'https://basescan.org/tx/', native:'ETH',
       hosts:['https://mainnet.base.org','https://base.publicnode.com','https://1rpc.io/base','https://base.drpc.org'],
       assets:{
         ETH:{symbol:'ETH',decimals:18,contract:null},
@@ -2404,11 +2404,27 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       }
     },
     arbitrum:{
-      chainId:42161, label:'Arbitrum One', explorer:'https://arbiscan.io/tx/',
+      chainId:42161, label:'Arbitrum One', explorer:'https://arbiscan.io/tx/', native:'ETH',
       hosts:['https://arb1.arbitrum.io/rpc','https://arbitrum-one-rpc.publicnode.com'],
       assets:{
         ETH:{symbol:'ETH',decimals:18,contract:null},
         ANT:{symbol:'ANT',decimals:18,contract:'0xa78d8321B20c4Ef90eCd72f2588AA985A4BDb684'} // PUBLIC-CONSTANT: ANT (Autonomi) on Arbitrum One
+      }
+    },
+    /* THE TESTNET RAIL. Same signer, same registry shape, a different chain id
+       — that is the whole point of R2: a testnet is not a mode, it is a row.
+       Its asset is named tETH, NOT ETH, and that name is load-bearing: the
+       spend cap keys on `asset.symbol`, so a rail carrying "ETH" would let
+       worthless testnet sends eat the owner's real ETH/day budget. Faucet ETH
+       is the funding path — this rail needs no estate deployment and no ops
+       float, which is why it is reachable today. The three hosts were each
+       read back live (eth_chainId -> 0x67078 = 421614, CORS open) before this
+       row landed; 1rpc.io/arb/sepolia answered 400 and is deliberately absent. */
+    arbitrumSepolia:{
+      chainId:421614, label:'Arbitrum Sepolia · testnet', explorer:'https://sepolia.arbiscan.io/tx/', native:'tETH',
+      hosts:['https://sepolia-rollup.arbitrum.io/rpc','https://arbitrum-sepolia-rpc.publicnode.com','https://arbitrum-sepolia.drpc.org'],
+      assets:{
+        tETH:{symbol:'tETH',decimals:18,contract:null}
       }
     }
   };
@@ -4529,7 +4545,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       held=(b&&b.slice)?' · <b>'+fromBaseUnits(BigInt(b),asset.decimals)+' '+asset.symbol+'</b>':' · '+asset.symbol+' unread';
     }
     $('se-stat').innerHTML='<b>'+esc(rail.label)+'</b> (chain '+rail.chainId+') · derived <b>'+addr.slice(0,10)+'…'+addr.slice(-6)+'</b> · '+
-      fromBaseUnits(BigInt(wei),18)+' ETH'+held+' · nonce '+(nonce&&nonce.slice?parseInt(nonce,16):'0')+
+      fromBaseUnits(BigInt(wei),18)+' '+rail.native+held+' · nonce '+(nonce&&nonce.slice?parseInt(nonce,16):'0')+
       ' · gas '+(parseInt(gp,16)/1e9).toFixed(4)+' gwei';
   }
   /* ══ THE EVM SIGNER — one function for every EVM rail and every asset on it.
@@ -4598,7 +4614,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
          would re-introduce exactly the drift toBaseUnits exists to remove */
       var t=await evmSendRaw(railKey,to,assetKey,amt);
       var fee=fromBaseUnits(t.gas*t.gasPrice,18);
-      $('se-stat').textContent='broadcasting on '+rail.label+'… fee ≈ '+fee+' ETH';
+      $('se-stat').textContent='broadcasting on '+rail.label+'… fee ≈ '+fee+' '+rail.native;
       var txid=await evmCall('eth_sendRawTransaction',[t.rawHex],railKey);
       if(txid&&txid.slice&&/^0x[0-9a-f]{64}$/i.test(txid)){
         await seRefresh();   // refresh first, so the receipt line stays on top

@@ -48,7 +48,7 @@ const ok = (name, cond, detail) => {
 /* every host either EVM rail may pick, as ONE RegExp — both rails' full host
    sets mirrored from EVM_RAILS. Anything not matched here would hit the live
    network, so the gate asserts below that nothing did. */
-const RAIL_RE = /^https:\/\/(mainnet\.base\.org|base\.publicnode\.com|1rpc\.io\/base|base\.drpc\.org|arb1\.arbitrum\.io\/rpc|arbitrum-one-rpc\.publicnode\.com)(\/|$)/;
+const RAIL_RE = /^https:\/\/(mainnet\.base\.org|base\.publicnode\.com|1rpc\.io\/base|base\.drpc\.org|arb1\.arbitrum\.io\/rpc|arbitrum-one-rpc\.publicnode\.com|sepolia-rollup\.arbitrum\.io\/rpc|arbitrum-sepolia-rpc\.publicnode\.com|arbitrum-sepolia\.drpc\.org)(\/|$)/;
 /* the wallet's OTHER standing reads (Vaulta balance, Hive balance). They are
    not this gate's subject, but they must still be mocked: a gate that lets
    ANY request reach the live network cannot claim its results are hermetic,
@@ -235,21 +235,44 @@ try {
       out.arbEth = await g('arbitrum', 'ETH', '0.01');
       out.baseUsdc = await g('base', 'USDC', '2.5');
       out.arbAnt = await g('arbitrum', 'ANT', '2.5');
+      out.arbSepEth = await g('arbitrumSepolia', 'tETH', '0.01');
+      out.sepMainnetAsset = await g('arbitrumSepolia', 'ETH', '0.01');
       out.badRail = await g('ethereum', 'ETH', '1');
       out.badAsset = await g('base', 'ANT', '1');
       out.badTo = await (async () => { try { await P.evmSendRaw('base', '0xdeadbeef', 'ETH', '1'); return {} } catch (e) { return { err: e.message } } })();
       out.rails = Object.keys(P.rails);
+      out.natives = Object.keys(P.rails).map(k => ({
+        rail: k, native: P.rails[k].native, assets: Object.keys(P.rails[k].assets) }));
       return out;
     }, TO);
 
-    const decode = hexStr => {
+    const decode = (hexStr, who) => {
+      if (typeof hexStr !== 'string') throw new Error(
+        'the gate has no signed bytes for ' + (who || 'a rail') +
+        ' — the registry did not build it. Add the rail to EVM_RAILS, or delete this assertion with the rail.');
       const b = Buffer.from(hexStr.slice(2), 'hex');
       const f = rlpDecode(b);
       return { nonce: big(f[0]), gasPrice: big(f[1]), gas: big(f[2]), to: hexOf(f[3]),
         value: big(f[4]), data: hexOf(f[5]), v: big(f[6]), r: f[7], s: f[8] };
     };
 
-    ok('the registry carries both EVM rails as data', JSON.stringify(built.rails) === '["base","arbitrum"]', JSON.stringify(built.rails));
+    /* THE RAIL SET IS PINNED, not merely non-empty. A new rail is a new place
+       real value can leave from, so it lands in this line in the SAME commit
+       that adds it — the remedy on a RED is: add the rail here after reading
+       its chain id back from the chain, never delete the pin. */
+    ok('the registry carries exactly the three pinned EVM rails as data',
+      JSON.stringify(built.rails) === '["base","arbitrum","arbitrumSepolia"]', JSON.stringify(built.rails));
+
+    /* every rail names its native unit, and names one it actually carries.
+       Without this the balance and fee lines print "0.05 undefined" to the
+       owner — a display defect no signature assertion can see. */
+    ok('every rail declares a native unit that is one of its own assets',
+      built.natives.length === 3 && built.natives.every(n =>
+        typeof n.native === 'string' && n.native.length > 0 && n.assets.includes(n.native)),
+      JSON.stringify(built.natives));
+    ok('the testnet rail\'s native unit is tETH, not ETH',
+      (built.natives.find(n => n.rail === 'arbitrumSepolia') || {}).native === 'tETH',
+      JSON.stringify(built.natives.find(n => n.rail === 'arbitrumSepolia')));
 
     const be = decode(built.baseEth.raw), ae = decode(built.arbEth.raw);
     // chainId is recoverable from v: v = 35 + 2*chainId + recovery
@@ -260,6 +283,22 @@ try {
       chainFromV(ae.v) === 42161n && built.arbEth.chainId === 42161, `v=${ae.v} -> ${chainFromV(ae.v)}`);
     ok('the two chains produce DIFFERENT bytes for the same transfer (no replay across rails)',
       built.baseEth.raw !== built.arbEth.raw);
+
+    /* the testnet rail is the same code path: no branch, no mode flag */
+    let se = null, seErr = null;
+    try { se = decode(built.arbSepEth.raw, 'arbitrumSepolia/tETH') } catch (e) { seErr = e.message }
+    ok('the gate could build an arbitrumSepolia tETH tx at all', se !== null, seErr || built.arbSepEth.err);
+    se = se || { v: 0n };
+    ok('an Arbitrum Sepolia tETH tx carries chain id 421614 IN THE SIGNATURE',
+      chainFromV(se.v) === 421614n && built.arbSepEth.chainId === 421614, `v=${se.v} -> ${chainFromV(se.v)}`);
+    /* the string check is load-bearing: without it this line PASSES when the
+       rail is missing entirely (undefined !== raw), which is a vacuous green on
+       the exact absence the assertion exists to catch. */
+    ok('testnet bytes differ from BOTH mainnet rails — a testnet tx can never replay onto mainnet',
+      typeof built.arbSepEth.raw === 'string' &&
+      built.arbSepEth.raw !== built.baseEth.raw && built.arbSepEth.raw !== built.arbEth.raw);
+    ok('the testnet rail does NOT carry an asset called ETH — mainnet ETH is unreachable there',
+      /not carried on Arbitrum Sepolia/.test(built.sepMainnetAsset.err || ''), built.sepMainnetAsset.err);
     ok('a native ETH transfer sends to the RECIPIENT with the value in the value field',
       be.to === TO.slice(2).toLowerCase() && be.value === 10000000000000000n && be.data === '',
       `to=${be.to} value=${be.value} data=${be.data}`);
@@ -320,6 +359,12 @@ try {
       set({ ETH: 0.01 });
       try { await P.evmSendRaw('base', to, 'ETH', '5'); out.overCap = 'SIGNED ANYWAY' } catch (e) { out.overCap = e.capRefused ? 'refused' : 'wrong: ' + e.message }
       try { await P.evmSendRaw('base', to, 'ETH', '0.005'); out.underCap = 'signed' } catch (e) { out.underCap = 'REFUSED: ' + e.message }
+      // a real-money cap must not be spent by worthless testnet sends
+      set({ ETH: 0.02 });
+      try { const t = await P.evmSendRaw('arbitrumSepolia', to, 'tETH', '5');
+        out.testnetUncapped = 'signed'; out.testnetCapChain = t.chainId }
+      catch (e) { out.testnetUncapped = e.capRefused ? 'REFUSED BY THE MAINNET ETH CAP' : 'wrong: ' + e.message }
+      clear();
       // a cap on one unit must not gate a different unit
       try { await P.evmSendRaw('base', to, 'USDC', '5'); out.otherUnit = 'signed' } catch (e) { out.otherUnit = 'REFUSED: ' + e.message }
       // the rolling-day ledger: spend up to the cap, then the next one is refused
@@ -335,6 +380,12 @@ try {
     ok('over the cap, the SIGNER refuses — nothing is built', r.overCap === 'refused', r.overCap);
     ok('under the cap, it signs with no prompt and no human in the loop', r.underCap === 'signed', r.underCap);
     ok('a cap on one unit does not gate another unit', r.otherUnit === 'signed', r.otherUnit);
+    /* the chain id is asserted HERE, not just in section C: without it this
+       probe can be silently retargeted at a mainnet rail and still go green,
+       which would make it stop proving testnet isolation while still claiming to. */
+    ok('a mainnet ETH/day cap does NOT gate a testnet tETH send (the cap keys on the symbol)',
+      r.testnetUncapped === 'signed' && r.testnetCapChain === 421614,
+      r.testnetUncapped + ' on chain ' + r.testnetCapChain);
     ok('the rolling-day ledger counts: 9.5 already spent + 1 exceeds a 10/day cap', r.ledger === 'refused', r.ledger);
     ok('…and 9.5 + 0.4 still fits, so it signs', r.ledgerUnder === 'signed', r.ledgerUnder);
     await ctx.close();
