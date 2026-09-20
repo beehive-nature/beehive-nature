@@ -389,6 +389,16 @@ try {
        (/base/ and /arbitrum/) cannot survive testnet rails: "base-sepolia…"
        matches /base/ and "arbitrum-sepolia…" matches /arbitrum/, so two rails
        could go unread while the assertion still went green. */
+    /* THE TRIGGER, NAMED WHERE THE NEXT EDITOR OF THIS MAP STANDS (bFUzZ, T2
+       PROVE 2026-09-20): this map keys on the BARE host, while the
+       disjointness assertion above keys on the full endpoint URL and is
+       path-aware. They disagree the moment one host serves two rails on
+       different paths — a multiplexed endpoint like x.example/base and
+       x.example/base-sepolia would collapse to one key here and attribute
+       both rails' reads to whichever row was registered last, while the
+       disjointness line stays green because the URLs really are distinct.
+       No rail shares a bare host today, so this is latent, not a defect.
+       If you add a multiplexed host, key this map on host + path prefix. */
     const hostToRail = new Map();
     for (const n of built.natives) for (const h of n.hosts) hostToRail.set(new URL(h).host, n.rail);
     const readPerRail = {};
