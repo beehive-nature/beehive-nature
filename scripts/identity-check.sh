@@ -101,7 +101,7 @@ if [ "${1:-}" = "--selftest" ]; then
     out=$("$@" 2>&1); rc=$?
     n=$(git rev-list --count HEAD 2>/dev/null || echo 0)
     a=$(git log -1 --format='%an' 2>/dev/null); c=$(git log -1 --format='%cn' 2>/dev/null)
-    tr=$(git log -1 --format='%(trailers:key=Co-authored-by)' 2>/dev/null | grep -c 'Co-authored-by' || true)
+    tr=$(git log -1 --format='%(trailers:key=Co-authored-by)' 2>/dev/null | grep -ci 'co-authored-by' || true)
     if [ "$rc" = "0" ] && [ "$n" -ge 1 ] && [ "$a" = "$FOUNDER_NAME" ] && [ "$c" = "$want_c" ] \
        && { [ "$want_trailer" = "no" ] || [ "$tr" -ge 1 ]; }; then
       echo "  PASS $desc — created A=$a C=$c trailer=$tr"
@@ -110,7 +110,7 @@ if [ "${1:-}" = "--selftest" ]; then
     fi
   }
 
-  echo "§7 selftest — four cases through the REAL hooks (throwaway repo, deleted after):"
+  echo "§7 selftest — five cases through the REAL hooks (throwaway repo, deleted after):"
   # every case pins its FULL ident env — the rig is hermetic against whatever
   # the caller exported (a caller's GIT_COMMITTER_* leaked into T4 once and
   # the gate CORRECTLY blocked what the rig mislabeled founder-typed)
@@ -133,6 +133,11 @@ if [ "${1:-}" = "--selftest" ]; then
     env GIT_AUTHOR_NAME="$FOUNDER_NAME" GIT_AUTHOR_EMAIL="$FOUNDER_EMAIL" \
         GIT_COMMITTER_NAME="$FOUNDER_NAME" GIT_COMMITTER_EMAIL="$FOUNDER_EMAIL" \
     git commit -q -m "t4 founder typed"
+  echo z >> f.txt && git add f.txt
+  printf 't5 subject\n\nCo-Authored-By: zCode <z@x>\n' > "$T/msg5"
+  created "T5 mixed-case trailer lands (I-1: git trailer keys are case-insensitive; the gate must match git)" bZiq yes \
+    env GIT_AUTHOR_NAME="$FOUNDER_NAME" GIT_AUTHOR_EMAIL="$FOUNDER_EMAIL" \
+        GIT_COMMITTER_NAME=bZiq GIT_COMMITTER_EMAIL=seat@x git commit -q -F "$T/msg5"
   if [ "$st" -ne 0 ]; then echo "§7 selftest FAIL — a working gate and a dead one are not distinguishable by silence; these cases are the difference"; fi
   exit "$st"
 fi
@@ -155,7 +160,7 @@ if [ -n "${S7_STAGED:-}" ]; then
       # git's OWN trailer parser — the same semantics %(trailers:key=…) uses in
       # the range check below. A Co-authored-by line that sits in the body is
       # invisible to it, which is exactly the three-time mistake this catches.
-      trailers=$(git interpret-trailers --parse < "$S7_MSG_FILE" 2>/dev/null | grep -c '^Co-authored-by:' || true)
+      trailers=$(git interpret-trailers --parse < "$S7_MSG_FILE" 2>/dev/null | grep -ci '^co-authored-by:' || true)
       [ "$trailers" -ge 1 ] \
         || die "seat-typed commit (committer '$cn <$ce>') with no PARSED Co-authored-by trailer — a trailer buried in the body does not count; it must be the final block of the message"
       say "ok — founder-authored · seat-committed by '$cn' · Co-authored-by trailer parsed: $trailers"
@@ -229,7 +234,7 @@ while IFS='|' read -r commit an ae cn ce; do
     continue
   fi
 
-  trailers=$(git show -s --format='%(trailers:key=Co-authored-by)' "$commit" | grep -c 'Co-authored-by' || true)
+  trailers=$(git show -s --format='%(trailers:key=Co-authored-by)' "$commit" | grep -ci 'co-authored-by' || true)
 
   # A seat self-identifies by committer != founder: exactly those commits
   # hard-require a Co-authored-by trailer. Founder-typed commits (author ==

@@ -1,0 +1,26 @@
+{
+ "schema": "skaists.evidence/1",
+ "person": {
+  "name": "Ragnar Loðbrók (Ragnar Sigurdsson)",
+  "lifespan": "0740–0845 (traditional)",
+  "fsid": "M8WZ-XZY",
+  "tier": "saga",
+  "tierBasis": "era-heuristic + academic consensus: legendary"
+ },
+ "summary": "The estate's walked FamilySearch record carries Ragnar as a blood ancestor (generation 39; the blood rides his daughter Alof by Queen Thora). He is a figure of legend: the stories are carried by sagas and medieval chronicles, contemporary academia regards most of them as fiction, and no reliable historical identification exists — while several of his SONS are historical. The evidence below archives what the sources actually say.",
+ "claims": [
+  {"claim": "Legendary Viking hero; per legend king of Sweden and Denmark; traditional death 865 in Northumbria; most stories regarded by modern academia as fiction though parts may be historical.",
+   "source": "Wikipedia (tertiary index)", "url": "https://en.wikipedia.org/wiki/Ragnar_Lodbrok"},
+  {"claim": "Carried by: Saga of Ragnar Lothbrok, Tale of Ragnar's Sons, Heimskringla, Hervarar saga, Sögubrot (13th-c. Icelandic tradition); Chronicon Roskildense c.1138 ('Lothpardus', father of Ywar); Sven Aggesen c.1190; Saxo Grammaticus Gesta Danorum c.1200 Book IX; Ragnarsdrápa (attrib. Bragi Boddason, 9th c.); Krakumal (12th c.); Maeshowe runic inscription (early 12th c.).",
+   "source": "Wikipedia source survey", "url": "https://en.wikipedia.org/wiki/Ragnar_Lodbrok"},
+  {"claim": "Historical candidates — a chieftain 'Reginherus' led the 845 siege of Paris; a Ragnar was granted Torhout by Charles the Bald c.841; identifications with Horik I (d.854) or Reginfrid (d.814) have 'failed because of the difficulty in reconciling the various accounts and their chronology'.",
+   "source": "Wikipedia (historicity section)", "url": "https://en.wikipedia.org/wiki/Ragnar_Lodbrok"},
+  {"claim": "Wives/children per tradition: Thora Borgarhjort (sons Erik, Agnar; Saxo adds Radbard, Dunvat, Sigurd Snake-in-the-Eye, Björn Ironside, Agnar, Ivar); Kráka/Aslaug, secret daughter of Sigurd Fafnesbane (sons Ivar the Boneless, Björn Ironside, Hvitserk, Ragnvald, Sigurd Snake-in-the-Eye); Saxo adds Ladgerda and others. The walked FS record carries exactly two children: Alof (by Thora — OUR blood) and Björn Ironside (by Aslaug).",
+   "source": "Wikipedia + walked FamilySearch record", "url": "https://en.wikipedia.org/wiki/Ragnar_Lodbrok"},
+  {"claim": "Death: defeated in Northumbria with two ships; King Ælla had him thrown into a snake pit (sagas; Saxo likewise — a fate paralleling Gunnar of Burgundian legend). Sons' revenge: the Great Heathen Army invaded c.865–866 led by Ivar, Ubba, Halfdan, Björn, Hvitserk, Sigurd Snake-in-the-Eye; Ivar led until c.870 (Æthelweard records his death 870).",
+   "source": "Wikipedia", "url": "https://en.wikipedia.org/wiki/Ragnar_Lodbrok"},
+  {"claim": "Maeshowe inscription phrase 'her sons' has prompted a theory Lodbrok was originally conceived as a woman — archived as a curiosity of the source record.",
+   "source": "Wikipedia", "url": "https://en.wikipedia.org/wiki/Ragnar_Lodbrok"}
+ ],
+ "law": "This pack indexes and quotes SECONDARY/TERTIARY scholarship about PRIMARY tradition (sagas, chronicles). It upgrades nothing: Ragnar stays tier 'saga'. The FS walk, not this pack, establishes the genealogical LINK (through Alof)."
+}
