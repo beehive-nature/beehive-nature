@@ -195,7 +195,7 @@ try {
     await p2.waitForFunction(() => window.BNRWALLET && BNRWALLET.adapters.vaulta.attached, null, { timeout: 25000 });
     const sentBefore = await p2.evaluate(() => BNRWALLET._telemetry.vaulta.sent);   // describe already counted
     const r = await p2.evaluate(() => window.BNRWALLET.walletAction('banchor22222', 'commit',
-      { committer: 'x', epoch: '1' }, [{ actor: 'banchor22222', permission: 'active' }], { network: 'j4', wif: '5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3' }));
+      { committer: 'x', epoch: '1' }, [{ actor: 'banchor22222', permission: 'active' }], { network: 'j4', wif: '5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3' })); // TESTNET-ONLY: eosio documented dev key
     const sentAfter = await p2.evaluate(() => BNRWALLET._telemetry.vaulta.sent);
     const out = await p2.locator('#tx-out').innerText();
     ok('undeclared capability: the shell refuses at the seam — ZERO messages dispatched',
