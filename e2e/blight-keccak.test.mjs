@@ -14,7 +14,7 @@ import vm from "node:vm";
 const here = dirname(fileURLToPath(import.meta.url));
 const surf = (p) => readFileSync(join(here, "../surfaces/blight", p), "utf8");
 const PAGES = ["gallery.html", "inscription-explorer.html", "midi.html", "profile.html", "workbench.html"];
-const VECTOR_EMPTY = "c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470"; // Keccak-256("")
+const VECTOR_EMPTY = "c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470"; // Keccak-256("") PUBLIC-CONSTANT: public known-answer-test vector
 
 const hex = (u8) => [...u8].map((b) => b.toString(16).padStart(2, "0")).join("");
 
