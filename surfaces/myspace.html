@@ -170,10 +170,10 @@
     <summary data-reg-copy="tech-summary">index · rail · identity</summary>
     <p class="hash">
       index {sha256, name, size, mode, keyref, ts} in this browser's IndexedDB — this device is the truth.<br>
-      rail estate Blossom: <code>PUT /upload</code>, <code>GET /media/&lt;sha256&gt;.png</code>, kind:24242 auth.<br>
-      private = AES-GCM in this browser, then the ciphertext is wrapped as a lossless PNG, because the store accepts images only.<br>
-      the store has <b>no delete route</b>: DELETE answers 405 and the server's own header reads <code>Allow: GET,HEAD</code>.<br>
-      flip = re-PUT in the other form + forget the old row locally; the old blob stays at its hash.<br>
+      private = AES-GCM in this browser; the ciphertext and the key both stay in IndexedDB. <b>Nothing is uploaded.</b><br>
+      public = the estate Blossom rail: <code>PUT /upload</code> with <code>x-sha-256</code>, <code>GET /media/&lt;sha256&gt;.png</code>, kind:24242 auth. Plaintext, wrapped in a lossless PNG because the store accepts images only.<br>
+      both ends of the rail are member-gated, so sharing (and only sharing) claims the estate's standing invite for this phone's key: <code>POST /api/invites/claim</code>, NIP-98.<br>
+      the store has <b>no delete route</b>: DELETE answers 405 and the server's own header reads <code>Allow: GET,HEAD</code>. A public copy cannot be pulled back.<br>
       identity = a key generated once in this browser and kept here. No login, no session.
     </p>
   </details>

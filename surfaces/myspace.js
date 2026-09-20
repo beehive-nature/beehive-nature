@@ -16,9 +16,15 @@
        private delete destroys the key (the ciphertext dies with it); public delete forgets
        locally and the blob stays at its hash. Those are two different sentences and this
        file never flattens them into one.
-     - reads are member-gated. Anonymous GET is 401; a fresh key is 403 `relay membership
-       required`. "Public" here means hive members with the link, never "public to the
-       internet", and the page says so in those words.
+     - both ends are member-gated. Anonymous GET is 401; a key the hive does not know is 403
+       `relay membership required` on GET and on PUT. Measured after that: a fresh key that
+       claims the estate's standing invite is `status:"joined"`, its PUT answers 200, and a
+       SECOND fresh key reads the first key's blob byte-exact. So "public" is real for any
+       stranger — their phone joins the hive to read, which the page says in that sentence
+       and at that moment.
+     - `x-sha-256` is required on PUT. Without it the relay answers 401 whatever key signs.
+     - PRIVATE never touches the rail at all, so nobody is enrolled in anything for keeping
+       a file to themselves.
 
    The device index is the truth. That is what makes "come back later and find it" true by
    construction rather than by promise. */
@@ -29,7 +35,7 @@
   var RELAY_HOST = 'skaists.buzz';
   var JOIN_DOOR = 'https://skaists.dev/join/';
   var DB_NAME = 'myspace';
-  var DB_VERSION = 1;
+  var DB_VERSION = 2;
   var SK_KEY = 'myspace.device-secret.v1';
 
   /* ---------- small helpers ---------- */
@@ -255,6 +261,8 @@
         var db = req.result;
         if (!db.objectStoreNames.contains('files')) db.createObjectStore('files', { keyPath: 'id' });
         if (!db.objectStoreNames.contains('keys')) db.createObjectStore('keys');
+        /* v2: private bytes live HERE and nowhere else. See the joining note below. */
+        if (!db.objectStoreNames.contains('blobs')) db.createObjectStore('blobs');
       };
       req.onsuccess = function () { resolve(req.result); };
       req.onerror = function () { reject(req.error); };
@@ -278,18 +286,102 @@
   function putKey(id, key) { return tx('keys', 'readwrite', function (s) { return s.put(key, id); }); }
   function getKey(id) { return tx('keys', 'readonly', function (s) { return s.get(id); }); }
   function dropKey(id) { return tx('keys', 'readwrite', function (s) { return s.delete(id); }); }
+  function putBlob(id, bytes) { return tx('blobs', 'readwrite', function (s) { return s.put(bytes, id); }); }
+  function getBlob(id) { return tx('blobs', 'readonly', function (s) { return s.get(id); }); }
+  function dropBlob(id) { return tx('blobs', 'readwrite', function (s) { return s.delete(id); }); }
 
-  /* ---------- the rail ---------- */
+  /* ---------- joining the hive, in this page, with this phone's own key ----------
+     Both ends of the rail are member-gated: a key the hive does not know is `403 relay
+     membership required` on PUT and on GET. The estate already publishes the way in, and
+     this page uses that way rather than sending the visitor somewhere else: `join.json`
+     is served CORS-open from the relay origin and carries the standing invite; the claim
+     is NIP-98 (kind 27235) over the CANONICAL origin, body {code, policy_receipt}.
 
-  async function put(bytes) {
+     This is the live join page's own wire, read out of the deployed bundle
+     (https://skaists.buzz/join/assets/index-_RsFMRoT.js) rather than guessed, and measured
+     from a fresh 32-byte key: 403 before the claim, `status:"joined"` on the claim, 200 on
+     the PUT after it, and a SECOND fresh key reading the first key's blob byte-exact.
+
+     Transport here IS the canonical origin (skaists.buzz), so the `u` tag and the URL are
+     the same string. A page served against an alias host would have to read NIP-11 /info
+     for `push.origin` and sign THAT — the canonical-origin signing law. This page does not
+     need it; it does not pretend to handle it either. */
+
+  var joined = false;
+
+  /* THE BOUNDARY (ruled by the coordinator seat, 2026-09-20 19:05Z, and held here by
+     construction rather than by care): the claim fires ONLY on the sharing path — the
+     visitor chose public, or the visitor opened someone's link. It never fires on page
+     load, and never on the private path. Somebody who only keeps files to themselves
+     never becomes a member of anything, because their bytes never touch the rail at all.
+     That is why `put` and `fetchBlob` are the only callers of this function, and why
+     the private path below has no call to either. */
+
+  async function joinHive() {
+    if (joined) return true;
+    /* Said at the moment it happens, not in a footnote: this puts the visitor's own key
+       in the hive's member list. It is the price of the rail and they should read it as
+       it is paid. */
+    setStatus(t('joining'));
+    var mat = await fetch(RELAY + '/join.json').then(function (r) { return r.ok ? r.json() : null; });
+    var code = mat && typeof mat.invite_url === 'string'
+      ? mat.invite_url.slice(mat.invite_url.indexOf('/invite/') + 8)
+      : null;
+    if (!code) throw new Error('the hive publishes no invite right now');
+
+    var s = signer();
+    if (!s) throw new Error('signer unavailable');
+    var url = RELAY + '/api/invites/claim';
+    var body = JSON.stringify({ code: code, policy_receipt: null });
+    var now = Math.floor(Date.now() / 1000);
+    var ev = {
+      pubkey: hex(s.getPublicKey(SK)),
+      created_at: now,
+      kind: 27235,
+      tags: [
+        ['u', url],
+        ['method', 'POST'],
+        ['payload', await sha256hex(new TextEncoder().encode(body))],
+        ['nonce', crypto.randomUUID()]
+      ],
+      content: ''
+    };
+    var serial = JSON.stringify([0, ev.pubkey, ev.created_at, ev.kind, ev.tags, ev.content]);
+    ev.id = await sha256hex(new TextEncoder().encode(serial));
+    ev.sig = hex(await s.sign(fromHex(ev.id), SK));
+
+    var res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Authorization': 'Nostr ' + btoa(JSON.stringify(ev)), 'Content-Type': 'application/json' },
+      body: body
+    });
+    var out = await res.json().catch(function () { return {}; });
+    if (!res.ok) throw new Error(out.error || ('the hive refused the invite (HTTP ' + res.status + ')'));
+    joined = true;
+    return true;
+  }
+
+  /* ---------- the rail ----------
+     `x-sha-256` is not optional: without it the relay answers `401 authentication failed`
+     whatever key signs the request. Measured against a seat key that uploads fine with the
+     header and fails with it removed. */
+
+  async function put(bytes, retried) {
     var sha = await sha256hex(bytes);
-    var auth = await blossomAuth('upload', sha);
     var res = await fetch(RELAY + '/upload', {
       method: 'PUT',
-      headers: { 'Authorization': auth, 'Content-Type': 'image/png' },
+      headers: {
+        'Authorization': await blossomAuth('upload', sha),
+        'Content-Type': 'image/png',
+        'x-sha-256': sha
+      },
       body: bytes
     });
     var text = await res.text();
+    if (res.status === 403 && !retried) {
+      await joinHive();
+      return put(bytes, true);
+    }
     if (!res.ok) {
       var err = new Error(text || ('HTTP ' + res.status));
       err.status = res.status;
@@ -298,9 +390,14 @@
     return JSON.parse(text);
   }
 
-  async function fetchBlob(sha) {
-    var auth = await blossomAuth('get', sha);
-    var res = await fetch(RELAY + '/media/' + sha + '.png', { headers: { 'Authorization': auth } });
+  async function fetchBlob(sha, retried) {
+    var res = await fetch(RELAY + '/media/' + sha + '.png', {
+      headers: { 'Authorization': await blossomAuth('get', sha) }
+    });
+    if (res.status === 403 && !retried) {
+      await joinHive();
+      return fetchBlob(sha, true);
+    }
     if (!res.ok) {
       var err = new Error('HTTP ' + res.status);
       err.status = res.status;
@@ -317,11 +414,15 @@
       lede: 'Your files live on this phone.',
       empty: 'Nothing here yet. Add a file from this phone. You choose who can open it.',
       attach: 'Add a file',
-      'pub-title': 'Public', 'pub-body': 'Hive members with the link. A stranger joins in one tap, then it opens.',
-      'priv-title': 'Private', 'priv-body': 'Only this phone. Locked here before it leaves.',
+      'pub-title': 'Public', 'pub-body': 'Anyone with the link opens it. Their phone joins the hive to do that, the same way this one did.',
+      joining: 'Putting this phone in the hive — that is what lets it hold a file, and what lets a link open.',
+      'priv-title': 'Private', 'priv-body': 'Only this phone. Locked here, and it never leaves.',
       'badge-pub': 'anyone with the link', 'badge-priv': 'only this phone',
       'why-pub': 'An open copy sits in the hive at its hash.',
-      'why-priv': 'Locked on this phone before it left.',
+      'why-priv': 'Locked on this phone. It never left.',
+      locking: 'Locking it on this phone…', locked: 'Locked. Nothing left this phone.',
+      sharing: 'Putting an open copy in the hive…', shared: 'In the hive. Copy the link to share it.',
+      flipping: 'Changing who can open it…',
       'flip-to-pub': 'Make it public', 'flip-to-priv': 'Make it private',
       remove: 'Remove', keep: 'Keep it', confirm: 'Remove from this phone',
       'flip-keep': 'Leave it as it is', 'flip-go': 'Change it',
@@ -334,11 +435,15 @@
       lede: 'yours. this phone. one tap.',
       empty: 'drop a file in.',
       attach: 'add a file',
-      'pub-title': 'public', 'pub-body': 'hive members with the link. one tap to join, then it opens.',
-      'priv-title': 'private', 'priv-body': 'sealed here first.',
+      'pub-title': 'public', 'pub-body': 'the link opens it. their phone joins the hive to do it, same as yours did.',
+      joining: 'this phone is joining the hive. that is what makes a link open.',
+      'priv-title': 'private', 'priv-body': 'sealed here. stays here.',
       'badge-pub': 'link opens it', 'badge-priv': 'this phone only',
       'why-pub': 'an open copy is in the hive, at its hash.',
-      'why-priv': 'sealed on this phone before it left.',
+      'why-priv': 'sealed here. it never left.',
+      locking: 'sealing…', locked: 'sealed. nothing left this phone.',
+      sharing: 'sending an open copy…', shared: 'in the hive. grab the link.',
+      flipping: 'switching…',
       'flip-to-pub': 'make public', 'flip-to-priv': 'make private',
       remove: 'remove', keep: 'keep', confirm: 'remove',
       'flip-keep': 'leave it', 'flip-go': 'change it',
@@ -351,11 +456,15 @@
       lede: 'Device index is authority. Store is a blob rail.',
       empty: '0 objects. PUT a blob from this device.',
       attach: 'PUT',
-      'pub-title': 'PUBLIC', 'pub-body': 'plaintext by sha256. member-gated GET: anonymous is 401, fresh key is 403.',
-      'priv-title': 'PRIVATE', 'priv-body': 'AES-GCM in-browser. key never leaves. store holds ciphertext.',
+      'pub-title': 'PUBLIC', 'pub-body': 'plaintext by sha256. member-gated GET: anonymous 401, unclaimed key 403. a reader claims the standing invite and reads.',
+      joining: 'POST /api/invites/claim — this device key enters the member list.',
+      'priv-title': 'PRIVATE', 'priv-body': 'AES-GCM in-browser. ciphertext and key both stay in IndexedDB. no PUT.',
       'badge-pub': 'PUBLIC', 'badge-priv': 'PRIVATE',
       'why-pub': 'plaintext blob on the rail at its sha256.',
-      'why-priv': 'ciphertext on the rail. keyref stays on device.',
+      'why-priv': 'ciphertext in local store. no rail record exists.',
+      locking: 'AES-GCM encrypt -> IndexedDB blobs…', locked: 'sealed local. zero bytes on the wire.',
+      sharing: 'PUT /upload…', shared: 'PUT 200. blob addressed by sha256.',
+      flipping: 're-addressing…',
       'flip-to-pub': 're-PUT public', 'flip-to-priv': 're-PUT private',
       remove: 'DROP', keep: 'abort', confirm: 'DROP ROW',
       'flip-keep': 'abort', 'flip-go': 're-PUT',
@@ -375,7 +484,7 @@
      into one would be the lie this page exists not to tell. */
   function deleteSentence(row) {
     if (row.mode === 'private') {
-      return 'This phone destroys the key. The copy in the store becomes unreadable — to anyone, including us.';
+      return 'The locked bytes and the key are both on this phone, and both go. Nothing about this file exists anywhere else.';
     }
     return 'This phone forgets the file. The copy in the hive’s store stays at its hash, and anyone who already has the link still has it.';
   }
@@ -383,7 +492,7 @@
   /* Said at the moment of the flip, never in a footnote. */
   function flipSentence(row) {
     if (row.mode === 'private') {
-      return 'This phone puts an open copy in the hive. Anyone with the new link — after the one-tap join — can open it. Making it private again later does not pull that copy back: anyone who already has the link still has it.';
+      return 'This phone puts an open copy in the hive, and joins the hive itself to do it. Anyone with the new link can then open it. Making it private again later does not pull that copy back: anyone who already has the link still has it.';
     }
     return 'This phone locks a new copy and keeps the key here. The open copy you already shared stays in the hive at its hash, and anyone who has that link still has it. Locking it now protects what you share from here on, not what you already shared.';
   }
@@ -443,13 +552,13 @@
       why.textContent = row.mode === 'public' ? t('why-pub') : t('why-priv');
       art.appendChild(why);
 
-      if (row.sha) {
-        var h = document.createElement('p');
-        h.className = 'hash';
-        h.textContent = 'sha256 ' + row.sha + (row.keyref ? ('\nkeyref ' + row.keyref) : '') +
-          '\nts ' + new Date(row.ts).toISOString().replace(/\.\d+Z$/, 'Z');
-        art.appendChild(h);
-      }
+      var h = document.createElement('p');
+      h.className = 'hash';
+      h.textContent = (row.sha ? ('sha256 ' + row.sha) : 'no rail record — these bytes are only here') +
+        (row.keyref ? ('\nkeyref ' + row.keyref) : '') +
+        (row.oldSha ? ('\nstill in the hive at ' + row.oldSha) : '') +
+        '\nts ' + new Date(row.ts).toISOString().replace(/\.\d+Z$/, 'Z');
+      art.appendChild(h);
 
       var actions = document.createElement('div');
       actions.className = 'actions' + (row.sha && row.mode === 'public' ? ' three' : '');
@@ -462,7 +571,7 @@
         share.onclick = function () {
           var link = location.origin + location.pathname + '?f=' + row.sha + '&n=' + encodeURIComponent(row.name);
           navigator.clipboard.writeText(link).then(function () {
-            setStatus('Link copied. Whoever opens it joins the hive in one tap, then the file opens.');
+            setStatus('Link copied. Whoever opens it joins the hive to read it, then the file opens.');
           }, function () { setStatus('Link: ' + link); });
         };
         actions.appendChild(share);
@@ -530,70 +639,85 @@
       mode: mode, ts: Date.now(), sha: null, keyref: null, wrapped: true
     };
 
-    setStatus(mode === 'private' ? 'Locking it on this phone…' : 'Putting an open copy in the hive…');
-    var payload;
     if (mode === 'private') {
-      payload = wrapAsPng(await encryptFor(id, plain));
+      /* Nothing leaves. The bytes are encrypted and kept in this browser, which is both
+         the strongest form of the promise on the mode button and the reason a private
+         file never puts this phone in anybody's member list. */
+      setStatus(t('locking'));
+      await putBlob(id, await encryptFor(id, plain));
       row.keyref = 'device:aes-gcm:v1';
-    } else {
-      payload = wrapAsPng(plain);
+      row.local = true;
+      await putRow(row);
+      setStatus(t('locked'));
+      await render();
+      return;
     }
 
+    setStatus(t('sharing'));
     try {
-      var res = await put(payload);
+      var res = await put(wrapAsPng(plain));
       row.sha = res.sha256;
       await putRow(row);
-      setStatus(mode === 'private'
-        ? 'Locked. The key stays on this phone.'
-        : 'In the hive. Copy the link to share it.');
+      setStatus(t('shared'));
     } catch (e) {
       /* The file is still the visitor's — the index keeps it even when the rail refuses.
-         Saying "saved" while the upload failed would be exactly the lie this page avoids. */
+         Saying "shared" while the upload failed would be exactly the lie this page avoids. */
+      row.local = true;
+      row.mode = 'private';
+      await putBlob(id, await encryptFor(id, plain));
+      row.keyref = 'device:aes-gcm:v1';
       await putRow(row);
-      if (e.status === 403) {
-        setStatus('Kept on this phone. The hive has not let this device in yet, so nothing was uploaded — join at ' + JOIN_DOOR + ' and add it again to share it.', true);
-      } else {
-        setStatus('Kept on this phone. The hive did not take the upload (' + (e.message || 'error') + '), so nothing left this device.', true);
-      }
+      setStatus('The hive did not take it (' + (e.message || 'error') + '), so nothing left this phone. It is here, locked, and you can try to share it again.', true);
     }
     await render();
   }
 
-  async function doFlip(row) {
-    setStatus('Changing who can open it…');
-    try {
-      var bytes = null;
-      if (row.sha) {
-        var got = await fetchBlob(row.sha);
-        bytes = isWrapped(got) ? unwrapPng(got) : got;
-        if (row.mode === 'private') {
-          var k = await getKey(row.id);
-          if (!k) throw new Error('the key for this file is gone from this phone');
-          bytes = new Uint8Array(await crypto.subtle.decrypt(
-            { name: 'AES-GCM', iv: bytes.subarray(0, 12) }, k.key, bytes.subarray(12)));
-        }
-      } else {
-        throw new Error('this file was never uploaded, so there is nothing to re-put');
-      }
+  async function plainBytes(row) {
+    if (row.local) {
+      var stored = await getBlob(row.id);
+      if (!stored) throw new Error('this phone no longer holds the bytes for that file');
+      var k = await getKey(row.id);
+      if (!k) throw new Error('the key for this file is gone from this phone');
+      var joinedBytes = new Uint8Array(stored);
+      return new Uint8Array(await crypto.subtle.decrypt(
+        { name: 'AES-GCM', iv: joinedBytes.subarray(0, 12) }, k.key, joinedBytes.subarray(12)));
+    }
+    if (!row.sha) throw new Error('this file is neither on this phone nor on the rail');
+    var got = await fetchBlob(row.sha);
+    return isWrapped(got) ? unwrapPng(got) : got;
+  }
 
-      var next = row.mode === 'private' ? 'public' : 'private';
-      var payload;
-      if (next === 'private') {
-        payload = wrapAsPng(await encryptFor(row.id, bytes));
-        row.keyref = 'device:aes-gcm:v1';
-      } else {
-        await dropKey(row.id);
-        payload = wrapAsPng(bytes);
+  async function doFlip(row) {
+    setStatus(t('flipping'));
+    try {
+      var bytes = await plainBytes(row);
+
+      if (row.mode === 'private') {
+        /* private -> public: this is the sharing path, so the rail (and, if this phone is
+           not a member yet, the claim) happens HERE and nowhere else. */
+        var res = await put(wrapAsPng(bytes));
+        row.sha = res.sha256;
+        row.mode = 'public';
+        row.local = false;
         row.keyref = null;
+        await dropBlob(row.id);
+        await dropKey(row.id);
+        await putRow(row);
+        setStatus('An open copy is in the hive now. Anyone with the link can open it.');
+      } else {
+        /* public -> private: the copy already in the hive CANNOT be pulled back. The store
+           has no delete route (405, Allow: GET,HEAD), so the honest result is a locked copy
+           here plus an open copy that stays where it is. */
+        await putBlob(row.id, await encryptFor(row.id, bytes));
+        row.oldSha = row.sha;
+        row.sha = null;
+        row.mode = 'private';
+        row.local = true;
+        row.keyref = 'device:aes-gcm:v1';
+        await putRow(row);
+        setStatus('Locked on this phone. The open copy you already shared stays in the hive at ' +
+          row.oldSha.slice(0, 12) + '… and anyone holding that link still has it.', true);
       }
-      var res = await put(payload);
-      row.oldSha = row.sha;   /* the old blob is still there; the store has no delete route */
-      row.sha = res.sha256;
-      row.mode = next;
-      await putRow(row);
-      setStatus(next === 'public'
-        ? 'Open copy is in the hive. The locked copy stays at its old hash.'
-        : 'Locked copy is in the hive. The open copy you already shared stays at its old hash.');
     } catch (e) {
       setStatus('Nothing changed — ' + (e.message || 'the hive refused') + '.', true);
     }
@@ -603,7 +727,7 @@
   async function doDelete(row) {
     /* Private: the key dies here and the ciphertext dies with it.
        Public: the row goes and the blob stays. Two acts, two sentences. */
-    if (row.mode === 'private') await dropKey(row.id);
+    if (row.mode === 'private') { await dropKey(row.id); await dropBlob(row.id); }
     await dropRow(row.id);
     setStatus(row.mode === 'private'
       ? 'Key destroyed. That copy cannot be read again by anyone.'
@@ -627,7 +751,7 @@
       setStatus('Opened ' + (name || sha.slice(0, 12)) + '.');
     } catch (e) {
       if (e.status === 401 || e.status === 403) {
-        setStatus('This file is in the hive, and this device is not in the hive yet. Join in one tap at ' + JOIN_DOOR + ' and open the link again.', true);
+        setStatus('This file is in the hive and this phone could not get in to read it. The door is ' + JOIN_DOOR + ' if you want to try it by hand.', true);
       } else {
         setStatus('Could not open it (' + (e.message || 'error') + ').', true);
       }
