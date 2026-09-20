@@ -78,3 +78,33 @@ if output=$(sh "$scanner" diff 2>&1); then
 fi
 echo "PASS low-similarity rename (A+D) still blocks"
 git reset -q --hard HEAD
+
+# SS-3 contract (2026-09-20, bee-laborer order): the count must parse as a
+# number - empty or non-numeric is a refusal (exit 2), never a clean. The
+# missing-tool class (grep/wc absent from PATH) produces exactly this shape:
+# the substitution emits empty while every rc stays 0. Reproduced WITHOUT
+# stripping PATH (environment-dependent) by neutralizing the count emission
+# in a copy of the script - `cat >/dev/null` swallows the stream exactly
+# like a missing tool. Runs on any CI runner.
+cleanroot=$(mktemp -d /tmp/bnr-secret-scan-count.XXXXXXXX)
+git init -q "$cleanroot"
+cd "$cleanroot"
+printf 'benign line\n' > ok.txt
+git add -- ok.txt
+broken="$test_root/scanner-count-broken.sh"
+sed -e 's/grep -c \./cat >\/dev\/null/' -e 's/wc -l/cat >\/dev\/null/' "$scanner" > "$broken"
+for mode in diff tree; do
+  status=0
+  output=$(sh "$broken" "$mode" 2>&1) || status=$?
+  if [ "$status" -ne 2 ]; then echo "FAIL $mode count guard: expected exit 2 on an empty count, got $status"; exit 1; fi
+  [[ $output == *'REFUSING'* ]]
+  echo "PASS $mode refuses a non-numeric count with exit 2 (SS-3 contract)"
+done
+# Control: the UNBROKEN scanner on the same fixture cleans with the numeric
+# count visible (1 added line / 1 tracked file) - the refusal is not vacuous.
+for mode in diff tree; do
+  output=$(sh "$scanner" "$mode" 2>&1) || { echo "FAIL $mode clean fixture should pass: [$output]"; exit 1; }
+  [[ $output == *', 1 '* ]] || { echo "FAIL $mode clean fixture count not numeric-1: [$output]"; exit 1; }
+  echo "PASS $mode clean fixture counts exactly 1"
+done
+rm -rf -- "$cleanroot"
