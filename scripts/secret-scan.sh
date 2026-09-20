@@ -76,8 +76,28 @@ PROPTEST_RE='(^|[+:])cc [0-9a-fA-F]{64}([^0-9a-fA-F]|$)'
 
 case "$mode" in
 diff)
-    names=$(git diff --cached --name-only --diff-filter=ACM | grep -Ei "$NAME_RE")
-    added=$(git diff --cached --diff-filter=ACM -- . ':(exclude)Cargo.lock' ':(exclude)*/Cargo.lock' ':(exclude)fixtures/' ':(exclude)docs/audits/' ':(exclude)dockets/*/receipt-*.json' ':(exclude)surfaces/blight/bnri-art/' ':(exclude)crates/voucher-escrow/fixtures/' ':(exclude)docs/handoffs/silentpay-v2/' |
+    # SS-1 (2026-09-19): fail closed on the enumeration-failure class.
+    # Measured live: WSL git against a worktree whose .git file carries a
+    # Windows path prints `fatal: not a git repository` and STILL EXITS 0 -
+    # the exit code lies; stdout does not. rev-parse prints `true` in every
+    # usable checkout (ordinary, fresh clone, worktree under working git)
+    # and prints nothing when the gitdir cannot be resolved, so the CONTENT
+    # is the guard, not the exit status. Exit 2 = environment refused, never
+    # readable as a pass (1 = secret found, 0 = clean). A working repository
+    # with an empty staged set still passes - that is a real clean.
+    inside=$(git rev-parse --is-inside-work-tree 2>/dev/null)
+    if [ "$inside" != "true" ]; then
+        echo "  secret-scan: REFUSING - git cannot resolve this checkout (rev-parse answered nothing)." >&2
+        echo "  Not a usable repository, or git failed. A scan of nothing is not a pass." >&2
+        exit 2
+    fi
+    # SS-2 fold-in (order 91c72e99; hole reproduced by bOPus5, 2026-09-20):
+    # R-status changes were invisible to ACM - a high-similarity rename that
+    # appended a key rode past the scan (rc=0). ACMR + --no-renames: renames
+    # decompose to A+D, the destination's full content is inspected, and the
+    # clean line's count is over exactly what was scanned.
+    names=$(git diff --cached --name-only --diff-filter=ACMR --no-renames | grep -Ei "$NAME_RE")
+    added=$(git diff --cached --diff-filter=ACMR --no-renames -- . ':(exclude)Cargo.lock' ':(exclude)*/Cargo.lock' ':(exclude)fixtures/' ':(exclude)docs/audits/' ':(exclude)dockets/*/receipt-*.json' ':(exclude)surfaces/blight/bnri-art/' ':(exclude)crates/voucher-escrow/fixtures/' ':(exclude)docs/handoffs/silentpay-v2/' |
         grep '^+' | grep -v '^+++')
     hex=$(printf '%s\n' "$added" | grep -vF -e "$MARK" -e "$MARK2" | grep -vE "$PROPTEST_RE" | grep -nE "$HEX_RE")
     pem=$(printf '%s\n' "$added" | grep -nE "$PEM_RE")
@@ -98,9 +118,11 @@ esac
 # script reports "secret-scan: clean" having inspected NOTHING. A guard that passes
 # without looking is worse than no guard, because it produces a receipt.
 # In tree mode a repository always has tracked files, so an empty listing means the
-# enumeration failed rather than that the tree is clean. diff mode is left alone: an empty
-# staged set legitimately means there is nothing to check, and refusing there would break
-# the pre-commit hook on ordinary commits.
+# enumeration failed rather than that the tree is clean.
+# Diff mode: guarded at the top of its branch by the rev-parse content check
+# (SS-1) - a working repository with an empty staged set still passes (a real
+# clean for the pre-commit hook); a checkout git cannot enumerate refuses
+# with exit 2 before scanning nothing.
 if [ "$mode" = tree ] && [ -z "$(git ls-files 2>/dev/null)" ]; then
     echo "  secret-scan: REFUSING — git ls-files returned nothing." >&2
     echo "  Not a git repository, or git failed. A scan of zero files is not a pass." >&2
@@ -132,5 +154,14 @@ if [ "$fail" -ne 0 ]; then
         echo "Last resort (eyeballed exception): git commit --no-verify — but CI re-scans the tree on push." >&2
     fi
     exit 1
+fi
+
+# Clean is self-evidencing (SS-1): the count proves the scan enumerated real
+# content. A silent exit 0 is indistinguishable from a scan that never ran -
+# the WSL/worktree vacuity class this guard family closes.
+if [ "$mode" = "diff" ]; then
+    echo "secret-scan: clean - diff mode, $(printf '%s\n' "$added" | grep -c .) added lines scanned"
+else
+    echo "secret-scan: clean - tree mode, $(git ls-files | wc -l) tracked files scanned"
 fi
 exit 0
