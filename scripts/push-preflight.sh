@@ -243,6 +243,42 @@ if [ "${1:-}" = "--selftest" ]; then
   if [ "$(kcls "$M_UNC")" != ERR ] && [ "$(kcls "$FLIP")" = INVALID ]; then
     echo "  P10 classifier non-vacuity: minted reads VALID, one char flipped reads INVALID (correct)"
   else echo "  P10 classifier vacuous - cannot tell a key from a flipped key"; st=1; fi
+  # P11 - the WIRING row (bOPus5 mutation M1 against this gate, 2026-09-20):
+  # P5-P7 prove the arms, P9-P10 the classifier, but NO row ran check 3 BODY -
+  # a swapped wiring passed 10/10 while collapsing three checksum-VALID keys.
+  # This row builds a real throwaway repo (the identity-check T-rig pattern),
+  # commits a runtime-minted VALID fixture plus a shape-only noise line, runs
+  # THIS script over that delta, and asserts the VALID key lands in the
+  # LISTING, the noise in the collapsed count, and the preflight stays ok.
+  T=$(mktemp -d 2>/dev/null) || { echo "  P11 wiring row -> mktemp failed"; st=1; T=""; }
+  if [ -n "$T" ]; then
+    (
+      cd "$T" && git init -q repo 2>/dev/null && cd repo && mkdir -p scripts || exit 1
+      cp "$SELF" scripts/push-preflight.sh
+      cp "$(dirname "$SELF")/secret-scan.sh" scripts/secret-scan.sh 2>/dev/null || true
+      git add scripts 2>/dev/null
+      GIT_AUTHOR_NAME=probe GIT_AUTHOR_EMAIL=probe@invalid \
+      GIT_COMMITTER_NAME=probe GIT_COMMITTER_EMAIL=probe@invalid \
+        git commit -q -m base 2>/dev/null || exit 1
+      printf 'demo fixture: one checksum-VALID uncompressed WIF and one shape-only run\n%s\n%s\n' "$M_UNC" "$NOISE" > demo.txt
+      git add demo.txt 2>/dev/null
+      GIT_AUTHOR_NAME=probe GIT_AUTHOR_EMAIL=probe@invalid \
+      GIT_COMMITTER_NAME=probe GIT_COMMITTER_EMAIL=probe@invalid \
+        git commit -q -m fixture 2>/dev/null || exit 1
+      sh scripts/push-preflight.sh HEAD~1 > "$T/out" 2>&1
+      echo "$?" > "$T/rc"
+    )
+    _prc=$(cat "$T/rc" 2>/dev/null || echo 99)
+    _pre=$(printf '%.16s' "$M_UNC")
+    _noi=$(printf '%.16s' "$NOISE")
+    if [ "$_prc" -eq 0 ] && grep -qF "ACCOUNT FOR EACH" "$T/out" && grep -qF "$_pre" "$T/out" \
+       && grep -q "collapsed" "$T/out" && ! grep -qF "$_noi" "$T/out"; then
+      echo "  P11 wiring row: check-3 body over a real minted delta -> VALID listed, noise collapsed, preflight ok (correct)"
+    else
+      echo "  P11 wiring row -> the body does not do what the arms promise (rc=$_prc)"; st=1
+    fi
+    rm -rf "$T"
+  fi
   rm -f /tmp/ps1 /tmp/ps2
   [ "$st" -eq 0 ] && echo "selftest ok — refuses what it must, permits what it must."                    || echo "selftest FAIL — see above."
   exit $st

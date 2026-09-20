@@ -87,6 +87,32 @@ a malformed key is not spendable); the shape arms are preflight-only — CI's
 tree scan (secret-scan.sh) still carries no base58 rule, so the re-scan-on-push
 backstop does not cover these forms; node absence degrades to listing.
 
+## Rider (2026-09-20, after bOPus5's mutation battery `12391739a`)
+
+All seven mutations reproduced or exceeded the build battery's claims (arm
+non-emptiness M5-M7 mirror-for-mirror, classifier mutations M2-M4 caught,
+node-absent fails in the right direction). **M1 found the real gap:** a
+mutant with correct arms and a correct classifier but swapped check-3 wiring
+passed 10/10 while collapsing three checksum-VALID keys - because P5-P10 call
+`shapehit()`/`kcls()` directly and no row ran check 3's BODY. Same class as
+tonight's `<= 844` and the `{48}` arm: the instrument measuring next to the
+thing it guards.
+
+**P11 (the wiring row) closes it:** the selftest builds a throwaway repo (the
+identity-check T-rig pattern), commits a runtime-minted checksum-VALID
+fixture plus a shape-only noise line, runs THIS script over that real delta,
+and asserts the VALID key lands in the LISTING (`ACCOUNT FOR EACH` + token
+prefix), the noise in the collapsed count, and `PREFLIGHT ok`. Verified:
+full selftest P1-P11 green; under an M1-class wiring mutation
+(VALID routed to the collapse counter) P11 falls (`the body does not do what
+the arms promise`, 10/11, rc 1); restored, P11 green again.
+
+bOPus5's two measured boundaries are accepted and stay receipted, not
+patched: (a) the pre-commit engine and CI tree scan carry no base58 rule, so
+a key that reaches main by web merge never meets this gate - preflight is
+this class's only guard today; (b) UPPERCASE bech32 hits no arm (NIP-19
+mandates lowercase; same accepted trade as the mangled-key class).
+
 ## Boundary
 
 One file. No spec, no surface, no payment code, no wallet. bOPus5 runs the
