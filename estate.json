@@ -789,6 +789,17 @@
    "descriptionKey": "s.forge-orbit.name"
   },
   {
+   "id": "myspace",
+   "family": "skaists",
+   "home": "skaists.dev",
+   "path": "surfaces/myspace.html",
+   "state": "LIVE",
+   "gloss": "keep a file on your phone, or share one — you choose which, per file",
+   "org": "skaists",
+   "label": "My Space",
+   "limit": "a file you shared cannot be unshared: the store has no delete route, so the copy stays at its hash"
+  },
+  {
    "id": "review",
    "family": "skaists",
    "home": "skaists.dev",
@@ -1324,8 +1335,8 @@
   }
  ],
  "counts": {
-  "surfaces": 97,
-  "listed": 106,
+  "surfaces": 98,
+  "listed": 107,
   "families": 8,
   "domains": 26,
   "domainsLive": 4,
@@ -1334,7 +1345,7 @@
   "byFamily": {
    "beehivenature": 42,
    "plur": 7,
-   "skaists": 19,
+   "skaists": 20,
    "bnature": 18,
    "beehivebiomass": 5,
    "beehivebuds": 0,
@@ -1342,11 +1353,11 @@
    "bnr": 1
   },
   "byState": {
-   "LIVE": 106
+   "LIVE": 107
   },
   "byOrg": {
    "beehive-nature": 59,
-   "skaists": 33,
+   "skaists": 34,
    "beehive-biomass": 5
   }
  },
