@@ -61,6 +61,10 @@
 #
 # usage: secret-scan.sh diff   # scan the staged diff (pre-commit hook)
 #        secret-scan.sh tree   # scan all tracked files (CI backstop)
+#
+# Exit contract: 0 = clean · 1 = secret found · 2 = environment refused
+# (unresolvable checkout, empty tree listing, or a clean-count that does not
+# parse as a number - never readable as a pass).
 
 mode="$1"
 fail=0
@@ -159,9 +163,29 @@ fi
 # Clean is self-evidencing (SS-1): the count proves the scan enumerated real
 # content. A silent exit 0 is indistinguishable from a scan that never ran -
 # the WSL/worktree vacuity class this guard family closes.
+# SS-3 (bee-laborer order, 2026-09-20; incident: bFUzZ bare-PATH run printed
+# `clean - diff mode, [empty] added lines scanned` with rc 0 - a fourth vacuity
+# vector, caught only by the count-line discipline). The clean path's count
+# must PARSE AS A NUMBER. A tool missing from PATH (grep, wc, tr) makes the
+# substitution emit empty while every rc stays 0; an empty or non-numeric
+# count means the scan cannot state its own work: REFUSING, exit 2. The
+# legitimate zero (empty staged set in a working repo) still prints `0` and
+# passes - grep prints its zero, only a MISSING tool prints nothing.
 if [ "$mode" = "diff" ]; then
-    echo "secret-scan: clean - diff mode, $(printf '%s\n' "$added" | grep -c .) added lines scanned"
+    count=$(printf '%s\n' "$added" | grep -c .)
 else
-    echo "secret-scan: clean - tree mode, $(git ls-files | wc -l) tracked files scanned"
+    count=$(git ls-files | wc -l | tr -d '[:space:]')
+fi
+case $count in
+    ''|*[!0-9]*)
+        echo "  secret-scan: REFUSING - the count did not parse as a number (got '$count')." >&2
+        echo "  Missing scanner tooling, or a broken enumeration. A clean without a numeric count is not a pass." >&2
+        exit 2
+        ;;
+esac
+if [ "$mode" = "diff" ]; then
+    echo "secret-scan: clean - diff mode, $count added lines scanned"
+else
+    echo "secret-scan: clean - tree mode, $count tracked files scanned"
 fi
 exit 0
