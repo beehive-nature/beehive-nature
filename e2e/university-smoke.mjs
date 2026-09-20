@@ -293,7 +293,25 @@ await page.waitForTimeout(300);
 ok("listening: the piece renders (seed + viz + lineage sections)", (await page.locator("#seed").count())===1 && (await page.locator("#viz").count())===1 && (await page.locator("#lineage").count())===1);
 await page.locator("#fork").click();
 ok("listening: fork derives child + lineage row + counter", (await page.locator("#forkcount").textContent()).includes("1 fork") && (await page.locator(".forkrow").count())===1 && (await page.locator(".forkrow").innerHTML()).includes("divergence receipt"));
-ok("listening: the DB-1 provenance card + creation doctrine present", (await page.locator("body").innerText()).includes("WHAT A REAL INSCRIPTION CARRIES") && (await page.locator("body").innerText()).includes("bMeshAi"));
+{
+  // U123 (2026-09-20): the creation doctrine rides the estate disclosure
+  // canon — the full text lives inside a collapsed details[data-reg-disclose]
+  // body, one 44px summary tap away. A gate that reads innerText in the
+  // resting page asserts the doctrine VANISHED, which is a lie about the
+  // design, not a finding. What this house actually promises is "the reader
+  // gets it with one tap": open the disclosure (register.js owns the collapse
+  // law; a real click on the summary is the reader's gesture), wait for the
+  // text to RENDER, then assert. innerText is kept deliberately — textContent
+  // would pass forever on display:none bytes, which is exactly what this
+  // assertion exists to catch.
+  const doctrineGate = page.locator('details[data-reg-disclose]', { hasText: "bMeshAi" }).first();
+  await doctrineGate.locator('summary').click();
+  await page.waitForFunction(() => document.body.innerText.includes("bMeshAi"), null, { timeout: 4000 });
+  const listeningText = await page.locator("body").innerText();
+  ok("listening: the DB-1 provenance card + creation doctrine present",
+     listeningText.includes("WHAT A REAL INSCRIPTION CARRIES")
+  &&  listeningText.includes("bMeshAi"));
+}
 
 // hub + review registration
 await page.goto(`${BASE}/surfaces/bfood.html`);

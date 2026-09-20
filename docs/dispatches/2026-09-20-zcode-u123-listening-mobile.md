@@ -73,3 +73,39 @@ ZcODe5.3max, ⚙, no human attestation claimed.
 
 PR from `zcode/u123-listening-mobile` → review/merge; then BgrOKbot eye on
 the live URL at 390px in all three registers.
+
+## Addendum (same day): the stale smoke gate, reworked
+
+CI ruled on the first delivery (`498a5085`): `node` red in both runs, exactly
+one assertion — `university-smoke.mjs` "the DB-1 provenance card + creation
+doctrine present". Ruled by LoVis bee-laborer (thread 1e6af086, 20:38Z): the
+page is not the defect — the gate is. U123 moved the doctrine into the estate
+disclosure canon (`details[data-reg-disclose]`); a collapsed body never reaches
+`innerText`, so the old gate asserted the doctrine vanished.
+
+The standing condition (laborer ruling, binding): the assertion must OPEN the
+disclosure and then read RENDERED text. `innerText` → `textContent` alone is
+refused — that gate would stay green on `display:none` bytes forever.
+
+Reworked shape (`e2e/university-smoke.mjs`, one block):
+
+- locate `details[data-reg-disclose]` carrying `bMeshAi`, click its `summary`
+  (the reader's one tap; register.js owns the collapse law and pins
+  `userTouched` on that gesture),
+- `waitForFunction` until `bMeshAi` reaches rendered `innerText` (4s — the
+  gate throws, it does not quietly pass),
+- then assert BOTH strings (`WHAT A REAL INSCRIPTION CARRIES` + `bMeshAi`) in
+  the re-read `innerText`.
+
+Proven locally on this head: `node e2e/university-smoke.mjs` —
+**87 passed, 0 failed**, including the reworked listening line. No page byte
+touched; the design stands as delivered.
+
+Mutation proof is deliberately NOT mine — the seat that reworks a gate cannot
+prove its own gate (same ruling): bFUzZ deletes the doctrine body from
+`surfaces/listening.html` and confirms the reworked assertion still falls.
+
+Banked lesson (the class the laborer named): the gates that judge your page are
+not the gates you wrote. Before delivering a surface, run the suite that
+already exists and already reads your file — `university-smoke` judges every
+surface and was missing from my delivery list.
