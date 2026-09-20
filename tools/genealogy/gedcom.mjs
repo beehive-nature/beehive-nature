@@ -5,6 +5,13 @@
 
 import { birthYear, deathYear, privatize, evidenceClass } from "./model.mjs";
 
+// GEDCOM 5.5.1 writes a BC year as "<n> B.C."; a negative number is not a
+// date to any reader, so the sign never reaches the stream.
+const gedYear = (y) => (y < 0 ? `${-y} B.C.` : `${y}`);
+// ...and back: the corpus writes a BC year zero-padded to four digits
+// ("0972BC"), AD years unpadded. Preserved so a BC lifespan round-trips.
+const lsYear = (y) => (y < 0 ? `${String(-y).padStart(4, "0")}BC` : `${y}`);
+
 const gedName = (name) => {
   const m = String(name).match(/^(.*) (\S+)$/);
   return m ? `${m[1]} /${m[2]}/` : `${name} //`;
@@ -54,8 +61,8 @@ export function toGedcom(model, { privatizeLiving = true } = {}) {
     const p = M.persons[id];
     indi.push(`0 @${idx.get(id)}@ INDI`, `1 NAME ${gedName(esc(p.name))}`);
     const b = birthYear(p.lifespan), d = deathYear(p.lifespan);
-    if (b) indi.push("1 BIRT", `2 DATE ${b}`);
-    if (d) indi.push("1 DEAT", `2 DATE ${d}`);
+    if (b) indi.push("1 BIRT", `2 DATE ${gedYear(b)}`);
+    if (d) indi.push("1 DEAT", `2 DATE ${gedYear(d)}`);
     if (p.gender) indi.push(`1 SEX ${p.gender === "M" ? "M" : p.gender === "F" ? "F" : "U"}`);
     if (famcOf.get(id)) indi.push(`1 FAMC @${famcOf.get(id)}@`);
     for (const ref of famOf.get(id) || []) indi.push(`1 FAMS @${ref}@`);
@@ -106,9 +113,10 @@ export function fromGedcom(model, text) {
     }
     if (line.level === 2) {
       // subordinate DATE under the last level-1 event (BIRT/DEAT/MARR)
-      const date = line.text.match(/^DATE\s+(\d{3,4})$/);
-      if (date && curEvent === "BIRT") cur.birt = parseInt(date[1], 10);
-      if (date && curEvent === "DEAT") cur.deat = parseInt(date[1], 10);
+      const date = line.text.match(/^DATE\s+(\d{1,4})(\s+B\.C\.)?$/);
+      const year = date ? (date[2] ? -parseInt(date[1], 10) : parseInt(date[1], 10)) : null;
+      if (date && curEvent === "BIRT") cur.birt = year;
+      if (date && curEvent === "DEAT") cur.deat = year;
       if (date && curEvent === "MARR") cur.marr = date[1];
     }
   }
@@ -120,7 +128,7 @@ export function fromGedcom(model, text) {
     const id = p.noteSources[0]?.sourceId || `ged:${xref}`;
     idOf.set(xref, id);
     const lifespan = p.birt || p.deat
-      ? `${p.birt ?? "?"}–${p.deat ?? (living ? "Living" : "Deceased")}` : null;
+      ? `${p.birt === undefined ? "?" : lsYear(p.birt)}–${p.deat === undefined ? (living ? "Living" : "Deceased") : lsYear(p.deat)}` : null;
     model.persons[id] = {
       name: p.name,
       lifespan,

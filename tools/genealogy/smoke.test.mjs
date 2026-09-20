@@ -3,7 +3,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
   createModel, addPerson, addEdge, addCouple, bloodline, spine, depths,
-  privatize, validate, evidenceClass,
+  privatize, validate, evidenceClass, birthYear, deathYear,
 } from "./model.mjs";
 import { harvestResponse, importWalk } from "./fs-adapter.mjs";
 import { toGedcom, fromGedcom } from "./gedcom.mjs";
@@ -103,6 +103,8 @@ test("fs-adapter harvestResponse parses the real r9 response shape", () => {
 
 test("GEDCOM round-trip: export → parse → same persons, edges, evidence", () => {
   const m = fixtureModel();
+  // a BC ancestor: the export must not emit a negative year, and the sign must survive the trip
+  addPerson(m, { id: "P6", name: "Sigurd Saga", lifespan: "1045BC–0972BC", gender: "M", living: false, source: "familysearch", sourceId: "P6" });
   const ged = toGedcom(m, { privatizeLiving: true });
   assert.ok(ged.startsWith("0 HEAD"));
   assert.ok(ged.endsWith("0 TRLR\n"));
@@ -113,12 +115,17 @@ test("GEDCOM round-trip: export → parse → same persons, edges, evidence", ()
 
   const back = createModel({ source: "gedcom-import" });
   const { persons } = fromGedcom(back, ged);
-  assert.equal(persons, 5); // 3 deceased + 2 anonymous "Living" root-line stubs
+  assert.equal(persons, 6); // 4 deceased (incl. the BC ancestor) + 2 anonymous "Living" root-line stubs
   assert.equal(back.persons.P3.name, "Father Deceased");
   assert.equal(back.persons.P3.evidence.class, "recorded"); // 1925 birth = recorded era
   assert.equal(back.persons.P4.evidence.class, "colonial"); // 1701 = colonial era
   assert.equal(back.persons.P3.sourceId, "P3");
   assert.equal(back.persons.P3.lifespan, "1925–1988"); // level-2 DATE parse round-trips
+  assert.ok(ged.includes("2 DATE 1045 B.C."), "BC birth exports as GEDCOM 5.5.1 B.C., never a negative year");
+  assert.ok(ged.includes("2 DATE 972 B.C."));
+  assert.ok(!/2 DATE -d/.test(ged), "no negative year reaches the GEDCOM stream");
+  assert.equal(back.persons.P6.lifespan, "1045BC–0972BC"); // BC round-trips byte-exact, zero-padded as the corpus writes it
+  assert.equal(back.persons.P6.evidence.class, "saga");
   assert.deepEqual(back.edges.P3.sort(), ["P4", "P5"].sort()); // child->parents survives
 });
 
@@ -136,4 +143,34 @@ test("fs-adapter importWalk folds a raw walk dump", () => {
   assert.equal(m.root, "AAAA-111");
   assert.deepEqual(m.edges["AAAA-111"], ["BBBB-222"]);
   assert.equal(m.persons["BBBB-222"].evidence.class, "recorded");
+});
+
+test("lifespans parse BC and short years — signed integers, 1-4 digits", () => {
+  // every shape present in the public bloodline at ca025ede
+  assert.deepEqual([birthYear("1920–1982"), deathYear("1920–1982")], [1920, 1982]);
+  assert.deepEqual([birthYear("1931–Deceased"), deathYear("1931–Deceased")], [1931, null]);
+  assert.deepEqual([birthYear("Deceased"), deathYear("Deceased")], [null, null]);
+  assert.deepEqual([birthYear("1080BC–Deceased"), deathYear("1080BC–Deceased")], [-1080, null]);
+  assert.deepEqual([birthYear("1045BC–0972BC"), deathYear("1045BC–0972BC")], [-1045, -972]);
+  assert.deepEqual([birthYear("93–Deceased"), deathYear("93–Deceased")], [93, null]);
+  assert.deepEqual([birthYear("–1187BC"), deathYear("–1187BC")], [null, -1187]);
+  assert.deepEqual([birthYear("98–0160"), deathYear("98–0160")], [98, 160]);
+  assert.deepEqual([birthYear("0050BC–25"), deathYear("0050BC–25")], [-50, 25]);
+  // 123 lifespans cross the era boundary; 6 are born 0001BC
+  assert.deepEqual([birthYear("0001BC–20"), deathYear("0001BC–20")], [-1, 20]);
+  assert.deepEqual([birthYear("–1801"), deathYear("–1801")], [null, 1801]);
+  assert.deepEqual([birthYear("30–83"), deathYear("30–83")], [30, 83]);
+  assert.deepEqual([birthYear("9–67"), deathYear("9–67")], [9, 67]);
+  assert.deepEqual([birthYear("2–Deceased"), deathYear("2–Deceased")], [2, null]);
+  assert.deepEqual([birthYear("–35"), deathYear("–35")], [null, 35]);
+  assert.deepEqual([birthYear(null), deathYear(null)], [null, null]);
+  // a BC birth is saga by the existing <1000 rule; thresholds unchanged
+  assert.equal(evidenceClass({ lifespan: "1045BC–0972BC" }), "saga");
+  assert.equal(evidenceClass({ lifespan: "0050BC–25" }), "saga");
+  // a short AD birth is no longer unrecorded
+  assert.equal(evidenceClass({ lifespan: "93–Deceased" }), "saga");
+  assert.equal(evidenceClass({ lifespan: "9–67" }), "saga");
+  // absent dates stay unrecorded — the null path is not widened
+  assert.equal(evidenceClass({ lifespan: "Deceased" }), "unrecorded");
+  assert.equal(evidenceClass({ lifespan: null }), "unrecorded");
 });
