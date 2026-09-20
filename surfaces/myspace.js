@@ -767,6 +767,14 @@
       var keepBtn = document.createElement('button');
       keepBtn.className = 'ghost';
       keepBtn.type = 'button';
+      /* The id is load-bearing, not decoration: `e2e/tour-bar-clearance.test.mjs`
+         drives the real gesture across the estate and closes this sheet by
+         `#flipKeep`. When the sheet's buttons stopped being markup and started
+         being built here, the button survived and the handle did not — the
+         visitor lost nothing and the gate lost its anchor. A class selector
+         would be an anchor on incidental structure, which is the thing that has
+         cost us most this week; the id is the cheap, stable handle. */
+      keepBtn.id = 'flipKeep';
       keepBtn.textContent = t('flip-keep');
       keepBtn.onclick = closeSheet;
       box.appendChild(keepBtn);
