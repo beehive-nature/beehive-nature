@@ -547,6 +547,17 @@ jobs:
         if: always()
         working-directory: e2e
         run: node --test orb-seat.test.mjs
+      # Tour-bar clearance (bee-laborer slice, 2026-09-20): the fixed estate bar
+      # sat on the lowest 18px of MY SPACE's sheet buttons at 390px (measured on
+      # the live page). tour.js now retreats behind any aria-modal dialog /
+      # showModal() and publishes --tbar-h for page-own sticky rows. Proven by
+      # hit-testing every sheet button through the REAL gesture (attach → row →
+      # sheet → keep), the published height on fixed and in-flow hosts, and a
+      # native <dialog>. Ran 3/3 red on the pre-fix tour.js.
+      - name: Tour bar — clearance regression (no page action row covered)
+        if: always()
+        working-directory: e2e
+        run: node --test tour-bar-clearance.test.mjs
       # SHARED-POLICY FIELD OWNERSHIP (ceremony-blocking repair, 2026-09-17):
       # a View change in a stale wallet tab must NEVER erase newer founder
       # policy from the shared key — every writer merges with the latest
