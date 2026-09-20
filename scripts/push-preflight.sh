@@ -80,10 +80,6 @@ locate() {
 
 . "$(dirname "$0")/keyshape.sh"
 
-# zpad n -> n z chars (selftest fixture assembly; runtime-built so no literal
-# in this file is ever key-shaped)
-zrep() { _n=$1; _s=; _i=0; while [ "$_i" -lt "$_n" ]; do _s="z$_s"; _i=$((_i+1)); done; printf '%s' "$_s"; }
-
 
 # ---- SELFTEST ------------------------------------------------------------
 # LAW (founder, 2026-08-25): a checker is not LANDED until it has been run

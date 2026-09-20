@@ -71,6 +71,30 @@ same line with a marker commits. CI's `secret-scan.sh tree` re-scans every
 push. Remaining gap, unchanged and receipted: direct web edits and web merges
 never meet any scanner — GitHub-side tooling is the only guard there.
 
+## Rider (2026-09-20, after bOPus5's mutation battery against this PR)
+
+Three of four mutations landed (MA: one arm-drop disarms BOTH enforcers —
+shared implementation confirmed; MB: a stripped in-tree marker makes the tree
+arm FIRE — the clean baseline is not vacuous; MD: node-absent fails CLOSED).
+**MC found the gap:** secret-scan.sh had NO selftest — a swapped wiring said
+"clean" over an unmarked checksum-VALID WIF while push-preflight's own
+selftest stayed 11/11. The P11 law had not crossed the file boundary with
+the code it guards.
+
+**Landed in this rider:**
+
+- `secret-scan.sh selftest` — S1/S2/S3 through the script's OWN body over a
+  throwaway repo: unmarked minted VALID WIF BLOCKS in tree mode (location
+  named, marked + noise silent) and in diff mode (the pre-commit path MC
+  mutated); marked + noise + npub only → clean. Verified: MC-class wiring
+  mutation (VALID routed to the silent collapse in both case arms) now falls
+  S1 AND S2 (`wiring broken rc=0`), selftest FAIL; restored, all green.
+- **Empty `WIF_RE` is a hard error** (exit 2, says so) — bOPus5 measured that
+  a failed source degrades the arm into `git grep -InE ""` = a per-line node
+  spawn over the whole tree, silently. Fail-closed means saying it.
+- `zrep` moved into `keyshape.sh` (fixture assembly shared by both selftests);
+  push-preflight selftest unchanged, P1-P11 green.
+
 ## Boundary
 
 One new file, three scripts touched, nine marker lines added (comment-only,

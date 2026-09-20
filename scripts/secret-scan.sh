@@ -68,6 +68,11 @@
 #
 # usage: secret-scan.sh diff   # scan the staged diff (pre-commit hook)
 #        secret-scan.sh tree   # scan all tracked files (CI backstop)
+#        secret-scan.sh selftest  # known-BAD/known-GOOD through THIS body (2026-09-20,
+#                                # the P11 law carried across the file boundary: a
+#                                # blocker whose wiring can be swapped while saying
+#                                # "clean" is false confidence in exactly the path
+#                                # that runs where no seat does)
 
 mode="$1"
 fail=0
@@ -75,6 +80,14 @@ fail=0
 # Shared key-shape implementation (WIF_RE + keyshape classify/mint): one
 # implementation, two enforcers - this file and push-preflight.sh.
 . "$(dirname "$0")/keyshape.sh"
+# FAIL CLOSED on a broken source: an empty WIF_RE would turn the arm into
+# `git grep -InE ""` - a match on every line of every file and a per-line
+# node spawn over the whole tree, silently, instead of saying it is broken
+# (measured by the mutation seat, 2026-09-20). Say it and stop.
+if [ -z "$WIF_RE" ]; then
+    echo "secret-scan: keyshape.sh did not load - WIF_RE is empty. FAILING CLOSED." >&2
+    exit 2
+fi
 
 NAME_RE='\.(seed|key|pem|secret)$|(^|/)secrets/|(^|/)\.env(\.|$)'
 HEX_RE='[0-9a-fA-F]{48,}'
@@ -86,6 +99,58 @@ MARK2='PUBLIC-CONSTANT'
 PROPTEST_RE='(^|[+:])cc [0-9a-fA-F]{64}([^0-9a-fA-F]|$)'
 
 case "$mode" in
+selftest)
+    # The founder law (a checker is not landed until known-BAD and known-GOOD
+    # both appear in its report) + the P11 law carried across the file
+    # boundary: the rows run THIS script's own body over a real throwaway
+    # repo, not the shared helpers. The mutation seat measured (MC, 2026-09-20)
+    # that a swapped wiring in this file said "clean" over an unmarked
+    # checksum-VALID WIF while push-preflight's own selftest stayed 11/11 -
+    # a blocker that can silently stop blocking is false confidence in
+    # exactly the path that runs where no seat does.
+    st=0
+    SELF=$(cd "$(dirname "$0")" && pwd)/$(basename "$0")
+    M=$(keyshape mint unc)
+    NP=$(keyshape mint npub)
+    NOISE="K$(zrep 51)"
+    if [ "$M" = ERR ] || [ -z "$M" ]; then
+      echo "  fixture mint failed (node unavailable?) - the arm cannot be trusted: FAIL"
+      exit 1
+    fi
+    T=$(mktemp -d 2>/dev/null) || { echo "  mktemp failed: FAIL"; exit 1; }
+    (
+      cd "$T" && git init -q repo 2>/dev/null && cd repo && mkdir -p scripts || exit 1
+      cp "$SELF" scripts/secret-scan.sh
+      cp "$(dirname "$SELF")/keyshape.sh" scripts/keyshape.sh
+      printf 'fixture: unmarked checksum-VALID WIF\n%s\n' "$M" > fx-unmarked.txt
+      printf 'fixture: marked\n%s  TESTNET-ONLY: runtime-minted selftest fixture\n' "$M" > fx-marked.txt
+      printf 'fixture: shape-only noise\n%s\n' "$NOISE" > fx-noise.txt
+      printf 'fixture: public id\n%s\n' "$NP" > fx-npub.txt
+      git add fx-unmarked.txt fx-marked.txt fx-noise.txt 2>/dev/null
+      sh scripts/secret-scan.sh tree > "$T/t1" 2>&1; echo "$?" > "$T/r1"
+      sh scripts/secret-scan.sh diff > "$T/t2" 2>&1; echo "$?" > "$T/r2"
+      git rm -q --cached fx-unmarked.txt 2>/dev/null
+      rm -f fx-unmarked.txt
+      git add fx-npub.txt 2>/dev/null
+      sh scripts/secret-scan.sh tree > "$T/t3" 2>&1; echo "$?" > "$T/r3"
+    )
+    r1=$(cat "$T/r1" 2>/dev/null || echo 99)
+    r2=$(cat "$T/r2" 2>/dev/null || echo 99)
+    r3=$(cat "$T/r3" 2>/dev/null || echo 99)
+    if [ "$r1" -eq 1 ] && grep -qF "fx-unmarked.txt" "$T/t1" && ! grep -qF "fx-marked.txt" "$T/t1" && ! grep -qF "fx-noise.txt" "$T/t1"; then
+      echo "  S1 known-BAD  unmarked VALID WIF, tree mode -> BLOCKED, location named, marked+noise silent (correct)"
+    else echo "  S1 known-BAD  tree wiring broken (rc=$r1)"; st=1; fi
+    if [ "$r2" -eq 1 ] && grep -qF "key-shaped checksum-VALID" "$T/t2"; then
+      echo "  S2 known-BAD  unmarked VALID WIF, diff mode (the pre-commit path) -> BLOCKED (correct)"
+    else echo "  S2 known-BAD  diff wiring broken (rc=$r2)"; st=1; fi
+    if [ "$r3" -eq 0 ] && grep -q "clean" "$T/t3"; then
+      echo "  S3 known-GOOD marked + noise + npub only -> clean (correct)"
+    else echo "  S3 known-GOOD  false positive on marked/noise/npub (rc=$r3)"; st=1; fi
+    rm -rf "$T"
+    [ "$st" -eq 0 ] && echo "secret-scan selftest ok - the blocker blocks, the marked pass, the noise collapses." \
+                      || echo "secret-scan selftest FAIL - see above."
+    exit $st
+    ;;
 diff)
     # SS-1 (2026-09-19): fail closed on the enumeration-failure class.
     # Measured live: WSL git against a worktree whose .git file carries a
@@ -141,7 +206,7 @@ tree)
       done)
     ;;
 *)
-    echo "usage: $0 {diff|tree}" >&2
+    echo "usage: $0 {diff|tree|selftest}" >&2
     exit 2
     ;;
 esac

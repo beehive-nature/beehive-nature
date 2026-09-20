@@ -103,3 +103,7 @@ keyshape() {
     } else { console.log("ERR"); process.exit(1); }
   ' 2>/dev/null || echo ERR
 }
+
+# zrep n -> n z chars (selftest fixture assembly for BOTH enforcers; runtime-
+# built so no literal in either file is ever key-shaped)
+zrep() { _n=$1; _s=; _i=0; while [ "$_i" -lt "$_n" ]; do _s="z$_s"; _i=$((_i+1)); done; printf '%s' "$_s"; }
