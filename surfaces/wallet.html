@@ -2426,6 +2426,25 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       assets:{
         tETH:{symbol:'tETH',decimals:18,contract:null}
       }
+    },
+    /* The chain ops/x402-door is chartered to smoke against. Same registry
+       shape again; the ERC-20 row is what makes it more than a copy of the
+       Arb Sepolia line — a user can hold a balance here, not just gas.
+       tUSDC, not USDC, for the same cap reason tETH is not ETH: capAssert
+       keys on the asset's own symbol, and a testnet row wearing the mainnet
+       symbol would spend the owner's real USDC/day budget on nothing. */
+    baseSepolia:{
+      chainId:84532, label:'Base Sepolia · testnet', explorer:'https://sepolia.basescan.org/tx/', native:'tETH',
+      hosts:['https://sepolia.base.org','https://base-sepolia-rpc.publicnode.com','https://base-sepolia.drpc.org'],
+      assets:{
+        tETH:{symbol:'tETH',decimals:18,contract:null},
+        // PUBLIC-CONSTANT: Circle testnet USDC on Base Sepolia. Read back from the chain, not from memory:
+        // name()/symbol() = "USDC", decimals() = 6, version() = "2", and DOMAIN_SEPARATOR() reconstructs
+        // BYTE-EXACT from {name:"USDC",version:"2",chainId:84532,verifyingContract:this} — so the EIP-712
+        // domain is this token on this chain and nothing else. authorizationState() answers instead of
+        // reverting, so EIP-3009 is present (the door's scheme; the wallet still sends plain transfer).
+        tUSDC:{symbol:'tUSDC',decimals:6,contract:'0x036CbD53842c5426634e7929541eC2318f3dCF7e'}
+      }
     }
   };
   function railOf(k){ var r=EVM_RAILS[k]; if(!r)throw new Error('no such EVM rail: '+k); return r }
