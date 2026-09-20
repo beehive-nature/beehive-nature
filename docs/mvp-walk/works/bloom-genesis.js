@@ -123,7 +123,7 @@
     details.forEach(function (d, i) {
       d.open = previous ? previous[i] : reading === 'cypherpunk' && d.dataset.viewDisclosure === 'receipts';
     });
-    if (theme) theme.content = reading === 'bee' ? '#f6f7f2' : reading === 'raver' ? '#16111f' : '#081610';
+    if (theme) theme.content = reading === 'bee' ? '#fbf7f0' : reading === 'raver' ? '#16111f' : '#081610';
     lastReading = reading;
     applyBloom();
   }

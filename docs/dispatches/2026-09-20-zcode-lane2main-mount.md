@@ -97,3 +97,16 @@ Plus the 3 merges: `ca025ede` (GUX-01 atlas UI), `db7ded27` (#156 F1), `8da8d9ab
 ## Post-merge hygiene (non-gating)
 
 4 of 6 D1 locks test resolved construction rather than page bytes; realize the mirror from blood.html bytes or rename the four.
+
+
+## CORRECTION — the explained red is instrument-local; CI's PR-path §7 is GREEN (22:33Z cut)
+
+Measured by the laborer (2f05327f): `gh pr checks 169` = node/scan/static/test all green, and the CI §7 step ("author is the founder on the contributed range") PASSED on the same range my local run calls 30 FAIL. Two instruments, one range, opposite verdicts — and the merge-deciding instrument is CI. What this changes and does not:
+
+- CHANGED: the section above titled "the explained red" describes the LOCAL instrument (`S7_RANGE=origin/main..lane` over `scripts/identity-check.sh`), not what CI enforces on the pull_request path. What CI actually judges — especially whether the trailer clause (author != committer ⇒ `Co-authored-by`) is enforced in ANY CI path — is bFUzZ's measurement block before this PR reaches the laborer. A green we do not understand is worse than a red we understand.
+- UNCHANGED: the no-rewrite ruling, the credit record, and the exact-30 proof — all stand on their own reasons.
+
+## CONFLICT RESOLUTION (the merge commit carrying this dispatch)
+
+`estate.json` / `surfaces/index.html` / `surfaces/lang-corpus.json` conflicted; all three are registry-and-generated artifacts, resolved by REGENERATION, never by hand-merged JSON: the registry union (blood row LIVE), `node tools/build-surfaces.mjs` + `node scripts/build-atlas.mjs` for the hub (estate-check PASS: 107 listed / 98 counted / 26 domains, state-root `69538c67`), and lang-corpus taken as main's strict superset — measured lossless: 50,927 lane keys, **0 missing** from main's 60,294.
+

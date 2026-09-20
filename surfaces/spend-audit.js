@@ -262,7 +262,7 @@
     var cells = ledger.receipts.map(function (r, j) {
       var a = result.receipts[j];
       return '<button type="button" data-rc="' + j + '" aria-label="receipt ' + (j + 1) + ': ' + a.state + '"' +
-        ' style="background:none;border:none;padding:0;cursor:pointer;display:flex;align-items:center;justify-content:center;min-width:30px;min-height:30px">' +
+        ' style="background:none;border:none;padding:0;cursor:pointer;display:flex;align-items:center;justify-content:center;min-width:44px;min-height:44px">' +
         cellChip(a.state, 26, r.operation && r.operation.kind) + '</button>';
     }).join('');
 
@@ -295,25 +295,50 @@
         ' <span style="color:var(--faint)">(' + v.passed + ' passed · ' + v.failed + ' failed · ' + v.pending + ' pending · ' + v.inconclusive + ' inconclusive — from this record only)</span></span>';
     }).join(' · ');
 
+    /* THE COMPREHENSION LAW (founder order 2026-09-16) reaches the engine's
+       own rendering: the headline total stays visible for every register,
+       and the deep material — comb, per-receipt proofs, the paste auditor,
+       services and seller scores — rides inside data-reg-disclose
+       disclosures: collapsed to plain-language summaries for New bee and
+       Raver, standing open for cypherpunk (register.js owns the law; the
+       initial state is set here because this mounts after the register's
+       apply pass). Nothing is removed and nothing is dumbed down — the
+       technical depth is one tap away in every register. */
+    var T = function (key, fallback) {
+      return (window.BNRLanguage && typeof window.BNRLanguage.text === 'function')
+        ? window.BNRLanguage.text(key, fallback) : fallback;
+    };
     el.innerHTML =
       '<div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap">' +
       '<span style="font-size:26px;font-weight:600;color:var(--gold);font-variant-numeric:tabular-nums">' + fromS(tot) + ' A</span>' +
       '<span style="font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint)">recomputed total — Σ quantity × rate, never the stored number</span></div>' +
+      '<div style="font-size:11.5px;color:var(--ink);margin-top:6px">' + T('sa.lead', 'Every bill re-checked here in your browser — open a receipt to see its proof.') + '</div>' +
+      '<details class="tnote" data-reg-disclose style="margin-top:8px"><summary data-i18n="sa.d.comb">' + T('sa.d.comb', 'The receipts — one cell per bill, tap for its proof') + '</summary>' +
       '<div style="display:flex;gap:4px;flex-wrap:wrap;margin:10px 0 2px">' + cells + '</div>' +
       '<div style="display:flex;gap:10px;flex-wrap:wrap;font-size:9.5px;color:var(--dim);letter-spacing:.06em">' +
       '<span>' + cellChip('PASSED', 13) + ' PASSED = capped</span><span>' + cellChip('PENDING_ANCHOR', 13) + ' PENDING_ANCHOR = honey</span>' +
       '<span>' + cellChip('FAILED', 13) + ' FAILED = flag #c07f1c</span><span>' + cellChip('INCONCLUSIVE', 13) + ' INCONCLUSIVE = nectar</span></div>' +
+      '<div style="margin-top:10px">' + rows + '</div>' +
       (opts.showPaste !== false ?
         '<div style="margin-top:10px"><textarea id="sa-paste" rows="3" placeholder="paste any spend receipt (SPEC-SPEND-RECEIPT-1 JSON) — a stranger can audit any session, keylessly"' +
         ' style="width:100%;box-sizing:border-box;background:var(--well);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:9px;font:11px \'IBM Plex Mono\',monospace"></textarea>' +
-        '<div style="display:flex;gap:8px;align-items:center;margin-top:6px"><button type="button" id="sa-paste-go" style="background:var(--well);color:var(--gold);border:1px solid var(--line);border-radius:8px;padding:8px 14px;cursor:pointer;font:11px \'IBM Plex Mono\',monospace;min-height:34px">audit it</button>' +
+        '<div style="display:flex;gap:8px;align-items:center;margin-top:6px"><button type="button" id="sa-paste-go" style="background:var(--well);color:var(--gold);border:1px solid var(--line);border-radius:8px;padding:8px 14px;cursor:pointer;font:11px \'IBM Plex Mono\',monospace;min-height:44px">audit it</button>' +
         '<span id="sa-paste-out" style="font-size:10px;color:var(--dim)"></span></div></div>' : '') +
-      '<div style="margin-top:10px">' + rows + '</div>' +
+      '</details>' +
+      '<details class="tnote" data-reg-disclose style="margin-top:6px"><summary data-i18n="sa.d.watch">' + T('sa.d.watch', 'Services and seller scores — from this record only') + '</summary>' +
       '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">' + svcs + '</div>' +
       '<div style="margin-top:8px">' + score + '</div>' +
+      '</details>' +
       '<div style="margin-top:10px;border:1px solid var(--line);border-left:3px solid var(--gold);border-radius:6px;padding:9px 11px;font-size:10px;color:var(--ink);background:var(--well)">' +
       '<b style="color:var(--gold);letter-spacing:.18em">CARE</b> — this is topology and vocabulary, NEVER a security claim.</div>' +
       '<div style="margin-top:7px;font-size:9.5px;color:var(--faint);line-height:1.8">' + esc((ledger._note && ledger._note[0]) || '') + '</div>';
+    /* initial seat: this mounts after register.js's apply pass, so the open
+       state is set here; later register switches ride the shared law, and a
+       reader's own tap always wins (click-pinned in register.js) */
+    var regNow = (document.body && document.body.dataset.reg) || 'bee';
+    el.querySelectorAll('details[data-reg-disclose]').forEach(function (d) {
+      d.open = (regNow === 'cypherpunk');
+    });
 
     var pasteOut = el.querySelector('#sa-paste-out');
     var go = el.querySelector('#sa-paste-go');

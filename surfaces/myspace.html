@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>My Space — your files, on this phone, public or private</title>
+<style>
+  :root {
+    --bg: #fbf7f0; --ink: #0c1412; --dim: #4a5f55; --panel: #fff;
+    --well: #efe9dd; --line: #e6dfd2; --active: #0c1412; --on: #fbf7f0;
+    --accent: #9e327f; --ok: #326b39; --warn: #855b0b;
+    --font: system-ui, -apple-system, "Segoe UI", sans-serif;
+    --radius: 16px; --ctl-radius: 999px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: var(--bg); color: var(--ink); }
+  body { font: 18px/1.5 var(--font); color-scheme: light; }
+  main { max-width: 620px; margin: 0 auto; padding: 18px 16px 40px; }
+  button, a, input { font: inherit; color: inherit; }
+
+  .kicker { font-size: 14px; letter-spacing: .12em; text-transform: uppercase; color: var(--dim); margin-bottom: 6px; }
+  h1 { font-size: 28px; letter-spacing: -.03em; line-height: 1.15; font-weight: 650; }
+  .lede { margin: 10px 0 18px; color: var(--dim); max-width: 34ch; }
+  .count { font-size: 14px; color: var(--dim); margin-bottom: 14px; }
+
+  .drop {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 10px; min-height: 148px; padding: 18px;
+    border: 1.5px dashed var(--line); border-radius: var(--radius);
+    background: var(--panel); text-align: center;
+  }
+  .drop .mark { width: 56px; height: 56px; }
+  .drop p { font-size: 16px; color: var(--dim); max-width: 24ch; }
+
+  .primary, .ghost, .danger {
+    appearance: none; display: inline-flex; align-items: center; justify-content: center;
+    min-height: 44px; padding: 10px 16px; border-radius: 12px; cursor: pointer; width: 100%;
+  }
+  .primary { background: var(--accent); color: #fff; border: 0; font-weight: 600; }
+  .ghost { background: transparent; border: 1px solid var(--line); }
+  .danger { background: transparent; border: 1px solid var(--accent); color: var(--accent); font-weight: 600; }
+  .primary[disabled], .ghost[disabled], .danger[disabled] { opacity: .55; cursor: default; }
+  .primary:focus-visible, .ghost:focus-visible, .danger:focus-visible, .mode:focus-visible {
+    outline: 2px solid var(--ink); outline-offset: 3px;
+  }
+
+  .modes { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 14px 0 18px; }
+  .mode {
+    min-height: 88px; padding: 12px; text-align: left; cursor: pointer;
+    border: 1px solid var(--line); border-radius: 12px; background: var(--panel);
+  }
+  .mode[aria-pressed="true"] { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+  .mode b { display: block; font-size: 16px; margin-bottom: 4px; }
+  .mode span { display: block; font-size: 14px; color: var(--dim); line-height: 1.45; }
+
+  .file {
+    padding: 14px; margin-bottom: 10px; border: 1px solid var(--line);
+    border-radius: var(--radius); background: var(--panel);
+  }
+  .file .name { font-weight: 650; font-size: 18px; overflow-wrap: anywhere; }
+  .file .meta { margin-top: 4px; font-size: 14px; color: var(--dim); }
+  .file .why { margin-top: 8px; font-size: 16px; }
+  .file .hash { margin-top: 8px; font: 13px/1.45 ui-monospace, Consolas, monospace; color: var(--dim); overflow-wrap: anywhere; white-space: pre-line; }
+  .file .hash .prov { display: none; }
+  body[data-reg="cypherpunk"] .file .hash .prov { display: block; }
+  .file .hash .left { display: block; color: var(--warn); }
+  .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
+  .actions.three { grid-template-columns: 1fr 1fr 1fr; }
+  .badge {
+    display: inline-flex; align-items: center; min-height: 28px; padding: 2px 8px;
+    border-radius: 999px; font-size: 13px; font-weight: 650; letter-spacing: .02em;
+    background: var(--well); color: var(--ok);
+  }
+  .badge.pub { color: var(--warn); }
+
+  .law { margin-top: 16px; font-size: 14px; color: var(--dim); max-width: 40ch; line-height: 1.55; }
+  .note { margin-top: 12px; font-size: 14px; color: var(--dim); line-height: 1.55; }
+  .note.loud { color: var(--accent); }
+  details.tech { margin-top: 12px; }
+  details.tech summary { display: flex; align-items: center; gap: 8px; min-height: 44px; cursor: pointer; font-size: 14px; }
+
+  .sheet {
+    display: none; position: fixed; inset: 0; background: rgba(12,20,18,.42);
+    padding: 24px 12px 12px; align-items: flex-end; z-index: 60;
+  }
+  body[data-state="delete"] .sheet-del, body[data-state="flip"] .sheet-flip { display: flex; }
+  .sheet .card {
+    width: 100%; max-width: 620px; margin: 0 auto; padding: 18px 16px 16px;
+    border-radius: 20px 20px 12px 12px; background: var(--panel); border: 1px solid var(--line);
+  }
+  .sheet h2 { font-size: 22px; margin-bottom: 8px; overflow-wrap: anywhere; }
+  .sheet p { color: var(--dim); font-size: 16px; margin-bottom: 16px; }
+  .sheet .actions { margin-top: 0; }
+
+  .hide { display: none !important; }
+  body[data-state="empty"] .has-file { display: none !important; }
+  body[data-state="file"] .empty-only,
+  body[data-state="delete"] .empty-only,
+  body[data-state="flip"] .empty-only { display: none !important; }
+
+  /* bee is the palette above. raver and cypherpunk change character and density only —
+     same facts, same storage, same routes. */
+  body[data-reg="raver"] {
+    --bg: #0e1b19; --ink: #e9f2ec; --dim: #9bb5a8; --panel: #132420;
+    --well: #15241f; --line: #2a4a40; --active: #d655bb; --on: #06110c;
+    --accent: #d655bb; --ok: #7ddf8f; --warn: #ffd27a; --radius: 22px;
+    color-scheme: dark;
+  }
+  body[data-reg="raver"] .drop {
+    border-style: solid; border-color: #6f3b63; min-height: 176px;
+    background: radial-gradient(circle at 50% 30%, rgba(214,85,187,.28), transparent 58%), var(--panel);
+  }
+  body[data-reg="raver"] h1 { letter-spacing: .02em; text-transform: lowercase; }
+  body[data-reg="raver"] .primary { border-radius: 999px; }
+  body[data-reg="raver"] .mode, body[data-reg="raver"] .file { border-radius: 18px; }
+
+  body[data-reg="cypherpunk"] {
+    --bg: #06110c; --ink: #e9f2ec; --dim: #8aa89a; --panel: #0a1813;
+    --well: #0c1412; --line: #2a5f3e; --active: #45c2dc; --on: #06110c;
+    --accent: #45c2dc; --ok: #45c2dc; --warn: #e7c75b;
+    --font: ui-monospace, "Cascadia Mono", Consolas, monospace;
+    --radius: 4px; --ctl-radius: 4px; color-scheme: dark; font-size: 16px;
+  }
+  body[data-reg="cypherpunk"] h1 { font-size: 20px; letter-spacing: .08em; text-transform: uppercase; }
+  body[data-reg="cypherpunk"] .kicker { letter-spacing: .18em; }
+  body[data-reg="cypherpunk"] .primary, body[data-reg="cypherpunk"] .ghost,
+  body[data-reg="cypherpunk"] .danger, body[data-reg="cypherpunk"] .mode,
+  body[data-reg="cypherpunk"] .file, body[data-reg="cypherpunk"] .sheet .card { border-radius: 4px; }
+  body[data-reg="cypherpunk"] .badge { border-radius: 2px; }
+  body[data-reg="cypherpunk"] .drop { border-style: dashed; min-height: 108px; }
+  body[data-reg="cypherpunk"] .hash { font-size: 12px; }
+</style>
+</head>
+<body data-reg="bee" data-state="empty" data-bee-theme="shared">
+
+<main>
+  <p class="kicker" data-reg-copy="kicker">My Space</p>
+  <h1 data-reg-copy="title">My Space</h1>
+  <p class="lede" data-reg-copy="lede">Your files live on this phone.</p>
+  <p class="count has-file" id="count"></p>
+
+  <div class="drop empty-only">
+    <svg class="mark" viewBox="0 0 56 56" aria-hidden="true">
+      <polygon points="28,6 48,17 48,39 28,50 8,39 8,17" fill="none" stroke="currentColor" stroke-width="1.6"/>
+      <path d="M28 18v20M18 28h20" stroke="currentColor" stroke-width="1.6" fill="none"/>
+    </svg>
+    <p data-reg-copy="empty">Nothing here yet. Add a file from this phone. You choose who can open it.</p>
+    <button class="primary" type="button" data-attach="1" data-reg-copy="attach">Add a file</button>
+  </div>
+
+  <button class="primary has-file" type="button" data-attach="1" data-reg-copy="attach">Add a file</button>
+
+  <div class="modes empty-only" role="group" aria-label="who can open it">
+    <button class="mode" type="button" id="modePublic" aria-pressed="false">
+      <b data-reg-copy="pub-title">Public</b>
+      <span data-reg-copy="pub-body">Hive members with the link. A stranger joins in one tap, then it opens.</span>
+    </button>
+    <button class="mode" type="button" id="modePrivate" aria-pressed="true">
+      <b data-reg-copy="priv-title">Private</b>
+      <span data-reg-copy="priv-body">Only this phone. Locked here before it leaves.</span>
+    </button>
+  </div>
+
+  <input type="file" id="picker" hidden>
+  <p class="note" id="status" hidden></p>
+
+  <div id="list"></div>
+
+  <p class="law" data-reg-copy="law">This phone remembers. There is no account. Come back later on this phone and it is still here.</p>
+
+  <details class="tech" data-reg-disclose>
+    <summary data-reg-copy="tech-summary">index · rail · identity</summary>
+    <p class="hash">
+      index {sha256, name, size, mode, keyref, ts} in this browser's IndexedDB — this device is the truth.<br>
+      private = AES-GCM in this browser; the ciphertext and the key both stay in IndexedDB. <b>Nothing is uploaded.</b><br>
+      public = the estate Blossom rail: <code>PUT /upload</code> with <code>x-sha-256</code>, <code>GET /media/&lt;sha256&gt;.png</code>, kind:24242 auth. Plaintext, wrapped in a lossless PNG because the store accepts images only.<br>
+      both ends of the rail are member-gated, so sharing (and only sharing) claims the estate's standing invite for this phone's key: <code>POST /api/invites/claim</code>, NIP-98.<br>
+      the store has <b>no delete route</b>: DELETE answers 405 and the server's own header reads <code>Allow: GET,HEAD</code>. A public copy cannot be pulled back.<br>
+      identity = a key generated once in this browser and kept here. No login, no session.
+    </p>
+  </details>
+</main>
+
+<div class="sheet sheet-del" role="dialog" aria-modal="true" aria-labelledby="del-title">
+  <div class="card">
+    <h2 id="del-title">Remove this file?</h2>
+    <p id="del-body"></p>
+    <div class="actions">
+      <button class="ghost" type="button" id="delKeep" data-reg-copy="keep">Keep it</button>
+      <button class="danger" type="button" id="delConfirm" data-reg-copy="confirm">Remove from this phone</button>
+    </div>
+  </div>
+</div>
+
+<div class="sheet sheet-flip" role="dialog" aria-modal="true" aria-labelledby="flip-title">
+  <div class="card">
+    <h2 id="flip-title">Change who can open it?</h2>
+    <p id="flip-body"></p>
+    <div class="actions">
+      <button class="ghost" type="button" id="flipKeep" data-reg-copy="flip-keep">Leave it as it is</button>
+      <button class="primary" type="button" id="flipGo" data-reg-copy="flip-go">Change it</button>
+    </div>
+  </div>
+</div>
+
+<script src="onboarding/vendor/bnr-sign.js"></script>
+<script src="adapter-seam.js"></script>
+<script src="myspace.js"></script>
+<script src="tour.js?v=42"></script>
+</body>
+</html>

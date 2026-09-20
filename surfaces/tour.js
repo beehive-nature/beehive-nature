@@ -27,7 +27,7 @@
     '—',
     ['reader','blight/vaulta-reader.html'],['c1','blight/c1-aid.html'],
     '—',
-    ['keys','onboarding/'],['receive','onboarding/receive.html'],['dids','keys/addresses.html'],['recover','recover.html'],['hw','hardware/'],
+    ['my data','bdata.html'],['keys','onboarding/'],['receive','onboarding/receive.html'],['dids','keys/addresses.html'],['recover','recover.html'],['hw','hardware/'],
     '—',
     ['🎓','university/'],['🐝','bqueenbee-live.html'],['🎧','listening.html'],['⬡','bfood.html'],['🏛','bsymposium.html'],['⚙','stack.html'],['🐜','bantfarm.html'],['♫','bset.html'],['🪩','plur.html'],['🎪','festival/'],['🎨','buzz-studio.html'],['⚒','forge/'],
       '—',
@@ -122,16 +122,60 @@
     if(inlineHost) return;
     var bar=document.getElementById('tbar'); if(!bar) return;
     var h=Math.ceil(bar.getBoundingClientRect().height); if(!h) return;
+    /* PUBLISHED, not just reserved (2026-09-20): body padding only clears the
+       bar for in-flow content. A page's OWN fixed or sticky bottom row (a
+       sheet's action buttons, a sticky toolbar) cannot read that padding, so
+       the height is also published as --tbar-h on <html>; a page anchors with
+       bottom:var(--tbar-h,0) and never has to know the bar's number. Measured
+       on the resting strip: the open drawer covers the page by design. */
+    document.documentElement.style.setProperty('--tbar-h',h+'px');
     var need=h+22;
     var cur=parseFloat(getComputedStyle(document.body).paddingBottom)||0;
     if(cur<need) document.body.style.paddingBottom=need+'px';
   }
   if(!inlineHost) document.body.style.paddingBottom='69px'; /* fail-safe before measurement */
+  else document.documentElement.style.setProperty('--tbar-h','0px'); /* in-flow bar takes no fixed room */
   fitPad();
   document.addEventListener('bregister',function(){sync();fitPad();});
   setTimeout(fitPad,500);   /* after register/lang/rails mount into the bar */
   setTimeout(fitPad,1500);
   addEventListener('resize',fitPad);
+
+  /* MODAL RETREAT (2026-09-20, measured on the live MY SPACE page at 390x844):
+     the bar sits at z-index 9998, ABOVE any page dialog, so a bottom sheet's
+     action row lost its lowest 18px of 52px under the strip and 121px² more
+     under the toggle — taps landed, but only because the centre stayed clear.
+     A modal dialog blocks the page beneath it by definition; the estate nav
+     is part of that page. So while an aria-modal dialog (or a <dialog> opened
+     with showModal) is rendered, the bar and its toggle retreat with
+     visibility:hidden — layout, body padding and the riders' seats stay put,
+     nothing reflows, and the bar returns the moment the dialog closes. Owned
+     here, once, so no surface has to repeat it. */
+  var modalUp=false, modalRaf=0;
+  function modalSel(){ try{ document.querySelector('dialog:modal'); return 'dialog:modal,[aria-modal="true"]'; }catch(e){ return 'dialog[open],[aria-modal="true"]'; } }
+  var MODAL=modalSel();
+  function modalShown(){
+    var ds=document.querySelectorAll(MODAL);
+    for(var i=0;i<ds.length;i++){
+      var d=ds[i]; if(d.closest('#tbar,#tbarMore,#adWin,#adPanel')) continue;
+      var cs=getComputedStyle(d); if(cs.display==='none'||cs.visibility==='hidden') continue;
+      var r=d.getBoundingClientRect(); if(r.width>0&&r.height>0) return true;
+    }
+    return false;
+  }
+  function retreat(){
+    modalRaf=0;
+    if(inlineHost) return;
+    var up=modalShown(); if(up===modalUp) return;
+    modalUp=up;
+    b.style.visibility=up?'hidden':''; tg.style.visibility=up?'hidden':'';
+    if(up) b.setAttribute('aria-hidden','true'); else b.removeAttribute('aria-hidden');
+  }
+  function retreatSoon(){ if(!modalRaf) modalRaf=requestAnimationFrame(retreat); }
+  if(!inlineHost&&window.MutationObserver){
+    new MutationObserver(retreatSoon).observe(document.documentElement,{subtree:true,childList:true,attributes:true,attributeFilter:['open','class','style','hidden','aria-hidden','aria-modal','data-state']});
+    retreat();
+  }
 
   /* THE EXTERNAL-LINK LAW (founder, 2026-08-21): every hyperlink that leaves the dApp
      opens in a NEW tab, so the reader's BNRoSe session stays handy and fully functional.
