@@ -199,12 +199,39 @@ const settle = page => page.waitForFunction(
   null, { timeout: 10000 });
 
 // Adds a file under a named purpose and waits for the page to stop working.
+//
+// THE STATUS LINE IS CLEARED FIRST, and that is load-bearing, not tidiness.
+// Until §15 every add ran in a fresh context where #status started empty, so
+// "not hidden, has text, not working" was an edge. Called a second time in one
+// context it is already TRUE on entry and the helper returns before the add has
+// begun — measured here: the second file's row was read before it existed and
+// its rail write landed three assertions later, inside a row counting the wire.
+// Clearing restores the precondition the wait was written against, and the
+// clear is asserted rather than assumed.
 async function add(page, purpose, name, text) {
+  const cleared = await page.evaluate(() => {
+    const el = document.getElementById('status');
+    el.hidden = true; el.textContent = '';
+    return el.hidden === true && el.textContent === '';
+  });
+  if (!cleared) throw new Error('add(): could not clear #status, so the settle wait cannot edge-trigger');
   await page.click(`#mode-${purpose}`);
   await page.setInputFiles('#picker', { name, mimeType: 'text/plain', buffer: Buffer.from(text, 'utf8') });
+  /* The in-progress list is BY TEXT, and it was missing the longest-running
+     status on the page: the bee copy for `joining` reads "Putting this phone in
+     the hive…" and contains none of the words this regex looked for, so a share
+     add settled DURING the join — before the retry PUT and before the row was
+     written. It only never showed because no context reached the share path
+     through this helper until §15. Each pattern below is a substring of the copy
+     it names, checked in all three registers. */
   await page.waitForFunction(() => {
     const el = document.getElementById('status');
-    return el && !el.hidden && el.textContent && !/joining|Putting it away|stashing|writing to rail/i.test(el.textContent);
+    const busy = /Putting it away|stashing|writing to rail/i          // t('working')
+      .test(el.textContent) || /Putting this phone in the hive|joining the hive|claiming the standing invite/i
+      .test(el.textContent) || /Moving it|moving…|re-addressing/i     // t('flipping')
+      .test(el.textContent) || /Opening it|opening…|reading from rail/i
+      .test(el.textContent);
+    return el && !el.hidden && el.textContent && !busy;
   }, null, { timeout: 15000 });
   return page.evaluate(() => window.__myspace.rows());
 }
@@ -224,6 +251,7 @@ const browser = await chromium.launch({ args: ['--no-sandbox'] });
 const LETTER = 'dear nobody, this is a letter that is not an image.\n';
 const KEPT = 'this one stays on the phone and goes nowhere.\n';
 const FLEETING = 'this one is only for this visit.\n';
+const SECOND = 'the second file, chosen from a picker that used to disappear.\n';
 
 try {
   // ── 1 · three rails, one shell ─────────────────────────────────────────────
@@ -299,10 +327,10 @@ try {
     purposes1.join(','));
 
   // ── 2 · a keep-it-here purpose puts NOTHING on the wire ────────────────────
-  // The purpose picker only shows while the page is empty (slice 01's shape,
-  // eye-checked and accepted), so each purpose is measured in its own context
-  // rather than by clicking a control that is not on screen. The wire counter is
-  // per context, which makes each count unambiguous.
+  // Each purpose is measured in its OWN browser context because the wire
+  // counter is per context, which is what makes each count unambiguous. That
+  // used to be forced — the picker only existed in the empty state — and is a
+  // choice now; §15 drives the picker with a file already on the page.
   console.log('\n2 · §7 — the privacy promise, counted on the wire rather than asserted');
   const beforeKeep = wire1.length;
   const rowsKeep = await add(p1, 'keep', 'kept.txt', KEPT);
@@ -723,6 +751,167 @@ try {
   ok('CONTROL — the hive adapter still names its own route, so the scan can find things',
     blossomSrc.includes('/upload') && blossomSrc.includes('24242'),
     'the scan found nothing even in the adapter that owns these facts');
+
+  // A purpose card is VOICE from the register then FACTS from the rail, in that
+  // order. When the two say the same sentence the card stutters — the raver
+  // share card printed "the link opens it." twice, caught on the live page by
+  // the eye seat 2026-09-20 22:51Z. Judged as a RULE over every register and
+  // every purpose, not as the one string that was wrong: a row that only knows
+  // the instance cannot stop the next one.
+  const c14 = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  await mockHive(c14);
+  const p14 = await c14.newPage();
+  await p14.goto(PAGE, { waitUntil: 'load' });
+  await settle(p14);
+  await p14.waitForFunction(() => window.__myspace.purposes().length === 3, null, { timeout: 10000 }).catch(() => {});
+  const stutters = [];
+  for (const register of ['bee', 'raver', 'cypherpunk']) {
+    const cards = await p14.evaluate(r => {
+      document.body.setAttribute('data-reg', r);
+      document.dispatchEvent(new Event('bregister'));
+      const split = s => s.split(/(?<=[.!?])\s+/).map(x => x.trim().toLowerCase()).filter(Boolean);
+      const dupOf = parts => parts.filter((x, i) => parts.indexOf(x) !== i);
+      return {
+        cards: [...document.querySelectorAll('#modes .mode')].map(b => ({
+          id: b.getAttribute('data-purpose'), dup: dupOf(split(b.querySelector('span').textContent))
+        })),
+        // THE SAME two functions over a planted repeat, and over one without.
+        probeDup: dupOf(split('one thing. one thing. another.')),
+        probeClean: dupOf(split('one thing. another. a third.'))
+      };
+    }, register);
+    cards.cards.forEach(c => { if (c.dup.length) stutters.push(register + '/' + c.id + ': "' + c.dup.join('" "') + '"'); });
+    // NON-VACUITY, run by the page that does the judging: the same splitter and
+    // the same duplicate finder must SEE a planted repeat and must NOT invent
+    // one. Without both halves this row can only ever say zero.
+    ok(`CONTROL — in ${register}, the duplicate finder catches a planted repeat and clears a clean card`,
+      cards.cards.length === 3 && cards.probeDup.join() === 'one thing.' && cards.probeClean.length === 0,
+      JSON.stringify({ dup: cards.probeDup, clean: cards.probeClean, cards: cards.cards.length }));
+  }
+  ok('no register says the same sentence twice in one purpose card',
+    stutters.length === 0, stutters.join(' | '));
+  await c14.close();
+
+  // ── 15 · the three things a stranger with a phone could not do ─────────────
+  // bee-laborer's rows, 2026-09-20 22:18Z: a kept file had no way to be opened,
+  // the purpose picker vanished the moment a file existed, and NOTHING in this
+  // gate had ever clicked #delConfirm — bFUzZ stubbed doDelete's drops and the
+  // gate stayed 57/0, because judging a DECLARATION (deletable agrees with
+  // x.drop) is not judging the MECHANISM. All three are driven here by the real
+  // control, in one context, on one file.
+  console.log('\n15 · a kept file opens · the picker survives the first file · delete, end to end');
+  const c15 = await browser.newContext({ viewport: { width: 390, height: 844 }, acceptDownloads: true });
+  const wire15 = [];
+  offBox(c15, wire15);
+  await mockHive(c15);
+  const p15 = await c15.newPage();
+  const errs15 = [];
+  p15.on('pageerror', e => errs15.push(e.message));
+  await p15.goto(PAGE, { waitUntil: 'load' });
+  await settle(p15);
+  await p15.waitForFunction(() => window.__myspace.purposes().length === 3, null, { timeout: 10000 }).catch(() => {});
+
+  const OPENED = 'this one is kept, and a stranger must be able to read it back.\n';
+  const rows15 = await add(p15, 'keep', 'openable.txt', OPENED);
+  const keptRow = rows15[0];
+  ok('a file is on the page to act on', rows15.length === 1 && keptRow.addr.scheme === 'local',
+    JSON.stringify(rows15.map(r => r.name + ':' + (r.addr && r.addr.scheme))));
+
+  // (b) THE PICKER SURVIVES THE FIRST FILE. Measured as a box on screen, with
+  // the empty-state drop zone as the CONTROL so the probe can return false.
+  const vis15 = await p15.evaluate(() => {
+    const box = el => { if (!el) return null; const r = el.getBoundingClientRect(); return { h: Math.round(r.height), shown: !!el.offsetParent }; };
+    return { state: document.body.getAttribute('data-state'), modes: box(document.getElementById('modes')),
+             drop: box(document.querySelector('.drop')), buttons: document.querySelectorAll('#modes .mode').length };
+  });
+  ok('with a file on the page the purpose picker is still on screen, all three buttons',
+    vis15.state === 'file' && vis15.modes && vis15.modes.shown === true && vis15.modes.h > 0 && vis15.buttons === 3,
+    JSON.stringify(vis15));
+  ok('CONTROL — the empty-state drop zone IS hidden in the same state, so the probe can say no',
+    vis15.drop !== null && vis15.drop.shown === false,
+    JSON.stringify(vis15.drop));
+
+  // Reachable is not the same as visible: this adds a SECOND file by clicking
+  // the picker while the first one is on the page. `add` clicks #mode-share, so
+  // a hidden picker fails this row by timeout rather than by assertion — and
+  // `share` is deliberately the FARTHEST purpose, because the reset row below
+  // then has a move to observe. Adding under `now` would have left the picker
+  // pressed on `now` either way, and a row satisfied whether or not the
+  // mechanism ran is not a row.
+  await add(p15, 'share', 'second.txt', SECOND);
+  // The row count is the mechanism; the status line is only how the helper
+  // guesses at it. Waited on explicitly here so this section cannot pass on a
+  // settle heuristic the way it silently failed to before.
+  await p15.waitForFunction(async () => (await window.__myspace.rows()).length === 2, null, { timeout: 15000 });
+  const rows15b = await p15.evaluate(() => window.__myspace.rows());
+  const second = rows15b.find(r => r.name === 'second.txt');
+  ok('a SECOND file takes the purpose chosen from the picker with the first still there',
+    rows15b.length === 2 && second && second.purpose === 'share' && second.addr.scheme === 'blossom',
+    JSON.stringify(rows15b.map(r => r.name + ':' + r.purpose)));
+  const pressed = await p15.evaluate(() => [...document.querySelectorAll('#modes .mode')]
+    .map(b => b.getAttribute('data-purpose') + '=' + b.getAttribute('aria-pressed')).join(','));
+  ok('and the selection moved back from share to the most private purpose, where the visitor can see it',
+    pressed === 'now=true,keep=false,share=false', pressed);
+
+  // (a) A KEPT FILE OPENS. Same read path a move uses, ending at the device.
+  const wireBeforeOpen = wire15.length;
+  const dl15 = p15.waitForEvent('download', { timeout: 20000 });
+  await p15.click('#open-' + keptRow.id);
+  const openedFile = await dl15;
+  const openedBytes = await readFile(await openedFile.path());
+  ok('the kept file OPENS, byte-exact, under its own name',
+    openedBytes.equals(Buffer.from(OPENED, 'utf8')) && openedFile.suggestedFilename() === 'openable.txt',
+    `${openedBytes.length} B as ${openedFile.suggestedFilename()}`);
+  ok('and opening a kept file put ZERO requests on the wire',
+    wire15.length === wireBeforeOpen, wire15.slice(wireBeforeOpen).join(' | '));
+
+  // (c) DELETE, END TO END, THROUGH #delConfirm. The preconditions are asserted
+  // first — a fixture asserts the precondition it claims to create, or "gone"
+  // afterwards is indistinguishable from never having been there.
+  const railHas = addr => p15.evaluate(async a => {
+    const db = await new Promise((res, rej) => { const r = indexedDB.open('myspace-rail-local', 1); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); });
+    const b = await new Promise((res, rej) => { const t = db.transaction('blobs', 'readonly'); const q = t.objectStore('blobs').get(a); q.onsuccess = () => res(q.result); q.onerror = () => rej(q.error); });
+    return b ? new Uint8Array(b).length : 0;
+  }, addr);
+  const keyHeld = id => p15.evaluate(async i => {
+    const db = await new Promise((res, rej) => { const r = indexedDB.open('myspace', 2); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); });
+    const k = await new Promise((res, rej) => { const t = db.transaction('keys', 'readonly'); const q = t.objectStore('keys').get(i); q.onsuccess = () => res(q.result); q.onerror = () => rej(q.error); });
+    return !!k;                                    // a CryptoKey does not cross this boundary; its presence does
+  }, id);
+
+  const bytesBefore = await railHas(keptRow.addr.address);
+  const keyBefore = await keyHeld(keptRow.id);
+  ok('PRECONDITION — before the delete the rail holds the ciphertext and this page holds the key',
+    bytesBefore > 0 && keyBefore === true, `rail ${bytesBefore} B · key ${keyBefore}`);
+
+  await p15.click('#del-' + keptRow.id);
+  await p15.waitForFunction(() => document.body.getAttribute('data-state') === 'delete', null, { timeout: 5000 });
+  const delSaid = await p15.textContent('#del-body');
+  ok('the sheet says what THIS rail will do, before the tap that does it',
+    /key goes with them/i.test(delSaid || '') && /Only this phone opens it/i.test(delSaid || ''), delSaid);
+
+  await p15.click('#delConfirm');
+  await p15.waitForFunction(() => document.body.getAttribute('data-state') !== 'delete', null, { timeout: 15000 });
+  const saidAfter = await p15.textContent('#status');
+  ok('and afterwards it says which of the two things actually happened',
+    /existed nowhere else/i.test(saidAfter || ''), saidAfter);
+
+  const bytesAfter = await railHas(keptRow.addr.address);
+  const keyAfter = await keyHeld(keptRow.id);
+  ok('the rail really dropped the bytes — the row is not the only thing that went',
+    bytesAfter === 0, `${bytesAfter} B still held`);
+  ok('and the key went with them, so the ciphertext could not be read even if it had stayed',
+    keyAfter === false, `key still held: ${keyAfter}`);
+
+  await p15.reload({ waitUntil: 'load' });
+  await settle(p15);
+  await p15.waitForFunction(() => window.__myspace.purposes().length === 3, null, { timeout: 10000 }).catch(() => {});
+  const afterReload = await p15.evaluate(() => window.__myspace.rows());
+  ok('the row is gone after a reload — the delete was written, not just rendered',
+    !afterReload.some(r => r.id === keptRow.id),
+    JSON.stringify(afterReload.map(r => r.name)));
+  ok('no page errors across open, picker and delete', errs15.length === 0, errs15.join(' | '));
+  await c15.close();
 
 } catch (e) {
   fail++;

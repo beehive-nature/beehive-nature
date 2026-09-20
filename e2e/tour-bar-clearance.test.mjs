@@ -83,8 +83,14 @@ for (const [W, H, label] of [[390, 844, 'phone 390x844'], [1920, 1080, 'desktop 
   /* the real gesture: attach one private file, then open each sheet from the row */
   await p.setInputFiles('#picker', { name: 'letter.txt', mimeType: 'text/plain', buffer: Buffer.from('hello from the clearance gate') });
   await p.waitForFunction(() => document.body.getAttribute('data-state') === 'file', null, { timeout: 15000 });
-  for (const [btnClass, kind, keepId] of [['.danger', 'delete', 'delKeep'], ['.ghost', 'flip', 'flipKeep']]) {
-    const rowBtn = p.locator(`#list button${btnClass}`).first();
+  /* ANCHORED ON THE ID, NOT THE CLASS (2026-09-20): `.ghost` first-match used to
+     mean "Move it" only because Move happened to be the first ghost button in
+     the row. MY SPACE then gained an Open button — also a ghost, also ahead of
+     Move — and this loop would have opened a file instead of the flip sheet.
+     The row's controls carry `open-`, `move-` and `del-` ids for exactly this;
+     a class is an anchor on incidental structure. */
+  for (const [sel, kind, keepId] of [['[id^="del-"]', 'delete', 'delKeep'], ['[id^="move-"]', 'flip', 'flipKeep']]) {
+    const rowBtn = p.locator(`#list button${sel}`).first();
     await rowBtn.scrollIntoViewIfNeeded();
     await rowBtn.click();
     await p.waitForFunction(k => document.body.getAttribute('data-state') === k, kind, { timeout: 5000 });
