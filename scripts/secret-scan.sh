@@ -137,6 +137,14 @@ selftest|--selftest)
       git add fx-unmarked.txt 2>/dev/null
       sh scripts/secret-scan.sh diff > "$T/t2" 2>&1; echo "$?" > "$T/r2"
       git rm -q --cached fx-unmarked.txt 2>/dev/null
+      # S4 (bOPus5 2026-09-20, N9): the noise class had a row in TREE mode only.
+      # A diff arm that reported checksum-INVALID strings too - blocking a
+      # committer's base64 asset in a real key's place - left S1/S2/S3 all
+      # "correct" and the selftest green, measured at f95946ea and again at
+      # c474ace7. The false-alarm direction needs its own fixture on its own arm.
+      git add fx-noise.txt 2>/dev/null
+      sh scripts/secret-scan.sh diff > "$T/t4" 2>&1; echo "$?" > "$T/r4"
+      git rm -q --cached fx-noise.txt 2>/dev/null
       rm -f fx-unmarked.txt
       git add fx-marked.txt fx-noise.txt fx-npub.txt 2>/dev/null
       sh scripts/secret-scan.sh tree > "$T/t3" 2>&1; echo "$?" > "$T/r3"
@@ -144,6 +152,7 @@ selftest|--selftest)
     r1=$(cat "$T/r1" 2>/dev/null || echo 99)
     r2=$(cat "$T/r2" 2>/dev/null || echo 99)
     r3=$(cat "$T/r3" 2>/dev/null || echo 99)
+    r4=$(cat "$T/r4" 2>/dev/null || echo 99)
     if [ "$r1" -eq 1 ] && grep -qF "fx-unmarked.txt" "$T/t1" && ! grep -qF "fx-marked.txt" "$T/t1" && ! grep -qF "fx-noise.txt" "$T/t1"; then
       echo "  S1 known-BAD  unmarked VALID WIF, tree mode -> BLOCKED, location named, marked+noise silent (correct)"
     else echo "  S1 known-BAD  tree wiring broken (rc=$r1)"; st=1; fi
@@ -153,6 +162,9 @@ selftest|--selftest)
     if [ "$r3" -eq 0 ] && grep -q "clean" "$T/t3"; then
       echo "  S3 known-GOOD marked + noise + npub only -> clean (correct)"
     else echo "  S3 known-GOOD  false positive on marked/noise/npub (rc=$r3)"; st=1; fi
+    if [ "$r4" -eq 0 ] && grep -q "clean" "$T/t4"; then
+      echo "  S4 known-GOOD shape-only noise ALONE staged, diff mode -> clean (correct)"
+    else echo "  S4 known-GOOD  false positive on the noise class in DIFF mode (rc=$r4)"; st=1; fi
     rm -rf "$T"
     [ "$st" -eq 0 ] && echo "secret-scan selftest ok - the blocker blocks, the marked pass, the noise collapses." \
                       || echo "secret-scan selftest FAIL - see above."

@@ -158,8 +158,15 @@
 
   <!-- Built by myspace.js from what the attached adapters declare. Empty in the
        markup on purpose: a purpose printed here as a literal would be a promise
-       the page makes before it has asked any rail whether it can keep it. -->
-  <div class="modes empty-only" id="modes" role="group" aria-label="what is this file for"></div>
+       the page makes before it has asked any rail whether it can keep it.
+
+       NO LONGER empty-only (2026-09-20): until this slice the picker vanished
+       the moment a file existed, so a visitor with one file could not choose a
+       purpose for the next one — they got whatever the last reset had left.
+       It stays on screen in both states now; myspace.js resets the selection to
+       the most private purpose after every add, which is a visible move rather
+       than a hidden one. -->
+  <div class="modes" id="modes" role="group" aria-label="what the next file is for"></div>
 
   <input type="file" id="picker" hidden>
   <p class="note" id="status" hidden></p>

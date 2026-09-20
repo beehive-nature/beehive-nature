@@ -341,8 +341,9 @@
       'keep-title': 'Keep it here', 'keep-body': 'Yours, on this phone.',
       'share-title': 'Show the world', 'share-body': 'Give someone the link.',
       joining: 'Putting this phone in the hive — that is what lets it hold a file, and what lets a link open.',
-      copy: 'Copy link', move: 'Move it',
+      copy: 'Copy link', move: 'Move it', open: 'Open',
       working: 'Putting it away…', done: 'Done.',
+      opening: 'Opening it…',
       flipping: 'Moving it…',
       'move-to': function (n) { return 'Move it: ' + n; },
       remove: 'Remove', keep: 'Keep it', confirm: 'Remove from this phone',
@@ -359,10 +360,17 @@
       attach: 'add a file',
       'now-title': 'just now', 'now-body': 'this visit. that is all.',
       'keep-title': 'keep it', 'keep-body': 'yours. this phone.',
-      'share-title': 'show it', 'share-body': 'the link opens it.',
+      /* `share-body` is the ACT, never the terms: the rail's own readers line in
+         this register is already 'the link opens it.', and a card that prints
+         the same sentence twice reads as a stutter rather than as two facts.
+         Caught on the live page by the eye seat 2026-09-20 22:51Z. The row that
+         keeps it dead is in `e2e/myspace-seam.mjs` §14 and it judges every
+         register, not this one line. */
+      'share-title': 'show it', 'share-body': 'put it out there.',
       joining: 'this phone is joining the hive. that is what makes a link open.',
-      copy: 'copy link', move: 'move it',
+      copy: 'copy link', move: 'move it', open: 'open',
       working: 'stashing…', done: 'done.',
+      opening: 'opening…',
       flipping: 'moving…',
       'move-to': function (n) { return 'move: ' + n; },
       remove: 'remove', keep: 'keep', confirm: 'remove',
@@ -381,8 +389,9 @@
       'keep-title': 'DEVICE', 'keep-body': 'purpose: retained here.',
       'share-title': 'PUBLISHED', 'share-body': 'purpose: readable by link.',
       joining: 'claiming the standing invite for this device key.',
-      copy: 'copy URL', move: 'REWRITE',
+      copy: 'copy URL', move: 'REWRITE', open: 'READ',
       working: 'writing to rail…', done: 'written.',
+      opening: 'reading from rail…',
       flipping: 're-addressing…',
       'move-to': function (n) { return 'REWRITE -> ' + n; },
       remove: 'DROP', keep: 'abort', confirm: 'DROP ROW',
@@ -708,7 +717,23 @@
       art.appendChild(h);
 
       var actions = document.createElement('div');
-      actions.className = 'actions' + (addrOf(row) && row.purpose === 'share' ? ' three' : '');
+      actions.className = 'actions';
+
+      /* Offered only when there is something to read. A row whose bytes are on
+         no rail and not on this phone would fail on tap, and a control that
+         fails on tap is the thing `availablePurposes` exists to avoid one level
+         up. The id is the handle two gates drive this row by — a class would be
+         an anchor on incidental structure, and this button being added is
+         exactly what broke the previous `.ghost` first-match anchor. */
+      if (addrOf(row) || row.local) {
+        var openBtn = document.createElement('button');
+        openBtn.type = 'button';
+        openBtn.className = 'ghost';
+        openBtn.id = 'open-' + row.id;
+        openBtn.textContent = t('open');
+        openBtn.onclick = function () { doOpen(row); };
+        actions.appendChild(openBtn);
+      }
 
       if (addrOf(row) && row.purpose === 'share') {
         var share = document.createElement('button');
@@ -740,9 +765,16 @@
       var del = document.createElement('button');
       del.type = 'button';
       del.className = 'danger';
+      del.id = 'del-' + row.id;
       del.textContent = t('remove');
       del.onclick = function () { openSheet('delete', row); };
       actions.appendChild(del);
+
+      /* Three fit one row at 390px; four wrap to two-by-two on the two-column
+         default. Counted, not guessed from the purpose — the row's buttons are
+         built conditionally above and a second SHARE rail would change the
+         count without touching this line. */
+      if (actions.children.length === 3) actions.className = 'actions three';
 
       art.appendChild(actions);
       list.appendChild(art);
@@ -848,13 +880,21 @@
         setStatus('Nothing was written (' + (e.message || 'error') + '), so nothing left this phone.', true);
       }
     }
-    /* Back to the most private purpose any rail can answer. Slice 02 did the
-       same thing with two modes and it is worth more with three: the purpose
-       picker only shows while the page is empty, so whatever is selected when
-       the next file arrives was not chosen for that file. The default that
-       carries no surprise is the one that sends the bytes least far, and
-       `PURPOSES` is ordered from the most private outward precisely so this line
-       cannot drift into meaning something else. */
+    /* Back to the most private purpose any rail can answer.
+
+       WAS TRUE UNTIL THIS SLICE AND IS NOT ANY MORE, so the reason is rewritten
+       rather than left standing: the justification here used to be that the
+       purpose picker only showed while the page was empty, so a stale selection
+       could never be read as a choice made for the file that just arrived. The
+       picker is on screen in both states now (the founder's stranger could not
+       reach it once they had one file), which makes this reset VISIBLE instead
+       of invisible — the buttons move under the visitor's eyes and the next
+       file's purpose is the one they can see.
+
+       The reset itself is unchanged and its real reason never depended on the
+       picker being hidden: a default that carries no surprise is the one that
+       sends the bytes least far, and `PURPOSES` is ordered from the most private
+       outward precisely so this line cannot drift into meaning something else. */
     var open = availablePurposes();
     pendingPurpose = open.length ? open[0].id : null;
     await render();
@@ -912,6 +952,38 @@
     closeSheet();
   }
 
+  /* Hand bytes back to the device. The only exit this page has for a file's
+     contents, used by both openings: the row's own Open button and a shared
+     link's arrival. The bytes are already plaintext by the time they get here —
+     whatever a rail needed them to look like, and whatever the page had to
+     decrypt, happened before the call. */
+  function handToDevice(bytes, name, type) {
+    var url = URL.createObjectURL(new Blob([bytes], type ? { type: type } : undefined));
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = name;
+    a.click();
+    setTimeout(function () { URL.revokeObjectURL(url); }, 4000);
+  }
+
+  /* A kept file could be put away and never taken back out: every row carried
+     Move it and Remove, and nothing that opened it (slice 01 through 03; named
+     in #168 and measured on the live page by the eye seat 2026-09-20 22:51Z).
+     This is the same read `plainBytes` already did for a move, ending at the
+     device instead of at another rail — so it works for every rail the page can
+     route to, including ones that do not exist yet, and it branches on no rail
+     name. */
+  async function doOpen(row) {
+    setStatus(t('opening'));
+    try {
+      var bytes = await plainBytes(row);
+      handToDevice(bytes, row.name, row.type);
+      setStatus(t('done'));
+    } catch (e) {
+      setStatus('Could not open ' + row.name + ' (' + (e.message || 'error') + ').', true);
+    }
+  }
+
   /* ---------- a shared link ---------- */
 
   async function openShared(address, name) {
@@ -923,12 +995,7 @@
     setStatus('Opening ' + (name || 'the file') + '…');
     try {
       var bytes = (await railGet(scheme, address)).bytes;
-      var url = URL.createObjectURL(new Blob([bytes]));
-      var a = document.createElement('a');
-      a.href = url;
-      a.download = name || (address.slice(0, 12) + '.bin');
-      a.click();
-      setTimeout(function () { URL.revokeObjectURL(url); }, 4000);
+      handToDevice(bytes, name || (address.slice(0, 12) + '.bin'), '');
       setStatus('Opened ' + (name || address.slice(0, 12)) + '.');
     } catch (e) {
       /* A code, not a parsed sentence. These two mean the rail would not let this

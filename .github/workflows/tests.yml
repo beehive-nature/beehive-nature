@@ -301,7 +301,7 @@ jobs:
       # secret-scan selftest (#170 rider, 2026-09-20): this blocker exists to
       # guard the path where no seat runs, so its witness cannot be hand-only.
       # Same law as the §7 hook selftest above, one file over: every push.
-      - name: secret-scan selftest - three fixtures, every push
+      - name: secret-scan selftest - four fixtures, every push
         if: always()
         run: sh scripts/secret-scan.sh --selftest
       # push-preflight selftest (#170 rider, 2026-09-20): P1-P11 guarded the
