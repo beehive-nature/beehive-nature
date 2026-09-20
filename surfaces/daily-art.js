@@ -298,9 +298,9 @@
     /* Neutral decorative families - no semantic hue is introduced, repainted or
        carried alone (colour law 2026-08-26). Opacity/softness families only. */
     var families = [
-      { o: 0.16, w: 1.0, s: 1 }, { o: 0.10, w: 1.6, s: 2 }, { o: 0.22, w: 0.7, s: 1 },
-      { o: 0.13, w: 1.2, s: 3 }, { o: 0.08, w: 2.0, s: 1 }, { o: 0.18, w: 0.9, s: 2 },
-      { o: 0.11, w: 1.4, s: 2 }, { o: 0.20, w: 0.8, s: 3 }
+      { o: 0.40, w: 1.0, s: 1 }, { o: 0.28, w: 1.6, s: 2 }, { o: 0.52, w: 0.7, s: 1 },
+      { o: 0.34, w: 1.2, s: 3 }, { o: 0.24, w: 2.0, s: 1 }, { o: 0.44, w: 0.9, s: 2 },
+      { o: 0.30, w: 1.4, s: 2 }, { o: 0.48, w: 0.8, s: 3 }
     ];
     return families[p % families.length];
   }
@@ -313,6 +313,16 @@
      opacity, stroke-width, animation). Variant selects which subset is
      visible; density selects how many; nothing structural ever changes. */
   var N_ELL = 3, N_RECT = 4, N_LINE = 12, N_CIRC = 40;
+
+  /* CRANK (founder order eae141a0 2026-09-20, scope = bGrokBot visual read):
+     opacity floor raised (families 0.24-0.52, was 0.08-0.22); every shape
+     family carries a faint baseline EVERY day - the day's variant BOOSTS its
+     own family, never hides another; motes larger (2-6px, was 1-3px); tree
+     ring always visible (opacity 0.15-0.39 + wider border by ringEmph).
+     Attribute-level only: same skeleton, same counts, manifest bytes and the
+     whole derive path UNTOUCHED (no generator_version bump - pre-merge free
+     parameter change per the order). */
+  var FAINT = 0.35;
 
   function render(manifest, mode) {
     var host = document.querySelector('header.mast');
@@ -329,12 +339,12 @@
     for (i = 0; i < N_ELL; i++) {
       var r = 30 + i * (18 + (next() % 20));
       vis = params.variant === 3 && i < Math.min(nVisible, 9) ? 1 : 0;
-      parts.push('<ellipse class="bui-ell" cx="195" cy="240" rx="' + r + '" ry="' + r + '" fill="none" stroke="currentColor" stroke-width="' + (pal.w * 0.8).toFixed(2) + '" opacity="' + (vis ? (pal.o * (1 - i / 10)).toFixed(3) : '0') + '"/>');
+      parts.push('<ellipse class="bui-ell" cx="195" cy="240" rx="' + r + '" ry="' + r + '" fill="none" stroke="currentColor" stroke-width="' + (pal.w * 0.8).toFixed(2) + '" opacity="' + ((vis ? 1 : FAINT) * pal.o * (1 - i / 10)).toFixed(3) + '"/>');
     }
     /* 4 rects - aurora bands (v6) */
     for (i = 0; i < N_RECT; i++) {
       y = next() % 480; vis = params.variant === 6 && i < Math.min(Math.ceil(nVisible / 2), 8) ? 1 : 0;
-      parts.push('<rect class="bui-rect" x="0" y="' + y + '" width="390" height="' + (6 + next() % 26) + '" fill="currentColor" opacity="' + (vis ? (pal.o * 0.35).toFixed(3) : '0') + '"/>');
+      parts.push('<rect class="bui-rect" x="0" y="' + y + '" width="390" height="' + (6 + next() % 26) + '" fill="currentColor" opacity="' + ((vis ? 1 : FAINT) * pal.o * 0.35).toFixed(3) + '"/>');
     }
     /* 12 lines - constellation edges (v2) / weave lattice (v5) */
     var px = [], py = [];
@@ -342,18 +352,20 @@
     for (i = 0; i < N_LINE; i++) {
       var x1 = 0, y1 = 0, x2 = 0, y2 = 0, lo = 0;
       if (params.variant === 5) { x1 = -12 + i * 34; y1 = 0; x2 = x1 + 200; y2 = 480; lo = pal.o * 0.4; }
-      else if (params.variant === 2 || (mode === 'cypherpunk' && params.variant !== 5)) {
+      else {
         var a = (i * 3 + 1) % N_CIRC, bIdx = (i * 3 + 2) % N_CIRC;
-        x1 = px[a]; y1 = py[a]; x2 = px[bIdx]; y2 = py[bIdx]; lo = pal.o * 0.6;
+        x1 = px[a]; y1 = py[a]; x2 = px[bIdx]; y2 = py[bIdx];
+        lo = pal.o * 0.6 * (params.variant === 2 || mode === 'cypherpunk' ? 1 : FAINT);
       }
-      parts.push('<line class="bui-line" x1="' + x1 + '" y1="' + y1 + '" x2="' + x2 + '" y2="' + y2 + '" stroke="currentColor" stroke-width="0.4" opacity="' + (lo ? lo.toFixed(3) : '0') + '"/>');
+      parts.push('<line class="bui-line" x1="' + x1 + '" y1="' + y1 + '" x2="' + x2 + '" y2="' + y2 + '" stroke="currentColor" stroke-width="0.4" opacity="' + lo.toFixed(3) + '"/>');
     }
     /* 40 circles - motes (v1/v4) / stars (v2) / accents (v3/v5/v6) */
     var circleCap = params.variant === 1 || params.variant === 4 ? N_CIRC : Math.min(N_CIRC, Math.max(14, Math.ceil(nVisible * 0.5)));
     for (i = 0; i < N_CIRC; i++) {
-      var rr = 1 + next() % 3, o = 0;
+      var rr = 2 + next() % 4 + (i < circleCap ? 1 : 0), o;
       if (i < circleCap) o = pal.o * (0.4 + (next() % 60) / 100);
-      parts.push('<circle class="bui-dot" cx="' + px[i] + '" cy="' + py[i] + '" r="' + rr + '" fill="currentColor" opacity="' + (o ? o.toFixed(3) : '0') + '"/>');
+      else o = pal.o * FAINT * (0.8 + (i % 5) / 10);
+      parts.push('<circle class="bui-dot" cx="' + px[i] + '" cy="' + py[i] + '" r="' + rr + '" fill="currentColor" opacity="' + o.toFixed(3) + '"/>');
     }
     parts.push('</svg>');
     var overlay = document.createElement('div');
@@ -366,8 +378,7 @@
     var ring = document.createElement('div');
     ring.className = 'bui-ring';
     ring.setAttribute('aria-hidden', 'true');
-    var emph = params.ringEmph === 2;
-    ring.style.cssText = 'left:50%;top:38%;width:210px;height:210px;transform:translate(-50%,-50%);border:' + (emph ? 1.5 : 1) + 'px solid currentColor;opacity:' + (params.ringEmph > 0 ? (emph ? 0.20 : 0.10) : 0) + ';z-index:0';
+    ring.style.cssText = 'left:50%;top:38%;width:210px;height:210px;transform:translate(-50%,-50%);border:' + (1 + params.ringEmph * 0.5) + 'px solid currentColor;opacity:' + (0.15 + params.ringEmph * 0.12).toFixed(2) + ';z-index:0';
     host.appendChild(ring);
     host.appendChild(overlay);
     if (!motionPaused() && !state.degraded) {

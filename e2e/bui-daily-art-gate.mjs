@@ -301,7 +301,15 @@ await noArtPage.waitForTimeout(250 + 400);
 const strip = (u) => u.replace(origin, '').split('?')[0];
 const setWith = [...new Set(withArt.postLoadRequests.map(strip))].sort();
 const setWithout = [...new Set(noArtReqs.map(strip))].sort();
-check('P9: the art module adds zero runtime requests (differential vs module-blocked page)', JSON.stringify(setWith) === JSON.stringify(setWithout), 'with=' + JSON.stringify(setWith) + ' without=' + JSON.stringify(setWithout));
+/* Subset semantics (crank session 2026-09-20): the art page's post-load ear is
+   openCell's 250ms while the module-blocked ear is 650ms, so the hub's own lazy
+   scripts (rails-badge.js / register.js) can land inside the longer ear only -
+   strict set equality then fails on timing, not on art. The claim under test is
+   "the art module ADDS zero requests": every request seen WITH the art module
+   must also be seen WITHOUT it. Subset asserts exactly that and still fails the
+   moment art introduces any request of its own. */
+const artAdds = setWith.filter(u => !setWithout.includes(u));
+check('P9: the art module adds zero runtime requests (differential vs module-blocked page)', artAdds.length === 0, 'art-added=' + JSON.stringify(artAdds) + ' with=' + JSON.stringify(setWith) + ' without=' + JSON.stringify(setWithout));
 await withArt.ctx.close();
 await noArtCtx.close();
 
