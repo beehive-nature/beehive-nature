@@ -37,7 +37,14 @@ const server = createServer(async (req, res) => {
     res.end(body);
   } catch { res.writeHead(404); res.end('nf') }
 });
-await new Promise(r => server.listen(8893, '127.0.0.1', r));
+/* EPHEMERAL PORT, not a fixed one. A hardcoded port made this gate fail with
+   EADDRINUSE whenever another seat's run held it on this shared box —
+   a RED that says nothing about the code under test, which is the fastest way
+   to teach a team to ignore a gate. Bind 0, then read back what the OS actually
+   assigned; every use below reads PORT, so there is no second place to forget. */
+await new Promise(r => server.listen(0, '127.0.0.1', r));
+const PORT = server.address().port;
+if (!Number.isInteger(PORT) || PORT <= 0) throw new Error('the fixture server reported no usable port: ' + PORT);
 
 let pass = 0, fail = 0;
 const ok = (name, cond, detail) => {
@@ -124,10 +131,10 @@ async function connectedPage(ctx, mutate) {
   const page = await ctx.newPage();
   page.on('request', r => {
     const u = r.url();
-    if (!/^http:\/\/127\.0\.0\.1:8893/.test(u) && !RAIL_RE.test(u) && !OTHER_RE.test(u)) leaked.push(u);
+    if (!u.startsWith('http://127.0.0.1:' + PORT + '/') && !RAIL_RE.test(u) && !OTHER_RE.test(u)) leaked.push(u);
   });
   await page.addInitScript(() => { try { localStorage.setItem('bnr_soul', 'gatesoul'); } catch (e) {} });
-  await page.goto('http://127.0.0.1:8893' + URL_, { waitUntil: 'load' });
+  await page.goto('http://127.0.0.1:' + PORT + URL_, { waitUntil: 'load' });
   await page.waitForFunction(() => window.BZDIDKEY && window.BnrSign && window.BNRPAY, null, { timeout: 20000 });
   await page.evaluate(() => {
     const mprk = new Uint8Array(32).fill(0x2a);          // TEST-ONLY masterPRK
@@ -273,6 +280,19 @@ try {
     ok('the testnet rail\'s native unit is tETH, not ETH',
       (built.natives.find(n => n.rail === 'arbitrumSepolia') || {}).native === 'tETH',
       JSON.stringify(built.natives.find(n => n.rail === 'arbitrumSepolia')));
+    /* H1 (bFUzZ's M7b/M7c pair, 2026-09-20): the line above pins the TESTNET
+       rail's unit by name. The two MAINNET rails are covered only by the
+       generic 'native is one of my own assets' line above that — and weakening
+       THAT to a mere presence check leaves their units unverified while the
+       suite stays GREEN. That is the M7 survivor, and it survives because one
+       assertion cannot defend its own predicate against being weakened. A
+       second, independent assertion can. So the mainnet units are pinned by
+       name the same way the testnet unit is. Remedy on a RED: read the rail
+       back from the chain and correct the registry, never relax this line. */
+    ok('both mainnet rails name ETH as their native unit, pinned by name',
+      ['base', 'arbitrum'].every(k =>
+        (built.natives.find(n => n.rail === k) || {}).native === 'ETH'),
+      JSON.stringify(['base', 'arbitrum'].map(k => built.natives.find(n => n.rail === k))));
 
     const be = decode(built.baseEth.raw), ae = decode(built.arbEth.raw);
     // chainId is recoverable from v: v = 35 + 2*chainId + recovery
