@@ -99,8 +99,7 @@
   /* spawn(rail, script) -> handle. `rail` is the value the adapter must return
      from describe(); a mismatch is a refusal, because a caller-supplied
      classification is not a classification (§7). */
-  function spawn(rail, script, options) {
-    var opt = options || {};
+  function spawn(rail, script) {
     var a = {
       rail: rail,
       worker: null,
@@ -123,7 +122,6 @@
       a.caps = null;
       a.ops = {};                                   // §9.2: the call paths go with it
       a.state = 'down — ' + why;                    // ONE rail, never the page (§6)
-      if (opt.onstate) opt.onstate(a);
     }
 
     function call(method, params, ms) {
@@ -134,7 +132,7 @@
         var timer = setTimeout(function () {
           a.pending.delete(id);
           rej(rpcError({ code: -32011, message: method + ' on ' + rail + ' timed out' }));
-        }, ms || opt.timeout || 15000);
+        }, ms || 15000);
         a.pending.set(id, { res: res, rej: rej, timer: timer });
         a.telemetry.sent++;
         a.worker.postMessage({ jsonrpc: '2.0', id: id, method: method, params: params || {} });
@@ -165,7 +163,7 @@
       };
       a.worker.onerror = function () { crash('worker error'); };
 
-      a.ready = call('describe', {}, opt.attachTimeout || 8000).then(function (d) {
+      a.ready = call('describe', {}, 8000).then(function (d) {
         if (!d || d.rail !== rail || d.contract_version !== '1' ||
             !Array.isArray(d.capabilities) || !d.capabilities.length) {
           crash('describe incomplete — adapter not attached (contract §9.1)');
@@ -181,7 +179,6 @@
         d.capabilities.forEach(function (cap) {
           a.ops[cap] = function (params, ms) { return call(cap, params, ms); };
         });
-        if (opt.onstate) opt.onstate(a);
         return d;
       }, function (e) {
         crash('describe failed: ' + ((e && e.message) || e));
