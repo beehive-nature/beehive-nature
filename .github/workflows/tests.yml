@@ -435,6 +435,17 @@ jobs:
         if: always()
         working-directory: e2e
         run: node kandi-thread.mjs
+      # MY SPACE slice 02: the storage seam. SPEC-ADAPTER-CONTRACT-1 in the
+      # browser carrier with the hive's Blossom store as the first adapter —
+      # describe-or-no-attach (§9.1), an undeclared capability with no call
+      # path at all (§9.2), the redaction wall (§4.1), a dead rail that is
+      # never a dead page (§6), and a stranger's phone reading back the exact
+      # bytes the author's phone put there. The rail is mocked in-process; no
+      # request leaves the runner.
+      - name: MY SPACE — storage adapter seam
+        if: always()
+        working-directory: e2e
+        run: node myspace-seam.mjs
       # bPay Phase A gate (UI seat, 2026-09-17): the REAL machine-bound
       # invoice renders in the wallet surface — identity (name/bytes/sha256),
       # owed recomputed from the carried quote set by the TEST, native gas
