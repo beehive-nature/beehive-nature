@@ -56,6 +56,27 @@ test("model validation catches structure breaks and privacy leaks", () => {
   assert.deepEqual(validate(pub, { public: true }).filter((p) => !p.startsWith("unresolved:")), []);
 });
 
+test("validate names parent-graph cycles by component, with a witness walked from real edges", () => {
+  const m = createModel({ root: "A" });
+  for (const id of ["A", "B", "C", "D", "E", "F", "G", "S"]) addPerson(m, { id, name: id, lifespan: "1900–1950" });
+  // A←B←C←A is a simple ring
+  addEdge(m, "A", ["B"]); addEdge(m, "B", ["C"]); addEdge(m, "C", ["A"]);
+  // D,E,F,G is one component but no single ring covers it: D→E→D and D→F→G→D
+  addEdge(m, "D", ["E", "F"]); addEdge(m, "E", ["D"]); addEdge(m, "F", ["G"]); addEdge(m, "G", ["D"]);
+  // a person listed as their own parent
+  addEdge(m, "S", ["S"]);
+  assert.deepEqual(validate(m).filter((p) => p.startsWith("cycle-component: ") || p.startsWith("witness: ")), [
+    "cycle-component: A,B,C",
+    "witness: A -> B -> C -> A",
+    "cycle-component: D,E,F,G",
+    "witness: D -> E -> D",
+    "cycle-component: S",
+    "witness: S -> S",
+  ]);
+  // an acyclic model reports no cycles
+  assert.equal(validate(fixtureModel()).some((p) => p.startsWith("cycle-component: ")), false);
+});
+
 test("privatize — living bloodline become anonymous stubs, off-line living dropped", () => {
   const m = fixtureModel();
   const pub = privatize(m);
