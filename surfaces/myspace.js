@@ -1,38 +1,36 @@
-/* myspace.js — MY SPACE slice 01, variant 1 (`bee` authored first; one DOM, three registers).
+/* myspace.js — MY SPACE, the shell (`bee` authored first; one DOM, three registers).
 
-   Order: PLANS/MYSPACE_01_SLICE.md (founder events ebedeaf6 / 9bc95b29).
+   Order: PLANS/MYSPACE_01_SLICE.md (founder events ebedeaf6 / 9bc95b29); slice 02
+   cut by the coordinator seat 2026-09-20 20:06Z — seam first, Blossom as the
+   first adapter, and a row that carries {scheme, address} instead of a bare hash.
    Comps: OUTBOX/2026-09-20_MYSPACE_COMPS/myspace-comp.html.
 
-   Every sentence this file shows a stranger is written to a measurement taken against the
-   live relay on 2026-09-20 and recorded in WORK_LOGS/2026-09-20_BOPUS5_MYSPACE01_STEP0_BLOSSOM.md:
+   THIS FILE NO LONGER KNOWS A RAIL. Every measured fact about the hive's blob
+   store — images only, no DELETE route, member-gated at both ends, `x-sha-256`
+   required, the PNG wrapper, the invite door — moved to
+   `surfaces/myspace-adapter-blossom.js`, which is where those measurements are
+   now written down (they were taken on 2026-09-20 and recorded in
+   WORK_LOGS/2026-09-20_BOPUS5_MYSPACE01_STEP0_BLOSSOM.md). What stays here is the
+   half that is not the rail's: the device key, the signature over an adapter's
+   digest, the retry decision, the index, and the words.
 
-     - the store accepts IMAGES ONLY. A .txt is refused `unsupported file type:
-       application/octet-stream`; PNG magic with a junk body is refused `422 invalid image
-       data`. So every blob this page PUTs is a valid lossless PNG, and anything that is not
-       already an accepted image rides inside one. Originals come back byte-exact (measured),
-       so the wrapper is lossless in practice as well as in theory.
-     - there is NO DELETE ROUTE. `DELETE /media/<sha>.png` answers 405 and the server's own
-       header reads `Allow: GET,HEAD`. Nothing this page does can remove a blob. Therefore:
-       private delete destroys the key (the ciphertext dies with it); public delete forgets
-       locally and the blob stays at its hash. Those are two different sentences and this
-       file never flattens them into one.
-     - both ends are member-gated. Anonymous GET is 401; a key the hive does not know is 403
-       `relay membership required` on GET and on PUT. Measured after that: a fresh key that
-       claims the estate's standing invite is `status:"joined"`, its PUT answers 200, and a
-       SECOND fresh key reads the first key's blob byte-exact. So "public" is real for any
-       stranger — their phone joins the hive to read, which the page says in that sentence
-       and at that moment.
-     - `x-sha-256` is required on PUT. Without it the relay answers 401 whatever key signs.
-     - PRIVATE never touches the rail at all, so nobody is enrolled in anything for keeping
-       a file to themselves.
+   Two sentences the shell still owns, because they are about the visitor and not
+   about a store:
 
-   The device index is the truth. That is what makes "come back later and find it" true by
-   construction rather than by promise. */
+     - PRIVATE never reaches an adapter at all. Those bytes are encrypted and kept
+       in this browser, so nobody is enrolled in anything for keeping a file to
+       themselves.
+     - a copy that has been shared cannot be unshared. The delete and flip
+       sentences say that in words, and they are written against THIS rail's
+       measured truth. When a second adapter lands, that sentence has to come from
+       the adapter rather than from this file — named here, not built here, because
+       one rail cannot exercise a per-rail answer.
+
+   The device index is the truth. That is what makes "come back later and find it"
+   true by construction rather than by promise. */
 (function () {
   'use strict';
 
-  var RELAY = 'https://skaists.buzz';
-  var RELAY_HOST = 'skaists.buzz';
   var JOIN_DOOR = 'https://skaists.dev/join/';
   var DB_NAME = 'myspace';
   var DB_VERSION = 2;
@@ -51,16 +49,10 @@
     for (var i = 0; i < u.length; i++) u[i] = parseInt(h.substr(2 * i, 2), 16);
     return u;
   }
-  async function sha256hex(bytes) {
-    return hex(new Uint8Array(await crypto.subtle.digest('SHA-256', bytes)));
-  }
   function kb(n) {
     if (n < 1024) return n + ' B';
     if (n < 1024 * 1024) return Math.round(n / 1024) + ' KB';
     return (n / (1024 * 1024)).toFixed(1) + ' MB';
-  }
-  function b64url(str) {
-    return btoa(str).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
   }
 
   /* ---------- identity: one key, generated once in this browser, never sent ----------
@@ -93,165 +85,6 @@
     return hex(s.getPublicKey(SK));
   }
 
-  /* ---------- Blossom kind:24242 auth (BUD-11), the shape the relay actually verifies ----
-     Read from the client that already works against this relay:
-     crates/buzz-cli/src/client.rs sign_blossom_upload / sign_blossom_get, and checked
-     against the verifier in crates/buzz-media/src/auth.rs. */
-
-  async function blossomAuth(verb, sha256) {
-    var s = signer();
-    if (!s) throw new Error('signer unavailable');
-    var pub = hex(s.getPublicKey(SK));
-    var now = Math.floor(Date.now() / 1000);
-    var tags = [['t', verb], ['expiration', String(now + 600)], ['server', RELAY_HOST]];
-    if (verb === 'upload') tags.splice(1, 0, ['x', sha256]);
-    var ev = {
-      pubkey: pub,
-      created_at: now,
-      kind: 24242,
-      tags: tags,
-      content: verb === 'upload' ? 'Upload file' : 'Get media'
-    };
-    var serial = JSON.stringify([0, ev.pubkey, ev.created_at, ev.kind, ev.tags, ev.content]);
-    var id = await sha256hex(new TextEncoder().encode(serial));
-    var sig = hex(await s.sign(fromHex(id), SK));
-    ev.id = id;
-    ev.sig = sig;
-    return 'Nostr ' + b64url(JSON.stringify(ev));
-  }
-
-  /* ---------- the PNG wrapper ----------
-     The store decodes what it is given and refuses anything that is not an image, so bytes
-     that are not already an accepted image travel inside a valid 8-bit grayscale PNG: one
-     row, width = payload length, one filter byte. Measured byte-exact through the live
-     store before this page was written. */
-
-  var CRC_TABLE = (function () {
-    var t = new Int32Array(256);
-    for (var n = 0; n < 256; n++) {
-      var c = n;
-      for (var k = 0; k < 8; k++) c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1);
-      t[n] = c;
-    }
-    return t;
-  })();
-
-  function crc32(bytes) {
-    var c = 0xFFFFFFFF;
-    for (var i = 0; i < bytes.length; i++) c = CRC_TABLE[(c ^ bytes[i]) & 0xFF] ^ (c >>> 8);
-    return (c ^ 0xFFFFFFFF) >>> 0;
-  }
-
-  function chunk(type, data) {
-    var out = new Uint8Array(12 + data.length);
-    var dv = new DataView(out.buffer);
-    dv.setUint32(0, data.length);
-    for (var i = 0; i < 4; i++) out[4 + i] = type.charCodeAt(i);
-    out.set(data, 8);
-    dv.setUint32(8 + data.length, crc32(out.subarray(4, 8 + data.length)));
-    return out;
-  }
-
-  /* zlib stream with stored (uncompressed) deflate blocks — no compression, so the
-     wrapper is exact and dependency-free. */
-  function zlibStore(payload) {
-    var blocks = [];
-    var pos = 0;
-    var MAX = 65535;
-    do {
-      var len = Math.min(MAX, payload.length - pos);
-      var last = (pos + len >= payload.length) ? 1 : 0;
-      var head = new Uint8Array(5);
-      head[0] = last;
-      head[1] = len & 0xFF; head[2] = (len >>> 8) & 0xFF;
-      head[3] = (~len) & 0xFF; head[4] = ((~len) >>> 8) & 0xFF;
-      blocks.push(head, payload.subarray(pos, pos + len));
-      pos += len;
-    } while (pos < payload.length);
-    var body = 0;
-    blocks.forEach(function (b) { body += b.length; });
-    var out = new Uint8Array(2 + body + 4);
-    out[0] = 0x78; out[1] = 0x01;
-    var o = 2;
-    blocks.forEach(function (b) { out.set(b, o); o += b.length; });
-    // adler-32
-    var a = 1, bsum = 0;
-    for (var i = 0; i < payload.length; i++) { a = (a + payload[i]) % 65521; bsum = (bsum + a) % 65521; }
-    new DataView(out.buffer).setUint32(2 + body, ((bsum << 16) | a) >>> 0);
-    return out;
-  }
-
-  var PNG_MAGIC = [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A];
-
-  /* No tEXt marker chunk. The relay refuses any PNG carrying metadata —
-     `422 media contains metadata or a non-canonical metadata channel`, measured — so the
-     wrapper is recognised by its IHDR shape instead: one row, 8-bit grayscale, width =
-     payload length. Only bytes that ride the rail are wrapped; a private file is raw
-     ciphertext in IndexedDB and never goes through here. */
-  function wrapAsPng(payload) {
-    var ihdr = new Uint8Array(13);
-    var dv = new DataView(ihdr.buffer);
-    dv.setUint32(0, payload.length);   // width  = payload length
-    dv.setUint32(4, 1);                // height = 1
-    ihdr[8] = 8;                       // 8 bits
-    ihdr[9] = 0;                       // grayscale
-    var raw = new Uint8Array(payload.length + 1);
-    raw[0] = 0;                        // filter: none
-    raw.set(payload, 1);
-    var parts = [
-      new Uint8Array(PNG_MAGIC),
-      chunk('IHDR', ihdr),
-      chunk('IDAT', zlibStore(raw)),
-      chunk('IEND', new Uint8Array(0))
-    ];
-    var total = 0;
-    parts.forEach(function (p) { total += p.length; });
-    var png = new Uint8Array(total);
-    var o = 0;
-    parts.forEach(function (p) { png.set(p, o); o += p.length; });
-    return png;
-  }
-
-  function isWrapped(png) {
-    if (png.length < 33) return false;
-    for (var i = 0; i < 8; i++) if (png[i] !== PNG_MAGIC[i]) return false;
-    var dv = new DataView(png.buffer, png.byteOffset, png.byteLength);
-    if (dv.getUint32(8) !== 13) return false;
-    if (String.fromCharCode(png[12], png[13], png[14], png[15]) !== 'IHDR') return false;
-    var height = dv.getUint32(20);
-    var depth = png[24];
-    var colorType = png[25];
-    return height === 1 && depth === 8 && colorType === 0;
-  }
-
-  function unwrapPng(png) {
-    var o = 8, idat = [];
-    var dv = new DataView(png.buffer, png.byteOffset, png.byteLength);
-    while (o + 8 <= png.length) {
-      var len = dv.getUint32(o);
-      var type = String.fromCharCode(png[o + 4], png[o + 5], png[o + 6], png[o + 7]);
-      if (type === 'IDAT') idat.push(png.subarray(o + 8, o + 8 + len));
-      o += 12 + len;
-    }
-    var size = 0;
-    idat.forEach(function (b) { size += b.length; });
-    var z = new Uint8Array(size), p = 0;
-    idat.forEach(function (b) { z.set(b, p); p += b.length; });
-    // stored deflate blocks only — this is our own wrapper, read back the way we wrote it
-    var out = [], q = 2;
-    for (;;) {
-      var last = z[q] & 1;
-      var len = z[q + 1] | (z[q + 2] << 8);
-      out.push(z.subarray(q + 5, q + 5 + len));
-      q += 5 + len;
-      if (last) break;
-    }
-    var totalRaw = 0;
-    out.forEach(function (b) { totalRaw += b.length; });
-    var raw = new Uint8Array(totalRaw), r = 0;
-    out.forEach(function (b) { raw.set(b, r); r += b.length; });
-    return raw.subarray(1); // drop the filter byte
-  }
 
   /* ---------- the device index: this device is the truth ---------- */
 
@@ -282,6 +115,29 @@
   }
 
   function allRows() { return tx('files', 'readonly', function (s) { return s.getAll(); }); }
+
+  /* ---------- an address is {scheme, address}, never a bare hash ----------
+     Slice 01 stored `sha` — an address under a scheme nobody wrote down, which
+     was unambiguous only because there was exactly one rail. There will not be.
+     The migration below is not a guess: every row that carries a `sha` was
+     written by slice 01, and slice 01 had no rail but this one, so the scheme is
+     known rather than inferred. It runs once per row and persists. */
+  function addrOf(row) { return (row.addr && row.addr.address) || null; }
+
+  function migrateRow(row) {
+    var moved = false;
+    if (row.sha && !row.addr) { row.addr = { scheme: RAIL, address: row.sha }; moved = true; }
+    if (row.oldSha && !row.oldAddr) { row.oldAddr = { scheme: RAIL, address: row.oldSha }; moved = true; }
+    if (moved) { delete row.sha; delete row.oldSha; }
+    return moved;
+  }
+
+  async function loadRows() {
+    var rows = await allRows();
+    var moved = rows.filter(migrateRow);
+    for (var i = 0; i < moved.length; i++) await putRow(moved[i]);
+    return rows;
+  }
   function putRow(row) { return tx('files', 'readwrite', function (s) { return s.put(row); }); }
   function dropRow(id) { return tx('files', 'readwrite', function (s) { return s.delete(id); }); }
   function putKey(id, key) { return tx('keys', 'readwrite', function (s) { return s.put(key, id); }); }
@@ -291,32 +147,78 @@
   function getBlob(id) { return tx('blobs', 'readonly', function (s) { return s.get(id); }); }
   function dropBlob(id) { return tx('blobs', 'readwrite', function (s) { return s.delete(id); }); }
 
-  /* ---------- joining the hive, in this page, with this phone's own key ----------
-     Both ends of the rail are member-gated: a key the hive does not know is `403 relay
-     membership required` on PUT and on GET. The estate already publishes the way in, and
-     this page uses that way rather than sending the visitor somewhere else: `join.json`
-     is served CORS-open from the relay origin and carries the standing invite; the claim
-     is NIP-98 (kind 27235) over the CANONICAL origin, body {code, policy_receipt}.
+  /* ---------- the rail, on the far side of a boundary ----------
+     Slice 02. Everything this page used to know about the hive's blob store —
+     the origin, the kind:24242 auth event, the PNG wrapper the store's image-only
+     decoder requires, the invite door — moved into
+     `surfaces/myspace-adapter-blossom.js`, which runs in its own dedicated Web
+     Worker behind SPEC-ADAPTER-CONTRACT-1 (§1, §2). What is left here is the
+     shell's half and only that: the device key, the signature, the outbox
+     decision, and the words.
 
-     This is the live join page's own wire, read out of the deployed bundle
-     (https://skaists.buzz/join/assets/index-_RsFMRoT.js) rather than guessed, and measured
-     from a fresh 32-byte key: 403 before the claim, `status:"joined"` on the claim, 200 on
-     the PUT after it, and a SECOND fresh key reading the first key's blob byte-exact.
+     The shape below is the contract's, not a convenience: an adapter NEVER holds
+     key material (§4), and this rail authenticates every single request, so each
+     call is two halves — the adapter builds an unsigned request and hands back a
+     digest, this page signs that digest with the key that has never left it, and
+     the adapter speaks to the rail with the signature only. `intent_id` is the
+     idempotency key, and a retry resubmits the identical intent under the
+     identical signature (§6). The shell owns the retry; the adapter has none.
 
-     Transport here IS the canonical origin (skaists.buzz), so the `u` tag and the URL are
-     the same string. A page served against an alias host would have to read NIP-11 /info
-     for `push.origin` and sign THAT — the canonical-origin signing law. This page does not
-     need it; it does not pretend to handle it either. */
+     THE BOUNDARY (ruled by the coordinator seat, 2026-09-20 19:05Z) SURVIVES THE
+     MOVE and is now held by construction twice over: the claim fires only on the
+     sharing path, and the private path never calls `railOp` at all — those bytes
+     are encrypted and stored without this section being entered. Spawning the
+     worker touches no network: `describe` is answered locally. */
 
+  var RAIL = 'blossom';
+  var ADAPTER_SCRIPT = 'myspace-adapter-blossom.js';
+
+  /* The adapter's own codes. §6: an adapter answers with a code, never a
+     plain-language string the shell has to parse to learn what happened. */
+  var MEMBERSHIP_REQUIRED = -32020;
+  var NOT_PERMITTED = -32023;
+
+  var adapter = null;
   var joined = false;
 
-  /* THE BOUNDARY (ruled by the coordinator seat, 2026-09-20 19:05Z, and held here by
-     construction rather than by care): the claim fires ONLY on the sharing path — the
-     visitor chose public, or the visitor opened someone's link. It never fires on page
-     load, and never on the private path. Somebody who only keeps files to themselves
-     never becomes a member of anything, because their bytes never touch the rail at all.
-     That is why `put` and `fetchBlob` are the only callers of this function, and why
-     the private path below has no call to either. */
+  function rail() {
+    if (!adapter) {
+      if (!window.BnrSeam) throw new Error('the adapter seam did not load, so nothing can be shared from this phone');
+      adapter = window.BnrSeam.spawn(RAIL, ADAPTER_SCRIPT);
+    }
+    return adapter;
+  }
+
+  async function signDigest(digest) {
+    var s = signer();
+    if (!s) throw new Error('signer unavailable');
+    return hex(await s.sign(fromHex(digest), SK));
+  }
+
+  async function railOp(verb, params) {
+    var a = rail();
+    await a.ready;
+    var begin = 'x.begin' + verb;
+    var submit = 'x.submit' + verb;
+    /* §9.2 is not a check here — `ops` was built from the adapter's own
+       declaration, so an undeclared capability has no function to call and no
+       message is dispatched. This reads the same shape for a reason. */
+    if (!a.can(begin) || !a.can(submit)) throw new Error(RAIL + ' does not declare ' + verb.toLowerCase());
+    var p = params || {};
+    p.pubkey = devicePubkey();
+    if (!p.pubkey) throw new Error('signer unavailable');
+    var intent = await a.ops[begin](p);
+    var sig = await signDigest(intent.digest);
+    try {
+      return await a.ops[submit]({ intent_id: intent.intent_id, sig: sig });
+    } catch (e) {
+      if (e.code !== MEMBERSHIP_REQUIRED || verb === 'Join') throw e;
+      await joinHive();
+      /* The IDENTICAL intent and the IDENTICAL signature. The shell resubmits; it
+         never re-signs and never builds a second intent (§6). */
+      return a.ops[submit]({ intent_id: intent.intent_id, sig: sig });
+    }
+  }
 
   async function joinHive() {
     if (joined) return true;
@@ -324,88 +226,13 @@
        in the hive's member list. It is the price of the rail and they should read it as
        it is paid. */
     setStatus(t('joining'));
-    var mat = await fetch(RELAY + '/join.json').then(function (r) { return r.ok ? r.json() : null; });
-    var code = mat && typeof mat.invite_url === 'string'
-      ? mat.invite_url.slice(mat.invite_url.indexOf('/invite/') + 8)
-      : null;
-    if (!code) throw new Error('the hive publishes no invite right now');
-
-    var s = signer();
-    if (!s) throw new Error('signer unavailable');
-    var url = RELAY + '/api/invites/claim';
-    var body = JSON.stringify({ code: code, policy_receipt: null });
-    var now = Math.floor(Date.now() / 1000);
-    var ev = {
-      pubkey: hex(s.getPublicKey(SK)),
-      created_at: now,
-      kind: 27235,
-      tags: [
-        ['u', url],
-        ['method', 'POST'],
-        ['payload', await sha256hex(new TextEncoder().encode(body))],
-        ['nonce', crypto.randomUUID()]
-      ],
-      content: ''
-    };
-    var serial = JSON.stringify([0, ev.pubkey, ev.created_at, ev.kind, ev.tags, ev.content]);
-    ev.id = await sha256hex(new TextEncoder().encode(serial));
-    ev.sig = hex(await s.sign(fromHex(ev.id), SK));
-
-    var res = await fetch(url, {
-      method: 'POST',
-      headers: { 'Authorization': 'Nostr ' + btoa(JSON.stringify(ev)), 'Content-Type': 'application/json' },
-      body: body
-    });
-    var out = await res.json().catch(function () { return {}; });
-    if (!res.ok) throw new Error(out.error || ('the hive refused the invite (HTTP ' + res.status + ')'));
+    await railOp('Join', {});
     joined = true;
     return true;
   }
 
-  /* ---------- the rail ----------
-     `x-sha-256` is not optional: without it the relay answers `401 authentication failed`
-     whatever key signs the request. Measured against a seat key that uploads fine with the
-     header and fails with it removed. */
-
-  async function put(bytes, retried) {
-    var sha = await sha256hex(bytes);
-    var res = await fetch(RELAY + '/upload', {
-      method: 'PUT',
-      headers: {
-        'Authorization': await blossomAuth('upload', sha),
-        'Content-Type': 'image/png',
-        'x-sha-256': sha
-      },
-      body: bytes
-    });
-    var text = await res.text();
-    if (res.status === 403 && !retried) {
-      await joinHive();
-      return put(bytes, true);
-    }
-    if (!res.ok) {
-      var err = new Error(text || ('HTTP ' + res.status));
-      err.status = res.status;
-      throw err;
-    }
-    return JSON.parse(text);
-  }
-
-  async function fetchBlob(sha, retried) {
-    var res = await fetch(RELAY + '/media/' + sha + '.png', {
-      headers: { 'Authorization': await blossomAuth('get', sha) }
-    });
-    if (res.status === 403 && !retried) {
-      await joinHive();
-      return fetchBlob(sha, true);
-    }
-    if (!res.ok) {
-      var err = new Error('HTTP ' + res.status);
-      err.status = res.status;
-      throw err;
-    }
-    return new Uint8Array(await res.arrayBuffer());
-  }
+  function railPut(bytes) { return railOp('Put', { bytes: bytes }); }
+  function railGet(address) { return railOp('Get', { address: address }); }
 
   /* ---------- copy, per register. Same facts, same storage, same routes. ---------- */
 
@@ -488,9 +315,9 @@
      into one would be the lie this page exists not to tell. */
   function deleteSentence(row) {
     if (row.mode === 'private') {
-      if (row.oldSha) {
+      if (row.oldAddr) {
         return 'The locked bytes and the key are both on this phone, and both go. The open copy you shared earlier is still in the hive at ' +
-          row.oldSha.slice(0, 12) + '…, and this cannot reach it.';
+          row.oldAddr.address.slice(0, 12) + '…, and this cannot reach it.';
       }
       return 'The locked bytes and the key are both on this phone, and both go. Nothing about this file exists anywhere else.';
     }
@@ -530,7 +357,7 @@
   }
 
   async function render() {
-    var rows = await allRows();
+    var rows = await loadRows();
     rows.sort(function (a, b) { return b.ts - a.ts; });
     document.body.setAttribute('data-state', rows.length ? 'file' : 'empty');
     $('count').textContent = COPY[reg()].count(rows.length);
@@ -564,30 +391,38 @@
       h.className = 'hash';
       var prov = document.createElement('span');
       prov.className = 'prov';
-      prov.textContent = (row.sha ? ('sha256 ' + row.sha) : 'no rail record — these bytes are only here') +
+      /* The scheme is shown because the row now carries one. "sha256 <hex>" was
+         the shell naming the rail's hash function, which is exactly the knowledge
+         the shell no longer has and should not pretend to. */
+      prov.textContent = (row.addr ? (row.addr.scheme + ':' + row.addr.address) : 'no rail record — these bytes are only here') +
         (row.keyref ? ('\nkeyref ' + row.keyref) : '') +
         '\nts ' + new Date(row.ts).toISOString().replace(/\.\d+Z$/, 'Z');
       h.appendChild(prov);
       /* This one is never a register's choice. A copy the visitor cannot pull back is said
          in every register, in words, next to the file it belongs to. */
-      if (row.oldSha) {
+      if (row.oldAddr) {
         var left = document.createElement('span');
         left.className = 'left';
-        left.textContent = 'An open copy you shared earlier is still in the hive at ' + row.oldSha.slice(0, 12) + '…';
+        left.textContent = 'An open copy you shared earlier is still in the hive at ' + row.oldAddr.address.slice(0, 12) + '…';
         h.appendChild(left);
       }
       art.appendChild(h);
 
       var actions = document.createElement('div');
-      actions.className = 'actions' + (row.sha && row.mode === 'public' ? ' three' : '');
+      actions.className = 'actions' + (addrOf(row) && row.mode === 'public' ? ' three' : '');
 
-      if (row.sha && row.mode === 'public') {
+      if (addrOf(row) && row.mode === 'public') {
         var share = document.createElement('button');
         share.type = 'button';
         share.className = 'ghost';
         share.textContent = t('copy');
         share.onclick = function () {
-          var link = location.origin + location.pathname + '?f=' + row.sha + '&n=' + encodeURIComponent(row.name);
+          /* `f` carries a bare address and means this rail, because every link
+             ever minted from this page was minted against this rail. It is not
+             widened here: a second rail needs a scheme in the link, and inventing
+             that parameter before a second rail exists would be a guess at its
+             shape. Named, not built. */
+          var link = location.origin + location.pathname + '?f=' + addrOf(row) + '&n=' + encodeURIComponent(row.name);
           navigator.clipboard.writeText(link).then(function () {
             setStatus('Link copied. Whoever opens it joins the hive to read it, then the file opens.');
           }, function () { setStatus('Link: ' + link); });
@@ -654,7 +489,7 @@
     var mode = pendingMode;
     var row = {
       id: id, name: file.name || 'file', size: plain.length, type: file.type || '',
-      mode: mode, ts: Date.now(), sha: null, keyref: null
+      mode: mode, ts: Date.now(), addr: null, keyref: null
     };
 
     if (mode === 'private') {
@@ -674,8 +509,8 @@
 
     setStatus(t('sharing'));
     try {
-      var res = await put(wrapAsPng(plain));
-      row.sha = res.sha256;
+      var res = await railPut(plain);
+      row.addr = { scheme: res.scheme, address: res.address };
       await putRow(row);
       setStatus(t('shared'));
     } catch (e) {
@@ -702,9 +537,11 @@
       return new Uint8Array(await crypto.subtle.decrypt(
         { name: 'AES-GCM', iv: joinedBytes.subarray(0, 12) }, k.key, joinedBytes.subarray(12)));
     }
-    if (!row.sha) throw new Error('this file is neither on this phone nor on the rail');
-    var got = await fetchBlob(row.sha);
-    return isWrapped(got) ? unwrapPng(got) : got;
+    if (!addrOf(row)) throw new Error('this file is neither on this phone nor on the rail');
+    /* The adapter hands back exactly the bytes that were handed to it. Whatever
+       the rail needed them to look like on the wire is the rail's business and
+       stays behind the boundary. */
+    return (await railGet(addrOf(row))).bytes;
   }
 
   async function doFlip(row) {
@@ -715,8 +552,8 @@
       if (row.mode === 'private') {
         /* private -> public: this is the sharing path, so the rail (and, if this phone is
            not a member yet, the claim) happens HERE and nowhere else. */
-        var res = await put(wrapAsPng(bytes));
-        row.sha = res.sha256;
+        var res = await railPut(bytes);
+        row.addr = { scheme: res.scheme, address: res.address };
         row.mode = 'public';
         row.local = false;
         row.keyref = null;
@@ -729,14 +566,14 @@
            has no delete route (405, Allow: GET,HEAD), so the honest result is a locked copy
            here plus an open copy that stays where it is. */
         await putBlob(row.id, await encryptFor(row.id, bytes));
-        row.oldSha = row.sha;
-        row.sha = null;
+        row.oldAddr = row.addr;
+        row.addr = null;
         row.mode = 'private';
         row.local = true;
         row.keyref = 'device:aes-gcm:v1';
         await putRow(row);
         setStatus('Locked on this phone. The open copy you already shared stays in the hive at ' +
-          row.oldSha.slice(0, 12) + '… and anyone holding that link still has it.', true);
+          row.oldAddr.address.slice(0, 12) + '… and anyone holding that link still has it.', true);
       }
     } catch (e) {
       setStatus('Nothing changed — ' + (e.message || 'the hive refused') + '.', true);
@@ -750,8 +587,8 @@
     if (row.mode === 'private') { await dropKey(row.id); await dropBlob(row.id); }
     await dropRow(row.id);
     setStatus(row.mode === 'private'
-      ? (row.oldSha
-          ? 'Gone from this phone. The open copy you shared earlier is still in the hive at ' + row.oldSha.slice(0, 12) + '\u2026.'
+      ? (row.oldAddr
+          ? 'Gone from this phone. The open copy you shared earlier is still in the hive at ' + row.oldAddr.address.slice(0, 12) + '\u2026.'
           : 'Gone. The bytes and the key were both here, and this file existed nowhere else.')
       : 'Gone from this phone. The copy in the hive stays at its hash.');
     closeSheet();
@@ -759,20 +596,22 @@
 
   /* ---------- a shared link ---------- */
 
-  async function openShared(sha, name) {
+  async function openShared(address, name) {
     setStatus('Opening ' + (name || 'the file') + '…');
     try {
-      var got = await fetchBlob(sha);
-      var bytes = isWrapped(got) ? unwrapPng(got) : got;
+      var bytes = (await railGet(address)).bytes;
       var url = URL.createObjectURL(new Blob([bytes]));
       var a = document.createElement('a');
       a.href = url;
-      a.download = name || (sha.slice(0, 12) + '.bin');
+      a.download = name || (address.slice(0, 12) + '.bin');
       a.click();
       setTimeout(function () { URL.revokeObjectURL(url); }, 4000);
-      setStatus('Opened ' + (name || sha.slice(0, 12)) + '.');
+      setStatus('Opened ' + (name || address.slice(0, 12)) + '.');
     } catch (e) {
-      if (e.status === 401 || e.status === 403) {
+      /* A code, not a parsed sentence. These two mean the rail would not let this
+         phone read — the case with a door. Everything else, including a refused
+         join, keeps its own words, which say more than the door would. */
+      if (e.code === NOT_PERMITTED || e.code === MEMBERSHIP_REQUIRED) {
         setStatus('This file is in the hive and this phone could not get in to read it. The door is ' + JOIN_DOOR + ' if you want to try it by hand.', true);
       } else {
         setStatus('Could not open it (' + (e.message || 'error') + ').', true);
@@ -806,6 +645,14 @@
       setStatus('This browser could not load the signing engine, so nothing can be sent to the hive. Files you add stay on this phone.', true);
     }
 
+    /* The worker is spawned at load, not at the first share, so the page knows
+       whether it has a rail before the visitor asks it for one. This touches no
+       network: `describe` is answered inside the worker. A visitor who only ever
+       keeps files to themselves still sends nothing anywhere. */
+    try { rail(); } catch (e) {
+      setStatus('This page could not load its storage adapter, so nothing can be shared from here. Files you add stay on this phone.', true);
+    }
+
     var q = new URLSearchParams(location.search);
     var f = q.get('f');
     render().then(function () {
@@ -816,9 +663,14 @@
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();
 
-  /* opened for the e2e walk; not a public API */
+  /* Opened for `e2e/myspace-seam.mjs` and for nothing else; not a public API.
+     Slice 01 listed the PNG wrapper here "for the e2e walk" while no walk
+     existed — a signal prettier than the truth, and it is deleted rather than
+     patched. These four are each read by a named assertion in that gate. */
   window.__myspace = {
-    wrapAsPng: wrapAsPng, unwrapPng: unwrapPng, isWrapped: isWrapped,
-    devicePubkey: devicePubkey, blossomAuth: blossomAuth, render: render
+    adapter: function () { return adapter; },
+    devicePubkey: devicePubkey,
+    rows: loadRows,
+    render: render
   };
 })();
