@@ -116,11 +116,11 @@ test('one set of capabilities in three authored views — and nothing leaves the
     views[r] = html.slice(i, next);
   }
   const must = { 'find a name': /data-form="(name|rtools|cq)"/, 'read a birth day': /data-form="(birth|rtools)"/, 'keep someone': /data-form="add"/,
-    'old style → new style': /data-form="os"/, 'a Thai year → CE': /data-form="be"/, 'calendar file': /data-act="ics"/, 'save a copy': /data-act="export"/, 'bring a copy back': /data-act="import"/ };
+    'old style → new style': /data-form="os"/, 'a Thai year → CE': /data-form="be"/, 'calendar file': /data-act="ics"/, 'save a copy': /data-act="export"/, 'bring a copy back': /data-act="import"/, 'read the team': /data-cap="team"/, 'say where (time zone)': /name="tz"/ };
   for (const [r, body] of Object.entries(views)) for (const [cap, re] of Object.entries(must)) assert.match(body, re, r + ' can: ' + cap);
   for (const act of ['light', 'hold']) assert.ok(html.includes('data-act="' + act + '"'), 'a candle can be lit: ' + act);
-  /* the private lane: one same-origin read, and no way out but a file the reader asks for */
-  assert.deepEqual([...html.matchAll(/fetch\(([^)]*)\)/g)].map((m) => m[1].split(',')[0]), ["'bnamesday-data.json'"]);
+  /* the private lane: two same-origin reads, and no way out but a file the reader asks for */
+  assert.deepEqual([...html.matchAll(/fetch\(([^)]*)\)/g)].map((m) => m[1].split(',')[0]), ["'bnamesday-data.json'", "'bnamesday-sky.json'"], 'exactly two same-origin reads: the calendar and the sky');
   assert.doesNotMatch(html, /XMLHttpRequest|sendBeacon|WebSocket|EventSource|<form[^>]+action=/i);
   assert.doesNotMatch(read('surfaces/bnamesday.js'), /fetch|localStorage|document\.|window\./, 'the core stays pure');
   for (const m of html.matchAll(/<(?:script|link|img|iframe)[^>]+(?:src|href)="(https?:)?\/\//g)) assert.fail('remote asset: ' + m[0]);

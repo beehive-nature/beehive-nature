@@ -1,6 +1,8 @@
 <!doctype html>
 <!-- bNames Day — two houses, one hive.
      LATVIA (the matriarch's tongue) gives a NAME its day. THAILAND (the patriarch's) gives a DAY its name.
+     CHINA reads the year, month, day and hour in stems and branches; and the WHEEL OF SIXTY-FOUR (the Yi Jing circle,
+     the sky at birth) gives the five ways people are built to work — so a team can stop asking everyone to work alike.
      One set of facts in bnamesday.js + bnamesday-data.json; three AUTHORED presentations of it here:
        new bee    — guided and generous: one question at a time, nothing to learn first
        raver      — the year as a wheel you touch: colour, motion, ritual and sound carry the meaning
@@ -64,6 +66,17 @@ label{font-size:.875rem;color:var(--quiet);display:grid;gap:6px;min-width:0}p,h1
 @media(max-width:520px){.hs{grid-template-columns:minmax(0,1fr)}}
 .hs.k{background:none;border:1.5px dashed var(--heart);border-inline-start-width:4px}
 
+/* ── the sky lens: hexagram figures, type bands, pillars, the team ── */
+.hexfig{display:inline-grid;gap:3px;inline-size:36px;vertical-align:middle;flex:none}.hexfig i{display:block;block-size:4px;border-radius:1px;background:currentColor}
+.hexfig i.n{background:linear-gradient(90deg,currentColor 0 40%,transparent 40% 60%,currentColor 60%)}
+.hx{display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:center;padding:10px 12px;border-radius:12px;background:var(--card);border:1px solid var(--line)}
+.hx b{font-weight:650}.hx small{display:block;color:var(--quiet)}.typeband{border-top:6px solid var(--c)}
+.pill{display:grid;grid-template-columns:repeat(auto-fit,minmax(6.8rem,1fr));gap:8px;margin-top:10px}.pill>div{padding:10px;border-radius:12px;background:var(--card);border:1px solid var(--line);text-align:center}
+.pill .zh{font-size:1.7rem;line-height:1.15}.pill small{display:block;color:var(--quiet)}
+.words{inline-size:100%;border-collapse:collapse}.words td{padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:top;font-size:.9375rem;border-inline:0}
+.tm{display:grid;gap:8px}.tmrow{display:grid;gap:4px;padding:12px 14px;border-radius:14px;background:var(--well);border-inline-start:6px solid var(--c,var(--edge))}
+.tmsum{display:flex;gap:8px;flex-wrap:wrap}.lens{font-size:.875rem;color:var(--quiet)}
+#r-sky{inline-size:min(100%,82vh,760px)}#r-sky text{font-family:system-ui,sans-serif}#r-china{inline-size:min(100%,560px)}
 /* ── NEW BEE: one column, big type, one question at a time ── */
 [data-view="bee"]{max-width:620px;margin-inline:auto}
 .b-card{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:24px;margin-top:18px}
@@ -156,13 +169,15 @@ pre{margin:0;overflow:auto;max-inline-size:100%;padding:10px;border-radius:4px;b
  </section>
 
  <section class="b-card" aria-labelledby="b-h2">
-  <h2 id="b-h2">A birthday, read two ways</h2>
+  <h2 id="b-h2">A birthday, read four ways</h2>
+  <p class="quiet" style="margin-bottom:12px">Latvia, Thailand, China, and the wheel of sixty-four. The date is enough to begin; the hour and the time zone make it exact.</p>
   <form data-form="birth" style="display:grid;gap:10px">
    <div class="row"><label>Born on<input type="date" name="date" required></label><label>At (if you know)<input type="time" name="time"></label></div>
-   <label>Their name in Thai (if they have one)<input name="th" lang="th" autocomplete="off" placeholder="สมชาย"></label>
+   <div class="row"><label>In which time zone<input name="tz" list="tzlist" autocomplete="off" placeholder="Europe/Riga"></label><label>Their name in Thai (if they have one)<input name="th" lang="th" autocomplete="off" placeholder="สมชาย"></label></div>
    <button class="primary">Read this day</button>
   </form>
   <div class="b-out" id="b-birthout" aria-live="polite"></div>
+  <div class="b-out" id="b-skyout" aria-live="polite"></div>
  </section>
 
  <section class="b-card" aria-labelledby="b-h3">
@@ -173,12 +188,20 @@ pre{margin:0;overflow:auto;max-inline-size:100%;padding:10px;border-radius:4px;b
    <form data-form="add" style="display:grid;gap:10px">
     <label>Their first name<input name="name" required autocomplete="off" placeholder="Anna"></label>
     <div class="row"><label>Who they are to you<input name="rel" autocomplete="off" placeholder="great-grandmother"></label>
-     <label>Their house<select name="side"><option value="lv">Latvian side</option><option value="th">Thai side</option><option value="other">another house</option></select></label></div>
-    <div class="row"><label>Born (if you know)<input type="date" name="born"></label><label>Name in Thai (if any)<input name="th" lang="th" autocomplete="off"></label></div>
+     <label>Their house<select name="side"><option value="lv">Latvian side</option><option value="th">Thai side</option><option value="other">another house</option><option value="agent">an agent (born when it first ran)</option></select></label></div>
+    <div class="row"><label>Born (if you know)<input type="date" name="born"></label><label>At (if you know)<input type="time" name="time"></label></div>
+    <div class="row"><label>In which time zone<input name="tz" list="tzlist" autocomplete="off" placeholder="Europe/Riga"></label><label>Name in Thai (if any)<input name="th" lang="th" autocomplete="off"></label></div>
     <button class="primary">Keep them here</button>
    </form></div></details>
   <div class="row" style="margin-top:14px"><button data-act="ics">Put these days in my calendar</button><button data-act="export">Save a copy</button><button data-act="import">Bring a copy back</button></div>
   <p class="quiet" id="b-fammsg" style="margin-top:8px" aria-live="polite"></p>
+ </section>
+
+ <section class="b-card" aria-labelledby="b-h5" data-cap="team">
+  <h2 id="b-h5">Working together</h2>
+  <p class="quiet">People are built differently. Here is how each person you have added starts things, decides, and likes to be asked — so a team can stop asking everyone to work the same way.</p>
+  <div class="tm" id="b-team" style="margin-top:14px"></div>
+  <p class="lens" style="margin-top:12px">A lens, not a verdict. It describes how to ask someone; it is never used here to rank, hire, or leave anyone out.</p>
  </section>
 
  <section class="b-card" aria-labelledby="b-h4">
@@ -215,6 +238,7 @@ pre{margin:0;overflow:auto;max-inline-size:100%;padding:10px;border-radius:4px;b
    <label>a name<input id="r-name" name="q" autocomplete="off" enterkeyhint="search"></label>
    <label>born<input type="date" name="date"></label>
    <label>at (if known)<input type="time" name="time"></label>
+   <label>time zone<input name="tz" list="tzlist" autocomplete="off" style="inline-size:11rem"></label>
    <label>name in thai (if any)<input id="r-th" name="th" lang="th" autocomplete="off"></label>
    <button><span aria-hidden="true">→</span> go</button>
    <button type="button" data-act="today"><span aria-hidden="true">◉</span> today</button>
@@ -226,14 +250,20 @@ pre{margin:0;overflow:auto;max-inline-size:100%;padding:10px;border-radius:4px;b
    <label>their first name<input name="name" required autocomplete="off"></label>
    <label>who they are to you<input name="rel" autocomplete="off"></label>
    <label>born (if known)<input type="date" name="born"></label>
+   <label>at (if known)<input type="time" name="time"></label>
+   <label>time zone<input name="tz" list="tzlist" autocomplete="off" style="inline-size:11rem"></label>
    <label>name in thai (if any)<input name="th" lang="th" autocomplete="off"></label>
-   <label>their house<select name="side"><option value="lv">🇱🇻 latvian side</option><option value="th">🇹🇭 thai side</option><option value="other">✳ another house</option></select></label>
+   <label>their house<select name="side"><option value="lv">🇱🇻 latvian side</option><option value="th">🇹🇭 thai side</option><option value="other">✳ another house</option><option value="agent">🤖 an agent</option></select></label>
    <button class="primary">keep them here</button>
   </form>
   <p class="r-say" id="r-keeps">the people you add stay on this device. nothing is sent anywhere. everyone’s in.</p>
   <div class="r-people" id="r-people"></div>
   <svg id="r-oct" viewBox="0 0 600 600" role="img" hidden></svg>
   <div id="r-xray" aria-live="polite"></div>
+  <svg id="r-sky" viewBox="0 0 1000 1000" role="img" hidden></svg>
+  <p class="r-say" id="r-skysay" aria-live="polite"></p>
+  <div id="r-china" aria-live="polite"></div>
+  <div id="r-team" class="r-people" data-cap="team"></div>
   <p class="r-say" id="r-octsay" hidden>the eight houses, read clockwise from your own planet at the top. the dashed house holds the letters to leave out of a name.</p>
   <div class="r-tools"><button type="button" data-act="ics"><span aria-hidden="true">📅</span> calendar file</button><button type="button" data-act="export"><span aria-hidden="true">⤓</span> save a copy</button><button type="button" data-act="import"><span aria-hidden="true">⤒</span> bring a copy back</button></div>
   <p class="r-say" id="r-fammsg" aria-live="polite"></p>
@@ -255,7 +285,7 @@ pre{margin:0;overflow:auto;max-inline-size:100%;padding:10px;border-radius:4px;b
     <rect x="4" y="24" width="140" height="46" rx="4"/><text x="12" y="43" fill="currentColor" stroke="none">data.gov.lv</text><text x="12" y="59" fill="var(--quiet)" stroke="none">2 × CSV (VVC)</text>
     <path d="M144 47h38m-7-5 7 5-7 5"/><rect x="182" y="24" width="160" height="46" rx="4"/><text x="190" y="43" fill="currentColor" stroke="none">build-bnamesday-data</text><text x="190" y="59" fill="var(--quiet)" stroke="none">asserts, then writes</text>
     <path d="M342 47h38m-7-5 7 5-7 5"/><rect x="380" y="24" width="214" height="46" rx="4"/><text x="388" y="43" fill="currentColor" stroke="none">bnamesday-data.json</text><text x="388" y="59" fill="var(--quiet)" stroke="none">v:1 · sha256 of sources</text>
-    <path d="M468 70v34m-5-7 5 7 5-7"/><text x="458" y="92" text-anchor="end" fill="var(--quiet)" stroke="none">1 × same-origin GET</text>
+    <path d="M468 70v34m-5-7 5 7 5-7"/><text x="458" y="92" text-anchor="end" fill="var(--quiet)" stroke="none">2 × same-origin GET</text>
     <rect x="182" y="104" width="412" height="46" rx="4" stroke="var(--accent)"/><text x="190" y="123" fill="currentColor" stroke="none">this page · bnamesday.js (pure core)</text><text x="190" y="139" fill="var(--quiet)" stroke="none">0 third-party requests · 0 analytics · 0 cookies</text>
     <path d="M4 170h590" stroke-dasharray="4 5" stroke="var(--heart)"/><text x="4" y="188" fill="var(--heart)" stroke="none">PRIVATE · never in the repo · never on the wire</text>
     <rect x="4" y="198" width="220" height="46" rx="4" stroke="var(--heart)"/><text x="12" y="217" fill="currentColor" stroke="none">localStorage</text><text x="12" y="233" fill="var(--quiet)" stroke="none">bnamesday.people.v1</text>
@@ -278,14 +308,18 @@ pre{margin:0;overflow:auto;max-inline-size:100%;padding:10px;border-radius:4px;b
   <section class="c-p"><h2>ทักษา thaksa <span>house[i] = RING[(seat(birthday) + i) mod 8] · ring order ☉ ☽ ♂ ☿ ♄ ♃ ☊ ♀ · day turns 06:00 · Wed 18:00 → Thu 06:00 = Rahu</span></h2><div class="tw all"><table id="c-thaksa"></table></div></section>
 
   <section class="c-p h"><h2>birth <span>thaiDay() · xray()</span></h2>
-   <form class="row" data-form="birth"><label>date<input type="date" name="date" required></label><label>time<input type="time" name="time"></label><label>th name<input name="th" lang="th" autocomplete="off"></label><button class="primary">read</button></form>
+   <form class="row" data-form="birth"><label>date<input type="date" name="date" required></label><label>time<input type="time" name="time"></label><label>tz<input name="tz" list="tzlist" autocomplete="off"></label><label>th name<input name="th" lang="th" autocomplete="off"></label><button class="primary">read</button></form>
    <div id="c-birth" style="margin-top:10px"></div></section>
   <section class="c-p h"><h2>calendars <span>oldStyleToNew() · thaiYearToCE()</span></h2>
    <form class="row" data-form="os"><label>Julian (old style)<input type="date" name="date" required></label><button>→ Gregorian</button></form><pre id="c-osout" style="margin-block:8px">JDN_j = d + ⌊(153m′+2)/5⌋ + 365y′ + ⌊y′/4⌋ − 32083 ; gap = JDN_j − JDN_g(same y-m-d)</pre>
    <form class="row" data-form="be"><label>year<input type="number" name="year" required min="1" max="3000"></label><label>era<select name="era"><option value="be">พ.ศ. BE</option><option value="rs">ร.ศ. RS</option></select></label><label>month<select name="month"><option value="0">?</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option><option>10</option><option>11</option><option>12</option></select></label><button>→ CE</button></form><pre id="c-beout" style="margin-top:8px">CE = พ.ศ. − 543 ; พ.ศ. ≤ 2483 ∧ month ∈ {1,2,3} → − 542 (year turned 1 April until 1940) ; CE = ร.ศ. + 1781</pre></section>
 
+  <section class="c-p"><h2>sky <span>chart() · planets VSOP87 · Moon + true node Meeus ch.47 · Pluto Standish · checked against JPL Horizons</span></h2><div id="c-sky"></div></section>
+  <section class="c-p h"><h2>china <span>china() · the calendar computed from Sun and Moon</span></h2><div id="c-china"></div></section>
+  <section class="c-p h"><h2>wheel proof <span>wheelIsBinary()</span></h2><div id="c-proof"></div></section>
+  <section class="c-p" data-cap="team"><h2>team <span>one lens per person · PRIVATE · Constitution VII.1: a lens, never a score</span></h2><div class="tw all"><table id="c-team"></table></div><div id="c-teamrel" style="margin-top:8px"></div></section>
   <section class="c-p"><h2>people <span>PRIVATE · localStorage["bnamesday.people.v1"] · <b id="c-bytes"></b></span></h2>
-   <form class="row" data-form="add"><label>name<input name="name" required autocomplete="off"></label><label>rel<input name="rel" autocomplete="off"></label><label>side<select name="side"><option>lv</option><option>th</option><option>other</option></select></label><label>born<input type="date" name="born"></label><label>th<input name="th" lang="th" autocomplete="off"></label><button class="primary">add</button></form>
+   <form class="row" data-form="add"><label>name<input name="name" required autocomplete="off"></label><label>rel<input name="rel" autocomplete="off"></label><label>side<select name="side"><option>lv</option><option>th</option><option>other</option><option>agent</option></select></label><label>born<input type="date" name="born"></label><label>time<input type="time" name="time"></label><label>tz<input name="tz" list="tzlist" autocomplete="off"></label><label>th<input name="th" lang="th" autocomplete="off"></label><button class="primary">add</button></form>
    <div class="tw" style="margin-block:10px"><table><thead><tr><th>day</th><th>in</th><th>kind</th><th>person</th><th>rel</th><th>side</th><th>born → thai day</th><th>lit</th><th></th></tr></thead><tbody id="c-people"></tbody></table></div>
    <div class="row"><button data-act="ics">export .ics</button><button data-act="export">export .json</button><button data-act="import">import .json</button><button data-act="wipe">wipe</button></div>
    <p id="c-fammsg" style="margin-top:8px" aria-live="polite"></p><pre id="c-store" style="margin-top:8px"></pre></section>
@@ -295,6 +329,9 @@ pre{margin:0;overflow:auto;max-inline-size:100%;padding:10px;border-radius:4px;b
    <li>criteria, revision years, the 2026 additions — <a target="_blank" rel="noopener noreferrer" href="https://www.vvc.gov.lv/lv/kalendarvardu-ekspertu-komisija">vvc.gov.lv · Kalendārvārdu ekspertu komisija</a></li>
    <li>thaksa letter table — อำนาจ ปักษาสุข, “ตำราทักษากับการตั้งชื่อของคนไทย”, <a target="_blank" rel="noopener noreferrer" href="https://so06.tci-thaijo.org/index.php/VANNAVIDAS/article/view/48400">VANNAVIDAS (ThaiJO)</a>; cross-checked against a second published table — all eight กาลกิณี rows reproduce (e2e/bnamesday.test.mjs)</li>
    <li>Thai surnames (1913 Act; one family per name) — <a target="_blank" rel="noopener noreferrer" href="https://en.wikipedia.org/wiki/Thai_name">Thai name</a></li>
+   <li>planets — VSOP87 (Bretagnon &amp; Francou 1988), <a target="_blank" rel="noopener noreferrer" href="https://cdsarc.cds.unistra.fr/ftp/VI/81/">CDS catalogue VI/81</a>, truncated and measured by scripts/build-bnamesday-sky.mjs; every body checked against <a target="_blank" rel="noopener noreferrer" href="https://ssd.jpl.nasa.gov/horizons/">JPL Horizons</a></li>
+   <li>the circle of 64 — Shao Yong’s Xiantian arrangement (11th c.); the hexagram names are the Yì Jīng’s, the English glosses are this page’s own plain readings of the characters, not a quotation of any translation</li>
+   <li>the five types, the nine centres and the 88° rule — the Human Design System (Ra Uru Hu, 1987); named here to say whose lens this is. Published charts reproduce (e2e/bnamesday-sky.test.mjs)</li>
    <li>church books — <a target="_blank" rel="noopener noreferrer" href="https://www.raduraksti.arhivi.lv/">Raduraksti</a>, Latvijas Valsts vēstures arhīvs</li>
    <li class="quiet">INFERENCE, stated as such: gender from the ending (not in the source); “same-day forms” = same date ∧ same first three folded letters; naming-after-the-calendar is a research clue, not a rule.</li></ul></section>
  </div>
@@ -304,9 +341,11 @@ pre{margin:0;overflow:auto;max-inline-size:100%;padding:10px;border-radius:4px;b
 <footer class="foot"><span>Calendar: State Language Centre of Latvia · CC0 · files of 16 May 2025</span><span>Your family stays on this device</span><a href="index.html">the hub</a></footer>
 <div data-tour-host></div>
 </div>
+<datalist id="tzlist"></datalist>
 <input type="file" id="importfile" accept="application/json,.json" hidden aria-hidden="true" tabindex="-1">
 
 <script src="bnamesday.js"></script>
+<script src="bnamesday-sky.js"></script>
 <script>
 (async function(){
 'use strict';
@@ -315,7 +354,7 @@ const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'
 const now=new Date(),TODAY={y:now.getFullYear(),m:now.getMonth()+1,d:now.getDate()},TKEY=B.keyOf(TODAY.m,TODAY.d);
 const iso=t=>t.y+'-'+String(t.m).padStart(2,'0')+'-'+String(t.d).padStart(2,'0');
 const KEY='bnamesday.people.v1';
-const S={data:null,ix:null,sel:TKEY,q:'',hit:null,birth:null,night:false,people:[],sound:false,rows:[],keeps:true};
+const S={skyOK:false,data:null,ix:null,sel:TKEY,q:'',hit:null,birth:null,night:false,people:[],sound:false,rows:[],keeps:true};
 const reg=()=>document.body.getAttribute('data-reg')||'bee';
 const fmtKey=k=>new Intl.DateTimeFormat('en-GB',{day:'numeric',month:'long',timeZone:'UTC'}).format(new Date(Date.UTC(2024,+k.slice(0,2)-1,+k.slice(3))));
 const inDays=n=>n===0?'today':n===1?'tomorrow':'in '+n+' days';
@@ -326,6 +365,8 @@ const dl=(name,mime,text)=>{const a=document.createElement('a');a.href=URL.creat
 try{const r=await fetch('bnamesday-data.json',{cache:'no-cache'});if(!r.ok)throw new Error(r.status);S.data=await r.json();if(S.data.v!==1||!S.data.days)throw new Error('payload');}
 catch(e){$('#loadfail').hidden=false;$('#main').hidden=true;return;}
 S.ix=B.buildIndex(S.data);
+/* the sky is a second payload; if it fails the calendar still stands and the page says what is missing */
+try{const r2=await fetch('bnamesday-sky.json',{cache:'no-cache'});if(!r2.ok)throw new Error(r2.status);window.bNamesSky.load(await r2.json());S.skyOK=window.bNamesSky.wheelIsBinary()}catch(e){S.skyOK=false}
 try{const raw=localStorage.getItem(KEY);if(raw)S.people=B.cleanPeople(JSON.parse(raw)).people;}catch(e){S.people=[];}
 function save(){try{localStorage.setItem(KEY,JSON.stringify({v:1,people:S.people}));S.keeps=true}catch(e){S.keeps=false}}
 
@@ -336,18 +377,111 @@ function birthRead(){if(!S.birth)return null;const b=S.birth,t=B.thaiDay(b.y,b.m
 function events(){return B.familyDays(S.ix,S.people).map(e=>Object.assign(e,{next:B.nextOccurrence(e.key,TODAY)})).sort((a,b)=>a.next.inDays-b.next.inDays)}
 function onDay(k){return B.familyDays(S.ix,S.people).filter(e=>e.key===k)}
 const chip=d=>d?`<span class="chip"><span class="dot" style="--c:${d.color}"></span>${esc(d.en)} · ${esc(d.colorName)} · ${esc(d.planet.en)} ${d.planet.glyph}</span>`:'';
-function housesHTML(i){return '<div class="hss">'+B.thaksa(i).map(r=>`<div class="hs${r.kalakini?' k':''}" style="--c:${r.group.color}"><div><b lang="th">${r.house.th}</b><small>${esc(r.house.en)}</small></div><div class="ls" lang="th">${esc(r.group.show||r.group.letters.join(' '))} <small style="display:inline;letter-spacing:0" class="quiet">${r.group.glyph}</small></div></div>`).join('')+'</div>'}
+function housesHTML(i){return '<div class="hss">'+B.thaksa(i).map(r=>`<div class="hs${r.kalakini?' k':''}" style="--c:${r.group.color}"><div><b lang="th">${r.house.th}</b><small><i>${r.house.rom}</i> — ${esc(r.house.en)}</small></div><div class="ls" lang="th">${esc(r.group.show||r.group.letters.join(' '))} <small style="display:inline;letter-spacing:0" class="quiet">${r.group.glyph}</small></div></div>`).join('')+'</div>'}
 function xrayHTML(name,i){const x=B.xray(name,i);if(!x.thai)return '';return '<div lang="th">'+x.cells.map(c=>c.skip||c.foreign||c.unplaced?`<span class="lt s">${esc(c.ch)}</span>`:`<span class="lt${c.kalakini?' k':''}" style="--c:${c.group.color}" title="${esc(c.house.th+' · '+c.house.en)}">${esc(c.ch)}</span>`).join('')+'</div>'}
-const sideGlyph={lv:'🇱🇻',th:'🇹🇭',other:'✳'};
+const sideGlyph={lv:'🇱🇻',th:'🇹🇭',other:'✳',agent:'🤖'};
 const lit=p=>p.lit===iso(TODAY);
+
+/* ══════════════ THE SKY LENS — one reading, shared by all three views ══════════════
+   China (the calendar computed from Sun and Moon) and the wheel of sixty-four (the Yì Jīng circle, the nine
+   centres, the five types). Constitution Art. VII.1: an interpretation lens — it describes, it never ranks. */
+const K=window.bNamesSky,pad2=n=>String(n).padStart(2,'0'),HOMETZ=(()=>{try{return Intl.DateTimeFormat().resolvedOptions().timeZone||'UTC'}catch(e){return 'UTC'}})();
+const readCache=new Map();
+function readMoment(born,time,tz){if(!S.skyOK)return null;const d=parseDate(born);if(!d)return null;const key=born+'|'+(time||'')+'|'+(tz||'');if(readCache.has(key))return readCache.get(key);
+ const tm=/^(\d\d):(\d\d)$/.exec(time||''),zone=tz||HOMETZ;let out;
+ try{const china=K.china(d.y,d.m,d.d,tm?+tm[1]:undefined,tm?+tm[2]:undefined,zone);
+  if(tm){const c=K.chart(K.localToJd(d.y,d.m,d.d,+tm[1],+tm[2],zone).jd);out={china,chart:c,types:[c.type],certain:true,hasTime:true,zone}}
+  else{const dd=K.chartsOfDay(d.y,d.m,d.d,zone);out={china,chart:dd.noon,types:dd.types,certain:dd.certain,hasTime:false,zone}}}
+ catch(e){out={error:String(e&&e.message||e)}}
+ readCache.set(key,out);return out}
+const birthSky=()=>S.birth?readMoment(iso(S.birth),S.birth.hh==null?'':pad2(S.birth.hh)+':'+pad2(S.birth.mm),S.birth.tz):null;
+const hexFig=h=>'<span class="hexfig" aria-hidden="true">'+h.lines.slice().reverse().map(l=>'<i class="'+(l?'y':'n')+'"></i>').join('')+'</span>';
+const FOUR=['The Sun at birth','The Earth at birth','The Sun, 88° before','The Earth, 88° before'];
+function hxRow(a,label){const h=K.hexagram(a.gate),pl=K.PLACE[a.line];return `<div class="hx">${hexFig(h)}<div><small>${label} ${a.glyph}</small><b>${h.n} · <span lang="zh-Hant">${h.zh}</span> <i>${h.py}</i></b> — ${esc(h.en)}<small><span lang="zh-Hant">${h.upper.zh}</span> <i>${h.upper.py}</i> ${h.upper.en} over <span lang="zh-Hant">${h.lower.zh}</span> <i>${h.lower.py}</i> ${h.lower.en} · line ${a.line} (<span lang="zh-Hant">${pl[0]}</span>): ${esc(pl[1])}</small></div></div>`}
+const pillarsHTML=c=>`<div class="pill">${[['year',c.year],['month',c.month],['day',c.day],['hour',c.hour]].map(([k,x])=>x?`<div><small>${k}</small><div class="zh" lang="zh-Hant">${x.zh}</div><small><i>${x.py}</i></small><small>${x.yang?'yang':'yin'} ${x.element} · ${x.animal}</small></div>`:`<div><small>${k}</small><div class="zh">—</div><small>needs the birth hour</small></div>`).join('')}</div>`;
+const nyText=c=>fmtKey(B.keyOf(c.newYear.m,c.newYear.d));
+const flagText=ch=>{if(!ch.flags.length)return '';const names=ch.flags.map(f=>f.name).filter((x,i,a)=>a.indexOf(x)===i);return `${names.join(', ')} ${names.length>1?'sit':'sits'} within a hair of the edge between two hexagrams. Another calculator may place ${names.length>1?'them':'it'} on the other side; this page says so rather than guess.`};
+
+function skyCardsBee(r){
+ if(!r)return S.skyOK?'':'<div class="b-res"><p class="quiet">The sky didn’t load, so the last two readings are missing. Reload to try again.</p></div>';
+ if(r.error)return '<div class="b-res"><p>I don’t know that time zone. Try one like <b>Europe/Riga</b> or <b>Asia/Bangkok</b>, or an offset like <b>+07:00</b>.</p></div>';
+ const c=r.china,p=c.popular,el=K.ELEMENT[p.element],ch=r.chart,t=K.TYPES[ch.type],au=K.AUTHORITY[ch.authority];
+ let h=`<div class="b-res" style="border-top:6px solid ${el[2]}"><p class="quiet">🇨🇳 In China</p><div class="nm">${p.emoji} ${p.animal}</div><div class="when"><b lang="zh-Hant">${p.zh}</b> <i>${p.py}</i> — the ${p.yang?'yang':'yin'} ${p.element} ${p.animal}</div>
+  <p>The year’s element is <b lang="zh-Hant">${el[0]}</b> (<i>${el[1]}</i>, ${p.element}). ${c.bornBeforeNewYear?`Born before that year’s lunar New Year (${nyText(c)}), so the old year’s animal still holds — a chart that only reads the year number gets this wrong.`:`That year’s lunar New Year fell on ${nyText(c)}.`}</p>
+  ${c.yearsDiffer?`<p class="quiet">The four pillars turn the year at the start of spring (<span lang="zh-Hant">立春</span> <i>lì chūn</i>), not at the New Year, so they count this birth in the ${c.year.animal} year.</p>`:''}
+  <p style="margin-top:10px"><b>The four pillars</b> <span class="quiet">— <span lang="zh-Hant">八字</span> <i>bā zì</i>, “eight characters”: a heavenly stem and an earthly branch for the year, month, day and hour</span></p>${pillarsHTML(c)}</div>`;
+ h+=`<div class="b-res typeband" style="--c:${r.certain?t.color:'var(--edge)'}"><p class="quiet">☯ On the wheel of sixty-four</p>`;
+ if(r.certain)h+=`<div class="nm">${t.en}</div><div class="when">${t.way}</div><p><b>How they decide:</b> ${au[0]} — ${au[1]}.</p><p><b>Working with them:</b> ${t.work}</p>${r.hasTime?'':'<p class="quiet">I don’t have the birth hour, so I read that day every two hours: the type holds all day. The lines below are for noon.</p>'}`;
+ else h+=`<div class="nm">${r.types.map(x=>K.TYPES[x].en).join(' or ')}</div><p>Without the birth hour I read that day every two hours, and the answer changes as the Moon moves. Add the time above and it settles.</p>`;
+ h+=`<p style="margin-top:12px"><b>The four hexagrams</b> <span class="quiet">— from the <span lang="zh-Hant">易經</span> <i>Yì Jīng</i>, the Book of Changes</span></p><div style="display:grid;gap:8px;margin-top:8px">${ch.four.map((a,i)=>hxRow(a,FOUR[i])).join('')}</div>`;
+ if(ch.flags.length)h+=`<p class="quiet" style="margin-top:10px">${flagText(ch)}</p>`;
+ h+=`<p class="lens" style="margin-top:10px">The five types are the Human Design System’s (1987). Here they are rebuilt from the sky itself and the thousand-year-old circle of the Yì Jīng. It describes how to ask someone — it never ranks anyone.</p></div>`;
+ return h}
+function wordsBee(t2,r){if(!t2)return '';const dy=t2.day,b=S.birth,wd=B.DAYS[new Date(Date.UTC(b.y,b.m-1,b.d)).getUTCDay()];
+ const rows=[[`<span lang="lv">vārda diena</span>`,'VAR-dah DIEH-nah','name day'],[`<span lang="lv">Daudz laimes!</span>`,'dowdz LIE-mess','much happiness!'],[`<span lang="lv">${wd.lv}</span>`,'',`${wd.en} — literally “${wd.lvEn}”`],
+  [`<span lang="th">${dy.th}</span>`,dy.rom,dy.en],[`<span lang="th">${dy.colorTh}</span>`,dy.colorRom,'the colour '+dy.colorName],[`<span lang="th">${dy.planet.thFull}</span>`,dy.planet.rom,'the '+(dy.planet.en==='Rahu'?'shadow planet Rahu, who swallows the Moon in an eclipse':'planet-god '+dy.planet.en)],
+  [`<span lang="th">${dy.posture.th}</span>`,dy.posture.rom,'the Buddha '+dy.posture.en],[`<span lang="th">ทักษา</span>`,'thaksa','the old table that sorts the letters by planet'],[`<span lang="th">กาลกิณี</span>`,'kalakini','the house of letters to leave out of a name']];
+ if(r&&!r.error){const p=r.china.popular,el=K.ELEMENT[p.element];rows.push([`<span lang="zh-Hant">${p.zh}</span>`,p.py,`the ${p.yang?'yang':'yin'} ${p.element} ${p.animal}`],[`<span lang="zh-Hant">${el[0]}</span>`,el[1],p.element+', one of the five phases'],[`<span lang="zh-Hant">八字</span>`,'bā zì','“eight characters” — the four pillars'],[`<span lang="zh-Hant">易經</span>`,'Yì Jīng','the Book of Changes'])}
+ return `<div class="b-res"><details class="b-more" open style="border-top:0"><summary>Words you just met</summary><div><table class="words"><tbody>${rows.map(x=>`<tr><td><b>${x[0]}</b></td><td><i>${x[1]}</i></td><td>${x[2]}</td></tr>`).join('')}</tbody></table></div></details></div>`}
+
+/* the team: who is here, how each is built to work, and what the group is missing */
+const teamRows=()=>S.people.map(p=>({p,r:p.born?readMoment(p.born,p.time,p.tz):null}));
+function teamCounts(rows){const c={};rows.forEach(x=>{if(x.r&&!x.r.error&&x.r.certain)c[x.r.chart.type]=(c[x.r.chart.type]||0)+1});return c}
+function teamRelations(rows){const out=[],m=rows.filter(x=>x.r&&!x.r.error);for(let i=0;i<m.length;i++)for(let j=i+1;j<m.length;j++){const rel=K.relation(m[i].r.china.popular.branch,m[j].r.china.popular.branch);if(rel.kind!=='none'&&rel.kind!=='same')out.push({a:m[i].p,b:m[j].p,rel})}return out}
+const plural=(n,w)=>n+' '+w+(n===1?'':'s');
+function teamBee(){const rows=teamRows();if(!rows.length)return '<div class="empty">Add the people you work with, under “Your family’s days”. A birth date is enough to begin; the hour and the time zone make it exact.</div>';
+ let h=rows.map(({p,r})=>{if(!p.born)return `<div class="tmrow"><div><b>${esc(p.name)}</b> ${sideGlyph[p.side]}</div><div class="quiet">Add a birth date to read them.</div></div>`;
+  if(!r||r.error)return `<div class="tmrow"><div><b>${esc(p.name)}</b> ${sideGlyph[p.side]}</div><div class="quiet">${S.skyOK?'I don’t know their time zone — remove and add them again with one like Europe/Riga.':'The sky didn’t load.'}</div></div>`;
+  const t=K.TYPES[r.chart.type],a=r.china.popular;
+  return r.certain?`<div class="tmrow" style="--c:${t.color}"><div><b>${esc(p.name)}</b> ${sideGlyph[p.side]} · ${t.en} · ${a.emoji} ${a.animal}</div><div class="quiet">${t.way}; decides by ${K.AUTHORITY[r.chart.authority][0]}.</div><div>${t.work}</div></div>`
+   :`<div class="tmrow"><div><b>${esc(p.name)}</b> ${sideGlyph[p.side]} · ${r.types.map(x=>K.TYPES[x].en).join(' or ')} · ${a.emoji} ${a.animal}</div><div class="quiet">Their birth hour decides which. Add it and this settles.</div></div>`}).join('');
+ const c=teamCounts(rows);if(Object.keys(c).length){h+=`<div class="tmsum" style="margin-top:6px">${Object.keys(K.TYPES).map(k=>`<span class="chip"><span class="dot" style="--c:${K.TYPES[k].color}"></span>${plural(c[k]||0,K.TYPES[k].en)}</span>`).join('')}</div>`;
+  const miss=Object.keys(K.TYPES).filter(k=>!c[k]&&k!=='reflector');if(miss.length)h+=`<p class="quiet">Not on this team yet: ${miss.map(k=>K.TYPES[k].en).join(', ')}. ${miss.indexOf('projector')>=0?'No one here is built to guide how the others spend their energy — invite that view from outside. ':''}${miss.indexOf('manifestor')>=0?'No one here is built to start from nothing — give the team something to respond to. ':''}${miss.indexOf('generator')>=0&&miss.indexOf('mg')>=0?'No one here has the sustained life-force to carry long work — plan rest, and do not measure this team in hours.':''}</p>`}
+ const rel=teamRelations(rows);if(rel.length)h+='<p style="margin-top:8px"><b>By the Chinese year-animals</b></p>'+rel.map(x=>`<p class="quiet">${esc(x.a.name)} &amp; ${esc(x.b.name)}: <span lang="zh-Hant">${x.rel.zh}</span> <i>${x.rel.py||''}</i> — ${x.rel.en}.</p>`).join('');
+ return h}
+
+/* raver: the sky as a second wheel — the 64 on the rim, the planets at their places, the nine centres as a comb */
+const COMB={head:[500,262],ajna:[500,334],throat:[500,410],g:[500,494],heart:[574,538],sacral:[500,582],spleen:[416,612],solar:[584,612],root:[500,672]};
+function drawSkyWheel(r){const svg=$('#r-sky'),ok=!!(r&&!r.error);svg.toggleAttribute('hidden',!ok);$('#r-skysay').textContent=r&&r.error?'i don’t know that time zone. try one like Europe/Riga, or an offset like +07:00.':'';$('#r-china').innerHTML='';if(!ok)return;
+ const ch=r.chart,t=K.TYPES[ch.type],ang=lon=>((lon-280.4)/360)*TAU-Math.PI/2,pt=(R,lon)=>[500+R*Math.cos(ang(lon)),500+R*Math.sin(ang(lon))],mine={};ch.activations.forEach(a=>{mine[a.gate]=1});
+ let g='<circle cx="500" cy="500" r="494" fill="none" stroke="var(--line)" stroke-width="1.500"/><circle cx="500" cy="500" r="424" fill="none" stroke="var(--line)" stroke-width="1"/>';
+ K.WHEEL.forEach((n,i)=>{const mid=K.PIN+i*K.ARC+K.ARC/2,h=K.hexagram(n),on=mine[n],col=on?'var(--gold)':'var(--quiet)';
+  g+=`<g transform="rotate(${f1(mid-280.4)} 500 500)" opacity="${on?1:.34}" stroke="${col}" stroke-width="3.400">`+h.lines.map((l,k)=>{const y=500-(434+k*9);return l?`<line x1="486" y1="${y}" x2="514" y2="${y}"/>`:`<line x1="486" y1="${y}" x2="497" y2="${y}"/><line x1="503" y1="${y}" x2="514" y2="${y}"/>`}).join('')+`<text x="500" y="${500-404}" text-anchor="middle" font-size="13" stroke="none" fill="${col}">${n}</text></g>`});
+ ch.activations.forEach(a=>{const birth=a.moment==='birth',col=birth?'var(--gold)':'var(--heart)',p=pt(birth?376:344,a.lon),q=pt(424,a.lon),q2=pt(birth?390:358,a.lon);
+  g+=`<line x1="${f1(q[0])}" y1="${f1(q[1])}" x2="${f1(q2[0])}" y2="${f1(q2[1])}" stroke="${col}" stroke-width="1.200" opacity=".55"/><text x="${f1(p[0])}" y="${f1(p[1]+7)}" text-anchor="middle" font-size="20" fill="${col}"><title>${a.name} ${birth?'at birth':'88° before'}: hexagram ${a.gate}, line ${a.line}</title>${a.glyph}</text>`});
+ const def={};ch.defined.forEach(c=>{def[c]=1});const live={};ch.channels.forEach(c=>{live[c.gates.join('-')]=1});
+ K.CHANNELS.forEach(c=>{const a=COMB[K.CENTRE_OF[c[0]]],b=COMB[K.CENTRE_OF[c[1]]],on=live[c.join('-')];g+=`<line x1="${a[0]}" y1="${a[1]}" x2="${b[0]}" y2="${b[1]}" stroke="${on?'var(--gold)':'var(--line)'}" stroke-width="${on?5:1.500}"/>`});
+ Object.keys(COMB).forEach(c=>{const p=COMB[c],on=def[c];g+=`<path d="${hex(p[0],p[1],33)}" fill="${on?(r.certain?t.color:'var(--edge)'):'var(--bg)'}" stroke="${on?'var(--gold)':'var(--edge)'}" stroke-width="2"/><text x="${p[0]}" y="${p[1]+4}" text-anchor="middle" font-size="11" fill="${on?'#06110c':'var(--quiet)'}">${K.CENTRE_EN[c]}</text>`});
+ svg.innerHTML=g;svg.setAttribute('aria-label',`The sky at this birth on the wheel of sixty-four. ${r.certain?t.en:r.types.map(x=>K.TYPES[x].en).join(' or ')}. Joined centres: ${ch.defined.map(c=>K.CENTRE_EN[c]).join(', ')||'none'}.`);
+ const au=K.AUTHORITY[ch.authority];$('#r-skysay').textContent=(r.certain?`${t.en.toLowerCase()} — ${t.way}. decides by ${au[0]}: ${au[1]}. `:`the birth hour decides between ${r.types.map(x=>K.TYPES[x].en.toLowerCase()).join(' and ')}. `)+'gold marks are the sky at birth; rose marks are the sky when the sun stood 88° earlier. a lit cell is a centre both moments join. '+flagText(ch).toLowerCase();
+ const c=r.china,p=c.popular;$('#r-china').innerHTML=`<p class="r-say"><span style="font-size:2.4rem">${p.emoji}</span><br><b lang="zh-Hant">${p.zh}</b> <i>${p.py}</i> — the ${p.yang?'yang':'yin'} ${p.element} ${p.animal.toLowerCase()}. ${c.bornBeforeNewYear?'born before that year’s lunar new year ('+nyText(c)+'), so the old year’s animal still holds.':''}</p>${pillarsHTML(c)}`}
+function teamRaver(){const rows=teamRows().filter(x=>x.r&&!x.r.error),c=teamCounts(rows);$('#r-team').innerHTML=rows.length?'<p class="r-say" style="flex-basis:100%">your people, by how each is built to work. a lens, never a rank.</p>'+rows.map(({p,r})=>{const t=K.TYPES[r.chart.type];return `<span class="chip" style="border-color:${r.certain?t.color:'var(--edge)'}"><span class="dot" style="--c:${r.certain?t.color:'transparent'}"></span>${esc(p.name)} · ${r.certain?t.en.toLowerCase():r.types.map(x=>K.TYPES[x].en.toLowerCase()).join(' or ')} · ${r.china.popular.emoji}</span>`}).join('')+(Object.keys(c).length?'<p class="r-say" style="flex-basis:100%">'+Object.keys(K.TYPES).map(k=>plural(c[k]||0,K.TYPES[k].en.toLowerCase())).join(' · ')+'</p>':''):''}
+
+/* cypherpunk: every number the lens stands on */
+function skyCypher(){const r=birthSky(),deg=x=>x.toFixed(4);
+ $('#c-proof').innerHTML=S.skyOK?`<p>wheelIsBinary() → <b>${K.wheelIsBinary()}</b> · from 坤 the circle counts 0…31, then 63…32 (Shao Yong, 11th c.; Leibniz read it as binary in 1703). pin: hexagram 41 opens at ${K.PIN}° (2° Aquarius), ${K.ARC}° each — the pin is the modern systems’ convention.</p><pre>${K.WHEEL.map(n=>pad2(n)+'='+K.binaryOf(n).toString(2).padStart(6,'0')).join(' ')}</pre>`:'<p class="err">sky payload not loaded</p>';
+ if(!r){$('#c-sky').innerHTML='<p class="quiet">no birth set</p>';$('#c-china').innerHTML='<p class="quiet">no birth set</p>'}
+ else if(r.error){$('#c-sky').innerHTML=`<p class="err">${esc(r.error)}</p>`;$('#c-china').innerHTML=''}
+ else{const ch=r.chart,b=ch.activations.slice(0,13),d=ch.activations.slice(13);
+  $('#c-sky').innerHTML=`<div class="tw all"><table><thead><tr><th>body</th><th>λ birth</th><th>hex.line</th><th>edge°</th><th>λ 88° before</th><th>hex.line</th><th>edge°</th><th>trust°</th></tr></thead><tbody>${b.map((a,i)=>`<tr><td>${a.glyph} ${a.name}</td><td>${deg(a.lon)}</td><td>${a.gate}.${a.line}</td><td class="${a.nearEdge?'k':''}">${deg(a.edge)}</td><td>${deg(d[i].lon)}</td><td>${d[i].gate}.${d[i].line}</td><td class="${d[i].nearEdge?'k':''}">${deg(d[i].edge)}</td><td>${K.TRUST[a.body]}</td></tr>`).join('')}</tbody></table></div>
+   <pre style="margin-top:8px">${esc(JSON.stringify({zone:r.zone,hasTime:r.hasTime,jdUT:+ch.jdUT.toFixed(6),deltaT_s:+ch.deltaT.toFixed(1),jdTT_before:+ch.jdBefore.toFixed(6),typesAcrossTheDay:r.types,certain:r.certain,type:ch.type,authority:ch.authority,lines:ch.lines,centres:ch.defined,channels:ch.channels.map(c=>c.gates.join('-')),flagged:ch.flags.map(f=>f.moment+':'+f.body)},null,1))}</pre>
+   <p class="quiet">a dashed cell is a body closer to a hexagram’s edge than its measured trust — the result may differ from another ephemeris. trust = worst error against JPL Horizons, rounded up (e2e/bnamesday-sky.test.mjs). node = true node.</p>`;
+  const c=r.china;$('#c-china').innerHTML=`<pre>${esc(JSON.stringify({popular_year:c.popular.zh+' '+c.popular.py+' · '+c.popular.element+' '+c.popular.animal,lunar_new_year_that_year:c.newYear.y+'-'+pad2(c.newYear.m)+'-'+pad2(c.newYear.d),born_before_new_year:c.bornBeforeNewYear,pillars:{year:c.year.zh,month:c.month.zh,day:c.day.zh,hour:c.hour?c.hour.zh:null},lichun_local:c.lichun.y+'-'+pad2(c.lichun.m)+'-'+pad2(c.lichun.d)+' '+pad2(Math.floor(c.lichun.hours))+':'+pad2(Math.floor(c.lichun.hours%1*60)),rules:'month 11 holds the winter solstice; leap month = first without a principal term; civil days at UTC+8; pillar year turns at 立春 (315°); day = (JDN+49) mod 60; the day turns at 23:00'},null,1))}</pre>`}
+ const rows=teamRows();$('#c-team').innerHTML='<thead><tr><th>person</th><th>side</th><th>born · time · zone</th><th>type</th><th>decides by</th><th>lines</th><th>year</th><th>thai day</th></tr></thead><tbody>'+(rows.map(({p,r})=>{const pd=parseDate(p.born),td=pd?B.thaiDay(pd.y,pd.m,pd.d).day:null;return `<tr><td>${esc(p.name)}</td><td>${p.side}</td><td>${esc([p.born,p.time,p.tz].filter(Boolean).join(' · '))||'—'}</td><td>${r&&!r.error?(r.certain?K.TYPES[r.chart.type].en:r.types.map(x=>K.TYPES[x].en).join(' | ')+' (hour decides)'):(r&&r.error?'<span class="err">bad zone</span>':'n/a')}</td><td>${r&&!r.error&&r.certain?K.AUTHORITY[r.chart.authority][0]:''}</td><td>${r&&!r.error&&r.hasTime?r.chart.lines:''}</td><td>${r&&!r.error?r.china.popular.zh+' '+r.china.popular.element+' '+r.china.popular.animal:''}</td><td>${td?td.id:''}</td></tr>`}).join('')||'<tr><td colspan="8" class="quiet">∅ no people</td></tr>')+'</tbody>';
+ const rel=teamRelations(rows),c=teamCounts(rows);$('#c-teamrel').innerHTML=`<pre>${esc(JSON.stringify({counts:c,relations:rel.map(x=>x.a.name+' × '+x.b.name+': '+x.rel.kind+' '+x.rel.zh)},null,1))}</pre>`}
+
+function renderSky(view){
+ if(view==='raver'){drawSkyWheel(birthSky());teamRaver()}
+ else if(view==='cypherpunk')skyCypher();
+ else{const t2=birthRead();$('#b-skyout').innerHTML=S.birth?skyCardsBee(birthSky())+wordsBee(t2,birthSky()):'';$('#b-team').innerHTML=teamBee()}}
 
 /* ══════════════ NEW BEE ══════════════ */
 function renderBee(){
  const d=dayOf(TKEY),t=B.thaiDay(TODAY.y,TODAY.m,TODAY.d,now.getHours(),now.getMinutes()).day;
  $('#b-todaydate').textContent=new Intl.DateTimeFormat('en-GB',{weekday:'long',day:'numeric',month:'long'}).format(now);
  $('#b-today').innerHTML=d.t.length?d.t.map(esc).join(' <span class="sep">·</span> '):'No one at all';
- $('#b-todaylead').innerHTML=d.t.length?`Today is their name day in Latvia${d.x.length?` — and ${d.x.length} more in the long list`:''}. If you know one, say <b lang="lv">“Daudz laimes vārda dienā!”</b>`:'29 February is the one day the Latvian calendar leaves empty.';
- $('#b-todaythai').innerHTML=chip(t)+`<span class="quiet" style="display:block;margin-top:6px">and in Thailand, today is <span lang="th">${t.th}</span> — ${esc(t.colorName)} is the colour to wear</span>`;
+ $('#b-todaylead').innerHTML=d.t.length?`Today is their name day in Latvia${d.x.length?` — and ${d.x.length} more in the long list`:''}. If you know one, say <b lang="lv">“Daudz laimes vārda dienā!”</b> — “much happiness on your name day.”`:'29 February is the one day the Latvian calendar leaves empty.';
+ $('#b-todaythai').innerHTML=chip(t)+`<span class="quiet" style="display:block;margin-top:6px">and in Thailand, today is <b lang="th">${t.th}</b> (<i>${t.rom}</i>, ${esc(t.en)}) — <b lang="th">${t.colorTh}</b> (<i>${t.colorRom}</i>, ${esc(t.colorName)}) is the colour to wear</span>`;
  $$('[data-n="t"]').forEach(n=>n.textContent=S.data._meta.counts.traditional.toLocaleString('en'));
  $$('[data-n="x"]').forEach(n=>n.textContent=S.data._meta.counts.extended_only.toLocaleString('en'));
  /* a name */
@@ -367,9 +501,10 @@ function renderBee(){
  /* a birthday, two ways */
  const t2=birthRead();h='';
  if(t2){const b=S.birth,k=B.keyOf(b.m,b.d),ld=dayOf(k),dy=t2.day;
-  h=`<div class="b-two"><div class="b-res"><p class="quiet">🇱🇻 In Latvia</p><div class="nm">${ld.t.length?ld.t.map(esc).join(' · '):'an empty day'}</div><p>${ld.t.length?`${fmtKey(k)} belongs to ${ld.t.length>1?'these names':'this name'}${ld.x.length?`, and to ${ld.x.length} more in the long list`:''}. A child born that day might well have been given one.`:'29 February is the only day the calendar leaves without a name.'}</p></div>
-  <div class="b-res b-th" style="--c:${dy.color}"><p class="quiet">🇹🇭 In Thailand</p><div class="nm"><span lang="th">${dy.th}</span></div><div class="when">${esc(dy.en)} · ${esc(dy.colorName)} · ${esc(dy.planet.en)} ${dy.planet.glyph}</div>
-   <p>The Buddha of this day: <span lang="th">${dy.posture.th}</span> — ${esc(dy.posture.en)}.</p>
+  h=`<div class="b-two"><div class="b-res"><p class="quiet">🇱🇻 In Latvia</p><div class="nm">${ld.t.length?ld.t.map(esc).join(' · '):'an empty day'}</div><p>${ld.t.length?`${fmtKey(k)} belongs to ${ld.t.length>1?'these names':'this name'}${ld.x.length?`, and to ${ld.x.length} more in the long list`:''}. A child born that day might well have been given one.`:'29 February is the only day the calendar leaves without a name.'}</p><p class="quiet">In Latvian that weekday is <b lang="lv">${B.DAYS[new Date(Date.UTC(b.y,b.m-1,b.d)).getUTCDay()].lv}</b> — “${B.DAYS[new Date(Date.UTC(b.y,b.m-1,b.d)).getUTCDay()].lvEn}”. Latvian simply counts its days.</p></div>
+  <div class="b-res b-th" style="--c:${dy.color}"><p class="quiet">🇹🇭 In Thailand</p><div class="nm"><span lang="th">${dy.th}</span></div><div class="when"><i>${dy.rom}</i> — ${esc(dy.en)}</div>
+   <p>Its colour is <b lang="th">${dy.colorTh}</b> (<i>${dy.colorRom}</i>, ${esc(dy.colorName)}) and its planet <b lang="th">${dy.planet.thFull}</b> (<i>${dy.planet.rom}</i>, ${esc(dy.planet.en)} ${dy.planet.glyph}). Many Thais wear their day’s colour and know it as surely as their birthday.</p>
+   <p>The Buddha of this day: <b lang="th">${dy.posture.th}</b> (<i>${dy.posture.rom}</i>) — ${esc(dy.posture.en)}. In a temple, look for the row of eight small figures: this is the one to make your offering to.</p>
    ${t2.beforeDawn?'<p class="quiet">Born before six in the morning, so tradition counts the day before.</p>':''}
    ${!t2.hasTime?`<p class="quiet">Tradition turns the day at 6 am. Born before then? Add the time above and I’ll count it properly.</p>`:''}
    ${!t2.hasTime&&t2.open.some(o=>o.indexOf('rahu')===0)?`<p><button class="mini" data-act="night" aria-pressed="${S.night}">${S.night?'✓ ':''}Born at night — Rahu’s hours</button></p>`:''}
@@ -441,7 +576,7 @@ function runQuery(f){const q=(f.q||'').trim();let test=null,msg='';const m=/^\/(
  else if(q){const fq=B.fold(q);test=e=>e.f.indexOf(fq)>=0}
  S.rows=S.ix.all.filter(e=>(!test||test(e))&&(!f.list||e.list===f.list)&&(!f.end||e.end===f.end)&&(!f.month||e.key.slice(0,2)===f.month));return msg}
 function renderCypher(){
- const M=S.data._meta;$('#c-meta').innerHTML=[['v',S.data.v],['publisher',M.publisher],['licence',M.licence],['retrieved',M.retrieved],['counts',JSON.stringify(M.counts)],['sha256 traditional',M.source_files['traditional_sha256_PUBLIC-CONSTANT']],['sha256 extended',M.source_files['extended_sha256_PUBLIC-CONSTANT']],['caveat',M.caveat],['gender',M.gender],['built by',M.built_by],['network','1 same-origin GET · 0 third-party · 0 cookies']].map(r=>`<dt>${esc(r[0])}</dt><dd>${esc(r[1])}</dd>`).join('');
+ const M=S.data._meta;$('#c-meta').innerHTML=[['v',S.data.v],['publisher',M.publisher],['licence',M.licence],['retrieved',M.retrieved],['counts',JSON.stringify(M.counts)],['sha256 traditional',M.source_files['traditional_sha256_PUBLIC-CONSTANT']],['sha256 extended',M.source_files['extended_sha256_PUBLIC-CONSTANT']],['caveat',M.caveat],['gender',M.gender],['built by',M.built_by],['network','2 same-origin GETs (calendar, sky) · 0 third-party · 0 cookies']].map(r=>`<dt>${esc(r[0])}</dt><dd>${esc(r[1])}</dd>`).join('');
  const cap=300;$('#c-rows').innerHTML=S.rows.slice(0,cap).map(e=>`<tr data-seat="${B.seatOf(e.key)}"><td>${esc(e.name)}</td><td>${e.key}</td><td>${B.seatOf(e.key)+1}</td><td>${e.list}</td><td>${e.end}</td><td>${esc(e.ltg||'')}</td><td class="quiet">${B.variants(S.ix,e).slice(0,8).map(esc).join(' ')}</td></tr>`).join('');
  if(!$('#c-qmsg').classList.contains('err'))$('#c-qmsg').textContent=S.rows.length+' rows'+(S.rows.length>cap?' · first '+cap+' drawn, exports carry all':'');
  const d=dayOf(S.sel),t=thaiOfKey(S.sel),n=B.nextOccurrence(S.sel,TODAY);$('#c-daykey').textContent=S.sel+' · seat '+(B.seatOf(S.sel)+1)+'/366';
@@ -455,13 +590,13 @@ function renderCypher(){
  const raw=JSON.stringify({v:1,people:S.people},null,1);$('#c-store').textContent=raw;$('#c-bytes').textContent=new Blob([raw]).size+' B'+(S.keeps?'':' · NOT PERSISTED (storage refused)');
 }
 
-function render(){const r=reg();if(r==='raver')renderRaver();else if(r==='cypherpunk')renderCypher();else renderBee();
- $$('form[data-form="birth"],form[data-form="rtools"]').forEach(f=>{if(S.birth&&f.date&&!f.contains(document.activeElement)){f.date.value=iso(S.birth);if(f.time)f.time.value=S.birth.hh==null?'':String(S.birth.hh).padStart(2,'0')+':'+String(S.birth.mm).padStart(2,'0');if(f.th)f.th.value=S.birth.th||''}})}
+function render(){const r=reg();if(r==='raver')renderRaver();else if(r==='cypherpunk')renderCypher();else renderBee();renderSky(r);
+ $$('form[data-form="birth"],form[data-form="rtools"]').forEach(f=>{if(S.birth&&f.date&&!f.contains(document.activeElement)){f.date.value=iso(S.birth);if(f.time)f.time.value=S.birth.hh==null?'':String(S.birth.hh).padStart(2,'0')+':'+String(S.birth.mm).padStart(2,'0');if(f.th)f.th.value=S.birth.th||'';if(f.tz)f.tz.value=S.birth.tz||HOMETZ}})}
 
 /* ── one set of actions, whichever view raised them ── */
-function setBirth(f){const p=parseDate(f.date.value);if(!p){return}const tm=/^(\d\d):(\d\d)$/.exec(f.time?f.time.value:'');S.birth={y:p.y,m:p.m,d:p.d,hh:tm?+tm[1]:undefined,mm:tm?+tm[2]:undefined,th:(f.th?f.th.value:'').trim()};S.night=false;S.sel=B.keyOf(p.m,p.d)}
+function setBirth(f){const p=parseDate(f.date.value);if(!p){return}const tm=/^(\d\d):(\d\d)$/.exec(f.time?f.time.value:'');S.birth={y:p.y,m:p.m,d:p.d,hh:tm?+tm[1]:undefined,mm:tm?+tm[2]:undefined,th:(f.th?f.th.value:'').trim(),tz:(f.tz&&f.tz.value.trim())||HOMETZ};S.night=false;S.sel=B.keyOf(p.m,p.d)}
 function setQuery(q){S.q=q.trim();const f=S.q?B.findName(S.ix,S.q):{exact:[]};S.hit=f.exact[0]||null;if(S.q&&!/[฀-๿]/.test(S.q))S.sel=S.hit?S.hit.key:'05-22';if(S.q&&!S.hit&&!/[฀-๿]/.test(S.q))S.hit={name:S.q,key:'05-22'};if(/[฀-๿]/.test(S.q)){$$('form[data-form="birth"] [name=th],form[data-form="rtools"] [name=th]').forEach(i=>{if(!i.value)i.value=S.q})}}
-function addPerson(f){const one=B.cleanPeople({v:1,people:[{name:f.name.value,rel:f.rel?f.rel.value:'',side:f.side.value,born:f.born?f.born.value:'',th:f.th?f.th.value:''}]}).people[0];S.people.push(one);save();f.reset();const e=B.familyDays(S.ix,[one])[0];S.sel=e.key;blip(B.seatOf(e.key))}
+function addPerson(f){const one=B.cleanPeople({v:1,people:[{name:f.name.value,rel:f.rel?f.rel.value:'',side:f.side.value,born:f.born?f.born.value:'',time:f.time?f.time.value:'',tz:(f.tz&&f.tz.value.trim())||HOMETZ,th:f.th?f.th.value:''}]}).people[0];S.people.push(one);save();f.reset();if(f.tz)f.tz.value=HOMETZ;const e=B.familyDays(S.ix,[one])[0];S.sel=e.key;blip(B.seatOf(e.key))}
 function famMsg(t){['#b-fammsg','#c-fammsg','#r-fammsg'].forEach(s=>{const n=$(s);if(n)n.textContent=t})}
 document.addEventListener('submit',ev=>{const f=ev.target,k=f.getAttribute('data-form');if(!k)return;ev.preventDefault();
  if(k==='name')setQuery(f.q.value);
@@ -511,6 +646,8 @@ document.addEventListener('pointerdown',e=>{const b=e.target.closest('[data-act=
 ['pointerup','pointercancel'].forEach(t=>document.addEventListener(t,()=>{clearInterval(holdT);$$('[data-act="hold"]').forEach(b=>b.style.setProperty('--p',0))},true));
 document.addEventListener('keydown',e=>{const b=e.target.closest&&e.target.closest('[data-act="hold"]');if(b&&(e.key==='Enter'||e.key===' ')){e.preventDefault();lightNow(b.getAttribute('data-id'))}});
 
+try{const dl0=$('#tzlist');(Intl.supportedValuesOf?Intl.supportedValuesOf('timeZone'):[]).forEach(z=>{const o=document.createElement('option');o.value=z;dl0.append(o)})}catch(e){}
+$$('input[name=tz]').forEach(i=>{if(!i.value)i.value=HOMETZ});
 buildWheel();runQuery({q:'',list:'t',end:'',month:TKEY.slice(0,2)});$$('form[data-form="cq"]').forEach(f=>{f.list.value='t';f.month.value=TKEY.slice(0,2)});
 document.addEventListener('bregister',render);render();
 })();

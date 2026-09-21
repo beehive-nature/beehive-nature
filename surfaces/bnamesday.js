@@ -49,6 +49,14 @@
     { id: 'rahu', en: 'Wednesday night', th: 'วันพุธกลางคืน', lv: 'trešdienas nakts', ring: 6, colorName: 'grey', colorTh: 'สีเทา', posture: { th: 'ปางป่าเลไลยก์', en: 'seated in the forest, an elephant and a monkey bringing gifts' } }
   ];
   DAYS.forEach(function (d) { d.color = RING[d.ring].color; d.planet = RING[d.ring]; });
+  /* every word carries how to say it (RTGS romanisation) and what it means — learning the words is the point.
+     Latvian weekdays simply count: first day … sixth day, then the holy day. */
+  var SAY = { sun: ['wan athit', 'si daeng', 'pang thawai net', 'the holy day'], mon: ['wan chan', 'si lueang', 'pang ham yat', 'the first day'], tue: ['wan angkhan', 'si chomphu', 'pang saiyat', 'the second day'],
+    wed: ['wan phut', 'si khiao', 'pang um bat', 'the third day'], thu: ['wan pharuehatsabodi', 'si som', 'pang samathi', 'the fourth day'], fri: ['wan suk', 'si fa', 'pang ramphueng', 'the fifth day'],
+    sat: ['wan sao', 'si muang', 'pang nak prok', 'the sixth day'], rahu: ['wan phut klang khuen', 'si thao', 'pang pa lelai', 'the night of the third day'] };
+  DAYS.forEach(function (d) { var s = SAY[d.id]; d.rom = s[0]; d.colorRom = s[1]; d.posture.rom = s[2]; d.lvEn = s[3]; });
+  var PLANET_TH = { sun: ['พระอาทิตย์', 'phra athit'], moon: ['พระจันทร์', 'phra chan'], mars: ['พระอังคาร', 'phra angkhan'], mercury: ['พระพุธ', 'phra phut'], saturn: ['พระเสาร์', 'phra sao'], jupiter: ['พระพฤหัสบดี', 'phra pharuehatsabodi'], rahu: ['พระราหู', 'phra rahu'], venus: ['พระศุกร์', 'phra suk'] };
+  RING.forEach(function (g) { g.thFull = PLANET_TH[g.id][0]; g.rom = PLANET_TH[g.id][1]; });
 
   /* the eight houses for a birth day: [{house, group}] — a rotation of RING, nothing more */
   function thaksa(dayIndex) {
@@ -196,7 +204,8 @@
 
   /* ── the people you keep: shape-checked on the way in, so an import cannot smuggle markup
      or a foreign schema into the page. Payloads carry v. ── */
-  var SIDES = ['lv', 'th', 'other'];
+  var SIDES = ['lv', 'th', 'other', 'agent'];
+  var TZ = /^(UTC|[+-]\d\d:?\d\d|[A-Za-z_]+(\/[A-Za-z0-9_+\-]+){0,2})$/;
   function cleanPeople(payload) {
     if (!payload || payload.v !== 1 || !Array.isArray(payload.people)) throw new Error('not a bNames Day family file (v:1 with a people list)');
     return { v: 1, people: payload.people.slice(0, 500).map(function (p, i) {
@@ -205,7 +214,7 @@
       return { id: /^[a-z0-9]{6,24}$/.test(p.id || '') ? p.id : 'p' + Math.random().toString(36).slice(2, 12),
         name: p.name.trim().slice(0, 80), th: typeof p.th === 'string' ? p.th.trim().slice(0, 80) : '',
         rel: typeof p.rel === 'string' ? p.rel.trim().slice(0, 60) : '', side: SIDES.indexOf(p.side) >= 0 ? p.side : 'other',
-        born: born, time: /^\d\d:\d\d$/.test(p.time || '') ? p.time : '', lit: /^\d{4}-\d\d-\d\d$/.test(p.lit || '') ? p.lit : '' };
+        born: born, time: /^\d\d:\d\d$/.test(p.time || '') ? p.time : '', tz: typeof p.tz === 'string' && p.tz.length <= 40 && TZ.test(p.tz) ? p.tz : '', lit: /^\d{4}-\d\d-\d\d$/.test(p.lit || '') ? p.lit : '' };
     }) };
   }
   /* every day the family keeps: a name day if the calendar holds the name (22 May if it does
