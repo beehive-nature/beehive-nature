@@ -118,6 +118,17 @@ if [ "${1:-}" = "--selftest" ]; then
     n=$(git rev-list --count HEAD 2>/dev/null || echo 0)
     a=$(git log -1 --format='%an' 2>/dev/null); c=$(git log -1 --format='%cn' 2>/dev/null)
     tr=$(git log -1 --format='%(trailers:key=Co-authored-by)' 2>/dev/null | grep -ci 'co-authored-by' || true)
+    # The rig's own counter, same shape as the gate's. It has always failed
+    # CLOSED here, but BY ACCIDENT: an empty `tr` makes `[ "" -ge 1 ]` exit 2,
+    # the && chain reads 2 as false, and the row reports FAIL. Correct outcome,
+    # produced by operator order rather than by intent — one reordering and it
+    # becomes a PASS. Named, so the closure is a decision. (Boundary: no row
+    # exercises THIS line; a rig cannot witness itself. Stated, not papered.)
+    case "$tr" in
+      ''|*[!0-9]*)
+        echo "  FAIL $desc — the rig's own trailer counter came back as '$tr', not a count; the tool that produces it did not answer, so this row judged nothing"; st=1
+        tr=-1 ;;
+    esac
     if [ "$rc" = "0" ] && [ "$n" -ge 1 ] && [ "$a" = "$FOUNDER_NAME" ] && [ "$c" = "$want_c" ] \
        && { [ "$want_trailer" = "no" ] || [ "$tr" -ge 1 ]; }; then
       echo "  PASS $desc — created A=$a C=$c trailer=$tr"
@@ -126,7 +137,7 @@ if [ "${1:-}" = "--selftest" ]; then
     fi
   }
 
-  echo "§7 selftest — six cases through the REAL hooks (throwaway repo, deleted after):"
+  echo "§7 selftest — every case below, through the REAL hooks and a real range (throwaway repo, deleted after):"
   # every case pins its FULL ident env — the rig is hermetic against whatever
   # the caller exported (a caller's GIT_COMMITTER_* leaked into T4 once and
   # the gate CORRECTLY blocked what the rig mislabeled founder-typed)
@@ -188,6 +199,38 @@ if [ "${1:-}" = "--selftest" ]; then
     else
       echo "  PASS T6 uncomputable counter dies named — rc=$src6, no ok line for $tip6"
     fi
+  fi
+  # T7 — RANGE RESOLUTION, and it is deliberately three arms, because the whole
+  # point of the chosen shape is that it separates two answers WITHOUT refusing
+  # a third. One arm alone cannot show that: a gate that dies on everything
+  # passes arm A and is useless.
+  #   A unresolvable        -> must DIE BY NAME (before the fix it printed the
+  #                            very same "contains 0 commits" line as arm B)
+  #   B legitimately empty  -> must still PASS LOUDLY  (the OVER-BLOCK guard)
+  #   C '--not' form        -> must still be JUDGED    (the form a ".." split
+  #                            would have turned into a non-ref)
+  r7base=$(git rev-parse HEAD~1 2>/dev/null)
+  a7=$(env S7_RANGE="nosuchref..HEAD" sh "$SELF" 2>&1); arc7=$?
+  b7=$(env S7_RANGE="HEAD..HEAD" sh "$SELF" 2>&1); brc7=$?
+  c7=$(env S7_RANGE="HEAD --not $r7base" sh "$SELF" 2>&1); crc7=$?
+  if [ -z "$r7base" ]; then
+    echo "  FAIL T7 fixture — needed a parent commit to build the --not arm"; st=1
+  elif [ "$arc7" -eq 0 ] || ! printf '%s\n' "$a7" | grep -q 'could not be COMPUTED'; then
+    echo "  FAIL T7-A — an unresolvable range must die by name; rc=$arc7 out: $a7"; st=1
+  elif printf '%s\n' "$a7" | grep -q 'contains 0 commits'; then
+    echo "  FAIL T7-A — it stopped, but still called an uncomputable range empty; out: $a7"; st=1
+  elif [ "$brc7" -ne 0 ] || ! printf '%s\n' "$b7" | grep -q 'contains 0 commits'; then
+    echo "  FAIL T7-B — a LEGITIMATELY empty range must still pass loudly; rc=$brc7 out: $b7"; st=1
+  elif printf '%s\n' "$c7" | grep -q 'could not be COMPUTED' \
+       || ! printf '%s\n' "$c7" | grep -q 'checking 1 commit'; then
+    # NOTE WHAT THIS ARM CLAIMS: JUDGED, not PASSED. T7 runs after T6, whose
+    # fixture is a deliberate trailer-less commit, so this arm's VERDICT is
+    # correctly rc=1 — and the verdict is irrelevant to the claim. Requiring
+    # rc=0 here would assert the fixture rather than the form, and it is how
+    # this row failed on its first run.
+    echo "  FAIL T7-C — the --not form must still be judged, not refused on resolution; rc=$crc7 out: $c7"; st=1
+  else
+    echo "  PASS T7 range resolution — unresolvable dies named · empty still passes · --not still judged"
   fi
   if [ "$st" -ne 0 ]; then echo "§7 selftest FAIL — a working gate and a dead one are not distinguishable by silence; these cases are the difference"; fi
   exit "$st"
@@ -268,7 +311,28 @@ else
 fi
 
 # ---- count the range (a failure here is also could-not-compute)
-count=$(git log --format='%H' $RANGE 2>/dev/null | wc -l | tr -d ' \r')
+#
+# READ THE PRODUCER'S STATUS, NOT THE COUNTER'S. The single line this replaces
+# destroyed git's answer twice: `2>/dev/null` ate the message, and the pipe into
+# `wc` made $? WC'S. An unresolvable range then arrived here as the string "0"
+# and PASSED LOUDLY with the same words a genuinely empty range gets — this
+# file's own law at :25 inverted, because "could not compute" is not "computed
+# empty". Measured before the fix: S7_RANGE='nosuchref..HEAD' and
+# S7_RANGE='HEAD..HEAD' printed IDENTICAL output and both exited 0.
+#
+# ENDPOINT-SPLITTING WAS CONSIDERED AND REFUSED (bee-laborer, 2026-09-21): a
+# revision range is not always two endpoints. `HEAD --not origin/main`,
+# `^origin/main HEAD` and `A..B -- path` all resolve, and splitting at ".."
+# hands each to a ref check as a non-ref — dying by name on a LEGITIMATE range.
+# git already answers for every form; the only thing missing was reading it.
+range_out=$(git log --format='%H' $RANGE 2>/dev/null); range_rc=$?
+if [ "$range_rc" -ne 0 ]; then
+  # diagnostic-only second call, made AFTER the range is known not to resolve,
+  # solely to quote git's own words rather than paraphrase them
+  range_why=$(git log --format='%H' $RANGE 2>&1 >/dev/null)
+  die "the range ($RANGE) could not be COMPUTED — git log exited $range_rc. git said: $range_why. An unresolvable range is not an empty one and is never read as zero commits."
+fi
+count=$(printf '%s' "$range_out" | grep -c . || true)
 require_count "the range size" "$count" \
   || die "counter validation unavailable — require_count did not run"
 if [ "$count" = "0" ]; then
