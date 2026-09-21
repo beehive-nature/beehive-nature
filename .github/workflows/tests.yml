@@ -76,6 +76,20 @@ jobs:
       - name: Estate registry — counts computed, not written
         if: always()
         run: node scripts/estate-check.mjs
+      # DOOR COUNTS: the doors are hand-kept, so their "N open now" is the one
+      # number on this estate no generator keeps honest. cc0909a0 shipped 28
+      # against 38 tiles and no gate saw it (fixed by hand at fe40aa20). Three
+      # sources per door — the list row, the door's own .n, the real anchors
+      # inside section.d — so a red says WHICH one is lying, not just that they
+      # differ. All six doors agree today, which is exactly why the selftest
+      # below (drifted fixtures, one per source) is the row that proves the
+      # gate: a natural exam here can only ever be green.
+      - name: Doors — three numbers, one truth
+        if: always()
+        run: node e2e/door-counts.mjs
+      - name: Doors — door-counts selftest (drifted fixtures, every push)
+        if: always()
+        run: node e2e/door-counts.mjs --selftest
       - name: Front door — search, source parity and accessible art
         if: always()
         run: node --test e2e/atlas.test.mjs e2e/agent-dock.test.mjs e2e/lang-coverage.test.mjs e2e/register.test.mjs e2e/social-arrival.test.mjs e2e/first-click.test.mjs e2e/social-three-view.test.mjs e2e/forge-room-views.test.mjs e2e/kandi-views.test.mjs e2e/kandi-state.test.mjs e2e/kandi-handlers.test.mjs e2e/artist-audio-showcase.test.mjs e2e/artist-audio-collection.test.mjs e2e/artist-audio-player.test.mjs e2e/bearth-views.test.mjs e2e/bsymposium-views.test.mjs e2e/bfood-views.test.mjs e2e/review-views.test.mjs e2e/bigen-views.test.mjs e2e/university-views.test.mjs e2e/onboarding-views.test.mjs e2e/blongevity-views.test.mjs e2e/buzz-directory-views.test.mjs e2e/profile-views.test.mjs e2e/first-work.test.mjs e2e/bloom-work-pack.test.mjs e2e/bnames-rpc.test.mjs e2e/no-dead-host.test.mjs e2e/music-cleanup.test.mjs e2e/bui-daily-art.test.mjs
