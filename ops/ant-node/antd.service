@@ -6,8 +6,8 @@ Wants=network-online.target
 
 [Service]
 User=ubuntu
-  binary on box: /home/ubuntu/ant-lane/antd (sha256 1cc3b4b9997e7344b92ed17cccf44324fa1aa1d8ac6e4d891fa7f3a0eab32cd8 == v0.12.0 antd-linux-arm64, verified 2026-09-21) PUBLIC-CONSTANT: vendor release sha256
-  binds the docker bridge IP only - Caddy reaches it, the public cannot; gRPC stays loopback
+# binary on box: /home/ubuntu/ant-lane/antd (sha256 1cc3b4b9997e7344b92ed17cccf44324fa1aa1d8ac6e4d891fa7f3a0eab32cd8 == v0.12.0 antd-linux-arm64, verified 2026-09-21) PUBLIC-CONSTANT: vendor release sha256
+# binds the docker bridge IP only - Caddy reaches it, the public cannot; gRPC stays loopback
 ExecStart=/home/ubuntu/ant-lane/antd --rest-addr 172.18.0.1:8082 --cors
 Environment=ANTD_LOG_LEVEL=info
 Restart=always

@@ -35,6 +35,17 @@ pointed at 8082); no new public port; no keys. An earlier 0-byte unit write
 (cmd `type` used inside remote bash; empty unit files read as "masked") is in
 the sudo journal at 06:47:07 and was repaired in-turn.
 
+## Byte-equality repair (laborer finding 07:18Z)
+
+At 07:18Z LoVis bee-laborer measured that the in-tree unit was NOT
+byte-equal to the live one: the hook tag that let the vendor release sha256
+past the scanner had also stripped the `#` from the two comment lines
+inside `[Service]` (755 B box vs 794 B tree). Remedy, one commit on this
+branch: `#` restored on both lines, tag kept. The exact tree bytes are then
+written to `/etc/systemd/system/antd.service` with `daemon-reload` +
+restart and the receipt re-run — the law is tree == box, closed by two
+matching sha256 lines, box and tree.
+
 ## The receipt (in the order's own words)
 
 1. `/health`: `{"status":"ok","version":"0.12.0","build_commit":"8378338ca04d",
