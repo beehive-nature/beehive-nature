@@ -1,34 +1,42 @@
 #!/usr/bin/env node
 /* ═══════════════════════════════════════════════════════════════════════════
-   build-surfaces.mjs — THE ONE BUILDER.
+   build-surfaces.mjs — THE DOOR-TILE DRAFTER.
 
-   surfaces/index.html (the hub) and surfaces/doors/*.html (the six front
-   doors) are GENERATED from surfaces/estate.json. Nothing here is
-   hand-edited; an edit to a name, a hint, a caveat or a whole new surface
-   happens once, in the registry, and both the hub and the door it belongs to
-   change together. e2e/estate-source.mjs rebuilds into a temp dir and fails
-   if the committed HTML has drifted, so skipping this file cannot survive a
-   gate.
+   The hub builder is scripts/build-atlas.mjs, reading the atlas registry at
+   the repo root; this tool has not generated the hub since the atlas lane
+   (e2e/estate-source.mjs §2 guards the hub byte for byte). The doors,
+   surfaces/doors/*.html, are HAND-KEPT since 2026-08-28 (byte-true
+   hex-band and A3 redesign rulings): no generator owns them, and this tool
+   touching them at all is a smell — see the fail-closed note below. Its
+   sanctioned use: drafting door tiles from surfaces/estate.json into a
+   scratch directory, to be hand-keyed into the door from there. NEVER run
+   it over surfaces/doors/ — the d083b809 merge-sync did exactly that, and
+   it took 40a33d1c + fe40aa20 to repair the doors.
 
    WHY THIS SHAPE (founder, 2026-08-26: "the best structural design to
    accommodate our languages stack and updates/editing forward"):
 
-   · ONE SOURCE. The hub and the doors were two hand-kept lists that had
-     already disagreed once — the hub said five domains after bnature.bio
-     made six. Two lists of the same truth always drift; one cannot.
-   · TRANSLATABLE BY CONSTRUCTION. Every generated string carries a
+   · ONE SOURCE PER TRUTH. The hub and the doors were two hand-kept lists
+     that had already disagreed once — the hub said five domains after
+     bnature.bio made six. The split today: hub counts compute from the
+     atlas registry, door tiles draft from surfaces/estate.json, and the
+     doors themselves are hand-kept pages the rulings own.
+   · TRANSLATABLE BY CONSTRUCTION. Every drafted string carries a
      data-i18n key, so surfaces/lang.js swaps it like any other estate
      string, and a missing translation falls back to English visibly and is
      counted — the corpus law, untouched. Keys are MECHANICAL, never
      invented: a surface is s.<path with / and . as ->, a domain field is
-     d.<id>.<field>. That means the 26-language corpus can be extended by a
-     script rather than by someone naming 200 keys by hand.
-   · EDITING FORWARD. Adding a surface is one object in estate.json. It
-     appears on the hub, behind its door, in the right domain, with its
-     honesty state, in one run.
+     d.<id>.<field>. That means the corpus can be extended by a script
+     rather than by someone naming 200 keys by hand.
+   · EDITING FORWARD. Adding a surface is one object in
+     surfaces/estate.json. Its tile drafts from the registry and appears
+     behind its door only when hand-keyed there; the hub is the atlas
+     registry's business, not this file's.
 
-   Usage:  node tools/build-surfaces.mjs
-           node tools/build-surfaces.mjs --out <dir>    (used by the gate)
+   Usage:  node tools/build-surfaces.mjs --out <dir>    (draft to scratch —
+           the sanctioned form while the doors are hand-kept)
+           node tools/build-surfaces.mjs                (writes toward
+           surfaces/ — NEVER over the hand-kept doors)
    ═══════════════════════════════════════════════════════════════════════════ */
 import { readFileSync, writeFileSync, mkdirSync, readdirSync } from 'node:fs';
 import { join, dirname, resolve } from 'node:path';
