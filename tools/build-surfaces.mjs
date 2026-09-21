@@ -34,19 +34,40 @@
      registry's business, not this file's.
 
    Usage:  node tools/build-surfaces.mjs --out <dir>    (draft to scratch —
-           the sanctioned form while the doors are hand-kept)
-           node tools/build-surfaces.mjs                (writes toward
-           surfaces/ — NEVER over the hand-kept doors)
+           the ONLY form: --out is mandatory and must resolve outside
+           surfaces/; bare invocation and in-tree targets refuse by name)
    ═══════════════════════════════════════════════════════════════════════════ */
 import { readFileSync, writeFileSync, mkdirSync, readdirSync } from 'node:fs';
-import { join, dirname, resolve } from 'node:path';
+import { join, dirname, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(HERE, '..');
 const SURF = join(ROOT, 'surfaces');
 const argOut = process.argv.indexOf('--out');
-const OUT = argOut > 0 ? resolve(process.argv[argOut + 1]) : SURF;
+/* MANDATORY --out (2026-09-21, laborer row after #174): the doors are
+   HAND-KEPT - this tool drafts tiles to scratch, never over surfaces/.
+   The old default (OUT = SURF) is the mechanism that let the d083b809
+   merge-sync overwrite hand-kept doors; and a guard that rests on data
+   nobody maintains (the eight id-less registry rows) is a coincidence,
+   not a guard. Refuse by name, write nothing. */
+if (argOut < 0 || !process.argv[argOut + 1]) {
+  throw new Error('BUILD-SURFACES REFUSES: no --out directory given. The doors are '
+    + 'hand-kept; this tool drafts tiles into a scratch directory only - bare '
+    + 'invocation used to default to surfaces/ and can overwrite hand-kept doors '
+    + '(d083b809). Run: node tools/build-surfaces.mjs --out <scratch-dir>');
+}
+const OUT = resolve(process.argv[argOut + 1]);
+/* and never INTO the living surfaces tree, even when asked explicitly:
+   the same destruction with a longer command line is the same destruction
+   (header law: NEVER over surfaces/doors/). Compared case-insensitively -
+   this repo lives on a case-insensitive filesystem. */
+const outLc = OUT.toLowerCase(), surfLc = SURF.toLowerCase();
+if (outLc === surfLc || outLc.startsWith(surfLc + sep)) {
+  throw new Error('BUILD-SURFACES REFUSES: --out resolves inside surfaces/ (' + OUT + '). '
+    + 'The doors are hand-kept - draft to a scratch directory outside the tree, '
+    + 'then hand-key the tiles.');
+}
 
 const E = JSON.parse(readFileSync(join(SURF, 'estate.json'), 'utf8'));
 /* FAIL CLOSED ON UNRESOLVED i18n (2026-09-20, sixth instance of the
