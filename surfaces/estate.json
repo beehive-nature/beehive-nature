@@ -2,7 +2,6 @@
  "_meta": {
   "law": "THE REGISTRY. The hub, surfaces/index.html, is generated (scripts/build-atlas.mjs, from the atlas registry) and gate-guarded — e2e/estate-source.mjs regenerates it and fails unless the committed page matches byte for byte, so a hand-edit to generated output cannot survive. surfaces/doors/*.html are HAND-KEPT since 2026-08-28 (byte-true hex-band and A3 redesign rulings): no generator owns them, never rebuild a door — its tiles are keyed by hand, and their integrity is the language checks plus estate-check's registry laws. tools/build-surfaces.mjs drafts door tiles from this file (--out scratch only, never over surfaces/doors/) and FAILS CLOSED on a registry row with an unresolved i18n id, before writing anything. Add a surface here and it reaches a stranger only when its tile is hand-keyed behind its door.",
   "i18n": "Every generated string carries a data-i18n key so surfaces/lang.js can swap it. Keys are mechanical: a surface is s.<path-with-slashes-and-dots-as-dashes>, a domain is d.<id>.<field>. Missing translations fall back to English visibly and are counted — the corpus law, unchanged.",
-  "generated_by": "tools/build-surfaces.mjs",
   "sorted_by": "workflow wf_635765f1-ce1 — every surface opened and judged, then a challenge pass for forced fits and roadmap claims",
   "binding_rule": "A door may not claim anything the estate does not currently do. state:\"roadmap\" never appears among a door’s open surfaces — only under \"not built yet\".",
   "updated": "2026-09-21",
@@ -408,54 +407,62 @@
    "file": "blight/pixelrefiner.html",
    "domain": "nature",
    "name": "smeared art in, crisp cells out",
-   "state": "working"
+   "state": "working",
+   "i18n": "s.blight-pixelrefiner"
   },
   {
    "file": "blight/qrtree.html",
    "domain": "nature",
    "name": "the URL lives in the code",
-   "state": "working"
+   "state": "working",
+   "i18n": "s.blight-qrtree"
   },
   {
    "file": "blight/qrroses.html",
    "domain": "nature",
    "name": "roses and bees over a frozen code",
-   "state": "working"
+   "state": "working",
+   "i18n": "s.blight-qrroses"
   },
   {
    "file": "blight/profile.html",
    "domain": "nature",
    "name": "the profile half that needs no server",
    "state": "working",
-   "caveat": "read-only: holdings, PFP and shorthand from chain; nickname/quests/referrals/claims/submissions named as the half that needs a writable home"
+   "caveat": "read-only: holdings, PFP and shorthand from chain; nickname/quests/referrals/claims/submissions named as the half that needs a writable home",
+   "i18n": "s.blight-profile"
   },
   {
    "file": "record.html",
    "domain": "nature",
    "name": "every screenshot we ever kept",
    "state": "working",
-   "caveat": "the shots are the record — never edited, cropped or retouched; ugly is what it looked like"
+   "caveat": "the shots are the record — never edited, cropped or retouched; ugly is what it looked like",
+   "i18n": "s.record"
   },
   {
    "file": "blight/midi.html",
    "domain": "nature",
    "name": "one seed, a performance",
    "state": "working",
-   "caveat": "seed from the MiDi contract on Base, read-only; block-sprite medium, score-driven performance — visual and audio siblings from one timeline; Web Audio oscillators only, sound never autoplays; reduced motion rests as one composed silent frame"
+   "caveat": "seed from the MiDi contract on Base, read-only; block-sprite medium, score-driven performance — visual and audio siblings from one timeline; Web Audio oscillators only, sound never autoplays; reduced motion rests as one composed silent frame",
+   "i18n": "s.blight-midi"
   },
   {
    "file": "blight/midiroom.html",
    "domain": "nature",
    "name": "the bMiDi room — three densities",
    "state": "working",
-   "caveat": "demo of the bMiDi agent loop: plain-word ask → deterministic seed-space search → setlist; beginner/DJ/producer level toggle; the room log is LOCAL — the relay lane signs it to buzz; agent runs on-device in this demo, zero off-origin"
+   "caveat": "demo of the bMiDi agent loop: plain-word ask → deterministic seed-space search → setlist; beginner/DJ/producer level toggle; the room log is LOCAL — the relay lane signs it to buzz; agent runs on-device in this demo, zero off-origin",
+   "i18n": "s.blight-midiroom"
   },
   {
    "file": "blight/midivault.html",
    "domain": "nature",
    "name": "the vault — music on Autonomi",
    "state": "working",
-   "caveat": "record/store/delete/send created music: score artifacts + offline-rendered WAVs; public (address=door), private (AES-GCM, key only in local manifest), privileged (capability = address+key); SIMULATED backend labelled, antd adapter awaits live route verification"
+   "caveat": "record/store/delete/send created music: score artifacts + offline-rendered WAVs; public (address=door), private (AES-GCM, key only in local manifest), privileged (capability = address+key); SIMULATED backend labelled, antd adapter awaits live route verification",
+   "i18n": "s.blight-midivault"
   },
   {
    "file": "bnames.html",
