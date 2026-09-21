@@ -51,6 +51,11 @@ jobs:
         run: |
           cargo test --locked --manifest-path ops/x402-door/Cargo.toml
           cargo build --locked --manifest-path ops/x402-door/Cargo.toml --features live-wiring
+      # ant-writedoor (ruled 2026-09-21): the keyless Autonomi write door's
+      # HTTP contract battery. Mock-gateway only — CI touches no network.
+      - name: ant-writedoor (contract battery; mock gateway, zero mainnet)
+        if: always()
+        run: cargo test --locked --manifest-path ops/ant-writedoor/Cargo.toml
       # SPEC-BINDEXER-0: the keyless attestation is a CI-visible receipt
       - name: bindexer keyless attestation (SPEC-BINDEXER-0)
         if: always()
@@ -134,6 +139,32 @@ jobs:
       - name: Voucher/escrow engine battery (moat ledger core)
         if: always()
         run: python3 scripts/buzz-meter/test_voucher_escrow.py
+      # bMAILROOM CANDIDATE battery (zCode seat, 2026-09-19; start order
+      # d003de1f + corrections 1e18cbf8/6689f0e1): sink multi-RCPT red-first
+      # fix; single-reader ledger (dedupe on (mailbox,digest), crash resume
+      # at both points, uncertain-publish retry with stored bytes, hold-
+      # then-binding completion, notification/drafting independence);
+      # roster single-source vs sink KNOWN; draft-only outbound seam; and
+      # the pinned nostr-tools native-notice adapter (signed room metadata,
+      # strict DM flags, disabled seam, probe regressions). Node half needs
+      # the adapter package (npm ci runs the committed lock).
+      - name: bMAILroom candidate battery (sink fix + single reader + draft-only seam)
+        if: always()
+        run: |
+          python3 scripts/buzz-mail/test_sink_multircpt.py
+          python3 scripts/buzz-mail/test_mailgate.py
+          python3 scripts/buzz-mail/test_notify.py
+          python3 scripts/buzz-mail/test_roster.py
+          python3 scripts/buzz-mail/test_outbound.py
+          python3 scripts/buzz-mail/test_bech32id.py
+          python3 scripts/buzz-mail/test_import_from_triage.py
+      - name: bMAILroom native notice adapter (pinned nostr-tools, disabled seam)
+        if: always()
+        run: |
+          npm ci --ignore-scripts --prefix scripts/buzz-mail
+          node scripts/buzz-mail/notify-transport.mjs --selftest
+          node scripts/buzz-mail/test_notify_transport.mjs
+          python3 scripts/buzz-mail/test_notify_adapter_cli.py
       # x402-RAID-Z33 battery (z3.3, 2026-09-04): credit-from-settlement,
       # pause-not-kill, upto ceiling (nonce burn even at zero), lane cost
       # basis + tithe, the 4-state receipt, and the three NAMED halt tests
@@ -607,6 +638,24 @@ jobs:
         if: always()
         working-directory: e2e
         run: node --test tour-bar-clearance.test.mjs
+      # Law of the Sea print (founder word "print publish" 2026-09-21, BgrOKbot):
+      # the ruled first screen (title, three laws, Manifest) and the first
+      # disclosure summary sit clear of #tbar at 390x844. Limit is innerHeight
+      # minus --tbar-h; empty --tbar-h fails closed.
+      - name: Law of the Sea — first screen clears the tour bar
+        if: always()
+        working-directory: e2e
+        run: node --test law-of-the-sea-fold.test.mjs
+      # Watch from Autonomi (founder upload 2026-09-21 would not play): the page must play a public
+      # video whatever shape the ant door is in. antd 0.12.0 cuts /stream at a wrong Content-Length
+      # (ant-sdk PR #243), so the page falls back to the {"data":"<base64>"} envelope and plays the
+      # decoded Blob; an upgraded antd streams directly and the envelope is never fetched. Door down,
+      # not a video, error and cut envelopes end on the failure row. The door is MOCKED; the real
+      # relay is touched zero times.
+      - name: Watch from Autonomi — plays through today's door and an upgraded one (mocked door)
+        if: always()
+        working-directory: e2e
+        run: node --test watch-ant.test.mjs
       # SHARED-POLICY FIELD OWNERSHIP (ceremony-blocking repair, 2026-09-17):
       # a View change in a stale wallet tab must NEVER erase newer founder
       # policy from the shared key — every writer merges with the latest

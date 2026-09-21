@@ -153,8 +153,26 @@ test('the skaists design system’s laws, as far as a file can show them', () =>
   for (const v of ['--guard:#4a3aa8', '--guard:#b7a8f7', '--sov:#6e3fb8', '--you:#a8238c', '--rose:#a3122b', '--bg:#06110c']) assert.ok(html.includes(v), 'exact token ' + v);
   assert.equal((html.match(/class="primary"/g) || []).length, 3, 'one filled action per view');
   const body = html.slice(html.indexOf('<body'), html.indexOf('<script src="bnamesday.js">'));
-  for (const m of body.matchAll(/<(h1|h2|button|summary|label)\b[^>]*>(?:<span[^>]*>[^<]*<\/span>\s*)?([A-Za-z][^<]{2,})/g)) { const first = m[2].trim().split(/\s+/)[0];
+  for (const m of body.matchAll(/<(h1|h2|button|summary|label)\b[^>]*>(?:<span aria-hidden[^>]*>[^<]*<\/span>\s*)?(?:<span data-i18n="[^"]+">)?([A-Za-z][^<]{2,})/g)) { const first = m[2].trim().split(/\s+/)[0];
     assert.ok(/^[a-z]/.test(first) || /^(Latvia|Latvian|Thailand|Thai|China|Julian|PRIVATE)/.test(first), 'the casing law: “' + m[2].trim().slice(0, 40) + '” begins a ' + m[1]); }
   assert.doesNotMatch(body, />—<\/(div|td|dd)>/, 'a gauge that cannot vouch says so — never a dash');
   assert.match(html, /id="r-houses"/, 'the octagon’s words are captions, not art'); assert.doesNotMatch(html, /lang="th">\$\{r\.house\.th\}<\/text>/, 'no house names inside the SVG');
+});
+
+test('the words law: new bee’s sentences are keys in the one dictionary, whole, with their slots and marks intact in every tongue', () => {
+  const corpus = JSON.parse(read('surfaces/lang-corpus.json')), rows = corpus.strings, langs = corpus._meta.langs;
+  const bee = html.slice(html.indexOf('<div data-view="bee">'), html.indexOf('<div data-view="raver">'));
+  const keys = [...new Set([...html.matchAll(/data-i18n(?:-ph)?="(bnd\.[^"]+)"/g)].map((m) => m[1]))];
+  assert.ok(keys.length >= 54, 'the keyed sentences: ' + keys.length);
+  const marks = (s) => (s.match(/<[^>]+>/g) || []).sort().join('|'), slots = (s) => (s.match(/\{\w+\}/g) || []).sort().join('|');
+  for (const k of keys) { const row = rows[k]; assert.ok(row && row.en, k + ' is in the corpus');
+    for (const L of langs) { assert.ok(typeof row[L] === 'string' && row[L].trim(), k + ' reaches ' + L);
+      assert.equal(marks(row[L]), marks(row.en), k + ' keeps its marks in ' + L + ' — native words and the file name are never translated');
+      assert.equal(slots(row[L]), slots(row.en), k + ' keeps its {slots} in ' + L); } }
+  /* no static sentence of this view is left outside the dictionary: every lettered text run sits in a keyed holder */
+  const bare = bee.replace(/<!--[\s\S]*?-->/g, '').replace(/<(\w+)\b[^>]*\bdata-i18n="[^"]+"[^>]*>[\s\S]*?<\/\1>/g, '').replace(/<[^>]+>/g, '\n').split('\n').map((x) => x.trim()).filter((x) => /[A-Za-z]{2}/.test(x));
+  assert.deepEqual(bare, [], 'unkeyed words in the new bee view');
+  assert.match(rows['bnd.why.lv.p2'].en, /\{t\}.*\{x\}/, 'the counts ride in slots, inside a sentence the translator owns');
+  assert.match(html, /data-i18n="bnd\.why\.lv\.p2" data-slots/); assert.match(html, /addEventListener\('blang',fillSlots\)/, 'a language change refills the slots');
+  assert.doesNotMatch(bee, /data-n="/, 'no glued fragments around a number');
 });

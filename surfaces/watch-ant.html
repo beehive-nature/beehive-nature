@@ -44,7 +44,7 @@ body[data-reg="cypherpunk"] :is(input,button,.say,video,.tap){border-radius:3px}
     <button type="submit" data-i18n="want.go">Watch</button>
   </form>
   <p class="say" id="s-bad" data-i18n="want.bad" hidden>That is not an autonomi:// address. It is 64 letters and numbers after autonomi://</p>
-  <p class="say" id="s-slow" data-i18n="want.slow" hidden>Fetching from the network. Picture starts as soon as enough of the file has arrived.</p>
+  <p class="say" id="s-slow" data-i18n="want.slow" hidden>Fetching from the network. The first seconds can take a while.</p>
   <progress id="pg" max="1" value="0" aria-labelledby="s-slow" hidden></progress>
   <p class="got" id="got" translate="no" dir="ltr" aria-live="off" hidden></p>
   <p class="say" id="s-fail" data-i18n="want.fail" hidden>The network door did not answer, or this file is not a video. Try again in a few minutes.</p>
@@ -57,18 +57,13 @@ body[data-reg="cypherpunk"] :is(input,button,.say,video,.tap){border-radius:3px}
 </main>
 <script src="register.js?v=42"></script>
 <script>
-/* watch-ant — ANT public video via estate door.
-   Cache: Cache Storage keyed by XOR so refresh plays local, no re-pull.
-   Play: unmuted autoplay; if browser blocks, one-tap with sound.
-   Progressive: arm <video> at PLAY_AT media bytes; stub /stream aborts fast.
-   x0x off playback path. */
+/* watch-ant — ANT public video via estate door (relay.skaists.dev/ant/v1 → antd).
+   Cache by XOR so refresh does not re-pull. /stream first (antd ≥0.12.1); stub
+   times out fast then JSON envelope decode. Unmuted play; tap if blocked. */
 (() => {
   const DOOR = 'https://relay.skaists.dev/ant/v1/data/public/';
   const CACHE = 'ant-watch-v1';
-  const HEAD = '{"data":"';
-  const PLAY_AT = 2 << 20;
-  const STUB_MAX = 65536;
-  const STREAM_MS = 800;
+  const HEAD = '{"data":"', STREAM_WAIT = 2500, BLOB_WAIT = 20000, SEGMENT = 8 << 20;
   const $ = id => document.getElementById(id), says = ['s-bad', 's-slow', 's-fail'];
   const say = id => says.forEach(s => $(s).hidden = s !== id);
   const parse = raw => { const m = /^\s*(?:autonomi:\/\/)?([0-9a-f]{64})\s*$/i.exec(raw || ''); return m ? m[1].toLowerCase() : null; };
@@ -82,18 +77,13 @@ body[data-reg="cypherpunk"] :is(input,button,.say,video,.tap){border-radius:3px}
   const cacheKey = a => 'ant-watch://' + a;
   async function cacheGet(a) {
     if (!('caches' in window)) return null;
-    try {
-      const c = await caches.open(CACHE);
-      const r = await c.match(cacheKey(a));
-      return r ? await r.blob() : null;
-    } catch { return null; }
+    try { const c = await caches.open(CACHE); const r = await c.match(cacheKey(a)); return r ? await r.blob() : null; }
+    catch { return null; }
   }
   async function cachePut(a, blob) {
     if (!('caches' in window)) return;
-    try {
-      const c = await caches.open(CACHE);
-      await c.put(cacheKey(a), new Response(blob, { headers: { 'content-type': blob.type || 'video/mp4' } }));
-    } catch (_) {}
+    try { const c = await caches.open(CACHE); await c.put(cacheKey(a), new Response(blob, { headers: { 'content-type': blob.type || 'video/mp4' } })); }
+    catch (_) {}
   }
   const firstFrame = ms => new Promise(done => {
     const end = ok => { clearTimeout(t); v.removeEventListener('loadeddata', yes); v.removeEventListener('error', no); done(ok); };
@@ -102,86 +92,20 @@ body[data-reg="cypherpunk"] :is(input,button,.say,video,.tap){border-radius:3px}
   });
   async function goSound(my) {
     if (my !== job) return;
-    v.muted = false; v.volume = 1;
-    tap.hidden = true;
-    try {
-      await v.play();
-      if (my === job) { playing = my; say(null); }
-    } catch {
-      if (my === job) { tap.hidden = false; say(null); }
-    }
+    v.muted = false; v.volume = 1; tap.hidden = true;
+    try { await v.play(); if (my === job) { playing = my; say(null); } }
+    catch { if (my === job) { tap.hidden = false; say(null); } }
   }
   tap.addEventListener('click', () => {
     v.muted = false; v.volume = 1;
     v.play().then(() => { tap.hidden = true; }).catch(() => {});
   });
-  function armSrc(partsOrBlob, mime, my, { final = false } = {}) {
-    if (my !== job) return;
-    const t = v.currentTime || 0;
-    const was = !v.paused && playing === my;
-    if (blobUrl) URL.revokeObjectURL(blobUrl);
-    const blob = partsOrBlob instanceof Blob ? partsOrBlob : new Blob(partsOrBlob, { type: mime || 'video/mp4' });
-    blobUrl = URL.createObjectURL(blob);
-    v.src = blobUrl; v.load();
-    const resume = () => {
-      if (t > 0.25) { try { v.currentTime = t; } catch (_) {} }
-      if (was || final || playing === my) goSound(my);
-      else goSound(my);
-    };
-    v.addEventListener('loadeddata', resume, { once: true });
-  }
-  async function tryStream(a, signal, my) {
-    const ac = new AbortController();
-    const onAbort = () => ac.abort();
-    signal.addEventListener('abort', onAbort);
-    const timer = setTimeout(() => ac.abort(), STREAM_MS);
-    try {
-      const r = await fetch(DOOR + a + '/stream', { signal: ac.signal });
-      if (!r.ok || !r.body) return false;
-      const cl = +r.headers.get('content-length') || 0;
-      if (cl > 0 && cl <= STUB_MAX) return false;
-      const reader = r.body.getReader();
-      const chunks = [];
-      let got = 0, head = new Uint8Array(0);
-      for (;;) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        chunks.push(value); got += value.length;
-        if (head.length < 8) {
-          const h = new Uint8Array(Math.min(8, head.length + value.length));
-          h.set(head); h.set(value.subarray(0, h.length - head.length), head.length); head = h;
-        }
-      }
-      if (got <= STUB_MAX) return false;
-      const mime = kind(head);
-      if (!mime) return false;
-      const blob = new Blob(chunks, { type: mime });
-      await cachePut(a, blob);
-      armSrc(blob, mime, my, { final: true });
-      const ok = await firstFrame(8000);
-      if (ok && my === job) { playing = my; say(null); await goSound(my); }
-      return ok;
-    } catch { return false; }
-    finally {
-      clearTimeout(timer);
-      signal.removeEventListener('abort', onAbort);
-    }
-  }
-  async function unwrapPlay(a, signal, my) {
+  async function unwrap(a, signal, my) {
     const r = await fetch(DOOR + a, { signal });
-    if (!r.ok || !r.body) throw new Error('door ' + r.status);
-    const total = +r.headers.get('content-length') || 0;
-    const rd = r.body.getReader(), td = new TextDecoder();
+    if (!r.ok || !r.body) throw new Error('door answered ' + r.status);
+    const total = +r.headers.get('content-length') || 0, rd = r.body.getReader(), td = new TextDecoder(), segs = [];
     let parts = [], held = 0, head = new Uint8Array(0), got = 0, bytes = 0, text = '', started = false, tail = null;
-    let armed = false, mime = '';
     if (!total) pg.removeAttribute('value');
-    const flush = force => {
-      if (!parts.length || !mime) return;
-      if (!armed && (bytes >= PLAY_AT || force)) {
-        armSrc(parts.slice(), mime, my, { final: false });
-        armed = true;
-      }
-    };
     for (;;) {
       const { done, value } = await rd.read();
       if (done) break;
@@ -200,24 +124,16 @@ body[data-reg="cypherpunk"] :is(input,button,.say,video,.tap){border-radius:3px}
       const cut = text.length - text.length % 4;
       if (cut) {
         const part = b64(text.slice(0, cut)); text = text.slice(cut);
-        if (head.length < 8) {
-          const h = new Uint8Array(Math.min(8, head.length + part.length));
-          h.set(head); h.set(part.subarray(0, h.length - head.length), head.length); head = h;
-          mime = kind(head);
-        }
+        if (head.length < 8) { const h = new Uint8Array(Math.min(8, head.length + part.length)); h.set(head); h.set(part.subarray(0, h.length - head.length), head.length); head = h; }
         parts.push(part); held += part.length; bytes += part.length;
-        if (my === job) $('got').textContent = (bytes / 1048576).toFixed(1) + ' MB';
-        if (held >= (1 << 20)) { flush(false); held = 0; }
+        if (held >= SEGMENT) { segs.push(new Blob(parts)); parts = []; held = 0; }
+        if (my === job) $('got').textContent = Math.floor(bytes / 1048576) + ' MB';
       }
       if (tail !== null && text) throw new Error('base64 ended mid-quad');
     }
     if (tail === null || tail.trim() !== '"}') throw new Error('body ended early');
-    if (!mime) throw new Error('not a video');
-    const blob = new Blob(parts, { type: mime });
-    await cachePut(a, blob);
-    armSrc(blob, mime, my, { final: true });
-    const ok = await firstFrame(20000);
-    if (my === job) { if (ok) { playing = my; say(null); await goSound(my); } else say('s-fail'); }
+    if (parts.length) segs.push(new Blob(parts));
+    return new Blob(segs, { type: kind(head) });
   }
   async function watch(raw) {
     const a = parse(raw), my = ++job;
@@ -231,16 +147,25 @@ body[data-reg="cypherpunk"] :is(input,button,.say,video,.tap){border-radius:3px}
     $('shown').textContent = 'autonomi://' + a; $('out').hidden = false; say('s-slow');
     const hit = await cacheGet(a);
     if (hit && my === job) {
-      armSrc(hit, hit.type || 'video/mp4', my, { final: true });
-      const ok = await firstFrame(8000);
-      if (ok && my === job) { playing = my; say(null); await goSound(my); return; }
+      if (blobUrl) URL.revokeObjectURL(blobUrl);
+      blobUrl = URL.createObjectURL(hit); v.src = blobUrl; v.load();
+      if (await firstFrame(BLOB_WAIT)) { if (my === job) { playing = my; say(null); await goSound(my); } return; }
     }
-    if (await tryStream(a, signal, my)) return;
+    v.src = DOOR + a + '/stream'; v.load();
+    if (await firstFrame(STREAM_WAIT)) { if (my === job) { playing = my; say(null); await goSound(my); } return; }
     if (my !== job) return;
-    busy(true);
-    try { await unwrapPlay(a, signal, my); }
-    catch { if (my === job) say('s-fail'); }
-    finally { if (my === job) busy(false); }
+    v.removeAttribute('src'); v.load(); busy(true);
+    try {
+      const blob = await unwrap(a, signal, my);
+      if (my !== job) return;
+      await cachePut(a, blob);
+      if (blobUrl) URL.revokeObjectURL(blobUrl);
+      blobUrl = URL.createObjectURL(blob); v.src = blobUrl; v.load();
+      const ok = await firstFrame(BLOB_WAIT);
+      if (my === job) { busy(false); if (ok) { playing = my; say(null); await goSound(my); } else say('s-fail'); }
+    } catch {
+      if (my === job) { busy(false); say('s-fail'); }
+    }
   }
   $('f').addEventListener('submit', e => { e.preventDefault(); const x = $('addr').value.trim(); if (!x) return; history.replaceState(null, '', '#' + x); watch(x); });
   const fromHash = () => { const x = decodeURIComponent(location.hash.slice(1)); if (x) { $('addr').value = x; watch(x); } };

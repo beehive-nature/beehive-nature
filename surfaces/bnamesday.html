@@ -152,10 +152,13 @@ pre{margin:0;overflow:auto;max-inline-size:100%;padding:10px;border-radius:4px;b
  <div data-register-host></div>
 </header>
 
-<div id="loadfail" class="nodata" hidden role="alert"><b>the calendar didn’t load.</b> This page reads <code>bnamesday-data.json</code> from beside itself and could not. nothing is shown rather than something guessed. reload, or open the page from a web address rather than a file.</div>
+<div id="loadfail" class="nodata" hidden role="alert" data-i18n="bnd.loadfail"><b>the calendar didn’t load.</b> this page reads <code>bnamesday-data.json</code> from beside itself and could not. nothing is shown rather than something guessed. reload, or open the page from a web address rather than a file.</div>
 
 <main id="main">
-<!-- ══════════════ NEW BEE ══════════════ -->
+<!-- ══════════════ NEW BEE ══════════════
+     THE WORDS LAW (skaists · translation): every sentence below is a key in the estate's one dictionary
+     (lang-corpus.json, bnd.*). the english here IS the corpus's `en` cell — e2e/bnamesday.test.mjs holds them equal.
+     whole sentences; numbers ride in {slots} filled by fillSlots(); names and native words are never translated. -->
 <div data-view="bee">
  <section class="b-card b-hero" aria-labelledby="b-today">
   <p class="quiet" id="b-todaydate"></p>
@@ -163,67 +166,67 @@ pre{margin:0;overflow:auto;max-inline-size:100%;padding:10px;border-radius:4px;b
   <p id="b-todaylead"></p>
   <div id="b-todayall" data-cap="learn"></div>
   <p style="margin-top:14px" id="b-todaythai"></p>
-  <p class="b-idea">in Latvia, your <b>name</b> has a day.<br>in Thailand, your <b>day</b> has a name.</p>
+  <p class="b-idea" data-i18n="bnd.idea">in Latvia, your <b>name</b> has a day.<br>in Thailand, your <b>day</b> has a name.</p>
  </section>
 
  <section class="b-card" aria-labelledby="b-h1">
-  <h2 id="b-h1">find a name’s day</h2>
-  <form class="row" data-form="name"><label>a first name<input name="q" autocomplete="off" placeholder="Jānis, Līga, Anna…" enterkeyhint="search"></label><button>find</button></form>
+  <h2 id="b-h1" data-i18n="bnd.find.h">find a name’s day</h2>
+  <form class="row" data-form="name"><label><span data-i18n="bnd.find.label">a first name</span><input name="q" autocomplete="off" placeholder="Jānis, Līga, Anna…" enterkeyhint="search"></label><button data-i18n="bnd.find.go">find</button></form>
   <div class="b-out" id="b-nameout" aria-live="polite"></div>
  </section>
 
  <section class="b-card" aria-labelledby="b-h2">
-  <h2 id="b-h2">a birthday, read four ways</h2>
-  <p class="quiet" style="margin-bottom:12px">Latvia, Thailand, China, and the wheel of sixty-four. the date is enough to begin; the hour and the time zone make it exact.</p>
+  <h2 id="b-h2" data-i18n="bnd.birth.h">a birthday, read four ways</h2>
+  <p class="quiet" style="margin-bottom:12px" data-i18n="bnd.birth.lead">Latvia, Thailand, China, and the wheel of sixty-four. the date is enough to begin; the hour and the time zone make it exact.</p>
   <form data-form="birth" style="display:grid;gap:10px">
-   <div class="row"><label>born on<input type="date" name="date" required></label><label>at (if you know)<input type="time" name="time"></label></div>
-   <div class="row"><label>in which time zone<input name="tz" list="tzlist" autocomplete="off" placeholder="Europe/Riga"></label><label>their name in Thai (if they have one)<input name="th" lang="th" autocomplete="off" placeholder="สมชาย"></label></div>
-   <button class="primary">read this day</button>
+   <div class="row"><label><span data-i18n="bnd.birth.on">born on</span><input type="date" name="date" required></label><label><span data-i18n="bnd.at.ifyouknow">at (if you know)</span><input type="time" name="time"></label></div>
+   <div class="row"><label><span data-i18n="bnd.tz">in which time zone</span><input name="tz" list="tzlist" autocomplete="off" placeholder="Europe/Riga"></label><label><span data-i18n="bnd.thainame.theirs">their name in Thai (if they have one)</span><input name="th" lang="th" autocomplete="off" placeholder="สมชาย"></label></div>
+   <button class="primary" data-i18n="bnd.birth.go">read this day</button>
   </form>
   <div class="b-out" id="b-birthout" aria-live="polite"></div>
   <div class="b-out" id="b-skyout" aria-live="polite"></div>
  </section>
 
  <section class="b-card" aria-labelledby="b-h3">
-  <h2 id="b-h3">your family’s days</h2>
-  <p class="quiet">add the people you come from. they stay on this device — nothing is sent anywhere.</p>
+  <h2 id="b-h3" data-i18n="bnd.fam.h">your family’s days</h2>
+  <p class="quiet" data-i18n="bnd.fam.lead">add the people you come from. they stay on this device — nothing is sent anywhere.</p>
   <div class="b-fam" id="b-fam" style="margin-top:14px"></div>
-  <details class="b-more" id="b-adddet" style="margin-top:12px"><summary>add someone</summary><div>
+  <details class="b-more" id="b-adddet" style="margin-top:12px"><summary data-i18n="bnd.fam.add">add someone</summary><div>
    <form data-form="add" style="display:grid;gap:10px">
-    <label>their first name<input name="name" required autocomplete="off" placeholder="Anna"></label>
-    <div class="row"><label>who they are to you<input name="rel" autocomplete="off" placeholder="great-grandmother"></label>
-     <label>their house<select name="side"><option value="lv">Latvian side</option><option value="th">Thai side</option><option value="other">another house</option><option value="agent">an agent (born when it first ran)</option></select></label></div>
-    <div class="row"><label>born (if you know)<input type="date" name="born"></label><label>at (if you know)<input type="time" name="time"></label></div>
-    <div class="row"><label>in which time zone<input name="tz" list="tzlist" autocomplete="off" placeholder="Europe/Riga"></label><label>name in Thai (if any)<input name="th" lang="th" autocomplete="off"></label></div>
-    <button>keep them here</button>
+    <label><span data-i18n="bnd.fam.first">their first name</span><input name="name" required autocomplete="off" placeholder="Anna"></label>
+    <div class="row"><label><span data-i18n="bnd.fam.rel">who they are to you</span><input name="rel" autocomplete="off" placeholder="great-grandmother" data-i18n-ph="bnd.fam.rel.ph"></label>
+     <label><span data-i18n="bnd.fam.house">their house</span><select name="side"><option value="lv" data-i18n="bnd.side.lv">Latvian side</option><option value="th" data-i18n="bnd.side.th">Thai side</option><option value="other" data-i18n="bnd.side.other">another house</option><option value="agent" data-i18n="bnd.side.agent">an agent (born when it first ran)</option></select></label></div>
+    <div class="row"><label><span data-i18n="bnd.fam.born">born (if you know)</span><input type="date" name="born"></label><label><span data-i18n="bnd.at.ifyouknow">at (if you know)</span><input type="time" name="time"></label></div>
+    <div class="row"><label><span data-i18n="bnd.tz">in which time zone</span><input name="tz" list="tzlist" autocomplete="off" placeholder="Europe/Riga"></label><label><span data-i18n="bnd.thainame.any">name in Thai (if any)</span><input name="th" lang="th" autocomplete="off"></label></div>
+    <button data-i18n="bnd.fam.keep">keep them here</button>
    </form></div></details>
-  <div class="row" style="margin-top:14px"><button data-act="ics">put these days in my calendar</button><button data-act="export">save a copy</button><button data-act="import">bring a copy back</button></div>
+  <div class="row" style="margin-top:14px"><button data-act="ics" data-i18n="bnd.act.ics">put these days in my calendar</button><button data-act="export" data-i18n="bnd.act.export">save a copy</button><button data-act="import" data-i18n="bnd.act.import">bring a copy back</button></div>
   <p class="quiet" id="b-fammsg" style="margin-top:8px" aria-live="polite"></p>
  </section>
 
  <section class="b-card" aria-labelledby="b-h5" data-cap="team">
-  <h2 id="b-h5">working together</h2>
-  <p class="quiet">people are built differently. here is how each person you have added starts things, decides, and likes to be asked — so a team can stop asking everyone to work the same way.</p>
+  <h2 id="b-h5" data-i18n="bnd.team.h">working together</h2>
+  <p class="quiet" data-i18n="bnd.team.lead">people are built differently. here is how each person you have added starts things, decides, and likes to be asked — so a team can stop asking everyone to work the same way.</p>
   <div class="tm" id="b-team" style="margin-top:14px"></div>
-  <p class="lens" style="margin-top:12px">a lens, not a verdict. it describes how to ask someone; it is never used here to rank, hire, or leave anyone out.</p>
+  <p class="lens" style="margin-top:12px" data-i18n="bnd.team.lens">a lens, not a verdict. it describes how to ask someone; it is never used here to rank, hire, or leave anyone out.</p>
  </section>
 
  <section class="b-card" aria-labelledby="b-h4">
-  <h2 id="b-h4">why a name has a day</h2>
-  <details class="b-more"><summary>how Latvia chooses the names</summary><div>
-   <p>a small commission at Latvia’s State Language Centre keeps the calendar. it meets every few years — 2018, 2022, 2025 — and weighs each proposed name: where it comes from, what it means, how it sounds in Latvian, and whether people really use it in one steady form.</p>
-   <p>there are two lists. the <b>calendar</b> is the one printed on kitchen walls: <span data-n="t"></span> names. the <b>long list</b> adds <span data-n="x"></span> more, so that almost everyone has a day.</p></div></details>
-  <details class="b-more"><summary>the day for every other name</summary><div>
-   <p><b>22 May</b> is kept for “every unusual name no calendar has written down.” If your name isn’t here, that day is yours — the calendar says so itself.</p>
-   <p><b>29 February</b> is the one day of the year with no names at all.</p></div></details>
-  <details class="b-more"><summary>how Thailand names a day</summary><div>
-   <p>in Thailand the weekday you were born on comes with a colour, a planet, and a posture of the Buddha — many people know theirs as surely as their birthday. tradition turns the day at <b>six in the morning</b>, not midnight, and gives <b>Wednesday night</b> to Rahu, as a day of its own.</p>
-   <p>when a child is named, an old table called <b lang="th">ทักษา</b> (thaksa) sorts the Thai letters into eight groups, one per planet. starting from your own day, each group falls into a house — honour, fortune, the elders who lift you. the eighth house, <b lang="th">กาลกิณี</b>, holds the letters to leave out.</p></div></details>
-  <details class="b-more"><summary>reading old family records</summary><div>
-   <p><b>Latvia.</b> Church books — baptisms, weddings, burials — are scanned and free to read at Raduraksti, the State Historical Archives’ reading room. under the Russian Empire they were dated in the <b>old calendar</b>, 12 or 13 days behind ours. a child was often given a name from the days around the birth or the christening, so a name day can be a clue to a date, and a date a clue to a name. a clue — not proof.</p>
-   <div class="b-tool"><form class="row" data-form="os"><label>a date from an old record<input type="date" name="date" required></label><button>turn into today’s calendar</button></form><p id="b-osout" aria-live="polite"></p></div>
-   <p><b>Thailand.</b> Family names only began in 1913, and the law keeps each one to a single family — so two people who share a Thai surname are almost certainly kin. papers count years in the Buddhist Era.</p>
-   <div class="b-tool"><form class="row" data-form="be"><label>a Thai year<input type="number" name="year" required min="1" max="3000" placeholder="2470"></label><label>counted in<select name="era"><option value="be">พ.ศ. Buddhist Era</option><option value="rs">ร.ศ. Rattanakosin Era</option></select></label><label>month (if known)<select name="month"><option value="0">—</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option><option>10</option><option>11</option><option>12</option></select></label><button>convert</button></form><p id="b-beout" aria-live="polite"></p></div>
+  <h2 id="b-h4" data-i18n="bnd.why.h">why a name has a day</h2>
+  <details class="b-more"><summary data-i18n="bnd.why.lv.s">how Latvia chooses the names</summary><div>
+   <p data-i18n="bnd.why.lv.p1">a small commission at Latvia’s State Language Centre keeps the calendar. it meets every few years — 2018, 2022, 2025 — and weighs each proposed name: where it comes from, what it means, how it sounds in Latvian, and whether people really use it in one steady form.</p>
+   <p data-i18n="bnd.why.lv.p2" data-slots>there are two lists. the <b>calendar</b> is the one printed on kitchen walls: {t} names. the <b>long list</b> adds {x} more, so that almost everyone has a day.</p></div></details>
+  <details class="b-more"><summary data-i18n="bnd.why.other.s">the day for every other name</summary><div>
+   <p data-i18n="bnd.why.other.p1"><b>22 May</b> is kept for “every unusual name no calendar has written down.” if your name isn’t here, that day is yours — the calendar says so itself.</p>
+   <p data-i18n="bnd.why.other.p2"><b>29 February</b> is the one day of the year with no names at all.</p></div></details>
+  <details class="b-more"><summary data-i18n="bnd.why.th.s">how Thailand names a day</summary><div>
+   <p data-i18n="bnd.why.th.p1">in Thailand the weekday you were born on comes with a colour, a planet, and a posture of the Buddha — many people know theirs as surely as their birthday. tradition turns the day at <b>six in the morning</b>, not midnight, and gives <b>Wednesday night</b> to Rahu, as a day of its own.</p>
+   <p data-i18n="bnd.why.th.p2">when a child is named, an old table called <b lang="th" translate="no">ทักษา</b> (thaksa) sorts the Thai letters into eight groups, one per planet. starting from your own day, each group falls into a house — honour, fortune, the elders who lift you. the eighth house, <b lang="th" translate="no">กาลกิณี</b>, holds the letters to leave out.</p></div></details>
+  <details class="b-more"><summary data-i18n="bnd.why.old.s">reading old family records</summary><div>
+   <p data-i18n="bnd.why.old.lv"><b>Latvia.</b> church books — baptisms, weddings, burials — are scanned and free to read at Raduraksti, the State Historical Archives’ reading room. under the Russian Empire they were dated in the <b>old calendar</b>, 12 or 13 days behind ours. a child was often given a name from the days around the birth or the christening, so a name day can be a clue to a date, and a date a clue to a name. a clue — not proof.</p>
+   <div class="b-tool"><form class="row" data-form="os"><label><span data-i18n="bnd.os.label">a date from an old record</span><input type="date" name="date" required></label><button data-i18n="bnd.os.go">turn into today’s calendar</button></form><p id="b-osout" aria-live="polite"></p></div>
+   <p data-i18n="bnd.why.old.th"><b>Thailand.</b> family names only began in 1913, and the law keeps each one to a single family — so two people who share a Thai surname are almost certainly kin. papers count years in the Buddhist Era.</p>
+   <div class="b-tool"><form class="row" data-form="be"><label><span data-i18n="bnd.be.year">a Thai year</span><input type="number" name="year" required min="1" max="3000" placeholder="2470"></label><label><span data-i18n="bnd.be.counted">counted in</span><select name="era"><option value="be" data-i18n="bnd.era.be">พ.ศ. Buddhist Era</option><option value="rs" data-i18n="bnd.era.rs">ร.ศ. Rattanakosin Era</option></select></label><label><span data-i18n="bnd.be.month">month (if known)</span><select name="month"><option value="0" data-i18n="bnd.be.month.none">not known</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option><option>10</option><option>11</option><option>12</option></select></label><button data-i18n="bnd.be.go">convert</button></form><p id="b-beout" aria-live="polite"></p></div>
   </div></details>
  </section>
 </div>
@@ -507,6 +510,12 @@ function dayAllHTML(key){const d=dayOf(key),btn=x=>`<button class="mini" data-ac
   <p class="quiet" style="margin-top:10px">press a name to see its day, the names it shares it with, and how old records may spell it.</p>
   ${deeperHTML([B.DEEPER.calendarSource,B.DEEPER.nameDay,B.DEEPER.latvianName,B.DEEPER.latgalian,B.DEEPER.raduraksti])}
   <p class="lens">knowledge quests in this estate: <a href="university/">the university</a> · <a href="blanguage.html">dock your tongue</a> · <a href="profile.html">the family line</a></p></div>`}
+/* THE WORDS LAW: static copy is keyed (data-i18n → lang-corpus.json bnd.*) and lang.js swaps it. a sentence that
+   carries a number keeps a {slot}; lang.js restores the template on every language change and fires 'blang', and
+   this fills it again — so word order belongs to the translator and the number to the payload. */
+const slotOf=k=>{const c=S.data&&S.data._meta.counts,n=k==='t'?c&&c.traditional:k==='x'?c&&c.extended_only:null;if(n==null)return null;try{return n.toLocaleString(document.documentElement.lang||'en')}catch(e){return String(n)}};
+function fillSlots(){$$('[data-slots]').forEach(el=>{if(el.innerHTML.indexOf('{')<0)return;el.innerHTML=el.innerHTML.replace(/\{(\w+)\}/g,(m,k)=>{const v=slotOf(k);return v==null?m:esc(v)})});
+ $$('[data-i18n-ph]').forEach(el=>{if(el.dataset.phEn===undefined)el.dataset.phEn=el.placeholder;el.placeholder=window.BNRLanguage?window.BNRLanguage.text(el.getAttribute('data-i18n-ph'),el.dataset.phEn):el.dataset.phEn})}
 const protectWords=()=>$$('main [lang]').forEach(e=>e.setAttribute('translate','no'));
 
 /* ══════════════ NEW BEE ══════════════ */
@@ -517,8 +526,7 @@ function renderBee(){
  $('#b-todaylead').innerHTML=d.t.length?`today is their name day in Latvia${d.x.length?` — and ${d.x.length} more in the long list`:''}. if you know one, say <b lang="lv">“Daudz laimes vārda dienā!”</b> — “much happiness on your name day.”`:'29 February is the one day the Latvian calendar leaves empty.';
  $('#b-todayall').innerHTML=`<details class="b-more" style="border-top:0;text-align:start"><summary style="justify-content:center">see every name of today, and where to learn more</summary>${dayAllHTML(TKEY)}</details>`;
  $('#b-todaythai').innerHTML=chip(t)+`<span class="quiet" style="display:block;margin-top:6px">and in Thailand, today is <b lang="th">${t.th}</b> (<i>${t.rom}</i>, ${esc(t.en)}) — <b lang="th">${t.colorTh}</b> (<i>${t.colorRom}</i>, ${esc(t.colorName)}) is the colour to wear</span>`;
- $$('[data-n="t"]').forEach(n=>n.textContent=S.data._meta.counts.traditional.toLocaleString('en'));
- $$('[data-n="x"]').forEach(n=>n.textContent=S.data._meta.counts.extended_only.toLocaleString('en'));
+ fillSlots();
  /* a name */
  let h='';
  if(S.q){
@@ -689,7 +697,7 @@ document.addEventListener('keydown',e=>{const b=e.target.closest&&e.target.close
 try{const dl0=$('#tzlist');(Intl.supportedValuesOf?Intl.supportedValuesOf('timeZone'):[]).forEach(z=>{const o=document.createElement('option');o.value=z;dl0.append(o)})}catch(e){}
 $$('input[name=tz]').forEach(i=>{if(!i.value)i.value=HOMETZ});
 buildWheel();runQuery({q:'',list:'t',end:'',month:TKEY.slice(0,2)});$$('form[data-form="cq"]').forEach(f=>{f.list.value='t';f.month.value=TKEY.slice(0,2)});
-document.addEventListener('bregister',render);render();
+document.addEventListener('bregister',render);document.addEventListener('blang',fillSlots);render();
 })();
 </script>
 <script src="tour.js?v=42"></script>
