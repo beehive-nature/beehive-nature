@@ -41,6 +41,23 @@ const argOut = process.argv.indexOf('--out');
 const OUT = argOut > 0 ? resolve(process.argv[argOut + 1]) : SURF;
 
 const E = JSON.parse(readFileSync(join(SURF, 'estate.json'), 'utf8'));
+/* FAIL CLOSED ON UNRESOLVED i18n (2026-09-20, sixth instance of the
+   undefined-input law: empty --tbar-h -> zero; empty WIF_RE -> scan
+   everything; unresolvable boundary -> red in the wrong direction; a
+   status regex never reads -> a wait that does not wait; unresolved
+   surface id -> "undefined" as part of the key). A registry row without
+   an i18n id renders as the literal key "undefined.name" - a string no
+   tongue can reach and no gate can name; the d083b809 regen printed
+   eight of them into a hand-kept door. The doors are hand-kept since
+   the byte-true rulings, so this tool touching them at all is already
+   a smell; if it ever runs, it dies on what it cannot key. */
+{
+  const unkeyed = E.surfaces.filter(s => !s.i18n);
+  if (unkeyed.length) throw new Error('BUILD-SURFACES FAILS CLOSED: ' + unkeyed.length
+    + ' registry row(s) lack an i18n id (' + unkeyed.map(s => s.file).join(', ') + '). '
+    + 'Keys are mechanical: s.<path-with-slashes-and-dots-as-dashes>. '
+    + 'Add the id in surfaces/estate.json or do not build - a missing id renders as "undefined.name".');
+}
 const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const rank = { working: 0, partly: 1, roadmap: 2 };
 
