@@ -127,9 +127,9 @@ test('antd 0.12.0 door: stub /stream aborts fast, envelope plays, full decode st
     const f = id => !document.getElementById(id).hidden;
     const v = document.getElementById('v');
     const got = document.getElementById('got');
-    return f('s-fail') || (!f('s-slow') && !(document.getElementById('pg') && f('pg')) && (v.videoWidth > 0 || (got && got.textContent === '9 MB')));
+    return f('s-fail') || (!f('s-slow') && !(document.getElementById('pg') && f('pg')) && (v.videoWidth > 0 || (got && /^9(\\.\\d)? MB/.test(got.textContent))));
   }, 60000);
-  assert.equal(await p.locator('#got').textContent(), '9 MB', 'the counter reached the whole decoded file');
+  assert.match(await p.locator('#got').textContent(), /^9(\.\d)? MB/, 'the counter reached the whole decoded file');
   assert.equal(s.shown, 'autonomi://' + A1);
   assert.match(s.src, /^blob:/, 'progressive Blob is what plays');
   assert.deepEqual([hits.stream.length, hits.json.length], [1, 1], 'stream tried once, envelope fetched once');
@@ -205,7 +205,7 @@ test('progressive envelope: first frame before the JSON body finishes', async ()
     src: document.getElementById('v').currentSrc,
   }));
   assert.equal(mid.bar, true, 'download bar still up while bytes arrive');
-  assert.match(mid.got, /^\d+ MB$/, 'counter moving before settle');
+  assert.match(mid.got, /^\d+(\.\d)? MB/, 'counter moving before settle');
   if (await hasCodec(p)) {
     if (mid.w === 0) {
       await p.waitForFunction(() => document.getElementById('v').videoWidth > 0 && !document.getElementById('pg').hidden, null, { timeout: 20000 });
@@ -259,7 +259,7 @@ test('honest /stream binary progressive: first frame before the body finishes', 
     src: document.getElementById('v').currentSrc,
   }));
   assert.equal(mid.bar, true, 'download bar still up while /stream bytes arrive');
-  assert.match(mid.got, /^\d+ MB$/, 'counter moving before settle');
+  assert.match(mid.got, /^\d+(\.\d)? MB/, 'counter moving before settle');
   if (await hasCodec(p)) {
     if (mid.w === 0) {
       await p.waitForFunction(() => document.getElementById('v').videoWidth > 0 && !document.getElementById('pg').hidden, null, { timeout: 20000 });

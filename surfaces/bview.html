@@ -85,7 +85,7 @@ body[data-reg="cypherpunk"] video{border-radius:3px}
 (() => {
   const DOOR = 'https://relay.skaists.dev/ant/v1/data/public/';
   const HEAD = '{"data":"', STREAM_PROBE = 450, BLOB_WAIT = 20000;
-  const EARLY_MDAT = 256 << 10, SEGMENT = 8 << 20, STUB_CL = 128 << 10;
+  const EARLY_MDAT = 256 << 10, SEGMENT = 8 << 20, STUB_CL = 128 << 10, PLAY_MIN = 12 << 20;
   const $ = id => document.getElementById(id), says = ['s-bad', 's-slow', 's-fail'];
   const say = id => says.forEach(s => $(s).hidden = s !== id);
   const parse = raw => { const m = /^\s*(?:autonomi:\/\/)?([0-9a-f]{64})\s*$/i.exec(raw || ''); return m ? m[1].toLowerCase() : null; };
@@ -116,6 +116,21 @@ body[data-reg="cypherpunk"] video{border-radius:3px}
   // Early Blob carries full moov duration but short mdat — Chrome races currentTime to the end.
   // Hold a real playhead and clamp while the download bar is still up.
   let keepAt = 0;
+  const rateClock = { t0: 0, b0: 0 };
+  const resetRate = () => { rateClock.t0 = performance.now(); rateClock.b0 = 0; };
+  const showGot = (bytes) => {
+    const el = $('got');
+    if (!el) return;
+    const mb = bytes / 1048576;
+    const dt = (performance.now() - rateClock.t0) / 1000;
+    const db = bytes - rateClock.b0;
+    const mbs = dt > 0.25 ? (db / 1048576) / dt : 0;
+    el.textContent = mbs >= 0.05
+      ? (mb >= 10 ? mb.toFixed(0) : mb.toFixed(1)) + ' MB · ' + mbs.toFixed(1) + ' MB/s'
+      : (mb >= 10 ? mb.toFixed(0) : mb.toFixed(1)) + ' MB';
+    // slide window so the rate stays honest
+    if (dt >= 1.5) { rateClock.t0 = performance.now(); rateClock.b0 = bytes; }
+  };
   v.addEventListener('timeupdate', () => {
     if (playing !== job) return;
     if (!pg.hidden && v.buffered.length) {
@@ -180,30 +195,39 @@ body[data-reg="cypherpunk"] video{border-radius:3px}
     if (my !== job || bytes < 32) return;
     const prefix = prefixOf(parts, bytes, Math.min(bytes, (512 << 10) + EARLY_MDAT));
     const me = moovEnd(prefix);
-    // Need a solid early mdat (256 KiB) so the decoder does not MEDIA_ERR_DECODE on a stub slice.
     if (me <= 0 || bytes < me + EARLY_MDAT) return;
     state.mime = kind(prefix);
     if (!state.mime) return;
-    // First paint, or refresh every 2 MiB so the playable mdat keeps ahead of the playhead.
-    const UPGRADE = 2 << 20;
-    if (state.early && bytes - (state.paintedAt || 0) < UPGRADE) return;
-    const snap = prefixOf(parts, bytes, bytes);
-    const tHold = state.early ? (keepAt || 0) : 0;
-    const ok = await paintBlob(new Blob([snap], { type: state.mime }), BLOB_WAIT);
-    if (my === job && ok && v.videoWidth > 0) {
+
+    // Phase A — first frame only (paused at 0). Never autoplay a short-mdat Blob (moov duration yank).
+    if (!state.preview) {
+      const snap = prefixOf(parts, bytes, bytes);
+      const ok = await paintBlob(new Blob([snap], { type: state.mime }), BLOB_WAIT);
+      if (!(my === job && ok && v.videoWidth > 0)) {
+        if (my === job) { frameGen++; v.removeAttribute('src'); v.load(); }
+        return;
+      }
+      state.preview = true;
       state.early = true;
       state.paintedAt = bytes;
-      if (tHold > 0) {
-        try { v.currentTime = tHold; } catch {}
-        keepAt = tHold;
-      }
-      playing = my; say(null);
-      if (!state.sounded) { state.sounded = true; await goSound(my); }
-      else { try { await v.play(); } catch {} }
-    } else if (my === job && !state.early) {
-      frameGen++;
-      v.removeAttribute('src'); v.load();
+      try { v.pause(); v.currentTime = 0; } catch {}
+      keepAt = 0;
+      playing = my;
+      say(null); // clear "Fetching…" — frame is up; bar + rate still show progress
+      return;
     }
+
+    // Phase B — one playable Blob once enough mdat is local, then leave it alone until finishBinary.
+    if (state.sounded || bytes < PLAY_MIN) return;
+    const snap = prefixOf(parts, bytes, bytes);
+    const ok = await paintBlob(new Blob([snap], { type: state.mime }), BLOB_WAIT);
+    if (!(my === job && ok && v.videoWidth > 0)) return;
+    state.paintedAt = bytes;
+    state.sounded = true;
+    keepAt = 0;
+    try { v.currentTime = 0; } catch {}
+    playing = my; say(null);
+    await goSound(my);
   }
   async function finishBinary(parts, bytes, state, my, a) {
     if (!state.mime) state.mime = kind(prefixOf(parts, bytes, Math.min(bytes, 64)));
@@ -212,18 +236,20 @@ body[data-reg="cypherpunk"] video{border-radius:3px}
     // (do not fall through and re-download the same file as base64).
     if (!state.mime) return false;
     if (my !== job) return true;
-    let t0 = keepAt || v.currentTime || 0;
-    if (v.duration && t0 > v.duration - 1) t0 = keepAt || 0;
+    // Prefer a held playhead only if it is still in the early seconds — end-skips are discarded.
+    let t0 = keepAt || 0;
+    if (t0 > 15) t0 = 0;
     const full = new Blob(parts, { type: state.mime });
     await cachePut(a, full);
-    if (playing === my) {
+    if (playing === my || state.preview) {
       const ok = await paintBlob(full, BLOB_WAIT);
       if (ok) {
         try { v.currentTime = t0; } catch {}
         keepAt = t0;
-        try { await v.play(); } catch {}
-      }
-      say(null);
+        playing = my; say(null);
+        if (!state.sounded) { state.sounded = true; await goSound(my); }
+        else { try { await v.play(); } catch {} }
+      } else say(null);
       return true;
     }
     const ok = await paintBlob(full, BLOB_WAIT);
@@ -237,7 +263,7 @@ body[data-reg="cypherpunk"] video{border-radius:3px}
     if (seed && seed.length) { parts.push(seed); bytes = seed.length; held = seed.length; }
     const state = { early: false, mime: '' };
     if (bytes && my === job) {
-      $('got').textContent = Math.floor(bytes / 1048576) + ' MB';
+      showGot(bytes);
       if (total) pg.value = bytes / total;
       await flushEarlyPaint(parts, bytes, state, my);
     }
@@ -251,7 +277,7 @@ body[data-reg="cypherpunk"] video{border-radius:3px}
       if (held >= SEGMENT) held = 0;
       if (my === job) {
         if (total) pg.value = bytes / total;
-        $('got').textContent = Math.floor(bytes / 1048576) + ' MB';
+        showGot(bytes);
       }
       await flushEarlyPaint(parts, bytes, state, my);
     }
@@ -338,7 +364,7 @@ body[data-reg="cypherpunk"] video{border-radius:3px}
         }
         parts.push(part); held += part.length; bytes += part.length;
         if (held >= SEGMENT) held = 0;
-        if (my === job) $('got').textContent = Math.floor(bytes / 1048576) + ' MB';
+        if (my === job) showGot(bytes);
         await flushEarlyPaint(parts, bytes, state, my);
       }
       if (tail !== null && text) throw new Error('base64 ended mid-quad');
@@ -356,7 +382,7 @@ body[data-reg="cypherpunk"] video{border-radius:3px}
     const signal = ctl.signal;
     if (blobUrl) { URL.revokeObjectURL(blobUrl); blobUrl = null; }
     const busy = on => { pg.hidden = $('got').hidden = !on; };
-    busy(false); pg.value = 0; $('got').textContent = ''; playing = 0; keepAt = 0;
+    busy(false); pg.value = 0; $('got').textContent = ''; playing = 0; keepAt = 0; resetRate();
     if (!a) { $('out').hidden = true; v.removeAttribute('src'); v.load(); say('s-bad'); return; }
     $('shown').textContent = 'autonomi://' + a; $('out').hidden = false; say('s-slow'); if (tap) tap.hidden = true;
     const hit = await cacheGet(a);
