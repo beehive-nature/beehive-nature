@@ -50,7 +50,7 @@
   function series(s, t) { var sum = 0, tp = 1; for (var p = 0; p < s.length; p++) { var terms = s[p], x = 0; for (var i = 0; i < terms.length; i++) x += terms[i][0] * Math.cos(terms[i][1] + terms[i][2] * t); sum += x * tp; tp *= t; } return sum; }
   function helio(body, jdTT) { var t = (jdTT - 2451545) / 365250, b = SKY.bodies[body]; return { L: series(b.L, t), B: series(b.B, t), R: series(b.R, t) }; }
   /* Pluto: Standish's mean Keplerian elements (JPL "approximate positions", 1800–2050 table), J2000 ecliptic,
-     carried to the equinox of date by the general precession. Slow enough that its gate lasts years. */
+     carried to the equinox of date by the general precession. slow enough that its gate lasts years. */
   function plutoHelio(jdTT) { var T = (jdTT - 2451545) / 36525, a = 39.48211675 - 0.00031596 * T, e = 0.24882730 + 0.00005170 * T, I = 17.14001206 + 0.00004818 * T,
       L = 238.92903833 + 145.20780515 * T, wb = 224.06891629 - 0.04062942 * T, Om = 110.30393684 - 0.01183482 * T, M = n180(L - wb), w = wb - Om, E = M + e / D * sin(M);
     for (var i = 0; i < 8; i++) E += (M - (E - e / D * sin(E))) / (1 - e * cos(E));
@@ -132,11 +132,11 @@
     [10, 57], [25, 51], [26, 44], [37, 40], [27, 50], [34, 57], [59, 6], [42, 53], [3, 60], [9, 52], [18, 58], [28, 38], [32, 54], [19, 49], [39, 55], [41, 30]];
   var CENTRE_OF = {}; Object.keys(CENTRES).forEach(function (c) { CENTRES[c].forEach(function (g) { CENTRE_OF[g] = c; }); });
   var TYPES = {
-    reflector: { en: 'Reflector', share: '~1%', color: '#C0C8D4', glyph: '☽', way: 'waits a full turn of the Moon before a large decision', work: 'Give them time and changing company; never force a quick yes. They mirror the health of the whole team — ask them how the group is doing, and believe the answer.' },
-    manifestor: { en: 'Manifestor', share: '~9%', color: '#E63946', glyph: '♂', way: 'starts things, and keeps the peace by telling people first', work: 'Do not ask them to ask permission. Ask them to tell you before they move — then get out of the way. They open doors; others carry the work through.' },
-    mg: { en: 'Manifesting Generator', share: '~33%', color: '#FF6B1A', glyph: '♂☉', way: 'responds with the gut, moves fast, then tells people what changed', work: 'Offer options and watch the gut response. Expect skipped steps and several tracks at once; agree how they will tell you when they change course.' },
-    generator: { en: 'Generator', share: '~37%', color: '#FFD60A', glyph: '☉', way: 'responds with the gut to what life puts in front of them', work: 'Ask yes-or-no questions and listen for the sound before the words. Do not ask them to start from nothing; give them something to respond to, and they will outlast everyone.' },
-    projector: { en: 'Projector', share: '~20%', color: '#00BFB2', glyph: '◉', way: 'waits to be recognised and invited, then guides', work: 'Invite them by name for their view — they see how others could work better. Do not measure them in hours; their energy is not the sustained kind. One invited insight can save the team a week.' } };
+    reflector: { en: 'Reflector', share: '~1%', color: '#C0C8D4', glyph: '☽', way: 'waits a full turn of the Moon before a large decision', work: 'give them time and changing company; never force a quick yes. they mirror the health of the whole team — ask them how the group is doing, and believe the answer.' },
+    manifestor: { en: 'Manifestor', share: '~9%', color: '#E63946', glyph: '♂', way: 'starts things, and keeps the peace by telling people first', work: 'do not ask them to ask permission. ask them to tell you before they move — then get out of the way. they open doors; others carry the work through.' },
+    mg: { en: 'Manifesting Generator', share: '~33%', color: '#FF6B1A', glyph: '♂☉', way: 'responds with the gut, moves fast, then tells people what changed', work: 'offer options and watch the gut response. expect skipped steps and several tracks at once; agree how they will tell you when they change course.' },
+    generator: { en: 'Generator', share: '~37%', color: '#FFD60A', glyph: '☉', way: 'responds with the gut to what life puts in front of them', work: 'ask yes-or-no questions and listen for the sound before the words. do not ask them to start from nothing; give them something to respond to, and they will outlast everyone.' },
+    projector: { en: 'Projector', share: '~20%', color: '#00BFB2', glyph: '◉', way: 'waits to be recognised and invited, then guides', work: 'invite them by name for their view — they see how others could work better. do not measure them in hours; their energy is not the sustained kind. one invited insight can save the team a week.' } };
   var AUTHORITY = { solar: ['the feeling wave', 'no truth in the moment — sleep on it, let the wave pass, then decide'], sacral: ['the gut response', 'an immediate bodily yes or no, in the moment'], spleen: ['instinct', 'a quiet first knowing, said once — trust it then, it will not repeat'],
     ego: ['the will', 'what the heart is truly willing to commit to'], self: ['the voice of the self', 'talk it out loud to someone and hear what you say'], outer: ['the sounding board', 'talk it through with trusted people in the right place; clarity comes from outside'], moon: ['the lunar month', 'about twenty-eight days, and many conversations'] };
 
@@ -199,7 +199,14 @@
     for (var j = 0; j < PAIRS.length; j++) if ((PAIRS[j][0] === a && PAIRS[j][1] === b) || (PAIRS[j][0] === b && PAIRS[j][1] === a)) return { kind: 'pair', zh: '六合', py: 'liù hé', en: 'one of the six pairings — a quiet bond' };
     return { kind: 'none', zh: '', en: '' }; }
 
-  root.bNamesSky = { load: load, jd: jd, fromJd: fromJd, deltaT: deltaT, ttOf: ttOf, offsetMinutes: offsetMinutes, localToJd: localToJd, sunLon: sunLon, moonLon: moonLon, nodeLon: nodeLon, planetLon: planetLon, lonOf: lonOf,
+  var WIKI = 'https://en.wikipedia.org/wiki/';
+  var DEEPER = { zodiac: [WIKI + 'Chinese_zodiac', 'the twelve animals'], cycle: [WIKI + 'Sexagenary_cycle', 'the cycle of sixty: stems and branches'], stems: [WIKI + 'Heavenly_Stems', 'the ten heavenly stems'], branches: [WIKI + 'Earthly_Branches', 'the twelve earthly branches'],
+    pillars: [WIKI + 'Four_Pillars_of_Destiny', 'the four pillars'], wuxing: [WIKI + 'Wuxing_(Chinese_philosophy)', 'the five phases'], lichun: [WIKI + 'Lichun', 'lì chūn, the start of spring'], solarTerm: [WIKI + 'Solar_term', 'the twenty-four solar terms'], calendar: [WIKI + 'Chinese_calendar', 'the Chinese calendar'],
+    iching: [WIKI + 'I_Ching', 'the Yì Jīng, the Book of Changes'], hexagrams: [WIKI + 'List_of_hexagrams_of_the_I_Ching', 'all sixty-four hexagrams'], shaoYong: [WIKI + 'Shao_Yong', 'Shao Yong, who drew the circle'], bagua: [WIKI + 'Bagua', 'the eight trigrams'], humanDesign: [WIKI + 'Human_Design', 'the Human Design System'] };
+  function hexLink(n) { return WIKI + 'List_of_hexagrams_of_the_I_Ching#Hexagram_' + n; }
+  function animalLink(branch) { return WIKI + BRANCHES[branch][2] + '_(zodiac)'; }
+
+  root.bNamesSky = { DEEPER: DEEPER, hexLink: hexLink, animalLink: animalLink, load: load, jd: jd, fromJd: fromJd, deltaT: deltaT, ttOf: ttOf, offsetMinutes: offsetMinutes, localToJd: localToJd, sunLon: sunLon, moonLon: moonLon, nodeLon: nodeLon, planetLon: planetLon, lonOf: lonOf,
     BODY: BODY, TRUST: TRUST, TRI: TRI, WHEEL: WHEEL, PIN: PIN, ARC: ARC, PLACE: PLACE, hexagram: hexagram, binaryOf: binaryOf, wheelIsBinary: wheelIsBinary, gateOf: gateOf,
     CENTRES: CENTRES, CENTRE_EN: CENTRE_EN, CENTRE_OF: CENTRE_OF, CHANNELS: CHANNELS, MOTORS: MOTORS, TYPES: TYPES, AUTHORITY: AUTHORITY, chart: chart, chartsOfDay: chartsOfDay,
     STEMS: STEMS, BRANCHES: BRANCHES, ELEMENT: ELEMENT, FEEDS: FEEDS, CHECKS: CHECKS, pillar: pillar, chineseNewYear: chineseNewYear, china: china, relation: relation, solveSun: solveSun, newMoonNear: newMoonNear };
