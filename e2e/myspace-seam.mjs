@@ -1228,6 +1228,19 @@ try {
   ok('and a keep-it-here that FAILED put ZERO requests on the wire — a refusal never becomes a send',
     wire16.length === 0, wire16.join(' | '));
 
+  // THE ORPHAN KEY (routed out of slice 05). `encryptFor` used to write the
+  // file's key into the shell's own store BEFORE the rail was asked for the
+  // bytes, so this refused add left a key behind with no row and no ciphertext
+  // anywhere to match it. Read from the store itself: the ids it holds, not a
+  // count the page reports about itself.
+  const keyIds16 = () => p16.evaluate(async () => {
+    const db = await new Promise((res, rej) => { const r = indexedDB.open('myspace', 2); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); });
+    return new Promise((res, rej) => { const t = db.transaction('keys', 'readonly'); const q = t.objectStore('keys').getAllKeys(); q.onsuccess = () => res(q.result.map(String).sort()); q.onerror = () => rej(q.error); });
+  });
+  const orphans16 = await keyIds16();
+  ok('a REFUSED add leaves no key behind — the key is written only once the rail has the bytes',
+    orphans16.length === 0, JSON.stringify(orphans16));
+
   // ONE DEAD RAIL, NEVER THE PAGE (§6) — and said by a file that lands, not by
   // the absence of a complaint.
   const rows16b = await add(p16, 'now', 'fleeting.txt', FLEETING);
@@ -1235,14 +1248,68 @@ try {
     rows16b.length === 1 && rows16b[0].addr && rows16b[0].addr.scheme === 'temp',
     JSON.stringify(rows16b.map(r => r.name + ':' + (r.addr && r.addr.scheme))));
   ok('and that one was still zero requests on the wire', wire16.length === 0, wire16.join(' | '));
-  ok('no page errors across the refusal and the recovery', errs16.length === 0, errs16.join(' | '));
 
-  // NAMED, NOT FIXED, AND NOT ASSERTED EITHER WAY: `encryptFor` writes the file's
-  // key into the shell's own store BEFORE the rail is asked for the bytes, so a
-  // refused add leaves a key behind with no ciphertext anywhere to match it. It
-  // is not a leak — a key alone opens nothing — and it is not this slice's
-  // obligation. Routed rather than folded in.
+  // NON-VACUITY for the orphan row above: the same probe, on the same store,
+  // DOES see a key when a keep-class rail took the bytes. Without this, an
+  // empty answer from a probe that could never see anything would read as a fix.
+  const held16 = await keyIds16();
+  const locked16 = rows16b.filter(r => r.keyref).map(r => r.id).sort();
+  ok('CONTROL — the key probe sees the one key a landed add wrote, and it is exactly that row\'s',
+    locked16.length === 1 && JSON.stringify(held16) === JSON.stringify(locked16),
+    `held ${JSON.stringify(held16)} · rows with a key ${JSON.stringify(locked16)}`);
+  ok('no page errors across the refusal and the recovery', errs16.length === 0, errs16.join(' | '));
   await c16.close();
+
+  // ── 17 · a REFUSED move keeps the file openable ─────────────────────────────
+  // The same early write, on the other caller. A move between two keep-class
+  // rails re-encrypts under the SAME row id, so `encryptFor` replaced the key
+  // for the ciphertext still sitting on the old rail before the new rail had
+  // agreed to anything. When the new rail refused, "Nothing changed" was said
+  // over a file that could no longer be opened. The fixture refuses every put
+  // on TEMP, the destination; LOCAL, where the file lives, is untouched.
+  console.log('\n17 · a refused move between two keep-class rails — the kept file still opens');
+  const c17 = await browser.newContext({ viewport: { width: 390, height: 844 }, acceptDownloads: true });
+  const wire17 = [];
+  offBox(c17, wire17);
+  await mockHive(c17);
+  await mutate(c17, TEMP_RE, TEMP_REL,
+    '    HELD.set(address, p.bytes.slice());',
+    "    throw fail(E.BAD_PARAMS, 'FIXTURE: this rail refuses every put');");
+  const p17 = await c17.newPage();
+  const errs17 = [];
+  p17.on('pageerror', e => errs17.push(e.message));
+  await p17.goto(PAGE, { waitUntil: 'load' });
+  await settle(p17);
+  await p17.waitForFunction(() => window.__myspace.purposes().length === 3, null, { timeout: 10000 }).catch(() => {});
+
+  const MOVED = 'this one was asked to move and the move was refused.\n';
+  const rows17 = await add(p17, 'keep', 'unmoved.txt', MOVED);
+  const kept17 = rows17[0];
+  ok('PRECONDITION — the file is kept on LOCAL, the rail the fixture leaves alone',
+    rows17.length === 1 && kept17.addr && kept17.addr.scheme === 'local',
+    JSON.stringify(rows17.map(r => r.name + ':' + (r.addr && r.addr.scheme))));
+
+  const after17 = await moveTo(p17, kept17.id, 'now');
+  const said17 = await p17.textContent('#status');
+  // WHICH refusal: the fixture's own words, so this row cannot pass on a move
+  // that failed for some other reason and never reached the destination's put.
+  ok('PRECONDITION — the move was refused BY THE DESTINATION\'S PUT, in the fixture\'s words',
+    /Nothing changed/i.test(said17 || '') && /refuses every put/i.test(said17 || ''), said17);
+  const row17 = after17.find(r => r.id === kept17.id);
+  ok('and the row still points at LOCAL, where the ciphertext is',
+    !!row17 && row17.addr && row17.addr.scheme === 'local' && row17.addr.address === kept17.addr.address,
+    JSON.stringify(row17 && row17.addr));
+
+  const dl17 = p17.waitForEvent('download', { timeout: 20000 }).catch(() => null);
+  await p17.click('#open-' + kept17.id);
+  const opened17 = await dl17;
+  const bytes17 = opened17 ? await readFile(await opened17.path()) : null;
+  ok('the file the page said did not change STILL OPENS, byte-exact — its key was not replaced',
+    !!bytes17 && bytes17.equals(Buffer.from(MOVED, 'utf8')),
+    bytes17 ? `${bytes17.length} B` : 'no download: ' + (await p17.textContent('#status')));
+  ok('and the refused move put ZERO requests on the wire', wire17.length === 0, wire17.join(' | '));
+  ok('no page errors across the refused move and the open', errs17.length === 0, errs17.join(' | '));
+  await c17.close();
 
 } catch (e) {
   fail++;
