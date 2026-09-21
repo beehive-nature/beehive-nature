@@ -8,9 +8,14 @@ Agents spend nothing. Every gate runs against a mock bridge and a mock wallet. T
 ## What is already true (evidence, 2026-09-21)
 
 - `surfaces/ant-pay.js` is on main (PR #190, 8/8) and live. It refuses `no-contracts` against today's bridge.
-- The founder's video is on Autonomi mainnet by the CLI fallback, his own hand: `7c4f61ed…bb78`, 56/56 chunks, 4.2126 ANT,
-  0.0000445 ETH, download sha256 = original. **Consequence for the UI demo:** re-uploading the same bytes may quote ~0
-  (chunks already stored) — the founder's first UI press should use a different short clip.
+- The CLI fallback works end to end on mainnet, run by the founder's own hand on a test recording: 56/56 chunks, 4.2126 ANT,
+  0.0000445 ETH, download sha256 = original. **Founder decision, same day:** that recording is not his (a local-test-network
+  demo with other people in it), so it is not published under his name and its address is not promoted — it is not recorded
+  here. **Consequence for the UI demo:** the founder's first UI press uses a file the estate owns, recorded on his machine on
+  the live network; that becomes ants.tub's first entry.
+- **The key clause stands** (founder, same day): "no agent holds/requests/transmits private key material" is unchanged. An upload
+  wallet is a narrow exception the founder writes himself — named, capped, single-purpose, never his keys. Until then no seat
+  creates or uses one. Phase E needs none: the person's own wallet signs.
 
 ## THE DECISION (addendum item 2): how a chosen file's bytes reach the keyless local bridge
 
