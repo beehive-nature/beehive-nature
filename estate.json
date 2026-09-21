@@ -1241,6 +1241,16 @@
    "org": "skaists"
   },
   {
+   "id": "law-of-the-sea",
+   "family": "skaists",
+   "home": "skaists.dev",
+   "path": "surfaces/law-of-the-sea.html",
+   "state": "LIVE",
+   "gloss": "the estate's naval data language — a data action gets the sea's word; manifest is ruled",
+   "org": "skaists",
+   "label": "Law of the Sea"
+  },
+  {
    "id": "or-board",
    "family": "skaists",
    "home": "skaists.dev",
@@ -1363,8 +1373,8 @@
   }
  ],
  "counts": {
-  "surfaces": 101,
-  "listed": 110,
+  "surfaces": 102,
+  "listed": 111,
   "families": 8,
   "domains": 26,
   "domainsLive": 4,
@@ -1373,7 +1383,7 @@
   "byFamily": {
    "beehivenature": 42,
    "plur": 7,
-   "skaists": 23,
+   "skaists": 24,
    "bnature": 18,
    "beehivebiomass": 5,
    "beehivebuds": 0,
@@ -1381,11 +1391,11 @@
    "bnr": 1
   },
   "byState": {
-   "LIVE": 110
+   "LIVE": 111
   },
   "byOrg": {
    "beehive-nature": 59,
-   "skaists": 37,
+   "skaists": 38,
    "beehive-biomass": 5
   }
  },
