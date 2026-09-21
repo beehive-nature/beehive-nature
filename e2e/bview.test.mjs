@@ -1,15 +1,15 @@
-// watch-ant.test.mjs — Watch from Autonomi plays a public video through the estate's ant door, whatever
+// bview.test.mjs â€” bViEw plays a public video through the estate's ant door, whatever
 // shape the door is in. The door is always MOCKED here (the real relay is touched zero times):
-//   · today's antd 0.12.0: /stream is cut at a wrong Content-Length (4170 B), /data/public answers
-//     {"data":"<base64>"} — the page must fall back to the envelope and play the decoded Blob;
-//   · an upgraded antd (>= 0.12.1): /stream carries the whole file — the page plays it and never
+//   Â· today's antd 0.12.0: /stream is cut at a wrong Content-Length (4170 B), /data/public answers
+//     {"data":"<base64>"} â€” the page must fall back to the envelope and play the decoded Blob;
+//   Â· an upgraded antd (>= 0.12.1): /stream carries the whole file â€” the page plays it and never
 //     downloads the envelope;
-//   · door down, not a video, error envelope: the honest failure row, no page errors;
-//   · a failure after the first frame still shows the failure row;
-//   · a bad address requests nothing; a new address really cancels (aborts) the old download;
-//   · the live door's reply shape (no Content-Length): the bar says busy, the counter moves, it plays.
+//   Â· door down, not a video, error envelope: the honest failure row, no page errors;
+//   Â· a failure after the first frame still shows the failure row;
+//   Â· a bad address requests nothing; a new address really cancels (aborts) the old download;
+//   Â· the live door's reply shape (no Content-Length): the bar says busy, the counter moves, it plays.
 // Fixture: a real 6 s H.264 MP4 already in the tree (moov first, like the founder's upload).
-// Run: node --test e2e/watch-ant.test.mjs
+// Run: node --test e2e/bview.test.mjs
 import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { chromium } from 'playwright';
@@ -96,7 +96,7 @@ test('antd 0.12.0 door: the cut stream falls back to the envelope, and the decod
     stream: () => ({ status: 200, headers: { ...cors, 'content-type': 'application/octet-stream', 'content-length': String(CUT) }, body: MP4.subarray(0, CUT) }),
     json: () => ({ status: 200, headers: { ...cors, 'content-type': 'application/json' }, body: envelope(BIG) }),
   });
-  await p.goto(`${ORIGIN}/surfaces/watch-ant.html`, { waitUntil: 'domcontentloaded' });
+  await p.goto(`${ORIGIN}/surfaces/bview.html`, { waitUntil: 'domcontentloaded' });
   await watch(p, A1);
   const s = await settles(p, done, 60000);
   assert.equal(await p.locator('#got').textContent(), '9 MB', 'the counter reached the whole decoded file (two segments)');
@@ -115,7 +115,7 @@ test('upgraded door (antd >= 0.12.1): the whole stream plays and the envelope is
     stream: () => ({ status: 200, headers: { ...cors, 'content-type': 'application/octet-stream', 'content-length': String(MP4.length) }, body: MP4 }),
     json: () => 'abort',   // counted below: it must never be asked for
   });
-  await p.goto(`${ORIGIN}/surfaces/watch-ant.html`, { waitUntil: 'domcontentloaded' });
+  await p.goto(`${ORIGIN}/surfaces/bview.html`, { waitUntil: 'domcontentloaded' });
   await watch(p, A1);
   const s = await settles(p, done);
   assert.equal(s.fail, false); assert.equal(s.w, 720);
@@ -138,7 +138,7 @@ test('door down, not a video, error envelope: the honest failure row and no page
   ];
   for (const [name, door] of cases) {
     const { ctx, p, errs, hits } = await open(door);
-    await p.goto(`${ORIGIN}/surfaces/watch-ant.html`, { waitUntil: 'domcontentloaded' });
+    await p.goto(`${ORIGIN}/surfaces/bview.html`, { waitUntil: 'domcontentloaded' });
     await watch(p, A1);
     const s = await settles(p, done, 60000);
     assert.equal(s.fail, true, `${name}: failure row shown`);
@@ -150,7 +150,7 @@ test('door down, not a video, error envelope: the honest failure row and no page
 
 test('a bad address requests nothing', async () => {
   const { ctx, p, errs, hits } = await open({ stream: () => 'abort', json: () => 'abort' });
-  await p.goto(`${ORIGIN}/surfaces/watch-ant.html`, { waitUntil: 'domcontentloaded' });
+  await p.goto(`${ORIGIN}/surfaces/bview.html`, { waitUntil: 'domcontentloaded' });
   await watch(p, 'not-an-address');
   const s = await state(p);
   assert.equal(s.bad, true); assert.equal(s.slow, false);
@@ -166,7 +166,7 @@ test('a new address cancels the old download; only the new one plays', async () 
       return { status: 200, headers: { ...cors, 'content-type': 'application/json' }, body: envelope(MP4) };
     },
   });
-  await p.goto(`${ORIGIN}/surfaces/watch-ant.html`, { waitUntil: 'domcontentloaded' });
+  await p.goto(`${ORIGIN}/surfaces/bview.html`, { waitUntil: 'domcontentloaded' });
   await watch(p, A1);
   await p.waitForFunction(() => document.getElementById('pg') ? !document.getElementById('pg').hidden : !document.getElementById('s-slow').hidden, null, { timeout: 30000 });
   await watch(p, A2);
@@ -204,7 +204,7 @@ test('the real door reply shape: no Content-Length, the bar says busy (never a f
       return new Response(slow, { status: r.status, headers: h });
     };
   }, DOOR);
-  await p.goto(`${ORIGIN}/surfaces/watch-ant.html`, { waitUntil: 'domcontentloaded' });
+  await p.goto(`${ORIGIN}/surfaces/bview.html`, { waitUntil: 'domcontentloaded' });
   await watch(p, A1);
   await p.waitForFunction(() => { const g = document.getElementById('pg'); return !g.hidden && !g.hasAttribute('value') && /\d+ MB/.test(document.getElementById('got').textContent); }, null, { timeout: 30000, polling: 50 });
   const s = await settles(p, done, 60000);

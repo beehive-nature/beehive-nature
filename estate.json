@@ -263,7 +263,7 @@
    "home": "skaists.buzz",
    "path": "surfaces/doors/skaists-buzz.html",
    "state": "LIVE",
-   "gloss": "the founder's hive door — both roads shown, clean road for filtered networks",
+   "gloss": "the founder's hive door â€” both roads shown, clean road for filtered networks",
    "org": "skaists"
   },
   {
@@ -272,7 +272,7 @@
    "home": "beehivenature.buzz",
    "path": "surfaces/doors/beehivenature-buzz.html",
    "state": "LIVE",
-   "gloss": "the science hive door — both roads shown, clean road for filtered networks",
+   "gloss": "the science hive door â€” both roads shown, clean road for filtered networks",
    "org": "beehive-nature"
   },
   {
@@ -440,7 +440,7 @@
    "home": "skaists.dev",
    "path": "surfaces/local-agent/index.html",
    "state": "LIVE",
-   "gloss": "the local agent — a Qwen mind that runs in your page",
+   "gloss": "the local agent â€” a Qwen mind that runs in your page",
    "org": "skaists",
    "label": "Local agent"
   },
@@ -452,7 +452,7 @@
    "state": "LIVE",
    "gloss": "every screenshot we ever kept",
    "org": "beehive-nature",
-   "limit": "the shots are the record — never edited, cropped or retouched; ugly is what it looked like"
+   "limit": "the shots are the record â€” never edited, cropped or retouched; ugly is what it looked like"
   },
   {
    "id": "blight-midi",
@@ -462,7 +462,7 @@
    "state": "LIVE",
    "gloss": "one seed, a performance",
    "org": "skaists",
-   "limit": "seed from the MiDi contract on Base, read-only; block-sprite medium, score-driven performance — visual and audio siblings from one timeline; Web Audio oscillators only, sound never autoplays; reduced motion rests as one composed silent frame"
+   "limit": "seed from the MiDi contract on Base, read-only; block-sprite medium, score-driven performance â€” visual and audio siblings from one timeline; Web Audio oscillators only, sound never autoplays; reduced motion rests as one composed silent frame"
   },
   {
    "id": "blight-midiroom",
@@ -470,9 +470,9 @@
    "home": "midi.blue",
    "path": "surfaces/blight/midiroom.html",
    "state": "LIVE",
-   "gloss": "the bMiDi room — three densities",
+   "gloss": "the bMiDi room â€” three densities",
    "org": "skaists",
-   "limit": "demo of the bMiDi agent loop: plain-word ask → deterministic seed-space search → setlist; beginner/DJ/producer level toggle; the room log is LOCAL — the relay lane signs it to buzz; agent runs on-device in this demo, zero off-origin"
+   "limit": "demo of the bMiDi agent loop: plain-word ask â†’ deterministic seed-space search â†’ setlist; beginner/DJ/producer level toggle; the room log is LOCAL â€” the relay lane signs it to buzz; agent runs on-device in this demo, zero off-origin"
   },
   {
    "id": "blight-midivault",
@@ -480,7 +480,7 @@
    "home": "midi.blue",
    "path": "surfaces/blight/midivault.html",
    "state": "LIVE",
-   "gloss": "the vault — music on Autonomi",
+   "gloss": "the vault â€” music on Autonomi",
    "org": "skaists",
    "limit": "record/store/delete/send created music: score artifacts + offline-rendered WAVs; public (address=door), private (AES-GCM, key only in local manifest), privileged (capability = address+key); SIMULATED backend labelled, antd adapter awaits live route verification"
   },
@@ -629,7 +629,7 @@
    "warn": true,
    "org": "beehive-nature",
    "descriptionKey": "s.blight-farmers.name",
-   "limit": "reads as a plan — settlement is not built",
+   "limit": "reads as a plan â€” settlement is not built",
    "limitKey": "s.blight-farmers.caveat"
   },
   {
@@ -694,7 +694,7 @@
    "gloss": "inscriptions, honestly traded",
    "org": "skaists",
    "descriptionKey": "s.blight-market.name",
-   "limit": "a design surface — no market runs behind it"
+   "limit": "a design surface â€” no market runs behind it"
   },
   {
    "id": "bset",
@@ -794,7 +794,7 @@
    "home": "skaists.dev",
    "path": "surfaces/myspace.html",
    "state": "LIVE",
-   "gloss": "keep a file on your phone, or share one — you choose which, per file",
+   "gloss": "keep a file on your phone, or share one â€” you choose which, per file",
    "org": "skaists",
    "label": "My Space",
    "limit": "a file you shared cannot be unshared: the store has no delete route, so the copy stays at its hash"
@@ -970,7 +970,7 @@
    "warn": true,
    "org": "beehive-nature",
    "descriptionKey": "s.forge-huddle.name",
-   "limit": "you supply your own venue URL — we ship no server",
+   "limit": "you supply your own venue URL â€” we ship no server",
    "limitKey": "s.forge-huddle.caveat"
   },
   {
@@ -1169,7 +1169,7 @@
    "home": "skaists.dev",
    "path": "surfaces/index.html",
    "state": "LIVE",
-   "gloss": "Art, science and tools made in the open — with people to meet.",
+   "gloss": "Art, science and tools made in the open â€” with people to meet.",
    "org": "skaists",
    "label": "skaists atlas",
    "descriptionKey": "atlas.intro"
@@ -1180,7 +1180,7 @@
    "home": "skaists.xyz",
    "path": "surfaces/forge/orbit-v2.html",
    "state": "LIVE",
-   "gloss": "tinkering fork of the frozen orbit renderer — counted by the tree, deliberately not presented (presenting invites edits to the pinned original)",
+   "gloss": "tinkering fork of the frozen orbit renderer â€” counted by the tree, deliberately not presented (presenting invites edits to the pinned original)",
    "presented": false,
    "org": "skaists"
   },
@@ -1210,7 +1210,7 @@
    "home": "skaists.dev",
    "path": "surfaces/fieldnotes.html",
    "state": "LIVE",
-   "gloss": "the logbook — receipts, measurements, honest costs",
+   "gloss": "the logbook â€” receipts, measurements, honest costs",
    "org": "skaists"
   },
   {
@@ -1228,16 +1228,16 @@
    "home": "skaists.dev",
    "path": "surfaces/read.html",
    "state": "LIVE",
-   "gloss": "read a public buzz message in the browser — no app, no account; private channels never shown",
+   "gloss": "read a public buzz message in the browser â€” no app, no account; private channels never shown",
    "org": "skaists"
   },
   {
-   "id": "watch-ant",
+   "id": "bview",
    "family": "skaists",
    "home": "skaists.dev",
-   "path": "surfaces/watch-ant.html",
+   "path": "surfaces/bview.html",
    "state": "LIVE",
-   "gloss": "watch a public autonomi video in the browser — paste an address, no app, no account",
+   "gloss": "watch a public autonomi video in the browser â€” paste an address, no app, no account",
    "org": "skaists"
   },
   {
@@ -1246,7 +1246,7 @@
    "home": "skaists.dev",
    "path": "surfaces/law-of-the-sea.html",
    "state": "LIVE",
-   "gloss": "the estate's naval data language — a data action gets the sea's word; manifest is ruled",
+   "gloss": "the estate's naval data language â€” a data action gets the sea's word; manifest is ruled",
    "org": "skaists",
    "label": "Law of the Sea"
   },
@@ -1256,7 +1256,7 @@
    "home": "skaists.dev",
    "path": "surfaces/or-board.html",
    "state": "LIVE",
-   "gloss": "the OR board — every agent, every bug, every kit",
+   "gloss": "the OR board â€” every agent, every bug, every kit",
    "org": "skaists",
    "label": "OR board"
   },
@@ -1266,7 +1266,7 @@
    "home": "skaists.dev",
    "path": "surfaces/ant-door.html",
    "state": "LIVE",
-   "gloss": "the Autonomi door — mainnet bytes read same-origin through the estate GET-only door",
+   "gloss": "the Autonomi door â€” mainnet bytes read same-origin through the estate GET-only door",
    "org": "skaists",
    "label": "Autonomi door"
   },
@@ -1276,7 +1276,7 @@
    "home": "skaists.dev",
    "path": "surfaces/profile.html",
    "state": "LIVE",
-   "gloss": "the dynasty layer — one name, every generation",
+   "gloss": "the dynasty layer â€” one name, every generation",
    "org": "skaists"
   },
   {
@@ -1295,7 +1295,7 @@
    "home": "skaists.dev",
    "path": "surfaces/comb.html",
    "state": "LIVE",
-   "gloss": "the comb — canon geometry, one renderer at every zoom",
+   "gloss": "the comb â€” canon geometry, one renderer at every zoom",
    "org": "beehive-nature"
   },
   {
@@ -1304,7 +1304,7 @@
    "home": "skaists.dev",
    "path": "surfaces/vending.html",
    "state": "LIVE",
-   "gloss": "the vending machine — mint your agent, keep what you make",
+   "gloss": "the vending machine â€” mint your agent, keep what you make",
    "org": "beehive-nature",
    "label": "Vending machine"
   },
@@ -1314,7 +1314,7 @@
    "home": "skaists.dev",
    "path": "surfaces/privacy-lens.html",
    "state": "LIVE",
-   "gloss": "the privacy lens — the private note, both sides of the glass",
+   "gloss": "the privacy lens â€” the private note, both sides of the glass",
    "org": "beehive-nature",
    "label": "Privacy lens"
   },
@@ -1324,7 +1324,7 @@
    "home": "skaists.dev",
    "path": "surfaces/watch.html",
    "state": "LIVE",
-   "gloss": "the SKAISTS watch room — one screen, the room shares it",
+   "gloss": "the SKAISTS watch room â€” one screen, the room shares it",
    "org": "beehive-nature",
    "label": "SKAISTS watch room"
   },
@@ -1334,9 +1334,9 @@
    "home": "plur.earth",
    "path": "surfaces/music.html",
    "state": "LIVE",
-   "gloss": "SKAISTS mUsiC · PLUR jam — shared room manifest, encrypted set; three views, BNR color law",
+   "gloss": "SKAISTS mUsiC Â· PLUR jam â€” shared room manifest, encrypted set; three views, BNR color law",
    "org": "skaists",
-   "label": "SKAISTS mUsiC · PLUR jam"
+   "label": "SKAISTS mUsiC Â· PLUR jam"
   },
   {
    "id": "jams",
@@ -1344,7 +1344,7 @@
    "home": "plur.earth",
    "path": "surfaces/jams.html",
    "state": "LIVE",
-   "gloss": "permanent redirect to music.html — the room's old address, kept so every saved link keeps working",
+   "gloss": "permanent redirect to music.html â€” the room's old address, kept so every saved link keeps working",
    "presented": false,
    "org": "skaists",
    "label": "SKAISTS mUsiC (old address)"
@@ -1355,9 +1355,9 @@
    "home": "skaists.dev",
    "path": "surfaces/bdata.html",
    "state": "LIVE",
-   "gloss": "My Data — who can get it, what is happening to it, what the bees may do",
+   "gloss": "My Data â€” who can get it, what is happening to it, what the bees may do",
    "org": "beehive-nature",
-   "label": "My Data · bData",
+   "label": "My Data Â· bData",
    "descriptionKey": "s.bdata"
   },
   {
@@ -1366,9 +1366,9 @@
    "home": "skaists.dev",
    "path": "surfaces/blood.html",
    "state": "LIVE",
-   "gloss": "bGenealogy — the blood fractal: every blood relative for millennia, evidence layers distinct, preservation in five honest states",
+   "gloss": "bGenealogy â€” the blood fractal: every blood relative for millennia, evidence layers distinct, preservation in five honest states",
    "org": "beehive-nature",
-   "label": "bGenealogy · the blood fractal",
+   "label": "bGenealogy Â· the blood fractal",
    "descriptionKey": "s.blood"
   }
  ],
@@ -1399,5 +1399,5 @@
    "beehive-biomass": 5
   }
  },
- "_note": "skaists.dev repo-home exception (plumbing fact, recorded once): the hub and estate-internal surfaces are SERVED from the beehive-nature repo at skaists.dev — the repo is plumbing, the positioning is skaists. org follows the founder-ruled domain map, never the repo that happens to host a page."
+ "_note": "skaists.dev repo-home exception (plumbing fact, recorded once): the hub and estate-internal surfaces are SERVED from the beehive-nature repo at skaists.dev â€” the repo is plumbing, the positioning is skaists. org follows the founder-ruled domain map, never the repo that happens to host a page."
 }
