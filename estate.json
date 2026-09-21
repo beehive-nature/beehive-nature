@@ -1241,6 +1241,16 @@
    "org": "skaists"
   },
   {
+   "id": "watch-ant",
+   "family": "skaists",
+   "home": "skaists.dev",
+   "path": "surfaces/watch-ant.html",
+   "state": "LIVE",
+   "gloss": "permanent redirect to bview.html — the viewer's old address, kept so every saved link keeps working",
+   "presented": false,
+   "org": "skaists"
+  },
+  {
    "id": "law-of-the-sea",
    "family": "skaists",
    "home": "skaists.dev",
@@ -1373,8 +1383,8 @@
   }
  ],
  "counts": {
-  "surfaces": 102,
-  "listed": 111,
+  "surfaces": 103,
+  "listed": 112,
   "families": 8,
   "domains": 26,
   "domainsLive": 4,
@@ -1383,7 +1393,7 @@
   "byFamily": {
    "beehivenature": 42,
    "plur": 7,
-   "skaists": 24,
+   "skaists": 25,
    "bnature": 18,
    "beehivebiomass": 5,
    "beehivebuds": 0,
@@ -1391,11 +1401,11 @@
    "bnr": 1
   },
   "byState": {
-   "LIVE": 111
+   "LIVE": 112
   },
   "byOrg": {
    "beehive-nature": 59,
-   "skaists": 38,
+   "skaists": 39,
    "beehive-biomass": 5
   }
  },

@@ -407,6 +407,11 @@ const REACHABILITY_EXEMPT = [
             'for saved off-site links and search history, not for in-estate ' +
             'navigation. Nothing may link it, so it is orphaned on purpose; the ' +
             'shim itself is proven by e2e/zcode-music-check.mjs.' },
+  { path: 'watch-ant.html',
+    reason: 'permanent redirect shim to bview.html (#197 rename, 2026-09-21) — it ' +
+            'exists for saved off-site watch-ant links, not for in-estate navigation. ' +
+            'Nothing may link it, so it is orphaned on purpose. No gate follows the ' +
+            'redirect yet.' },
 ];
 
 {

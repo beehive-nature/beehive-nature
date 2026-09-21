@@ -160,6 +160,16 @@ const ALLOWLIST = [
     notCovering: 'exempts REACHABILITY for THIS file only. Not a pass for music.html — the ' +
       'room itself must stay reachable from the hub — and it ENDS the day the shim is ' +
       'retired; then the file must be gone from the tree and the registry together.'
+  },
+  {
+    path: 'surfaces/watch-ant.html',
+    reason: 'deliberately unlinked: the permanent redirect shim to bview.html (#197 ' +
+      'rename, 2026-09-21). It exists for saved off-site watch-ant links, never for ' +
+      'in-estate navigation — nothing may link it, so it is orphaned on purpose. No ' +
+      'gate follows the redirect yet.',
+    notCovering: 'exempts REACHABILITY for THIS file only. Not a pass for bview.html — the ' +
+      'viewer itself must stay reachable from the hub — and it ENDS the day the shim is ' +
+      'retired; then the file must be gone from the tree and the registry together.'
   }
 ]; // entries: { path, reason, notCovering }
 if (OVERRIDE) {
