@@ -506,15 +506,18 @@
 
   /* ---------- bytes ---------- */
 
-  async function encryptFor(id, bytes) {
+  /* Returns the key rather than storing it. The caller stores it only once the
+     rail has taken the bytes: written earlier, a refused add left a key with
+     nothing to open, and a refused move between two keep-class rails replaced
+     the key the old rail's ciphertext still needed. */
+  async function encryptFor(bytes) {
     var key = await crypto.subtle.generateKey({ name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']);
     var iv = crypto.getRandomValues(new Uint8Array(12));
     var ct = new Uint8Array(await crypto.subtle.encrypt({ name: 'AES-GCM', iv: iv }, key, bytes));
-    await putKey(id, { key: key, iv: iv });
     var out = new Uint8Array(12 + ct.length);
     out.set(iv, 0);
     out.set(ct, 12);
-    return out;
+    return { bytes: out, key: { key: key, iv: iv } };
   }
 
   async function decryptFor(id, stored) {
@@ -532,8 +535,9 @@
   function encryptsFor(scheme) { return !speaksToTheWorld(scheme); }
 
   async function storeBytes(id, scheme, plain) {
-    var payload = encryptsFor(scheme) ? await encryptFor(id, plain) : plain;
-    var res = await railPut(scheme, payload);
+    var sealed = encryptsFor(scheme) ? await encryptFor(plain) : null;
+    var res = await railPut(scheme, sealed ? sealed.bytes : plain);
+    if (sealed) await putKey(id, sealed.key);
     return { scheme: res.scheme, address: res.address };
   }
 
