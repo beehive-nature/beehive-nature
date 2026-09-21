@@ -24,11 +24,12 @@ input{flex:1 1 240px;min-width:0;min-height:48px;padding:0 14px;font:15px var(--
 button{min-height:48px;padding:0 22px;font:600 16px var(--body);color:var(--on);background:var(--act);border:0;border-radius:12px;cursor:pointer}
 :is(input,button,a,summary):focus-visible{outline:2.5px solid var(--ink);outline-offset:2px}
 .say{padding:14px 16px;border:1.5px dashed var(--edge);border-radius:12px;color:var(--ink)}
+.tap{margin:8px 0 0;min-height:48px;width:100%;font:600 16px var(--body);color:var(--on);background:var(--act);border:0;border-radius:12px;cursor:pointer}
 video{display:block;width:100%;max-height:70dvh;background:#000;border-radius:14px;margin:6px 0 10px}
 progress{display:block;width:100%;height:10px;margin:8px 0 0;accent-color:var(--act)}
 .got{font:14px var(--mono);color:var(--dim);margin:4px 0 0}
 .addrline{font:13px var(--mono);color:var(--dim);overflow-wrap:anywhere}
-body[data-reg="cypherpunk"] :is(input,button,.say,video){border-radius:3px}
+body[data-reg="cypherpunk"] :is(input,button,.say,video,.tap){border-radius:3px}
 [hidden]{display:none!important}
 </style>
 </head>
@@ -48,47 +49,86 @@ body[data-reg="cypherpunk"] :is(input,button,.say,video){border-radius:3px}
   <p class="got" id="got" translate="no" dir="ltr" aria-live="off" hidden></p>
   <p class="say" id="s-fail" data-i18n="want.fail" hidden>The network door did not answer, or this file is not a video. Try again in a few minutes.</p>
   <section id="out" aria-live="polite" hidden>
-    <video id="v" controls playsinline preload="metadata"></video>
+    <video id="v" controls playsinline preload="auto"></video>
+    <button type="button" class="tap" id="tap" hidden>Tap to play with sound</button>
     <p class="addrline" id="shown" translate="no" dir="ltr"></p>
   </section>
-  <p class="lead" data-i18n="want.note">Public files only. Anyone with the address can watch.</p>
+  <p class="lead" data-i18n="want.note">Public files only. Anyone with the address can watch. This device keeps a copy so refresh does not re-fetch.</p>
 </main>
 <script src="register.js?v=42"></script>
 <script>
-/* watch-ant — ANT public video via estate door (relay.skaists.dev/ant/v1).
-   Happy path: /stream binary progressive (needs honest antd ≥0.12.1).
-   Stub /stream (tiny CL / truncated moov) aborts in <500ms.
-   Fallback: JSON {"data":"<base64>"} decoded as bytes arrive; first frame starts
-   once PLAY_AT media bytes are in (moov+early mdat), NOT after the whole file.
-   x0x is off the playback path. */
+/* watch-ant — ANT public video via estate door.
+   Cache: Cache Storage keyed by XOR so refresh plays local, no re-pull.
+   Play: unmuted autoplay; if browser blocks, one-tap with sound.
+   Progressive: arm <video> at PLAY_AT media bytes; stub /stream aborts fast.
+   x0x off playback path. */
 (() => {
   const DOOR = 'https://relay.skaists.dev/ant/v1/data/public/';
+  const CACHE = 'ant-watch-v1';
   const HEAD = '{"data":"';
-  const PLAY_AT = 2 << 20;      // start attempting first frame after 2 MiB media
-  const STUB_MAX = 65536;       // /stream smaller than this = DataMap stub class
-  const STREAM_MS = 800;        // patience on /stream before stub/fail
+  const PLAY_AT = 2 << 20;
+  const STUB_MAX = 65536;
+  const STREAM_MS = 800;
   const $ = id => document.getElementById(id), says = ['s-bad', 's-slow', 's-fail'];
   const say = id => says.forEach(s => $(s).hidden = s !== id);
   const parse = raw => { const m = /^\s*(?:autonomi:\/\/)?([0-9a-f]{64})\s*$/i.exec(raw || ''); return m ? m[1].toLowerCase() : null; };
-  const v = $('v'), pg = $('pg');
+  const v = $('v'), pg = $('pg'), tap = $('tap');
   let job = 0, ctl = null, blobUrl = null, playing = 0;
   v.addEventListener('error', () => { if (playing && playing === job) say('s-fail'); });
   const b64 = typeof Uint8Array.fromBase64 === 'function' ? s => Uint8Array.fromBase64(s)
     : s => { const t = atob(s), u = new Uint8Array(t.length); for (let i = 0; i < t.length; i++) u[i] = t.charCodeAt(i); return u; };
   const kind = u => u.length < 8 ? '' : u[4] === 0x66 && u[5] === 0x74 && u[6] === 0x79 && u[7] === 0x70 ? 'video/mp4'
     : u[0] === 0x1a && u[1] === 0x45 && u[2] === 0xdf && u[3] === 0xa3 ? 'video/webm' : '';
+  const cacheKey = a => 'ant-watch://' + a;
+  async function cacheGet(a) {
+    if (!('caches' in window)) return null;
+    try {
+      const c = await caches.open(CACHE);
+      const r = await c.match(cacheKey(a));
+      return r ? await r.blob() : null;
+    } catch { return null; }
+  }
+  async function cachePut(a, blob) {
+    if (!('caches' in window)) return;
+    try {
+      const c = await caches.open(CACHE);
+      await c.put(cacheKey(a), new Response(blob, { headers: { 'content-type': blob.type || 'video/mp4' } }));
+    } catch (_) {}
+  }
   const firstFrame = ms => new Promise(done => {
     const end = ok => { clearTimeout(t); v.removeEventListener('loadeddata', yes); v.removeEventListener('error', no); done(ok); };
     const yes = () => end(true), no = () => end(false), t = setTimeout(no, ms);
     v.addEventListener('loadeddata', yes); v.addEventListener('error', no);
   });
-  function armSrc(parts, mime, my) {
+  async function goSound(my) {
+    if (my !== job) return;
+    v.muted = false; v.volume = 1;
+    tap.hidden = true;
+    try {
+      await v.play();
+      if (my === job) { playing = my; say(null); }
+    } catch {
+      if (my === job) { tap.hidden = false; say(null); }
+    }
+  }
+  tap.addEventListener('click', () => {
+    v.muted = false; v.volume = 1;
+    v.play().then(() => { tap.hidden = true; }).catch(() => {});
+  });
+  function armSrc(partsOrBlob, mime, my, { final = false } = {}) {
     if (my !== job) return;
     const t = v.currentTime || 0;
+    const was = !v.paused && playing === my;
     if (blobUrl) URL.revokeObjectURL(blobUrl);
-    blobUrl = URL.createObjectURL(new Blob(parts, { type: mime || 'video/mp4' }));
+    const blob = partsOrBlob instanceof Blob ? partsOrBlob : new Blob(partsOrBlob, { type: mime || 'video/mp4' });
+    blobUrl = URL.createObjectURL(blob);
     v.src = blobUrl; v.load();
-    if (t > 0.25) v.addEventListener('loadeddata', () => { try { v.currentTime = t; } catch (_) {} }, { once: true });
+    const resume = () => {
+      if (t > 0.25) { try { v.currentTime = t; } catch (_) {} }
+      if (was || final || playing === my) goSound(my);
+      else goSound(my);
+    };
+    v.addEventListener('loadeddata', resume, { once: true });
   }
   async function tryStream(a, signal, my) {
     const ac = new AbortController();
@@ -99,7 +139,7 @@ body[data-reg="cypherpunk"] :is(input,button,.say,video){border-radius:3px}
       const r = await fetch(DOOR + a + '/stream', { signal: ac.signal });
       if (!r.ok || !r.body) return false;
       const cl = +r.headers.get('content-length') || 0;
-      if (cl > 0 && cl <= STUB_MAX) return false; // known stub class
+      if (cl > 0 && cl <= STUB_MAX) return false;
       const reader = r.body.getReader();
       const chunks = [];
       let got = 0, head = new Uint8Array(0);
@@ -111,19 +151,18 @@ body[data-reg="cypherpunk"] :is(input,button,.say,video){border-radius:3px}
           const h = new Uint8Array(Math.min(8, head.length + value.length));
           h.set(head); h.set(value.subarray(0, h.length - head.length), head.length); head = h;
         }
-        // If server closed early with tiny body → stub
-        if (cl === 0 && got <= STUB_MAX) continue;
       }
       if (got <= STUB_MAX) return false;
       const mime = kind(head);
       if (!mime) return false;
-      armSrc(chunks, mime, my);
+      const blob = new Blob(chunks, { type: mime });
+      await cachePut(a, blob);
+      armSrc(blob, mime, my, { final: true });
       const ok = await firstFrame(8000);
-      if (ok && my === job) { playing = my; say(null); }
+      if (ok && my === job) { playing = my; say(null); await goSound(my); }
       return ok;
-    } catch {
-      return false;
-    } finally {
+    } catch { return false; }
+    finally {
       clearTimeout(timer);
       signal.removeEventListener('abort', onAbort);
     }
@@ -137,10 +176,9 @@ body[data-reg="cypherpunk"] :is(input,button,.say,video){border-radius:3px}
     let armed = false, mime = '';
     if (!total) pg.removeAttribute('value');
     const flush = force => {
-      if (!parts.length) return;
-      if (!armed && (bytes >= PLAY_AT || force) && mime) {
-        armSrc(parts.slice(), mime, my);
-        firstFrame(12000).then(ok => { if (ok && my === job) { playing = my; say(null); } });
+      if (!parts.length || !mime) return;
+      if (!armed && (bytes >= PLAY_AT || force)) {
+        armSrc(parts.slice(), mime, my, { final: false });
         armed = true;
       }
     };
@@ -175,10 +213,11 @@ body[data-reg="cypherpunk"] :is(input,button,.say,video){border-radius:3px}
     }
     if (tail === null || tail.trim() !== '"}') throw new Error('body ended early');
     if (!mime) throw new Error('not a video');
-    flush(true);
-    armSrc(parts, mime, my);
+    const blob = new Blob(parts, { type: mime });
+    await cachePut(a, blob);
+    armSrc(blob, mime, my, { final: true });
     const ok = await firstFrame(20000);
-    if (my === job) { if (ok) playing = my; say(ok ? null : 's-fail'); }
+    if (my === job) { if (ok) { playing = my; say(null); await goSound(my); } else say('s-fail'); }
   }
   async function watch(raw) {
     const a = parse(raw), my = ++job;
@@ -187,9 +226,15 @@ body[data-reg="cypherpunk"] :is(input,button,.say,video){border-radius:3px}
     const signal = ctl.signal;
     if (blobUrl) { URL.revokeObjectURL(blobUrl); blobUrl = null; }
     const busy = on => { pg.hidden = $('got').hidden = !on; };
-    busy(false); pg.value = 0; $('got').textContent = ''; playing = 0;
+    busy(false); pg.value = 0; $('got').textContent = ''; playing = 0; tap.hidden = true;
     if (!a) { $('out').hidden = true; v.removeAttribute('src'); v.load(); say('s-bad'); return; }
     $('shown').textContent = 'autonomi://' + a; $('out').hidden = false; say('s-slow');
+    const hit = await cacheGet(a);
+    if (hit && my === job) {
+      armSrc(hit, hit.type || 'video/mp4', my, { final: true });
+      const ok = await firstFrame(8000);
+      if (ok && my === job) { playing = my; say(null); await goSound(my); return; }
+    }
     if (await tryStream(a, signal, my)) return;
     if (my !== job) return;
     busy(true);
