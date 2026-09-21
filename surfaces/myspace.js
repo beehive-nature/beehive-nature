@@ -296,7 +296,7 @@
     /* Said at the moment it happens, not in a footnote: this puts the visitor's own key
        in that rail's member list. It is the price of the rail and they should read it as
        it is paid. */
-    setStatus(t('joining'));
+    setStatus(t('joining'), false, true);
     await railOp(scheme, 'join', {});
     joined[scheme] = true;
     return true;
@@ -610,7 +610,35 @@
   var pendingPurpose = 'keep';
   var sheetRow = null;
 
-  function setStatus(msg, loud) {
+  /* THE BUSY STATE IS PUBLISHED, NEVER INFERRED FROM THE WORDS.
+
+     Until this slice the only way to know the page was mid-act was to read the
+     status LINE and match it against a list of in-progress sentences, in three
+     registers, maintained by hand. That list was wrong twice: it missed the
+     longest-running status on the page (`joining`, whose bee copy shares no word
+     with the others), and a plain copy edit to `working` makes it wrong again
+     with nothing in the tree objecting. A sentence is written for a reader; a
+     reader is not a machine, and asking a machine to parse one is how a gate
+     goes green on the thing it exists to catch.
+
+     So the page states it, the way the tour bar states `--tbar-h`: `data-busy`
+     is `1` while an act is in flight and the line is DESCRIBING it, `0` when
+     what is on the line is the RESULT. Set before the early return, so a
+     cleared status is never left reading busy.
+
+     AND A FLAG ALONE WAS NOT ENOUGH — measured, not reasoned. A reader that
+     chooses a file and then looks for `data-busy="1"` is asking a question
+     about a moment that may already be over: a refusal (an undeclared `x.put`,
+     a store the browser will not open) goes busy and back to idle inside the
+     round trip, and the look lands on `0`. Two clean runs in four failed that
+     way. `0` cannot say "not started" apart from "already finished", so every
+     announcement of work also moves `data-busy-seq` forward, and a reader waits
+     for the sequence to pass the number it saw BEFORE it acted. That question
+     has one answer however fast the act was. */
+  var busySeq = 0;
+  function setStatus(msg, loud, busy) {
+    document.body.setAttribute('data-busy', busy ? '1' : '0');
+    if (busy) document.body.setAttribute('data-busy-seq', String(++busySeq));
     var el = $('status');
     if (!msg) { el.hidden = true; el.textContent = ''; return; }
     el.hidden = false;
@@ -839,8 +867,6 @@
   /* ---------- the acts ---------- */
 
   async function addFile(file) {
-    var id = 'f' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
-    var plain = new Uint8Array(await file.arrayBuffer());
     var want = pendingPurpose;
     var scheme = railFor(want);
     if (!scheme) {
@@ -848,12 +874,24 @@
       return;
     }
 
+    /* SAID BEFORE THE FIRST `await`, AND THAT ORDERING IS THE POINT. Reading the
+       file's bytes is already work the visitor is waiting through, so the line
+       used to appear after it — which left a window where the page was busy and
+       said so nowhere. Running the whole decision synchronously inside the
+       change event means `data-busy` is `1` by the time the tap has finished
+       being a tap: for a visitor the status simply arrives sooner, and for
+       anything reading the flag there is no gap where the page looks idle while
+       an act is under way. */
+    setStatus(t('working'), false, true);
+
+    var id = 'f' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+    var plain = new Uint8Array(await file.arrayBuffer());
+
     var row = {
       id: id, name: file.name || 'file', size: plain.length, type: file.type || '',
       purpose: want, ts: Date.now(), addr: null, keyref: null
     };
 
-    setStatus(t('working'));
     try {
       row.addr = await storeBytes(id, scheme, plain);
       if (encryptsFor(scheme)) row.keyref = 'device:aes-gcm:v1';
@@ -903,7 +941,7 @@
   async function doMove(row, toId) {
     var toScheme = railFor(toId);
     if (!toScheme) { setStatus('That is not available right now, so nothing changed.', true); return closeSheet(); }
-    setStatus(t('flipping'));
+    setStatus(t('flipping'), false, true);
     try {
       var bytes = await plainBytes(row);
       var from = schemeOf(row);
@@ -974,7 +1012,7 @@
      route to, including ones that do not exist yet, and it branches on no rail
      name. */
   async function doOpen(row) {
-    setStatus(t('opening'));
+    setStatus(t('opening'), false, true);
     try {
       var bytes = await plainBytes(row);
       handToDevice(bytes, row.name, row.type);
@@ -992,7 +1030,7 @@
       setStatus('This page cannot open a shared file right now: it has no rail that reads one.', true);
       return;
     }
-    setStatus('Opening ' + (name || 'the file') + '…');
+    setStatus('Opening ' + (name || 'the file') + '…', false, true);
     try {
       var bytes = (await railGet(scheme, address)).bytes;
       handToDevice(bytes, name || (address.slice(0, 12) + '.bin'), '');
