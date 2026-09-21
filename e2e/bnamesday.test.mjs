@@ -116,7 +116,7 @@ test('one set of capabilities in three authored views — and nothing leaves the
     views[r] = html.slice(i, next);
   }
   const must = { 'find a name': /data-form="(name|rtools|cq)"/, 'read a birth day': /data-form="(birth|rtools)"/, 'keep someone': /data-form="add"/,
-    'old style → new style': /data-form="os"/, 'a Thai year → CE': /data-form="be"/, 'calendar file': /data-act="ics"/, 'save a copy': /data-act="export"/, 'bring a copy back': /data-act="import"/, 'read the team': /data-cap="team"/, 'say where (time zone)': /name="tz"/ };
+    'old style → new style': /data-form="os"/, 'a Thai year → CE': /data-form="be"/, 'calendar file': /data-act="ics"/, 'save a copy': /data-act="export"/, 'bring a copy back': /data-act="import"/, 'read the team': /data-cap="team"/, 'say where (time zone)': /name="tz"/, 'learn a word and go deeper': /data-cap="learn"/ };
   for (const [r, body] of Object.entries(views)) for (const [cap, re] of Object.entries(must)) assert.match(body, re, r + ' can: ' + cap);
   for (const act of ['light', 'hold']) assert.ok(html.includes('data-act="' + act + '"'), 'a candle can be lit: ' + act);
   /* the private lane: two same-origin reads, and no way out but a file the reader asks for */
@@ -133,4 +133,28 @@ test('house laws the page keeps', () => {
   assert.doesNotMatch(html, /text-transform\s*:/, 'casings are payload — never forced in CSS');
   assert.doesNotMatch(html, /genealogy/i, 'this is a complement; bGENEaLOGy is its own keeper and is not claimed here');
   assert.match(html, /prefers-reduced-motion/); assert.match(html, /id="loadfail"[^>]*hidden/, 'a failed load shows nothing rather than something guessed');
+});
+
+test('every foreign word can be learned: the Thai letters by name, and links that are alive and say they leave', () => {
+  const grouped = B.RING.slice(1).flatMap((g) => [...g.letters]);
+  assert.equal(grouped.length, 41); for (const ch of grouped) assert.ok(B.LETTERS[ch] && B.LETTERS[ch].length === 3, 'a name for ' + ch);
+  assert.equal(Object.keys(B.LETTERS).length, 44, 'all forty-four consonants, the two obsolete ones included');
+  assert.deepEqual([...B.LETTERS['ผ']], ['ผึ้ง', 'pho phueng', 'bee']); assert.equal(B.RING.find((g) => g.letters.includes('ผ')).id, 'jupiter');
+  for (const d of B.DAYS) assert.ok(d.rom && d.colorRom && d.posture.rom && d.lvEn, d.en + ' says how it sounds and what it means');
+  const skySandbox = { Intl, Date, Math }; vm.runInNewContext(read('surfaces/bnamesday-sky.js'), skySandbox); const K = skySandbox.bNamesSky;
+  for (const [k, pair] of [...Object.entries(B.DEEPER), ...Object.entries(K.DEEPER)]) { assert.match(pair[0], /^https:\/\/(en\.wikipedia\.org|data\.gov\.lv|www\.raduraksti\.arhivi\.lv|so06\.tci-thaijo\.org)\//, k); assert.ok(pair[1].length > 3, k); }
+  assert.equal(K.hexLink(33), 'https://en.wikipedia.org/wiki/List_of_hexagrams_of_the_I_Ching#Hexagram_33'); assert.equal(K.animalLink(7), 'https://en.wikipedia.org/wiki/Goat_(zodiac)');
+  assert.match(html, /const ext=\(pair,label\)=>`<a target="_blank" rel="noopener noreferrer"/, 'one helper builds every outbound link, and it always opens a new tab');
+  assert.match(html, /each opens a new tab/); assert.match(html, /setAttribute\('translate','no'\)/, 'native words are protected when a browser translates the page');
+});
+
+test('the skaists design system’s laws, as far as a file can show them', () => {
+  assert.doesNotMatch(html, /--gold|--heart|--warn/, 'honey is the colour of b alone; guard is lilac and never red');
+  for (const v of ['--guard:#4a3aa8', '--guard:#b7a8f7', '--sov:#6e3fb8', '--you:#a8238c', '--rose:#a3122b', '--bg:#06110c']) assert.ok(html.includes(v), 'exact token ' + v);
+  assert.equal((html.match(/class="primary"/g) || []).length, 3, 'one filled action per view');
+  const body = html.slice(html.indexOf('<body'), html.indexOf('<script src="bnamesday.js">'));
+  for (const m of body.matchAll(/<(h1|h2|button|summary|label)\b[^>]*>(?:<span[^>]*>[^<]*<\/span>\s*)?([A-Za-z][^<]{2,})/g)) { const first = m[2].trim().split(/\s+/)[0];
+    assert.ok(/^[a-z]/.test(first) || /^(Latvia|Latvian|Thailand|Thai|China|Julian|PRIVATE)/.test(first), 'the casing law: “' + m[2].trim().slice(0, 40) + '” begins a ' + m[1]); }
+  assert.doesNotMatch(body, />—<\/(div|td|dd)>/, 'a gauge that cannot vouch says so — never a dash');
+  assert.match(html, /id="r-houses"/, 'the octagon’s words are captions, not art'); assert.doesNotMatch(html, /lang="th">\$\{r\.house\.th\}<\/text>/, 'no house names inside the SVG');
 });

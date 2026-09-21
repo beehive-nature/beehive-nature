@@ -58,6 +58,23 @@
   var PLANET_TH = { sun: ['พระอาทิตย์', 'phra athit'], moon: ['พระจันทร์', 'phra chan'], mars: ['พระอังคาร', 'phra angkhan'], mercury: ['พระพุธ', 'phra phut'], saturn: ['พระเสาร์', 'phra sao'], jupiter: ['พระพฤหัสบดี', 'phra pharuehatsabodi'], rahu: ['พระราหู', 'phra rahu'], venus: ['พระศุกร์', 'phra suk'] };
   RING.forEach(function (g) { g.thFull = PLANET_TH[g.id][0]; g.rom = PLANET_TH[g.id][1]; });
 
+  /* THE LETTER NAMES. A Thai child learns each consonant by the word it stands in: ก ไก่ "ko kai", the chicken.
+     [the word, how to say it, what it means]. ฃ and ฅ are obsolete and sit in no planet's group. */
+  var LETTERS = { 'ก': ['ไก่', 'ko kai', 'chicken'], 'ข': ['ไข่', 'kho khai', 'egg'], 'ฃ': ['ขวด', 'kho khuat', 'bottle (no longer written)'], 'ค': ['ควาย', 'kho khwai', 'water buffalo'], 'ฅ': ['คน', 'kho khon', 'person (no longer written)'],
+    'ฆ': ['ระฆัง', 'kho rakhang', 'bell'], 'ง': ['งู', 'ngo ngu', 'snake'], 'จ': ['จาน', 'cho chan', 'plate'], 'ฉ': ['ฉิ่ง', 'cho ching', 'small cymbals'], 'ช': ['ช้าง', 'cho chang', 'elephant'], 'ซ': ['โซ่', 'so so', 'chain'],
+    'ฌ': ['เฌอ', 'cho choe', 'tree'], 'ญ': ['หญิง', 'yo ying', 'woman'], 'ฎ': ['ชฎา', 'do chada', 'dancer’s headdress'], 'ฏ': ['ปฏัก', 'to patak', 'goad'], 'ฐ': ['ฐาน', 'tho than', 'pedestal'], 'ฑ': ['มณโฑ', 'tho montho', 'Montho, a queen of the Ramakien'],
+    'ฒ': ['ผู้เฒ่า', 'tho phuthao', 'elder'], 'ณ': ['เณร', 'no nen', 'novice monk'], 'ด': ['เด็ก', 'do dek', 'child'], 'ต': ['เต่า', 'to tao', 'turtle'], 'ถ': ['ถุง', 'tho thung', 'bag'], 'ท': ['ทหาร', 'tho thahan', 'soldier'],
+    'ธ': ['ธง', 'tho thong', 'flag'], 'น': ['หนู', 'no nu', 'mouse'], 'บ': ['ใบไม้', 'bo baimai', 'leaf'], 'ป': ['ปลา', 'po pla', 'fish'], 'ผ': ['ผึ้ง', 'pho phueng', 'bee'], 'ฝ': ['ฝา', 'fo fa', 'lid'], 'พ': ['พาน', 'pho phan', 'offering tray'],
+    'ฟ': ['ฟัน', 'fo fan', 'teeth'], 'ภ': ['สำเภา', 'pho samphao', 'sailing junk'], 'ม': ['ม้า', 'mo ma', 'horse'], 'ย': ['ยักษ์', 'yo yak', 'giant'], 'ร': ['เรือ', 'ro ruea', 'boat'], 'ล': ['ลิง', 'lo ling', 'monkey'], 'ว': ['แหวน', 'wo waen', 'ring'],
+    'ศ': ['ศาลา', 'so sala', 'pavilion'], 'ษ': ['ฤๅษี', 'so ruesi', 'hermit'], 'ส': ['เสือ', 'so suea', 'tiger'], 'ห': ['หีบ', 'ho hip', 'chest'], 'ฬ': ['จุฬา', 'lo chula', 'kite'], 'อ': ['อ่าง', 'o ang', 'basin'], 'ฮ': ['นกฮูก', 'ho nok huk', 'owl'] };
+  /* GO DEEPER. Every link checked alive on 2026-09-20; each opens a new tab and is followed only by a reader's own tap. */
+  var WIKI = 'https://en.wikipedia.org/wiki/';
+  var DEEPER = { nameDay: [WIKI + 'Name_day', 'name days across Europe'], latvianName: [WIKI + 'Latvian_name', 'Latvian names'], latgalian: [WIKI + 'Latgalian_language', 'the Latgalian language'],
+    calendarSource: ['https://data.gov.lv/dati/lv/dataset/latviesu-tradicionalais-un-paplasinatais-kalendarvardu-saraksts', 'the calendar itself, from the State Language Centre'], raduraksti: ['https://www.raduraksti.arhivi.lv/', 'Raduraksti — the church books, scanned'],
+    oldStyle: [WIKI + 'Old_Style_and_New_Style_dates', 'old style and new style dates'], thaiDays: [WIKI + 'Colors_of_the_day_in_Thailand', 'the colours of the day in Thailand'], postures: [WIKI + 'Iconography_of_Gautama_Buddha_in_Laos_and_Thailand', 'the postures of the Buddha, day by day'],
+    thaiScript: [WIKI + 'Thai_script', 'the Thai script and its letter names'], planets: [WIKI + 'Navagraha', 'the nine planet-gods'], rahu: [WIKI + 'Rahu', 'Rahu, who swallows the Moon'], thaksa: ['https://so06.tci-thaijo.org/index.php/VANNAVIDAS/article/view/48400', 'ตำราทักษากับการตั้งชื่อของคนไทย — a scholar’s paper on thaksa (in Thai)'],
+    thaiName: [WIKI + 'Thai_name', 'Thai names and the one-family surname'], thaiCalendar: [WIKI + 'Thai_solar_calendar', 'the Thai calendar and the Buddhist Era'] };
+
   /* the eight houses for a birth day: [{house, group}] — a rotation of RING, nothing more */
   function thaksa(dayIndex) {
     var start = DAYS[dayIndex].ring;
@@ -229,7 +246,7 @@
     return out;
   }
 
-  var api = { RING: RING, HOUSES: HOUSES, DAYS: DAYS, MLEN: MLEN, thaksa: thaksa, thaiDay: thaiDay, xray: xray,
+  var api = { LETTERS: LETTERS, DEEPER: DEEPER, RING: RING, HOUSES: HOUSES, DAYS: DAYS, MLEN: MLEN, thaksa: thaksa, thaiDay: thaiDay, xray: xray,
     fold: fold, ending: ending, buildIndex: buildIndex, findName: findName, variants: variants,
     keyOf: keyOf, seatOf: seatOf, keyOfSeat: keyOfSeat, isLeap: isLeap, nextOccurrence: nextOccurrence,
     oldStyleToNew: oldStyleToNew, thaiYearToCE: thaiYearToCE, ics: ics, cleanPeople: cleanPeople, familyDays: familyDays };
