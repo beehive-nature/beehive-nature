@@ -72,19 +72,19 @@ body[data-reg="cypherpunk"] video{border-radius:3px}
 /* bview.html — PUBLIC Autonomi video through the estate ANT door
    (relay.skaists.dev/ant/v1 → antd). Happy path is progressive binary,
    not whole-file base64.
-   1. /data/public/<addr>/stream: probe in <500 ms. Honest body (antd
-      ≥0.12.1 / ant-sdk PR #243) → native <video src=stream>. Stub
+   1. /data/public/<addr>/stream: probe headers in <500 ms. Stub
       (antd 0.12.0 DataMap-sized CL / truncated moov, no mdat) → abort,
-      never burn tens of seconds.
+      never burn tens of seconds. Honest body (antd ≥0.12.1) → consume
+      THIS fetch as binary progressive Blobs (moov + early mdat first).
+      Never assign the remote URL to <video src> — the live door has no
+      Accept-Ranges, so cancel+reassign raced a second full GET and left
+      the page on "Fetching…" with a spinner.
    2. /data/public/<addr> JSON {"data":"<base64>"}: decode as bytes
-      arrive; start playback as soon as ftyp+moov+early mdat is in hand
-      (partial Blob / progressive), keep folding the rest. Full-file
-      wait is not the happy path — last resort only when the door still
-      stubs /stream.
+      arrive; same early-paint helper. Last resort when /stream stubs.
    x0x stays off the playback path (may coordinate only). */
 (() => {
   const DOOR = 'https://relay.skaists.dev/ant/v1/data/public/';
-  const HEAD = '{"data":"', STREAM_PROBE = 450, STREAM_WAIT = 20000, BLOB_WAIT = 20000;
+  const HEAD = '{"data":"', STREAM_PROBE = 450, BLOB_WAIT = 20000;
   const EARLY_MDAT = 256 << 10, SEGMENT = 8 << 20, STUB_CL = 128 << 10;
   const $ = id => document.getElementById(id), says = ['s-bad', 's-slow', 's-fail'];
   const say = id => says.forEach(s => $(s).hidden = s !== id);
@@ -150,7 +150,78 @@ body[data-reg="cypherpunk"] video{border-radius:3px}
     v.src = blobUrl; v.load();
   };
   const paintBlob = (blob, ms) => paintSrc(() => setBlob(blob), ms);
-  // Probe /stream. Honest → native progressive src. Stub / dead → false fast.
+  const prefixOf = (parts, bytes, need) => {
+    const n = Math.min(bytes, need), u = new Uint8Array(n); let o = 0;
+    for (const p of parts) { const k = Math.min(p.length, n - o); u.set(p.subarray(0, k), o); o += k; if (o >= n) break; }
+    return u;
+  };
+  // Shared early paint: contiguous snap once moov + EARLY_MDAT are in hand.
+  async function flushEarlyPaint(parts, bytes, state, my) {
+    if (state.early || my !== job || bytes < 32) return;
+    const prefix = prefixOf(parts, bytes, Math.min(bytes, (512 << 10) + EARLY_MDAT));
+    const me = moovEnd(prefix);
+    // Need a solid early mdat (256 KiB) so the decoder does not MEDIA_ERR_DECODE on a stub slice.
+    if (me <= 0 || bytes < me + EARLY_MDAT) return;
+    state.mime = kind(prefix);
+    if (!state.mime) return;
+    const snap = prefixOf(parts, bytes, bytes);
+    const ok = await paintBlob(new Blob([snap], { type: state.mime }), BLOB_WAIT);
+    if (my === job && ok && v.videoWidth > 0) {
+      state.early = true;
+      playing = my; say(null); await goSound(my);
+    } else if (my === job) {
+      frameGen++;
+      v.removeAttribute('src'); v.load();
+    }
+  }
+  async function finishBinary(parts, bytes, state, my, a) {
+    if (!state.mime) state.mime = kind(prefixOf(parts, bytes, Math.min(bytes, 64)));
+    // Not a video → false so the JSON envelope path can still try.
+    // Valid video bytes from /stream → true even if this Chromium cannot decode
+    // (do not fall through and re-download the same file as base64).
+    if (!state.mime) return false;
+    if (my !== job) return true;
+    const t0 = v.currentTime || 0;
+    const full = new Blob(parts, { type: state.mime });
+    await cachePut(a, full);
+    if (playing === my) {
+      const ok = await paintBlob(full, BLOB_WAIT);
+      if (ok) { try { v.currentTime = t0; } catch {} }
+      say(null);
+      return true;
+    }
+    const ok = await paintBlob(full, BLOB_WAIT);
+    if (my === job) { if (ok) { playing = my; say(null); await goSound(my); } else say('s-fail'); }
+    return true;
+  }
+  // Consume an already-open /stream body as binary progressive Blobs.
+  async function readBinaryStream(rd, seed, total, signal, my, a) {
+    const parts = [];
+    let bytes = 0, held = 0;
+    if (seed && seed.length) { parts.push(seed); bytes = seed.length; held = seed.length; }
+    const state = { early: false, mime: '' };
+    if (bytes && my === job) {
+      $('got').textContent = Math.floor(bytes / 1048576) + ' MB';
+      if (total) pg.value = bytes / total;
+      await flushEarlyPaint(parts, bytes, state, my);
+    }
+    for (;;) {
+      if (signal.aborted || my !== job) { try { rd.cancel(); } catch {} return state.early; }
+      const { done, value } = await rd.read();
+      if (done) break;
+      parts.push(value);
+      bytes += value.length;
+      held += value.length;
+      if (held >= SEGMENT) held = 0;
+      if (my === job) {
+        if (total) pg.value = bytes / total;
+        $('got').textContent = Math.floor(bytes / 1048576) + ' MB';
+      }
+      await flushEarlyPaint(parts, bytes, state, my);
+    }
+    return finishBinary(parts, bytes, state, my, a);
+  }
+  // /stream: stub CL → false fast. Honest → binary progressive from THIS response.
   async function tryStream(a, signal, my) {
     const url = DOOR + a + '/stream';
     let r;
@@ -159,73 +230,54 @@ body[data-reg="cypherpunk"] video{border-radius:3px}
     if (my !== job || signal.aborted) return false;
     if (!r.ok) { try { r.body && r.body.cancel(); } catch {} return false; }
     const cl = +r.headers.get('content-length') || 0;
-    // Known-broken antd 0.12.0 class: DataMap-sized CL (live repro 4170).
-    // Headers already arrived — abort the body now, never burn STREAM_WAIT.
+    // Known-broken antd 0.12.0 class: DataMap-sized CL (live repro was 4170).
+    // Headers already arrived — abort the body now, never burn a long wait.
     // Tiny complete files still play via the JSON envelope path below.
     if (cl > 0 && cl < STUB_CL) {
       try { r.body && r.body.cancel(); } catch {}
       return false;
     }
+    if (!r.body) return false;
+    const rd = r.body.getReader();
+    let seed = new Uint8Array(0);
     // Chunked / unknown CL: brief peek for truncated moov (moov size > bytes).
-    if (!cl && r.body) {
-      const rd = r.body.getReader();
-      let buf = new Uint8Array(0);
+    if (!cl) {
       const until = performance.now() + STREAM_PROBE;
       try {
-        while (performance.now() < until && buf.length < STUB_CL) {
+        while (performance.now() < until && seed.length < STUB_CL) {
           const { done, value } = await rd.read();
-          if (value) { const n = new Uint8Array(buf.length + value.length); n.set(buf); n.set(value, buf.length); buf = n; }
+          if (value) { const n = new Uint8Array(seed.length + value.length); n.set(seed); n.set(value, seed.length); seed = n; }
           if (done) {
-            const end = moovEnd(buf);
-            try { rd.cancel(); } catch {}
-            if (end <= 0 || buf.length < end + 16) return false;
+            const end = moovEnd(seed);
+            if (end <= 0 || seed.length < end + 16) return false;
             break;
           }
         }
       } catch { try { rd.cancel(); } catch {} return false; }
-      try { rd.cancel(); } catch {}
     }
-    // Honest CL (or chunked that did not look like a stub): native progressive.
-    try { r.body && r.body.cancel(); } catch {}
-    if (my !== job) return false;
-    const ok = await paintSrc(() => { v.src = url; v.load(); }, STREAM_WAIT);
-    if (my === job && ok) { playing = my; say(null); await goSound(my); return true; }
-    v.removeAttribute('src'); v.load();
-    return false;
+    if (my !== job) { try { rd.cancel(); } catch {} return false; }
+    // Honest stream: one fetch, progressive Blob paint — never video.src = remote URL.
+    pg.hidden = $('got').hidden = false;
+    if (!cl) pg.removeAttribute('value');
+    else pg.value = 0;
+    try {
+      const ok = await readBinaryStream(rd, seed, cl, signal, my, a);
+      if (my === job) { pg.hidden = $('got').hidden = true; }
+      return ok;
+    } catch {
+      try { rd.cancel(); } catch {}
+      if (my === job) { pg.hidden = $('got').hidden = true; }
+      return false;
+    }
   }
-  // JSON envelope → decode progressively; paint first frame before the whole file lands.
+  // JSON envelope → decode progressively; same early-paint helper as /stream.
   async function progressive(a, signal, my) {
     const r = await fetch(DOOR + a, { signal });
     if (!r.ok || !r.body) throw new Error('door answered ' + r.status);
     const total = +r.headers.get('content-length') || 0, rd = r.body.getReader(), td = new TextDecoder();
     let parts = [], held = 0, head = new Uint8Array(0), got = 0, bytes = 0, text = '', started = false, tail = null;
-    let early = false, mime = '';
+    const state = { early: false, mime: '' };
     if (!total) pg.removeAttribute('value');
-    const prefixOf = need => {
-      const n = Math.min(bytes, need), u = new Uint8Array(n); let o = 0;
-      for (const p of parts) { const k = Math.min(p.length, n - o); u.set(p.subarray(0, k), o); o += k; if (o >= n) break; }
-      return u;
-    };
-    const flushEarly = async () => {
-      if (early || my !== job || bytes < 32) return;
-      const prefix = prefixOf(Math.min(bytes, (512 << 10) + EARLY_MDAT));
-      const me = moovEnd(prefix);
-      // Need a solid early mdat (256 KiB) so the decoder does not MEDIA_ERR_DECODE on a stub slice.
-      if (me <= 0 || bytes < me + EARLY_MDAT) return;
-      mime = kind(prefix);
-      if (!mime) return;
-      // Contiguous snapshot — multi-part Blob of tiny base64 quads was decoding as error 3 in Chromium.
-      const snap = prefixOf(bytes);
-      const ok = await paintBlob(new Blob([snap], { type: mime }), BLOB_WAIT);
-      if (my === job && ok && v.videoWidth > 0) {
-        early = true;
-        playing = my; say(null); await goSound(my);
-      } else if (my === job) {
-        frameGen++;
-        v.removeAttribute('src'); v.load();
-        // leave early=false so a later chunk can retry with more mdat
-      }
-    };
     for (;;) {
       const { done, value } = await rd.read();
       if (done) break;
@@ -251,26 +303,15 @@ body[data-reg="cypherpunk"] video{border-radius:3px}
         parts.push(part); held += part.length; bytes += part.length;
         if (held >= SEGMENT) held = 0;
         if (my === job) $('got').textContent = Math.floor(bytes / 1048576) + ' MB';
-        await flushEarly();
+        await flushEarlyPaint(parts, bytes, state, my);
       }
       if (tail !== null && text) throw new Error('base64 ended mid-quad');
     }
     if (tail === null || tail.trim() !== '"}') throw new Error('body ended early');
-    if (!mime) mime = kind(head);
-    if (!mime) throw new Error('not a video');
-    if (my !== job) return;
-    // Final full Blob (keeps seek to end honest once the door has delivered everything).
-    const t0 = v.currentTime || 0;
-    const full = new Blob(parts, { type: mime });
-    await cachePut(a, full);
-    if (playing === my) {
-      const ok = await paintBlob(full, BLOB_WAIT);
-      if (ok) { try { v.currentTime = t0; } catch {} }
-      say(null);
-      return;
-    }
-    const ok = await paintBlob(full, BLOB_WAIT);
-    if (my === job) { if (ok) { playing = my; say(null); await goSound(my); } else say('s-fail'); }
+    if (!state.mime) state.mime = kind(head);
+    if (!state.mime) throw new Error('not a video');
+    const ok = await finishBinary(parts, bytes, state, my, a);
+    if (my === job && !ok && !playing) say('s-fail');
   }
   async function view(raw) {
     const a = parse(raw), my = ++job;

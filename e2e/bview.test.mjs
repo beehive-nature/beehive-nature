@@ -3,8 +3,8 @@
 //   · today's antd 0.12.0: /stream is cut at a wrong Content-Length (4170 B) — the page aborts that
 //     stub in <500 ms and falls to the JSON envelope, playing as soon as moov + early mdat arrive
 //     (not after the whole file);
-//   · an upgraded antd (>= 0.12.1): /stream carries the whole file — the page plays it and never
-//     downloads the envelope;
+//   · an upgraded antd (>= 0.12.1): /stream carries the whole file — the page consumes that
+//     fetch as binary progressive Blobs (never video.src = remote URL) and never downloads the envelope;
 //   · door down, not a video, error envelope: the honest failure row, no page errors;
 //   · a failure after the first frame still shows the failure row;
 //   · a bad address requests nothing; a new address really cancels (aborts) the old download;
@@ -145,7 +145,7 @@ test('antd 0.12.0 door: stub /stream aborts fast, envelope plays, full decode st
   await ctx.close();
 });
 
-test('upgraded door (antd >= 0.12.1): the whole stream plays and the envelope is never fetched', async () => {
+test('upgraded door (antd >= 0.12.1): honest /stream plays as progressive Blob; envelope never fetched', async () => {
   const { ctx, p, errs, hits } = await open({
     stream: () => ({ status: 200, headers: { ...cors, 'content-type': 'application/octet-stream', 'content-length': String(MP4.length) }, body: MP4 }),
     json: () => 'abort',   // counted below: it must never be asked for
@@ -153,16 +153,17 @@ test('upgraded door (antd >= 0.12.1): the whole stream plays and the envelope is
   await p.goto(`${ORIGIN}/surfaces/bview.html`, { waitUntil: 'domcontentloaded' });
   await watch(p, A1);
   if (!(await hasCodec(p))) {
-    // Without H.264 the native <video src=stream> errors; the page falls through to the
-    // envelope (json hit may be aborted by the mock). Stream probe still happened.
+    // Without H.264 Blob paint may time out; stream was still consumed (no remote video.src).
     await p.waitForTimeout(1500);
     assert.ok(hits.stream.length >= 1, 'stream was probed');
+    assert.equal(hits.json.length, 0, 'envelope not fetched on honest stream');
     await ctx.close();
     return;
   }
   const s = await settles(p, done);
   assert.equal(s.fail, false); assert.equal(s.w, 720);
-  assert.equal(s.src, DOOR + A1 + '/stream', 'the stream itself plays');
+  assert.match(s.src, /^blob:/, 'honest stream plays via Blob, never remote video.src');
+  assert.ok(!s.src.includes('/stream'), 'remote /stream URL is not the media src');
   await plays(p);
   await p.evaluate(() => document.getElementById('v').dispatchEvent(new Event('error')));
   assert.equal((await state(p)).fail, true, 'a mid-play media error shows the failure row');
@@ -221,6 +222,61 @@ test('progressive envelope: first frame before the JSON body finishes', async ()
   }
   const s = await settles(p, done, 120000);
   if (await hasCodec(p)) { assert.equal(s.fail, false); assert.equal(s.w, 720); await plays(p); }
+  assert.deepEqual(hits.stray, []); assert.deepEqual(errs, []);
+  await ctx.close();
+});
+
+
+test('honest /stream binary progressive: first frame before the body finishes', async () => {
+  const { ctx, p, errs, hits } = await open({
+    stream: () => ({ status: 200, headers: { ...cors, 'content-type': 'application/octet-stream', 'content-length': String(BIG.length) }, body: BIG }),
+    json: () => 'abort',
+  });
+  await ctx.addInitScript(door => {
+    const real = window.fetch;
+    window.fetch = async (u, o) => {
+      const r = await real(u, o);
+      if (!String(u).startsWith(door) || !String(u).endsWith('/stream')) return r;
+      const h = new Headers(r.headers);
+      const slow = r.body.pipeThrough(new TransformStream({ async transform(c, out) {
+        for (let i = 0; i < c.length; i += 65536) { await new Promise(z => setTimeout(z, 40)); out.enqueue(c.subarray(i, i + 65536)); }
+      } }));
+      return new Response(slow, { status: r.status, headers: h });
+    };
+  }, DOOR);
+  await p.goto(`${ORIGIN}/surfaces/bview.html`, { waitUntil: 'domcontentloaded' });
+  await watch(p, A1);
+  await p.waitForFunction(() => {
+    const g = document.getElementById('got');
+    const v = document.getElementById('v');
+    const bar = document.getElementById('pg') && !document.getElementById('pg').hidden;
+    return (v.videoWidth > 0 && bar) || (g && /[1-9]\d* MB/.test(g.textContent) && bar);
+  }, null, { timeout: 60000, polling: 50 });
+  let mid = await p.evaluate(() => ({
+    w: document.getElementById('v').videoWidth,
+    bar: !document.getElementById('pg').hidden,
+    got: document.getElementById('got').textContent,
+    src: document.getElementById('v').currentSrc,
+  }));
+  assert.equal(mid.bar, true, 'download bar still up while /stream bytes arrive');
+  assert.match(mid.got, /^\d+ MB$/, 'counter moving before settle');
+  if (await hasCodec(p)) {
+    if (mid.w === 0) {
+      await p.waitForFunction(() => document.getElementById('v').videoWidth > 0 && !document.getElementById('pg').hidden, null, { timeout: 20000 });
+      mid = await p.evaluate(() => ({
+        w: document.getElementById('v').videoWidth,
+        bar: !document.getElementById('pg').hidden,
+        got: document.getElementById('got').textContent,
+        src: document.getElementById('v').currentSrc,
+      }));
+    }
+    assert.equal(mid.w, 720, 'first frame while /stream still dripping');
+    assert.match(mid.src, /^blob:/);
+    assert.equal(mid.bar, true, 'still downloading after early paint');
+  }
+  const s = await settles(p, done, 120000);
+  if (await hasCodec(p)) { assert.equal(s.fail, false); assert.equal(s.w, 720); assert.match(s.src, /^blob:/); await plays(p); }
+  assert.equal(hits.json.length, 0, 'envelope never fetched');
   assert.deepEqual(hits.stray, []); assert.deepEqual(errs, []);
   await ctx.close();
 });
