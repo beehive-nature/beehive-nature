@@ -113,6 +113,26 @@ body[data-reg="cypherpunk"] video{border-radius:3px}
 
   let job = 0, ctl = null, blobUrl = null, playing = 0;
   v.addEventListener('error', () => { if (playing && playing === job && pg.hidden) say('s-fail'); });
+  // Early Blob carries full moov duration but short mdat — Chrome races currentTime to the end.
+  // Hold a real playhead and clamp while the download bar is still up.
+  let keepAt = 0;
+  v.addEventListener('timeupdate', () => {
+    if (playing !== job) return;
+    if (!pg.hidden && v.buffered.length) {
+      const end = v.buffered.end(v.buffered.length - 1);
+      if (v.currentTime >= end - 0.2) {
+        try { v.pause(); v.currentTime = Math.max(0, end - 0.4); } catch {}
+        keepAt = v.currentTime;
+        return;
+      }
+    }
+    const dur = v.duration;
+    if (v.currentTime > 0.05 && !(dur > 0 && v.currentTime > dur - 0.75)) keepAt = v.currentTime;
+  });
+  v.addEventListener('ended', () => {
+    if (playing !== job || pg.hidden) return;
+    try { v.pause(); if (keepAt > 0) v.currentTime = keepAt; } catch {}
+  });
   const b64 = typeof Uint8Array.fromBase64 === 'function' ? s => Uint8Array.fromBase64(s)
     : s => { const t = atob(s), u = new Uint8Array(t.length); for (let i = 0; i < t.length; i++) u[i] = t.charCodeAt(i); return u; };
   const kind = u => u.length < 8 ? '' : u[4] === 0x66 && u[5] === 0x74 && u[6] === 0x79 && u[7] === 0x70 ? 'video/mp4'
@@ -157,19 +177,30 @@ body[data-reg="cypherpunk"] video{border-radius:3px}
   };
   // Shared early paint: contiguous snap once moov + EARLY_MDAT are in hand.
   async function flushEarlyPaint(parts, bytes, state, my) {
-    if (state.early || my !== job || bytes < 32) return;
+    if (my !== job || bytes < 32) return;
     const prefix = prefixOf(parts, bytes, Math.min(bytes, (512 << 10) + EARLY_MDAT));
     const me = moovEnd(prefix);
     // Need a solid early mdat (256 KiB) so the decoder does not MEDIA_ERR_DECODE on a stub slice.
     if (me <= 0 || bytes < me + EARLY_MDAT) return;
     state.mime = kind(prefix);
     if (!state.mime) return;
+    // First paint, or refresh every 2 MiB so the playable mdat keeps ahead of the playhead.
+    const UPGRADE = 2 << 20;
+    if (state.early && bytes - (state.paintedAt || 0) < UPGRADE) return;
     const snap = prefixOf(parts, bytes, bytes);
+    const tHold = state.early ? (keepAt || 0) : 0;
     const ok = await paintBlob(new Blob([snap], { type: state.mime }), BLOB_WAIT);
     if (my === job && ok && v.videoWidth > 0) {
       state.early = true;
-      playing = my; say(null); await goSound(my);
-    } else if (my === job) {
+      state.paintedAt = bytes;
+      if (tHold > 0) {
+        try { v.currentTime = tHold; } catch {}
+        keepAt = tHold;
+      }
+      playing = my; say(null);
+      if (!state.sounded) { state.sounded = true; await goSound(my); }
+      else { try { await v.play(); } catch {} }
+    } else if (my === job && !state.early) {
       frameGen++;
       v.removeAttribute('src'); v.load();
     }
@@ -181,12 +212,17 @@ body[data-reg="cypherpunk"] video{border-radius:3px}
     // (do not fall through and re-download the same file as base64).
     if (!state.mime) return false;
     if (my !== job) return true;
-    const t0 = v.currentTime || 0;
+    let t0 = keepAt || v.currentTime || 0;
+    if (v.duration && t0 > v.duration - 1) t0 = keepAt || 0;
     const full = new Blob(parts, { type: state.mime });
     await cachePut(a, full);
     if (playing === my) {
       const ok = await paintBlob(full, BLOB_WAIT);
-      if (ok) { try { v.currentTime = t0; } catch {} }
+      if (ok) {
+        try { v.currentTime = t0; } catch {}
+        keepAt = t0;
+        try { await v.play(); } catch {}
+      }
       say(null);
       return true;
     }
@@ -320,7 +356,7 @@ body[data-reg="cypherpunk"] video{border-radius:3px}
     const signal = ctl.signal;
     if (blobUrl) { URL.revokeObjectURL(blobUrl); blobUrl = null; }
     const busy = on => { pg.hidden = $('got').hidden = !on; };
-    busy(false); pg.value = 0; $('got').textContent = ''; playing = 0;
+    busy(false); pg.value = 0; $('got').textContent = ''; playing = 0; keepAt = 0;
     if (!a) { $('out').hidden = true; v.removeAttribute('src'); v.load(); say('s-bad'); return; }
     $('shown').textContent = 'autonomi://' + a; $('out').hidden = false; say('s-slow'); if (tap) tap.hidden = true;
     const hit = await cacheGet(a);
