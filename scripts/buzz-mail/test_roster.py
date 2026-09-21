@@ -18,8 +18,12 @@ import roster as roster_mod  # noqa: E402
 
 class RosterTest(unittest.TestCase):
     def test_known_locals_parsed_from_sink_bytes(self):
+        # the pin follows sink.py KNOWN, the single source: main grew it
+        # 6 -> 11 while this branch was in review (19414582 bgrokbot,
+        # 1ebee3d1 bfable+bee-laborer+bopus5, df01bdee bcodexastra);
+        # reconciled 2026-09-21 onto c0ec1596
         locals_ = roster_mod.known_locals_from_sink()
-        self.assertEqual(locals_, {"claude-code", "bzcode", "bclaude", "bfuzz", "honeybee", "bqueenbee"})
+        self.assertEqual(locals_, {"bclaude", "bcodexastra", "bee-laborer", "bfable", "bfuzz", "bgrokbot", "bopus5", "bqueenbee", "bzcode", "claude-code", "honeybee"})
 
     def test_load_matches_known_exactly(self):
         resolved = roster_mod.load()
