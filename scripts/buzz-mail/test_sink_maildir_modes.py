@@ -120,6 +120,32 @@ class SinkMaildirModesTest(unittest.TestCase):
         self._deliver("bfuzz")
         self._assert_private("bfuzz")
 
+    # MAILROOT slice (2026-09-21): the root itself is enforced too. The
+    # startup mkdir lived inline in __main__ and passed no mode, so
+    # /var/mail-agents inherited the process umask (0755 under the deployed
+    # Umask=0022) — the same leak class as the mailbox dirs, one level up.
+    # The fix is prepare_mailroot(): mkdir(mode=0o700) + chmod heal, called
+    # from __main__ — named and callable so this gate exercises the real
+    # code path, not a copy of it (drift-gate law).
+    def _assert_root_private(self):
+        mode = stat.S_IMODE(os.stat(self.mailroot).st_mode)
+        self.assertEqual(mode, 0o700,
+                         f"MAILROOT mode {oct(mode)} != 0700 (umask leak at the root, aiosmtpd={AIOSMTPD_MODE})")
+
+    def test_mailroot_private_under_deployed_umask_022(self):
+        sink.prepare_mailroot()
+        self._assert_root_private()
+
+    def test_mailroot_private_under_fully_permissive_umask_000(self):
+        os.umask(0o000)
+        sink.prepare_mailroot()
+        self._assert_root_private()
+
+    def test_preexisting_wide_mailroot_healed(self):
+        os.chmod(self.mailroot, 0o755)   # today's production state: wide root
+        sink.prepare_mailroot()
+        self._assert_root_private()
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
