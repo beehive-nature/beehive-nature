@@ -1,0 +1,74 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pf2c933119a",
+ "bnr": "bnr://skaists.dev/blood/pf2c933119a",
+ "identity": {
+  "name": "Aurelia \"Fausta\" Carausia de Bretagne",
+  "lifespan": "0310–0355",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LV82-1T4"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p3ca6fc4714",
+    "name": "Marcus \"Carausius\" Aurelius Valerius",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pbbd915eca9",
+    "name": "Oriuna of Gaul",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p857f3d183e",
+    "name": "Elen Luyddog"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p16d55c393d",
+    "name": "Eudaf Hen Octavian",
+    "marriage": null
+   },
+   {
+    "id": "pf47d0aa438",
+    "name": "Eudaf Hen ap Einedd King of Gliwissig",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LV82-1T4",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

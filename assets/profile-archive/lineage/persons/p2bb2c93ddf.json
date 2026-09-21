@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p2bb2c93ddf",
+ "bnr": "bnr://skaists.dev/blood/p2bb2c93ddf",
+ "identity": {
+  "name": "Ebraucus ap Mempricius 6th King of the Britons",
+  "lifespan": "1030BC–0988BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G2HB-ND4"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pf782be1328",
+    "name": "Mempricius ap Maddan 5th King of Britain",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pf929dfb2e0",
+    "name": "Mrs Mempricius",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p43cfcb48f2",
+    "name": "King Brutus II 'Green Shield' ap Ebraucus of Britain"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p81891c99de",
+    "name": "Mrs Ebraucus",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G2HB-ND4",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

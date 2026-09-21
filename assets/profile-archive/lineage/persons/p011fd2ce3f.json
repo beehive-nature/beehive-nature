@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p011fd2ce3f",
+ "bnr": "bnr://skaists.dev/blood/p011fd2ce3f",
+ "identity": {
+  "name": "Willemptje Pieterse Wyckoff",
+  "lifespan": "1654–1693",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LTNK-CGZ"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pf4d8ee4d51",
+    "name": "Pieter Claesen Wyckoff",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pf715eb06b6",
+    "name": "Grietje Cornelis van Nes",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p876263ae2e",
+    "name": "Adrian Kenney"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p7f57513607",
+    "name": "Adriaen Pieterse Kinne",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LTNK-CGZ",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

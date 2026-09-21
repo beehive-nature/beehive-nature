@@ -1,0 +1,78 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pc29b34b6bb",
+ "bnr": "bnr://skaists.dev/blood/pc29b34b6bb",
+ "identity": {
+  "name": "John Bliss Chapman",
+  "lifespan": "1644–1712",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L2RK-6XV"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pa9fd2c27c7",
+    "name": "Robert Chapman",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p486c007b71",
+    "name": "Ann Bliss",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p848f209439",
+    "name": "Joseph Chapman"
+   },
+   {
+    "id": "p8195aff4b4",
+    "name": "Elizabeth Chapman"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pe8e90a6581",
+    "name": "Elizabeth Hawley",
+    "marriage": null
+   },
+   {
+    "id": "p188fdc4b78",
+    "name": "Elizabeth Beamont",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L2RK-6XV",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

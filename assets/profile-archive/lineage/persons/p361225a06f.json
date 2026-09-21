@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p361225a06f",
+ "bnr": "bnr://skaists.dev/blood/p361225a06f",
+ "identity": {
+  "name": "Arembert d'Aremberg",
+  "lifespan": "0487–0555",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GPFD-VSN"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p2a5f13444a",
+    "name": "Warnachaire d'Aremberg",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p5845ffd95b",
+    "name": "Flavia der Burgunden",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p01dbc79d66",
+    "name": "Delphine de Bourgogne-Thüringe-Austrasia"
+   },
+   {
+    "id": "pbee21c4b02",
+    "name": "Sigrya Menia de Bourgogne"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p342d55603f",
+    "name": "Rodelinde de Thurigne",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GPFD-VSN",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

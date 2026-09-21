@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p0ed51708b7",
+ "bnr": "bnr://skaists.dev/blood/p0ed51708b7",
+ "identity": {
+  "name": "Exilarch Haninai  of Nehar Pekkod ben Bustanai bar Adai Exilarch - Gaon of Sura",
+  "lifespan": "0628–0689",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LCRX-1N5"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p1bbbb83ed7",
+    "name": "Hananya \"Bustanai\" ben Haninai 1st Exilarch 3rd Dynasty",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pf374fa5d8d",
+    "name": "Princess Adai bint Asad ibn Hashim",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "peaa6ef2f55",
+    "name": "Natronai Ben Nehemiah Gaon Of Pumbeditha"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pa2383c3b82",
+    "name": "Haldetrude bat Hisdai Shahrijar",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LCRX-1N5",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

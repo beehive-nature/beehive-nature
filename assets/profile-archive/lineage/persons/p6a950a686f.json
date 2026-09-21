@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p6a950a686f",
+ "bnr": "bnr://skaists.dev/blood/p6a950a686f",
+ "identity": {
+  "name": "Daniel Stauffer",
+  "lifespan": "1685–1735",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PFT1-C4B"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p5939dd2b61",
+    "name": "Christen Stauffer",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p26234f0b61",
+    "name": "Maria Barbara Brubacher",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p02b0c87415",
+    "name": "Barbara Stauffer"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p3c704f038a",
+    "name": "Magdalena Krehbiel",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PFT1-C4B",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

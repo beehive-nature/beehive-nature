@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p06b2e28c64",
+ "bnr": "bnr://skaists.dev/blood/p06b2e28c64",
+ "identity": {
+  "name": "King Amon ben Manasseh",
+  "lifespan": "0680BC–0641BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LD8H-7S5"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p24f2bc5ce9",
+    "name": "Manasseh",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p37994a21e4",
+    "name": "Meshullemeth",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p7a489a4641",
+    "name": "King Josiah ben Amon"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p57548f616d",
+    "name": "Jedidah bat Adaiah",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LD8H-7S5",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

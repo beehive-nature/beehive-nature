@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pe880c9ac49",
+ "bnr": "bnr://skaists.dev/blood/pe880c9ac49",
+ "identity": {
+  "name": "Sir Thomas Alexander Ruddington Walker",
+  "lifespan": "1515–1574",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PFLV-BJ3"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p77e000cc65",
+    "name": "George Townsend Walker",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pd4ca36fe20",
+    "name": "Lady Isabella Maxwell",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pe47d2ce445",
+    "name": "Sir John Thomas Walker"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p78fad9645a",
+    "name": "Lady Alexandra Ann Gervace Knutson (Lady of Ruddington)",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PFLV-BJ3",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

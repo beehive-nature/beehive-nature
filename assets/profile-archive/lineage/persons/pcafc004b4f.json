@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pcafc004b4f",
+ "bnr": "bnr://skaists.dev/blood/pcafc004b4f",
+ "identity": {
+  "name": "Lucius Junius Rufinus Proculianus",
+  "lifespan": "0129–Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GQRJ-C3Q"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p93e2d638f9",
+    "name": "Aulus Lunius Rufi de Rome",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pad4dffbd84",
+    "name": "Triaria Vibiana Pomponia de Rome",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p26033ccb26",
+    "name": "Pomponia Arria"
+   },
+   {
+    "id": "p6dddec0433",
+    "name": "Servius Cornelius Scipio Orfitus Scipio Salvidenus Orfitus"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p0d34633591",
+    "name": "Arria Sextia Paulina",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GQRJ-C3Q",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

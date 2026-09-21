@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pcfb5a39b49",
+ "bnr": "bnr://skaists.dev/blood/pcfb5a39b49",
+ "identity": {
+  "name": "Catheloys Des Rois Pecheurs",
+  "lifespan": "0165–0213",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "P6XP-79Q"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pe4c0925075",
+    "name": "Aminbab TINTAGEL",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p567fa84568",
+    "name": "Queen of the East Franks Eurgen verch Lleiffer Mawr",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pbaa3403886",
+    "name": "Marcus DE BRETAGNE"
+   },
+   {
+    "id": "p9aebe08c62",
+    "name": "Godard Valardius of The Ménappes de Morinie"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p04e5685636",
+    "name": "Octavius de Menapie, King of the Morini",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/P6XP-79Q",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

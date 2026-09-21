@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p08e9f1231b",
+ "bnr": "bnr://skaists.dev/blood/p08e9f1231b",
+ "identity": {
+  "name": "Abir ibn Shalikh",
+  "lifespan": "2391BC–1417BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LH6W-CHL"
+  }
+ ],
+ "evidence": {
+  "era": "recorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "recorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p17fd823540",
+    "name": "Hazrat Shalikh ibn Arfakhsad 5th Prophet of Islam",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p3edc5bb854",
+    "name": "Muak bat Cainán ibn Arfakhsad",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p85f3e1a7c2",
+    "name": "Yaqtan ibn `Abir"
+   },
+   {
+    "id": "p26d1cbe7c6",
+    "name": "Falikh ibn Abir , King of Babylon"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pa4e312666f",
+    "name": "Azurad bint Namrūd",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LH6W-CHL",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

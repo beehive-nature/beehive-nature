@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pedcb427d72",
+ "bnr": "bnr://skaists.dev/blood/pedcb427d72",
+ "identity": {
+  "name": "Rohese Trussebut",
+  "lifespan": "1151–1196",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G9LB-N8G"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p855da2e0b8",
+    "name": "William Trussebut the younger",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p7b0e33263b",
+    "name": "Albreda de Harcourt",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pc34a7c0bbe",
+    "name": "Robert de Ros 4th Baron Hamlake"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p6044b7a66d",
+    "name": "Everard de Ros",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G9LB-N8G",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

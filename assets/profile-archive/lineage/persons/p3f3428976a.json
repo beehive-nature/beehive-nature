@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p3f3428976a",
+ "bnr": "bnr://skaists.dev/blood/p3f3428976a",
+ "identity": {
+  "name": "Aube Ermengarde D'ORLEANS Abbess Of Sauxillanges",
+  "lifespan": "0865–0893",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G68W-NSW"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pd716590362",
+    "name": "Warin de Chalon II",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pcf9f84e2c0",
+    "name": "Alba D'Autun",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p36058eac3f",
+    "name": "Comtesse Aube d'Auvergne"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pbff7a8be5e",
+    "name": "Hector d'Auvergne",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G68W-NSW",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

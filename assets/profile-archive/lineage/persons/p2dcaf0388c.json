@@ -1,0 +1,58 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p2dcaf0388c",
+ "bnr": "bnr://skaists.dev/blood/p2dcaf0388c",
+ "identity": {
+  "name": "Pachouych ben Pharnavaz II, King of Arme-Supria",
+  "lifespan": "–0631BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GQSL-SFL"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p4b8791ee44",
+    "name": "Pharnavaz II ben Hratchia, King of Arme-Supria",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p61c89fcf66",
+    "name": "Kornak ben Pachouych, King of Arme-Supria"
+   }
+  ],
+  "spouses": []
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GQSL-SFL",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

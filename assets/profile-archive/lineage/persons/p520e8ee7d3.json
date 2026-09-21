@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p520e8ee7d3",
+ "bnr": "bnr://skaists.dev/blood/p520e8ee7d3",
+ "identity": {
+  "name": "Cateryne Philpott",
+  "lifespan": "1456–1521",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LBW2-LV3"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p2e1cb874ac",
+    "name": "Sir Richard Milwarde Philpott",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pbed3044af2",
+    "name": "Elizabeth Maria Longe",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p16b26862fe",
+    "name": "Robert Millard"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pd07513207b",
+    "name": "Richard Phillpott Milward",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LBW2-LV3",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

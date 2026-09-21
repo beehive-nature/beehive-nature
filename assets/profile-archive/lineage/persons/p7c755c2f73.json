@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p7c755c2f73",
+ "bnr": "bnr://skaists.dev/blood/p7c755c2f73",
+ "identity": {
+  "name": "Margaret Friar",
+  "lifespan": "1598–1668",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "KNQW-QXZ"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p7e3a1bda0d",
+    "name": "Walter Friar",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p1154a50337",
+    "name": "Grace Mullins",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p8fcc355b0e",
+    "name": "Thomas Gardner Jr."
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p9e107d80cc",
+    "name": "Thomas Gardner",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/KNQW-QXZ",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

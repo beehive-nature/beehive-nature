@@ -1,0 +1,71 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p269ec340ef",
+ "bnr": "bnr://skaists.dev/blood/p269ec340ef",
+ "identity": {
+  "name": "Hugh de Giffard",
+  "lifespan": "1195–1246",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G9ZH-BQX"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "GXQJ-RVH",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "GXQJ-KQ9",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p403a03fb39",
+    "name": "Maud Matilda de Giffard"
+   },
+   {
+    "id": "p5775874441",
+    "name": "Alice de Giffard"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p0902196410",
+    "name": "Sybil de Cormeilles",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G9ZH-BQX",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

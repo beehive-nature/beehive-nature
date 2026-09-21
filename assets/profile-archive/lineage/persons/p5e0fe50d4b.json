@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p5e0fe50d4b",
+ "bnr": "bnr://skaists.dev/blood/p5e0fe50d4b",
+ "identity": {
+  "name": "Shepseskaf 7th Pharaoh of the 4th Dynasty",
+  "lifespan": "2526BC–2498BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LRXC-TX9"
+  }
+ ],
+ "evidence": {
+  "era": "recorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "recorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p8ac5da4b76",
+    "name": "Menkaura Menkaure, Mykerinos, Mycerinus 6th Pharaoh of the 4th Dynasty",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p0599a75afa",
+    "name": "Rekhetre , Queen of Egypt",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p78dd213feb",
+    "name": "Khamaat"
+   },
+   {
+    "id": "p8143dea3af",
+    "name": "Bunefer , Queen of Egypt"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p6456ea8517",
+    "name": "Sekhemre bat Menkaure",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LRXC-TX9",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

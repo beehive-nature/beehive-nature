@@ -1,0 +1,95 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pbb29dbf013",
+ "bnr": "bnr://skaists.dev/blood/pbb29dbf013",
+ "identity": {
+  "name": "Cain Qabil ben Adam",
+  "lifespan": "3999BC–3074BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L6G6-PQZ"
+  }
+ ],
+ "evidence": {
+  "era": "recorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "recorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pd0ff9cc915",
+    "name": "Adam ben Elohim 1st Patriarch",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p65ca477791",
+    "name": "Eve bat Elohim",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p7a510a6f20",
+    "name": "Enoch ben Cain"
+   },
+   {
+    "id": "p4440eaacd0",
+    "name": "Enochs Wife"
+   },
+   {
+    "id": "pc3e113b2e1",
+    "name": "Bart ibn Qābīl"
+   },
+   {
+    "id": "paa9f36d462",
+    "name": "Beth bint Qābīl"
+   },
+   {
+    "id": "p951fc462be",
+    "name": "Hanoch ibn Qābīl"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pf13c37cd0b",
+    "name": "'Âwân bint Adam",
+    "marriage": null
+   },
+   {
+    "id": "p330393ddf2",
+    "name": "Iqlimah bint Adam",
+    "marriage": null
+   },
+   {
+    "id": "p34f42c672a",
+    "name": "Jumella  Balbira bint-Adam",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L6G6-PQZ",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pf123da0a12",
+ "bnr": "bnr://skaists.dev/blood/pf123da0a12",
+ "identity": {
+  "name": "Reina Consorte Cleópatra I Syra de Egipto Princesa de Siria",
+  "lifespan": "0218BC–0176BC",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "9CZ5-88Z"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pcc1cc25880",
+    "name": "Antiochus III. \"The Great,\" Megas Basileus of the Seleucid Empire",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p92249b9d96",
+    "name": "Reina Laódice Mitridátida",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p712dbee451",
+    "name": "Ptolemy VIII Euergetes II, Pharaoh of Egypt"
+   },
+   {
+    "id": "p3a307bfbca",
+    "name": "Cleopatra II Philometor Soteira"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pb554277b9c",
+    "name": "Ptolemy V Epiphanes, Pharaoh of Egypt",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/9CZ5-88Z",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

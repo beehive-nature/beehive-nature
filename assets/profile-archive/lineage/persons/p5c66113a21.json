@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p5c66113a21",
+ "bnr": "bnr://skaists.dev/blood/p5c66113a21",
+ "identity": {
+  "name": "Sir John Millard",
+  "lifespan": "1515–1602",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "P793-WYY"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pea36d83533",
+    "name": "John Millard",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p971385259c",
+    "name": "Katherine Countess Bridgewater Howard Mylewarde",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pca55960330",
+    "name": "Joane Millard"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pe2b276ca32",
+    "name": "Isabella Zouche",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/P793-WYY",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

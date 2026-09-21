@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p35d352374d",
+ "bnr": "bnr://skaists.dev/blood/p35d352374d",
+ "identity": {
+  "name": "Saint Eucherius",
+  "lifespan": "0380–0449",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PQST-Y1D"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p59fc85e5cc",
+    "name": "Valerianus de Lyon",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pedc06c9c8b",
+    "name": "Thermentia Major de Rome",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p7a080f12a2",
+    "name": "Tulia de Lyon"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p8e3f846c4b",
+    "name": "Galla Neratia Lugduni",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PQST-Y1D",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

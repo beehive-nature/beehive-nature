@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pdea312e695",
+ "bnr": "bnr://skaists.dev/blood/pdea312e695",
+ "identity": {
+  "name": "Æneas, son of Anchises",
+  "lifespan": "1220BC–1175BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PC4C-T9C"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pe36d3db288",
+    "name": "TROJAN GENERATIONS",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p19aa45b020",
+    "name": "Venus Dios Thygater",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p6e85dd6c26",
+    "name": "King Ascanius Euryleon de Lavinium"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pa8cb1209e1",
+    "name": "Príncesa Creusa de Tróia",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PC4C-T9C",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

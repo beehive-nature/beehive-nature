@@ -1,0 +1,68 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p37fe3d5bc0",
+ "bnr": "bnr://skaists.dev/blood/p37fe3d5bc0",
+ "identity": {
+  "name": "Johanna Richmond Webb",
+  "lifespan": "1545–1610",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PQLY-9W7"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pc501a1b189",
+    "name": "Richmond",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pb9453ab049",
+    "name": "Lord Mayor Matthew Randall I, of Bath"
+   },
+   {
+    "id": "p5fcce20f39",
+    "name": "Isabel Ramadale"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p7c01948d6e",
+    "name": "Sir John Alfred Randall",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PQLY-9W7",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

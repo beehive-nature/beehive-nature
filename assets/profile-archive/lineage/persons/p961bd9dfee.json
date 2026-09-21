@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p961bd9dfee",
+ "bnr": "bnr://skaists.dev/blood/p961bd9dfee",
+ "identity": {
+  "name": "Mary Polly Norris",
+  "lifespan": "1783–1832",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "9WLJ-4QS"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pcac6ff852e",
+    "name": "Thomas Norris Jr",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pc66bdb1752",
+    "name": "Jane Bowers",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pf562f50cb9",
+    "name": "John Lowry"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pa1d565ec62",
+    "name": "William Lowry",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/9WLJ-4QS",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

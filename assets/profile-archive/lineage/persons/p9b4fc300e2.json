@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p9b4fc300e2",
+ "bnr": "bnr://skaists.dev/blood/p9b4fc300e2",
+ "identity": {
+  "name": "Joan of Lancaster",
+  "lifespan": "1312–1345",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LT5N-7F7"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p6155e770de",
+    "name": "Henry of Lancaster",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "paaeaee899d",
+    "name": "Matilda de Chaworth",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pbc8c1054b5",
+    "name": "Eleanor de Mowbray"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pe23ea591fc",
+    "name": "John de Mowbray",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LT5N-7F7",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

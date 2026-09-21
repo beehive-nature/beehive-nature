@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p3c98cf3c41",
+ "bnr": "bnr://skaists.dev/blood/p3c98cf3c41",
+ "identity": {
+  "name": "Mary Hodgetts",
+  "lifespan": "1569–1632",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LHLH-5T8"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p8954b238de",
+    "name": "William Preston Hodgetts",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p60f3ff1539",
+    "name": "Eleanor Persall",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pcc01c10e12",
+    "name": "Margery Baker"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pc1c7c4493f",
+    "name": "Nicholas Baker",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LHLH-5T8",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

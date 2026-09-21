@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pf562f50cb9",
+ "bnr": "bnr://skaists.dev/blood/pf562f50cb9",
+ "identity": {
+  "name": "John Lowry",
+  "lifespan": "1799–1867",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "KWJT-VHB"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pa1d565ec62",
+    "name": "William Lowry",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p961bd9dfee",
+    "name": "Mary Polly Norris",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p77b0ff1f6e",
+    "name": "Abner Lowry"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p7a4e5d9e9e",
+    "name": "Mary Wilcox",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/KWJT-VHB",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

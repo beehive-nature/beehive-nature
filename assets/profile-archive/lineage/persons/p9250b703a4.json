@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p9250b703a4",
+ "bnr": "bnr://skaists.dev/blood/p9250b703a4",
+ "identity": {
+  "name": "Carausius II Dit Flavius Carausius DE BRETAGNE",
+  "lifespan": "0290–0358",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G1YK-XYH"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pb948d90557",
+    "name": "Genseris Dit De Bretagne DE MENAPIE",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p6845042c1e",
+    "name": "Sig.ra. Genseris Die de Bretagne-Menapie",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p1dcc1a76cd",
+    "name": "Valeria Fausta Maximina"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pe04240872b",
+    "name": "Oriuna DES BRITONS",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G1YK-XYH",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

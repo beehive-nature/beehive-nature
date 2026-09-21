@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p67a657009b",
+ "bnr": "bnr://skaists.dev/blood/p67a657009b",
+ "identity": {
+  "name": "Edouard Poingdestre",
+  "lifespan": "1545–Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LKKR-TT1"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p571011843d",
+    "name": "Gilles Poingdestre",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pc774293973",
+    "name": "Mrs Gilles Poingdestre",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pc0f9f8b673",
+    "name": "Sara Poingdestre"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p9c46abe220",
+    "name": "Mrs Poingdestre",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LKKR-TT1",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

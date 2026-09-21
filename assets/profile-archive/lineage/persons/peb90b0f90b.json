@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "peb90b0f90b",
+ "bnr": "bnr://skaists.dev/blood/peb90b0f90b",
+ "identity": {
+  "name": "Shelah bint Urghuwa",
+  "lifespan": "2175BC–1951BC",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LV6S-GZC"
+  }
+ ],
+ "evidence": {
+  "era": "recorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "recorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pf9cf787d97",
+    "name": "Urghuwa ibn Falikh ibn Abir",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p8e19f8e30b",
+    "name": "Ora bint Ur of Babylon",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p990dba8941",
+    "name": "Nestag ibn Heraclim"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pa5b86c67ac",
+    "name": "Heraclim ibn Falikh ibn Abir",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LV6S-GZC",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

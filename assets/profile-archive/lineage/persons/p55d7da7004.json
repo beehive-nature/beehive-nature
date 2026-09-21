@@ -1,0 +1,58 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p55d7da7004",
+ "bnr": "bnr://skaists.dev/blood/p55d7da7004",
+ "identity": {
+  "name": "Cyngen ap Dyfnwal Hen",
+  "lifespan": "1030BC–0940BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GBNR-7MN"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p661c68cdc9",
+    "name": "Duke Dyfnwal Hen ap Gorwynyawn of Cornwall",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p235bda06c9",
+    "name": "Asser ap Cyngen 6th Duke of Cornwall"
+   }
+  ],
+  "spouses": []
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GBNR-7MN",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

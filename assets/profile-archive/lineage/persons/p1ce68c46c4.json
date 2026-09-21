@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p1ce68c46c4",
+ "bnr": "bnr://skaists.dev/blood/p1ce68c46c4",
+ "identity": {
+  "name": "Ariobarzanes I King of Cappadocia",
+  "lifespan": "0120BC–0062BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GJJ8-7SX"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pbe323ce904",
+    "name": "King Ariobarzanes of Cappadocia I",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p27af9a42bb",
+    "name": "Reina Athenais bat Mithradates V de Capadocia",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p03ecd92997",
+    "name": "Reina Isias Philostorgos de Commagene"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p8126149b29",
+    "name": "Athenais I Philostorgos",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GJJ8-7SX",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

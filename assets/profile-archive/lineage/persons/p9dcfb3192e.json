@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p9dcfb3192e",
+ "bnr": "bnr://skaists.dev/blood/p9dcfb3192e",
+ "identity": {
+  "name": "Asshur ben Shem",
+  "lifespan": "2338BC–2220BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LD5M-24H"
+  }
+ ],
+ "evidence": {
+  "era": "recorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "recorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pc8176195c1",
+    "name": "Shem ben Noah",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p62e400b303",
+    "name": "Sedeqetelebab bint Eliakim",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p357e0c6834",
+    "name": "Asshar bint Assur"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p6ae5f66411",
+    "name": "Mullissu Ninlil bint Japheth",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LD5M-24H",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pcb8e9195df",
+ "bnr": "bnr://skaists.dev/blood/pcb8e9195df",
+ "identity": {
+  "name": "Jane Gainor Wilson",
+  "lifespan": "1665–1740",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LC7G-CHS"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p3e640003e6",
+    "name": "George Wilson",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p56d42e5d7d",
+    "name": "Mary Irvine Gainer",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p55caa6cf85",
+    "name": "Jane Roberts"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pb654e17fa6",
+    "name": "John Roberts Sr",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LC7G-CHS",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

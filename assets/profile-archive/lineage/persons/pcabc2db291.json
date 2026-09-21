@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pcabc2db291",
+ "bnr": "bnr://skaists.dev/blood/pcabc2db291",
+ "identity": {
+  "name": "Hugues de Bassigny II",
+  "lifespan": "0849–0914",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G75D-TGK"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pfa126b229a",
+    "name": "Gosselin de Meulan I",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pc24899ab60",
+    "name": "de Bassy",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p8941c6c465",
+    "name": "Agnès Adélaïde de Bassingny"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pb932f5615f",
+    "name": "Gertrude de Lassois",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G75D-TGK",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

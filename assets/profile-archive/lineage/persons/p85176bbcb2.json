@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p85176bbcb2",
+ "bnr": "bnr://skaists.dev/blood/p85176bbcb2",
+ "identity": {
+  "name": "Zinca GOLESCU",
+  "lifespan": "1574–Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GXG6-PYV"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pdb9d5bbb5e",
+    "name": "Albu Golescu",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p150d1c5dc1",
+    "name": "Basaraba Irina Princess of Wallachia",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pe362167df4",
+    "name": "Margaret Moffet"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p2fa775f2de",
+    "name": "Robert Hamilton",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GXG6-PYV",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

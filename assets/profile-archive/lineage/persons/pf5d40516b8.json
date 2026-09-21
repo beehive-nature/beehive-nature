@@ -1,0 +1,84 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pf5d40516b8",
+ "bnr": "bnr://skaists.dev/blood/pf5d40516b8",
+ "identity": {
+  "name": "Ragnar Sigurdsson",
+  "lifespan": "0740–0845",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "M8WZ-XZY"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "tradition-entered",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pd670359145",
+    "name": "Sigurd Ring Randversson",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p2e855cde8a",
+    "name": "Queen Alfhild Ingebjorg Gandolfsdottir",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p114923a3fe",
+    "name": "Alof Ragnarsdottír"
+   },
+   {
+    "id": "p403cc2e7f0",
+    "name": "Björn Ragnarsson"
+   },
+   {
+    "id": "ovl-sigurd-snake-eye",
+    "name": "Sigurd Snake-in-the-Eye (Sigurd Ragnarsson)"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pd09f426e79",
+    "name": "Queen Thora Herraudrsdottír Of Sweden",
+    "marriage": null
+   },
+   {
+    "id": "p8bfb696a4b",
+    "name": "Queen Aslaug Sigurdsdottir Of Norway, Sweden And Denmark",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/M8WZ-XZY",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": {
+   "pack": "evidence/ragnar-lodbrok.json"
+  },
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": true,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

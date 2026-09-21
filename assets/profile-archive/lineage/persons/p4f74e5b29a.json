@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p4f74e5b29a",
+ "bnr": "bnr://skaists.dev/blood/p4f74e5b29a",
+ "identity": {
+  "name": "Silence Brooks",
+  "lifespan": "1707–1780",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LZNZ-7XX"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p34b4e55667",
+    "name": "Joseph Brooks",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p1dfcb287c5",
+    "name": "Lydia Warner",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pfe9faf6324",
+    "name": "John Grandey Sr."
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p405b294def",
+    "name": "Edmund Grandy",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LZNZ-7XX",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,78 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p72fa6e29e4",
+ "bnr": "bnr://skaists.dev/blood/p72fa6e29e4",
+ "identity": {
+  "name": "Queen Gladys The Elder ferch Eurgen",
+  "lifespan": "0125–0193",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "9C46-3RB"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pf40fa9bf8d",
+    "name": "King Eugein ap Marius of Siluria",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pada33450c8",
+    "name": "Eurgen ap Marius Meurig",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p567fa84568",
+    "name": "Queen of the East Franks Eurgen verch Lleiffer Mawr"
+   },
+   {
+    "id": "pf1b1a1dbb7",
+    "name": "Gladys The Younger verch Lleuver Mawr"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pa31c3027cb",
+    "name": "Saint Lucius Lleuver Mawr Ap Coilus Blessed Sovereign",
+    "marriage": null
+   },
+   {
+    "id": "p7367d8de97",
+    "name": "Lleiffer Mawr ap Coel I King of The Britons",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/9C46-3RB",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

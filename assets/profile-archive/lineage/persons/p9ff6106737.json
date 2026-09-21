@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p9ff6106737",
+ "bnr": "bnr://skaists.dev/blood/p9ff6106737",
+ "identity": {
+  "name": "High Priest Jehoiada ben Amariah",
+  "lifespan": "0966BC–0836BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "94BJ-RNP"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p680ecc471d",
+    "name": "Amariah ibn Ǎzaryāh I",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p4af1e1be8f",
+    "name": "Dama Azariah",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p0e98947abb",
+    "name": "Joaddan"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p4071c5f875",
+    "name": "Princess Jehosheba bat Jehoram",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/94BJ-RNP",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

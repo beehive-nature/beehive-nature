@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p51324cb1f9",
+ "bnr": "bnr://skaists.dev/blood/p51324cb1f9",
+ "identity": {
+  "name": "Ἀρχίδαμος",
+  "lifespan": "0400BC–0338BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PZL2-9T1"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pbfcb901a6b",
+    "name": "King Agesilaus II of Sparta",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pf031d8c7ff",
+    "name": "Cléora de Esparta",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p4119b09ae5",
+    "name": "Εὐδαμίδας"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pa2bf8a557b",
+    "name": "Deinicha",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PZL2-9T1",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

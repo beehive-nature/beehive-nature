@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p7d39efed14",
+ "bnr": "bnr://skaists.dev/blood/p7d39efed14",
+ "identity": {
+  "name": "George West Davis",
+  "lifespan": "1815–1881",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LZN9-1L5"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p4239613b8b",
+    "name": "Benjamin Davis",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pc9eaf32fd2",
+    "name": "'Sally' Sarah Burdick",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p2d8a59eeca",
+    "name": "Harrison Edgar Davis"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p7530442f3c",
+    "name": "Zilphia Ann Williams",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LZN9-1L5",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

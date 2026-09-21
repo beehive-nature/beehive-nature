@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p356a952243",
+ "bnr": "bnr://skaists.dev/blood/p356a952243",
+ "identity": {
+  "name": "Elisabeth Margaret Brems",
+  "lifespan": "1528–1586",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LBP6-6YC"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p6f6e08c48f",
+    "name": "Thomas Herman Jacob BREMS",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pe146a7747b",
+    "name": "Elisabetha Maria LEIS",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p49433cf0c2",
+    "name": "Jacob Anspach II"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pcbd98dc303",
+    "name": "Jacob Anspach",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LBP6-6YC",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

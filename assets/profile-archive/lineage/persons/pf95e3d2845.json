@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pf95e3d2845",
+ "bnr": "bnr://skaists.dev/blood/pf95e3d2845",
+ "identity": {
+  "name": "King Clodomir IV Magnus of the Salian Franks",
+  "lifespan": "0104–0166",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L65M-H2T"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "ped378157b9",
+    "name": "King Marcomir IV de Sicambres of The Franks",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p630c483e2b",
+    "name": "Queen Athilda De Britains",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p3e7821aaed",
+    "name": "King Farabert Magnus de Toxandrie"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p16f628826e",
+    "name": "Princess Hafilda de Moselle Queens of the Franks of the Rugij",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L65M-H2T",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

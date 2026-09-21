@@ -1,0 +1,71 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p74c286a7dd",
+ "bnr": "bnr://skaists.dev/blood/p74c286a7dd",
+ "identity": {
+  "name": "Queen Snotra Skafnortungsdatter",
+  "lifespan": "0596–Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GR22-JVB"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "GQHN-17X",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "LDHP-DVD",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p602056d902",
+    "name": "Gauthildr Gautreksdottir"
+   },
+   {
+    "id": "pe57fa4f816",
+    "name": "King Gautrek Gautreksson"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p92c45b2ee5",
+    "name": "Petty King Gauti Gautsson",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GR22-JVB",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

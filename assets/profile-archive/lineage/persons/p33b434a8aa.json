@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p33b434a8aa",
+ "bnr": "bnr://skaists.dev/blood/p33b434a8aa",
+ "identity": {
+  "name": "Thomas Knight II",
+  "lifespan": "1500–1553",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GN3L-ZD1"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p65dcd96b05",
+    "name": "Thomas \"The Bocher\" Knight of Forncett",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p24618a0712",
+    "name": "Margery de Wadker of Norfolk",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p4d4e45edb8",
+    "name": "Thomas Smythe Knight III, Vicar of Witney"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pa0e4e7f3cd",
+    "name": "Lady Agnes de Legh",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GN3L-ZD1",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

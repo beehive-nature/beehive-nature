@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p8fb325eaf4",
+ "bnr": "bnr://skaists.dev/blood/p8fb325eaf4",
+ "identity": {
+  "name": "Walter de Clare",
+  "lifespan": "1124–1198",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LBHJ-3FQ"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p2126ee6a7e",
+    "name": "Robert fitz Richard de Clare",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p7db30b708e",
+    "name": "Maud de Senlis",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pa695cd705e",
+    "name": "Lord Robert FitzWalter 3rd Lord Fitzwalter of Dunmow"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p9df3ef6177",
+    "name": "Mathilde de Lucy",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LBHJ-3FQ",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

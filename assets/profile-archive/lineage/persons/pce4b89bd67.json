@@ -1,0 +1,64 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pce4b89bd67",
+ "bnr": "bnr://skaists.dev/blood/pce4b89bd67",
+ "identity": {
+  "name": "The Younger Lady (Nebet-Ta Shepset-en-Amun) Royal Lady of the Two Lands, Great King's Daughter of the 18th Dynasty of Egypt The Younger Lady Nebet'Ta Shepset'en'Amun Royal Lady of the Eighteenth Dynasty",
+  "lifespan": "1350BC–1325BC",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PZXC-31Z"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pcacf8b3b7e",
+    "name": "Amenhotep III Nebma'atre' 9th Pharaoh 18th Dynasty",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p16a678c3db",
+    "name": "Egi Tiye d'Ugarit Nubie",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [],
+  "spouses": [
+   {
+    "id": "p36daab3857",
+    "name": "Akhenaton Amenhotep  IV, 10th Pharaoh, 18th Dynasty",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PZXC-31Z",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

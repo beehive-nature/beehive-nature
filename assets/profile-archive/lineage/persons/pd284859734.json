@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pd284859734",
+ "bnr": "bnr://skaists.dev/blood/pd284859734",
+ "identity": {
+  "name": "Robert Bird",
+  "lifespan": "1561–1622",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LYCN-BBM"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "peaf88b3b12",
+    "name": "Richard Bird",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p571b0bd2e8",
+    "name": "Joanna Mitchell",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p05e233649d",
+    "name": "Dorothy Bird"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pba60aa0b35",
+    "name": "Amy Marsead",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LYCN-BBM",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

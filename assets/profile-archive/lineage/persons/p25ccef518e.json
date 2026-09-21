@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p25ccef518e",
+ "bnr": "bnr://skaists.dev/blood/p25ccef518e",
+ "identity": {
+  "name": "Elizabeth Canfield",
+  "lifespan": "1660–1730",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "MM6P-5GM"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p5630134621",
+    "name": "Thomas Canfield",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pcdafc5d839",
+    "name": "Phebe Crane",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p07ad33c86b",
+    "name": "Martha Baldwin"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p223d080a9e",
+    "name": "Theophilus Baldwin I",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/MM6P-5GM",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

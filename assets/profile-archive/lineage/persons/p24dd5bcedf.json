@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p24dd5bcedf",
+ "bnr": "bnr://skaists.dev/blood/p24dd5bcedf",
+ "identity": {
+  "name": "Roger de Carminow II",
+  "lifespan": "1210–1284",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "9HT1-K1H"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p3d7f927ad5",
+    "name": "Robert Carminow",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pd2c7a9d436",
+    "name": "Margaret de Trenoweth",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p4cbf7b4979",
+    "name": "Sir Roger de Carminow Lord of Trenoweth"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pf3db997c8b",
+    "name": "Sarah de Hornicote",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/9HT1-K1H",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

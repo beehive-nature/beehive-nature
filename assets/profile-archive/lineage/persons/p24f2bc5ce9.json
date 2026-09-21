@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p24f2bc5ce9",
+ "bnr": "bnr://skaists.dev/blood/p24f2bc5ce9",
+ "identity": {
+  "name": "Manasseh",
+  "lifespan": "0709BC–0643BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PFN1-QGV"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p0573f59518",
+    "name": "Hezekiah ben Ahaz 12th King of Judah",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p861c31750a",
+    "name": "Hephzibah",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p06b2e28c64",
+    "name": "King Amon ben Manasseh"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p37994a21e4",
+    "name": "Meshullemeth",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PFN1-QGV",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p08ea963011",
+ "bnr": "bnr://skaists.dev/blood/p08ea963011",
+ "identity": {
+  "name": "Phillippa Wyck",
+  "lifespan": "1345–Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L4H9-4SV"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "G7VH-QBY",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "KN4P-V5V",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pac9e25cee3",
+    "name": "Ralph de Reskymer"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p1eccc9a2a1",
+    "name": "John de Reskymer",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L4H9-4SV",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

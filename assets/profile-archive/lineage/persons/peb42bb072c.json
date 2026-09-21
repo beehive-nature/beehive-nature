@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "peb42bb072c",
+ "bnr": "bnr://skaists.dev/blood/peb42bb072c",
+ "identity": {
+  "name": "Hanun ben Nahash, King of Ammon",
+  "lifespan": "1030BC–0950BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LKYT-PJH"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p5e985629a3",
+    "name": "Nahash , King of Ammon",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p1efc9616c1",
+    "name": "Mrs Nahash King Of Amon",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p3bb79bf1a4",
+    "name": "Naamah bat Zelek, \"The Ammonite\""
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p6e8f864f2a",
+    "name": "Hanun Queen of Amon",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LKYT-PJH",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

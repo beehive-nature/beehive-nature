@@ -1,0 +1,74 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p0fc13f89b9",
+ "bnr": "bnr://skaists.dev/blood/p0fc13f89b9",
+ "identity": {
+  "name": "Suris ben Adam",
+  "lifespan": "3991BC–Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GYP6-367"
+  }
+ ],
+ "evidence": {
+  "era": "recorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "recorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p2273b271a4",
+    "name": "Adam",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pb3c62d4c7d",
+    "name": "Eve",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p23726c16dc",
+    "name": "Lectar ben Suris"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pd56c7ffea6",
+    "name": "Iectas bat Adam",
+    "marriage": null
+   },
+   {
+    "id": "p6195f8b5e5",
+    "name": "Elisara Bint-Adam",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GYP6-367",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

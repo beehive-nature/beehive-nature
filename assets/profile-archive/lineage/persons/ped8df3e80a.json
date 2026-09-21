@@ -1,0 +1,64 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "ped8df3e80a",
+ "bnr": "bnr://skaists.dev/blood/ped8df3e80a",
+ "identity": {
+  "name": "Abigail Bat Nahash The Carmelite",
+  "lifespan": "1040BC–Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L6L8-1MS"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p5e985629a3",
+    "name": "Nahash , King of Ammon",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p1efc9616c1",
+    "name": "Mrs Nahash King Of Amon",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [],
+  "spouses": [
+   {
+    "id": "p8e8870340b",
+    "name": "King David of Israel",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L6L8-1MS",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

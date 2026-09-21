@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p3183953435",
+ "bnr": "bnr://skaists.dev/blood/p3183953435",
+ "identity": {
+  "name": "Anaxandridas I of Sparta",
+  "lifespan": "Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G7T1-SKZ"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p8ccd5f51c7",
+    "name": "Theopompus of Sparta",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pc8a0d0b27e",
+    "name": "Mrs Theopompus of Sparta",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p223d8a8a3a",
+    "name": "Archidamus I of Sparta"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pcad3aa7146",
+    "name": "Mrs Anaxandridas I of Sparta",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G7T1-SKZ",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

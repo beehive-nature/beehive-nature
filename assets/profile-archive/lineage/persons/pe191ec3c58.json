@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pe191ec3c58",
+ "bnr": "bnr://skaists.dev/blood/pe191ec3c58",
+ "identity": {
+  "name": "Acilia Aviola de Rome",
+  "lifespan": "29–Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G7LT-RJQ"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p1e79c3dffe",
+    "name": "Gaius Calpurnius Acilius Aviola DE ROME",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p713d613fb0",
+    "name": "Esposa Di Roma",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pb9fd25a5a6",
+    "name": "Metilus de Rome"
+   },
+   {
+    "id": "pbb5e7bae35",
+    "name": "Metilia DE ROME-DE ROME"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p9a36e8cc53",
+    "name": "Metilus de Rome",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G7LT-RJQ",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p536da86ee8",
+ "bnr": "bnr://skaists.dev/blood/p536da86ee8",
+ "identity": {
+  "name": "Lucius Julius Libo",
+  "lifespan": "0310BC–0250BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L6FW-PZR"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pd964591575",
+    "name": "Lucius Julius Jullus VI",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p3c9484525c",
+    "name": "Caecilia Metella Balearica Minor Appius Claudius Pulcher",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p799cbb240a",
+    "name": "Lucius Julius II Caesar"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pae19d98d6d",
+    "name": "Caecilia Metella Macedonica \"Caesar\"",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L6FW-PZR",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

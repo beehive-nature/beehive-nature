@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p017ec2014a",
+ "bnr": "bnr://skaists.dev/blood/p017ec2014a",
+ "identity": {
+  "name": "King Sargon II 'Sharru-kinu' Sargonid of Assyria",
+  "lifespan": "–0705BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GC3L-49G"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p31ad5db5c9",
+    "name": "Tiglath Pilaser III",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pd54c52ad02",
+    "name": "Ashusharrat",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p28826fe0ec",
+    "name": "King Sennacherib, King of the Neo-Assyrian Empire"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pf884a8e136",
+    "name": "Athalia bar Jotham of Judah",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GC3L-49G",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

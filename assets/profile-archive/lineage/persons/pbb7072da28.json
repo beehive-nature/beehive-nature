@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pbb7072da28",
+ "bnr": "bnr://skaists.dev/blood/pbb7072da28",
+ "identity": {
+  "name": "Domitia Lucilla Calvilla Minor",
+  "lifespan": "95–0158",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L71K-47W"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pe86b461598",
+    "name": "Publius Domitius Calvisius Tullus Ruso Calvisii",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pceb49d5053",
+    "name": "Domicia Lucilla Maior DE ROME",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p48dc7a70b9",
+    "name": "Marcus Nonius Macrinus Consul of Rome"
+   },
+   {
+    "id": "p02a2813788",
+    "name": "Annia Cornificina Faustina"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p4e891366b7",
+    "name": "Marcus Nonius Mucianus Publius Delpius Peregrinus",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L71K-47W",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

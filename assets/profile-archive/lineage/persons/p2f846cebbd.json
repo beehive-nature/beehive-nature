@@ -1,0 +1,77 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p2f846cebbd",
+ "bnr": "bnr://skaists.dev/blood/p2f846cebbd",
+ "identity": {
+  "name": "Arria Plaria Vera Priscilla",
+  "lifespan": "59–0105",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G6RP-5GF"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pa43a9f46f3",
+    "name": "Lucius Arrius Plarianus Aufidius Turbo",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pf27c6b19f1",
+    "name": "Atilla Sabina de Rome",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p9c133eb34c",
+    "name": "Lucius Sergius Plautius De Rome"
+   },
+   {
+    "id": "p56dd280f36",
+    "name": "Julia Claudia"
+   },
+   {
+    "id": "p56fc761b1e",
+    "name": "Manlius Acilius Glabrio II"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pce8a44ff49",
+    "name": "Manlius Acilius Glabrio I",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G6RP-5GF",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

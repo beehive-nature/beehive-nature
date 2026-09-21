@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p32c2d5be23",
+ "bnr": "bnr://skaists.dev/blood/p32c2d5be23",
+ "identity": {
+  "name": "Bodicus König von Sachsen",
+  "lifespan": "0539–0568",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "9CS2-STD"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p020df61e4b",
+    "name": "Berthold Hulderich König von Sachsen",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p758d175de4",
+    "name": "Bertruda von Burgund",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "paf377a7c35",
+    "name": "Berthold König von Sachsen"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p85063cdef6",
+    "name": "Irmafreda of Kent",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/9CS2-STD",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

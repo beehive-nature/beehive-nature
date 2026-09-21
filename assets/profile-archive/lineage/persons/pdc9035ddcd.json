@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pdc9035ddcd",
+ "bnr": "bnr://skaists.dev/blood/pdc9035ddcd",
+ "identity": {
+  "name": "Elizabeth Wilmarth",
+  "lifespan": "1647–1709",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LT8X-JPN"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p2ac293a26c",
+    "name": "Thomas Willmarth",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p4dc44b3435",
+    "name": "Elizabeth Bliss",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p7f4aa73936",
+    "name": "David Fuller"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p2b92024b38",
+    "name": "Jonathan Fuller",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LT8X-JPN",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

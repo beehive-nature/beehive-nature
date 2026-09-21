@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p0163d915eb",
+ "bnr": "bnr://skaists.dev/blood/p0163d915eb",
+ "identity": {
+  "name": "Margaret Carminow",
+  "lifespan": "1425–1512",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LD5L-CW8"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p5c5ea1cec7",
+    "name": "Thomas Carminow of Boconnoc",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p0f9e85383b",
+    "name": "Jane Hill",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pd1720f50f5",
+    "name": "Elizabeth de Courtenay"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p6cc1670a36",
+    "name": "Sir Hugh Courtenay",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LD5L-CW8",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": true,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

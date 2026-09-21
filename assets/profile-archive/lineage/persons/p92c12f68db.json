@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p92c12f68db",
+ "bnr": "bnr://skaists.dev/blood/p92c12f68db",
+ "identity": {
+  "name": "Apame (Amastris) of DASCYLIUM",
+  "lifespan": "0360BC–0280BC",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "P4PJ-D87"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p121f65e777",
+    "name": "Sátrapa Artabazos ben Pharnabazus II de Frigia Hellespontina",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p9573952a2f",
+    "name": "Apama of Rhodes",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pac2d9edc1a",
+    "name": "Apama De Bactriane Apama Ière de Pharnakéia"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p74b7c890ce",
+    "name": "Sátrapa Spitamenes I de Bactria",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/P4PJ-D87",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pc9c2599245",
+ "bnr": "bnr://skaists.dev/blood/pc9c2599245",
+ "identity": {
+  "name": "Thomas Merwin",
+  "lifespan": "1525–1586",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "KVG8-9B7"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p34018986e3",
+    "name": "John Merwin",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p94a040e256",
+    "name": "Isabel Bartlett",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p71b4346d1c",
+    "name": "Marie Merwin"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pf4b1f3fc4b",
+    "name": "Mary Margaret Smith",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/KVG8-9B7",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

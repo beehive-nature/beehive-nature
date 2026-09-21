@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p37e3d5aaf4",
+ "bnr": "bnr://skaists.dev/blood/p37e3d5aaf4",
+ "identity": {
+  "name": "King Hutterus of the Herulii",
+  "lifespan": "40–0117",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L5D4-6CB"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pb53fcf1507",
+    "name": "King Anthyrius II of the Herulii",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p014bcf8300",
+    "name": "Marina of Jutland",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p6a2f14a896",
+    "name": "Rei Visislaw des Hérules"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p5c48054421",
+    "name": "Judith de Jutlandia",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L5D4-6CB",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

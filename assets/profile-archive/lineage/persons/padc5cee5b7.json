@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "padc5cee5b7",
+ "bnr": "bnr://skaists.dev/blood/padc5cee5b7",
+ "identity": {
+  "name": "Joan de Bodrugan",
+  "lifespan": "1284–1331",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "K8MX-JWD"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "paa6a44103c",
+    "name": "Sir Henry de Bodrugan",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p68dceb1a4b",
+    "name": "Sybil de Mandeville",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p7f5595b480",
+    "name": "Elizabeth Bloyou"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p111a7a3d83",
+    "name": "Alan Bloyou of Marazion",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/K8MX-JWD",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": true,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

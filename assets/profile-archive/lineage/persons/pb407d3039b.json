@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pb407d3039b",
+ "bnr": "bnr://skaists.dev/blood/pb407d3039b",
+ "identity": {
+  "name": "Dorothy Grey",
+  "lifespan": "1555–1634",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GG8D-P91"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p279468ea41",
+    "name": "William Grey",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p44c2fd8679",
+    "name": "Mary Beaufort",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pcdad389ec3",
+    "name": "Rebecca Mead"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p0e3d3b1e4b",
+    "name": "Priscila Mead",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GG8D-P91",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

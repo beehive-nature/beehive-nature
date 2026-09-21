@@ -1,0 +1,74 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p9c93c3c6ef",
+ "bnr": "bnr://skaists.dev/blood/p9c93c3c6ef",
+ "identity": {
+  "name": "Kālib bin Gefunne \"Caleb the Spy\"",
+  "lifespan": "1485BC–1350BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L7LP-XH5"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p68d6d5f86c",
+    "name": "Gefunne ibn Beri al-Yahuda",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p775f957542",
+    "name": "Mrs Jephunneh",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p3ddffc93af",
+    "name": "Hur ibn Kālib al-Yehuda"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p4fb27fae84",
+    "name": "Maachah bat Segub",
+    "marriage": null
+   },
+   {
+    "id": "pa804b3af09",
+    "name": "Miriam bint Imram 'the Prophetess'",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L7LP-XH5",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

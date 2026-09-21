@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p267b7fe883",
+ "bnr": "bnr://skaists.dev/blood/p267b7fe883",
+ "identity": {
+  "name": "Pupiena Rufina",
+  "lifespan": "0245–Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GJ1Z-Q8V"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p67e0ce45ef",
+    "name": "Publius Pupienus Maximus",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pccc51d27d9",
+    "name": "Sig.ra. Publius Pupienus Maximus",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p164c367847",
+    "name": "Gaius Memmius Caelinus II Placidus De Rome-De Rome"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p61da4ade82",
+    "name": "Gaius Memminus Caecillianus Placidus",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GJ1Z-Q8V",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

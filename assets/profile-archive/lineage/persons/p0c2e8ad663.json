@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p0c2e8ad663",
+ "bnr": "bnr://skaists.dev/blood/p0c2e8ad663",
+ "identity": {
+  "name": "Aldeberthe de Gauchin",
+  "lifespan": "0898–Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G99G-D1B"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pfc9d737550",
+    "name": "Hutin Gauchin",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p272bc7131d",
+    "name": "Hilde",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pd715a0471e",
+    "name": "Wauthier D'OLHAIN I"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p244e14148c",
+    "name": "Hermon d'Ollehain",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G99G-D1B",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

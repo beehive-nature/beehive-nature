@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pf3db997c8b",
+ "bnr": "bnr://skaists.dev/blood/pf3db997c8b",
+ "identity": {
+  "name": "Sarah de Hornicote",
+  "lifespan": "1204–1302",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "MB13-VGP"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [],
+  "children": [
+   {
+    "id": "p4cbf7b4979",
+    "name": "Sir Roger de Carminow Lord of Trenoweth"
+   },
+   {
+    "id": "pcbb24d5872",
+    "name": "Joanna Dinham"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p24dd5bcedf",
+    "name": "Roger de Carminow II",
+    "marriage": null
+   },
+   {
+    "id": "p0b56654150",
+    "name": "Geoffrey Dinham",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/MB13-VGP",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

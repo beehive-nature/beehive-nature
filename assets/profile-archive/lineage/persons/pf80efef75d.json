@@ -1,0 +1,64 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pf80efef75d",
+ "bnr": "bnr://skaists.dev/blood/pf80efef75d",
+ "identity": {
+  "name": "Ugo I Fieschi Conte di Lavagna",
+  "lifespan": "1150–1211",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GC4Z-9LL"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p37234cd26d",
+    "name": "Ruffino Fieschi",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p56a01ab42f",
+    "name": "Conte Teodoro Tedisio IV Fieschi dei Conti di Lavagna"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pe9203b0000",
+    "name": "Beatrice Grillo",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GC4Z-9LL",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

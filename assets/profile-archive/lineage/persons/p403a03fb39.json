@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p403a03fb39",
+ "bnr": "bnr://skaists.dev/blood/p403a03fb39",
+ "identity": {
+  "name": "Maud Matilda de Giffard",
+  "lifespan": "1224–1297",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LYCJ-ZL3"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p269ec340ef",
+    "name": "Hugh de Giffard",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p0902196410",
+    "name": "Sybil de Cormeilles",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p44766c055b",
+    "name": "Alexander De Freville"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p5219934162",
+    "name": "Baldwin De Freville",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LYCJ-ZL3",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

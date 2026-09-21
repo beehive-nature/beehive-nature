@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p30c3ade7ae",
+ "bnr": "bnr://skaists.dev/blood/p30c3ade7ae",
+ "identity": {
+  "name": "Caesonia Manilia Bassa",
+  "lifespan": "0272–Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GTJP-QBK"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pe33e7062c1",
+    "name": "Lucius Caesonius Ovinius  Rufinius Bassus De Rome",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p713f52f426",
+    "name": "Iunia Unii Maximi Junia",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p046ecf5763",
+    "name": "Amnius Anicius Paulinus di Anicii,"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p0b2a6b0091",
+    "name": "Amnius Anicius Julianius De Rome",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GTJP-QBK",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

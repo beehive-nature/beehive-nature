@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p0d9a9aed30",
+ "bnr": "bnr://skaists.dev/blood/p0d9a9aed30",
+ "identity": {
+  "name": "Oslac of Isle of Wight",
+  "lifespan": "0785–0846",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "9HLT-8RF"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pee60632b2f",
+    "name": "King Withgar Oslac of England",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p0cd27a6ff6",
+    "name": "Princess Sabd of Ossary",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p442540cb29",
+    "name": "Osburga of Isle of Wight"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p07648ca864",
+    "name": "Lady Judith of Wessex",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/9HLT-8RF",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

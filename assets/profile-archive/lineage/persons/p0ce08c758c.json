@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p0ce08c758c",
+ "bnr": "bnr://skaists.dev/blood/p0ce08c758c",
+ "identity": {
+  "name": "Manogan Capoir Digueillus ap Eneid of the Druids",
+  "lifespan": "0116BC–0072BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "9HPR-CFZ"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p13224d4344",
+    "name": "Eneid Capior Digueil ap Cerwyd, Druid King of the Britons",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p2e551d3aab",
+    "name": "Capoir verch Pyrr",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p3b5aafaf9f",
+    "name": "Beli  'Mawr' ap Mynogan of Pennines"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p33d3955108",
+    "name": "Anna of Arimathea",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/9HPR-CFZ",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

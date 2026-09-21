@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p0a2b198ba4",
+ "bnr": "bnr://skaists.dev/blood/p0a2b198ba4",
+ "identity": {
+  "name": "Publius Quinctilius Varus the Younger",
+  "lifespan": "4–27",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GX6G-1WG"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p18797a9fd1",
+    "name": "Publius Quinctilius Varus -Roman General and Politician",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p008195457d",
+    "name": "Claudia Pulchera Messalina DE ROME",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p1f95bfdf0e",
+    "name": "Quinctilia Varia"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p22cace244b",
+    "name": "Plautia Laterana",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GX6G-1WG",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

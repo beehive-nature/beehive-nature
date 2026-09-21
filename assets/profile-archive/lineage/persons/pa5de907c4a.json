@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pa5de907c4a",
+ "bnr": "bnr://skaists.dev/blood/pa5de907c4a",
+ "identity": {
+  "name": "Amytis dokhtar az Cyaxares Princess of Media, Queen of Babylon",
+  "lifespan": "0630BC–0565BC",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G58H-YWX"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p836dddef40",
+    "name": "King Cyaxares Of Medes",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p524621dbec",
+    "name": "N.N. Hija de Nabopolasar Princesa de Babilonia",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pa64c3c6c46",
+    "name": "Neitaqert (Nitocris) (Queen) of BABYLON"
+   },
+   {
+    "id": "p77e42e3bb4",
+    "name": "Amel-Marduk 3rd King 10th Dynasty"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pd98ac338fb",
+    "name": "Nebuchadnezzar II King of Babylon",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G58H-YWX",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p4971c9278e",
+ "bnr": "bnr://skaists.dev/blood/p4971c9278e",
+ "identity": {
+  "name": "Elioenai ben Neariah 20th Exilarch",
+  "lifespan": "0275BC–0197BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L15G-GFL"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p86cf726113",
+    "name": "Neariah ben Shemaiah 18th Exilarch",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p95b3ea0024",
+    "name": "Mrs Neariah ben Shemaiah",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pd2963148c6",
+    "name": "Eliashib ibn Elioenai"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p473158fffb",
+    "name": "Mrs Elioenai ben Neariah",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L15G-GFL",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

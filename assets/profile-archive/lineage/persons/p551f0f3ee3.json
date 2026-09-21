@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p551f0f3ee3",
+ "bnr": "bnr://skaists.dev/blood/p551f0f3ee3",
+ "identity": {
+  "name": "Foulques II 'le Bon' d'Anjou",
+  "lifespan": "0909–0958",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L1DW-Q5N"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pcc96812cbd",
+    "name": "Foulques Ier 'le Roux' d'Anjou",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p0256f4e2d3",
+    "name": "Roscille de Loches",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p6f974f4b74",
+    "name": "Geoffroy Ier 'Grisegonelle' d'Anjou"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p502c5aa3a7",
+    "name": "Comtesse Gerberge DU MAINE EN GATINAIS",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L1DW-Q5N",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

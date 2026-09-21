@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p5e2f5047f2",
+ "bnr": "bnr://skaists.dev/blood/p5e2f5047f2",
+ "identity": {
+  "name": "Nicholas Stevenson",
+  "lifespan": "1483–1547",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LRH1-DB2"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "MG29-MT5",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "GM6X-TSF",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p14a5d0b639",
+    "name": "John Stephenson"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p3a057db53e",
+    "name": "Elizabeth Stevenson",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LRH1-DB2",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pfe105dca4a",
+ "bnr": "bnr://skaists.dev/blood/pfe105dca4a",
+ "identity": {
+  "name": "Vipsania Iulia Minor Agrippina",
+  "lifespan": "0039BC–29",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GTJD-KMB"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pc6134667bc",
+    "name": "Marcus Vipsanius Agrippa",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p1985d93c2d",
+    "name": "Iulia Maior Caesaris Augusti filia",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p59f9681985",
+    "name": "Aemilia Lepida Minor de Roma"
+   },
+   {
+    "id": "p0535337707",
+    "name": "Julia Octavius Laenas Paula of Rome Princess of House Iulia"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p365e6fec84",
+    "name": "Lucius Aemilius Paulus",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GTJD-KMB",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

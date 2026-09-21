@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p58ec9cc83d",
+ "bnr": "bnr://skaists.dev/blood/p58ec9cc83d",
+ "identity": {
+  "name": "Ruth Perry",
+  "lifespan": "1781–1805",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LHYW-KBK"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pf679d16934",
+    "name": "James Perry",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pbb878af203",
+    "name": "Sarah Littlefield",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p72d226cedf",
+    "name": "Albert Perry Rockwood"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p55eb2f15c6",
+    "name": "Luther Rockwood",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LHYW-KBK",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

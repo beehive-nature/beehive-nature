@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pa14f045bb1",
+ "bnr": "bnr://skaists.dev/blood/pa14f045bb1",
+ "identity": {
+  "name": "Elizabeth Crushe",
+  "lifespan": "1560–1602",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "P7RM-7VH"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p36bcdb81b7",
+    "name": "Robert Crushe",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p63d8ce974c",
+    "name": "Elizabeth Rossell",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pff353380d8",
+    "name": "John Joseph Barrow"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pbf354e08cf",
+    "name": "John Edward Barrow III",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/P7RM-7VH",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

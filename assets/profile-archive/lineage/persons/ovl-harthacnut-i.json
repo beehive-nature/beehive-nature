@@ -1,0 +1,56 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "ovl-harthacnut-i",
+ "bnr": "bnr://skaists.dev/blood/ovl-harthacnut-i",
+ "identity": {
+  "name": "Harthacnut I of Denmark (Harthacanute)",
+  "lifespan": "late 9th century–0916? (traditional; king of part of Denmark ~916)",
+  "gender": "M",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "attested-overlay",
+   "id": "ovl-harthacnut-i"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "attested",
+  "basis": "attested-overlay: tradition; father of Gorm the Old — the bridge toward documented Danish kings (Adam of Bremen conflicts: names his father 'Sven')",
+  "class": "saga"
+ },
+ "research": {
+  "status": "tradition-entered",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "ovl-sigurd-snake-eye",
+    "name": "Sigurd Snake-in-the-Eye (Sigurd Ragnarsson)",
+    "evidence": "disputed — inspect in the comb"
+   },
+   {
+    "id": "ovl-blaeja-of-northumbria",
+    "name": "Blaeja of Northumbria",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [],
+  "spouses": []
+ },
+ "layers": {
+  "records": null,
+  "tradition": {
+   "pack": "evidence/sigurd-snake-in-eye.json"
+  },
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

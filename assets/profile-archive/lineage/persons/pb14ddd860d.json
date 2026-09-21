@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pb14ddd860d",
+ "bnr": "bnr://skaists.dev/blood/pb14ddd860d",
+ "identity": {
+  "name": "King Dyfnwal Moelmud ap Cloten of Britain",
+  "lifespan": "0475BC–0395BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LK54-SM6"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p7c98f40bb1",
+    "name": "King Cloten ap Dyfnarth Fawr of Cambria",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p3e834408b9",
+    "name": "Fodt ferch de Cambria",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pd9f9082596",
+    "name": "Belinus ap Dyfnwal Moelmud, King of the Druids"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p226c3364b2",
+    "name": "Tonnuenna Des Sicambres",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LK54-SM6",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

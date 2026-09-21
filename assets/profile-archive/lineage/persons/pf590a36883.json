@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pf590a36883",
+ "bnr": "bnr://skaists.dev/blood/pf590a36883",
+ "identity": {
+  "name": "Maritgen Fransdr Meerman",
+  "lifespan": "1542–1606",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LK6H-CN4"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p611c1ff5cd",
+    "name": "Frans Dirck Govertsz Meerman",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pc1032bcca4",
+    "name": "Elijsbeth Beukelsdr van der Burch",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p1911cbb625",
+    "name": "Grietgen Claesdr van Adrichem"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pf037aa2416",
+    "name": "Claas Adriaansz van Adrichem",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LK6H-CN4",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

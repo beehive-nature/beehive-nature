@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pd7f9538925",
+ "bnr": "bnr://skaists.dev/blood/pd7f9538925",
+ "identity": {
+  "name": "Rev. Jean de la Vigne",
+  "lifespan": "1550–1622",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LR73-86Y"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pf7610c28a0",
+    "name": "Jean De La Vigne",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p8f7b65090e",
+    "name": "Anne Marie Eugenie Cocher",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p67b66896e1",
+    "name": "Ghislain de la Vigne"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pfd6f930bea",
+    "name": "Jeanne Petitiau",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LR73-86Y",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

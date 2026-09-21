@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p32676cd97d",
+ "bnr": "bnr://skaists.dev/blood/p32676cd97d",
+ "identity": {
+  "name": "Marcus Titus Flavius II Sabinus",
+  "lifespan": "0020BC–69",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LD53-LDK"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p992ac063e7",
+    "name": "Titus Flavius Petro",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p3ffc859011",
+    "name": "Tertulla",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p1d75f9c9ca",
+    "name": "Mariamne Caecina Arria Sabinus"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p6d5b2a23e2",
+    "name": "Mariamme IV Arria de Judea",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LD53-LDK",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

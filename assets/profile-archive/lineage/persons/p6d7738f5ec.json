@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p6d7738f5ec",
+ "bnr": "bnr://skaists.dev/blood/p6d7738f5ec",
+ "identity": {
+  "name": "Margaretha Schroten",
+  "lifespan": "1584–1673",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PH8M-428"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pea063d4f01",
+    "name": "Simon Schroten",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pd8b71a82ee",
+    "name": "Anna Busaei",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pe3778d0681",
+    "name": "Johann Nicolaus Klock"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p8eaf1764ec",
+    "name": "Nicolaus Klock",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PH8M-428",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

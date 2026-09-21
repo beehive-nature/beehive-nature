@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p217981e324",
+ "bnr": "bnr://skaists.dev/blood/p217981e324",
+ "identity": {
+  "name": "Michiel Taleman",
+  "lifespan": "1520–1580",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L14V-BLB"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p1e9c92e383",
+    "name": "Michiel Taleman Sr",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p687136c03c",
+    "name": "Kateline Herwijn",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p2fba47800f",
+    "name": "Jacques Taelmann"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pb2fa48706b",
+    "name": "Sara Berruwijns",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L14V-BLB",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

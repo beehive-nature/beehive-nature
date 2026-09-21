@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pe234dc9bc0",
+ "bnr": "bnr://skaists.dev/blood/pe234dc9bc0",
+ "identity": {
+  "name": "Sherah bint Ephraim",
+  "lifespan": "1849BC–Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L2T6-W6X"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p311a68ea23",
+    "name": "Ephraim ben Joseph",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pc4d45fdaed",
+    "name": "Alisa",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pead31fc4b1",
+    "name": "Bezaleel ben  Uri"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p072b841fbf",
+    "name": "Uri ben Hur",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L2T6-W6X",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

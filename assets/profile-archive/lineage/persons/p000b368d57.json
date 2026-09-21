@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p000b368d57",
+ "bnr": "bnr://skaists.dev/blood/p000b368d57",
+ "identity": {
+  "name": "Emma Louisa Abbott",
+  "lifespan": "1552–1600",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LHS3-1D1"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p0724911412",
+    "name": "Thomas Abbott",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pe368f7ca60",
+    "name": "Alice Abbott Tomsson",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p605e63aeef",
+    "name": "Mary Goore"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p3c0e38f947",
+    "name": "John William Goore",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LHS3-1D1",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

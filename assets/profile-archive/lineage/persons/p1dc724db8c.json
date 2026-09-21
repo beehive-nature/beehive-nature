@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p1dc724db8c",
+ "bnr": "bnr://skaists.dev/blood/p1dc724db8c",
+ "identity": {
+  "name": "Laodameia Euthymidou De'Chaonia",
+  "lifespan": "0405BC–Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PXHG-575"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pa55a7d2541",
+    "name": "Euthymides De'Chaonia",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pfeda1e0210",
+    "name": "Andromache De'Thesprotia",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p16eb9175e6",
+    "name": "Queen of Macedon Olympias of Epirus"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p6e4fea7e93",
+    "name": "Neoptolemus Epirus I",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PXHG-575",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pa8c733211a",
+ "bnr": "bnr://skaists.dev/blood/pa8c733211a",
+ "identity": {
+  "name": "Johannes Lamberts",
+  "lifespan": "1595–1633",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "P9HF-68R"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pebc6ea33d9",
+    "name": "Johannes Michael Lambert",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "ped150ccc7d",
+    "name": "Catharina Maria Müllers",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p6e4dc0319a",
+    "name": "Gertrude Lamberts"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pcdbbab5d5a",
+    "name": "Mary Ann Hollweg",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/P9HF-68R",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

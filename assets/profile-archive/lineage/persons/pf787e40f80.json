@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pf787e40f80",
+ "bnr": "bnr://skaists.dev/blood/pf787e40f80",
+ "identity": {
+  "name": "Gilbert de Brionne",
+  "lifespan": "0979–1040",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "K84R-TMS"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p8ebf1a649f",
+    "name": "Godefroi de Brionne, Comte d'Eu",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pde5fd2bd08",
+    "name": "Hawise de Brionne",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p83608a3e08",
+    "name": "Richard I FitzGilbert de Clare"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p7c15999225",
+    "name": "Gunnora De Cucy",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/K84R-TMS",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

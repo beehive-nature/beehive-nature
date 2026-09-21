@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pf54215c521",
+ "bnr": "bnr://skaists.dev/blood/pf54215c521",
+ "identity": {
+  "name": "John Clarke Sr.",
+  "lifespan": "1541–1598",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "9VR1-JHQ"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "paa0fc0c080",
+    "name": "John Clarke",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p4407bfc4b6",
+    "name": "Margaret Clarke",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pf5160af592",
+    "name": "Thomas Clarke"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p97486d1c8a",
+    "name": "Katherine Cooke",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/9VR1-JHQ",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

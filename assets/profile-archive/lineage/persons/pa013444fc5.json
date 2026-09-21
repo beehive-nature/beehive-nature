@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pa013444fc5",
+ "bnr": "bnr://skaists.dev/blood/pa013444fc5",
+ "identity": {
+  "name": "Antiochos IV Seleucide",
+  "lifespan": "0221BC–0163BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L619-Y2K"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pcc1cc25880",
+    "name": "Antiochus III. \"The Great,\" Megas Basileus of the Seleucid Empire",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p92249b9d96",
+    "name": "Reina Laódice Mitridátida",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pdec26f5dfc",
+    "name": "Laodicé VI Seleucide"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p9f90a4d79b",
+    "name": "Queen consort of the Seleucid Empire Laodice IV",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L619-Y2K",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

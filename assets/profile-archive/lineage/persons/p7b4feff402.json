@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p7b4feff402",
+ "bnr": "bnr://skaists.dev/blood/p7b4feff402",
+ "identity": {
+  "name": "Mentuhotep II Nebhepetre",
+  "lifespan": "2081BC–2009BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "9QQ9-G3V"
+  }
+ ],
+ "evidence": {
+  "era": "recorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "recorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p55ce2ef7d1",
+    "name": "Intef III Nakhtnebtepnefer 5th Pharaoh 11th Dynasty",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pfa24b36392",
+    "name": "Iah III de Thebes , Queen of Egypt",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p24320c333e",
+    "name": "Prince Taikhasut Of Egypt"
+   },
+   {
+    "id": "p9685238669",
+    "name": "Sankhara Mentuhotep III Nebhepetre"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p6fa331cd07",
+    "name": "Queen, XI Dynasty Ancient Neferu II Egypt",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/9QQ9-G3V",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

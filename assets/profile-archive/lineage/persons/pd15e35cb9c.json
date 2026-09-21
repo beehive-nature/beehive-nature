@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pd15e35cb9c",
+ "bnr": "bnr://skaists.dev/blood/pd15e35cb9c",
+ "identity": {
+  "name": "Adinah bint Haran",
+  "lifespan": "1956BC–Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L8TV-GSL"
+  }
+ ],
+ "evidence": {
+  "era": "recorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "recorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p4f5a654714",
+    "name": "Haran ben Terah",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pfc0f1546d9",
+    "name": "Emtelai Of Agade",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p34389f9baa",
+    "name": "Leah bint Laban"
+   },
+   {
+    "id": "pa2a2f0f8a0",
+    "name": "Rachel bat Laban"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pc767dead38",
+    "name": "Laban ben Bethuel",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L8TV-GSL",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

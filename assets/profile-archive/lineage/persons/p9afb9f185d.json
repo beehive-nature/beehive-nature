@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p9afb9f185d",
+ "bnr": "bnr://skaists.dev/blood/p9afb9f185d",
+ "identity": {
+  "name": "Rev. Of Langraw George Ramsey",
+  "lifespan": "1545–1629",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GZHR-VQV"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pc3cba9bd4d",
+    "name": "John Ramsay",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pf5da9c8143",
+    "name": "Katherine Elizabeth Gourley",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p5c3c3e60b3",
+    "name": "Elizabeth Ramsay"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p0f0148a616",
+    "name": "Margaret Gourlay",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GZHR-VQV",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

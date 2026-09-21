@@ -1,0 +1,64 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pf140192e5f",
+ "bnr": "bnr://skaists.dev/blood/pf140192e5f",
+ "identity": {
+  "name": "Michaiah Ben Gemariah de JÉRUSALEM",
+  "lifespan": "Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GQH4-4L4"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p5b71a711e0",
+    "name": "Gemariah",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "peda0f4625a",
+    "name": "Achbor ben Michaiah"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p498c9de6c5",
+    "name": "Isah Michaiah ben Gemariah",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GQH4-4L4",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

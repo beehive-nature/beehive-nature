@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pe3af33c20b",
+ "bnr": "bnr://skaists.dev/blood/pe3af33c20b",
+ "identity": {
+  "name": "Jonathan ben Saul",
+  "lifespan": "1060BC–1009BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LW1M-4DN"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pfcaaa9c10f",
+    "name": "King Saul ben Kish",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p94fc60d347",
+    "name": "Ahinoam bat Ahimaaz",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pf205b209ba",
+    "name": "Mephibosheth ben Jonathan ben Saul"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pc8802d1937",
+    "name": "Mrs Jonathan",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LW1M-4DN",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

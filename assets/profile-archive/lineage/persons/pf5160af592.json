@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pf5160af592",
+ "bnr": "bnr://skaists.dev/blood/pf5160af592",
+ "identity": {
+  "name": "Thomas Clarke",
+  "lifespan": "1570–1627",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LZNW-DF3"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pf54215c521",
+    "name": "John Clarke Sr.",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p97486d1c8a",
+    "name": "Katherine Cooke",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p476e93322c",
+    "name": "Joseph Clarke"
+   },
+   {
+    "id": "p4cc4ee9a22",
+    "name": "Mary Clarke"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p976e94c0f8",
+    "name": "Rose Kerrich",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LZNW-DF3",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pdb86fc6177",
+ "bnr": "bnr://skaists.dev/blood/pdb86fc6177",
+ "identity": {
+  "name": "Petrus Joannes Hylenbroeck  Barlandus",
+  "lifespan": "1560–Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "P74Y-D2B"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p08b6792d84",
+    "name": "Joannes Baptista Hylenbroeck  Barlandus",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p33355893b0",
+    "name": "Theresia NOBELS",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p8992d48dc1",
+    "name": "Maeyken Barlandus"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p19a6482b44",
+    "name": "Judoca Hylenbroeck De Beul",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/P74Y-D2B",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

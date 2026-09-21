@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pfc33f2888a",
+ "bnr": "bnr://skaists.dev/blood/pfc33f2888a",
+ "identity": {
+  "name": "Mrs Nabû Shuma Ukin 1er Souverain D'Assyrie",
+  "lifespan": "Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "P4P5-6VN"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pbed55ee477",
+    "name": "Tukulti-urta D'Assyrie Roi d'Assyrie",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pdb199c8368",
+    "name": "Mrs Tukulti-urta D'Assyrie",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pbba545fffa",
+    "name": "Marduk Zakir Schumi"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p60bfca4bb9",
+    "name": "Nabû Shuma Ukin 1er Souverain de Babylone",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/P4P5-6VN",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

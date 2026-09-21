@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p891a240a1a",
+ "bnr": "bnr://skaists.dev/blood/p891a240a1a",
+ "identity": {
+  "name": "Adobogiona 'the Elder'",
+  "lifespan": "0089BC–0050BC",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G6RG-R6G"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p3eaf1d51a7",
+    "name": "Deiotarus I King of galatia",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p99540e68f2",
+    "name": "Queen Bernice Of Pergamon",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p1970d402f4",
+    "name": "Sinorix I ben Deiotarix Tetrach of the Tolistobogii"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p56be0d33f9",
+    "name": "Deiotarix ben Attalus III",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G6RG-R6G",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

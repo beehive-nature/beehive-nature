@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pedb1e6cf0f",
+ "bnr": "bnr://skaists.dev/blood/pedb1e6cf0f",
+ "identity": {
+  "name": "King Sisillius II ap Guithelin, of Britain",
+  "lifespan": "0370BC–0343BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L69V-CGK"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p941d39eab4",
+    "name": "King Guithelin ap Gurguit Barbtuc",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pcae3b76cfe",
+    "name": "Queen Marcia of Britain",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pf984c36be5",
+    "name": "King Danius ap Sisillius II of Britain"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pdfb19eb139",
+    "name": "Rhegaw Maria de Britain",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L69V-CGK",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

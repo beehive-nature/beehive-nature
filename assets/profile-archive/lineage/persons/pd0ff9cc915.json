@@ -1,0 +1,82 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pd0ff9cc915",
+ "bnr": "bnr://skaists.dev/blood/pd0ff9cc915",
+ "identity": {
+  "name": "Adam ben Elohim 1st Patriarch",
+  "lifespan": "4004BC–3074BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "KG97-S9V"
+  }
+ ],
+ "evidence": {
+  "era": "recorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "recorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [],
+  "children": [
+   {
+    "id": "p8ce4340c02",
+    "name": "Seth ben Adam 2nd Patriarch"
+   },
+   {
+    "id": "p5c808066c4",
+    "name": "Azûrâ bat Adam"
+   },
+   {
+    "id": "pbb29dbf013",
+    "name": "Cain Qabil ben Adam"
+   },
+   {
+    "id": "pf13c37cd0b",
+    "name": "'Âwân bint Adam"
+   },
+   {
+    "id": "p330393ddf2",
+    "name": "Iqlimah bint Adam"
+   },
+   {
+    "id": "p34f42c672a",
+    "name": "Jumella  Balbira bint-Adam"
+   },
+   {
+    "id": "pdf54f47f8a",
+    "name": "Abel ben Adam"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p65ca477791",
+    "name": "Eve bat Elohim",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/KG97-S9V",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

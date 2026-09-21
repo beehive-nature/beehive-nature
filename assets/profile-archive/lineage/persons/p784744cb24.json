@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p784744cb24",
+ "bnr": "bnr://skaists.dev/blood/p784744cb24",
+ "identity": {
+  "name": "Zeror ben Bechorath ha-Benjamin",
+  "lifespan": "1150BC–Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "9C3G-88Q"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p267f4a10bb",
+    "name": "Bechorath ben Aphiah ha-Benjamin",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p75ebfabae9",
+    "name": "Mrs Bekhor ibn Aphiah",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pe51380a8c8",
+    "name": "Abiel ben Zeror ha-Benjamin"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p10fa523fd0",
+    "name": "Mrs Zeror ibn Bechorath",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/9C3G-88Q",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

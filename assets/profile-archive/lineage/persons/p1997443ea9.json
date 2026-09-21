@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p1997443ea9",
+ "bnr": "bnr://skaists.dev/blood/p1997443ea9",
+ "identity": {
+  "name": "Baraka bint Rasu’aya",
+  "lifespan": "3540BC–2578BC",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G17F-ZW3"
+  }
+ ],
+ "evidence": {
+  "era": "recorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "recorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pf8ae86eea6",
+    "name": "Rasu’aya ibn Qaynan",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pd076cd0094",
+    "name": "Tecia bint Mahūjāʾil",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pc03038a270",
+    "name": "Azrial ibn Yarid Prince de Sippa"
+   },
+   {
+    "id": "p63843ba74d",
+    "name": "Idris ibn Yarid"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pb821edc7bb",
+    "name": "Yarid ibn Mahla'il ibn Qaynan",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G17F-ZW3",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

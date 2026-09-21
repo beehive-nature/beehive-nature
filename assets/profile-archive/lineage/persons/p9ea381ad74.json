@@ -1,0 +1,95 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p9ea381ad74",
+ "bnr": "bnr://skaists.dev/blood/p9ea381ad74",
+ "identity": {
+  "name": "Duathathor-Henuttawy",
+  "lifespan": "1089BC–1054BC",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L8RB-VCV"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p30321c799c",
+    "name": "MenKheperre' , High Priest of Amun",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pa735d65509",
+    "name": "Princess Esemkhebe Isiemkheb Istemkheb Egypt",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p5649ca0367",
+    "name": "Pharoah Ramesse Psusennes I of Egypt"
+   },
+   {
+    "id": "p7b7a0416fe",
+    "name": "psousennès 1er akhere D'EGYPTE"
+   },
+   {
+    "id": "pfd54830ddd",
+    "name": "Psusennes I, 3rd Pharaoh, 21st Dynasty"
+   },
+   {
+    "id": "p00d5ef9445",
+    "name": "Mutnedjmet"
+   },
+   {
+    "id": "p8d8fb80372",
+    "name": "Nesikhons Queen of Egypt"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p5a5b41df23",
+    "name": "Smendes I , 1st Pharaoh of the 21st Dynasty",
+    "marriage": null
+   },
+   {
+    "id": "p1c3c4c5e51",
+    "name": "Pinedjem I High Priest of Amun",
+    "marriage": null
+   },
+   {
+    "id": "pa6b372a62a",
+    "name": "Smendes II , High Priest of Amun",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L8RB-VCV",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

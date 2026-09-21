@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pdee79e0bcf",
+ "bnr": "bnr://skaists.dev/blood/pdee79e0bcf",
+ "identity": {
+  "name": "Laodice of the Tectosages",
+  "lifespan": "14–30",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GGR8-RM2"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p3904c8883d",
+    "name": "Amyntas II de Tectosagii, King of Cilicia Trachea",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pb4e2993c37",
+    "name": "Mrs Amuntas of the Tectosagil",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p41bbeece53",
+    "name": "Caius Julius Severus Quadratus de Rome de Asie"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pd2ebd9bc8d",
+    "name": "Artemidoros Quadrarus de Trocmii",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GGR8-RM2",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

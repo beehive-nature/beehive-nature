@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p80a769b6c2",
+ "bnr": "bnr://skaists.dev/blood/p80a769b6c2",
+ "identity": {
+  "name": "Naasson Ben Aminadab HA-ABRAHAM {9}",
+  "lifespan": "1658BC–Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GWRN-9DN"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p2d14bb8df0",
+    "name": "Amminadab Ben Aram HA-ABRAHAM {8}",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p651e941f63",
+    "name": "Mrs. Aminadab Ben Aram HA-ABRAHAM",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p28df34755e",
+    "name": "Salmon Ben Nasson"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pcb1d735ef3",
+    "name": "Mrs. Naasson Ben Aminadab HA-ABRAHAM",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GWRN-9DN",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

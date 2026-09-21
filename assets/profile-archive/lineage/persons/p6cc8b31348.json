@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p6cc8b31348",
+ "bnr": "bnr://skaists.dev/blood/p6cc8b31348",
+ "identity": {
+  "name": "Marcia Furnilla",
+  "lifespan": "33–0100",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LXSJ-VWK"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p382f99b82c",
+    "name": "Quintus Marcius Barea Sura Di Roma Senator of Rome",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pb5fb5e025c",
+    "name": "Antonia Furnilla Di Roma",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p4bfcff924c",
+    "name": "Titus Flavius Vespasianus"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pf6b329ffec",
+    "name": "Titus Flavius Vespasianus",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LXSJ-VWK",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

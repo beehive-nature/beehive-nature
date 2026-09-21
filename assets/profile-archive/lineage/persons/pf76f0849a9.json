@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pf76f0849a9",
+ "bnr": "bnr://skaists.dev/blood/pf76f0849a9",
+ "identity": {
+  "name": "Guillaume VI Taillefer Comte d’Angoulême",
+  "lifespan": "1125–1179",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "MQ97-2VC"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "9W8M-CH6",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "LB7R-1BV",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p0a6e371234",
+    "name": "Aymar de Taillefer d'Angoulême"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pc82d85ee3e",
+    "name": "Marguerite de Turenne",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/MQ97-2VC",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

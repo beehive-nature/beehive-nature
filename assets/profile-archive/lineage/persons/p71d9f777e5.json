@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p71d9f777e5",
+ "bnr": "bnr://skaists.dev/blood/p71d9f777e5",
+ "identity": {
+  "name": "Marcus Maecius Probus Major",
+  "lifespan": "0160–0209",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GTWB-DZF"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p8a6b44f011",
+    "name": "Marcus Annius Severus",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p0d126de837",
+    "name": "Manlia Minor de Rome",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "paf5609a6b7",
+    "name": "Marcus Pomponius Maecius Probus"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p26033ccb26",
+    "name": "Pomponia Arria",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GTWB-DZF",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

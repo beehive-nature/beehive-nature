@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pe7f43f0273",
+ "bnr": "bnr://skaists.dev/blood/pe7f43f0273",
+ "identity": {
+  "name": "James Brigge",
+  "lifespan": "1505–1591",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GHVM-88Y"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p6cbba8d2a0",
+    "name": "Richard Bigge",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p824f21a0b4",
+    "name": "Joan Hendley",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p586e14a4b5",
+    "name": "John Briggs"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p5f42cc3fa6",
+    "name": "Hannah Palmer",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GHVM-88Y",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

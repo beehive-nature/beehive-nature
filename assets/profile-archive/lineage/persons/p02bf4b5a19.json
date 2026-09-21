@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p02bf4b5a19",
+ "bnr": "bnr://skaists.dev/blood/p02bf4b5a19",
+ "identity": {
+  "name": "Merenre II Nemtyemsaf 6th Pharaoh 6th Dynasty",
+  "lifespan": "2250BC–2182BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GHKJ-7Y4"
+  }
+ ],
+ "evidence": {
+  "era": "recorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "recorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p1ea9f26f81",
+    "name": "Pepi II",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pbf167b43e8",
+    "name": "Iput II de Egypte",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "peb13b5d8e8",
+    "name": "Ankhn-Khonsu"
+   },
+   {
+    "id": "p13f145e0f0",
+    "name": "Menkare 1st Pharaoh 7th Dynasty"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p41e853380c",
+    "name": "Netikereti D'EGYPTE-D'EGYPTE",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GHKJ-7Y4",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

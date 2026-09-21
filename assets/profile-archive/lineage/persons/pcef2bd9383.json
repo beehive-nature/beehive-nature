@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pcef2bd9383",
+ "bnr": "bnr://skaists.dev/blood/pcef2bd9383",
+ "identity": {
+  "name": "King Henry III of England",
+  "lifespan": "1207–1272",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "9SS7-5BT"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p42f4f5576a",
+    "name": "King John of England",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pbc19b9a9d2",
+    "name": "Isabella of Angouleme",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p9728c2339c",
+    "name": "Edmund Crouchback 1st Earl of Leicester and  Lancaster"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pc38ed81e98",
+    "name": "Eleanor de Provence",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/9SS7-5BT",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

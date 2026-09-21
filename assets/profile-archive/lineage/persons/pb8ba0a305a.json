@@ -1,0 +1,74 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pb8ba0a305a",
+ "bnr": "bnr://skaists.dev/blood/pb8ba0a305a",
+ "identity": {
+  "name": "Tentshepeh A the Libyan",
+  "lifespan": "1004BC–0979BC",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "94RF-ZTF"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p7d7c3f51f2",
+    "name": "Sheshong Des Mâ",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pe0bae7e584",
+    "name": "Mehtenoueskhet Des Mâ",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pd4bbedc2b3",
+    "name": "Shoshenq I ben Nimlot A , 1st Pharaoh 22nd Dynasty"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pc62bec72ff",
+    "name": "Nimlot A ben Shoshenq A, Great Chief of Ma",
+    "marriage": null
+   },
+   {
+    "id": "p5f9238a453",
+    "name": "Nimlot A , Great Chief of the Ma",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/94RF-ZTF",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

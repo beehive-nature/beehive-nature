@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pdbe469324c",
+ "bnr": "bnr://skaists.dev/blood/pdbe469324c",
+ "identity": {
+  "name": "Elizabeth Symes",
+  "lifespan": "1596–1628",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "9455-G4X"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p34ce3db3cb",
+    "name": "William Symes",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pa11cfe9227",
+    "name": "Mary Ingleram",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p7e46358f99",
+    "name": "Lydia Danforth"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p6b67f8a3ee",
+    "name": "Nicholas Danforth",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/9455-G4X",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p33a753aad0",
+ "bnr": "bnr://skaists.dev/blood/p33a753aad0",
+ "identity": {
+  "name": "Gaius Octavious A de Rome",
+  "lifespan": "–0031BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L63L-2HQ"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p4d7750b3b5",
+    "name": "Titus Pomponius Atticus",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p38cdd9b46e",
+    "name": "Céacilla Metela Matella Cornélia",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p992ac063e7",
+    "name": "Titus Flavius Petro"
+   },
+   {
+    "id": "p4c41e2f3fd",
+    "name": "Julia Malone de Rome"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p658afa443a",
+    "name": "Scribonia Uxor Augusti",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L63L-2HQ",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

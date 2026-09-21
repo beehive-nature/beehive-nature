@@ -1,0 +1,74 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p256a118cf3",
+ "bnr": "bnr://skaists.dev/blood/p256a118cf3",
+ "identity": {
+  "name": "Adah bat Elon the Hittite",
+  "lifespan": "2006BC–Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L63D-B2W"
+  }
+ ],
+ "evidence": {
+  "era": "recorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "recorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p1e14239a62",
+    "name": "Elon ben Zebulun",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p6b00222875",
+    "name": "Anah Ra'La al-Sayyida",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pe5b4846fd5",
+    "name": "Eliphaz ben Esau"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p99657adfa4",
+    "name": "Isaú ibn Ishaq",
+    "marriage": null
+   },
+   {
+    "id": "p6a95e7f8a8",
+    "name": "Sayyid ibn Zibeon",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L63D-B2W",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

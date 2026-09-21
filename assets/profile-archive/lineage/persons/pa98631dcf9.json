@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pa98631dcf9",
+ "bnr": "bnr://skaists.dev/blood/pa98631dcf9",
+ "identity": {
+  "name": "Maddan ap Locrinus 4th King of Britain",
+  "lifespan": "1110BC–1026BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G85L-C4T"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p4ac2223f08",
+    "name": "Locrinus ap Brutus 2nd King Britain",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p7a54329ad9",
+    "name": "Gwendolen verch Corineus",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pf782be1328",
+    "name": "Mempricius ap Maddan 5th King of Britain"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pee9999911d",
+    "name": "Mrs Maddan",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G85L-C4T",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

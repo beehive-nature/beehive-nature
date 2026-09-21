@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p5ce1e21be5",
+ "bnr": "bnr://skaists.dev/blood/p5ce1e21be5",
+ "identity": {
+  "name": "Elizabeth Bond",
+  "lifespan": "1548–1623",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "KHSM-6QT"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p620f1b4f63",
+    "name": "Dionis Bonde",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p9799680b95",
+    "name": "Alicia Arden",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pa42148c883",
+    "name": "Millicent Swayne"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p4ce584b845",
+    "name": "Robert Swane",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/KHSM-6QT",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

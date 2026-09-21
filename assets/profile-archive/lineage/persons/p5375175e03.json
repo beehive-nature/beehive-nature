@@ -1,0 +1,78 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p5375175e03",
+ "bnr": "bnr://skaists.dev/blood/p5375175e03",
+ "identity": {
+  "name": "Queen Mutemwiya d'Égypte",
+  "lifespan": "1427BC–1388BC",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "KVLS-5GR"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p539d133270",
+    "name": "Artatama I",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p5a92550888",
+    "name": "Menwi of Egypt",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pcacf8b3b7e",
+    "name": "Amenhotep III Nebma'atre' 9th Pharaoh 18th Dynasty"
+   },
+   {
+    "id": "p21f8528088",
+    "name": "bint Shuttarna II de Mitanni"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p312e2af853",
+    "name": "Thutmose IV Menheprouré D'EGYPTE-DE MESOPOTAMIE",
+    "marriage": null
+   },
+   {
+    "id": "p70c917c50f",
+    "name": "King Shuttarna II d'Mitanni",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/KVLS-5GR",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

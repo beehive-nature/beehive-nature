@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p8661c4f699",
+ "bnr": "bnr://skaists.dev/blood/p8661c4f699",
+ "identity": {
+  "name": "Deborah Elizabeth Jones",
+  "lifespan": "1735–Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LZDW-GQV"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p181ef7964d",
+    "name": "Joseph Jones",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p7cde584be0",
+    "name": "Mary Prowse",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pccc17e8c97",
+    "name": "Miriam Hadlock"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p254f9ddf59",
+    "name": "Joseph Hadlock",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LZDW-GQV",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

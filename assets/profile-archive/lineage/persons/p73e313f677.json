@@ -1,0 +1,77 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p73e313f677",
+ "bnr": "bnr://skaists.dev/blood/p73e313f677",
+ "identity": {
+  "name": "Cassia Longina",
+  "lifespan": "35–53",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LDTY-57Z"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p19cf110f21",
+    "name": "Gaius Cassius Longinus",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p076cc30909",
+    "name": "Junia Lepida",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p726eb312d3",
+    "name": "Domitia Longina"
+   },
+   {
+    "id": "p4660d505d7",
+    "name": "Domitia Lucilla Longina"
+   },
+   {
+    "id": "pb505dee9ce",
+    "name": "Cassius Lepidus II DE ROME-?"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pa5e6129003",
+    "name": "Gnaeus Domitius Corbulo",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LDTY-57Z",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

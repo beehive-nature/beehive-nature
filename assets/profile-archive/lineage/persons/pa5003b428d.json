@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pa5003b428d",
+ "bnr": "bnr://skaists.dev/blood/pa5003b428d",
+ "identity": {
+  "name": "Bethides Argeades",
+  "lifespan": "0174BC–Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GSPP-8XW"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pae0f78630d",
+    "name": "Perkephos Argeades",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pcb8841c9d9",
+    "name": "E MRS Percefus in Britain",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p4fc9080a72",
+    "name": "Macedonian Princess Barsine Argeades"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pe25164d71d",
+    "name": "Cercia De Macédoine",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GSPP-8XW",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

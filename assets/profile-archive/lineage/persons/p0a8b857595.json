@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p0a8b857595",
+ "bnr": "bnr://skaists.dev/blood/p0a8b857595",
+ "identity": {
+  "name": "King Phraortes II Of Media",
+  "lifespan": "0700BC–0625BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GJY5-8XS"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pf7e009c426",
+    "name": "King Deioces Of Media",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "paffd28a5d6",
+    "name": "Mrs Deioces Of Media",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p836dddef40",
+    "name": "King Cyaxares Of Medes"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p3a5d344c3d",
+    "name": "Mrs Phraortes II Of Media",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GJY5-8XS",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

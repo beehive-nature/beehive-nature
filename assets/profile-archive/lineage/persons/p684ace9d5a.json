@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p684ace9d5a",
+ "bnr": "bnr://skaists.dev/blood/p684ace9d5a",
+ "identity": {
+  "name": "Juliane de Lomene",
+  "lifespan": "1240–1323",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "MDGS-PF9"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p2390589996",
+    "name": "Sir Richard de Lomene",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pdf085cec2b",
+    "name": "Mary Lammen",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p8d0a6fa4fc",
+    "name": "Henry de Willington"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p5f4ca540ea",
+    "name": "Ralph de Willington",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/MDGS-PF9",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

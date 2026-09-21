@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p73cd79015d",
+ "bnr": "bnr://skaists.dev/blood/p73cd79015d",
+ "identity": {
+  "name": "Kerstant Jacobsz van der Vliet",
+  "lifespan": "1465–1515",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LZJ4-DRC"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "LZND-S1Q",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "LZJ7-BYT",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pcaaecd9ca3",
+    "name": "Baertgen Corssen van Vliet van der Woerd"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p6e5c164b03",
+    "name": "Machteld Bartholomeusdr van Dorp",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LZJ4-DRC",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

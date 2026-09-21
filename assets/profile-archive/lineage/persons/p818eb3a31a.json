@@ -1,0 +1,64 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p818eb3a31a",
+ "bnr": "bnr://skaists.dev/blood/p818eb3a31a",
+ "identity": {
+  "name": "Llyr II ap Bleuddyd 11th King of Britain",
+  "lifespan": "0970BC–Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L84H-T4Y"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pf9656aa3ae",
+    "name": "Bleidudd ap Ruhudibras 10th King of Britain",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p2c02ca12a0",
+    "name": "Rhagaw verch Llyr de Bretagne"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p2188667dcc",
+    "name": "Mrs Llyr ap Bleidudd de Bretagne Queen of Britain",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L84H-T4Y",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

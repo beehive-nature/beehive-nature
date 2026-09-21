@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p24e2b37911",
+ "bnr": "bnr://skaists.dev/blood/p24e2b37911",
+ "identity": {
+  "name": "Lord Richard Arnold",
+  "lifespan": "1514–1593",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LWRG-V2F"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p64d093111c",
+    "name": "Richard Arnold",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p9af4bfbd16",
+    "name": "Emmate Young",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p0408df009f",
+    "name": "Nicholas Arnold"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pabd8e30e52",
+    "name": "Jaquita Agatha Young",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LWRG-V2F",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

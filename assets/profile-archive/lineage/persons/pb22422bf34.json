@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pb22422bf34",
+ "bnr": "bnr://skaists.dev/blood/pb22422bf34",
+ "identity": {
+  "name": "Frugillus Fulvus de Roma",
+  "lifespan": "71–Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PSWF-6M5"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p4f8bd38ca9",
+    "name": "Consul Senateur Marcus Asinuis Marcellus de Rome",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p8d2260e629",
+    "name": "Ummidia Quadratilla Asconia Seconda de Rome",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p6d41ffad9b",
+    "name": "Caia Asinia Frugilla DE ROME-DE ROME"
+   },
+   {
+    "id": "pce1aa6f2d1",
+    "name": "Furius de ROME"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pfab9b76bff",
+    "name": "Caia Asinia Julina de Rome",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PSWF-6M5",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

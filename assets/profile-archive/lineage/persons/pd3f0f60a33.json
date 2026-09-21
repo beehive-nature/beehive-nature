@@ -1,0 +1,64 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pd3f0f60a33",
+ "bnr": "bnr://skaists.dev/blood/pd3f0f60a33",
+ "identity": {
+  "name": "Mahol Descendant of Zerah al-Yahudha",
+  "lifespan": "1600BC–Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LDKN-D9S"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pb6387d38e7",
+    "name": "Generations in Egypt About four-hundred and thirty Years",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p053ca652d5",
+    "name": "Darda ben Mahol"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p95572f71bf",
+    "name": "Basia, Queen of Dardania bint Teucer",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LDKN-D9S",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

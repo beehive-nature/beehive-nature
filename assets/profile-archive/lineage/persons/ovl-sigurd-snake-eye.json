@@ -1,0 +1,72 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "ovl-sigurd-snake-eye",
+ "bnr": "bnr://skaists.dev/blood/ovl-sigurd-snake-eye",
+ "identity": {
+  "name": "Sigurd Snake-in-the-Eye (Sigurd Ragnarsson)",
+  "lifespan": "mid 9th century–0887? (traditional; possibly the Sigfred killed in West Francia 887)",
+  "gender": "M",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "attested-overlay",
+   "id": "ovl-sigurd-snake-eye"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "attested",
+  "basis": "attested-overlay: tradition carried by Ragnarssona þáttr / Ragnars saga / Saxo",
+  "class": "saga"
+ },
+ "research": {
+  "status": "tradition-entered",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pf5d40516b8",
+    "name": "Ragnar Sigurdsson",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p8bfb696a4b",
+    "name": "Queen Aslaug Sigurdsdottir Of Norway, Sweden And Denmark",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "ovl-harthacnut-i",
+    "name": "Harthacnut I of Denmark (Harthacanute)"
+   }
+  ],
+  "spouses": []
+ },
+ "layers": {
+  "records": null,
+  "tradition": {
+   "pack": "evidence/sigurd-snake-in-eye.json"
+  },
+  "testimony": [],
+  "meaning": [
+   {
+    "id": "crest-serpents-sigurd",
+    "symbol": "the crest's paired serpents",
+    "meaning": "Protection, continuity, renewal — and, in the founder's authorship of the house crest, in conversation with Sigurd Ormr-í-auga (snake-in-the-eye): the meaning and the tradition point at each other without either becoming the other.",
+    "connects": [
+     "ovl-sigurd-snake-eye"
+    ],
+    "kind": "meaning",
+    "attribution": "founder-authored symbolism — identified as symbolism, never rendered as a parent-child claim or as verification"
+   }
+  ]
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

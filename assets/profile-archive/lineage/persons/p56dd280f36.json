@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p56dd280f36",
+ "bnr": "bnr://skaists.dev/blood/p56dd280f36",
+ "identity": {
+  "name": "Julia Claudia",
+  "lifespan": "79–Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GZDJ-S4Y"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pce8a44ff49",
+    "name": "Manlius Acilius Glabrio I",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p2f846cebbd",
+    "name": "Arria Plaria Vera Priscilla",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p52ea69f97d",
+    "name": "Paulla de Rome"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p9c133eb34c",
+    "name": "Lucius Sergius Plautius De Rome",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GZDJ-S4Y",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

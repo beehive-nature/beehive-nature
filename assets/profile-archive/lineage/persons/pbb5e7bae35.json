@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pbb5e7bae35",
+ "bnr": "bnr://skaists.dev/blood/pbb5e7bae35",
+ "identity": {
+  "name": "Metilia DE ROME-DE ROME",
+  "lifespan": "53–Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GQGC-8FS"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p9a36e8cc53",
+    "name": "Metilus de Rome",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pe191ec3c58",
+    "name": "Acilia Aviola de Rome",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pff4c4ee585",
+    "name": "Marcus Appius Bradua"
+   },
+   {
+    "id": "pe9ffb02547",
+    "name": "Marcus Bradua de Rome"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pb600182f54",
+    "name": "Marcus Atilius Postumus BRADUA DE ROME",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GQGC-8FS",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

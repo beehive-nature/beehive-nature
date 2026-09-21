@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p7f15f46e1b",
+ "bnr": "bnr://skaists.dev/blood/p7f15f46e1b",
+ "identity": {
+  "name": "Robert I \"le Bon\" Comte d'Artois",
+  "lifespan": "1216–1249",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "9HPG-8RZ"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p5286e0a044",
+    "name": "Louis VIII 'le Lion' Roi de France",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pc2f999d132",
+    "name": "Blanca de Castilla Regina Consort de France",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p06cd914332",
+    "name": "Blanche d'Artois"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pe3b5e9e414",
+    "name": "Mathilde van Brabant",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/9HPG-8RZ",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

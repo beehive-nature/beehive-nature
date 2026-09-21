@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "ped378157b9",
+ "bnr": "bnr://skaists.dev/blood/ped378157b9",
+ "identity": {
+  "name": "King Marcomir IV de Sicambres of The Franks",
+  "lifespan": "89–0149",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LDHG-3Z6"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pa77ba781c3",
+    "name": "King Odomir de Toxandrie I",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p67c1046f87",
+    "name": "Queen Hasilda de Rugii Of Sicambri",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pf95e3d2845",
+    "name": "King Clodomir IV Magnus of the Salian Franks"
+   },
+   {
+    "id": "paa5d21782b",
+    "name": "Ascyla des Sicambres de Grande Bretagne"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p630c483e2b",
+    "name": "Queen Athilda De Britains",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LDHG-3Z6",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

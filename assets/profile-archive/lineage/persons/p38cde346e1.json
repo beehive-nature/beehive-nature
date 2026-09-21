@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p38cde346e1",
+ "bnr": "bnr://skaists.dev/blood/p38cde346e1",
+ "identity": {
+  "name": "Martin Nüssli",
+  "lifespan": "1520–Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LV2Y-BK3"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p8ade3db273",
+    "name": "Martin Nüssli",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p60e20e79a1",
+    "name": "Barbara Alenson",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pef465d5983",
+    "name": "Jacob Nüssli"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p6bce6f16d9",
+    "name": "Anna Elisabeth Wolfensberger",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LV2Y-BK3",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

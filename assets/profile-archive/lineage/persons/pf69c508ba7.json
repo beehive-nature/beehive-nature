@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pf69c508ba7",
+ "bnr": "bnr://skaists.dev/blood/pf69c508ba7",
+ "identity": {
+  "name": "Jannettee Jejanes",
+  "lifespan": "1595–1655",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LV8P-8TJ"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pd8400fa083",
+    "name": "End Jejanes",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pcd8b2948da",
+    "name": "Mrs End Jejanes",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pc6c3ac37fc",
+    "name": "Paulus Dircke Brinckerhoff"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p43013f2a42",
+    "name": "Dirck Dirchse Brinkerhoff Hoff",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LV8P-8TJ",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p0082bbb6f9",
+ "bnr": "bnr://skaists.dev/blood/p0082bbb6f9",
+ "identity": {
+  "name": "Robert de Vaux",
+  "lifespan": "1145–1216",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GFMM-BQF"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pc074338387",
+    "name": "William FitzRobert de Vaux",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p68b9f2a2c8",
+    "name": "Anna de Carlisle",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pa967e05942",
+    "name": "Oliver de Vaux"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p40f76d569f",
+    "name": "Ada d’Engaine",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GFMM-BQF",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

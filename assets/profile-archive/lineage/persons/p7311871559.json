@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p7311871559",
+ "bnr": "bnr://skaists.dev/blood/p7311871559",
+ "identity": {
+  "name": "Marritje Gerrits",
+  "lifespan": "1632–Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "M86R-GR4"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p439e9762ab",
+    "name": "Gerrit Jansz",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p20ca042be2",
+    "name": "Trijntje Henrix or Heinrixdr",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pd9b0be5759",
+    "name": "Maria Van Hoogten"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p8c82eee7b0",
+    "name": "Frans Janszen Van Hoogten",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/M86R-GR4",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

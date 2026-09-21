@@ -1,0 +1,64 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pd84668a20a",
+ "bnr": "bnr://skaists.dev/blood/pd84668a20a",
+ "identity": {
+  "name": "Anne Bruneau",
+  "lifespan": "–1619",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "4GJC-3T5"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pa4b847b147",
+    "name": "Jean Bruneau",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p025fe50cb7",
+    "name": "John Perrin"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p27f459237d",
+    "name": "John Perrin I",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/4GJC-3T5",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

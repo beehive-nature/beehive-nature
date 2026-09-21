@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "paae14ee809",
+ "bnr": "bnr://skaists.dev/blood/paae14ee809",
+ "identity": {
+  "name": "Senusret-sonbe",
+  "lifespan": "Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G17G-Y6Z"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p3980555868",
+    "name": "Senusret II Khakheperre 4th Pharaoh 12th Dynasty",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p8f71777f65",
+    "name": "Nofret II, Kings Daughter",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p1f3517ac75",
+    "name": "Potipherah Ben Ahiram Priest of On"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p77936dd538",
+    "name": "Sebekshedty-Neferu of Egypt",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G17G-Y6Z",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

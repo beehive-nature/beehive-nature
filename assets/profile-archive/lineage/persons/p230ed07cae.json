@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p230ed07cae",
+ "bnr": "bnr://skaists.dev/blood/p230ed07cae",
+ "identity": {
+  "name": "Fabia Minor",
+  "lifespan": "0406BC–Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GGND-C6X"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p8a1b71a10f",
+    "name": "Marcus Fabius Ambustus",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p719e7bbc2b",
+    "name": "Mrs Marcus Fabius Ambustus",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p496952c091",
+    "name": "Licinius Calvus Stolo"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pcf9b1c08a6",
+    "name": "Gaius Licinius C. f. P. n. Calvus Stolo Consul",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GGND-C6X",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

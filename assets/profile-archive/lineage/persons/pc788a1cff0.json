@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pc788a1cff0",
+ "bnr": "bnr://skaists.dev/blood/pc788a1cff0",
+ "identity": {
+  "name": "Prince Pascweten de Rennes II",
+  "lifespan": "0882–0936",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PDT6-T58"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pbbd00c29a5",
+    "name": "King Alain I \"The Great\" of Brittany, Duc de Bretagne et Comte de  Vanes",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pee73eeb9bf",
+    "name": "Queen Oreguen Of Brittany",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p6a9fbc2dce",
+    "name": "Judicaël Bérenger Comte de Rennes"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pd7459a12cc",
+    "name": "Adalind Judith de Bretagne of Rennes",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PDT6-T58",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

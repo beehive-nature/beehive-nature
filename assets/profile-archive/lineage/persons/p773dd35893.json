@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p773dd35893",
+ "bnr": "bnr://skaists.dev/blood/p773dd35893",
+ "identity": {
+  "name": "Princess Gynrithe Olafsdottir Of Denmark",
+  "lifespan": "0923–1002",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "KLXB-KTC"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p4f8023f3bf",
+    "name": "King Olof Björnsson",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p55253d3eb0",
+    "name": "Queen Ingeborg Thrandsdottir Of Sweden",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pa6cf2ec02d",
+    "name": "Wevia de Crépon"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pc98d0d2119",
+    "name": "Herbastus De Crêpon",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/KLXB-KTC",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": true,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,77 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pf091508f8d",
+ "bnr": "bnr://skaists.dev/blood/pf091508f8d",
+ "identity": {
+  "name": "Edna bint Azrial",
+  "lifespan": "3379BC–Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "9WP8-G7L"
+  }
+ ],
+ "evidence": {
+  "era": "recorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "recorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pc03038a270",
+    "name": "Azrial ibn Yarid Prince de Sippa",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pd0436af6ce",
+    "name": "Baraka bat  Mahla'il",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p50323072f8",
+    "name": "Lamik ibn Mutwashlack ibn Idris"
+   },
+   {
+    "id": "p07564be563",
+    "name": "Eliaquim ibn Mutwashlack ibn Idris"
+   },
+   {
+    "id": "p5028a84c9b",
+    "name": "Rake'el ibn Mutwashlack ibn Idris"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p16dc931e2e",
+    "name": "Mutwashlack ibn Idris",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/9WP8-G7L",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

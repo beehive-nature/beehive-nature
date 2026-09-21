@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p2b3b9d3630",
+ "bnr": "bnr://skaists.dev/blood/p2b3b9d3630",
+ "identity": {
+  "name": "Ardys",
+  "lifespan": "1230BC–Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GNRV-PST"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p7d9ebdfca7",
+    "name": "King Of Lydia Giges",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pf98c9a865b",
+    "name": "Nyssia",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pcc4a42a082",
+    "name": "Briseus de Pedasus"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p09b1c717ae",
+    "name": "Sra. de Ardys",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GNRV-PST",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

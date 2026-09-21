@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "peb06463478",
+ "bnr": "bnr://skaists.dev/blood/peb06463478",
+ "identity": {
+  "name": "Johannes Löw",
+  "lifespan": "1600–1669",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "P3ZF-5KD"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p19a7cc1dd3",
+    "name": "Ludwig Löw",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p45805d1b9a",
+    "name": "Clara Stähler",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pcd9d4e1fce",
+    "name": "Anna Maria Loew"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p8710751900",
+    "name": "Christine Scheffen",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/P3ZF-5KD",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

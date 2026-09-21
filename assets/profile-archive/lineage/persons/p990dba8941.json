@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p990dba8941",
+ "bnr": "bnr://skaists.dev/blood/p990dba8941",
+ "identity": {
+  "name": "Nestag ibn Heraclim",
+  "lifespan": "2100BC–Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LD5M-KMR"
+  }
+ ],
+ "evidence": {
+  "era": "recorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "recorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pa5b86c67ac",
+    "name": "Heraclim ibn Falikh ibn Abir",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "peb90b0f90b",
+    "name": "Shelah bint Urghuwa",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pc38646c229",
+    "name": "Iyaska bint Nestag Chaldees"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p90a6a67cb3",
+    "name": "Mrs Nestag ibn Heraclim of Ur",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LD5M-KMR",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

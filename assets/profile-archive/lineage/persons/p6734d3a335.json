@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p6734d3a335",
+ "bnr": "bnr://skaists.dev/blood/p6734d3a335",
+ "identity": {
+  "name": "Julia Prima of Rome",
+  "lifespan": "0788BC–Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PHMZ-DP1"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p3fdf69ab6d",
+    "name": "King of Rome Romulus",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pa3a6272a9b",
+    "name": "Hersilia Sabina",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p2bc6469292",
+    "name": "Numa Pompilius The Sabini"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p141c84e7be",
+    "name": "Pomponius Pompilius the Sabine",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PHMZ-DP1",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

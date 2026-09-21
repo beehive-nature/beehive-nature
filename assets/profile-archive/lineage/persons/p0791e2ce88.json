@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p0791e2ce88",
+ "bnr": "bnr://skaists.dev/blood/p0791e2ce88",
+ "identity": {
+  "name": "Probiana Probianus",
+  "lifespan": "0345–Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "P4RT-FCB"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p6609af9191",
+    "name": "PROBIANUS",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p52275208f0",
+    "name": "Probiana Probianus",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pf9f02db689",
+    "name": "Acilius Glabrio Sibidius Spedius"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pa79728d6aa",
+    "name": "Rufius Valerius Messala",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/P4RT-FCB",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

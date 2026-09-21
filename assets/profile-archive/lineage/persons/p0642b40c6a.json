@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p0642b40c6a",
+ "bnr": "bnr://skaists.dev/blood/p0642b40c6a",
+ "identity": {
+  "name": "Sir John Courtenay",
+  "lifespan": "1384–1406",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LTG9-KQ6"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p8788a1ef94",
+    "name": "Philip de Courtenay",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pc6a8b49ef8",
+    "name": "Ann Margaret Wake",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p9e0e3759b8",
+    "name": "Sir Philip de Courtenay of Powderham and Molland"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p0da265c00a",
+    "name": "Joan Champernoun",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LTG9-KQ6",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

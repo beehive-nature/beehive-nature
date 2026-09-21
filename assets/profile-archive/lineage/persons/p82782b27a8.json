@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p82782b27a8",
+ "bnr": "bnr://skaists.dev/blood/p82782b27a8",
+ "identity": {
+  "name": "Margaret Wardlaw",
+  "lifespan": "1559–1614",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PHFW-7KC"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pc936b1e9fa",
+    "name": "Robert Wardlaw",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pe066e9c172",
+    "name": "Margaret Brown",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p36f0569df9",
+    "name": "Captain Edward Henry Lindsay"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pcd0be2bdb6",
+    "name": "Thomas J. Carnegie-Lyndsay Earl of Southesk",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PHFW-7KC",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

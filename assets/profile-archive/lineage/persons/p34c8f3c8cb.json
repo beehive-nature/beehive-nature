@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p34c8f3c8cb",
+ "bnr": "bnr://skaists.dev/blood/p34c8f3c8cb",
+ "identity": {
+  "name": "Manius Acilius Glabrio VI",
+  "lifespan": "0040BC–15",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GQZY-GJQ"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pe35f77ec51",
+    "name": "Manius Acilius Glabrio V",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p9eaeeea967",
+    "name": "Mrs Manius Acilius Glabrio V",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pdc5dbeb19d",
+    "name": "Gaius Calpurnius Glabrio"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pfbb1e10579",
+    "name": "Mrs Manius Acilius Glabrio",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GQZY-GJQ",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

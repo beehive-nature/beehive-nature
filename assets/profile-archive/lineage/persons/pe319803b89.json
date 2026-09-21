@@ -1,0 +1,81 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pe319803b89",
+ "bnr": "bnr://skaists.dev/blood/pe319803b89",
+ "identity": {
+  "name": "Queen Athildis of the Sicambrian Franks",
+  "lifespan": "0278–0356",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LHNV-GW7"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p064e792eb2",
+    "name": "Marcomir Chrocus I de Toxandrie",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p0811e72dd3",
+    "name": "Sigarde d'Alemania",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p95ad095d24",
+    "name": "Witta De Thuringe Sol. De Jutland"
+   },
+   {
+    "id": "pcad8a13d82",
+    "name": "Queen Ascyla de Ascyllius Of Lombardia"
+   },
+   {
+    "id": "pb1d3b99066",
+    "name": "Malaric I de Toxandrie Roi des Francs"
+   },
+   {
+    "id": "p78d112ba93",
+    "name": "Isabelle Ivy de los Francos"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pc5b8959e69",
+    "name": "King Ragaise Merogais de Toxandrie I",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LHNV-GW7",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

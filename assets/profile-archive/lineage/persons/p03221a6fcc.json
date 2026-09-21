@@ -1,0 +1,80 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p03221a6fcc",
+ "bnr": "bnr://skaists.dev/blood/p03221a6fcc",
+ "identity": {
+  "name": "Agnes Warnestead",
+  "lifespan": "1470–1550",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PS3K-DFN"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "GV79-MXC",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "GTLX-FHS",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p64d093111c",
+    "name": "Richard Arnold"
+   },
+   {
+    "id": "p9af4bfbd16",
+    "name": "Emmate Young"
+   },
+   {
+    "id": "pe351436f56",
+    "name": "Pearce Young Jr"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p4cfec8bee8",
+    "name": "Thomas Arnold",
+    "marriage": null
+   },
+   {
+    "id": "pde02f29f42",
+    "name": "Pearse Young",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PS3K-DFN",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

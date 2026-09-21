@@ -1,0 +1,77 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pa9b16ad3fe",
+ "bnr": "bnr://skaists.dev/blood/pa9b16ad3fe",
+ "identity": {
+  "name": "Djedefre \"Kheper\", 3rd Pharaoh, 4th Dynasty",
+  "lifespan": "2585BC–2558BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G4MT-ZQZ"
+  }
+ ],
+ "evidence": {
+  "era": "recorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "recorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p1678b7c111",
+    "name": "Khufu Menes",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pb31c5d30e9",
+    "name": "Henutsen",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pa78e0b9b7d",
+    "name": "Neferhetepes bint Djedefre"
+   },
+   {
+    "id": "pa39d77a357",
+    "name": "Pharaoh Khafre"
+   },
+   {
+    "id": "p3e5232489f",
+    "name": "Setka"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p11f9aecb9c",
+    "name": "Priestess Hetepheres II bint Khufu, Queen of Egypt 4th Dynasty",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G4MT-ZQZ",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

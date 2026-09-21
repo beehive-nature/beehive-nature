@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pd644538fbb",
+ "bnr": "bnr://skaists.dev/blood/pd644538fbb",
+ "identity": {
+  "name": "Marduk Balatsu Iqbi De Babylone Souverain de Babylone",
+  "lifespan": "–0812BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GPX1-5QV"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pbba545fffa",
+    "name": "Marduk Zakir Schumi",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p64e1673631",
+    "name": "Shuma Damqa Assyria",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pcb6cf1a277",
+    "name": "Mrs Agar Nabu"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p0f6b2ed9c7",
+    "name": "Marduk Balatsu Iqbi Ap Babylone Souverain Ap Babylone",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GPX1-5QV",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

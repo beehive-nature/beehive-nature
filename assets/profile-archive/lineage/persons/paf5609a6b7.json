@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "paf5609a6b7",
+ "bnr": "bnr://skaists.dev/blood/paf5609a6b7",
+ "identity": {
+  "name": "Marcus Pomponius Maecius Probus",
+  "lifespan": "0201–0228",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GSVV-32B"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p71d9f777e5",
+    "name": "Marcus Maecius Probus Major",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p26033ccb26",
+    "name": "Pomponia Arria",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pbfdd11f57d",
+    "name": "Marcus Maecius Probus"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p526ce5c10e",
+    "name": "Cethegilla de Rome",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GSVV-32B",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

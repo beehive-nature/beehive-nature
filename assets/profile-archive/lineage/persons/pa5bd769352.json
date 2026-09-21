@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pa5bd769352",
+ "bnr": "bnr://skaists.dev/blood/pa5bd769352",
+ "identity": {
+  "name": "Helvise d’Ibelin Comtesse de Sidon, Dame de Castres",
+  "lifespan": "1182–1216",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "K6MM-WKG"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p680c31ace1",
+    "name": "Balian d’Ibelin",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pef4936f618",
+    "name": "Μαρία Κομνηνή της Ιερουσαλήμ",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p9d93f63dfc",
+    "name": "Philippe de Montfort - Seigneur de Tyre I"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p0cc02f0776",
+    "name": "comte Guy de Montfort - L'Amaury de Bigorre",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/K6MM-WKG",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

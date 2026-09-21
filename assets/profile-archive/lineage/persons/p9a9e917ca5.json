@@ -1,0 +1,63 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p9a9e917ca5",
+ "bnr": "bnr://skaists.dev/blood/p9a9e917ca5",
+ "identity": {
+  "name": "Son Of Hananiah",
+  "lifespan": "0450BC–Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GKZR-RMN"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p191fead26f",
+    "name": "Hananiah II ben Hachaliah",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p5102f18b2e",
+    "name": "Mrs Hananiah II",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p294cbb981c",
+    "name": "Gid Di Yehezqiyah Ha-David"
+   }
+  ],
+  "spouses": []
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GKZR-RMN",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

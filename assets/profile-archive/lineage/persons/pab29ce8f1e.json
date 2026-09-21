@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pab29ce8f1e",
+ "bnr": "bnr://skaists.dev/blood/pab29ce8f1e",
+ "identity": {
+  "name": "St. Begga, Äbtissin von Andenne",
+  "lifespan": "0615–0693",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LDSS-HQZ"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p4f0d1ec585",
+    "name": "Pippin I. der Ältere Hausmeier in Austrasien",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pa2030a4e04",
+    "name": "Iduberga von Nivelles",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pe0556e5003",
+    "name": "Pippin II. der Mittlere, Hausmeier von Austrasien und Neustrien"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p39b2040804",
+    "name": "Ansegisel von Metz Hausmeier von Austrasien und Neustrien",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LDSS-HQZ",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

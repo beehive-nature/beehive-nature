@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p781495b429",
+ "bnr": "bnr://skaists.dev/blood/p781495b429",
+ "identity": {
+  "name": "Amauri de Saint-Amand",
+  "lifespan": "1235–1285",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "277J-ZH7"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pa93f07e9ea",
+    "name": "Ralph de Saint-Amand",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pf53fd663d2",
+    "name": "Asceline d'Aubigny",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p9b9fcd5f1e",
+    "name": "Hawise de Saint-Amand"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p454ed4eae5",
+    "name": "Isabella Ferquisia",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/277J-ZH7",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

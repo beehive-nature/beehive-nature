@@ -1,0 +1,87 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p022ced245c",
+ "bnr": "bnr://skaists.dev/blood/p022ced245c",
+ "identity": {
+  "name": "Ibrahim ibn Tarakh 6th Prophet of Islam",
+  "lifespan": "2166BC–1991BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "9CDJ-Z5J"
+  }
+ ],
+ "evidence": {
+  "era": "recorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "recorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p9c3efa04cb",
+    "name": "Terah ben Nahor",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p6651aa3e3a",
+    "name": "first daughter bat Lahij",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p403351ec22",
+    "name": "Ishaq bin Ibrahim 9th Prophet of Islam"
+   },
+   {
+    "id": "pd698fd4846",
+    "name": "Isma'il ibn Ibrāhīm 8th Prophet of Islam"
+   },
+   {
+    "id": "p2b5cfa09c2",
+    "name": "Madyan ibn Ibrahim the Zoroastrian"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p0d57672d41",
+    "name": "Sarah bint Buthwil",
+    "marriage": null
+   },
+   {
+    "id": "p31f67c846a",
+    "name": "Hagar the Egyptian",
+    "marriage": null
+   },
+   {
+    "id": "p87341dea7f",
+    "name": "Qanturah ibn Maftur",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/9CDJ-Z5J",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

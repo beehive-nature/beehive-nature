@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p2c5dc9d1e5",
+ "bnr": "bnr://skaists.dev/blood/p2c5dc9d1e5",
+ "identity": {
+  "name": "Calavia DE ROME",
+  "lifespan": "0229BC–Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G6RP-7W3"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p380433501d",
+    "name": "Pacuvius Calavius",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pdfd8d79237",
+    "name": "Claudia Pulcher",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pfc113b42c7",
+    "name": "Marcus Livius Drusus II de Rome Le Jeune"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pfd3459b523",
+    "name": "Marcus Aemilius Lepidus AEMILIUS IV",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G6RP-7W3",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

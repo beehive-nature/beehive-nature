@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p164ff0b3df",
+ "bnr": "bnr://skaists.dev/blood/p164ff0b3df",
+ "identity": {
+  "name": "John Wright of Kelvedon",
+  "lifespan": "1488–1551",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L1W5-9RX"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pecbe7bc22e",
+    "name": "Lord John Wright",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p979935c97c",
+    "name": "Agnes Hunt",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pe618c98430",
+    "name": "Katherine Wright of Kelvedon"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p5066e08ced",
+    "name": "Olive",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L1W5-9RX",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

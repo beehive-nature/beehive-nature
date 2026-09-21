@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pf037aa2416",
+ "bnr": "bnr://skaists.dev/blood/pf037aa2416",
+ "identity": {
+  "name": "Claas Adriaansz van Adrichem",
+  "lifespan": "1538–1607",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GBYT-SQR"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p4352086206",
+    "name": "Adriaen Claesz van Adrichem",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pcaaecd9ca3",
+    "name": "Baertgen Corssen van Vliet van der Woerd",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p1911cbb625",
+    "name": "Grietgen Claesdr van Adrichem"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pf590a36883",
+    "name": "Maritgen Fransdr Meerman",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GBYT-SQR",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

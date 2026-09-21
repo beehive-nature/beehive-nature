@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p97570b01e6",
+ "bnr": "bnr://skaists.dev/blood/p97570b01e6",
+ "identity": {
+  "name": "Cornelia La Mayor",
+  "lifespan": "0201BC–0130BC",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "P4KW-TFV"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p1e21ea9880",
+    "name": "Publius Cornelius Scipio “Africanus”",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p918fe8e3fb",
+    "name": "Aemilia Paulla Tercia",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p70cc2f3aee",
+    "name": "Publius Cornelius Nasica Serapio SCIPIO DE ROME-SCIPIO DE ROME"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pafed05f691",
+    "name": "Publius Cornelius Scipio Nasica Corculum Triumvir",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/P4KW-TFV",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pe3be043872",
+ "bnr": "bnr://skaists.dev/blood/pe3be043872",
+ "identity": {
+  "name": "Licinia Cornelia Volusia Torquata",
+  "lifespan": "55–Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G3Q8-NH5"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p9d51dcbb04",
+    "name": "Marcus Licinius Scribonianus Camerinus",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pb865cd2ae3",
+    "name": "Volusia Cornelia",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pf71dfc455b",
+    "name": "Volusia Volusianus Saturninus"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pbad67272d5",
+    "name": "Lucius Volusianus Saturninus",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G3Q8-NH5",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

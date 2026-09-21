@@ -1,0 +1,78 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p14243069cd",
+ "bnr": "bnr://skaists.dev/blood/p14243069cd",
+ "identity": {
+  "name": "Meryre Pepi I 3rd Pharaoh 6th Dynasty",
+  "lifespan": "2295BC–2283BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G4PY-HHP"
+  }
+ ],
+ "evidence": {
+  "era": "recorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "recorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pcf1a9c6bff",
+    "name": "Teti",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p2957bcf730",
+    "name": "Queen Khuit of Egypt I",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p1ea9f26f81",
+    "name": "Pepi II"
+   },
+   {
+    "id": "pbf167b43e8",
+    "name": "Iput II de Egypte"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pdfe78e2b05",
+    "name": "Nubwenet de Egypte",
+    "marriage": null
+   },
+   {
+    "id": "p77e805e18f",
+    "name": "Ankhesenpepi II bat Khui de Egypte",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G4PY-HHP",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,68 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p550a67a981",
+ "bnr": "bnr://skaists.dev/blood/p550a67a981",
+ "identity": {
+  "name": "Reina Sancha de Castilla",
+  "lifespan": "1155–1208",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "KFLP-MFB"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "paa6ec86ab2",
+    "name": "Rey Alfonso VII \"El emperador\" Rey de Castilla, León, Galicia y Toledo, Imperator Totius Hispaniæ",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "LBHB-3X9",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pf136736497",
+    "name": "Comte Alfons II de Provença"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pc96347aa90",
+    "name": "Rey Alfonso II de Aragon \"El Casto\"",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/KFLP-MFB",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

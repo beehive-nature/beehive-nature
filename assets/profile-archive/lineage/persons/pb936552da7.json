@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pb936552da7",
+ "bnr": "bnr://skaists.dev/blood/pb936552da7",
+ "identity": {
+  "name": "Plotius II di Roma",
+  "lifespan": "18–49",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L19J-3KH"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p3eabae2043",
+    "name": "Plotius I di Roma",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p1802b9c7e7",
+    "name": "Marciana Ercolano",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pf223c0d6d4",
+    "name": "Plotia Isaurica Plotius"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p7c8d8e2cdc",
+    "name": "Servilia Isaurica of Rome",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L19J-3KH",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

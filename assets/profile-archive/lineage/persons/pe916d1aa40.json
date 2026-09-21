@@ -1,0 +1,78 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pe916d1aa40",
+ "bnr": "bnr://skaists.dev/blood/pe916d1aa40",
+ "identity": {
+  "name": "Amenhotep I Djeserkare , 2nd Pharaoh 18th Dynasty",
+  "lifespan": "1560BC–1504BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "9MCF-MJR"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p326ba7ffb2",
+    "name": "Ahmose I Nebpehtire",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p9e72de83f9",
+    "name": "Ahmose-Néfértari",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p7af0af5c30",
+    "name": "Ahmose Nebpehtire"
+   },
+   {
+    "id": "p097ed2783f",
+    "name": "Thutmose I Aakheperkare, 3rd Pharaoh 18th Dynasty"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p61c80c5f4c",
+    "name": "Ahmose-Meritamon Nebpehtire",
+    "marriage": null
+   },
+   {
+    "id": "p84d4e8e46e",
+    "name": "Seniseneb de Egipto",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/9MCF-MJR",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

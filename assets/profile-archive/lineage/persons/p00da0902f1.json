@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p00da0902f1",
+ "bnr": "bnr://skaists.dev/blood/p00da0902f1",
+ "identity": {
+  "name": "Kesed ibn Arfakhsad",
+  "lifespan": "2294BC–1878BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LDPB-SCX"
+  }
+ ],
+ "evidence": {
+  "era": "recorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "recorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p4b982add26",
+    "name": "Arphaxad ben Shem",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p913440dd73",
+    "name": "Rasu'eya bint Elam",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p0fa3333957",
+    "name": "'Ûr-Nammu ibn Kesed King of the Neo-Sumerian Empire"
+   },
+   {
+    "id": "pc9a5a235da",
+    "name": "Ahar ibn Kesed"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p357e0c6834",
+    "name": "Asshar bint Assur",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LDPB-SCX",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

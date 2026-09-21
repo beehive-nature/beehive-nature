@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p13b175908a",
+ "bnr": "bnr://skaists.dev/blood/p13b175908a",
+ "identity": {
+  "name": "Riwallon III Comte de Poher",
+  "lifespan": "0788–0857",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LKCH-GG5"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p8d1e97d293",
+    "name": "Duke Erispoë rex Brittonum and  I Earl of Poher.",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p60d770c618",
+    "name": "Duchess Adele d'Alsace de Hunebourg",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p1960b22c32",
+    "name": "Queen Marmoëc de Poher"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p37805b1bad",
+    "name": "Roiandrech De Cornouialle",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LKCH-GG5",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

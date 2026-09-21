@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pa8cb1209e1",
+ "bnr": "bnr://skaists.dev/blood/pa8cb1209e1",
+ "identity": {
+  "name": "Príncesa Creusa de Tróia",
+  "lifespan": "1219BC–1199BC",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G5CR-66S"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p0e5e9893a0",
+    "name": "Priam Podarces King of Troy",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p106ebd3486",
+    "name": "Hécube de Phrygie",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p6e85dd6c26",
+    "name": "King Ascanius Euryleon de Lavinium"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pdea312e695",
+    "name": "Æneas, son of Anchises",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G5CR-66S",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pbf6cb71878",
+ "bnr": "bnr://skaists.dev/blood/pbf6cb71878",
+ "identity": {
+  "name": "Géraud Ier de Mâcon",
+  "lifespan": "1124–1184",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "KC5Z-8G9"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "GNLP-B5F",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "LZ82-9QL",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p240bc9ad02",
+    "name": "Countess Béatrice de Vienne-Mâcon of Savoy"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p252032514d",
+    "name": "Maurette de Salins",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/KC5Z-8G9",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,83 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pc8b11378ca",
+ "bnr": "bnr://skaists.dev/blood/pc8b11378ca",
+ "identity": {
+  "name": "Abbess Richilde D'Arles",
+  "lifespan": "0827–0883",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LZXK-6XH"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p7263f96785",
+    "name": "Boson l'Ancien d'Arles",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p124960d50d",
+    "name": "Engeltrude",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p63a7acba18",
+    "name": "Duke Thierry II de Chalons"
+   },
+   {
+    "id": "p24ec66954f",
+    "name": "Boson de Provence, comte de Vienne"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p2b86ee92af",
+    "name": "Count Thierry de Chalons I  of Autun",
+    "marriage": null
+   },
+   {
+    "id": "pfd06fb763f",
+    "name": "Bivin de Vienne",
+    "marriage": null
+   },
+   {
+    "id": "p8708ba57ef",
+    "name": "Berenger d'Amiens de Lommois II",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LZXK-6XH",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p51259791b8",
+ "bnr": "bnr://skaists.dev/blood/p51259791b8",
+ "identity": {
+  "name": "Agnes Lingwood",
+  "lifespan": "1564–1619",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "M1XM-SLX"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p8405cb2d83",
+    "name": "John Lingwood",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p248d6de800",
+    "name": "Jone",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p01e967d5d0",
+    "name": "Joseph Loomis Sr."
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p303bdc6b04",
+    "name": "John Loomis II",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/M1XM-SLX",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

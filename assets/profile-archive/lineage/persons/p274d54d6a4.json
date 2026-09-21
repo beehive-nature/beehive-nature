@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p274d54d6a4",
+ "bnr": "bnr://skaists.dev/blood/p274d54d6a4",
+ "identity": {
+  "name": "Gébica De Burgundy",
+  "lifespan": "0280–Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PDT2-65W"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "PDYW-1QB",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "PDYW-JMX",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p34eb6b3a6f",
+    "name": "Orkning Des Burgondes"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p2087166dd5",
+    "name": "Elba d'Alémanie",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PDT2-65W",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p50a1791a02",
+ "bnr": "bnr://skaists.dev/blood/p50a1791a02",
+ "identity": {
+  "name": "Sheth ibn Saraph of Moab",
+  "lifespan": "Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GGVG-2FB"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pa7ce6b6728",
+    "name": "Saraph of Moab",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pa95f2ea102",
+    "name": "Mrs Saraph",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pe9e9397c92",
+    "name": "Tzipor ben Sheth"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pb7b99b35be",
+    "name": "Mrs Sheth of Moab",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GGVG-2FB",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

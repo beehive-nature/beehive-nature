@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p176f36c3e0",
+ "bnr": "bnr://skaists.dev/blood/p176f36c3e0",
+ "identity": {
+  "name": "Thomas West 8th Baron De La Warr",
+  "lifespan": "1457–1525",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LTGM-QS1"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p296541d2ea",
+    "name": "Richard West 7th Baron De La Warre",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p38f5a559e1",
+    "name": "Lady Catharine Hungerford",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p62c086f426",
+    "name": "Elizabeth West"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pf36fff0d20",
+    "name": "Elizabeth Mortimer Baroness la Warre",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LTGM-QS1",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

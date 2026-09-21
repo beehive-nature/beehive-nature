@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p18dc4759a3",
+ "bnr": "bnr://skaists.dev/blood/p18dc4759a3",
+ "identity": {
+  "name": "William de London",
+  "lifespan": "1168–Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LHC3-2JY"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pf64caef6cd",
+    "name": "William de London II",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p00e15c4315",
+    "name": "Sibylla FitzWilliam",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pfe41bfceda",
+    "name": "Lord Thomas de Londres of Kidwelly"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p727d449ddc",
+    "name": "Maud De Cantilupe",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LHC3-2JY",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

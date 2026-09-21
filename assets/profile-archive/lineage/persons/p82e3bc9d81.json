@@ -1,0 +1,82 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p82e3bc9d81",
+ "bnr": "bnr://skaists.dev/blood/p82e3bc9d81",
+ "identity": {
+  "name": "King Henry II of England",
+  "lifespan": "1133–1189",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LYD7-TB9"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p5c46caf55c",
+    "name": "Geoffrey V 'le Bel' Comte de Anjou et Maine",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p699609f3d3",
+    "name": "Empress Matilda of England",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p42f4f5576a",
+    "name": "King John of England"
+   },
+   {
+    "id": "p46801890b1",
+    "name": "William , Longspee, 3rd Earl of Salisbury"
+   },
+   {
+    "id": "p51acb41e47",
+    "name": "Eleanor of England Reina Consorte de Castilla"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pa13b083506",
+    "name": "Éléanore d'Aquitaine",
+    "marriage": null
+   },
+   {
+    "id": "p196118bf90",
+    "name": "Ida de Tosny Countess of Norfolk",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LYD7-TB9",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

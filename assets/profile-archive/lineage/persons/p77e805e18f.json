@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p77e805e18f",
+ "bnr": "bnr://skaists.dev/blood/p77e805e18f",
+ "identity": {
+  "name": "Ankhesenpepi II bat Khui de Egypte",
+  "lifespan": "2290BC–2250BC",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GMNF-PLD"
+  }
+ ],
+ "evidence": {
+  "era": "recorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "recorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p3aee8d2a2e",
+    "name": "Khui of Egypt",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pf9d1c8eacb",
+    "name": "Nebet de Egypte , 1st Female Vizier",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p1ea9f26f81",
+    "name": "Pepi II"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p14243069cd",
+    "name": "Meryre Pepi I 3rd Pharaoh 6th Dynasty",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GMNF-PLD",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

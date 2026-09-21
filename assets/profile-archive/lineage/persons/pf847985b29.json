@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pf847985b29",
+ "bnr": "bnr://skaists.dev/blood/pf847985b29",
+ "identity": {
+  "name": "Suzanne de Gramines",
+  "lifespan": "1015–1099",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GNQR-554"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p687033abb7",
+    "name": "Siger de Grimmingen",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p31d7cebe0b",
+    "name": "Mrs Siger de Grimmingen",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p03a859efcc",
+    "name": "Guillaume de Guines seigneur de Bournonville"
+   },
+   {
+    "id": "p6e708a7424",
+    "name": "Baudouin I de Guînes"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p6a9c64000e",
+    "name": "Eustache Ier de GUÎNES",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GNQR-554",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

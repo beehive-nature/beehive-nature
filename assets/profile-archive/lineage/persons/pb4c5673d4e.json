@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pb4c5673d4e",
+ "bnr": "bnr://skaists.dev/blood/pb4c5673d4e",
+ "identity": {
+  "name": "Grimhilde d'Alsace",
+  "lifespan": "0770–0865",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GS9T-JHD"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "PFCP-XN8",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "PFX4-7TS",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p6c8ff46f8d",
+    "name": "Engeltrude de Fézensac"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p392df31d9f",
+    "name": "Leuthard Ier de Paris comte de Fézensac",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GS9T-JHD",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

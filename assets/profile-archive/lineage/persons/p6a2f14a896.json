@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p6a2f14a896",
+ "bnr": "bnr://skaists.dev/blood/p6a2f14a896",
+ "identity": {
+  "name": "Rei Visislaw des Hérules",
+  "lifespan": "70–0119",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "P7HJ-MT8"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p37e3d5aaf4",
+    "name": "King Hutterus of the Herulii",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p5c48054421",
+    "name": "Judith de Jutlandia",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p6faff73f69",
+    "name": "Vitilaus de los Hérulos"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p794ec42fe5",
+    "name": "Tibernia de Norvége",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/P7HJ-MT8",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

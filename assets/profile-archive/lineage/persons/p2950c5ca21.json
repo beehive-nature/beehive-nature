@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p2950c5ca21",
+ "bnr": "bnr://skaists.dev/blood/p2950c5ca21",
+ "identity": {
+  "name": "Peter de Montfort",
+  "lifespan": "1240–1287",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L2K5-7QQ"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pca62bde21b",
+    "name": "Peter de Montfort",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pf3b7e493f5",
+    "name": "Alice de Aldithley",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p84a867e2a0",
+    "name": "Elizabeth de Montfort"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p3babcedc12",
+    "name": "Matilda de La Mare",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L2K5-7QQ",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pc814c9719e",
+ "bnr": "bnr://skaists.dev/blood/pc814c9719e",
+ "identity": {
+  "name": "King Francus De Lorraine I of The Sicambria",
+  "lifespan": "0058BC–0005BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "9CZY-WCR"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pce3ace883e",
+    "name": "Antharius King of the Sicambri",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pa3d51240b0",
+    "name": "Rainha de Sicambrii Antharius Sicambrisdatter",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pfb1229d470",
+    "name": "Clodius II King of The West Franks"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p170ad4325f",
+    "name": "Queen Athidis Of The Sicambrian Franks",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/9CZY-WCR",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

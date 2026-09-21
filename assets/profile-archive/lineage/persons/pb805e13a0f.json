@@ -1,0 +1,63 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pb805e13a0f",
+ "bnr": "bnr://skaists.dev/blood/pb805e13a0f",
+ "identity": {
+  "name": "Sir J E Godfrey",
+  "lifespan": "1545–1592",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PZG8-CPG"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p6c10074c33",
+    "name": "Robert William Godfrey",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pc40ac41a20",
+    "name": "Lady Grace Briggs",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p656d602162",
+    "name": "Richard Godfrey Sr."
+   }
+  ],
+  "spouses": []
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PZG8-CPG",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

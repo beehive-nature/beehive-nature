@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pcacf8b3b7e",
+ "bnr": "bnr://skaists.dev/blood/pcacf8b3b7e",
+ "identity": {
+  "name": "Amenhotep III Nebma'atre' 9th Pharaoh 18th Dynasty",
+  "lifespan": "1401BC–1351BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L8RB-K7T"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p312e2af853",
+    "name": "Thutmose IV Menheprouré D'EGYPTE-DE MESOPOTAMIE",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p5375175e03",
+    "name": "Queen Mutemwiya d'Égypte",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pce4b89bd67",
+    "name": "The Younger Lady (Nebet-Ta Shepset-en-Amun) Royal Lady of the Two Lands, Great King's Daughter of the 18th Dynasty of Egypt The Younger Lady Nebet'Ta Shepset'en'Amun Royal Lady of the Eighteenth Dynasty"
+   },
+   {
+    "id": "p312e2af853",
+    "name": "Thutmose IV Menheprouré D'EGYPTE-DE MESOPOTAMIE"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p16a678c3db",
+    "name": "Egi Tiye d'Ugarit Nubie",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L8RB-K7T",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

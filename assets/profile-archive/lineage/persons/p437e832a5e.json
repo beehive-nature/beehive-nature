@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p437e832a5e",
+ "bnr": "bnr://skaists.dev/blood/p437e832a5e",
+ "identity": {
+  "name": "Lijsbeth Matthias Gravenwaert",
+  "lifespan": "1620–1652",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GSQJ-CC7"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p31d8976e66",
+    "name": "Matthijs Aelbertsz Van Gravenweert",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pc3d104d940",
+    "name": "Lijsken Gijsberts",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pe478c013ee",
+    "name": "Geertruyd Jans Van Lent"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p6ec2e44f97",
+    "name": "Jan Geritsz van Lent",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GSQJ-CC7",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

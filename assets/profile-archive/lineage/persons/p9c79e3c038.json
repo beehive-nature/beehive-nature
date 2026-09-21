@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p9c79e3c038",
+ "bnr": "bnr://skaists.dev/blood/p9c79e3c038",
+ "identity": {
+  "name": "Cossonius Eggius Cossonius Ambibilus",
+  "lifespan": "95–Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GQLK-TMK"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p7e32b00de2",
+    "name": "Ibius Avitus",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pb75ec4d3a1",
+    "name": "Pomponia",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pd02d3156cb",
+    "name": "Eggia Maruilla"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p44d93fab1a",
+    "name": "Maecia",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GQLK-TMK",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p62ff315ffe",
+ "bnr": "bnr://skaists.dev/blood/p62ff315ffe",
+ "identity": {
+  "name": "Joan Marsead Marshall",
+  "lifespan": "1520–1565",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L58X-99K"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pe4b1b87f62",
+    "name": "John Marstead Or Marshall",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pc0de8d030b",
+    "name": "Agnes Dowife Wyllie Basse Lady",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p3e0aae890d",
+    "name": "Agnes Wylie"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p897a1217c6",
+    "name": "John Wylley",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L58X-99K",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

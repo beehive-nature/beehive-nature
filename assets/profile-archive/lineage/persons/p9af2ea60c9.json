@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p9af2ea60c9",
+ "bnr": "bnr://skaists.dev/blood/p9af2ea60c9",
+ "identity": {
+  "name": "King Himbald Of the Franks",
+  "lifespan": "0337–0398",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PMQ9-QX6"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pb51ad9cfa7",
+    "name": "Mallobaudes I De Toxandrië Roi De Franks",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p58772109e9",
+    "name": "Queen Ascylia Balthes Van Gallic von Toxandria",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pdd092f6310",
+    "name": "Hatilde de Francie"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p9a6356eaba",
+    "name": "Hodesch De Rome",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PMQ9-QX6",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

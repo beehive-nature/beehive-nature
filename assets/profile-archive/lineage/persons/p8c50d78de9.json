@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p8c50d78de9",
+ "bnr": "bnr://skaists.dev/blood/p8c50d78de9",
+ "identity": {
+  "name": "Hawise de Londres",
+  "lifespan": "1223–1274",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "99W6-GSF"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pfe41bfceda",
+    "name": "Lord Thomas de Londres of Kidwelly",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p0f615b76bb",
+    "name": "Eva Tracy",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p8b0e512202",
+    "name": "Lord Patrick de Chaworth"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pa0d9f6a298",
+    "name": "Patrick de Chaworth",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/99W6-GSF",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

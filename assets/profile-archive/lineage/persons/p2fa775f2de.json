@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p2fa775f2de",
+ "bnr": "bnr://skaists.dev/blood/p2fa775f2de",
+ "identity": {
+  "name": "Robert Hamilton",
+  "lifespan": "1573–Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GD94-H9F"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p317763c955",
+    "name": "Gavin Hamilton",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p042018b464",
+    "name": "Jean Anne Dishington Of Andross",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pe362167df4",
+    "name": "Margaret Moffet"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p85176bbcb2",
+    "name": "Zinca GOLESCU",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GD94-H9F",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

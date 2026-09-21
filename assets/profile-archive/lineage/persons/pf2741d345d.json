@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pf2741d345d",
+ "bnr": "bnr://skaists.dev/blood/pf2741d345d",
+ "identity": {
+  "name": "Elizabeth Flexman",
+  "lifespan": "1777–1841",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "MS86-N1L"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p1508498c29",
+    "name": "Thomas Flexman",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p806dfa5bd4",
+    "name": "Hannah Brandley",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p40e19f7c05",
+    "name": "Mary Anne Saunders"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pf0ebba136a",
+    "name": "William Saunders",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/MS86-N1L",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

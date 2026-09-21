@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pb907471b2e",
+ "bnr": "bnr://skaists.dev/blood/pb907471b2e",
+ "identity": {
+  "name": "Aššur-etel-šame-erseti-muballissu",
+  "lifespan": "0676BC–0626BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L2BM-6X8"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pc928818863",
+    "name": "Esarhaddon , King of the Neo-Assyrian Empire",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p5244872fc2",
+    "name": "Ešara- Hammat Queen of the Neo-Assyrian Empire",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p9274d6101b",
+    "name": "Shuma Damqa d'Assyrie"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pf3f8fcdf7d",
+    "name": "Assur-etil-same-ersiti-uballitsu of Assyria",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L2BM-6X8",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

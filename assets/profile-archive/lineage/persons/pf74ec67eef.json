@@ -1,0 +1,62 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pf74ec67eef",
+ "bnr": "bnr://skaists.dev/blood/pf74ec67eef",
+ "identity": {
+  "name": "Chlodio \"le Chevelu\" König der Salfranken",
+  "lifespan": "0395–0448",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L6SH-6PM"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [],
+  "children": [
+   {
+    "id": "pc6ae3691bd",
+    "name": "Merowech König der Salfranken"
+   },
+   {
+    "id": "p009fd1d6d6",
+    "name": "Chlodebaud   dit Pharamon DE FRANCIE DE COLOGNE"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pbd0e34e536",
+    "name": "Hildegonde von Kohln",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L6SH-6PM",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

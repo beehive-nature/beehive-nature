@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p2b9111d2da",
+ "bnr": "bnr://skaists.dev/blood/p2b9111d2da",
+ "identity": {
+  "name": "Edward Camp Jr",
+  "lifespan": "1617–1659",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LZP9-YN2"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p1c49e49bf2",
+    "name": "Edward Camp",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p31b015b45e",
+    "name": "Grace Mott",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p139100dd28",
+    "name": "Samuel Camp"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p119f5f2b2c",
+    "name": "Mary Canfield",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LZP9-YN2",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

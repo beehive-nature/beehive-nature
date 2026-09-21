@@ -1,0 +1,78 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p486d0c3509",
+ "bnr": "bnr://skaists.dev/blood/p486d0c3509",
+ "identity": {
+  "name": "Geoffrey FitzPiers",
+  "lifespan": "1162–1213",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L19Q-5K2"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p77c27abe03",
+    "name": "Piers de Lutegareshale",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p01557afd0f",
+    "name": "Maud de Mandeville",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p53d9f373c2",
+    "name": "John FitzGeoffrey"
+   },
+   {
+    "id": "p3efb1300c6",
+    "name": "William de Mandeville"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p627b60114d",
+    "name": "Aveline de Clare",
+    "marriage": null
+   },
+   {
+    "id": "pb0f61537c0",
+    "name": "Beatrice de Saye",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L19Q-5K2",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

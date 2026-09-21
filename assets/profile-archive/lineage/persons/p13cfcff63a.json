@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p13cfcff63a",
+ "bnr": "bnr://skaists.dev/blood/p13cfcff63a",
+ "identity": {
+  "name": "Jonathan D. Prosser I",
+  "lifespan": "1676–1714",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "MNBC-6B1"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p59f855b6d3",
+    "name": "William Prosser",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p3ea93f5999",
+    "name": "Anne Field",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pa29028ef96",
+    "name": "Martha Prosser"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p73532da8f5",
+    "name": "Ruth  Ann Ellis Leatherwood",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/MNBC-6B1",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

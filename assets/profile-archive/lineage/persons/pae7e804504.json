@@ -1,0 +1,64 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pae7e804504",
+ "bnr": "bnr://skaists.dev/blood/pae7e804504",
+ "identity": {
+  "name": "Costobarus the Nabatean",
+  "lifespan": "0070BC–0025BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LVDV-VGL"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "peed67d212c",
+    "name": "Nabatean Royal Family Father of Idomea",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p207202585b",
+    "name": "Berenice bat Costobarus by Salome of Judea"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p241158caf4",
+    "name": "Salome I bat Antipater I",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LVDV-VGL",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

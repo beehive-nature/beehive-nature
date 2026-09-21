@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pa2125fd27b",
+ "bnr": "bnr://skaists.dev/blood/pa2125fd27b",
+ "identity": {
+  "name": "King Llyr Lleddiarth ap Baran of Britain",
+  "lifespan": "0031BC–36",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "MNKM-G5S"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "L6S7-SXN",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "GYRY-4KV",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p4aa6ed880f",
+    "name": "Mandabrutius"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pbd4200e0f5",
+    "name": "Llweriadd Penarddun ferch Beli Queen of Siluria",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/MNKM-G5S",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}
