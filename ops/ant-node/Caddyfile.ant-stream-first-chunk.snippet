@@ -13,5 +13,7 @@
 handle @ant_stream {
 	# Cheap Accept-Ranges stamp; the cache also sets it on HIT/MISS.
 	header Accept-Ranges bytes
+	# Browser JS needs these custom headers exposed (bViEw n-chunk / n-ranges).
+	header Access-Control-Expose-Headers "X-Ant-First-Chunk, Accept-Ranges"
 	reverse_proxy 172.18.0.1:8084
 }

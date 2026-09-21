@@ -88,3 +88,5 @@ this unit + Caddy point.
 ## Note
 Entry uses `fileURLToPath(import.meta.url)` so the unit starts on Windows test seats as well as the Linux relay.
 
+## Browser CORS (bViEw sheet)
+Custom response headers `X-Ant-First-Chunk` and `Accept-Ranges` must be listed in `Access-Control-Expose-Headers` (see Caddy snippet) or the page reads them as null and shows em-dash — Content-Length alone is CORS-safelisted.
