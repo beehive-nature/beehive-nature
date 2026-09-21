@@ -137,7 +137,10 @@
   body[data-reg="cypherpunk"] .hash { font-size: 12px; }
 </style>
 </head>
-<body data-reg="bee" data-state="empty" data-bee-theme="shared">
+<!-- `data-busy` and `data-busy-seq` start at 0 so both exist before the first
+     act. A reader that has to tell "not busy" from "not published yet" is
+     reading two different things through one absence. -->
+<body data-reg="bee" data-state="empty" data-bee-theme="shared" data-busy="0" data-busy-seq="0">
 
 <main>
   <p class="kicker" data-reg-copy="kicker">My Space</p>

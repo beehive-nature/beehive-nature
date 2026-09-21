@@ -188,6 +188,11 @@ const LOCAL_RE = /myspace-adapter-local\.js/;
 const LOCAL_REL = 'surfaces/myspace-adapter-local.js';
 const TEMP_RE = /myspace-adapter-temp\.js/;
 const TEMP_REL = 'surfaces/myspace-adapter-temp.js';
+// The shell itself, for the one fixture that plants a drifted sentence in a
+// register's own term table. Anchored to the end of the path so it cannot also
+// match an adapter file, all three of which contain `myspace` too.
+const SHELL_RE = /\/surfaces\/myspace\.js$/;
+const SHELL_REL = 'surfaces/myspace.js';
 
 const attachState = (page, scheme = 'blossom') => page.evaluate(s => {
   const a = window.__myspace.adapter(s);
@@ -200,39 +205,65 @@ const settle = page => page.waitForFunction(
 
 // Adds a file under a named purpose and waits for the page to stop working.
 //
-// THE STATUS LINE IS CLEARED FIRST, and that is load-bearing, not tidiness.
-// Until §15 every add ran in a fresh context where #status started empty, so
-// "not hidden, has text, not working" was an edge. Called a second time in one
-// context it is already TRUE on entry and the helper returns before the add has
-// begun — measured here: the second file's row was read before it existed and
-// its rail write landed three assertions later, inside a row counting the wire.
-// Clearing restores the precondition the wait was written against, and the
-// clear is asserted rather than assumed.
+// THE WAIT IS ON THE PAGE'S OWN PUBLISHED STATE, NOT ON ITS WORDS. Three
+// earlier shapes of this helper are worth keeping written down, because the
+// second AND the third each looked like the fix:
+//
+//   1  "not hidden, has text, not working" was an EDGE only because every add
+//      before §15 ran in a fresh context where #status started empty. Called a
+//      second time in one context it is already TRUE on entry and the helper
+//      returns before the add has begun — measured: the second file's row was
+//      read before it existed and its rail write landed three assertions later,
+//      inside a row counting the wire. A clear-first restored the edge.
+//   2  the in-progress list was BY TEXT, and it missed the longest-running
+//      status on the page (the bee copy for `joining` shares no word with the
+//      others). Lengthening the list fixed that instance and not the class:
+//      changing `working` in one register from "Putting it away…" to "One
+//      moment…" — a copy edit, nothing else — puts this gate back to three
+//      failures, one of which is the zero-requests privacy row reporting a
+//      share PUT against a keep-it-here open. Measured before this row, not
+//      argued.
+//
+//   3  the first shape of THIS one read `data-busy` once, right after choosing
+//      the file, and demanded `1`. That is a question about a moment, and on a
+//      fast refusal the moment is already over when Node gets to ask: §9's
+//      undeclared `x.put` and §16's denied store go busy and back to idle
+//      inside the round trip. Two clean runs in four died there. An edge read
+//      after the fact is not an edge.
+//
+// `data-busy` is published by `setStatus` and is the same value in every
+// register, so no list is maintained here and none can go stale. The wait is on
+// the SEQUENCE the page moves every time it announces work: the number is read
+// BEFORE the file is chosen, and the add is over when the sequence has passed it
+// and the flag is back to `0`. However fast the act, that has one answer.
+//
+// SAID PLAINLY, BECAUSE IT WAS MEASURED: the sequence half is not witnessed on
+// this box. Dropping it (flag-only wait), moving the page's announcement back
+// behind its first `await`, and both at once all stay green — the flag-only
+// form has not been made to fail here. What fixed the flake was deleting shape
+// 3's point-in-time read. The sequence is held against an ordering the page
+// could lose, not against a failure anyone has seen.
 async function add(page, purpose, name, text) {
-  const cleared = await page.evaluate(() => {
-    const el = document.getElementById('status');
-    el.hidden = true; el.textContent = '';
-    return el.hidden === true && el.textContent === '';
-  });
-  if (!cleared) throw new Error('add(): could not clear #status, so the settle wait cannot edge-trigger');
   await page.click(`#mode-${purpose}`);
+  // Read RAW: Number(null) is 0, so a page that publishes nothing would pass a
+  // numeric check and every wait below would be satisfied by the first act.
+  const raw0 = await page.evaluate(() => document.body.getAttribute('data-busy-seq'));
+  if (!/^\d+$/.test(raw0 || '')) throw new Error('add(): the page publishes no data-busy-seq (read ' + JSON.stringify(raw0) + '), so nothing below could be a wait');
+  const seq0 = Number(raw0);
   await page.setInputFiles('#picker', { name, mimeType: 'text/plain', buffer: Buffer.from(text, 'utf8') });
-  /* The in-progress list is BY TEXT, and it was missing the longest-running
-     status on the page: the bee copy for `joining` reads "Putting this phone in
-     the hive…" and contains none of the words this regex looked for, so a share
-     add settled DURING the join — before the retry PUT and before the row was
-     written. It only never showed because no context reached the share path
-     through this helper until §15. Each pattern below is a substring of the copy
-     it names, checked in all three registers. */
-  await page.waitForFunction(() => {
-    const el = document.getElementById('status');
-    const busy = /Putting it away|stashing|writing to rail/i          // t('working')
-      .test(el.textContent) || /Putting this phone in the hive|joining the hive|claiming the standing invite/i
-      .test(el.textContent) || /Moving it|moving…|re-addressing/i     // t('flipping')
-      .test(el.textContent) || /Opening it|opening…|reading from rail/i
-      .test(el.textContent);
-    return el && !el.hidden && el.textContent && !busy;
-  }, null, { timeout: 15000 });
+  try {
+    await page.waitForFunction(s => {
+      const el = document.getElementById('status');
+      return Number(document.body.getAttribute('data-busy-seq')) > s &&
+        document.body.getAttribute('data-busy') === '0' && el && !el.hidden && el.textContent;
+    }, seq0, { timeout: 15000 });
+  } catch (e) {
+    // Named, not a bare timeout: which half never arrived is the whole diagnosis.
+    const at = await page.evaluate(() => ({ seq: document.body.getAttribute('data-busy-seq'), busy: document.body.getAttribute('data-busy') }));
+    throw new Error(`add(${purpose}, ${name}): ${Number(at.seq) > seq0
+      ? 'the act began (data-busy-seq ' + seq0 + ' -> ' + at.seq + ') and never went back to data-busy="0"'
+      : 'the page never announced an act for this file (data-busy-seq still ' + at.seq + ')'}`);
+  }
   return page.evaluate(() => window.__myspace.rows());
 }
 
@@ -244,6 +275,140 @@ async function moveTo(page, rowId, purpose) {
   await page.click(`[data-move-to="${purpose}"]`);
   await page.click(`[data-move-to="${purpose}"]`);
   await page.waitForFunction(() => document.body.getAttribute('data-state') !== 'flip', null, { timeout: 15000 });
+  return page.evaluate(() => window.__myspace.rows());
+}
+
+/* ---------- the stutter rule ----------
+   ONE splitter and ONE duplicate finder, used by every surface §14 judges and by
+   the control that proves they can both say yes and no. A stutter is a whole
+   SENTENCE said twice: the page pastes its sentences together from two sources —
+   voice from the register, facts from the rail — so a sentence is the unit the
+   defect arrives in.
+
+   They live here rather than in the page because the walk below DRIVES the page.
+   The same two functions have to reach card text, why-lines and both sheets; a
+   copy living inside one `evaluate` could only ever reach the first of those. */
+const SENTENCES = s => String(s).split(/(?<=[.!?])\s+/).map(x => x.trim().toLowerCase()).filter(Boolean);
+const REPEATS = parts => parts.filter((x, i) => parts.indexOf(x) !== i);
+
+/* Wears a register and WAITS for the page to finish putting it on.
+
+   THE WAIT IS THE WHOLE FIX. `bregister` is answered by `render()`, which awaits
+   IndexedDB before it rewrites a single word, so a read taken in the SAME
+   evaluate as the dispatch comes back in the register that was already on
+   screen. That is what the row standing here until this slice did: measured on
+   this tree 2026-09-21, after dispatching `raver` the purpose cards still read
+   "For this visit only. Only this phone opens it. …", and only once the render
+   landed did they read "this visit. that is all. …". The row reported bee · bee ·
+   bee under three names, and the raver card stutter it was written for could not
+   have been caught by it.
+
+   The barrier is `#modes` changing, and that is not an arbitrary handle:
+   `render()` rebuilds the file list first and calls `applyCopy()` — which is what
+   rewrites `#modes` — last, so a changed `#modes` means the rest of the page is
+   already in the new register.
+
+   IT REFUSES A REGISTER THE PAGE IS ALREADY WEARING. A no-op switch cannot be
+   waited for, and a caller that asks for one has written a walk that judges one
+   register twice. Refusing here makes that impossible instead of unlikely. */
+async function wearRegister(page, register) {
+  const before = await page.evaluate(() => document.getElementById('modes').textContent);
+  const already = await page.evaluate(r => {
+    if (document.body.getAttribute('data-reg') === r) return true;
+    document.body.setAttribute('data-reg', r);
+    document.dispatchEvent(new Event('bregister'));
+    return false;
+  }, register);
+  if (already) throw new Error(`wearRegister(${register}): the page was already wearing it, so this call could not be a wait`);
+  await page.waitForFunction(b => document.getElementById('modes').textContent !== b, before, { timeout: 10000 });
+}
+
+/* Every sentence the page says to a visitor about WHERE A FILE LIVES, in the
+   register it is currently wearing, collected by driving the real controls.
+
+   FOUR SURFACES, NOT ONE. The purpose cards are where the defect was seen; they
+   are not where the class lives. The same two term words are pasted into the
+   file row's why-line, into the delete sheet and into the move sheet, and until
+   this slice none of those three was read by anything.
+
+   It DRIVES rather than rebuilds: a gate that pastes the sentence together from
+   the same tables the page uses cannot catch the page pasting them together
+   differently, which is exactly the shape of this defect. */
+const readShown = page => page.evaluate(() => ({
+  cards: [...document.querySelectorAll('#modes .mode')]
+    .map(b => ({ id: b.getAttribute('data-purpose'), text: b.querySelector('span').textContent })),
+  whys: [...document.querySelectorAll('#list .file')]
+    .map(a => ({ name: a.querySelector('.name').textContent, text: a.querySelector('.why').textContent }))
+}));
+
+async function sayings(page) {
+  const reg = await page.evaluate(() => document.body.getAttribute('data-reg'));
+  const out = [];
+  const shown = await readShown(page);
+  shown.cards.forEach(c => out.push({ kind: 'purpose card', where: `${reg} · purpose card · ${c.id}`, text: c.text }));
+  shown.whys.forEach(w => out.push({ kind: 'why-line', where: `${reg} · file row why-line · ${w.name}`, text: w.text }));
+
+  const rows = await page.evaluate(() => window.__myspace.rows());
+  for (const row of rows) {
+    await page.click('#del-' + row.id);
+    await page.waitForFunction(() => document.body.getAttribute('data-state') === 'delete', null, { timeout: 5000 });
+    out.push({ kind: 'delete sheet', where: `${reg} · delete sheet · ${row.name}`, text: await page.textContent('#del-body') });
+    await page.click('#delKeep');
+    await page.waitForFunction(() => document.body.getAttribute('data-state') !== 'delete', null, { timeout: 10000 });
+
+    await page.click('#move-' + row.id);
+    await page.waitForFunction(() => document.body.getAttribute('data-state') === 'flip', null, { timeout: 5000 });
+    const dests = await page.evaluate(() => [...document.querySelectorAll('[data-move-to]')].map(b => b.getAttribute('data-move-to')));
+    for (const d of dests) {
+      /* FIRST tap only. The first renders the sentence for that destination; the
+         second is the one that moves the file, and this walk reads the page — it
+         does not rearrange it. Each destination button is tapped once. */
+      await page.click(`[data-move-to="${d}"]`);
+      out.push({ kind: 'move sheet', where: `${reg} · move sheet · ${row.name} -> ${d}`, text: await page.textContent('#flip-body') });
+    }
+    await page.click('#flipKeep');
+    await page.waitForFunction(() => document.body.getAttribute('data-state') !== 'flip', null, { timeout: 10000 });
+  }
+  /* DID THE REGISTER LAND BEFORE THE FIRST READ? Asked of the page, with no copy
+     written into this gate. Every sheet the walk closed re-rendered the page in
+     whatever register `data-reg` names, so what is on screen NOW is certainly
+     that register. If the cards and why-lines read at the start differ from the
+     ones read now, the first read was taken before the switch landed — and it is
+     exactly the start-of-walk reads that a stale switch poisons, because the
+     sheets are built at the moment they open and are never stale. */
+  const landed = JSON.stringify(await readShown(page)) === JSON.stringify(shown);
+  return { said: out, landed };
+}
+
+// Walks all three registers and returns what each one said, plus everything
+// that stuttered. The order starts away from `bee`, which the page loads in, so
+// every switch is a real change and `wearRegister` never has to refuse one.
+async function stutterWalk(page) {
+  const walked = [];
+  const stutters = [];
+  for (const register of ['raver', 'cypherpunk', 'bee']) {
+    await wearRegister(page, register);
+    const { said, landed } = await sayings(page);
+    walked.push({
+      register, n: said.length, landed,
+      kinds: [...new Set(said.map(s => s.kind))].sort().join(','),
+      fingerprint: said.map(s => s.text).join(' ~ ')
+    });
+    said.forEach(s => {
+      const d = REPEATS(SENTENCES(s.text));
+      if (d.length) stutters.push({ register, kind: s.kind, where: s.where, said: d.join('" "') });
+    });
+  }
+  return { walked, stutters };
+}
+
+// One file on each of the three rails, so every surface has something to say.
+// Without them three of the four surfaces do not exist, and a walk that reported
+// four while reading one would be the defect it exists to catch.
+async function threeFiles(page) {
+  await add(page, 'now', 'fleeting.txt', FLEETING);
+  await add(page, 'keep', 'kept.txt', KEPT);
+  await add(page, 'share', 'open.txt', LETTER);
   return page.evaluate(() => window.__myspace.rows());
 }
 
@@ -752,45 +917,141 @@ try {
     blossomSrc.includes('/upload') && blossomSrc.includes('24242'),
     'the scan found nothing even in the adapter that owns these facts');
 
-  // A purpose card is VOICE from the register then FACTS from the rail, in that
-  // order. When the two say the same sentence the card stutters — the raver
-  // share card printed "the link opens it." twice, caught on the live page by
-  // the eye seat 2026-09-20 22:51Z. Judged as a RULE over every register and
-  // every purpose, not as the one string that was wrong: a row that only knows
-  // the instance cannot stop the next one.
+  // ── the stutter rule, over four surfaces and three registers ──────────────
+  //
+  // A page sentence about a file is VOICE from the register and then FACTS from
+  // the rail. When the two say the same sentence the surface stutters — the
+  // raver share card printed "the link opens it." twice, caught on the live page
+  // by the eye seat 2026-09-20 22:51Z. It is judged as a RULE over every
+  // register and every surface, because a row that only knows the instance
+  // cannot stop the next one.
+  //
+  // THE ROW THAT STOOD HERE UNTIL THIS SLICE WAS GREEN FOR THE WRONG REASON,
+  // twice over, and both are measured rather than argued:
+  //
+  //   1  IT JUDGED ONE REGISTER THREE TIMES. `data-reg` was set, `bregister`
+  //      dispatched and the cards read in the same `evaluate`; the page answers
+  //      that event with `render()`, which awaits IndexedDB before it rewrites a
+  //      word. So the read always came back in the register already on screen —
+  //      bee · bee · bee under three names. The stutter it was written for lived
+  //      in raver, which it never saw. Its three per-register CONTROLs all
+  //      passed: they ran the splitter over planted strings, which judges the
+  //      instruments and never the wiring. See `wearRegister` for the numbers.
+  //   2  IT JUDGED ONE SURFACE. Three more places paste the same two term words
+  //      together — the file row's why-line, the delete sheet, the move sheet —
+  //      and none of them was read.
+  //
+  // §14b below plants a drifted sentence and shows all four surfaces go red, in
+  // the drifted register only.
   const c14 = await browser.newContext({ viewport: { width: 390, height: 844 } });
   await mockHive(c14);
   const p14 = await c14.newPage();
+  const errs14 = [];
+  p14.on('pageerror', e => errs14.push(e.message));
   await p14.goto(PAGE, { waitUntil: 'load' });
   await settle(p14);
-  await p14.waitForFunction(() => window.__myspace.purposes().length === 3, null, { timeout: 10000 }).catch(() => {});
-  const stutters = [];
-  for (const register of ['bee', 'raver', 'cypherpunk']) {
-    const cards = await p14.evaluate(r => {
-      document.body.setAttribute('data-reg', r);
-      document.dispatchEvent(new Event('bregister'));
-      const split = s => s.split(/(?<=[.!?])\s+/).map(x => x.trim().toLowerCase()).filter(Boolean);
-      const dupOf = parts => parts.filter((x, i) => parts.indexOf(x) !== i);
-      return {
-        cards: [...document.querySelectorAll('#modes .mode')].map(b => ({
-          id: b.getAttribute('data-purpose'), dup: dupOf(split(b.querySelector('span').textContent))
-        })),
-        // THE SAME two functions over a planted repeat, and over one without.
-        probeDup: dupOf(split('one thing. one thing. another.')),
-        probeClean: dupOf(split('one thing. another. a third.'))
-      };
-    }, register);
-    cards.cards.forEach(c => { if (c.dup.length) stutters.push(register + '/' + c.id + ': "' + c.dup.join('" "') + '"'); });
-    // NON-VACUITY, run by the page that does the judging: the same splitter and
-    // the same duplicate finder must SEE a planted repeat and must NOT invent
-    // one. Without both halves this row can only ever say zero.
-    ok(`CONTROL — in ${register}, the duplicate finder catches a planted repeat and clears a clean card`,
-      cards.cards.length === 3 && cards.probeDup.join() === 'one thing.' && cards.probeClean.length === 0,
-      JSON.stringify({ dup: cards.probeDup, clean: cards.probeClean, cards: cards.cards.length }));
-  }
-  ok('no register says the same sentence twice in one purpose card',
-    stutters.length === 0, stutters.join(' | '));
+  await p14.waitForFunction(() => window.__myspace.purposes().length === 3, null, { timeout: 10000 });
+
+  const have14 = await threeFiles(p14);
+  ok('PRECONDITION — one file on each of the three rails, so all four surfaces have something to say',
+    have14.length === 3 && new Set(have14.map(r => r.addr && r.addr.scheme)).size === 3,
+    JSON.stringify(have14.map(r => r.name + ':' + (r.addr && r.addr.scheme))));
+
+  const walk14 = await stutterWalk(p14);
+
+  // 3 purpose cards + 3 why-lines + 3 delete sheets + 3 rows × 2 destinations.
+  // Asserted as a NUMBER, so a walk that silently read nothing cannot report a
+  // clean page: an empty scan is vacuous, never green.
+  const EXPECTED_SAYINGS = 15;
+  ok('the walk read all four surfaces in all three registers',
+    walk14.walked.length === 3 && walk14.walked.every(w =>
+      w.n === EXPECTED_SAYINGS && w.kinds === 'delete sheet,move sheet,purpose card,why-line'),
+    JSON.stringify(walk14.walked.map(w => w.register + ':' + w.n + ':' + w.kinds)));
+
+  // THE ROW THAT CATCHES A LATE SWITCH. The old row's switch did not fail to
+  // happen, it happened AFTER the read — so the question is not "did the words
+  // change" but "had they changed yet". Asked per register, of the page itself.
+  ok('each register had landed before the walk read it — the first read is what is still on screen after every sheet re-rendered',
+    walk14.walked.every(w => w.landed === true),
+    JSON.stringify(walk14.walked.map(w => w.register + ':' + w.landed)));
+
+  // A NARROWER ROW, AND IT SAYS SO: equal fingerprints across three registers
+  // mean the switch changed nothing at all. It does NOT catch a switch that lands
+  // late — the sheets are built when they open, so a walk whose cards are stale
+  // still differs from its neighbours. That case is the row above.
+  ok('each register was really worn — three registers, three different sets of words',
+    new Set(walk14.walked.map(w => w.fingerprint)).size === 3,
+    walk14.walked.map(w => w.register + ':' + w.fingerprint.slice(0, 40)).join(' | '));
+
+  // NON-VACUITY for the rule itself: the same splitter and the same duplicate
+  // finder must SEE a planted repeat and must NOT invent one.
+  const probeDup = REPEATS(SENTENCES('one thing. one thing. another.'));
+  const probeClean = REPEATS(SENTENCES('one thing. another. a third.'));
+  ok('CONTROL — the duplicate finder catches a planted repeat and clears a clean one',
+    probeDup.join() === 'one thing.' && probeClean.length === 0,
+    JSON.stringify({ dup: probeDup, clean: probeClean }));
+
+  ok('no surface in any register says the same sentence twice',
+    walk14.stutters.length === 0, walk14.stutters.map(s => s.where + ': "' + s.said + '"').join(' | '));
+  ok('no page errors across the whole walk', errs14.length === 0, errs14.join(' | '));
   await c14.close();
+
+  // ── 14b · the fixture: all four surfaces go red, in one register only ──────
+  // All four agree today, so a natural exam here can only ever be green — the
+  // gate is proven by a DRIFTED PAIR or it is not proven at all. The fixture is
+  // planted where the defect really lives: two entries of ONE register's term
+  // table made equal to a sentence the page already hardcodes. That is the exact
+  // shape of the 2026-09-20 card — a rail fact arriving twice in one surface.
+  //
+  // 'The bytes go and the key goes with them.' is the delete sheet's own opening
+  // sentence, so a single planted pair reaches all four surfaces:
+  //   readers['this-device']       → the two keep-it-here rails' cards, why-lines
+  //                                  and delete sheets
+  //   lifetime['until-you-delete-it'] → the local rail's card, why-line and the
+  //                                  move sentence that names it as a destination
+  // and the other two registers are the control inside the same run.
+  console.log('\n14b · the fixture — a drifted register lights up all four surfaces, and only that register');
+  const c14b = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  await mockHive(c14b);
+  await mutate(c14b, SHELL_RE, SHELL_REL,
+    `      readers: { 'this-device': 'Only this phone opens it.', 'link-holders': 'Anyone with the link opens it.' },
+      lifetime: { 'until-this-tab-closes': 'It goes when you close this tab.', 'until-you-delete-it': 'It stays until you remove it.', 'while-the-store-keeps-it': 'It stays as long as the hive keeps it.' },`,
+    `      readers: { 'this-device': 'The bytes go and the key goes with them.', 'link-holders': 'Anyone with the link opens it.' },
+      lifetime: { 'until-this-tab-closes': 'It goes when you close this tab.', 'until-you-delete-it': 'The bytes go and the key goes with them.', 'while-the-store-keeps-it': 'It stays as long as the hive keeps it.' },`);
+  const p14b = await c14b.newPage();
+  await p14b.goto(PAGE, { waitUntil: 'load' });
+  await settle(p14b);
+  await p14b.waitForFunction(() => window.__myspace.purposes().length === 3, null, { timeout: 10000 });
+  const have14b = await threeFiles(p14b);
+  ok('FIXTURE PRECONDITION — the drifted page still routes all three purposes, so the walk judges the same 15 places',
+    have14b.length === 3 && new Set(have14b.map(r => r.addr && r.addr.scheme)).size === 3,
+    JSON.stringify(have14b.map(r => r.name + ':' + (r.addr && r.addr.scheme))));
+
+  const walk14b = await stutterWalk(p14b);
+  ok('the fixture walk read the same 15 places in each register, each one landed',
+    walk14b.walked.every(w => w.n === EXPECTED_SAYINGS && w.landed === true),
+    JSON.stringify(walk14b.walked.map(w => w.register + ':' + w.n + ':' + w.landed)));
+
+  // WHICH ONES, BY NAME — not "a catch happened". A row that only counts is
+  // satisfied by the wrong six as easily as by the right six.
+  const lit = walk14b.stutters.filter(s => s.register === 'bee').map(s => s.where).sort();
+  const EXPECTED_LIT = [
+    'bee · delete sheet · fleeting.txt',
+    'bee · delete sheet · kept.txt',
+    'bee · file row why-line · kept.txt',
+    'bee · move sheet · fleeting.txt -> keep',
+    'bee · move sheet · open.txt -> keep',
+    'bee · purpose card · keep'
+  ];
+  ok('the drifted register lights up exactly the six places that paste the drifted pair, by name',
+    JSON.stringify(lit) === JSON.stringify(EXPECTED_LIT), JSON.stringify(lit));
+  ok('and those six cover all FOUR surfaces, so none of the three new ones is decoration',
+    new Set(walk14b.stutters.filter(s => s.register === 'bee').map(s => s.kind)).size === 4,
+    JSON.stringify([...new Set(walk14b.stutters.filter(s => s.register === 'bee').map(s => s.kind))]));
+  ok('CONTROL — the two registers with no drifted pair stay clean in the same run',
+    walk14b.stutters.filter(s => s.register !== 'bee').length === 0,
+    walk14b.stutters.filter(s => s.register !== 'bee').map(s => s.where).join(' | '));
+  await c14b.close();
 
   // ── 15 · the three things a stranger with a phone could not do ─────────────
   // bee-laborer's rows, 2026-09-20 22:18Z: a kept file had no way to be opened,
@@ -912,6 +1173,76 @@ try {
     JSON.stringify(afterReload.map(r => r.name)));
   ok('no page errors across open, picker and delete', errs15.length === 0, errs15.join(' | '));
   await c15.close();
+
+  // ── 16 · a storage-denied profile: the keep rail attaches, then refuses ────
+  // NAMED SO IT IS NOT READ AS §10 AGAIN: that rail never attached at all. This
+  // one ATTACHES — `describe` is answered inside the worker and touches no
+  // store — and then refuses the first byte, which is what a private-browsing or
+  // storage-denied profile actually does. The local adapter has carried the arm
+  // for it since slice 03 (`openDb`'s `onerror` returns RAIL_UNREACHABLE) and
+  // nothing had ever run it; it was written into the slice-03 PR as an open row.
+  console.log('\n16 · a storage-denied profile — the keep rail attaches, then refuses the first byte');
+  const c16 = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  const wire16 = [];
+  offBox(c16, wire16);
+  await mockHive(c16);
+  /* The fixture replaces the BROWSER's `indexedDB.open` for this worker and
+     nothing else. The handler assignments, the rejection, the error code and the
+     sentence the visitor reads are all the adapter's own code, unmutated — a
+     fixture that replaced the rejection would be testing itself. */
+  await mutate(c16, LOCAL_RE, LOCAL_REL,
+    '    var req = indexedDB.open(DB_NAME, DB_VERSION);',
+    '    var req = {}; setTimeout(function () { req.onerror(); }, 0);   // FIXTURE: a profile that will not open storage');
+  const p16 = await c16.newPage();
+  const errs16 = [];
+  p16.on('pageerror', e => errs16.push(e.message));
+  await p16.goto(PAGE, { waitUntil: 'load' });
+  await settle(p16);
+  await p16.waitForFunction(() => window.__myspace.purposes().length === 3, null, { timeout: 10000 }).catch(() => {});
+
+  const st16 = await attachState(p16, 'local');
+  ok('PRECONDITION — the denied rail ATTACHED: describe touches no store, so this is not §10 over again',
+    st16 && st16.attached === true, JSON.stringify(st16 && { attached: st16.attached, state: st16.state }));
+  const purposes16 = await p16.evaluate(() => window.__myspace.purposes());
+  ok('and keep-it-here is still OFFERED, because a purpose is a predicate over what a rail DECLARED',
+    purposes16.includes('keep'), JSON.stringify(purposes16));
+
+  const rows16 = await add(p16, 'keep', 'denied.txt', KEPT);
+  const said16 = await p16.textContent('#status');
+  const loud16 = await p16.evaluate(() => document.getElementById('status').classList.contains('loud'));
+  // WHICH refusal, not merely that something failed: the sentence the visitor
+  // reads has to be the one the denied store produced, or this row would pass
+  // on any error at all — including one the fixture caused somewhere else.
+  ok('the tap says nothing was written, in the rail\'s own words about storage',
+    /Nothing was written/i.test(said16 || '') && /would not open local storage/i.test(said16 || ''), said16);
+  ok('and it is said LOUDLY — a refusal is not a result line', loud16 === true, String(loud16));
+  ok('the page is not left looking busy after the refusal',
+    (await p16.evaluate(() => document.body.getAttribute('data-busy'))) === '0');
+
+  // THE PRIVACY ROW. `addFile`'s fallback is the keep-it-here rail, and here that
+  // IS the rail that failed — so there must be no second attempt, and above all
+  // no quiet widening to a rail that speaks to the world. Measured on the wire,
+  // not read off the code.
+  ok('NOTHING was written: no row on the page, so the index did not record a file that has no bytes',
+    rows16.length === 0, JSON.stringify(rows16.map(r => r.name)));
+  ok('and a keep-it-here that FAILED put ZERO requests on the wire — a refusal never becomes a send',
+    wire16.length === 0, wire16.join(' | '));
+
+  // ONE DEAD RAIL, NEVER THE PAGE (§6) — and said by a file that lands, not by
+  // the absence of a complaint.
+  const rows16b = await add(p16, 'now', 'fleeting.txt', FLEETING);
+  ok('the page still takes a file on a rail that is not denied',
+    rows16b.length === 1 && rows16b[0].addr && rows16b[0].addr.scheme === 'temp',
+    JSON.stringify(rows16b.map(r => r.name + ':' + (r.addr && r.addr.scheme))));
+  ok('and that one was still zero requests on the wire', wire16.length === 0, wire16.join(' | '));
+  ok('no page errors across the refusal and the recovery', errs16.length === 0, errs16.join(' | '));
+
+  // NAMED, NOT FIXED, AND NOT ASSERTED EITHER WAY: `encryptFor` writes the file's
+  // key into the shell's own store BEFORE the rail is asked for the bytes, so a
+  // refused add leaves a key behind with no ciphertext anywhere to match it. It
+  // is not a leak — a key alone opens nothing — and it is not this slice's
+  // obligation. Routed rather than folded in.
+  await c16.close();
 
 } catch (e) {
   fail++;
