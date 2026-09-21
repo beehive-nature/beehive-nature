@@ -1,0 +1,15 @@
+# buzz-mailgate.timer.example — INACTIVE EXAMPLE, NOT DEPLOYED
+#
+# Cadence ported from the deployed buzz-mail-triage.timer (every 2 min).
+# See buzz-mailgate.service.example and cutover-from-triage.md first.
+
+[Unit]
+Description=Check rostered mailboxes every two minutes (single reader)
+
+[Timer]
+OnBootSec=90s
+OnUnitInactiveSec=120s
+Unit=buzz-mailgate.service
+
+[Install]
+WantedBy=timers.target

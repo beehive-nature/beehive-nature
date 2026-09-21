@@ -1,0 +1,21 @@
+{
+  "domain": "agents.skaists.buzz",
+  "law": "scripts/buzz-mail/sink.py KNOWN is the single source of accepted addresses; this file is parsed and cross-checked against it at load (roster.py) and any drift fails loud. npub values are bech32 public keys or null. A binding is only usable for notification when its status is a cited 'verified:<receipt>' AND an npub is present — room membership alone proves a Buzz key, not authority over a mailbox (correction 1e18cbf8 #2). Historical records are never routable and never presented as reachable.",
+  "mailboxes": {
+    "bclaude":     { "npub": null, "binding": "unverified" },
+    "bcodexastra": { "npub": null, "binding": "unverified" },
+    "bee-laborer": { "npub": null, "binding": "unverified" },
+    "bfable":      { "npub": null, "binding": "unverified" },
+    "bfuzz":       { "npub": null, "binding": "unverified" },
+    "bgrokbot":    { "npub": null, "binding": "unverified" },
+    "bopus5":      { "npub": null, "binding": "unverified" },
+    "bqueenbee":   { "npub": null, "binding": "unverified" },
+    "bzcode":      { "npub": null, "binding": "unverified", "note": "the earlier 'verified:buzz-channels-members' claim is withdrawn (1e18cbf8): channel membership proves a Buzz key, not mailbox assignment; no mailbox-assignment receipt exists yet" },
+    "claude-code": { "npub": null, "binding": "unverified" },
+    "honeybee":    { "npub": null, "binding": "unverified" }
+  },
+  "historical": {
+    "skaists": { "npub": null, "status": "historical-not-provisioned", "note": "founder card address; ADD/DROP ruling open; page keeps it as historical with no mail actions (Astra 663a4fe0)" },
+    "z2.1":    { "npub": null, "status": "historical-not-provisioned", "note": "historical seat; not routable, not presented as reachable" }
+  }
+}
