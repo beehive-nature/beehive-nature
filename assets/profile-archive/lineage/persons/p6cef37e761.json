@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p6cef37e761",
+ "bnr": "bnr://skaists.dev/blood/p6cef37e761",
+ "identity": {
+  "name": "Agatha Anna Welti",
+  "lifespan": "1538–Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L64S-HTR"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p5ebafae101",
+    "name": "Joseph Welti",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p831ece8d92",
+    "name": "Ursula Oehri",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p33dec95939",
+    "name": "Hans Huser"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p64155b9f95",
+    "name": "Jacob Huser",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L64S-HTR",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

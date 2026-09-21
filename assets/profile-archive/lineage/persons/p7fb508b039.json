@@ -1,0 +1,62 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p7fb508b039",
+ "bnr": "bnr://skaists.dev/blood/p7fb508b039",
+ "identity": {
+  "name": "forester in the Pais de Calais",
+  "lifespan": "Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "KX2S-NWF"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [],
+  "children": [
+   {
+    "id": "pa308e3581b",
+    "name": "Aveline"
+   },
+   {
+    "id": "p5206d9aa5c",
+    "name": "Gunnor Comtesse de Rouen"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p6c30fc72cc",
+    "name": "Forester de Pais de Calais",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/KX2S-NWF",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

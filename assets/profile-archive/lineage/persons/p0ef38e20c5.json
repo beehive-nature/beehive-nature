@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p0ef38e20c5",
+ "bnr": "bnr://skaists.dev/blood/p0ef38e20c5",
+ "identity": {
+  "name": "Michal bat Saul",
+  "lifespan": "1039BC–0973BC",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LK98-7RB"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pfcaaa9c10f",
+    "name": "King Saul ben Kish",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p94fc60d347",
+    "name": "Ahinoam bat Ahimaaz",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [],
+  "spouses": [
+   {
+    "id": "p8e8870340b",
+    "name": "King David of Israel",
+    "marriage": null
+   },
+   {
+    "id": "pf4b0f8da16",
+    "name": "King David ben Jesse",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LK98-7RB",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

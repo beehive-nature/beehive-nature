@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p6362eda3c1",
+ "bnr": "bnr://skaists.dev/blood/p6362eda3c1",
+ "identity": {
+  "name": "Landro DE MENAPIE DE HASBAYE",
+  "lifespan": "0420–0503",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GW5S-3JM"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pb19146a8ec",
+    "name": "Carolus de Hesbaye III, le bel, the beautiful",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p769956a860",
+    "name": "Mathilde",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pbc3a6520d1",
+    "name": "Austrapius DE MENAPIE DE HASBAYE"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pf83add9966",
+    "name": "Menapie",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GW5S-3JM",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

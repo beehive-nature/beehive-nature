@@ -1,0 +1,74 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p04ff3b07cd",
+ "bnr": "bnr://skaists.dev/blood/p04ff3b07cd",
+ "identity": {
+  "name": "Margaret Rankin",
+  "lifespan": "1740–1810",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G7G3-7R6"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p176aeab75e",
+    "name": "William Rankin Sr.",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p58e269a81e",
+    "name": "Elizabeth Few",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p9d53471961",
+    "name": "Hannah Chandler"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p3a301630c7",
+    "name": "Jacob Chandler",
+    "marriage": null
+   },
+   {
+    "id": "p4b65bd7592",
+    "name": "David Bailey Sr",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G7G3-7R6",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

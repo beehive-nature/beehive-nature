@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p5764e4073d",
+ "bnr": "bnr://skaists.dev/blood/p5764e4073d",
+ "identity": {
+  "name": "Basemath bint Solomon",
+  "lifespan": "Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PZTJ-9D4"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p0dfd12288c",
+    "name": "King Solomon ben David",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p5f5970a819",
+    "name": "Nicauli Tashere bint Shoshenq Pharaoh's Daughter, Princess of Egypt",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p3f18dc12f9",
+    "name": "Arsah bat Ahimaz Ha-Naphtali"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pce0983a042",
+    "name": "Ahimaz ha-Naphtali",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PZTJ-9D4",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pd6690d1571",
+ "bnr": "bnr://skaists.dev/blood/pd6690d1571",
+ "identity": {
+  "name": "Saru' ibn Urghuwa",
+  "lifespan": "2180BC–1949BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LD13-Y9W"
+  }
+ ],
+ "evidence": {
+  "era": "recorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "recorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pf9cf787d97",
+    "name": "Urghuwa ibn Falikh ibn Abir",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p8e19f8e30b",
+    "name": "Ora bint Ur of Babylon",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p16a20d92e7",
+    "name": "Karnevo ibn Saru' ibn Urghuwa"
+   },
+   {
+    "id": "pbe42687a79",
+    "name": "Melka bint Saru' of Ur"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pb67a8dc19c",
+    "name": "Ijaska bint Kaber",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LD13-Y9W",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

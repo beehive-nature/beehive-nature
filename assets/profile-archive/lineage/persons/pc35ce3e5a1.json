@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pc35ce3e5a1",
+ "bnr": "bnr://skaists.dev/blood/pc35ce3e5a1",
+ "identity": {
+  "name": "Tamar bint Epher",
+  "lifespan": "–1800BC",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "MDGF-TF4"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p581855f74d",
+    "name": "Epher ben Midian",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p968808aa76",
+    "name": "Mrs Epher",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p28cb6517a8",
+    "name": "Faris ibn Yehuda"
+   },
+   {
+    "id": "p8221560526",
+    "name": "Zerah ben Judah"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pd78b86b1c4",
+    "name": "Yehuda ibn Yaʿqūb",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/MDGF-TF4",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

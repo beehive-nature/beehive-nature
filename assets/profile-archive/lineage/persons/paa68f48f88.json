@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "paa68f48f88",
+ "bnr": "bnr://skaists.dev/blood/paa68f48f88",
+ "identity": {
+  "name": "Amice of Gloucester",
+  "lifespan": "1160–1225",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "KH8X-ZDW"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p83b169d58c",
+    "name": "Robert fitz Robert 2nd Earl of Gloucester",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pf4314d7c7f",
+    "name": "Hawise de Beaumont",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p71f5b16d97",
+    "name": "Sir Gilbert de Clare, 5th Earl of Hertford"
+   },
+   {
+    "id": "p8641658f41",
+    "name": "Matilda de Clare II"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pe8d7ea877c",
+    "name": "Richard de Clare, 3rd Earl of Hertford",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/KH8X-ZDW",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

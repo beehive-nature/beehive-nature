@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p25fd422324",
+ "bnr": "bnr://skaists.dev/blood/p25fd422324",
+ "identity": {
+  "name": "Thomas Sheafe",
+  "lifespan": "1532–1604",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L56R-VT3"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pfafbb4f733",
+    "name": "Richard Sheafe",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pff0fabb7c9",
+    "name": "Dame Elizabeth Andrews",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pd6e02ab034",
+    "name": "Katherine Sheaffe"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p6898d747b4",
+    "name": "Mary Harman",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L56R-VT3",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

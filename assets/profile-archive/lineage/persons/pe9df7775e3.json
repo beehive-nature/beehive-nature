@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pe9df7775e3",
+ "bnr": "bnr://skaists.dev/blood/pe9df7775e3",
+ "identity": {
+  "name": "High Priest Azariah ben Ahimaaz",
+  "lifespan": "1085BC–0913BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "K63X-3BX"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p454613e733",
+    "name": "Ahimaas",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pf2c018ec03",
+    "name": "Basemath bat Solomon",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p51f8772573",
+    "name": "High Priest Johanan ben Azariah I"
+   },
+   {
+    "id": "p680ecc471d",
+    "name": "Amariah ibn Ǎzaryāh I"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p1acb741bb0",
+    "name": "Isah Azarías ben Ahimaas",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/K63X-3BX",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

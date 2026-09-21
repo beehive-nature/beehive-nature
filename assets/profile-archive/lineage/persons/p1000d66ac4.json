@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p1000d66ac4",
+ "bnr": "bnr://skaists.dev/blood/p1000d66ac4",
+ "identity": {
+  "name": "John of Gaunt Duke of Lancaster",
+  "lifespan": "1340–1399",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GWZX-F4D"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pe07623bef4",
+    "name": "Edward III King of England",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p57f8de3762",
+    "name": "Philippa de Hainaut Queen of England",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p67f772c124",
+    "name": "Sir John Beaufort 1st Earl of Somerset"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pdc2d64a29a",
+    "name": "Katherine de Roët",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GWZX-F4D",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

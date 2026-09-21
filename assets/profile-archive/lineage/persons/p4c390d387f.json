@@ -1,0 +1,79 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p4c390d387f",
+ "bnr": "bnr://skaists.dev/blood/p4c390d387f",
+ "identity": {
+  "name": "St. Bianca Emerentia bat Matthat",
+  "lifespan": "0065BC–30",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GF72-JC5"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p496f28c8a1",
+    "name": "Matthat ben Levi",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p80cd7e9582",
+    "name": "Hazibah Estha De Jerusalem",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p400f903bcb",
+    "name": "Saint Anne bat Yehoshua"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pb9a3cee571",
+    "name": "High Priest Joshua ben Fabus",
+    "marriage": null
+   },
+   {
+    "id": "pd573859a15",
+    "name": "Hezekiah ben Matthan",
+    "marriage": null
+   },
+   {
+    "id": "p4713c3b3bc",
+    "name": "Yehoshua ben Phiabi",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GF72-JC5",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p43a2733eec",
+ "bnr": "bnr://skaists.dev/blood/p43a2733eec",
+ "identity": {
+  "name": "Asilia Hastila de Lombardía",
+  "lifespan": "0310–0387",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "P7Z3-JSH"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pf3d16101d5",
+    "name": "King of the Lombards Aio Agio Ajonis Agilulf d'Alemanie",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p87725dc5fb",
+    "name": "Nu Iunii Neratii de Roma",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p548b7fe17b",
+    "name": "Ascyla de Toxandrie"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pe4b484f51a",
+    "name": "Ascyllius de Francs King of the Salian Franks",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/P7Z3-JSH",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

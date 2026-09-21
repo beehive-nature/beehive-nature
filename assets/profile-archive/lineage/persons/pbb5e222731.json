@@ -1,0 +1,58 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pbb5e222731",
+ "bnr": "bnr://skaists.dev/blood/pbb5e222731",
+ "identity": {
+  "name": "spouse DE MENAPIE Carausius Dit Marcus Aurelius Valerius Dit A La Pourpre",
+  "lifespan": "0240–Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G1Y2-6BM"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [],
+  "children": [
+   {
+    "id": "pb948d90557",
+    "name": "Genseris Dit De Bretagne DE MENAPIE"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pff59040ea1",
+    "name": "Carausius Dit Marcus Aurelius Valerius Dit A La Pourpre Dit L'Usurpateur DE MENAPIE",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G1Y2-6BM",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

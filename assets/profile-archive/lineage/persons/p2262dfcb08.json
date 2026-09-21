@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p2262dfcb08",
+ "bnr": "bnr://skaists.dev/blood/p2262dfcb08",
+ "identity": {
+  "name": "Anne Maundy",
+  "lifespan": "1560–1613",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L71V-HWQ"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p106771a505",
+    "name": "John Maundy",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p4e3649ae8e",
+    "name": "Alice Temple",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p23f647de2b",
+    "name": "Bennet Hodsoll"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p1a4f14db15",
+    "name": "John V Hodsoll",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L71V-HWQ",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

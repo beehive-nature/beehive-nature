@@ -1,0 +1,62 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pc5617c9d18",
+ "bnr": "bnr://skaists.dev/blood/pc5617c9d18",
+ "identity": {
+  "name": "Queen Godwulf Troy",
+  "lifespan": "42–0118",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "P3TH-P7R"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [],
+  "children": [
+   {
+    "id": "p2d5fc042e5",
+    "name": "Ethespamare D' Ostrogothie"
+   },
+   {
+    "id": "pcbe8c2f37c",
+    "name": "Hulmul of the Amal"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p82923fa685",
+    "name": "Gaut of the Amal",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/P3TH-P7R",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

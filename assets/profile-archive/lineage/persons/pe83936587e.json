@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pe83936587e",
+ "bnr": "bnr://skaists.dev/blood/pe83936587e",
+ "identity": {
+  "name": "Gallus Magnus Bishop of Troyes",
+  "lifespan": "0490–0562",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GQ23-D8T"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p51f52ec446",
+    "name": "Magnus VI Clarissimus",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p7cf7523305",
+    "name": "Unknow of Treves",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p81aa1eee9c",
+    "name": "Countess Palatina d'Angouleme de Troyes"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p63be49bb15",
+    "name": "Unknow of Treves",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GQ23-D8T",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

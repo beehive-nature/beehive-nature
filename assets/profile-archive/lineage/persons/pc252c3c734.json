@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pc252c3c734",
+ "bnr": "bnr://skaists.dev/blood/pc252c3c734",
+ "identity": {
+  "name": "Duke Theodon I Agilofinges of Bavaria",
+  "lifespan": "0602–0667",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PFXK-M4P"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p782828ee02",
+    "name": "Duke Garibaldi Agilfinges of Bavaria",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p3baedae408",
+    "name": "Regentrude Merovingian",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p2a416e46a4",
+    "name": "Theodo II. Herzog der Bajuwaren in Baiern"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p9a970e47e2",
+    "name": "Fara Folchaide Robertian Of Bavaria",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PFXK-M4P",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

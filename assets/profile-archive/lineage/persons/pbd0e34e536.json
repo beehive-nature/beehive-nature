@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pbd0e34e536",
+ "bnr": "bnr://skaists.dev/blood/pbd0e34e536",
+ "identity": {
+  "name": "Hildegonde von Kohln",
+  "lifespan": "0395–0450",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LVDW-8FX"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pebe42b5986",
+    "name": "Marcomir I de Cologne Roi et Duc des Salian Francs Rhénans",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p75f01da790",
+    "name": "Hatilde de Cologne",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p009fd1d6d6",
+    "name": "Chlodebaud   dit Pharamon DE FRANCIE DE COLOGNE"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pf74ec67eef",
+    "name": "Chlodio \"le Chevelu\" König der Salfranken",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LVDW-8FX",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

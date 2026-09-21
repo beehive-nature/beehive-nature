@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pb3e0d118a1",
+ "bnr": "bnr://skaists.dev/blood/pb3e0d118a1",
+ "identity": {
+  "name": "Appius Claudius Pulcher II",
+  "lifespan": "0185BC–0135BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GHRQ-QPJ"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pb2c32d93a2",
+    "name": "Appius Claudius Pulcher I",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pa5984712db",
+    "name": "Antistia",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p9ea3df41f1",
+    "name": "Alfidia Lurco"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pf9422fff69",
+    "name": "Servilia Caepionis",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GHRQ-QPJ",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

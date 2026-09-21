@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p0face66a01",
+ "bnr": "bnr://skaists.dev/blood/p0face66a01",
+ "identity": {
+  "name": "Annetje Pieterse Praa or Prat",
+  "lifespan": "1652–Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LHXX-68R"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p48badf4cde",
+    "name": "Pieter Pieterse Praa",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p59a6024542",
+    "name": "Marie Phillipe",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p2b08e1b7e2",
+    "name": "Elizabeth Andries"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p945f5de773",
+    "name": "Andries Jeuriaenszen",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LHXX-68R",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

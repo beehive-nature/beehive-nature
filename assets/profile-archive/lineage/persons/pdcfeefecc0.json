@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pdcfeefecc0",
+ "bnr": "bnr://skaists.dev/blood/pdcfeefecc0",
+ "identity": {
+  "name": "Elizabethe Hooper",
+  "lifespan": "1550–1641",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G4LG-Y2X"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pb4f0c8406f",
+    "name": "Eduardus or Edvardi Hooper",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p4793aa4b55",
+    "name": "Martha",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p6ccd1f2c46",
+    "name": "Agnes Wingod"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p28aa458885",
+    "name": "Guilielmus Wingod",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G4LG-Y2X",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

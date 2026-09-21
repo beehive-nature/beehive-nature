@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p811dc2d2a4",
+ "bnr": "bnr://skaists.dev/blood/p811dc2d2a4",
+ "identity": {
+  "name": "Elizabeth Berkeley",
+  "lifespan": "1386–1422",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LYVY-R4W"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pba35517fe7",
+    "name": "Thomas Berkeley, 5th Baron Berkeley",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p454f8ddab4",
+    "name": "Margaret de Lisle 3rd Baroness Lisle",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p82c95a350f",
+    "name": "Eleanor Beauchamp"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "paa730fa64f",
+    "name": "Richard Beauchamp 13th Earl of Warwick",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LYVY-R4W",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

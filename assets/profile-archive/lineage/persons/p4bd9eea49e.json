@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p4bd9eea49e",
+ "bnr": "bnr://skaists.dev/blood/p4bd9eea49e",
+ "identity": {
+  "name": "X De Babylone",
+  "lifespan": "Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "P458-JYP"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pda5b17dcd4",
+    "name": "Adad Shuma Usur De Babylone",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pfe3f1f0a64",
+    "name": "X D'Assyrie  X D'Assyrie",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pc66982eb22",
+    "name": "Ashur Dan D'Assyrie Roi d'Assyrie Roi d'Assyrie"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p1dfa14ce35",
+    "name": "Ninurta Apal Ekur D'Assyrie Roi de l' empire assyrien moyen Roi d'Assyrie",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/P458-JYP",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

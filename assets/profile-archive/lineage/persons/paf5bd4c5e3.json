@@ -1,0 +1,52 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "paf5bd4c5e3",
+ "bnr": "bnr://skaists.dev/blood/paf5bd4c5e3",
+ "identity": {
+  "name": "Pharaoah Akhenaton XVIII Dynasty of Egypt 10th PHARAOH of 18th Dynasty EGYPT",
+  "lifespan": "1370BC–1336BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GGWX-XLD"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [],
+  "children": [
+   {
+    "id": "p71bd07b59c",
+    "name": "Pharaoah Smenkhkare XVIII Dynasty of Egypt"
+   }
+  ],
+  "spouses": []
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GGWX-XLD",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

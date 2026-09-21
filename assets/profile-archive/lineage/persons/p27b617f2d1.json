@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p27b617f2d1",
+ "bnr": "bnr://skaists.dev/blood/p27b617f2d1",
+ "identity": {
+  "name": "Richard Sparrow",
+  "lifespan": "1602–1661",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L51W-7T5"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pe5bb6235ce",
+    "name": "James Sparrow",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pac8c96f203",
+    "name": "Joane Watkins",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p8ecb7f737c",
+    "name": "Capt. Jonathan Sparrow"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p8f75c66b0e",
+    "name": "Pandora Bangs",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L51W-7T5",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

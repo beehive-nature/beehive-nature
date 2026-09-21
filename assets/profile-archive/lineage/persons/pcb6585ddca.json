@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pcb6585ddca",
+ "bnr": "bnr://skaists.dev/blood/pcb6585ddca",
+ "identity": {
+  "name": "Servius Sulpicius Rufus de Rome",
+  "lifespan": "0105BC–0043BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L6XP-T7F"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pef77c302d3",
+    "name": "Lucius Julius Caesar III",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pdffded3feb",
+    "name": "Fulvia Crossutia",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pd619800acc",
+    "name": "Suplicia Scribonia Julia Crusiello"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pcda696d606",
+    "name": "Julia Rufus Caesaris",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L6XP-T7F",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

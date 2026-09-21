@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p5c53465866",
+ "bnr": "bnr://skaists.dev/blood/p5c53465866",
+ "identity": {
+  "name": "Tabitha Kinsley",
+  "lifespan": "1630–1682",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LZNG-Y3T"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pfebddf5e3a",
+    "name": "Stephen Kinsley",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p73f4a9a175",
+    "name": "Marie Spaulding",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pb8d478996b",
+    "name": "Elizabeth Crane"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p2ff899972a",
+    "name": "Henry Crane",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LZNG-Y3T",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

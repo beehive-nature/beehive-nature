@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p6375fa5db9",
+ "bnr": "bnr://skaists.dev/blood/p6375fa5db9",
+ "identity": {
+  "name": "Cornelia Cethegilla Minor di Rome",
+  "lifespan": "80–Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GVHW-8FT"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pa90c7773ef",
+    "name": "Servius Cornelius Salvidienus Orfitus",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pff28967548",
+    "name": "Calpurina Lepida",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pe513881e3a",
+    "name": "Marcus Gavius Squilla Gallicanus"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p6df6932558",
+    "name": "Marcus Gavius Squilla Gallicanus",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GVHW-8FT",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

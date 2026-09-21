@@ -1,0 +1,64 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p3eaf1d51a7",
+ "bnr": "bnr://skaists.dev/blood/p3eaf1d51a7",
+ "identity": {
+  "name": "Deiotarus I King of galatia",
+  "lifespan": "0105–0040BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PS4W-L2V"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p54b215549b",
+    "name": "Sinorix",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p891a240a1a",
+    "name": "Adobogiona 'the Elder'"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p99540e68f2",
+    "name": "Queen Bernice Of Pergamon",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PS4W-L2V",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

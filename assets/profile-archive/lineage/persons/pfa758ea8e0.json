@@ -1,0 +1,77 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pfa758ea8e0",
+ "bnr": "bnr://skaists.dev/blood/pfa758ea8e0",
+ "identity": {
+  "name": "Arria Caesennia Paulina Caesennius",
+  "lifespan": "0115–0161",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GWXW-7SC"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p001fb97d9a",
+    "name": "Lucius Junius Caessennius Antoninus",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p59c24ba021",
+    "name": "Sra Lucius Caesennius Antoninus Caesennius",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p0d34633591",
+    "name": "Arria Sextia Paulina"
+   },
+   {
+    "id": "pe1ac62b040",
+    "name": "Marcus Laelius de Rome"
+   },
+   {
+    "id": "pfc4300a966",
+    "name": "MARCUS NONIUS ARRIUS MUCIANUS"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p48dc7a70b9",
+    "name": "Marcus Nonius Macrinus Consul of Rome",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GWXW-7SC",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

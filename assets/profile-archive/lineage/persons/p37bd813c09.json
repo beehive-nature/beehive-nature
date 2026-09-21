@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p37bd813c09",
+ "bnr": "bnr://skaists.dev/blood/p37bd813c09",
+ "identity": {
+  "name": "Philip Torrey",
+  "lifespan": "1530–1604",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LZ2D-G5L"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pf9566f4101",
+    "name": "William Torrey",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p717fb12d3f",
+    "name": "Thomasyne",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p3794f8c965",
+    "name": "William Torrey"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p51cd1fe5b6",
+    "name": "Margaret Killigrew",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LZ2D-G5L",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

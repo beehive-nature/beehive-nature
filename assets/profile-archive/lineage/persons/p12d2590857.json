@@ -1,0 +1,68 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p12d2590857",
+ "bnr": "bnr://skaists.dev/blood/p12d2590857",
+ "identity": {
+  "name": "Ranulf de Quercy II  de Castelnau",
+  "lifespan": "0815–0868",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GLS6-BZ1"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "PHDM-DGQ",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p545c2a3c15",
+    "name": "Aiga DE BOURGES",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pbfc1c0f406",
+    "name": "Comtesse Adaltrude DE QUERCY, DE CAHORS"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p4bfb304672",
+    "name": "Rotrude Du Maine",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GLS6-BZ1",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p81c4b169e8",
+ "bnr": "bnr://skaists.dev/blood/p81c4b169e8",
+ "identity": {
+  "name": "Maj. John Freeman",
+  "lifespan": "1626–1719",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LT4G-TFZ"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pec504ff348",
+    "name": "Edmund Freeman",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p23f647de2b",
+    "name": "Bennet Hodsoll",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pdb374140d4",
+    "name": "LT. Edmond Freeman Sr."
+   },
+   {
+    "id": "p702ea826d3",
+    "name": "William Freeman"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pef2e307981",
+    "name": "Mercy Prence",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LT4G-TFZ",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

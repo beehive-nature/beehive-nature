@@ -1,0 +1,77 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pba2cb983ca",
+ "bnr": "bnr://skaists.dev/blood/pba2cb983ca",
+ "identity": {
+  "name": "Lomna bint Seni",
+  "lifespan": "2245BC–2004BC",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LDPP-WXF"
+  }
+ ],
+ "evidence": {
+  "era": "recorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "recorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p52d6c7e82f",
+    "name": "Seni ibn Kanaán of the Sinites",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pd55ab32fca",
+    "name": "Edna Ashmua bint Lamik",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pa5b86c67ac",
+    "name": "Heraclim ibn Falikh ibn Abir"
+   },
+   {
+    "id": "pf9cf787d97",
+    "name": "Urghuwa ibn Falikh ibn Abir"
+   },
+   {
+    "id": "pac78735331",
+    "name": "Kaber ibn Falikh"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p26d1cbe7c6",
+    "name": "Falikh ibn Abir , King of Babylon",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LDPP-WXF",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

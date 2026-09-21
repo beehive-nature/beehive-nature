@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p476e93322c",
+ "bnr": "bnr://skaists.dev/blood/p476e93322c",
+ "identity": {
+  "name": "Joseph Clarke",
+  "lifespan": "1618–1694",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LY27-4H8"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pf5160af592",
+    "name": "Thomas Clarke",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p976e94c0f8",
+    "name": "Rose Kerrich",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p6d2ea3e333",
+    "name": "Joseph Clarke"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p463e93231b",
+    "name": "Margaret Turner",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LY27-4H8",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

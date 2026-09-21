@@ -1,0 +1,58 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "paa66f34308",
+ "bnr": "bnr://skaists.dev/blood/paa66f34308",
+ "identity": {
+  "name": "Haral Hillditur Roucsson de Heidmark",
+  "lifespan": "0600–Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "P7ZQ-NNH"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [],
+  "children": [
+   {
+    "id": "pffef13ac1c",
+    "name": "Thrond Haraldsson de Heidmark"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p3abb826a85",
+    "name": "Wife Haral Hillditur Roucsson de Heidmark",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/P7ZQ-NNH",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,62 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p94dee6e533",
+ "bnr": "bnr://skaists.dev/blood/p94dee6e533",
+ "identity": {
+  "name": "Mrs Joseph",
+  "lifespan": "0060BC–Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GFBP-BY8"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [],
+  "children": [
+   {
+    "id": "p4179af5338",
+    "name": "Joseph III ben Joseph of Idumea"
+   },
+   {
+    "id": "p6859c79021",
+    "name": "daughter bat Joseph"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p2791f30c20",
+    "name": "Joseph ben Antipater",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GFBP-BY8",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

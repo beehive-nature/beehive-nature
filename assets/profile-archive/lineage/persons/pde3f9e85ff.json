@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pde3f9e85ff",
+ "bnr": "bnr://skaists.dev/blood/pde3f9e85ff",
+ "identity": {
+  "name": "Asinia II Juliana \"A Velha“ Nicomachus De'Asinius",
+  "lifespan": "0197–Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PFT1-G99"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p3d6b7c8c27",
+    "name": "Gaius Julianus Asinius Quadratus of Belgium De'Asinius",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p45c39d06e8",
+    "name": "Julia Quadratilla de Rome",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p03b932088e",
+    "name": "Juliana Fausta Nicomacha"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p4d481484ce",
+    "name": "Sextus Anicius Faustus Paulinus de Rome",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PFT1-G99",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

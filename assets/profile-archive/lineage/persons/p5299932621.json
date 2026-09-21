@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p5299932621",
+ "bnr": "bnr://skaists.dev/blood/p5299932621",
+ "identity": {
+  "name": "Mes-Anne-pada 5th King of Ur, King of Uruk",
+  "lifespan": "–2525BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LR7C-12W"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p824d41f7ed",
+    "name": "Meskalamdug 3rd King of Ur, King of Kish",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p5bc7c3049d",
+    "name": "Puabi , Queen of Ur",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pdb8c366be7",
+    "name": "? (dite La Perle de Mari) D'UR-?"
+   },
+   {
+    "id": "pd4ae64429e",
+    "name": "? (dite La Perle de Kish) D'UR-?"
+   }
+  ],
+  "spouses": []
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LR7C-12W",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pfee9785169",
+ "bnr": "bnr://skaists.dev/blood/pfee9785169",
+ "identity": {
+  "name": "John Rathbun",
+  "lifespan": "1628–1702",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LTMP-JQQ"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p602ae4d1ae",
+    "name": "Thomas Rathbone V",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p327fd63aa8",
+    "name": "Alitia Childwall",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pee67cf8e6d",
+    "name": "John Rathbone"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pc4d7bc7e59",
+    "name": "Margaret Acres",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LTMP-JQQ",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

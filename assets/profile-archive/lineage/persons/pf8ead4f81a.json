@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pf8ead4f81a",
+ "bnr": "bnr://skaists.dev/blood/pf8ead4f81a",
+ "identity": {
+  "name": "Vivette Champagné",
+  "lifespan": "0902–0926",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "FH9L-8TH"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pe3da2da17e",
+    "name": "Champagne",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pef2900136b",
+    "name": "Berthe de Troyes",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pbf02774f7c",
+    "name": "Hérivée de Châtillon"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p7602483557",
+    "name": "Eude de Chatillon-sur-Marne",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/FH9L-8TH",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

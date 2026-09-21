@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pfa88875409",
+ "bnr": "bnr://skaists.dev/blood/pfa88875409",
+ "identity": {
+  "name": "Nicholas Danforth",
+  "lifespan": "1530–1585",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LTFS-62D"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pacc7a2880d",
+    "name": "Paul Danforth",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p55008c783a",
+    "name": "Katherine",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pae62f1e261",
+    "name": "Thomas Danforth"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pc2c193a427",
+    "name": "Alice Jordan",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LTFS-62D",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p772b426111",
+ "bnr": "bnr://skaists.dev/blood/p772b426111",
+ "identity": {
+  "name": "Theron George Boyd",
+  "lifespan": "1829–1862",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "218J-SND"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p24d384cec4",
+    "name": "John Nicholson Boyd",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p73ea53e968",
+    "name": "Bethiah Louise Corwin",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p10e83a0970",
+    "name": "Elizabeth Jane \"Eliza\" Boyd"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pd5b75f4d49",
+    "name": "Jane Bethia Sawyer",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/218J-SND",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

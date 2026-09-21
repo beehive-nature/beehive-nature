@@ -1,0 +1,82 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p16a678c3db",
+ "bnr": "bnr://skaists.dev/blood/p16a678c3db",
+ "identity": {
+  "name": "Egi Tiye d'Ugarit Nubie",
+  "lifespan": "1398BC–1338BC",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "KPQF-7B3"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p6163f0c4f7",
+    "name": "Yuya d'Ugarit ben Artatama I Commander of Chariotry",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p181701a127",
+    "name": "Thuyu Nubie",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p36daab3857",
+    "name": "Akhenaton Amenhotep  IV, 10th Pharaoh, 18th Dynasty"
+   },
+   {
+    "id": "pce4b89bd67",
+    "name": "The Younger Lady (Nebet-Ta Shepset-en-Amun) Royal Lady of the Two Lands, Great King's Daughter of the 18th Dynasty of Egypt The Younger Lady Nebet'Ta Shepset'en'Amun Royal Lady of the Eighteenth Dynasty"
+   },
+   {
+    "id": "p312e2af853",
+    "name": "Thutmose IV Menheprouré D'EGYPTE-DE MESOPOTAMIE"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p070f99db10",
+    "name": "Amenhotep III van Egypte",
+    "marriage": null
+   },
+   {
+    "id": "pcacf8b3b7e",
+    "name": "Amenhotep III Nebma'atre' 9th Pharaoh 18th Dynasty",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/KPQF-7B3",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

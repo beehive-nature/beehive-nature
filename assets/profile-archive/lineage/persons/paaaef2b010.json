@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "paaaef2b010",
+ "bnr": "bnr://skaists.dev/blood/paaaef2b010",
+ "identity": {
+  "name": "Aulus Larcius Lepidus Sulpicianus",
+  "lifespan": "80–Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PZDX-N84"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p84a4c3b7b7",
+    "name": "Aulus Larcius Gallus",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p12947c7482",
+    "name": "Sulpicia Telero",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p018be90ff6",
+    "name": "Aulus Larcius Lepidus Console Romana"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pcae57ecdae",
+    "name": "Caecina Larga",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PZDX-N84",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

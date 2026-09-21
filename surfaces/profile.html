@@ -276,6 +276,27 @@ body[data-reg="cypherpunk"] .claim-stamp{border-radius:2px}
 .rverdict.ok{color:var(--verified)}
 .rverdict.no{color:var(--gold)}
 .rlaw{margin-top:10px;font-size:10px;color:var(--dim);line-height:1.8}
+/* ── the bloodline record — walked FamilySearch data (zCode lineage import 2026-09-16) ── */
+#blood-record .blood-stats{margin-top:8px;font-size:.78rem;color:var(--gold);letter-spacing:.02em}
+.fanwrap{margin-top:14px;display:grid;justify-items:center;gap:8px}
+.fanwrap svg{width:100%;max-width:640px;height:auto}
+.fanwrap .fanslice{cursor:default}
+.fanwrap .fanslice:hover{opacity:.82}
+.fancap{font-size:.72rem;color:var(--dim);text-align:center}
+.tierlegend{display:flex;flex-wrap:wrap;gap:7px 12px;justify-content:center;font-size:.68rem;color:var(--dim)}
+.tierlegend .tk{display:inline-flex;align-items:center;gap:5px}
+.tierlegend .tk i{width:9px;height:9px;border-radius:2px;display:inline-block}
+.spinedetails{margin-top:14px}
+.spinedetails summary{cursor:pointer;color:var(--ink);font:650 .95rem/1.4 var(--bee-font)}
+.spinerail{margin-top:10px;display:grid;gap:3px;max-height:340px;overflow:auto;padding-right:6px}
+.spinerail li{display:flex;gap:9px;align-items:baseline;font-size:.74rem;color:var(--dim);list-style:none}
+.spinerail li .gen{color:var(--dim);min-width:3.4ch;text-align:right;opacity:.7}
+.spinerail li .who{color:var(--ink)}
+.spinerail li .yrs{color:var(--dim);opacity:.85;white-space:nowrap}
+.spinerail li .tdot{width:8px;height:8px;border-radius:50%;flex:none;align-self:center}
+.spinerail li.saga .who{color:var(--violet)}
+.spinerail li.medieval .who{color:var(--gold)}
+@media(max-width:720px){.spinerail{max-height:260px}.fanwrap svg{max-width:420px}}
 </style>
 </head>
 <body data-reg="bee" data-bee-theme="custom" data-prof-beat="arrival" data-experience="profile">
@@ -474,6 +495,41 @@ body[data-reg="cypherpunk"] .claim-stamp{border-radius:2px}
       <div class="lineage-node" data-mark="◇" data-scope="circle"><strong data-i18n="prof.arch.node.living">Living relations</strong><p data-i18n="prof.arch.node.living.p">Names, dates, portraits, and relationships remain placeholders until each person consents.</p><span class="scope-tag" data-i18n="prof.arch.scope.circle">trusted circle</span></div>
       <div class="lineage-node" data-mark="⌁" data-scope="private"><strong data-i18n="prof.arch.node.private">Private archive</strong><p data-i18n="prof.arch.node.private.p">Unpublished research notes, uncertain links, and sensitive records stay on the holder’s device.</p><span class="scope-tag" data-i18n="prof.arch.scope.private">private</span></div>
       <div class="lineage-node" data-mark="△" data-scope="public"><strong data-i18n="prof.arch.node.hist">Historical lineage</strong><p data-i18n="prof.arch.node.hist.p">Family interpretations may be shared as stories. Genealogical assertions need a citation or an explicit unverified label.</p><span class="scope-tag" data-i18n="prof.arch.scope.sourced">public with source</span></div>
+    </div>
+  </section>
+
+  <!-- ── the bloodline record — walked FamilySearch data (zCode lineage import, 2026-09-16) ── -->
+  <section class="archive-panel" id="blood-record" aria-labelledby="blood-title">
+    <h2 id="blood-title" data-i18n="prof.arch.blood.h">the bloodline record — walked from FamilySearch</h2>
+    <p data-i18n="prof.arch.blood.p">The founder’s line, lifted 2026-09-16 out of the FamilySearch tree his grandmother Marilyn Lowry Remington built with him twelve years ago. Deceased ancestors publish here with era labels; every living person stays redacted. Past the colonial era the spine is traditional, not proven — the ring color says which.</p>
+    <p class="blood-stats" id="blood-stats"></p>
+    <div class="fanwrap">
+      <svg id="blood-fan" viewBox="0 0 720 436" role="img" aria-label="fan chart of seven generations, colored by evidence era"></svg>
+      <p class="fancap" data-i18n="prof.arch.blood.fan.cap">seven generations from the founder · color = evidence era</p>
+    </div>
+    <div class="tierlegend" id="blood-legend" role="list"></div>
+    <details class="spinedetails">
+      <summary data-i18n="prof.arch.blood.spine.sum">the spine — the founder through Ragnar Loðbrók to the deep ancestors</summary>
+      <ol class="spinerail" id="blood-spine"></ol>
+    </details>
+    <div class="sagaring" id="blood-saga">
+      <h3 data-i18n="prof.arch.blood.saga.h">the saga generation — the crest’s kin</h3>
+      <p data-i18n="prof.arch.blood.saga.p">Ragnar Loðbrók (0740–0845) is the walked ancestor; the blood rides through his daughter Alof by Queen Thora. By saga, Ragnar and Queen Aslaug also bore the sons this house honors — Björn Ironside, whose line the tree carries to the kings of Sweden, and Sigurd Snake-in-the-Eye, the serpent of the house mark.</p>
+      <ol class="spinerail sagarows">
+        <li class="saga"><span class="tdot"></span><span class="who">Ragnar Loðbrók (Ragnar Sigurdsson)</span><span class="yrs">0740–0845</span></li>
+        <li class="saga"><span class="tdot"></span><span class="who">Queen Thora Herraudrsdottír of Sweden</span><span class="yrs">0765–Deceased</span><span class="chip ok" data-i18n="prof.arch.blood.saga.ourblood">our blood</span></li>
+        <li class="saga"><span class="tdot"></span><span class="who">Queen Aslaug Sigurdsdottir of Norway, Sweden and Denmark</span><span class="yrs">0755–0867</span></li>
+        <li class="saga"><span class="tdot"></span><span class="who">Alof Ragnarsdottír → Eric Edmundsson</span><span class="yrs">0837–0871</span><span class="chip ok" data-i18n="prof.arch.blood.saga.ourblood">our blood</span></li>
+        <li class="saga"><span class="tdot"></span><span class="who">Björn Ironside (Björn Ragnarsson) — the kings of Sweden ride his line</span><span class="yrs">0794–0891</span></li>
+        <li class="saga"><span class="tdot"></span><span class="who">Sigurd Snake-in-the-Eye (Orm-í-auga) — the crest’s serpent</span><span class="yrs">saga only</span><span class="chip bad" data-i18n="prof.arch.blood.saga.kin">saga kin — not in the walked record</span></li>
+      </ol>
+      <p class="translation-caveat" data-i18n="prof.arch.blood.saga.q">"first king of sweden?" — in this tree the Swedish crown enters through Björn Ironside’s line (Björn III Eriksson → King Olof Björnsson → Gynrithe), while the sagas seat Sigurd Snake-in-the-Eye in Denmark; every name before ~970 is saga, not documented history.</p>
+    </div>
+    <p class="translation-caveat" data-reg="cypherpunk" data-i18n="prof.arch.blood.cypher">Corpus JSON carries FamilySearch IDs for deceased persons only; the walk ran under the founder’s own signed-in session; tiers are era heuristics until the source-based confidence lane replaces them.</p>
+    <div class="archive-actions">
+      <a class="door" href="../assets/profile-archive/lineage/remington-bloodline.json" data-i18n="prof.arch.blood.prov">open the lineage corpus (JSON)</a>
+      <a class="door primary" href="blood.html" data-i18n="prof.arch.blood.enter">enter the blood comb — the fractal archive →</a>
+      <a class="door" href="blood.html#myth" data-i18n="prof.arch.blood.myth">enter through the mythology — the sagas and the crest's own meaning →</a>
     </div>
   </section>
 
@@ -889,7 +945,11 @@ function restoreVisibleFocus(focus){
         path:'docs/mvp-walk/assets/genesis-3d/motion/green-teal-breathing.svg',
         sha256:'9971D2CA697797AF7430B062CA1842AB063BA3746418E8963A527BD4BF017FE3' // PUBLIC-CONSTANT: breathing bloom digest
       },
-      fields:fields,
+      lineage_corpus:{
+        path:'assets/profile-archive/lineage/remington-bloodline.json',
+        sha256:'84D37120326C547D76C6F0A133BAB27EB4C47073653C0895A5195D8AB113A877' // PUBLIC-CONSTANT: lineage corpus digest
+      },
+      fields:fields.concat(['era-labeled-historical-lineage']),
       living_people:'consent-required',
       title_claim:'not-certified',
       marketplace:'not-listed',
@@ -1025,6 +1085,109 @@ function restoreVisibleFocus(focus){
   }
   document.getElementById('rail-go').addEventListener('click',check);
   document.getElementById('rail-name').addEventListener('keydown',function(e){if(e.key==='Enter')check();});
+})();
+</script>
+<script type="application/json" id="blood-data">{"fan":{"n":"Living","l":null,"t":"living","up":[{"n":"Living","l":null,"t":"living","up":[{"n":"Jack Benedum Sutphen","l":"1920–1982","t":"recorded","f":"KWCL-VJ6","up":[{"n":"Henry Miller Sutphen","l":"1897–1972","t":"recorded","f":"L4R4-43N","up":[{"n":"Joshua Clark Sutphen","l":"1873–1941","t":"recorded","f":"L4R4-43V","up":[{"n":"Captain John Melanchton Sutphen","l":"1836–1920","t":"colonial","f":"LDCB-5SK","up":[{"n":"John Boggs Sutphen","l":"1808–1882","t":"colonial","f":"KN8N-W19"},{"n":"Sarah Ann Quick","l":"1810–1872","t":"colonial","f":"L6LW-PJF"}]},{"n":"Ellen Clarke","l":"1839–1903","t":"colonial","f":"KZ1Z-4LC","up":[{"n":"Joshua J Clarke","l":"1795–1866","t":"colonial","f":"KC4G-9RB"},{"n":"Adaline Doan","l":"1812–1881","t":"colonial","f":"2W99-HHZ"}]}]},{"n":"Alma Jane Miller","l":"1862–1947","t":"recorded","f":"LK3P-9BX","up":[{"n":"Henry Miller","l":"1805–1883","t":"colonial","f":"LC5M-71F","up":[{"n":"Abraham Miller","l":"1766–1831","t":"colonial","f":"LZ6K-CQ9"},{"n":"Elizabeth Brumbach","l":"1772–1862","t":"colonial","f":"K8T5-K19"}]},{"n":"Mary M. Shane","l":"1839–1868","t":"colonial","f":"L6LC-SCL","up":[null,null]}]}]},{"n":"Frances Belle Benidum","l":"1897–1976","t":"recorded","f":"LWBJ-MJ8","up":[{"n":"Charles C Benadum","l":"1863–1923","t":"recorded","f":"L6LW-1G2","up":[{"n":"Joseph Benadum","l":"1832–1864","t":"colonial","f":"LJDG-CYG","up":[null,null]},{"n":"Rebecca Zellers","l":"1835–1907","t":"colonial","f":"MR5L-9R3","up":[{"n":"John Peter Zeller","l":"1795–Deceased","t":"colonial","f":"G9YX-PM9"},{"n":"Maria Schmidt","l":"1800–Deceased","t":"colonial","f":"MRRK-HRF"}]}]},{"n":"Florence  M Eder","l":"1868–1959","t":"recorded","f":"LJD7-VHS","up":[{"n":"John Eder","l":"1834–1881","t":"colonial","f":"LN5V-3N2","up":[{"n":"Samuel Alexander Eder","l":"1770–1863","t":"colonial","f":"LN5V-N5B"},{"n":"Jane Porter","l":"1794–1868","t":"colonial","f":"LN5V-G8F"}]},{"n":"Sarah Jane Spotts","l":"1842–1935","t":"colonial","f":"LN5J-5W3","up":[{"n":"Peter Spotz","l":"1796–1864","t":"colonial","f":"LNJF-V31"},{"n":"Maria Catharina Drumheller","l":"1802–1881","t":"colonial","f":"LNJF-R3X"}]}]}]}]},{"n":"Donna Ruth Lawton","l":"1925–1988","t":"recorded","f":"KWCL-VNB","up":[{"n":"Rollin Eugene Lawton","l":"1894–1974","t":"recorded","f":"KWCL-VJS","up":[{"n":"Rufus Elijah Lawton","l":"1872–1954","t":"recorded","f":"L7FD-PWH","up":[{"n":"Loyal Hiram Lawton","l":"1831–1904","t":"colonial","f":"K236-R3S","up":[{"n":"Edward Lawton","l":"1806–1841","t":"colonial","f":"K2MP-SZ8"},{"n":"Mahitable Howe","l":"1806–Deceased","t":"colonial","f":"K2QN-CTZ"}]},{"n":"Harriet Phylena Fuller","l":"1844–1899","t":"colonial","f":"K236-YQ7","up":[{"n":"Edwin Fuller","l":"1809–1875","t":"colonial","f":"K64P-5TN"},{"n":"Eunice L. Maxson","l":"1812–1873","t":"colonial","f":"K6HN-GB2"}]}]},{"n":"Fannie Susan Davis","l":"1876–1911","t":"recorded","f":"L7FD-PLX","up":[{"n":"Harrison Edgar Davis","l":"1855–1917","t":"recorded","f":"K234-B6X","up":[{"n":"George West Davis","l":"1815–1881","t":"colonial","f":"LZN9-1L5"},{"n":"Zilphia Ann Williams","l":"1820–1908","t":"colonial","f":"LZN9-15Z"}]},{"n":"Elizabeth Jane \"Eliza\" Boyd","l":"1857–1947","t":"recorded","f":"LHH9-Z4T","up":[{"n":"Theron George Boyd","l":"1829–1862","t":"colonial","f":"218J-SND"},{"n":"Jane Bethia Sawyer","l":"1834–1910","t":"colonial","f":"L7LV-8W1"}]}]}]},{"n":"Lora Ann Humes","l":"1901–1986","t":"recorded","f":"KWCL-VJ7","up":[{"n":"Willard Humes","l":"1873–1933","t":"recorded","f":"KWCX-WXX","up":[{"n":"Jonas Willard Humes","l":"1844–1897","t":"colonial","f":"K2QX-ZDX","up":[{"n":"Manning Humes","l":"1806–1885","t":"colonial","f":"KWJH-CBH"},{"n":"Lucy Chaffin","l":"1815–1855","t":"colonial","f":"L4PS-BFK"}]},{"n":"Sarah Irinda Smith","l":"1857–1911","t":"recorded","f":"LLQK-SMC","up":[{"n":"Thomas Thomas C. C. Smith","l":"1825–1899","t":"colonial","f":"KWJD-KPP"},{"n":"Sarah Ann Frampton","l":"1831–1893","t":"colonial","f":"KWJD-KPG"}]}]},{"n":"Minnie Clarence Howe","l":"1877–1949","t":"recorded","f":"KWCX-WX8","up":[{"n":"Joseph Saunders Howe","l":"1822–1904","t":"colonial","f":"KWJ4-PQK","up":[{"n":"Joseph Howe","l":"1790–Deceased","t":"colonial","f":"LZJW-F2M"},{"n":"Mary Anne Saunders","l":"1804–Deceased","t":"colonial","f":"MS86-NB5"}]},{"n":"Ruth Ann Smith","l":"1845–1911","t":"colonial","f":"KWVM-KBB","up":[{"n":"Jackson Osbourn Smith","l":"1815–1880","t":"colonial","f":"KWVM-K1M"},{"n":"Mary Marie Owens","l":"1818–1881","t":"colonial","f":"KWVM-KB1"}]}]}]}]}]},{"n":"Living","l":null,"t":"living","up":[{"n":"Don Ray Remington","l":"1931–Deceased","t":"living","f":"LNQ5-BSG","up":[{"n":"Fuller Rasmussen Remington","l":"1891–1982","t":"recorded","f":"KWCL-B8V","up":[{"n":"Joseph Fuller Remington","l":"1859–1900","t":"recorded","f":"KWCL-B82","up":[{"n":"Jerome Napoleon Remington","l":"1819–1877","t":"colonial","f":"KVPT-5QS","up":[{"n":"Joseph David Remington","l":"1780–1846","t":"colonial","f":"KWBB-F25"},{"n":"Sarah Fuller","l":"1791–1847","t":"colonial","f":"KLY1-63F"}]},{"n":"Lydia Ripley Badger","l":"1831–1906","t":"colonial","f":"K2HZ-X58","up":[{"n":"John Badger","l":"1800–1840","t":"colonial","f":"KWJ5-CSM"},{"n":"Lydia Chamberlain","l":"1798–1844","t":"colonial","f":"KWJ5-C91"}]}]},{"n":"Amanda Alfreda Rasmussen","l":"1871–1955","t":"recorded","f":"KWCL-B8P","up":[{"n":"Mads Peter Rasmussen","l":"1836–1887","t":"colonial","f":"L5JF-J21","up":[{"n":"Rasmus Sørensen Basse","l":"1808–1870","t":"colonial","f":"L5JF-VHG"},{"n":"Mette Catherine Petersdatter","l":"1802–1865","t":"colonial","f":"L5JF-JQ5"}]},{"n":"Anna Gertrude Claesson","l":"1836–1913","t":"colonial","f":"KWJZ-FWW","up":[{"n":"Clas Jöransson","l":"1805–1885","t":"colonial","f":"LHG3-69T"},{"n":"Anna Margaretha Olofsdotter","l":"1811–1875","t":"colonial","f":"LZVX-X1L"}]}]}]},{"n":"Edith Leoma Hadlock","l":"1897–1982","t":"recorded","f":"KWCL-B8K","up":[{"n":"Erskine Curtis Hadlock","l":"1854–1936","t":"recorded","f":"KWCL-BDM","up":[{"n":"Archibald Gilchrist Hadlock","l":"1815–1898","t":"colonial","f":"KWJR-LHN","up":[{"n":"Samuel Arthur Hadlock","l":"1770–1849","t":"colonial","f":"LVQ1-CT2"},{"n":"Miriam Hadlock","l":"1774–1861","t":"colonial","f":"L8QJ-R7N"}]},{"n":"Fannie Bell Martha Hadlock","l":"1814–1897","t":"colonial","f":"KWJR-LHF","up":[{"n":"Joseph Hadlock","l":"1777–1849","t":"colonial","f":"LZ19-MWV"},{"n":"Olive Sanborn","l":"1781–1872","t":"colonial","f":"L8QJ-RZ8"}]}]},{"n":"Edith Ann Hobbs","l":"1861–1939","t":"recorded","f":"KWCL-B8Y","up":[{"n":"Charles William Hobbs","l":"1833–1912","t":"colonial","f":"KWZ9-FDR","up":[{"n":"William Bennett Hobbs","l":"1807–1846","t":"colonial","f":"LRRW-5DH"},{"n":"Ann Owen","l":"1809–1894","t":"colonial","f":"KWJ7-Y9Y"}]},{"n":"Mary Ann Emms","l":"1835–1919","t":"colonial","f":"KWZ9-FDT","up":[{"n":"Charles Richard Emms","l":"1809–1867","t":"colonial","f":"L56P-66L"},{"n":"Edith Ayers","l":"1800–1881","t":"colonial","f":"LW1S-ZB3"}]}]}]}]},{"n":"Marilyn Lowry","l":"1932–Deceased","t":"living","f":"LNQ5-BSF","up":[{"n":"Hyrum Deronda Lowry","l":"1903–1985","t":"recorded","f":"KWZ2-6DC","up":[{"n":"John Hyrum Lowry","l":"1870–1914","t":"recorded","f":"KWCK-2TQ","up":[{"n":"Abner Lowry","l":"1831–1900","t":"colonial","f":"KWJD-H5Y","up":[{"n":"John Lowry","l":"1799–1867","t":"colonial","f":"KWJT-VHB"},{"n":"Mary Wilcox","l":"1802–1859","t":"colonial","f":"KWJT-VHR"}]},{"n":"Betsy Louisa Bradley","l":"1835–1881","t":"colonial","f":"LT4D-F45","up":[{"n":"George Washington Bradley","l":"1813–1891","t":"colonial","f":"KWJ8-HC4"},{"n":"Elizabeth Ann Kroll","l":"1811–1893","t":"colonial","f":"KWJT-BZV"}]}]},{"n":"Minnie LaDell Taylor","l":"1878–1959","t":"recorded","f":"KWCK-2T4","up":[{"n":"Martin Van Buren Taylor Sr.","l":"1835–1900","t":"colonial","f":"KWJ4-22P","up":[{"n":"Benjamin Franklin Taylor","l":"1805–1889","t":"colonial","f":"KWJC-CBJ"},{"n":"Ann Mennell","l":"1812–1875","t":"colonial","f":"KWJT-B8M"}]},{"n":"Mary Ann Clemens","l":"1841–1903","t":"colonial","f":"KWJT-YN5","up":[{"n":"William Clemens","l":"1812–1850","t":"colonial","f":"K4KR-SPG"},{"n":"Ann Wiles","l":"1817–1908","t":"colonial","f":"KWJT-BNY"}]}]}]},{"n":"Ardella Rockwood","l":"1904–1990","t":"recorded","f":"KWZ2-6DZ","up":[{"n":"Julius Apollus Rockwood","l":"1878–1943","t":"recorded","f":"KWC6-VDV","up":[{"n":"Albert Perry Rockwood","l":"1805–1879","t":"colonial","f":"KWJ4-XBD","up":[{"n":"Luther Rockwood","l":"1780–1856","t":"colonial","f":"LCRW-GSP"},{"n":"Ruth Perry","l":"1781–1805","t":"colonial","f":"LHYW-KBK"}]},{"n":"Juliane Sophie Olsen","l":"1835–1914","t":"colonial","f":"KWJ6-3KP","up":[{"n":"Ole Nielsen","l":"1803–1857","t":"colonial","f":"LQ5Y-7F5"},{"n":"Mette Larsdatter","l":"1812–1865","t":"colonial","f":"MQLP-XWN"}]}]},{"n":"Mary Ellen Hill","l":"1879–1955","t":"recorded","f":"KWC6-VDK","up":[{"n":"William Hood Hill","l":"1840–1907","t":"colonial","f":"KWNF-8YX","up":[{"n":"Alexander Hill Jr","l":"1811–1889","t":"colonial","f":"KWJC-KHN"},{"n":"Agnes Hood","l":"1811–1872","t":"colonial","f":"KWJC-KHF"}]},{"n":"Elizabeth Ann Hamilton","l":"1850–1916","t":"recorded","f":"KWNV-B37","up":[{"n":"James Lang Hamilton","l":"1818–1875","t":"colonial","f":"KWJ8-QZL"},{"n":"Mary Ann Campbell","l":"1825–1910","t":"colonial","f":"KWJ8-QZG"}]}]}]}]}]}]},"spine":[{"i":0,"n":"Living","l":null,"t":"living"},{"i":1,"n":"Living","l":null,"t":"living"},{"i":2,"n":"Donna Ruth Lawton","l":"1925–1988","t":"recorded","f":"KWCL-VNB"},{"i":3,"n":"Rollin Eugene Lawton","l":"1894–1974","t":"recorded","f":"KWCL-VJS"},{"i":4,"n":"Rufus Elijah Lawton","l":"1872–1954","t":"recorded","f":"L7FD-PWH"},{"i":5,"n":"Harriet Phylena Fuller","l":"1844–1899","t":"colonial","f":"K236-YQ7"},{"i":6,"n":"Eunice L. Maxson","l":"1812–1873","t":"colonial","f":"K6HN-GB2"},{"i":7,"n":"Jared Maxson","l":"1764–1850","t":"colonial","f":"27SL-4N5"},{"i":8,"n":"Stephen Maxson","l":"1735–1794","t":"colonial","f":"L81C-KDG"},{"i":9,"n":"Thankful Betty Randall","l":"1702–1785","t":"colonial","f":"LHSC-D94"},{"i":10,"n":"Matthew Randall","l":"1671–1735","t":"colonial","f":"LBK8-D9L"},{"i":11,"n":"John Randall I","l":"1640–1684","t":"colonial","f":"L1X1-9X3"},{"i":12,"n":"Margaret Trevisa","l":"1613–1668","t":"colonial","f":"LBMX-YP1"},{"i":13,"n":"Margaret Courtenay","l":"1574–1658","t":"colonial","f":"LH1L-28L"},{"i":14,"n":"Peter Courtenay Of Landrake","l":"1536–1606","t":"medieval","f":"L1WB-WJJ"},{"i":15,"n":"Margaret Trethurfee","l":"1504–1576","t":"medieval","f":"MKZF-8M6"},{"i":16,"n":"Thomas Trethurffe","l":"1477–1529","t":"medieval","f":"LZ71-8P3"},{"i":17,"n":"Elizabeth de Courtenay","l":"1447–1510","t":"medieval","f":"L1W2-LWW"},{"i":18,"n":"Margaret Carminow","l":"1425–1512","t":"medieval","f":"LD5L-CW8"},{"i":19,"n":"Thomas Carminow of Boconnoc","l":"1396–1442","t":"medieval","f":"GY4B-Q49"},{"i":20,"n":"Sir William de Carminow","l":"1377–1406","t":"medieval","f":"GW9P-WV8"},{"i":21,"n":"Alice Tynten","l":"1324–1356","t":"medieval","f":"G83C-16X"},{"i":22,"n":"Elizabeth Bloyou","l":"1301–1371","t":"medieval","f":"GQ8Q-T5Y"},{"i":23,"n":"Joan de Bodrugan","l":"1284–1331","t":"medieval","f":"K8MX-JWD"},{"i":24,"n":"Sybil de Mandeville","l":"1264–1307","t":"medieval","f":"G94Q-PV8"},{"i":25,"n":"Walter of Manderville","l":"1220–1267","t":"medieval","f":"P4F1-9PS"},{"i":26,"n":"Christine FitzRobert Countess Of Essex","l":"1187–1232","t":"medieval","f":"G8TV-DFB"},{"i":27,"n":"Gunnora de Valognes","l":"1166–1212","t":"medieval","f":"GM5J-515"},{"i":28,"n":"Robert de Valognes","l":"1136–1184","t":"medieval","f":"GD7X-BMF"},{"i":29,"n":"Sir Roger de Valognes","l":"1081–1141","t":"medieval","f":"G3PR-QC5"},{"i":30,"n":"Albreda De Ryes-Gifford De Bolbec","l":"1052–1096","t":"medieval","f":"G95Q-XJK"},{"i":31,"n":"Albérade Gifford de Bolbec-de la Hayes Dame des Préaux","l":"1024–1055","t":"medieval","f":"PF9D-HBL"},{"i":32,"n":"Honfroi Humfridum de Veulles du Ponteaudemer","l":"0980–1044","t":"saga","f":"99Y7-MCD"},{"i":33,"n":"Wevia de Crépon","l":"0952–0990","t":"saga","f":"PHDB-7QL"},{"i":34,"n":"Princess Gynrithe Olafsdottir Of Denmark","l":"0923–1002","t":"saga","f":"KLXB-KTC"},{"i":35,"n":"King Olof Björnsson","l":"0885–0964","t":"saga","f":"L7N5-6KK"},{"i":36,"n":"Prince of Sweden Bjorn III Eriksson","l":"0872–0956","t":"saga","f":"PHG3-Q1P"},{"i":37,"n":"Eric Edmundsson","l":"0849–0900","t":"saga","f":"G8KQ-J2R"},{"i":38,"n":"Alof Ragnarsdottír","l":"0837–0871","t":"saga","f":"GNB9-NC5"},{"i":39,"n":"Ragnar Sigurdsson","l":"0740–0845","t":"saga","f":"M8WZ-XZY"},{"i":40,"n":"Sigurd Ring Randversson","l":"0715–0810","t":"saga","f":"LTSB-5WH"},{"i":41,"n":"Randver Radbardson","l":"0670–0730","t":"saga","f":"LZ2F-W87"}],"stats":{"personsWalked":18575,"bloodlinePersons":10097,"deceasedPublished":10259,"livingRedacted":5,"livingStubs":3,"spineGenerations":42,"spineReaches":"Randver Radbardson 0670–0730"}}</script>
+<script>
+/* ── the bloodline record renderer — inline JSON in, first-party SVG fan out (zCode) ── */
+(function(){
+  var dataEl=document.getElementById('blood-data');
+  if(!dataEl) return;
+  var D; try{ D=JSON.parse(dataEl.textContent); }catch(e){ return; }
+  var esc=function(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});};
+  function langText(key,fallback){var t=window.BNRLanguage&&window.BNRLanguage.text;return t?t(key,fallback):fallback;}
+  var TIER_COLOR={recorded:'var(--verified)',colonial:'var(--info)',medieval:'var(--gold)',saga:'var(--violet)',living:'var(--dim)',unrecorded:'var(--dim)'};
+  /* dynamic strings re-render on the language event, same law as the editor status */
+  function renderDyn(){
+    var s=D.stats||{};
+    var st=document.getElementById('blood-stats');
+    if(st){
+      st.textContent=langText('prof.arch.blood.stats','{w} persons walked · {d} deceased published · {l} living redacted · spine {g} generations deep')
+        .replace('{w}',s.personsWalked).replace('{d}',s.deceasedPublished).replace('{l}',s.livingRedacted).replace('{g}',s.spineGenerations);
+    }
+    var lg=document.getElementById('blood-legend');
+    if(lg){
+      while(lg.firstChild) lg.removeChild(lg.firstChild);
+      var tiers=[
+        ['recorded','prof.arch.blood.tier.recorded','recorded · born 1850+'],
+        ['colonial','prof.arch.blood.tier.colonial','colonial · 1550–1850'],
+        ['medieval','prof.arch.blood.tier.medieval','medieval · 1000–1550'],
+        ['saga','prof.arch.blood.tier.saga','saga · before 1000'],
+        ['living','prof.arch.blood.tier.living','living · redacted']];
+      tiers.forEach(function(t){
+        var k=document.createElement('span');k.className='tk';
+        var dot=document.createElement('i');dot.style.background=TIER_COLOR[t[0]];k.appendChild(dot);
+        var lab=document.createElement('span');lab.textContent=langText(t[1],t[2]);
+        k.appendChild(lab);lg.appendChild(k);
+      });
+      var cap=document.createElement('span');cap.className='tk';
+      cap.textContent=langText('prof.arch.blood.tier','era labels, not verdicts');
+      lg.appendChild(cap);
+    }
+  }
+  renderDyn();
+  document.addEventListener('blang',renderDyn);
+  var svg=document.getElementById('blood-fan');
+  if(svg&&D.fan){
+    var NS='http://www.w3.org/2000/svg';
+    var CX=360,CY=414,R0=56,BAND=50;
+    function pt(r,aDeg){var a=aDeg*Math.PI/180;return [CX+r*Math.cos(a),CY-r*Math.sin(a)];}
+    function slice(rIn,rOut,a0,a1){
+      var p1=pt(rIn,a0),p2=pt(rIn,a1),p3=pt(rOut,a1),p4=pt(rOut,a0);
+      return 'M'+p1[0].toFixed(1)+' '+p1[1].toFixed(1)+
+        ' A'+rIn+' '+rIn+' 0 0 0 '+p2[0].toFixed(1)+' '+p2[1].toFixed(1)+
+        ' L'+p3[0].toFixed(1)+' '+p3[1].toFixed(1)+
+        ' A'+rOut+' '+rOut+' 0 0 1 '+p4[0].toFixed(1)+' '+p4[1].toFixed(1)+' Z';
+    }
+    function surname(n){var w=String(n||'').trim().split(/\s+/);return w[w.length-1]||n;}
+    function draw(node,depth,slot){
+      if(!node) return;
+      var rIn=R0+depth*BAND, rOut=rIn+BAND;
+      var w=180/Math.pow(2,depth);
+      var a0=180-slot*w, a1=a0-w;
+      var p=document.createElementNS(NS,'path');
+      p.setAttribute('d',slice(rIn,rOut,a0,a1));
+      p.setAttribute('class','fanslice');
+      p.setAttribute('fill',TIER_COLOR[node.t]||TIER_COLOR.unrecorded);
+      p.setAttribute('fill-opacity',depth===0?'0.95':'0.55');
+      p.setAttribute('stroke','var(--bg)');
+      p.setAttribute('stroke-width','1');
+      var title=document.createElementNS(NS,'title');
+      title.textContent=node.n+(node.l?' · '+node.l:'');
+      p.appendChild(title);
+      svg.appendChild(p);
+      if(depth<=3){
+        var mid=(a0+a1)/2, rMid=(rIn+rOut)/2;
+        var c=pt(rMid,mid);
+        var t=document.createElementNS(NS,'text');
+        t.setAttribute('x',c[0].toFixed(1));t.setAttribute('y',c[1].toFixed(1));
+        t.setAttribute('text-anchor','middle');t.setAttribute('dominant-baseline','middle');
+        t.setAttribute('fill','#0d1410');t.setAttribute('font-size',depth<=1?'10':'8.5');
+        t.setAttribute('font-family','IBM Plex Mono,monospace');t.setAttribute('pointer-events','none');
+        var lab=node.n==='Living'?'Living':surname(node.n);
+        if(lab.length>16) lab=lab.slice(0,15)+'…';
+        t.textContent=lab;
+        svg.appendChild(t);
+      }
+      if(node.up){ draw(node.up[0],depth+1,slot*2); draw(node.up[1],depth+1,slot*2+1); }
+    }
+    draw(D.fan,0,0);
+  }
+  var sp=document.getElementById('blood-spine');
+  if(sp){
+    (D.spine||[]).forEach(function(row){
+      var li=document.createElement('li');
+      li.className=row.t;
+      var gen=document.createElement('span');gen.className='gen';gen.textContent=row.i;
+      var dot=document.createElement('span');dot.className='tdot';dot.style.background=TIER_COLOR[row.t]||TIER_COLOR.unrecorded;
+      var who=document.createElement('span');who.className='who';who.textContent=row.n;
+      var yrs=document.createElement('span');yrs.className='yrs';yrs.textContent=row.l||'';
+      li.appendChild(gen);li.appendChild(dot);li.appendChild(who);li.appendChild(yrs);
+      sp.appendChild(li);
+    });
+  }
+  var dots=document.querySelectorAll('#blood-saga .sagarows .tdot');
+  for(var i=0;i<dots.length;i++) dots[i].style.background=TIER_COLOR.saga;
 })();
 </script>
 <script src="agent-dock.js?v=5"></script>

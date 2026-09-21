@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p31f72e5af8",
+ "bnr": "bnr://skaists.dev/blood/p31f72e5af8",
+ "identity": {
+  "name": "Unruoch II. von Friaul Graf in Alemannien",
+  "lifespan": "0778–0853",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "MVLP-YQL"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p98371a531c",
+    "name": "Unruoch von Friaul I",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pdad7de5089",
+    "name": "Spouse Unruoch von Friaul I",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pe24c94b278",
+    "name": "Eberhard von Friaul"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p7af9889bb1",
+    "name": "Engeltrude",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/MVLP-YQL",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

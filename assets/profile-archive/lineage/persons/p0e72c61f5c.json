@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p0e72c61f5c",
+ "bnr": "bnr://skaists.dev/blood/p0e72c61f5c",
+ "identity": {
+  "name": "John Benger Esq.",
+  "lifespan": "1475–1554",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L7V9-YGT"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "MKPV-9K7",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "GLJW-1FG",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p41c71016e2",
+    "name": "William Benger"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p367052cd05",
+    "name": "Dorothy Danvers",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L7V9-YGT",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

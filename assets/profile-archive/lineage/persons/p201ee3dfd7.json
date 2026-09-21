@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p201ee3dfd7",
+ "bnr": "bnr://skaists.dev/blood/p201ee3dfd7",
+ "identity": {
+  "name": "William de Franceis I",
+  "lifespan": "1195–1242",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LZ82-R8Y"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pa3a2ccce7b",
+    "name": "Robert de Fraunceis III",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p8b534cd231",
+    "name": "Mabel de Luttchurch",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pccf35195e1",
+    "name": "John de Franceis I"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p9624087f0a",
+    "name": "Agnes de Bradeleye",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LZ82-R8Y",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

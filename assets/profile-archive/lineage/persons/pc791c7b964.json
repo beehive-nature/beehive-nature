@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pc791c7b964",
+ "bnr": "bnr://skaists.dev/blood/pc791c7b964",
+ "identity": {
+  "name": "Isanbart Graf im Thurgau",
+  "lifespan": "0750–0806",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G9QS-9N3"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p2ac67a05f3",
+    "name": "Warin Comte de Alemannien",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p20f7944c1e",
+    "name": "Adelindis di Spoleto",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p8a2f87f500",
+    "name": "Heilwig abbesse de Chelles"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pdf715718f8",
+    "name": "Theodrada Äbtissin des Marienklosters in Soissons",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G9QS-9N3",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

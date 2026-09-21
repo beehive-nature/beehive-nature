@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p5bcba1b2bf",
+ "bnr": "bnr://skaists.dev/blood/p5bcba1b2bf",
+ "identity": {
+  "name": "Capt. John Coe Jr",
+  "lifespan": "1693–1751",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L5VS-L29"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p0750f9714f",
+    "name": "Captain John Coe Sr",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pfe9a0f5c45",
+    "name": "Mary Hawley",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p8cf4f950a8",
+    "name": "Sybil Coe"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pcbd2746bd6",
+    "name": "Hannah Parsons",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L5VS-L29",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

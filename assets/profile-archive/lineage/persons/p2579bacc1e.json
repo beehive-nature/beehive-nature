@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p2579bacc1e",
+ "bnr": "bnr://skaists.dev/blood/p2579bacc1e",
+ "identity": {
+  "name": "CNAEUS DOMITIUS CURVIUS LUCANUS OF ROME",
+  "lifespan": "28–78",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LVWT-WHG"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p175c3e8712",
+    "name": "Dasumia Lucius Dasumii of Spain",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p2c14660343",
+    "name": "Dasumia Lucius Dasumii de España",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pfce5dd1b66",
+    "name": "Kalendae di Rome"
+   },
+   {
+    "id": "pceb49d5053",
+    "name": "Domicia Lucilla Maior DE ROME"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p8225ec9bd6",
+    "name": "Curtilla Mancia di Rome",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LVWT-WHG",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

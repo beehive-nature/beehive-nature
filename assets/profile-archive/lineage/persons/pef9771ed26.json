@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pef9771ed26",
+ "bnr": "bnr://skaists.dev/blood/pef9771ed26",
+ "identity": {
+  "name": "Rupilia Faustina Licinii Crassi",
+  "lifespan": "61–Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LZBC-ZNJ"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p28de7b428c",
+    "name": "Decimus Rupilius Libo Frugi",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p1c2ceeded8",
+    "name": "Galeria de Rome",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pda6cee515b",
+    "name": "Augusta Annia Galeria Major Faustina Vera"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p7584fb9e78",
+    "name": "Marcus Annius Verus II",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LZBC-ZNJ",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

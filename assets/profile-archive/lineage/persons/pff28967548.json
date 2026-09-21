@@ -1,0 +1,77 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pff28967548",
+ "bnr": "bnr://skaists.dev/blood/pff28967548",
+ "identity": {
+  "name": "Calpurina Lepida",
+  "lifespan": "50–93",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G6TS-JQ9"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p636dbe4f76",
+    "name": "Lucius Calpurnius Piso Frugi Licinianus of Rome",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pc5f11b86f0",
+    "name": "Verania Gemina of Rome",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p849b4eb186",
+    "name": "Sulpicius di Roma"
+   },
+   {
+    "id": "p0102bb81b5",
+    "name": "Servius Cornelius Scipio Salvidienus Orfitus II"
+   },
+   {
+    "id": "p6375fa5db9",
+    "name": "Cornelia Cethegilla Minor di Rome"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pa90c7773ef",
+    "name": "Servius Cornelius Salvidienus Orfitus",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G6TS-JQ9",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

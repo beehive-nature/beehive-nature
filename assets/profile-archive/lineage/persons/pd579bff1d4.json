@@ -1,0 +1,71 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pd579bff1d4",
+ "bnr": "bnr://skaists.dev/blood/pd579bff1d4",
+ "identity": {
+  "name": "Lucius Valerius Maximus Basilius De Rome",
+  "lifespan": "0270–0323",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LYG1-XP7"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "GNZQ-RS5",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "PC5K-L73",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p4b81404e74",
+    "name": "Pontius Paulinus I de Bordeaux"
+   },
+   {
+    "id": "p18a0e7c695",
+    "name": "Lucius Valerius Maximus Valerius Maximus Basilius"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p65e858d48b",
+    "name": "Septima de Rome",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LYG1-XP7",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

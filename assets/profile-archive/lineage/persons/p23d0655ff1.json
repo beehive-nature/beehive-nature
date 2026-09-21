@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p23d0655ff1",
+ "bnr": "bnr://skaists.dev/blood/p23d0655ff1",
+ "identity": {
+  "name": "Sheva ben Caleb",
+  "lifespan": "1775BC–Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LJLK-KWB"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pf8b3bfd5fe",
+    "name": "Caleb ben Hezron",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p4fb27fae84",
+    "name": "Maachah bat Segub",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p058d5ce8f0",
+    "name": "Gibea'ah ibn Seva"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p1841ce74c8",
+    "name": "Mrs Sheva",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LJLK-KWB",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

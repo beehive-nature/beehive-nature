@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p994ec22889",
+ "bnr": "bnr://skaists.dev/blood/p994ec22889",
+ "identity": {
+  "name": "Alice Spencer",
+  "lifespan": "1544–1577",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LHDR-QWS"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p8404e987e5",
+    "name": "Sir John Spencer",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p1d0f420ce8",
+    "name": "Katherine Kitson",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pca5faf7d17",
+    "name": "Eleanor Blackett"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pa0edbfc5e5",
+    "name": "Thomas Blackett",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LHDR-QWS",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

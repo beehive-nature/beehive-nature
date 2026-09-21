@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p8e5c3a0fb2",
+ "bnr": "bnr://skaists.dev/blood/p8e5c3a0fb2",
+ "identity": {
+  "name": "Aline de Braose",
+  "lifespan": "1290–1331",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LVX3-2TM"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pfb98ac37aa",
+    "name": "William de Braose",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p1ed159f8f7",
+    "name": "Agnes Moels",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pe23ea591fc",
+    "name": "John de Mowbray"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pc193ff9733",
+    "name": "John de Mowbray 2nd Baron Mowbray",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LVX3-2TM",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

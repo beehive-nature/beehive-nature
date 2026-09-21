@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pe21be1bd63",
+ "bnr": "bnr://skaists.dev/blood/pe21be1bd63",
+ "identity": {
+  "name": "Prince Walderavans Amal of The Ostrogoths",
+  "lifespan": "0325–0409",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GL6N-KVN"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p332ffb6908",
+    "name": "Vultulf 𐍂𐌴𐌹𐌺𐍃 of the Ostrogoths",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p42d2fd6d6e",
+    "name": "Atela des Huns",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pf6fd65bf79",
+    "name": "Vinithar Viniter Amal d`Ostrogothie"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p7620fed5ac",
+    "name": "Claudia Adelphia de Rome",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GL6N-KVN",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

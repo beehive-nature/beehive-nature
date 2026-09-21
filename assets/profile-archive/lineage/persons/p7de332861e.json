@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p7de332861e",
+ "bnr": "bnr://skaists.dev/blood/p7de332861e",
+ "identity": {
+  "name": "Mayor Aega of the Palace of Neustria and Burgundy",
+  "lifespan": "0567–0641",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PZT5-QLQ"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p4672ff2411",
+    "name": "Duke Erchembald of Alsace",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p9180e1faaa",
+    "name": "Gertrude of Moselle",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p91ef7966a8",
+    "name": "Hultrude Ou Gerberge D'ALSACE DE BURGONDIE"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pa279080e78",
+    "name": "Gerberge de Bourgogne",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PZT5-QLQ",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

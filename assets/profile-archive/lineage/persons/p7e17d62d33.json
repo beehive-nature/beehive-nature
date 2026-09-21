@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p7e17d62d33",
+ "bnr": "bnr://skaists.dev/blood/p7e17d62d33",
+ "identity": {
+  "name": "Henioche of Pherae",
+  "lifespan": "1180BC–Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GL21-81N"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p14004216d6",
+    "name": "Armenius of Pherae",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p6d44df68c2",
+    "name": "Mrs Armenius of Pherae",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pd6dbf59a0d",
+    "name": "Melanthus ., King of Messenia King of Athens"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p53209ad046",
+    "name": "Andropompus of Messenia",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GL21-81N",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

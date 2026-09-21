@@ -1,0 +1,63 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "peb13b5d8e8",
+ "bnr": "bnr://skaists.dev/blood/peb13b5d8e8",
+ "identity": {
+  "name": "Ankhn-Khonsu",
+  "lifespan": "Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PXS9-N6W"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p02bf4b5a19",
+    "name": "Merenre II Nemtyemsaf 6th Pharaoh 6th Dynasty",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p41e853380c",
+    "name": "Netikereti D'EGYPTE-D'EGYPTE",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pd65e58e8e6",
+    "name": "Inyotef I"
+   }
+  ],
+  "spouses": []
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PXS9-N6W",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

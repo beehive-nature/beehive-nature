@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p02341fc5b6",
+ "bnr": "bnr://skaists.dev/blood/p02341fc5b6",
+ "identity": {
+  "name": "Thomas III de Bruyères",
+  "lifespan": "1190–1251",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GHW8-VFT"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p60a74c89db",
+    "name": "Geoffroi II de Lèves",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p6414456b63",
+    "name": "Marguerite de la Chapelle la Reine",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pb1976bc724",
+    "name": "Jeanne de Bruyeres"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pdbb33e976b",
+    "name": "Agnès de Beaumont du Gatinais",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GHW8-VFT",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

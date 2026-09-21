@@ -78,7 +78,7 @@ jobs:
         run: node scripts/estate-check.mjs
       - name: Front door — search, source parity and accessible art
         if: always()
-        run: node --test e2e/atlas.test.mjs e2e/agent-dock.test.mjs e2e/lang-coverage.test.mjs e2e/register.test.mjs e2e/social-arrival.test.mjs e2e/first-click.test.mjs e2e/social-three-view.test.mjs e2e/forge-room-views.test.mjs e2e/kandi-views.test.mjs e2e/kandi-state.test.mjs e2e/kandi-handlers.test.mjs e2e/artist-audio-showcase.test.mjs e2e/artist-audio-collection.test.mjs e2e/artist-audio-player.test.mjs e2e/bearth-views.test.mjs e2e/bsymposium-views.test.mjs e2e/bfood-views.test.mjs e2e/review-views.test.mjs e2e/bigen-views.test.mjs e2e/university-views.test.mjs e2e/onboarding-views.test.mjs e2e/blongevity-views.test.mjs e2e/buzz-directory-views.test.mjs e2e/profile-views.test.mjs e2e/first-work.test.mjs e2e/bloom-work-pack.test.mjs e2e/bnames-rpc.test.mjs e2e/no-dead-host.test.mjs e2e/music-cleanup.test.mjs e2e/bnamesday.test.mjs e2e/bnamesday-sky.test.mjs
+        run: node --test e2e/atlas.test.mjs e2e/agent-dock.test.mjs e2e/lang-coverage.test.mjs e2e/register.test.mjs e2e/social-arrival.test.mjs e2e/first-click.test.mjs e2e/social-three-view.test.mjs e2e/forge-room-views.test.mjs e2e/kandi-views.test.mjs e2e/kandi-state.test.mjs e2e/kandi-handlers.test.mjs e2e/artist-audio-showcase.test.mjs e2e/artist-audio-collection.test.mjs e2e/artist-audio-player.test.mjs e2e/bearth-views.test.mjs e2e/bsymposium-views.test.mjs e2e/bfood-views.test.mjs e2e/review-views.test.mjs e2e/bigen-views.test.mjs e2e/university-views.test.mjs e2e/onboarding-views.test.mjs e2e/blongevity-views.test.mjs e2e/buzz-directory-views.test.mjs e2e/profile-views.test.mjs e2e/first-work.test.mjs e2e/bloom-work-pack.test.mjs e2e/bnames-rpc.test.mjs e2e/no-dead-host.test.mjs e2e/music-cleanup.test.mjs e2e/bnamesday.test.mjs e2e/bnamesday-sky.test.mjs e2e/bui-daily-art.test.mjs
       - name: Forge room — pinned Yjs convergence, late join and usable fallback
         if: always()
         working-directory: forge/visual/test
@@ -290,14 +290,28 @@ jobs:
         if: always()
         run: node e2e/dock-claims.mjs
       # §7 hook selftest: a gate's success state is SILENCE — a passing hook
-      # and a broken hook look identical. The four cases (seat-author blocked,
-      # trailer-in-body blocked, correct shape lands, founder-typed lands) run
-      # through the REAL hooks in a throwaway repo every push, so a reintroduced
-      # fail-open goes red the same hour. Hook, CI and selftest share ONE
-      # implementation — identity-check.sh — never agreeing by convention.
-      - name: §7 hook selftest — four cases, every push
+      # and a broken hook look identical. Every case runs through the REAL hooks
+      # (or, for the range loop, a real throwaway range) in a scratch repo every
+      # push, so a reintroduced fail-open goes red the same hour. Hook, CI and
+      # selftest share ONE implementation — identity-check.sh — never agreeing
+      # by convention. The case list lives in the script and its banner prints
+      # the live count: a count typed HERE drifted silently once already (T5
+      # landed against a step still saying "four"), so this name no longer
+      # carries one.
+      - name: §7 hook selftest — every push
         if: always()
         run: sh scripts/identity-check.sh --selftest
+      # secret-scan selftest (#170 rider, 2026-09-20): this blocker exists to
+      # guard the path where no seat runs, so its witness cannot be hand-only.
+      # Same law as the §7 hook selftest above, one file over: every push.
+      - name: secret-scan selftest - four fixtures, every push
+        if: always()
+        run: sh scripts/secret-scan.sh --selftest
+      # push-preflight selftest (#170 rider, 2026-09-20): P1-P11 guarded the
+      # push path by hand only until today; CI never ran them at all.
+      - name: push-preflight selftest - P1-P11, every push
+        if: always()
+        run: sh scripts/push-preflight.sh --selftest
       # SPRINT CLOSING RECEIPT (founder order, 2026-08-25): the four-suite gap
       # was work that landed and gated nothing, and a report cannot tell a sprint
       # that shipped from one that stalled. This re-derives every sprint claim
@@ -435,6 +449,17 @@ jobs:
         if: always()
         working-directory: e2e
         run: node kandi-thread.mjs
+      # MY SPACE slice 02: the storage seam. SPEC-ADAPTER-CONTRACT-1 in the
+      # browser carrier with the hive's Blossom store as the first adapter —
+      # describe-or-no-attach (§9.1), an undeclared capability with no call
+      # path at all (§9.2), the redaction wall (§4.1), a dead rail that is
+      # never a dead page (§6), and a stranger's phone reading back the exact
+      # bytes the author's phone put there. The rail is mocked in-process; no
+      # request leaves the runner.
+      - name: MY SPACE — storage adapter seam
+        if: always()
+        working-directory: e2e
+        run: node myspace-seam.mjs
       # bPay Phase A gate (UI seat, 2026-09-17): the REAL machine-bound
       # invoice renders in the wallet surface — identity (name/bytes/sha256),
       # owed recomputed from the carried quote set by the TEST, native gas
@@ -494,6 +519,15 @@ jobs:
         if: always()
         working-directory: e2e
         run: node no-page-errors.mjs
+      # bui Slice 01 (queen order 1822fa54, zCode writer seat): the daily art
+      # manifest engine gate - 24 cells (3 frozen UTC dates x 3 modes x 2 widths
+      # + reduced-motion), facts byte-equal across the matrix, byte-identical
+      # replay, broken-candidate fallback to last good, cache-never-authority,
+      # attribute-flip fork visibility, P3/P4/P5/P9 budgets per the PROVE ruling.
+      - name: bUi daily art - manifest engine gate (24 cells + budgets)
+        if: always()
+        working-directory: e2e
+        run: node bui-daily-art-gate.mjs
       # the language lane (2026-08-28), browser-side like every playwright
       # suite: first the checker-silence proof — the coverage instrument must
       # count a keyed string AND an unkeyed string through the same path
@@ -538,6 +572,17 @@ jobs:
         if: always()
         working-directory: e2e
         run: node --test orb-seat.test.mjs
+      # Tour-bar clearance (bee-laborer slice, 2026-09-20): the fixed estate bar
+      # sat on the lowest 18px of MY SPACE's sheet buttons at 390px (measured on
+      # the live page). tour.js now retreats behind any aria-modal dialog /
+      # showModal() and publishes --tbar-h for page-own sticky rows. Proven by
+      # hit-testing every sheet button through the REAL gesture (attach → row →
+      # sheet → keep), the published height on fixed and in-flow hosts, and a
+      # native <dialog>. Ran 3/3 red on the pre-fix tour.js.
+      - name: Tour bar — clearance regression (no page action row covered)
+        if: always()
+        working-directory: e2e
+        run: node --test tour-bar-clearance.test.mjs
       # SHARED-POLICY FIELD OWNERSHIP (ceremony-blocking repair, 2026-09-17):
       # a View change in a stale wallet tab must NEVER erase newer founder
       # policy from the shared key — every writer merges with the latest

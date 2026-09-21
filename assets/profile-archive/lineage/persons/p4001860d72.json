@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p4001860d72",
+ "bnr": "bnr://skaists.dev/blood/p4001860d72",
+ "identity": {
+  "name": "Havoise de Wamin",
+  "lifespan": "1017–1072",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "P67X-2F7"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p9ad64d8ff3",
+    "name": "Nocher de Wamin",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "paeb7ef351b",
+    "name": "Berthilde de Crepy en Artois",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pba2482084b",
+    "name": "Adélaïde de Hesdin"
+   },
+   {
+    "id": "p817a534a48",
+    "name": "Gérard de Hesdin II"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pdafa576c96",
+    "name": "Gerald de Hesdin",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/P67X-2F7",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

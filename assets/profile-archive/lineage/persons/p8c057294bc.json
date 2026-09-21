@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p8c057294bc",
+ "bnr": "bnr://skaists.dev/blood/p8c057294bc",
+ "identity": {
+  "name": "Judah Aristobulus I ben John Hyrcanus 50th High Priest",
+  "lifespan": "0135BC–0076BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L5Y8-9NJ"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p4a7f613f15",
+    "name": "High Priest John Hyrcanus I ben Simon III Thassi",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p9f0dbcf46c",
+    "name": "Mrs John Hyrcanus",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pab31c04e78",
+    "name": "Mariamne I bat Alexander"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pe501edd032",
+    "name": "Salomé Alexandra bat Shetach of Judea",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L5Y8-9NJ",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

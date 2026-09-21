@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p3f588e53d8",
+ "bnr": "bnr://skaists.dev/blood/p3f588e53d8",
+ "identity": {
+  "name": "Willem Simonsz Stavenisse",
+  "lifespan": "1498–1557",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "KDM5-C88"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "GQ6S-93D",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "GQ69-Y1F",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p6863e0fd14",
+    "name": "Cornelis Willemsz Heer van Stavenisse en St. Annaland"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pf636305c87",
+    "name": "Adriana van Duijveland",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/KDM5-C88",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

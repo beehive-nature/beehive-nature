@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pc5626e4e7f",
+ "bnr": "bnr://skaists.dev/blood/pc5626e4e7f",
+ "identity": {
+  "name": "Sulpicia Kelero De ROME",
+  "lifespan": "20–59",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PMG5-9ZY"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pedf5c588b6",
+    "name": "Consul Quintus Sulpicius Camerinus Pythicus of Rome",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p410436a440",
+    "name": "Postumia Festa",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p55b944ed55",
+    "name": "Aelius Quardronius Versus de Rome"
+   },
+   {
+    "id": "pf27c6b19f1",
+    "name": "Atilla Sabina de Rome"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pac76671d01",
+    "name": "Aulus Gallus Larcius de Rome",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PMG5-9ZY",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pd8430282d8",
+ "bnr": "bnr://skaists.dev/blood/pd8430282d8",
+ "identity": {
+  "name": "Lucius Aurelius Quirinius Gallus",
+  "lifespan": "85–0150",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LYWV-4QL"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pa0d6c03976",
+    "name": "Lucius Aurelius Gallus II",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pe948de3c86",
+    "name": "Mrs Lucius Aurelius Gallus II",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p7345693ad7",
+    "name": "Lucius Aurelius Gallus III."
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p792282387e",
+    "name": "Mrs Lucius Aurelius Quirinius Gallus",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LYWV-4QL",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

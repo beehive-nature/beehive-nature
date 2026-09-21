@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p2f2c777392",
+ "bnr": "bnr://skaists.dev/blood/p2f2c777392",
+ "identity": {
+  "name": "Artaxias of Armenia King",
+  "lifespan": "0190BC–0161BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GLSN-839"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p9be8a88540",
+    "name": "Zariadres I",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p6e48435560",
+    "name": "Spouce Zariadres I",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pcd4bdb56e6",
+    "name": "King Tigranes I. d'Armenie"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p4f1f3d936a",
+    "name": "Satenik Des ALAINS",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GLSN-839",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

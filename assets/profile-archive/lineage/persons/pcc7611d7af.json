@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pcc7611d7af",
+ "bnr": "bnr://skaists.dev/blood/pcc7611d7af",
+ "identity": {
+  "name": "Susan Wood",
+  "lifespan": "1589–1646",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LKKM-CH7"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p67c3257724",
+    "name": "Edmund Wood I of Northowram",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p5d4200385c",
+    "name": "Margaret",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p5df5f5e2ee",
+    "name": "Hannah Mitchell"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pd729949cea",
+    "name": "Matthew Mitchell",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LKKM-CH7",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

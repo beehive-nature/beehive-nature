@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p8c51c71627",
+ "bnr": "bnr://skaists.dev/blood/p8c51c71627",
+ "identity": {
+  "name": "Tenuantius ap Lludd",
+  "lifespan": "0070BC–0009BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LVQT-FPV"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pb0787ce70f",
+    "name": "King Lludd ap Beli Mawr",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p245ec70431",
+    "name": "Anna verch Beli Mawr",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p49026c938e",
+    "name": "King Cymbeline ap Tenuantius"
+   },
+   {
+    "id": "pd690997ff2",
+    "name": "Anna Genvissa Cartismuanda of Wales"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p91b720604e",
+    "name": "Verica Cassandra des Arvernes",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LVQT-FPV",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

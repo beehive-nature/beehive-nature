@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pfc41683e81",
+ "bnr": "bnr://skaists.dev/blood/pfc41683e81",
+ "identity": {
+  "name": "Thankful Woodward",
+  "lifespan": "1646–1724",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LYTV-DGH"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pf61d431f9e",
+    "name": "Henry Woodward",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p3e9c21eec3",
+    "name": "Elizabeth Mather",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pbf8b588ddc",
+    "name": "Rhoda Taylor"
+   },
+   {
+    "id": "pce317718df",
+    "name": "Thankful Taylor"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p9c9573eaa0",
+    "name": "Capt John Taylor III",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LYTV-DGH",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

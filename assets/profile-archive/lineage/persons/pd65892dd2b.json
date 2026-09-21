@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pd65892dd2b",
+ "bnr": "bnr://skaists.dev/blood/pd65892dd2b",
+ "identity": {
+  "name": "Gnaeius Cornelius Aquilis Orfitus",
+  "lifespan": "0165–Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G2QB-SD6"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p1b78ea6a50",
+    "name": "Gnaeus Pompeius Strabo",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pe75b285781",
+    "name": "Cornelia SCIPIO SALVIDIENUS ORFITUS",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p1972a61c19",
+    "name": "Cónsul I Manius Acilius Glabrio"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pbeb846b764",
+    "name": "Tarrutenia",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G2QB-SD6",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p84d4e8e46e",
+ "bnr": "bnr://skaists.dev/blood/p84d4e8e46e",
+ "identity": {
+  "name": "Seniseneb de Egipto",
+  "lifespan": "Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "9HB1-2D3"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p326ba7ffb2",
+    "name": "Ahmose I Nebpehtire",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p9e72de83f9",
+    "name": "Ahmose-Néfértari",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p097ed2783f",
+    "name": "Thutmose I Aakheperkare, 3rd Pharaoh 18th Dynasty"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pe916d1aa40",
+    "name": "Amenhotep I Djeserkare , 2nd Pharaoh 18th Dynasty",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/9HB1-2D3",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p68c9144597",
+ "bnr": "bnr://skaists.dev/blood/p68c9144597",
+ "identity": {
+  "name": "Isabelle de Hainaut Reine des Francs",
+  "lifespan": "1170–1190",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LCC8-C2J"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p3e4360abec",
+    "name": "Baudouin de Hainaut V",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p9ce14a9a9b",
+    "name": "Marguerite d'Alsace",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p5286e0a044",
+    "name": "Louis VIII 'le Lion' Roi de France"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p314f08e783",
+    "name": "Philippe II Auguste Roi de France",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LCC8-C2J",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

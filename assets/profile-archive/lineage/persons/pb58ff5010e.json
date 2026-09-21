@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pb58ff5010e",
+ "bnr": "bnr://skaists.dev/blood/pb58ff5010e",
+ "identity": {
+  "name": "Adélais de Saumur",
+  "lifespan": "0960–0981",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G129-P22"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p95cacb176c",
+    "name": "Gelduin de Saumur II",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pf782d23219",
+    "name": "Leutgarde de Doué",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pfec32bffa1",
+    "name": "Bellay de Vismes de Montreuil"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "ped59ac6de6",
+    "name": "Bellay de Vismes de Montreuil",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G129-P22",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

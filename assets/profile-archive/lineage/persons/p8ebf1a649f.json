@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p8ebf1a649f",
+ "bnr": "bnr://skaists.dev/blood/p8ebf1a649f",
+ "identity": {
+  "name": "Godefroi de Brionne, Comte d'Eu",
+  "lifespan": "0953–1015",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LDHB-RRD"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p9eda680973",
+    "name": "Richard Ier 'Sans Peur' de Normandie comte de Rouen",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pc94782c9e2",
+    "name": "Maîtresses Inconnues",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pf787e40f80",
+    "name": "Gilbert de Brionne"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pde5fd2bd08",
+    "name": "Hawise de Brionne",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LDHB-RRD",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

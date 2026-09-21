@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p403351ec22",
+ "bnr": "bnr://skaists.dev/blood/p403351ec22",
+ "identity": {
+  "name": "Ishaq bin Ibrahim 9th Prophet of Islam",
+  "lifespan": "2066BC–1886BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "9HJ8-F5T"
+  }
+ ],
+ "evidence": {
+  "era": "recorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "recorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p022ced245c",
+    "name": "Ibrahim ibn Tarakh 6th Prophet of Islam",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p0d57672d41",
+    "name": "Sarah bint Buthwil",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p99657adfa4",
+    "name": "Isaú ibn Ishaq"
+   },
+   {
+    "id": "p494c8cf790",
+    "name": "Yaʿqūb bin Ishaq 10th Prophet of Islam"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pb61935067b",
+    "name": "Rafqa bint Lūṭ",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/9HJ8-F5T",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

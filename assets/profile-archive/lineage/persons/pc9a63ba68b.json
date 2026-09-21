@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pc9a63ba68b",
+ "bnr": "bnr://skaists.dev/blood/pc9a63ba68b",
+ "identity": {
+  "name": "Johanna \"Jane\" Sullivan",
+  "lifespan": "1551–1630",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GMDP-ZV7"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pdd51736ffc",
+    "name": "Sullivan",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p4b2f15a2ae",
+    "name": "No",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p1e8a3fa9d7",
+    "name": "Ambrose Aldridge"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pa84afcfbfb",
+    "name": "Thomas Aldridge",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GMDP-ZV7",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

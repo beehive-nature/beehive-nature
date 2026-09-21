@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p11da38bb8a",
+ "bnr": "bnr://skaists.dev/blood/p11da38bb8a",
+ "identity": {
+  "name": "Lydia Maxson",
+  "lifespan": "1612–1718",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G15Z-9T8"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pa34c974f3c",
+    "name": "Maxson",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p16756b0390",
+    "name": "Lois Isabel Monroe",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pef2f1035fb",
+    "name": "Mary Mosher"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pf58bced28f",
+    "name": "Ensign Nicholas  Hugh Ezekiel Mosher",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G15Z-9T8",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

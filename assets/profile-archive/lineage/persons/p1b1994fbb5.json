@@ -1,0 +1,58 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p1b1994fbb5",
+ "bnr": "bnr://skaists.dev/blood/p1b1994fbb5",
+ "identity": {
+  "name": "Schebim 8th Pharaoh of the 2nd Dynasty",
+  "lifespan": "2358–2720BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LRQF-JC6"
+  }
+ ],
+ "evidence": {
+  "era": "recorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "recorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pbc161a68bb",
+    "name": "Senedj 7th Pharaoh of the 2nd Dynasty",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pae34b5bfeb",
+    "name": "Seth-Peribsen 9th Pharaoh of the 2nd Dynasty"
+   }
+  ],
+  "spouses": []
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LRQF-JC6",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

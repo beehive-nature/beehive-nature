@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pc76a3da9d0",
+ "bnr": "bnr://skaists.dev/blood/pc76a3da9d0",
+ "identity": {
+  "name": "Katherine L Angell",
+  "lifespan": "1554–1630",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GL45-96F"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p35b63aff83",
+    "name": "Thomas Angell",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p10ebab673c",
+    "name": "Anne Harby",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p7d9d1a6d6d",
+    "name": "Mary  Alice Gibbs (Smith) DBGAAA-14F"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p135d7ccfca",
+    "name": "Gregorius Gibbes",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GL45-96F",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

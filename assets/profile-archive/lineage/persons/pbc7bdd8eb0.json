@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pbc7bdd8eb0",
+ "bnr": "bnr://skaists.dev/blood/pbc7bdd8eb0",
+ "identity": {
+  "name": "Meshar Meshayyanath bint Shealtiel",
+  "lifespan": "0575BC–Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "9MCF-MKK"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p09b730a618",
+    "name": "Salathial ben Neri",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pa07c02009c",
+    "name": "Hachalya bint Jeconiah",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p2d65e0b40a",
+    "name": "Roxana Raoxhna"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p7a422bf6c2",
+    "name": "Hystaspes Persian Satrap of Bactria and Persis",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/9MCF-MKK",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

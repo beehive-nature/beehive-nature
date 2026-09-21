@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p82ca6c5415",
+ "bnr": "bnr://skaists.dev/blood/p82ca6c5415",
+ "identity": {
+  "name": "George Parker Sr",
+  "lifespan": "1570–1645",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L6TM-QXV"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p53ee6d981f",
+    "name": "Archdeacon William Parker of Cornwall",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p4967412c27",
+    "name": "Jane Joan Panchard",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p1b19872f9b",
+    "name": "Sir George Parker Jr"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p6bbf70d99d",
+    "name": "Mary White",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L6TM-QXV",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

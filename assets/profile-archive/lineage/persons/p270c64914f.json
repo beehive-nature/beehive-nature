@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p270c64914f",
+ "bnr": "bnr://skaists.dev/blood/p270c64914f",
+ "identity": {
+  "name": "Gaius Octavius Thurinius van Rome",
+  "lifespan": "0099BC–0058BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L6BJ-4CG"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pfc68201ed5",
+    "name": "Gaius Octavius III Rufus de Rome",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p0384c751ba",
+    "name": "Ancharia Major of Rome",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p23201dae59",
+    "name": "Octavia Thurina Minor 'the Younger'"
+   },
+   {
+    "id": "p5863084a75",
+    "name": "Gaius Iulius Caesar Octavianus Imperator Caesar Divi filius Augustus"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pb37bc81e29",
+    "name": "Atia Balba Caesonia Secunda",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L6BJ-4CG",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

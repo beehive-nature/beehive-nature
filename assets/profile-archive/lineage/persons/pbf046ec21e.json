@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pbf046ec21e",
+ "bnr": "bnr://skaists.dev/blood/pbf046ec21e",
+ "identity": {
+  "name": "Hamutahl Of Samaria",
+  "lifespan": "0550BC–Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LT48-BZG"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p850c58b4f3",
+    "name": "Eliashib ben Joiakim",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p6b14f24019",
+    "name": "Isha Bint Manasseh",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p51763d61f5",
+    "name": "Yoiakim ibn Yeshua 32nd High Priest"
+   },
+   {
+    "id": "p0ad5b37804",
+    "name": "Tshamita Milka bat Yeshua"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pb4c95d13d8",
+    "name": "High Priest Joshuah ben Jehozadak",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LT48-BZG",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

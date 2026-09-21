@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p5639f716bf",
+ "bnr": "bnr://skaists.dev/blood/p5639f716bf",
+ "identity": {
+  "name": "Andrew Vincent",
+  "lifespan": "1527–1581",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L2ML-KMX"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pd725e116d3",
+    "name": "Nicholas Vincent",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p9ddda7bbb8",
+    "name": "Agnes",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pee4577d933",
+    "name": "Mary Vincent"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p56ea447e59",
+    "name": "Alice Jane Orren  Sheriff  Dyble Gooden Goodwin",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L2ML-KMX",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

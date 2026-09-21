@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p9ad64d8ff3",
+ "bnr": "bnr://skaists.dev/blood/p9ad64d8ff3",
+ "identity": {
+  "name": "Nocher de Wamin",
+  "lifespan": "0987–1041",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GN1K-B3B"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p5e82b81fa7",
+    "name": "Nestor I DE CRÉPY EN ARTOIS",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pa28bbd4d0d",
+    "name": "Aédelis DE RUISSEAUVILLE",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p4001860d72",
+    "name": "Havoise de Wamin"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "paeb7ef351b",
+    "name": "Berthilde de Crepy en Artois",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GN1K-B3B",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

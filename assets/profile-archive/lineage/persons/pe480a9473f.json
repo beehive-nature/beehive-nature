@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pe480a9473f",
+ "bnr": "bnr://skaists.dev/blood/pe480a9473f",
+ "identity": {
+  "name": "Wyntje Arents",
+  "lifespan": "1640–1682",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LVPX-Z3V"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p9c68c982bc",
+    "name": "Aert Teunissen Van Putten",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p2c6368ed95",
+    "name": "Susannah Jans",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p4141708105",
+    "name": "Susanna Symonsen Simons"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p2a84bc5556",
+    "name": "Simon Barentszen",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LVPX-Z3V",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

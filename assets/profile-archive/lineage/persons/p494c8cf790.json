@@ -1,0 +1,99 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p494c8cf790",
+ "bnr": "bnr://skaists.dev/blood/p494c8cf790",
+ "identity": {
+  "name": "Yaʿqūb bin Ishaq 10th Prophet of Islam",
+  "lifespan": "1891BC–1715BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LD8Z-1HS"
+  }
+ ],
+ "evidence": {
+  "era": "recorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "recorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p403351ec22",
+    "name": "Ishaq bin Ibrahim 9th Prophet of Islam",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pb61935067b",
+    "name": "Rafqa bint Lūṭ",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pd78b86b1c4",
+    "name": "Yehuda ibn Yaʿqūb"
+   },
+   {
+    "id": "p1af3978ecb",
+    "name": "Lawi ibn Yaʿqūb"
+   },
+   {
+    "id": "p9a03a72ca5",
+    "name": "Zabūlūn ibn Yaʿqūb"
+   },
+   {
+    "id": "pc57da1e8e2",
+    "name": "Yosef ibn Ya'qub 11th Prophet of Islam"
+   },
+   {
+    "id": "p1a27891492",
+    "name": "Binyāmîn Bən-Yaʿaqōv (Yīšrāʾēl)"
+   },
+   {
+    "id": "p1c63e15ab4",
+    "name": "Naphtali ben Jacob"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p9dfdc3d5c0",
+    "name": "Leah bat Laban ibn Buthwil",
+    "marriage": null
+   },
+   {
+    "id": "p0c6649231c",
+    "name": "Rahil bint Labán ibn Buthwil",
+    "marriage": null
+   },
+   {
+    "id": "paa43d70252",
+    "name": "Bilhah the Concubine",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LD8Z-1HS",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

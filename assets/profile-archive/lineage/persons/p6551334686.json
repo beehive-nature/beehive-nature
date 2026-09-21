@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p6551334686",
+ "bnr": "bnr://skaists.dev/blood/p6551334686",
+ "identity": {
+  "name": "Catherine Kepley",
+  "lifespan": "1770–1838",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L66C-RHL"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p04a2bfdbef",
+    "name": "Matthew Kepley",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pa5bf3bfa85",
+    "name": "Mrs. Matthew Kepley",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p33f0d97ca3",
+    "name": "John Peter Zeller"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pdce0551a42",
+    "name": "Peter Zeller",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L66C-RHL",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

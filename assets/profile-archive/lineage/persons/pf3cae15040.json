@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pf3cae15040",
+ "bnr": "bnr://skaists.dev/blood/pf3cae15040",
+ "identity": {
+  "name": "Esther Taylor",
+  "lifespan": "1705–1725",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LHKV-1SX"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p57f198ce8d",
+    "name": "Thomas Paul Taylor Sr",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p1a38e991f4",
+    "name": "Hannah Howell",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p3a301630c7",
+    "name": "Jacob Chandler"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p2477e15232",
+    "name": "George Chandler III",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LHKV-1SX",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

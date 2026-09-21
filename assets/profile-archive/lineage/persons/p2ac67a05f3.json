@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p2ac67a05f3",
+ "bnr": "bnr://skaists.dev/blood/p2ac67a05f3",
+ "identity": {
+  "name": "Warin Comte de Alemannien",
+  "lifespan": "Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L1XC-LH1"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pb7d982dc29",
+    "name": "Saint Warnius Gueriin Burgundy",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pac0b6b13a5",
+    "name": "Gunza de Treves de Metz, de Poitiers",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pc791c7b964",
+    "name": "Isanbart Graf im Thurgau"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p20f7944c1e",
+    "name": "Adelindis di Spoleto",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L1XC-LH1",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

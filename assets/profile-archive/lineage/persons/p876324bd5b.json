@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p876324bd5b",
+ "bnr": "bnr://skaists.dev/blood/p876324bd5b",
+ "identity": {
+  "name": "préfet du prétoire des Gaules Thaumastus Apollinaris",
+  "lifespan": "0400–0475",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PWZ1-1XK"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p648f43ff18",
+    "name": "Praetorian Apollinaris De Narbonne Prefect Of Gaul III",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p2780febc13",
+    "name": "Anonyma",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pbd18ee1894",
+    "name": "Eulalia bat Thaumastus"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p40de0df967",
+    "name": "Papianillia DE LYON",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PWZ1-1XK",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

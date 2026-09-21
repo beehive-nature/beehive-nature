@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pc57da1e8e2",
+ "bnr": "bnr://skaists.dev/blood/pc57da1e8e2",
+ "identity": {
+  "name": "Yosef ibn Ya'qub 11th Prophet of Islam",
+  "lifespan": "1800BC–1690BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "9HYQ-MVN"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p494c8cf790",
+    "name": "Yaʿqūb bin Ishaq 10th Prophet of Islam",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p0c6649231c",
+    "name": "Rahil bint Labán ibn Buthwil",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p311a68ea23",
+    "name": "Ephraim ben Joseph"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pefaff16d3b",
+    "name": "Asenath bat Shechem",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/9HYQ-MVN",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p202180711b",
+ "bnr": "bnr://skaists.dev/blood/p202180711b",
+ "identity": {
+  "name": "En-me-nuna 15th King of Kish",
+  "lifespan": "2800BC–Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "939C-G1B"
+  }
+ ],
+ "evidence": {
+  "era": "recorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "recorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pf9c63b6c95",
+    "name": "Balih ben Etana 14th King of Kish",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p8931ff9bb4",
+    "name": "E MRS Balih OF KISH",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pf98f08a2f7",
+    "name": "Melem-Kish ben En-me-nuna 16th King of Kish"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pb9e3db8b6a",
+    "name": "E MRS Emennuna OF KISH",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/939C-G1B",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

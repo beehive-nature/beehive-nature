@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p585eae62c4",
+ "bnr": "bnr://skaists.dev/blood/p585eae62c4",
+ "identity": {
+  "name": "Robert Coe II",
+  "lifespan": "1626–1659",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LKKM-HZB"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pb6d10a21c3",
+    "name": "Hon. Robert Coe I",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p2bff0c125e",
+    "name": "Marie",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p0750f9714f",
+    "name": "Captain John Coe Sr"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p5df5f5e2ee",
+    "name": "Hannah Mitchell",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LKKM-HZB",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

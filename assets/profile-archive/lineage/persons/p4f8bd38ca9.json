@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p4f8bd38ca9",
+ "bnr": "bnr://skaists.dev/blood/p4f8bd38ca9",
+ "identity": {
+  "name": "Consul Senateur Marcus Asinuis Marcellus de Rome",
+  "lifespan": "35–0134",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GZTW-H8Z"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p4a480ac600",
+    "name": "Marcus Asinuis Marcellus de Rome",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pe167d70c31",
+    "name": "Egee de Lydie",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pb22422bf34",
+    "name": "Frugillus Fulvus de Roma"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p8d2260e629",
+    "name": "Ummidia Quadratilla Asconia Seconda de Rome",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GZTW-H8Z",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p63843ba74d",
+ "bnr": "bnr://skaists.dev/blood/p63843ba74d",
+ "identity": {
+  "name": "Idris ibn Yarid",
+  "lifespan": "3404BC–3039BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "9CMZ-J8N"
+  }
+ ],
+ "evidence": {
+  "era": "recorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "recorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pb821edc7bb",
+    "name": "Yarid ibn Mahla'il ibn Qaynan",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p1997443ea9",
+    "name": "Baraka bint Rasu’aya",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p16dc931e2e",
+    "name": "Mutwashlack ibn Idris"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p83df6c7a77",
+    "name": "Edna bint Dan'el ibn Mahla'il",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/9CMZ-J8N",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

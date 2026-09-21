@@ -1,0 +1,78 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p4a1e6af78a",
+ "bnr": "bnr://skaists.dev/blood/p4a1e6af78a",
+ "identity": {
+  "name": "Matthan ben Eleazar",
+  "lifespan": "0100BC–0038BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L2MY-MDK"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pc5710e7333",
+    "name": "Eleazar ben Eliud Of Judea",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p1587ce2f6e",
+    "name": "Tsamiti ha David",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p9e340f3275",
+    "name": "Jacob Panthera ben Matthan"
+   },
+   {
+    "id": "pd573859a15",
+    "name": "Hezekiah ben Matthan"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p7773faf0bb",
+    "name": "widow of Mathan",
+    "marriage": null
+   },
+   {
+    "id": "pcd8e725ffa",
+    "name": "Hazibah 'Estha' bat Levi",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L2MY-MDK",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

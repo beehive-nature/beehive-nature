@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p88f4d6e39a",
+ "bnr": "bnr://skaists.dev/blood/p88f4d6e39a",
+ "identity": {
+  "name": "Elizabeth Arnold",
+  "lifespan": "1611–1685",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "M5Q2-FQL"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pfad902db9c",
+    "name": "William Arnold",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p706c05f5e7",
+    "name": "Christian Peake",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pbc49cecd84",
+    "name": "Lydia Carpenter"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p02df61b474",
+    "name": "Capt. William Carpenter",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/M5Q2-FQL",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

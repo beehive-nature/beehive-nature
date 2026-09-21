@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pf374fa5d8d",
+ "bnr": "bnr://skaists.dev/blood/pf374fa5d8d",
+ "identity": {
+  "name": "Princess Adai bint Asad ibn Hashim",
+  "lifespan": "0591–0651",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LTH7-5XD"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pe33c443634",
+    "name": "Asad ibn Hashim ibn 'Abd Manaf",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p30bac32e97",
+    "name": "Zahna bat Akhtab Mar-Zutra II Ha-David",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p0ed51708b7",
+    "name": "Exilarch Haninai  of Nehar Pekkod ben Bustanai bar Adai Exilarch - Gaon of Sura"
+   },
+   {
+    "id": "pa1ce0d82b2",
+    "name": "Shahriyar Surkhab Ben Bustanai king of Tabaristan"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p1bbbb83ed7",
+    "name": "Hananya \"Bustanai\" ben Haninai 1st Exilarch 3rd Dynasty",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LTH7-5XD",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

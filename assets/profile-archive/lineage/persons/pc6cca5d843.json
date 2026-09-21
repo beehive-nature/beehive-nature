@@ -1,0 +1,62 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pc6cca5d843",
+ "bnr": "bnr://skaists.dev/blood/pc6cca5d843",
+ "identity": {
+  "name": "Shalmaneser I of Assyria",
+  "lifespan": "1290–1244",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PFR6-368"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p5229f33d51",
+    "name": "Adad Nirari I",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p70e3b6add7",
+    "name": "Miss Shalmaneser II"
+   },
+   {
+    "id": "pddd99f639d",
+    "name": "Yabín Rey De Canaán"
+   }
+  ],
+  "spouses": []
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PFR6-368",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

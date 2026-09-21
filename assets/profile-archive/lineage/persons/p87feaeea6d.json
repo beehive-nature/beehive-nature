@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p87feaeea6d",
+ "bnr": "bnr://skaists.dev/blood/p87feaeea6d",
+ "identity": {
+  "name": "William Clemens",
+  "lifespan": "1812–1850",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "K4KR-SPG"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pa13e0a212a",
+    "name": "James Clement Sr",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pbc8ac21ce1",
+    "name": "Elizabeth Russell",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pca0eb92e50",
+    "name": "Mary Ann Clemens"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pd7d4ba9a27",
+    "name": "Ann Wiles",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/K4KR-SPG",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

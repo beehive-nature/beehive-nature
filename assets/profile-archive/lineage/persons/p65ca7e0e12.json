@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p65ca7e0e12",
+ "bnr": "bnr://skaists.dev/blood/p65ca7e0e12",
+ "identity": {
+  "name": "Catherine Marsden",
+  "lifespan": "1551–1621",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GL72-C2G"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pdeb163a7a4",
+    "name": "James Howarth Marsden",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pd7913f81be",
+    "name": "Jane Elizabeth Sykes",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pfd949f1fde",
+    "name": "Anne Downham"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pce32a314cd",
+    "name": "Richard Downham",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GL72-C2G",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

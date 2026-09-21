@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p94fc60d347",
+ "bnr": "bnr://skaists.dev/blood/p94fc60d347",
+ "identity": {
+  "name": "Ahinoam bat Ahimaaz",
+  "lifespan": "1075BC–Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L271-M1Q"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p454613e733",
+    "name": "Ahimaas",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pf2c018ec03",
+    "name": "Basemath bat Solomon",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p0ef38e20c5",
+    "name": "Michal bat Saul"
+   },
+   {
+    "id": "pe3af33c20b",
+    "name": "Jonathan ben Saul"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pfcaaa9c10f",
+    "name": "King Saul ben Kish",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L271-M1Q",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pb3d659b211",
+ "bnr": "bnr://skaists.dev/blood/pb3d659b211",
+ "identity": {
+  "name": "Mary Winterflood",
+  "lifespan": "1547–1592",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "K8D6-8S9"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p9169b2a70e",
+    "name": "John Johis Winterflood",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pe714c8ee68",
+    "name": "Johanna Hobbe",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "peeb9260d5a",
+    "name": "Robert Humphrey"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p548589abee",
+    "name": "William Humphrey",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/K8D6-8S9",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

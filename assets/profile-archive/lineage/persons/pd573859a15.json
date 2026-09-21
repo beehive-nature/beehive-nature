@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pd573859a15",
+ "bnr": "bnr://skaists.dev/blood/pd573859a15",
+ "identity": {
+  "name": "Hezekiah ben Matthan",
+  "lifespan": "0065BC–0004BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GFTN-WCM"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p4a1e6af78a",
+    "name": "Matthan ben Eleazar",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pcd8e725ffa",
+    "name": "Hazibah 'Estha' bat Levi",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p400f903bcb",
+    "name": "Saint Anne bat Yehoshua"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p4c390d387f",
+    "name": "St. Bianca Emerentia bat Matthat",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GFTN-WCM",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

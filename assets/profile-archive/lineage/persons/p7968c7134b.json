@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p7968c7134b",
+ "bnr": "bnr://skaists.dev/blood/p7968c7134b",
+ "identity": {
+  "name": "Agnes Champneis",
+  "lifespan": "1330–1424",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G54S-WS9"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pba8acef1d4",
+    "name": "Sir William Champneis",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p63c4aad2e8",
+    "name": "Agnes Longe de Wykeham",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pc63779fe12",
+    "name": "Maud Francis"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pef6effe72b",
+    "name": "Sir Adam Francis",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G54S-WS9",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

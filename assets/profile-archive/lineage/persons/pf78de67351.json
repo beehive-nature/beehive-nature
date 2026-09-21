@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pf78de67351",
+ "bnr": "bnr://skaists.dev/blood/pf78de67351",
+ "identity": {
+  "name": "Joan of Kent 4th Countess of Kent",
+  "lifespan": "1327–1385",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "KDQ8-TWV"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "L8MJ-ZLQ",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "LTTF-3K8",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pfd03cd4abe",
+    "name": "Sir Thomas de Holand"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pfca209c0e8",
+    "name": "Thomas de Holand 1st Earl of Kent, K.G.",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/KDQ8-TWV",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

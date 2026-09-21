@@ -789,6 +789,17 @@
    "descriptionKey": "s.forge-orbit.name"
   },
   {
+   "id": "myspace",
+   "family": "skaists",
+   "home": "skaists.dev",
+   "path": "surfaces/myspace.html",
+   "state": "LIVE",
+   "gloss": "keep a file on your phone, or share one — you choose which, per file",
+   "org": "skaists",
+   "label": "My Space",
+   "limit": "a file you shared cannot be unshared: the store has no delete route, so the copy stays at its hash"
+  },
+  {
    "id": "review",
    "family": "skaists",
    "home": "skaists.dev",
@@ -1320,20 +1331,31 @@
    "org": "beehive-nature",
    "label": "My Data · bData",
    "descriptionKey": "s.bdata"
+  },
+  {
+   "id": "blood",
+   "family": "beehivenature",
+   "home": "skaists.dev",
+   "path": "surfaces/blood.html",
+   "state": "LIVE",
+   "gloss": "bGenealogy — the blood fractal: every blood relative for millennia, evidence layers distinct, preservation in five honest states",
+   "org": "beehive-nature",
+   "label": "bGenealogy · the blood fractal",
+   "descriptionKey": "s.blood"
   }
  ],
  "counts": {
-  "surfaces": 97,
-  "listed": 106,
+  "surfaces": 99,
+  "listed": 108,
   "families": 8,
   "domains": 26,
   "domainsLive": 4,
   "domainsPending": 17,
   "domainsSeatOpen": 5,
   "byFamily": {
-   "beehivenature": 41,
+   "beehivenature": 42,
    "plur": 7,
-   "skaists": 20,
+   "skaists": 21,
    "bnature": 18,
    "beehivebiomass": 5,
    "beehivebuds": 0,
@@ -1341,11 +1363,11 @@
    "bnr": 1
   },
   "byState": {
-   "LIVE": 106
+   "LIVE": 108
   },
   "byOrg": {
-   "beehive-nature": 58,
-   "skaists": 34,
+   "beehive-nature": 59,
+   "skaists": 35,
    "beehive-biomass": 5
   }
  },

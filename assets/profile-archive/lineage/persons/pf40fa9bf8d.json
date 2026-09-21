@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pf40fa9bf8d",
+ "bnr": "bnr://skaists.dev/blood/pf40fa9bf8d",
+ "identity": {
+  "name": "King Eugein ap Marius of Siluria",
+  "lifespan": "85–0152",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LKGD-N8L"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p888dc0213b",
+    "name": "Marius King Marius of the Britons",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pc2ea982150",
+    "name": "Julia Victoria Panardun verch Prasutigas",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p72fa6e29e4",
+    "name": "Queen Gladys The Elder ferch Eurgen"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pada33450c8",
+    "name": "Eurgen ap Marius Meurig",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LKGD-N8L",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

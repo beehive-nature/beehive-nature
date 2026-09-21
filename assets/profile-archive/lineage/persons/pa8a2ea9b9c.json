@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pa8a2ea9b9c",
+ "bnr": "bnr://skaists.dev/blood/pa8a2ea9b9c",
+ "identity": {
+  "name": "Charles, Duc de Basse-Lotharingie",
+  "lifespan": "0953–0992",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LZLQ-664"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pa1c6ad05f9",
+    "name": "Louis IV 'd'Outremer', Roi des Francs occidentale",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p5ff98de921",
+    "name": "Gerberga von Sachsen Fränkische Königin",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p5e022ad7e2",
+    "name": "Gerberge de Basse-Lotharingie"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p109638a715",
+    "name": "Adelaïs de Troyes-Vermandois",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LZLQ-664",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

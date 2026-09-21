@@ -1,0 +1,78 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p91cd2f8f43",
+ "bnr": "bnr://skaists.dev/blood/p91cd2f8f43",
+ "identity": {
+  "name": "Peter Tallman",
+  "lifespan": "1623–1708",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LKD2-83G"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pc49a71430b",
+    "name": "Peter Taelmann",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pde67682d45",
+    "name": "Maria Maitz Von Peene",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p1645b5d9a3",
+    "name": "Elizabeth Tallman"
+   },
+   {
+    "id": "p0e3d41ca25",
+    "name": "Doctor James Tallman"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p5f00258202",
+    "name": "Ann Hill",
+    "marriage": null
+   },
+   {
+    "id": "pb26bd402c5",
+    "name": "Joan Briggs",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LKD2-83G",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

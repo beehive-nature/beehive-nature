@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p59c9b2259b",
+ "bnr": "bnr://skaists.dev/blood/p59c9b2259b",
+ "identity": {
+  "name": "Sneferu Snefru, Snofru 1st Pharaoh of the 4th Dynasty",
+  "lifespan": "2650BC–2589BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G8Y1-38J"
+  }
+ ],
+ "evidence": {
+  "era": "recorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "recorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p7b4ad2a64c",
+    "name": "Huni Nysuteh 13th Pharaoh of the 3rd Dynasty",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p31a373781b",
+    "name": "Meresankh I",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p1678b7c111",
+    "name": "Khufu Menes"
+   },
+   {
+    "id": "pb31c5d30e9",
+    "name": "Henutsen"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p833ce1db81",
+    "name": "Queen Hetepheres I",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G8Y1-38J",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

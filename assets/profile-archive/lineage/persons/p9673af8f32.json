@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p9673af8f32",
+ "bnr": "bnr://skaists.dev/blood/p9673af8f32",
+ "identity": {
+  "name": "Consul de Roma Flavius Magnus Sénateur de Narbonne",
+  "lifespan": "0405–0475",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LTH9-1JK"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p98da1dae22",
+    "name": "Flavius Felix Constantius",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p6dece84987",
+    "name": "Padusia Flavius Julius Agricola of Rome",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p55e278e328",
+    "name": "Flavius Probus GALLO De Narbonne"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p7615f1daef",
+    "name": "Rufia Probanus",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LTH9-1JK",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pb175d7e930",
+ "bnr": "bnr://skaists.dev/blood/pb175d7e930",
+ "identity": {
+  "name": "Alphonse II DE CANLERS",
+  "lifespan": "0981–1034",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LDS9-2ZM"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p8573a176b9",
+    "name": "Sieur Alphonse de Canlers",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p4303c01702",
+    "name": "Adalie D'Olhain",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p86a777cee8",
+    "name": "Artus de Canlers"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "padb83056d7",
+    "name": "Octavie de Crespy-En-Artois",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LDS9-2ZM",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

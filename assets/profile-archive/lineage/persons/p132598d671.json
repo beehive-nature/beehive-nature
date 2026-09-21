@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p132598d671",
+ "bnr": "bnr://skaists.dev/blood/p132598d671",
+ "identity": {
+  "name": "Moza ben Zimri",
+  "lifespan": "Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "9H1R-T2H"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pcf10b88fbe",
+    "name": "Zimri ben Jehoadah",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p9abeccc277",
+    "name": "*E MRS ZIMRI BEN JEHOADAH",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p18d9179e3a",
+    "name": "Azel ben Moza ha-Benjamin"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pfd8ea1b02f",
+    "name": "*E MRS MOZA BEN ZIMRI OF ISRAEL",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/9H1R-T2H",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

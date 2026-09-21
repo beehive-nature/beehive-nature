@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pb2b1bf0a83",
+ "bnr": "bnr://skaists.dev/blood/pb2b1bf0a83",
+ "identity": {
+  "name": "Libni ben Gershon",
+  "lifespan": "1700BC–Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G6YK-QBQ"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p43e48e5110",
+    "name": "Gershon ben Levi",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pa35374c2c3",
+    "name": "Mrs Gershon ben Levi",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p2c8c922b34",
+    "name": "Yahath ibn Libni"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p62ab38c95c",
+    "name": "Mrs. Libni",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G6YK-QBQ",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p16cdaecda5",
+ "bnr": "bnr://skaists.dev/blood/p16cdaecda5",
+ "identity": {
+  "name": "Hastilla vel Asillia de Lombardy",
+  "lifespan": "0309–0360",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "9CW1-DXW"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pbb6ee9f53c",
+    "name": "Senator Ascyllius Francis Patrica der Salier König von Konstantinopel",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pcad8a13d82",
+    "name": "Queen Ascyla de Ascyllius Of Lombardia",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p1c8568d72c",
+    "name": "Clodius IV Von Cologne Duke of Therouanne"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p8dab179548",
+    "name": "Walter, King of the East Franks",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/9CW1-DXW",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

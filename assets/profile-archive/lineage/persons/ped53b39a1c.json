@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "ped53b39a1c",
+ "bnr": "bnr://skaists.dev/blood/ped53b39a1c",
+ "identity": {
+  "name": "Carausius Mausaeus, Emperor of the North",
+  "lifespan": "0225–0293",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "9C3G-KH9"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pbaa3403886",
+    "name": "Marcus DE BRETAGNE",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p3e84159239",
+    "name": "Marie De Bretagne",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p3ca6fc4714",
+    "name": "Marcus \"Carausius\" Aurelius Valerius"
+   },
+   {
+    "id": "p3e96fe10c4",
+    "name": "Genseric ap Catausius de Menapie"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p6c9dda91db",
+    "name": "Gancienne de Coriosolites",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/9C3G-KH9",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

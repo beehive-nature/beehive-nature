@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p6690c96e64",
+ "bnr": "bnr://skaists.dev/blood/p6690c96e64",
+ "identity": {
+  "name": "Margaret Geertruyd van Pelt",
+  "lifespan": "1693–1748",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LCRH-RVB"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p9cd679fabf",
+    "name": "Aert Teunissen Lanen Van Pelt",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p4b7b0bf602",
+    "name": "Neeltje Janse Van Tuyl",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p328f7e9f24",
+    "name": "Jacobus James Sutphen"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pb55079da74",
+    "name": "Guisbert Sutven",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LCRH-RVB",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

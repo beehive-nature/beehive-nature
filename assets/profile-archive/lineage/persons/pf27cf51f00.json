@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pf27cf51f00",
+ "bnr": "bnr://skaists.dev/blood/pf27cf51f00",
+ "identity": {
+  "name": "Pupienia Sextia Paulina Cethegilla",
+  "lifespan": "0225–Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LD53-K8D"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pf0699dafa0",
+    "name": "Marcus Pupienus Africanus Maximus",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pf908f9e6f0",
+    "name": "Cornelia Marullina Lucia Di Roma",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pbb33cba563",
+    "name": "Marcus Maecius Orfitus"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pbfdd11f57d",
+    "name": "Marcus Maecius Probus",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LD53-K8D",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

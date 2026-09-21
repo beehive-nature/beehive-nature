@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p742e6d7d29",
+ "bnr": "bnr://skaists.dev/blood/p742e6d7d29",
+ "identity": {
+  "name": "Accius Sura Maior",
+  "lifespan": "0036BC–Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GDG5-F9R"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p81a8595efd",
+    "name": "Publius Lucinus Crassus",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p1ec1a7ed04",
+    "name": "Venuleia",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pa5d8811a45",
+    "name": "Neratius Proculus"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p2088cee5d4",
+    "name": "Juliana De ROME",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GDG5-F9R",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

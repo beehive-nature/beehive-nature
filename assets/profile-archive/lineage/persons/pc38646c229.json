@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pc38646c229",
+ "bnr": "bnr://skaists.dev/blood/pc38646c229",
+ "identity": {
+  "name": "Iyaska bint Nestag Chaldees",
+  "lifespan": "2264BC–2006BC",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L61H-JD5"
+  }
+ ],
+ "evidence": {
+  "era": "recorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "recorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p990dba8941",
+    "name": "Nestag ibn Heraclim",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p90a6a67cb3",
+    "name": "Mrs Nestag ibn Heraclim of Ur",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p9c3efa04cb",
+    "name": "Terah ben Nahor"
+   },
+   {
+    "id": "pfc0f1546d9",
+    "name": "Emtelai Of Agade"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p9b2f7f36ab",
+    "name": "Nahor ben Serug",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L61H-JD5",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

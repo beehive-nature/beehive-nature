@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p50251186de",
+ "bnr": "bnr://skaists.dev/blood/p50251186de",
+ "identity": {
+  "name": "King Eliakim Jehoiakim ben Josiah",
+  "lifespan": "0633BC–0598BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LJYK-GB8"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p7a489a4641",
+    "name": "King Josiah ben Amon",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p436d37853c",
+    "name": "Dalilah bint Kermias",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pa3fbd0a30e",
+    "name": "King Jeconiah ben Eliakim"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p195dd71972",
+    "name": "Nehushta bat Elnathan",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LJYK-GB8",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

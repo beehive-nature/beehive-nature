@@ -1,0 +1,58 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "paaaf46d349",
+ "bnr": "bnr://skaists.dev/blood/paaaf46d349",
+ "identity": {
+  "name": "Gervais-Jean de Paganel Payne",
+  "lifespan": "0970–1066",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "P3LG-S2B"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [],
+  "children": [
+   {
+    "id": "p25b6193946",
+    "name": "UKN"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p276053e7e7",
+    "name": "Beatrice FitzGuillaume",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/P3LG-S2B",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

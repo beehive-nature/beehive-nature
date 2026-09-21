@@ -1,0 +1,78 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pebf81c4ef8",
+ "bnr": "bnr://skaists.dev/blood/pebf81c4ef8",
+ "identity": {
+  "name": "Abihail bat Eliab",
+  "lifespan": "0990BC–0841",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LKYP-F8Q"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p35cc2bd1f4",
+    "name": "Eliab ben Jesse",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p20ca4d232a",
+    "name": "Ascaviana Sempronianaeris Pustilius",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p0a7143e7d7",
+    "name": "Tamar bat Absalom"
+   },
+   {
+    "id": "p0d68fe62ec",
+    "name": "Mahalath bat Jerimoth first wife of Rehoboam"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p8dc89c4f61",
+    "name": "Absalom ben David",
+    "marriage": null
+   },
+   {
+    "id": "pafd1f9fa8f",
+    "name": "Jerimoth ben David",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LKYP-F8Q",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

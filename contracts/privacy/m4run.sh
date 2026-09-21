@@ -13,7 +13,7 @@ CLEOS="/usr/bin/cleos -u $U"
 echo "[0] wallet + account"
 $CLEOS wallet list 2>/dev/null | grep -q bnrzk || $CLEOS wallet create --name bnrzk --file $W/bnrzk.pw >/dev/null
 $CLEOS wallet unlock --name bnrzk --password "$(cat $W/bnrzk.pw)" >/dev/null 2>&1 || true
-$CLEOS wallet import --name bnrzk --private-key 5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3 >/dev/null 2>&1 || true
+$CLEOS wallet import --name bnrzk --private-key 5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3 >/dev/null 2>&1 || true # TESTNET-ONLY: eosio documented dev key
 BENCH_PRIV=$(awk '{print $1}' /tmp/nd/bench.key)
 $CLEOS wallet import --name bnrzk --private-key "$BENCH_PRIV" >/dev/null 2>&1 || true
 BENCH_PUB=$(awk '{print $2}' /tmp/nd/bench.key)

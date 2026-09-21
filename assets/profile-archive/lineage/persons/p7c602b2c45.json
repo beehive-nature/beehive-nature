@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p7c602b2c45",
+ "bnr": "bnr://skaists.dev/blood/p7c602b2c45",
+ "identity": {
+  "name": "Elie Grandin",
+  "lifespan": "1598–1662",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "KFRR-86P"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pcda01d8150",
+    "name": "Pierre Grandin",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p3dc9e051cf",
+    "name": "Elizabeth Grandin",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p134944a587",
+    "name": "Elie Grandin"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pee5304ec83",
+    "name": "Jeanne le Vavasseur dit Durell",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/KFRR-86P",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

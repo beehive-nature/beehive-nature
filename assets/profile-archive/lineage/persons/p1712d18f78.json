@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p1712d18f78",
+ "bnr": "bnr://skaists.dev/blood/p1712d18f78",
+ "identity": {
+  "name": "Mathilde de Boulogne-Alsace",
+  "lifespan": "1162–1210",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LDW5-M8S"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pbf8321e93d",
+    "name": "Matthieu d'Alsace comte de Boulogne,",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p73afb800b0",
+    "name": "Marie de Boulogne-Blois",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pf76f5da533",
+    "name": "Hendrik II 'de Edelmoedige' van Brabant"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p65266cb5d8",
+    "name": "Hendrik I 'de Krijgshaftige' van Brabant hertog van Neder-Lotharingen",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LDW5-M8S",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

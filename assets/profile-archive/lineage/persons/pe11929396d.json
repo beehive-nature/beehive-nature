@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pe11929396d",
+ "bnr": "bnr://skaists.dev/blood/pe11929396d",
+ "identity": {
+  "name": "Marcus Claudius Pupienus Maximus Emperor of Rome",
+  "lifespan": "0168–0238",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LVHY-B7N"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pd675efcffd",
+    "name": "Marcus Pupienus Maximus De ROME",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p062684a08f",
+    "name": "Claudia Pulchera de ROME",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pf0699dafa0",
+    "name": "Marcus Pupienus Africanus Maximus"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p860c1e9fcd",
+    "name": "Sextia Cethegilla Di Roma",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LVHY-B7N",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

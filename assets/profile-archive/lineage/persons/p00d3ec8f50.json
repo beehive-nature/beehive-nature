@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p00d3ec8f50",
+ "bnr": "bnr://skaists.dev/blood/p00d3ec8f50",
+ "identity": {
+  "name": "Jacob Schmit Nesimus Kemper",
+  "lifespan": "1505–1572",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "9QTC-6JL"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p9d84b29eb7",
+    "name": "Jost Gerhardt Kemper-Schmyt",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p40f783b7a4",
+    "name": "Frau Jost Gerhardt Kemper-Schmyt",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p24a8c2cf0a",
+    "name": "Tilman Kemper Schmit of Ernsdorf"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "peefa0853b8",
+    "name": "Maria von Bon",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/9QTC-6JL",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

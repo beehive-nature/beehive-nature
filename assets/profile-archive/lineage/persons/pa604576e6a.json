@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pa604576e6a",
+ "bnr": "bnr://skaists.dev/blood/pa604576e6a",
+ "identity": {
+  "name": "Gaius Caecilius Metellus Caprarius",
+  "lifespan": "0349BC–0315BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G3K1-3WX"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p4a4bba39e6",
+    "name": "Lucius Caecilius Metellus",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p39b4037a5d",
+    "name": "Mrs Lucius Caecilius Metellus I",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p88531dd557",
+    "name": "Lucius Caecilius Metellus Denter"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pb4b5e3abdc",
+    "name": "Mrs Gaius Caecilius Metellus Caprarius",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G3K1-3WX",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p61afe83406",
+ "bnr": "bnr://skaists.dev/blood/p61afe83406",
+ "identity": {
+  "name": "Thomas atte Mead Sr",
+  "lifespan": "1350–Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "P7DZ-V8M"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p702e75cc6b",
+    "name": "Sir Thomas Mead",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p7239c27b7b",
+    "name": "Mrs Thomas Mead",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p76510a546d",
+    "name": "Thomas atte Mead Jr"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p194c98806c",
+    "name": "Agnes Wycliff",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/P7DZ-V8M",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

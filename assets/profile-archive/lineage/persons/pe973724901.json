@@ -1,0 +1,63 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pe973724901",
+ "bnr": "bnr://skaists.dev/blood/pe973724901",
+ "identity": {
+  "name": "Mary Magdalene bat Cyrus of Bethany",
+  "lifespan": "3–63",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "9HR5-JGD"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p79258c2684",
+    "name": "Cyrus of Magdala",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p731becb9c4",
+    "name": "Eucharia 'Cleopatra' bint Menahem",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p35b63fd518",
+    "name": "Princess Sarah-Damaris of The West Franks"
+   }
+  ],
+  "spouses": []
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/9HR5-JGD",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

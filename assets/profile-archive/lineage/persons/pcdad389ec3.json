@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pcdad389ec3",
+ "bnr": "bnr://skaists.dev/blood/pcdad389ec3",
+ "identity": {
+  "name": "Rebecca Mead",
+  "lifespan": "1596–1696",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PQBJ-6PD"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p0e3d3b1e4b",
+    "name": "Priscila Mead",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pb407d3039b",
+    "name": "Dorothy Grey",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pbafa33b192",
+    "name": "Gen. John Lambert Sr."
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p37025d8836",
+    "name": "Richard Lambert",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PQBJ-6PD",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

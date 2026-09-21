@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pb2d29a80ca",
+ "bnr": "bnr://skaists.dev/blood/pb2d29a80ca",
+ "identity": {
+  "name": "Lydia Sparrow",
+  "lifespan": "1661–1709",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LC2F-2ZX"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p8ecb7f737c",
+    "name": "Capt. Jonathan Sparrow",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pa9ecf927ec",
+    "name": "Rebecca Bangs",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p8b24018d9e",
+    "name": "Lydia Freeman"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p702ea826d3",
+    "name": "William Freeman",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LC2F-2ZX",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

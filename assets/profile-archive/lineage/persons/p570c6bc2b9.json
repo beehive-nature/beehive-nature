@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p570c6bc2b9",
+ "bnr": "bnr://skaists.dev/blood/p570c6bc2b9",
+ "identity": {
+  "name": "Appius Claudius Pulcher II de ROME",
+  "lifespan": "Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G73Y-SG5"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p3a6515dfde",
+    "name": "Publius Appius Claudius Pulcher I. di Rome",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p75ff77eee1",
+    "name": "Arria Vera di Rome",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p3eee1ee508",
+    "name": "Appius Claudius Pulcher of Rome Roman Consul"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p1cc2d82f55",
+    "name": "CORNELIA MANLIOLA DE ROME",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G73Y-SG5",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

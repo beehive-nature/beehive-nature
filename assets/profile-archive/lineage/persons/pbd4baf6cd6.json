@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pbd4baf6cd6",
+ "bnr": "bnr://skaists.dev/blood/pbd4baf6cd6",
+ "identity": {
+  "name": "Adam Ier De Beaumont- En- Gatinais",
+  "lifespan": "1150–1191",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GMDG-M9W"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "GRNL-3SG",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "G5L8-QVM",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pdbb33e976b",
+    "name": "Agnès de Beaumont du Gatinais"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pedc41e560a",
+    "name": "Alix LE RICHE de PARIS",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GMDG-M9W",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

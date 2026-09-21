@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p142a87511d",
+ "bnr": "bnr://skaists.dev/blood/p142a87511d",
+ "identity": {
+  "name": "Thomas Browne",
+  "lifespan": "1535–1617",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G8TV-PNX"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p95166c2aa6",
+    "name": "Thomas Browne",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p0a097f8edb",
+    "name": "Mrs Thomas Browne",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p14bd6b7110",
+    "name": "Margaret Browne"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pbdd3764afb",
+    "name": "Alice Chapman",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G8TV-PNX",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

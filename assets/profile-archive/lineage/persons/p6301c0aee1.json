@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p6301c0aee1",
+ "bnr": "bnr://skaists.dev/blood/p6301c0aee1",
+ "identity": {
+  "name": "Thomas Freebody",
+  "lifespan": "1458–1491",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L6GW-V3N"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pae2ac1a6fa",
+    "name": "Thomas Freebody",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p57e5d50c9e",
+    "name": "Elizabeth Nightingale",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pde9bf32c21",
+    "name": "Anne Frebodye"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pf34278c248",
+    "name": "Elizabeth Heard",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L6GW-V3N",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

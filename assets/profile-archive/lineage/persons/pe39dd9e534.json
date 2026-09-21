@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pe39dd9e534",
+ "bnr": "bnr://skaists.dev/blood/pe39dd9e534",
+ "identity": {
+  "name": "Johanna Glynn",
+  "lifespan": "1294–1350",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LH73-NGW"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p1a6f19323b",
+    "name": "Sir John Glynn",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pcd912f1a20",
+    "name": "Isabella Glynn",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p6d1768f923",
+    "name": "Sir Walter de Carminow"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pa3bd7d222f",
+    "name": "Sir John de Carminow",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LH73-NGW",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

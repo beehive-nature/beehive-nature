@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pb67a8dc19c",
+ "bnr": "bnr://skaists.dev/blood/pb67a8dc19c",
+ "identity": {
+  "name": "Ijaska bint Kaber",
+  "lifespan": "2150BC–Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L7LP-X83"
+  }
+ ],
+ "evidence": {
+  "era": "recorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "recorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pac78735331",
+    "name": "Kaber ibn Falikh",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pa9e4bc4920",
+    "name": "Ruth bint Madai ben Yaafith",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p16a20d92e7",
+    "name": "Karnevo ibn Saru' ibn Urghuwa"
+   },
+   {
+    "id": "pbe42687a79",
+    "name": "Melka bint Saru' of Ur"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pd6690d1571",
+    "name": "Saru' ibn Urghuwa",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L7LP-X83",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

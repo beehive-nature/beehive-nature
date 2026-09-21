@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pdeb163a7a4",
+ "bnr": "bnr://skaists.dev/blood/pdeb163a7a4",
+ "identity": {
+  "name": "James Howarth Marsden",
+  "lifespan": "1524–1583",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GL72-W5D"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p9054b9ddbc",
+    "name": "Sir RICHARD MARSDEN",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pb9cc68f049",
+    "name": "Margaret Howarth",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p65ca7e0e12",
+    "name": "Catherine Marsden"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pd7913f81be",
+    "name": "Jane Elizabeth Sykes",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GL72-W5D",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

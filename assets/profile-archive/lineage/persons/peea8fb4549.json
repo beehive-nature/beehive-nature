@@ -1,0 +1,58 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "peea8fb4549",
+ "bnr": "bnr://skaists.dev/blood/peea8fb4549",
+ "identity": {
+  "name": "Brelade Alexandre",
+  "lifespan": "1540–1590",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "9KG1-TDH"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [],
+  "children": [
+   {
+    "id": "p1c73889e97",
+    "name": "Mrs. Marie Alexandre"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pc531ca860f",
+    "name": "Richarde Bisson",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/9KG1-TDH",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

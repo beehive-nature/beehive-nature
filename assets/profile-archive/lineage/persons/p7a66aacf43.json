@@ -1,0 +1,58 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p7a66aacf43",
+ "bnr": "bnr://skaists.dev/blood/p7a66aacf43",
+ "identity": {
+  "name": "Tukulti-Ninurta I Of Assyria king of Assyria",
+  "lifespan": "1244BC–1207BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PSPG-2Z5"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p415b7e53ab",
+    "name": "Shalmaneser I, 5th King of the Middle Assyrian Empire",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p77b7e60ac9",
+    "name": "King of the Middle Assyrian Empire Ashur-nadin-apli"
+   }
+  ],
+  "spouses": []
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PSPG-2Z5",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,74 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pfbeab34138",
+ "bnr": "bnr://skaists.dev/blood/pfbeab34138",
+ "identity": {
+  "name": "Cornelia Africana Minor",
+  "lifespan": "0190BC–0115BC",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GZLN-K37"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p1e21ea9880",
+    "name": "Publius Cornelius Scipio “Africanus”",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p918fe8e3fb",
+    "name": "Aemilia Paulla Tercia",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pd2435cfb91",
+    "name": "Gaius Sempronius Gracchus Roman Senator"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p4784e4863e",
+    "name": "Tiberius Sempronius Gracchus Triumvir",
+    "marriage": null
+   },
+   {
+    "id": "p01c583faf3",
+    "name": "Tiberio Sempronio Graco",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GZLN-K37",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

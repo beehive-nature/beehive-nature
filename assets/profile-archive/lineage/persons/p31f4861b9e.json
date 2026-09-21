@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p31f4861b9e",
+ "bnr": "bnr://skaists.dev/blood/p31f4861b9e",
+ "identity": {
+  "name": "Demetrius I Soter",
+  "lifespan": "0185BC–0150BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LVZV-1KY"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pfd4f3f3844",
+    "name": "Seleucus IV Philopator",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p9f90a4d79b",
+    "name": "Queen consort of the Seleucid Empire Laodice IV",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p36fc0bf8de",
+    "name": "Demetrius II Nicator"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p8c0b0a8bb1",
+    "name": "Laodicée V SELEUCIDE",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LVZV-1KY",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

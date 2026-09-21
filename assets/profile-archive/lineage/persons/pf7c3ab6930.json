@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pf7c3ab6930",
+ "bnr": "bnr://skaists.dev/blood/pf7c3ab6930",
+ "identity": {
+  "name": "Sir John Booth",
+  "lifespan": "1516–1555",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GXM6-4NP"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pf829b39d52",
+    "name": "George Boothe",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p9e90d77ba5",
+    "name": "Elizabeth Boteler",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p06a91589bc",
+    "name": "Katherine Booth"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p40689587ac",
+    "name": "Ellen Leigh",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GXM6-4NP",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "paae5ea89e9",
+ "bnr": "bnr://skaists.dev/blood/paae5ea89e9",
+ "identity": {
+  "name": "Sarah Tapp",
+  "lifespan": "1599–1638",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LRJ3-HKP"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pd612c78e5b",
+    "name": "Edmund Tapp II",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pbabb8713d3",
+    "name": "Anne",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p00529d0210",
+    "name": "William Fowler Jr"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p48bb0ea1b6",
+    "name": "William Fowler",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LRJ3-HKP",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

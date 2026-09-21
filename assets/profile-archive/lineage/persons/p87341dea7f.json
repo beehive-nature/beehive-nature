@@ -1,0 +1,64 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p87341dea7f",
+ "bnr": "bnr://skaists.dev/blood/p87341dea7f",
+ "identity": {
+  "name": "Qanturah ibn Maftur",
+  "lifespan": "2052BC–1890BC",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L66D-V58"
+  }
+ ],
+ "evidence": {
+  "era": "recorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "recorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p9e316e3e37",
+    "name": "Maftur ibn Yaqtan ibn `Abir",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p2b5cfa09c2",
+    "name": "Madyan ibn Ibrahim the Zoroastrian"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p022ced245c",
+    "name": "Ibrahim ibn Tarakh 6th Prophet of Islam",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L66D-V58",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p95a696782d",
+ "bnr": "bnr://skaists.dev/blood/p95a696782d",
+ "identity": {
+  "name": "Titus Sextius Africanus III De ROME",
+  "lifespan": "6–66",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PMP1-LJC"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p1cdf3c4ab2",
+    "name": "Titus Sextius Africanus II De ROME",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p31cdc3b37c",
+    "name": "? ?",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pb7b7c25160",
+    "name": "Titus Sextius Africanus IV De ROME"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p4128100ae1",
+    "name": "Magia De ROME",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PMP1-LJC",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

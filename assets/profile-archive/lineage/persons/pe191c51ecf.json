@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pe191c51ecf",
+ "bnr": "bnr://skaists.dev/blood/pe191c51ecf",
+ "identity": {
+  "name": "Sybil de Salisbury",
+  "lifespan": "1126–1176",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L785-BPL"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "L17V-2Q7",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "M5GV-G5K",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pb2a8bd0d7d",
+    "name": "Sir William Marshal , 1st Earl of Pembroke, Regent of England"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pb5d8e6ad39",
+    "name": "John Fitz Gilbert Marshall of England",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L785-BPL",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

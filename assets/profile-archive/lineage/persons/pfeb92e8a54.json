@@ -1,0 +1,85 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pfeb92e8a54",
+ "bnr": "bnr://skaists.dev/blood/pfeb92e8a54",
+ "identity": {
+  "name": "Enos ben Seth",
+  "lifespan": "3769BC–2864BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LZJ1-H8K"
+  }
+ ],
+ "evidence": {
+  "era": "recorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "recorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p8ce4340c02",
+    "name": "Seth ben Adam 2nd Patriarch",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p5c808066c4",
+    "name": "Azûrâ bat Adam",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p4011b92810",
+    "name": "Qaynan ibn Anwas"
+   },
+   {
+    "id": "pb1751d2a73",
+    "name": "Mûalêlêth bint Anwas"
+   },
+   {
+    "id": "p49327066ec",
+    "name": "Baraki'el ibn Anwas, Prince de Sippar"
+   },
+   {
+    "id": "p7d83a0cd8e",
+    "name": "Cainan ben Enos 4th Patriarch"
+   },
+   {
+    "id": "pa3c733cb9b",
+    "name": "Mualeleth bint Enos"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pe2957f3929",
+    "name": "Noam bint Seth",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LZJ1-H8K",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

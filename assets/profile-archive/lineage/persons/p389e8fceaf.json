@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p389e8fceaf",
+ "bnr": "bnr://skaists.dev/blood/p389e8fceaf",
+ "identity": {
+  "name": "Robert Hoskins",
+  "lifespan": "1550–1617",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GB9B-HCX"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p02dc3782d6",
+    "name": "William Hoskins",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pe7d8a68eeb",
+    "name": "Edith Hines",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p546fee981e",
+    "name": "Margaret Hoskins"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p82139397d5",
+    "name": "Elizabeth Margaret Lawrence",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GB9B-HCX",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

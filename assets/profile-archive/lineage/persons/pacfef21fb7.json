@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pacfef21fb7",
+ "bnr": "bnr://skaists.dev/blood/pacfef21fb7",
+ "identity": {
+  "name": "ʿAbd Manāf ibn Quṣayy",
+  "lifespan": "0430–Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GHGT-D1C"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "G8XC-5X1",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "LZF3-Z2T",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pee33af64e0",
+    "name": "Hāshim ibn ʿAbd Manāf"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p81b616564b",
+    "name": "'Átikah bint Murrah",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GHGT-D1C",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

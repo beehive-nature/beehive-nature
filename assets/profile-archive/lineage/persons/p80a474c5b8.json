@@ -1,0 +1,77 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p80a474c5b8",
+ "bnr": "bnr://skaists.dev/blood/p80a474c5b8",
+ "identity": {
+  "name": "Seir the Horite",
+  "lifespan": "2006BC–Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LKYX-1T3"
+  }
+ ],
+ "evidence": {
+  "era": "recorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "recorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p651a92eb02",
+    "name": "Hori Hur II of Hevi Ben Hevi II",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p2ccc526a6c",
+    "name": "Shushan",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pde9a55fa29",
+    "name": "Dishon ben Seir"
+   },
+   {
+    "id": "p131888221d",
+    "name": "Lotan ibn Seir"
+   },
+   {
+    "id": "pd532a21781",
+    "name": "Zibeon ibn Seir"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p84c13bed5e",
+    "name": "Shua bint Barsan of Adullam",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LKYX-1T3",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

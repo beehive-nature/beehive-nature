@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p769511172b",
+ "bnr": "bnr://skaists.dev/blood/p769511172b",
+ "identity": {
+  "name": "King Carolus I de Ménapie",
+  "lifespan": "30–83",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LVVM-C81"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pc7c2651de7",
+    "name": "Valerius de Ménapie I",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pc73173deff",
+    "name": "NN Menpisque",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pc132310f98",
+    "name": "Turig der Thüringen"
+   },
+   {
+    "id": "p0b85a52fea",
+    "name": "Priapus de Morinie Roi des Morins"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p477112c266",
+    "name": "Suriente De Menappes",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LVVM-C81",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

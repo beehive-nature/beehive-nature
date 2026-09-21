@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p451228ae26",
+ "bnr": "bnr://skaists.dev/blood/p451228ae26",
+ "identity": {
+  "name": "Søren Lauritsen Basse",
+  "lifespan": "1755–1809",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L8NC-PLR"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "peec044e683",
+    "name": "Laurits Sørensen Basse",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p5bce7e075d",
+    "name": "Kirsten Rasmusdatter",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p655640b739",
+    "name": "Rasmus Sørensen Basse"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p753fe00be1",
+    "name": "Anne Rasmusdatter Brok",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L8NC-PLR",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

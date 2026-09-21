@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pec692f7833",
+ "bnr": "bnr://skaists.dev/blood/pec692f7833",
+ "identity": {
+  "name": "Gallus Salustus de Rome",
+  "lifespan": "14–44",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G1RT-BTJ"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p25adba3ef0",
+    "name": "Gaius Sallustius Crispus Passienus Equitius",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p52c6df01a8",
+    "name": "X TRASTEVERE",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p29169c56ee",
+    "name": "Gaius Ummidius Quadratus Salustus de Rome"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p8edd126126",
+    "name": "Ummida Quadratta de Rome",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G1RT-BTJ",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

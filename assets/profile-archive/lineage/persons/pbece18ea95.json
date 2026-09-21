@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pbece18ea95",
+ "bnr": "bnr://skaists.dev/blood/pbece18ea95",
+ "identity": {
+  "name": "Publius Galerius Trachalus",
+  "lifespan": "12–86",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "P6MH-DD9"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p9effceb6be",
+    "name": "Gaius Galerius",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p9d6b5778cb",
+    "name": "Helvia Secunda",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pd1f3f735cf",
+    "name": "Galeria Fundania"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pd4f5064d5e",
+    "name": "Fundana",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/P6MH-DD9",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

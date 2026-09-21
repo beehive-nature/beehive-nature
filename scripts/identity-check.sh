@@ -47,6 +47,22 @@ FOUNDER_EMAIL="loviswater44@gmail.com"
 say() { echo "§7: $*"; }
 die() { echo "§7 FAIL — $*"; echo "§7 FAIL — this check fails closed when it cannot determine an answer."; exit 1; }
 
+# COUNTERS — the fail-open this file's own general law forbids, measured by
+# bFUzZ on 2026-09-20 while judging #169: every counter here is produced by a
+# pipeline ending in `grep -c` or `wc -l` and is captured with `|| true`, so a
+# shell that cannot run that tool yields the EMPTY STRING. POSIX `[ "" -lt 1 ]`
+# prints "integer expected" and returns 2; an `if` reads 2 as FALSE, the
+# guarded clause is SKIPPED, and a seat-typed commit with no trailer at all
+# prints "ok". Twenty-seven real violations scored ok that way in one local run.
+# An empty or non-numeric counter is NOT zero — it is "could not compute", which
+# line 25's law sends to die(), not to a comparison. Named hard error, same
+# fail-closed form the scanner's WIF_RE got, and for the same reason.
+require_count() { # $1 what it counts, $2 the captured value
+  case "${2:-}" in
+    ''|*[!0-9]*) die "$1 came back as '${2:-}', which is not a count — the tool that produces it did not answer (a shell without grep or wc does exactly this). A counter this check cannot compute is never read as zero." ;;
+  esac
+}
+
 # ---- SELFTEST ------------------------------------------------------------
 # A gate's success state is SILENCE — a passing hook and a broken hook look
 # identical on a normal day. This enforcement layer failed OPEN twice tonight
@@ -101,7 +117,7 @@ if [ "${1:-}" = "--selftest" ]; then
     out=$("$@" 2>&1); rc=$?
     n=$(git rev-list --count HEAD 2>/dev/null || echo 0)
     a=$(git log -1 --format='%an' 2>/dev/null); c=$(git log -1 --format='%cn' 2>/dev/null)
-    tr=$(git log -1 --format='%(trailers:key=Co-authored-by)' 2>/dev/null | grep -c 'Co-authored-by' || true)
+    tr=$(git log -1 --format='%(trailers:key=Co-authored-by)' 2>/dev/null | grep -ci 'co-authored-by' || true)
     if [ "$rc" = "0" ] && [ "$n" -ge 1 ] && [ "$a" = "$FOUNDER_NAME" ] && [ "$c" = "$want_c" ] \
        && { [ "$want_trailer" = "no" ] || [ "$tr" -ge 1 ]; }; then
       echo "  PASS $desc — created A=$a C=$c trailer=$tr"
@@ -110,7 +126,7 @@ if [ "${1:-}" = "--selftest" ]; then
     fi
   }
 
-  echo "§7 selftest — four cases through the REAL hooks (throwaway repo, deleted after):"
+  echo "§7 selftest — six cases through the REAL hooks (throwaway repo, deleted after):"
   # every case pins its FULL ident env — the rig is hermetic against whatever
   # the caller exported (a caller's GIT_COMMITTER_* leaked into T4 once and
   # the gate CORRECTLY blocked what the rig mislabeled founder-typed)
@@ -133,6 +149,46 @@ if [ "${1:-}" = "--selftest" ]; then
     env GIT_AUTHOR_NAME="$FOUNDER_NAME" GIT_AUTHOR_EMAIL="$FOUNDER_EMAIL" \
         GIT_COMMITTER_NAME="$FOUNDER_NAME" GIT_COMMITTER_EMAIL="$FOUNDER_EMAIL" \
     git commit -q -m "t4 founder typed"
+  echo z >> f.txt && git add f.txt
+  printf 't5 subject\n\nCo-Authored-By: zCode <z@x>\n' > "$T/msg5"
+  created "T5 mixed-case trailer lands (I-1: git trailer keys are case-insensitive; the gate must match git)" bZiq yes \
+    env GIT_AUTHOR_NAME="$FOUNDER_NAME" GIT_AUTHOR_EMAIL="$FOUNDER_EMAIL" \
+        GIT_COMMITTER_NAME=bZiq GIT_COMMITTER_EMAIL=seat@x git commit -q -F "$T/msg5"
+  # T6 — THE COUNTER CLAUSE, and the first row that runs the RANGE path at all.
+  # T1-T5 above drive the staged/hook path; the loop that judges a pushed range
+  # was never exercised by this selftest, which is why the fail-open lived there.
+  # The row asserts WHICH thing it caught: the named counter error present, and
+  # no "ok" line for that exact sha. Its fixture is committed with --no-verify
+  # on purpose — the hook correctly refuses to create the violation the range
+  # check must catch, and a rig that cannot build the violation proves nothing.
+  echo w >> f.txt && git add f.txt
+  base6=$(git rev-parse HEAD)
+  env GIT_AUTHOR_NAME="$FOUNDER_NAME" GIT_AUTHOR_EMAIL="$FOUNDER_EMAIL" \
+      GIT_COMMITTER_NAME=bZiq GIT_COMMITTER_EMAIL=seat@x \
+      git commit -q --no-verify -m "t6 seat-typed with no trailer" >/dev/null 2>&1
+  tip6=$(git rev-parse HEAD)
+  ftr6=$(git show -s --format='%(trailers:key=Co-authored-by)' "$tip6" 2>/dev/null)
+  c6=$(git log -1 --format='%cn' 2>/dev/null)
+  if [ "$tip6" = "$base6" ] || [ -n "$ftr6" ] || [ "$c6" != "bZiq" ]; then
+    echo "  FAIL T6 fixture — needed a NEW seat-typed commit carrying zero parsed trailers (base6=$base6 tip6=$tip6 committer=$c6 trailers='$ftr6')"; st=1
+  else
+    mkdir -p "$T/nogrep"
+    printf '#!/bin/sh\nexit 127\n' > "$T/nogrep/grep"
+    chmod +x "$T/nogrep/grep"
+    ctl6=$(env S7_RANGE="$base6..$tip6" sh "$SELF" 2>&1); crc6=$?
+    sub6=$(env PATH="$T/nogrep:$PATH" S7_RANGE="$base6..$tip6" sh "$SELF" 2>&1); src6=$?
+    if [ "$crc6" -eq 0 ] || ! printf '%s\n' "$ctl6" | grep -q 'without a Co-authored-by trailer'; then
+      echo "  FAIL T6 control — with its tools present the gate must already reject this commit on the trailer clause; rc=$crc6 out: $ctl6"; st=1
+    elif [ "$src6" -eq 0 ]; then
+      echo "  FAIL T6 — counter empty (grep absent) and the range check still exited 0; out: $sub6"; st=1
+    elif printf '%s\n' "$sub6" | grep -q "ok   §7 $tip6"; then
+      echo "  FAIL T6 — a seat-typed commit with no trailer was reported ok while the counter was uncomputable; out: $sub6"; st=1
+    elif ! printf '%s\n' "$sub6" | grep -q 'which is not a count'; then
+      echo "  FAIL T6 — it stopped, but not on the named counter error, so the row cannot say what it caught; rc=$src6 out: $sub6"; st=1
+    else
+      echo "  PASS T6 uncomputable counter dies named — rc=$src6, no ok line for $tip6"
+    fi
+  fi
   if [ "$st" -ne 0 ]; then echo "§7 selftest FAIL — a working gate and a dead one are not distinguishable by silence; these cases are the difference"; fi
   exit "$st"
 fi
@@ -155,7 +211,9 @@ if [ -n "${S7_STAGED:-}" ]; then
       # git's OWN trailer parser — the same semantics %(trailers:key=…) uses in
       # the range check below. A Co-authored-by line that sits in the body is
       # invisible to it, which is exactly the three-time mistake this catches.
-      trailers=$(git interpret-trailers --parse < "$S7_MSG_FILE" 2>/dev/null | grep -c '^Co-authored-by:' || true)
+      trailers=$(git interpret-trailers --parse < "$S7_MSG_FILE" 2>/dev/null | grep -ci '^co-authored-by:' || true)
+      require_count "the staged trailer counter" "$trailers" \
+        || die "counter validation unavailable — require_count did not run"
       [ "$trailers" -ge 1 ] \
         || die "seat-typed commit (committer '$cn <$ce>') with no PARSED Co-authored-by trailer — a trailer buried in the body does not count; it must be the final block of the message"
       say "ok — founder-authored · seat-committed by '$cn' · Co-authored-by trailer parsed: $trailers"
@@ -210,7 +268,9 @@ else
 fi
 
 # ---- count the range (a failure here is also could-not-compute)
-count=$(git log --format='%H' $RANGE 2>/dev/null | wc -l | tr -d ' ')
+count=$(git log --format='%H' $RANGE 2>/dev/null | wc -l | tr -d ' \r')
+require_count "the range size" "$count" \
+  || die "counter validation unavailable — require_count did not run"
 if [ "$count" = "0" ]; then
   # Computed-empty is a DETERMINED answer: zero commits in range. Pass loudly.
   say "ok — computed range ($RANGE) contains 0 commits; nothing to check"
@@ -229,7 +289,9 @@ while IFS='|' read -r commit an ae cn ce; do
     continue
   fi
 
-  trailers=$(git show -s --format='%(trailers:key=Co-authored-by)' "$commit" | grep -c 'Co-authored-by' || true)
+  trailers=$(git show -s --format='%(trailers:key=Co-authored-by)' "$commit" | grep -ci 'co-authored-by' || true)
+  require_count "the trailer counter for $commit" "$trailers" \
+    || die "counter validation unavailable — require_count did not run"
 
   # A seat self-identifies by committer != founder: exactly those commits
   # hard-require a Co-authored-by trailer. Founder-typed commits (author ==

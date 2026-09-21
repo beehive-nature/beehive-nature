@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p6e094de8e0",
+ "bnr": "bnr://skaists.dev/blood/p6e094de8e0",
+ "identity": {
+  "name": "Cunigunde Wasserburg",
+  "lifespan": "1132–1168",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LT8S-QWZ"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "GDTX-3TK",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "GZ29-LJ4",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p92f373d097",
+    "name": "Egeno IV von Urach"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pf15227c5db",
+    "name": "Egino III von Urach",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LT8S-QWZ",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pe501af5512",
+ "bnr": "bnr://skaists.dev/blood/pe501af5512",
+ "identity": {
+  "name": "Lord Herbert FitzHerbert of Blane Llyfni",
+  "lifespan": "1125–1204",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "K2SV-HJ7"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p75d1827f0a",
+    "name": "Herbert FitzHerbert the Elder",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pc37bbded50",
+    "name": "Sybille Corbet of Alcester",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p90fb13f781",
+    "name": "Piers FitzHerbert Lord of Blaen Llyfni"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p306d760248",
+    "name": "Lucy de Pitres",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/K2SV-HJ7",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

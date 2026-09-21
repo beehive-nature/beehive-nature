@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pd2ebd9bc8d",
+ "bnr": "bnr://skaists.dev/blood/pd2ebd9bc8d",
+ "identity": {
+  "name": "Artemidoros Quadrarus de Trocmii",
+  "lifespan": "29–Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LKYM-Q7X"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p7e4312a4bc",
+    "name": "Amyntas Brigatos de Trocmii II",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p5eff166ebf",
+    "name": "Princess M bat Castor of the Tectosagi",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p41bbeece53",
+    "name": "Caius Julius Severus Quadratus de Rome de Asie"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pdee79e0bcf",
+    "name": "Laodice of the Tectosages",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LKYM-Q7X",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

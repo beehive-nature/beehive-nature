@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pbbe0795228",
+ "bnr": "bnr://skaists.dev/blood/pbbe0795228",
+ "identity": {
+  "name": "Reina Apamée de Bithynia",
+  "lifespan": "Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "P6Q3-MB8"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pf07211eb98",
+    "name": "Rey Prusias II Cynegus de Bithynia",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p579f963ef9",
+    "name": "Apamée IV de Macedonia",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pc9a8d6f72a",
+    "name": "Sames II Theosebes Dikaios"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p3c546eb2ce",
+    "name": "Ptolomeo de Comagene",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/P6Q3-MB8",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p76e714df39",
+ "bnr": "bnr://skaists.dev/blood/p76e714df39",
+ "identity": {
+  "name": "Gordian II, Roman emperor",
+  "lifespan": "0192–0238",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LTFW-TNQ"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pdde1f048d4",
+    "name": "Marcus Antonius Gordianius Sempronianus Romanus African us Gordien",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p27688375ef",
+    "name": "Fabia Orestilla de Rome",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p97c4183da0",
+    "name": "Claudius II, Marcus Aurelius Flavius Claudius Gothicus Emperor"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pe10a788a60",
+    "name": "spouse Gordian II",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LTFW-TNQ",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

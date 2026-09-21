@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p87afee96bb",
+ "bnr": "bnr://skaists.dev/blood/p87afee96bb",
+ "identity": {
+  "name": "Elisbeth 1530 Elisabeht Elsbeth Elissabeht Cruetz Hebeisen",
+  "lifespan": "1530–Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PFZ8-M8W"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p01926305ad",
+    "name": "Johann Gorg Cruetz \\ Creutz",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p9c47960105",
+    "name": "Catharina Wilhelmina Kaiser",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pdc5e12a13a",
+    "name": "Elsbeth Elsie  Hebysen Hebyen Cunz"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p57cf34f9d2",
+    "name": "Jost Hebeisen",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PFZ8-M8W",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,71 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pb5fb5e025c",
+ "bnr": "bnr://skaists.dev/blood/pb5fb5e025c",
+ "identity": {
+  "name": "Antonia Furnilla Di Roma",
+  "lifespan": "15–Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LXWW-9JH"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "GBC4-D5T",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "GBC4-4X6",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p6cc8b31348",
+    "name": "Marcia Furnilla"
+   },
+   {
+    "id": "p4cbe83d0cb",
+    "name": "Marcia Furnilla"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p382f99b82c",
+    "name": "Quintus Marcius Barea Sura Di Roma Senator of Rome",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LXWW-9JH",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

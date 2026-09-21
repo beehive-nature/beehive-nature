@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pbd9ffe8f2d",
+ "bnr": "bnr://skaists.dev/blood/pbd9ffe8f2d",
+ "identity": {
+  "name": "Lampadia DE ROME",
+  "lifespan": "0316–0380",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GR36-NP6"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p18a0e7c695",
+    "name": "Lucius Valerius Maximus Valerius Maximus Basilius",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pbf9d24030c",
+    "name": "Vulcacia",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pa79728d6aa",
+    "name": "Rufius Valerius Messala"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pca73946401",
+    "name": "Rufius Maecius Maecius Placidus Vir Consularis Romana",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GR36-NP6",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

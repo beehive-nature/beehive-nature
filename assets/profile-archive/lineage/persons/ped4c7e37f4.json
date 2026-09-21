@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "ped4c7e37f4",
+ "bnr": "bnr://skaists.dev/blood/ped4c7e37f4",
+ "identity": {
+  "name": "Lucius Aemilius Paullus III de Roma",
+  "lifespan": "0180BC–Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PXXX-PYW"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p48f5f33557",
+    "name": "Marcus Aemilius Paullus II de Rome",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p2c569146b7",
+    "name": "Leria de Cossyra",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p05b420815d",
+    "name": "Aemilia Paula de Roma"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pe4f91b0e6f",
+    "name": "Calavia de Roma",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PXXX-PYW",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

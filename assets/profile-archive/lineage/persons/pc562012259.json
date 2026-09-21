@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pc562012259",
+ "bnr": "bnr://skaists.dev/blood/pc562012259",
+ "identity": {
+  "name": "Philip of Elimeia",
+  "lifespan": "0381BC–0326BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "KL6H-RXZ"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pc87302969a",
+    "name": "Machatas of Elimaea",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pd692e9140b",
+    "name": "Mrs Machatus of Elimaea",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pe57f0e5c33",
+    "name": "Antigonus I Monophthalmus Macedon Basileus of the Antigonid Empire"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p0b908ab894",
+    "name": "Phila van Macedonië",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/KL6H-RXZ",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

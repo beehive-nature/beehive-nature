@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p3feabe4c39",
+ "bnr": "bnr://skaists.dev/blood/p3feabe4c39",
+ "identity": {
+  "name": "Hugh de Kevelioc 5th Earl of Chester",
+  "lifespan": "1147–1181",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PFVP-WPM"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "PFRQ-BP6",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "PFR7-14K",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p10e2d31e02",
+    "name": "Hawise of Chester"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pb5b0fe10fa",
+    "name": "Bertrade de Montfort",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PFVP-WPM",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

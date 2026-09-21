@@ -1,0 +1,77 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p6d2ea3e333",
+ "bnr": "bnr://skaists.dev/blood/p6d2ea3e333",
+ "identity": {
+  "name": "Joseph Clarke",
+  "lifespan": "1642–1726",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LTQB-PDB"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p476e93322c",
+    "name": "Joseph Clarke",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p463e93231b",
+    "name": "Margaret Turner",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pd7c61b9324",
+    "name": "Thomas Clarke"
+   },
+   {
+    "id": "p61f9fe69b6",
+    "name": "Susanna Hubbard Clarke"
+   },
+   {
+    "id": "p31d591a7b6",
+    "name": "Judith Clark"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p5645027681",
+    "name": "Bethiah Hubbard",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LTQB-PDB",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

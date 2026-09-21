@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p0108a22dea",
+ "bnr": "bnr://skaists.dev/blood/p0108a22dea",
+ "identity": {
+  "name": "Margaret Leveland",
+  "lifespan": "1206–1258",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LY99-967"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pf62c4e837e",
+    "name": "Robert Leveland",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p93609b44df",
+    "name": "Mrs Robert Leveland",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pcca7bee804",
+    "name": "Guncelin de Badlesmere"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p03d9758aee",
+    "name": "Bartholomew de Badlesmere",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LY99-967",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

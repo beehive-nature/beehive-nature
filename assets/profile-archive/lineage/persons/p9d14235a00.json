@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p9d14235a00",
+ "bnr": "bnr://skaists.dev/blood/p9d14235a00",
+ "identity": {
+  "name": "BARTHOLOMEUS LAENEN VAN PELT",
+  "lifespan": "1527–1552",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PH6L-2XQ"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p82e6033a7e",
+    "name": "Johannes Laenen",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p14c5f0b4d6",
+    "name": "Marie Petronella Janssen Luls ' m. Laenen",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pa9c64e9b9f",
+    "name": "Mattheus Joannes Henneken Laenen"
+   },
+   {
+    "id": "p0716d46e3e",
+    "name": "Maria Petronella Lolofs Jansen"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pd2db36250b",
+    "name": "Anna Catharina Van Der Steene Van Pelt Laenen Clavant",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PH6L-2XQ",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pe3fe92cf27",
+ "bnr": "bnr://skaists.dev/blood/pe3fe92cf27",
+ "identity": {
+  "name": "Bellica de Rome",
+  "lifespan": "49–Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G7G3-LNY"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p2f4f54b271",
+    "name": "Bellicus de Rome",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "paff2e38770",
+    "name": "Tebana",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pd8e2ecc8b9",
+    "name": "Caucidia Tertulla"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pc1b26cf17d",
+    "name": "Caucilius de Rome",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G7G3-LNY",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

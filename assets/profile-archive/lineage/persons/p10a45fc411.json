@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p10a45fc411",
+ "bnr": "bnr://skaists.dev/blood/p10a45fc411",
+ "identity": {
+  "name": "Heremod of the Ostragoths",
+  "lifespan": "0095BC–Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GKZZ-K3L"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pfb758799b6",
+    "name": "Itermon ben Hathra of Asgard More og Romsdal, Norway",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p1375816e62",
+    "name": "Vingemer des Ases",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p324f9f6cbf",
+    "name": "Sceaf D'Asgaard"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pfc98a513f9",
+    "name": "Hwala de Asgard",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GKZZ-K3L",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

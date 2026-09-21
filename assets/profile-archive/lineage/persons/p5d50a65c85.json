@@ -1,0 +1,62 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p5d50a65c85",
+ "bnr": "bnr://skaists.dev/blood/p5d50a65c85",
+ "identity": {
+  "name": "Rufius Caecina Postumianus",
+  "lifespan": "0295–0366",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GDRR-XJG"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "KLLR-GFL",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "KL62-HVB",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [],
+  "spouses": [
+   {
+    "id": "p2abfa55eec",
+    "name": "Egnatia Lolliana",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GDRR-XJG",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,82 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pd8decfac4e",
+ "bnr": "bnr://skaists.dev/blood/pd8decfac4e",
+ "identity": {
+  "name": "Claudius Celsinus di Roma",
+  "lifespan": "0240–Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L2RX-ZZX"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p6b8a23ab14",
+    "name": "Quintus Fabius Claudius Aggripianus Celsinus",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p6a33ee35a0",
+    "name": "Labria Pompeiana",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "peabb6f9035",
+    "name": "Claudius Celsinus II de Rome"
+   },
+   {
+    "id": "p77fe329651",
+    "name": "Adelphia Burdigala"
+   },
+   {
+    "id": "p065c725619",
+    "name": "Claudia Celsina Adelphia"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p905025752d",
+    "name": "Haberia Pomerane de Rome",
+    "marriage": null
+   },
+   {
+    "id": "p73e31a6a72",
+    "name": "Demetrius de Rome",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L2RX-ZZX",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

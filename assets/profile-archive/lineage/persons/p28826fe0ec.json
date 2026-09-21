@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p28826fe0ec",
+ "bnr": "bnr://skaists.dev/blood/p28826fe0ec",
+ "identity": {
+  "name": "King Sennacherib, King of the Neo-Assyrian Empire",
+  "lifespan": "0745BC–0681BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "94BJ-L6H"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p017ec2014a",
+    "name": "King Sargon II 'Sharru-kinu' Sargonid of Assyria",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pf884a8e136",
+    "name": "Athalia bar Jotham of Judah",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pc928818863",
+    "name": "Esarhaddon , King of the Neo-Assyrian Empire"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p1ab4714fc7",
+    "name": "Tashmetum-sharrat Of Babylon princess of Babylon",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/94BJ-L6H",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

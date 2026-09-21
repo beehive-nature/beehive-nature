@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pfe2eab450f",
+ "bnr": "bnr://skaists.dev/blood/pfe2eab450f",
+ "identity": {
+  "name": "Anna Ulli",
+  "lifespan": "1605–1655",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PXY1-D7D"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pc5ab864242",
+    "name": "Johann Caspar Uhl",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p7389419b58",
+    "name": "Anna Margretha Miller",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p4913cae908",
+    "name": "Anna Brändli"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p0a6299d3fb",
+    "name": "Hans Jakob Brändli",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PXY1-D7D",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

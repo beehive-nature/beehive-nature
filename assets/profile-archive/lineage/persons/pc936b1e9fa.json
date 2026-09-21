@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pc936b1e9fa",
+ "bnr": "bnr://skaists.dev/blood/pc936b1e9fa",
+ "identity": {
+  "name": "Robert Wardlaw",
+  "lifespan": "1537–1610",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "KCW5-C6F"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pb2d1524846",
+    "name": "John Wardlaw",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pe798574e3f",
+    "name": "Isobel Cockburn",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p82782b27a8",
+    "name": "Margaret Wardlaw"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pe066e9c172",
+    "name": "Margaret Brown",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/KCW5-C6F",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

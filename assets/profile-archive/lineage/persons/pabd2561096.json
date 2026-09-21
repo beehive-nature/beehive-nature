@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pabd2561096",
+ "bnr": "bnr://skaists.dev/blood/pabd2561096",
+ "identity": {
+  "name": "Pyrr Ap Sawl King of Britain",
+  "lifespan": "0185BC–0100BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "9HL9-VJM"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p9728b453ce",
+    "name": "Sawyl ap Rhydderch",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p1e80b3e727",
+    "name": "Penardim verch Beli of Britain",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p09b8701f64",
+    "name": "Capoir ap Pyrr"
+   },
+   {
+    "id": "p2e551d3aab",
+    "name": "Capoir verch Pyrr"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p588d520548",
+    "name": "Mrs Pyrr ap Samuel Penissel",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/9HL9-VJM",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

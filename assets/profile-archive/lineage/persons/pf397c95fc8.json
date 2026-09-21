@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pf397c95fc8",
+ "bnr": "bnr://skaists.dev/blood/pf397c95fc8",
+ "identity": {
+  "name": "King Pandion l of Athens",
+  "lifespan": "1299BC–Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PS5Z-FKF"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p6e0d59532f",
+    "name": "King Erictonio of Atena",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pf2d1758b41",
+    "name": "Praxitea",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pe0cca02eb8",
+    "name": "King Erechtheus of Athens"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p0de9995d6e",
+    "name": "Queen Zeuxipa of Athens",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PS5Z-FKF",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

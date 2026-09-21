@@ -1,0 +1,64 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pd8224f58e7",
+ "bnr": "bnr://skaists.dev/blood/pd8224f58e7",
+ "identity": {
+  "name": "Princesa Cananea",
+  "lifespan": "1200BC–Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PFRD-KPP"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pddd99f639d",
+    "name": "Yabín Rey De Canaán",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pab629ec2f5",
+    "name": "Guerrero Dorhanefil"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p5d01f7f667",
+    "name": "Cananeo Dorhanefil",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PFRD-KPP",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

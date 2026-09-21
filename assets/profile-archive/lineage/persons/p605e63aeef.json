@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p605e63aeef",
+ "bnr": "bnr://skaists.dev/blood/p605e63aeef",
+ "identity": {
+  "name": "Mary Goore",
+  "lifespan": "1573–1620",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L8P6-HHY"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p3c0e38f947",
+    "name": "John William Goore",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p000b368d57",
+    "name": "Emma Louisa Abbott",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p2ff78b0de4",
+    "name": "Nicholas Camp"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p3bde142c16",
+    "name": "John Campe",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L8P6-HHY",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

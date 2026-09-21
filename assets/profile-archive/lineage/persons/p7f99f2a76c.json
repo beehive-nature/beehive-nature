@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p7f99f2a76c",
+ "bnr": "bnr://skaists.dev/blood/p7f99f2a76c",
+ "identity": {
+  "name": "Catharina Larsdotter",
+  "lifespan": "1790–1843",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "KN4L-PRL"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pa5dd12099f",
+    "name": "Lars Olofsson",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pa77b3fdaae",
+    "name": "Gardrut Pehrsdotter",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p73222c4499",
+    "name": "Anna Margaretha Olofsdotter"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p453dfae01a",
+    "name": "Olof Olofsson",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/KN4L-PRL",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

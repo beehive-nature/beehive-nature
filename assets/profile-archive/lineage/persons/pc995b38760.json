@@ -1,0 +1,64 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pc995b38760",
+ "bnr": "bnr://skaists.dev/blood/pc995b38760",
+ "identity": {
+  "name": "Sacrovir de Galatie",
+  "lifespan": "0215–Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GZJ9-1P8"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p36679c88ee",
+    "name": "Ante de Galatie Gouverneur des Gaules",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p883a95fa63",
+    "name": "Solinius De Galatie"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p5a5e98b44d",
+    "name": "spouse Sacrovir de Galatie",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GZJ9-1P8",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

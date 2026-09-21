@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p1aa614022a",
+ "bnr": "bnr://skaists.dev/blood/p1aa614022a",
+ "identity": {
+  "name": "Bathsheba Brooks",
+  "lifespan": "1653–1738",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "MGMS-RXP"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p36d66c0bc2",
+    "name": "Gilbert Brooks",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p7188a1d427",
+    "name": "Elizabeth Simmons",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pf8dbd847e4",
+    "name": "Mary Walker"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pe7c12b5692",
+    "name": "James Walker III",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/MGMS-RXP",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

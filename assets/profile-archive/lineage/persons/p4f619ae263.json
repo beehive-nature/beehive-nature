@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p4f619ae263",
+ "bnr": "bnr://skaists.dev/blood/p4f619ae263",
+ "identity": {
+  "name": "Bilichilde fränkische Prinzessin",
+  "lifespan": "0525–0580",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GTFQ-7JT"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "paa96a5edbe",
+    "name": "Chlothar I. 'der Alte', König der Franken",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p12814b36cd",
+    "name": "Ingunde Königin der Franken",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p55d2c395a2",
+    "name": "Erchinoald de Schelde d'Alsace"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pdea98a1f37",
+    "name": "Ansbert Tonantius \"vir Noblissimus\" Ferreolus de Narbonne Gallo Roman Senator de Moselle et Dux de Schelde",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GTFQ-7JT",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,75 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p23726c16dc",
+ "bnr": "bnr://skaists.dev/blood/p23726c16dc",
+ "identity": {
+  "name": "Lectar ben Suris",
+  "lifespan": "Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PFFH-PPS"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p0fc13f89b9",
+    "name": "Suris ben Adam",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pd56c7ffea6",
+    "name": "Iectas bat Adam",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pb076a34b65",
+    "name": "Kennah ben Lectar"
+   },
+   {
+    "id": "pb9dc80c16b",
+    "name": "Kathrine bat-Lectar"
+   },
+   {
+    "id": "p47f4eb7cc8",
+    "name": "Benjaman ben Lectar"
+   },
+   {
+    "id": "pb24f1f9e5c",
+    "name": "Lassie bat-Lectar"
+   }
+  ],
+  "spouses": []
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PFFH-PPS",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

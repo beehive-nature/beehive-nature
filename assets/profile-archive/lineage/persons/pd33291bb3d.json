@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pd33291bb3d",
+ "bnr": "bnr://skaists.dev/blood/pd33291bb3d",
+ "identity": {
+  "name": "Dominia Paulina Maior",
+  "lifespan": "5–86",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GVQP-VJ8"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p8eb574b257",
+    "name": "Asceplus of Rome",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p55bb228f0f",
+    "name": "Ulpia Trainus of Italy",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p0fd292c28a",
+    "name": "Aelia Domitia Lucilla Longina Aelius"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p3b3cadc2ca",
+    "name": "Publius Aelius Hadrianus Marullinus Roman Senator",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GVQP-VJ8",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

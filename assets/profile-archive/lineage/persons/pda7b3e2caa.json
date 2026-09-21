@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pda7b3e2caa",
+ "bnr": "bnr://skaists.dev/blood/pda7b3e2caa",
+ "identity": {
+  "name": "Regina Basina von Thüringen",
+  "lifespan": "0420–0477",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GSJD-JS5"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pfddc49cfe7",
+    "name": "Weldelphus König von Thüringen",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p220886dd99",
+    "name": "Amalaberge Valdamerca d'Ostrogothie",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p6bf90e8ff4",
+    "name": "Audofleda Königin der Ostgoten"
+   },
+   {
+    "id": "p09a3029a31",
+    "name": "Chlodwig I. König der Franken"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pa9c291c5cd",
+    "name": "Childerich I. König der Salischen Franken",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GSJD-JS5",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

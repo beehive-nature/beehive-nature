@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pdf8245770b",
+ "bnr": "bnr://skaists.dev/blood/pdf8245770b",
+ "identity": {
+  "name": "Walther of de Northumbria",
+  "lifespan": "1045–1076",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LDSS-ZMW"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p08a70c570d",
+    "name": "Siward de Northumbria",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p4a63ebfa4e",
+    "name": "Ælflæda of Northumbria I",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pe9b57fc237",
+    "name": "Matilda of Huntingdon"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p97345143ca",
+    "name": "Judith de Lens",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LDSS-ZMW",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

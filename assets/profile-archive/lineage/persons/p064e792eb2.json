@@ -1,0 +1,71 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p064e792eb2",
+ "bnr": "bnr://skaists.dev/blood/p064e792eb2",
+ "identity": {
+  "name": "Marcomir Chrocus I de Toxandrie",
+  "lifespan": "0245–0319",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L6QY-RQC"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "L299-FJM",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "PF41-4JZ",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pe319803b89",
+    "name": "Queen Athildis of the Sicambrian Franks"
+   },
+   {
+    "id": "pc301eae1d5",
+    "name": "Chroca d'Alemanie"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p0811e72dd3",
+    "name": "Sigarde d'Alemania",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L6QY-RQC",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

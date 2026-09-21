@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pe3e84a917d",
+ "bnr": "bnr://skaists.dev/blood/pe3e84a917d",
+ "identity": {
+  "name": "Ulpia De Rome",
+  "lifespan": "27–Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "P7H9-5ZX"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pb6df77579c",
+    "name": "UPLIUS NERVA DE ROME",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p1524c30140",
+    "name": "FORUM Nervae",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pae77e289cd",
+    "name": "Publius Aelius Hadrianus Marullinus d´Hispania"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p20f9ca8d1d",
+    "name": "Publius Aelius Hadrianus Marullinus",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/P7H9-5ZX",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

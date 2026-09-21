@@ -1,0 +1,166 @@
+{
+ "schema": "skaists.eternalization-receipt/1",
+ "law": "Each question answers with its own state, never conflated: preserved ≠ approved ≠ quoted ≠ purchased ≠ uploaded ≠ retrieved ≠ hash-verified ≠ experience-restored.",
+ "whatWasPreserved": {
+  "question": "What was preserved?",
+  "answer": "The first zBlood public preservation snapshot: 20,537 files (the whole family experience — corpus of 10,259 ancestor objects, 4 evidence packs, attested overlays with corrections and symbolic links, the versioned reconstruction, the founder-created crest and its authored meaning, both surfaces, their runtime dependencies, the identity registry, the staging inventory). 62,139,972 bytes of content, carried as an 80,998,400-byte deterministic tar (sha256 fec5fba8360d9de211c3b6c5966e93bc2462133099f651891d500b6a2ea98b9b).", "hexLawNote": "PUBLIC-CONSTANT public chain data",
+  "state": "preserved"
+ },
+ "whoApproved": {
+  "question": "Who approved it?",
+  "answer": "The founder (loVis), 2026-09-16T22:36:15Z, binding exact manifest 440b502a6e1ac2dc086902f743f9f750437e7079040dfd5e76c8dd42c7de4389 to destination 'bnr genesis — skaists.dev blood archive (ANT/AR pending adapter receipt)'.", "hexLawNote": "PUBLIC-CONSTANT public chain data",
+  "state": "approved"
+ },
+ "whatExactBytes": {
+  "question": "What exact bytes?",
+  "answer": "Manifest SHA-256 440b502a… (recomputed and matched at purchase time). Upload object: pkg3.tar, 80,998,400 bytes, sha256 fec5fba8…, deterministic (--sort=name, fixed mtime 2026-09-16T22:35:14Z, numeric owner). All 20,537 files individually hash-verified against the manifest.",
+  "state": "verified"
+ },
+ "whatDidItCost": {
+  "question": "What did it cost?",
+  "quote": {
+   "state": "quoted (display-only, priced_sample)",
+   "client": "ant 0.3.1 on the founder's seat",
+   "queriedAt": "2026-09-17T00:14:10Z",
+   "raw": {
+    "file_size": 80998400,
+    "chunk_count": 23,
+    "storage_cost_atto": "3106827489257812500",
+    "estimated_gas_cost_wei": "150000000000000",
+    "payment_mode": "single",
+    "confidence": "priced_sample"
+   },
+   "computed": {
+    "storageANT": 3.106827,
+    "storageUSD": 0.1081,
+    "gasETH": 0.00015,
+    "gasUSD": 0.3628,
+    "totalUSD": 0.471
+   },
+   "tokenReferences": {
+    "ANT/USD": 0.03480868,
+    "ETH/USD": 2418.98,
+    "at": "2026-09-17T00:15:43Z",
+    "source": "coingecko"
+   },
+   "qualifications": [
+    "display-only — true cost reconciles at payment",
+    "sampled confidence class",
+    "storage and gas are separate line items"
+   ]
+  },
+  "purchase": {
+   "state": "BLOCKED — spending credential required",
+   "blocker": "the ant client needs SECRET_KEY (the spending key); the founder supplies it at the box or exports it to this seat",
+   "command": "In the FOUNDER'S OWN TERMINAL (key never in chat, never in the repo, never given to an agent): set SECRET_KEY without shell history, verify wallet address + balance, then: ant --json file upload C:/Users/travi/family-lineage/pkg3.tar",
+   "expectedSafeOutput": [
+    "transaction/payment receipt",
+    "resulting ANT address/reference (the content address)",
+    "actual ANT charged",
+    "actual gas charged",
+    "client version",
+    "timestamp",
+    "confidence/finality information"
+   ],
+   "scrubLaw": "Scrub anything resembling a private key before sharing — zBlood receives ONLY the non-secret output"
+  },
+  "state": "quoted-not-purchased"
+ },
+ "whereIsIt": {
+  "question": "Where is it?",
+  "answer": "PENDING — the ANT content address appears here after the upload receipt is banked.",
+  "state": "not-yet-uploaded"
+ },
+ "wasItRetrieved": {
+  "question": "Was it retrieved independently?",
+  "answer": "PENDING — a fresh context (no original archive) retrieves from the ANT network address.",
+  "state": "not-yet-retrieved"
+ },
+ "didBytesMatch": {
+  "question": "Did the bytes match?",
+  "answer": "PENDING — the retrieved tar is hashed BEFORE opening; the hash must equal fec5fba8… byte-for-byte.",
+  "state": "not-yet-verified"
+ },
+ "didExperienceRestore": {
+  "question": "Did the family experience restore successfully?",
+  "answer": "PENDING — restore into an empty directory and run the existing acceptance journey: person page → crest → corpus → fractal/pedigree. The restored experience must work from the retrieved package alone.",
+  "state": "not-yet-restored"
+ },
+ "retrievalEconomics": {
+  "question": "What did retrieval cost?",
+  "answer": "PENDING — the first real retrieval becomes the first empirical data point; 10/100/1K/1M remain explicitly modeled scenarios in zblood-storage-economics.json.",
+  "state": "modeled-only"
+ },
+ "cardState": {
+  "question": "What does the zBlood card say?",
+  "answer": "NOT 'ANT retrieval-verified' — that label appears only after all nine steps pass. Current: quoted, purchase blocked on credential.",
+  "currentState": "quoted-not-purchased"
+ },
+ "theReusablePattern": "This receipt is the seed of 'immortalize your own family archive': preserve → approve → quote → purchase → upload → retrieve fresh → hash-verify → restore-and-prove. Each state is distinct; each transition is receipted; the family's experience, not just the data, must grow back.",
+ "generatedAt": "2026-09-17T00:20Z",
+ "generatedBy": "zBlood seat (lane/zcode-lineage-import @20cc777b)",
+ "spendAuthorization": {
+  "law": "Two different assets, two separate bounds — never collapsed into one dollar figure. Any artifact/hash change or either bound exceeded → STOP and requote/reapprove.",
+  "artifact": "pkg3.tar",
+  "sha256": "fec5fba8360d9de211c3b6c5966e93bc2462133099f651891d500b6a2ea98b9b", "hexLawNote": "PUBLIC-CONSTANT public chain data",
+  "maxStorageANT": 3.2,
+  "maxGasETH": 0.0002,
+  "quoteReferenced": {
+   "storageANT": 3.106827,
+   "gasETH": 0.00015,
+   "at": "2026-09-17T00:14:10Z",
+   "confidence": "priced_sample"
+  },
+  "authorizedBy": "founder order 2026-09-17 (this message)",
+  "stopConditions": [
+   "sha256(pkg3.tar) ≠ fec5fba8… at upload time",
+   "actual storage charge > 3.2 ANT",
+   "actual gas > 0.0002 ETH",
+   "client reports a different artifact or chunk count (23 expected)"
+  ]
+ },
+ "progression": [
+  {
+   "state": "preserved",
+   "at": "2026-09-16T22:35:14Z"
+  },
+  {
+   "state": "approved",
+   "at": "2026-09-16T22:36:15Z",
+   "by": "founder",
+   "manifest": "440b502a…"
+  },
+  {
+   "state": "quoted",
+   "at": "2026-09-17T00:14:10Z",
+   "client": "ant 0.3.1",
+   "confidence": "priced_sample"
+  },
+  {
+   "state": "spend-authorized",
+   "at": "2026-09-17T00:30Z",
+   "by": "founder order (separated bounds: ≤3.2 ANT + ≤0.0002 ETH)"
+  },
+  {
+   "state": "purchased",
+   "at": null,
+   "note": "PENDING — founder performs the single signing gesture in his own terminal; zBlood receives only the non-secret output"
+  },
+  {
+   "state": "uploaded",
+   "at": null
+  },
+  {
+   "state": "retrieved",
+   "at": null
+  },
+  {
+   "state": "hash-verified",
+   "at": null
+  },
+  {
+   "state": "restoration-verified",
+   "at": null
+  }
+ ]
+}

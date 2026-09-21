@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pa3fbd0a30e",
+ "bnr": "bnr://skaists.dev/blood/pa3fbd0a30e",
+ "identity": {
+  "name": "King Jeconiah ben Eliakim",
+  "lifespan": "0616BC–0561BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "9HP2-YZR"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p50251186de",
+    "name": "King Eliakim Jehoiakim ben Josiah",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p195dd71972",
+    "name": "Nehushta bat Elnathan",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pa07c02009c",
+    "name": "Hachalya bint Jeconiah"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p1ee2d05b18",
+    "name": "Tamar bat Johanan",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/9HP2-YZR",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

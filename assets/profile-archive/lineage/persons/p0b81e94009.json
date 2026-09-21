@@ -1,0 +1,64 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p0b81e94009",
+ "bnr": "bnr://skaists.dev/blood/p0b81e94009",
+ "identity": {
+  "name": "Tiberios Claudius Pompeianus Hipparchus",
+  "lifespan": "40–95",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G4QK-QRW"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p29ed41a18c",
+    "name": "Tiberius Claudius HERODES of MARATHON",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p02bbeb5ea9",
+    "name": "Tiberius Claudius Atticus Herodes son of Tiberios Klaudios Hipparchus"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p4e98e34611",
+    "name": "Claudia Tisamenis De Sparte",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G4QK-QRW",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

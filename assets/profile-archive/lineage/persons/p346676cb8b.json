@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p346676cb8b",
+ "bnr": "bnr://skaists.dev/blood/p346676cb8b",
+ "identity": {
+  "name": "Roger de Bretton",
+  "lifespan": "1125–Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L5T4-8VT"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p634c8ed51a",
+    "name": "John de Breton",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pa28d96c311",
+    "name": "spouse John de Breton",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p0a9ad5a4fe",
+    "name": "Isabella de Bretton"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p5156c283f3",
+    "name": "Mrs. Roger de Bretton",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L5T4-8VT",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

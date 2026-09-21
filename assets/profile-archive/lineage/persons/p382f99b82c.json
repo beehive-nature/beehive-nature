@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p382f99b82c",
+ "bnr": "bnr://skaists.dev/blood/p382f99b82c",
+ "identity": {
+  "name": "Quintus Marcius Barea Sura Di Roma Senator of Rome",
+  "lifespan": "12–46",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LXWW-9NC"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pbff902dbd8",
+    "name": "Quintus Sulpicius Rufus",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pc869ed4ef6",
+    "name": "Caepionia Crispina DE ROME",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p6cc8b31348",
+    "name": "Marcia Furnilla"
+   },
+   {
+    "id": "p4cbe83d0cb",
+    "name": "Marcia Furnilla"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pb5fb5e025c",
+    "name": "Antonia Furnilla Di Roma",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LXWW-9NC",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

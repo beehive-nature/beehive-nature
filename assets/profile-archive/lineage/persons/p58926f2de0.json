@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p58926f2de0",
+ "bnr": "bnr://skaists.dev/blood/p58926f2de0",
+ "identity": {
+  "name": "Ragnetrude Ou Râegentrude DE BAVIÁERE",
+  "lifespan": "0646–Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PZH2-Y8P"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "peb96c5df13",
+    "name": "Theodard d'Oeren de Maastricht II Bishop de Maastricht",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p9ba39b6d57",
+    "name": "Regintrude Austrasia II",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pfde2c06f45",
+    "name": "Norbert d'Aquitaine de Laon Comte de Laon"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p59fbbf22ed",
+    "name": "Godefried, Gottfried D'ALÉMANIE",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PZH2-Y8P",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

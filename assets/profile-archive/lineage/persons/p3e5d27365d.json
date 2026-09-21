@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p3e5d27365d",
+ "bnr": "bnr://skaists.dev/blood/p3e5d27365d",
+ "identity": {
+  "name": "Moses Humes Sr.",
+  "lifespan": "1765–1821",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "KLYB-LZ9"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pa88958b1ce",
+    "name": "Robert Humes",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p55fa3c74f8",
+    "name": "Miriam Shepard",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pe7f8934051",
+    "name": "Manning Humes"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p95abf8a809",
+    "name": "Anna Brown",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/KLYB-LZ9",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

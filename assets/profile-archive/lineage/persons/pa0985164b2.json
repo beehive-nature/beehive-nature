@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pa0985164b2",
+ "bnr": "bnr://skaists.dev/blood/pa0985164b2",
+ "identity": {
+  "name": "Philippe Le Brocq",
+  "lifespan": "1615–1668",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GBJS-3QH"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pbeb97d7d46",
+    "name": "Philippe Le Brocq",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pc6d7b51dfc",
+    "name": "Jeanne Pipon",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p62e18e13e9",
+    "name": "Rachel Le Brocq"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p760bd9fdc6",
+    "name": "Sara D'Auvergne",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GBJS-3QH",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

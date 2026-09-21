@@ -1,0 +1,81 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pdec26f5dfc",
+ "bnr": "bnr://skaists.dev/blood/pdec26f5dfc",
+ "identity": {
+  "name": "Laodicé VI Seleucide",
+  "lifespan": "0178BC–0110BC",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LJLX-C36"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pa013444fc5",
+    "name": "Antiochos IV Seleucide",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p9f90a4d79b",
+    "name": "Queen consort of the Seleucid Empire Laodice IV",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p3f83283645",
+    "name": "Mithradates VI Eupator ben Mithradates V"
+   },
+   {
+    "id": "pbfb7365674",
+    "name": "Laodice bat Mithradates V"
+   },
+   {
+    "id": "p1d0097cfa3",
+    "name": "Pythodoris bat Mithradates V"
+   },
+   {
+    "id": "p27af9a42bb",
+    "name": "Reina Athenais bat Mithradates V de Capadocia"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p09c5271394",
+    "name": "Mithradates V ben Pharnaces I",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LJLX-C36",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p8c31116d58",
+ "bnr": "bnr://skaists.dev/blood/p8c31116d58",
+ "identity": {
+  "name": "Intef I Sehertawy 3rd Pharaoh 11th Dynasty",
+  "lifespan": "2134BC–2111BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GTLN-NC4"
+  }
+ ],
+ "evidence": {
+  "era": "recorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "recorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p42f5548c17",
+    "name": "Mentuhotep I 'the Great' , 2nd Pharaoh 11th Dynasty",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pdc1b21e3e7",
+    "name": "Neferu I Queen of Egypt",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p82a37cb901",
+    "name": "Neferukayeth"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p875213cbe3",
+    "name": "Akhtiphi",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GTLN-NC4",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

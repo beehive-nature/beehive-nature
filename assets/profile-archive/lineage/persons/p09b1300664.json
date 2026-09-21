@@ -1,0 +1,64 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p09b1300664",
+ "bnr": "bnr://skaists.dev/blood/p09b1300664",
+ "identity": {
+  "name": "John Hill",
+  "lifespan": "1495–1546",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G4KH-2TM"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p4e962ff590",
+    "name": "Thomas Hill",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p05351921cb",
+    "name": "Eleanor Hill"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p9d1a5e5456",
+    "name": "Alice",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G4KH-2TM",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

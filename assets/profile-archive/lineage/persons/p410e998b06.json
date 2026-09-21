@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p410e998b06",
+ "bnr": "bnr://skaists.dev/blood/p410e998b06",
+ "identity": {
+  "name": "Claudia Acilia Priscilliana",
+  "lifespan": "0202–0235",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PMWY-68D"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p279697bee6",
+    "name": "Tiberius Claudius Cleobuls",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p75314750b3",
+    "name": "Acilia Frestana",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pafe188bdae",
+    "name": "Valeria Paulla Maximus"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pa14b77033f",
+    "name": "Lucius Valerius Claudius Acilius Maximus",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PMWY-68D",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

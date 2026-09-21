@@ -1,0 +1,64 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pd27a306efa",
+ "bnr": "bnr://skaists.dev/blood/pd27a306efa",
+ "identity": {
+  "name": "Publius Metilius Nepos",
+  "lifespan": "–0127",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G3Q8-N38"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p575e110dd3",
+    "name": "Publius Metilius Nepos",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p177a66ef20",
+    "name": "Publius Metilius Secundus"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p07b212c2cd",
+    "name": "Volusia",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G3Q8-N38",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

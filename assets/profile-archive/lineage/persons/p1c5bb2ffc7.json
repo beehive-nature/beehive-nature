@@ -1,0 +1,62 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p1c5bb2ffc7",
+ "bnr": "bnr://skaists.dev/blood/p1c5bb2ffc7",
+ "identity": {
+  "name": "Spouse Cassius Statilius Severus Hadrianus di Rome",
+  "lifespan": "50–Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PD1M-SL6"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [],
+  "children": [
+   {
+    "id": "pe41261d650",
+    "name": "Cassius Hadrianus Rome"
+   },
+   {
+    "id": "p2d390351cf",
+    "name": "Caesonia de Rome"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p45098ca32f",
+    "name": "Cassius Statilius Severus Hadrianus di Rome",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PD1M-SL6",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

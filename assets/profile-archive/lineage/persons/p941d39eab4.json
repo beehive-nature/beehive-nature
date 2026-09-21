@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p941d39eab4",
+ "bnr": "bnr://skaists.dev/blood/p941d39eab4",
+ "identity": {
+  "name": "King Guithelin ap Gurguit Barbtuc",
+  "lifespan": "0400BC–0363BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "9HL9-KZ4"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p328b34e99c",
+    "name": "Gurguit Barbtruc ap  Belinus",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pd2fd51b568",
+    "name": "Mrs Gurguit Barbtruc",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pedb1e6cf0f",
+    "name": "King Sisillius II ap Guithelin, of Britain"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pcae3b76cfe",
+    "name": "Queen Marcia of Britain",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/9HL9-KZ4",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

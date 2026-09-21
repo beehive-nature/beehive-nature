@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pecc7232823",
+ "bnr": "bnr://skaists.dev/blood/pecc7232823",
+ "identity": {
+  "name": "Antenor II llium King of Sicambri",
+  "lifespan": "0512BC–0442BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "P9GW-K6H"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p420e3cc092",
+    "name": "King Helenus IV of Cimmerians",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p36a0e8bf9e",
+    "name": "Marion Sue Der Cimmerianen",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p82194b429c",
+    "name": "Marcomir l ll King of the Cimmerians"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pa3f5a83631",
+    "name": "Cambra de Bretons",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/P9GW-K6H",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

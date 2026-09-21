@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pd6a329476c",
+ "bnr": "bnr://skaists.dev/blood/pd6a329476c",
+ "identity": {
+  "name": "Hilda Childa Goda Sigrade",
+  "lifespan": "0610–0677",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PXDB-Q5B"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p71d81be722",
+    "name": "Ansoud de Alsace",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p931fa673fe",
+    "name": "Spouse of Ansoud de Alsace",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pac0b6b13a5",
+    "name": "Gunza de Treves de Metz, de Poitiers"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p5c3e759389",
+    "name": "Chlodulf Bischof von Metz",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PXDB-Q5B",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

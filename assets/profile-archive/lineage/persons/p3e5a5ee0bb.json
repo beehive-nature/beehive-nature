@@ -1,0 +1,81 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p3e5a5ee0bb",
+ "bnr": "bnr://skaists.dev/blood/p3e5a5ee0bb",
+ "identity": {
+  "name": "King Coel I ap Marius de Camu-Lot de Silurie",
+  "lifespan": "80–0170",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L6FM-45R"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p888dc0213b",
+    "name": "Marius King Marius of the Britons",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pc2ea982150",
+    "name": "Julia Victoria Panardun verch Prasutigas",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p70168ba48f",
+    "name": "Athildis Verch Coëll, Princesse de de Bretagne, des Silures"
+   },
+   {
+    "id": "pa31c3027cb",
+    "name": "Saint Lucius Lleuver Mawr Ap Coilus Blessed Sovereign"
+   },
+   {
+    "id": "p7367d8de97",
+    "name": "Lleiffer Mawr ap Coel I King of The Britons"
+   },
+   {
+    "id": "pa5987257e0",
+    "name": "Gaod Ap Coel DE GRANDE BRETAGNE-DES SILURES"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p7d1fb17ea8",
+    "name": "Ystradwl Verch Cadfan of Siluria Gadeon of Cumbria the fair",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L6FM-45R",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

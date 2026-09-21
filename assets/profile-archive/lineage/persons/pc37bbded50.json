@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pc37bbded50",
+ "bnr": "bnr://skaists.dev/blood/pc37bbded50",
+ "identity": {
+  "name": "Sybille Corbet of Alcester",
+  "lifespan": "1077–1157",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L825-5W4"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "GMVG-TRB",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "PZX7-NHR",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pe501af5512",
+    "name": "Lord Herbert FitzHerbert of Blane Llyfni"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p75d1827f0a",
+    "name": "Herbert FitzHerbert the Elder",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L825-5W4",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

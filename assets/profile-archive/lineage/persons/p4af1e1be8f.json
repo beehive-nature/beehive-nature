@@ -1,0 +1,62 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p4af1e1be8f",
+ "bnr": "bnr://skaists.dev/blood/p4af1e1be8f",
+ "identity": {
+  "name": "Dama Azariah",
+  "lifespan": "0891–Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PS1W-6Y2"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [],
+  "children": [
+   {
+    "id": "p9ff6106737",
+    "name": "High Priest Jehoiada ben Amariah"
+   },
+   {
+    "id": "p7c2575855e",
+    "name": "King Jehoash ben Ahaziah"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p680ecc471d",
+    "name": "Amariah ibn Ǎzaryāh I",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PS1W-6Y2",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

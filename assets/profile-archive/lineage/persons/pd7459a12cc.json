@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pd7459a12cc",
+ "bnr": "bnr://skaists.dev/blood/pd7459a12cc",
+ "identity": {
+  "name": "Adalind Judith de Bretagne of Rennes",
+  "lifespan": "0885–Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PDT6-4V1"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p15183798cf",
+    "name": "Berengar II, of Neustria",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "peaa5341e1b",
+    "name": "Mrs. Berengar of Neustria",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p6a9fbc2dce",
+    "name": "Judicaël Bérenger Comte de Rennes"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pc788a1cff0",
+    "name": "Prince Pascweten de Rennes II",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PDT6-4V1",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

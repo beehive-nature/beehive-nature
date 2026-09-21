@@ -1,0 +1,79 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p5970551960",
+ "bnr": "bnr://skaists.dev/blood/p5970551960",
+ "identity": {
+  "name": "Merneptah ben Ramesses II 4th Pharaoh 19th Dynasty",
+  "lifespan": "1272BC–1203BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LBJC-Q7Z"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pd69d747cb1",
+    "name": "Ramesses II , 3rd Pharaoh of 19th Dynasty",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pcce82bdc3d",
+    "name": "Istnofret I of Egypt",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pba826b89f2",
+    "name": "Amenmesse 6th Pharaoh 19th Dynasty"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p6bf8f323cf",
+    "name": "Takhat I Egypt",
+    "marriage": null
+   },
+   {
+    "id": "pa2e0151dfc",
+    "name": "Takah",
+    "marriage": null
+   },
+   {
+    "id": "pdee3411967",
+    "name": "Isetnofret II of Egypt",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LBJC-Q7Z",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p3fadcbd946",
+ "bnr": "bnr://skaists.dev/blood/p3fadcbd946",
+ "identity": {
+  "name": "Eustache de Boulogne I",
+  "lifespan": "0989–1049",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "M1VS-25N"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pc23707fb60",
+    "name": "Baudouin de Boulogne II",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p5f6b15b45c",
+    "name": "Adelheid van Holland",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p5fba27cc4e",
+    "name": "Lambert II de Boulogne comte de Lens"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p25d99a6672",
+    "name": "Mathilde , gravin van Leuven",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/M1VS-25N",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

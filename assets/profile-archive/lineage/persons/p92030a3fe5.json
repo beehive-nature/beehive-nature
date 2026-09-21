@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p92030a3fe5",
+ "bnr": "bnr://skaists.dev/blood/p92030a3fe5",
+ "identity": {
+  "name": "Alice Parkinson",
+  "lifespan": "–1705",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "MHMD-S21"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p3151532d6e",
+    "name": "Roger Parkinson",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p6d02525d89",
+    "name": "Jane Null",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pad03f935eb",
+    "name": "Elizabeth Corles"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p287de3bbf5",
+    "name": "Rychard Corles",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/MHMD-S21",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

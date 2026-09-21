@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p999b693037",
+ "bnr": "bnr://skaists.dev/blood/p999b693037",
+ "identity": {
+  "name": "Margaret Trethurfee",
+  "lifespan": "1504–1576",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "MKZF-8M6"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p8448cdfb82",
+    "name": "Thomas Trethurffe",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pbe5c9a8f64",
+    "name": "Mary Trevisa",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p92ba2aa5b1",
+    "name": "Peter Courtenay Of Landrake"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p610d6508bb",
+    "name": "Edward Courtenay II Of Landrake",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/MKZF-8M6",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": true,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

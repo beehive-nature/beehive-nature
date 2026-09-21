@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p9f8cd95f10",
+ "bnr": "bnr://skaists.dev/blood/p9f8cd95f10",
+ "identity": {
+  "name": "Sir David Middleton",
+  "lifespan": "1500–Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GGY5-PTQ"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pe9f926d248",
+    "name": "Fulke Myddelton",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p5113b8d940",
+    "name": "Margaret Smith",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pa40b4d1287",
+    "name": "Lady Elizabeth Middleton"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pa1a66e1e74",
+    "name": "Mary Ellen Myddelton nee Moss Leycester",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GGY5-PTQ",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

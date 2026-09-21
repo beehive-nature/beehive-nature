@@ -1,0 +1,62 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p651e941f63",
+ "bnr": "bnr://skaists.dev/blood/p651e941f63",
+ "identity": {
+  "name": "Mrs. Aminadab Ben Aram HA-ABRAHAM",
+  "lifespan": "1692BC–Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GWRN-MYK"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [],
+  "children": [
+   {
+    "id": "pfe47df922c",
+    "name": "Elisheba bat Aminadab"
+   },
+   {
+    "id": "p80a769b6c2",
+    "name": "Naasson Ben Aminadab HA-ABRAHAM {9}"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p2d14bb8df0",
+    "name": "Amminadab Ben Aram HA-ABRAHAM {8}",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GWRN-MYK",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p62bf6b59ef",
+ "bnr": "bnr://skaists.dev/blood/p62bf6b59ef",
+ "identity": {
+  "name": "Livia Drusilla Julia Augusta Empress of the Roman Empire",
+  "lifespan": "0058BC–29",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PC5X-C3F"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pdf94b60099",
+    "name": "Marcus Livius Drusus III",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pbd46811020",
+    "name": "Mrs. Marcus Livius The Younger Drusus",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p029a2fef0d",
+    "name": "Clavaria de Rome"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p3a1f647738",
+    "name": "Quintus Servilius \" The Younger\" Caepio",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PC5X-C3F",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

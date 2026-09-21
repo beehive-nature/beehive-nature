@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p726eb312d3",
+ "bnr": "bnr://skaists.dev/blood/p726eb312d3",
+ "identity": {
+  "name": "Domitia Longina",
+  "lifespan": "60–0130",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LVWR-JH6"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pa5e6129003",
+    "name": "Gnaeus Domitius Corbulo",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p73e313f677",
+    "name": "Cassia Longina",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p667d2c7d9d",
+    "name": "Ignota Plautia Aeliana"
+   },
+   {
+    "id": "p542b130ac7",
+    "name": "Plautia Plautius Maior"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p24db2c7c47",
+    "name": "Lucius Aelius Lamia Plautius Aelianus",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LVWR-JH6",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

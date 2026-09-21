@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pb8d8aba1eb",
+ "bnr": "bnr://skaists.dev/blood/pb8d8aba1eb",
+ "identity": {
+  "name": "Archidamos of Sparta IV",
+  "lifespan": "–0300BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G1WZ-285"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p4119b09ae5",
+    "name": "Εὐδαμίδας",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p943085498f",
+    "name": "Queen Archidamia of Sparta",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p2be0a188df",
+    "name": "Eupolias Eurypontid of Sparta"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pcf6a22cd74",
+    "name": "Queen Archidamia of Sparta",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G1WZ-285",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

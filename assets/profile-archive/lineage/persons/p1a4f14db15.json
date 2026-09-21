@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p1a4f14db15",
+ "bnr": "bnr://skaists.dev/blood/p1a4f14db15",
+ "identity": {
+  "name": "John V Hodsoll",
+  "lifespan": "1555–1617",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LB2G-CKS"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p26188383f7",
+    "name": "John Hodsoll",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pa1076637b0",
+    "name": "Anne Thomas",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p23f647de2b",
+    "name": "Bennet Hodsoll"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p2262dfcb08",
+    "name": "Anne Maundy",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LB2G-CKS",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

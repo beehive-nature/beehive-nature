@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p1ed9cbc024",
+ "bnr": "bnr://skaists.dev/blood/p1ed9cbc024",
+ "identity": {
+  "name": "Robert Hignett",
+  "lifespan": "1545–1614",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GSZ8-BN1"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p5c8f02a62c",
+    "name": "Thomas Hignett",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p128d4b7356",
+    "name": "Ellen",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p4fa34963c9",
+    "name": "Margaret Hignett"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pa0bf61c1ea",
+    "name": "Katherine Bunning",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GSZ8-BN1",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

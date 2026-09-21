@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pff194f1dc6",
+ "bnr": "bnr://skaists.dev/blood/pff194f1dc6",
+ "identity": {
+  "name": "Mahalaleel ben Cainan 5th Patriarch",
+  "lifespan": "3604BC–2708BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LDLP-STN"
+  }
+ ],
+ "evidence": {
+  "era": "recorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "recorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p7d83a0cd8e",
+    "name": "Cainan ben Enos 4th Patriarch",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pa3c733cb9b",
+    "name": "Mualeleth bint Enos",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pd0fa1f9233",
+    "name": "Patriarch Jared ben Mahalaleel"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pabc3553227",
+    "name": "Dînâh Bat Barakiel",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LDLP-STN",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,102 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p3f3c8ece41",
+ "bnr": "bnr://skaists.dev/blood/p3f3c8ece41",
+ "identity": {
+  "name": "Adataneses bint Eliakim ibn Mutwashlack",
+  "lifespan": "2350BC–Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L2YS-R1Y"
+  }
+ ],
+ "evidence": {
+  "era": "recorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "recorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p07564be563",
+    "name": "Eliaquim ibn Mutwashlack ibn Idris",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p0bfffb54aa",
+    "name": "Edna bint Baraki'el ibn Anwas",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p703d6291f7",
+    "name": "Madai ben Japheth of Medes"
+   },
+   {
+    "id": "p705ad480e4",
+    "name": "Arsal bint Batawil"
+   },
+   {
+    "id": "p2a5aafd1e5",
+    "name": "Shushan bint Yaafith"
+   },
+   {
+    "id": "p6ae5f66411",
+    "name": "Mullissu Ninlil bint Japheth"
+   },
+   {
+    "id": "p16a0676b40",
+    "name": "Tiras ibn Yaafith"
+   },
+   {
+    "id": "pc8a1729c10",
+    "name": "Qarnabil bint Batawil"
+   },
+   {
+    "id": "p9ea0c9c184",
+    "name": "Asteria Bint-Japheth"
+   },
+   {
+    "id": "p58d2bfe755",
+    "name": "Gomer ben Japheth"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p5d0e12e68b",
+    "name": "Japheth ben Noah",
+    "marriage": null
+   },
+   {
+    "id": "p2cc02f8c00",
+    "name": "Batawil Yaphetidy ibn Tiras",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L2YS-R1Y",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

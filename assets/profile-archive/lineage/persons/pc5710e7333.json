@@ -1,0 +1,90 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pc5710e7333",
+ "bnr": "bnr://skaists.dev/blood/pc5710e7333",
+ "identity": {
+  "name": "Eleazar ben Eliud Of Judea",
+  "lifespan": "0124BC–0060BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L6FC-3QN"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p7c710c2d7b",
+    "name": "Eliud ben Achim",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p04667c8c70",
+    "name": "Awad de Yerushalayim",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p0d09eca0f8",
+    "name": "Rachel bint Eleazor"
+   },
+   {
+    "id": "pa72152d7a7",
+    "name": "Simeon ben Eleazar"
+   },
+   {
+    "id": "p46c04f17f8",
+    "name": "Pailine bint Eleazar"
+   },
+   {
+    "id": "p492ddca997",
+    "name": "Anna verch Eleazor"
+   },
+   {
+    "id": "p4a1e6af78a",
+    "name": "Matthan ben Eleazar"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p54202a6079",
+    "name": "Janna Hyrcanus bint Putiel",
+    "marriage": null
+   },
+   {
+    "id": "p1587ce2f6e",
+    "name": "Tsamiti ha David",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L6FC-3QN",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

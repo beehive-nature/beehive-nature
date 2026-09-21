@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p2e3583eb09",
+ "bnr": "bnr://skaists.dev/blood/p2e3583eb09",
+ "identity": {
+  "name": "Sulpicia Praetextata",
+  "lifespan": "33–Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LD53-LG7"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p064bfd9bce",
+    "name": "Quintus Sulpicius Camerinus Peticus",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p1009617c5e",
+    "name": "Sig.ra. Quintus Sulpicius Camerinus Peticus",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pbce9f8d50b",
+    "name": "Libo Rupilius Frugi"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p54bf379c9c",
+    "name": "Marcus Licinius Crassus Frugi",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LD53-LG7",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

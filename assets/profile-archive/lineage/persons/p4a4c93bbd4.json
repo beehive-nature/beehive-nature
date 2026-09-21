@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p4a4c93bbd4",
+ "bnr": "bnr://skaists.dev/blood/p4a4c93bbd4",
+ "identity": {
+  "name": "Aurelia Cotta de Rome",
+  "lifespan": "0119BC–0054BC",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LHK2-SKH"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p32bff67cb4",
+    "name": "Lucius Aurelius Cotta",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p5f6a05655c",
+    "name": "Rutilia Rufa",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p14eb2caa76",
+    "name": "Licinia Júlia Cesaris Menor"
+   },
+   {
+    "id": "p1d123addae",
+    "name": "Gaius Julius Caesar IV"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pc721197a4b",
+    "name": "Gaius Julius Caesar Governor of Asia III",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LHK2-SKH",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

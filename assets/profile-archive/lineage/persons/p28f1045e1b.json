@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p28f1045e1b",
+ "bnr": "bnr://skaists.dev/blood/p28f1045e1b",
+ "identity": {
+  "name": "Lucius Nonius Asprenas",
+  "lifespan": "0014BC–6",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G3BX-2M7"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p64f54fe679",
+    "name": "Lucius Nonius Asprenas, suffect consul 36 bc",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p27fd3b2222",
+    "name": "Quinctilia Varilla",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pad2e890b40",
+    "name": "Nonius Asprenas Calpurnius Torquatus De ROME"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p703555421a",
+    "name": "Calpurnia Pisonis",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G3BX-2M7",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

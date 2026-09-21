@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pad377c6114",
+ "bnr": "bnr://skaists.dev/blood/pad377c6114",
+ "identity": {
+  "name": "Elizabeth Brogdem",
+  "lifespan": "1552–1650",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GTVS-6YW"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pf9d510bb13",
+    "name": "George John Cope Brogden",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "ped483dfcb0",
+    "name": "Elizabeth Cody Lady",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p648594bc03",
+    "name": "William John Sheppard Basselle"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p75a9cf1c06",
+    "name": "Robert Baseley Basselle",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GTVS-6YW",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

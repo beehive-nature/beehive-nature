@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p3c0e38f947",
+ "bnr": "bnr://skaists.dev/blood/p3c0e38f947",
+ "identity": {
+  "name": "John William Goore",
+  "lifespan": "1543–1600",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GVBZ-T7W"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pba43055d62",
+    "name": "Richard Gore",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p97d54b8837",
+    "name": "Mrs Richard Gore",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p605e63aeef",
+    "name": "Mary Goore"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p000b368d57",
+    "name": "Emma Louisa Abbott",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GVBZ-T7W",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

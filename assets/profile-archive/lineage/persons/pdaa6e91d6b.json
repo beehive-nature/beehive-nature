@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pdaa6e91d6b",
+ "bnr": "bnr://skaists.dev/blood/pdaa6e91d6b",
+ "identity": {
+  "name": "Thomas Mather",
+  "lifespan": "1575–1633",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "K64K-BFK"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p120370dc01",
+    "name": "John Mather",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p57946b641f",
+    "name": "Margaret W. Nairn",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p88e80bd676",
+    "name": "Richard Mather"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pccad044fa9",
+    "name": "Margaret Abraham",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/K64K-BFK",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

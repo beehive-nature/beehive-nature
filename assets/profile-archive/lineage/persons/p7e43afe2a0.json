@@ -1,0 +1,64 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p7e43afe2a0",
+ "bnr": "bnr://skaists.dev/blood/p7e43afe2a0",
+ "identity": {
+  "name": "Ulrich Miller",
+  "lifespan": "1633–1670",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "K4KV-Y89"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p548539371c",
+    "name": "Jacob Miller",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p80df85098a",
+    "name": "Hanss Jacob Miller"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p6d2a50582a",
+    "name": "Elisabetha Maurer",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/K4KV-Y89",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

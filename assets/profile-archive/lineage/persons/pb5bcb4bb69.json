@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pb5bcb4bb69",
+ "bnr": "bnr://skaists.dev/blood/pb5bcb4bb69",
+ "identity": {
+  "name": "Ralph III De Willington",
+  "lifespan": "1210–1253",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LRJ6-55D"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p017e779b16",
+    "name": "Ralph I de Wylington",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p59822761dd",
+    "name": "Olimpia Chevaler",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p5f4ca540ea",
+    "name": "Ralph de Willington"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pebfd63b014",
+    "name": "Joan Champernoun",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LRJ6-55D",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

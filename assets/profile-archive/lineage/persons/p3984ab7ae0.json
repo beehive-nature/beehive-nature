@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p3984ab7ae0",
+ "bnr": "bnr://skaists.dev/blood/p3984ab7ae0",
+ "identity": {
+  "name": "Anna Lord",
+  "lifespan": "1614–1688",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "9C93-4N3"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p149f3f8793",
+    "name": "Thomas Lord Sr",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p05e233649d",
+    "name": "Dorothy Bird",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p6433579b31",
+    "name": "Robert Stanton"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pefbca941ec",
+    "name": "Thomas Stanton",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/9C93-4N3",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p2d9b238730",
+ "bnr": "bnr://skaists.dev/blood/p2d9b238730",
+ "identity": {
+  "name": "Lady Sandra Joyce McPherson",
+  "lifespan": "1481–1578",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PQKQ-BGT"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "GBLW-22N",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "GZ53-QM5",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p468ce056a9",
+    "name": "Sir John Robert Kerrich, Yeoman of Saxstead, Suffolk, Landed Gentry, buried at St. Nicholas, Bedfield Sr"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p75c6211fc5",
+    "name": "William Kerrich III",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PQKQ-BGT",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "peade032191",
+ "bnr": "bnr://skaists.dev/blood/peade032191",
+ "identity": {
+  "name": "Eithne Ingen MacCoipre",
+  "lifespan": "82–0230",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "KLB2-Z68"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "peda8671c49",
+    "name": "king Coipre Galgacus MacCairbre",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pe4db1b29c8",
+    "name": "Corbred Ingen MacLugdach",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p2d746c7bd3",
+    "name": "Conaire II MacMogha 111th King of Ireland"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p523d66db0b",
+    "name": "Mug Lama Modha Lugaid Allathach aka Modha Lawha Moglama Lamha Mac Lugaid King of Dal Riata",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/KLB2-Z68",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pa9b4c00346",
+ "bnr": "bnr://skaists.dev/blood/pa9b4c00346",
+ "identity": {
+  "name": "Simon III Thassi ben Mattathias 48th High Priest",
+  "lifespan": "0184BC–0135BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LH5K-PM8"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p970a46b6b8",
+    "name": "Mattathias ben Johanan",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pd4f2394ee6",
+    "name": "Simona bat Judas",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p4a7f613f15",
+    "name": "High Priest John Hyrcanus I ben Simon III Thassi"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p6a7f77544c",
+    "name": "A Slave",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LH5K-PM8",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}
