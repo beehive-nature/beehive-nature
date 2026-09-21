@@ -53,8 +53,19 @@ class Sink:
             os.replace(tmp, final)
         return "250 Message accepted for delivery"
 
+def prepare_mailroot():
+    # MAILROOT privacy is enforced at the root too, never inherited from the
+    # process umask (2026-09-21: the startup mkdir passed no mode, so
+    # /var/mail-agents landed 0755 under the deployed Umask=0022 — mailbox
+    # names + mtimes readable by traversal; same law as the mailbox dirs
+    # above: mkdir mode is umask-capped, chmod heals and is umask-proof).
+    # Named and callable so the mode gate exercises the real code path.
+    MAILROOT.mkdir(parents=True, exist_ok=True, mode=0o700)
+    os.chmod(MAILROOT, 0o700)
+
+
 if __name__ == "__main__":
-    MAILROOT.mkdir(parents=True, exist_ok=True)
+    prepare_mailroot()
     ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
     ctx.load_cert_chain(CERT, KEY)
     controller = Controller(Sink(), hostname="0.0.0.0", port=25,
