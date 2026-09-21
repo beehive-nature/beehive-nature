@@ -646,6 +646,16 @@ jobs:
         if: always()
         working-directory: e2e
         run: node --test law-of-the-sea-fold.test.mjs
+      # Watch from Autonomi (founder upload 2026-09-21 would not play): the page must play a public
+      # video whatever shape the ant door is in. antd 0.12.0 cuts /stream at a wrong Content-Length
+      # (ant-sdk PR #243), so the page falls back to the {"data":"<base64>"} envelope and plays the
+      # decoded Blob; an upgraded antd streams directly and the envelope is never fetched. Door down,
+      # not a video, error and cut envelopes end on the failure row. The door is MOCKED; the real
+      # relay is touched zero times.
+      - name: Watch from Autonomi — plays through today's door and an upgraded one (mocked door)
+        if: always()
+        working-directory: e2e
+        run: node --test watch-ant.test.mjs
       # SHARED-POLICY FIELD OWNERSHIP (ceremony-blocking repair, 2026-09-17):
       # a View change in a stale wallet tab must NEVER erase newer founder
       # policy from the shared key — every writer merges with the latest
