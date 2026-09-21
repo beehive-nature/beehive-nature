@@ -51,6 +51,11 @@ jobs:
         run: |
           cargo test --locked --manifest-path ops/x402-door/Cargo.toml
           cargo build --locked --manifest-path ops/x402-door/Cargo.toml --features live-wiring
+      # ant-writedoor (ruled 2026-09-21): the keyless Autonomi write door's
+      # HTTP contract battery. Mock-gateway only — CI touches no network.
+      - name: ant-writedoor (contract battery; mock gateway, zero mainnet)
+        if: always()
+        run: cargo test --locked --manifest-path ops/ant-writedoor/Cargo.toml
       # SPEC-BINDEXER-0: the keyless attestation is a CI-visible receipt
       - name: bindexer keyless attestation (SPEC-BINDEXER-0)
         if: always()
