@@ -45,6 +45,12 @@ before(async () => { await new Promise(r => srv.listen(PORT, '127.0.0.1', r)); b
 after(async () => { if (b) await b.close(); srv.close(); });
 
 const cors = { 'access-control-allow-origin': ORIGIN };
+// Browser CORS: custom headers (x-ant-first-chunk, accept-ranges) stay hidden from
+// JS unless exposed. Content-Length is safelisted. Live door must ExposeHeaders too (#208).
+const corsExpose = {
+  ...cors,
+  'access-control-expose-headers': 'x-ant-first-chunk, accept-ranges',
+};
 const envelope = bytes => JSON.stringify({ data: Buffer.from(bytes).toString('base64') });
 
 // door: { stream(addr) -> fulfil opts | 'abort', json(addr) -> fulfil opts | 'abort' | Promise<...> }
@@ -366,6 +372,46 @@ test('the real door reply shape: no Content-Length, the bar says busy (never a f
   } else {
     assert.match(await p.locator('#got').textContent(), /\d+ MB/);
   }
+  assert.deepEqual(hits.stray, []); assert.deepEqual(errs, []);
+  await ctx.close();
+});
+
+
+test('cypherpunk sheet: honest path/size fields only — no invented Autonomi network stats', async () => {
+  const { ctx, p, errs, hits } = await open({
+    stream: () => ({ status: 200, headers: { ...corsExpose, 'content-type': 'application/octet-stream', 'content-length': String(MP4.length), 'accept-ranges': 'bytes', 'x-ant-first-chunk': 'HIT' }, body: MP4 }),
+    json: () => 'abort',
+  });
+  await ctx.addInitScript(() => { try { localStorage.setItem('bregister', 'cypherpunk'); } catch {} });
+  await p.goto(`${ORIGIN}/surfaces/bview.html`, { waitUntil: 'domcontentloaded' });
+  await watch(p, A1);
+  if (!(await hasCodec(p))) {
+    await p.waitForTimeout(1500);
+    assert.ok(hits.stream.length >= 1);
+    await ctx.close();
+    return;
+  }
+  await settles(p, done);
+  const sheet = await p.evaluate(() => ({
+    reg: document.body.getAttribute('data-reg'),
+    open: document.getElementById('sheet-wrap')?.open,
+    path: document.getElementById('n-path')?.textContent,
+    cl: document.getElementById('n-cl')?.textContent,
+    chunk: document.getElementById('n-chunk')?.textContent,
+    ranges: document.getElementById('n-ranges')?.textContent,
+    addr: document.getElementById('n-addr')?.textContent,
+    size: document.getElementById('n-size')?.textContent,
+    nm: [...document.querySelectorAll('#nerd .nm dd')].map(d => d.textContent),
+  }));
+  assert.equal(sheet.reg, 'cypherpunk');
+  assert.equal(sheet.open, true, 'disclose opens for cypherpunk');
+  assert.equal(sheet.path, 'stream');
+  assert.match(sheet.cl, new RegExp(String(MP4.length)));
+  assert.equal(sheet.chunk, 'HIT');
+  assert.match(sheet.ranges, /bytes/i);
+  assert.match(sheet.addr, new RegExp(A1));
+  assert.match(sheet.size, /\d/);
+  assert.ok(sheet.nm.every(t => /not measured/i.test(t)), 'Autonomi demo fields stay silent');
   assert.deepEqual(hits.stray, []); assert.deepEqual(errs, []);
   await ctx.close();
 });
