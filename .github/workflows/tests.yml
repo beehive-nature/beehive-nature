@@ -474,6 +474,16 @@ jobs:
         if: always()
         working-directory: e2e
         run: node myspace-seam.mjs
+      # THE DOORS, RENDERED (founder order 2026-08-26): each door at 390px,
+      # tap floor, footer clearance, zero page errors, and every link a door
+      # lists resolves 200 with body text. Which pages are doors comes from
+      # e2e/not-doors.mjs, the list door-counts.mjs reads too. Link
+      # resolution has no other gate; the static job counts anchors, it does
+      # not follow them.
+      - name: Doors — rendered at 390px, every listed link resolves
+        if: always()
+        working-directory: e2e
+        run: node doors.mjs
       # bPay Phase A gate (UI seat, 2026-09-17): the REAL machine-bound
       # invoice renders in the wallet surface — identity (name/bytes/sha256),
       # owed recomputed from the carried quote set by the TEST, native gas

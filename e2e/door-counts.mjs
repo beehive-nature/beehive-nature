@@ -27,7 +27,7 @@
    hive pages that are not doors and declare no section.d. If "declares no
    section.d" were the exemption rule, deleting the section from a real door
    would delete it from this gate's sight — a gate that erases itself when the
-   thing it guards is removed. So the two are listed below by filename, and
+   thing it guards is removed. So the two are listed by filename in e2e/not-doors.mjs, and
    ANY OTHER page in that directory without a section.d is a hard failure.
 
    usage:  node e2e/door-counts.mjs [--root <dir>] [--selftest]
@@ -42,14 +42,13 @@ import { join, dirname, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { execFileSync } from 'node:child_process';
+import { NOT_DOORS } from './not-doors.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const SELF = join(HERE, 'door-counts.mjs');
 
-/* the two pages in surfaces/doors/ that are NOT doors — hive pages, no
-   section.d, no count to state. Named, so that a door losing its section
-   fails instead of vanishing. */
-const NOT_DOORS = new Set(['beehivenature-buzz.html', 'skaists-buzz.html']);
+/* NOT_DOORS — the pages in surfaces/doors/ that are not doors — lives in
+   e2e/not-doors.mjs, shared with e2e/doors.mjs so the two gates read one list. */
 const LIST = 'index.html';
 
 let pass = 0, fail = 0;
@@ -155,7 +154,7 @@ function run() {
     if (sec === null) {
       ok(`${f} — declares a section.d`, false,
         'no section.d, or it is never closed. A door with no section states no count; ' +
-        'if it is not a door, name it in NOT_DOORS — never let it fall out of sight');
+        'if it is not a door, name it in e2e/not-doors.mjs — never let it fall out of sight');
       continue;
     }
     const n = sheadN(sec);
