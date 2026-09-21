@@ -6,10 +6,10 @@ Wants=network-online.target
 
 [Service]
 User=ubuntu
-# binary on box: /home/ubuntu/ant-lane/antd
-# v0.12.1 antd-linux-arm64 sha256 95bad9ad70d47f1f811c1836d0270be3e2e3ed233c81542d7da5d0a7bfe66676 PUBLIC-CONSTANT (vendor SHA256SUMS) — resolves shrunk DataMap before sizing /stream (ant-sdk PR #243 / V2-1104). Prior pin v0.12.0 1cc3b4b9997e7344b92ed17cccf44324fa1aa1d8ac6e4d891fa7f3a0eab32cd8 PUBLIC-CONSTANT.
+# binary on box: /home/ubuntu/ant-lane/antd (sha256 95bad9ad70d47f1f811c1836d0270be3e2e3ed233c81542d7da5d0a7bfe66676 == v0.12.1 antd-linux-arm64, verified 2026-09-21; rollback copy ~/ant-lane/antd.v0.12.0) PUBLIC-CONSTANT: vendor release sha256
 # binds the docker bridge IP only - Caddy reaches it, the public cannot; gRPC stays loopback
-ExecStart=/home/ubuntu/ant-lane/antd --rest-addr 172.18.0.1:8082 --cors
+# no --cors: from v0.12.1 a bare --cors allows no origins; Caddy strips antd ACAO and stamps https://skaists.dev
+ExecStart=/home/ubuntu/ant-lane/antd --rest-addr 172.18.0.1:8082
 Environment=ANTD_LOG_LEVEL=info
 Restart=always
 RestartSec=5
