@@ -67438,6 +67438,37 @@
    "tr": "Ağ kapısı yanıt vermedi ya da bu dosya bir video değil. Birkaç dakika sonra yeniden deneyin.",
    "hu": "A hálózati kapu nem válaszolt, vagy ez a fájl nem videó. Próbáld újra néhány perc múlva.",
    "sa": "जालद्वारं उत्तरं न दत्तवत्, अथवा एषा सञ्चिका चलच्चित्रं नास्ति। कतिपयनिमेषानन्तरं पुनः प्रयतताम्।"
+  },
+  "bview.label": {
+   "en": "autonomi:// address",
+   "ru": "Адрес autonomi://",
+   "lv": "autonomi:// adrese",
+   "th": "ที่อยู่ autonomi://",
+   "gd": "Seòladh autonomi://",
+   "tt": "autonomi:// адресы",
+   "uk": "Адреса autonomi://",
+   "cs": "Adresa autonomi://",
+   "zh": "autonomi:// 地址",
+   "ko": "autonomi:// 주소",
+   "ar": "عنوان autonomi://",
+   "nl-be": "autonomi://-adres",
+   "es": "Dirección autonomi://",
+   "nl": "autonomi://-adres",
+   "de": "autonomi://-Adresse",
+   "fr": "Adresse autonomi://",
+   "he": "כתובת autonomi://",
+   "hi": "autonomi:// पता",
+   "bn": "autonomi:// ঠিকানা",
+   "fa": "نشانی autonomi://",
+   "ur": "autonomi:// پتہ",
+   "ja": "autonomi:// アドレス",
+   "da": "autonomi://-adresse",
+   "nb": "autonomi://-adresse",
+   "sv": "autonomi://-adress",
+   "fi": "autonomi://-osoite",
+   "tr": "autonomi:// adresi",
+   "hu": "autonomi:// cím",
+   "sa": "autonomi:// सङ्केतः"
   }
  }
 }
