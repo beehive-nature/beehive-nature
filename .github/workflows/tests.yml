@@ -638,6 +638,14 @@ jobs:
         if: always()
         working-directory: e2e
         run: node --test tour-bar-clearance.test.mjs
+      # Law of the Sea print (founder word "print publish" 2026-09-21, BgrOKbot):
+      # the ruled first screen (title, three laws, Manifest) and the first
+      # disclosure summary sit clear of #tbar at 390x844. Limit is innerHeight
+      # minus --tbar-h; empty --tbar-h fails closed.
+      - name: Law of the Sea — first screen clears the tour bar
+        if: always()
+        working-directory: e2e
+        run: node --test law-of-the-sea-fold.test.mjs
       # SHARED-POLICY FIELD OWNERSHIP (ceremony-blocking repair, 2026-09-17):
       # a View change in a stale wallet tab must NEVER erase newer founder
       # policy from the shared key — every writer merges with the latest

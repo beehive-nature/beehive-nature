@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#fbf7f0">
+<meta name="color-scheme" content="light dark">
+<meta name="description" content="Law of the Sea — the estate's naval data language. A data action gets the sea's word when one exists. Manifest is ruled.">
+<title>Law of the Sea — skaists.dev</title>
+<link rel="preload" href="fonts/burti.woff2" as="font" type="font/woff2" crossorigin>
+<style>
+@font-face{font-family:burti;src:url(fonts/burti.woff2) format("woff2");font-display:swap}
+:root{--paper:#fbf7f0;--ink:#0c1412;--well:#efe9dd;--line:#e6dfd2;--dim:#4a5f55;--edge:#857d70;--link:#6e3fb8;--act:#a8238c;--gold:#8a6a00;--on:#fff;--mono:ui-monospace,"Cascadia Mono",Menlo,Consolas,monospace;--body:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+body[data-reg="raver"]{--paper:#0d0b14;--ink:#f4eefc;--well:#17132a;--line:#2a2346;--dim:#b9aed6;--edge:#6a5f92;--link:#d655bb;--act:#d655bb;--gold:#e6c35c;--on:#0d0b14}
+body[data-reg="cypherpunk"]{--paper:#0a0e10;--ink:#dfeaec;--well:#10171a;--line:#1f2b30;--dim:#9db3b9;--edge:#5b7178;--link:#45c2dc;--act:#45c2dc;--gold:#d4b84a;--on:#0a0e10;--body:var(--mono)}
+*{box-sizing:border-box;margin:0}
+body{background:var(--paper);color:var(--ink);font:16px/1.55 var(--body);min-height:100dvh;padding:12px 16px 90px}
+main{max-width:720px;margin:0 auto}
+.brand{font-family:burti,var(--mono);font-size:1.05rem;color:var(--ink);text-decoration:none;display:inline-flex;align-items:center;min-height:44px}
+.kicker{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);margin-top:4px}
+h1{font-size:clamp(1.45rem,6vw,2.1rem);line-height:1.15;margin:.2rem 0 .35rem;font-weight:650;letter-spacing:-.01em}
+.lead{color:var(--ink);margin-bottom:.45rem}
+.quote{color:var(--dim);font-size:14px;line-height:1.5;margin-bottom:.7rem}
+ol.laws{margin:0 0 .7rem;padding:0;list-style:none;counter-reset:law}
+ol.laws li{counter-increment:law;position:relative;padding:6px 0 6px 28px;border-top:1px solid var(--line);font-size:15px;line-height:1.45;color:var(--ink)}
+ol.laws li:last-child{border-bottom:1px solid var(--line)}
+ol.laws li::before{content:counter(law);position:absolute;left:0;top:6px;color:var(--gold);font:600 13px var(--mono)}
+ol.laws b{font-weight:650}
+.card{background:var(--well);border:1.5px solid var(--edge);border-radius:14px;padding:10px 12px;margin:0 0 .55rem}
+.card .mark{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);margin-bottom:2px}
+.card h2{font-size:1.05rem;font-weight:650;margin:0 0 2px}
+.card p{color:var(--dim);font-size:14px;line-height:1.4}
+.card p b{color:var(--ink);font-weight:650}
+details[data-reg-disclose]{margin-top:8px;border-top:1px solid var(--line)}
+details[data-reg-disclose]>summary{color:var(--ink);font-weight:650;font-size:15px}
+.dbody{padding:4px 0 12px}
+.dbody p{color:var(--dim);margin:0 0 10px;font-size:15px;line-height:1.55}
+.dbody p b{color:var(--ink);font-weight:650}
+.term{background:var(--well);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-top:8px}
+.term.ruled{border-color:var(--edge);border-width:1.5px}
+.term h3{font-size:16px;font-weight:650;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.term h3 .st{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);font-weight:650}
+.term h3 .st.prop{color:var(--dim)}
+.term .sea,.term .here{font-size:14px;color:var(--dim);line-height:1.45;margin-top:4px}
+.term .sea b,.term .here b{color:var(--ink);font-weight:600;font-size:12px;letter-spacing:.04em;text-transform:uppercase}
+.hist{border-top:1px solid var(--line);padding:8px 0}
+.hist .when{font:600 12px var(--mono);color:var(--gold);letter-spacing:.02em}
+.hist .what{font-size:14px;color:var(--ink);margin-top:2px;line-height:1.4}
+.hist .gave{font-size:14px;color:var(--dim);margin-top:2px;line-height:1.4}
+.open li{margin:6px 0 6px 18px;color:var(--dim);font-size:15px;line-height:1.45}
+a{color:var(--link)}
+:is(a,summary,button):focus-visible{outline:2.5px solid var(--ink);outline-offset:2px}
+footer{margin-top:18px;color:var(--dim);font-size:13px;line-height:1.7}
+body[data-reg="cypherpunk"] :is(.card,.term){border-radius:3px}
+@media (max-width:600px){
+  body{padding:4px 12px 90px}
+  .kicker{margin-top:0;font-size:11px}
+  h1{font-size:1.35rem;margin:.1rem 0 .2rem}
+  .lead{margin-bottom:.3rem}
+  .quote{font-size:13px;line-height:1.4;margin-bottom:.45rem}
+  ol.laws{margin-bottom:.45rem}
+  ol.laws li{padding:4px 0 4px 24px;font-size:14px;line-height:1.35}
+  .card{padding:8px 10px;margin-bottom:.4rem}
+  .card h2{font-size:1rem}
+  .card p{font-size:13px;line-height:1.35}
+  details[data-reg-disclose]{margin-top:4px}
+}
+</style>
+</head>
+<body data-experience="law-of-the-sea">
+<main>
+  <div id="first">
+    <a class="brand" href="index.html" translate="no" dir="ltr">skaists.dev</a>
+    <p class="kicker">the estate's naval data language</p>
+    <h1>Law of the Sea</h1>
+    <p class="lead">Every data flow on the estate is named in the language of the sea.</p>
+    <p class="quote">Founder ruling, 2026-09-21: “hold hard to naval terms with data flow and management. Law of the sea.”</p>
+    <ol class="laws">
+      <li>A data action gets the sea's word for it when one exists. The first is <b>manifest</b>: a file is added to the manifest before it sails to Autonomi.</li>
+      <li>The word must be true to its meaning at sea. A term that only sounds naval is not used.</li>
+      <li>A stranger must still understand the page. The naval word is the name; one plain sentence beside it says what happens.</li>
+    </ol>
+    <article class="card" id="ruled">
+      <div class="mark">ruled now</div>
+      <h2>Manifest</h2>
+      <p>The list of files a person has chosen to send: name, size, fingerprint, status — declared before they sail.</p>
+    </article>
+  </div>
+
+  <details data-reg-disclose id="why">
+    <summary>Why the sea</summary>
+    <div class="dbody">
+      <p>The sea solved the estate's problems first. A ship moves valuable cargo between strangers, across waters nobody owns, with no central authority on board. Sailors answered that with manifests, logs, watches, shared-loss rules and a duty to rescue. Those are the same answers a serverless data network needs.</p>
+    </div>
+  </details>
+
+  <details data-reg-disclose id="glossary">
+    <summary>The glossary — only Manifest is ruled</summary>
+    <div class="dbody">
+      <p>A first draft of the working vocabulary, in the order a file travels. Only <b>manifest</b> is ruled; every other row is proposed.</p>
+      <article class="term ruled"><h3>Manifest <span class="st">ruled</span></h3><p class="sea"><b>at sea</b> The list of everything the ship carries, declared before sailing</p><p class="here"><b>on the estate</b> The list of files a person has chosen to send: name, size, fingerprint, status</p></article>
+      <article class="term"><h3>Cargo <span class="st prop">proposed</span></h3><p class="sea"><b>at sea</b> The goods being carried</p><p class="here"><b>on the estate</b> The files themselves</p></article>
+      <article class="term"><h3>Hold <span class="st prop">proposed</span></h3><p class="sea"><b>at sea</b> The space below decks where cargo waits and rides</p><p class="here"><b>on the estate</b> Local staging on the person's own device, before anything leaves</p></article>
+      <article class="term"><h3>Bill of lading <span class="st prop">proposed</span></h3><p class="sea"><b>at sea</b> The receipt a carrier gives for cargo taken aboard, stating what and for whom</p><p class="here"><b>on the estate</b> The price quote and payment plan a person sees before paying</p></article>
+      <article class="term"><h3>Clearance <span class="st prop">proposed</span></h3><p class="sea"><b>at sea</b> Permission from the port to sail</p><p class="here"><b>on the estate</b> The person's own authorization and spending ceiling</p></article>
+      <article class="term"><h3>Pilot <span class="st prop">proposed</span></h3><p class="sea"><b>at sea</b> The local expert who guides a ship through a harbor, never its owner</p><p class="here"><b>on the estate</b> The bridge program: it prepares the passage and holds no keys</p></article>
+      <article class="term"><h3>Make sail <span class="st prop">proposed</span></h3><p class="sea"><b>at sea</b> Departure</p><p class="here"><b>on the estate</b> The upload, once the wallet has paid</p></article>
+      <article class="term"><h3>Log <span class="st prop">proposed</span></h3><p class="sea"><b>at sea</b> The ship's written record, kept every watch, never erased</p><p class="here"><b>on the estate</b> The receipt trail: address, chunks, amount paid, time</p></article>
+      <article class="term"><h3>Port of call <span class="st prop">proposed</span></h3><p class="sea"><b>at sea</b> Where cargo is delivered</p><p class="here"><b>on the estate</b> The network a file lands on: Autonomi, Arweave, Hive, local</p></article>
+      <article class="term"><h3>Landfall <span class="st prop">proposed</span></h3><p class="sea"><b>at sea</b> First sight of the destination</p><p class="here"><b>on the estate</b> The datamap address coming back</p></article>
+      <article class="term"><h3>Sounding <span class="st prop">proposed</span></h3><p class="sea"><b>at sea</b> Measuring the depth before moving forward</p><p class="here"><b>on the estate</b> Verify by downloading and comparing the fingerprint</p></article>
+      <article class="term"><h3>Watch <span class="st prop">proposed</span></h3><p class="sea"><b>at sea</b> The crew on duty, in rotation, so the ship is never unattended</p><p class="here"><b>on the estate</b> Seats on shift; checks that run on every change</p></article>
+      <article class="term"><h3>Muster <span class="st prop">proposed</span></h3><p class="sea"><b>at sea</b> Calling the roll to confirm everyone is accounted for</p><p class="here"><b>on the estate</b> The registry count: every surface present and numbered</p></article>
+      <article class="term"><h3>Colors <span class="st prop">proposed</span></h3><p class="sea"><b>at sea</b> The flag that says whose ship this is</p><p class="here"><b>on the estate</b> Signed identity on a message or commit</p></article>
+      <article class="term"><h3>Ballast <span class="st prop">proposed</span></h3><p class="sea"><b>at sea</b> Weight carried for stability, not for sale</p><p class="here"><b>on the estate</b> Redundant copies kept so data survives</p></article>
+      <article class="term"><h3>Jettison <span class="st prop">proposed</span></h3><p class="sea"><b>at sea</b> Throwing cargo overboard to save the ship</p><p class="here"><b>on the estate</b> Deleting what can be deleted; never possible for permanent public data</p></article>
+      <article class="term"><h3>General average <span class="st prop">proposed</span></h3><p class="sea"><b>at sea</b> All parties share the loss when cargo is jettisoned to save the voyage</p><p class="here"><b>on the estate</b> Shared cost and shared loss across the hive, never one member alone</p></article>
+      <article class="term"><h3>Salvage <span class="st prop">proposed</span></h3><p class="sea"><b>at sea</b> Recovering a ship or cargo in peril</p><p class="here"><b>on the estate</b> Resuming a paid but unfinished upload without paying twice</p></article>
+      <article class="term"><h3>Dry dock <span class="st prop">proposed</span></h3><p class="sea"><b>at sea</b> Out of the water for repair</p><p class="here"><b>on the estate</b> A surface taken offline to be fixed</p></article>
+      <article class="term"><h3>Shakedown <span class="st prop">proposed</span></h3><p class="sea"><b>at sea</b> A new ship's first trial run</p><p class="here"><b>on the estate</b> Tests against mocks before anything real is spent</p></article>
+      <article class="term"><h3>Commission <span class="st prop">proposed</span></h3><p class="sea"><b>at sea</b> A ship formally enters service</p><p class="here"><b>on the estate</b> A surface goes live, proven at its public address</p></article>
+      <article class="term"><h3>Sick bay <span class="st prop">proposed</span></h3><p class="sea"><b>at sea</b> Where the corpsman treats the crew</p><p class="here"><b>on the estate</b> Bug diagnosis and repair</p></article>
+    </div>
+  </details>
+
+  <details data-reg-disclose id="sailors">
+    <summary>Ten thousand years of sailors</summary>
+    <div class="dbody">
+      <p>People have crossed open water for more than ten thousand years, and nearly every rule the estate needs was written by them first. Dates below are approximate and written from general knowledge, not from sources opened for this draft; each row is to be checked against a source.</p>
+      <div class="hist"><div class="when">About 11,000 BCE</div><div class="what">Obsidian from the island of Melos reaches mainland Greece, so people were already crossing open Aegean water</div><div class="gave">Proof that seafaring is older than farming, writing or the city</div></div>
+      <div class="hist"><div class="when">About 8000 BCE</div><div class="what">The Pesse canoe, a dugout found in the Netherlands, the oldest known boat</div><div class="gave">The first surviving hull</div></div>
+      <div class="hist"><div class="when">About 5000 BCE</div><div class="what">Reed boats sealed with bitumen sail the Persian Gulf</div><div class="gave">Trade by sea between early settlements</div></div>
+      <div class="hist"><div class="when">About 3000 BCE onward</div><div class="what">Austronesian voyagers spread from Taiwan across the Pacific and Indian oceans</div><div class="gave">Wayfinding by stars, swells and birds, with no instruments</div></div>
+      <div class="hist"><div class="when">About 2500 BCE</div><div class="what">The Khufu ship is buried beside the Great Pyramid</div><div class="gave">Plank-built ships made to last for eternity</div></div>
+      <div class="hist"><div class="when">About 1300 BCE</div><div class="what">The Uluburun ship sinks off Turkey carrying copper, tin, glass and ivory from many lands</div><div class="gave">The oldest mixed cargo we can still inventory: a manifest on the seabed</div></div>
+      <div class="hist"><div class="when">About 1200 to 300 BCE</div><div class="what">Phoenician traders work the whole Mediterranean and pass the alphabet along their routes</div><div class="gave">Trade networks that carried writing itself</div></div>
+      <div class="hist"><div class="when">About 800 BCE onward</div><div class="what">The Rhodian sea law: cargo thrown overboard to save a ship is a loss shared by all</div><div class="gave">General average, still in force today</div></div>
+      <div class="hist"><div class="when">About 1000 CE</div><div class="what">Norse sailors reach North America</div><div class="gave">Open-ocean crossing in the North Atlantic</div></div>
+      <div class="hist"><div class="when">About 1100 to 1300 CE</div><div class="what">Polynesian voyagers settle Hawaii, Rapa Nui and Aotearoa</div><div class="gave">The largest settlement by sea in human history</div></div>
+      <div class="hist"><div class="when">12th to 14th century</div><div class="what">The Rolls of Oleron and the Consolato del Mare set out the rights and duties of masters and crews</div><div class="gave">Written law of the sea, carried from port to port</div></div>
+      <div class="hist"><div class="when">1405 to 1433</div><div class="what">Zheng He's treasure fleets sail from China to East Africa</div><div class="gave">Fleet logistics on a scale Europe would not match for centuries</div></div>
+      <div class="hist"><div class="when">1747</div><div class="what">James Lind's trial aboard HMS Salisbury shows citrus treats scurvy</div><div class="gave">Often called the first controlled clinical trial, run at sea by a ship's surgeon</div></div>
+      <div class="hist"><div class="when">1760s</div><div class="what">John Harrison's chronometer solves longitude</div><div class="gave">A ship can know where it is</div></div>
+      <div class="hist"><div class="when">1898</div><div class="what">The United States Navy Hospital Corps is established on 17 June</div><div class="gave">The corpsman becomes a rating of his own</div></div>
+      <div class="hist"><div class="when">1982</div><div class="what">The United Nations Convention on the Law of the Sea is signed</div><div class="gave">The high seas are held in common and belong to no one state</div></div>
+    </div>
+  </details>
+
+  <details data-reg-disclose id="line">
+    <summary>The founder in the line</summary>
+    <div class="dbody">
+      <p>The founder joined that line himself: he served as a United States Navy and Fleet Marine Force Hospital Corpsman. He joined the Navy at 17 and left for his first boot camp in 1995. That is what he shares publicly; units, stations and operations stay out of this document.</p>
+      <p>A Hospital Corpsman is the sailor who keeps the crew alive. A Fleet Marine Force corpsman does it ashore with the Marines, who call him "Doc" and call "Corpsman up" when someone is hit. The rating descends from the ship's surgeons and loblolly boys of the age of sail, the same tradition that produced Lind's scurvy trial.</p>
+      <p>The estate already runs on his two trades. The operating room gives it seats, a surgical team and S.O.A.P. notes for every bug. The ship gives it the manifest, the log and the watch. The corpsman is where the two meet: one person, trained to act alone, far from any hospital, responsible for everyone aboard.</p>
+      <p>That is the posture the estate asks of every seat. Treat what is in front of you, write it in the log, and never leave a shipmate behind.</p>
+    </div>
+  </details>
+
+  <details data-reg-disclose id="open">
+    <summary>Open items</summary>
+    <div class="dbody">
+      <ul class="open">
+        <li>Rule the glossary rows beyond manifest, or strike any that read wrong to a sailor.</li>
+        <li>Check every date in the history table against a source.</li>
+        <li>Once ruled, the seats rename data actions on My Data and MY SPACE to match, in all 29 languages.</li>
+      </ul>
+    </div>
+  </details>
+
+  <footer>
+    Founder ruling 2026-09-21 · drafted by the Cowork seat · printed on his word · words from <span translate="no">docs/LAW-OF-THE-SEA.md</span> · AGPL-3.0-only · <a href="index.html" data-i18n="law.hive">← the hive</a>
+  </footer>
+</main>
+<script src="tour.js?v=42"></script>
+</body>
+</html>
