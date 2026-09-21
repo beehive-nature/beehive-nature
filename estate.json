@@ -1252,6 +1252,16 @@
    "org": "skaists"
   },
   {
+   "id": "bnamesday",
+   "family": "skaists",
+   "home": "skaists.social",
+   "path": "surfaces/bnamesday.html",
+   "state": "LIVE",
+   "gloss": "a name has a day, a day has a name",
+   "org": "skaists",
+   "descriptionKey": "s.bnamesday.name"
+  },
+  {
    "id": "comb",
    "family": "beehivenature",
    "home": "skaists.dev",
@@ -1335,8 +1345,8 @@
   }
  ],
  "counts": {
-  "surfaces": 98,
-  "listed": 107,
+  "surfaces": 99,
+  "listed": 108,
   "families": 8,
   "domains": 26,
   "domainsLive": 4,
@@ -1345,7 +1355,7 @@
   "byFamily": {
    "beehivenature": 42,
    "plur": 7,
-   "skaists": 20,
+   "skaists": 21,
    "bnature": 18,
    "beehivebiomass": 5,
    "beehivebuds": 0,
@@ -1353,11 +1363,11 @@
    "bnr": 1
   },
   "byState": {
-   "LIVE": 107
+   "LIVE": 108
   },
   "byOrg": {
    "beehive-nature": 59,
-   "skaists": 34,
+   "skaists": 35,
    "beehive-biomass": 5
   }
  },
