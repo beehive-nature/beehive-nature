@@ -185,6 +185,7 @@
       storage is an adapter, never this page: each rail runs in its own dedicated Web Worker behind SPEC-ADAPTER-CONTRACT-1, and this page holds the key, the signature, the retry and the index — nothing else.<br>
       you choose a <b>purpose</b>; the page picks a rail whose own declared terms answer it. Those terms — deletable? who reads? how long? who paid? — come from the rail's <code>describe</code>, and are printed on every file above. This page does not know them.<br>
       a keep-it-here purpose is never routed to a rail that declares any network, and the two rails that serve those purposes contain no network primitive at all. What they hold is AES-GCM ciphertext; the key stays in this page, so there is no key on that side to hold.<br>
+      a file kept forever is paid by you, from your own wallet. This page cannot take that payment yet: it refuses every price by name and asks your wallet for nothing. It never holds, derives or stores a wallet key.<br>
       identity = a key generated once in this browser and kept here. No login, no session.
     </p>
   </details>

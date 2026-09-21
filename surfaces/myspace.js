@@ -138,7 +138,7 @@
   function dropLegacy(id) { return tx('blobs', 'readwrite', function (s) { return s.delete(id); }); }
 
   /* ---------- the rails ----------
-     Three adapters, one contract, one seam. Two of them speak to nothing at all,
+     Four adapters, one contract, one seam. Two of them speak to nothing at all,
      which is the whole reason the coordinator put them before HIVE, ANT and AR:
      if the boundary does not hold for a rail with no account, no key, no network
      and no approval, we learn it for nothing.
@@ -152,7 +152,8 @@
   var RAILS = [
     { scheme: 'temp', script: 'myspace-adapter-temp.js' },
     { scheme: 'local', script: 'myspace-adapter-local.js' },
-    { scheme: 'blossom', script: 'myspace-adapter-blossom.js' }
+    { scheme: 'blossom', script: 'myspace-adapter-blossom.js' },
+    { scheme: 'ant', script: 'myspace-adapter-ant.js' }
   ];
 
   /* The adapters' own codes. §6: an adapter answers with a code, never a
@@ -215,6 +216,14 @@
     {
       id: 'share', allowNetwork: true,
       wants: function (t) { return t.readers === 'link-holders'; }
+    },
+    /* Rail 4 (ruling 06:27Z). Last because it sends bytes furthest: readable
+       by anyone, for as long as the network lasts, with no delete. Its own
+       predicate rather than a widened `share`, because `railFor` takes the
+       FIRST rail that answers and `share` would never reach past the hive. */
+    {
+      id: 'forever', allowNetwork: true,
+      wants: function (t) { return t.readers === 'everyone' && t.lifetime === 'permanent' && t.deletable === false; }
     }
   ];
 
@@ -272,6 +281,10 @@
     var single = 'x.' + verb;
     if (a.can(single)) return a.ops[single](p);
 
+    /* The third shape: the rail PRICES, a payment is made, the rail STORES.
+       Read from the declaration like the other two. */
+    if (verb === 'put' && a.can('x.preparePut') && a.can('x.finalizePut')) return paidPut(a, p.bytes);
+
     var begin = 'x.begin' + cap(verb);
     var submit = 'x.submit' + cap(verb);
     if (!a.can(begin) || !a.can(submit)) throw new Error(scheme + ' does not declare ' + verb);
@@ -300,6 +313,60 @@
     await railOp(scheme, 'join', {});
     joined[scheme] = true;
     return true;
+  }
+
+  /* ---------- a rail the visitor pays for ----------
+     The rail prices the file (the door reads it to self-encrypt and quote),
+     `payFor` pays the plan it returns, and the rail stores against that
+     payment. `sent` and `paid` travel on the error so the sentence the
+     visitor reads afterwards says what really left the phone.
+
+     THIS PAGE CANNOT PAY YET. `PAY_ARMS` is empty, so `payFor` refuses every
+     plan by name and the wallet is never asked for anything. Paying is slice W
+     (ruling 795cce0e): it wires the estate's one payer, surfaces/ant-pay.js,
+     with the price shown and accepted before anything is signed. There is no
+     wallet code in this file, and there must not be a second payer here. */
+
+  var NOTHING_SENT = [-32030, -32031];   // the adapter's DOOR_CLOSED and TOO_LARGE: thrown before its POST
+
+  var PAY_ARMS = {};
+
+  async function payFor(plan) {
+    var arm = PAY_ARMS[plan && plan.payment_type];
+    if (!arm) throw new Error('this page cannot pay a ' + (plan && plan.payment_type) + ' plan yet, so it will not ask your wallet to');
+    var txs = await arm(plan);
+    if (!Array.isArray(txs) || !txs.length) throw new Error('the payment step returned no payment');
+    return txs;
+  }
+
+  async function paidPut(a, bytes) {
+    setStatus(t('pricing'), false, true);
+    var prep;
+    try {
+      prep = await a.ops['x.preparePut']({ bytes: bytes }, 180000);
+    } catch (e) {
+      if (NOTHING_SENT.indexOf(e.code) < 0) e.sent = true;
+      throw e;
+    }
+    var txs = null;
+    try {
+      txs = await payFor(prep.plan);
+      setStatus(t('working'), false, true);
+      return await a.ops['x.finalizePut']({ intent_id: prep.intent_id, txs: txs }, 180000);
+    } catch (e) {
+      e.sent = true;
+      if (txs) e.paid = txs.map(function (x) { return x.tx_hash; });
+      throw e;
+    }
+  }
+
+  /* What left the phone, said after a paid act fails. Paid-and-not-stored is
+     the stranded-payment case (SPEC-AUTONOMI-TREZOR-1 §4), and the hashes are
+     the visitor's receipt for it, so they are printed, not summarised. */
+  function leftSaying(e) {
+    if (e.paid) return ' You paid (' + e.paid.join(', ') + ') and the file was not confirmed as stored; keep those payment ids.';
+    if (e.sent) return ' The estate\'s door saw the file to price it; nothing was stored and nothing was paid.';
+    return '';
   }
 
   function railPut(scheme, bytes) { return railOp(scheme, 'put', { bytes: bytes }); }
@@ -340,6 +407,8 @@
       'now-title': 'Just for now', 'now-body': 'For this visit only.',
       'keep-title': 'Keep it here', 'keep-body': 'Yours, on this phone.',
       'share-title': 'Show the world', 'share-body': 'Give someone the link.',
+      'forever-title': 'Keep it forever', 'forever-body': 'Put it out in the open, for good.',
+      pricing: 'Asking what it costs. The estate\'s door reads the file to price it.',
       joining: 'Putting this phone in the hive — that is what lets it hold a file, and what lets a link open.',
       copy: 'Copy link', move: 'Move it', open: 'Open',
       working: 'Putting it away…', done: 'Done.',
@@ -367,6 +436,8 @@
          keeps it dead is in `e2e/myspace-seam.mjs` §14 and it judges every
          register, not this one line. */
       'share-title': 'show it', 'share-body': 'put it out there.',
+      'forever-title': 'forever', 'forever-body': 'out in the open. for good.',
+      pricing: 'pricing it. the estate door reads it to quote.',
       joining: 'this phone is joining the hive. that is what makes a link open.',
       copy: 'copy link', move: 'move it', open: 'open',
       working: 'stashing…', done: 'done.',
@@ -388,6 +459,8 @@
       'now-title': 'EPHEMERAL', 'now-body': 'purpose: this session.',
       'keep-title': 'DEVICE', 'keep-body': 'purpose: retained here.',
       'share-title': 'PUBLISHED', 'share-body': 'purpose: readable by link.',
+      'forever-title': 'PERMANENT', 'forever-body': 'purpose: public record.',
+      pricing: 'requesting a quote from the door…',
       joining: 'claiming the standing invite for this device key.',
       copy: 'copy URL', move: 'REWRITE', open: 'READ',
       working: 'writing to rail…', done: 'written.',
@@ -411,22 +484,22 @@
      deciding what a rail is allowed to say. */
   var TERM_WORDS = {
     bee: {
-      readers: { 'this-device': 'Only this phone opens it.', 'link-holders': 'Anyone with the link opens it.' },
-      lifetime: { 'until-this-tab-closes': 'It goes when you close this tab.', 'until-you-delete-it': 'It stays until you remove it.', 'while-the-store-keeps-it': 'It stays as long as the hive keeps it.' },
-      deletable: { yes: 'You can take it back.', no: 'You cannot take it back.' },
-      payer: { nobody: 'Nobody is paying for it.', 'the-hive': 'The hive is paying for it.' }
+      readers: { 'this-device': 'Only this phone opens it.', 'link-holders': 'Anyone with the link opens it.', everyone: 'Anyone can read it.' },
+      lifetime: { 'until-this-tab-closes': 'It goes when you close this tab.', 'until-you-delete-it': 'It stays until you remove it.', 'while-the-store-keeps-it': 'It stays as long as the hive keeps it.', permanent: 'It lasts forever.' },
+      deletable: { yes: 'You can take it back.', no: 'Nobody can delete it, not even you.' },
+      payer: { nobody: 'Nobody is paying for it.', 'the-hive': 'The hive is paying for it.', you: 'You pay for it, from your own wallet.' }
     },
     raver: {
-      readers: { 'this-device': 'this phone only.', 'link-holders': 'the link opens it.' },
-      lifetime: { 'until-this-tab-closes': 'gone when this tab closes.', 'until-you-delete-it': 'stays till you drop it.', 'while-the-store-keeps-it': 'stays while the hive holds it.' },
-      deletable: { yes: 'you can pull it back.', no: 'you cannot pull it back.' },
-      payer: { nobody: 'nobody paid.', 'the-hive': 'the hive paid.' }
+      readers: { 'this-device': 'this phone only.', 'link-holders': 'the link opens it.', everyone: 'anyone reads it.' },
+      lifetime: { 'until-this-tab-closes': 'gone when this tab closes.', 'until-you-delete-it': 'stays till you drop it.', 'while-the-store-keeps-it': 'stays while the hive holds it.', permanent: 'lasts forever.' },
+      deletable: { yes: 'you can pull it back.', no: 'nobody can delete it. not even you.' },
+      payer: { nobody: 'nobody paid.', 'the-hive': 'the hive paid.', you: 'you pay. your wallet.' }
     },
     cypherpunk: {
-      readers: { 'this-device': 'readers: this device', 'link-holders': 'readers: link holders' },
-      lifetime: { 'until-this-tab-closes': 'lifetime: session', 'until-you-delete-it': 'lifetime: until dropped', 'while-the-store-keeps-it': 'lifetime: store-bound' },
+      readers: { 'this-device': 'readers: this device', 'link-holders': 'readers: link holders', everyone: 'readers: everyone' },
+      lifetime: { 'until-this-tab-closes': 'lifetime: session', 'until-you-delete-it': 'lifetime: until dropped', 'while-the-store-keeps-it': 'lifetime: store-bound', permanent: 'lifetime: permanent' },
       deletable: { yes: 'deletable: yes', no: 'deletable: no' },
-      payer: { nobody: 'payer: none', 'the-hive': 'payer: the hive' }
+      payer: { nobody: 'payer: none', 'the-hive': 'payer: the hive', you: 'payer: you (own wallet)' }
     }
   };
 
@@ -441,6 +514,20 @@
     var t = terms(scheme);
     if (!t) return '';
     return word('readers', t.readers) + ' ' + word('lifetime', t.lifetime);
+  }
+
+  /* A purpose card says more than a why-line, because it is read BEFORE the
+     choice: a rail with no delete says so, and a rail the visitor pays for says
+     so, on the card itself and ahead of any price or signature (ruling 06:27Z —
+     "a card that says only 'store forever' is the pretty-signal class"). Driven
+     by the declared values, never by which purpose or rail this is. */
+  function cardTerms(scheme) {
+    var tm = terms(scheme);
+    if (!tm) return '';
+    var out = termsLine(scheme);
+    if (tm.deletable === false) out += ' ' + word('deletable', 'no');
+    if (tm.payer === 'you') out += ' ' + word('payer', 'you');
+    return out;
   }
 
   function reg() {
@@ -577,7 +664,7 @@
 
   function leftBehind(row) {
     if (!row.oldAddr) return '';
-    return ' An open copy you shared earlier is still in the hive at ' +
+    return ' An open copy you shared earlier is still out there at ' + row.oldAddr.scheme + ':' +
       row.oldAddr.address.slice(0, 12) + '…, and this cannot reach it.';
   }
 
@@ -676,7 +763,7 @@
       var body = document.createElement('span');
       /* Voice from the register, facts from the rail — in that order, so a
          reader gets the character and then the terms it is character about. */
-      body.textContent = purposeBody(p.id) + ' ' + termsLine(railFor(p.id));
+      body.textContent = purposeBody(p.id) + ' ' + cardTerms(railFor(p.id));
       b.appendChild(title);
       b.appendChild(body);
       b.onclick = function () { pendingPurpose = p.id; renderPurposes(); };
@@ -715,7 +802,7 @@
       meta.className = 'meta';
       meta.textContent = kb(row.size) + ' · ';
       var badge = document.createElement('span');
-      badge.className = 'badge' + (row.purpose === 'share' ? ' pub' : '');
+      badge.className = 'badge' + (speaksToTheWorld(schemeOf(row)) ? ' pub' : '');
       badge.textContent = purposeTitle(row.purpose) || row.purpose;
       meta.appendChild(badge);
       art.appendChild(meta);
@@ -743,7 +830,7 @@
       if (row.oldAddr) {
         var left = document.createElement('span');
         left.className = 'left';
-        left.textContent = 'An open copy you shared earlier is still in the hive at ' + row.oldAddr.address.slice(0, 12) + '…';
+        left.textContent = 'An open copy you shared earlier is still out there at ' + row.oldAddr.scheme + ':' + row.oldAddr.address.slice(0, 12) + '…';
         h.appendChild(left);
       }
       art.appendChild(h);
@@ -914,12 +1001,12 @@
           row.purpose = 'keep';
           row.keyref = 'device:aes-gcm:v1';
           await putRow(row);
-          setStatus('That did not go through (' + (e.message || 'error') + '), so nothing left this phone. It is here, locked, and you can try again.', true);
+          setStatus('That did not go through (' + (e.message || 'error') + ').' + (leftSaying(e) || ' Nothing left this phone.') + ' It is here, locked, and you can try again.', true);
         } catch (e2) {
-          setStatus('Nothing was written (' + (e2.message || e.message || 'error') + '), so nothing left this phone.', true);
+          setStatus('Nothing was written (' + (e2.message || e.message || 'error') + ').' + (leftSaying(e) || ' Nothing left this phone.'), true);
         }
       } else {
-        setStatus('Nothing was written (' + (e.message || 'error') + '), so nothing left this phone.', true);
+        setStatus('Nothing was written (' + (e.message || 'error') + ').' + (leftSaying(e) || ' Nothing left this phone.'), true);
       }
     }
     /* Back to the most private purpose any rail can answer.
@@ -971,7 +1058,7 @@
       await putRow(row);
       setStatus(moveSentence(row, toId));
     } catch (e) {
-      setStatus('Nothing changed — ' + (e.message || 'that did not work') + '.', true);
+      setStatus('Nothing changed — ' + (e.message || 'that did not work') + '.' + leftSaying(e), true);
     }
     closeSheet();
   }

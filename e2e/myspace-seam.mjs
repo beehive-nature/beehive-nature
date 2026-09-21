@@ -430,7 +430,7 @@ try {
   p1.on('pageerror', e => pageErrors.push(e.message));
   await p1.goto(PAGE, { waitUntil: 'load' });
   await settle(p1);
-  await p1.waitForFunction(() => window.__myspace.purposes().length === 3, null, { timeout: 10000 })
+  await p1.waitForFunction(() => window.__myspace.purposes().length === 4, null, { timeout: 10000 })
     .catch(() => {});
 
   const shapes = await p1.evaluate(() => {
@@ -448,8 +448,8 @@ try {
     return out;
   });
 
-  ok('all three rails attached by answering describe (§9.1)',
-    ['temp', 'local', 'blossom'].every(s => shapes[s] && shapes[s].attached === true),
+  ok('all four rails attached by answering describe (§9.1)',
+    ['temp', 'local', 'blossom', 'ant'].every(s => shapes[s] && shapes[s].attached === true),
     JSON.stringify(Object.keys(shapes).map(k => k + ':' + (shapes[k] && shapes[k].attached))));
 
   // §7 of the contract closes `Rail` and `Capability` as enums and names no
@@ -457,8 +457,15 @@ try {
   // every rail answered all four questions in the contract's own vocabulary.
   const TERM_KEYS = ['deletable', 'readers', 'lifetime', 'survives_reload', 'payer'];
   ok('every rail answers deletable? / who reads? / how long? / who paid?',
-    ['temp', 'local', 'blossom'].every(s => shapes[s].terms && TERM_KEYS.every(k => shapes[s].terms[k] !== undefined)),
-    JSON.stringify(['temp', 'local', 'blossom'].map(s => s + '=' + JSON.stringify(shapes[s].terms))));
+    ['temp', 'local', 'blossom', 'ant'].every(s => shapes[s].terms && TERM_KEYS.every(k => shapes[s].terms[k] !== undefined)),
+    JSON.stringify(['temp', 'local', 'blossom', 'ant'].map(s => s + '=' + JSON.stringify(shapes[s].terms))));
+
+  // Rail 4's four answers, exactly as ruled 2026-09-21 06:04Z and 06:07Z. Each
+  // one is a fact a visitor cannot undo, so each one is asserted by value.
+  ok('the ANT rail says: not deletable, read by everyone, permanent, and YOU pay',
+    !!shapes.ant.terms && shapes.ant.terms.deletable === false && shapes.ant.terms.readers === 'everyone' &&
+    shapes.ant.terms.lifetime === 'permanent' && shapes.ant.terms.payer === 'you' && shapes.ant.nets.length > 0,
+    JSON.stringify({ terms: shapes.ant.terms, nets: shapes.ant.nets }));
 
   // The answers must actually DIFFER, or the four questions are decoration and
   // the shell could still be printing one rail's facts for all of them.
@@ -475,20 +482,24 @@ try {
     shapes.local.caps.join(',') === 'x.put,x.get,x.drop' &&
     shapes.temp.caps.join(',') === 'x.put,x.get,x.drop',
     JSON.stringify({ blossom: shapes.blossom.caps, local: shapes.local.caps, temp: shapes.temp.caps }));
+  // The third shape: the rail prices, the visitor's wallet pays, the rail stores.
+  // No x.drop, which is what deletable:false says in the other vocabulary.
+  ok('the ANT rail declares the paid shape — prepare, finalize, read — and nothing that deletes',
+    shapes.ant.caps.join(',') === 'x.preparePut,x.finalizePut,x.get', shapes.ant.caps.join(','));
 
   // `deletable` and the presence of x.drop are two statements of one fact. The
   // one thing they must never do is disagree, because the page writes its delete
   // sentence from the first and calls the second.
   ok('deletable and the presence of x.drop agree on every rail',
-    ['temp', 'local', 'blossom'].every(s => shapes[s].terms.deletable === shapes[s].caps.includes('x.drop')),
-    JSON.stringify(['temp', 'local', 'blossom'].map(s => `${s}: deletable=${shapes[s].terms.deletable} drop=${shapes[s].caps.includes('x.drop')}`)));
+    ['temp', 'local', 'blossom', 'ant'].every(s => shapes[s].terms.deletable === shapes[s].caps.includes('x.drop')),
+    JSON.stringify(['temp', 'local', 'blossom', 'ant'].map(s => `${s}: deletable=${shapes[s].terms.deletable} drop=${shapes[s].caps.includes('x.drop')}`)));
 
-  ok('spawning three rails touched nothing off this box', wire1.length === 0, wire1.join(' | '));
+  ok('spawning four rails touched nothing off this box', wire1.length === 0, wire1.join(' | '));
 
   const purposes1 = await p1.evaluate(() => window.__myspace.purposes());
-  ok('all three purposes are offered, and the buttons match',
-    purposes1.join(',') === 'now,keep,share' &&
-    (await p1.$$('#modes .mode')).length === 3,
+  ok('all four purposes are offered, and the buttons match',
+    purposes1.join(',') === 'now,keep,share,forever' &&
+    (await p1.$$('#modes .mode')).length === 4,
     purposes1.join(','));
 
   // ── 2 · a keep-it-here purpose puts NOTHING on the wire ────────────────────
@@ -514,7 +525,7 @@ try {
   const pT = await cT.newPage();
   await pT.goto(PAGE, { waitUntil: 'load' });
   await settle(pT);
-  await pT.waitForFunction(() => window.__myspace.purposes().length === 3, null, { timeout: 10000 }).catch(() => {});
+  await pT.waitForFunction(() => window.__myspace.purposes().length === 4, null, { timeout: 10000 }).catch(() => {});
   const beforeNow = wireT.length;
   const rowsNow = await add(pT, 'now', 'fleeting.txt', FLEETING);
   ok('the just-for-now purpose put ZERO requests on the wire either',
@@ -618,7 +629,7 @@ try {
   console.log('\n5b · §9 — the temp rail does not survive a reload, and the shell learns that by asking');
   await pT.reload({ waitUntil: 'load' });
   await settle(pT);
-  await pT.waitForFunction(() => window.__myspace.purposes().length === 3, null, { timeout: 10000 }).catch(() => {});
+  await pT.waitForFunction(() => window.__myspace.purposes().length === 4, null, { timeout: 10000 }).catch(() => {});
   const sweptRows = await pT.evaluate(() => window.__myspace.rows());
   const sweptStatus = await pT.textContent('#status');
   ok('the just-for-now row is GONE after a reload, swept by its rail\'s own answer',
@@ -629,7 +640,7 @@ try {
 
   await p1.reload({ waitUntil: 'load' });
   await settle(p1);
-  await p1.waitForFunction(() => window.__myspace.purposes().length === 3, null, { timeout: 10000 }).catch(() => {});
+  await p1.waitForFunction(() => window.__myspace.purposes().length === 4, null, { timeout: 10000 }).catch(() => {});
   const survivors = await p1.evaluate(() => window.__myspace.rows());
   ok('the kept row survived the same reload, because ITS rail said it would',
     survivors.some(r => r.id === homeRow.id && r.purpose === 'keep'),
@@ -950,7 +961,7 @@ try {
   p14.on('pageerror', e => errs14.push(e.message));
   await p14.goto(PAGE, { waitUntil: 'load' });
   await settle(p14);
-  await p14.waitForFunction(() => window.__myspace.purposes().length === 3, null, { timeout: 10000 });
+  await p14.waitForFunction(() => window.__myspace.purposes().length === 4, null, { timeout: 10000 });
 
   const have14 = await threeFiles(p14);
   ok('PRECONDITION — one file on each of the three rails, so all four surfaces have something to say',
@@ -959,10 +970,10 @@ try {
 
   const walk14 = await stutterWalk(p14);
 
-  // 3 purpose cards + 3 why-lines + 3 delete sheets + 3 rows × 2 destinations.
+  // 4 purpose cards + 3 why-lines + 3 delete sheets + 3 rows × 3 destinations.
   // Asserted as a NUMBER, so a walk that silently read nothing cannot report a
   // clean page: an empty scan is vacuous, never green.
-  const EXPECTED_SAYINGS = 15;
+  const EXPECTED_SAYINGS = 19;
   ok('the walk read all four surfaces in all three registers',
     walk14.walked.length === 3 && walk14.walked.every(w =>
       w.n === EXPECTED_SAYINGS && w.kinds === 'delete sheet,move sheet,purpose card,why-line'),
@@ -1014,21 +1025,21 @@ try {
   const c14b = await browser.newContext({ viewport: { width: 390, height: 844 } });
   await mockHive(c14b);
   await mutate(c14b, SHELL_RE, SHELL_REL,
-    `      readers: { 'this-device': 'Only this phone opens it.', 'link-holders': 'Anyone with the link opens it.' },
-      lifetime: { 'until-this-tab-closes': 'It goes when you close this tab.', 'until-you-delete-it': 'It stays until you remove it.', 'while-the-store-keeps-it': 'It stays as long as the hive keeps it.' },`,
-    `      readers: { 'this-device': 'The bytes go and the key goes with them.', 'link-holders': 'Anyone with the link opens it.' },
-      lifetime: { 'until-this-tab-closes': 'It goes when you close this tab.', 'until-you-delete-it': 'The bytes go and the key goes with them.', 'while-the-store-keeps-it': 'It stays as long as the hive keeps it.' },`);
+    `      readers: { 'this-device': 'Only this phone opens it.', 'link-holders': 'Anyone with the link opens it.', everyone: 'Anyone can read it.' },
+      lifetime: { 'until-this-tab-closes': 'It goes when you close this tab.', 'until-you-delete-it': 'It stays until you remove it.', 'while-the-store-keeps-it': 'It stays as long as the hive keeps it.', permanent: 'It lasts forever.' },`,
+    `      readers: { 'this-device': 'The bytes go and the key goes with them.', 'link-holders': 'Anyone with the link opens it.', everyone: 'Anyone can read it.' },
+      lifetime: { 'until-this-tab-closes': 'It goes when you close this tab.', 'until-you-delete-it': 'The bytes go and the key goes with them.', 'while-the-store-keeps-it': 'It stays as long as the hive keeps it.', permanent: 'It lasts forever.' },`);
   const p14b = await c14b.newPage();
   await p14b.goto(PAGE, { waitUntil: 'load' });
   await settle(p14b);
-  await p14b.waitForFunction(() => window.__myspace.purposes().length === 3, null, { timeout: 10000 });
+  await p14b.waitForFunction(() => window.__myspace.purposes().length === 4, null, { timeout: 10000 });
   const have14b = await threeFiles(p14b);
-  ok('FIXTURE PRECONDITION — the drifted page still routes all three purposes, so the walk judges the same 15 places',
+  ok('FIXTURE PRECONDITION — the drifted page still routes all three purposes it adds to, so the walk judges the same 19 places',
     have14b.length === 3 && new Set(have14b.map(r => r.addr && r.addr.scheme)).size === 3,
     JSON.stringify(have14b.map(r => r.name + ':' + (r.addr && r.addr.scheme))));
 
   const walk14b = await stutterWalk(p14b);
-  ok('the fixture walk read the same 15 places in each register, each one landed',
+  ok('the fixture walk read the same 19 places in each register, each one landed',
     walk14b.walked.every(w => w.n === EXPECTED_SAYINGS && w.landed === true),
     JSON.stringify(walk14b.walked.map(w => w.register + ':' + w.n + ':' + w.landed)));
 
@@ -1070,7 +1081,7 @@ try {
   p15.on('pageerror', e => errs15.push(e.message));
   await p15.goto(PAGE, { waitUntil: 'load' });
   await settle(p15);
-  await p15.waitForFunction(() => window.__myspace.purposes().length === 3, null, { timeout: 10000 }).catch(() => {});
+  await p15.waitForFunction(() => window.__myspace.purposes().length === 4, null, { timeout: 10000 }).catch(() => {});
 
   const OPENED = 'this one is kept, and a stranger must be able to read it back.\n';
   const rows15 = await add(p15, 'keep', 'openable.txt', OPENED);
@@ -1085,8 +1096,8 @@ try {
     return { state: document.body.getAttribute('data-state'), modes: box(document.getElementById('modes')),
              drop: box(document.querySelector('.drop')), buttons: document.querySelectorAll('#modes .mode').length };
   });
-  ok('with a file on the page the purpose picker is still on screen, all three buttons',
-    vis15.state === 'file' && vis15.modes && vis15.modes.shown === true && vis15.modes.h > 0 && vis15.buttons === 3,
+  ok('with a file on the page the purpose picker is still on screen, all four buttons',
+    vis15.state === 'file' && vis15.modes && vis15.modes.shown === true && vis15.modes.h > 0 && vis15.buttons === 4,
     JSON.stringify(vis15));
   ok('CONTROL — the empty-state drop zone IS hidden in the same state, so the probe can say no',
     vis15.drop !== null && vis15.drop.shown === false,
@@ -1112,7 +1123,7 @@ try {
   const pressed = await p15.evaluate(() => [...document.querySelectorAll('#modes .mode')]
     .map(b => b.getAttribute('data-purpose') + '=' + b.getAttribute('aria-pressed')).join(','));
   ok('and the selection moved back from share to the most private purpose, where the visitor can see it',
-    pressed === 'now=true,keep=false,share=false', pressed);
+    pressed === 'now=true,keep=false,share=false,forever=false', pressed);
 
   // (a) A KEPT FILE OPENS. Same read path a move uses, ending at the device.
   const wireBeforeOpen = wire15.length;
@@ -1166,7 +1177,7 @@ try {
 
   await p15.reload({ waitUntil: 'load' });
   await settle(p15);
-  await p15.waitForFunction(() => window.__myspace.purposes().length === 3, null, { timeout: 10000 }).catch(() => {});
+  await p15.waitForFunction(() => window.__myspace.purposes().length === 4, null, { timeout: 10000 }).catch(() => {});
   const afterReload = await p15.evaluate(() => window.__myspace.rows());
   ok('the row is gone after a reload — the delete was written, not just rendered',
     !afterReload.some(r => r.id === keptRow.id),
@@ -1198,7 +1209,7 @@ try {
   p16.on('pageerror', e => errs16.push(e.message));
   await p16.goto(PAGE, { waitUntil: 'load' });
   await settle(p16);
-  await p16.waitForFunction(() => window.__myspace.purposes().length === 3, null, { timeout: 10000 }).catch(() => {});
+  await p16.waitForFunction(() => window.__myspace.purposes().length === 4, null, { timeout: 10000 }).catch(() => {});
 
   const st16 = await attachState(p16, 'local');
   ok('PRECONDITION — the denied rail ATTACHED: describe touches no store, so this is not §10 over again',
@@ -1280,7 +1291,7 @@ try {
   p17.on('pageerror', e => errs17.push(e.message));
   await p17.goto(PAGE, { waitUntil: 'load' });
   await settle(p17);
-  await p17.waitForFunction(() => window.__myspace.purposes().length === 3, null, { timeout: 10000 }).catch(() => {});
+  await p17.waitForFunction(() => window.__myspace.purposes().length === 4, null, { timeout: 10000 }).catch(() => {});
 
   const MOVED = 'this one was asked to move and the move was refused.\n';
   const rows17 = await add(p17, 'keep', 'unmoved.txt', MOVED);
@@ -1310,6 +1321,322 @@ try {
   ok('and the refused move put ZERO requests on the wire', wire17.length === 0, wire17.join(' | '));
   ok('no page errors across the refused move and the open', errs17.length === 0, errs17.join(' | '));
   await c17.close();
+
+  // ── 18 · rail 4, ANT: a file that lasts forever, paid by the visitor ──────
+  //
+  // THE BOUNDARY, WRITTEN DOWN THE WAY THE MOCKED HIVE IS: this section spends
+  // NOTHING on any network. The estate door at relay.skaists.dev is MOCKED here
+  // — every one of its routes is answered by `mockAntDoor` below, in this
+  // process. There is no wallet in this section, and none in the page: rail 4
+  // ships no wallet code (ruling 795cce0e). The boundary row in (g) asserts that
+  // every request that left the page went to the mocked door and nowhere else.
+  //
+  // THE ARM IS PLANTED, NOT SHIPPED. The shell ships `PAY_ARMS = {}`, so every
+  // plan is refused by name until slice W wires surfaces/ant-pay.js. To drive
+  // the prepare → pay → finalize path, (g) plants ONE mock arm into the served
+  // shell — a function that returns a fake transaction id per quote and touches
+  // nothing — the same way §16 plants a denied store. Everything around it runs
+  // unmutated: the ceiling probe, the prepare, the finalize, the row, the open.
+  console.log('\n18 · rail 4 — ANT: forever, public, paid by the visitor, behind a closed door until it opens');
+
+  const ANT_RE = /myspace-adapter-ant\.js/;
+  const ANT_REL = 'surfaces/myspace-adapter-ant.js';
+  const DOOR_ORIGIN = 'https://relay.skaists.dev';
+  const FOREVER = 'this one is for everyone, for good, and it was paid for.\n';
+  const MOCK_TX = '0x' + 'ee'.repeat(32);
+  const QUOTED_ATTO = '1500000000000000000';           // 1.5 ANT, the mock door's price
+  const QUOTE_HASH = '0x' + '0'.repeat(63) + '1';
+  const QUOTE_HASH_2 = '0x' + '0'.repeat(63) + '2';
+
+  // The door, mocked. `open:false` answers the ceiling probe the way the live
+  // door does today — refused — so the closed-door row is the live page's case.
+  async function mockAntDoor(ctx, { open, maxBytes = 32 * 1024 * 1024, paymentType = 'wave_batch', twoQuotes = false, totalDelta = 0n }) {
+    const log = { ceiling: 0, prepare: [], finalize: [], read: 0 };
+    const held = new Map();
+    await ctx.route(/^https:\/\/relay\.skaists\.dev\/ant\/v1\//, async route => {
+      const req = route.request();
+      const u = new URL(req.url());
+      if (req.method() === 'OPTIONS') return route.fulfill({ status: 204, headers: cors });
+      if (u.pathname === '/ant/v1/upload/prepare' && req.method() === 'GET') {
+        log.ceiling++;
+        if (!open) return route.fulfill({ status: 403, headers: cors, body: 'forbidden' });
+        return route.fulfill({ status: 200, headers: cors, contentType: 'application/json', body: JSON.stringify({ max_bytes: maxBytes }) });
+      }
+      if (u.pathname === '/ant/v1/upload/prepare' && req.method() === 'POST') {
+        const bytes = req.postDataBuffer() || Buffer.alloc(0);
+        const addr = sha256hex(bytes);
+        log.prepare.push({ size: bytes.length, addr });
+        held.set('up-' + addr.slice(0, 8), { addr, bytes });
+        return route.fulfill({ status: 200, headers: cors, contentType: 'application/json', body: JSON.stringify({
+          upload_id: 'up-' + addr.slice(0, 8), payment_type: paymentType,
+          total_atto: (BigInt(QUOTED_ATTO) + totalDelta).toString(),
+          chunks: { total: 3, already_stored: 0 },
+          quotes: twoQuotes
+            ? [{ quote_hash: QUOTE_HASH, rewards_address: '0x' + '22'.repeat(20), amount_atto: '1000000000000000000' },
+               { quote_hash: QUOTE_HASH_2, rewards_address: '0x' + '33'.repeat(20), amount_atto: '500000000000000000' }]
+            : [{ quote_hash: QUOTE_HASH, rewards_address: '0x' + '22'.repeat(20), amount_atto: QUOTED_ATTO }],
+          data_map_address: '0x' + addr }) });
+      }
+      if (u.pathname === '/ant/v1/upload/finalize' && req.method() === 'POST') {
+        const body = JSON.parse(req.postData() || '{}');
+        log.finalize.push(body);
+        const up = held.get(body.upload_id);
+        if (!up) return route.fulfill({ status: 404, headers: cors, body: '{}' });
+        up.stored = true;
+        return route.fulfill({ status: 200, headers: cors, contentType: 'application/json', body: JSON.stringify({ data_map_address: up.addr }) });
+      }
+      const pub = u.pathname.match(/^\/ant\/v1\/data\/public\/([0-9a-f]{64})$/);
+      if (pub) {
+        log.read++;
+        const hit = [...held.values()].find(h => h.addr === pub[1] && h.stored);
+        if (!hit) return route.fulfill({ status: 404, headers: cors, body: '{}' });
+        return route.fulfill({ status: 200, headers: cors, contentType: 'application/json', body: JSON.stringify({ data: hit.bytes.toString('base64') }) });
+      }
+      return route.fulfill({ status: 403, headers: cors, body: 'forbidden' });
+    });
+    return log;
+  }
+
+  async function antPage(ctx) {
+    const page = await ctx.newPage();
+    const errs = [];
+    page.on('pageerror', e => errs.push(e.message));
+    await page.goto(PAGE, { waitUntil: 'load' });
+    await settle(page);
+    await page.waitForFunction(() => window.__myspace.purposes().length === 4, null, { timeout: 10000 }).catch(() => {});
+    return { page, errs };
+  }
+
+  // (a) THE PURPOSE ROUTES, BOTH WAYS, ON THE REAL RAILS.
+  const cA = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  const wireA = [];
+  offBox(cA, wireA);
+  await mockHive(cA);
+  const { page: pA, errs: errsA } = await antPage(cA);
+  const routes = await pA.evaluate(() => ({
+    now: window.__myspace.railFor('now'), keep: window.__myspace.railFor('keep'),
+    share: window.__myspace.railFor('share'), forever: window.__myspace.railFor('forever')
+  }));
+  ok('forever routes to ANT, share still routes to the hive, and neither private purpose reaches ANT',
+    routes.forever === 'ant' && routes.share === 'blossom' && routes.now !== 'ant' && routes.keep !== 'ant',
+    JSON.stringify(routes));
+
+  // (b) THE CARD SAYS ALL THREE IRREVERSIBLE FACTS, BEFORE ANY PRICE, IN EVERY
+  // REGISTER. Read from the rendered card, per register, with the wait the
+  // stutter walk proved is needed. Each register's words are named here so a
+  // card that lost one fact fails by name, not by a count.
+  const FACTS = {
+    bee: [/anyone can read it/i, /lasts forever/i, /nobody can delete it/i, /you pay/i],
+    raver: [/anyone reads it/i, /lasts forever/i, /nobody can delete it/i, /you pay/i],
+    cypherpunk: [/readers: everyone/, /lifetime: permanent/, /deletable: no/, /payer: you/]
+  };
+  const cardSays = {};
+  for (const register of ['raver', 'cypherpunk', 'bee']) {
+    await wearRegister(pA, register);
+    cardSays[register] = await pA.evaluate(() => {
+      const b = document.querySelector('#modes [data-purpose="forever"] span');
+      return b ? b.textContent : null;
+    });
+  }
+  const missing = Object.keys(FACTS).flatMap(r => FACTS[r].filter(re => !re.test(cardSays[r] || '')).map(re => r + ':' + re));
+  ok('the forever card says anyone reads it, it lasts forever, nobody can delete it, and you pay — in all three registers',
+    missing.length === 0, 'missing ' + missing.join(' ') + ' in ' + JSON.stringify(cardSays));
+  const keepCard = await pA.evaluate(() => {
+    const b = document.querySelector('#modes [data-purpose="keep"] span');
+    return b ? b.textContent : null;
+  });
+  ok('CONTROL — the keep-it-here card says none of that, so the probe can say no',
+    !!keepCard && !FACTS.bee.some(re => re.test(keepCard)), keepCard);
+  ok('rendering the ANT rail and its card put nothing on the wire', wireA.length === 0, wireA.join(' | '));
+  await cA.close();
+
+  // (c) THE NETWORK GUARD, AGAINST AN ANT RAIL THAT LIES — and the guard deleted
+  // as the CONTROL, in the same gate, so the row is shown to fall without it.
+  // The local rail is moved out of the way exactly as §6 does, so the lying ANT
+  // rail is the ONLY candidate whose declared terms answer keep-it-here.
+  const lieAnt = async ctx => {
+    await mockHive(ctx);
+    await mutate(ctx, ANT_RE, ANT_REL, "        readers: 'everyone',", "        readers: 'this-device',");
+    await mutate(ctx, LOCAL_RE, LOCAL_REL, "        readers: 'this-device',", "        readers: 'link-holders',");
+  };
+  const cC = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  await lieAnt(cC);
+  const { page: pC } = await antPage(cC);
+  await pC.waitForFunction(() => window.__myspace.adapters().ant && window.__myspace.adapters().ant.attached, null, { timeout: 10000 });
+  const guarded = await pC.evaluate(() => ({ keep: window.__myspace.railFor('keep'), t: window.__myspace.terms('ant') }));
+  ok('a lying ANT rail whose terms answer keep-it-here is refused keep-it-here — the guard is the only refuser here',
+    guarded.t && guarded.t.readers === 'this-device' && guarded.keep === null, JSON.stringify(guarded));
+  await cC.close();
+
+  const cC2 = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  await lieAnt(cC2);
+  await mutate(cC2, SHELL_RE, SHELL_REL, "      if (!p.allowNetwork && speaksToTheWorld(scheme)) continue;\n", "");
+  const { page: pC2 } = await antPage(cC2);
+  await pC2.waitForFunction(() => window.__myspace.adapters().ant && window.__myspace.adapters().ant.attached, null, { timeout: 10000 });
+  const unguarded = await pC2.evaluate(() => window.__myspace.railFor('keep'));
+  ok('CONTROL — with the guard line deleted, the same liar DOES get keep-it-here, so the row above falls without it',
+    unguarded === 'ant', String(unguarded));
+  await cC2.close();
+
+  // (d) THE LIVE CASE: the write door is not open.
+  const cD = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  const wireD = [];
+  offBox(cD, wireD);
+  await mockHive(cD);
+  const doorD = await mockAntDoor(cD, { open: false });
+  const { page: pD, errs: errsD } = await antPage(cD);
+  const rowsD = await add(pD, 'forever', 'closed.txt', FOREVER);
+  const saidD = await pD.textContent('#status');
+  ok('the closed door refuses in its own words — "the estate\'s write door for this rail is not open"',
+    /write door for this rail is not open/.test(saidD || ''), saidD);
+  ok('and the page can still truthfully say nothing left this phone',
+    /Nothing left this phone/.test(saidD || ''), saidD);
+  ok('the door was ASKED (the ceiling probe) and never sent the file — no prepare, no bytes, no finalize',
+    doorD.ceiling === 1 && doorD.prepare.length === 0 && doorD.finalize.length === 0 &&
+    wireD.length === 1 && wireD[0] === 'GET ' + DOOR_ORIGIN + '/ant/v1/upload/prepare',
+    JSON.stringify({ ceiling: doorD.ceiling, prepare: doorD.prepare.length, wire: wireD }));
+  ok('the file stayed with the visitor, kept here, not on the rail that refused',
+    rowsD.length === 1 && rowsD[0].purpose === 'keep' && rowsD[0].addr.scheme === 'local',
+    JSON.stringify(rowsD.map(r => r.purpose + ':' + (r.addr && r.addr.scheme))));
+  ok('no page errors on the closed-door path', errsD.length === 0, errsD.join(' | '));
+  await cD.close();
+
+  // (f) THE DOOR IS OPEN AND THE PAGE HAS NO ARM FOR THE PLAN — the shipped
+  // state until slice W. Refused by name, nothing finalized, and the sentence
+  // says the door saw the file.
+  const cF = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  const wireF = [];
+  offBox(cF, wireF);
+  await mockHive(cF);
+  const doorF = await mockAntDoor(cF, { open: true });
+  const { page: pF, errs: errsF } = await antPage(cF);
+  await add(pF, 'forever', 'noarm.txt', FOREVER);
+  const saidF = await pF.textContent('#status');
+  ok('with no arm for the plan the page refuses by name: it cannot pay a wave_batch plan yet',
+    /cannot pay a wave_batch plan yet/.test(saidF || ''), saidF);
+  ok('and it says what really happened to the file: the door saw it, nothing was stored or paid',
+    /door saw the file to price it; nothing was stored and nothing was paid/.test(saidF || ''), saidF);
+  ok('PRECONDITION — the door was open and DID price it, so the refusal above is the page\'s, not the door\'s',
+    doorF.ceiling === 1 && doorF.prepare.length === 1, JSON.stringify({ ceiling: doorF.ceiling, prepare: doorF.prepare.length }));
+  ok('nothing was finalized, and nothing but the ceiling probe and the prepare left the page',
+    doorF.finalize.length === 0 && wireF.length === 2 && wireF.every(w => w.includes(DOOR_ORIGIN + '/ant/v1/upload/prepare')),
+    JSON.stringify({ finalize: doorF.finalize.length, wire: wireF }));
+  ok('no page errors on the no-arm path', errsF.length === 0, errsF.join(' | '));
+  await cF.close();
+
+  // (g) PREPARE → PAY → FINALIZE, END TO END, with one planted arm.
+  const PAYS_ALL = "function (plan) { return plan.quotes.map(function (q) { return { quote_hash: q.quote_hash, tx_hash: '" + MOCK_TX + "' }; }); }";
+  const plantArm = (ctx, arm = PAYS_ALL) => mutate(ctx, SHELL_RE, SHELL_REL, '  var PAY_ARMS = {};',
+    '  var PAY_ARMS = { wave_batch: ' + arm + ' };   // FIXTURE: a mock arm; the shipped table is empty until slice W');
+
+  const cG = await browser.newContext({ viewport: { width: 390, height: 844 }, acceptDownloads: true });
+  const wireG = [];
+  offBox(cG, wireG);
+  await mockHive(cG);
+  const doorG = await mockAntDoor(cG, { open: true });
+  await plantArm(cG);
+  const { page: pG, errs: errsG } = await antPage(cG);
+  const rowsG = await add(pG, 'forever', 'forever.txt', FOREVER);
+  const foreverRow = rowsG.find(r => r.name === 'forever.txt');
+  if (!foreverRow) throw new Error('(g) stored no forever row — the rows above say why');
+  ok('the door finalized against THE PAYMENT, named per quote the door gave, in the door\'s own shape',
+    doorG.finalize.length === 1 && Array.isArray(doorG.finalize[0].txs) && doorG.finalize[0].txs.length === 1 &&
+    doorG.finalize[0].txs[0].quote_hash === QUOTE_HASH && doorG.finalize[0].txs[0].tx_hash === MOCK_TX &&
+    doorG.finalize[0].tx_hashes === undefined,
+    JSON.stringify(doorG.finalize));
+  ok('the file is on the ANT rail at the address the door quoted, as plaintext — it is public by choice',
+    !!foreverRow && foreverRow.purpose === 'forever' && foreverRow.addr.scheme === 'ant' &&
+    foreverRow.addr.address === doorG.prepare[doorG.prepare.length - 1].addr && foreverRow.keyref === null,
+    JSON.stringify(foreverRow && { purpose: foreverRow.purpose, addr: foreverRow.addr, keyref: foreverRow.keyref }));
+  ok('the bytes the door was given are the bytes the visitor chose',
+    doorG.prepare.length === 1 && doorG.prepare[0].addr === sha256hex(Buffer.from(FOREVER, 'utf8')), JSON.stringify(doorG.prepare));
+
+  // and it reads back through the same read route ant-door-cors.html uses
+  const dlG = pG.waitForEvent('download', { timeout: 20000 }).catch(() => null);
+  await pG.click('#open-' + foreverRow.id);
+  const openedG = await dlG;
+  const bytesG = openedG ? await readFile(await openedG.path()) : null;
+  ok('the forever file OPENS, byte-exact, through the door\'s public read route',
+    !!bytesG && bytesG.equals(Buffer.from(FOREVER, 'utf8')) && doorG.read === 1,
+    bytesG ? bytesG.length + ' B, reads ' + doorG.read : 'no download: ' + (await pG.textContent('#status')));
+  ok('there is no delete for it: the remove sheet says the copy stays where it is',
+    await (async () => {
+      await pG.click('#del-' + foreverRow.id);
+      await pG.waitForFunction(() => document.body.getAttribute('data-state') === 'delete', null, { timeout: 5000 });
+      const said = await pG.textContent('#del-body');
+      await pG.click('#delKeep');
+      return /copy stays where it is/.test(said || '');
+    })(), 'delete sheet did not say so');
+
+  // THE BOUNDARY ROW: every request that left this page went to the mocked door.
+  const strays = wireG.filter(w => !w.includes(DOOR_ORIGIN + '/ant/v1/'));
+  ok('every request that left the page went to the MOCKED door — no RPC, no real network, nothing spent',
+    wireG.length > 0 && strays.length === 0, JSON.stringify({ n: wireG.length, strays }));
+  ok('no page errors across prepare, pay, finalize and open', errsG.length === 0, errsG.join(' | '));
+  await cG.close();
+
+  // (h) A PLAN THAT DOES NOT ADD UP, AND A PAYMENT THAT DOES NOT MATCH THE PLAN.
+  // Each fixture changes ONE thing from a two-quote plan that the CONTROL shows
+  // is stored, so a refusal here is that one thing's, and each refusal is asserted
+  // by its own words where the adapter has distinct words for it.
+  async function antCase(name, door, arm) {
+    const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
+    await mockHive(ctx);
+    const log = await mockAntDoor(ctx, { open: true, twoQuotes: true, ...door });
+    await plantArm(ctx, arm);
+    const { page, errs } = await antPage(ctx);
+    const rows = await add(page, 'forever', name, FOREVER);
+    const said = await page.textContent('#status');
+    await ctx.close();
+    return { log, rows, said, errs, stored: rows.some(r => r.purpose === 'forever' && r.addr && r.addr.scheme === 'ant') };
+  }
+  const hC = await antCase('control.txt', {}, PAYS_ALL);
+  ok('CONTROL — the two-quote plan, paid in full, IS stored, so each refusal below is its one change\'s',
+    hC.stored && hC.log.finalize.length === 1 && hC.log.finalize[0].txs.length === 2 && hC.errs.length === 0,
+    JSON.stringify({ stored: hC.stored, finalize: hC.log.finalize, said: hC.said }));
+  const hSum = await antCase('sum.txt', { totalDelta: 1n }, PAYS_ALL);
+  ok('a quoted total that is not the sum of its quotes (off by one atto) is refused: no payment asked for, nothing stored',
+    !hSum.stored && hSum.log.prepare.length === 1 && hSum.log.finalize.length === 0 && /without a complete price/.test(hSum.said || ''),
+    JSON.stringify({ said: hSum.said, finalize: hSum.log.finalize.length }));
+  const hPart = await antCase('partial.txt', {}, "function (plan) { return [{ quote_hash: plan.quotes[0].quote_hash, tx_hash: '" + MOCK_TX + "' }]; }");
+  ok('a payment that leaves a quote unpaid is refused by the page, by name, before the door is asked to store',
+    !hPart.stored && hPart.log.finalize.length === 0 && /missing_quote_tx/.test(hPart.said || ''),
+    JSON.stringify({ said: hPart.said, finalize: hPart.log.finalize.length }));
+  const hStray = await antCase('stray.txt', {}, "function (plan) { return plan.quotes.map(function (q) { return { quote_hash: q.quote_hash, tx_hash: '" + MOCK_TX + "' }; }).concat([{ quote_hash: '0x' + '99'.repeat(32), tx_hash: '" + MOCK_TX + "' }]); }");
+  ok('a payment naming a quote the door did not give is refused by name, before the door is asked to store',
+    !hStray.stored && hStray.log.finalize.length === 0 && /did not give/.test(hStray.said || ''),
+    JSON.stringify({ said: hStray.said, finalize: hStray.log.finalize.length }));
+  const hTwice = await antCase('twice.txt', {}, "function (plan) { var t = plan.quotes.map(function (q) { return { quote_hash: q.quote_hash, tx_hash: '" + MOCK_TX + "' }; }); return t.concat([t[0]]); }");
+  ok('a quote paid twice is refused by name, before the door is asked to store',
+    !hTwice.stored && hTwice.log.finalize.length === 0 && /paid twice/.test(hTwice.said || ''),
+    JSON.stringify({ said: hTwice.said, finalize: hTwice.log.finalize.length }));
+
+  // (i) A FILE OVER THE DOOR'S CEILING never leaves the phone.
+  const cI = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  await mockHive(cI);
+  const doorI = await mockAntDoor(cI, { open: true, maxBytes: 8 });
+  const { page: pI } = await antPage(cI);
+  await add(pI, 'forever', 'big.txt', FOREVER);
+  const saidI = await pI.textContent('#status');
+  ok('a file over the door\'s ceiling is refused by name, before it is sent',
+    /takes at most 8/.test(saidI || '') && doorI.ceiling === 1 && doorI.prepare.length === 0 && /Nothing left this phone/.test(saidI || ''),
+    JSON.stringify({ said: saidI, prepare: doorI.prepare.length }));
+  await cI.close();
+
+  // (j) SOURCE: rail 4 ships no wallet code and no second payer.
+  const antSrc = (await readFile(join(ROOT, ANT_REL), 'utf8')).replace(/\/\*[\s\S]*?\*\//g, '');
+  const shellSrc18 = (await readFile(join(ROOT, SHELL_REL), 'utf8')).replace(/\/\*[\s\S]*?\*\//g, '');
+  const pageSrc = await readFile(join(ROOT, 'surfaces/myspace.html'), 'utf8');
+  const KEYISH = ['privateKey', 'private_key', 'mnemonic', 'eth_sign', 'personal_sign', 'signTransaction', 'ethereum', 'eth_'];
+  ok('the ANT adapter names no key and no wallet — it cannot reach one from its worker',
+    KEYISH.filter(k => antSrc.includes(k)).length === 0, KEYISH.filter(k => antSrc.includes(k)).join(','));
+  ok('the shell names no key and no wallet either — rail 4 ships no wallet code',
+    KEYISH.filter(k => shellSrc18.includes(k)).length === 0, KEYISH.filter(k => shellSrc18.includes(k)).join(','));
+  ok('and the pay step ships with NO arm — every plan is refused until slice W',
+    (shellSrc18.match(/var PAY_ARMS = \{\};/g) || []).length === 1, 'the arm table is not the one empty table');
+  const scripts = [...pageSrc.matchAll(/<script src="([^"]+)"/g)].map(m => m[1]);
+  ok('the page loads no payer of its own: ant-pay.js is the estate\'s one payer, and slice W is what wires it',
+    scripts.length > 0 && scripts.every(src => !/pay/i.test(src)), JSON.stringify(scripts));
 
 } catch (e) {
   fail++;
