@@ -26,6 +26,7 @@ zcode/bmailroom-candidate-02 tip 00b999bb (same as test_sink_known_roster.py).
 """
 import asyncio
 import os
+import shutil
 import stat
 import sys
 import tempfile
@@ -120,31 +121,69 @@ class SinkMaildirModesTest(unittest.TestCase):
         self._deliver("bfuzz")
         self._assert_private("bfuzz")
 
-    # MAILROOT slice (2026-09-21): the root itself is enforced too. The
-    # startup mkdir lived inline in __main__ and passed no mode, so
-    # /var/mail-agents inherited the process umask (0755 under the deployed
-    # Umask=0022) — the same leak class as the mailbox dirs, one level up.
-    # The fix is prepare_mailroot(): mkdir(mode=0o700) + chmod heal, called
-    # from __main__ — named and callable so this gate exercises the real
-    # code path, not a copy of it (drift-gate law).
+
+class SinkMailrootModesTest(unittest.TestCase):
+    """The root's own privacy — creation path and heal, without the mailbox
+    machinery.
+
+    VACUITY FIX (coordinator measurement ad1082969, 2026-09-21): the first
+    version of these tests lived in SinkMaildirModesTest, whose
+    tempfile.TemporaryDirectory() pre-creates the mailroot at 0700 BEFORE
+    sink.MAILROOT is pointed at it — so MAILROOT.mkdir(exist_ok=True) was a
+    NO-OP and the two umask tests named conditions they never established;
+    the creation path that broke in production (fresh box creates
+    /var/mail-agents at startup under Umask=0022) executed in NONE of them.
+    Here the mailroot does NOT pre-exist: self.base is the temporary
+    directory, self.mailroot is a child that only prepare_mailroot() may
+    create.
+    """
+
+    def setUp(self):
+        self.base = tempfile.mkdtemp()
+        self.mailroot = Path(self.base) / "mailroot"   # does not exist yet
+        self.original_mailroot = sink.MAILROOT
+        sink.MAILROOT = self.mailroot
+        self.original_umask = os.umask(0o022)   # the deployed sink's Umask=0022
+
+    def tearDown(self):
+        os.umask(self.original_umask)
+        sink.MAILROOT = self.original_mailroot
+        shutil.rmtree(self.base, ignore_errors=True)
+
     def _assert_root_private(self):
         mode = stat.S_IMODE(os.stat(self.mailroot).st_mode)
         self.assertEqual(mode, 0o700,
                          f"MAILROOT mode {oct(mode)} != 0700 (umask leak at the root, aiosmtpd={AIOSMTPD_MODE})")
 
-    def test_mailroot_private_under_deployed_umask_022(self):
+    def test_fresh_root_private_under_deployed_umask_022(self):
+        # the production incident scenario, now actually executed
         sink.prepare_mailroot()
         self._assert_root_private()
 
-    def test_mailroot_private_under_fully_permissive_umask_000(self):
+    def test_fresh_root_private_under_fully_permissive_umask_000(self):
         os.umask(0o000)
         sink.prepare_mailroot()
         self._assert_root_private()
 
     def test_preexisting_wide_mailroot_healed(self):
-        os.chmod(self.mailroot, 0o755)   # today's production state: wide root
+        self.mailroot.mkdir(mode=0o755)   # today's production state: wide root
         sink.prepare_mailroot()
         self._assert_root_private()
+
+    # BOUNDARY (measured, ad1082969): with the follow-up chmod present,
+    # mkdir's mode=0o700 is NOT observable at steady state — it closes the
+    # creation window between mkdir and chmod (a crash there leaves 0700,
+    # not 0755) and is the safety net if chmod is ever lost. Belt-and-braces
+    # by design, not a hole. The mutation ground is therefore the measured
+    # matrix: strip BOTH lines and all three tests fall on the MODE assert
+    # (fresh-022 -> 0755, fresh-000 -> 0777, heal -> stays 0755); strip the
+    # chmod alone and the heal case falls (mkdir's mode is umask-masked but
+    # 022 never masks owner bits, so fresh roots still land 0700); strip
+    # mkdir's mode alone and everything stays green BY DESIGN. The fresh-root
+    # tests assert the CONTRACT — prepare_mailroot() yields a private root
+    # on a fresh box under any umask — and their result is umask-independent
+    # BY CONSTRUCTION (chmod enforces); the scenarios are exercised because
+    # production runs them.
 
 
 if __name__ == "__main__":
