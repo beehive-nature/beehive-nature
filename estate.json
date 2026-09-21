@@ -1223,6 +1223,15 @@
    "org": "skaists"
   },
   {
+   "id": "read-buzz",
+   "family": "skaists",
+   "home": "skaists.dev",
+   "path": "surfaces/read.html",
+   "state": "LIVE",
+   "gloss": "read a public buzz message in the browser — no app, no account; private channels never shown",
+   "org": "skaists"
+  },
+  {
    "id": "or-board",
    "family": "skaists",
    "home": "skaists.dev",
@@ -1345,8 +1354,8 @@
   }
  ],
  "counts": {
-  "surfaces": 99,
-  "listed": 108,
+  "surfaces": 100,
+  "listed": 109,
   "families": 8,
   "domains": 26,
   "domainsLive": 4,
@@ -1355,7 +1364,7 @@
   "byFamily": {
    "beehivenature": 42,
    "plur": 7,
-   "skaists": 21,
+   "skaists": 22,
    "bnature": 18,
    "beehivebiomass": 5,
    "beehivebuds": 0,
@@ -1363,11 +1372,11 @@
    "bnr": 1
   },
   "byState": {
-   "LIVE": 108
+   "LIVE": 109
   },
   "byOrg": {
    "beehive-nature": 59,
-   "skaists": 35,
+   "skaists": 36,
    "beehive-biomass": 5
   }
  },

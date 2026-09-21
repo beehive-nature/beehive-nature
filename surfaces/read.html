@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#fbf7f0">
+<meta name="description" content="Read a public Buzz message in the browser. No app, no account. Private channels are never shown.">
+<title>read a Buzz message — skaists.dev</title>
+<link rel="preload" href="fonts/burti.woff2" as="font" type="font/woff2" crossorigin>
+<style>
+@font-face{font-family:burti;src:url(fonts/burti.woff2) format("woff2");font-display:swap}
+:root{--paper:#fbf7f0;--ink:#0c1412;--well:#efe9dd;--line:#e6dfd2;--dim:#4a5f55;--edge:#857d70;--link:#6e3fb8;--act:#a8238c;--on:#fff;--mono:ui-monospace,"Cascadia Mono",Menlo,Consolas,monospace;--body:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+body[data-reg="raver"]{--paper:#0d0b14;--ink:#f4eefc;--well:#17132a;--line:#2a2346;--dim:#b9aed6;--edge:#6a5f92;--link:#d655bb;--act:#d655bb;--on:#0d0b14}
+body[data-reg="cypherpunk"]{--paper:#0a0e10;--ink:#dfeaec;--well:#10171a;--line:#1f2b30;--dim:#9db3b9;--edge:#5b7178;--link:#45c2dc;--act:#45c2dc;--on:#0a0e10;--body:var(--mono)}
+*{box-sizing:border-box;margin:0}
+body{background:var(--paper);color:var(--ink);font:16px/1.6 var(--body);min-height:100dvh;padding:20px 16px 72px}
+main{max-width:720px;margin:0 auto}
+.brand{font-family:burti,var(--mono);font-size:1.15rem;color:var(--ink);text-decoration:none;display:inline-flex;align-items:center;min-height:44px}
+h1{font-size:clamp(1.6rem,6vw,2.3rem);line-height:1.15;margin:.5rem 0 .4rem;font-weight:650;letter-spacing:-.01em}
+.lead{color:var(--dim);margin-bottom:1.2rem}
+form{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:1.4rem}
+label{flex:1 0 100%;font-size:.9rem;color:var(--dim)}
+input{flex:1 1 240px;min-width:0;min-height:48px;padding:0 14px;font:15px var(--mono);color:var(--ink);background:var(--well);border:1.5px solid var(--edge);border-radius:12px}
+button{min-height:48px;padding:0 22px;font:600 16px var(--body);color:var(--on);background:var(--act);border:0;border-radius:12px;cursor:pointer}
+:is(input,button,a,summary):focus-visible{outline:2.5px solid var(--ink);outline-offset:2px}
+.say{padding:14px 16px;border:1.5px dashed var(--edge);border-radius:12px;color:var(--ink)}
+article{border:1px solid var(--line);background:var(--well);border-radius:14px;padding:14px 16px;margin:10px 0}
+article.hit{border:2px solid var(--link)}
+article header{display:flex;flex-wrap:wrap;gap:4px 12px;align-items:baseline;font-size:.85rem;color:var(--dim);margin-bottom:6px}
+article header b{color:var(--ink);font:600 .9rem var(--mono);overflow-wrap:anywhere}
+.txt{white-space:pre-wrap;overflow-wrap:anywhere}
+.txt a{color:var(--link);text-underline-offset:3px}
+.txt code{font:14px var(--mono);background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:1px 5px}
+h2{font-size:1rem;margin:1.4rem 0 .2rem;font-weight:650}
+details{margin-top:1.4rem}
+summary{min-height:44px;display:flex;align-items:center;cursor:pointer;font-weight:650;color:var(--link)}
+.join{display:inline-flex;align-items:center;min-height:44px;margin-top:1.2rem;color:var(--link);font-weight:600;text-underline-offset:3px}
+body[data-reg="cypherpunk"] :is(article,input,button,.say){border-radius:3px}
+[hidden]{display:none!important}
+</style>
+</head>
+<body data-experience="read">
+<main>
+  <a class="brand" href="index.html" translate="no" dir="ltr">skaists.dev</a>
+  <h1 data-i18n="read.title">Read a Buzz message</h1>
+  <p class="lead" data-i18n="read.lead">Paste a buzz:// address. No app, no account.</p>
+  <form id="f" autocomplete="off">
+    <label for="addr" data-i18n="read.label">buzz:// address</label>
+    <input id="addr" name="addr" inputmode="url" spellcheck="false" dir="ltr" translate="no" placeholder="buzz://message?channel=…&amp;id=…">
+    <button type="submit" data-i18n="read.go">Read</button>
+  </form>
+  <p class="say" id="s-private" data-i18n="read.notPublic" hidden>This channel is not public, or the address is not right. Private channels are never shown here.</p>
+  <p class="say" id="s-offline" data-i18n="read.offline" hidden>The public feed is not answering right now. Try again in a few minutes.</p>
+  <p class="say" id="s-missing" data-i18n="read.notFound" hidden>The channel is public, but this message is not in its recent feed.</p>
+  <section id="out" aria-live="polite" aria-busy="false">
+    <h2 id="chan" translate="no" dir="auto" hidden></h2>
+    <div id="hit"></div>
+    <h2 id="th-h" data-i18n="read.thread" hidden>Replies</h2>
+    <div id="thread"></div>
+    <details id="rest" hidden><summary data-i18n="read.more">More from this channel</summary><div id="restlist"></div></details>
+  </section>
+  <a class="join" href="doors/skaists-buzz.html" data-i18n="read.join">Want to reply? Join the hive</a>
+</main>
+<script src="tour.js?v=42"></script>
+<script>
+/* read.html — a guest reads a PUBLIC Buzz message in the browser. The relay box publishes
+   its open channels as plain JSON (the same road as /hive/board.json); this page only reads
+   that feed. Private channels never leave the box, so they cannot appear here. Message text
+   is set as text, never as markup; only https links become links. */
+(() => {
+  const FEED = 'https://relay.skaists.dev/hive/public/';
+  const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/, HEX = /^[0-9a-f]{64}$/;
+  const $ = id => document.getElementById(id), says = ['s-private', 's-offline', 's-missing'];
+  const parse = raw => {
+    const m = /^\s*buzz:\/\/message\/?\?(.+?)\s*$/i.exec(raw || ''); if (!m) return null;
+    const q = new URLSearchParams(m[1]), g = k => (q.get(k) || '').toLowerCase();
+    const a = { channel: g('channel'), id: g('id'), thread: g('thread') };
+    return UUID.test(a.channel) && (!a.id || HEX.test(a.id)) && (!a.thread || HEX.test(a.thread)) ? a : null;
+  };
+  const say = id => { says.forEach(s => $(s).hidden = s !== id); };
+  const clear = () => { ['hit', 'thread', 'restlist'].forEach(i => $(i).textContent = ''); $('th-h').hidden = true; $('chan').hidden = true; $('rest').hidden = true; };
+  const text = (el, str) => {                       /* text first; https links and `code` only */
+    String(str).split(/(https:\/\/[^\s<>"')\]]+|`[^`\n]+`)/g).forEach(p => {
+      if (!p) return; let n;
+      if (p.startsWith('https://')) { n = document.createElement('a'); n.href = p; n.rel = 'noopener noreferrer nofollow'; n.target = '_blank'; n.textContent = p; }
+      else if (p[0] === '`' && p.length > 2) { n = document.createElement('code'); n.textContent = p.slice(1, -1); }
+      else n = document.createTextNode(p);
+      el.appendChild(n);
+    });
+  };
+  const card = (m, hit) => {
+    const a = document.createElement('article'), h = document.createElement('header'), b = document.createElement('b'), t = document.createElement('time'), d = document.createElement('div');
+    if (hit) a.className = 'hit';
+    b.textContent = m.name || (m.pubkey ? String(m.pubkey).slice(0, 8) + '…' : '—'); b.translate = false; b.dir = 'ltr';
+    const when = new Date((+m.created_at || 0) * 1000); t.dateTime = when.toISOString(); t.textContent = when.toLocaleString(document.documentElement.lang || undefined);
+    d.className = 'txt'; d.translate = false; d.dir = 'auto'; text(d, m.content || '');
+    h.append(b, t); a.append(h, d); return a;
+  };
+  const parents = m => (m.e_tags || m.tags || []).filter(t => t && t[0] === 'e').map(t => t[1]);
+  async function read(a) {
+    clear(); say(null); $('out').setAttribute('aria-busy', 'true');
+    let list;
+    try {
+      const r = await fetch(FEED + a.channel + '.json', { cache: 'no-store', credentials: 'omit', referrerPolicy: 'no-referrer' });
+      if (r.status === 404 || r.status === 403) { say('s-private'); return; }
+      if (!r.ok) throw 0;
+      const j = await r.json(); list = Array.isArray(j) ? j : (j.messages || j.events || []);
+      const cn = j.channel && (j.channel.name || j.channel); if (typeof cn === 'string') { $('chan').textContent = cn; $('chan').hidden = false; }
+    } catch (e) { say('s-offline'); return; }
+    finally { $('out').setAttribute('aria-busy', 'false'); }
+    list = list.filter(m => m && typeof m.content === 'string').sort((x, y) => x.created_at - y.created_at);
+    const root = a.thread || a.id, shown = new Set();
+    const put = (where, m, hit) => { shown.add(m.id); $(where).appendChild(card(m, hit)); };
+    if (root) {
+      const head = list.find(m => m.id === root);
+      if (!head) say('s-missing'); else put('hit', head, a.id === root || !a.id);
+      const kids = list.filter(m => parents(m).includes(root));
+      kids.forEach(m => put('thread', m, m.id === a.id)); $('th-h').hidden = !kids.length;
+      const focus = document.querySelector('article.hit'); if (focus && focus.scrollIntoView) focus.scrollIntoView({ block: 'nearest' });
+    }
+    const rest = list.filter(m => !shown.has(m.id)).slice(-60);
+    rest.forEach(m => $('restlist').appendChild(card(m))); $('rest').hidden = !rest.length; if (!root) $('rest').open = true;
+  }
+  const go = raw => { const a = parse(raw); if (!a) { clear(); say('s-private'); return; } read(a); };
+  $('f').addEventListener('submit', e => { e.preventDefault(); const v = $('addr').value.trim(); if (!v) return; history.replaceState(null, '', '#' + v); go(v); });
+  const fromHash = () => { const v = decodeURIComponent(location.hash.slice(1)); if (v) { $('addr').value = v; go(v); } };
+  addEventListener('hashchange', fromHash); fromHash();
+})();
+</script>
+</body>
+</html>
