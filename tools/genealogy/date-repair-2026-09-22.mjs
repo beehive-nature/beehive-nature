@@ -71,13 +71,29 @@ for (const [id, p] of Object.entries(model.persons)) {
 
   if (h1 && h2) { ambiguous++; continue; }
   if (h1) plan.push({ id, name: p.name, mechanism: "H1", was: p.lifespan, now: `${dt}${p.lifespan.match(DASH)[0]}${bt}`, span: swapSpan });
-  else if (h2) plan.push({ id, name: p.name, mechanism: "H2", was: p.lifespan, now: `${num(bt)}BC${p.lifespan.match(DASH)[0]}${dt}`, span: bcSpan });
+  else if (h2) plan.push({ id, name: p.name, mechanism: "H2", was: p.lifespan, now: `${bt}BC${p.lifespan.match(DASH)[0]}${dt}`, span: bcSpan });
   else residue.push({ id, name: p.name, lifespan: p.lifespan });
 }
 
 if (ambiguous !== 0) {
   console.error(`REFUSING: ${ambiguous} record(s) fit BOTH mechanisms. Assigning one would be a guess on a family record.`);
   process.exit(1);
+}
+
+// NEITHER MECHANISM MAY CHANGE A DIGIT. H1 reorders the two year tokens; H2
+// appends a marker. Both preserve every digit group exactly, padding included.
+// This refusal exists because the first version of H2 rebuilt the year from a
+// parsed integer and silently dropped a leading zero -- `0850` became `850`.
+// A transform that is identity on most of its inputs and lossy on a minority
+// survives every test that samples the majority, so the invariant is asserted
+// rather than sampled.
+const groups = (s) => (s.match(/\d+/g) || []).slice().sort();
+for (const r of plan) {
+  const a = groups(r.was), b = groups(r.now);
+  if (a.length !== b.length || a.some((g, i) => g !== b[i])) {
+    console.error(`REFUSING: ${r.id} ${r.mechanism} changed a digit group: [${a}] -> [${b}]. The mechanism authorises one edit; this made two.`);
+    process.exit(1);
+  }
 }
 const classC = plan.filter((r) => CLASS_C.has(r.id));
 const apply = plan.filter((r) => !CLASS_C.has(r.id));
