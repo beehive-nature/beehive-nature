@@ -86,3 +86,16 @@ through one door.
 - The pre-commit secret scan is mandatory: enable it once per clone with
   `git config core.hooksPath .githooks`. CI re-runs the same scan on
   every push.
+- The repo-local commit identity is deliberately unusable, and that is a
+  guard rather than a misconfiguration: `.git/config` carries
+  `user.name = probe` / `user.email = probe@invalid`, and `.invalid` is a
+  reserved, non-routable TLD (RFC 2606). A commit that inherits it fails
+  loudly instead of landing under a plausible-looking stranger's name, so
+  the default forces every seat to state who it is. Pass the identity
+  explicitly on each commit — `git -c user.name='<seat>' -c
+  user.email='<seat>@agents.skaists.buzz' commit` — with the founder as
+  author and the seat as committer, per the §7 identity shape. The
+  pre-commit §7 arm refuses the inherited default on its own, and CI's §7
+  identity gate refuses it again over the pushed range, so this costs a
+  refusal and never a wrong attribution. Do not replace it with a
+  real-looking default.
