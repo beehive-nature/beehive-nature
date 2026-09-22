@@ -309,10 +309,41 @@ test("corpus: founder → Albert Perry Rockwood is a blood path; spouse-only cou
   assert.ok(rel.spouses.every((s) => s.blood === false));
 });
 
-test("corpus: public privacy gate passes; ghost frontier reported, not conflated", { skip: haveCorpus ? false : "corpus not present (outside-repo run)" }, () => {
+test("corpus: privacy gate passes on its own terms; parent-graph cycles are REPORTED with witnesses, never conflated", { skip: haveCorpus ? false : "corpus not present (outside-repo run)" }, () => {
   const a = loadArchive({ corpusPath: CORPUS });
   const res = a.validatePublic();
-  assert.equal(res.ok, true, `problems: ${JSON.stringify(res.problems.slice(0, 5))}`);
+  const comps = res.problems.filter((p) => p.startsWith("cycle-component:"));
+  const wits = res.problems.filter((p) => p.startsWith("witness:"));
+  const other = res.problems.filter((p) => !p.startsWith("cycle-component:") && !p.startsWith("witness:"));
+
+  // THE PRIVACY CLAIM, said directly instead of through res.ok: not one
+  // problem outside the parent-graph-cycle class. res.ok was only ever true
+  // because the checker was blind to cycles (model.validate gained cycle
+  // reporting in d47ba87f), so asserting ok === true encoded "this corpus has
+  // no cyclic parent edges" as a PREMISE of the privacy gate. It is not one.
+  assert.deepEqual(other, [], "no privacy or integrity problem of any other class");
+
+  // THE KNOWN DEFECT, held open on purpose. Eight cyclic components in the
+  // parent graph are a question about the corpus, not about this test, and
+  // they get their own slice. These two numbers are the tripwire: nothing may
+  // quietly resolve them, and nothing may quietly add more.
+  assert.equal(comps.length, 8, "the eight known cyclic components are reported, not swallowed");
+  assert.equal(wits.length, comps.length, "every reported component carries a witness path");
+
+  // The witness is JUDGED, not counted: each must be a closed walk whose every
+  // hop is a real child -> parent edge, over ids one reported component named.
+  const compSets = comps.map((c) => new Set(c.slice("cycle-component:".length).trim().split(",")));
+  for (const w of wits) {
+    const hops = w.slice("witness:".length).trim().split(" -> ");
+    assert.ok(hops.length >= 2, `witness is a walk, not a point: ${w}`);
+    assert.equal(hops[0], hops[hops.length - 1], `witness closes on itself: ${w}`);
+    for (let i = 0; i + 1 < hops.length; i++)
+      assert.ok((a.model.edges[hops[i]] || []).includes(hops[i + 1]), `hop ${hops[i]} -> ${hops[i + 1]} is a real parent edge`);
+    const owner = compSets.filter((s) => hops.every((h) => s.has(h)));
+    assert.equal(owner.length, 1, `witness belongs to exactly one reported component: ${w}`);
+  }
+
+  // Everything below this line never executed while res.ok was assertion one.
   assert.equal(res.ghostFrontier.reportedByModel, 1959);
   assert.equal(res.ghostFrontier.countedHere, 1959);
   const living = Object.entries(a.model.persons).filter(([, p]) => p.living);
