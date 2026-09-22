@@ -81,6 +81,94 @@ locate() {
 . "$(dirname "$0")/keyshape.sh"
 
 
+# ---- HOOKS PRECONDITION — about the BOX, not about the delta --------------
+# WHY THIS EXISTS: on 2026-09-22 this estate measured core.hooksPath UNSET at
+# local, global and effective scope in every worktree, while .githooks/ shipped
+# pre-commit and commit-msg. No seat had a local secret scan or a staged §7 for
+# at least two days. ZcODe named it in
+# docs/dispatches/2026-09-20-zcode-ss2-precommit-hook.md:18 on 09-20, and
+# scripts/identity-check.sh:8 states the same hazard in its own header — and it
+# still sat open, because a warning in a header nobody re-reads is not a gate.
+#
+# THAT IS WHY THIS ROW REFUSES (rc=1) RATHER THAN WARNING. A second printed
+# warning would be the same signal in the same place that already failed. The
+# refusal is cheap and cannot lose a push: this whole layer is advisory by
+# design (see the header above — "never call this layer enforced"), so refusing
+# costs a seat one command, never any work.
+#
+# RESOLVING IS NOT FIRING. A config read tells you a setting; it does not tell
+# you the gate runs. That distinction is exactly how the hazard hid, and the
+# tree carried a second instance of it: .githooks/commit-msg was index mode
+# 100644, so git SILENTLY SKIPS it on every POSIX seat while the config is
+# perfect. This row therefore asks whether the hook can EXECUTE, and the
+# selftest below asks the only question this row cannot: does it actually fire.
+#
+# TWO INSTRUMENTS, AND THEY DO NOT ANSWER THE SAME QUESTION:
+#   index mode (git ls-files -s)  PORTABLE. It is the mode every clone gets.
+#   filesystem -x                 TRUE on POSIX, VACUOUS under Git for Windows,
+#                                 which fabricates the bit: on this box `ls -l`
+#                                 reports -rwxr-xr-x for a file that is 100644
+#                                 in the index. Used only as a fallback for a
+#                                 hooks dir outside the tree, and labelled weak.
+#
+# PLACEMENT: this prints AFTER the empty-delta halt and OUTSIDE the numbered
+# 1)-7) series, deliberately. Checks 1-7 all scan $ADDED; this one scans
+# nothing — it is a precondition about the seat's box. Selftest P2 asserts that
+# an empty delta runs ZERO checks by counting `^[1-7])`, so numbering this row
+# `8)` would silently stop that counter from meaning anything. Do not renumber.
+hooks_check() {
+  _hbad=0; _hn=0
+  _hd=$(git rev-parse --git-path hooks 2>/dev/null)
+  if [ -z "${_hd:-}" ]; then
+    echo "HOOKS — FAIL: git cannot name a hooks directory. That is 'unknown',"
+    echo "   not 'installed'. Refusing rather than assuming."
+    return 1
+  fi
+  echo "HOOKS — effective hooks directory: $_hd"
+  echo "   (git rev-parse --git-path hooks honours core.hooksPath at every scope,"
+  echo "    so this is git's own answer, not a precedence rule re-implemented here.)"
+  for _hpair in 'pre-commit:secret-scan.sh' 'commit-msg:identity-check.sh'; do
+    _hh=${_hpair%%:*}; _hgate=${_hpair#*:}
+    _hf="$_hd/$_hh"
+    _hn=$((_hn + 1))
+    if [ ! -s "$_hf" ]; then
+      echo "   MISSING  $_hh — nothing installed at $_hf"; _hbad=$((_hbad + 1)); continue
+    fi
+    if ! grep -qF "$_hgate" "$_hf"; then
+      echo "   INERT    $_hh — installed but never runs $_hgate"; _hbad=$((_hbad + 1)); continue
+    fi
+    _hmode=$(git ls-files -s -- "$_hf" 2>/dev/null | cut -c1-6)
+    if [ -n "$_hmode" ]; then
+      if [ "$_hmode" = 100755 ]; then
+        echo "   ok       $_hh — runs $_hgate, index mode 100755 (executable in every clone)"
+      else
+        echo "   DEAD     $_hh — runs $_hgate but index mode is $_hmode. Git SKIPS a"
+        echo "            non-executable hook and says so only as an advice hint. The"
+        echo "            config can be perfect and this hook still never runs on POSIX."
+        _hbad=$((_hbad + 1))
+      fi
+    elif [ -x "$_hf" ]; then
+      echo "   ok(weak) $_hh — runs $_hgate; outside the tree, so the portable index"
+      echo "            mode is unavailable and only the filesystem bit was read."
+      echo "            Under Git for Windows that bit is fabricated and proves nothing."
+    else
+      echo "   DEAD     $_hh — runs $_hgate but is not executable and is not tracked"; _hbad=$((_hbad + 1))
+    fi
+  done
+  echo "   $((_hn - _hbad)) of $_hn required hooks installed, wired and executable"
+  if [ "$_hbad" -ne 0 ]; then
+    echo "HOOKS BLOCKED — this box has no complete local gate. Remedy, from the repo root:"
+    echo "     git config --local core.hooksPath .githooks"
+    echo "     git update-index --chmod=+x .githooks/pre-commit .githooks/commit-msg"
+    echo "   (the second line is a tracked mode change and must be committed to hold"
+    echo "    for anyone else; a local chmod fixes only your own clone.)"
+    echo "   This layer is advisory: CI re-scans on push either way. It refuses here"
+    echo "   because a hookless box publishes UNSCANNED material the instant it pushes."
+    return 1
+  fi
+  return 0
+}
+
 # ---- SELFTEST ------------------------------------------------------------
 # LAW (founder, 2026-08-25): a checker is not LANDED until it has been run
 # against a KNOWN-BAD and a KNOWN-GOOD, and BOTH results appear in its report.
@@ -169,6 +257,17 @@ if [ "${1:-}" = "--selftest" ]; then
       GIT_AUTHOR_NAME=probe GIT_AUTHOR_EMAIL=probe@invalid \
       GIT_COMMITTER_NAME=probe GIT_COMMITTER_EMAIL=probe@invalid \
         git commit -q -m fixture 2>/dev/null || exit 1
+      # The HOOKS row added below now refuses a box with no local gate, so this
+      # rig must look like a seat's box or P11 would fail on the precondition
+      # instead of on check 3. Installed AFTER the fixture commits on purpose:
+      # P11's subject is the DELTA, and hooking the rig's own commits would
+      # change what P11 tests rather than leave it alone.
+      mkdir -p .githooks
+      cp "$(dirname "$SELF")/../.githooks/pre-commit" .githooks/pre-commit 2>/dev/null
+      cp "$(dirname "$SELF")/../.githooks/commit-msg" .githooks/commit-msg 2>/dev/null
+      git add .githooks >/dev/null 2>&1
+      git update-index --chmod=+x .githooks/pre-commit .githooks/commit-msg >/dev/null 2>&1
+      git config core.hooksPath .githooks
       sh scripts/push-preflight.sh HEAD~1 > "$T/out" 2>&1
       echo "$?" > "$T/rc"
     )
@@ -183,6 +282,129 @@ if [ "${1:-}" = "--selftest" ]; then
     fi
     rm -rf "$T"
   fi
+  # P12-P14 — the HOOKS row FIRED, not resolved. This is the whole point of the
+  # row: a config read tells you a setting, and a setting is what was already
+  # "correct" on the day .githooks/commit-msg turned out to be index mode 644
+  # and silently skipped. So these arms build a real throwaway repo (the P11 /
+  # identity-check T-rig pattern), install the estate's own hooks in it, and
+  # make git actually run them.
+  #
+  #   P12 known-GOOD  hooks live, benign commit   -> COMMITS, and the scanner
+  #                                                  SPEAKS (its own count line)
+  #       known-BAD   hooks live, planted 64-hex  -> BLOCKED, commit count flat
+  #   P13 known-BAD   hooks pointed elsewhere     -> the SAME content COMMITS and
+  #                                                  the count RISES (the hazard
+  #                                                  shown, not inferred from an
+  #                                                  absent refusal), and --hooks
+  #                                                  refuses by name
+  #   P14 known-BAD   hook present but mode 644   -> --hooks refuses naming it
+  #       known-GOOD  same hook at mode 755       -> --hooks passes
+  #
+  # P13's rise is what makes P12's block mean anything: without it, "blocked"
+  # could be any failure at all. P14 is the arm for the WRONG ANSWER rather than
+  # the off-switch — a row that only catches a missing file would hand a green
+  # to the exact tree we are sitting in.
+  _hsrc=$(dirname "$SELF")
+  _fn=$(sed -n 's/^FOUNDER_NAME="\(.*\)"$/\1/p' "$_hsrc/identity-check.sh" | head -1)
+  _fe=$(sed -n 's/^FOUNDER_EMAIL="\(.*\)"$/\1/p' "$_hsrc/identity-check.sh" | head -1)
+  # The fixture asserts its own precondition: an empty founder identity would
+  # make every §7 arm below refuse for the wrong reason and read as a catch.
+  if [ -z "$_fn" ] || [ -z "$_fe" ]; then
+    echo "  P12-P14 -> could not read the founder identity out of identity-check.sh; arms not run"; st=1
+  else
+  # Generated here, never copied: 8 x 8 chars = a 64-run, and no 48+ literal
+  # ever appears in this source (which would make this file block itself).
+  _hex=$(printf 'deadbeef%.0s' 1 2 3 4 5 6 7 8)
+  _msg_c="control
+
+Co-authored-by: preflight selftest seat <selftest@invalid>"
+  H=$(mktemp -d 2>/dev/null) || H=""
+  case "$H" in
+    "$(git rev-parse --show-toplevel 2>/dev/null)"*)
+      echo "  P12-P14 -> refusing: mktemp handed back a path INSIDE the estate checkout ($H)"; st=1; H="" ;;
+  esac
+  if [ -z "$H" ]; then
+    echo "  P12-P14 -> no usable throwaway directory; arms not run"; st=1
+  else
+    (
+      cd "$H" && git init -q r 2>/dev/null && cd r && mkdir -p scripts .githooks || exit 1
+      cp "$SELF" scripts/push-preflight.sh
+      cp "$_hsrc/secret-scan.sh" "$_hsrc/keyshape.sh" "$_hsrc/identity-check.sh" scripts/ || exit 1
+      cp "$_hsrc/../.githooks/pre-commit" "$_hsrc/../.githooks/commit-msg" .githooks/ || exit 1
+      git add -A >/dev/null 2>&1
+      # --chmod, not chmod: the filesystem bit does not reach the index under
+      # Git for Windows, and the index mode is the thing the row reads.
+      git update-index --chmod=+x .githooks/pre-commit .githooks/commit-msg >/dev/null 2>&1
+      GIT_AUTHOR_NAME="$_fn" GIT_AUTHOR_EMAIL="$_fe" \
+      GIT_COMMITTER_NAME='preflight selftest seat' GIT_COMMITTER_EMAIL='selftest@invalid' \
+        git commit -q -m "$_msg_c" >/dev/null 2>&1 || exit 1
+      git config core.hooksPath .githooks
+      git rev-list --count HEAD > c0
+
+      echo "benign control line" > control.txt; git add control.txt >/dev/null 2>&1
+      GIT_AUTHOR_NAME="$_fn" GIT_AUTHOR_EMAIL="$_fe" \
+      GIT_COMMITTER_NAME='preflight selftest seat' GIT_COMMITTER_EMAIL='selftest@invalid' \
+        git commit -m "$_msg_c" > a.out 2>&1
+      echo "$?" > a.rc; git rev-list --count HEAD > a.n
+
+      printf 'planted, unmarked: %s\n' "$_hex" > bad.txt; git add bad.txt >/dev/null 2>&1
+      GIT_AUTHOR_NAME="$_fn" GIT_AUTHOR_EMAIL="$_fe" \
+      GIT_COMMITTER_NAME='preflight selftest seat' GIT_COMMITTER_EMAIL='selftest@invalid' \
+        git commit -m "$_msg_c" > b.out 2>&1
+      echo "$?" > b.rc; git rev-list --count HEAD > b.n
+
+      mkdir -p .nohooks; git config core.hooksPath .nohooks
+      GIT_AUTHOR_NAME="$_fn" GIT_AUTHOR_EMAIL="$_fe" \
+      GIT_COMMITTER_NAME='preflight selftest seat' GIT_COMMITTER_EMAIL='selftest@invalid' \
+        git commit -m "$_msg_c" > c.out 2>&1
+      echo "$?" > c.rc; git rev-list --count HEAD > c.n
+      sh scripts/push-preflight.sh --hooks > c.pf 2>&1; echo "$?" > c.pfrc
+
+      git config core.hooksPath .githooks
+      git update-index --chmod=-x .githooks/commit-msg >/dev/null 2>&1
+      sh scripts/push-preflight.sh --hooks > d.out 2>&1; echo "$?" > d.rc
+      git update-index --chmod=+x .githooks/commit-msg >/dev/null 2>&1
+      sh scripts/push-preflight.sh --hooks > e.out 2>&1; echo "$?" > e.rc
+    )
+    _R="$H/r"
+    _rd() { cat "$_R/$1" 2>/dev/null || echo MISSING; }
+    _c0=$(_rd c0); _arc=$(_rd a.rc); _an=$(_rd a.n); _brc=$(_rd b.rc); _bn=$(_rd b.n)
+    _crc=$(_rd c.rc); _cn=$(_rd c.n); _cpf=$(_rd c.pfrc); _drc=$(_rd d.rc); _erc=$(_rd e.rc)
+    if [ "$_arc" = 0 ] && [ "$_an" = "$((${_c0:-0} + 1))" ] && grep -q "added lines scanned" "$_R/a.out" 2>/dev/null; then
+      echo "  P12a known-GOOD hooks live, benign commit -> committed ($_c0 -> $_an) and the scanner SPOKE its count (correct)"
+    else
+      echo "  P12a known-GOOD hooks live, benign commit -> rc=$_arc count $_c0 -> $_an, scanner silent — the rig cannot commit or the hook never ran"; st=1
+    fi
+    if [ "$_brc" != 0 ] && [ "$_bn" = "$_an" ] && grep -q "BLOCKED" "$_R/b.out" 2>/dev/null; then
+      echo "  P12b known-BAD  hooks live, planted 64-hex -> refused, count flat at $_bn (correct)"
+    else
+      echo "  P12b known-BAD  hooks live, planted 64-hex -> rc=$_brc count $_an -> $_bn — the hook did not fire"; st=1
+    fi
+    if [ "$_crc" = 0 ] && [ "$_cn" = "$((${_bn:-0} + 1))" ]; then
+      echo "  P13a known-BAD  hooks pointed elsewhere -> the SAME content LANDED, count ROSE $_bn -> $_cn (the hazard, shown)"
+    else
+      echo "  P13a known-BAD  hooks pointed elsewhere -> rc=$_crc count $_bn -> $_cn — no rise, so P12b's block is unattributed"; st=1
+    fi
+    if [ "$_cpf" = 1 ] && grep -q "HOOKS BLOCKED" "$_R/c.pf" 2>/dev/null && grep -q "MISSING  pre-commit" "$_R/c.pf" 2>/dev/null; then
+      echo "  P13b known-BAD  --hooks over that box -> refused rc=1, naming the missing hook (correct)"
+    else
+      echo "  P13b known-BAD  --hooks over that box -> rc=$_cpf without naming the missing hook — the row is not the thing refusing"; st=1
+    fi
+    if [ "$_drc" = 1 ] && grep -q "DEAD     commit-msg" "$_R/d.out" 2>/dev/null && grep -q "index mode is 100644" "$_R/d.out" 2>/dev/null; then
+      echo "  P14a known-BAD  hook installed, wired, index mode 644 -> refused, named as DEAD (correct)"
+    else
+      echo "  P14a known-BAD  mode-644 hook -> rc=$_drc, not reported dead — config-correct and skipped reads as installed"; st=1
+    fi
+    if [ "$_erc" = 0 ] && grep -q "2 of 2 required hooks" "$_R/e.out" 2>/dev/null; then
+      echo "  P14b known-GOOD same hook at mode 755 -> 2 of 2, permitted (correct)"
+    else
+      echo "  P14b known-GOOD mode-755 hook -> rc=$_erc — the row refuses a correctly installed box"; st=1
+    fi
+    rm -rf "$H"
+    if [ -e "$H" ]; then echo "  P12-P14 cleanup -> $H SURVIVED; a rig that leaves state can green the next run"; st=1
+    else echo "  P12-P14 cleanup -> throwaway tree removed (correct)"; fi
+  fi
+  fi
   rm -f /tmp/ps1 /tmp/ps2
   [ "$st" -eq 0 ] && echo "selftest ok — refuses what it must, permits what it must."                    || echo "selftest FAIL — see above."
   exit $st
@@ -190,6 +412,14 @@ fi
 
 set -u
 cd "$(git rev-parse --show-toplevel 2>/dev/null || echo .)" || exit 1
+# --hooks runs the HOOKS precondition row ALONE and exits with its verdict.
+# The selftest needs it: running the whole preflight to judge one row lets
+# checks 1-7 decide rc, so a green would not belong to this row. It is also the
+# mutation target — turn this row off and exactly one selftest arm must fall.
+if [ "${1:-}" = "--hooks" ]; then
+  hooks_check; exit $?
+fi
+
 BASE_REF=${1:-origin/main}
 
 if ! git rev-parse --verify -q "$BASE_REF" >/dev/null; then
@@ -242,6 +472,11 @@ echo "  direction: $BASE_REF..HEAD (base -> lane). Never lane -> base."
 SELF=scripts/push-preflight.sh
 ADDED=$(git diff "$BASE_REF"...HEAD -- . ":(exclude)$SELF" | grep '^+' | grep -v '^+++')
 rc=0
+
+# The box precondition, judged before any of the delta checks below. It sets
+# rc like check 6 does, so the existing "PREFLIGHT BLOCKED" footer carries it;
+# a second exit path here would bypass the checks a seat still needs to read.
+hooks_check || rc=1
 
 echo ""
 echo "1) secret scan over the tree"
