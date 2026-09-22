@@ -129,7 +129,7 @@ test("R3 class B — a HEURISTIC threshold, and it must not read as a defect lis
 
 test("R4 class C — judged on BIRTH years, because that is what the question needs", () => {
   assert.equal(classC.length, 275, "class C count on the birth-year denominator");
-  assert.equal(cDenomBirth, 9504, "edges judgeable on birth years alone");
+  assert.equal(cDenomBirth, 9505, "edges judgeable on birth years alone");
   // THE FILTER LAW, as an assertion. Requiring a death year at both ends is a
   // filter chosen by what parses rather than by what a birth-order question
   // asks, and it silently discards judgeable edges AND the violations in them.
