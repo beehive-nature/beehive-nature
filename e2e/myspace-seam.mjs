@@ -1350,7 +1350,7 @@ try {
 
   // The door, mocked. `open:false` answers the ceiling probe the way the live
   // door does today — refused — so the closed-door row is the live page's case.
-  async function mockAntDoor(ctx, { open, maxBytes = 32 * 1024 * 1024, paymentType = 'wave_batch', twoQuotes = false, totalDelta = 0n }) {
+  async function mockAntDoor(ctx, { open, maxBytes = 32 * 1024 * 1024, paymentType = 'wave_batch', twoQuotes = false, totalDelta = 0n, finalizeStatus = 200 }) {
     const log = { ceiling: 0, prepare: [], finalize: [], read: 0 };
     const held = new Map();
     await ctx.route(/^https:\/\/relay\.skaists\.dev\/ant\/v1\//, async route => {
@@ -1382,6 +1382,7 @@ try {
         log.finalize.push(body);
         const up = held.get(body.upload_id);
         if (!up) return route.fulfill({ status: 404, headers: cors, body: '{}' });
+        if (finalizeStatus !== 200) return route.fulfill({ status: finalizeStatus, headers: cors, contentType: 'application/json', body: JSON.stringify({ error: 'gateway' }) });
         up.stored = true;
         return route.fulfill({ status: 200, headers: cors, contentType: 'application/json', body: JSON.stringify({ data_map_address: up.addr }) });
       }
@@ -1395,6 +1396,108 @@ try {
       return route.fulfill({ status: 403, headers: cors, body: 'forbidden' });
     });
     return log;
+  }
+
+  // THE WALLET AND THE CHAIN, MOCKED, for the real arm in (k). The wallet is an
+  // EIP-1193 object planted before the page loads; it records every request and
+  // signs nothing — a "transaction hash" is a counter. The chain is the public
+  // Arbitrum One RPC the payer reads balances from (evmlib src/lib.rs:52-53),
+  // answered in this process. MAINNET SPEND: 0.
+  const WALLET_ADDR = '0x' + '44'.repeat(20);
+  const WALLET_TX = n => '0x' + 'c'.repeat(62) + String(n).padStart(2, '0');
+  const RPC_URL = 'https://arb1.arbitrum.io/rpc';
+  const EVM_TOKEN = '0xa78d8321b20c4ef90ecd72f2588aa985a4bdb684';   // evmlib v0.9.1 src/lib.rs:64-65
+  const EVM_VAULT = '0x9a3ecac693b699fc0b2b6a50b5549e50c2320a26';   // evmlib v0.9.1 src/lib.rs:71-72
+  async function mockWallet(ctx, { chain = '0xa4b1', decline = false, absent = false } = {}) {
+    await ctx.addInitScript(({ chain, decline, absent, addr }) => {
+      window.__walletCalls = [];
+      // A SPY on the payer's front door, not a stand-in for it: ant-pay.js runs
+      // unmodified; this records the authorization the shell hands to settle().
+      let real;
+      Object.defineProperty(window, 'AntPay', { configurable: true, get() { return real; }, set(v) {
+        real = Object.assign({}, v, { create(cfg) { const p = v.create(cfg); return Object.assign({}, p, {
+          settle(input) { window.__settleAuth = JSON.parse(JSON.stringify(input.authorization)); return p.settle(input); } }); } });
+      } });
+      if (absent) return;
+      let n = 0;
+      window.ethereum = {
+        request: async ({ method, params }) => {
+          window.__walletCalls.push({ method, params: params || [] });
+          if (method === 'eth_requestAccounts') return [addr];
+          if (method === 'eth_chainId') return chain;
+          if (method === 'eth_sendTransaction') {
+            if (decline) { const e = new Error('User rejected the request.'); e.code = 4001; throw e; }
+            n += 1; return '0x' + 'c'.repeat(62) + String(n).padStart(2, '0');
+          }
+          throw new Error('mock wallet: unexpected ' + method);
+        }
+      };
+    }, { chain, decline, absent, addr: WALLET_ADDR });
+    return () => ctx.pages()[0].evaluate(() => window.__walletCalls);
+  }
+  async function mockChain(ctx, { ant = 10n ** 21n, eth = 10n ** 15n, allowance = 0n, receipt = 'ok' } = {}) {
+    const log = [];
+    const hex = v => '0x' + BigInt(v).toString(16);
+    await ctx.route(RPC_URL, async route => {
+      const req = route.request();
+      if (req.method() === 'OPTIONS') return route.fulfill({ status: 204, headers: { 'access-control-allow-origin': '*', 'access-control-allow-headers': 'content-type' } });
+      const { id, method, params } = JSON.parse(req.postData() || '{}');
+      log.push(method + (method === 'eth_call' ? ':' + params[0].to.toLowerCase() + ':' + params[0].data.slice(0, 10) : ''));
+      let result;
+      if (method === 'eth_getBalance') result = hex(eth);
+      else if (method === 'eth_call') result = params[0].data.startsWith('0x70a08231') ? hex(ant) : hex(allowance);
+      else if (method === 'eth_getTransactionReceipt') {
+        // the approve (the token's tx) always lands; `receipt` shapes only the payment's
+        const isPayment = params[0] !== '0x' + 'c'.repeat(62) + '01';
+        if (isPayment && receipt === 'down') return route.fulfill({ status: 503, headers: { 'access-control-allow-origin': '*' }, body: 'unavailable' });
+        result = { status: isPayment && receipt === 'reverted' ? '0x0' : '0x1' };
+      }
+      else return route.fulfill({ status: 200, headers: { 'access-control-allow-origin': '*' }, contentType: 'application/json', body: JSON.stringify({ jsonrpc: '2.0', id, error: { code: -32601, message: 'mock chain: ' + method } }) });
+      return route.fulfill({ status: 200, headers: { 'access-control-allow-origin': '*' }, contentType: 'application/json', body: JSON.stringify({ jsonrpc: '2.0', id, result }) });
+    });
+    return log;
+  }
+  // Every value `data-state` takes, in order, from the moment this is called.
+  async function watchStates(page) {
+    await page.evaluate(() => {
+      window.__states = [document.body.getAttribute('data-state')];
+      new MutationObserver(() => {
+        const s = document.body.getAttribute('data-state');
+        if (window.__states[window.__states.length - 1] !== s) window.__states.push(s);
+      }).observe(document.body, { attributes: true, attributeFilter: ['data-state'] });
+    });
+    return () => page.evaluate(() => window.__states.slice());
+  }
+  // add() for a paid put: each answer is [stage, yes]. The helper waits for the
+  // sheet of THAT stage, records what it said and what the wallet had been asked
+  // by then, taps, and after the last answer waits the way add() does — on the
+  // page's own busy sequence.
+  async function addPaying(page, name, answers, chainLog = []) {
+    await page.click('#mode-forever');
+    const raw0 = await page.evaluate(() => document.body.getAttribute('data-busy-seq'));
+    if (!/^\d+$/.test(raw0 || '')) throw new Error('addPaying(): no data-busy-seq');
+    const seq0 = Number(raw0);
+    await page.setInputFiles('#picker', { name, mimeType: 'text/plain', buffer: Buffer.from(FOREVER, 'utf8') });
+    const sheets = [];
+    for (const [stage, yes] of answers) {
+      await page.waitForFunction(s => document.body.getAttribute('data-state') === 'pay' &&
+        document.getElementById('payYes').getAttribute('data-stage') === s, stage, { timeout: 15000 })
+        .catch(async () => { throw new Error(`addPaying(${name}): no ${stage} sheet; status: ` + await page.textContent('#status')); });
+      sheets.push(await page.evaluate(() => ({
+        stage: document.getElementById('payYes').getAttribute('data-stage'),
+        title: document.getElementById('pay-title').textContent, body: document.getElementById('pay-body').textContent,
+        yes: document.getElementById('payYes').textContent, no: document.getElementById('payNo').textContent,
+        walletSoFar: window.__walletCalls.map(c => c.method)
+      })));
+      sheets[sheets.length - 1].chainSoFar = chainLog.length;   // chain reads BY THE TIME this sheet was on screen
+      await page.click(yes ? '#payYes' : '#payNo');
+    }
+    await page.waitForFunction(s => {
+      const el = document.getElementById('status');
+      return Number(document.body.getAttribute('data-busy-seq')) > s && document.body.getAttribute('data-busy') === '0' &&
+        document.body.getAttribute('data-state') !== 'pay' && el && !el.hidden && el.textContent;
+    }, seq0, { timeout: 20000 });
+    return { sheets, rows: await page.evaluate(() => window.__myspace.rows()), said: await page.textContent('#status') };
   }
 
   async function antPage(ctx) {
@@ -1501,19 +1604,25 @@ try {
   ok('no page errors on the closed-door path', errsD.length === 0, errsD.join(' | '));
   await cD.close();
 
-  // (f) THE DOOR IS OPEN AND THE PAGE HAS NO ARM FOR THE PLAN — the shipped
-  // state until slice W. Refused by name, nothing finalized, and the sentence
-  // says the door saw the file.
+  // (f) THE DOOR PRICES A MERKLE BATCH WHERE A WAVE WAS EXPECTED. The page has
+  // one arm, `wave_batch`; a plan of any other type is refused by name and is
+  // never paid by the wave arm (the arm-switch law, plan_model.rs:12-14; the
+  // non-vacuity row ruled at 7b0cc99b). No price sheet, no wallet, nothing
+  // finalized, and the sentence says the door saw the file.
   const cF = await browser.newContext({ viewport: { width: 390, height: 844 } });
   const wireF = [];
   offBox(cF, wireF);
   await mockHive(cF);
-  const doorF = await mockAntDoor(cF, { open: true });
+  const doorF = await mockAntDoor(cF, { open: true, paymentType: 'merkle' });
+  const walletF = await mockWallet(cF);
   const { page: pF, errs: errsF } = await antPage(cF);
+  const statesF = await watchStates(pF);
   await add(pF, 'forever', 'noarm.txt', FOREVER);
   const saidF = await pF.textContent('#status');
-  ok('with no arm for the plan the page refuses by name: it cannot pay a wave_batch plan yet',
-    /cannot pay a wave_batch plan yet/.test(saidF || ''), saidF);
+  ok('a merkle plan where a wave was expected is refused by name: the page cannot pay a merkle plan yet',
+    /cannot pay a merkle plan yet/.test(saidF || ''), saidF);
+  ok('and it never switched arms: no price sheet was shown and the wallet was asked for nothing',
+    !(await statesF()).includes('pay') && (await walletF()).length === 0, JSON.stringify({ states: await statesF(), wallet: await walletF() }));
   ok('and it says what really happened to the file: the door saw it, nothing was stored or paid',
     /door saw the file to price it; nothing was stored and nothing was paid/.test(saidF || ''), saidF);
   ok('PRECONDITION — the door was open and DID price it, so the refusal above is the page\'s, not the door\'s',
@@ -1521,13 +1630,16 @@ try {
   ok('nothing was finalized, and nothing but the ceiling probe and the prepare left the page',
     doorF.finalize.length === 0 && wireF.length === 2 && wireF.every(w => w.includes(DOOR_ORIGIN + '/ant/v1/upload/prepare')),
     JSON.stringify({ finalize: doorF.finalize.length, wire: wireF }));
-  ok('no page errors on the no-arm path', errsF.length === 0, errsF.join(' | '));
+  ok('no page errors on the merkle path', errsF.length === 0, errsF.join(' | '));
   await cF.close();
 
-  // (g) PREPARE → PAY → FINALIZE, END TO END, with one planted arm.
+  // (g) PREPARE → PAY → FINALIZE, END TO END, with one planted arm in place of
+  // the shipped wallet arm, so (g) and (h) judge the SEAM — the adapter's own
+  // checks on what a payment step returns — apart from any wallet. The real
+  // arm is driven in (k).
   const PAYS_ALL = "function (plan) { return plan.quotes.map(function (q) { return { quote_hash: q.quote_hash, tx_hash: '" + MOCK_TX + "' }; }); }";
-  const plantArm = (ctx, arm = PAYS_ALL) => mutate(ctx, SHELL_RE, SHELL_REL, '  var PAY_ARMS = {};',
-    '  var PAY_ARMS = { wave_batch: ' + arm + ' };   // FIXTURE: a mock arm; the shipped table is empty until slice W');
+  const plantArm = (ctx, arm = PAYS_ALL) => mutate(ctx, SHELL_RE, SHELL_REL, '  var PAY_ARMS = { wave_batch: payByWallet };',
+    '  var PAY_ARMS = { wave_batch: ' + arm + ' };   // FIXTURE: a mock arm in place of the wallet arm');
 
   const cG = await browser.newContext({ viewport: { width: 390, height: 844 }, acceptDownloads: true });
   const wireG = [];
@@ -1623,20 +1735,152 @@ try {
     JSON.stringify({ said: saidI, prepare: doorI.prepare.length }));
   await cI.close();
 
-  // (j) SOURCE: rail 4 ships no wallet code and no second payer.
+  // (k) SLICE W: THE REAL ARM — the price, the visitor's two taps, their own
+  // wallet, the estate's one payer. Nothing is planted in the shell here: the
+  // wallet and the chain are mocked (above) and everything on the page runs as
+  // shipped. Each case is one change from the (k1) CONTROL, which is stored.
+  async function payCase(name, { wallet = {}, chain = {}, door = {}, answers, register } = {}) {
+    const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
+    const wire = [];
+    offBox(ctx, wire);
+    await mockHive(ctx);
+    const doorLog = await mockAntDoor(ctx, { open: true, ...door });
+    const chainLog = await mockChain(ctx, chain);
+    const walletOf = await mockWallet(ctx, wallet);
+    const { page, errs } = await antPage(ctx);
+    if (register) await wearRegister(page, register);
+    const r = await addPaying(page, name, answers, chainLog);
+    const calls = await walletOf();
+    const auth = await page.evaluate(() => window.__settleAuth || null);
+    await ctx.close();
+    return { ...r, door: doorLog, chain: chainLog, calls, auth, sends: calls.filter(c => c.method === 'eth_sendTransaction'), wire, errs,
+      stored: r.rows.some(x => x.purpose === 'forever' && x.addr && x.addr.scheme === 'ant') };
+  }
+  const QUOTED_ANT = '1.5';
+  const approveData = '0x095ea7b3' + EVM_VAULT.slice(2).padStart(64, '0') + BigInt(QUOTED_ATTO).toString(16).padStart(64, '0');
+
+  const k1 = await payCase('paid.txt', { answers: [['price', true], ['plan', true]] });
+  ok('(k1) the PRICE comes first: the door\'s exact total, in ANT, before the wallet is asked for anything at all',
+    k1.sheets[0].stage === 'price' && k1.sheets[0].title.includes(QUOTED_ANT + ' ANT') && k1.sheets[0].yes.includes(QUOTED_ANT + ' ANT') &&
+    k1.sheets[0].walletSoFar.length === 0 && k1.sheets[0].chainSoFar === 0 && k1.sheets[1].chainSoFar > 0,
+    JSON.stringify({ sheet: k1.sheets[0], chainAtPlan: k1.sheets[1].chainSoFar }));
+  ok('(k1) the PLAN comes second, after the balances were read, before anything was signed: two wallet confirmations',
+    k1.sheets[1].stage === 'plan' && /twice|2 times/.test(k1.sheets[1].title) && /exactly 1\.5 ANT/.test(k1.sheets[1].body) &&
+    !k1.sheets[1].walletSoFar.includes('eth_sendTransaction') && k1.sheets[1].walletSoFar.includes('eth_requestAccounts'),
+    JSON.stringify(k1.sheets[1]));
+  ok('(k1) the wallet signed the EXACT approve to evmlib\'s vault on evmlib\'s token, then paid the vault — and nothing else',
+    k1.sends.length === 2 && k1.sends[0].params[0].to.toLowerCase() === EVM_TOKEN && k1.sends[0].params[0].data === approveData &&
+    k1.sends[1].params[0].to.toLowerCase() === EVM_VAULT && k1.sends[1].params[0].data.startsWith('0xb6c2141b') &&
+    k1.sends.every(s => s.params[0].value === '0x0' && s.params[0].from === WALLET_ADDR),
+    JSON.stringify(k1.sends.map(s => s.params[0])));
+  ok('(k1) the door stored against the WALLET\'S payment, named per quote, and the file is on the ANT rail',
+    k1.stored && k1.door.finalize.length === 1 && k1.door.finalize[0].txs.length === 1 &&
+    k1.door.finalize[0].txs[0].quote_hash === QUOTE_HASH && k1.door.finalize[0].txs[0].tx_hash === WALLET_TX(2),
+    JSON.stringify({ finalize: k1.door.finalize, said: k1.said }));
+  const straysK1 = k1.wire.filter(w => !w.includes(DOOR_ORIGIN + '/ant/v1/') && !w.includes(RPC_URL));
+  ok('(k1) every request went to the mocked door or the mocked chain; the chain was only READ',
+    straysK1.length === 0 && k1.chain.length > 0 && k1.chain.every(m => /^(eth_getBalance|eth_call:|eth_getTransactionReceipt)/.test(m)) &&
+    k1.chain.some(m => m === 'eth_call:' + EVM_TOKEN + ':0x70a08231'),
+    JSON.stringify({ strays: straysK1, chain: k1.chain }));
+  ok('(k1) the authorization is the visitor\'s yes to THAT price: its ceiling is the shown total, bound to that upload',
+    !!k1.auth && k1.auth.state === 'authorized-for-signing' && k1.auth.ant_ceiling_atto === QUOTED_ATTO &&
+    k1.auth.upload_id === 'up-' + k1.door.prepare[0].addr.slice(0, 8) && Object.keys(k1.auth).length === 3,
+    JSON.stringify(k1.auth));
+  ok('(k1) no page errors on the paid path', k1.errs.length === 0, k1.errs.join(' | '));
+
+  const k2 = await payCase('no-at-price.txt', { answers: [['price', false]] });
+  ok('(k2) NO at the price: the wallet is never asked, the chain is never read, nothing is finalized, and the page says so',
+    k2.calls.length === 0 && k2.chain.length === 0 && k2.door.finalize.length === 0 && !k2.stored &&
+    /did not accept the price/.test(k2.said || '') && /nothing was stored and nothing was paid/.test(k2.said || ''),
+    JSON.stringify({ calls: k2.calls.length, chain: k2.chain, said: k2.said }));
+
+  const k3 = await payCase('no-at-plan.txt', { answers: [['price', true], ['plan', false]] });
+  ok('(k3) NO at the plan: the wallet shared its account and signed NOTHING; nothing finalized',
+    k3.calls.some(c => c.method === 'eth_requestAccounts') && k3.sends.length === 0 && k3.door.finalize.length === 0 && !k3.stored &&
+    /did not confirm/.test(k3.said || ''),
+    JSON.stringify({ calls: k3.calls.map(c => c.method), said: k3.said }));
+
+  const k4 = await payCase('short.txt', { chain: { ant: BigInt(QUOTED_ATTO) - 1n }, answers: [['price', true]] });
+  ok('(k4) a wallet one atto short of the price is refused by name, before any plan or signature',
+    /less ANT than the price/.test(k4.said || '') && k4.sends.length === 0 && k4.door.finalize.length === 0 && k4.sheets.length === 1,
+    JSON.stringify({ said: k4.said, sends: k4.sends.length }));
+
+  const k5 = await payCase('wrongchain.txt', { wallet: { chain: '0x1' }, answers: [['price', true]] });
+  ok('(k5) a wallet on another chain is refused by name — Autonomi is paid on Arbitrum One — and signs nothing',
+    /Arbitrum One/.test(k5.said || '') && k5.sends.length === 0 && k5.chain.length === 0,
+    JSON.stringify({ said: k5.said }));
+
+  const k6 = await payCase('nowallet.txt', { wallet: { absent: true }, answers: [['price', true]] });
+  ok('(k6) with no wallet in the browser the price is still shown first, then the page says there is no wallet',
+    k6.sheets[0].stage === 'price' && /no wallet is connected/.test(k6.said || '') && k6.door.finalize.length === 0,
+    JSON.stringify({ said: k6.said }));
+
+  const k7 = await payCase('declined.txt', { wallet: { decline: true }, answers: [['price', true], ['plan', true]] });
+  ok('(k7) the wallet declining the approve pays nothing and the page does not claim a payment',
+    k7.sends.length === 1 && k7.door.finalize.length === 0 && !/You paid/.test(k7.said || '') && /rejected/i.test(k7.said || ''),
+    JSON.stringify({ said: k7.said, sends: k7.sends.length }));
+
+  const k8 = await payCase('stranded.txt', { door: { finalizeStatus: 502 }, answers: [['price', true], ['plan', true]] });
+  ok('(k8) paid but not stored: the page prints the WALLET\'S payment id, the stranded-payment receipt',
+    k8.sends.length === 2 && !k8.stored && (k8.said || '').includes('You paid (' + WALLET_TX(2) + ')') && !(k8.said || '').includes(WALLET_TX(1)),
+    JSON.stringify({ said: k8.said }));
+
+  const k11 = await payCase('chaindown.txt', { chain: { receipt: 'down' }, answers: [['price', true], ['plan', true]] });
+  ok('(k11) the payment left the wallet and the chain could not be asked about it: the page names that payment id',
+    k11.sends.length === 2 && !k11.stored && k11.door.finalize.length === 0 && (k11.said || '').includes('You paid (' + WALLET_TX(2) + ')'),
+    JSON.stringify({ said: k11.said }));
+  const k12 = await payCase('reverted.txt', { chain: { receipt: 'reverted' }, answers: [['price', true], ['plan', true]] });
+  ok('(k12) a payment the chain REVERTED moved no ANT: the page says the chain refused it and never prints it as paid',
+    k12.sends.length === 2 && !k12.stored && /refused by the chain/.test(k12.said || '') && !/You paid/.test(k12.said || ''),
+    JSON.stringify({ said: k12.said }));
+
+  const k9 = await payCase('cypher.txt', { register: 'cypherpunk', answers: [['price', true], ['plan', true]] });
+  ok('(k9) cypherpunk: the price sheet prints total_atto to the atto and the plan names the approve and the vault',
+    k9.stored && k9.sheets[0].body.includes('total_atto ' + QUOTED_ATTO) && k9.sheets[1].body.includes('approve(') &&
+    k9.sheets[1].body.toLowerCase().includes(EVM_VAULT),
+    JSON.stringify(k9.sheets));
+
+  // (k10) A RE-RENDER WHILE THE PRICE IS ON SCREEN keeps the question open, in the new voice.
+  const cK = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  await mockHive(cK);
+  const doorK = await mockAntDoor(cK, { open: true });
+  await mockChain(cK);
+  await mockWallet(cK);
+  const { page: pK } = await antPage(cK);
+  await pK.click('#mode-forever');
+  await pK.setInputFiles('#picker', { name: 'reregister.txt', mimeType: 'text/plain', buffer: Buffer.from(FOREVER, 'utf8') });
+  await pK.waitForFunction(() => document.body.getAttribute('data-state') === 'pay', null, { timeout: 15000 });
+  await wearRegister(pK, 'raver');
+  const afterSwitch = await pK.evaluate(() => ({ state: document.body.getAttribute('data-state'), title: document.getElementById('pay-title').textContent }));
+  ok('(k10) switching register while the price is shown keeps the sheet up, re-said in the new register',
+    afterSwitch.state === 'pay' && /^forever costs 1\.5 ANT\.$/.test(afterSwitch.title) && doorK.finalize.length === 0,
+    JSON.stringify(afterSwitch));
+  await cK.close();
+
+  // (j) SOURCE: the shell reaches a wallet in exactly one place, through the
+  // estate's one payer, and carries no payer of its own.
   const antSrc = (await readFile(join(ROOT, ANT_REL), 'utf8')).replace(/\/\*[\s\S]*?\*\//g, '');
   const shellSrc18 = (await readFile(join(ROOT, SHELL_REL), 'utf8')).replace(/\/\*[\s\S]*?\*\//g, '');
   const pageSrc = await readFile(join(ROOT, 'surfaces/myspace.html'), 'utf8');
   const KEYISH = ['privateKey', 'private_key', 'mnemonic', 'eth_sign', 'personal_sign', 'signTransaction', 'ethereum', 'eth_'];
   ok('the ANT adapter names no key and no wallet — it cannot reach one from its worker',
     KEYISH.filter(k => antSrc.includes(k)).length === 0, KEYISH.filter(k => antSrc.includes(k)).join(','));
-  ok('the shell names no key and no wallet either — rail 4 ships no wallet code',
-    KEYISH.filter(k => shellSrc18.includes(k)).length === 0, KEYISH.filter(k => shellSrc18.includes(k)).join(','));
-  ok('and the pay step ships with NO arm — every plan is refused until slice W',
-    (shellSrc18.match(/var PAY_ARMS = \{\};/g) || []).length === 1, 'the arm table is not the one empty table');
+  const KEYS_ONLY = ['privateKey', 'private_key', 'mnemonic', 'eth_sign', 'personal_sign', 'signTransaction', 'eth_'];
+  ok('the shell names no key material and makes no wallet or chain call of its own',
+    KEYS_ONLY.filter(k => shellSrc18.includes(k)).length === 0, KEYS_ONLY.filter(k => shellSrc18.includes(k)).join(','));
+  ok('the shell touches a wallet in exactly one place: it hands window.ethereum to the payer\'s injected signer',
+    (shellSrc18.match(/ethereum/g) || []).length === 1 && /AP\.injectedSigner\(window\.ethereum\)/.test(shellSrc18),
+    String((shellSrc18.match(/ethereum/g) || []).length));
+  // Judged on CODE, not words: the cypherpunk plan sheet prints "approve(" and
+  // "payForQuotes" as copy, which is the payer's plan said aloud, not a payer.
+  ok('the shell carries no payer of its own: no selector, no encoder, no signer of its own',
+    !/0x095ea7b3|0xb6c2141b|encodeApprove|encodePayForQuotes|serialize1559|trezorSigner|\.send\(/.test(shellSrc18), 'a payer fragment is in the shell');
+  ok('the arm table has one arm, the wave, and it is the wallet arm',
+    (shellSrc18.match(/var PAY_ARMS = \{ wave_batch: payByWallet \};/g) || []).length === 1, 'the arm table is not the one wallet arm');
   const scripts = [...pageSrc.matchAll(/<script src="([^"]+)"/g)].map(m => m[1]);
-  ok('the page loads no payer of its own: ant-pay.js is the estate\'s one payer, and slice W is what wires it',
-    scripts.length > 0 && scripts.every(src => !/pay/i.test(src)), JSON.stringify(scripts));
+  ok('the page loads exactly one payer, the estate\'s — ant-pay.js — and loads it before the shell',
+    JSON.stringify(scripts.filter(s => /pay/i.test(s))) === '["ant-pay.js"]' && scripts.indexOf('ant-pay.js') < scripts.indexOf('myspace.js'),
+    JSON.stringify(scripts));
 
 } catch (e) {
   fail++;

@@ -1,6 +1,13 @@
 /* ant-pay.js — Phase E: the one shared piece every door uses to pay Autonomi for a prepared upload.
 
-   prepare (keyless bridge) → the person's OWN wallet signs on Arbitrum One → finalize (bridge) → receipt.
+   prepare (the estate's keyless write door) → the person's OWN wallet signs on Arbitrum One → finalize (door) → receipt.
+
+   THE WIRE is the door's (ops/ant-writedoor/README.md, ruled 7b0cc99b / 795cce0e), never the private bridge's:
+     prepare  → {upload_id, payment_type, total_atto:"<decimal>", chunks:{total, already_stored},
+                 quotes:[{quote_hash, rewards_address, amount_atto}], data_map_address}
+     finalize → POST /ant/v1/upload/finalize {upload_id, txs:[{quote_hash, tx_hash}]} → {data_map_address}
+   total_atto is REQUIRED and must equal the sum of the quotes; an absent total is a refusal, never a skip.
+   Downloading to verify is NOT here: the door has no route for it, so there is nothing honest to call.
 
    THE LAWS THIS FILE KEEPS
    - the page never holds an EVM key. a signer is something that SIGNS: Trezor Connect from our own page
@@ -10,16 +17,23 @@
      surface's own button — has been shown the exact plan: token, spender, ANT total, and the exact number
      of wallet confirmations (SPEC §1: printed BEFORE any signing).
    - refusal with a named reason, never a default. no wallet, wrong chain, no quote, a plan over the
-     authorized ceiling, contracts the bridge did not name, a merkle plan this build cannot pay: each is a
+     authorized ceiling, a price with no total or one its quotes do not add up to, a merkle plan this build cannot pay: each is a
      refusal{code} the surface can say in plain words. a price is never invented here.
-   - approve is for the EXACT quoted total, never unlimited.
-   - contract addresses come from the bridge's own binary (/health → evm), never from a document or this file.
+   - approve is for the EXACT quoted total, never unlimited (evmlib itself approves U256::MAX, wallet.rs:188 — not here).
+   - contract addresses are read from upstream evmlib at a pinned tag, file:line below. the door names none,
+     and nothing a server answers can move them.
    - transaction hashes are persisted BEFORE finalize. a paid-but-unfinalized upload resumes; it never pays twice.
    - wire facts are cited: selectors and tuple order are held to a real Arbitrum One transaction in
-     e2e/ant-pay-vector.json (PaymentVaultV2.payForQuotes, verified source on Blockscout). */
+     e2e/ant-pay-vector.json (PaymentVaultV2.payForQuotes, verified source on Blockscout), and the tuple order
+     to evmlib contracts/Types.sol:33-37 (rewardsAddress, amount, quoteHash). */
 (function (root) {
   'use strict';
-  var CHAIN_ID = 42161, CHAIN_HEX = '0xa4b1', MAX_PER_TX = 256; /* evmlib MAX_TRANSFERS_PER_TRANSACTION */
+  /* evmlib v0.9.1 = fbf879b1f7068b5b072a936589721272c62f2ca0, the version ant-client ant-cli-v0.3.7 (785a155c)
+     locks — the same pin the door cites. src/lib.rs:64-65 the token, :71-72 the vault, :52-53 the public RPC,
+     src/contract/payment_vault/mod.rs:11 the per-call ceiling. */
+  var CHAIN_ID = 42161, CHAIN_HEX = '0xa4b1', MAX_PER_TX = 256;
+  var CONTRACTS = Object.freeze({ token: '0xa78d8321B20c4Ef90eCd72f2588AA985A4BDb684', vault: '0x9A3EcAc693b699Fc0B2B6A50B5549e50c2320A26' });
+  var PUBLIC_RPC = 'https://arb1.arbitrum.io/rpc';
   var SEL = { approve: '0x095ea7b3', balanceOf: '0x70a08231', allowance: '0xdd62ed3e', payForQuotes: '0xb6c2141b' };
 
   function refusal(code, message, detail) { var e = new Error(message); e.refusal = code; if (detail) e.detail = detail; return e; }
@@ -107,36 +121,37 @@
 
   /* ── the payer ── */
   function create(cfg) {
-    var fetchFn = cfg.fetch || (root.fetch && root.fetch.bind(root)), bridge = String(cfg.bridge || '').replace(/\/$/, '');
-    var rpc = cfg.rpcCall || rpcOf(fetchFn, cfg.rpc), now = cfg.now || function () { return Date.now(); };
+    var fetchFn = cfg.fetch || (root.fetch && root.fetch.bind(root)), door = String(cfg.door || '').replace(/\/$/, '');
+    var rpc = cfg.rpcCall || rpcOf(fetchFn, cfg.rpc || PUBLIC_RPC), now = cfg.now || function () { return Date.now(); };
     var sleep = cfg.sleep || function (ms) { return new Promise(function (r) { setTimeout(r, ms); }); };
     var store = cfg.store || { get: function () { return null; }, set: function () {} }, tell = cfg.onState || function () {};
     var KEY = function (id) { return 'ant-pay.paid.' + id; };
 
-    function bridgeJSON(path, body) {
-      return fetchFn(bridge + path, body ? { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) } : {})
-        .then(function (r) { if (!r.ok) return r.text().then(function (t) { throw refusal(r.status >= 500 ? 'network' : 'bridge-refused', 'the bridge answered HTTP ' + r.status + (t ? ' — ' + t.slice(0, 200) : ''), { status: r.status }); }); return r.json(); });
-    }
-    function contracts() {
-      return bridgeJSON('/health').then(function (h) {
-        var e = h && h.evm;
-        if (!e || !isAddr(e.payment_token) || !isAddr(e.payment_vault)) throw refusal('no-contracts', 'the bridge did not name the ANT token and payment vault it was built with — this page will not take them from anywhere else');
-        if (Number(e.chain_id) !== CHAIN_ID) throw refusal('wrong-chain', 'the bridge pays on chain ' + e.chain_id + ', not Arbitrum One', { have: e.chain_id, need: CHAIN_ID });
-        return { token: e.payment_token, vault: e.payment_vault };
-      });
+    /* a door refusal is {"error": "<name>"}; the name rides on the refusal so the surface can say which law held. */
+    function doorJSON(path, body) {
+      return fetchFn(door + path, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+        .then(function (r) {
+          if (r.ok) return r.json();
+          return r.text().then(function (t) {
+            var name = null; try { name = JSON.parse(t).error || null; } catch (e) { /* a body that is not the door's JSON keeps name null */ }
+            throw refusal(r.status >= 500 ? 'network' : 'door-refused', 'the door answered HTTP ' + r.status + (t ? ' — ' + t.slice(0, 200) : ''), { status: r.status, door: name });
+          });
+        });
     }
     function readPlan(prepare, authorization) {
       if (!prepare || !prepare.upload_id) throw refusal('no-quote', 'there is no price yet — ask Autonomi first');
+      /* the arm is the door's, and it is never switched here: a merkle price is refused, not paid as a wave. */
       if (prepare.payment_type !== 'wave_batch') throw refusal('merkle-not-built', 'this upload is priced as a ' + prepare.payment_type + ' plan, which this build cannot pay yet');
-      var all = Array.isArray(prepare.payments) ? prepare.payments : [];
-      if (!all.length) throw refusal('no-quote', 'the price carries no payments');
+      if (typeof prepare.total_atto !== 'string' || !/^\d+$/.test(prepare.total_atto)) throw refusal('no-total', 'the price names no total to check its parts against, so this page will not pay it');
+      var all = Array.isArray(prepare.quotes) ? prepare.quotes : [];
+      if (!all.length) throw refusal('no-quote', 'the price carries no quotes');
       var seen = {}, total = 0n;
       all.forEach(function (p) {
         if (!isH32(p.quote_hash) || !isAddr(p.rewards_address)) throw refusal('bad-plan', 'a payment is malformed');
         if (seen[p.quote_hash.toLowerCase()]) throw refusal('bad-plan', 'a quote appears twice'); seen[p.quote_hash.toLowerCase()] = 1;
         total += big(p.amount_atto, 'a payment');
       });
-      if (prepare.total_amount_atto != null && big(prepare.total_amount_atto, 'the total') !== total) throw refusal('quote-sum', 'the payments do not add up to the quoted total');
+      if (big(prepare.total_atto, 'the total') !== total) throw refusal('quote-sum', 'the quotes do not add up to the quoted total');
       if (!authorization || authorization.state !== 'authorized-for-signing') throw refusal('not-authorized', 'this price has not been authorized for signing');
       if (authorization.upload_id !== prepare.upload_id) throw refusal('not-authorized', 'the authorization is for a different price');
       var ceiling = big(authorization.ant_ceiling_atto, 'the ceiling');
@@ -158,27 +173,33 @@
         });
       })();
     }
+    /* one entry per quote that costs anything — the door's finalize refuses a paid quote left out (missing_quote_tx). */
+    function pairs(plan, txHashes) { return plan.owed.map(function (p) { return { quote_hash: p.quote_hash, tx_hash: txHashes[p.quote_hash] }; }); }
     function finalize(prepare, txHashes, plan, payer, started) {
       tell({ phase: 'finalizing', upload_id: prepare.upload_id });
-      return bridgeJSON('/v1/upload/finalize', { upload_id: prepare.upload_id, tx_hashes: txHashes }).then(function (f) {
-        if (f.total_chunks != null && f.chunks_stored < f.total_chunks) throw refusal('partial-store', 'only ' + f.chunks_stored + ' of ' + f.total_chunks + ' pieces were stored', { chunks_stored: f.chunks_stored, total_chunks: f.total_chunks });
-        var receipt = { address: f.data_map_address || prepare.data_map_address || null, chunks: f.chunks_stored != null ? f.chunks_stored : null, quotes_paid: plan.owed.length,
-          ant_atto: plan.total.toString(), payer: payer, tx_hashes: txHashes, seconds: Math.round((now() - started) / 1000), finished_at: new Date(now()).toISOString() };
+      var txs = pairs(plan, txHashes);
+      return doorJSON('/ant/v1/upload/finalize', { upload_id: prepare.upload_id, txs: txs }).then(function (f) {
+        if (!f || strip(f.data_map_address || '') !== strip(prepare.data_map_address || '') || !strip(f.data_map_address || ''))
+          throw refusal('address-mismatch', 'the door confirmed an address that is not the one it quoted. the payment is on chain; keep these payment ids', { txs: txs });
+        var receipt = { address: f.data_map_address, chunks: prepare.chunks && prepare.chunks.total != null ? prepare.chunks.total : null, quotes_paid: plan.owed.length,
+          ant_atto: plan.total.toString(), payer: payer, txs: txs, seconds: Math.round((now() - started) / 1000), finished_at: new Date(now()).toISOString() };
         store.set(KEY(prepare.upload_id), JSON.stringify({ txHashes: txHashes, finalized: true, receipt: receipt }));
         tell({ phase: 'done', receipt: receipt }); return receipt;
       }, function (e) {
-        throw refusal('paid-not-finalized', 'the payment is on chain but the upload did not finish: ' + e.message + '. nothing is lost — ask for the price again so the bridge recovers this plan, then resume; you will not be charged twice', { tx_hashes: txHashes });
+        throw refusal('paid-not-finalized', 'the payment is on chain but the upload did not finish: ' + e.message + '. nothing is lost — ask for the price again so the door recovers this plan, then resume; you will not be charged twice', { txs: txs, door: e.detail && e.detail.door });
       });
     }
+    function refused(e, fallback) { if (!e.refusal) e = refusal(fallback, String(e && e.message || e).slice(0, 200)); tell({ phase: 'refused', code: e.refusal, message: e.message, detail: e.detail }); throw e; }
 
-    function pay(input) {
-      var started = now(), prepare = input && input.prepare, plan, c, payer, signer = cfg.signer, txHashes = {};
+    /* the chain half only: read, show, sign, wait. the hashes are kept before this returns. */
+    function charge(input) {
+      var started = now(), prepare = input && input.prepare, plan, c = CONTRACTS, payer, signer = cfg.signer, txHashes = {};
       return Promise.resolve().then(function () {
         plan = readPlan(prepare, input.authorization);
         if (store.get(KEY(prepare.upload_id))) throw refusal('already-paid', 'this price was already paid from this device — resume it instead of paying again');
         if (!signer) throw refusal('no-wallet', 'no wallet is connected to this page');
-        return contracts();
-      }).then(function (x) { c = x; return signer.address(); }).then(function (a) {
+        return signer.address();
+      }).then(function (a) {
         payer = a;
         return Promise.all([rpc('eth_call', [{ to: c.token, data: SEL.balanceOf + pad32(a) }, 'latest']), rpc('eth_getBalance', [a, 'latest']), rpc('eth_call', [{ to: c.token, data: SEL.allowance + pad32(a) + pad32(c.vault) }, 'latest'])]);
       }).then(function (v) {
@@ -204,12 +225,22 @@
               if (!isH32(h)) throw refusal('wallet-declined', 'the wallet returned no transaction hash');
               batch.forEach(function (p) { txHashes[p.quote_hash] = h; });
               store.set(KEY(prepare.upload_id), JSON.stringify({ txHashes: txHashes, finalized: false })); /* BEFORE finalize, before the wait */
+              tell({ phase: 'sent', what: 'payment', tx: h }); /* the surface's own record of what left the wallet, even if its store is denied */
               return waitFor(h, 'payment', input.signal);
             });
           }, Promise.resolve());
         });
-      }).then(function () { return finalize(prepare, txHashes, plan, payer, started); })
-        .catch(function (e) { if (!e.refusal) e = refusal('wallet-declined', String(e && e.message || e).slice(0, 200)); tell({ phase: 'refused', code: e.refusal, message: e.message, detail: e.detail }); throw e; });
+      }).then(function () { return { prepare: prepare, plan: plan, payer: payer, txHashes: txHashes, started: started }; });
+    }
+    /* pay on chain and hand the per-quote pairs back: for a surface whose own door adapter finalizes. */
+    function settle(input) {
+      return charge(input).then(function (r) { var txs = pairs(r.plan, r.txHashes); tell({ phase: 'paid', upload_id: r.prepare.upload_id, txs: txs }); return txs; })
+        .catch(function (e) { return refused(e, 'wallet-declined'); });
+    }
+    /* pay on chain, then finalize at the door. */
+    function pay(input) {
+      return charge(input).then(function (r) { return finalize(r.prepare, r.txHashes, r.plan, r.payer, r.started); })
+        .catch(function (e) { return refused(e, 'wallet-declined'); });
     }
     /* a paid upload that did not finish: confirm the kept hashes on chain, then finalize. never signs, never pays. */
     function resume(input) {
@@ -221,19 +252,12 @@
         if (plan.owed.some(function (p) { return !kept.txHashes[p.quote_hash]; })) throw refusal('nothing-to-resume', 'the kept payment does not cover this price — it belongs to a different plan');
         return hashes.reduce(function (ch, h) { return ch.then(function () { return waitFor(h, 'payment', input.signal); }); }, Promise.resolve())
           .then(function () { return finalize(prepare, kept.txHashes, plan, null, started); });
-      }).catch(function (e) { if (!e.refusal) e = refusal('network', String(e && e.message || e).slice(0, 200)); tell({ phase: 'refused', code: e.refusal, message: e.message, detail: e.detail }); throw e; });
+      }).catch(function (e) { return refused(e, 'network'); });
     }
-    /* verify by downloading: only if the bridge says it can. otherwise the surface says "not available yet" in prose. */
-    function verify(address, sha256) {
-      return bridgeJSON('/health').then(function (h) {
-        if (!h || !h.capabilities || h.capabilities.indexOf('verify-download') < 0) return { available: false, reason: 'this bridge cannot download yet, so the check by downloading is not available yet' };
-        return bridgeJSON('/v1/download/verify', { address: address, expect_sha256: sha256 }).then(function (v) { return { available: true, matches: v.matches === true, sha256: v.sha256 || null, bytes: v.bytes || null }; });
-      });
-    }
-    return { pay: pay, resume: resume, verify: verify, contracts: contracts };
+    return { pay: pay, settle: settle, resume: resume };
   }
 
-  var api = { create: create, injectedSigner: injectedSigner, trezorSigner: trezorSigner, loadTrezorConnect: loadTrezorConnect, CHAIN_ID: CHAIN_ID,
+  var api = { create: create, injectedSigner: injectedSigner, trezorSigner: trezorSigner, loadTrezorConnect: loadTrezorConnect, CHAIN_ID: CHAIN_ID, CONTRACTS: CONTRACTS,
     _wire: { encodeApprove: encodeApprove, encodePayForQuotes: encodePayForQuotes, rlp: rlp, serialize1559: serialize1559, SEL: SEL } };
   if (typeof module === 'object' && module.exports) module.exports = api;
   if (typeof window === 'object') root.AntPay = api;
