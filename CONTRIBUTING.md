@@ -91,13 +91,14 @@ through one door.
   with the founder as author and the seat as committer, per the §7
   identity shape. A fresh clone sets no local identity at all, so an
   unstated one silently falls back to whatever global identity you
-  happen to carry. This estate's own working checkouts go further and
-  set `user.name = probe` / `user.email = probe@invalid` in their
-  `.git/config`; `.invalid` is a reserved, non-routable TLD (RFC 2606),
-  so an unstated identity fails loudly there instead of landing under a
-  plausible-looking stranger's name. If your checkout carries it, that
-  is a guard and not a misconfiguration — do not replace it with a
-  real-looking default. Either way the pre-commit §7 arm refuses a
-  non-founder author on its own, and CI's §7 identity gate refuses it
-  again over the pushed range, so an unstated identity costs a refusal
-  and never a wrong attribution.
+  happen to carry. The seat worktrees on this estate's build box go
+  further: they share a gitdir that sets `user.name = probe` /
+  `user.email = probe@invalid`, and `.invalid` is a reserved,
+  non-routable TLD (RFC 2606), so an unstated identity fails loudly
+  there instead of landing under a plausible-looking stranger's name.
+  If your checkout carries it, that is a guard and not a
+  misconfiguration — do not replace it with a real-looking default.
+  Either way the pre-commit §7 arm refuses a non-founder author on its
+  own, and CI's §7 identity gate refuses it again over the pushed
+  range, so an unstated identity costs a refusal and never a wrong
+  attribution.
