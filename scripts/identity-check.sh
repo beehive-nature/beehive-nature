@@ -44,6 +44,67 @@ set -u
 FOUNDER_NAME="loVis waTer"
 FOUNDER_EMAIL="loviswater44@gmail.com"
 
+# ---- GITHUB WEB-FLOW, the founder's own hand through GitHub's UI --------
+#
+# THE DEFECT THIS CLOSES (measured 2026-09-22 on main 85839cde, push run
+# 35661322897): GitHub's merge button writes the merge commit with the
+# PRESSING ACCOUNT as author and GitHub as committer. For this estate that
+# is 'Travis Remington <111410861+loviswaternakamoto@users.noreply.github.com>'
+# — the founder, under his GitHub identity, not the git identity §7 names.
+# The check read that as "author is not the founder" and main's static job
+# went red after EVERY web merge. An always-red gate trains dismissal: the
+# next reader stops asking which row fell, and a real violation rides in
+# under the noise. That is the same family as every other defect banked this
+# sprint, and it is why this is a repair rather than a documented artifact.
+#
+# WHAT THE EXEMPTION IS PINNED ON, and why each half is load-bearing:
+#   committer == 'GitHub <noreply@github.com>'  — the web-flow committer. A
+#     seat's own commit never carries it; a seat commits as itself by rule.
+#   author email == <FOUNDER_GH_ID>+<login>@users.noreply.github.com — the
+#     NUMERIC GitHub account id, which is immutable. The login half is a
+#     wildcard on purpose (a rename must not turn this gate red) and the
+#     display NAME is not pinned at all (a profile edit must not either).
+# Drop either half and the exemption stops meaning "the founder": committer
+# alone would exempt every collaborator's web merge, author alone would
+# exempt anything that merely types that address. Both halves are exercised
+# by their own selftest arm below.
+#
+# WHAT IT IS NOT PINNED ON: the parent count. Measured in this estate's own
+# checkouts the same day — REPOS/beehive-nature is shallow, and `git rev-list
+# --parents -1 85839cde` returns the sha ALONE, no parents. A merge-ness test
+# would be uncomputable there, and this file's law sends uncomputable to
+# die(), i.e. straight back to red. A founder web-UI edit is the founder's
+# hand too, so requiring a merge would buy nothing it could pay for.
+#
+# WHAT IT DOES NOT CLAIM: this is not signature verification. The exemption
+# is sound by construction against a seat's ORDINARY commit — no seat types
+# as GitHub — and it is not a cryptographic proof of origin. §7 is detection,
+# stated at the top of this file, and this row does not raise that ceiling.
+# STAGED MODE DOES NOT GET THIS EXEMPTION: a seat's commit in progress is
+# never GitHub's, and an exemption reachable from a local commit is an
+# instruction to forge one.
+GH_WEBFLOW_NAME="GitHub"
+GH_WEBFLOW_EMAIL="noreply@github.com"
+FOUNDER_GH_ID="111410861"
+GH_NOREPLY_DOMAIN="users.noreply.github.com"
+
+# true when $1 is a noreply address minted by GitHub for the founder's account.
+# The middle is checked for emptiness and for a stray '@' rather than left to a
+# glob: "$FOUNDER_GH_ID+*@$GH_NOREPLY_DOMAIN" alone also matches
+# '111410861+x@evil.example@users.noreply.github.com'.
+is_founder_gh_noreply() {
+  case "${1:-}" in
+    "$FOUNDER_GH_ID"+*"@$GH_NOREPLY_DOMAIN") ;;
+    *) return 1 ;;
+  esac
+  _mid=${1#"$FOUNDER_GH_ID"+}
+  _mid=${_mid%"@$GH_NOREPLY_DOMAIN"}
+  case "$_mid" in
+    ''|*@*) return 1 ;;
+  esac
+  return 0
+}
+
 say() { echo "§7: $*"; }
 die() { echo "§7 FAIL — $*"; echo "§7 FAIL — this check fails closed when it cannot determine an answer."; exit 1; }
 
@@ -68,8 +129,10 @@ require_count() { # $1 what it counts, $2 the captured value
 # identical on a normal day. This enforcement layer failed OPEN twice tonight
 # (2026-08-24) in two independent builds: an unreachable §7 line, and helpers
 # defined after their callers (command-not-found exiting 0). The selftest runs
-# the four cases that can tell a working gate from a dead one, continuously in
-# CI, so the next edit that reintroduces a fail-open goes red the same hour:
+# the cases below — every one of them tells a working gate from a dead one —
+# continuously in CI, so the next edit that reintroduces a fail-open goes red
+# the same hour. No count is typed here: one was, and it drifted (T5 landed
+# against a step still saying "four"). The rows print their own names:
 #
 #   T1 seat-as-author      → BLOCKED: exit ≠ 0, "§7 FAIL" in the output, zero commits
 #   T2 trailer-in-body     → BLOCKED by commit-msg (a body line is not a trailer)
@@ -232,6 +295,67 @@ if [ "${1:-}" = "--selftest" ]; then
   else
     echo "  PASS T7 range resolution — unresolvable dies named · empty still passes · --not still judged"
   fi
+  # T8 — GITHUB WEB-FLOW, and it runs through the RANGE path because that is the
+  # only path that ever sees such a commit: GitHub writes it, no hook runs, CI
+  # reads it after the push. FIVE arms, because one arm cannot show a rule is
+  # NARROW — an exemption that passes everything passes arm A too.
+  #   A the founder's own web merge            -> ok, by its own word
+  #   B another GitHub account, same committer -> FAIL (the author-id half)
+  #   C the founder's GH address, seat commits -> FAIL (the committer half)
+  #   D a real seat-as-author commit, the live specimen 9f6b943e's own idents
+  #                                            -> FAIL (the rule this file exists for)
+  #   E an address that only ENDS in the noreply domain
+  #                                            -> FAIL (the stray-'@' guard)
+  # Arm D is the one the off-switch test cannot give: deleting the exemption
+  # makes A fall and proves the row is load-bearing, which is not the same as
+  # proving it still returns the right answer for everything else.
+  # Fixtures commit with --no-verify on purpose: staged mode correctly refuses
+  # to let a seat create any of these, and a rig that cannot build the shape
+  # under test proves nothing.
+  t8() { # $1 desc, $2 ok|fail, $3 a substring the output must carry, then the ident env + git
+    d8=$1; want8=$2; must8=$3; shift 3
+    echo "$d8" >> f.txt && git add f.txt
+    b8=$(git rev-parse HEAD)
+    "$@" -q --no-verify -m "$d8" >/dev/null 2>&1
+    p8=$(git rev-parse HEAD)
+    if [ "$p8" = "$b8" ]; then
+      echo "  FAIL $d8 — fixture: no commit was created, so this arm judged nothing"; st=1; return
+    fi
+    o8=$(env S7_RANGE="$b8..$p8" sh "$SELF" 2>&1); r8=$?
+    if ! printf '%s\n' "$o8" | grep -qF "$must8"; then
+      echo "  FAIL $d8 — the output does not carry '$must8', so the arm cannot say WHICH thing it judged; rc=$r8 out: $o8"; st=1
+    elif [ "$want8" = ok ] && { [ "$r8" -ne 0 ] || ! printf '%s\n' "$o8" | grep -qF "ok   §7 $p8"; }; then
+      echo "  FAIL $d8 — expected $p8 to pass; rc=$r8 out: $o8"; st=1
+    elif [ "$want8" = fail ] && { [ "$r8" -eq 0 ] || printf '%s\n' "$o8" | grep -qF "ok   §7 $p8"; }; then
+      echo "  FAIL $d8 — expected $p8 to be refused; rc=$r8 out: $o8"; st=1
+    else
+      echo "  PASS $d8"
+    fi
+  }
+  t8 "T8-A founder's GitHub web merge is ok" ok \
+     "GitHub web-flow by the founder's account" \
+     env GIT_AUTHOR_NAME="Travis Remington" \
+         GIT_AUTHOR_EMAIL="$FOUNDER_GH_ID+loviswaternakamoto@$GH_NOREPLY_DOMAIN" \
+         GIT_COMMITTER_NAME="$GH_WEBFLOW_NAME" GIT_COMMITTER_EMAIL="$GH_WEBFLOW_EMAIL" git commit
+  t8 "T8-B another GitHub account's web merge is refused" fail \
+     "author is 'Someone Else <999999+someoneelse@$GH_NOREPLY_DOMAIN>', not the founder" \
+     env GIT_AUTHOR_NAME="Someone Else" \
+         GIT_AUTHOR_EMAIL="999999+someoneelse@$GH_NOREPLY_DOMAIN" \
+         GIT_COMMITTER_NAME="$GH_WEBFLOW_NAME" GIT_COMMITTER_EMAIL="$GH_WEBFLOW_EMAIL" git commit
+  t8 "T8-C the founder's GitHub address with a SEAT as committer is refused" fail \
+     "author is 'Travis Remington <$FOUNDER_GH_ID+loviswaternakamoto@$GH_NOREPLY_DOMAIN>', not the founder" \
+     env GIT_AUTHOR_NAME="Travis Remington" \
+         GIT_AUTHOR_EMAIL="$FOUNDER_GH_ID+loviswaternakamoto@$GH_NOREPLY_DOMAIN" \
+         GIT_COMMITTER_NAME=bZiq GIT_COMMITTER_EMAIL=seat@x git commit
+  t8 "T8-D a real seat-as-author commit still FAILs (9f6b943e's own idents)" fail \
+     "author is 'bFUzZ <bGoose@agents.skaists.dev>', not the founder" \
+     env GIT_AUTHOR_NAME="bFUzZ" GIT_AUTHOR_EMAIL="bGoose@agents.skaists.dev" \
+         GIT_COMMITTER_NAME="bFUzZ" GIT_COMMITTER_EMAIL="bGoose@agents.skaists.dev" git commit
+  t8 "T8-E an address that merely ENDS in the noreply domain is refused" fail \
+     "author is 'Travis Remington <$FOUNDER_GH_ID+x@evil.example@$GH_NOREPLY_DOMAIN>', not the founder" \
+     env GIT_AUTHOR_NAME="Travis Remington" \
+         GIT_AUTHOR_EMAIL="$FOUNDER_GH_ID+x@evil.example@$GH_NOREPLY_DOMAIN" \
+         GIT_COMMITTER_NAME="$GH_WEBFLOW_NAME" GIT_COMMITTER_EMAIL="$GH_WEBFLOW_EMAIL" git commit
   if [ "$st" -ne 0 ]; then echo "§7 selftest FAIL — a working gate and a dead one are not distinguishable by silence; these cases are the difference"; fi
   exit "$st"
 fi
@@ -346,7 +470,19 @@ status=0
 while IFS='|' read -r commit an ae cn ce; do
   [ -z "$commit" ] && continue
 
-  # Author is ALWAYS the founder — no exceptions, seat-typed or founder-typed.
+  # GitHub web-flow, the founder's own hand: committer is GitHub and the author
+  # is a noreply address minted for the founder's GitHub account id. There is no
+  # seat in such a commit, so the trailer clause has nobody to credit and does
+  # not apply — hence its own branch, and its own word in the output rather than
+  # "founder-typed", which would report the wrong reason for the pass. See the
+  # block beside FOUNDER_EMAIL for what the two halves buy and what they do not.
+  if [ "$cn" = "$GH_WEBFLOW_NAME" ] && [ "$ce" = "$GH_WEBFLOW_EMAIL" ] \
+     && is_founder_gh_noreply "$ae"; then
+    echo "ok   §7 $commit — GitHub web-flow by the founder's account (author '$an <$ae>', committer GitHub); no seat in this commit, so the trailer clause does not apply"
+    continue
+  fi
+
+  # Author is otherwise ALWAYS the founder — seat-typed or founder-typed alike.
   if [ "$an" != "$FOUNDER_NAME" ] || [ "$ae" != "$FOUNDER_EMAIL" ]; then
     echo "FAIL §7 $commit — author is '$an <$ae>', not the founder (seats are committers + trailers, never authors)"
     status=1
