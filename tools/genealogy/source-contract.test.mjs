@@ -354,6 +354,10 @@ test("non-data anywhere in a projected value is refused, never silently dropped 
   const withSymbolKey = { date: "1922", [Symbol("k")]: 1 };
   const withGetter = { date: "1922", get where() { return "Elm St"; } };
   const hidden = { date: "1922" }; Object.defineProperty(hidden, "secret", { value: "x", enumerable: false });
+  // JSON would silently lose each of these: -0 becomes 0, a named array property vanishes
+  const namedArray = [1, 2]; namedArray.foo = "x";
+  const symArray = [1]; symArray[Symbol("k")] = 1;
+  const getterArray = []; Object.defineProperty(getterArray, 0, { get: () => "Elm St", enumerable: true });
   const bad = {
     "nested function":        [{ date: "1922", helper: () => 1 }, /value\.helper: function/],
     "nested symbol":          [{ date: "1922", tag: Symbol("t") }, /value\.tag: symbol/],
@@ -373,6 +377,12 @@ test("non-data anywhere in a projected value is refused, never silently dropped 
     "symbol-keyed property":  [withSymbolKey, /symbol-keyed property/],
     "accessor property":      [withGetter, /value\.where: accessor property/],
     "non-enumerable property": [hidden, /value\.secret: non-enumerable property/],
+    "negative zero":          [-0, /value: negative zero/],
+    "nested negative zero":   [{ offset: [0, -0] }, /value\.offset\[1\]: negative zero/],
+    "array named property":   [namedArray, /value\.foo: array property that is not an element/],
+    "array symbol key":       [symArray, /value: symbol-keyed property/],
+    "array accessor element": [getterArray, /value\[0\]: accessor element/],
+    "array subclass":         [new (class Dates extends Array {})(), /value: array subclass/],
   };
   for (const [name, [v, re]] of Object.entries(bad)) {
     assert.match(nonDataAt(v) ?? "", re, `${name}: not named`);

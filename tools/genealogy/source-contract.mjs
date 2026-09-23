@@ -277,21 +277,34 @@ export const PUBLIC_FIELDS = {
 };
 
 // Where a projected value stops being JSON data, or null when it is data all
-// the way down. Data is null, a string, a boolean, a finite number, a dense
-// array of data, or a plain object (no prototype other than Object's) whose
-// own properties are enumerable string-keyed data values. Anything else,
-// anywhere in the structure, is named rather than dropped or transformed.
+// the way down. Data is null, a string, a boolean, a finite number other
+// than -0, a dense plain array whose only own properties are its elements,
+// or a plain object (no prototype other than Object's) whose own properties
+// are enumerable string-keyed data values. Anything else, anywhere in the
+// structure, is named rather than dropped or transformed, so the JSON copy
+// made after it is exact.
 export function nonDataAt(v, path = "value", seen = new Set()) {
   if (v === null || typeof v === "string" || typeof v === "boolean") return null;
-  if (typeof v === "number") return Number.isFinite(v) ? null : `${path}: non-finite number ${v}`;
+  if (typeof v === "number") {
+    if (!Number.isFinite(v)) return `${path}: non-finite number ${v}`;
+    if (Object.is(v, -0)) return `${path}: negative zero (JSON would publish it as 0)`;
+    return null;
+  }
   if (typeof v !== "object") return `${path}: ${typeof v}`;
   if (seen.has(v)) return `${path}: cycle`;
   seen.add(v);
   try {
     if (Array.isArray(v)) {
+      if (Object.getPrototypeOf(v) !== Array.prototype) return `${path}: array subclass`;
+      if (Object.getOwnPropertySymbols(v).length) return `${path}: symbol-keyed property`;
+      // JSON keeps only the elements: any other own property would vanish
+      for (const k of Object.getOwnPropertyNames(v))
+        if (k !== "length" && String(Number(k) >>> 0) !== k) return `${path}.${k}: array property that is not an element`;
       for (let i = 0; i < v.length; i++) {
-        if (!(i in v)) return `${path}[${i}]: hole`;
-        const bad = nonDataAt(v[i], `${path}[${i}]`, seen);
+        const d = Object.getOwnPropertyDescriptor(v, i);
+        if (!d) return `${path}[${i}]: hole`;
+        if (!("value" in d)) return `${path}[${i}]: accessor element`;
+        const bad = nonDataAt(d.value, `${path}[${i}]`, seen);
         if (bad) return bad;
       }
       return null;
