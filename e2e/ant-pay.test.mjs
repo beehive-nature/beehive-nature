@@ -46,12 +46,19 @@ function world(o = {}) {
   };
   const signer = 'signer' in o ? o.signer : { name: 'mock wallet', address: async () => PAYER, send: async (tx) => { log.sends.push(tx); log.order.push('send');
     if (o.decline || (o.declineAfter != null && log.sends.filter((t) => t.to === VAULT).length > o.declineAfter)) throw new Error('user rejected'); return TX(log.sends.length); } };
-  /* denyClear: a store that took the record and refuses to clear it — true for every clear, or a
-     count for the first N. Distinct from storeThrows, which refuses every write including the one
-     that created the record; only a store that ACCEPTED the record can strand it. */
+  /* denyClear: a store that took the record and refuses to clear it — true for every clear, a count
+     for the first N, or 'record' for the upload record's own clear alone. Distinct from storeThrows,
+     which refuses every write including the one that created the record; only a store that ACCEPTED
+     the record can strand it. swallowDeny: the denial is SWALLOWED rather than thrown — the shape of
+     the ONLY adapter that ships, surfaces/myspace.js:382-385 payStore, which catches its own denial.
+     A row anchored on a throwing store cannot see what the one caller that exists actually does. */
   let clears = 0;
+  const quoteKey = (k) => k.startsWith('ant-pay.paid.quote.');
+  const denies = (k, v) => v === '' && !!o.denyClear &&
+    (o.denyClear === 'record' ? !quoteKey(k) : o.denyClear === 'quote' ? quoteKey(k)
+      : o.denyClear === true || ++clears <= o.denyClear);
   const store = { get: (k) => mem.get(k) ?? null, set: (k, v) => { if (o.storeThrows) throw new Error('storage denied');
-    if (v === '' && o.denyClear && (o.denyClear === true || ++clears <= o.denyClear)) throw new Error('storage denied');
+    if (denies(k, v)) { if (o.swallowDeny) return; throw new Error('storage denied'); }
     mem.set(k, v); log.order.push('persist'); } };
   /* throwOnState: the surface's own renderer blows up on that phase — a caller's failure, not this page's. */
   const onState = (s) => { log.states.push(s); if (o.throwOnState === s.phase) throw new Error('the surface’s renderer blew up'); };
@@ -434,7 +441,13 @@ test('a payment the chain refused is not paid-forever: its quotes are cleared an
    and the second is refused. Clearing the lot would throw away 256 quotes of real ANT. */
 test('only the refused transaction is unwound: a batch that did land keeps its quotes marked paid', async () => {
   const p = prepareOf(300), w = world({ allowance: 10n ** 20n, revertHashes: [TX(2)] });
-  await refused(w.payer.pay({ prepare: p, authorization: authOf(p), confirmPlan: yes }), 'tx-reverted');
+  /* and the read-back asks whether the record still names THE REFUSED HASH, not whether it is empty:
+     a record that legitimately keeps the landed batch must not be reported as a clear that failed. */
+  await assert.rejects(w.payer.pay({ prepare: p, authorization: authOf(p), confirmPlan: yes }), (e) => {
+    assert.equal(e.refusal, 'tx-reverted', e.message);
+    assert.doesNotMatch(e.message, /could not clear/, 'the clear landed, so the refusal is the chain’s verdict and nothing more');
+    return true;
+  });
   assert.equal(w.log.sends.filter((t) => t.to === VAULT).length, 2, 'precondition: two payment calls, one landed and one refused');
   const entries = [...w.mem].filter(([k, v]) => k.startsWith('ant-pay.paid.quote.') && v);
   assert.equal(entries.length, 256, 'exactly the landed batch is still marked paid');
@@ -532,6 +545,44 @@ test('a clear the store refuses stays the chain’s verdict, and the refusal say
   });
   assert.equal(marked(w2), 1, 'one key refused it, the other was cleared anyway');
   assert.equal(w2.mem.get('ant-pay.paid.up-1'), '', 'and the record itself was cleared — this is the arm where only a QUOTE key was refused');
+
+  /* THE ONE ADAPTER THAT SHIPS SWALLOWS. surfaces/myspace.js:382-385 payStore catches its own
+     denial, so a clear that never happened raises nothing and a 'landed' taken from the absence of a
+     throw is always true on the page this sentence was written for. Same denial underneath, one
+     thing changed: the stranded state is identical to the throwing arm above, and without a read-back
+     the sentence exists only in a store this estate does not ship. */
+  const w3 = world({ allowance: 10n ** 20n, revert: true, denyClear: true, swallowDeny: true });
+  await assert.rejects(w3.payer.pay({ prepare: p, authorization: authOf(p), confirmPlan: yes }), (e) => {
+    assert.equal(e.refusal, 'tx-reverted', e.message);
+    assert.match(e.message, /could not clear its own record/, 'a SWALLOWED denial is still a denial, and the reader is still told');
+    return true;
+  });
+  assert.equal(marked(w3), 2, 'and it warns about exactly the state the throwing arm leaves');
+
+  /* TWO WRITERS SET ONE FLAG, so the arm above cannot judge either of them: with every clear denied
+     the record's own read-back reports the failure and the index's is masked. These two arms deny
+     exactly one half each, which is the only place a single read-back is the reason for the
+     sentence. First: the QUOTE keys alone, so the record is cleared and the index is what is stale. */
+  const w3b = world({ allowance: 10n ** 20n, revert: true, denyClear: 'quote', swallowDeny: true });
+  await assert.rejects(w3b.payer.pay({ prepare: p, authorization: authOf(p), confirmPlan: yes }), (e) => {
+    assert.equal(e.refusal, 'tx-reverted', e.message);
+    assert.match(e.message, /could not clear its own record/, 'the index’s own clear is read back');
+    return true;
+  });
+  assert.equal(marked(w3b), 2, 'the quote keys are what stayed');
+  assert.equal(w3b.mem.get('ant-pay.paid.up-1'), '', 'precondition: while the record itself WAS cleared, so it is not what reports this');
+
+  /* and the other half: the RECORD's own clear swallowed while every quote key is cleared. The index then no longer
+     believes in the payment while the record goes on naming the refused transaction — the dead end
+     this file closed for charge() — and only the record's own read-back can see it. */
+  const w4 = world({ allowance: 10n ** 20n, revert: true, denyClear: 'record', swallowDeny: true });
+  await assert.rejects(w4.payer.pay({ prepare: p, authorization: authOf(p), confirmPlan: yes }), (e) => {
+    assert.equal(e.refusal, 'tx-reverted', e.message);
+    assert.match(e.message, /could not clear its own record/, 'the record’s clear is read back too, not only the index');
+    return true;
+  });
+  assert.equal(marked(w4), 0, 'precondition: every quote key WAS cleared, so the index is not what is stale');
+  assert.equal(Object.keys(JSON.parse(w4.mem.get('ant-pay.paid.up-1')).txHashes).length, 2, 'while the record still names the transaction the chain refused');
 
   /* CONTROL — a store that allows the clear says the chain’s verdict and nothing more. */
   const ctl = world({ allowance: 10n ** 20n, revert: true });

@@ -178,11 +178,29 @@
        could not validate its own output owes that fact to the reader, which is what reverted()
        adds; without it the next attempt is greeted by 'already paid' and nothing in this file
        says why. */
+    /* READ THE CLEAR BACK; 'landed' IS NOT THE ABSENCE OF A THROW. The one store that ships —
+       surfaces/myspace.js:382-385 payStore — CATCHES its own denial, so on the page this sentence
+       was written for a clear that never happened raises nothing at all. Measured on the two
+       adapters with nothing else changed: identical stranded state, both answering already-paid,
+       and the second half of the refusal in the THROWING one alone. The instrument is one line from
+       the repair. Each key is asked the READER'S OWN QUESTION rather than compared byte for byte —
+       paidFor() calls an entry absent when it reads falsy, and the record's only question is whether
+       it still names the refused hash — so a store that answers '' as null is not reported as a
+       failure it did not have. A read that itself throws is not a clear either. */
+    function entryGone(key) { try { return !store.get(key); } catch (e) { return false; } }
+    function recordGone(key, hash) {
+      var raw; try { raw = store.get(key); } catch (e) { return false; }
+      if (!raw) return true;
+      var r = null; try { r = JSON.parse(raw); } catch (e) { return false; }
+      var m = (r && r.txHashes) || {};
+      return !Object.keys(m).some(function (h) { return m[h] === hash; });
+    }
     function unwind(hash, covered, recordId, record) {
       var landed = true;
       covered.forEach(function (x) {
         if (x.tx_hash !== hash) return;
         try { store.set(QKEY(x.quote_hash), ''); } catch (e) { landed = false; }
+        if (!entryGone(QKEY(x.quote_hash))) landed = false;
       });
       /* A FINALIZED record is LEFT WHOLE. It is the door's own answer — the data is stored and the
          address is the door's, not ours to withdraw because the chain later refused one of the
@@ -193,6 +211,7 @@
       Object.keys(record.txHashes).forEach(function (h) { if (record.txHashes[h] === hash) delete record.txHashes[h]; });
       var left = Object.keys(record.txHashes).length;
       try { store.set(KEY(recordId), left ? JSON.stringify(record) : ''); } catch (e) { landed = false; }
+      if (!recordGone(KEY(recordId), hash)) landed = false;
       return landed;
     }
     /* the chain's verdict is never replaced, only EXTENDED when the clear did not land. */
