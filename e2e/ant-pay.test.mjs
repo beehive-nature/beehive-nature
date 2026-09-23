@@ -24,7 +24,7 @@ const prepareOf = (n, amt = 1000n, extra = {}) => ({ upload_id: 'up-1', payment_
 const authOf = (p, ceiling) => ({ id: 'auth-1', state: 'authorized-for-signing', upload_id: p.upload_id, ant_ceiling_atto: String(ceiling ?? p.total_atto) });
 
 function world(o = {}) {
-  const log = { sends: [], finalize: [], states: [], urls: [], order: [] }, mem = new Map(), hex = (v) => '0x' + BigInt(v).toString(16);
+  const log = { sends: [], finalize: [], states: [], urls: [], order: [], swallowed: 0 }, mem = new Map(), hex = (v) => '0x' + BigInt(v).toString(16);
   const fetch = async (url, init) => {
     log.urls.push(url);
     const json = (status, body) => ({ ok: status < 400, status, json: async () => body, text: async () => (typeof body === 'string' ? body : JSON.stringify(body)) });
@@ -52,13 +52,25 @@ function world(o = {}) {
      the record can strand it. swallowDeny: the denial is SWALLOWED rather than thrown — the shape of
      the ONLY adapter that ships, surfaces/myspace.js:382-385 payStore, which catches its own denial.
      A row anchored on a throwing store cannot see what the one caller that exists actually does. */
-  let clears = 0;
+  /* denyRecordWrite: the Nth write to the upload RECORD key is refused WHATEVER ITS VALUE. denies()
+     above can only refuse a write of '', so every arm in this file exercised unwind's EMPTYING
+     branch and none could reach the REWRITE a partial revert takes — the branch that leaves a
+     record alive with the batch that landed. Gating that read-back on `!left` left this suite 26/26
+     while the stranding went silent. Counted by ORDINAL, not matched by value: unwind's rewrite and
+     charge()'s two 'before the wait' writes all name txHashes, so a value predicate cannot tell the
+     write I mean from the writes around it. */
+  let clears = 0, recordWrites = 0;
   const quoteKey = (k) => k.startsWith('ant-pay.paid.quote.');
   const denies = (k, v) => v === '' && !!o.denyClear &&
     (o.denyClear === 'record' ? !quoteKey(k) : o.denyClear === 'quote' ? quoteKey(k)
       : o.denyClear === true || ++clears <= o.denyClear);
+  const deniesRecordWrite = (k) => !quoteKey(k) && o.denyRecordWrite != null && ++recordWrites === o.denyRecordWrite;
   const store = { get: (k) => mem.get(k) ?? null, set: (k, v) => { if (o.storeThrows) throw new Error('storage denied');
-    if (denies(k, v)) { if (o.swallowDeny) return; throw new Error('storage denied'); }
+    /* both evaluated: a short circuit would skew the ordinal. No arm sets denyClear and
+       denyRecordWrite together, so nothing here witnesses that — replacing this with `||` is green.
+       It is a guard against the next arm, named rather than claimed. */
+    const no = denies(k, v), noRecord = deniesRecordWrite(k);
+    if (no || noRecord) { if (o.swallowDeny) { log.swallowed++; return; } throw new Error('storage denied'); }
     mem.set(k, v); log.order.push('persist'); } };
   /* throwOnState: the surface's own renderer blows up on that phase — a caller's failure, not this page's. */
   const onState = (s) => { log.states.push(s); if (o.throwOnState === s.phase) throw new Error('the surface’s renderer blew up'); };
@@ -589,6 +601,47 @@ test('a clear the store refuses stays the chain’s verdict, and the refusal say
   await assert.rejects(ctl.payer.pay({ prepare: p, authorization: authOf(p), confirmPlan: yes }), (e) => {
     assert.equal(e.refusal, 'tx-reverted'); assert.doesNotMatch(e.message, /could not clear/); return true; });
   assert.equal(marked(ctl), 0, 'and nothing is left marked paid');
+});
+
+/* A PARTIAL REVERT TAKES THE OTHER BRANCH. Every arm above strands a record by refusing a clear,
+   so all of them exercise the write of '' — and unwind's REWRITE, the one a batch that DID land
+   leaves behind, had no arm at all: gating its read-back on `!left` kept this suite 26/26 while the
+   stranding went silent. The fixture is the reason and not the file: its clear predicate could only
+   refuse an empty value. This is the branch, denied by ORDINAL and SWALLOWED, which is the shape of
+   the only adapter that ships. */
+test('a partial revert whose record REWRITE is refused still owes the reader the second half', async () => {
+  const marked = (x) => [...x.mem].filter(([k, v]) => k.startsWith('ant-pay.paid.quote.') && v).length;
+  const persists = (x) => x.log.order.filter((s) => s === 'persist').length;
+  const run = async (o) => {
+    const p = prepareOf(300), w = world({ allowance: 10n ** 20n, revertHashes: [TX(2)], ...o });
+    let seen = null;
+    await assert.rejects(w.payer.pay({ prepare: p, authorization: authOf(p), confirmPlan: yes }), (e) => {
+      assert.equal(e.refusal, 'tx-reverted', e.message); seen = e.message; return true; });
+    return { w, seen };
+  };
+  /* record write 1 and 2 are charge()'s own, before each wait; 3 is unwind's rewrite of what is left. */
+  const probe = await run({ denyRecordWrite: 3, swallowDeny: true });
+  assert.match(probe.seen, /refused by the chain/, 'the chain’s verdict is not replaced');
+  assert.match(probe.seen, /could not clear its own record/, 'and a rewrite that did not land is still told to the reader');
+  assert.equal(probe.w.log.swallowed, 1, 'precondition: the refusal reached the store and was SWALLOWED, as the one adapter that ships does — a THROWN one would reach the catch and set landed from there, and this row would stop judging the read-back');
+  assert.equal(marked(probe.w), 256, 'precondition: every quote key of the refused batch WAS cleared, so the index is not what reports this');
+  assert.equal(Object.keys(JSON.parse(probe.w.mem.get('ant-pay.paid.up-1')).txHashes).length, 300,
+    'while the record kept all 300 and goes on naming the transaction the chain refused');
+
+  /* CONTROL — the same store refusing a DIFFERENT record write, so unwind's own rewrite lands. It
+     says the ordinal selects the write this row is about, and that a refused write is not by itself
+     enough to earn the sentence. */
+  const ctl2 = await run({ denyRecordWrite: 2, swallowDeny: true });
+  assert.equal(ctl2.w.log.swallowed, 1, 'and its refusal was swallowed the same way');
+  assert.doesNotMatch(ctl2.seen, /could not clear/, 'a write refused elsewhere does not make unwind claim its own rewrite failed');
+  assert.equal(Object.keys(JSON.parse(ctl2.w.mem.get('ant-pay.paid.up-1')).txHashes).length, 256,
+    'and the record it rewrote keeps exactly the batch that landed');
+
+  /* CONTROL — nothing refused at all. */
+  const ctl = await run({});
+  assert.doesNotMatch(ctl.seen, /could not clear/, 'a clear that lands says the chain’s verdict and nothing more');
+  assert.equal(persists(ctl.w) - persists(ctl2.w), 1, 'precondition: the control2 store really did refuse exactly one write');
+  assert.equal(persists(ctl.w) - persists(probe.w), 1, 'and so did the probe’s');
 });
 
 test('the door must confirm the address it quoted: a different one is refused by name, and the payment ids are kept', async () => {

@@ -186,7 +186,16 @@
        the repair. Each key is asked the READER'S OWN QUESTION rather than compared byte for byte —
        paidFor() calls an entry absent when it reads falsy, and the record's only question is whether
        it still names the refused hash — so a store that answers '' as null is not reported as a
-       failure it did not have. A read that itself throws is not a clear either. */
+       failure it did not have. A read that itself throws is not a clear either — and that catch has
+       NO ARM, for a reason worth writing down rather than arming around. MEASURED on two adapters
+       with nothing else changed: a RAW store whose get throws refuses at readPlan — refusal
+       wallet-declined "storage denied", ZERO payment sends — so nothing is signed and this line is
+       never reached; the store that SHIPS catches its own read too (myspace.js:382, `get` returns
+       null on a denial), so no throw from a read reaches this file at all. The direction is the
+       fail-closed one and is kept; what it guards is a store this estate does not have. The
+       adapter's null is its line and not this one, and it points the other way — a read that could
+       not happen arrives here as 'absent', which reads as CLEARED. Reaching that needs a store which
+       denies reads after accepting writes; it is constructible in a rig and I cannot point at one. */
     function entryGone(key) { try { return !store.get(key); } catch (e) { return false; } }
     function recordGone(key, hash) {
       var raw; try { raw = store.get(key); } catch (e) { return false; }
