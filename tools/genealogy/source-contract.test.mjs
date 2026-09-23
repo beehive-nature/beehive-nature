@@ -229,6 +229,130 @@ test('R5: a pinned row declares the MAGNITUDE its detail publishes — a name al
   }
 });
 
+
+/* ---------------------------------------------------------- coverage floors
+ * R1 asks only whether a clause inspected SOMETHING. For 31 of the 33 that is
+ * a truthiness test, and a truthiness test cannot see a sweep COLLAPSE: cut
+ * the persons loop to its first row and CLM-ERA-AS-SUPPORT falls 10,259 -> 1
+ * with this whole suite green. Measured by bee-laborer attacking #225 on
+ * 2026-09-23, mutating the reader ON DISK and running the shipped battery —
+ * 10,259 -> 1 and 7,204 -> 5 both read clean. The M arms cannot supply the
+ * cover: they run on a small synthetic fixture, so whether a collapse trips
+ * one depends on where the fixture happened to put its planted defect. A
+ * surviving window of five rows — a 99.93% coverage loss on the real archive
+ * — puts every M arm back to green.
+ *
+ * The two floors R1 does carry are CHOSEN CONSTANTS (> 20000, > 10000). This
+ * table takes the number from the POPULATION THE CLAUSE SWEEPS instead, read
+ * out of the artifacts by this file rather than reported by the reader: a
+ * reader cannot be its own witness about how much of the archive it read. A
+ * derived number never needs editing when the corpus grows and it cannot be
+ * satisfied by a sample.
+ *
+ * EXACT, not a floor. A floor refuses a collapse; equality also refuses a
+ * DOUBLE COUNT, and an inflated inspected count is exactly what would hide a
+ * collapse elsewhere. STATED COST: adding a second sweep site for a covered
+ * clause reds this row until the population expression is updated — a real
+ * red with a named action, not one nobody can act on.
+ *
+ * WHAT IT DOES NOT GUARD, stated so the next editor does not read it as
+ * wider than it is: both sides are derived from the same artifacts, so a
+ * TRUNCATED CORPUS moves them together and stays green here. R2/R3/R5 read
+ * the corpus; this row reads the READER.
+ */
+const sumOf = (xs, f) => xs.reduce((n, x) => n + f(x), 0);
+const popPersons = (a) => Object.keys(a.corpus.persons || {}).length;
+const popOverlayPersons = (a) => Object.keys(a.overlay.persons || {}).length;
+const popPacks = (a) => Object.keys(a.packs).length;
+const popPackClaims = (a) => sumOf(Object.values(a.packs), (p) => ((p && p.claims) || []).length);
+const popSymbolic = (a) => ((a.overlay && a.overlay.symbolicLinks) || []).length;
+const popEdges = (a) => Object.keys(a.corpus.edges || {}).length;
+const popCouples = (a) => Object.keys(a.corpus.couples || {}).length;
+
+/* [code, the population this clause sweeps, how THIS file counts it] */
+const SWEEPS = [
+  ['SRC-PACK-UNDECLARED', 'overlay.persons', popOverlayPersons],
+  ['SRC-OVERLAY-CLASS', 'overlay.persons', popOverlayPersons],
+  ['SRC-PACK-NO-LAW', 'the packs on disk', popPacks],
+  ['SRC-PACK-FSID-UNRESOLVED', 'the packs on disk', popPacks],
+  ['SRC-PACK-CLAIM-UNSOURCED', 'every claim in every pack', popPackClaims],
+  ['CLM-VERIFICATION-LANGUAGE', 'every claim in every pack', popPackClaims],
+  ['SRC-META-PACK-UNKNOWN', 'meta.packs', (a) => Object.keys((a.corpus.meta || {}).packs || {}).length],
+  ['CLM-ERA-AS-SUPPORT', 'corpus.persons', popPersons],
+  ['CLM-SUPPORT-OVERSTATED', 'corpus.persons', popPersons],
+  ['LNK-OVERLAY-PREFIX', 'overlay.persons + corpus.persons', (a) => popOverlayPersons(a) + popPersons(a)],
+  ['CLM-SYMBOL-UNATTRIBUTED', 'overlay.symbolicLinks', popSymbolic],
+  ['CLM-SYMBOL-AS-EDGE', 'overlay.symbolicLinks', popSymbolic],
+  ['CLM-SYMBOL-DANGLING', 'every connects[] target of every symbolic link',
+    (a) => sumOf(((a.overlay && a.overlay.symbolicLinks) || []), (s) => ((s && s.connects) || []).length)],
+  ['CLM-MONEY-AS-BLOOD', 'overlay.moneyHistory.entries', (a) => (((a.overlay || {}).moneyHistory || {}).entries || []).length],
+  ['CLM-TESTIMONY-UNATTRIBUTED', 'overlay.testimony', (a) => ((a.overlay || {}).testimony || []).length],
+  ['CLM-DISPUTE-THIN', 'overlay.relationshipEvidence', (a) => Object.keys((a.overlay || {}).relationshipEvidence || {}).length],
+  ['LNK-CORRECTION-UNRESOLVED', 'overlay.corrections', (a) => Object.keys((a.overlay || {}).corrections || {}).length],
+  ['LNK-OVERLAY-EDGE-UNRESOLVED', 'every parent ref of every overlay edge',
+    (a) => sumOf(Object.values((a.overlay || {}).edges || {}), (refs) => (refs || []).length)],
+  ['LNK-SELF-PARENT', 'corpus.edges', popEdges],
+  ['LNK-EDGE-ORPHAN', 'corpus.edges', popEdges],
+  ['LNK-COUPLE-BROKEN', 'corpus.couples', popCouples],
+  ['LNK-COUPLE-AND-EDGE', 'corpus.couples', popCouples],
+  ['LNK-RECIPROCITY', 'every parent and child row of every staged person',
+    (a) => sumOf(Object.values(a.staged), (s) => {
+      const rel = (s && s.relationships) || {};
+      return ((rel.parents || []).length) + ((rel.children || []).length);
+    })],
+  ['LNK-STAGED-CORPUS-DIVERGE', 'the staged objects on disk', (a) => Object.keys(a.staged).length],
+];
+
+/* The rest, each with the BRANCH that decides its count. Deriving these here
+ * would mean re-implementing the reader's own condition inside the file that
+ * checks it, which is the one thing an independent reader may not do — so
+ * they are covered by R1's truthiness test alone, and that is written down
+ * rather than left for the next reader to discover. */
+const UNCOVERED_SWEEPS = [
+  ['SRC-PACK-MISSING', 'counted only for an overlay person that declares an evidencePack'],
+  ['SRC-NO-PROVENANCE', 'counted only for a staged person that is NOT a private-stub'],
+  ['SRC-STUB-CARRIES-REFS', 'counted only for a staged person that IS a private-stub'],
+  ['SRC-EDGE-OVERSTATED', 'counted only when an overlay parent ref resolves AND the staged child carries that parent row'],
+  ['CLM-TIER-UNDECLARED', 'counted once per DISTINCT evidence.class in use — a derived set, not an artifact population'],
+  ['CLM-DISPUTE-UNDISCLOSED', 'counted only for a relationshipEvidence entry that names a disputed claim'],
+  ['LNK-CORRECTION-NOT-APPLIED', 'counted only for a correction whose provider id resolves to a published person'],
+  ['LNK-FRONTIER-UNDISCLOSED', 'a singleton, reached only when the staged store is non-empty'],
+  ['META-COUNT-DIVERGE', 'one row per declared number, and the census keys are a UNION of declared and recomputed'],
+];
+
+test('R6: a clause sweeping an artifact population inspected ALL of it — a truthiness census cannot see a collapse', () => {
+  /* THE PARTITION. Every clause is filed as covered, or as covered-by-R1-only
+   * with its branch named; a new clause cannot arrive unfiled and none can sit
+   * in both lists. Without this the table is an allow-list, and an allow-list
+   * reports a missing entry never. */
+  const covered = SWEEPS.map(([c]) => c);
+  const uncovered = UNCOVERED_SWEEPS.map(([c]) => c);
+  assert.deepEqual(covered.filter((c) => uncovered.includes(c)), [],
+    'a clause is filed as both swept and unswept');
+  assert.deepEqual([...covered, ...uncovered].sort(), [...CLAUSE_CODES].sort(),
+    'every clause owes a population expression or a named reason it has none');
+
+  /* NON-VACUITY. An equality between two zeroes passes whatever the reader
+   * did, so every covered population must be something the archive holds.
+   * IT CANNOT FALL ALONE AND THAT IS BY CONSTRUCTION, measured rather than
+   * assumed: the covered set is a subset of CLAUSE_CODES (the partition
+   * above proves it), so any 0 === 0 state is also a clause that inspected
+   * nothing, which R1 already fails on. Blinding a population AND emptying
+   * the matching reader loop reds R1 and R6 together, and neutering this
+   * very assertion leaves that verdict unchanged. It is kept so that R6
+   * names its own vacuity instead of reading green while a sibling row
+   * reports something that sounds unrelated — not because it adds cover. */
+  const empty = SWEEPS.filter(([, , pop]) => pop(archive) === 0).map(([c, name]) => `${c} (${name})`);
+  assert.deepEqual(empty, [],
+    'these populations are empty in the archive, so their coverage check is 0 === 0 and proves nothing');
+
+  /* THE COUNT ITSELF. */
+  for (const [code, name, pop] of SWEEPS) {
+    assert.equal(real.inspected[code], pop(archive),
+      `${code} inspected ${real.inspected[code]} of the ${pop(archive)} rows in ${name} — the clause read a sample, not the archive`);
+  }
+});
+
 /* ========================================================================
  * M — THE MUTATIONS
  * ===================================================================== */
