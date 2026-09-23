@@ -88,7 +88,8 @@ test('the whole path on the door’s wire: plan shown first, exact approve, one 
   assert.deepEqual(Object.keys(body).sort(), ['txs', 'upload_id']); assert.equal(body.upload_id, 'up-1');
   assert.equal(body.txs.length, 55); assert.deepEqual(body.txs.map((x) => x.quote_hash), p.quotes.map((x) => x.quote_hash));
   assert.ok(body.txs.every((x) => Object.keys(x).sort().join() === 'quote_hash,tx_hash' && x.tx_hash === TX(2)), 'one {quote_hash, tx_hash} per quote, each naming the payment that carried it');
-  assert.deepEqual([r.address, r.chunks, r.ant_atto, r.payer, r.quotes_paid, r.txs.length], [ADDR, 55, '55000', PAYER, 55, 55]);
+  assert.deepEqual([r.address, r.chunks_quoted, r.ant_atto, r.ant_paid_now_atto, r.payer, r.quotes_paid, r.quotes_already_paid, r.txs.length], [ADDR, 55, '55000', '55000', PAYER, 55, 0, 55]);
+  assert.ok(!('chunks' in r), 'the receipt no longer carries a bare `chunks`: it was copied from PREPARE, an input, and sat among outputs');
   assert.deepEqual(w.log.states.map((s) => s.phase).filter((x, i, a) => a.indexOf(x) === i), ['plan', 'signing', 'sent', 'finalizing', 'done']);
   assert.deepEqual(w.log.states.filter((s) => s.phase === 'sent').map((s) => [s.what, s.tx]), [['payment', TX(2)]], 'each payment is announced with its hash as it leaves the wallet; the approve is not a payment');
 });
@@ -149,12 +150,79 @@ test('paid but not finished: the pairs are kept and named, a second pay is refus
   const p = prepareOf(5), w = world({ finalizeFails: 422 });
   await assert.rejects(w.payer.pay({ prepare: p, authorization: authOf(p), confirmPlan: yes }), (e) => {
     assert.equal(e.refusal, 'paid-not-finalized'); assert.equal(e.detail.txs.length, 5); assert.equal(e.detail.door, 'missing_quote_tx', 'the door’s own refusal name rides along'); return true; });
-  const kept = JSON.parse([...w.mem.values()][0]); assert.equal(kept.finalized, false); assert.equal(Object.keys(kept.txHashes).length, 5);
+  const kept = JSON.parse(w.mem.get('ant-pay.paid.up-1')); assert.equal(kept.finalized, false); assert.equal(Object.keys(kept.txHashes).length, 5);
   const sendsSoFar = w.log.sends.length; await refused(w.payer.pay({ prepare: p, authorization: authOf(p), confirmPlan: yes }), 'already-paid'); assert.equal(w.log.sends.length, sendsSoFar, 'never pays twice');
   const w2 = world(); for (const [k, v] of w.mem) w2.mem.set(k, v);
   const r = await w2.payer.resume({ prepare: p, authorization: authOf(p) }); assert.equal(w2.log.sends.length, 0, 'resume never signs'); assert.equal(r.address, ADDR); assert.equal(w2.log.finalize.length, 1);
   assert.equal(w2.log.finalize[0].txs.length, 5);
   await refused(world().payer.resume({ prepare: p, authorization: authOf(p) }), 'nothing-to-resume');
+});
+
+/* THE IDENTITY OF A PAYMENT IS THE QUOTE HASH, NOT THE upload_id. Keyed on upload_id, the page
+   paid the same quotes twice: bee-laborer demonstrated it on #211 and it reproduced here — new
+   upload_id, byte-identical quote hashes, a second payForQuotes and no refusal. The same-upload_id
+   CONTROL is kept in the same row so the fix cannot pass by disabling the guard, and the
+   different-quotes arm is kept so it cannot pass by refusing everything. */
+test('a re-prepare of the same bytes is not paid again: the guard and resume are keyed on the QUOTE SET, not on upload_id', async () => {
+  const payCalls = (w) => w.log.sends.filter((t) => t.to === VAULT).length;
+  const w = world(), p1 = prepareOf(2);
+  await w.payer.pay({ prepare: p1, authorization: authOf(p1), confirmPlan: yes });
+  assert.equal(payCalls(w), 1);
+
+  /* CONTROL — the same upload_id. This is what the old guard caught, and it must keep catching it. */
+  await refused(w.payer.pay({ prepare: p1, authorization: authOf(p1), confirmPlan: yes }), 'already-paid');
+  assert.equal(payCalls(w), 1, 'the same upload_id is still refused');
+
+  /* PROBE — a NEW upload_id carrying byte-identical quote hashes. The door's README says identical
+     bytes re-prepare to the same quote HASHES; it says nothing about upload_id. */
+  const p2 = { ...p1, upload_id: 'up-2' };
+  assert.deepEqual(p2.quotes.map((x) => x.quote_hash), p1.quotes.map((x) => x.quote_hash), 'precondition: the quote hashes are byte-identical');
+  assert.notEqual(p2.upload_id, p1.upload_id, 'precondition: the upload_id differs');
+  await refused(w.payer.pay({ prepare: p2, authorization: authOf(p2), confirmPlan: yes }), 'already-paid');
+  assert.equal(payCalls(w), 1, 'a re-prepare of the same bytes signs nothing');
+  assert.equal(w.log.finalize.length, 1, 'and it does not finalize a second time');
+
+  /* resume() used to answer nothing-to-resume about a payment that exists, and the only move left
+     — pay() — charged again. It now finds the kept payment by its quotes. */
+  const r = await w.payer.resume({ prepare: { ...p1, upload_id: 'up-9' }, authorization: authOf({ ...p1, upload_id: 'up-9' }) });
+  assert.equal(r.address, ADDR); assert.equal(payCalls(w), 1, 'resume never signs');
+
+  /* AND IT IS NOT A BLANKET REFUSAL: different quotes under a new upload_id are paid normally. */
+  const other = prepareOf(2); other.upload_id = 'up-3';
+  other.quotes = other.quotes.map((x, i) => ({ ...x, quote_hash: q(900 + i) }));
+  assert.equal(other.quotes.filter((x) => p1.quotes.some((y) => y.quote_hash === x.quote_hash)).length, 0, 'precondition: no quote is shared');
+  await w.payer.pay({ prepare: other, authorization: authOf(other), confirmPlan: yes });
+  assert.equal(payCalls(w), 2, 'a genuinely new price still pays');
+});
+
+test('a crash between batches is finished, not re-paid: only the unpaid quotes are signed for and finalize carries every priced quote', async () => {
+  /* 300 quotes = two payment calls. The wallet declines the second, so batch one is on chain and
+     kept; the person asks for the price again and gets a new upload_id. */
+  const p = prepareOf(300), w = world(), sends = [];
+  w.payer = AntPay.create({
+    door: DOOR, sleep: async () => {}, onState: () => {}, store: { get: (k) => w.mem.get(k) ?? null, set: (k, v) => w.mem.set(k, v) },
+    fetch: async (url, init) => ({ ok: true, status: 200, json: async () => { w.log.finalize.push(JSON.parse(init.body)); return { data_map_address: ADDR }; }, text: async () => '' }),
+    rpcCall: async (m, params) => (m === 'eth_getBalance' ? '0x' + (10n ** 15n).toString(16)
+      : m === 'eth_call' ? '0x' + (params[0].data.startsWith('0x70a08231') ? (10n ** 24n) : 0n).toString(16)
+      : m === 'eth_getTransactionReceipt' ? { status: '0x1' } : (() => { throw new Error('unexpected rpc ' + m); })()),
+    signer: { name: 'mock wallet', address: async () => PAYER, send: async (tx) => { sends.push(tx); if (sends.filter((t) => t.to === VAULT).length > 1) throw new Error('user rejected'); return TX(sends.length); } },
+  });
+  await assert.rejects(w.payer.pay({ prepare: p, authorization: authOf(p), confirmPlan: yes }), (e) => { assert.equal(e.refusal, 'wallet-declined'); return true; });
+  const kept = JSON.parse(w.mem.get('ant-pay.paid.up-1'));
+  assert.equal(Object.keys(kept.txHashes).length, 256, 'precondition: exactly the first batch is kept');
+
+  /* the allowance already covers the remainder, so w2 signs no approve — which keeps its first
+     payment hash distinct from the kept one and lets the next assertion mean something. */
+  const again = { ...p, upload_id: 'up-2' }, w2 = world({ allowance: 10n ** 20n });
+  for (const [k, v] of w.mem) w2.mem.set(k, v);
+  let shown = null;
+  const r = await w2.payer.pay({ prepare: again, authorization: authOf(again), confirmPlan: async (s) => { shown = s; return true; } });
+  assert.deepEqual([shown.quotes, shown.quotes_already_paid, shown.payment_calls], [44, 256, 1], 'only the 44 unpaid quotes are signed for');
+  assert.equal(shown.ant_total_atto, '44000', 'the wallet is asked for the remainder, not the whole price');
+  assert.equal(w2.log.sends.filter((t) => t.to === VAULT).length, 1);
+  assert.equal(w2.log.finalize[0].txs.length, 300, 'finalize still carries a tx for every priced quote');
+  assert.equal(new Set(w2.log.finalize[0].txs.map((x) => x.tx_hash)).size, 2, 'the kept hash rides along beside the new one');
+  assert.deepEqual([r.quotes_paid, r.quotes_already_paid, r.ant_atto, r.ant_paid_now_atto], [300, 256, '300000', '44000']);
 });
 
 test('the door must confirm the address it quoted: a different one is refused by name, and the payment ids are kept', async () => {
