@@ -44,12 +44,12 @@ const L = join(ROOT, 'assets', 'profile-archive', 'lineage');
  * ===================================================================== */
 const BASELINE = [
   ['SRC-EDGE-OVERSTATED :: ovl-sigurd-snake-eye->pf5d40516b8',
-    'OPEN. attested-overlays.edgeNotes calls this edge "parents per tradition"; the staged person object and the person PAGE a stranger reads both label it "walked provider link" — the strongest tag in the hop vocabulary. person-panel-corpus.mjs:217 computes the honest "overlay — tradition-carried" at render time, so the panel reader and the archive-door reader disagree about the same fact. Not repaired here: the staged objects are pipeline.mjs output and this lane may not touch it.'],
+    'OPEN. attested-overlays.edgeNotes calls this edge "parents per tradition"; the staged person object and the person PAGE a stranger reads both label it "walked provider link" — the strongest tag in the hop vocabulary. surfaces/person-panel-corpus.mjs:217 computes the honest "overlay — tradition-carried" at render time, so the panel reader and the archive-door reader disagree about the same fact. Not repaired here: the staged objects are pipeline.mjs output and this lane may not touch it.'],
   ['SRC-EDGE-OVERSTATED :: ovl-sigurd-snake-eye->p8bfb696a4b', 'OPEN. Same edge class, second parent (Queen Aslaug).'],
   ['SRC-EDGE-OVERSTATED :: ovl-harthacnut-i->ovl-blaeja-of-northumbria',
     'OPEN. Sharper than the other two: the overlay\'s own relationshipEvidence disputes the claim "Harthacnut is the son of Sigurd AND Blaeja", and the Sigurd half is staged "disputed — inspect in the comb" while the Blaeja half of the SAME disputed claim is staged "walked provider link". One claim, two provenance labels.'],
   ['CLM-TIER-UNDECLARED :: unrecorded',
-    'OPEN, and narrower than it reads. "unrecorded" is a real sixth tier — blood.html, profile.html, person-panel-corpus.mjs and the GUX-01 frontier dispatch all name it. What is missing is the CORPUS\'S OWN sentence: meta.confidenceTiers declares four classes and the corpus publishes 1,800 persons in a fifth. The defect is the declaration, not the data.'],
+    'OPEN, and narrower than it reads. "unrecorded" is a real sixth tier — surfaces/blood.html, surfaces/profile.html, surfaces/person-panel-corpus.mjs and the GUX-01 frontier dispatch all name it. What is missing is the CORPUS\'S OWN sentence: meta.confidenceTiers declares four classes and the corpus publishes 1,800 persons in a fifth. The defect is the declaration, not the data.', [1800]],
   ['LNK-COUPLE-AND-EDGE :: p0b2a91a835|p59ca207357', 'OPEN — Probus Ferreolus di Roma / Syagria Papianilla, 4th c. Gaul.'],
   ['LNK-COUPLE-AND-EDGE :: p59ca207357|p7b4ce90388', 'OPEN — Syagria Papianilla / Flavius Afranius Syagrius II. Syagria stands in two of the seven.'],
   ['LNK-COUPLE-AND-EDGE :: p13f145e0f0|p41e853380c', 'OPEN — Menkare / Netikereti, 7th dynasty.'],
@@ -58,9 +58,40 @@ const BASELINE = [
   ['LNK-COUPLE-AND-EDGE :: p7c4314f0bf|p854fa8143e', 'OPEN — Eglon ben Balak / Orfa bat Eglon.'],
   ['LNK-COUPLE-AND-EDGE :: p48d02fc52a|pebab1efcae', 'OPEN — "Mrs Aksumay Ramissu of Ethiopia" / "Aksumay Ramissu of ETHIOPIA": two provider records that read like one person, which is the OTHER way into this class. Whether each of the seven is a faithful marriage or a duplicate record is unresolved here and the row does not claim it.'],
   ['LNK-FRONTIER-UNDISCLOSED :: meta.reconciliation',
-    'OPEN. 1,959 staged parent references point at persons the corpus did not publish. meta.reconciliation accounts for the raw walk minus the published corpus and says nothing about references the published corpus still carries INTO that excluded population. PR #222 adds the disclosure; this lane is ordered not to touch #222\'s changes, so the row is reported and left standing.'],
+    'OPEN. 1,959 staged parent references point at persons the corpus did not publish. meta.reconciliation accounts for the raw walk minus the published corpus and says nothing about references the published corpus still carries INTO that excluded population. PR #222 adds the disclosure; this lane is ordered not to touch #222\'s changes, so the row is reported and left standing.', [1959]],
 ];
 const BASELINE_KEYS = new Set(BASELINE.map(([k]) => k));
+
+/* ------------------------------------------------------------- magnitudes
+ * A baseline row pins a NAME (`code :: where`). R2 and R3 never read
+ * `f.detail`, so a row the baseline ALREADY names can change what it says by
+ * any amount and both directions stay green. Measured rather than feared:
+ * planting 3,000 unpublished parent refs into one staged person moves the
+ * frontier row from 1,959 to 4,959 and the whole shipped suite stays 46/46.
+ * The baseline's own note for that row reads "1,959 staged parent
+ * references", so the artifact would be carrying a false sentence with
+ * nothing red — the class this file exists to refuse, one layer up.
+ *
+ * The obvious gate is wrong, and it was measured wrong before it was written:
+ * a digit sweep over the NOTES returns five rows and only two of them are
+ * magnitudes the archive produces — "217" is a line anchor, "4" and "7" are
+ * centuries, "222" is a PR number. Three false reds out of five.
+ *
+ * So the census reads the READER'S OUTPUT and never the prose: a live finding
+ * whose DETAIL publishes a number owes a pin. Today exactly 2 of the 12 do,
+ * and the other 10 are what proves the extractor can say no.
+ */
+const MAGNITUDE = /\d[\d,]*/g;
+function detailMagnitudes(detail) {
+  return (String(detail).match(MAGNITUDE) || []).map((s) => Number(s.replace(/,/g, '')));
+}
+/* deterministic thousands grouping — no ICU, so a node built without it
+ * cannot silently turn this arm into a wildcard */
+function grouped(n) {
+  return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+}
+const BASELINE_MAG = new Map(BASELINE.filter(([, , m]) => m).map(([k, , m]) => [k, m]));
+const BASELINE_NOTE = new Map(BASELINE.map(([k, note]) => [k, note]));
 
 /* ---------------------------------------------------------------- loaders */
 function loadArchive() {
@@ -156,6 +187,46 @@ test('R4: the declared tier vocabulary is parsed out of the corpus, not hard-cod
   /* the parser must be able to return a different answer, or it is a constant */
   assert.deepEqual([...declaredTiers('era heuristic (saga <1000)')], ['saga']);
   assert.deepEqual([...declaredTiers('')], []);
+});
+
+test('R5: a pinned row declares the MAGNITUDE its detail publishes — a name alone lets the number move by any amount', () => {
+  const live = new Map(real.findings.map((f) => [findingKey(f), detailMagnitudes(f.detail)]));
+  const liveWithMag = [...live].filter(([, m]) => m.length).map(([k]) => k).sort();
+  const liveWithout = [...live].filter(([, m]) => !m.length).map(([k]) => k);
+
+  /* NON-VACUITY, taken from the live archive in BOTH directions rather than
+   * from a synthetic control: an extractor that never hits makes the census
+   * empty, and one that always hits makes it a wildcard. */
+  assert.ok(liveWithMag.length > 0,
+    'no live finding detail carries a number — the extractor found nothing, so this census means nothing');
+  assert.ok(liveWithout.length > 0,
+    `every live finding detail carries a number — the extractor cannot say no: ${liveWithout.length} expected to be > 0`);
+
+  /* (a) THE CENSUS, both directions, BY NAME. A new number-publishing finding
+   * owes a pin; a pin whose row stopped publishing one must be deleted in the
+   * same commit, exactly as R3 requires of a repaired row. */
+  assert.deepEqual(liveWithMag, [...BASELINE_MAG.keys()].sort(),
+    'a finding detail publishing a number must pin it here, and a pin for a row that no longer publishes one is dead');
+
+  for (const [key, want] of BASELINE_MAG) {
+    /* (b) THE VALUE — the whole ordered list, not a first match. */
+    assert.deepEqual(live.get(key), want,
+      `${key}: the archive moved and the baseline did not — update the pin AND the note in the same edit`);
+
+    /* (c) THE NOTE. The prose beside the pin is a sentence ABOUT this number,
+     * and it is the part a reviewer actually reads. Requiring the number to
+     * appear in its own row's note is a POSITIVE marker over the two pinned
+     * rows — not the digit sweep refused above, which reddens three rows that
+     * never carried a magnitude at all.
+     * STATED COST: for a small magnitude this can be satisfied by an unrelated
+     * digit in the same note. It is a guard against a stale sentence, not a
+     * proof that the sentence is about this number. */
+    const note = BASELINE_NOTE.get(key) || '';
+    for (const n of want) {
+      assert.ok(note.includes(String(n)) || note.includes(grouped(n)),
+        `${key}: the pinned magnitude ${grouped(n)} appears nowhere in its own note, so the note is prose about a number the row no longer publishes`);
+    }
+  }
 });
 
 /* ========================================================================
