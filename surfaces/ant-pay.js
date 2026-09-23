@@ -160,13 +160,45 @@
        them when the receipt came back 0x0. The quotes then read paid-forever on a device that
        spent no ANT: pay() answered already-paid, resume() answered tx-reverted, two refusals
        pointing at each other. Before this file kept an index a re-prepare simply signed again;
-       closing that route is what makes the clear owed. Only entries naming THIS hash are cleared,
-       so a batch that did land keeps its own. '' reads back as absent through paidFor, and absent
-       is the true answer once the chain has said nothing moved. A denied store must not replace
-       'tx-reverted' with a storage error: the stale entry is the lesser harm and the refusal
-       below still names the revert. */
-    function unpay(hash, covered) {
-      try { covered.forEach(function (x) { if (x.tx_hash === hash) store.set(QKEY(x.quote_hash), ''); }); } catch (e) { /* kept stale; the tx-reverted refusal still stands */ }
+       closing that route is what makes the clear owed.
+       BOTH HALVES IN ONE PLACE, because charge() unwound the upload record and resume() did not:
+       one chain verdict answered with two different sentences depending on which upload_id the
+       person happened to be holding, and the function whose own index no longer believed in the
+       payment went on re-announcing it forever. Only entries naming THIS hash are cleared, so a
+       batch that did land keeps its own. The record is emptied outright when no hash is left, so
+       resume says 'no payment is waiting on this price' rather than 'it belongs to a different
+       plan'. On the by-quote path the record that was READ belongs to another upload, so the id
+       it was read under is the id rewritten — not this prepare's; a finalized one is left whole,
+       for the reason given at the line below.
+       '' reads back as absent through paidFor, and absent is the true answer once the chain has
+       said nothing moved. EVERY WRITE IS ATTEMPTED ON ITS OWN — a store that refuses one key must
+       not leave the rest naming a refused transaction — and the return says whether all of them
+       landed. A denied store must not replace 'tx-reverted' with a storage error: the chain's
+       verdict is what the person acts on and the stale entry is the lesser harm. But a repair that
+       could not validate its own output owes that fact to the reader, which is what reverted()
+       adds; without it the next attempt is greeted by 'already paid' and nothing in this file
+       says why. */
+    function unwind(hash, covered, recordId, record) {
+      var landed = true;
+      covered.forEach(function (x) {
+        if (x.tx_hash !== hash) return;
+        try { store.set(QKEY(x.quote_hash), ''); } catch (e) { landed = false; }
+      });
+      /* A FINALIZED record is LEFT WHOLE. It is the door's own answer — the data is stored and the
+         address is the door's, not ours to withdraw because the chain later refused one of the
+         transactions that paid for it — and its only reader is the receipt lookup in resume(). The
+         index above is cleared either way, so nothing is paid twice and nothing is skipped. An
+         UNFINALIZED record is what a recovery reads, so that one must stop naming the refused hash. */
+      if (record.finalized) return landed;
+      Object.keys(record.txHashes).forEach(function (h) { if (record.txHashes[h] === hash) delete record.txHashes[h]; });
+      var left = Object.keys(record.txHashes).length;
+      try { store.set(KEY(recordId), left ? JSON.stringify(record) : ''); } catch (e) { landed = false; }
+      return landed;
+    }
+    /* the chain's verdict is never replaced, only EXTENDED when the clear did not land. */
+    function reverted(e, landed) {
+      if (!landed) e.message += '. this device could not clear its own record of that payment, so it may still answer “already paid” for these quotes — clear this site’s stored data before asking for the price again';
+      return e;
     }
 
     /* a door refusal is {"error": "<name>"}; the name rides on the refusal so the surface can say which law held. */
@@ -293,9 +325,6 @@
             }).then(function (h) {
               if (!isH32(h)) throw refusal('wallet-declined', 'the wallet returned no transaction hash');
               batch.forEach(function (p) { txHashes[p.quote_hash] = h; });
-              /* the tell comes FIRST so the claim on it is true: a denied store must not be able to
-                 swallow the one line that names what left the wallet. It used to sit under both
-                 writes, where a throwing store reached the caller and this never fired. */
               /* ISOLATED, not ordered. Ordering cannot make two effects survive each other — it
                  only chooses which one dies. Under the writes, a throwing store swallowed the one
                  line naming what left the wallet; above them, a throwing renderer destroyed the
@@ -308,14 +337,8 @@
               store.set(KEY(prepare.upload_id), JSON.stringify({ txHashes: txHashes, finalized: false })); /* BEFORE finalize, before the wait */
               markPaid(prepare.upload_id, txHashes); /* the per-quote index, written in the same breath as the upload record */
               return waitFor(h, 'payment', input.signal).catch(function (e) {
-                if (e && e.refusal === 'tx-reverted') {
-                  unpay(h, batch.map(function (p) { return { quote_hash: p.quote_hash, tx_hash: txHashes[p.quote_hash] }; }));
-                  batch.forEach(function (p) { if (txHashes[p.quote_hash] === h) delete txHashes[p.quote_hash]; });
-                  /* the upload record must not keep naming a refused transaction as the payment for
-                     these quotes. Emptied outright when nothing is left, so resume answers 'no
-                     payment is waiting on this price' rather than 'it belongs to a different plan'. */
-                  try { store.set(KEY(prepare.upload_id), Object.keys(txHashes).length ? JSON.stringify({ txHashes: txHashes, finalized: false }) : ''); } catch (e2) { /* as above */ }
-                }
+                if (e && e.refusal === 'tx-reverted')
+                  throw reverted(e, unwind(h, batch.map(function (p) { return { quote_hash: p.quote_hash, tx_hash: txHashes[p.quote_hash] }; }), prepare.upload_id, { txHashes: txHashes, finalized: false }));
                 throw e;
               });
             });
@@ -335,7 +358,7 @@
     }
     /* a paid upload that did not finish: confirm the kept hashes on chain, then finalize. never signs, never pays. */
     function resume(input) {
-      var started = now(), prepare = input && input.prepare, kept;
+      var started = now(), prepare = input && input.prepare, kept, keptId = prepare && prepare.upload_id;
       return Promise.resolve().then(function () {
         var raw = prepare && store.get(KEY(prepare.upload_id));
         if (!raw && prepare) {
@@ -344,7 +367,12 @@
              the only move left — pay() — charged them a second time. */
           var byQuote = null;
           (Array.isArray(prepare.quotes) ? prepare.quotes : []).some(function (p) { var k = paidFor(p.quote_hash); if (k) { byQuote = k.upload_id; return true; } return false; });
-          if (byQuote) raw = store.get(KEY(byQuote));
+          /* the id the record is READ under, remembered here because it is the id that has to be
+             rewritten if the chain refuses one of these hashes. On this path it is not this
+             prepare's, and writing under this prepare's would leave the refused transaction named
+             in the record it actually came from while minting an empty one for an upload that never
+             held a payment. */
+          if (byQuote) { raw = store.get(KEY(byQuote)); keptId = byQuote; }
         }
         if (!raw) throw refusal('nothing-to-resume', 'no payment from this device is waiting on this price');
         kept = JSON.parse(raw);
@@ -363,7 +391,7 @@
            ours, fall through and let the door finalize this upload; nothing is signed either way. */
         if (kept.finalized && strip(prepare.data_map_address || '') && strip(kept.receipt && kept.receipt.address || '') === strip(prepare.data_map_address || '')) return kept.receipt;
         var hashes = covered.map(function (x) { return x.tx_hash; }).filter(function (h, i, a) { return a.indexOf(h) === i; });
-        return hashes.reduce(function (ch, h) { return ch.then(function () { return waitFor(h, 'payment', input.signal).catch(function (e) { if (e && e.refusal === 'tx-reverted') unpay(h, covered); throw e; }); }); }, Promise.resolve())
+        return hashes.reduce(function (ch, h) { return ch.then(function () { return waitFor(h, 'payment', input.signal).catch(function (e) { if (e && e.refusal === 'tx-reverted') throw reverted(e, unwind(h, covered, keptId, kept)); throw e; }); }); }, Promise.resolve())
           .then(function () { return finalize(prepare, kept.txHashes, plan, null, started); });
       }).catch(function (e) { return refused(e, 'network'); });
     }

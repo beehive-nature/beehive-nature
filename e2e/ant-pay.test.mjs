@@ -46,7 +46,13 @@ function world(o = {}) {
   };
   const signer = 'signer' in o ? o.signer : { name: 'mock wallet', address: async () => PAYER, send: async (tx) => { log.sends.push(tx); log.order.push('send');
     if (o.decline || (o.declineAfter != null && log.sends.filter((t) => t.to === VAULT).length > o.declineAfter)) throw new Error('user rejected'); return TX(log.sends.length); } };
-  const store = { get: (k) => mem.get(k) ?? null, set: (k, v) => { if (o.storeThrows) throw new Error('storage denied'); mem.set(k, v); log.order.push('persist'); } };
+  /* denyClear: a store that took the record and refuses to clear it — true for every clear, or a
+     count for the first N. Distinct from storeThrows, which refuses every write including the one
+     that created the record; only a store that ACCEPTED the record can strand it. */
+  let clears = 0;
+  const store = { get: (k) => mem.get(k) ?? null, set: (k, v) => { if (o.storeThrows) throw new Error('storage denied');
+    if (v === '' && o.denyClear && (o.denyClear === true || ++clears <= o.denyClear)) throw new Error('storage denied');
+    mem.set(k, v); log.order.push('persist'); } };
   /* throwOnState: the surface's own renderer blows up on that phase — a caller's failure, not this page's. */
   const onState = (s) => { log.states.push(s); if (o.throwOnState === s.phase) throw new Error('the surface’s renderer blew up'); };
   const payer = AntPay.create({ door: DOOR, fetch, rpcCall, signer, store, sleep: async () => {}, onState });
@@ -441,6 +447,97 @@ test('only the refused transaction is unwound: a batch that did land keeps its q
   await w2.payer.pay({ prepare: again, authorization: authOf(again), confirmPlan: async (s) => { shown = s; return true; } });
   assert.deepEqual([shown.quotes, shown.quotes_already_paid], [44, 256], 'only the refused batch is asked for again');
   assert.equal(w2.log.finalize[0].txs.length, 300, 'and finalize still carries a tx for every priced quote');
+});
+
+/* THE INDEX AND THE RECORD ARE ONE VERDICT. charge() unwound both; resume() unwound only the index,
+   so the same chain verdict was answered with two different sentences depending on which upload_id
+   the person happened to be holding — and resume went on re-announcing a dead transaction its own
+   index no longer believed in. The record is rewritten under the id it was READ under, which on the
+   by-quote path is not this prepare's. */
+test('the record is unwound with the index: resume stops naming a transaction the chain refused, under the id it read', async () => {
+  const p = prepareOf(2), w = world({ allowance: 10n ** 20n, revert: true });
+  const stopped = (x) => ({ get aborted() { return x.log.sends.some((t) => t.to === VAULT); } });
+  await refused(w.payer.pay({ prepare: p, authorization: authOf(p), confirmPlan: yes, signal: stopped(w) }), 'stopped-waiting');
+  assert.equal(Object.keys(JSON.parse(w.mem.get('ant-pay.paid.up-1')).txHashes).length, 2, 'precondition: the device holds an unconfirmed hash for both quotes');
+  await refused(w.payer.resume({ prepare: p, authorization: authOf(p) }), 'tx-reverted');
+  assert.equal(w.mem.get('ant-pay.paid.up-1'), '', 'the record stops naming the refused transaction, emptied because no hash is left');
+  await refused(w.payer.resume({ prepare: p, authorization: authOf(p) }), 'nothing-to-resume');
+
+  /* CONTROL — the same shape with the chain CONFIRMING: resume finalizes, so the refusals above are
+     the chain's verdict and not a rig that refuses. */
+  const ctl = world({ allowance: 10n ** 20n });
+  await refused(ctl.payer.pay({ prepare: p, authorization: authOf(p), confirmPlan: yes, signal: stopped(ctl) }), 'stopped-waiting');
+  assert.equal((await ctl.payer.resume({ prepare: p, authorization: authOf(p) })).address, ADDR);
+
+  /* the BY-QUOTE path: the record read is up-1's while the prepare is up-2's. Rewriting under the
+     prepare's id would leave the refused transaction named where it actually came from AND mint an
+     empty record for an upload that never held a payment. */
+  const w2 = world({ allowance: 10n ** 20n, revert: true }), again = { ...p, upload_id: 'up-2' };
+  await refused(w2.payer.pay({ prepare: p, authorization: authOf(p), confirmPlan: yes, signal: stopped(w2) }), 'stopped-waiting');
+  await refused(w2.payer.resume({ prepare: again, authorization: authOf(again) }), 'tx-reverted');
+  assert.equal(w2.mem.get('ant-pay.paid.up-1'), '', 'the record it READ is the record it rewrote');
+  assert.equal(w2.mem.get('ant-pay.paid.up-2'), undefined, 'and no empty record is minted for an upload that never held one');
+});
+
+/* A FINALIZED RECORD IS LEFT WHOLE. A is paid and finalized while the chain confirms; the same
+   device is then read by a chain that refuses A's transaction, and the two worlds differ in nothing
+   else. File D is one chunk sharing A's first quote, so resume(D) reaches A's record by quote, is
+   correctly refused the receipt by the address guard, and then watches A's transaction revert.
+   Emptying A's record there would withdraw an address the DOOR confirmed — the data is stored —
+   because the chain later refused a transaction that paid for it. The index is cleared either way,
+   and that is what stops a second payment. */
+test('a finalized record is left whole: the chain refusing its transaction does not withdraw an address the door confirmed', async () => {
+  const AA = '0x' + 'aa'.repeat(32), w3 = world({ allowance: 10n ** 20n, stored: AA }), A = prepareOf(2, 1000n, { data_map_address: AA });
+  const rA = await w3.payer.pay({ prepare: A, authorization: authOf(A), confirmPlan: yes });
+  assert.equal(JSON.parse(w3.mem.get('ant-pay.paid.up-1')).finalized, true, 'precondition: A is finalized and its receipt kept');
+  const w4 = world({ allowance: 10n ** 20n, stored: AA, revertHashes: [TX(1)] });
+  for (const [k, v] of w3.mem) w4.mem.set(k, v);
+  assert.equal(JSON.parse(w4.mem.get('ant-pay.paid.up-1')).txHashes[A.quotes[0].quote_hash], TX(1), 'precondition: and the hash it names is the one this chain now refuses');
+  const D = { ...A, upload_id: 'up-D', data_map_address: '0x' + 'dead'.repeat(16), chunks: { total: 1, already_stored: 0 }, quotes: [A.quotes[0]], total_atto: '1000' };
+  await refused(w4.payer.resume({ prepare: D, authorization: authOf(D) }), 'tx-reverted');
+  assert.equal(w4.mem.get('ant-pay.paid.quote.' + A.quotes[0].quote_hash), '', 'the index entry for the quote THIS plan named is cleared, so nothing it asked about reads as paid by a refused transaction');
+  /* SCOPE, named: A's other quote is not in D's plan, so resume cannot see it and its entry stays.
+     It self-heals on the next contact — a plan containing it waits on the same hash and unwinds it
+     there — and the harm meanwhile is a quote left OUT of a payment, which the door refuses by name
+     (missing_quote_tx): visible and recoverable, never a second signature. */
+  assert.equal(JSON.parse(w4.mem.get('ant-pay.paid.quote.' + A.quotes[1].quote_hash)).tx_hash, TX(1), 'while a quote outside this plan is beyond its reach');
+  assert.equal((await w4.payer.resume({ prepare: A, authorization: authOf(A) })).address, rA.address, 'and A can still be handed the address the door confirmed');
+});
+
+/* A DENIED CLEAR MUST NOT BECOME A STORAGE ERROR. The chain's verdict is what the person acts on —
+   renaming it 'wallet-declined' names a wallet that did not decline and erases whether the money
+   moved. But a repair that could not validate its own output owes that fact to the reader: without
+   the second half of the sentence the next attempt meets 'already paid' and nothing says why. */
+test('a clear the store refuses stays the chain’s verdict, and the refusal says the record is still stale', async () => {
+  const marked = (x) => [...x.mem].filter(([k, v]) => k.startsWith('ant-pay.paid.quote.') && v).length;
+  const p = prepareOf(2), w = world({ allowance: 10n ** 20n, revert: true, denyClear: true });
+  await assert.rejects(w.payer.pay({ prepare: p, authorization: authOf(p), confirmPlan: yes }), (e) => {
+    assert.equal(e.refusal, 'tx-reverted', e.message);
+    assert.match(e.message, /refused by the chain/, 'the chain’s verdict is not replaced');
+    assert.match(e.message, /could not clear its own record/, 'and the reader is told the record is stale');
+    return true;
+  });
+  assert.equal(marked(w), 2, 'the stale entries stay — the lesser harm, and now a named one');
+
+  /* only the FIRST clear denied: every remaining key is still attempted rather than the loop ending
+     on the refusal, so a store that refuses one key cannot leave the rest naming a dead transaction.
+     This is also the ONE arm where the record's own clear lands while a quote key did not, so it is
+     the only place the per-key report is not masked by the record write's — without it a mutation
+     that stops recording a refused KEY passes, which the battery on this commit measured. */
+  const w2 = world({ allowance: 10n ** 20n, revert: true, denyClear: 1 });
+  await assert.rejects(w2.payer.pay({ prepare: p, authorization: authOf(p), confirmPlan: yes }), (e) => {
+    assert.equal(e.refusal, 'tx-reverted', e.message);
+    assert.match(e.message, /could not clear its own record/, 'one refused key is enough to owe the reader the second half');
+    return true;
+  });
+  assert.equal(marked(w2), 1, 'one key refused it, the other was cleared anyway');
+  assert.equal(w2.mem.get('ant-pay.paid.up-1'), '', 'and the record itself was cleared — this is the arm where only a QUOTE key was refused');
+
+  /* CONTROL — a store that allows the clear says the chain’s verdict and nothing more. */
+  const ctl = world({ allowance: 10n ** 20n, revert: true });
+  await assert.rejects(ctl.payer.pay({ prepare: p, authorization: authOf(p), confirmPlan: yes }), (e) => {
+    assert.equal(e.refusal, 'tx-reverted'); assert.doesNotMatch(e.message, /could not clear/); return true; });
+  assert.equal(marked(ctl), 0, 'and nothing is left marked paid');
 });
 
 test('the door must confirm the address it quoted: a different one is refused by name, and the payment ids are kept', async () => {
