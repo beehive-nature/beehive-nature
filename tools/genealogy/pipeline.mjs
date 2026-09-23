@@ -199,6 +199,31 @@ pub.couples = Object.fromEntries(Object.entries(pub.couples)
     const p1 = idmap[c.p1] || c.p1, p2 = idmap[c.p2] || c.p2;
     return [[p1, p2].sort().join("|"), { p1, p2, ...(c.marriage ? { marriage: c.marriage } : {}) }];
   }));
+// DATE-REPAIR RECEIPTS REPLAY (founded by #218): repairs made to the published
+// corpus line-wise are carried in date-repairs-*.json, keyed by internal id.
+// A regeneration from the raw walk would silently undo them, so each receipt
+// row is replayed here: still "was" -> apply "now" and recompute the era;
+// already "now" (the provider was fixed) -> nothing; anything else -> DRIFT,
+// reported, never applied. The receipt is the authority; nothing is re-derived.
+const dateRepairs = { applied: 0, alreadyFixed: 0, drift: [] };
+{
+  const { readdirSync } = await import("node:fs");
+  const dir = "assets/profile-archive/lineage/";
+  for (const file of readdirSync(dir).filter((x) => /^date-repairs-.*\.json$/.test(x)).sort()) {
+    const receipt = JSON.parse(readFileSync(dir + file, "utf8"));
+    for (const row of receipt.repaired || []) {
+      const p = pub.persons[row.id];
+      if (!p) { dateRepairs.drift.push(`${file}: ${row.id} not published`); continue; }
+      if (p.lifespan === row.now) { dateRepairs.alreadyFixed++; continue; }
+      if (p.lifespan !== row.was) { dateRepairs.drift.push(`${file}: ${row.id} carries "${p.lifespan}", receipt expected "${row.was}"`); continue; }
+      p.lifespan = row.now;
+      const era = evidenceClass({ living: p.living, lifespan: p.lifespan });
+      p.evidence = { ...(p.evidence || {}), era, class: era };
+      dateRepairs.applied++;
+    }
+  }
+}
+
 // published lines carry internal ids like everything else (the private
 // line mapping never ships: privatize() emits `lines`, never `roots`)
 if (pub.lines) pub.lines = pub.lines.map((l) => ({ ...l, root: idmap[l.root] || l.root, entries: l.entries.map((e) => idmap[e] || e).sort() }));
@@ -261,6 +286,7 @@ pub.meta = {
   })(),
   correctionsApplied,
   overlayPersons,
+  dateRepairs,
   ...(Object.keys(lineIntake).length ? { lineIntake } : {}),
 };
 // privacy stays FATAL here; only the two disclosed classes pass
