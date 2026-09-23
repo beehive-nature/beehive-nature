@@ -297,9 +297,15 @@ export function nonDataAt(v, path = "value", seen = new Set()) {
     if (Array.isArray(v)) {
       if (Object.getPrototypeOf(v) !== Array.prototype) return `${path}: array subclass`;
       if (Object.getOwnPropertySymbols(v).length) return `${path}: symbol-keyed property`;
-      // JSON keeps only the elements: any other own property would vanish
-      for (const k of Object.getOwnPropertyNames(v))
-        if (k !== "length" && String(Number(k) >>> 0) !== k) return `${path}.${k}: array property that is not an element`;
+      // JSON keeps only the elements: any other own property would vanish.
+      // An element key is a canonical integer below length (so "4294967295",
+      // 2^32-1, which never extends length, is not one).
+      for (const k of Object.getOwnPropertyNames(v)) {
+        if (k === "length") continue;
+        const i = Number(k);
+        if (!(Number.isInteger(i) && i >= 0 && i < v.length && String(i) === k))
+          return `${path}.${k}: array property that is not an element`;
+      }
       for (let i = 0; i < v.length; i++) {
         const d = Object.getOwnPropertyDescriptor(v, i);
         if (!d) return `${path}[${i}]: hole`;

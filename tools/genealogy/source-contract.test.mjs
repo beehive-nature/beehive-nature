@@ -356,6 +356,9 @@ test("non-data anywhere in a projected value is refused, never silently dropped 
   const hidden = { date: "1922" }; Object.defineProperty(hidden, "secret", { value: "x", enumerable: false });
   // JSON would silently lose each of these: -0 becomes 0, a named array property vanishes
   const namedArray = [1, 2]; namedArray.foo = "x";
+  // "4294967295" (2^32-1) looks like an index but never extends length, so JSON drops it
+  const maxKeyArray = [1, 2]; maxKeyArray["4294967295"] = "x";
+  const oddKeyArray = [1, 2]; oddKeyArray["01"] = "x";
   const symArray = [1]; symArray[Symbol("k")] = 1;
   const getterArray = []; Object.defineProperty(getterArray, 0, { get: () => "Elm St", enumerable: true });
   const bad = {
@@ -380,6 +383,8 @@ test("non-data anywhere in a projected value is refused, never silently dropped 
     "negative zero":          [-0, /value: negative zero/],
     "nested negative zero":   [{ offset: [0, -0] }, /value\.offset\[1\]: negative zero/],
     "array named property":   [namedArray, /value\.foo: array property that is not an element/],
+    "array key 2^32-1":       [maxKeyArray, /value\.4294967295: array property that is not an element/],
+    "array key -0 / 01":      [oddKeyArray, /value\.01: array property that is not an element/],
     "array symbol key":       [symArray, /value: symbol-keyed property/],
     "array accessor element": [getterArray, /value\[0\]: accessor element/],
     "array subclass":         [new (class Dates extends Array {})(), /value: array subclass/],
