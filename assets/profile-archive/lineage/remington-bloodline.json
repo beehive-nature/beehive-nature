@@ -117364,10 +117364,10 @@
    "living": false,
    "source": "familysearch",
    "evidence": {
-    "era": "medieval",
+    "era": "saga",
     "support": "unsourced-entry",
     "basis": "era label from dates; support unsourced until sources are harvested",
-    "class": "medieval"
+    "class": "saga"
    },
    "refs": [
     {
@@ -119418,10 +119418,10 @@
    "living": false,
    "source": "familysearch",
    "evidence": {
-    "era": "medieval",
+    "era": "saga",
     "support": "unsourced-entry",
     "basis": "era label from dates; support unsourced until sources are harvested",
-    "class": "medieval"
+    "class": "saga"
    },
    "refs": [
     {
@@ -125008,10 +125008,10 @@
    "living": false,
    "source": "familysearch",
    "evidence": {
-    "era": "medieval",
+    "era": "saga",
     "support": "unsourced-entry",
     "basis": "era label from dates; support unsourced until sources are harvested",
-    "class": "medieval"
+    "class": "saga"
    },
    "refs": [
     {
@@ -314096,6 +314096,11 @@
   },
   "correctionsApplied": 4,
   "overlayPersons": 3,
+  "dateRepairs": {
+   "applied": 20,
+   "alreadyFixed": 0,
+   "drift": []
+  },
   "disputedAncestry": {
    "law": "DISPUTED, not incomplete: each component is a set of people who become their own ancestors along a path in the provider tree. Published with disclosure; traversal stays safe (cyclicAncestryOf is the one cycle authority) and any relationship crossing a component is shown disputed.",
    "components": 8,

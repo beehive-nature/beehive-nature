@@ -660,7 +660,7 @@ test('J4 discoveries are CONTEXTUAL — the same archive tells a different story
   assert.equal(Df.deepest.depth, 143);
   assert.equal(Df.tiers.total, 10097);
   assert.deepEqual(Df.tiers.order, ['saga', 'medieval', 'colonial', 'unrecorded', 'recorded', 'living']);
-  assert.equal(Df.tiers.counts.saga, 4325, 'more saga-tier than recorded-tier — the thinning is countable'); /* 3153 → 4325 on 2026-09-22: 1,172 BC/short-year lifespans relabelled under bfb2867c7 */
+  assert.equal(Df.tiers.counts.saga, 4327, 'more saga-tier than recorded-tier — the thinning is countable'); /* 3153 → 4325 on 2026-09-22: 1,172 BC/short-year lifespans relabelled under bfb2867c7; → 4327: two #218-repaired records whose restored dates read saga once the era is recomputed */
   /* Rockwood root: a small colonial world with its own frontier story */
   assert.equal(Da.deepest.depth, 3);
   assert.equal(Da.deepest.id, 'p92dc6be4f8');
