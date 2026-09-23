@@ -104,18 +104,62 @@ locate() {
 # selftest below asks the only question this row cannot: does it actually fire.
 #
 # TWO INSTRUMENTS, AND THEY DO NOT ANSWER THE SAME QUESTION:
-#   index mode (git ls-files -s)  PORTABLE. It is the mode every clone gets.
-#   filesystem -x                 TRUE on POSIX, VACUOUS under Git for Windows,
-#                                 which fabricates the bit: on this box `ls -l`
-#                                 reports -rwxr-xr-x for a file that is 100644
-#                                 in the index. Used only as a fallback for a
-#                                 hooks dir outside the tree, and labelled weak.
+#   index mode (git ls-files -s)  PORTABLE. It is the mode every FRESH clone
+#                                 gets. It is NOT what git execs.
+#   filesystem -x                 What git actually execs — but VACUOUS under
+#                                 Git for Windows, which fabricates the bit: on
+#                                 that box `ls -l` reports -rwxr-xr-x for a file
+#                                 that is 100644 in the index.
+#
+# READING THE INDEX ALONE WAS A FALSE GREEN, DEMONSTRATED (bee-laborer, attack
+# on this PR, 2026-09-23; reproduced by my own hand on ext4 before this fix).
+# With `core.fileMode=false` the filesystem bit can be removed while the index
+# still reads 100755: this row printed "2 of 2 ... executable" at rc=0, git
+# status showed nothing, and a planted 64-hex commit LANDED UNSCANNED, count
+# 1 -> 2. The row read a setting one layer above the thing that fires — which
+# is the exact defect its own header calls RESOLVING IS NOT FIRING. And
+# core.fileMode=false is not exotic here: it is how every /mnt/c clone on this
+# estate behaves, which is the configuration the WSL lane runs in.
+#
+# THE FIX IS A FIRING PROBE, NOT A PLATFORM GUESS. Asking "am I on Windows?"
+# would be another setting read. Instead the row MEASURES whether this
+# filesystem carries the bit: make a throwaway file beside the hooks, chmod +x,
+# chmod -x, read `[ -x ]` back.
+#   bit carried (POSIX)   -> require index 100755 AND filesystem -x, and refuse
+#                            when they disagree, naming the disagreement.
+#   bit not carried (GfW) -> keep the index-only verdict and SAY SO, because
+#                            `[ -x ]` there is a fabricated answer.
+# No false alarm under Git for Windows, no false green on POSIX. The file
+# already knew `-x` is vacuous on one platform; the defect was treating that as
+# a reason never to read it on the other.
 #
 # PLACEMENT: this prints AFTER the empty-delta halt and OUTSIDE the numbered
 # 1)-7) series, deliberately. Checks 1-7 all scan $ADDED; this one scans
 # nothing — it is a precondition about the seat's box. Selftest P2 asserts that
 # an empty delta runs ZERO checks by counting `^[1-7])`, so numbering this row
 # `8)` would silently stop that counter from meaning anything. Do not renumber.
+# FIRING PROBE for the mode bit. Not a platform name, not a config read: it
+# makes a throwaway file on the SAME filesystem as the hooks, sets +x, and
+# removes it again. The +x arm is not decoration — it is the fixture asserting
+# its own precondition: if chmod is a no-op in both directions, the probe says
+# "unknown" instead of reporting a carried bit it never observed.
+# Echoes exactly one of: yes | no | unknown.
+_exec_bit_probe() {
+  _pdir=$1; _pf=''
+  if [ -d "$_pdir" ] && [ -w "$_pdir" ]; then
+    _pf=$(mktemp "$_pdir/.execbitprobe.XXXXXX" 2>/dev/null) || _pf=''
+  fi
+  if [ -z "$_pf" ]; then
+    _pf=$(mktemp 2>/dev/null) || _pf=''
+  fi
+  if [ -z "$_pf" ]; then echo unknown; return 0; fi
+  chmod +x "$_pf" 2>/dev/null
+  if [ ! -x "$_pf" ]; then rm -f "$_pf"; echo no:notset; return 0; fi
+  chmod -x "$_pf" 2>/dev/null
+  if [ -x "$_pf" ]; then rm -f "$_pf"; echo no:notcleared; return 0; fi
+  rm -f "$_pf"; echo yes; return 0
+}
+
 hooks_check() {
   _hbad=0; _hn=0
   _hd=$(git rev-parse --git-path hooks 2>/dev/null)
@@ -127,6 +171,24 @@ hooks_check() {
   echo "HOOKS — effective hooks directory: $_hd"
   echo "   (git rev-parse --git-path hooks honours core.hooksPath at every scope,"
   echo "    so this is git's own answer, not a precedence rule re-implemented here.)"
+  _hcarry=$(_exec_bit_probe "$_hd")
+  case "$_hcarry" in
+    yes)
+      echo "   exec-bit probe: this filesystem CARRIES the mode bit, so [ -x ] is"
+      echo "    authoritative here and BOTH instruments are required below." ;;
+    no:notcleared)
+      echo "   exec-bit probe: this filesystem does NOT carry the mode bit — chmod -x"
+      echo "    left it set (Git for Windows fabricates it). [ -x ] is vacuous here, so"
+      echo "    only the index mode is read. A POSIX seat gets the stricter verdict." ;;
+    no:notset)
+      echo "   exec-bit probe: this filesystem does NOT carry the mode bit — chmod +x"
+      echo "    did not make a throwaway file executable, so [ -x ] cannot be trusted"
+      echo "    in either direction. Index mode only; requiring [ -x ] here would"
+      echo "    refuse a correctly installed box." ;;
+    *)
+      echo "   exec-bit probe: INCONCLUSIVE — no throwaway file could be created at"
+      echo "    all, so the filesystem bit is unread and a stripped bit is invisible." ;;
+  esac
   for _hpair in 'pre-commit:secret-scan.sh' 'commit-msg:identity-check.sh'; do
     _hh=${_hpair%%:*}; _hgate=${_hpair#*:}
     _hf="$_hd/$_hh"
@@ -139,8 +201,19 @@ hooks_check() {
     fi
     _hmode=$(git ls-files -s -- "$_hf" 2>/dev/null | cut -c1-6)
     if [ -n "$_hmode" ]; then
-      if [ "$_hmode" = 100755 ]; then
-        echo "   ok       $_hh — runs $_hgate, index mode 100755 (executable in every clone)"
+      if [ "$_hmode" = 100755 ] && [ "$_hcarry" = yes ] && [ ! -x "$_hf" ]; then
+        echo "   DEAD     $_hh — runs $_hgate, index mode 100755, but the file ON DISK"
+        echo "            is not executable. Git execs the FILE, not the index, so this"
+        echo "            hook never runs on this box. Usual cause: core.fileMode=false,"
+        echo "            which also makes git status report nothing. Remedy: chmod +x"
+        echo "            $_hf"
+        _hbad=$((_hbad + 1))
+      elif [ "$_hmode" = 100755 ] && [ "$_hcarry" = yes ]; then
+        echo "   ok       $_hh — runs $_hgate, index mode 100755 AND executable on disk"
+      elif [ "$_hmode" = 100755 ]; then
+        echo "   ok(index) $_hh — runs $_hgate, index mode 100755, so every fresh clone"
+        echo "            gets the bit. The filesystem bit was NOT read here (the probe"
+        echo "            says it is not carried), so this box's own file is unverified."
       else
         echo "   DEAD     $_hh — runs $_hgate but index mode is $_hmode. Git SKIPS a"
         echo "            non-executable hook and says so only as an advice hint. The"
@@ -155,13 +228,21 @@ hooks_check() {
       echo "   DEAD     $_hh — runs $_hgate but is not executable and is not tracked"; _hbad=$((_hbad + 1))
     fi
   done
-  echo "   $((_hn - _hbad)) of $_hn required hooks installed, wired and executable"
+  # NAME THE INSTRUMENT WITH THE NUMBER: "executable" meant two different
+  # measurements depending on the box, and saying only the word is how the
+  # index-only reading passed for the stronger one.
+  if [ "$_hcarry" = yes ]; then _hword="executable on disk"; else _hword="executable by index mode"; fi
+  echo "   $((_hn - _hbad)) of $_hn required hooks installed, wired and $_hword"
   if [ "$_hbad" -ne 0 ]; then
     echo "HOOKS BLOCKED — this box has no complete local gate. Remedy, from the repo root:"
     echo "     git config --local core.hooksPath .githooks"
     echo "     git update-index --chmod=+x .githooks/pre-commit .githooks/commit-msg"
     echo "   (the second line is a tracked mode change and must be committed to hold"
     echo "    for anyone else; a local chmod fixes only your own clone.)"
+    echo "   If a hook above is DEAD with index mode 100755, the tracked mode is already"
+    echo "   right and only YOUR working file lost the bit:"
+    echo "     chmod +x $_hd/pre-commit $_hd/commit-msg"
+    echo "     git config --local --unset core.fileMode   # if it is set to false"
     echo "   This layer is advisory: CI re-scans on push either way. It refuses here"
     echo "   because a hookless box publishes UNSCANNED material the instant it pushes."
     return 1
@@ -319,10 +400,30 @@ if [ "${1:-}" = "--selftest" ]; then
 
 Co-authored-by: preflight selftest seat <selftest@invalid>"
   H=$(mktemp -d 2>/dev/null) || H=""
-  case "$H" in
-    "$(git rev-parse --show-toplevel 2>/dev/null)"*)
-      echo "  P12-P14 -> refusing: mktemp handed back a path INSIDE the estate checkout ($H)"; st=1; H="" ;;
-  esac
+  # CAPTURE THE PREFIX BEFORE COMPARING. Substituting the command straight into
+  # the case pattern made an EMPTY answer become the pattern `*`, which matches
+  # every path — so a box where git cannot name a toplevel refused with the
+  # sentence "INSIDE the estate checkout" about a /tmp path that plainly is not,
+  # and P12-P14 — this row's entire point — silently did not run while the
+  # header still presented them as the proof. Reproduced 2026-09-23 by running
+  # this selftest with its cwd outside any repository; bee-laborer hit the same
+  # branch from a Windows-created worktree read under WSL, whose .git file
+  # carries a C:/ path git cannot resolve. Same family as the empty WIF_RE that
+  # made `git grep -InE ""` match every line: AN EMPTY PATTERN IS A WILDCARD,
+  # NOT AN ABSENT TEST.
+  _top=$(git rev-parse --show-toplevel 2>/dev/null) || _top=''
+  if [ -z "${_top:-}" ]; then
+    echo "  P12-P14 -> refusing: git cannot name a toplevel from here, so 'is this"
+    echo "            throwaway path inside the estate checkout?' has no answer. That is"
+    echo "            'unknown', not 'outside'. Run the selftest from inside a checkout"
+    echo "            git can resolve."
+    st=1; H=""
+  else
+    case "$H" in
+      "$_top"*)
+        echo "  P12-P14 -> refusing: mktemp handed back a path INSIDE the estate checkout ($H)"; st=1; H="" ;;
+    esac
+  fi
   if [ -z "$H" ]; then
     echo "  P12-P14 -> no usable throwaway directory; arms not run"; st=1
   else
@@ -365,6 +466,23 @@ Co-authored-by: preflight selftest seat <selftest@invalid>"
       sh scripts/push-preflight.sh --hooks > d.out 2>&1; echo "$?" > d.rc
       git update-index --chmod=+x .githooks/commit-msg >/dev/null 2>&1
       sh scripts/push-preflight.sh --hooks > e.out 2>&1; echo "$?" > e.rc
+
+      # f: the index mode stays 100755 and only the FILESYSTEM bit is stripped,
+      # which is what core.fileMode=false lets happen silently. git execs the
+      # file, so this is a dead hook wearing a correct tracked mode.
+      git config core.fileMode false
+      chmod -x .githooks/commit-msg 2>/dev/null
+      # SECOND INSTRUMENT, read by the rig and not by the gate: did the bit
+      # actually come off? Without this the arm would take the script's OWN
+      # probe verdict as the reason to skip itself, so a probe stuck on "no"
+      # would silence P14c/P14d and still print "selftest ok".
+      if [ -x .githooks/commit-msg ]; then echo no > f.carry; else echo yes > f.carry; fi
+      sh scripts/push-preflight.sh --hooks > f.out 2>&1; echo "$?" > f.rc
+      # g: put the bit back and ask again. Without this control an rc=1 above is
+      # only a rig that refuses; with it, the refusal is attributable to the bit.
+      chmod +x .githooks/commit-msg 2>/dev/null
+      git config --unset core.fileMode 2>/dev/null
+      sh scripts/push-preflight.sh --hooks > g.out 2>&1; echo "$?" > g.rc
     )
     _R="$H/r"
     _rd() { cat "$_R/$1" 2>/dev/null || echo MISSING; }
@@ -400,11 +518,62 @@ Co-authored-by: preflight selftest seat <selftest@invalid>"
     else
       echo "  P14b known-GOOD mode-755 hook -> rc=$_erc — the row refuses a correctly installed box"; st=1
     fi
+    _frc=$(_rd f.rc); _grc=$(_rd g.rc); _fcarry=$(_rd f.carry)
+    if [ "$_fcarry" = yes ] && ! grep -q "exec-bit probe: this filesystem CARRIES" "$_R/f.out" 2>/dev/null; then
+      echo "  P14c/P14d -> the rig's own read says the mode bit CAME OFF, and the row's probe"
+      echo "            says it is not carried. The probe is wrong, and a wrong probe here"
+      echo "            silently downgrades every hook verdict to index-only."; st=1
+    elif [ "$_fcarry" = yes ]; then
+      if [ "$_frc" = 1 ] && grep -q "DEAD     commit-msg" "$_R/f.out" 2>/dev/null && grep -q "file ON DISK" "$_R/f.out" 2>/dev/null; then
+        echo "  P14c known-BAD  index 100755, filesystem bit STRIPPED -> refused rc=1, named DEAD on disk (correct)"
+      else
+        echo "  P14c known-BAD  index 100755, filesystem bit stripped -> rc=$_frc without naming the disagreement. git execs the FILE; reading the index alone is a FALSE GREEN"; st=1
+      fi
+      if [ "$_grc" = 0 ] && grep -q "2 of 2 required hooks" "$_R/g.out" 2>/dev/null; then
+        echo "  P14d CONTROL    same hook, bit restored -> 2 of 2, permitted (so P14c's refusal is the BIT, not a rig that refuses)"
+      else
+        echo "  P14d CONTROL    bit restored -> rc=$_grc still not permitted; P14c's rc=1 is unattributed"; st=1
+      fi
+    else
+      echo "  P14c/P14d NOT CONSTRUCTIBLE HERE — the RIG's own read (not the row's probe)"
+      echo "            says chmod -x did not take on this filesystem, so the fixture cannot"
+      echo "            be built. Not a pass and not a skip to be read as one: these two arms"
+      echo "            run for real on every POSIX seat and in CI (ubuntu), which is exactly"
+      echo "            where the defect bites."
+    fi
     rm -rf "$H"
     if [ -e "$H" ]; then echo "  P12-P14 cleanup -> $H SURVIVED; a rig that leaves state can green the next run"; st=1
     else echo "  P12-P14 cleanup -> throwaway tree removed (correct)"; fi
   fi
   fi
+
+  # P15 — the throwaway-dir guard's OTHER branch: git cannot name a toplevel.
+  # This runs the REAL script rather than re-checking its case statement here,
+  # because a selftest that exercises a gate's components never judges its
+  # wiring (#165, P5-P10). PREFLIGHT_SELFTEST_DEPTH stops the inner run from
+  # spawning a third: the inner run skips exactly this arm and nothing else.
+  if [ -z "${PREFLIGHT_SELFTEST_DEPTH:-}" ]; then
+    _nt=$(mktemp -d 2>/dev/null) || _nt=''
+    if [ -z "$_nt" ]; then
+      echo "  P15 -> no throwaway directory; arm not run"; st=1
+    elif (cd "$_nt" && git rev-parse --show-toplevel >/dev/null 2>&1); then
+      echo "  P15 -> fixture precondition FAILED: $_nt is inside a repository git can"
+      echo "         resolve, so the no-toplevel branch cannot be reached from there."; st=1
+      rm -rf "$_nt"
+    else
+      (cd "$_nt" && PREFLIGHT_SELFTEST_DEPTH=1 sh "$SELF" --selftest) > "$_nt.out" 2>&1
+      _p15rc=$?
+      if [ "$_p15rc" != 0 ] \
+         && grep -q "git cannot name a toplevel from here" "$_nt.out" 2>/dev/null \
+         && ! grep -q "INSIDE the estate checkout" "$_nt.out" 2>/dev/null; then
+        echo "  P15 known-BAD  no resolvable toplevel -> refused rc=$_p15rc naming 'unknown', and NOT claiming the /tmp path is inside the checkout (correct)"
+      else
+        echo "  P15 known-BAD  no resolvable toplevel -> rc=$_p15rc; the refusal does not name the missing toplevel, or still says 'INSIDE the estate checkout' about a path that is not. An empty prefix is a WILDCARD, not an absent test"; st=1
+      fi
+      rm -rf "$_nt" "$_nt.out"
+    fi
+  fi
+
   rm -f /tmp/ps1 /tmp/ps2
   [ "$st" -eq 0 ] && echo "selftest ok — refuses what it must, permits what it must."                    || echo "selftest FAIL — see above."
   exit $st
