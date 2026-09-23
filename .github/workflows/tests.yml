@@ -446,7 +446,7 @@ jobs:
           # A SKIP NOTICE IS NOT ATTENDANCE (bee-laborer's W2/W3). The ran set was every line
           # opening with an arm id, and a skip notice opens with the arm id too — so P14e and
           # P14f could each be forced to skip AND have their one recording line deleted, and this
-          # step passed with "24 ids declared, all 24 present" while the arm sat out. Her own U4
+          # step passed with "24 ids declared, all 24 present" while the arm sat out. Their own U4
           # caught P14c/P14d only because that notice names two arms and the second is not at the
           # start of the line. ATTENDANCE IS NOW READ FROM VERDICT LINES ONLY: an arm that judged
           # something ends its line in "(correct)".
@@ -463,7 +463,7 @@ jobs:
           # author writes, so a wording nobody has written yet walks straight through, and
           # bee-laborer's Z9 is that wording today — REWORD the skip notice so it carries no
           # "NOT CONSTRUCTIBLE" at all and ends its first line in "(correct)", and P14e sits out
-          # with this step rc=0, the census at (none) and the inventory at 24 of 24. Her Z9CTRL,
+          # with this step rc=0, the census at (none) and the inventory at 24 of 24. Their Z9CTRL,
           # the same reworded notice without the marker, is red, which localises the green to the
           # marker and nothing else. Measured in a clean POSIX clone at 93de30f2:
           #   CONTROL0=0  Z7=1  Z1=1  Z6=1  Z9=0  Z9CTRL=1  Z12b=0  Z5a=1  Z5b=0
@@ -509,7 +509,7 @@ jobs:
           # NOT CONSTRUCTIBLE notice whose line ALSO ends in "(correct)" was read as a verdict, so
           # P14e could be forced to skip, its one recording line deleted, and the census, the arm
           # floor, the inventory and the script's own "selftest ok" all stayed green while the arm
-          # sat out. Her Z7 is the control: the same skip with the notice unmodified is red, so the
+          # sat out. Their Z7 is the control: the same skip with the notice unmodified is red, so the
           # green was the marker and nothing else. ONE LINE CANNOT BE BOTH a judgement and an
           # admission that nothing was judged, and the contradiction is refused rather than resolved
           # in the permissive direction — which is the direction that does not go red.

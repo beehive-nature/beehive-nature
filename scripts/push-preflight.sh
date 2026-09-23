@@ -731,7 +731,7 @@ Co-authored-by: preflight selftest seat <selftest@invalid>"
   #     "a partition needs no gaps and no overlaps", which promises that the two halves between
   #     them classify every line. They do not: bee-laborer's Z9 REWORDS the notice — no
   #     "NOT CONSTRUCTIBLE" anywhere in it, first line ending in "(correct)" — and the arm sits
-  #     out with the census at (none), the inventory at 24 of 24 and this file saying ok. Her
+  #     out with the census at (none), the inventory at 24 of 24 and this file saying ok. Their
   #     Z9CTRL, the same reworded notice WITHOUT the marker, is red, so the green is the marker
   #     and nothing else. Both halves key on text an author writes, so a wording nobody has
   #     written yet walks through; the overlap half is kept because it costs nothing and catches
@@ -742,7 +742,7 @@ Co-authored-by: preflight selftest seat <selftest@invalid>"
   #     (Z1), and so is skipping with the recording intact (Z7). Green costs the author that
   #     marker on a line which judged nothing — and the marker is author-written, which is the
   #     reach already named. AN EARLIER DRAFT PUT THE COST AS "a false sentence a reader can
-  #     read"; bee-laborer's Z13 refutes it. Her notice is TRUE in every English clause — the
+  #     read"; bee-laborer's Z13 refutes it. Their notice is TRUE in every English clause — the
   #     rig's chmod -x did not take on that filesystem, so there is no dead hook to probe and
   #     nothing is claimed about the blind case — and it ends in "(correct)". P14e sits out at
   #     STEP_RC=0, census (none), 24 of 24. A reader reading that line learns exactly that the arm
