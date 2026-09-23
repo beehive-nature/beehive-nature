@@ -390,3 +390,46 @@ test('M-REMEDY SRC-EDGE-OVERSTATED: the honest tag clears it, and a missing row 
   assert.ok(absent.inspected['SRC-EDGE-OVERSTATED'] < runFixture(null).inspected['SRC-EDGE-OVERSTATED'],
     'removing the staged row left the inspected count unchanged — the clause is counting something else');
 });
+
+test('M-REMEDY META-COUNT-DIVERGE: a DELETED census declaration fires by name — the clause used to fail open on exactly this', () => {
+  /* PRECONDITION: the fixture must actually publish a census under both
+   * fields, or a "fires" assertion below would be asserting the fixture. */
+  const clean = cleanFixture();
+  const sp = clean.corpus.meta.stagedPersons;
+  for (const key of ['researchCounts', 'publicationCounts']) {
+    const total = Object.values(sp[key]).reduce((n, v) => n + v, 0);
+    assert.ok(total > 0, `the fixture declares an EMPTY ${key}, so deleting it proves nothing`);
+  }
+
+  for (const key of ['researchCounts', 'publicationCounts']) {
+    const r = runFixture((s) => { delete s.corpus.meta.stagedPersons[key]; });
+    assert.deepEqual(r.findings.map(findingKey), [`META-COUNT-DIVERGE :: meta.stagedPersons.${key}`],
+      `deleting meta.stagedPersons.${key} must be reported BY NAME; a silent skip turns three real comparisons off and every gate stays green`);
+  }
+
+  /* the OTHER direction: a declaration that is present and honest stays silent,
+   * so the row above is not a ban on the field existing. */
+  assert.deepEqual(runFixture(null).findings.map(findingKey), []);
+
+  /* and the inspected count is not the instrument: it FALLS on the deletion,
+   * which is precisely why a truthiness test on it could not see the fail-open. */
+  const base = runFixture(null).inspected['META-COUNT-DIVERGE'];
+  const cut = runFixture((s) => { delete s.corpus.meta.stagedPersons.researchCounts; }).inspected['META-COUNT-DIVERGE'];
+  assert.ok(cut < base, `inspected did not fall (${base} -> ${cut}); the deletion never reached the clause`);
+});
+
+test('M-REMEDY META-COUNT-DIVERGE: an absent census over an EMPTY field is silent — the escape hatch owes a row too', () => {
+  /* Nothing is published under `research`, so there is no census to declare
+   * and an absent declaration states nothing false. Without this arm the
+   * `total === 0` branch is an untested off-switch. */
+  const r = runFixture((s) => {
+    delete s.corpus.meta.stagedPersons.researchCounts;
+    for (const obj of Object.values(s.staged)) delete obj.research;
+    for (const p of Object.values(s.corpus.persons)) delete p.research;
+  });
+  const metaRows = r.findings.filter((f) => f.code === 'META-COUNT-DIVERGE');
+  assert.deepEqual(metaRows.map(findingKey), [],
+    'an absent census over a field nobody publishes must not be reported — that would be a ban on the field being unused');
+  /* non-vacuity: the clause still ran. */
+  assert.ok(r.inspected['META-COUNT-DIVERGE'] > 0, 'the clause never executed, so its silence means nothing');
+});

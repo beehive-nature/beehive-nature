@@ -470,6 +470,9 @@ export function checkSourceContract({ corpus, overlay, packs = {}, staged = {}, 
       ['meta.overlayPersons', meta.overlayPersons, Object.keys(ovPersons).length],
       ['meta.correctionsApplied', meta.correctionsApplied, Object.keys((overlay && overlay.corrections) || {}).length],
     ];
+    /* rows whose declared side is a whole CENSUS OBJECT rather than a number;
+     * they cannot go through the numeric comparison below. */
+    const censusRows = [];
     if (stagedIds.length) {
       const sp = meta.stagedPersons || {};
       declared.push(['meta.stagedPersons.publicStaged', sp.publicStaged, stagedIds.length]);
@@ -483,8 +486,18 @@ export function checkSourceContract({ corpus, overlay, packs = {}, staged = {}, 
       };
       for (const [key, field] of [['researchCounts', 'research'], ['publicationCounts', 'publication']]) {
         const want = sp[key];
-        if (!want) continue;
         const got = census(field);
+        /* A MISSING CENSUS IS ITSELF A DIVERGENCE. The three fixed rows above
+         * already report an absent declaration (`typeof want !== 'number'`);
+         * this one used to `continue` on a falsy `want`, so a producer that
+         * stopped declaring a census switched its comparisons off and the
+         * clause still read clean. The skip was invisible to the battery too:
+         * the inspected count merely fell, and a truthiness test cannot see
+         * 9 fall to 6. Reported by bee-laborer attacking #225, 2026-09-23. */
+        if (!want || typeof want !== 'object') {
+          censusRows.push([`meta.stagedPersons.${key}`, want, got]);
+          continue;
+        }
         for (const k of new Set([...Object.keys(want), ...Object.keys(got)])) {
           declared.push([`meta.stagedPersons.${key}.${k}`, want[k], got[k] || 0]);
         }
@@ -497,6 +510,13 @@ export function checkSourceContract({ corpus, overlay, packs = {}, staged = {}, 
       } else if (want !== got) {
         add('META-COUNT-DIVERGE', where, `declared ${want}, artifacts hold ${got}`);
       }
+    }
+    for (const [where, want, got] of censusRows) {
+      saw('META-COUNT-DIVERGE');
+      const total = Object.values(got).reduce((n, v) => n + v, 0);
+      if (total === 0) continue; /* nothing published under this field; an absent census declares nothing wrong */
+      add('META-COUNT-DIVERGE', where,
+        `the corpus declares no census here (${want === undefined ? 'absent' : JSON.stringify(want)}); the artifacts hold ${total} staged person(s) across ${JSON.stringify(got)}`);
     }
   }
 
