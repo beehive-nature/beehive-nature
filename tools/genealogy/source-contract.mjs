@@ -255,7 +255,8 @@ export function duplicateAssessment(store, a, b, topology = {}) {
 //   projectText(text, { object, field, id })   the only way opaque human-authored
 //                                          text leaves; only a returned string publishes
 //   projectValue(value, { claimId, subject, predicate })  the only way a claim's
-//                                          payload leaves; null/undefined omits it
+//                                          payload leaves; null/undefined omits it, and
+//                                          anything not JSON data at any depth is refused
 // Every schema key has exactly one disposition below; a key without one
 // cannot be added (the test suite checks the lists against *_KEYS).
 export const PUBLIC_FIELDS = {
@@ -274,6 +275,42 @@ export const PUBLIC_FIELDS = {
     text: ["locator", "quote", "note"],
   },
 };
+
+// Where a projected value stops being JSON data, or null when it is data all
+// the way down. Data is null, a string, a boolean, a finite number, a dense
+// array of data, or a plain object (no prototype other than Object's) whose
+// own properties are enumerable string-keyed data values. Anything else,
+// anywhere in the structure, is named rather than dropped or transformed.
+export function nonDataAt(v, path = "value", seen = new Set()) {
+  if (v === null || typeof v === "string" || typeof v === "boolean") return null;
+  if (typeof v === "number") return Number.isFinite(v) ? null : `${path}: non-finite number ${v}`;
+  if (typeof v !== "object") return `${path}: ${typeof v}`;
+  if (seen.has(v)) return `${path}: cycle`;
+  seen.add(v);
+  try {
+    if (Array.isArray(v)) {
+      for (let i = 0; i < v.length; i++) {
+        if (!(i in v)) return `${path}[${i}]: hole`;
+        const bad = nonDataAt(v[i], `${path}[${i}]`, seen);
+        if (bad) return bad;
+      }
+      return null;
+    }
+    const proto = Object.getPrototypeOf(v);
+    if (proto !== Object.prototype && proto !== null) return `${path}: ${v.constructor?.name ?? "non-plain"} object`;
+    if (Object.getOwnPropertySymbols(v).length) return `${path}: symbol-keyed property`;
+    for (const k of Object.getOwnPropertyNames(v)) {
+      const d = Object.getOwnPropertyDescriptor(v, k);
+      if (!("value" in d)) return `${path}.${k}: accessor property`;
+      if (!d.enumerable) return `${path}.${k}: non-enumerable property`;
+      const bad = nonDataAt(d.value, `${path}.${k}`, seen);
+      if (bad) return bad;
+    }
+    return null;
+  } finally {
+    seen.delete(v);
+  }
+}
 
 export function publicView(store, { isPublicSubject, isPublicSource, projectText, projectValue } = {}) {
   for (const [name, fn] of Object.entries({ isPublicSubject, isPublicSource }))
@@ -294,9 +331,9 @@ export function publicView(store, { isPublicSubject, isPublicSource, projectText
       if (obj[k] === undefined || !projectValue) continue;
       const v = projectValue(obj[k], valueContext);
       if (v === undefined || v === null) continue;
-      const json = JSON.stringify(v); // a detached copy: nothing aliases the private store
-      if (json === undefined) throw new Error(`publicView: projectValue for claim ${id} returned something that is not data`);
-      out[k] = JSON.parse(json);
+      const bad = nonDataAt(v);
+      if (bad) throw new Error(`publicView: projectValue for claim ${id} returned something that is not data (${bad})`);
+      out[k] = JSON.parse(JSON.stringify(v)); // lossless once validated; a detached copy that aliases nothing
     }
     return out;
   };

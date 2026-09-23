@@ -7,7 +7,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import {
-  SOURCE_SCHEMA, CLAIM_SCHEMA, BINDING_SCHEMA, STANDINGS, PUBLIC_FIELDS, SOURCE_KEYS, CLAIM_KEYS, BINDING_KEYS,
+  SOURCE_SCHEMA, CLAIM_SCHEMA, BINDING_SCHEMA, STANDINGS, PUBLIC_FIELDS, SOURCE_KEYS, CLAIM_KEYS, BINDING_KEYS, nonDataAt,
   createStore, addSource, addClaim, bind, admit, validateStore,
   sourceProblems, claimStanding, personSupport, duplicateAssessment, publicView,
 } from "./source-contract.mjs";
@@ -345,6 +345,48 @@ test("claim values leave only through projectValue, as detached data", () => {
   refuses(() => publicView(s, { ...base, projectValue: () => () => 1 }), /not data/);
   refuses(() => publicView(s, { ...base, projectValue: () => Symbol("x") }), /not data/);
   assert.throws(() => publicView(s, { ...base, projectValue: () => 1n }));
+});
+
+test("non-data anywhere in a projected value is refused, never silently dropped or transformed", () => {
+  const s = payloadStore();
+  class Place { constructor() { this.name = "Parish"; } }
+  const cyclic = { date: "1922" }; cyclic.self = cyclic;
+  const withSymbolKey = { date: "1922", [Symbol("k")]: 1 };
+  const withGetter = { date: "1922", get where() { return "Elm St"; } };
+  const hidden = { date: "1922" }; Object.defineProperty(hidden, "secret", { value: "x", enumerable: false });
+  const bad = {
+    "nested function":        [{ date: "1922", helper: () => 1 }, /value\.helper: function/],
+    "nested symbol":          [{ date: "1922", tag: Symbol("t") }, /value\.tag: symbol/],
+    "nested bigint":          [{ date: "1922", n: 1n }, /value\.n: bigint/],
+    "nested undefined":       [{ date: "1922", place: undefined }, /value\.place: undefined/],
+    "array with undefined":   [{ dates: ["1922", undefined] }, /value\.dates\[1\]: undefined/],
+    "array with a hole":      [{ dates: ["1922", , "1923"] }, /value\.dates\[1\]: hole/],
+    "array with a function":  [["1922", () => 1], /value\[1\]: function/],
+    "deep NaN":               [{ a: { b: [1, NaN] } }, /value\.a\.b\[1\]: non-finite number NaN/],
+    "deep Infinity":          [{ a: [{ age: Infinity }] }, /value\.a\[0\]\.age: non-finite number Infinity/],
+    "top-level NaN":          [NaN, /value: non-finite number NaN/],
+    "Date object":            [{ at: new Date(0) }, /value\.at: Date object/],
+    "Map":                    [{ m: new Map() }, /value\.m: Map object/],
+    "class instance":         [{ place: new Place() }, /value\.place: Place object/],
+    "toJSON hook":            [{ date: "1922", toJSON: () => ({ date: "altered" }) }, /value\.toJSON: function/],
+    "cycle":                  [cyclic, /value\.self: cycle/],
+    "symbol-keyed property":  [withSymbolKey, /symbol-keyed property/],
+    "accessor property":      [withGetter, /value\.where: accessor property/],
+    "non-enumerable property": [hidden, /value\.secret: non-enumerable property/],
+  };
+  for (const [name, [v, re]] of Object.entries(bad)) {
+    assert.match(nonDataAt(v) ?? "", re, `${name}: not named`);
+    refuses(() => publicView(s, { ...base, projectValue: () => v }), /not data/);
+  }
+  // non-vacuity: deep JSON data passes unchanged, a shared (non-cyclic) reference is allowed,
+  // and a null-prototype object is plain
+  const shared = { y: 1 };
+  const bare = Object.create(null); bare.date = "1922";
+  const good = { date: "1922", place: null, ok: true, n: -0.5, list: [[1, 2], { a: "b" }], s1: shared, s2: shared, bare };
+  assert.equal(nonDataAt(good), null);
+  const pub = publicView(s, { ...base, projectValue: (v, at) => (at.claimId === "C-death" ? good : undefined) });
+  assert.deepEqual(pub.claims["C-death"].value, JSON.parse(JSON.stringify(good)));
+  assert.notEqual(pub.claims["C-death"].value.s1, shared, "detached copy");
 });
 
 // ── mutation: provenance, assertions and counts cannot be bent ───────────────
