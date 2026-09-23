@@ -202,7 +202,23 @@ hooks_check() {
     _hf="$_hd/$_hh"
     _hn=$((_hn + 1))
     if [ ! -s "$_hf" ]; then
-      echo "   MISSING  $_hh — nothing installed at $_hf"; _hbad=$((_hbad + 1)); continue
+      # A MISSING VERDICT MUST BE ABOUT THE FILE, NOT ABOUT THE DIRECTORY. When $_hd cannot be
+      # SEARCHED, every stat inside it fails and an installed, wired, executable hook reads as
+      # absent — and the reader is told to install what is already there. rc stays 1 because git
+      # cannot read the hook either, so this is fail-closed with a FALSE REASON, which is the
+      # worse half. MEASURED on ext4 as uid 1000, not guessed: dir 0755 and 0500 -> [ -d "$d/." ]
+      # true and [ -s "$d/file" ] true; dir 0600 and 0400 -> both false, together. `ls` is the
+      # WRONG instrument here (true at 0600: it needs r, not x). Under Git for Windows every mode
+      # reads searchable, so this arm cannot raise a false alarm there.
+      if [ -d "$_hd" ] && [ ! -d "$_hd/." ]; then
+        echo "   UNREADABLE $_hh — $_hd exists but cannot be SEARCHED from here, so nothing"
+        echo "            inside it can be stat'd and whether $_hh is installed is UNKNOWN."
+        echo "            Git reads the hook the same way and will not run it either, so this"
+        echo "            is still a refusal — but do NOT reinstall: fix the directory's mode."
+      else
+        echo "   MISSING  $_hh — nothing installed at $_hf"
+      fi
+      _hbad=$((_hbad + 1)); continue
     fi
     if ! grep -qF "$_hgate" "$_hf"; then
       echo "   INERT    $_hh — installed but never runs $_hgate"; _hbad=$((_hbad + 1)); continue
@@ -517,6 +533,20 @@ Co-authored-by: preflight selftest seat <selftest@invalid>"
       chmod 700 .githooks 2>/dev/null
       chmod +x .githooks/commit-msg 2>/dev/null
       git config --unset core.fileMode 2>/dev/null
+
+      # i: the hooks directory is READABLE but not SEARCHABLE (0600), bits intact. Every stat
+      # inside it fails, so an installed, wired, executable hook reads as absent. Git cannot run
+      # it either, so rc=1 is the right verdict — but "MISSING, nothing installed" is a FALSE
+      # REASON that sends the reader to reinstall a file that is already there.
+      chmod 600 .githooks 2>/dev/null
+      # the rig's OWN second read of the fixture, never the gate's answer: is the directory
+      # actually unsearchable here? On Git for Windows it is not, and the arm says so instead
+      # of claiming a pass it did not earn.
+      if [ -d .githooks/. ]; then echo no > i.blind; else echo yes > i.blind; fi
+      sh scripts/push-preflight.sh --hooks > i.out 2>&1; echo "$?" > i.rc
+      chmod 700 .githooks 2>/dev/null
+      # read AFTER the mode is restored — inside a 0600 directory this test cannot answer.
+      if [ -s .githooks/commit-msg ] && [ -x .githooks/commit-msg ]; then echo yes > i.present; else echo no > i.present; fi
     )
     _R="$H/r"
     _rd() { cat "$_R/$1" 2>/dev/null || echo MISSING; }
@@ -594,6 +624,22 @@ Co-authored-by: preflight selftest seat <selftest@invalid>"
       echo "            directory (root, or a filesystem without POSIX modes), so the blind"
       echo "            case cannot be built. Runs for real on a non-root POSIX seat."
     fi
+    # P14f — a MISSING verdict must be about the FILE. An unsearchable directory made every
+    # stat inside it fail, and the row told the reader to install a hook that was already
+    # there, wired and executable. Fail-closed with a false reason is the worse half.
+    _ibl=$(_rd i.blind); _irc=$(_rd i.rc); _ipr=$(_rd i.present)
+    if [ "$_ibl" != yes ]; then
+      echo "  P14f NOT CONSTRUCTIBLE HERE — paths inside a 0600 directory still resolve on this"
+      echo "            filesystem (Git for Windows fabricates the modes), so an unsearchable"
+      echo "            hooks directory cannot be built. Runs for real on a non-root POSIX seat."
+    elif [ "$_ipr" = yes ] && [ "$_irc" = 1 ] \
+         && grep -q "UNREADABLE commit-msg" "$_R/i.out" 2>/dev/null \
+         && grep -q "UNREADABLE pre-commit" "$_R/i.out" 2>/dev/null \
+         && ! grep -q "MISSING" "$_R/i.out" 2>/dev/null; then
+      echo "  P14f known-BAD  hooks dir UNSEARCHABLE, hooks installed and executable -> refused rc=1 naming UNREADABLE, and NOT claiming nothing is installed (correct)"
+    else
+      echo "  P14f known-BAD  hooks dir UNSEARCHABLE -> rc=$_irc, hooks-present-afterwards=$_ipr. Either the refusal still says MISSING about a hook that is installed, or it does not name the directory as the cause"; st=1
+    fi
     rm -rf "$H"
     if [ -e "$H" ]; then echo "  P12-P14 cleanup -> $H SURVIVED; a rig that leaves state can green the next run"; st=1
     else echo "  P12-P14 cleanup -> throwaway tree removed (correct)"; fi
@@ -627,6 +673,30 @@ Co-authored-by: preflight selftest seat <selftest@invalid>"
     fi
   fi
 
+  # P16 — the ARM-COUNT FLOOR bee-laborer ruled after M5: deleting an arm outright was
+  # invisible to this selftest, and that is the same defect as a glob that matches nothing
+  # (#212) — a counter nobody reads. A FLOOR, never an equality: it refuses a deletion and
+  # permits an addition, which is what a growing selftest needs.
+  #
+  # IT COUNTS DECLARATIONS, NOT ARMS THAT RAN, AND THE DISTINCTION IS THE POINT. The number
+  # PRINTED is platform-dependent — 21 under Git for Windows, 22 on a clean POSIX clone, 14
+  # from a Windows-made worktree read under WSL where git cannot name a toplevel and the
+  # P12-P14 family correctly refuses. A floor on a printed count would go red on a box that
+  # is behaving correctly, and an always-red gate trains dismissal. The DECLARED inventory is
+  # structural: it does not move with the box, and a deletion is exactly what changes it.
+  # So this arm cannot say the arms ran — P14c/P14e and the others say that for themselves.
+  # The off-switch it cannot catch is its own deletion, which is true of every gate; it is
+  # named here rather than left for a reader to discover.
+  # IT COUNTS ARM-OUTCOME LINES, NOT DISTINCT ARM IDS: my first draft counted IDs and a
+  # HALF-deletion — one arm's pass branch removed while its fail branch stayed — left the
+  # count at 24 and passed, with the arm gone from the run. That is M5 exactly.
+  _armfloor=59
+  _armseen=$(grep -cE '"  P[0-9]+[a-z]*' "$SELF" 2>/dev/null | tr -d ' ')
+  if [ "${_armseen:-0}" -ge "$_armfloor" ]; then
+    echo "  P16 arm inventory -> $_armseen arm-outcome lines declared (floor $_armfloor) — neither a whole arm nor one of its branches can be deleted silently (correct)"
+  else
+    echo "  P16 arm inventory -> only $_armseen arm-outcome lines declared, floor is $_armfloor. An arm or one of its branches was removed from this selftest. If the removal is deliberate, lower the floor in the SAME commit and say why; do not let it fall quietly"; st=1
+  fi
   rm -f /tmp/ps1 /tmp/ps2
   [ "$st" -eq 0 ] && echo "selftest ok — refuses what it must, permits what it must."                    || echo "selftest FAIL — see above."
   exit $st
