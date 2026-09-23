@@ -143,8 +143,14 @@
     var QKEY = function (h) { return 'ant-pay.paid.quote.' + String(h).toLowerCase(); };
     function paidFor(quoteHash) {
       var raw = store.get(QKEY(quoteHash)); if (!raw) return null;
-      var ptr = null; try { ptr = JSON.parse(raw); } catch (e) { return null; } /* a corrupt entry is 'unknown', so it is paid again rather than skipped */
-      return (ptr && ptr.upload_id && isH32(ptr.tx_hash)) ? ptr : null;
+      /* an entry that is present and unreadable is REFUSED BY NAME, never guessed. Guessing 'unpaid'
+         spends real ANT a second time — silent and permanent; refusing is visible and recoverable.
+         An instrument that cannot read its own record says so; it does not answer in the expensive
+         direction. Absent is a different answer from unreadable, and only absent means 'not paid'. */
+      var ptr = null; try { ptr = JSON.parse(raw); } catch (e) { ptr = null; }
+      if (!ptr || !ptr.upload_id || !isH32(ptr.tx_hash))
+        throw refusal('unreadable-record', 'this device kept a payment record for one of these quotes and cannot read it back, so it cannot say whether that quote is already paid. nothing was signed. clear this site’s stored data and ask for the price again', { key: QKEY(quoteHash), quote: quoteHash });
+      return ptr;
     }
     function markPaid(uploadId, txHashes) {
       Object.keys(txHashes).forEach(function (h) { store.set(QKEY(h), JSON.stringify({ upload_id: uploadId, tx_hash: txHashes[h] })); });
@@ -274,9 +280,12 @@
             }).then(function (h) {
               if (!isH32(h)) throw refusal('wallet-declined', 'the wallet returned no transaction hash');
               batch.forEach(function (p) { txHashes[p.quote_hash] = h; });
+              /* the tell comes FIRST so the claim on it is true: a denied store must not be able to
+                 swallow the one line that names what left the wallet. It used to sit under both
+                 writes, where a throwing store reached the caller and this never fired. */
+              tell({ phase: 'sent', what: 'payment', tx: h }); /* the surface's own record of what left the wallet, even if its store is denied */
               store.set(KEY(prepare.upload_id), JSON.stringify({ txHashes: txHashes, finalized: false })); /* BEFORE finalize, before the wait */
               markPaid(prepare.upload_id, txHashes); /* the per-quote index, written in the same breath as the upload record */
-              tell({ phase: 'sent', what: 'payment', tx: h }); /* the surface's own record of what left the wallet, even if its store is denied */
               return waitFor(h, 'payment', input.signal);
             });
           }, Promise.resolve());
@@ -307,11 +316,22 @@
           if (byQuote) raw = store.get(KEY(byQuote));
         }
         if (!raw) throw refusal('nothing-to-resume', 'no payment from this device is waiting on this price');
-        kept = JSON.parse(raw); if (kept.finalized) return kept.receipt;
-        var plan = readPlan(prepare, input.authorization), hashes = Object.keys(kept.txHashes).map(function (k) { return kept.txHashes[k]; }).filter(function (h, i, a) { return a.indexOf(h) === i; });
-        /* PRICED, not owed: owed now excludes the quotes the index says are paid, so asking it here
-           would be vacuously empty and this row would assert nothing. */
-        if (plan.priced.some(function (p) { return !kept.txHashes[p.quote_hash]; })) throw refusal('nothing-to-resume', 'the kept payment does not cover this price — it belongs to a different plan');
+        kept = JSON.parse(raw);
+        var plan = readPlan(prepare, input.authorization);
+        /* coverage is judged over the MERGED map — literally the body finalize would send. Asking
+           kept.txHashes alone reads THIS upload's hashes only, so after a partial recovery (a crash
+           between batches, then a re-prepare) it saw 44 of 300 and refused a payment the device was
+           holding the other 256 of, while pay() said already-paid: two refusals pointing at each
+           other with real ANT on chain. PRICED, not owed: owed excludes what the index says is paid,
+           so asking it here would be vacuously empty and this row would assert nothing. */
+        var covered = pairs(plan, kept.txHashes);
+        if (covered.some(function (x) { return !x.tx_hash; })) throw refusal('nothing-to-resume', 'the kept payment does not cover this price — it belongs to a different plan');
+        /* only THIS upload's receipt is handed back. On the by-quote path `kept` can belong to a
+           different upload that shares these quotes, and its receipt names a different address —
+           the person asked about one file and would be told another one is done. When it is not
+           ours, fall through and let the door finalize this upload; nothing is signed either way. */
+        if (kept.finalized && strip(prepare.data_map_address || '') && strip(kept.receipt && kept.receipt.address || '') === strip(prepare.data_map_address || '')) return kept.receipt;
+        var hashes = covered.map(function (x) { return x.tx_hash; }).filter(function (h, i, a) { return a.indexOf(h) === i; });
         return hashes.reduce(function (ch, h) { return ch.then(function () { return waitFor(h, 'payment', input.signal); }); }, Promise.resolve())
           .then(function () { return finalize(prepare, kept.txHashes, plan, null, started); });
       }).catch(function (e) { return refused(e, 'network'); });

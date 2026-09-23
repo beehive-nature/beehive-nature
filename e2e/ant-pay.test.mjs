@@ -30,7 +30,8 @@ function world(o = {}) {
     const json = (status, body) => ({ ok: status < 400, status, json: async () => body, text: async () => (typeof body === 'string' ? body : JSON.stringify(body)) });
     if (url === FINALIZE && init && init.method === 'POST') {
       log.order.push('finalize'); log.finalize.push(JSON.parse(init.body));
-      if (o.finalizeFails) return json(o.finalizeFails, { error: o.finalizeFails >= 500 ? 'gateway' : 'missing_quote_tx' });
+      /* failOnce: the door is down for one call and back for the next — a recovery, not an outage. */
+      if (o.finalizeFails && !(o.failOnce && log.finalize.length > 1)) return json(o.finalizeFails, { error: o.finalizeFails >= 500 ? 'gateway' : 'missing_quote_tx' });
       return json(200, { data_map_address: 'stored' in o ? o.stored : ADDR });
     }
     return json(404, { error: 'no route' });
@@ -38,11 +39,14 @@ function world(o = {}) {
   const rpcCall = async (method, params) => {
     if (method === 'eth_getBalance') return hex(o.eth ?? 10n ** 15n);
     if (method === 'eth_call') { log.urls.push('rpc:' + params[0].to); return params[0].data.startsWith('0x70a08231') ? hex(o.ant ?? 10n ** 24n) : hex(o.allowance ?? 0n); }
-    if (method === 'eth_getTransactionReceipt') return { status: o.revert ? '0x0' : '0x1' };
+    /* revertHashes: the chain refused THAT transaction and confirmed the others — per-hash, because
+       a kept payment and the payment being made now are not the same transaction. */
+    if (method === 'eth_getTransactionReceipt') return { status: (o.revert || (o.revertHashes || []).includes(params[0])) ? '0x0' : '0x1' };
     throw new Error('unexpected rpc ' + method);
   };
-  const signer = 'signer' in o ? o.signer : { name: 'mock wallet', address: async () => PAYER, send: async (tx) => { log.sends.push(tx); log.order.push('send'); if (o.decline) throw new Error('user rejected'); return TX(log.sends.length); } };
-  const store = { get: (k) => mem.get(k) ?? null, set: (k, v) => { mem.set(k, v); log.order.push('persist'); } };
+  const signer = 'signer' in o ? o.signer : { name: 'mock wallet', address: async () => PAYER, send: async (tx) => { log.sends.push(tx); log.order.push('send');
+    if (o.decline || (o.declineAfter != null && log.sends.filter((t) => t.to === VAULT).length > o.declineAfter)) throw new Error('user rejected'); return TX(log.sends.length); } };
+  const store = { get: (k) => mem.get(k) ?? null, set: (k, v) => { if (o.storeThrows) throw new Error('storage denied'); mem.set(k, v); log.order.push('persist'); } };
   const payer = AntPay.create({ door: DOOR, fetch, rpcCall, signer, store, sleep: async () => {}, onState: (s) => log.states.push(s) });
   return { payer, log, mem };
 }
@@ -223,6 +227,141 @@ test('a crash between batches is finished, not re-paid: only the unpaid quotes a
   assert.equal(w2.log.finalize[0].txs.length, 300, 'finalize still carries a tx for every priced quote');
   assert.equal(new Set(w2.log.finalize[0].txs.map((x) => x.tx_hash)).size, 2, 'the kept hash rides along beside the new one');
   assert.deepEqual([r.quotes_paid, r.quotes_already_paid, r.ant_atto, r.ant_paid_now_atto], [300, 256, '300000', '44000']);
+});
+
+/* THE RECOVERY MUST NOT DEAD-END. bee-laborer took the crash-between-batches row above, changed
+   exactly one thing — the door fails ONCE on the recovery run — and both remaining doors shut:
+   resume said the kept payment "belongs to a different plan" and pay said "already paid", with 44
+   quotes of real ANT on chain and the device holding all 300 quote-to-tx mappings. The cause was
+   one expression: coverage was judged over kept.txHashes, which holds THIS upload's hashes only,
+   while pairs() — the body finalize actually sends — reads the merged map. Coverage now reads the
+   same map. The same-upload_id control is kept in the row so the fix cannot pass by loosening the
+   guard, and the never-paid arm is kept so it cannot pass by resuming anything. */
+test('a door that fails once does not strand the payment: resume finalizes the partial recovery and still signs nothing', async () => {
+  const p = prepareOf(300), w = world({ declineAfter: 1 });
+  await refused(w.payer.pay({ prepare: p, authorization: authOf(p), confirmPlan: yes }), 'wallet-declined');
+  assert.equal(Object.keys(JSON.parse(w.mem.get('ant-pay.paid.up-1')).txHashes).length, 256, 'precondition: exactly batch one is kept');
+
+  /* the recovery run: a new upload_id over the same bytes, and the door is down for that one call. */
+  const again = { ...p, upload_id: 'up-2' }, w2 = world({ allowance: 10n ** 20n, finalizeFails: 502, failOnce: true });
+  for (const [k, v] of w.mem) w2.mem.set(k, v);
+  let shown = null;
+  await refused(w2.payer.pay({ prepare: again, authorization: authOf(again), confirmPlan: async (s) => { shown = s; return true; } }), 'paid-not-finalized');
+  assert.deepEqual([shown.quotes, shown.quotes_already_paid], [44, 256], 'precondition: 44 paid now, 256 already');
+  assert.equal(Object.keys(JSON.parse(w2.mem.get('ant-pay.paid.up-2')).txHashes).length, 44, 'precondition: this upload kept 44 of the 300');
+
+  const signedBefore = w2.log.sends.filter((t) => t.to === VAULT).length;
+  const r = await w2.payer.resume({ prepare: again, authorization: authOf(again) });
+  assert.equal(w2.log.sends.filter((t) => t.to === VAULT).length, signedBefore, 'resume signs nothing');
+  assert.equal(r.address, ADDR);
+  const body = w2.log.finalize[w2.log.finalize.length - 1];
+  assert.equal(body.txs.length, 300, 'finalize carries every priced quote, not only this upload’s 44');
+  assert.equal(body.txs.filter((x) => !x.tx_hash).length, 0, 'and no quote rides with a null hash');
+
+  /* CONTROL — the guard it must not have loosened. */
+  await refused(w2.payer.pay({ prepare: again, authorization: authOf(again), confirmPlan: yes }), 'already-paid');
+  /* CONTROL — a price this device never paid is still not resumable. */
+  const never = { ...prepareOf(2), upload_id: 'up-9' };
+  never.quotes = never.quotes.map((x, i) => ({ ...x, quote_hash: q(8000 + i) }));
+  await refused(w2.payer.resume({ prepare: never, authorization: authOf(never) }), 'nothing-to-resume');
+});
+
+/* AND WHAT IS FINALIZED IS WHAT WAS CONFIRMED. Judging coverage over the merged map without also
+   WAITING on it would finalize a body containing a transaction this page never watched: the index
+   is written before the wait (deliberately — a crash must not lose a hash), so a kept quote can
+   carry a tx the chain went on to refuse. The wait list is built from the same merged map. */
+test('resume waits on every hash it is about to finalize, including the ones another upload kept', async () => {
+  const p = prepareOf(300), w = world({ revertHashes: [TX(2)] });
+  await refused(w.payer.pay({ prepare: p, authorization: authOf(p), confirmPlan: yes }), 'tx-reverted');
+  const kept1 = JSON.parse(w.mem.get('ant-pay.paid.up-1'));
+  assert.equal(Object.keys(kept1.txHashes).length, 256, 'precondition: batch one is kept');
+  assert.equal(kept1.txHashes[q(1)], TX(2), 'precondition: and the hash it kept is the one the chain refused');
+
+  const again = { ...p, upload_id: 'up-2' }, w2 = world({ allowance: 10n ** 20n, finalizeFails: 502, failOnce: true, revertHashes: [TX(2)] });
+  for (const [k, v] of w.mem) w2.mem.set(k, v);
+  await refused(w2.payer.pay({ prepare: again, authorization: authOf(again), confirmPlan: yes }), 'paid-not-finalized');
+  assert.equal(Object.keys(JSON.parse(w2.mem.get('ant-pay.paid.up-2')).txHashes).length, 44, 'precondition: up-2 kept only its own 44, all confirmed');
+
+  const finalizedBefore = w2.log.finalize.length;
+  await refused(w2.payer.resume({ prepare: again, authorization: authOf(again) }), 'tx-reverted');
+  assert.equal(w2.log.finalize.length, finalizedBefore, 'it never reached the door with a refused transaction in the body');
+
+  /* CONTROL — the same shape with nothing reverted finalizes, so the refusal above is the chain’s
+     verdict and not a rig that refuses. */
+  const w3 = world({ allowance: 10n ** 20n });
+  for (const [k, v] of w2.mem) w3.mem.set(k, v);
+  const r = await w3.payer.resume({ prepare: again, authorization: authOf(again) });
+  assert.equal(r.address, ADDR); assert.equal(w3.log.finalize[0].txs.length, 300);
+});
+
+/* A KEPT RECEIPT IS HANDED BACK ONLY WHEN IT IS THIS UPLOAD'S. The finalized shortcut used to run
+   BEFORE the coverage check, and the by-quote lookup is the one path on which `kept` can belong to
+   a different upload — so a person who asked about file B was told file A was finished, at file A's
+   address. Both arms are here: coverage failing (file B shares a quote and has an unpaid one) and
+   coverage PASSING (file D is one chunk, byte-identical to A's first chunk, so its only quote is
+   already paid — nothing but the address tells the two apart). */
+test('resume never hands back another upload’s receipt: the kept record must cover this price AND name this address', async () => {
+  const A = prepareOf(2, 1000n, { data_map_address: '0x' + 'aa'.repeat(32) }), w = world({ stored: '0x' + 'aa'.repeat(32) });
+  const rA = await w.payer.pay({ prepare: A, authorization: authOf(A), confirmPlan: yes });
+  assert.equal(JSON.parse(w.mem.get('ant-pay.paid.up-1')).finalized, true, 'precondition: A is finalized and its receipt is kept');
+  const signed = () => w.log.sends.filter((t) => t.to === VAULT).length, signedAfterA = signed();
+
+  /* CONTROL — A's own resume still answers with A's receipt. */
+  assert.equal((await w.payer.resume({ prepare: A, authorization: authOf(A) })).address, rA.address);
+
+  const B = { ...A, upload_id: 'up-B', data_map_address: '0x' + 'bb'.repeat(32),
+    quotes: [A.quotes[0], { quote_hash: q(9), rewards_address: '0x' + (9).toString(16).padStart(40, '0'), amount_atto: '1000' }] };
+  assert.equal(w.mem.get('ant-pay.paid.quote.' + q(9)), undefined, 'precondition: B’s second quote was never paid');
+  await refused(w.payer.resume({ prepare: B, authorization: authOf(B) }), 'nothing-to-resume');
+
+  const D = { ...A, upload_id: 'up-D', data_map_address: '0x' + 'dead'.repeat(16), chunks: { total: 1, already_stored: 0 }, quotes: [A.quotes[0]], total_atto: '1000' };
+  assert.ok(w.mem.get('ant-pay.paid.quote.' + D.quotes[0].quote_hash), 'precondition: D’s only quote IS already paid, so coverage passes');
+  const rD = await w.payer.resume({ prepare: D, authorization: authOf(D) }).then(() => null, (e) => e);
+  assert.ok(rD && rD.refusal, 'D is refused rather than handed A’s receipt');
+  assert.notEqual(rD.address, rA.address);
+  assert.equal(signed(), signedAfterA, 'nothing was signed on either arm');
+});
+
+/* A RECORD THAT IS PRESENT AND UNREADABLE IS NOT 'UNPAID'. It used to read as unknown and be paid
+   again — the silent, permanent direction — while a refusal is visible and recoverable. */
+test('an unreadable payment record is refused by name, never guessed into a second payment', async () => {
+  const p = prepareOf(2), w = world();
+  await w.payer.pay({ prepare: p, authorization: authOf(p), confirmPlan: yes });
+  const p2 = { ...p, upload_id: 'up-2' }, paid = (x) => x.log.sends.filter((t) => t.to === VAULT).length;
+
+  const ctl = world(); for (const [k, v] of w.mem) ctl.mem.set(k, v);
+  await refused(ctl.payer.pay({ prepare: p2, authorization: authOf(p2), confirmPlan: yes }), 'already-paid');
+  assert.equal(paid(ctl), 0, 'CONTROL: an intact index refuses, and refuses for the already-paid reason');
+
+  const probe = world(); for (const [k, v] of w.mem) probe.mem.set(k, v);
+  probe.mem.set('ant-pay.paid.quote.' + q(1), '{"upload_id":"up-1","tx_h');
+  await refused(probe.payer.pay({ prepare: p2, authorization: authOf(p2), confirmPlan: yes }), 'unreadable-record');
+  assert.equal(paid(probe), 0, 'a truncated entry pays nothing');
+
+  /* a record that parses but names no hash is the same answer — the shape is judged, not the JSON. */
+  const probe2 = world(); for (const [k, v] of w.mem) probe2.mem.set(k, v);
+  probe2.mem.set('ant-pay.paid.quote.' + q(1), '{"upload_id":"up-1","tx_hash":"0xnope"}');
+  await refused(probe2.payer.pay({ prepare: p2, authorization: authOf(p2), confirmPlan: yes }), 'unreadable-record');
+  assert.equal(paid(probe2), 0);
+});
+
+/* THE SURFACE'S RECORD OF WHAT LEFT THE WALLET MUST SURVIVE A DENIED STORE. The comment on that
+   line claimed it already did; the tell sat under both writes, where a throwing store reached the
+   caller and it never fired. The resilience bee-laborer measured lives in myspace.js's caller, not
+   here — so the line now earns its own sentence. */
+test('the payment hash is announced before it is written down: a denied store cannot swallow it', async () => {
+  /* the allowance already covers the price, so the payment is the FIRST send and its hash is TX(1). */
+  const p = prepareOf(2), w = world({ storeThrows: true, allowance: 10n ** 20n });
+  const sent = () => w.log.states.filter((s) => s.phase === 'sent').map((s) => s.tx);
+  await assert.rejects(w.payer.settle({ prepare: p, authorization: authOf(p), confirmPlan: yes }));
+  assert.equal(w.log.sends.filter((t) => t.to === VAULT).length, 1, 'precondition: a payment did leave the wallet');
+  assert.equal(w.mem.size, 0, 'precondition: the store kept nothing');
+  assert.deepEqual(sent(), [TX(1)], 'and its hash was still announced');
+
+  const ctl = world({ allowance: 10n ** 20n });
+  await ctl.payer.settle({ prepare: p, authorization: authOf(p), confirmPlan: yes });
+  assert.deepEqual(ctl.log.states.filter((s) => s.phase === 'sent').map((s) => s.tx), [TX(1)], 'CONTROL: the working store announces the same hash');
+  assert.ok(ctl.mem.size > 0, 'CONTROL: and it does write it down');
 });
 
 test('the door must confirm the address it quoted: a different one is refused by name, and the payment ids are kept', async () => {
