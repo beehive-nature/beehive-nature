@@ -37,7 +37,7 @@ sits in. bee-laborer caught it and named the cause as their own acceptance wordi
 **AN ACCEPTANCE CRITERION THAT FORBIDS NAMING THE THING REMOVED IS UNSATISFIABLE BY
 A COMMIT THAT CARRIES ITS OWN RECEIPT — A REMOVAL CRITERION IS SCOPED TO THE
 ARTEFACT, NEVER TO THE TREE.** The repair is k001 on the false half only: the word
-"tree-wide" goes, the number stays, and the tree-wide figure is stated with its reason.
+"tree-wide" goes and the number stays.
 
 ## What the fix is, and what it deliberately is not
 
@@ -85,9 +85,9 @@ TWO INSTRUMENT NOTES, both of which change how this row must be judged:
    name `array key 01`. The per-row harness is what answers the criterion; the
    suite rc is only the coarse witness. A battery over a table needs to evaluate
    rows independently or it silently reports the first one.
-2. **A table row is not a node test.** The genealogy glob reads 16 suites /
+2. **A table row is not a node test.** The genealogy glob reads 16 test FILES and
    273 tests / 273 pass at this tree — the same 273 as the base, because this row
-   lives inside an existing `test()`. The suite count cannot witness this change;
+   lives inside an existing `test()`. The test count cannot witness this change;
    only the mutation battery can.
 
 Fixture precondition asserted before the table ran: the three fixtures produce
@@ -115,9 +115,23 @@ above. My battery answered the criterion I was given; it did not answer whether
 the row is visible to the instrument CI runs. Those are different questions and
 only the second one protects the estate.
 
-## Full run at this tree
+## Full run at this tree — each number attributed to the instrument that prints it
 
-    node --test $(ls tools/genealogy/*.test.mjs)   16 suites  273 tests  273 pass  rc=0
+    ls tools/genealogy/*.test.mjs | wc -l          16           <- FILES
+    tests.yml:120 prints                           genealogy: running 16 suite(s)
+    node --test $(ls tools/genealogy/*.test.mjs)   tests 273 · suites 0 · pass 273 · rc=0
+
+`node --test` reports `suites 0` — its `suites` field counts `describe()` blocks,
+of which this package has none. An earlier draft of this receipt wrote
+"16 suites / 273 tests / 273 pass" under the `node --test` command, which is not
+reproducible from it. **CALLING A TEST FILE A SUITE IS SOUND AS DESCRIPTION AND
+FALSE AS A QUOTATION OF OUTPUT** — bee-laborer's sentence, and theirs to keep.
+
+Where the shorthand comes from, measured rather than guessed: the estate's own
+wiring says it. `tests.yml:111` names the step "every suite in tools/genealogy",
+`:115` takes `n` from `ls | wc -l`, and `:120` prints `running $n suite(s)`. So
+"16 suites" is a true quotation of the WORKFLOW step and a false one of `node`,
+and both of us inherited the word from the file that runs the tests.
 
 ## Roles
 
