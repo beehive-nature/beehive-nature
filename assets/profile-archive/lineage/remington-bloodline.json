@@ -130,19 +130,54 @@
   },
   "p4ceb2ace98": {
    "name": "Don Ray Remington",
-   "lifespan": "1931–Deceased",
+   "lifespan": "1931–2025",
    "gender": "MALE",
    "living": false,
    "source": "familysearch",
    "evidence": {
     "era": "recorded",
-    "support": "unsourced-entry",
-    "basis": "era label from dates; support unsourced until sources are harvested",
+    "support": "sourced",
+    "basis": "obituary harvested 2026-09-22: born 24 June 1931, died 27 May 2025 (age 93)",
     "class": "recorded"
    },
+   "sources": [
+    {
+     "title": "Don Ray Remington obituary",
+     "publisher": "Dignity Memorial · Wasatch Lawn Memorial Park and Mortuary",
+     "url": "https://www.dignitymemorial.com/obituaries/millcreek-ut/don-remington-12396678",
+     "read": "2026-09-22",
+     "deliveredBy": "founder, 2026-09-22",
+     "supports": [
+      "birth 24 June 1931",
+      "death 27 May 2025",
+      "parents Fuller and Edith Remington (matches the walked parents)",
+      "burial: Wasatch Lawn Memorial Park, Millcreek, Utah"
+     ]
+    }
+   ],
+   "cultureClaims": [
+    {
+     "kind": "religion",
+     "value": "Latter-day Saint (LDS)",
+     "source": "Don Ray Remington obituary, Dignity Memorial · Wasatch Lawn Memorial Park and Mortuary, https://www.dignitymemorial.com/obituaries/millcreek-ut/don-remington-12396678 (read 2026-09-22)",
+     "note": "served an LDS mission in New Zealand; the obituary gives no years"
+    },
+    {
+     "kind": "region",
+     "value": "Vernal, Utah",
+     "source": "Don Ray Remington obituary, Dignity Memorial · Wasatch Lawn Memorial Park and Mortuary, https://www.dignitymemorial.com/obituaries/millcreek-ut/don-remington-12396678 (read 2026-09-22)",
+     "note": "childhood, moving between Vernal, a family hay farm and Ogden; no years given"
+    },
+    {
+     "kind": "region",
+     "value": "Salt Lake City, Utah",
+     "source": "Don Ray Remington obituary, Dignity Memorial · Wasatch Lawn Memorial Park and Mortuary, https://www.dignitymemorial.com/obituaries/millcreek-ut/don-remington-12396678 (read 2026-09-22)",
+     "note": "settled with his family during high school; no years given"
+    }
+   ],
    "corrected": {
-    "attested": "founder order 2026-09-16: all four grandparents confirmed deceased",
-    "note": "FamilySearch private-space record flags Don Ray Remington living; the founder attests the family line — famous grandpa is not 'Living'. Death year unknown to the archive; no year invented. Founder-attested: maternal grandfather."
+    "attested": "founder order 2026-09-16: all four grandparents confirmed deceased; obituary delivered by the founder 2026-09-22",
+    "note": "The FamilySearch private-space record flagged Don Ray Remington living (the founder has since corrected it on FamilySearch). Death now SOURCED: his obituary gives 24 June 1931 to 27 May 2025. marriage date CONFLICTS between the two obituaries: 15 August 1955 (his) and 19 August 1955 (hers); recorded, not resolved; no date is published on the couple. Founder-attested: maternal grandfather."
    },
    "refs": [
     {
@@ -153,7 +188,7 @@
    "research": {
     "status": "corrected-attested",
     "basis": "per-person source counts not yet harvested",
-    "note": "FamilySearch private-space record flags Don Ray Remington living; the founder attests the family line — famous grandpa is not 'Living'. Death year unknown to the archive; no year invented. Founder-attested: maternal grandfather."
+    "note": "The FamilySearch private-space record flagged Don Ray Remington living (the founder has since corrected it on FamilySearch). Death now SOURCED: his obituary gives 24 June 1931 to 27 May 2025. marriage date CONFLICTS between the two obituaries: 15 August 1955 (his) and 19 August 1955 (hers); recorded, not resolved; no date is published on the couple. Founder-attested: maternal grandfather."
    },
    "publication": {
     "status": "public"
@@ -161,19 +196,47 @@
   },
   "p455afa9256": {
    "name": "Marilyn Lowry",
-   "lifespan": "1932–Deceased",
+   "lifespan": "1932–2023",
    "gender": "FEMALE",
    "living": false,
    "source": "familysearch",
    "evidence": {
     "era": "recorded",
-    "support": "unsourced-entry",
-    "basis": "era label from dates; support unsourced until sources are harvested",
+    "support": "sourced",
+    "basis": "obituary harvested 2026-09-22: born 16 March 1932, died 9 January 2023",
     "class": "recorded"
    },
+   "sources": [
+    {
+     "title": "Marilyn Lowry Remington obituary",
+     "publisher": "Dignity Memorial · Wasatch Lawn Memorial Park and Mortuary",
+     "url": "https://www.dignitymemorial.com/obituaries/millcreek-ut/marilyn-remington-11096556",
+     "read": "2026-09-22",
+     "deliveredBy": "founder, 2026-09-22",
+     "supports": [
+      "birth 16 March 1932",
+      "death 9 January 2023",
+      "parents Hyrum Deronda and Ardella Lowry (matches the walked parents)"
+     ]
+    }
+   ],
+   "cultureClaims": [
+    {
+     "kind": "religion",
+     "value": "Latter-day Saint (LDS)",
+     "source": "Marilyn Lowry Remington obituary, Dignity Memorial · Wasatch Lawn Memorial Park and Mortuary, https://www.dignitymemorial.com/obituaries/millcreek-ut/marilyn-remington-11096556 (read 2026-09-22)",
+     "note": "an active member who held many callings; the obituary gives no years"
+    },
+    {
+     "kind": "region",
+     "value": "Sugar House, Salt Lake City, Utah",
+     "source": "Marilyn Lowry Remington obituary, Dignity Memorial · Wasatch Lawn Memorial Park and Mortuary, https://www.dignitymemorial.com/obituaries/millcreek-ut/marilyn-remington-11096556 (read 2026-09-22)",
+     "note": "where she grew up; no years given"
+    }
+   ],
    "corrected": {
-    "attested": "founder order 2026-09-16: all four grandparents confirmed deceased",
-    "note": "FamilySearch private-space record flags Marilyn Lowry Remington living; she is the founder's deceased grandmother (the tree's co-builder with him, 12 years ago). Death year unknown to the archive; no year invented. Founder-attested: maternal grandmother."
+    "attested": "founder order 2026-09-16: all four grandparents confirmed deceased; obituary delivered by the founder 2026-09-22",
+    "note": "The FamilySearch private-space record flagged Marilyn Lowry Remington living (the founder has since corrected it on FamilySearch). Death now SOURCED: her obituary gives 16 March 1932 to 9 January 2023. marriage date CONFLICTS between the two obituaries: 15 August 1955 (his) and 19 August 1955 (hers); recorded, not resolved; no date is published on the couple. Founder-attested: maternal grandmother, the tree's co-builder."
    },
    "refs": [
     {
@@ -184,7 +247,7 @@
    "research": {
     "status": "corrected-attested",
     "basis": "per-person source counts not yet harvested",
-    "note": "FamilySearch private-space record flags Marilyn Lowry Remington living; she is the founder's deceased grandmother (the tree's co-builder with him, 12 years ago). Death year unknown to the archive; no year invented. Founder-attested: maternal grandmother."
+    "note": "The FamilySearch private-space record flagged Marilyn Lowry Remington living (the founder has since corrected it on FamilySearch). Death now SOURCED: her obituary gives 16 March 1932 to 9 January 2023. marriage date CONFLICTS between the two obituaries: 15 August 1955 (his) and 19 August 1955 (hers); recorded, not resolved; no date is published on the couple. Founder-attested: maternal grandmother, the tree's co-builder."
    },
    "publication": {
     "status": "public"
