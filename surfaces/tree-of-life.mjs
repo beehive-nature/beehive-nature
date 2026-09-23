@@ -20,7 +20,8 @@
    STATE (all of it, in the hash): #l=<line key>&f=<focus id>&p=<person id>
      l — which family line; f — the person the view climbs from (default: the
      line's own start); p — the person whose card is open. The register is a
-     preference, read from <html data-reg>, and changes reading, never state.
+     preference, read from body[data-reg] (or <html data-reg> on a page
+     without the estate's register.js), and changes reading, never state.
 
    THE THREE READINGS take the SAME view (same people, same links, same
    counts) and differ only in layout and dress:
@@ -34,6 +35,7 @@
 
 export const TOL_VERSION = 'tree-of-life/1';
 export const DEPTH = 4; // generations shown above the focus
+export const ROW_PX = 140; // one generation's band in the row readings
 
 export const WORDS = {
   lines: 'family lines',
@@ -177,12 +179,12 @@ export function layout(view, reg, px = 600) {
       pos[n.id] = { a: -Math.PI / 2 + (n.pos - 0.5) * Math.PI * 1.7,
         r: n.gen === 0 ? 0 : 20 + ((n.gen - 1) / Math.max(1, depth - 1)) * 18, w: n.gen === 0 ? 16 : 22 };
     spaceRings(view.nodes, pos, 22);
-    unclash(view.nodes, pos, (60 / px) * 100);
+    unclash(view.nodes, pos, (56 / px) * 100);
   } else {
     const w = Math.min(reg === 'cypherpunk' ? 24 : 26, 96 / rowMax - 1.5);
     for (const n of view.nodes) {
       const spread = reg === 'cypherpunk' ? 1 : 0.6 + 0.4 * (n.gen / depth); // the fir widens upward
-      pos[n.id] = { x: 50 + (n.pos - 0.5) * 92 * spread, y: 88 - (n.gen / depth) * 72, w };
+      pos[n.id] = { x: 50 + (n.pos - 0.5) * 92 * spread, y: 100 - ((n.gen + 0.5) / (depth + 1)) * 100, w };
     }
     spaceOut(view.nodes, pos, w);
   }
@@ -283,7 +285,12 @@ export function mountTreeOfLife(host, corpus, opts = {}) {
   const words = Object.assign({}, WORDS, opts.words || {});
   const useHistory = opts.history !== false && typeof window !== 'undefined';
   const doc = host.ownerDocument;
-  const reg = () => (doc.documentElement.dataset.reg === 'raver' || doc.documentElement.dataset.reg === 'cypherpunk') ? doc.documentElement.dataset.reg : 'bee';
+  // the estate contract keeps the reading on body[data-reg] (register.js hides
+  // any OTHER element carrying data-reg); a standalone page may use <html>
+  const reg = () => {
+    const r = (doc.body && doc.body.dataset.reg) || doc.documentElement.dataset.reg;
+    return r === 'raver' || r === 'cypherpunk' ? r : 'bee';
+  };
   const lines = corpus.lines || [];
   let st = { l: null, f: null, p: null };
 
@@ -318,6 +325,9 @@ export function mountTreeOfLife(host, corpus, opts = {}) {
     const view = st.l ? lineView(corpus, st.l, st.f, opts.depth || pickDepth(host.clientWidth)) : null;
     if (!view) { host.innerHTML = `<p class="tol-note">${esc(words.noLine)}</p>`; return; }
     const { pos, paths } = layout(view, r, host.clientWidth || 600);
+    const rows = Math.max(...view.nodes.map((n) => n.gen)) + 1;
+    const stageStyle = r === 'raver' ? '' : ` style="height:${Math.max(2, rows) * ROW_PX}px;aspect-ratio:auto"`;
+    const ry = pos[view.focus] ? pos[view.focus].y : 92;
     const P = corpus.persons;
     const entryNames = view.line.entries.map((id) => P[id] && P[id].name).filter(Boolean);
     const focusP = P[view.focus];
@@ -325,7 +335,7 @@ export function mountTreeOfLife(host, corpus, opts = {}) {
     const tabs = lines.map((l) => `<button type="button" class="tol-tab" data-line="${esc(l.key)}" aria-pressed="${l.key === st.l}">${esc(lineName(l.key, words))}</button>`).join('');
 
     const svg = `<svg class="tol-art" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-      ${r === 'bee' ? '<path class="tol-root" d="M50,92 q -6,5 -12,6 M50,92 q 6,5 12,6 M50,92 v7" />' : r === 'raver' ? '<circle class="tol-root" cx="50" cy="50" r="44" />' : ''}
+      ${r === 'bee' ? `<path class="tol-root" d="M50,${ry} q -6,${(100 - ry) * 0.5} -12,${(100 - ry) * 0.6} M50,${ry} q 6,${(100 - ry) * 0.5} 12,${(100 - ry) * 0.6} M50,${ry} V99" />` : r === 'raver' ? '<circle class="tol-root" cx="50" cy="50" r="44" />' : ''}
       ${paths.map((k) => `<path class="tol-branch${P[k.parent] && P[k.parent].living ? ' is-held' : ''}" d="${k.d}" />`).join('')}
     </svg>
     <svg class="tol-hit" viewBox="0 0 100 100" preserveAspectRatio="none">
@@ -344,7 +354,7 @@ export function mountTreeOfLife(host, corpus, opts = {}) {
         ? `<span class="tol-cap tol-mono">${esc(n.id)}</span><span class="tol-cap tol-mono">${esc(n.lifespan || words.datesUnknown)}</span>`
         : `<span class="tol-cap">${esc(n.lifespan || words.datesUnknown)}</span>`;
       const more = n.above ? `<span class="tol-more">${esc(fill(words.more, { n: n.above }))}</span>` : '';
-      return `<button type="button" class="tol-node${n.id === st.p ? ' is-open' : ''}${n.claims ? ' has-claims' : ''}" style="${style}" data-person="${esc(n.id)}" aria-pressed="${n.id === st.p}">
+      return `<button type="button" class="tol-node${n.id === st.p ? ' is-open' : ''}${n.claims ? ' has-claims' : ''}" style="${style}" data-person="${esc(n.id)}" aria-pressed="${n.id === st.p}" title="${esc(n.name)}">
         <span class="tol-name">${esc(n.name)}</span>${meta}${more}</button>`;
     }).join('');
 
@@ -356,7 +366,7 @@ export function mountTreeOfLife(host, corpus, opts = {}) {
     host.innerHTML = `
       <nav class="tol-lines" aria-label="${esc(words.lines)}">${tabs}</nav>
       ${focusLine}
-      <div class="tol-stage" data-reading="${r}">${svg}${nodes}</div>
+      <div class="tol-stage" data-reading="${r}"${stageStyle}>${svg}${nodes}</div>
       <div class="tol-guard" role="note"><span class="tol-lock" aria-hidden="true"></span><span>${esc(heldText(view.line.bridge, words))}</span></div>
       ${entryNames.length ? `<p class="tol-note">${esc(fill(words.emerges, { names: entryNames.join(' · ') }))}</p>` : ''}
       ${card}`;
@@ -401,7 +411,7 @@ export function mountTreeOfLife(host, corpus, opts = {}) {
   host.addEventListener('click', onClick);
   host.addEventListener('keydown', onKey);
   if (useHistory) window.addEventListener('popstate', onPop);
-  if (obs) obs.observe(doc.documentElement, { attributes: true, attributeFilter: ['data-reg'] });
+  if (obs) for (const el of [doc.documentElement, doc.body]) if (el) obs.observe(el, { attributes: true, attributeFilter: ['data-reg'] });
 
   st = normalize(useHistory ? decodeState(location.hash) : {});
   render();

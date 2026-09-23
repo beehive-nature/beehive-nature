@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>austras koks · the tree of life</title>
+<meta name="description" content="austras koks: the family line read as the latvian tree of life. climb it branch by branch; living people stay out.">
+<link rel="stylesheet" href="tree-of-life.css">
+<link rel="stylesheet" href="person-panel.css">
+<style>
+/* the page ground follows the tree's own skaists tokens (tree-of-life.css) */
+*{box-sizing:border-box}
+html{background:#fbf7f0}
+body{margin:0;min-height:100vh;background:var(--tol-bg);color:var(--tol-ink);font:16px/1.45 var(--tol-face)}
+main{max-width:1180px;margin:0 auto;padding:18px 18px 48px}
+h1{font-size:30px;line-height:1.1;margin:6px 0;font-weight:600;color:var(--tol-sov-strong)}
+.lede{color:var(--tol-mut);margin:0 0 18px;max-width:62ch}
+.grid{display:grid;gap:24px}
+@media (min-width:980px){.grid{grid-template-columns:minmax(0,3fr) minmax(0,2fr);align-items:start}}
+.later{color:var(--tol-mut);margin:18px 0 0}
+details.receipt{margin-top:24px;border-top:1px dashed var(--tol-line);padding-top:12px}
+details.receipt summary{min-height:44px;display:flex;align-items:center;cursor:pointer;color:var(--tol-mut)}
+.receipt pre{font:13px/1.5 var(--tol-mono);color:var(--tol-mut);white-space:pre-wrap;margin:6px 0 0}
+/* the person panel's own variables, mapped onto skaists (no gold: honey is b only) */
+#panel{--bg:var(--tol-bg);--panel:var(--tol-card);--well:var(--tol-well);--ink:var(--tol-ink);--dim:var(--tol-mut);
+  --faint:var(--tol-dim);--line:var(--tol-line);--cyan:var(--tol-sov);--gold:var(--tol-sov-strong);--violet:var(--tol-sov);
+  --rose:var(--tol-guard);--info:var(--tol-ai);--verified:var(--tol-life);
+  background:var(--tol-card);border:1px solid var(--tol-line);border-radius:18px;padding:12px;font-size:14px}
+#panel:empty{display:none}
+</style>
+</head>
+<body data-bee-theme="shared">
+<script>
+/* first paint in the reader's own register — register.js re-asserts on mount.
+   the reading lives on body[data-reg] ONLY: register.js hides every other
+   element that carries data-reg, <html> included */
+(function(){var r='bee';try{var v=localStorage.getItem('bregister');if(v==='raver'||v==='cypherpunk')r=v;}catch(e){}
+document.body.setAttribute('data-reg',r);})();
+</script>
+<main class="tol">
+  <h1>austras koks</h1>
+  <p class="lede">the tree of life, holding a family line. touch a branch to climb it, touch a person to read their story. back takes you to exactly where you were.</p>
+  <div class="grid">
+    <div id="tree" aria-busy="true"><p class="tol-note">reading the family archive.</p></div>
+    <div id="panel"></div>
+  </div>
+  <p class="later">more family lines join this tree when their records are kept. each one starts at its first ancestor who has died; living people stay out.</p>
+  <details class="receipt" data-reg-disclose>
+    <summary>how this tree is checked</summary>
+    <pre id="receipt">not measured yet.</pre>
+  </details>
+</main>
+<script type="module">
+/* THE TREE ON THE REAL ARCHIVE. Truth comes from ONE resolver: the person
+   panel's archive (corpus + attested overlay, Rule A) supplies every
+   person's parents; the tree never re-merges the overlay itself. The line's
+   emergence is the model's own emergence(). Until the pipeline publishes
+   `lines` (it will once it privatizes through model.privatize with roots),
+   the founder line is derived here from the published root. Every failure
+   is said in words; nothing throws past this script. */
+import { fetchArchive } from './person-panel-corpus.mjs';
+import { mountPersonPanel } from './person-panel.mjs';
+import { mountTreeOfLife } from './tree-of-life.mjs';
+
+const BASE = '../assets/profile-archive/lineage/';
+const host = document.getElementById('tree');
+const receipt = document.getElementById('receipt');
+const say = (t) => { host.removeAttribute('aria-busy'); host.innerHTML = '<p class="tol-note"></p>'; host.firstChild.textContent = t; };
+const PRIVACY = /living|leak|cultureClaims|unsourced|roots|lines\[/;
+
+(async () => {
+  let got, M;
+  try {
+    got = await fetchArchive(BASE);
+    M = await import('../tools/genealogy/model.mjs');
+  } catch (e) {
+    say('the family archive could not be read just now. nothing is drawn rather than something guessed.');
+    return;
+  }
+  const { corpus, overlay, archive } = got;
+  const persons = Object.assign({}, corpus.persons, (overlay && overlay.persons) || {});
+  const edges = {};
+  for (const id of Object.keys(persons)) {
+    const v = archive.getPerson(id);
+    const ps = v && v.parents ? v.parents.map((p) => p.id).filter((x) => persons[x]) : [];
+    if (ps.length) edges[id] = ps;
+  }
+  const tree = { schema: M.SCHEMA, root: corpus.root, persons, edges, couples: corpus.couples || {},
+    lines: [{ key: 'founder', label: M.lineLabel('founder'), root: corpus.root, ...M.emergence({ persons, edges }, corpus.root) }] };
+
+  const problems = M.validate(tree, { public: true });
+  const privacy = problems.filter((p) => PRIVACY.test(p));
+  const count = (rx) => problems.filter((p) => rx.test(p)).length;
+  receipt.textContent = [
+    `people in the public archive: ${Object.keys(persons).length} · with parents on record: ${Object.keys(edges).length}`,
+    `validate(tree, {public:true}): privacy problems ${privacy.length}`,
+    `  also reported, not privacy: ancestors on record but not fetched yet ${archive.frontierTotal()} (the tree stops where the archive stops) · cycle components ${count(/^cycle-component/)}`,
+    `founder line: root ${tree.lines[0].root} (anonymous) · living generations held ${tree.lines[0].bridge} · comes into the open at ${tree.lines[0].entries.length} people`,
+    `language and culture claims carried: ${Object.values(persons).filter((p) => Array.isArray(p.cultureClaims) && p.cultureClaims.length).length}`,
+    `spouse lines: none published yet, each waits on its private record`,
+  ].join('\n');
+  if (privacy.length) {
+    say('this tree failed its privacy check, so nothing is drawn.');
+    receipt.textContent += '\n' + privacy.join('\n');
+    return;
+  }
+
+  host.removeAttribute('aria-busy');
+  const panelEl = document.getElementById('panel');
+  let panel = null;
+  mountTreeOfLife(host, tree, {
+    openPerson(id) {
+      if (!panel) panel = mountPersonPanel(panelEl, archive, {
+        root: corpus.root,
+        openPersonPage(pid) { location.href = BASE + 'persons/' + encodeURIComponent(pid) + '.html'; },
+      });
+      panelEl.hidden = false;
+      panel.openPerson(id);
+    },
+    closePerson() { panelEl.hidden = true; },
+  });
+})();
+</script>
+<script src="tour.js?v=42"></script>
+</body>
+</html>
