@@ -9,7 +9,7 @@ import { createHash } from "node:crypto";
 import {
   SOURCE_SCHEMA, CLAIM_SCHEMA, BINDING_SCHEMA, STANDINGS, PUBLIC_FIELDS, SOURCE_KEYS, CLAIM_KEYS, BINDING_KEYS, nonDataAt,
   createStore, addSource, addClaim, bind, admit, validateStore,
-  sourceProblems, claimStanding, personSupport, duplicateAssessment, publicView,
+  sourceProblems, claimStanding, personSupport, duplicateAssessment, publicView, bindingProblems,
 } from "./source-contract.mjs";
 
 // a register volume: a collection, so proof from it needs a locator
@@ -677,4 +677,66 @@ test("bind refuses a store-shape problem that its binding filter would drop", ()
   assert.equal(withJunk.bindings.length, 1, "an unrelated invalid source does not refuse an honest binding");
   // CONTROL (c): a binding's OWN reason still reaches the caller
   refuses(() => bind(ok, mention("s-ghost", "c-real")), /source s-ghost is not held/);
+});
+
+/* bindingProblems is the one EXPORTED door that never asked for an own key.
+ * The four entries above cover every INTERNAL path to it; a direct call is not
+ * one of them, and on a hand-built or JSON-revived store the bare lookups
+ * answered from the prototype. Pre-existing in both directions at a05f246d --
+ * that commit neither introduced it nor closed it. Found by bee-laborer
+ * re-reading a05f246d; the phantom-field half below is mine.
+ * The repair is hasOwnProperty.call and NOT Object.create(null), for the reason
+ * that is reversed in the adders: this path only READS, so it cannot report a
+ * success and store nothing. Complementary to storeProblems -- strip either and
+ * the other still answers. */
+test("bindingProblems asks for an OWN key, on a store it did not build", () => {
+  for (const [label, rebuild] of REBUILT) {
+    const s = rebuild(seededStore());
+    assert.notEqual(Object.getPrototypeOf(s.sources), null, `${label}: the fixture asserts its precondition`);
+    const out = bindingProblems(mention("toString", "constructor"), s);
+    assert.ok(out.some((p) => p.includes("source toString is not held")), `${label}: the source must be named`);
+    assert.ok(out.some((p) => p.includes("claim constructor does not exist")), `${label}: the claim must be named`);
+    // CONTROL: the row is not satisfied by a door that refuses everything
+    assert.deepEqual(bindingProblems(mention("s-real", "c-real"), s), [], `${label}: an honest binding stays clean`);
+  }
+  // CONTROL: the same two calls on the store createStore() builds
+  const ok = seededStore();
+  assert.deepEqual(bindingProblems(mention("s-real", "c-real"), ok), []);
+  assert.equal(bindingProblems(mention("s-ghost", "c-ghost"), ok).length, 2);
+});
+
+test("a caller-supplied prototype supplies ARBITRARY ids, and its records were deciding the verdict", () => {
+  const base = seededStore();
+  const proto = { "ghost-src": src("ghost-src"), "ghost-claim": claim("ghost-claim", "P9", "death", { date: "1900-01-01" }) };
+  const sources = Object.assign(Object.create(proto), base.sources);
+  const claims = Object.assign(Object.create(proto), base.claims);
+  const s = { ...base, sources, claims };
+  // the fixture asserts its precondition: inherited, not own, and reachable by a bare lookup
+  assert.deepEqual(Object.keys(s.sources), ["s-real"], "the ghost is INHERITED, never an own key");
+  assert.equal(s.sources["ghost-src"], proto["ghost-src"], "a bare lookup still reaches it — that is the defect's mechanism");
+
+  // the class is not the JavaScript names, so a blocklist of them never closes it
+  const out = bindingProblems(mention("ghost-src", "ghost-claim"), s);
+  assert.ok(out.some((p) => p.includes("source ghost-src is not held")), "an attacker-chosen id must be named");
+  assert.ok(out.some((p) => p.includes("claim ghost-claim does not exist")), "an attacker-chosen id must be named");
+
+  // and it was never only a missing refusal: the phantom record's OWN FIELDS
+  // reached the verdict text. Neither sentence may be computed off a record
+  // nobody holds.
+  const convert = bindingProblems(link("ghost-src", "ghost-claim", "supports", "birth"), s);
+  assert.doesNotMatch(convert.join(" | "), /assertions never convert/,
+    "a predicate read off a claim nobody holds must not decide an assertion match");
+  const noLocator = bindingProblems(link("ghost-src", "ghost-claim", "supports", "death", { locator: null }), s);
+  assert.doesNotMatch(noLocator.join(" | "), /needs a locator/,
+    "a type and scope read off a source nobody holds must not decide a locator demand");
+
+  // NON-VACUITY, from the live population in both directions: both sentences are
+  // reachable, so doesNotMatch above is a verdict and not an absent instrument.
+  const ok = seededStore();
+  addSource(ok, src("s-coll"));
+  addClaim(ok, claim("c-death", "P9", "death", { date: "1900-01-01" }));
+  assert.match(bindingProblems(link("s-coll", "c-death", "supports", "birth"), ok).join(" | "), /assertions never convert/);
+  assert.match(bindingProblems(link("s-coll", "c-death", "supports", "death", { locator: null }), ok).join(" | "), /needs a locator/);
+  // CONTROL: an honest binding on the SAME poisoned store is still clean
+  assert.deepEqual(bindingProblems(mention("s-real", "c-real"), s), []);
 });

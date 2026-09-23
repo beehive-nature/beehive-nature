@@ -129,13 +129,34 @@ export function claimProblems(c) {
   return out;
 }
 
+// The two lookups below are the only place in this module where a
+// caller-chosen id indexes a map this module did not build. bindingProblems is
+// exported, so a caller reaches it without passing through validateStore, bind
+// or publicView, and on a hand-built or JSON-revived store a bare lookup
+// answers from the prototype. Measured, that is not only a missing refusal:
+// the inherited record's own fields reach the VERDICT -- "extracts birth; claim
+// is death" computed off a claim nobody holds, and "parish-register collection
+// proof needs a locator" off a source nobody holds. A caller-supplied
+// prototype supplies ARBITRARY ids, so a blocklist of the JavaScript names
+// never closes it.
+// hasOwnProperty.call here and Object.create(null) in createStore, and the
+// reason is reversed rather than inconsistent: this path only READS. The call
+// form's defect is that o["__proto__"] = s runs the setter and stores nothing,
+// which a function that stores nothing cannot hit.
+// Complementary to storeProblems, never a replacement -- strip either and the
+// other still answers. Found by bee-laborer re-reading a05f246d.
+// Scope, measured and unchanged: a sources/claims that is missing or null still
+// throws here (a different TypeError message, the same refusal), and one that
+// is a FUNCTION now reports its Function.prototype members as not held.
+const heldUnder = (map, id) => (Object.prototype.hasOwnProperty.call(map, id) ? map[id] : undefined);
+
 export function bindingProblems(b, store) {
   const at = `binding ${b?.sourceId ?? "?"}→${b?.claimId ?? "?"}`;
   if (!b || typeof b !== "object") return [`${at}: not an object`];
   const out = unknownKeys(b, BINDING_KEYS, at);
   if (b.schema !== BINDING_SCHEMA) out.push(`${at}: schema must be ${BINDING_SCHEMA}`);
   if (!RELATIONS.includes(b.relation)) out.push(`${at}: unknown relation ${b.relation}`);
-  const s = store.sources[b.sourceId], c = store.claims[b.claimId];
+  const s = heldUnder(store.sources, b.sourceId), c = heldUnder(store.claims, b.claimId);
   if (!s) out.push(`${at}: source ${b.sourceId} is not held`);
   if (!c) out.push(`${at}: claim ${b.claimId} does not exist`);
   if (b.relation === "mentions") return out;

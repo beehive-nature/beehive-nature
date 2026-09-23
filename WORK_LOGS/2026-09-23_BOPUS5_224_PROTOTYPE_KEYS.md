@@ -315,8 +315,11 @@ and M4/M5/M6 each pin the prototype of the map they mutate by falling alone.
 ```
 node --test tools/genealogy/source-contract.test.mjs   36 pass 0 fail rc=0   (33 before)
 genealogy glob, exactly tests.yml:114-121              16 suites · 279 pass 0 fail rc=0
-  (276 before; 279 and not 294 because this branch is based on 619e809c,
-   which does not carry #225's audit reader. A tally belongs to the tree it ran on.)
+  (276 before. It is 279 and not #225's figure because this branch is based on
+   619e809c, which does not carry #225's audit reader. A tally belongs to the
+   tree it ran on -- and for that reason no joint total is projected here; see
+   addendum 2, where the measured one is 327 and the number this line used to
+   name was wrong.)
 importers, scoped to tools/ surfaces/ scripts/ e2e/ minus its own two files:  NONE
 storeProblems in tools/:  5 — one definition and four call sites, no more
 ```
@@ -324,5 +327,175 @@ storeProblems in tools/:  5 — one definition and four call sites, no more
 **F3, the quadratic `personSupport`, is still NOT here.** The finder scoped it
 as a wiring-step row and widening a taken row is how a bounded repair becomes
 an architecture.
+
+**MAINNET SPEND: 0.**
+
+
+---
+
+# ADDENDUM 2 — `bindingProblems` is an exported door that never asked
+
+Appended, not retyped. Every command block above ran at `a05f246d` and before;
+this addendum is the next commit's and says so.
+
+**THE ROW, as handed over.** bee-laborer, re-reading `a05f246d`:
+`source-contract.mjs:138` does two bare lookups —
+`const s = store.sources[b.sourceId], c = store.claims[b.claimId];` — and
+`bindingProblems` is `export`ed. The four entries `a05f246d` guarded cover
+every INTERNAL path to it. A direct call is not one of them. Pre-existing in
+both directions at that commit: it neither introduced the defect nor closed it.
+
+## RED — reproduced before a line was written
+
+A fix taken on a diagnosis I did not reproduce is a fix I cannot defend.
+
+```
+store shape        proto      bindingProblems(mention("toString","constructor"))
+ctor  createStore  null       2 problems, both named        <- CONTROL
+hand-built         NON-NULL   []   <-- CLEAN VERDICT
+json round-trip    NON-NULL   []   <-- CLEAN VERDICT
+poisoned-proto     NON-NULL   []   <-- CLEAN VERDICT
+CONTROL  S-ghost -> C-ghost, every shape          2 problems
+CONTROL  S1 -> C1 honest mention, every shape     []
+```
+
+**And a second symptom the row did not name, which is mine.** It was never only
+a missing refusal. With `Object.create({ "ghost-src": <a real source>,
+"ghost-claim": <a real claim> })` as the map prototype and the honest own keys
+preserved:
+
+```
+own sources keys ["S1"]   own claims keys ["C1"]      <- the ghosts are INHERITED
+proof ghost-src -> ghost-claim  asserts=birth
+  ["binding ghost-src→ghost-claim: extracts birth; claim is death — assertions never convert"]
+proof ghost-src -> ghost-claim  asserts=death, no locator
+  ["binding ghost-src→ghost-claim: parish-register collection proof needs a locator (page, entry, folio, image)"]
+```
+
+`death` is the phantom claim's `predicate`. `parish-register` is the phantom
+source's `type`. **The inherited record's own field values reached the verdict
+TEXT** — the module computed and published substantive answers *about* a record
+nobody holds. And because a caller-supplied prototype carries ARBITRARY ids, a
+blocklist of the JavaScript names never closes this.
+
+## THE REACH OF THE REMEDY, measured before building it
+
+Instrument named: `grep -o` over the reader, OCCURRENCES not lines, with a gap
+probe. 12 occurrences of `sources[` / `claims[`:
+
+```
+ 1  line 82      PROSE (a comment) — the control that the pattern can hit prose
+ 2  line 138     bindingProblems           UNGUARDED, exported, the row
+ 4  lines 202-208  addSource / addClaim    guarded by storeProblems at the top of each
+ 1  line 239     claimStanding             guarded by refuse(validateStore(store))
+ 4  lines 406-414  publicView              3 are its own null-prototype locals;
+                                           414's store.sources[...] is reachable only
+                                           for an id the 411 filter established as an
+                                           OWN key of store.sources
+ 1 + 2 + 4 + 1 + 4 = 12 — the partition CLOSES
+gap probe, every other bracket index in the file: the only other caller-keyed map is
+  publicSource[ (null-prototype local). topology[k] is indexed by a FIXED literal list
+  the module owns, and PUBLIC_FIELDS[object] by a literal at each call site. NOTHING else.
+```
+
+So the repair is one site, and line 414 is safe **by the filter above it and not
+by its own form** — stated here rather than left for a later editor to
+rediscover.
+
+## GREEN — the repair
+
+`heldUnder(map, id)`, an own-key read, at both lookups.
+**`hasOwnProperty.call` here and `Object.create(null)` in `createStore`, and the
+reason is reversed rather than inconsistent: this path only READS.** The call
+form's defect — measured last round as M7 — is that `o["__proto__"] = s` runs
+the setter and stores nothing. A function that stores nothing cannot hit it.
+Complementary to `storeProblems`, never a replacement: strip either and the
+other still answers.
+
+```
+node --test tools/genealogy/source-contract.test.mjs   38 pass 0 fail rc=0   (36 before)
+genealogy glob, exactly tests.yml:114-121              16 suites · 281 tests · 281 pass · 0 fail
+  rc=0 captured BEFORE any pipe. 279 before. No joint total is projected.
+```
+
+## MUTATIONS — 6 arms, byte-copy restore, verdicts DIFFED against a pristine TAP run
+
+```
+PRISTINE                                          38/38  fails []
+G1 OFF-SWITCH  the bare lookups, exactly as found  36/38  BOTH new rows
+G2 WRONG OPERATOR  `id in map` (prototype-inclusive too)  36/38  BOTH new rows
+G3 WRONG ANSWER  a blocklist of the JavaScript names      36/38
+     the ARBITRARY-ids row falls where the OWN-key row does NOT — the discrimination
+     AND it reds a PRE-EXISTING row: publicView … prototype ids included
+G4 WRONG ANSWER  the door refuses everything       16/38  22 rows. Blunt; it shows
+     only that the guard can say YES.
+G5 HALF  the SOURCES lookup goes back to bare      36/38  both rows
+G6 HALF  the CLAIMS  lookup goes back to bare      36/38  both rows
+PRISTINE AGAIN 38/38 · reader byte-equal to the pre-battery copy
+```
+
+**Reported as they came, not as I wanted them.**
+
+- **G3 is the arm that earns the second row**, and it did more than predicted:
+  a name blocklist not only misses an attacker-chosen id, it **re-creates F2's
+  false refusal on the very id F2 was about** — a legitimately-held own key
+  `__proto__` reads as not held, `validateStore` turns non-empty, and
+  `publicView` throws. The remedy that looks adjacent is a regression.
+- **G5/G6 fall on the same two row NAMES, and the OWN-key row says which half
+  it caught** — `hand-built: the source must be named` vs
+  `hand-built: the claim must be named`. The ARBITRARY-ids row does not
+  discriminate: its `.some()` on the ghost source fires first in both. That is
+  the same trade bee-laborer reported for E4/E5 and I am reporting it the same
+  way rather than claiming a discrimination the second row does not have.
+- **G4 is not evidence for anything fine.** 22 rows fall because an honest
+  binding stops validating anywhere.
+
+## WHAT THIS DOES NOT CLOSE, written where the next editor reads it
+
+- `storeProblems`'s own scope is unchanged: a `sources`/`claims` that is
+  **missing or not an object** behaves as it did. Two measured consequences of
+  the new form, disclosed rather than discovered later: a `null`/`undefined`
+  map still throws (a different `TypeError` message, the same refusal), and a
+  map that is a **FUNCTION** now reports its `Function.prototype` members as not
+  held — which is a change, in the right direction, on the boundary
+  bee-laborer disclosed in their §4.
+- F3, the quadratic `personSupport`, is still NOT here. The finder scoped it as
+  a wiring-step row and widening a taken row is how a bounded repair becomes an
+  architecture.
+
+## A FIGURE OF MINE, CORRECTED ABOVE
+
+The shipping block used to project a joint total of `294` — `291` measured at
+**#225's** tree plus `3`, this branch's row delta, measured at **#226's**. A
+delta from one tree added to a total from another is not arithmetic.
+bee-laborer measured the real joint tree (`merge-tree a05f246d b21f3367`,
+materialised, glob run): **17 suites, 327 tests, 327 pass, rc=0.** The false
+counterfactual is deleted from that line rather than patched, and this is its
+record. **No joint total is projected from this commit either** — the joint
+figure belongs to whoever runs the joint tree.
+
+## MY OWN INSTRUMENTS, THIS PASS
+
+- `grep -E "^. (tests|pass|fail) "` over the glob output returned **nothing**,
+  and `rc=0` alone would have read as a clean run. node's summary mark `ℹ` is
+  three bytes and `^.` matches one. **This is the same defect that bit
+  bee-laborer twice in this session, arriving in my hand the turn after they
+  banked it** — a law read is not a law installed. Re-cut as `^.{0,3}` plus the
+  remedy that actually generalises: the matcher **refuses when it matches zero
+  lines of a non-empty file**, so a silent miss can never read as a verdict.
+- The battery reads verdicts from the **TAP** reporter (`not ok N - name`),
+  which does not print a failure twice. Last round I had to dedupe the spec
+  reporter's inline-plus-recap double count by hand; choosing the instrument
+  removes the class instead of correcting for it.
+- Its non-vacuity is its own: it refuses if the TAP summary is missing, if zero
+  tests ran, and if the pristine run is not green — before any arm is judged.
+- My first poisoned-proto fixture replaced the maps wholesale, so the honest
+  `S1 -> C1` control came back with problems. **A fixture asserts its
+  precondition**: re-cut to preserve the own keys, and the row now asserts
+  `Object.keys(s.sources)` is `["s-real"]` so the ghost is provably INHERITED.
+- The `doesNotMatch` assertions on the phantom-field half take their
+  non-vacuity **from the live population in both directions**: the same two
+  sentences are asserted REACHABLE on a `createStore` store in the same row, so
+  an absent instrument cannot read as a verdict.
 
 **MAINNET SPEND: 0.**
