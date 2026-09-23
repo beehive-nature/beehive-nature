@@ -7,7 +7,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import {
-  SOURCE_SCHEMA, CLAIM_SCHEMA, BINDING_SCHEMA, STANDINGS,
+  SOURCE_SCHEMA, CLAIM_SCHEMA, BINDING_SCHEMA, STANDINGS, PUBLIC_FIELDS, SOURCE_KEYS, CLAIM_KEYS, BINDING_KEYS,
   createStore, addSource, addClaim, bind, admit, validateStore,
   sourceProblems, claimStanding, personSupport, duplicateAssessment, publicView,
 } from "./source-contract.mjs";
@@ -35,7 +35,6 @@ function baptismStore() {
   return s;
 }
 const refuses = (fn, re) => assert.throws(fn, re);
-const everyone = { isPublicSubject: () => true };
 
 // ── negative controls ────────────────────────────────────────────────────────
 
@@ -217,95 +216,135 @@ test("one entry bound twice is not two sources", () => {
   refuses(() => bind(s, link("S1", "C-bap", "supports", "baptism")), /duplicate/);
 });
 
-// ── public projection: eligibility is the caller's ───────────────────────────
+// ── public projection: four caller decisions, an allowlist, nothing raw ─────
 
-function privacyStore() {
+// every free-text and value field carries a living third party's name
+const LIVING = /Living-|Elm St/;
+function payloadStore() {
   const s = createStore();
-  addSource(s, src("S1", { artifactRef: "private:scans/s1.png" }));
-  addSource(s, src("S2"));
-  addClaim(s, claim("C-a", "A", "baptism", { date: "1861" }));
-  addClaim(s, claim("C-b", "B", "birth", { date: "1990" }));
-  addClaim(s, claim("C-ab", "A|B", "parent-child", true));
-  bind(s, link("S1", "C-a", "supports", "baptism"));
-  bind(s, link("S2", "C-b", "supports", "birth"));
-  bind(s, link("S2", "C-ab", "supports", "parent-child"));
-  admit(s, { kind: "hint", subjects: ["A"] });
+  addSource(s, src("OB", { type: "obituary", scope: "item", title: "Obituary; survived by Living-Son-Q", recordId: "NEWS-1922-0104", note: "clipping kept by Living-Grandchild-Q", artifactRef: "private:clips/ob.png" }));
+  addSource(s, src("REG", { title: "Burial register vol. 2 (copy held by Living-Keeper-Q)", note: "photographed at the house of Living-Keeper-Q" }));
+  addSource(s, src("LTR", { type: "testimony", scope: "item", title: "Letter to Living-Son-Q", recordId: undefined, artifactRef: "private:letters/1.pdf" }));
+  addClaim(s, { ...claim("C-death", "D", "death", { date: "1922-01-03", informant: "Living-Son-Q, 41 Elm St" }), note: "informant Living-Son-Q" });
+  addClaim(s, claim("C-bur", "D", "burial", { date: "1922-01-06" }));
+  addClaim(s, claim("C-live", "L", "birth", { date: "1990" }));
+  addClaim(s, claim("C-rel", "D|L", "parent-child", true));
+  bind(s, { ...link("OB", "C-death", "supports", "death", { locator: null }), quote: "died Jan. 3; survived by her son Living-Son-Q of 41 Elm St", note: "from the copy of Living-Grandchild-Q" });
+  bind(s, link("REG", "C-bur", "supports", "burial", { locator: "p. 7, next to the family plot of Living-Keeper-Q" }));
+  bind(s, link("LTR", "C-death", "supports", "death", { locator: null }));
+  bind(s, link("OB", "C-live", "supports", "birth", { context: "death", quote: "son born 1990", locator: null }));
+  bind(s, link("OB", "C-rel", "supports", "parent-child", { context: "death", quote: "her son", locator: null }));
+  admit(s, { kind: "hint", subjects: ["D"] });
   return s;
 }
+const D_ONLY = (id) => id === "D";
+const PUBLIC_SRC = (id) => id === "OB" || id === "REG";
+const base = { isPublicSubject: D_ONLY, isPublicSource: PUBLIC_SRC };
 
-test("publicView projects only what the caller's privacy layer admits", () => {
-  const s = privacyStore();
-  const pub = publicView(s, { isPublicSubject: (id) => id === "A" });
-  assert.deepEqual(Object.keys(pub.claims), ["C-a"], "B and the A|B relationship stay private");
-  assert.deepEqual(Object.keys(pub.sources), ["S1"], "a source reaches public only through a kept binding");
-  assert.equal(pub.sources.S1.artifactRef, undefined, "the private pointer never leaves");
-  assert.deepEqual(pub.leads, []);
-  assert.ok(!JSON.stringify(pub).includes('"B"') && !JSON.stringify(pub).includes("A|B"));
+test("every schema key has exactly one public disposition (the class is closed, not chased)", () => {
+  for (const [object, keys] of [["source", SOURCE_KEYS], ["claim", CLAIM_KEYS], ["binding", BINDING_KEYS]]) {
+    const disposed = Object.values(PUBLIC_FIELDS[object]).flat();
+    assert.deepEqual([...disposed].sort(), [...keys].sort(), `${object}: every key disposed, none invented`);
+    assert.equal(new Set(disposed).size, disposed.length, `${object}: no key has two dispositions`);
+  }
+  assert.deepEqual(PUBLIC_FIELDS.source.never, ["artifactRef"]);
+  for (const k of ["title", "note"]) assert.ok(PUBLIC_FIELDS.source.text.includes(k));
+  for (const k of ["locator", "quote", "note"]) assert.ok(PUBLIC_FIELDS.binding.text.includes(k));
+  assert.deepEqual(PUBLIC_FIELDS.claim.value, ["value"]);
 });
 
-test("publicView has no privacy policy of its own: no predicate, no projection", () => {
-  const s = privacyStore();
+test("four decisions are required and separate: no subject or source predicate, no projection", () => {
+  const s = payloadStore();
   refuses(() => publicView(s), /must supply isPublicSubject/);
-  refuses(() => publicView(s, { isPublicSubject: new Set(["A"]) }), /must supply isPublicSubject/);
-  // only an explicit true admits: a truthy stand-in is not a decision
-  assert.deepEqual(Object.keys(publicView(s, { isPublicSubject: () => "yes" }).claims), []);
-  // it decides nothing from life status, in either direction: the caller's answer is final
-  s.claims["C-b"].value = { date: "1990", living: true };
-  assert.deepEqual(Object.keys(publicView(s, everyone).claims), ["C-a", "C-b", "C-ab"]);
-  assert.deepEqual(Object.keys(publicView(s, { isPublicSubject: () => false }).claims), []);
-  // artifact pointers and leads stay private even when everything is admitted
-  const all = publicView(s, everyone);
-  assert.ok(Object.values(all.sources).every((x) => x.artifactRef === undefined));
-  assert.deepEqual(all.leads, []);
+  refuses(() => publicView(s, { isPublicSubject: D_ONLY }), /must supply isPublicSource/);
+  refuses(() => publicView(s, { isPublicSubject: new Set(["D"]), isPublicSource: PUBLIC_SRC }), /must supply isPublicSubject/);
+  refuses(() => publicView(s, { ...base, projectText: "keep" }), /projectText must be a function/);
+  refuses(() => publicView(s, { ...base, projectValue: {} }), /projectValue must be a function/);
+  // only an explicit true admits a subject; a truthy stand-in is not a decision
+  assert.deepEqual(publicView(s, { isPublicSubject: () => "yes", isPublicSource: PUBLIC_SRC }).claims, {});
+  // and a relationship needs every party: D alone does not carry D|L out
+  assert.equal(publicView(s, base).claims["C-rel"], undefined);
 });
 
-// a deceased subject's obituary whose words name a living third party
-function obituaryStore() {
-  const s = createStore();
-  addSource(s, src("OB", { type: "obituary", scope: "item", title: "Obituary", recordId: "NEWS-1922-0104", note: "clipping kept by Living-Grandchild-Q" }));
-  addClaim(s, { ...claim("C-death", "D", "death", { date: "1922-01-03" }), note: "informant Living-Son-Q, 41 Elm St" });
-  bind(s, {
-    ...link("OB", "C-death", "supports", "death", { locator: null }),
-    quote: "died Jan. 3, 1922; survived by her son Living-Son-Q of 41 Elm St",
-    note: "transcribed from Living-Grandchild-Q's copy",
-  });
-  return s;
-}
-const LIVING_TEXT = /Living-|Elm St/;
-
-test("a deceased subject's quote naming a living third party does not leak (fail-closed free text)", () => {
-  const s = obituaryStore();
-  const pub = publicView(s, { isPublicSubject: (id) => id === "D" });
-  assert.deepEqual(Object.keys(pub.claims), ["C-death"], "the deceased subject IS public (non-vacuity)");
-  assert.equal(pub.bindings.length, 1);
-  assert.equal(pub.claims["C-death"].value.date, "1922-01-03", "the claim itself is projected");
-  assert.doesNotMatch(JSON.stringify(pub), LIVING_TEXT);
-  for (const [obj, field] of [[pub.bindings[0], "quote"], [pub.bindings[0], "note"], [pub.claims["C-death"], "note"], [pub.sources.OB, "note"]])
-    assert.equal(field in obj, false, `${field} was exported raw`);
-  // the private store keeps every word: omission is a projection, not a deletion
+test("by default a public subject publishes structure only: no raw text, no value, no living name anywhere", () => {
+  const s = payloadStore();
+  const pub = publicView(s, base);
+  assert.deepEqual(Object.keys(pub.claims).sort(), ["C-bur", "C-death"], "D's claims publish; L and D|L do not (non-vacuity)");
+  assert.doesNotMatch(JSON.stringify(pub), LIVING);
+  for (const b of pub.bindings) for (const k of ["quote", "note", "locator"]) assert.equal(k in b, false, `binding.${k} left raw`);
+  for (const c of Object.values(pub.claims)) for (const k of ["value", "note"]) assert.equal(k in c, false, `claim.${k} left raw`);
+  for (const x of Object.values(pub.sources)) for (const k of ["title", "note", "artifactRef"]) assert.equal(k in x, false, `source.${k} left raw`);
+  // structure survives: that is what keeps the claim checkable
+  assert.deepEqual(pub.claims["C-death"], { schema: CLAIM_SCHEMA, id: "C-death", subject: "D", predicate: "death" });
+  assert.deepEqual(pub.sources.OB, { schema: SOURCE_SCHEMA, id: "OB", type: "obituary", scope: "item", provider: "Synthetic Parish Archive", accessedAt: "2026-09-23", recordId: "NEWS-1922-0104" });
+  assert.deepEqual(pub.leads, []);
+  // omission is a projection, not a deletion
   assert.match(s.bindings[0].quote, /Living-Son-Q/);
 });
 
-test("free text reaches public only as a string the caller's projectText returns", () => {
-  const s = obituaryStore();
+test("a public subject does not make a private source public", () => {
+  const s = payloadStore();
+  const pub = publicView(s, base);
+  assert.equal(pub.sources.LTR, undefined, "the family letter stays private");
+  assert.equal(pub.bindings.some((b) => b.sourceId === "LTR"), false, "and so does its binding");
+  assert.deepEqual(pub.bindings.map((b) => b.sourceId).sort(), ["OB", "REG"]);
+  // only an explicit true admits a source
+  const none = publicView(s, { isPublicSubject: D_ONLY, isPublicSource: () => "yes" });
+  assert.deepEqual(none.bindings, []);
+  assert.deepEqual(none.sources, {});
+  assert.deepEqual(Object.keys(none.claims).sort(), ["C-bur", "C-death"], "the claim may still publish without its source");
+  // the caller decides from the source record itself
   const seen = [];
+  publicView(s, { isPublicSubject: D_ONLY, isPublicSource: (id, rec) => { seen.push(`${id}:${rec.type}`); return false; } });
+  assert.deepEqual(seen.sort(), ["LTR:testimony", "OB:obituary", "REG:parish-register"]);
+});
+
+test("opaque text leaves only as a string projectText returns: title, note, locator, quote", () => {
+  const s = payloadStore();
+  const asked = new Set();
   const pub = publicView(s, {
-    isPublicSubject: (id) => id === "D",
+    ...base,
     projectText: (text, at) => {
-      seen.push(`${at.object}.${at.field}`);
-      if (at.field === "quote") return text.replace(/;.*$/, "; [survivors withheld]");
-      if (at.object === "claim") return null;       // refused
-      if (at.object === "source") return 42;        // not a string: refused
-      return undefined;                             // refused
+      asked.add(`${at.object}.${at.field}`);
+      if (at.object === "source" && at.field === "title") return text.replace(/[;(].*$/, "").trim();
+      if (at.field === "locator") return text.replace(/,.*$/, "");
+      if (at.field === "quote") return 7;                 // not a string: omitted
+      if (at.object === "claim") return { text };        // not a string: omitted
+      return null;                                         // omitted
     },
   });
-  assert.deepEqual(seen.sort(), ["binding.note", "binding.quote", "claim.note", "source.note"], "every free-text field goes through the caller");
-  assert.equal(pub.bindings[0].quote, "died Jan. 3, 1922; [survivors withheld]");
-  assert.equal("note" in pub.bindings[0], false);
+  assert.deepEqual([...asked].sort(), ["binding.locator", "binding.note", "binding.quote", "claim.note", "source.note", "source.title"]);
+  assert.equal(pub.sources.OB.title, "Obituary");
+  assert.equal(pub.sources.REG.title, "Burial register vol. 2");
+  assert.equal(pub.bindings.find((b) => b.sourceId === "REG").locator, "p. 7");
+  for (const b of pub.bindings) assert.equal("quote" in b, false);
   assert.equal("note" in pub.claims["C-death"], false);
-  assert.equal("note" in pub.sources.OB, false);
-  assert.doesNotMatch(JSON.stringify(pub), LIVING_TEXT);
-  refuses(() => publicView(s, { isPublicSubject: () => true, projectText: "keep" }), /projectText must be a function/);
+  assert.doesNotMatch(JSON.stringify(pub), LIVING);
+});
+
+test("claim values leave only through projectValue, as detached data", () => {
+  const s = payloadStore();
+  const asked = [];
+  const pub = publicView(s, {
+    ...base,
+    projectValue: (value, at) => {
+      asked.push(`${at.claimId}:${at.predicate}:${at.subject}`);
+      return at.predicate === "death" ? { date: value.date } : undefined; // the burial value is withheld
+    },
+  });
+  assert.deepEqual(asked.sort(), ["C-bur:burial:D", "C-death:death:D"]);
+  assert.deepEqual(pub.claims["C-death"].value, { date: "1922-01-03" });
+  assert.equal("value" in pub.claims["C-bur"], false, "undefined omits");
+  assert.doesNotMatch(JSON.stringify(pub), LIVING);
+  // null omits too; a pass-through is the caller's explicit decision, and it is a copy
+  assert.equal("value" in publicView(s, { ...base, projectValue: () => null }).claims["C-death"], false);
+  const through = publicView(s, { ...base, projectValue: (v) => v });
+  through.claims["C-death"].value.date = "tampered";
+  assert.equal(s.claims["C-death"].value.date, "1922-01-03", "the public copy does not alias the private store");
+  // something that is not data is refused, not silently dropped
+  refuses(() => publicView(s, { ...base, projectValue: () => () => 1 }), /not data/);
+  refuses(() => publicView(s, { ...base, projectValue: () => Symbol("x") }), /not data/);
+  assert.throws(() => publicView(s, { ...base, projectValue: () => 1n }));
 });
 
 // ── mutation: provenance, assertions and counts cannot be bent ───────────────

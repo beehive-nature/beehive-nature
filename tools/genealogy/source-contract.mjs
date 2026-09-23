@@ -28,10 +28,12 @@
 //  · Claim standing (unsupported | supported | contradicted | contested) is
 //    not person support (sourced | attested | unsourced-entry, model.mjs).
 //    One supported claim never makes a whole person sourced.
-//  · Who is public is not decided here. The caller's privacy layer supplies
-//    isPublicSubject; this module only projects, strips the private artifact
-//    pointer, keeps leads out, and never exports raw free text (quotes and
-//    notes) unless the caller's projectText returns it.
+//  · A public subject is not a public-safe evidence payload. Who may appear
+//    (isPublicSubject), which sources may appear (isPublicSource), what
+//    opaque text may leave (projectText) and what claim payload may leave
+//    (projectValue) are four separate decisions, all the caller's. The
+//    projection is an allowlist: raw text and values never leave by
+//    default, artifactRef never leaves, leads never leave.
 //  · Identity is never decided here. Topology can open an investigation;
 //    only a founder turns evidence into a merge.
 
@@ -57,9 +59,9 @@ export const PREDICATES = [
 export const RELATIONS = ["supports", "contradicts", "mentions"];
 export const STANDINGS = ["unsupported", "supported", "contradicted", "contested"];
 
-const SOURCE_KEYS = ["schema", "id", "type", "scope", "provider", "title", "recordId", "url", "accessedAt", "digest", "artifactRef", "note"];
-const CLAIM_KEYS = ["schema", "id", "subject", "predicate", "value", "note"];
-const BINDING_KEYS = ["schema", "sourceId", "claimId", "relation", "context", "asserts", "quote", "locator", "note"];
+export const SOURCE_KEYS = ["schema", "id", "type", "scope", "provider", "title", "recordId", "url", "accessedAt", "digest", "artifactRef", "note"];
+export const CLAIM_KEYS = ["schema", "id", "subject", "predicate", "value", "note"];
+export const BINDING_KEYS = ["schema", "sourceId", "claimId", "relation", "context", "asserts", "quote", "locator", "note"];
 const DERIVED = /^\s*(inferred|derived|assumed|heuristic|guess|ai[\s-])/i;
 const DAY = /^(\d{4})-(\d{2})-(\d{2})$/;
 const DIGEST = /^sha256:[0-9a-f]{64}$/;
@@ -243,40 +245,73 @@ export function duplicateAssessment(store, a, b, topology = {}) {
   };
 }
 
-// Free text a public projection never exports raw: a deceased person's
-// obituary or register quote can name the living, and subject eligibility
-// says nothing about the words beside it.
-export const FREE_TEXT = { source: ["note"], claim: ["note"], binding: ["quote", "note"] };
+// ── the public projection: an allowlist, never clone-then-delete ─────────────
+// A public subject is not a public-safe evidence payload. Four decisions are
+// separate and all belong to the caller:
+//   isPublicSubject(id)                    may this genealogy subject appear?
+//   isPublicSource(id, source)             may this source's metadata appear? (a
+//                                          deceased subject does not make a family
+//                                          letter, subscription record or signed URL public)
+//   projectText(text, { object, field, id })   the only way opaque human-authored
+//                                          text leaves; only a returned string publishes
+//   projectValue(value, { claimId, subject, predicate })  the only way a claim's
+//                                          payload leaves; null/undefined omits it
+// Every schema key has exactly one disposition below; a key without one
+// cannot be added (the test suite checks the lists against *_KEYS).
+export const PUBLIC_FIELDS = {
+  source: {
+    structural: ["schema", "id", "type", "scope", "provider", "accessedAt", "digest", "recordId", "url"],
+    text: ["title", "note"],
+    never: ["artifactRef"],
+  },
+  claim: {
+    structural: ["schema", "id", "subject", "predicate"],
+    value: ["value"],
+    text: ["note"],
+  },
+  binding: {
+    structural: ["schema", "sourceId", "claimId", "relation", "context", "asserts"],
+    text: ["locator", "quote", "note"],
+  },
+};
 
-// The public projection. Eligibility belongs to the caller's privacy layer:
-// a claim is projected only when isPublicSubject accepts every party. This
-// module strips the private artifact pointer, never projects leads, and is
-// fail-closed on free text: FREE_TEXT fields are omitted unless the caller
-// supplies projectText(text, { object, field, id }), and only a string it
-// returns is published.
-export function publicView(store, { isPublicSubject, projectText } = {}) {
-  if (typeof isPublicSubject !== "function") throw new Error("publicView: the caller's privacy layer must supply isPublicSubject");
-  if (projectText !== undefined && typeof projectText !== "function") throw new Error("publicView: projectText must be a function when given");
+export function publicView(store, { isPublicSubject, isPublicSource, projectText, projectValue } = {}) {
+  for (const [name, fn] of Object.entries({ isPublicSubject, isPublicSource }))
+    if (typeof fn !== "function") throw new Error(`publicView: the caller's privacy layer must supply ${name}`);
+  for (const [name, fn] of Object.entries({ projectText, projectValue }))
+    if (fn !== undefined && typeof fn !== "function") throw new Error(`publicView: ${name} must be a function when given`);
   refuse(validateStore(store));
-  const scrub = (obj, object, id) => {
-    const out = { ...obj };
-    for (const field of FREE_TEXT[object]) {
-      if (!(field in out)) continue;
-      const text = projectText ? projectText(out[field], { object, field, id }) : undefined;
-      if (typeof text === "string") out[field] = text;
-      else delete out[field];
+
+  const project = (obj, object, id, valueContext) => {
+    const spec = PUBLIC_FIELDS[object], out = {};
+    for (const k of spec.structural) if (obj[k] !== undefined) out[k] = obj[k];
+    for (const k of spec.text) {
+      if (obj[k] === undefined || !projectText) continue;
+      const t = projectText(obj[k], { object, field: k, id });
+      if (typeof t === "string") out[k] = t;
+    }
+    for (const k of spec.value || []) {
+      if (obj[k] === undefined || !projectValue) continue;
+      const v = projectValue(obj[k], valueContext);
+      if (v === undefined || v === null) continue;
+      const json = JSON.stringify(v); // a detached copy: nothing aliases the private store
+      if (json === undefined) throw new Error(`publicView: projectValue for claim ${id} returned something that is not data`);
+      out[k] = JSON.parse(json);
     }
     return out;
   };
-  const claims = Object.fromEntries(
-    Object.entries(store.claims)
-      .filter(([, c]) => parties(c.subject).every((p) => isPublicSubject(p) === true))
-      .map(([id, c]) => [id, scrub(c, "claim", id)]));
-  const bindings = store.bindings.filter((b) => claims[b.claimId]).map((b) => scrub(b, "binding", `${b.sourceId}→${b.claimId}`));
+
+  const claims = {};
+  for (const [id, c] of Object.entries(store.claims))
+    if (parties(c.subject).every((p) => isPublicSubject(p) === true))
+      claims[id] = project(c, "claim", id, { claimId: id, subject: c.subject, predicate: c.predicate });
+  const publicSource = {};
+  for (const [id, s] of Object.entries(store.sources)) publicSource[id] = isPublicSource(id, s) === true;
+  // a binding appears only when both its claim and its source may
+  const bindings = store.bindings
+    .filter((b) => claims[b.claimId] && publicSource[b.sourceId])
+    .map((b) => project(b, "binding", `${b.sourceId}→${b.claimId}`));
   const sources = {};
-  for (const b of bindings) {
-    const { artifactRef, ...rest } = store.sources[b.sourceId];
-    sources[b.sourceId] = scrub(rest, "source", b.sourceId);
-  }
+  for (const b of bindings) sources[b.sourceId] ??= project(store.sources[b.sourceId], "source", b.sourceId);
   return { sources, claims, bindings, leads: [] };
 }
