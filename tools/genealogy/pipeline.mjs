@@ -7,6 +7,7 @@ import { existsSync } from "node:fs";
 import { createModel, bloodline, spine, depths, validate, birthYear, evidenceClass } from "./model.mjs";
 import { importWalk } from "./fs-adapter.mjs";
 import { publish } from "./publish.mjs";
+import { joinLine, emptyPart } from "./lines.mjs";
 
 const [rawPath, corpusOut, pageOut, spineRx, viaRx] = process.argv.slice(2);
 if (!rawPath || !corpusOut) {
@@ -18,28 +19,17 @@ const raw = JSON.parse(readFileSync(rawPath, "utf8"));
 const model = createModel({ root: raw.root, source: "familysearch" });
 importWalk(model, raw);
 
-// PRIVATE SPOUSE LINES (optional): the private mapping of line keys to walked
-// roots lives on estate-local disk, never in the repo —
-//   { "lines": { "spouse-1": { "root": "<provider id>", "walk": "<raw walk path>" } } }
-// Each walk joins the ONE model; the founder root is restored after each
-// import (importWalk sets root). Absent file = founder line only, as before.
+// PRIVATE SPOUSE LINES (optional): mapping + walks live on estate-local disk,
+// never in the repo; the join law is lines.mjs (additive, founder root kept).
 const LINES_PRIVATE = "C:/Users/travi/family-lineage/lines-private.json";
+const lineIntake = {};
 if (existsSync(LINES_PRIVATE)) {
   const spec = JSON.parse(readFileSync(LINES_PRIVATE, "utf8"));
-  const founderRoot = model.root;
-  model.roots = { founder: founderRoot };
   for (const [key, line] of Object.entries(spec.lines || {})) {
-    if (!/^spouse-[1-9]d*$/.test(key) || !line?.root || !line?.walk) {
-      console.error(`lines-private: refusing malformed line ${key}`);
-      process.exit(1);
-    }
-    importWalk(model, JSON.parse(readFileSync(line.walk, "utf8")));
-    model.root = founderRoot;
-    if (!model.persons[line.root]) {
-      console.error(`lines-private: ${key} root is not in its walk — refusing`);
-      process.exit(1);
-    }
-    model.roots[key] = line.root;
+    if (!Array.isArray(line?.walks) || !line.walks.length) { console.error(`lines-private: ${key} names no walk — refusing`); process.exit(1); }
+    const parts = line.walks.map((p) => { const m = emptyPart(); importWalk(m, JSON.parse(readFileSync(p, "utf8"))); return m; });
+    try { lineIntake[key] = joinLine(model, key, line, parts); }
+    catch (e) { console.error(e.message); process.exit(1); }
   }
 }
 
@@ -271,6 +261,7 @@ pub.meta = {
   })(),
   correctionsApplied,
   overlayPersons,
+  ...(Object.keys(lineIntake).length ? { lineIntake } : {}),
 };
 // privacy stays FATAL here; only the two disclosed classes pass
 const pubAll = validate(pub, { public: true });
