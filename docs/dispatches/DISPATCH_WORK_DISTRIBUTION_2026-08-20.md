@@ -64,6 +64,6 @@ downstream of it opens.
 
 Blessing pass on the acting-chief verifications (CI, museum dead-network) · the
 contamination-void wiring · the consent station · course 6 · Claude Design's artboards
-· the amino/EAA lanes he holds · and the G2 execution if §0.2 arms it.
+· the amino/EAA lanes they hold · and the G2 execution if §0.2 arms it.
 
 **zAgent (GLM 5.3), acting chief, 2026-08-20.** 🐝

@@ -288,10 +288,16 @@ test('house-archive chrome is fully keyed; record data stays the record', () => 
   // leaf elements whose text carries letters but which carry no data-i18n and
   // no keyed ancestor within one element (rich rows key each leaf directly)
   const leaves = archive.matchAll(/<(p|h2|strong|span|summary|button|dt|dd|th|td|a)\b([^>]*)>([^<]*)<\/\1>/gi);
+  let sagaRecords = 0;
   for (const m of leaves) {
     const attrs = m[2], text = m[3];
     if (!/\p{L}/u.test(text.trim())) continue;
     if (/data-i18n=/.test(attrs)) continue;
+    // the saga generation rows (the lineage lane, GUX-01): ancestor names
+    // and years are RECORD data — the chrome around them is keyed, records
+    // stay the record of origin (people's names are never translated).
+    // Scoped to the saga row classes and capped at the six ancestors.
+    if (/class="[^"]*\b(who|yrs)\b/.test(attrs)) { sagaRecords++; continue; }
     unkeyed.push(m[1] + '>' + text.trim().slice(0, 40));
   }
   const allowed = [
@@ -302,6 +308,9 @@ test('house-archive chrome is fully keyed; record data stays the record', () => 
     assert.ok(allowed.some(a => u.startsWith(a.slice(0, 14))) || /^p>Travis Mark Remington/.test(u) || u.includes('ความรักคือราชา'),
       'unkeyed archive chrome: ' + u);
   assert.ok(unkeyed.length <= 2, 'only the two holder-record displays may stay unkeyed, found ' + unkeyed.length);
+  // six ancestor names + the two letter-bearing year values (0765–Deceased,
+  // saga only) — nothing else in the saga rows carries letters
+  assert.ok(sagaRecords <= 8, 'saga record rows beyond the six ancestors: ' + sagaRecords);
 });
 
 /* Tranche 2 (founder card feedback, 2026-09-12): every readable line on the
@@ -446,7 +455,7 @@ test('beats and history disclosure remember per view instead of resetting', () =
   document.activeElement = document.body;
   const theme = element('meta');
   theme.attrs.name = 'theme-color';
-  theme.content = '#f6f7f2';
+  theme.content = '#fbf7f0';
   const history = element('details');
   history.dataset.viewDisclosure = 'history';
   history.appendChild(element('summary'));

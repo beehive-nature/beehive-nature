@@ -32,6 +32,14 @@ jobs:
       - name: Shell chain lint
         if: always()
         run: sh scripts/lint-shell-chains.sh
+      # AV-11/R5 (2026-09-16): standing future-rail detector — every
+      # first-line human payment surface is censused on every push; a
+      # surface that asks the human for native gas fails here. Ask-shaped
+      # patterns only (educational mentions pass); labeled last-line
+      # fallback zones exempt (data-r5-fallback).
+      - name: R5 surface audit — no human gas asks
+        if: always()
+        run: node scripts/r5-surface-audit.mjs
       # bSAFE host lives outside the kernel workspace (own members list + lockfile)
       - name: bSAFE host workspace (THP codec + Noise XX)
         if: always()
@@ -43,6 +51,11 @@ jobs:
         run: |
           cargo test --locked --manifest-path ops/x402-door/Cargo.toml
           cargo build --locked --manifest-path ops/x402-door/Cargo.toml --features live-wiring
+      # ant-writedoor (ruled 2026-09-21): the keyless Autonomi write door's
+      # HTTP contract battery. Mock-gateway only — CI touches no network.
+      - name: ant-writedoor (contract battery; mock gateway, zero mainnet)
+        if: always()
+        run: cargo test --locked --manifest-path ops/ant-writedoor/Cargo.toml
       # SPEC-BINDEXER-0: the keyless attestation is a CI-visible receipt
       - name: bindexer keyless attestation (SPEC-BINDEXER-0)
         if: always()
@@ -68,9 +81,44 @@ jobs:
       - name: Estate registry — counts computed, not written
         if: always()
         run: node scripts/estate-check.mjs
+      # DOOR COUNTS: the doors are hand-kept, so their "N open now" is the one
+      # number on this estate no generator keeps honest. cc0909a0 shipped 28
+      # against 38 tiles and no gate saw it (fixed by hand at fe40aa20). Three
+      # sources per door — the list row, the door's own .n, the real anchors
+      # inside section.d — so a red says WHICH one is lying, not just that they
+      # differ. All six doors agree today, which is exactly why the selftest
+      # below (drifted fixtures, one per source) is the row that proves the
+      # gate: a natural exam here can only ever be green.
+      - name: Doors — three numbers, one truth
+        if: always()
+        run: node e2e/door-counts.mjs
+      - name: Doors — door-counts selftest (drifted fixtures, every push)
+        if: always()
+        run: node e2e/door-counts.mjs --selftest
       - name: Front door — search, source parity and accessible art
         if: always()
-        run: node --test e2e/atlas.test.mjs e2e/agent-dock.test.mjs e2e/lang-coverage.test.mjs e2e/register.test.mjs e2e/social-arrival.test.mjs e2e/first-click.test.mjs e2e/social-three-view.test.mjs e2e/forge-room-views.test.mjs e2e/kandi-views.test.mjs e2e/kandi-state.test.mjs e2e/kandi-handlers.test.mjs e2e/artist-audio-showcase.test.mjs e2e/artist-audio-collection.test.mjs e2e/artist-audio-player.test.mjs e2e/bearth-views.test.mjs e2e/bsymposium-views.test.mjs e2e/bfood-views.test.mjs e2e/review-views.test.mjs e2e/bigen-views.test.mjs e2e/university-views.test.mjs e2e/onboarding-views.test.mjs e2e/blongevity-views.test.mjs e2e/buzz-directory-views.test.mjs e2e/profile-views.test.mjs e2e/first-work.test.mjs e2e/bloom-work-pack.test.mjs e2e/bnames-rpc.test.mjs e2e/no-dead-host.test.mjs e2e/music-cleanup.test.mjs
+        run: node --test e2e/atlas.test.mjs e2e/agent-dock.test.mjs e2e/lang-coverage.test.mjs e2e/register.test.mjs e2e/social-arrival.test.mjs e2e/first-click.test.mjs e2e/social-three-view.test.mjs e2e/forge-room-views.test.mjs e2e/kandi-views.test.mjs e2e/kandi-state.test.mjs e2e/kandi-handlers.test.mjs e2e/artist-audio-showcase.test.mjs e2e/artist-audio-collection.test.mjs e2e/artist-audio-player.test.mjs e2e/bearth-views.test.mjs e2e/bsymposium-views.test.mjs e2e/bfood-views.test.mjs e2e/review-views.test.mjs e2e/bigen-views.test.mjs e2e/university-views.test.mjs e2e/onboarding-views.test.mjs e2e/blongevity-views.test.mjs e2e/buzz-directory-views.test.mjs e2e/profile-views.test.mjs e2e/first-work.test.mjs e2e/bloom-work-pack.test.mjs e2e/bnames-rpc.test.mjs e2e/no-dead-host.test.mjs e2e/music-cleanup.test.mjs e2e/bnamesday.test.mjs e2e/bnamesday-sky.test.mjs e2e/ant-pay.test.mjs e2e/bui-daily-art.test.mjs
+      # tools/genealogy holds TWELVE suites (3,419 lines) and NO job has ever
+      # run one of them. That is why a real regression sat on an open, mergeable
+      # PR for three days with nothing red naming it: the gate was not weak, it
+      # was absent. Measured green on main before wiring (225 tests, 0 failures),
+      # so this lands as a guard, not as a new red.
+      #
+      # GLOBBED, never listed. An explicit filename list is exactly what made the
+      # directory invisible, and a thirteenth suite would be invisible the same
+      # way. The count guard is the non-vacuity assertion: a glob that matches
+      # nothing must fail BY NAME, never sail through green having run no tests.
+      - name: Genealogy — every suite in tools/genealogy (globbed, never listed)
+        if: always()
+        run: |
+          set -eu
+          n=$(ls tools/genealogy/*.test.mjs 2>/dev/null | wc -l | tr -d " ")
+          if [ "${n:-0}" -lt 1 ]; then
+            echo "genealogy: matched ${n:-0} suites under tools/genealogy — that is not a count of tests, it is a glob that found nothing. Refusing to report a pass."
+            exit 1
+          fi
+          echo "genealogy: running $n suite(s)"
+          node --test $(ls tools/genealogy/*.test.mjs)
       - name: Forge room — pinned Yjs convergence, late join and usable fallback
         if: always()
         working-directory: forge/visual/test
@@ -112,6 +160,39 @@ jobs:
       - name: Voucher/escrow engine battery (moat ledger core)
         if: always()
         run: python3 scripts/buzz-meter/test_voucher_escrow.py
+      # bMAILROOM CANDIDATE battery (zCode seat, 2026-09-19; start order
+      # d003de1f + corrections 1e18cbf8/6689f0e1): sink multi-RCPT red-first
+      # fix; single-reader ledger (dedupe on (mailbox,digest), crash resume
+      # at both points, uncertain-publish retry with stored bytes, hold-
+      # then-binding completion, notification/drafting independence);
+      # roster single-source vs sink KNOWN; draft-only outbound seam; and
+      # the pinned nostr-tools native-notice adapter (signed room metadata,
+      # strict DM flags, disabled seam, probe regressions). Node half needs
+      # the adapter package (npm ci runs the committed lock).
+      - name: bMAILroom candidate battery (sink fix + single reader + draft-only seam)
+        if: always()
+        run: |
+          python3 scripts/buzz-mail/test_sink_multircpt.py
+          python3 scripts/buzz-mail/test_mailgate.py
+          python3 scripts/buzz-mail/test_notify.py
+          python3 scripts/buzz-mail/test_roster.py
+          python3 scripts/buzz-mail/test_outbound.py
+          python3 scripts/buzz-mail/test_bech32id.py
+          python3 scripts/buzz-mail/test_import_from_triage.py
+          # These two sat in this directory, beside eight suites this step already
+          # names, and were never added to the list — not excluded, forgotten. They
+          # guard PRODUCTION mail behaviour: the KNOWN-roster single source (#164)
+          # and the maildir mode heal (#181). Measured green before wiring, 2026-09-23:
+          # known_roster OK (drove 11 locals through RCPT+DATA), maildir_modes 6 tests OK.
+          python3 scripts/buzz-mail/test_sink_known_roster.py
+          python3 scripts/buzz-mail/test_sink_maildir_modes.py
+      - name: bMAILroom native notice adapter (pinned nostr-tools, disabled seam)
+        if: always()
+        run: |
+          npm ci --ignore-scripts --prefix scripts/buzz-mail
+          node scripts/buzz-mail/notify-transport.mjs --selftest
+          node scripts/buzz-mail/test_notify_transport.mjs
+          python3 scripts/buzz-mail/test_notify_adapter_cli.py
       # x402-RAID-Z33 battery (z3.3, 2026-09-04): credit-from-settlement,
       # pause-not-kill, upto ceiling (nonce burn even at zero), lane cost
       # basis + tithe, the 4-state receipt, and the three NAMED halt tests
@@ -119,6 +200,170 @@ jobs:
       - name: x402 meter battery (x402-RAID-Z33)
         if: always()
         run: python3 scripts/buzz-meter/test_x402_meter.py
+      # Two more suites that existed and were named nowhere. Census on ab2d8fb3:
+      # 90 test-shaped files, 63 named, 14 matched by #212's glob, NINE named
+      # nowhere at all. These are the two of those nine that were already green
+      # by hand — the rest need a repair or a dependency decision first and are
+      # recorded in the channel rather than wired blind.
+      # NOT WIRED, and the reason is recorded so nobody re-discovers it: the x0x-622
+      # runner needs the blake3 module. It passed by hand under WSL python3 3.14.4
+      # (34 proofs, 0 failed) and failed in CI on this job at 01:39:43Z with
+      # "ModuleNotFoundError: No module named 'blake3'" — T1 and T1b fail, the other
+      # 32 pass. Same shape as tests/r6/test_sig.py needing pynacl. Decide the
+      # dependency (install it here, or exempt those arms BY NAME with this reason),
+      # then wire it. GREEN ON MY BOX IS NOT GREEN IN CI when a suite has a dependency:
+      # the dependency set is part of what "measured green before wiring" must cover.
+      # SS-2's own contract test. Its rig copied secret-scan.sh without
+      # keyshape.sh — which the scanner SOURCES at :82 — so three rows passed and
+      # the fourth died on ". : cannot open keyshape.sh". Nothing ran this file,
+      # so nobody saw it; push-preflight.sh's later selftest copies all three and
+      # had to learn the same lesson from scratch. Fixed in this commit, then wired.
+      - name: Hooks contract — the installer wires a pre-commit that REFUSES a key
+        if: always()
+        run: bash e2e/hooks-installed.test.sh
+      # AV-1 serve-bridge battery (zCode, 2026-09-16): meter.py serve under a
+      # temp BUZZ_METER_DIR on an ephemeral port — SIGKILL-mid-settle
+      # exactly-once, concurrent mixed load (chain + conservation + coherent
+      # responses), hostile-input battery (typed 4xx, zero mutation),
+      # unknown-response recovery, and the negative control that proves the
+      # harness catches a broken idempotency seam
+      - name: AV-1 serve-bridge battery (crash/concurrency/hostile)
+        if: always()
+        run: python3 scripts/buzz-meter/test_serve_bridge.py
+      # AV-3 split-brain battery (zCode, 2026-09-16): the meter↔door seam —
+      # PART A receipts the pre-fix gap (accrual during outage) forever;
+      # 3.1 door-down accrual parks (zero delta, ledger identical,
+      # reason=door); 3.2 resume-from-resume-point with zero retroactive
+      # backfill; 3.3 credit-out park-not-kill regression-keep; 3.4 the
+      # naive-charger negative control is detected
+      - name: AV-3 split-brain battery (meter vs delivery door)
+        if: always()
+        run: python3 scripts/buzz-meter/test_av3_split_brain.py
+      # AV-6 retry-storm battery (zCode, 2026-09-16, P1): PART A receipts
+      # forever that the 2-consecutive law cannot bound an alternating
+      # retry storm; 6.1/6.2 assert the aggregate failure-charge ceiling
+      # (inclusive bound, typed loud refusal past it, per-attempt evidence
+      # rows kept incl. refused attempts); the unbounded-policy negative
+      # control is detected
+      - name: AV-6 retry-storm battery (failure-charge ceiling)
+        if: always()
+        run: python3 scripts/buzz-meter/test_av6_retry_storm.py
+      # AV-5 reorg drill (zCode, 2026-09-16, P1): the poller's reorg leg —
+      # PART A receipts forever that consumed-seq mutations were skipped
+      # silently; 5.1 fork + rollback shapes ⇒ zero credit, evidence-carrying
+      # flag, parked watermark, identical ledger bytes; 5.3 the crediting
+      # poller detected. The Rust half (reversibility quorum verdicts for
+      # the fork) rides cargo test: crates/reversibility/tests/reorg_drill.rs
+      - name: AV-5 reorg drill (flag-not-credit)
+        if: always()
+        run: python3 scripts/buzz-meter/test_av5_reorg_drill.py
+      # AV-4 handle unlinkability (zCode, 2026-09-16, P1): PART A receipts
+      # forever that the old sequential minter was session-linkable; 4.2
+      # proves pure-entropy handles (no lane/timestamp/counter, zero reuse
+      # over 10k mints); the sequential minter is detected. The door-side
+      # disjointness half rides cargo: ops/x402-door av4_disjointness
+      - name: AV-4 handle unlinkability battery
+        if: always()
+        run: python3 scripts/buzz-meter/test_av4_handle_unlinkability.py
+      # AV-11 human-gas surface audit (zCode, 2026-09-16, P1): every rail
+      # classified first-line/last-line, every first-line gas surface
+      # REGISTERED with its R5 remediation, no stale ledger entries — and
+      # the future-rail detector fails on any unregistered human-gas surface
+      - name: AV-11 human-gas surface audit
+        if: always()
+        run: node scripts/audit-human-gas.mjs
+      # INVOICE-1 bPay invoice battery (zCode economic seat, 2026-09-17):
+      # the generic invoice attacked against the FIRST REFERENCE CONSUMER —
+      # zGenealogy's bpay.mjs + skaists.bpay-invoice/1, vendored byte-exact
+      # and sha-pinned from lane/zcode-lineage-import @68fdae20. Proves the
+      # transportable laws (per-asset separation / receipt-from-evidence-only /
+      # measured-states labeling) and registers the generic advance (commitment
+      # retrievability offline, evidenced void terminality, content-addressed
+      # identity). Registered reds pass and print; pin drift or an unregistered
+      # red fails (docs/agents/BPAY-ECONOMIC-LIFECYCLE.md §INVOICE-1)
+      - name: INVOICE-1 bPay invoice battery (generic law vs reference consumer)
+        if: always()
+        run: node scripts/inv1-bpay-invoice.mjs
+      # INVOICE-1 builder proof battery (zCode builder lane, 2026-09-17): the
+      # generic implementation closes the three registered reds on ITS side —
+      # the frozen battery above stays byte-unchanged as the record of the
+      # reference's gaps; this proves closure: canonical determinism, content
+      # identity, offline commitment re-derivation (incl. the committed
+      # attacker with a recomputed digest), evidenced void terminality incl.
+      # anchor-caught re-forge + lawful supersession, fresh-process restart
+      # with pricing drift, R20/signature fence.
+      - name: INVOICE-1 builder proofs (generic implementation)
+        if: always()
+        run: node scripts/inv1-generic-builder.mjs
+      # INVOICE-1 oracle verifier (economic/POS/wallet seat, 2026-09-17):
+      # the INDEPENDENT 13-attack re-verification of the generic law — own
+      # canonicalization re-derived from the documented set law (quotes are
+      # an unordered collection of unique quote identities; raw values
+      # sorted before representation). CI-wired only after the formal
+      # oracle pass earned 13/13 @801d869f (receipt:
+      # docs/dispatches/2026-09-17-invoice1-oracle-reverification-green.md).
+      - name: INVOICE-1 oracle verifier (independent 13-attack)
+        if: always()
+        run: node scripts/inv1-oracle-verify.mjs
+      # VOCAB-1 settlement-outcome crosswalk battery (economic seat, 2026-09-17):
+      # the naive generic status enum is a REGISTERED RED (information-loss
+      # detector fires — normalization must not manufacture certainty); the
+      # lossless predicate crosswalk is green; seven founder distinctions as
+      # invariants; sabotage negative control proves the detector teeth
+      # (docs/agents/VOCAB-1-CROSSWALK.md).
+      - name: VOCAB-1 crosswalk battery (lossless outcome predicates)
+        if: always()
+        run: node scripts/vocab1-crosswalk.mjs
+      # RECON-1 obligation-closure battery (economic seat, 2026-09-17):
+      # reconciliation DERIVES from evidence and never upgrades the VOCAB-1
+      # evidence class; the founder's red-first refusal cases + strongest
+      # closure positives + persistence laws (determinism, order-insensitivity,
+      # duplicate idempotence); the label-based naive reconciler is the
+      # REGISTERED RED comparator (10/10 convicted).
+      - name: RECON-1 closure battery (derives, never upgrades evidence)
+        if: always()
+        run: node scripts/recon1-closure.mjs
+      # RECON-1 BUILDER PROOF (zCode builder lane, 2026-09-17): the production
+      # primitive scripts/lib/recon-reconcile.mjs proven against the FROZEN
+      # closure battery — its case table extracted at runtime from the
+      # sha256-pinned frozen bytes (the spec cannot be silently weakened),
+      # cross-checked against the frozen inline reference, naive comparator
+      # re-convicted through the same harness; mission behaviors (carried-quote
+      # owed, fail-closed finality, multi-asset, supersession), human-gesture
+      # surface law, persistence through a fresh child process, and source
+      # fences (no rail imports, pure derivation).
+      - name: RECON-1 primitive builder proof (vs frozen oracle)
+        if: always()
+        run: node scripts/recon1-primitive.mjs
+      # RECON-1 INDEPENDENT ORACLE VERIFIER (economic/oracle seat, 2026-09-17):
+      # written against the mission text + frozen oracle bytes ONLY (the
+      # builder battery is not imported; its 23/23 is not evidence here).
+      # Frozen cases reproduced via the seat's OWN extraction; adversarial
+      # lattice A1-A10 (finality fail-closed, class-upgrade dressings,
+      # duplicate arithmetic, 24-permutation ordering, restart under
+      # mutated/absent pricing, void/supersession matrix, overpay finality,
+      # multi-asset no-FX/no-cross-netting, human-gesture SURFACE_MISSING
+      # projection with independent tree scan, rail-certainty non-upgrade).
+      - name: RECON-1 oracle independent verifier
+        if: always()
+        run: node scripts/recon1-oracle-verify.mjs
+      # Sabotage control: the oracle seat's OWN seductive reconciler
+      # (scripts/fixtures/recon1-seductive.mjs — cross-netting, duplicate-
+      # counting, finality-blind, refund-manufacturing, SURFACE_READY-
+      # claiming) must be CONVICTED on all five named seductions; a green
+      # run here would mean the verifier lost its teeth.
+      - name: RECON-1 oracle sabotage selftest (teeth)
+        if: always()
+        run: node scripts/recon1-oracle-verify.mjs --sabotage-selftest
+      # bPay MVP Phase A builder selftest (UI seat, 2026-09-17): the quote→
+      # invoice mechanical binding — a prepare response for the pinned Bux
+      # artifact builds a valid INVOICE-1 invoice (owed derived from the
+      # carried quote set, exact ceiling), and REFUSES wrong-artifact sha /
+      # wrong byte count / quote-sum mismatch (synthetic selftest fixture,
+      # labelled; the real quote receipt is docs/receipts/).
+      - name: bPay Phase A — quote→invoice builder selftest (refusal gates)
+        if: always()
+        run: node scripts/bpay-mvp/invoice-from-quote.mjs --selftest
       # PEER FUNNEL testnet runner selftest (z3.3 Order C, 2026-09-05): the
       # one-broadcast tool cannot rot — keccak + EIP-155 RLP hash vectors and
       # the sign/recover roundtrip proven every push (key parts skip cleanly
@@ -139,14 +384,28 @@ jobs:
         if: always()
         run: node e2e/dock-claims.mjs
       # §7 hook selftest: a gate's success state is SILENCE — a passing hook
-      # and a broken hook look identical. The four cases (seat-author blocked,
-      # trailer-in-body blocked, correct shape lands, founder-typed lands) run
-      # through the REAL hooks in a throwaway repo every push, so a reintroduced
-      # fail-open goes red the same hour. Hook, CI and selftest share ONE
-      # implementation — identity-check.sh — never agreeing by convention.
-      - name: §7 hook selftest — four cases, every push
+      # and a broken hook look identical. Every case runs through the REAL hooks
+      # (or, for the range loop, a real throwaway range) in a scratch repo every
+      # push, so a reintroduced fail-open goes red the same hour. Hook, CI and
+      # selftest share ONE implementation — identity-check.sh — never agreeing
+      # by convention. The case list lives in the script and its banner prints
+      # the live count: a count typed HERE drifted silently once already (T5
+      # landed against a step still saying "four"), so this name no longer
+      # carries one.
+      - name: §7 hook selftest — every push
         if: always()
         run: sh scripts/identity-check.sh --selftest
+      # secret-scan selftest (#170 rider, 2026-09-20): this blocker exists to
+      # guard the path where no seat runs, so its witness cannot be hand-only.
+      # Same law as the §7 hook selftest above, one file over: every push.
+      - name: secret-scan selftest - four fixtures, every push
+        if: always()
+        run: sh scripts/secret-scan.sh --selftest
+      # push-preflight selftest (#170 rider, 2026-09-20): P1-P11 guarded the
+      # push path by hand only until today; CI never ran them at all.
+      - name: push-preflight selftest - P1-P11, every push
+        if: always()
+        run: sh scripts/push-preflight.sh --selftest
       # SPRINT CLOSING RECEIPT (founder order, 2026-08-25): the four-suite gap
       # was work that landed and gated nothing, and a report cannot tell a sprint
       # that shipped from one that stalled. This re-derives every sprint claim
@@ -284,6 +543,73 @@ jobs:
         if: always()
         working-directory: e2e
         run: node kandi-thread.mjs
+      # MY SPACE slice 02: the storage seam. SPEC-ADAPTER-CONTRACT-1 in the
+      # browser carrier with the hive's Blossom store as the first adapter —
+      # describe-or-no-attach (§9.1), an undeclared capability with no call
+      # path at all (§9.2), the redaction wall (§4.1), a dead rail that is
+      # never a dead page (§6), and a stranger's phone reading back the exact
+      # bytes the author's phone put there. The rail is mocked in-process; no
+      # request leaves the runner.
+      - name: MY SPACE — storage adapter seam
+        if: always()
+        working-directory: e2e
+        run: node myspace-seam.mjs
+      # THE DOORS, RENDERED (founder order 2026-08-26): each door at 390px,
+      # tap floor, footer clearance, zero page errors, and every link a door
+      # lists resolves 200 with body text. Which pages are doors comes from
+      # e2e/not-doors.mjs, the list door-counts.mjs reads too. Link
+      # resolution has no other gate; the static job counts anchors, it does
+      # not follow them.
+      - name: Doors — rendered at 390px, every listed link resolves
+        if: always()
+        working-directory: e2e
+        run: node doors.mjs
+      # bPay Phase A gate (UI seat, 2026-09-17): the REAL machine-bound
+      # invoice renders in the wallet surface — identity (name/bytes/sha256),
+      # owed recomputed from the carried quote set by the TEST, native gas
+      # separate, freshness, commitment, honest waiting state — and the page
+      # carries NO authorization route (recon1-oracle A9c law holds until the
+      # Phase C SURFACE_READY re-ruling). Serves surfaces/ from the tree;
+      # the artifact is surfaces/bpay-invoice.json (built from the banked
+      # live quote receipt, never hand-typed).
+      - name: bPay Phase A gate — real invoice rendered, nothing spendable
+        if: always()
+        working-directory: e2e
+        run: node bpay-invoice-phase-a.mjs
+      # bPay Phase B gate (UI seat, 2026-09-17): the CHOOSER — audience is a
+      # real product gesture (🌐 Public selectable; 🔒 only-me / 👥
+      # selected-people visibly unavailable, never promised); the resolved
+      # policy RIDES the fresh-quote request {artifact pin, audience:public,
+      # force_fresh} — asserted server-side by the labelled MOCK bridge; the
+      # fresh quote renders as CAUSED BY THE CHOICE with "Nothing has been
+      # paid."; inspection depth (newbee/raver/cypherpunk) changes visibility
+      # only; no confirmation count; A9c holds. The MOCK exists so no agent
+      # ever simulates the founder's real acceptance — that ceremony belongs
+      # to the founder against the real keyless bridge.
+      - name: bPay Phase B gate — the chooser (mock bridge; founder keeps the real acceptance)
+        if: always()
+        working-directory: e2e
+        run: node bpay-phase-b-chooser.mjs
+      # bData (My Data) gate (UX architecture correction, founder 2026-09-17):
+      # the organism-level data surface — mechanical identity from the
+      # reference invoice; resolved audience + VISIBLY unavailable private
+      # modes; the supersede law (commitment exists → change requires a new
+      # quote, old plan stays history); the price IN PLACE (gas separate,
+      # nothing paid, no navigation); automation as a first-class policy
+      # (Ask me / within limits / Never) with append-only editions; A9c held.
+      # THE A+ REBUILD (founder 2026-09-18, "D+ — buttons don't even work"):
+      # the checks are TRANSITIONS, so a dead, decoy or double-firing control
+      # FAILS — New bee's light 16px canvas + 44px floor; unavailable modes are
+      # prose with reasons, never buttons; the wait is visible with NO price
+      # button while asking; single-flight asks; Stop waiting / Undo; honest
+      # failure classes; a second tab follows without reload; the TOP-BAR
+      # register opens the anatomy (8 sections) and the language select
+      # re-words the JS-drawn page. No context can reach the live quote
+      # service (:8807 aborted at the browser, touches asserted zero).
+      - name: bData gate — My Data owns policy, bPay holds the economics
+        if: always()
+        working-directory: e2e
+        run: node bdata-surface.mjs
       - name: Onboarding e2e (Chromium + virtual authenticator w/ PRF)
         if: always()
         working-directory: e2e
@@ -297,6 +623,15 @@ jobs:
         if: always()
         working-directory: e2e
         run: node no-page-errors.mjs
+      # bui Slice 01 (queen order 1822fa54, zCode writer seat): the daily art
+      # manifest engine gate - 24 cells (3 frozen UTC dates x 3 modes x 2 widths
+      # + reduced-motion), facts byte-equal across the matrix, byte-identical
+      # replay, broken-candidate fallback to last good, cache-never-authority,
+      # attribute-flip fork visibility, P3/P4/P5/P9 budgets per the PROVE ruling.
+      - name: bUi daily art - manifest engine gate (24 cells + budgets)
+        if: always()
+        working-directory: e2e
+        run: node bui-daily-art-gate.mjs
       # the language lane (2026-08-28), browser-side like every playwright
       # suite: first the checker-silence proof — the coverage instrument must
       # count a keyed string AND an unkeyed string through the same path
@@ -341,6 +676,67 @@ jobs:
         if: always()
         working-directory: e2e
         run: node --test orb-seat.test.mjs
+      # Tour-bar clearance (bee-laborer slice, 2026-09-20): the fixed estate bar
+      # sat on the lowest 18px of MY SPACE's sheet buttons at 390px (measured on
+      # the live page). tour.js now retreats behind any aria-modal dialog /
+      # showModal() and publishes --tbar-h for page-own sticky rows. Proven by
+      # hit-testing every sheet button through the REAL gesture (attach → row →
+      # sheet → keep), the published height on fixed and in-flow hosts, and a
+      # native <dialog>. Ran 3/3 red on the pre-fix tour.js.
+      - name: Tour bar — clearance regression (no page action row covered)
+        if: always()
+        working-directory: e2e
+        run: node --test tour-bar-clearance.test.mjs
+      # Law of the Sea print (founder word "print publish" 2026-09-21, BgrOKbot):
+      # the ruled first screen (title, three laws, Manifest) and the first
+      # disclosure summary sit clear of #tbar at 390x844. Limit is innerHeight
+      # minus --tbar-h; empty --tbar-h fails closed.
+      - name: Law of the Sea — first screen clears the tour bar
+        if: always()
+        working-directory: e2e
+        run: node --test law-of-the-sea-fold.test.mjs
+      # Watch from Autonomi (founder upload 2026-09-21 would not play): the page must play a public
+      # video whatever shape the ant door is in. antd 0.12.0 cuts /stream at a wrong Content-Length
+      # (ant-sdk PR #243), so the page falls back to the {"data":"<base64>"} envelope and plays the
+      # decoded Blob; an upgraded antd streams directly and the envelope is never fetched. Door down,
+      # not a video, error and cut envelopes end on the failure row. The door is MOCKED; the real
+      # relay is touched zero times.
+      - name: Watch from Autonomi — plays through today's door and an upgraded one (mocked door)
+        if: always()
+        working-directory: e2e
+        run: node --test bview.test.mjs
+      # SHARED-POLICY FIELD OWNERSHIP (ceremony-blocking repair, 2026-09-17):
+      # a View change in a stale wallet tab must NEVER erase newer founder
+      # policy from the shared key — every writer merges with the latest
+      # stored object and owns only its fields (presentation/service vs the
+      # founder-gesture policy fields audience/selectedAt). Two tabs opened
+      # BEFORE the gesture: My Data chooses Public; the stale wallet toggles
+      # its view; the shared state stays Public with the SAME selectedAt;
+      # reload — both surfaces render the founder's choice, agreeing. The
+      # wallet's own gesture path still records (merged, preserving service
+      # fields). Orthogonality law, proven in the product — not by tab
+      # discipline.
+      - name: bPay/bData — shared-policy field ownership (stale-tab repair)
+        if: always()
+        working-directory: e2e
+        run: node --test bpay-policy-ownership.test.mjs
+      # The comprehension law (founder order 2026-09-16): dense technical
+      # walls collapse to keyed summaries for bee/raver, stand open for
+      # cypherpunk, a reader’s own tap survives register switches, the full
+      # text is never removed, ru renders corpus-exact, 44px touch floor.
+      - name: Comprehension — disclosure + touch regression (rendered)
+        if: always()
+        working-directory: e2e
+        run: node --test comprehension.test.mjs
+      # The Engine Room data loop (zCode, 2026-09-17): follow-one-file at three
+      # depths on stack.html. Proves register switches are presentation-only
+      # (ZERO network/storage side-effects, same factual constants), keyboard +
+      # reduced-motion paths, mechanically-derived evidence card vs the intake
+      # receipt, honest degrade, ru corpus render, 390px + touch floor.
+      - name: Engineflow — data-loop register inertness + evidence card (rendered)
+        if: always()
+        working-directory: e2e
+        run: node engineflow.browser.mjs
       # fleet-pixels: every chart-bearing hosted surface must DRAW (pixels
       # read back from the canvas, not merely load). fleet-bus: the
       # localStorage data bus asserted both directions (same origin reads;

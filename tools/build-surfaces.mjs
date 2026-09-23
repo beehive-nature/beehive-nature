@@ -1,46 +1,92 @@
 #!/usr/bin/env node
 /* ═══════════════════════════════════════════════════════════════════════════
-   build-surfaces.mjs — THE ONE BUILDER.
+   build-surfaces.mjs — THE DOOR-TILE DRAFTER.
 
-   surfaces/index.html (the hub) and surfaces/doors/*.html (the six front
-   doors) are GENERATED from surfaces/estate.json. Nothing here is
-   hand-edited; an edit to a name, a hint, a caveat or a whole new surface
-   happens once, in the registry, and both the hub and the door it belongs to
-   change together. e2e/estate-source.mjs rebuilds into a temp dir and fails
-   if the committed HTML has drifted, so skipping this file cannot survive a
-   gate.
+   The hub builder is scripts/build-atlas.mjs, reading the atlas registry at
+   the repo root; this tool has not generated the hub since the atlas lane
+   (e2e/estate-source.mjs §2 guards the hub byte for byte). The doors,
+   surfaces/doors/*.html, are HAND-KEPT since 2026-08-28 (byte-true
+   hex-band and A3 redesign rulings): no generator owns them, and this tool
+   touching them at all is a smell — see the fail-closed note below. Its
+   sanctioned use: drafting door tiles from surfaces/estate.json into a
+   scratch directory, to be hand-keyed into the door from there. NEVER run
+   it over surfaces/doors/ — the d083b809 merge-sync did exactly that, and
+   it took 40a33d1c + fe40aa20 to repair the doors.
 
    WHY THIS SHAPE (founder, 2026-08-26: "the best structural design to
    accommodate our languages stack and updates/editing forward"):
 
-   · ONE SOURCE. The hub and the doors were two hand-kept lists that had
-     already disagreed once — the hub said five domains after bnature.bio
-     made six. Two lists of the same truth always drift; one cannot.
-   · TRANSLATABLE BY CONSTRUCTION. Every generated string carries a
+   · ONE SOURCE PER TRUTH. The hub and the doors were two hand-kept lists
+     that had already disagreed once — the hub said five domains after
+     bnature.bio made six. The split today: hub counts compute from the
+     atlas registry, door tiles draft from surfaces/estate.json, and the
+     doors themselves are hand-kept pages the rulings own.
+   · TRANSLATABLE BY CONSTRUCTION. Every drafted string carries a
      data-i18n key, so surfaces/lang.js swaps it like any other estate
      string, and a missing translation falls back to English visibly and is
      counted — the corpus law, untouched. Keys are MECHANICAL, never
      invented: a surface is s.<path with / and . as ->, a domain field is
-     d.<id>.<field>. That means the 26-language corpus can be extended by a
-     script rather than by someone naming 200 keys by hand.
-   · EDITING FORWARD. Adding a surface is one object in estate.json. It
-     appears on the hub, behind its door, in the right domain, with its
-     honesty state, in one run.
+     d.<id>.<field>. That means the corpus can be extended by a script
+     rather than by someone naming 200 keys by hand.
+   · EDITING FORWARD. Adding a surface is one object in
+     surfaces/estate.json. Its tile drafts from the registry and appears
+     behind its door only when hand-keyed there; the hub is the atlas
+     registry's business, not this file's.
 
-   Usage:  node tools/build-surfaces.mjs
-           node tools/build-surfaces.mjs --out <dir>    (used by the gate)
+   Usage:  node tools/build-surfaces.mjs --out <dir>    (draft to scratch —
+           the ONLY form: --out is mandatory and must resolve outside
+           surfaces/; bare invocation and in-tree targets refuse by name)
    ═══════════════════════════════════════════════════════════════════════════ */
 import { readFileSync, writeFileSync, mkdirSync, readdirSync } from 'node:fs';
-import { join, dirname, resolve } from 'node:path';
+import { join, dirname, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(HERE, '..');
 const SURF = join(ROOT, 'surfaces');
 const argOut = process.argv.indexOf('--out');
-const OUT = argOut > 0 ? resolve(process.argv[argOut + 1]) : SURF;
+/* MANDATORY --out (2026-09-21, laborer row after #174): the doors are
+   HAND-KEPT - this tool drafts tiles to scratch, never over surfaces/.
+   The old default (OUT = SURF) is the mechanism that let the d083b809
+   merge-sync overwrite hand-kept doors; and a guard that rests on data
+   nobody maintains (the eight id-less registry rows) is a coincidence,
+   not a guard. Refuse by name, write nothing. */
+if (argOut < 0 || !process.argv[argOut + 1]) {
+  throw new Error('BUILD-SURFACES REFUSES: no --out directory given. The doors are '
+    + 'hand-kept; this tool drafts tiles into a scratch directory only - bare '
+    + 'invocation used to default to surfaces/ and can overwrite hand-kept doors '
+    + '(d083b809). Run: node tools/build-surfaces.mjs --out <scratch-dir>');
+}
+const OUT = resolve(process.argv[argOut + 1]);
+/* and never INTO the living surfaces tree, even when asked explicitly:
+   the same destruction with a longer command line is the same destruction
+   (header law: NEVER over surfaces/doors/). Compared case-insensitively -
+   this repo lives on a case-insensitive filesystem. */
+const outLc = OUT.toLowerCase(), surfLc = SURF.toLowerCase();
+if (outLc === surfLc || outLc.startsWith(surfLc + sep)) {
+  throw new Error('BUILD-SURFACES REFUSES: --out resolves inside surfaces/ (' + OUT + '). '
+    + 'The doors are hand-kept - draft to a scratch directory outside the tree, '
+    + 'then hand-key the tiles.');
+}
 
 const E = JSON.parse(readFileSync(join(SURF, 'estate.json'), 'utf8'));
+/* FAIL CLOSED ON UNRESOLVED i18n (2026-09-20, sixth instance of the
+   undefined-input law: empty --tbar-h -> zero; empty WIF_RE -> scan
+   everything; unresolvable boundary -> red in the wrong direction; a
+   status regex never reads -> a wait that does not wait; unresolved
+   surface id -> "undefined" as part of the key). A registry row without
+   an i18n id renders as the literal key "undefined.name" - a string no
+   tongue can reach and no gate can name; the d083b809 regen printed
+   eight of them into a hand-kept door. The doors are hand-kept since
+   the byte-true rulings, so this tool touching them at all is already
+   a smell; if it ever runs, it dies on what it cannot key. */
+{
+  const unkeyed = E.surfaces.filter(s => !s.i18n);
+  if (unkeyed.length) throw new Error('BUILD-SURFACES FAILS CLOSED: ' + unkeyed.length
+    + ' registry row(s) lack an i18n id (' + unkeyed.map(s => s.file).join(', ') + '). '
+    + 'Keys are mechanical: s.<path-with-slashes-and-dots-as-dashes>. '
+    + 'Add the id in surfaces/estate.json or do not build - a missing id renders as "undefined.name".');
+}
 const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const rank = { working: 0, partly: 1, roadmap: 2 };
 

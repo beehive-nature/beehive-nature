@@ -1,0 +1,19 @@
+# ANT /stream first-chunk cache (2026-09-21)
+# Paste INSIDE the relay.skaists.dev site block, BEFORE the generic /ant/*
+# reverse_proxy to antd :8082. Then recreate the caddy container (inode law —
+# reload alone may keep the old Caddyfile inode).
+#
+# Warm HIT returns first 2 MiB from local disk (Accept-Ranges: bytes) then
+# splices the remainder from antd. x0x stays OFF this path.
+#
+# Match both stripped and unstripped path shapes Caddy may present.
+@ant_stream {
+	path /ant/v1/data/public/*/stream /v1/data/public/*/stream
+}
+handle @ant_stream {
+	# Cheap Accept-Ranges stamp; the cache also sets it on HIT/MISS.
+	header Accept-Ranges bytes
+	# Browser JS needs these custom headers exposed (bViEw n-chunk / n-ranges).
+	header Access-Control-Expose-Headers "X-Ant-First-Chunk, Accept-Ranges"
+	reverse_proxy 172.18.0.1:8084
+}

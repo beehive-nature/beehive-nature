@@ -7,9 +7,16 @@
    at build (read, never retyped — preservation law: diff, don't trust). The
    in-page JS adds search and reading preferences. Run after editing estate.json:
      node scripts/build-atlas.mjs
-   CI (scripts/estate-check.mjs) fails if the page drifts from the registry. */
+   CI (scripts/estate-check.mjs) fails if the page drifts from the registry.
+   THE TREE OF LIFE PASS (2026-09-19, hub lane): the house hand (burti) names
+   the page, and Austras koks — drawn from these same counts by
+   scripts/atlas-tree.mjs — is the hero in three readings: a fir bearing comb
+   (new bee), a wheel of light (raver), a graph you can check (cypherpunk).
+   The keep rows reuse their destinations' own words (bd.*, watch.*). */
 import { readFileSync, writeFileSync, readdirSync } from 'node:fs';
+import { createHash } from 'node:crypto';
 import { countSurfacesOnDisk, listSurfacesOnDisk, recomputeCounts } from './surface-count.mjs';
+import { treeBee, treeRaver, treeCypher } from './atlas-tree.mjs';
 
 const E = JSON.parse(readFileSync('estate.json', 'utf8'));
 
@@ -43,6 +50,14 @@ if (countsBefore !== JSON.stringify(E.counts)) {
   console.log('counts block re-derived from tree+rows — surfaces: ' + recomputed.surfaces + ' (was ' + JSON.parse(countsBefore).surfaces + ')');
 }
 const c = E.counts;
+
+/* bui Slice 01 (queen order 1822fa54, writer zCode): the state root the daily
+   art derives from - sha256 over the estate.json bytes AS SERVED. Computed
+   after the counts rewrite so it is always the final registry bytes; the
+   browser never fetches estate.json, this baked digest is the runtime truth a
+   day commits to (an intraday deploy forks explicitly - every manifest
+   records the root it derived from). Asserted by estate-check. */
+const stateRoot = createHash('sha256').update(readFileSync('estate.json')).digest('hex');
 
 /* ── the preservation lift: the doors' hex band, byte-true ─────────────────
    The band markup and its CSS are READ from surfaces/doors/index.html and
@@ -124,6 +139,33 @@ const starters = [
       : '<svg viewBox="0 0 80 80" fill="none" aria-hidden="true"><path d="m40 12 15 9v18l-15 9-15-9V21Zm-15 27 15 9v18l-15 9-15-9V48Zm30 0 15 9v18l-15 9-15-9V48Z" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/></svg>';
   return `<a class="start-link ${item.mark}" href="${esc(s.path.replace(/^surfaces\//,''))}"><span class="start-picture" aria-hidden="true">${picture}</span><div><strong>${text('atlas.'+item.mark+'Action',item.action)}</strong><span class="start-help">${text('atlas.'+item.mark+'Help',item.help)}</span><span class="start-technical" data-reg="cypherpunk">${description(s)}</span></div><span class="start-arrow" aria-hidden="true">→</span></a>`;
 }).join('\n');
+/* ── remember · restore · keep ──────────────────────────────────────────────
+   Two open doors and one honest not-yet. The open rows take their words from
+   the destination pages' own keys, so the hub can never promise more than the
+   page does. bGENEaLOGy is not registered yet, so it is a plain row with its
+   reason — never a link to nowhere, never a disabled button. */
+const keepPictures = {
+  data: '<svg viewBox="0 0 80 80" fill="none" aria-hidden="true"><path d="m40 10 26 15v30L40 70 14 55V25Z" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/><path d="m40 27 11.5 6.5v13L40 53l-11.5-6.5v-13Z" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/></svg>',
+  watch: '<svg viewBox="0 0 80 80" fill="none" aria-hidden="true"><rect x="10" y="16" width="60" height="40" rx="7" stroke="currentColor" stroke-width="3"/><path d="m35 28 13 8-13 8Z" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/><path d="M27 67h26" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>',
+  line: '<svg viewBox="0 0 80 80" fill="none" aria-hidden="true"><path d="M40 12v58M40 34c-7-2-14-7-19-15M40 34c7-2 14-7 19-15M40 54c-10-3-20-10-27-22M40 54c10-3 20-10 27-22M22 70l6-3 6 3 6-3 6 3 6-3 6 3" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+};
+const keepers = [
+  {id:'bdata',mark:'data',action:'bd.h1',help:'bd.lead'},
+  {id:'watch',mark:'watch',action:'watch.title',help:'watch.beeLead'}
+].map(item => {
+  const s = E.surfaces.find(s => s.id === item.id && s.presented !== false);
+  if (!s) throw new Error('Keep destination missing from registry: '+item.id);
+  for (const key of [item.action, item.help]) if (!corpus[key]?.en) throw new Error('Keep row key missing from the corpus: '+key);
+  return `<a class="keep-link ${item.mark}" href="${esc(s.path.replace(/^surfaces\//,''))}"><span class="start-picture" aria-hidden="true">${keepPictures[item.mark]}</span><div><strong>${text(item.action,'')}</strong><span class="start-help">${text(item.help,'')}</span><span class="start-technical" data-reg="cypherpunk">${description(s)}</span></div><span class="start-arrow" aria-hidden="true">→</span></a>`;
+}).join('\n');
+if (E.surfaces.some(s => /genealogy/i.test(s.id + s.path))) throw new Error('bGENEaLOGy is registered now — turn its plain row on the hub into a keep-link');
+const notYet = `<div class="keep-plain line"><span class="start-picture" aria-hidden="true">${keepPictures.line}</span><div><strong class="bgene" translate="no" dir="ltr">b<b>GENE</b>a<b>LOG</b>y</strong><span class="start-help">${text('hub.keep.line.help','')}</span><span class="keep-state"><span aria-hidden="true">△</span> ${text('hub.keep.line.state','')}</span></div></div>`;
+
+/* ── Austras koks, from the counts ───────────────────────────────────────── */
+const treeFams = E.families.map(f => { const o = ORGS.find(o => o.id === familyOrg(f)); return {id:f, org:o?.id, mark:o?.mark || 'sk', n:c.byFamily[f] || 0}; });
+const treeOrgs = ORGS.map(o => ({id:o.id, mark:o.mark, n:c.byOrg[o.id] || 0}));
+if (treeFams.reduce((n, f) => n + f.n, 0) !== c.surfaces) throw new Error('TREE DRIFT — the boughs carry '+treeFams.reduce((n, f) => n + f.n, 0)+' cells but the registry counts '+c.surfaces);
+const tree = `<figure class="tree-stage"><div data-reg="bee">${treeBee(treeFams)}</div><div data-reg="raver">${treeRaver(treeFams)}</div><div data-reg="cypherpunk">${treeCypher(treeFams, treeOrgs, c.surfaces, 'skaists.dev')}</div><figcaption id="tree-caption"><span class="tree-sum"><b>${c.surfaces}</b> ${text('hub.w.surfaces','surfaces')} · <b>${c.families}</b> ${text('hub.w.families','families')} · <b>${ORGS.length}</b> ${text('hub.w.orgs','orgs')}</span><span class="tree-legend">${treeOrgs.map(o => `<span class="tree-key ${o.mark}" translate="no"><i aria-hidden="true"></i>${esc(o.id)} <b>${o.n}</b></span>`).join('')}</span></figcaption></figure>`;
 const side = ORGS.map(o => `<div class="side-house ${o.mark}"><a class="side-org" href="#org-${o.id}"><span>${o.label}</span><b>${c.byOrg[o.id] || 0}</b></a>${E.families.filter(f => familyOrg(f) === o.id).map(f => `<a class="side-family" href="#fam-${f}" data-family-link="${f}"><span class="family-human">${text('hub.gl.'+f,'')}</span><span class="family-canonical">${esc(f)}</span><b>${c.byFamily[f] || 0}</b></a>`).join('')}</div>`).join('\n');
 const page = `<!doctype html>
 <html lang="en">
@@ -131,12 +173,13 @@ const page = `<!doctype html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="light dark">
-<meta name="theme-color" content="#f6f7f2">
+<meta name="theme-color" content="#fbf7f0">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="apple-touch-icon" href="bn-logo.jpg">
-<link rel="stylesheet" href="atlas.css?v=3">
+<link rel="preload" href="fonts/burti.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="atlas.css?v=4">
 <title>skaists · beehive nature reserve</title>
 <meta name="description" content="Explore the beehive nature reserve: on-chain art, music, people, science and open tools. Find a place to begin, then browse the whole estate.">
 <style>
@@ -146,18 +189,20 @@ const page = `<!doctype html>
 ${bandCss}
 </style>
 </head>
-<body data-reg="bee" data-experience="home">
+<body data-reg="bee" data-experience="home" data-state-root="${stateRoot}" data-state-root-src="estate.json v${E.v}"> <!-- PUBLIC-CONSTANT: sha256(estate.json) baked at build - recomputed every build, estate-check-asserted -->
 <a class="skip" href="#explore">${text('atlas.browse','Explore the estate')}</a>
 <div class="mode-bar"><div class="wrap mode-inner"><a class="mode-home" href="index.html" aria-label="skaists home">⬡ <span>skaists</span></a><div data-register-host aria-describedby="view-explainer"></div><a class="mode-proof" href="#explore">${text('atlas.everything','Explore everything')} ↓</a></div><p class="sr-only" id="view-explainer">${text('atlas.view','Choose how this page speaks to you')}. ${text('atlas.canonical','Same facts. Three ways to read them.')}</p></div>
 <nav data-experience-nav aria-label="Explore skaists"><a href="index.html" data-i18n="social.arrival.home" aria-current="page">Home</a><a href="blight/gallery.html" data-i18n="experience.gallery">Art gallery</a><a href="blight/studio-music.html" data-i18n="experience.music">Music studio</a><a href="buzz-directory.html" data-i18n="atlas.peopleAction">Meet the hive</a><a href="profile.html" data-i18n="experience.profile">People and names</a></nav>
 <header class="mast" data-art>
   ${bandLine}
   <div class="wrap mast-content">
-    <nav class="mast-nav" aria-label="Primary"><a class="wordmark" href="index.html">skaists<span>.dev</span></a><span data-language-host></span></nav>
+    <nav class="mast-nav" aria-label="Primary"><a class="wordmark house" href="index.html" translate="no" dir="ltr">skaists<span>.dev</span></a><span data-language-host></span></nav>
     <div id="technical-search-slot"></div>
     <div class="welcome">
-      <div class="welcome-copy"><p class="eyebrow">${text('m.4','')}</p><h1><span data-reg="bee">${text('atlas.heading','A place for your creativity.')}</span><span data-reg="raver">${text('hub.name','')}</span><span data-reg="cypherpunk">${text('hub.name','')}</span></h1><p class="intro" data-reg="bee">${text('atlas.intro','Art, science and tools made in the open — with people to meet.')}</p><p class="intro" data-reg="raver">${text('atlas.raver','Carry a garden. Make a sound. Find your people.')}</p><p class="intro" data-reg="cypherpunk">${text('atlas.cypher','Inspect the implementation, provenance and limits of each surface.')}</p><p class="begin-note" data-reg="bee">${text('atlas.progressive','Choose a place to begin. The rest is here when you want it.')}</p></div>
-      <div class="start"><p class="eyebrow">${text('atlas.start','Start here')}</p>${starters}</div>
+      <div class="welcome-copy"><p class="eyebrow">${text('m.4','')}</p><h1><span data-reg="bee">${text('hub.keep.heading','keep what matters.')}</span><span data-reg="raver">${text('hub.name','')}</span><span data-reg="cypherpunk">${text('hub.name','')}</span></h1><p class="intro" data-reg="bee">${text('hub.keep.intro','')}</p><p class="intro" data-reg="raver">${text('atlas.raver','Carry a garden. Make a sound. Find your people.')}</p><p class="intro" data-reg="cypherpunk">${text('atlas.cypher','Inspect the implementation, provenance and limits of each surface.')}</p><p class="begin-note" data-reg="bee">${text('atlas.progressive','Choose a place to begin. The rest is here when you want it.')}</p></div>
+      ${tree}
+      <div class="start"><div class="start-group keep"><p class="group-label">${text('hub.keep.eyebrow','remember · restore · keep')}</p>${keepers}
+${notYet}</div><div class="start-group make"><p class="group-label">${text('hub.keep.more','make and meet')}</p>${starters}</div></div>
     </div>
     <div class="art-stage" data-reg="raver"><a class="art-piece fungi" href="blight/gallery.html"><img src="atlas-art/fungi.svg" width="240" height="240" alt="FUNGi on-chain mushroom artwork"><span><b>FUNGi</b><span>ERC20i</span></span></a><a class="art-piece froggi" href="blight/gallery.html"><img src="atlas-art/froggi.svg" width="240" height="240" alt="FROGGi on-chain frog artwork"><span><b>FROGGi</b><span>ERC20i</span></span></a><a class="art-piece pepi" href="blight/gallery.html"><img src="atlas-art/pepi.svg" width="240" height="240" alt="PEPi on-chain pixel artwork"><span><b>PEPi</b><span>ERC20i</span></span></a><p class="art-caption">${text('atlas.art','On-chain artwork snapshots. Open the gallery to explore.')} <a href="atlas-art/provenance.json">${text('h.016','SOURCES')} ↗</a></p></div>
     <details class="architecture"><summary>${text('atlas.source','Source & limits')}</summary><div class="counts"><span><b data-hero-number>${c.surfaces}</b> ${text('hub.w.surfaces','surfaces')}</span><span><b>${c.families}</b> ${text('hub.w.families','families')}</span><span><b>${ORGS.length}</b> ${text('hub.w.orgs','orgs')}</span></div><div class="architecture-grid"><div><span>registry</span><a href="../estate.json">estate.json · v${E.v}</a></div><div><span>render</span><a href="https://github.com/beehive-nature/beehive-nature/blob/main/scripts/build-atlas.mjs" target="_blank" rel="noopener">build-atlas.mjs ↗</a></div><div><span>kernel</span><a href="dock.html">BNRoSe · ${text('s.dock.name','')}</a></div><div><span>continuity</span><a href="../docs/dispatches/2026-09-06-astra-kernel-continuity.md">${text('atlas.proof','Read the evidence')} ↗</a></div></div></details>
@@ -184,7 +229,7 @@ ${bandCss}
 </div>
 </details>
 </main>
-<footer class="wrap footer"><div><a class="wordmark" href="index.html">skaists<span>.dev</span></a><p>${text('hub.name','')}</p></div><div class="footer-links"><a href="onboarding/index.html">${text('reg.bee','')}</a><a href="doors/index.html">${text('hub.foot.doors','')}</a><a href="../estate.json">${text('hub.foot.registry','')}</a><a href="https://github.com/beehive-nature/beehive-nature" target="_blank" rel="noopener">${text('hub.foot.code','')} ↗</a></div><p class="footer-count"><b>${c.surfaces}</b> ${text('hub.w.surfaces','surfaces')} · <b>${c.domains}</b> ${text('hub.w.domains','domains')} · ${text('hub.counts.tail','')}</p><details class="address"><summary>web+bnr</summary><button id="reg" type="button">Register web+bnr addresses</button><a href="web+bnr://skaists.dev">bnr://skaists.dev</a><p id="protocol-status" role="status"></p></details></footer>
+<footer class="wrap footer"><div><a class="wordmark" href="index.html" translate="no" dir="ltr">skaists<span>.dev</span></a><p>${text('hub.name','')}</p></div><div class="footer-links"><a href="onboarding/index.html">${text('reg.bee','')}</a><a href="doors/index.html">${text('hub.foot.doors','')}</a><a href="../estate.json">${text('hub.foot.registry','')}</a><a href="https://github.com/beehive-nature/beehive-nature" target="_blank" rel="noopener">${text('hub.foot.code','')} ↗</a></div><p class="footer-count"><b>${c.surfaces}</b> ${text('hub.w.surfaces','surfaces')} · <b>${c.domains}</b> ${text('hub.w.domains','domains')} · ${text('hub.counts.tail','')}</p><details class="address"><summary>web+bnr</summary><button id="reg" type="button">Register web+bnr addresses</button><a href="web+bnr://skaists.dev">bnr://skaists.dev</a><p id="protocol-status" role="status"></p></details></footer>
 <div class="wrap estate-navigation"><details><summary>${text('atlas.browse','Explore the estate')}</summary><div data-tour-host></div></details></div>
 <script type="application/json" id="estate">
 <!--ESTATE-JSON-START-->
@@ -193,6 +238,7 @@ ${JSON.stringify(E)}
 </script>
 <script src="atlas-search.js?v=1" defer></script>
 <script src="atlas.js?v=4" defer></script>
+<script src="daily-art.js?v=1" defer></script>
 <script src="agent-dock.js?v=9"></script>
 <script src="tour.js?v=42"></script>
 </body>
@@ -200,4 +246,4 @@ ${JSON.stringify(E)}
 `;
 // Whitespace-only template slots should not become dirty generated lines.
 writeFileSync('surfaces/index.html', page.replace(/^ +$/gm, ''));
-console.log('atlas built — '+E.surfaces.length+' listed · '+c.surfaces+' counted · preserved doors artwork · '+page.length+' bytes');
+console.log('atlas built — '+E.surfaces.length+' listed · '+c.surfaces+' counted · preserved doors artwork · '+page.length+' bytes - state-root '+stateRoot.slice(0,8));

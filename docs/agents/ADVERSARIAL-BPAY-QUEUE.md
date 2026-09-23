@@ -142,3 +142,65 @@ restart.
 ceiling; adapter-availability pause law; handle-rotation policy; witness-retention policy;
 unknown-status reconciliation law for pollers. Each becomes a ruling proposal only after its
 AV test demonstrates the gap. — zArcheology seat, 2026-09-16. No implementation performed.*
+
+---
+
+## CONSUMPTION LOG
+
+- **AV-6 · CONSUMED + GREEN 2026-09-16** (zCode workerb, founder P1 roll after the
+  stale-routing correction; verified untaken first — no av6 lane existed). Per-leg
+  retry ceiling in `ops/x402-door`: RED receipted behaviorally (4th same-leg
+  attempt returned `Ok(Error)` pre-fix — unlimited retry proven live); GREEN =
+  `Reservation.settle_attempts` (leg-lifetime, serde-defaulted, outside the state
+  enum because the state is `Settling` at failure-record time — state-sourced
+  counters reset per cycle, lesson banked in the field doc) +
+  `Journal.max_settle_attempts_per_leg` (default 3, override) + loud
+  FailedKeep-gated refusal naming attempts and ceiling. Full door suite green
+  locally (acceptance 11 + adversarial 10 + d_specs 10); landed `424d0dc0`,
+  CI arbitrates. Receipt:
+  [`2026-09-16-av6-retry-ceiling-receipt.md`](../dispatches/2026-09-16-av6-retry-ceiling-receipt.md).
+  The retry-failure **aggregate ceiling** invariant is now law-shaped in code for
+  the door rail (bounded attempts, loud); the ruling-proposal step for other
+  rails stands.
+  **Founder distinction (2026-09-16, binding):** AV-6's landing bounds
+  `max_attempts` (settlement attempts per leg) — NOT yet
+  `max_failure_charge` (aggregate monetary failure-fee ceiling across
+  heterogeneous attempts). Two complementary limits once actual fee evidence
+  is available; never infer one from the other.
+- **AV-5 · CONSUMED + GREEN 2026-09-16** (same seat): reorg law at the
+  credit boundary — `ReorgFlagged` (prior evidence verbatim + depth) with
+  the founder's law verbatim in the refusal (`history changed, outcome
+  UNDETERMINED -- replay refused, evidence preserved; the flag never decides
+  refund, debit, or settlement`), human-gated + upto-bounded `resolve_reorg`,
+  history preserved in `Settled.reorg_note`. Landed `f99cd316`; hex-law
+  blocked the first attempt (synthetic 58-hex-char test tx — receipted).
+- **AV-4 · CONSUMED + GREEN 2026-09-16** (same seat): `tests/r4_audit.rs`
+  value-level cross-rail join detector + deliberately leaking fixture;
+  first known-good run FAILED on 18 hits (keys-vs-values + the harness
+  sharing payTo/asset/payer/tx across rails — the real R4 lesson banked:
+  same-bytes-on-two-rails IS the join). Plus a genuine timing flake fixed
+  (LegKey includes valid_before; per-call far_future() made rebuilt legs
+  differ across second boundaries — capture once). Landed `8a94a986`.
+- **AV-11 · CONSUMED + CLEAN VERDICT 2026-09-16** (same seat):
+  `scripts/r5-surface-audit.mjs` (selftest-validated ask-shaped detector;
+  labeled-fallback exemption) — **live scan 113/113 surfaces, ZERO
+  human-gas asks: R5 HOLDS today.** Landed `eeb541d7`; CI-wiring named for
+  the pipeline owner.
+- **P0/P1 RECONCILIATION MATRIX produced 2026-09-16** (founder stop-order):
+  [`2026-09-16-av-matrix-reconciliation.md`](../dispatches/2026-09-16-av-matrix-reconciliation.md)
+  — every landed protection is currently a REPOSITORY LAW, not yet a
+  production protection; per-row live-wiring blockers named (door Sepolia →
+  founder-gated prod; serve-bridge token+rates; TTL ruling; split-brain
+  live drill; flag_reorg notifier wiring; r4-audit on production stores;
+  r5 CI step). **Consumption of new adversarial items is PAUSED for one
+  reconciliation pass per founder order.**
+- **CONTROL SURFACE MOVED 2026-09-16 →** [`ASSURANCE-LEDGER.md`](ASSURANCE-LEDGER.md)
+  (absorbs the matrix): A/B/C/D per row with producer→signal→enforcement→
+  state→recovery→probe; **two ceremonies** (M: one meter window promoting
+  AV-1/2/3 with three drills; D: one Sepolia pass promoting AV-4/5/6a/7/8
+  with five drills); AV-6 keeps independent future columns
+  (`max_attempts` implemented; `max_failure_charge` awaiting monetary
+  failure-fee evidence, never inferred); **AV-11 wired into CI** (49/49
+  shape-guarded standing step — the one zero-decision gesture). Zero
+  production changes. **Workerb PAUSED — next human decision is a
+  deployment gesture, not an architecture question.**

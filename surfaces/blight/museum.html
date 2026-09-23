@@ -58,6 +58,9 @@
   code{color:var(--cyan);font-size:11px}
   blockquote{margin:14px 0;padding:12px 16px;border-left:2px solid var(--accent2);
     color:var(--ink);font-size:12.5px;background:#12121a;border-radius:0 8px 8px 0}
+
+/* comprehension touch floor (2026-09-16): 44px canon on phones */
+@media(max-width:520px){button,select,input,a.btn,.btn{min-height:44px}}
 </style>
 </head>
 <body><div class="wrap">
@@ -159,7 +162,9 @@
 </div>
 
 <h2><span data-i18n="h.078">Exhibit 5 · What it cost to be here</span></h2>
-<div class="panel note">
+<details class="tnote" data-reg-disclose><summary data-i18n="mu.d.autoglyph">The Autoglyph comparison — generative art inside the mint itself</summary>
+  <details class="tnote" data-reg-disclose><summary data-i18n="mu.d.autoglyph">The Autoglyph comparison — generative art inside the mint itself</summary>
+  <div class="panel note">
   Every Autoglyph ran its full generative loop <i>inside the mint transaction</i>:
   <b>median 2,874,700 gas — 35.9% of the entire block gas limit, per artwork.</b>
   512 works were minted by <b>59 distinct addresses</b>, and the collection sold out in
@@ -167,6 +172,8 @@
   So anyone who found this later and felt priced out was right about the machine and wrong
   about the wall: <b>the barrier was supply, not gas.</b> Both facts belong on the label.
 </div>
+  </details>
+  </details>
 
 <h2><span data-i18n="h.079">Exhibit 6 · The process wall — 1,408 bytes</span></h2>
 <div class="lede">
@@ -183,7 +190,8 @@
   <tr><td>FROGGI (Base)</td><td><code>0x88A7…22FE</code></td><td id="szR">reading…</td></tr>
   <tr><td><b>v2 − v1</b></td><td></td><td id="szDiff" class="warn">—</td></tr>
 </table></div>
-<div class="note" style="margin-top:8px" id="pw1408note">
+<details class="tnote" data-reg-disclose><summary data-i18n="mu.d.v2">What the 1,408 extra bytes bought — measured from the verified ABIs</summary>
+  <div class="note" style="margin-top:8px" id="pw1408note">
   The v2 deployment is larger by <b id="pw1408">—</b> bytes, and the verified
   ABIs say precisely what that bought: <b>one</b> new external function,
   <code>getHolderIndex</code> — a holder-enumeration view (37 functions → 38).
@@ -191,10 +199,13 @@
   <code>eth_getCode</code> and Sourcify-v2 verified ABIs; if the table above
   says "reading…" the chain is unreachable and <b>no number is invented</b>.
 </div>
+  </details>
 </div>
 
 <h2><span data-i18n="h.080">Exhibit 7 · The process wall — a revert, performed live</span></h2>
-<div class="lede">
+<details class="tnote" data-reg-disclose><summary data-i18n="mu.d.seed">How the seed is drawn — nothing up the sleeve</summary>
+  <details class="tnote" data-reg-disclose><summary data-i18n="mu.d.seed">How the seed is drawn — nothing up the sleeve</summary>
+  <div class="lede">
   ERC-20i derives its seed from the balance, and the draw is
   <code>seed + nonce − 1</code>. At <code>seed = 0</code> that underflows:
   Solidity panics <b>0x11</b>. Harmless to a holder — nobody holds zero and
@@ -203,6 +214,8 @@
   it as the control, then replays the <b>same record with only the seed
   zeroed</b>.
 </div>
+  </details>
+  </details>
 <div class="panel two">
   <figure>
     <div class="stage" id="trapCtl"><span class="note">reading chain…</span></div>
@@ -239,7 +252,8 @@
       the same <code>(lvl,file)</code> wipes the first; there is no append-mode
       setter on any of the seven reference contracts</td></tr>
 </table></div>
-<div class="note" style="margin-top:8px">
+<details class="tnote" data-reg-disclose><summary data-i18n="mu.d.gate">The rehearsal gate — why upload order is checked on deploy day</summary>
+  <div class="note" style="margin-top:8px">
   Hence the rehearsal gate: <b>upload order is a deploy-day check</b>
   (<code>evmcheck.py</code> exists; the testnet rehearsal does not, and the
   exSat testnet lane is frozen). And still open on the wall, founder testimony
@@ -248,6 +262,7 @@
   (<code>SPEC-ERC20I-MECHANICS-1</code> §10). The museum shows the question,
   not a settled answer.
 </div>
+  </details>
 </div>
 
 <h2><span data-i18n="h.082">Exhibit 9 · Bitcoin's answer — a whole-block inscription, and the asymmetry</span></h2>
@@ -294,7 +309,9 @@
           <b>cenotaphs</b> — malformed runestones that burn their runes;
           the Handbook's own example rune is <code>UNCOMMONGOODS</code></td></tr>
 </table></div>
-<div class="note" style="margin-top:8px">
+<details class="tnote" data-reg-disclose><summary data-i18n="mu.d.classes">How these two sit against the museum’s six classes</summary>
+  <details class="tnote" data-reg-disclose><summary data-i18n="mu.d.classes">How these two sit against the museum’s six classes</summary>
+  <div class="note" style="margin-top:8px">
   Against the museum's six classes: both sit inside existing rows — inscription
   content is data-on-chain (b/c hybrid: the envelope is an ordinary Bitcoin
   transaction), runes are commodities like ERC-20i but carried by outputs, not
@@ -306,10 +323,13 @@
   halving: <b>block 840,000, 2024-04-20 00:09 UTC</b> (hash verified via the same
   API while building this exhibit).
 </div>
+  </details>
+  </details>
 </div>
 
 <h2>Exhibit 10 · A name that went with the phone</h2>
-<div class="panel note">
+<details class="tnote" data-reg-disclose><summary data-i18n="mu.d.record">The recording of the first pieces — one device, both chains</summary>
+  <div class="panel note">
   <b>bqueenbee.base.eth</b> · recorded 2026-08-26<br><br>
   One device carried both the phone and the wallet, and the device is gone.
   The name is still out there, pointing at a door nobody can open.<br><br>
@@ -321,6 +341,7 @@
   waits.<br><br>
   <b>An identity with exactly one key is a countdown, not a design.</b>
 </div>
+  </details>
 
 <div class="note" style="margin-top:34px">
   <b>Corrections are part of the exhibit.</b> "Random art maker" is backwards — Autoglyphs
@@ -331,7 +352,8 @@
 
 <div style="margin-top:34px">
 <h2 style="font-size:14px;font-weight:400;letter-spacing:.15em;color:#c9a0ff"><span data-i18n="h.083">SOURCES &amp; DOORS — the ERC-20i wing, receipted</span></h2>
-<div class="note" style="margin-top:6px">
+<details class="tnote" data-reg-disclose><summary data-i18n="mu.d.origin">Where ERC-20i came from — the chain’s own record</summary>
+  <div class="note" style="margin-top:6px">
   <b>The origin, from the chain rather than from memory:</b> ERC-20i — fungible tokens whose
   balances deterministically seed fully on-chain, dynamically rendered art — began <b>on Base,
   with Fungi, 2024-03-31</b> (contract deployed 16:17 UTC; its FUNGI/WETH pool opened 45
@@ -345,6 +367,7 @@
   and Jelli's domain redirects to an unrelated shop. <b>On-chain art outlives its websites;
   that asymmetry is this wing's whole lesson.</b>
 </div>
+  </details>
 <div style="overflow-x:auto"><table style="margin-top:10px">
   <tr><th>family</th><th>contract — the work itself</th><th>alive outside</th><th>our doors</th></tr>
   <tr><td>PEPI eth</td>

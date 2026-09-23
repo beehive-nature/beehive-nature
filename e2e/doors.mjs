@@ -6,7 +6,19 @@
    form, which is the defect this estate is least willing to ship.
 
    Served from the repo root so relative rider paths resolve exactly as Pages
-   serves them (same shape as estate-review.mjs). */
+   serves them (same shape as estate-review.mjs).
+
+   WHICH PAGES ARE DOORS is not decided here. surfaces/doors/ also holds hive
+   pages that are not doors; e2e/not-doors.mjs owns that list and both this
+   file and e2e/door-counts.mjs import it, so the two gates can never disagree
+   about what a door is. The door count comes from the directory minus that list — never a
+   typed number, which is how this file came to assert 7 against a
+   directory of 9.
+
+   RUNS IN CI: the tests.yml node job, after playwright installs chromium —
+   the same job that runs myspace-seam.mjs. It serves the checkout itself and
+   touches no network. */
+import { NOT_DOORS } from './not-doors.mjs';
 import { createServer } from 'node:http';
 import { readFile, readdir } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
@@ -47,8 +59,14 @@ const TAP_FLOOR = 32;   // px — the estate's design floor, not an invented 40
 const CLEAR = 12;       // px the fixed bar must leave under the footer
 
 const browser = await chromium.launch();
-const files = (await readdir(DOORS)).filter(f => f.endsWith('.html')).sort();
-ok('the six doors exist, plus their index', files.length === 7, files.join(', '));
+const onDisk = (await readdir(DOORS)).filter(f => f.endsWith('.html')).sort();
+const files = onDisk.filter(f => !NOT_DOORS.has(f));
+/* a name exempted for a page that no longer exists is a stale exemption, not
+   a harmless one: say so, rather than let the list rot silently. */
+const staleExempt = [...NOT_DOORS].filter(f => !onDisk.includes(f));
+ok(`the door list is on disk, plus ${files.length - 1} door(s) (${onDisk.length} page(s), ${onDisk.length - files.length} not doors by name)`,
+  files.includes('index.html') && files.length > 1, files.join(', '));
+ok('every page exempted by name in not-doors.mjs exists', staleExempt.length === 0, staleExempt.join(', '));
 
 const allLinks = new Set();
 

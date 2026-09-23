@@ -6,7 +6,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <meta name="color-scheme" content="light dark">
-<meta name="theme-color" content="#f6f7f2">
+<meta name="theme-color" content="#fbf7f0">
 <title>bFood Hexagon — the successor to the food pyramid</title>
 <style>
 :root{
@@ -142,19 +142,19 @@ body[data-reg="raver"][data-bfood-beat="arrival"] #masthead{display:none}
 
 /* New bee — language-first calm room. */
 body[data-reg="bee"]{
-  --bg:#f6f7f2;--panel:#fff;--well:#edf2eb;--ink:#18362a;--dim:#435f4e;--faint:#52695b;
-  --line:#ccd7cf;--gold:#855b0b;--violet:#65509a;--cyan:#176879;--warn:#9f362c;
-  --cellbg:#edf2eb;--cellrim:#8a9e90;--fill:#326b39;--fillfull:#326b39;--over:#9f362c;
+  --bg:#fbf7f0;--panel:#fff;--well:#efe9dd;--ink:#0c1412;--dim:#4a5f55;--faint:#5a645e;
+  --line:#e6dfd2;--gold:#855b0b;--violet:#65509a;--cyan:#176879;--warn:#9f362c;
+  --cellbg:#efe9dd;--cellrim:#857d70;--fill:#326b39;--fillfull:#326b39;--over:#9f362c;
   color-scheme:light;
-  background:#f6f7f2;color:#18362a;font:1.125rem/1.65 var(--bee-font);
+  background:#fbf7f0;color:#0c1412;font:1.125rem/1.65 var(--bee-font);
 }
 body[data-reg="bee"] h1{color:var(--ink);letter-spacing:-.03em}
 body[data-reg="bee"] .calm,.take,.support,.eyebrow,.pair{font-family:var(--bee-font)}
-body[data-reg="bee"] .take{color:#326b39}
-body[data-reg="bee"] .door{font:500 1rem/1.4 var(--bee-font);border-radius:16px;min-width:11rem;background:#fff;border-color:#8a9e90}
-body[data-reg="bee"] .door.primary{background:#326b39;color:#fff;border-color:#326b39}
-body[data-reg="bee"] #tbar{background:#f6f7f2!important;border-top-color:#ccd7cf!important}
-body[data-reg="bee"] #tbar a{color:#18362a!important}
+body[data-reg="bee"] .take{color:#6e3fb8}
+body[data-reg="bee"] .door{font:500 1rem/1.4 var(--bee-font);border-radius:16px;min-width:11rem;background:#fff;border-color:#857d70}
+body[data-reg="bee"] .door.primary{background:#a8238c;color:#fff;border-color:#0c1412}
+body[data-reg="bee"] #tbar{background:#fbf7f0!important;border-top-color:#e6dfd2!important}
+body[data-reg="bee"] #tbar a{color:#0c1412!important}
 body[data-reg="bee"] section{background:#fff;border-color:var(--line)}
 
 /* Raver — living hex, plant–body wash. Feeling first; math one tap away. */
@@ -668,7 +668,7 @@ function applyReading(event){
   });
   document.body.setAttribute('data-bfood-beat', beatChoices.get(reading)||defaultBeat(reading));
   var theme=document.querySelector('meta[name="theme-color"]');
-  if(theme) theme.content=reading==='bee'?'#f6f7f2':reading==='raver'?'#0c1412':'#0d1410';
+  if(theme) theme.content=reading==='bee'?'#fbf7f0':reading==='raver'?'#0c1412':'#0d1410';
   restoreVisibleFocus(focus);
   lastReading=reading;
 }

@@ -56,6 +56,16 @@ pub enum VoucherError {
     Tamper(usize),
     /// A stored line is not a well-formed event (loader only).
     Malformed(usize, String),
+    /// AV-2: the cited conversion quote is older than the TTL (inclusive
+    /// boundary — age == TTL refuses too; future-dated quotes as well).
+    /// Names the measured age and the TTL so refusals are self-describing.
+    StaleQuote {
+        age_secs: u64,
+        ttl_secs: u64,
+    },
+    /// AV-2: a conversion quote id that already credited a deposit — quotes
+    /// are single-use independent of staleness. Nothing was written.
+    QuoteReplay(String),
 }
 
 impl std::fmt::Display for VoucherError {
@@ -72,6 +82,14 @@ impl std::fmt::Display for VoucherError {
             ),
             VoucherError::Tamper(n) => write!(f, "chain broken at event {n}"),
             VoucherError::Malformed(n, why) => write!(f, "stored event {n} is malformed: {why}"),
+            VoucherError::StaleQuote { age_secs, ttl_secs } => write!(
+                f,
+                "conversion quote age {age_secs}s >= TTL {ttl_secs}s — take a fresh quote (inclusive boundary, fail closed)"
+            ),
+            VoucherError::QuoteReplay(id) => write!(
+                f,
+                "conversion quote {id} already credited — single use, nothing written"
+            ),
         }
     }
 }
@@ -117,6 +135,46 @@ impl RateSet {
     }
 }
 
+/// AV-2: how long a served conversion quote stays creditable. Fail-closed
+/// default 300s per the spec's suggestion — THE NUMBER IS A FOUNDER RULING
+/// (the law decision gates the constant, never the test shape).
+pub const QUOTE_TTL_SECS: u64 = 300;
+
+/// AV-2: a USDC→A conversion quote — the rate actually served, WHEN it was
+/// served, and the id that makes it single-use. `deposit_usdc` credits only
+/// through a quote: age is measured quote-to-deposit with an INCLUSIVE TTL
+/// boundary, and a quote id credits exactly one deposit ever (the id burns
+/// into the ledger event, so the single-use law survives reloads).
+#[derive(Debug, Clone)]
+pub struct ConversionQuote {
+    pub id: String,
+    pub rate_fp8: u128,
+    pub rate_ref: String,
+    pub quoted_at: u64,
+}
+
+impl ConversionQuote {
+    pub fn new(id: &str, rate_fp8: u128, rate_ref: &str, quoted_at: u64) -> Result<Self> {
+        if id.is_empty() {
+            return Err(VoucherError::MissingRef("a quote id"));
+        }
+        if rate_ref.is_empty() {
+            return Err(VoucherError::MissingRef(
+                "a rate_ref (where the rate was read)",
+            ));
+        }
+        if rate_fp8 == 0 {
+            return Err(VoucherError::NonPositive("conversion rate"));
+        }
+        Ok(Self {
+            id: id.into(),
+            rate_fp8,
+            rate_ref: rate_ref.into(),
+            quoted_at,
+        })
+    }
+}
+
 /// fmt a quatch count as the A string the Python engine writes ("0.4400")
 pub fn fmt_a(quatch: u128) -> String {
     format!("{}.{:04}", quatch / 10_000, quatch % 10_000)
@@ -134,6 +192,11 @@ pub struct Escrow {
     /// of the stored line. `verify_chain` reads only from here, so no
     /// serialiser ever gets a second opinion about what was written.
     bodies: Vec<String>,
+    /// AV-2: conversion quote ids that already credited a deposit. Rebuilt
+    /// by `from_jsonl` from the stored events (the ledger IS the nonce set —
+    /// the same law as the python engine's settle nonces), so single-use
+    /// survives reloads.
+    consumed_quotes: std::collections::HashSet<String>,
 }
 
 impl Escrow {
@@ -308,6 +371,13 @@ impl Escrow {
             };
             let prev_parsed = field("prev")?;
             let hash_parsed = field("hash")?;
+            // AV-2: capture before the move below — the consumed-quote
+            // rebuild reads the same parsed object.
+            let ev_type = obj.get("type").and_then(|v| v.as_str()).map(str::to_string);
+            let quote_id = obj
+                .get("quote_id")
+                .and_then(|v| v.as_str())
+                .map(str::to_string);
 
             let mut body = line.to_string();
             let prev_cut = cut_string_field(&mut body, "prev");
@@ -322,12 +392,34 @@ impl Escrow {
             }
             es.events.push(parsed);
             es.bodies.push(body);
+            // AV-2: the stored event IS the durable nonce record — any
+            // DEPOSIT carrying a quote_id has consumed it.
+            if ev_type.as_deref() == Some("DEPOSIT") {
+                if let Some(id) = quote_id {
+                    es.consumed_quotes.insert(id);
+                }
+            }
         }
         Ok(es)
     }
 
     fn body_events(&self) -> impl Iterator<Item = &Value> {
         self.events.iter()
+    }
+
+    /// Serialize the ledger as JSONL — one full event per line, the same
+    /// shape [`Escrow::from_jsonl`] reads and the Python engine writes.
+    /// Round-trip helper (tests, snapshots); the stored body bytes in THIS
+    /// instance remain authoritative for verification.
+    pub fn to_jsonl(&self) -> Result<String> {
+        let mut out = String::new();
+        for (n, ev) in self.events.iter().enumerate() {
+            let line = serde_json::to_string(ev)
+                .map_err(|e| VoucherError::Malformed(n, format!("serialize: {e}")))?;
+            out.push_str(&line);
+            out.push('\n');
+        }
+        Ok(out)
     }
 
     /// Derived balance in quatch. There is no stored balance to corrupt.
@@ -389,15 +481,26 @@ impl Escrow {
         Ok(self.append(body))
     }
 
-    /// USDC-on-Base rail: credited in A at an EXPLICIT cited rate. Dust refused.
-    /// `usdc_micro` = 1e-6 USDC units; `rate_fp8` = A per USDC at 1e-8.
+    /// USDC-on-Base rail: credited in A at an EXPLICIT cited conversion
+    /// quote (AV-2). Dust refused. All refusal paths run BEFORE the append —
+    /// a refused deposit leaves the chain untouched.
+    ///
+    /// Quote law (SPEC AV-2, `docs/agents/ADVERSARIAL-BPAY-SPECS.md`):
+    /// - age = `ts - quote.quoted_at` measured quote-to-deposit; the TTL
+    ///   boundary is INCLUSIVE (age == TTL refuses — fail closed), and a
+    ///   future-dated quote refuses with the same typed error;
+    /// - a quote id credits exactly ONE deposit ever, independent of
+    ///   staleness — replay is refused even by a fresh-looking resubmission;
+    /// - the quote id + quoted_at burn into the ledger event, so both laws
+    ///   survive a reload via [`Escrow::from_jsonl`].
+    ///
+    /// `usdc_micro` = 1e-6 USDC units; `quote.rate_fp8` = A per USDC at 1e-8.
     pub fn deposit_usdc(
         &mut self,
         voucher: &str,
         usdc_micro: u128,
         base_tx: &str,
-        rate_fp8: u128,
-        rate_ref: &str,
+        quote: &ConversionQuote,
         ts: u64,
     ) -> Result<Value> {
         if usdc_micro == 0 {
@@ -406,14 +509,28 @@ impl Escrow {
         if base_tx.is_empty() {
             return Err(VoucherError::MissingRef("a base_tx reference"));
         }
-        if rate_ref.is_empty() {
-            return Err(VoucherError::MissingRef(
-                "a rate_ref (where the rate was read)",
-            ));
+        // Single use FIRST — independent of staleness (SPEC AV-2 2.4): a
+        // burned id refuses even a fresh-looking resubmission.
+        if self.consumed_quotes.contains(&quote.id) {
+            return Err(VoucherError::QuoteReplay(quote.id.clone()));
         }
-        if rate_fp8 == 0 {
-            return Err(VoucherError::NonPositive("conversion rate"));
+        // Staleness with an INCLUSIVE boundary (2.2/2.3). A future-dated
+        // quote is malformed, not fresh — same typed refusal (2.2b).
+        if quote.quoted_at > ts {
+            return Err(VoucherError::StaleQuote {
+                age_secs: quote.quoted_at - ts,
+                ttl_secs: QUOTE_TTL_SECS,
+            });
         }
+        let age = ts - quote.quoted_at;
+        if age >= QUOTE_TTL_SECS {
+            return Err(VoucherError::StaleQuote {
+                age_secs: age,
+                ttl_secs: QUOTE_TTL_SECS,
+            });
+        }
+        let rate_fp8 = quote.rate_fp8;
+        let rate_ref = quote.rate_ref.as_str();
         // usdc(1e-6) × rate(1e-8) = A at 1e-14 → quatch (1e-4) with half-up
         let credited = div_half_up(usdc_micro * rate_fp8, 10_000_000_000); // 1e-6 × 1e-8 → 1e-4
         if credited == 0 {
@@ -430,7 +547,12 @@ impl Escrow {
         body.insert("base_tx".into(), json!(base_tx));
         body.insert("rate_a_per_usdc".into(), json!(fmt_fp8(rate_fp8)));
         body.insert("rate_ref".into(), json!(rate_ref));
-        Ok(self.append(body))
+        body.insert("quote_id".into(), json!(quote.id));
+        body.insert("quote_ts".into(), json!(quote.quoted_at));
+        let ev = self.append(body);
+        // Burn the id only after the append succeeded — refusals never burn.
+        self.consumed_quotes.insert(quote.id.clone());
+        Ok(ev)
     }
 
     /// Meter usage against the voucher; refuses BEFORE writing if the total

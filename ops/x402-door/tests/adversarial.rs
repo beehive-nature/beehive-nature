@@ -369,19 +369,18 @@ fn adv_retained_failures_exhaust_the_budget_by_number() {
         },
         Arc::new(StaticFloat(1_000_000_000_000)),
     );
+    // ONE far_future for the whole test: LegKey includes valid_before, so
+    // per-call far_future() makes the rebuilt leg0 a DIFFERENT leg when the
+    // test straddles a second boundary — the journal's identity law then
+    // (correctly) reads it as Torn. Captured once, the leg is stable.
+    let vb = far_future();
     for i in 0..5u32 {
-        let req = request(
-            "eip155:8453",
-            "exact",
-            &format!("0xF{i}"),
-            "1",
-            far_future(),
-        );
+        let req = request("eip155:8453", "exact", &format!("0xF{i}"), "1", vb);
         let leg = extract_leg(&req).unwrap();
         d.verify(&leg, &req).unwrap();
         d.settle(&leg, &req).unwrap(); // each failure RETAINS its exposure
     }
-    let sixth = request("eip155:8453", "exact", "0xF5", "1", far_future());
+    let sixth = request("eip155:8453", "exact", "0xF5", "1", vb);
     let leg6 = extract_leg(&sixth).unwrap();
     let err = d.verify(&leg6, &sixth).unwrap_err().to_string();
     assert!(
@@ -389,7 +388,7 @@ fn adv_retained_failures_exhaust_the_budget_by_number() {
         "cap named: {err}"
     );
     // Evidence on ONE of them reconciles it down and reopens budget.
-    let req0 = request("eip155:8453", "exact", "0xF0", "1", far_future());
+    let req0 = request("eip155:8453", "exact", "0xF0", "1", vb);
     let leg0 = extract_leg(&req0).unwrap();
     d.journal.begin_settle(&leg0).unwrap();
     d.journal
@@ -405,6 +404,174 @@ fn adv_retained_failures_exhaust_the_budget_by_number() {
     assert!(
         d.verify(&leg6, &sixth).is_ok(),
         "budget reopened by evidence"
+    );
+}
+
+// ---------- deterministic clock-boundary law (slice 7083c5a2) ----------
+//
+// The flake class of adv_retained_failures_exhaust_the_budget_by_number,
+// made DETERMINISTIC: LegKey includes valid_before, so a rebuilt request
+// whose valid_before differs by even ONE second is a DIFFERENT leg. The
+// production identity-mismatch refusal (journal.rs, begin_settle's Torn
+// arm) is LAW and is untouched — these two tests pin it from the test
+// side, positively and negatively, with no sleep and no race:
+//   positive — the SAME captured valid_before rebuilds the SAME leg and
+//              evidence reconciles it;
+//   negative — a one-second-later rebuild is a different leg and the
+//              journal refuses it as an identity mismatch.
+
+#[test]
+fn adv_clock_boundary_same_valid_before_rebuilds_the_same_leg() {
+    struct Fail;
+    impl SettlementFacilitator for Fail {
+        fn verify(&self, _r: &serde_json::Value) -> Result<(), String> {
+            Ok(())
+        }
+        fn settle(&self, _r: &serde_json::Value) -> FacilitatorSettle {
+            FacilitatorSettle::Error {
+                reason: "reverted".into(),
+                network: "eip155:8453".into(),
+            }
+        }
+    }
+    let gas = 1_000u64;
+    let d = Door::new(
+        Arc::new(Journal::open(&tmp_root("adv-clk-pos"), 5 * gas).unwrap()),
+        Arc::new(Fail),
+        DoorConfig {
+            reserved_gas_wei: gas,
+            ops_float_available_wei: 1_000_000,
+        },
+        Arc::new(StaticFloat(1_000_000_000_000)),
+    );
+    // capture ONCE — the caller law the flake taught (8a94a986)
+    let vb = far_future();
+    let req = request("eip155:8453", "exact", "0xCLK1", "1", vb);
+    let leg = extract_leg(&req).unwrap();
+    d.verify(&leg, &req).unwrap();
+    d.settle(&leg, &req).unwrap(); // FailedKeep: exposure retained
+    let rebuilt = request("eip155:8453", "exact", "0xCLK1", "1", vb);
+    let rebuilt_leg = extract_leg(&rebuilt).unwrap();
+    d.journal.begin_settle(&rebuilt_leg).unwrap();
+    d.journal
+        .settle_with_evidence(
+            &rebuilt_leg,
+            &SettleEvidence {
+                actual_amount: "1".into(),
+                tx_hash: "0xclk-pos".into(),
+                gas_actual_wei: 0,
+            },
+        )
+        .unwrap();
+}
+
+#[test]
+fn adv_clock_boundary_one_second_later_is_a_different_leg() {
+    struct Fail;
+    impl SettlementFacilitator for Fail {
+        fn verify(&self, _r: &serde_json::Value) -> Result<(), String> {
+            Ok(())
+        }
+        fn settle(&self, _r: &serde_json::Value) -> FacilitatorSettle {
+            FacilitatorSettle::Error {
+                reason: "reverted".into(),
+                network: "eip155:8453".into(),
+            }
+        }
+    }
+    let gas = 1_000u64;
+    let d = Door::new(
+        Arc::new(Journal::open(&tmp_root("adv-clk-neg"), 5 * gas).unwrap()),
+        Arc::new(Fail),
+        DoorConfig {
+            reserved_gas_wei: gas,
+            ops_float_available_wei: 1_000_000,
+        },
+        Arc::new(StaticFloat(1_000_000_000_000)),
+    );
+    let vb = far_future();
+    let req = request("eip155:8453", "exact", "0xCLK2", "1", vb);
+    let leg = extract_leg(&req).unwrap();
+    d.verify(&leg, &req).unwrap();
+    d.settle(&leg, &req).unwrap(); // retained failure under vb
+                                   // deterministic "boundary crossed": one second later, no sleep involved
+    let later = request("eip155:8453", "exact", "0xCLK2", "1", vb + 1);
+    let later_leg = extract_leg(&later).unwrap();
+    let err = d.journal.begin_settle(&later_leg).unwrap_err().to_string();
+    assert!(
+        err.contains("identity mismatch"),
+        "the journal's identity law must name the mismatch: {err}"
+    );
+}
+
+// ---------- AV-6: same-leg retry storm / per-leg retry ceiling ----------
+
+/// A3/AV-6: a leg that fails N times must never charge unbounded failure
+/// attempts. The daily gas cap counts RETAINED exposure per leg (one slot
+/// however many retries), so a same-leg storm hits the real facilitator
+/// once per attempt with nothing tightening. The corpus FeePlan names
+/// failure-charge + retry ceilings; this battery pins the retry ceiling:
+/// bounded attempts with a LOUD refusal naming the number, while other
+/// legs stay live (per-leg ceiling, not a global freeze).
+#[test]
+fn adv_av6_same_leg_retry_storm_hits_the_retry_ceiling_loud() {
+    struct Fail;
+    impl SettlementFacilitator for Fail {
+        fn verify(&self, _r: &serde_json::Value) -> Result<(), String> {
+            Ok(())
+        }
+        fn settle(&self, _r: &serde_json::Value) -> FacilitatorSettle {
+            FacilitatorSettle::Error {
+                reason: "reverted".into(),
+                network: "eip155:8453".into(),
+            }
+        }
+    }
+    let gas = 1_000u64;
+    let d = Door::new(
+        Arc::new(Journal::open(&tmp_root("av6-storm"), 5 * gas).unwrap()),
+        Arc::new(Fail),
+        DoorConfig {
+            reserved_gas_wei: gas,
+            ops_float_available_wei: 1_000_000,
+        },
+        Arc::new(StaticFloat(1_000_000_000_000)),
+    );
+    let req = request("eip155:8453", "exact", "0xA6", "1", far_future());
+    let leg = extract_leg(&req).unwrap();
+    d.verify(&leg, &req).unwrap();
+
+    // Up to the ceiling, retries are lawful (no free without evidence).
+    let ceiling = 3u32; // DEFAULT_MAX_SETTLE_ATTEMPTS_PER_LEG (journal.rs)
+    for i in 1..=ceiling {
+        match d.settle(&leg, &req) {
+            Ok(FacilitatorSettle::Error { .. }) => {}
+            other => panic!("attempt {i} below ceiling must be an Error, got {other:?}"),
+        }
+    }
+
+    // The attempt AFTER the ceiling is refused LOUD, naming the number —
+    // never another facilitator round-trip.
+    let storm = d.settle(&leg, &req).unwrap_err().to_string();
+    assert!(
+        storm.contains("retry ceiling"),
+        "refusal names the ceiling: {storm}"
+    );
+    assert!(
+        storm.contains(&ceiling.to_string()),
+        "refusal names the attempt count: {storm}"
+    );
+
+    // Per-leg, not global: a different leg still verifies and settles.
+    let other_req = request("eip155:8453", "exact", "0xB7", "1", far_future());
+    let other_leg = extract_leg(&other_req).unwrap();
+    d.verify(&other_leg, &other_req).unwrap();
+    assert!(
+        matches!(
+            d.settle(&other_leg, &other_req),
+            Ok(FacilitatorSettle::Error { .. })
+        ),
+        "a fresh leg is unaffected by another leg's exhausted ceiling"
     );
 }
 
@@ -579,4 +746,132 @@ fn adv_expire_release_then_rereserve_refused() {
             || err.contains("released")
     );
     assert!(err2.contains("expired") || err2.contains("released") || err2.contains("torn"));
+}
+
+// ---------- AV-5: reorg at the confirmation/credit boundary ----------
+
+/// A2/AV-5 + founder law: `Reorg{depth}` means HISTORY CHANGED — it stops
+/// and flags credit but never itself decides refund, debit, or settlement.
+/// The flag preserves the prior evidence verbatim (RV-1 family: evidence
+/// survives); replay and release are refused while flagged; the ONLY way
+/// out is human-gated resolution with NEW on-chain evidence (which itself
+/// obeys the upto law).
+#[test]
+fn adv_av5_reorg_flags_history_but_never_decides_outcome() {
+    struct Good;
+    impl SettlementFacilitator for Good {
+        fn verify(&self, _r: &serde_json::Value) -> Result<(), String> {
+            Ok(())
+        }
+        fn settle(&self, _r: &serde_json::Value) -> FacilitatorSettle {
+            FacilitatorSettle::Success {
+                payer: "0xaaaa000000000000000000000000000000000aaa".into(),
+                transaction: "tx-av5-original".into(),
+                network: "eip155:8453".into(),
+                actual_amount: Some("7".into()),
+                gas_actual_wei: Some(90_000),
+            }
+        }
+    }
+    let gas = 1_000u64;
+    let d = Door::new(
+        Arc::new(Journal::open(&tmp_root("av5-reorg"), 5 * gas).unwrap()),
+        Arc::new(Good),
+        DoorConfig {
+            reserved_gas_wei: gas,
+            ops_float_available_wei: 1_000_000,
+        },
+        Arc::new(StaticFloat(1_000_000_000_000)),
+    );
+    let req = request("eip155:8453", "exact", "0xA5", "7", far_future());
+    let leg = extract_leg(&req).unwrap();
+    d.verify(&leg, &req).unwrap();
+    assert!(matches!(
+        d.settle(&leg, &req).unwrap(),
+        FacilitatorSettle::Success { .. }
+    ));
+
+    // History changed underneath the confirmation: flag it at depth 2.
+    d.flag_reorg(&leg, 2).unwrap();
+    match d.journal.get(&leg).unwrap().unwrap().state {
+        ReservationState::ReorgFlagged {
+            tx_hash,
+            reorg_depth,
+            ..
+        } => {
+            assert!(tx_hash.contains("av5-original"), "prior evidence preserved");
+            assert_eq!(reorg_depth, 2, "depth carried");
+        }
+        other => panic!("expected ReorgFlagged, got {other:?}"),
+    }
+
+    // The flag DECIDES NOTHING: idempotent replay is refused (returning the
+    // stale Success would credit history that changed), loud and named.
+    let replay = d.settle(&leg, &req).unwrap_err().to_string();
+    assert!(
+        replay.contains("reorg-flagged"),
+        "replay refused naming the reorg: {replay}"
+    );
+
+    // Expiry release is refused too — outcome undetermined is not
+    // non-settlement (D-4 contradiction law extended to the flag).
+    assert!(d
+        .journal
+        .expire_released(&leg, ReleaseVerdict::UnspentOnChain)
+        .is_err());
+
+    // Resolution is the ONLY door out, and it is human-gated with NEW
+    // evidence; upto law holds through the gate.
+    let over = SettleEvidence {
+        actual_amount: "8".into(), // > authorized 7
+        tx_hash: "tx-av5-resolved".into(),
+        gas_actual_wei: 1,
+    };
+    assert!(d
+        .resolve_reorg(&leg, HumanGate::explicit_human_approval(), &over)
+        .is_err());
+    let fresh = SettleEvidence {
+        actual_amount: "7".into(),
+        tx_hash: "tx-av5-resolved".into(),
+        gas_actual_wei: 1,
+    };
+    d.resolve_reorg(&leg, HumanGate::explicit_human_approval(), &fresh)
+        .unwrap();
+    match d.journal.get(&leg).unwrap().unwrap().state {
+        ReservationState::Settled {
+            tx_hash,
+            reorg_note,
+            ..
+        } => {
+            assert!(tx_hash.contains("av5-resolved"), "new evidence live");
+            let note = reorg_note.expect("reorg_note preserves the prior history");
+            assert!(
+                note.contains("av5-original") && note.contains("depth 2"),
+                "prior tx + depth preserved in the note: {note}"
+            );
+        }
+        other => panic!("expected Settled after resolution, got {other:?}"),
+    }
+
+    // After resolution, the ordinary idempotent replay is lawful again and
+    // returns the NEW evidence.
+    assert!(matches!(
+        d.settle(&leg, &req).unwrap(),
+        FacilitatorSettle::Success { .. }
+    ));
+
+    // The gate shape is enforced: flag_reorg on a non-settled leg and
+    // resolve_reorg on a non-flagged leg are both Law refusals.
+    let req2 = request("eip155:8453", "exact", "0xA5b", "7", far_future());
+    let leg2 = extract_leg(&req2).unwrap();
+    d.verify(&leg2, &req2).unwrap();
+    assert!(
+        d.flag_reorg(&leg2, 1).is_err(),
+        "flag requires settled evidence"
+    );
+    assert!(
+        d.resolve_reorg(&leg2, HumanGate::explicit_human_approval(), &fresh)
+            .is_err(),
+        "resolve requires the reorg flag"
+    );
 }

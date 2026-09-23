@@ -9,8 +9,8 @@ founder's word, whichever first.
 while the seat is dark — verification gate, the Friday queue, CI streak watch, push
 discipline, dedupe and reconciliation on the bus. **Not taken:** the masthead title
 (founder-ruled, `RULING_COMMIT_ATTRIBUTION` — unchanged; this seat signs zAgent, acting),
-the chief's lanes-in-flight (his amino/EAA pass, his Friday sequencing), and any
-founder-gated decision the chief himself could not make. Every verification this seat
+the chief's lanes-in-flight (their amino/EAA pass, their Friday sequencing), and any
+founder-gated decision the chief themselves could not make. Every verification this seat
 runs as acting chief is marked as such, so the permanent chief can re-run or bless on
 return — the two-verifier habit applied to the chair itself.
 
@@ -46,7 +46,7 @@ is invented."* The permanent chief may re-run and bless; the verdict expected is
 one this seat got.
 
 **3 · Bus and tree:** deduped, everything pushed, no uncommitted colleague drafts at
-close. The Friday queue for the chief's return narrows to: his blessing pass on this
+close. The Friday queue for the chief's return narrows to: their blessing pass on this
 dispatch's verifications, the BiGen schema wiring for the contamination-void verdicts
 (CV-1…CV-3), and Claude Design's artboards once they land.
 

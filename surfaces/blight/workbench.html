@@ -51,6 +51,9 @@
   details{margin-top:10px}summary{cursor:pointer;color:var(--dim);font-size:12px}
   pre{white-space:pre-wrap;word-break:break-all;font-size:10px;color:var(--dim);
     max-height:200px;overflow:auto;margin:8px 0 0}
+
+/* comprehension touch floor (2026-09-16): 44px canon on phones */
+@media(max-width:520px){button,select,input{min-height:44px}}
 </style>
 </head>
 <body>
@@ -85,6 +88,7 @@
     </div>
   </div>
 
+  <details class="tnote" data-reg-disclose><summary data-i18n="wb.d.market">Why the market is deliberately not live yet</summary>
   <div class="note" style="max-width:760px;border:1px solid var(--line);border-radius:8px;padding:12px;margin-top:16px">
     <b style="color:var(--accent2)">Market — deliberately not live yet.</b><br>
     Trading inscriptions is not a UI problem, it is a settlement problem. On this standard a
@@ -99,7 +103,9 @@
     <code>eth_call</code>. <b>Viewing is safe and read-only; trading ships when it is proven,
     not when it is demoed.</b>
   </div>
+  </details>
 
+  <details class="tnote" data-reg-disclose><summary data-i18n="wb.d.swap">When a swap destroys art, and when it doesn’t</summary>
   <div class="note" style="max-width:760px;border:1px solid var(--line);border-radius:8px;padding:12px">
     <b style="color:var(--accent2)">When a swap destroys art, and when it doesn't.</b><br>
     An earlier version of this page said every swap is a delete. <b>That was overstated and
@@ -117,7 +123,9 @@
     A wallet must therefore compute the actual risk, not shout on every trade. <i>Warning on
     every swap trains people to dismiss the warning that matters.</i>
   </div>
+  </details>
 
+  <details class="tnote" data-reg-disclose><summary data-i18n="wb.d.abi">Why four ABI shapes — no single ERC-20i interface</summary>
   <div class="note" style="max-width:760px">
     <b>Why four ABI shapes.</b> There is no single ERC-20i interface. PEPi answers on
     <code>0xa435130b</code>, the FUNGI/FROGGI/JELLI group on <code>0x422b9e23</code>, TRUFFI on
@@ -129,6 +137,7 @@
     <code>seed + nonce − 1</code> underflows. Any explorer that iterates addresses hits this. It is
     caught below rather than surfaced as a failure.
   </div>
+  </details>
 </div>
 
 <script>

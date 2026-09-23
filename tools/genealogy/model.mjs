@@ -34,13 +34,22 @@ export function createModel({ root, source } = {}) {
   };
 }
 
+// A lifespan reads "<birth>–<death>"; either end may be absent
+// ("–1187BC", "1931–Deceased") and a year is 1-4 digits with an optional
+// BC suffix. BC is carried as a negative integer: sign only, with no
+// astronomical year zero, so -1 is 1 BC and the next year is +1. 123
+// lifespans in the public bloodline cross that boundary (6 are born
+// 0001BC); none of the three consumers subtracts the two years - they
+// compare (evidenceClass, the spine reduce) and export (gedcom). A future
+// caller that measures a duration across the boundary must add one.
+const signed = (m) => (m[2] ? -parseInt(m[1], 10) : parseInt(m[1], 10));
 export function birthYear(lifespan) {
-  const m = String(lifespan || "").match(/^(\d{3,4})/);
-  return m ? parseInt(m[1], 10) : null;
+  const m = String(lifespan || "").match(/^(\d{1,4})(BC)?/);
+  return m ? signed(m) : null;
 }
 export function deathYear(lifespan) {
-  const m = String(lifespan || "").match(/–\s*(\d{3,4})/);
-  return m ? parseInt(m[1], 10) : null;
+  const m = String(lifespan || "").match(/–\s*(\d{1,4})(BC)?/);
+  return m ? signed(m) : null;
 }
 
 // era heuristic — the honest default until sources are harvested
@@ -239,5 +248,81 @@ export function validate(model, { public: isPublic = false } = {}) {
     if (k !== [c.p1, c.p2].sort().join("|")) problems.push(`couple key mismatch ${k}`);
     if (!P[c.p1] || !P[c.p2]) problems.push(`couple ${k} references missing person`);
   }
+  for (const comp of cyclicComponents(model)) {
+    problems.push(`cycle-component: ${comp.join(",")}`);
+    const w = cycleWitness(model, comp);
+    if (w) problems.push(`witness: ${w.join(" -> ")}`);
+  }
   return problems;
+}
+
+// ── parent-graph cycles. A person can never be their own ancestor, so every
+// strongly connected component of the child→parent graph with more than one
+// member (or a self-edge) is a defect. Only edges between existing persons
+// count — dangling parents are already reported as unresolved:.
+// Returns components as sorted id arrays, ordered by their lowest id.
+function parentsOf(model, id) {
+  return (model.edges[id] || []).filter((p) => model.persons[p]);
+}
+function cyclicComponents(model) {
+  // iterative Tarjan — the medieval web is deep enough to threaten recursion
+  const index = new Map(), low = new Map(), onStack = new Set(), stack = [], out = [];
+  let next = 0;
+  for (const start of Object.keys(model.persons).sort()) {
+    if (index.has(start)) continue;
+    const work = [[start, 0]];
+    index.set(start, next); low.set(start, next); next++;
+    stack.push(start); onStack.add(start);
+    while (work.length) {
+      const frame = work[work.length - 1];
+      const [v, i] = frame;
+      const ps = parentsOf(model, v);
+      if (i < ps.length) {
+        frame[1]++;
+        const w = ps[i];
+        if (!index.has(w)) {
+          index.set(w, next); low.set(w, next); next++;
+          stack.push(w); onStack.add(w);
+          work.push([w, 0]);
+        } else if (onStack.has(w)) low.set(v, Math.min(low.get(v), index.get(w)));
+        continue;
+      }
+      work.pop();
+      if (work.length) {
+        const u = work[work.length - 1][0];
+        low.set(u, Math.min(low.get(u), low.get(v)));
+      }
+      if (low.get(v) === index.get(v)) {
+        const comp = [];
+        let w;
+        do { w = stack.pop(); onStack.delete(w); comp.push(w); } while (w !== v);
+        if (comp.length > 1 || parentsOf(model, v).includes(v)) out.push(comp.sort());
+      }
+    }
+  }
+  return out.sort((a, b) => (a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0));
+}
+// A real cycle through the component's lowest id, walked child→parent over
+// existing edges only: breadth-first (shortest), parents tried lowest first.
+// Returns [start, …, start], or null rather than a fabricated chain.
+function cycleWitness(model, comp) {
+  const inComp = new Set(comp);
+  const start = comp[0];
+  const prev = new Map();
+  let frontier = [start];
+  while (frontier.length) {
+    const nextFrontier = [];
+    for (const v of frontier) {
+      for (const p of parentsOf(model, v).filter((x) => inComp.has(x)).sort()) {
+        if (p === start) {
+          const chain = [start];
+          for (let c = v; c !== start; c = prev.get(c)) chain.push(c);
+          return [start, ...chain.slice(1).reverse(), start];
+        }
+        if (!prev.has(p)) { prev.set(p, v); nextFrontier.push(p); }
+      }
+    }
+    frontier = nextFrontier;
+  }
+  return null;
 }

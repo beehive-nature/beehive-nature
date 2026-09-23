@@ -100,11 +100,17 @@ button.copy{background:var(--bg-well);border:1px solid var(--line);color:var(--i
 .sw-quote{font-size:12.5px;color:var(--ink);background:var(--bg-well);border-left:3px solid var(--sem-value);border-radius:0 9px 9px 0;padding:9px 12px;margin-top:10px;min-height:1.4em}
 button.copy:active{transform:translateY(1px)}
 @media (max-width:600px){.stat b{font-size:24px}.stat.science b{font-size:14px}}
+
+/* comprehension touch floor (2026-09-16): 44px canon on phones */
+@media(max-width:520px){button,select,input{min-height:44px}}
 </style>
 </head>
 <body>
 <h1 class="grad">bMiDi · the score the contract already wrote</h1>
-<p class="law">bMiDi does not compose. it <b>paints a score that already exists</b>: the MiDi
+<details class="tnote" data-reg-disclose><summary data-i18n="md.d.compose">What bMiDi does and does not do — it paints, never composes</summary>
+  <details class="tnote" data-reg-disclose><summary data-i18n="md.d.compose">What bMiDi does and does not do — it paints, never composes</summary>
+  <details class="tnote" data-reg-disclose><summary data-i18n="md.d.compose">What bMiDi does and does not do — it paints, never composes</summary>
+  <p class="law">bMiDi does not compose. it <b>paints a score that already exists</b>: the MiDi
 inscription contract on Base answers each seed with its scale, tempo and instrument — the page reads
 that answer from the chain and performs it. the picture is <b>hexagonal</b>, the collection's own
 medium; the colours are <b>the token's own palette</b>, hardcoded in its contract, deliberately not the
@@ -112,6 +118,9 @@ estate's. and the level ladder is the piece's <b>resolution</b>: the same score 
 at level zero it is still animated static, no music; as a balance rises through the thresholds it
 resolves, hex by hex, voice by voice, until level five carries the full ensemble. same seed, same
 performance, every time, forever.</p>
+  </details>
+  </details>
+  </details>
 
 <section class="panel">
   <div class="ladder" id="contracts" style="margin-top:0"></div>
@@ -158,6 +167,9 @@ performance, every time, forever.</p>
 
 <section class="panel pitch" id="pitch">
   <h2><b>the pitch</b> — why hold MiDi at all</h2>
+  <details class="tnote" data-reg-disclose><summary data-i18n="md.d.balance">Every balance is the same piece, at a higher resolution</summary>
+  <details class="tnote" data-reg-disclose><summary data-i18n="md.d.balance">Every balance is the same piece, at a higher resolution</summary>
+  <details class="tnote" data-reg-disclose><summary data-i18n="md.d.balance">Every balance is the same piece, at a higher resolution</summary>
   <p style="font-size:12.5px;margin-top:6px;color:var(--ink-mut)">every balance is the same piece at a higher
   resolution — and only <b style="color:var(--sem-value)">1,050,000+ whole MiDi</b> carries the <b>level-5
   container: a 3:33 psytrance journey at 162 BPM</b>, the full ensemble, hex by hex. this page reads the
@@ -168,6 +180,9 @@ performance, every time, forever.</p>
   are instrument contracts, your balance sets your level wherever it lives, and future deployments can be
   added live: say <i>contract 0x…</i> to bMiDi and it validates the candidate against the chain before it
   joins the switcher. B is the canonical holding: the only MiDi renounced with a live pool.</p>
+  </details>
+  </details>
+  </details>
   <div class="nums">
     <div class="num"><b id="pi-owner">…</b><span>owner — renounced means nobody can mint or change the score</span></div>
     <div class="num"><b id="pi-burn">…</b><span>burned — sent to the dead address, gone from every sale</span></div>
@@ -185,7 +200,8 @@ performance, every time, forever.</p>
 score — reload with the same seed and the same performance returns, note for note, hex for hex.
 the chain remembers; this page keeps nothing.</p>
 
-<p class="foot"><b>provenance.</b> one self-contained file · scale, tempo, ticks, instrument and the
+<details class="tnote" data-reg-disclose><summary data-i18n="md.d.prov">Where this score came from — the file, measured</summary>
+  <p class="foot"><b>provenance.</b> one self-contained file · scale, tempo, ticks, instrument and the
 artwork palette are read live from the MiDi inscription contract this surface performs
 (<span id="prov-c" style="font-family:ui-monospace,Menlo,monospace">…</span>) via keyless public RPC,
 read-only · the melody is the contract's own generator algorithm (verified source), drawn from the same
@@ -199,6 +215,7 @@ contract — it is deliberately NOT drawn from the estate tokens; estate tokens 
 chrome only</b> · the sound is Web Audio oscillators, synthesized live — no audio files, no CDN, no
 build step, zero off-origin beyond the RPC read · under <b>reduced motion</b> the performance rests as
 one composed, silent frame — a quiet one, not a lesser one.</p>
+  </details>
 <nav id="fleetnav"></nav>
 
 <div class="modal" id="swapmodal" hidden>
