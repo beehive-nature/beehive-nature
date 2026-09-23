@@ -115,6 +115,28 @@ for (const r of plan) {
     process.exit(1);
   }
 }
+// H3 MUST ASSERT ITS OWN OUTPUT. H1 and H2 produce a parseable shape by
+// construction -- they reorder or append around two tokens that already
+// parsed. H3 does not: `replace(/�+/, "–")` is non-global and collapses
+// ONE run, so it yields a readable lifespan only when the destroyed bytes sit
+// BETWEEN two clean year tokens. Demonstrated in review: plant "�0991–1078"
+// -- a lost LEADING byte rather than a lost separator -- and the script writes
+// "–0991–1078", three parts that parse as nothing, reports a successful repair,
+// exits 0 and records the row in the receipt. The digit-group refusal above
+// cannot see it, because the digit groups ARE identical. A false success is
+// worse than no repair: it puts a claim where there was a silent absence.
+// H3's evidence for its assumption was a sample of one, so the output is
+// checked instead of assumed.
+for (const r of plan) {
+  if (r.mechanism !== "H3") continue;
+  const h = halves(r.now);
+  const b = h === null ? null : yr(h[0]);
+  const d = h === null ? null : yr(h[1]);
+  if (h === null || b === null || d === null) {
+    console.error(`REFUSING: ${r.id} H3 rewrote "${r.was}" to "${r.now}", which is not a two-part lifespan with two readable years. The destroyed run was not the separator; this record needs a hand, not this mechanism.`);
+    process.exit(1);
+  }
+}
 const classC = plan.filter((r) => CLASS_C.has(r.id));
 const apply = plan.filter((r) => !CLASS_C.has(r.id));
 if (classC.length !== CLASS_C.size) {

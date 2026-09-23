@@ -11,7 +11,13 @@
 // en-dash rejected one byte at a time), which silently removed its person from
 // every chronological check. It was found by a hand reading records long after
 // it landed, because no row anywhere said "this record was not judged".
-// R-E2's sum is what would have named it on the day it arrived.
+// R-E4 is what would have named it on the day it arrived: the shape was not
+// on the allow-list, so the row fails printing the shape. R-E2's sum would
+// NOT have — a total partition is invariant under a record moving between
+// buckets, and every defect of this class moves a record between buckets.
+// That sentence stood here in the first candidate, was measured false in
+// review (plant a shape: R-E2 green, R-E4 falls alone), and is deleted rather
+// than patched. A refutation published in a message does not edit a file.
 //
 // IT REPORTS. It repairs nothing and it must never become a repair list —
 // precedent is the cycle row and the chronology reporter beside it.
@@ -78,16 +84,33 @@ for (const [id, p] of Object.entries(P)) {
 const POP = Object.keys(P).length;
 const RESIDUE = [...BUCKETS.deathOnly, ...BUCKETS.notTwoParts, ...BUCKETS.noLifespan, ...BUCKETS.neitherParses];
 
-// ── the shape inventory for the one bucket whose contents are strings rather
-// than dates. "Deceased" is the corpus's own placeholder; the other two are
-// reviewed defects, one of which the open date-repair lane fixes.
+// ── the shape inventory for the TWO buckets whose contents are strings rather
+// than dates. notTwoParts never split; neitherParses split into two halves and
+// neither half is a year. Those are different defects, but they share ONE
+// allow-list, because the question a reader asks of both is the same: has a
+// human looked at this shape yet?
+//
+// "Deceased" is the corpus's own placeholder. The other two are reviewed
+// defects. FFFD_ENDASH is now a DEAD matcher: the date-repair lane landed as
+// c8751901 and no record carries that shape any more. It is kept deliberately
+// — a subset check reports a dead entry never, which is exactly what lets a
+// repair land green, and R-E5 uses it as a live fixture. That is the cost of
+// the subset design, named here so it does not look free.
 const SANCTIONED = new Set(["Deceased"]);
 const FFFD_ENDASH = "0640" + "�".repeat(3) + "0709";   // built from codepoints
 const REVIEWED_UNPARSEABLE = new Set([FFFD_ENDASH, "9th century (traditional)"]);
 const shapeOf = (id) => (P[id].lifespan || "").trim();
-const shapeCensus = new Map();
-for (const id of BUCKETS.notTwoParts) shapeCensus.set(shapeOf(id), (shapeCensus.get(shapeOf(id)) || 0) + 1);
-const unreviewed = [...shapeCensus.keys()].filter((s) => !SANCTIONED.has(s) && !REVIEWED_UNPARSEABLE.has(s));
+const censusOf = (ids) => {
+  const m = new Map();
+  for (const id of ids) m.set(shapeOf(id), (m.get(shapeOf(id)) || 0) + 1);
+  return m;
+};
+const unreviewedIn = (census) =>
+  [...census.keys()].filter((s) => !SANCTIONED.has(s) && !REVIEWED_UNPARSEABLE.has(s));
+const shapeCensus = censusOf(BUCKETS.notTwoParts);
+const pairCensus = censusOf(BUCKETS.neitherParses);
+const unreviewed = unreviewedIn(shapeCensus);
+const unreviewedPairShapes = unreviewedIn(pairCensus);
 const classify = (shape) => (SANCTIONED.has(shape) ? "sanctioned" : REVIEWED_UNPARSEABLE.has(shape) ? "reviewed" : "UNREVIEWED");
 
 test("R-E1 non-vacuity: the real corpus, a parser that parses, and a residue that exists", () => {
@@ -113,10 +136,16 @@ test("R-E2 THE PARTITION: six buckets, pairwise disjoint, covering the populatio
       const both = BUCKETS[a].filter((id) => other.has(id));
       assert.equal(both.length, 0, `${a} and ${b} overlap on ${both.slice(0, 3).join(", ")}`);
     }
-  // the empty bucket is DECLARED, not omitted — this is the assertion that
-  // notices the day a two-part lifespan appears with neither half readable.
+  // the empty bucket is DECLARED, not omitted — an omitted bucket is exactly
+  // how a sum silently stops summing, and dropping this line is caught here.
   assert.ok(names.includes("neitherParses"), "the empty bucket is declared");
-  assert.equal(BUCKETS.neitherParses.length, 0, "no record has two halves that both fail to parse");
+  // NOTHING ELSE. Every assertion in this row is an identity across a total
+  // partition, so no corpus datum can move one: this row guards the INSTRUMENT
+  // and cannot see a corpus defect. It used to pin neitherParses.length === 0,
+  // which was the file's only pinned corpus count, fell on a realistic record
+  // ("–Deceased", the intersection of two shapes the corpus already carries),
+  // and failed with a bare 1 !== 0 — no id, no shape, nothing to grep. That
+  // detector now lives in R-E4 where the allow-list can name what it found.
 });
 
 test("R-E3 the residue is INVISIBLE to every denominator the chronology reporter uses", () => {
@@ -148,7 +177,7 @@ test("R-E3 the residue is INVISIBLE to every denominator the chronology reporter
     `birth-parseable ${birthYears} + residue ${RESIDUE.length} must be the population ${POP}`);
 });
 
-test("R-E4 every unparseable SHAPE is sanctioned or already reviewed — a new one fails here", () => {
+test("R-E4 every unparseable SHAPE, in EITHER unparseable bucket, is sanctioned or already reviewed — a new one fails here naming it", () => {
   assert.ok(shapeCensus.size > 0, "the shape census is non-empty");
   assert.ok([...shapeCensus.keys()].some((s) => SANCTIONED.has(s)),
     "the sanctioned placeholder is present, so the allow-list is not dead weight");
@@ -156,8 +185,14 @@ test("R-E4 every unparseable SHAPE is sanctioned or already reviewed — a new o
   // row stays green, while an unreviewed shape fails it by name. Pinning the
   // count instead would go red the day the U+FFFD record is repaired.
   assert.deepEqual(unreviewed, [],
-    `unreviewed unparseable lifespan shape(s): ${unreviewed.map((s) => JSON.stringify(s)).join(", ")} — review the record, then add the shape here or repair it`);
-  for (const id of BUCKETS.notTwoParts) assert.ok(P[id], `${id} is a real record`);
+    `unreviewed unparseable lifespan shape(s) in notTwoParts: ${unreviewed.map((s) => JSON.stringify(s)).join(", ")} — review the record, then add the shape here or repair it`);
+  // THE SIXTH BUCKET, on the same allow-list. It is empty today, so this arm
+  // cannot get its non-vacuity from the corpus — R-E5 proves unreviewedIn can
+  // return a non-empty list on a fixture instead. A criterion that needs the
+  // corpus to stay dirty is a criterion that cannot stay passing.
+  assert.deepEqual(unreviewedPairShapes, [],
+    `unreviewed two-part lifespan shape(s) whose halves are both unreadable: ${unreviewedPairShapes.map((s) => JSON.stringify(s)).join(", ")} — review the record, then add the shape here or repair it`);
+  for (const id of [...BUCKETS.notTwoParts, ...BUCKETS.neitherParses]) assert.ok(P[id], `${id} is a real record`);
 });
 
 test("R-E5 the shape classifier can return BOTH answers — on fixtures, not on the corpus", () => {
@@ -170,11 +205,23 @@ test("R-E5 the shape classifier can return BOTH answers — on fixtures, not on 
   const planted = "sometime in the reign of ��";  // minted here, absent from the corpus
   assert.equal(classify(planted), "UNREVIEWED", "an unknown shape classifies as UNREVIEWED");
   assert.ok(![...shapeCensus.keys()].includes(planted), "the planted fixture is not a real corpus shape");
+  // NON-VACUITY FOR R-E4'S SIXTH-BUCKET ARM. pairCensus is empty today, so
+  // assert.deepEqual(unreviewedPairShapes, []) would pass on an empty set no
+  // matter what unreviewedIn did. Exercise the same function on a fixture
+  // census built from "–Deceased" — the exact realistic plant that broke the
+  // old pinned count — and require it to return that shape and not "Deceased".
+  const fixtureCensus = new Map([["–Deceased", 1], ["Deceased", 3], [FFFD_ENDASH, 1]]);
+  assert.deepEqual(unreviewedIn(fixtureCensus), ["–Deceased"],
+    "unreviewedIn returns the unknown shape, skips the sanctioned and the reviewed — the sixth-bucket arm can fail");
+  // and NOT assert.equal(pairCensus.size, 0): that is the pinned corpus count
+  // this commit removes, moved one row down. The fixture above is the guard.
 });
 
 test("R-E6 the report: residue by shape, with the sum that makes it checkable", () => {
-  const byShape = [...shapeCensus.entries()].sort((a, b) => b[1] - a[1])
+  const render = (census) => census.size === 0 ? "(none)" : [...census.entries()].sort((a, b) => b[1] - a[1])
     .map(([s, n]) => `${n}x ${JSON.stringify(s)} [${classify(s)}]`).join(" · ");
+  const byShape = render(shapeCensus);
+  const byPairShape = render(pairCensus);
   console.log(
     `date residue report: population ${POP} = fullyDated ${BUCKETS.fullyDated.length} + ` +
     `birthOnly ${BUCKETS.birthOnly.length} + deathOnly ${BUCKETS.deathOnly.length} + ` +
@@ -182,6 +229,7 @@ test("R-E6 the report: residue by shape, with the sum that makes it checkable", 
     `neitherParses ${BUCKETS.neitherParses.length}. ` +
     `RESIDUE ${RESIDUE.length} records are judged by NO chronological class. ` +
     `Shapes in notTwoParts: ${byShape}. ` +
+    `Shapes in neitherParses (two halves, neither readable): ${byPairShape}. ` +
     `A death-only lifespan is valid data, not a defect; an UNREVIEWED shape is a defect.`,
   );
   assert.ok(RESIDUE.length < POP, "the residue is a minority of the corpus, not the whole of it");

@@ -29,7 +29,9 @@
 // kept — they would bound a future async row — but they are not the mechanism.
 //
 // The real mechanism is GROW-THEN-THROW. Unguarded, the frontier from the root
-// grows multiplicatively (1 2 4 8 16 32 … 28,939 by generation 60), outruns
+// grows multiplicatively (1 2 4 8 16 32 … 28,939 at generation 59, counting the
+// starting frontier as generation 0 — the convention matters: zero-indexed,
+// generation 60 is 37,107), outruns
 // V8's array ceiling and dies with `RangeError: Invalid array length`. THAT
 // throw is what fails the row. Measured with depths()'s `d[p] === undefined &&`
 // check removed: threw after 61,125 ms — i.e. AFTER the 60,000 ms these rows
@@ -42,8 +44,8 @@
 // hypothetical and it is not elsewhere — it is T3's own second line,
 // `depths(model, inCycle)`. T3 fails today only because the root call above it
 // throws first. Reorder those two and T3 hangs to the runner limit with nothing
-// red naming it. segment() (model.mjs:161) is the same shape for the same
-// reason: one `chain.push` per step through towardRoot() (:176), which scans
+// red naming it. segment() (model.mjs:160) is the same shape for the same
+// reason: one `chain.push` per step through towardRoot() (:175), which scans
 // every edge entry per step — measured 251 steps/sec, so V8's 4,294,967,295
 // limit is roughly SIX MONTHS away.
 //
