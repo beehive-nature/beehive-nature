@@ -30,7 +30,8 @@
 //    One supported claim never makes a whole person sourced.
 //  · Who is public is not decided here. The caller's privacy layer supplies
 //    isPublicSubject; this module only projects, strips the private artifact
-//    pointer, and keeps leads out.
+//    pointer, keeps leads out, and never exports raw free text (quotes and
+//    notes) unless the caller's projectText returns it.
 //  · Identity is never decided here. Topology can open an investigation;
 //    only a founder turns evidence into a merge.
 
@@ -242,19 +243,40 @@ export function duplicateAssessment(store, a, b, topology = {}) {
   };
 }
 
+// Free text a public projection never exports raw: a deceased person's
+// obituary or register quote can name the living, and subject eligibility
+// says nothing about the words beside it.
+export const FREE_TEXT = { source: ["note"], claim: ["note"], binding: ["quote", "note"] };
+
 // The public projection. Eligibility belongs to the caller's privacy layer:
 // a claim is projected only when isPublicSubject accepts every party. This
-// module strips the private artifact pointer and never projects leads.
-export function publicView(store, { isPublicSubject } = {}) {
+// module strips the private artifact pointer, never projects leads, and is
+// fail-closed on free text: FREE_TEXT fields are omitted unless the caller
+// supplies projectText(text, { object, field, id }), and only a string it
+// returns is published.
+export function publicView(store, { isPublicSubject, projectText } = {}) {
   if (typeof isPublicSubject !== "function") throw new Error("publicView: the caller's privacy layer must supply isPublicSubject");
+  if (projectText !== undefined && typeof projectText !== "function") throw new Error("publicView: projectText must be a function when given");
   refuse(validateStore(store));
+  const scrub = (obj, object, id) => {
+    const out = { ...obj };
+    for (const field of FREE_TEXT[object]) {
+      if (!(field in out)) continue;
+      const text = projectText ? projectText(out[field], { object, field, id }) : undefined;
+      if (typeof text === "string") out[field] = text;
+      else delete out[field];
+    }
+    return out;
+  };
   const claims = Object.fromEntries(
-    Object.entries(store.claims).filter(([, c]) => parties(c.subject).every((p) => isPublicSubject(p) === true)));
-  const bindings = store.bindings.filter((b) => claims[b.claimId]);
+    Object.entries(store.claims)
+      .filter(([, c]) => parties(c.subject).every((p) => isPublicSubject(p) === true))
+      .map(([id, c]) => [id, scrub(c, "claim", id)]));
+  const bindings = store.bindings.filter((b) => claims[b.claimId]).map((b) => scrub(b, "binding", `${b.sourceId}→${b.claimId}`));
   const sources = {};
   for (const b of bindings) {
     const { artifactRef, ...rest } = store.sources[b.sourceId];
-    sources[b.sourceId] = rest;
+    sources[b.sourceId] = scrub(rest, "source", b.sourceId);
   }
   return { sources, claims, bindings, leads: [] };
 }

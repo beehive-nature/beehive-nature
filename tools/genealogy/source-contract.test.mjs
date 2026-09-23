@@ -259,6 +259,55 @@ test("publicView has no privacy policy of its own: no predicate, no projection",
   assert.deepEqual(all.leads, []);
 });
 
+// a deceased subject's obituary whose words name a living third party
+function obituaryStore() {
+  const s = createStore();
+  addSource(s, src("OB", { type: "obituary", scope: "item", title: "Obituary", recordId: "NEWS-1922-0104", note: "clipping kept by Living-Grandchild-Q" }));
+  addClaim(s, { ...claim("C-death", "D", "death", { date: "1922-01-03" }), note: "informant Living-Son-Q, 41 Elm St" });
+  bind(s, {
+    ...link("OB", "C-death", "supports", "death", { locator: null }),
+    quote: "died Jan. 3, 1922; survived by her son Living-Son-Q of 41 Elm St",
+    note: "transcribed from Living-Grandchild-Q's copy",
+  });
+  return s;
+}
+const LIVING_TEXT = /Living-|Elm St/;
+
+test("a deceased subject's quote naming a living third party does not leak (fail-closed free text)", () => {
+  const s = obituaryStore();
+  const pub = publicView(s, { isPublicSubject: (id) => id === "D" });
+  assert.deepEqual(Object.keys(pub.claims), ["C-death"], "the deceased subject IS public (non-vacuity)");
+  assert.equal(pub.bindings.length, 1);
+  assert.equal(pub.claims["C-death"].value.date, "1922-01-03", "the claim itself is projected");
+  assert.doesNotMatch(JSON.stringify(pub), LIVING_TEXT);
+  for (const [obj, field] of [[pub.bindings[0], "quote"], [pub.bindings[0], "note"], [pub.claims["C-death"], "note"], [pub.sources.OB, "note"]])
+    assert.equal(field in obj, false, `${field} was exported raw`);
+  // the private store keeps every word: omission is a projection, not a deletion
+  assert.match(s.bindings[0].quote, /Living-Son-Q/);
+});
+
+test("free text reaches public only as a string the caller's projectText returns", () => {
+  const s = obituaryStore();
+  const seen = [];
+  const pub = publicView(s, {
+    isPublicSubject: (id) => id === "D",
+    projectText: (text, at) => {
+      seen.push(`${at.object}.${at.field}`);
+      if (at.field === "quote") return text.replace(/;.*$/, "; [survivors withheld]");
+      if (at.object === "claim") return null;       // refused
+      if (at.object === "source") return 42;        // not a string: refused
+      return undefined;                             // refused
+    },
+  });
+  assert.deepEqual(seen.sort(), ["binding.note", "binding.quote", "claim.note", "source.note"], "every free-text field goes through the caller");
+  assert.equal(pub.bindings[0].quote, "died Jan. 3, 1922; [survivors withheld]");
+  assert.equal("note" in pub.bindings[0], false);
+  assert.equal("note" in pub.claims["C-death"], false);
+  assert.equal("note" in pub.sources.OB, false);
+  assert.doesNotMatch(JSON.stringify(pub), LIVING_TEXT);
+  refuses(() => publicView(s, { isPublicSubject: () => true, projectText: "keep" }), /projectText must be a function/);
+});
+
 // ── mutation: provenance, assertions and counts cannot be bent ───────────────
 
 test("mutations that remove provenance, convert an assertion, or add a count all fail", () => {
