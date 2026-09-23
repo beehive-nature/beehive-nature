@@ -254,3 +254,117 @@ A verification is pinned to the sha it ran against; this addendum is pinned to
 the rename commit and to nothing later.
 
 **MAINNET SPEND: 0.**
+
+---
+
+## ADDENDUM 2 — THE BULK-INCREMENT ROW (bee-laborer's fifth finding on #225)
+
+**Pinned at `8c81ec0d` (the rename head) for the RED, and at the commit this
+addendum ships in for the GREEN.**
+
+### The defect
+
+`source-contract-audit.mjs:418` incremented the clause's inspection count once,
+in bulk, by the staged store's own size. R6's population expression for that
+same code was the same size computed a second time. The equality was `n === n`
+and could not fall from any collapse of the two walks the clause actually does.
+
+### Census of the mechanism — mine, not inherited
+
+Instrument named: `grep -o` over the reader at `8c81ec0d`, **occurrences, not
+lines**, with a gap probe.
+
+```
+saw(  total occurrences                 36
+  saw('CODE', ...)  bulk form            1   <- line 418, this clause, only this one
+  saw('CODE')       per-row form        35
+  1 + 35 = 36 — the partition CLOSES
+gap probe: any saw( matching neither shape ->  NOTHING
+```
+
+A colleague's count is still an unmeasured count: theirs was 36 sites / 1 bulk /
+**27** per-row, which leaves 8 sites unaccounted. The finding is the same and
+their scope was right; this partition is the one with no remainder.
+
+### RED — reproduced on the reader ON DISK through the SHIPPED battery
+
+Verdict lines diffed against a pristine run; rc is never the classifier.
+
+```
+PRISTINE                                  48/48 rc=0
+W5    surviving window 5 on both walks    47/48  FELL: M LNK-STAGED-CORPUS-DIVERGE
+W10   surviving window 10                 48/48  ALL GREEN   <- 99.90% coverage loss
+W100  surviving window 100                48/48  ALL GREEN
+s2    CONTROL: the bulk count -> 1         47/48  FELL: R6  ALONE
+PRISTINE AGAIN 48/48 · reader byte-equal to the copy: YES
+```
+
+`s2` is the control that makes the silence the gate's and not the rig's: R6's
+row for this code is alive and can say no. It simply could not say no to the
+collapse, because the number it compared was the number it was given.
+
+### GREEN — counted per row, over both lists
+
+```
+inspected[LNK-STAGED-CORPUS-DIVERGE]   10259  ->  20518
+corpus.persons 10259 · staged 10259 · sum 20518
+findings 12 · vacuous clauses 0        UNMOVED
+```
+
+The clause walks **two** lists — `Object.keys(persons)` for the
+missing-from-store side, `stagedIds` for the extra-in-store side — so the
+honest population is their sum, and the table said the staged store alone.
+
+**The verdicts are untouched and that is asserted by the shipped rows, not by
+me:** `R2` (no finding outside the baseline) and `R3` (no dead baseline entry)
+are green at the fixed tree, which is a stronger statement about the key set
+than any re-implementation of it here.
+
+### Mutations — 9 arms, verdicts DIFFED against pristine, restored byte-equal
+
+```
+B1  window 5 on both walks        R6 + M LNK-STAGED-CORPUS-DIVERGE
+B2  window 10                     R6   ALONE   <- the exact survivor, 48/48 before
+B3  window 100                    R6   ALONE
+B4  window 5000 (HALF of each list still walked)   R6   ALONE
+B5  HALF-DELETE the extra-in-store count only      R6   ALONE
+B6  HALF-DELETE the missing-from-store count only  R6   ALONE
+B7  OFF-SWITCH: restore the bulk increment         R6   ALONE
+B8  WRONG POPULATION: the table says staged alone  R6   ALONE
+B9  DOUBLE COUNT: count one row twice              R6   ALONE
+PRISTINE AGAIN 48/48 rc=0 · reader byte-equal YES · test byte-equal YES
+```
+
+`B1` is **reported as it came**: at a window of five the small-fixture M arm
+also fires, so R6 is claimed to fall ALONE at B2-B9 and not at B1.
+
+`B5`/`B6` are the arms that earn the row — a floor over an inventory must count
+the thing that can be DELETED, and here half the work can be deleted while the
+other half still runs. `B4` shows it catches a **partial** collapse, not only a
+drastic one. `B7` is the off-switch and `B8` is the wrong ANSWER on the table
+side; an arm shown to catch an off-switch has not been shown to catch a wrong
+answer.
+
+### One thing NOT proven, named rather than left to be found
+
+The population expression carries the reader's own `if (stagedIds.length)`
+guard. **Deleting that guard is INVISIBLE — measured, not assumed:**
+
+```
+GUARD-DELETED arm   rc=0   tests 48 · pass 48 · fail 0
+```
+
+R6 reads the published archive alone, whose staged store is not empty, so the
+false branch is unreachable and no arm in this file can fall on it. It mirrors
+the reader's condition so that an empty store reds nothing, and the file says
+so where the expression is. `LNK-FRONTIER-UNDISCLOSED` already sits in
+`UNCOVERED_SWEEPS` for the same branch.
+
+### GREEN, the shipping numbers
+
+```
+node --test .../source-contract-audit.test.mjs   rc=0  48 pass 0 fail 0 skipped
+genealogy glob, exactly tests.yml:115-121        rc=0  291 pass 0 fail, 16 suites
+```
+
+**MAINNET SPEND: 0.**

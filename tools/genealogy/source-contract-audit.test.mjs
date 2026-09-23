@@ -300,7 +300,18 @@ const SWEEPS = [
       const rel = (s && s.relationships) || {};
       return ((rel.parents || []).length) + ((rel.children || []).length);
     })],
-  ['LNK-STAGED-CORPUS-DIVERGE', 'the staged objects on disk', (a) => Object.keys(a.staged).length],
+  /* BOTH lists, because the clause walks both: published persons for the
+   * missing-from-store side, staged ids for the extra-in-store side. The
+   * staged store alone was ALSO the reader's own bulk increment, so the
+   * equality compared a number to itself and no collapse could move it.
+   * The guard is the reader's: neither walk runs when the store is empty.
+   * STATED COST: that guard's false branch is unreachable from the published
+   * archive, whose store is not empty, so NO arm in this file can fall on it.
+   * It mirrors the reader's own condition so that an empty store reds nothing,
+   * and it is untested here rather than proven — said plainly instead of left
+   * for the next reader to find. */
+  ['LNK-STAGED-CORPUS-DIVERGE', 'corpus.persons + the staged objects on disk — the clause walks both',
+    (a) => (Object.keys(a.staged).length ? popPersons(a) + Object.keys(a.staged).length : 0)],
 ];
 
 /* The rest, each with the BRANCH that decides its count. Deriving these here

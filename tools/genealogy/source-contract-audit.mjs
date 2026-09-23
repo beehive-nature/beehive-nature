@@ -415,9 +415,21 @@ export function checkSourceContract({ corpus, overlay, packs = {}, staged = {}, 
 
   const stagedIds = Object.keys(staged);
   if (stagedIds.length) {
-    saw('LNK-STAGED-CORPUS-DIVERGE', stagedIds.length);
-    const missingFromStore = Object.keys(persons).filter((id) => !staged[id]);
-    const extraInStore = stagedIds.filter((id) => !persons[id]);
+    /* COUNTED PER ROW, never in one bulk increment. A single increment by the
+     * staged store's own size would be the very expression R6 compares it to,
+     * computed twice: the equality reads n === n and survives any collapse of
+     * the two walks below. Found by bee-laborer attacking #225 — a surviving
+     * window of ten, a 99.9% coverage loss, read 48/48 green.
+     * And the clause walks TWO lists, so the honest population is the published
+     * corpus PLUS the staged store, not the staged store alone. */
+    const missingFromStore = Object.keys(persons).filter((id) => {
+      saw('LNK-STAGED-CORPUS-DIVERGE');
+      return !staged[id];
+    });
+    const extraInStore = stagedIds.filter((id) => {
+      saw('LNK-STAGED-CORPUS-DIVERGE');
+      return !persons[id];
+    });
     if (missingFromStore.length || extraInStore.length) {
       add('LNK-STAGED-CORPUS-DIVERGE', 'persons/',
         `${missingFromStore.length} published person(s) have no staged object; ${extraInStore.length} staged object(s) are not in the corpus`);
