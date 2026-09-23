@@ -155,6 +155,19 @@
     function markPaid(uploadId, txHashes) {
       Object.keys(txHashes).forEach(function (h) { store.set(QKEY(h), JSON.stringify({ upload_id: uploadId, tx_hash: txHashes[h] })); });
     }
+    /* THE CHAIN REFUSED IT, SO NOTHING MOVED. The index entries are written BEFORE the wait —
+       deliberately, so a crash keeps what did leave the wallet — and until now nothing cleared
+       them when the receipt came back 0x0. The quotes then read paid-forever on a device that
+       spent no ANT: pay() answered already-paid, resume() answered tx-reverted, two refusals
+       pointing at each other. Before this file kept an index a re-prepare simply signed again;
+       closing that route is what makes the clear owed. Only entries naming THIS hash are cleared,
+       so a batch that did land keeps its own. '' reads back as absent through paidFor, and absent
+       is the true answer once the chain has said nothing moved. A denied store must not replace
+       'tx-reverted' with a storage error: the stale entry is the lesser harm and the refusal
+       below still names the revert. */
+    function unpay(hash, covered) {
+      try { covered.forEach(function (x) { if (x.tx_hash === hash) store.set(QKEY(x.quote_hash), ''); }); } catch (e) { /* kept stale; the tx-reverted refusal still stands */ }
+    }
 
     /* a door refusal is {"error": "<name>"}; the name rides on the refusal so the surface can say which law held. */
     function doorJSON(path, body) {
@@ -283,10 +296,28 @@
               /* the tell comes FIRST so the claim on it is true: a denied store must not be able to
                  swallow the one line that names what left the wallet. It used to sit under both
                  writes, where a throwing store reached the caller and this never fired. */
-              tell({ phase: 'sent', what: 'payment', tx: h }); /* the surface's own record of what left the wallet, even if its store is denied */
+              /* ISOLATED, not ordered. Ordering cannot make two effects survive each other — it
+                 only chooses which one dies. Under the writes, a throwing store swallowed the one
+                 line naming what left the wallet; above them, a throwing renderer destroyed the
+                 record that stands between this page and a second real payment. Losing a status
+                 line costs a line; losing the record costs another signature. This is the only
+                 tell between the wallet signing and the record being written: 'plan'/'signing'
+                 come before anything is sent, and 'waiting'/'finalizing'/'done'/'refused' come
+                 after both writes. */
+              try { tell({ phase: 'sent', what: 'payment', tx: h }); } catch (e) { /* the surface's own rendering is not this page's payment */ }
               store.set(KEY(prepare.upload_id), JSON.stringify({ txHashes: txHashes, finalized: false })); /* BEFORE finalize, before the wait */
               markPaid(prepare.upload_id, txHashes); /* the per-quote index, written in the same breath as the upload record */
-              return waitFor(h, 'payment', input.signal);
+              return waitFor(h, 'payment', input.signal).catch(function (e) {
+                if (e && e.refusal === 'tx-reverted') {
+                  unpay(h, batch.map(function (p) { return { quote_hash: p.quote_hash, tx_hash: txHashes[p.quote_hash] }; }));
+                  batch.forEach(function (p) { if (txHashes[p.quote_hash] === h) delete txHashes[p.quote_hash]; });
+                  /* the upload record must not keep naming a refused transaction as the payment for
+                     these quotes. Emptied outright when nothing is left, so resume answers 'no
+                     payment is waiting on this price' rather than 'it belongs to a different plan'. */
+                  try { store.set(KEY(prepare.upload_id), Object.keys(txHashes).length ? JSON.stringify({ txHashes: txHashes, finalized: false }) : ''); } catch (e2) { /* as above */ }
+                }
+                throw e;
+              });
             });
           }, Promise.resolve());
         });
@@ -332,7 +363,7 @@
            ours, fall through and let the door finalize this upload; nothing is signed either way. */
         if (kept.finalized && strip(prepare.data_map_address || '') && strip(kept.receipt && kept.receipt.address || '') === strip(prepare.data_map_address || '')) return kept.receipt;
         var hashes = covered.map(function (x) { return x.tx_hash; }).filter(function (h, i, a) { return a.indexOf(h) === i; });
-        return hashes.reduce(function (ch, h) { return ch.then(function () { return waitFor(h, 'payment', input.signal); }); }, Promise.resolve())
+        return hashes.reduce(function (ch, h) { return ch.then(function () { return waitFor(h, 'payment', input.signal).catch(function (e) { if (e && e.refusal === 'tx-reverted') unpay(h, covered); throw e; }); }); }, Promise.resolve())
           .then(function () { return finalize(prepare, kept.txHashes, plan, null, started); });
       }).catch(function (e) { return refused(e, 'network'); });
     }

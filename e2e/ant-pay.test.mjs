@@ -47,7 +47,9 @@ function world(o = {}) {
   const signer = 'signer' in o ? o.signer : { name: 'mock wallet', address: async () => PAYER, send: async (tx) => { log.sends.push(tx); log.order.push('send');
     if (o.decline || (o.declineAfter != null && log.sends.filter((t) => t.to === VAULT).length > o.declineAfter)) throw new Error('user rejected'); return TX(log.sends.length); } };
   const store = { get: (k) => mem.get(k) ?? null, set: (k, v) => { if (o.storeThrows) throw new Error('storage denied'); mem.set(k, v); log.order.push('persist'); } };
-  const payer = AntPay.create({ door: DOOR, fetch, rpcCall, signer, store, sleep: async () => {}, onState: (s) => log.states.push(s) });
+  /* throwOnState: the surface's own renderer blows up on that phase — a caller's failure, not this page's. */
+  const onState = (s) => { log.states.push(s); if (o.throwOnState === s.phase) throw new Error('the surface’s renderer blew up'); };
+  const payer = AntPay.create({ door: DOOR, fetch, rpcCall, signer, store, sleep: async () => {}, onState });
   return { payer, log, mem };
 }
 const refused = async (promise, code) => { await assert.rejects(promise, (e) => { assert.equal(e.refusal, code, e.message); return true; }); };
@@ -271,25 +273,36 @@ test('a door that fails once does not strand the payment: resume finalizes the p
    is written before the wait (deliberately — a crash must not lose a hash), so a kept quote can
    carry a tx the chain went on to refuse. The wait list is built from the same merged map. */
 test('resume waits on every hash it is about to finalize, including the ones another upload kept', async () => {
+  /* the kept hash is UNCONFIRMED, which is the only way a device holds one the chain went on to
+     refuse: the person stopped waiting, and the file keeps the hash on purpose (':203'). A hash
+     pay() itself watched revert is now unwound on the spot, so it can no longer be the fixture. */
   const p = prepareOf(300), w = world({ revertHashes: [TX(2)] });
-  await refused(w.payer.pay({ prepare: p, authorization: authOf(p), confirmPlan: yes }), 'tx-reverted');
+  const stopped = { get aborted() { return w.log.sends.some((t) => t.to === VAULT); } };
+  await refused(w.payer.pay({ prepare: p, authorization: authOf(p), confirmPlan: yes, signal: stopped }), 'stopped-waiting');
   const kept1 = JSON.parse(w.mem.get('ant-pay.paid.up-1'));
   assert.equal(Object.keys(kept1.txHashes).length, 256, 'precondition: batch one is kept');
-  assert.equal(kept1.txHashes[q(1)], TX(2), 'precondition: and the hash it kept is the one the chain refused');
+  assert.equal(kept1.txHashes[q(1)], TX(2), 'precondition: and the hash it kept is one this chain refuses');
 
   const again = { ...p, upload_id: 'up-2' }, w2 = world({ allowance: 10n ** 20n, finalizeFails: 502, failOnce: true, revertHashes: [TX(2)] });
   for (const [k, v] of w.mem) w2.mem.set(k, v);
   await refused(w2.payer.pay({ prepare: again, authorization: authOf(again), confirmPlan: yes }), 'paid-not-finalized');
   assert.equal(Object.keys(JSON.parse(w2.mem.get('ant-pay.paid.up-2')).txHashes).length, 44, 'precondition: up-2 kept only its own 44, all confirmed');
 
+  /* CONTROL — snapshot taken BEFORE the refusal, because the refusal now unwinds what it refused. */
+  const w3 = world({ allowance: 10n ** 20n });
+  for (const [k, v] of w2.mem) w3.mem.set(k, v);
+
   const finalizedBefore = w2.log.finalize.length;
   await refused(w2.payer.resume({ prepare: again, authorization: authOf(again) }), 'tx-reverted');
   assert.equal(w2.log.finalize.length, finalizedBefore, 'it never reached the door with a refused transaction in the body');
+  const marks = (w, tx) => [...w.mem].filter(([k, v]) => k.startsWith('ant-pay.paid.quote.') && v && JSON.parse(v).tx_hash === tx).length;
+  assert.equal(marks(w2, TX(2)), 0, 'and the refused hash no longer marks any quote as paid — resume unwinds what it watched revert');
+  /* the unwind is per TRANSACTION. resume covers two of them and only one was refused; clearing
+     by upload would throw away 44 quotes of ANT the chain did confirm. */
+  assert.equal(marks(w2, TX(1)), 44, 'while every quote paid by the transaction that DID land keeps its entry');
 
-  /* CONTROL — the same shape with nothing reverted finalizes, so the refusal above is the chain’s
-     verdict and not a rig that refuses. */
-  const w3 = world({ allowance: 10n ** 20n });
-  for (const [k, v] of w2.mem) w3.mem.set(k, v);
+  /* the same shape with nothing reverted finalizes, so the refusal above is the chain’s verdict
+     and not a rig that refuses. */
   const r = await w3.payer.resume({ prepare: again, authorization: authOf(again) });
   assert.equal(r.address, ADDR); assert.equal(w3.log.finalize[0].txs.length, 300);
 });
@@ -362,6 +375,72 @@ test('the payment hash is announced before it is written down: a denied store ca
   await ctl.payer.settle({ prepare: p, authorization: authOf(p), confirmPlan: yes });
   assert.deepEqual(ctl.log.states.filter((s) => s.phase === 'sent').map((s) => s.tx), [TX(1)], 'CONTROL: the working store announces the same hash');
   assert.ok(ctl.mem.size > 0, 'CONTROL: and it does write it down');
+});
+
+/* ISOLATION, NOT ORDERING. bee-laborer's row asked this line for a true comment; the reorder that
+   delivered it opened a DOUBLE PAYMENT — a renderer that throws on 'sent' destroyed the record
+   before either write, so a re-prepare of the same bytes paid again. Ordering cannot make two
+   effects survive each other, it only chooses which one dies. The denied-store CONTROL is the
+   failure the ordering existed for and is kept in the row, so the fix cannot pass by moving it back. */
+test('a renderer that throws does not cost a second payment: the sent tell is isolated, not merely ordered', async () => {
+  const payCalls = (w) => w.log.sends.filter((t) => t.to === VAULT).length;
+  /* the allowance already covers the price, so the payment is the FIRST send and its hash is TX(1). */
+  const p1 = prepareOf(2), w = world({ allowance: 10n ** 20n, throwOnState: 'sent' });
+  await w.payer.pay({ prepare: p1, authorization: authOf(p1), confirmPlan: yes });
+  assert.equal(payCalls(w), 1);
+  assert.deepEqual(w.log.states.filter((s) => s.phase === 'sent').map((s) => s.tx), [TX(1)], 'precondition: the throwing tell did fire');
+  assert.equal(w.mem.size, 3, 'and the record survived it: the upload record and one key per quote');
+
+  const p2 = { ...p1, upload_id: 'up-2' };
+  await refused(w.payer.pay({ prepare: p2, authorization: authOf(p2), confirmPlan: yes }), 'already-paid');
+  assert.equal(payCalls(w), 1, 'a re-prepare of the same bytes still signs nothing');
+
+  const ctl = world({ allowance: 10n ** 20n, storeThrows: true });
+  await assert.rejects(ctl.payer.settle({ prepare: p1, authorization: authOf(p1), confirmPlan: yes }));
+  assert.deepEqual(ctl.log.states.filter((s) => s.phase === 'sent').map((s) => s.tx), [TX(1)], 'CONTROL: a denied store still cannot swallow the hash');
+});
+
+/* THE CHAIN SAID NOTHING MOVED. The per-quote index is written BEFORE the wait, deliberately, and
+   nothing cleared it when the receipt came back 0x0 — so the quotes read paid-forever on a device
+   that spent no ANT: pay() answered already-paid and resume() answered tx-reverted, two refusals
+   pointing at each other. Before this file kept an index, a re-prepare simply signed again; closing
+   that route is what makes the clear owed. The confirmed-payment CONTROL is kept in the row so the
+   clear cannot pass by disabling the guard. */
+test('a payment the chain refused is not paid-forever: its quotes are cleared and the price can be signed for again', async () => {
+  const payCalls = (w) => w.log.sends.filter((t) => t.to === VAULT).length;
+  const readable = (w) => [...w.mem].filter(([k, v]) => k.startsWith('ant-pay.paid.quote.') && v).length;
+  const p1 = prepareOf(2), p2 = { ...prepareOf(2), upload_id: 'up-2' }, w = world({ allowance: 10n ** 20n, revert: true });
+  await refused(w.payer.pay({ prepare: p1, authorization: authOf(p1), confirmPlan: yes }), 'tx-reverted');
+  assert.equal(payCalls(w), 1, 'precondition: a payment was signed and the chain refused it');
+  assert.equal(readable(w), 0, 'no quote is left marked paid by a transaction that moved nothing');
+  assert.ok(!w.mem.get('ant-pay.paid.up-1'), 'and the upload record does not name the refused hash');
+  await refused(w.payer.resume({ prepare: p2, authorization: authOf(p2) }), 'nothing-to-resume');
+  await refused(w.payer.pay({ prepare: p2, authorization: authOf(p2), confirmPlan: yes }), 'tx-reverted');
+  assert.equal(payCalls(w), 2, 'the price can be signed for again — the chain refused, so nothing was spent');
+
+  const ctl = world({ allowance: 10n ** 20n });
+  await ctl.payer.pay({ prepare: p1, authorization: authOf(p1), confirmPlan: yes });
+  await refused(ctl.payer.pay({ prepare: p2, authorization: authOf(p2), confirmPlan: yes }), 'already-paid');
+  assert.equal(payCalls(ctl), 1, 'CONTROL: a payment the chain CONFIRMED is still refused a second time');
+});
+
+/* and the unwind is per transaction, not per upload: 300 quotes ride in two calls, the first lands
+   and the second is refused. Clearing the lot would throw away 256 quotes of real ANT. */
+test('only the refused transaction is unwound: a batch that did land keeps its quotes marked paid', async () => {
+  const p = prepareOf(300), w = world({ allowance: 10n ** 20n, revertHashes: [TX(2)] });
+  await refused(w.payer.pay({ prepare: p, authorization: authOf(p), confirmPlan: yes }), 'tx-reverted');
+  assert.equal(w.log.sends.filter((t) => t.to === VAULT).length, 2, 'precondition: two payment calls, one landed and one refused');
+  const entries = [...w.mem].filter(([k, v]) => k.startsWith('ant-pay.paid.quote.') && v);
+  assert.equal(entries.length, 256, 'exactly the landed batch is still marked paid');
+  assert.ok(entries.every(([, v]) => JSON.parse(v).tx_hash === TX(1)), 'and every kept entry names the transaction that landed');
+  assert.equal(Object.keys(JSON.parse(w.mem.get('ant-pay.paid.up-1')).txHashes).length, 256, 'the upload record keeps the landed hashes and drops the refused one');
+
+  const again = { ...p, upload_id: 'up-2' }, w2 = world({ allowance: 10n ** 20n });
+  for (const [k, v] of w.mem) w2.mem.set(k, v);
+  let shown = null;
+  await w2.payer.pay({ prepare: again, authorization: authOf(again), confirmPlan: async (s) => { shown = s; return true; } });
+  assert.deepEqual([shown.quotes, shown.quotes_already_paid], [44, 256], 'only the refused batch is asked for again');
+  assert.equal(w2.log.finalize[0].txs.length, 300, 'and finalize still carries a tx for every priced quote');
 });
 
 test('the door must confirm the address it quoted: a different one is refused by name, and the payment ids are kept', async () => {
