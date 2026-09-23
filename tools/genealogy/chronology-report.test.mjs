@@ -92,6 +92,28 @@ const signFlip = classC.filter((r) => isBC(r.childTok) && !isBC(r.parentTok));
 const bothBC = classC.filter((r) => isBC(r.childTok) && isBC(r.parentTok));
 const bothAD = classC.filter((r) => !isBC(r.childTok) && !isBC(r.parentTok));
 
+// ── class D: the child was born after the parent was already dead.
+// The death year has been in these records all along and no check read it.
+// THE GRACE YEAR IS A PROPERTY OF THE FATHER, NOT OF PARENTHOOD: a posthumous
+// child of a man is ordinary, a posthumous child of a woman is not. A single
+// uniform +1 therefore forgives five impossible maternal rows; a uniform +0
+// flags twenty-five ordinary paternal ones. Neither number is the answer.
+const graceFor = (p) => (p && p.gender === "FEMALE" ? 0 : 1);
+let dDenom = 0, dUniformGrace = 0, dParentsFemale = 0, dParentsMale = 0;
+const classD = [];
+for (const [child, parents] of Object.entries(E)) {
+  const cb = birth(P[child]);
+  if (cb === null) continue;
+  for (const pid of parents) {
+    const pd = death(P[pid]);
+    if (pd === null) continue;
+    dDenom++;
+    if (P[pid].gender === "FEMALE") dParentsFemale++; else dParentsMale++;
+    if (cb > pd + 1) dUniformGrace++;
+    if (cb > pd + graceFor(P[pid])) classD.push({ child, parent: pid, gap: cb - pd, parentGender: P[pid].gender });
+  }
+}
+
 test("R1 non-vacuity: the parser parses, and BOTH date encodings exist in the corpus", () => {
   assert.ok(Object.keys(P).length > 1000, "the real corpus is loaded");
   assert.ok(birthYears > 1000, `birth years must parse, got ${birthYears}`);
@@ -105,7 +127,7 @@ test("R1 non-vacuity: the parser parses, and BOTH date encodings exist in the co
 test("R2 class A — death before birth: a CONTRADICTION localised to ONE record", () => {
   // Pinned on purpose, the way the cycle row is pinned: a repair turns this red
   // and the row gets re-ruled then. Do not edit the number to make it green.
-  assert.equal(classA.length, 26, "class A count");
+  assert.equal(classA.length, 7, "class A count");
   for (const r of classA) {
     assert.ok(P[r.id], "every row names a real record");
     const b = birth(P[r.id]), d = death(P[r.id]);
@@ -128,8 +150,8 @@ test("R3 class B — a HEURISTIC threshold, and it must not read as a defect lis
 });
 
 test("R4 class C — judged on BIRTH years, because that is what the question needs", () => {
-  assert.equal(classC.length, 277, "class C count on the birth-year denominator");
-  assert.equal(cDenomBirth, 9504, "edges judgeable on birth years alone");
+  assert.equal(classC.length, 275, "class C count on the birth-year denominator");
+  assert.equal(cDenomBirth, 9505, "edges judgeable on birth years alone");
   // THE FILTER LAW, as an assertion. Requiring a death year at both ends is a
   // filter chosen by what parses rather than by what a birth-order question
   // asks, and it silently discards judgeable edges AND the violations in them.
@@ -143,7 +165,7 @@ test("R4 class C — judged on BIRTH years, because that is what the question ne
 
 test("R5 class C is CONTAMINATED: a BC-marker defect is mixed into it", () => {
   assert.equal(signFlip.length + bothBC.length + bothAD.length, classC.length, "the decomposition is exhaustive");
-  assert.equal(signFlip.length, 34, "rows where the child keeps BC and the parent lost it");
+  assert.equal(signFlip.length, 33, "rows where the child keeps BC and the parent lost it");
   // These are DATE defects wearing an edge defect's clothes. At least one of
   // them is an edge that published scholarship supports, so a repair pass that
   // trusted the class C total would delete a correct relationship.
@@ -170,4 +192,19 @@ test("R6 ordering: the date class outranks the edge class, and the report says s
     `C=${classC.length}/${cDenomBirth} (contradiction, one pair) of which ${signFlip.length} are BC-marker defects. ` +
     `Repair the date class before the edge class.`,
   );
+});
+
+test("R7 class D — the child was born after the parent died, judged with a GENDERED grace year", () => {
+  assert.equal(dDenom, 7045, "edges judgeable child-birth vs parent-death");
+  assert.equal(classD.length, 191, "class D count under the gendered rule");
+  // NON-VACUITY: both parent genders must actually be present, or "gendered"
+  // is a term that never fires and the rule is uniform by accident.
+  assert.ok(dParentsFemale > 100, `female parents in the denominator: ${dParentsFemale}`);
+  assert.ok(dParentsMale > 100, `male parents in the denominator: ${dParentsMale}`);
+  // THE GENDER TERM IS LOAD-BEARING, asserted rather than described: a uniform
+  // one-year grace gives a DIFFERENT answer, so this row cannot be passing by
+  // accident on a rule that ignores the distinction.
+  assert.notEqual(dUniformGrace, classD.length, "a uniform grace year gives a different count");
+  assert.equal(dUniformGrace, 186, "uniform +1 forgives the five impossible maternal rows");
+  for (const r of classD) assert.ok(P[r.child] && P[r.parent], "every row names two real records");
 });
