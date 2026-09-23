@@ -1,0 +1,210 @@
+{
+ "generated": "2026-09-22",
+ "corpus": "remington-bloodline.json",
+ "plausible_years": 110,
+ "mechanisms": {
+  "H1": "endpoints written in the wrong order; swapped",
+  "H2": "birth endpoint lost its BC marker while death kept it; restored"
+ },
+ "repaired": [
+  {
+   "id": "pcc72d6d0a6",
+   "name": "Mr Joses , Joseph",
+   "mechanism": "H1",
+   "was": "0004BC–0025BC",
+   "now": "0025BC–0004BC",
+   "span": 21
+  },
+  {
+   "id": "p6c32dc087d",
+   "name": "Menkauhor Kaiu Horikau, Ikauhor 7th Pharaoh of the 5th Dynasty",
+   "mechanism": "H1",
+   "was": "2405BC–2414BC",
+   "now": "2414BC–2405BC",
+   "span": 9
+  },
+  {
+   "id": "p56d8feeb7e",
+   "name": "Paramesse D'EGYPTE",
+   "mechanism": "H2",
+   "was": "1400–1349BC",
+   "now": "1400BC–1349BC",
+   "span": 51
+  },
+  {
+   "id": "p329cac0c1e",
+   "name": "Bintanath Egypt",
+   "mechanism": "H2",
+   "was": "1270–1210BC",
+   "now": "1270BC–1210BC",
+   "span": 60
+  },
+  {
+   "id": "p3df611c015",
+   "name": "Djoser Zezer, Zozer, Djeser 5th Pharaoh of the 3rd Dynasty",
+   "mechanism": "H1",
+   "was": "2647BC–2648BC",
+   "now": "2648BC–2647BC",
+   "span": 1
+  },
+  {
+   "id": "p7b7a0416fe",
+   "name": "psousennès 1er akhere D'EGYPTE",
+   "mechanism": "H1",
+   "was": "1078–0991",
+   "now": "0991–1078",
+   "span": 87
+  },
+  {
+   "id": "pa5df475512",
+   "name": "XIX High Priest Shallum ben Zadok II",
+   "mechanism": "H1",
+   "was": "0575BC–0622BC",
+   "now": "0622BC–0575BC",
+   "span": 47
+  },
+  {
+   "id": "p2f8847ffe7",
+   "name": "REY SANAJ BEN HETEPJKHEMUY",
+   "mechanism": "H1",
+   "was": "1880BC–1960BC",
+   "now": "1960BC–1880BC",
+   "span": 80
+  },
+  {
+   "id": "pdbbe7ee187",
+   "name": "Zoba ben Terah",
+   "mechanism": "H1",
+   "was": "2056BC–2061BC",
+   "now": "2061BC–2056BC",
+   "span": 5
+  },
+  {
+   "id": "p66827a6c33",
+   "name": "Abd Ashtart of Tyre",
+   "mechanism": "H1",
+   "was": "0950–0920",
+   "now": "0920–0950",
+   "span": 30
+  },
+  {
+   "id": "p1d8aff98c7",
+   "name": "Abijah ben Rehoboam 2nd King of Judah",
+   "mechanism": "H1",
+   "was": "0950–0902",
+   "now": "0902–0950",
+   "span": 48
+  },
+  {
+   "id": "pf850b00583",
+   "name": "Nabopolassar van Babylon",
+   "mechanism": "H1",
+   "was": "0612–0541",
+   "now": "0541–0612",
+   "span": 71
+  },
+  {
+   "id": "p255df061b2",
+   "name": "Klavdia Kosnelia",
+   "mechanism": "H1",
+   "was": "0700–0660",
+   "now": "0660–0700",
+   "span": 40
+  },
+  {
+   "id": "pde127bff96",
+   "name": "Cornelia Scipionis",
+   "mechanism": "H1",
+   "was": "0135–89",
+   "now": "89–0135",
+   "span": 46
+  },
+  {
+   "id": "pc6cca5d843",
+   "name": "Shalmaneser I of Assyria",
+   "mechanism": "H1",
+   "was": "1290–1244",
+   "now": "1244–1290",
+   "span": 46
+  },
+  {
+   "id": "p7f8c2635e6",
+   "name": "Agemon DE CORYNTHE-?",
+   "mechanism": "H2",
+   "was": "0850–0784BC",
+   "now": "0850BC–0784BC",
+   "span": 66
+  },
+  {
+   "id": "pc776dd8a08",
+   "name": "Princesse ainée de Galatie",
+   "mechanism": "H1",
+   "was": "0034BC–0060BC",
+   "now": "0060BC–0034BC",
+   "span": 26
+  },
+  {
+   "id": "p3eaf1d51a7",
+   "name": "Deiotarus I King of galatia",
+   "mechanism": "H2",
+   "was": "0105–0040BC",
+   "now": "0105BC–0040BC",
+   "span": 65
+  },
+  {
+   "id": "p906a5c4ddc",
+   "name": "Elyzabeth Powell",
+   "mechanism": "H1",
+   "was": "1631–1558",
+   "now": "1558–1631",
+   "span": 73
+  }
+ ],
+ "class_c_not_repaired": [
+  {
+   "id": "pd5ba3146d4",
+   "name": "Lucius Licinius Lucullus",
+   "mechanism": "H1",
+   "was": "0117BC–0151BC",
+   "now": "0151BC–0117BC",
+   "span": 34,
+   "why": "swap contradicts an unchanged parent; direction not established"
+  },
+  {
+   "id": "p16a20d92e7",
+   "name": "Karnevo ibn Saru' ibn Urghuwa",
+   "mechanism": "H1",
+   "was": "2152BC–2230BC",
+   "now": "2230BC–2152BC",
+   "span": 78,
+   "why": "swap contradicts an unchanged parent; direction not established"
+  }
+ ],
+ "residue_no_edit": [
+  {
+   "id": "pd1e09beddb",
+   "name": "Melem-Ana 11th King of Uruk",
+   "lifespan": "2013BC–2552BC"
+  },
+  {
+   "id": "p824d41f7ed",
+   "name": "Meskalamdug 3rd King of Ur, King of Kish",
+   "lifespan": "1930BC–2600BC"
+  },
+  {
+   "id": "p1b1994fbb5",
+   "name": "Schebim 8th Pharaoh of the 2nd Dynasty",
+   "lifespan": "2358–2720BC"
+  },
+  {
+   "id": "p0e5e9893a0",
+   "name": "Priam Podarces King of Troy",
+   "lifespan": "0585BC–1183BC"
+  },
+  {
+   "id": "p409f2fb71a",
+   "name": "Ann Grainger",
+   "lifespan": "1840–1540"
+  }
+ ]
+}

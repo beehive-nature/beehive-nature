@@ -105,7 +105,7 @@ test("R1 non-vacuity: the parser parses, and BOTH date encodings exist in the co
 test("R2 class A — death before birth: a CONTRADICTION localised to ONE record", () => {
   // Pinned on purpose, the way the cycle row is pinned: a repair turns this red
   // and the row gets re-ruled then. Do not edit the number to make it green.
-  assert.equal(classA.length, 26, "class A count");
+  assert.equal(classA.length, 7, "class A count");
   for (const r of classA) {
     assert.ok(P[r.id], "every row names a real record");
     const b = birth(P[r.id]), d = death(P[r.id]);
@@ -128,7 +128,7 @@ test("R3 class B — a HEURISTIC threshold, and it must not read as a defect lis
 });
 
 test("R4 class C — judged on BIRTH years, because that is what the question needs", () => {
-  assert.equal(classC.length, 277, "class C count on the birth-year denominator");
+  assert.equal(classC.length, 275, "class C count on the birth-year denominator");
   assert.equal(cDenomBirth, 9504, "edges judgeable on birth years alone");
   // THE FILTER LAW, as an assertion. Requiring a death year at both ends is a
   // filter chosen by what parses rather than by what a birth-order question
@@ -143,7 +143,7 @@ test("R4 class C — judged on BIRTH years, because that is what the question ne
 
 test("R5 class C is CONTAMINATED: a BC-marker defect is mixed into it", () => {
   assert.equal(signFlip.length + bothBC.length + bothAD.length, classC.length, "the decomposition is exhaustive");
-  assert.equal(signFlip.length, 34, "rows where the child keeps BC and the parent lost it");
+  assert.equal(signFlip.length, 33, "rows where the child keeps BC and the parent lost it");
   // These are DATE defects wearing an edge defect's clothes. At least one of
   // them is an edge that published scholarship supports, so a repair pass that
   // trusted the class C total would delete a correct relationship.
