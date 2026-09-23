@@ -16,11 +16,21 @@
 //    proving every field beside it.
 //  · "supports" upgrades that one claim only. "contradicts" is retained beside
 //    it and nothing silently wins. "mentions" is never proof.
-//  · Event types are exact: a binding states what the source records there
-//    (`asserts`) and that must equal the claim's predicate. A baptism never
-//    binds to a birth; a burial never binds to a death.
-//  · Private material does not become public because it has a source: the
-//    public view is default-deny on anyone not known to be deceased.
+//  · A binding names the entry it reads (`context`, e.g. a baptism entry) and
+//    the assertion it extracts from it (`asserts`), which must equal the
+//    claim's predicate. When the two differ, the binding quotes the words
+//    that state it: a baptism entry that says "born 24 March" supports a
+//    birth; a baptism entry alone never does.
+//  · Proof is pinpoint-relocatable: a source scoped to one item (its record
+//    id, ARK or URL resolves the exact entry) needs nothing more; a source
+//    scoped to a collection (a register volume, a census roll, a book) needs
+//    the binding's locator.
+//  · Claim standing (unsupported | supported | contradicted | contested) is
+//    not person support (sourced | attested | unsourced-entry, model.mjs).
+//    One supported claim never makes a whole person sourced.
+//  · Who is public is not decided here. The caller's privacy layer supplies
+//    isPublicSubject; this module only projects, strips the private artifact
+//    pointer, and keeps leads out.
 //  · Identity is never decided here. Topology can open an investigation;
 //    only a founder turns evidence into a merge.
 
@@ -32,8 +42,8 @@ export const SOURCE_TYPES = [
   "parish-register", "civil-register", "census", "probate", "obituary", "newspaper",
   "gravestone", "military", "immigration", "archive-scan", "book", "provider-record", "testimony",
 ];
-// a source type whose entries must be located (page, entry, folio, line) when bound as proof
-const LOCATED_TYPES = new Set(["parish-register", "civil-register", "census", "probate", "newspaper", "military", "immigration", "archive-scan", "book"]);
+// item: recordId/url/artifactRef resolves the exact entry; collection: the binding must locate it
+export const SCOPES = ["item", "collection"];
 // things that arrive looking like sources and are not
 export const NOT_A_SOURCE = ["hint", "record-hint", "tree-link", "tree-person", "source-count", "ai-lead"];
 
@@ -44,10 +54,11 @@ export const PREDICATES = [
   "language", "people", "polity", "religion", "region", "house", "title",
 ];
 export const RELATIONS = ["supports", "contradicts", "mentions"];
+export const STANDINGS = ["unsupported", "supported", "contradicted", "contested"];
 
-const SOURCE_KEYS = ["schema", "id", "type", "provider", "title", "recordId", "url", "accessedAt", "digest", "artifactRef", "note"];
+const SOURCE_KEYS = ["schema", "id", "type", "scope", "provider", "title", "recordId", "url", "accessedAt", "digest", "artifactRef", "note"];
 const CLAIM_KEYS = ["schema", "id", "subject", "predicate", "value", "note"];
-const BINDING_KEYS = ["schema", "sourceId", "claimId", "relation", "asserts", "locator", "note"];
+const BINDING_KEYS = ["schema", "sourceId", "claimId", "relation", "context", "asserts", "quote", "locator", "note"];
 const DERIVED = /^\s*(inferred|derived|assumed|heuristic|guess|ai[\s-])/i;
 const DAY = /^(\d{4})-(\d{2})-(\d{2})$/;
 const DIGEST = /^sha256:[0-9a-f]{64}$/;
@@ -77,6 +88,7 @@ export function sourceProblems(s) {
   if (s.schema !== SOURCE_SCHEMA) out.push(`${at}: schema must be ${SOURCE_SCHEMA}`);
   if (!text(s.id)) out.push(`${at}: no id`);
   if (!SOURCE_TYPES.includes(s.type)) out.push(`${at}: unknown type ${s.type}`);
+  if (!SCOPES.includes(s.scope)) out.push(`${at}: scope must say whether it pins one item or a collection (got ${s.scope})`);
   if (!text(s.provider)) out.push(`${at}: no provider (who holds the record)`);
   if (!text(s.title)) out.push(`${at}: no title`);
   for (const k of ["provider", "title"])
@@ -113,11 +125,14 @@ export function bindingProblems(b, store) {
   if (!s) out.push(`${at}: source ${b.sourceId} is not held`);
   if (!c) out.push(`${at}: claim ${b.claimId} does not exist`);
   if (b.relation === "mentions") return out;
-  // supports / contradicts: the event the source records must be the claim's own
-  if (!PREDICATES.includes(b.asserts)) out.push(`${at}: asserts must name what the source records (got ${b.asserts})`);
+  // supports / contradicts: the entry read, the assertion extracted, and the claim must line up
+  if (!PREDICATES.includes(b.context)) out.push(`${at}: context must name the entry read (got ${b.context})`);
+  if (!PREDICATES.includes(b.asserts)) out.push(`${at}: asserts must name the assertion extracted (got ${b.asserts})`);
   else if (c && b.asserts !== c.predicate)
-    out.push(`${at}: source records ${b.asserts}; claim is ${c.predicate} — event types never convert`);
-  if (s && LOCATED_TYPES.has(s.type) && !text(b.locator)) out.push(`${at}: ${s.type} proof needs a locator (page, entry, folio)`);
+    out.push(`${at}: extracts ${b.asserts}; claim is ${c.predicate} — assertions never convert`);
+  if (PREDICATES.includes(b.context) && PREDICATES.includes(b.asserts) && b.context !== b.asserts && !text(b.quote))
+    out.push(`${at}: a ${b.context} entry does not imply ${b.asserts}; quote the words that state it`);
+  if (s && s.scope !== "item" && !text(b.locator)) out.push(`${at}: ${s.type} collection proof needs a locator (page, entry, folio, image)`);
   return out;
 }
 
@@ -174,7 +189,8 @@ export function admit(store, obs) {
   throw new Error(`admit: unknown observation kind ${obs?.kind}`);
 }
 
-// One claim's standing. Fail-closed: an invalid store has no standings.
+// One claim's standing (claim-level vocabulary). Fail-closed: an invalid
+// store has no standings.
 export function claimStanding(store, claimId) {
   refuse(validateStore(store));
   if (!store.claims[claimId]) refuse([`claim ${claimId} does not exist`]);
@@ -183,23 +199,24 @@ export function claimStanding(store, claimId) {
   const supports = by("supports"), contradicts = by("contradicts"), mentions = by("mentions");
   const standing =
     supports.length && contradicts.length ? "contested"
-    : supports.length ? "sourced"
+    : supports.length ? "supported"
     : contradicts.length ? "contradicted"
-    : "unsourced-entry";
+    : "unsupported";
   return { claimId, standing, supports, contradicts, mentions };
 }
 
-// A person is "sourced" only through claims a source actually supports; each
-// of those claims is named, and every other claim about them stays as it was.
+// Summary into the person-level vocabulary model.mjs owns. "sourced" here
+// means at least one claim has a supporting source; supportedClaims names
+// exactly which, and every other claim about the person keeps its standing.
 export function personSupport(store, personId) {
   refuse(validateStore(store));
   const claims = Object.values(store.claims).filter((c) => parties(c.subject).includes(personId));
   const standings = claims.map((c) => claimStanding(store, c.id));
-  const sourcedClaims = standings.filter((s) => s.supports.length).map((s) => s.claimId);
+  const supportedClaims = standings.filter((s) => s.supports.length).map((s) => s.claimId);
   return {
     personId,
-    support: sourcedClaims.length ? "sourced" : "unsourced-entry",
-    sourcedClaims,
+    support: supportedClaims.length ? "sourced" : "unsourced-entry",
+    supportedClaims,
     contestedClaims: standings.filter((s) => s.standing === "contested").map((s) => s.claimId),
   };
 }
@@ -216,7 +233,7 @@ export function duplicateAssessment(store, a, b, topology = {}) {
   const status = signals.length || idClaims.length ? "lead/investigate" : "no-lead";
   const decision =
     st.some((s) => s.standing === "contested") ? "contested — founder review"
-    : st.some((s) => s.standing === "sourced") ? "founder review"
+    : st.some((s) => s.standing === "supported") ? "founder review"
     : "NONE";
   return {
     pair: [a, b], status, signals, decision,
@@ -225,14 +242,14 @@ export function duplicateAssessment(store, a, b, topology = {}) {
   };
 }
 
-// The public projection. Default-deny: a claim is public only when every party
-// is known to be deceased. Sources appear only through a kept binding and
-// never carry their private artifact pointer. Leads are never public.
-export function publicView(store, persons) {
+// The public projection. Eligibility belongs to the caller's privacy layer:
+// a claim is projected only when isPublicSubject accepts every party. This
+// module strips the private artifact pointer and never projects leads.
+export function publicView(store, { isPublicSubject } = {}) {
+  if (typeof isPublicSubject !== "function") throw new Error("publicView: the caller's privacy layer must supply isPublicSubject");
   refuse(validateStore(store));
-  const deceased = (id) => persons?.[id] && persons[id].living === false;
   const claims = Object.fromEntries(
-    Object.entries(store.claims).filter(([, c]) => parties(c.subject).every(deceased)));
+    Object.entries(store.claims).filter(([, c]) => parties(c.subject).every((p) => isPublicSubject(p) === true)));
   const bindings = store.bindings.filter((b) => claims[b.claimId]);
   const sources = {};
   for (const b of bindings) {
