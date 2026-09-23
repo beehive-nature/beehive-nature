@@ -75,6 +75,36 @@ const realDay = (v) => {
 };
 const unknownKeys = (o, keys, at) => Object.keys(o).filter((k) => !keys.includes(k)).map((k) => `${at}: unknown key ${k}`);
 
+// A RECORD is the mirror of the store maps below: unknownKeys reads OWN keys
+// only and every field check reads `o.k` bare, so a record built with
+// Object.create(proto) is admitted on fields nobody wrote into it. Measured at
+// all three gates, and the symptom is publication, not only admission: an
+// inherited `url` satisfies locatability and then leaves RAW through the
+// structural allowlist with no caller decision at all; an inherited `subject`
+// is the id publicView asks isPublicSubject about; an inherited `quote` leaves
+// on a binding whose own keys are ["schema"] alone.
+// JSON revival cannot build one — "__proto__" arrives as an OWN key and
+// unknownKeys names it — so the producer is a hand that calls Object.create,
+// which is the same hand the store-shape row already assumes.
+// Sources were bee-laborer's row, re-read at 05b8d93c; claims and bindings are
+// mine and reproduce identically, so this is one check shared by the three
+// record gates rather than one patch.
+// It RETURNS rather than pushing: every sentence below it is computed off the
+// record's own fields, and a verdict computed off an INHERITED field is the
+// defect being refused — the phantom-field half, one level in.
+// null is allowed for the reason it is at the store: Object.create(null)
+// inherits nothing. The modality is "can": an array carries Array.prototype and
+// inherits no listed key, so it is refused by this sentence instead of by its
+// missing fields — a shorter true refusal, not a different verdict.
+// DISCLOSED: `at` is built from the record's own id/ids, which on this shape may
+// themselves be inherited. The sentence names the object by what it answers to
+// and then says that is not its own, which is the honest pair.
+const foreignProto = (o, at) => {
+  const p = Object.getPrototypeOf(o);
+  return p === Object.prototype || p === null ? null
+    : `${at}: carries a prototype, so a field nobody wrote into this record can read as its own -- build it as a plain object`;
+};
+
 // a claim subject is a person id, or "a|b" for a relationship between two
 export const parties = (subject) => String(subject).split("|");
 
@@ -96,6 +126,8 @@ export function createStore() {
 export function sourceProblems(s) {
   const at = `source ${s?.id ?? "?"}`;
   if (!s || typeof s !== "object") return [`${at}: not an object`];
+  const shape = foreignProto(s, at);
+  if (shape) return [shape]; // above the lead check: s.type may itself be inherited
   if (NOT_A_SOURCE.includes(s.type) || NOT_A_SOURCE.includes(s.kind))
     return [`${at}: a ${s.type ?? s.kind} is a lead, not a source`];
   const out = unknownKeys(s, SOURCE_KEYS, at);
@@ -117,6 +149,8 @@ export function sourceProblems(s) {
 export function claimProblems(c) {
   const at = `claim ${c?.id ?? "?"}`;
   if (!c || typeof c !== "object") return [`${at}: not an object`];
+  const shape = foreignProto(c, at);
+  if (shape) return [shape];
   const out = unknownKeys(c, CLAIM_KEYS, at);
   if (c.schema !== CLAIM_SCHEMA) out.push(`${at}: schema must be ${CLAIM_SCHEMA}`);
   if (!text(c.id)) out.push(`${at}: no id`);
@@ -153,6 +187,8 @@ const heldUnder = (map, id) => (Object.prototype.hasOwnProperty.call(map, id) ? 
 export function bindingProblems(b, store) {
   const at = `binding ${b?.sourceId ?? "?"}→${b?.claimId ?? "?"}`;
   if (!b || typeof b !== "object") return [`${at}: not an object`];
+  const shape = foreignProto(b, at);
+  if (shape) return [shape];
   const out = unknownKeys(b, BINDING_KEYS, at);
   if (b.schema !== BINDING_SCHEMA) out.push(`${at}: schema must be ${BINDING_SCHEMA}`);
   if (!RELATIONS.includes(b.relation)) out.push(`${at}: unknown relation ${b.relation}`);
@@ -209,7 +245,19 @@ export function validateStore(store) {
   const seen = new Set();
   for (const b of store.bindings) {
     out.push(...bindingProblems(b, store));
-    const key = `${b?.sourceId}|${b?.claimId}|${b?.locator ?? ""}`;
+    // Joined, never concatenated. "|" is this module's OWN delimiter — parties()
+    // splits a two-party subject on it — so an id carrying one is ordinary here,
+    // not exotic, and three fields concatenated on it are ambiguous: ("S1",
+    // "ID-FA|FB", "p. 4") and ("S1", "ID-FA", "FB|p. 4") joined equal, and one
+    // honest pair of bindings then denied the whole store with a sentence that
+    // names a duplicate that does not exist. A "|" in free LOCATOR text is
+    // harmless; the trigger is a "|" in an ID. Found by bee-laborer re-reading
+    // 05b8d93c. A fail-closed path still owes a TRUE reason.
+    // RESIDUAL, disclosed: JSON.stringify maps undefined and null to the same
+    // `null`, so two bindings differing only that way in one slot still join.
+    // Both are already named above — heldUnder finds neither — so the duplicate
+    // sentence is never the only thing said about them.
+    const key = JSON.stringify([b?.sourceId, b?.claimId, b?.locator ?? ""]);
     if (seen.has(key)) out.push(`binding ${b?.sourceId}→${b?.claimId}: duplicate (one entry counted twice is not two sources)`);
     seen.add(key);
   }

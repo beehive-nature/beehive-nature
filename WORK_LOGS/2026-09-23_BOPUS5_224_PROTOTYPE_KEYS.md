@@ -499,3 +499,188 @@ figure belongs to whoever runs the joint tree.
   an absent instrument cannot read as a verdict.
 
 **MAINNET SPEND: 0.**
+
+---
+
+# ADDENDUM 3 — two rows handed over at `05b8d93c`, both pre-existing, both taken
+
+Seat bOPus5. Parent `05b8d93c`, candidate on `bopus5/224-prototype-keys`, base
+`claude-LoVis/source-contract` (`619e809c`), still a fast-forward. Rows found by
+bee-laborer re-reading `05b8d93c`; both were measured PRE-EXISTING in all three
+directions (`619e809c`, `a05f246d`, `05b8d93c`), so neither was introduced or
+closed by anything on this branch. **MAINNET SPEND: 0.**
+
+## Reproduced before a line was written
+
+`.scratch/bopus5-226-r78-probe.mjs`, run at `05b8d93c`.
+
+```
+=========== ROW A — the duplicate key delimiter ===========
+CONTROL A genuine duplicate : REFUSED "binding S1→C1: duplicate (one entry counted twice is not two sources)"
+CONTROL B two distinct      : accepted 2 | validateStore []
+CONTROL C pipe in locator   : accepted 3 of 3
+
+ARM pipe in a CLAIM id      distinct field by field: true
+  bind(b1) ok · bind(b2) REFUSED: binding S1→ID-FA: duplicate (one entry counted twice is not two sources)
+  validateStore(handed) ["binding S1→ID-FA: duplicate ..."]
+  claimStanding THREW · publicView permit-all THREW
+ARM pipe in a SOURCE id     distinct field by field: true
+  bind(b1) ok · bind(b2) REFUSED: binding S1→v2|C1: duplicate ...
+  validateStore(handed) 1 problem · claimStanding THREW · publicView THREW
+```
+
+One honest pair of bindings denies the whole projection, with a sentence naming
+a duplicate that does not exist. A `|` in free LOCATOR text was always harmless
+(CONTROL C); the trigger is a `|` in an ID, and `|` is this module's own
+delimiter — `parties()` splits a two-party subject on it.
+
+```
+=========== ROW B — a RECORD carrying a prototype ===========
+SOURCE own keys        ["schema","id","type","scope","provider","accessedAt"]
+SOURCE sourceProblems  []            <- CLEAN, on a record whose url and title are INHERITED
+SOURCE addSource       ACCEPTED
+SOURCE published       {"s-proto":{... ,"url":"https://private.example/signed?token=SECRET", ...}}
+CONTROL ordinary       publishes its own recordId, no url
+JSON-revived           own key "__proto__", proto IS Object.prototype
+                       -> ["source s-json: unknown key __proto__", "... not locatable"]
+```
+
+## MINE — the same shape at the other two record gates
+
+bee-laborer's row named sources and deliberately left claims and bindings out,
+calling a shared check a shape decision rather than a patch. Measured at
+`05b8d93c`, both reproduce identically, and the claim is the sharper of the two:
+
+```
+--- CLAIM ---
+own keys ["schema","id"]        claimProblems []        addClaim ACCEPTED
+isPublicSubject was asked about ["P-LIVING"]   <- an id nobody wrote into the record
+published {"c-proto":{... "subject":"P-LIVING","predicate":"birth","note":"PRIVATE", ...}}
+--- BINDING ---
+own keys ["schema"]             bindingProblems []      bind() ACCEPTED
+published [{... "sourceId":"S1","claimId":"c-1","relation":"mentions","quote":"SECRET LETTER TEXT"}]
+```
+
+A claim's `subject` is the id the privacy layer is ASKED ABOUT, so an inherited
+subject means the decision was taken about a party nobody wrote in. A binding
+whose own keys are `["schema"]` alone carried its whole identity and its quote
+from a prototype. So the repair is ONE check shared by the three record gates.
+
+## The repair
+
+- `validateStore`'s duplicate key: `JSON.stringify([sourceId, claimId, locator])`,
+  joined rather than concatenated. **RESIDUAL, disclosed in the file:** JSON maps
+  `undefined` and `null` to the same `null`, so two bindings differing only that
+  way in one slot still join — and both are already named by `heldUnder` as not
+  held / does not exist, so the duplicate sentence is never the only thing said
+  about them.
+- `foreignProto(o, at)`, called at the top of `sourceProblems`, `claimProblems`
+  and `bindingProblems`. It **RETURNS rather than pushes**: every sentence below
+  it is computed off the record's fields, and a verdict computed off an INHERITED
+  field is the defect itself — the phantom-field half, one level in. In
+  `sourceProblems` it sits ABOVE the lead check, because `s.type` may itself be
+  inherited (P5 below).
+- `null` is allowed for the reason it is at the store: `Object.create(null)`
+  inherits nothing. The modality is **can**: an array carries `Array.prototype`
+  and inherits no listed key, so it is now refused by this sentence instead of by
+  its missing fields — a shorter true refusal, not a different verdict.
+- DISCLOSED: `at` is built from the record's own id, which on this shape may
+  itself be inherited. The sentence names the object by what it answers to and
+  then says that is not its own, which is the honest pair.
+
+## GREEN — the same probe at the candidate
+
+```
+ROW A   both arms ACCEPTED · validateStore [] · claimStanding ok · publicView publishes
+ROW B   sourceProblems  ["source s-proto: carries a prototype, ..."]   addSource REFUSED
+        claimProblems   ["claim c-proto: carries a prototype, ..."]    addClaim  REFUSED
+        bindingProblems ["binding S1→c-1: carries a prototype, ..."]   bind      REFUSED
+        published {} / {} / []          CONTROL ordinary source still publishes
+        JSON-revived still named by unknownKeys — a different, more precise reason
+```
+
+## Mutation battery — 9 arms, verdicts DIFFED against a pristine TAP run
+
+Byte-copy restore; landing asserted by byte inequality + old-absent +
+new-present; the matcher REFUSES when it matches zero TAP rows of a non-empty
+output. `.scratch/bopus5-226-battery.mjs`.
+
+```
+PRISTINE                                            40/40
+K1 the key, concatenated exactly as found           39/40  the duplicate row   ALONE
+K2 HALF the locator leaves the key                  39/40  the duplicate row   ALONE
+K3 OFF-SWITCH the duplicate check never fires       38/40  the duplicate row + the PRE-EXISTING
+                                                           "one entry bound twice is not two sources"
+P1 sourceProblems stops asking                      39/40  the record row      ALONE
+P2 claimProblems stops asking                       39/40  the record row      ALONE
+P3 bindingProblems stops asking                     39/40  the record row      ALONE
+P4 WRONG ANSWER null is not allowed either          39/40  the record row      ALONE
+P5 WRONG ANSWER the lead check runs first           39/40  the record row      ALONE
+P6 WRONG ANSWER the door refuses every record        2/40  38 rows, the whole battery
+PRISTINE AGAIN 40/40 · reader byte-equal TRUE
+```
+
+`K2` is the half-arm: it proves the locator is part of the key, and it lands on
+CONTROL C, where three bindings differ only inside free locator text. `K3` is the
+off-switch and it is the arm that shows the guard is live — a row that is only
+shown to catch a missing refusal has not been shown to catch a false one, and
+`K1` is the false one. `P6` is blunt by construction: refusing every record
+invalidates every store the suite builds, so it proves the helper can say YES and
+nothing finer.
+
+**The five P arms fall on the same ROW and on five different ASSERTIONS**, read
+from the failure text rather than relayed:
+
+```
+P1  deepEqual: []  vs  ["source s-proto: carries a prototype, ..."]
+P2  "the CLAIM gate must name the shape, and say nothing computed off an inherited field"
+P3  "the BINDING gate must name the shape, and say nothing computed off an inherited field"
+P4  deepEqual: ["source s-null: carries a prototype, ..."]  vs  []      <- the null CONTROL
+P5  did not match /carries a prototype.../  Input: "source s-typed: a hint is a lead, not a source"
+```
+
+`P2` and `P3` were indistinguishable when first measured — both read `0 !== 1`
+with no message, which is my own law arriving on me: **a row must assert WHICH
+thing it caught, not that a catch happened.** Messages added, re-measured above.
+`P5`'s input line is the phantom-verdict symptom in one string: at the parent the
+module answered "a hint is a lead, not a source" off a `type` nobody wrote in.
+
+## Counts, each at the tree that produced it
+
+```
+node --test tools/genealogy/source-contract.test.mjs     40 pass 0 fail rc=0   (38 before)
+genealogy glob, exactly tests.yml:114-121                16 suites · 283 pass 0 fail · rc=0 (281 before)
+```
+
+283 belongs to THIS tree. No joint total is projected from it: a delta from one
+tree added to a total from another is not arithmetic, and the joint figure
+belongs to whoever runs the joint tree.
+
+## Measured and NOT repaired, named so the boundary is disclosed
+
+`duplicateAssessment`'s `topology` argument is the one remaining caller-supplied
+object read by a bare index, and an inherited flag does produce a signal:
+
+```
+Object.create({ sharedParents: true })   own keys []   signals ["sharedParents"]
+CONTROL {}                                             signals []
+CONTROL { sharedParents: true }                        signals ["sharedParents"]
+```
+
+It is **not a record**: it carries no schema, passes no gate, and never
+publishes — its output is `lead/investigate`, a status, and nothing there
+reaches a stranger or a merge. It is outside the row as handed, and widening a
+taken row is how a bounded repair becomes an architecture. Named for whoever
+rules the file, not repaired here.
+
+`F3` (quadratic `personSupport`) is still not in this branch, at the finder's
+scoping.
+
+## My own instrument
+
+The first cut of the probe assumed `addSource` succeeded and crashed on the
+refusal it was measuring — an rc from a crash is not a measurement. Re-cut so
+every step reports through the same `tryIt`, and the GREEN run reads the
+refusals as results rather than dying on them.
+
+**MAINNET SPEND: 0.**

@@ -9,7 +9,7 @@ import { createHash } from "node:crypto";
 import {
   SOURCE_SCHEMA, CLAIM_SCHEMA, BINDING_SCHEMA, STANDINGS, PUBLIC_FIELDS, SOURCE_KEYS, CLAIM_KEYS, BINDING_KEYS, nonDataAt,
   createStore, addSource, addClaim, bind, admit, validateStore,
-  sourceProblems, claimStanding, personSupport, duplicateAssessment, publicView, bindingProblems,
+  sourceProblems, claimProblems, claimStanding, personSupport, duplicateAssessment, publicView, bindingProblems,
 } from "./source-contract.mjs";
 
 // a register volume: a collection, so proof from it needs a locator
@@ -739,4 +739,160 @@ test("a caller-supplied prototype supplies ARBITRARY ids, and its records were d
   assert.match(bindingProblems(link("s-coll", "c-death", "supports", "death", { locator: null }), ok).join(" | "), /needs a locator/);
   // CONTROL: an honest binding on the SAME poisoned store is still clean
   assert.deepEqual(bindingProblems(mention("s-real", "c-real"), s), []);
+});
+
+/* ── THE DUPLICATE KEY ───────────────────────────────────────────────────────
+ * validateStore joins three caller strings to spot one entry counted twice.
+ * "|" is this module's OWN delimiter -- parties() splits a two-party subject on
+ * it -- so an id carrying one is ordinary here, not exotic, and concatenating
+ * three fields on it made two genuinely distinct bindings join equal. One
+ * honest pair then denied the WHOLE store with a sentence naming a duplicate
+ * that does not exist: validateStore reported it, and claimStanding and
+ * publicView threw on it. A "|" in free LOCATOR text was always harmless; the
+ * trigger is a "|" in an ID. Pre-existing in all three directions at 05b8d93c
+ * -- neither introduced nor closed there. Found by bee-laborer re-reading it.
+ * A fail-closed path still owes a TRUE reason. */
+const permitAll = (s) => publicView(s, { isPublicSubject: () => true, isPublicSource: () => true });
+
+test("two distinct bindings do not join on this module's own delimiter", () => {
+  for (const [label, build] of [
+    ["a | in a CLAIM id", () => {
+      const s = createStore();
+      addSource(s, src("S1"));
+      addClaim(s, claim("ID-FA|FB", "FA|FB", "identity", "same person"));
+      addClaim(s, claim("ID-FA", "P1", "birth", { date: "1880-03-24" }));
+      return [s, { ...mention("S1", "ID-FA|FB"), locator: "p. 4" }, { ...mention("S1", "ID-FA"), locator: "FB|p. 4" }];
+    }],
+    ["a | in a SOURCE id", () => {
+      const s = createStore();
+      addSource(s, src("S1|v2"));
+      addSource(s, src("S1"));
+      addClaim(s, claim("C1", "P1", "birth", { date: "1880-03-24" }));
+      addClaim(s, claim("v2|C1", "P1", "death", { date: "1922-01-04" }));
+      return [s, { ...mention("S1|v2", "C1"), locator: "p. 4" }, { ...mention("S1", "v2|C1"), locator: "p. 4" }];
+    }],
+  ]) {
+    const [s, b1, b2] = build();
+    // the fixture asserts its precondition: distinct BEFORE any key is built
+    assert.ok(b1.sourceId !== b2.sourceId || b1.claimId !== b2.claimId || b1.locator !== b2.locator,
+      `${label}: the pair is distinct field by field`);
+    bind(s, b1);
+    bind(s, b2); // this is the one the concatenated key refused
+    assert.equal(s.bindings.length, 2, `${label}: both honest bindings are held`);
+    assert.deepEqual(validateStore(s), [], `${label}: and the store is not denied afterwards`);
+    assert.equal(permitAll(s).bindings.length, 2, `${label}: the projection is reachable, not thrown`);
+  }
+  // CONTROL, non-vacuity: a genuine duplicate is still refused, by name
+  const g = createStore();
+  addSource(g, src("S1"));
+  addClaim(g, claim("C1", "P1", "birth", { date: "1880-03-24" }));
+  bind(g, { ...mention("S1", "C1"), locator: "p. 4" });
+  refuses(() => bind(g, { ...mention("S1", "C1"), locator: "p. 4" }), /duplicate \(one entry counted twice/);
+  // CONTROL: the LOCATOR is part of the key, and a "|" inside free locator text
+  // is harmless — three bindings differing only there stay three, and a fourth
+  // that repeats one of them is still caught
+  const u = createStore();
+  addSource(u, src("S1"));
+  addClaim(u, claim("C1", "P1", "birth", { date: "1880-03-24" }));
+  addClaim(u, claim("C2", "P1", "death", { date: "1922-01-04" }));
+  bind(u, { ...mention("S1", "C1"), locator: "vol. 3 | p. 118" });
+  bind(u, { ...mention("S1", "C2"), locator: "vol. 3 | p. 118" });
+  bind(u, { ...mention("S1", "C1"), locator: "vol. 3 |p. 118" });
+  assert.equal(u.bindings.length, 3, "a | in the locator alone never joins two bindings");
+  refuses(() => bind(u, { ...mention("S1", "C1"), locator: "vol. 3 |p. 118" }), /duplicate/);
+});
+
+/* ── RECORD SHAPE ────────────────────────────────────────────────────────────
+ * The mirror of the store-shape row, asked about a RECORD. unknownKeys reads
+ * OWN keys only and every field check reads `o.k` bare, so a record built with
+ * Object.create(proto) was admitted on fields nobody wrote into it — and the
+ * symptom is publication, not only admission: an inherited `url` satisfied
+ * locatability and then left RAW through the structural allowlist with no
+ * caller decision at all, an inherited `subject` was the id publicView asked
+ * isPublicSubject about, and an inherited `quote` left on a binding whose own
+ * keys were ["schema"] alone. Pre-existing in all three directions at 05b8d93c.
+ * Sources were bee-laborer's row; claims and bindings are mine and reproduce
+ * identically, so the repair is ONE check shared by the three record gates.
+ * Each arm asserts the gate returns EXACTLY the shape sentence: every other
+ * sentence is computed off the record's fields, and a verdict computed off an
+ * INHERITED field is the defect itself. */
+const SHAPE = /carries a prototype, so a field nobody wrote into this record/;
+const OWN_SOURCE = { schema: SOURCE_SCHEMA, id: "s-proto", type: "parish-register", scope: "collection", provider: "Synthetic Parish Archive", accessedAt: "2026-09-23" };
+
+test("a record nobody built as a plain object is named, never read", () => {
+  // (1) each gate names it, and says nothing else
+  const inheritedSource = Object.assign(Object.create({ url: "https://private.example/signed?token=SECRET", title: "PRIVATE FAMILY LETTER" }), OWN_SOURCE);
+  assert.deepEqual(Object.keys(inheritedSource), Object.keys(OWN_SOURCE), "the fixture asserts its precondition: url and title are INHERITED");
+  assert.equal(inheritedSource.url, "https://private.example/signed?token=SECRET", "and a bare read still reaches them");
+  assert.deepEqual(sourceProblems(inheritedSource), [`source s-proto: carries a prototype, so a field nobody wrote into this record can read as its own -- build it as a plain object`]);
+
+  const inheritedClaim = Object.assign(Object.create({ subject: "P-LIVING", predicate: "birth", value: { date: "1990-01-01" } }), { schema: CLAIM_SCHEMA, id: "c-proto" });
+  assert.deepEqual(Object.keys(inheritedClaim), ["schema", "id"]);
+  assert.equal(claimProblems(inheritedClaim).length, 1, "the CLAIM gate must name the shape, and say nothing computed off an inherited field");
+  assert.match(claimProblems(inheritedClaim)[0], SHAPE);
+
+  const seeded = createStore();
+  addSource(seeded, src("S1"));
+  addClaim(seeded, claim("C1", "P1", "birth", { date: "1880-03-24" }));
+  const inheritedBinding = Object.assign(Object.create({ sourceId: "S1", claimId: "C1", relation: "mentions", quote: "SECRET LETTER TEXT" }), { schema: BINDING_SCHEMA });
+  assert.deepEqual(Object.keys(inheritedBinding), ["schema"]);
+  assert.equal(bindingProblems(inheritedBinding, seeded).length, 1, "the BINDING gate must name the shape, and say nothing computed off an inherited field");
+  assert.match(bindingProblems(inheritedBinding, seeded)[0], SHAPE);
+
+  // (2) the doors refuse, and nothing is left behind
+  const s = createStore();
+  refuses(() => addSource(s, inheritedSource), SHAPE);
+  refuses(() => addClaim(s, inheritedClaim), SHAPE);
+  refuses(() => bind(seeded, inheritedBinding), SHAPE);
+  assert.deepEqual(Object.keys(s.sources), [], "a refused add stores nothing");
+  assert.equal(seeded.bindings.length, 0, "a refused bind leaves nothing behind");
+
+  // (3) the publication half, with NO projectText supplied: `url` is structural,
+  // so at 05b8d93c it left with no caller decision at all. The store map itself
+  // is the one createStore() built, so this is the RECORD being refused.
+  const held = createStore();
+  held.sources["s-proto"] = inheritedSource;
+  addClaim(held, claim("C1", "P1", "birth", { date: "1880-03-24" }));
+  held.bindings.push({ ...mention("s-proto", "C1"), locator: "p. 4" });
+  refuses(() => permitAll(held), SHAPE);
+
+  // (4) a claim's inherited SUBJECT was the id the privacy layer was asked about
+  const asked = [];
+  const heldClaim = createStore();
+  heldClaim.claims["c-proto"] = inheritedClaim;
+  assert.throws(() => publicView(heldClaim, { isPublicSubject: (p) => { asked.push(p); return true; }, isPublicSource: () => true }), SHAPE);
+  assert.deepEqual(asked, [], "no privacy decision is taken about a subject nobody wrote into the record");
+
+  // (5) the shape refusal comes FIRST, because the record's own type may be
+  // inherited too: at 05b8d93c this returned "a hint is a lead, not a source",
+  // a verdict computed off a field nobody wrote in.
+  const inheritedType = Object.assign(Object.create({ type: "hint" }), {
+    schema: SOURCE_SCHEMA, id: "s-typed", scope: "collection", provider: "Synthetic Parish Archive",
+    title: "Register s-typed", recordId: "REG-s-typed", accessedAt: "2026-09-23",
+  });
+  assert.equal(inheritedType.type, "hint", "the fixture asserts its precondition");
+  assert.equal(sourceProblems(inheritedType).length, 1, "the SOURCE gate asks about the shape before it reads s.type");
+  assert.match(sourceProblems(inheritedType)[0], SHAPE);
+
+  // CONTROL: an ordinary record passes every gate and publishes its OWN url
+  const ok = createStore();
+  addSource(ok, src("s-own", { url: "https://archive.example/open/1" }));
+  addClaim(ok, claim("C1", "P1", "birth", { date: "1880-03-24" }));
+  bind(ok, { ...mention("s-own", "C1"), locator: "p. 4" });
+  assert.equal(permitAll(ok).sources["s-own"].url, "https://archive.example/open/1", "the publication path is reachable — (3) is a refusal, not an empty projection");
+
+  // CONTROL: null inherits nothing, so a null-prototype record is DATA and is
+  // admitted. The row is not "refuse every shape that is not the usual one".
+  const nul = createStore();
+  const nullProto = Object.assign(Object.create(null), src("s-null"));
+  assert.equal(Object.getPrototypeOf(nullProto), null, "the fixture asserts its precondition");
+  assert.deepEqual(sourceProblems(nullProto), []);
+  addSource(nul, nullProto);
+  assert.deepEqual(Object.keys(nul.sources), ["s-null"]);
+
+  // CONTROL: JSON revival cannot build one — "__proto__" arrives as an OWN key,
+  // and unknownKeys names it. A different and more precise reason, kept.
+  const revived = JSON.parse(`{"schema":"${SOURCE_SCHEMA}","id":"s-json","type":"parish-register","scope":"collection","provider":"P","title":"T","recordId":"R","accessedAt":"2026-09-23","__proto__":{"url":"https://private.example/x"}}`);
+  assert.equal(Object.getPrototypeOf(revived), Object.prototype, "the fixture asserts its precondition");
+  assert.deepEqual(sourceProblems(revived), ["source s-json: unknown key __proto__"]);
 });
