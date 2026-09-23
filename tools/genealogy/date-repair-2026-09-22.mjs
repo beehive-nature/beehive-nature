@@ -6,6 +6,22 @@
 //   H1  the two endpoints were written in the wrong order        -> swap them
 //   H2  the BIRTH endpoint lost its BC marker while death kept it -> restore it
 //
+// A third mechanism destroys a record without touching a digit:
+//
+//   H3  the SEPARATOR was destroyed in transit                  -> restore it
+//
+// H3 is the safest of the three and it is worth saying why, because caution
+// pointed the wrong way here. H1 CHOOSES between two readings of an ambiguous
+// record. H2 INFERS a marker that is not present. H3 infers nothing: both year
+// tokens are intact, U+FFFD means precisely "bytes that could not be decoded",
+// and what sat between them is fixed by the corpus's own uniform convention —
+// every other lifespan uses U+2013. There is nothing to decide, so there is
+// nothing to decide wrongly.
+//
+// An encoding defect does not look like a defect; it looks like an unusual
+// record. This one parses as neither a pair nor a date, so its person was
+// silently absent from every check in this directory.
+//
 // Every row is assigned by a predicate, never by hand, and the assignment is
 // recorded per row in the receipt. A row that BOTH mechanisms fit would be a
 // coin flip on the founder's family record; there are none, and this script
@@ -58,6 +74,10 @@ const plan = [];
 const residue = [];
 let ambiguous = 0;
 for (const [id, p] of Object.entries(model.persons)) {
+  if (typeof p.lifespan === "string" && p.lifespan.includes("�")) {
+    plan.push({ id, name: p.name, mechanism: "H3", was: p.lifespan, now: p.lifespan.replace(/�+/, "–"), span: null });
+    continue;
+  }
   const h = halves(p.lifespan);
   if (!h) continue;
   const bt = h[0].trim(), dt = h[1].trim();
@@ -142,12 +162,13 @@ writeFileSync(RECEIPT, JSON.stringify({
   mechanisms: {
     H1: "endpoints written in the wrong order; swapped",
     H2: "birth endpoint lost its BC marker while death kept it; restored",
+    H3: "separator destroyed in transit (U+FFFD); restored to U+2013",
   },
   repaired: apply,
   class_c_not_repaired: classC.map((r) => ({ ...r, why: "swap contradicts an unchanged parent; direction not established" })),
   residue_no_edit: residue,
 }, null, 1) + "\n", "utf8");
 
-console.log(`repaired ${applied} records (H1 ${apply.filter((r) => r.mechanism === "H1").length} · H2 ${apply.filter((r) => r.mechanism === "H2").length})`);
+console.log(`repaired ${applied} records (H1 ${apply.filter((r) => r.mechanism === "H1").length} · H2 ${apply.filter((r) => r.mechanism === "H2").length} · H3 ${apply.filter((r) => r.mechanism === "H3").length})`);
 console.log(`class C not repaired: ${classC.length}  ·  residue no edit: ${residue.length}  ·  ambiguous: ${ambiguous}`);
 console.log(`receipt: ${RECEIPT}`);

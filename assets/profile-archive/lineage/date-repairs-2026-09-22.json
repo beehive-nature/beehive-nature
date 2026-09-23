@@ -4,9 +4,18 @@
  "plausible_years": 110,
  "mechanisms": {
   "H1": "endpoints written in the wrong order; swapped",
-  "H2": "birth endpoint lost its BC marker while death kept it; restored"
+  "H2": "birth endpoint lost its BC marker while death kept it; restored",
+  "H3": "separator destroyed in transit (U+FFFD); restored to U+2013"
  },
  "repaired": [
+  {
+   "id": "pde9528c30c",
+   "name": "Gottfried von Alemannien",
+   "mechanism": "H3",
+   "was": "0640���0709",
+   "now": "0640–0709",
+   "span": null
+  },
   {
    "id": "pcc72d6d0a6",
    "name": "Mr Joses , Joseph",
