@@ -261,7 +261,7 @@ test("four decisions are required and separate: no subject or source predicate, 
   refuses(() => publicView(s, { ...base, projectText: "keep" }), /projectText must be a function/);
   refuses(() => publicView(s, { ...base, projectValue: {} }), /projectValue must be a function/);
   // only an explicit true admits a subject; a truthy stand-in is not a decision
-  assert.deepEqual(publicView(s, { isPublicSubject: () => "yes", isPublicSource: PUBLIC_SRC }).claims, {});
+  assert.deepEqual(Object.keys(publicView(s, { isPublicSubject: () => "yes", isPublicSource: PUBLIC_SRC }).claims), []);
   // and a relationship needs every party: D alone does not carry D|L out
   assert.equal(publicView(s, base).claims["C-rel"], undefined);
 });
@@ -291,7 +291,7 @@ test("a public subject does not make a private source public", () => {
   // only an explicit true admits a source
   const none = publicView(s, { isPublicSubject: D_ONLY, isPublicSource: () => "yes" });
   assert.deepEqual(none.bindings, []);
-  assert.deepEqual(none.sources, {});
+  assert.deepEqual(Object.keys(none.sources), []);
   assert.deepEqual(Object.keys(none.claims).sort(), ["C-bur", "C-death"], "the claim may still publish without its source");
   // the caller decides from the source record itself
   const seen = [];
@@ -495,4 +495,99 @@ test("the same packet can gain sources later without changing shape — and stil
 test("no topology signal and no identity claim → no lead", () => {
   const s = createStore();
   assert.equal(duplicateAssessment(s, "X", "Y").status, "no-lead");
+});
+
+/* ── PROTOTYPE KEYS ───────────────────────────────────────────────────────────
+ * Every existence test in the reader is a bare lookup, and so are publicView's
+ * two filters. On a plain object those answer YES for an id JavaScript puts on
+ * every object, so a binding naming one passed the "is not held" test, passed
+ * both privacy filters, and published its quote while the caller's layer had
+ * refused every subject and every source. Tests 8, 9 and 22 exist for exactly
+ * this class and are all anchored on an ordinary id ("NOPE", "LTR") — a gate
+ * anchored on the well-formed case is silent on what it exists to catch.
+ * Found by bee-laborer reviewing this PR; repaired with Object.create(null).
+ * Each row below carries a CONTROL in the same call shape that must pass, so
+ * a row cannot read clean because the mechanism never ran. */
+const PROTO_IDS = ["toString", "valueOf", "constructor", "hasOwnProperty", "__proto__"];
+
+function seededStore() {
+  const s = createStore();
+  addSource(s, src("s-real"));
+  addClaim(s, claim("c-real", "P1", "birth", { date: "1880-03-24" }));
+  return s;
+}
+
+test("a binding naming a prototype key is REFUSED, and for the true reason", () => {
+  // CONTROL: an ordinary ghost id is refused, so the refusal path is reachable
+  const control = seededStore();
+  assert.throws(() => bind(control, { ...mention("s-ghost", "c-ghost"), quote: "held text" }),
+    /source s-ghost is not held[\s\S]*claim c-ghost does not exist/);
+  for (const id of PROTO_IDS) {
+    const s = seededStore();
+    assert.throws(() => bind(s, { ...mention(id, id), quote: "held text" }),
+      new RegExp(`source ${id === "__proto__" ? "__proto__" : id} is not held`),
+      `a binding whose sourceId is "${id}" must be refused`);
+    assert.equal(s.bindings.length, 0, `"${id}" must leave no binding behind`);
+  }
+  // and no standing exists for a claim nobody added
+  const s = seededStore();
+  for (const id of PROTO_IDS) assert.throws(() => claimStanding(s, id), /does not exist/);
+  assert.equal(claimStanding(s, "c-real").standing, "unsupported"); // CONTROL: a real claim answers
+});
+
+test("publicView publishes NOTHING that the caller's privacy layer refused — prototype ids included", () => {
+  /* The two filters are ANDed, so a single plain map is MASKED by the other:
+   * each sub-case below leaves exactly ONE of them deciding. "__proto__" is the
+   * id that discriminates, because assigning it on a plain object invokes the
+   * setter and creates NO own key — the map then answers from the prototype. */
+  const s = seededStore();
+  addSource(s, src("__proto__"));
+  addClaim(s, claim("__proto__", "P1", "birth", { date: "1880-03-24" }));
+  bind(s, { ...mention("__proto__", "__proto__"), quote: "SECRET FAMILY LETTER TEXT" });
+  const view = (subject, source) => publicView(s, {
+    isPublicSubject: () => subject, isPublicSource: () => source,
+    projectText: (t) => t, projectValue: (v) => v,
+  });
+
+  // (a) both refused
+  const none = view(false, false);
+  assert.deepEqual(Object.keys(none.claims), []);
+  assert.deepEqual(Object.keys(none.sources), []);
+  assert.deepEqual(none.bindings, [], "neither may, so nothing publishes");
+
+  // (b) the SUBJECT may, the SOURCE may not — only publicSource can refuse
+  const noSource = view(true, false);
+  assert.deepEqual(noSource.bindings, [],
+    "a public subject does not make a private source public");
+  assert.deepEqual(Object.keys(noSource.sources), []);
+
+  // (c) the SOURCE may, the SUBJECT may not — only claims can refuse
+  const noSubject = view(false, true);
+  assert.deepEqual(noSubject.bindings, [],
+    "a public source does not make a private subject's claim public");
+  assert.deepEqual(Object.keys(noSubject.claims), []);
+
+  // (d) CONTROL, non-vacuity: the same store DOES publish when both permit
+  const all = view(true, true);
+  assert.equal(all.bindings.length, 1, "the projection is reachable — the rows above are refusals, not an empty store");
+  assert.deepEqual(Object.keys(all.sources), ["__proto__"]);
+  assert.equal(all.bindings[0].quote, "SECRET FAMILY LETTER TEXT");
+});
+
+test("a source or claim whose id is a prototype key is held as an OWN key, not swallowed", () => {
+  for (const id of PROTO_IDS) {
+    const s = createStore();
+    addSource(s, src(id));
+    assert.deepEqual(Object.keys(s.sources), [id], `"${id}" must be stored as an own key`);
+    addClaim(s, claim(id, "P1", "birth", { date: "1880-03-24" }));
+    assert.deepEqual(Object.keys(s.claims), [id]);
+    assert.deepEqual(validateStore(s), []);
+    // the duplicate guard still works for it — the reason must stay TRUE
+    assert.throws(() => addSource(s, src(id)), /already held/);
+  }
+  // CONTROL: an ordinary id behaves identically, so the row is about the ids
+  const c = createStore();
+  addSource(c, src("s-ordinary"));
+  assert.deepEqual(Object.keys(c.sources), ["s-ordinary"]);
+  assert.throws(() => addSource(c, src("s-ordinary")), /already held/);
 });

@@ -78,8 +78,19 @@ const unknownKeys = (o, keys, at) => Object.keys(o).filter((k) => !keys.includes
 // a claim subject is a person id, or "a|b" for a relationship between two
 export const parties = (subject) => String(subject).split("|");
 
+// Every map below is keyed by an id the CALLER chooses, so it carries no
+// prototype. On a plain object `sources["toString"]` answers with an inherited
+// function: a binding naming it passes the "is not held" test, passes
+// publicView's two filters, and publishes its quote while the caller's privacy
+// layer refused every subject and every source. The mirror is a false refusal —
+// adding a real source under one of those ids reported "already held" when
+// nothing was. Found by bee-laborer reviewing this PR.
+// `Object.create(null)` and not hasOwnProperty.call, because the call form
+// still cannot store one: on a plain object `o["__proto__"] = s` invokes the
+// setter and creates NO own key, so the add would report success and keep
+// nothing.
 export function createStore() {
-  return { sources: {}, claims: {}, bindings: [], leads: [] };
+  return { sources: Object.create(null), claims: Object.create(null), bindings: [], leads: [] };
 }
 
 export function sourceProblems(s) {
@@ -357,17 +368,20 @@ export function publicView(store, { isPublicSubject, isPublicSource, projectText
     return out;
   };
 
-  const claims = {};
+  // null-prototype for the same reason createStore is: these three are looked
+  // up by a binding's own sourceId/claimId below, and an inherited member reads
+  // as a published claim or a permitted source.
+  const claims = Object.create(null);
   for (const [id, c] of Object.entries(store.claims))
     if (parties(c.subject).every((p) => isPublicSubject(p) === true))
       claims[id] = project(c, "claim", id, { claimId: id, subject: c.subject, predicate: c.predicate });
-  const publicSource = {};
+  const publicSource = Object.create(null);
   for (const [id, s] of Object.entries(store.sources)) publicSource[id] = isPublicSource(id, s) === true;
   // a binding appears only when both its claim and its source may
   const bindings = store.bindings
     .filter((b) => claims[b.claimId] && publicSource[b.sourceId])
     .map((b) => project(b, "binding", `${b.sourceId}→${b.claimId}`));
-  const sources = {};
+  const sources = Object.create(null);
   for (const b of bindings) sources[b.sourceId] ??= project(store.sources[b.sourceId], "source", b.sourceId);
   return { sources, claims, bindings, leads: [] };
 }
