@@ -723,11 +723,34 @@ Co-authored-by: preflight selftest seat <selftest@invalid>"
   #     as the arm having run — P14e and P14f could be switched off with every instrument green.
   #     Getting the marker wrong on a pass line makes CI RED, never quiet: the id then appears
   #     declared and absent. An arm line that is neither is refused there by name.
-  #   · AND NEITHER LINE MAY BE BOTH. A partition needs no gaps AND no overlaps: a notice ending
-  #     in "(correct)" read as a verdict, so P14e could skip with its recording deleted and every
-  #     instrument stay green — the marker forged in the direction that does not go red.
-  #     tests.yml refuses a line carrying both, because an arm cannot judge something and in the
-  #     same breath say it never ran.
+  #   · AND NEITHER LINE MAY BE BOTH. A notice ending in "(correct)" was read as a verdict, so
+  #     P14e could skip with its recording deleted and every instrument stay green — the marker
+  #     forged in the direction that does not go red. tests.yml refuses a line carrying both,
+  #     because an arm cannot judge something and in the same breath say it never ran.
+  #     THIS IS NOT A CLOSURE AND IT IS NOT CALLED ONE. An earlier draft of this block claimed
+  #     "a partition needs no gaps and no overlaps", which promises that the two halves between
+  #     them classify every line. They do not: bee-laborer's Z9 REWORDS the notice — no
+  #     "NOT CONSTRUCTIBLE" anywhere in it, first line ending in "(correct)" — and the arm sits
+  #     out with the census at (none), the inventory at 24 of 24 and this file saying ok. Her
+  #     Z9CTRL, the same reworded notice WITHOUT the marker, is red, so the green is the marker
+  #     and nothing else. Both halves key on text an author writes, so a wording nobody has
+  #     written yet walks through; the overlap half is kept because it costs nothing and catches
+  #     the honest accident (the same copy-edit that left P13a and P14d without markers, one sign
+  #     over), not because it closes the space.
+  #     THE BOUND THAT IS TRUE: AN ARM CANNOT SIT OUT WHILE THE LOG STAYS HONEST. Deleting the
+  #     recording and leaving the notice alone is red (Z1), and so is skipping with the recording
+  #     intact (Z7). Green costs the author a line that says the arm judged something when it did
+  #     not — a false sentence a reader can read. That is as far as a text predicate over
+  #     author-written lines reaches, and it is what this file claims.
+  #     MEASURED AND REFUSED: a FLOOR on the _skipped recording lines. All of Z1, Z6 and Z9 share
+  #     a first edit — deleting the one line where a skipping branch records itself — so a floor
+  #     on those 7 lines would kill the class at the common edit. Z12b refutes it: EMPTY the
+  #     recording instead of deleting it — assign a blank in place of the arm id, which is why no
+  #     token here is written out — and the count is still 7 while the arm sits out, rc=0. Clean
+  #     POSIX clone at 93de30f2: CONTROL0 7 lines, Z1 6, Z12b 7 and green. A floor is not added.
+  #     (Emptying it and keeping the canonical phrase — appending the marker to the notice rather
+  #     than rewording it — IS caught by the both-kinds check: that arm is rc=1. Only the reworded
+  #     form walks through.)
   #   · ONLY THE FIRST LINE OF AN ARM IS AN ARM LINE. A continuation is indented past the two
   #     spaces an arm line opens with — which is what the NOT CONSTRUCTIBLE notices below already
   #     do, and why they are invisible to both counters. This was the file's practice and not its
@@ -746,9 +769,13 @@ Co-authored-by: preflight selftest seat <selftest@invalid>"
   # with P16 reading 59 of 59. P16 is a
   # DECLARATION floor, so it is structurally blind to a skip — nothing was deleted. The
   # PRINTED arm count did move, 24 -> 23, and a floor on it would have caught U1; but the
-  # printed count is platform-dependent (24 clean POSIX, 21 Git for Windows, 14 from a
-  # Windows-made worktree under WSL), so a floor on it goes red on a box that is behaving
-  # correctly, and an always-red gate trains dismissal. Neither counter can do this job.
+  # printed count is platform-dependent — re-measured at THIS commit, same instrument as P16's
+  # comment above (lines matching ^  P<id> in --selftest): 24 clean POSIX clone, 23 Git for
+  # Windows, 15 from a Windows-made worktree under WSL. An earlier draft of THIS line still said
+  # 21 and 14 after P16's copy had been corrected, so the file carried two numbers for one
+  # measurement — the false-signal class, and the very defect the correction above was written to
+  # remove. A floor on a platform-dependent count goes red on a box that is behaving correctly,
+  # and an always-red gate trains dismissal. Neither counter can do this job.
   #
   # The census can, because it does not count: each skipping branch NAMES the arms it
   # skipped, and the line is printed whether or not anything was skipped — '(none)' is the
