@@ -437,8 +437,34 @@ jobs:
           # not take the script's word for anything. Catches the case half one cannot: a
           # skip branch that stops recording itself, which would report an empty census
           # while its arm sits out. A GATE MUST NOT BE ITS OWN WITNESS.
-          grep -oE '"  P[0-9]+[a-z]*' scripts/push-preflight.sh | sed 's/^"  //' | sort -u > /tmp/pf-declared
-          grep -oE '^  P[0-9]+[a-z]*' /tmp/preflight-selftest.out | sed 's/^  //' | sort -u > /tmp/pf-ran
+          #
+          # EITHER QUOTE (bee-laborer's W4): requiring a double quote put an arm printed with
+          # single quotes outside this inventory AND outside the script's own arm-count floor at
+          # the same time — addable, never run, both counters reporting fine. COST NAMED: an arm
+          # printed from a VARIABLE is outside both and nothing here can see it.
+          grep -oE "[\"']  P[0-9]+[a-z]*" scripts/push-preflight.sh | sed -E "s/^[\"']  //" | sort -u > /tmp/pf-declared
+          # A SKIP NOTICE IS NOT ATTENDANCE (bee-laborer's W2/W3). The ran set was every line
+          # opening with an arm id, and a skip notice opens with the arm id too — so P14e and
+          # P14f could each be forced to skip AND have their one recording line deleted, and this
+          # step passed with "24 ids declared, all 24 present" while the arm sat out. Her own U4
+          # caught P14c/P14d only because that notice names two arms and the second is not at the
+          # start of the line. ATTENDANCE IS NOW READ FROM VERDICT LINES ONLY: an arm that judged
+          # something ends its line in "(correct)".
+          grep -E '^  P[0-9]+[a-z]*' /tmp/preflight-selftest.out > /tmp/pf-armlines
+          grep -E '\(correct\)$' /tmp/pf-armlines | grep -oE '^  P[0-9]+[a-z]*' | sed 's/^  //' | sort -u > /tmp/pf-ran
+          # THE PARTITION, so the marker is ENFORCED rather than hoped for. The script passed rc=0
+          # above, so every arm line it printed is either a verdict or a notice that an arm could
+          # not be built. A line that is neither is one this gate cannot classify — and a
+          # discriminator whose mistakes are silent is the defect above wearing a new wording.
+          unclassified=$(grep -vE '\(correct\)$' /tmp/pf-armlines | grep -vF 'NOT CONSTRUCTIBLE' || true)
+          if [ -n "$unclassified" ]; then
+            echo "arm line(s) that are neither a verdict nor a NOT CONSTRUCTIBLE notice:"
+            echo "$unclassified"
+            echo "  A passing arm ends its line in '(correct)'; an arm that could not be built says"
+            echo "  NOT CONSTRUCTIBLE. Attendance is read from the first kind only, so a third kind"
+            echo "  cannot be classified and is refused instead of guessed at."
+            exit 1
+          fi
           ndecl=$(wc -l < /tmp/pf-declared)
           # non-vacuity: an empty declared set makes the comparison below pass while
           # comparing nothing. 24 arm ids are declared today; 20 is a floor, not a pin.
@@ -451,10 +477,11 @@ jobs:
           if [ -n "$missing" ]; then
             echo "arm id(s) declared in push-preflight.sh but absent from this run:" $missing
             echo "  Derived from the file and from the output above, not from the census line,"
-            echo "  so a skip branch that stopped reporting itself is caught here."
+            echo "  so a skip branch that stopped reporting itself is caught here. An arm whose"
+            echo "  only line was a skip notice reads as absent, which is what it is."
             exit 1
           fi
-          echo "arm inventory: $ndecl ids declared, all $ndecl present in this run's output"
+          echo "arm inventory: $ndecl ids declared, all $ndecl judged something in this run"
       # SPRINT CLOSING RECEIPT (founder order, 2026-08-25): the four-suite gap
       # was work that landed and gated nothing, and a report cannot tell a sprint
       # that shipped from one that stalled. This re-derives every sprint claim

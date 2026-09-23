@@ -568,7 +568,7 @@ Co-authored-by: preflight selftest seat <selftest@invalid>"
       echo "  P12b known-BAD  hooks live, planted 64-hex -> rc=$_brc count $_an -> $_bn — the hook did not fire"; st=1
     fi
     if [ "$_crc" = 0 ] && [ "$_cn" = "$((${_bn:-0} + 1))" ]; then
-      echo "  P13a known-BAD  hooks pointed elsewhere -> the SAME content LANDED, count ROSE $_bn -> $_cn (the hazard, shown)"
+      echo "  P13a known-BAD  hooks pointed elsewhere -> the SAME content LANDED, count ROSE $_bn -> $_cn — the hazard, shown (correct)"
     else
       echo "  P13a known-BAD  hooks pointed elsewhere -> rc=$_crc count $_bn -> $_cn — no rise, so P12b's block is unattributed"; st=1
     fi
@@ -599,7 +599,7 @@ Co-authored-by: preflight selftest seat <selftest@invalid>"
         echo "  P14c known-BAD  index 100755, filesystem bit stripped -> rc=$_frc without naming the disagreement. git execs the FILE; reading the index alone is a FALSE GREEN"; st=1
       fi
       if [ "$_grc" = 0 ] && grep -q "2 of 2 required hooks" "$_R/g.out" 2>/dev/null; then
-        echo "  P14d CONTROL    same hook, bit restored -> 2 of 2, permitted (so P14c's refusal is the BIT, not a rig that refuses)"
+        echo "  P14d CONTROL    same hook, bit restored -> 2 of 2, permitted — so P14c's refusal is the BIT, not a rig that refuses (correct)"
       else
         echo "  P14d CONTROL    bit restored -> rc=$_grc still not permitted; P14c's rc=1 is unattributed"; st=1
       fi
@@ -691,19 +691,40 @@ Co-authored-by: preflight selftest seat <selftest@invalid>"
   # permits an addition, which is what a growing selftest needs.
   #
   # IT COUNTS DECLARATIONS, NOT ARMS THAT RAN, AND THE DISTINCTION IS THE POINT. The number
-  # PRINTED is platform-dependent — 21 under Git for Windows, 22 on a clean POSIX clone, 14
-  # from a Windows-made worktree read under WSL where git cannot name a toplevel and the
-  # P12-P14 family correctly refuses. A floor on a printed count would go red on a box that
-  # is behaving correctly, and an always-red gate trains dismissal. The DECLARED inventory is
-  # structural: it does not move with the box, and a deletion is exactly what changes it.
+  # PRINTED is platform-dependent. Measured at THIS commit, instrument named — lines matching
+  # ^  P<id> in the output of --selftest:
+  #     24, rc=0   clean POSIX clone, ext4, native .git, uid 1000 (every arm constructible)
+  #     23, rc=0   Git for Windows on the seat box (P14c/P14d/P14e/P14f not constructible)
+  #     15, rc=1   a Windows-made worktree read under WSL, where git cannot name a toplevel and
+  #                the whole P12-P14 family correctly refuses — 10 arms in the census
+  # An earlier draft of this comment said 21 and 14 for the second and third, and another line of
+  # it said 22 for the first: three numbers taken at earlier pins and never re-measured. A file
+  # carrying two numbers for one measurement is the false-signal class, so the stale ones are
+  # deleted rather than qualified. A COUNT IS ONLY AS FRESH AS THE PIN IT WAS MEASURED AT.
+  # A floor on a printed count would go red on a box that is behaving correctly,
+  # and an always-red gate trains dismissal. The DECLARED inventory is structural: it does not
+  # move with the box, and a deletion is exactly what changes it.
   # So this arm cannot say the arms ran — P14c/P14e and the others say that for themselves.
   # The off-switch it cannot catch is its own deletion, which is true of every gate; it is
   # named here rather than left for a reader to discover.
   # IT COUNTS ARM-OUTCOME LINES, NOT DISTINCT ARM IDS: my first draft counted IDs and a
   # HALF-deletion — one arm's pass branch removed while its fail branch stayed — left the
   # count at 24 and passed, with the arm gone from the run. That is M5 exactly.
+  #
+  # THE TWO PATTERNS BELOW AND IN tests.yml ARE ONE CONVENTION AND IT IS LOAD-BEARING.
+  #   · an arm line is emitted as a quoted literal opening with two spaces and the arm id, in
+  #     EITHER quote — bee-laborer's W4 showed that requiring a double quote put a single-quoted
+  #     arm outside this floor AND outside CI's inventory at the same time, so it could be added
+  #     and never run with both counters reporting fine. COST NAMED: an arm printed from a
+  #     VARIABLE is still outside both, and nothing here can see it.
+  #   · an arm that ASSERTS AN OUTCOME ends its line in "(correct)"; a notice that an arm could
+  #     not be built says NOT CONSTRUCTIBLE and claims nothing. tests.yml reads attendance from
+  #     the first kind ONLY, because a skip notice that opens with the arm id was being counted
+  #     as the arm having run — P14e and P14f could be switched off with every instrument green.
+  #     Getting the marker wrong on a pass line makes CI RED, never quiet: the id then appears
+  #     declared and absent. An arm line that is neither is refused there by name.
   _armfloor=59
-  _armseen=$(grep -cE '"  P[0-9]+[a-z]*' "$SELF" 2>/dev/null | tr -d ' ')
+  _armseen=$(grep -cE "[\"']  P[0-9]+[a-z]*" "$SELF" 2>/dev/null | tr -d ' ')
   if [ "${_armseen:-0}" -ge "$_armfloor" ]; then
     echo "  P16 arm inventory -> $_armseen arm-outcome lines declared (floor $_armfloor) — neither a whole arm nor one of its branches can be deleted silently (correct)"
   else
