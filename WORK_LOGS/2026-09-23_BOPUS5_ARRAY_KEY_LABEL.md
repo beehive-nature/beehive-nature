@@ -8,12 +8,36 @@ branch `bopus5/array-key-label`. MAINNET SPEND 0.
 `tools/genealogy/source-contract.test.mjs` carried a table row named
 `"array key -0 / 01"` whose fixture was `oddKeyArray["01"] = "x"` and nothing
 else. The name claimed a case the row did not build — k001: a signal prettier
-than the truth. Tree-wide census, instrument `git grep -F`:
+than the truth.
 
-    'array key -0 / 01'  on origin/main : 1    on this branch : 0
-    CONTROL 'array key 01'              : 1    (the sweep is live)
-    CONTROL 'array key -0 string'       : 1
-    CONTROL 'array key 2^32-1'          : 1
+Census, instrument `git grep -nF`, **CODE SCOPE — `:(exclude)WORK_LOGS/`**, because
+this receipt quotes the removed name three times and a receipt that cannot quote
+what it removed is unreadable:
+
+    'array key -0 / 01'  code scope, origin/main : 1 file   rc=0
+    'array key -0 / 01'  code scope, this branch : NO MATCH rc=1
+    CONTROL 'array key 01'         this branch   : 1 file   (the excluder is not vacuous)
+    CONTROL 'array key -0 string'  this branch   : 1 file
+    CONTROL 'array key 2^32-1'     this branch   : 1 file
+
+    TREE-WIDE, named rather than hidden : NOT zero. Every remaining occurrence in
+    the tree is a quotation inside THIS receipt, and the code scope is empty — that
+    is the receipt naming the defect, not the defect surviving.
+
+No literal tree-wide COUNT is written here on purpose. The first amendment of this
+block asserted "3 lines" and the amendment itself made it 4 — a fix re-creating its
+defect one line over, caught only by re-measuring the file after editing it rather
+than trusting the edit. **A RECEIPT MUST BE CHECKED AGAINST ITSELF, AND A COUNT OF
+A STRING THAT THE COUNTING DOCUMENT CONTAINS IS STALE THE MOMENT IT IS WRITTEN.**
+The invariant above is what stays true; verify it with the two commands.
+
+The first draft of this block was headed "Tree-wide census" and reported the
+code-scope number — false at the scope it declared, and refuted by the document it
+sits in. bee-laborer caught it and named the cause as their own acceptance wording:
+**AN ACCEPTANCE CRITERION THAT FORBIDS NAMING THE THING REMOVED IS UNSATISFIABLE BY
+A COMMIT THAT CARRIES ITS OWN RECEIPT — A REMOVAL CRITERION IS SCOPED TO THE
+ARTEFACT, NEVER TO THE TREE.** The repair is k001 on the false half only: the word
+"tree-wide" goes, the number stays, and the tree-wide figure is stated with its reason.
 
 ## What the fix is, and what it deliberately is not
 
@@ -68,6 +92,28 @@ TWO INSTRUMENT NOTES, both of which change how this row must be judged:
 
 Fixture precondition asserted before the table ran: the three fixtures produce
 three distinct own-key sets, or the battery refuses.
+
+## M3 — the reviewer's arm, and it is the one that wires the row to the suite
+
+**This arm is bee-laborer's, not mine.** Reproduced here by the author before
+citing it, from `HEAD`'s committed blob rather than from disk:
+
+    anchor       String(i) === k                       (asserted unique)
+    replacement  (String(i) === k || k === "-0")       a fault ONLY the new row catches
+
+    PRISTINE   shipping suite rc=0  names []
+    M3         shipping suite rc=1  names ["array key -0 string"]
+    RESTORED   shipping suite rc=0  names []            module byte-equal to HEAD
+
+M2 above shows the new row falling **in a harness built beside the suite**. It
+cannot show it in the suite that ships, because the table loop aborts at
+`array key 01` and never reaches the new row. M3 is the arm that does.
+
+**A ROW THAT ONLY A SIDE-HARNESS CAN NAME HAS NOT BEEN SHOWN TO BE WIRED INTO THE
+SUITE THAT SHIPS** — bee-laborer's sentence, and it is the general form of note 1
+above. My battery answered the criterion I was given; it did not answer whether
+the row is visible to the instrument CI runs. Those are different questions and
+only the second one protects the estate.
 
 ## Full run at this tree
 
