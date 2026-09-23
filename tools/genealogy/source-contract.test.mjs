@@ -1061,3 +1061,170 @@ test("the chain this accepts cannot carry a field any gate reads", () => {
   assert.equal(claimProblems(Object.assign(Object.create(wider), claim("C2", "P1", "birth", 1))).length, 1);
   assert.equal(bindingProblems(Object.assign(Object.create(wider), mention("s-p", "C1")), store).length, 1);
 });
+
+/* ── AN ID IS A MAP KEY; THE STORE KEYS IT BY ToString ───────────────────────
+ * The coercion above exempted objects and symbols from the key, and the comment
+ * licensing that exemption was about the LOCATOR alone -- a field that is not a
+ * map key. Applied to the two IDS it broke in BOTH directions out of one
+ * expression, because ToPropertyKey is ToString for every non-symbol: an object
+ * id whose toString reads "S1" resolves through heldUnder to the source held
+ * under "S1", so the same entry bound twice was held twice and published as two
+ * bindings on one source; and two DIFFERENT object ids both serialised to "{}",
+ * so an honest second binding was denied as a duplicate of the first. Found by
+ * bee-laborer re-reading 14528dee. The precondition carries the row: the object
+ * form must be an entry the store really does resolve, or neither half proves
+ * anything. */
+test("an id the store resolves is the same id, whatever object it arrives as", () => {
+  const one = () => {
+    const s = createStore();
+    addSource(s, src("S1"));
+    addClaim(s, claim("C1", "P1", "birth", { date: "1880-03-24" }));
+    return s;
+  };
+  const objId = (t) => ({ toString: () => t });
+
+  // the fixture asserts its precondition: the OBJECT ids resolve to the very
+  // records the string ids name, so the second bind below is one entry twice
+  const s = one();
+  assert.deepEqual(bindingProblems({ ...mention(objId("S1"), objId("C1")), locator: "p. 4" }, s), [],
+    "the store resolves the object ids — the two bindings are one entry");
+  bind(s, { ...mention("S1", "C1"), locator: "p. 4" });
+  assert.throws(() => bind(s, { ...mention(objId("S1"), objId("C1")), locator: "p. 4" }), /duplicate \(one entry counted twice/,
+    "an object id names the record its toString names, so this is one entry bound twice");
+  assert.equal(s.bindings.length, 1, "one entry, one binding");
+  assert.equal(permitAll(s).bindings.length, 1, "and the projection is one binding on one source");
+
+  // the other direction of the SAME exemption: two DISTINCT object ids joined
+  const d = one();
+  addSource(d, src("S2"));
+  bind(d, { ...mention(objId("S1"), "C1"), locator: "p. 4" });
+  assert.doesNotThrow(() => bind(d, { ...mention(objId("S2"), "C1"), locator: "p. 4" }),
+    "two DIFFERENT object ids are two sources — joining them names a duplicate that does not exist");
+  assert.equal(d.bindings.length, 2, "two entries stay two");
+
+  // CONTROL, non-vacuity: a genuine duplicate in the object form was always
+  // refused, so the first half is not passing on a gate that refuses everything
+  const g = one();
+  const o1 = objId("S1"), o2 = objId("C1");
+  bind(g, { ...mention(o1, o2), locator: "p. 4" });
+  refuses(() => bind(g, { ...mention(o1, o2), locator: "p. 4" }), /duplicate/);
+
+  // CONTROL: an object id naming a source nobody holds is still not held —
+  // coercing the key did not make the lookup lie
+  const gh = one();
+  refuses(() => bind(gh, { ...mention(objId("S-ghost"), "C1"), locator: "p. 4" }), /source S-ghost is not held/);
+
+  // CONTROL: the LOCATOR keeps its exemption, which is what the row is about —
+  // two distinct object locators on one source and one claim are two entries
+  const l = one();
+  bind(l, { ...mention("S1", "C1"), locator: { page: 4 } });
+  assert.doesNotThrow(() => bind(l, { ...mention("S1", "C1"), locator: { page: 9 } }),
+    "an object LOCATOR is not a map key and is still left to its own value");
+  assert.equal(l.bindings.length, 2);
+});
+
+/* ── A LOCATOR THAT CANNOT CARRY AN IDENTITY IS NAMED, NEVER THROWN ──────────
+ * The locator is left to JSON because it is not a map key. JSON is not total
+ * over it: a CIRCULAR locator and one holding a BIGINT threw a TypeError, and a
+ * SYMBOL and an object whose toJSON returns undefined both serialised to
+ * nothing, so two distinct ones joined. The throw is the worse half and it
+ * escaped as a crash rather than a refusal -- the exported door returned CLEAN
+ * for such a binding while validateStore, claimStanding, personSupport and
+ * publicView all died on it. Found by bee-laborer re-reading 14528dee.
+ * Measured and refused: nonDataAt closes the same four shapes and is this
+ * module's own instrument, but its prototype tests are IDENTITY tests, so it
+ * would also refuse a cross-realm object, a cross-realm array, a Date and a
+ * function locator -- all four key correctly today, and the controls below are
+ * what a reader would fall on if anyone reaches for it later. */
+test("a locator JSON cannot express is refused by name, and every other shape still keys", () => {
+  const one = () => {
+    const s = createStore();
+    addSource(s, src("S1"));
+    addClaim(s, claim("C1", "P1", "birth", { date: "1880-03-24" }));
+    return s;
+  };
+  const circular = (i) => { const o = { page: i }; o.self = o; return o; };
+
+  // refused BY NAME at the door, and the sentence carries the cause
+  for (const [what, mk, why] of [
+    ["a cycle", circular, /locator cannot be part of a duplicate key -- .*circular/],
+    ["a bigint", (i) => ({ page: BigInt(i) }), /locator cannot be part of a duplicate key -- .*BigInt/],
+    ["a symbol", (i) => Symbol(`loc-${i}`), /locator does not survive serialisation/],
+    ["a toJSON that returns undefined", (i) => ({ page: i, toJSON: () => undefined }), /locator does not survive serialisation/],
+  ]) {
+    // caught by hand, not by assert.throws: a non-matching regex makes
+    // assert.throws itself the failure, so a `not a TypeError` assertion placed
+    // after it is a row nothing ever plays. The three questions are separate —
+    // was it refused at all, was the refusal a refusal rather than a crash, and
+    // does the sentence carry the cause — and each gets its own assertion.
+    const s = one();
+    let e = null;
+    try { bind(s, { ...mention("S1", "C1"), locator: mk(4) }); } catch (err) { e = err; }
+    assert.ok(e, `a locator carrying ${what} is refused rather than accepted`);
+    assert.ok(!(e instanceof TypeError), `${what}: refused BY NAME, not by crash — a fail-closed path still owes a true reason (got ${e.message.split("\n")[0]})`);
+    assert.match(e.message, why, `${what}: and the sentence carries the cause`);
+    assert.equal(s.bindings.length, 0, `${what}: and nothing was held`);
+  }
+
+  // the exported door and the gates agree, on a store that ALREADY holds one:
+  // this is what threw a TypeError out of all four
+  const held = one();
+  const b = { ...mention("S1", "C1"), locator: circular(4) };
+  held.bindings.push(b); // pushed past bind(), the way a hand-built store arrives
+  assert.deepEqual(bindingProblems(b, held), ["binding S1→C1: locator cannot be part of a duplicate key -- Converting circular structure to JSON"],
+    "the exported door answers for it, rather than returning clean on a binding every gate dies on");
+  assert.deepEqual(validateStore(held), bindingProblems(b, held), "and validateStore says it once, not twice");
+  for (const [name, fn] of [["claimStanding", () => claimStanding(held, "C1")], ["personSupport", () => personSupport(held, "P1")], ["publicView", () => permitAll(held)]]) {
+    let e = null;
+    try { fn(); } catch (err) { e = err; }
+    assert.ok(e, `${name} refuses a store it cannot key`);
+    assert.ok(!(e instanceof TypeError), `${name}: refused BY NAME, not by crash (got ${e.message.split("\n")[0]})`);
+    assert.match(e.message, /locator cannot be part of a duplicate key/, `${name}: and the sentence carries the cause`);
+  }
+
+  // and two unkeyable bindings do not become a duplicate of each other: an
+  // unkeyable locator joins NOTHING rather than joining everything, which is
+  // the difference between skipping it and keying it as null
+  const pair = one();
+  pair.bindings.push({ ...mention("S1", "C1"), locator: circular(4) }, { ...mention("S1", "C1"), locator: circular(9) });
+  const said = validateStore(pair);
+  assert.equal(said.length, 2, "one sentence each");
+  // /duplicate/ alone is satisfied by the refusal's OWN wording ("duplicate
+  // key"), so the assertion names the duplicate SENTENCE and not the word it
+  // shares with the refusal it is checking is absent
+  assert.ok(!said.some((p) => /duplicate \(one entry counted twice/.test(p)), "and neither is reported as a duplicate of the other");
+
+  // CONTROLS — every keyable shape still keys, and two distinct ones stay two.
+  // These are the rows nonDataAt would have taken down: the first three are the
+  // realm-local defect this commit's parent repaired one function over.
+  for (const [what, mk] of [
+    ["a cross-realm plain object", (i) => Object.assign(vm.runInNewContext("({})"), { page: i })],
+    ["a cross-realm array", (i) => vm.runInNewContext(`[${i}]`)],
+    ["a Date", (i) => new Date(Date.UTC(2026, 0, i))],
+    ["a function", (i) => new Function(`return ${i};`)],
+    ["a null-prototype object", (i) => Object.assign(Object.create(null), { page: i })],
+    ["a plain object", (i) => ({ page: i })],
+    ["an ordinary string", (i) => `p. ${i}`],
+  ]) {
+    const s = one();
+    assert.doesNotThrow(() => bind(s, { ...mention("S1", "C1"), locator: mk(4) }), `${what} is a keyable locator`);
+    assert.doesNotThrow(() => bind(s, { ...mention("S1", "C1"), locator: mk(9) }), `${what}: two DISTINCT locators are two entries`);
+    assert.equal(s.bindings.length, 2, `${what}: two entries stay two`);
+    refuses(() => bind(s, { ...mention("S1", "C1"), locator: mk(4) }), /duplicate/);
+  }
+
+  // CONTROL: nesting the locator's JSON TEXT in the key adds no join, because
+  // JSON quotes strings — the object and a string that reads like its
+  // serialisation are two entries
+  const n = one();
+  bind(n, { ...mention("S1", "C1"), locator: { page: 4 } });
+  assert.doesNotThrow(() => bind(n, { ...mention("S1", "C1"), locator: '{"page":4}' }),
+    "the object and the string that reads like its serialisation are two entries");
+  assert.equal(n.bindings.length, 2);
+
+  // CONTROL: an absent locator is the empty string on both sides, so the row
+  // did not quietly make every unlocated binding unkeyable
+  const a = one();
+  bind(a, mention("S1", "C1"));
+  refuses(() => bind(a, { ...mention("S1", "C1"), locator: "" }), /duplicate/);
+});

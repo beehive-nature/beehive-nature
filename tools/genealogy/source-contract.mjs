@@ -200,6 +200,44 @@ export function claimProblems(c) {
 // is a FUNCTION now reports its Function.prototype members as not held.
 const heldUnder = (map, id) => (Object.prototype.hasOwnProperty.call(map, id) ? map[id] : undefined);
 
+// A locator is NOT a map key. Two bindings on one source and one claim are two
+// entries when their locators differ, so a locator carries identity BY VALUE
+// and is left to JSON rather than coerced -- coercing it would join every
+// object locator on "[object Object]".
+// But JSON is not total over it. Measured at 14528dee across fourteen shapes: a
+// CIRCULAR locator and one holding a BIGINT made JSON.stringify THROW, and a
+// SYMBOL and an object whose toJSON returns undefined both serialise to nothing
+// inside the array, so two distinct ones joined. The throw is the worse half:
+// the exported door returned CLEAN for such a binding, and a store already
+// holding one threw a TypeError out of validateStore, claimStanding,
+// personSupport and publicView alike -- four gates failing by crash instead of
+// by refusal. A fail-closed path still owes a TRUE reason, and a crash is not
+// one. Found by bee-laborer re-reading 14528dee.
+// So the locator is serialised ALONE and the SERIALISATION is judged: a value
+// JSON cannot express, or expresses as nothing, cannot carry an identity and is
+// REFUSED BY NAME. Everything else joins on its own JSON text, which makes the
+// key TOTAL -- the outer stringify now sees three strings and cannot throw.
+// Nesting the text adds no join, because JSON quotes strings: the locator
+// string {"page":4} and the object {page:4} still key apart, asserted below.
+// NOT nonDataAt, though it is this module's own is-this-data instrument and
+// closes exactly these four shapes: its prototype tests are IDENTITY tests, so
+// it also refuses a cross-realm plain object, a cross-realm array, a Date and a
+// function locator -- four shapes that key correctly today, measured, and the
+// first of them is the realm-local defect this commit's parent repaired one
+// function over. A remedy that re-creates the defect it sits beside is not the
+// remedy; the cost table is in the receipt.
+// RESIDUAL, unchanged and disclosed: JSON text is key-ORDER sensitive, so
+// {a:1,b:2} and {b:2,a:1} are two entries. That was true of the join before
+// this commit and is not what this row repairs.
+const locatorKey = (v) => {
+  const raw = (typeof v === "object" && v !== null) || typeof v === "symbol" ? v : String(v);
+  let text;
+  try { text = JSON.stringify(raw); }
+  catch (e) { return { why: `locator cannot be part of a duplicate key -- ${String(e?.message).split("\n")[0]}` }; }
+  if (text === undefined) return { why: "locator does not survive serialisation, so two distinct locators would join" };
+  return { text };
+};
+
 export function bindingProblems(b, store) {
   const at = `binding ${b?.sourceId ?? "?"}→${b?.claimId ?? "?"}`;
   if (!b || typeof b !== "object") return [`${at}: not an object`];
@@ -211,6 +249,12 @@ export function bindingProblems(b, store) {
   const s = heldUnder(store.sources, b.sourceId), c = heldUnder(store.claims, b.claimId);
   if (!s) out.push(`${at}: source ${b.sourceId} is not held`);
   if (!c) out.push(`${at}: claim ${b.claimId} does not exist`);
+  // The exported door answers for the locator too, so a binding whose locator
+  // cannot carry an identity is named HERE and not only where the key is built
+  // -- that disagreement was the row: this returned clean while every gate that
+  // keys the store crashed on the same binding.
+  const lk = locatorKey(b.locator ?? "");
+  if (lk.why) out.push(`${at}: ${lk.why}`);
   if (b.relation === "mentions") return out;
   // supports / contradicts: the entry read, the assertion extracted, and the claim must line up
   if (!PREDICATES.includes(b.context)) out.push(`${at}: context must name the entry read (got ${b.context})`);
@@ -269,22 +313,27 @@ export function validateStore(store) {
     // names a duplicate that does not exist. A "|" in free LOCATOR text is
     // harmless; the trigger is a "|" in an ID. Found by bee-laborer re-reading
     // 05b8d93c. A fail-closed path still owes a TRUE reason.
-    // Joining stopped the key COERCING, and the store still does: its maps are
-    // indexed by PROPERTY KEY, so `5` and "5" are one held source, while
-    // JSON.stringify keeps them apart -- one entry bound twice then published as
-    // two bindings on one source. Coerce each part the way the store keys, which
-    // is also what `at` above already did to both ids one line into
-    // bindingProblems: every id that reaches this line has survived that same
-    // ToString, so this adds no failure mode to them (a bigint id THREW here
-    // before and no longer does). The locator is NOT a map key, so an object
-    // locator is left to JSON exactly as it was rather than coerced into a
-    // throw. A REGRESSION of the joining above, found by bee-laborer re-reading
-    // it one head later; the delimiter half is unchanged and its controls hold.
-    // RESIDUAL, disclosed: a symbol id still serialises to `null`, so two
-    // distinct symbols join -- but a symbol id throws in `at` before it reaches
-    // here, and the class is named there.
-    const part = (v) => ((typeof v === "object" && v !== null) || typeof v === "symbol" ? v : String(v));
-    const key = JSON.stringify([part(b?.sourceId), part(b?.claimId), part(b?.locator ?? "")]);
+    // Coerce each part the way the store keys it. An ID *is* a map key: these
+    // maps are indexed by PROPERTY KEY and ToPropertyKey is ToString for every
+    // non-symbol, so the source held under "5" is the one a binding names as 5,
+    // and an object id whose toString reads "S1" resolves to the source held
+    // under "S1". `part` exempted objects and symbols from that coercion for
+    // ALL THREE fields while the sentence licensing the exemption was about the
+    // LOCATOR alone, and one exemption produced both errors at once: an object
+    // id MISSED a duplicate -- the same entry bound twice, held twice and
+    // published as two bindings on one source -- while two DIFFERENT object ids
+    // joined on "{}" into a duplicate that does not exist. Found by bee-laborer
+    // re-reading 14528dee; the comment already stated the law the expression
+    // broke. String() adds no failure mode here, measured: `at` is built from
+    // both ids in a template literal one line into bindingProblems, so a symbol
+    // or null-prototype id throws THERE and never reaches this line, and that
+    // is where the class is named.
+    const idPart = (v) => String(v);
+    const lk = locatorKey(b?.locator ?? "");
+    // Already named by bindingProblems above. An unkeyable locator joins
+    // nothing rather than joining everything, and the sentence is said once.
+    if (lk.why) continue;
+    const key = JSON.stringify([idPart(b?.sourceId), idPart(b?.claimId), lk.text]);
     if (seen.has(key)) out.push(`binding ${b?.sourceId}→${b?.claimId}: duplicate (one entry counted twice is not two sources)`);
     seen.add(key);
   }

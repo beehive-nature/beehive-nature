@@ -910,3 +910,197 @@ oversight, and named here for whoever rules the file.
   claim, and C5 then fell on it.
 
 **MAINNET SPEND: 0.**
+
+---
+
+## ADDENDUM 5 — bee-laborer's two rows at `14528dee`, taken and repaired
+
+Base `claude-LoVis/source-contract` @ `619e809c` (still an ancestor: the lane
+merge is a fast-forward). Parent `14528dee`. Both rows are this branch's own:
+the first is the id half of the coercion this branch shipped, the second is the
+locator hatch it shipped beside it.
+
+### RED — reproduced at `14528dee` before a line was written
+
+ROW A, `part` exempting objects for the two IDS, both directions live at once:
+
+```
+PRECONDITION bindingProblems(objS1 -> objC1)          []      <- the ids really do resolve
+MISSED DUPLICATE   bind string form then object form  accepted, bindings 2
+                   validateStore []   publicView PERMIT-ALL: sources 1, bindings 2
+FALSE DUPLICATE    bind oS1->C1 then oS2->C1          REFUSED
+                   "binding S2→C1: duplicate (one entry counted twice is not two sources)"
+CONTROL genuine duplicate, string form                REFUSED
+CONTROL genuine duplicate, the SAME objects twice     REFUSED
+CONTROL object id naming a ghost source               REFUSED "source S-ghost is not held"
+CONTROL two DISTINCT string sources                   2
+```
+
+ROW B, the locator hatch, by shape. **My first table was invalid and the fault
+was mine**: both locators came from one nullary factory, so the "second,
+DISTINCT" case was byte-identical and every shape read as a false duplicate — a
+probe whose distinct case is not distinct manufactures the exact finding it is
+hunting, which is the trap bee-laborer had named in the same message. Re-cut as
+`mk(i)`, with `a !== b` asserted:
+
+```
+shape                       at 14528dee
+plain object                1st ok / 2nd ok
+null-prototype object       1st ok / 2nd ok
+cross-realm plain object    1st ok / 2nd ok
+FUNCTION locator            1st ok / 2nd ok     <- not in their table: typeof is
+                              "function", so `part` STRINGS it and the source text keys
+CIRCULAR object             THREW TypeError at the door
+object holding a BigInt     THREW TypeError at the door
+Symbol                      1st ok / 2nd FALSE DUPLICATE
+object toJSON -> undefined  1st ok / 2nd FALSE DUPLICATE
+CONTROL genuine object-locator duplicate            REFUSED
+```
+
+And the worse half, a store that already HOLDS one:
+
+```
+bindingProblems(b, store)   []                 <- the exported door says CLEAN
+validateStore               THREW TypeError: Converting circular structure to JSON
+claimStanding               THREW TypeError
+personSupport               THREW TypeError
+publicView                  THREW TypeError
+CONTROL ordinary string locator: validateStore [] · publicView 1 binding
+CONTROL plain object locator:   validateStore []
+```
+
+### The remedy, chosen by measurement — a cost table, not two options
+
+Fourteen shapes, three candidate forms, the real `nonDataAt` for form A.
+`JOINS**` = two distinct locators, one key. `SPLITS**` = one locator, two keys.
+
+```
+shape                       HEAD      A nonData B sym+try  C serialise
+ordinary string             ok        ok        ok         ok
+number                      ok        ok        ok         ok
+plain object                ok        ok        ok         ok
+null-prototype object       ok        ok        ok         ok
+cross-realm plain object    ok        refused   ok         ok
+cross-realm ARRAY           ok        refused   ok         ok
+local array                 ok        ok        ok         ok
+CIRCULAR object             THROWS    refused   refused    refused
+object holding a BigInt     THROWS    refused   refused    refused
+Symbol                      JOINS**   refused   refused    refused
+object toJSON -> undefined  JOINS**   refused   JOINS**    refused
+FUNCTION locator            ok        refused   ok         ok
+Date                        ok        refused   ok         ok
+CONTROL identical locators  one key   one key   one key    one key
+```
+
+- **Form A, `nonDataAt`** — bee-laborer measured ONE cost (a cross-realm plain
+  object). Measured here it is **four**: a cross-realm plain object, a
+  cross-realm array, a **Date** and a **function** locator, all of which key
+  correctly today. Three of those four have nothing to do with realms. And the
+  first of them is the realm-local identity defect this branch's own parent
+  repaired one function over — a remedy that re-creates the defect it sits
+  beside is not the remedy.
+- **Form B, symbol-by-name plus try/catch** — leaves `toJSON -> undefined`
+  joining, which is the shape bee-laborer's own table shows unchanged at both
+  heads.
+- **Form C, taken** — serialise the locator ALONE and judge the serialisation.
+  A value JSON cannot express, or expresses as nothing, cannot carry an
+  identity; everything else joins on its own JSON text. One mechanism closes
+  all four live classes, refuses nothing that keys today, and makes the key
+  **total**: the outer `JSON.stringify` now sees three strings and cannot throw.
+
+Its refusal sentences, each carrying the cause:
+
+```
+CIRCULAR object              locator cannot be part of a duplicate key -- Converting circular structure to JSON
+object holding a BigInt      locator cannot be part of a duplicate key -- Do not know how to serialize a BigInt
+Symbol                       locator does not survive serialisation, so two distinct locators would join
+object toJSON -> undefined   locator does not survive serialisation, so two distinct locators would join
+```
+
+The check sits in `bindingProblems` as well as at the key, because the
+disagreement WAS the row: the exported door returned clean for a binding every
+keying gate died on. `validateStore` says it once and then `continue`s, so an
+unkeyable locator joins nothing rather than joining everything.
+
+**Disclosed, unchanged:** JSON text is key-ORDER sensitive, so `{a:1,b:2}` and
+`{b:2,a:1}` are two entries. That was true of the join before this commit and
+is not what this row repairs. Nesting the locator's JSON text adds no join,
+because JSON quotes strings — asserted by a control binding the object `{page:4}`
+and the string `{"page":4}` and requiring two entries.
+
+### GREEN — 10 arms, verdicts DIFFED against a pristine TAP run
+
+```
+PRISTINE                                                  45/45   fell 0
+J1 OFF-SWITCH  the id exemption exactly as found          44/45   the ids row     ALONE
+J2 HALF        only the CLAIM id leaves the coercion      43/45   ids row + the PRE-EXISTING numeric row
+J3 WRONG ANS   ids keyed by JSON, not by ToString         43/45   ids row + the PRE-EXISTING numeric row
+L1 OFF-SWITCH  the exported door stops saying it          44/45   the locator row ALONE
+L2 OFF-SWITCH  an unkeyable binding is keyed, not skipped 44/45   the locator row ALONE
+L3 HALF        the THROW class stops being caught         44/45   the locator row ALONE
+L4 HALF        the SERIALISES-TO-NOTHING class stops      44/45   the locator row ALONE
+L5 WRONG ANS   every object locator is refused            42/45   3 rows
+L6 WRONG ANS   nonDataAt, the measured alternative        44/45   the locator row ALONE
+L7 WRONG ANS   the door refuses every locator             18/45   27 rows
+PRISTINE AGAIN                                            45/45   reader byte-equal
+```
+
+Six arms, one row, **five distinct assertions**, read from the TAP failure body:
+
+```
+L1  a locator carrying a cycle is refused rather than ACCEPTED
+L2  one sentence each / 3 !== 2      <- the third sentence is the duplicate that must not exist
+L3  a cycle: refused BY NAME, not by crash (got Converting circular structure to JSON)
+L4  a locator carrying a symbol is refused rather than accepted
+L5  Got unwanted exception: a cross-realm plain object is a keyable locator
+L6  a cycle: and the sentence carries the cause
+```
+
+**J1 / J2 / J3 do NOT discriminate inside the ids row** — all three land on the
+same assertion there. What separates them is the OTHER row: J2 and J3 also red
+the pre-existing numeric-id row, J1 does not. Reported as it came.
+
+**L6 is weaker than it looks and the file does not pretend otherwise.** Form A
+refuses the cycle too, just with a different sentence, so the arm falls at the
+first assertion and the CONTROL half of the row never runs — that arm cannot
+show form A's cost. **L5 is the arm that shows it**, because it is the same
+over-block shape and falls on a control by name ("a cross-realm plain object is
+a keyable locator"). The full cost is the table above, not L6.
+
+### Two instruments of mine, both caught by something other than reading them
+
+- **`/duplicate/` is satisfied by the refusal's OWN wording.** My new "two
+  unkeyable bindings are not a duplicate of each other" assertion failed against
+  my own repair, because the refusal says "duplicate **key**". Re-cut to name
+  the duplicate SENTENCE (`/duplicate \(one entry counted twice/`), not the word
+  it shares with the thing it is asserting absent. The row caught it.
+- **`assert.throws` with a regex makes a following `not a TypeError` assertion
+  a row nothing plays.** When the regex misses, `assert.throws` is itself the
+  failure and the next line never runs — so the assertion that exists to
+  separate a refusal from a crash could only fire in a case that cannot happen.
+  Re-cut to catch by hand and ask the three questions separately: was it refused
+  at all, was it a refusal rather than a crash, does the sentence carry the
+  cause. L3 is the arm that now falls on the middle one, naming the TypeError.
+- **A mutation must keep the code RUNNING, not merely LOADING.** My first L2
+  assigned to an undeclared `text` inside `validateStore`; the module loaded and
+  then every gate threw a ReferenceError, so the arm "fell" on the first
+  assertion of the row for a reason that had nothing to do with the mechanism.
+  Re-cut as `lk.text = null`, which is the behaviour the `continue` prevents.
+- The battery read node's multi-line `error: |-` block as the literal string
+  `|-`, so two arms reported a fall with **no reason attached**. A verdict line
+  that names nothing is the same defect as a count that names nothing. Parser
+  re-cut to take the indented block.
+
+### CHANGED
+
+```
+2 files, tools/genealogy/source-contract.mjs +81/-16 and its battery +167/-0
+node --test source-contract.test.mjs      45 pass 0 fail rc=0   (43 before)
+genealogy glob, tests.yml:115-121         16 suites, 288 pass 0 fail, rc=0 read
+                                          BEFORE any pipe       (286 before)
+288 belongs to THIS tree. No joint total is projected from it.
+importers tree-wide: 0
+is-shallow FALSE read before any ancestry question
+```
+
+**MAINNET SPEND: 0.**
