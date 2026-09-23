@@ -15,10 +15,10 @@
   }
  ],
  "evidence": {
-  "era": "unrecorded",
+  "era": "saga",
   "support": "unsourced-entry",
   "basis": "era label from dates; support unsourced until sources are harvested",
-  "class": "unrecorded"
+  "class": "saga"
  },
  "research": {
   "status": "incomplete",

@@ -503,7 +503,10 @@ test('I1 discoveries() — every hook computed, locked to the pin corpus (founde
   assert.equal(D.personsCount, 10259);
   assert.deepEqual(D.spine, { gens: 42, terminus: 'p980ac0fa0b' });
   assert.equal(archive.getPerson(D.spine.terminus).name, 'Randver Radbardson');
-  assert.deepEqual(D.deepest, { id: 'pc996e1efee', depth: 143, from: 'founder', descent: ['living', 'recorded', 'colonial', 'medieval', 'saga', 'unrecorded', 'saga', 'unrecorded', 'saga', 'unrecorded', 'saga', 'unrecorded', 'medieval', 'colonial', 'recorded', 'unrecorded', 'recorded', 'unrecorded', 'recorded'] });
+  assert.deepEqual(D.deepest, { id: 'pc996e1efee', depth: 143, from: 'founder', descent: ['living', 'recorded', 'colonial', 'medieval', 'saga', 'unrecorded', 'saga', 'unrecorded', 'saga', 'unrecorded', 'saga', 'recorded', 'unrecorded', 'saga', 'unrecorded', 'recorded'] });
+  /* descent re-pinned 2026-09-22: the archive regenerated under bfb2867c7's
+   * signed BC/short-year reading, so BC lifespans once labelled recorded/
+   * medieval/colonial now read saga. Same person, same depth 143. */
   assert.equal(archive.getPerson(D.deepest.id).name, 'E Anna Tum DE LAGASH');
   assert.deepEqual(D.collapse, { gens: 12, repeaters: 50, top: { id: 'p240410e903', n: 3 } });
   assert.equal(archive.getPerson(D.collapse.top.id).name, 'Tacy Cooper');
@@ -657,7 +660,7 @@ test('J4 discoveries are CONTEXTUAL — the same archive tells a different story
   assert.equal(Df.deepest.depth, 143);
   assert.equal(Df.tiers.total, 10097);
   assert.deepEqual(Df.tiers.order, ['saga', 'medieval', 'colonial', 'unrecorded', 'recorded', 'living']);
-  assert.equal(Df.tiers.counts.saga, 3153, 'more saga-tier than recorded-tier — the thinning is countable');
+  assert.equal(Df.tiers.counts.saga, 4325, 'more saga-tier than recorded-tier — the thinning is countable'); /* 3153 → 4325 on 2026-09-22: 1,172 BC/short-year lifespans relabelled under bfb2867c7 */
   /* Rockwood root: a small colonial world with its own frontier story */
   assert.equal(Da.deepest.depth, 3);
   assert.equal(Da.deepest.id, 'p92dc6be4f8');
