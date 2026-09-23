@@ -150,8 +150,33 @@ export function bindingProblems(b, store) {
   return out;
 }
 
-export function validateStore(store) {
+// The store's SHAPE is part of the contract, not only its contents. A map that
+// carries Object.prototype answers "held" for toString, constructor and
+// __proto__ -- the class closed above -- and cannot store a source under the id
+// "__proto__" at all. createStore() builds both maps prototype-free, but nothing
+// forces a caller to have used it: a hand-built literal and
+// JSON.parse(JSON.stringify(store)) both produce plain maps, and both bring that
+// class straight back (measured; the privacy half stays closed under every store
+// shape because publicView builds its own null-prototype maps). Found by
+// bee-laborer re-reading the repair above.
+// Refused by name rather than repaired, because repairing means mutating the
+// caller's store. COST, stated so it is not mistaken for free: a persisted store
+// cannot be revived by JSON.parse alone. There is no revive path here and no
+// caller that needs one; the hand that persists a store writes it.
+// Scope: the prototype only. A sources/claims that is missing or not an object
+// is left exactly as it behaves today and is not this row.
+export function storeProblems(store) {
   const out = [];
+  for (const [name, reads] of [["sources", "a held source"], ["claims", "an existing claim"]]) {
+    const m = store?.[name];
+    if (m && typeof m === "object" && Object.getPrototypeOf(m) !== null)
+      out.push(`store.${name}: carries a prototype, so an id JavaScript puts on every object reads as ${reads} -- build it with createStore()`);
+  }
+  return out;
+}
+
+export function validateStore(store) {
+  const out = storeProblems(store);
   for (const [k, s] of Object.entries(store.sources)) {
     out.push(...sourceProblems(s));
     if (s?.id !== k) out.push(`source ${k}: keyed under a different id`);
@@ -173,16 +198,20 @@ export function validateStore(store) {
 // adders refuse rather than store something invalid
 const refuse = (problems) => { if (problems.length) throw new Error(problems.join("; ")); };
 export function addSource(store, s) {
-  refuse(sourceProblems(s));
+  refuse([...storeProblems(store), ...sourceProblems(s)]);
   if (store.sources[s.id]) refuse([`source ${s.id}: already held`]);
   store.sources[s.id] = s;
 }
 export function addClaim(store, c) {
-  refuse(claimProblems(c));
+  refuse([...storeProblems(store), ...claimProblems(c)]);
   if (store.claims[c.id]) refuse([`claim ${c.id}: already exists`]);
   store.claims[c.id] = c;
 }
 export function bind(store, b) {
+  // The filter below keeps an unrelated invalid source from refusing every
+  // bind. A store-shape problem is not unrelated: it is what makes this
+  // binding's own existence lookups lie, and the filter would drop it.
+  refuse(storeProblems(store));
   const probe = { ...store, bindings: [...store.bindings, b] };
   refuse(validateStore(probe).filter((p) => p.startsWith("binding ")));
   store.bindings.push(b);

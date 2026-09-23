@@ -525,7 +525,7 @@ test("a binding naming a prototype key is REFUSED, and for the true reason", () 
   for (const id of PROTO_IDS) {
     const s = seededStore();
     assert.throws(() => bind(s, { ...mention(id, id), quote: "held text" }),
-      new RegExp(`source ${id === "__proto__" ? "__proto__" : id} is not held`),
+      new RegExp(`source ${id} is not held`),
       `a binding whose sourceId is "${id}" must be refused`);
     assert.equal(s.bindings.length, 0, `"${id}" must leave no binding behind`);
   }
@@ -590,4 +590,91 @@ test("a source or claim whose id is a prototype key is held as an OWN key, not s
   addSource(c, src("s-ordinary"));
   assert.deepEqual(Object.keys(c.sources), ["s-ordinary"]);
   assert.throws(() => addSource(c, src("s-ordinary")), /already held/);
+});
+
+/* ── STORE SHAPE ────────────────────────────────────────────────
+ * The repair above is a property of createStore(), not of the store. A
+ * hand-built literal and JSON.parse(JSON.stringify(store)) both carry
+ * Object.prototype again and bring the whole class back: a binding to a source
+ * nobody holds, a standing for a claim nobody added, and "already held" for an
+ * id nothing is stored under. Found by bee-laborer re-reading that repair.
+ * The shape is now refused BY NAME, and each row below is anchored on ONE
+ * entry point with a CONTROL in the same call shape, because the four entries
+ * check it separately — bind's filter drops everything that is not a binding
+ * problem, and the adders never call validateStore at all.
+ * The privacy half needs none of this and is asserted nowhere below: publicView
+ * builds its own null-prototype maps, so it publishes nothing the caller
+ * refused under every store shape. Measured, not assumed.
+ * COST, so it is not mistaken for free: a persisted store cannot be revived by
+ * JSON.parse alone. Nothing here persists one, and the hand that does writes
+ * the revive path. */
+const handBuilt = (s) => ({ sources: { ...s.sources }, claims: { ...s.claims }, bindings: [...s.bindings], leads: [...s.leads] });
+const jsonRevived = (s) => JSON.parse(JSON.stringify(s));
+const REBUILT = [["hand-built", handBuilt], ["JSON-revived", jsonRevived]];
+
+test("a store nobody built with createStore() is named, never walked", () => {
+  for (const [label, rebuild] of REBUILT) {
+    const s = rebuild(seededStore());
+    assert.notEqual(Object.getPrototypeOf(s.sources), null, `${label}: the fixture asserts its precondition`);
+    const problems = validateStore(s);
+    for (const name of ["sources", "claims"])
+      assert.ok(problems.some((p) => p.startsWith(`store.${name}: carries a prototype`) && p.includes("createStore()")),
+        `${label}: store.${name} must be named, and the sentence must carry the remedy`);
+    // every entry that validates refuses instead of answering from the prototype
+    refuses(() => claimStanding(s, "constructor"), /store\.claims: carries a prototype/);
+    refuses(() => personSupport(s, "P1"), /store\.(sources|claims): carries a prototype/);
+    refuses(() => publicView(s, { isPublicSubject: () => true, isPublicSource: () => true }),
+      /store\.(sources|claims): carries a prototype/);
+  }
+  // CONTROL: the store createStore() builds is clean and every one of those answers
+  const ok = seededStore();
+  assert.deepEqual(validateStore(ok), []);
+  assert.equal(claimStanding(ok, "c-real").standing, "unsupported");
+  assert.equal(personSupport(ok, "P1").support, "unsourced-entry");
+  assert.deepEqual(Object.keys(publicView(ok, { isPublicSubject: () => true, isPublicSource: () => true }).claims), ["c-real"]);
+});
+
+test("an adder refuses a store it cannot store into, and the reason is TRUE", () => {
+  for (const [label, rebuild] of REBUILT) {
+    const s = rebuild(seededStore());
+    refuses(() => addSource(s, src("s-new")), /store\.sources: carries a prototype/);
+    refuses(() => addClaim(s, claim("c-new", "P1", "birth", { date: "1880-03-24" })), /store\.claims: carries a prototype/);
+    assert.deepEqual(Object.keys(s.sources), ["s-real"], `${label}: a refused add stores nothing`);
+    // the mirror of the same line. "already held" was the FALSE reason: nothing
+    // is stored under __proto__, and on a plain map nothing can be.
+    assert.equal(Object.keys(s.sources).includes("__proto__"), false);
+    assert.throws(() => addSource(s, src("__proto__")), (e) => {
+      assert.match(e.message, /store\.sources: carries a prototype/);
+      assert.doesNotMatch(e.message, /already held/, `${label}: "already held" is a false reason here`);
+      return true;
+    });
+  }
+  // CONTROL: the same two calls land on a store createStore() built
+  const ok = seededStore();
+  addSource(ok, src("s-new"));
+  addClaim(ok, claim("c-new", "P1", "birth", { date: "1880-03-24" }));
+  assert.deepEqual(Object.keys(ok.sources).sort(), ["s-new", "s-real"]);
+  assert.deepEqual(Object.keys(ok.claims).sort(), ["c-new", "c-real"]);
+});
+
+test("bind refuses a store-shape problem that its binding filter would drop", () => {
+  for (const [label, rebuild] of REBUILT) {
+    const s = rebuild(seededStore());
+    refuses(() => bind(s, { ...mention("toString", "constructor"), quote: "SECRET FAMILY LETTER TEXT" }),
+      /store\.sources: carries a prototype/);
+    assert.equal(s.bindings.length, 0, `${label}: a refused bind leaves nothing behind`);
+  }
+  const ok = seededStore();
+  // CONTROL (a): the same binding lands on a store createStore() built
+  bind(ok, mention("s-real", "c-real"));
+  assert.equal(ok.bindings.length, 1);
+  // CONTROL (b): the filter was NOT widened to the whole store. It exists so an
+  // unrelated invalid source does not refuse every honest bind, and it still does.
+  const withJunk = seededStore();
+  withJunk.sources["s-broken"] = { schema: SOURCE_SCHEMA, id: "s-broken" };
+  assert.ok(validateStore(withJunk).some((p) => p.startsWith("source s-broken:")), "the fixture asserts its precondition");
+  bind(withJunk, mention("s-real", "c-real"));
+  assert.equal(withJunk.bindings.length, 1, "an unrelated invalid source does not refuse an honest binding");
+  // CONTROL (c): a binding's OWN reason still reaches the caller
+  refuses(() => bind(ok, mention("s-ghost", "c-real")), /source s-ghost is not held/);
 });
