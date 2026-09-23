@@ -421,7 +421,13 @@ export function checkSourceContract({ corpus, overlay, packs = {}, staged = {}, 
      * the two walks below. Found by bee-laborer attacking #225 — a surviving
      * window of ten, a 99.9% coverage loss, read 48/48 green.
      * And the clause walks TWO lists, so the honest population is the published
-     * corpus PLUS the staged store, not the staged store alone. */
+     * corpus PLUS the staged store, not the staged store alone. That sum is
+     * also what makes the regression witness sharp: stop counting EITHER walk
+     * and the count lands on the published-corpus size exactly -- the very
+     * figure the bulk form used to publish and R6 used to accept. The old
+     * defect's own reading is now the value R6 refuses. (Named without its
+     * digits on purpose: that number moves with the corpus, and a magnitude
+     * written into a comment goes stale where a description does not.) */
     const missingFromStore = Object.keys(persons).filter((id) => {
       saw('LNK-STAGED-CORPUS-DIVERGE');
       return !staged[id];
