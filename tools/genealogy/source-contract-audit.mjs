@@ -1,4 +1,4 @@
-/* source-contract.mjs — AN INDEPENDENT READING OF THE PUBLISHED ARCHIVE.
+/* source-contract-audit.mjs — AN INDEPENDENT READING OF THE PUBLISHED ARCHIVE.
  *
  * Founder order 2026-09-23 (SKAISTS CORE SPRINT 001): build an independent
  * reader from the SOURCE CONTRACT — no model.mjs, no pipeline.mjs, no #222
@@ -11,7 +11,7 @@
  * agreeing is a real fact and it is not this fact. This module implements the
  * CONTRACT — the sentences the artifacts and the dispatches declare about
  * themselves — and reads the published bytes with its own code. It imports
- * nothing from the genealogy implementation; source-contract.test.mjs locks
+ * nothing from the genealogy implementation; source-contract-audit.test.mjs locks
  * that mechanically, because an import would quietly turn this file into a
  * third copy of the same reading.
  *

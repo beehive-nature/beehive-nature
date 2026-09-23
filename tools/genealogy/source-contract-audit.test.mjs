@@ -1,8 +1,8 @@
-/* source-contract.test.mjs — the battery for the independent reader.
+/* source-contract-audit.test.mjs — the battery for the independent reader.
  *
  * Three things are being proven here, and they are different things:
  *
- *  I  INDEPENDENCE. source-contract.mjs imports nothing from the genealogy
+ *  I  INDEPENDENCE. source-contract-audit.mjs imports nothing from the genealogy
  *     implementation. An import would make it a third copy of the reading it
  *     exists to cross. The scanner is proven capable of finding an import by
  *     running it over a file that HAS them.
@@ -30,7 +30,7 @@ import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { join, dirname } from 'node:path';
 
-import { checkSourceContract, findingKey, CLAUSE_CODES, declaredTiers } from './source-contract.mjs';
+import { checkSourceContract, findingKey, CLAUSE_CODES, declaredTiers } from './source-contract-audit.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(HERE, '..', '..');
@@ -130,14 +130,14 @@ test('I1: the scanner can find an import — control on a file that has them', (
   assert.ok(hits.length >= 5, `the import scanner found ${hits.length} imports in agreement.test.mjs — a scanner that finds nothing cannot report an absence`);
 });
 
-test('I2: source-contract.mjs imports nothing at all', () => {
-  const src = readFileSync(join(HERE, 'source-contract.mjs'), 'utf8');
+test('I2: source-contract-audit.mjs imports nothing at all', () => {
+  const src = readFileSync(join(HERE, 'source-contract-audit.mjs'), 'utf8');
   const hits = importHits(src);
   assert.deepEqual(hits, [], `the independent reader imports: ${JSON.stringify(hits)}`);
 });
 
-test('I3: source-contract.mjs names no implementation module, even in prose-free code', () => {
-  const src = readFileSync(join(HERE, 'source-contract.mjs'), 'utf8');
+test('I3: source-contract-audit.mjs names no implementation module, even in prose-free code', () => {
+  const src = readFileSync(join(HERE, 'source-contract-audit.mjs'), 'utf8');
   /* strip block and line comments: the header QUOTES these filenames on
    * purpose, and a scan that cannot tell a citation from a dependency would
    * fail on its own documentation. */

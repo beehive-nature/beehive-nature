@@ -151,3 +151,106 @@ Test-only. No production byte, no payment path, no security gate, no `#222`
 file, no `model.mjs`, no `pipeline.mjs`.
 
 **MAINNET SPEND: 0.**
+
+---
+
+## ADDENDUM — RENAME, founder order 2026-09-23 10:44Z
+
+**Everything above this line was measured at `fb11b47f`, where the two files
+were still `tools/genealogy/source-contract.mjs` and `.test.mjs`. Those pasted
+commands are left exactly as they ran; they are not retyped to the new names,
+because a receipt that renames its own history stops being a record of what
+happened.** The re-run under the new names is below.
+
+### The collision, reproduced — this is the RED
+
+`#224` (`claude-LoVis/source-contract`, head `619e809c`) and `#225`
+(`bopus5/source-contract`, head `fb11b47f`) both ADD the same two paths, and
+they hold different systems: `#224` is the provider-neutral source / claim /
+binding contract; `#225` is the independent reader that audits the published
+archive. Both report MERGEABLE against main individually, which says nothing
+about each other.
+
+```
+gh api .../pulls/224/files   added 373/0  tools/genealogy/source-contract.mjs
+                             added 498/0  tools/genealogy/source-contract.test.mjs
+gh api .../pulls/225/files   added 531/0  tools/genealogy/source-contract.mjs
+                             added 630/0  tools/genealogy/source-contract.test.mjs
+
+git merge-tree --write-tree --messages 619e809c fb11b47f        rc=1
+  CONFLICT (add/add): Merge conflict in tools/genealogy/source-contract.mjs
+  CONFLICT (add/add): Merge conflict in tools/genealogy/source-contract.test.mjs
+```
+
+Individually mergeable, jointly conflicting. Whichever lands first turns the
+other into an add/add conflict, and the one-owner-per-file-family rule is
+broken before either merges.
+
+### The rename — `#224` keeps the canonical names
+
+```
+git mv tools/genealogy/source-contract.mjs       tools/genealogy/source-contract-audit.mjs
+git mv tools/genealogy/source-contract.test.mjs  tools/genealogy/source-contract-audit.test.mjs
+```
+
+**NO LOGIC CHANGE, measured rather than asserted.** Occurrence census before
+the edit — every `source-contract` token in both files is part of a filename,
+with no gap:
+
+```
+source-contract.mjs        ".test.mjs" 1 + ".mjs" 1 = 2   ALL hits 2
+source-contract.test.mjs   ".test.mjs" 1 + ".mjs" 6 = 7   ALL hits 7
+```
+
+After the substitution, the same census, and the diff:
+
+```
+old name remaining, both files                                   0
+new names present                          1+1  and  6+1    (counts preserved)
+git diff -M -U0 -- tools/genealogy   total changed lines      18 = (2+7)*2
+                                     changed lines NOT bearing the name   0
+CONTROL: the same filter CAN report a line — it reports        18
+git status --porcelain                RM  ->  RM   (both detected as renames)
+```
+
+### GREEN — at the new names
+
+```
+node --test tools/genealogy/source-contract-audit.test.mjs
+  rc=0   tests 48 · pass 48 · fail 0 · skipped 0      (48 at fb11b47f too)
+
+the genealogy glob, exactly tests.yml:115-121:
+  ls tools/genealogy/*.test.mjs | wc -l       16 suite(s)
+  position 16 in the glob: tools/genealogy/source-contract-audit.test.mjs
+  node --test $(ls tools/genealogy/*.test.mjs)
+  rc=0   tests 291 · pass 291 · fail 0 · skipped 0    (291 at fb11b47f too)
+```
+
+**The CI pickup is not assumed.** The glob is `ls tools/genealogy/*.test.mjs`,
+so a `*.test.mjs` under that directory is matched whatever its stem, and the
+listing above names the renamed file at position 16 of 16.
+
+### The collision, after — this is the GREEN for the RED above
+
+```
+git merge-tree --write-tree --messages 619e809c <renamed head>    rc=0
+  conflicts: NONE
+```
+
+### What the rename did NOT touch
+
+`I2` already asserts the reader **imports nothing at all**, so it covers
+`#224`'s `source-contract.mjs` without a new row — no clause was added,
+widened or narrowed for the rename. `R6`, the coverage census, the partition
+and all eleven arms are byte-identical apart from the filename in `I2`/`I3`'s
+`readFileSync` and the header prose.
+
+### Still owed, and it is not mine to do
+
+Per the order: `#224` is finished and final-reviewed first, `#225` is then
+updated from the main that carries it, the reader and the R6 mutations are
+re-run against that exact tree, and **bee-laborer re-reads the new head**.
+A verification is pinned to the sha it ran against; this addendum is pinned to
+the rename commit and to nothing later.
+
+**MAINNET SPEND: 0.**
