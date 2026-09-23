@@ -737,11 +737,18 @@ Co-authored-by: preflight selftest seat <selftest@invalid>"
   #     written yet walks through; the overlap half is kept because it costs nothing and catches
   #     the honest accident (the same copy-edit that left P13a and P14d without markers, one sign
   #     over), not because it closes the space.
-  #     THE BOUND THAT IS TRUE: AN ARM CANNOT SIT OUT WHILE THE LOG STAYS HONEST. Deleting the
-  #     recording and leaving the notice alone is red (Z1), and so is skipping with the recording
-  #     intact (Z7). Green costs the author a line that says the arm judged something when it did
-  #     not — a false sentence a reader can read. That is as far as a text predicate over
-  #     author-written lines reaches, and it is what this file claims.
+  #     THE BOUND THAT IS TRUE, STATED MECHANICALLY: AN ARM CANNOT SIT OUT UNLESS ITS OWN LINE
+  #     CARRIES THE VERDICT MARKER. Deleting the recording and leaving the notice alone is red
+  #     (Z1), and so is skipping with the recording intact (Z7). Green costs the author that
+  #     marker on a line which judged nothing — and the marker is author-written, which is the
+  #     reach already named. AN EARLIER DRAFT PUT THE COST AS "a false sentence a reader can
+  #     read"; bee-laborer's Z13 refutes it. Her notice is TRUE in every English clause — the
+  #     rig's chmod -x did not take on that filesystem, so there is no dead hook to probe and
+  #     nothing is claimed about the blind case — and it ends in "(correct)". P14e sits out at
+  #     STEP_RC=0, census (none), 24 of 24. A reader reading that line learns exactly that the arm
+  #     did not run. What is forged is the MACHINE TOKEN, not the sentence, and a bound that
+  #     promises a reader would meet a lie invites the next seat to trust the prose and skip the
+  #     token. State the mechanism; the honesty of the prose is not what is being checked.
   #     MEASURED AND REFUSED: a FLOOR on the _skipped recording lines. All of Z1, Z6 and Z9 share
   #     a first edit — deleting the one line where a skipping branch records itself — so a floor
   #     on those 7 lines would kill the class at the common edit. Z12b refutes it: EMPTY the
