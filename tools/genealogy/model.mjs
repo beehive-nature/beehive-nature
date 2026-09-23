@@ -42,8 +42,8 @@ export function createModel({ root, source } = {}) {
   };
 }
 
-// the one year reader lives in surfaces/lifespan.mjs (shared with the panel)
-import { birthYear, deathYear } from "../../surfaces/lifespan.mjs";
+// the one year reader: ./lifespan.mjs (genealogy core; surfaces import it, never the reverse)
+import { birthYear, deathYear } from "./lifespan.mjs";
 export { birthYear, deathYear };
 
 // era heuristic — the honest default until sources are harvested

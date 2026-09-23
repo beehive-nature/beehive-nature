@@ -1,5 +1,6 @@
-// lifespan.mjs — THE one year reader for the whole genealogy stack (model,
-// person panel, and the mirrored byr() in blood.html, held equal by
+// lifespan.mjs — THE one year reader for the whole genealogy stack, in the
+// genealogy core (the model is pure and depends on no surface; surfaces
+// import this). Consumers: the model, the person panel, and the mirrored byr() in blood.html, held equal by
 // tools/genealogy/lifespan.test.mjs). Before 2026-09-22 the panel and
 // blood.html each carried an unsigned /^(\d{3,4})/ copy that ignored BC and
 // 1-2 digit years: 1,462 of the panel's 1,543 "impossible chronology" chips

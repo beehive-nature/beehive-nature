@@ -57,7 +57,7 @@
    composed verbatim from the organ tip (bFUzZ, bfuzz/gux01-archive-graph)
    and mounted inside buildArchive on this adapter's own merged tables. */
 import { createArchiveCore } from './archive-core.mjs';
-import { birthYear } from './lifespan.mjs';
+import { birthYear } from '../tools/genealogy/lifespan.mjs';
 
 /* ── tiny utils ─────────────────────────────────────────────────────────── */
 
@@ -73,7 +73,7 @@ function normName (s) {
   return String(s == null ? '' : s).toLowerCase().replace(/\s+/g, ' ').trim();
 }
 
-/* the one signed year reader (BC negative, 1-4 digit years): surfaces/lifespan.mjs */
+/* the one signed year reader (BC negative, 1-4 digit years): tools/genealogy/lifespan.mjs */
 
 function escapeRe (s) { return String(s).replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
 

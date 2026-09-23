@@ -223,6 +223,14 @@ const dateRepairs = { applied: 0, alreadyFixed: 0, drift: [] };
     }
   }
 }
+// A third value means the source changed underneath an adjudicated repair.
+// It is neither overwritten nor published past: REVIEW BLOCK, before any
+// public artifact is written.
+if (dateRepairs.drift.length) {
+  console.error(`DATE-REPAIR DRIFT (${dateRepairs.drift.length}) — public regeneration refused pending review:`);
+  dateRepairs.drift.forEach((d) => console.error("  - " + d));
+  process.exit(1);
+}
 
 // published lines carry internal ids like everything else (the private
 // line mapping never ships: privatize() emits `lines`, never `roots`)

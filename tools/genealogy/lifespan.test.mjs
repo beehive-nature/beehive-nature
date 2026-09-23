@@ -4,7 +4,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { birthYear, deathYear } from "../../surfaces/lifespan.mjs";
+import { birthYear, deathYear } from "./lifespan.mjs";
 import * as model from "./model.mjs";
 
 const VECTORS = [
@@ -38,5 +38,12 @@ test("no unsigned year reader remains in the genealogy surfaces", () => {
   for (const f of ["surfaces/person-panel-corpus.mjs", "surfaces/blood.html", "surfaces/tree-of-life.mjs"]) {
     const s = readFileSync(new URL("../../" + f, import.meta.url), "utf8");
     assert.doesNotMatch(s, /match\(\/\^\(\\d\{3,4\}\)\//, f);
+  }
+});
+
+test("the pure model depends on no surface (dependency direction: surfaces -> core)", () => {
+  for (const f of ["model.mjs", "lifespan.mjs", "publish.mjs", "lines.mjs"]) {
+    const s = readFileSync(new URL("./" + f, import.meta.url), "utf8");
+    assert.doesNotMatch(s, /from\s+["'][^"']*surfaces\//, f);
   }
 });
