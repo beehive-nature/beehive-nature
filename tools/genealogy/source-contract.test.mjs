@@ -359,6 +359,10 @@ test("non-data anywhere in a projected value is refused, never silently dropped 
   // "4294967295" (2^32-1) looks like an index but never extends length, so JSON drops it
   const maxKeyArray = [1, 2]; maxKeyArray["4294967295"] = "x";
   const oddKeyArray = [1, 2]; oddKeyArray["01"] = "x";
+  // SPEC PIN: a string key differing from the canonical index only by sign is
+  // not an element, and JSON drops it. The numeric a[-0] IS index 0 and is kept,
+  // so what this row fixes is the value/key asymmetry, not a second spelling.
+  const negKeyArray = [1, 2]; negKeyArray["-0"] = "x";
   const symArray = [1]; symArray[Symbol("k")] = 1;
   const getterArray = []; Object.defineProperty(getterArray, 0, { get: () => "Elm St", enumerable: true });
   const bad = {
@@ -384,7 +388,8 @@ test("non-data anywhere in a projected value is refused, never silently dropped 
     "nested negative zero":   [{ offset: [0, -0] }, /value\.offset\[1\]: negative zero/],
     "array named property":   [namedArray, /value\.foo: array property that is not an element/],
     "array key 2^32-1":       [maxKeyArray, /value\.4294967295: array property that is not an element/],
-    "array key -0 / 01":      [oddKeyArray, /value\.01: array property that is not an element/],
+    "array key 01":           [oddKeyArray, /value\.01: array property that is not an element/],
+    "array key -0 string":    [negKeyArray, /value\.-0: array property that is not an element/],
     "array symbol key":       [symArray, /value: symbol-keyed property/],
     "array accessor element": [getterArray, /value\[0\]: accessor element/],
     "array subclass":         [new (class Dates extends Array {})(), /value: array subclass/],
