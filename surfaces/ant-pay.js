@@ -172,12 +172,13 @@
        for the reason given at the line below.
        '' reads back as absent through paidFor, and absent is the true answer once the chain has
        said nothing moved. EVERY WRITE IS ATTEMPTED ON ITS OWN — a store that refuses one key must
-       not leave the rest naming a refused transaction — and the return says whether all of them
-       landed. A denied store must not replace 'tx-reverted' with a storage error: the chain's
-       verdict is what the person acts on and the stale entry is the lesser harm. But a repair that
-       could not validate its own output owes that fact to the reader, which is what reverted()
-       adds; without it the next attempt is greeted by 'already paid' and nothing in this file
-       says why. */
+       not leave the rest naming a refused transaction — and the return says WHICH HALF of them did
+       not land, the index or the record, because the two strand a person differently and one answer
+       for both was false in one of them. A denied store must not replace 'tx-reverted' with a
+       storage error: the chain's verdict is what the person acts on and the stale entry is the
+       lesser harm. But a repair that could not validate its own output owes that fact to the reader,
+       which is what reverted() adds; without it the next attempt meets a refusal with nothing in
+       this file saying why. */
     /* READ THE CLEAR BACK; 'landed' IS NOT THE ABSENCE OF A THROW. The one store that ships —
        surfaces/myspace.js:382-385 payStore — CATCHES its own denial, so on the page this sentence
        was written for a clear that never happened raises nothing at all. Measured on the two
@@ -205,27 +206,49 @@
       return !Object.keys(m).some(function (h) { return m[h] === hash; });
     }
     function unwind(hash, covered, recordId, record) {
-      var landed = true;
+      /* TWO HALVES, REPORTED APART. They fail with OPPOSITE symptoms and one boolean could not say
+         which, so the sentence built on it was true of one of them and false of the other. */
+      var stale = { index: false, record: false };
       covered.forEach(function (x) {
         if (x.tx_hash !== hash) return;
-        try { store.set(QKEY(x.quote_hash), ''); } catch (e) { landed = false; }
-        if (!entryGone(QKEY(x.quote_hash))) landed = false;
+        try { store.set(QKEY(x.quote_hash), ''); } catch (e) { stale.index = true; }
+        if (!entryGone(QKEY(x.quote_hash))) stale.index = true;
       });
       /* A FINALIZED record is LEFT WHOLE. It is the door's own answer — the data is stored and the
          address is the door's, not ours to withdraw because the chain later refused one of the
          transactions that paid for it — and its only reader is the receipt lookup in resume(). The
          index above is cleared either way, so nothing is paid twice and nothing is skipped. An
          UNFINALIZED record is what a recovery reads, so that one must stop naming the refused hash. */
-      if (record.finalized) return landed;
+      if (record.finalized) return stale;
       Object.keys(record.txHashes).forEach(function (h) { if (record.txHashes[h] === hash) delete record.txHashes[h]; });
       var left = Object.keys(record.txHashes).length;
-      try { store.set(KEY(recordId), left ? JSON.stringify(record) : ''); } catch (e) { landed = false; }
-      if (!recordGone(KEY(recordId), hash)) landed = false;
-      return landed;
+      try { store.set(KEY(recordId), left ? JSON.stringify(record) : ''); } catch (e) { stale.record = true; }
+      if (!recordGone(KEY(recordId), hash)) stale.record = true;
+      return stale;
     }
-    /* the chain's verdict is never replaced, only EXTENDED when the clear did not land. */
-    function reverted(e, landed) {
-      if (!landed) e.message += '. this device could not clear its own record of that payment, so it may still answer “already paid” for these quotes — clear this site’s stored data before asking for the price again';
+    /* THE CHAIN'S VERDICT IS NEVER REPLACED, ONLY EXTENDED — BY WHICHEVER HALF DID NOT LAND. One
+       boolean carried one sentence, and that sentence named a symptom that happens in only one of
+       the two halves. Measured on one device, 300 quotes, the second batch refused by the chain,
+       the denial SWALLOWED as the one adapter that ships swallows it:
+         the INDEX clears refused   -> re-prepare and pay answers ALREADY-PAID with zero signatures,
+            and resume answers tx-reverted: the two refusals point at each other and nothing but
+            clearing this site's data opens it. The 'already paid' sentence is exactly true here.
+         the RECORD rewrite refused -> the index is clean, so re-prepare and pay SIGNS and resolves.
+            Nobody is ever told 'already paid'. What goes on is resume(), re-announcing a
+            transaction that moved nothing — and the sentence did not mention resume at all.
+       So the reader of a record failure was handed a prediction that does not come true, about a
+       function that is not the one biting them. A fail-closed path owes a TRUE reason, and both
+       read-backs already know which half failed.
+       HOW LOUD THE SECOND CLAUSE SHOULD BE IS A PROPERTY OF THE STORE, AND THIS FILE CANNOT TELL.
+       Under a ONE-SHOT denial the stranded record REPAIRS ITSELF on the next resume(), which unwinds
+       what it watched revert: measured tx-reverted then nothing-to-resume, the record dropping from
+       300 hashes to 256. Under a PERSISTENT one it does not: tx-reverted, tx-reverted, the record
+       still at 300. The clause is written for the persistent case, because that is the one that does
+       not end; on a store that denies once it is a warning about a state already gone. Naming both
+       rather than picking one — a claim measured on a one-shot rig is a property of the rig. */
+    function reverted(e, stale) {
+      if (stale.index) e.message += '. this device could not clear its own record of that payment, so it may still answer “already paid” for these quotes — clear this site’s stored data before asking for the price again';
+      if (stale.record) e.message += '. this device could not clear the payment it had kept for this upload, so asking to RESUME this upload will go on naming that refused transaction — ask for the price again rather than resuming it';
       return e;
     }
 

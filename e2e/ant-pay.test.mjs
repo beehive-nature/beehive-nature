@@ -64,7 +64,12 @@ function world(o = {}) {
   const denies = (k, v) => v === '' && !!o.denyClear &&
     (o.denyClear === 'record' ? !quoteKey(k) : o.denyClear === 'quote' ? quoteKey(k)
       : o.denyClear === true || ++clears <= o.denyClear);
-  const deniesRecordWrite = (k) => !quoteKey(k) && o.denyRecordWrite != null && ++recordWrites === o.denyRecordWrite;
+  /* denyRecordWriteFrom: the Nth record write and EVERY LATER ONE — a store that stays denied rather
+     than one that blinks. The difference is not cosmetic: under a one-shot denial resume()'s own
+     unwind repairs the stranded record on the next call, so the warning is about a state already
+     gone; under a persistent one nothing repairs it and the warning is the only thing the person has. */
+  const deniesRecordWrite = (k) => !quoteKey(k) && (o.denyRecordWrite != null || o.denyRecordWriteFrom != null) &&
+    (++recordWrites === o.denyRecordWrite || (o.denyRecordWriteFrom != null && recordWrites >= o.denyRecordWriteFrom));
   const store = { get: (k) => mem.get(k) ?? null, set: (k, v) => { if (o.storeThrows) throw new Error('storage denied');
     /* both evaluated: a short circuit would skew the ordinal. No arm sets denyClear and
        denyRecordWrite together, so nothing here witnesses that — replacing this with `||` is green.
@@ -532,14 +537,24 @@ test('a finalized record is left whole: the chain refusing its transaction does 
 /* A DENIED CLEAR MUST NOT BECOME A STORAGE ERROR. The chain's verdict is what the person acts on —
    renaming it 'wallet-declined' names a wallet that did not decline and erases whether the money
    moved. But a repair that could not validate its own output owes that fact to the reader: without
-   the second half of the sentence the next attempt meets 'already paid' and nothing says why. */
+   the second half of the sentence the next attempt meets a refusal and nothing says why.
+   AND IT OWES THE *TRUE* HALF. The index and the record strand a person differently, so every arm
+   below asserts the clause that belongs to it AND the absence of the other: one sentence for both
+   predicted 'already paid' to a reader whose next ask would have signed and resolved, and said
+   nothing about resume(), which is what actually bites them. Measured on one device, 300 quotes,
+   the second batch refused, the denial swallowed:
+     INDEX stale  -> pay answers already-paid with ZERO signatures; resume answers tx-reverted.
+     RECORD stale -> pay SIGNS and resolves; resume re-announces a transaction that moved nothing.
+   A row that accepts either clause cannot tell those apart, which is how the false half survived. */
+const SAYS_ALREADY_PAID = /may still answer “already paid”/, SAYS_RESUME = /go on naming that refused transaction/;
 test('a clear the store refuses stays the chain’s verdict, and the refusal says the record is still stale', async () => {
   const marked = (x) => [...x.mem].filter(([k, v]) => k.startsWith('ant-pay.paid.quote.') && v).length;
   const p = prepareOf(2), w = world({ allowance: 10n ** 20n, revert: true, denyClear: true });
   await assert.rejects(w.payer.pay({ prepare: p, authorization: authOf(p), confirmPlan: yes }), (e) => {
     assert.equal(e.refusal, 'tx-reverted', e.message);
     assert.match(e.message, /refused by the chain/, 'the chain’s verdict is not replaced');
-    assert.match(e.message, /could not clear its own record/, 'and the reader is told the record is stale');
+    assert.match(e.message, SAYS_ALREADY_PAID, 'and the reader is told the index is stale');
+    assert.match(e.message, SAYS_RESUME, 'and the record too — this store refuses BOTH clears, so both halves are owed');
     return true;
   });
   assert.equal(marked(w), 2, 'the stale entries stay — the lesser harm, and now a named one');
@@ -552,7 +567,8 @@ test('a clear the store refuses stays the chain’s verdict, and the refusal say
   const w2 = world({ allowance: 10n ** 20n, revert: true, denyClear: 1 });
   await assert.rejects(w2.payer.pay({ prepare: p, authorization: authOf(p), confirmPlan: yes }), (e) => {
     assert.equal(e.refusal, 'tx-reverted', e.message);
-    assert.match(e.message, /could not clear its own record/, 'one refused key is enough to owe the reader the second half');
+    assert.match(e.message, SAYS_ALREADY_PAID, 'one refused key is enough to owe the reader the second half');
+    assert.doesNotMatch(e.message, SAYS_RESUME, 'and the record’s own clear LANDED here, so the clause about resuming is not owed and is not said');
     return true;
   });
   assert.equal(marked(w2), 1, 'one key refused it, the other was cleared anyway');
@@ -566,7 +582,8 @@ test('a clear the store refuses stays the chain’s verdict, and the refusal say
   const w3 = world({ allowance: 10n ** 20n, revert: true, denyClear: true, swallowDeny: true });
   await assert.rejects(w3.payer.pay({ prepare: p, authorization: authOf(p), confirmPlan: yes }), (e) => {
     assert.equal(e.refusal, 'tx-reverted', e.message);
-    assert.match(e.message, /could not clear its own record/, 'a SWALLOWED denial is still a denial, and the reader is still told');
+    assert.match(e.message, SAYS_ALREADY_PAID, 'a SWALLOWED denial is still a denial, and the reader is still told');
+    assert.match(e.message, SAYS_RESUME, 'both halves again, because this store refuses both clears');
     return true;
   });
   assert.equal(marked(w3), 2, 'and it warns about exactly the state the throwing arm leaves');
@@ -578,7 +595,8 @@ test('a clear the store refuses stays the chain’s verdict, and the refusal say
   const w3b = world({ allowance: 10n ** 20n, revert: true, denyClear: 'quote', swallowDeny: true });
   await assert.rejects(w3b.payer.pay({ prepare: p, authorization: authOf(p), confirmPlan: yes }), (e) => {
     assert.equal(e.refusal, 'tx-reverted', e.message);
-    assert.match(e.message, /could not clear its own record/, 'the index’s own clear is read back');
+    assert.match(e.message, SAYS_ALREADY_PAID, 'the index’s own clear is read back, and THIS is the half that half of the sentence is true of');
+    assert.doesNotMatch(e.message, SAYS_RESUME, 'and nothing is claimed about the record, which was cleared');
     return true;
   });
   assert.equal(marked(w3b), 2, 'the quote keys are what stayed');
@@ -590,7 +608,8 @@ test('a clear the store refuses stays the chain’s verdict, and the refusal say
   const w4 = world({ allowance: 10n ** 20n, revert: true, denyClear: 'record', swallowDeny: true });
   await assert.rejects(w4.payer.pay({ prepare: p, authorization: authOf(p), confirmPlan: yes }), (e) => {
     assert.equal(e.refusal, 'tx-reverted', e.message);
-    assert.match(e.message, /could not clear its own record/, 'the record’s clear is read back too, not only the index');
+    assert.match(e.message, SAYS_RESUME, 'the record’s clear is read back too, not only the index');
+    assert.doesNotMatch(e.message, SAYS_ALREADY_PAID, 'and the index IS clear, so nobody will meet “already paid” — predicting it here was the false half');
     return true;
   });
   assert.equal(marked(w4), 0, 'precondition: every quote key WAS cleared, so the index is not what is stale');
@@ -622,7 +641,8 @@ test('a partial revert whose record REWRITE is refused still owes the reader the
   /* record write 1 and 2 are charge()'s own, before each wait; 3 is unwind's rewrite of what is left. */
   const probe = await run({ denyRecordWrite: 3, swallowDeny: true });
   assert.match(probe.seen, /refused by the chain/, 'the chain’s verdict is not replaced');
-  assert.match(probe.seen, /could not clear its own record/, 'and a rewrite that did not land is still told to the reader');
+  assert.match(probe.seen, SAYS_RESUME, 'and a rewrite that did not land is still told to the reader');
+  assert.doesNotMatch(probe.seen, SAYS_ALREADY_PAID, 'in the clause that is TRUE of it: the index below is clean, so the next ask signs and nobody meets “already paid”');
   assert.equal(probe.w.log.swallowed, 1, 'precondition: the refusal reached the store and was SWALLOWED, as the one adapter that ships does — a THROWN one would reach the catch and set landed from there, and this row would stop judging the read-back');
   assert.equal(marked(probe.w), 256, 'precondition: every quote key of the refused batch WAS cleared, so the index is not what reports this');
   assert.equal(Object.keys(JSON.parse(probe.w.mem.get('ant-pay.paid.up-1')).txHashes).length, 300,
@@ -642,6 +662,55 @@ test('a partial revert whose record REWRITE is refused still owes the reader the
   assert.doesNotMatch(ctl.seen, /could not clear/, 'a clear that lands says the chain’s verdict and nothing more');
   assert.equal(persists(ctl.w) - persists(ctl2.w), 1, 'precondition: the control2 store really did refuse exactly one write');
   assert.equal(persists(ctl.w) - persists(probe.w), 1, 'and so did the probe’s');
+});
+
+/* A SECOND HALF IS A PREDICTION, AND A PREDICTION IS JUDGED AT THE NEXT STEP, NOT BY ITS WORDING.
+   Swapping one string for another would leave 'the clause is true' resting on nobody. These two arms
+   take the two stranded states to the step the sentence talks about and read what the device does. */
+test('each half of the refusal predicts what the next ask actually meets, and the two are opposites', async () => {
+  const paid = (x) => x.log.sends.filter((t) => t.to === VAULT).length;
+
+  /* RECORD stale, index clean. The sentence must NOT promise 'already paid': it signs. */
+  const p = prepareOf(300), w = world({ allowance: 10n ** 20n, revertHashes: [TX(2)], denyRecordWrite: 3, swallowDeny: true });
+  let seen = null;
+  await assert.rejects(w.payer.pay({ prepare: p, authorization: authOf(p), confirmPlan: yes }), (e) => { seen = e.message; assert.equal(e.refusal, 'tx-reverted', e.message); return true; });
+  assert.match(seen, SAYS_RESUME); assert.doesNotMatch(seen, SAYS_ALREADY_PAID);
+  const before = paid(w), again = { ...p, upload_id: 'up-2' };
+  await w.payer.pay({ prepare: again, authorization: authOf(again), confirmPlan: yes });
+  assert.equal(paid(w) - before, 1, 'THE PREDICTION, MEASURED: asking for the price again SIGNS and resolves — the old sentence told this reader to expect “already paid”, which never comes');
+
+  /* INDEX stale, record clean. Here 'already paid' is exactly what comes, with nothing signed. */
+  const p2 = prepareOf(2), w2 = world({ allowance: 10n ** 20n, revert: true, denyClear: 'quote', swallowDeny: true });
+  let seen2 = null;
+  await assert.rejects(w2.payer.pay({ prepare: p2, authorization: authOf(p2), confirmPlan: yes }), (e) => { seen2 = e.message; assert.equal(e.refusal, 'tx-reverted', e.message); return true; });
+  assert.match(seen2, SAYS_ALREADY_PAID); assert.doesNotMatch(seen2, SAYS_RESUME);
+  const before2 = paid(w2), again2 = { ...p2, upload_id: 'up-2' };
+  await assert.rejects(w2.payer.pay({ prepare: again2, authorization: authOf(again2), confirmPlan: yes }), (e) => { assert.equal(e.refusal, 'already-paid', e.message); return true; });
+  assert.equal(paid(w2) - before2, 0, 'THE PREDICTION, MEASURED: exactly the refusal that half names, and nothing signed');
+});
+
+/* HOW LOUD THE RECORD CLAUSE SHOULD BE IS A PROPERTY OF THE STORE, AND THE FILE SAYS ONE THING FOR
+   BOTH. A store that blinks once and a store that stays denied leave the same state and different
+   futures; a claim measured only on the first is a property of the rig. The clause is written for
+   the persistent case because that is the one that does not end. */
+test('a record stranded by a ONE-SHOT denial repairs itself on the next resume; a persistent one does not', async () => {
+  const held = (x) => Object.keys(JSON.parse(x.mem.get('ant-pay.paid.up-1')).txHashes).length;
+  const strand = async (o) => {
+    const p = prepareOf(300), w = world({ allowance: 10n ** 20n, revertHashes: [TX(2)], swallowDeny: true, ...o });
+    await assert.rejects(w.payer.pay({ prepare: p, authorization: authOf(p), confirmPlan: yes }), (e) => { assert.equal(e.refusal, 'tx-reverted', e.message); return true; });
+    assert.equal(held(w), 300, 'precondition: the rewrite did not land, so the record still names the refused transaction');
+    const once = await w.payer.resume({ prepare: p, authorization: authOf(p) }).then(() => 'ok', (e) => e.refusal);
+    const mid = held(w);
+    const twice = await w.payer.resume({ prepare: p, authorization: authOf(p) }).then(() => 'ok', (e) => e.refusal);
+    return { once, mid, twice, end: w.mem.get('ant-pay.paid.up-1') ? held(w) : 0 };
+  };
+  const blink = await strand({ denyRecordWrite: 3 });
+  assert.deepEqual([blink.once, blink.twice], ['tx-reverted', 'nothing-to-resume'], 'a store that refused once: resume unwinds what it watched revert, and the second call finds nothing waiting');
+  assert.equal(blink.mid, 256, 'and the record is repaired down to the batch that actually landed');
+
+  const stuck = await strand({ denyRecordWriteFrom: 3 });
+  assert.deepEqual([stuck.once, stuck.twice], ['tx-reverted', 'tx-reverted'], 'a store that stays denied: the same dead answer, again, about a transaction that moved nothing');
+  assert.equal(stuck.end, 300, 'because nothing can repair the record — this is the reader the clause is written for');
 });
 
 test('the door must confirm the address it quoted: a different one is refused by name, and the payment ids are kept', async () => {
