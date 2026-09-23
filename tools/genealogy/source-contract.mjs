@@ -279,9 +279,62 @@ const nameId = (v) => {
   catch (e) { return { why: `cannot be named -- ${causeOf(e)}` }; }
 };
 
+// nameId guards the COERCION of a value. The property ACCESS that produces it
+// was outside every try in this file: `b.sourceId` is an accessor call, and an
+// accessor can throw. Measured at 92d57d93 across the nine declared binding
+// keys -- a throwing getter on any of eight of them made bind(), the exported
+// door, validateStore, claimStanding, personSupport and publicView ALL fail by
+// throw instead of by refusal. Six entries, the same door-versus-gate shape the
+// locator half of this file closed one function up, one level out: there the
+// value could not be SERIALISED, here it cannot be OBTAINED. Pre-existing for
+// the ids and `relation` in all three directions; for the LOCATOR it is this
+// branch's trade, because at 619e809c the door returned CLEAN on a binding that
+// crashed every gate. Found by bee-laborer re-reading 92d57d93.
+// The ninth key is why the pre-read covers the DECLARED set and not the fields
+// this function happens to read: `note` is never read here, so the door AND
+// validateStore both answered CLEAN while publicView -- which projects it --
+// crashed on the same binding. A guard shaped to one reader's appetite leaves
+// the next reader's open, and the projection is the reader that matters.
+// Each declared field is read ONCE and every sentence below is built from that
+// value, so this REPLACES the second read rather than adding a third (the
+// receipt counts the invocations before and after).
+// RESIDUAL, disclosed rather than discovered later: a getter that answers here
+// and differently afterwards is still two evaluations of one caller-supplied
+// value. publicView reads a binding's claimId SEVEN times and the projection's
+// read is not the filter's, so a flip-flopping id passes the privacy filter
+// under one claim and publishes under another -- measured at 619e809c too, the
+// same class as the double toJSON named at 8c467528. Reading each record once
+// at the edge and passing the value down is a shape decision, not this row.
+const readField = (o, k) => {
+  try { return { v: o?.[k] }; }
+  catch (e) { return { why: `${k} cannot be read -- ${causeOf(e)}` }; }
+};
+const readDeclared = (o, keys) => {
+  const v = {}, why = [], unread = new Set();
+  for (const k of keys) {
+    const r = readField(o, k);
+    if (r.why) { why.push(r.why); unread.add(k); } else v[k] = r.v;
+  }
+  return { v, why, unread };
+};
+
 export function bindingProblems(b, store) {
-  const sn = nameId(b?.sourceId ?? "?"), cn = nameId(b?.claimId ?? "?");
+  const f = readDeclared(b, BINDING_KEYS);
+  // "?" names exactly one thing from here on: an id that could not be PRODUCED
+  // -- unreadable above, or unnameable in nameId below -- so nothing was looked
+  // up under it and there is no name to give. A MISSING id is produced: it
+  // names `undefined`, which is the property key heldUnder actually asks the
+  // store for. `?? "?"` said `?` while the lookup used undefined, so a store
+  // holding a source under the id "?" was told, falsely, that it does not hold
+  // it -- and validateStore one function down named the same field `undefined`
+  // in the same run. Found by bee-laborer re-reading 92d57d93; the two names in
+  // one validateStore output are mine, measured in the same pass.
+  const sn = f.unread.has("sourceId") ? { text: "?" } : nameId(f.v.sourceId);
+  const cn = f.unread.has("claimId") ? { text: "?" } : nameId(f.v.claimId);
   const at = `binding ${sn.text ?? "?"}→${cn.text ?? "?"}`;
+  // RETURN, never push, for the reason the unnameable id returns: every
+  // sentence below is computed off fields this object refused to hand over.
+  if (f.why.length) return f.why.map((w) => `${at}: ${w}`);
   // RETURN, never push: heldUnder() coerces the id to a property key, so every
   // sentence below is computed off a field that cannot be read at all.
   if (sn.why || cn.why)
@@ -290,9 +343,9 @@ export function bindingProblems(b, store) {
   const shape = foreignProto(b, at);
   if (shape) return [shape];
   const out = unknownKeys(b, BINDING_KEYS, at);
-  if (b.schema !== BINDING_SCHEMA) out.push(`${at}: schema must be ${BINDING_SCHEMA}`);
-  if (!RELATIONS.includes(b.relation)) out.push(`${at}: unknown relation ${b.relation}`);
-  const s = heldUnder(store.sources, b.sourceId), c = heldUnder(store.claims, b.claimId);
+  if (f.v.schema !== BINDING_SCHEMA) out.push(`${at}: schema must be ${BINDING_SCHEMA}`);
+  if (!RELATIONS.includes(f.v.relation)) out.push(`${at}: unknown relation ${f.v.relation}`);
+  const s = heldUnder(store.sources, f.v.sourceId), c = heldUnder(store.claims, f.v.claimId);
   // sn.text / cn.text, never the raw id: these two were template literals on the
   // raw field, so they re-opened the same crash for a SYMBOL id one line below
   // the reader that exists to close it. Measured -- the repair above was green
@@ -303,19 +356,19 @@ export function bindingProblems(b, store) {
   // cannot carry an identity is named HERE and not only where the key is built
   // -- that disagreement was the row: this returned clean while every gate that
   // keys the store crashed on the same binding.
-  const lk = locatorKey(b.locator ?? "");
+  const lk = locatorKey(f.v.locator ?? "");
   if (lk.why) out.push(`${at}: ${lk.why}`);
   if (sn.joins) out.push(`${at}: sourceId ${sn.joins}`);
   if (cn.joins) out.push(`${at}: claimId ${cn.joins}`);
-  if (b.relation === "mentions") return out;
+  if (f.v.relation === "mentions") return out;
   // supports / contradicts: the entry read, the assertion extracted, and the claim must line up
-  if (!PREDICATES.includes(b.context)) out.push(`${at}: context must name the entry read (got ${b.context})`);
-  if (!PREDICATES.includes(b.asserts)) out.push(`${at}: asserts must name the assertion extracted (got ${b.asserts})`);
-  else if (c && b.asserts !== c.predicate)
-    out.push(`${at}: extracts ${b.asserts}; claim is ${c.predicate} — assertions never convert`);
-  if (PREDICATES.includes(b.context) && PREDICATES.includes(b.asserts) && b.context !== b.asserts && !text(b.quote))
-    out.push(`${at}: a ${b.context} entry does not imply ${b.asserts}; quote the words that state it`);
-  if (s && s.scope !== "item" && !text(b.locator)) out.push(`${at}: ${s.type} collection proof needs a locator (page, entry, folio, image)`);
+  if (!PREDICATES.includes(f.v.context)) out.push(`${at}: context must name the entry read (got ${f.v.context})`);
+  if (!PREDICATES.includes(f.v.asserts)) out.push(`${at}: asserts must name the assertion extracted (got ${f.v.asserts})`);
+  else if (c && f.v.asserts !== c.predicate)
+    out.push(`${at}: extracts ${f.v.asserts}; claim is ${c.predicate} — assertions never convert`);
+  if (PREDICATES.includes(f.v.context) && PREDICATES.includes(f.v.asserts) && f.v.context !== f.v.asserts && !text(f.v.quote))
+    out.push(`${at}: a ${f.v.context} entry does not imply ${f.v.asserts}; quote the words that state it`);
+  if (s && s.scope !== "item" && !text(f.v.locator)) out.push(`${at}: ${s.type} collection proof needs a locator (page, entry, folio, image)`);
   return out;
 }
 
@@ -379,8 +432,13 @@ export function validateStore(store) {
     // broke. The ids are named by nameId, the same reader the door uses, so an
     // id the key cannot express is skipped here exactly as an unkeyable locator
     // is -- both are already named above, and each sentence is said once.
-    const sk = nameId(b?.sourceId), ck = nameId(b?.claimId);
-    const lk = locatorKey(b?.locator ?? "");
+    // Through the same guarded reader as the door: a field that cannot be READ
+    // is skipped here exactly as an unnameable id or an unkeyable locator is --
+    // all three are already named above, and each sentence is said once.
+    const sr = readField(b, "sourceId"), cr = readField(b, "claimId"), lr = readField(b, "locator");
+    if (sr.why || cr.why || lr.why) continue;
+    const sk = nameId(sr.v), ck = nameId(cr.v);
+    const lk = locatorKey(lr.v ?? "");
     if (sk.why || ck.why || sk.joins || ck.joins || lk.why) continue;
     const key = JSON.stringify([sk.text, ck.text, lk.text]);
     if (seen.has(key)) out.push(`binding ${sk.text}→${ck.text}: duplicate (one entry counted twice is not two sources)`);

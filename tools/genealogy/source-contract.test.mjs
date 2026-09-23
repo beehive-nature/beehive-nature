@@ -1409,3 +1409,148 @@ test("a refusal's cause is never the word `undefined`, and reading it cannot cra
   const alien = vm.runInNewContext("(function () { throw new Error('from another realm'); })");
   assert.match(causeOf({ toJSON() { alien(); } }), /-- from another realm$/, "a cross-realm Error's message is read like any other");
 });
+
+/* nameId guards the COERCION of a value; the property ACCESS that produces it
+ * sat outside every try in the module. A throwing getter on a declared binding
+ * key made bind(), the exported door, validateStore, claimStanding,
+ * personSupport and publicView all fail by throw instead of by refusal -- the
+ * same six entries, and the same door-versus-gate shape, as the locator row
+ * above, one level out: there the value could not be SERIALISED, here it cannot
+ * be OBTAINED. Pre-existing for the ids and `relation` in all three
+ * directions; for the LOCATOR it is this branch's trade, because at 619e809c
+ * the door returned CLEAN on a binding every gate crashed on. Found by
+ * bee-laborer re-reading 92d57d93.
+ * MINE, and it is why the guard covers the DECLARED set rather than the fields
+ * this function happens to read: `note` is never read by bindingProblems, so
+ * the door AND validateStore both answered CLEAN while publicView -- which
+ * projects it -- crashed on the same binding. A guard shaped to one reader's
+ * appetite leaves the next reader's open.
+ * MEASURED AND NOT TAKEN: sourceProblems and claimProblems carry the identical
+ * class -- 11 of 12 SOURCE_KEYS and 5 of 6 CLAIM_KEYS crash their gate, and
+ * `note` on either record passes both gates and reaches the projection. Same
+ * mechanism, two more doors, and not this row: bee-laborer scoped this to the
+ * binding and ruled the branch frozen after it. Named here so the next hand
+ * finds a measurement rather than an inconsistency. */
+test("a binding field that cannot be READ is refused BY NAME at every entry, not thrown out of them", () => {
+  const one = () => {
+    const s = createStore();
+    addSource(s, src("S1"));
+    addClaim(s, claim("C1", "P1", "birth", { date: "1880-03-24" }));
+    return s;
+  };
+  // a proof binding that reaches EVERY sentence below the relation switch, so
+  // no key is left unread by the fixture's own shape
+  const whole = () => link("S1", "C1", "supports", "birth", { context: "baptism", quote: "born 24 March", locator: "p. 4" });
+  const poison = (k) => {
+    const o = { ...whole(), note: "n" };
+    Object.defineProperty(o, k, { get() { throw new Error(`reading ${k} threw`); }, enumerable: true, configurable: true });
+    return o;
+  };
+
+  // NON-VACUITY: the fixture really does declare every key the module declares,
+  // so "every declared key" below is a full sweep and not a subset that happens
+  // to pass. An unread key would make this row's own sweep silently narrower.
+  assert.deepEqual(Object.keys({ ...whole(), note: "n" }).sort(), [...BINDING_KEYS].sort(),
+    "the fixture carries every declared binding key");
+
+  for (const k of BINDING_KEYS) {
+    const why = new RegExp(`${k} cannot be read -- reading ${k} threw`);
+    const held = one();
+    const b = poison(k);
+    held.bindings.push(b);
+    // caught by hand: under the defect this call THROWS, and a row that lets the
+    // engine's own text be its verdict reports a catch without naming it
+    const said = answered(() => bindingProblems(b, held), `a throwing getter on ${k}: the exported door`);
+    assert.equal(said.length, 1, `${k}: the door says it once`);
+    assert.match(said[0], why, `${k}: the door names the field it could not read, and why`);
+
+    assert.deepEqual(answered(() => validateStore(held), `${k}: validateStore`), said,
+      `${k}: validateStore says it once, not twice — the duplicate loop reads through the same guard`);
+
+    for (const [name, fn] of [
+      ["bind", () => bind(one(), poison(k))],
+      ["claimStanding", () => claimStanding(held, "C1")],
+      ["personSupport", () => personSupport(held, "P1")],
+      ["publicView", () => permitAll(held)],
+    ]) {
+      let e = null;
+      try { fn(); } catch (err) { e = err; }
+      assert.ok(e, `${k}: ${name} refuses a binding it cannot read`);
+      assert.ok(!(e instanceof TypeError), `${k}: ${name} refused BY NAME, not by crash (got ${String(e.message).split("\n")[0]})`);
+      assert.match(e.message, why, `${k}: ${name}'s sentence names the field and its cause`);
+    }
+  }
+
+  // the projection is where `note` is read at all, so the sweep above is not
+  // the whole claim: name the one key the DOOR has no other reason to touch
+  const noteOnly = one();
+  noteOnly.bindings.push(poison("note"));
+  refuses(() => permitAll(noteOnly), /note cannot be read/);
+
+  // CONTROLS — an ordinary binding is unmoved at every entry, and a getter that
+  // ANSWERS is not refused for answering through an accessor
+  const ok = one();
+  assert.doesNotThrow(() => bind(ok, whole()), "an ordinary binding is unmoved");
+  assert.equal(permitAll(ok).bindings.length, 1, "and the projection is reachable, not thrown");
+  const acc = one();
+  const answering = { ...whole() };
+  Object.defineProperty(answering, "locator", { get: () => "p. 4", enumerable: true, configurable: true });
+  assert.doesNotThrow(() => bind(acc, answering), "a getter that answers is an ordinary field");
+  assert.equal(permitAll(acc).bindings.length, 1, "and its binding publishes");
+});
+
+/* `?? "?"` named an id the lookup never used. The door read
+ * nameId(b?.sourceId ?? "?") while heldUnder looked the id up RAW, so a binding
+ * with no sourceId was looked up under the property key "undefined" and then
+ * told, by name, that the store does not hold "?" -- false about a store that
+ * holds one. validateStore one function down used nameId(b?.sourceId) with no
+ * substitution, so the SAME binding carried two names inside ONE returned
+ * array. Found by bee-laborer re-reading 92d57d93; the two-names-in-one-run
+ * half is mine, measured in the same pass.
+ * After this commit "?" names exactly one thing: an id that could not be
+ * PRODUCED -- unreadable, or unnameable. A MISSING id is produced, and names
+ * the key heldUnder actually asked for. */
+test("a missing id is named as the key the store was asked for, and one binding has one name", () => {
+  const holdsQuestionMark = () => {
+    const s = createStore();
+    addSource(s, src("S1"));
+    addSource(s, src("?"));
+    addClaim(s, claim("C1", "P1", "birth", { date: "1880-03-24" }));
+    addClaim(s, claim("?", "P1", "death", { date: "1900-01-01" }));
+    return s;
+  };
+  const idless = () => ({ schema: BINDING_SCHEMA, relation: "mentions" });
+
+  const s = holdsQuestionMark();
+  assert.ok(s.sources["?"] && s.claims["?"], "the fixture really holds a source and a claim under the id \"?\"");
+  assert.equal(s.sources[undefined], undefined, "and holds nothing under the key the lookup actually uses");
+
+  const said = bindingProblems(idless(), s);
+  assert.deepEqual(said, [
+    "binding undefined→undefined: source undefined is not held",
+    "binding undefined→undefined: claim undefined does not exist",
+  ], "the refusal names the key that was looked up, not a \"?\" the store may hold");
+  assert.ok(!said.some((p) => /source \? is not held|claim \? does not exist/.test(p)),
+    "and never says the store does not hold something it does hold");
+
+  // ONE binding, ONE name: the door's sentences and the duplicate loop's
+  // sentence named the same binding differently inside one returned array
+  const dup = holdsQuestionMark();
+  dup.bindings.push(idless(), idless());
+  const all = validateStore(dup);
+  const names = [...new Set(all.map((p) => p.split(":")[0]))];
+  assert.deepEqual(names, ["binding undefined→undefined"],
+    "every sentence about the id-less binding uses one name — the door's and the duplicate loop's alike");
+  assert.ok(all.some((p) => /duplicate \(one entry counted twice/.test(p)),
+    "and the duplicate is still reported, so the name agreement is not an empty run");
+
+  // CONTROLS — an ordinary ghost id is unmoved, and an id that cannot be
+  // produced still names "?", which is the one thing "?" means now
+  assert.deepEqual(bindingProblems(mention("S-ghost", "C1"), s), ["binding S-ghost→C1: source S-ghost is not held"],
+    "an ordinary ghost id is refused exactly as before");
+  const unreadable = { schema: BINDING_SCHEMA, relation: "mentions", claimId: "C1", get sourceId() { throw new Error("nope"); } };
+  assert.match(answered(() => bindingProblems(unreadable, s), "an unreadable id")[0], /^binding \?→C1: sourceId cannot be read/,
+    "an id that could not be produced is the only thing \"?\" names now");
+  const ordinary = holdsQuestionMark();
+  assert.doesNotThrow(() => bind(ordinary, mention("?", "?")), "and a binding that NAMES the held \"?\" is accepted");
+});

@@ -1266,3 +1266,200 @@ genealogy glob exactly tests.yml:113-121               16 suites · 291 tests ·
 ```
 
 **MAINNET SPEND: 0.**
+
+---
+
+## Addendum 7 — the property ACCESS, and the `?` that named an id nobody looked up
+
+Two rows handed by bee-laborer re-reading `92d57d93`, both taken. Candidate on
+`bopus5/224-prototype-keys`, base `claude-LoVis/source-contract` `619e809c` (ff),
+rollback ref `92d57d93`.
+
+### RED, at `92d57d93`, before a line was written
+
+Readers materialised from each rev's blob and hash-verified against the tree
+entry (`e2266a68` at 92d57d93, `6358dfd9` at 8c467528, `931d4183` at 619e809c).
+Six entries each: `bind()`, the exported door, `validateStore`, `claimStanding`,
+`personSupport`, `publicView`.
+
+```
+                              92d57d93        8c467528        619e809c
+throwing getter on sourceId   THREW  (all 6)  THREW  (all 6)  THREW  (all 6)
+throwing getter on relation   THREW  (all 6)  THREW  (all 6)  THREW  (all 6)
+throwing getter on locator    THREW  (all 6)  THREW  (all 6)  door [] CLEAN,
+                                                              THREW at the other 5
+CONTROL honest binding        accepted / [] / [] / unsupported / unsourced-entry / 1
+CONTROL ghost source id       refused BY NAME at every entry
+```
+
+The ids and `relation` are PRE-EXISTING in all three directions. The LOCATOR is
+this branch's TRADE: at the lane tip the door returned CLEAN on a binding every
+gate crashed on, and `8c467528` closed that disagreement in the direction *the
+door crashes too*. bee-laborer's table, reproduced here.
+
+Row two, the `?? "?"` substitution:
+
+```
+store holds sources ["S1","?"] and claims ["C1","?"]; the binding has NO ids
+                       92d57d93                        8c467528 / 619e809c
+door                   "binding ?→?: source ? is not    "binding ?→?: source
+                        held"                            undefined is not held"
+                       "binding ?→?: claim ? does        "... claim undefined
+                        not exist"        <- FALSE        does not exist"  <- true
+what was looked up     store.sources[undefined] === undefined,  all three
+CONTROL no "?" held    the SAME sentence at 92d57d93 — it cannot discriminate
+CONTROL ordinary ghost "source S-ghost is not held",  all three
+```
+
+The parent's sentence was TRUE and this commit's predecessor made it false.
+
+### Mine, measured in the same pass
+
+**(1) `note` is the ninth key, and it is why the guard covers the DECLARED set.**
+`bindingProblems` never reads `note`, so a guard shaped to the fields this
+function happens to read would have left it open. At `92d57d93`:
+
+```
+throwing getter per BINDING_KEY      door          validateStore   publicView
+schema sourceId claimId relation
+context asserts quote locator        THREW         THREW           THREW
+note                                 []  CLEAN     []  CLEAN       THREW
+CONTROL ordinary binding             []            []              published
+```
+
+Eight of nine crash the door; the ninth passes both gates and crashes the
+projection. A guard shaped to one reader's appetite leaves the next reader's
+open, and the projection is the reader that matters.
+
+**(2) One binding carried TWO names inside ONE returned array.** bee-laborer
+named the door-versus-`validateStore` disagreement across functions; it is
+narrower than that — it is inside a single `validateStore` return value:
+
+```
+92d57d93, two id-less bindings, ONE validateStore run:
+  binding ?→?: source ? is not held
+  binding ?→?: claim ? does not exist
+  binding ?→?: source ? is not held
+  binding ?→?: claim ? does not exist
+  binding undefined→undefined: duplicate (one entry counted twice is not two sources)
+```
+
+Same array, same binding, two names. At `8c467528` and `619e809c` the split runs
+the other way (`at` said `?`, the sentences said `undefined`), so the defect is
+older than the name it wears here.
+
+**(3) MEASURED AND NOT TAKEN — the same class at two more gates.**
+
+```
+SOURCE record, throwing getter per key    11 of 12 SOURCE_KEYS crash sourceProblems
+CLAIM  record, throwing getter per key     5 of 6  CLAIM_KEYS  crash claimProblems
+`note` on EITHER record                    gate [] · validateStore [] · publicView THREW
+CONTROL neither poisoned                   gate [] · validateStore [] · sources 1
+IDENTICAL at 92d57d93 and at this candidate — this commit changes neither.
+```
+
+Same mechanism, two more doors. NOT taken: bee-laborer scoped the row to the
+binding and ruled the branch frozen after this commit, and widening a taken row
+is how a bounded repair becomes an architecture. Named in the reader and in the
+suite so the next hand finds a measurement rather than an inconsistency.
+
+### The repair
+
+`readField(o, k)` returns `{ v }` or `{ why }`; `readDeclared(o, keys)` reads
+every DECLARED key once and reports which could not be read. `bindingProblems`
+RETURNS on an unreadable field for the reason an unnameable id returns — every
+sentence below is computed off fields the object refused to hand over — and the
+body then reads `f.v.*`, never the record again. The duplicate loop in
+`validateStore` reads through the same guard and `continue`s, exactly as it does
+for an unnameable id and an unkeyable locator.
+
+`?? "?"` is deleted, not patched. After this commit `?` names exactly one thing:
+an id that could not be PRODUCED — unreadable above, or unnameable in `nameId`.
+A MISSING id is produced, and names `undefined`, which is the property key
+`heldUnder` actually asks the store for.
+
+**COST, measured rather than predicted.** bee-laborer's preview said the pre-read
+REPLACES the second read rather than adding a third. Measured, it is one fewer
+than that, because the body uses the pre-read value instead of re-reading:
+
+```
+sourceId getter invocations        92d57d93    candidate
+bindingProblems (the door)             2           1
+validateStore                          3           2
+publicView                             7           6
+```
+
+**RESIDUAL, disclosed at the line:** a getter that answers here and differently
+afterwards is still two evaluations of one caller-supplied value. `publicView`
+reads a binding's `claimId` six times at this head and the projection's read is
+NOT the filter's, so a flip-flopping id passes the privacy filter under one claim
+and publishes under another:
+
+```
+flip after the filter, at 619e809c AND at this candidate:
+  published binding claimId "C-private"   while claims published = ["C-public"]
+CONTROL a stable claimId publishes the claim it was filtered on
+```
+
+Pre-existing, unchanged, and the same class as the double `toJSON` named at
+`8c467528`. Reading each record once at the edge and passing the value down is a
+shape decision, not this row.
+
+### GREEN — 11 arms, verdicts DIFFED against a pristine TAP run, reader byte-equal
+
+```
+PRISTINE                                                        50/50
+R1 OFF-SWITCH  the fields are read directly again, as found     48/50  BOTH new rows
+R2 HALF        the pre-read drops `note` from the swept set     49/50  the read row ALONE
+R3 WRONG ANS   an unreadable field reads as absent, door CLEAN  48/50  BOTH new rows
+R4 OFF-SWITCH  the duplicate loop stops reading through it      49/50  the read row ALONE
+R5 WRONG ANS   an unreadable field is PUSHED, not returned      49/50  the read row ALONE
+R6 WRONG ANS   the guard refuses every field                    13/50  37 rows
+Q1 OFF-SWITCH  `?? "?"` on both ids, exactly as found           49/50  the name row ALONE
+Q2 HALF        `?? "?"` on the SOURCE id alone                  49/50  the name row ALONE
+Q3 WRONG ANS   the duplicate loop names it differently          49/50  the name row ALONE
+Q4 WRONG ANS   an unproducible id is named "undefined" too      49/50  the name row ALONE
+X  WRONG ANS   bee-laborer's arm: the JOINS case RETURNS        49/50  the symbol row ALONE
+PRISTINE AGAIN 50/50 · reader byte-equal to the pristine copy
+```
+
+Bodies read from the TAP block, never the row name:
+
+```
+R1  a throwing getter on schema: the exported door: answered rather than crashing
+      (got Error: reading schema threw)
+R2  note: the door says it once
+R3  schema: the door names the field it could not read, and why
+R4  sourceId: validateStore: answered rather than crashing (got Error: reading sourceId threw)
+R5  schema: the door says it once
+Q1  the refusal names the key that was looked up, not a "?" the store may hold
+Q2  the SAME assertion as Q1
+Q3  every sentence about the id-less binding uses one name — the door's and the
+      duplicate loop's alike
+Q4  an id that could not be produced is the only thing "?" names now
+X   a symbol id does not swallow the binding's other problems
+```
+
+**Reported as they came.** R2 and R5 land on the SAME assertion (`said.length === 1`)
+and differ only in the KEY that reaches it — R2 on `note`, R5 on `schema` — so
+five R arms carry FOUR distinct assertions, not five. Q1 and Q2 land on the same
+assertion, so Q2 is a HALF that cannot discriminate from Q1; the same caveat C3
+carried two rounds ago. R6 is blunt: refusing every field invalidates every
+binding in the file and proves the guard can say YES and nothing finer.
+
+**ARM X is bee-laborer's, adopted whole.** Their correction to my last battery is
+taken: N4 and N5 land on the same assertion, so it was three distinct and not
+four, and the fourth assertion — `a symbol id does not swallow the binding's
+other problems` at the symbol row — was alive and unwitnessed. Their arm plays
+it; an unplayed assertion is not a dead one.
+
+### Suite and gates, at this tree
+
+```
+node --test tools/genealogy/source-contract.test.mjs   50 pass 0 fail rc=0   (48 before)
+genealogy glob, tests.yml:113-121   16 suites · 293 tests · 293 pass · 0 fail
+  rc=0 captured BEFORE any pipe.  293 belongs to THIS tree; the joint tree is
+  bee-laborer's instrument and no joint total is projected from here.
+```
+
+**MAINNET SPEND: 0.**
