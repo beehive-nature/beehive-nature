@@ -723,6 +723,16 @@ Co-authored-by: preflight selftest seat <selftest@invalid>"
   #     as the arm having run — P14e and P14f could be switched off with every instrument green.
   #     Getting the marker wrong on a pass line makes CI RED, never quiet: the id then appears
   #     declared and absent. An arm line that is neither is refused there by name.
+  #   · AND NEITHER LINE MAY BE BOTH. A partition needs no gaps AND no overlaps: a notice ending
+  #     in "(correct)" read as a verdict, so P14e could skip with its recording deleted and every
+  #     instrument stay green — the marker forged in the direction that does not go red.
+  #     tests.yml refuses a line carrying both, because an arm cannot judge something and in the
+  #     same breath say it never ran.
+  #   · ONLY THE FIRST LINE OF AN ARM IS AN ARM LINE. A continuation is indented past the two
+  #     spaces an arm line opens with — which is what the NOT CONSTRUCTIBLE notices below already
+  #     do, and why they are invisible to both counters. This was the file's practice and not its
+  #     stated rule, so a second line at two spaces was refused with no remedy named; it is
+  #     written down here and named in tests.yml's own refusal.
   _armfloor=59
   _armseen=$(grep -cE "[\"']  P[0-9]+[a-z]*" "$SELF" 2>/dev/null | tr -d ' ')
   if [ "${_armseen:-0}" -ge "$_armfloor" ]; then

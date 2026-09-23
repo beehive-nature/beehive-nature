@@ -454,8 +454,17 @@ jobs:
           grep -E '\(correct\)$' /tmp/pf-armlines | grep -oE '^  P[0-9]+[a-z]*' | sed 's/^  //' | sort -u > /tmp/pf-ran
           # THE PARTITION, so the marker is ENFORCED rather than hoped for. The script passed rc=0
           # above, so every arm line it printed is either a verdict or a notice that an arm could
-          # not be built. A line that is neither is one this gate cannot classify — and a
-          # discriminator whose mistakes are silent is the defect above wearing a new wording.
+          # not be built. A PARTITION NEEDS NO GAPS AND NO OVERLAPS and the first cut had only the
+          # no-gap half, so both are below. A discriminator whose mistakes are silent is the defect
+          # above wearing a new wording.
+          #
+          # NO GAPS — a line that is neither kind cannot be classified. ONLY THE FIRST LINE OF AN
+          # ARM IS AN ARM LINE: this file's own multi-line notices already indent their
+          # continuations past the two-space opening, which is why they are invisible here. That
+          # convention was unwritten, so bee-laborer's Z5a — an arm that RAN and added one line of
+          # context at two spaces — was refused with a message that named no remedy. The refusal
+          # stays; the sentence now says what to do, because a red nobody can act on is the
+          # always-red gate this file refuses elsewhere.
           unclassified=$(grep -vE '\(correct\)$' /tmp/pf-armlines | grep -vF 'NOT CONSTRUCTIBLE' || true)
           if [ -n "$unclassified" ]; then
             echo "arm line(s) that are neither a verdict nor a NOT CONSTRUCTIBLE notice:"
@@ -463,6 +472,28 @@ jobs:
             echo "  A passing arm ends its line in '(correct)'; an arm that could not be built says"
             echo "  NOT CONSTRUCTIBLE. Attendance is read from the first kind only, so a third kind"
             echo "  cannot be classified and is refused instead of guessed at."
+            echo "  IF THIS IS A CONTINUATION of the line above it, indent it past the two spaces"
+            echo "  an arm line opens with — that is what the NOT CONSTRUCTIBLE notices already do,"
+            echo "  and a continuation is then not an arm line at all. If it IS an arm, give it a"
+            echo "  verdict marker so its attendance can be read."
+            exit 1
+          fi
+          # NO OVERLAPS (bee-laborer's Z6). The marker was forgeable in the GREEN direction: a
+          # NOT CONSTRUCTIBLE notice whose line ALSO ends in "(correct)" was read as a verdict, so
+          # P14e could be forced to skip, its one recording line deleted, and the census, the arm
+          # floor, the inventory and the script's own "selftest ok" all stayed green while the arm
+          # sat out. Her Z7 is the control: the same skip with the notice unmodified is red, so the
+          # green was the marker and nothing else. ONE LINE CANNOT BE BOTH a judgement and an
+          # admission that nothing was judged, and the contradiction is refused rather than resolved
+          # in the permissive direction — which is the direction that does not go red.
+          contradiction=$(grep -E '\(correct\)$' /tmp/pf-armlines | grep -F 'NOT CONSTRUCTIBLE' || true)
+          if [ -n "$contradiction" ]; then
+            echo "arm line(s) claiming a verdict AND saying the arm could not be built:"
+            echo "$contradiction"
+            echo "  '(correct)' means this arm judged something; NOT CONSTRUCTIBLE means it never"
+            echo "  ran. Attendance is read from the first, so a line carrying both would grant an"
+            echo "  arm attendance it is in the same breath disclaiming. Drop whichever half is"
+            echo "  untrue — and if the arm really did run, the notice is what is wrong."
             exit 1
           fi
           ndecl=$(wc -l < /tmp/pf-declared)
