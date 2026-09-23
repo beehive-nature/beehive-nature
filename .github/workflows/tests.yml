@@ -179,6 +179,13 @@ jobs:
           python3 scripts/buzz-mail/test_outbound.py
           python3 scripts/buzz-mail/test_bech32id.py
           python3 scripts/buzz-mail/test_import_from_triage.py
+          # These two sat in this directory, beside eight suites this step already
+          # names, and were never added to the list — not excluded, forgotten. They
+          # guard PRODUCTION mail behaviour: the KNOWN-roster single source (#164)
+          # and the maildir mode heal (#181). Measured green before wiring, 2026-09-23:
+          # known_roster OK (drove 11 locals through RCPT+DATA), maildir_modes 6 tests OK.
+          python3 scripts/buzz-mail/test_sink_known_roster.py
+          python3 scripts/buzz-mail/test_sink_maildir_modes.py
       - name: bMAILroom native notice adapter (pinned nostr-tools, disabled seam)
         if: always()
         run: |
@@ -193,6 +200,22 @@ jobs:
       - name: x402 meter battery (x402-RAID-Z33)
         if: always()
         run: python3 scripts/buzz-meter/test_x402_meter.py
+      # Two more suites that existed and were named nowhere. Census on ab2d8fb3:
+      # 90 test-shaped files, 63 named, 14 matched by #212's glob, NINE named
+      # nowhere at all. These are the two of those nine that were already green
+      # by hand — the rest need a repair or a dependency decision first and are
+      # recorded in the channel rather than wired blind.
+      - name: x0x-622 runner (34 proofs, previously named in no job)
+        if: always()
+        run: python3 scripts/x0x-622/test_runner.py
+      # SS-2's own contract test. Its rig copied secret-scan.sh without
+      # keyshape.sh — which the scanner SOURCES at :82 — so three rows passed and
+      # the fourth died on ". : cannot open keyshape.sh". Nothing ran this file,
+      # so nobody saw it; push-preflight.sh's later selftest copies all three and
+      # had to learn the same lesson from scratch. Fixed in this commit, then wired.
+      - name: Hooks contract — the installer wires a pre-commit that REFUSES a key
+        if: always()
+        run: bash e2e/hooks-installed.test.sh
       # AV-1 serve-bridge battery (zCode, 2026-09-16): meter.py serve under a
       # temp BUZZ_METER_DIR on an ephemeral port — SIGKILL-mid-settle
       # exactly-once, concurrent mixed load (chain + conservation + coherent
