@@ -205,9 +205,14 @@ jobs:
       # nowhere at all. These are the two of those nine that were already green
       # by hand — the rest need a repair or a dependency decision first and are
       # recorded in the channel rather than wired blind.
-      - name: x0x-622 runner (34 proofs, previously named in no job)
-        if: always()
-        run: python3 scripts/x0x-622/test_runner.py
+      # NOT WIRED, and the reason is recorded so nobody re-discovers it: the x0x-622
+      # runner needs the blake3 module. It passed by hand under WSL python3 3.14.4
+      # (34 proofs, 0 failed) and failed in CI on this job at 01:39:43Z with
+      # "ModuleNotFoundError: No module named 'blake3'" — T1 and T1b fail, the other
+      # 32 pass. Same shape as tests/r6/test_sig.py needing pynacl. Decide the
+      # dependency (install it here, or exempt those arms BY NAME with this reason),
+      # then wire it. GREEN ON MY BOX IS NOT GREEN IN CI when a suite has a dependency:
+      # the dependency set is part of what "measured green before wiring" must cover.
       # SS-2's own contract test. Its rig copied secret-scan.sh without
       # keyshape.sh — which the scanner SOURCES at :82 — so three rows passed and
       # the fourth died on ". : cannot open keyshape.sh". Nothing ran this file,
