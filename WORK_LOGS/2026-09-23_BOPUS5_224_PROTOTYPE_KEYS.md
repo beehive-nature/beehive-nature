@@ -1104,3 +1104,165 @@ is-shallow FALSE read before any ancestry question
 ```
 
 **MAINNET SPEND: 0.**
+
+---
+
+## Addendum 6 — bee-laborer’s two rows at `8c467528`, taken
+
+Rows handed over 2026-09-23T13:27:28Z. Both reproduced HERE, at `8c467528`,
+before a line of repair was written; both measured past the diagnosis, and both
+measurements moved the remedy.
+
+### RED at `8c467528` — the two IDS, six entries
+
+A probe on this box (scratch, not in the tree), every step through one `tryIt` so a refusal
+reads as a result and a crash is named.
+
+```
+===== ROW 1 — the two IDS, six entries =====
+shape | bind() | door | validateStore | claimStanding | personSupport | publicView
+symbol sourceId        | THREW TypeError: Cannot convert a Symbol value to a string  (all six)
+null-prototype obj id  | THREW TypeError: Cannot convert object to primitive value   (all six)
+toString THROWS        | THREW Error: nope                                           (all six)
+CONTROL "S1"           | "ACCEPTED" | [] | [] | "supported" | "sourced" | 1
+CONTROL 5 numeric      | refused BY NAME, "binding 5→C1: source 5 is not held", at every entry
+```
+
+`at` at `619e809c:122` and `14528dee:204` is byte-identical to `8c467528`'s —
+measured, not relayed — so the crash is pre-existing in all three directions.
+What was this branch's is the sentence in `validateStore` clearing the ids. It is
+**thrown** there, not named. That sentence was mine; **deleted, not patched**.
+
+### RED at `8c467528` — the cause
+
+```
+toJSON throws Error("boom")  -> "... duplicate key -- boom"
+toJSON throws a STRING       -> "... duplicate key -- undefined"
+toJSON throws null           -> "... duplicate key -- undefined"
+getter throws Error("")      -> "... duplicate key -- "
+CONTROL circular             -> "... duplicate key -- Converting circular structure to JSON"
+CONTROL symbol locator       -> "... does not survive serialisation ..."
+CONTROL ordinary string      -> []
+```
+
+### The measurement that moved the remedy — a symbol is NOT the crash class
+
+```
+two distinct symbols, one description:  a === b ? false
+held apart by the map?                  2 own symbol keys
+m[a].id / m[b].id                       A B   <- the store resolves BOTH, to different records
+String(a) === String(b) ?                true "Symbol(sid)"
+`${a}`    THREW TypeError: Cannot convert a Symbol value to a string
+String(a) -> "Symbol(sid)"               (does NOT throw)
+```
+
+`String(symbol)` does not throw — only the template literal does — and a symbol
+**is** a property key. So the store holds two distinct symbols apart while
+ToString names both with one string: a **JOIN in the duplicate key**, not a crash
+at the door. Neither bee-laborer's wording nor my first cut had that. Hence two
+handlings: an **unbuildable** name RETURNS (`heldUnder` coerces the id to a
+property key, so every sentence below is computed off a field that cannot be read
+at all), an **ambiguous** one is pushed and the rest of the machine still runs.
+
+Full `String()` / map-key table for fifteen id shapes, measured on this box: the two agree on **every** shape but the
+symbol, which is why the coercion is right for the ids and the symbol needs its
+own sentence.
+
+### The repair moved twice under measurement
+
+1. The first cut was green for the unnameable ids and **still threw for the
+   symbol**, because `source ${b.sourceId} is not held` and
+   `claim ${b.claimId} does not exist` were template literals on the raw field —
+   one line below the reader that exists to close that. Patch F names both
+   through `nameId`. `N11` is its arm.
+2. `causeOf` deliberately does **not** test `instanceof Error`: that is a
+   realm-local identity test, the defect repaired two functions up, and a
+   cross-realm Error would be misdescribed by it. A control binds a
+   `vm.runInNewContext` Error and requires its message to be read like any other.
+3. The message can itself throw, and it is **reachable**, measured — a locator
+   whose `toJSON` throws a value with a throwing `message` getter defeated the
+   naive reader and crashed the door, the class this file repairs. `N7` is its arm.
+
+### GREEN — 11 arms, verdicts DIFFED against a pristine TAP run
+
+```
+PRISTINE                                             48/48
+N1  OFF-SWITCH    `at` is the raw template literal again           46/48  BOTH id rows
+N2  HALF          only the SOURCE id is named                      47/48  the unnameable row ALONE
+N3  WRONG ANSWER  push instead of return                           47/48  the unnameable row ALONE
+N4  WRONG ANSWER  a SYMBOL treated as unnameable                   47/48  the symbol row ALONE
+N5  WRONG ANSWER  the symbol clause deleted                        47/48  the symbol row ALONE
+N6  OFF-SWITCH    the cause read as String(e?.message) as found    47/48  the cause row ALONE
+N7  HALF          the message read unguarded                       47/48  the cause row ALONE
+N8  WRONG ANSWER  the cause never reports a real message           45/48  3 rows
+N9  WRONG ANSWER  the key stops skipping an id it cannot express   47/48  the symbol row ALONE
+N10 WRONG ANSWER  nameId refuses every id                          13/48  35 rows
+N11 WRONG ANSWER  the not-held sentences back on the raw field     47/48  the symbol row ALONE
+PRISTINE AGAIN 48/48 · reader byte-equal to the pristine copy: true
+every arm took at least one row
+```
+
+Eight arms fall on ONE row. **Four of those fall on the SAME row and each on a
+DIFFERENT assertion** — read from the TAP failure body, never from the row name:
+
+```
+N4   "a symbol id does not swallow the binding's other problems"
+N5   "the symbol is named where it joins"
+N9   "two distinct symbol ids are not reported as a duplicate of each other"
+N11  "a symbol id: the exported door: answered rather than crashing (got TypeError: Cannot convert a Symbol value to a string)"
+```
+
+`N1` and `N10` are blunt and reported as they came: `N1` restores the crash for
+both id classes at once, and `N10` invalidates every binding in the file, so it
+proves the reader can say YES and nothing finer.
+
+### My own instruments — two, both caught by the battery and not by reading it
+
+- **Four arms first fell with the ENGINE's own text as their whole verdict**
+  (`error: 'Cannot convert object to primitive value'`). A catch that names
+  nothing is the same defect as a count that names nothing. The rows now catch by
+  hand through one `answered` helper, and the four bodies above are the result.
+- **That helper's own sentence was false for its second caller**: it read
+  "answered rather than crashing *on an id it cannot name*" while reporting a
+  thrown `message` getter, which is not an id. Widened to the true sentence, with
+  the specificity carried by each call site's own `what`. A false refusal reason
+  inside the fix for false refusal reasons — the third time on this branch.
+
+### Measured and NOT taken
+
+```
+sourceProblems / claimProblems, on a RECORD's own id field, at every head:
+  symbol id                -> THREW TypeError: Cannot convert a Symbol value to a string
+  null-prototype object id -> THREW TypeError: Cannot convert object to primitive value
+  toString THROWS id       -> THREW Error: nope
+  CONTROL string id        -> 0 problems / 0 problems
+```
+
+Same class, different door. **Not this row**: a record's id is already contracted
+to be a string by `text(s.id)`, so the sentence it owes is `no id`, not
+`cannot be named`, and choosing between them is a shape decision for the file's
+owner rather than a patch. The same measurement is why `publicView`'s own
+`` `${b.sourceId}→${b.claimId}` `` needs nothing here:
+
+```
+addSource with a symbol / null-prototype / throwing id -> THREW at sourceProblems
+addSource with "S1"                                    -> HELD, own keys 1 + 0 symbol
+```
+
+A source can never be HELD under such an id, so the projection — which only
+reaches a binding whose source is held **and** public — is not reachable with one.
+
+**F3 is still not in this branch**, at bee-laborer's scoping.
+
+### CHANGED
+
+```
+node --test tools/genealogy/source-contract.test.mjs   48 pass 0 fail rc=0  (45 before)
+genealogy glob exactly tests.yml:113-121               16 suites · 291 tests · 291 pass · fail 0
+  rc=0 captured from node directly, before any pipe
+  291 belongs to THIS tree. It is NOT #225's 291 — two different numbers that happen
+  to agree, and a number that matches is not a number that means the same thing.
+  No joint total is projected from here; the joint tree is bee-laborer's instrument.
+```
+
+**MAINNET SPEND: 0.**

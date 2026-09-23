@@ -1228,3 +1228,184 @@ test("a locator JSON cannot express is refused by name, and every other shape st
   bind(a, mention("S1", "C1"));
   refuses(() => bind(a, { ...mention("S1", "C1"), locator: "" }), /duplicate/);
 });
+
+// A gate that is supposed to ANSWER must not be allowed to report a crash as
+// this row's verdict: the engine's own message names what broke and never which
+// claim of the row broke. Measured — four arms of the battery below first fell
+// with `Cannot convert object to primitive value` as their whole reason.
+const answered = (fn, what) => {
+  try { return fn(); } catch (e) {
+    assert.fail(`${what}: answered rather than crashing (got ${e?.constructor?.name}: ${String(e?.message).split("\n")[0]})`);
+  }
+};
+
+/* An id the sentence machine cannot NAME crashed every entry instead of
+ * refusing at one. `binding ${sourceId}→${claimId}` is a template literal, so a
+ * null-prototype id and an id whose toString throws made bind(), the exported
+ * door, validateStore, claimStanding, personSupport and publicView all fail by
+ * TypeError -- six entries, the shape the locator row above closed one field
+ * over. Pre-existing (`at` sits at 619e809c:122); the sentence in validateStore
+ * that cleared the ids was mine and is deleted. Found by bee-laborer re-reading
+ * 8c467528.
+ * MEASURED AND NOT TAKEN, so the boundary is looked over rather than assumed:
+ * sourceProblems and claimProblems carry the same class on a RECORD's own id
+ * field (`source ${s?.id ?? "?"}` at :143), and all three shapes crash there
+ * too. That is not this row -- a record's id is already contracted to be a
+ * string by `text(s.id)`, so the sentence it owes is "no id", not "cannot be
+ * named", and choosing between them is a shape decision for the file's owner.
+ * The same measurement is why publicView's own `${b.sourceId}→${b.claimId}`
+ * needs nothing: a source can never be HELD under such an id, because
+ * sourceProblems refuses first, so the projection is not reachable with one. */
+test("an id that cannot be named is refused BY NAME at every entry, not thrown out of them", () => {
+  const one = () => {
+    const s = createStore();
+    addSource(s, src("S1"));
+    addClaim(s, claim("C1", "P1", "birth", { date: "1880-03-24" }));
+    return s;
+  };
+  const unnameable = [
+    ["a null-prototype id", () => Object.assign(Object.create(null), { tag: "x" }), /sourceId cannot be named -- Cannot convert object to primitive value/],
+    ["an id whose toString throws", () => ({ toString() { throw new Error("nope"); } }), /sourceId cannot be named -- nope/],
+  ];
+
+  for (const [what, mk, why] of unnameable) {
+    // the exported door, on a store that ALREADY holds one — the shape that
+    // returned clean for the locator and is the reason the check sits here
+    const held = one();
+    const b = { ...mention(mk(), "C1") };
+    held.bindings.push(b);
+    // caught by hand: under the defect this call THROWS, and a row that lets the
+    // engine's own text be its verdict reports a catch without naming it
+    const said = answered(() => bindingProblems(b, held), `${what}: the exported door`);
+    assert.equal(said.length, 1, `${what}: the door says it once`);
+    assert.match(said[0], why, `${what}: the door names the id it could not read`);
+
+    assert.deepEqual(answered(() => validateStore(held), `${what}: validateStore`), said,
+      "and validateStore says it once, not twice");
+
+    // and the four gates that key the store refuse with that same sentence
+    for (const [name, fn] of [
+      ["bind", () => bind(one(), { ...mention(mk(), "C1") })],
+      ["claimStanding", () => claimStanding(held, "C1")],
+      ["personSupport", () => personSupport(held, "P1")],
+      ["publicView", () => permitAll(held)],
+    ]) {
+      let e = null;
+      try { fn(); } catch (err) { e = err; }
+      assert.ok(e, `${what}: ${name} refuses a binding it cannot name`);
+      assert.ok(!(e instanceof TypeError), `${what}: ${name} refused BY NAME, not by crash (got ${String(e.message).split("\n")[0]})`);
+      assert.match(e.message, why, `${what}: ${name}'s sentence names the id and its cause`);
+    }
+  }
+
+  // the claim id is the same field one over, and its sentence says CLAIM
+  const c = one();
+  const cb = { ...mention("S1", Object.create(null)) };
+  c.bindings.push(cb);
+  assert.match(answered(() => bindingProblems(cb, c), "an unnameable CLAIM id: the exported door")[0],
+    /claimId cannot be named/, "the claim id is named as the claim id");
+
+  // CONTROLS — every id the store can key still keys, and a wrong one is still
+  // refused for the ordinary reason rather than for this one
+  const ok = one();
+  assert.doesNotThrow(() => bind(ok, mention("S1", "C1")), "an ordinary string id is unmoved");
+  assert.deepEqual(bindingProblems(mention(5, "C1"), ok), ["binding 5→C1: source 5 is not held"],
+    "a numeric id is still refused for NOT BEING HELD, by name, and not for being unnameable");
+  // an object id whose toString reads "S1" IS the held source: the store keys by
+  // ToString, so naming it must not turn a held binding into a refused one
+  assert.doesNotThrow(() => bind(one(), { ...mention({ toString: () => "S1" }, "C1") }),
+    "an object id the store resolves to a held source is still accepted");
+});
+
+/* A SYMBOL is a different defect wearing the same costume, and measuring it
+ * moved the sentence: String(symbol) does NOT throw -- only the template
+ * literal does -- and a symbol IS a property key, so the store holds two
+ * distinct symbols apart while ToString names both "Symbol(sid)". That is a
+ * JOIN in the duplicate key, not a crash at the door. So it is named where it
+ * joins, and everything else about the binding is still computed: an ambiguous
+ * name does not stop the sentence machine, an unbuildable one does. */
+test("a symbol id is named where it JOINS, and the binding's other sentences are still said", () => {
+  const s = createStore();
+  addSource(s, src("S1"));
+  addClaim(s, claim("C1", "P1", "birth", { date: "1880-03-24" }));
+
+  // the mechanism the sentence asserts, in the fixture: two distinct symbols of
+  // one description are held APART by a map and named ALIKE by ToString
+  const a = Symbol("sid"), b = Symbol("sid");
+  assert.notEqual(a, b, "the fixture's two symbols are distinct");
+  const m = Object.create(null);
+  m[a] = 1; m[b] = 2;
+  assert.equal(Object.getOwnPropertySymbols(m).length, 2, "a map holds two distinct symbols apart");
+  assert.equal(String(a), String(b), "and ToString names both with one string — that is the join");
+
+  const sym = { ...mention(a, "C1") };
+  s.bindings.push(sym);
+  const said = answered(() => bindingProblems(sym, s), "a symbol id: the exported door");
+  assert.ok(said.some((p) => /sourceId is a symbol: the store holds two distinct symbols apart/.test(p)),
+    "the symbol is named where it joins");
+  assert.ok(!said.some((p) => /cannot be named/.test(p)),
+    "and NOT as an id that cannot be named — String(symbol) does not throw, so that sentence would be false about it");
+
+  // the discriminator: an ambiguous name does not stop the rest of the machine.
+  // Returning here instead of pushing would hide this binding's OTHER defect.
+  const both = { schema: BINDING_SCHEMA, sourceId: a, claimId: "C1", relation: "insinuates" };
+  assert.ok(answered(() => bindingProblems(both, s), "a symbol id with a second defect").some((p) => /unknown relation insinuates/.test(p)),
+    "a symbol id does not swallow the binding's other problems");
+
+  // and the key SKIPS it rather than joining on "Symbol(sid)": two bindings
+  // whose sources are two distinct symbols are not a duplicate of each other
+  const pair = createStore();
+  addSource(pair, src("S1"));
+  addClaim(pair, claim("C1", "P1", "birth", { date: "1880-03-24" }));
+  pair.bindings.push({ ...mention(a, "C1") }, { ...mention(b, "C1") });
+  const two = validateStore(pair);
+  assert.ok(!two.some((p) => /duplicate \(one entry counted twice/.test(p)),
+    "two distinct symbol ids are not reported as a duplicate of each other");
+});
+
+/* A refusal's cause is read off the throw, and a throw is not guaranteed to be
+ * an Error: String(e?.message) printed the word "undefined" for a toJSON that
+ * threw a string or threw null, in the commit whose own law is that a
+ * fail-closed path owes a TRUE reason. Found by bee-laborer re-reading
+ * 8c467528. MINE, measured in the same pass: the message can ITSELF throw, and
+ * it is reachable -- a locator whose toJSON throws a value with a throwing
+ * `message` getter defeated the naive reader and crashed the door, which is the
+ * class this file repairs. */
+test("a refusal's cause is never the word `undefined`, and reading it cannot crash the door", () => {
+  const one = () => {
+    const s = createStore();
+    addSource(s, src("S1"));
+    addClaim(s, claim("C1", "P1", "birth", { date: "1880-03-24" }));
+    return s;
+  };
+  const causeOf = (locator) => {
+    const s = one();
+    const b = { ...mention("S1", "C1"), locator };
+    s.bindings.push(b);
+    const said = answered(() => bindingProblems(b, s), "reading a refusal's cause");
+    assert.equal(said.length, 1, "the door says it once");
+    return said[0];
+  };
+
+  for (const [what, mk, why] of [
+    ["a throw that is a string", () => ({ toJSON() { throw "plain string"; } }), /-- it threw a string with no message$/],
+    ["a throw that is null", () => ({ toJSON() { throw null; } }), /-- it threw null with no message$/],
+    ["an Error with no message", () => ({ toJSON() { throw new Error(""); } }), /-- it threw an object with no message$/],
+    ["a message that is not a string", () => ({ toJSON() { throw { message: 7 }; } }), /-- it threw an object with no message$/],
+    ["a message that itself throws", () => ({ toJSON() { throw { get message() { throw new Error("inner"); } }; } }), /-- reading its message threw as well$/],
+  ]) {
+    const said = causeOf(mk());
+    assert.match(said, why, `${what}: the sentence says what it could not get`);
+    assert.ok(!/-- undefined$/.test(said), `${what}: and never the word undefined where the cause belongs`);
+  }
+
+  // CONTROLS — a throw that DOES carry a cause still reports that cause, so the
+  // reader was not simply made to stop reading
+  assert.match(causeOf({ toJSON() { throw new Error("boom"); } }), /-- boom$/, "a real message is still the cause");
+  const circular = () => { const o = { page: 4 }; o.self = o; return o; };
+  assert.match(causeOf(circular()), /-- Converting circular structure to JSON$/, "and so is the engine's own");
+  // CONTROL: the cause reader is not an `instanceof Error` test, which is
+  // realm-local — the defect repaired two functions up in this same file
+  const alien = vm.runInNewContext("(function () { throw new Error('from another realm'); })");
+  assert.match(causeOf({ toJSON() { alien(); } }), /-- from another realm$/, "a cross-realm Error's message is read like any other");
+});

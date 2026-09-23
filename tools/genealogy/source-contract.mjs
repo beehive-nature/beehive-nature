@@ -229,17 +229,63 @@ const heldUnder = (map, id) => (Object.prototype.hasOwnProperty.call(map, id) ? 
 // RESIDUAL, unchanged and disclosed: JSON text is key-ORDER sensitive, so
 // {a:1,b:2} and {b:2,a:1} are two entries. That was true of the join before
 // this commit and is not what this row repairs.
+// A refusal's cause is read off the throw, and a throw is not guaranteed to be
+// an Error. Measured at 8c467528: a toJSON that threw a string or threw null
+// produced "-- undefined", so the sentence printed the word undefined where the
+// cause belongs, inside the commit whose own law is that a fail-closed path owes
+// a TRUE reason. Found by bee-laborer re-reading 8c467528.
+// And the message can itself throw -- REACHABLE, measured: a locator whose
+// toJSON throws a value with a throwing `message` getter defeated the naive
+// reader and crashed the door, which is the class this very file repairs.
+// Deliberately NOT `e instanceof Error`: that is a realm-local identity test,
+// the defect repaired two functions up, and it would misdescribe a cross-realm
+// Error. The reader says what it could not get instead of naming a constructor.
+const causeOf = (e) => {
+  let m;
+  try { m = e?.message; } catch { return "reading its message threw as well"; }
+  if (typeof m === "string" && m !== "") return m.split("\n")[0];
+  return `it threw ${e === null ? "null" : typeof e === "object" ? "an object" : `a ${typeof e}`} with no message`;
+};
+
 const locatorKey = (v) => {
   const raw = (typeof v === "object" && v !== null) || typeof v === "symbol" ? v : String(v);
   let text;
   try { text = JSON.stringify(raw); }
-  catch (e) { return { why: `locator cannot be part of a duplicate key -- ${String(e?.message).split("\n")[0]}` }; }
+  catch (e) { return { why: `locator cannot be part of a duplicate key -- ${causeOf(e)}` }; }
   if (text === undefined) return { why: "locator does not survive serialisation, so two distinct locators would join" };
   return { text };
 };
 
+// Every sentence this module says about a binding is built from its two ids, so
+// the ids are read BEFORE anything else -- and reading them is not free.
+// Measured at 8c467528: `binding ${sourceId}→${claimId}` is a template literal,
+// so a null-prototype id and an id whose toString throws made bind(), the
+// exported door, validateStore, claimStanding, personSupport and publicView ALL
+// fail by TypeError instead of by refusal. Six entries, the same shape the
+// locator half of this file closed one function up, in the field the comment
+// down in validateStore cleared -- and that sentence was mine and is deleted.
+// Pre-existing: `at` sits at 619e809c:122 unchanged. Found by bee-laborer
+// re-reading 8c467528.
+// A SYMBOL is a different defect in the same costume and the measurement moved
+// it: String(symbol) does NOT throw (only the template literal does), and a
+// symbol IS a property key, so the store holds two distinct symbols apart while
+// ToString names both "Symbol(sid)". That is a JOIN in the duplicate key, not a
+// crash at the door, so it is named where it joins and everything else about
+// the binding is still computed -- an ambiguous name does not stop the sentence
+// machine, an unbuildable one does.
+const nameId = (v) => {
+  if (typeof v === "symbol") return { text: String(v), joins: "is a symbol: the store holds two distinct symbols apart, and the duplicate key names both with one string" };
+  try { return { text: String(v) }; }
+  catch (e) { return { why: `cannot be named -- ${causeOf(e)}` }; }
+};
+
 export function bindingProblems(b, store) {
-  const at = `binding ${b?.sourceId ?? "?"}→${b?.claimId ?? "?"}`;
+  const sn = nameId(b?.sourceId ?? "?"), cn = nameId(b?.claimId ?? "?");
+  const at = `binding ${sn.text ?? "?"}→${cn.text ?? "?"}`;
+  // RETURN, never push: heldUnder() coerces the id to a property key, so every
+  // sentence below is computed off a field that cannot be read at all.
+  if (sn.why || cn.why)
+    return [...(sn.why ? [`${at}: sourceId ${sn.why}`] : []), ...(cn.why ? [`${at}: claimId ${cn.why}`] : [])];
   if (!b || typeof b !== "object") return [`${at}: not an object`];
   const shape = foreignProto(b, at);
   if (shape) return [shape];
@@ -247,14 +293,20 @@ export function bindingProblems(b, store) {
   if (b.schema !== BINDING_SCHEMA) out.push(`${at}: schema must be ${BINDING_SCHEMA}`);
   if (!RELATIONS.includes(b.relation)) out.push(`${at}: unknown relation ${b.relation}`);
   const s = heldUnder(store.sources, b.sourceId), c = heldUnder(store.claims, b.claimId);
-  if (!s) out.push(`${at}: source ${b.sourceId} is not held`);
-  if (!c) out.push(`${at}: claim ${b.claimId} does not exist`);
+  // sn.text / cn.text, never the raw id: these two were template literals on the
+  // raw field, so they re-opened the same crash for a SYMBOL id one line below
+  // the reader that exists to close it. Measured -- the repair above was green
+  // for the unnameable ids and still threw here for the symbol.
+  if (!s) out.push(`${at}: source ${sn.text} is not held`);
+  if (!c) out.push(`${at}: claim ${cn.text} does not exist`);
   // The exported door answers for the locator too, so a binding whose locator
   // cannot carry an identity is named HERE and not only where the key is built
   // -- that disagreement was the row: this returned clean while every gate that
   // keys the store crashed on the same binding.
   const lk = locatorKey(b.locator ?? "");
   if (lk.why) out.push(`${at}: ${lk.why}`);
+  if (sn.joins) out.push(`${at}: sourceId ${sn.joins}`);
+  if (cn.joins) out.push(`${at}: claimId ${cn.joins}`);
   if (b.relation === "mentions") return out;
   // supports / contradicts: the entry read, the assertion extracted, and the claim must line up
   if (!PREDICATES.includes(b.context)) out.push(`${at}: context must name the entry read (got ${b.context})`);
@@ -324,17 +376,14 @@ export function validateStore(store) {
     // published as two bindings on one source -- while two DIFFERENT object ids
     // joined on "{}" into a duplicate that does not exist. Found by bee-laborer
     // re-reading 14528dee; the comment already stated the law the expression
-    // broke. String() adds no failure mode here, measured: `at` is built from
-    // both ids in a template literal one line into bindingProblems, so a symbol
-    // or null-prototype id throws THERE and never reaches this line, and that
-    // is where the class is named.
-    const idPart = (v) => String(v);
+    // broke. The ids are named by nameId, the same reader the door uses, so an
+    // id the key cannot express is skipped here exactly as an unkeyable locator
+    // is -- both are already named above, and each sentence is said once.
+    const sk = nameId(b?.sourceId), ck = nameId(b?.claimId);
     const lk = locatorKey(b?.locator ?? "");
-    // Already named by bindingProblems above. An unkeyable locator joins
-    // nothing rather than joining everything, and the sentence is said once.
-    if (lk.why) continue;
-    const key = JSON.stringify([idPart(b?.sourceId), idPart(b?.claimId), lk.text]);
-    if (seen.has(key)) out.push(`binding ${b?.sourceId}→${b?.claimId}: duplicate (one entry counted twice is not two sources)`);
+    if (sk.why || ck.why || sk.joins || ck.joins || lk.why) continue;
+    const key = JSON.stringify([sk.text, ck.text, lk.text]);
+    if (seen.has(key)) out.push(`binding ${sk.text}→${ck.text}: duplicate (one entry counted twice is not two sources)`);
     seen.add(key);
   }
   return out;
