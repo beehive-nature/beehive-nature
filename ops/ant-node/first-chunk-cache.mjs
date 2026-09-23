@@ -106,6 +106,8 @@ function corsHeaders(req, extra = {}) {
   if (req.headers.origin === cfg().allowedOrigin) {
     out['access-control-allow-origin'] = cfg().allowedOrigin;
     out.vary = 'origin';
+    // bViEw sheet reads these; Content-Length is safelisted, these are not.
+    out['access-control-expose-headers'] = 'X-Ant-First-Chunk, Accept-Ranges';
   }
   return out;
 }
@@ -348,6 +350,7 @@ async function serveMiss(req, res, xor) {
       headers['x-ant-first-chunk'] = 'MISS';
       if (req.headers.origin === cfg().allowedOrigin) {
         headers['access-control-allow-origin'] = cfg().allowedOrigin;
+        headers['access-control-expose-headers'] = 'X-Ant-First-Chunk, Accept-Ranges';
       }
       const cl = headers['content-length'] ? Number(headers['content-length']) : null;
       const ct = headers['content-type'] || 'application/octet-stream';
