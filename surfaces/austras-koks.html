@@ -96,7 +96,10 @@ const PRIVACY = /living|leak|cultureClaims|unsourced|roots|lines\[/;
     `validate(tree, {public:true}): privacy problems ${privacy.length}`,
     `  also reported, not privacy: ancestors on record but not fetched yet ${archive.frontierTotal()} (the tree stops where the archive stops) · cycle components ${count(/^cycle-component/)}`,
     `founder line: root ${tree.lines[0].root} (anonymous) · living generations held ${tree.lines[0].bridge} · comes into the open at ${tree.lines[0].entries.length} people`,
-    `language and culture claims carried: ${Object.values(persons).filter((p) => Array.isArray(p.cultureClaims) && p.cultureClaims.length).length}`,
+    (() => {
+      const withClaims = Object.values(persons).filter((p) => Array.isArray(p.cultureClaims) && p.cultureClaims.length);
+      return `sourced language and culture claims: ${withClaims.reduce((n, p) => n + p.cultureClaims.length, 0)}, on ${withClaims.length} people`;
+    })(),
     `spouse lines: none published yet, each waits on its private record`,
   ].join('\n');
   if (privacy.length) {
