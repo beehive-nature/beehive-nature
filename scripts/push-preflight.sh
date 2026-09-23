@@ -144,13 +144,18 @@ locate() {
 # its own precondition: if chmod is a no-op in both directions, the probe says
 # "unknown" instead of reporting a carried bit it never observed.
 # Echoes exactly one of: yes | no | unknown.
+# IT PROBES THE HOOKS DIRECTORY OR IT ANSWERS 'unknown'. There is deliberately no
+# fallback to $TMPDIR: the first draft had one, and bee-laborer demonstrated that it
+# restores the very false green this row exists to close — hooks dir unwritable,
+# TMPDIR on a filesystem that does not carry the bit, and the row printed "2 of 2 ...
+# executable by index mode" rc=0 on the exact box it refuses when the probe lands in
+# the right place. The mirror direction is a false REFUSAL of a correct box. An
+# instrument that cannot answer for the thing in question must say it does not know,
+# never answer for something adjacent.
 _exec_bit_probe() {
   _pdir=$1; _pf=''
   if [ -d "$_pdir" ] && [ -w "$_pdir" ]; then
     _pf=$(mktemp "$_pdir/.execbitprobe.XXXXXX" 2>/dev/null) || _pf=''
-  fi
-  if [ -z "$_pf" ]; then
-    _pf=$(mktemp 2>/dev/null) || _pf=''
   fi
   if [ -z "$_pf" ]; then echo unknown; return 0; fi
   chmod +x "$_pf" 2>/dev/null
@@ -186,8 +191,11 @@ hooks_check() {
       echo "    in either direction. Index mode only; requiring [ -x ] here would"
       echo "    refuse a correctly installed box." ;;
     *)
-      echo "   exec-bit probe: INCONCLUSIVE — no throwaway file could be created at"
-      echo "    all, so the filesystem bit is unread and a stripped bit is invisible." ;;
+      echo "   exec-bit probe: INCONCLUSIVE — nothing could be written inside $_hd, so"
+      echo "    the filesystem bit is UNREAD and a stripped bit is invisible here. This"
+      echo "    is an admitted blind spot, not a clean bill: the verdict below is the"
+      echo "    permissive index-only one. It does NOT probe anywhere else — a probe in"
+      echo "    another filesystem answers a different question." ;;
   esac
   for _hpair in 'pre-commit:secret-scan.sh' 'commit-msg:identity-check.sh'; do
     _hh=${_hpair%%:*}; _hgate=${_hpair#*:}
@@ -201,7 +209,20 @@ hooks_check() {
     fi
     _hmode=$(git ls-files -s -- "$_hf" 2>/dev/null | cut -c1-6)
     if [ -n "$_hmode" ]; then
-      if [ "$_hmode" = 100755 ] && [ "$_hcarry" = yes ] && [ ! -x "$_hf" ]; then
+      # `[ -x ]` IS A ONE-WAY INSTRUMENT AND ONLY THE FALSE DIRECTION IS SOUND EVERYWHERE.
+      # TRUE is vacuous under Git for Windows, which fabricates it — that is the whole
+      # reason this row used to read the index alone. FALSE is not fabricated by any
+      # platform measured here: on this Windows box both real hooks read `[ -x ]` TRUE
+      # while `chmod +x` on an empty throwaway file does not take at all. So a FALSE is
+      # taken as DEAD even when the probe could not answer, and it is ignored in exactly
+      # one case — probe `no:notset`, the answer that says +x cannot be observed at all,
+      # where a FALSE cannot be distinguished from an instrument stuck low.
+      # WHY IT IS HERE: with no fallback, an unwritable hooks directory gives `unknown`,
+      # and `unknown` alone lands on the permissive index-only verdict. Measured on ext4:
+      # hooks dead, directory unwritable -> rc=0 "2 of 2 ... executable by index mode",
+      # which is the same false green by a different door. THIS IS BEYOND THE ROW AS CUT
+      # and is bee-laborer's to reject; the fallback removal above stands without it.
+      if [ "$_hmode" = 100755 ] && [ "$_hcarry" != no:notset ] && [ ! -x "$_hf" ]; then
         echo "   DEAD     $_hh — runs $_hgate, index mode 100755, but the file ON DISK"
         echo "            is not executable. Git execs the FILE, not the index, so this"
         echo "            hook never runs on this box. Usual cause: core.fileMode=false,"
@@ -212,8 +233,9 @@ hooks_check() {
         echo "   ok       $_hh — runs $_hgate, index mode 100755 AND executable on disk"
       elif [ "$_hmode" = 100755 ]; then
         echo "   ok(index) $_hh — runs $_hgate, index mode 100755, so every fresh clone"
-        echo "            gets the bit. The filesystem bit was NOT read here (the probe"
-        echo "            says it is not carried), so this box's own file is unverified."
+        echo "            gets the bit. The disk bit is not FALSE here, which is the only"
+        echo "            direction this box can answer (probe: $_hcarry), so a fabricated"
+        echo "            TRUE is all that was available and the file stays unverified."
       else
         echo "   DEAD     $_hh — runs $_hgate but index mode is $_hmode. Git SKIPS a"
         echo "            non-executable hook and says so only as an advice hint. The"
@@ -483,6 +505,18 @@ Co-authored-by: preflight selftest seat <selftest@invalid>"
       chmod +x .githooks/commit-msg 2>/dev/null
       git config --unset core.fileMode 2>/dev/null
       sh scripts/push-preflight.sh --hooks > g.out 2>&1; echo "$?" > g.rc
+
+      # h: the bit is off AND the hooks directory cannot be written. On a POSIX box
+      # $TMPDIR carries the bit, so a probe that fell back there would print CARRIES
+      # and refuse; the correct answer is that this instrument cannot see.
+      git config core.fileMode false
+      chmod -x .githooks/commit-msg 2>/dev/null
+      chmod 500 .githooks 2>/dev/null
+      if ( : > .githooks/.wprobe ) 2>/dev/null; then rm -f .githooks/.wprobe; echo no > h.unwritable; else echo yes > h.unwritable; fi
+      sh scripts/push-preflight.sh --hooks > h.out 2>&1; echo "$?" > h.rc
+      chmod 700 .githooks 2>/dev/null
+      chmod +x .githooks/commit-msg 2>/dev/null
+      git config --unset core.fileMode 2>/dev/null
     )
     _R="$H/r"
     _rd() { cat "$_R/$1" 2>/dev/null || echo MISSING; }
@@ -540,6 +574,25 @@ Co-authored-by: preflight selftest seat <selftest@invalid>"
       echo "            be built. Not a pass and not a skip to be read as one: these two arms"
       echo "            run for real on every POSIX seat and in CI (ubuntu), which is exactly"
       echo "            where the defect bites."
+    fi
+    # P14e is OUTSIDE the carried-bit branch on purpose: it judges where the probe
+    # LOOKS, which is a question on every platform, and an arm nobody prints is an
+    # arm nobody can miss the absence of.
+    _hun=$(_rd h.unwritable)
+    if [ "$_hun" = yes ]; then
+      _hrc=$(_rd h.rc)
+      if grep -q "exec-bit probe: INCONCLUSIVE" "$_R/h.out" 2>/dev/null \
+         && ! grep -q "this filesystem CARRIES" "$_R/h.out" 2>/dev/null \
+         && ! grep -q "does NOT carry" "$_R/h.out" 2>/dev/null \
+         && [ "$_hrc" = 1 ] && grep -q "DEAD     commit-msg" "$_R/h.out" 2>/dev/null; then
+        echo "  P14e known-BLIND hooks dir UNWRITABLE, bit stripped -> probe answers INCONCLUSIVE, probes no other filesystem, and the dead hook is STILL named (correct)"
+      else
+        echo "  P14e known-BLIND hooks dir UNWRITABLE, bit stripped -> rc=$_hrc. Either the probe answered for a DIFFERENT filesystem — its verdict decided by where mktemp landed — or a blind probe let a dead hook read as installed"; st=1
+      fi
+    else
+      echo "  P14e NOT CONSTRUCTIBLE HERE — the rig could still write inside a 0500 hooks"
+      echo "            directory (root, or a filesystem without POSIX modes), so the blind"
+      echo "            case cannot be built. Runs for real on a non-root POSIX seat."
     fi
     rm -rf "$H"
     if [ -e "$H" ]; then echo "  P12-P14 cleanup -> $H SURVIVED; a rig that leaves state can green the next run"; st=1
