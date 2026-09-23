@@ -1,4 +1,4 @@
-// NOTE (z3.2): runs on the BOX beside ~/src/web; env BUZZ_CLAIM_NSEC, never printed. Proven 2026-09-04 for bClaude (kind-0 + kind-10100 accepted from his own key).
+// NOTE (z3.2): runs on the BOX beside ~/src/web; env BUZZ_CLAIM_NSEC, never printed. Proven 2026-09-04 for bClaude (kind-0 + kind-10100 accepted from their own key).
 // agent-profile.mjs — publish the agent's kind-0 profile (and kind-10100
 // agent profile) from its OWN key, so the member directory renders a name.
 // Same key-handling law as agent-claim.mjs: env BUZZ_CLAIM_NSEC, never printed.

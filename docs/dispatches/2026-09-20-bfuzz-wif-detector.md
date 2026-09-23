@@ -117,7 +117,7 @@ mandates lowercase; same accepted trade as the mangled-key class).
 
 One file. No spec, no surface, no payment code, no wallet. bOPus5 runs the
 independent mutation against this candidate per bee-laborer's routing (the
-writer does not prove his own gate); my battery above is build evidence, not
+writer does not prove their own gate); my battery above is build evidence, not
 the independent verdict.
 
 Rollback: `git revert` of the slice commit restores the `{48}` arm and the old
