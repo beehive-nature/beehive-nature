@@ -684,3 +684,229 @@ every step reports through the same `tryIt`, and the GREEN run reads the
 refusals as results rather than dying on them.
 
 **MAINNET SPEND: 0.**
+
+---
+
+# ADDENDUM 4 — two rows handed over at `ff8746f6`, and the first is MINE
+
+Appended, never retyped: everything above belongs to the head that produced it.
+The `ff8746f6` verdicts in bee-laborer's re-read are pinned to that head and are
+retired by this commit, which is what taking their rows costs.
+
+Rows handed over by bee-laborer re-reading `ff8746f6`. **The standing is new: both
+arrived WITH that commit and neither is pre-existing, and ROW A is a regression
+of my own fix one head earlier.**
+
+* **ROW A — the joined key lost the string coercion the store performs.** The
+  store's maps are indexed by PROPERTY KEY, so a source held under `"5"` is the
+  same source a binding names as `5`. `JSON.stringify([...])` keeps them apart.
+  One entry bound twice was held twice and published as two bindings on one
+  source.
+* **ROW B — the record prototype check asks a prototype's IDENTITY where it
+  means its SHAPE.** `=== Object.prototype` is realm-local; `node:vm` is a live
+  idiom in this tree, and a cross-realm record — same own keys, same inherited
+  surface, zero inherited data fields — was refused with a sentence that is
+  false about it.
+
+## RED — reproduced at `ff8746f6` before a line was written
+
+A fix taken on a diagnosis I did not reproduce is a fix I cannot defend.
+
+```
+=== ROW A: numeric vs string ids, the SAME entry ===
+bind {'5','7','p. 4'}                          "accepted"
+bind { 5 , 7 ,'p. 4'}  SAME entry              "accepted"      <-- one entry, twice
+bindings held                                  2
+validateStore                                  []
+publicView sources/bindings                    [1,2]           <-- one source, two bindings
+CONTROL 3 bindingProblems(numeric)             []              <-- the ids really do resolve
+locator '0' then 0, same entry                 "accepted both"
+CONTROL 1 genuine dup both strings             THREW: binding 5→7: duplicate (one entry counted twice is not two sources)
+CONTROL 2 genuine dup both numbers             THREW: binding 5→7: duplicate (one entry counted twice is not two sources)
+CONTROL 5 two genuinely distinct               2
+CONTROL delimiter pair (their fix)             2
+CONTROL claimStanding sees the numeric bind?   {"standing":"unsupported","mentions":[]}
+
+=== ROW B: cross-realm plain record ===
+own keys identical                             true
+inherited DATA fields   local / vm             [[],[]]
+proto === Object.prototype   local / vm        true / false
+sourceProblems(local plain)                    []
+sourceProblems(vm plain)                       ["source s-vm: carries a prototype, so a field
+                                                 nobody wrote into this record can read as its own..."]
+CONTROL poisoned DATA field                    refused, correctly
+CONTROL null-proto record                      []
+CONTROL array                                  refused, correctly
+```
+
+Their scope note on `claimStanding` reproduces and is sharper than it looks: it
+filters `b.claimId === claimId` without coercing, so the numeric-id binding was
+held AND published AND invisible to standing — three readings of one entry.
+
+## MEASURED BEFORE BUILDING — their remedy, and what it takes away
+
+Their preview was `String()` on all three parts. Measured rather than adopted:
+
+```
+                       String(v)                          JSON.stringify([v])
+plain object           "[object Object]"                  "[{}]"
+null-proto object      THREW: cannot convert to primitive "[{}]"
+symbol                 "Symbol(x)"                        "[null]"
+bigint                 "10"                               THREW: do not know how to serialize
+null / undefined       "null" / "undefined"               "[null]" / "[null]"
+```
+
+Two findings that decided the shape of the repair:
+
+1. **For the two IDS, `String()` adds no failure mode at all, because the line
+   above already did it.** `at` is built as `` `binding ${b?.sourceId}→${b?.claimId}` ``
+   one line into `bindingProblems`, and a template literal coerces: a null-proto
+   id and a symbol id BOTH throw there, before the key is ever computed
+   (measured, including through the early-return path). So coercing the ids is
+   not a new coercion — it is the SAME one the refusal sentence already
+   performs, and the same one the store performs. A **bigint** id threw at the
+   key before this commit and no longer does.
+2. **For the LOCATOR it is not free.** The locator is not a map key. It reaches
+   the key line uncoerced today, and `String()` there would (a) turn a held
+   binding carrying a null-prototype locator into a thrown `TypeError`, and (b)
+   join every two distinct object locators on `"[object Object]"`. So the
+   repair coerces primitives and leaves objects and symbols to JSON exactly as
+   they were — one line, and the direction of its mistakes checked both ways.
+
+**Third round running in which measuring the handed remedy changed the answer.**
+
+## GREEN
+
+```
+part coerces primitives, leaves objects/symbols to JSON
+
+bind {'5','7'} then { 5 , 7 }   REFUSED: binding 5→7: duplicate (one entry counted twice ...)
+bindings held                   1
+publicView sources/bindings     [1,1]
+locator '0' then 0              REFUSED
+CONTROL genuine dup, strings    REFUSED      CONTROL genuine dup, numbers  REFUSED
+CONTROL two distinct entries    2            CONTROL delimiter pair        2
+
+plainChain: no prototype, or ONE level carrying exactly Object.prototype's names
+sourceProblems(vm plain)        []
+CONTROL poisoned DATA field     refused      CONTROL array        refused
+CONTROL null-proto record       []           CONTROL local plain  []
+```
+
+## What makes the widening bounded, and why it is a row and not a paragraph
+
+The accepted set grew from "is Object.prototype" to "carries exactly
+Object.prototype's names, one level deep". That is sound only because **no key
+this module reads is among those twelve names** — measured: the read set is
+`SOURCE_KEYS ∪ CLAIM_KEYS ∪ BINDING_KEYS ∪ {kind}` and the intersection is
+empty. Put a listed key on such a prototype and the name set stops matching.
+
+I did not write that as a list comparison, because **a list compared to the
+prototype's names is satisfied by an EMPTY list** — the row would survive its own
+gutting. It is written as a mechanism instead: build the most hostile chain the
+check accepts (a null-prototype object carrying every one of the twelve names,
+each poisoned) and require all three gates to answer **exactly as they answer for
+an ordinary record**, with a control that giving that same chain ONE name of its
+own makes every gate refuse it. Add a schema key named like a member of
+`Object.prototype` and that row falls.
+
+## Mutations — 10 arms, verdicts DIFFED against a pristine TAP run, restored byte-equal
+
+```
+PRISTINE                                             43/43
+C1 OFF-SWITCH    the key stops coercing, as found    42/43   the coercion row ALONE
+C2 HALF          the LOCATOR leaves the coercion     42/43   the coercion row ALONE
+C3 HALF          the SOURCE id leaves the coercion   42/43   the coercion row ALONE
+C4 WRONG ANSWER  every object coerced too            42/43   the coercion row ALONE
+C5 WRONG ANSWER  only PLAIN objects coerced          42/43   the coercion row ALONE
+S1 OFF-SWITCH    the prototype test asks IDENTITY    41/43   the realm row + the bound row
+S2 WRONG ANSWER  the DEPTH half is dropped           42/43   the realm row  ALONE
+S3 WRONG ANSWER  how MANY names, not which           42/43   the realm row  ALONE
+S4 WRONG ANSWER  every shape is plain                40/43   3 rows
+S5 WRONG ANSWER  null is refused too                 41/43   2 rows
+PRISTINE AGAIN 43/43 · reader byte-equal
+```
+
+The five C arms fall on ONE row at **four** distinct assertions, read from the
+failure text and not from the row name:
+
+```
+C1  Missing expected exception: a numeric id names the record the string id names,
+                                so this is one entry bound twice
+C2  Missing expected exception: the LOCATOR is part of the key and is coerced with the ids
+C3  (same assertion as C1 — C3 is a HALF of C1 and cannot discriminate from it;
+     reported as it came rather than dressed up)
+C4  Got unwanted exception: an OBJECT locator is left to JSON, never coerced into a throw
+C5  Got unwanted exception: two DISTINCT object locators are two entries
+```
+
+**C4 and C5 are the arms that earn the escape hatch its own row.** An escape
+hatch owes its own mutation, and this one has two, because its two mistakes
+point in opposite directions: coercing everything CRASHES on a null-prototype
+locator, and coercing plain objects only JOINS two distinct ones.
+
+**S2 and S3 are what make the two halves of `plainChain` both load-bearing**, and
+each has a fixture built for it and falls at its own message:
+
+```
+S2  a masking chain one level deeper hides a field the name set cannot see
+    fixture: Object.create(masked) where masked's OWN names are exactly
+    Object.prototype's twelve and masked itself inherits `url` -- the field is
+    reachable (asserted) and only the DEPTH half refuses it
+S3  a realm that traded a name for a field of its own has the same COUNT and a
+    different SET
+    fixture: a vm realm that DELETES Object.prototype.toLocaleString and adds
+    `url` -- twelve names either way (asserted) and only the NAME half refuses it
+```
+
+**S1 falls on two rows and the second is a precondition, not a second catch:**
+under the identity test the hostile-chain fixture stops being accepted at all,
+so the bound row's own precondition (`the chain is accepted`) is what fails.
+Stated rather than counted as coverage.
+
+## MEASURED AND NOT REPAIRED
+
+`nonDataAt` makes the same identity test on VALUES, twice, and a cross-realm
+value is refused by both:
+
+```
+local [1,2,3]        published
+cross-realm [1,2,3]  THREW: ... not data (value: array subclass)     <- false about it
+local {a:1}          published
+cross-realm {a:1}    THREW: ... not data (value: Object object)
+```
+
+Unchanged in both directions by this commit. It is the same class as ROW B and
+it is **not** the row I was handed: it fails CLOSED — a legitimate value is not
+published — where the record check failed a RECORD with a false sentence, and
+widening what may be PUBLISHED on a privacy path is not a repair to take
+unasked. Disclosed at the line so the two forms in one file do not read as an
+oversight, and named here for whoever rules the file.
+
+**F3 is still not in this branch**, at bee-laborer's scoping.
+
+## My own instruments
+
+* `grep -E "^. (tests|pass|fail)"` over the glob output matched **nothing**, and
+  `rc=0` alone would have read as a clean run. node's `ℹ` is three bytes and `^.`
+  matches one — **the third time this format has beaten a matcher on this lane in
+  two days**, twice for bee-laborer and now twice for me, both times AFTER it was
+  banked. `^.{0,3}` is still not enough (the mark plus a space is four), and the
+  remedy that generalises is the one already banked and not yet installed: **a
+  matcher refuses when it matches zero lines of a non-empty file.** The battery
+  does exactly that and prints `INSTRUMENT REFUSES` rather than a verdict; my
+  shell did not, and reading the empty output is what caught it.
+* An unterminated heredoc (I closed a `<<'NEWEOF'` with `OLDEOF`) swallowed the
+  node command that was to apply the patch. Nothing landed and nothing was
+  damaged — the module was byte-identical afterwards, checked — but the shell
+  reported only a warning and the *absence* of the patch is what said so.
+  Anchors and replacement text go through a file written with a real writer, not
+  a heredoc, which is a law I had already banked for backslashes and had not
+  extended to delimiters.
+* My first cut of the object-locator control bound the two plain-object locators
+  to DIFFERENT claims, so their keys differed on the claim and the join
+  direction was never exercised. The arm that exists to catch a false join was
+  passing for a reason that had nothing to do with joining; re-cut onto one
+  claim, and C5 then fell on it.
+
+**MAINNET SPEND: 0.**

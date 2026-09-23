@@ -6,6 +6,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
+import vm from "node:vm";
 import {
   SOURCE_SCHEMA, CLAIM_SCHEMA, BINDING_SCHEMA, STANDINGS, PUBLIC_FIELDS, SOURCE_KEYS, CLAIM_KEYS, BINDING_KEYS, nonDataAt,
   createStore, addSource, addClaim, bind, admit, validateStore,
@@ -895,4 +896,168 @@ test("a record nobody built as a plain object is named, never read", () => {
   const revived = JSON.parse(`{"schema":"${SOURCE_SCHEMA}","id":"s-json","type":"parish-register","scope":"collection","provider":"P","title":"T","recordId":"R","accessedAt":"2026-09-23","__proto__":{"url":"https://private.example/x"}}`);
   assert.equal(Object.getPrototypeOf(revived), Object.prototype, "the fixture asserts its precondition");
   assert.deepEqual(sourceProblems(revived), ["source s-json: unknown key __proto__"]);
+});
+
+/* ── THE DUPLICATE KEY, SECOND HALF: COERCION ────────────────────────────────
+ * Joining the three parts above closed the delimiter and stopped the key
+ * COERCING. The store never stopped: its maps are indexed by PROPERTY KEY, so a
+ * source held under "5" is the same source a binding names as 5 -- heldUnder
+ * resolves it and bindingProblems returns clean -- and one entry bound twice was
+ * then held twice and PUBLISHED as two bindings on one source, which is this
+ * sentence's own law read backwards. A REGRESSION of the join: it arrived WITH
+ * ff8746f6 and was not there before, and bee-laborer found it re-reading that
+ * head. The precondition below carries the row's whole weight: the pair must be
+ * one entry the store really does resolve, or the refusal proves nothing. */
+test("one entry bound twice is one entry, whatever type its ids arrive as", () => {
+  const one = () => {
+    const s = createStore();
+    addSource(s, src("5"));
+    addClaim(s, claim("7", "P1", "birth", { date: "1880-03-24" }));
+    return s;
+  };
+  const s = one();
+  // the fixture asserts its precondition: the NUMERIC ids resolve to the very
+  // records the string ids name, so the second bind is the same entry and not a
+  // binding that is merely invalid for some other reason
+  assert.deepEqual(bindingProblems({ ...mention(5, 7), locator: "p. 4" }, s), [],
+    "the store resolves the numeric ids — the two bindings are one entry");
+  bind(s, { ...mention("5", "7"), locator: "p. 4" });
+  assert.throws(() => bind(s, { ...mention(5, 7), locator: "p. 4" }), /duplicate \(one entry counted twice/,
+    "a numeric id names the record the string id names, so this is one entry bound twice");
+  assert.equal(s.bindings.length, 1, "one entry, one binding");
+  assert.equal(permitAll(s).bindings.length, 1, "and the projection is one binding on one source");
+
+  // the locator is part of the key and is coerced with the ids
+  const l = one();
+  bind(l, { ...mention("5", "7"), locator: "0" });
+  assert.throws(() => bind(l, { ...mention("5", "7"), locator: 0 }), /duplicate/,
+    "the LOCATOR is part of the key and is coerced with the ids");
+
+  // CONTROL, non-vacuity in both types: a genuine duplicate was always refused
+  const gs = one(); bind(gs, { ...mention("5", "7"), locator: "p. 4" });
+  refuses(() => bind(gs, { ...mention("5", "7"), locator: "p. 4" }), /duplicate/);
+  const gn = one(); bind(gn, { ...mention(5, 7), locator: "p. 4" });
+  refuses(() => bind(gn, { ...mention(5, 7), locator: "p. 4" }), /duplicate/);
+
+  // CONTROL: coercing does not make distinct entries join — two claims, and the
+  // delimiter pair from the row above, which the first half of this fix bought
+  const d = one();
+  addClaim(d, claim("8", "P1", "death", { date: "1922-01-04" }));
+  bind(d, { ...mention(5, "7"), locator: "p. 4" });
+  bind(d, { ...mention("5", 8), locator: "p. 4" });
+  assert.equal(d.bindings.length, 2, "two entries stay two");
+  const p = createStore();
+  addSource(p, src("S1"));
+  addClaim(p, claim("ID-FA|FB", "FA|FB", "identity", "same person"));
+  addClaim(p, claim("ID-FA", "P1", "birth", { date: "1880-03-24" }));
+  bind(p, { ...mention("S1", "ID-FA|FB"), locator: "p. 4" });
+  bind(p, { ...mention("S1", "ID-FA"), locator: "FB|p. 4" });
+  assert.equal(p.bindings.length, 2, "the delimiter half survives the coercion half");
+
+  // The DISCLOSED boundary owes its own row: the locator is not a map key, so an
+  // OBJECT locator is left to JSON rather than coerced. Coercing it would both
+  // join two distinct ones ("[object Object]" twice) and turn a null-prototype
+  // locator from a held binding into a thrown TypeError.
+  const o = one();
+  assert.doesNotThrow(() => bind(o, { ...mention("5", "7"), locator: Object.assign(Object.create(null), { page: 11 }) }),
+    "an OBJECT locator is left to JSON, never coerced into a throw");
+  bind(o, { ...mention("5", "7"), locator: { page: 4 } });
+  assert.doesNotThrow(() => bind(o, { ...mention("5", "7"), locator: { page: 9 } }),
+    "two DISTINCT object locators are two entries — coercing them would join every object locator");
+  assert.equal(o.bindings.length, 3, "three distinct object locators stay three");
+  assert.deepEqual(validateStore(o), [], "and the store carrying a null-prototype locator is not denied");
+  refuses(() => bind(o, { ...mention("5", "7"), locator: { page: 4 } }), /duplicate/);
+});
+
+/* ── THE PROTOTYPE TEST ASKS A SHAPE, NOT AN IDENTITY ────────────────────────
+ * The record-shape check above compared the prototype to `Object.prototype` by
+ * IDENTITY, which is realm-local. node:vm is a live idiom in this tree, and a
+ * record built in another realm carries THAT realm's Object.prototype: the same
+ * own keys, the same inherited surface, ZERO inherited data fields -- and was
+ * refused with a sentence asserting a consequence that is false about it.
+ * Arrived with ff8746f6, found by bee-laborer re-reading it.
+ * The accepted set is "no prototype, or ONE level carrying EXACTLY the names
+ * Object.prototype carries". Both halves are load-bearing and each has its
+ * control below: drop the depth and a masking chain hides a field further up;
+ * compare only how MANY names and a realm that traded one name for a field
+ * walks in. What makes the whole thing sound is the row after it. */
+test("a record from another realm is a plain record", () => {
+  const realm = () => vm.runInNewContext("({})");
+  const NAMES = Object.getOwnPropertyNames(Object.prototype);
+  assert.notEqual(Object.getPrototypeOf(realm()), Object.prototype, "the fixture asserts its precondition: another realm");
+  const inherited = (o) => { const out = []; for (const k in o) if (!Object.hasOwn(o, k)) out.push(k); return out; };
+
+  const foreign = Object.assign(realm(), src("s-vm", { scope: "item" }));
+  assert.deepEqual(inherited(foreign), [], "the fixture asserts its precondition: nothing is inherited");
+  assert.deepEqual(Object.keys(foreign).sort(), Object.keys(src("s-vm", { scope: "item" })).sort());
+  assert.deepEqual(sourceProblems(foreign), []);
+  const fs2 = createStore();
+  addSource(fs2, foreign);
+  addClaim(fs2, claim("C1", "P1", "birth", { date: "1880-03-24" }));
+  bind(fs2, Object.assign(realm(), mention("s-vm", "C1")));
+  assert.equal(permitAll(fs2).bindings.length, 1, "the binding gate takes one too — it is one shared check");
+
+  const SHAPE_ONLY = (id) => [`source ${id}: carries a prototype, so a field nobody wrote into this record can read as its own -- build it as a plain object`];
+  // CONTROL: one level DEEPER, masked so the immediate prototype's name set
+  // matches exactly. Only the depth half refuses this one.
+  const masked = Object.create({ url: "https://private.example/?token=SECRET" });
+  for (const n of NAMES) Object.defineProperty(masked, n, { value: undefined, enumerable: false, configurable: true });
+  const deep = Object.assign(Object.create(masked), src("s-deep", { recordId: undefined }));
+  assert.equal(deep.url, "https://private.example/?token=SECRET", "the fixture asserts its precondition: the field is reachable");
+  assert.deepEqual(Object.getOwnPropertyNames(masked).sort(), [...NAMES].sort(), "and the immediate prototype's names match exactly");
+  assert.deepEqual(sourceProblems(deep), SHAPE_ONLY("s-deep"),
+    "a masking chain one level deeper hides a field the name set cannot see");
+
+  // CONTROL: a realm that traded one of those names for a field of its own —
+  // the SAME COUNT, a different set. Only the name half refuses this one.
+  const traded = vm.runInNewContext("delete Object.prototype.toLocaleString; Object.prototype.url = 'https://private.example/?token=SECRET'; ({})");
+  assert.equal(traded.url, "https://private.example/?token=SECRET", "the fixture asserts its precondition");
+  assert.equal(Object.getOwnPropertyNames(Object.getPrototypeOf(traded)).length, NAMES.length, "and it is the same COUNT of names");
+  assert.deepEqual(sourceProblems(Object.assign(traded, src("s-traded", { recordId: undefined }))), SHAPE_ONLY("s-traded"),
+    "a realm that traded a name for a field of its own has the same COUNT and a different SET");
+
+  // CONTROL: the shapes the identity test refused are still refused, and the
+  // ones it admitted are still admitted
+  assert.deepEqual(sourceProblems(Object.assign(Object.create({ url: "x" }), src("s-loc"))), SHAPE_ONLY("s-loc"));
+  assert.equal(sourceProblems([]).length, 1, "an array carries Array.prototype and is one level too deep");
+  assert.deepEqual(sourceProblems(Object.assign(Object.create(null), src("s-null"))), []);
+  assert.deepEqual(sourceProblems(src("s-here")), []);
+});
+
+/* What bounds the widening: a chain the check ACCEPTS cannot carry anything this
+ * module reads, because no key it reads is one of the names such a chain is
+ * allowed to have. Asserted as a MECHANISM and not as a list comparison — a list
+ * of read keys compared to the prototype's names is satisfied by an EMPTY list,
+ * and this is not: it builds the most hostile accepted chain there is, one whose
+ * every allowed name is poisoned, and requires all three gates to answer exactly
+ * as they answer for an ordinary record. Add a schema key named like a member of
+ * Object.prototype and this row falls. */
+test("the chain this accepts cannot carry a field any gate reads", () => {
+  const POISON = "INHERITED-POISON";
+  const proto = Object.create(null);
+  for (const n of Object.getOwnPropertyNames(Object.prototype))
+    Object.defineProperty(proto, n, { value: POISON, enumerable: false, configurable: true });
+  const on = (rec) => Object.assign(Object.create(proto), rec);
+
+  const s = on(src("s-p")), c = on(claim("C1", "P1", "birth", { date: "1880-03-24" })), b = on(mention("s-p", "C1"));
+  // the fixture asserts its precondition: every allowed name really is poisoned,
+  // and the chain really is one this check accepts
+  assert.equal(s.toString, POISON, "the poison is reachable");
+  assert.deepEqual(sourceProblems(s), [], "the chain is accepted");
+
+  const store = createStore();
+  addSource(store, src("s-p"));
+  addClaim(store, claim("C1", "P1", "birth", { date: "1880-03-24" }));
+  assert.deepEqual(sourceProblems(s), sourceProblems(src("s-p")), "the SOURCE gate answers as it does for an ordinary record");
+  assert.deepEqual(claimProblems(c), claimProblems(claim("C1", "P1", "birth", { date: "1880-03-24" })), "the CLAIM gate does");
+  assert.deepEqual(bindingProblems(b, store), bindingProblems(mention("s-p", "C1"), store), "the BINDING gate does");
+
+  // CONTROL, non-vacuity: give that same chain ONE name of its own and every
+  // gate refuses it, so the assertions above are not passing on an inert fixture
+  const wider = Object.create(null);
+  for (const n of [...Object.getOwnPropertyNames(Object.prototype), "url"])
+    Object.defineProperty(wider, n, { value: POISON, enumerable: false, configurable: true });
+  assert.equal(sourceProblems(Object.assign(Object.create(wider), src("s-w"))).length, 1);
+  assert.equal(claimProblems(Object.assign(Object.create(wider), claim("C2", "P1", "birth", 1))).length, 1);
+  assert.equal(bindingProblems(Object.assign(Object.create(wider), mention("s-p", "C1")), store).length, 1);
 });

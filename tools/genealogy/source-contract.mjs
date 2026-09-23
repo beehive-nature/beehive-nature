@@ -99,11 +99,27 @@ const unknownKeys = (o, keys, at) => Object.keys(o).filter((k) => !keys.includes
 // DISCLOSED: `at` is built from the record's own id/ids, which on this shape may
 // themselves be inherited. The sentence names the object by what it answers to
 // and then says that is not its own, which is the honest pair.
-const foreignProto = (o, at) => {
+// The question is the prototype's SHAPE, never its IDENTITY. `=== Object.prototype`
+// is realm-local, and node:vm is a live idiom in this tree: a record built in
+// another realm carries THAT realm's Object.prototype -- same own keys, the same
+// inherited surface, ZERO inherited data fields -- and was refused with a
+// sentence that is false about it. Accepted here: no prototype at all, or one
+// level carrying exactly the names Object.prototype carries. That is sound
+// because NO key this module reads is among those names, which the battery
+// asserts mechanically with a control rather than arguing in prose: put a listed
+// key on the prototype and the name set no longer matches. A realm whose
+// Object.prototype has been extended is refused, which is the closed direction.
+// NOT cached per prototype: one cached as plain can gain a field afterwards.
+// Found by bee-laborer re-reading ff8746f6; arrived with that commit, not before.
+const PLAIN_PROTO_NAMES = Object.getOwnPropertyNames(Object.prototype).sort().join(",");
+const plainChain = (o) => {
   const p = Object.getPrototypeOf(o);
-  return p === Object.prototype || p === null ? null
-    : `${at}: carries a prototype, so a field nobody wrote into this record can read as its own -- build it as a plain object`;
+  if (p === null) return true;
+  if (Object.getPrototypeOf(p) !== null) return false; // Array.prototype, or a poisoned chain
+  return Object.getOwnPropertyNames(p).sort().join(",") === PLAIN_PROTO_NAMES;
 };
+const foreignProto = (o, at) => (plainChain(o) ? null
+  : `${at}: carries a prototype, so a field nobody wrote into this record can read as its own -- build it as a plain object`);
 
 // a claim subject is a person id, or "a|b" for a relationship between two
 export const parties = (subject) => String(subject).split("|");
@@ -253,11 +269,22 @@ export function validateStore(store) {
     // names a duplicate that does not exist. A "|" in free LOCATOR text is
     // harmless; the trigger is a "|" in an ID. Found by bee-laborer re-reading
     // 05b8d93c. A fail-closed path still owes a TRUE reason.
-    // RESIDUAL, disclosed: JSON.stringify maps undefined and null to the same
-    // `null`, so two bindings differing only that way in one slot still join.
-    // Both are already named above — heldUnder finds neither — so the duplicate
-    // sentence is never the only thing said about them.
-    const key = JSON.stringify([b?.sourceId, b?.claimId, b?.locator ?? ""]);
+    // Joining stopped the key COERCING, and the store still does: its maps are
+    // indexed by PROPERTY KEY, so `5` and "5" are one held source, while
+    // JSON.stringify keeps them apart -- one entry bound twice then published as
+    // two bindings on one source. Coerce each part the way the store keys, which
+    // is also what `at` above already did to both ids one line into
+    // bindingProblems: every id that reaches this line has survived that same
+    // ToString, so this adds no failure mode to them (a bigint id THREW here
+    // before and no longer does). The locator is NOT a map key, so an object
+    // locator is left to JSON exactly as it was rather than coerced into a
+    // throw. A REGRESSION of the joining above, found by bee-laborer re-reading
+    // it one head later; the delimiter half is unchanged and its controls hold.
+    // RESIDUAL, disclosed: a symbol id still serialises to `null`, so two
+    // distinct symbols join -- but a symbol id throws in `at` before it reaches
+    // here, and the class is named there.
+    const part = (v) => ((typeof v === "object" && v !== null) || typeof v === "symbol" ? v : String(v));
+    const key = JSON.stringify([part(b?.sourceId), part(b?.claimId), part(b?.locator ?? "")]);
     if (seen.has(key)) out.push(`binding ${b?.sourceId}→${b?.claimId}: duplicate (one entry counted twice is not two sources)`);
     seen.add(key);
   }
@@ -424,6 +451,13 @@ export function nonDataAt(v, path = "value", seen = new Set()) {
       }
       return null;
     }
+    // MEASURED AND NOT REPAIRED, so the two forms in this file are not an
+    // oversight: these two prototype tests are IDENTITY tests, like the record
+    // check was, and a cross-realm value is refused by them -- an array as
+    // "array subclass", a plain object as "Object object", both false about it.
+    // They fail CLOSED (a legitimate value is not published) where the record
+    // check failed a record with a false sentence, and widening what may be
+    // PUBLISHED is not a repair to take unasked. Named in the receipt.
     const proto = Object.getPrototypeOf(v);
     if (proto !== Object.prototype && proto !== null) return `${path}: ${v.constructor?.name ?? "non-plain"} object`;
     if (Object.getOwnPropertySymbols(v).length) return `${path}: symbol-keyed property`;
