@@ -403,9 +403,58 @@ jobs:
         run: sh scripts/secret-scan.sh --selftest
       # push-preflight selftest (#170 rider, 2026-09-20): P1-P11 guarded the
       # push path by hand only until today; CI never ran them at all.
-      - name: push-preflight selftest - P1-P11, every push
+      #
+      # THE SKIP CENSUS (#215, from bee-laborer's U1 mutation). One token in that
+      # file stopped P14c and P14d from running while the selftest still printed
+      # "selftest ok" and its arm-count floor still read 59 of 59 — the floor counts
+      # DECLARATIONS, so a skip is invisible to it, and nothing was deleted. The
+      # selftest REPORTS its skips rather than refusing on them, because the
+      # P12-P14 family genuinely cannot be built under Git for Windows and a gate
+      # that reds a correct box trains dismissal. ubuntu is where every one of those
+      # arms runs for real, and where the census is empty today — so the assertion
+      # that NOTHING was skipped belongs here and not in the script.
+      # It also catches the census line's own deletion, which neither the census nor
+      # the arm-count floor can catch for itself.
+      - name: push-preflight selftest - P1-P16, and an EMPTY skip census, every push
         if: always()
-        run: sh scripts/push-preflight.sh --selftest
+        run: |
+          set +e
+          sh scripts/push-preflight.sh --selftest > /tmp/preflight-selftest.out 2>&1
+          rc=$?
+          cat /tmp/preflight-selftest.out
+          if [ "$rc" != 0 ]; then echo "push-preflight --selftest FAILED, rc=$rc"; exit "$rc"; fi
+          # HALF ONE — the script's own census, read literally. Catches a NON-EMPTY census
+          # (an arm skipped), a DELETED census line, and a census that only prints when it
+          # has something to say. It cannot catch a skip branch that stopped reporting.
+          if ! grep -qF "SKIP CENSUS -> 0 arm(s) declared but not run: (none)" /tmp/preflight-selftest.out; then
+            echo "SKIP CENSUS is NOT empty on this runner, or the census line is gone."
+            echo "  Every P12-P16 arm is constructible here, so an arm that did not run is"
+            echo "  an arm guarding nothing — and the selftest can print 'ok' with two of"
+            echo "  its arms switched off. The census line above names which ones."
+            exit 1
+          fi
+          # HALF TWO — DERIVED here, from the script and from this run's output, so it does
+          # not take the script's word for anything. Catches the case half one cannot: a
+          # skip branch that stops recording itself, which would report an empty census
+          # while its arm sits out. A GATE MUST NOT BE ITS OWN WITNESS.
+          grep -oE '"  P[0-9]+[a-z]*' scripts/push-preflight.sh | sed 's/^"  //' | sort -u > /tmp/pf-declared
+          grep -oE '^  P[0-9]+[a-z]*' /tmp/preflight-selftest.out | sed 's/^  //' | sort -u > /tmp/pf-ran
+          ndecl=$(wc -l < /tmp/pf-declared)
+          # non-vacuity: an empty declared set makes the comparison below pass while
+          # comparing nothing. 24 arm ids are declared today; 20 is a floor, not a pin.
+          if [ "$ndecl" -lt 20 ]; then
+            echo "only $ndecl arm ids found in push-preflight.sh — that is not a census, it is"
+            echo "  a pattern that stopped matching. Refusing to report a pass on it."
+            exit 1
+          fi
+          missing=$(comm -23 /tmp/pf-declared /tmp/pf-ran)
+          if [ -n "$missing" ]; then
+            echo "arm id(s) declared in push-preflight.sh but absent from this run:" $missing
+            echo "  Derived from the file and from the output above, not from the census line,"
+            echo "  so a skip branch that stopped reporting itself is caught here."
+            exit 1
+          fi
+          echo "arm inventory: $ndecl ids declared, all $ndecl present in this run's output"
       # SPRINT CLOSING RECEIPT (founder order, 2026-08-25): the four-suite gap
       # was work that landed and gated nothing, and a report cannot tell a sprint
       # that shipped from one that stalled. This re-derives every sprint claim

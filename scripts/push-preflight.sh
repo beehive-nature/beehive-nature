@@ -300,6 +300,9 @@ hooks_check() {
 if [ "${1:-}" = "--selftest" ]; then
   SELF=$(cd "$(dirname "$0")" && pwd)/$(basename "$0")
   st=0
+  # _skipped — every arm this run DECLARED but did not RUN, named by the branch that
+  # skipped it. See the SKIP CENSUS at the foot of this selftest for why it exists.
+  _skipped=''
   echo "push-preflight selftest — known-BAD and known-GOOD:"
   sh "$SELF" refs/heads/__no_such_ref__ >/tmp/ps1 2>&1; r=$?
   if [ "$r" -ne 0 ] && grep -q "does not resolve" /tmp/ps1; then
@@ -430,6 +433,7 @@ if [ "${1:-}" = "--selftest" ]; then
   # make every §7 arm below refuse for the wrong reason and read as a catch.
   if [ -z "$_fn" ] || [ -z "$_fe" ]; then
     echo "  P12-P14 -> could not read the founder identity out of identity-check.sh; arms not run"; st=1
+    _skipped="$_skipped P12a P12b P13a P13b P14a P14b P14c P14d P14e P14f"
   else
   # Generated here, never copied: 8 x 8 chars = a 64-run, and no 48+ literal
   # ever appears in this source (which would make this file block itself).
@@ -464,6 +468,7 @@ Co-authored-by: preflight selftest seat <selftest@invalid>"
   fi
   if [ -z "$H" ]; then
     echo "  P12-P14 -> no usable throwaway directory; arms not run"; st=1
+    _skipped="$_skipped P12a P12b P13a P13b P14a P14b P14c P14d P14e P14f"
   else
     (
       cd "$H" && git init -q r 2>/dev/null && cd r && mkdir -p scripts .githooks || exit 1
@@ -599,6 +604,7 @@ Co-authored-by: preflight selftest seat <selftest@invalid>"
         echo "  P14d CONTROL    bit restored -> rc=$_grc still not permitted; P14c's rc=1 is unattributed"; st=1
       fi
     else
+      _skipped="$_skipped P14c P14d"
       echo "  P14c/P14d NOT CONSTRUCTIBLE HERE — the RIG's own read (not the row's probe)"
       echo "            says chmod -x did not take on this filesystem, so the fixture cannot"
       echo "            be built. Not a pass and not a skip to be read as one: these two arms"
@@ -620,6 +626,7 @@ Co-authored-by: preflight selftest seat <selftest@invalid>"
         echo "  P14e known-BLIND hooks dir UNWRITABLE, bit stripped -> rc=$_hrc. Either the probe answered for a DIFFERENT filesystem — its verdict decided by where mktemp landed — or a blind probe let a dead hook read as installed"; st=1
       fi
     else
+      _skipped="$_skipped P14e"
       echo "  P14e NOT CONSTRUCTIBLE HERE — the rig could still write inside a 0500 hooks"
       echo "            directory (root, or a filesystem without POSIX modes), so the blind"
       echo "            case cannot be built. Runs for real on a non-root POSIX seat."
@@ -629,6 +636,7 @@ Co-authored-by: preflight selftest seat <selftest@invalid>"
     # there, wired and executable. Fail-closed with a false reason is the worse half.
     _ibl=$(_rd i.blind); _irc=$(_rd i.rc); _ipr=$(_rd i.present)
     if [ "$_ibl" != yes ]; then
+      _skipped="$_skipped P14f"
       echo "  P14f NOT CONSTRUCTIBLE HERE — paths inside a 0600 directory still resolve on this"
       echo "            filesystem (Git for Windows fabricates the modes), so an unsearchable"
       echo "            hooks directory cannot be built. Runs for real on a non-root POSIX seat."
@@ -654,7 +662,7 @@ Co-authored-by: preflight selftest seat <selftest@invalid>"
   if [ -z "${PREFLIGHT_SELFTEST_DEPTH:-}" ]; then
     _nt=$(mktemp -d 2>/dev/null) || _nt=''
     if [ -z "$_nt" ]; then
-      echo "  P15 -> no throwaway directory; arm not run"; st=1
+      echo "  P15 -> no throwaway directory; arm not run"; st=1; _skipped="$_skipped P15"
     elif (cd "$_nt" && git rev-parse --show-toplevel >/dev/null 2>&1); then
       echo "  P15 -> fixture precondition FAILED: $_nt is inside a repository git can"
       echo "         resolve, so the no-toplevel branch cannot be reached from there."; st=1
@@ -671,6 +679,10 @@ Co-authored-by: preflight selftest seat <selftest@invalid>"
       fi
       rm -rf "$_nt" "$_nt.out"
     fi
+  else
+    # the inner run started by P15 itself. Recorded rather than silent: an arm that did
+    # not run is an arm that did not run, whatever the reason.
+    _skipped="$_skipped P15"
   fi
 
   # P16 — the ARM-COUNT FLOOR bee-laborer ruled after M5: deleting an arm outright was
@@ -696,6 +708,33 @@ Co-authored-by: preflight selftest seat <selftest@invalid>"
     echo "  P16 arm inventory -> $_armseen arm-outcome lines declared (floor $_armfloor) — neither a whole arm nor one of its branches can be deleted silently (correct)"
   else
     echo "  P16 arm inventory -> only $_armseen arm-outcome lines declared, floor is $_armfloor. An arm or one of its branches was removed from this selftest. If the removal is deliberate, lower the floor in the SAME commit and say why; do not let it fall quietly"; st=1
+  fi
+  # ── SKIP CENSUS ─────────────────────────────────────────────────────────────
+  # bee-laborer's U1: ONE TOKEN — the rig's own carried-bit read replaced by a pinned
+  # 'no' — stopped P14c and P14d from running, and this file still said "selftest ok"
+  # with P16 reading 59 of 59. P16 is a
+  # DECLARATION floor, so it is structurally blind to a skip — nothing was deleted. The
+  # PRINTED arm count did move, 24 -> 23, and a floor on it would have caught U1; but the
+  # printed count is platform-dependent (24 clean POSIX, 21 Git for Windows, 14 from a
+  # Windows-made worktree under WSL), so a floor on it goes red on a box that is behaving
+  # correctly, and an always-red gate trains dismissal. Neither counter can do this job.
+  #
+  # The census can, because it does not count: each skipping branch NAMES the arms it
+  # skipped, and the line is printed whether or not anything was skipped — '(none)' is the
+  # answer a reader needs, and a row that only appears when it has something to say is a
+  # row whose absence means nothing.
+  #
+  # IT IS A REPORT HERE AND A GATE IN CI, deliberately. On Git for Windows these arms
+  # correctly cannot be built, so refusing here would refuse a correct box. On ubuntu every
+  # one of them runs for real — that is where the defect bites and where the census is
+  # empty today — so .github/workflows/tests.yml requires it to be empty there.
+  # WHAT IT CANNOT SEE: an arm deleted outright (that is P16's half), and an arm that runs
+  # but judges the wrong thing (that is each arm's own mutation).
+  _skipn=0; for _a in $_skipped; do _skipn=$((_skipn + 1)); done
+  if [ "$_skipn" -eq 0 ]; then
+    echo "  SKIP CENSUS -> 0 arm(s) declared but not run: (none)"
+  else
+    echo "  SKIP CENSUS -> $_skipn arm(s) declared but not run:$_skipped"
   fi
   rm -f /tmp/ps1 /tmp/ps2
   [ "$st" -eq 0 ] && echo "selftest ok — refuses what it must, permits what it must."                    || echo "selftest FAIL — see above."
