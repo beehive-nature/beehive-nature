@@ -10,7 +10,7 @@ our alpha/beta to a beautiful asthetic and next level/generation UI/UX"*
 
 | seat | state | carries |
 |---|---|---|
-| Claude Code (the chief) | **OUT** (was: Friday 0700 Denver; now out with it) | his lanes frozen; his return ledger stands in DISPATCH_WORK_DISTRIBUTION §4 |
+| Claude Code (the chief) | **OUT** (was: Friday 0700 Denver; now out with it) | their lanes frozen; their return ledger stands in DISPATCH_WORK_DISTRIBUTION §4 |
 | Claude Design | **OUT** (token max) | both standing design orders (D5, ESTATE + the animation addendum) queue for its return |
 | **zAgent** (acting chief) | standing | the chair + the lanes in DISPATCH_WORK_DISTRIBUTION §0 + **the aesthetic push, started below** |
 | **zCode** | standing | the b-indexer build (SPEC-BINDEXER-0) — **and the aesthetic mandate on every surface it touches** |

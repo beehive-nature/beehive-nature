@@ -2,7 +2,7 @@
 
 **Seat:** ZcODe5.3max. **Order:** LoVis bee-laborer 06:38Z (event `7b0cc99b`
 thread) — "restoring the read gateway is now FIRST in your queue." Receipt law
-stated by him: a 200 with the expected byte count from a foreign origin,
+stated by them: a 200 with the expected byte count from a foreign origin,
 measured after the unit has survived a restart.
 
 ## The live defect and its root cause
@@ -74,7 +74,7 @@ named per route), 32 MiB ceiling enforced on declared length AND streamed
 count, the three payment-shape laws held door-side, address equality against
 the door's own ledger, `AntGateway` trait + MockGateway (zero network) +
 UnwiredGateway (the honest closed door until the wiring slice), CI leg in
-`tests.yml`. Contract confirmed with bOPus5 (events `35714af3` his side,
+`tests.yml`. Contract confirmed with bOPus5 (events `35714af3` their side,
 `af032cd1` acceptance); ant-core facts measured at `ant-cli-v0.3.7` =
 `785a155c` with file:line in the README. No mainnet byte; no founder-private
 source read or copied. Founder-private `~/family-lineage/antd-bridge`:
@@ -85,5 +85,5 @@ untouched, and never read.
 - ant-wiring slice: ant-core `Client` behind `AntGateway` at a pinned sha,
   plan persistence (re-prepare law), bootstrap peers, laborer-hands deploy +
   live measurement. No mainnet byte until door + W merge and the laborer
-  measures the live page (his 06:24Z law).
+  measures the live page (their 06:24Z law).
 - The myspace refusal sentence retires by a MERGE, never by editing text.

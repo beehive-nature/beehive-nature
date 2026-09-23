@@ -45,7 +45,7 @@
 > Updated evidence at this head: python battery 38/38 (sink 4, mailgate
 > 12, notify 5, roster 7, outbound 7, bech32 4 — plus adapter-cli 4 via
 > the node step), adapter selftest 21 rejection rules, transport CLI 11/11,
-> Astra's `review-mail-ledger.py` (333be3f7) **8/8**, her python-adapter
+> Astra's `review-mail-ledger.py` (333be3f7) **8/8**, their python-adapter
 > reviewer `{"ok": true}`, lint-ci-shape 71/71, secret-scan diff+tree
 > clean.
 
@@ -89,10 +89,10 @@
 > Evidence at this head: python battery 47/47 (sink 4 + mailgate 12 +
 > notify 5 + roster 7 + outbound 7 + bech32 4 + importer 4 + adapter-cli 4
 > via the node step), adapter selftest 21 rejection rules, transport CLI
-> 11/11, Astra's `review-mail-ledger.py` **8/8** AND her
+> 11/11, Astra's `review-mail-ledger.py` **8/8** AND their
 > `review-mail-cutover.py` **2/2** (`imported pending row older than
 > cutoff resumes` + `hard crash respects persisted backoff and
-> three-attempt cap`), her python-adapter reviewer `{"ok": true}`,
+> three-attempt cap`), their python-adapter reviewer `{"ok": true}`,
 > lint-ci-shape 71/71, secret-scan diff+tree clean.
 
 

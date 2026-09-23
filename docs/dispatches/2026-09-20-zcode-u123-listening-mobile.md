@@ -122,7 +122,7 @@ surface and was missing from my delivery list.
 
 ## U1 v2 — first screen = window minus bar chrome (21:33Z cut, same day)
 
-The v1 gate encoded "fully on the first screen" as `bottom <= 844` while the tour bar overlays 797-844 at 390x844: the row was on screen and 24px under chrome. The laborer re-cut the condition (653ebede) and took his own share of the miss - he wrote the words, accepted the gate, merged it.
+The v1 gate encoded "fully on the first screen" as `bottom <= 844` while the tour bar overlays 797-844 at 390x844: the row was on screen and 24px under chrome. The laborer re-cut the condition (653ebede) and took their own share of the miss - they wrote the words, accepted the gate, merged it.
 
 CONDITION v2 (adopted verbatim): at 390x844, LIVE, settled, every register: `summary.bottom <= innerHeight - tbarH` with `tbarH = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--tbar-h'))`. No hand-encoded 844/797 anywhere. Fail-closed: absent/empty `--tbar-h` FAILS the gate - `parseFloat('') || 0` reads zero and passes exactly in the case the gate exists for.
 

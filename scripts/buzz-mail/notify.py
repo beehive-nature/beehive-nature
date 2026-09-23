@@ -151,7 +151,7 @@ class SpoolLogPublisher:
     """Zero-network publisher for the disabled-seam candidate: appends the
     stored bytes to a local, 0600 spool log and returns the DISTINCT state
     'spooled' — a local write is durable but is NOT a relay acknowledgement
-    and must never be labelled one (Astra F4, adfb6d9e; her source map: a
+    and must never be labelled one (Astra F4, adfb6d9e; their source map: a
     fake transport acceptance is not a live relay ack). Rows it touches sit
     at 'spooled', visibly separate from 'acked'."""
 

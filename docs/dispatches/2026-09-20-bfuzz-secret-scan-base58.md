@@ -112,9 +112,9 @@ Ruling `49d43f2b`: #170 stays held until all four rows land in one touch.
    Resolution = main's bytes + this lane's two TESTNET-ONLY markers on the same
    two fixtures (2 lines, nothing else). The lane's other seven markers
    auto-merge (bOPus5's overlay: nine hits on main, only the seam pair moved).
-   His candidate `152a39c8` found the same two lines independently before the
+   Their candidate `152a39c8` found the same two lines independently before the
    rebase was reassigned here (one-writer-per-branch, event `343f7ac3`).
-2. **S2 discrimination** (his N2): the selftest's diff row now stages ONLY the
+2. **S2 discrimination** (their N2): the selftest's diff row now stages ONLY the
    VALID fixture and asserts the report names ITS added-line. Under the N2
    mutant the lone fixture scans clean (rc=0) and the row falls — re-measured
    against the mutant in a scratch worktree before push, torn down after.
