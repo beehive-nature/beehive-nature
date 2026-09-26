@@ -95,7 +95,9 @@ await page.addInitScript(bridge => {
 const pageErrors = [];
 page.on('pageerror', e => pageErrors.push(String(e)));
 
-await page.goto(origin + '/wallet.html', { waitUntil: 'load' });
+// the bPay panel is deep-linked, as a reader arriving for it would be: new bee
+// lands in the task that holds it (the three grammars, 2026-09-26)
+await page.goto(origin + '/wallet.html#bpay-sec', { waitUntil: 'load' });
 await page.waitForTimeout(1200);
 
 const sec = () => page.$('#bpay-sec');

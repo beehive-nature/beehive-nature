@@ -94,6 +94,19 @@ const assertUrl = (href, host, asset) => {
 };
 
 const browser = await chromium.launch({ args: ['--no-sandbox'] });
+// THE THREE GRAMMARS (2026-09-26): new bee and raver open the wallet one task
+// at a time; this battery drives the PIPELINE, so its readers sit in
+// cypherpunk, where every section is open at once. A register never changes
+// what a person may do: e2e/wallet-registers.mjs proves every section is one
+// tap away in bee and raver, and the controls under test are the same nodes.
+{
+  const newContext = browser.newContext.bind(browser);
+  browser.newContext = async (opts) => {
+    const c = await newContext(opts);
+    await c.addInitScript(() => { try { localStorage.setItem('bregister', 'cypherpunk'); } catch (e) {} });
+    return c;
+  };
+}
 try {
   /* ── A · key UNSET (file as committed) ─────────────────────────────── */
   console.log('A · key unset (as committed):');
@@ -258,6 +271,9 @@ try {
   console.log('F · design acceptance (390px phone):');
   {
     const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
+    // the dress checks below are new bee's (the pin above set cypherpunk; this
+    // later init script wins)
+    await ctx.addInitScript(() => { try { localStorage.setItem('bregister', 'bee'); } catch (e) {} });
     const page = await ctx.newPage();
     await page.goto('http://127.0.0.1:8891' + URL_, { waitUntil: 'domcontentloaded' });
     await page.waitForTimeout(600);
@@ -277,8 +293,24 @@ try {
     // honey is the colour of b and ONLY of b — never a heading; bee sets the
     // argument in ink-dim with no gradient at all
     ok('headline argument: bee solid ink-dim, no gradient, no gold in a heading', !/linear-gradient/.test(head.img) && head.color === 'rgb(74, 95, 85)', JSON.stringify(head).slice(0, 90));
+    // new bee's own fold: its home says "here is what this is" (the home-chain
+    // figure) and asks one question, before any field asks to be filled
+    const beeFold = await page.evaluate(() => {
+      const card = document.querySelector('#wl-bee .wlb-card'), q = document.querySelector('#wl-bee .wlb-q');
+      const inputs = [...document.querySelectorAll('main input, main select, main textarea')].filter(el => el.getClientRects().length);
+      return { card: Math.round(card.getBoundingClientRect().bottom), q: Math.round(q.getBoundingClientRect().top), fold: window.innerHeight, visibleInputs: inputs.length };
+    });
+    ok('bee fold: the home-chain figure and the one question sit in the fold, no field to fill', beeFold.card <= beeFold.fold && beeFold.q < beeFold.fold && beeFold.visibleInputs === 0, JSON.stringify(beeFold));
+    // the pipeline fold law now lives where the whole pipeline is open at once
+    await page.evaluate(() => { localStorage.setItem('bregister', 'cypherpunk'); });
+    await ctx.clearCookies();
+    await page.close();
+    const cyCtx = await browser.newContext({ viewport: { width: 390, height: 844 } });
+    const cyPage = await cyCtx.newPage();
+    await cyPage.goto('http://127.0.0.1:8891' + URL_, { waitUntil: 'domcontentloaded' });
+    await cyPage.waitForTimeout(600);
     // the fold, on a phone: hero balance + ring ABOVE connect (form-kill law)
-    const fold = await page.evaluate(() => {
+    const fold = await cyPage.evaluate(() => {
       const top = el => Math.round(el.getBoundingClientRect().top + window.scrollY);
       const bal = document.getElementById('chains').closest('section');
       const kc = document.getElementById('kc-sec');
@@ -301,6 +333,7 @@ try {
     });
     ok('desktop order unchanged (CONNECT stays above BALANCES)', dOrder.connect < dOrder.bal, JSON.stringify(dOrder));
     await desk.close();
+    await cyCtx.close();
     await ctx.close();
   }
 } finally {
