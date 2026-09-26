@@ -1452,7 +1452,7 @@ function restoreVisibleFocus(focus){
     var d = { houses: [] };
     document.querySelectorAll('#instrument .house').forEach(function(h, i){
       var ty = h.querySelector('.htype'), meta = h.querySelector('.bmeta'), gw = h.querySelector('.gwhen');
-      var kind = ty && ty.querySelector('[data-i18n="prof.rec.type.guest"]') ? 'guest' : (ty && ty.classList.contains('baigentic') ? 'agent' : 'person');
+      var kind = ty && [].some.call(ty.querySelectorAll('[data-i18n]'), function(e){ return e.dataset.i18n === 'prof.rec.type.guest'; }) ? 'guest' : (ty && ty.classList.contains('baigentic') ? 'agent' : 'person');
       d.houses.push({
         id: h.id, name: txt(h.querySelector('.hname')), kind: kind, holder: txt(h.querySelector('.bname')),
         desc: txt(h.querySelector('.bdesc')), meta: txt(meta), current: h.classList.contains('current'),
