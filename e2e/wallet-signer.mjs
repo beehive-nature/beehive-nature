@@ -48,7 +48,7 @@ const ok = (name, cond, detail) => {
 /* every host either EVM rail may pick, as ONE RegExp — both rails' full host
    sets mirrored from EVM_RAILS. Anything not matched here would hit the live
    network, so the gate asserts below that nothing did. */
-const RAIL_RE = /^https:\/\/(mainnet\.base\.org|base\.publicnode\.com|1rpc\.io\/base|base\.drpc\.org|arb1\.arbitrum\.io\/rpc|arbitrum-one-rpc\.publicnode\.com)(\/|$)/;
+const RAIL_RE = /^https:\/\/(mainnet\.base\.org|base\.publicnode\.com|1rpc\.io\/base|base\.drpc\.org|arb1\.arbitrum\.io\/rpc|arbitrum-one-rpc\.publicnode\.com|sepolia-rollup\.arbitrum\.io\/rpc|arbitrum-sepolia-rpc\.publicnode\.com|arbitrum-sepolia\.drpc\.org|sepolia\.base\.org|base-sepolia-rpc\.publicnode\.com|base-sepolia\.drpc\.org)(\/|$)/;
 /* the wallet's OTHER standing reads (Vaulta balance, Hive balance). They are
    not this gate's subject, but they must still be mocked: a gate that lets
    ANY request reach the live network cannot claim its results are hermetic,
@@ -235,21 +235,64 @@ try {
       out.arbEth = await g('arbitrum', 'ETH', '0.01');
       out.baseUsdc = await g('base', 'USDC', '2.5');
       out.arbAnt = await g('arbitrum', 'ANT', '2.5');
+      out.arbSepEth = await g('arbitrumSepolia', 'tETH', '0.01');
+      out.sepMainnetAsset = await g('arbitrumSepolia', 'ETH', '0.01');
+      out.baseSepEth = await g('baseSepolia', 'tETH', '0.01');
+      out.baseSepUsdc = await g('baseSepolia', 'tUSDC', '2.5');
+      out.baseSepMainnetAsset = await g('baseSepolia', 'USDC', '2.5');
       out.badRail = await g('ethereum', 'ETH', '1');
       out.badAsset = await g('base', 'ANT', '1');
       out.badTo = await (async () => { try { await P.evmSendRaw('base', '0xdeadbeef', 'ETH', '1'); return {} } catch (e) { return { err: e.message } } })();
       out.rails = Object.keys(P.rails);
+      out.natives = Object.keys(P.rails).map(k => ({
+        rail: k, native: P.rails[k].native, assets: Object.keys(P.rails[k].assets),
+        hosts: P.rails[k].hosts.slice() }));
       return out;
     }, TO);
 
-    const decode = hexStr => {
+    const decode = (hexStr, who) => {
+      if (typeof hexStr !== 'string') throw new Error(
+        'the gate has no signed bytes for ' + (who || 'a rail') +
+        ' — the registry did not build it. Add the rail to EVM_RAILS, or delete this assertion with the rail.');
       const b = Buffer.from(hexStr.slice(2), 'hex');
       const f = rlpDecode(b);
       return { nonce: big(f[0]), gasPrice: big(f[1]), gas: big(f[2]), to: hexOf(f[3]),
         value: big(f[4]), data: hexOf(f[5]), v: big(f[6]), r: f[7], s: f[8] };
     };
 
-    ok('the registry carries both EVM rails as data', JSON.stringify(built.rails) === '["base","arbitrum"]', JSON.stringify(built.rails));
+    /* THE RAIL SET IS PINNED, not merely non-empty. A new rail is a new place
+       real value can leave from, so it lands in this line in the SAME commit
+       that adds it — the remedy on a RED is: add the rail here after reading
+       its chain id back from the chain, never delete the pin. */
+    ok('the registry carries exactly the four pinned EVM rails as data',
+      JSON.stringify(built.rails) === '["base","arbitrum","arbitrumSepolia","baseSepolia"]', JSON.stringify(built.rails));
+
+    /* every rail names its native unit, and names one it actually carries.
+       Without this the balance and fee lines print "0.05 undefined" to the
+       owner — a display defect no signature assertion can see. */
+    ok('every rail declares a native unit that is one of its own assets',
+      built.natives.length === 4 && built.natives.every(n =>
+        typeof n.native === 'string' && n.native.length > 0 && n.assets.includes(n.native)),
+      JSON.stringify(built.natives));
+    /* NO TWO RAILS SHARE AN RPC ENDPOINT. Caught by mutation: pointing the
+       Base Sepolia row at the MAINNET Base hosts passed every other assertion
+       — the rail would read mainnet balance, nonce and gas while calling
+       itself testnet, and with a wrong chain id alongside it that is a real
+       mainnet send from a row labelled testnet. Chain identity lives in the
+       host set as much as in the chainId field, so both are pinned. */
+    {
+      const seenHost = new Map();
+      const collisions = [];
+      for (const n of built.natives) for (const h of n.hosts) {
+        if (seenHost.has(h)) collisions.push(h + ' on both ' + seenHost.get(h) + ' and ' + n.rail);
+        else seenHost.set(h, n.rail);
+      }
+      ok('no two rails share an RPC endpoint — a rail on another chain\'s hosts reads the wrong chain',
+        collisions.length === 0, collisions.join('; '));
+    }
+    ok('the testnet rail\'s native unit is tETH, not ETH',
+      (built.natives.find(n => n.rail === 'arbitrumSepolia') || {}).native === 'tETH',
+      JSON.stringify(built.natives.find(n => n.rail === 'arbitrumSepolia')));
 
     const be = decode(built.baseEth.raw), ae = decode(built.arbEth.raw);
     // chainId is recoverable from v: v = 35 + 2*chainId + recovery
@@ -260,6 +303,47 @@ try {
       chainFromV(ae.v) === 42161n && built.arbEth.chainId === 42161, `v=${ae.v} -> ${chainFromV(ae.v)}`);
     ok('the two chains produce DIFFERENT bytes for the same transfer (no replay across rails)',
       built.baseEth.raw !== built.arbEth.raw);
+
+    /* the testnet rail is the same code path: no branch, no mode flag */
+    let se = null, seErr = null;
+    try { se = decode(built.arbSepEth.raw, 'arbitrumSepolia/tETH') } catch (e) { seErr = e.message }
+    ok('the gate could build an arbitrumSepolia tETH tx at all', se !== null, seErr || built.arbSepEth.err);
+    se = se || { v: 0n };
+    ok('an Arbitrum Sepolia tETH tx carries chain id 421614 IN THE SIGNATURE',
+      chainFromV(se.v) === 421614n && built.arbSepEth.chainId === 421614, `v=${se.v} -> ${chainFromV(se.v)}`);
+    /* the string check is load-bearing: without it this line PASSES when the
+       rail is missing entirely (undefined !== raw), which is a vacuous green on
+       the exact absence the assertion exists to catch. */
+    ok('testnet bytes differ from BOTH mainnet rails — a testnet tx can never replay onto mainnet',
+      typeof built.arbSepEth.raw === 'string' &&
+      built.arbSepEth.raw !== built.baseEth.raw && built.arbSepEth.raw !== built.arbEth.raw);
+    ok('the testnet rail does NOT carry an asset called ETH — mainnet ETH is unreachable there',
+      /not carried on Arbitrum Sepolia/.test(built.sepMainnetAsset.err || ''), built.sepMainnetAsset.err);
+
+    /* Base Sepolia — the chain ops/x402-door is chartered for. The ERC-20 row
+       is the part Arb Sepolia does not exercise: a testnet token whose
+       on-chain symbol collides with a mainnet one the wallet also carries. */
+    let bse = null, bseErr = null;
+    try { bse = decode(built.baseSepEth.raw, 'baseSepolia/tETH') } catch (e) { bseErr = e.message }
+    ok('the gate could build a baseSepolia tETH tx at all', bse !== null, bseErr || built.baseSepEth.err);
+    bse = bse || { v: 0n };
+    ok('a Base Sepolia tETH tx carries chain id 84532 IN THE SIGNATURE',
+      chainFromV(bse.v) === 84532n && built.baseSepEth.chainId === 84532, `v=${bse.v} -> ${chainFromV(bse.v)}`);
+    ok('all four rails produce four DISTINCT signed payloads for the same transfer',
+      new Set([built.baseEth.raw, built.arbEth.raw, built.arbSepEth.raw, built.baseSepEth.raw]
+        .filter(r => typeof r === 'string')).size === 4);
+
+    let bsu = null, bsuErr = null;
+    try { bsu = decode(built.baseSepUsdc.raw, 'baseSepolia/tUSDC') } catch (e) { bsuErr = e.message }
+    ok('the gate could build a baseSepolia tUSDC transfer at all', bsu !== null, bsuErr || built.baseSepUsdc.err);
+    bsu = bsu || { to: '', data: '' };
+    ok('the tUSDC transfer targets the Circle testnet token contract, not the recipient',
+      bsu.to === '036cbd53842c5426634e7929541ec2318f3dcf7e', bsu.to);
+    ok('2.5 tUSDC encodes as 2500000 — SIX decimals on a TESTNET token, read from the registry',
+      String(bsu.data).length >= 136 && BigInt('0x' + bsu.data.slice(72, 136)) === 2500000n,
+      String(bsu.data).slice(0, 8) + '…');
+    ok('the Base Sepolia rail does NOT carry an asset called USDC — real USDC is unreachable there',
+      /not carried on Base Sepolia/.test(built.baseSepMainnetAsset.err || ''), built.baseSepMainnetAsset.err);
     ok('a native ETH transfer sends to the RECIPIENT with the value in the value field',
       be.to === TO.slice(2).toLowerCase() && be.value === 10000000000000000n && be.data === '',
       `to=${be.to} value=${be.value} data=${be.data}`);
@@ -296,12 +380,32 @@ try {
 
     const est = seen.filter(s => s.method === 'eth_estimateGas');
     ok('gas is estimated against the TOKEN CONTRACT (the old lane estimated the recipient)',
-      est.length > 0 && est.every(e => (e.params[0].to || '').toLowerCase() === '0x833589fcd6edb6e08f4c7c32d4f71b54bda02913'.toLowerCase()
-        || (e.params[0].to || '').toLowerCase() === '0xa78d8321b20c4ef90ecd72f2588aa985a4bdb684'),
+      est.length > 0 && est.every(e => ['0x833589fcd6edb6e08f4c7c32d4f71b54bda02913',
+        '0xa78d8321b20c4ef90ecd72f2588aa985a4bdb684',
+        '0x036cbd53842c5426634e7929541ec2318f3dcf7e']
+        .includes((e.params[0].to || '').toLowerCase())),
       JSON.stringify(est.map(e => e.params[0].to)));
-    const baseHosts = seen.filter(s => /base/.test(s.host)).length;
-    const arbHosts = seen.filter(s => /arbitrum/.test(s.host)).length;
-    ok('each rail was actually read on ITS OWN hosts', baseHosts > 0 && arbHosts > 0, `base=${baseHosts} arb=${arbHosts}`);
+    /* EXACT host sets, taken from the registry itself. The old substring form
+       (/base/ and /arbitrum/) cannot survive testnet rails: "base-sepolia…"
+       matches /base/ and "arbitrum-sepolia…" matches /arbitrum/, so two rails
+       could go unread while the assertion still went green. */
+    /* THE TRIGGER, NAMED WHERE THE NEXT EDITOR OF THIS MAP STANDS (bFUzZ, T2
+       PROVE 2026-09-20): this map keys on the BARE host, while the
+       disjointness assertion above keys on the full endpoint URL and is
+       path-aware. They disagree the moment one host serves two rails on
+       different paths — a multiplexed endpoint like x.example/base and
+       x.example/base-sepolia would collapse to one key here and attribute
+       both rails' reads to whichever row was registered last, while the
+       disjointness line stays green because the URLs really are distinct.
+       No rail shares a bare host today, so this is latent, not a defect.
+       If you add a multiplexed host, key this map on host + path prefix. */
+    const hostToRail = new Map();
+    for (const n of built.natives) for (const h of n.hosts) hostToRail.set(new URL(h).host, n.rail);
+    const readPerRail = {};
+    for (const s of seen) { const r = hostToRail.get(s.host); if (r) readPerRail[r] = (readPerRail[r] || 0) + 1 }
+    ok('every rail was actually read on ITS OWN hosts, exact-matched from the registry',
+      built.natives.length > 0 && built.natives.every(n => (readPerRail[n.rail] || 0) > 0),
+      JSON.stringify(readPerRail));
     await ctx.close();
   }
 
@@ -320,6 +424,18 @@ try {
       set({ ETH: 0.01 });
       try { await P.evmSendRaw('base', to, 'ETH', '5'); out.overCap = 'SIGNED ANYWAY' } catch (e) { out.overCap = e.capRefused ? 'refused' : 'wrong: ' + e.message }
       try { await P.evmSendRaw('base', to, 'ETH', '0.005'); out.underCap = 'signed' } catch (e) { out.underCap = 'REFUSED: ' + e.message }
+      // a real-money cap must not be spent by worthless testnet sends
+      set({ ETH: 0.02 });
+      try { const t = await P.evmSendRaw('arbitrumSepolia', to, 'tETH', '5');
+        out.testnetUncapped = 'signed'; out.testnetCapChain = t.chainId }
+      catch (e) { out.testnetUncapped = e.capRefused ? 'REFUSED BY THE MAINNET ETH CAP' : 'wrong: ' + e.message }
+      clear();
+      // ...and the same for the testnet ERC-20 whose on-chain symbol IS "USDC"
+      set({ USDC: 1 });
+      try { const t = await P.evmSendRaw('baseSepolia', to, 'tUSDC', '500');
+        out.tusdcUncapped = 'signed'; out.tusdcCapChain = t.chainId }
+      catch (e) { out.tusdcUncapped = e.capRefused ? 'REFUSED BY THE MAINNET USDC CAP' : 'wrong: ' + e.message }
+      clear();
       // a cap on one unit must not gate a different unit
       try { await P.evmSendRaw('base', to, 'USDC', '5'); out.otherUnit = 'signed' } catch (e) { out.otherUnit = 'REFUSED: ' + e.message }
       // the rolling-day ledger: spend up to the cap, then the next one is refused
@@ -335,6 +451,15 @@ try {
     ok('over the cap, the SIGNER refuses — nothing is built', r.overCap === 'refused', r.overCap);
     ok('under the cap, it signs with no prompt and no human in the loop', r.underCap === 'signed', r.underCap);
     ok('a cap on one unit does not gate another unit', r.otherUnit === 'signed', r.otherUnit);
+    /* the chain id is asserted HERE, not just in section C: without it this
+       probe can be silently retargeted at a mainnet rail and still go green,
+       which would make it stop proving testnet isolation while still claiming to. */
+    ok('a mainnet ETH/day cap does NOT gate a testnet tETH send (the cap keys on the symbol)',
+      r.testnetUncapped === 'signed' && r.testnetCapChain === 421614,
+      r.testnetUncapped + ' on chain ' + r.testnetCapChain);
+    ok('a mainnet USDC/day cap does NOT gate a testnet tUSDC send on Base Sepolia',
+      r.tusdcUncapped === 'signed' && r.tusdcCapChain === 84532,
+      r.tusdcUncapped + ' on chain ' + r.tusdcCapChain);
     ok('the rolling-day ledger counts: 9.5 already spent + 1 exceeds a 10/day cap', r.ledger === 'refused', r.ledger);
     ok('…and 9.5 + 0.4 still fits, so it signs', r.ledgerUnder === 'signed', r.ledgerUnder);
     await ctx.close();
