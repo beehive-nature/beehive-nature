@@ -60,10 +60,322 @@ nav:not(#tbar) a:hover{color:var(--cyan)}
   #fam td{white-space:nowrap;padding:8px 18px 8px 0}
   #fam td:first-child{width:auto;padding-right:18px}
   #fam td:nth-child(3){white-space:normal;min-width:240px}
+/* ── ETERNAL FRONT (docs/design/eternal) — three products in one surface. Every value is a skaists
+   token (../skaists.css, compiled from docs/design/skaists/tokens.json): no hand-picked hex, size or
+   corner (sizes carry a fallback for servers that never deliver the stylesheet). Measured by
+   e2e/skaists-conformance.mjs. One register visible at a time; new bee is the default. Every class
+   is et- prefixed and every rule is scoped to #eternal, so the page's own bare rules never reach in. ── */
+#eternal{box-sizing:border-box;position:relative;z-index:6;width:100%;max-width:600px;margin:0 auto var(--sk-s2,12px);padding:var(--sk-s2,12px) 0 0;text-align:left;letter-spacing:normal;text-transform:none;background:none;border:0}
+#eternal *,#eternal *::before,#eternal *::after{box-sizing:border-box}
+#eternal>.et-r,#eternal>.et-c{display:none}
+body[data-reg="raver"] #eternal>.et-b,body[data-reg="cypherpunk"] #eternal>.et-b{display:none}
+body[data-reg="raver"] #eternal>.et-r{display:block}
+body[data-reg="cypherpunk"] #eternal>.et-c{display:block}
+#eternal [hidden]{display:none!important}
+#eternal button{margin:0;color:inherit;text-transform:none;letter-spacing:normal;min-width:0;box-shadow:none}
+#eternal svg{display:block;max-width:100%}
+#eternal a{text-decoration:none}
+#eternal :focus-visible{outline:2px solid var(--sk-focus);outline-offset:3px}
+#eternal h2,#eternal h3,#eternal p,#eternal ol,#eternal ul,#eternal table,#eternal figure{margin:0;padding:0;border:0;background:none;text-transform:none;letter-spacing:normal;text-shadow:none}
+#eternal table{border-collapse:separate;border-spacing:0;width:100%}
+#eternal th,#eternal td{border:0;padding:0;vertical-align:top;background:none;width:auto}
+#eternal canvas{display:block;image-rendering:pixelated;image-rendering:crisp-edges}
+#etArchive.et-archive-h{position:relative;z-index:6;max-width:600px;margin:var(--sk-s5,36px) auto var(--sk-s2,12px);padding:var(--sk-s4,24px) 0 0;border:0;border-top:1px solid var(--sk-line);color:var(--sk-ink);text-transform:none;letter-spacing:normal;background:none;text-shadow:none}
+body[data-reg="bee"] #etArchive.et-archive-h{font:400 28px/1.1 var(--sk-font-bee-serif)}
+body[data-reg="raver"] #etArchive.et-archive-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em}
+body[data-reg="cypherpunk"] #etArchive.et-archive-h{font:600 15px/1.45 var(--sk-font-mono)}
+
+/* NEW BEE — a calm room: plain rows, one reassurance, one magenta action, a link, a footnote */
+#eternal .et-b{display:flex;flex-direction:column;gap:var(--sk-s3,18px);color:var(--sk-ink);font:400 16px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-b-mark{font:400 18px/1.2 var(--sk-font-house);color:var(--sk-sovereign)}
+#eternal .et-b-h{font:400 40px/1.05 var(--sk-font-bee-serif);color:var(--sk-ink)}
+#eternal .et-b-lede{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink-mut);text-wrap:pretty}
+#eternal .et-b-guard{display:flex;align-items:center;gap:var(--sk-s2,12px);min-height:var(--sk-control-min,44px);padding:var(--sk-s1,6px) var(--sk-s3,18px);border-radius:var(--sk-radius,12px);background:var(--sk-guard-wash);color:var(--sk-guard);font:600 15px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-b-ic{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+#eternal .et-b-rows{display:flex;flex-direction:column;background:var(--sk-bg-card);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl,18px);overflow:hidden}
+#eternal .et-b-row{display:flex;align-items:center;justify-content:space-between;gap:var(--sk-s2,12px);width:100%;min-height:var(--sk-control-row,52px);padding:var(--sk-s1,6px) var(--sk-s3,18px);border:0;border-bottom:1px solid var(--sk-line-soft);border-radius:0;background:transparent;text-align:left;font:500 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+#eternal .et-b-row:last-child{border-bottom:0}
+#eternal button.et-b-row,#eternal a.et-b-row{cursor:pointer}
+#eternal button.et-b-row:hover,#eternal a.et-b-row:hover{background:var(--sk-sovereign-tint);color:var(--sk-ink)}
+#eternal .et-b-row>span{flex:1 1 auto}
+#eternal .et-b-row small{display:flex;align-items:center;gap:var(--sk-s1,6px);flex:none;max-width:55%;text-align:right;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-row small.et-out{color:var(--sk-guard)}
+#eternal .et-b-row small.et-ok{color:var(--sk-verified)}
+#eternal .et-b-row[aria-expanded="true"],#eternal .et-b-row[aria-pressed="true"]{background:var(--sk-sovereign-tint);color:var(--sk-sovereign-strong);font-weight:600}
+#eternal .et-b-row[aria-expanded="true"] small,#eternal .et-b-row[aria-pressed="true"] small{color:var(--sk-sovereign-strong)}
+#eternal .et-chev{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;flex:none;transition:transform var(--dur,.26s)}
+#eternal .et-b-row[aria-expanded="true"] .et-chev{transform:rotate(90deg)}
+#eternal .et-b-open{display:flex;flex-direction:column;gap:var(--sk-s1,6px);padding:var(--sk-s2,12px) var(--sk-s3,18px);background:var(--sk-sovereign-tint);border-bottom:1px solid var(--sk-line-soft)}
+#eternal .et-b-open div{font:400 15px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+#eternal .et-b-person{display:flex;align-items:center;gap:var(--sk-s2,12px);min-height:var(--sk-control-person,60px);padding:var(--sk-s1,6px) var(--sk-s3,18px);border-bottom:1px solid var(--sk-line-soft)}
+#eternal .et-b-person:last-child{border-bottom:0}
+#eternal .et-b-person i{width:40px;height:40px;border-radius:var(--sk-radius-pill,999px);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong);display:flex;align-items:center;justify-content:center;font:600 14px/1.4 var(--sk-font-bee-sans);font-style:normal;flex:none}
+#eternal .et-b-person i.et-dash{background:transparent;border:1.5px dashed var(--sk-ink-dim);color:var(--sk-ink-mut)}
+#eternal .et-b-person i.et-ok{background:var(--sk-verified-wash);color:var(--sk-verified)}
+#eternal .et-b-person i.et-no{background:var(--sk-guard-wash);color:var(--sk-guard)}
+#eternal .et-b-person b{display:block;font:500 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+#eternal .et-b-person span{display:block;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-note{padding:var(--sk-s2,12px) var(--sk-s3,18px);font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-act{display:flex;flex-direction:column;gap:var(--sk-s1,6px);margin-top:var(--sk-s1,6px)}
+#eternal .et-b-primary{display:flex;align-items:center;justify-content:center;width:100%;height:var(--sk-control-primary,54px);padding:0 var(--sk-s3,18px);border:0;border-radius:var(--sk-radius-lg,16px);background:var(--sk-primary);color:var(--sk-on-primary)!important;font:600 17px/1.2 var(--sk-font-bee-sans)!important;text-align:center;cursor:pointer}
+#eternal .et-b-primary:hover{background:var(--sk-primary);color:var(--sk-on-primary)!important;filter:none}
+#eternal .et-b-primary:disabled,#eternal .et-b-primary[aria-disabled="true"]{background:var(--sk-bg-well);color:var(--sk-ink-mut)!important;cursor:not-allowed}
+#eternal .et-b-link{display:flex;align-items:center;justify-content:center;width:100%;min-height:var(--sk-control-min,44px);padding:0 var(--sk-s2,12px);border:0;border-radius:var(--sk-radius,12px);background:transparent;font:600 16px/1.45 var(--sk-font-bee-sans)!important;color:var(--sk-link)!important;cursor:pointer;text-align:center}
+#eternal .et-b-link:hover{background:transparent;color:var(--sk-link-hover)!important}
+#eternal .et-b-link:disabled{color:var(--sk-ink-mut)!important;cursor:not-allowed}
+#eternal .et-b-foot{text-align:center;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-card{display:flex;flex-direction:column;gap:var(--sk-s1,6px);padding:var(--sk-s3,18px);background:var(--sk-bg-card);border:1px dashed var(--sk-ink-dim);border-radius:var(--sk-radius-xl,18px)}
+#eternal .et-b-card.et-ok{border:1px solid var(--sk-line);background:var(--sk-verified-wash)}
+#eternal .et-b-card.et-no{border:1px dashed var(--sk-guard);background:var(--sk-guard-wash)}
+#eternal .et-b-card h3{font:400 28px/1.1 var(--sk-font-bee-serif);color:var(--sk-ink)}
+#eternal .et-b-card div{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-card.et-no div,#eternal .et-b-card.et-ok div{color:var(--sk-ink)}
+
+/* RAVER — the data is the art; lowercase is allowed joy; the numbers never change */
+#eternal .et-r{color:var(--sk-ink);font:400 14px/1.4 var(--sk-font-raver-body)}
+#eternal .et-r-top{display:flex;align-items:baseline;justify-content:space-between;gap:var(--sk-s2,12px);flex-wrap:wrap}
+#eternal .et-r-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em;color:var(--sk-ink)}
+#eternal .et-r-hint{font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-art{position:relative;width:100%;max-width:360px;margin:var(--sk-s3,18px) auto var(--sk-s2,12px)}
+#eternal .et-r-art>svg{width:100%;height:auto;filter:drop-shadow(var(--sk-glow-sovereign))}
+#eternal .et-r-art [role="button"]{cursor:pointer}
+#eternal .et-r-art [role="button"]:focus{outline:none}
+#eternal .et-r-art [role="button"]:focus-visible>*{stroke:var(--sk-ink);stroke-width:2}
+#eternal .et-r-mid{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;text-align:center;pointer-events:none;max-width:40%}
+#eternal .et-r-mid b{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em;color:var(--sk-ink)}
+#eternal .et-r-mid span{font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-legend{display:flex;flex-wrap:wrap;justify-content:center;gap:var(--sk-s1,6px) var(--sk-s3,18px);margin:0 0 var(--sk-s3,18px)}
+#eternal .et-r-legend span{display:inline-flex;align-items:center;gap:var(--sk-s1,6px);font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-legend i{width:14px;height:14px;border-radius:var(--sk-radius-pill,999px);flex:none}
+#eternal .et-r-card{display:flex;gap:var(--sk-s2,12px);align-items:flex-start;padding:var(--sk-s2,12px) var(--sk-s3,18px);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl,18px);background:var(--sk-sovereign-tint);min-height:var(--sk-control-person,60px)}
+#eternal .et-r-card .et-rk{min-width:44px;height:44px;padding:0 var(--sk-s1,6px);border-radius:var(--sk-radius,12px);background:var(--sk-sovereign-strong);color:var(--sk-bg);display:flex;align-items:center;justify-content:center;font:700 15px/1.2 var(--sk-font-raver-display);flex:none}
+#eternal .et-r-card b{display:block;font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink);overflow-wrap:anywhere}
+#eternal .et-r-card span{display:block;margin-top:var(--sk-s1,6px);font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-sub{margin:var(--sk-s4,24px) 0 var(--sk-s2,12px);font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em;color:var(--sk-ink)}
+#eternal .et-r-tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:var(--sk-s2,12px)}
+#eternal .et-r-tile{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--sk-s1,6px);min-height:96px;padding:var(--sk-s2,12px) var(--sk-s1,6px);border-radius:var(--sk-radius-xl,18px);border:1.5px solid var(--sk-sovereign);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong)!important;font:600 14px/1.25 var(--sk-font-raver-body)!important;text-align:center;cursor:pointer;transition:opacity var(--dur,.26s),box-shadow var(--dur,.26s)}
+#eternal .et-r-tile:hover{background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong)!important}
+#eternal .et-r-tile.et-dash{border-style:dashed;border-color:var(--sk-ink-dim);background:var(--sk-bg-card);color:var(--sk-ink-soft)!important}
+#eternal .et-r-tile.et-on{border-color:var(--sk-verified);box-shadow:var(--sk-glow-ok);color:var(--sk-ink)!important}
+#eternal .et-r-tile[aria-pressed="true"]{border-color:var(--sk-you);box-shadow:var(--sk-glow-sovereign);color:var(--sk-ink)!important}
+#eternal .et-r-tile svg{width:26px;height:26px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+#eternal .et-r-note{margin:var(--sk-s2,12px) 0 0;text-align:center;font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-pill{display:flex;align-items:center;justify-content:center;width:100%;height:58px;margin-top:var(--sk-s4,24px);padding:0 var(--sk-s3,18px);border:0;border-radius:var(--sk-radius-pill,999px);background:var(--sk-primary);color:var(--sk-on-primary)!important;font:700 15px/1.2 var(--sk-font-raver-display)!important;letter-spacing:.04em;text-align:center;cursor:pointer}
+#eternal .et-r-pill:hover{background:var(--sk-primary);color:var(--sk-on-primary)!important}
+#eternal .et-r-pill:disabled{background:var(--sk-sovereign-wash);color:var(--sk-sovereign-soft)!important;cursor:not-allowed}
+#eternal .et-r-ghost{display:flex;align-items:center;justify-content:center;margin:var(--sk-s2,12px) auto 0;min-height:var(--sk-control-min,44px);padding:0 var(--sk-s3,18px);border:1.5px solid var(--sk-biomass);border-radius:var(--sk-radius-pill,999px);background:transparent;color:var(--sk-biomass)!important;font:600 14px/1.25 var(--sk-font-raver-body)!important;cursor:pointer;text-align:center}
+#eternal .et-r-ghost:hover{background:transparent;color:var(--sk-ink)!important}
+#eternal .et-r-hold{position:relative;width:196px;height:196px;margin:var(--sk-s3,18px) auto 0}
+#eternal .et-r-hold>svg{position:absolute;inset:0;width:100%;height:100%;transform:rotate(-90deg);pointer-events:none}
+#eternal .et-hold-track{fill:none;stroke:var(--sk-line);stroke-width:8}
+#eternal .et-hold-prog{fill:none;stroke:var(--sk-biomass);stroke-width:8;stroke-linecap:round;stroke-dasharray:578;stroke-dashoffset:578}
+#eternal .et-r-holdbtn{position:absolute;inset:22px;padding:0;border:0;border-radius:0;background:var(--sk-primary);color:var(--sk-on-primary)!important;clip-path:polygon(50% 0,93% 25%,93% 75%,50% 100%,7% 75%,7% 25%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--sk-s1,6px);cursor:pointer;touch-action:none;user-select:none;-webkit-user-select:none}
+#eternal .et-r-holdbtn:hover{background:var(--sk-primary);color:var(--sk-on-primary)!important}
+#eternal .et-r-holdbtn b{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em}
+#eternal .et-r-holdbtn span{font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em}
+#eternal .et-r-holdbtn:disabled{background:var(--sk-sovereign-wash);color:var(--sk-sovereign-soft)!important;cursor:not-allowed}
+@media (prefers-reduced-motion:reduce){#eternal *{transition:none!important;animation:none!important}}
+
+/* CYPHERPUNK — the instrument, complete at first paint: tables, a numbered pipeline, receipts */
+#eternal .et-c{font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink);overflow-wrap:anywhere}
+#eternal .et-c-path{font:600 15px/1.45 var(--sk-font-mono);color:var(--sk-ink);word-break:break-all}
+#eternal .et-c-chips{display:flex;flex-wrap:wrap;gap:var(--sk-s1,6px);margin:var(--sk-s2,12px) 0}
+#eternal .et-c-chips span{padding:2px var(--sk-s1,6px);border:1px solid var(--sk-line);border-radius:4px;background:var(--sk-bg-card);font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-soft)}
+#eternal .et-c-chips span.et-on{border-color:var(--sk-guard);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong)}
+#eternal .et-c-chips span.et-ok{border-color:var(--sk-verified);color:var(--sk-verified)}
+#eternal .et-c-chips span.et-no{border-color:var(--sk-info);color:var(--sk-info)}
+#eternal .et-c-guard{display:flex;justify-content:space-between;align-items:center;gap:var(--sk-s2,12px);flex-wrap:wrap;min-height:var(--sk-control-min,44px);padding:var(--sk-s1,6px) var(--sk-s3,18px);border:1px dashed var(--sk-guard);border-radius:var(--sk-radius-sm,6px);background:var(--sk-guard-wash);color:var(--sk-guard)}
+#eternal .et-c-guard b{font-weight:600;color:var(--sk-sovereign-strong)}
+#eternal .et-c-h{margin:var(--sk-s4,24px) 0 var(--sk-s2,12px)!important;font:600 15px/1.45 var(--sk-font-mono);color:var(--sk-ink)}
+#eternal .et-c-tab{width:100%;margin:var(--sk-s2,12px) 0 var(--sk-s1,6px)!important;border:1px solid var(--sk-line)!important;border-radius:var(--sk-radius-sm,6px);overflow:hidden;background:var(--sk-bg-card)!important;table-layout:auto}
+#eternal .et-c-tab th{padding:var(--sk-s1,6px) var(--sk-s2,12px)!important;text-align:left;white-space:nowrap;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);border-bottom:1px solid var(--sk-line)!important;background:var(--sk-bg-well)}
+#eternal .et-c-tab td{height:var(--sk-control-min,44px);padding:var(--sk-s1,6px) var(--sk-s2,12px)!important;border-bottom:1px solid var(--sk-line)!important;font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink);vertical-align:middle}
+#eternal .et-c-tab tr:last-child td{border-bottom:0!important}
+#eternal .et-c-tab td:first-child{color:var(--sk-guard)}
+#eternal .et-c-tab td:first-child,#eternal .et-c-tab th:first-child{white-space:nowrap;width:1%}
+#eternal .et-c-tab tr.et-pick{cursor:pointer}
+#eternal .et-c-tab tr.et-pick:hover td,#eternal .et-c-tab tr.et-pick[aria-selected="true"] td{background:var(--sk-sovereign-tint)}
+#eternal .et-c-tab tr.et-more td{height:auto;white-space:normal;width:auto;background:var(--sk-sovereign-tint);color:var(--sk-ink-soft)}
+#eternal .et-c-tab small{display:block;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut)}
+#eternal .et-c-tab .et-nw{white-space:nowrap}
+#eternal .et-st-ok{color:var(--sk-verified)}
+#eternal .et-st-no{color:var(--sk-info)}
+#eternal .et-st-wait{color:var(--sk-ai)}
+#eternal .et-st-guard{color:var(--sk-guard)}
+#eternal .et-c-pipe{list-style:none;margin:0;padding:0;display:grid;gap:var(--sk-s2,12px);counter-reset:etp}
+#eternal .et-c-pipe li{display:grid;grid-template-columns:28px 1fr;gap:var(--sk-s1,6px) var(--sk-s2,12px);padding:var(--sk-s2,12px) var(--sk-s3,18px);border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm,6px);background:var(--sk-bg-card);counter-increment:etp}
+#eternal .et-c-pipe li::before{content:counter(etp,decimal-leading-zero);color:var(--sk-guard);font-weight:600}
+#eternal .et-c-pipe li b{font-weight:600;color:var(--sk-ink)}
+#eternal .et-c-pipe li div{grid-column:2;color:var(--sk-ink-soft)}
+#eternal .et-c-pipe li.et-done b{color:var(--sk-verified)}
+#eternal .et-c-pipe li.et-guard{border-style:dashed;border-color:var(--sk-guard)}
+#eternal .et-c-pipe li.et-guard b{color:var(--sk-guard)}
+#eternal .et-c-pipe li.et-now{border-color:var(--sk-ai);box-shadow:inset 0 0 0 1px var(--sk-ai)}
+#eternal .et-c-pipe li.et-now b{color:var(--sk-ai)}
+#eternal .et-c-pipe li.et-todo div{color:var(--sk-ink-mut)}
+#eternal .et-c-primary{display:flex;align-items:center;justify-content:center;width:100%;height:52px;margin-top:var(--sk-s3,18px);padding:0 var(--sk-s2,12px);border:0;border-radius:var(--sk-radius-sm,6px);background:var(--sk-primary);color:var(--sk-on-primary)!important;font:600 14px/1.2 var(--sk-font-mono)!important;text-align:center;cursor:pointer}
+#eternal .et-c-primary:hover{background:var(--sk-primary);color:var(--sk-on-primary)!important}
+#eternal .et-c-primary:disabled{background:var(--sk-bg-well);color:var(--sk-ink-mut)!important;border:1px dashed var(--sk-line);cursor:not-allowed}
+#eternal .et-c-kv{width:100%;border:1px solid var(--sk-line)!important;border-radius:var(--sk-radius-sm,6px);overflow:hidden;background:var(--sk-bg-card)!important}
+#eternal .et-c-kv th{width:104px;padding:var(--sk-s2,12px)!important;text-align:left;vertical-align:top;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);border-bottom:1px solid var(--sk-line)!important;background:transparent}
+#eternal .et-c-kv td{padding:var(--sk-s2,12px)!important;border-bottom:1px solid var(--sk-line)!important;font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink);word-break:break-word}
+#eternal .et-c-kv td small{display:block;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut)}
+#eternal .et-c-kv tr:last-child th,#eternal .et-c-kv tr:last-child td{border-bottom:0!important}
+#eternal .et-c-verify{margin-top:var(--sk-s3,18px);padding:var(--sk-s3,18px);border-radius:var(--sk-radius-sm,6px);background:var(--sk-bg-card);border:1px solid var(--sk-line)}
+#eternal .et-c-verify-h{font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);margin-bottom:var(--sk-s1,6px)}
+#eternal .et-c-verify ol{margin:0;padding-left:var(--sk-s4,24px)!important;display:grid;gap:var(--sk-s1,6px)}
+#eternal .et-c-verify code,#eternal .et-c code{font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ai);background:none;padding:0;border:0;word-break:break-all}
+#eternal .et-c-row{display:grid;grid-template-columns:1fr 1fr;gap:var(--sk-s2,12px);margin-top:var(--sk-s3,18px)}
+#eternal .et-c-ghost{display:flex;align-items:center;justify-content:center;min-height:52px;padding:0 var(--sk-s1,6px);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius-sm,6px);background:transparent;color:var(--sk-ink)!important;text-align:center;font:600 14px/1.2 var(--sk-font-mono)!important;cursor:pointer}
+#eternal .et-c-ghost:hover{background:transparent;color:var(--sk-link-hover)!important}
+#eternal .et-c-well{margin-top:var(--sk-s2,12px);padding:var(--sk-s2,12px);border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm,6px);background:var(--sk-bg-well);font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink-soft);white-space:pre-wrap;word-break:break-all}
+
+/* catalog front specifics: the versus card (bee) and the ladder bloom (raver) */
+#eternal .et-b-row .et-b-pickv{color:var(--sk-ink);font-weight:600}
+#eternal .et-b-opts{display:flex;flex-direction:column;background:var(--sk-sovereign-tint);border-bottom:1px solid var(--sk-line-soft)}
+#eternal .et-b-opts .et-b-row{min-height:var(--sk-control-min,44px);padding-left:var(--sk-s4,24px);border-bottom:1px solid var(--sk-line-soft)}
+#eternal .et-b-opts .et-b-row[aria-pressed="true"]{background:var(--sk-sovereign-wash)}
+#eternal .et-b-vs{display:grid;grid-template-columns:1fr 1fr;gap:0 var(--sk-s3,18px);padding:var(--sk-s3,18px);background:var(--sk-bg-card);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl,18px)}
+#eternal .et-b-vs b{font:400 28px/1.1 var(--sk-font-bee-serif);color:var(--sk-ink);overflow-wrap:anywhere}
+#eternal .et-b-vs .et-vs-l{grid-column:1/-1;margin-top:var(--sk-s2,12px);padding-top:var(--sk-s2,12px);border-top:1px solid var(--sk-line-soft);font:600 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-vs .et-vs-v{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink);overflow-wrap:anywhere}
+#eternal .et-b-vs .et-vs-v.et-unk{color:var(--sk-guard)}
+#eternal .et-r-rays .et-ray{cursor:pointer}
+#eternal .et-r-rays .et-ray:focus{outline:none}
+#eternal .et-r-rays .et-ray:focus-visible .et-ray-hit{stroke:var(--sk-ink);stroke-width:1.5;stroke-dasharray:3 4}
+#eternal .et-ray-hit{fill:transparent;stroke:none}
+#eternal .et-ray-line{fill:none;stroke-width:3;stroke-linecap:round}
+#eternal .et-ray-guide{fill:none;stroke:var(--sk-line);stroke-width:1;stroke-dasharray:2 5}
+#eternal .et-r-mid b{font:700 30px/1 var(--sk-font-raver-display)}
+#eternal .et-r-scale{display:flex;justify-content:center;flex-wrap:wrap;gap:var(--sk-s1,6px) var(--sk-s2,12px);margin:0 0 var(--sk-s2,12px);font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-pair{display:grid;grid-template-columns:1fr 1fr;gap:var(--sk-s2,12px);margin-top:var(--sk-s2,12px)}
+#eternal .et-r-pair>div{padding:var(--sk-s2,12px);border:1.5px solid var(--sk-line);border-radius:var(--sk-radius-xl,18px);background:var(--sk-bg-card)}
+#eternal .et-r-pair>div.et-a{border-color:var(--sk-you)}
+#eternal .et-r-pair>div.et-b2{border-color:var(--sk-ai)}
+#eternal .et-r-pair b{display:block;font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em;color:var(--sk-ink);overflow-wrap:anywhere}
+#eternal .et-r-pair span{display:block;margin-top:var(--sk-s1,6px);font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-pair em{display:block;margin-top:var(--sk-s1,6px);font:600 14px/1.25 var(--sk-font-raver-body);font-style:normal;color:var(--sk-ink)}
+#eternal .et-c-diff td.et-ne{color:var(--sk-you)}
+
+/* ── THE WHOLE CATALOG, dressed per register: the page's own variables mapped onto skaists tokens.
+   The cells, the sources and the live price reads are unchanged; this is how the house hangs them. ── */
+body[data-reg]{--bg:var(--sk-bg);--panel:var(--sk-bg-card);--panel2:var(--sk-bg-well);--line:var(--sk-line);--ink:var(--sk-ink);
+  --crt:var(--sk-verified);--cyan:var(--sk-ai);--pink:var(--sk-you);--purple:var(--sk-guard);--lime:var(--sk-verified);--dim:var(--sk-ink-mut);
+  background-color:var(--sk-bg);color:var(--sk-ink)}
+body[data-reg="bee"],body[data-reg="raver"]{background-image:none}
+body[data-reg="bee"]::after,body[data-reg="raver"]::after{display:none}
+body[data-reg] h1{text-shadow:none;letter-spacing:0}
+body[data-reg] td{border-bottom:1px solid var(--sk-line-soft)}
+body[data-reg] .pane{border-radius:var(--sk-radius-xl,18px)}
+body[data-reg] .rung{border-radius:4px}
+body[data-reg] .rung.top{box-shadow:none;border-color:var(--sk-verified);color:var(--sk-verified)}
+body[data-reg] .bar select,body[data-reg] .bar button{min-height:var(--sk-control-min,44px);border-radius:var(--sk-radius-sm,6px)}
+body[data-reg] .bar select{background:var(--sk-bg-card);border-color:var(--sk-ai);color:var(--sk-ink)}
+body[data-reg] .bar button{background:transparent;border-color:var(--sk-ink);color:var(--sk-ink)}
+body[data-reg] .bar button:hover{background:var(--sk-bg-well);color:var(--sk-ink)}
+body[data-reg] nav:not(#tbar){border-top-color:var(--sk-line)}
+body[data-reg] nav:not(#tbar) a{color:var(--sk-link)}
+body[data-reg] nav:not(#tbar) a:hover{color:var(--sk-link-hover)}
+body[data-reg] .foot b{color:var(--sk-ink)}
+body[data-reg="bee"]{font:400 16px/1.6 var(--sk-font-bee-sans)}
+body[data-reg="bee"] h1{font:400 40px/1.05 var(--sk-font-bee-serif);color:var(--sk-ink)}
+body[data-reg="bee"] h1 span{font:400 28px/1.1 var(--sk-font-bee-serif)}
+body[data-reg="bee"] .sub{font:400 16px/1.6 var(--sk-font-bee-sans);color:var(--sk-ink-soft)}
+body[data-reg="bee"] h2{font:400 28px/1.1 var(--sk-font-bee-serif);color:var(--sk-ink)}
+body[data-reg="bee"] .pane h3{font:600 17px/1.2 var(--sk-font-bee-sans);color:var(--sk-you)}
+body[data-reg="bee"] .pane .by,body[data-reg="bee"] table,body[data-reg="bee"] .rung{font-family:var(--sk-font-bee-sans);font-size:14px}
+body[data-reg="bee"] .pane td{font-size:15px}
+body[data-reg="bee"] .foot,body[data-reg="bee"] nav:not(#tbar){font:400 14px/1.6 var(--sk-font-bee-sans)}
+body[data-reg="bee"] .bar select,body[data-reg="bee"] .bar button{font:600 16px/1.2 var(--sk-font-bee-sans);border-radius:var(--sk-radius-md,14px)}
+body[data-reg="raver"]{--crt:var(--sk-biomass);--lime:var(--sk-biomass);--purple:var(--sk-sovereign-soft);--dim:var(--sk-ink-soft);font:400 14px/1.6 var(--sk-font-raver-body)}
+body[data-reg="raver"] h1{font:700 30px/1 var(--sk-font-raver-display);color:var(--sk-ink)}
+body[data-reg="raver"] h1 span{font:600 14px/1.25 var(--sk-font-raver-body)}
+body[data-reg="raver"] .sub{font-size:14px;color:var(--sk-ink-soft)}
+body[data-reg="raver"] h2{font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em}
+body[data-reg="raver"] .pane{box-shadow:var(--sk-glow-sovereign)}
+body[data-reg="raver"] .pane h3{font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em}
+body[data-reg="raver"] .pane .by,body[data-reg="raver"] table,body[data-reg="raver"] .rung{font-family:var(--sk-font-raver-body);font-size:14px}
+body[data-reg="raver"] .bar select,body[data-reg="raver"] .bar button{font:600 14px/1.25 var(--sk-font-raver-body);border-radius:var(--sk-radius-pill,999px);padding:0 var(--sk-s3,18px)}
+body[data-reg="cypherpunk"]{font:400 13px/1.55 var(--sk-font-mono)}
+body[data-reg="cypherpunk"] h1{font:600 15px/1.45 var(--sk-font-mono);color:var(--sk-ai)}
+body[data-reg="cypherpunk"] h1 span{font-size:13px}
+body[data-reg="cypherpunk"] .sub{font-size:12px;color:var(--sk-ink-soft)}
+body[data-reg="cypherpunk"] .pane,body[data-reg="cypherpunk"] .rung{border-radius:var(--sk-radius-sm,6px)}
+body[data-reg="cypherpunk"] .bar select,body[data-reg="cypherpunk"] .bar button{font:600 14px/1.2 var(--sk-font-mono)}
+body[data-reg] #bnr-beta-badge a{background:var(--sk-bg-card)!important;color:var(--sk-link)!important;border-color:var(--sk-line)!important}
+body[data-reg="cypherpunk"] #bnr-beta-badge a{border-radius:var(--sk-radius-sm,6px)!important}
+#eternal .et-r-legend .et-r-chip{flex-direction:row;min-height:var(--sk-control-min,44px);padding:0 var(--sk-s2,12px);gap:var(--sk-s1,6px);border-radius:var(--sk-radius-pill,999px);border:1px solid var(--sk-line);background:var(--sk-bg-card);color:var(--sk-ink-soft)!important}
+#eternal .et-r-legend .et-r-chip[aria-pressed="true"]{border-color:var(--sk-ink);color:var(--sk-ink)!important;box-shadow:none}
+#eternal .et-r-legend{gap:var(--sk-s1,6px)}
+#eternal .et-c-tab small.et-st-ok{color:var(--sk-verified)}#eternal .et-c-tab small.et-st-guard{color:var(--sk-guard)}#eternal .et-c-tab small.et-st-no{color:var(--sk-info)}
+
 </style>
+<link rel="stylesheet" href="../skaists.css">
 </head>
-<body>
+<body data-bee-theme="custom">
 <div class="wrap">
+<!-- ETERNAL FRONT (founder blueprint 2026-09-26, docs/design/eternal): three separate products in one
+     surface. ONE data layer (the catalog's own COLS table below, every cell sourced, plus the live price
+     read the panes make) drives all three, so the facts cannot drift. Every choice of two writes
+     through to the catalog's own pickers (#a, #b) and redraws the real panes; a price is shown only
+     when the price read below actually returned one. -->
+<section id="eternal" aria-label="the catalog">
+
+  <!-- NEW BEE — two at a time: pick them in plain rows, read the difference in plain words -->
+  <div class="et-b">
+    <div class="et-b-mark">bLighT catalog</div>
+    <h2 class="et-b-h" data-etk="et.compare.beeH">a family of living art</h2>
+    <p class="et-b-lede" id="etCmBeeLede"></p>
+    <div class="et-b-guard"><svg class="et-b-ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span data-etk="et.compare.beeGuard">every fact comes from a contract's code or the chain. what is not known yet says so.</span></div>
+    <div class="et-b-rows" id="etCmPick"></div>
+    <div class="et-b-vs" id="etCmVs" aria-live="polite"></div>
+    <div class="et-b-act">
+      <a class="et-b-primary" id="etCmBeeGo" href="#split" data-etk="et.compare.beeGo">see every detail of these two</a>
+      <a class="et-b-link" href="#fam" data-etk="et.compare.beeFam">the whole family in one table</a>
+      <p class="et-b-foot" data-etk="et.compare.beeFoot">prices are asked live, and they may not answer.</p>
+    </div>
+  </div>
+
+  <!-- RAVER — every ladder as a ray: the rungs climb outward as a share of all there is; light two -->
+  <div class="et-r">
+    <div class="et-r-top"><h2 class="et-r-h" data-etk="et.compare.raverH">the ladders</h2><span class="et-r-hint" id="etCmHint"></span></div>
+    <div class="et-r-art">
+      <svg class="et-r-rays" id="etCmRays" viewBox="-200 -200 400 400" role="group" aria-label="every collection as a ray, its level ladder as beads climbing outward"></svg>
+      <div class="et-r-mid" aria-hidden="true"><b id="etCmMid"></b><span data-etk="et.compare.raverMid">families</span></div>
+    </div>
+    <div class="et-r-scale" id="etCmScale"></div>
+    <div class="et-r-legend" id="etCmLegend"></div>
+    <div class="et-r-pair" id="etCmPair" aria-live="polite"></div>
+    <p class="et-r-note" id="etCmRaverNote"></p>
+    <a class="et-r-pill" id="etCmRaverGo" href="#split" data-etk="et.compare.raverGo">open the lit two</a>
+    <button type="button" class="et-r-ghost" id="etCmSwap" data-etk="et.compare.raverSwap">swap sides</button>
+  </div>
+
+  <!-- CYPHERPUNK — the instrument: every cell with its source, the pair diff, the price read, verify it -->
+  <div class="et-c">
+    <div class="et-c-path" id="etCmPath">catalog://erc-20i</div>
+    <div class="et-c-chips" id="etCmChips"></div>
+    <div class="et-c-guard"><span data-etk="et.compare.cyGuard">no cross-collection threshold is reused</span><b id="etCmCyGuardN"></b></div>
+    <h3 class="et-c-h" data-etk="et.compare.cyFamH">family · one row per deployment</h3>
+    <table class="et-c-tab"><thead><tr><th>#</th><th>collection</th><th>top rung</th></tr></thead><tbody id="etCmRows"></tbody></table>
+    <h3 class="et-c-h" id="etCmDiffH">pair diff</h3>
+    <table class="et-c-kv et-c-diff" id="etCmDiff"></table>
+    <h3 class="et-c-h" data-etk="et.compare.cyPipeH">how each cell was read</h3>
+    <ol class="et-c-pipe" id="etCmPipe"></ol>
+    <button type="button" class="et-c-primary" id="etCmCyRead" data-etk="et.compare.cyRead">read the pair again</button>
+    <h3 class="et-c-h" data-etk="et.compare.cyRcptH">receipt · this read</h3>
+    <table class="et-c-kv" id="etCmReceipt"></table>
+    <div class="et-c-verify">
+      <div class="et-c-verify-h" data-etk="et.compare.verifyH">verify · no trust in this page needed</div>
+      <ol id="etCmVerify"></ol>
+    </div>
+    <div class="et-c-row">
+      <a class="et-c-ghost" href="#srcs" data-etk="et.compare.cySrc">sources ↓</a>
+      <a class="et-c-ghost" href="https://github.com/beehive-nature/beehive-nature/blob/main/surfaces/blight/compare.html" target="_blank" rel="noopener noreferrer" data-etk="et.compare.cyFork">fork the template ↗ new tab</a>
+    </div>
+  </div>
+</section>
+<h2 class="et-archive-h" id="etArchive" data-etk="et.compare.archive">the whole catalog</h2>
 <h1>bLighT Catalog <span style="color:var(--dim)">// the multi-artist ERC-20i family</span></h1>
 <div class="sub">Every artist's scheme in its own terms. Every cell sourced from read code or a chain receipt — pending cells say so.</div>
 
@@ -256,6 +568,218 @@ $('srcs').innerHTML='<b>Sources.</b> FUNGI: ToddStool/fungi <i>Generator.sol:10-
 $('fleet').innerHTML=(window.FLEET_NAV||[
  '<a href="./index.html">◈ fLeeT</a>','<a href="./museum.html">◈ museum</a>','<a href="./inscription-explorer.html">◈ explorer</a>',
  '<a href="./studio-gate.html">◈ studio gate</a>','<a href="./c1-aid.html">◈ C-1 aid</a>','<a href="./vaulta-reader.html">◈ vaulta reader</a>']).join('');
+</script>
+<script>
+/* ETERNAL FRONT — one data layer, three renderers (docs/design/eternal). The facts are the catalog's
+   own COLS table above (every cell traced to read code or a chain receipt; pending cells say so) and
+   the live price read the panes make (dexscreener, in this browser). The pair is ONE state: the
+   catalog's own pickers #a and #b. Every choice of two in any register writes through to them and
+   redraws the real panes; the fronts read the pair and the price back from there, so nothing can
+   drift, and a price is shown only when the read returned one. */
+(function(){
+  var $=function(id){return document.getElementById(id);};
+  var T=function(k,f){var t=window.BNRLanguage&&window.BNRLanguage.text;return t?t(k,f):f;};
+  var K=function(k,f){return T('et.compare.'+k,f);};
+  var esc=function(v){return String(v==null?'':v).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});};
+  var num=function(n){return Number(n).toLocaleString('en-US');};
+  var tok=function(n){return getComputedStyle(document.body).getPropertyValue('--sk-'+n).trim();};
+  var CHEV='<svg class="et-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>';
+
+  /* ── the data layer ── */
+  var SRC=(typeof COLS!=='undefined'&&COLS)||[];
+  var D={cols:SRC.map(function(c,i){
+    var top=c.ladder?c.ladder[c.ladder.length-1]:null;
+    return {i:i,sym:c.sym,chain:c.chain,addr:c.addr,artist:c.artist,supply:c.supply,seedWords:c.seedWords,seedShape:c.seedShape,
+      ladder:c.ladder,rungs:c.ladder?c.ladder.length:null,lvl0:(c.lvlOffset||0)+1,top:top,topName:c.topName,
+      pct:(top&&c.supply)?(top/c.supply*100):null,hasMeta:c.hasMeta,traits:c.traits,capture:c.capture,bug:c.bug,pool:c.pool,
+      provenance:c.provenance,priced:!!c.dsPair,pair:c.dsPair||null};
+  }),pair:[0,2],price:{},readAt:null};
+  var R={last:'b',open:null};
+  var pctS=function(C){return C.pct==null?null:C.pct.toPrecision(2)+'%';};
+  function pending(){var n=0;D.cols.forEach(function(C){if(C.supply==null)n++;if(!C.ladder)n+=2;if(C.hasMeta==null)n++;});return n;}
+  function readPair(){var a=$('a'),b=$('b');if(a&&b&&a.value!==''&&b.value!=='')D.pair=[+a.value,+b.value];}
+  /* the price is read back from the pane the page drew: never guessed, never cached */
+  function readPrice(){
+    D.cols.forEach(function(C){
+      if(!C.priced){return;}
+      var el=$('tp-'+C.sym.replace(/[^A-Z]/ig,'')), t=el?el.textContent.trim():'';
+      var st=!el?'idle':/^fetching/.test(t)?'wait':el.className==='live'?'ok':/unreachable/.test(t)?'no':'none';
+      var prev=D.price[C.sym];
+      if(!prev||prev.state!==st||prev.text!==t)D.readAt=new Date();
+      D.price[C.sym]={state:st,text:st==='idle'?'':t};
+    });
+  }
+  function setPair(a,b){
+    var A=$('a'),B=$('b'); if(!A||!B)return;
+    A.value=String(a);B.value=String(b);
+    A.dispatchEvent(new Event('change'));   /* the catalog's own handler: draw() */
+  }
+  function priceLine(C){
+    if(!C.priced)return K('p.none','no price is asked for this one yet');
+    var P=D.price[C.sym]||{state:'idle'};
+    return P.state==='ok'?K('p.ok','top rung at the live price: {v}').replace('{v}',P.text):P.state==='wait'?K('p.wait','asking for the live price…'):P.state==='no'?K('p.no','the price did not answer here, so none is shown'):P.state==='none'?K('p.nopx','the pair answered without a price'):K('p.idle','price not asked yet');
+  }
+
+  /* ── NEW BEE ── */
+  function who(C){var a=String(C.artist||'');return /^unattributed/i.test(a)?K('b.who0','not known yet'):/anon/i.test(a)?K('b.whoAnon','an anonymous artist'):a.split(/\s[—(]/)[0].trim();}
+  function beePrice(C){
+    if(!C.priced)return K('b.pNone','not asked here yet');
+    var P=D.price[C.sym]||{state:'idle'};
+    return P.state==='ok'?P.text:P.state==='wait'?K('b.pWait','asking…'):P.state==='no'?K('b.pNo','it did not answer today'):P.state==='none'?K('b.pNopx','the market gave no price'):K('b.pIdle','not asked yet');
+  }
+  function bee(){
+    $('etCmBeeLede').textContent=K('b.lede','{n} collections whose pictures grow as you hold more of them. pick two to see how they differ.').replace('{n}',D.cols.length);
+    var box=$('etCmPick'), h='';
+    [['a',0,K('b.first','first')],['b',1,K('b.second','second')]].forEach(function(S){
+      var C=D.cols[D.pair[S[1]]], open=R.open===S[0];
+      h+='<button type="button" class="et-b-row" data-side="'+S[0]+'" aria-expanded="'+open+'"><span>'+esc(S[2])+'</span><small><span class="et-b-pickv">'+esc(C?C.sym:'')+'</span>'+CHEV+'</small></button>';
+      if(open)h+='<div class="et-b-opts">'+D.cols.map(function(O){return '<button type="button" class="et-b-row" data-pick="'+O.i+'" data-for="'+S[0]+'" aria-pressed="'+(O.i===D.pair[S[1]])+'"><span>'+esc(O.sym)+'</span><small>'+esc(O.chain)+'</small></button>';}).join('')+'</div>';
+    });
+    box.innerHTML=h;
+    var A=D.cols[D.pair[0]], B=D.cols[D.pair[1]]; if(!A||!B){$('etCmVs').innerHTML='';return;}
+    var unk=K('b.unk','not known yet');
+    var v=function(x,cls){return '<div class="et-vs-v'+(x==null?' et-unk':'')+'">'+esc(x==null?unk:x)+'</div>';};
+    var rows=[
+      [K('b.exist','how many exist'),A.supply==null?null:num(A.supply),B.supply==null?null:num(B.supply)],
+      [K('b.levels','levels to grow through'),A.rungs==null?null:A.rungs+' '+K('b.steps','steps'),B.rungs==null?null:B.rungs+' '+K('b.steps','steps')],
+      [K('b.top','the top level needs'),A.top==null?null:num(A.top)+(A.pct!=null?' · '+pctS(A)+' '+K('b.ofAll','of all'):''),B.top==null?null:num(B.top)+(B.pct!=null?' · '+pctS(B)+' '+K('b.ofAll','of all'):'')],
+      [K('b.traits','its traits are written on the chain'),A.hasMeta==null?null:A.hasMeta?K('b.yes','yes'):K('b.no','no, they live in the picture'),B.hasMeta==null?null:B.hasMeta?K('b.yes','yes'):K('b.no','no, they live in the picture')],
+      [K('b.price','price at the top level'),beePrice(A),beePrice(B)],
+      [K('b.who','made by'),A.artist&&!/^unattributed/i.test(A.artist)?who(A):null,B.artist&&!/^unattributed/i.test(B.artist)?who(B):null]
+    ];
+    $('etCmVs').innerHTML='<b>'+esc(A.sym)+'</b><b>'+esc(B.sym)+'</b>'+rows.map(function(r){return '<div class="et-vs-l">'+esc(r[0])+'</div>'+v(r[1])+v(r[2]);}).join('');
+  }
+
+  /* ── RAVER ── every collection a ray; its rungs climb outward on a log scale of the share of all
+     supply they need (0.0001 % at the heart's edge, 1 % at the rim); unmeasured ladders are dashed */
+  var R0=58,R1=184;
+  var rad=function(p){return R0+(Math.log10(p)+4)/4*(R1-R0);};
+  function ang(i){return (-90+i*360/D.cols.length)*Math.PI/180;}
+  function rays(){
+    var svg=$('etCmRays'); if(!svg)return;
+    var h='', A=D.pair[0], B=D.pair[1];
+    [0.001,0.01,0.1,1].forEach(function(p){h+='<circle class="et-ray-guide" r="'+rad(p).toFixed(1)+'"/>';});
+    D.cols.forEach(function(C){
+      var a=ang(C.i), cs=Math.cos(a), sn=Math.sin(a), lit=C.i===A?'you':C.i===B?'ai':null;
+      var col=lit?tok(lit):C.ladder?tok('sovereign'):tok('ink-dim');
+      var end=C.ladder?rad(C.pct):R1, x=function(r){return (r*cs).toFixed(1);}, y=function(r){return (r*sn).toFixed(1);};
+      h+='<g class="et-ray" data-i="'+C.i+'" role="button" tabindex="0" aria-pressed="'+(!!lit)+'" aria-label="'+esc(C.sym+': '+(C.ladder?C.rungs+' rungs, top '+num(C.top)+' = '+pctS(C)+' of supply':'ladder not measured'))+'" opacity="'+(lit?1:0.72)+'">';
+      var w=Math.PI/D.cols.length, P=function(r,d){return (r*Math.cos(a+d)).toFixed(1)+' '+(r*Math.sin(a+d)).toFixed(1);};
+      h+='<path class="et-ray-hit" d="M'+P(R0-8,-w)+'A'+(R0-8)+' '+(R0-8)+' 0 0 1 '+P(R0-8,w)+'L'+P(R1+14,w)+'A'+(R1+14)+' '+(R1+14)+' 0 0 0 '+P(R1+14,-w)+'Z"/>';
+      h+='<line class="et-ray-line" x1="'+x(R0)+'" y1="'+y(R0)+'" x2="'+x(end)+'" y2="'+y(end)+'" stroke="'+col+'"'+(C.ladder?'':' stroke-dasharray="3 6"')+'/>';
+      if(C.ladder&&C.supply){
+        C.ladder.forEach(function(v,k){var r=rad(v/C.supply*100),topR=k===C.ladder.length-1,s=topR?8:4.5;
+          h+='<circle cx="'+x(r)+'" cy="'+y(r)+'" r="'+s+'" fill="'+(C.hasMeta?col:tok('bg'))+'" stroke="'+col+'" stroke-width="2"/>';});
+      } else h+='<circle cx="'+x(R1)+'" cy="'+y(R1)+'" r="6" fill="'+tok('bg')+'" stroke="'+col+'" stroke-width="2" stroke-dasharray="2 3"/>';
+      h+='</g>';
+    });
+    svg.innerHTML=h;
+    $('etCmMid').textContent=String(D.cols.length);
+  }
+  function raver(){
+    rays();
+    var measured=D.cols.filter(function(C){return C.ladder;}).length;
+    $('etCmHint').textContent=K('r.hint','{m} of {n} ladders measured · light two').replace('{m}',measured).replace('{n}',D.cols.length);
+    $('etCmScale').innerHTML='<span>'+esc(K('r.scale','rings, heart to rim: 0.001 % · 0.01 % · 0.1 % · 1 % of all there is'))+'</span>';
+    $('etCmLegend').innerHTML=D.cols.map(function(C){var lit=C.i===D.pair[0]?'you':C.i===D.pair[1]?'ai':null;
+      return '<button type="button" class="et-r-tile et-r-chip" data-i="'+C.i+'" aria-pressed="'+(!!lit)+'"><i style="background:'+(lit?tok(lit):C.ladder?tok('sovereign'):'transparent')+';border:1.5px '+(C.ladder?'solid':'dashed')+' '+(lit?tok(lit):C.ladder?tok('sovereign'):tok('ink-dim'))+'"></i>'+esc(C.sym)+'</button>';}).join('');
+    var card=function(C,cls){return '<div class="'+cls+'"><b>'+esc(C.sym)+'</b><span>'+esc(C.ladder?K('r.top','top rung {v} · {p} of supply').replace('{v}',num(C.top)).replace('{p}',pctS(C)):K('r.noLadder','ladder not measured yet'))+'</span><span>'+esc(C.ladder?C.rungs+' '+K('r.rungs','rungs'):'')+(C.ladder?' · ':'')+esc(C.hasMeta?K('r.meta','traits on-chain'):C.hasMeta===false?K('r.noMeta','traits only in the art'):K('r.metaUnk','traits unmeasured'))+'</span><em>'+esc(priceLine(C))+'</em></div>';};
+    var A=D.cols[D.pair[0]],B=D.cols[D.pair[1]];
+    $('etCmPair').innerHTML=A&&B?card(A,'et-a')+card(B,'et-b2'):'';
+    $('etCmRaverNote').textContent=K('r.note','tap a ray or a name: it takes the side you changed less recently. filled beads = traits on-chain · hollow = in the art · dashed = not measured');
+  }
+
+  /* ── CYPHERPUNK ── */
+  function cy(){
+    var n=D.cols.length, measured=D.cols.filter(function(C){return C.ladder;}).length, chains={};
+    D.cols.forEach(function(C){chains[C.chain]=1;});
+    var A=D.cols[D.pair[0]], B=D.cols[D.pair[1]];
+    var priced=D.cols.filter(function(C){return C.priced;}), P0=priced[0], PS=P0?(D.price[P0.sym]||{state:'idle'}):null;
+    $('etCmPath').textContent='catalog://erc-20i · '+n+' deployments · '+Object.keys(chains).length+' chains';
+    $('etCmChips').innerHTML='<span class="et-on">sources code + chain</span><span>pending said '+pending()+'</span><span>price pairs '+priced.length+'</span>'+
+      (PS?'<span class="'+(PS.state==='ok'?'et-ok':PS.state==='no'||PS.state==='none'?'et-no':'')+'">price '+(PS.state==='ok'?'live':PS.state==='wait'?'asking':PS.state==='no'?'unreachable':PS.state==='none'?'no price':'not asked')+'</span>':'');
+    $('etCmCyGuardN').textContent=measured+' of '+n+' '+K('c.ladders','ladders measured');
+    $('etCmRows').innerHTML=D.cols.map(function(C){
+      var id=String(C.i+1).padStart(2,'0'), open=R.open==='c'+C.i;
+      var meta=C.hasMeta?'<small class="et-st-ok">getMeta yes · on-chain JSON</small>':C.hasMeta===false?'<small class="et-st-guard">getMeta no</small>':'<small class="et-st-no">getMeta unmeasured</small>';
+      return '<tr class="et-pick" data-i="'+C.i+'" tabindex="0" aria-expanded="'+open+'" aria-selected="'+(C.i===D.pair[0]||C.i===D.pair[1])+'"><td>'+id+'</td><td>'+esc(C.sym)+'<small>'+esc(C.chain.toLowerCase()+' · '+C.addr.slice(0,8)+'…'+C.addr.slice(-4))+'</small>'+meta+'</td><td><span class="et-nw">'+(C.top?esc(C.topName+' @ '+num(C.top))+'</span><small>'+esc(pctS(C)+' of supply')+'</small>':'<span class="et-st-no">pending</span></span>')+'</td></tr>'+
+        (open?'<tr class="et-more" data-i="'+C.i+'"><td colspan="3">'+
+          '<small>supply '+esc(C.supply==null?'pending':num(C.supply))+' · seed words '+esc(C.seedWords)+'</small><small>seed shape '+esc(C.seedShape)+'</small>'+
+          '<small>ladder '+esc(C.ladder?C.ladder.map(function(v,k){return 'L'+(k+C.lvl0)+' ≥ '+num(v);}).join(' · '):'source pending')+'</small>'+
+          '<small>capture '+esc(C.capture)+'</small><small>known bug '+esc(C.bug)+'</small><small>pool '+esc(C.pool)+'</small><small>provenance '+esc(C.provenance)+'</small>'+
+          '<div class="et-c-row"><button type="button" class="et-c-ghost" data-set="a" data-i="'+C.i+'">set as a</button><button type="button" class="et-c-ghost" data-set="b" data-i="'+C.i+'">set as b</button></div></td></tr>':'');
+    }).join('');
+    $('etCmDiffH').textContent='pair diff · a '+(A?A.sym:'')+' × b '+(B?B.sym:'');
+    var f=function(C,k){var v=C[k];return v==null?'pending':typeof v==='number'?num(v):String(v);};
+    var rows=A&&B?[
+      ['chain',A.chain,B.chain],['supply',f(A,'supply'),f(B,'supply')],['seed words',String(A.seedWords),String(B.seedWords)],
+      ['rungs',A.rungs==null?'source pending':String(A.rungs),B.rungs==null?'source pending':String(B.rungs)],
+      ['top rung',A.top?A.topName+' @ '+num(A.top):'?',B.top?B.topName+' @ '+num(B.top):'?'],
+      ['% supply',pctS(A)||'?',pctS(B)||'?'],
+      ['getMeta',A.hasMeta==null?'unmeasured':A.hasMeta?'yes · on-chain JSON':'no',B.hasMeta==null?'unmeasured':B.hasMeta?'yes · on-chain JSON':'no'],
+      ['price',A.priced?(D.price[A.sym]||{}).state||'not asked':'not asked · no pair in the catalog',B.priced?(D.price[B.sym]||{}).state||'not asked':'not asked · no pair in the catalog']
+    ]:[];
+    $('etCmDiff').innerHTML=rows.map(function(r){var ne=r[1]!==r[2];return '<tr><th>'+esc(r[0])+'</th><td class="'+(ne?'et-ne':'')+'">'+(ne?'≠ ':'= ')+esc(r[1])+'<small>b '+esc(r[2])+'</small></td></tr>';}).join('');
+    var steps=[
+      ['read verified source · build-time','Pepi.sol (PEPi, trySeedTransfer three-path decode) · Generator.sol:10-14 (FUNGI, cloned 2026-08-16)','et-done'],
+      ['bisect ladders on-chain · build-time','boundary calls bracket each rung ±1 · FROGGI · JELLI · JEDI · 2,099,999 → L4 / 2,100,000 → L5 on FUNGI','et-done'],
+      ['selector census · build-time','bytecode read on two RPCs per deployment, agreement required · PEPI eth · NTNT · MiDi · 2026-08-25','et-done'],
+      ['price · live in this browser',P0?(P0.sym+' pair '+P0.pair.split('/')[1].slice(0,10)+'… · '+(PS.state==='ok'?'answered: '+PS.text:PS.state==='wait'?'asking now':PS.state==='no'?'no answer · said as unreachable, never a stale number':PS.state==='none'?'answered with no price':'not asked: '+P0.sym+' is not in the pair')):'no priced pair',PS&&PS.state==='ok'?'et-done':PS&&PS.state==='wait'?'et-now':PS&&(PS.state==='no'||PS.state==='none')?'et-guard':'et-todo'],
+      ['render','two panes + the family table · a pending cell says pending','et-done']
+    ];
+    $('etCmPipe').innerHTML=steps.map(function(s){return '<li class="'+s[2]+'"><b>'+esc(s[0])+'</b><div>'+esc(s[1])+'</div></li>';}).join('');
+    $('etCmReceipt').innerHTML=[
+      ['pair',A&&B?esc(A.sym+' × '+B.sym):'none'],
+      ['price',P0?esc(P0.sym)+' · '+(PS.state==='ok'?'<span class="et-st-ok">'+esc(PS.text)+'</span>':'<span class="et-st-no">'+esc(PS.state==='wait'?'asking':PS.state==='no'?'unreachable · none shown':PS.state==='none'?'no price in the answer':'not asked')+'</span>')+(D.readAt&&PS.state!=='idle'?'<small>state at '+D.readAt.toISOString().slice(11,19)+' utc</small>':''):'no priced pair'],
+      ['pending','<span class="et-st-guard">'+pending()+' cells said as pending, unmeasured or ?</span>'],
+      ['ladders',measured+' of '+n+' measured · each from its own contract’s constants'],
+      ['census','docs/receipts/RECEIPT_SELECTOR_CENSUS_2026-08.md']
+    ].map(function(r){return '<tr><th>'+r[0]+'</th><td>'+r[1]+'</td></tr>';}).join('');
+    $('etCmVerify').innerHTML=[
+      P0?'curl -s https://api.dexscreener.com/latest/dex/pairs/'+P0.pair+' → pair.priceUsd × '+num(P0.top)+' = the top-rung price':'',
+      'read Generator.sol lines 10-14 in github.com/ToddStool/fungi → the FUNGI ladder 21,000 · 525,000 · 1,050,000 · 1,575,000 · 2,100,000',
+      'cat docs/receipts/RECEIPT_SELECTOR_CENSUS_2026-08.md → the PEPI eth · NTNT · MiDi interface cells'
+    ].filter(Boolean).map(function(s){return '<li><code>'+esc(s)+'</code></li>';}).join('');
+  }
+
+  function keyed(){document.querySelectorAll('#eternal [data-etk],#etArchive[data-etk]').forEach(function(e){if(e.dataset.etEn==null)e.dataset.etEn=e.textContent;e.textContent=T(e.dataset.etk,e.dataset.etEn);});}
+  function all(){readPair();readPrice();keyed();bee();raver();cy();}
+  var sched=0;function soon(){if(sched)return;sched=requestAnimationFrame(function(){sched=0;all();});}
+  function light(i){
+    if(i===D.pair[0]||i===D.pair[1])return;
+    var side=R.last==='a'?'b':'a'; R.last=side;
+    setPair(side==='a'?i:D.pair[0],side==='b'?i:D.pair[1]);
+  }
+
+  function wire(){
+    var ev=$('eternal'); if(!ev)return;
+    ev.addEventListener('click',function(e){
+      var side=e.target.closest('.et-b-row[data-side]');
+      if(side){var s=side.getAttribute('data-side');R.open=R.open===s?null:s;bee();var b=ev.querySelector('.et-b-row[data-side="'+s+'"]');if(b)b.focus({preventScroll:true});return;}
+      var pick=e.target.closest('.et-b-row[data-pick]');
+      if(pick){var i=+pick.getAttribute('data-pick'),f=pick.getAttribute('data-for');R.open=null;R.last=f;setPair(f==='a'?i:D.pair[0],f==='b'?i:D.pair[1]);all();var bb=ev.querySelector('.et-b-row[data-side="'+f+'"]');if(bb)bb.focus({preventScroll:true});return;}
+      var ray=e.target.closest('.et-ray,.et-r-chip');
+      if(ray){light(+ray.getAttribute('data-i'));all();return;}
+      var set=e.target.closest('[data-set]');
+      if(set){var j=+set.getAttribute('data-i'),w=set.getAttribute('data-set');R.last=w;setPair(w==='a'?j:D.pair[0],w==='b'?j:D.pair[1]);all();return;}
+      var tr=e.target.closest('.et-c-tab tr.et-pick');
+      if(tr){var k='c'+tr.getAttribute('data-i');R.open=R.open===k?null:k;cy();var t2=ev.querySelector('.et-c-tab tr.et-pick[data-i="'+tr.getAttribute('data-i')+'"]');if(t2)t2.focus({preventScroll:true});}
+    });
+    ev.addEventListener('keydown',function(e){
+      if(e.key!=='Enter'&&e.key!==' ')return;
+      var t=e.target.closest('.et-ray,.et-c-tab tr.et-pick'); if(!t)return;
+      e.preventDefault(); t.dispatchEvent(new MouseEvent('click',{bubbles:true}));
+    });
+    $('etCmSwap').addEventListener('click',function(){var s=$('sw');if(s)s.click();});
+    $('etCmCyRead').addEventListener('click',function(){var a=$('a');if(a)a.dispatchEvent(new Event('change'));});
+    var split=$('split'); if(split)new MutationObserver(soon).observe(split,{childList:true,subtree:true,characterData:true,attributes:true,attributeFilter:['class']});
+    ['a','b'].forEach(function(id){var s=$(id);if(s)s.addEventListener('change',soon);});
+    document.addEventListener('blang',function(){all();});
+  }
+
+  wire(); all();
+  window.__eternal={data:D,raver:R};
+})();
 </script>
 <div id="bnr-beta-badge" style="position:fixed;right:.6rem;bottom:calc(var(--tbar-h,50px) + 10px);z-index:9997;font:14px ui-monospace,monospace"><a href="../" style="display:inline-flex;align-items:center;min-height:44px;color:#39c5cf;text-decoration:none;border:1px solid #30363d;border-radius:99px;padding:0 16px;background:#161b22">⌂ hub</a></div>
 <script src="../tour.js?v=42"></script>
