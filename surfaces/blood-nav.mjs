@@ -519,10 +519,21 @@ function ensureDrawer() {
   var bar = doc.createElement('div');
   bar.id = 'drawerbar'; bar.className = 'drawerbar';
   var name = doc.createElement('span'); name.id = 'drawer-name';
+  /* the peek names who the drawer holds from the first paint (it read as an empty band until a tap) */
+  var cur = a.S && (a.S.curRoot || a.S.root), cp = cur && a.S.persons[cur];
+  if (cp && !cp.living) name.textContent = cp.name || cur;
   var btn = doc.createElement('button');
   btn.id = 'drawer-toggle'; btn.type = 'button'; btn.setAttribute('aria-label', 'collapse the person drawer');
-  btn.textContent = '?';
-  btn.addEventListener('click', function () { detail.classList.toggle('open'); });
+  /* the glyph was a mangled '?' (encoding loss): draw the real direction, and keep the label true to it */
+  function mark() {
+    var open = detail.classList.contains('open');
+    btn.textContent = open ? '\u25BE' : '\u25B4';
+    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    btn.setAttribute('aria-label', open ? 'collapse the person drawer' : 'open the person drawer');
+  }
+  mark();
+  btn.addEventListener('click', function () { detail.classList.toggle('open'); mark(); });
+  if (typeof MutationObserver === 'function') new MutationObserver(mark).observe(detail, { attributes: true, attributeFilter: ['class'] });
   bar.appendChild(name); bar.appendChild(btn);
   detail.insertBefore(bar, detail.firstChild);
 }

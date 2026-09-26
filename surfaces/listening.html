@@ -76,6 +76,11 @@ th{color:var(--violet);font-weight:400;font-size:13px} td.n{color:var(--ink)}
   body details[data-reg-disclose]>summary{padding:10px 14px}
 }
 footer{max-width:920px;margin:22px auto 0;color:var(--dim);font-size:12.5px;text-align:center;line-height:1.8}
+/* the page end at 390 px (2026-09-26 lower-half pass): the fork count and the
+   footer read at 14 px; footer links are 44 px targets without moving a line. */
+.badge,.machine{font-size:14px;letter-spacing:.04em}
+footer{font-size:14px}
+footer a{display:inline-block;padding-block:12px;margin-block:-12px}
 </style>
 </head>
 <body>

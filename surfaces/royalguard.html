@@ -52,6 +52,25 @@ a{color:var(--cyan)}
 .breach b{color:#fff}
 footer{max-width:1020px;margin:22px auto 0;color:var(--faint);font-size:10px;text-align:center;line-height:2}
 @media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
+/* THE LOWER HALF AT 390 (2026-09-26, footer audit): the stack cards, the
+   vantage tiles, the raw box and the footer were 8.5–11 px, the footer in
+   --faint at 3.7:1, and the crate/parent links 11–12 px tall. Floor 12 px
+   everywhere (cypherpunk keeps the dense mono); New bee and raver read at
+   14 px, New bee prose at 16 px. Short links carry a 44 px tap box without
+   moving the line (padding in, margin back out). */
+h2{font-size:12px}
+.law,.stackcard,.breach,.reg .body,.door .dd{font-size:12px}
+.stackcard .lay,.v .l,.reg .note,.reg .who{font-size:12px}
+.reg .note{color:var(--dim)}
+.rawbox{font-size:12px}
+.vantage{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+.stackcard .lay{margin-bottom:4px}
+footer{font-size:12px;color:var(--dim);padding:0 14px 8px;line-height:1.9}
+.stackcard a,.law a,footer a,.reg .body a{display:inline-block;padding-block:12px;margin-block:-12px}
+.breach a{padding-block:12px}
+body:not([data-reg="cypherpunk"]) h2{font-size:14px}
+body:not([data-reg="cypherpunk"]) :is(.law,.stackcard,.breach,.reg .body,.door .dd,.stackcard .lay,.v .l,.reg .note,.reg .who,footer){font-size:14px}
+body[data-reg="bee"] :is(.law,.breach){font-size:16px;line-height:1.75}
 </style>
 </head>
 <body>
@@ -119,7 +138,7 @@ footer{max-width:1020px;margin:22px auto 0;color:var(--faint);font-size:10px;tex
        stroke-linecap="round" transform="rotate(-90 60 60)"/><text x="60" y="57" text-anchor="middle" fill="#E8B54B" font-size="17" font-family="IBM Plex Mono">$1.49</text>
       <text x="60" y="74" text-anchor="middle" fill="#8a9a8a" font-size="8" font-family="IBM Plex Mono">/ GB · 1 h</text></svg>
       <div class="big">21.1 ANT</div>
-      <div class="body" style="text-align:center;font-size:10px">1 h upload cost · 7 d settles to
+      <div class="body" style="text-align:center">1 h upload cost · 7 d settles to
       <b>$1.26 / 23.3 ANT</b> · ANT $0.0408 · ETH $2,435</div>
       <div class="note">vividness lives in the chrome — never in the data encoding</div>
     </div>

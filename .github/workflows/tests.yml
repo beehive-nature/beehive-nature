@@ -687,6 +687,18 @@ jobs:
         if: always()
         working-directory: e2e
         run: node --test tour-bar-clearance.test.mjs
+      # THE BOTTOM HALF OF EVERY SURFACE (founder order 2026-09-26: "EVERYTHING BOTTOM HALF OF
+      # EVERY SURFACE NEEDS TO BE CHECKED AND FIXED"): every counted surface x bee/raver/cypherpunk
+      # at 390x844, scrolled to the end — the bar (cut items, 44 px targets, the page end under the
+      # bar, sideways scroll, a widened layout viewport) and the lower half (type under 12 px, text
+      # under 4.5:1, forced capitals, a dash or NaN shown as a value, text drawn over text, broken
+      # images, cut text). A RATCHET against e2e/footer-audit.baseline.json: a page x register may
+      # only lose findings; layout kinds get 2 of slack for runner font wrap. After a fix, record
+      # the smaller floor with --write-baseline and commit it.
+      - name: Bottom half — every surface x three registers at 390 px (ratchet)
+        if: always()
+        working-directory: e2e
+        run: node footer-audit.mjs --baseline footer-audit.baseline.json
       # Law of the Sea print (founder word "print publish" 2026-09-21, BgrOKbot):
       # the ruled first screen (title, three laws, Manifest) and the first
       # disclosure summary sit clear of #tbar at 390x844. Limit is innerHeight
@@ -700,11 +712,37 @@ jobs:
       # (ant-sdk PR #243), so the page falls back to the {"data":"<base64>"} envelope and plays the
       # decoded Blob; an upgraded antd streams directly and the envelope is never fetched. Door down,
       # not a video, error and cut envelopes end on the failure row. The door is MOCKED; the real
-      # relay is touched zero times.
+      # relay is touched zero times. WHEN to play is by time, not bytes (2026-09-26, VP9 fixture
+      # fixtures/bview/ — this Chromium has no H.264): a door at half the bitrate gets an honest
+      # "ready to play in ~N s" and no play before the computed threshold, then no freeze; twice
+      # the bitrate plays early; a mid-play slowdown brings the countdown back and resumes by
+      # itself; mediaCapabilities smooth=false shows the plain warning row.
       - name: Watch from Autonomi — plays through today's door and an upgraded one (mocked door)
         if: always()
         working-directory: e2e
         run: node --test bview.test.mjs
+      # ETERNAL (founder blueprint 2026-09-26, docs/design/eternal): bGENEaLOGy is three products in
+      # one surface. At 390 px each register shows only its own front in its own dress (paper +
+      # Instrument Serif / black-green + Unbounded mandala / Plex Mono instrument); all three carry
+      # the same facts (the line walked from the model, the living guard, the storage receipt); the
+      # gestures are honest (bee consent box, raver four terms + a full hold, cypherpunk sign) and
+      # every one hands off to the preservation flow — "kept" is drawn only from the receipt.
+      - name: bGENEaLOGy — three products, one set of facts (eternal blueprint)
+        if: always()
+        working-directory: e2e
+        run: node --test blood-eternal.test.mjs
+      # SKAISTS, THE DESIGN SYSTEM IN CODE (founder, 2026-09-26: "there is real UX/UI/standards metrics").
+      # surfaces/skaists.css is compiled from docs/design/skaists/tokens.json (graded A- 2026-09-19) and must
+      # stay fresh; a three-UI front must score 100% on the standards meter per register: every painted
+      # colour a token of that register, every size on its type scale, every corner a radius token,
+      # every target >= 44 px, text >= 4.5:1 (WCAG 2.2 AA), no text-transform.
+      - name: Skaists — the design system is compiled, not hand-copied
+        if: always()
+        run: node scripts/build-skaists.mjs --check
+      - name: Skaists — the standards meter (three-UI fronts score 100%)
+        if: always()
+        working-directory: e2e
+        run: node skaists-conformance.mjs --only blood.html --min 100
       # SHARED-POLICY FIELD OWNERSHIP (ceremony-blocking repair, 2026-09-17):
       # a View change in a stale wallet tab must NEVER erase newer founder
       # policy from the shared key — every writer merges with the latest

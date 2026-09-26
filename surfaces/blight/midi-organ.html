@@ -7,28 +7,34 @@
 <meta http-equiv="Expires" content="0">
 <title>bLighT Organ — the seed becomes sound (for MiDi, the youngest lost boy)</title>
 <style>
-:root{--bg:#0A0A0F;--crt:#00FF41;--cyan:#00E5FF;--pink:#FF3DB0;--dim:#5a6478}
+:root{--bg:#0A0A0F;--crt:#00FF41;--cyan:#00E5FF;--pink:#FF3DB0;--dim:#8b95a8}
 *{margin:0;padding:0;box-sizing:border-box}
 body{background:var(--bg);color:#cfe8d6;font:13px/1.6 'IBM Plex Mono',monospace;padding:26px 18px 60px;
   background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="56" height="97"><g fill="none" stroke="%231a1a2a"><path d="M28 0 L56 16 L56 48 L28 64 L0 48 L0 16 Z"/><path d="M28 0 L56 16 L56 48 L28 64 L0 48 L0 16 Z" transform="translate(28,48)"/></g></svg>')}
 .wrap{max-width:760px;margin:0 auto}
 h1{color:var(--cyan);font-size:20px;text-shadow:0 0 10px rgba(0,229,255,.4)}
-.sub{color:var(--dim);font-size:11.5px;margin:6px 0 18px;line-height:1.7}
+.sub{color:var(--dim);font-size:14px;margin:6px 0 18px;line-height:1.7}
 .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
-input,select,button{font:inherit;background:#0d0d15;color:var(--crt);border:1px solid #262638;padding:8px 12px;border-radius:4px}
+input,select,button{font:inherit;font-size:14px;min-height:44px;background:#0d0d15;color:var(--crt);border:1px solid #262638;padding:8px 12px;border-radius:4px}
 input[type=number]{width:130px;color:var(--cyan)}
 #c{max-width:100%;min-width:0}
 button{cursor:pointer;border-color:var(--crt)} button:hover{background:var(--crt);color:#000}
 button.stop{border-color:var(--pink);color:var(--pink)} button.stop:hover{background:var(--pink);color:#000}
-button.ghost{border-color:#262638;color:var(--dim)} button.ghost:hover{background:#1a1a2a;color:var(--cyan)}
+button.ghost{border-color:#34344a;color:#a9b5ae} button.ghost:hover{background:#1a1a2a;color:var(--cyan)}
 #stage{background:#000;border:1px solid #1a1a2a;border-radius:6px;height:150px;display:flex;align-items:flex-end;
   gap:3px;padding:10px;margin-bottom:12px;overflow:hidden}
 .bar{flex:1;min-width:6px;border-radius:2px 2px 0 0;transition:height .12s ease;height:8%}
-#meta{font-size:11.5px;line-height:2;margin-bottom:10px;min-height:24px}
-.chip{display:inline-block;border:1px solid #2a2a3d;border-radius:4px;padding:2px 8px;margin:2px 6px 2px 0;font-size:11px}
-.hint{color:var(--dim);font-size:11px;margin:10px 0;line-height:1.7}
+#meta{font-size:14px;line-height:1.8;margin-bottom:10px;min-height:24px}
+.chip{display:inline-block;border:1px solid #2a2a3d;border-radius:4px;padding:2px 8px;margin:2px 6px 2px 0;font-size:13px}
+.hint{color:var(--dim);font-size:14px;margin:14px 0;line-height:1.7}
 .hint b{color:#cfe8d6}
-.foot{margin-top:20px;color:var(--dim);font-size:10.5px;line-height:1.8}
+.foot{margin-top:22px;padding-top:14px;border-top:1px solid #1a1a2a;color:var(--dim);font-size:14px;line-height:1.7}
+@media (prefers-reduced-motion:reduce){.bar{transition:none}}
+
+  /* LOWER HALF at 390px (2026-09-26): the hub chip is a 44px control floating
+     just above the tour bar (anchored on the bar's published --tbar-h), so the
+     page end reserves the bar plus the chip and nothing ever ends beneath either. */
+  body{padding-bottom:calc(var(--tbar-h,50px) + 24px)!important}
 </style>
 </head>
 <body><div class="wrap">
@@ -170,7 +176,7 @@ $('link').onclick=()=>{
 };
 if(q.get('seed')) read();
 </script>
-</div><div id="bnr-beta-badge" style="position:fixed;right:.6rem;bottom:calc(.6rem + 46px);z-index:9997;font:12px ui-monospace,monospace;opacity:.75"><a href="../" style="color:#39c5cf;text-decoration:none;border:1px solid #30363d;border-radius:99px;padding:.15rem .7rem;background:#161b22">⌂ hub</a></div>
+</div><div id="bnr-beta-badge" style="position:fixed;right:.6rem;bottom:calc(var(--tbar-h,50px) + 10px);z-index:9997;font:14px ui-monospace,monospace"><a href="../" style="display:inline-flex;align-items:center;min-height:44px;color:#39c5cf;text-decoration:none;border:1px solid #30363d;border-radius:99px;padding:0 16px;background:#161b22">⌂ hub</a></div>
 <script src="../tour.js?v=42"></script>
 </body>
 </html>

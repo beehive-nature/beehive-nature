@@ -51,6 +51,23 @@ nav:not(#tbar){margin-top:24px;display:flex;gap:14px;flex-wrap:wrap;font-size:11
 nav:not(#tbar) a{color:var(--dim);text-decoration:none}
 nav:not(#tbar) a:hover{color:var(--cyan)}
 @media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
+/* ── the page's end, read on a phone (footer pass 2026-09-26) ────────────
+   casing law: no forced capitals; nothing under 12 px; the fleet row is a
+   44 px tap row; bee and raver read the end at 14 px. */
+:root{--dim:#8c96aa}
+.herofig .cap{text-transform:none;letter-spacing:.04em;font-size:12px}
+.pane h3{letter-spacing:.3px}
+.pane .by{font-size:12px}
+.facts,.status{font-size:12.5px}
+.foot{font-size:12px;padding-top:16px;border-top:1px solid var(--line)}
+nav:not(#tbar){gap:0 14px;font-size:12px;align-items:center;margin-top:16px;color:var(--dim)}
+nav:not(#tbar) a{display:inline-flex;align-items:center;min-height:44px}
+body:not([data-reg="cypherpunk"]) .facts,body:not([data-reg="cypherpunk"]) .status,
+body:not([data-reg="cypherpunk"]) .foot,body:not([data-reg="cypherpunk"]) nav:not(#tbar),
+body:not([data-reg="cypherpunk"]) .pane .by{font-size:14px}
+body:not([data-reg="cypherpunk"]) .herofig .cap{font-size:13px}
+.split>*{min-width:0}
+.facts i{overflow-wrap:anywhere}
 </style>
 </head>
 <body>
@@ -70,10 +87,10 @@ is told. One file, zero calls — the engine is vendored MIT in the source of th
 </div>
 
 <div class="split">
-  <div class="pane"><h3 id="viewTitle">THE TREE — tap to flatten</h3>
+  <div class="pane"><h3 id="viewTitle">the tree — tap to flatten</h3>
     <div class="by" id="viewHint">dark modules stand raised; light modules are the ground</div>
     <div class="well"><canvas id="cv" width="640" height="640"></canvas></div></div>
-  <div class="pane"><h3>THE CODE, HONESTLY</h3><div class="by">what the matrix carries</div>
+  <div class="pane"><h3>the code, honestly</h3><div class="by">what the matrix carries</div>
     <div class="facts" id="facts">—</div>
     <div class="status" id="status">paste a link and press GROW.</div></div>
 </div>
@@ -1033,7 +1050,7 @@ function animateRise(){
 cv.addEventListener('click',function(){
   if(!state.qr)return;
   state.flat=!state.flat;render();
-  $('viewTitle').textContent=state.flat?'THE PLATE — tap to raise':'THE TREE — tap to flatten';
+  $('viewTitle').textContent=state.flat?'the plate — tap to raise':'the tree — tap to flatten';
   $('viewHint').textContent=state.flat
     ?'strict scan plate: H · 4-module quiet zone · ≈17:1 contrast — this is what cameras read'
     :'dark modules stand raised; light modules are the ground';

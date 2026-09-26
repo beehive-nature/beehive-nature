@@ -91,6 +91,19 @@ video{width:100%;aspect-ratio:1;object-fit:cover;border-radius:var(--radius);
   color:var(--ink-dim);font-size:.72rem;text-align:center}
 pre{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:9px;
   font-size:.7rem;overflow:auto;max-height:130px;color:var(--ink-mut);margin:var(--s2) 0 0}
+/* the page end at 390 px (2026-09-26 lower-half pass). Casing law: gauge
+   states and speaker names read as written, never re-cased. Type floor: the
+   gauges, the conversation, the log and the foot read at 12-14 px; quiet text
+   (--ink-dim) lifted to 4.5:1 on the card and inside the tinted lines. */
+:root{--ink-dim:#7a9689}
+.gauge .s,.line .who{text-transform:none;letter-spacing:.02em;font-size:.8125rem}
+.line .meta,pre{font-size:.8125rem}
+.muted,.ratechip{font-size:.875rem}
+.foot{font-size:.875rem;line-height:1.6}
+/* a gauge whose sentence carries a <b> was split into flex columns (three
+   narrow strips at 390 px); the state chip now floats and the sentence flows */
+.gauge{display:flow-root}
+.gauge .s{float:left;margin:2px 8px 0 0}
 </style>
 </head>
 <body>

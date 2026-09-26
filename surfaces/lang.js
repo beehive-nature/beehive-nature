@@ -198,19 +198,19 @@ if(typeof document!=='undefined') (function(){
        page exercises the select/span hole today — closed before one does.
        The tour bar is nobody's element selector. */
     var wrap=document.createElement('span'); wrap.id='blangctl';
-    wrap.style.cssText='display:inline-flex;gap:5px;align-items:center;margin:0 0 0 10px;flex-shrink:0;'
-      +'padding-left:10px;border-left:1px solid #243026;vertical-align:middle;'
+    wrap.style.cssText='display:inline-flex;gap:5px;align-items:center;margin:0;flex-shrink:0;'
+      +'padding-left:6px;border-left:1px solid #243026;vertical-align:middle;'
       +'min-height:0;height:auto;box-sizing:border-box';
     var sel=document.createElement('select'); sel.id='blangsel';
     sel.setAttribute('aria-label','language');
     sel.style.cssText='background:#0d1410;color:#8a9a8a;border:1px solid #243026;'
-      +'border-radius:6px;font:10px "IBM Plex Mono",monospace;padding:2px 4px;max-width:110px;'
-      +'margin:0;min-height:24px;height:auto;box-sizing:border-box';
+      +'border-radius:8px;font:13px ui-sans-serif,system-ui,sans-serif;padding:0 6px;max-width:104px;'
+      +'margin:0;min-height:44px;height:44px;box-sizing:border-box';
     sel.innerHTML='<option value="" disabled>🌐</option>'+LANGS.map(function(L){
       return '<option value="'+L[0]+'"'+(L[2]?' title="'+L[2]+'"':'')+'>'+L[1]+'</option>'; }).join('');
     sel.addEventListener('change',function(){ setPref(sel.value); });
     var note=document.createElement('span'); note.id='blangnote';
-    note.style.cssText='font:9px "IBM Plex Mono",monospace;color:#FFD700;white-space:nowrap;'
+    note.style.cssText='font:12px ui-monospace,monospace;color:#e8c95a;white-space:nowrap;'
       +'margin:0;min-height:0;height:auto;box-sizing:border-box';
     wrap.appendChild(sel); wrap.appendChild(note);
     if(host) host.appendChild(wrap); else document.body.appendChild(wrap);

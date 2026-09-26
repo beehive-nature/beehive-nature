@@ -170,6 +170,29 @@ body[data-reg="cypherpunk"] #sources-panel summary{cursor:pointer;min-height:44p
   border:1px solid var(--reg-line,var(--line))!important;font:inherit!important
 }
 .bearth-language #blangnote{white-space:normal!important;color:var(--reg-ink,var(--dim))!important;font:.75rem/1.4 inherit!important}
+/* lower half at 390 px — the instrument's reading floor (founder phone review, 2026-09-26):
+   12px+ everywhere incl. cypherpunk, 44px footer doors, no dash drawn as a value */
+h2{font-size:12.5px;letter-spacing:.05em;line-height:1.5}
+.law{font-size:12.5px;line-height:1.8}
+table{font-size:12px}
+th{font-size:12px;letter-spacing:.02em}
+.vd{font-size:12px;letter-spacing:.02em}
+.quote{font-size:12.5px}
+.card h4{font-size:12px;letter-spacing:.03em;line-height:1.5}
+.card p{font-size:13px;line-height:1.75}
+.card p.fails{font-size:12px}
+.cw .cap,.o .l,.o .w,label{font-size:12px}
+.cmp .row{font-size:12px}
+footer{color:var(--dim);font-size:12.5px;line-height:1.7}
+footer{line-height:2.1}
+footer a{padding-block:12px;text-underline-offset:3px}
+body[data-reg="bee"] :is(.law,.quote,.card p){font:16px/1.7 var(--bee-font)}
+body[data-reg="bee"] .card p.fails{font-size:15px}
+body[data-reg="bee"] :is(table,th,.vd,.card h4,footer,.cw .cap,.o .l,.o .w,label,.cmp .row){font-family:var(--bee-font);font-size:14px;letter-spacing:normal}
+body[data-reg="bee"] h2{font:600 16px/1.4 var(--bee-font);letter-spacing:normal}
+body[data-reg="raver"] :is(.law,.quote,.card p){font-size:14.5px}
+body[data-reg="raver"] :is(table,th,.vd,.card h4,footer,h2,.cw .cap,.o .l,.o .w,label,.cmp .row){font-size:14px}
+#sources-panel .law{line-height:2.05}
 </style>
 </head>
 <body data-reg="bee" data-bee-theme="custom" data-bearth-beat="arrival">
@@ -485,7 +508,7 @@ body[data-reg="cypherpunk"] #sources-panel summary{cursor:pointer;min-height:44p
       <p>Hemp absorbs twice as much CO₂ as rainforest and sequesters nitrogen, making it the world's
       most powerful carbon-capturing crop — and its waste stream is a natural fertiliser that closes
       the nutrient loop.</p>
-      <p style="color:var(--dim);font-size:10px;margin-top:9px">Every clause fails. Rainforest was
+      <p class="fails" style="color:var(--dim);margin-top:9px">Every clause fails. Rainforest was
       never in the source; gross seasonal uptake is being compared to net annual accumulation; hemp
       fixes no nitrogen and exports 40 kg N/ha in seed; and its bulk co-product removes soil nitrogen
       rather than supplying it.</p>
@@ -699,8 +722,8 @@ function render(){
   $('animals').tBodies[0].innerHTML=A.map(function(a){
     return '<tr><td class="n">'+a[0]+'</td><td style="text-align:right">'+a[1]+'</td>'
       +'<td style="text-align:right;font-style:italic;color:var(--faint)">'+a[2]+'</td>'
-      +'<td style="text-align:right;font-style:italic;color:var(--faint)">—</td>'
-      +'<td style="text-align:right;font-style:italic;color:var(--faint)">—</td>'
+      +'<td style="text-align:right;font-style:italic;color:var(--faint)">not measured</td>'
+      +'<td style="text-align:right;font-style:italic;color:var(--faint)">not measured</td>'
       +'<td>'+a[3]+'</td></tr>'; }).join('');
 }
 function o(v,u,l,w,alarm){ return '<div class="o'+(alarm?' alarm':'')+'"><div class="v">'+v

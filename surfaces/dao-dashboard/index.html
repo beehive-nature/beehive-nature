@@ -230,6 +230,26 @@ a:hover{color:var(--ai);text-decoration:underline}
   .prop-row{grid-template-columns:58px 1fr;row-gap:6px}
   .prop-row .status-chip,.prop-row .votes-cell{grid-column:2}
 }
+
+/* THE LOWER HALF AT 390 (2026-09-26, footer audit). Chips, stamps, the
+   price-feed source line, the "lands when" lines and the legend read at
+   9.5–11.5 px. Floors: 12 px everywhere (cypherpunk is the dense register),
+   14 px in new bee and raver; the CAP tick label stays 12 px because it sits
+   inside the 14 px bar at 87.5% and a larger label would leave the card.
+   Colour dress stays this page's one light dress. Network values wrap on
+   1.4 lines instead of 1. */
+.status-chip,.chip,.panel-stamp,.hr-note,.hr-line,.finding-badge,.absent-chip,.absent-lands,.legend-title,.lchip,.legend-text,.legend-enums,.legend-note,.hud-time,.gauge-meta-b,.gauge-meta-money,.atcap-note,.spirit-method,.breach-meta,.hr-breach-badge,.hr-past-lab,.hr-cap-lab,.votes-na,.votes,.delta,.prop-id,.net-k,.hud-label,.toggle-label,.commons-chip,.rate-body,.panel-sub,.absent-reason.quiet,.tagline,.hud-sub{font-size:12px}
+.net-v{line-height:1.4}
+.panel-stamp,.legend-title,.status-chip,.absent-chip{line-height:1.4}
+.legend-text{line-height:1.45}
+.panel-head{flex-wrap:wrap;row-gap:4px}
+@media (max-width:560px){
+  .finding{flex-wrap:wrap;row-gap:6px}
+  .finding-text{order:3;flex-basis:100%}
+  .finding-delta{margin-inline-start:auto}
+}
+.legend-items{row-gap:12px}
+body:is([data-reg="bee"],[data-reg="raver"]) :is(.status-chip,.panel-stamp,.hr-note,.hr-line,.finding-badge,.absent-chip,.absent-lands,.legend-title,.lchip,.legend-text,.legend-enums,.legend-note,.atcap-note,.spirit-method,.breach-meta,.hr-breach-badge,.votes-na,.votes,.prop-id,.net-k,.net-v,.rate-body,.panel-sub,.absent-reason.quiet,.absent-reason.fwd,.finding-text,.price-name,.circle-name,.respect-name,.prop-title){font-size:14px}
 </style>
 </head>
 <body>
@@ -301,7 +321,7 @@ const COPY = {
     netSub: 'Node quorum and chain state.',
     circleReason: "Absent — the circle lexicon hasn't landed. Nothing is drawn until it does.",
     circleLands: 'Lands when: circle lexicon v0.3 ratifies.',
-    spiritReason: 'Absent — SPIRIT-1 is undefined. There is no method to measure against yet.',
+    spiritReason: 'Absent — SPIRIT-1 is not defined yet. There is no method to measure against yet.',
     spiritLands: 'Lands when: SPIRIT-1 is defined and ratified.',
     breachTitle: 'Emission breached the cycle cap',
     breachBody: 'Emitted b exceeded the cap by 140. This is not a full gauge — it is a floor law failing, and it stays unmissable until resolved.',

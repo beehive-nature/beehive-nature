@@ -79,6 +79,25 @@ footer{max-width:900px;margin:22px auto 0;color:var(--dim);font-size:10px;text-a
   #pipe{height:150px}
 }
 @media(prefers-reduced-motion:reduce){#pipe{animation:none}}
+
+/* THE LOWER HALF AT 390 (2026-09-26, footer audit): the findings ledger, the
+   Sophia table, the fork and the footer read at 9–10.5 px, with 17 px
+   disclosure rows and 11–12 px inline link targets. Floors: 12 px everywhere
+   (cypherpunk stays the dense register), 14 px reading text in new bee and
+   raver, 16 px ledger prose in new bee. Casing law: no text-transform in the lower half (the hero caption up top keeps
+   its uppercase: e2e/design-acceptance.mjs D4 asserts it).
+   Colour dress stays this page's one dark dress. Inline links keep their
+   line but take a 32 px+ tap area; disclosure rows and the footer's way
+   home are 44 px targets. */
+.law,.badge,.art .meta,.art .chips span,summary,.art-body,.art-body h4,.art-body pre,.finder .who,.finder .what,table,.never,footer,header p{font-size:12px}
+.art-body pre{font-size:12px}
+summary{display:flex;align-items:center;min-height:44px;letter-spacing:.02em}
+:is(.law,.finder .what,td,.never,.art-body,.art .sym) a{padding-block:9px}
+footer a{display:inline-flex;align-items:center;min-height:44px;padding:0 6px}
+footer{line-height:1.9}
+body:is([data-reg="bee"],[data-reg="raver"]) :is(.law,.art .meta,.art .chips span,summary,.art-body,.art-body h4,.finder .who,.finder .what,table,.never,footer,header p,.art .sym,.art h3,section h2){font-size:14px}
+body:is([data-reg="bee"],[data-reg="raver"]) .badge{font-size:13px}
+html body[data-reg="bee"] :is(.law,.finder .what,.art-body,.never,.art .sym){font-size:16px;line-height:1.75}
 </style>
 </head>
 <body>

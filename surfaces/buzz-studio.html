@@ -25,49 +25,49 @@
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{overflow-x:hidden}
 body{background:var(--void);color:var(--ink);
- font:13px/1.65 ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+ font:max(13px,var(--fmin,12px))/1.65 ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
  padding:26px 14px 90px}
 main{max-width:960px;margin:0 auto}
 header{text-align:center;margin-bottom:6px}
 h1{font-size:clamp(32px,6vw,44px);line-height:1.1;font-weight:600;margin:10px 0 6px;
  background-image:linear-gradient(105deg,var(--biomass) 20%,#DFF5E0 90%);
  -webkit-background-clip:text;background-clip:text;color:transparent}
-.sub{color:var(--dim);font-size:11.5px;margin-top:8px;max-width:700px;margin-inline:auto;line-height:1.8}
+.sub{color:var(--dim);font-size:max(11.5px,var(--fmin,12px));margin-top:8px;max-width:700px;margin-inline:auto;line-height:1.8}
 .sub b{color:var(--ink);font-weight:400}
 a{color:var(--biomass)}
 /* D4 — one live figure, the comb's own count */
 .herofig{margin:18px auto 4px;display:flex;flex-direction:column;align-items:center;gap:2px}
 .herofig .num{font-size:38px;line-height:1;font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums}
-.herofig .cap{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
+.herofig .cap{font-size:max(10.5px,var(--fmin,12px));letter-spacing:.04em;text-transform:none;color:var(--faint)}
 .ministats{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-top:8px}
 .stat{display:inline-block;background:var(--inset);border:1px solid var(--line);border-radius:8px;
- padding:5px 10px;margin:2px 2px 0 0;font-size:10px;color:var(--dim)}
+ padding:5px 10px;margin:2px 2px 0 0;font-size:max(10px,var(--fmin,12px));color:var(--dim)}
 .stat b{color:var(--ink);font-weight:400}
 section{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:15px 16px;margin-top:14px}
-h2{font-size:13px;color:var(--ink);font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px;
+h2{font-size:max(13px,var(--fmin,12px));color:var(--ink);font-weight:700;letter-spacing:.04em;text-transform:none;margin-bottom:10px;
  display:flex;align-items:center;gap:9px;flex-wrap:wrap}
 h2::before{content:'';width:10px;height:10px;flex:none;
  clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);background:var(--biomass)}
 h2 b{color:var(--biomass);font-weight:700}
-.crumbs{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 0 9px;border-bottom:1px solid var(--line);font-size:11px;letter-spacing:.12em;text-transform:uppercase}
-.crumbs a{color:var(--dim)} .crumbs .here{color:var(--ink)} .crumbs .badge-live{margin-left:auto;display:inline-flex;align-items:center;gap:7px;color:var(--dim);font-size:10px;letter-spacing:.14em}
+.crumbs{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 0 9px;border-bottom:1px solid var(--line);font-size:max(11px,var(--fmin,12px));letter-spacing:.04em;text-transform:none}
+.crumbs a{color:var(--dim)} .crumbs .here{color:var(--ink)} .crumbs .badge-live{margin-left:auto;display:inline-flex;align-items:center;gap:7px;color:var(--dim);font-size:max(10px,var(--fmin,12px));letter-spacing:.14em}
 .crumbs .badge-live i{width:8px;height:8px;border-radius:50%;background:var(--biomass)}
-.kicker{font-size:10px;letter-spacing:.34em;text-transform:uppercase;color:var(--faint);margin-top:20px}
+.kicker{font-size:max(10px,var(--fmin,12px));letter-spacing:.04em;text-transform:none;color:var(--faint);margin-top:20px}
 h2 b{color:var(--biomass);font-weight:400}
-.law{color:var(--dim);font-size:10.5px;line-height:1.85}
+.law{color:var(--dim);font-size:max(10.5px,var(--fmin,12px));line-height:1.85}
 .law b{color:var(--ink);font-weight:400}
 /* the room — the guarantee door */
 .room{background:var(--inset);border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-top:4px}
 .roomname{font-size:17px;color:var(--ink)}
 .dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--faint);margin-right:7px;vertical-align:1px}
 .dot.live{background:var(--biomass)}
-.roomstate{color:var(--dim);font-size:10.5px;margin-top:6px;line-height:1.7}
+.roomstate{color:var(--dim);font-size:max(10.5px,var(--fmin,12px));margin-top:6px;line-height:1.7}
 .roomstate b{color:var(--ink);font-weight:400}
 .joinline{display:flex;gap:8px;align-items:stretch;flex-wrap:wrap;margin-top:10px}
 .joincode{flex:1 1 210px;min-width:0;background:var(--void);border:1px solid var(--line);border-radius:8px;
- padding:9px 11px;font:12px ui-monospace,monospace;color:var(--ai);word-break:break-all}
+ padding:9px 11px;font:max(12px,var(--fmin,12px)) ui-monospace,monospace;color:var(--ai);word-break:break-all}
 button.act{background:var(--inset);color:var(--biomass);border:1px solid var(--line);border-radius:8px;
- padding:8px 14px;cursor:pointer;font:11.5px ui-monospace,SFMono-Regular,Menlo,monospace;min-height:40px;margin:6px 6px 0 0}
+ padding:8px 14px;cursor:pointer;font:max(11.5px,var(--fmin,12px)) ui-monospace,SFMono-Regular,Menlo,monospace;min-height:40px;margin:6px 6px 0 0}
 button.act:hover{background:var(--biomass);color:var(--void)}
 button.act.primary{background:var(--biomass);color:var(--void)}
 button.act.primary:hover{background:#A9E29A}
@@ -79,19 +79,27 @@ button.act.primary:hover{background:#A9E29A}
 #palette button[aria-pressed="true"]{border-color:var(--biomass);box-shadow:0 0 0 2px rgba(134,204,114,.35)}
 #palette button.erase{background:var(--void);color:var(--dim);font-size:16px}
 textarea{width:100%;min-height:56px;background:var(--inset);color:var(--ink);border:1px solid var(--line);
- border-radius:8px;padding:8px;font:9.5px ui-monospace,monospace;resize:vertical;word-break:break-all}
+ border-radius:8px;padding:8px;font:max(9.5px,var(--fmin,12px)) ui-monospace,monospace;resize:vertical;word-break:break-all}
 pre{background:var(--inset);border:1px solid var(--line);border-radius:8px;padding:10px;margin-top:8px;
- font-size:9.5px;line-height:1.6;overflow-x:auto;color:var(--dim);white-space:pre-wrap;word-break:break-all}
+ font-size:max(9.5px,var(--fmin,12px));line-height:1.6;overflow-x:auto;color:var(--dim);white-space:pre-wrap;word-break:break-all}
 .ladder{background:var(--inset);border:1px solid var(--line);border-radius:10px;padding:11px 13px;
- font-size:10.5px;color:var(--dim);line-height:1.85;margin-top:8px}
+ font-size:max(10.5px,var(--fmin,12px));color:var(--dim);line-height:1.85;margin-top:8px}
 .ladder b{color:var(--ink);font-weight:400}
-footer{max-width:960px;margin:22px auto 0;color:var(--faint);font-size:10px;text-align:center;line-height:2}
+footer{max-width:960px;margin:22px auto 0;color:var(--faint);font-size:max(10px,var(--fmin,12px));text-align:center;line-height:2}
 @media (max-width:600px){
   body{padding:18px 10px 70px}
   section{padding:13px 12px}
   .herofig .num{font-size:34px}
-  .joincode{font-size:11px}
+  .joincode{font-size:max(11px,var(--fmin,12px))}
 }
+/* footer links are controls: a thumb-sized row, not text-height slivers */
+footer a{padding-block:14px} /* a 44 px tap target that leaves the line rhythm alone */
+/* pasted blocks break anywhere; the resting hint breaks between words */
+textarea:placeholder-shown{word-break:normal;overflow-wrap:break-word;min-height:76px}
+/* Lower-half floor (2026-09-26, 390 px phone review): every small size on this page
+   reads max(its own size, --fmin) — 12 px in cypherpunk's dense mono, 14 px for new bee
+   and raver, so no register ever draws reading text a phone cannot hold. */
+body[data-reg="bee"],body[data-reg="raver"]{--fmin:14px}
 </style>
 </head>
 <body>
@@ -140,7 +148,7 @@ footer{max-width:960px;margin:22px auto 0;color:var(--faint);font-size:10px;text
       <code class="joincode" id="joincode">wss://skaists.buzz</code>
       <button class="act primary" id="copywss" data-i18n="bz.copy">copy join address</button>
     </div>
-    <div style="margin-top:10px"><a id="roomdoor" href="https://skaists.buzz" style="display:inline-flex;align-items:center;min-height:32px;font-size:12px" data-i18n="bz.door">the web door is open — a standing invite →</a></div>
+    <div style="margin-top:10px"><a id="roomdoor" href="https://skaists.buzz" style="display:inline-flex;align-items:center;min-height:32px;font-size:max(12px,var(--fmin,12px))" data-i18n="bz.door">the web door is open — a standing invite →</a></div>
     <div class="roomstate" id="roomprobe" style="margin-top:8px">state: live — as of 2026-08-28 ·
       <b>no request leaves this page to render it</b></div>
     <button class="act" id="checkroom" style="margin-top:2px" data-i18n="bz.probe.btn">check the room now (opt-in probe)</button>

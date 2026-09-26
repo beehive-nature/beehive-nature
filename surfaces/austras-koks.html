@@ -27,6 +27,15 @@ details.receipt summary{min-height:44px;display:flex;align-items:center;cursor:p
   --rose:var(--tol-guard);--info:var(--tol-ai);--verified:var(--tol-life);
   background:var(--tol-card);border:1px solid var(--tol-line);border-radius:18px;padding:12px;font-size:14px}
 #panel:empty{display:none}
+/* lower half at 390 px (founder phone review, 2026-09-26): names break at syllables, not mid-letter;
+   raver keeps the whole name (three lines) instead of clipping it under "2 more above"; 12px floor */
+@media (max-width:520px){
+  .tol .tol-name{font-size:12.5px;hyphens:auto;-webkit-hyphens:auto}
+  .tol .tol-node{padding-inline:4px}
+  .tol .tol-cap,.tol .tol-more{font-size:12px}
+}
+.tol [data-reading="raver"] .tol-name,.tol[data-reading="raver"] .tol-name{-webkit-line-clamp:3;line-clamp:3}
+.tol [data-reading="cypherpunk"] :is(.tol-cap,.tol-more){font-size:12px}
 </style>
 </head>
 <body data-bee-theme="shared">

@@ -97,6 +97,28 @@ pre.boardlaw{background:var(--well);border:1px solid var(--line);border-radius:v
 @media (max-width:600px){body{padding:14px 10px 80px}section{padding:13px 12px}
   .seat{padding:10px 11px}.seat .pk{margin-left:0;width:100%}}
 @media (prefers-reduced-motion:reduce){.hx.nectar.live,.hx.honey.live{animation:none}}
+/* THE LOWER HALF AT 390 (2026-09-26, footer audit): the file rows, the bug
+   chips and the footer were drawn at 9–11 px. Floor is 12 px everywhere
+   (cypherpunk keeps the dense mono); New bee and raver read at 14 px, with
+   16 px for the prose paragraphs in New bee. Short links get a 44 px tap box
+   without moving the line (padding in, margin back out). */
+.orow .ochip,.bugrow .bs{font-size:12px;padding:3px 10px}
+.orow .omodel{margin-left:8px;font-size:12px;color:var(--dim)}
+.orow .ometa,.seat .duty,.seat .pres{font-size:12px}
+.bugrow{padding:12px 13px}
+.bugrow .bt{font-size:13px;line-height:1.6}
+.srcline,footer,.law{font-size:12px}
+pre.boardlaw{font-size:12px;line-height:1.7;padding:12px 13px}
+.orow .ometa a,.seat .duty a,.law button{display:inline-block;padding-block:10px;margin-block:-10px}
+footer a{display:inline-block;padding-block:12px;margin-block:-12px;word-break:break-all}
+body:not([data-reg="cypherpunk"]) .law{font-size:14px}
+body[data-reg="bee"] .law{font-size:16px;line-height:1.7}
+body:not([data-reg="cypherpunk"]) :is(.orow .ometa,.seat .duty,.seat .pres,.bugrow .bt,.srcline,footer,pre.boardlaw){font-size:14px}
+body:not([data-reg="cypherpunk"]) :is(.orow .ochip,.orow .omodel,.bugrow .bs){font-size:14px}
+body:not([data-reg="cypherpunk"]) h2{font-size:14px}
+/* the law's hard line breaks were set for a desk screen; at phone width they
+   left ragged half-lines, so the text reflows as one paragraph there */
+@media (max-width:600px){pre.boardlaw{white-space:normal}footer{text-align:left}}
 </style>
 </head>
 <body>
@@ -289,13 +311,13 @@ function renderFile(){
     var chipCls=a.session==='sunsetting'?'sunsetting':'new';
     d.innerHTML='<div class="oh"><span class="oname">'+esc(a.name)+'</span>'+
       '<span class="ochip '+chipCls+'">'+esc(a.session)+'</span>'+
-      '<span style="margin-left:8px;font-size:10px;color:var(--dim)">'+esc(a.model)+' · '+esc(a.effort)+'</span></div>'+
+      '<span class="omodel">'+esc(a.model)+' · '+esc(a.effort)+'</span></div>'+
       '<div class="ometa"><b>'+T('or.f.lane','lane')+':</b> '+esc(a.lane)+' · <b>'+T('or.f.progress','progress')+':</b> '+a.progress+'%'+
       (a.lastReceipt?' · <a href="'+esc(a.lastReceipt)+'" rel="noopener">'+T('or.f.lastreceipt','last receipt')+'</a>':'')+
       '<br><b>'+T('or.f.note','note')+':</b> '+esc(a.note)+'</div>';
     agEl.appendChild(d);
   });
-  var bgEl=$('bugs');
+  var bgEl=$('bugs'); bgEl.innerHTML='';  /* a tongue switch re-renders: clear first, or every bug row doubles */
   (data.bugs||[]).forEach(function(bg){
     var d=document.createElement('div');d.className='bugrow';
     var cls=bg.status==='closed'?'closed':'scheduled';

@@ -39,6 +39,14 @@ p{color:var(--mut);font-size:.9rem;margin:.5rem 0}
 table{width:100%;border-collapse:collapse;margin:.6rem 0}
 th{border:1px solid var(--line);padding:.4rem .6rem;text-align:left;color:var(--mut);font-size:.8rem}
 footer{color:var(--mut);font-size:.78rem;margin-top:2rem;border-top:1px solid var(--line);padding-top:1rem}
+/* lower-half finish (2026-09-26, 390 px review): the footer reads at 14 px and
+   stays one flowing sentence; each link carries its own 44 px touch height so
+   the separators stay attached to the words they separate. New bee reads prose at 16 px. */
+footer{font-size:.875rem;line-height:1.6;padding-bottom:.5rem}
+footer a{display:inline-block;padding:11px 0}
+body[data-reg="bee"] :is(p,.doctrine,.law,.means){font-size:1rem}
+.gear td,th{font-size:.875rem}
+.disc{font-size:.875rem;padding:.2rem .7rem}
 </style></head><body><main>
 <nav><a href="../">⌂ hub</a><a href="index.html">🐝 open hardware guide</a><a href="security.html">🛡 security events</a><a href="build.html">🔧 become a producer</a><a class="here" href="lab.html">⬡ the lab</a></nav>
 <h1>The Lab — science and art, under stage lights</h1>
@@ -89,7 +97,7 @@ Review units come from manufacturers and are <b style="color:var(--ink)">disclos
 <tr><td><b>Pulse</b></td><td>Open wearable dev kits (PineTime/Bangle.js-class) — Lane-B presence research; the open-ring gap is still an open invitation.</td></tr>
 <tr><td><b>Software shelf</b></td><td>FOSS only: Sparrow, Nunchuk, Electrum-class coordinators, the BNR surfaces & offline recovery tool. Multisig quorums exercised air-gapped end to end.</td></tr>
 </table>
-<p style="font-size:.8rem">Same law as everything above: open designs, direct links, zero affiliates. If a category has no open option worth listing, the row says so — that gap is an assignment for the <a href="build.html">build page</a>.</p></div>
+<p>Same law as everything above: open designs, direct links, zero affiliates. If a category has no open option worth listing, the row says so — that gap is an assignment for the <a href="build.html">build page</a>.</p></div>
 
 <footer>science by the surgical code team · art by the founder · units disclosed, always · negative results publish · <a href="index.html">← the guide</a> · <a href="../onboarding/">🔑 onboard ceremony</a> · <a href="../recover.html">📄 recovery tool</a> · <a href="../blight/demo.html">💡 the beam</a> · <a href="https://github.com/beehive-nature/beehive-nature/blob/main/surfaces/hardware/lab.html" rel="noopener">view source</a></footer>
 </main><script src="../tour.js?v=42"></script>
