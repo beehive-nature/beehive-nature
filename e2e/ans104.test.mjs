@@ -16,8 +16,31 @@ const sandbox = { self: undefined, crypto: webcrypto, TextEncoder, btoa, atob, r
 vm.runInNewContext(src + '\nthis.ANS104 = ANS104;', sandbox);
 const A = sandbox.ANS104;
 
-test('a signed item parses, verifies and carries the same id in arbundles', async () => {
-  const { DataItem } = req('@dha-team/arbundles');
+/* the reference library is a dev dependency of the vending tool, installed there
+   with npm; CI's static job does not install it, so the parity test SKIPS by name
+   rather than pretending. The library-free verification below always runs. */
+let arbundles = null; try { arbundles = req('@dha-team/arbundles'); } catch {}
+
+test('the signature verifies under WebCrypto over the same deepHash, and the id is sha256(signature)', async () => {
+  const key = await A.generateKey();
+  const data = new TextEncoder().encode('{"record":"probe"}');
+  const tags = [{ name: 'App-Name', value: 'skaists-vending' }];
+  const item = await A.sign(key, data, tags);
+  const te = new TextEncoder();
+  const msg = await A.deepHash([te.encode('dataitem'), te.encode('1'), te.encode('2'), key.publicRaw, new Uint8Array(0), new Uint8Array(0), A.serializeTags(tags), data]);
+  const sig = A.fromB64url(item.signature);
+  assert.equal(await webcrypto.subtle.verify({ name: 'Ed25519' }, key.publicKey, sig, msg), true);
+  assert.equal(item.id, A.b64url(new Uint8Array(await webcrypto.subtle.digest('SHA-256', sig))));
+  /* the binary layout: sigtype 2 LE · 64 B sig · 32 B owner · no target · no anchor · tag counts · tags · data */
+  const b = item.bytes;
+  assert.deepEqual([...b.slice(0, 2)], [2, 0]); assert.deepEqual([...b.slice(2, 66)], [...sig]); assert.deepEqual([...b.slice(66, 98)], [...key.publicRaw]);
+  assert.deepEqual([...b.slice(98, 100)], [0, 0]);
+  assert.equal(b.length, 100 + 16 + A.serializeTags(tags).length + data.length);
+  assert.deepEqual([...b.slice(b.length - data.length)], [...data]);
+});
+
+test('a signed item parses, verifies and carries the same id in arbundles', { skip: arbundles ? false : 'the reference library is not installed here (npm install in contracts/vending/tool)' }, async () => {
+  const { DataItem } = arbundles;
   const key = await A.generateKey();
   const data = new TextEncoder().encode(JSON.stringify({ record: 'probe', n: 1 }));
   const tags = [{ name: 'App-Name', value: 'skaists-vending' }, { name: 'Type', value: 'agent-birth-certificate' }, { name: 'Content-Type', value: 'application/json' }, { name: 'Member-Key', value: key.publicHex }];
