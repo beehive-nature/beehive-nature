@@ -101,13 +101,264 @@ textarea:placeholder-shown{word-break:normal;overflow-wrap:break-word;min-height
    and raver, so no register ever draws reading text a phone cannot hold. */
 body[data-reg="bee"],body[data-reg="raver"]{--fmin:14px}
 </style>
+<style id="eternal-css">
+/* ── ETERNAL FRONT (docs/design/eternal) — every value is a skaists token (surfaces/skaists.css,
+   compiled from docs/design/skaists/tokens.json): no hand-picked hex, size or corner. Measured by
+   e2e/skaists-conformance.mjs. One register visible at a time; new bee is the default. Every rule
+   is scoped under #eternal so the page's own bare h2/a/button/section rules never reach in. ── */
+#eternal{display:block;max-width:40rem;margin:var(--sk-s3,18px) auto var(--sk-s2,12px);padding:0;border:0;border-radius:0;background:transparent;text-align:start;color:var(--sk-ink)}
+#eternal>.et-r,#eternal>.et-c{display:none}
+body[data-reg="raver"] #eternal>.et-b,body[data-reg="cypherpunk"] #eternal>.et-b{display:none}
+body[data-reg="raver"] #eternal>.et-r{display:block}
+body[data-reg="cypherpunk"] #eternal>.et-c{display:block}
+#eternal [hidden]{display:none!important}
+#eternal *{box-sizing:border-box}
+#eternal h2,#eternal h3,#eternal p,#eternal ol,#eternal ul{margin:0;padding:0;letter-spacing:normal;text-transform:none}
+#eternal button,#eternal a{margin:0;text-transform:none;letter-spacing:normal}
+#eternal button{font:inherit;color:inherit;background:none;border:0;border-radius:0;padding:0;min-height:0;box-shadow:none;cursor:pointer}
+#eternal svg{display:block}
+#eternal :focus-visible{outline:2px solid var(--sk-focus);outline-offset:3px}
+#eternal .et-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.et-archive-h{max-width:40rem;margin:var(--sk-s5,36px) auto var(--sk-s2,12px);padding-top:var(--sk-s4,24px);border-top:1px solid var(--sk-line);color:var(--sk-ink);text-align:start;letter-spacing:normal;text-transform:none}
+body[data-reg="bee"] .et-archive-h{font:400 28px/1.1 var(--sk-font-bee-serif)}
+body[data-reg="raver"] .et-archive-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em}
+body[data-reg="cypherpunk"] .et-archive-h{font:600 15px/1.45 var(--sk-font-mono)}
+
+/* NEW BEE — a calm room: plain rows, one reassurance, one action */
+#eternal .et-b{display:flex;flex-direction:column;gap:var(--sk-s3,18px);color:var(--sk-ink);font:400 16px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-b-mark{font:400 18px/1.2 var(--sk-font-house);color:var(--sk-sovereign)}
+#eternal .et-b-h{font:400 40px/1.05 var(--sk-font-bee-serif);color:var(--sk-ink)}
+#eternal .et-b-lede{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink-mut);text-wrap:pretty}
+#eternal .et-b-guard{display:flex;align-items:center;gap:var(--sk-s2,12px);min-height:var(--sk-control-min,44px);padding:var(--sk-s1,6px) var(--sk-s3,18px);border-radius:var(--sk-radius);background:var(--sk-guard-wash);color:var(--sk-guard);font:600 15px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-b-guard svg,#eternal .et-ico{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+#eternal .et-b-rows{display:flex;flex-direction:column;background:var(--sk-bg-card);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl);overflow:hidden}
+#eternal .et-b-row{display:flex;align-items:center;justify-content:space-between;gap:var(--sk-s2,12px);width:100%;min-height:var(--sk-control-row,52px);padding:var(--sk-s1,6px) var(--sk-s3,18px);border:0;border-bottom:1px solid var(--sk-line-soft);background:transparent;text-align:start;font:500 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink);text-decoration:none}
+#eternal .et-b-row:last-child{border-bottom:0}
+#eternal .et-b-rows>.et-b-row:nth-last-child(2):has(+ .et-b-open[hidden]){border-bottom:0}
+#eternal button.et-b-row,#eternal a.et-b-row{cursor:pointer}
+#eternal .et-b-row small{display:flex;align-items:center;gap:var(--sk-s1,6px);flex:none;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut);text-align:end}
+#eternal .et-b-row[aria-expanded="true"],#eternal .et-b-row[aria-pressed="true"]{background:var(--sk-sovereign-tint);color:var(--sk-sovereign-strong);font-weight:600}
+#eternal .et-b-row[aria-expanded="true"] small,#eternal .et-b-row[aria-pressed="true"] small{color:var(--sk-sovereign-strong)}
+#eternal .et-b-row .chev{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;transition:transform var(--dur,.26s)}
+#eternal .et-b-row[aria-expanded="true"] .chev{transform:rotate(90deg)}
+#eternal .et-b-open{display:grid;gap:0;background:var(--sk-sovereign-tint);border-bottom:1px solid var(--sk-line-soft)}
+#eternal .et-b-person{display:flex;align-items:center;gap:var(--sk-s2,12px);min-height:var(--sk-control-person,60px);padding:var(--sk-s1,6px) var(--sk-s3,18px);border-top:1px solid var(--sk-line-soft)}
+#eternal .et-b-person:first-child{border-top:0}
+#eternal .et-b-person>i{display:flex;align-items:center;justify-content:center;width:40px;height:40px;flex:none;border-radius:var(--sk-radius-pill);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong);font:600 14px/1.4 var(--sk-font-bee-sans);font-style:normal}
+#eternal .et-b-person>div{min-width:0;flex:1}
+#eternal .et-b-person b{display:block;font:500 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink);overflow-wrap:anywhere}
+#eternal .et-b-person span{display:block;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut);overflow-wrap:anywhere}
+#eternal .et-b-person a{display:inline-flex;align-items:center;justify-content:center;min-height:var(--sk-control-min,44px);min-width:var(--sk-control-min,44px);flex:none;font:600 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-link);text-decoration:none}
+#eternal .et-b-person a:hover{color:var(--sk-link-hover)}
+#eternal .et-b-more{padding:var(--sk-s2,12px) var(--sk-s3,18px);font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut);border-top:1px solid var(--sk-line-soft)}
+#eternal .et-b-card{padding:var(--sk-s3,18px);background:var(--sk-bg-card);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl);display:grid;gap:var(--sk-s1,6px)}
+#eternal .et-b-card b{font:600 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-card p{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+#eternal .et-b-act{display:flex;flex-direction:column;gap:var(--sk-s1,6px);margin-top:var(--sk-s1,6px)}
+#eternal .et-b-primary{display:flex;align-items:center;justify-content:center;gap:var(--sk-s1,6px);width:100%;min-height:var(--sk-control-primary,54px);padding:0 var(--sk-s3,18px);border:0;border-radius:var(--sk-radius-lg);background:var(--sk-primary);color:var(--sk-on-primary);font:600 17px/1.2 var(--sk-font-bee-sans);text-align:center;text-decoration:none;cursor:pointer}
+#eternal .et-b-primary:disabled{background:var(--sk-bg-well);color:var(--sk-ink-mut);cursor:not-allowed}
+#eternal .et-b-link{display:flex;align-items:center;justify-content:center;min-height:var(--sk-control-min,44px);border:0;background:transparent;font:600 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-link);text-align:center;text-decoration:none;cursor:pointer}
+#eternal .et-b-link:hover{color:var(--sk-link-hover)}
+#eternal .et-b-foot{text-align:center;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-now{font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut);text-align:center}
+
+/* RAVER — the data is the art; lowercase is allowed joy; the numbers never change */
+#eternal .et-r{color:var(--sk-ink);font:600 14px/1.25 var(--sk-font-raver-body)}
+#eternal .et-r-top{display:flex;align-items:baseline;justify-content:space-between;gap:var(--sk-s2,12px);flex-wrap:wrap}
+#eternal .et-r-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em;color:var(--sk-ink)}
+#eternal .et-r-hint{font:400 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-art{width:100%;max-width:360px;height:auto;margin:var(--sk-s3,18px) auto var(--sk-s2,12px);filter:drop-shadow(var(--sk-glow-sovereign));touch-action:none;cursor:pointer}
+#eternal .et-r-art:focus{outline:none}
+#eternal .et-r-art:focus-visible{outline:2px solid var(--sk-focus);outline-offset:3px}
+#eternal .et-r-legend{display:flex;flex-wrap:wrap;justify-content:center;gap:var(--sk-s1,6px) var(--sk-s3,18px);margin:0 0 var(--sk-s2,12px);font:400 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-legend span{display:inline-flex;align-items:center;gap:var(--sk-s1,6px)}
+#eternal .et-r-legend i{display:inline-block;width:18px;height:12px;border-radius:var(--sk-radius-sm)}
+#eternal .et-r-card{display:flex;gap:var(--sk-s2,12px);align-items:center;min-height:var(--sk-control-person,60px);padding:var(--sk-s2,12px) var(--sk-s3,18px);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl);background:var(--sk-sovereign-tint)}
+#eternal .et-r-card .rk{display:flex;align-items:center;justify-content:center;min-width:44px;height:44px;padding:0 var(--sk-s1,6px);flex:none;border-radius:var(--sk-radius);background:var(--sk-sovereign-strong);color:var(--sk-bg);font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em}
+#eternal .et-r-card>div{min-width:0}
+#eternal .et-r-card b{display:block;font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink);overflow-wrap:anywhere}
+#eternal .et-r-card span{display:block;margin-top:var(--sk-s1,6px);font:400 14px/1.25 var(--sk-font-raver-body);color:var(--sk-sovereign-soft);overflow-wrap:anywhere}
+#eternal .et-r-chips{display:flex;flex-wrap:wrap;gap:var(--sk-s1,6px);justify-content:center;margin:var(--sk-s2,12px) 0}
+#eternal .et-r-chips button{min-height:var(--sk-control-min,44px);min-width:var(--sk-control-min,44px);padding:0 var(--sk-s3,18px);border-radius:var(--sk-radius-pill);border:1.5px solid var(--sk-sovereign);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong);font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em;cursor:pointer}
+#eternal .et-r-chips button[aria-pressed="true"]{border-color:var(--sk-you);background:var(--sk-sovereign-tint);color:var(--sk-ink);box-shadow:var(--sk-glow-sovereign)}
+#eternal .et-r-note{margin-top:var(--sk-s2,12px);text-align:center;font:400 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-big{margin:var(--sk-s2,12px) 0 var(--sk-s1,6px);text-align:center;font:700 60px/.95 var(--sk-font-raver-display);letter-spacing:-.02em;color:var(--sk-ink)}
+#eternal .et-r-pill{display:flex;align-items:center;justify-content:center;gap:var(--sk-s1,6px);width:100%;min-height:58px;margin-top:var(--sk-s4,24px);padding:0 var(--sk-s3,18px);border:0;border-radius:var(--sk-radius-pill);background:var(--sk-primary);color:var(--sk-on-primary);font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em;text-align:center;text-decoration:none;cursor:pointer}
+#eternal .et-r-ghost{display:flex;align-items:center;justify-content:center;min-height:var(--sk-control-min,44px);margin:var(--sk-s2,12px) auto 0;padding:0 var(--sk-s2,12px);border:0;background:none;color:var(--sk-link);font:400 14px/1.25 var(--sk-font-raver-body);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+#eternal .et-r-ghost:hover{color:var(--sk-link-hover)}
+@keyframes et-breathe{0%,100%{opacity:1}50%{opacity:.62}}
+@keyframes et-spin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){#eternal .breathe,#eternal .spin{animation:none!important}#eternal .et-b-row .chev{transition:none}}
+
+/* CYPHERPUNK — the instrument, complete at first paint; every row is a fact you can check */
+#eternal .et-c{font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink)}
+#eternal .et-c-path{font:600 15px/1.45 var(--sk-font-mono);color:var(--sk-ink);overflow-wrap:anywhere}
+#eternal .et-c-chips{display:flex;flex-wrap:wrap;gap:var(--sk-s1,6px);margin:var(--sk-s2,12px) 0}
+#eternal .et-c-chips span{padding:2px var(--sk-s1,6px);border:1px solid var(--sk-line);border-radius:4px;background:var(--sk-bg-card);font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-soft)}
+#eternal .et-c-chips span.on{border-color:var(--sk-guard);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong)}
+#eternal .et-c-chips span.ok{border-color:var(--sk-verified);color:var(--sk-verified)}
+#eternal .et-c-guard{display:flex;justify-content:space-between;align-items:center;gap:var(--sk-s1,6px) var(--sk-s2,12px);flex-wrap:wrap;min-height:var(--sk-control-min,44px);padding:var(--sk-s1,6px) var(--sk-s3,18px);border:1px dashed var(--sk-guard);border-radius:var(--sk-radius-sm);background:var(--sk-guard-wash);color:var(--sk-guard)}
+#eternal .et-c-guard b{font-weight:600;color:var(--sk-sovereign-strong)}
+#eternal .et-c-h{margin:var(--sk-s4,24px) 0 var(--sk-s2,12px);font:600 15px/1.45 var(--sk-font-mono);color:var(--sk-ink)}
+#eternal .et-c-tab{width:100%;margin:var(--sk-s2,12px) 0 var(--sk-s1,6px);border-collapse:separate;border-spacing:0;border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm);overflow:hidden;background:var(--sk-bg-card)}
+#eternal .et-c-tab th{padding:var(--sk-s1,6px) var(--sk-s2,12px);text-align:start;vertical-align:bottom;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);border:0;border-bottom:1px solid var(--sk-line);background:var(--sk-bg-well);letter-spacing:normal}
+#eternal .et-c-tab td{height:var(--sk-control-min,44px);padding:var(--sk-s1,6px) var(--sk-s2,12px);border:0;border-bottom:1px solid var(--sk-line);font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink);vertical-align:middle;overflow-wrap:anywhere}
+#eternal .et-c-tab tr:last-child td{border-bottom:0}
+#eternal .et-c-tab td.k{color:var(--sk-guard);white-space:nowrap}
+#eternal .et-c-tab td.v{white-space:nowrap;text-align:end}
+#eternal .et-c-tab tr.pick{cursor:pointer}
+#eternal .et-c-tab tr.pick:hover td{background:var(--sk-sovereign-tint)}
+#eternal .et-c-tab tr.more td{height:auto;padding:var(--sk-s1,6px) var(--sk-s2,12px) var(--sk-s2,12px);background:var(--sk-sovereign-tint);color:var(--sk-ink-soft)}
+#eternal .et-c-tab small{display:block;margin-top:2px;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut)}
+#eternal .et-c-tab a{display:inline-flex;align-items:center;min-height:var(--sk-control-min,44px);min-width:var(--sk-control-min,44px);color:var(--sk-link);font:500 12px/1.45 var(--sk-font-mono)}
+#eternal .t-ok{color:var(--sk-verified)}#eternal .t-part{color:var(--sk-info)}#eternal .t-guard{color:var(--sk-guard)}#eternal .t-you{color:var(--sk-you)}#eternal .t-ai{color:var(--sk-ai)}#eternal .t-mut{color:var(--sk-ink-mut)}
+#eternal .et-c-pipe{list-style:none;display:grid;gap:var(--sk-s2,12px);counter-reset:p}
+#eternal .et-c-pipe li{display:grid;grid-template-columns:36px minmax(0,1fr);gap:var(--sk-s1,6px) var(--sk-s2,12px);padding:var(--sk-s2,12px) var(--sk-s3,18px);border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm);background:var(--sk-bg-card);counter-increment:p}
+#eternal .et-c-pipe li::before{content:counter(p,decimal-leading-zero);color:var(--sk-guard);font-weight:600}
+#eternal .et-c-pipe li b{font-weight:600;color:var(--sk-ink);overflow-wrap:anywhere}
+#eternal .et-c-pipe li p{grid-column:2;color:var(--sk-ink-soft);overflow-wrap:anywhere}
+#eternal .et-c-pipe li.done b{color:var(--sk-verified)}
+#eternal .et-c-pipe li.guard{border-style:dashed;border-color:var(--sk-guard)}
+#eternal .et-c-pipe li.guard b{color:var(--sk-guard)}
+#eternal .et-c-pipe li.now{border-color:var(--sk-ai);box-shadow:inset 0 0 0 1px var(--sk-ai)}
+#eternal .et-c-pipe li.now b{color:var(--sk-ai)}
+#eternal .et-c-primary{display:flex;align-items:center;justify-content:center;gap:var(--sk-s1,6px);width:100%;min-height:52px;margin-top:var(--sk-s3,18px);padding:0 var(--sk-s2,12px);border:0;border-radius:var(--sk-radius-sm);background:var(--sk-primary);color:var(--sk-on-primary);font:600 14px/1.2 var(--sk-font-mono);text-align:center;text-decoration:none;cursor:pointer}
+#eternal .et-c-kv{width:100%;border-collapse:collapse;border:1px solid var(--sk-line);background:var(--sk-bg-card)}
+#eternal .et-c-kv th{width:120px;padding:var(--sk-s1,6px) var(--sk-s2,12px);text-align:start;vertical-align:top;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);border:0;border-bottom:1px solid var(--sk-line);letter-spacing:normal}
+#eternal .et-c-kv td{padding:var(--sk-s1,6px) var(--sk-s2,12px);border:0;border-bottom:1px solid var(--sk-line);font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink);overflow-wrap:anywhere}
+#eternal .et-c-verify{margin-top:var(--sk-s3,18px);padding:var(--sk-s3,18px);border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm);background:var(--sk-bg-card)}
+#eternal .et-c-verify-h{margin-bottom:var(--sk-s1,6px);font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut)}
+#eternal .et-c-verify ol{padding-inline-start:var(--sk-s4,24px);display:grid;gap:var(--sk-s1,6px);color:var(--sk-ink)}
+#eternal .et-c-verify code{font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ai);background:transparent;overflow-wrap:anywhere}
+#eternal .et-c-row{display:grid;grid-template-columns:1fr 1fr;gap:var(--sk-s2,12px);margin-top:var(--sk-s3,18px)}
+#eternal .et-c-ghost{display:flex;align-items:center;justify-content:center;min-height:52px;padding:0 var(--sk-s1,6px);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius-sm);background:transparent;color:var(--sk-ink);font:600 14px/1.2 var(--sk-font-mono);text-align:center;text-decoration:none;cursor:pointer}
+#eternal .et-c-seg{display:flex;flex-wrap:wrap;gap:var(--sk-s1,6px);margin:var(--sk-s2,12px) 0}
+#eternal .et-c-seg button{min-height:var(--sk-control-min,44px);min-width:var(--sk-control-min,44px);padding:0 var(--sk-s2,12px);border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm);background:var(--sk-bg-card);color:var(--sk-ink-soft);font:500 12px/1.45 var(--sk-font-mono);cursor:pointer}
+#eternal .et-c-seg button[aria-pressed="true"]{border-color:var(--sk-ai);color:var(--sk-ai)}
+
+/* buzz-studio — a patch of the comb (bee), the whole comb as the art (raver), the CRDT instrument (cypherpunk) */
+#eternal h2,#eternal h3{display:block}
+#eternal h2::before,#eternal h3::before,.et-archive-h::before{content:none;display:none}
+#eternal .et-b-patch{width:100%;height:auto;padding:var(--sk-s1,6px);background:var(--sk-bg-card);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl);touch-action:manipulation}
+#eternal .et-b-patch .cell{fill:var(--sk-bg-well);stroke:var(--sk-ink-mut);stroke-width:1.5;cursor:pointer}
+#eternal .et-b-patch .cell:focus{outline:none}
+#eternal .et-b-patch .cell:focus-visible{stroke:var(--sk-focus);stroke-width:3}
+#eternal .et-b-swatches{display:flex;flex-wrap:wrap;gap:var(--sk-s1,6px)}
+#eternal .et-b-swatches button{display:inline-flex;align-items:center;gap:var(--sk-s1,6px);min-height:var(--sk-control-min,44px);min-width:var(--sk-control-min,44px);padding:0 var(--sk-s2,12px);border:1.5px solid var(--sk-line);border-radius:var(--sk-radius-pill);background:var(--sk-bg-card);color:var(--sk-ink);font:600 14px/1.4 var(--sk-font-bee-sans);cursor:pointer}
+#eternal .et-b-swatches button[aria-checked="true"]{border-color:var(--sk-ink);background:var(--sk-sovereign-tint)}
+#eternal .et-sw{display:inline-block;width:18px;height:18px;flex:none;border-radius:var(--sk-radius-pill);border:1px solid var(--sk-line)}
+#eternal .et-sw.k0{background:var(--sk-cat-works)}#eternal .et-sw.k1{background:var(--sk-cat-idea)}#eternal .et-sw.k2{background:var(--sk-cat-bug)}#eternal .et-sw.k3{background:var(--sk-cat-gap)}
+#eternal .et-sw.erase{background:var(--sk-bg);border:1.5px dashed var(--sk-ink-mut)}
+#eternal .et-r-comb .c{fill:var(--sk-bg-card);stroke:var(--sk-line);stroke-width:1}
+#eternal .et-r-comb .last{fill:none;stroke:var(--sk-you);stroke-width:3}
+#eternal .et-r-comb .breathe{animation:et-breathe 3s ease-in-out infinite}
+#eternal .et-r.paused .breathe{animation-play-state:paused}
+#eternal .et-r-swatches{display:flex;flex-wrap:wrap;justify-content:center;gap:var(--sk-s2,12px);margin:var(--sk-s2,12px) 0}
+#eternal .et-r-swatches button{display:flex;flex-direction:column;align-items:center;gap:var(--sk-s1,6px);min-width:var(--sk-control-min,44px);min-height:var(--sk-control-min,44px);padding:var(--sk-s1,6px);border:0;border-radius:var(--sk-radius-xl);background:transparent;color:var(--sk-ink-soft);font:400 12px/1.4 var(--sk-font-raver-body);cursor:pointer}
+#eternal .et-r-swatches .et-sw{width:36px;height:36px;border:2px solid var(--sk-line)}
+#eternal .et-r-swatches button[aria-checked="true"]{color:var(--sk-ink)}
+#eternal .et-r-swatches button[aria-checked="true"] .et-sw{border-color:var(--sk-you);box-shadow:var(--sk-glow-sovereign)}
+#eternal .et-r-big small{display:block;margin-top:var(--sk-s1,6px);font:400 14px/1.25 var(--sk-font-raver-body);letter-spacing:normal;color:var(--sk-ink-soft)}
+#eternal .et-c-op{display:grid;grid-template-columns:1fr 1fr;gap:var(--sk-s2,12px);margin:var(--sk-s2,12px) 0 0}
+#eternal .et-c-op label{display:grid;gap:var(--sk-s1,6px);font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut)}
+#eternal .et-c-op input,#eternal .et-c-op select{width:100%;min-height:var(--sk-control-min,44px);padding:0 var(--sk-s1,6px);border:1px solid var(--sk-ink-mut);border-radius:var(--sk-radius-sm);background:var(--sk-bg-card);color:var(--sk-ink);font:400 13px/1.45 var(--sk-font-mono)}
+#eternal .et-c-tab td.n{color:var(--sk-guard);white-space:nowrap}
+
+/* ── THE WHOLE STUDIO, dressed per register: the page's own variables mapped onto skaists.
+   The comb below keeps its own canvas and the nine paint colours: they are what people painted. ── */
+body[data-reg="bee"]{--void:var(--sk-bg);--panel:var(--sk-bg-card);--inset:var(--sk-bg-well);--line:var(--sk-line);--ink:var(--sk-ink);--dim:var(--sk-ink-mut);--faint:var(--sk-ink-mut);
+ --biomass:var(--sk-verified);--ai:var(--sk-ai);--info:var(--sk-info);--guard:var(--sk-guard);--radius:var(--sk-radius-xl);background:var(--sk-bg);color:var(--sk-ink);font-family:var(--sk-font-bee-sans)}
+body[data-reg="bee"] header h1{background-image:none;color:var(--sk-ink);font-family:var(--sk-font-bee-serif);font-weight:400}
+body[data-reg="bee"] main button.act{border-color:var(--sk-ink);color:var(--sk-sovereign);background:var(--sk-bg-card);border-radius:var(--sk-radius-md);font-family:var(--sk-font-bee-sans)}
+body[data-reg="bee"] main button.act.primary{background:var(--sk-primary);color:var(--sk-on-primary);border-color:var(--sk-primary)}
+body[data-reg="bee"] main button.act:hover{background:var(--sk-sovereign-tint);color:var(--sk-sovereign-strong)}
+body[data-reg="bee"] :is(.room,.joincode,.ladder,.stat,textarea,pre){border-radius:var(--sk-radius)}
+body[data-reg="raver"]{--void:var(--sk-bg);--panel:var(--sk-bg-card);--inset:var(--sk-bg-well);--line:var(--sk-line);--ink:var(--sk-ink);--dim:var(--sk-ink-soft);--faint:var(--sk-ink-mut);
+ --biomass:var(--sk-biomass);--ai:var(--sk-ai);--info:var(--sk-info);--guard:var(--sk-guard);--radius:var(--sk-radius-xl);background:var(--sk-bg);color:var(--sk-ink);font-family:var(--sk-font-raver-body)}
+body[data-reg="raver"] header h1{background-image:var(--sk-rainbow);font-family:var(--sk-font-raver-display);font-weight:700}
+body[data-reg="raver"] main button.act{border-radius:var(--sk-radius-pill);font-family:var(--sk-font-raver-body)}
+body[data-reg="raver"] main button.act.primary{background:var(--sk-primary);color:var(--sk-on-primary)}
+body[data-reg="raver"] :is(.room,.ladder,textarea,pre){border-radius:var(--sk-radius-xl)}
+body[data-reg="raver"] :is(.joincode,.stat){border-radius:var(--sk-radius-pill)}
+body[data-reg="cypherpunk"]{--void:var(--sk-bg);--panel:var(--sk-bg-card);--inset:var(--sk-bg-well);--line:var(--sk-line);--ink:var(--sk-ink);--dim:var(--sk-ink-soft);--faint:var(--sk-ink-mut);
+ --biomass:var(--sk-verified);--ai:var(--sk-ai);--info:var(--sk-info);--guard:var(--sk-guard);--radius:var(--sk-radius-sm);background:var(--sk-bg);color:var(--sk-ink);font-family:var(--sk-font-mono)}
+body[data-reg="cypherpunk"] header h1{background-image:none;color:var(--sk-ai);font-family:var(--sk-font-mono)}
+body[data-reg="cypherpunk"] main button.act{border-color:var(--sk-ink);border-radius:var(--sk-radius-sm);font-family:var(--sk-font-mono)}
+body[data-reg="cypherpunk"] main button.act.primary{background:var(--sk-primary);color:var(--sk-on-primary);border-color:var(--sk-primary)}
+body[data-reg="cypherpunk"] :is(.room,.joincode,.ladder,.stat,textarea,pre){border-radius:var(--sk-radius-sm)}
+</style>
+<link rel="stylesheet" href="skaists.css">
 </head>
-<body>
+<body data-bee-theme="custom">
 <main>
 <nav class="crumbs" aria-label="you are here">
   <a href="index.html">beehive nature</a><span class="sub">▸</span><span class="here" data-i18n="bz.crumb">the buzz room</span>
   <span class="badge-live"><i></i><span data-i18n="bz.badge">no account · no server · no company in the middle</span></span>
 </nav>
+<!-- ETERNAL FRONT (founder blueprint 2026-09-26, docs/design/eternal): three separate products in
+     one surface. ONE document: every front reads the page's own comb (window.__buzz) and paints
+     through its localSet, so a stroke up here is the same op, the same lamport tick and the same
+     merge as a stroke on the comb below. The fronts join nothing on arrival: they open no channel,
+     no peer connection and no request. "invite a friend" only takes you to the page's own pairing
+     ceremony; the relay is never probed from here. -->
+<section id="eternal" aria-label="paint a comb together, live">
+
+  <!-- NEW BEE — a calm room: a small window of the comb, big cells, four colours, one invitation -->
+  <div class="et-b">
+    <div class="et-b-mark">bUZZ Studio</div>
+    <h2 class="et-b-h" data-t="et.buzzstudio.b.title">paint a comb together</h2>
+    <p class="et-b-lede" data-t="et.buzzstudio.b.lede">tap a cell to colour it. another tab on this device sees it at once, and a friend can join with a copy-and-paste invite.</p>
+    <div class="et-b-guard"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span data-t="et.buzzstudio.b.guard">no account and no server. nothing leaves this device unless you invite a friend.</span></div>
+    <div class="et-b-swatches" id="etBeeSw" role="radiogroup" aria-label="your colour"></div>
+    <svg class="et-b-patch" id="etPatch" role="group" aria-label="a window of thirty cells in the middle of the shared comb"></svg>
+    <div class="et-b-rows" id="etBeeRows"></div>
+    <div class="et-b-act">
+      <button type="button" class="et-b-primary" id="etBeeInvite" data-t="et.buzzstudio.b.invite">invite a friend</button>
+      <a class="et-b-link" href="#comb" data-t="et.buzzstudio.b.whole">see the whole comb</a>
+      <p class="et-b-foot" data-t="et.buzzstudio.b.foot">a friend joins only when you both paste the blocks below.</p>
+    </div>
+  </div>
+
+  <!-- RAVER — the comb is the art: every one of its cells, live; drag to paint -->
+  <div class="et-r">
+    <div class="et-r-top"><h2 class="et-r-h" data-t="et.buzzstudio.r.title">paint it live</h2><span class="et-r-hint" id="etRaverHint">drag to paint</span></div>
+    <svg class="et-r-art et-r-comb" id="etComb" viewBox="0 0 640 486" role="img" aria-label="the whole shared comb; drag across it to paint"></svg>
+    <div class="et-r-swatches" id="etRaverSw" role="radiogroup" aria-label="your colour"></div>
+    <p class="et-r-big" id="etRaverBig">0<small>cells lit</small></p>
+    <p class="et-r-note" data-t="et.buzzstudio.r.note">a stroke reaches your other tabs on this device, and a friend once you pair. nothing else.</p>
+    <button type="button" class="et-r-pill" id="etRaverInvite" data-t="et.buzzstudio.r.invite">bring a friend</button>
+    <button type="button" class="et-r-ghost" id="etPulse" aria-pressed="false">pause the pulse</button>
+  </div>
+
+  <!-- CYPHERPUNK — the CRDT as an instrument: the op, the merge, the log, the hash, the transports -->
+  <div class="et-c">
+    <p class="et-c-path" id="etPath">buzz://…</p>
+    <div class="et-c-chips" id="etChips"></div>
+    <div class="et-c-guard"><span data-t="et.buzzstudio.c.guard">joined on arrival: nothing</span> <b id="etGuardB">no probe · no peer · no request from this front</b></div>
+    <h3 class="et-c-h" data-t="et.buzzstudio.c.opH">compose an op · set cell i = colour k</h3>
+    <div class="et-c-op">
+      <label><span>i · 0 to <span id="etOpMax">503</span></span><input type="number" id="etOpI" min="0" max="503" step="1" value="0" inputmode="numeric"></label>
+      <label><span>k · colour</span><select id="etOpK"></select></label>
+    </div>
+    <button type="button" class="et-c-primary" id="etCyApply">apply op</button>
+    <p class="et-c-verify-h" id="etCyLast" aria-live="polite"></p>
+    <h3 class="et-c-h" data-t="et.buzzstudio.c.logH">op log · since this page opened</h3>
+    <table class="et-c-tab"><thead><tr><th>cell</th><th>t</th><th>client</th><th>k</th><th>from</th></tr></thead><tbody id="etLog"></tbody></table>
+    <h3 class="et-c-h" data-t="et.buzzstudio.c.stateH">state · live</h3>
+    <table class="et-c-kv" id="etState"></table>
+    <h3 class="et-c-h" data-t="et.buzzstudio.c.pipeH">pipeline · stroke to peer</h3>
+    <ol class="et-c-pipe" id="etPipe"></ol>
+    <div class="et-c-verify">
+      <div class="et-c-verify-h" data-t="et.buzzstudio.c.verifyH">verify · no trust in this page needed</div>
+      <ol id="etVerify"></ol>
+    </div>
+    <div class="et-c-row">
+      <button type="button" class="et-c-ghost" id="etCyExport">export svg ↓</button>
+      <a class="et-c-ghost" href="https://github.com/beehive-nature/beehive-nature/blob/main/surfaces/buzz-studio.html" target="_blank" rel="noopener noreferrer"><span data-t="et.buzzstudio.c.fork">fork the template ↗</span><span class="et-sr"> (opens in a new tab)</span></a>
+    </div>
+  </div>
+</section>
+<h2 class="et-archive-h" id="etArchive" data-t="et.buzzstudio.archive">the whole studio</h2>
 <header>
   <div class="kicker" data-i18n="bz.kicker">the co-creation genesis · crdt-merged · order can't break it</div>
   <h1>the bUZZ Studio</h1>
@@ -381,9 +632,11 @@ function hexPts(cx,cy){ var p=[]; for(var k=0;k<6;k++){ var a=Math.PI/180*(60*k-
 function paintCell(i){ var op=state[i];
   cells[i].setAttribute('fill', op&&op.k>=0?PAL[op.k]:'#0d1410'); }
 function refresh(){ var n=0; for(var i in state) if(state[i].k>=0) n++;
-  $('painted').textContent=n; $('ops').textContent=opCount; }
+  $('painted').textContent=n; $('ops').textContent=opCount; changed(); }
 function refreshPeers(){ var ids=Object.keys(peers);
-  $('peers').textContent=ids.length?ids.length+' beside you':'just you'; }
+  $('peers').textContent=ids.length?ids.length+' beside you':'just you'; changed(); }
+/* the ETERNAL fronts above redraw from this same document when it changes (no copy, no channel of their own) */
+function changed(){ try{ document.dispatchEvent(new CustomEvent('bz-change')); }catch(e){} }
 /* palette */
 (function(){ var p=$('palette');
   PAL.forEach(function(c,k){ var b=document.createElement('button');
@@ -401,6 +654,13 @@ function refreshPeers(){ var ids=Object.keys(peers);
 })();
 $('me').textContent=ME;
 send({hello:ME});
+/* ONE engine: the fronts read this document and paint through localSet, exactly as the comb below
+   does; they open no channel, no peer connection and no request of their own */
+window.__buzz={COLS:COLS,ROWS:ROWS,N:N,PAL:PAL,me:ME,ROOM:ROOM,fnv:fnv,
+  paint:function(i,k){ if(i>=0&&i<N&&k>=-1&&k<PAL.length) localSet(i,k); },
+  get state(){return state;}, get ops(){return opCount;}, get clock(){return clock;},
+  get peers(){return Object.keys(peers).length;}, get channel(){return !!bc;},
+  get paired(){return !!(dc&&dc.readyState==='open');}};
 /* ---- export: 2D greedy merge into rows-of-runs (the PNG2rectSVG lesson) + provenance ---- */
 function fnv(s){ var h=0x811c9dc5; for(var i=0;i<s.length;i++){ h^=s.charCodeAt(i); h=(h*0x01000193)>>>0; } return h>>>0; }
 $('dosvg').onclick=function(){
@@ -417,6 +677,138 @@ $('dosvg').onclick=function(){
   $('svgout').style.display='block';
 };
 $('clear').onclick=function(){ for(var i=0;i<N;i++) localSet(i,-1); };
+})();
+</script>
+<script id="eternal-js">
+/* ETERNAL FRONT — one document, three renderers (docs/design/eternal). Every number is read from the
+   page's own comb (window.__buzz): its state, its lamport clock, its op count, its peers and its
+   fnv seed. Every stroke goes through the page's localSet, the same op the comb below makes. The
+   fronts open nothing on arrival: no channel, no peer connection, no request; "invite" only takes
+   you to the page's own pairing ceremony, and "export" presses the page's own export. */
+(function(){
+  if(!document.getElementById('eternal')||!window.__buzz) return;
+  var $=function(id){return document.getElementById(id);};
+  var T=function(k,f){var t=window.BNRLanguage&&window.BNRLanguage.text;return t?t(k,f):f;};
+  var Z=window.__buzz;
+  function esc(v){return String(v==null?'':v).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+  var NAMES=['green','violet','amber','teal','leaf','cyan','gold','red','pale'], FRONT=[0,1,2,3,-1];
+  function cname(k){return k<0?T('et.buzzstudio.k.erase','erase'):T('et.buzzstudio.k.'+NAMES[k],NAMES[k]);}
+  /* the ONE data layer: a live view of the page's document */
+  var D={cols:Z.COLS,rows:Z.ROWS,n:Z.N,me:Z.me,room:Z.ROOM,painted:0,ops:0,clock:0,peers:0,paired:false,seed:0,log:[],last:-1};
+  var S={k:0}, R={paused:false}, seen={};
+  function read(first){
+    var st=Z.state, n=0;
+    Object.keys(st).map(Number).sort(function(a,b){return st[a].t-st[b].t;}).forEach(function(i){var o=st[i];if(o.k>=0)n++;var sig=o.t+':'+o.c+':'+o.k;
+      if(seen[i]!==sig){seen[i]=sig;if(!first){D.log.unshift({i:i,t:o.t,c:o.c,k:o.k,from:o.c===Z.me?'you':'peer'});D.last=i;}}});
+    D.log=D.log.slice(0,8); D.painted=n; D.ops=Z.ops; D.clock=Z.clock; D.peers=Z.peers; D.paired=Z.paired; D.seed=Z.fnv(JSON.stringify(st));
+  }
+  function labels(){document.querySelectorAll('[data-t^="et.buzzstudio."]').forEach(function(e){if(e.__en==null)e.__en=e.textContent;e.textContent=T(e.getAttribute('data-t'),e.__en);});}
+  function fillOf(i){var o=Z.state[i];return o&&o.k>=0?Z.PAL[o.k]:'';}
+  function swatches(id,raver){
+    $(id).innerHTML=FRONT.map(function(k){return '<button type="button" role="radio" aria-checked="'+(S.k===k)+'" data-k="'+k+'"><span class="et-sw '+(k<0?'erase':'k'+k)+'" aria-hidden="true"></span><span>'+esc(cname(k))+'</span></button>';}).join('');
+    void raver;
+  }
+  function hexPts(cx,cy,r){var p=[];for(var k=0;k<6;k++){var a=Math.PI/180*(60*k-90);p.push((cx+r*Math.cos(a)).toFixed(1)+','+(cy+r*Math.sin(a)).toFixed(1));}return p.join(' ');}
+
+  /* ── NEW BEE: a 6 × 5 window into the middle of the same comb ── */
+  var P={c0:9,r0:8,cols:6,rows:5,R:30};
+  function patchBuild(){
+    var R0=P.R, W=Math.sqrt(3)*R0, g=3, pad=4, h='';
+    for(var r=P.r0;r<P.r0+P.rows;r++)for(var c=P.c0;c<P.c0+P.cols;c++){
+      var i=r*D.cols+c, x=pad+(c-P.c0)*(W+g)+(r%2?(W+g)/2:0)+W/2, y=pad+(r-P.r0)*(1.5*R0+g)+R0;
+      h+='<polygon class="cell" data-i="'+i+'" role="button" tabindex="0" points="'+hexPts(x,y,R0)+'"/>';
+    }
+    var svg=$('etPatch'); svg.setAttribute('viewBox','0 0 '+Math.ceil(pad*2+P.cols*(W+g)+(W+g)/2)+' '+Math.ceil(pad*2+(P.rows-1)*(1.5*R0+g)+2*R0)); svg.innerHTML=h;
+  }
+  function bee(){
+    [].forEach.call(document.querySelectorAll('#etPatch .cell'),function(p){var i=+p.getAttribute('data-i'),f=fillOf(i),o=Z.state[i];p.style.fill=f;
+      p.setAttribute('aria-label',T('et.buzzstudio.b.cell','cell {i}: {c}').replace('{i}',i).replace('{c}',o&&o.k>=0?cname(o.k):T('et.buzzstudio.b.empty','empty')));});
+    var chev='<svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>';
+    $('etBeeRows').innerHTML=
+      '<div class="et-b-row"><span>'+esc(T('et.buzzstudio.b.painted','painted so far'))+'</span><small>'+esc(T('et.buzzstudio.b.cells','{n} of {m} cells').replace('{n}',D.painted).replace('{m}',D.n))+'</small></div>'+
+      '<div class="et-b-row"><span>'+esc(T('et.buzzstudio.b.here','here with you'))+'</span><small>'+esc(D.peers?T('et.buzzstudio.b.others','{n} beside you').replace('{n}',D.peers):T('et.buzzstudio.b.alone','just you'))+'</small></div>'+
+      '<div class="et-b-row"><span>'+esc(T('et.buzzstudio.b.device','on this device'))+'</span><small>'+esc(T('et.buzzstudio.b.tabs','other tabs join by themselves'))+'</small></div>'+
+      '<a class="et-b-row" href="#pairbox"><span>'+esc(T('et.buzzstudio.b.friend','a friend'))+'</span><small>'+esc(D.paired?T('et.buzzstudio.b.paired','paired'):T('et.buzzstudio.b.notYet','not invited yet'))+chev+'</small></a>';
+  }
+
+  /* ── RAVER: the whole comb, the page's own geometry ── */
+  var CR=14.6, CW=Math.sqrt(3)*CR;
+  function centre(i){var col=i%D.cols,row=(i/D.cols)|0;return [14+col*(CW+.8)+(row%2?(CW+.8)/2:0),16+row*(1.5*CR+.8)];}
+  function combBuild(){var h='';for(var i=0;i<D.n;i++){var c=centre(i);h+='<polygon class="c" data-i="'+i+'" points="'+hexPts(c[0],c[1],CR)+'"/>';}h+='<polygon class="last breathe" id="etLast" points="" visibility="hidden"/>';$('etComb').innerHTML=h;}
+  function raver(){
+    [].forEach.call(document.querySelectorAll('#etComb .c'),function(p){var f=fillOf(+p.getAttribute('data-i'));if(p.style.fill!==f)p.style.fill=f;});
+    var last=$('etLast'); if(D.last>=0){var c=centre(D.last);last.setAttribute('points',hexPts(c[0],c[1],CR+2));last.setAttribute('visibility','visible');}else last.setAttribute('visibility','hidden');
+    $('etRaverHint').textContent=T('et.buzzstudio.r.hint','{n} cells · drag to paint').replace('{n}',D.n);
+    $('etRaverBig').innerHTML=D.painted+'<small>'+esc(T('et.buzzstudio.r.lit','cells lit · every hand, one math'))+'</small>';
+    $('etPulse').textContent=R.paused?T('et.buzzstudio.r.resume','let it pulse'):T('et.buzzstudio.r.pause','pause the pulse'); $('etPulse').setAttribute('aria-pressed',R.paused?'true':'false');
+    document.querySelector('#eternal .et-r').classList.toggle('paused',R.paused);
+  }
+
+  /* ── CYPHERPUNK ── */
+  function cyBuild(){
+    $('etOpK').innerHTML='<option value="-1">-1 · '+esc(cname(-1))+'</option>'+Z.PAL.map(function(c,k){return '<option value="'+k+'"'+(k===0?' selected':'')+'>'+k+' · '+esc(cname(k))+' · '+c+'</option>';}).join('');
+    $('etOpMax').textContent=D.n-1; $('etOpI').max=D.n-1;
+  }
+  function cy(){
+    $('etPath').textContent='buzz://'+D.room.name+'/genesis · '+D.cols+'×'+D.rows+' · lww-crdt';
+    $('etChips').innerHTML='<span class="on">client '+esc(D.me)+'</span><span>lamport '+D.clock+'</span><span>ops '+D.ops+'</span><span class="'+(D.peers?'ok':'')+'">peers '+D.peers+'</span>';
+    $('etLog').innerHTML=D.log.length?D.log.map(function(o){return '<tr><td class="n">'+o.i+'</td><td>'+o.t+'</td><td>'+esc(o.c)+'</td><td>'+o.k+'</td><td class="'+(o.from==='you'?'t-you':'t-ai')+'">'+o.from+'</td></tr>';}).join(''):'<tr><td colspan="5" class="t-mut">'+esc(T('et.buzzstudio.c.noOps','no op yet · paint anywhere, or compose one above'))+'</td></tr>';
+    var pair=($('pairstate')||{}).textContent||'';
+    $('etState').innerHTML=[
+      ['engine',esc(T('et.buzzstudio.c.engine','per-cell lww · (lamport, clientId, colour)'))],
+      ['merge',esc(T('et.buzzstudio.c.merge','higher t wins · tie → higher client id · commutative, associative, idempotent'))],
+      ['painted',D.painted+' / '+D.n],
+      ['seed',D.seed+' · '+esc(T('et.buzzstudio.c.seed','fnv-1a of the state, the same seed the export prints'))],
+      ['tier 1',Z.channel?'broadcastchannel · '+esc(T('et.buzzstudio.c.t1','same device · opened by the page at load')):'<span class="t-guard">'+esc(T('et.buzzstudio.c.t1no','broadcastchannel unavailable in this browser'))+'</span>'],
+      ['tier 2','webrtc · '+(D.paired?'<span class="t-ok">'+esc(T('et.buzzstudio.c.paired','paired'))+'</span>':esc(pair.trim()||T('et.buzzstudio.c.notPaired','not paired')))],
+      ['relay',esc(D.room.wss)+' · '+esc(D.room.state)+' · '+esc(T('et.buzzstudio.c.noProbe','not probed from here'))]
+    ].map(function(r){return '<tr><th>'+r[0]+'</th><td>'+r[1]+'</td></tr>';}).join('');
+    $('etPipe').innerHTML=[
+      ['local op',T('et.buzzstudio.c.p1','clock++ → {t, c, k} · the stroke is an op, never a pixel'),'done'],
+      ['merge',T('et.buzzstudio.c.p2','max(t, c) per cell · order and duplicates cannot break it'),'done'],
+      ['tier 1 · same device',T('et.buzzstudio.c.p3','broadcastchannel "buzz-studio-genesis" · every tab of this page on this device'),Z.channel?'done':'guard'],
+      ['tier 2 · a friend',D.paired?T('et.buzzstudio.c.p4ok','paired · direct, encrypted by webrtc, serverless'):T('et.buzzstudio.c.p4','manual sdp · no signaling, no stun · not paired · the ceremony is below'),D.paired?'done':'now'],
+      ['export',T('et.buzzstudio.c.p5','2d greedy svg + provenance card · the original never mutates'),''],
+      ['relay door',T('et.buzzstudio.c.p6','{w} · rendered from data · the probe is opt-in, below').replace('{w}',D.room.wss),'guard']
+    ].map(function(s){return '<li class="'+s[2]+'"><b>'+esc(s[0])+'</b><p>'+esc(s[1])+'</p></li>';}).join('');
+    $('etVerify').innerHTML=['<li>'+esc(T('et.buzzstudio.c.v1','open this page in a second tab'))+'</li>','<li>'+esc(T('et.buzzstudio.c.v2','paint in either tab, in any order'))+'</li>','<li>'+esc(T('et.buzzstudio.c.v3','compare the seed row in both: equal seeds are converged replicas'))+'</li>'].join('');
+  }
+
+  var queued=0;
+  function all(){ queued=0; read(false); labels(); swatches('etBeeSw'); swatches('etRaverSw',true); bee(); raver(); cy(); }
+  /* a timer, not an animation frame: a second tab in the background keeps its front current too */
+  function soon(){ if(!queued) queued=setTimeout(all,16); }
+  function brush(k){ S.k=k; swatches('etBeeSw'); swatches('etRaverSw',true); }
+  function invite(){ var b=$('mkoffer'); if(!b) return; b.scrollIntoView({block:'center'}); try{ b.focus({preventScroll:true}); }catch(e){ b.focus(); } }
+  function paint(i){ if(i==null||isNaN(i)) return; var o=Z.state[i]; if(o&&o.k===S.k) return; if(!o&&S.k<0) return; Z.paint(i,S.k); }
+  function wire(){
+    var ev=$('eternal');
+    ev.addEventListener('click',function(e){
+      var sw=e.target.closest('.et-b-swatches button,.et-r-swatches button'); if(sw){brush(+sw.getAttribute('data-k'));return;}
+      var cell=e.target.closest('#etPatch .cell'); if(cell){paint(+cell.getAttribute('data-i'));return;}
+    });
+    $('etPatch').addEventListener('keydown',function(e){var c=e.target.closest('.cell');if(c&&(e.key==='Enter'||e.key===' ')){e.preventDefault();paint(+c.getAttribute('data-i'));}});
+    var comb=$('etComb'), down=false;
+    function hit(e){var t=document.elementFromPoint(e.clientX,e.clientY);if(t&&t.closest&&t.closest('#etComb')&&t.classList.contains('c'))paint(+t.getAttribute('data-i'));}
+    comb.addEventListener('pointerdown',function(e){down=true;try{comb.setPointerCapture(e.pointerId);}catch(x){}hit(e);});
+    comb.addEventListener('pointermove',function(e){if(down)hit(e);});
+    ['pointerup','pointercancel'].forEach(function(t){comb.addEventListener(t,function(){down=false;});});
+    comb.addEventListener('touchmove',function(e){if(down)e.preventDefault();},{passive:false});
+    $('etBeeInvite').addEventListener('click',invite);
+    $('etRaverInvite').addEventListener('click',invite);
+    $('etPulse').addEventListener('click',function(){R.paused=!R.paused;raver();});
+    $('etCyApply').addEventListener('click',function(){
+      var i=parseInt($('etOpI').value,10), k=parseInt($('etOpK').value,10), out=$('etCyLast');
+      if(isNaN(i)||i<0||i>=D.n){out.textContent=T('et.buzzstudio.c.refused','refused · i must be 0 to {m}').replace('{m}',D.n-1);return;}
+      Z.paint(i,k); read(false); var o=Z.state[i];
+      out.textContent=T('et.buzzstudio.c.applied','applied · ')+JSON.stringify({op:[i,o]});
+    });
+    $('etCyExport').addEventListener('click',function(){var b=$('dosvg');if(!b)return;b.click();var o=$('svgout');if(o)o.scrollIntoView({block:'start'});});
+    document.addEventListener('bz-change',soon);
+    document.addEventListener('blang',all);
+  }
+  read(true); patchBuild(); combBuild(); cyBuild(); wire(); all();
+  window.__eternal={data:D,brush:S,raver:R,refresh:all};
 })();
 </script>
 </body>
