@@ -4,7 +4,7 @@
  "bnr": "bnr://skaists.dev/blood/p56d8feeb7e",
  "identity": {
   "name": "Paramesse D'EGYPTE",
-  "lifespan": "1400–1349BC",
+  "lifespan": "1400BC–1349BC",
   "gender": "MALE",
   "living": false
  },
@@ -15,10 +15,10 @@
   }
  ],
  "evidence": {
-  "era": "medieval",
+  "era": "saga",
   "support": "unsourced-entry",
   "basis": "era label from dates; support unsourced until sources are harvested",
-  "class": "medieval"
+  "class": "saga"
  },
  "research": {
   "status": "incomplete",

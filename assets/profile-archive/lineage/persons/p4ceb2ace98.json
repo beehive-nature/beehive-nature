@@ -4,7 +4,7 @@
  "bnr": "bnr://skaists.dev/blood/p4ceb2ace98",
  "identity": {
   "name": "Don Ray Remington",
-  "lifespan": "1931–Deceased",
+  "lifespan": "1931–2025",
   "gender": "MALE",
   "living": false
  },
@@ -16,21 +16,21 @@
  ],
  "evidence": {
   "era": "recorded",
-  "support": "unsourced-entry",
-  "basis": "era label from dates; support unsourced until sources are harvested",
+  "support": "sourced",
+  "basis": "obituary harvested 2026-09-22: born 24 June 1931, died 27 May 2025 (age 93)",
   "class": "recorded"
  },
  "research": {
   "status": "corrected-attested",
   "basis": "per-person source counts not yet harvested",
-  "note": "FamilySearch private-space record flags Don Ray Remington living; the founder attests the family line — famous grandpa is not 'Living'. Death year unknown to the archive; no year invented. Founder-attested: maternal grandfather."
+  "note": "The FamilySearch private-space record flagged Don Ray Remington living (the founder has since corrected it on FamilySearch). Death now SOURCED: his obituary gives 24 June 1931 to 27 May 2025. marriage date CONFLICTS between the two obituaries: 15 August 1955 (his) and 19 August 1955 (hers); recorded, not resolved; no date is published on the couple. Founder-attested: maternal grandfather."
  },
  "publication": {
   "status": "public"
  },
  "corrected": {
-  "attested": "founder order 2026-09-16: all four grandparents confirmed deceased",
-  "note": "FamilySearch private-space record flags Don Ray Remington living; the founder attests the family line — famous grandpa is not 'Living'. Death year unknown to the archive; no year invented. Founder-attested: maternal grandfather."
+  "attested": "founder order 2026-09-16: all four grandparents confirmed deceased; obituary delivered by the founder 2026-09-22",
+  "note": "The FamilySearch private-space record flagged Don Ray Remington living (the founder has since corrected it on FamilySearch). Death now SOURCED: his obituary gives 24 June 1931 to 27 May 2025. marriage date CONFLICTS between the two obituaries: 15 August 1955 (his) and 19 August 1955 (hers); recorded, not resolved; no date is published on the couple. Founder-attested: maternal grandfather."
  },
  "relationships": {
   "parents": [

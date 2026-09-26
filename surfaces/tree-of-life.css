@@ -1,0 +1,107 @@
+/* tree-of-life.css — austras koks. skaists tokens (FAw4pbmMfrKNX6ffA1cDsj,
+   tokens.json): new bee is the default; raver and cypherpunk ride body[data-reg]
+   (the estate contract) or <html data-reg> on a standalone page.
+   guard is lilac and never red; no honey here (honey is the colour of b only);
+   estate surfaces fetch no fonts, so the ui and mono stacks carry the sizes. */
+:root {
+  --tol-bg: #fbf7f0; --tol-card: #ffffff; --tol-well: #efe9dd; --tol-line: #e6dfd2;
+  --tol-ink: #0c1412; --tol-mut: #4a5f55; --tol-dim: #6a736e;
+  --tol-sov: #6e3fb8; --tol-sov-strong: #4f2a8c; --tol-sov-wash: #eadff8; --tol-sov-tint: #f7f2fc;
+  --tol-primary: #a8238c; --tol-on-primary: #ffffff;
+  --tol-guard: #4a3aa8; --tol-guard-wash: #ece8fa;
+  --tol-life: #527c46; --tol-ai: #0f6f82;
+  --tol-face: ui-sans-serif, system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --tol-mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Menlo, Consolas, monospace;
+  --tol-radius: 18px; --tol-radius-control: 16px;
+}
+:is(:root, body)[data-reg="raver"], :is(:root, body)[data-reg="cypherpunk"] {
+  --tol-bg: #06110c; --tol-card: #0c1412; --tol-well: #0c1412; --tol-line: #1e2b26;
+  --tol-ink: #e9f2ec; --tol-mut: #8fa79c; --tol-dim: #648176;
+  --tol-sov: #9c6fd6; --tol-sov-strong: #e4d6fa; --tol-sov-wash: #171028; --tol-sov-tint: #120e1e;
+  --tol-primary: #d655bb; --tol-on-primary: #06110c;
+  --tol-guard: #b7a8f7; --tol-guard-wash: #12102a;
+  --tol-life: #86cc72; --tol-ai: #45c2dc;
+  --tol-radius: 999px; --tol-radius-control: 999px;
+}
+:is(:root, body)[data-reg="cypherpunk"] {
+  --tol-primary: #45c2dc; --tol-guard-wash: #06110c; --tol-sov-strong: #c9b2ee;
+  --tol-face: var(--tol-mono); --tol-radius: 6px; --tol-radius-control: 6px;
+}
+
+.tol { color: var(--tol-ink); font: 16px/1.45 var(--tol-face); }
+:where(.tol) button { font: inherit; color: inherit; } /* zero-specificity: component sizes win */
+:where(.tol) :focus-visible { outline: 2px solid var(--tol-ink); outline-offset: 3px; }
+
+.tol-lines { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 12px; padding: 6px; background: var(--tol-well); border-radius: var(--tol-radius-control); }
+.tol-tab { min-height: 44px; padding: 0 18px; border: 0; border-radius: var(--tol-radius-control); background: none; color: var(--tol-mut); cursor: pointer; font-size: 14px; }
+.tol-tab[aria-pressed="true"] { background: var(--tol-ink); color: var(--tol-bg); font-weight: 600; }
+:is(:root, body)[data-reg="raver"] .tol-tab[aria-pressed="true"] { background: var(--tol-primary); color: var(--tol-on-primary); }
+:is(:root, body)[data-reg="cypherpunk"] .tol-tab[aria-pressed="true"] { background: var(--tol-ai); color: var(--tol-bg); }
+
+.tol-focus { margin: 0 0 6px; color: var(--tol-mut); font-size: 14px; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; }
+
+.tol-stage { position: relative; aspect-ratio: 4 / 5; margin: 0 0 12px; border: 1px solid var(--tol-line); border-radius: var(--tol-radius); background: var(--tol-card); overflow: hidden; }
+@media (min-width: 720px) { .tol-stage { aspect-ratio: 16 / 11; } }
+.tol-stage[data-reading="raver"] { aspect-ratio: 1 / 1; background: radial-gradient(circle at 50% 50%, var(--tol-sov-wash) 0%, var(--tol-bg) 70%); }
+.tol-art, .tol-hit { position: absolute; inset: 0; width: 100%; height: 100%; }
+.tol-art { pointer-events: none; }
+.tol-root { fill: none; stroke: var(--tol-life); stroke-width: 3; stroke-linecap: round; vector-effect: non-scaling-stroke; opacity: .7; }
+.tol-branch { fill: none; stroke: var(--tol-sov); stroke-width: 3; stroke-linecap: round; vector-effect: non-scaling-stroke; }
+.tol-branch.is-held { stroke: var(--tol-guard); stroke-dasharray: 6 6; }
+[data-reading="raver"] .tol-branch { stroke-width: 4; filter: drop-shadow(0 0 6px var(--tol-sov)); }
+[data-reading="cypherpunk"] .tol-branch { stroke: var(--tol-ai); stroke-width: 1.5; }
+.tol-limb { fill: none; stroke: transparent; stroke-width: 22; vector-effect: non-scaling-stroke; cursor: pointer; pointer-events: stroke; }
+.tol-limb:hover, .tol-limb:focus-visible { stroke: var(--tol-sov-wash); outline: none; }
+:is(:root, body)[data-reg="cypherpunk"] .tol-limb:hover { stroke: rgba(69, 194, 220, .18); }
+
+.tol-node { position: absolute; transform: translate(-50%, -50%); box-sizing: border-box; min-height: 44px; padding: 6px 8px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0; text-align: center;
+  border: 1.5px solid var(--tol-sov); border-radius: var(--tol-radius-control); background: var(--tol-sov-tint); cursor: pointer; }
+.tol-node:hover { border-color: var(--tol-sov-strong); }
+.tol-node.is-open { background: var(--tol-sov-wash); box-shadow: 0 0 0 2px var(--tol-sov) inset; }
+.tol-node.has-claims::after { content: ""; position: absolute; inset-block-start: -4px; inset-inline-end: -4px; width: 10px; height: 10px; border-radius: 50%; background: var(--tol-life); }
+.tol-name { font-weight: 600; font-size: 14px; line-height: 1.2; color: var(--tol-sov-strong); overflow-wrap: anywhere;
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; line-clamp: 3; overflow: hidden; } /* the whole name is the title, the card, and the panel */
+.tol-cap { font-size: 12px; color: var(--tol-mut); overflow-wrap: anywhere; }
+.tol-more { font-size: 12px; color: var(--tol-sov); }
+.tol-climb { flex-basis: 100%; min-height: 44px; border: 0; background: none; color: var(--tol-guard); font-size: 12px; text-decoration: underline; cursor: pointer; }
+.tol-mono { font-family: var(--tol-mono); }
+.tol-node.is-held { cursor: default; border: 1.5px dashed var(--tol-guard); background: var(--tol-guard-wash); flex-direction: row; flex-wrap: wrap; gap: 4px 6px; }
+.tol-node.is-held .tol-cap { color: var(--tol-guard); font-weight: 600; }
+[data-reading="raver"] .tol-node:not(.is-held) { background: var(--tol-sov-wash); box-shadow: 0 0 18px -4px var(--tol-sov); }
+[data-reading="raver"] .tol-node:not(.is-held) .tol-cap { display: none; }
+[data-reading="raver"] .tol-name { font-size: 12px; -webkit-line-clamp: 2; line-clamp: 2; } /* raver speaks in shape; dates wait on the card */
+[data-reading="cypherpunk"] .tol-node { align-items: flex-start; text-align: start; }
+[data-reading="cypherpunk"] .tol-node:not(.is-held) { border-color: var(--tol-ai); background: var(--tol-card); }
+[data-reading="cypherpunk"] .tol-name { color: var(--tol-ink); font-size: 13px; -webkit-line-clamp: 2; line-clamp: 2; }
+[data-reading="cypherpunk"] .tol-cap, [data-reading="cypherpunk"] .tol-more { font-size: 11px; line-height: 1.3; }
+[data-reading="cypherpunk"] .tol-node { padding: 4px 6px; }
+@media (max-width: 520px) { .tol-node { padding: 4px 6px; } .tol-name { font-size: 13px; } .tol-cap { font-size: 11px; } }
+
+.tol-lock { display: inline-block; width: 12px; height: 12px; border: 2px solid var(--tol-guard); border-radius: 3px; position: relative; flex: none; }
+.tol-lock::before { content: ""; position: absolute; left: 1px; top: -8px; width: 6px; height: 6px; border: 2px solid var(--tol-guard); border-bottom: 0; border-radius: 5px 5px 0 0; }
+
+.tol-guard { display: flex; align-items: center; gap: 12px; min-height: 44px; padding: 6px 18px; margin: 0 0 12px;
+  color: var(--tol-guard); font-weight: 600; font-size: 14px; background: var(--tol-guard-wash); border: 1.5px dashed var(--tol-guard); border-radius: var(--tol-radius-control); }
+.tol-note { color: var(--tol-mut); margin: 0 0 12px; }
+
+.tol-card { background: var(--tol-card); border: 1px solid var(--tol-line); border-radius: var(--tol-radius); padding: 18px 24px; margin: 0 0 18px; }
+:is(:root, body)[data-reg="raver"] .tol-card { border-radius: 24px; }
+.tol-card-name { margin: 0; font-size: 22px; line-height: 1.2; color: var(--tol-sov-strong); }
+.tol-card-dates { margin: 0 0 12px; color: var(--tol-mut); }
+.tol-card-support { display: none; margin: -6px 0 12px; font: 13px var(--tol-mono); color: var(--tol-dim); }
+:is(:root, body)[data-reg="cypherpunk"] .tol-reg-cypherpunk { display: block; }
+.tol-card-head { margin: 0 0 6px; font-size: 14px; font-weight: 600; color: var(--tol-mut); }
+.tol-claims { list-style: none; margin: 0 0 18px; padding: 0; display: grid; gap: 6px; }
+.tol-claims li { padding: 6px 12px; border-inline-start: 3px solid var(--tol-life); background: var(--tol-bg); border-radius: 6px; }
+.tol-kind { color: var(--tol-mut); }
+.tol-when { color: var(--tol-mut); }
+.tol-src { display: block; font-size: 13px; color: var(--tol-dim); }
+.tol-actions { display: flex; flex-wrap: wrap; gap: 12px; }
+.tol-primary { min-height: 54px; padding: 0 24px; border: 0; border-radius: var(--tol-radius-control); background: var(--tol-primary); color: var(--tol-on-primary) !important; font-weight: 600; cursor: pointer; }
+.tol-quiet { min-height: 44px; padding: 0 18px; border: 1.5px solid var(--tol-ink); border-radius: var(--tol-radius-control); background: none; cursor: pointer; }
+.tol-focus .tol-quiet { min-height: 44px; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .tol-node, .tol-tab { transition: background-color 140ms ease-out, border-color 140ms ease-out; }
+}
