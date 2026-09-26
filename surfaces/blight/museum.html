@@ -61,9 +61,83 @@
 
 /* comprehension touch floor (2026-09-16): 44px canon on phones */
 @media(max-width:520px){button,select,input,a.btn,.btn{min-height:44px}}
+/* ── A-LEVEL MUSEUM (founder review 2026-09-26: "PLEASE MAKE IT A/A- LEVEL MUSEUM").
+   The words, the facts and the live chain reads are unchanged; this is how the house hangs
+   them, one hang per register. Casing law: no forced capitals anywhere. Unknown values are
+   said, not dashed. Artworks keep their black vitrine in every register — the chain draws them
+   on black — and every caption reads as a wall label. ── */
+h1,h2{text-transform:none;letter-spacing:normal}
+figcaption{font-size:13px;line-height:1.55}
+.note{font-size:13px}
+code{font-size:12.5px}
+table{font-size:13px}
+.cls{width:22px;height:22px;line-height:22px;font-size:12px}
+.stage .note,pre .note,body[data-reg] .stage .note,body[data-reg] pre .note{display:block;max-width:26ch;margin:auto;text-align:center;color:#d4d4de;font:15px/1.55 system-ui,-apple-system,sans-serif;white-space:normal;letter-spacing:normal}
+/* Phones: a table is a stack of entries — the first cell heads each one; nothing is ever squeezed
+   to a letter-wide column. */
+@media(max-width:600px){
+  .scroll table,.scroll tbody,.scroll tr,.scroll td,div[style*="overflow-x"] table,div[style*="overflow-x"] tbody,div[style*="overflow-x"] tr,div[style*="overflow-x"] td{display:block;width:auto}
+  .scroll tr:has(th),div[style*="overflow-x"] tr:has(th){display:none}
+  .scroll tr,div[style*="overflow-x"] tr{padding:12px 0;border-bottom:1px solid var(--line)}
+  .scroll td,div[style*="overflow-x"] td{border:0;padding:2px 0}
+  .scroll td:first-child,div[style*="overflow-x"] td:first-child{font-weight:600}
+  .scroll td:empty,div[style*="overflow-x"] td:empty{display:none}
+}
+
+/* NEW BEE — a daylight gallery: paper walls, serif titles, generous reading text, one accent. */
+body[data-reg="bee"]{--bg:#fbf7f0;--panel:#fffdf8;--line:#e6dfd2;--ink:#0c1412;--dim:#4a5f55;--accent:#a8238c;--accent2:#6e3fb8;--cyan:#176879;--ok:#2f6b3a;--bad:#9b2c46;
+  font:17px/1.65 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;padding:20px 18px 64px}
+body[data-reg="bee"] h1{font:400 clamp(2.4rem,11vw,3.4rem)/1.05 Georgia,"Iowan Old Style","Times New Roman",serif;margin:.2em 0 .35em}
+body[data-reg="bee"] h1 span{color:var(--accent)}
+body[data-reg="bee"] h2{font:400 1.55rem/1.25 Georgia,"Iowan Old Style","Times New Roman",serif;color:var(--ink);margin:56px 0 10px;padding-top:28px}
+body[data-reg="bee"] .lede{font-size:17px;color:#2b3a33;max-width:62ch}
+body[data-reg="bee"] .lede b{color:var(--ink)}
+body[data-reg="bee"] .panel{border-radius:20px;padding:18px;box-shadow:0 1px 0 var(--line),0 10px 30px rgba(12,20,18,.06)}
+body[data-reg="bee"] .stage,body[data-reg="bee"] pre{border-radius:12px}
+body[data-reg="bee"] figcaption{font:14px/1.6 system-ui,-apple-system,sans-serif;color:var(--dim);margin-top:12px}
+body[data-reg="bee"] blockquote{background:transparent;border-left:3px solid var(--accent);font:italic 1.2rem/1.55 Georgia,"Iowan Old Style",serif;color:var(--ink);padding:4px 0 4px 18px}
+body[data-reg="bee"] table{font-size:15px}
+body[data-reg="bee"] th{color:var(--dim)}
+body[data-reg="bee"] code{color:var(--cyan);font-size:14px;background:#eef4f2;border-radius:5px;padding:0 4px}
+body[data-reg="bee"] .note{color:var(--dim);font-size:15px}
+body[data-reg="bee"] .a{background:#e3f1e6;color:#2f6b3a}body[data-reg="bee"] .b{background:#f6efd8;color:#7a5d00}body[data-reg="bee"] .c{background:#f1e4f6;color:#6e3fb8}
+body[data-reg="bee"] .d{background:#fbe8dc;color:#8a3d10}body[data-reg="bee"] .e{background:#f8e1e6;color:#9b2c46}body[data-reg="bee"] .f{background:#ecebe6;color:#4a5f55}
+body[data-reg="bee"] a{color:#6e3fb8}
+body[data-reg="bee"] .warn{color:#7a5d00}
+
+/* RAVER — the gallery at night: display titles in light, the works full-bleed and glowing. */
+body[data-reg="raver"]{--bg:#06110c;--panel:#0e1a15;--line:#23352c;--ink:#f4eefc;--dim:#c9bde6;
+  font:16px/1.65 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+body[data-reg="raver"] h1{font:800 clamp(2.4rem,12vw,3.4rem)/1 system-ui,sans-serif;background:linear-gradient(90deg,#d655bb,#9c6fd6 55%,#45c2dc);-webkit-background-clip:text;background-clip:text;color:transparent}
+body[data-reg="raver"] h1 span{color:inherit}
+body[data-reg="raver"] h2{font:800 1.35rem/1.2 system-ui,sans-serif;color:#f4eefc;border-top:0;margin-top:48px}
+body[data-reg="raver"] h2 span{background:linear-gradient(90deg,#d655bb,#9c6fd6);-webkit-background-clip:text;background-clip:text;color:transparent}
+body[data-reg="raver"] .lede{font-size:16px;color:var(--dim)}
+body[data-reg="raver"] .panel{border-radius:24px}
+body[data-reg="raver"] .stage{margin:0 -34px;border-radius:0;box-shadow:0 0 0 1px rgba(214,85,187,.35),0 0 32px rgba(156,111,214,.35)}
+body[data-reg="raver"] figcaption{font-size:14px;color:var(--dim)}
+body[data-reg="raver"] blockquote{font-size:16px}
+body[data-reg="raver"] table{font-size:14px}
+
+/* A READ THAT DID NOT ARRIVE is a quiet card, not a black void: the frame folds to its note
+   (the artwork's square is kept only for art). Every register keeps its own dress. */
+.stage:has(> .note:only-child),pre:has(> .note:only-child){aspect-ratio:auto!important;min-height:0!important;padding:22px 16px!important;background:transparent!important;border:1px dashed rgba(160,160,175,.5);box-shadow:none!important}
+.stage > .note:only-child,pre > .note:only-child{color:inherit!important;opacity:.85;white-space:normal}
+body[data-reg="bee"] .stage:has(> .note:only-child),body[data-reg="bee"] pre:has(> .note:only-child){background:#f4eee4!important;border-color:#d9cdb9;color:#4a443c}
+body[data-reg="raver"] .stage:has(> .note:only-child){margin:0!important;border-radius:14px;border-color:rgba(214,85,187,.55);color:#e7d9ef}
+body[data-reg="cypherpunk"] .stage:has(> .note:only-child),body[data-reg="cypherpunk"] pre:has(> .note:only-child){border-radius:4px;border-color:#2c5a63;color:#9fd0da}
+/* links: readable in every register, and a link standing alone in a table cell is a 44px target */
+a{color:#9fd8ff}
+body[data-reg="raver"] a{color:#eaa0dc}
+body[data-reg="cypherpunk"] a{color:#45c2dc}
+@media(max-width:600px){td>a,td>code>a{display:inline-flex;align-items:center;min-height:44px}}
+/* CYPHERPUNK — the receipts room: mono throughout, dense, never below 12.5px. */
+body[data-reg="cypherpunk"] h1{font-size:20px}
+body[data-reg="cypherpunk"] h2{font-size:15px;color:#45c2dc}
+body[data-reg="cypherpunk"] .lede{font-size:14px}
 </style>
 </head>
-<body><div class="wrap">
+<body data-bee-theme="custom"><div class="wrap">
 
 <h1>bLighT <span>Museum</span></h1>
 <div class="lede">
@@ -93,7 +167,7 @@
   <figure>
     <pre id="glyphText">reading chain…</pre>
     <figcaption><b>What the chain returns</b> — <code>tokenURI(1)</code> on
-      <code>0xd4e4078c…</code>, live. Plain text, <span id="glyphBytes">—</span>.
+      <code>0xd4e4078c…</code>, live. Plain text, <span id="glyphBytes">size not read yet</span>.
       Complete, deterministic, self-contained.</figcaption>
   </figure>
   <figure>
@@ -114,13 +188,13 @@
   <figure>
     <div class="stage" id="pepiArt"><span class="note">reading chain…</span></div>
     <figcaption><b>PEPi</b> <code>0x28a5e71B…</code> on Base, frozen record at the burn
-      address. <span id="pepiBytes">—</span> of SVG. <span class="ok">Zero external
+      address. <span id="pepiBytes">SVG size not read yet</span>. <span class="ok">Zero external
       references.</span></figcaption>
   </figure>
   <figure>
     <div class="stage" id="froggiArt"><span class="note">reading chain…</span></div>
     <figcaption><b>FROGGi</b> <code>0x88A78C50…</code>, the same call on a different
-      contract. <span id="froggiBytes">—</span> — an order of magnitude larger than its
+      contract. <span id="froggiBytes">size not read yet</span> — an order of magnitude larger than its
       peers.</figcaption>
   </figure>
 </div>
@@ -155,9 +229,9 @@
   <tr><td>2017</td><td>Curio Cards</td><td><span class="cls d">d</span></td><td>~30 hand-rolled ERC-20s, <code>decimals: 0</code> — <b>a fungible token that is one picture</b></td></tr>
   <tr><td>2019-04-05</td><td>Autoglyphs</td><td><span class="cls a">a</span>/<span class="cls c">c</span></td><td>block 7,510,386 — depends whether the artwork is the text or the image</td></tr>
   <tr><td>2024-03-03</td><td>the 3.99 MB inscription</td><td><span class="cls b">b</span>/<span class="cls c">c</span></td><td>block 832,947 — <b>99.8% of a block's weight budget in one transaction</b>, riding the witness discount</td></tr>
-  <tr><td>2026-08-18</td><td>The hidden family revealed</td><td><span class="cls a">a</span></td><td>the FUNGI crown leaderboard: eleven strangers each holding over 1% of a website-dead economy — the conviction whale (bajohn, FUNGI-monogamous at 2.8M, verified on-chain to the token), the entropy-max wallet (the founder, #12, the only known wallet holding five family tokens at once), and the suspect seat right under the LP. the variety hunt begins: wallets holding many ERC-20i at once are the makers’ fingerprints.</td></tr>
-<tr><td>2024-04-20</td><td>Runes launch</td><td><span class="cls a">a</span></td><td>block 840,000 — the halving; runestones in <code>OP_RETURN</code> outputs, commodities without a VM</td></tr>
+  <tr><td>2024-04-20</td><td>Runes launch</td><td><span class="cls a">a</span></td><td>block 840,000 — the halving; runestones in <code>OP_RETURN</code> outputs, commodities without a VM</td></tr>
   <tr><td>2024</td><td>ERC-20i (FUNGI)</td><td><span class="cls a">a</span></td><td>seed-derived art on a fungible balance; <code>getSvg</code> returns the SVG itself</td></tr>
+  <tr><td>2026-08-18</td><td>The hidden family revealed</td><td><span class="cls a">a</span></td><td>the FUNGI crown leaderboard: eleven strangers each holding over 1% of a website-dead economy — the conviction whale (bajohn, FUNGI-monogamous at 2.8M, verified on-chain to the token), the entropy-max wallet (the founder, #12, the only known wallet holding five family tokens at once), and the suspect seat right under the LP. the variety hunt begins: wallets holding many ERC-20i at once are the makers’ fingerprints.</td></tr>
 </table></div>
 </div>
 
@@ -188,11 +262,11 @@
   <tr><td>PEPI v2 (Base)</td><td><code>0x28a5…de9F</code></td><td id="sz2">reading…</td></tr>
   <tr><td>FUNGI (Base)</td><td><code>0x7d9C…D15F</code></td><td id="szF">reading…</td></tr>
   <tr><td>FROGGI (Base)</td><td><code>0x88A7…22FE</code></td><td id="szR">reading…</td></tr>
-  <tr><td><b>v2 − v1</b></td><td></td><td id="szDiff" class="warn">—</td></tr>
+  <tr><td><b>v2 − v1</b></td><td></td><td id="szDiff" class="warn">not read yet</td></tr>
 </table></div>
 <details class="tnote" data-reg-disclose><summary data-i18n="mu.d.v2">What the 1,408 extra bytes bought — measured from the verified ABIs</summary>
   <div class="note" style="margin-top:8px" id="pw1408note">
-  The v2 deployment is larger by <b id="pw1408">—</b> bytes, and the verified
+  The v2 deployment is larger by <b id="pw1408">1,408 (measured 2026-08-16; the live read is on its way)</b> bytes, and the verified
   ABIs say precisely what that bought: <b>one</b> new external function,
   <code>getHolderIndex</code> — a holder-enumeration view (37 functions → 38).
   v2 adds nothing else to the surface. Measured 2026-08-16 from
@@ -221,12 +295,12 @@
     <div class="stage" id="trapCtl"><span class="note">reading chain…</span></div>
     <figcaption><b>Control — the record as stored.</b> <code>getSvg(seed,
       second, extra)</code> with the burn address's own words.
-      <span id="trapCtlBytes">—</span>.</figcaption>
+      <span id="trapCtlBytes">not read yet</span>.</figcaption>
   </figure>
   <figure>
     <div class="stage" id="trapBad"><span class="note">reading chain…</span></div>
     <figcaption><b>The trap — same record, seed forced to 0.</b> The exact
-      revert, unedited: <span id="trapErr" class="bad">—</span><br>
+      revert, unedited: <span id="trapErr" class="bad">not read yet</span><br>
       Everything else about the call is identical. The panic selector
       <code>0x4e487b71</code> with code <code>0x11</code> is the arithmetic
       underflow, arriving through a call any marketplace might make.</figcaption>
@@ -287,7 +361,7 @@
   </figure>
   <figure>
     <div class="stage" style="min-height:200px;aspect-ratio:auto;padding:16px;text-align:left">
-      <div style="width:100%" id="btcBar">—</div>
+      <div style="width:100%" id="btcBar">not read yet</div>
     </div>
     <figcaption><b>One transaction against one block.</b> Bitcoin blocks cap at
       4,000,000 weight units. This transaction is nearly the entire budget by
@@ -351,7 +425,7 @@
 </div>
 
 <div style="margin-top:34px">
-<h2 style="font-size:14px;font-weight:400;letter-spacing:.15em;color:#c9a0ff"><span data-i18n="h.083">SOURCES &amp; DOORS — the ERC-20i wing, receipted</span></h2>
+<h2><span data-i18n="h.083">Sources &amp; doors — the ERC-20i wing, receipted</span></h2>
 <details class="tnote" data-reg-disclose><summary data-i18n="mu.d.origin">Where ERC-20i came from — the chain’s own record</summary>
   <div class="note" style="margin-top:6px">
   <b>The origin, from the chain rather than from memory:</b> ERC-20i — fungible tokens whose
@@ -454,7 +528,10 @@ function drawGlyph(text){
     document.getElementById('glyphText').textContent=glyphRows(txt).join('\n');
     document.getElementById('glyphBytes').textContent=txt.length.toLocaleString()+' bytes';
     document.getElementById('glyphArt').innerHTML=drawGlyph(txt);
-  } else { document.getElementById('glyphText').textContent='chain unreachable — nothing cached to show you'; }
+  } else {
+    document.getElementById('glyphText').innerHTML='<span class="note">chain unreachable — nothing cached to show you</span>';
+    document.getElementById('glyphArt').innerHTML='<span class="note">chain unreachable — nothing cached to show you</span>';
+  }
 
   // Exhibit 2 — a frozen PEPi record at the burn address, and a FROGGi live spore
   const DEAD='0x000000000000000000000000000000000000dEaD';
@@ -464,7 +541,7 @@ function drawGlyph(text){
     const svg=await call('base','0x28a5e71bfc02723eac17e39c84c5190415c0de9f','0xa435130b'+W(32)+w[0]+w[1]);
     if(svg){ const s=decStr(svg);
       document.getElementById('pepiArt').innerHTML=s;
-      document.getElementById('pepiBytes').textContent=s.length.toLocaleString()+' bytes'; } }
+      document.getElementById('pepiBytes').textContent=s.length.toLocaleString()+' bytes of SVG'; } }
   // FROGGi has NO sporesDegree — it reverts. The seed source is not universal any more
   // than the renderer is, so fall back to the whole-token balance.
   const FROGGI='0x88a78c5035bdc8c9a8bb5c029e6cfcdd14b822fe';
@@ -519,7 +596,7 @@ function drawGlyph(text){
     put('sz1','<span class="bad">chain unreachable</span>'); put('sz2','<span class="bad">chain unreachable</span>');
     put('pw1408note','Chain unreachable — the sizes are NOT shown. Measured on 2026-08-16 they were 20,173 and 21,581 bytes (diff 1,408); today\u2019s read failed and no number is invented.');
   }
-  put('szF',sf?sf.toLocaleString()+' B':'—'); put('szR',sr?sr.toLocaleString()+' B':'—');
+  put('szF',sf?sf.toLocaleString()+' B':'<span class="bad">chain unreachable</span>'); put('szR',sr?sr.toLocaleString()+' B':'<span class="bad">chain unreachable</span>');
 
   // Exhibit 7 — the seed=0 trap: control render vs panic, one word apart
   const rec=await call('base',P2,'0x0fd9587e'+AD(DEAD)+W(0));   // getItemData(address,uint256)

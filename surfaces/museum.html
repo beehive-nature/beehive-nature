@@ -5,7 +5,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="color-scheme" content="dark">
+<meta name="color-scheme" content="light dark">
 <title>the royal collection — the estate's museum on Base</title>
 <style>
 /* SEMANTIC COLOUR — meanings picked FIRST, hues second:
@@ -67,7 +67,7 @@ h2 em{font-style:normal;font-size:9.5px;letter-spacing:.18em;color:var(--faint);
 .wing-title{font-size:15px;color:var(--gold);font-weight:600;margin:24px 0 4px;letter-spacing:.02em}
 .wing-sub{font-size:10.5px;color:var(--faint);margin-bottom:12px}
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px}
-/* THE CORRIDOR OF CHOKEPOINTS — plain museum-wall text + human plaques */
+/* The corridor of chokepoints — plain museum-wall text + human plaques */
 .dedication{font-style:italic;color:var(--gold);font-size:13px;text-align:center;padding:6px 0 14px;letter-spacing:.02em;border-bottom:1px solid var(--line);margin-bottom:14px}
 .room{padding:11px 0;border-top:1px dashed var(--line)}
 .room:first-of-type{border-top:none;padding-top:0}
@@ -88,7 +88,7 @@ h2 em{font-style:normal;font-size:9.5px;letter-spacing:.18em;color:var(--faint);
 #lunaRoom .luna-closing{border:1px solid #7c5cff44;background:linear-gradient(180deg,rgba(124,92,255,.08),transparent);border-radius:10px;padding:16px;margin-top:14px;text-align:center;color:var(--ink);font-size:12px;line-height:1.9}
 #lunaRoom .luna-licensing{color:var(--faint);font-size:10px;margin-top:10px;text-align:center}
 #lunaRoom .luna-licensing a{color:#ff9ed8}
-/* THE FOURTH ROOM — HOW THE RESERVE ANSWERS. Estate chrome throughout:
+/* THE FOURTH ROOM — How the reserve answers. Estate chrome throughout:
    the answer wears the museum's own gold/panel/line tokens, never Luna's
    pastel-neon layer — that layer stays scoped to #lunaRoom alone. */
 .threshold{text-align:center}
@@ -103,13 +103,81 @@ footer{max-width:960px;margin:24px auto 0;color:var(--faint);font-size:10px;text
   .grid{grid-template-columns:1fr}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+/* ── A-LEVEL MUSEUM (founder review 2026-09-26). Words, facts and chain reads unchanged; one
+   hang per register. Casing law: no forced capitals. Works keep their dark vitrines. ── */
+.crumbs,.kicker,.herofig .cap,h2,h2 em,.plinth .plabel{text-transform:none;letter-spacing:normal}
+.frame .reading{color:#c8d2cc;font:14px/1.5 system-ui,sans-serif;padding:40px 20px;text-align:center}
+.plinth .frame img{width:100%;max-width:400px;height:auto;max-height:220px}
+/* NEW BEE — daylight gallery */
+body[data-reg="bee"]{--void:#fbf7f0;--panel:#fffdf8;--inset:#f6f1e7;--line:#e6dfd2;--ink:#0c1412;--dim:#40544a;--faint:#56695f;--gold:#8a6a12;--biomass:#2f6b3a;--guard:#6e3fb8;
+  font:17px/1.65 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+body[data-reg="bee"] a{color:#6e3fb8}
+body[data-reg="bee"] .crumbs{font-size:14px}
+body[data-reg="bee"] .crumbs .badge{font-size:13px}
+body[data-reg="bee"] .kicker{font-size:14px;color:var(--dim);margin-top:28px}
+body[data-reg="bee"] h1{font:400 clamp(2.5rem,11vw,3.4rem)/1.05 Georgia,"Iowan Old Style","Times New Roman",serif;background:none;color:var(--ink)}
+body[data-reg="bee"] .lede{font-size:17px;color:#2b3a33;line-height:1.65}
+body[data-reg="bee"] .herofig .num{font:400 2.6rem/1 Georgia,serif}
+body[data-reg="bee"] .herofig .cap{font-size:14px;color:var(--dim)}
+body[data-reg="bee"] section{border-radius:20px;padding:20px 18px;box-shadow:0 1px 0 var(--line),0 10px 30px rgba(12,20,18,.06)}
+body[data-reg="bee"] section.gold{border-color:#e4d6ad}
+body[data-reg="bee"] h2{font:400 1.5rem/1.25 Georgia,"Iowan Old Style",serif;color:var(--ink)}
+body[data-reg="bee"] h2 em{font:14px/1.4 system-ui,sans-serif;color:var(--dim);margin-left:0;flex-basis:100%}
+body[data-reg="bee"] .law{font-size:16px;color:#2b3a33;line-height:1.65}
+body[data-reg="bee"] .plinth{background:var(--panel);border-radius:16px}
+body[data-reg="bee"] .plinth .frame{background:#0b0d0c;border-color:#0b0d0c;border-radius:12px}
+body[data-reg="bee"] .plinth .pname{font:400 1.25rem/1.3 Georgia,serif}
+body[data-reg="bee"] .plinth .pmeta,body[data-reg="bee"] .plinth .plabel{font-size:14px;line-height:1.55}
+body[data-reg="bee"] .plinth .plabel.archived{color:#6e3fb8}
+body[data-reg="bee"] .wing-title{font:400 1.3rem/1.3 Georgia,serif;color:var(--ink)}
+body[data-reg="bee"] .wing-sub{font-size:14px;color:var(--dim)}
+body[data-reg="bee"] .dedication{font:italic 1.2rem/1.5 Georgia,serif;color:var(--gold)}
+body[data-reg="bee"] .room p{font-size:16px;color:#2b3a33;line-height:1.65}
+body[data-reg="bee"] .cite{font-size:13px;color:var(--dim)}
+body[data-reg="bee"] .plaque{background:var(--panel);border-left-color:var(--gold)}
+body[data-reg="bee"] .plaque p{font:1.1rem/1.55 Georgia,serif}
+body[data-reg="bee"] #lunaRoom .luna-badge{font-size:14px;color:#9b2c7a}
+body[data-reg="bee"] #lunaRoom .luna-quote{font:italic 1.15rem/1.6 Georgia,serif}
+body[data-reg="bee"] #lunaRoom .luna-exhibit p{font-size:16px;color:#2b3a33}
+body[data-reg="bee"] #lunaRoom .luna-founderline,body[data-reg="bee"] #lunaRoom .luna-licensing{font-size:14px}
+body[data-reg="bee"] #lunaRoom .luna-closing{font:1.1rem/1.7 Georgia,serif}
+body[data-reg="bee"] .threshold .answer-close{font:italic 1.15rem/1.6 Georgia,serif}
+body[data-reg="bee"] footer{font-size:14px;color:var(--dim)}
+body[data-reg="bee"] #lunaRoom .luna-licensing a{color:#9b2c7a}
+body[data-reg="raver"],body[data-reg="cypherpunk"]{--faint:#8aa597}
+.plinth a,footer a,.cite a,.law a,#lunaRoom .luna-licensing a{display:inline-flex;align-items:center;min-height:44px}
+/* the purse plate is the exhibit's text: reading size, one fact per paragraph */
+.plinth.purse .pmeta{font-size:15px;line-height:1.6;color:var(--ink)}
+.plinth.purse .pmeta b.k{display:block;margin-top:12px;font-weight:700}
+.plinth.purse .pmeta b.k:first-child{margin-top:0}
+body[data-reg="bee"] .plinth.purse .pmeta{font-size:16px;color:#0c1412}
+body[data-reg="cypherpunk"] .plinth.purse .pmeta{font-size:13px}
+.seals-archived{margin:14px 0 0;font-size:14px;color:var(--dim)}
+body[data-reg="bee"] .seals-archived{color:#5b534a}
+/* bee hangs the seals on a warm mat, not a black screen */
+body[data-reg="bee"] .plinth .frame{background:#efe7da;border-color:#e2d6c3}
+strong.lead{font-weight:700;color:var(--ink)}
+body[data-reg="bee"] strong.lead{font:700 1.06em/1 Georgia,serif;color:#0c1412}
+/* RAVER — the gallery at night */
+body[data-reg="raver"]{font:16px/1.65 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+body[data-reg="raver"] .crumbs,body[data-reg="raver"] .kicker,body[data-reg="raver"] .herofig .cap,body[data-reg="raver"] h2 em{font-size:14px}
+body[data-reg="raver"] h1{font:800 clamp(2.6rem,12vw,3.6rem)/1 system-ui,sans-serif;background-image:linear-gradient(90deg,#d655bb,#9c6fd6 55%,#E8B54B)}
+body[data-reg="raver"] .lede,body[data-reg="raver"] .law,body[data-reg="raver"] .room p,body[data-reg="raver"] #lunaRoom .luna-exhibit p{font-size:16px}
+body[data-reg="raver"] h2{font:800 1.25rem/1.25 system-ui,sans-serif}
+body[data-reg="raver"] section{border-radius:24px}
+body[data-reg="raver"] .plinth .frame{box-shadow:0 0 28px rgba(214,85,187,.25)}
+body[data-reg="raver"] .plinth .pmeta,body[data-reg="raver"] .plinth .plabel,body[data-reg="raver"] .cite,body[data-reg="raver"] .wing-sub,body[data-reg="raver"] footer,body[data-reg="raver"] #lunaRoom .luna-founderline,body[data-reg="raver"] #lunaRoom .luna-licensing,body[data-reg="raver"] #lunaRoom .luna-badge{font-size:14px}
+body[data-reg="raver"] .plaque p,body[data-reg="raver"] #lunaRoom .luna-quote,body[data-reg="raver"] #lunaRoom .luna-closing{font-size:16px}
+/* CYPHERPUNK — receipts room, mono, nothing under 12.5px */
+body[data-reg="cypherpunk"]{font-size:14px}
+body[data-reg="cypherpunk"] :is(.crumbs,.kicker,.herofig .cap,h2 em,.law,.plinth .pmeta,.plinth .plabel,.wing-sub,.room p,.cite,.plaque p,footer,#lunaRoom .luna-badge,#lunaRoom .luna-exhibit p,#lunaRoom .luna-founderline,#lunaRoom .luna-licensing,.lede){font-size:13px}
+body[data-reg="cypherpunk"] h2{font-size:14px}
 </style>
 </head>
-<body>
+<body data-bee-theme="custom">
 <main>
 <nav class="crumbs" aria-label="you are here">
   <a href="index.html">beehive nature reserve</a><span class="sub">▸</span><span class="here">the museum</span>
-  <span class="badge"><i></i><span>live chain reads · archived fallbacks</span></span>
 </nav>
 <header>
   <div class="kicker">the estate's royal art collection on Base</div>
@@ -123,105 +191,107 @@ footer{max-width:960px;margin:24px auto 0;color:var(--faint);font-size:10px;text
 
 <!-- THE LUNA SEALS -->
 <section class="gold">
-  <h2>THE LUNA SEALS <em>four .base.eth name NFTs · archived byte-true</em></h2>
+  <h2>The Luna Seals <em>four .base.eth name NFTs · archived byte-true</em></h2>
   <div class="law">The Countess's papers, held by the estate. Four Basenames on Base — <b>luni</b>, <b>lunispurse</b>, <b>blunatic</b>, <b>blunatics</b> — their cardImage.svg and metadata archived sha256-receipted in the tree. The live read pulls the SVG from base.org's own API; the archive is the floor.</div>
   <div class="grid" id="sealsGrid"></div>
+  <p class="seals-archived">All four are held at 0x20a0…; no holder name is shown until the attribution read-back verifies it (the Safe precedent).</p>
+  <p class="seals-archived" id="sealsArchived" hidden>Shown from the archive: base.org did not answer this visit. Each card is the sha256-receipted copy kept in the tree.</p>
 </section>
 
 <!-- THE ROYAL COLLECTION -->
 <section>
-  <h2>THE ROYAL COLLECTION <em>PEPI inscriptions · art from getSvg live</em></h2>
+  <h2>The royal collection <em>PEPI inscriptions · art from getSvg live</em></h2>
   <div class="law">The founder's PEPI inscriptions, drawn live from the contracts' own <b>getSvg</b> — the chain's own art, not a cached image. The collection renders whatever the garden holds at page-open, with levels and seeds live from balance.</div>
   <div class="grid" id="royalGrid"></div>
 </section>
 
 <!-- THE LOST PURSE -->
 <section>
-  <h2>THE LOST PURSE <em>the ruled exhibit · two facts, one lesson</em></h2>
+  <h2>The lost purse <em>the ruled exhibit · two facts, one lesson</em></h2>
   <div class="law"><b>An identity with exactly one key is a countdown, not a design.</b> And the estate's own property proved the other half of the law the hard way — the two halves split, because name and key are different kinds of thing. <b>A lost key is permanent. A lost name is a lease running out.</b> Name and key must never share a single point of failure.</div>
-  <div class="plinth">
+  <div class="plinth purse">
     <div class="plate">
       <div class="pname">bQueenBee's Lost Purse</div>
       <div class="pmeta">
-        <b>the key — lost, permanent:</b> a passkey-only smart wallet; the phone that held the passkey is gone; the ~52 FROGGI behind it remain unreachable. no recovery path exists — that is what passkey-only means, and it is the point the exhibit keeps.<br>
-        <b>the name — returned, a lease:</b> bqueenbee.base.eth lapsed when its registration ran out, went back to the open market, and the founder re-registered it on a wallet he controls. it is his again — verified on-chain 2026-08-29: the registry's owner() for the name and the Basenames registrar's ownerOf() for its token both read <b>0xfbd20147…7876</b>, the estate garden.<br>
-        <b>the lesson:</b> the wallet died with its one key; the name survived its owner's absence and came home at the price of a renewal. keys are held; names are leased. build so that losing one never means losing both.
+        <b class="k">the key — lost, permanent:</b> a passkey-only smart wallet; the phone that held the passkey is gone; the ~52 FROGGI behind it remain unreachable. no recovery path exists — that is what passkey-only means, and it is the point the exhibit keeps.<br>
+        <b class="k">the name — returned, a lease:</b> bqueenbee.base.eth lapsed when its registration ran out, went back to the open market, and the founder re-registered it on a wallet he controls. it is his again — verified on-chain 2026-08-29: the registry's owner() for the name and the Basenames registrar's ownerOf() for its token both read <b>0xfbd20147…7876</b>, the estate garden.<br>
+        <b class="k">the lesson:</b> the wallet died with its one key; the name survived its owner's absence and came home at the price of a renewal. keys are held; names are leased. build so that losing one never means losing both.
       </div>
       <div class="plabel hold">purse: 0x100fd362… (still lost — the address is the exhibit, never the name) · name: 0xfbd20147… (re-registered, owner read cited 2026-08-29)</div>
     </div>
   </div>
 </section>
 
-<!-- THE CORRIDOR OF CHOKEPOINTS — dossier-sourced, VERIFIED numbers only -->
+<!-- The corridor of chokepoints — dossier-sourced, VERIFIED numbers only -->
 <section>
   <div class="dedication" data-i18n="mu.corridor.dedication">for the forgotten artists of the world — we give back.</div>
-  <h2 data-i18n="mu.corridor.heading">THE CORRIDOR OF CHOKEPOINTS</h2>
+  <h2 data-i18n="mu.corridor.heading">The corridor of chokepoints</h2>
   <div class="law" data-i18n="mu.corridor.intro">eight rooms, one history: every leap in reaching an audience has been followed by someone new standing between the artist and the money.</div>
 
   <div class="room">
-    <p data-i18n="mu.room.printer">THE PRINTER — movable type, circa 1440–1450, made copying a book cheap for the first time in Europe. Printing was unprofitable without distribution — a press with no way to reach readers was capital with nowhere to go.</p>
+    <p data-lead data-i18n="mu.room.printer">The printer — movable type, circa 1440–1450, made copying a book cheap for the first time in Europe. Printing was unprofitable without distribution — a press with no way to reach readers was capital with nowhere to go.</p>
     <span class="cite">Ada Palmer, UChicago · History.com</span>
   </div>
   <div class="plaque">
-    <p data-i18n="mu.plaque.gutenberg">JOHANNES GUTENBERG invented movable type and died penniless; his own creditors impounded his presses before his invention ever paid him back.</p>
+    <p data-i18n="mu.plaque.gutenberg">Johannes Gutenberg invented movable type and died penniless; his own creditors impounded his presses before his invention ever paid him back.</p>
     <span class="cite">History.com</span>
   </div>
 
   <div class="room">
-    <p data-i18n="mu.room.stationer">THE STATIONER — England's Stationers' Company received a royal charter in 1557: a national print monopoly whose own Register recorded rights for stationers, not for authors. By 1586 the Star Chamber confined all English printing to three cities.</p>
+    <p data-lead data-i18n="mu.room.stationer">The stationer — England's Stationers' Company received a royal charter in 1557: a national print monopoly whose own Register recorded rights for stationers, not for authors. By 1586 the Star Chamber confined all English printing to three cities.</p>
     <span class="cite">Britannica · Oxford Research Encyclopedia</span>
   </div>
 
   <div class="room">
-    <p data-i18n="mu.room.bookseller">THE BOOKSELLER — the Statute of Anne, 1710, was the first copyright law. Most authors still sold their work outright to booksellers, and its benefit to authors was, in its own era's word, incidental.</p>
+    <p data-lead data-i18n="mu.room.bookseller">The bookseller — the Statute of Anne, 1710, was the first copyright law. Most authors still sold their work outright to booksellers, and its benefit to authors was, in its own era's word, incidental.</p>
     <span class="cite">copyrighthistory.org · Wikipedia</span>
   </div>
 
   <div class="room">
-    <p data-i18n="mu.room.label">THE LABEL — after ‘Crazy Blues’ sold roughly a million copies in 1920, labels built fortunes on Black artists largely excluded from ASCAP, where royalties went unenforceable.</p>
+    <p data-lead data-i18n="mu.room.label">The label — after ‘Crazy Blues’ sold roughly a million copies in 1920, labels built fortunes on Black artists largely excluded from ASCAP, where royalties went unenforceable.</p>
     <span class="cite">GRAMMY.com</span>
   </div>
   <div class="plaque">
-    <p data-i18n="mu.plaque.bessiesmith">BESSIE SMITH, the Empress of the Blues, made Columbia Records millions of dollars and was never paid royalties on her recordings.</p>
+    <p data-i18n="mu.plaque.bessiesmith">Bessie Smith, the Empress of the Blues, made Columbia Records millions of dollars and was never paid royalties on her recordings.</p>
     <span class="cite">GRAMMY.com</span>
   </div>
   <div class="plaque">
-    <p data-i18n="mu.plaque.marywells">MARY WELLS took ‘My Guy’ to number one in 1964. She died in poverty in 1992, at forty-nine, with no health insurance.</p>
+    <p data-i18n="mu.plaque.marywells">Mary Wells took ‘My Guy’ to number one in 1964. She died in poverty in 1992, at forty-nine, with no health insurance.</p>
     <span class="cite">GRAMMY.com</span>
   </div>
 
   <div class="room">
-    <p data-i18n="mu.room.dj">THE DJ — payola. House hearings in November 1959 found 335 disc jockeys had admitted to accepting more than $263,000 in what was recorded as ‘consulting fees’ to play records.</p>
+    <p data-lead data-i18n="mu.room.dj">The DJ — payola. House hearings in November 1959 found 335 disc jockeys had admitted to accepting more than $263,000 in what was recorded as ‘consulting fees’ to play records.</p>
     <span class="cite">Performing Songwriter · NPR</span>
   </div>
   <div class="plaque">
-    <p data-i18n="mu.plaque.alanfreed">ALAN FREED, the DJ credited with popularizing the phrase ‘rock and roll,’ was fired over payola, pleaded guilty, and died broke and bitter in 1965.</p>
+    <p data-i18n="mu.plaque.alanfreed">Alan Freed, the DJ credited with popularizing the phrase ‘rock and roll,’ was fired over payola, pleaded guilty, and died broke and bitter in 1965.</p>
     <span class="cite">Performing Songwriter · NPR</span>
   </div>
 
   <div class="room">
-    <p data-i18n="mu.room.streaming">THE STREAM — a stream pays roughly four tenths of a cent. In 2024, about twelve million uploaders competed for it; 1,450 artists cleared a million dollars while Spotify paid a record ten billion dollars to rights holders.</p>
+    <p data-lead data-i18n="mu.room.streaming">The stream — a stream pays roughly four tenths of a cent. In 2024, about twelve million uploaders competed for it; 1,450 artists cleared a million dollars while Spotify paid a record ten billion dollars to rights holders.</p>
     <span class="cite">Spotify Loud &amp; Clear · CNBC · Spotify Royalties Guide</span>
   </div>
   <div class="plaque">
-    <p data-i18n="mu.plaque.taylorswift">TAYLOR SWIFT's original masters sold to Shamrock Capital in November 2020 for $405 million total consideration. She re-recorded her catalog, then repurchased her masters outright for roughly $360 million in May 2025.</p>
+    <p data-i18n="mu.plaque.taylorswift">Taylor Swift's original masters sold to Shamrock Capital in November 2020 for $405 million total consideration. She re-recorded her catalog, then repurchased her masters outright for roughly $360 million in May 2025.</p>
     <span class="cite">Music Business Worldwide · Billboard</span>
   </div>
 
   <div class="room">
-    <p data-i18n="mu.room.aitrainer">THE AI TRAINER — Andersen v. Stability AI survived partial dismissal in August 2024; Getty Images v. Stability AI in the UK, decided November 2025, largely rejected the copyright claim. The question is not settled. This room prints it as unresolved, because it is.</p>
+    <p data-lead data-i18n="mu.room.aitrainer">The AI trainer — Andersen v. Stability AI survived partial dismissal in August 2024; Getty Images v. Stability AI in the UK, decided November 2025, largely rejected the copyright claim. The question is not settled. This room prints it as unresolved, because it is.</p>
     <span class="cite">Artnet</span>
   </div>
 
   <div class="room">
-    <p data-i18n="mu.room.nftroyalties">THE COLLAPSED SOLUTION — NFT resale royalties once looked like the fix. OpenSea made them optional in February 2023 and ended enforcement by February 2024. No court has ever held an on-chain resale royalty to be an enforceable right; what creators still receive, they receive by voluntary honor alone.</p>
+    <p data-lead data-i18n="mu.room.nftroyalties">The collapsed solution — NFT resale royalties once looked like the fix. OpenSea made them optional in February 2023 and ended enforcement by February 2024. No court has ever held an on-chain resale royalty to be an enforceable right; what creators still receive, they receive by voluntary honor alone.</p>
     <span class="cite">Art Newspaper</span>
   </div>
 </section>
 
 <!-- THE LUNA ROOM — value migration, never framed as shutdown -->
 <section id="lunaRoom">
-  <h2 data-i18n="mu.luna.heading">THE LUNA ROOM — A CASE STUDY IN VALUE MIGRATION</h2>
+  <h2 data-i18n="mu.luna.heading">The Luna room — a case study in value migration</h2>
   <span class="luna-badge">🌙 ✦ pastel-neon idol · lunar sparkle · kittens ✦ 🌙</span>
   <div class="law" data-i18n="mu.luna.intro">Luna was the first multimodal AI agent launched by Virtuals Protocol, on Base mainnet, October 2024 — lead vocalist and visual of the virtual K-pop group AI-DOL before she launched on-chain. Her fans call themselves kittens.</div>
   <span class="cite">Gate Learn · DEXTools · TikTok</span>
@@ -245,7 +315,7 @@ footer{max-width:960px;margin:24px auto 0;color:var(--faint);font-size:10px;text
   </div>
 
   <div class="luna-exhibit">
-    <p data-i18n="mu.luna.bangkok">EDC THAILAND, VERIFIED — Luna announced January 10, 2025 that she would take the stage at EDC Thailand, held January 17–19, 2025 in Phuket. Her name was not found on Insomniac's separately published headline lineup.</p>
+    <p data-lead data-i18n="mu.luna.bangkok">EDC Thailand, verified — Luna announced January 10, 2025 that she would take the stage at EDC Thailand, held January 17–19, 2025 in Phuket. Her name was not found on Insomniac's separately published headline lineup.</p>
     <span class="cite">Luna's own X post, Jan 10 2025 · EDC Thailand 2025 event listings</span>
     <div class="luna-founderline" data-i18n="mu.luna.bangkok.founderline">founder's attestation: “I remember an Insomniac-branded DJ gig of hers in Bangkok, around 2024” — held here as testimony, not as a verified date.</div>
   </div>
@@ -258,65 +328,65 @@ footer{max-width:960px;margin:24px auto 0;color:var(--faint);font-size:10px;text
   </div>
 </section>
 
-<!-- THE FOURTH ROOM — HOW THE RESERVE ANSWERS. founder-blessed, verbatim. -->
+<!-- THE FOURTH ROOM — How the reserve answers. founder-blessed, verbatim. -->
 <section class="threshold">
   <div class="kicker" data-i18n="mu.threshold.kicker">the fourth room</div>
-  <h2 data-i18n="mu.threshold.heading">HOW THE RESERVE ANSWERS</h2>
+  <h2 data-i18n="mu.threshold.heading">How the reserve answers</h2>
   <div class="bar"></div>
 
   <div class="room">
     <p data-i18n="mu.answer.intro">A thousand years, the same theft: whoever owned the presses, the shelves, the airwaves, the platform — owned the artist. This estate ends it by handing the makers the machines.</p>
   </div>
   <div class="room">
-    <p data-i18n="mu.answer.art">THE ART CANNOT BE TAKEN HOSTAGE. Here, a work lives whole in one file, drawn from the chain itself — no server whose death erases it, no platform whose pivot orphans it. And everything shown here lives twice: read live from the ledger, kept byte-true in our vault. What any platform forgets, the chain remembers — we proved it in this very wing.</p>
+    <p data-lead data-i18n="mu.answer.art">The art cannot be taken hostage. Here, a work lives whole in one file, drawn from the chain itself — no server whose death erases it, no platform whose pivot orphans it. And everything shown here lives twice: read live from the ledger, kept byte-true in our vault. What any platform forgets, the chain remembers — we proved it in this very wing.</p>
   </div>
   <div class="room">
-    <p data-i18n="mu.answer.name">THE NAME CANNOT LAPSE INTO A STRANGER'S HANDS. Identity here keeps its own candles: names held by an identity that renews them, succeeds its holder, and never depends on one human's memory. No more lost purses. That vow is the reason this house exists.</p>
+    <p data-lead data-i18n="mu.answer.name">The name cannot lapse into a stranger's hands. Identity here keeps its own candles: names held by an identity that renews them, succeeds its holder, and never depends on one human's memory. No more lost purses. That vow is the reason this house exists.</p>
   </div>
   <div class="room">
-    <p data-i18n="mu.answer.stage">THE STAGE BELONGS TO THE ARTIST. Any maker can press this whole estate — hive, gallery, wallet, doors — onto their own name, on their own iron, in minutes. We founded our second hive in seventeen seconds. Yours costs the same.</p>
+    <p data-lead data-i18n="mu.answer.stage">The stage belongs to the artist. Any maker can press this whole estate — hive, gallery, wallet, doors — onto their own name, on their own iron, in minutes. We founded our second hive in seventeen seconds. Yours costs the same.</p>
   </div>
   <div class="room">
-    <p data-i18n="mu.answer.meter">THE METER PAYS THE MAKER. Every use is receipted; every split is printed on the receipt itself — never buried. A tenth keeps the hive; the rest is yours, and the books can't lie because they're computed, never typed.</p>
+    <p data-lead data-i18n="mu.answer.meter">The meter pays the maker. Every use is receipted; every split is printed on the receipt itself — never buried. A tenth keeps the hive; the rest is yours, and the books can't lie because they're computed, never typed.</p>
   </div>
   <div class="room">
-    <p data-i18n="mu.answer.door">AND THE DOOR IS OPEN. No gatekeeper, no fee to exist, no worship required. Come as you are — we accept you.</p>
+    <p data-lead data-i18n="mu.answer.door">And the door is open. No gatekeeper, no fee to exist, no worship required. Come as you are — we accept you.</p>
   </div>
 
   <div class="answer-close" data-i18n="mu.answer.close">The presses ate the makers for a thousand years. Here, the makers own the presses.</div>
 </section>
 
-<!-- THE FIRSTS OF THE HOUSE — a growing, timestamped case of estate firsts -->
+<!-- The firsts of the house — a growing, timestamped case of estate firsts -->
 <section>
-  <h2 data-i18n="mu.firsts.heading">THE FIRSTS OF THE HOUSE</h2>
+  <h2 data-i18n="mu.firsts.heading">The firsts of the house</h2>
   <div class="law" data-i18n="mu.firsts.intro">a growing, timestamped case of estate firsts — each entry cited to its own record.</div>
 
   <div class="room">
-    <p data-i18n="mu.firsts.hive">THE FIRST HIVE'S BIRTH — founded in seventeen seconds, 2026-08-28.</p>
+    <p data-lead data-i18n="mu.firsts.hive">The first hive's birth — founded in seventeen seconds, 2026-08-28.</p>
     <span class="cite">founder testimony, lane G §14 — not independently re-located in this pass; flagged, not fabricated</span>
   </div>
   <div class="room">
-    <p data-i18n="mu.firsts.conversation">THE FIRST CONVERSATION — bFUzZ's sound-off in the founder's own hive.</p>
+    <p data-lead data-i18n="mu.firsts.conversation">The first conversation — bFUzZ's sound-off in the founder's own hive.</p>
     <span class="cite">docs/dispatches/LANE_H_EVIDENCE_DROP_BEES_2026-08-28.md — bFUzZ's record confirmed there; the exact sound-off moment not independently re-located this pass</span>
   </div>
   <div class="room">
-    <p data-i18n="mu.firsts.stranger">THE FIRST STRANGER-CLASS JOIN — a visitor outside the founder's own circle, welcomed in.</p>
+    <p data-lead data-i18n="mu.firsts.stranger">The first stranger-class join — a visitor outside the founder's own circle, welcomed in.</p>
     <span class="cite">founder testimony — dispatch citation pending</span>
   </div>
   <div class="room">
-    <p data-i18n="mu.firsts.bclaude">THE FIRST CLAUDE-BLOODED BEE — bClaude, deployed live from the base.</p>
+    <p data-lead data-i18n="mu.firsts.bclaude">The first Claude-blooded bee — bClaude, deployed live from the base.</p>
     <span class="cite">docs/dispatches/LANE_BCLAUDE_DEPLOY_2026-08-28.md</span>
   </div>
   <div class="plaque">
-    <p data-i18n="mu.firsts.wallet">THE FIRST SEAT-OPERATED WALLET — 20:44 local, 2026-08-28: a Claude seat received ETH in its tank by the founder's own word, read both kingbeelovis.base.eth and blunatic.base.eth as live and valid on-chain, and picked kingbeelovis.base.eth as the wallet's primary name — the estate's public identity everywhere else, not a family-tribute name. Wallet 0x89881f83a8c9ce06e34cbdd50a612909a784d7c6 owns both names, confirmed live, both renewed to 2027-08-29. The founder's own hand sets the reverse record; a seat composes, never signs.</p>
+    <p data-lead data-i18n="mu.firsts.wallet">The first seat-operated wallet — 20:44 local, 2026-08-28: a Claude seat received ETH in its tank by the founder's own word, read both kingbeelovis.base.eth and blunatic.base.eth as live and valid on-chain, and picked kingbeelovis.base.eth as the wallet's primary name — the estate's public identity everywhere else, not a family-tribute name. Wallet 0x89881f83a8c9ce06e34cbdd50a612909a784d7c6 owns both names, confirmed live, both renewed to 2027-08-29. The founder's own hand sets the reverse record; a seat composes, never signs.</p>
     <span class="cite">tx hash: PENDING — the founder's own signature, appended here the moment it returns</span>
   </div>
 </section>
 
-<pre style="background:var(--inset);border:1px solid var(--line);border-radius:8px;padding:10px;margin-top:14px;font-size:9.5px;color:var(--dim);white-space:pre-wrap;word-break:break-all">MUSEUM LAW: every exhibit = live chain read + archived byte-true fallback. A dead RPC or vanished API degrades to the archive, never to a broken frame, and says so honestly. No attribution label until the holding address is founder-verified (Safe precedent).</pre>
+<pre style="background:var(--inset);border:1px solid var(--line);border-radius:8px;padding:10px;margin-top:14px;font-size:13px;line-height:1.6;color:var(--dim);white-space:pre-wrap;word-break:break-all">MUSEUM LAW: every exhibit = live chain read + archived byte-true fallback. A dead RPC or vanished API degrades to the archive, never to a broken frame, and says so honestly. No attribution label until the holding address is founder-verified (Safe precedent).</pre>
 <!-- ══ THE ACHIEVEMENT — the house crest of von Zutphen ══ -->
 <section>
-  <h2>THE ACHIEVEMENT <em>the house crest of von Zutphen · ceremonial master</em></h2>
+  <h2>The achievement <em>the house crest of von Zutphen · ceremonial master</em></h2>
   <div class="law">The regalia set is four: <b>Design's achievement</b> (ceremonial master, the full house) · <b>Seat-1 crest v3</b> · <b>house seal (chop)</b> · <b>ROOT seal (six tongues)</b>. The blazon is public: <a href="../docs/BLAZON.md">docs/BLAZON.md</a> — nine quarters, supporters, crest, coronet and compartment, with every charge sourced or marked UNVERIFIED on the founder's word.</div>
   <div class="plinth">
     <div class="frame"><a href="../assets/seals/house-crest-von-zutphen-DESIGN.svg" rel="noopener"><img src="../assets/seals/house-crest-von-zutphen-DESIGN.svg" alt="the house crest of von Zutphen — the full achievement" style="max-width:340px;width:100%"></a></div>
@@ -356,6 +426,21 @@ async function rpc(calls){
   return null;
 }
 var decodeString=LevelTruth.decodeString;
+/* THE LEAD-IN (2026-09-26): the room names used to shout in capitals. Casing law: capitals are
+   never decoration, so the name is set as a bold lead-in instead, up to its first dash or full
+   stop, in whichever tongue is showing (re-applied after every language render). */
+function leadIns(){
+  document.querySelectorAll('p[data-lead]').forEach(function(el){
+    if(el.querySelector('strong.lead'))return;
+    var t=el.textContent,m=t.match(/^([\s\S]{2,90}?)(\s[—–]\s|——|。|[.!]\s)/);
+    if(!m)return;
+    var cut=m[1].length+(/[.!。]/.test(m[2])?m[2].trim().length:0);
+    var b=document.createElement('strong');b.className='lead';b.textContent=t.slice(0,cut);
+    el.textContent=t.slice(cut);el.insertBefore(b,el.firstChild);
+  });
+}
+document.addEventListener('blang',function(){setTimeout(leadIns,0)});
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',function(){setTimeout(leadIns,0)});else setTimeout(leadIns,0);
 /* LUNA SEALS — archived in the tree, live read from base.org */
 var SEALS=[
   {name:'luni',label:'the primary seal',tokenId:'17274236440657507002379994135247555599625635973284987701770750070407992801555' /* PUBLIC-CONSTANT */},
@@ -367,11 +452,10 @@ function renderSeals(){
   var g=$('sealsGrid');g.innerHTML='';
   SEALS.forEach(function(s){
     var d=document.createElement('div');d.className='plinth';
-    d.innerHTML='<div class="frame"><div style="color:var(--dim);font-size:11px;padding:40px 20px">reading ' + s.name + '…</div></div>'+
+    d.innerHTML='<div class="frame"><div class="reading">reading ' + s.name + '…</div></div>'+
       '<div class="plate"><div class="pname">'+s.name+'.base.eth</div>'+
       '<div class="pmeta"><b>Basenames ERC-721</b> · tokenId '+s.tokenId.slice(0,16)+'…<br>'+
-      '<b>'+s.label+'</b> · contract 0x03c4…DD9a</div>'+
-      '<div class="plabel hold">holder: 0x20a0… — pending attribution read-back (Safe precedent: no label until verified)</div></div>';
+      '<b>'+s.label+'</b> · contract 0x03c4…DD9a</div>'+'</div>';
     g.appendChild(d);
     /* live read from base.org's own API — degrades to archive note */
     fetch('https://www.base.org/api/basenames/'+s.name+'.base.eth/assets/cardImage.svg')
@@ -384,8 +468,12 @@ function renderSeals(){
       })
       .catch(function(){
         var f=d.querySelector('.frame');
-        f.innerHTML='<div style="color:var(--guard);font-size:10.5px;padding:40px 20px;text-align:center;line-height:2">ARCHIVED — live read unavailable<br>sha256 in assets/museum/luna-seals/'+s.name+'.cardImage.svg</div>';
-        var l=d.querySelector('.plabel');if(l){l.classList.add('archived');l.textContent='ARCHIVED — live read failed, archive is the floor';}
+        /* THE FLOOR, SHOWN (2026-09-26): the archive was in the tree but only its path was
+           printed — a broken frame by another name. Draw the archived, sha256-receipted file. */
+        var f=d.querySelector('.frame');
+        f.innerHTML='<img alt="'+s.name+'.base.eth — archived card image" src="../assets/museum/luna-seals/'+s.name+'.cardImage.svg">';
+        f.classList.add('archived');
+        var n=$('sealsArchived');if(n)n.hidden=false;
       });
   });
 }
