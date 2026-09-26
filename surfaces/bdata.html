@@ -115,7 +115,135 @@ details.card>summary{color:var(--ink);font-weight:600}
 [data-reg]:not(body){display:none}
 body[data-reg="bee"] [data-reg="bee"],body[data-reg="raver"] [data-reg="raver"],body[data-reg="cypherpunk"] [data-reg="cypherpunk"]{display:revert}
 .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0}
+/* ── ETERNAL FRONT (docs/design/eternal) — three products in one surface. Every value below is a
+   skaists token (surfaces/skaists.css): no hand-picked hex, size or corner. One register shows
+   at a time; new bee is the default. The data layer is bdata.js (the same state the whole page
+   below is drawn from), so the three fronts cannot disagree with it or with each other. ── */
+#eternal{margin:0 0 var(--sk-s2)}
+#eternal>.et-r,#eternal>.et-c{display:none}
+body[data-reg="raver"] #eternal>.et-b,body[data-reg="cypherpunk"] #eternal>.et-b{display:none}
+body[data-reg="raver"] #eternal>.et-r{display:block}
+body[data-reg="cypherpunk"] #eternal>.et-c{display:block}
+#eternal [hidden]{display:none!important}
+#eternal button{font:inherit;color:inherit}
+#eternal svg{display:block}
+#eternal :focus-visible{outline:2px solid var(--sk-focus);outline-offset:3px}
+#eternal p{margin:0}
+.et-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.et-archive-h{margin:var(--sk-s5) 0 var(--sk-s1);padding-top:var(--sk-s4);border-top:1px solid var(--sk-line);color:var(--sk-ink)}
+body[data-reg="bee"] .et-archive-h{font:400 28px/1.1 var(--sk-font-bee-serif)}
+body[data-reg="raver"] .et-archive-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em}
+body[data-reg="cypherpunk"] .et-archive-h{font:600 15px/1.45 var(--sk-font-mono)}
+
+/* NEW BEE — a calm room: one file, four plain rows, one action */
+#eternal .et-b{color:var(--sk-ink);display:flex;flex-direction:column;gap:var(--sk-s3)}
+#eternal .et-b-mark{font:400 18px/1.2 var(--sk-font-house);color:var(--sk-sovereign)}
+#eternal .et-b-h{margin:0;font:400 40px/1.05 var(--sk-font-bee-serif);color:var(--sk-ink)}
+#eternal .et-b-lede{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink-mut);text-wrap:pretty}
+#eternal .et-b-guard{display:flex;align-items:center;gap:var(--sk-s2);min-height:var(--sk-control-min);padding:var(--sk-s1) var(--sk-s3);border-radius:var(--sk-radius);background:var(--sk-guard-wash);color:var(--sk-guard);font:600 15px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-b-guard svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+#eternal .et-b-rows{display:flex;flex-direction:column;background:var(--sk-bg-card);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl);overflow:hidden}
+#eternal .et-b-file{display:flex;align-items:center;gap:var(--sk-s2);min-height:var(--sk-control-person);padding:var(--sk-s2) var(--sk-s3);border-bottom:1px solid var(--sk-line-soft)}
+#eternal .et-b-file i{width:40px;height:40px;border-radius:var(--sk-radius-pill);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong);display:flex;align-items:center;justify-content:center;font:600 14px/1.4 var(--sk-font-bee-sans);font-style:normal;flex:none}
+#eternal .et-b-file b{display:block;font:600 16px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-b-file span{display:block;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-row{display:flex;align-items:center;justify-content:space-between;gap:var(--sk-s2);min-height:var(--sk-control-row);padding:var(--sk-s1) var(--sk-s3);border:0;border-bottom:1px solid var(--sk-line-soft);background:transparent;text-align:left;width:100%;font:500 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink);cursor:pointer}
+#eternal .et-b-rows>.et-b-row:last-of-type{border-bottom:0}
+#eternal .et-b-row small{display:flex;align-items:center;gap:var(--sk-s1);font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut);text-align:right}
+#eternal .et-b-row small.ok{color:var(--sk-verified);font-weight:600}
+#eternal .et-b-row[aria-expanded="true"]{background:var(--sk-sovereign-tint);color:var(--sk-sovereign-strong);font-weight:600}
+#eternal .et-b-row[aria-expanded="true"] small{color:var(--sk-sovereign-strong)}
+#eternal .et-b-row .chev{flex:none;transition:transform var(--dur,.26s)}.et-b-row[aria-expanded="true"] .chev{transform:rotate(90deg)}
+#eternal .et-b-open{padding:var(--sk-s2) var(--sk-s3) var(--sk-s3);border-bottom:1px solid var(--sk-line-soft);background:var(--sk-sovereign-tint);display:grid;gap:var(--sk-s1)}
+#eternal .et-b-open p{font:400 15px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+#eternal .et-b-open p.mut{color:var(--sk-ink-mut)}
+#eternal .et-b-open .et-b-fig{font:400 32px/1 var(--sk-font-bee-serif);color:var(--sk-ink);overflow-wrap:anywhere}
+#eternal .et-b-open .et-b-fig span{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-open p.out{color:var(--sk-guard);font-weight:600}
+#eternal .et-b-act{display:flex;flex-direction:column;gap:var(--sk-s1);margin-top:var(--sk-s1)}
+#eternal .et-b-primary{display:flex;align-items:center;justify-content:center;height:var(--sk-control-primary);border-radius:var(--sk-radius-lg);border:0;background:var(--sk-primary);color:var(--sk-on-primary)!important;font:600 17px/1.2 var(--sk-font-bee-sans)!important;text-decoration:none;cursor:pointer}
+#eternal .et-b-link{min-height:var(--sk-control-min);display:flex;align-items:center;justify-content:center;border:0;background:transparent;font:600 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-link)!important;text-decoration:none;cursor:pointer}
+#eternal .et-b-link:hover{color:var(--sk-link-hover)!important}
+#eternal .et-b-foot{text-align:center;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-wait{padding:var(--sk-s3);font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+
+/* RAVER — the data is the art: the video as 56 petals, each one a stored piece */
+#eternal .et-r{color:var(--sk-ink);font-family:var(--sk-font-raver-body)}
+#eternal .et-r-top{display:flex;align-items:baseline;justify-content:space-between;gap:var(--sk-s2);flex-wrap:wrap}
+#eternal .et-r-h{margin:0;font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em;color:var(--sk-ink)}
+#eternal .et-r-hint{font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-bloom{width:100%;max-width:360px;margin:var(--sk-s3) auto var(--sk-s1);filter:drop-shadow(var(--sk-glow-sovereign));touch-action:manipulation;cursor:pointer}
+#eternal .et-r-bloom .pt{transition:fill var(--dur,.26s),opacity var(--dur,.26s)}
+#eternal .et-r-step{display:flex;justify-content:center;gap:var(--sk-s2);margin:0 0 var(--sk-s2)}
+#eternal .et-r-step button{min-width:var(--sk-control-min);min-height:var(--sk-control-min);padding:0 var(--sk-s3);border:1.5px solid var(--sk-sovereign);border-radius:var(--sk-radius-pill);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong)!important;font:600 14px/1.25 var(--sk-font-raver-body)!important;cursor:pointer}
+#eternal .et-r-legend{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--sk-s1);margin:var(--sk-s1) 0 var(--sk-s2);font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft);text-align:center}
+#eternal .et-r-legend span{display:flex;flex-direction:column;align-items:center;gap:var(--sk-s1)}
+#eternal .et-r-legend i{width:28px;height:12px;border-radius:var(--sk-radius-sm)}
+#eternal .et-r-card{display:flex;gap:var(--sk-s2);align-items:center;padding:var(--sk-s2) var(--sk-s3);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl);background:var(--sk-sovereign-tint);min-height:var(--sk-control-person)}
+#eternal .et-r-card .rk{min-width:44px;height:44px;padding:0 var(--sk-s1);border-radius:var(--sk-radius);background:var(--sk-sovereign-strong);color:var(--sk-bg);display:flex;align-items:center;justify-content:center;font:700 15px/1.2 var(--sk-font-raver-display);flex:none}
+#eternal .et-r-card b{display:block;font:600 14px/1.25 var(--sk-font-raver-body)}.et-r-card span{display:block;font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-sovereign-soft)}
+#eternal .et-r-note{margin:var(--sk-s2) 0 0;text-align:center;font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-pill{display:flex;align-items:center;justify-content:center;width:100%;height:58px;margin-top:var(--sk-s4);border:0;border-radius:var(--sk-radius-pill);background:var(--sk-primary);color:var(--sk-on-primary)!important;font:700 15px/1.2 var(--sk-font-raver-display)!important;letter-spacing:.04em;text-decoration:none;cursor:pointer}
+#eternal .et-r-ghost{display:flex;align-items:center;justify-content:center;margin:var(--sk-s2) auto 0;min-height:var(--sk-control-min);padding:0 var(--sk-s2);border:0;background:none;color:var(--sk-link)!important;font:400 14px/1.4 var(--sk-font-raver-body)!important;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+@media (prefers-reduced-motion:reduce){#eternal .et-r-bloom .pt,#eternal .et-b-row .chev{transition:none}}
+
+/* CYPHERPUNK — the instrument: the object, the pipeline, the receipt, checked here */
+#eternal .et-c{font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink)}
+#eternal .et-c-path{font:600 15px/1.45 var(--sk-font-mono);word-break:break-all}
+#eternal .et-c-chips{display:flex;flex-wrap:wrap;gap:var(--sk-s1);margin:var(--sk-s2) 0}
+#eternal .et-c-chips span{padding:2px var(--sk-s1);border:1px solid var(--sk-line);border-radius:4px;background:var(--sk-bg-card);font:500 12px/1.45 var(--sk-font-mono)}
+#eternal .et-c-chips span.ok{border-color:var(--sk-verified);color:var(--sk-verified)}
+#eternal .et-c-chips span.on{border-color:var(--sk-guard);color:var(--sk-sovereign-strong);background:var(--sk-sovereign-wash)}
+#eternal .et-c-guard{display:flex;justify-content:space-between;align-items:center;gap:var(--sk-s2);flex-wrap:wrap;min-height:var(--sk-control-min);padding:var(--sk-s1) var(--sk-s3);border:1px dashed var(--sk-guard);border-radius:var(--sk-radius-sm);background:var(--sk-guard-wash);color:var(--sk-guard)}
+#eternal .et-c-h{margin:var(--sk-s4) 0 var(--sk-s2);font:600 15px/1.45 var(--sk-font-mono);color:var(--sk-ink)}
+#eternal .et-c-kv{width:100%;border-collapse:collapse;border:1px solid var(--sk-line);background:var(--sk-bg-card);table-layout:fixed}
+#eternal .et-c-kv th{width:92px;padding:var(--sk-s1) var(--sk-s2);text-align:left;vertical-align:top;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);border-bottom:1px solid var(--sk-line)}
+#eternal .et-c-kv td{padding:var(--sk-s1) var(--sk-s2);border-bottom:1px solid var(--sk-line);overflow-wrap:anywhere}
+#eternal .et-c-kv .no{color:var(--sk-info)}.et-c-kv .yes{color:var(--sk-verified)}.et-c-kv .out{color:var(--sk-guard)}
+#eternal .et-c-pipe{list-style:none;margin:0;padding:0;display:grid;gap:var(--sk-s2);counter-reset:p}
+#eternal .et-c-pipe li{display:grid;grid-template-columns:30px 1fr;gap:var(--sk-s1) var(--sk-s2);padding:var(--sk-s2) var(--sk-s3);border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm);background:var(--sk-bg-card);counter-increment:p}
+#eternal .et-c-pipe li::before{content:counter(p,decimal-leading-zero);color:var(--sk-guard);font-weight:600}
+#eternal .et-c-pipe li b{font-weight:600;overflow-wrap:anywhere}.et-c-pipe li p{grid-column:2;color:var(--sk-ink-soft);overflow-wrap:anywhere}
+#eternal .et-c-pipe li.done b{color:var(--sk-verified)}.et-c-pipe li.you b{color:var(--sk-you)}
+#eternal .et-c-pipe li.now{border-color:var(--sk-ai);box-shadow:inset 0 0 0 1px var(--sk-ai)}.et-c-pipe li.now b{color:var(--sk-ai)}
+#eternal .et-c-pipe li.skip p{color:var(--sk-ink-mut)}.et-c-pipe li.skip{border-style:dashed}
+#eternal .et-c-pipe li.todo p{color:var(--sk-ink-mut)}
+#eternal .et-c-verify{margin-top:var(--sk-s3);padding:var(--sk-s3);border-radius:var(--sk-radius-sm);background:var(--sk-bg-card)}
+#eternal .et-c-verify-h{font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);margin-bottom:var(--sk-s1)}
+#eternal .et-c-verify ol{margin:0;padding-left:var(--sk-s4);display:grid;gap:var(--sk-s1)}
+#eternal .et-c-verify li.yes{color:var(--sk-verified)}.et-c-verify li.no{color:var(--sk-guard)}
+#eternal .et-c-verify code{font:400 13px/1.45 var(--sk-font-mono);overflow-wrap:anywhere}
+#eternal .et-c-primary{display:flex;align-items:center;justify-content:center;width:100%;height:52px;margin-top:var(--sk-s3);border:0;border-radius:var(--sk-radius-sm);background:var(--sk-primary);color:var(--sk-on-primary)!important;font:600 14px/1.2 var(--sk-font-mono)!important;cursor:pointer}
+#eternal .et-c-row{display:grid;grid-template-columns:1fr 1fr;gap:var(--sk-s2);margin-top:var(--sk-s3)}
+#eternal .et-c-ghost{display:flex;align-items:center;justify-content:center;min-height:52px;padding:0 var(--sk-s1);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius-sm);color:var(--sk-ink)!important;text-decoration:none;text-align:center;font:600 14px/1.2 var(--sk-font-mono)}
+#eternal .et-c-ghost.wide{grid-column:1/-1}
+
+/* ── THE WHOLE PAGE, dressed per register: the page's own variables mapped onto skaists ── */
+html body[data-reg="bee"][data-bee-theme]{--bg:var(--sk-bg);--panel:var(--sk-bg-card);--well:var(--sk-bg-well);--line:var(--sk-line);--ink:var(--sk-ink);--dim:var(--sk-ink-mut);
+ --accent:var(--sk-primary);--accent-soft:var(--sk-sovereign-tint);--on-accent:var(--sk-on-primary);--bad:var(--sk-guard);background:var(--sk-bg);font-family:var(--sk-font-bee-sans)}
+html body[data-reg="bee"][data-bee-theme] main#bdata h1{font:400 40px/1.05 var(--sk-font-bee-serif);letter-spacing:0}
+html body[data-reg="bee"][data-bee-theme] main#bdata h2{font:400 28px/1.1 var(--sk-font-bee-serif)}
+html body[data-reg="bee"][data-bee-theme] main#bdata h3{font:600 17px/1.2 var(--sk-font-bee-sans)}
+html body[data-reg="bee"][data-bee-theme] main#bdata .kicker{color:var(--sk-sovereign);letter-spacing:0}
+html body[data-reg="bee"][data-bee-theme] main#bdata .btn.primary{font:600 17px/1.2 var(--sk-font-bee-sans);border-radius:var(--sk-radius-lg)}
+html:has(body[data-reg="raver"]),html:has(body[data-reg="cypherpunk"]){background:var(--sk-bg)}
+body[data-reg="raver"]{--bg:var(--sk-bg);--panel:var(--sk-bg-card);--well:var(--sk-bg-well);--line:var(--sk-line);--ink:var(--sk-ink);--dim:var(--sk-ink-soft);
+ --accent:var(--sk-primary);--accent-soft:var(--sk-sovereign-wash);--on-accent:var(--sk-on-primary);--bad:var(--sk-guard);background:var(--sk-bg);font:400 15px/1.6 var(--sk-font-raver-body)}
+body[data-reg="raver"] main#bdata h1{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em}
+body[data-reg="raver"] main#bdata :is(h2,h3){font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em}
+body[data-reg="raver"] main#bdata :is(.law,p,.opt,.btn,details.more>summary,.field,.rv){font-size:15px}
+body[data-reg="raver"] main#bdata .btn{border-radius:var(--sk-radius-pill)}
+body[data-reg="raver"] main#bdata .card{border-radius:var(--sk-radius-xl)}
+body[data-reg="raver"] main#bdata .kicker{color:var(--sk-sovereign-soft);letter-spacing:.04em}
+body[data-reg="cypherpunk"]{--bg:var(--sk-bg);--panel:var(--sk-bg-card);--well:var(--sk-bg-well);--line:var(--sk-line);--ink:var(--sk-ink);--dim:var(--sk-ink-soft);
+ --accent:var(--sk-primary);--accent-soft:var(--sk-sovereign-wash);--on-accent:var(--sk-on-primary);--bad:var(--sk-guard);background:var(--sk-bg);font:400 13px/1.5 var(--sk-font-mono)}
+body[data-reg="cypherpunk"] main#bdata h1{font:600 15px/1.45 var(--sk-font-mono)}
+body[data-reg="cypherpunk"] main#bdata :is(h2,h3){font:600 15px/1.45 var(--sk-font-mono)}
+body[data-reg="cypherpunk"] main#bdata :is(.law,p,.opt,.btn,details.more>summary,.field,.rv,.amount.small){font-size:13px}
+body[data-reg="cypherpunk"] main#bdata :is(.card,.btn,.opt,.review,.alert,.field input,.skel){border-radius:var(--sk-radius-sm)}
+body[data-reg="cypherpunk"] main#bdata .kicker{color:var(--sk-ai);letter-spacing:.04em}
 </style>
+<link rel="stylesheet" href="skaists.css">
 </head>
 <body data-bee-theme="shared">
 <script>
@@ -124,6 +252,68 @@ body[data-reg="bee"] [data-reg="bee"],body[data-reg="raver"] [data-reg="raver"],
 document.body.setAttribute('data-reg',r);document.documentElement.setAttribute('data-bee-light',String(r==='bee'));})();
 </script>
 <main id="bdata">
+  <!-- ETERNAL FRONT (founder blueprint 2026-09-26, docs/design/eternal): three separate products in
+       one surface, one data layer (bdata.js: the invoice, the verified store receipt and the policy
+       the whole page below is drawn from). Nothing here pays, signs or changes a policy: "watch it"
+       opens the stored video, and "who can get it" hands off to the real chooser below. -->
+  <section id="eternal" aria-label="my data">
+
+    <!-- NEW BEE — a calm room: one file, four plain questions, one action -->
+    <div class="et-b">
+      <div class="et-b-mark">b<b>Data</b></div>
+      <h2 class="et-b-h" id="etBeeTitle">your files</h2>
+      <p class="et-b-lede" data-etk="et.bdata.b.lede">what you have, who can get it and where it is kept.</p>
+      <div class="et-b-guard"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span data-etk="et.bdata.b.guard">nothing on this page can spend your money.</span></div>
+      <div class="et-b-rows" id="etBeeRows"><div class="et-b-wait">reading your files…</div></div>
+      <div class="et-b-act">
+        <a class="et-b-primary" id="etBeeGo" href="#aud-h" data-handoff="who">choose who can get it</a>
+        <a class="et-b-link" href="#etArchive" data-etk="et.bdata.b.more">see every detail below</a>
+        <p class="et-b-foot" data-etk="et.bdata.b.foot">forever means it cannot be taken down.</p>
+      </div>
+    </div>
+
+    <!-- RAVER — the data is the art: the video as a bloom of its stored pieces -->
+    <div class="et-r">
+      <div class="et-r-top"><h2 class="et-r-h" id="etRaverTitle">pieces</h2><span class="et-r-hint" id="etRaverHint">tap a petal</span></div>
+      <svg class="et-r-bloom" id="etBloom" viewBox="-200 -200 400 400" role="img" aria-label="the video as petals, one per stored piece; a petal's length is its quoted price"></svg>
+      <div class="et-r-step"><button type="button" data-step="-1" aria-label="previous piece">‹ <span data-etk="et.bdata.r.piece1">piece</span></button><button type="button" data-step="1" aria-label="next piece"><span data-etk="et.bdata.r.piece2">piece</span> ›</button></div>
+      <div class="et-r-legend" id="etLegend" aria-label="ANT per piece"></div>
+      <div class="et-r-card" id="etRaverCard" aria-live="polite"></div>
+      <p class="et-r-note" id="etRaverNote"></p>
+      <a class="et-r-pill" id="etRaverGo" href="#aud-h" data-handoff="who">who can get it</a>
+      <a class="et-r-ghost" href="#etArchive" data-etk="et.bdata.r.more">the whole of my data</a>
+    </div>
+
+    <!-- CYPHERPUNK — the instrument: object, pipeline, receipt, a check you run here -->
+    <div class="et-c">
+      <div class="et-c-path" id="etCyPath">bdata://… reading bpay-invoice.json</div>
+      <div class="et-c-chips" id="etChips"></div>
+      <div class="et-c-guard" id="etCyGuard"></div>
+      <h3 class="et-c-h" data-etk="et.bdata.c.object">object · bpay-invoice.json</h3>
+      <table class="et-c-kv" id="etObject"></table>
+      <h3 class="et-c-h" data-etk="et.bdata.c.pipe">store pipeline · public path</h3>
+      <ol class="et-c-pipe" id="etPipe"></ol>
+      <div class="et-c-verify">
+        <div class="et-c-verify-h" data-etk="et.bdata.c.sources">sources · the receipt cites</div>
+        <ol id="etSources"></ol>
+      </div>
+      <div class="et-c-verify">
+        <div class="et-c-verify-h" data-etk="et.bdata.c.vHere">verify · receipt ↔ invoice, field by field, in this page</div>
+        <ol id="etVerify"></ol>
+        <button type="button" class="et-c-primary" id="etCyVerify" data-etk="et.bdata.c.run">run verify here</button>
+      </div>
+      <div class="et-c-verify">
+        <div class="et-c-verify-h" data-etk="et.bdata.c.vHand">verify · no trust in this page needed</div>
+        <ol id="etByHand"></ol>
+      </div>
+      <div class="et-c-row">
+        <a class="et-c-ghost" href="bdata-stored-bux-try-autonomi.json" download data-etk="et.bdata.c.export">export receipt</a>
+        <a class="et-c-ghost" id="etCyWatch" href="#aud-h" hidden data-etk="et.bdata.c.watch">watch · bview</a>
+        <a class="et-c-ghost wide" href="https://github.com/beehive-nature/beehive-nature/blob/main/surfaces/bdata.js" target="_blank" rel="noopener noreferrer"><span data-etk="et.bdata.c.fork">fork the template ↗</span> <span class="et-sr" data-etk="et.newtab">(opens in a new tab)</span></a>
+      </div>
+    </div>
+  </section>
+  <h2 class="et-archive-h" id="etArchive" data-etk="et.bdata.archive">the whole of my data</h2>
   <div class="kicker" data-i18n="bd.kicker">bData — the organism-level data surface</div>
   <h1 data-i18n="bd.h1">My Data</h1>
   <p data-i18n="bd.lead">Your files — who can get them, and what it costs to keep them.</p>

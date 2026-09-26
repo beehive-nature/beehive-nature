@@ -260,7 +260,7 @@ ok('on a phone the first screen holds a different KIND of thing: bee choices, ra
     ['paste it once below', 'within the keychain'],
     ['Any device in the list above', 'within the vault'],
     ['connect your keychain above to see your derived keys', 'key forge ← keychain, same task, before it'],
-    ['orge new ones below', 'within the key forge'],
+    ['rge new ones below', 'within the key forge'],
     ['(live price below)', 'within the account forge'],
     ['addresses below are yours to hand out', 'within pay'],
     ['Each address above falls out of the', 'within pay'],
@@ -327,47 +327,68 @@ ok('on a phone the first screen holds a different KIND of thing: bee choices, ra
 }
 
 // 4d · AT TASK DEPTH (the dress-stripped audit): one tap in, bee and raver must
-// not be the same body under a different header. Per task: what each register
-// shows, and per section the three bodies measured against each other:
-// cypherpunk everything, bee its engineering folded, raver controls only.
+// not be the same body under a different header. Driven by the reader's own
+// taps: bee taps its row, raver taps its glyph and then each card; cypherpunk
+// has nothing to tap (every section is open). Per section, three measures:
+// the visible words, the visible controls, and any engineering left showing.
 {
   const TASKS = { have: ['connect-sec', 'bal-sec', 'summary-sec'], move: ['pay-sec', 'outbox-sec'], add: ['voucher-sec', 'fund-sec', 'peer-sec'],
     keep: ['bpay-sec', 'insc-sec', 'arw-sec'], key: ['kc-sec', 'vault-sec', 'forge-sec', 'acct-sec'], proof: ['receipts-sec', 'composer-sec', 'matrix-sec'] };
+  const measure = (page, id) => page.evaluate(i => {
+    // shown = it has boxes AND no closed <details> folds it (this Chromium keeps boxes for a closed note's content)
+    const folded = e => { for (let d = e.closest('details'); d; d = d.parentElement && d.parentElement.closest('details')) { const sm = d.querySelector(':scope>summary'); if (!d.open && !(sm && sm.contains(e))) return true; } return false; };
+    const s = document.getElementById(i), vis = e => e.getClientRects().length > 0 && !folded(e);
+    const CTL = 'button:not(.wl-more),a[href],input:not([type="hidden"]),select,textarea';
+    return {
+      // the words are prose: visible text outside the controls (a button's label or a select's options are not words)
+      words: (() => { const w = document.createTreeWalker(s, NodeFilter.SHOW_TEXT); let t = '', n;
+        while ((n = w.nextNode())) { const p = n.parentElement; if (!p || !vis(p) || p.closest('button,select,textarea,option')) continue; t += ' ' + n.textContent; }
+        return t.replace(/\s+/g, ' ').trim(); })(),
+      // a disclosure whose note holds controls is itself the way in to them: its summary counts
+      ctrls: [...s.querySelectorAll(CTL)].filter(vis).length + [...s.querySelectorAll('details>summary')].filter(sm => vis(sm) && sm.parentElement.querySelector(CTL)).length,
+      tech: [...s.querySelectorAll('[data-wl-tech]')].filter(e => vis(e) && !e.querySelector(CTL)).length,
+    };
+  }, id);
   const bodies = {};
   for (const reg of REGS) {
     const { ctx, page } = await open(reg);
     bodies[reg] = {};
     for (const [task, ids] of Object.entries(TASKS)) {
-      await page.evaluate(t => { document.body.setAttribute('data-wl-view', t); }, task);
-      await page.waitForTimeout(120);
+      if (reg === 'bee') await page.click(`#wl-bee [data-wl-go="${task}"]`);
+      if (reg === 'raver') await page.click(`#wl-dock [data-wl-go="${task}"]`);
+      await page.waitForTimeout(350);
       const shownSecs = await page.evaluate(() => [...document.querySelectorAll('main>section[data-wl-task]')].filter(s => s.getClientRects().length).map(s => s.id));
       const cardsShown = await page.evaluate(() => [...document.querySelectorAll('#wl-cards .wlr-card')].filter(c => c.getClientRects().length).length);
-      // each section's visible body, as that register renders it (raver: opened through its card)
-      const text = {};
+      const sec = {};
       for (const id of ids) {
-        text[id] = await page.evaluate(i => {
-          const s = document.getElementById(i);
-          if (document.body.dataset.reg === 'raver') { document.querySelectorAll('main>section').forEach(x => x.removeAttribute('data-wl-open')); s.setAttribute('data-wl-open', ''); }
-          const t = s.innerText.replace(/s+/g, ' ').trim();
-          if (document.body.dataset.reg === 'raver') s.removeAttribute('data-wl-open');
-          return t.length;
-        }, id);
+        const card = `#wl-cards .wlr-card[data-wl-card-for="${id}"]`;
+        if (reg === 'raver') { if (!await page.isVisible(card)) { sec[id] = null; continue; } await page.click(card); await page.waitForTimeout(250); }
+        sec[id] = await measure(page, id);
+        if (reg === 'raver') { await page.click(card); await page.waitForTimeout(150); }
       }
-      bodies[reg][task] = { shownSecs, cardsShown, text };
+      bodies[reg][task] = { shownSecs, cardsShown, sec };
+      if (reg === 'bee') { await page.click('#wl-bar [data-wl-go="home"]'); await page.waitForTimeout(350); }
     }
     await ctx.close();
   }
   const tasks = Object.keys(TASKS);
-  ok('one tap in, raver deals CARDS and shows no section, while bee shows the task’s sections: never the same page under a different header',
+  ok('one tap in (the reader\'s own row or glyph), raver deals CARDS and shows no section, while bee shows the task’s sections: never the same page under a different header',
     tasks.every(t => bodies.raver[t].shownSecs.length === 0 && bodies.raver[t].cardsShown === TASKS[t].length && bodies.bee[t].shownSecs.length >= 1 && bodies.bee[t].cardsShown === 0),
     tasks.map(t => `${t}: bee ${bodies.bee[t].shownSecs.length} sections · raver ${bodies.raver[t].cardsShown} cards`).join(' · '));
-  const sec = (reg, id) => bodies[reg][Object.keys(TASKS).find(t => TASKS[t].includes(id))].text[id];
-  const folded = ['kc-sec', 'forge-sec', 'pay-sec', 'insc-sec', 'composer-sec', 'outbox-sec', 'matrix-sec'];
-  ok('each section with engineering reads as three different bodies: cypherpunk > bee (engineering folded) > raver (controls first)',
-    folded.every(id => sec('cypherpunk', id) > sec('bee', id) && sec('bee', id) > sec('raver', id)),
-    folded.map(id => `${id} ${sec('cypherpunk', id)}/${sec('bee', id)}/${sec('raver', id)}`).join(' · '));
-  const same = [].concat(...tasks.map(t => TASKS[t])).filter(id => sec('bee', id) === sec('raver', id));
-  ok('no section renders the SAME body in bee and raver (to the character)', same.length === 0, same.join(', ') || 'none identical');
+  const all = [].concat(...tasks.map(t => TASKS[t]));
+  const m = (reg, id) => bodies[reg][tasks.find(t => TASKS[t].includes(id))].sec[id];
+  const folded = ['kc-sec', 'forge-sec', 'pay-sec', 'insc-sec', 'receipts-sec', 'composer-sec', 'outbox-sec', 'matrix-sec'];
+  ok('each section with engineering reads as three bodies by visible words: cypherpunk > bee (engineering folded) > raver (words folded)',
+    folded.every(id => m('cypherpunk', id).words.length > m('bee', id).words.length && m('bee', id).words.length > m('raver', id).words.length),
+    folded.map(id => `${id} ${m('cypherpunk', id).words.length}/${m('bee', id).words.length}/${m('raver', id).words.length}`).join(' · '));
+  const noCtl = all.filter(id => m('cypherpunk', id).ctrls > 0 && !(m('raver', id) && m('raver', id).ctrls > 0));
+  ok('raver: every card whose section has controls opens with a control showing (a button, link, field, or the summary of a note that holds controls; the words fold, the controls never do)',
+    noCtl.length === 0, all.filter(id => m('cypherpunk', id).ctrls > 0).map(id => `${id} ${m('raver', id) ? m('raver', id).ctrls : '-'}`).join(' · ') + (noCtl.length ? ' · NONE: ' + noCtl.join(',') : ''));
+  const techShown = reg => all.filter(id => m(reg, id) && m(reg, id).tech > 0);
+  ok('bee and raver at rest show none of a section’s engineering (every [data-wl-tech] block without a control is folded)',
+    techShown('bee').length === 0 && techShown('raver').length === 0, `bee ${techShown('bee').join(',') || 'none'} · raver ${techShown('raver').join(',') || 'none'}`);
+  const same = all.filter(id => m('bee', id) && m('raver', id) && m('bee', id).words === m('raver', id).words);
+  ok('no section renders the SAME body in bee and raver (the visible words compared as strings)', same.length === 0, same.join(', ') || 'none identical');
 }
 
 // 5 · raver: a stage and a dock. A glyph swaps the deck in place; arrows and a swipe move along it.
@@ -608,9 +629,15 @@ ok('on a phone the first screen holds a different KIND of thing: bee choices, ra
     const HONEY = ['rgb(255, 215, 0)', 'rgb(232, 181, 75)', 'rgb(122, 82, 9)', 'rgb(133, 91, 11)'];
     const honey = [...document.querySelectorAll('main>section[data-wl-task], main>section[data-wl-task] *')].filter(e => e.getClientRects().length).filter(e => {
       const c = getComputedStyle(e);
-      return HONEY.includes(c.backgroundColor) || (parseFloat(c.borderTopWidth) > 0 && HONEY.includes(c.borderTopColor)) || /255, 215, 0|232, 181, 75/.test(c.backgroundImage);
+      return HONEY.includes(c.backgroundColor) || ['Top', 'Right', 'Bottom', 'Left'].some(k => parseFloat(c['border' + k + 'Width']) > 0 && HONEY.includes(c['border' + k + 'Color'])) || /255, 215, 0|232, 181, 75/.test(c.backgroundImage);
     }).map(e => (e.id || e.tagName.toLowerCase() + '.' + (e.getAttribute('class') || '')).slice(0, 30));
-    return { out, small, dash, honey };
+    // and no visible text paints honey: a direct text node's colour is its parent's
+    const honeyText = [];
+    for (const e of document.querySelectorAll('main>section[data-wl-task] *')) {
+      if (!e.getClientRects().length || ![...e.childNodes].some(n => n.nodeType === 3 && n.textContent.trim())) continue;
+      const c = getComputedStyle(e); if (HONEY.includes(e instanceof SVGElement ? c.fill : c.color)) honeyText.push((e.id || e.tagName.toLowerCase()) + ' "' + e.textContent.trim().slice(0, 24) + '"');
+    }
+    return { out, small, dash, honey, honeyText };
   });
   const low = {}, audit = {};
   for (const reg of REGS) {
@@ -624,8 +651,10 @@ ok('on a phone the first screen holds a different KIND of thing: bee choices, ra
     await ctx.close();
   }
   // honey is the colour of b only: no section border or background paints it, in any register
-  ok('no visible section border or background paints honey (gold) in any register (the crest’s gold stays out of the interface)',
+  ok('no visible section border (any side) or background paints honey (gold) in any register, the whole wallet at rest',
     REGS.every(r => audit[r].honey.length === 0), REGS.map(r => r + ' ' + audit[r].honey.slice(0, 3).join(',')).join(' · '));
+  ok('no visible text in any section paints honey in any register at rest (the crest’s gold stays out of the interface; states reached only after an action are not rendered here)',
+    REGS.every(r => audit[r].honeyText.length === 0), REGS.map(r => r + ' ' + (audit[r].honeyText.slice(0, 3).join(', ') || 'none')).join(' · '));
   ok('bee: no visible text node at rest in the whole wallet (every task open, notes folded) reads under the 14px label floor, SVG and script-set styles included', audit.bee.small.length === 0,
     audit.bee.small.slice(0, 4).map(l => `${l.sec} "${l.t}" ${l.px}px`).join(' · '));
   ok('no register shows a bare dash standing for a value in any visible text node at rest of the whole wallet (never 0, never a dash)', REGS.every(r => audit[r].dash.length === 0),
@@ -694,12 +723,46 @@ ok('on a phone the first screen holds a different KIND of thing: bee choices, ra
   await ctx.close();
 }
 
-// 10 · deep links land in the task that holds their target, in bee
+// 9b · bee's "show the details" is bee's: a register switch starts every section folded, and the toggle is not work
+{
+  const { ctx, page } = await open('bee');
+  await page.click('#wl-bee [data-wl-go="move"]'); await page.waitForTimeout(350);
+  await page.click('#pay-sec .wl-more'); await page.waitForTimeout(150);
+  const before = await page.evaluate(() => document.getElementById('pay-sec').hasAttribute('data-wl-more'));
+  await page.click('#breg-raver'); await page.waitForTimeout(400);
+  const after = await page.evaluate(() => ({ more: [...document.querySelectorAll('main>section[data-wl-more]')].map(s => s.id), open: [...document.querySelectorAll('main>section[data-wl-open]')].map(s => s.id) }));
+  ok('bee\'s opened details do not carry into raver: after the switch no section is unfolded and no card opened itself', before && after.more.length === 0 && after.open.length === 0, JSON.stringify({ before, ...after }));
+  await ctx.close();
+}
+
+// 10 · deep links land in the task that holds their target, in every register
 {
   const a = await open('bee', { path: '/wallet.html?compose=' + encodeURIComponent('kingbeelovis:registeracc'), fixture: false });
   const c = await a.page.evaluate(() => ({ view: document.body.dataset.wlView, shown: document.getElementById('composer-sec').getClientRects().length > 0, contract: document.getElementById('tx-contract').value, top: Math.round(document.getElementById('composer-sec').getBoundingClientRect().top) }));
   ok('?compose= opens bee ON the composer (its task, scrolled to it) with the contract prefilled', c.view === 'proof' && c.shown && c.contract === 'kingbeelovis' && c.top >= 0 && c.top < 120, JSON.stringify(c));
   await a.ctx.close();
+  // raver lands on the composer's own card, cypherpunk on the composer in the open pipeline
+  for (const reg of ['raver', 'cypherpunk']) {
+    const r = await open(reg, { path: '/wallet.html?compose=' + encodeURIComponent('kingbeelovis:registeracc'), fixture: false });
+    await r.page.waitForTimeout(800);
+    const c2 = await r.page.evaluate(() => ({ view: document.body.dataset.wlView, shown: document.getElementById('composer-sec').getClientRects().length > 0, contract: document.getElementById('tx-contract').value, top: Math.round(document.getElementById('composer-sec').getBoundingClientRect().top) }));
+    ok(`?compose= lands ${reg} ON the composer, painted, with the contract prefilled`, c2.shown && c2.contract === 'kingbeelovis' && c2.top >= 0 && c2.top < 160, JSON.stringify(c2));
+    await r.ctx.close();
+  }
+  // the desktop's QR (#qr=<request>) lands on the waiting sheet, painted, in every register
+  {
+    const q = Buffer.alloc(49, 7); q[16] = 2;
+    const got = {};
+    for (const reg of REGS) {
+      const r = await open(reg, { path: '/wallet.html#qr=' + q.toString('base64url'), fixture: false });
+      await r.page.waitForTimeout(800);
+      await r.page.waitForTimeout(400); // past the re-land
+      got[reg] = await r.page.evaluate(() => { const e = document.getElementById('qr-sec'), b = e.getBoundingClientRect(); return { painted: e.getClientRects().length > 0, top: Math.round(b.top), title: document.getElementById('qr-title').textContent.slice(0, 40) }; });
+      await r.ctx.close();
+    }
+    ok('#qr= lands on the QR bridge sheet ("a desktop is waiting"), painted and in view, in every register',
+      REGS.every(r => got[r].painted && got[r].top >= 0 && got[r].top < 200 && /waiting/.test(got[r].title)), JSON.stringify(got));
+  }
   // record the FIRST view the body ever wears: a #section link must never flash home
   const b = await (async () => {
     const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });

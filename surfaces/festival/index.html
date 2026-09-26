@@ -116,8 +116,234 @@ button.act{font-size:15px;min-height:44px;padding:10px 16px}
 .gate a{color:var(--cyan)}
 footer{font-size:var(--fz-lab);color:var(--dim);line-height:1.8;padding:0 14px}
 footer a{display:inline-block;padding:11px 0}
-</style></head><body>
+/* ── ETERNAL FRONT (docs/design/eternal) — every value is a skaists token (surfaces/skaists.css,
+   compiled from docs/design/skaists/tokens.json): no hand-picked hex, size or corner. Measured by
+   e2e/skaists-conformance.mjs. One register visible at a time; new bee is the default. ── */
+#eternal{margin:0 0 var(--sk-s2);padding:0;border:0;border-radius:0;background:transparent;font-size:16px;line-height:1.45}
+#eternal>.et-r,#eternal>.et-c{display:none}
+body[data-reg="raver"] #eternal>.et-b,body[data-reg="cypherpunk"] #eternal>.et-b{display:none}
+body[data-reg="raver"] #eternal>.et-r{display:block}
+body[data-reg="cypherpunk"] #eternal>.et-c{display:block}
+#eternal [hidden]{display:none!important}
+#eternal button{transition:none}
+#eternal svg{display:block}
+#eternal :focus-visible{outline:2px solid var(--sk-focus);outline-offset:3px}
+.et-archive-h{margin:var(--sk-s5) 0 var(--sk-s2);padding-top:var(--sk-s4);border-top:1px solid var(--sk-line);color:var(--sk-ink);letter-spacing:0;text-align:left}
+body[data-reg="bee"] .et-archive-h{font:400 28px/1.1 var(--sk-font-bee-serif)}
+body[data-reg="raver"] .et-archive-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em}
+body[data-reg="cypherpunk"] .et-archive-h{font:600 15px/1.45 var(--sk-font-mono)}
+
+/* NEW BEE — a calm welcome: your pass, then the day as a plain list */
+.et-b{color:var(--sk-ink);display:flex;flex-direction:column;gap:var(--sk-s3);font-family:var(--sk-font-bee-sans)}
+.et-b-mark{font:400 18px/1.2 var(--sk-font-house);color:var(--sk-sovereign)}
+.et-b-h{margin:0;font:400 40px/1.05 var(--sk-font-bee-serif);color:var(--sk-ink);letter-spacing:0}
+.et-b-lede{margin:0;font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink-mut);text-wrap:pretty}
+.et-b-guard{display:flex;align-items:center;gap:var(--sk-s2);min-height:var(--sk-control-min);padding:var(--sk-s1) var(--sk-s3);border-radius:var(--sk-radius);background:var(--sk-guard-wash);color:var(--sk-guard);font:600 15px/1.45 var(--sk-font-bee-sans)}
+.et-b-guard svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.et-b-rows{display:flex;flex-direction:column;background:var(--sk-bg-card);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl);overflow:hidden}
+.et-b-row{display:flex;align-items:center;justify-content:space-between;gap:var(--sk-s2);min-height:var(--sk-control-row);padding:0 var(--sk-s3);border:0;border-bottom:1px solid var(--sk-line-soft);background:transparent;text-align:left;width:100%;font:500 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink);text-decoration:none}
+.et-b-row:last-child{border-bottom:0}
+a.et-b-row{cursor:pointer}
+.et-b-row small{display:flex;align-items:center;gap:var(--sk-s1);font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut);text-align:right}
+.et-b-row .chev{flex:none}
+.et-b-now{margin:0;padding:var(--sk-s2) var(--sk-s3);border-radius:var(--sk-radius);background:var(--sk-sovereign-tint);color:var(--sk-sovereign-strong);font:600 16px/1.45 var(--sk-font-bee-sans)}
+.et-b-act{display:flex;flex-direction:column;gap:var(--sk-s1)}
+.et-b-primary{height:var(--sk-control-primary);border-radius:var(--sk-radius-lg);border:0;background:var(--sk-primary);color:var(--sk-on-primary)!important;font:600 17px/1.2 var(--sk-font-bee-sans)!important;cursor:pointer;padding:0 var(--sk-s3)}
+.et-b-link{min-height:var(--sk-control-min);display:flex;align-items:center;justify-content:center;border:0;background:transparent;font:600 16px/1.45 var(--sk-font-bee-sans)!important;color:var(--sk-link)!important;text-decoration:none;cursor:pointer;padding:0}
+.et-b-link:hover{color:var(--sk-link-hover)!important;background:transparent}
+.et-b-foot{margin:0;text-align:center;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+
+/* RAVER — the day is a comb: nine cells you tap, your name strung as seven beads around it by a
+   hold. The cells glow on a 4.2 s swing (well under 3 Hz); the calm tent stills them, and so does
+   prefers-reduced-motion. */
+.et-r{color:var(--sk-ink);font-family:var(--sk-font-raver-body)}
+.et-r-top{display:flex;align-items:baseline;justify-content:space-between;gap:var(--sk-s2);flex-wrap:wrap}
+.et-r-h{margin:0;font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em;color:var(--sk-ink)}
+.et-r-hint{font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+.et-b-pass{display:flex;flex-direction:column;gap:var(--sk-s2);padding:var(--sk-s3);background:var(--sk-bg-card);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl)}
+.et-b-field{display:flex;flex-direction:column;gap:var(--sk-s1);font:600 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+.et-b-field input{width:100%;height:var(--sk-control-primary);padding:0 var(--sk-s3);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius-md);background:var(--sk-bg);color:var(--sk-ink);font:400 16px/1.45 var(--sk-font-bee-sans)}
+.et-b-field input::placeholder,.et-r-field input::placeholder,.et-c-field input::placeholder{color:var(--sk-ink-mut);opacity:1}
+.et-b-strand{display:flex;align-items:center;gap:var(--sk-s2);flex-wrap:wrap;min-height:var(--sk-control-min);font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+.et-b-strand svg{flex:none}
+.et-b-strand b{font:600 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+.et-b-row b{font-weight:500}
+.et-b-row small.et-gate{color:var(--sk-guard)}
+.et-r-comb{width:100%;max-width:360px;margin:var(--sk-s3) auto var(--sk-s1);filter:drop-shadow(var(--sk-glow-sovereign))}
+.et-r-comb .string{fill:none;stroke:var(--sk-line);stroke-width:2}
+.et-r-comb .cell{cursor:pointer}
+.et-r-comb .cell path{stroke:var(--sk-bg);stroke-width:3}
+.et-r-comb .cell.live path{fill:var(--sk-biomass)}.et-r-comb .cell.door path{fill:var(--sk-sovereign)}
+.et-r-comb .cell.gates path{fill:var(--sk-guard-wash);stroke:var(--sk-guard);stroke-width:2;stroke-dasharray:6 5}
+.et-r-comb .cell text{fill:var(--sk-bg);font:700 15px/1.2 var(--sk-font-raver-display)}
+.et-r-comb .cell.gates text{fill:var(--sk-guard)}
+.et-r-comb .cell.sel path{stroke:var(--sk-ink);stroke-width:4}
+.et-r-comb .cell:focus{outline:none}.et-r-comb .cell:focus-visible path{stroke:var(--sk-ink);stroke-width:4}
+.et-r-comb .bead{stroke:var(--sk-bg);stroke-width:3;opacity:.35}
+.et-r-comb .bead.on{opacity:1}
+.et-r-glow{animation:etGlow 4.2s ease-in-out infinite alternate}
+@keyframes etGlow{from{opacity:.72}to{opacity:1}}
+body.still .et-r-glow{animation-play-state:paused}
+@media (prefers-reduced-motion:reduce){.et-r-glow{animation:none}}
+.et-r-go{display:flex;align-items:center;justify-content:center;width:100%;min-height:var(--sk-control-min);margin-top:var(--sk-s2);padding:0 var(--sk-s3);border:1.5px solid var(--sk-sovereign);border-radius:var(--sk-radius-pill);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong);font:600 14px/1.25 var(--sk-font-raver-body);cursor:pointer}
+.et-r-field{display:flex;flex-direction:column;gap:var(--sk-s1);margin-top:var(--sk-s3);font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+.et-r-field input{width:100%;height:52px;padding:0 var(--sk-s3);border:1.5px solid var(--sk-sovereign);border-radius:var(--sk-radius-pill);background:var(--sk-bg-card);color:var(--sk-ink);font:600 14px/1.25 var(--sk-font-raver-body)}
+.et-c-field{display:flex;align-items:center;gap:var(--sk-s2);min-height:var(--sk-control-min);margin-bottom:var(--sk-s2);font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut)}
+.et-c-field input{flex:1;min-width:0;height:var(--sk-control-min);padding:0 var(--sk-s2);border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm);background:var(--sk-bg-card);color:var(--sk-ink);font:400 13px/1.45 var(--sk-font-mono)}
+.et-c-beats tr.pick{cursor:pointer}
+.et-c-beats td{height:var(--sk-control-min)}
+.et-c-beats .st-live{color:var(--sk-verified)}.et-c-beats .st-door{color:var(--sk-sovereign-strong)}.et-c-beats .st-gates{color:var(--sk-guard)}
+.et-c-kv .bd{display:inline-block;width:12px;height:12px;margin-right:2px;border-radius:var(--sk-radius-pill);vertical-align:middle}
+.et-r-legend{display:flex;justify-content:space-between;gap:var(--sk-s1);margin:var(--sk-s1) 0 var(--sk-s2);font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+.et-r-legend span{display:flex;flex-direction:column;align-items:center;gap:var(--sk-s1)}
+.et-r-legend i{width:28px;height:12px;border-radius:var(--sk-radius-sm)}
+.et-r-legend em{font-style:normal}
+.lg-live{background:var(--sk-biomass)}.lg-door{background:var(--sk-sovereign)}.lg-gate{border:1.5px dashed var(--sk-guard);background:var(--sk-guard-wash)}.lg-bead{background:var(--sk-you)}
+.et-r-card{display:flex;gap:var(--sk-s2);align-items:center;padding:var(--sk-s2) var(--sk-s3);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl);background:var(--sk-sovereign-tint);min-height:var(--sk-control-person)}
+.et-r-card .rk{min-width:44px;height:44px;padding:0 var(--sk-s1);border-radius:var(--sk-radius);background:var(--sk-sovereign-strong);color:var(--sk-bg);display:flex;align-items:center;justify-content:center;font:700 15px/1.2 var(--sk-font-raver-display);flex:none}
+.et-r-card b{display:block;font:600 14px/1.25 var(--sk-font-raver-body)}.et-r-card span{font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-sovereign-soft)}
+.et-r-forks{display:flex;flex-wrap:wrap;gap:var(--sk-s1);margin:var(--sk-s2) 0 0}
+.et-r-forks span{padding:var(--sk-s1) var(--sk-s2);border:1px solid var(--sk-line);border-radius:var(--sk-radius-pill);background:var(--sk-bg-card);font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+.et-r-pill{position:relative;overflow:hidden;display:block;width:100%;height:58px;margin-top:var(--sk-s4);border:0;border-radius:var(--sk-radius-pill);background:var(--sk-primary);color:var(--sk-on-primary)!important;font:700 15px/1.2 var(--sk-font-raver-display)!important;letter-spacing:.04em;cursor:pointer;touch-action:none;user-select:none;-webkit-user-select:none;padding:0}
+.et-r-pill:hover{background:var(--sk-primary)}
+.et-r-pill .fill{position:absolute;left:0;top:0;bottom:0;width:0;background:var(--sk-bg);opacity:.25}
+.et-r-pill .lbl{position:relative}
+.et-r-note{margin:var(--sk-s2) 0 0;text-align:center;font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+.et-r-ghost{display:block;margin:var(--sk-s1) auto 0;min-height:var(--sk-control-min);padding:0 var(--sk-s2);border:0;background:none;color:var(--sk-link)!important;font:400 14px/1.4 var(--sk-font-raver-body)!important;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.et-r-ghost:hover{background:none}
+
+/* CYPHERPUNK — the day as an instrument: beats, the board's reads, the pass derivation */
+.et-c{font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink)}
+.et-c-path{font:600 15px/1.45 var(--sk-font-mono);overflow-wrap:anywhere;margin:0}
+.et-c-chips{display:flex;flex-wrap:wrap;gap:var(--sk-s1);margin:var(--sk-s2) 0}
+.et-c-chips span{padding:2px var(--sk-s1);border:1px solid var(--sk-line);border-radius:4px;background:var(--sk-bg-card);font:600 12px/1.4 var(--sk-font-mono)}
+.et-c-chips span.on{border-color:var(--sk-guard);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong)}
+.et-c-chips span.ok{border-color:var(--sk-verified);color:var(--sk-verified)}
+.et-c-kv{width:100%;margin:0;border-collapse:collapse;border:1px solid var(--sk-line);background:var(--sk-bg-card);font:400 13px/1.45 var(--sk-font-mono)}
+.et-c-kv th{width:104px;padding:var(--sk-s1) var(--sk-s2);text-align:left;vertical-align:top;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);border-bottom:1px solid var(--sk-line);background:transparent}
+.et-c-kv td{padding:var(--sk-s1) var(--sk-s2);border-bottom:1px solid var(--sk-line);word-break:break-word;color:var(--sk-ink)}
+.et-c-kv .no{color:var(--sk-info)}.et-c-kv .yes{color:var(--sk-verified)}.et-c-kv .sig{color:var(--sk-you)}
+.et-c-h{margin:var(--sk-s4) 0 var(--sk-s2);font:600 15px/1.45 var(--sk-font-mono);color:var(--sk-ink);letter-spacing:0}
+.et-c-notes{width:100%;border-collapse:collapse;border:1px solid var(--sk-line);background:var(--sk-bg-card);font:400 12px/1.45 var(--sk-font-mono)}
+.et-c-notes th{padding:var(--sk-s1);text-align:left;font:600 12px/1.4 var(--sk-font-mono);color:var(--sk-ink-mut);background:var(--sk-bg-well);border-bottom:1px solid var(--sk-line)}
+.et-c-notes td{padding:2px var(--sk-s1);border-bottom:1px solid var(--sk-line);color:var(--sk-ink-soft);white-space:nowrap}
+.et-c-notes td.on{color:var(--sk-verified)}
+.et-c-pipe{list-style:none;margin:0;padding:0;display:grid;gap:var(--sk-s2);counter-reset:p}
+.et-c-pipe li{display:grid;grid-template-columns:30px 1fr;gap:var(--sk-s1) var(--sk-s2);padding:var(--sk-s2);border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm);background:var(--sk-bg-card);counter-increment:p}
+.et-c-pipe li::before{content:counter(p,decimal-leading-zero);color:var(--sk-guard);font-weight:600}
+.et-c-pipe li b{font-weight:600}.et-c-pipe li p{grid-column:2;margin:0;color:var(--sk-ink-soft);word-break:break-word}
+.et-c-pipe li.done b{color:var(--sk-verified)}
+.et-c-pipe li.now{border-color:var(--sk-ai);box-shadow:inset 0 0 0 1px var(--sk-ai)}.et-c-pipe li.now b{color:var(--sk-ai)}
+.et-c-primary{display:flex;align-items:center;justify-content:center;width:100%;height:52px;margin-top:var(--sk-s3);border:0;border-radius:var(--sk-radius-sm);background:var(--sk-primary);color:var(--sk-on-primary)!important;font:600 14px/1.2 var(--sk-font-mono)!important;cursor:pointer;padding:0}
+.et-c-primary:hover{background:var(--sk-primary)}
+.et-c-verify{margin-top:var(--sk-s3);padding:var(--sk-s3);border-radius:var(--sk-radius-sm);background:var(--sk-bg-card)}
+.et-c-verify-h{font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);margin-bottom:var(--sk-s1)}
+.et-c-verify ol{margin:0;padding-left:var(--sk-s4);display:grid;gap:var(--sk-s1);overflow-wrap:anywhere}
+.et-c-row{display:grid;grid-template-columns:1fr 1fr;gap:var(--sk-s2);margin-top:var(--sk-s3)}
+.et-c-ghost{display:flex;align-items:center;justify-content:center;min-height:52px;padding:0 var(--sk-s1);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius-sm);background:transparent;color:var(--sk-ink)!important;text-decoration:none;text-align:center;font:600 14px/1.2 var(--sk-font-mono)!important;cursor:pointer}
+.et-c-ghost:hover{background:transparent}
+/* ── THE WHOLE DAY, dressed per register: the page's own variables mapped onto skaists. The four
+   PLUR colours become tokens (p = ai, l = you, u = cat-bug, r = sovereign); on new bee's paper a
+   colour is a mark, and words stay ink. ── */
+body[data-reg]{--p:var(--sk-ai);--l:var(--sk-you);--u:var(--sk-cat-bug);--r:var(--sk-sovereign);--ok:var(--sk-verified);--amber:var(--sk-guard);--cyan:var(--sk-link);
+ --bg:var(--sk-bg);--panel:var(--sk-bg-card);--well:var(--sk-bg-well);--line:var(--sk-line);--ink:var(--sk-ink);--dim:var(--sk-ink-mut);--faint:var(--sk-ink-mut);background:var(--sk-bg);color:var(--sk-ink)}
+body[data-reg] .rib .cell[data-go="s-arrive"],body[data-reg] .rib .cell[data-go="s-calm"],body[data-reg] #s-arrive,body[data-reg] #s-calm{--c:var(--sk-ai)!important}
+body[data-reg] .rib .cell[data-go="s-floor"],body[data-reg] .rib .cell[data-go="s-receipt"],body[data-reg] #s-floor,body[data-reg] #s-receipt,body[data-reg] #s-receipt .door{--c:var(--sk-you)!important}
+body[data-reg] .rib .cell[data-go="s-speak"],body[data-reg] .rib .cell[data-go="s-family"],body[data-reg] #s-speak,body[data-reg] #s-family,body[data-reg] #s-speak .door{--c:var(--sk-cat-bug)!important}
+body[data-reg] .rib .cell[data-go="s-kandi"],body[data-reg] #s-kandi,body[data-reg] #s-kandi .door{--c:var(--sk-sovereign)!important}
+body[data-reg] .rib .cell[data-go="s-econ"],body[data-reg] #s-econ{--c:var(--sk-info)!important}
+body[data-reg] .rib .cell[data-go="s-set"],body[data-reg] #s-set,body[data-reg] #s-set .door{--c:var(--sk-biomass)!important}
+body[data-reg] #comb2 polygon{stroke:var(--sk-bg)}
+body[data-reg] .dial .arc path{stroke:var(--sk-line)}
+body[data-reg] #ngas line{stroke:var(--sk-ai)}body[data-reg] #nblk line{stroke:var(--sk-biomass)}body[data-reg] #nused line{stroke:var(--sk-cat-bug)}
+body[data-reg] button.act{background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong);border-color:var(--sk-line)}
+body[data-reg] button.act.calmb{background:var(--sk-verified-wash);color:var(--sk-verified)}
+body[data-reg] button.act:hover{background:var(--sk-sovereign-strong);color:var(--sk-bg)}
+body[data-reg] .gate .gl{border-color:var(--sk-guard);color:var(--sk-guard)!important}
+body[data-reg] .gate[style]{border-color:var(--sk-verified)!important}
+body[data-reg] section.beat::before{background:var(--sk-bg)}
+body[data-reg="bee"] .spk{color:var(--sk-sovereign)!important}
+body[data-reg="bee"]{font-family:var(--sk-font-bee-sans);color-scheme:light}
+body[data-reg="bee"] h1{font:400 40px/1.05 var(--sk-font-bee-serif);letter-spacing:0;text-shadow:none}
+body[data-reg="bee"] h1 :is(.p,.l2,.u2,.r2){color:var(--sk-ink)}
+body[data-reg="bee"] main section:not(#eternal) h2,body[data-reg="bee"] .door .t,body[data-reg="bee"] section.beat::before{color:var(--sk-ink)}
+body[data-reg="bee"] .rib .cell i{color:var(--sk-ink)}
+body[data-reg="bee"] main :is(section,.door,.dial,.gate,.pass){border-radius:var(--sk-radius-xl)}
+body[data-reg="bee"] main section:not(#eternal) h2{font:600 16px/1.45 var(--sk-font-bee-sans);letter-spacing:0}
+body[data-reg="raver"]{font-family:var(--sk-font-raver-body)}
+body[data-reg="raver"] h1{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em}
+body[data-reg="raver"] main section:not(#eternal) h2{font:600 14px/1.25 var(--sk-font-raver-body);letter-spacing:0}
+body[data-reg="raver"] main :is(section,.door,.dial,.gate,.pass){border-radius:var(--sk-radius-xl)}
+body[data-reg="cypherpunk"]{font-family:var(--sk-font-mono)}
+body[data-reg="cypherpunk"] h1{font:600 15px/1.45 var(--sk-font-mono);letter-spacing:0}
+body[data-reg="cypherpunk"] main :is(section,.door,.dial,.gate,.pass,button.act){border-radius:var(--sk-radius-sm)}
+body[data-reg] #eternal{border-radius:0}
+</style>
+<link rel="stylesheet" href="../skaists.css"></head><body>
 <main>
+<!-- ETERNAL FRONT (founder blueprint 2026-09-26, docs/design/eternal): three separate products in
+     one surface. ONE data layer (the nine beats as the page declares them, the day pass the page's
+     own beads(name) strings, the calm tent's state and the economy board's last read) drives all
+     three, so the facts cannot drift; each register has its own layout, graphic, gesture and voice.
+     Nothing here stores, sends or reads on its own: the pass is typed into the page's own
+     #passname, the calm is the page's #calm, the board is the page's #eread. -->
+<section id="eternal" aria-label="your day at the festival">
+
+  <!-- NEW BEE — a calm welcome: your pass, then the day as a plain list -->
+  <div class="et-b">
+    <div class="et-b-mark">the festival</div>
+    <h2 class="et-b-h" data-t="et.festival.b.title">your day at the festival</h2>
+    <p class="et-b-lede" data-t="et.festival.b.lede">one day on the floor, nine stops. each stop says plainly whether it is open.</p>
+    <div class="et-b-guard"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span data-t="et.festival.b.guard">no ticket, no account, no wallet. nothing is stored or sent.</span></div>
+    <div class="et-b-pass">
+      <label class="et-b-field"><span data-t="et.festival.b.nameL">a name for your day pass</span><input type="text" id="etBeeName" maxlength="24" autocomplete="off" spellcheck="false" placeholder="any name"></label>
+      <div class="et-b-strand" id="etBeeStrand" aria-live="polite"></div>
+      <button type="button" class="et-b-primary" id="etBeePass">make my day pass</button>
+    </div>
+    <div class="et-b-rows" id="etBeeRows"><div class="et-b-row"><span data-t="et.festival.b.reading">reading the day…</span></div></div>
+    <div class="et-b-act">
+      <button type="button" class="et-b-link" id="etBeeCalm">rest in the calm tent</button>
+      <p class="et-b-foot" data-t="et.festival.b.foot">if a door is not built yet, it says so on its face.</p>
+    </div>
+  </div>
+
+  <!-- RAVER — the day is a comb: nine cells you tap; your name strung as kandi around it -->
+  <div class="et-r">
+    <div class="et-r-top"><h2 class="et-r-h" id="etRaverTitle">your day</h2><span class="et-r-hint" id="etRaverHint">9 beats · tap a cell</span></div>
+    <svg class="et-r-comb" id="etComb" viewBox="-200 -200 400 400" role="group" aria-label="the day as a comb of nine beats, your strand around it"></svg>
+    <div class="et-r-legend" aria-label="what the colours mean">
+      <span><i class="lg-live"></i><em data-t="et.festival.r.live">live</em></span><span><i class="lg-door"></i><em data-t="et.festival.r.door">door</em></span><span><i class="lg-gate"></i><em data-t="et.festival.r.gate">gates</em></span><span><i class="lg-bead"></i><em data-t="et.festival.r.bead">your bead</em></span>
+    </div>
+    <div class="et-r-card" id="etRaverCard" aria-live="polite"></div>
+    <button type="button" class="et-r-go" id="etRaverGo" hidden>go to this beat</button>
+    <label class="et-r-field"><span data-t="et.festival.r.nameL">your name, strung as kandi</span><input type="text" id="etRaverName" maxlength="24" autocomplete="off" spellcheck="false" placeholder="any name"></label>
+    <button type="button" class="et-r-pill" id="etStringHold" aria-describedby="etStringHint"><span class="fill" id="etStringFill"></span><span class="lbl" data-t="et.festival.r.hold">hold to string it</span></button>
+    <p class="et-r-note" id="etStringHint" data-t="et.festival.r.holdHint">hold 1.4 s · seven beads · stored nowhere, sent nowhere</p>
+    <button type="button" class="et-r-ghost" id="etRaverCalm">dim the rig</button>
+  </div>
+
+  <!-- CYPHERPUNK — the day as an instrument: beats, the board's reads, the pass derivation -->
+  <div class="et-c">
+    <p class="et-c-path"><span data-et="path">festival://attendee-day · static · keyless</span></p>
+    <div class="et-c-chips" id="etChips"></div>
+    <table class="et-c-notes et-c-beats" id="etBeats"></table>
+    <h3 class="et-c-h" data-t="et.festival.c.boardH">economy board · public rpc · keyless</h3>
+    <ol class="et-c-pipe" id="etPipe"></ol>
+    <button type="button" class="et-c-primary" id="etCyRead">read the board again</button>
+    <h3 class="et-c-h" data-t="et.festival.c.passH">day pass · derivation</h3>
+    <label class="et-c-field"><span>name</span><input type="text" id="etCyName" maxlength="24" autocomplete="off" spellcheck="false" placeholder="anonymous tonight"></label>
+    <table class="et-c-kv" id="etReceipt"></table>
+    <div class="et-c-verify">
+      <div class="et-c-verify-h" data-t="et.festival.c.verifyH">verify · no trust in this page needed</div>
+      <ol><li>h = fnv-1a 32 (name), empty name = "anonymous tonight"</li><li>bead j = (h &gt;&gt;&gt; 3j) mod 10, j = 0…6</li><li>POST eth_blockNumber to a public Arbitrum One host; compare</li></ol>
+    </div>
+    <div class="et-c-row">
+      <button type="button" class="et-c-ghost" id="etCyCalm">dim the rig</button>
+      <a class="et-c-ghost" href="https://github.com/beehive-nature/beehive-nature/blob/main/surfaces/festival/index.html" target="_blank" rel="noopener noreferrer">fork the template ↗ new tab</a>
+    </div>
+  </div>
+</section>
+<h2 class="et-archive-h" id="etArchive" data-t="et.festival.archive">the whole festival</h2>
 <header>
   <h1>🎪 the <span class="p">f</span><span class="l2">e</span><span class="u2">s</span><span class="r2">t</span><span class="p">i</span><span class="l2">v</span><span class="u2">a</span><span class="r2">l</span></h1>
   <div class="sub"><span data-i18n="f.sub">the festival, attendee edition — one day on the floor, every rail it runs on, live</span></div>
@@ -243,9 +469,9 @@ footer a{display:inline-block;padding:11px 0}
   tab is hidden; RPC failure renders amber and names itself — a gap is data. The full
   cockpit lives at <a href="../bantfarm.html">the bANTfarm</a>.</div>
   <div class="dials">
-    <div class="dial"><svg class="arc" viewBox="0 0 100 52" aria-hidden="true"><path d="M8 48 A42 42 0 0 1 92 48" fill="none" stroke="#2a1f3d" stroke-width="7" stroke-linecap="round"/><g class="needle" id="ngas"><line x1="50" y1="44" x2="50" y2="12" stroke="#45C2DC" stroke-width="2.5" stroke-linecap="round"/></g></svg><div class="val" id="dgasv">—</div><div class="lbl">L2 gas price</div><div class="src">eth_gasPrice · Arbitrum One · public RPC</div></div>
-    <div class="dial"><svg class="arc" viewBox="0 0 100 52" aria-hidden="true"><path d="M8 48 A42 42 0 0 1 92 48" fill="none" stroke="#2a1f3d" stroke-width="7" stroke-linecap="round"/><g class="needle" id="nblk"><line x1="50" y1="44" x2="50" y2="12" stroke="#7ddf8f" stroke-width="2.5" stroke-linecap="round"/></g></svg><div class="val" id="dblkv">—</div><div class="lbl">latest block</div><div class="src">eth_blockNumber · needle: last 100k blocks</div></div>
-    <div class="dial"><svg class="arc" viewBox="0 0 100 52" aria-hidden="true"><path d="M8 48 A42 42 0 0 1 92 48" fill="none" stroke="#2a1f3d" stroke-width="7" stroke-linecap="round"/><g class="needle" id="nused"><line x1="50" y1="44" x2="50" y2="12" stroke="#e6b32e" stroke-width="2.5" stroke-linecap="round"/></g></svg><div class="val" id="dusedv">—</div><div class="lbl">gas used, latest block</div><div class="src">eth_getBlockByNumber · dial 0–30 Mgas</div></div>
+    <div class="dial"><svg class="arc" viewBox="0 0 100 52" aria-hidden="true"><path d="M8 48 A42 42 0 0 1 92 48" fill="none" stroke="#2a1f3d" stroke-width="7" stroke-linecap="round"/><g class="needle" id="ngas"><line x1="50" y1="44" x2="50" y2="12" stroke="#45C2DC" stroke-width="2.5" stroke-linecap="round"/></g></svg><div class="val" id="dgasv">reading…</div><div class="lbl">L2 gas price</div><div class="src">eth_gasPrice · Arbitrum One · public RPC</div></div>
+    <div class="dial"><svg class="arc" viewBox="0 0 100 52" aria-hidden="true"><path d="M8 48 A42 42 0 0 1 92 48" fill="none" stroke="#2a1f3d" stroke-width="7" stroke-linecap="round"/><g class="needle" id="nblk"><line x1="50" y1="44" x2="50" y2="12" stroke="#7ddf8f" stroke-width="2.5" stroke-linecap="round"/></g></svg><div class="val" id="dblkv">reading…</div><div class="lbl">latest block</div><div class="src">eth_blockNumber · needle: last 100k blocks</div></div>
+    <div class="dial"><svg class="arc" viewBox="0 0 100 52" aria-hidden="true"><path d="M8 48 A42 42 0 0 1 92 48" fill="none" stroke="#2a1f3d" stroke-width="7" stroke-linecap="round"/><g class="needle" id="nused"><line x1="50" y1="44" x2="50" y2="12" stroke="#e6b32e" stroke-width="2.5" stroke-linecap="round"/></g></svg><div class="val" id="dusedv">reading…</div><div class="lbl">gas used, latest block</div><div class="src">eth_getBlockByNumber · dial 0–30 Mgas</div></div>
   </div>
   <div style="margin-top:8px"><button class="act" id="eread">read the board again</button></div>
   <div class="raw" id="eraw">raw lane — last responses land here as they arrive</div>
@@ -389,7 +615,9 @@ footer a{display:inline-block;padding:11px 0}
 (function(){
 "use strict";
 var $=function(id){return document.getElementById(id)};
-var COLS=['#39c5cf','#D655BB','#e6b32e','#a78bfa','#7ddf8f','#45C2DC'];
+/* the rig's colours are skaists tokens (docs/design/skaists), resolved per register: the four PLUR
+   colours (ai, you, cat-bug, sovereign) then biomass and info — same order as before, no hex here */
+var COLS=['var(--sk-ai)','var(--sk-you)','var(--sk-cat-bug)','var(--sk-sovereign)','var(--sk-biomass)','var(--sk-info)'];
 var NS='http://www.w3.org/2000/svg';
 
 /* the 127-comb rig — deterministic, CSS keyframes only, ≤3 Hz law */
@@ -405,7 +633,7 @@ if(comb){
     for(var i=0;i<6;i++){var a=Math.PI/180*(60*i-30);
       v.push((x+(S-1.6)*Math.cos(a)).toFixed(1)+','+(y+(S-1.6)*Math.sin(a)).toFixed(1));}
     poly.setAttribute('points',v.join(' '));
-    poly.setAttribute('fill',COLS[hsh%6]);
+    poly.style.fill=COLS[hsh%6];
     poly.style.setProperty('--dl',(ring*.38+((hsh>>>8)%100)/100*1.4).toFixed(2)+'s');
     poly.style.setProperty('--d',(2.6+((hsh>>>8)%100)/100*2.2).toFixed(2)+'s');
     frag.appendChild(poly); n++;
@@ -442,15 +670,22 @@ document.querySelectorAll('.rib .cell').forEach(function(b){
 });
 
 /* the day pass — a strand from your name, stored nowhere */
-var PCOLS=['#39c5cf','#D655BB','#e6b32e','#a78bfa','#7ddf8f','#45C2DC','#ff8c5a','#ece5f7','#5b4a86','#f4e04d'];
-function strand(name){
+var PTOK=['ai','you','cat-bug','sovereign','biomass','info','cat-works','ink','sovereign-strong','guard'];
+/* beads: FNV-1a 32 over the name, three bits per bead, ten token colours; the ETERNAL front reads
+   the same beads through window.festivalDay (pure, stores nothing, sends nothing) */
+function beads(name){
   var h=2166136261; name=String(name||'').trim()||'anonymous tonight';
   for(var i=0;i<name.length;i++){ h^=name.charCodeAt(i); h=(h+((h<<1)+(h<<4)+(h<<7)+(h<<8)+(h<<24)))>>>0; }
+  var b=[]; for(var j=0;j<7;j++) b.push((h>>>(j*3))%10);
+  return {name:name,hash:h,beads:b};
+}
+function strand(name){
   var out='';
-  for(var j=0;j<7;j++){ var c=PCOLS[(h>>>(j*3))%10];
-    out+='<circle cx="'+(14+j*16)+'" cy="14" r="6" fill="'+c+'" stroke="#0a0612" stroke-width="1.5"/>'; }
+  beads(name).beads.forEach(function(k,j){
+    out+='<circle cx="'+(14+j*16)+'" cy="14" r="6" style="fill:var(--sk-'+PTOK[k]+');stroke:var(--sk-bg)" stroke-width="1.5"/>'; });
   return '<svg viewBox="0 0 132 28" width="132" height="28" role="img" aria-label="your day-pass strand, seven beads">'+out+'</svg>';
 }
+window.festivalDay={beads:beads,tokens:PTOK.slice()};
 function pass(){ $('passout').innerHTML=strand($('passname').value); }
 $('passname').addEventListener('input',pass);
 pass();
@@ -493,7 +728,8 @@ function econ(){
       });
     });
   }).catch(function(e){
-    $('dgasv').textContent='—'; $('dblkv').textContent='—'; $('dusedv').textContent='—';
+    /* a failed read says so in words, never a dash for a value */
+    $('dgasv').textContent='not reached'; $('dblkv').textContent='not reached'; $('dusedv').textContent='not reached';
     $('eraw').textContent='raw lane — RPC unreachable from this browser: '+String(e&&e.message||e)+' — declared failure, never zero';
     ['ngas','nblk','nused'].forEach(function(id){needle(id,0)});
   });
@@ -522,6 +758,151 @@ function setCalm(on){
 }
 try{ if(localStorage.getItem('fcalm')==='1') setCalm(true); }catch(e){}
 calmBtn.onclick=function(){ setCalm(!document.body.classList.contains('still')); };
+})();
+</script>
+<script>
+/* ETERNAL FRONT — one data layer, three renderers (docs/design/eternal). Facts come from the page
+   itself: the nine beats as each section declares them (data-beat), the family doors, the 127-cell
+   rig, the day pass strung by the page's own beads(name) (window.festivalDay), the calm tent's
+   state (body.still) and the economy board's last read (#eraw and the dial values). Nothing here
+   stores, sends or reads on its own: the name goes into the page's #passname, the calm is #calm,
+   the board is #eread, and a beat is reached through the ribbon's own cell. */
+(function(){
+  var $=function(id){return document.getElementById(id);};
+  var T=function(k,f){var t=window.BNRLanguage&&window.BNRLanguage.text;return t?t(k,f):f;};
+  var NAMES={'s-arrive':'arrive','s-floor':'the floor','s-speak':'speak light','s-kandi':'kandi','s-econ':'the economy board','s-set':'the set','s-calm':'the calm tent','s-receipt':'leave a receipt','s-family':'the family'};
+  var WORD={live:'open',door:'a door to another room',gates:'not built yet'};
+  var D={beats:[],cells:0,gates:{total:0,open:0},calm:false,board:{state:'reading',gas:'',block:'',used:'',raw:''},pass:{name:'',hash:0,beads:[]},tokens:[]};
+  var R={sel:null,strung:7};
+  function esc(v){return String(v==null?'':v).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+  function set(sel,txt){document.querySelectorAll('#eternal [data-et="'+sel+'"]').forEach(function(e){e.textContent=txt;});}
+  function hex8(n){return ('00000000'+(n>>>0).toString(16)).slice(-8);}
+  function read(){
+    D.beats=[].map.call(document.querySelectorAll('section.beat'),function(s,i){
+      var st=((s.getAttribute('data-beat')||'').split('·')[1]||'').trim().toLowerCase();
+      return {id:s.id,n:i+1,name:NAMES[s.id]||s.id,state:st==='live'?'live':st==='door'?'door':'gates',title:(s.querySelector('h2 [data-i18n]')||s.querySelector('h2')).textContent.trim()};});
+    D.cells=document.querySelectorAll('#comb2 polygon').length;
+    D.gates={total:document.querySelectorAll('.fam .gate').length,open:[].filter.call(document.querySelectorAll('.fam .gate'),function(g){return ![].some.call(g.querySelectorAll('[data-i18n]'),function(e){return e.dataset.i18n==='f.gate';});}).length};
+    D.calm=document.body.classList.contains('still');
+    var raw=($('eraw')&&$('eraw').textContent)||'';
+    D.board={raw:raw,state:/^raw lane · eth_gasPrice/.test(raw)?'read':/unreachable/.test(raw)?'unreachable':'reading',
+      gas:($('dgasv')||{}).textContent||'',block:($('dblkv')||{}).textContent||'',used:($('dusedv')||{}).textContent||''};
+    var F=window.festivalDay; if(F){D.pass=F.beads(($('passname')||{}).value||'');D.tokens=F.tokens;}
+  }
+  function beadSvg(sz){var o='';D.pass.beads.forEach(function(k,j){o+='<circle cx="'+(sz+j*sz*2.4)+'" cy="'+sz+'" r="'+(sz*0.8)+'" style="fill:var(--sk-'+D.tokens[k]+');stroke:var(--sk-bg-card)" stroke-width="1.5"/>';});
+    return '<svg width="'+Math.round(sz*2+6*sz*2.4)+'" height="'+sz*2+'" viewBox="0 0 '+Math.round(sz*2+6*sz*2.4)+' '+sz*2+'" aria-hidden="true">'+o+'</svg>';}
+  function boardWords(){return D.board.state==='read'?D.board.gas+' · '+T('et.festival.block','block')+' '+D.board.block+' · '+D.board.used
+    :D.board.state==='unreachable'?T('et.festival.unreached','not reached from this browser · a declared gap, never a zero'):T('et.festival.reading','being read');}
+
+  /* ── NEW BEE ── */
+  function bee(){
+    $('etBeeStrand').innerHTML=beadSvg(9)+'<span><b>'+esc(D.pass.name)+'</b> · '+esc(T('et.festival.b.beads','seven beads, kept nowhere'))+'</span>';
+    $('etBeePass').textContent=T('et.festival.b.make','make my day pass');
+    $('etBeeRows').innerHTML=D.beats.map(function(b){
+      var w=T('et.festival.b.st.'+b.state,WORD[b.state]);
+      if(b.id==='s-family')w=(D.gates.total-D.gates.open)+' '+T('et.festival.b.notYet','not built yet')+' · '+D.gates.open+' '+T('et.festival.b.open','open');
+      if(b.id==='s-econ'&&D.board.state==='unreachable')w=T('et.festival.b.boardOff','open · the chain is not reachable here');
+      return '<button type="button" class="et-b-row" data-go="'+esc(b.id)+'"><b>'+esc(T('et.festival.beat.'+b.id,b.name))+'</b><small class="'+(b.state==='gates'?'et-gate':'')+'">'+esc(w)+'<svg class="chev" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2"/></svg></small></button>';}).join('');
+    $('etBeeCalm').textContent=D.calm?T('et.festival.b.calmOn','the rig is resting · light it up again'):T('et.festival.b.calm','rest in the calm tent');
+  }
+
+  /* ── RAVER ── */
+  var POS=[[-80.8,-60],[-11.5,-60],[57.8,-60],[-46.2,0],[23.1,0],[92.4,0],[-80.8,60],[-11.5,60],[57.8,60]];
+  function hexPath(x,y,r){var p=[];for(var i=0;i<6;i++){var a=Math.PI/180*(60*i-90);p.push((x+r*Math.cos(a)).toFixed(1)+' '+(y+r*Math.sin(a)).toFixed(1));}return 'M'+p.join('L')+'Z';}
+  var sig='';
+  function comb(){
+    var svg=$('etComb'); if(!svg)return;
+    var now=D.beats.map(function(b){return b.state;}).join()+'|'+D.pass.beads.join();
+    if(now!==sig){ /* built once per day + strand, so the glow never restarts; later renders toggle classes */
+      var h='<circle class="string" r="172"/>';
+      D.beats.forEach(function(b,i){var p=POS[i]||[0,0];
+        h+='<g class="cell '+b.state+'" data-i="'+i+'" role="button" tabindex="0" aria-label="'+esc(b.n+' · '+b.name+' · '+WORD[b.state])+'"><path class="et-r-glow" style="animation-delay:-'+(i*0.47).toFixed(2)+'s" d="'+hexPath(p[0],p[1],38)+'"/><text x="'+p[0]+'" y="'+(p[1]+5)+'" text-anchor="middle">'+b.n+'</text></g>';});
+      D.pass.beads.forEach(function(k,j){var a=-Math.PI/2+j*2*Math.PI/7;
+        h+='<circle class="bead" cx="'+(172*Math.cos(a)).toFixed(1)+'" cy="'+(172*Math.sin(a)).toFixed(1)+'" r="15" style="fill:var(--sk-'+D.tokens[k]+')"/>';});
+      svg.innerHTML=h; sig=now;
+    }
+    svg.querySelectorAll('.cell').forEach(function(c,i){c.classList.toggle('sel',R.sel===i);});
+    svg.querySelectorAll('.bead').forEach(function(c,j){c.classList.toggle('on',j<R.strung);});
+  }
+  function raver(){
+    $('etRaverHint').textContent=D.beats.length+' '+T('et.festival.r.hint','beats · tap a cell')+(D.calm?' · '+T('et.festival.r.still','the rig is still'):'');
+    comb();
+    var c=$('etRaverCard'), b=R.sel!=null&&D.beats[R.sel];
+    if(b)c.innerHTML='<span class="rk">'+b.n+'</span><div><b>'+esc(T('et.festival.beat.'+b.id,b.name))+'</b><span>'+esc(T('et.festival.b.st.'+b.state,WORD[b.state])+(b.id==='s-econ'?' · '+boardWords():b.id==='s-family'?' · '+(D.gates.total-D.gates.open)+' gates, '+D.gates.open+' open':''))+'</span></div>';
+    else c.innerHTML='<span class="rk">7</span><div><b>'+esc(D.pass.name)+'</b><span>'+esc(T('et.festival.r.strand','your strand · seven beads · stored nowhere'))+'</span></div>';
+    $('etRaverGo').hidden=!b;
+    $('etRaverCalm').textContent=D.calm?T('et.festival.r.light','light the rig up'):T('et.festival.r.dim','dim the rig');
+  }
+
+  /* ── CYPHERPUNK ── */
+  function cy(){
+    $('etChips').innerHTML='<span class="'+(D.board.state==='read'?'ok':'on')+'">rpc '+esc(D.board.state)+'</span><span class="on">calm '+(D.calm?'on':'off')+'</span><span>'+D.cells+' cells</span>';
+    $('etBeats').innerHTML='<tr><th>#</th><th>beat</th><th>state</th><th>id</th></tr>'+D.beats.map(function(b){
+      return '<tr class="pick" tabindex="0" data-go="'+esc(b.id)+'"><td>'+String(b.n).padStart(2,'0')+'</td><td>'+esc(b.name)+'</td><td class="st-'+b.state+'">'+esc(b.state)+'</td><td>#'+esc(b.id)+'</td></tr>';}).join('');
+    var st=D.board.state, raw=D.board.raw;
+    var steps=[
+      ['eth_gasPrice',st==='read'?D.board.gas:st==='unreachable'?'unreachable · failover tried both hosts':'in flight',st==='read'?'done':st==='unreachable'?'guard':'now'],
+      ['eth_blockNumber',st==='read'?D.board.block:st==='unreachable'?'not reached':'waiting',st==='read'?'done':'todo'],
+      ['eth_getBlockByNumber → gasUsed',st==='read'?D.board.used:st==='unreachable'?'not reached':'waiting',st==='read'?'done':'todo'],
+      ['render dials',st==='read'?'needles set · refresh 20 s, paused while hidden':st==='unreachable'?'declared failure · needles at rest, never a zero':'waiting',st==='read'?'done':st==='unreachable'?'now':'todo']
+    ];
+    $('etPipe').innerHTML=steps.map(function(s){return '<li class="'+s[2]+'"><b>'+esc(s[0])+'</b><p>'+esc(s[1])+'</p></li>';}).join('');
+    var kv=function(rows){return rows.map(function(r){return '<tr><th>'+esc(r[0])+'</th><td>'+r[1]+'</td></tr>';}).join('');};
+    $('etReceipt').innerHTML=kv([
+      ['name',esc(D.pass.name)],['fnv-1a 32','0x'+hex8(D.pass.hash)],
+      ['beads',D.pass.beads.map(function(k){return '<i class="bd" style="background:var(--sk-'+D.tokens[k]+')"></i>';}).join('')+' '+esc('['+D.pass.beads.join(',')+']')],
+      ['stored','<span class="yes">nowhere</span> · no storage, no request'],
+      ['board',st==='read'?esc(raw.replace(/^raw lane · /,'')):'<span class="no">'+esc(boardWords())+'</span>'],
+      ['calm',D.calm?'<span class="yes">on</span> · beams, sparks and comb paused':'<span class="no">off</span> · motion ≤ 3 Hz, still under reduced motion'],
+      ['family',esc(D.gates.total+' doors · '+(D.gates.total-D.gates.open)+' gates · '+D.gates.open+' open')]]);
+    $('etCyCalm').textContent=D.calm?T('et.festival.c.light','light the rig up'):T('et.festival.c.dim','dim the rig');
+  }
+
+  function labels(){document.querySelectorAll('[data-t^="et.festival."]').forEach(function(e){if(e.__en==null)e.__en=e.textContent;e.textContent=T(e.getAttribute('data-t'),e.__en);});}
+  function all(){read();bee();raver();cy();syncNames();}
+  function syncNames(){var v=($('passname')||{}).value||'';['etBeeName','etRaverName','etCyName'].forEach(function(id){var i=$(id);if(i&&document.activeElement!==i&&i.value!==v)i.value=v;});}
+
+  /* ── the hand-offs: the page owns every real step ── */
+  function pass(name){var p=$('passname');if(!p)return;p.value=name;p.dispatchEvent(new Event('input',{bubbles:true}));all();}
+  function calm(){var b=$('calm');if(b)b.click();all();}
+  function go(id){var cell=document.querySelector('.rib .cell[data-go="'+id+'"]');if(cell)cell.click();}
+  var hold={t0:0,raf:0};
+  function holdStart(e){
+    if(hold.raf)return; if(e&&e.preventDefault)e.preventDefault();
+    hold.t0=performance.now(); R.strung=0; comb();
+    (function tick(now){var f=Math.min(1,(now-hold.t0)/1400);$('etStringFill').style.width=(f*100)+'%';
+      var k=Math.floor(f*7); if(k!==R.strung){R.strung=k;comb();}
+      if(f>=1){hold.raf=0;$('etStringFill').style.width='0';R.strung=7;pass($('etRaverName').value);return;}hold.raf=requestAnimationFrame(tick);})(hold.t0);
+  }
+  function holdStop(){if(!hold.raf)return;cancelAnimationFrame(hold.raf);hold.raf=0;$('etStringFill').style.width='0';R.strung=7;comb();}
+
+  function wire(){
+    var ev=$('eternal'); if(!ev)return;
+    $('etBeePass').addEventListener('click',function(){pass($('etBeeName').value);});
+    $('etBeeName').addEventListener('keydown',function(e){if(e.key==='Enter')pass(this.value);});
+    $('etCyName').addEventListener('input',function(){pass(this.value);});
+    ['etBeeCalm','etRaverCalm','etCyCalm'].forEach(function(id){$(id).addEventListener('click',calm);});
+    $('etCyRead').addEventListener('click',function(){var b=$('eread');if(b)b.click();all();});
+    $('etRaverGo').addEventListener('click',function(){var b=D.beats[R.sel];if(b)go(b.id);});
+    ev.addEventListener('click',function(e){
+      var g=e.target.closest('.et-b-row[data-go],.et-c-beats tr.pick'); if(g){go(g.getAttribute('data-go'));return;}
+      var c=e.target.closest('#etComb .cell'); if(c){var i=+c.getAttribute('data-i');R.sel=R.sel===i?null:i;raver();}
+    });
+    ev.addEventListener('keydown',function(e){if(e.key!=='Enter'&&e.key!==' ')return;var t=e.target.closest&&e.target.closest('#etComb .cell,.et-c-beats tr.pick');if(!t)return;e.preventDefault();t.dispatchEvent(new MouseEvent('click',{bubbles:true}));});
+    var hb=$('etStringHold');
+    hb.addEventListener('pointerdown',function(e){try{hb.setPointerCapture(e.pointerId);}catch(x){}holdStart(e);});
+    ['pointerup','pointercancel','pointerleave'].forEach(function(t){hb.addEventListener(t,holdStop);});
+    hb.addEventListener('keydown',function(e){if((e.key===' '||e.key==='Enter')&&!e.repeat){e.preventDefault();holdStart(e);}});
+    hb.addEventListener('keyup',function(e){if(e.key===' '||e.key==='Enter')holdStop();});
+    hb.addEventListener('contextmenu',function(e){e.preventDefault();});
+    /* the page speaks through its own nodes; the fronts listen, they never guess */
+    var mo=new MutationObserver(all);
+    ['eraw','passout'].forEach(function(id){if($(id))mo.observe($(id),{childList:true,characterData:true,subtree:true});});
+    new MutationObserver(all).observe(document.body,{attributes:true,attributeFilter:['class']});
+    document.addEventListener('blang',function(){labels();all();});
+  }
+  labels(); wire(); all();
+  window.__eternal={data:D,raver:R,refresh:all};
 })();
 </script>
 <script src="../tour.js?v=42"></script>

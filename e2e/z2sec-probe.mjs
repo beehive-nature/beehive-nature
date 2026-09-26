@@ -32,8 +32,13 @@ const fakeSessionBody = {
     evil: '<img src=x onerror="window.__pwned=1">',
   },
 };
+let liveHost = false; // watch: a room host answers /live/health only while a probe needs a hosted room
 const estate = createServer((req, res) => {
   const path = decodeURIComponent(req.url.split('?')[0]);
+  if (liveHost && path === '/live/health') {
+    res.setHeader('content-type', 'application/json');
+    res.end(JSON.stringify({ publishing: false, rooms: [] })); return;
+  }
   if (path.startsWith('/live/session/') && path.endsWith('.json')) {
     res.setHeader('content-type', 'application/json');
     res.end(JSON.stringify(fakeSessionBody)); return;
@@ -230,6 +235,9 @@ try {
 
   /* ═══ 6. SPOOFING — watch session fields are data, never HTML ═══ */
   {
+    /* the room pass only shows where a room host answers /live/health (W@TCH UX PASS 1, fd51c804:
+       a static host gets the honest "no room here" preview instead), so this probe hosts one */
+    liveHost = true;
     const page = await fresh();
     await page.goto(`${BASE}/surfaces/watch.html`, { waitUntil: 'networkidle' });
     await page.fill('#sess', '600');
@@ -239,6 +247,7 @@ try {
     check('spoofing: watch receipt fields render as text (injected markup inert)',
       nums.includes('credit') && !(await page.evaluate(() => !!window.__pwned)), nums);
     await page.close();
+    liveHost = false;
   }
 
   /* ═══ 7. S3 HARDENED — bnr_soul escapes before innerHTML ═══ */
@@ -280,8 +289,11 @@ try {
     await page3.waitForTimeout(300);
     const st = await page3.textContent('#st');
     const dot = await page3.getAttribute('#dot', 'class');
-    check('unavailable: watch with no /live backend shows Connection unavailable (honest degrade)',
-      /unavailable|недоступн/i.test(st) || /Connection/i.test(st), `st="${st}" dot=${dot}`);
+    /* since W@TCH UX PASS 1 (fd51c804) a host with no /live backend is named for what it is: a preview
+       with "No room is hosted at this address yet" and no room pass offered — still an honest degrade */
+    const noRoom = await page3.evaluate(() => document.body.dataset.room === 'none' && !document.getElementById('no-room-pass').hidden && !document.getElementById('sess').checkVisibility());
+    check('unavailable: watch with no /live backend says so honestly (Connection unavailable, or the no-room preview)',
+      /unavailable|недоступн/i.test(st) || /Connection/i.test(st) || (/Preview/.test(st) && noRoom), `st="${st}" dot=${dot} noRoom=${noRoom}`);
     await page3.close();
   }
 

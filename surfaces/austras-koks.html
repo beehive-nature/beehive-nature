@@ -5,37 +5,182 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>austras koks · the tree of life</title>
 <meta name="description" content="austras koks: the family line read as the latvian tree of life. climb it branch by branch; living people stay out.">
+<link rel="stylesheet" href="skaists.css">
 <link rel="stylesheet" href="tree-of-life.css">
 <link rel="stylesheet" href="person-panel.css">
 <style>
-/* the page ground follows the tree's own skaists tokens (tree-of-life.css) */
+/* the page ground follows the tree's own skaists tokens (tree-of-life.css aliases --tol-* onto --sk-*) */
 *{box-sizing:border-box}
-html{background:#fbf7f0}
-body{margin:0;min-height:100vh;background:var(--tol-bg);color:var(--tol-ink);font:16px/1.45 var(--tol-face)}
-main{max-width:1180px;margin:0 auto;padding:18px 18px 48px}
-h1{font-size:30px;line-height:1.1;margin:6px 0;font-weight:600;color:var(--tol-sov-strong)}
-.lede{color:var(--tol-mut);margin:0 0 18px;max-width:62ch}
-.grid{display:grid;gap:24px}
+html{background:var(--sk-bg)}
+body{margin:0;min-height:100vh;background:var(--tol-bg);color:var(--tol-ink);font:400 var(--tol-fs-body)/1.45 var(--tol-face)}
+main{max-width:1180px;margin:0 auto;padding:var(--sk-s3) var(--sk-s3) var(--sk-s6)}
+h1{margin:var(--sk-s1) 0;color:var(--tol-sov-strong)}
+.lede{color:var(--tol-mut);margin:0 0 var(--sk-s3);max-width:62ch}
+.grid{display:grid;gap:var(--sk-s4)}
 @media (min-width:980px){.grid{grid-template-columns:minmax(0,3fr) minmax(0,2fr);align-items:start}}
-.later{color:var(--tol-mut);margin:18px 0 0}
-details.receipt{margin-top:24px;border-top:1px dashed var(--tol-line);padding-top:12px}
-details.receipt summary{min-height:44px;display:flex;align-items:center;cursor:pointer;color:var(--tol-mut)}
-.receipt pre{font:13px/1.5 var(--tol-mono);color:var(--tol-mut);white-space:pre-wrap;margin:6px 0 0}
+.later{color:var(--tol-mut);margin:var(--sk-s3) 0 0}
+details.receipt{margin-top:var(--sk-s4);border-top:1px dashed var(--tol-line);padding-top:var(--sk-s2)}
+details.receipt summary{min-height:var(--sk-control-min);display:flex;align-items:center;cursor:pointer;color:var(--tol-mut);font-size:var(--tol-fs-label)}
+.receipt pre{font:400 var(--tol-fs-small)/1.5 var(--tol-mono);color:var(--tol-mut);white-space:pre-wrap;margin:var(--sk-s1) 0 0}
+/* THE WHOLE PAGE, dressed per register: the title in each register's own face */
+body[data-reg="bee"] h1{font:400 40px/1.05 var(--sk-font-bee-serif);color:var(--sk-ink)}
+body[data-reg="raver"] h1{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em;color:var(--sk-sovereign-strong)}
+body[data-reg="cypherpunk"] h1{font:600 15px/1.45 var(--sk-font-mono);color:var(--sk-ink)}
 /* the person panel's own variables, mapped onto skaists (no gold: honey is b only) */
 #panel{--bg:var(--tol-bg);--panel:var(--tol-card);--well:var(--tol-well);--ink:var(--tol-ink);--dim:var(--tol-mut);
   --faint:var(--tol-dim);--line:var(--tol-line);--cyan:var(--tol-sov);--gold:var(--tol-sov-strong);--violet:var(--tol-sov);
   --rose:var(--tol-guard);--info:var(--tol-ai);--verified:var(--tol-life);
-  background:var(--tol-card);border:1px solid var(--tol-line);border-radius:18px;padding:12px;font-size:14px}
+  background:var(--tol-card);border:1px solid var(--tol-line);border-radius:var(--tol-radius);padding:var(--sk-s2);font-size:var(--tol-fs-label)}
 #panel:empty{display:none}
-/* lower half at 390 px (founder phone review, 2026-09-26): names break at syllables, not mid-letter;
-   raver keeps the whole name (three lines) instead of clipping it under "2 more above"; 12px floor */
-@media (max-width:520px){
-  .tol .tol-name{font-size:12.5px;hyphens:auto;-webkit-hyphens:auto}
-  .tol .tol-node{padding-inline:4px}
-  .tol .tol-cap,.tol .tol-more{font-size:12px}
-}
-.tol [data-reading="raver"] .tol-name,.tol[data-reading="raver"] .tol-name{-webkit-line-clamp:3;line-clamp:3}
-.tol [data-reading="cypherpunk"] :is(.tol-cap,.tol-more){font-size:12px}
+/* ── ETERNAL FRONT (docs/design/eternal) — every value is a skaists token (surfaces/skaists.css,
+   compiled from docs/design/skaists/tokens.json): no hand-picked hex, size or corner. Measured by
+   e2e/skaists-conformance.mjs. One register visible at a time; new bee is the default. Every rule
+   rides #eternal so the page's own element styles (buttons, links, inputs) never leak in. ── */
+#eternal{margin:var(--sk-s2) auto var(--sk-s2);max-width:620px;text-align:start;letter-spacing:0}
+#eternal *{box-sizing:border-box}
+#eternal>.et-r,#eternal>.et-c{display:none}
+body[data-reg="raver"] #eternal>.et-b,body[data-reg="cypherpunk"] #eternal>.et-b{display:none}
+body[data-reg="raver"] #eternal>.et-r{display:block}
+body[data-reg="cypherpunk"] #eternal>.et-c{display:block}
+#eternal [hidden]{display:none!important}
+#eternal :is(button,a,input){margin:0;box-shadow:none;transform:none;text-shadow:none;animation:none}
+#eternal button{appearance:none;background:none;border:0;border-radius:0;padding:0;min-height:0;cursor:pointer;color:inherit;font:inherit;text-align:inherit}
+#eternal button:hover{background:none;color:inherit;transform:none}
+#eternal a{color:var(--sk-link);text-decoration-thickness:1px;text-underline-offset:3px}
+#eternal a:hover{color:var(--sk-link-hover)}
+#eternal svg{display:block}
+#eternal p,#eternal h2,#eternal h3,#eternal ol,#eternal ul{margin:0}
+#eternal h2,#eternal h3{letter-spacing:0}
+#eternal :focus-visible{outline:2px solid var(--sk-focus);outline-offset:3px}
+#eternal .et-center{text-align:center}
+#eternal .et-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.et-archive-h{margin:var(--sk-s5) auto var(--sk-s1);padding-top:var(--sk-s4);border-top:1px solid var(--sk-line);color:var(--sk-ink);max-width:620px;letter-spacing:0;text-align:start}
+body[data-reg="bee"] .et-archive-h{font:400 28px/1.1 var(--sk-font-bee-serif)}
+body[data-reg="raver"] .et-archive-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em}
+body[data-reg="cypherpunk"] .et-archive-h{font:600 15px/1.45 var(--sk-font-mono)}
+
+/* NEW BEE — a calm room: one question, plain rows, one magenta action */
+#eternal .et-b{color:var(--sk-ink);display:flex;flex-direction:column;gap:var(--sk-s3);font:400 16px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-b-mark{font:400 18px/1.2 var(--sk-font-house);color:var(--sk-sovereign)}
+#eternal .et-b-mark b{font-weight:700}
+#eternal .et-b-h{font:400 40px/1.05 var(--sk-font-bee-serif);color:var(--sk-ink)}
+#eternal .et-b-lede{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink-mut);text-wrap:pretty}
+#eternal .et-b-guard{display:flex;align-items:center;gap:var(--sk-s2);min-height:var(--sk-control-min);padding:var(--sk-s1) var(--sk-s3);border-radius:var(--sk-radius);background:var(--sk-guard-wash);color:var(--sk-guard);font:600 15px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-b-guard svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+#eternal .et-b-rows{display:flex;flex-direction:column;background:var(--sk-bg-card);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl);overflow:hidden}
+#eternal .et-b-row{display:flex;align-items:center;justify-content:space-between;gap:var(--sk-s2);width:100%;min-height:var(--sk-control-row);padding:var(--sk-s1) var(--sk-s3);border-bottom:1px solid var(--sk-line-soft);background:transparent;text-align:start;font:500 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink);text-decoration:none}
+#eternal .et-b-row:last-child{border-bottom:0}
+#eternal .et-b-row small{display:flex;align-items:center;gap:var(--sk-s1);font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut);text-align:end}
+#eternal .et-b-row small.out{color:var(--sk-guard)}
+#eternal .et-b-row small.ok{color:var(--sk-verified)}
+#eternal .et-b-row[aria-expanded="true"]{background:var(--sk-sovereign-tint);color:var(--sk-sovereign-strong);font-weight:600}
+#eternal .et-b-row[aria-expanded="true"] small{color:var(--sk-sovereign-strong)}
+#eternal .et-b-row .chev{flex:none;transition:transform .26s}
+#eternal .et-b-row[aria-expanded="true"] .chev{transform:rotate(90deg)}
+#eternal .et-b-person{display:flex;align-items:center;gap:var(--sk-s2);min-height:var(--sk-control-person);padding:var(--sk-s1) var(--sk-s3);border-bottom:1px solid var(--sk-line-soft)}
+#eternal .et-b-person:last-child{border-bottom:0}
+#eternal .et-b-person i{width:40px;height:40px;border-radius:var(--sk-radius-pill);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong);display:flex;align-items:center;justify-content:center;font:600 14px/1.4 var(--sk-font-bee-sans);font-style:normal;flex:none}
+#eternal .et-b-person b{display:block;font:500 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+#eternal .et-b-person span{display:block;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-more{padding:var(--sk-s2) var(--sk-s3);font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut);border-top:1px solid var(--sk-line-soft)}
+#eternal .et-b-act{display:flex;flex-direction:column;gap:var(--sk-s1);margin-top:var(--sk-s1)}
+#eternal .et-b-primary{display:flex;align-items:center;justify-content:center;width:100%;min-height:var(--sk-control-primary);padding:0 var(--sk-s3);border-radius:var(--sk-radius-lg);border:0;background:var(--sk-primary);color:var(--sk-on-primary);font:600 17px/1.2 var(--sk-font-bee-sans);text-align:center;text-decoration:none;cursor:pointer}
+#eternal .et-b-primary:hover{background:var(--sk-primary);color:var(--sk-on-primary)}
+#eternal .et-b-primary:disabled{background:var(--sk-bg-well);color:var(--sk-ink-mut);cursor:not-allowed}
+#eternal .et-b-link{min-height:var(--sk-control-min);display:flex;align-items:center;justify-content:center;border:0;background:transparent;font:600 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-link);text-decoration:none;text-align:center;cursor:pointer}
+#eternal .et-b-link:hover{color:var(--sk-link-hover)}
+#eternal .et-b-foot{text-align:center;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-field{display:grid;gap:var(--sk-s1);font:600 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-field input{width:100%;min-height:var(--sk-control-row);padding:0 var(--sk-s3);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius-md);background:var(--sk-bg-card);color:var(--sk-ink);font:400 16px/1.45 var(--sk-font-bee-sans);outline-offset:3px}
+#eternal .et-b-field input:focus{border-color:var(--sk-ink);box-shadow:none}
+#eternal .et-b-answer{padding:var(--sk-s3);border-radius:var(--sk-radius-xl);background:var(--sk-sovereign-tint);border:1px solid var(--sk-line);display:grid;gap:var(--sk-s1)}
+#eternal .et-b-answer b{font:400 28px/1.1 var(--sk-font-bee-serif);color:var(--sk-sovereign-strong)}
+#eternal .et-b-answer span{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+#eternal .et-b-answer small{font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-answer.out b{color:var(--sk-guard)}
+
+/* RAVER — the data is the art; the gesture is physical; lower case is allowed joy */
+#eternal .et-r{color:var(--sk-ink);font:400 14px/1.4 var(--sk-font-raver-body)}
+#eternal .et-r-top{display:flex;align-items:baseline;justify-content:space-between;gap:var(--sk-s2);flex-wrap:wrap}
+#eternal .et-r-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em;color:var(--sk-ink)}
+#eternal .et-r-hint{font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-art{width:100%;max-width:360px;height:auto;margin:var(--sk-s3) auto var(--sk-s1);filter:drop-shadow(var(--sk-glow-sovereign))}
+#eternal .et-r-art [role="button"]{cursor:pointer}
+#eternal .et-r-art [role="button"]:focus{outline:none}
+#eternal .et-r-art [role="button"]:focus-visible .hit{stroke:var(--sk-ink);stroke-width:2}
+#eternal .et-r-art .cell{transition:opacity .26s,fill .26s}
+#eternal .et-r-legend{display:flex;justify-content:center;flex-wrap:wrap;gap:var(--sk-s1) var(--sk-s3);margin:var(--sk-s1) 0 var(--sk-s2);font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-legend span{display:flex;align-items:center;gap:var(--sk-s1)}
+#eternal .et-r-legend i{width:14px;height:14px;border-radius:var(--sk-radius-pill);flex:none}
+#eternal .et-r-card{display:flex;gap:var(--sk-s2);align-items:center;padding:var(--sk-s2) var(--sk-s3);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl);background:var(--sk-sovereign-tint);min-height:var(--sk-control-person)}
+#eternal .et-r-card .rk{min-width:44px;height:44px;padding:0 var(--sk-s1);border-radius:var(--sk-radius);background:var(--sk-sovereign-strong);color:var(--sk-bg);display:flex;align-items:center;justify-content:center;font:700 15px/1.2 var(--sk-font-raver-display);flex:none}
+#eternal .et-r-card b{display:block;font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink)}
+#eternal .et-r-card span{display:block;font:600 14px/1.4 var(--sk-font-raver-body);color:var(--sk-sovereign-soft)}
+#eternal .et-r-pill{display:flex;align-items:center;justify-content:center;width:100%;min-height:58px;margin-top:var(--sk-s4);padding:0 var(--sk-s3);border:0;border-radius:var(--sk-radius-pill);background:var(--sk-primary);color:var(--sk-on-primary);font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em;text-align:center;text-decoration:none;cursor:pointer}
+#eternal .et-r-pill:hover{background:var(--sk-primary);color:var(--sk-on-primary)}
+#eternal .et-r-ghost{display:flex;align-items:center;justify-content:center;margin:var(--sk-s2) auto 0;min-height:var(--sk-control-min);padding:0 var(--sk-s2);border:0;background:none;color:var(--sk-link);font:400 14px/1.4 var(--sk-font-raver-body);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+#eternal .et-r-note{margin:var(--sk-s2) 0 0;text-align:center;font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-big{margin:var(--sk-s2) 0 var(--sk-s1);text-align:center;font:700 60px/.95 var(--sk-font-raver-display);letter-spacing:-.02em;color:var(--sk-ink)}
+#eternal .et-r-pause{display:flex;align-items:center;justify-content:center;min-width:var(--sk-control-min);min-height:var(--sk-control-min);padding:0 var(--sk-s2);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius-pill);font:600 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink)}
+@media (prefers-reduced-motion:reduce){#eternal .et-r-art .cell,#eternal .et-b-row .chev{transition:none}}
+
+/* CYPHERPUNK — the instrument, complete at first paint; every row a fact you can check */
+#eternal .et-c{font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink)}
+#eternal .et-c-path{font:600 15px/1.45 var(--sk-font-mono);word-break:break-all;color:var(--sk-ink)}
+#eternal .et-c-chips{display:flex;flex-wrap:wrap;gap:var(--sk-s1);margin:var(--sk-s2) 0}
+#eternal .et-c-chips span{padding:2px var(--sk-s1);border:1px solid var(--sk-line);border-radius:4px;background:var(--sk-bg-card);font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink)}
+#eternal .et-c-chips span.on{border-color:var(--sk-guard);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong)}
+#eternal .et-c-chips span.ok{border-color:var(--sk-verified);color:var(--sk-verified)}
+#eternal .et-c-chips span.no{border-color:var(--sk-guard);color:var(--sk-guard)}
+#eternal .et-c-guard{display:flex;justify-content:space-between;align-items:center;gap:var(--sk-s2);flex-wrap:wrap;min-height:var(--sk-control-min);padding:var(--sk-s1) var(--sk-s3);border:1px dashed var(--sk-guard);border-radius:var(--sk-radius-sm);background:var(--sk-guard-wash);color:var(--sk-guard)}
+#eternal .et-c-guard b{font-weight:600;color:var(--sk-sovereign-strong)}
+#eternal .et-c-tab{width:100%;margin:var(--sk-s2) 0 var(--sk-s1);border-collapse:separate;border-spacing:0;border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm);overflow:hidden;background:var(--sk-bg-card)}
+#eternal .et-c-tab th{padding:var(--sk-s1) var(--sk-s2);text-align:start;font:600 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);border-bottom:1px solid var(--sk-line);background:var(--sk-bg-well);position:static}
+#eternal .et-c-tab td{height:var(--sk-control-min);padding:var(--sk-s1) var(--sk-s2);border-bottom:1px solid var(--sk-line);font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink);vertical-align:middle;word-break:break-word}
+#eternal .et-c-tab tr:last-child td{border-bottom:0}
+#eternal .et-c-tab td:first-child{color:var(--sk-guard)}
+#eternal .et-c-tab tr.pick{cursor:pointer}
+#eternal .et-c-tab tr.pick:hover td{background:var(--sk-sovereign-tint)}
+#eternal .et-c-tab tr.names td{height:auto;background:var(--sk-sovereign-tint);color:var(--sk-ink)}
+#eternal .et-c-tab small{display:block;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut)}
+#eternal .et-c-tab .ok{color:var(--sk-verified)}#eternal .et-c-tab .no{color:var(--sk-guard)}#eternal .et-c-tab .part{color:var(--sk-info)}
+#eternal .et-c-h{margin:var(--sk-s4) 0 var(--sk-s2);font:600 15px/1.45 var(--sk-font-mono);color:var(--sk-ink)}
+#eternal .et-c-pipe{list-style:none;margin:0;padding:0;display:grid;gap:var(--sk-s2);counter-reset:p}
+#eternal .et-c-pipe li{display:grid;grid-template-columns:36px 1fr;gap:var(--sk-s1) var(--sk-s2);padding:var(--sk-s2) var(--sk-s3);border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm);background:var(--sk-bg-card);counter-increment:p}
+#eternal .et-c-pipe li::before{content:counter(p,decimal-leading-zero);color:var(--sk-guard);font-weight:600}
+#eternal .et-c-pipe li b{font-weight:600;color:var(--sk-ink)}
+#eternal .et-c-pipe li p{grid-column:2;margin:0;color:var(--sk-ink-soft);word-break:break-word}
+#eternal .et-c-pipe li.done b{color:var(--sk-verified)}
+#eternal .et-c-pipe li.guard{border-style:dashed;border-color:var(--sk-guard)}#eternal .et-c-pipe li.guard b{color:var(--sk-guard)}
+#eternal .et-c-pipe li.now{border-color:var(--sk-ai);box-shadow:inset 0 0 0 1px var(--sk-ai)}#eternal .et-c-pipe li.now b{color:var(--sk-ai)}
+#eternal .et-c-pipe li.todo p{color:var(--sk-ink-mut)}
+#eternal .et-c-primary{display:flex;align-items:center;justify-content:center;width:100%;min-height:52px;margin-top:var(--sk-s3);padding:0 var(--sk-s2);border:0;border-radius:var(--sk-radius-sm);background:var(--sk-primary);color:var(--sk-on-primary);font:600 14px/1.2 var(--sk-font-mono);text-align:center;text-decoration:none;cursor:pointer}
+#eternal .et-c-primary:hover{background:var(--sk-primary);color:var(--sk-on-primary)}
+#eternal .et-c-kv{width:100%;border-collapse:collapse;border:1px solid var(--sk-line);background:var(--sk-bg-card)}
+#eternal .et-c-kv th{width:104px;padding:var(--sk-s2) var(--sk-s2);text-align:start;vertical-align:top;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);border-bottom:1px solid var(--sk-line);background:transparent;position:static}
+#eternal .et-c-kv td{padding:var(--sk-s2) var(--sk-s2);border-bottom:1px solid var(--sk-line);word-break:break-word;font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink)}
+#eternal .et-c-kv .no{color:var(--sk-info)}#eternal .et-c-kv .yes{color:var(--sk-verified)}#eternal .et-c-kv .held{color:var(--sk-guard)}
+#eternal .et-c-verify{margin-top:var(--sk-s3);padding:var(--sk-s3);border-radius:var(--sk-radius-sm);background:var(--sk-bg-card);border:1px solid var(--sk-line)}
+#eternal .et-c-verify-h{font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);margin-bottom:var(--sk-s1)}
+#eternal .et-c-verify ol{margin:0;padding-inline-start:var(--sk-s4);display:grid;gap:var(--sk-s1);color:var(--sk-ink)}
+#eternal .et-c-verify code{font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ai);word-break:break-all;background:none;padding:0}
+#eternal .et-c-row{display:grid;grid-template-columns:1fr 1fr;gap:var(--sk-s2);margin-top:var(--sk-s3)}
+#eternal .et-c-ghost{display:flex;align-items:center;justify-content:center;min-height:52px;padding:0 var(--sk-s1);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius-sm);color:var(--sk-ink);text-decoration:none;text-align:center;font:600 14px/1.2 var(--sk-font-mono);background:transparent}
+#eternal .et-c-ghost:hover{color:var(--sk-ink);background:transparent}
+#eternal .et-c-field{display:flex;gap:var(--sk-s1);margin-top:var(--sk-s2)}
+#eternal .et-c-field input{flex:1;min-width:0;min-height:var(--sk-control-min);padding:0 var(--sk-s2);border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm);background:var(--sk-bg-card);color:var(--sk-ink);font:400 13px/1.45 var(--sk-font-mono)}
+#eternal .et-c-field input:focus{border-color:var(--sk-ai);box-shadow:none}
+#eternal .et-c-field button{min-height:var(--sk-control-min);min-width:var(--sk-control-min);padding:0 var(--sk-s2);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius-sm);font:600 14px/1.2 var(--sk-font-mono);color:var(--sk-ink)}
+/* austras koks, the front's own pieces */
+#eternal .et-r-art .tier .hit{fill:transparent;stroke:transparent}
+#eternal .et-r-art .twig{fill:none;stroke:var(--sk-sovereign-soft);stroke-width:1;opacity:.5}
+#eternal .et-r-art .trunk{fill:none;stroke:var(--sk-biomass);stroke-width:3;stroke-linecap:round}
+#eternal .et-r-art .held{fill:none;stroke:var(--sk-guard);stroke-width:1.5;stroke-dasharray:4 4}
+#eternal .et-r-art text{font:400 14px/1.4 var(--sk-font-raver-body);fill:var(--sk-ink-soft)}
+#eternal .et-r-art .you text{fill:var(--sk-you)}
+#eternal .lg-found{background:var(--sk-sovereign)}#eternal .lg-not{background:var(--sk-sovereign-wash);border:1px solid var(--sk-line)}
+#eternal .lg-held{border:1.5px dashed var(--sk-guard)}#eternal .lg-sel{background:var(--sk-sovereign-strong)}
+#eternal .et-r-pill:disabled{background:var(--sk-sovereign-wash);color:var(--sk-sovereign-soft);cursor:not-allowed}
 </style>
 </head>
 <body data-bee-theme="shared">
@@ -47,6 +192,62 @@ details.receipt summary{min-height:44px;display:flex;align-items:center;cursor:p
 document.body.setAttribute('data-reg',r);})();
 </script>
 <main class="tol">
+<!-- ETERNAL FRONT (founder blueprint 2026-09-26, docs/design/eternal): three separate products in one
+     surface. ONE data layer (the archive the tree below reads, through the same resolver) drives all
+     three, so the facts cannot drift; each register has its own layout, graphic, gesture and voice.
+     Every climb hands off to the tree below (mountTreeOfLife's own go()); nothing here invents a person. -->
+<section id="eternal" aria-label="austras koks, the tree of life">
+
+  <!-- NEW BEE — a calm room: where the line comes into the open, one way in -->
+  <div class="et-b">
+    <div class="et-b-mark">austras koks</div>
+    <h2 class="et-b-h" id="etBeeTitle" data-t="et.austras.b.title">the tree of life</h2>
+    <p class="et-b-lede" id="etBeeLede" data-t="et.austras.b.lede">one family line, from the first ancestors on record upward. you climb it one branch at a time.</p>
+    <div class="et-b-guard"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span id="etBeeGuard" data-t="et.austras.b.guard">living people stay out. always.</span></div>
+    <div class="et-b-rows" id="etBeeRows"><div class="et-b-row"><span>reading the family archive…</span></div></div>
+    <div class="et-b-act">
+      <button type="button" class="et-b-primary" id="etBeeClimb" data-t="et.austras.b.climb" disabled>climb the tree</button>
+      <button type="button" class="et-b-link" id="etBeeHow" data-t="et.austras.b.how">how this tree is checked</button>
+      <p class="et-b-foot" id="etBeeFoot" data-t="et.austras.b.foot">the tree stops where the records stop. nothing is guessed.</p>
+    </div>
+  </div>
+
+  <!-- RAVER — the line as a tree of light: every leaf a person on record; tap a branch, climb it -->
+  <div class="et-r">
+    <div class="et-r-top"><h2 class="et-r-h" id="etRaverTitle">austras koks</h2><span class="et-r-hint" id="etRaverHint" data-t="et.austras.r.hint">tap a branch · climb it</span></div>
+    <svg class="et-r-art" id="etTree" viewBox="0 0 360 452" role="group" aria-label="the line as a tree: each branch a generation, each leaf a place"></svg>
+    <div class="et-r-legend"><span><i class="lg-found"></i>found</span><span><i class="lg-not"></i>not yet</span><span><i class="lg-held"></i>living · held</span><span><i class="lg-sel"></i>lit</span></div>
+    <div class="et-r-card" id="etRaverCard" aria-live="polite"><span class="rk">g…</span><div><b>reading the family archive…</b></div></div>
+    <button type="button" class="et-r-pill" id="etRaverClimb" disabled>climb this branch</button>
+    <p class="et-r-note" id="etRaverNote" data-t="et.austras.r.note">bright = found · dim = not found yet · dashed = living, held</p>
+  </div>
+
+  <!-- CYPHERPUNK — the instrument: generations, the resolver pipeline, the receipt, how to verify -->
+  <div class="et-c">
+    <div class="et-c-path" id="etPath">austras-koks://founder-line</div>
+    <div class="et-c-chips" id="etChips"><span>reading the archive</span></div>
+    <div class="et-c-guard">living = held, never named <b>guard · <span data-et="bridge">not read yet</span> generations held</b></div>
+    <table class="et-c-tab"><thead><tr><th>gen</th><th>rel</th><th>slots</th><th>state</th></tr></thead><tbody id="etGens"></tbody></table>
+    <h3 class="et-c-h" data-t="et.austras.c.pipe">resolver pipeline · public path</h3>
+    <ol class="et-c-pipe" id="etPipe"></ol>
+    <button type="button" class="et-c-primary" id="etCyClimb" data-t="et.austras.c.climb" disabled>mount the tree · climb from the first ancestor</button>
+    <h3 class="et-c-h" data-t="et.austras.c.receipt">receipt</h3>
+    <table class="et-c-kv" id="etReceipt"></table>
+    <div class="et-c-verify">
+      <div class="et-c-verify-h" data-t="et.austras.c.verify">verify · no trust in this page needed</div>
+      <ol>
+        <li>fetch <code>assets/profile-archive/lineage/remington-bloodline.json</code></li>
+        <li>run <code>emergence(model, root)</code> from <code>tools/genealogy/model.mjs</code> and compare the entries</li>
+        <li><code>node --test tools/genealogy/treeoflife-nav.test.mjs</code></li>
+      </ol>
+    </div>
+    <div class="et-c-row">
+      <a class="et-c-ghost" href="https://github.com/beehive-nature/beehive-nature/blob/main/surfaces/tree-of-life.mjs" target="_blank" rel="noopener noreferrer" data-t="et.austras.c.source">read the component · new tab</a>
+      <a class="et-c-ghost" href="https://github.com/beehive-nature/beehive-nature/tree/main/tools/genealogy" target="_blank" rel="noopener noreferrer" data-t="et.austras.c.fork">fork the template · new tab</a>
+    </div>
+  </div>
+</section>
+<h2 class="et-archive-h" id="etArchive" data-t="et.austras.whole">the whole tree</h2>
   <h1>austras koks</h1>
   <p class="lede">the tree of life, holding a family line. touch a branch to climb it, touch a person to read their story. back takes you to exactly where you were.</p>
   <div class="grid">
@@ -66,7 +267,10 @@ document.body.setAttribute('data-reg',r);})();
    emergence is the model's own emergence(). Until the pipeline publishes
    `lines` (it will once it privatizes through model.privatize with roots),
    the founder line is derived here from the published root. Every failure
-   is said in words; nothing throws past this script. */
+   is said in words; nothing throws past this script.
+   ETERNAL FRONT — the same model feeds the three fronts above (one data layer, window.__eternal):
+   every number they show is read from `tree` and `archive` here, and every climb is the
+   mounted tree's own go(), so the fronts can never disagree with the tree they hand off to. */
 import { fetchArchive } from './person-panel-corpus.mjs';
 import { mountPersonPanel } from './person-panel.mjs';
 import { mountTreeOfLife } from './tree-of-life.mjs';
@@ -77,6 +281,159 @@ const receipt = document.getElementById('receipt');
 const say = (t) => { host.removeAttribute('aria-busy'); host.innerHTML = '<p class="tol-note"></p>'; host.firstChild.textContent = t; };
 const PRIVACY = /living|leak|cultureClaims|unsourced|roots|lines\[/;
 
+/* ── ETERNAL FRONT: one data layer, three renderers ── */
+const $ = (id) => document.getElementById(id);
+const T = (k, f) => { const t = window.BNRLanguage && window.BNRLanguage.text; return t ? t(k, f) : f; };
+const esc = (v) => String(v == null ? '' : v).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const num = (n) => Number(n).toLocaleString('en-US');
+const REL = ['the living start', 'parents', 'grandparents', 'great-grandparents', '2× great-grandparents', '3× great-grandparents', '4× great-grandparents', '5× great-grandparents'];
+const GENS = 7;
+const D = { state: 'reading', why: '', people: null, withParents: null, privacy: null, frontier: null, cycles: null,
+  bridge: null, entries: [], claims: null, claimPeople: null, deepest: null, root: null, gens: [] };
+const R = { sel: null };
+let handle = null;
+window.__eternal = { data: D, raver: R, climb: (id) => climb(id) };
+
+function initials(n) { const p = String(n || '').trim().split(/\s+/); return ((p[0] || '')[0] || '') + ((p.length > 1 ? p[p.length - 1] : '')[0] || ''); }
+/* the line walked parentward from the root: position p in gen g has parents 2p, 2p+1 (the tree's own ahnentafel) */
+function walk(persons, edges, root) {
+  const gens = []; let lvl = [{ id: root, pos: 0 }];
+  for (let g = 0; g <= GENS; g++) {
+    const slots = 2 ** g, cells = new Array(slots).fill('none'), people = []; let found = 0, living = 0;
+    for (const c of lvl) { const p = persons[c.id]; if (p.living) { living++; cells[c.pos] = 'living'; } else { found++; cells[c.pos] = 'found'; people.push({ id: c.id, name: p.name, years: p.lifespan || '' }); } }
+    gens.push({ g, slots, found, living, cells, people });
+    const nx = [];
+    for (const c of lvl) (edges[c.id] || []).slice(0, 2).forEach((pid, k) => { if (persons[pid]) nx.push({ id: pid, pos: c.pos * 2 + k }); });
+    lvl = nx;
+  }
+  return gens;
+}
+function deepest(persons, edges, root) {
+  const seen = new Set([root]); let lvl = [root], d = 0;
+  while (lvl.length && d < 200) { const nx = []; for (const id of lvl) for (const p of (edges[id] || [])) if (persons[p] && !seen.has(p)) { seen.add(p); nx.push(p); } if (!nx.length) break; lvl = nx; d++; }
+  return d;
+}
+function climb(id) {
+  if (!handle || !id) return false;
+  handle.go({ f: id, p: null }); cy();
+  host.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion:reduce)').matches ? 'auto' : 'smooth', block: 'start' });
+  const node = host.querySelector('.tol-node[data-person]'); if (node) node.focus({ preventScroll: true });
+  return true;
+}
+function words() { document.querySelectorAll('#eternal [data-t],#etArchive[data-t]').forEach((e) => { if (!e.dataset.en) e.dataset.en = e.textContent; e.textContent = T(e.dataset.t, e.dataset.en); }); }
+
+/* ── NEW BEE ── */
+function bee() {
+  const box = $('etBeeRows');
+  if (D.state !== 'ready') { box.innerHTML = '<div class="et-b-row"><span>' + esc(D.state === 'failed' ? D.why : T('et.austras.reading', 'reading the family archive…')) + '</span></div>'; $('etBeeClimb').disabled = true; return; }
+  let h = '<div class="et-b-row"><span>' + esc(T('et.austras.b.held', 'living generations')) + '</span><small class="out">' + esc(T('et.austras.b.heldN', '{n} held, never named').replace('{n}', D.bridge)) + '</small></div>';
+  h += '<div class="et-b-row"><span>' + esc(T('et.austras.b.opens', 'the line comes into the open at')) + '</span><small>' + esc(T('et.austras.b.people', '{n} people').replace('{n}', D.entries.length)) + '</small></div>';
+  h += D.entries.map((p) => '<button type="button" class="et-b-row et-b-person" data-open="' + esc(p.id) + '"><i>' + esc(initials(p.name)) + '</i><div style="flex:1"><b>' + esc(p.name) + '</b><span>' + esc(p.years || T('et.austras.noDates', 'dates not known yet')) + '</span></div><svg class="chev" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2"/></svg></button>').join('');
+  h += '<div class="et-b-row"><span>' + esc(T('et.austras.b.deep', 'generations on record')) + '</span><small>' + esc(num(D.deepest)) + '</small></div>';
+  h += '<div class="et-b-row"><span>' + esc(T('et.austras.b.archive', 'people in the family archive')) + '</span><small>' + esc(num(D.people)) + '</small></div>';
+  box.innerHTML = h; $('etBeeClimb').disabled = false;
+}
+
+/* ── RAVER: the tree of light ── */
+const W = 360, BASE_Y = 426, STEP = 50;
+function tierY(g) { return BASE_Y - 24 - g * STEP; }
+function cellX(g, i) { const span = Math.min(336, 40 + g * 48); return W / 2 - span / 2 + span * ((i + 0.5) / 2 ** g); }
+function cellY(g, i) { const t = (i + 0.5) / 2 ** g * 2 - 1; return tierY(g) + 10 * t * t * Math.min(1, g / 3); } /* each branch lifts at its tips, like the sign */
+function art() {
+  const svg = $('etTree'); if (!svg) return;
+  const tok = (n) => getComputedStyle(document.body).getPropertyValue('--sk-' + n).trim();
+  if (D.state !== 'ready') { svg.innerHTML = '<text x="180" y="226" text-anchor="middle">' + esc(D.state === 'failed' ? T('et.austras.r.fail', 'the archive did not answer') : T('et.austras.reading', 'reading the family archive…')) + '</text>'; return; }
+  let h = '<path class="trunk" d="M180 ' + BASE_Y + ' V' + (tierY(0) + 12) + '"/>';
+  for (let g = 1; g < D.gens.length; g++) for (let i = 0; i < 2 ** g; i++) { /* twigs: every place joined to its child below */
+    const c = Math.floor(i / 2); h += '<path class="twig" d="M' + cellX(g - 1, c).toFixed(1) + ' ' + cellY(g - 1, c).toFixed(1) + ' Q' + cellX(g, i).toFixed(1) + ' ' + (cellY(g - 1, c) - STEP * 0.4).toFixed(1) + ' ' + cellX(g, i).toFixed(1) + ' ' + cellY(g, i).toFixed(1) + '"/>';
+  }
+  D.gens.forEach((G) => {
+    const sel = R.sel === G.g, r = Math.max(2.2, 11 - G.g * 1.35), y = tierY(G.g);
+    h += '<g class="tier" data-g="' + G.g + '" role="button" tabindex="0" aria-pressed="' + sel + '" aria-label="' + esc(REL[G.g] + ': ' + (G.living ? G.living + ' living, held' : G.found + ' of ' + G.slots + ' found')) + '">';
+    h += '<rect class="hit" x="0" y="' + (y - STEP / 2) + '" width="' + W + '" height="' + STEP + '"/>';
+    G.cells.forEach((c, i) => {
+      const x = cellX(G.g, i).toFixed(1), cy = cellY(G.g, i).toFixed(1);
+      if (c === 'living') h += '<circle class="cell held" cx="' + x + '" cy="' + cy + '" r="' + (r + 2) + '"/>';
+      else h += '<circle class="cell" cx="' + x + '" cy="' + cy + '" r="' + r + '" fill="' + (c === 'found' ? tok(sel ? 'sovereign-strong' : 'sovereign') : tok('sovereign-wash')) + '"' + (c === 'found' ? '' : ' stroke="' + tok('line') + '"') + ' opacity="' + (R.sel == null || sel ? 1 : 0.6) + '"/>';
+    });
+    h += '</g>';
+  });
+  h += '<g class="you"><text x="180" y="' + (BASE_Y + 20) + '" text-anchor="middle">' + esc(T('et.austras.r.root', 'the roots · living, held')) + '</text></g>';
+  svg.innerHTML = h;
+}
+function raver() {
+  art();
+  const card = $('etRaverCard'), pill = $('etRaverClimb');
+  if (D.state !== 'ready') { pill.disabled = true; card.innerHTML = '<span class="rk">g</span><div><b>' + esc(D.state === 'failed' ? D.why : T('et.austras.reading', 'reading the family archive…')) + '</b></div>'; return; }
+  const G = D.gens[R.sel];
+  const names = G.people.slice(0, 2).map((p) => p.name).join(' + ');
+  const line = G.living && !G.found ? T('et.austras.r.held', '{n} living · held, never named').replace('{n}', G.living) : T('et.austras.r.found', '{n} of {s} found').replace('{n}', G.found).replace('{s}', G.slots);
+  card.innerHTML = '<span class="rk">g' + G.g + '</span><div><b>' + esc(names || T('et.austras.r.nobody', 'no one is named on this branch')) + '</b><span>' + esc(T('et.austras.rel.' + G.g, REL[G.g]) + ' · ' + line) + '</span></div>';
+  pill.disabled = !G.people.length;
+  pill.textContent = G.people.length ? T('et.austras.r.climb', 'climb from {name}').replace('{name}', G.people[0].name) : T('et.austras.r.cant', 'this branch is held while living');
+}
+
+/* ── CYPHERPUNK ── */
+function cy() {
+  const ok = D.state === 'ready';
+  $('etPath').textContent = 'austras-koks://founder-line' + (ok ? ' · root ' + D.root + ' (anonymous)' : '');
+  document.querySelectorAll('#eternal [data-et="bridge"]').forEach((e) => { e.textContent = ok ? String(D.bridge) : T('et.austras.c.notRead', 'not read yet'); });
+  $('etChips').innerHTML = ok
+    ? '<span class="on">lines 1 · founder</span><span class="' + (D.privacy === 0 ? 'ok' : 'no') + '">privacy problems ' + D.privacy + '</span><span>spouse lines 0 published</span><span>state in location.hash</span>'
+    : '<span class="no">' + esc(D.state === 'failed' ? 'archive unreadable' : 'reading') + '</span>';
+  $('etGens').innerHTML = ok ? D.gens.map((G) => {
+    const s = G.living && !G.found ? '<span class="no">living·held</span>' : G.found === G.slots ? '<span class="ok">found ' + G.found + '</span>' : '<span class="part">found ' + G.found + '/' + G.slots + '</span>';
+    return '<tr class="pick" data-g="' + G.g + '" tabindex="0" aria-expanded="false"><td>g' + G.g + '</td><td>' + esc(REL[G.g].replace('-grandparents', '').replace('grandparents', 'grand')) + '</td><td>' + G.slots + '</td><td>' + s + '</td></tr>' +
+      '<tr class="names" data-g="' + G.g + '" hidden><td colspan="4">' + (G.people.slice(0, 4).map((p) => esc(p.name) + '<small>' + esc(p.id) + ' · ' + esc(p.years || 'dates not known yet') + '</small>').join('') || '<small>held while living · never named</small>') + (G.people.length > 4 ? '<small>+ ' + (G.people.length - 4) + ' more in the tree below</small>' : '') + '</td></tr>';
+  }).join('') : '<tr><td colspan="4">' + esc(D.state === 'failed' ? D.why : 'reading the archive…') + '</td></tr>';
+  const steps = ok ? [
+    ['fetchArchive · corpus + attested overlay', num(D.people) + ' people · one resolver, Rule A', 'done'],
+    ['resolve parents · archive.getPerson(id).parents', num(D.withParents) + ' people with parents on record', 'done'],
+    ['emergence(model, root)', 'bridge ' + D.bridge + ' · entries ' + D.entries.length + ' · deepest generation ' + D.deepest, 'done'],
+    ['guard · validate(tree, {public:true})', 'privacy problems ' + D.privacy + ' · living never named', 'guard'],
+    ['mountTreeOfLife(host, tree)', handle ? 'mounted · three readings of one view · state in location.hash' : 'not mounted', handle ? 'done' : 'todo'],
+    ['climb · go({f})', location.hash ? 'at ' + location.hash : 'your move · Back restores the exact prior tree', location.hash ? 'done' : 'todo'],
+  ] : [['fetchArchive · corpus + attested overlay', D.state === 'failed' ? D.why : 'reading', 'todo']];
+  const nowAt = steps.findIndex((s) => s[2] === 'todo');
+  $('etPipe').innerHTML = steps.map((s, i) => '<li class="' + s[2] + (i === nowAt ? ' now' : '') + '"><b>' + esc(s[0]) + '</b><p>' + esc(s[1]) + '</p></li>').join('');
+  $('etReceipt').innerHTML = (ok ? [
+    ['people', num(D.people)], ['with parents', num(D.withParents)], ['root', esc(D.root) + ' · anonymous'],
+    ['held', '<span class="held">' + D.bridge + ' living generations</span>'],
+    ['entries', D.entries.map((p) => esc(p.name)).join(' · ')],
+    ['privacy', '<span class="' + (D.privacy === 0 ? 'yes' : 'no') + '">' + D.privacy + ' problems</span>'],
+    ['frontier', num(D.frontier) + ' on record, not fetched yet'], ['cycles', num(D.cycles) + ' components'],
+    ['claims', D.claims + ' sourced, on ' + D.claimPeople + ' people'],
+  ] : [['archive', '<span class="no">' + esc(D.state === 'failed' ? D.why : 'reading') + '</span>']]).map((r) => '<tr><th>' + r[0] + '</th><td>' + r[1] + '</td></tr>').join('');
+  $('etCyClimb').disabled = !ok || !handle;
+}
+function all() { words(); bee(); raver(); cy(); }
+
+function wire() {
+  const ev = $('eternal');
+  ev.addEventListener('click', (e) => {
+    const open = e.target.closest('[data-open]');
+    if (open && handle) { handle.go({ p: open.getAttribute('data-open') }); host.scrollIntoView({ block: 'start' }); return; }
+    const tier = e.target.closest('#etTree .tier');
+    if (tier) { R.sel = +tier.getAttribute('data-g'); raver(); return; }
+    const tr = e.target.closest('.et-c-tab tr.pick');
+    if (tr) { const o = tr.getAttribute('aria-expanded') !== 'true'; tr.setAttribute('aria-expanded', String(o)); const nm = ev.querySelector('.et-c-tab tr.names[data-g="' + tr.getAttribute('data-g') + '"]'); if (nm) nm.hidden = !o; }
+  });
+  ev.addEventListener('keydown', (e) => {
+    if (e.key !== 'Enter' && e.key !== ' ') return;
+    const t = e.target.closest('#etTree .tier,.et-c-tab tr.pick'); if (!t) return;
+    e.preventDefault(); t.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+  });
+  $('etBeeClimb').addEventListener('click', () => { if (D.entries[0]) climb(D.entries[0].id); });
+  $('etBeeHow').addEventListener('click', () => { const d = document.querySelector('details.receipt'); if (d) { d.open = true; d.scrollIntoView({ block: 'center' }); const s = d.querySelector('summary'); if (s) s.focus({ preventScroll: true }); } });
+  $('etRaverClimb').addEventListener('click', () => { const G = D.gens[R.sel]; if (G && G.people[0]) climb(G.people[0].id); });
+  $('etCyClimb').addEventListener('click', () => { if (D.entries[0]) climb(D.entries[0].id); });
+  document.addEventListener('blang', all);
+  document.addEventListener('bregister', () => setTimeout(all, 0));
+  addEventListener('popstate', () => cy());
+  host.addEventListener('click', () => setTimeout(cy, 0)); /* the tree's own navigation moves the pipeline's last step */
+}
+wire(); all();
+
 (async () => {
   let got, M;
   try {
@@ -84,6 +441,7 @@ const PRIVACY = /living|leak|cultureClaims|unsourced|roots|lines\[/;
     M = await import('../tools/genealogy/model.mjs');
   } catch (e) {
     say('the family archive could not be read just now. nothing is drawn rather than something guessed.');
+    D.state = 'failed'; D.why = T('et.austras.fail', 'the family archive could not be read just now. nothing is drawn rather than something guessed.'); all();
     return;
   }
   const { corpus, overlay, archive } = got;
@@ -100,27 +458,32 @@ const PRIVACY = /living|leak|cultureClaims|unsourced|roots|lines\[/;
   const problems = M.validate(tree, { public: true });
   const privacy = problems.filter((p) => PRIVACY.test(p));
   const count = (rx) => problems.filter((p) => rx.test(p)).length;
+  const withClaims = Object.values(persons).filter((p) => Array.isArray(p.cultureClaims) && p.cultureClaims.length);
   receipt.textContent = [
     `people in the public archive: ${Object.keys(persons).length} · with parents on record: ${Object.keys(edges).length}`,
     `validate(tree, {public:true}): privacy problems ${privacy.length}`,
     `  also reported, not privacy: ancestors on record but not fetched yet ${archive.frontierTotal()} (the tree stops where the archive stops) · cycle components ${count(/^cycle-component/)}`,
     `founder line: root ${tree.lines[0].root} (anonymous) · living generations held ${tree.lines[0].bridge} · comes into the open at ${tree.lines[0].entries.length} people`,
-    (() => {
-      const withClaims = Object.values(persons).filter((p) => Array.isArray(p.cultureClaims) && p.cultureClaims.length);
-      return `sourced language and culture claims: ${withClaims.reduce((n, p) => n + p.cultureClaims.length, 0)}, on ${withClaims.length} people`;
-    })(),
+    `sourced language and culture claims: ${withClaims.reduce((n, p) => n + p.cultureClaims.length, 0)}, on ${withClaims.length} people`,
     `spouse lines: none published yet, each waits on its private record`,
   ].join('\n');
+  /* the fronts read the very numbers the receipt prints */
+  Object.assign(D, { people: Object.keys(persons).length, withParents: Object.keys(edges).length, privacy: privacy.length,
+    frontier: archive.frontierTotal(), cycles: count(/^cycle-component/), bridge: tree.lines[0].bridge, root: tree.lines[0].root,
+    entries: tree.lines[0].entries.map((id) => ({ id, name: persons[id].name, years: persons[id].lifespan || '' })),
+    claims: withClaims.reduce((n, p) => n + p.cultureClaims.length, 0), claimPeople: withClaims.length,
+    deepest: deepest(persons, edges, corpus.root), gens: walk(persons, edges, corpus.root) });
   if (privacy.length) {
     say('this tree failed its privacy check, so nothing is drawn.');
     receipt.textContent += '\n' + privacy.join('\n');
+    D.state = 'failed'; D.why = T('et.austras.privacy', 'this tree failed its privacy check, so nothing is drawn.'); all();
     return;
   }
 
   host.removeAttribute('aria-busy');
   const panelEl = document.getElementById('panel');
   let panel = null;
-  mountTreeOfLife(host, tree, {
+  handle = mountTreeOfLife(host, tree, {
     openPerson(id) {
       if (!panel) panel = mountPersonPanel(panelEl, archive, {
         root: corpus.root,
@@ -131,6 +494,9 @@ const PRIVACY = /living|leak|cultureClaims|unsourced|roots|lines\[/;
     },
     closePerson() { panelEl.hidden = true; },
   });
+  D.state = 'ready';
+  R.sel = D.gens.findIndex((G) => G.people.length); if (R.sel < 0) R.sel = 0;
+  all();
 })();
 </script>
 <script src="tour.js?v=42"></script>

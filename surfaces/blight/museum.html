@@ -84,60 +84,313 @@ table{font-size:13px}
   .scroll td:empty,div[style*="overflow-x"] td:empty{display:none}
 }
 
-/* NEW BEE — a daylight gallery: paper walls, serif titles, generous reading text, one accent. */
-body[data-reg="bee"]{--bg:#fbf7f0;--panel:#fffdf8;--line:#e6dfd2;--ink:#0c1412;--dim:#4a5f55;--accent:#a8238c;--accent2:#6e3fb8;--cyan:#176879;--ok:#2f6b3a;--bad:#9b2c46;
-  font:17px/1.65 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;padding:20px 18px 64px}
-body[data-reg="bee"] h1{font:400 clamp(2.4rem,11vw,3.4rem)/1.05 Georgia,"Iowan Old Style","Times New Roman",serif;margin:.2em 0 .35em}
-body[data-reg="bee"] h1 span{color:var(--accent)}
-body[data-reg="bee"] h2{font:400 1.55rem/1.25 Georgia,"Iowan Old Style","Times New Roman",serif;color:var(--ink);margin:56px 0 10px;padding-top:28px}
-body[data-reg="bee"] .lede{font-size:17px;color:#2b3a33;max-width:62ch}
-body[data-reg="bee"] .lede b{color:var(--ink)}
-body[data-reg="bee"] .panel{border-radius:20px;padding:18px;box-shadow:0 1px 0 var(--line),0 10px 30px rgba(12,20,18,.06)}
-body[data-reg="bee"] .stage,body[data-reg="bee"] pre{border-radius:12px}
-body[data-reg="bee"] figcaption{font:14px/1.6 system-ui,-apple-system,sans-serif;color:var(--dim);margin-top:12px}
-body[data-reg="bee"] blockquote{background:transparent;border-left:3px solid var(--accent);font:italic 1.2rem/1.55 Georgia,"Iowan Old Style",serif;color:var(--ink);padding:4px 0 4px 18px}
+/* ── THE WHOLE MUSEUM, dressed per register: the page's own variables mapped onto skaists tokens
+   (../skaists.css). The words, the facts and the live chain reads are unchanged; this is how the
+   house hangs them. Artworks keep a dark vitrine in every register (the chain draws them on black):
+   ink in new bee, the black-green ground in raver and cypherpunk. A read that did not arrive is a
+   quiet dashed card, never a black void. ── */
+body[data-reg]{--panel:var(--sk-bg-card);--line:var(--sk-line);--ink:var(--sk-ink);--dim:var(--sk-ink-mut);--accent:var(--sk-sovereign);--accent2:var(--sk-sovereign);
+  --cyan:var(--sk-ai);--ok:var(--sk-verified);--bad:var(--sk-info);--bg:var(--sk-bg);--vitrine:var(--sk-bg);--vitrine-ink:var(--sk-ink);
+  background:var(--sk-bg);color:var(--sk-ink);padding:var(--sk-s4) var(--sk-s3) 64px}
+body[data-reg] .wrap{max-width:900px}
+body[data-reg] .stage{background:var(--vitrine);border-radius:var(--sk-radius)}
+body[data-reg] pre{background:var(--vitrine);color:var(--vitrine-ink);border-radius:var(--sk-radius)}
+body[data-reg] .panel{background:var(--sk-bg-card);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl);box-shadow:none}
+body[data-reg] blockquote{background:transparent;border-left:3px solid var(--sk-sovereign);border-radius:0;color:var(--sk-ink)}
+body[data-reg] .warn{color:var(--sk-ink)}
+body[data-reg] .ok{color:var(--sk-verified)}
+body[data-reg] .bad{color:var(--sk-info)}
+body[data-reg] a{color:var(--sk-link)}
+body[data-reg] a:hover{color:var(--sk-link-hover)}
+body[data-reg] code{color:var(--sk-ai);background:none;padding:0}
+body[data-reg] h2{border-top:1px solid var(--sk-line)}
+body[data-reg] h1 span{color:var(--sk-sovereign)}
+body[data-reg] .cls{border-radius:4px}
+body[data-reg] .a{background:var(--sk-verified-wash);color:var(--sk-verified)}
+body[data-reg] .b{background:var(--sk-bg-well);color:var(--sk-ink)}
+body[data-reg] .c{background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong)}
+body[data-reg] .d{background:var(--sk-bg-card);color:var(--sk-info);box-shadow:inset 0 0 0 1px var(--sk-info)}
+body[data-reg] .e{background:var(--sk-guard-wash);color:var(--sk-guard)}
+body[data-reg] .f{background:var(--sk-bg-well);color:var(--sk-ink-mut)}
+body[data-reg] .stage .note,body[data-reg] pre .note{color:var(--sk-ink)}
+body[data-reg] .stage:has(> .note:only-child),body[data-reg] pre:has(> .note:only-child){margin:0!important;background:var(--sk-bg-card)!important;border:1px dashed var(--sk-ink-dim);border-radius:var(--sk-radius);color:var(--sk-ink-mut)}
+body[data-reg] .stage > .note:only-child,body[data-reg] pre > .note:only-child{color:var(--sk-ink-mut)!important;opacity:1}
+body[data-reg] #bnr-beta-badge a{background:var(--sk-bg-card)!important;color:var(--sk-link)!important;border-color:var(--sk-line)!important;display:inline-flex;align-items:center;min-height:44px;padding:0 16px!important}
+body[data-reg] #btcTx .note,body[data-reg] #btcBar .note{color:var(--sk-ink-mut)}
+
+/* NEW BEE — a daylight gallery: paper walls, serif titles, generous reading text */
+body[data-reg="bee"]{--vitrine:var(--sk-ink);--vitrine-ink:var(--sk-bg);font:400 16px/1.6 var(--sk-font-bee-sans)}
+body[data-reg="bee"] h1{font:400 40px/1.05 var(--sk-font-bee-serif);margin:.2em 0 .35em}
+body[data-reg="bee"] h2{font:400 28px/1.1 var(--sk-font-bee-serif);color:var(--sk-ink);margin:48px 0 10px;padding-top:24px}
+body[data-reg="bee"] .lede{font:400 16px/1.6 var(--sk-font-bee-sans);color:var(--sk-ink-soft);max-width:62ch}
+body[data-reg="bee"] .lede b{color:var(--sk-ink)}
+body[data-reg="bee"] figcaption{font:400 14px/1.55 var(--sk-font-bee-sans);color:var(--sk-ink-mut);margin-top:12px}
+body[data-reg="bee"] figcaption b{color:var(--sk-ink)}
+body[data-reg="bee"] blockquote{font:italic 400 17px/1.55 var(--sk-font-bee-serif);padding:4px 0 4px 18px}
 body[data-reg="bee"] table{font-size:15px}
-body[data-reg="bee"] th{color:var(--dim)}
-body[data-reg="bee"] code{color:var(--cyan);font-size:14px;background:#eef4f2;border-radius:5px;padding:0 4px}
-body[data-reg="bee"] .note{color:var(--dim);font-size:15px}
-body[data-reg="bee"] .a{background:#e3f1e6;color:#2f6b3a}body[data-reg="bee"] .b{background:#f6efd8;color:#7a5d00}body[data-reg="bee"] .c{background:#f1e4f6;color:#6e3fb8}
-body[data-reg="bee"] .d{background:#fbe8dc;color:#8a3d10}body[data-reg="bee"] .e{background:#f8e1e6;color:#9b2c46}body[data-reg="bee"] .f{background:#ecebe6;color:#4a5f55}
-body[data-reg="bee"] a{color:#6e3fb8}
-body[data-reg="bee"] .warn{color:#7a5d00}
+body[data-reg="bee"] th{color:var(--sk-ink-mut);font-size:14px}
+body[data-reg="bee"] code{font:400 15px/1.4 var(--sk-font-mono)}
+body[data-reg="bee"] .note{font-size:15px;color:var(--sk-ink-mut)}
+body[data-reg="bee"] .cls{width:24px;height:24px;line-height:24px;font:600 14px/24px var(--sk-font-bee-sans)}
+body[data-reg="bee"] .stage .note,body[data-reg="bee"] pre .note{font:400 15px/1.55 var(--sk-font-bee-sans)}
+body[data-reg="bee"] details[data-reg-disclose]>summary{font:600 14px/1.4 var(--sk-font-bee-sans)}
+body[data-reg="bee"] #bnr-beta-badge{font:600 14px/1.4 var(--sk-font-bee-sans)!important}
 
-/* RAVER — the gallery at night: display titles in light, the works full-bleed and glowing. */
-body[data-reg="raver"]{--bg:#06110c;--panel:#0e1a15;--line:#23352c;--ink:#f4eefc;--dim:#c9bde6;
-  font:16px/1.65 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
-body[data-reg="raver"] h1{font:800 clamp(2.4rem,12vw,3.4rem)/1 system-ui,sans-serif;background:linear-gradient(90deg,#d655bb,#9c6fd6 55%,#45c2dc);-webkit-background-clip:text;background-clip:text;color:transparent}
+/* RAVER — the gallery at night: display titles, the works glowing */
+body[data-reg="raver"]{font:400 14px/1.6 var(--sk-font-raver-body)}
+body[data-reg="raver"] h1{font:700 60px/.95 var(--sk-font-raver-display);letter-spacing:-.02em;background:var(--sk-rainbow);-webkit-background-clip:text;background-clip:text;color:transparent}
 body[data-reg="raver"] h1 span{color:inherit}
-body[data-reg="raver"] h2{font:800 1.35rem/1.2 system-ui,sans-serif;color:#f4eefc;border-top:0;margin-top:48px}
-body[data-reg="raver"] h2 span{background:linear-gradient(90deg,#d655bb,#9c6fd6);-webkit-background-clip:text;background-clip:text;color:transparent}
-body[data-reg="raver"] .lede{font-size:16px;color:var(--dim)}
-body[data-reg="raver"] .panel{border-radius:24px}
-body[data-reg="raver"] .stage{margin:0 -34px;border-radius:0;box-shadow:0 0 0 1px rgba(214,85,187,.35),0 0 32px rgba(156,111,214,.35)}
-body[data-reg="raver"] figcaption{font-size:14px;color:var(--dim)}
-body[data-reg="raver"] blockquote{font-size:16px}
-body[data-reg="raver"] table{font-size:14px}
+body[data-reg="raver"] h2{font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em;color:var(--sk-ink);border-top:0;margin-top:48px}
+body[data-reg="raver"] h2 span{background:none;color:var(--sk-sovereign-strong)}
+body[data-reg="raver"] .lede,body[data-reg="raver"] figcaption,body[data-reg="raver"] .note,body[data-reg="raver"] table,body[data-reg="raver"] blockquote{font-size:14px;color:var(--sk-ink-soft)}
+body[data-reg="raver"] figcaption b,body[data-reg="raver"] .lede b{color:var(--sk-ink)}
+body[data-reg="raver"] code{font:400 14px/1.4 var(--sk-font-mono)}
+body[data-reg="raver"] .cls{width:22px;height:22px;line-height:22px;font:600 14px/22px var(--sk-font-raver-body)}
+body[data-reg="raver"] .stage{box-shadow:var(--sk-glow-sovereign)}
+body[data-reg="raver"] .stage .note,body[data-reg="raver"] pre .note{font:400 14px/1.55 var(--sk-font-raver-body)}
+body[data-reg="raver"] details[data-reg-disclose]>summary{font:600 14px/1.25 var(--sk-font-raver-body)}
+body[data-reg="raver"] #bnr-beta-badge{font:600 14px/1.25 var(--sk-font-raver-body)!important}
 
-/* A READ THAT DID NOT ARRIVE is a quiet card, not a black void: the frame folds to its note
-   (the artwork's square is kept only for art). Every register keeps its own dress. */
-.stage:has(> .note:only-child),pre:has(> .note:only-child){aspect-ratio:auto!important;min-height:0!important;padding:22px 16px!important;background:transparent!important;border:1px dashed rgba(160,160,175,.5);box-shadow:none!important}
-.stage > .note:only-child,pre > .note:only-child{color:inherit!important;opacity:.85;white-space:normal}
-body[data-reg="bee"] .stage:has(> .note:only-child),body[data-reg="bee"] pre:has(> .note:only-child){background:#f4eee4!important;border-color:#d9cdb9;color:#4a443c}
-body[data-reg="raver"] .stage:has(> .note:only-child){margin:0!important;border-radius:14px;border-color:rgba(214,85,187,.55);color:#e7d9ef}
-body[data-reg="cypherpunk"] .stage:has(> .note:only-child),body[data-reg="cypherpunk"] pre:has(> .note:only-child){border-radius:4px;border-color:#2c5a63;color:#9fd0da}
-/* links: readable in every register, and a link standing alone in a table cell is a 44px target */
-a{color:#9fd8ff}
-body[data-reg="raver"] a{color:#eaa0dc}
-body[data-reg="cypherpunk"] a{color:#45c2dc}
-@media(max-width:600px){td>a,td>code>a{display:inline-flex;align-items:center;min-height:44px}}
-/* CYPHERPUNK — the receipts room: mono throughout, dense, never below 12.5px. */
-body[data-reg="cypherpunk"] h1{font-size:20px}
-body[data-reg="cypherpunk"] h2{font-size:15px;color:#45c2dc}
-body[data-reg="cypherpunk"] .lede{font-size:14px}
+/* CYPHERPUNK — the receipts room: mono throughout, dense, never below 12 px */
+body[data-reg="cypherpunk"]{font:400 13px/1.6 var(--sk-font-mono)}
+body[data-reg="cypherpunk"] h1{font:600 15px/1.45 var(--sk-font-mono)}
+body[data-reg="cypherpunk"] h2{font:600 15px/1.45 var(--sk-font-mono);color:var(--sk-ai)}
+body[data-reg="cypherpunk"] .lede,body[data-reg="cypherpunk"] table,body[data-reg="cypherpunk"] code,body[data-reg="cypherpunk"] blockquote{font-size:13px}
+body[data-reg="cypherpunk"] .lede{color:var(--sk-ink-soft)}
+body[data-reg="cypherpunk"] figcaption,body[data-reg="cypherpunk"] .note,body[data-reg="cypherpunk"] th{font-size:12px}
+body[data-reg="cypherpunk"] .panel{border-radius:var(--sk-radius-sm)}
+body[data-reg="cypherpunk"] .stage,body[data-reg="cypherpunk"] pre,body[data-reg="cypherpunk"] .stage:has(> .note:only-child),body[data-reg="cypherpunk"] pre:has(> .note:only-child){border-radius:var(--sk-radius-sm)}
+body[data-reg="cypherpunk"] .cls{width:22px;height:22px;line-height:22px;font:600 12px/22px var(--sk-font-mono)}
+body[data-reg="cypherpunk"] .stage .note,body[data-reg="cypherpunk"] pre .note{font:400 13px/1.55 var(--sk-font-mono)}
+body[data-reg="cypherpunk"] details[data-reg-disclose]>summary{font:500 12px/1.45 var(--sk-font-mono)}
+body[data-reg="cypherpunk"] #bnr-beta-badge{font:500 12px/1.45 var(--sk-font-mono)!important}
+body[data-reg="cypherpunk"] #bnr-beta-badge a{border-radius:var(--sk-radius-sm)!important}
+/* ── ETERNAL FRONT (docs/design/eternal) — three products in one surface. Every value is a skaists
+   token (../skaists.css, compiled from docs/design/skaists/tokens.json): no hand-picked hex, size or
+   corner. Measured by e2e/skaists-conformance.mjs. One register visible at a time; new bee is the
+   default. Every class is et- prefixed so the page's own bare rules never reach in. ── */
+#eternal{box-sizing:border-box;width:100%;max-width:600px;margin:0 auto var(--sk-s2);padding:var(--sk-s2) 0 0;text-align:left;letter-spacing:normal;text-transform:none}
+#eternal *,#eternal *::before,#eternal *::after{box-sizing:border-box}
+#eternal>.et-r,#eternal>.et-c{display:none}
+body[data-reg="raver"] #eternal>.et-b,body[data-reg="cypherpunk"] #eternal>.et-b{display:none}
+body[data-reg="raver"] #eternal>.et-r{display:block}
+body[data-reg="cypherpunk"] #eternal>.et-c{display:block}
+#eternal [hidden]{display:none!important}
+#eternal button{margin:0;color:inherit;text-transform:none;letter-spacing:normal;min-width:0}
+#eternal svg{display:block;max-width:100%}
+#eternal a{text-decoration:none}
+#eternal :focus-visible{outline:2px solid var(--sk-focus);outline-offset:3px}
+#eternal h2,#eternal h3,#eternal p,#eternal ol,#eternal ul,#eternal table{margin:0;padding:0;border:0;background:none;text-transform:none;letter-spacing:normal}
+#eternal table{border-collapse:separate;border-spacing:0}
+#eternal th,#eternal td{border:0;padding:0;vertical-align:top}
+.et-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+#etArchive.et-archive-h{margin:var(--sk-s5) 0 var(--sk-s2);padding:var(--sk-s4) 0 0;border:0;border-top:1px solid var(--sk-line);color:var(--sk-ink);text-transform:none;letter-spacing:normal;background:none}
+body[data-reg="bee"] #etArchive.et-archive-h{font:400 28px/1.1 var(--sk-font-bee-serif)}
+body[data-reg="raver"] #etArchive.et-archive-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em}
+body[data-reg="cypherpunk"] #etArchive.et-archive-h{font:600 15px/1.45 var(--sk-font-mono)}
+
+/* NEW BEE — a calm room: plain rows, one reassurance, one magenta action, a link, a footnote */
+#eternal .et-b{display:flex;flex-direction:column;gap:var(--sk-s3);color:var(--sk-ink);font:400 16px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-b-mark{font:400 18px/1.2 var(--sk-font-house);color:var(--sk-sovereign)}
+#eternal .et-b-h{font:400 40px/1.05 var(--sk-font-bee-serif);color:var(--sk-ink)}
+#eternal .et-b-lede{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink-mut);text-wrap:pretty}
+#eternal .et-b-guard{display:flex;align-items:center;gap:var(--sk-s2);min-height:var(--sk-control-min,44px);padding:var(--sk-s1) var(--sk-s3);border-radius:var(--sk-radius);background:var(--sk-guard-wash);color:var(--sk-guard);font:600 15px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-b-guard svg,#eternal .et-b-ic{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+#eternal .et-b-rows{display:flex;flex-direction:column;background:var(--sk-bg-card);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl);overflow:hidden}
+#eternal .et-b-row{display:flex;align-items:center;justify-content:space-between;gap:var(--sk-s2);width:100%;min-height:var(--sk-control-row,52px);padding:var(--sk-s1) var(--sk-s3);border:0;border-bottom:1px solid var(--sk-line-soft);border-radius:0;background:transparent;text-align:left;font:500 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+#eternal .et-b-row:last-child{border-bottom:0}
+#eternal button.et-b-row,#eternal a.et-b-row{cursor:pointer}
+#eternal .et-b-row>span{flex:1 1 auto}
+#eternal .et-b-row small{display:flex;align-items:center;gap:var(--sk-s1);flex:none;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-row small.et-out{color:var(--sk-guard)}
+#eternal .et-b-row small.et-ok{color:var(--sk-verified)}
+#eternal .et-b-row[aria-expanded="true"]{background:var(--sk-sovereign-tint);color:var(--sk-sovereign-strong);font-weight:600}
+#eternal .et-b-row[aria-expanded="true"] small{color:var(--sk-sovereign-strong)}
+#eternal .et-b-row .et-chev{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;transition:transform var(--dur,.26s)}
+#eternal .et-b-row[aria-expanded="true"] .et-chev{transform:rotate(90deg)}
+#eternal .et-b-open{display:flex;flex-direction:column;gap:var(--sk-s1);padding:var(--sk-s2) var(--sk-s3);background:var(--sk-sovereign-tint);border-bottom:1px solid var(--sk-line-soft)}
+#eternal .et-b-open p{font:400 15px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+#eternal .et-b-go{display:flex;align-items:center;justify-content:space-between;gap:var(--sk-s2);min-height:var(--sk-control-min,44px);font:600 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-link)}
+#eternal .et-b-go:hover{color:var(--sk-link-hover)}
+#eternal .et-b-person{display:flex;align-items:center;gap:var(--sk-s2);min-height:var(--sk-control-person,60px);padding:var(--sk-s1) var(--sk-s3);border-bottom:1px solid var(--sk-line-soft)}
+#eternal .et-b-person:last-child{border-bottom:0}
+#eternal .et-b-person i{width:40px;height:40px;border-radius:var(--sk-radius-pill);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong);display:flex;align-items:center;justify-content:center;font:600 14px/1.4 var(--sk-font-bee-sans);font-style:normal;flex:none}
+#eternal .et-b-person i.et-dash{background:transparent;border:1.5px dashed var(--sk-ink-dim);color:var(--sk-ink-mut)}
+#eternal .et-b-person i.et-ok{background:var(--sk-verified-wash);color:var(--sk-verified)}
+#eternal .et-b-person b{display:block;font:500 16px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-b-person span{display:block;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-note{padding:var(--sk-s2) var(--sk-s3);font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-act{display:flex;flex-direction:column;gap:var(--sk-s1);margin-top:var(--sk-s1)}
+#eternal .et-b-primary{display:flex;align-items:center;justify-content:center;width:100%;height:var(--sk-control-primary,54px);padding:0 var(--sk-s3);border:0;border-radius:var(--sk-radius-lg);background:var(--sk-primary);color:var(--sk-on-primary)!important;font:600 17px/1.2 var(--sk-font-bee-sans)!important;text-align:center;cursor:pointer}
+#eternal .et-b-primary:disabled{background:var(--sk-bg-well);color:var(--sk-ink-mut)!important;cursor:not-allowed}
+#eternal .et-b-link{display:flex;align-items:center;justify-content:center;min-height:var(--sk-control-min,44px);border:0;background:transparent;font:600 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-link)!important;cursor:pointer;text-align:center}
+#eternal .et-b-link:hover{color:var(--sk-link-hover)!important}
+#eternal .et-b-foot{text-align:center;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-card{display:flex;flex-direction:column;gap:var(--sk-s1);padding:var(--sk-s3);background:var(--sk-bg-card);border:1px dashed var(--sk-ink-dim);border-radius:var(--sk-radius-xl)}
+#eternal .et-b-card.et-ok{border:1px solid var(--sk-line);background:var(--sk-verified-wash)}
+#eternal .et-b-card h3{font:400 28px/1.1 var(--sk-font-bee-serif);color:var(--sk-ink)}
+#eternal .et-b-card p{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+
+/* RAVER — the data is the art; lowercase is allowed joy; the numbers never change */
+#eternal .et-r{color:var(--sk-ink);font:400 14px/1.4 var(--sk-font-raver-body)}
+#eternal .et-r-top{display:flex;align-items:baseline;justify-content:space-between;gap:var(--sk-s2);flex-wrap:wrap}
+#eternal .et-r-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em;color:var(--sk-ink)}
+#eternal .et-r-hint{font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-art{position:relative;width:100%;max-width:360px;margin:var(--sk-s3) auto var(--sk-s2)}
+#eternal .et-r-art>svg{width:100%;height:auto;filter:drop-shadow(var(--sk-glow-sovereign))}
+#eternal .et-r-art [role="button"]{cursor:pointer}
+#eternal .et-r-art [role="button"]:focus{outline:none}
+#eternal .et-r-art [role="button"]:focus-visible>*{stroke:var(--sk-ink);stroke-width:2}
+#eternal .et-r-mid{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;text-align:center;pointer-events:none;max-width:40%}
+#eternal .et-r-mid b{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em;color:var(--sk-ink)}
+#eternal .et-r-mid span{font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-legend{display:flex;flex-wrap:wrap;justify-content:center;gap:var(--sk-s1) var(--sk-s2);margin:0 0 var(--sk-s3)}
+#eternal .et-r-legend span{display:inline-flex;align-items:center;gap:var(--sk-s1);font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-legend i{width:14px;height:14px;border-radius:var(--sk-radius-pill);flex:none}
+#eternal .et-r-card{display:flex;gap:var(--sk-s2);align-items:flex-start;padding:var(--sk-s2) var(--sk-s3);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl);background:var(--sk-sovereign-tint);min-height:var(--sk-control-person,60px)}
+#eternal .et-r-card .et-rk{width:44px;height:44px;border-radius:var(--sk-radius);background:var(--sk-sovereign-strong);color:var(--sk-bg);display:flex;align-items:center;justify-content:center;font:700 15px/1.2 var(--sk-font-raver-display);flex:none}
+#eternal .et-r-card b{display:block;font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink)}
+#eternal .et-r-card span{display:block;margin-top:var(--sk-s1);font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-sub{margin:var(--sk-s4) 0 var(--sk-s2);font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em;color:var(--sk-ink)}
+#eternal .et-r-tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:var(--sk-s2)}
+#eternal .et-r-tile{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--sk-s1);min-height:96px;padding:var(--sk-s2) var(--sk-s1);border-radius:var(--sk-radius-xl);border:1.5px solid var(--sk-sovereign);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong)!important;font:600 14px/1.25 var(--sk-font-raver-body);text-align:center;cursor:pointer;transition:opacity var(--dur,.26s),box-shadow var(--dur,.26s)}
+#eternal .et-r-tile.et-dash{border-style:dashed;border-color:var(--sk-ink-dim);background:var(--sk-bg-card);color:var(--sk-ink-soft)!important}
+#eternal .et-r-tile.et-on{border-color:var(--sk-verified);box-shadow:var(--sk-glow-ok);color:var(--sk-ink)!important}
+#eternal .et-r-tile[aria-pressed="true"]{border-color:var(--sk-you);box-shadow:var(--sk-glow-sovereign)}
+#eternal .et-r-tile svg{width:26px;height:26px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+#eternal .et-r-note{margin:var(--sk-s2) 0 0;text-align:center;font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-pill{display:flex;align-items:center;justify-content:center;width:100%;height:58px;margin-top:var(--sk-s4);padding:0 var(--sk-s3);border:0;border-radius:var(--sk-radius-pill);background:var(--sk-primary);color:var(--sk-on-primary)!important;font:700 15px/1.2 var(--sk-font-raver-display)!important;letter-spacing:.04em;text-align:center;cursor:pointer}
+#eternal .et-r-pill:disabled{background:var(--sk-sovereign-wash);color:var(--sk-sovereign-soft)!important;cursor:not-allowed}
+#eternal .et-r-ghost{display:flex;align-items:center;justify-content:center;margin:var(--sk-s2) auto 0;min-height:var(--sk-control-min,44px);padding:0 var(--sk-s2);border:0;background:none;color:var(--sk-link)!important;font:600 14px/1.25 var(--sk-font-raver-body)!important;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+@media (prefers-reduced-motion:reduce){#eternal .et-r *,#eternal .et-b *{transition:none!important;animation:none!important}}
+
+/* CYPHERPUNK — the instrument, complete at first paint: tables, a numbered pipeline, receipts */
+#eternal .et-c{font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink);overflow-wrap:anywhere}
+#eternal .et-c-path{font:600 15px/1.45 var(--sk-font-mono);color:var(--sk-ink);word-break:break-all}
+#eternal .et-c-chips{display:flex;flex-wrap:wrap;gap:var(--sk-s1);margin:var(--sk-s2) 0}
+#eternal .et-c-chips span{padding:2px var(--sk-s1);border:1px solid var(--sk-line);border-radius:4px;background:var(--sk-bg-card);font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-soft)}
+#eternal .et-c-chips span.et-on{border-color:var(--sk-guard);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong)}
+#eternal .et-c-chips span.et-ok{border-color:var(--sk-verified);color:var(--sk-verified)}
+#eternal .et-c-chips span.et-no{border-color:var(--sk-info);color:var(--sk-info)}
+#eternal .et-c-guard{display:flex;justify-content:space-between;align-items:center;gap:var(--sk-s2);flex-wrap:wrap;min-height:var(--sk-control-min,44px);padding:var(--sk-s1) var(--sk-s3);border:1px dashed var(--sk-guard);border-radius:var(--sk-radius-sm);background:var(--sk-guard-wash);color:var(--sk-guard)}
+#eternal .et-c-guard b{font-weight:600;color:var(--sk-sovereign-strong)}
+#eternal .et-c-h{margin:var(--sk-s4) 0 var(--sk-s2)!important;font:600 15px/1.45 var(--sk-font-mono);color:var(--sk-ink)}
+#eternal .et-c-tab{width:100%;margin:var(--sk-s2) 0 var(--sk-s1)!important;border:1px solid var(--sk-line)!important;border-radius:var(--sk-radius-sm);overflow:hidden;background:var(--sk-bg-card)!important;table-layout:auto}
+#eternal .et-c-tab th{padding:var(--sk-s1) var(--sk-s2)!important;text-align:left;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);border-bottom:1px solid var(--sk-line)!important;background:var(--sk-bg-well)}
+#eternal .et-c-tab td{height:var(--sk-control-min,44px);padding:var(--sk-s1) var(--sk-s2)!important;border-bottom:1px solid var(--sk-line)!important;font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink);vertical-align:middle}
+#eternal .et-c-tab tr:last-child td{border-bottom:0!important}
+#eternal .et-c-tab td:first-child{color:var(--sk-guard)}
+#eternal .et-c-tab tr.et-pick{cursor:pointer}
+#eternal .et-c-tab tr.et-pick:hover td{background:var(--sk-sovereign-tint)}
+#eternal .et-c-tab tr.et-more td{height:auto;background:var(--sk-sovereign-tint);color:var(--sk-ink-soft)}
+#eternal .et-c-tab small{display:block;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut)}
+#eternal .et-st-ok{color:var(--sk-verified)}.et-st-no{color:var(--sk-info)}.et-st-wait{color:var(--sk-ai)}.et-st-guard{color:var(--sk-guard)}
+#eternal .et-c-pipe{list-style:none;margin:0;padding:0;display:grid;gap:var(--sk-s2);counter-reset:etp}
+#eternal .et-c-pipe li{display:grid;grid-template-columns:28px 1fr;gap:var(--sk-s1) var(--sk-s2);padding:var(--sk-s2) var(--sk-s3);border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm);background:var(--sk-bg-card);counter-increment:etp}
+#eternal .et-c-pipe li::before{content:counter(etp,decimal-leading-zero);color:var(--sk-guard);font-weight:600}
+#eternal .et-c-pipe li b{font-weight:600;color:var(--sk-ink)}
+#eternal .et-c-pipe li p{grid-column:2;color:var(--sk-ink-soft)}
+#eternal .et-c-pipe li.et-done b{color:var(--sk-verified)}
+#eternal .et-c-pipe li.et-guard{border-style:dashed;border-color:var(--sk-guard)}.et-c-pipe li.et-guard b{color:var(--sk-guard)}
+#eternal .et-c-pipe li.et-now{border-color:var(--sk-ai);box-shadow:inset 0 0 0 1px var(--sk-ai)}.et-c-pipe li.et-now b{color:var(--sk-ai)}
+#eternal .et-c-pipe li.et-todo p{color:var(--sk-ink-mut)}
+#eternal .et-c-primary{display:flex;align-items:center;justify-content:center;width:100%;height:52px;margin-top:var(--sk-s3);padding:0 var(--sk-s2);border:0;border-radius:var(--sk-radius-sm);background:var(--sk-primary);color:var(--sk-on-primary)!important;font:600 14px/1.2 var(--sk-font-mono)!important;text-align:center;cursor:pointer}
+#eternal .et-c-primary:disabled{background:var(--sk-bg-well);color:var(--sk-ink-mut)!important;border:1px dashed var(--sk-line);cursor:not-allowed}
+#eternal .et-c-kv{width:100%;border:1px solid var(--sk-line)!important;border-radius:var(--sk-radius-sm);overflow:hidden;background:var(--sk-bg-card)!important}
+#eternal .et-c-kv th{width:104px;padding:var(--sk-s2) var(--sk-s2)!important;text-align:left;vertical-align:top;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);border-bottom:1px solid var(--sk-line)!important;background:transparent}
+#eternal .et-c-kv td{padding:var(--sk-s2) var(--sk-s2)!important;border-bottom:1px solid var(--sk-line)!important;font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink);word-break:break-word}
+#eternal .et-c-kv tr:last-child th,#eternal .et-c-kv tr:last-child td{border-bottom:0!important}
+#eternal .et-c-verify{margin-top:var(--sk-s3);padding:var(--sk-s3);border-radius:var(--sk-radius-sm);background:var(--sk-bg-card);border:1px solid var(--sk-line)}
+#eternal .et-c-verify-h{font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);margin-bottom:var(--sk-s1)}
+#eternal .et-c-verify ol{margin:0;padding-left:var(--sk-s4)!important;display:grid;gap:var(--sk-s1)}
+#eternal .et-c-verify code{font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ai);background:none;padding:0;word-break:break-all}
+#eternal .et-c-row{display:grid;grid-template-columns:1fr 1fr;gap:var(--sk-s2);margin-top:var(--sk-s3)}
+#eternal .et-c-ghost{display:flex;align-items:center;justify-content:center;min-height:52px;padding:0 var(--sk-s1);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius-sm);background:transparent;color:var(--sk-ink)!important;text-align:center;font:600 14px/1.2 var(--sk-font-mono)!important;cursor:pointer}
+#eternal .et-c-tab td:first-child,#eternal .et-c-tab th:first-child{white-space:nowrap;width:1%}
+#eternal .et-c-tab .et-nw{white-space:nowrap}
+#eternal .et-c-a{display:inline-flex;align-items:center;min-height:var(--sk-control-min,44px);min-width:var(--sk-control-min,44px);color:var(--sk-link)}
+#eternal .et-c-a:hover{color:var(--sk-link-hover)}
+/* museum page specifics: a read that did not arrive folds to a quiet card (the artwork's square is
+   kept only for art); a link alone in a table cell is a 44 px target; the two Bitcoin panels are
+   data, not art, so they sit on the card, not in the vitrine */
+.stage:has(> .note:only-child),pre:has(> .note:only-child){aspect-ratio:auto!important;min-height:0!important;padding:22px 16px!important;box-shadow:none!important}
+@media(max-width:600px){td>a,td>code>a{display:inline-flex;align-items:center;min-height:44px;min-width:44px}}
+body[data-reg] .stage:has(#btcTx),body[data-reg] .stage:has(#btcBar){background:var(--sk-bg-card);border:1px dashed var(--sk-ink-dim);box-shadow:none;margin:0}
+/* the fleet bar (fleet.js, shared and untouched) worn in this page's register */
+body[data-reg] #fleet-nav{border-top-color:var(--sk-line)!important;color:var(--sk-ink-soft)!important;background:var(--sk-bg)!important}
+body[data-reg] #fleet-nav a{color:var(--sk-ink-soft)!important;border-color:var(--sk-line)!important;background:transparent!important}
+body[data-reg] #fleet-nav a.here{color:var(--sk-link)!important;border-color:var(--sk-link)!important}
+body[data-reg] #fleet-nav a:hover{color:var(--sk-link-hover)!important;border-color:var(--sk-link-hover)!important}
+body[data-reg="bee"] #fleet-nav,body[data-reg="bee"] #fleet-nav a{font:500 14px/1.4 var(--sk-font-bee-sans)!important}
+body[data-reg="raver"] #fleet-nav,body[data-reg="raver"] #fleet-nav a{font:600 14px/1.25 var(--sk-font-raver-body)!important}
+body[data-reg="cypherpunk"] #fleet-nav,body[data-reg="cypherpunk"] #fleet-nav a{font:500 13px/1.45 var(--sk-font-mono)!important}
 </style>
+<link rel="stylesheet" href="../skaists.css">
 </head>
 <body data-bee-theme="custom"><div class="wrap">
+<!-- ETERNAL FRONT (founder blueprint 2026-09-26, docs/design/eternal; founder order for this page:
+     "PLEASE MAKE IT A/A- LEVEL MUSEUM"): three separate products in one surface. ONE data layer
+     (the museum's own walls: the six-class table, the chronology table, the exhibit headings, and
+     the live chain reads observed where the exhibits land them) drives all three, so the facts
+     cannot drift. No gesture here reads, buys or signs anything: a read is only ever "read live"
+     when the exhibit below actually holds what the chain returned. -->
+<section id="eternal" aria-label="the museum">
+
+  <!-- NEW BEE — a calm museum lobby: five halls, one way in, plain words -->
+  <div class="et-b">
+    <div class="et-b-mark">bLighT museum</div>
+    <h2 class="et-b-h" id="etMuBeeH" data-etk="et.museum.beeH">what does on-chain mean?</h2>
+    <p class="et-b-lede" id="etMuBeeLede" data-etk="et.museum.beeLede">a small museum of art that lives inside blockchains. every work is read fresh when you walk in.</p>
+    <div class="et-b-guard"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span id="etMuBeeGuard" data-etk="et.museum.beeGuard">no stored copies. a work is read fresh, or not shown.</span></div>
+    <div class="et-b-rows" id="etMuHalls"></div>
+    <div class="et-b-act">
+      <a class="et-b-primary" id="etMuBeeGo" data-etk="et.museum.beeGo" href="#ex1">walk the halls</a>
+      <a class="et-b-link" id="etMuBeeSix" data-etk="et.museum.beeSix" href="#ex3">the six meanings of on-chain</a>
+      <p class="et-b-foot" id="etMuBeeFoot" data-etk="et.museum.beeFoot">nothing here is for sale, and nothing asks for a wallet.</p>
+    </div>
+    <div class="et-b-card" id="etMuToday" aria-live="polite"></div>
+  </div>
+
+  <!-- RAVER — the six meanings as rings, the chronology as stars on them; tap to light -->
+  <div class="et-r">
+    <div class="et-r-top"><h2 class="et-r-h" id="etMuRaverH" data-etk="et.museum.raverH">six rings</h2><span class="et-r-hint" id="etMuRaverHint"></span></div>
+    <div class="et-r-art">
+      <svg id="etMuRings" viewBox="-200 -200 400 400" role="group" aria-label="the six meanings of on-chain as rings, the works as stars"></svg>
+      <div class="et-r-mid" aria-hidden="true"><b id="etMuMid"></b></div>
+    </div>
+    <div class="et-r-legend" id="etMuLegend"></div>
+    <div class="et-r-card" id="etMuRaverCard" aria-live="polite"></div>
+    <h3 class="et-r-sub" id="etMuRaverSub" data-etk="et.museum.raverSub">tonight on the wall</h3>
+    <div class="et-r-tiles" id="etMuTiles"></div>
+    <p class="et-r-note" id="etMuRaverNote"></p>
+    <a class="et-r-pill" id="etMuRaverGo" data-etk="et.museum.raverGo" href="#ex1">enter the halls</a>
+  </div>
+
+  <!-- CYPHERPUNK — the instrument: every live read, the pipeline, the build receipts, verify it yourself -->
+  <div class="et-c">
+    <div class="et-c-path" id="etMuPath">bLighT://museum</div>
+    <div class="et-c-chips" id="etMuChips"></div>
+    <div class="et-c-guard"><span id="etMuCyGuard" data-etk="et.museum.cyGuard">cache = none · failure = said</span><b id="etMuCyGuardN"></b></div>
+    <h3 class="et-c-h" id="etMuCyReadsH" data-etk="et.museum.cyReadsH">live reads</h3>
+    <table class="et-c-tab"><thead><tr><th>#</th><th>call · where</th><th>state</th></tr></thead><tbody id="etMuReads"></tbody></table>
+    <h3 class="et-c-h" id="etMuCyClassH" data-etk="et.museum.cyClassH">the six classes</h3>
+    <table class="et-c-tab"><thead><tr><th>cls</th><th>means</th><th>survives its author</th></tr></thead><tbody id="etMuClasses"></tbody></table>
+    <h3 class="et-c-h" id="etMuCyPipeH" data-etk="et.museum.cyPipeH">read pipeline · per work</h3>
+    <ol class="et-c-pipe" id="etMuPipe"></ol>
+    <button type="button" class="et-c-primary" id="etMuCyGo" data-etk="et.museum.cyGo">read the chain again</button>
+    <h3 class="et-c-h" id="etMuCyRcptH" data-etk="et.museum.cyRcptH">build receipts · not live</h3>
+    <table class="et-c-kv" id="etMuReceipt"></table>
+    <div class="et-c-verify">
+      <div class="et-c-verify-h" id="etMuVerifyH" data-etk="et.museum.verifyH">verify · no trust in this page needed</div>
+      <ol id="etMuVerify"></ol>
+    </div>
+    <div class="et-c-row">
+      <a class="et-c-ghost" id="etMuCySrc" data-etk="et.museum.cySrc" href="#exSources">sources ↓</a>
+      <a class="et-c-ghost" id="etMuCyFork" href="https://github.com/beehive-nature/beehive-nature/blob/main/surfaces/blight/museum.html" target="_blank" rel="noopener noreferrer"><span data-etk="et.museum.cyFork">fork the template ↗</span><span class="et-sr"> (opens in a new tab)</span></a>
+    </div>
+  </div>
+</section>
+<h2 class="et-archive-h" id="etArchive">the whole museum</h2>
 
 <h1>bLighT <span>Museum</span></h1>
 <div class="lede">
@@ -146,7 +399,7 @@ body[data-reg="cypherpunk"] .lede{font-size:14px}
   and the difference decides what survives.
 </div>
 
-<h2><span data-i18n="h.074">Exhibit 1 · The score and the picture</span></h2>
+<h2 id="ex1"><span data-i18n="h.074">Exhibit 1 · The score and the picture</span></h2>
 <div class="lede">
   <b>Autoglyphs</b> (2019) is usually called the first fully on-chain generative art on
   Ethereum, and the founding object of this lineage. What its contract actually returns is
@@ -178,7 +431,7 @@ body[data-reg="cypherpunk"] .lede{font-size:14px}
   </figure>
 </div>
 
-<h2><span data-i18n="h.075">Exhibit 2 · The picture itself</span></h2>
+<h2 id="ex2"><span data-i18n="h.075">Exhibit 2 · The picture itself</span></h2>
 <div class="lede">
   <b>ERC-20i</b> (2024) returns the artwork, not instructions for it. <code>getSvg</code>
   emits a complete SVG — no legend, no interpretation, no renderer to lose. The image below
@@ -205,7 +458,7 @@ body[data-reg="cypherpunk"] .lede{font-size:14px}
   is the reason this museum exists as running code rather than a wall of JPEGs.
 </div>
 
-<h2><span data-i18n="h.076">Exhibit 3 · Six meanings of "on-chain"</span></h2>
+<h2 id="ex3"><span data-i18n="h.076">Exhibit 3 · Six meanings of "on-chain"</span></h2>
 <div class="lede">Most disputes about whether something is "really on-chain" are two people using different rows.</div>
 <div class="panel">
 <div class="scroll"><table>
@@ -219,7 +472,7 @@ body[data-reg="cypherpunk"] .lede{font-size:14px}
 </table></div>
 </div>
 
-<h2><span data-i18n="h.077">Exhibit 4 · The chronology</span></h2>
+<h2 id="ex4"><span data-i18n="h.077">Exhibit 4 · The chronology</span></h2>
 <div class="lede">Dates read from creation transactions and block headers, not from write-ups. The story starts on Bitcoin, three years before Ethereum's art history.</div>
 <div class="panel">
 <div class="scroll"><table>
@@ -235,7 +488,7 @@ body[data-reg="cypherpunk"] .lede{font-size:14px}
 </table></div>
 </div>
 
-<h2><span data-i18n="h.078">Exhibit 5 · What it cost to be here</span></h2>
+<h2 id="ex5"><span data-i18n="h.078">Exhibit 5 · What it cost to be here</span></h2>
 <details class="tnote" data-reg-disclose><summary data-i18n="mu.d.autoglyph">The Autoglyph comparison — generative art inside the mint itself</summary>
   <details class="tnote" data-reg-disclose><summary data-i18n="mu.d.autoglyph">The Autoglyph comparison — generative art inside the mint itself</summary>
   <div class="panel note">
@@ -249,7 +502,7 @@ body[data-reg="cypherpunk"] .lede{font-size:14px}
   </details>
   </details>
 
-<h2><span data-i18n="h.079">Exhibit 6 · The process wall — 1,408 bytes</span></h2>
+<h2 id="ex6"><span data-i18n="h.079">Exhibit 6 · The process wall — 1,408 bytes</span></h2>
 <div class="lede">
   Two PEPi deployments share a symbol and a lineage. Their bytecode sizes are
   read from chain <b>when this page loads</b>, and the difference is computed
@@ -276,7 +529,7 @@ body[data-reg="cypherpunk"] .lede{font-size:14px}
   </details>
 </div>
 
-<h2><span data-i18n="h.080">Exhibit 7 · The process wall — a revert, performed live</span></h2>
+<h2 id="ex7"><span data-i18n="h.080">Exhibit 7 · The process wall — a revert, performed live</span></h2>
 <details class="tnote" data-reg-disclose><summary data-i18n="mu.d.seed">How the seed is drawn — nothing up the sleeve</summary>
   <details class="tnote" data-reg-disclose><summary data-i18n="mu.d.seed">How the seed is drawn — nothing up the sleeve</summary>
   <div class="lede">
@@ -307,7 +560,7 @@ body[data-reg="cypherpunk"] .lede{font-size:14px}
   </figure>
 </div>
 
-<h2><span data-i18n="h.081">Exhibit 8 · The process wall — a layer that shipped empty</span></h2>
+<h2 id="ex8"><span data-i18n="h.081">Exhibit 8 · The process wall — a layer that shipped empty</span></h2>
 <div class="lede">
   Not every error performs. <code>earsLevelCounts</code> shipped
   <b>[0,0,0,0,0,0]</b> — a declared layer, empty forever — and no getter on the
@@ -339,7 +592,7 @@ body[data-reg="cypherpunk"] .lede{font-size:14px}
   </details>
 </div>
 
-<h2><span data-i18n="h.082">Exhibit 9 · Bitcoin's answer — a whole-block inscription, and the asymmetry</span></h2>
+<h2 id="ex9"><span data-i18n="h.082">Exhibit 9 · Bitcoin's answer — a whole-block inscription, and the asymmetry</span></h2>
 <div class="lede">
   The museum's lineage starts on Bitcoin (Counterparty, 2014) and its classes were
   built without Bitcoin's modern era. The founder's inclusivity ruling (2026-08-16)
@@ -401,7 +654,7 @@ body[data-reg="cypherpunk"] .lede{font-size:14px}
   </details>
 </div>
 
-<h2>Exhibit 10 · A name that went with the phone</h2>
+<h2 id="ex10">Exhibit 10 · A name that went with the phone</h2>
 <details class="tnote" data-reg-disclose><summary data-i18n="mu.d.record">The recording of the first pieces — one device, both chains</summary>
   <div class="panel note">
   <b>bqueenbee.base.eth</b> · recorded 2026-08-26<br><br>
@@ -425,7 +678,7 @@ body[data-reg="cypherpunk"] .lede{font-size:14px}
 </div>
 
 <div style="margin-top:34px">
-<h2><span data-i18n="h.083">Sources &amp; doors — the ERC-20i wing, receipted</span></h2>
+<h2 id="exSources"><span data-i18n="h.083">Sources &amp; doors — the ERC-20i wing, receipted</span></h2>
 <details class="tnote" data-reg-disclose><summary data-i18n="mu.d.origin">Where ERC-20i came from — the chain’s own record</summary>
   <div class="note" style="margin-top:6px">
   <b>The origin, from the chain rather than from memory:</b> ERC-20i — fungible tokens whose
@@ -663,6 +916,229 @@ function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g
     '<div style="font-size:11px;color:var(--dim);margin-top:6px">one full block = 4,000,000 wu — '+pct.toFixed(1)+'% is this one transaction</div>';
 })();
 
+</script>
+<script>
+/* ETERNAL FRONT — one data layer, three renderers (docs/design/eternal). The facts are the
+   museum's own walls, read from this page: the six-class table (exhibit 3), the chronology table
+   (exhibit 4), the exhibit headings, and the live chain reads, observed in the exhibits where the
+   reads above land them (the RPC ladder is the page's own RPC constant). A read is "read live" only
+   when its exhibit holds what the chain returned; unreachable is said, never drawn over. The one
+   real re-read is a reload: nothing is cached, so a reload is a fresh read. */
+(function(){
+  var $=function(id){return document.getElementById(id);};
+  var T=function(k,f){var t=window.BNRLanguage&&window.BNRLanguage.text;return t?t(k,f):f;};
+  var K=function(k,f){return T('et.museum.'+k,f);};
+  var esc=function(v){return String(v==null?'':v).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});};
+  var txt=function(e){return (e&&e.textContent||'').replace(/\s+/g,' ').trim();};
+  var tok=function(n){return getComputedStyle(document.body).getPropertyValue('--sk-'+n).trim();};
+
+  /* ── the data layer ── */
+  var D={rooms:[],halls:[],classes:[],chron:[],reads:[],rpc:{},build:null};
+  var R={sel:'a',star:null};
+
+  /* the exhibit headings, in wall order: ex1 … ex10, then the sources */
+  function rooms(){
+    var hs=[].slice.call(document.querySelectorAll('h2[id^="ex"]'));
+    return hs.map(function(h,i){return {id:h.id,n:h.id==='exSources'?0:i+1,title:txt(h)};});
+  }
+  function tableAfter(key){
+    var s=[].filter.call(document.querySelectorAll('[data-i18n]'),function(e){return e.dataset.i18n===key;})[0]; if(!s) return [];
+    for(var e=s.closest('h2').nextElementSibling;e;e=e.nextElementSibling){var t=e.querySelector&&e.querySelector('table');if(t)return [].slice.call(t.querySelectorAll('tr')).filter(function(r){return !r.querySelector('th');});if(e.tagName==='H2')break;}
+    return [];
+  }
+  function classes(){
+    return tableAfter('h.076').map(function(r){var td=r.querySelectorAll('td');var sv=td[2];
+      return {c:txt(td[0]),means:txt(td[1]),survives:txt(sv),tone:sv.classList.contains('ok')?'ok':sv.classList.contains('bad')?'bad':sv.classList.contains('warn')?'warn':'note'};});
+  }
+  function chron(){
+    return tableAfter('h.077').map(function(r){var td=r.querySelectorAll('td');
+      var cls=[].slice.call(td[2].querySelectorAll('.cls')).map(function(x){return txt(x);});
+      return {date:txt(td[0]),what:txt(td[1]),cls:cls,layer:!cls.length,note:txt(td[3])};});
+  }
+  /* the live reads, exactly as the exhibit scripts above make them */
+  var has=function(id){var e=$(id);return !!(e&&e.querySelector('svg'));};
+  var said=function(id,re){return re.test(txt($(id)));};
+  var READS=[
+    {k:'glyph',ex:'ex1',net:'Ethereum',what:'Autoglyph #1, the score',to:'0xd4e4078c…',call:'tokenURI(1)',
+     st:function(){var e=$('glyphText');if(!e)return['no',''];if(e.querySelector('.note'))return['no',''];if(/^reading chain/.test(txt(e)))return['wait',''];return['ok',txt($('glyphBytes'))];}},
+    {k:'pepi',ex:'ex2',net:'Base',what:'PEPi, the picture',to:'0x28a5e71B…',call:'getSvg(record at 0x…dEaD)',
+     st:function(){if(has('pepiArt'))return['ok',txt($('pepiBytes'))];return said('pepiArt',/unreachable|failed/)?['no','']:['wait',''];}},
+    {k:'froggi',ex:'ex2',net:'Base',what:'FROGGi, the picture',to:'0x88A78C50…',call:'getSvg(spore at 0x…dEaD)',
+     st:function(){if(has('froggiArt'))return['ok',txt($('froggiBytes'))];return said('froggiArt',/unreachable|failed/)?['no','']:['wait',''];}},
+    {k:'sizes',ex:'ex6',net:'Base',what:'four code sizes, the 1,408 bytes',to:'PEPi v1 · v2 · FUNGI · FROGGI',call:'eth_getCode ×4',
+     st:function(){var t=txt($('sz2'));if(/reading/.test(t))return['wait',''];if(/unreachable/.test(t))return['no',''];return['ok','v2 − v1 = '+txt($('szDiff'))];}},
+    {k:'control',ex:'ex7',net:'Base',what:'the seed trap, control',to:'0x28a5e71B…',call:'getSvg(stored record)',
+     st:function(){if(has('trapCtl'))return['ok',txt($('trapCtlBytes'))];return said('trapCtl',/unreachable|failed|unexpected/)?['no','']:['wait',''];}},
+    {k:'revert',ex:'ex7',net:'Base',what:'the seed trap, the revert',to:'0x28a5e71B…',call:'getSvg(seed 0) → panic 0x11',
+     st:function(){var t=txt($('trapBad'));if(/^reading chain/.test(t))return['wait',''];if(/unreachable|not performed|unexpected|no revert came back/.test(t))return['no',''];return['ok',txt($('trapErr'))];}},
+    {k:'btc',ex:'ex9',net:'Bitcoin',what:'the 3.99 MB inscription',to:'tx ed76bf35…72a0',call:'Esplora GET /tx',
+     st:function(){var t=txt($('btcTx'));if(/^reading Bitcoin/.test(t))return['wait',''];if(/unreachable/.test(t))return['no',''];return['ok',t.slice(0,60)];}}
+  ];
+  function reads(){return READS.map(function(r){var s=r.st();return {k:r.k,ex:r.ex,net:r.net,what:r.what,to:r.to,call:r.call,state:s[0],detail:s[1]};});}
+  var count=function(st){return D.reads.filter(function(r){return r.state===st;}).length;};
+
+  /* five halls for a first visit; every exhibit sits in exactly one */
+  var HALLS=[
+    {k:'works',name:'the works themselves',plain:'art that lives inside the chain, read fresh for you. one is only instructions; one is the finished picture.',ex:['ex1','ex2']},
+    {k:'meaning',name:'what on-chain means',plain:'six different things people mean by it, the order they arrived in, and what the first works cost.',ex:['ex3','ex4','ex5']},
+    {k:'process',name:'the process walls',plain:'measurements and mistakes, kept on the wall on purpose. one mistake is performed live.',ex:['ex6','ex7','ex8']},
+    {k:'bitcoin',name:'Bitcoin’s answer',plain:'one artwork that filled almost a whole Bitcoin block.',ex:['ex9']},
+    {k:'stories',name:'stories and sources',plain:'a name that was lost with a phone, and where every fact on these walls came from.',ex:['ex10','exSources']}
+  ];
+
+  /* ── NEW BEE ── */
+  var openHall=null;
+  function bee(){
+    var box=$('etMuHalls'); if(!box) return;
+    var byId={}; D.rooms.forEach(function(r){byId[r.id]=r;});
+    box.innerHTML=HALLS.map(function(H){
+      var open=openHall===H.k, n=H.ex.length;
+      var h='<button type="button" class="et-b-row" data-hall="'+H.k+'" aria-expanded="'+open+'"><span>'+esc(K('hall.'+H.k,H.name))+'</span><small>'+esc(n===1?K('b.room','1 room'):K('b.rooms','{n} rooms').replace('{n}',n))+
+        '<svg class="et-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></small></button>';
+      if(open){
+        h+='<div class="et-b-open"><p>'+esc(K('hall.'+H.k+'.plain',H.plain))+'</p>'+H.ex.map(function(id){var r=byId[id];if(!r)return '';
+          return '<a class="et-b-go" href="#'+id+'"><span>'+esc(r.title)+'</span><svg class="et-b-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a>';}).join('')+'</div>';
+      }
+      return h;
+    }).join('');
+    var t=$('etMuToday'), ok=count('ok'), no=count('no'), wait=count('wait'), n=D.reads.length;
+    t.className='et-b-card'+(ok===n?' et-ok':'');
+    var head=wait?K('b.todayWait','the chain is being asked.'):ok===n?K('b.todayAll','every work was read just now.'):ok?K('b.todaySome','some works answered today.'):K('b.todayNone','the chain is quiet today.');
+    var body=wait?K('b.todayWaitP','{n} works are being read fresh from the chain.').replace('{n}',n)
+      :ok===n?K('b.todayAllP','all {n} works on the walls came straight from the chain.').replace('{n}',n)
+      :K('b.todayNoP','{no} of {n} works could not be read just now, so their frames stay empty rather than show an old copy. the words on every wall are still here.').replace('{no}',no).replace('{n}',n);
+    t.innerHTML='<h3>'+esc(head)+'</h3><p>'+esc(body)+'</p><div class="et-b-rows">'+D.reads.map(function(r){
+      var ic=r.state==='ok'?'<i class="et-ok" aria-hidden="true">✓</i>':r.state==='wait'?'<i aria-hidden="true">…</i>':'<i class="et-dash" aria-hidden="true">⬡</i>';
+      var st=r.state==='ok'?K('b.stOk','read just now'):r.state==='wait'?K('b.stWait','being read'):K('b.stNo','not read today');
+      return '<div class="et-b-person">'+ic+'<div><b>'+esc(K('read.'+r.k,r.what))+'</b><span>'+esc(st)+'</span></div></div>';}).join('')+'</div>';
+  }
+
+  /* ── RAVER ── the six classes are rings (a at the heart, f at the rim); the chronology walks
+     clockwise from 2014, one star per work on each ring its class names; Counterparty, a layer and
+     not a class, sits on the dashed rim beneath them all */
+  var RING={a:[48,66],b:[72,90],c:[96,114],d:[120,138],e:[144,162],f:[168,186]};
+  function col(c){var st=(tok('rainbow').match(/#[0-9a-f]{6}/gi)||[]);return {a:tok('biomass'),b:st[0]||tok('info'),c:tok('ai'),d:tok('info'),e:tok('sovereign'),f:tok('ink-dim')}[c];}
+  function pos(i,n,r){var a=(-90+(i+0.5)*330/n)*Math.PI/180;return [r*Math.cos(a),r*Math.sin(a)];}
+  function rings(){
+    var svg=$('etMuRings'); if(!svg) return;
+    var h='', n=D.chron.length;
+    h+='<circle r="194" fill="none" stroke="'+tok('ink-dim')+'" stroke-width="1.5" stroke-dasharray="3 6"/>';
+    D.classes.forEach(function(C){
+      var r=RING[C.c]; if(!r) return; var on=R.sel===C.c;
+      h+='<g class="et-ring" data-c="'+C.c+'" role="button" tabindex="0" aria-pressed="'+on+'" aria-label="'+esc(K('r.ringLabel','class {c}: {m}').replace('{c}',C.c).replace('{m}',C.means))+'">'+
+        '<circle r="'+((r[0]+r[1])/2)+'" fill="none" stroke="'+col(C.c)+'" stroke-width="'+(r[1]-r[0])+'" opacity="'+(on?0.95:0.32)+'"/></g>';
+    });
+    D.chron.forEach(function(W,i){
+      var cs=W.layer?['rim']:W.cls, pts=cs.map(function(c){return pos(i,n,c==='rim'?194:(RING[c][0]+RING[c][1])/2);});
+      var lit=R.star===i||(!W.layer&&W.cls.indexOf(R.sel)>=0);
+      h+='<g class="et-star" data-i="'+i+'" role="button" tabindex="0" aria-pressed="'+(R.star===i)+'" aria-label="'+esc(W.date+' · '+W.what)+'">';
+      if(pts.length>1)h+='<line fill="none" x1="'+pts[0][0].toFixed(1)+'" y1="'+pts[0][1].toFixed(1)+'" x2="'+pts[1][0].toFixed(1)+'" y2="'+pts[1][1].toFixed(1)+'" stroke="'+tok('ink-soft')+'" stroke-width="2" opacity="'+(lit?0.9:0.45)+'"/>';
+      pts.forEach(function(p,k){var c=cs[k];
+        h+='<circle cx="'+p[0].toFixed(1)+'" cy="'+p[1].toFixed(1)+'" r="26" fill="transparent"/>'+
+           '<circle cx="'+p[0].toFixed(1)+'" cy="'+p[1].toFixed(1)+'" r="'+(R.star===i?10:7)+'" fill="'+(c==='rim'?tok('bg'):lit?tok('ink'):col(c))+'" stroke="'+(c==='rim'?tok('ink-soft'):tok('bg'))+'" stroke-width="2.5"/>';});
+      h+='</g>';
+    });
+    h+='<polygon points="0,-26 22.5,-13 22.5,13 0,26 -22.5,13 -22.5,-13" fill="'+tok('bg-card')+'" stroke="'+tok('sovereign')+'" stroke-width="1.5"/>';
+    svg.innerHTML=h;
+    $('etMuMid').textContent=String(n);
+  }
+  function raverCard(){
+    var c=$('etMuRaverCard'); if(!c) return;
+    if(R.star!=null&&D.chron[R.star]){var W=D.chron[R.star];
+      c.innerHTML='<span class="et-rk">'+esc(W.layer?'·':W.cls.join('/'))+'</span><div><b>'+esc(W.date+' · '+W.what)+'</b><span>'+esc(W.note)+'</span></div>';return;}
+    var C=D.classes.filter(function(x){return x.c===R.sel;})[0]; if(!C){c.innerHTML='';return;}
+    var on=D.chron.filter(function(W){return W.cls.indexOf(C.c)>=0;}).map(function(W){return W.what+' '+W.date.slice(0,4);});
+    c.innerHTML='<span class="et-rk">'+esc(C.c)+'</span><div><b>'+esc(C.means)+'</b><span>'+esc(K('r.survives','survives its author')+': '+C.survives)+'</span><span>'+esc(on.length?on.join(' · '):K('r.noWork','no work on the wall sits on this ring yet'))+'</span></div>';
+  }
+  function raver(){
+    rings(); raverCard();
+    $('etMuRaverHint').textContent=K('r.hint','{n} works · {c} rings · tap one').replace('{n}',D.chron.length).replace('{c}',D.classes.length);
+    $('etMuLegend').innerHTML=D.classes.map(function(C){return '<span><i style="background:'+col(C.c)+'"></i>'+esc(C.c)+'</span>';}).join('')+'<span><i style="border:1.5px dashed '+tok('ink-dim')+'"></i>'+esc(K('r.layer','layer'))+'</span>';
+    var byId={}; D.rooms.forEach(function(r){byId[r.id]=r;});
+    $('etMuTiles').innerHTML=D.reads.map(function(r){
+      var cls=r.state==='ok'?' et-on':r.state==='no'?' et-dash':'';
+      var ic=r.state==='ok'?'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l8.7 5v10L12 22l-8.7-5V7z"/><path d="M8 12l3 3 5-6"/></svg>':'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l8.7 5v10L12 22l-8.7-5V7z" stroke-dasharray="3 3"/></svg>';
+      return '<a class="et-r-tile'+cls+'" href="#'+r.ex+'">'+ic+'<span>'+esc(K('read.'+r.k,r.what))+'</span></a>';}).join('');
+    var ok=count('ok'), n=D.reads.length, wait=count('wait');
+    $('etMuRaverNote').textContent=wait?K('r.wait','{n} works being asked for').replace('{n}',wait)
+      :K('r.lit','{ok} of {n} lit live · a dashed frame is a quiet chain, never a stored copy').replace('{ok}',ok).replace('{n}',n);
+  }
+
+  /* ── CYPHERPUNK ── */
+  function cy(){
+    var tb=$('etMuReads'); if(!tb) return;
+    var ok=count('ok'), no=count('no'), wait=count('wait'), n=D.reads.length;
+    $('etMuPath').textContent='bLighT://museum · '+(D.rooms.length-1)+' exhibits · '+n+' live reads';
+    $('etMuChips').innerHTML='<span class="et-on">cache none</span><span class="'+(ok===n?'et-ok':'et-no')+'">read '+ok+'/'+n+'</span>'+(no?'<span class="et-no">unreachable '+no+'</span>':'')+(wait?'<span>pending '+wait+'</span>':'')+'<span>server of ours none</span>';
+    $('etMuCyGuardN').textContent=no?no+' '+K('c.said','unreachable, said'):K('c.none','0 invented');
+    var open=tb.getAttribute('data-open')||'';
+    tb.innerHTML=D.reads.map(function(r,i){
+      var st=r.state==='ok'?'<span class="et-st-ok">read ✓</span>':r.state==='wait'?'<span class="et-st-wait">pending</span>':'<span class="et-st-no">no answer</span>';
+      var id=String(i+1).padStart(2,'0');
+      return '<tr class="et-pick" data-k="'+r.k+'" tabindex="0" aria-expanded="'+(open===r.k)+'"><td>'+id+'</td><td>'+esc(r.call)+'<small>'+r.ex.replace('ex','exhibit ')+' · '+esc(r.net.toLowerCase())+'</small></td><td class="et-nw">'+st+'</td></tr>'+
+        '<tr class="et-more" data-k="'+r.k+'"'+(open===r.k?'':' hidden')+'><td colspan="3">'+esc(r.what)+'<small>to '+esc(r.to)+'</small><small>'+esc(r.state==='ok'?r.detail:r.state==='wait'?'the ladder is still being walked':'every endpoint in the ladder failed · nothing cached · nothing drawn')+'</small></td></tr>';
+    }).join('');
+    $('etMuClasses').innerHTML=D.classes.map(function(C){var t=C.tone==='ok'?'et-st-ok':C.tone==='bad'?'et-st-guard':C.tone==='warn'?'et-st-wait':'';
+      return '<tr><td>'+esc(C.c)+'</td><td>'+esc(C.means)+'</td><td class="'+t+'">'+esc(C.survives)+'</td></tr>';}).join('');
+    var eth=(D.rpc.eth||[]).length, base=(D.rpc.base||[]).length;
+    var steps=[
+      ['rpc ladder · keyless','eth '+eth+' endpoints · base '+base+' endpoints · first answer wins · a failure returns nothing, never a value','et-done'],
+      ['eth_call · eth_getCode','tokenURI · getSvg · getItemData · eth_getCode, straight to the contract','et-done'],
+      ['abi decode · in this page','string at offset 0x20 · the score’s %0A newlines decoded to 64 rows','et-done'],
+      ['render','ERC-20i svg shown as returned · the Autoglyph drawn from its legend: stroke and size chosen here','et-done'],
+      ['failure','no answer → the exhibit says so · no cached copy exists to fall back on','et-guard'],
+      ['bitcoin','Esplora, a third-party indexer (blockstream · mempool · emzy) · said on the label',wait?'et-now':'et-done']
+    ];
+    $('etMuPipe').innerHTML=steps.map(function(s){return '<li class="'+s[2]+'"><b>'+esc(s[0])+'</b><p>'+esc(s[1])+'</p></li>';}).join('');
+    var B=D.build;
+    $('etMuReceipt').innerHTML=[
+      ['code size v1','20,173 B · eth_getCode 2026-08-16'],
+      ['code size v2','21,581 B · eth_getCode 2026-08-16'],
+      ['v2 − v1','1,408 B · one new function: getHolderIndex'],
+      ['inscription','3,991,238 B · weight 3,991,772 / 4,000,000 wu'],
+      ['block','832,947 · 2024-03-03 · fee 1.0977 BTC'],
+      ['today',ok===n?'all '+n+' read live':(wait?wait+' pending · ':'')+ok+' read · '+no+' unreachable · numbers above are build-time, labelled so']
+    ].map(function(r){return '<tr><th>'+esc(r[0])+'</th><td>'+esc(r[1])+'</td></tr>';}).join('');
+    void B;
+    $('etMuVerify').innerHTML=[
+      'POST {"method":"eth_getCode","params":["0x28a5e71BFc02723eAC17E39c84c5190415C0de9F","latest"]} to any Base RPC',
+      'same for PEPi v1 0x19706c142d33376240e418d6385f05691a5fa8e2 · subtract · expect 1,408',
+      'GET /api/tx/ed76bf35…72a0 on any Esplora · weight ÷ 4,000,000'
+    ].map(function(s){return '<li><code>'+esc(s)+'</code></li>';}).join('');
+  }
+
+  function keyed(){document.querySelectorAll('#eternal [data-etk]').forEach(function(e){if(e.dataset.etEn==null)e.dataset.etEn=e.textContent;e.textContent=T(e.dataset.etk,e.dataset.etEn);});}
+  function all(){D.rooms=rooms();D.reads=reads();keyed();bee();raver();cy();}
+  var sched=0; function soon(){if(sched)return;sched=requestAnimationFrame(function(){sched=0;var before=JSON.stringify(D.reads.map(function(r){return r.state+r.detail;}));D.reads=reads();if(JSON.stringify(D.reads.map(function(r){return r.state+r.detail;}))!==before){bee();raver();cy();}});}
+
+  function wire(){
+    var ev=$('eternal'); if(!ev) return;
+    ev.addEventListener('click',function(e){
+      var hall=e.target.closest('[data-hall]');
+      if(hall){var k=hall.getAttribute('data-hall');openHall=openHall===k?null:k;bee();var b=ev.querySelector('[data-hall="'+k+'"]');if(b)b.focus({preventScroll:true});return;}
+      var star=e.target.closest('.et-star');
+      if(star){var i=+star.getAttribute('data-i');R.star=R.star===i?null:i;raver();return;}
+      var ring=e.target.closest('.et-ring');
+      if(ring){R.sel=ring.getAttribute('data-c');R.star=null;raver();return;}
+      var tr=e.target.closest('.et-c-tab tr.et-pick');
+      if(tr){var tb=$('etMuReads'),k2=tr.getAttribute('data-k');tb.setAttribute('data-open',tb.getAttribute('data-open')===k2?'':k2);cy();}
+    });
+    ev.addEventListener('keydown',function(e){
+      if(e.key!=='Enter'&&e.key!==' ')return;
+      var t=e.target.closest('.et-ring,.et-star,.et-c-tab tr.et-pick'); if(!t)return;
+      e.preventDefault(); t.dispatchEvent(new MouseEvent('click',{bubbles:true}));
+    });
+    /* the one real re-read: nothing is cached, so a reload asks the chain again from scratch */
+    $('etMuCyGo').addEventListener('click',function(){location.reload();});
+    document.addEventListener('blang',function(){all();});
+    var mo=new MutationObserver(soon);
+    ['glyphText','pepiArt','froggiArt','sz2','trapCtl','trapBad','btcTx'].forEach(function(id){var e=$(id);if(e)mo.observe(e,{childList:true,subtree:true,characterData:true});});
+  }
+
+  D.classes=classes(); D.chron=chron(); D.rpc={eth:(typeof RPC!=='undefined'&&RPC.eth)||[],base:(typeof RPC!=='undefined'&&RPC.base)||[]};
+  wire(); all();
+  window.__eternal={data:D,raver:R};
+})();
 </script>
 <script src="./fleet.js"></script>
 <div id="bnr-beta-badge" style="position:fixed;right:.6rem;bottom:calc(.6rem + 46px);z-index:9997;font:12px ui-monospace,monospace;opacity:.75"><a href="../" style="color:#39c5cf;text-decoration:none;border:1px solid #30363d;border-radius:99px;padding:.15rem .7rem;background:#161b22">⌂ hub</a></div>

@@ -179,7 +179,7 @@ export function layout(view, reg, px = 600) {
       pos[n.id] = { a: -Math.PI / 2 + (n.pos - 0.5) * Math.PI * 1.7,
         r: n.gen === 0 ? 0 : 20 + ((n.gen - 1) / Math.max(1, depth - 1)) * 18, w: n.gen === 0 ? 16 : 22 };
     spaceRings(view.nodes, pos, 22);
-    unclash(view.nodes, pos, (56 / px) * 100);
+    unclash(view.nodes, pos, (96 / px) * 100); /* a raver name reads at 14 px (the floor), three lines and a caption tall */
   } else {
     const w = Math.min(reg === 'cypherpunk' ? 24 : 26, 96 / rowMax - 1.5);
     for (const n of view.nodes) {

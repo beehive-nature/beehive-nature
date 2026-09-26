@@ -7,125 +7,200 @@
 <meta name="description" content="Watch a public Autonomi video in the browser. No app, no account.">
 <title>bViEw — skaists.dev</title>
 <link rel="preload" href="fonts/burti.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="skaists.css">
 <style>
 @font-face{font-family:burti;src:url(fonts/burti.woff2) format("woff2");font-display:swap}
-/* THREE AUTHORED PRESENTATIONS (founder 2026-09-26: "three separate user experiences and
-   interfaces/graphics/design/information for three separate personas"). One engine, one set of
-   facts and actions (register canon 2026-08-28); each register composes its own page around it.
-   Tokens per the 2026-09-25 register dress (PR #232): bee paper + ink + ONE magenta action, serif
-   title, 20px cards / 12px controls, no glow; raver black + magenta, display 800, pills, one glow;
-   cypherpunk black + mono + teal actions, 4px corners, dense. No text-transform anywhere (casing
-   law); no dash for an unknown value. The address is written once: in the field. */
-:root{--mono:ui-monospace,"Cascadia Mono",Menlo,Consolas,monospace;--sans:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;--serif:Georgia,"Iowan Old Style","Times New Roman",serif}
-body{--bg:#fbf7f0;--ink:#0c1412;--dim:#4a5f55;--well:#fffdf8;--line:#e6dfd2;--edge:#857d70;--act:#a8238c;--on:#fff;--link:#6e3fb8;--card:20px;--ctl:12px;--font:var(--sans);--title:var(--serif)}
-body[data-reg="raver"]{--bg:#06110c;--ink:#f4eefc;--dim:#c9bde6;--well:#140f22;--line:#2d2447;--edge:#6a5f92;--act:#d655bb;--on:#06110c;--link:#d655bb;--card:28px;--ctl:999px;--glow:0 0 0 1px rgba(214,85,187,.45),0 0 28px rgba(156,111,214,.45)}
-body[data-reg="cypherpunk"]{--bg:#06110c;--ink:#dfeaec;--dim:#9db3b9;--well:#0b1714;--line:#1f2b30;--edge:#5b7178;--act:#45c2dc;--on:#06110c;--link:#45c2dc;--card:4px;--ctl:4px;--font:var(--mono);--title:var(--mono)}
+/* ETERNAL (founder blueprint 2026-09-26, docs/design/eternal): three separate products around ONE
+   engine. new bee is a calm room, raver is the drop (the file as a ring of light), cypherpunk is the
+   instrument (the fetch pipeline, the byte map, the start rule, the receipts). One set of facts and
+   one real action: the address field and its button, which travel into whichever front is showing
+   (the address is written once, in that field). Every value below is a skaists token
+   (surfaces/skaists.css, compiled from docs/design/skaists/tokens.json): no hand-picked hex, size or
+   corner. Measured by e2e/skaists-conformance.mjs; proven by e2e/bview-eternal.test.mjs.
+   No text-transform anywhere (casing law); no dash for an unknown value (brand law). */
+body{--bg:var(--sk-bg);--ink:var(--sk-ink);--dim:var(--sk-ink-mut);--well:var(--sk-bg-card);--line:var(--sk-line);--edge:var(--sk-ink);
+ --act:var(--sk-primary);--on:var(--sk-on-primary);--link:var(--sk-link);--card:var(--sk-radius-xl);--ctl:var(--sk-radius-lg);
+ --font:var(--sk-font-bee-sans);--title:var(--sk-font-bee-serif);--screen:var(--sk-ink);--screen-ink:var(--sk-bg);--fs:16px;--fs2:14px}
+body[data-reg="raver"]{--edge:var(--sk-line);--ctl:var(--sk-radius-pill);--card:var(--sk-radius-xl);--font:var(--sk-font-raver-body);--title:var(--sk-font-raver-display);
+ --screen:var(--sk-bg-card);--screen-ink:var(--sk-ink);--dim:var(--sk-ink-soft);--fs:14px;--fs2:14px}
+body[data-reg="cypherpunk"]{--edge:var(--sk-ink-mut);--ctl:var(--sk-radius-sm);--card:var(--sk-radius-sm);--font:var(--sk-font-mono);--title:var(--sk-font-mono);
+ --screen:var(--sk-bg-card);--screen-ink:var(--sk-ink);--fs:13px;--fs2:12px}
 *{box-sizing:border-box;margin:0}
 [hidden]{display:none!important}
 [data-reg]:not(body){display:none}
 body[data-reg="bee"] [data-reg="bee"],body[data-reg="raver"] [data-reg="raver"],body[data-reg="cypherpunk"] [data-reg="cypherpunk"]{display:revert}
-.sr{position:absolute!important;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
-body{background:var(--bg);color:var(--ink);font:16px/1.55 var(--font);min-height:100dvh;padding:8px 16px 88px}
+.sr{position:absolute!important;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;font-size:var(--fs2)}
+body{background:var(--bg);color:var(--ink);font:400 var(--fs)/1.45 var(--font);min-height:100dvh;padding:var(--sk-s1) var(--sk-s3) var(--sk-s6)}
 main{max-width:640px;margin:0 auto;display:flex;flex-direction:column}
-h1{font:600 clamp(2rem,9vw,2.6rem)/1.1 var(--title);margin:.4rem 0 .35rem;letter-spacing:-.01em}
-.voice{color:var(--dim);margin:0 0 1rem}
-form{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 1rem}
-label{flex:1 0 100%;color:var(--dim)}
-input{flex:1 1 200px;min-width:0;min-height:48px;padding:0 14px;font:15px var(--mono);color:var(--ink);background:var(--well);border:1.5px solid var(--edge);border-radius:var(--ctl)}
-button{min-height:48px;padding:0 22px;font:600 16px var(--font);color:var(--on);background:var(--act);border:0;border-radius:var(--ctl);cursor:pointer;transition:transform .14s ease}
-button:active{transform:scale(.97)}
-:is(input,button,a,summary):focus-visible{outline:2.5px solid var(--ink);outline-offset:2px}
-.say{padding:12px 14px;border:1.5px dashed var(--edge);border-radius:var(--ctl);margin:0 0 12px}
-#out{display:flex;flex-direction:column;gap:12px;margin:0 0 12px}
-.stage{position:relative;background:#000;border-radius:var(--card);overflow:hidden}
-video{display:block;width:100%;max-height:70dvh;background:#000}
-progress{display:block;width:100%;height:6px;appearance:none;border:0;background:rgba(127,127,127,.25);accent-color:var(--act)}
-progress::-webkit-progress-bar{background:rgba(127,127,127,.25)}progress::-webkit-progress-value{background:var(--act)}
+:is(input,button,a,summary,[tabindex]):focus-visible{outline:2px solid var(--sk-focus);outline-offset:3px}
+button{cursor:pointer;font-family:inherit}
+h1.bv-mark{margin:var(--sk-s2) 0 var(--sk-s2);font:400 18px/1.2 var(--sk-font-house);color:var(--sk-sovereign);letter-spacing:0}
+
+/* ── the front: one visible at a time; new bee is the default ── */
+#eternal{display:block}
+#eternal>.et-r,#eternal>.et-c{display:none}
+body[data-reg="raver"] #eternal>.et-b,body[data-reg="cypherpunk"] #eternal>.et-b{display:none}
+body[data-reg="raver"] #eternal>.et-r,body[data-reg="cypherpunk"] #eternal>.et-c{display:flex}
+#eternal svg{display:block}
+
+/* the one real action: the address field and its button (#f), dressed by the front it sits in */
+form{display:flex;flex-wrap:wrap;gap:var(--sk-s2)}
+label{flex:1 0 100%;display:flex;align-items:center;min-height:var(--sk-control-min)}
+input{flex:1 1 200px;min-width:0;min-height:var(--sk-control-row);padding:0 var(--sk-s2);font:400 15px/1.4 var(--sk-font-mono);color:var(--sk-ink);background:var(--sk-bg);border:1.5px solid var(--edge);border-radius:var(--sk-radius)}
+input::placeholder{color:var(--sk-ink-mut)}
+button[type=submit]{min-height:var(--sk-control-primary);padding:0 var(--sk-s4);border:0;border-radius:var(--ctl);background:var(--act);color:var(--on);transition:transform .14s ease}
+button[type=submit]:active{transform:scale(.97)}
+.say{padding:var(--sk-s2) var(--sk-s3);border:1.5px dashed var(--sk-guard);border-radius:var(--sk-radius);background:var(--sk-guard-wash);color:var(--sk-ink);font:400 var(--fs)/1.45 var(--font)}
+#etDock{display:flex;flex-direction:column;gap:var(--sk-s2)}
+#out{display:flex;flex-direction:column;gap:var(--sk-s2)}
+.stage{position:relative;background:var(--screen);border-radius:var(--card);overflow:hidden}
+video{display:block;width:100%;max-height:70dvh;background:var(--screen)}
+progress{display:block;width:100%;height:6px;appearance:none;border:0;background:var(--sk-line);accent-color:var(--act)}
+progress::-webkit-progress-bar{background:var(--sk-line)}progress::-webkit-progress-value{background:var(--act)}
 .got{display:none}
-.veil{position:absolute;inset:0;display:grid;place-items:center;align-content:center;gap:6px;pointer-events:none;background:rgba(6,17,12,.55);color:#fff;text-align:center}
+.veil{position:absolute;inset:0;display:grid;place-items:center;align-content:center;gap:var(--sk-s1);pointer-events:none;background:color-mix(in srgb,var(--screen) 62%,transparent);color:var(--screen-ink);text-align:center}
 .ring{width:118px;height:118px;transform:rotate(-90deg)}
-.ring circle{fill:none;stroke-width:8}.ring .track{stroke:rgba(255,255,255,.25)}.ring .fill{stroke:var(--act);stroke-linecap:round;stroke-dasharray:327;stroke-dashoffset:327;transition:stroke-dashoffset .26s ease}
+.ring circle{fill:none;stroke-width:8}.ring .track{stroke:var(--screen-ink);stroke-opacity:.28}.ring .fill{stroke:var(--act);stroke-linecap:round;stroke-dasharray:327;stroke-dashoffset:327;transition:stroke-dashoffset .26s ease}
 .count{position:absolute;inset:0;display:grid;place-items:center;align-content:center}
-.count b{font:700 1.9rem/1 var(--font)}
-.tap{width:100%}
-details.facts>summary{cursor:pointer;color:var(--link);min-height:44px;display:flex;align-items:center}
-.sheet h2{font:600 1.15rem/1.2 var(--title);margin:0 0 12px}
-.nerd{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 14px}
-.nerd>div{min-width:0}
-.nerd dt{font:14px/1.3 var(--font);color:var(--dim)}
-.nerd dd{margin:2px 0 0;font:15px/1.35 var(--mono);overflow-wrap:anywhere}
-.nerd .nm dd{color:var(--dim)}
-.done{margin:12px 0 0;color:var(--dim);font-size:14px}
-.note{color:var(--dim);font-size:15px;margin:0 0 12px}
+.count b{font:400 32px/1 var(--sk-font-bee-serif)}
+.till{font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em}
+.tap{width:100%;min-height:var(--sk-control-row);border:1.5px solid var(--sk-ink);border-radius:var(--ctl);background:transparent;color:var(--sk-ink);font:600 var(--fs)/1.2 var(--font)}
+@media (prefers-reduced-motion:reduce){button[type=submit],.ring .fill{transition:none}}
 
-/* ---- NEW BEE: a calm room. Serif title, one card holding the one question, one magenta
-   action, the video in a soft frame, the wait said once over the picture. No jargon, no
-   numbers but the countdown; the facts wait behind "details". */
-body[data-reg="bee"] form{background:var(--well);border:1px solid var(--line);border-radius:var(--card);padding:16px}
-body[data-reg="bee"] label{color:var(--ink);font-weight:600}
-body[data-reg="bee"] #s-wait{border:0;padding:0 4px;color:var(--dim)}
-body[data-reg="bee"] .stage{box-shadow:0 1px 0 var(--line),0 8px 24px rgba(12,20,18,.08)}
-body[data-reg="bee"] .sheet{padding:4px 0 0}
+/* NEW BEE — a calm room: one question, one card, one magenta action, plain rows */
+.et-b{display:flex;flex-direction:column;gap:var(--sk-s3)}
+.et-b-h{font:400 40px/1.05 var(--sk-font-bee-serif);color:var(--sk-ink);text-wrap:balance}
+.et-b-lede{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink-mut);text-wrap:pretty}
+.et-b-guard{display:flex;align-items:center;gap:var(--sk-s2);min-height:var(--sk-control-min);padding:var(--sk-s1) var(--sk-s3);border-radius:var(--sk-radius);background:var(--sk-guard-wash);color:var(--sk-guard);font:600 15px/1.45 var(--sk-font-bee-sans)}
+.et-b-guard svg,.et-b-row svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.et-b #f{padding:var(--sk-s3);background:var(--sk-bg-card);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl)}
+.et-b label{font:600 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+.et-b button[type=submit]{flex:1 0 100%;font:600 17px/1.2 var(--sk-font-bee-sans)}
+.et-b #s-wait{border:0;background:transparent;padding:0 var(--sk-s1);color:var(--sk-ink-mut)}
+.et-b-rows{display:flex;flex-direction:column;background:var(--sk-bg-card);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl);overflow:hidden}
+.et-b-row{display:flex;align-items:center;justify-content:space-between;gap:var(--sk-s2);width:100%;min-height:var(--sk-control-row);padding:0 var(--sk-s3);border:0;border-bottom:1px solid var(--sk-line-soft);background:transparent;text-align:left;font:500 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+.et-b-row small{display:flex;align-items:center;gap:var(--sk-s1);font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut);text-align:right}
+.et-b-row[aria-expanded="true"]{background:var(--sk-sovereign-tint);color:var(--sk-sovereign-strong);font-weight:600}
+.et-b-row[aria-expanded="true"] small{color:var(--sk-sovereign-strong)}
+.et-b-row .chev{transition:transform .26s}.et-b-row[aria-expanded="true"] .chev{transform:rotate(90deg)}
+.et-b-say{padding:var(--sk-s2) var(--sk-s3);border-bottom:1px solid var(--sk-line-soft);background:var(--sk-sovereign-tint);font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+.et-b-rows>:last-child{border-bottom:0}
+.et-b-link{align-self:center;min-height:var(--sk-control-min);display:flex;align-items:center;font:600 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-link);text-decoration:none}
+.et-b-link:hover{color:var(--sk-link-hover)}
+.et-b-foot{text-align:center;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
 
-/* ---- RAVER: the drop. Black ground, a full-bleed stage, a display title in light, one pill with
-   one glowing play, a countdown you can feel, and a flow meter that says in plain words how the
-   network keeps pace with the beat. Motion is slow (well under 3 Hz), pausable, still when the
-   reader asks for reduced motion and whenever the tab is hidden. */
-body[data-reg="raver"] h1{font:800 clamp(2.6rem,13vw,3.6rem)/1 var(--sans);background:linear-gradient(90deg,#d655bb,#9c6fd6 60%,#45c2dc);-webkit-background-clip:text;background-clip:text;color:transparent;margin-top:.6rem}
-body[data-reg="raver"] form{flex-wrap:nowrap;background:var(--well);border-radius:999px;padding:6px;box-shadow:var(--glow)}
-body[data-reg="raver"] form input{border:0;background:transparent}
-body[data-reg="raver"] form label{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
-body[data-reg="raver"] form button{width:52px;padding:0;font-size:20px;flex:none}
-body[data-reg="raver"] .stage{margin:0 -16px;border-radius:0}
-body[data-reg="raver"] .veil{background:radial-gradient(circle at 50% 50%,rgba(20,15,34,.35),rgba(6,17,12,.85))}
-body[data-reg="raver"] .ring{width:150px;height:150px;filter:drop-shadow(0 0 10px rgba(214,85,187,.7))}
-body[data-reg="raver"] .count b{font:800 3.2rem/1 var(--sans)}
-body[data-reg="raver"] #s-wait{display:none}
-body[data-watching] :is(#art,#motion){display:none!important}
-.till{font:600 15px/1.2 var(--sans);opacity:.9}
-body[data-reg="raver"] progress{height:3px}
-.art{margin:0 -16px 16px;display:block}
-.art svg{display:block;width:100%;height:auto}
-.flow{display:flex;align-items:flex-end;gap:10px}
-.flow .bars{display:flex;align-items:flex-end;gap:4px;height:34px;flex:none}
-.flow .bars i{display:block;width:8px;border-radius:99px;background:#2d2447}
-.flow .bars i:nth-child(1){height:10px}.flow .bars i:nth-child(2){height:16px}.flow .bars i:nth-child(3){height:22px}.flow .bars i:nth-child(4){height:28px}.flow .bars i:nth-child(5){height:34px}
-.flow .bars i.on{background:linear-gradient(#d655bb,#9c6fd6);box-shadow:0 0 8px rgba(214,85,187,.6)}
-.flow p{color:var(--dim);font-size:15px}
-.motion{background:transparent;color:var(--dim);border:1px solid var(--line);min-height:44px;padding:0 16px;font-weight:400;align-self:flex-start;margin:0 0 14px}
+/* RAVER — the drop: the file is a ring of light; you tap it to read it */
+.et-r{display:flex;flex-direction:column;gap:var(--sk-s3);color:var(--sk-ink);font-family:var(--sk-font-raver-body)}
+.et-r-top{display:flex;align-items:baseline;justify-content:space-between;gap:var(--sk-s2);flex-wrap:wrap}
+.et-r-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em;color:var(--sk-ink)}
+.et-r-hint{font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+.et-r-lede{font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+.art{margin:0 auto;width:100%;max-width:340px;filter:drop-shadow(var(--sk-glow-sovereign))}
+.art svg{width:100%;height:auto}
+.art .dial{cursor:pointer}
+.art .dial:focus{outline:none}.art .dial:focus-visible .core{stroke:var(--sk-ink);stroke-width:2}
+.art .beat{fill:var(--sk-sovereign-wash);transition:fill .26s}
+.art .beat.rest{fill:var(--sk-sovereign-soft);opacity:.5}.art .beat.lit{fill:var(--sk-sovereign)}.art .beat.hot{fill:var(--sk-you)}.art .beat.head{fill:var(--sk-sovereign-strong)}
+.art .halo{fill:none;stroke:var(--sk-sovereign);stroke-width:1.5;stroke-dasharray:3 5;opacity:.7}
+.art .core{fill:var(--sk-bg-card);stroke:var(--sk-line);stroke-width:1.5}
+.art .mid{font:700 30px/1 var(--sk-font-raver-display);fill:var(--sk-ink)}
+.art .sub{font:400 14px/1.4 var(--sk-font-raver-body);fill:var(--sk-ink-soft)}
+.motion{align-self:center;min-height:var(--sk-control-min);padding:0 var(--sk-s3);border:1.5px solid var(--sk-sovereign-soft);border-radius:var(--sk-radius-pill);background:transparent;color:var(--sk-ink-soft);font:400 14px/1.4 var(--sk-font-raver-body)}
+.et-r #f{flex-wrap:wrap;gap:var(--sk-s1) var(--sk-s2)}
+.et-r label{font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+.et-r label .sr{position:static!important;width:auto;height:auto;overflow:visible;clip-path:none}
+.et-r input{min-height:var(--sk-control-primary);padding:0 var(--sk-s3);border:1px solid var(--sk-line);border-radius:var(--sk-radius-pill);background:var(--sk-bg-card);box-shadow:var(--sk-glow-sovereign);font:400 14px/1.4 var(--sk-font-mono)}
+.et-r button[type=submit]{width:var(--sk-control-primary);padding:0;flex:none;font:700 15px/1.2 var(--sk-font-raver-display);box-shadow:var(--sk-glow-sovereign)}
+.et-r .stage{margin:0 calc(-1 * var(--sk-s3));border-radius:0}
+.et-r .ring{width:150px;height:150px;filter:drop-shadow(var(--sk-glow-sovereign))}
+.et-r .count b{font:700 60px/.95 var(--sk-font-raver-display);letter-spacing:-.02em}
+.et-r #s-wait{display:none}
+.et-r progress{height:3px}
+.flow{display:flex;align-items:flex-end;gap:var(--sk-s2)}
+.flow .bars{display:flex;align-items:flex-end;gap:var(--sk-s1);height:36px;flex:none}
+.flow .bars i{display:block;width:6px;border-radius:var(--sk-radius-pill);background:var(--sk-sovereign-wash)}
+.flow .bars i:nth-child(1){height:12px}.flow .bars i:nth-child(2){height:18px}.flow .bars i:nth-child(3){height:24px}.flow .bars i:nth-child(4){height:30px}.flow .bars i:nth-child(5){height:36px}
+.flow .bars i.on{background:var(--sk-you);box-shadow:var(--sk-glow-sovereign)}
+.flow p{color:var(--sk-ink-soft);font:400 14px/1.4 var(--sk-font-raver-body)}
+.et-r-tiles{display:grid;grid-template-columns:1fr 1fr;gap:var(--sk-s2)}
+.et-r-tiles button{display:flex;flex-direction:column;align-items:flex-start;gap:var(--sk-s1);min-height:88px;padding:var(--sk-s2) var(--sk-s3);border:1.5px solid var(--sk-line);border-radius:var(--sk-radius-xl);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong);text-align:left;transition:border-color .26s,box-shadow .26s}
+.et-r-tiles button[aria-pressed="true"]{opacity:1;border-color:var(--sk-you);box-shadow:var(--sk-glow-sovereign)}
+.et-r-tiles b{font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em}
+.et-r-tiles span{font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink)}
+.et-r-foot{text-align:center;font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
 @media(prefers-reduced-motion:no-preference){
   body[data-reg="raver"]:not([data-motion-paused]) .beat{animation:beat 1.6s ease-in-out infinite;transform-origin:50% 100%;transform-box:fill-box}
-  body[data-reg="raver"]:not([data-motion-paused]) .beat:nth-child(2n){animation-delay:.4s}
-  body[data-reg="raver"]:not([data-motion-paused]) .beat:nth-child(3n){animation-delay:.8s}
+  body[data-reg="raver"]:not([data-motion-paused]) .spoke:nth-child(2n) .beat{animation-delay:.4s}
+  body[data-reg="raver"]:not([data-motion-paused]) .spoke:nth-child(3n) .beat{animation-delay:.8s}
   body[data-reg="raver"]:not([data-motion-paused]) .halo{animation:halo 3.2s ease-in-out infinite}
-  @keyframes beat{50%{transform:scaleY(.45)}}
-  @keyframes halo{50%{opacity:.35}}
+  @keyframes beat{50%{transform:scaleY(.62)}}
+  @keyframes halo{50%{opacity:.3}}
 }
 body[data-tab-hidden] *{animation-play-state:paused!important}
-@media(prefers-reduced-motion:reduce){#motion{display:none!important}}
+@media(prefers-reduced-motion:reduce){#motion{display:none!important}.et-r-tiles button,.art .beat{transition:none}}
 
-/* ---- CYPHERPUNK: the instrument, complete at first paint. Mono top to bottom, teal actions,
-   4px corners. The file as a byte map, the start rule with its live numbers, the device's own
-   decodingInfo answer, a receipt log, and the your-file grid open — cite or silent. */
-body[data-reg="cypherpunk"]{font-size:14px}
-body[data-reg="cypherpunk"] h1{font:600 1.5rem/1.2 var(--mono)}
-body[data-reg="cypherpunk"] .voice{font-size:13px}
-body[data-reg="cypherpunk"] label{font-size:13px}
-body[data-reg="cypherpunk"] .say{border-style:solid;font-size:13px}
-body[data-reg="cypherpunk"] details.facts>summary{display:none}
-body[data-reg="cypherpunk"] .sheet,.pane{border:1px solid var(--line);border-radius:4px;padding:12px;background:var(--well)}
-body[data-reg="cypherpunk"] .nerd{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 12px}
-body[data-reg="cypherpunk"] .nerd dt{font:12.5px var(--mono)}
-body[data-reg="cypherpunk"] .nerd dd{font-size:13px}
-body[data-reg="cypherpunk"] progress,body[data-reg="cypherpunk"] .veil,body[data-reg="cypherpunk"] #s-wait{display:none!important}
-.pane{margin:0 0 12px}
-.pane h2{font:600 13px/1.3 var(--mono);color:var(--dim);margin:0 0 8px}
+/* CYPHERPUNK — the instrument, complete at first paint: pipeline, byte map, rule, receipts */
+.et-c{display:flex;flex-direction:column;gap:var(--sk-s2);font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink)}
+.et-c-path{font:600 15px/1.45 var(--sk-font-mono);color:var(--sk-ink);word-break:break-all}
+.et-c-path span{color:var(--sk-ai)}
+.et-c-lede{font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink-soft)}
+.et-c-chips{display:flex;flex-wrap:wrap;gap:var(--sk-s1)}
+.et-c-chips span{padding:var(--sk-s1) var(--sk-s2);border:1px solid var(--sk-line);border-radius:4px;background:var(--sk-bg-card);font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-soft)}
+.et-c-chips span.on{border-color:var(--sk-ai);color:var(--sk-ai)}.et-c-chips span.ok{border-color:var(--sk-verified);color:var(--sk-verified)}.et-c-chips span.guard{border-color:var(--sk-guard);color:var(--sk-guard)}
+.et-c label{font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut)}
+.et-c input{background:var(--sk-bg-card);border-radius:var(--sk-radius-sm);font:400 13px/1.45 var(--sk-font-mono)}
+.et-c button[type=submit]{min-height:52px;font:600 14px/1.2 var(--sk-font-mono)}
+.et-c .say{border-radius:var(--sk-radius-sm);font:400 13px/1.45 var(--sk-font-mono)}
+.et-c progress,.et-c .veil,.et-c #s-wait{display:none!important}
+.et-c-h{margin-top:var(--sk-s2);font:600 15px/1.45 var(--sk-font-mono);color:var(--sk-ink)}
+.et-c-pipe{list-style:none;padding:0;display:grid;gap:var(--sk-s1);counter-reset:p}
+.et-c-pipe li{display:grid;grid-template-columns:30px 1fr;gap:0 var(--sk-s2);padding:var(--sk-s2) var(--sk-s3);border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm);background:var(--sk-bg-card);counter-increment:p}
+.et-c-pipe li::before{content:counter(p,decimal-leading-zero);color:var(--sk-guard);font-weight:600}
+.et-c-pipe li b{font-weight:600;min-width:0;overflow-wrap:anywhere}.et-c-pipe li p{grid-column:2;min-width:0;overflow-wrap:anywhere;color:var(--sk-ink-soft)}
+.et-c-pipe li.done b{color:var(--sk-verified)}.et-c-pipe li.skip b{color:var(--sk-ink-mut)}
+.et-c-pipe li.guard{border-style:dashed;border-color:var(--sk-guard)}.et-c-pipe li.guard b{color:var(--sk-guard)}
+.et-c-pipe li.now{border-color:var(--sk-ai);box-shadow:inset 0 0 0 1px var(--sk-ai)}.et-c-pipe li.now b{color:var(--sk-ai)}
+.et-c-pipe li.todo p{color:var(--sk-ink-mut)}
+.pane{padding:var(--sk-s2) var(--sk-s3);border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm);background:var(--sk-bg-card)}
+#inst{display:flex;flex-direction:column;gap:var(--sk-s2)}
+.pane h2{margin:0 0 var(--sk-s1);font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut)}
 .map svg{display:block;width:100%;height:46px}
-.map .legend{display:flex;flex-wrap:wrap;gap:4px 12px;margin:6px 0 0;font:12.5px var(--mono);color:var(--dim)}
-.map .legend i{display:inline-block;width:10px;height:10px;margin-right:4px;vertical-align:-1px;border-radius:2px}
-.kv{font:13px/1.5 var(--mono);overflow-wrap:anywhere}
-.log{list-style:none;padding:0;font:12.5px/1.5 var(--mono);color:var(--dim);max-height:220px;overflow:auto}
-.log b{color:var(--ink);font-weight:400}
+.map .m-track{fill:var(--sk-line)}.map .m-got{fill:var(--sk-info)}.map .m-blob{fill:none;stroke:var(--sk-ai);stroke-width:2}.map .m-head{fill:var(--sk-ink-soft)}
+.map .m-go{stroke:var(--sk-you);stroke-width:2;stroke-dasharray:3 2}.map .m-play{stroke:var(--sk-ink);stroke-width:2}
+.map .legend{display:flex;flex-wrap:wrap;gap:var(--sk-s1) var(--sk-s2);margin:var(--sk-s1) 0 0;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut)}
+.map .legend i{display:inline-block;width:12px;height:12px;margin-right:var(--sk-s1);vertical-align:-1px;border-radius:4px}
+.lg-head{background:var(--sk-ink-soft)}.lg-got{background:var(--sk-info)}.lg-blob{border:2px solid var(--sk-ai)}.lg-go{background:var(--sk-you)}.lg-play{background:var(--sk-ink)}
+.kv{font:400 13px/1.45 var(--sk-font-mono);overflow-wrap:anywhere}
+.log{list-style:none;padding:0;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);max-height:220px;overflow:auto}
+.log b{color:var(--sk-ink);font-weight:500}
+.et-c-kv{width:100%;border-collapse:collapse;border:1px solid var(--sk-line);background:var(--sk-bg-card);table-layout:fixed}
+.et-c-kv th{width:96px;padding:var(--sk-s1) var(--sk-s2);text-align:left;vertical-align:top;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);border-bottom:1px solid var(--sk-line)}
+.et-c-kv td{padding:var(--sk-s1) var(--sk-s2);border-bottom:1px solid var(--sk-line);font:400 13px/1.45 var(--sk-font-mono);overflow-wrap:anywhere}
+.et-c-kv .no{color:var(--sk-info)}.et-c-kv .yes{color:var(--sk-verified)}
+.et-c-verify{padding:var(--sk-s2) var(--sk-s3);border:1px dashed var(--sk-line);border-radius:var(--sk-radius-sm)}
+.et-c-verify p{font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);margin-bottom:var(--sk-s1)}
+.et-c-verify ol{padding-left:var(--sk-s4);display:grid;gap:var(--sk-s1);font:400 13px/1.45 var(--sk-font-mono);overflow-wrap:anywhere}
+.et-c-row{display:grid;grid-template-columns:1fr 1fr;gap:var(--sk-s2)}
+.et-c-ghost{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:52px;padding:var(--sk-s1);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius-sm);color:var(--sk-ink);text-decoration:none;text-align:center;font:600 14px/1.2 var(--sk-font-mono)}
+.et-c-ghost small{font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut)}
+
+/* ── THE WHOLE FILE, below the fronts, dressed per register (the page's variables on skaists) ── */
+.et-archive-h{margin:var(--sk-s5) 0 var(--sk-s2);padding-top:var(--sk-s4);border-top:1px solid var(--sk-line);color:var(--sk-ink);font:400 28px/1.1 var(--sk-font-bee-serif)}
+body[data-reg="raver"] .et-archive-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em}
+body[data-reg="cypherpunk"] .et-archive-h{font:600 15px/1.45 var(--sk-font-mono)}
+details.facts>summary{cursor:pointer;color:var(--link);min-height:var(--sk-control-min);display:flex;align-items:center;font:600 var(--fs)/1.45 var(--font)}
+body[data-reg="cypherpunk"] details.facts>summary{display:none}
+.sheet{padding:var(--sk-s2) 0 0}
+body[data-reg="cypherpunk"] .sheet{padding:var(--sk-s2) var(--sk-s3);border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm);background:var(--sk-bg-card)}
+.sheet h2{font:600 15px/1.45 var(--sk-font-mono);margin:0 0 var(--sk-s2)}
+.nerd{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--sk-s2)}
+.nerd>div{min-width:0}
+.nerd dt{font:400 var(--fs2)/1.4 var(--font);color:var(--dim)}
+.nerd dd{margin:2px 0 0;font:400 15px/1.4 var(--sk-font-mono);overflow-wrap:anywhere}
+body[data-reg="raver"] .nerd dd{font-size:14px}
+body[data-reg="cypherpunk"] .nerd dd{font-size:13px}
+.nerd .nm dd{color:var(--dim)}
+.done{margin:var(--sk-s2) 0 0;color:var(--dim);font:400 var(--fs2)/1.4 var(--font)}
 @media(min-width:760px){.nerd{grid-template-columns:repeat(3,minmax(0,1fr))}}
 </style>
 </head>
@@ -140,66 +215,102 @@ document.addEventListener('DOMContentLoaded',function(){
 });})();
 </script>
 <main>
-  <h1 data-i18n="bview.title">bViEw</h1>
-  <p class="voice" data-reg="bee" data-i18n="bview.bee.lead">Watch a video someone shared with you.</p>
-  <p class="voice" data-reg="raver" data-i18n="bview.raverLead">Bring a public address. Feel the pulse as the picture arrives.</p>
-  <p class="voice" data-reg="cypherpunk" data-i18n="bview.cypherLead">Your file — honest client and door metrics only. Nothing invented.</p>
-  <figure class="art" data-reg="raver" id="art" aria-hidden="true">
-    <svg viewBox="0 0 390 150" preserveAspectRatio="xMidYMid slice">
-      <defs><linearGradient id="gv" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#9c6fd6"/><stop offset="1" stop-color="#d655bb"/></linearGradient>
-      <radialGradient id="gh"><stop offset="0" stop-color="#d655bb" stop-opacity=".55"/><stop offset="1" stop-color="#d655bb" stop-opacity="0"/></radialGradient></defs>
-      <rect width="390" height="150" fill="#06110c"/>
-      <circle class="halo" cx="195" cy="150" r="140" fill="url(#gh)"/>
-      <g fill="url(#gv)"><rect class="beat" x="31" y="70" width="10" height="80" rx="5"/><rect class="beat" x="55" y="40" width="10" height="110" rx="5"/><rect class="beat" x="79" y="85" width="10" height="65" rx="5"/><rect class="beat" x="103" y="25" width="10" height="125" rx="5"/><rect class="beat" x="127" y="60" width="10" height="90" rx="5"/><rect class="beat" x="151" y="10" width="10" height="140" rx="5"/><rect class="beat" x="175" y="45" width="10" height="105" rx="5"/><rect class="beat" x="199" y="5" width="10" height="145" rx="5"/><rect class="beat" x="223" y="50" width="10" height="100" rx="5"/><rect class="beat" x="247" y="20" width="10" height="130" rx="5"/><rect class="beat" x="271" y="75" width="10" height="75" rx="5"/><rect class="beat" x="295" y="35" width="10" height="115" rx="5"/><rect class="beat" x="319" y="90" width="10" height="60" rx="5"/><rect class="beat" x="343" y="55" width="10" height="95" rx="5"/></g>
-    </svg>
-  </figure>
-  <button type="button" class="motion" data-reg="raver" id="motion"><span data-i18n="bview.raver.pause" id="motion-pause">pause the motion</span><span data-i18n="bview.raver.resume" id="motion-play" hidden>let it move</span></button>
-  <form id="f" autocomplete="off">
-    <label for="addr"><span data-reg="bee" data-i18n="bview.bee.label">The link you were sent</span><span data-reg="raver" class="sr" data-i18n="bview.raver.label">public address</span><span data-reg="cypherpunk" data-i18n="bview.cy.label">address (64 hex)</span></label>
-    <input id="addr" name="addr" inputmode="url" spellcheck="false" dir="ltr" translate="no" placeholder="autonomi://…">
-    <button type="submit" class="primary"><span data-reg="bee" data-i18n="bview.bee.go">watch</span><span data-reg="raver" aria-hidden="true">▶</span><span data-reg="raver" class="sr" data-i18n="bview.raver.go">play</span><span data-reg="cypherpunk" data-i18n="bview.cy.go">fetch</span></button>
-  </form>
-  <p class="say" id="s-bad" data-i18n="bview.badOne" hidden>That is not a video address: after autonomi:// come 64 letters and numbers.</p>
-  <p class="say" id="s-slow" data-i18n="bview.slow" hidden>Fetching from the network. The first seconds can take a while.</p>
-  <p class="say" id="s-fail" data-i18n="bview.fail" hidden>The network door did not answer, or this file is not a video. Try again in a few minutes.</p>
-  <section id="out" aria-live="polite" hidden>
-    <div class="stage">
-      <video id="v" controls playsinline preload="auto"></video>
-      <div class="veil" id="veil" hidden>
-        <svg class="ring" viewBox="0 0 120 120"><circle class="track" cx="60" cy="60" r="52"/><circle class="fill" id="ring" cx="60" cy="60" r="52"/></svg>
-        <p class="count"><span><b id="count" translate="no" dir="ltr"></b><br><span class="till" data-reg="raver" data-i18n="bview.raver.till">till it plays</span></span></p>
+  <h1 class="bv-mark" data-i18n="bview.title">bViEw</h1>
+  <!-- ETERNAL FRONT: three products, one engine. The dock (#etDock: the address field, its button,
+       the honest status rows and the stage) is ONE element; it moves into the front that is showing. -->
+  <section id="eternal" aria-label="watch a shared video">
+
+    <!-- NEW BEE — a calm room: one question, the link, one magenta watch, plain rows -->
+    <div class="et-b">
+      <h2 class="et-b-h" data-i18n="bview.bee.lead">Watch a video someone shared with you.</h2>
+      <p class="et-b-lede" data-et-t="et.bview.b.lede">no app and no account. paste the link and it plays right here.</p>
+      <div class="et-b-guard"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg><span data-et-t="et.bview.b.guard">you only watch. nothing is sent from this device but the request.</span></div>
+      <div class="et-slot" data-slot="bee">
+        <div id="etDock">
+          <form id="f" autocomplete="off">
+            <label for="addr"><span data-reg="bee" data-i18n="bview.bee.label">The link you were sent</span><span data-reg="raver" class="sr" data-i18n="bview.raver.label">public address</span><span data-reg="cypherpunk" data-i18n="bview.cy.label">address (64 hex)</span></label>
+            <input id="addr" name="addr" inputmode="url" spellcheck="false" dir="ltr" translate="no" placeholder="autonomi://…">
+            <button type="submit" class="primary"><span data-reg="bee" data-i18n="bview.bee.go">watch</span><span data-reg="raver" aria-hidden="true">▶</span><span data-reg="raver" class="sr" data-i18n="bview.raver.go">play</span><span data-reg="cypherpunk" data-i18n="bview.cy.go">fetch</span></button>
+          </form>
+          <p class="say" id="s-bad" data-i18n="bview.badOne" hidden>That is not a video address: after autonomi:// come 64 letters and numbers.</p>
+          <p class="say" id="s-slow" data-i18n="bview.slow" hidden>Fetching from the network. The first seconds can take a while.</p>
+          <p class="say" id="s-fail" data-i18n="bview.fail" hidden>The network door did not answer, or this file is not a video. Try again in a few minutes.</p>
+          <section id="out" aria-live="polite" hidden>
+            <div class="stage">
+              <video id="v" controls playsinline preload="auto"></video>
+              <div class="veil" id="veil" hidden>
+                <svg class="ring" viewBox="0 0 120 120" aria-hidden="true"><circle class="track" cx="60" cy="60" r="52"/><circle class="fill" id="ring" cx="60" cy="60" r="52"/></svg>
+                <p class="count"><span><b id="count" translate="no" dir="ltr"></b><br><span class="till" data-reg="raver" data-i18n="bview.raver.till">till it plays</span></span></p>
+              </div>
+              <progress id="pg" max="1" value="0" aria-labelledby="s-slow" hidden></progress>
+            </div>
+            <p class="got" id="got" translate="no" dir="ltr" aria-live="off" hidden></p>
+            <button type="button" class="tap" id="tap" data-i18n="bview.tap" hidden>tap to play with sound</button>
+            <p class="say" id="s-wait" hidden></p>
+            <p class="say" id="s-rough" data-i18n="bview.rough" hidden>This device may not play this video smoothly.</p>
+            <div class="flow" data-reg="raver" id="flow" hidden>
+              <span class="bars" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
+              <p id="flow-say"></p>
+            </div>
+          </section>
+        </div>
       </div>
-      <progress id="pg" max="1" value="0" aria-labelledby="s-slow" hidden></progress>
+      <div class="et-b-rows" id="etBeeRows"></div>
+      <a class="et-b-link" href="#sheet-wrap" data-et-t="et.bview.b.more">see the details</a>
+      <p class="et-b-foot" data-i18n="bview.bee.note">Public video: anyone with the link can watch it. This device keeps a copy, so it opens at once next time.</p>
     </div>
-    <p class="got" id="got" translate="no" dir="ltr" aria-live="off" hidden></p>
-    <button type="button" class="tap" id="tap" data-i18n="bview.tap" hidden>tap to play with sound</button>
-    <p class="say" id="s-wait" hidden></p>
-    <p class="say" id="s-rough" data-i18n="bview.rough" hidden>This device may not play this video smoothly.</p>
-    <div class="flow" data-reg="raver" id="flow" hidden>
-      <span class="bars" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
-      <p id="flow-say"></p>
+
+    <!-- RAVER — the drop: the file as a ring of light; tap the ring, the tiles light up -->
+    <div class="et-r">
+      <div class="et-r-top"><h2 class="et-r-h" data-et-t="et.bview.r.h">the drop</h2><span class="et-r-hint" id="etRaverHint"></span></div>
+      <p class="et-r-lede" data-i18n="bview.raverLead">Bring a public address. Feel the pulse as the picture arrives.</p>
+      <figure class="art" id="art"><svg id="etRing" viewBox="-170 -170 340 340" role="group" aria-label="the file as a ring"></svg></figure>
+      <button type="button" class="motion" id="motion"><span data-i18n="bview.raver.pause" id="motion-pause">pause the motion</span><span data-i18n="bview.raver.resume" id="motion-play" hidden>let it move</span></button>
+      <div class="et-slot" data-slot="raver"></div>
+      <div class="et-r-tiles" id="etTiles"></div>
+      <p class="et-r-foot" data-i18n="bview.raverNote">A public picture, shared by address. Your device keeps a copy — refresh stays warm.</p>
+    </div>
+
+    <!-- CYPHERPUNK — the instrument: the path, the pipeline, the byte map, the rule, the receipt -->
+    <div class="et-c">
+      <div class="et-c-path" translate="no" dir="ltr">GET <span id="etDoor">relay.skaists.dev/ant/v1/data/public/</span>{address}/stream</div>
+      <p class="et-c-lede" data-i18n="bview.cypherLead">Your file — honest client and door metrics only. Nothing invented.</p>
+      <div class="et-c-chips" id="etChips"></div>
+      <div class="et-slot" data-slot="cypherpunk"></div>
+      <h3 class="et-c-h" data-et-t="et.bview.c.pipe">fetch pipeline · public read</h3>
+      <ol class="et-c-pipe" id="etPipe"></ol>
+      <section id="inst">
+        <div class="pane map">
+          <h2 data-i18n="bview.cy.map">byte map</h2>
+          <svg id="map" viewBox="0 0 358 46" preserveAspectRatio="none" role="img" aria-labelledby="map-say">
+            <rect class="m-track" x="0" y="10" width="358" height="22"/>
+            <rect class="m-got" id="map-got" x="0" y="10" width="0" height="22"/>
+            <rect class="m-blob" id="map-blob" x="0" y="10" width="0" height="22"/>
+            <rect class="m-head" id="map-head" x="0" y="10" width="0" height="22"/>
+            <line class="m-go" id="map-go" x1="0" x2="0" y1="4" y2="38" visibility="hidden"/>
+            <line class="m-play" id="map-play" x1="0" x2="0" y1="2" y2="44" visibility="hidden"/>
+          </svg>
+          <p class="legend"><span><i class="lg-head"></i>moov</span><span><i class="lg-got"></i>arrived</span><span><i class="lg-blob"></i>in the playing blob</span><span><i class="lg-go"></i>play allowed</span><span><i class="lg-play"></i>playhead</span></p>
+          <p class="kv" id="map-say" translate="no" dir="ltr"></p>
+        </div>
+        <div class="pane"><h2 data-i18n="bview.cy.rule">start rule</h2><p class="kv" id="rule" translate="no" dir="ltr">(mdat end − arrived) ÷ rate × 1.15 + 2 s ≤ duration − playhead</p></div>
+        <div class="pane"><h2 translate="no">decodingInfo</h2><p class="kv" id="dec" translate="no" dir="ltr"></p></div>
+        <div class="pane"><h2 data-i18n="bview.cy.log">receipts</h2><ol class="log" id="log" translate="no" dir="ltr"></ol></div>
+      </section>
+      <h3 class="et-c-h" data-et-t="et.bview.c.receipt">receipt</h3>
+      <table class="et-c-kv" id="etReceipt"></table>
+      <div class="et-c-verify">
+        <p data-et-t="et.bview.c.verifyH">verify · no trust in this page needed</p>
+        <ol translate="no" dir="ltr"><li>curl -s https://relay.skaists.dev/ant/v1/data/public/&lt;address&gt;/stream -o f</li><li>sha256sum f == the sha256 in the receipt</li><li data-et-t="et.bview.c.verify3">the byte map and the rule read the same counters</li></ol>
+      </div>
+      <div class="et-c-row">
+        <a class="et-c-ghost" href="#sheet-wrap"><span data-et-t="et.bview.c.sheet">the whole file</span></a>
+        <a class="et-c-ghost" href="https://github.com/beehive-nature/beehive-nature/blob/main/surfaces/bview.html" target="_blank" rel="noopener noreferrer"><span data-et-t="et.bview.c.fork">fork the template ↗</span><small data-et-t="et.bview.c.newTab">opens a new tab</small></a>
+      </div>
     </div>
   </section>
-  <section id="inst" data-reg="cypherpunk">
-    <div class="pane map">
-      <h2 data-i18n="bview.cy.map">byte map</h2>
-      <svg id="map" viewBox="0 0 358 46" preserveAspectRatio="none" role="img" aria-labelledby="map-say">
-        <rect x="0" y="10" width="358" height="22" fill="#10201c"/>
-        <rect id="map-got" x="0" y="10" width="0" height="22" fill="#1f5b66"/>
-        <rect id="map-blob" x="0" y="10" width="0" height="22" fill="none" stroke="#45c2dc" stroke-width="2"/>
-        <rect id="map-head" x="0" y="10" width="0" height="22" fill="#9db3b9"/>
-        <line id="map-go" x1="0" x2="0" y1="4" y2="38" stroke="#d655bb" stroke-width="2" stroke-dasharray="3 2" visibility="hidden"/>
-        <line id="map-play" x1="0" x2="0" y1="2" y2="44" stroke="#dfeaec" stroke-width="2" visibility="hidden"/>
-      </svg>
-      <p class="legend"><span><i style="background:#9db3b9"></i>moov</span><span><i style="background:#1f5b66"></i>arrived</span><span><i style="border:2px solid #45c2dc"></i>in the playing blob</span><span><i style="background:#d655bb"></i>play allowed</span><span><i style="background:#dfeaec"></i>playhead</span></p>
-      <p class="kv" id="map-say" translate="no" dir="ltr"></p>
-    </div>
-    <div class="pane"><h2 data-i18n="bview.cy.rule">start rule</h2><p class="kv" id="rule" translate="no" dir="ltr">(mdat end − arrived) ÷ rate × 1.15 + 2 s ≤ duration − playhead</p></div>
-    <div class="pane"><h2 translate="no">decodingInfo</h2><p class="kv" id="dec" translate="no" dir="ltr"></p></div>
-    <div class="pane"><h2 data-i18n="bview.cy.log">receipts</h2><ol class="log" id="log" translate="no" dir="ltr"></ol></div>
-  </section>
-  <p class="note" data-reg="bee" data-i18n="bview.bee.note">Public video: anyone with the link can watch it. This device keeps a copy, so it opens at once next time.</p>
-  <p class="note" data-reg="raver" data-i18n="bview.raverNote">A public picture, shared by address. Your device keeps a copy — refresh stays warm.</p>
+
+  <h2 class="et-archive-h" id="etArchive" data-et-t="et.bview.archive">the whole file</h2>
   <details class="facts" data-reg-disclose id="sheet-wrap">
     <summary><span data-reg="bee" data-i18n="bview.bee.sum">details</span><span data-reg="raver" data-i18n="bview.raver.sum">the numbers</span><span data-reg="cypherpunk" data-i18n="bview.sheet.sum">Your file — download sheet</span></summary>
     <div class="sheet" id="sheet">
@@ -267,7 +378,9 @@ document.addEventListener('DOMContentLoaded',function(){
   const SAFETY = 1.15, MARGIN = 2, AHEAD = 1, EXTEND_LEAD = 1.5, EXTEND_GAIN = 2;
   const WAIT_EN = 'Ready to play in ~{s} s. The network sends this video slower than it plays, so a head start loads first.';
   const $ = id => document.getElementById(id), says = ['s-bad', 's-slow', 's-wait', 's-fail'];
-  const say = id => { says.forEach(s => $(s).hidden = s !== id); const vl = $('veil'); if (vl && id !== 's-wait') vl.hidden = true; };
+  // ETERNAL FRONT hook: tell the three renderers the engine moved (they read, never write).
+  const pub = () => { try { if (window.__eternalPaint) window.__eternalPaint(); } catch (_) {} };
+  const say = id => { says.forEach(s => $(s).hidden = s !== id); const vl = $('veil'); if (vl && id !== 's-wait') vl.hidden = true; pub(); };
   const parse = raw => { const m = /^\s*(?:autonomi:\/\/)?([0-9a-f]{64})\s*$/i.exec(raw || ''); return m ? m[1].toLowerCase() : null; };
   const v = $('v'), pg = $('pg');
   const tap = $('tap');
@@ -306,6 +419,7 @@ document.addEventListener('DOMContentLoaded',function(){
     set('n-ttff', fmtMs(metrics.ttffMs));
     set('n-path', metrics.path || ny);
     set('n-sha', metrics.sha || ny);
+    pub();
     const done = $('n-done');
     if (done) {
       if (metrics.doneMs != null) {
@@ -611,6 +725,7 @@ document.addEventListener('DOMContentLoaded',function(){
   }
   // Cypherpunk: the file as a byte map, and the start rule with its live numbers.
   function renderInst() {
+    pub();
     const st = feed, pl = st && st.plan, W = 358;
     const size = metrics.cl || (pl && pl.m1) || (st && st.bytes) || 0;
     const x = n => size ? Math.max(0, Math.min(W, W * n / size)).toFixed(1) : '0';
@@ -996,10 +1111,176 @@ document.addEventListener('DOMContentLoaded',function(){
       if (my === job) { busy(false); if (!playing) say('s-fail'); }
     }
   }
+  // ETERNAL FRONT: a read-only snapshot of the engine for the three renderers (docs/design/eternal).
+  // The facts on every front come from here and from nowhere else; it never writes to the engine.
+  window.__bviewEngine = () => {
+    const st = feed, pl = st && st.plan;
+    return {
+      door: DOOR, cache: CACHE, rule: { safety: SAFETY, margin: MARGIN, ahead: AHEAD, probeMs: STREAM_PROBE, stubBytes: STUB_CL },
+      has: !!metrics.addr, bad: !$('s-bad').hidden, fail: !$('s-fail').hidden, slow: !$('s-slow').hidden,
+      path: metrics.path || null, bytes: metrics.bytes || (st ? st.bytes : 0), size: metrics.cl || (pl && pl.m1) || 0,
+      rateMbs: metrics.rateMbs, rateBps: rateBps(), ttfbMs: metrics.ttfbMs, ttffMs: metrics.ttffMs, sha: metrics.sha, doneMs: metrics.doneMs,
+      dec: metrics.dec || null, moov: st && st.me > 0 ? st.me : 0,
+      plan: pl ? { dur: pl.dur, bps: 8 * (pl.m1 - pl.m0) / pl.dur, codec: pl.codec, w: pl.w, h: pl.h, fps: pl.fps, m0: pl.m0, m1: pl.m1 } : null,
+      planless: !!(st && st.planless), preview: !!(st && st.preview), sounded: !!(st && st.sounded), stalled: !!(st && st.stalled), done: !!(st && st.done),
+      paintedAt: st ? st.paintedAt : 0, waitS, playhead: v.currentTime || 0,
+    };
+  };
   $('f').addEventListener('submit', e => { e.preventDefault(); const x = $('addr').value.trim(); if (!x) return; history.replaceState(null, '', '#' + x); view(x); });
   const fromHash = () => { const x = decodeURIComponent(location.hash.slice(1)); if (x) { $('addr').value = x; view(x); } };
   paintNerd(); renderInst();
   addEventListener('hashchange', fromHash); fromHash();
+})();
+</script>
+<script>
+/* ETERNAL FRONT — one data layer, three renderers (docs/design/eternal). Every fact comes from the
+   engine's own snapshot (window.__bviewEngine: its counters, its plan, its constants), formatted ONCE
+   here, so new bee, raver and cypherpunk cannot drift. The one real action is the engine's own form
+   (#f); it lives in #etDock, which moves into the front that is showing. Nothing here fetches, plays or
+   claims a state the engine has not reached. */
+(function(){
+  var $=function(id){return document.getElementById(id);};
+  var T=function(k,f){var t=window.BNRLanguage&&window.BNRLanguage.text;var v=t?t(k,f):f;return v||f;};
+  var esc=function(v){return String(v==null?'':v).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});};
+  var mb=function(n){return ((n/1048576)>=10?(n/1048576).toFixed(0):(n/1048576).toFixed(1))+' MB';};
+  var tok=function(n){return getComputedStyle(document.body).getPropertyValue('--sk-'+n).trim();};
+  var D={door:{network:'Autonomi',host:'',base:''},rule:null,cache:'',live:null,view:{}};
+  var R={mode:'arrived',open:{}};
+  var N=48;
+
+  /* ── the one data layer ── */
+  function read(){
+    var E=window.__bviewEngine?window.__bviewEngine():null; if(!E) return;
+    var u=new URL(E.door); D.door.host=u.host; D.door.base=u.pathname; D.rule=E.rule; D.cache=E.cache; D.live=E;
+    var s=!E.has?(E.bad?'refused':'idle'):E.fail?'failed':E.doneMs!=null?'done':E.stalled?'stalled':(E.waitS&&!(E.sounded&&!E.stalled))?'waiting':(E.sounded?'playing':'fetching');
+    var pl=E.plan, flowX=pl&&E.rateBps?E.rateBps/((pl.m1-pl.m0)/pl.dur):null;
+    D.view={
+      state:s,
+      arrived:E.bytes?mb(E.bytes)+(E.size?' '+T('et.bview.of','of')+' '+mb(E.size):''):T('et.bview.nothingYet','nothing yet'),
+      frac:E.size?Math.min(1,E.bytes/E.size):(E.doneMs!=null?1:0),
+      copy:E.size&&E.paintedAt?Math.min(1,E.paintedAt/E.size):0,
+      length:pl?pl.dur.toFixed(1)+' s · '+(pl.bps/1e6).toFixed(1)+' Mb/s':T('et.bview.notRead','not read yet'),
+      time:pl&&E.sounded?Math.min(1,E.playhead/pl.dur):0,
+      flowX:flowX,
+      flow:flowX!=null?flowX.toFixed(flowX<1?2:1)+'× '+T('et.bview.asFast','as fast as it plays'):T('et.bview.notMeasured','not measured yet'),
+      sha:E.sha||'',
+      path:E.path||'',
+      done:E.doneMs!=null?(E.doneMs/1000).toFixed(2)+' s':''
+    };
+  }
+  var WORD={
+    bee:{idle:['et.bview.b.s.idle','by itself'],refused:['et.bview.b.s.refused','when the link is whole'],fetching:['et.bview.b.s.fetching','getting ready'],waiting:['et.bview.b.s.waiting','after a head start'],playing:['et.bview.b.s.playing','playing now'],stalled:['et.bview.b.s.stalled','catching up'],done:['et.bview.b.s.done','all here'],failed:['et.bview.b.s.failed','it did not load']},
+    raver:{idle:['et.bview.r.s.idle','paste · tap ▶ · watch it arrive'],refused:['et.bview.r.s.refused','that address is not whole'],fetching:['et.bview.r.s.fetching','arriving'],waiting:['et.bview.r.s.waiting','building up'],playing:['et.bview.r.s.playing','playing'],stalled:['et.bview.r.s.stalled','catching up'],done:['et.bview.r.s.done','all in'],failed:['et.bview.r.s.failed','the door did not answer']},
+    cy:{idle:'idle',refused:'refused',fetching:'fetching',waiting:'hold',playing:'playing',stalled:'hold (ran dry)',done:'all arrived',failed:'failed'}
+  };
+  var w=function(reg){var x=WORD[reg][D.view.state];return T(x[0],x[1]);};
+
+  /* ── NEW BEE: plain rows, one line each, one tap opens a plain sentence ── */
+  function bee(){
+    var box=$('etBeeRows'); if(!box) return;
+    var rows=[
+      ['where',T('et.bview.b.where','where it comes from'),'<span data-et="network">'+esc(T('et.bview.b.network','the {n} network').replace('{n}',D.door.network))+'</span>',T('et.bview.b.whereSay','it comes through the estate’s door. nothing is uploaded from this device.')],
+      ['when',T('et.bview.b.when','when it starts'),'<span data-et="state" data-state="'+D.view.state+'">'+esc(w('bee'))+'</span>',T('et.bview.b.whenSay','when the network is slower than the video, a head start loads first, so it does not stop halfway.')],
+      ['sofar',T('et.bview.b.sofar','so far'),'<span data-et="arrived">'+esc(D.view.arrived)+'</span>',T('et.bview.b.sofarSay','the rest keeps arriving while you watch.')],
+      ['next',T('et.bview.b.next','next time'),esc(T('et.bview.b.nextV','opens at once')),T('et.bview.b.nextSay','this device keeps a copy of what you watched.')]
+    ];
+    box.innerHTML=rows.map(function(r){var o=!!R.open[r[0]];
+      return '<button type="button" class="et-b-row" data-row="'+r[0]+'" aria-expanded="'+o+'"><span>'+esc(r[1])+'</span><small>'+r[2]+'<svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></small></button>'+
+        '<p class="et-b-say" data-say="'+r[0]+'"'+(o?'':' hidden')+'>'+esc(r[3])+'</p>';}).join('');
+  }
+
+  /* ── RAVER: the ring. 48 spokes; lit = arrived, you-magenta = in the playing copy, bright = the playhead ── */
+  function ring(){
+    var svg=$('etRing'); if(!svg) return;
+    var V=D.view, m=R.mode, h='';
+    var litTo=m==='arrived'?V.frac:m==='time'?V.time:m==='flow'?(V.flowX==null?0:Math.min(1,V.flowX/2)):1;
+    var hotTo=m==='arrived'?V.copy:m==='flow'&&V.flowX!=null&&V.flowX>=1?litTo:0;
+    var headAt=m==='time'&&V.time>0?Math.min(N-1,Math.floor(V.time*N)):-1;
+    for(var i=0;i<N;i++){
+      var len=26+Math.round(34*Math.abs(Math.sin(i*0.61))*Math.abs(Math.cos(i*0.23))), f=(i+0.5)/N;
+      var cls='beat'+(i===headAt?' head':(f<=hotTo?' hot':(f<=litTo?' lit':(D.live&&!D.live.has?' rest':''))));
+      h+='<g class="spoke" transform="rotate('+(i*360/N).toFixed(2)+')"><rect class="'+cls+'" x="-3.5" y="'+(-(78+len))+'" width="7" height="'+len+'" rx="3.5"/></g>';
+    }
+    var pct=m==='arrived'?(V.frac?Math.round(V.frac*100)+'%':(D.live&&D.live.bytes?mb(D.live.bytes):'0%')):m==='time'?(V.time?Math.round(V.time*100)+'%':'0%'):m==='flow'?(V.flowX!=null?V.flowX.toFixed(V.flowX<1?2:1)+'×':'0×'):D.door.network.toLowerCase();
+    var cap={arrived:T('et.bview.r.arrived','arrived'),time:T('et.bview.r.time','played'),flow:T('et.bview.r.flow','flow'),door:T('et.bview.r.door','door')}[m];
+    svg.innerHTML='<circle class="halo" r="152"/><g class="dial" role="button" tabindex="0" aria-label="'+esc(T('et.bview.r.dial','the file as a ring: tap to read it another way')+' · '+cap+' '+pct)+'">'+h+
+      '<circle class="core" r="68"/><text class="mid" y="6" text-anchor="middle">'+esc(pct)+'</text><text class="sub" y="32" text-anchor="middle">'+esc(cap)+'</text></g>';
+  }
+  function raver(){
+    var hint=$('etRaverHint'); if(hint) hint.textContent=w('raver');
+    ring();
+    var t=$('etTiles'); if(!t) return;
+    var tiles=[['arrived',T('et.bview.r.arrived','arrived'),'<span data-et="arrived">'+esc(D.view.arrived)+'</span>'],
+      ['time',T('et.bview.r.length','length'),'<span>'+esc(D.view.length)+'</span>'],
+      ['flow',T('et.bview.r.flow','flow'),'<span>'+esc(D.view.flow)+'</span>'],
+      ['door',T('et.bview.r.door','door'),'<span data-et="network">'+esc(D.door.network+' · '+T('et.bview.r.estateDoor','the estate door'))+'</span>']];
+    t.innerHTML=tiles.map(function(x){return '<button type="button" data-mode="'+x[0]+'" aria-pressed="'+(R.mode===x[0])+'"><b>'+esc(x[1])+'</b>'+x[2]+'</button>';}).join('')+
+      '<span hidden data-et="state" data-state="'+D.view.state+'"></span>';
+  }
+
+  /* ── CYPHERPUNK: chips, the numbered pipeline, the receipt ── */
+  function cy(){
+    var E=D.live, V=D.view; if(!E) return;
+    var door=$('etDoor'); if(door) door.textContent=D.door.host+D.door.base;
+    $('etChips').innerHTML='<span class="on" data-et="state" data-state="'+V.state+'">state '+esc(WORD.cy[V.state])+'</span><span class="'+(V.path?'ok':'')+'">path '+esc(V.path||'none yet')+'</span><span>cache '+esc(D.cache)+'</span>';
+    var r=D.rule, pl=E.plan;
+    var steps=[
+      ['parse · 64 hex','refuse anything else · no request is made for a bad address',E.bad?'guard':E.has?'done':'todo'],
+      ['cache · '+D.cache,E.path==='cache'?'hit · plays at once from this device':E.has?'miss · ask the door':'a hit plays at once; nothing is fetched',E.has?'done':'todo'],
+      ['/stream · probe '+r.probeMs+' ms','Content-Length under '+(r.stubBytes>>10)+' KiB = the antd 0.12.0 stub → cancel, fall back',E.path==='stream'?'done':(E.path==='envelope'?'skip':'todo')],
+      ['/data/public · JSON envelope','base64 decoded as it arrives · the fallback path',E.path==='envelope'?'done':(E.path==='stream'||E.path==='cache'?'skip':'todo')],
+      ['moov → plan',pl?('duration '+pl.dur.toFixed(2)+' s · mdat '+mb(pl.m1-pl.m0)+(pl.codec?' · '+pl.codec:'')):(E.planless?'no plan · plays when the whole file is in':'duration, media span and codec, then decodingInfo'),pl||E.planless?'done':'todo'],
+      ['start rule','rest ÷ rate × '+r.safety+' + '+r.margin+' s ≤ time left → '+esc(WORD.cy[V.state]),E.sounded||E.doneMs!=null?'done':'todo'],
+      ['sha256 · whole file',E.sha?E.sha:'hashed when the last byte is in',E.sha?'done':'todo']
+    ];
+    if(E.fail) steps[2][2]=steps[2][2]==='todo'?'guard':steps[2][2];
+    var now=steps.findIndex(function(s){return s[2]==='todo';});
+    $('etPipe').innerHTML=steps.map(function(s,i){return '<li class="'+s[2]+(i===now&&E.has?' now':'')+'"><b>'+esc(s[0])+'</b><p>'+esc(s[1])+'</p></li>';}).join('');
+    var no=function(t){return '<span class="no">'+esc(t)+'</span>';};
+    $('etReceipt').innerHTML=[
+      ['door','<span data-et="network">'+esc(D.door.host+' · '+D.door.network)+'</span>'],
+      ['path',V.path?esc(V.path):no('not yet')],
+      ['arrived','<span data-et="arrived">'+esc(V.arrived)+'</span>'],
+      ['length',esc(V.length)],
+      ['flow',esc(V.flow)],
+      ['sha256',V.sha?'<span class="yes">'+esc(V.sha)+'</span>':no('not yet · hashed when the last byte is in')],
+      ['done',V.done?'<span class="yes">'+esc(V.done)+'</span>':no('not yet')]
+    ].map(function(x){return '<tr><th>'+x[0]+'</th><td>'+x[1]+'</td></tr>';}).join('');
+  }
+
+  /* ── the dock: ONE form and ONE stage, carried into the front that is showing ── */
+  function place(){
+    var reg=document.body.getAttribute('data-reg')||'bee', slot=document.querySelector('#eternal .et-slot[data-slot="'+reg+'"]'), dock=$('etDock'), v=$('v');
+    if(!slot||!dock||dock.parentNode===slot) return;
+    var was=v&&!v.paused&&!v.ended;
+    slot.appendChild(dock);
+    if(was){try{v.play().catch(function(){});}catch(e){}}
+  }
+  function words(){document.querySelectorAll('#eternal [data-et-t],#etArchive[data-et-t]').forEach(function(e){if(!e.dataset.etEn)e.dataset.etEn=e.textContent;e.textContent=T(e.dataset.etT,e.dataset.etEn);});}
+  var queued=0;
+  function paint(){read();bee();raver();cy();}
+  window.__eternalPaint=function(){if(queued)return;queued=requestAnimationFrame(function(){queued=0;paint();});};
+
+  function wire(){
+    var ev=$('eternal');
+    ev.addEventListener('click',function(e){
+      var row=e.target.closest('.et-b-row[data-row]');
+      if(row){var k=row.getAttribute('data-row');R.open[k]=!R.open[k];bee();return;}
+      var tile=e.target.closest('#etTiles button[data-mode]');
+      if(tile){R.mode=tile.getAttribute('data-mode');raver();return;}
+      if(e.target.closest('#etRing .dial')){var m=['arrived','time','flow','door'];R.mode=m[(m.indexOf(R.mode)+1)%m.length];raver();return;}
+      var more=e.target.closest('a[href="#sheet-wrap"]');
+      if(more){var d=$('sheet-wrap');if(d){d.open=true;d.dataset.userTouched='1';}}
+    });
+    ev.addEventListener('keydown',function(e){
+      if((e.key==='Enter'||e.key===' ')&&e.target.closest('#etRing .dial')){e.preventDefault();e.target.dispatchEvent(new MouseEvent('click',{bubbles:true}));}
+    });
+    document.addEventListener('bregister',function(){place();paint();});
+    new MutationObserver(function(){place();}).observe(document.body,{attributes:true,attributeFilter:['data-reg']});
+    document.addEventListener('blang',function(){words();paint();});
+  }
+  words(); place(); wire(); paint();
+  window.__eternal={data:D,raver:R,paint:paint};
 })();
 </script>
 </body>

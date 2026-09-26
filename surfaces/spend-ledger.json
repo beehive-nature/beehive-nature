@@ -1,6 +1,6 @@
 {
  "_note": [
-  "THE PUBLIC SPEND-RECEIPT RECORD — rehearsal copy. The live meter (scripts/buzz-meter/meter.py, SPEC-SPEND-RECEIPT-1) writes real receipts on the box; none are public yet, so this in-tree copy gives the auditor true-shaped rows. Free-tier rates are real law (rateset-v2); rateset-fixture-a prices NOTHING — an A-rate for the closed paid lane would be a tokenomics constant, and those are fence-held. Rows labelled FIXTURE are deliberately broken so the four verifier states are all present; the auditor catches each one.",
+  "THE PUBLIC SPEND-RECEIPT RECORD: rehearsal copy. The live meter (scripts/buzz-meter/meter.py, SPEC-SPEND-RECEIPT-1) writes real receipts on the box; none are public yet, so this in-tree copy gives the auditor true-shaped rows. Free-tier rates are real law (rateset-v2); rateset-fixture-a prices NOTHING: an A-rate for the closed paid lane would be a tokenomics constant, and those are fence-held. Rows labelled FIXTURE are deliberately broken so the four verifier states are all present; the auditor catches each one.",
   "VISIBILITY LAW (SPEC §3a): only visibility:\"public\" rows live in a public store — a private receipt written here would be published. The spender's private rows stay in the spender's store. Totals are computed at every read, never stored (the stored total_computed is itself re-derived and checked). CARE: this is topology and vocabulary, NEVER a security claim."
  ],
  "ledger": "spend-receipts-public-1",

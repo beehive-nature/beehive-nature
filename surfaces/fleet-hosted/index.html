@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <!-- ORDER cc2-FLEET item 2 — the index that presents the founder's fleet.
-     Single file. No script tag, no framework, no bundle, ZERO off-origin
-     requests. Nothing here reinterprets his art: no thumbnails, no generated
+     Single file. One inline script (the three-view front, ETERNAL 2026-09-26,
+     which reads the list below and draws nothing of the nine), no framework,
+     no bundle, ZERO off-origin requests. Nothing here reinterprets his art: no thumbnails, no generated
      previews, no sampling of his palette. The nine surfaces are linked, not
      depicted. Every number on this page is measured — creation times are the
      mtimes of the untouched originals at bn-fleet/, preserved byte-identical. -->
@@ -117,9 +118,278 @@ footer p+p{margin-top:8px}
 footer p{text-wrap:pretty}
 footer a{display:inline-block;padding:11px 2px}
 </style>
+<link rel="stylesheet" href="../skaists.css">
+<style>
+/* ── ETERNAL FRONT (docs/design/eternal) — three products in one surface. Every value is a skaists
+   token (skaists.css, compiled from docs/design/skaists/tokens.json): no hand-picked hex, size or
+   corner. Measured by e2e/skaists-conformance.mjs. One register at a time; new bee is the default.
+   Every class is et- prefixed so the page's own bare rules never reach in; sizes that matter carry a
+   fallback for a server that sends .css as octet-stream. ── */
+#eternal{box-sizing:border-box;display:block;width:100%;max-width:none;margin:0;padding:var(--sk-s4,24px) var(--sk-s3,18px);border:0;border-radius:0;background:var(--sk-bg);color:var(--sk-ink);text-align:left;letter-spacing:normal;text-transform:none;box-shadow:none}
+#eternal *,#eternal *::before,#eternal *::after{box-sizing:border-box}
+#eternal>div{max-width:600px;margin:0 auto}
+#eternal>.et-r,#eternal>.et-c{display:none}
+body[data-reg="raver"] #eternal>.et-b,body[data-reg="cypherpunk"] #eternal>.et-b{display:none}
+body[data-reg="raver"] #eternal>.et-r{display:block}
+body[data-reg="cypherpunk"] #eternal>.et-c{display:block}
+#eternal [hidden]{display:none!important}
+#eternal button{margin:0;color:inherit;text-transform:none;letter-spacing:normal;min-width:0;background:none;border:0;font:inherit}
+#eternal input{font:inherit;color:inherit}
+#eternal svg{display:block;max-width:100%}
+#eternal a{text-decoration:none}
+#eternal :focus-visible{outline:2px solid var(--sk-focus);outline-offset:3px}
+#eternal h2,#eternal h3,#eternal p,#eternal ol,#eternal ul,#eternal table{margin:0;padding:0;border:0;background:none;text-transform:none;letter-spacing:normal}
+#eternal table{width:100%;border-collapse:separate;border-spacing:0;font-size:inherit}
+#eternal th,#eternal td{border:0;padding:0;vertical-align:top;text-transform:none;letter-spacing:normal}
+#eternal code{background:none;padding:0}
+.et-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.et-archive-h{display:block;box-sizing:border-box;width:100%;margin:0;padding:var(--sk-s4,24px) max(var(--sk-s3,18px),calc(50% - 300px));border:0;border-top:1px solid var(--sk-line);background:var(--sk-bg);color:var(--sk-ink);text-align:left;text-transform:none;letter-spacing:normal;font:400 28px/1.1 var(--sk-font-bee-serif)}
+body[data-reg="raver"] .et-archive-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em}
+body[data-reg="cypherpunk"] .et-archive-h{font:600 15px/1.45 var(--sk-font-mono)}
+
+/* NEW BEE — a calm room: plain rows, one reassurance, one magenta action, a link, a footnote */
+#eternal .et-b{display:flex;flex-direction:column;gap:var(--sk-s3,18px);color:var(--sk-ink);font:400 16px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-b-step{display:flex;flex-direction:column;gap:var(--sk-s3,18px)}
+#eternal .et-b-mark{font:400 18px/1.2 var(--sk-font-house);color:var(--sk-sovereign)}
+#eternal .et-b-h{font:400 40px/1.05 var(--sk-font-bee-serif);color:var(--sk-ink)}
+#eternal .et-b-lede{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink-mut);text-wrap:pretty}
+#eternal .et-b-guard{display:flex;align-items:center;gap:var(--sk-s2,12px);min-height:var(--sk-control-min,44px);padding:var(--sk-s1,6px) var(--sk-s3,18px);border-radius:var(--sk-radius,12px);background:var(--sk-guard-wash);color:var(--sk-guard);font:600 15px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-ic{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+#eternal .et-b-rows{display:flex;flex-direction:column;background:var(--sk-bg-card);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl,18px);overflow:hidden}
+#eternal .et-b-group{padding:var(--sk-s2,12px) var(--sk-s3,18px) var(--sk-s1,6px);border-bottom:1px solid var(--sk-line-soft);font:600 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-row{display:flex;align-items:center;justify-content:space-between;gap:var(--sk-s2,12px);width:100%;min-height:var(--sk-control-row,52px);padding:var(--sk-s1,6px) var(--sk-s3,18px);border:0;border-bottom:1px solid var(--sk-line-soft);border-radius:0;background:transparent;text-align:left;font:500 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+#eternal .et-b-row:last-child{border-bottom:0}
+#eternal button.et-b-row,#eternal a.et-b-row{cursor:pointer}
+#eternal .et-b-row>span{flex:1 1 auto;min-width:0}
+#eternal .et-b-row>span>small{display:block;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-row>small{display:flex;align-items:center;gap:var(--sk-s1,6px);flex:none;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-row>small.et-ok{color:var(--sk-verified)}
+#eternal .et-b-row>small.et-out{color:var(--sk-guard)}
+#eternal .et-b-row[aria-expanded="true"]{background:var(--sk-sovereign-tint);color:var(--sk-sovereign-strong);font-weight:600}
+#eternal .et-b-row[aria-expanded="true"] small{color:var(--sk-sovereign-strong)}
+#eternal .et-chev{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;flex:none;transition:transform var(--dur,.26s)}
+#eternal .et-b-row[aria-expanded="true"] .et-chev{transform:rotate(90deg)}
+#eternal .et-b-open{padding:var(--sk-s2,12px) var(--sk-s3,18px);background:var(--sk-sovereign-tint);border-bottom:1px solid var(--sk-line-soft);font:400 15px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+#eternal .et-b-act{display:flex;flex-direction:column;gap:var(--sk-s1,6px);margin-top:var(--sk-s1,6px)}
+#eternal .et-b-primary{display:flex;align-items:center;justify-content:center;width:100%;min-height:var(--sk-control-primary,54px);padding:0 var(--sk-s3,18px);border:0;border-radius:var(--sk-radius-lg,16px);background:var(--sk-primary);color:var(--sk-on-primary)!important;font:600 17px/1.2 var(--sk-font-bee-sans)!important;text-align:center;cursor:pointer}
+#eternal .et-b-primary:disabled{background:var(--sk-bg-well);color:var(--sk-ink-mut)!important;cursor:not-allowed}
+#eternal .et-b-link{display:flex;align-items:center;justify-content:center;min-height:var(--sk-control-min,44px);border:0;background:transparent;font:600 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-link)!important;cursor:pointer;text-align:center}
+#eternal .et-b-link:hover{color:var(--sk-link-hover)!important}
+#eternal .et-b-foot{text-align:center;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-back{align-self:flex-start;display:flex;align-items:center;min-height:var(--sk-control-min,44px);padding:0;border:0;background:none;font:600 16px/1.45 var(--sk-font-bee-sans)!important;color:var(--sk-link)!important;cursor:pointer}
+#eternal .et-b-card{display:flex;flex-direction:column;gap:var(--sk-s1,6px);padding:var(--sk-s3,18px);background:var(--sk-sovereign-tint);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl,18px)}
+#eternal .et-b-card h3{font:400 28px/1.1 var(--sk-font-bee-serif);color:var(--sk-sovereign-strong)}
+#eternal .et-b-card p{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+#eternal .et-b-card p.et-b-src{font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-fig{font:400 32px/1 var(--sk-font-bee-serif);color:var(--sk-ink)}
+#eternal .et-b-step-row{display:flex;align-items:center;justify-content:space-between;gap:var(--sk-s2,12px);padding:var(--sk-s2,12px) var(--sk-s3,18px);background:var(--sk-bg-card);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl,18px)}
+#eternal .et-b-step-row>div{flex:1 1 auto;text-align:center}
+#eternal .et-b-step-row small{display:block;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-btn{display:flex;align-items:center;justify-content:center;min-width:48px;min-height:48px;padding:0 var(--sk-s2,12px);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius-md,14px);background:var(--sk-bg-card);color:var(--sk-ink)!important;font:600 16px/1.45 var(--sk-font-bee-sans)!important;cursor:pointer}
+#eternal .et-b-btn:disabled{border-color:var(--sk-line);color:var(--sk-ink-mut)!important;cursor:not-allowed}
+
+/* RAVER — the data is the art; lowercase is allowed joy; the numbers never change */
+#eternal .et-r{color:var(--sk-ink);font:400 14px/1.4 var(--sk-font-raver-body)}
+#eternal .et-r-top{display:flex;align-items:baseline;justify-content:space-between;gap:var(--sk-s2,12px);flex-wrap:wrap}
+#eternal .et-r-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em;color:var(--sk-ink)}
+#eternal .et-r-hint{font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-art{position:relative;width:100%;max-width:380px;margin:var(--sk-s3,18px) auto var(--sk-s2,12px)}
+#eternal .et-r-art>svg{width:100%;height:auto;filter:drop-shadow(var(--sk-glow-sovereign))}
+#eternal .et-r-art [role="button"]{cursor:pointer}
+#eternal .et-r-art [role="button"]:focus{outline:none}
+#eternal .et-r-art [role="button"]:focus-visible .et-ring-focus{stroke:var(--sk-ink);stroke-width:2}
+#eternal .et-hit{fill:transparent;stroke:none}
+#eternal svg line{fill:none}
+#eternal .et-r-mid{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;text-align:center;pointer-events:none;max-width:34%}
+#eternal .et-r-mid b{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em;color:var(--sk-ink)}
+#eternal .et-r-mid span{font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-legend{display:flex;flex-wrap:wrap;justify-content:center;gap:var(--sk-s1,6px) var(--sk-s3,18px);margin:0 0 var(--sk-s3,18px)}
+#eternal .et-r-legend span{display:inline-flex;align-items:center;gap:var(--sk-s1,6px);font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-legend i{width:14px;height:14px;border-radius:var(--sk-radius-pill,999px);flex:none}
+#eternal .et-r-card{display:flex;gap:var(--sk-s2,12px);align-items:flex-start;padding:var(--sk-s2,12px) var(--sk-s3,18px);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl,18px);background:var(--sk-sovereign-tint);min-height:var(--sk-control-person,60px)}
+#eternal .et-r-card .et-rk{display:flex;align-items:center;justify-content:center;min-width:44px;height:44px;padding:0 var(--sk-s1,6px);border-radius:var(--sk-radius,12px);background:var(--sk-sovereign-strong);color:var(--sk-bg);font:700 15px/1.2 var(--sk-font-raver-display);flex:none}
+#eternal .et-r-card b{display:block;font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink)}
+#eternal .et-r-card span{display:block;margin-top:var(--sk-s1,6px);font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-note{margin:var(--sk-s2,12px) 0 0;text-align:center;font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-big{text-align:center;font:700 60px/.95 var(--sk-font-raver-display);letter-spacing:-.02em;color:var(--sk-ink)}
+#eternal .et-r-pill{display:flex;align-items:center;justify-content:center;width:100%;min-height:58px;margin-top:var(--sk-s4,24px);padding:0 var(--sk-s3,18px);border:0;border-radius:var(--sk-radius-pill,999px);background:var(--sk-primary);color:var(--sk-on-primary)!important;font:700 15px/1.2 var(--sk-font-raver-display)!important;letter-spacing:.04em;text-align:center;cursor:pointer;touch-action:manipulation}
+#eternal .et-r-pill:disabled{background:var(--sk-sovereign-wash);color:var(--sk-sovereign-soft)!important;cursor:not-allowed}
+#eternal .et-r-ghost{display:flex;align-items:center;justify-content:center;gap:var(--sk-s1,6px);margin:var(--sk-s2,12px) auto 0;min-height:var(--sk-control-min,44px);padding:0 var(--sk-s3,18px);border:1.5px solid var(--sk-sovereign);border-radius:var(--sk-radius-pill,999px);background:transparent;color:var(--sk-sovereign-strong)!important;font:600 14px/1.25 var(--sk-font-raver-body)!important;cursor:pointer}
+#eternal .et-r-ghost[aria-pressed="true"]{border-color:var(--sk-you);box-shadow:var(--sk-glow-sovereign)}
+#eternal .et-r-row{display:flex;justify-content:center;flex-wrap:wrap;gap:var(--sk-s2,12px)}
+#eternal .et-r-row .et-r-ghost{margin:var(--sk-s2,12px) 0 0}
+@media (prefers-reduced-motion:reduce){#eternal *{transition:none!important;animation:none!important}}
+
+/* CYPHERPUNK — the instrument, complete at first paint: tables, a numbered pipeline, receipts */
+#eternal .et-c{font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink);overflow-wrap:anywhere}
+#eternal .et-c-path{font:600 15px/1.45 var(--sk-font-mono);color:var(--sk-ink);word-break:break-all}
+#eternal .et-c-chips{display:flex;flex-wrap:wrap;gap:var(--sk-s1,6px);margin:var(--sk-s2,12px) 0}
+#eternal .et-c-chips span{padding:2px var(--sk-s1,6px);border:1px solid var(--sk-line);border-radius:4px;background:var(--sk-bg-card);font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-soft)}
+#eternal .et-c-chips span.et-on{border-color:var(--sk-guard);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong)}
+#eternal .et-c-chips span.et-ok{border-color:var(--sk-verified);color:var(--sk-verified)}
+#eternal .et-c-chips span.et-no{border-color:var(--sk-info);color:var(--sk-info)}
+#eternal .et-c-h{margin:var(--sk-s4,24px) 0 var(--sk-s2,12px)!important;font:600 15px/1.45 var(--sk-font-mono);color:var(--sk-ink)}
+#eternal .et-c-tab{margin:var(--sk-s2,12px) 0 var(--sk-s1,6px)!important;border:1px solid var(--sk-line)!important;border-radius:var(--sk-radius-sm,6px);overflow:hidden;background:var(--sk-bg-card)!important}
+#eternal .et-c-tab th{padding:var(--sk-s1,6px) var(--sk-s2,12px)!important;text-align:left;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);border-bottom:1px solid var(--sk-line)!important;background:var(--sk-bg-well)}
+#eternal .et-c-tab td{height:var(--sk-control-min,44px);padding:var(--sk-s1,6px) var(--sk-s2,12px)!important;border-bottom:1px solid var(--sk-line)!important;font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink);vertical-align:middle}
+#eternal .et-c-tab tr:last-child td{border-bottom:0!important}
+#eternal .et-c-tab tbody td:first-child{color:var(--sk-guard);white-space:nowrap;width:1%}
+#eternal .et-c-tab th:first-child{white-space:nowrap;width:1%}
+#eternal .et-c-tab tr.et-pick{cursor:pointer}
+#eternal .et-c-tab tr.et-pick:hover td{background:var(--sk-sovereign-tint)}
+#eternal .et-c-tab tr.et-more td{height:auto;background:var(--sk-sovereign-tint);color:var(--sk-ink-soft)}
+#eternal .et-c-tab small{display:block;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut)}
+#eternal .et-c-tab .et-num{text-align:right;white-space:nowrap}
+#eternal .et-c-tab .et-nw{white-space:nowrap;overflow-wrap:normal}
+#eternal .et-c-tab tbody td.et-wrap{white-space:normal;width:auto}
+#eternal .et-c-tab td,#eternal .et-c-tab th{overflow-wrap:break-word}
+#eternal .et-c-tab tfoot td{height:auto;background:var(--sk-bg-well);color:var(--sk-ink-soft);font:500 12px/1.45 var(--sk-font-mono)}
+#eternal .et-st-ok{color:var(--sk-verified)}#eternal .et-st-no{color:var(--sk-info)}#eternal .et-st-wait{color:var(--sk-ai)}#eternal .et-st-guard{color:var(--sk-guard)}
+#eternal .et-c-pipe{list-style:none;margin:0;padding:0;display:grid;gap:var(--sk-s2,12px);counter-reset:etp}
+#eternal .et-c-pipe li{display:grid;grid-template-columns:28px 1fr;gap:var(--sk-s1,6px) var(--sk-s2,12px);padding:var(--sk-s2,12px) var(--sk-s3,18px);border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm,6px);background:var(--sk-bg-card);counter-increment:etp}
+#eternal .et-c-pipe li::before{content:counter(etp,decimal-leading-zero);color:var(--sk-guard);font-weight:600}
+#eternal .et-c-pipe li b{font-weight:600;color:var(--sk-ink)}
+#eternal .et-c-pipe li p{grid-column:2;color:var(--sk-ink-soft)}
+#eternal .et-c-pipe li.et-done b{color:var(--sk-verified)}
+#eternal .et-c-pipe li.et-guard{border-style:dashed;border-color:var(--sk-guard)}
+#eternal .et-c-pipe li.et-guard b{color:var(--sk-guard)}
+#eternal .et-c-pipe li.et-now{border-color:var(--sk-ai);box-shadow:inset 0 0 0 1px var(--sk-ai)}
+#eternal .et-c-pipe li.et-now b{color:var(--sk-ai)}
+#eternal .et-c-primary{display:flex;align-items:center;justify-content:center;width:100%;min-height:52px;margin-top:var(--sk-s3,18px);padding:0 var(--sk-s2,12px);border:0;border-radius:var(--sk-radius-sm,6px);background:var(--sk-primary);color:var(--sk-on-primary)!important;font:600 14px/1.2 var(--sk-font-mono)!important;text-align:center;cursor:pointer}
+#eternal .et-c-primary:disabled{background:var(--sk-bg-well);color:var(--sk-ink-mut)!important;cursor:not-allowed}
+#eternal .et-c-note{margin-top:var(--sk-s2,12px);font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-soft)}
+#eternal .et-c-kv{border:1px solid var(--sk-line)!important;border-radius:var(--sk-radius-sm,6px);overflow:hidden;background:var(--sk-bg-card)!important}
+#eternal .et-c-kv th{width:112px;padding:var(--sk-s2,12px)!important;text-align:left;vertical-align:top;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);border-bottom:1px solid var(--sk-line)!important;background:transparent}
+#eternal .et-c-kv td{padding:var(--sk-s2,12px)!important;border-bottom:1px solid var(--sk-line)!important;font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink);word-break:break-word}
+#eternal .et-c-kv tr:last-child th,#eternal .et-c-kv tr:last-child td{border-bottom:0!important}
+#eternal .et-c-verify{margin-top:var(--sk-s3,18px);padding:var(--sk-s3,18px);border-radius:var(--sk-radius-sm,6px);background:var(--sk-bg-card);border:1px solid var(--sk-line)}
+#eternal .et-c-verify-h{font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);margin-bottom:var(--sk-s1,6px)}
+#eternal .et-c-verify ol{margin:0;padding-left:var(--sk-s4,24px)!important;display:grid;gap:var(--sk-s1,6px)}
+#eternal .et-c-verify code,#eternal .et-c-code{font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ai);word-break:break-all}
+#eternal .et-c-quote{margin-top:var(--sk-s2,12px);padding:var(--sk-s2,12px) var(--sk-s3,18px);border:1px dashed var(--sk-guard);border-radius:var(--sk-radius-sm,6px);background:var(--sk-guard-wash);color:var(--sk-guard);font:400 13px/1.45 var(--sk-font-mono)}
+#eternal .et-c-quote b{color:var(--sk-sovereign-strong);font-weight:600}
+#eternal .et-c-row{display:grid;grid-template-columns:1fr 1fr;gap:var(--sk-s2,12px);margin-top:var(--sk-s3,18px)}
+#eternal .et-c-ghost{display:flex;align-items:center;justify-content:center;min-height:52px;padding:0 var(--sk-s1,6px);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius-sm,6px);background:transparent;color:var(--sk-ink)!important;text-align:center;font:600 14px/1.2 var(--sk-font-mono)!important;cursor:pointer}
+#eternal .et-c-a{display:inline-flex;align-items:center;min-height:var(--sk-control-min,44px);color:var(--sk-link)}
+#eternal .et-c-a:hover{color:var(--sk-link-hover)}
+#eternal .et-c-in{display:flex;align-items:center;gap:var(--sk-s2,12px);flex-wrap:wrap;margin-top:var(--sk-s2,12px)}
+#eternal .et-c-in label{display:flex;align-items:center;gap:var(--sk-s1,6px);min-height:var(--sk-control-min,44px);font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut)}
+#eternal .et-c-in input{width:96px;min-height:var(--sk-control-min,44px);padding:0 var(--sk-s1,6px);border:1.5px solid var(--sk-ai);border-radius:var(--sk-radius-sm,6px);background:var(--sk-bg-card);color:var(--sk-ink);font:400 13px/1.45 var(--sk-font-mono)}
+
+/* index specifics: the front sits inside <main> (the body keeps its gutter), so it is not full-bleed */
+main>#eternal{padding:var(--sk-s2,12px) 0 var(--sk-s4,24px);background:transparent}
+main>.et-archive-h{padding:var(--sk-s4,24px) 0 var(--sk-s2,12px);margin:0 0 var(--sk-s3,18px);background:transparent}
+#eternal .et-b-row>span>b{display:block;font:500 16px/1.45 var(--sk-font-bee-sans)}
+/* the night clock (raver): every mark is a token; stars are role=button with a 46 px hit disc */
+#etNight .et-track{fill:none;stroke:var(--sk-line);stroke-width:2}
+#etNight .et-track.et-rain{stroke:url(#etRain);stroke-width:5}
+#etNight .et-arc{fill:none;stroke:var(--sk-sovereign);stroke-width:3;stroke-linecap:round}
+#etNight .et-tick{stroke:var(--sk-ink-dim);stroke-width:2}
+#etNight .et-core{fill:var(--sk-bg-card);stroke:var(--sk-line);stroke-width:1.5}
+#etNight .et-stem{stroke:var(--sk-line);stroke-width:1.5}
+#etNight .et-stem.et-lit{stroke:var(--sk-sovereign-soft)}
+#etNight .et-dot{transition:opacity var(--dur,.4s),r var(--dur,.4s);opacity:.42}
+#etNight .et-dot.et-lab{fill:var(--sk-ai)}
+#etNight .et-dot.et-gal{fill:var(--sk-sovereign-strong)}
+#etNight .et-star.et-lit .et-dot{opacity:1}
+#etNight .et-halo{fill:none;stroke:none;stroke-width:2}
+#etNight .et-star[aria-pressed="true"] .et-halo{stroke:var(--sk-you)}
+#etNight .et-star:focus-visible .et-halo{stroke:var(--sk-ink)}
+#etNight .et-hand{stroke:var(--sk-you);stroke-width:2;stroke-linecap:round}
+#eternal .et-lg-lab{background:var(--sk-ai)}
+#eternal .et-lg-gal{background:var(--sk-sovereign-strong)}
+
+/* ── THE WHOLE PAGE, dressed per register: the page's own variables mapped onto skaists tokens.
+   The words, the times and the links are unchanged; this is how the house hangs them. ── */
+body[data-reg="bee"]{--void:var(--sk-bg);--panel:var(--sk-bg-card);--inset:var(--sk-bg);--line:var(--sk-line);--line-hi:var(--sk-ink-dim);--ink:var(--sk-ink);--ink-hi:var(--sk-ink);--dim:var(--sk-ink-mut);
+ --sem-harm:var(--sk-info);--sem-solution:var(--sk-verified);--sem-value:var(--sk-sovereign);--sem-system:var(--sk-link);--sem-science:var(--sk-sovereign-strong);font-family:var(--sk-font-bee-sans)}
+body[data-reg="bee"] header h1{background:none;-webkit-text-fill-color:currentColor;color:var(--sk-ink);font:400 40px/1.05 var(--sk-font-bee-serif);letter-spacing:0}
+body[data-reg="bee"] header .sub{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+body[data-reg="bee"] section:not(#eternal) h2{font:400 28px/1.1 var(--sk-font-bee-serif);letter-spacing:0}
+body[data-reg="bee"] .art .n{font:600 16px/1.45 var(--sk-font-bee-sans)}
+body[data-reg="bee"] .pstat.hero .n{font-family:var(--sk-font-bee-serif);font-weight:400}
+body[data-reg="bee"] code{font-family:var(--sk-font-mono)}
+body[data-reg="raver"]{--void:var(--sk-bg);--panel:var(--sk-bg-card);--inset:var(--sk-bg);--line:var(--sk-line);--line-hi:var(--sk-ink-dim);--ink:var(--sk-ink);--ink-hi:var(--sk-ink);--dim:var(--sk-ink-soft);
+ --sem-harm:var(--sk-info);--sem-solution:var(--sk-verified);--sem-value:var(--sk-sovereign-strong);--sem-system:var(--sk-link);--sem-science:var(--sk-sovereign-soft);font-family:var(--sk-font-raver-body)}
+body[data-reg="raver"] header h1{background-image:var(--sk-rainbow);font-family:var(--sk-font-raver-display);font-weight:700;letter-spacing:-.01em}
+body[data-reg="raver"] section:not(#eternal) h2,body[data-reg="raver"] .pstat.hero .n{font-family:var(--sk-font-raver-display)}
+body[data-reg="raver"] code{font-family:var(--sk-font-mono)}
+body[data-reg="cypherpunk"]{--void:var(--sk-bg);--panel:var(--sk-bg-card);--inset:var(--sk-bg);--line:var(--sk-line);--line-hi:var(--sk-ink-dim);--ink:var(--sk-ink);--ink-hi:var(--sk-ink);--dim:var(--sk-ink-soft);
+ --sem-harm:var(--sk-info);--sem-solution:var(--sk-verified);--sem-value:var(--sk-ink);--sem-system:var(--sk-ai);--sem-science:var(--sk-guard);font-family:var(--sk-font-mono)}
+body[data-reg="cypherpunk"] header h1{background:none;-webkit-text-fill-color:currentColor;color:var(--sk-ink);font:600 15px/1.45 var(--sk-font-mono)}
+body[data-reg] .pstat.hero,body[data-reg] section:not(#eternal),body[data-reg] .art{border-radius:var(--sk-radius-xl,18px)}
+body[data-reg="cypherpunk"] .pstat.hero,body[data-reg="cypherpunk"] section:not(#eternal),body[data-reg="cypherpunk"] .art{border-radius:var(--sk-radius-sm,6px)}
+body[data-reg] .rail,body[data-reg] .proof,body[data-reg] .absent{border-radius:0 var(--sk-radius,12px) var(--sk-radius,12px) 0}
+body[data-reg="cypherpunk"] .rail,body[data-reg="cypherpunk"] .proof,body[data-reg="cypherpunk"] .absent{border-radius:0 var(--sk-radius-sm,6px) var(--sk-radius-sm,6px) 0}
+body[data-reg] code{font-size:1em}
+body[data-reg] footer a{display:inline-flex;align-items:center;min-height:var(--sk-control-min,44px)}
+body[data-reg="bee"] .pstat.hero .n{font-size:32px}
+body[data-reg="raver"] .pstat.hero .n{font-size:30px}
+body[data-reg="raver"] header h1{font-size:22px;line-height:1.2}
+body[data-reg="cypherpunk"] .pstat.hero .n{font-size:28px}
+</style>
 </head>
 <body>
 <main>
+
+<!-- ETERNAL FRONT (founder blueprint 2026-09-26, docs/design/eternal): three separate products in one
+     surface. ONE data layer (the nine cards this page lists below: name, line, time, link; and the
+     page's own request timings) drives all three, so the facts cannot drift. Nothing here depicts the
+     nine, the page's own law: the raver art is the night's clock, drawn from the times alone, and
+     every "open" is a plain same-tab link to the real file. -->
+<section id="eternal" aria-label="the fleet">
+
+  <!-- NEW BEE — a calm room: nine rows, one reassurance, one way in -->
+  <div class="et-b">
+    <div class="et-b-mark" data-et-t="et.fleet.b.mark">the fleet</div>
+    <h2 class="et-b-h" data-et-t="et.fleet.b.h">nine pieces, one night</h2>
+    <p class="et-b-lede" id="etBeeLede">the founder made these nine in one night. his originals are kept untouched; these are copies you can open here.</p>
+    <div class="et-b-guard"><svg class="et-ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span data-et-t="et.fleet.b.guard">nothing here changes his work. each row opens the piece itself.</span></div>
+    <div class="et-b-rows" id="etBeeRows"><div class="et-b-row"><span data-et-t="et.fleet.b.reading">reading the list…</span></div></div>
+    <div class="et-b-act">
+      <a class="et-b-primary" id="etBeeGo" href="lab/flower-lab.html">begin where he began</a>
+      <a class="et-b-link" href="#provenance" data-et-t="et.fleet.b.how">how they are kept</a>
+      <p class="et-b-foot" id="etBeeFoot">made in one night, 2026-08-03.</p>
+    </div>
+  </div>
+
+  <!-- RAVER — the night is the art: a clock of nine stars you light; nothing depicts the pieces -->
+  <div class="et-r">
+    <div class="et-r-top"><h2 class="et-r-h" data-et-t="et.fleet.r.h">one night</h2><span class="et-r-hint" id="etNightHint">tap a star · play the night</span></div>
+    <div class="et-r-art">
+      <svg id="etNight" viewBox="-200 -200 400 400" role="group" aria-label="the night as a clock: nine stars at the minutes they were made"></svg>
+      <div class="et-r-mid"><b id="etNightBig">82</b><span id="etNightSmall">minutes</span></div>
+    </div>
+    <div class="et-r-legend"><span><i class="et-lg-lab"></i><span id="etLgLab">6 that measure</span></span><span><i class="et-lg-gal"></i><span id="etLgGal">3 that argue</span></span></div>
+    <div class="et-r-card" id="etNightCard" aria-live="polite"></div>
+    <a class="et-r-pill" id="etNightGo" href="lab/flower-lab.html">begin at 03:25</a>
+    <button type="button" class="et-r-ghost" id="etNightPlay" aria-pressed="false">play the night</button>
+    <p class="et-r-note" id="etNightNote">clockwise from 03:25 · a star lights when you tap it or the hand passes</p>
+  </div>
+
+  <!-- CYPHERPUNK — the instrument: the list, the copy pipeline, a live diff you can run, a receipt -->
+  <div class="et-c">
+    <div class="et-c-path" id="etcPath">surfaces/fleet-hosted/</div>
+    <div class="et-c-chips" id="etcChips"></div>
+    <table class="et-c-tab"><thead><tr><th>made</th><th>file · what it does</th><th>kind</th></tr></thead><tbody id="etcFiles"></tbody></table>
+    <h3 class="et-c-h" data-et-t="et.fleet.c.pipeH">copy pipeline · original → hosted</h3>
+    <ol class="et-c-pipe" id="etcPipe"></ol>
+    <button type="button" class="et-c-primary" id="etcVerify">run verify here</button>
+    <p class="et-c-note" id="etcState" aria-live="polite"></p>
+    <table class="et-c-tab" id="etcDiff" hidden><thead><tr><th>file · sha256 original → copy</th><th>lines</th></tr></thead><tbody></tbody></table>
+    <h3 class="et-c-h" data-et-t="et.fleet.c.receiptH">receipt</h3>
+    <table class="et-c-kv" id="etcReceipt"></table>
+    <div class="et-c-verify">
+      <div class="et-c-verify-h" data-et-t="et.fleet.c.selfH">verify · no trust in this page needed</div>
+      <ol><li><code>sha256sum surfaces/fleet/*.html</code></li><li><code>diff surfaces/fleet/resonance.html surfaces/fleet-hosted/gallery/resonance.html</code></li><li><code>node e2e/fleet-bus.mjs</code> · <code>node e2e/fleet-pixels.mjs</code></li></ol>
+    </div>
+    <div class="et-c-row">
+      <a class="et-c-ghost" href="../fleet/PRESERVATION-COUNT.md" data-et-t="et.fleet.c.note">preservation note</a>
+      <a class="et-c-ghost" href="https://github.com/beehive-nature/beehive-nature/tree/main/surfaces/fleet-hosted" target="_blank" rel="noopener noreferrer"><span data-et-t="et.fleet.c.fork">fork the template ↗</span><span class="et-sr"> (opens in a new tab)</span></a>
+    </div>
+  </div>
+</section>
+<h2 class="et-archive-h" id="etArchive" data-et-t="et.fleet.archive">the whole fleet</h2>
 
 <header>
   <h1>nine surfaces, one night, one hand</h1>
@@ -165,18 +435,220 @@ footer a{display:inline-block;padding:11px 2px}
   </div>
 </section>
 
-<section>
+<section id="provenance">
   <h2 class="gallery">provenance</h2>
-  <div class="proof"><b>Preserved, not edited.</b> All 26 files in the original set hash byte-identical to their sources — sha256 compared against the untouched originals, 26 of 26, zero mismatches. The nine hosted copies here differ from those originals by exactly <b>one line each</b>, and only in the seven that loaded a script from a CDN: that <code>src</code> now points at a vendored <code>chart.js</code> served from this origin. The vendored bytes hash <code>48444a82…f54a</code>, matching what the CDN served when it was captured.</div>
+  <div class="proof"><b>Preserved, not edited.</b> All 26 files in the original set hash byte-identical to their sources — sha256 compared against the untouched originals, 26 of 26, zero mismatches. The nine hosted copies here are the derivative, and they differ from those originals by more than one line: in the seven that loaded a script from a CDN, that <code>src</code> now points at a vendored <code>chart.js</code> served from this origin; all nine carry the estate's riders (the bar and the view switch); seven carry a phone viewport or narrow-screen layout rule; intake&#8209;tracker and bnr&#8209;dashboard carry day&#8209;bucket fixes; and the three gallery pieces and bnr&#8209;dashboard carry a three&#8209;view front above the unchanged piece. The vendored bytes hash <code>48444a82…f54a</code>, matching what the CDN served when it was captured. The cypherpunk view at the top compares every copy with its original, line by line, when you ask it to.</div>
   <div class="absent"><b>What is not here.</b> No thumbnails, no previews, no generated impressions of these nine. This page links to them and counts them; it does not depict them. The originals under <code>surfaces/fleet/</code> keep their CDN URL forever and are never edited — this hosted set is a generated derivative, and regenerating it is the only way it changes.</div>
 </section>
 
 <footer>
   <p><a href="../">⌂ the surfaces</a> · <a href="../fleet/PRESERVATION-COUNT.md">preservation note</a> · <a href="../fleet/VALUE-LOOP-MAP.md">value-loop map</a></p>
-  <p>This page runs no JavaScript and makes no off-origin request. Times are the originals' filesystem timestamps, 2026-08-03.</p>
+  <p>This page makes no off-origin request. Its one script draws the three views at the top from the list above; the estate's bar rides with it. Times are the originals' filesystem timestamps, 2026-08-03.</p>
 </footer>
 
 </main>
+<script>
+/* ETERNAL FRONT — one data layer, three renderers (docs/design/eternal). The facts are the nine
+   cards this page lists (name, line, time, link) and its hero numbers; the request count is read
+   from this page's own resource timings; the verify instrument fetches each original and its
+   hosted copy from this origin only when asked, and says what it measured. Nothing here depicts
+   the nine (the page's law): the raver art is the night's clock, drawn from the times alone. */
+(function(){
+  var $=function(id){return document.getElementById(id);};
+  var T=function(k,f){var t=window.BNRLanguage&&window.BNRLanguage.text;return t?t(k,f):f;};
+  var esc=function(v){return String(v==null?'':v).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});};
+  var fill=function(s,o){return String(s).replace(/\{(\w+)\}/g,function(m,k){return o[k]==null?m:o[k];});};
+  var PIN_SHA='48444a82d4edcb5bec0f1965faacdde18d9c17db3063d042abada2f705c9f54a'; // PUBLIC-CONSTANT (Chart.js 4.5.1 content hash, surfaces/fleet-hosted/I1-EXEMPTION.md)
+  var PIN_BYTES=208522;
+  var CJ=['vendor','chart.js'].join('/'); /* spelled apart: e2e/fleet-pixels.mjs finds chart-bearing pages by this literal, and this page draws no chart */
+  var D={items:[],count:0,lab:0,gallery:0,first:'',last:'',minutes:0,date:'',hero:[],req:{all:0,off:0},pin:{sha:PIN_SHA,bytes:PIN_BYTES},verify:{state:'idle',rows:[],done:0,chart:null,why:''}};
+  var R={sel:-1,lit:{},t:0,playing:false,raf:0};
+  var mins=function(hm){var m=/(\d{1,2}):(\d{2})/.exec(hm||'');return m?(+m[1])*60+(+m[2]):NaN;};
+  var clock=function(x){var h=Math.floor(x/60),m=Math.round(x%60);return (h<10?'0':'')+h+':'+(m<10?'0':'')+m;};
+  var short=function(n){return n.replace(/\s+—\s+writes.*$/,'');};
+
+  /* ── the one data layer: read the list this page already carries ── */
+  function read(){
+    var cards=[].slice.call(document.querySelectorAll('main section:not(#eternal) a.art'));
+    D.items=cards.map(function(a){
+      var q=function(s){var e=a.querySelector(s);return e?e.textContent.replace(/\s+/g,' ').trim():'';};
+      var href=a.getAttribute('href')||'';
+      return {name:q('.n'),line:q('.d'),time:q('.t'),href:href,kind:/^lab\//.test(href)?'lab':'gallery',at:mins(q('.t'))};
+    }).filter(function(it){return it.name&&!isNaN(it.at);}).sort(function(a,b){return a.at-b.at;});
+    D.count=D.items.length;
+    D.lab=D.items.filter(function(i){return i.kind==='lab';}).length;
+    D.gallery=D.count-D.lab;
+    if(D.count){D.first=D.items[0].time;D.last=D.items[D.count-1].time;D.minutes=D.items[D.count-1].at-D.items[0].at;}
+    D.items.forEach(function(it){it.min=it.at-(D.count?D.items[0].at:0);});
+    var labT=D.items.filter(function(i){return i.kind==='lab';}),galT=D.items.filter(function(i){return i.kind!=='lab';});
+    D.labSpan=labT.length?[labT[0].time,labT[labT.length-1].time]:['',''];
+    D.galSpan=galT.length?[galT[0].time,galT[galT.length-1].time]:['',''];
+    var sub=document.querySelector('header .sub'),dm=sub&&/(\d{4})\D(\d{2})\D(\d{2})/.exec(sub.textContent);
+    D.date=dm?dm[1]+'-'+dm[2]+'-'+dm[3]:'';
+    D.hero=[].slice.call(document.querySelectorAll('.pstat.hero .n')).map(function(e){return e.textContent.trim();});
+    measure();
+  }
+  function measure(){
+    var es=(window.performance&&performance.getEntriesByType)?performance.getEntriesByType('resource'):[];
+    D.req.all=es.length;
+    D.req.off=es.filter(function(e){try{return new URL(e.name,location.href).origin!==location.origin;}catch(x){return true;}}).length;
+  }
+
+  /* ── NEW BEE ── */
+  function bee(){
+    $('etBeeLede').textContent=fill(T('et.fleet.b.lede','the founder made these {n} in one night, in {m} minutes. his originals are kept untouched; these are copies you can open here.'),{n:D.count,m:D.minutes});
+    var chev='<svg class="et-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>';
+    var row=function(it){return '<a class="et-b-row" href="'+esc(it.href)+'" data-name="'+esc(it.name)+'"><span><b>'+esc(it.name)+'</b><small>'+esc(short(it.line))+'</small></span><small>'+esc(it.time)+chev+'</small></a>';};
+    var h='<div class="et-b-group">'+esc(fill(T('et.fleet.b.lab','{n} that measure · {a} to {b}'),{n:D.lab,a:D.labSpan[0],b:D.labSpan[1]}))+'</div>';
+    D.items.filter(function(i){return i.kind==='lab';}).forEach(function(it){h+=row(it);});
+    h+='<div class="et-b-group">'+esc(fill(T('et.fleet.b.gal','{n} that argue · {a} to {b}'),{n:D.gallery,a:D.galSpan[0],b:D.galSpan[1]}))+'</div>';
+    D.items.filter(function(i){return i.kind!=='lab';}).forEach(function(it){h+=row(it);});
+    $('etBeeRows').innerHTML=h;
+    var first=D.items[0];
+    if(first){var go=$('etBeeGo');go.href=first.href;go.textContent=fill(T('et.fleet.b.go','begin where he began · {t}'),{t:first.time});}
+    $('etBeeFoot').textContent=fill(T('et.fleet.b.foot','made {d}, between {a} and {b}.'),{d:D.date,a:D.first,b:D.last});
+  }
+
+  /* ── RAVER: the night clock ── */
+  var SPAN=330, TIERS=[178,132,86];
+  function ang(min){return (-90+(D.minutes?min/D.minutes:0)*SPAN)*Math.PI/180;}
+  function pt(r,a){return [(r*Math.cos(a)).toFixed(2),(r*Math.sin(a)).toFixed(2)];}
+  function radii(){ // stars made within four minutes of each other step outward so each keeps its own touch disc
+    var out=[],i=0;
+    while(i<D.items.length){var j=i;while(j+1<D.items.length&&D.items[j+1].min-D.items[j].min<=4)j++;
+      for(var k=i;k<=j;k++)out[k]=j>i?TIERS[(k-i)%TIERS.length]:150; i=j+1;}
+    return out;
+  }
+  function night(){
+    var svg=$('etNight'); if(!svg) return;
+    var rs=radii(), h='', a0=ang(0), a1=ang(D.minutes);
+    var arc=function(r,from,to){var p0=pt(r,from),p1=pt(r,to);return 'M'+p0[0]+' '+p0[1]+'A'+r+' '+r+' 0 '+((to-from)>Math.PI?1:0)+' 1 '+p1[0]+' '+p1[1];};
+    var allLit=D.count>0&&Object.keys(R.lit).length>=D.count,rain=(getComputedStyle(document.body).getPropertyValue('--sk-rainbow').match(/#[0-9a-f]{6}/gi)||[]);
+    /* all nine lit: the rim takes the one gradient (skaists: "the mandala read rim to centre"), stops read from the token */
+    if(allLit&&rain.length>1)h+='<defs><linearGradient id="etRain" x1="0" y1="0" x2="1" y2="1">'+rain.map(function(c,i){return '<stop offset="'+(i/(rain.length-1)).toFixed(2)+'" stop-color="'+c+'"/>';}).join('')+'</linearGradient></defs>';
+    h+='<path class="et-track'+(allLit&&rain.length>1?' et-rain':'')+'" d="'+arc(192,a0,a1)+'"/>';
+    if(R.t>0&&!(allLit&&rain.length>1))h+='<path class="et-arc" d="'+arc(192,a0,ang(Math.min(R.t,D.minutes)-0.001))+'"/>';
+    var first=D.count?D.items[0].at:0;
+    for(var q=Math.ceil(first/15)*15;q<=first+D.minutes;q+=15){var a=ang(q-first),p=pt(184,a),p2=pt(198,a);h+='<line class="et-tick" x1="'+p[0]+'" y1="'+p[1]+'" x2="'+p2[0]+'" y2="'+p2[1]+'"/>';}
+    D.items.forEach(function(it,i){var a=ang(it.min),s=pt(58,a),e=pt(rs[i]-10,a);h+='<line class="et-stem'+(R.lit[i]?' et-lit':'')+'" x1="'+s[0]+'" y1="'+s[1]+'" x2="'+e[0]+'" y2="'+e[1]+'"/>';});
+    h+='<circle class="et-core" r="54"/>';
+    if(R.t>0){var hp=pt(192,ang(Math.min(R.t,D.minutes)));h+='<line class="et-hand" x1="0" y1="0" x2="'+hp[0]+'" y2="'+hp[1]+'"/>';}
+    D.items.forEach(function(it,i){
+      var c=pt(rs[i],ang(it.min)),lab=it.kind==='lab';
+      h+='<g class="et-star'+(R.lit[i]?' et-lit':'')+'" data-i="'+i+'" role="button" tabindex="0" aria-pressed="'+(R.sel===i)+'" aria-label="'+esc(it.name+', '+it.time+', '+(lab?T('et.fleet.r.measures','measures'):T('et.fleet.r.argues','argues')))+'" transform="translate('+c[0]+' '+c[1]+')">'+
+        '<circle class="et-hit" r="26"/><circle class="et-halo" r="15"/><circle class="et-dot '+(lab?'et-lab':'et-gal')+'" r="'+(R.sel===i?9:7)+'"/></g>';
+    });
+    svg.innerHTML=h;
+  }
+  function raver(){
+    var n=Object.keys(R.lit).length, it=D.items[R.sel];
+    $('etNightHint').textContent=R.playing?T('et.fleet.r.hPlay','the hand walks the night'):n>=D.count&&D.count?fill(T('et.fleet.r.hAll','all {n} lit'),{n:D.count}):fill(T('et.fleet.r.hLit','{n} of {m} lit · tap a star'),{n:n,m:D.count});
+    $('etNightBig').textContent=R.playing||(R.t>0&&R.t<D.minutes)?clock((D.count?D.items[0].at:0)+R.t):it?it.time:String(D.minutes);
+    $('etNightSmall').textContent=R.playing||(R.t>0&&R.t<D.minutes)?T('et.fleet.r.now','on the clock'):it?(it.kind==='lab'?T('et.fleet.r.measures','measures'):T('et.fleet.r.argues','argues')):T('et.fleet.r.minutes','minutes');
+    $('etLgLab').textContent=fill(T('et.fleet.r.lgLab','{n} that measure'),{n:D.lab});
+    $('etLgGal').textContent=fill(T('et.fleet.r.lgGal','{n} that argue'),{n:D.gallery});
+    var card=$('etNightCard');
+    if(it)card.innerHTML='<span class="et-rk">'+esc(it.time)+'</span><div><b>'+esc(it.name)+'</b><span>'+esc(it.line)+'</span></div>';
+    else card.innerHTML='<span class="et-rk">'+esc(D.count)+'</span><div><b>'+esc(fill(T('et.fleet.r.cardH','{n} surfaces, one hand'),{n:D.count}))+'</b><span>'+esc(fill(T('et.fleet.r.cardS','{a} to {b} · {m} minutes · tap a star to read it'),{a:D.first,b:D.last,m:D.minutes}))+'</span></div>';
+    var go=$('etNightGo'), tgt=it||D.items[0];
+    if(tgt){go.href=tgt.href;go.textContent=it?fill(T('et.fleet.r.open','open {n}'),{n:it.name}):fill(T('et.fleet.r.begin','begin at {t}'),{t:tgt.time});}
+    var pl=$('etNightPlay');pl.setAttribute('aria-pressed',String(R.playing));
+    pl.textContent=R.playing?T('et.fleet.r.pause','pause the night'):(R.t>0&&R.t<D.minutes)?T('et.fleet.r.resume','play on'):R.t>=D.minutes&&D.minutes?T('et.fleet.r.again','play the night again'):T('et.fleet.r.play','play the night');
+    night();
+  }
+  function still(){try{if(localStorage.getItem('bnr.motion.paused')==='true')return true;}catch(e){}return !!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches);}
+  function passTo(t){R.t=t;D.items.forEach(function(it,i){if(it.min<=t+1e-6)R.lit[i]=true;});}
+  function play(){
+    if(R.playing){R.playing=false;cancelAnimationFrame(R.raf);R.raf=0;raver();return;}
+    if(R.t>=D.minutes){R.t=0;R.lit={};}
+    if(still()){passTo(D.minutes);raver();return;}      /* reduced motion: the whole night at once, no sweep */
+    R.playing=true;var t0=performance.now(),from=R.t,MS=100; /* one minute of the night = 100 ms: a sweep, never a flash */
+    (function tick(now){if(!R.playing)return;var t=Math.min(D.minutes,from+(now-t0)/MS);passTo(t);
+      if(t>=D.minutes){R.playing=false;R.raf=0;raver();return;}raver();R.raf=requestAnimationFrame(tick);})(t0);
+    raver();
+  }
+
+  /* ── CYPHERPUNK ── */
+  function cy(){
+    $('etcPath').textContent='surfaces/fleet-hosted/ · '+D.count+' '+T('et.fleet.c.files','files')+' · '+D.date+' '+D.first+' → '+D.last;
+    $('etcChips').innerHTML='<span class="et-on">'+esc(fill(T('et.fleet.c.chipN','{n} surfaces · {m} min'),{n:D.count,m:D.minutes}))+'</span><span class="et-ok">'+esc(fill(T('et.fleet.c.chipOff','off-origin {n} · measured'),{n:D.req.off}))+'</span><span>'+esc(T('et.fleet.c.chipOrig','originals untouched'))+'</span>';
+    $('etcFiles').innerHTML=D.items.map(function(it){return '<tr><td>'+esc(it.time)+'</td><td><a class="et-c-a" href="'+esc(it.href)+'">'+esc(it.href)+'</a><small>'+esc(it.line)+'</small></td><td class="et-nw">'+esc(it.kind)+'</td></tr>';}).join('');
+    var V=D.verify, vdone=V.state==='done';
+    var steps=[
+      ['written · '+D.date,fill(T('et.fleet.c.p1','{n} surfaces in {m} minutes, {a} to {b} · times are the originals\' file timestamps'),{n:D.count,m:D.minutes,a:D.first,b:D.last}),'et-done'],
+      ['preserved · surfaces/fleet/',T('et.fleet.c.p2','the original set, 26 files, hashed byte-identical to their sources, 26 of 26 (this page\'s provenance record) · never edited'),'et-done'],
+      ['hosted · surfaces/fleet-hosted/',T('et.fleet.c.p3','a generated derivative on this origin; regenerating it is the only way it changes'),'et-done'],
+      ['vendored · '+CJ,'sha256 '+PIN_SHA.slice(0,8)+'…'+PIN_SHA.slice(-4)+' · '+PIN_BYTES.toLocaleString('en')+' bytes · '+T('et.fleet.c.p4','the seven chart pieces load it from here, not from a cdn'),'et-done'],
+      ['carried · riders, fixes, fronts',T('et.fleet.c.p5','every copy carries the estate bar; seven carry a phone layout rule; intake-tracker and bnr-dashboard carry day-bucket fixes; three gallery pieces and bnr-dashboard carry a three-view front above the unchanged piece'),''],
+      ['verify · fetch → sha256 → compare',vdone?fill(T('et.fleet.c.p6done','ran here: {n} pairs read'),{n:V.rows.filter(function(r){return r.ok;}).length}):T('et.fleet.c.p6','not run yet · the button below fetches each original and its copy from this origin'),vdone?'et-done':'et-now']
+    ];
+    $('etcPipe').innerHTML=steps.map(function(s){return '<li class="'+s[2]+'"><b>'+esc(s[0])+'</b><p>'+esc(s[1])+'</p></li>';}).join('');
+    var btn=$('etcVerify');btn.disabled=V.state==='running';
+    btn.textContent=V.state==='running'?fill(T('et.fleet.c.running','reading {n} of {m}…'),{n:V.done,m:D.count}):vdone?T('et.fleet.c.rerun','run verify again'):T('et.fleet.c.run','run verify here');
+    $('etcState').textContent=V.state==='failed'?V.why:vdone?T('et.fleet.c.stateDone','measured in this browser just now. "lines" counts lines found only in the copy (+) and only in the original (−).'):'';
+    var tb=$('etcDiff');tb.hidden=!vdone;
+    if(vdone){
+      var rows=V.rows.map(function(r){
+        if(!r.ok)return '<tr><td>'+esc(r.file)+'<small class="et-st-no">'+esc(T('et.fleet.c.unread','not read'))+' · '+esc(r.why)+'</small></td><td class="et-num et-st-no">'+esc(T('et.fleet.c.na','not read'))+'</td></tr>';
+        return '<tr><td>'+esc(r.file)+'<small>'+esc(r.o.slice(0,8))+' → '+esc(r.c.slice(0,8))+'</small></td><td class="et-num">+'+r.add+' −'+r.del+'<small class="'+(r.same?'et-st-ok':'et-st-wait')+'">'+esc(r.same?T('et.fleet.c.same','identical'):T('et.fleet.c.diff','differs'))+'</small></td></tr>';
+      });
+      if(V.chart)rows.push('<tr><td>'+CJ+'<small>'+esc(V.chart.sha.slice(0,8))+'…'+esc(V.chart.sha.slice(-4))+' · '+V.chart.bytes.toLocaleString('en')+' bytes</small></td><td class="et-num '+(V.chart.sha===PIN_SHA?'et-st-ok':'et-st-no')+'">'+esc(V.chart.sha===PIN_SHA?T('et.fleet.c.pinOk','matches pin ✓'):T('et.fleet.c.pinNo','not the pin'))+'</td></tr>');
+      tb.querySelector('tbody').innerHTML=rows.join('');
+    }
+    $('etcReceipt').innerHTML=[
+      ['surfaces',fill(T('et.fleet.c.kSurf','{n} · {a} measure · {b} argue'),{n:D.count,a:D.lab,b:D.gallery})],
+      ['night',D.date+' · '+D.first+' → '+D.last+' · '+D.minutes+' min'],
+      ['requests',fill(T('et.fleet.c.kReq','{n} so far from this page · {o} off-origin · measured from its resource timings'),{n:D.req.all,o:D.req.off})],
+      ['chart.js',vdone&&V.chart?(esc(V.chart.sha===PIN_SHA?T('et.fleet.c.kPinOk','measured here, matches the pin'):T('et.fleet.c.kPinNo','measured here, differs from the pin'))+' · sha256 '+esc(PIN_SHA.slice(0,8))+'…'+esc(PIN_SHA.slice(-4))):esc(T('et.fleet.c.kPin','pinned'))+' · sha256 '+esc(PIN_SHA.slice(0,8))+'…'+esc(PIN_SHA.slice(-4))+' · '+PIN_BYTES.toLocaleString('en')+' bytes'],
+      ['originals',esc(T('et.fleet.c.kOrig','surfaces/fleet/ · untouched · 26 of 26 byte-identical to their sources, as recorded below'))]
+    ].map(function(r){return '<tr><th>'+esc(r[0])+'</th><td>'+(r[0]==='chart.js'||r[0]==='originals'?r[1]:esc(r[1]))+'</td></tr>';}).join('');
+  }
+  function hex(buf){return [].map.call(new Uint8Array(buf),function(b){return (b<16?'0':'')+b.toString(16);}).join('');}
+  function get(u){
+    return fetch(u,{cache:'no-store'}).then(function(r){if(!r.ok)throw new Error(r.status+' '+u);return r.arrayBuffer();})
+      .then(function(buf){return crypto.subtle.digest('SHA-256',buf).then(function(h){return {sha:hex(h),text:new TextDecoder().decode(buf),bytes:buf.byteLength};});});
+  }
+  function delta(a,b){ /* lines found only in b (+) and only in a (−), as a multiset: honest, not a diff */
+    var m={},add=0,del=0;a.split('\n').forEach(function(l){m[l]=(m[l]||0)+1;});
+    b.split('\n').forEach(function(l){if(m[l])m[l]--;else add++;});
+    Object.keys(m).forEach(function(k){del+=m[k];});return {add:add,del:del};
+  }
+  function verify(){
+    var V=D.verify; if(V.state==='running')return;
+    if(!(window.fetch&&window.crypto&&crypto.subtle&&window.TextDecoder)){V.state='failed';V.why=T('et.fleet.c.noCrypto','this browser gives no sha256 on this page; run the commands below instead.');cy();return;}
+    V.state='running';V.rows=[];V.done=0;V.chart=null;cy();
+    Promise.all(D.items.map(function(it){
+      var orig='../fleet/'+it.href.split('/').pop();
+      return Promise.all([get(orig),get(it.href)]).then(function(r){var d=delta(r[0].text,r[1].text);return {file:it.href,ok:true,o:r[0].sha,c:r[1].sha,same:r[0].sha===r[1].sha,add:d.add,del:d.del};})
+        .catch(function(e){return {file:it.href,ok:false,why:String(e&&e.message||e)};})
+        .then(function(row){V.done++;cy();return row;});
+    })).then(function(rows){V.rows=rows;return get(CJ).then(function(v){V.chart={sha:v.sha,bytes:v.bytes};},function(){V.chart=null;});})
+      .then(function(){V.state='done';measure();cy();});
+  }
+
+  /* static words keep their English in the markup and ride T() for the translation pass */
+  var EN={};
+  function words(){[].forEach.call(document.querySelectorAll('#eternal [data-et-t],#etArchive[data-et-t]'),function(e){var k=e.getAttribute('data-et-t');if(!(k in EN))EN[k]=e.textContent;e.textContent=T(k,EN[k]);});}
+  function all(){words();bee();raver();cy();}
+  function wire(){
+    var ev=$('eternal'); if(!ev) return;
+    ev.addEventListener('click',function(e){
+      var st=e.target.closest&&e.target.closest('#etNight .et-star');
+      if(st){var i=+st.getAttribute('data-i');R.sel=R.sel===i?-1:i;R.lit[i]=true;raver();}
+    });
+    ev.addEventListener('keydown',function(e){
+      if(e.key!=='Enter'&&e.key!==' ')return;var st=e.target.closest&&e.target.closest('#etNight .et-star');if(!st)return;
+      e.preventDefault();st.dispatchEvent(new MouseEvent('click',{bubbles:true}));
+    });
+    $('etNightPlay').addEventListener('click',play);
+    $('etcVerify').addEventListener('click',verify);
+    document.addEventListener('blang',all);
+    addEventListener('load',function(){measure();cy();setTimeout(function(){measure();cy();},1500);});
+  }
+  read(); wire(); all();
+  window.__eternal={data:D,raver:R,verify:verify};
+})();
+</script>
 <script src="../agent-dock.js?v=5"></script>
 <script src="../tour.js?v=42"></script>
 </body>

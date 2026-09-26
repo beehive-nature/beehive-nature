@@ -204,7 +204,152 @@ section .law,label,.st,.note,.note .t,footer,table{font-size:12px}
 .st{word-break:normal;overflow-wrap:anywhere}
 footer{padding-bottom:12px}
 footer a,.law a[href$="pointers.js"]{display:inline-block;padding-block:12px;margin-block:-12px}
+
+/* ── ETERNAL FRONT (docs/design/eternal) — the Royal Review as three products. Every value is a
+   skaists token (skaists.css, compiled from docs/design/skaists/tokens.json): no hand-picked hex,
+   size or corner. Measured by e2e/skaists-conformance.mjs --only review.html. ── */
+#eternal{margin:var(--sk-s2) 0 var(--sk-s4);padding:0;border:0;border-radius:0;background:none}
+#eternal>.et-r,#eternal>.et-c{display:none}
+body[data-reg="raver"] #eternal>.et-b,body[data-reg="cypherpunk"] #eternal>.et-b{display:none}
+body[data-reg="raver"] #eternal>.et-r,body[data-reg="cypherpunk"] #eternal>.et-c{display:block}
+#eternal [hidden]{display:none!important}
+#eternal :is(h2,h3,p,ol,ul,table){margin:0;padding:0;letter-spacing:normal}
+#eternal button{margin:0;padding:0;border:0;background:none;color:inherit;font:inherit;border-radius:0;cursor:pointer;min-height:0}
+#eternal button:hover{background:none;color:inherit}
+#eternal :is(select,input,textarea){margin:0;min-height:0}
+#eternal label{display:block;margin:0}
+#eternal a{color:inherit}
+#eternal svg{display:block}
+#eternal :focus-visible{outline:2px solid var(--sk-focus);outline-offset:3px}
+[dir="rtl"] #eternal .chev{transform:scaleX(-1)}
+.et-archive-h{margin:var(--sk-s5) 0 var(--sk-s2);padding-top:var(--sk-s4);border-top:1px solid var(--sk-line);color:var(--sk-ink);text-align:start}
+body[data-reg="bee"] .et-archive-h{font:400 28px/1.1 var(--sk-font-bee-serif)}
+body[data-reg="raver"] .et-archive-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em}
+body[data-reg="cypherpunk"] .et-archive-h{font:600 15px/1.45 var(--sk-font-mono)}
+
+/* NEW BEE — a calm room: one page, one mark, a few words; one magenta action */
+#eternal .et-b{display:flex;flex-direction:column;gap:var(--sk-s3);color:var(--sk-ink);text-align:start}
+#eternal .et-b-h{font:400 40px/1.05 var(--sk-font-bee-serif);color:var(--sk-ink)}
+#eternal .et-b-lede{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-guard{display:flex;align-items:center;gap:var(--sk-s2);min-height:var(--sk-control-min);padding:var(--sk-s1) var(--sk-s3);border-radius:var(--sk-radius);background:var(--sk-guard-wash);color:var(--sk-guard);font:600 15px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-b-guard svg{width:18px;height:18px;flex:none;fill:none;stroke:var(--sk-guard);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+#eternal .et-b-q{font:600 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-field{display:flex;flex-direction:column;gap:var(--sk-s1);font:600 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-select,#eternal .et-b-note{width:100%;min-height:var(--sk-control-row);padding:var(--sk-s2) var(--sk-s3);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius-md);background:var(--sk-bg-card);color:var(--sk-ink);font:400 16px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-b-note{min-height:96px;resize:vertical}
+#eternal .et-b-count{align-self:flex-end;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-rows{display:flex;flex-direction:column;background:var(--sk-bg-card);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl);overflow:hidden}
+#eternal .et-b-row{display:flex;align-items:center;justify-content:space-between;gap:var(--sk-s2);width:100%;min-height:var(--sk-control-row);padding:0 var(--sk-s3);border-bottom:1px solid var(--sk-line-soft);text-align:start;font:500 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+#eternal .et-b-rows>:last-child{border-bottom:0}
+#eternal .et-b-row i{width:28px;height:28px;flex:none;border-radius:var(--sk-radius-pill);display:flex;align-items:center;justify-content:center;font:600 14px/1.4 var(--sk-font-bee-sans);font-style:normal;background:var(--sk-bg-well);color:var(--sk-ink-mut)}
+#eternal .et-b-row[aria-pressed="true"]{background:var(--sk-sovereign-tint);color:var(--sk-sovereign-strong);font-weight:600}
+#eternal .et-b-row[aria-pressed="true"] i{background:var(--sk-sovereign-strong);color:var(--sk-bg-card)}
+#eternal .et-b-act{display:flex;flex-direction:column;gap:var(--sk-s1)}
+#eternal .et-b-primary{height:var(--sk-control-primary);border-radius:var(--sk-radius-lg);background:var(--sk-primary);color:var(--sk-on-primary);font:600 17px/1.2 var(--sk-font-bee-sans)}
+#eternal .et-b-outline{min-height:48px;padding:0 var(--sk-s3);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius-md);background:var(--sk-bg-card);color:var(--sk-ink);font:600 16px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-b-link{display:flex;align-items:center;justify-content:center;min-height:var(--sk-control-min);font:600 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-link);text-decoration:none}
+#eternal .et-b-foot{text-align:center;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-draft{display:flex;flex-direction:column;gap:var(--sk-s2);padding:var(--sk-s3);border-radius:var(--sk-radius-xl);background:var(--sk-bg-card);border:1px solid var(--sk-line)}
+#eternal .et-b-draft b{font:400 28px/1.1 var(--sk-font-bee-serif);color:var(--sk-ink)}
+#eternal .et-b-draft code{display:block;padding:var(--sk-s2);border-radius:var(--sk-radius);background:var(--sk-bg);font:400 15px/1.4 var(--sk-font-mono);color:var(--sk-ink);white-space:pre-wrap;overflow-wrap:anywhere}
+#eternal .et-b-draft span{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-draft span.ok{color:var(--sk-verified)}
+
+/* RAVER — every page of the estate is a star; tap one, light a mark, hold to draft your gift */
+#eternal .et-r{color:var(--sk-ink);font:600 14px/1.25 var(--sk-font-raver-body);text-align:start}
+#eternal .et-r-top{display:flex;align-items:baseline;justify-content:space-between;gap:var(--sk-s2);flex-wrap:wrap}
+#eternal .et-r-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em;color:var(--sk-ink)}
+#eternal .et-r-hint{font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-sky{width:100%;max-width:360px;margin:var(--sk-s3) auto var(--sk-s1);filter:drop-shadow(var(--sk-glow-sovereign));cursor:pointer;touch-action:manipulation}
+#eternal .et-r-sky circle{transition:r .26s}
+#eternal .et-r-card{display:flex;gap:var(--sk-s2);align-items:center;min-height:var(--sk-control-person);padding:var(--sk-s2);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl);background:var(--sk-sovereign-tint)}
+#eternal .et-r-card .rk{width:var(--sk-control-min);height:var(--sk-control-min);flex:none;border-radius:var(--sk-radius);background:var(--sk-sovereign-strong);color:var(--sk-bg);display:flex;align-items:center;justify-content:center;font:700 15px/1.2 var(--sk-font-raver-display)}
+#eternal .et-r-card div{flex:1;min-width:0}
+#eternal .et-r-card b{display:block;font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink);overflow-wrap:anywhere}
+#eternal .et-r-card span{font:600 14px/1.4 var(--sk-font-raver-body);color:var(--sk-sovereign-soft)}
+#eternal .et-r-legend{display:flex;justify-content:center;flex-wrap:wrap;gap:var(--sk-s1) var(--sk-s3);margin:var(--sk-s2) 0;font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-legend span{display:flex;align-items:center;gap:var(--sk-s1)}
+#eternal .et-r-legend i{width:10px;height:10px;border-radius:var(--sk-radius-pill)}
+#eternal .lg-door{background:var(--sk-sovereign-strong)}#eternal .lg-blight{background:var(--sk-ai)}#eternal .lg-top{background:var(--sk-sovereign)}#eternal .lg-deep{background:var(--sk-info)}
+#eternal .et-r-tiles{display:grid;grid-template-columns:1fr 1fr;gap:var(--sk-s2);margin:var(--sk-s3) 0}
+#eternal .et-r-tiles button{height:96px;border-radius:var(--sk-radius-xl);border:1.5px solid var(--sk-sovereign);background:var(--sk-sovereign-wash);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--sk-s1);color:var(--sk-sovereign-strong);font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em;opacity:.7;transition:opacity .26s,box-shadow .26s}
+#eternal .et-r-tiles button b{font:700 30px/1 var(--sk-font-raver-display)}
+#eternal .et-r-tiles button[aria-pressed="true"]{opacity:1;border-color:var(--sk-you);box-shadow:var(--sk-glow-sovereign)}
+#eternal .et-r-input{width:100%;height:var(--sk-control-primary);padding:0 var(--sk-s3);border:1.5px solid var(--sk-sovereign-soft);border-radius:var(--sk-radius-pill);background:var(--sk-bg-card);color:var(--sk-ink);font:400 14px/1.4 var(--sk-font-raver-body)}
+#eternal .et-r-hold{position:relative;width:176px;height:176px;margin:var(--sk-s4) auto 0}
+#eternal .et-r-hold svg{position:absolute;inset:0;width:100%;height:100%;transform:rotate(-90deg)}
+#eternal .et-r-hold circle{fill:none;stroke-width:5}
+#eternal .et-r-hold .track{stroke:var(--sk-line)}
+#eternal .et-r-hold .fill{stroke:var(--sk-biomass);stroke-linecap:round;stroke-dasharray:540;stroke-dashoffset:540}
+#eternal #etRHold{position:absolute;inset:18px;border-radius:var(--sk-radius-pill);background:var(--sk-primary);color:var(--sk-on-primary);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;touch-action:none;user-select:none;-webkit-user-select:none;font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em}
+#eternal #etRHold span{font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em}
+#eternal .et-r-note{margin-top:var(--sk-s2);text-align:center;font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-gift{margin-top:var(--sk-s3);padding:var(--sk-s3);border-radius:var(--sk-radius-xl);border:1.5px solid var(--sk-you);background:var(--sk-sovereign-tint)}
+#eternal .et-r-gift code{display:block;font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink);white-space:pre-wrap;overflow-wrap:anywhere}
+#eternal .et-r-ghost{display:flex;align-items:center;justify-content:center;width:100%;min-height:var(--sk-control-primary);margin-top:var(--sk-s2);border-radius:var(--sk-radius-pill);border:1.5px solid var(--sk-sovereign);color:var(--sk-sovereign-strong);font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em}
+@media (prefers-reduced-motion:reduce){#eternal .et-r-sky circle,#eternal .et-r-tiles button{transition:none}}
+
+/* CYPHERPUNK — the instrument: the grammar, the receipt, its hash, the pipeline to a guard */
+#eternal .et-c{font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink);text-align:start}
+#eternal .et-c-path{font:600 15px/1.45 var(--sk-font-mono);color:var(--sk-ink);overflow-wrap:anywhere}
+#eternal .et-c-sub{margin-top:var(--sk-s1);font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut)}
+#eternal .et-c-form{display:grid;gap:var(--sk-s1);margin-top:var(--sk-s3)}
+#eternal .et-c-form label{font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);display:flex;flex-direction:column;gap:2px}
+#eternal .et-c-in{width:100%;min-height:var(--sk-control-min);padding:var(--sk-s1) var(--sk-s2);border:1px solid var(--sk-ink-mut);border-radius:var(--sk-radius-sm);background:var(--sk-bg-card);color:var(--sk-ink);font:400 13px/1.45 var(--sk-font-mono)}
+#eternal .et-c-primary{display:flex;align-items:center;justify-content:center;width:100%;height:52px;margin-top:var(--sk-s2);border-radius:var(--sk-radius-sm);background:var(--sk-primary);color:var(--sk-on-primary);font:600 14px/1.2 var(--sk-font-mono)}
+#eternal .et-c-h{margin:var(--sk-s4) 0 var(--sk-s2);font:600 15px/1.45 var(--sk-font-mono);color:var(--sk-ink)}
+#eternal .et-c-kv{width:100%;border-collapse:collapse;border:1px solid var(--sk-line);background:var(--sk-bg-card);table-layout:fixed}
+#eternal .et-c-kv th{width:84px;padding:var(--sk-s1) var(--sk-s2);text-align:start;vertical-align:top;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);border-bottom:1px solid var(--sk-line)}
+#eternal .et-c-kv td{padding:var(--sk-s1) var(--sk-s2);border-bottom:1px solid var(--sk-line);font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink);overflow-wrap:anywhere;white-space:pre-wrap}
+#eternal .et-c-kv tr:last-child :is(th,td){border-bottom:0}
+#eternal .et-c-kv .ok{color:var(--sk-verified)}#eternal .et-c-kv .no{color:var(--sk-info)}#eternal .et-c-kv .guard{color:var(--sk-guard)}
+#eternal .et-c-pipe{list-style:none;display:grid;gap:var(--sk-s1);counter-reset:p}
+#eternal .et-c-pipe li{display:grid;grid-template-columns:30px minmax(0,1fr);gap:2px var(--sk-s2);padding:var(--sk-s2);border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm);background:var(--sk-bg-card);counter-increment:p}
+#eternal .et-c-pipe li::before{content:counter(p,decimal-leading-zero);color:var(--sk-ink-mut);font-weight:600}
+#eternal .et-c-pipe li b{font-weight:600;color:var(--sk-ink);overflow-wrap:anywhere}
+#eternal .et-c-pipe li p{grid-column:2;color:var(--sk-ink-soft);overflow-wrap:anywhere}
+#eternal .et-c-pipe li.done b{color:var(--sk-verified)}
+#eternal .et-c-pipe li.now{border-color:var(--sk-ai)}#eternal .et-c-pipe li.now b{color:var(--sk-ai)}
+#eternal .et-c-pipe li.guard{border-style:dashed;border-color:var(--sk-guard)}#eternal .et-c-pipe li.guard b{color:var(--sk-guard)}
+#eternal .et-c-pipe li.you b{color:var(--sk-you)}
+#eternal .et-c-pipe li.todo p{color:var(--sk-ink-mut)}
+#eternal .et-c-verify{margin-top:var(--sk-s3);padding:var(--sk-s2) var(--sk-s3);border-radius:var(--sk-radius-sm);background:var(--sk-bg-card);border:1px solid var(--sk-line)}
+#eternal .et-c-verify b{display:block;margin-bottom:var(--sk-s1);font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut)}
+#eternal .et-c-verify ol{padding-inline-start:var(--sk-s4);display:grid;gap:var(--sk-s1);color:var(--sk-ink)}
+#eternal .et-c-row{display:grid;grid-template-columns:1fr 1fr;gap:var(--sk-s2);margin-top:var(--sk-s3)}
+#eternal .et-c-ghost{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:var(--sk-control-min);padding:var(--sk-s1);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius-sm);color:var(--sk-ink);text-decoration:none;text-align:center;font:600 14px/1.2 var(--sk-font-mono)}
+#eternal .et-c-ghost .et-c-nt{font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut)}
+
+/* ── THE WHOLE DECK, dressed per register: the page's own variables mapped onto skaists ── */
+body[data-reg]{--bg:var(--sk-bg);--panel:var(--sk-bg-card);--well:var(--sk-bg-well);--ink:var(--sk-ink);--line:var(--sk-line);--leaf:var(--sk-verified);--amber:var(--sk-info);background:var(--sk-bg)}
+body[data-reg="bee"]{--dim:var(--sk-ink-mut);--gold:var(--sk-sovereign);--violet:var(--sk-sovereign-strong);--cyan:var(--sk-link);--bee-font:var(--sk-font-bee-sans)}
+body[data-reg="raver"]{--dim:var(--sk-ink-soft);--gold:var(--sk-sovereign-strong);--violet:var(--sk-sovereign-soft);--cyan:var(--sk-link);--leaf:var(--sk-primary);--bee-font:var(--sk-font-raver-body);font-family:var(--sk-font-raver-body)}
+body[data-reg="raver"][data-review-beat="arrival"]{background:var(--sk-bg)}
+body[data-reg="cypherpunk"]{--dim:var(--sk-ink-soft);--gold:var(--sk-sovereign-strong);--violet:var(--sk-sovereign-soft);--cyan:var(--sk-ai);font-family:var(--sk-font-mono)}
+body[data-reg] :is(section,.out,.note,.tile,#tip){background:var(--sk-bg-card);border-color:var(--sk-line)}
+body[data-reg] :is(select,input,textarea){background:var(--sk-bg-well);color:var(--sk-ink);border-color:var(--sk-ink-mut);border-radius:var(--sk-radius-sm)}
+body[data-reg] button:not(.door):not(.mark){background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong);border-color:var(--sk-line);border-radius:var(--sk-radius-sm)}
+body[data-reg] button.gold:not(.door){background:var(--sk-bg-well);color:var(--sk-ink);border-color:var(--sk-ink)}
+body[data-reg="bee"] #mkReview{background:var(--sk-primary);color:var(--sk-on-primary)}
+body[data-reg="raver"] .door.primary{background:var(--sk-primary);color:var(--sk-on-primary);border-color:var(--sk-primary)}
+body[data-reg="cypherpunk"] :is(section,.out,.note,.tile,#tip){border-radius:var(--sk-radius-sm)}
+body[data-reg="bee"] h1{font:400 40px/1.05 var(--sk-font-bee-serif)}
+body[data-reg="raver"] h1{font:700 30px/1.1 var(--sk-font-raver-display);letter-spacing:-.01em;color:var(--sk-ink)}
+body[data-reg="cypherpunk"] h1{font:600 15px/1.45 var(--sk-font-mono);letter-spacing:normal;color:var(--sk-ink)}
+body[data-reg="raver"] :where(section .law,label,.st,.note,.note .t,footer,table,.tile .tl,.brow .bn,.brow .bc,summary),body[data-reg="raver"] #legend{font-size:14px}
+body[data-reg="cypherpunk"] :where(.tile .tl,.brow .bn,.brow .bc,summary,.out),body[data-reg="cypherpunk"] #legend,body[data-reg="cypherpunk"] #instrument button{font-size:12px}
+body[data-reg="bee"]{--faint:var(--sk-ink-mut)}
+body[data-reg="bee"] .door:not(.primary){color:var(--sk-ink);border-color:var(--sk-ink);background:var(--sk-bg-card)}
+body[data-reg="bee"] #masthead h1{font:400 40px/1.05 var(--sk-font-bee-serif)}
+body[data-reg="raver"] #masthead h1{font:700 30px/1.1 var(--sk-font-raver-display)}
+body[data-reg="cypherpunk"] #masthead h1{font:600 15px/1.45 var(--sk-font-mono)}
+body[data-reg="raver"] .tile .tl{font-size:14px}
+body[data-reg="cypherpunk"] .tile .tl{font-size:12px}
+body[data-reg] #instrument button{min-height:44px}
+/* the shared reading room paints raver violet-black (register.js); this page's raver is skaists black-green */
+html body[data-reading-room][data-reg="raver"]{--bg:var(--sk-bg);--panel:var(--sk-bg-card);--well:var(--sk-bg-well);--ink:var(--sk-ink);--dim:var(--sk-ink-soft);--line:var(--sk-line);--cyan:var(--sk-link);--violet:var(--sk-sovereign-soft);background:var(--sk-bg)!important;color:var(--sk-ink)}
 </style>
+<link rel="stylesheet" href="skaists.css">
 </head>
 <body data-reg="bee" data-bee-theme="custom" data-review-beat="arrival">
 <div id="bregbar">
@@ -214,6 +359,71 @@ footer a,.law a[href$="pointers.js"]{display:inline-block;padding-block:12px;mar
   <span class="review-language" data-language-host></span>
 </div>
 <main>
+<!-- ETERNAL FRONT (founder blueprint 2026-09-26, docs/design/eternal): the Royal Review as three
+     separate products in one surface. ONE data layer (the deck's own roster, verdicts, note limit,
+     bind state and tally, exported as window.ReviewDeck by the script below) drives all three. Every
+     "draft" gesture hands the page, the mark and the note to the composer (#surf, #verdict, #rnote,
+     #mkReview) and shows what IT wrote; copying is #cpReview's own honest copy. Nothing publishes. -->
+<section id="eternal" aria-label="leave a review">
+
+  <!-- NEW BEE — a calm room: one page, one mark, a few words -->
+  <div class="et-b">
+    <h2 class="et-b-h" id="etBTitle">tell us what you noticed</h2>
+    <p class="et-b-lede" id="etBLede">one page, one mark, a few words. it stays a draft on this page until you copy it.</p>
+    <div class="et-b-guard"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span id="etBGuard">nothing is published for you. you choose where it goes.</span></div>
+    <label class="et-b-field"><span id="etBPageQ">the page you visited</span><select class="et-b-select" id="etBSurf" data-et-surf></select></label>
+    <p class="et-b-q" id="etBMarkQ">what happened there?</p>
+    <div class="et-b-rows" id="etBMarks" role="group" aria-labelledby="etBMarkQ"></div>
+    <label class="et-b-field"><span id="etBNoteQ">in your words</span><textarea class="et-b-note" id="etBNote" data-et-note maxlength="140" rows="3"></textarea></label>
+    <span class="et-b-count" id="etBCount" aria-live="polite"></span>
+    <div class="et-b-act">
+      <button type="button" class="et-b-primary" id="etBGo" data-et-draft>preview my review</button>
+      <button type="button" class="et-b-link" data-review-go="deeper" id="etBDeeper">go deeper</button>
+    </div>
+    <div class="et-b-draft" id="etBDraft" hidden><b id="etBDraftH">your draft</b><code id="etBDraftTxt"></code><span id="etBDraftSay"></span><button type="button" class="et-b-outline" data-et-copy id="etBCopy">copy my review</button></div>
+    <p class="et-b-foot" id="etBFoot">unsigned unless you bind a passkey below. guards mark unsigned reviews unverified.</p>
+  </div>
+
+  <!-- RAVER — every page of the estate is a star: tap one, light a mark, hold to draft the gift -->
+  <div class="et-r">
+    <div class="et-r-top"><h2 class="et-r-h" id="etRTitle">give a gift</h2><span class="et-r-hint" id="etRHint">tap a star · light a mark · hold</span></div>
+    <svg class="et-r-sky" id="etRSky" viewBox="-200 -200 400 400" role="img" aria-label="every page of the estate as a star"></svg>
+    <div class="et-r-legend"><span><i class="lg-door"></i><span id="etRLgDoor">doors</span></span><span><i class="lg-blight"></i><span id="etRLgBlight">blight</span></span><span><i class="lg-top"></i><span id="etRLgTop">estate</span></span><span><i class="lg-deep"></i><span id="etRLgDeep">rooms</span></span></div>
+    <div class="et-r-card" id="etRCard" aria-live="polite"></div>
+    <div class="et-r-tiles" id="etRTiles" role="group" aria-label="your mark"></div>
+    <input class="et-r-input" id="etRNote" data-et-note maxlength="140" aria-label="a few words, up to 140" placeholder="a few words · up to 140">
+    <div class="et-r-hold">
+      <svg viewBox="0 0 180 180" aria-hidden="true"><circle class="track" cx="90" cy="90" r="86"/><circle class="fill" id="etRProg" cx="90" cy="90" r="86"/></svg>
+      <button type="button" id="etRHold" aria-describedby="etRSay">hold<span id="etRHoldSub">to draft</span></button>
+    </div>
+    <p class="et-r-note" id="etRSay"></p>
+    <div class="et-r-gift" id="etRGift" hidden><code id="etRGiftTxt"></code><button type="button" class="et-r-ghost" data-et-copy id="etRCopy">copy the gift</button></div>
+  </div>
+
+  <!-- CYPHERPUNK — the instrument: grammar, receipt, its hash, the path to a guard -->
+  <div class="et-c">
+    <h2 class="et-c-path" id="etCPath">[bX review] &lt;verdict&gt; &lt;surface&gt; — &lt;url&gt; — from: … — note: ≤140</h2>
+    <p class="et-c-sub" id="etCSub">attestation, never telemetry · a receipt exists only if you publish it</p>
+    <div class="et-c-form">
+      <label><span>surface</span><select class="et-c-in" id="etCSurf" data-et-surf></select></label>
+      <label><span>verdict</span><select class="et-c-in" id="etCVerdict"></select></label>
+      <label><span id="etCNoteL">note · ≤140</span><input class="et-c-in" id="etCNote" data-et-note maxlength="140"></label>
+    </div>
+    <button type="button" class="et-c-primary" id="etCGo" data-et-draft>compose receipt</button>
+    <h3 class="et-c-h" id="etCRecH">receipt</h3>
+    <table class="et-c-kv" id="etCRec"></table>
+    <h3 class="et-c-h" id="etCPipeH">pipeline · draft to guard</h3>
+    <ol class="et-c-pipe" id="etCPipe"></ol>
+    <h3 class="et-c-h" id="etCTallyH">tally · the live rails</h3>
+    <table class="et-c-kv" id="etCTally"></table>
+    <div class="et-c-verify"><b id="etCVerH">verify · no trust in this page needed</b><ol><li>ref = sha256(line)[0..12]</li><li>ed25519.verify(sig, line, pub)</li><li>a guard cites the ref; it weighs, never gates</li></ol></div>
+    <div class="et-c-row">
+      <button type="button" class="et-c-ghost" data-et-copy id="etCCopy">copy receipt</button>
+      <a class="et-c-ghost" href="https://github.com/beehive-nature/beehive-nature/blob/main/surfaces/blight/pointers.js" target="_blank" rel="noopener noreferrer"><span id="etCFork">fork the grammar ↗</span><span class="et-c-nt" id="etCNew">opens in a new tab</span></a>
+    </div>
+  </div>
+</section>
+<h2 class="et-archive-h" id="etArchive">the whole deck</h2>
 <header id="masthead">
   <h1>👑 <span data-i18n="review.mark">the Royal Review</span></h1>
   <p class="eyebrow pair" data-reg="cypherpunk" data-i18n="review.pair">a signed receipt you choose to publish</p>
@@ -596,6 +806,7 @@ $('w1go').onclick=async function(){
     'plur.html','kandi.html','festival/index.html','music.html','jams.html','bfood.html','bearth.html','bfactory.html','bigen.html','blanguage.html',
     'attest.html','buzz-studio.html','bset.html','bantfarm.html','stack.html','btranslated.html','dao-dashboard/index.html','blight/c1-aid.html','bmeshasi.html','royalguard.html','bnames.html','wallet.html','bdata.html',
     'forge/index.html','forge/hexfield.html','forge/orbit.html','forge/room.html','forge/huddle.html','devroom.html','dock.html','forge/orbit-v2.html','fleet-hosted/index.html','myspace.html'];
+  window.ReviewDeck={surfaces:SURFACES}; /* the ETERNAL front reads the one roster, never a copy */
   SURFACES.forEach(function(s){
     [ $('surf'), $('aiSurf') ].forEach(function(sel){
       var o=document.createElement('option'); o.value=s; o.textContent=s; sel.appendChild(o);
@@ -718,6 +929,8 @@ $('w1go').onclick=async function(){
     {key:'gap',  glyph:'🕳',name:'gap',  css:'var(--v-gap)'}
   ];
   var counts={}, latest={}, totals={receipts:0,guards:0,bugs:0,dedup:{}};
+  window.ReviewDeck.verdicts=VERDICTS;
+  window.ReviewDeck.tally=function(){ return {receipts:totals.receipts,guards:totals.guards,bugs:totals.bugs,walked:Object.keys(counts).length,demo:location.hash==='#demo'}; };
   function seen(txt){ if(totals.dedup[txt]) return true; totals.dedup[txt]=1; return false; }
   function ingest(txt,who,at){
     var isReview=txt.indexOf('[bX review]')===0, isGuard=txt.indexOf('[bX guard]')===0;
@@ -805,6 +1018,180 @@ $('w1go').onclick=async function(){
     try{ BSKY.searchPointer('[bX review',function(p){ ingest(p.text,p.author,p.at); },function(){});
          BSKY.searchPointer('[bX guard',function(p){ ingest(p.text,p.author,p.at); },function(){}); }catch(e){}
   };
+})();
+</script>
+<script>
+/* ETERNAL FRONT — one data layer, three renderers (docs/design/eternal). The facts are the deck's
+   own: its roster and verdicts (window.ReviewDeck), the note limit (#rnote maxlength), the bind
+   state (#bindSt) and the live tally. Every "draft" gesture fills the composer (#surf, #verdict,
+   #rnote) and runs ITS button (#mkReview); the draft shown is what #reviewOut says. "copied" is
+   drawn only when #cpReview's own result says so. This front publishes nothing. */
+(function(){
+  var $=function(id){return document.getElementById(id);};
+  var T=function(k,f){var t=window.BNRLanguage&&window.BNRLanguage.text;return t?t(k,f):f;};
+  var RD=window.ReviewDeck||{surfaces:[],verdicts:[],tally:function(){return null;}};
+  var WORD={works:['✓','it worked'],idea:['✧','i have an idea'],bug:['!','something broke'],gap:['○','something is missing']};
+  var D={surfaces:RD.surfaces.slice(),verdicts:RD.verdicts.map(function(v){return {key:v.key,value:v.glyph+' '+v.name,glyph:v.glyph,name:v.name};}),
+    max:+($('rnote').getAttribute('maxlength')||140),surface:$('surf').value,verdict:$('verdict').value,note:'',signed:false,draft:'',line:'',ref:'',copied:null,tally:null,listening:false};
+  var R={hold:{t0:0,raf:0}};
+  function esc(v){return String(v==null?'':v).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+  function vkey(v){var m=D.verdicts.filter(function(x){return x.value===v;})[0];return m?m.key:'works';}
+
+  function read(){
+    D.surface=$('surf').value; D.verdict=$('verdict').value; D.note=$('rnote').value;
+    D.signed=/^bound/.test(($('bindSt').textContent||'').trim());
+    var out=$('reviewOut'); D.draft=out.style.display==='block'?out.textContent:''; D.line=D.draft.split('\n')[0]||'';
+    D.copied=!$('review-copied').hidden?true:!$('review-copy-failed').hidden?false:null;
+    D.tally=RD.tally?RD.tally():null; D.listening=($('tallySt').textContent||'').trim()!=='idle';
+  }
+  /* the composer is the one writer: the front sets its fields, never its own copy of the state */
+  function put(field,val){
+    if(field==='surf'){$('surf').value=val;}
+    if(field==='verdict'){$('verdict').value=val;$('verdict').dispatchEvent(new Event('change'));}
+    if(field==='note'){$('rnote').value=String(val).slice(0,D.max);}
+    hideDraft(); all();
+  }
+  function hideDraft(){ /* a changed field makes the old preview stale: the page hides it, as the composer would re-make it */
+    if($('reviewOut').style.display==='block'){$('reviewOut').style.display='none';$('review-ready').hidden=true;$('review-copied').hidden=true;$('review-copy-failed').hidden=true;}
+  }
+  function draft(){ var b=$('mkReview'); if(b&&b.onclick){ Promise.resolve(b.onclick()).then(function(){hashRef();}); } }
+  function copy(){ var b=$('cpReview'); if(b&&b.onclick&&D.draft){ Promise.resolve(b.onclick()).then(function(){all();}); } }
+  function hashRef(){
+    read(); if(!D.line){D.ref='';all();return;}
+    var line=D.line; crypto.subtle.digest('SHA-256',new TextEncoder().encode(line)).then(function(buf){
+      if(line!==D.line) return;
+      D.ref=Array.prototype.map.call(new Uint8Array(buf),function(b){return b.toString(16).padStart(2,'0');}).join('').slice(0,12); all();
+    }).catch(function(){D.ref='';all();});
+  }
+  function fillSurf(sel){ if(sel.options.length) return; sel.innerHTML=D.surfaces.map(function(x){return '<option value="'+esc(x)+'">'+esc(x)+'</option>';}).join(''); }
+
+  /* ── NEW BEE ── */
+  function bee(){
+    $('etBSurf').value=D.surface;
+    $('etBMarks').innerHTML=D.verdicts.map(function(v){var on=v.value===D.verdict,w=WORD[v.key]||[v.glyph,v.name];
+      return '<button type="button" class="et-b-row" data-verdict="'+esc(v.value)+'" aria-pressed="'+on+'"><span>'+esc(T('et.review.b.'+v.key,w[1]))+'</span><i aria-hidden="true">'+(on?'✓':w[0])+'</i></button>';}).join('');
+    if(document.activeElement!==$('etBNote')) $('etBNote').value=D.note;
+    $('etBCount').textContent=T('et.review.count','{n} of {m} characters').replace('{n}',D.note.length).replace('{m}',D.max);
+    var has=!!D.draft; $('etBDraft').hidden=!has;
+    if(has){ $('etBDraftTxt').textContent=D.draft;
+      var say=$('etBDraftSay'); say.className=D.copied===true?'ok':'';
+      say.textContent=D.copied===true?T('et.review.b.copied','copied. paste it wherever you want to share it.'):D.copied===false?T('et.review.b.copyFailed','copy did not work. select the text and copy it yourself.'):T('et.review.b.ready','your draft is ready. nothing has been published.'); }
+  }
+  /* ── RAVER: the sky of pages ── */
+  var GA=Math.PI*(3-Math.sqrt(5));
+  function kind(x){return /^doors\//.test(x)?'door':/^blight\//.test(x)?'blight':/\//.test(x)?'deep':'top';}
+  var COL={door:'sovereign-strong',blight:'ai',top:'sovereign',deep:'info'};
+  function star(i){var r=16*Math.sqrt(i+0.6),a=i*GA;return [r*Math.cos(a),r*Math.sin(a)];}
+  function sky(){
+    var h='', t=D.tally, walked={}, sel=D.surfaces.indexOf(D.surface);
+    D.surfaces.forEach(function(x,i){var p=star(i),on=i===sel;
+      h+='<circle cx="'+p[0].toFixed(1)+'" cy="'+p[1].toFixed(1)+'" r="'+(on?7:3.2)+'" data-i="'+i+'" style="fill:var(--sk-'+COL[kind(x)]+')"/>';});
+    if(sel>=0){var q=star(sel);h+='<circle cx="'+q[0].toFixed(1)+'" cy="'+q[1].toFixed(1)+'" r="13" fill="none" stroke-width="1.5" stroke-dasharray="3 3" style="stroke:var(--sk-you)"/>';}
+    $('etRSky').innerHTML=h; void t; void walked;
+  }
+  function raver(){
+    sky();
+    var i=D.surfaces.indexOf(D.surface);
+    $('etRCard').innerHTML='<button type="button" class="rk" data-step="-1" aria-label="'+esc(T('et.review.r.prev','previous page'))+'">‹</button><div><b dir="ltr">'+esc(D.surface)+'</b><span>'+
+      esc(T('et.review.r.card','star {i} of {n} · {k}').replace('{i}',i+1).replace('{n}',D.surfaces.length).replace('{k}',T('et.review.r.k.'+kind(D.surface),{door:'a door',blight:'blight',top:'the estate',deep:'a room'}[kind(D.surface)])))+'</span></div>'+
+      '<button type="button" class="rk" data-step="1" aria-label="'+esc(T('et.review.r.next','next page'))+'">›</button>';
+    $('etRTiles').innerHTML=D.verdicts.map(function(v){var on=v.value===D.verdict,w=WORD[v.key]||[v.glyph,v.name];
+      return '<button type="button" data-verdict="'+esc(v.value)+'" aria-pressed="'+on+'"><b aria-hidden="true">'+w[0]+'</b>'+esc(T('et.review.r.'+v.key,v.name))+'</button>';}).join('');
+    if(document.activeElement!==$('etRNote')) $('etRNote').value=D.note;
+    $('etRSay').textContent=D.draft?T('et.review.r.drafted','drafted · nothing published · copy it, give it'):T('et.review.r.say','one page · one mark · {n} of {m}').replace('{n}',D.note.length).replace('{m}',D.max);
+    $('etRGift').hidden=!D.draft; if(D.draft) $('etRGiftTxt').textContent=D.draft;
+    $('etRCopy').textContent=D.copied===true?T('et.review.r.copied','copied · go give it'):D.copied===false?T('et.review.r.copyFailed','copy failed · select the text'):T('et.review.r.copy','copy the gift');
+  }
+  /* ── CYPHERPUNK ── */
+  function cy(){
+    $('etCSurf').value=D.surface; $('etCVerdict').value=D.verdict;
+    if(document.activeElement!==$('etCNote')) $('etCNote').value=D.note;
+    var no=function(t){return '<span class="no">'+esc(t)+'</span>';}, nd=T('et.review.c.notYet','not composed yet');
+    $('etCRec').innerHTML=[
+      ['line',D.line?esc(D.line):no(nd)],
+      ['ref',D.ref?'<span class="ok">'+esc(D.ref)+'</span> · sha256[0..12]':no(D.line?T('et.review.c.hashing','hashing'):nd)],
+      ['signed',D.signed?'<span class="ok">ed25519 · bound passkey</span>':'<span class="guard">'+esc(T('et.review.c.unsigned','unsigned · guest · guards mark it unverified'))+'</span>'],
+      ['note',esc(D.note.length+' / '+D.max)],
+      ['published','<span class="no">'+esc(T('et.review.c.never','never by this page · paste it into your own client'))+'</span>'],
+      ['copied',D.copied===true?'<span class="ok">✓</span>':D.copied===false?'<span class="guard">'+esc(T('et.review.c.copyFailed','failed · select it yourself'))+'</span>':no(T('et.review.c.no','no'))]
+    ].map(function(r){return '<tr><th>'+r[0]+'</th><td>'+r[1]+'</td></tr>';}).join('');
+    var steps=[
+      ['compose · PTR.review','one surface · one verdict · note ≤'+D.max+' · local only',D.line?'done':'now'],
+      ['bind · passkey or guest',D.signed?'bound · bzDiD record key re-derived on this device':'guest · unsigned · recovery phrases never enter this page',D.signed?'done':'guard'],
+      ['sign · ed25519',D.signed?'pub + sig appended to the line':'skipped · unsigned receipts stay publishable',D.signed&&D.line?'done':'todo'],
+      ['copy','clipboard · or select it yourself',D.copied===true?'done':D.line?'now':'todo'],
+      ['publish · your client','nostr note or bluesky post · the in-page path docks with TASK 6b','you'],
+      ['guard · verify','ed25519 arithmetic · the guard cites ref · weighs, never gates','todo']
+    ];
+    $('etCPipe').innerHTML=steps.map(function(x){return '<li class="'+x[2]+'"><b>'+esc(x[0])+'</b><p>'+esc(x[1])+'</p></li>';}).join('');
+    var t=D.tally, heard=D.listening||(t&&t.demo);
+    $('etCTally').innerHTML=[
+      ['roster',D.surfaces.length+' surfaces'],
+      ['receipts',heard&&t?esc(t.receipts):no(T('et.review.c.notRead','not read yet · listen below'))],
+      ['walked',heard&&t?esc(t.walked+' / '+D.surfaces.length):no(T('et.review.c.notRead','not read yet · listen below'))],
+      ['guards',heard&&t?esc(t.guards):no(T('et.review.c.notRead','not read yet · listen below'))],
+      ['source',t&&t.demo?'<span class="guard">demo · synthetic, labeled</span>':esc('nostr relay + bluesky appview')]
+    ].map(function(r){return '<tr><th>'+r[0]+'</th><td>'+r[1]+'</td></tr>';}).join('');
+  }
+
+  var WORDS={etBTitle:['et.review.b.title','tell us what you noticed'],etBLede:['et.review.b.lede','one page, one mark, a few words. it stays a draft on this page until you copy it.'],
+    etBGuard:['et.review.b.guard','nothing is published for you. you choose where it goes.'],etBPageQ:['et.review.b.pageQ','the page you visited'],etBMarkQ:['et.review.b.markQ','what happened there?'],
+    etBNoteQ:['et.review.b.noteQ','in your words'],etBGo:['et.review.b.go','preview my review'],etBDeeper:['et.review.b.deeper','go deeper'],etBDraftH:['et.review.b.draftH','your draft'],
+    etBCopy:['et.review.b.copy','copy my review'],etBFoot:['et.review.b.foot','unsigned unless you bind a passkey below. guards mark unsigned reviews unverified.'],
+    etRTitle:['et.review.r.title','give a gift'],etRHint:['et.review.r.hint','tap a star · light a mark · hold'],etRHoldSub:['et.review.r.holdSub','to draft'],
+    etRLgDoor:['et.review.r.lgDoor','doors'],etRLgBlight:['et.review.r.lgBlight','blight'],etRLgTop:['et.review.r.lgTop','estate'],etRLgDeep:['et.review.r.lgDeep','rooms'],
+    etCSub:['et.review.c.sub','attestation, never telemetry · a receipt exists only if you publish it'],etCGo:['et.review.c.go','compose receipt'],etCRecH:['et.review.c.recH','receipt'],
+    etCPipeH:['et.review.c.pipeH','pipeline · draft to guard'],etCTallyH:['et.review.c.tallyH','tally · the live rails'],etCVerH:['et.review.c.verH','verify · no trust in this page needed'],
+    etCCopy:['et.review.c.copy','copy receipt'],etCFork:['et.review.c.fork','fork the grammar ↗'],etCNew:['et.review.c.newTab','opens in a new tab'],etArchive:['et.review.archive','the whole deck']};
+  function words(){Object.keys(WORDS).forEach(function(id){var e=$(id);if(!e)return;if(e.firstChild&&e.firstChild.nodeType===3&&e.children.length)e.firstChild.nodeValue=T(WORDS[id][0],WORDS[id][1]);else if(!e.children.length)e.textContent=T(WORDS[id][0],WORDS[id][1]);});}
+  function all(){read();bee();raver();cy();}
+
+  function holdStart(e){
+    var H=R.hold; if(H.raf) return; if(e&&e.preventDefault)e.preventDefault();
+    var prog=$('etRProg'); H.t0=performance.now();
+    (function tick(now){var f=Math.min(1,(now-H.t0)/900);prog.style.strokeDashoffset=String(540*(1-f));
+      if(f>=1){H.raf=0;draft();setTimeout(function(){prog.style.strokeDashoffset='540';},400);return;}H.raf=requestAnimationFrame(tick);})(H.t0);
+  }
+  function holdStop(){var H=R.hold;if(!H.raf)return;cancelAnimationFrame(H.raf);H.raf=0;$('etRProg').style.strokeDashoffset='540';}
+
+  function wire(){
+    ['etBSurf','etCSurf'].forEach(function(id){fillSurf($(id));$(id).addEventListener('change',function(){put('surf',this.value);});});
+    $('etCVerdict').innerHTML=D.verdicts.map(function(v){return '<option value="'+esc(v.value)+'">'+esc(v.value)+'</option>';}).join('');
+    $('etCVerdict').addEventListener('change',function(){put('verdict',this.value);});
+    document.querySelectorAll('#eternal [data-et-note]').forEach(function(n){n.setAttribute('maxlength',D.max);n.addEventListener('input',function(){put('note',n.value);});});
+    var ev=$('eternal');
+    ev.addEventListener('click',function(e){
+      var v=e.target.closest('[data-verdict]'); if(v){put('verdict',v.getAttribute('data-verdict'));return;}
+      if(e.target.closest('[data-et-draft]')){draft();return;}
+      if(e.target.closest('[data-et-copy]')){copy();return;}
+      var st=e.target.closest('[data-step]'); if(st){var i=D.surfaces.indexOf(D.surface),n=D.surfaces.length;put('surf',D.surfaces[(i+ +st.getAttribute('data-step')+n)%n]);return;}
+    });
+    $('etRSky').addEventListener('click',function(e){
+      var svg=$('etRSky'),r=svg.getBoundingClientRect(),x=(e.clientX-r.left)/r.width*400-200,y=(e.clientY-r.top)/r.height*400-200,best=-1,bd=1e9;
+      D.surfaces.forEach(function(s,i){var p=star(i),d=(p[0]-x)*(p[0]-x)+(p[1]-y)*(p[1]-y);if(d<bd){bd=d;best=i;}});
+      if(best>=0&&bd<900) put('surf',D.surfaces[best]);
+    });
+    var hb=$('etRHold');
+    hb.addEventListener('pointerdown',function(e){try{hb.setPointerCapture(e.pointerId);}catch(x){}holdStart(e);});
+    ['pointerup','pointercancel','pointerleave'].forEach(function(t){hb.addEventListener(t,holdStop);});
+    hb.addEventListener('keydown',function(e){if((e.key===' '||e.key==='Enter')&&!e.repeat){e.preventDefault();holdStart(e);}});
+    hb.addEventListener('keyup',function(e){if(e.key===' '||e.key==='Enter')holdStop();});
+    hb.addEventListener('contextmenu',function(e){e.preventDefault();});
+    /* the composer below is the same flow: whatever it shows, the fronts show */
+    var mo=new MutationObserver(function(){all();});
+    mo.observe($('reviewOut'),{attributes:true,childList:true,characterData:true,subtree:true});
+    ['review-ready','review-copied','review-copy-failed'].forEach(function(id){mo.observe($(id),{attributes:true,attributeFilter:['hidden']});});
+    mo.observe($('bindSt'),{childList:true,characterData:true,subtree:true});
+    mo.observe($('tallySt'),{childList:true,characterData:true,subtree:true});
+    mo.observe($('t-receipts'),{childList:true,characterData:true,subtree:true});
+    ['surf','verdict','rnote'].forEach(function(id){$(id).addEventListener('change',all);$(id).addEventListener('input',all);});
+    $('mkReview').addEventListener('click',function(){setTimeout(hashRef,0);});
+    document.addEventListener('blang',function(){words();all();});
+  }
+  /* arriving from a page of the estate: that page is the one you visited */
+  try{var ref=document.referrer&&new URL(document.referrer);if(ref&&ref.origin===location.origin){var m=/\/surfaces\/(.+)$/.exec(ref.pathname);if(m&&D.surfaces.indexOf(m[1])>=0&&m[1]!=='review.html')$('surf').value=m[1];}}catch(e){}
+  wire(); words(); all();
+  window.__eternal={data:D,draft:draft,copy:copy};
 })();
 </script>
 </body>

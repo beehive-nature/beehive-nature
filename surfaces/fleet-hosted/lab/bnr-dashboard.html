@@ -40,8 +40,246 @@ body{background:#1a1a2e;color:#eee;font-family:Inter,system-ui,sans-serif}
 .empty-state{text-align:center;padding:30px;color:#555;font-size:12px}
 .section{display:none}.section.active{display:block}
 </style>
+<link rel="stylesheet" href="../../skaists.css">
+<style>
+/* ── ETERNAL FRONT (docs/design/eternal) — three products in one surface. Every value is a skaists
+   token (skaists.css, compiled from docs/design/skaists/tokens.json): no hand-picked hex, size or
+   corner. Measured by e2e/skaists-conformance.mjs. One register at a time; new bee is the default.
+   Every class is et- prefixed so the page's own bare rules never reach in; sizes that matter carry a
+   fallback for a server that sends .css as octet-stream. ── */
+#eternal{box-sizing:border-box;display:block;width:100%;max-width:none;margin:0;padding:var(--sk-s4,24px) var(--sk-s3,18px);border:0;border-radius:0;background:var(--sk-bg);color:var(--sk-ink);text-align:left;letter-spacing:normal;text-transform:none;box-shadow:none}
+#eternal *,#eternal *::before,#eternal *::after{box-sizing:border-box}
+#eternal>div{max-width:600px;margin:0 auto}
+#eternal>.et-r,#eternal>.et-c{display:none}
+body[data-reg="raver"] #eternal>.et-b,body[data-reg="cypherpunk"] #eternal>.et-b{display:none}
+body[data-reg="raver"] #eternal>.et-r{display:block}
+body[data-reg="cypherpunk"] #eternal>.et-c{display:block}
+#eternal [hidden]{display:none!important}
+#eternal button{margin:0;color:inherit;text-transform:none;letter-spacing:normal;min-width:0;background:none;border:0;font:inherit}
+#eternal input{font:inherit;color:inherit}
+#eternal svg{display:block;max-width:100%}
+#eternal a{text-decoration:none}
+#eternal :focus-visible{outline:2px solid var(--sk-focus);outline-offset:3px}
+#eternal h2,#eternal h3,#eternal p,#eternal ol,#eternal ul,#eternal table{margin:0;padding:0;border:0;background:none;text-transform:none;letter-spacing:normal}
+#eternal table{width:100%;border-collapse:separate;border-spacing:0;font-size:inherit}
+#eternal th,#eternal td{border:0;padding:0;vertical-align:top;text-transform:none;letter-spacing:normal}
+#eternal code{background:none;padding:0}
+.et-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.et-archive-h{display:block;box-sizing:border-box;width:100%;margin:0;padding:var(--sk-s4,24px) max(var(--sk-s3,18px),calc(50% - 300px));border:0;border-top:1px solid var(--sk-line);background:var(--sk-bg);color:var(--sk-ink);text-align:left;text-transform:none;letter-spacing:normal;font:400 28px/1.1 var(--sk-font-bee-serif)}
+body[data-reg="raver"] .et-archive-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em}
+body[data-reg="cypherpunk"] .et-archive-h{font:600 15px/1.45 var(--sk-font-mono)}
+
+/* NEW BEE — a calm room: plain rows, one reassurance, one magenta action, a link, a footnote */
+#eternal .et-b{display:flex;flex-direction:column;gap:var(--sk-s3,18px);color:var(--sk-ink);font:400 16px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-b-step{display:flex;flex-direction:column;gap:var(--sk-s3,18px)}
+#eternal .et-b-mark{font:400 18px/1.2 var(--sk-font-house);color:var(--sk-sovereign)}
+#eternal .et-b-h{font:400 40px/1.05 var(--sk-font-bee-serif);color:var(--sk-ink)}
+#eternal .et-b-lede{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink-mut);text-wrap:pretty}
+#eternal .et-b-guard{display:flex;align-items:center;gap:var(--sk-s2,12px);min-height:var(--sk-control-min,44px);padding:var(--sk-s1,6px) var(--sk-s3,18px);border-radius:var(--sk-radius,12px);background:var(--sk-guard-wash);color:var(--sk-guard);font:600 15px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-ic{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+#eternal .et-b-rows{display:flex;flex-direction:column;background:var(--sk-bg-card);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl,18px);overflow:hidden}
+#eternal .et-b-group{padding:var(--sk-s2,12px) var(--sk-s3,18px) var(--sk-s1,6px);border-bottom:1px solid var(--sk-line-soft);font:600 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-row{display:flex;align-items:center;justify-content:space-between;gap:var(--sk-s2,12px);width:100%;min-height:var(--sk-control-row,52px);padding:var(--sk-s1,6px) var(--sk-s3,18px);border:0;border-bottom:1px solid var(--sk-line-soft);border-radius:0;background:transparent;text-align:left;font:500 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+#eternal .et-b-row:last-child{border-bottom:0}
+#eternal button.et-b-row,#eternal a.et-b-row{cursor:pointer}
+#eternal .et-b-row>span{flex:1 1 auto;min-width:0}
+#eternal .et-b-row>span>small{display:block;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-row>small{display:flex;align-items:center;gap:var(--sk-s1,6px);flex:none;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-row>small.et-ok{color:var(--sk-verified)}
+#eternal .et-b-row>small.et-out{color:var(--sk-guard)}
+#eternal .et-b-row[aria-expanded="true"]{background:var(--sk-sovereign-tint);color:var(--sk-sovereign-strong);font-weight:600}
+#eternal .et-b-row[aria-expanded="true"] small{color:var(--sk-sovereign-strong)}
+#eternal .et-chev{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;flex:none;transition:transform var(--dur,.26s)}
+#eternal .et-b-row[aria-expanded="true"] .et-chev{transform:rotate(90deg)}
+#eternal .et-b-open{padding:var(--sk-s2,12px) var(--sk-s3,18px);background:var(--sk-sovereign-tint);border-bottom:1px solid var(--sk-line-soft);font:400 15px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+#eternal .et-b-act{display:flex;flex-direction:column;gap:var(--sk-s1,6px);margin-top:var(--sk-s1,6px)}
+#eternal .et-b-primary{display:flex;align-items:center;justify-content:center;width:100%;min-height:var(--sk-control-primary,54px);padding:0 var(--sk-s3,18px);border:0;border-radius:var(--sk-radius-lg,16px);background:var(--sk-primary);color:var(--sk-on-primary)!important;font:600 17px/1.2 var(--sk-font-bee-sans)!important;text-align:center;cursor:pointer}
+#eternal .et-b-primary:disabled{background:var(--sk-bg-well);color:var(--sk-ink-mut)!important;cursor:not-allowed}
+#eternal .et-b-link{display:flex;align-items:center;justify-content:center;min-height:var(--sk-control-min,44px);border:0;background:transparent;font:600 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-link)!important;cursor:pointer;text-align:center}
+#eternal .et-b-link:hover{color:var(--sk-link-hover)!important}
+#eternal .et-b-foot{text-align:center;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-back{align-self:flex-start;display:flex;align-items:center;min-height:var(--sk-control-min,44px);padding:0;border:0;background:none;font:600 16px/1.45 var(--sk-font-bee-sans)!important;color:var(--sk-link)!important;cursor:pointer}
+#eternal .et-b-card{display:flex;flex-direction:column;gap:var(--sk-s1,6px);padding:var(--sk-s3,18px);background:var(--sk-sovereign-tint);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl,18px)}
+#eternal .et-b-card h3{font:400 28px/1.1 var(--sk-font-bee-serif);color:var(--sk-sovereign-strong)}
+#eternal .et-b-card p{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+#eternal .et-b-card p.et-b-src{font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-fig{font:400 32px/1 var(--sk-font-bee-serif);color:var(--sk-ink)}
+#eternal .et-b-step-row{display:flex;align-items:center;justify-content:space-between;gap:var(--sk-s2,12px);padding:var(--sk-s2,12px) var(--sk-s3,18px);background:var(--sk-bg-card);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl,18px)}
+#eternal .et-b-step-row>div{flex:1 1 auto;text-align:center}
+#eternal .et-b-step-row small{display:block;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-btn{display:flex;align-items:center;justify-content:center;min-width:48px;min-height:48px;padding:0 var(--sk-s2,12px);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius-md,14px);background:var(--sk-bg-card);color:var(--sk-ink)!important;font:600 16px/1.45 var(--sk-font-bee-sans)!important;cursor:pointer}
+#eternal .et-b-btn:disabled{border-color:var(--sk-line);color:var(--sk-ink-mut)!important;cursor:not-allowed}
+
+/* RAVER — the data is the art; lowercase is allowed joy; the numbers never change */
+#eternal .et-r{color:var(--sk-ink);font:400 14px/1.4 var(--sk-font-raver-body)}
+#eternal .et-r-top{display:flex;align-items:baseline;justify-content:space-between;gap:var(--sk-s2,12px);flex-wrap:wrap}
+#eternal .et-r-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em;color:var(--sk-ink)}
+#eternal .et-r-hint{font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-art{position:relative;width:100%;max-width:380px;margin:var(--sk-s3,18px) auto var(--sk-s2,12px)}
+#eternal .et-r-art>svg{width:100%;height:auto;filter:drop-shadow(var(--sk-glow-sovereign))}
+#eternal .et-r-art [role="button"]{cursor:pointer}
+#eternal .et-r-art [role="button"]:focus{outline:none}
+#eternal .et-r-art [role="button"]:focus-visible .et-ring-focus{stroke:var(--sk-ink);stroke-width:2}
+#eternal .et-hit{fill:transparent;stroke:none}
+#eternal svg line{fill:none}
+#eternal .et-r-mid{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;text-align:center;pointer-events:none;max-width:34%}
+#eternal .et-r-mid b{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em;color:var(--sk-ink)}
+#eternal .et-r-mid span{font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-legend{display:flex;flex-wrap:wrap;justify-content:center;gap:var(--sk-s1,6px) var(--sk-s3,18px);margin:0 0 var(--sk-s3,18px)}
+#eternal .et-r-legend span{display:inline-flex;align-items:center;gap:var(--sk-s1,6px);font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-legend i{width:14px;height:14px;border-radius:var(--sk-radius-pill,999px);flex:none}
+#eternal .et-r-card{display:flex;gap:var(--sk-s2,12px);align-items:flex-start;padding:var(--sk-s2,12px) var(--sk-s3,18px);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl,18px);background:var(--sk-sovereign-tint);min-height:var(--sk-control-person,60px)}
+#eternal .et-r-card .et-rk{display:flex;align-items:center;justify-content:center;min-width:44px;height:44px;padding:0 var(--sk-s1,6px);border-radius:var(--sk-radius,12px);background:var(--sk-sovereign-strong);color:var(--sk-bg);font:700 15px/1.2 var(--sk-font-raver-display);flex:none}
+#eternal .et-r-card b{display:block;font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink)}
+#eternal .et-r-card span{display:block;margin-top:var(--sk-s1,6px);font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-note{margin:var(--sk-s2,12px) 0 0;text-align:center;font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-big{text-align:center;font:700 60px/.95 var(--sk-font-raver-display);letter-spacing:-.02em;color:var(--sk-ink)}
+#eternal .et-r-pill{display:flex;align-items:center;justify-content:center;width:100%;min-height:58px;margin-top:var(--sk-s4,24px);padding:0 var(--sk-s3,18px);border:0;border-radius:var(--sk-radius-pill,999px);background:var(--sk-primary);color:var(--sk-on-primary)!important;font:700 15px/1.2 var(--sk-font-raver-display)!important;letter-spacing:.04em;text-align:center;cursor:pointer;touch-action:manipulation}
+#eternal .et-r-pill:disabled{background:var(--sk-sovereign-wash);color:var(--sk-sovereign-soft)!important;cursor:not-allowed}
+#eternal .et-r-ghost{display:flex;align-items:center;justify-content:center;gap:var(--sk-s1,6px);margin:var(--sk-s2,12px) auto 0;min-height:var(--sk-control-min,44px);padding:0 var(--sk-s3,18px);border:1.5px solid var(--sk-sovereign);border-radius:var(--sk-radius-pill,999px);background:transparent;color:var(--sk-sovereign-strong)!important;font:600 14px/1.25 var(--sk-font-raver-body)!important;cursor:pointer}
+#eternal .et-r-ghost[aria-pressed="true"]{border-color:var(--sk-you);box-shadow:var(--sk-glow-sovereign)}
+#eternal .et-r-row{display:flex;justify-content:center;flex-wrap:wrap;gap:var(--sk-s2,12px)}
+#eternal .et-r-row .et-r-ghost{margin:var(--sk-s2,12px) 0 0}
+@media (prefers-reduced-motion:reduce){#eternal *{transition:none!important;animation:none!important}}
+
+/* CYPHERPUNK — the instrument, complete at first paint: tables, a numbered pipeline, receipts */
+#eternal .et-c{font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink);overflow-wrap:anywhere}
+#eternal .et-c-path{font:600 15px/1.45 var(--sk-font-mono);color:var(--sk-ink);word-break:break-all}
+#eternal .et-c-chips{display:flex;flex-wrap:wrap;gap:var(--sk-s1,6px);margin:var(--sk-s2,12px) 0}
+#eternal .et-c-chips span{padding:2px var(--sk-s1,6px);border:1px solid var(--sk-line);border-radius:4px;background:var(--sk-bg-card);font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-soft)}
+#eternal .et-c-chips span.et-on{border-color:var(--sk-guard);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong)}
+#eternal .et-c-chips span.et-ok{border-color:var(--sk-verified);color:var(--sk-verified)}
+#eternal .et-c-chips span.et-no{border-color:var(--sk-info);color:var(--sk-info)}
+#eternal .et-c-h{margin:var(--sk-s4,24px) 0 var(--sk-s2,12px)!important;font:600 15px/1.45 var(--sk-font-mono);color:var(--sk-ink)}
+#eternal .et-c-tab{margin:var(--sk-s2,12px) 0 var(--sk-s1,6px)!important;border:1px solid var(--sk-line)!important;border-radius:var(--sk-radius-sm,6px);overflow:hidden;background:var(--sk-bg-card)!important}
+#eternal .et-c-tab th{padding:var(--sk-s1,6px) var(--sk-s2,12px)!important;text-align:left;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);border-bottom:1px solid var(--sk-line)!important;background:var(--sk-bg-well)}
+#eternal .et-c-tab td{height:var(--sk-control-min,44px);padding:var(--sk-s1,6px) var(--sk-s2,12px)!important;border-bottom:1px solid var(--sk-line)!important;font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink);vertical-align:middle}
+#eternal .et-c-tab tr:last-child td{border-bottom:0!important}
+#eternal .et-c-tab tbody td:first-child{color:var(--sk-guard);white-space:nowrap;width:1%}
+#eternal .et-c-tab th:first-child{white-space:nowrap;width:1%}
+#eternal .et-c-tab tr.et-pick{cursor:pointer}
+#eternal .et-c-tab tr.et-pick:hover td{background:var(--sk-sovereign-tint)}
+#eternal .et-c-tab tr.et-more td{height:auto;background:var(--sk-sovereign-tint);color:var(--sk-ink-soft)}
+#eternal .et-c-tab small{display:block;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut)}
+#eternal .et-c-tab .et-num{text-align:right;white-space:nowrap}
+#eternal .et-c-tab .et-nw{white-space:nowrap;overflow-wrap:normal}
+#eternal .et-c-tab tbody td.et-wrap{white-space:normal;width:auto}
+#eternal .et-c-tab td,#eternal .et-c-tab th{overflow-wrap:break-word}
+#eternal .et-c-tab tfoot td{height:auto;background:var(--sk-bg-well);color:var(--sk-ink-soft);font:500 12px/1.45 var(--sk-font-mono)}
+#eternal .et-st-ok{color:var(--sk-verified)}#eternal .et-st-no{color:var(--sk-info)}#eternal .et-st-wait{color:var(--sk-ai)}#eternal .et-st-guard{color:var(--sk-guard)}
+#eternal .et-c-pipe{list-style:none;margin:0;padding:0;display:grid;gap:var(--sk-s2,12px);counter-reset:etp}
+#eternal .et-c-pipe li{display:grid;grid-template-columns:28px 1fr;gap:var(--sk-s1,6px) var(--sk-s2,12px);padding:var(--sk-s2,12px) var(--sk-s3,18px);border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm,6px);background:var(--sk-bg-card);counter-increment:etp}
+#eternal .et-c-pipe li::before{content:counter(etp,decimal-leading-zero);color:var(--sk-guard);font-weight:600}
+#eternal .et-c-pipe li b{font-weight:600;color:var(--sk-ink)}
+#eternal .et-c-pipe li p{grid-column:2;color:var(--sk-ink-soft)}
+#eternal .et-c-pipe li.et-done b{color:var(--sk-verified)}
+#eternal .et-c-pipe li.et-guard{border-style:dashed;border-color:var(--sk-guard)}
+#eternal .et-c-pipe li.et-guard b{color:var(--sk-guard)}
+#eternal .et-c-pipe li.et-now{border-color:var(--sk-ai);box-shadow:inset 0 0 0 1px var(--sk-ai)}
+#eternal .et-c-pipe li.et-now b{color:var(--sk-ai)}
+#eternal .et-c-primary{display:flex;align-items:center;justify-content:center;width:100%;min-height:52px;margin-top:var(--sk-s3,18px);padding:0 var(--sk-s2,12px);border:0;border-radius:var(--sk-radius-sm,6px);background:var(--sk-primary);color:var(--sk-on-primary)!important;font:600 14px/1.2 var(--sk-font-mono)!important;text-align:center;cursor:pointer}
+#eternal .et-c-primary:disabled{background:var(--sk-bg-well);color:var(--sk-ink-mut)!important;cursor:not-allowed}
+#eternal .et-c-note{margin-top:var(--sk-s2,12px);font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-soft)}
+#eternal .et-c-kv{border:1px solid var(--sk-line)!important;border-radius:var(--sk-radius-sm,6px);overflow:hidden;background:var(--sk-bg-card)!important}
+#eternal .et-c-kv th{width:112px;padding:var(--sk-s2,12px)!important;text-align:left;vertical-align:top;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);border-bottom:1px solid var(--sk-line)!important;background:transparent}
+#eternal .et-c-kv td{padding:var(--sk-s2,12px)!important;border-bottom:1px solid var(--sk-line)!important;font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink);word-break:break-word}
+#eternal .et-c-kv tr:last-child th,#eternal .et-c-kv tr:last-child td{border-bottom:0!important}
+#eternal .et-c-verify{margin-top:var(--sk-s3,18px);padding:var(--sk-s3,18px);border-radius:var(--sk-radius-sm,6px);background:var(--sk-bg-card);border:1px solid var(--sk-line)}
+#eternal .et-c-verify-h{font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);margin-bottom:var(--sk-s1,6px)}
+#eternal .et-c-verify ol{margin:0;padding-left:var(--sk-s4,24px)!important;display:grid;gap:var(--sk-s1,6px)}
+#eternal .et-c-verify code,#eternal .et-c-code{font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ai);word-break:break-all}
+#eternal .et-c-quote{margin-top:var(--sk-s2,12px);padding:var(--sk-s2,12px) var(--sk-s3,18px);border:1px dashed var(--sk-guard);border-radius:var(--sk-radius-sm,6px);background:var(--sk-guard-wash);color:var(--sk-guard);font:400 13px/1.45 var(--sk-font-mono)}
+#eternal .et-c-quote b{color:var(--sk-sovereign-strong);font-weight:600}
+#eternal .et-c-row{display:grid;grid-template-columns:1fr 1fr;gap:var(--sk-s2,12px);margin-top:var(--sk-s3,18px)}
+#eternal .et-c-ghost{display:flex;align-items:center;justify-content:center;min-height:52px;padding:0 var(--sk-s1,6px);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius-sm,6px);background:transparent;color:var(--sk-ink)!important;text-align:center;font:600 14px/1.2 var(--sk-font-mono)!important;cursor:pointer}
+#eternal .et-c-a{display:inline-flex;align-items:center;min-height:var(--sk-control-min,44px);color:var(--sk-link)}
+#eternal .et-c-a:hover{color:var(--sk-link-hover)}
+#eternal .et-c-in{display:flex;align-items:center;gap:var(--sk-s2,12px);flex-wrap:wrap;margin-top:var(--sk-s2,12px)}
+#eternal .et-c-in label{display:flex;align-items:center;gap:var(--sk-s1,6px);min-height:var(--sk-control-min,44px);font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut)}
+#eternal .et-c-in input{width:96px;min-height:var(--sk-control-min,44px);padding:0 var(--sk-s1,6px);border:1.5px solid var(--sk-ai);border-radius:var(--sk-radius-sm,6px);background:var(--sk-bg-card);color:var(--sk-ink);font:400 13px/1.45 var(--sk-font-mono)}
+
+/* the day ring (raver): day start at the top, clockwise to the next day start; a bead per intake
+   entry at its time, sized by mg, marked by method; the rim fills toward your daily amount. */
+#etDay .et-face{fill:none;stroke:var(--sk-line);stroke-width:2}
+#etDay .et-face.et-empty{stroke:var(--sk-ink-dim);stroke-dasharray:4 8}
+#etDay .et-hour{stroke:var(--sk-ink-dim);stroke-width:2}
+#etDay .et-rim{fill:none;stroke:var(--sk-bg-card);stroke-width:10}
+#etDay .et-rim-fill{fill:none;stroke:var(--sk-you);stroke-width:10;stroke-linecap:round}
+#etDay .et-core{fill:var(--sk-bg-card);stroke:var(--sk-line);stroke-width:1.5}
+#etDay .et-lbl{fill:var(--sk-ink-soft);font:600 18px/1 var(--sk-font-raver-body)}
+#etDay .et-bead{stroke:var(--sk-bg);stroke-width:2}
+#etDay .et-m-flower{fill:var(--sk-biomass)}#etDay .et-m-vape{fill:var(--sk-ai)}#etDay .et-m-distillate{fill:var(--sk-sovereign-soft)}#etDay .et-m-spliff{fill:var(--sk-info)}#etDay .et-m-edible{fill:var(--sk-cat-bug)}#etDay .et-m-other{fill:var(--sk-ink-soft)}
+#etDay .et-b-g[aria-pressed="true"] .et-bead,#etDay .et-b-g:focus-visible .et-bead{stroke:var(--sk-ink);stroke-width:3}
+#eternal .et-lgm{width:14px;height:14px}
+#eternal .et-lg-flower{background:var(--sk-biomass)}#eternal .et-lg-vape{background:var(--sk-ai)}#eternal .et-lg-distillate{background:var(--sk-sovereign-soft)}#eternal .et-lg-spliff{background:var(--sk-info)}#eternal .et-lg-edible{background:var(--sk-cat-bug)}
+#eternal .et-lg-rdi{background:var(--sk-you)}
+</style>
 </head>
 <body>
+<!-- ETERNAL FRONT (founder blueprint 2026-09-26, docs/design/eternal): three separate products above the
+     founder's dashboard, which stays below exactly as hosted (fleet-hosted ruling: the dashboard, its
+     chart and the localStorage bus keep working; e2e/fleet-bus.mjs and e2e/intake-daybucket.mjs stay
+     green). ONE data layer reads the SAME storage the dashboard reads (bnSessions, bnIntake_<day>,
+     bnRDI, bnDayStart) with the SAME arithmetic, and checks itself against the numbers the dashboard
+     renders. It only reads: nothing here writes storage or sends anything. Logging happens where it
+     always did, in the lab's own instruments. -->
+<section id="eternal" aria-label="the dashboard, what has been logged">
+
+  <!-- NEW BEE — a calm room: what this browser has logged, in plain rows; one way to log more -->
+  <div class="et-b">
+    <div class="et-b-mark" data-et-t="et.dashboard.b.mark">bnr dashboard</div>
+    <h2 class="et-b-h" data-et-t="et.dashboard.b.h">what you have logged</h2>
+    <p class="et-b-lede" data-et-t="et.dashboard.b.lede">this page reads what the lab's tools have saved in this browser. it only reads; it never writes.</p>
+    <div class="et-b-guard"><svg class="et-ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span data-et-t="et.dashboard.b.guard">your logs stay in this browser. this page only reads them.</span></div>
+    <div class="et-b-rows" id="etBeeRows"></div>
+    <div class="et-b-card" id="etBeeEmpty" hidden>
+      <h3 data-et-t="et.dashboard.b.emptyH">nothing logged yet</h3>
+      <p data-et-t="et.dashboard.b.emptyP">nothing has been logged in this browser yet. the intake tracker and flower lab write here, and this page shows it the next time it opens.</p>
+    </div>
+    <div class="et-b-rows" id="etBeeRecent" hidden></div>
+    <div class="et-b-act">
+      <a class="et-b-primary" href="intake-tracker.html" data-et-t="et.dashboard.b.go">log something in the intake tracker</a>
+      <a class="et-b-link" href="flower-lab.html" data-et-t="et.dashboard.b.flower">or log a blend in flower lab</a>
+      <p class="et-b-foot" id="etBeeFoot"></p>
+    </div>
+  </div>
+
+  <!-- RAVER — the day is the art: a ring from day start to day start, a bead for each thing logged -->
+  <div class="et-r">
+    <div class="et-r-top"><h2 class="et-r-h" data-et-t="et.dashboard.r.h">your day ring</h2><span class="et-r-hint" id="etDayHint">tap a bead</span></div>
+    <div class="et-r-art">
+      <svg id="etDay" viewBox="-200 -200 400 400" role="group" aria-label="today as a ring from your day start; a bead for each intake logged, the rim for your daily amount"></svg>
+      <div class="et-r-mid"><b id="etDayBig">0</b><span id="etDaySmall">mg</span></div>
+    </div>
+    <div class="et-r-legend" id="etDayLegend"></div>
+    <div class="et-r-card" id="etDayCard" aria-live="polite"></div>
+    <a class="et-r-pill" id="etDayGo" href="intake-tracker.html">light the ring · intake tracker</a>
+    <p class="et-r-note" id="etDayNote"></p>
+  </div>
+
+  <!-- CYPHERPUNK — the instrument: the keys it reads, the arithmetic, the receipt against the page -->
+  <div class="et-c">
+    <div class="et-c-path" id="etcPath">fleet-hosted/lab/bnr-dashboard.html</div>
+    <div class="et-c-chips" id="etcChips"></div>
+    <h3 class="et-c-h" data-et-t="et.dashboard.c.busH">the bus · keys this page reads</h3>
+    <table class="et-c-tab" id="etcBus"><thead><tr><th>key</th><th>state</th></tr></thead><tbody></tbody></table>
+    <h3 class="et-c-h" data-et-t="et.dashboard.c.pipeH">the arithmetic · as loadData() does it</h3>
+    <ol class="et-c-pipe" id="etcPipe"></ol>
+    <a class="et-c-primary" href="intake-tracker.html" data-et-t="et.dashboard.c.go">open the write side · intake-tracker</a>
+    <h3 class="et-c-h" data-et-t="et.dashboard.c.receiptH">receipt · recomputed against the page</h3>
+    <table class="et-c-kv" id="etcReceipt"></table>
+    <div class="et-c-quote" id="etcHazard"></div>
+    <div class="et-c-verify">
+      <div class="et-c-verify-h" data-et-t="et.dashboard.c.selfH">verify · no trust in this page needed</div>
+      <ol><li><code>Object.keys(localStorage).filter(k =&gt; k.startsWith('bn'))</code></li><li><code>node e2e/fleet-bus.mjs</code> · <code>node e2e/intake-daybucket.mjs</code></li><li><code>diff surfaces/fleet/bnr-dashboard.html surfaces/fleet-hosted/lab/bnr-dashboard.html</code></li></ol>
+    </div>
+    <div class="et-c-row">
+      <button type="button" class="et-c-ghost" id="etcExport" data-et-t="et.dashboard.c.export">export what was read</button>
+      <a class="et-c-ghost" href="https://github.com/beehive-nature/beehive-nature/blob/main/surfaces/fleet-hosted/lab/bnr-dashboard.html" target="_blank" rel="noopener noreferrer"><span data-et-t="et.dashboard.c.src">view the source ↗</span><span class="et-sr"> (opens in a new tab)</span></a>
+    </div>
+  </div>
+</section>
+<h2 class="et-archive-h" id="etArchive" tabindex="-1" data-et-t="et.dashboard.archive">the whole dashboard</h2>
 <div class="hdr"><div><h1>BNR Dashboard</h1><div class="sub">bnature.social - Collective Command Center v1.0</div></div></div>
 <div class="tabs">
 <div class="tab active" onclick="showTab('data')">bData</div>
@@ -207,6 +445,147 @@ if(ctx){new Chart(ctx,{type:'doughnut',data:{labels:['Flower','Vape','Distillate
 }
 
 document.addEventListener('DOMContentLoaded',function(){loadLibrary();loadModules();loadData();});
+</script>
+<script>
+/* ETERNAL FRONT — one data layer, three renderers (docs/design/eternal). The dashboard "reads what the
+   other instruments write"; so does this front: the SAME keys (bnSessions, bnIntake_<day>, bnRDI,
+   bnDayStart), the SAME behavioural day (now minus the day start, local date) and the SAME arithmetic
+   as loadData(), run after it, then checked against the numbers the dashboard rendered. It only
+   reads: no storage write, no request. An empty browser is shown as empty, never as a sample. */
+(function(){
+  var $=function(id){return document.getElementById(id);};
+  var T=function(k,f){var t=window.BNRLanguage&&window.BNRLanguage.text;return t?t(k,f):f;};
+  var esc=function(v){return String(v==null?'':v).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});};
+  var fill=function(s,o){return String(s).replace(/\{(\w+)\}/g,function(m,k){return o[k]==null?m:o[k];});};
+  var METHODS=['flower','vape','distillate','spliff','edible'];
+  var D={ok:false,why:'',origin:location.origin,keys:{},sessions:[],intake:[],dayStart:4,dayStartSet:false,today:'',sessMg:0,intakeMg:0,total:{},methods:{},page:{},agree:false,library:{},modules:{}};
+  var R={sel:-1};
+  var p2=function(n){return (n<10?'0':'')+n;};
+  var pl=function(n,one,many){return n+' '+(n===1?one:many);};
+
+  /* ── the one data layer: the bus, read exactly as loadData() reads it ── */
+  function read(){
+    var get=function(k){try{return localStorage.getItem(k);}catch(e){return null;}};
+    try{
+      var raw=get('bnSessions');D.sessions=JSON.parse(raw||'[]');D.keys.bnSessions=raw==null?null:D.sessions.length;
+      var ds=get('bnDayStart');D.dayStartSet=ds!=null&&!isNaN(parseFloat(ds));D.dayStart=parseFloat(ds)||4;
+      var d=new Date(new Date().getTime()-D.dayStart*3600000);D.today=d.getFullYear()+'-'+p2(d.getMonth()+1)+'-'+p2(d.getDate());
+      var ri=get('bnIntake_'+D.today);D.intake=JSON.parse(ri||'[]');D.keys.intake=ri==null?null:D.intake.length;
+      var rr=get('bnRDI');D.rdi=parseInt(rr||'100');D.keys.bnRDI=rr;D.keys.bnDayStart=ds;
+      D.sessMg=0;D.sessions.forEach(function(s){if(s.doseG&&s.thcaPercent){var pct=parseFloat(s.thcaPercent)||0;D.sessMg+=s.doseG*pct/100*1000*0.877;}});
+      D.intakeMg=0;D.methods={};METHODS.forEach(function(m){D.methods[m]=0;});
+      D.intake.forEach(function(e){D.intakeMg+=e.mg||0;if(D.methods[e.method]!==undefined)D.methods[e.method]++;});
+      var tm=D.sessMg+D.intakeMg;
+      D.total={sessions:D.sessions.length+D.intake.length,mg:Math.round(tm),blends:D.sessions.length,rdiPct:D.rdi>0?Math.round(tm/D.rdi*100)+'%':'0%',rdiFrac:D.rdi>0?tm/D.rdi:0};
+      D.ok=true;
+    }catch(e){D.ok=false;D.why=String(e&&e.message||e);}
+    var t=function(id){var e=$(id);return e?e.textContent.trim():'';};
+    D.page={sessions:t('totalSessions'),mg:t('totalMg'),blends:t('totalBlends'),rdiPct:t('avgRDI')};
+    D.agree=D.ok&&D.page.sessions===String(D.total.sessions)&&D.page.mg===String(D.total.mg)&&D.page.blends===String(D.total.blends)&&D.page.rdiPct===D.total.rdiPct;
+    var W=Array.isArray(window.WIKI)?window.WIKI:[],M=Array.isArray(window.MODULES)?window.MODULES:[];
+    D.library={n:W.length,grades:W.reduce(function(a,w){a[w.ev]=(a[w.ev]||0)+1;return a;},{})};
+    D.modules={n:M.length};
+    D.beads=D.intake.map(function(e,i){
+      var hm=/^(\d{1,2}):(\d{2})/.exec(e.time||''),mins=NaN,lt=e.timestamp?new Date(e.timestamp):null;
+      if(hm)mins=(+hm[1])*60+(+hm[2]);else if(lt&&!isNaN(lt))mins=lt.getHours()*60+lt.getMinutes();
+      return {i:i,method:e.method||'',strain:e.strain||'',mg:e.mg||0,time:hm?hm[1]+':'+hm[2]:(lt&&!isNaN(lt)?p2(lt.getHours())+':'+p2(lt.getMinutes()):''),mins:mins};
+    });
+  }
+  var startHM=function(){var h=Math.floor(D.dayStart),m=Math.round((D.dayStart-h)*60);return p2(h)+':'+p2(m);};
+
+  /* ── NEW BEE ── */
+  function bee(){
+    var t=D.total,row=function(l,v,c){return '<div class="et-b-row"><span>'+esc(l)+'</span><small'+(c?' class="'+c+'"':'')+'>'+esc(v)+'</small></div>';};
+    if(!D.ok){$('etBeeRows').innerHTML=row(T('et.dashboard.b.unread','your logs could not be read here'),D.why);$('etBeeEmpty').hidden=true;$('etBeeRecent').hidden=true;return;}
+    $('etBeeRows').innerHTML=row(T('et.dashboard.b.sessions','sessions logged'),t.sessions)+row(T('et.dashboard.b.mg','milligrams tracked'),t.mg+' mg')+row(T('et.dashboard.b.blends','blends made'),t.blends)+row(T('et.dashboard.b.rdi','of your daily amount'),t.rdiPct,t.rdiFrac>=1?'et-ok':'');
+    var none=!D.sessions.length&&!D.intake.length;$('etBeeEmpty').hidden=!none;
+    var rec=[];
+    D.sessions.slice(-3).forEach(function(s){rec.push(row(fill(T('et.dashboard.b.recFlower','flower lab · {b}'),{b:s.blend||T('et.dashboard.b.unnamed','unnamed')}),(s.doseG||0)+' g'));});
+    D.intake.slice(-3).forEach(function(e){rec.push(row(fill(T('et.dashboard.b.recIntake','{m} · {s}'),{m:e.method,s:e.strain||T('et.dashboard.b.nostrain','no strain named')}),(e.mg||0)+' mg'+(e.time?' · '+e.time:'')));});
+    $('etBeeRecent').innerHTML=rec.length?'<div class="et-b-group">'+esc(T('et.dashboard.b.recent','most recent'))+'</div>'+rec.join(''):'';$('etBeeRecent').hidden=!rec.length;
+    $('etBeeFoot').textContent=fill(T('et.dashboard.b.foot','today, as this page counts it: {d}, from {s}.'),{d:D.today,s:startHM()});
+  }
+
+  /* ── RAVER: the day ring ── */
+  function pt(r,deg){var a=(deg-90)*Math.PI/180;return [(r*Math.cos(a)).toFixed(2),(r*Math.sin(a)).toFixed(2)];}
+  function deg(mins){return ((mins-D.dayStart*60)%1440+1440)%1440/1440*360;}
+  function day(){
+    var svg=$('etDay');if(!svg)return;var h='',empty=!D.intake.length;
+    h+='<circle class="et-rim" r="186"/>';
+    var f=Math.min(1,D.total.rdiFrac||0);
+    if(f>0.001){var p1=pt(186,Math.min(359.9,f*360));h+=f>=0.999?'<circle class="et-rim-fill" r="186"/>':'<path class="et-rim-fill" d="M0 -186A186 186 0 '+(f>0.5?1:0)+' 1 '+p1[0]+' '+p1[1]+'"/>';}
+    h+='<circle class="et-face'+(empty?' et-empty':'')+'" r="150"/>';
+    for(var k=0;k<24;k+=6){var a=k*15,q0=pt(162,a),q1=pt(172,a);h+='<line class="et-hour" x1="'+q0[0]+'" y1="'+q0[1]+'" x2="'+q1[0]+'" y2="'+q1[1]+'"/>';}
+    var s0=pt(128,0);h+='<text class="et-lbl" x="'+s0[0]+'" y="'+(+s0[1]+6)+'" text-anchor="middle">'+esc(startHM())+'</text>';
+    h+='<circle class="et-core" r="62"/>';
+    var max=Math.max.apply(null,D.beads.map(function(b){return b.mg;}).concat([1]));
+    D.beads.forEach(function(b){if(isNaN(b.mins))return;var a=deg(b.mins),c=pt(150,a),r=8+14*Math.sqrt((b.mg||0)/max),m=METHODS.indexOf(b.method)>=0?b.method:'other';
+      h+='<g class="et-b-g" role="button" tabindex="0" data-b="'+b.i+'" aria-pressed="'+(R.sel===b.i)+'" aria-label="'+esc(b.method+', '+b.mg+' mg, '+b.time)+'" transform="translate('+c[0]+' '+c[1]+')"><circle class="et-hit" r="26"/><circle class="et-bead et-m-'+m+'" r="'+r.toFixed(1)+'"/></g>';});
+    svg.innerHTML=h;
+  }
+  function raver(){
+    var t=D.total,b=D.beads[R.sel],card=$('etDayCard'),empty=!D.sessions.length&&!D.intake.length;
+    $('etDayHint').textContent=D.intake.length?fill(T('et.dashboard.r.hint','{n} today · tap a bead'),{n:D.intake.length}):T('et.dashboard.r.hEmpty','nothing on the ring yet');
+    $('etDayBig').textContent=D.ok?String(t.mg):'0';$('etDaySmall').textContent=D.ok?fill(T('et.dashboard.r.small','mg · {p} of rdi'),{p:t.rdiPct}):T('et.dashboard.r.unread','not read');
+    var used=METHODS.filter(function(m){return D.methods[m];});
+    $('etDayLegend').innerHTML=used.map(function(m){return '<span><i class="et-lgm et-lg-'+m+'"></i>'+esc(m+' · '+D.methods[m])+'</span>';}).join('')+'<span><i class="et-lgm et-lg-rdi"></i>'+esc(fill(T('et.dashboard.r.lgRdi','rim · rdi {r} mg'),{r:D.rdi}))+'</span>';
+    if(b)card.innerHTML='<span class="et-rk">'+esc(b.mg)+'</span><div><b>'+esc(b.method+(b.strain?' · '+b.strain:''))+'</b><span>'+esc(fill(T('et.dashboard.r.bead','{mg} mg at {t} · logged in the intake tracker'),{mg:b.mg,t:b.time||T('et.dashboard.r.notime','no time given')}))+'</span></div>';
+    else if(empty)card.innerHTML='<span class="et-rk">0</span><div><b>'+esc(T('et.dashboard.r.emptyH','an empty ring, honestly'))+'</b><span>'+esc(T('et.dashboard.r.emptyS','nothing is logged in this browser yet. each thing you log in the intake tracker becomes a bead here.'))+'</span></div>';
+    else card.innerHTML='<span class="et-rk">'+esc(t.sessions)+'</span><div><b>'+esc(fill(T('et.dashboard.r.cardH','{n} sessions · {mg} mg'),{n:t.sessions,mg:t.mg}))+'</b><span>'+esc(t.blends===1?T('et.dashboard.r.cardS1','1 flower-lab blend is counted in the total but has no bead: the ring is today\'s intake.'):fill(T('et.dashboard.r.cardS','{b} flower-lab blends are counted in the total but have no bead: the ring is today\'s intake.'),{b:t.blends}))+'</span></div>';
+    $('etDayNote').textContent=fill(T('et.dashboard.r.note','the ring starts at your day start, {s} · read from this browser only'),{s:startHM()});
+    day();
+  }
+
+  /* ── CYPHERPUNK ── */
+  function cy(){
+    var t=D.total,host=location.host||'this origin';
+    $('etcPath').textContent='fleet-hosted/lab/bnr-dashboard.html · localStorage@'+host;
+    $('etcChips').innerHTML='<span class="et-on">read-only</span><span>'+esc('day '+D.today)+'</span><span>'+esc('day start '+startHM()+(D.dayStartSet?'':' · default'))+'</span><span class="'+(D.agree?'et-ok':'et-no')+'">'+esc(D.agree?'agrees with the page ✓':'differs from the page')+'</span>';
+    var st=function(v,none){return v==null?'<span class="et-st-no">'+esc(none)+'</span>':esc(v);};
+    $('etcBus').querySelector('tbody').innerHTML=[
+      ['bnSessions',st(D.keys.bnSessions==null?null:pl(D.keys.bnSessions,'entry','entries'),'absent · read as []')],
+      ['bnIntake_'+D.today,st(D.keys.intake==null?null:pl(D.keys.intake,'entry','entries'),'absent · read as []')],
+      ['bnRDI',st(D.keys.bnRDI,'absent · 100 by default')],
+      ['bnDayStart',st(D.keys.bnDayStart,'absent · 4 by default')]
+    ].map(function(r){return '<tr><td>'+esc(r[0])+'</td><td class="et-wrap">'+r[1]+'</td></tr>';}).join('');
+    var r1=function(x){return Math.round(x*10)/10;};
+    $('etcPipe').innerHTML=[
+      ['read bnSessions',fill('{n} · Σ doseG × thca% × 10 × 0.877 = {mg} mg',{n:pl(D.sessions.length,'session','sessions'),mg:r1(D.sessMg)})],
+      ['day key',fill('now − {h} h → local date {d} → bnIntake_{d}',{h:D.dayStart,d:D.today})],
+      ['read bnIntake_'+D.today,fill('{n} · Σ mg = {mg}',{n:pl(D.intake.length,'entry','entries'),mg:r1(D.intakeMg)})],
+      ['totals',fill('sessions {a} · mg round({x}) = {b} · blends {c}',{a:t.sessions,x:r1(D.sessMg+D.intakeMg),b:t.mg,c:t.blends})],
+      ['rdi met',fill('round({x} / {r} × 100) = {p}',{x:r1(D.sessMg+D.intakeMg),r:D.rdi,p:t.rdiPct})]
+    ].map(function(s){return '<li class="et-done"><b>'+esc(s[0])+'</b><p>'+esc(s[1])+'</p></li>';}).join('');
+    var yn=function(a,b){return esc(a)+' · '+esc(b)+(String(a)===String(b)?' <span class="et-st-ok">✓</span>':' <span class="et-st-wait">≠</span>');};
+    var g=D.library.grades||{};
+    $('etcReceipt').innerHTML=[
+      ['sessions',yn(D.page.sessions,t.sessions)],['mg',yn(D.page.mg,t.mg)],['blends',yn(D.page.blends,t.blends)],['rdi met',yn(D.page.rdiPct,t.rdiPct)],
+      ['methods',esc(METHODS.map(function(m){return m+' '+D.methods[m];}).join(' · '))],
+      ['writes',esc(T('et.dashboard.c.writes','none · this page and this front only read'))],
+      ['library',esc(fill('{n} entries · '+Object.keys(g).sort().map(function(k){return '['+k+'] '+g[k];}).join(' · ')+' · grades as the page assigns them',{n:D.library.n}))],
+      ['modules',esc(fill(T('et.dashboard.c.modules','{n} · their statuses are written into the page, not read from your data'),{n:D.modules.n}))]
+    ].map(function(r){return '<tr><th>'+esc(r[0])+'</th><td>'+r[1]+'</td></tr>';}).join('');
+    $('etcHazard').innerHTML='<b>'+esc(T('et.dashboard.c.hazardH','the bus is per origin'))+'</b> · '+esc(fill(T('et.dashboard.c.hazard','this reads localStorage on {o} only. the same files on another origin read zero and throw nothing, which looks exactly like "no data yet" (proved both ways by e2e/fleet-bus.mjs).'),{o:host}));
+  }
+  function exportRead(){
+    var body={v:1,note:'what bnr-dashboard read from this browser; nothing was sent anywhere',origin:location.origin,day:D.today,dayStart:D.dayStart,rdi:D.rdi,bnSessions:D.sessions,intake:D.intake,totals:D.total};
+    try{var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(body,null,2)],{type:'application/json'}));a.download='bnr-dashboard-read-'+D.today+'.json';document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove();},0);}catch(e){}
+  }
+
+  var EN={};
+  function tr(){[].forEach.call(document.querySelectorAll('#eternal [data-et-t],#etArchive[data-et-t]'),function(e){var k=e.getAttribute('data-et-t');if(!(k in EN))EN[k]=e.textContent;e.textContent=T(k,EN[k]);});}
+  function all(){tr();bee();raver();cy();}
+  function wire(){
+    var ev=$('eternal');if(!ev)return;
+    ev.addEventListener('click',function(e){var b=e.target.closest('#etDay .et-b-g');if(b){var i=+b.getAttribute('data-b');R.sel=R.sel===i?-1:i;raver();}});
+    ev.addEventListener('keydown',function(e){if(e.key!=='Enter'&&e.key!==' ')return;var t=e.target.closest('#etDay [role="button"]');if(!t)return;e.preventDefault();t.dispatchEvent(new MouseEvent('click',{bubbles:true}));});
+    $('etcExport').addEventListener('click',exportRead);
+    document.addEventListener('blang',all);
+  }
+  function boot(){read();wire();all();window.__eternal={data:D,raver:R};}
+  /* after the dashboard's own loadData(): its DOMContentLoaded listener was added first */
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
+})();
 </script>
 <script src="../../agent-dock.js?v=4"></script>
 <script src="../../tour.js?v=42"></script>

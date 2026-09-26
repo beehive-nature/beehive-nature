@@ -243,7 +243,153 @@ body[data-reg="bee"] h2{font:600 16px/1.4 var(--bee-font);letter-spacing:normal}
 body[data-reg="raver"] :is(.law,p.fine,#vtxt,.arb .sm){font-size:14.5px}
 body[data-reg="raver"] :is(table,th,.tag,.note td,footer,h2,label,#key,.fam .cnt,.dc .l,.dc .w,.food .fsrc,.food .auto,.dia,.dia-foot){font-size:14px}
 #sources-panel .law{line-height:2.05}
+/* ── ETERNAL FRONT (docs/design/eternal) — the reading-room front. Every value is a skaists token
+   (surfaces/skaists.css, compiled from docs/design/skaists/tokens.json): no hand-picked hex, size
+   or corner. Measured by e2e/skaists-conformance.mjs. One register visible at a time. ── */
+#eternal{display:block;margin:var(--sk-s3) 0 var(--sk-s2);padding:0;border:0;border-radius:0;background:transparent;text-align:start;max-width:40rem;margin-inline:auto}
+#eternal>.et-r,#eternal>.et-c{display:none}
+body[data-reg="raver"] #eternal>.et-b,body[data-reg="cypherpunk"] #eternal>.et-b{display:none}
+body[data-reg="raver"] #eternal>.et-r{display:block}
+body[data-reg="cypherpunk"] #eternal>.et-c{display:block}
+#eternal [hidden]{display:none!important}
+#eternal *{box-sizing:border-box}
+#eternal h2,#eternal h3,#eternal p{margin:0;letter-spacing:normal}
+#eternal button{color:inherit;font:inherit}
+#eternal svg{display:block}
+#eternal :focus-visible{outline:2px solid var(--sk-focus);outline-offset:3px}
+.et-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.et-archive-h{max-width:40rem;margin:var(--sk-s5) auto var(--sk-s2);padding-top:var(--sk-s4);border-top:1px solid var(--sk-line);color:var(--sk-ink);text-align:start}
+body[data-reg="bee"] .et-archive-h{font:400 28px/1.1 var(--sk-font-bee-serif)}
+body[data-reg="raver"] .et-archive-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em}
+body[data-reg="cypherpunk"] .et-archive-h{font:600 15px/1.45 var(--sk-font-mono)}
+
+/* NEW BEE — a calm room: plain rows, one reassurance, one action */
+.et-b{color:var(--sk-ink);display:flex;flex-direction:column;gap:var(--sk-s3);font:400 16px/1.45 var(--sk-font-bee-sans)}
+.et-b-mark{font:400 18px/1.2 var(--sk-font-house);color:var(--sk-sovereign)}
+#eternal .et-b-h{font:400 40px/1.05 var(--sk-font-bee-serif);color:var(--sk-ink)}
+.et-b-lede{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink-mut);text-wrap:pretty}
+.et-b-fig{display:flex;align-items:baseline;gap:var(--sk-s2);flex-wrap:wrap;padding:var(--sk-s3);background:var(--sk-bg-card);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl)}
+.et-b-fig b{font:400 52px/1 var(--sk-font-bee-serif);color:var(--sk-ink)}
+.et-b-fig span{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+.et-b-guard{display:flex;align-items:center;gap:var(--sk-s2);min-height:var(--sk-control-min);padding:var(--sk-s1) var(--sk-s3);border-radius:var(--sk-radius);background:var(--sk-guard-wash);color:var(--sk-guard);font:600 15px/1.45 var(--sk-font-bee-sans)}
+.et-b-guard svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.et-b-rows{display:flex;flex-direction:column;background:var(--sk-bg-card);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl);overflow:hidden}
+.et-b-row{display:flex;align-items:center;justify-content:space-between;gap:var(--sk-s2);min-height:var(--sk-control-row);padding:var(--sk-s1) var(--sk-s3);border:0;border-bottom:1px solid var(--sk-line-soft);background:transparent;text-align:start;width:100%;font:500 16px/1.45 var(--sk-font-bee-sans)!important;color:var(--sk-ink)!important;cursor:pointer}
+.et-b-row:last-child{border-bottom:0}
+.et-b-row small{display:flex;align-items:center;gap:var(--sk-s1);flex:none;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut);text-align:end}
+.et-b-row[aria-expanded="true"]{background:var(--sk-sovereign-tint);color:var(--sk-sovereign-strong)!important;font-weight:600!important}
+.et-b-row[aria-expanded="true"] small{color:var(--sk-sovereign-strong)}
+.et-b-row .chev{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;transition:transform var(--dur,.26s)}
+.et-b-row[aria-expanded="true"] .chev{transform:rotate(90deg)}
+.et-b-open{padding:var(--sk-s2) var(--sk-s3) var(--sk-s3);background:var(--sk-sovereign-tint);border-bottom:1px solid var(--sk-line-soft);display:grid;gap:var(--sk-s1)}
+.et-b-open p{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+.et-b-open small{display:block;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+.et-b-dot{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:var(--sk-radius-pill);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong);font:600 14px/1.4 var(--sk-font-bee-sans);flex:none}
+.et-b-act{display:flex;flex-direction:column;gap:var(--sk-s1);margin-top:var(--sk-s1)}
+.et-b-primary{display:flex;align-items:center;justify-content:center;width:100%;height:var(--sk-control-primary);border-radius:var(--sk-radius-lg);border:0;background:var(--sk-primary);color:var(--sk-on-primary)!important;font:600 17px/1.2 var(--sk-font-bee-sans)!important;cursor:pointer;text-decoration:none}
+.et-b-link{min-height:var(--sk-control-min);display:flex;align-items:center;justify-content:center;border:0;background:transparent;font:600 16px/1.45 var(--sk-font-bee-sans)!important;color:var(--sk-link)!important;text-decoration:none;cursor:pointer}
+.et-b-link:hover{color:var(--sk-link-hover)!important}
+.et-b-foot{text-align:center;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+
+/* RAVER — the data is the art; lowercase is allowed joy; the numbers never change */
+.et-r{color:var(--sk-ink);font:600 14px/1.25 var(--sk-font-raver-body)}
+.et-r-top{display:flex;align-items:baseline;justify-content:space-between;gap:var(--sk-s2);flex-wrap:wrap}
+#eternal .et-r-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em;color:var(--sk-ink)}
+.et-r-hint{font:400 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+.et-r-art{width:100%;max-width:360px;height:auto;margin:var(--sk-s3) auto var(--sk-s2);filter:drop-shadow(var(--sk-glow-sovereign));touch-action:manipulation}
+.et-r-art [role="button"]{cursor:pointer}
+.et-r-art [role="button"]:focus{outline:none}
+.et-r-art [role="button"]:focus-visible .hit{stroke:var(--sk-ink);stroke-width:2}
+.et-r-legend{display:flex;flex-wrap:wrap;justify-content:center;gap:var(--sk-s1) var(--sk-s3);margin:0 0 var(--sk-s2);font:400 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+.et-r-legend span{display:inline-flex;align-items:center;gap:var(--sk-s1)}
+.et-r-legend i{display:inline-block;width:18px;height:12px;border-radius:var(--sk-radius-sm)}
+.et-r-card{display:flex;gap:var(--sk-s2);align-items:center;padding:var(--sk-s2) var(--sk-s3);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl);background:var(--sk-sovereign-tint);min-height:var(--sk-control-person)}
+.et-r-card .rk{min-width:44px;height:44px;padding:0 var(--sk-s1);border-radius:var(--sk-radius);background:var(--sk-sovereign-strong);color:var(--sk-bg);display:flex;align-items:center;justify-content:center;font:700 15px/1.2 var(--sk-font-raver-display);flex:none}
+.et-r-card b{display:block;font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink)}
+.et-r-card span{display:block;margin-top:var(--sk-s1);font:400 14px/1.25 var(--sk-font-raver-body);color:var(--sk-sovereign-soft)}
+.et-r-chips{display:flex;flex-wrap:wrap;gap:var(--sk-s1);justify-content:center;margin:var(--sk-s2) 0}
+.et-r-chips button{min-height:var(--sk-control-min);min-width:var(--sk-control-min);padding:0 var(--sk-s3);border-radius:var(--sk-radius-pill);border:1.5px solid var(--sk-sovereign);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong)!important;font:700 15px/1.2 var(--sk-font-raver-display)!important;letter-spacing:.04em;cursor:pointer}
+.et-r-chips button[aria-pressed="true"]{border-color:var(--sk-you);background:var(--sk-sovereign-tint);color:var(--sk-ink)!important;box-shadow:var(--sk-glow-sovereign)}
+.et-r-note{margin-top:var(--sk-s2)!important;text-align:center;font:400 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-big{margin:var(--sk-s2) 0 var(--sk-s1)!important;text-align:center;font:700 60px/.95 var(--sk-font-raver-display);letter-spacing:-.02em;color:var(--sk-ink)}
+.et-r-pill{display:flex;align-items:center;justify-content:center;width:100%;height:58px;margin-top:var(--sk-s4);border:0;border-radius:var(--sk-radius-pill);background:var(--sk-primary);color:var(--sk-on-primary)!important;font:700 15px/1.2 var(--sk-font-raver-display)!important;letter-spacing:.04em;cursor:pointer;text-decoration:none}
+.et-r-ghost{display:flex;align-items:center;justify-content:center;margin:var(--sk-s2) auto 0;min-height:var(--sk-control-min);padding:0 var(--sk-s2);border:0;background:none;color:var(--sk-link)!important;font:400 14px/1.25 var(--sk-font-raver-body)!important;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.et-r-hold{position:relative;display:block;width:132px;height:132px;margin:var(--sk-s3) auto 0;border:0;border-radius:var(--sk-radius-pill);background:var(--sk-sovereign-wash);color:var(--sk-ink)!important;cursor:pointer;touch-action:none;user-select:none;-webkit-user-select:none}
+.et-r-hold svg{position:absolute;inset:0;width:100%;height:100%;transform:rotate(-90deg)}
+.et-r-hold .trk{fill:none;stroke:var(--sk-line);stroke-width:6}
+.et-r-hold .prg{fill:none;stroke:var(--sk-biomass);stroke-width:6;stroke-linecap:round;stroke-dasharray:370;stroke-dashoffset:370}
+.et-r-hold b{position:relative;display:block;font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em}
+.et-r-hold span{position:relative;display:block;margin-top:var(--sk-s1);font:400 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+@keyframes et-breathe{0%,100%{opacity:1}50%{opacity:.62}}
+.et-r .breathe{animation:et-breathe 4s ease-in-out infinite}
+body[data-motion-paused="true"] #eternal .breathe{animation-play-state:paused}
+@media (prefers-reduced-motion:reduce){.et-r .breathe{animation:none}.et-b-row .chev{transition:none}}
+
+/* CYPHERPUNK — the instrument, complete at first paint; every row is a fact you can check */
+.et-c{font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink)}
+.et-c-path{font:600 15px/1.45 var(--sk-font-mono);word-break:break-all;color:var(--sk-ink)}
+.et-c-chips{display:flex;flex-wrap:wrap;gap:var(--sk-s1);margin:var(--sk-s2) 0}
+.et-c-chips span{padding:2px var(--sk-s1);border:1px solid var(--sk-line);border-radius:4px;background:var(--sk-bg-card);font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-soft)}
+.et-c-chips span.on{border-color:var(--sk-guard);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong)}
+.et-c-chips span.ok{border-color:var(--sk-verified);color:var(--sk-verified)}
+.et-c-guard{display:flex;justify-content:space-between;align-items:center;gap:var(--sk-s2);flex-wrap:wrap;min-height:var(--sk-control-min);padding:var(--sk-s1) var(--sk-s3);border:1px dashed var(--sk-guard);border-radius:var(--sk-radius-sm);background:var(--sk-guard-wash);color:var(--sk-guard)}
+.et-c-guard b{font-weight:600;color:var(--sk-sovereign-strong)}
+#eternal .et-c-h{margin:var(--sk-s4) 0 var(--sk-s2)!important;font:600 15px/1.45 var(--sk-font-mono);color:var(--sk-ink)}
+.et-c-tab{width:100%;margin:var(--sk-s2) 0 var(--sk-s1);border-collapse:separate;border-spacing:0;border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm);overflow:hidden;background:var(--sk-bg-card);table-layout:auto}
+.et-c-tab th{padding:var(--sk-s1) var(--sk-s2);text-align:start;vertical-align:bottom;white-space:normal;font:500 12px/1.45 var(--sk-font-mono)!important;color:var(--sk-ink-mut)!important;border-bottom:1px solid var(--sk-line)!important;background:var(--sk-bg-well)}
+.et-c-tab td{height:var(--sk-control-min);padding:var(--sk-s1) var(--sk-s2);border-bottom:1px solid var(--sk-line)!important;font:400 13px/1.45 var(--sk-font-mono)!important;color:var(--sk-ink)!important;vertical-align:middle}
+.et-c-tab tr:last-child td{border-bottom:0!important}
+.et-c-tab td.k{color:var(--sk-guard)!important;white-space:nowrap}
+.et-c-tab td.v{white-space:nowrap;text-align:end}
+.et-c-tab tr.pick{cursor:pointer}.et-c-tab tr.pick:hover td{background:var(--sk-sovereign-tint)}
+.et-c-tab tr.more td{height:auto;padding:var(--sk-s1) var(--sk-s2) var(--sk-s2);background:var(--sk-sovereign-tint);color:var(--sk-ink-soft)!important}
+.et-c-tab tr.more small{display:block;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut)}
+.et-c-tab tr.more a{display:inline-flex;align-items:center;min-height:var(--sk-control-min);min-width:var(--sk-control-min);margin-inline-end:var(--sk-s2);color:var(--sk-link)!important;font:500 12px/1.45 var(--sk-font-mono)}
+.t-ok{color:var(--sk-verified)!important}.t-part{color:var(--sk-info)!important}.t-guard{color:var(--sk-guard)!important}.t-you{color:var(--sk-you)!important}.t-ai{color:var(--sk-ai)!important}.t-mut{color:var(--sk-ink-mut)!important}
+.et-c-pipe{list-style:none;margin:0;padding:0;display:grid;gap:var(--sk-s2);counter-reset:p}
+.et-c-pipe li{display:grid;grid-template-columns:36px minmax(0,1fr);gap:var(--sk-s1) var(--sk-s2);padding:var(--sk-s2) var(--sk-s3);border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm);background:var(--sk-bg-card);counter-increment:p}
+.et-c-pipe li::before{content:counter(p,decimal-leading-zero);color:var(--sk-guard);font-weight:600}
+.et-c-pipe li b{font-weight:600;color:var(--sk-ink)}.et-c-pipe li p{grid-column:2;color:var(--sk-ink-soft);overflow-wrap:anywhere}
+.et-c-pipe li.done b{color:var(--sk-verified)}.et-c-pipe li.guard{border-style:dashed;border-color:var(--sk-guard)}.et-c-pipe li.guard b{color:var(--sk-guard)}
+.et-c-pipe li.now{border-color:var(--sk-ai);box-shadow:inset 0 0 0 1px var(--sk-ai)}.et-c-pipe li.now b{color:var(--sk-ai)}
+.et-c-primary{display:flex;align-items:center;justify-content:center;width:100%;height:52px;margin-top:var(--sk-s3);border:0;border-radius:var(--sk-radius-sm);background:var(--sk-primary);color:var(--sk-on-primary)!important;font:600 14px/1.2 var(--sk-font-mono)!important;cursor:pointer;text-decoration:none;text-align:center;padding:0 var(--sk-s2)}
+.et-c-kv{width:100%;border-collapse:collapse;border:1px solid var(--sk-line);background:var(--sk-bg-card)}
+.et-c-kv th{width:120px;padding:var(--sk-s1) var(--sk-s2);text-align:start;vertical-align:top;font:500 12px/1.45 var(--sk-font-mono)!important;color:var(--sk-ink-mut)!important;border-bottom:1px solid var(--sk-line)!important;white-space:normal}
+.et-c-kv td{padding:var(--sk-s1) var(--sk-s2);border-bottom:1px solid var(--sk-line)!important;font:400 13px/1.45 var(--sk-font-mono)!important;color:var(--sk-ink)!important;overflow-wrap:anywhere}
+.et-c-verify{margin-top:var(--sk-s3);padding:var(--sk-s3);border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm);background:var(--sk-bg-card)}
+.et-c-verify-h{font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);margin-bottom:var(--sk-s1)}
+.et-c-verify ol{margin:0;padding-inline-start:var(--sk-s4);display:grid;gap:var(--sk-s1);color:var(--sk-ink)}
+.et-c-verify code{font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ai);overflow-wrap:anywhere;background:transparent}
+.et-c-row{display:grid;grid-template-columns:1fr 1fr;gap:var(--sk-s2);margin-top:var(--sk-s3)}
+.et-c-ghost{display:flex;align-items:center;justify-content:center;min-height:52px;padding:0 var(--sk-s1);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius-sm);background:transparent;color:var(--sk-ink)!important;text-decoration:none;text-align:center;font:600 14px/1.2 var(--sk-font-mono)!important;cursor:pointer}
+.et-c-seg{display:flex;gap:var(--sk-s1);flex-wrap:wrap;margin:var(--sk-s2) 0}
+.et-c-seg button{min-height:var(--sk-control-min);padding:0 var(--sk-s2);border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm);background:var(--sk-bg-card);color:var(--sk-ink-soft)!important;font:500 12px/1.45 var(--sk-font-mono)!important;cursor:pointer}
+.et-c-seg button[aria-pressed="true"]{border-color:var(--sk-ai);color:var(--sk-ai)!important}
+.et-c-tab tr.pick small{display:block;margin-top:2px;font:500 12px/1.45 var(--sk-font-mono)}
+.et-c-tab td.k{white-space:normal}
+#eternal table{min-width:0!important;width:100%;max-width:100%}
+#eternal .room-table{overflow:visible}
+/* ── THE WHOLE HEXAGON, dressed per register: the page's own variables mapped onto skaists.
+   The four food identities stay the page's validated categorical set (skaists' cat-* four). ── */
+html body[data-reg="bee"]{--bg:var(--sk-bg);--panel:var(--sk-bg-card);--well:var(--sk-bg-well);--ink:var(--sk-ink);--dim:var(--sk-ink-mut);--faint:var(--sk-ink-mut);--line:var(--sk-line);
+ --gold:var(--sk-sovereign-strong);--violet:var(--sk-sovereign);--cyan:var(--sk-ai);--cellbg:var(--sk-bg-well);--fill:var(--sk-verified);--fillfull:var(--sk-verified);--bee-font:var(--sk-font-bee-sans);background:var(--sk-bg);color:var(--sk-ink)}
+html body[data-reg="bee"] #masthead h1{font-family:var(--sk-font-bee-serif);font-weight:400}
+html body[data-reg="bee"] .door.primary{background:var(--sk-primary);color:var(--sk-on-primary);border-color:var(--sk-primary)}
+html body[data-reg="bee"] .door:not(.primary){background:var(--sk-bg-card);border-color:var(--sk-ink);color:var(--sk-ink)}
+html body[data-reg="bee"] .take{color:var(--sk-sovereign)}
+html body[data-reg="raver"],html body[data-reading-room][data-reg="raver"]{--bg:var(--sk-bg);--panel:var(--sk-bg-card);--well:var(--sk-bg-well);--ink:var(--sk-ink);--dim:var(--sk-ink-soft);--faint:var(--sk-ink-mut);--line:var(--sk-line);
+ --gold:var(--sk-sovereign-soft);--violet:var(--sk-sovereign-soft);--cyan:var(--sk-ai);--leaf:var(--sk-sovereign-soft);--cellbg:var(--sk-bg-card);--fill:var(--sk-ai);--fillfull:var(--sk-biomass);background:var(--sk-bg)!important;color:var(--sk-ink);font-family:var(--sk-font-raver-body)}
+html body[data-reg="raver"] #first-raver{background:var(--sk-bg-card);box-shadow:var(--sk-glow-sovereign)}
+html body[data-reg="raver"] #first-raver .feel,html body[data-reg="raver"] .take{font-family:var(--sk-font-raver-display);color:var(--sk-ink)}
+html body[data-reg="raver"] .door.primary,html body[data-reading-room][data-reg="raver"] #first-raver .door.primary{background:var(--sk-primary);border-color:var(--sk-primary);color:var(--sk-on-primary)}
+html body[data-reg="raver"] .door:not(.primary){background:transparent;border-color:var(--sk-ink);color:var(--sk-ink)}
+html body[data-reg="raver"] :is(section,.card,.fam,.food,.dc,.arb){background:var(--sk-bg-card);border-color:var(--sk-line)}
+html body[data-reg="cypherpunk"]{--bg:var(--sk-bg);--panel:var(--sk-bg-card);--well:var(--sk-bg-well);--ink:var(--sk-ink);--dim:var(--sk-ink-mut);--faint:var(--sk-ink-mut);--line:var(--sk-line);
+ --gold:var(--sk-ai);--violet:var(--sk-sovereign-soft);--cyan:var(--sk-ai);--cellbg:var(--sk-bg-card);--fill:var(--sk-ai);--fillfull:var(--sk-biomass);--warn:var(--sk-cat-bug);background:var(--sk-bg);color:var(--sk-ink);font-family:var(--sk-font-mono)}
+html body[data-reg="cypherpunk"] :is(section,.card,.fam,.food,.dc,.arb){background:var(--sk-bg-card);border-color:var(--sk-line)}
+html body[data-reg="cypherpunk"] #masthead h1{color:var(--sk-ai);font-family:var(--sk-font-mono)}
 </style>
+<link rel="stylesheet" href="skaists.css">
 </head>
 <body data-reg="bee" data-bee-theme="custom" data-bfood-beat="arrival">
 <div id="bregbar">
@@ -253,6 +399,59 @@ body[data-reg="raver"] :is(table,th,.tag,.note td,footer,h2,label,#key,.fam .cnt
   <span class="bfood-language" data-language-host></span>
 </div>
 <main>
+<!-- ETERNAL FRONT (founder blueprint 2026-09-26, docs/design/eternal): three separate products in
+     one surface. ONE data layer (the Hexagon's own render: window.__bfood, the 40 rows computed from
+     your five inputs and the basket) drives all three, so no register can show a different number.
+     Every gesture hands off to the page's own inputs (data-bfood-go) — nothing here guesses a body. -->
+<section id="eternal" aria-label="your food, drawn honestly">
+
+  <!-- NEW BEE — a calm room: one number, four plain rows, one choice -->
+  <div class="et-b">
+    <div class="et-b-mark">bFood</div>
+    <h2 class="et-b-h" id="etBeeTitle">your food, drawn honestly</h2>
+    <p class="et-b-lede" id="etBeeLede"></p>
+    <div class="et-b-fig"><b id="etBeeMet"></b><span id="etBeeMetL"></span></div>
+    <div class="et-b-guard"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9z" stroke-dasharray="3 3"/></svg><span id="etBeeGuard">a blank stays blank. it is never drawn as zero.</span></div>
+    <div class="et-b-rows" id="etBeeRows"></div>
+    <div class="et-b-act">
+      <button type="button" class="et-b-primary" data-bfood-go="inputs" id="etBeeGo">set my body</button>
+      <button type="button" class="et-b-link" data-bfood-go="deeper" id="etBeeDeeper">see all 40 cells</button>
+      <p class="et-b-foot" id="etBeeFoot">what food holds: USDA FoodData Central. what you need: the NASEM reference intakes.</p>
+    </div>
+  </div>
+
+  <!-- RAVER — the comb: forty cells, each filled from the bottom by what you got; tap one to light it -->
+  <div class="et-r">
+    <div class="et-r-top"><h2 class="et-r-h" id="etRaverTitle">your comb</h2><span class="et-r-hint" id="etRaverHint">tap a cell</span></div>
+    <svg class="et-r-art" id="etComb" viewBox="0 0 360 352" role="group" aria-label="forty cells, one per nutrient, filled by what you got"></svg>
+    <div class="et-r-legend" id="etLegend"></div>
+    <div class="et-r-card" id="etRaverCard" aria-live="polite"></div>
+    <button type="button" class="et-r-pill" data-bfood-go="inputs" id="etRaverGo">set my body</button>
+    <button type="button" class="et-r-ghost" data-bfood-go="deeper" id="etRaverDeeper">every cell, below</button>
+  </div>
+
+  <!-- CYPHERPUNK — the instrument: body → requirement → composition → sum, with the floor law visible -->
+  <div class="et-c">
+    <div class="et-c-path" id="etPath">bfood://hexagon/</div>
+    <div class="et-c-chips" id="etChips"></div>
+    <div class="et-c-guard" id="etGuard"></div>
+    <table class="et-c-tab"><thead><tr><th>fam</th><th>family</th><th>met</th><th>n/m</th></tr></thead><tbody id="etFams"></tbody></table>
+    <h3 class="et-c-h" id="etPipeH">pipeline · one body, one basket</h3>
+    <ol class="et-c-pipe" id="etPipe"></ol>
+    <button type="button" class="et-c-primary" id="etCyEdit">edit the five inputs ↓</button>
+    <h3 class="et-c-h" id="etRecH">receipt</h3>
+    <table class="et-c-kv" id="etReceipt"></table>
+    <div class="et-c-verify">
+      <div class="et-c-verify-h" id="etVerifyH">verify · no trust in this page needed</div>
+      <ol id="etVerify"></ol>
+    </div>
+    <div class="et-c-row">
+      <a class="et-c-ghost" href="https://fdc.nal.usda.gov/food-details/170148/nutrients" target="_blank" rel="noopener noreferrer"><span>fdc 170148 ↗</span><span class="et-sr"> (opens in a new tab)</span></a>
+      <a class="et-c-ghost" href="https://github.com/beehive-nature/beehive-nature/blob/main/surfaces/bfood.html" target="_blank" rel="noopener noreferrer"><span id="etFork">fork the template ↗</span><span class="et-sr"> (opens in a new tab)</span></a>
+    </div>
+  </div>
+</section>
+<h2 class="et-archive-h" id="etArchive">the whole hexagon</h2>
 <header id="masthead">
   <h1>⬡ <span data-i18n="bfood.mark">bFood Hexagon</span></h1>
   <p class="eyebrow" data-i18n="s.bfood.name">your nutrients, drawn honestly, never zero</p>
@@ -1134,6 +1333,9 @@ function render(){
    +'Every food figure here is a <b>published composition value, labelled as such</b>. A commissioned '
    +'lot COA replaces this column when it lands, and the two will be shown side by side rather than '
    +'silently swapped.';
+  /* the one data layer the ETERNAL front reads: this render's own rows, never a second model */
+  window.__bfood={rows:rows,person:p,d:d,grams:grams,foods:FOODS,fam:FAM,met:metAll,cells:cntAll};
+  if(window.__etRender) window.__etRender();
 }
 function dc(v,u,l,w){ return '<div class="dc"><div class="v">'+v+(u?' <s>'+u+'</s>':'')
   +'</div><div class="l">'+l+'</div><div class="w">'+w+'</div></div>'; }
@@ -1161,6 +1363,151 @@ FOODS.forEach(function(f){ var el=$('g-'+f.id);
   if(f.lock) el.addEventListener('change',function(){
     if((+el.value||0)<1){ el.value=1; render(); } }); });
 render();
+})();
+</script>
+<script id="eternal-js">
+/* ETERNAL FRONT — one data layer, three renderers (docs/design/eternal). The facts are the
+   Hexagon's own render (window.__bfood: the 40 rows computed from the five inputs and the basket).
+   The front re-draws whenever the page re-renders, so a changed body shows the same new numbers in
+   every register. Three states never merge: measured · floor (≥, a food lacks a published row) ·
+   not measured (n/m, never drawn as zero). */
+(function(){
+  var $=function(id){return document.getElementById(id);};
+  var T=function(k,f){var t=window.BNRLanguage&&window.BNRLanguage.text;return t?t(k,f):f;};
+  if(!document.getElementById('eternal')) return;
+  function esc(v){return String(v==null?'':v).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+  function num(x){if(x==null||!isFinite(x))return null;var a=Math.abs(x),d=a>=100?0:a>=10?1:a>=1?2:3;return String(+x.toFixed(d)).replace(/\B(?=(\d{3})+(?!\d))/g,',');}
+  var D={}, R={sel:null};
+
+  /* the data layer: derived from the page's own rows, read by all three renderers */
+  function derive(){
+    var M=window.__bfood; if(!M) return false;
+    D.person=M.person; D.eer=M.d.eer; D.prot=M.d.prot; D.fib=M.d.fib; D.met=M.met; D.cells=M.cells;
+    D.grams=M.foods.map(function(f){return {n:f.n,g:M.grams[f.id]||0,src:f.src};});
+    D.total=D.grams.reduce(function(a,f){return a+f.g;},0);
+    D.fam=M.fam.map(function(F){return F.n.toLowerCase();});
+    D.cellsList=M.rows.map(function(r){
+      var st=r.pct===null?'nm':r.over?'over':r.pct>=100?'met':'short';
+      return {k:r.n.k,s:r.n.s,u:r.n.u,b:r.n.b,fam:r.n.fam,state:st,floor:!!(r.del.floor&&r.pct!==null),pct:r.pct===null?null:Math.round(r.pct),
+        need:r.req,gives:r.del.measured?r.del.tot:null,missing:r.del.missing.slice()};
+    });
+    var c=D.cellsList;
+    D.count={met:c.filter(function(x){return x.pct!==null&&x.pct>=100;}).length,short:c.filter(function(x){return x.pct!==null&&x.pct<100;}).length,
+      nm:c.filter(function(x){return x.state==='nm';}).length,floor:c.filter(function(x){return x.floor;}).length,over:c.filter(function(x){return x.state==='over';}).length};
+    if(R.sel===null){var lys=c.findIndex(function(x){return x.k==='lysine';});R.sel=lys<0?0:lys;}
+    return true;
+  }
+  function pctText(x){return x.pct===null?T('et.bfood.nm','not measured'):(x.floor?'≥ ':'')+x.pct+'%';}
+  function who(){var p=D.person;return T('et.bfood.who','a {age}-year-old {sex}, {ht} cm and {wt} kg').replace('{age}',p.age).replace('{sex}',p.sex==='m'?T('et.bfood.man','man'):T('et.bfood.woman','woman')).replace('{ht}',p.ht).replace('{wt}',p.wt);}
+
+  /* ── NEW BEE ── */
+  function bee(){
+    $('etBeeLede').textContent=T('et.bfood.b.lede','drawn for {who}, eating {g} g of food a day. change it to your own body.').replace('{who}',who()).replace('{g}',num(D.total));
+    $('etBeeMet').textContent=D.met+' '+T('et.bfood.of','of')+' '+D.cells;
+    $('etBeeMetL').textContent=T('et.bfood.b.metL','nutrients covered by today’s basket');
+    var groups=[
+      ['met',T('et.bfood.b.met','covered'),function(x){return x.pct!==null&&x.pct>=100;},T('et.bfood.b.metNote','the basket meets your need for these.')],
+      ['short',T('et.bfood.b.short','not covered yet'),function(x){return x.pct!==null&&x.pct<100;},T('et.bfood.b.shortNote','the basket gives some, but less than you need.')],
+      ['nm',T('et.bfood.b.nm','not measured'),function(x){return x.state==='nm';},T('et.bfood.b.nmNote','no food here has a published number for these. the cell stays empty, never zero.')],
+      ['floor',T('et.bfood.b.floor','at least this much'),function(x){return x.floor;},T('et.bfood.b.floorNote','one food has no published number, so the total is a floor. these are also counted above.')]
+    ], h='';
+    groups.forEach(function(g){
+      var mine=D.cellsList.filter(g[2]);
+      h+='<button type="button" class="et-b-row" aria-expanded="false" data-t="'+g[0]+'"><span>'+esc(g[1])+'</span><small>'+mine.length+'<svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></small></button>'+
+        '<div class="et-b-open" data-t="'+g[0]+'" hidden><p>'+esc(g[3])+'</p><small>'+(mine.length?mine.map(function(x){return esc(x.k+' · '+pctText(x));}).join(' · '):esc(T('et.bfood.b.none','none today')))+'</small></div>';
+    });
+    $('etBeeRows').innerHTML=h;
+  }
+
+  /* ── RAVER ── the comb */
+  var W=54,RR=30,VS=47;
+  function hexPts(cx,cy,r){var p=[];for(var i=0;i<6;i++){var a=(-90+60*i)*Math.PI/180;p.push((cx+r*Math.cos(a)).toFixed(1)+','+(cy+r*Math.sin(a)).toFixed(1));}return p.join(' ');}
+  function fillPts(cx,cy,r,f){
+    var K=Math.sqrt(3)/2,yT=cy+r-2*r*Math.max(0,Math.min(1,f));
+    function hw(y){if(y<=cy-r||y>=cy+r)return 0;if(y<cy-r/2)return K*r*(y-(cy-r))/(r/2);if(y>cy+r/2)return K*r*((cy+r)-y)/(r/2);return K*r;}
+    var ys=[yT];[cy-r/2,cy+r/2].forEach(function(b){if(b>yT&&b<cy+r)ys.push(b);});ys.push(cy+r);
+    return ys.map(function(y){return [cx-hw(y),y];}).concat(ys.map(function(y){return [cx+hw(y),y];}).reverse()).map(function(p){return p[0].toFixed(1)+','+p[1].toFixed(1);}).join(' ');
+  }
+  var COL={met:'biomass',short:'ai',over:'cat-bug',nm:'guard'};
+  function comb(){
+    var h='';
+    D.cellsList.forEach(function(x,i){
+      var row=Math.floor(i/6),col=i%6,cx=28+col*W+(row%2?W/2:0),cy=34+row*VS,sel=i===R.sel,c='var(--sk-'+COL[x.state]+')';
+      h+='<g role="button" tabindex="0" data-i="'+i+'" aria-pressed="'+sel+'" aria-label="'+esc(x.k+' · '+pctText(x))+'">';
+      h+='<polygon class="hit" points="'+hexPts(cx,cy,RR-1)+'" style="fill:var(--sk-bg-card);stroke:'+(sel?'var(--sk-ink)':c)+';stroke-width:'+(sel?2.5:1.5)+(x.floor||x.state==='nm'?';stroke-dasharray:4 3':'')+'"/>';
+      if(x.pct!==null&&x.pct>0)h+='<polygon class="'+(sel?'breathe':'')+'" points="'+fillPts(cx,cy,RR-2.5,x.pct/100)+'" style="fill:'+c+';opacity:.55" pointer-events="none"/>';
+      h+='<text x="'+cx+'" y="'+(cy-3)+'" text-anchor="middle" pointer-events="none" style="fill:var(--sk-ink);font:600 14px/1.25 var(--sk-font-raver-body)">'+esc(x.s)+'</text>';
+      h+='<text x="'+cx+'" y="'+(cy+16)+'" text-anchor="middle" pointer-events="none" style="fill:var(--sk-ink-soft);font:400 14px/1.25 var(--sk-font-raver-body)">'+esc(x.pct===null?'n/m':(x.floor?'≥':'')+Math.min(x.pct,999)+'%')+'</text></g>';
+    });
+    $('etComb').innerHTML=h;
+  }
+  function raver(){
+    var x=D.cellsList[R.sel];
+    $('etRaverHint').textContent=D.met+' '+T('et.bfood.of','of')+' '+D.cells+' '+T('et.bfood.r.hint','lit · tap a cell');
+    $('etLegend').innerHTML='<span><i style="background:var(--sk-biomass)"></i>'+esc(T('et.bfood.r.met','met'))+'</span><span><i style="background:var(--sk-ai)"></i>'+esc(T('et.bfood.r.short','part'))+'</span><span><i style="border:1.5px dashed var(--sk-ink-soft)"></i>'+esc(T('et.bfood.r.floor','≥ floor'))+'</span><span><i style="border:1.5px dashed var(--sk-guard)"></i>'+esc(T('et.bfood.r.nm','n/m · never zero'))+'</span>';
+    var need=num(x.need),gives=num(x.gives);
+    $('etRaverCard').innerHTML='<span class="rk">'+esc(x.s)+'</span><div><b>'+esc(x.k+' · '+pctText(x))+'</b><span>'+esc(
+      (need?T('et.bfood.r.need','you need')+' '+need+' '+x.u+' ('+x.b+')':'')+
+      (x.gives===null?' · '+T('et.bfood.r.nogive','no food here has a published number'):' · '+T('et.bfood.r.gives','basket gives')+' '+(x.floor?'≥ ':'')+gives+' '+x.u)+
+      (x.floor?' · '+T('et.bfood.r.missing','no row for')+' '+x.missing.join(', '):'')+' · '+D.fam[x.fam])+'</span></div>';
+    comb();
+  }
+
+  /* ── CYPHERPUNK ── */
+  function cy(){
+    var p=D.person;
+    $('etPath').textContent='bfood://hexagon/'+p.sex+'-'+p.age+'y-'+p.ht+'cm-'+p.wt+'kg-pal'+p.pal;
+    $('etChips').innerHTML='<span>'+D.cells+' cells</span><span class="ok">met '+D.count.met+'</span><span>floor ≥ '+D.count.floor+'</span><span class="on">n/m '+D.count.nm+'</span>';
+    $('etGuard').innerHTML=esc(T('et.bfood.c.guard','n/m ≠ 0 · a missing row is never summed as zero'))+' <b>'+esc(T('et.bfood.c.guardB','missing row ⇒ floor ≥'))+'</b>';
+    $('etFams').innerHTML=D.fam.map(function(f,fi){
+      var mine=D.cellsList.filter(function(x){return x.fam===fi;});
+      var met=mine.filter(function(x){return x.pct!==null&&x.pct>=100;}).length,nm=mine.filter(function(x){return x.state==='nm';}).length;
+      return '<tr class="pick" data-i="'+fi+'" tabindex="0" aria-expanded="false"><td class="k">f'+fi+'</td><td>'+esc(f)+'</td><td class="v"><span class="t-ok">'+met+'</span>/'+mine.length+'</td><td class="v"><span class="'+(nm?'t-guard':'t-mut')+'">'+nm+'</span></td></tr>'+
+        '<tr class="more" data-i="'+fi+'" hidden><td colspan="4">'+mine.map(function(x){return esc(x.k)+' <span class="'+(x.state==='nm'?'t-guard':x.pct>=100?'t-ok':'t-part')+'">'+esc(x.pct===null?'n/m':(x.floor?'≥':'')+x.pct+'%')+'</span><small>need '+esc(num(x.need)+' '+x.u+' '+x.b)+' · gives '+esc(x.gives===null?'no published row':(x.floor?'≥ ':'')+num(x.gives)+' '+x.u)+'</small>';}).join('<br>')+'</td></tr>';
+    }).join('');
+    $('etPipe').innerHTML=[
+      ['done','body · 5 inputs',p.sex+' · '+p.age+' y · '+p.ht+' cm · '+p.wt+' kg · activity '+p.pal],
+      ['done','energy · NASEM 2023 EER',num(D.eer)+' kcal · protein 0.8 g/kg = '+num(D.prot)+' g · fibre 14 g/1,000 kcal = '+num(D.fib)+' g'],
+      ['done','requirements · DRI adults 19+',D.cells+' rows · amino acids mg/kg × your mass · the rest flat for your group'],
+      ['done','composition · per 100 g',D.grams.map(function(f){return f.n+' '+f.g+' g';}).join(' · ')],
+      ['guard','sum · floor law','a food with no published row ⇒ total is ≥ · no row anywhere ⇒ n/m, never 0'],
+      ['now','verdict',D.met+' of '+D.cells+' covered · '+D.count.floor+' floors · '+D.count.nm+' not measured']
+    ].map(function(s){return '<li class="'+s[0]+'"><b>'+esc(s[1])+'</b><p>'+esc(s[2])+'</p></li>';}).join('');
+    $('etReceipt').innerHTML=[
+      ['body',esc(p.sex+' · '+p.age+' y · '+p.ht+' cm · '+p.wt+' kg')],
+      ['eer',esc(num(D.eer))+' kcal/day'],
+      ['basket',esc(num(D.total))+' g/day · '+D.grams.length+' foods'],
+      ['sources',D.grams.map(function(f){return esc(f.n+': '+f.src);}).join('<br>')],
+      ['covered','<span class="t-ok">'+D.met+'</span> of '+D.cells],
+      ['floors',D.count.floor+' · marked ≥'],
+      ['not measured','<span class="t-guard">'+D.count.nm+'</span> · drawn empty, never 0'],
+      ['upper limit',D.count.over?'<span class="t-you">'+D.count.over+' exceeded</span>':'none exceeded']
+    ].map(function(r){return '<tr><th>'+r[0]+'</th><td>'+r[1]+'</td></tr>';}).join('');
+    $('etVerify').innerHTML=['open fdc 170148 → hemp hearts per 100 g → compare the ledger below',
+      'eer = a + b·age + c·height + d·weight (NASEM 2023, your sex and activity)',
+      'amino acids: RDA = 1.24 × EAR on all nine rows'].map(function(s){return '<li>'+esc(s)+'</li>';}).join('');
+  }
+
+  function all(){if(!derive())return;bee();raver();cy();}
+  window.__etRender=all;
+  var ev=$('eternal');
+  ev.addEventListener('click',function(e){
+    var row=e.target.closest('.et-b-row[data-t]');
+    if(row){var o=row.getAttribute('aria-expanded')!=='true';row.setAttribute('aria-expanded',String(o));var p=ev.querySelector('.et-b-open[data-t="'+row.getAttribute('data-t')+'"]');if(p)p.hidden=!o;return;}
+    var c=e.target.closest('#etComb [data-i]');
+    if(c){R.sel=+c.getAttribute('data-i');raver();if(e.detail===0){var f=ev.querySelector('#etComb [data-i="'+R.sel+'"]');if(f)f.focus();}return;}
+    var tr=e.target.closest('.et-c-tab tr.pick');
+    if(tr){var o2=tr.getAttribute('aria-expanded')!=='true';tr.setAttribute('aria-expanded',String(o2));var m=ev.querySelector('.et-c-tab tr.more[data-i="'+tr.getAttribute('data-i')+'"]');if(m)m.hidden=!o2;}
+  });
+  ev.addEventListener('keydown',function(e){
+    if(e.key!=='Enter'&&e.key!==' ')return;
+    var t=e.target.closest('#etComb [data-i],.et-c-tab tr.pick'); if(!t)return;
+    e.preventDefault(); t.dispatchEvent(new MouseEvent('click',{bubbles:true}));
+  });
+  $('etCyEdit').addEventListener('click',function(){var a=$('age');if(a){a.scrollIntoView({block:'center'});a.focus({preventScroll:true});}});
+  document.addEventListener('blang',all);
+  all();
+  window.__eternal={data:D,raver:R};
 })();
 </script>
 </body>
