@@ -14,24 +14,29 @@ body{background:var(--bg);color:var(--ink);font:13px/1.6 'IBM Plex Mono',monospa
   background-image:radial-gradient(ellipse at 50% 0%,rgba(255,160,60,.05),transparent 55%)}
 header{text-align:center;margin-bottom:20px}
 h1{font-size:clamp(18px,4vw,26px);color:var(--gold);font-weight:400;letter-spacing:.05em;text-shadow:0 0 14px rgba(255,180,80,.25)}
-header p{color:var(--dim);font-size:11px;margin-top:6px}
+header p{color:var(--dim);font-size:14px;margin-top:6px}
 #chat{max-width:680px;margin:0 auto;display:flex;flex-direction:column;gap:10px;min-height:50vh}
-.msg{border-radius:12px;padding:12px 16px;font-size:12.5px;line-height:1.8;max-width:88%;overflow-wrap:anywhere;word-break:break-word}
+.msg{border-radius:12px;padding:12px 16px;font-size:14px;line-height:1.7;max-width:88%;overflow-wrap:anywhere;word-break:break-word}
 .msg.user{align-self:flex-end;background:#123024;color:#c9e8cf;border:1px solid #1d4a2e}
 .msg.ai{align-self:flex-start;background:#1a1a2a;color:#d8cff0;border:1px solid #2a2a4d}
 .msg.ai .art{margin-top:10px;background:#000;padding:10px;border-radius:8px;max-width:280px}
 .msg.ai .art svg{width:100%;height:auto}
-.msg.ai .link{margin-top:8px;font-size:10.5px}
+.msg.ai .link{margin-top:8px;font-size:13px}
 .msg.ai .link a{color:var(--cyan)}
 #ask{max-width:680px;margin:16px auto 0;display:flex;gap:8px}
-#ask input{flex:1;background:#0a100c;color:var(--cyan);border:1px solid var(--line);border-radius:10px;padding:12px 16px;font:13px 'IBM Plex Mono',monospace;outline:none}
+#ask input{flex:1;background:#0a100c;color:var(--cyan);border:1px solid var(--line);border-radius:10px;padding:10px 14px;min-height:48px;font:16px 'IBM Plex Mono',monospace;outline:none}
 #ask input:focus{border-color:var(--gold)}
-#ask button{background:#3d2a10;color:var(--gold);border:1px solid #5a4020;border-radius:10px;padding:12px 20px;cursor:pointer;font:13px 'IBM Plex Mono',monospace}
+#ask button{background:#3d2a10;color:var(--gold);border:1px solid #5a4020;border-radius:10px;padding:10px 20px;min-height:48px;cursor:pointer;font:15px 'IBM Plex Mono',monospace}
 #ask button:hover{background:var(--gold);color:#000}
-#seeds{max-width:680px;margin:12px auto 0;display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
-#seeds button{background:none;border:1px solid var(--line);color:var(--dim);border-radius:8px;padding:6px 12px;cursor:pointer;font:11px 'IBM Plex Mono',monospace}
+#seeds{max-width:680px;margin:12px auto 0;display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+#seeds button{background:none;border:1px solid var(--line);color:var(--dim);border-radius:10px;padding:6px 14px;min-height:44px;cursor:pointer;font:14px 'IBM Plex Mono',monospace}
 #seeds button:hover{color:var(--gold);border-color:var(--gold)}
-.note{max-width:680px;margin:16px auto 0;color:#5a6478;font-size:10px;text-align:center;line-height:1.8}
+.note{max-width:680px;margin:18px auto 0;padding:0 4px;color:var(--dim);font-size:14px;text-align:center;line-height:1.7}
+
+  /* LOWER HALF at 390px (2026-09-26): the hub chip is a 44px control floating
+     just above the tour bar (anchored on the bar's published --tbar-h), so the
+     page end reserves the bar plus the chip and nothing ever ends beneath either. */
+  body{padding-bottom:calc(var(--tbar-h,50px) + 24px)!important}
 </style>
 </head>
 <body>
@@ -176,7 +181,7 @@ document.getElementById('send').onclick=ask;
 document.getElementById('q').addEventListener('keydown',function(e){ if(e.key==='Enter') ask(); });
 document.querySelectorAll('#seeds button').forEach(function(b){ b.onclick=function(){ document.getElementById('q').value=b.dataset.q; ask(); }; });
 </script>
-<div id="bnr-beta-badge" style="position:fixed;right:.6rem;bottom:calc(.6rem + 46px);z-index:9997;font:12px ui-monospace,monospace;opacity:.75"><a href="../" style="color:#39c5cf;text-decoration:none;border:1px solid #30363d;border-radius:99px;padding:.15rem .7rem;background:#161b22">⌂ hub</a></div>
+<div id="bnr-beta-badge" style="position:fixed;right:.6rem;bottom:calc(var(--tbar-h,50px) + 10px);z-index:9997;font:14px ui-monospace,monospace"><a href="../" style="display:inline-flex;align-items:center;min-height:44px;color:#39c5cf;text-decoration:none;border:1px solid #30363d;border-radius:99px;padding:0 16px;background:#161b22">⌂ hub</a></div>
 <script src="../tour.js?v=42"></script>
 </body>
 </html>
