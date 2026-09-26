@@ -326,6 +326,8 @@ button.et-b-row{cursor:pointer}
 .et-c-pipe li.done b{color:var(--sk-verified)}.et-c-pipe li.guard{border-style:dashed;border-color:var(--sk-guard)}.et-c-pipe li.guard b{color:var(--sk-guard)}
 .et-c-pipe li.consent b{color:var(--sk-you)}.et-c-pipe li.now{border-color:var(--sk-ai);box-shadow:inset 0 0 0 1px var(--sk-ai)}.et-c-pipe li.now b{color:var(--sk-ai)}
 .et-c-pipe li.todo p{color:var(--sk-ink-mut)}
+.et-c-branch{margin-top:var(--sk-s2);padding:var(--sk-s2) var(--sk-s3);border:1px dashed var(--sk-line);border-radius:var(--sk-radius-sm);color:var(--sk-ink-soft)}
+.et-c-branch b{display:block;font-weight:600;color:var(--sk-ink)}.et-c-branch p{margin:var(--sk-s1) 0 0}
 .et-c-primary{display:flex;align-items:center;justify-content:center;width:100%;height:52px;margin-top:var(--sk-s3);border:0;border-radius:var(--sk-radius-sm);background:var(--sk-primary);color:var(--sk-on-primary)!important;font:600 14px/1.2 var(--sk-font-mono)!important;cursor:pointer}
 .et-c-kv{width:100%;border-collapse:collapse;border:1px solid var(--sk-line);background:var(--sk-bg-card)}
 .et-c-kv th{width:96px;padding:var(--sk-s2) var(--sk-s3);text-align:left;vertical-align:top;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);border-bottom:1px solid var(--sk-line)}
@@ -454,6 +456,13 @@ body[data-reg="cypherpunk"] .et-archive-h{font:600 15px/1.45 var(--sk-font-mono)
     <table class="et-c-tab"><thead><tr><th>gen</th><th>rel</th><th>slots</th><th>state</th></tr></thead><tbody id="etManifest"></tbody></table>
     <h3 class="et-c-h">seal pipeline · public path</h3>
     <ol class="et-c-pipe" id="etPipe"></ol>
+    <!-- the private branch, declared and refused (deck boards 07/08). zbData is the noun docs/CONTRACT.md
+         governs; nothing here stores it: the one storage flow below is visibility "public" (bData).
+         Gated in e2e/blood-eternal.test.mjs: found by the governed reason, zero operable controls inside. -->
+    <div class="et-c-branch">
+      <b>branch after 02 → private zbData (only me · selected people) · self-encrypted · not wired yet</b>
+      <p>zbData = private encrypted bytes (docs/CONTRACT.md). reason: the one storage flow on this page is visibility public, so it writes bData only. this page has no private key, no grant and no chooser for only me or selected people, so nothing private is stored here.</p>
+    </div>
     <button type="button" class="et-c-primary" id="etCySign">sign consent + settle</button>
     <h3 class="et-c-h">receipt</h3>
     <table class="et-c-kv" id="etReceipt"></table>

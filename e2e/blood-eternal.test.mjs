@@ -23,9 +23,14 @@ let browser;
 before(async () => { await new Promise(r => srv.listen(PORT, '127.0.0.1', r)); browser = await chromium.launch(); });
 after(async () => { if (browser) await browser.close(); srv.close(); });
 
-async function open(reg) {
+async function open(reg, bound) {
   const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
   await ctx.addInitScript(r => { try { localStorage.setItem('bregister', r); } catch {} }, reg);
+  // optional: remember every element that gets a listener of these types (read by the zbData gate)
+  if (bound) await ctx.addInitScript(types => {
+    const seen = window.__bound = new WeakSet(), add = EventTarget.prototype.addEventListener;
+    EventTarget.prototype.addEventListener = function (t, ...a) { if (types.includes(t) && this instanceof Element) seen.add(this); return add.call(this, t, ...a); };
+  }, bound);
   await ctx.route('**/*', r => r.request().url().startsWith(ORIGIN) ? r.continue() : r.abort('blockedbyclient'));
   const p = await ctx.newPage(); const errs = [];
   p.on('pageerror', e => errs.push(String(e)));
@@ -159,4 +164,95 @@ test('the laws hold on the front: no dash for a value, no forced capitals, 44 px
     assert.deepEqual(bad, [], reg);
     await ctx.close();
   }
+});
+
+/* zbData: the private branch is declared with its governed reason, and nothing in it can be operated.
+   The condition as cut in CORE (7b7d9a63), repaired for arm 13 (8f60093c, e608744d, 4c3dbb2d, 1ae9793c):
+   - instrument: a plain DOM query inside page.evaluate, never Playwright actionability. The register switch
+     hides whole fronts, and an actionability count cannot tell "hidden by register" from "no control here".
+     So the absence gate runs in all three registers and must give the same answer in each.
+   - shape 2: the absence region is LOCATED by a literal held in this file (ZB_NEEDLE), so a docs edit can
+     never blind it. Conformance to docs/CONTRACT.md:12 is a separate named test. The derivation from
+     CONTRACT.md asserts its own output before it is used: missing, empty or stub -> the test refuses in a
+     sentence that blames docs/CONTRACT.md, never the page.
+   - non-vacuity: #etCySign, counted by the same function in the same evaluate, must read operable by tag
+     AND by recorded listener. A broken selector or a dead listener record then goes red, never green.
+   Coupling cost, named: relabelling zbData in docs/CONTRACT.md:12 moves the contract, this page's
+   declaration, and 87 corpus strings across 3 keys (flow.r.state.in, flow.p.boundary.cy, flow.p.state.rav;
+   29 entries each, every one carrying the token; measured at bdd34ed9). On that day the conformance test
+   goes red and says so; the absence test does not move. */
+const ZB_DEF = 'private encrypted bytes';   // docs/CONTRACT.md:12 at bdd34ed9, held literally
+const ZB_NEEDLE = 'zbData = ' + ZB_DEF;
+const ZB_COST = 'a zbData relabel moves docs/CONTRACT.md:12, surfaces/blood.html and 87 corpus strings across 3 keys (flow.r.state.in, flow.p.boundary.cy, flow.p.state.rav)';
+function deriveZb(text) {
+  // every refusal names docs/CONTRACT.md: the seat that trips it is editing the contract, not the page
+  if (typeof text !== 'string') return { ok: false, why: 'docs/CONTRACT.md is missing or unreadable' };
+  const line = text.split('\n').map(l => l.trim()).find(l => /^\*\*zbData\*\*/.test(l));
+  if (!line) return { ok: false, why: 'docs/CONTRACT.md has no "**zbData** = ..." definition line' };
+  const def = (line.match(/^\*\*zbData\*\*\s*=\s*([^(]*)/) || [, ''])[1].trim().replace(/\.$/, '').trim();
+  if (!def) return { ok: false, why: 'docs/CONTRACT.md defines zbData as an empty string' };
+  if (def.length < 12 || !/private/i.test(def) || !/encrypt/i.test(def))
+    return { ok: false, why: 'docs/CONTRACT.md defines zbData as a stub ("' + def + '"): under 12 characters, or without the private + encrypted meaning' };
+  return { ok: true, def };
+}
+let CONTRACT = null;
+try { CONTRACT = await readFile(join(ROOT, 'docs/CONTRACT.md'), 'utf8'); } catch {}
+const BOUND = ['click', 'dblclick', 'auxclick', 'mousedown', 'mouseup', 'pointerdown', 'pointerup', 'touchstart', 'touchend', 'keydown', 'keyup', 'keypress', 'change', 'input', 'submit', 'contextmenu'];
+
+test('zbData: the private branch is declared with its reason, and nothing in it can be operated', async () => {
+  assert.ok(ZB_NEEDLE.length > 'zbData = '.length + 11, 'the locator literal is not a stub');
+  for (const reg of ['cypherpunk', 'bee', 'raver']) {
+    const { ctx, p, errs } = await open(reg, BOUND);
+    const r = await p.evaluate(reason => {
+      const norm = s => s.replace(/\s+/g, ' ').trim(), bound = window.__bound;
+      if (!bound) return { hook: false };
+      // ONE instrument for the region and the control: why is this element operable?
+      const why = el => {
+        const w = [];
+        if (el.matches('button,input,select,textarea,summary,a[href]:not([href="#"]),[role=button],[role=link],[role=checkbox],[role=switch],[role=menuitem],[contenteditable=""],[contenteditable="true"],[onclick],[data-go]')) w.push('tag');
+        if (el.hasAttribute('tabindex') && el.getAttribute('tabindex') !== '-1') w.push('tabindex');
+        if (bound.has(el) || typeof el.onclick === 'function') w.push('listener');
+        if (getComputedStyle(el).cursor === 'pointer') w.push('cursor');
+        return w;
+      };
+      const operable = root => [root, ...root.querySelectorAll('*')].map(el => ({ el, w: why(el) })).filter(x => x.w.length);
+      const name = x => x.el.tagName.toLowerCase() + (x.el.id ? '#' + x.el.id : '') + ' [' + x.w + ']';
+      const front = document.querySelector('#eternal>.et-c'), sign = document.getElementById('etCySign');
+      const ctl = sign ? operable(sign).filter(x => x.el === sign).map(x => x.w)[0] || [] : null;
+      const carriers = [...front.querySelectorAll('*')].filter(el => norm(el.textContent).includes(reason) &&
+        ![...el.children].some(c => norm(c.textContent).includes(reason)));
+      if (carriers.length !== 1) return { hook: true, ctl, carriers: carriers.length };
+      const region = carriers[0].parentElement, box = region.getBoundingClientRect();
+      return {
+        hook: true, ctl, carriers: 1, text: norm(region.textContent), inside: operable(region).map(name),
+        tight: region !== front && front.contains(region) && !(sign && region.contains(sign)),
+        laid: box.width > 0 && box.height > 0 && getComputedStyle(front).display !== 'none' && getComputedStyle(region).visibility === 'visible',
+      };
+    }, ZB_NEEDLE);
+    assert.ok(r.hook, reg + ': the listener record is installed');
+    // non-vacuity first: the same instrument, in the same run, sees the live control, and the listener arm
+    // must fire on its own (the tag arm is guaranteed on a <button> and cannot witness it)
+    assert.ok(r.ctl, reg + ': #etCySign exists');
+    assert.ok(r.ctl.includes('tag') && r.ctl.includes('listener'), reg + ': the instrument sees #etCySign by tag and by listener, got ' + JSON.stringify(r.ctl));
+    // the region is where the reason is, and nowhere else
+    assert.equal(r.carriers, 1, reg + ': surfaces/blood.html: exactly one block on the cypherpunk front carries "' + ZB_NEEDLE + '"');
+    assert.ok(r.tight, reg + ': the region is a tight block, not the front and not around #etCySign');
+    assert.match(r.text, /not wired yet/, reg + ': the branch says it is not wired');
+    assert.match(r.text, /reason: \S.{20,}/, reg + ': and says why');
+    assert.deepEqual(r.inside, [], reg + ': nothing in the private branch can be operated');
+    if (reg === 'cypherpunk') assert.ok(r.laid, 'cypherpunk: the declaration is on screen');
+    assert.equal(errs.length, 0, errs.join(' | '));
+    await ctx.close();
+  }
+});
+
+test('zbData: the page names the noun exactly as docs/CONTRACT.md:12 defines it', async () => {
+  const d = deriveZb(CONTRACT);
+  assert.ok(d.ok, 'REFUSED, not a page fault: ' + d.why + '. Fix docs/CONTRACT.md:12.');
+  assert.equal(d.def, ZB_DEF, 'docs/CONTRACT.md:12 now defines zbData as "' + d.def + '", this gate holds "' + ZB_DEF + '". Coupling cost: ' + ZB_COST + '.');
+  const { ctx, p, errs } = await open('cypherpunk');
+  const front = await p.evaluate(() => document.querySelector('#eternal>.et-c').textContent.replace(/\s+/g, ' '));
+  assert.ok(front.includes('zbData = ' + d.def + ' (docs/CONTRACT.md)'), 'surfaces/blood.html: the cypherpunk front cites "zbData = ' + d.def + ' (docs/CONTRACT.md)"');
+  assert.equal(errs.length, 0, errs.join(' | '));
+  await ctx.close();
 });
