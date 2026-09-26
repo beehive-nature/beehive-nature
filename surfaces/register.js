@@ -54,6 +54,73 @@
 
     [data-reg]:not(body){display:none}
     body[data-reg="bee"] [data-reg="bee"],body[data-reg="raver"] [data-reg="raver"],body[data-reg="cypherpunk"] [data-reg="cypherpunk"]{display:revert}
+    /* ══ THE GOLDEN DRESS CONTRACT (founder 2026-09-26) ══════════════════════
+       wallet.html is the REFERENCE IMPLEMENTATION of register behavior; these
+       body-scoped sets are the estate's SINGLE SHIPPED SOURCE of the register
+       tokens — surfaces ADOPT by setting data-reg-dress="contract" and aliasing
+       the tokens (or consuming them with var(--reg-*, fallback)), NEVER by
+       re-declaring values. Gated behind the opt-in attribute on purpose: the
+       rollout is NARROW — each surface activates with its own gate, evaluated
+       against the contract, never silently re-dressed. A register changes
+       voice, density and dress — never a number, a price, a limit, an address,
+       or what a person may do. Token values are the ruled sheet (2026-09-19),
+       columns new bee / raver / cypherpunk; e2e/register-contract.mjs is the
+       instrument that measures any adopting surface against THIS block. */
+    body[data-reg="bee"][data-reg-dress="contract"]{
+      --reg-bg:#fbf7f0;--reg-card:#ffffff;--reg-well:#efe9dd;--reg-ink:#0c1412;
+      --reg-ink-mut:#4a5f55;--reg-ink-dim:#6a736e;--reg-line:#e6dfd2;--reg-line-soft:#efe9dd;
+      --reg-primary:#a8238c;--reg-on-primary:#ffffff;
+      --reg-sovereign:#6e3fb8;--reg-sovereign-strong:#4f2a8c;--reg-sovereign-soft:#865fb8;
+      --reg-sovereign-wash:#eadff8;--reg-sovereign-tint:#f7f2fc;
+      --reg-link:#6e3fb8;--reg-link-hover:#4f2a8c;
+      --reg-guard:#4a3aa8;--reg-guard-wash:#ece8fa;--reg-verified:#2e6b1e;--reg-verified-wash:#e4f1df;
+      --reg-ai:#0f6f82;--reg-info:#4d759b;--reg-biomass:#527c46;--reg-b-value:#e8b54b;--reg-b-chip:#0c1412;
+      --reg-rose:#a3122b;--reg-rose-deep:#6e0c1f;
+      --reg-cat-works:#3f9c55;--reg-cat-idea:#a476ec;--reg-cat-bug:#c07f1c;--reg-cat-gap:#0092a6;
+      --reg-font-body:system-ui,-apple-system,'Segoe UI',sans-serif;
+      --reg-font-title:Georgia,'Times New Roman',serif;
+      --reg-font-mono:ui-monospace,'Cascadia Mono',Consolas,Menlo,monospace;
+      --reg-radius-card:20px;--reg-radius-btn:12px;--reg-radius-cut:4px;
+      --reg-bg-wash:#fbf7f0;--reg-glow:none;
+      --reg-press-ease:cubic-bezier(.2,0,0,1);--reg-press-ms:140ms;--reg-change-ms:260ms;--reg-arrive-ms:520ms;
+    }
+    body[data-reg="raver"][data-reg-dress="contract"]{
+      --reg-bg:#06110c;--reg-card:#0c1412;--reg-well:#0c1412;--reg-ink:#e9f2ec;
+      --reg-ink-mut:#8fa79c;--reg-ink-dim:#648176;--reg-line:#1e2b26;--reg-line-soft:#1e2b26;
+      --reg-primary:#d655bb;--reg-on-primary:#06110c;
+      --reg-sovereign:#9c6fd6;--reg-sovereign-strong:#e4d6fa;--reg-sovereign-soft:#b79fe0;
+      --reg-sovereign-wash:#171028;--reg-sovereign-tint:#120e1e;
+      --reg-link:#b79fe0;--reg-link-hover:#e4d6fa;
+      --reg-guard:#b7a8f7;--reg-guard-wash:#12102a;--reg-verified:#86cc72;--reg-verified-wash:#0c1412;
+      --reg-ai:#45c2dc;--reg-info:#6fa9e0;--reg-biomass:#86cc72;--reg-b-value:#e8b54b;--reg-b-chip:#0c1412;
+      --reg-rose:#c41e3a;--reg-rose-deep:#8e1230;
+      --reg-cat-works:#3f9c55;--reg-cat-idea:#a476ec;--reg-cat-bug:#c07f1c;--reg-cat-gap:#0092a6;
+      --reg-font-body:system-ui,-apple-system,'Segoe UI',sans-serif;
+      --reg-font-title:system-ui,-apple-system,'Segoe UI',sans-serif;
+      --reg-font-mono:ui-monospace,'Cascadia Mono',Consolas,Menlo,monospace;
+      --reg-radius-card:28px;--reg-radius-btn:999px;--reg-radius-cut:4px;
+      --reg-bg-wash:radial-gradient(130% 80% at 50% -12%,#171028 0%,#0b0d1a 38%,#06110c 68%) #06110c;
+      --reg-glow:0 0 0 1px #9c6fd61c,0 0 46px #17102899,0 0 130px #d655bb1f; /* glow-sovereign — raver's ONE glow */
+      --reg-press-ease:cubic-bezier(.2,0,0,1);--reg-press-ms:140ms;--reg-change-ms:260ms;--reg-arrive-ms:520ms;
+    }
+    body[data-reg="cypherpunk"][data-reg-dress="contract"]{
+      --reg-bg:#06110c;--reg-card:#0c1412;--reg-well:#0c1412;--reg-ink:#e9f2ec;
+      --reg-ink-mut:#8fa79c;--reg-ink-dim:#648176;--reg-line:#1e2b26;--reg-line-soft:#1e2b26;
+      --reg-primary:#45c2dc;--reg-on-primary:#06110c;
+      --reg-sovereign:#9c6fd6;--reg-sovereign-strong:#c9b2ee;--reg-sovereign-soft:#b79fe0;
+      --reg-sovereign-wash:#120e1e;--reg-sovereign-tint:#120e1e;
+      --reg-link:#45c2dc;--reg-link-hover:#8eddee;
+      --reg-guard:#b7a8f7;--reg-guard-wash:#06110c;--reg-verified:#86cc72;--reg-verified-wash:#0c1412;
+      --reg-ai:#45c2dc;--reg-info:#6fa9e0;--reg-biomass:#86cc72;--reg-b-value:#e8b54b;--reg-b-chip:#0c1412;
+      --reg-rose:#c41e3a;--reg-rose-deep:#8e1230;
+      --reg-cat-works:#3f9c55;--reg-cat-idea:#a476ec;--reg-cat-bug:#c07f1c;--reg-cat-gap:#0092a6;
+      --reg-font-body:ui-monospace,'Cascadia Mono',Consolas,Menlo,monospace;
+      --reg-font-title:ui-monospace,'Cascadia Mono',Consolas,Menlo,monospace;
+      --reg-font-mono:ui-monospace,'Cascadia Mono',Consolas,Menlo,monospace;
+      --reg-radius-card:4px;--reg-radius-btn:4px;--reg-radius-cut:4px;
+      --reg-bg-wash:#06110c;--reg-glow:none;
+      --reg-press-ease:cubic-bezier(.2,0,0,1);--reg-press-ms:140ms;--reg-change-ms:260ms;--reg-arrive-ms:520ms;
+    }
     #bregbar,#bregctl{--reg-bg:#fbf7f0;--reg-ink:#0c1412;--reg-track:#efe9dd;--reg-line:#857d70;--reg-active:#0c1412;--reg-on:#fbf7f0;--reg-font:system-ui,-apple-system,'Segoe UI',sans-serif;color-scheme:light}
     body[data-reg="raver"] #bregbar,body[data-reg="raver"] #bregctl{--reg-track:#15241f;--reg-bg:#0e1b19;--reg-ink:#e9f2ec;--reg-line:#729889;--reg-active:#d655bb;--reg-on:#06110c;color-scheme:dark}
     body[data-reg="cypherpunk"] #bregbar,body[data-reg="cypherpunk"] #bregctl{--reg-track:#0c1412;--reg-radius:4px;--reg-bg:#06110c;--reg-ink:#e9f2ec;--reg-line:#729889;--reg-active:#45c2dc;--reg-on:#06110c;--reg-font:ui-monospace,'Cascadia Mono',Consolas,monospace;color-scheme:dark}
