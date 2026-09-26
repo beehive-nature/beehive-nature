@@ -796,10 +796,6 @@ jobs:
       - name: Skaists — the design system is compiled, not hand-copied
         if: always()
         run: node scripts/build-skaists.mjs --check
-      - name: Skaists — the standards meter (three-UI fronts score 100%)
-        if: always()
-        working-directory: e2e
-        run: node skaists-conformance.mjs --only blood.html,bigen.html,bfood.html,bearth.html,blongevity.html,austras-koks.html,buzz-directory.html,bnames.html,bnamesday.html,bdata.html,vending.html,profile.html,bview.html,museum.html,watch.html,music.html,listening.html,festival/index.html,plur.html,blight/museum.html,blight/index.html,blight/gallery.html,blight/market.html,read.html,blanguage.html,review.html,university/index.html,onboarding/index.html,onboarding/receive.html,myspace.html,kandi.html,fleet-hosted/index.html,fleet-hosted/gallery/acid-cascade.html,fleet-hosted/gallery/indigo-index.html,fleet-hosted/gallery/resonance.html,fleet-hosted/lab/bnr-dashboard.html,blight/midi.html,blight/midi-organ.html,blight/midiroom.html,blight/midivault.html,blight/studio-music.html,hardware/index.html,hardware/build.html,hardware/lab.html,hardware/security.html,stack.html,blight/pixelrefiner.html,blight/studio-gate.html,blight/inscription-explorer.html,blight/compare.html,blight/bnri-gallery.html --min 100
       # (moved here from the node job 2026-09-26: node ran 19m09s of its 20-min cap on c013f2e1, and
       # this audit grows with every front the rollout lands.)
       # THE BOTTOM HALF OF EVERY SURFACE (founder order 2026-09-26: "EVERYTHING BOTTOM HALF OF
@@ -814,3 +810,25 @@ jobs:
         if: always()
         working-directory: e2e
         run: node footer-audit.mjs --baseline footer-audit.baseline.json
+
+  # THE STANDARDS METER, its own job (2026-09-26): 51 fronts x 3 registers took 7m11s on this box and
+  # ~8.2 s/page in CI; wave 2 takes it past 70 pages, which with the ETERNAL tests and the bottom half
+  # would cross the eternal job's 20-min cap. Split, not raised: each job keeps its own bound.
+  meter:
+    timeout-minutes: 20
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22
+      - name: shared setup — install (exempt from always())
+        working-directory: e2e
+        run: |
+          npm ci
+          npx playwright --version
+          npx playwright install --with-deps chromium
+      - name: Skaists — the standards meter (three-UI fronts score 100%)
+        if: always()
+        working-directory: e2e
+        run: node skaists-conformance.mjs --only blood.html,bigen.html,bfood.html,bearth.html,blongevity.html,austras-koks.html,buzz-directory.html,bnames.html,bnamesday.html,bdata.html,vending.html,profile.html,bview.html,museum.html,watch.html,music.html,listening.html,festival/index.html,plur.html,blight/museum.html,blight/index.html,blight/gallery.html,blight/market.html,read.html,blanguage.html,review.html,university/index.html,onboarding/index.html,onboarding/receive.html,myspace.html,kandi.html,fleet-hosted/index.html,fleet-hosted/gallery/acid-cascade.html,fleet-hosted/gallery/indigo-index.html,fleet-hosted/gallery/resonance.html,fleet-hosted/lab/bnr-dashboard.html,blight/midi.html,blight/midi-organ.html,blight/midiroom.html,blight/midivault.html,blight/studio-music.html,hardware/index.html,hardware/build.html,hardware/lab.html,hardware/security.html,stack.html,blight/pixelrefiner.html,blight/studio-gate.html,blight/inscription-explorer.html,blight/compare.html,blight/bnri-gallery.html --min 100
