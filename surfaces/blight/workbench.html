@@ -69,9 +69,324 @@ details.tnote>.note{margin-top:10px!important;max-width:760px;border:1px solid v
 body:not([data-reg="cypherpunk"]) .note,body:not([data-reg="cypherpunk"]) summary{font-size:14px}
 body:not([data-reg="cypherpunk"]) table{font-size:14px}
 </style>
+<style>
+/* ── ETERNAL FRONT (docs/design/eternal) — three products in one surface. Every value is a skaists
+   token (../skaists.css, compiled from docs/design/skaists/tokens.json): no hand-picked hex, size or
+   corner. Measured by e2e/skaists-conformance.mjs. One register visible at a time; new bee is the
+   default. Every class is et- prefixed and every control is reset here, so the page's own bare
+   rules (button, input, h1, section) never reach in. ── */
+#eternal{box-sizing:border-box;width:100%;max-width:600px;margin:0 auto var(--sk-s2);padding:var(--sk-s2) 0 0;text-align:left;letter-spacing:normal;text-transform:none;line-height:1.45;background:none;border:0;border-radius:0}
+#eternal *,#eternal *::before,#eternal *::after{box-sizing:border-box;text-transform:none}
+#eternal>.et-r,#eternal>.et-c{display:none}
+body[data-reg="raver"] #eternal>.et-b,body[data-reg="cypherpunk"] #eternal>.et-b{display:none}
+body[data-reg="raver"] #eternal>.et-r{display:block}
+body[data-reg="cypherpunk"] #eternal>.et-c{display:block}
+#eternal [hidden]{display:none!important}
+#eternal button{margin:0;padding:0;border:0;border-radius:0;background:none;color:inherit;font:inherit;letter-spacing:normal;min-width:0;box-shadow:none;cursor:pointer;text-align:center}
+#eternal button:disabled{cursor:not-allowed}
+#eternal input,#eternal select{margin:0;min-width:0;letter-spacing:normal;box-shadow:none}
+#eternal svg,#eternal canvas,#eternal img{display:block;max-width:100%}
+#eternal a{text-decoration:none}
+#eternal :focus-visible{outline:2px solid var(--sk-focus);outline-offset:3px}
+#eternal h2,#eternal h3,#eternal p,#eternal ol,#eternal ul,#eternal table,#eternal figure,#eternal label{margin:0;padding:0;border:0;background:none;letter-spacing:normal;text-shadow:none}
+#eternal h2,#eternal h3{-webkit-text-fill-color:currentColor;background-image:none}
+#eternal table{border-collapse:separate;border-spacing:0}
+#eternal th,#eternal td{border:0;padding:0;vertical-align:top;max-width:none;overflow:visible;white-space:normal;text-overflow:clip}
+#eternal code{background:none;padding:0;border:0}
+#etArchive.et-archive-h{margin:var(--sk-s5) 0 var(--sk-s2);padding:var(--sk-s4) 0 0;border:0;border-top:1px solid var(--sk-line);color:var(--sk-ink);text-transform:none;letter-spacing:normal;background:none;-webkit-text-fill-color:currentColor;text-shadow:none}
+body[data-reg="bee"] #etArchive.et-archive-h{font:400 28px/1.1 var(--sk-font-bee-serif)}
+body[data-reg="raver"] #etArchive.et-archive-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em}
+body[data-reg="cypherpunk"] #etArchive.et-archive-h{font:600 15px/1.45 var(--sk-font-mono)}
+
+/* NEW BEE — a calm room: plain rows, one reassurance, one magenta action, a link, a footnote */
+#eternal .et-b{display:flex;flex-direction:column;gap:var(--sk-s3);color:var(--sk-ink);font:400 16px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-b-mark{font:400 18px/1.2 var(--sk-font-house);color:var(--sk-sovereign)}
+#eternal .et-b-h{font:400 40px/1.05 var(--sk-font-bee-serif);color:var(--sk-ink)}
+#eternal .et-b-lede{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink-mut);text-wrap:pretty}
+#eternal .et-b-guard{display:flex;align-items:center;gap:var(--sk-s2);min-height:var(--sk-control-min,44px);padding:var(--sk-s1) var(--sk-s3);border-radius:var(--sk-radius);background:var(--sk-guard-wash);color:var(--sk-guard);font:600 15px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-ic{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+#eternal .et-b-rows{display:flex;flex-direction:column;background:var(--sk-bg-card);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl);overflow:hidden}
+#eternal .et-b-row{display:flex;align-items:center;justify-content:space-between;gap:var(--sk-s2);width:100%;min-height:var(--sk-control-row,52px);padding:var(--sk-s1) var(--sk-s3);border:0;border-bottom:1px solid var(--sk-line-soft);border-radius:0;background:var(--sk-bg-card);text-align:left;font:500 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+#eternal .et-b-row:last-child{border-bottom:0}
+#eternal .et-b-row>span{flex:1 1 auto}
+#eternal .et-b-row small{display:flex;align-items:center;gap:var(--sk-s1);flex:none;max-width:55%;text-align:right;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-row small.et-ok{color:var(--sk-verified)}
+#eternal .et-b-row small.et-out{color:var(--sk-guard)}
+#eternal .et-b-row[aria-expanded="true"]{background:var(--sk-sovereign-tint);color:var(--sk-sovereign-strong);font-weight:600}
+#eternal .et-b-row[aria-expanded="true"] small{color:var(--sk-sovereign-strong)}
+#eternal .et-chev{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;flex:none;transition:transform var(--dur,.26s)}
+#eternal .et-b-row[aria-expanded="true"] .et-chev{transform:rotate(90deg)}
+#eternal .et-b-open{padding:var(--sk-s2) var(--sk-s3);background:var(--sk-sovereign-tint);border-bottom:1px solid var(--sk-line-soft);font:400 15px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+#eternal .et-b-person{display:flex;align-items:center;gap:var(--sk-s2);min-height:var(--sk-control-person,60px);padding:var(--sk-s1) var(--sk-s3);border-bottom:1px solid var(--sk-line-soft);background:var(--sk-bg-card)}
+#eternal .et-b-person:last-child{border-bottom:0}
+#eternal .et-b-person i{width:40px;height:40px;border-radius:var(--sk-radius-pill);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong);display:flex;align-items:center;justify-content:center;font:600 14px/1.4 var(--sk-font-bee-sans);font-style:normal;flex:none}
+#eternal .et-b-person i.et-ok{background:var(--sk-verified-wash);color:var(--sk-verified)}
+#eternal .et-b-person i.et-dash{background:var(--sk-bg-card);border:1.5px dashed var(--sk-ink-dim);color:var(--sk-ink-mut)}
+#eternal .et-b-person b{display:block;font:500 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink);overflow-wrap:anywhere}
+#eternal .et-b-person span{display:block;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut);overflow-wrap:anywhere}
+#eternal .et-b-act{display:flex;flex-direction:column;gap:var(--sk-s1);margin-top:var(--sk-s1)}
+#eternal .et-b-primary{display:flex;align-items:center;justify-content:center;width:100%;min-height:var(--sk-control-primary,54px);padding:0 var(--sk-s3);border:0;border-radius:var(--sk-radius-lg);background:var(--sk-primary);color:var(--sk-on-primary);font:600 17px/1.2 var(--sk-font-bee-sans);text-align:center;cursor:pointer}
+#eternal .et-b-primary:disabled{background:var(--sk-bg-well);color:var(--sk-ink-mut)}
+#eternal .et-b-link{display:flex;align-items:center;justify-content:center;min-height:var(--sk-control-min,44px);padding:0 var(--sk-s2);border:0;background:none;font:600 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-link);cursor:pointer;text-align:center}
+#eternal .et-b-link:hover{color:var(--sk-link-hover)}
+#eternal .et-b-foot{text-align:center;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-card{display:flex;flex-direction:column;gap:var(--sk-s1);padding:var(--sk-s3);background:var(--sk-bg-card);border:1px dashed var(--sk-ink-dim);border-radius:var(--sk-radius-xl)}
+#eternal .et-b-card.et-ok{border:1px solid var(--sk-line);background:var(--sk-verified-wash)}
+#eternal .et-b-card.et-guard{border:1px dashed var(--sk-guard);background:var(--sk-guard-wash)}
+#eternal .et-b-card h3{font:400 28px/1.1 var(--sk-font-bee-serif);color:var(--sk-ink)}
+#eternal .et-b-card.et-guard h3,#eternal .et-b-card.et-guard p{color:var(--sk-guard)}
+#eternal .et-b-card p{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-field{display:flex;flex-direction:column;gap:var(--sk-s1)}
+#eternal .et-b-field>span{font:600 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-input{width:100%;height:var(--sk-control-primary,54px);padding:0 var(--sk-s3);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius-md);background:var(--sk-bg-card);color:var(--sk-ink);font:400 15px/1.4 var(--sk-font-mono);outline-offset:3px}
+
+/* RAVER — the data is the art; lowercase is allowed joy; the numbers never change */
+#eternal .et-r{color:var(--sk-ink);font:400 14px/1.4 var(--sk-font-raver-body)}
+#eternal .et-r-top{display:flex;align-items:baseline;justify-content:space-between;gap:var(--sk-s2);flex-wrap:wrap}
+#eternal .et-r-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em;color:var(--sk-ink)}
+#eternal .et-r-hint{font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-art{position:relative;width:100%;max-width:360px;margin:var(--sk-s3) auto var(--sk-s2)}
+#eternal .et-r-art>svg{width:100%;height:auto;filter:drop-shadow(var(--sk-glow-sovereign))}
+#eternal .et-r-art [role="button"]{cursor:pointer}
+#eternal .et-r-art [role="button"]:focus{outline:none}
+#eternal .et-r-art [role="button"]:focus-visible .et-hit{stroke:var(--sk-ink);stroke-width:2}
+#eternal .et-r-mid{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;text-align:center;pointer-events:none;max-width:42%}
+#eternal .et-r-mid b{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em;color:var(--sk-ink)}
+#eternal .et-r-mid span{font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-legend{display:flex;flex-wrap:wrap;justify-content:center;gap:var(--sk-s1) var(--sk-s3);margin:0 0 var(--sk-s3)}
+#eternal .et-r-legend span{display:inline-flex;align-items:center;gap:var(--sk-s1);font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-legend i{width:14px;height:14px;border-radius:var(--sk-radius-pill);flex:none}
+#eternal .et-r-card{display:flex;gap:var(--sk-s2);align-items:flex-start;padding:var(--sk-s2) var(--sk-s3);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl);background:var(--sk-sovereign-tint);min-height:var(--sk-control-person,60px)}
+#eternal .et-r-card .et-rk{min-width:44px;height:44px;padding:0 var(--sk-s1);border-radius:var(--sk-radius);background:var(--sk-sovereign-strong);color:var(--sk-bg);display:flex;align-items:center;justify-content:center;font:700 15px/1.2 var(--sk-font-raver-display);flex:none}
+#eternal .et-r-card b{display:block;font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink);overflow-wrap:anywhere}
+#eternal .et-r-card span{display:block;margin-top:var(--sk-s1);font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft);overflow-wrap:anywhere}
+#eternal .et-r-sub{margin:var(--sk-s4) 0 var(--sk-s2);font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em;color:var(--sk-ink)}
+#eternal .et-r-tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:var(--sk-s2)}
+#eternal .et-r-tile{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--sk-s1);min-height:96px;padding:var(--sk-s2) var(--sk-s1);border-radius:var(--sk-radius-xl);border:1.5px solid var(--sk-sovereign);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong);font:600 14px/1.25 var(--sk-font-raver-body);text-align:center;cursor:pointer;transition:border-color var(--dur,.26s),box-shadow var(--dur,.26s)}
+#eternal .et-r-tile.et-dash{border-style:dashed;border-color:var(--sk-ink-dim);background:var(--sk-bg-card);color:var(--sk-ink-soft)}
+#eternal .et-r-tile.et-on{border-color:var(--sk-verified);box-shadow:var(--sk-glow-ok);color:var(--sk-ink)}
+#eternal .et-r-tile[aria-pressed="true"]{border-color:var(--sk-you);box-shadow:var(--sk-glow-sovereign);color:var(--sk-ink)}
+#eternal .et-r-tile svg{width:26px;height:26px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+#eternal .et-r-tile small{font:400 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-note{margin:var(--sk-s2) 0 0;text-align:center;font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-pill{display:flex;align-items:center;justify-content:center;width:100%;min-height:58px;margin-top:var(--sk-s4);padding:0 var(--sk-s3);border:0;border-radius:var(--sk-radius-pill);background:var(--sk-primary);color:var(--sk-on-primary);font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em;text-align:center;cursor:pointer}
+#eternal .et-r-pill:disabled{background:var(--sk-sovereign-wash);color:var(--sk-sovereign-soft)}
+#eternal .et-r-ghost{display:flex;align-items:center;justify-content:center;margin:var(--sk-s2) auto 0;min-height:var(--sk-control-min,44px);padding:0 var(--sk-s2);border:0;background:none;color:var(--sk-link);font:600 14px/1.25 var(--sk-font-raver-body);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+#eternal .et-r-input{width:100%;height:var(--sk-control-primary,54px);margin-top:var(--sk-s3);padding:0 var(--sk-s3);border:1.5px solid var(--sk-sovereign-soft);border-radius:var(--sk-radius-pill);background:var(--sk-bg-card);color:var(--sk-ink);font:400 14px/1.4 var(--sk-font-raver-body)}
+#eternal .et-r-hold{position:relative;width:176px;height:176px;margin:var(--sk-s3) auto 0}
+#eternal .et-r-hold>svg{position:absolute;inset:0;width:100%;height:100%;transform:rotate(-90deg);pointer-events:none}
+#eternal .et-r-hold .et-track{fill:none;stroke:var(--sk-line);stroke-width:8}
+#eternal .et-r-hold .et-prog{fill:none;stroke:var(--sk-biomass);stroke-width:8;stroke-linecap:round;stroke-dasharray:578;stroke-dashoffset:578}
+#eternal .et-r-hold>button{position:absolute;inset:20px;border:0;background:var(--sk-primary);color:var(--sk-on-primary);clip-path:polygon(50% 0,93% 25%,93% 75%,50% 100%,7% 75%,7% 25%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--sk-s1);cursor:pointer;touch-action:none;user-select:none;-webkit-user-select:none}
+#eternal .et-r-hold>button b{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em}
+#eternal .et-r-hold>button span{font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em}
+#eternal .et-r-hold>button:disabled{background:var(--sk-sovereign-wash);color:var(--sk-sovereign-soft)}
+@media (prefers-reduced-motion:reduce){#eternal *{transition:none!important;animation:none!important}}
+
+/* CYPHERPUNK — the instrument, complete at first paint: tables, a numbered pipeline, receipts */
+#eternal .et-c{font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink);overflow-wrap:anywhere}
+#eternal .et-c-path{font:600 15px/1.45 var(--sk-font-mono);color:var(--sk-ink);word-break:break-all}
+#eternal .et-c-sub{margin-top:var(--sk-s1);font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut)}
+#eternal .et-c-chips{display:flex;flex-wrap:wrap;gap:var(--sk-s1);margin:var(--sk-s2) 0}
+#eternal .et-c-chips span{padding:2px var(--sk-s1);border:1px solid var(--sk-line);border-radius:4px;background:var(--sk-bg-card);font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-soft)}
+#eternal .et-c-chips span.et-on{border-color:var(--sk-guard);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong)}
+#eternal .et-c-chips span.et-ok{border-color:var(--sk-verified);color:var(--sk-verified)}
+#eternal .et-c-chips span.et-no{border-color:var(--sk-info);color:var(--sk-info)}
+#eternal .et-c-guard{display:flex;justify-content:space-between;align-items:center;gap:var(--sk-s2);flex-wrap:wrap;min-height:var(--sk-control-min,44px);padding:var(--sk-s1) var(--sk-s3);border:1px dashed var(--sk-guard);border-radius:var(--sk-radius-sm);background:var(--sk-guard-wash);color:var(--sk-guard)}
+#eternal .et-c-guard b{font-weight:600;color:var(--sk-sovereign-strong)}
+#eternal .et-c-h{margin:var(--sk-s4) 0 var(--sk-s2);font:600 15px/1.45 var(--sk-font-mono);color:var(--sk-ink)}
+#eternal .et-c-tab{width:100%;margin:var(--sk-s2) 0 var(--sk-s1);border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm);overflow:hidden;background:var(--sk-bg-card);table-layout:auto}
+#eternal .et-c-tab th{padding:var(--sk-s1) var(--sk-s2);text-align:left;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);border-bottom:1px solid var(--sk-line);background:var(--sk-bg-well)}
+#eternal .et-c-tab td{height:var(--sk-control-min,44px);padding:var(--sk-s1) var(--sk-s2);border-bottom:1px solid var(--sk-line);font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink);vertical-align:middle;word-break:break-word}
+#eternal .et-c-tab tr:last-child td{border-bottom:0}
+#eternal .et-c-tab td:first-child,#eternal .et-c-tab th:first-child{white-space:nowrap;width:1%;color:var(--sk-guard)}
+#eternal .et-c-tab th:first-child{color:var(--sk-ink-mut)}
+#eternal .et-c-tab small{display:block;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut)}
+#eternal .et-c-tab .et-nw{white-space:nowrap}
+#eternal .et-c-tab tr.et-pick{cursor:pointer}
+#eternal .et-c-tab tr.et-pick:hover td{background:var(--sk-sovereign-tint)}
+#eternal .et-c-tab tr.et-sel td{background:var(--sk-sovereign-tint)}
+#eternal .et-st-ok{color:var(--sk-verified)}
+#eternal .et-st-no{color:var(--sk-info)}
+#eternal .et-st-wait{color:var(--sk-ai)}
+#eternal .et-st-guard{color:var(--sk-guard)}
+#eternal .et-c-pipe{list-style:none;margin:0;padding:0;display:grid;gap:var(--sk-s2);counter-reset:etp}
+#eternal .et-c-pipe li{display:grid;grid-template-columns:28px 1fr;gap:var(--sk-s1) var(--sk-s2);padding:var(--sk-s2) var(--sk-s3);border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm);background:var(--sk-bg-card);counter-increment:etp}
+#eternal .et-c-pipe li::before{content:counter(etp,decimal-leading-zero);color:var(--sk-guard);font-weight:600}
+#eternal .et-c-pipe li b{font-weight:600;color:var(--sk-ink)}
+#eternal .et-c-pipe li p{grid-column:2;color:var(--sk-ink-soft)}
+#eternal .et-c-pipe li.et-done b{color:var(--sk-verified)}
+#eternal .et-c-pipe li.et-guard{border-style:dashed;border-color:var(--sk-guard)}
+#eternal .et-c-pipe li.et-guard b{color:var(--sk-guard)}
+#eternal .et-c-pipe li.et-now{border-color:var(--sk-ai);box-shadow:inset 0 0 0 1px var(--sk-ai)}
+#eternal .et-c-pipe li.et-now b{color:var(--sk-ai)}
+#eternal .et-c-pipe li.et-todo p{color:var(--sk-ink-mut)}
+#eternal .et-c-primary{display:flex;align-items:center;justify-content:center;width:100%;min-height:52px;margin-top:var(--sk-s3);padding:0 var(--sk-s2);border:0;border-radius:var(--sk-radius-sm);background:var(--sk-primary);color:var(--sk-on-primary);font:600 14px/1.2 var(--sk-font-mono);text-align:center;cursor:pointer}
+#eternal .et-c-primary:disabled{background:var(--sk-bg-well);color:var(--sk-ink-mut);border:1px dashed var(--sk-line)}
+#eternal .et-c-kv{width:100%;border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm);overflow:hidden;background:var(--sk-bg-card)}
+#eternal .et-c-kv th{width:104px;padding:var(--sk-s2);text-align:left;vertical-align:top;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);border-bottom:1px solid var(--sk-line);background:var(--sk-bg-card)}
+#eternal .et-c-kv td{padding:var(--sk-s2);border-bottom:1px solid var(--sk-line);font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink);word-break:break-word}
+#eternal .et-c-kv tr:last-child th,#eternal .et-c-kv tr:last-child td{border-bottom:0}
+#eternal .et-c-verify{margin-top:var(--sk-s3);padding:var(--sk-s3);border-radius:var(--sk-radius-sm);background:var(--sk-bg-card);border:1px solid var(--sk-line)}
+#eternal .et-c-verify-h{font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);margin-bottom:var(--sk-s1)}
+#eternal .et-c-verify ol{margin:0;padding-left:var(--sk-s4);display:grid;gap:var(--sk-s1)}
+#eternal .et-c-verify code{font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ai);word-break:break-all}
+#eternal .et-c-out{margin-top:var(--sk-s2);font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink-soft)}
+#eternal .et-c-row{display:grid;grid-template-columns:1fr 1fr;gap:var(--sk-s2);margin-top:var(--sk-s3)}
+#eternal .et-c-ghost{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:52px;padding:var(--sk-s1);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius-sm);background:none;color:var(--sk-ink);text-align:center;font:600 14px/1.2 var(--sk-font-mono);cursor:pointer}
+#eternal .et-c-ghost small{font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut)}
+#eternal .et-c-in{display:flex;gap:var(--sk-s1);margin-top:var(--sk-s2)}
+#eternal .et-c-input{flex:1 1 auto;width:100%;height:var(--sk-control-min,44px);padding:0 var(--sk-s2);border:1px solid var(--sk-ink-mut);border-radius:var(--sk-radius-sm);background:var(--sk-bg-card);color:var(--sk-ink);font:400 13px/1.45 var(--sk-font-mono)}
+#eternal .et-c-btn{flex:none;min-width:var(--sk-control-min,44px);min-height:var(--sk-control-min,44px);padding:0 var(--sk-s2);border:1.5px solid var(--sk-ai);border-radius:var(--sk-radius-sm);background:none;color:var(--sk-ai);font:600 14px/1.2 var(--sk-font-mono)}
+#eternal .et-c-a{display:inline-flex;align-items:center;min-height:var(--sk-control-min,44px);min-width:var(--sk-control-min,44px);color:var(--sk-link)}
+#eternal .et-c-a:hover{color:var(--sk-link-hover)}
+
+/* the fleet bar and the hub chip (shared, untouched) worn in this page's register */
+body[data-reg] #fleet-nav{border-top-color:var(--sk-line)!important;color:var(--sk-ink-soft)!important}
+body[data-reg] #fleet-nav a{color:var(--sk-ink-soft)!important;border-color:var(--sk-line)!important;background:transparent!important}
+body[data-reg] #fleet-nav a.here{color:var(--sk-link)!important;border-color:var(--sk-link)!important}
+body[data-reg] #fleet-nav a:hover{color:var(--sk-link-hover)!important;border-color:var(--sk-link-hover)!important}
+body[data-reg="bee"] #fleet-nav,body[data-reg="bee"] #fleet-nav a{font:500 14px/1.4 var(--sk-font-bee-sans)!important}
+body[data-reg="raver"] #fleet-nav,body[data-reg="raver"] #fleet-nav a{font:600 14px/1.25 var(--sk-font-raver-body)!important}
+body[data-reg="cypherpunk"] #fleet-nav,body[data-reg="cypherpunk"] #fleet-nav a{font:500 13px/1.45 var(--sk-font-mono)!important}
+body[data-reg] #bnr-beta-badge{opacity:1!important}
+body[data-reg] #bnr-beta-badge a{background:var(--sk-bg-card)!important;color:var(--sk-link)!important;border-color:var(--sk-line)!important;display:inline-flex;align-items:center;min-height:44px;padding:0 16px!important}
+body[data-reg="bee"] #bnr-beta-badge{font:600 14px/1.4 var(--sk-font-bee-sans)!important}
+body[data-reg="raver"] #bnr-beta-badge{font:600 14px/1.25 var(--sk-font-raver-body)!important}
+body[data-reg="cypherpunk"] #bnr-beta-badge{font:500 12px/1.45 var(--sk-font-mono)!important}
+body[data-reg="cypherpunk"] #bnr-beta-badge a{border-radius:var(--sk-radius-sm)!important}
+/* workbench specifics: the seven gardens, the hold pill, the bench form */
+#eternal .et-hold{position:relative;overflow:hidden;touch-action:none;user-select:none;-webkit-user-select:none}
+#eternal .et-hold>.et-fill{position:absolute;left:0;top:0;bottom:0;width:0;background:var(--sk-sovereign-strong);opacity:.55;pointer-events:none}
+#eternal .et-hold>.et-lab{position:relative}
+#eternal .et-b-card a{display:flex;align-items:center;min-height:var(--sk-control-min,44px);font:600 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-link)}
+#eternal .et-c-form{display:grid;grid-template-columns:1fr;gap:var(--sk-s1);margin-top:var(--sk-s3)}
+#eternal .et-c-f{display:flex;flex-direction:column;gap:2px}
+#eternal .et-c-f>span{font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut)}
+#eternal .et-c-select{width:100%;height:var(--sk-control-min,44px);padding:0 var(--sk-s2);border:1px solid var(--sk-ink-mut);border-radius:var(--sk-radius-sm);background:var(--sk-bg-card);color:var(--sk-ink);font:400 13px/1.45 var(--sk-font-mono)}
+#eternal .et-c-two{display:grid;grid-template-columns:1fr 1fr;gap:var(--sk-s2)}
+#eternal .et-c-two .et-c-primary,#eternal .et-c-two .et-c-ghost{margin-top:var(--sk-s1)}
+
+/* ── THE WHOLE BENCH, dressed per register: the page's own variables mapped onto skaists tokens.
+   The bench, its reads and its words are unchanged; the art stage is a paper well in new bee (so its
+   own captions read) and a dark well in raver and cypherpunk. ── */
+body[data-reg]{--bg:var(--sk-bg);--panel:var(--sk-bg-card);--line:var(--sk-line);--ink:var(--sk-ink);--dim:var(--sk-ink-mut);--accent:var(--sk-ai);--accent2:var(--sk-sovereign);--ok:var(--sk-verified);--bad:var(--sk-info);--cyan:var(--sk-ai);background:var(--sk-bg);color:var(--sk-ink)}
+body[data-reg] .panel{background:var(--sk-bg-card);border-color:var(--sk-line);border-radius:var(--sk-radius-xl)}
+body[data-reg] .art{background:var(--vitrine);border-radius:var(--sk-radius)}
+body[data-reg] input:not(#eternal *),body[data-reg] select:not(#eternal *){background:var(--sk-bg-card);color:var(--sk-ink);border:1px solid var(--sk-ink-mut);border-radius:var(--sk-radius-md)}
+body[data-reg] button:not(#eternal *){background:var(--sk-bg-card);color:var(--sk-ai);border:1.5px solid var(--sk-ai);border-radius:var(--sk-radius-pill)}
+body[data-reg] button.alt:not(#eternal *){color:var(--sk-ink-soft);border-color:var(--sk-ink-mut)}
+body[data-reg] .warn{color:var(--sk-guard)}
+body[data-reg] .ok{color:var(--sk-verified)}
+body[data-reg] .bad{color:var(--sk-info)}
+body[data-reg] .tag{border-color:var(--sk-line);color:var(--sk-ink-mut)}
+body[data-reg] code{color:var(--sk-ai)}
+body[data-reg] h1 span{color:var(--sk-sovereign)}
+body[data-reg] details.tnote>.note{border-color:var(--sk-line)!important;background:var(--sk-bg-card)}
+body[data-reg="bee"]{--vitrine:var(--sk-bg-well);font:400 16px/1.6 var(--sk-font-bee-sans)}
+body[data-reg="bee"] h1{font:400 40px/1.05 var(--sk-font-bee-serif);letter-spacing:normal;margin:0 0 .3em}
+body[data-reg="bee"] .sub{font:400 16px/1.6 var(--sk-font-bee-sans);color:var(--sk-ink-soft)}
+body[data-reg="bee"] .note,body[data-reg="bee"] summary{font-family:var(--sk-font-bee-sans);font-size:15px;color:var(--sk-ink-mut)}
+body[data-reg="bee"] details.tnote>.note{color:var(--sk-ink)}
+body[data-reg="bee"] table{font:400 14px/1.5 var(--sk-font-mono)}
+body[data-reg="bee"] .tag{font-size:14px}
+body[data-reg="bee"] #art>span{font-size:14px!important}
+body[data-reg="bee"] button:not(#eternal *){font:600 16px/1.2 var(--sk-font-bee-sans);color:var(--sk-sovereign);border-color:var(--sk-ink)}
+body[data-reg="raver"]{--vitrine:var(--sk-bg-well);font:400 14px/1.6 var(--sk-font-raver-body)}
+body[data-reg="raver"] h1{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em}
+body[data-reg="raver"] h1 span{color:var(--sk-you)}
+body[data-reg="raver"] .sub,body[data-reg="raver"] .note,body[data-reg="raver"] summary,body[data-reg="raver"] table{font-family:var(--sk-font-raver-body);font-size:14px;color:var(--sk-ink-soft)}
+body[data-reg="raver"] button:not(#eternal *){font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em;color:var(--sk-on-primary);background:var(--sk-primary);border-color:var(--sk-primary)}
+body[data-reg="raver"] button.alt:not(#eternal *){background:var(--sk-bg-card);color:var(--sk-link);border-color:var(--sk-sovereign-soft)}
+body[data-reg="cypherpunk"]{--vitrine:var(--sk-bg-well);font:400 13px/1.6 var(--sk-font-mono)}
+body[data-reg="cypherpunk"] h1{font:600 15px/1.45 var(--sk-font-mono);letter-spacing:normal}
+body[data-reg="cypherpunk"] .sub{font-size:13px;color:var(--sk-ink-soft)}
+body[data-reg="cypherpunk"] .panel,body[data-reg="cypherpunk"] .art{border-radius:var(--sk-radius-sm)}
+body[data-reg="cypherpunk"] input:not(#eternal *),body[data-reg="cypherpunk"] select:not(#eternal *),body[data-reg="cypherpunk"] button:not(#eternal *){border-radius:var(--sk-radius-sm);font-family:var(--sk-font-mono)}
+</style>
+<link rel="stylesheet" href="../skaists.css">
 </head>
 <body>
 <div class="wrap">
+
+  <!-- ETERNAL FRONT (founder blueprint 2026-09-26, docs/design/eternal): three separate products in
+       one surface. ONE data layer (the bench's own constants CHAINS, TOKENS and SHAPES, and the
+       bench's own read as it writes it into #diag and #art) drives all three, so the facts cannot
+       drift. No front reads the chain: every gesture writes the bench's own inputs and presses the
+       bench's own View or Scan. Nothing here moves, sells or signs. -->
+  <section id="eternal" aria-label="the workbench">
+
+    <!-- NEW BEE — a calm room: paste a wallet, one action, what came back in plain words -->
+    <div class="et-b">
+      <div class="et-b-mark">bLighT workbench</div>
+      <h2 class="et-b-h" data-etk="et.workbench.beeH">see the art a wallet holds</h2>
+      <p class="et-b-lede" data-etk="et.workbench.beeLede">some art lives entirely inside a blockchain. paste a wallet address and this page draws it, straight from the chain, with nothing in between.</p>
+      <div class="et-b-guard"><svg class="et-ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span data-etk="et.workbench.beeGuard">looking only. nothing here moves, sells or signs.</span></div>
+      <label class="et-b-field"><span data-etk="et.workbench.beeField">a wallet address or name</span>
+        <input class="et-b-input" id="etWbBAddr" data-et-addr spellcheck="false" autocomplete="off" inputmode="text" dir="ltr" translate="no" placeholder="0x… or name.b"></label>
+      <div class="et-b-card" id="etWbBState" aria-live="polite"></div>
+      <div class="et-b-rows" id="etWbBAsk"></div>
+      <div class="et-b-act">
+        <button type="button" class="et-b-primary" id="etWbBGo" data-etk="et.workbench.beeGo">look for art</button>
+        <button type="button" class="et-b-link" id="etWbBWhy" data-etk="et.workbench.beeWhy">why nothing here is for sale</button>
+        <p class="et-b-foot" data-etk="et.workbench.beeFoot">the connect button below is only for signing. looking needs no wallet.</p>
+      </div>
+    </div>
+
+    <!-- RAVER — seven gardens on a ring, the four keys inside; tap a garden, hold to draw it -->
+    <div class="et-r">
+      <div class="et-r-top"><h2 class="et-r-h" data-etk="et.workbench.raverH">seven gardens</h2><span class="et-r-hint" id="etWbRHint"></span></div>
+      <input class="et-r-input" id="etWbRAddr" data-et-addr spellcheck="false" autocomplete="off" dir="ltr" translate="no" aria-label="a wallet address or name" placeholder="paste a wallet · 0x… or name.b">
+      <div class="et-r-art">
+        <svg id="etWbSky" viewBox="-200 -200 400 400" role="group" aria-label="the seven collections as a ring, the four ways of asking for art inside"></svg>
+        <div class="et-r-mid" aria-hidden="true"><b id="etWbMid"></b><span id="etWbMidS"></span></div>
+      </div>
+      <div class="et-r-legend" id="etWbLegend"></div>
+      <div class="et-r-card" id="etWbRCard" aria-live="polite"></div>
+      <button type="button" class="et-r-pill et-hold" id="etWbRHold" aria-describedby="etWbRSay"><span class="et-fill" id="etWbRFill"></span><span class="et-lab" id="etWbRHoldL">hold to draw it</span></button>
+      <p class="et-r-note" id="etWbRSay"></p>
+    </div>
+
+    <!-- CYPHERPUNK — the bench: the call, every selector, every shape, the diag as a receipt -->
+    <div class="et-c">
+      <div class="et-c-path" id="etWbPath">eth_call://</div>
+      <div class="et-c-sub" data-etk="et.workbench.cySub">zero dependencies · one file · no backend · no indexer · no key</div>
+      <div class="et-c-chips" id="etWbChips"></div>
+      <div class="et-c-guard"><span data-etk="et.workbench.cyGuard">seed = 0 → panic 0x11 (seed + nonce − 1 underflows)</span><b data-etk="et.workbench.cyGuardB">guarded · never called</b></div>
+      <form class="et-c-form" id="etWbForm">
+        <div class="et-c-f"><span id="etWbFHolder">holder · 0x… or .b / .eth / .base.eth</span><input class="et-c-input" id="etWbCAddr" data-et-addr aria-labelledby="etWbFHolder" spellcheck="false" autocomplete="off" dir="ltr" translate="no"></div>
+        <div class="et-c-f"><span id="etWbFCol">collection · chain</span><select class="et-c-select" id="etWbCCol" aria-labelledby="etWbFCol"></select></div>
+        <div class="et-c-two">
+          <button type="submit" class="et-c-primary" id="etWbCyGo">view · eth_call</button>
+          <button type="button" class="et-c-ghost" id="etWbCyScan">scan all 7</button>
+        </div>
+      </form>
+      <h3 class="et-c-h" data-etk="et.workbench.cyColsH">collections · keyed on (chain, address)</h3>
+      <table class="et-c-tab"><thead><tr><th>#</th><th>symbol · address</th><th>chain</th></tr></thead><tbody id="etWbCols"></tbody></table>
+      <h3 class="et-c-h" data-etk="et.workbench.cyShapesH">getSvg shapes · probed, never assumed</h3>
+      <table class="et-c-tab"><thead><tr><th>#</th><th>shape</th><th class="et-nw">words</th></tr></thead><tbody id="etWbShapes"></tbody></table>
+      <h3 class="et-c-h" data-etk="et.workbench.cyPipeH">view pipeline · one holder, one collection</h3>
+      <ol class="et-c-pipe" id="etWbPipe"></ol>
+      <h3 class="et-c-h" data-etk="et.workbench.cyRcptH">receipt · the bench's own diag</h3>
+      <table class="et-c-kv" id="etWbReceipt"></table>
+      <h3 class="et-c-h" data-etk="et.workbench.cyChainsH">chains · endpoints pooled</h3>
+      <table class="et-c-tab"><thead><tr><th>#</th><th>chain · id</th><th>hosts</th></tr></thead><tbody id="etWbChains"></tbody></table>
+      <div class="et-c-verify">
+        <div class="et-c-verify-h" data-etk="et.workbench.verifyH">verify · no trust in this page needed</div>
+        <ol id="etWbVerify"></ol>
+        <div class="et-c-two" style="margin-top:var(--sk-s2)">
+          <a class="et-c-ghost" id="etWbSelf" href="?selftest"><span data-etk="et.workbench.cySelf">run the self-test</span><small data-etk="et.workbench.cySelfS">no network · reloads here</small></a>
+          <button type="button" class="et-c-ghost" id="etWbKec"><span data-etk="et.workbench.cyKec">keccak vector</span><small data-etk="et.workbench.cyKecS">run here · offline</small></button>
+        </div>
+        <div class="et-c-out" id="etWbKecOut" aria-live="polite"></div>
+      </div>
+      <div class="et-c-row">
+        <a class="et-c-ghost" href="#etArchive" data-etk="et.workbench.cyBench">the bench below ↓</a>
+        <a class="et-c-ghost" href="https://github.com/beehive-nature/beehive-nature/blob/main/surfaces/blight/workbench.html" target="_blank" rel="noopener noreferrer"><span data-etk="et.workbench.cyFork">fork the template ↗</span><small data-etk="et.workbench.newTab">opens in a new tab</small></a>
+      </div>
+    </div>
+  </section>
+  <h2 class="et-archive-h" id="etArchive" data-etk="et.workbench.archive">the whole bench</h2>
   <h1>bLighT <span>Inscription Explorer</span></h1>
   <div class="sub">Renders on-chain inscription art from chain state alone. No server, no indexer, no API key.</div>
 
@@ -1237,6 +1552,223 @@ if(new URLSearchParams(location.search).has('selftest')){
       if(a&&a[0]&&!walletProvider){ walletProvider=window.ethereum; setWalletState(a[0]); }
     }).catch(()=>{});
   }
+})();
+</script>
+<script>
+/* ETERNAL FRONT — one data layer, three renderers (docs/design/eternal). The facts are the bench's
+   own: CHAINS, TOKENS and SHAPES from the script above, and the bench's read exactly as it writes it
+   (the #diag rows and the #art stage, observed, never re-derived). No front calls the chain: a gesture
+   writes the bench's own address field and selects, then presses the bench's own View or Scan.
+   The read-path selectors are quoted from resolve() and view() above (decimals 0x313ce567,
+   balanceOf 0x70a08231, sporesDegree 0xa775188a, mushroomCount 0x9c216508). */
+(function(){
+  var $=function(id){return document.getElementById(id);};
+  var T=function(k,f){var t=window.BNRLanguage&&window.BNRLanguage.text;return t?t(k,f):f;};
+  var K=function(k,f){return T('et.workbench.'+k,f);};
+  var esc=function(v){return String(v==null?'':v).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});};
+  var txt=function(e){return (e&&e.textContent||'').replace(/\s+/g,' ').trim();};
+  var tok=function(n){return getComputedStyle(document.body).getPropertyValue('--sk-'+n).trim();};
+  var short=function(a){a=String(a||'');return a.length>14?a.slice(0,6)+'…'+a.slice(-4):a;};
+  var KV='c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470'; // PUBLIC-CONSTANT: keccak256 of empty input, universal test vector
+
+  /* ── the data layer ── */
+  var D={chains:[],tokens:[],shapes:[],sel:0,holder:'',diag:[],phase:'idle',art:'',found:0,unreadable:[],shape:'',selftest:null};
+  var R={};
+  function consts(){
+    D.chains=(typeof CHAINS!=='undefined'?CHAINS:[]).map(function(c,i){return {i:i,name:c.name,id:c.id,hosts:c.rpcs.length,kind:c.btc?'bitcoin':c.bch?'bitcoin cash':'evm'};});
+    D.tokens=(typeof TOKENS!=='undefined'?TOKENS:[]).map(function(t,i){return {i:i,sym:t.sym,chain:(CHAINS[t.chain||0]||{}).name,ci:t.chain||0,addr:t.addr,model:t.seedWords===4?'item model':'spore model'};});
+    D.shapes=(typeof SHAPES!=='undefined'?SHAPES:[]).map(function(s){return {id:s.id,sel:s.sel,words:s.words};});
+  }
+  /* the bench's own diag, read row by row, and what it adds up to */
+  function observe(){
+    D.diag=[].map.call(document.querySelectorAll('#diag tr'),function(tr){var td=tr.querySelectorAll('td');return {k:txt(td[0]),v:txt(td[1]),cls:(td[1]&&td[1].className)||''};});
+    var art=$('art'), at=txt(art), has=!!(art&&art.querySelector('svg,img,pre'));
+    var get=function(k){return D.diag.filter(function(r){return r.k===k;})[0];};
+    var st=get('status'), shape=get('ABI shape');
+    D.shape=shape?shape.v:''; D.art=at; D.unreadable=[]; D.found=0; D.selftest=null;
+    var self=get('SELF-TEST'), live=get('live spores'), froz=get('frozen / locked'), unr=get('UNREADABLE');
+    if(self){var m=/^(\d+)\/(\d+)/.exec(self.v);D.selftest=m?{pass:+m[1],total:+m[2]}:null;D.phase='selftest';}
+    else if(/^reading chain/.test(at)||get('scanning'))D.phase='reading';
+    else if(live){D.found=(+live.v||0)+(+(froz&&froz.v)||0);D.unreadable=unr?unr.v.split(' — ')[0].split(', '):[];D.phase='swept';}
+    else if(st&&/rendered from chain/.test(st.v)&&has)D.phase='rendered';
+    else if(st&&st.v==='idle')D.phase='idle';
+    else if(D.diag.some(function(r){return /bad|warn/.test(r.cls);})||/did not resolve|failed|no renderer|network/.test(at))D.phase='failed';
+    else if(st)D.phase='said';
+    var sel=$('token'), ch=+($('chain')&&$('chain').value)||0;
+    var ti=D.tokens.findIndex(function(t){return t.addr===(sel&&sel.value)&&t.ci===ch;});
+    if(ti<0)ti=D.tokens.findIndex(function(t){return t.addr===(sel&&sel.value);});
+    D.sel=ti<0?0:ti; D.holder=($('addr')&&$('addr').value.trim())||'';
+  }
+  var status=function(){var s=D.diag.filter(function(r){return r.k==='status';})[0];return s?s.v:'';};
+
+  /* the one hand-off: the bench's own field, selects and buttons */
+  function pick(i){var t=D.tokens[i];if(!t)return;var c=$('chain');if(c&&+c.value!==t.ci){c.value=String(t.ci);c.dispatchEvent(new Event('change'));}$('token').value=t.addr;$('custom').value='';}
+  function toBench(addr,i,mode){
+    $('addr').value=addr; if(i!=null)pick(i);
+    var c=$('chain'); if(mode==='scan'&&c&&D.chains[+c.value]&&D.chains[+c.value].kind!=='evm'){c.value='0';c.dispatchEvent(new Event('change'));}
+    $(mode==='scan'?'scan':'go').click();
+  }
+  function mirror(v,from){['etWbBAddr','etWbRAddr','etWbCAddr'].forEach(function(id){if(id!==from&&$(id))$(id).value=v;});}
+
+  /* ── NEW BEE ── */
+  var open=null;
+  var ASK=[
+    {k:'which',q:'which collections it looks in'},
+    {k:'safe',q:'is it safe to look'},
+    {k:'onchain',q:'what “on the chain” means here'}
+  ];
+  function answer(k){
+    if(k==='which'){var by={};D.tokens.forEach(function(t){(by[t.chain]=by[t.chain]||[]).push(t.sym.replace(/\s*\(.*\)$/,''));});
+      return K('b.a.which','{n} collections, on {c}: {list}. the same name can live at several addresses, so each one is looked up by where it really lives.').replace('{n}',D.tokens.length).replace('{c}',Object.keys(by).join(' and ')).replace('{list}',Object.keys(by).map(function(c){return by[c].join(', ')+' on '+c;}).join('; '));}
+    if(k==='safe')return K('b.a.safe','yes. looking only reads the chain and changes nothing. no wallet is asked for and nothing is signed. buying and selling wait until a safe way is proven.');
+    return K('b.a.onchain','each picture is drawn by the contract itself, from one call. there is no image server to go down, so the art lasts as long as the chain does.');
+  }
+  function bee(){
+    var s=$('etWbBState'), tone='', h='', p='', link='';
+    if(D.phase==='reading'){h=K('b.readH','looking…');p=K('b.readP','the chain is being asked, one collection at a time. this can take a little while.');}
+    else if(D.phase==='rendered'){tone='et-ok';h=K('b.okH','found it.');p=K('b.okP','drawn just now from {sym}, by the chain itself.').replace('{sym}',D.tokens[D.sel]?D.tokens[D.sel].sym:'');link=K('b.see','see it below ↓');}
+    else if(D.phase==='swept'){tone=D.found?'et-ok':'';h=D.found?K('b.foundH','{n} pieces found.').replace('{n}',D.found):K('b.noneH','no pieces found for this wallet.');
+      p=D.unreadable.length?K('b.unreadP','{n} collections could not be read just now, so they may still hold art. nothing was guessed.').replace('{n}',D.unreadable.length):K('b.allP','every collection answered.');if(D.found)link=K('b.seeAll','see them below ↓');}
+    else if(D.phase==='failed'){tone='et-guard';h=K('b.failH','the chain didn’t answer.');p=K('b.failP','nothing was drawn, and nothing old is shown. try again in a moment, or paste the plain 0x address.');}
+    else if(D.phase==='selftest'&&D.selftest){tone=D.selftest.pass===D.selftest.total?'et-ok':'et-guard';h=K('b.selfH','the page checked itself.');p=K('b.selfP','{p} of {t} checks passed, with no network at all.').replace('{p}',D.selftest.pass).replace('{t}',D.selftest.total);}
+    else if(D.phase==='said'){h=K('b.saidH','the bench answered.');p=status();}
+    else {h=K('b.idleH','nothing looked at yet.');p=K('b.idleP','paste a wallet above. the page looks in all {n} collections for you.').replace('{n}',D.tokens.length);}
+    s.className='et-b-card'+(tone?' '+tone:'');
+    s.innerHTML='<h3>'+esc(h)+'</h3><p>'+esc(p)+'</p>'+(link?'<a href="#art">'+esc(link)+'</a>':'');
+    $('etWbBAsk').innerHTML=ASK.map(function(A){var o=open===A.k;
+      return '<button type="button" class="et-b-row" data-ask="'+A.k+'" aria-expanded="'+o+'"><span>'+esc(K('b.q.'+A.k,A.q))+'</span><small><svg class="et-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></small></button>'+(o?'<div class="et-b-open">'+esc(answer(A.k))+'</div>':'');}).join('');
+    $('etWbBGo').disabled=D.phase==='reading';
+  }
+
+  /* ── RAVER ── seven gardens on a ring (coloured by chain), four keys inside (the getSvg shapes) */
+  var HEX=function(cx,cy,r){var p=[];for(var k=0;k<6;k++){var a=Math.PI/3*k+Math.PI/6;p.push((cx+r*Math.cos(a)).toFixed(1)+','+(cy+r*Math.sin(a)).toFixed(1));}return p.join(' ');};
+  function tag(t){var m=/\(([^)]*)\)/.exec(t.sym);if(!m)return '';var v=/v\d+/.exec(m[1]);return v?v[0]:m[1].split(';')[0].trim();}
+  function sky(){
+    var svg=$('etWbSky'); if(!svg) return;
+    var n=D.tokens.length||1, h='', chainTok={Base:'ai',Ethereum:'sovereign'};
+    var lit=D.phase==='rendered', dark=D.phase==='failed', usedShape=D.shape;
+    D.shapes.forEach(function(S,i){
+      var a0=-Math.PI/2+i*Math.PI/2+0.08, a1=-Math.PI/2+(i+1)*Math.PI/2-0.08, r=88;
+      var P=function(a){return (r*Math.cos(a)).toFixed(1)+' '+(r*Math.sin(a)).toFixed(1);};
+      var on=usedShape===S.id;
+      h+='<path d="M'+P(a0)+'A'+r+' '+r+' 0 0 1 '+P(a1)+'" fill="none" stroke="'+tok(on?'biomass':'line')+'" stroke-width="'+(on?14:10)+'" stroke-linecap="round"/>';
+    });
+    D.tokens.forEach(function(t,i){
+      var a=-Math.PI/2+i*2*Math.PI/n, cx=148*Math.cos(a), cy=148*Math.sin(a), sel=D.sel===i;
+      var c=tok(chainTok[t.chain]||'info'), fill=sel?(lit?tok('biomass'):dark?tok('bg-card'):c):tok('sovereign-wash');
+      h+='<g class="et-gdn" data-i="'+i+'" role="button" tabindex="0" aria-pressed="'+sel+'" aria-label="'+esc(t.sym+' · '+t.chain)+'">'+
+        '<polygon class="et-hit" points="'+HEX(cx,cy,34)+'" fill="'+fill+'" stroke="'+(sel?tok('you'):c)+'" stroke-width="'+(sel?3:1.5)+'"'+(sel&&dark?' stroke-dasharray="4 5"':'')+'/>'+
+        '<text x="'+cx.toFixed(1)+'" y="'+(cy+(tag(t)?-1:5)).toFixed(1)+'" text-anchor="middle" fill="'+tok(sel&&!dark?'bg':'ink')+'" style="font:700 15px/1.2 var(--sk-font-raver-display)">'+esc(t.sym.replace(/\s*\(.*\)$/,'').slice(0,4).toLowerCase())+'</text>'+
+        (tag(t)?'<text x="'+cx.toFixed(1)+'" y="'+(cy+15).toFixed(1)+'" text-anchor="middle" fill="'+tok(sel&&!dark?'bg':'ink')+'" style="font:600 14px/1.25 var(--sk-font-raver-body)">'+esc(tag(t))+'</text>':'')+'</g>';
+    });
+    svg.innerHTML=h;
+    var mid=$('etWbMid'), ms=$('etWbMidS');
+    if(D.phase==='rendered'){mid.textContent=K('r.drawn','drawn');ms.textContent=K('r.drawnS','by the chain');}
+    else if(D.phase==='swept'){mid.textContent=String(D.found);ms.textContent=K('r.pieces','pieces found');}
+    else if(D.phase==='reading'){mid.textContent=K('r.asking','asking');ms.textContent='';}
+    else if(D.phase==='failed'){mid.textContent=K('r.quiet','quiet');ms.textContent=K('r.quietS','nothing drawn');}
+    else {mid.textContent=String(D.tokens.length);ms.textContent=K('r.gardens','gardens');}
+  }
+  function raver(){
+    sky();
+    $('etWbRHint').textContent=K('r.hint','tap a garden · hold to draw');
+    $('etWbLegend').innerHTML='<span><i style="background:'+tok('ai')+'"></i>Base</span><span><i style="background:'+tok('sovereign')+'"></i>Ethereum</span><span><i style="background:'+tok('biomass')+'"></i>'+esc(K('r.lgKey','the key that fit'))+'</span>';
+    var t=D.tokens[D.sel], c=$('etWbRCard');
+    c.innerHTML=t?'<span class="et-rk">'+(D.sel+1)+'/'+D.tokens.length+'</span><div><b>'+esc(t.sym)+'</b><span>'+esc(t.chain+' · '+short(t.addr)+' · '+t.model)+'</span>'+
+      (D.phase==='rendered'&&D.shape?'<span>'+esc(K('r.fit','the key that fit')+' · '+D.shape)+'</span>':D.phase==='failed'?'<span>'+esc(status()||K('r.noAns','no answer'))+'</span>':'')+'</div>':'';
+    $('etWbRHold').disabled=D.phase==='reading';
+    $('etWbRHoldL').textContent=K('r.hold','hold to draw it');
+    $('etWbRSay').textContent=D.phase==='rendered'?K('r.sayOk','drawn by the contract itself · one call'):D.phase==='failed'?K('r.sayNo','the chain stayed quiet · nothing was drawn, nothing old is shown'):K('r.say','{n} gardens · 4 keys · the chain draws, never a server').replace('{n}',D.tokens.length);
+  }
+
+  /* ── CYPHERPUNK ── */
+  function cy(){
+    var t=D.tokens[D.sel]||{}, ch=(t.chain||'base').toLowerCase().replace(/\s+/g,'-');
+    $('etWbPath').textContent='eth_call://'+ch+'/'+(t.addr||'?');
+    var pc=D.phase==='rendered'||D.phase==='swept'?'et-ok':D.phase==='failed'?'et-no':'';
+    $('etWbChips').innerHTML='<span class="'+pc+'">state '+esc(D.phase)+'</span><span>collections '+D.tokens.length+'</span><span>chains '+D.chains.length+'</span><span>shapes '+D.shapes.length+'</span><span class="et-on">provider '+(typeof walletProvider!=='undefined'&&walletProvider?'wallet':'public pool')+'</span>';
+    var sel=$('etWbCCol'); if(sel&&sel.options.length!==D.tokens.length)sel.innerHTML=D.tokens.map(function(x,i){return '<option value="'+i+'">'+esc(x.sym+' · '+x.chain)+'</option>';}).join('');
+    if(sel&&document.activeElement!==sel)sel.value=String(D.sel);
+    $('etWbCols').innerHTML=D.tokens.map(function(x,i){return '<tr class="et-pick'+(i===D.sel?' et-sel':'')+'" data-i="'+i+'" tabindex="0"><td>'+String(i+1).padStart(2,'0')+'</td><td>'+esc(x.sym)+'<small>'+esc(x.addr)+'</small></td><td class="et-nw">'+esc(x.chain.toLowerCase())+'</td></tr>';}).join('');
+    $('etWbShapes').innerHTML=D.shapes.map(function(S,i){var on=D.shape===S.id;return '<tr'+(on?' class="et-sel"':'')+'><td>'+String(i+1).padStart(2,'0')+'</td><td>0x'+esc(S.sel)+'<small>'+esc(S.id)+(on?' · matched this read':'')+'</small></td><td class="'+(on?'et-st-ok':'')+'">'+S.words+'</td></tr>';}).join('');
+    var g=function(k){var r=D.diag.filter(function(x){return x.k===k;})[0];return r?r.v:'';};
+    var did=D.phase!=='idle'&&D.phase!=='selftest', ok=D.phase==='rendered';
+    var steps=[
+      ['name → address','0x… passes through · .b via Vaulta · .eth via ENS · .base.eth via Basenames · keccak self-checked first',g('resolver')||g('name')?'et-done':did?'et-done':'et-todo'],
+      ['decimals() · 0x313ce567',g('decimals')?'decimals '+g('decimals'):'the token\'s own decimals; 18 if it will not say',g('decimals')?'et-done':'et-todo'],
+      ['balanceOf(holder) · 0x70a08231',g('seed')?'seed '+g('seed'):'whole tokens = balance ÷ 10^decimals · 0 is guarded, never called',g('seed')?'et-done':'et-todo'],
+      ['sporesDegree(holder) · 0xa775188a',g('seed source')?g('seed source')+(g('on-chain seed')?' · on-chain seed '+g('on-chain seed'):''):'the live (seed, seed2, extra) triple · read, not derived',g('seed source')?'et-done':'et-todo'],
+      ['getSvg · 4 shapes probed',g('ABI shape')?'matched '+g('ABI shape')+' · '+g('SVG bytes')+' B':'first answer longer than 200 hex wins · a revert is a miss, not a failure',ok?'et-done':'et-todo'],
+      ['self-contained?',g('external refs')||'external URLs in the SVG are counted and named · none means fully on-chain',ok?'et-done':'et-todo']
+    ];
+    var nowAt=D.phase==='reading'?steps.findIndex(function(s){return s[2]==='et-todo';}):-1;
+    if(D.phase==='failed'){var fi=steps.findIndex(function(s){return s[2]==='et-todo';});if(fi>=0)steps[fi][2]='et-guard',steps[fi][1]=status()||steps[fi][1];}
+    $('etWbPipe').innerHTML=steps.map(function(s,i){return '<li class="'+s[2]+(i===nowAt?' et-now':'')+'"><b>'+esc(s[0])+'</b><p>'+esc(s[1])+'</p></li>';}).join('');
+    $('etWbReceipt').innerHTML=D.diag.length?D.diag.map(function(r){var c=/ok/.test(r.cls)?'et-st-ok':/bad/.test(r.cls)?'et-st-no':/warn/.test(r.cls)?'et-st-guard':'';return '<tr><th>'+esc(r.k)+'</th><td class="'+c+'">'+esc(r.v)+'</td></tr>';}).join(''):'<tr><th>status</th><td>not read yet</td></tr>';
+    $('etWbChains').innerHTML=D.chains.map(function(c,i){return '<tr><td>'+String(i+1).padStart(2,'0')+'</td><td>'+esc(c.name.toLowerCase())+'<small>'+esc(c.kind+(c.id?' · id '+c.id:''))+'</small></td><td class="et-nw">'+(c.kind==='bitcoin'?'esplora ladder':c.kind==='bitcoin cash'?'blockchair':c.hosts?String(c.hosts):'paste one')+'</td></tr>';}).join('');
+    var holder=/^0x[0-9a-fA-F]{40}$/.test(D.holder)?D.holder.toLowerCase().replace(/^0x/,''):'<holder>';
+    $('etWbVerify').innerHTML=[
+      'curl -s '+((CHAINS[(D.tokens[D.sel]||{}).ci||0]||{}).rpcs||[''])[0]+' -H \'content-type: application/json\' -d \'{"jsonrpc":"2.0","id":1,"method":"eth_call","params":[{"to":"'+(t.addr||'')+'","data":"0x70a08231'+(holder==='<holder>'?'000…'+holder:'000000000000000000000000'+holder)+'"},"latest"]}\'',
+      'compare the balance with the diag receipt above',
+      'open ?selftest: the page runs its own decoders and merkle walkers on synthesized cases, no network'
+    ].map(function(s){return '<li><code>'+esc(s)+'</code></li>';}).join('');
+    $('etWbCyGo').disabled=$('etWbCyScan').disabled=D.phase==='reading';
+  }
+
+  function keyed(){document.querySelectorAll('#eternal [data-etk]').forEach(function(e){if(e.dataset.etEn==null)e.dataset.etEn=e.textContent;e.textContent=T(e.dataset.etk,e.dataset.etEn);});}
+  function all(){observe();bee();raver();cy();}
+  var sched=0; function soon(){if(sched)return;sched=requestAnimationFrame(function(){sched=0;all();});}
+
+  function holdable(btn,fill,ms,done){
+    var t0=0,raf=0;
+    function stop(){if(!raf)return;cancelAnimationFrame(raf);raf=0;fill.style.width='0';}
+    function start(e){if(btn.disabled||raf)return;if(e&&e.preventDefault)e.preventDefault();t0=performance.now();
+      (function tick(now){var f=Math.min(1,(now-t0)/ms);fill.style.width=(f*100)+'%';if(f>=1){raf=0;fill.style.width='0';done();return;}raf=requestAnimationFrame(tick);})(t0);}
+    btn.addEventListener('pointerdown',function(e){try{btn.setPointerCapture(e.pointerId);}catch(x){}start(e);});
+    ['pointerup','pointercancel','pointerleave'].forEach(function(t){btn.addEventListener(t,stop);});
+    btn.addEventListener('keydown',function(e){if((e.key===' '||e.key==='Enter')&&!e.repeat){e.preventDefault();start(e);}});
+    btn.addEventListener('keyup',function(e){if(e.key===' '||e.key==='Enter')stop();});
+    btn.addEventListener('contextmenu',function(e){e.preventDefault();});
+  }
+
+  function wire(){
+    var ev=$('eternal'); if(!ev) return;
+    ev.addEventListener('click',function(e){
+      var a=e.target.closest('[data-ask]');
+      if(a){var k=a.getAttribute('data-ask');open=open===k?null:k;bee();var b=[].filter.call(ev.querySelectorAll('[data-ask]'),function(x){return x.getAttribute('data-ask')===k;})[0];if(b)b.focus({preventScroll:true});return;}
+      var gd=e.target.closest('.et-gdn,.et-c-tab tr.et-pick');
+      if(gd){pick(+gd.getAttribute('data-i'));all();}
+    });
+    ev.addEventListener('keydown',function(e){
+      if(e.key!=='Enter'&&e.key!==' ')return;
+      var t=e.target.closest('.et-gdn,.et-c-tab tr.et-pick'); if(!t)return;
+      e.preventDefault(); t.dispatchEvent(new MouseEvent('click',{bubbles:true}));
+    });
+    ['etWbBAddr','etWbRAddr','etWbCAddr'].forEach(function(id){$(id).addEventListener('input',function(){mirror(this.value,id);raver();});});
+    $('etWbBGo').addEventListener('click',function(){
+      var v=$('etWbBAddr').value.trim();
+      if(!v){var s=$('etWbBState');s.className='et-b-card';s.innerHTML='<h3>'+esc(K('b.needH','paste a wallet first.'))+'</h3><p>'+esc(K('b.needP','an address starting 0x, or a name ending .b or .eth.'))+'</p>';$('etWbBAddr').focus();return;}
+      toBench(v,null,'scan');
+    });
+    $('etWbBWhy').addEventListener('click',function(){var d=[].filter.call(document.querySelectorAll('details.tnote'),function(x){return x.querySelector('summary')&&x.querySelector('summary').dataset.i18n==='wb.d.market';})[0];if(d){d.open=true;d.scrollIntoView({block:'start'});}});
+    holdable($('etWbRHold'),$('etWbRFill'),900,function(){var v=$('etWbRAddr').value.trim();
+      if(!v){$('etWbRSay').textContent=K('r.needAddr','paste a wallet above first · nothing was sent');$('etWbRAddr').focus();return;}
+      toBench(v,D.sel,'view');});
+    $('etWbCCol').addEventListener('change',function(){pick(+this.value);all();});
+    $('etWbForm').addEventListener('submit',function(e){e.preventDefault();var v=$('etWbCAddr').value.trim();if(!v){$('etWbCAddr').focus();return;}toBench(v,+$('etWbCCol').value,'view');});
+    $('etWbCyScan').addEventListener('click',function(){var v=$('etWbCAddr').value.trim();if(!v){$('etWbCAddr').focus();return;}toBench(v,null,'scan');});
+    $('etWbKec').addEventListener('click',function(){
+      var got=typeof keccak256==='function'?[].map.call(keccak256(new Uint8Array(0)),function(b){return b.toString(16).padStart(2,'0');}).join(''):'';
+      $('etWbKecOut').innerHTML=got===KV?'<span class="et-st-ok">keccak256("") = '+esc(got.slice(0,10))+'…'+esc(got.slice(-8))+' · the universal vector ✓ · this page\'s keccak can resolve names</span>':'<span class="et-st-no">keccak256("") = '+esc(got||'not available')+' · does not match the vector · names would resolve wrong</span>';
+    });
+    var mo=new MutationObserver(soon);
+    ['diag','art'].forEach(function(id){var e=$(id);if(e)mo.observe(e,{childList:true,subtree:true,characterData:true});});
+    ['chain','token'].forEach(function(id){var e=$(id);if(e)e.addEventListener('change',soon);});
+    $('addr').addEventListener('input',function(){mirror(this.value,'addr');soon();});
+    document.addEventListener('blang',function(){keyed();all();});
+  }
+  consts(); keyed(); wire(); all();
+  window.__eternal={data:D,raver:R};
 })();
 </script>
 <script src="./fleet.js"></script>

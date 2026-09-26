@@ -66,8 +66,335 @@ footer a{padding-block:14px} /* a 44 px tap target that leaves the line rhythm a
    and raver, so no register ever draws reading text a phone cannot hold. */
 body[data-reg="bee"],body[data-reg="raver"]{--fmin:14px}
 </style>
+<link rel="stylesheet" href="skaists.css">
+<style id="etKit">
+/* ── ETERNAL FRONT KIT (docs/design/eternal) — three products in one surface. Every value is a skaists
+   token (skaists.css, compiled from docs/design/skaists/tokens.json): no hand-picked hex, size or
+   corner; sizes carry fallbacks for servers that send .css as octet-stream. Measured by
+   e2e/skaists-conformance.mjs. One register visible at a time; new bee is the default. Every class is
+   et- prefixed and every rule starts at #eternal, so the page's own bare rules never reach in. ── */
+#eternal{box-sizing:border-box;display:block;width:100%;max-width:600px;margin:0 auto var(--sk-s2,12px);padding:var(--sk-s2,12px) 0 0;border:0;border-radius:0;background:none;box-shadow:none;text-align:left;letter-spacing:normal;text-transform:none;color:var(--sk-ink);overflow-wrap:break-word}
+#eternal *,#eternal *::before,#eternal *::after{box-sizing:border-box}
+#eternal>.et-r,#eternal>.et-c{display:none}
+body[data-reg="raver"] #eternal>.et-b,body[data-reg="cypherpunk"] #eternal>.et-b{display:none}
+body[data-reg="raver"] #eternal>.et-r{display:block}
+body[data-reg="cypherpunk"] #eternal>.et-c{display:block}
+#eternal [hidden]{display:none!important}
+#eternal button{margin:0;color:inherit;text-transform:none;letter-spacing:normal;min-width:0;font-family:inherit;box-shadow:none}
+#eternal svg{display:block;max-width:100%}
+#eternal a{text-decoration:none}
+#eternal a:hover{text-decoration:none}
+#eternal :focus-visible{outline:2px solid var(--sk-focus);outline-offset:3px}
+#eternal h2,#eternal h3,#eternal p,#eternal ol,#eternal ul,#eternal table{margin:0;padding:0;border:0;background:none;text-transform:none;letter-spacing:normal;min-width:0;max-width:none;text-shadow:none;color:inherit}
+#eternal table{width:100%;border-collapse:separate;border-spacing:0;font-size:inherit}
+#eternal th,#eternal td{border:0;padding:0;vertical-align:top;text-align:left;background:none;letter-spacing:normal;color:inherit;font-weight:inherit}
+#eternal code{font:inherit;background:none;padding:0;border:0;color:inherit}
+#eternal .et-ic{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+#eternal .et-chev{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;flex:none;transition:transform var(--dur,.26s)}
+#etArchive.et-archive-h{box-sizing:border-box;width:100%;max-width:600px;margin:var(--sk-s5,36px) auto var(--sk-s2,12px);padding:var(--sk-s4,24px) 0 0;border:0;border-top:1px solid var(--sk-line);background:none;color:var(--sk-ink);text-transform:none;letter-spacing:normal;text-shadow:none;-webkit-text-fill-color:currentColor;text-align:left}
+body[data-reg="bee"] #etArchive.et-archive-h{font:400 28px/1.1 var(--sk-font-bee-serif)}
+body[data-reg="raver"] #etArchive.et-archive-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em}
+body[data-reg="cypherpunk"] #etArchive.et-archive-h{font:600 15px/1.45 var(--sk-font-mono)}
+
+/* NEW BEE — a calm room: plain rows, one reassurance, one magenta action, a link, a footnote */
+#eternal .et-b{display:flex;flex-direction:column;gap:var(--sk-s3,18px);color:var(--sk-ink);font:400 16px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-b-step{display:flex;flex-direction:column;gap:var(--sk-s3,18px)}
+#eternal .et-b-mark{font:400 18px/1.2 var(--sk-font-house);color:var(--sk-sovereign)}
+#eternal .et-b-h{font:400 40px/1.05 var(--sk-font-bee-serif);color:var(--sk-ink)}
+#eternal .et-b-h2{font:400 28px/1.1 var(--sk-font-bee-serif);color:var(--sk-ink)}
+#eternal .et-b-lede{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink-mut);text-wrap:pretty}
+#eternal .et-b-guard{display:flex;align-items:center;gap:var(--sk-s2,12px);min-height:var(--sk-control-min,44px);padding:var(--sk-s1,6px) var(--sk-s3,18px);border-radius:var(--sk-radius,12px);background:var(--sk-guard-wash);color:var(--sk-guard);font:600 15px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-b-rows{display:flex;flex-direction:column;background:var(--sk-bg-card);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl,18px);overflow:hidden}
+#eternal .et-b-row{display:flex;align-items:center;justify-content:space-between;gap:var(--sk-s2,12px);width:100%;min-height:var(--sk-control-row,52px);padding:var(--sk-s1,6px) var(--sk-s3,18px);border:0;border-bottom:1px solid var(--sk-line-soft);border-radius:0;background:transparent;text-align:left;font:500 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+#eternal .et-b-row:last-child{border-bottom:0}
+#eternal button.et-b-row,#eternal a.et-b-row{cursor:pointer}
+#eternal .et-b-rl{display:flex;flex-direction:column;flex:1 1 auto;min-width:0}
+#eternal .et-b-rl b{font:500 16px/1.45 var(--sk-font-bee-sans);color:inherit}
+#eternal .et-b-rl small{font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-rv{display:flex;align-items:center;gap:var(--sk-s1,6px);flex:0 1 auto;max-width:50%;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut);text-align:right}
+#eternal .et-b-rv.et-out{color:var(--sk-guard)}
+#eternal .et-b-rv.et-ok{color:var(--sk-verified)}
+#eternal .et-b-row[aria-expanded="true"],#eternal .et-b-row[aria-pressed="true"]{background:var(--sk-sovereign-tint);color:var(--sk-sovereign-strong)}
+#eternal .et-b-row[aria-expanded="true"] .et-b-rl b,#eternal .et-b-row[aria-pressed="true"] .et-b-rl b{font-weight:600}
+#eternal .et-b-row[aria-expanded="true"] .et-b-rv,#eternal .et-b-row[aria-pressed="true"] .et-b-rv,#eternal .et-b-row[aria-expanded="true"] .et-b-rl small,#eternal .et-b-row[aria-pressed="true"] .et-b-rl small{color:var(--sk-sovereign-strong)}
+#eternal .et-b-row[aria-expanded="true"] .et-chev{transform:rotate(90deg)}
+#eternal .et-b-open{display:flex;flex-direction:column;gap:var(--sk-s1,6px);padding:var(--sk-s2,12px) var(--sk-s3,18px);background:var(--sk-sovereign-tint);border-bottom:1px solid var(--sk-line-soft)}
+#eternal .et-b-open:last-child{border-bottom:0}
+#eternal .et-b-open>div{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+#eternal .et-b-open>div.et-b-src{font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-open a{display:flex;align-items:center;min-height:var(--sk-control-min,44px);font:600 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-link)!important}
+#eternal .et-b-open a:hover{color:var(--sk-link-hover)!important}
+#eternal .et-b-term{display:flex;gap:var(--sk-s2,12px);align-items:flex-start;padding:var(--sk-s2,12px) var(--sk-s3,18px);border-bottom:1px solid var(--sk-line-soft)}
+#eternal .et-b-term:last-child{border-bottom:0}
+#eternal .et-b-term>i{width:36px;height:36px;border-radius:var(--sk-radius-pill,999px);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong);display:flex;align-items:center;justify-content:center;flex:none;font:600 14px/1.4 var(--sk-font-bee-sans);font-style:normal}
+#eternal .et-b-term>i.et-ok{background:var(--sk-verified-wash);color:var(--sk-verified)}
+#eternal .et-b-term>i.et-dash{background:transparent;border:1.5px dashed var(--sk-guard);color:var(--sk-guard)}
+#eternal .et-b-term>div{display:flex;flex-direction:column;min-width:0}
+#eternal .et-b-term b{display:block;font:600 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+#eternal .et-b-term span{font:400 15px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-figure{font:400 32px/1 var(--sk-font-bee-serif);color:var(--sk-ink)}
+#eternal .et-b-act{display:flex;flex-direction:column;gap:var(--sk-s1,6px);margin-top:var(--sk-s1,6px)}
+#eternal .et-b-primary{display:flex;align-items:center;justify-content:center;width:100%;min-height:var(--sk-control-primary,54px);padding:var(--sk-s1,6px) var(--sk-s3,18px);border:0;border-radius:var(--sk-radius-lg,16px);background:var(--sk-primary);color:var(--sk-on-primary)!important;font:600 17px/1.2 var(--sk-font-bee-sans)!important;text-align:center;cursor:pointer}
+#eternal .et-b-primary:disabled{background:var(--sk-bg-well);color:var(--sk-ink-mut)!important;cursor:not-allowed}
+#eternal .et-b-link{display:flex;align-items:center;justify-content:center;min-height:var(--sk-control-min,44px);padding:0 var(--sk-s2,12px);border:0;background:transparent;font:600 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-link)!important;cursor:pointer;text-align:center}
+#eternal .et-b-link:hover{color:var(--sk-link-hover)!important}
+#eternal .et-b-foot{text-align:center;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-status{padding:var(--sk-s2,12px) var(--sk-s3,18px);border-radius:var(--sk-radius,12px);background:var(--sk-verified-wash);color:var(--sk-verified);font:600 14px/1.4 var(--sk-font-bee-sans)}
+#eternal .et-b-status.et-no{background:var(--sk-guard-wash);color:var(--sk-guard)}
+#eternal .et-b-status.et-wait{background:var(--sk-sovereign-tint);color:var(--sk-sovereign-strong)}
+#eternal .et-b-back{align-self:flex-start;display:flex;align-items:center;min-height:var(--sk-control-min,44px);padding:0;border:0;background:none;font:600 16px/1.45 var(--sk-font-bee-sans)!important;color:var(--sk-link)!important;cursor:pointer}
+#eternal .et-b-card{display:flex;flex-direction:column;gap:var(--sk-s1,6px);padding:var(--sk-s3,18px);background:var(--sk-sovereign-tint);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl,18px)}
+#eternal .et-b-card h3{font:400 28px/1.1 var(--sk-font-bee-serif);color:var(--sk-sovereign-strong)}
+#eternal .et-b-card>div{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+#eternal .et-b-card.et-dash{background:var(--sk-bg-card);border:1px dashed var(--sk-ink-dim)}
+#eternal .et-b-seg{display:flex;flex-wrap:wrap;gap:var(--sk-s1,6px)}
+#eternal .et-b-seg button{flex:1 1 auto;min-height:var(--sk-control-min,44px);padding:var(--sk-s1,6px) var(--sk-s3,18px);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius-md,14px);background:var(--sk-bg-card);color:var(--sk-ink)!important;font:600 16px/1.45 var(--sk-font-bee-sans);cursor:pointer}
+#eternal .et-b-seg button[aria-pressed="true"]{background:var(--sk-ink);color:var(--sk-bg)!important}
+
+/* RAVER — the data is the art; lowercase is allowed joy; the numbers never change */
+#eternal .et-r{color:var(--sk-ink);font:400 14px/1.4 var(--sk-font-raver-body)}
+#eternal .et-r-top{display:flex;align-items:baseline;justify-content:space-between;gap:var(--sk-s1,6px) var(--sk-s2,12px);flex-wrap:wrap}
+#eternal .et-r-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em;color:var(--sk-ink)}
+#eternal .et-r-hint{font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-art{position:relative;width:100%;max-width:360px;margin:var(--sk-s3,18px) auto var(--sk-s2,12px)}
+#eternal .et-r-art>svg{width:100%;height:auto;filter:drop-shadow(var(--sk-glow-sovereign))}
+#eternal .et-r-art [role="button"]{cursor:pointer}
+#eternal .et-r-art [role="button"]:focus{outline:none}
+#eternal .et-r-art [role="button"]:focus-visible>*{stroke:var(--sk-ink);stroke-width:2}
+#eternal .et-r-art text{pointer-events:none}
+#eternal .et-r-legend{display:flex;flex-wrap:wrap;justify-content:center;gap:var(--sk-s1,6px) var(--sk-s3,18px);margin:0 0 var(--sk-s3,18px)}
+#eternal .et-r-legend span{display:inline-flex;align-items:center;gap:var(--sk-s1,6px);font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-legend i{width:14px;height:14px;border-radius:var(--sk-radius-pill,999px);flex:none}
+#eternal .et-r-card{display:flex;gap:var(--sk-s2,12px);align-items:flex-start;padding:var(--sk-s2,12px) var(--sk-s3,18px);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl,18px);background:var(--sk-sovereign-tint);min-height:var(--sk-control-person,60px)}
+#eternal .et-r-card .et-rk{min-width:44px;height:44px;padding:0 var(--sk-s1,6px);border-radius:var(--sk-radius,12px);background:var(--sk-sovereign-strong);color:var(--sk-bg);display:flex;align-items:center;justify-content:center;font:700 15px/1.2 var(--sk-font-raver-display);flex:none}
+#eternal .et-r-card .et-rk.et-dash{background:transparent;border:1.5px dashed var(--sk-guard);color:var(--sk-guard)}
+#eternal .et-r-card>div{min-width:0;flex:1 1 auto}
+#eternal .et-r-card b{display:block;font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink)}
+#eternal .et-r-card span{display:block;margin-top:var(--sk-s1,6px);font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-card span.et-src{color:var(--sk-sovereign-soft)}
+#eternal .et-r-sub{margin:var(--sk-s4,24px) 0 var(--sk-s2,12px);font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em;color:var(--sk-ink)}
+#eternal .et-r-chips{display:flex;flex-wrap:wrap;gap:var(--sk-s1,6px)}
+#eternal .et-r-chip{display:inline-flex;align-items:center;justify-content:center;gap:var(--sk-s1,6px);min-height:var(--sk-control-min,44px);padding:0 var(--sk-s3,18px);border:1.5px solid var(--sk-line);border-radius:var(--sk-radius-pill,999px);background:var(--sk-bg-card);color:var(--sk-ink-soft)!important;font:600 14px/1.25 var(--sk-font-raver-body);cursor:pointer}
+#eternal .et-r-chip[aria-pressed="true"]{border-color:var(--sk-you);color:var(--sk-ink)!important;box-shadow:var(--sk-glow-sovereign)}
+#eternal .et-r-note{margin:var(--sk-s2,12px) 0 0;text-align:center;font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-big{text-align:center;font:700 60px/.95 var(--sk-font-raver-display);letter-spacing:-.02em;color:var(--sk-ink)}
+#eternal .et-r-pill{display:flex;align-items:center;justify-content:center;width:100%;min-height:58px;margin-top:var(--sk-s4,24px);padding:var(--sk-s1,6px) var(--sk-s3,18px);border:0;border-radius:var(--sk-radius-pill,999px);background:var(--sk-primary);color:var(--sk-on-primary)!important;font:700 15px/1.2 var(--sk-font-raver-display)!important;letter-spacing:.04em;text-align:center;cursor:pointer}
+#eternal .et-r-pill:disabled{background:var(--sk-sovereign-wash);color:var(--sk-sovereign-soft)!important;cursor:not-allowed}
+#eternal .et-r-ghost{display:flex;align-items:center;justify-content:center;margin:var(--sk-s2,12px) auto 0;min-height:var(--sk-control-min,44px);padding:0 var(--sk-s2,12px);border:0;background:none;color:var(--sk-link)!important;font:600 14px/1.25 var(--sk-font-raver-body)!important;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+#eternal .et-r-still{display:inline-flex;align-items:center;justify-content:center;gap:var(--sk-s1,6px);min-height:var(--sk-control-min,44px);min-width:var(--sk-control-min,44px);padding:0 var(--sk-s2,12px);border:1.5px solid var(--sk-line);border-radius:var(--sk-radius-pill,999px);background:var(--sk-bg-card);color:var(--sk-ink-soft)!important;font:600 14px/1.25 var(--sk-font-raver-body)!important;cursor:pointer}
+#eternal .et-r-still[aria-pressed="true"]{border-color:var(--sk-sovereign);color:var(--sk-sovereign-strong)!important}
+#eternal .et-r-bar{display:flex;align-items:center;justify-content:space-between;gap:var(--sk-s2,12px);flex-wrap:wrap;margin-top:var(--sk-s2,12px)}
+#eternal .et-r-bar .et-r-ghost{margin:0}
+@keyframes et-breathe{0%,100%{opacity:1}50%{opacity:.55}}
+#eternal .et-r.et-still-on *{animation-play-state:paused!important}
+@media (prefers-reduced-motion:reduce){#eternal .et-r *,#eternal .et-b *,#eternal .et-c *{transition:none!important;animation:none!important}}
+
+/* CYPHERPUNK — the instrument, complete at first paint: tables, a numbered pipeline, receipts */
+#eternal .et-c{font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink)}
+#eternal .et-c-path{font:600 15px/1.45 var(--sk-font-mono);color:var(--sk-ink);overflow-wrap:anywhere}
+#eternal .et-c-chips{display:flex;flex-wrap:wrap;gap:var(--sk-s1,6px);margin:var(--sk-s2,12px) 0}
+#eternal .et-c-chips span{padding:2px var(--sk-s1,6px);border:1px solid var(--sk-line);border-radius:4px;background:var(--sk-bg-card);font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-soft)}
+#eternal .et-c-chips span.et-on{border-color:var(--sk-guard);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong)}
+#eternal .et-c-chips span.et-ok{border-color:var(--sk-verified);color:var(--sk-verified)}
+#eternal .et-c-chips span.et-no{border-color:var(--sk-info);color:var(--sk-info)}
+#eternal .et-c-guard{display:flex;justify-content:space-between;align-items:center;gap:var(--sk-s1,6px) var(--sk-s2,12px);flex-wrap:wrap;min-height:var(--sk-control-min,44px);padding:var(--sk-s1,6px) var(--sk-s3,18px);border:1px dashed var(--sk-guard);border-radius:var(--sk-radius-sm,6px);background:var(--sk-guard-wash);color:var(--sk-guard)}
+#eternal .et-c-guard b{font-weight:600;color:var(--sk-sovereign-strong)}
+#eternal .et-c-h{margin:var(--sk-s4,24px) 0 var(--sk-s2,12px)!important;font:600 15px/1.45 var(--sk-font-mono);color:var(--sk-ink)}
+#eternal .et-c-tab{width:100%;margin:var(--sk-s2,12px) 0 var(--sk-s1,6px)!important;border:1px solid var(--sk-line)!important;border-radius:var(--sk-radius-sm,6px);overflow:hidden;background:var(--sk-bg-card)!important;table-layout:auto}
+#eternal .et-c-tab th{padding:var(--sk-s1,6px) var(--sk-s2,12px)!important;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);border-bottom:1px solid var(--sk-line)!important;background:var(--sk-bg-well)}
+#eternal .et-c-tab td{height:var(--sk-control-min,44px);padding:var(--sk-s1,6px) var(--sk-s2,12px)!important;border-bottom:1px solid var(--sk-line)!important;font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink);vertical-align:middle}
+#eternal .et-c-tab tr:last-child td{border-bottom:0!important}
+#eternal .et-c-tab td:first-child{color:var(--sk-guard)}
+#eternal .et-c-tab td:first-child,#eternal .et-c-tab th:first-child{white-space:nowrap;width:1%}
+#eternal .et-c-tab tr.et-pick{cursor:pointer}
+#eternal .et-c-tab tr.et-pick:hover td,#eternal .et-c-tab tr.et-pick[aria-expanded="true"] td,#eternal .et-c-tab tr.et-pick[aria-pressed="true"] td{background:var(--sk-sovereign-tint)}
+#eternal .et-c-tab tr.et-more td{height:auto;background:var(--sk-sovereign-tint);color:var(--sk-ink-soft)}
+#eternal .et-c-tab small{display:block;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut)}
+#eternal .et-c-tab td:not(.et-nw){overflow-wrap:anywhere}
+#eternal .et-c-tab .et-nw{white-space:nowrap}
+#eternal .et-st-ok{color:var(--sk-verified)!important}#eternal .et-st-no{color:var(--sk-info)!important}#eternal .et-st-wait{color:var(--sk-ai)!important}#eternal .et-st-guard{color:var(--sk-guard)!important}#eternal .et-st-dim{color:var(--sk-ink-mut)!important}
+#eternal .et-c-pipe{list-style:none;margin:0;padding:0;display:grid;gap:var(--sk-s2,12px);counter-reset:etp}
+#eternal .et-c-pipe li{display:grid;grid-template-columns:28px 1fr;gap:var(--sk-s1,6px) var(--sk-s2,12px);padding:var(--sk-s2,12px) var(--sk-s3,18px);border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm,6px);background:var(--sk-bg-card);counter-increment:etp;min-width:0}
+#eternal .et-c-pipe li::before{content:counter(etp,decimal-leading-zero);color:var(--sk-guard);font-weight:600}
+#eternal .et-c-pipe li b{font-weight:600;color:var(--sk-ink);min-width:0}
+#eternal .et-c-pipe li p,#eternal .et-c-pipe li>div{grid-column:2;color:var(--sk-ink-soft);min-width:0}
+#eternal .et-c-pipe li.et-done b{color:var(--sk-verified)}
+#eternal .et-c-pipe li.et-guard{border-style:dashed;border-color:var(--sk-guard)}
+#eternal .et-c-pipe li.et-guard b{color:var(--sk-guard)}
+#eternal .et-c-pipe li.et-now{border-color:var(--sk-ai);box-shadow:inset 0 0 0 1px var(--sk-ai)}
+#eternal .et-c-pipe li.et-now b{color:var(--sk-ai)}
+#eternal .et-c-pipe li.et-todo p,#eternal .et-c-pipe li.et-todo>div{color:var(--sk-ink-mut)}
+#eternal .et-c-pipe code{color:var(--sk-ai);overflow-wrap:anywhere}
+#eternal .et-c-primary{display:flex;align-items:center;justify-content:center;width:100%;min-height:52px;margin-top:var(--sk-s3,18px);padding:var(--sk-s1,6px) var(--sk-s2,12px);border:0;border-radius:var(--sk-radius-sm,6px);background:var(--sk-primary);color:var(--sk-on-primary)!important;font:600 14px/1.2 var(--sk-font-mono)!important;text-align:center;cursor:pointer}
+#eternal .et-c-primary:disabled{background:var(--sk-bg-well);color:var(--sk-ink-mut)!important;border:1px dashed var(--sk-line);cursor:not-allowed}
+#eternal .et-c-kv{width:100%;border:1px solid var(--sk-line)!important;border-radius:var(--sk-radius-sm,6px);overflow:hidden;background:var(--sk-bg-card)!important;table-layout:fixed}
+#eternal .et-c-kv th{width:104px;padding:var(--sk-s2,12px)!important;vertical-align:top;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);border-bottom:1px solid var(--sk-line)!important;background:transparent;overflow-wrap:anywhere}
+#eternal .et-c-kv td{padding:var(--sk-s2,12px)!important;border-bottom:1px solid var(--sk-line)!important;font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink);overflow-wrap:anywhere}
+#eternal .et-c-kv tr:last-child th,#eternal .et-c-kv tr:last-child td{border-bottom:0!important}
+#eternal .et-c-kv .et-no{color:var(--sk-info)}#eternal .et-c-kv .et-yes{color:var(--sk-verified)}#eternal .et-c-kv .et-g{color:var(--sk-guard)}
+#eternal .et-c-verify{margin-top:var(--sk-s3,18px);padding:var(--sk-s3,18px);border-radius:var(--sk-radius-sm,6px);background:var(--sk-bg-card);border:1px solid var(--sk-line)}
+#eternal .et-c-verify-h{font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);margin-bottom:var(--sk-s1,6px)}
+#eternal .et-c-verify ol{margin:0;padding-left:var(--sk-s4,24px)!important;display:grid;gap:var(--sk-s1,6px)}
+#eternal .et-c-verify li{min-width:0;overflow-wrap:anywhere}
+#eternal .et-c-verify code{font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ai);overflow-wrap:anywhere}
+#eternal .et-c-row{display:grid;grid-template-columns:1fr 1fr;gap:var(--sk-s2,12px);margin-top:var(--sk-s3,18px)}
+#eternal .et-c-ghost{display:flex;align-items:center;justify-content:center;min-height:52px;padding:var(--sk-s1,6px);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius-sm,6px);background:transparent;color:var(--sk-ink)!important;text-align:center;font:600 14px/1.2 var(--sk-font-mono)!important;cursor:pointer}
+#eternal .et-c-a{display:inline-flex;align-items:center;min-height:var(--sk-control-min,44px);min-width:var(--sk-control-min,44px);color:var(--sk-link)!important;overflow-wrap:anywhere}
+#eternal .et-c-a:hover{color:var(--sk-link-hover)!important}
+#eternal .et-c-kv .et-c-a{display:flex;min-width:0}
+#eternal .et-c-seg{display:flex;flex-wrap:wrap;gap:var(--sk-s1,6px);margin:var(--sk-s2,12px) 0}
+#eternal .et-c-seg button{flex:1 1 auto;min-height:var(--sk-control-min,44px);padding:var(--sk-s1,6px) var(--sk-s2,12px);border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm,6px);background:var(--sk-bg-card);color:var(--sk-ink-soft)!important;font:500 12px/1.45 var(--sk-font-mono);cursor:pointer}
+#eternal .et-c-seg button[aria-pressed="true"]{border-color:var(--sk-ai);color:var(--sk-ai)!important;box-shadow:inset 0 0 0 1px var(--sk-ai)}
+/* ── /ETERNAL FRONT KIT ── */
+</style>
+<style id="etPage">
+/* bmeshasi's own front pieces */
+#eternal .et-ms-range{display:flex;flex-direction:column;gap:var(--sk-s1,6px)}
+#eternal .et-ms-range label{font:600 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+#eternal .et-ms-range input{width:100%;min-height:var(--sk-control-min,44px);margin:0;accent-color:var(--sk-primary)}
+#eternal .et-ms-fig{display:flex;align-items:baseline;gap:var(--sk-s2,12px);flex-wrap:wrap}
+#eternal .et-ms-fig small{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+/* raver: the fee curve as a landscape — the booked stretch lights up under the curve; its area is the fee */
+#eternal #etMsCurve{touch-action:pan-y}
+#eternal #etMsCurve .et-axis{stroke:var(--sk-line);stroke-width:1.5}
+#eternal #etMsCurve .et-curve{fill:none;stroke:var(--sk-sovereign-soft);stroke-width:2.5}
+#eternal #etMsCurve .et-flat{fill:var(--sk-sovereign);opacity:.8}
+#eternal #etMsCurve .et-intg{fill:var(--sk-you);opacity:.8;animation:et-breathe 3.6s ease-in-out infinite}
+#eternal #etMsCurve .et-wm{stroke:var(--sk-guard);stroke-width:1.5;stroke-dasharray:4 4}
+#eternal #etMsCurve text{fill:var(--sk-ink-soft);font:600 14px/1.25 var(--sk-font-raver-body)}
+#eternal #etMsCurve text.et-wmt{fill:var(--sk-guard)}
+#eternal #etMsCurve .et-h{cursor:ew-resize;touch-action:none}
+#eternal #etMsCurve .et-h .et-hit{fill:var(--sk-bg);fill-opacity:0}
+#eternal #etMsCurve .et-h .et-dot{fill:var(--sk-ink);stroke:var(--sk-you);stroke-width:3}
+#eternal #etMsCurve .et-h[aria-pressed="true"] .et-dot{fill:var(--sk-you);stroke:var(--sk-ink)}
+#eternal .et-ms-big{display:flex;align-items:baseline;justify-content:center;gap:var(--sk-s2,12px);flex-wrap:wrap;margin:var(--sk-s1,6px) 0}
+#eternal .et-ms-big b{font:700 60px/.95 var(--sk-font-raver-display);letter-spacing:-.02em;color:var(--sk-ink)}
+#eternal .et-ms-big span{font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-ms-drops{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--sk-s2,12px);margin-top:var(--sk-s3,18px)}
+#eternal .et-ms-drop{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--sk-s1,6px);min-height:88px;padding:var(--sk-s2,12px) var(--sk-s1,6px);border-radius:var(--sk-radius-xl,18px);border:1.5px solid var(--sk-sovereign);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong)!important;font:600 14px/1.25 var(--sk-font-raver-body);text-align:center;cursor:pointer;opacity:.7}
+#eternal .et-ms-drop b{font:700 30px/1 var(--sk-font-raver-display)}
+#eternal .et-ms-drop.et-first{border-color:var(--sk-biomass);color:var(--sk-ink)!important;opacity:1;box-shadow:var(--sk-glow-ok)}
+#eternal .et-ms-drop[aria-pressed="true"]{opacity:1;border-color:var(--sk-you);box-shadow:var(--sk-glow-sovereign)}
+#eternal .et-ms-pulse{display:grid;grid-template-columns:1fr 1fr;gap:var(--sk-s2,12px);margin-top:var(--sk-s3,18px)}
+#eternal .et-ms-pulse div{display:flex;flex-direction:column;gap:var(--sk-s1,6px);padding:var(--sk-s2,12px);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl,18px);background:var(--sk-bg-card);font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft);min-width:0;overflow-wrap:anywhere}
+#eternal .et-ms-pulse div.et-fail{border:1.5px dashed var(--sk-guard);background:var(--sk-guard-wash)}
+#eternal .et-ms-pulse b{font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em;color:var(--sk-ink)}
+#eternal .et-c-in{width:100%;min-height:var(--sk-control-min,44px);padding:0 var(--sk-s2,12px);border:1px solid var(--sk-ai);border-radius:var(--sk-radius-sm,6px);background:var(--sk-bg);color:var(--sk-ink);font:400 13px/1.45 var(--sk-font-mono)}
+
+/* ── THE WHOLE PAGE, dressed per register: the page's own variables mapped onto skaists. The "not
+   live" ceiling and the gated statuses wear info (never amber); the iron-first step wears biomass. ── */
+body[data-reg]{--bg:var(--sk-bg);--ink:var(--sk-ink);--dim:var(--sk-ink-mut);--line:var(--sk-line);--cyan:var(--sk-link);--gold:var(--sk-you);--violet:var(--sk-sovereign);--leaf:var(--sk-verified);--amber:var(--sk-info);--open:var(--sk-ai);background:var(--sk-bg);color:var(--sk-ink)}
+body[data-reg="raver"]{--dim:var(--sk-ink-soft);--violet:var(--sk-sovereign-soft)}
+body[data-reg="cypherpunk"]{--dim:var(--sk-ink-soft);--gold:var(--sk-ai);--violet:var(--sk-sovereign-strong)}
+body[data-reg] header::after{background:var(--sk-rainbow);opacity:1}
+body[data-reg] h1{text-shadow:none;color:var(--sk-ink)}
+body[data-reg] section:not(#eternal){background:var(--sk-bg-card);border-color:var(--sk-line);border-radius:var(--sk-radius-xl,18px)}
+body[data-reg] :is(.col,.wf .step,.rd,.rc,.ceiling){background:var(--sk-bg);border-radius:var(--sk-radius,12px)}
+body[data-reg] .wf .step.first{border-color:var(--sk-biomass)}
+body[data-reg] .wf .step.first b{color:var(--sk-verified)}
+body[data-reg] .badge{border-radius:4px}
+body[data-reg] .ctl input[type=range]{accent-color:var(--sk-primary)}
+body[data-reg="cypherpunk"] :is(section:not(#eternal),.col,.wf .step,.rd,.rc,.ceiling){border-radius:var(--sk-radius-sm,6px)}
+body[data-reg] footer{color:var(--sk-ink-mut)}
+body[data-reg] footer a,body[data-reg] main a,body[data-reg] header a{color:var(--sk-link)}
+body[data-reg="bee"]{font-family:var(--sk-font-bee-sans)}
+body[data-reg="bee"] h1{font:400 28px/1.1 var(--sk-font-bee-serif);letter-spacing:0}
+body[data-reg="bee"] :is(header p,.law,.col,.ceiling,.wf .step){font-family:var(--sk-font-bee-sans);font-size:16px;line-height:1.6}
+body[data-reg="bee"] section h2{font:600 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-sovereign)}
+body[data-reg="bee"] :is(.col h3,.wf .step b,.gate){font-family:var(--sk-font-bee-sans);font-size:16px}
+body[data-reg="bee"] :is(.ctl label,.ctl .val,.rd .k,.rd .s,.badge,table,th,td,.gate .gw,.rc .rt,.rc .rd2,footer){font-family:var(--sk-font-bee-sans);font-size:14px}
+body[data-reg="bee"] :is(.rd .v,.rd .v.fail){font:400 16px/1.45 var(--sk-font-bee-sans)!important}
+body[data-reg="bee"] .rd.hero .v{font:400 28px/1.1 var(--sk-font-bee-serif)!important}
+body[data-reg="raver"]{font-family:var(--sk-font-raver-body)}
+body[data-reg="raver"] h1{font:700 30px/1.05 var(--sk-font-raver-display);letter-spacing:-.01em}
+body[data-reg="raver"] :is(header p,.law,.col,.ceiling,.wf .step,.col h3,.wf .step b,.gate,.ctl label,.ctl .val,.rd .k,.rd .s,.badge,table,th,td,.gate .gw,.rc .rt,.rc .rd2,footer){font-family:var(--sk-font-raver-body);font-size:14px}
+body[data-reg="raver"] section h2{font:700 15px/1.3 var(--sk-font-raver-display);letter-spacing:.04em}
+body[data-reg="raver"] :is(.rd .v,.rd .v.fail){font:600 14px/1.4 var(--sk-font-raver-body)!important}
+body[data-reg="raver"] .rd.hero .v{font:700 30px/1.1 var(--sk-font-raver-display)!important}
+body[data-reg="cypherpunk"]{font-family:var(--sk-font-mono)}
+body[data-reg="cypherpunk"] h1{font:600 15px/1.45 var(--sk-font-mono);letter-spacing:0}
+body[data-reg="cypherpunk"] :is(header p,.law,.col,.ceiling,.wf .step,.col h3,.wf .step b,.gate,.rc .rt){font-family:var(--sk-font-mono);font-size:13px}
+body[data-reg="cypherpunk"] :is(.ctl label,.ctl .val,.rd .k,.rd .s,.badge,table,th,td,.gate .gw,.rc .rd2,footer){font-family:var(--sk-font-mono);font-size:12px}
+body[data-reg="cypherpunk"] section h2{font:600 13px/1.45 var(--sk-font-mono);letter-spacing:0}
+body[data-reg="cypherpunk"] :is(.rd .v,.rd .v.fail){font:400 13px/1.45 var(--sk-font-mono)!important}
+body[data-reg="cypherpunk"] .rd.hero .v{font:600 15px/1.45 var(--sk-font-mono)!important}
+</style>
 </head>
 <body>
+<!-- ETERNAL FRONT (founder blueprint 2026-09-26, docs/design/eternal): three separate products in
+     one surface. ONE data layer drives all three: the page's own meter engine and sliders
+     (window.BMESH: the same meterFee() the readout below calls), its reference values and the
+     conformance vector it states, the weigh-in columns, the waterfall, the supply board, the founder
+     gates and the live pulses its own reads print. Settlement is not live and nothing here moves
+     value: the meter reads in meter units on reference parameters, and every register says so. The
+     gestures move the page's own sliders; nothing pays, pledges or signs. -->
+<section id="eternal" aria-label="the community iron exchange">
+
+  <!-- NEW BEE — a calm room: what exists, what doesn't, who is paid first, then one slider -->
+  <div class="et-b">
+    <div class="et-b-step" data-step="home">
+      <div class="et-b-mark" data-etk="et.bmeshasi.mark">bMeshAsi</div>
+      <h2 class="et-b-h" data-etk="et.bmeshasi.beeH">share a machine, pay the machine first</h2>
+      <div class="et-b-lede" data-etk="et.bmeshasi.beeLede">people lend spare computers to the community. whoever uses them pays by how busy they are, and the owners' costs are repaid before anything else. none of the paying is switched on yet.</div>
+      <div class="et-b-guard"><svg class="et-ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span data-etk="et.bmeshasi.beeGuard">nothing on this page moves money. it shows the order of payment and the maths.</span></div>
+      <div class="et-b-rows" id="etMsRows"></div>
+      <div class="et-b-act">
+        <button type="button" class="et-b-primary" data-go="meter" data-etk="et.bmeshasi.beeGo">try the meter</button>
+        <a class="et-b-link" href="#etArchive" data-etk="et.bmeshasi.beeAll">read the whole exchange</a>
+        <div class="et-b-foot" data-etk="et.bmeshasi.beeFoot">the meter's numbers are reference settings from a published test, not our prices.</div>
+      </div>
+    </div>
+    <div class="et-b-step" data-step="meter" hidden>
+      <button type="button" class="et-b-back" data-go="home" data-etk="et.bmeshasi.beeBack">‹ the exchange</button>
+      <h2 class="et-b-h" data-etk="et.bmeshasi.beeMeterH">how the meter counts</h2>
+      <div class="et-b-lede" data-etk="et.bmeshasi.beeMeterLede">the busier the network gets while you use it, the more each moment costs. slide to see.</div>
+      <div class="et-ms-range"><label for="etMsBeeU1" id="etMsBeeLbl"></label><input type="range" id="etMsBeeU1" min="0" max="1" step="0.01"></div>
+      <div class="et-b-rows"><div class="et-b-term"><i class="et-ok">1</i><div><b id="etMsBeeFee"></b><span id="etMsBeeFeeS"></span></div></div></div>
+      <div class="et-b-status et-no" id="etMsBeeNote"></div>
+      <div class="et-b-act"><a class="et-b-link" href="#etMeter" data-etk="et.bmeshasi.beeFull">open the full meter below</a></div>
+    </div>
+  </div>
+
+  <!-- RAVER — the fee curve as a landscape: drag the ends of your stretch, the lit area is the fee -->
+  <div class="et-r">
+    <div class="et-r-top"><h2 class="et-r-h" data-etk="et.bmeshasi.raverH">the meter</h2><span class="et-r-hint" data-etk="et.bmeshasi.raverHint">drag an end · tap the curve</span></div>
+    <div class="et-r-art"><svg id="etMsCurve" viewBox="0 0 360 250" role="group" aria-label="the fee curve: the booked stretch lit under the curve, its area is the fee"></svg></div>
+    <div class="et-ms-big"><b id="etMsBig"></b><span id="etMsBigS"></span></div>
+    <div class="et-r-legend"><span><i class="et-mk-flat" style="background:var(--sk-sovereign)"></i><span data-etk="et.bmeshasi.lgFlat">flat, below the watermark</span></span><span><i style="background:var(--sk-you)"></i><span data-etk="et.bmeshasi.lgIntg">under the curve, above it</span></span></div>
+    <div class="et-r-card" id="etMsCard" aria-live="polite"></div>
+    <h3 class="et-r-sub" data-etk="et.bmeshasi.raverFlowH">who is paid first</h3>
+    <div class="et-ms-drops" id="etMsDrops"></div>
+    <div class="et-ms-pulse" id="etMsPulse"></div>
+    <a class="et-r-pill" href="#etMeter" data-etk="et.bmeshasi.raverGo">the full meter ↓</a>
+    <div class="et-r-bar"><button type="button" class="et-r-still" id="etMsStill" aria-pressed="false">pause the light</button><a class="et-r-ghost" href="#etArchive" data-etk="et.bmeshasi.raverAll">the whole exchange</a></div>
+  </div>
+
+  <!-- CYPHERPUNK — the instrument: the parameters, the engine's breakdown, the conformance check, the board -->
+  <div class="et-c">
+    <div class="et-c-path" data-etk="et.bmeshasi.cyPath">crates/bmesh-meter · p(u) = min + (max−min)·u^(e−1)</div>
+    <div class="et-c-chips" id="etMsChips"></div>
+    <div class="et-c-guard"><span data-etk="et.bmeshasi.cyGuard">claim ceiling · SPEC-ORIGINATION-1 §7.5</span><b data-etk="et.bmeshasi.cyGuardB">sound by construction, nothing stronger</b></div>
+    <h3 class="et-c-h" data-etk="et.bmeshasi.cyParamH">parameters · the page's own sliders</h3>
+    <table class="et-c-kv" id="etMsParams"></table>
+    <button type="button" class="et-c-primary" id="etMsCyGo" data-etk="et.bmeshasi.cyGo">load case 1 · u₀=0 · u₁=1 · w=0</button>
+    <h3 class="et-c-h" data-etk="et.bmeshasi.cyOutH">engine output · meterFee()</h3>
+    <table class="et-c-kv" id="etMsOut"></table>
+    <h3 class="et-c-h" data-etk="et.bmeshasi.cyFlowH">waterfall · the order is the law</h3>
+    <ol class="et-c-pipe" id="etMsFlow"></ol>
+    <h3 class="et-c-h" data-etk="et.bmeshasi.cySupplyH">supply board · statuses as printed</h3>
+    <table class="et-c-tab"><thead><tr><th>#</th><th data-etk="et.bmeshasi.thRes">resource · class</th><th data-etk="et.bmeshasi.thStatus">status</th></tr></thead><tbody id="etMsSupply"></tbody></table>
+    <h3 class="et-c-h" data-etk="et.bmeshasi.cyGateH">founder gates · one word each</h3>
+    <table class="et-c-tab"><thead><tr><th>gate</th><th data-etk="et.bmeshasi.thGate">question</th><th data-etk="et.bmeshasi.thState">state</th></tr></thead><tbody id="etMsGates"></tbody></table>
+    <h3 class="et-c-h" data-etk="et.bmeshasi.cyPulseH">live pulses · this tab</h3>
+    <table class="et-c-kv" id="etMsPulses"></table>
+    <div class="et-c-verify">
+      <div class="et-c-verify-h" data-etk="et.bmeshasi.cyVerifyH">verify · no trust in this page needed</div>
+      <ol id="etMsVerify"></ol>
+    </div>
+    <div class="et-c-row"><a class="et-c-ghost" href="#etArchive" data-etk="et.bmeshasi.cyAll">the whole exchange ↓</a><a class="et-c-ghost" href="https://github.com/beehive-nature/beehive-nature/tree/main/crates/bmesh-meter" target="_blank" rel="noopener noreferrer" data-etk="et.bmeshasi.cyFork">fork the meter ↗ (new tab)</a></div>
+  </div>
+</section>
+<h2 class="et-archive-h" id="etArchive" data-etk="et.bmeshasi.archive">the whole exchange</h2>
 <header>
   <h1>⚓ bMeshAsi — the community iron exchange</h1>
   <p>save the builders their cloud bill · meter the usage on our landed curve ·
@@ -133,7 +460,7 @@ body[data-reg="bee"],body[data-reg="raver"]{--fmin:14px}
   is running. sound by construction — nothing stronger.</div>
 </section>
 
-<section>
+<section id="etMeter">
   <h2>3 · THE METER — clickable, semantics faithful to the landed crate</h2>
   <div class="law">the fee curve is the landed <b>bmesh-meter</b> semantics:
   <b>p(u) = min + (max−min)·u^(e−1)</b>, flat-below-watermark priced at the
@@ -305,26 +632,36 @@ body[data-reg="bee"],body[data-reg="raver"]{--fmin:14px}
      └──────────────────────────────────────────────────────────────────────┘ */
   var FOUNDER_VALUES = null; /* MX-1 OPEN — reference vectors below */
   function priceAt(u,minP,maxP,e){ if(e===1) return maxP; return minP+(maxP-minP)*Math.pow(u,e-1); }
-  function compute(){
-    var e=+$('e').value, minP=+$('minp').value, maxP=+$('maxp').value, w=+$('w').value,
-        u0=+$('u0').value, u1=+$('u1').value, ua=+$('ua').value;
-    $('ve').textContent=e.toFixed(1); $('vmin').textContent=minP; $('vmax').textContent=maxP;
-    $('vw').textContent=w.toFixed(2); $('vu0').textContent=u0.toFixed(2);
-    $('vu1').textContent=u1.toFixed(2); $('vua').textContent=ua.toFixed(2);
-    var g=$('guard');
-    if(e<1){ g.textContent='guard: exponent e ≥ 1 is enforced (the crate rejects below-one)'; g.style.color='var(--amber)'; return; }
-    if(e===1&&minP!==maxP){ g.textContent='guard: at e = 1 the source forces min = max (ExponentOneRequiresEqualPrices)'; g.style.color='var(--amber)'; return; }
-    if(u1<u0){ g.textContent='interval inverted — u₁ must be ≥ u₀'; g.style.color='var(--amber)'; return; }
-    g.style.color=''; g.textContent='one ceil at the end, exactly as the crate';
+  /* the meter as one pure function: the page's own readout below and the three ETERNAL fronts above
+     both call it, so there is one engine and no second copy of the arithmetic */
+  function meterFee(q){
+    var e=q.e, minP=q.min, maxP=q.max, w=q.w, u0=q.u0, u1=q.u1, ua=q.ua;
+    if(e<1) return {ok:false,guard:'exponent'};
+    if(e===1&&minP!==maxP) return {ok:false,guard:'exponentOne'};
+    if(u1<u0) return {ok:false,guard:'inverted'};
     var pua=priceAt(ua,minP,maxP,e);
     var below=Math.max(0, Math.min(u1,w)-u0)*pua;                 // flat stretch below the watermark, priced at adjusted utilization
     var hi=Math.max(u0,w), above=0;
     if(u1>hi){ above=minP*(u1-hi)+(maxP-minP)*(Math.pow(u1,e)-Math.pow(hi,e))/e; } // integral of p(u) above the watermark
-    var fee=Math.ceil(below+above);
-    $('fee').textContent=fee.toLocaleString('en-US');
-    $('flat').textContent=Math.round(below).toLocaleString('en-US');
-    $('intg').textContent=Math.round(above).toLocaleString('en-US');
-    $('pua').textContent=Math.round(pua).toLocaleString('en-US');
+    return {ok:true,fee:Math.ceil(below+above),flat:below,intg:above,pua:pua};
+  }
+  var GUARD={exponent:'guard: exponent e ≥ 1 is enforced (the crate rejects below-one)',
+    exponentOne:'guard: at e = 1 the source forces min = max (ExponentOneRequiresEqualPrices)',
+    inverted:'interval inverted — u₁ must be ≥ u₀'};
+  function params(){ return {e:+$('e').value, min:+$('minp').value, max:+$('maxp').value, w:+$('w').value,
+        u0:+$('u0').value, u1:+$('u1').value, ua:+$('ua').value}; }
+  function compute(){
+    var q=params();
+    $('ve').textContent=q.e.toFixed(1); $('vmin').textContent=q.min; $('vmax').textContent=q.max;
+    $('vw').textContent=q.w.toFixed(2); $('vu0').textContent=q.u0.toFixed(2);
+    $('vu1').textContent=q.u1.toFixed(2); $('vua').textContent=q.ua.toFixed(2);
+    var g=$('guard'), r=meterFee(q);
+    if(!r.ok){ g.textContent=GUARD[r.guard]; g.style.color='var(--amber)'; return; }
+    g.style.color=''; g.textContent='one ceil at the end, exactly as the crate';
+    $('fee').textContent=r.fee.toLocaleString('en-US');
+    $('flat').textContent=Math.round(r.flat).toLocaleString('en-US');
+    $('intg').textContent=Math.round(r.intg).toLocaleString('en-US');
+    $('pua').textContent=Math.round(r.pua).toLocaleString('en-US');
   }
   ['e','minp','maxp','w','u0','u1','ua'].forEach(function(id){ $(id).addEventListener('input',compute); });
   if(FOUNDER_VALUES){
@@ -334,6 +671,12 @@ body[data-reg="bee"],body[data-reg="raver"]{--fmin:14px}
       chip.style.color='var(--gold)'; chip.style.borderColor='var(--gold)'; }
   }
   compute();
+  /* the same engine, shared with the ETERNAL fronts: they read and set the page's own sliders */
+  var REF={}; ['e','minp','maxp','w','u0','u1','ua'].forEach(function(id){ REF[id]=+$(id).defaultValue; });
+  window.BMESH={fee:meterFee, params:params, founder:FOUNDER_VALUES,
+    reference:{e:REF.e,min:REF.minp,max:REF.maxp,w:REF.w,u0:REF.u0,u1:REF.u1,ua:REF.ua},
+    set:function(q){ var ids={e:'e',min:'minp',max:'maxp',w:'w',u0:'u0',u1:'u1',ua:'ua'};
+      Object.keys(ids).forEach(function(k){ if(q[k]!=null) $(ids[k]).value=q[k]; }); compute(); return params(); }};
 
   /* ⚡ THE DIVERSION — live dials, session-honest, visitor's browser only.
      Laws inherited from the bANTfarm's cockpit: failover per lane, a dead read
@@ -375,6 +718,179 @@ body[data-reg="bee"],body[data-reg="raver"]{--fmin:14px}
   }
   document.addEventListener('visibilitychange',function(){ if(document.visibilityState==='visible') poll(); });
   poll(); setInterval(poll,15000);
+})();
+</script>
+<script>
+/* ETERNAL FRONT — one data layer, three renderers (docs/design/eternal). The meter is the page's own
+   engine (window.BMESH.fee, the meterFee() its readout calls) over the page's own sliders; the
+   reference values are the sliders' own defaults and the conformance vector is the one the page
+   states. The weigh-in, the waterfall, the supply board, the gates and the pulses are read from the
+   page. Settlement is not live: every register reads the meter in meter units on reference
+   parameters, and no gesture pays, pledges or signs; they only move the page's own sliders. */
+(function(){
+  var $=function(id){return document.getElementById(id);};
+  var T=function(k,f){var t=window.BNRLanguage&&window.BNRLanguage.text;return t?t(k,f):f;};
+  var K=function(k,f){return T('et.bmeshasi.'+k,f);};
+  var esc=function(v){return String(v==null?'':v).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});};
+  var txt=function(e){return (e&&e.textContent||'').replace(/\s+/g,' ').trim();};
+  var fill=function(s,o){return String(s).replace(/\{(\w+)\}/g,function(_,k){return o[k]==null?'':o[k];});};
+  var n0=function(x){return Math.round(x).toLocaleString('en-US');};
+  var CHEV='<svg class="et-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>';
+  var M=window.BMESH;
+
+  /* ── the data layer ── */
+  var D={meter:null,result:null,reference:null,founder:null,vector:null,exists:[],notYet:[],flow:[],live:null,supply:[],gates:[],bill:null,pulse:{},page:'bmeshasi.html'};
+  var B={step:'home',open:0}, R={drop:0,still:false,drag:null}, C={};
+  function sec(re){return [].filter.call(document.querySelectorAll('main section'),function(s){return re.test(txt(s.querySelector('h2')));})[0];}
+  function items(col){var out=[],cur=null;if(!col)return out;[].forEach.call(col.childNodes,function(n){
+    if(n.nodeName==='B'&&!n.getAttribute('style')){cur={name:txt(n),text:''};out.push(cur);return;}
+    if(n.nodeName==='BR'){cur=null;return;} if(cur)cur.text=(cur.text+' '+n.textContent).replace(/\s+/g,' ').replace(/^\s*—\s*/,'').trim();});return out;}
+  function state(el){var t=txt(el);if(!el)return {s:'missing'};if(/couldn[’']t|not read|out of reach|fail/i.test(t)||el.classList.contains('fail'))return {s:'fail',t:t};if(/^reading…$/.test(t))return {s:'wait'};return {s:'ok',v:t};}
+  function readPage(){
+    var sig0=JSON.stringify([D.meter,D.pulse]);
+    D.meter=M?M.params():null; D.result=M&&D.meter?M.fee(D.meter):null; D.reference=M?M.reference:null; D.founder=M?M.founder:null;
+    var m3=sec(/THE METER/), law=m3&&[].filter.call(m3.querySelectorAll('.law'),function(l){return /whole-market rental/.test(txt(l));})[0];
+    var sv=law&&/rental \[0,1\] reads ([\d,]+)/.exec(txt(law));
+    var ref=D.reference, calc=ref&&M?M.fee({e:ref.e,min:ref.min,max:ref.max,w:0,u0:0,u1:1,ua:ref.ua}):null;
+    D.vector={stated:sv?sv[1]:null,computed:calc&&calc.ok?calc.fee:null};
+    D.vector.match=D.vector.stated!=null&&D.vector.computed!=null&&+D.vector.stated.replace(/,/g,'')===D.vector.computed;
+    D.exists=items(document.querySelector('main .col.yes')); D.notYet=items(document.querySelector('main .col.no'));
+    var s2=sec(/THE EXCHANGE/);
+    D.flow=s2?[].map.call(s2.querySelectorAll('.wf .step'),function(st){var b=st.querySelector('b');return {name:txt(b),text:txt(st).slice(txt(b).length).trim(),first:st.classList.contains('first')};}):[];
+    D.live=s2&&/settlement is NOT LIVE/i.test(txt(s2.querySelector('.ceiling')))?false:null;
+    D.supply=[].map.call((sec(/SUPPLY BOARD/)||document.createElement('i')).querySelectorAll('tbody tr'),function(tr){var td=tr.querySelectorAll('td');return {resource:txt(td[0]),cls:txt(td[1]),holder:txt(td[2]),status:txt(td[3].querySelector('.badge')),note:txt(td[3]).slice(txt(td[3].querySelector('.badge')).length).trim()};});
+    D.gates=[].map.call(document.querySelectorAll('main .gate'),function(g){var id=txt(g.querySelector('b')), all=txt(g), gw=txt(g.querySelector('.gw'));
+      return {id:id,question:all.slice(id.length,all.length-gw.length).replace(/^\s*—\s*/,'').trim(),prepared:/PREPARED:/.test(gw),ruled:/RULED/.test(gw)};});
+    var s5=sec(/THE DIVERSION/), bm=s5&&/~\$([\d,]+)\/mo/.exec(txt(s5)); D.bill=bm?'$'+bm[1]+'/mo':null;
+    D.pulse={vaulta:state($('vhead')),hive:state($('hhead')),witness:state($('hwit')),vmeta:txt($('vmeta')),hmeta:txt($('hmeta')),reads:txt($('rds'))};
+    return JSON.stringify([D.meter,D.pulse])!==sig0;
+  }
+  var set=function(q){if(M){M.set(q);} readPage(); all();};
+  var pct=function(u){return Math.round(u*100)+'%';};
+  var count=function(list,re){return list.filter(function(x){return re.test(x.status);}).length;};
+
+  /* ── NEW BEE ── */
+  var beeP=function(s){return !s||s.s==='wait'?K('bAsk','still asking'):s.s==='ok'?fill(K('bBlock','block {v}'),{v:s.v}):K('bOut','out of reach from here');};
+  function bee(){
+    if(!$('etMsRows')) return;
+    document.querySelectorAll('#eternal .et-b-step').forEach(function(e){e.hidden=e.dataset.step!==B.step;});
+    var prepared=D.gates.filter(function(g){return g.prepared;}).length;
+    var rows=[
+      {n:1,t:K('b1','what works today'),v:fill(K('b1v','{n} parts'),{n:D.exists.length}),p:D.exists.map(function(x){return x.name;}).join(' · '),src:K('b1s','each one links its receipt below.')},
+      {n:2,t:K('b2','what doesn\'t exist yet'),v:fill(K('b2v','{n} parts, said plainly'),{n:D.notYet.length}),out:true,p:D.notYet.map(function(x){return x.name;}).join(' · '),src:K('b2s','there is no live payment: the order of payment is a rule on paper today.')},
+      {n:3,t:K('b3','who is paid first'),v:K('b3v','the machine\'s owner'),ok:true,p:K('b3p','first the owners\' real costs: servers, hardware, bandwidth. only then everything else. every step leaves a receipt.'),src:D.flow.map(function(f){return f.name;}).join(' → ')},
+      {n:4,t:K('b4','machines offered so far'),v:fill(K('b4v','{p} pledged · {o} offered'),{p:count(D.supply,/PLEDGED/),o:count(D.supply,/OFFERED/)}),p:D.supply.map(function(s){return s.resource+': '+s.status;}).join(' · '),src:K('b4s','a pledge is a statement on this page, not a payment.')},
+      {n:6,t:K('b6','the chains it would pay into'),v:fill(K('b6v','{n} of 2 answering here'),{n:[D.pulse.vaulta,D.pulse.hive].filter(function(s){return s&&s.s==='ok';}).length}),p:fill(K('b6p','both are read live from your own browser. vaulta: {v}. hive: {h}.'),{v:beeP(D.pulse.vaulta),h:beeP(D.pulse.hive)}),src:K('b6s','a failed read says so; it never shows a zero.')},
+      {n:5,t:K('b5','decisions still open'),v:fill(K('b5v','{n} open · {p} prepared'),{n:D.gates.filter(function(g){return !g.ruled;}).length,p:prepared}),p:K('b5p','the founder decides each one with a single word. the work around each is already done where it could be.'),src:D.gates.map(function(g){return g.id;}).join(' · ')}
+    ];
+    $('etMsRows').innerHTML=rows.map(function(r){var open=B.open===r.n;
+      return '<button type="button" class="et-b-row" data-row="'+r.n+'" aria-expanded="'+(open?'true':'false')+'"><span class="et-b-rl"><b>'+esc(r.t)+'</b></span><span class="et-b-rv'+(r.out?' et-out':r.ok?' et-ok':'')+'">'+esc(r.v)+CHEV+'</span></button>'+
+        (open?'<div class="et-b-open"><div>'+esc(r.p)+'</div><div class="et-b-src">'+esc(r.src)+'</div></div>':'');}).join('');
+    var q=D.meter, r=D.result;
+    if(q){
+      var sl=$('etMsBeeU1'); if(document.activeElement!==sl) sl.value=q.u1;
+      $('etMsBeeLbl').textContent=fill(K('bSlide','how busy your use makes the network: from {a} to {b}'),{a:pct(q.u0),b:pct(q.u1)});
+      $('etMsBeeFee').textContent=r&&r.ok?fill(K('bFee','{f} meter units'),{f:n0(r.fee)}):K('bFeeNo','the meter refuses this setting');
+      $('etMsBeeFeeS').textContent=r&&r.ok?K('bFeeS','rounded up once at the end, exactly as the tested code does.'):K('bFeeNoS','the start is past the end. slide further right.');
+      $('etMsBeeNote').textContent=fill(K('bNote','meter units, not money. these are the reference settings of a published test{f}; the real prices wait for the founder\'s word. the machine\'s owner is paid first, whatever the meter reads.'),{f:D.vector.match?fill(K('bNoteV',', which reads {v} for the whole network'),{v:D.vector.stated}):''});
+    }
+  }
+
+  /* ── RAVER: the curve landscape ── */
+  var X0=34,X1=346,YB=206,YT=18;
+  var X=function(u){return X0+u*(X1-X0);}, U=function(x){return Math.max(0,Math.min(1,(x-X0)/(X1-X0)));};
+  function curve(){
+    var svg=$('etMsCurve'); if(!svg||!M||!D.meter) return;
+    var q=D.meter, top=Math.max(q.max,q.min)*1.08||1, Y=function(p){return YB-(p/top)*(YB-YT);};
+    var pts=[];for(var i=0;i<=64;i++){var u=i/64;pts.push(X(u).toFixed(1)+','+Y(q.e===1?q.max:q.min+(q.max-q.min)*Math.pow(u,q.e-1)).toFixed(1));}
+    var r=D.result, h='<line class="et-axis" x1="'+X0+'" y1="'+YB+'" x2="'+X1+'" y2="'+YB+'"/>';
+    if(r&&r.ok){
+      var fe=Math.min(q.u1,q.w);
+      if(fe>q.u0) h+='<rect class="et-flat" x="'+X(q.u0).toFixed(1)+'" y="'+Y(r.pua).toFixed(1)+'" width="'+(X(fe)-X(q.u0)).toFixed(1)+'" height="'+(YB-Y(r.pua)).toFixed(1)+'"/>';
+      var hi=Math.max(q.u0,q.w);
+      if(q.u1>hi){var a=[X(hi).toFixed(1)+','+YB];for(var j=0;j<=32;j++){var uu=hi+(q.u1-hi)*j/32;a.push(X(uu).toFixed(1)+','+Y(q.e===1?q.max:q.min+(q.max-q.min)*Math.pow(uu,q.e-1)).toFixed(1));}a.push(X(q.u1).toFixed(1)+','+YB);
+        h+='<polygon class="et-intg" points="'+a.join(' ')+'"/>';}
+    }
+    h+='<polyline class="et-curve" points="'+pts.join(' ')+'"/>';
+    h+='<line class="et-wm" x1="'+X(q.w).toFixed(1)+'" y1="'+YT+'" x2="'+X(q.w).toFixed(1)+'" y2="'+YB+'"/><text class="et-wmt" x="'+(X(q.w)+6).toFixed(1)+'" y="'+(YT+14)+'">w '+q.w.toFixed(2)+'</text>';
+    h+='<text x="'+X0+'" y="228" text-anchor="middle">0</text><text x="'+X1+'" y="228" text-anchor="middle">1</text><text x="'+((X0+X1)/2)+'" y="246" text-anchor="middle">'+esc(K('rAxis','how busy the network is'))+'</text>';
+    [['u0',q.u0],['u1',q.u1]].forEach(function(e){h+='<g class="et-h" role="button" tabindex="0" data-end="'+e[0]+'" aria-pressed="'+(R.drag===e[0]?'true':'false')+'" aria-label="'+esc((e[0]==='u0'?K('rU0','start of your stretch'):K('rU1','end of your stretch'))+': '+e[1].toFixed(2))+'"><circle class="et-hit" cx="'+X(e[1]).toFixed(1)+'" cy="'+YB+'" r="23"/><circle class="et-dot" cx="'+X(e[1]).toFixed(1)+'" cy="'+YB+'" r="9"/></g>';});
+    svg.innerHTML=h;
+  }
+  function raver(){
+    if(!$('etMsCurve')) return;
+    curve();
+    var r=D.result, q=D.meter;
+    $('etMsBig').textContent=r&&r.ok?n0(r.fee):K('rRefuse','refused');
+    $('etMsBigS').textContent=r&&r.ok?K('rUnits','meter units · reference curve'):K('rRefuseS','the crate refuses this stretch');
+    $('etMsCard').innerHTML=q?'<span class="et-rk">'+esc(pct(q.u1-q.u0))+'</span><div><b>'+esc(fill(K('rCard','your stretch: {a} → {b} busy'),{a:pct(q.u0),b:pct(q.u1)}))+'</b><span>'+esc(r&&r.ok?fill(K('rCardS','flat {f} + under the curve {i} → {t}, rounded up once'),{f:n0(r.flat),i:n0(r.intg),t:n0(r.fee)}):K('rCardNo','no fee: the stretch runs backwards'))+'</span><span class="et-src">'+esc(D.founder?K('rFounder','the founder\'s values are live'):K('rRef','reference values from the published test · our prices wait for the founder (MX-1) · nothing is charged'))+'</span></div>':'';
+    $('etMsDrops').innerHTML=D.flow.map(function(f,i){var sel=R.drop===i;return '<button type="button" class="et-ms-drop'+(f.first&&i===0?' et-first':'')+'" data-drop="'+i+'" aria-pressed="'+(sel?'true':'false')+'"><b>'+(i+1)+'</b>'+esc(i===0?K('d1','iron first'):i===1?K('d2','the rest'):K('d3','the receipt'))+'</button>';}).join('');
+    var p=D.pulse, cell=function(name,st,meta){return '<div class="'+(st.s==='fail'?'et-fail':'')+'"><b>'+esc(name)+'</b>'+esc(st.s==='ok'?st.v:st.s==='fail'?K('rOut','out of reach from here · never a zero'):K('rAsk','asking…'))+'</div>';};
+    $('etMsPulse').innerHTML=cell(K('rVaulta','vaulta'),p.vaulta||{s:'wait'})+cell(K('rHive','hive'),p.hive||{s:'wait'});
+    var s=$('etMsStill'); s.setAttribute('aria-pressed',R.still?'true':'false'); s.textContent=R.still?K('play','play the light'):K('still','pause the light');
+    document.querySelector('#eternal .et-r').classList.toggle('et-still-on',R.still);
+    var f=D.flow[R.drop];
+    if(f&&R.dropOpen){$('etMsCard').innerHTML='<span class="et-rk">'+(R.drop+1)+'</span><div><b>'+esc(f.name)+'</b><span>'+esc(f.text)+'</span><span class="et-src">'+esc(K('rNotLive','settlement is not live · this is the order, not a payment'))+'</span></div>';}
+  }
+
+  /* ── CYPHERPUNK ── */
+  var PARAMS=[['e','exponent e','0.1'],['min','min price','100'],['max','max price','100'],['w','watermark w','0.01'],['u0','interval start u₀','0.01'],['u1','interval end u₁','0.01'],['ua','adjusted uₐ (ratchet out)','0.01']];
+  function cy(){
+    if(!$('etMsParams')||!D.meter) return;
+    var q=D.meter, r=D.result, ref=D.reference||{};
+    $('etMsChips').innerHTML='<span class="et-no">'+esc(D.live===false?K('cLive','settlement not live'):K('cLiveU','settlement not stated'))+'</span><span class="et-on">'+esc(D.founder?K('cFounder','MX-1 armed · founder values'):K('cMx1','MX-1 open · reference vectors'))+'</span><span>'+esc(fill(K('cGates','gates {n} · open {o} · prepared {p}'),{n:D.gates.length,o:D.gates.filter(function(g){return !g.ruled;}).length,p:D.gates.filter(function(g){return g.prepared;}).length}))+'</span><span class="'+(D.vector.match?'et-ok':'et-no')+'">'+esc(D.vector.match?K('cVec','case 1 matches'):K('cVecNo','case 1 unchecked'))+'</span>';
+    $('etMsParams').innerHTML=PARAMS.map(function(p){var focused=document.activeElement&&document.activeElement.dataset&&document.activeElement.dataset.param===p[0];
+      return '<tr><th>'+esc(p[1])+'</th><td><input class="et-c-in" type="number" inputmode="decimal" step="'+p[2]+'" data-param="'+p[0]+'" value="'+q[p[0]]+'" aria-label="'+esc(p[1])+'"><small>'+esc(fill(K('cRef','reference {v}'),{v:ref[p[0]]}))+'</small></td></tr>';}).join('');
+    $('etMsOut').innerHTML=(r&&r.ok?[['p(uₐ)',n0(r.pua)],['flat · below w',n0(r.flat)],['integral · above w',n0(r.intg)],['fee · one ceil','<span class="et-yes">'+n0(r.fee)+'</span> '+esc(K('cUnits','meter units'))]]:[['guard','<span class="et-g">'+esc(r?r.guard:K('cNoEngine','no engine on this page'))+'</span>']]).concat([
+      ['case 1',esc(fill(K('cCase','[0,1], w=0 at reference: engine {c} · page states {s}'),{c:D.vector.computed!=null?n0(D.vector.computed):K('cNone','not computed'),s:D.vector.stated||K('cNone2','not stated')}))+' '+(D.vector.match?'<span class="et-yes">'+esc(K('cMatch','match ✓'))+'</span>':'<span class="et-no">'+esc(K('cMismatch','mismatch'))+'</span>')]
+    ]).map(function(x){return '<tr><th>'+x[0]+'</th><td>'+x[1]+'</td></tr>';}).join('');
+    $('etMsFlow').innerHTML=D.flow.map(function(f,i){return '<li class="'+(i===0?'et-done':'et-todo')+'"><b>'+esc(f.name)+'</b><div>'+esc(f.text)+'</div></li>';}).join('')+'<li class="et-guard"><b>'+esc(K('cCeil','settlement · not live'))+'</b><div>'+esc(K('cCeilD','the order of payment is the law on this surface; no reimbursement runs yet'))+'</div></li>';
+    $('etMsSupply').innerHTML=D.supply.map(function(s,i){return '<tr><td>'+(i+1)+'</td><td>'+esc(s.resource)+'<small>'+esc(s.cls+' · '+s.holder)+'</small></td><td class="'+(/PLEDGED/.test(s.status)?'et-st-ok':/GATED|OPEN/.test(s.status)?'et-st-no':'et-st-dim')+'">'+esc(s.status)+'</td></tr>';}).join('');
+    $('etMsGates').innerHTML=D.gates.map(function(g){return '<tr><td>'+esc(g.id)+'</td><td>'+esc(g.question)+'</td><td class="'+(g.ruled?'et-st-ok':g.prepared?'et-st-wait':'et-st-dim')+'">'+esc(g.ruled?K('cRuled','ruled'):g.prepared?K('cPrep','prepared'):K('cOpen','open'))+'</td></tr>';}).join('');
+    var p=D.pulse, pv=function(st){return st.s==='ok'?'<span class="et-yes">'+esc(st.v)+'</span>':st.s==='fail'?'<span class="et-g">'+esc(K('cFail','failed · declared, not zeroed'))+'</span>':'<span class="et-no">'+esc(K('cWait','reading'))+'</span>';};
+    $('etMsPulses').innerHTML=[['vaulta head',pv(p.vaulta)],['hive head',pv(p.hive)],['witness',pv(p.witness)],['reads',esc(p.reads||'0')],['bill today',esc(D.bill?fill(K('cBill','~{b} to a cloud (his numbers, self-published) · the flow, never a price'),{b:D.bill}):K('cBillNo','not stated'))]].map(function(x){return '<tr><th>'+x[0]+'</th><td>'+x[1]+'</td></tr>';}).join('');
+    $('etMsVerify').innerHTML=[
+      '<code>cargo test -p bmesh-meter --test live_conformance</code>',
+      esc(K('v2','cited: crates/bmesh-meter/tests/live_conformance.rs · whole_market_from_zero_costs_min_plus_half_spread asserts 38_750 (cited, not re-run here)')),
+      esc(fill(K('v3','this front computes case 1 with the page\'s own meterFee(): {c}; the page states {s}'),{c:D.vector.computed!=null?n0(D.vector.computed):K('cNone','not computed'),s:D.vector.stated||K('cNone2','not stated')}))
+    ].map(function(s){return '<li>'+s+'</li>';}).join('');
+  }
+
+  function keyedCopy(){document.querySelectorAll('#eternal [data-etk]').forEach(function(e){if(e.dataset.etEn==null)e.dataset.etEn=e.textContent;e.textContent=T(e.dataset.etk,e.dataset.etEn);});}
+  function all(){bee();raver();cy();}
+  function wire(){
+    var ev=$('eternal'); if(!ev) return;
+    ev.addEventListener('click',function(e){
+      var go=e.target.closest('[data-go]'); if(go){B.step=go.dataset.go;bee();return;}
+      var row=e.target.closest('.et-b-row[data-row]'); if(row){var n=+row.dataset.row;B.open=B.open===n?0:n;bee();return;}
+      var dr=e.target.closest('[data-drop]'); if(dr){R.drop=+dr.dataset.drop;R.dropOpen=true;raver();return;}
+      if(e.target.closest('#etMsStill')){R.still=!R.still;raver();return;}
+      if(e.target.closest('#etMsCyGo')){set({u0:0,u1:1,w:0});return;}
+    });
+    ev.addEventListener('input',function(e){
+      if(e.target.id==='etMsBeeU1'){set({u1:+e.target.value});return;}
+    });
+    ev.addEventListener('change',function(e){var k=e.target.dataset&&e.target.dataset.param; if(k&&e.target.value!==''){var o={};o[k]=+e.target.value;set(o);}});
+    /* raver: drag an end along the axis, or tap the curve to move the nearer end */
+    var svg=$('etMsCurve');
+    if(svg){
+      var toU=function(ev2){var r=svg.getBoundingClientRect();return Math.round(U((ev2.clientX-r.left)*360/r.width)*100)/100;};
+      var move=function(end,u){var q=D.meter,o={};if(!q)return;if(end==='u0')u=Math.min(u,q.u1);else u=Math.max(u,q.u0);o[end]=u;R.dropOpen=false;set(o);};
+      svg.addEventListener('pointerdown',function(ev2){var h=ev2.target.closest('.et-h');if(!h)return;R.drag=h.dataset.end;try{svg.setPointerCapture(ev2.pointerId);}catch(x){}ev2.preventDefault();});
+      svg.addEventListener('pointermove',function(ev2){if(!R.drag)return;move(R.drag,toU(ev2));});
+      ['pointerup','pointercancel'].forEach(function(t){svg.addEventListener(t,function(){if(R.drag){R.drag=null;raver();}});});
+      svg.addEventListener('click',function(ev2){if(ev2.target.closest('.et-h')||!D.meter)return;var u=toU(ev2),q=D.meter;move(Math.abs(u-q.u0)<Math.abs(u-q.u1)?'u0':'u1',u);});
+      svg.addEventListener('keydown',function(ev2){var h=ev2.target.closest('.et-h');if(!h||!D.meter)return;var d=ev2.key==='ArrowRight'||ev2.key==='ArrowUp'?0.01:ev2.key==='ArrowLeft'||ev2.key==='ArrowDown'?-0.01:0;if(!d)return;ev2.preventDefault();
+        var end=h.dataset.end;move(end,Math.round((D.meter[end]+d)*100)/100);var n=svg.querySelector('.et-h[data-end="'+end+'"]');if(n)n.focus();});
+    }
+    /* the page's own sliders move the fronts too; the pulses land through its own reads */
+    var main=document.querySelector('body>main');
+    if(main){main.addEventListener('input',function(){readPage();all();});
+      if(window.MutationObserver){var q=0;new MutationObserver(function(){if(q)return;q=setTimeout(function(){q=0;if(readPage())all();},80);}).observe(main,{subtree:true,childList:true,characterData:true});}}
+    document.addEventListener('blang',function(){keyedCopy();all();});
+  }
+  readPage(); keyedCopy(); wire(); all();
+  window.__eternal={data:D,bee:B,raver:R,cy:C};
 })();
 </script>
 <script src="agent-dock.js?v=5"></script>

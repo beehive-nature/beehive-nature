@@ -82,9 +82,315 @@ body[data-reg="bee"] :is(.stat .lbl,.stat .src,footer,button){font-family:system
 body[data-reg="bee"] button{font-size:15px}
 body[data-reg="raver"] .law,body[data-reg="raver"] .design{font-size:14.5px}
 body[data-reg="raver"] :is(h2,.stat .lbl,.stat .src,footer,button){font-size:14px}
+.dial .big.nm{font-size:16px;line-height:1.6}
+</style>
+<link rel="stylesheet" href="skaists.css">
+<style id="etKit">
+/* ── ETERNAL FRONT KIT (docs/design/eternal) — three products in one surface. Every value is a skaists
+   token (skaists.css, compiled from docs/design/skaists/tokens.json): no hand-picked hex, size or
+   corner; sizes carry fallbacks for servers that send .css as octet-stream. Measured by
+   e2e/skaists-conformance.mjs. One register visible at a time; new bee is the default. Every class is
+   et- prefixed and every rule starts at #eternal, so the page's own bare rules never reach in. ── */
+#eternal{box-sizing:border-box;display:block;width:100%;max-width:600px;margin:0 auto var(--sk-s2,12px);padding:var(--sk-s2,12px) 0 0;border:0;border-radius:0;background:none;box-shadow:none;text-align:left;letter-spacing:normal;text-transform:none;color:var(--sk-ink);overflow-wrap:break-word}
+#eternal *,#eternal *::before,#eternal *::after{box-sizing:border-box}
+#eternal>.et-r,#eternal>.et-c{display:none}
+body[data-reg="raver"] #eternal>.et-b,body[data-reg="cypherpunk"] #eternal>.et-b{display:none}
+body[data-reg="raver"] #eternal>.et-r{display:block}
+body[data-reg="cypherpunk"] #eternal>.et-c{display:block}
+#eternal [hidden]{display:none!important}
+#eternal button{margin:0;color:inherit;text-transform:none;letter-spacing:normal;min-width:0;font-family:inherit;box-shadow:none}
+#eternal svg{display:block;max-width:100%}
+#eternal a{text-decoration:none}
+#eternal a:hover{text-decoration:none}
+#eternal :focus-visible{outline:2px solid var(--sk-focus);outline-offset:3px}
+#eternal h2,#eternal h3,#eternal p,#eternal ol,#eternal ul,#eternal table{margin:0;padding:0;border:0;background:none;text-transform:none;letter-spacing:normal;min-width:0;max-width:none;text-shadow:none;color:inherit}
+#eternal table{width:100%;border-collapse:separate;border-spacing:0;font-size:inherit}
+#eternal th,#eternal td{border:0;padding:0;vertical-align:top;text-align:left;background:none;letter-spacing:normal;color:inherit;font-weight:inherit}
+#eternal code{font:inherit;background:none;padding:0;border:0;color:inherit}
+#eternal .et-ic{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+#eternal .et-chev{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;flex:none;transition:transform var(--dur,.26s)}
+#etArchive.et-archive-h{box-sizing:border-box;width:100%;max-width:600px;margin:var(--sk-s5,36px) auto var(--sk-s2,12px);padding:var(--sk-s4,24px) 0 0;border:0;border-top:1px solid var(--sk-line);background:none;color:var(--sk-ink);text-transform:none;letter-spacing:normal;text-shadow:none;-webkit-text-fill-color:currentColor;text-align:left}
+body[data-reg="bee"] #etArchive.et-archive-h{font:400 28px/1.1 var(--sk-font-bee-serif)}
+body[data-reg="raver"] #etArchive.et-archive-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em}
+body[data-reg="cypherpunk"] #etArchive.et-archive-h{font:600 15px/1.45 var(--sk-font-mono)}
+
+/* NEW BEE — a calm room: plain rows, one reassurance, one magenta action, a link, a footnote */
+#eternal .et-b{display:flex;flex-direction:column;gap:var(--sk-s3,18px);color:var(--sk-ink);font:400 16px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-b-step{display:flex;flex-direction:column;gap:var(--sk-s3,18px)}
+#eternal .et-b-mark{font:400 18px/1.2 var(--sk-font-house);color:var(--sk-sovereign)}
+#eternal .et-b-h{font:400 40px/1.05 var(--sk-font-bee-serif);color:var(--sk-ink)}
+#eternal .et-b-h2{font:400 28px/1.1 var(--sk-font-bee-serif);color:var(--sk-ink)}
+#eternal .et-b-lede{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink-mut);text-wrap:pretty}
+#eternal .et-b-guard{display:flex;align-items:center;gap:var(--sk-s2,12px);min-height:var(--sk-control-min,44px);padding:var(--sk-s1,6px) var(--sk-s3,18px);border-radius:var(--sk-radius,12px);background:var(--sk-guard-wash);color:var(--sk-guard);font:600 15px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-b-rows{display:flex;flex-direction:column;background:var(--sk-bg-card);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl,18px);overflow:hidden}
+#eternal .et-b-row{display:flex;align-items:center;justify-content:space-between;gap:var(--sk-s2,12px);width:100%;min-height:var(--sk-control-row,52px);padding:var(--sk-s1,6px) var(--sk-s3,18px);border:0;border-bottom:1px solid var(--sk-line-soft);border-radius:0;background:transparent;text-align:left;font:500 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+#eternal .et-b-row:last-child{border-bottom:0}
+#eternal button.et-b-row,#eternal a.et-b-row{cursor:pointer}
+#eternal .et-b-rl{display:flex;flex-direction:column;flex:1 1 auto;min-width:0}
+#eternal .et-b-rl b{font:500 16px/1.45 var(--sk-font-bee-sans);color:inherit}
+#eternal .et-b-rl small{font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-rv{display:flex;align-items:center;gap:var(--sk-s1,6px);flex:0 1 auto;max-width:50%;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut);text-align:right}
+#eternal .et-b-rv.et-out{color:var(--sk-guard)}
+#eternal .et-b-rv.et-ok{color:var(--sk-verified)}
+#eternal .et-b-row[aria-expanded="true"],#eternal .et-b-row[aria-pressed="true"]{background:var(--sk-sovereign-tint);color:var(--sk-sovereign-strong)}
+#eternal .et-b-row[aria-expanded="true"] .et-b-rl b,#eternal .et-b-row[aria-pressed="true"] .et-b-rl b{font-weight:600}
+#eternal .et-b-row[aria-expanded="true"] .et-b-rv,#eternal .et-b-row[aria-pressed="true"] .et-b-rv,#eternal .et-b-row[aria-expanded="true"] .et-b-rl small,#eternal .et-b-row[aria-pressed="true"] .et-b-rl small{color:var(--sk-sovereign-strong)}
+#eternal .et-b-row[aria-expanded="true"] .et-chev{transform:rotate(90deg)}
+#eternal .et-b-open{display:flex;flex-direction:column;gap:var(--sk-s1,6px);padding:var(--sk-s2,12px) var(--sk-s3,18px);background:var(--sk-sovereign-tint);border-bottom:1px solid var(--sk-line-soft)}
+#eternal .et-b-open:last-child{border-bottom:0}
+#eternal .et-b-open>div{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+#eternal .et-b-open>div.et-b-src{font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-open a{display:flex;align-items:center;min-height:var(--sk-control-min,44px);font:600 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-link)!important}
+#eternal .et-b-open a:hover{color:var(--sk-link-hover)!important}
+#eternal .et-b-term{display:flex;gap:var(--sk-s2,12px);align-items:flex-start;padding:var(--sk-s2,12px) var(--sk-s3,18px);border-bottom:1px solid var(--sk-line-soft)}
+#eternal .et-b-term:last-child{border-bottom:0}
+#eternal .et-b-term>i{width:36px;height:36px;border-radius:var(--sk-radius-pill,999px);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong);display:flex;align-items:center;justify-content:center;flex:none;font:600 14px/1.4 var(--sk-font-bee-sans);font-style:normal}
+#eternal .et-b-term>i.et-ok{background:var(--sk-verified-wash);color:var(--sk-verified)}
+#eternal .et-b-term>i.et-dash{background:transparent;border:1.5px dashed var(--sk-guard);color:var(--sk-guard)}
+#eternal .et-b-term>div{display:flex;flex-direction:column;min-width:0}
+#eternal .et-b-term b{display:block;font:600 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+#eternal .et-b-term span{font:400 15px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-figure{font:400 32px/1 var(--sk-font-bee-serif);color:var(--sk-ink)}
+#eternal .et-b-act{display:flex;flex-direction:column;gap:var(--sk-s1,6px);margin-top:var(--sk-s1,6px)}
+#eternal .et-b-primary{display:flex;align-items:center;justify-content:center;width:100%;min-height:var(--sk-control-primary,54px);padding:var(--sk-s1,6px) var(--sk-s3,18px);border:0;border-radius:var(--sk-radius-lg,16px);background:var(--sk-primary);color:var(--sk-on-primary)!important;font:600 17px/1.2 var(--sk-font-bee-sans)!important;text-align:center;cursor:pointer}
+#eternal .et-b-primary:disabled{background:var(--sk-bg-well);color:var(--sk-ink-mut)!important;cursor:not-allowed}
+#eternal .et-b-link{display:flex;align-items:center;justify-content:center;min-height:var(--sk-control-min,44px);padding:0 var(--sk-s2,12px);border:0;background:transparent;font:600 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-link)!important;cursor:pointer;text-align:center}
+#eternal .et-b-link:hover{color:var(--sk-link-hover)!important}
+#eternal .et-b-foot{text-align:center;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-status{padding:var(--sk-s2,12px) var(--sk-s3,18px);border-radius:var(--sk-radius,12px);background:var(--sk-verified-wash);color:var(--sk-verified);font:600 14px/1.4 var(--sk-font-bee-sans)}
+#eternal .et-b-status.et-no{background:var(--sk-guard-wash);color:var(--sk-guard)}
+#eternal .et-b-status.et-wait{background:var(--sk-sovereign-tint);color:var(--sk-sovereign-strong)}
+#eternal .et-b-back{align-self:flex-start;display:flex;align-items:center;min-height:var(--sk-control-min,44px);padding:0;border:0;background:none;font:600 16px/1.45 var(--sk-font-bee-sans)!important;color:var(--sk-link)!important;cursor:pointer}
+#eternal .et-b-card{display:flex;flex-direction:column;gap:var(--sk-s1,6px);padding:var(--sk-s3,18px);background:var(--sk-sovereign-tint);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl,18px)}
+#eternal .et-b-card h3{font:400 28px/1.1 var(--sk-font-bee-serif);color:var(--sk-sovereign-strong)}
+#eternal .et-b-card>div{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+#eternal .et-b-card.et-dash{background:var(--sk-bg-card);border:1px dashed var(--sk-ink-dim)}
+#eternal .et-b-seg{display:flex;flex-wrap:wrap;gap:var(--sk-s1,6px)}
+#eternal .et-b-seg button{flex:1 1 auto;min-height:var(--sk-control-min,44px);padding:var(--sk-s1,6px) var(--sk-s3,18px);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius-md,14px);background:var(--sk-bg-card);color:var(--sk-ink)!important;font:600 16px/1.45 var(--sk-font-bee-sans);cursor:pointer}
+#eternal .et-b-seg button[aria-pressed="true"]{background:var(--sk-ink);color:var(--sk-bg)!important}
+
+/* RAVER — the data is the art; lowercase is allowed joy; the numbers never change */
+#eternal .et-r{color:var(--sk-ink);font:400 14px/1.4 var(--sk-font-raver-body)}
+#eternal .et-r-top{display:flex;align-items:baseline;justify-content:space-between;gap:var(--sk-s1,6px) var(--sk-s2,12px);flex-wrap:wrap}
+#eternal .et-r-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em;color:var(--sk-ink)}
+#eternal .et-r-hint{font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-art{position:relative;width:100%;max-width:360px;margin:var(--sk-s3,18px) auto var(--sk-s2,12px)}
+#eternal .et-r-art>svg{width:100%;height:auto;filter:drop-shadow(var(--sk-glow-sovereign))}
+#eternal .et-r-art [role="button"]{cursor:pointer}
+#eternal .et-r-art [role="button"]:focus{outline:none}
+#eternal .et-r-art [role="button"]:focus-visible>*{stroke:var(--sk-ink);stroke-width:2}
+#eternal .et-r-art text{pointer-events:none}
+#eternal .et-r-legend{display:flex;flex-wrap:wrap;justify-content:center;gap:var(--sk-s1,6px) var(--sk-s3,18px);margin:0 0 var(--sk-s3,18px)}
+#eternal .et-r-legend span{display:inline-flex;align-items:center;gap:var(--sk-s1,6px);font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-legend i{width:14px;height:14px;border-radius:var(--sk-radius-pill,999px);flex:none}
+#eternal .et-r-card{display:flex;gap:var(--sk-s2,12px);align-items:flex-start;padding:var(--sk-s2,12px) var(--sk-s3,18px);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl,18px);background:var(--sk-sovereign-tint);min-height:var(--sk-control-person,60px)}
+#eternal .et-r-card .et-rk{min-width:44px;height:44px;padding:0 var(--sk-s1,6px);border-radius:var(--sk-radius,12px);background:var(--sk-sovereign-strong);color:var(--sk-bg);display:flex;align-items:center;justify-content:center;font:700 15px/1.2 var(--sk-font-raver-display);flex:none}
+#eternal .et-r-card .et-rk.et-dash{background:transparent;border:1.5px dashed var(--sk-guard);color:var(--sk-guard)}
+#eternal .et-r-card>div{min-width:0;flex:1 1 auto}
+#eternal .et-r-card b{display:block;font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink)}
+#eternal .et-r-card span{display:block;margin-top:var(--sk-s1,6px);font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-card span.et-src{color:var(--sk-sovereign-soft)}
+#eternal .et-r-sub{margin:var(--sk-s4,24px) 0 var(--sk-s2,12px);font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em;color:var(--sk-ink)}
+#eternal .et-r-chips{display:flex;flex-wrap:wrap;gap:var(--sk-s1,6px)}
+#eternal .et-r-chip{display:inline-flex;align-items:center;justify-content:center;gap:var(--sk-s1,6px);min-height:var(--sk-control-min,44px);padding:0 var(--sk-s3,18px);border:1.5px solid var(--sk-line);border-radius:var(--sk-radius-pill,999px);background:var(--sk-bg-card);color:var(--sk-ink-soft)!important;font:600 14px/1.25 var(--sk-font-raver-body);cursor:pointer}
+#eternal .et-r-chip[aria-pressed="true"]{border-color:var(--sk-you);color:var(--sk-ink)!important;box-shadow:var(--sk-glow-sovereign)}
+#eternal .et-r-note{margin:var(--sk-s2,12px) 0 0;text-align:center;font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-big{text-align:center;font:700 60px/.95 var(--sk-font-raver-display);letter-spacing:-.02em;color:var(--sk-ink)}
+#eternal .et-r-pill{display:flex;align-items:center;justify-content:center;width:100%;min-height:58px;margin-top:var(--sk-s4,24px);padding:var(--sk-s1,6px) var(--sk-s3,18px);border:0;border-radius:var(--sk-radius-pill,999px);background:var(--sk-primary);color:var(--sk-on-primary)!important;font:700 15px/1.2 var(--sk-font-raver-display)!important;letter-spacing:.04em;text-align:center;cursor:pointer}
+#eternal .et-r-pill:disabled{background:var(--sk-sovereign-wash);color:var(--sk-sovereign-soft)!important;cursor:not-allowed}
+#eternal .et-r-ghost{display:flex;align-items:center;justify-content:center;margin:var(--sk-s2,12px) auto 0;min-height:var(--sk-control-min,44px);padding:0 var(--sk-s2,12px);border:0;background:none;color:var(--sk-link)!important;font:600 14px/1.25 var(--sk-font-raver-body)!important;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+#eternal .et-r-still{display:inline-flex;align-items:center;justify-content:center;gap:var(--sk-s1,6px);min-height:var(--sk-control-min,44px);min-width:var(--sk-control-min,44px);padding:0 var(--sk-s2,12px);border:1.5px solid var(--sk-line);border-radius:var(--sk-radius-pill,999px);background:var(--sk-bg-card);color:var(--sk-ink-soft)!important;font:600 14px/1.25 var(--sk-font-raver-body)!important;cursor:pointer}
+#eternal .et-r-still[aria-pressed="true"]{border-color:var(--sk-sovereign);color:var(--sk-sovereign-strong)!important}
+#eternal .et-r-bar{display:flex;align-items:center;justify-content:space-between;gap:var(--sk-s2,12px);flex-wrap:wrap;margin-top:var(--sk-s2,12px)}
+#eternal .et-r-bar .et-r-ghost{margin:0}
+@keyframes et-breathe{0%,100%{opacity:1}50%{opacity:.55}}
+#eternal .et-r.et-still-on *{animation-play-state:paused!important}
+@media (prefers-reduced-motion:reduce){#eternal .et-r *,#eternal .et-b *,#eternal .et-c *{transition:none!important;animation:none!important}}
+
+/* CYPHERPUNK — the instrument, complete at first paint: tables, a numbered pipeline, receipts */
+#eternal .et-c{font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink)}
+#eternal .et-c-path{font:600 15px/1.45 var(--sk-font-mono);color:var(--sk-ink);overflow-wrap:anywhere}
+#eternal .et-c-chips{display:flex;flex-wrap:wrap;gap:var(--sk-s1,6px);margin:var(--sk-s2,12px) 0}
+#eternal .et-c-chips span{padding:2px var(--sk-s1,6px);border:1px solid var(--sk-line);border-radius:4px;background:var(--sk-bg-card);font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-soft)}
+#eternal .et-c-chips span.et-on{border-color:var(--sk-guard);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong)}
+#eternal .et-c-chips span.et-ok{border-color:var(--sk-verified);color:var(--sk-verified)}
+#eternal .et-c-chips span.et-no{border-color:var(--sk-info);color:var(--sk-info)}
+#eternal .et-c-guard{display:flex;justify-content:space-between;align-items:center;gap:var(--sk-s1,6px) var(--sk-s2,12px);flex-wrap:wrap;min-height:var(--sk-control-min,44px);padding:var(--sk-s1,6px) var(--sk-s3,18px);border:1px dashed var(--sk-guard);border-radius:var(--sk-radius-sm,6px);background:var(--sk-guard-wash);color:var(--sk-guard)}
+#eternal .et-c-guard b{font-weight:600;color:var(--sk-sovereign-strong)}
+#eternal .et-c-h{margin:var(--sk-s4,24px) 0 var(--sk-s2,12px)!important;font:600 15px/1.45 var(--sk-font-mono);color:var(--sk-ink)}
+#eternal .et-c-tab{width:100%;margin:var(--sk-s2,12px) 0 var(--sk-s1,6px)!important;border:1px solid var(--sk-line)!important;border-radius:var(--sk-radius-sm,6px);overflow:hidden;background:var(--sk-bg-card)!important;table-layout:auto}
+#eternal .et-c-tab th{padding:var(--sk-s1,6px) var(--sk-s2,12px)!important;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);border-bottom:1px solid var(--sk-line)!important;background:var(--sk-bg-well)}
+#eternal .et-c-tab td{height:var(--sk-control-min,44px);padding:var(--sk-s1,6px) var(--sk-s2,12px)!important;border-bottom:1px solid var(--sk-line)!important;font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink);vertical-align:middle}
+#eternal .et-c-tab tr:last-child td{border-bottom:0!important}
+#eternal .et-c-tab td:first-child{color:var(--sk-guard)}
+#eternal .et-c-tab td:first-child,#eternal .et-c-tab th:first-child{white-space:nowrap;width:1%}
+#eternal .et-c-tab tr.et-pick{cursor:pointer}
+#eternal .et-c-tab tr.et-pick:hover td,#eternal .et-c-tab tr.et-pick[aria-expanded="true"] td,#eternal .et-c-tab tr.et-pick[aria-pressed="true"] td{background:var(--sk-sovereign-tint)}
+#eternal .et-c-tab tr.et-more td{height:auto;background:var(--sk-sovereign-tint);color:var(--sk-ink-soft)}
+#eternal .et-c-tab small{display:block;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut)}
+#eternal .et-c-tab td:not(.et-nw){overflow-wrap:anywhere}
+#eternal .et-c-tab .et-nw{white-space:nowrap}
+#eternal .et-st-ok{color:var(--sk-verified)!important}#eternal .et-st-no{color:var(--sk-info)!important}#eternal .et-st-wait{color:var(--sk-ai)!important}#eternal .et-st-guard{color:var(--sk-guard)!important}#eternal .et-st-dim{color:var(--sk-ink-mut)!important}
+#eternal .et-c-pipe{list-style:none;margin:0;padding:0;display:grid;gap:var(--sk-s2,12px);counter-reset:etp}
+#eternal .et-c-pipe li{display:grid;grid-template-columns:28px 1fr;gap:var(--sk-s1,6px) var(--sk-s2,12px);padding:var(--sk-s2,12px) var(--sk-s3,18px);border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm,6px);background:var(--sk-bg-card);counter-increment:etp;min-width:0}
+#eternal .et-c-pipe li::before{content:counter(etp,decimal-leading-zero);color:var(--sk-guard);font-weight:600}
+#eternal .et-c-pipe li b{font-weight:600;color:var(--sk-ink);min-width:0}
+#eternal .et-c-pipe li p,#eternal .et-c-pipe li>div{grid-column:2;color:var(--sk-ink-soft);min-width:0}
+#eternal .et-c-pipe li.et-done b{color:var(--sk-verified)}
+#eternal .et-c-pipe li.et-guard{border-style:dashed;border-color:var(--sk-guard)}
+#eternal .et-c-pipe li.et-guard b{color:var(--sk-guard)}
+#eternal .et-c-pipe li.et-now{border-color:var(--sk-ai);box-shadow:inset 0 0 0 1px var(--sk-ai)}
+#eternal .et-c-pipe li.et-now b{color:var(--sk-ai)}
+#eternal .et-c-pipe li.et-todo p,#eternal .et-c-pipe li.et-todo>div{color:var(--sk-ink-mut)}
+#eternal .et-c-pipe code{color:var(--sk-ai);overflow-wrap:anywhere}
+#eternal .et-c-primary{display:flex;align-items:center;justify-content:center;width:100%;min-height:52px;margin-top:var(--sk-s3,18px);padding:var(--sk-s1,6px) var(--sk-s2,12px);border:0;border-radius:var(--sk-radius-sm,6px);background:var(--sk-primary);color:var(--sk-on-primary)!important;font:600 14px/1.2 var(--sk-font-mono)!important;text-align:center;cursor:pointer}
+#eternal .et-c-primary:disabled{background:var(--sk-bg-well);color:var(--sk-ink-mut)!important;border:1px dashed var(--sk-line);cursor:not-allowed}
+#eternal .et-c-kv{width:100%;border:1px solid var(--sk-line)!important;border-radius:var(--sk-radius-sm,6px);overflow:hidden;background:var(--sk-bg-card)!important;table-layout:fixed}
+#eternal .et-c-kv th{width:104px;padding:var(--sk-s2,12px)!important;vertical-align:top;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);border-bottom:1px solid var(--sk-line)!important;background:transparent;overflow-wrap:anywhere}
+#eternal .et-c-kv td{padding:var(--sk-s2,12px)!important;border-bottom:1px solid var(--sk-line)!important;font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink);overflow-wrap:anywhere}
+#eternal .et-c-kv tr:last-child th,#eternal .et-c-kv tr:last-child td{border-bottom:0!important}
+#eternal .et-c-kv .et-no{color:var(--sk-info)}#eternal .et-c-kv .et-yes{color:var(--sk-verified)}#eternal .et-c-kv .et-g{color:var(--sk-guard)}
+#eternal .et-c-verify{margin-top:var(--sk-s3,18px);padding:var(--sk-s3,18px);border-radius:var(--sk-radius-sm,6px);background:var(--sk-bg-card);border:1px solid var(--sk-line)}
+#eternal .et-c-verify-h{font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);margin-bottom:var(--sk-s1,6px)}
+#eternal .et-c-verify ol{margin:0;padding-left:var(--sk-s4,24px)!important;display:grid;gap:var(--sk-s1,6px)}
+#eternal .et-c-verify li{min-width:0;overflow-wrap:anywhere}
+#eternal .et-c-verify code{font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ai);overflow-wrap:anywhere}
+#eternal .et-c-row{display:grid;grid-template-columns:1fr 1fr;gap:var(--sk-s2,12px);margin-top:var(--sk-s3,18px)}
+#eternal .et-c-ghost{display:flex;align-items:center;justify-content:center;min-height:52px;padding:var(--sk-s1,6px);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius-sm,6px);background:transparent;color:var(--sk-ink)!important;text-align:center;font:600 14px/1.2 var(--sk-font-mono)!important;cursor:pointer}
+#eternal .et-c-a{display:inline-flex;align-items:center;min-height:var(--sk-control-min,44px);min-width:var(--sk-control-min,44px);color:var(--sk-link)!important;overflow-wrap:anywhere}
+#eternal .et-c-a:hover{color:var(--sk-link-hover)!important}
+#eternal .et-c-kv .et-c-a{display:flex;min-width:0}
+#eternal .et-c-seg{display:flex;flex-wrap:wrap;gap:var(--sk-s1,6px);margin:var(--sk-s2,12px) 0}
+#eternal .et-c-seg button{flex:1 1 auto;min-height:var(--sk-control-min,44px);padding:var(--sk-s1,6px) var(--sk-s2,12px);border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm,6px);background:var(--sk-bg-card);color:var(--sk-ink-soft)!important;font:500 12px/1.45 var(--sk-font-mono);cursor:pointer}
+#eternal .et-c-seg button[aria-pressed="true"]{border-color:var(--sk-ai);color:var(--sk-ai)!important;box-shadow:inset 0 0 0 1px var(--sk-ai)}
+/* ── /ETERNAL FRONT KIT ── */
+</style>
+<style id="etPage">
+/* bantfarm's own front pieces */
+#eternal .et-bf-state{display:flex;flex-direction:column;gap:var(--sk-s1,6px)}
+/* raver: the two treasuries as one ring — the ant side (Arbitrum One) and the dao side (Vaulta), a cell
+   per live read; lit = read live, dashed = the read failed, dim = still asking; the window at the heart */
+#eternal #etBfRing .et-cell path{stroke:var(--sk-line);stroke-width:1;transition:fill var(--dur,.26s),opacity var(--dur,.26s)}
+#eternal #etBfRing .et-cell.et-wait path{fill:var(--sk-sovereign-wash);opacity:.62}
+#eternal #etBfRing .et-cell.et-fail path{fill:none;stroke:var(--sk-guard);stroke-width:1.5;stroke-dasharray:4 4}
+#eternal #etBfRing .et-cell.et-ok.et-ant path{fill:var(--sk-ai)}
+#eternal #etBfRing .et-cell.et-ok.et-dao path{fill:var(--sk-sovereign)}
+#eternal #etBfRing .et-cell.et-ok path{animation:et-breathe 3.4s ease-in-out infinite}
+#eternal #etBfRing .et-cell[aria-pressed="true"] path{stroke:var(--sk-you);stroke-width:2.5;stroke-dasharray:none;opacity:1}
+#eternal #etBfRing .et-cell text{fill:var(--sk-ink);font:700 15px/1.2 var(--sk-font-raver-display)}
+#eternal #etBfRing .et-cell.et-ok text{fill:var(--sk-bg)}
+#eternal #etBfRing .et-cell.et-fail text{fill:var(--sk-guard)}
+#eternal #etBfRing .et-heart circle{fill:var(--sk-bg-card);stroke:var(--sk-sovereign);stroke-width:1.5}
+#eternal #etBfRing .et-heart[aria-pressed="true"] circle{stroke:var(--sk-you);stroke-width:2.5}
+#eternal #etBfRing .et-heart text{fill:var(--sk-ink);font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em}
+#eternal #etBfRing .et-heart text.et-s{fill:var(--sk-ink-soft);font:600 14px/1.25 var(--sk-font-raver-body);letter-spacing:0}
+#eternal #etBfRing text.et-side{fill:var(--sk-ink-soft);font:600 14px/1.25 var(--sk-font-raver-body)}
+#eternal .et-lg-ant{background:var(--sk-ai)}#eternal .et-lg-dao{background:var(--sk-sovereign)}#eternal .et-lg-fail{border:1.5px dashed var(--sk-guard)}#eternal .et-lg-wait{background:var(--sk-sovereign-wash);border:1px solid var(--sk-line)}
+#eternal #etBfVault{margin-top:var(--sk-s2,12px)}
+
+/* ── THE WHOLE PAGE, dressed per register: the page's own variables mapped onto skaists. A failed
+   read wears info (never amber); the ant side wears the machine teal, the dao side human purple. ── */
+body[data-reg]{--bg:var(--sk-bg);--panel:var(--sk-bg-card);--well:var(--sk-bg);--ink:var(--sk-ink);--dim:var(--sk-ink-mut);--faint:var(--sk-ink-mut);--line:var(--sk-line);--cyan:var(--sk-link);--gold:var(--sk-you);--leaf:var(--sk-verified);--violet:var(--sk-sovereign);--amber:var(--sk-info);--ant:var(--sk-ai);--vaulta:var(--sk-sovereign);background:var(--sk-bg);color:var(--sk-ink)}
+body[data-reg="raver"]{--dim:var(--sk-ink-soft);--violet:var(--sk-sovereign-soft)}
+body[data-reg="cypherpunk"]{--dim:var(--sk-ink-soft);--gold:var(--sk-ai);--violet:var(--sk-sovereign-strong)}
+body[data-reg] h1{color:var(--sk-ink)}
+body[data-reg] section{background:var(--sk-bg-card);border-color:var(--sk-line);border-radius:var(--sk-radius-xl,18px)}
+body[data-reg] :is(.stat,.dial,.spark,.cypre){border-radius:var(--sk-radius,12px)}
+body[data-reg] .bar{border-radius:var(--sk-radius-sm,6px)}
+body[data-reg] .design,body[data-reg] .law[style*="#3d3410"]{background:var(--sk-sovereign-tint)!important;border:1px dashed var(--sk-sovereign)!important;color:var(--sk-ink)!important;border-radius:var(--sk-radius,12px)!important}
+body[data-reg] :is(input,select,textarea){background:var(--sk-bg)!important;color:var(--sk-ink)!important;border:1.5px solid var(--sk-ink-mut)!important;border-radius:var(--sk-radius,12px)!important}
+body[data-reg] main button{background:var(--sk-bg-card);color:var(--sk-ink);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius-md,14px)}
+body[data-reg] main button:hover{background:var(--sk-ink);color:var(--sk-bg)}
+body[data-reg="raver"] main button{border-color:var(--sk-sovereign);border-radius:var(--sk-radius-pill,999px)}
+body[data-reg="cypherpunk"] main button{color:var(--sk-ai);border-color:var(--sk-ai);border-radius:var(--sk-radius-sm,6px)}
+body[data-reg="cypherpunk"] :is(section,.stat,.dial,.spark,.cypre),body[data-reg="cypherpunk"] :is(input,select,textarea){border-radius:var(--sk-radius-sm,6px)!important}
+body[data-reg] footer{color:var(--sk-ink-mut)}
+body[data-reg] footer a,body[data-reg] main a{color:var(--sk-link)}
+body[data-reg="bee"]{font-family:var(--sk-font-bee-sans)}
+body[data-reg="bee"] h1{font:400 40px/1.05 var(--sk-font-bee-serif)}
+body[data-reg="bee"] .sub{font:400 16px/1.6 var(--sk-font-bee-sans)}
+body[data-reg="bee"] :is(.law,.design){font:400 16px/1.6 var(--sk-font-bee-sans)!important}
+body[data-reg="bee"] h2{font:600 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-sovereign)}
+body[data-reg="bee"] :is(.stat .lbl,.stat .src,.dial .lbl,.dial .src,.spark .lbl,.skmm,.bar span,footer,main button,.cypre,input,select,textarea){font-family:var(--sk-font-bee-sans);font-size:14px}
+body[data-reg="bee"] :is(.stat .val,.dial .val){font:400 16px/1.45 var(--sk-font-bee-sans)}
+body[data-reg="bee"] .dial .big{font:400 28px/1.3 var(--sk-font-bee-serif)}
+body[data-reg="bee"] .dial .big.nm{font:400 16px/1.6 var(--sk-font-bee-sans)}
+body[data-reg="raver"]{font-family:var(--sk-font-raver-body)}
+body[data-reg="raver"] h1{font:700 30px/1.05 var(--sk-font-raver-display);letter-spacing:-.01em}
+body[data-reg="raver"] :is(.sub,.law,.design){font-family:var(--sk-font-raver-body);font-size:14px!important;line-height:1.6}
+body[data-reg="raver"] h2{font:700 15px/1.3 var(--sk-font-raver-display);letter-spacing:.04em}
+body[data-reg="raver"] :is(.stat .lbl,.stat .src,.dial .lbl,.dial .src,.spark .lbl,.skmm,.bar span,footer,main button,.cypre,input,select,textarea,.stat .val,.dial .val,.dial .big.nm){font-family:var(--sk-font-raver-body);font-size:14px}
+body[data-reg="raver"] .dial .big{font:700 30px/1.2 var(--sk-font-raver-display)}
+body[data-reg="raver"] .dial .big.nm{font:600 14px/1.5 var(--sk-font-raver-body)}
+body[data-reg="cypherpunk"]{font-family:var(--sk-font-mono)}
+body[data-reg="cypherpunk"] h1{font:600 15px/1.45 var(--sk-font-mono);letter-spacing:0}
+body[data-reg="cypherpunk"] :is(.sub,.law,.design){font-family:var(--sk-font-mono);font-size:13px!important;line-height:1.6}
+body[data-reg="cypherpunk"] h2{font:600 13px/1.45 var(--sk-font-mono);letter-spacing:0}
+body[data-reg="cypherpunk"] :is(.stat .lbl,.stat .src,.dial .lbl,.dial .src,.spark .lbl,.skmm,.bar span,footer,.cypre){font-family:var(--sk-font-mono);font-size:12px}
+body[data-reg="cypherpunk"] :is(main button,input,select,textarea,.stat .val,.dial .val){font-family:var(--sk-font-mono);font-size:13px}
+body[data-reg="cypherpunk"] .dial .big{font:600 15px/1.45 var(--sk-font-mono)}
+body[data-reg] .dial .big{color:var(--sk-ink)}
+body[data-reg="bee"] :is(select,textarea){font-family:var(--sk-font-bee-sans)!important;font-size:14px!important}
+body[data-reg="raver"] :is(select,textarea){font-family:var(--sk-font-raver-body)!important;font-size:14px!important}
 </style>
 </head>
 <body>
+<!-- ETERNAL FRONT (founder blueprint 2026-09-26, docs/design/eternal): three separate products in
+     one surface. ONE data layer drives all three: it reads what this page's own keyless reads put on
+     the page below (the token check at load, the Vaulta account, the dials, the registry and the name
+     cost), each with the time this tab saw it, plus the page's own constants read from its own script.
+     A failed read says so in every register and never shows a zero. The one gesture is the page's own
+     read of the network's payment vault (#evmvault): read-only, no key. Nothing here connects the
+     signing wing, signs, pays or pledges. -->
+<section id="eternal" aria-label="the two treasuries, read in the open">
+
+  <!-- NEW BEE — a calm room: the treasuries as plain rows, one read you can ask for, plain failure -->
+  <div class="et-b">
+    <div class="et-b-mark" data-etk="et.bantfarm.mark">the bANTfarm</div>
+    <h2 class="et-b-h" data-etk="et.bantfarm.beeH">two treasuries, read in the open</h2>
+    <div class="et-b-lede" data-etk="et.bantfarm.beeLede">storage for the archive is paid in ANT. the .b names are kept by a community fund on Vaulta. this page only looks at both; it can't spend anything.</div>
+    <div class="et-b-guard"><svg class="et-ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span data-etk="et.bantfarm.beeGuard">this page holds no keys. looking is free and safe.</span></div>
+    <div class="et-b-rows" id="etBfRows"><div class="et-b-row"><span data-etk="et.bantfarm.reading">asking the networks…</span></div></div>
+    <div class="et-b-act">
+      <button type="button" class="et-b-primary" id="etBfGo" data-etk="et.bantfarm.beeGo">look at the payment vault</button>
+      <div class="et-b-status et-wait" id="etBfAsked" hidden></div>
+      <a class="et-b-link" href="#evmaddr" id="etBfAddr" data-etk="et.bantfarm.beeAddr">or look up any public address</a>
+      <div class="et-b-foot" data-etk="et.bantfarm.beeFoot">a failed read says so. it never shows a zero.</div>
+    </div>
+  </div>
+
+  <!-- RAVER — one ring, two treasuries: a cell per live read, lit when it answers -->
+  <div class="et-r">
+    <div class="et-r-top"><h2 class="et-r-h" data-etk="et.bantfarm.raverH">the farm, live</h2><span class="et-r-hint" id="etBfHint"></span></div>
+    <div class="et-r-art"><svg id="etBfRing" viewBox="0 0 360 360" role="group" aria-label="the two treasuries as one ring: the ant side on the left, the dao side on the right, a cell per live read"></svg></div>
+    <div class="et-r-legend"><span><i class="et-lg-ant"></i><span data-etk="et.bantfarm.lgAnt">ant · read live</span></span><span><i class="et-lg-dao"></i><span data-etk="et.bantfarm.lgDao">dao · read live</span></span><span><i class="et-lg-fail"></i><span data-etk="et.bantfarm.lgFail">no answer</span></span><span><i class="et-lg-wait"></i><span data-etk="et.bantfarm.lgWait">asking</span></span></div>
+    <div class="et-r-card" id="etBfCard" aria-live="polite"></div>
+    <button type="button" class="et-r-pill" id="etBfPill" data-etk="et.bantfarm.raverGo">read the payment vault</button>
+    <div class="et-r-card" id="etBfVault" aria-live="polite" hidden></div>
+    <div class="et-r-bar"><button type="button" class="et-r-still" id="etBfStill" aria-pressed="false">pause the light</button><a class="et-r-ghost" href="#etArchive" data-etk="et.bantfarm.raverAll">the whole farm</a></div>
+  </div>
+
+  <!-- CYPHERPUNK — the instrument: every lane, its method, its state and when this tab saw it -->
+  <div class="et-c">
+    <div class="et-c-path" data-etk="et.bantfarm.cyPath">bantfarm://read-only · arbitrum-one + vaulta</div>
+    <div class="et-c-chips" id="etBfChips"></div>
+    <div class="et-c-guard"><span data-etk="et.bantfarm.cyGuard">rpc failure renders as declared failure</span><b data-etk="et.bantfarm.cyGuardB">never as 0</b></div>
+    <h3 class="et-c-h" data-etk="et.bantfarm.cyLaneH">lanes · state as this tab saw it</h3>
+    <table class="et-c-tab"><thead><tr><th>#</th><th data-etk="et.bantfarm.thLane">lane · value</th><th data-etk="et.bantfarm.thAt">seen</th></tr></thead><tbody id="etBfTab"></tbody></table>
+    <h3 class="et-c-h" data-etk="et.bantfarm.cyPipeH">read path · zero write paths</h3>
+    <ol class="et-c-pipe" id="etBfPipe"></ol>
+    <button type="button" class="et-c-primary" id="etBfCyGo" data-etk="et.bantfarm.cyGo">read the payment vault · eth_call balanceOf</button>
+    <table class="et-c-kv" id="etBfVaultKv" hidden></table>
+    <h3 class="et-c-h" data-etk="et.bantfarm.cyConstH">constants · read from this page's own script</h3>
+    <table class="et-c-kv" id="etBfConst"></table>
+    <div class="et-c-verify">
+      <div class="et-c-verify-h" data-etk="et.bantfarm.cyVerifyH">verify · no trust in this page needed</div>
+      <ol id="etBfVerify"></ol>
+    </div>
+    <div class="et-c-row"><a class="et-c-ghost" href="#etArchive" data-etk="et.bantfarm.cyAll">the whole farm ↓</a><a class="et-c-ghost" href="https://github.com/beehive-nature/beehive-nature/blob/main/surfaces/bantfarm.html" target="_blank" rel="noopener noreferrer" data-etk="et.bantfarm.cyFork">fork the template ↗ (new tab)</a></div>
+  </div>
+</section>
+<h2 class="et-archive-h" id="etArchive" data-etk="et.bantfarm.archive">the whole farm</h2>
 <main>
 <header>
   <h1>🐜 the bANTfarm</h1>
@@ -122,13 +428,13 @@ body[data-reg="raver"] :is(h2,.stat .lbl,.stat .src,footer,button){font-size:14p
   renders amber and breaks the sparkline — a gap is data. Raw responses land in the lane below.
   15 s cadence, paused while the tab is hidden; buffers cap at 160 samples in RAM only.</div>
   <div class="dials">
-    <div class="dial"><div id="dgas"></div><div class="val nm" id="dgasv">—</div><div class="lbl">L2 gas price</div><div class="src" id="dgass">eth_gasPrice · Arbitrum One</div></div>
-    <div class="dial"><div id="dfull"></div><div class="val nm" id="dfullv">—</div><div class="lbl">gas used, latest block</div><div class="src" id="dfulls">eth_getBlockByNumber · dial 0–30 Mgas</div></div>
-    <div class="dial"><div id="dbpm"></div><div class="val nm" id="dbpmv">—</div><div class="lbl">L2 block rate</div><div class="src" id="dbpms">measured this session, never quoted</div></div>
-    <div class="dial"><div id="dlib"></div><div class="val nm" id="dlibv">—</div><div class="lbl">Vaulta finality lag</div><div class="src" id="dlibs">head − LIB · get_info · Savanna</div></div>
-    <div class="dial nodial"><div class="big nm" id="dnamesv">—</div><div class="lbl">.b names on the registry</div><div class="src" id="dnamess">get_table_rows · kingbeelovis / domains</div></div>
-    <div class="dial nodial"><div class="big nm" id="dncost">—</div><div class="lbl">.b name cost · one-time, live</div><div class="src" id="dncosts">rammarket live · 2,537 B/row receipted · resellable (sellram), no renewals</div></div>
-    <div class="dial nodial"><div class="big nm" id="dsesv">—</div><div class="lbl">session samples</div><div class="src" id="dsess">this tab only — nothing stored, nothing sent</div></div>
+    <div class="dial"><div id="dgas"></div><div class="val nm" id="dgasv">not read yet</div><div class="lbl">L2 gas price</div><div class="src" id="dgass">eth_gasPrice · Arbitrum One</div></div>
+    <div class="dial"><div id="dfull"></div><div class="val nm" id="dfullv">not read yet</div><div class="lbl">gas used, latest block</div><div class="src" id="dfulls">eth_getBlockByNumber · dial 0–30 Mgas</div></div>
+    <div class="dial"><div id="dbpm"></div><div class="val nm" id="dbpmv">not read yet</div><div class="lbl">L2 block rate</div><div class="src" id="dbpms">measured this session, never quoted</div></div>
+    <div class="dial"><div id="dlib"></div><div class="val nm" id="dlibv">not read yet</div><div class="lbl">Vaulta finality lag</div><div class="src" id="dlibs">head − LIB · get_info · Savanna</div></div>
+    <div class="dial nodial"><div class="big nm" id="dnamesv">not read yet</div><div class="lbl">.b names on the registry</div><div class="src" id="dnamess">get_table_rows · kingbeelovis / domains</div></div>
+    <div class="dial nodial"><div class="big nm" id="dncost">not read yet</div><div class="lbl">.b name cost · one-time, live</div><div class="src" id="dncosts">rammarket live · 2,537 B/row receipted · resellable (sellram), no renewals</div></div>
+    <div class="dial nodial"><div class="big nm" id="dsesv">not read yet</div><div class="lbl">session samples</div><div class="src" id="dsess">this tab only — nothing stored, nothing sent</div></div>
   </div>
   <div class="sparks">
     <div class="spark" style="color:var(--cyan)"><div class="lbl">gas price — this session</div><div id="skgas"><span class="nm">two samples make a line — measuring…</span></div></div>
@@ -162,10 +468,10 @@ body[data-reg="raver"] :is(h2,.stat .lbl,.stat .src,footer,button){font-size:14p
     <button id="evmvault" title="the network's own payment vault — a public infrastructure address, as a live demo">demo: the payment vault</button>
   </div>
   <div class="grid2" id="evmout">
-    <div class="stat"><div class="val nm" id="antbal">—</div><div class="lbl">ANT balance</div><div class="src" id="antsrc">enter an address</div></div>
-    <div class="stat"><div class="val nm" id="ethbal">—</div><div class="lbl">ETH (gas) balance</div><div class="src">eth_getBalance · Arbitrum One</div></div>
-    <div class="stat"><div class="val nm" id="antsupply">—</div><div class="lbl">ANT total supply — read live</div><div class="src" id="supplysrc">totalSupply() at load</div></div>
-    <div class="stat"><div class="val nm" id="antdec">—</div><div class="lbl">token decimals — read live</div><div class="src">decimals() at load; the page assumes nothing</div></div>
+    <div class="stat"><div class="val nm" id="antbal">not read yet</div><div class="lbl">ANT balance</div><div class="src" id="antsrc">enter an address</div></div>
+    <div class="stat"><div class="val nm" id="ethbal">not read yet</div><div class="lbl">ETH (gas) balance</div><div class="src">eth_getBalance · Arbitrum One</div></div>
+    <div class="stat"><div class="val nm" id="antsupply">not read yet</div><div class="lbl">ANT total supply — read live</div><div class="src" id="supplysrc">totalSupply() at load</div></div>
+    <div class="stat"><div class="val nm" id="antdec">not read yet</div><div class="lbl">token decimals — read live</div><div class="src">decimals() at load; the page assumes nothing</div></div>
   </div>
 
   <h2 style="margin-top:16px">⛏ <span data-i18n="h.006">NODE OPERATIONS — where the farm actually runs</span></h2>
@@ -642,6 +948,221 @@ setInterval(ticks,15000);
 /* a tab opened in the background gets its needles the moment it is looked at */
 document.addEventListener('visibilitychange',function(){ if(!document.hidden) ticks(); });
 setInterval(function(){ if(!document.hidden) tickNames(); },300000);
+})();
+</script>
+<script>
+/* ETERNAL FRONT — one data layer, three renderers (docs/design/eternal). The facts are what this
+   page's own keyless reads put on the page (the token check at load, the Vaulta account, the dials,
+   the .b registry and the name cost, the vault read), each stamped with the time this tab saw it,
+   and the page's own constants (token, vault, hosts, registry, row size) read from its own script.
+   The front sends nothing itself: its one gesture presses the page's own read-only vault button
+   (#evmvault). A failed read is shown as a failure in every register, never as a zero. The signing
+   wing is never touched from here. */
+(function(){
+  var $=function(id){return document.getElementById(id);};
+  var T=function(k,f){var t=window.BNRLanguage&&window.BNRLanguage.text;return t?t(k,f):f;};
+  var K=function(k,f){return T('et.bantfarm.'+k,f);};
+  var esc=function(v){return String(v==null?'':v).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});};
+  var txt=function(e){return (e&&e.textContent||'').replace(/\s+/g,' ').trim();};
+  var fill=function(s,o){return String(s).replace(/\{(\w+)\}/g,function(_,k){return o[k]==null?'':o[k];});};
+  var CHEV='<svg class="et-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>';
+  var now=function(){return new Date().toTimeString().slice(0,8);};
+
+  /* the lanes: each is one element the page's own reads write into */
+  var LANES=[
+    {id:'supply',el:'antsupply',side:'ant',t:'ANT supply'},
+    {id:'dec',el:'antdec',side:'ant',t:'token decimals'},
+    {id:'gas',el:'dgasv',side:'ant',t:'L2 gas price'},
+    {id:'block',el:'dfullv',side:'ant',t:'gas per block'},
+    {id:'rate',el:'dbpmv',side:'ant',t:'block rate'},
+    {id:'lag',el:'dlibv',side:'dao',t:'finality lag'},
+    {id:'names',el:'dnamesv',side:'dao',t:'.b names'},
+    {id:'cost',el:'dncost',side:'dao',t:'.b name cost'},
+    {id:'ram',el:'vram',side:'dao',t:'fund RAM'},
+    {id:'bal',el:'vbal',side:'dao',t:'fund balance'}
+  ];
+  var D={lanes:{},order:LANES.map(function(l){return l.id;}),vault:{asked:false,addr:null,ant:null,eth:null,src:null},k:{},wing:{},account:null,samples:null,page:'bantfarm.html'};
+  var B={open:0,asked:false}, R={sel:'heart',still:false}, C={open:null};
+
+  function readConsts(){
+    var src=[].map.call(document.scripts,function(s){return s.textContent;}).filter(function(s){return /var ANT='0x[0-9a-fA-F]{40}'/.test(s);})[0]||'';
+    var one=function(re){var m=re.exec(src);return m?m[1]:null;};
+    var list=function(name){var m=new RegExp('var '+name+'=\\[([^\\]]*)\\]').exec(src);return m?(m[1].match(/'[^']+'/g)||[]).map(function(s){return s.slice(1,-1);}):[];};
+    var sels=[];src.replace(/to:ANT,data:'(0x[0-9a-f]{8})'/g,function(_,s){sels.push(s);});
+    D.k={ant:one(/var ANT='(0x[0-9a-fA-F]{40})'/),vault:one(/var VAULT='(0x[0-9a-fA-F]{40})'/),ehosts:list('EHOSTS'),vhosts:list('VAPI'),
+      selDecimals:sels[0]||null,selSupply:sels[1]||null,registry:one(/code:'(\w+)',scope:'\w+',table:'domains'/),rowBytes:one(/var costRaw=(\d+)\*/),
+      cadence:(function(){var m=/setInterval\(ticks,(\d+)\)/.exec(src);return m?(+m[1]/1000)+' s':null;})()};
+  }
+  function state(el){
+    if(!el) return {s:'missing'};
+    var t=txt(el);
+    if(el.querySelector('.err')||/fail|couldn[’']t|no such account/i.test(t)) return {s:'fail',t:t};
+    if(/absent, not zero/i.test(t)) return {s:'absent',t:t};
+    if(/^(not read yet|reading…|—|)$/.test(t)) return {s:t==='reading…'?'reading':'wait'};
+    return {s:'ok',v:t};
+  }
+  function readPage(){
+    var changed=false;
+    LANES.forEach(function(L){
+      var el=$(L.el), s=state(el), box=el&&el.closest('.dial,.stat'), prev=D.lanes[L.id];
+      if(L.id==='ram'&&s.s==='wait'){var b=state($('vbal'));if(b.s==='fail')s={s:'fail',t:b.t};}
+      if(L.id==='cost'&&s.s==='ok'){var m=/rammarket live · (\S+) /.exec(txt($('dncosts')));s.v=s.v+(m?' '+m[1]:'');}
+      var sig=s.s+'|'+(s.v||s.t||'');
+      if(!prev||prev.sig!==sig){changed=true;D.lanes[L.id]={id:L.id,side:L.side,t:L.t,label:txt(box&&box.querySelector('.lbl')),method:txt(box&&box.querySelector('.src')),s:s.s,v:s.v||null,why:s.t||null,sig:sig,at:now()};}
+      else prev.method=txt(box&&box.querySelector('.src'));
+    });
+    var acct=$('vacct'); D.account=acct?acct.value.trim():null;
+    var extra={cpu:state($('vcpu')),net:state($('vnet'))}; D.cpu=extra.cpu.v||null; D.net=extra.net.v||null;
+    var ss=state($('dsesv')); D.samples=ss.s==='ok'?ss.v:null;
+    var a=state($('antbal')), e=state($('ethbal')), addr=$('evmaddr')&&$('evmaddr').value.trim();
+    var vs=a.s+'|'+(a.v||a.t||'')+'|'+e.s+'|'+(e.v||e.t||'')+'|'+addr;
+    if(D.vault.sig!==vs){changed=true;D.vault={asked:D.vault.asked||B.asked,addr:addr||null,ant:a,eth:e,src:txt($('antsrc')),sig:vs,at:now()};}
+    var w={state:txt($('tzstate')),loaded:!!window.TrezorConnect};
+    if(w.state!==D.wing.state||w.loaded!==D.wing.loaded){changed=true;D.wing=w;}
+    return changed;
+  }
+  var lanes=function(){return D.order.map(function(id){return D.lanes[id];}).filter(Boolean);};
+  var count=function(s){return lanes().filter(function(l){return l.s===s;}).length;};
+  var isVault=function(){return D.vault.addr&&D.k.vault&&D.vault.addr.toLowerCase()===D.k.vault.toLowerCase();};
+  var short=function(a){return a?a.slice(0,8)+'…'+a.slice(-6):'';};
+
+  /* ── NEW BEE ── */
+  function beeValue(l){
+    if(!l) return K('bWait','asking…');
+    return l.s==='ok'?l.v:l.s==='fail'?K('bFail','not reachable from here'):l.s==='absent'?K('bAbsent','no balance kept here'):l.s==='reading'?K('bReading','reading…'):K('bWait','asking…');
+  }
+  function beeOpen(l,okLine){
+    if(!l) return '';
+    if(l.s==='ok') return fill(okLine,{at:l.at});
+    if(l.s==='fail') return K('bFailP','the network didn\'t answer from here. the page shows that plainly; it never fills in a zero.');
+    if(l.s==='absent') return K('bAbsentP','the account keeps no spendable balance. that is an absence, not a zero.');
+    return K('bWaitP','the page is still asking. the answer appears here when it arrives.');
+  }
+  function bee(){
+    var box=$('etBfRows'); if(!box) return;
+    var L=D.lanes, reg=D.account||D.k.registry||K('notStated','not stated');
+    var rows=[
+      {n:1,t:K('b1','ANT, the storage token'),sm:K('b1s','on Arbitrum One'),l:L.supply,p:beeOpen(L.supply,K('b1p','read live from the token itself at {at} in this tab. the page assumes nothing about it.'))},
+      {n:2,t:K('b2','the community fund\'s account'),sm:fill(K('b2s','{a} on Vaulta'),{a:reg}),l:L.bal,p:L.ram&&L.ram.s==='ok'?fill(K('b2p','memory in use: {ram}. processing: {cpu}. network: {net}. read at {at}.'),{ram:L.ram.v,cpu:D.cpu||K('notRead','not read yet'),net:D.net||K('notRead','not read yet'),at:L.ram.at}):beeOpen(L.bal,K('b2pb','read at {at}.'))},
+      {n:3,t:K('b3','.b names registered'),sm:K('b3s','the name registry'),l:L.names,p:beeOpen(L.names,K('b3p','counted live from the registry at {at}. anyone can add a name.'))},
+      {n:4,t:K('b4','the price of one .b name'),sm:K('b4s','a one-time cost, no renewals'),l:L.cost,p:beeOpen(L.cost,fill(K('b4p','priced live at {at} for the {b} bytes one name uses. you can sell the space back later.'),{b:D.k.rowBytes?(+D.k.rowBytes).toLocaleString('en-US'):K('notStated','not stated'),at:'{at}'}))},
+      {n:5,t:K('b5','your own nodes'),sm:K('b5s','they earn ANT for storing data'),out:true,p:K('b5p','your nodes run on your own machine. a web page can\'t reach into your computer, and this one doesn\'t try.')}
+    ];
+    box.innerHTML=rows.map(function(r){var open=B.open===r.n, v=r.out?K('b5v','on your machine only'):beeValue(r.l), cls=r.out?' et-out':(r.l&&r.l.s==='ok'?' et-ok':(r.l&&r.l.s==='fail'?' et-out':''));
+      return '<button type="button" class="et-b-row" data-row="'+r.n+'" aria-expanded="'+(open?'true':'false')+'"><span class="et-b-rl"><b>'+esc(r.t)+'</b><small>'+esc(r.sm)+'</small></span><span class="et-b-rv'+cls+'">'+esc(v)+CHEV+'</span></button>'+
+        (open?'<div class="et-b-open"><div>'+esc(r.p)+'</div>'+(r.l?'<div class="et-b-src">'+esc(K('bHow','how:')+' '+(r.l.method||r.l.label))+'</div>':'')+'</div>':'');
+    }).join('');
+    var st=$('etBfAsked'); st.hidden=!B.asked;
+    if(B.asked){var a=D.vault.ant||{}, e=D.vault.eth||{};
+      st.className='et-b-status'+(a.s==='ok'?'':(a.s==='fail'||e.s==='fail'?' et-no':' et-wait'));
+      st.textContent=a.s==='ok'?fill(K('bVaultOk','the payment vault holds {a} and {e}, read at {at}.'),{a:a.v,e:e.s==='ok'?e.v:K('bEthNo','no ETH figure'),at:D.vault.at}):
+        (a.s==='fail'||e.s==='fail')?K('bVaultFail','the network didn\'t answer from here. nothing changed, and no zero is shown.'):K('bVaultWait','reading the payment vault…');}
+  }
+
+  /* ── RAVER: one ring, two treasuries ── */
+  var CX=180, CY=186, R0=92, R1=150;
+  function arc(a0,a1){var r=Math.PI/180, p=function(rad,a){return (CX+rad*Math.cos(a*r)).toFixed(1)+' '+(CY+rad*Math.sin(a*r)).toFixed(1);};
+    var big=(a1-a0)>180?1:0;return 'M'+p(R1,a0)+'A'+R1+' '+R1+' 0 '+big+' 1 '+p(R1,a1)+'L'+p(R0,a1)+'A'+R0+' '+R0+' 0 '+big+' 0 '+p(R0,a0)+'Z';}
+  function cellAngles(i,side){var span=164/5;
+    if(side==='dao'){var a0=-82+i*span;return [a0+1.6,a0+span-1.6];}
+    var b1=262-i*span;return [b1-span+1.6,b1-1.6];}
+  var cls=function(l){return l.s==='ok'?'et-ok':l.s==='fail'?'et-fail':'et-wait';};
+  function ring(){
+    var svg=$('etBfRing'); if(!svg) return;
+    var h='<text class="et-side" x="4" y="18">'+esc(K('rAnt','ant · arbitrum one'))+'</text><text class="et-side" x="356" y="18" text-anchor="end">'+esc(K('rDao','dao · vaulta'))+'</text>';
+    var ant=lanes().filter(function(l){return l.side==='ant';}), dao=lanes().filter(function(l){return l.side==='dao';});
+    [[ant,'ant'],[dao,'dao']].forEach(function(pair){pair[0].forEach(function(l,i){
+      var an=cellAngles(i,pair[1]), mid=(an[0]+an[1])/2*Math.PI/180, rm=(R0+R1)/2, n=D.order.indexOf(l.id)+1;
+      h+='<g class="et-cell '+cls(l)+' et-'+pair[1]+'" role="button" tabindex="0" data-lane="'+l.id+'" aria-pressed="'+(R.sel===l.id?'true':'false')+'" aria-label="'+esc(l.label+': '+(l.s==='ok'?l.v:l.s==='fail'?K('rNo','no answer'):K('rAsk','asking')))+'">'+
+        '<path d="'+arc(an[0],an[1])+'"/><text x="'+(CX+rm*Math.cos(mid)).toFixed(1)+'" y="'+(CY+rm*Math.sin(mid)+5).toFixed(1)+'" text-anchor="middle">'+n+'</text></g>';
+    });});
+    h+='<g class="et-heart" role="button" tabindex="0" data-lane="heart" aria-pressed="'+(R.sel==='heart'?'true':'false')+'" aria-label="'+esc(K('rHeart','this window: reads only, no keys'))+'"><circle cx="'+CX+'" cy="'+CY+'" r="76"/>'+
+      '<text x="'+CX+'" y="'+(CY-8)+'" text-anchor="middle">'+esc(K('rReads','reads'))+'</text><text x="'+CX+'" y="'+(CY+12)+'" text-anchor="middle">'+esc(K('rOnly','only'))+'</text><text class="et-s" x="'+CX+'" y="'+(CY+34)+'" text-anchor="middle">'+esc(K('rKeys','0 keys'))+'</text></g>';
+    svg.innerHTML=h;
+  }
+  function raver(){
+    if(!$('etBfRing')) return;
+    var n=lanes().length;
+    $('etBfHint').textContent=fill(K('rHint','{ok} of {n} answered · tap a cell'),{ok:count('ok'),n:n});
+    ring();
+    var c=$('etBfCard'), l=D.lanes[R.sel];
+    if(l){c.innerHTML='<span class="et-rk'+(l.s==='ok'?'':' et-dash')+'">'+(D.order.indexOf(l.id)+1)+'</span><div><b>'+esc(l.label+' · '+(l.s==='ok'?l.v:l.s==='fail'?K('rNoA','no answer · never shown as zero'):l.s==='absent'?K('rAbs','absent, not zero'):K('rAsking','still asking')))+'</b><span>'+esc(l.method)+'</span><span class="et-src">'+esc(fill(K('rSeen','{side} · seen {at} in this tab'),{side:l.side==='ant'?K('rAntS','ant side · Arbitrum One'):K('rDaoS','dao side · Vaulta'),at:l.at}))+'</span></div>';}
+    else c.innerHTML='<span class="et-rk">'+count('ok')+'/'+n+'</span><div><b>'+esc(count('ok')?fill(K('rHeartOk','{ok} lanes answered live'),{ok:count('ok')}):K('rHeartNone','no lane has answered from here yet'))+'</b><span>'+esc(fill(K('rHeartP','{fail} no answer · {wait} still asking · a failure is shown, never a zero'),{fail:count('fail'),wait:n-count('ok')-count('fail')}))+'</span><span class="et-src">'+esc(K('rLaw','reads only · no keys, no custody, no write paths'))+'</span></div>';
+    var v=$('etBfVault'); v.hidden=!D.vault.asked;
+    if(D.vault.asked){var a=D.vault.ant||{}, e=D.vault.eth||{};
+      v.innerHTML='<span class="et-rk'+(a.s==='ok'?'':' et-dash')+'">'+esc(K('rVaultK','vault'))+'</span><div><b>'+esc(a.s==='ok'?a.v+' · '+(e.s==='ok'?e.v:K('rEthNo','no ETH figure')):(a.s==='fail'||e.s==='fail')?K('rVaultFail','the vault didn\'t answer from here'):K('rVaultWait','asking the vault…'))+'</b><span>'+esc(isVault()?K('rVaultIs','the network\'s own payment vault · public · read-only'):fill(K('rAddr','address {a}'),{a:short(D.vault.addr)}))+'</span><span class="et-src">'+esc(fill(K('rVaultAt','seen {at} · a look, not a payment'),{at:D.vault.at}))+'</span></div>';}
+    var s=$('etBfStill'); s.setAttribute('aria-pressed',R.still?'true':'false'); s.textContent=R.still?K('play','play the light'):K('still','pause the light');
+    document.querySelector('#eternal .et-r').classList.toggle('et-still-on',R.still);
+  }
+
+  /* ── CYPHERPUNK ── */
+  function cyState(l){return l.s==='ok'?'<span class="et-st-ok">'+esc(l.v)+'</span>':l.s==='fail'?'<span class="et-st-guard">'+esc(K('cFail','failed · declared, not zeroed'))+'</span>':l.s==='absent'?'<span class="et-st-no">'+esc(K('cAbsent','absent, not zero'))+'</span>':'<span class="et-st-wait">'+esc(l.s==='reading'?K('cReading','reading'):K('cWait','waiting · not read yet'))+'</span>';}
+  function cy(){
+    if(!$('etBfTab')) return;
+    var n=lanes().length, k=D.k;
+    $('etBfChips').innerHTML='<span class="'+(count('ok')?'et-ok':'et-no')+'">'+esc(fill(K('cAns','answered {ok}/{n}'),{ok:count('ok'),n:n}))+'</span><span class="et-on">'+esc(fill(K('cFailN','failed {f} · declared'),{f:count('fail')}))+'</span><span>'+esc(fill(K('cCad','cadence {c}'),{c:k.cadence||K('notStated','not stated')}))+'</span><span>'+esc(D.samples?fill(K('cSamples','session samples {s}'),{s:D.samples}):K('cNoSamples','session samples not counted yet'))+'</span><span>'+esc(D.wing.loaded?K('cWingOn','signing wing loaded by your press'):K('cWingOff','signing wing not loaded'))+'</span>';
+    $('etBfTab').innerHTML=lanes().map(function(l,i){var open=C.open===l.id;
+      return '<tr class="et-pick" tabindex="0" data-lane="'+l.id+'" aria-expanded="'+(open?'true':'false')+'"><td>'+(i+1)+'</td><td>'+esc(l.label)+'<small>'+cyState(l)+'</small></td><td class="et-nw">'+esc(l.at)+'</td></tr>'+
+        (open?'<tr class="et-more"><td colspan="3"><small>'+esc(K('cMethod','method')+' · '+l.method)+'</small><small>'+esc(K('cHosts','hosts')+' · '+((l.side==='ant'?k.ehosts:k.vhosts)||[]).join(' → '))+'</small>'+(l.why?'<small>'+esc(K('cRaw','as printed')+' · '+l.why)+'</small>':'')+'</td></tr>':'');
+    }).join('');
+    var L=D.lanes, st=function(ids){var s=ids.map(function(i){return L[i]&&L[i].s;});return s.indexOf('fail')>=0?'et-guard':s.every(function(x){return x==='ok'||x==='absent';})?'et-done':'et-now';};
+    var word=function(c){return c==='et-done'?K('pDone','answered'):c==='et-guard'?K('pFail','failed · declared'):K('pWait','waiting');};
+    var steps=[
+      [K('p1','token contract checked at load'),'decimals() '+(k.selDecimals||'')+' · totalSupply() '+(k.selSupply||'')+' · eth_call',st(['dec','supply'])],
+      [K('p2','dials every')+' '+(k.cadence||K('notStated','not stated')),'eth_gasPrice · eth_getBlockByNumber · get_info (head − LIB) · paused while the tab is hidden',st(['gas','block','lag'])],
+      [K('p3','the fund\'s account'),'get_account '+(D.account||'')+' → get_currency_balance core.vaulta/A, then eosio.token',st(['ram','bal'])],
+      [K('p4','the .b registry'),'get_table_rows '+(k.registry||'')+'/domains',st(['names'])],
+      [K('p5','one name\'s one-time cost'),'rammarket × '+(k.rowBytes||'?')+' B per row',st(['cost'])]
+    ];
+    $('etBfPipe').innerHTML=steps.map(function(s){return '<li class="'+s[2]+'"><b>'+esc(s[0]+' · '+word(s[2]))+'</b><div><code>'+esc(s[1])+'</code></div></li>';}).join('')+
+      '<li class="et-guard"><b>'+esc(K('p6','signing wing · on your press only'))+'</b><div>'+esc(fill(K('p6d','connect.trezor.io loads only from the wing\'s own button below · {w} · this front never presses it'),{w:D.wing.loaded?K('p6on','loaded'):K('p6off','not loaded')}))+'</div></li>';
+    var kv=$('etBfVaultKv'); kv.hidden=!D.vault.asked;
+    if(D.vault.asked){var a=D.vault.ant||{}, e=D.vault.eth||{};
+      kv.innerHTML=[['address',esc(D.vault.addr||K('notRead','not read yet'))+(isVault()?' <span class="et-no">'+esc(K('cVaultIs','· the payment vault'))+'</span>':'')],['balanceOf',a.s==='ok'?'<span class="et-yes">'+esc(a.v)+'</span>':cyState(a)],['eth_getBalance',e.s==='ok'?'<span class="et-yes">'+esc(e.v)+'</span>':cyState(e)],['seen',esc(D.vault.at)]].map(function(r){return '<tr><th>'+r[0]+'</th><td>'+r[1]+'</td></tr>';}).join('');}
+    var nf=K('notStatedPage','not stated on this page');
+    $('etBfConst').innerHTML=[
+      ['ANT token',esc(k.ant||nf)+'<br><span class="et-g">'+esc(K('cDisplay','display lane only · re-derive from the installed client before any payment'))+'</span>'],
+      ['payment vault',esc(k.vault||nf)],
+      ['arbitrum hosts',esc((k.ehosts||[]).join(' → ')||nf)],
+      ['vaulta hosts',esc((k.vhosts||[]).join(' → ')||nf)],
+      ['.b registry',esc(k.registry||nf)],
+      ['row size',esc(k.rowBytes?(+k.rowBytes).toLocaleString('en-US')+' B per .b name':nf)]
+    ].map(function(r){return '<tr><th>'+esc(r[0])+'</th><td>'+r[1]+'</td></tr>';}).join('');
+    var e0=(k.ehosts||[])[0]||nf, v0=(k.vhosts||[])[0]||nf;
+    $('etBfVerify').innerHTML=[
+      fill(K('v1','curl -s {h} -H \'content-type: application/json\' -d \'{"jsonrpc":"2.0","id":1,"method":"eth_call","params":[{"to":"{a}","data":"{s}"},"latest"]}\''),{h:e0,a:k.ant||nf,s:k.selSupply||nf}),
+      fill(K('v2','curl -s {h}/v1/chain/get_account -d \'{"account_name":"{r}"}\''),{h:v0,r:D.account||k.registry||nf}),
+      K('v3','compare with the lanes above: a lane that failed here shows failed, and yours should answer')
+    ].map(function(s,i){return '<li>'+(i<2?'<code>'+esc(s)+'</code>':esc(s))+'</li>';}).join('');
+  }
+
+  /* ── the one hand-off: the page's own read-only vault button ── */
+  function askVault(){var b=$('evmvault'); if(!b) return; B.asked=true; D.vault.asked=true; b.click(); render();}
+
+  function keyedCopy(){document.querySelectorAll('#eternal [data-etk]').forEach(function(e){if(e.dataset.etEn==null)e.dataset.etEn=e.textContent;e.textContent=T(e.dataset.etk,e.dataset.etEn);});}
+  function render(){readPage();bee();raver();cy();}
+  var q=0; function soon(){if(q)return;q=setTimeout(function(){q=0;if(readPage()){bee();raver();cy();}},60);}
+  function wire(){
+    var ev=$('eternal'); if(!ev) return;
+    ev.addEventListener('click',function(e){
+      var row=e.target.closest('.et-b-row[data-row]'); if(row){var n=+row.dataset.row;B.open=B.open===n?0:n;bee();return;}
+      var cell=e.target.closest('#etBfRing [data-lane]'); if(cell){R.sel=cell.dataset.lane;raver();return;}
+      if(e.target.closest('#etBfStill')){R.still=!R.still;raver();return;}
+      if(e.target.closest('#etBfGo,#etBfPill,#etBfCyGo')){askVault();return;}
+      if(e.target.closest('#etBfAddr')){setTimeout(function(){var i=$('evmaddr');if(i)i.focus({preventScroll:true});},0);return;}
+      var tr=e.target.closest('.et-c-tab tr.et-pick'); if(tr){var id=tr.dataset.lane;C.open=C.open===id?null:id;cy();}
+    });
+    ev.addEventListener('keydown',function(e){
+      if(e.key!=='Enter'&&e.key!==' ')return;
+      var t=e.target.closest('#etBfRing [role="button"],.et-c-tab tr.et-pick'); if(!t)return;
+      e.preventDefault(); t.dispatchEvent(new MouseEvent('click',{bubbles:true}));
+    });
+    var main=document.querySelector('body>main');
+    if(main&&window.MutationObserver) new MutationObserver(soon).observe(main,{subtree:true,childList:true,characterData:true});
+    document.addEventListener('blang',function(){keyedCopy();bee();raver();cy();});
+  }
+  readConsts(); keyedCopy(); wire(); render();
+  window.__eternal={data:D,bee:B,raver:R,cy:C};
 })();
 </script>
 </body>

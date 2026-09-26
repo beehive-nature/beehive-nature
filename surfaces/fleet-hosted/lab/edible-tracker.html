@@ -43,8 +43,332 @@ input,select,textarea{width:100%;background:#080820;border:1px solid #333;color:
 .export-out{background:#080820;border-radius:8px;padding:10px;margin-top:8px;font-size:9px;white-space:pre-wrap;max-height:200px;overflow:auto;display:none}
 .insight{background:#1a2e1a;border:1px solid #27AE6044;border-radius:8px;padding:10px;margin:8px 0;font-size:11px;color:#27AE60}
 </style>
+<link rel="stylesheet" href="../../skaists.css">
+<style>
+/* ── ETERNAL FRONT (docs/design/eternal) — three products in one surface. Every value is a skaists
+   token (skaists.css, compiled from docs/design/skaists/tokens.json): no hand-picked hex, size or
+   corner. Measured by e2e/skaists-conformance.mjs. One register at a time; new bee is the default.
+   Every class is et- prefixed so the lab's own bare rules (label, input, select, .btn, .card) never
+   reach in; sizes that matter carry a fallback for a server that sends .css as octet-stream. ── */
+#eternal{box-sizing:border-box;display:block;width:100%;max-width:none;margin:0;padding:var(--sk-s4,24px) var(--sk-s3,18px);border:0;border-radius:0;background:var(--sk-bg);color:var(--sk-ink);text-align:left;letter-spacing:normal;text-transform:none;box-shadow:none;font-weight:400}
+#eternal *,#eternal *::before,#eternal *::after{box-sizing:border-box}
+#eternal>div{max-width:600px;margin:0 auto}
+#eternal>.et-r,#eternal>.et-c{display:none}
+body[data-reg="raver"] #eternal>.et-b,body[data-reg="cypherpunk"] #eternal>.et-b{display:none}
+body[data-reg="raver"] #eternal>.et-r{display:block}
+body[data-reg="cypherpunk"] #eternal>.et-c{display:block}
+#eternal [hidden]{display:none!important}
+#eternal button{margin:0;color:inherit;text-transform:none;letter-spacing:normal;min-width:0;background:none;border:0;font:inherit;width:auto;padding:0;text-align:inherit}
+#eternal input,#eternal select{display:block;margin:0;font:inherit;color:inherit;text-transform:none;letter-spacing:normal;opacity:1}
+#eternal label{display:block;margin:0;padding:0;background:none;text-transform:none;letter-spacing:normal;width:auto}
+#eternal svg{display:block;max-width:100%}
+#eternal a{text-decoration:none}
+#eternal :focus-visible{outline:2px solid var(--sk-focus);outline-offset:3px}
+#eternal h2,#eternal h3,#eternal p,#eternal ol,#eternal ul,#eternal table{margin:0;padding:0;border:0;background:none;text-transform:none;letter-spacing:normal}
+#eternal table{width:100%;border-collapse:separate;border-spacing:0;font-size:inherit}
+#eternal th,#eternal td{border:0;padding:0;vertical-align:top;text-transform:none;letter-spacing:normal}
+#eternal code{background:none;padding:0}
+#eternal strong{font-weight:600}
+.et-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.et-archive-h{display:block;box-sizing:border-box;width:100%;margin:0;padding:var(--sk-s4,24px) max(var(--sk-s3,18px),calc(50% - 300px));border:0;border-top:1px solid var(--sk-line);background:var(--sk-bg);color:var(--sk-ink);text-align:left;text-transform:none;letter-spacing:normal;font:400 28px/1.1 var(--sk-font-bee-serif)}
+body[data-reg="raver"] .et-archive-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em}
+body[data-reg="cypherpunk"] .et-archive-h{font:600 15px/1.45 var(--sk-font-mono)}
+
+/* NEW BEE — a calm room: plain rows, one reassurance, one magenta action, a link, a footnote */
+#eternal .et-b{color:var(--sk-ink);font:400 16px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-b-step{display:flex;flex-direction:column;gap:var(--sk-s3,18px)}
+#eternal .et-b-mark{font:400 18px/1.2 var(--sk-font-house);color:var(--sk-sovereign)}
+#eternal .et-b-h{font:400 40px/1.05 var(--sk-font-bee-serif);color:var(--sk-ink)}
+#eternal .et-b-lede{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink-mut);text-wrap:pretty}
+#eternal .et-b-guard{display:flex;align-items:center;gap:var(--sk-s2,12px);min-height:var(--sk-control-min,44px);padding:var(--sk-s2,12px) var(--sk-s3,18px);border-radius:var(--sk-radius,12px);background:var(--sk-guard-wash);color:var(--sk-guard);font:600 15px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-ic{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+#eternal .et-b-rows{display:flex;flex-direction:column;background:var(--sk-bg-card);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl,18px);overflow:hidden}
+#eternal .et-b-group{padding:var(--sk-s2,12px) var(--sk-s3,18px) var(--sk-s1,6px);border-bottom:1px solid var(--sk-line-soft);font:600 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-row{display:flex;align-items:center;justify-content:space-between;gap:var(--sk-s2,12px);width:100%;min-height:var(--sk-control-row,52px);padding:var(--sk-s1,6px) var(--sk-s3,18px);border:0;border-bottom:1px solid var(--sk-line-soft);border-radius:0;background:transparent;text-align:left;font:500 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+#eternal .et-b-row:last-child{border-bottom:0}
+#eternal button.et-b-row{cursor:pointer}
+#eternal .et-b-row>span{flex:1 1 auto;min-width:0}
+#eternal .et-b-row>span>small{display:block;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-row>small{display:flex;align-items:center;gap:var(--sk-s1,6px);flex:none;max-width:55%;text-align:right;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-row>small.et-ok{color:var(--sk-verified)}
+#eternal .et-b-row>small.et-out{color:var(--sk-guard)}
+#eternal .et-b-row[aria-pressed="true"]{background:var(--sk-sovereign-tint);color:var(--sk-sovereign-strong);font-weight:600}
+#eternal .et-b-row[aria-pressed="true"] small{color:var(--sk-sovereign-strong)}
+#eternal .et-chev{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;flex:none}
+#eternal .et-b-act{display:flex;flex-direction:column;gap:var(--sk-s1,6px);margin-top:var(--sk-s1,6px)}
+#eternal .et-b-primary{display:flex;align-items:center;justify-content:center;width:100%;min-height:var(--sk-control-primary,54px);padding:0 var(--sk-s3,18px);border:0;border-radius:var(--sk-radius-lg,16px);background:var(--sk-primary);color:var(--sk-on-primary)!important;font:600 17px/1.2 var(--sk-font-bee-sans)!important;text-align:center;cursor:pointer}
+#eternal .et-b-primary:disabled{background:var(--sk-bg-well);color:var(--sk-ink-mut)!important;cursor:not-allowed}
+#eternal .et-b-link{display:flex;align-items:center;justify-content:center;width:100%;min-height:var(--sk-control-min,44px);border:0;background:transparent;font:600 16px/1.45 var(--sk-font-bee-sans)!important;color:var(--sk-link)!important;cursor:pointer;text-align:center}
+#eternal .et-b-link:hover{color:var(--sk-link-hover)!important}
+#eternal .et-b-foot{text-align:center;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-back{align-self:flex-start;display:flex;align-items:center;gap:var(--sk-s1,6px);min-height:var(--sk-control-min,44px);min-width:var(--sk-control-min,44px);padding:0;border:0;background:none;font:600 16px/1.45 var(--sk-font-bee-sans)!important;color:var(--sk-link)!important;cursor:pointer}
+#eternal .et-b-card{display:flex;flex-direction:column;gap:var(--sk-s1,6px);padding:var(--sk-s3,18px);background:var(--sk-sovereign-tint);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl,18px)}
+#eternal .et-b-card h3{font:400 28px/1.1 var(--sk-font-bee-serif);color:var(--sk-sovereign-strong)}
+#eternal .et-b-card p{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+#eternal .et-b-card p.et-b-src{font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-fig{font:400 32px/1 var(--sk-font-bee-serif);color:var(--sk-ink)}
+#eternal .et-b-sum{display:flex;flex-direction:column;gap:var(--sk-s1,6px);padding:var(--sk-s3,18px);background:var(--sk-bg-card);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl,18px)}
+#eternal .et-b-sum small{font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-stepper{display:flex;align-items:center;justify-content:space-between;gap:var(--sk-s2,12px);min-height:var(--sk-control-row,52px);padding:var(--sk-s1,6px) var(--sk-s3,18px);border-bottom:1px solid var(--sk-line-soft);color:var(--sk-ink);font:500 16px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-b-stepper:last-child{border-bottom:0}
+#eternal .et-b-stepper>span{flex:1 1 auto;min-width:0;font:500 16px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-b-stepper>span>small{display:block;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-stepper>b{min-width:64px;text-align:center;font:600 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+#eternal .et-b-btn{display:flex;align-items:center;justify-content:center;flex:none;min-width:var(--sk-control-min,44px);min-height:var(--sk-control-min,44px);padding:0 var(--sk-s2,12px);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius-md,14px);background:var(--sk-bg-card);color:var(--sk-ink)!important;font:600 16px/1.45 var(--sk-font-bee-sans)!important;cursor:pointer}
+#eternal .et-b-btn:disabled{border-color:var(--sk-line);color:var(--sk-ink-mut)!important;cursor:not-allowed}
+#eternal .et-b-field{flex:none;width:148px;min-height:var(--sk-control-min,44px);padding:0 var(--sk-s2,12px);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius,12px);background:var(--sk-bg-card);color:var(--sk-ink);font:400 16px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-b-check{display:flex;align-items:center;gap:var(--sk-s2,12px);min-height:var(--sk-control-min,44px);padding:var(--sk-s1,6px) var(--sk-s3,18px);border-bottom:1px solid var(--sk-line-soft);font:500 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink);cursor:pointer}
+#eternal .et-b-check:last-child{border-bottom:0}
+#eternal .et-b-check input{width:var(--sk-control-check,24px);height:var(--sk-control-check,24px);flex:none;accent-color:var(--sk-you)}
+#eternal .et-b-tick{width:78px;height:78px;margin:var(--sk-s2,12px) auto 0;border-radius:var(--sk-radius-pill,999px);background:var(--sk-verified-wash);color:var(--sk-verified);display:flex;align-items:center;justify-content:center;font:400 40px/1 var(--sk-font-bee-serif)}
+#eternal .et-b-done{text-align:center;font:400 52px/1 var(--sk-font-bee-serif);color:var(--sk-ink)}
+#eternal .et-b-said{text-align:center;font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-stars{display:flex;justify-content:space-between;gap:var(--sk-s1,6px);padding:var(--sk-s1,6px) var(--sk-s3,18px)}
+#eternal .et-b-stars button{flex:1 1 0;min-width:var(--sk-control-min,44px);min-height:var(--sk-control-min,44px);border:1.5px solid var(--sk-line);border-radius:var(--sk-radius,12px);background:var(--sk-bg-card);color:var(--sk-ink-mut)!important;font:600 16px/1.45 var(--sk-font-bee-sans)!important;text-align:center;cursor:pointer}
+#eternal .et-b-stars button[aria-pressed="true"]{border-color:var(--sk-you);background:var(--sk-sovereign-tint);color:var(--sk-sovereign-strong)!important}
+
+/* RAVER — the data is the art; lowercase is allowed joy; the numbers never change */
+#eternal .et-r{color:var(--sk-ink);font:400 14px/1.4 var(--sk-font-raver-body)}
+#eternal .et-r-top{display:flex;align-items:baseline;justify-content:space-between;gap:var(--sk-s2,12px);flex-wrap:wrap}
+#eternal .et-r-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em;color:var(--sk-ink)}
+#eternal .et-r-hint{font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-art{position:relative;width:100%;max-width:380px;margin:var(--sk-s3,18px) auto var(--sk-s2,12px)}
+#eternal .et-r-art>svg{width:100%;height:auto;filter:drop-shadow(var(--sk-glow-sovereign))}
+#eternal .et-r-art [role="button"]{cursor:pointer}
+#eternal .et-r-art [role="button"]:focus{outline:none}
+#eternal .et-hit{fill:transparent;stroke:none}
+#eternal svg line{fill:none}
+#eternal .et-r-mid{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;text-align:center;pointer-events:none;max-width:40%}
+#eternal .et-r-mid b{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em;color:var(--sk-ink)}
+#eternal .et-r-mid span{font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-legend{display:flex;flex-wrap:wrap;justify-content:center;gap:var(--sk-s1,6px) var(--sk-s3,18px);margin:0 0 var(--sk-s3,18px)}
+#eternal .et-r-legend span{display:inline-flex;align-items:center;gap:var(--sk-s1,6px);font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-lgb{display:inline-flex;align-items:center;gap:var(--sk-s1,6px);min-height:var(--sk-control-min,44px);padding:0 var(--sk-s2,12px)!important;border:1.5px solid var(--sk-line)!important;border-radius:var(--sk-radius-pill,999px);font:600 14px/1.25 var(--sk-font-raver-body)!important;color:var(--sk-ink-soft)!important;cursor:pointer}
+#eternal .et-r-lgb[aria-pressed="true"]{border-color:var(--sk-you)!important;color:var(--sk-ink)!important;box-shadow:var(--sk-glow-sovereign)}
+#eternal .et-r-lgb:disabled{cursor:default}
+#eternal .et-r-legend i{width:14px;height:14px;border-radius:var(--sk-radius-pill,999px);flex:none}
+#eternal .et-r-card{display:flex;gap:var(--sk-s2,12px);align-items:flex-start;padding:var(--sk-s2,12px) var(--sk-s3,18px);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl,18px);background:var(--sk-sovereign-tint);min-height:var(--sk-control-person,60px)}
+#eternal .et-r-card .et-rk{display:flex;align-items:center;justify-content:center;min-width:44px;height:44px;padding:0 var(--sk-s1,6px);border-radius:var(--sk-radius,12px);background:var(--sk-sovereign-strong);color:var(--sk-bg);font:700 15px/1.2 var(--sk-font-raver-display);flex:none}
+#eternal .et-r-card b{display:block;font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink)}
+#eternal .et-r-card span{display:block;margin-top:var(--sk-s1,6px);font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-note{margin:var(--sk-s2,12px) 0 0;text-align:center;font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-big{text-align:center;font:700 60px/.95 var(--sk-font-raver-display);letter-spacing:-.02em;color:var(--sk-ink)}
+#eternal .et-r-pill{display:flex;align-items:center;justify-content:center;width:100%;min-height:58px;margin-top:var(--sk-s4,24px);padding:0 var(--sk-s3,18px);border:0;border-radius:var(--sk-radius-pill,999px);background:var(--sk-primary);color:var(--sk-on-primary)!important;font:700 15px/1.2 var(--sk-font-raver-display)!important;letter-spacing:.04em;text-align:center;cursor:pointer;touch-action:manipulation}
+#eternal .et-r-pill:disabled{background:var(--sk-sovereign-wash);color:var(--sk-sovereign-soft)!important;cursor:not-allowed}
+#eternal .et-r-ghost{display:inline-flex;align-items:center;justify-content:center;gap:var(--sk-s1,6px);margin:var(--sk-s2,12px) auto 0;min-height:var(--sk-control-min,44px);min-width:var(--sk-control-min,44px);padding:0 var(--sk-s3,18px);border:1.5px solid var(--sk-sovereign);border-radius:var(--sk-radius-pill,999px);background:transparent;color:var(--sk-sovereign-strong)!important;font:600 14px/1.25 var(--sk-font-raver-body)!important;cursor:pointer}
+#eternal .et-r-ghost[aria-pressed="true"]{border-color:var(--sk-you);background:var(--sk-sovereign-wash);box-shadow:var(--sk-glow-sovereign)}
+#eternal .et-r-ghost:disabled{border-color:var(--sk-line);color:var(--sk-ink-mut)!important;cursor:not-allowed}
+#eternal .et-r-row{display:flex;justify-content:center;flex-wrap:wrap;gap:var(--sk-s2,12px)}
+#eternal .et-r-row .et-r-ghost{margin:var(--sk-s2,12px) 0 0}
+#eternal .et-r-tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--sk-s2,12px);margin:var(--sk-s2,12px) 0}
+#eternal .et-r-tiles button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--sk-s1,6px);min-height:88px;padding:var(--sk-s1,6px);border:1.5px solid var(--sk-sovereign);border-radius:var(--sk-radius-xl,18px);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong)!important;font:700 14px/1.2 var(--sk-font-raver-display)!important;letter-spacing:normal;text-align:center;cursor:pointer;opacity:.72;transition:opacity var(--dur,.26s),box-shadow var(--dur,.26s)}
+#eternal .et-r-tiles button[aria-pressed="true"]{opacity:1;border-color:var(--sk-you);box-shadow:var(--sk-glow-sovereign)}
+#eternal .et-r-tiles button small{font:400 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink-soft);letter-spacing:normal}
+#eternal .et-r-tiles svg{width:26px;height:26px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+#eternal .et-r-chip{display:flex;justify-content:center;align-items:center;flex-wrap:wrap;gap:var(--sk-s2,12px);margin:var(--sk-s2,12px) auto;padding:var(--sk-s1,6px) var(--sk-s3,18px);border:1px solid var(--sk-line);border-radius:var(--sk-radius-pill,999px);background:var(--sk-bg-card);width:max-content;max-width:100%;min-height:var(--sk-control-min,44px);text-align:center}
+#eternal .et-r-chip b{font:700 15px/1.2 var(--sk-font-raver-display);color:var(--sk-ink)}
+#eternal .et-r-chip span{font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-verified)}
+#eternal .et-r-chip span.et-off{color:var(--sk-guard)}
+#eternal .et-r-hold{position:relative;width:216px;height:216px;margin:var(--sk-s3,18px) auto 0}
+#eternal .et-r-hold svg{position:absolute;inset:0;width:100%;height:100%;transform:rotate(-90deg)}
+#eternal .et-hold-track{fill:none;stroke:var(--sk-line);stroke-width:8}
+#eternal .et-hold-prog{fill:none;stroke:var(--sk-biomass);stroke-width:8;stroke-linecap:round;stroke-dasharray:578;stroke-dashoffset:578}
+#eternal .et-r-holdbtn{position:absolute;inset:24px;border:0;background:var(--sk-primary);color:var(--sk-on-primary)!important;clip-path:polygon(50% 0,93% 25%,93% 75%,50% 100%,7% 75%,7% 25%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--sk-s1,6px);cursor:pointer;touch-action:none;user-select:none;-webkit-user-select:none;text-align:center}
+#eternal .et-r-holdbtn b{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em}
+#eternal .et-r-holdbtn span{font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em}
+#eternal .et-r-holdbtn:disabled{background:var(--sk-sovereign-wash);color:var(--sk-sovereign-soft)!important;cursor:not-allowed}
+@media (prefers-reduced-motion:reduce){#eternal *{transition:none!important;animation:none!important}}
+
+/* CYPHERPUNK — the instrument, complete at first paint: tables, a numbered pipeline, receipts */
+#eternal .et-c{font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink);overflow-wrap:anywhere}
+#eternal .et-c-path{font:600 15px/1.45 var(--sk-font-mono);color:var(--sk-ink);word-break:break-all}
+#eternal .et-c-chips{display:flex;flex-wrap:wrap;gap:var(--sk-s1,6px);margin:var(--sk-s2,12px) 0}
+#eternal .et-c-chips span{padding:2px var(--sk-s1,6px);border:1px solid var(--sk-line);border-radius:4px;background:var(--sk-bg-card);font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-soft)}
+#eternal .et-c-chips span.et-on{border-color:var(--sk-guard);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong)}
+#eternal .et-c-chips span.et-ok{border-color:var(--sk-verified);color:var(--sk-verified)}
+#eternal .et-c-chips span.et-no{border-color:var(--sk-info);color:var(--sk-info)}
+#eternal .et-c-h{margin:var(--sk-s4,24px) 0 var(--sk-s2,12px)!important;font:600 15px/1.45 var(--sk-font-mono);color:var(--sk-ink)}
+#eternal .et-c-tab{margin:var(--sk-s2,12px) 0 var(--sk-s1,6px)!important;border:1px solid var(--sk-line)!important;border-radius:var(--sk-radius-sm,6px);overflow:hidden;background:var(--sk-bg-card)!important}
+#eternal .et-c-tab th{padding:var(--sk-s1,6px) var(--sk-s2,12px)!important;text-align:left;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);border-bottom:1px solid var(--sk-line)!important;background:var(--sk-bg-well)}
+#eternal .et-c-tab td{height:var(--sk-control-min,44px);padding:var(--sk-s1,6px) var(--sk-s2,12px)!important;border-bottom:1px solid var(--sk-line)!important;font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink);vertical-align:middle}
+#eternal .et-c-tab tr:last-child td{border-bottom:0!important}
+#eternal .et-c-tab tbody td:first-child{color:var(--sk-guard);white-space:nowrap;width:1%}
+#eternal .et-c-tab th:first-child{white-space:nowrap;width:1%}
+#eternal .et-c-tab small{display:block;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut)}
+#eternal .et-c-tab .et-num{text-align:right;white-space:nowrap}
+#eternal .et-c-tab tbody td.et-wrap{white-space:normal;width:auto}
+#eternal .et-c-tab td,#eternal .et-c-tab th{overflow-wrap:break-word}
+#eternal .et-c-tab tfoot td{height:auto;background:var(--sk-bg-well);color:var(--sk-ink-soft);font:500 12px/1.45 var(--sk-font-mono)}
+#eternal .et-c-tab input{width:72px;min-height:var(--sk-control-min,44px);padding:0 var(--sk-s1,6px);border:1.5px solid var(--sk-ai);border-radius:var(--sk-radius-sm,6px);background:var(--sk-bg);color:var(--sk-ink);font:400 13px/1.45 var(--sk-font-mono);text-align:right}
+#eternal .et-st-ok{color:var(--sk-verified)}#eternal .et-st-no{color:var(--sk-info)}#eternal .et-st-wait{color:var(--sk-ai)}#eternal .et-st-guard{color:var(--sk-guard)}
+#eternal .et-c-pipe{list-style:none;margin:0;padding:0;display:grid;gap:var(--sk-s2,12px);counter-reset:etp}
+#eternal .et-c-pipe li{display:grid;grid-template-columns:28px 1fr;gap:var(--sk-s1,6px) var(--sk-s2,12px);padding:var(--sk-s2,12px) var(--sk-s3,18px);border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm,6px);background:var(--sk-bg-card);counter-increment:etp}
+#eternal .et-c-pipe li::before{content:counter(etp,decimal-leading-zero);color:var(--sk-guard);font-weight:600}
+#eternal .et-c-pipe li b{font-weight:600;color:var(--sk-ink)}
+#eternal .et-c-pipe li p{grid-column:2;color:var(--sk-ink-soft)}
+#eternal .et-c-pipe li.et-done b{color:var(--sk-verified)}
+#eternal .et-c-pipe li.et-guard{border-style:dashed;border-color:var(--sk-guard)}
+#eternal .et-c-pipe li.et-guard b{color:var(--sk-guard)}
+#eternal .et-c-pipe li.et-now{border-color:var(--sk-ai);box-shadow:inset 0 0 0 1px var(--sk-ai)}
+#eternal .et-c-pipe li.et-now b{color:var(--sk-ai)}
+#eternal .et-c-primary{display:flex;align-items:center;justify-content:center;width:100%;min-height:52px;margin-top:var(--sk-s3,18px);padding:0 var(--sk-s2,12px);border:0;border-radius:var(--sk-radius-sm,6px);background:var(--sk-primary);color:var(--sk-on-primary)!important;font:600 14px/1.2 var(--sk-font-mono)!important;text-align:center;cursor:pointer}
+#eternal .et-c-primary:disabled{background:var(--sk-bg-well);color:var(--sk-ink-mut)!important;cursor:not-allowed}
+#eternal .et-c-note{margin-top:var(--sk-s2,12px);font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-soft)}
+#eternal .et-c-kv{border:1px solid var(--sk-line)!important;border-radius:var(--sk-radius-sm,6px);overflow:hidden;background:var(--sk-bg-card)!important}
+#eternal .et-c-kv th{width:112px;padding:var(--sk-s2,12px)!important;text-align:left;vertical-align:top;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);border-bottom:1px solid var(--sk-line)!important;background:transparent}
+#eternal .et-c-kv td{padding:var(--sk-s2,12px)!important;border-bottom:1px solid var(--sk-line)!important;font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink);word-break:break-word}
+#eternal .et-c-kv tr:last-child th,#eternal .et-c-kv tr:last-child td{border-bottom:0!important}
+#eternal .et-c-verify{margin-top:var(--sk-s3,18px);padding:var(--sk-s3,18px);border-radius:var(--sk-radius-sm,6px);background:var(--sk-bg-card);border:1px solid var(--sk-line)}
+#eternal .et-c-verify-h{font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);margin-bottom:var(--sk-s1,6px)}
+#eternal .et-c-verify ol{margin:0;padding-left:var(--sk-s4,24px)!important;display:grid;gap:var(--sk-s1,6px)}
+#eternal .et-c-verify code,#eternal .et-c-code{font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ai);word-break:break-all}
+#eternal .et-c-quote{margin-top:var(--sk-s2,12px);padding:var(--sk-s2,12px) var(--sk-s3,18px);border:1px dashed var(--sk-guard);border-radius:var(--sk-radius-sm,6px);background:var(--sk-guard-wash);color:var(--sk-guard);font:400 13px/1.45 var(--sk-font-mono)}
+#eternal .et-c-quote b{color:var(--sk-sovereign-strong);font-weight:600}
+#eternal .et-c-row{display:grid;grid-template-columns:1fr 1fr;gap:var(--sk-s2,12px);margin-top:var(--sk-s3,18px)}
+#eternal .et-c-ghost{display:flex;align-items:center;justify-content:center;min-height:52px;padding:0 var(--sk-s1,6px);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius-sm,6px);background:transparent;color:var(--sk-ink)!important;text-align:center;font:600 14px/1.2 var(--sk-font-mono)!important;cursor:pointer}
+#eternal .et-c-a{display:inline-flex;align-items:center;min-height:var(--sk-control-min,44px);color:var(--sk-link)}
+#eternal .et-c-a:hover{color:var(--sk-link-hover)}
+#eternal .et-c-in{display:flex;align-items:center;gap:var(--sk-s2,12px);flex-wrap:wrap;margin-top:var(--sk-s2,12px)}
+#eternal .et-c-in label{display:flex;align-items:center;gap:var(--sk-s1,6px);min-height:var(--sk-control-min,44px);font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut)}
+#eternal .et-c-in input,#eternal .et-c-in select{width:96px;min-height:var(--sk-control-min,44px);padding:0 var(--sk-s1,6px);border:1.5px solid var(--sk-ai);border-radius:var(--sk-radius-sm,6px);background:var(--sk-bg-card);color:var(--sk-ink);font:400 13px/1.45 var(--sk-font-mono)}
+#eternal .et-c-in select{width:auto;min-width:132px}
+#eternal .et-c-in .et-c-ghost{min-height:var(--sk-control-min,44px);padding:0 var(--sk-s2,12px)}
+
+/* the web (raver): six good feelings on six axes. The bright web is the session being told, set through the
+   tracker's own sliders; the dashed web is the average of every session logged in this browser. */
+#etWeb .et-web-grid{fill:none;stroke:var(--sk-ink-dim);stroke-opacity:.55;stroke-width:1}
+#etWeb .et-web-grid.et-web-rim{stroke:var(--sk-sovereign-soft);stroke-opacity:.9;stroke-width:1.5}
+#etWeb .et-web-axis{stroke:var(--sk-ink-dim);stroke-opacity:.55;stroke-width:1}
+#etWeb .et-web-avg{fill:var(--sk-sovereign);fill-opacity:.18;stroke:var(--sk-sovereign-soft);stroke-width:2;stroke-dasharray:6 6}
+#etWeb .et-web-now{fill:var(--sk-biomass);fill-opacity:.22;stroke:var(--sk-biomass);stroke-width:2.5;stroke-linejoin:round}
+#etWeb .et-web-node{cursor:pointer}
+#etWeb .et-web-dot{fill:var(--sk-bg);stroke:var(--sk-biomass);stroke-width:2.5}
+#etWeb .et-web-node:focus-visible .et-web-dot{stroke:var(--sk-ink);stroke-width:3.5}
+#etWeb .et-web-v{fill:var(--sk-ink);font:700 18px/1 var(--sk-font-raver-display)}
+#eternal #etWebFx,#eternal #etWebSide,#eternal #etWebStars{margin:0 0 var(--sk-s2,12px)}
+#eternal #etWebFx .et-r-ghost,#eternal #etWebSide .et-r-ghost,#eternal #etWebStars .et-r-ghost{margin:var(--sk-s1,6px) 0 0}
+#eternal #etWebSide{margin-top:var(--sk-s3,18px)}
+#eternal .et-star{padding:0 var(--sk-s2,12px);font:700 18px/1 var(--sk-font-raver-display)!important}
+#eternal .et-star[aria-pressed="true"]{color:var(--sk-you)!important}
+#eternal #etcSide input{width:var(--sk-control-check,24px);min-height:0;height:var(--sk-control-check,24px);accent-color:var(--sk-ai)}
+#eternal #etcSide label{padding-right:var(--sk-s2,12px);color:var(--sk-ink)}
+#eternal .et-c-tab td.et-num input{margin-left:auto}
+#eternal .et-b-stars button{font:600 16px/1.45 var(--sk-font-bee-sans)!important}
+#eternal #etcTime{width:132px}
+</style>
 </head>
 <body>
+<!-- ETERNAL FRONT (founder blueprint 2026-09-26, docs/design/eternal): three separate products above the
+     founder's edible and effects tracker, which stays below exactly as hosted (fleet-hosted ruling: preserve
+     dress, 0 lines removed). ONE data layer reads the tracker's own model (sessions, baseline, starRating,
+     POS_EFFECTS, SIDE_EFFECTS) and the numbers its updateAnalysis() prints. Every change goes through the
+     tracker's own controls: its session fields, its effect sliders, its side-effect boxes, its stars and its
+     own "Log Session + Effects" button (logSession -> bnEdibleSessions). "logged" is said only when
+     bnEdibleSessions really grew. The baseline is saved only by the tracker's own button below. The fronts
+     quote the tracker's own words and add no advice. Nothing is sent. -->
+<section id="eternal" aria-label="the edible and effects tracker, how your sessions feel">
+
+  <!-- NEW BEE — a calm room: your pattern in plain rows, then one session told in plain steps -->
+  <div class="et-b">
+    <div class="et-b-step" id="etBeePattern">
+      <div class="et-b-mark" data-et-t="et.edible.b.mark">edible and effects tracker</div>
+      <h2 class="et-b-h" data-et-t="et.edible.b.h">how your sessions feel</h2>
+      <p class="et-b-lede" data-et-t="et.edible.b.lede">tell the tracker how a session felt. it averages your own ratings across every session you log here.</p>
+      <div class="et-b-guard"><svg class="et-ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span data-et-t="et.edible.b.guard">your notes stay in this browser. nothing is sent.</span></div>
+      <div class="et-b-rows" id="etBeeStats"></div>
+      <div class="et-b-rows" id="etBeeBase"></div>
+      <div class="et-b-act">
+        <button type="button" class="et-b-primary" id="etBeeTell" data-et-t="et.edible.b.tell">log how a session felt</button>
+        <button type="button" class="et-b-link" id="etBeeToBase" data-et-t="et.edible.b.toBase">set or change your baseline in the tracker below</button>
+        <p class="et-b-foot" id="etBeeFoot"></p>
+      </div>
+    </div>
+
+    <div class="et-b-step" id="etBeeTellStep" hidden>
+      <button type="button" class="et-b-back" id="etBeeBack"><svg class="et-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg><span data-et-t="et.edible.b.back">your pattern</span></button>
+      <h2 class="et-b-h" data-et-t="et.edible.b.tellH">how did it feel?</h2>
+      <div class="et-b-rows">
+        <label class="et-b-stepper"><span data-et-t="et.edible.b.method">how</span><select class="et-b-field" id="etBeeMethod"></select></label>
+        <label class="et-b-stepper"><span data-et-t="et.edible.b.time">when</span><input type="time" class="et-b-field" id="etBeeTime"></label>
+        <label class="et-b-stepper"><span><span data-et-t="et.edible.b.strain">strain or product</span><small data-et-t="et.edible.b.optional">optional</small></span><input type="text" class="et-b-field" id="etBeeStrain" autocomplete="off"></label>
+        <div class="et-b-stepper"><span data-et-t="et.edible.b.amount">how much</span><button type="button" class="et-b-btn" data-f="s_amount" data-d="-0.1" aria-label="less">−</button><b id="etBeeAmount"></b><button type="button" class="et-b-btn" data-f="s_amount" data-d="0.1" aria-label="more">+</button></div>
+        <div class="et-b-stepper"><span><span data-et-t="et.edible.b.thca">thca</span><small data-et-t="et.edible.b.thcaS">per cent</small></span><button type="button" class="et-b-btn" data-f="s_thca" data-d="-1" aria-label="less">−</button><b id="etBeeThca"></b><button type="button" class="et-b-btn" data-f="s_thca" data-d="1" aria-label="more">+</button></div>
+        <div class="et-b-stepper"><span><span data-et-t="et.edible.b.since">since your last edible</span><small data-et-t="et.edible.b.sinceS">hours</small></span><button type="button" class="et-b-btn" data-f="s_since_edible" data-d="-0.5" aria-label="fewer">−</button><b id="etBeeSince"></b><button type="button" class="et-b-btn" data-f="s_since_edible" data-d="0.5" aria-label="more">+</button></div>
+      </div>
+      <div class="et-b-rows" id="etBeeFelt"></div>
+      <div class="et-b-rows" id="etBeeSide"></div>
+      <div class="et-b-rows"><div class="et-b-group" data-et-t="et.edible.b.overall">overall, out of 5</div><div class="et-b-stars" id="etBeeStars" role="group" aria-label="overall, out of 5"></div>
+        <label class="et-b-stepper"><span><span data-et-t="et.edible.b.notes">notes</span><small data-et-t="et.edible.b.optional2">optional</small></span><input type="text" class="et-b-field" id="etBeeNotes" autocomplete="off"></label></div>
+      <div class="et-b-act">
+        <button type="button" class="et-b-primary" id="etBeeLog" data-et-t="et.edible.b.log">log this session</button>
+        <p class="et-b-foot" id="etBeeLogNote"></p>
+      </div>
+    </div>
+
+    <div class="et-b-step" id="etBeeDone" hidden>
+      <div class="et-b-tick" aria-hidden="true">✓</div>
+      <div class="et-b-done" data-et-t="et.edible.b.done">logged.</div>
+      <p class="et-b-said" id="etBeeSaid"></p>
+      <div class="et-b-act">
+        <button type="button" class="et-b-primary" id="etBeeAgain" data-et-t="et.edible.b.again">back to your pattern</button>
+        <button type="button" class="et-b-link" id="etBeeSee" data-et-t="et.edible.b.see">see the tracker's own analysis</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- RAVER — the feeling is a web: this session bright, your average dashed; tap a star, hold to log -->
+  <div class="et-r">
+    <div class="et-r-top"><h2 class="et-r-h" data-et-t="et.edible.r.h">your web</h2><span class="et-r-hint" id="etWebHint"></span></div>
+    <div class="et-r-art">
+      <svg id="etWeb" viewBox="-200 -200 400 400" role="group" aria-label="six good feelings as a web: this session bright, the average of your logged sessions dashed"></svg>
+    </div>
+    <div class="et-r-row" id="etWebFx" role="group" aria-label="tap to raise a feeling by one"></div>
+    <div class="et-r-card" id="etWebCard" aria-live="polite"></div>
+    <div class="et-r-row" id="etWebSide" role="group" aria-label="side effects"></div>
+    <div class="et-r-row" id="etWebStars" role="group" aria-label="overall, out of 5"></div>
+    <div class="et-r-hold">
+      <svg viewBox="0 0 200 200" aria-hidden="true"><circle cx="100" cy="100" r="92" class="et-hold-track"/><circle cx="100" cy="100" r="92" class="et-hold-prog" id="etWebProg"/></svg>
+      <button type="button" class="et-r-holdbtn" id="etWebHold" aria-describedby="etWebNote"><b data-et-t="et.edible.r.hold">hold</b><span data-et-t="et.edible.r.holdS">to log</span></button>
+    </div>
+    <p class="et-r-note" id="etWebNote"></p>
+  </div>
+
+  <!-- CYPHERPUNK — the instrument: baseline saved vs form, what logSession() reads, the analysis recomputed -->
+  <div class="et-c">
+    <div class="et-c-path" id="etcPath">fleet-hosted/lab/edible-tracker.html</div>
+    <div class="et-c-chips" id="etcChips"></div>
+    <h3 class="et-c-h" data-et-t="et.edible.c.baseH">baseline · bnBaseline against the form</h3>
+    <table class="et-c-tab" id="etcBase"><thead><tr><th>field</th><th>saved</th><th class="et-num">form</th></tr></thead><tbody></tbody></table>
+    <p class="et-c-note" id="etcBaseNote"></p>
+    <h3 class="et-c-h" data-et-t="et.edible.c.sessH">the session · what logSession() reads</h3>
+    <div class="et-c-in">
+      <label><span>s_method</span><select id="etcMethod"></select></label>
+      <label><span>s_time</span><input id="etcTime" type="time"></label>
+      <label><span>s_amount g</span><input id="etcAmount" type="number" step="0.1" min="0.1" inputmode="decimal"></label>
+      <label><span>s_thca %</span><input id="etcThca" type="number" step="0.1" min="0" inputmode="decimal"></label>
+      <label><span>s_since_edible h</span><input id="etcSince" type="number" step="0.5" min="0" inputmode="decimal"></label>
+      <label><span>stars</span><input id="etcStars" type="number" step="1" min="0" max="5" inputmode="numeric"></label>
+    </div>
+    <table class="et-c-tab" id="etcPos"><thead><tr><th>#</th><th>positive</th><th class="et-num">0–10</th></tr></thead><tbody></tbody></table>
+    <div class="et-c-in" id="etcSide" role="group" aria-label="sideEffects"></div>
+    <button type="button" class="et-c-primary" id="etcLog">logSession() · append to bnEdibleSessions</button>
+    <p class="et-c-note" id="etcLogged" aria-live="polite"></p>
+    <h3 class="et-c-h" data-et-t="et.edible.c.pipeH">the analysis · as updateAnalysis() does it</h3>
+    <ol class="et-c-pipe" id="etcPipe"></ol>
+    <h3 class="et-c-h" data-et-t="et.edible.c.receiptH">receipt · recomputed against the page</h3>
+    <table class="et-c-kv" id="etcReceipt"></table>
+    <div class="et-c-quote" id="etcQuote"></div>
+    <div class="et-c-verify">
+      <div class="et-c-verify-h" data-et-t="et.edible.c.selfH">verify · no trust in this page needed</div>
+      <ol><li><code>JSON.parse(localStorage.getItem('bnEdibleSessions'))</code></li><li><code>grep -rn bnEdibleSessions surfaces</code> · only this tracker reads or writes it</li><li><code>diff surfaces/fleet/edible-tracker.html surfaces/fleet-hosted/lab/edible-tracker.html</code></li></ol>
+    </div>
+    <div class="et-c-row">
+      <button type="button" class="et-c-ghost" id="etcExport" data-et-t="et.edible.c.export">exportData()</button>
+      <a class="et-c-ghost" href="https://github.com/beehive-nature/beehive-nature/blob/main/surfaces/fleet-hosted/lab/edible-tracker.html" target="_blank" rel="noopener noreferrer"><span data-et-t="et.edible.c.src">fork the template ↗</span><span class="et-sr"> (opens in a new tab)</span></a>
+    </div>
+  </div>
+</section>
+<h2 class="et-archive-h" id="etArchive" tabindex="-1" data-et-t="et.edible.archive">the whole edible tracker</h2>
 <div class="hdr"><h1>Edible & Effects Tracker</h1><p>bnature.social - Baseline Cannabinoid Nutrition + Acute Session Effects | v1.0</p></div>
 <div class="wrap">
 
@@ -263,6 +587,210 @@ out.textContent='bDATABASE EXPORT — BiGen Meta-Analysis\nHypothesis: ECS basel
 }
 
 loadAll();
+</script>
+<script>
+/* ETERNAL FRONT — one data layer, three renderers (docs/design/eternal). The tracker's own model is the
+   source: sessions, baseline, starRating, POS_EFFECTS and SIDE_EFFECTS (its globals), its form fields, and
+   the numbers updateAnalysis() prints. Every change goes through the tracker's own controls: a field is its
+   own input, a feeling is its own slider (input -> its own posv_ label), a side effect is its own box, the
+   stars are its own stars (setStars), and logging is its own "Log Session + Effects" button (logSession ->
+   bnEdibleSessions). "logged" is said only when bnEdibleSessions in this browser really grew. The fronts quote
+   the tracker's own words (its hypothesis) and add no advice; its insight sentence is left where it is. */
+(function(){
+  var $=function(id){return document.getElementById(id);};
+  var T=function(k,f){var t=window.BNRLanguage&&window.BNRLanguage.text;return t?t(k,f):f;};
+  var esc=function(v){return String(v==null?'':v).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});};
+  var fill=function(s,o){return String(s).replace(/\{(\w+)\}/g,function(m,k){return o[k]==null?m:o[k];});};
+  var r1=function(x){return Math.round(x*10)/10;};
+  var BASE=[['cbd','base_cbd','mg cbd a day'],['thc','base_thc','mg thc a day'],['other','base_other','mg cbg or cbn a day'],['carrier','base_carrier','carrier'],['volume','base_volume','ml a day'],['doses','base_doses','doses a day'],['days','base_days','days on it']];
+  var D={ok:false,pos:[],side:[],sessions:[],n:0,avgPos:0,sideCount:0,sidePct:0,avgRating:0,page:{},want:{},agree:false,baseline:{},baseSaved:false,baseForm:{},stored:null,form:{},hypothesis:'',last:null};
+  var R={msg:'',hold:0,t0:0};
+  var B={step:'pattern',fail:false};
+
+  /* ── the one data layer: the tracker's own model, read where it lives ── */
+  function storedCount(){try{var r=localStorage.getItem('bnEdibleSessions');if(r==null)return null;var a=JSON.parse(r);return Array.isArray(a)?a.length:null;}catch(e){return null;}}
+  function read(){
+    var P=Array.isArray(window.POS_EFFECTS)?window.POS_EFFECTS:[],SE=Array.isArray(window.SIDE_EFFECTS)?window.SIDE_EFFECTS:[],SS=Array.isArray(window.sessions)?window.sessions:[];
+    D.pos=P.map(function(n,i){var e=$('pos_'+i);return {i:i,name:n,label:n.toLowerCase(),v:e?parseInt(e.value):NaN};});
+    D.side=SE.map(function(n){var c=[].filter.call(document.querySelectorAll('#sideEffects input[type="checkbox"]'),function(x){return x.value===n;})[0];return {v:n,label:n.toLowerCase(),on:!!(c&&c.checked)};});
+    D.sessions=SS;D.n=SS.length;
+    var ap=0,sc=0,ar=0;SS.forEach(function(s){var ps=0;for(var k in s.positive)ps+=s.positive[k];ap+=ps/(P.length||6);if(s.sideEffects&&s.sideEffects.length>0)sc++;ar+=s.rating;});
+    D.avgPos=D.n?ap/D.n:0;D.avgRating=D.n?ar/D.n:0;D.sideCount=sc;D.sidePct=D.n?Math.round(sc/D.n*100):0;
+    D.avgVec=P.map(function(n){if(!D.n)return 0;var t=0;SS.forEach(function(s){t+=(s.positive&&s.positive[n])||0;});return t/D.n;});
+    var t=function(id){var e=$(id);return e?e.textContent.trim():'';};
+    D.page={count:t('a_count'),positive:t('a_positive'),side:t('a_side'),rating:t('a_rating')};
+    D.want={count:String(D.n),positive:D.n?D.avgPos.toFixed(1)+'/10':'—',side:D.n?D.sidePct+'% ('+D.sideCount+'/'+D.n+')':'—',rating:D.n?D.avgRating.toFixed(1)+'/5':'—'};
+    D.agree=Object.keys(D.want).every(function(k){return D.page[k]===D.want[k];});
+    D.baseline=window.baseline&&typeof window.baseline==='object'?window.baseline:{};
+    D.baseSaved=!!D.baseline.saved;
+    D.baseForm={};BASE.forEach(function(b){var e=$(b[1]);D.baseForm[b[0]]=e?e.value:'';});
+    D.stored=storedCount();
+    var v=function(id){var e=$(id);return e?e.value:'';};
+    D.form={method:v('s_method'),methods:$('s_method')?[].map.call($('s_method').options,function(o){return o.value;}):[],time:v('s_time'),strain:v('s_strain'),amount:parseFloat(v('s_amount')),thca:parseFloat(v('s_thca')),since:parseFloat(v('s_since_edible')),notes:v('s_notes'),stars:typeof window.starRating==='number'?window.starRating:0};
+    var foot=[].filter.call(document.querySelectorAll('.wrap>div'),function(d){return /^This tool tests the hypothesis/.test(d.textContent.trim());})[0];
+    D.hypothesis=foot?foot.textContent.replace(/\s+/g,' ').trim():'';
+    D.ok=P.length>0;
+  }
+  var nice=function(v,none){return v===''||v==null||isNaN(v)?none:v;};
+
+  /* ── the tracker's own controls: every change goes through them ── */
+  function setField(id,val){var e=$(id);if(!e)return;e.value=String(val);e.dispatchEvent(new Event('input',{bubbles:true}));}
+  function feel(i,val){var e=$('pos_'+i);if(!e)return;e.value=String(Math.max(0,Math.min(10,Math.round(val))));e.dispatchEvent(new Event('input',{bubbles:true}));update();}
+  function side(v){var c=[].filter.call(document.querySelectorAll('#sideEffects input[type="checkbox"]'),function(x){return x.value===v;})[0];if(c)c.click();update();}
+  function stars(n){var s=$('stars');if(s&&s.children[n-1])s.children[n-1].click();else if(n===0&&typeof window.setStars==='function')window.setStars(0);update();}
+  function method(v){var s=$('s_method');if(!s)return;s.value=v;s.dispatchEvent(new Event('change',{bubbles:true}));update();}
+  function labButton(fn){return [].filter.call(document.querySelectorAll('button'),function(b){return !b.closest('#eternal')&&b.getAttribute('onclick')===fn;})[0]||null;}
+  function log(){
+    read();var before=D.stored==null?0:D.stored,snap={method:D.form.method,time:D.form.time,stars:D.form.stars},b=labButton('logSession()');
+    if(!b)return {ok:false,before:before,after:before};
+    b.click();read();var after=D.stored==null?0:D.stored,last=D.sessions[D.sessions.length-1];
+    var res=after===before+1&&last?{ok:true,before:before,after:after,method:last.method,time:last.time,rating:last.rating,sides:last.sideEffects.length}:{ok:false,before:before,after:after,snap:snap};
+    D.last=res;render();return res;
+  }
+  function toLab(el,focus){if(!el)return;var still=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;el.scrollIntoView({behavior:still?'auto':'smooth',block:'start'});if(focus)try{focus.focus({preventScroll:true});}catch(e){}}
+
+  /* ── NEW BEE ── */
+  function row(l,v,c,sub){return '<div class="et-b-row"><span>'+esc(l)+(sub?'<small>'+esc(sub)+'</small>':'')+'</span><small'+(c?' class="'+c+'"':'')+'>'+esc(v)+'</small></div>';}
+  function bee(){
+    $('etBeePattern').hidden=B.step!=='pattern';$('etBeeTellStep').hidden=B.step!=='tell';$('etBeeDone').hidden=B.step!=='done';
+    var none=T('et.edible.b.none','nothing logged yet');
+    $('etBeeStats').innerHTML=row(T('et.edible.b.count','sessions logged'),D.n)+row(T('et.edible.b.pos','how good they felt, on average'),D.n?fill(T('et.edible.b.posV','{x} of 10'),{x:D.avgPos.toFixed(1)}):none)+row(T('et.edible.b.side','sessions with a side effect'),D.n?fill(T('et.edible.b.sideV','{p}% · {k} of {n}'),{p:D.sidePct,k:D.sideCount,n:D.n}):none)+row(T('et.edible.b.rating','overall, on average'),D.n?fill(T('et.edible.b.ratingV','{x} of 5'),{x:D.avgRating.toFixed(1)}):none);
+    var b=D.baseline;
+    $('etBeeBase').innerHTML='<div class="et-b-group">'+esc(T('et.edible.b.baseH','your daily baseline'))+'</div>'+(D.baseSaved?
+      row(T('et.edible.b.cbd','cbd'),fill(T('et.edible.b.mgDay','{n} mg a day'),{n:b.cbd}))+row(T('et.edible.b.thc','thc'),fill(T('et.edible.b.mgDay','{n} mg a day'),{n:b.thc}))+row(T('et.edible.b.other','cbg or cbn'),fill(T('et.edible.b.mgDay','{n} mg a day'),{n:b.other}))+row(T('et.edible.b.carrier','carried in'),String(b.carrier||'').toLowerCase())+row(T('et.edible.b.doses','doses a day'),b.doses)+row(T('et.edible.b.days','days on it'),b.days)
+      :row(T('et.edible.b.noBase','not saved in this browser yet'),'','',T('et.edible.b.noBaseS','the tracker\'s form below starts with its own numbers until you save yours.')));
+    $('etBeeFoot').textContent=D.hypothesis?fill(T('et.edible.b.foot','in the tracker\'s own words: “{h}”'),{h:D.hypothesis}):'';
+    var f=D.form;
+    var ms=$('etBeeMethod');if(ms.options.length!==f.methods.length)ms.innerHTML=f.methods.map(function(m){return '<option value="'+esc(m)+'">'+esc(m.toLowerCase())+'</option>';}).join('');ms.value=f.method;
+    if(document.activeElement!==$('etBeeTime'))$('etBeeTime').value=f.time;
+    if(document.activeElement!==$('etBeeStrain'))$('etBeeStrain').value=f.strain;
+    if(document.activeElement!==$('etBeeNotes'))$('etBeeNotes').value=f.notes;
+    $('etBeeAmount').textContent=nice(r1(f.amount),0)+' g';$('etBeeThca').textContent=nice(r1(f.thca),0)+'%';$('etBeeSince').textContent=nice(r1(f.since),0)+' h';
+    $('etBeeFelt').innerHTML='<div class="et-b-group">'+esc(T('et.edible.b.felt','how it felt, 0 to 10'))+'</div>'+D.pos.map(function(p){return '<div class="et-b-stepper"><span>'+esc(p.label)+'</span><button type="button" class="et-b-btn" data-pos="'+p.i+'" data-d="-1" aria-label="'+esc(fill(T('et.edible.b.lessOf','less {e}'),{e:p.label}))+'"'+(p.v<=0?' disabled':'')+'>−</button><b>'+esc(p.v)+'</b><button type="button" class="et-b-btn" data-pos="'+p.i+'" data-d="1" aria-label="'+esc(fill(T('et.edible.b.moreOf','more {e}'),{e:p.label}))+'"'+(p.v>=10?' disabled':'')+'>+</button></div>';}).join('');
+    $('etBeeSide').innerHTML='<div class="et-b-group">'+esc(T('et.edible.b.sideH','anything else you noticed'))+'</div>'+D.side.map(function(s){return '<label class="et-b-check"><input type="checkbox" data-side="'+esc(s.v)+'"'+(s.on?' checked':'')+'>'+esc(s.label)+'</label>';}).join('');
+    $('etBeeStars').innerHTML=[1,2,3,4,5].map(function(n){return '<button type="button" data-star="'+n+'" aria-pressed="'+(n<=f.stars)+'" aria-label="'+esc(fill(T('et.edible.b.starN','{n} of 5'),{n:n}))+'">'+(n<=f.stars?'★':'☆')+' '+n+'</button>';}).join('');
+    $('etBeeLogNote').textContent=B.fail?T('et.edible.b.fail','not logged: the tracker did not keep it. nothing changed.'):fill(T('et.edible.b.logNote','it is kept in this browser as session {n}, with the baseline numbers from the tracker\'s form. the dashboard does not read it. nothing is sent.'),{n:(D.stored||0)+1});
+    if(D.last&&D.last.ok)$('etBeeSaid').textContent=fill(T('et.edible.b.said','session {n} is in this browser: {m} at {t}, {r} of 5 overall.'),{n:D.last.after,m:String(D.last.method).toLowerCase(),t:D.last.time||T('et.edible.b.notime','no time given'),r:D.last.rating});
+  }
+
+  /* ── RAVER: the web ── */
+  var RMAX=150;
+  function pt(r,deg){var a=(deg-90)*Math.PI/180;return [+(r*Math.cos(a)).toFixed(2),+(r*Math.sin(a)).toFixed(2)];}
+  var rr=function(v){return 14+13.6*Math.max(0,Math.min(10,v||0));};
+  function web(){
+    var svg=$('etWeb');if(!svg)return;var h='',N=D.pos.length||6,step=360/N;
+    for(var q=2;q<=10;q+=2){h+='<polygon class="et-web-grid'+(q===10?' et-web-rim':'')+'" points="'+D.pos.map(function(p,i){return pt(rr(q),i*step).join(' ');}).join(' ')+'"/>';}
+    D.pos.forEach(function(p,i){var e=pt(rr(10)+6,i*step);h+='<line class="et-web-axis" x1="0" y1="0" x2="'+e[0]+'" y2="'+e[1]+'"/>';});
+    if(D.n)h+='<polygon class="et-web-avg" points="'+D.avgVec.map(function(v,i){return pt(rr(v),i*step).join(' ');}).join(' ')+'"/>';
+    h+='<polygon class="et-web-now" points="'+D.pos.map(function(p,i){return pt(rr(p.v),i*step).join(' ');}).join(' ')+'"/>';
+    D.pos.forEach(function(p,i){var c=pt(rr(p.v),i*step);h+='<g class="et-web-node" role="button" tabindex="0" data-pos="'+p.i+'" aria-label="'+esc(fill(T('et.edible.r.node','{e}, {v} of 10 · tap to raise'),{e:p.label,v:p.v}))+'" transform="translate('+c[0]+' '+c[1]+')"><circle class="et-hit" r="27"/><circle class="et-web-dot" r="18"/><text class="et-web-v" y="6" text-anchor="middle">'+esc(p.v)+'</text></g>';});
+    svg.innerHTML=h;
+  }
+  function raver(){
+    var f=D.form;
+    $('etWebHint').textContent=D.n?fill(T('et.edible.r.hint','{n} logged · tap a point to raise it'),{n:D.n}):T('et.edible.r.hintEmpty','no average yet · tap a point to raise it');
+    $('etWebFx').innerHTML=D.pos.map(function(p){return '<button type="button" class="et-r-ghost" data-pos="'+p.i+'">'+esc(p.label+' · '+p.v)+'</button>';}).join('');
+    var card=$('etWebCard');
+    if(R.msg)card.innerHTML=R.msg;
+    else card.innerHTML='<span class="et-rk">'+esc(D.n?D.avgPos.toFixed(1):'0')+'</span><div><b>'+esc(D.n?fill(T('et.edible.r.cardH','your average over {n}: {x} of 10'),{n:D.n,x:D.avgPos.toFixed(1)}):T('et.edible.r.emptyH','no sessions yet, honestly'))+'</b><span>'+esc(D.n?fill(T('et.edible.r.cardS','dashed web · a side effect in {p}% · {r} of 5 overall · this session is the bright web'),{p:D.sidePct,r:D.avgRating.toFixed(1)}):T('et.edible.r.emptyS','the bright web is the session you are telling. the dashed web appears once one is logged.'))+'</span></div>';
+    $('etWebSide').innerHTML=D.side.map(function(x){return '<button type="button" class="et-r-ghost" data-side="'+esc(x.v)+'" aria-pressed="'+x.on+'">'+esc(x.label)+'</button>';}).join('');
+    $('etWebStars').innerHTML=[1,2,3,4,5].map(function(n){return '<button type="button" class="et-r-ghost et-star" data-star="'+n+'" aria-pressed="'+(n<=f.stars)+'" aria-label="'+esc(fill(T('et.edible.b.starN','{n} of 5'),{n:n}))+'">'+(n<=f.stars?'★':'☆')+'</button>';}).join('');
+    $('etWebNote').textContent=fill(T('et.edible.r.note','one hold logs one {m} session through the tracker\'s own button · {s} of 5 overall'),{m:String(f.method).toLowerCase(),s:f.stars});
+    web();
+  }
+  function holdStart(e){
+    var btn=$('etWebHold');if(btn.disabled||R.hold)return;if(e&&e.preventDefault)e.preventDefault();
+    var prog=$('etWebProg');R.t0=performance.now();R.msg='';
+    (function tick(now){var f=Math.min(1,(now-R.t0)/1400);prog.style.strokeDashoffset=String(578*(1-f));
+      if(f>=1){R.hold=0;prog.style.strokeDashoffset='578';var res=log();
+        R.msg=res.ok?'<span class="et-rk">'+esc(res.after)+'</span><div><b>'+esc(fill(T('et.edible.r.logged','logged · session {n}'),{n:res.after}))+'</b><span>'+esc(fill(T('et.edible.r.loggedS','bnEdibleSessions grew {a} → {b} · the tracker reset its form'),{a:res.before,b:res.after}))+'</span></div>':'<span class="et-rk">0</span><div><b>'+esc(T('et.edible.r.failH','not logged'))+'</b><span>'+esc(T('et.edible.r.failS','the tracker did not keep it. nothing changed.'))+'</span></div>';
+        raver();return;}
+      R.hold=requestAnimationFrame(tick);})(R.t0);
+  }
+  function holdStop(){if(!R.hold)return;cancelAnimationFrame(R.hold);R.hold=0;$('etWebProg').style.strokeDashoffset='578';}
+
+  /* ── CYPHERPUNK ── */
+  function cy(){
+    var f=D.form,b=D.baseline;
+    $('etcPath').textContent='fleet-hosted/lab/edible-tracker.html · localStorage@'+(location.host||'this origin');
+    $('etcChips').innerHTML='<span class="et-on">writes bnEdibleSessions via logSession()</span><span>'+esc('bnBaseline · '+(D.baseSaved?'saved':'absent'))+'</span><span>'+esc('bnEdibleSessions · '+(D.stored==null?'absent':D.stored))+'</span><span class="'+(D.agree?'et-ok':'et-no')+'">'+esc(D.agree?'agrees with the page ✓':'differs from the page')+'</span>';
+    $('etcBase').querySelector('tbody').innerHTML=BASE.map(function(x){var sv=D.baseSaved?String(b[x[0]]):'absent',fv=String(D.baseForm[x[0]]);var same=D.baseSaved&&String(b[x[0]])===fv;return '<tr><td>'+esc(x[0])+'</td><td class="et-wrap">'+esc(sv)+'</td><td class="et-num">'+esc(fv)+(D.baseSaved?(same?' <span class="et-st-ok">✓</span>':' <span class="et-st-wait">≠</span>'):'')+'</td></tr>';}).join('');
+    $('etcBaseNote').textContent=D.baseSaved?'saved '+b.saved+' · saveBaseline() writes bnBaseline; the summary box below reads the form, not the saved copy':'bnBaseline absent · the summary box below shows the form\'s own starting numbers, not a saved baseline · each logged session copies cbd and thc from the form';
+    var ms=$('etcMethod');if(ms.options.length!==f.methods.length)ms.innerHTML=f.methods.map(function(m){return '<option value="'+esc(m)+'">'+esc(m.toLowerCase())+'</option>';}).join('');
+    var put=function(id,v){var e=$(id);if(document.activeElement!==e)e.value=v;};
+    put('etcMethod',f.method);put('etcTime',f.time);put('etcAmount',isNaN(f.amount)?'':f.amount);put('etcThca',isNaN(f.thca)?'':f.thca);put('etcSince',isNaN(f.since)?'':f.since);put('etcStars',f.stars);
+    var pb=$('etcPos').querySelector('tbody');
+    if(pb.children.length!==D.pos.length)pb.innerHTML=D.pos.map(function(p){return '<tr><td>'+esc('pos_'+p.i)+'</td><td class="et-wrap">'+esc(p.label)+'</td><td class="et-num"><input type="number" min="0" max="10" step="1" inputmode="numeric" data-pos="'+p.i+'" aria-label="'+esc(p.name+' 0 to 10')+'"></td></tr>';}).join('');
+    [].forEach.call(pb.querySelectorAll('input[data-pos]'),function(inp){var p=D.pos[+inp.getAttribute('data-pos')];if(p&&document.activeElement!==inp)inp.value=p.v;});
+    $('etcSide').innerHTML=D.side.map(function(x){return '<label><input type="checkbox" data-side="'+esc(x.v)+'"'+(x.on?' checked':'')+'><span>'+esc(x.v)+'</span></label>';}).join('');
+    $('etcLogged').textContent=D.last?(D.last.ok?'bnEdibleSessions · '+D.last.before+' → '+D.last.after+' ✓ · '+D.last.method+' · rating '+D.last.rating+' · '+D.last.sides+' side effects · the tracker reset its form':'bnEdibleSessions · '+D.last.before+' → '+D.last.after+' ≠ nothing was saved'):'will append { method: "'+f.method+'", time: "'+f.time+'", amount: '+f.amount+', thca: '+f.thca+', positive: {…6}, sideEffects: ['+D.side.filter(function(s){return s.on&&s.v!=='None';}).map(function(s){return s.v;}).join(', ')+'], rating: '+f.stars+', baseline: { cbd: '+(parseInt(D.baseForm.cbd)||0)+', thc: '+(parseInt(D.baseForm.thc)||0)+' } }';
+    $('etcPipe').innerHTML=[
+      ['per session','Σ positive / '+(D.pos.length||6)+' → '+(D.n?D.sessions.map(function(s){var t=0;for(var k in s.positive)t+=s.positive[k];return r1(t/(D.pos.length||6));}).join(' · '):'no sessions')],
+      ['avg positive',D.n?'mean over '+D.n+' = '+D.avgPos.toFixed(1)+'/10':'no sessions · the page prints a dash here'],
+      ['side effects',D.n?'sessions with ≥ 1 ("None" is dropped when logged) = '+D.sideCount+' / '+D.n+' → '+D.sidePct+'%':'no sessions · the page prints a dash here'],
+      ['avg rating',D.n?'Σ rating / '+D.n+' = '+D.avgRating.toFixed(1)+'/5 · an unrated session counts as 0':'no sessions · the page prints a dash here'],
+      ['insight','updateAnalysis() picks one of three fixed sentences from the baseline form and writes it into #insight. it tests nothing; its wording is the tracker\'s and is not repeated here.']
+    ].map(function(s,i){return '<li class="'+(i===4?'et-guard':'et-done')+'"><b>'+esc(s[0])+'</b><p>'+esc(s[1])+'</p></li>';}).join('');
+    var yn=function(a,b){if(a==='—'&&b==='—')return esc(T('et.edible.c.noSess','no sessions yet · nothing to average'))+' <span class="et-st-ok">✓</span>';return esc(a)+' · '+esc(b)+(String(a)===String(b)?' <span class="et-st-ok">✓</span>':' <span class="et-st-wait">≠</span>');};
+    $('etcReceipt').innerHTML=[
+      ['sessions',yn(D.page.count,D.want.count)],['avg positive',yn(D.page.positive,D.want.positive)],['side effects',yn(D.page.side,D.want.side)],['avg rating',yn(D.page.rating,D.want.rating)],
+      ['writes',esc('saveBaseline() → bnBaseline · logSession() → bnEdibleSessions · this front only presses the tracker\'s own controls')],
+      ['readers',esc('none elsewhere · bnr-dashboard reads bnSessions, bnIntake_<day> and bnRDI, not these keys')],
+      ['requests',esc('none · exportData() prints into the page')]
+    ].map(function(r){return '<tr><th>'+esc(r[0])+'</th><td>'+r[1]+'</td></tr>';}).join('');
+    $('etcQuote').innerHTML='<b>'+esc(T('et.edible.c.quoteH','the tracker\'s own words'))+'</b> · '+esc(D.hypothesis||T('et.edible.c.noQuote','its footnote could not be read here'));
+  }
+
+  function update(){read();render();}
+  var EN={};
+  function tr(){[].forEach.call(document.querySelectorAll('#eternal [data-et-t],#etArchive[data-et-t]'),function(e){var k=e.getAttribute('data-et-t');if(!(k in EN))EN[k]=e.textContent;e.textContent=T(k,EN[k]);});}
+  function render(){bee();raver();cy();}
+  function all(){tr();render();}
+  function wire(){
+    var ev=$('eternal');if(!ev)return;
+    /* bee */
+    $('etBeeTell').addEventListener('click',function(){B.step='tell';B.fail=false;update();$('etBeeTellStep').scrollIntoView({block:'start'});});
+    $('etBeeBack').addEventListener('click',function(){B.step='pattern';update();});
+    $('etBeeAgain').addEventListener('click',function(){B.step='pattern';update();$('etBeePattern').scrollIntoView({block:'start'});});
+    $('etBeeToBase').addEventListener('click',function(){toLab($('base_cbd')&&$('base_cbd').closest('.panel'),$('base_cbd'));});
+    $('etBeeSee').addEventListener('click',function(){toLab($('analysis'));});
+    $('etBeeMethod').addEventListener('change',function(){method(this.value);});
+    $('etBeeTime').addEventListener('input',function(){setField('s_time',this.value);read();cy();});
+    $('etBeeStrain').addEventListener('input',function(){setField('s_strain',this.value);read();cy();});
+    $('etBeeNotes').addEventListener('input',function(){setField('s_notes',this.value);read();cy();});
+    $('etBeeTellStep').addEventListener('click',function(e){var b=e.target.closest('[data-f]');if(!b||b.disabled)return;var id=b.getAttribute('data-f'),cur=parseFloat(($(id)||{}).value)||0;setField(id,Math.max(id==='s_amount'?0.1:0,r1(cur+(+b.getAttribute('data-d')))));update();});
+    $('etBeeFelt').addEventListener('click',function(e){var b=e.target.closest('[data-pos]');if(!b||b.disabled)return;var p=D.pos[+b.getAttribute('data-pos')];feel(p.i,(p.v||0)+(+b.getAttribute('data-d')));});
+    $('etBeeSide').addEventListener('change',function(e){var c=e.target.closest('[data-side]');if(c)side(c.getAttribute('data-side'));});
+    $('etBeeStars').addEventListener('click',function(e){var b=e.target.closest('[data-star]');if(b)stars(+b.getAttribute('data-star'));});
+    $('etBeeLog').addEventListener('click',function(){var r=log();if(r.ok){B.step='done';B.fail=false;}else B.fail=true;render();if(r.ok)$('etBeeDone').scrollIntoView({block:'start'});});
+    /* raver */
+    var raise=function(i){var p=D.pos[i];if(p){R.msg='';feel(i,((p.v||0)+1)%11);}};
+    $('etWebFx').addEventListener('click',function(e){var b=e.target.closest('[data-pos]');if(b)raise(+b.getAttribute('data-pos'));});
+    $('etWeb').addEventListener('click',function(e){var g=e.target.closest('.et-web-node');if(g)raise(+g.getAttribute('data-pos'));});
+    $('etWeb').addEventListener('keydown',function(e){if(e.key!=='Enter'&&e.key!==' ')return;var g=e.target.closest('.et-web-node');if(!g)return;e.preventDefault();var i=+g.getAttribute('data-pos');raise(i);var n=document.querySelector('#etWeb .et-web-node[data-pos="'+i+'"]');if(n)n.focus();});
+    $('etWebSide').addEventListener('click',function(e){var b=e.target.closest('[data-side]');if(b){R.msg='';side(b.getAttribute('data-side'));}});
+    $('etWebStars').addEventListener('click',function(e){var b=e.target.closest('[data-star]');if(b){R.msg='';stars(+b.getAttribute('data-star'));}});
+    var hb=$('etWebHold');
+    hb.addEventListener('pointerdown',function(e){try{hb.setPointerCapture(e.pointerId);}catch(x){}holdStart(e);});
+    ['pointerup','pointercancel','pointerleave'].forEach(function(t){hb.addEventListener(t,holdStop);});
+    hb.addEventListener('keydown',function(e){if((e.key===' '||e.key==='Enter')&&!e.repeat){e.preventDefault();holdStart(e);}});
+    hb.addEventListener('keyup',function(e){if(e.key===' '||e.key==='Enter')holdStop();});
+    hb.addEventListener('contextmenu',function(e){e.preventDefault();});
+    /* cypherpunk */
+    $('etcMethod').addEventListener('change',function(){method(this.value);});
+    [['etcTime','s_time'],['etcAmount','s_amount'],['etcThca','s_thca'],['etcSince','s_since_edible']].forEach(function(p){$(p[0]).addEventListener('input',function(){setField(p[1],this.value);read();bee();raver();});});
+    $('etcStars').addEventListener('change',function(){var n=Math.max(0,Math.min(5,parseInt(this.value)||0));stars(n);});
+    $('etcPos').addEventListener('change',function(e){var i=e.target.closest('input[data-pos]');if(i)feel(+i.getAttribute('data-pos'),parseFloat(i.value)||0);});
+    $('etcSide').addEventListener('change',function(e){var c=e.target.closest('[data-side]');if(c)side(c.getAttribute('data-side'));});
+    $('etcLog').addEventListener('click',function(){log();});
+    $('etcExport').addEventListener('click',function(){var b=labButton('exportData()');if(b){b.click();toLab($('exportOut'));}});
+    /* the tracker's own controls move the fronts too */
+    ['input','change','click'].forEach(function(t){document.addEventListener(t,function(e){if(e.target&&e.target.closest&&!e.target.closest('#eternal'))update();});});
+    document.addEventListener('blang',all);
+  }
+  function boot(){read();wire();all();window.__eternal={data:D,raver:R,bee:B,log:log};}
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
+})();
 </script>
 <script src="../../agent-dock.js?v=4"></script>
 <script src="../../tour.js?v=42"></script>

@@ -119,13 +119,281 @@ body:not([data-reg="cypherpunk"]) h2{font-size:14px}
 /* the law's hard line breaks were set for a desk screen; at phone width they
    left ragged half-lines, so the text reflows as one paragraph there */
 @media (max-width:600px){pre.boardlaw{white-space:normal}footer{text-align:left}}
+/* ── ETERNAL FRONT (docs/design/eternal) — three separate products in one surface. Every value is a
+   skaists token (skaists.css, compiled from docs/design/skaists/tokens.json): no hand-picked hex,
+   size or corner; sizes carry a token fallback for servers that never deliver the sheet. Measured
+   by e2e/skaists-conformance.mjs. One register visible at a time; new bee is the default. ── */
+#eternal{display:block;max-width:640px;margin:0 auto var(--sk-s2,12px);padding:0;border:0;border-radius:0;background:none;box-shadow:none;text-align:left;overflow-wrap:break-word}
+#eternal>.et-r,#eternal>.et-c{display:none}
+body[data-reg="raver"] #eternal>.et-b,body[data-reg="cypherpunk"] #eternal>.et-b{display:none}
+body[data-reg="raver"] #eternal>.et-r,body[data-reg="cypherpunk"] #eternal>.et-c{display:block}
+#eternal [hidden]{display:none!important}
+body[data-reg="bee"] #eternal{color-scheme:light}
+body[data-reg="raver"] #eternal,body[data-reg="cypherpunk"] #eternal{color-scheme:dark}
+#eternal :where(div,span,p,h2,h3,b,i,small,code,pre,ol,ul,li,table,thead,tbody,tr,th,td,label,input,textarea,button,a){margin:0;padding:0;box-sizing:border-box;letter-spacing:normal;text-transform:none;text-shadow:none}
+#eternal :where(button){background:none;border:0;border-radius:0;font:inherit;color:inherit;cursor:pointer;min-height:0;box-shadow:none;transition:none;opacity:1}
+#eternal :where(a){color:var(--sk-link)}
+#eternal :where(i){font-style:normal}
+#eternal svg{display:block}
+#eternal :focus-visible{outline:2px solid var(--sk-focus);outline-offset:3px}
+#eternal .et-ico{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.et-archive-h{max-width:640px;margin:var(--sk-s5,36px) auto var(--sk-s2,12px);padding-top:var(--sk-s4,24px);border-top:1px solid var(--sk-line);color:var(--sk-ink);text-align:left;text-transform:none}
+body[data-reg="bee"] .et-archive-h{font:400 28px/1.1 var(--sk-font-bee-serif);letter-spacing:normal}
+body[data-reg="raver"] .et-archive-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em}
+body[data-reg="cypherpunk"] .et-archive-h{font:600 15px/1.45 var(--sk-font-mono);letter-spacing:normal}
+
+/* NEW BEE — a calm room: one question at a time, plain rows, one magenta action */
+#eternal .et-b{color:var(--sk-ink);font:400 16px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-b-step{display:flex;flex-direction:column;gap:var(--sk-s3,18px)}
+#eternal .et-b-mark{font:400 18px/1.2 var(--sk-font-house);color:var(--sk-sovereign)}
+#eternal .et-b-h{font:400 40px/1.05 var(--sk-font-bee-serif);color:var(--sk-ink)}
+#eternal .et-b-lede{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-guard{display:flex;align-items:center;gap:var(--sk-s2,12px);min-height:var(--sk-control-min,44px);padding:var(--sk-s1,6px) var(--sk-s3,18px);border-radius:var(--sk-radius,12px);background:var(--sk-guard-wash);color:var(--sk-guard);font:600 15px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-b-rows{display:flex;flex-direction:column;background:var(--sk-bg-card);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl,18px)}
+#eternal .et-b-row{display:flex;align-items:center;justify-content:space-between;gap:var(--sk-s2,12px);width:100%;min-height:var(--sk-control-row,52px);padding:var(--sk-s1,6px) var(--sk-s3,18px);border-bottom:1px solid var(--sk-line-soft);background:transparent;text-align:left;font:500 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+#eternal .et-b-rows>:first-child{border-top-left-radius:var(--sk-radius-xl,18px);border-top-right-radius:var(--sk-radius-xl,18px)}
+#eternal .et-b-rows>:last-child{border-bottom:0;border-bottom-left-radius:var(--sk-radius-xl,18px);border-bottom-right-radius:var(--sk-radius-xl,18px)}
+#eternal .et-b-row small{display:flex;align-items:center;gap:var(--sk-s1,6px);flex:none;max-width:48%;text-align:right;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-row small.out{color:var(--sk-guard)}
+#eternal .et-b-row[aria-pressed="true"],#eternal .et-b-row[aria-expanded="true"]{background:var(--sk-sovereign-tint);color:var(--sk-sovereign-strong);font-weight:600}
+#eternal .et-b-row[aria-pressed="true"] small,#eternal .et-b-row[aria-expanded="true"] small{color:var(--sk-sovereign-strong)}
+#eternal .et-chev{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;flex:none}
+#eternal .et-b-row[aria-expanded="true"] .et-chev{transform:rotate(90deg)}
+#eternal .et-b-disc{width:40px;height:40px;border-radius:var(--sk-radius-pill,999px);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong);display:flex;align-items:center;justify-content:center;font:600 14px/1.4 var(--sk-font-bee-sans);flex:none}
+#eternal .et-b-more{padding:var(--sk-s2,12px) var(--sk-s3,18px);font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut);border-bottom:1px solid var(--sk-line-soft)}
+#eternal .et-b-act{display:flex;flex-direction:column;gap:var(--sk-s1,6px)}
+#eternal .et-b-primary{display:flex;align-items:center;justify-content:center;width:100%;min-height:var(--sk-control-primary,54px);padding:var(--sk-s1,6px) var(--sk-s3,18px);border-radius:var(--sk-radius-lg,16px);background:var(--sk-primary);color:var(--sk-on-primary);font:600 17px/1.2 var(--sk-font-bee-sans);text-align:center;text-decoration:none}
+#eternal .et-b-primary:disabled{background:var(--sk-bg-well);color:var(--sk-ink-mut);cursor:not-allowed}
+#eternal .et-b-link{display:flex;align-items:center;justify-content:center;min-height:var(--sk-control-min,44px);min-width:var(--sk-control-min,44px);font:600 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-link);text-decoration:none;text-align:center}
+#eternal .et-b-link:hover{color:var(--sk-link-hover)}
+#eternal .et-b-foot{text-align:center;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-back{align-self:flex-start;display:flex;align-items:center;min-height:var(--sk-control-min,44px);min-width:var(--sk-control-min,44px);font:600 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-link)}
+#eternal .et-b-card{background:var(--sk-sovereign-tint);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl,18px);padding:var(--sk-s3,18px)}
+#eternal .et-b-card h3{margin-bottom:var(--sk-s1,6px);font:400 28px/1.1 var(--sk-font-bee-serif);color:var(--sk-sovereign-strong)}
+#eternal .et-b-card p{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+#eternal .et-b-tick{width:78px;height:78px;margin:var(--sk-s2,12px) auto 0;border-radius:var(--sk-radius-pill,999px);background:var(--sk-verified-wash);color:var(--sk-verified);display:flex;align-items:center;justify-content:center;font:400 40px/1 var(--sk-font-bee-serif)}
+#eternal .et-center{text-align:center}
+#eternal .et-b-check{display:flex;align-items:flex-start;gap:var(--sk-s2,12px);width:100%;min-height:var(--sk-control-min,44px);padding:var(--sk-s2,12px) var(--sk-s3,18px);border-bottom:1px solid var(--sk-line-soft);cursor:pointer;font:500 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+#eternal .et-b-check input{width:var(--sk-control-check,24px);height:var(--sk-control-check,24px);flex:none;accent-color:var(--sk-primary)}
+#eternal .et-b-check small{display:block;margin-top:2px;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-field{display:block;width:100%;min-height:var(--sk-control-min,44px);padding:var(--sk-s2,12px) var(--sk-s3,18px);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius,12px);background:var(--sk-bg-card);color:var(--sk-ink);font:400 16px/1.45 var(--sk-font-bee-sans)}
+#eternal textarea.et-b-field{min-height:96px;resize:vertical}
+
+/* RAVER — the data is the art; the gesture is physical; motion is slow, pausable, still when asked */
+#eternal .et-r{color:var(--sk-ink);font:400 14px/1.4 var(--sk-font-raver-body)}
+#eternal .et-r-top{display:flex;align-items:baseline;justify-content:space-between;gap:var(--sk-s1,6px) var(--sk-s2,12px);flex-wrap:wrap}
+#eternal .et-r-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em;color:var(--sk-ink)}
+#eternal .et-r-hint{font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-art{width:100%;max-width:360px;height:auto;margin:var(--sk-s3,18px) auto var(--sk-s1,6px);filter:drop-shadow(var(--sk-glow-sovereign))}
+#eternal .et-r-art [role="button"]{cursor:pointer}
+#eternal .et-r-art [role="button"]:focus{outline:none}
+#eternal .et-r-art [role="button"]:focus-visible .et-hit{stroke:var(--sk-ink);stroke-width:2}
+#eternal .et-hit{fill:transparent;stroke:none}
+#eternal .et-r-legend{display:flex;flex-wrap:wrap;justify-content:center;gap:var(--sk-s1,6px) var(--sk-s3,18px);margin:var(--sk-s1,6px) 0 var(--sk-s2,12px);font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-legend span{display:inline-flex;align-items:center;gap:var(--sk-s1,6px)}
+#eternal .et-r-legend i{display:inline-block;width:18px;height:12px;border-radius:var(--sk-radius-sm,6px)}
+#eternal .et-r-card{display:flex;gap:var(--sk-s2,12px);align-items:center;margin-top:var(--sk-s2,12px);padding:var(--sk-s2,12px) var(--sk-s3,18px);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl,18px);background:var(--sk-sovereign-tint);min-height:var(--sk-control-person,60px)}
+#eternal .et-r-card .rk{width:44px;height:44px;border-radius:var(--sk-radius,12px);background:var(--sk-sovereign-strong);color:var(--sk-bg);display:flex;align-items:center;justify-content:center;font:700 15px/1.2 var(--sk-font-raver-display);flex:none}
+#eternal .et-r-card b{display:block;font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink)}
+#eternal .et-r-card .sub{display:block;margin-top:2px;font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-sovereign-soft)}
+#eternal .et-r-tiles{display:grid;grid-template-columns:1fr 1fr;gap:var(--sk-s2,12px);margin-top:var(--sk-s3,18px)}
+#eternal .et-r-tile{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--sk-s1,6px);min-height:72px;padding:var(--sk-s2,12px);border-radius:var(--sk-radius-xl,18px);border:1.5px solid var(--sk-sovereign);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong);font:700 14px/1.25 var(--sk-font-raver-display);text-align:center;opacity:.78}
+#eternal .et-r-tile[aria-pressed="true"]{opacity:1;border-color:var(--sk-you);box-shadow:var(--sk-glow-sovereign)}
+#eternal .et-r-tile.et-dash{border-style:dashed;border-color:var(--sk-guard);background:var(--sk-guard-wash);color:var(--sk-guard)}
+#eternal .et-r-hold{position:relative;width:196px;height:196px;margin:var(--sk-s3,18px) auto 0}
+#eternal .et-r-hold>svg{position:absolute;inset:0;width:100%;height:100%;transform:rotate(-90deg)}
+#eternal .hold-track{fill:none;stroke:var(--sk-line);stroke-width:8}
+#eternal .hold-prog{fill:none;stroke:var(--sk-biomass);stroke-width:8;stroke-linecap:round;stroke-dasharray:578;stroke-dashoffset:578}
+#eternal .et-hold{position:absolute;inset:22px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;background:var(--sk-primary);color:var(--sk-on-primary);clip-path:polygon(50% 0,93% 25%,93% 75%,50% 100%,7% 75%,7% 25%);touch-action:none;user-select:none;-webkit-user-select:none}
+#eternal .et-hold b{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em}
+#eternal .et-hold span{font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em}
+#eternal .et-hold:disabled{background:var(--sk-sovereign-wash);color:var(--sk-sovereign-soft);cursor:not-allowed}
+#eternal .et-r-note{margin-top:var(--sk-s2,12px);text-align:center;font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-big{margin-top:var(--sk-s2,12px);text-align:center;font:700 60px/.95 var(--sk-font-raver-display);letter-spacing:-.02em;color:var(--sk-ink)}
+#eternal .et-r-pill{display:flex;align-items:center;justify-content:center;width:100%;min-height:58px;margin-top:var(--sk-s3,18px);padding:var(--sk-s1,6px) var(--sk-s3,18px);border-radius:var(--sk-radius-pill,999px);background:var(--sk-primary);color:var(--sk-on-primary);font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em;text-align:center;text-decoration:none}
+#eternal .et-r-pill:disabled{background:var(--sk-sovereign-wash);color:var(--sk-sovereign-soft);cursor:not-allowed}
+#eternal .et-r-out{display:flex;align-items:center;justify-content:center;width:100%;min-height:58px;margin-top:var(--sk-s2,12px);padding:var(--sk-s1,6px) var(--sk-s3,18px);border:1.5px solid var(--sk-biomass);border-radius:var(--sk-radius-pill,999px);color:var(--sk-biomass);font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em;text-align:center;text-decoration:none}
+#eternal .et-r-ghost{display:flex;align-items:center;justify-content:center;min-height:var(--sk-control-min,44px);min-width:var(--sk-control-min,44px);margin:var(--sk-s1,6px) auto 0;padding:0 var(--sk-s2,12px);color:var(--sk-link);font:600 14px/1.4 var(--sk-font-raver-body);text-decoration:underline;text-underline-offset:3px;text-align:center}
+@media (prefers-reduced-motion:reduce){#eternal *{animation:none!important;transition:none!important}}
+body[data-motion-paused] #eternal *{animation-play-state:paused!important}
+
+/* CYPHERPUNK — the instrument, complete at first paint: every row a fact you can check */
+#eternal .et-c{font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink)}
+#eternal .et-c-path{font:600 15px/1.45 var(--sk-font-mono);color:var(--sk-ink);overflow-wrap:anywhere}
+#eternal .et-c-chips{display:flex;flex-wrap:wrap;gap:var(--sk-s1,6px);margin:var(--sk-s2,12px) 0}
+#eternal .et-c-chips span{padding:2px var(--sk-s1,6px);border:1px solid var(--sk-line);border-radius:4px;background:var(--sk-bg-card);font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-soft)}
+#eternal .et-c-chips .on{border-color:var(--sk-guard);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong)}
+#eternal .et-c-chips .ok{border-color:var(--sk-verified);color:var(--sk-verified)}
+#eternal .et-c-chips .ai{border-color:var(--sk-ai);color:var(--sk-ai)}
+#eternal .et-c-guard{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:var(--sk-s1,6px) var(--sk-s2,12px);min-height:var(--sk-control-min,44px);padding:var(--sk-s1,6px) var(--sk-s3,18px);border:1px dashed var(--sk-guard);border-radius:var(--sk-radius-sm,6px);background:var(--sk-guard-wash);color:var(--sk-guard)}
+#eternal .et-c-guard b{font-weight:600;color:var(--sk-sovereign-strong)}
+#eternal .et-c-tab{width:100%;margin:var(--sk-s2,12px) 0 var(--sk-s1,6px);border-collapse:separate;border-spacing:0;border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm,6px);background:var(--sk-bg-card);table-layout:fixed}
+#eternal .et-c-tab th{padding:var(--sk-s1,6px) var(--sk-s2,12px);text-align:left;font:600 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);border-bottom:1px solid var(--sk-line);background:var(--sk-bg-well)}
+#eternal .et-c-tab td{height:var(--sk-control-min,44px);padding:var(--sk-s1,6px) var(--sk-s2,12px);border-bottom:1px solid var(--sk-line);font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink);vertical-align:middle;overflow-wrap:anywhere}
+#eternal .et-c-tab tr:last-child td{border-bottom:0}
+#eternal .et-c-tab tr.pick{cursor:pointer}
+#eternal .et-c-tab tr.pick:hover td,#eternal .et-c-tab tr[aria-pressed="true"] td,#eternal .et-c-tab tr[aria-expanded="true"] td{background:var(--sk-sovereign-tint)}
+#eternal .et-c-tab tr.sub td{height:auto;padding-top:0;color:var(--sk-ink-soft);font:400 12px/1.45 var(--sk-font-mono)}
+#eternal .et-c-tab .st-ok{color:var(--sk-verified)}
+#eternal .et-c-tab .st-g{color:var(--sk-guard)}
+#eternal .et-c-tab .st-i{color:var(--sk-info)}
+#eternal .et-c-tab .st-ai{color:var(--sk-ai)}
+#eternal .et-c-tab .st-m{color:var(--sk-ink-mut)}
+#eternal .et-c-h{margin:var(--sk-s4,24px) 0 var(--sk-s2,12px);font:600 15px/1.45 var(--sk-font-mono);color:var(--sk-ink)}
+#eternal .et-c-pipe{list-style:none;display:grid;gap:var(--sk-s2,12px);counter-reset:p}
+#eternal .et-c-pipe li{display:grid;grid-template-columns:30px 1fr;gap:var(--sk-s1,6px) var(--sk-s2,12px);padding:var(--sk-s2,12px) var(--sk-s3,18px);border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm,6px);background:var(--sk-bg-card);counter-increment:p}
+#eternal .et-c-pipe li::before{content:counter(p,decimal-leading-zero);color:var(--sk-guard);font-weight:600}
+#eternal .et-c-pipe li b{font-weight:600;color:var(--sk-ink)}
+#eternal .et-c-pipe li p{grid-column:2;color:var(--sk-ink-soft)}
+#eternal .et-c-pipe li.done b{color:var(--sk-verified)}
+#eternal .et-c-pipe li.guard{border-style:dashed;border-color:var(--sk-guard)}
+#eternal .et-c-pipe li.guard b{color:var(--sk-guard)}
+#eternal .et-c-pipe li.you b{color:var(--sk-you)}
+#eternal .et-c-pipe li.now{border-color:var(--sk-ai);box-shadow:inset 0 0 0 1px var(--sk-ai)}
+#eternal .et-c-pipe li.now b{color:var(--sk-ai)}
+#eternal .et-c-pipe li.todo p{color:var(--sk-ink-mut)}
+#eternal .et-c-primary{display:flex;align-items:center;justify-content:center;width:100%;min-height:52px;margin-top:var(--sk-s3,18px);padding:var(--sk-s1,6px) var(--sk-s2,12px);border-radius:var(--sk-radius-sm,6px);background:var(--sk-primary);color:var(--sk-on-primary);font:600 14px/1.2 var(--sk-font-mono);text-align:center;text-decoration:none}
+#eternal .et-c-primary:disabled{background:var(--sk-bg-well);color:var(--sk-ink-mut);cursor:not-allowed}
+#eternal .et-c-kv{width:100%;border-collapse:collapse;border:1px solid var(--sk-line);background:var(--sk-bg-card);table-layout:fixed}
+#eternal .et-c-kv th{width:96px;padding:var(--sk-s2,12px);text-align:left;vertical-align:top;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);border-bottom:1px solid var(--sk-line)}
+#eternal .et-c-kv td{padding:var(--sk-s2,12px);border-bottom:1px solid var(--sk-line);font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink);overflow-wrap:anywhere}
+#eternal .et-c-kv .no{color:var(--sk-info)}
+#eternal .et-c-kv .yes{color:var(--sk-verified)}
+#eternal .et-c-kv .sig{color:var(--sk-you)}
+#eternal .et-c-kv .g{color:var(--sk-guard)}
+#eternal .et-c-verify{margin-top:var(--sk-s3,18px);padding:var(--sk-s3,18px);border-radius:var(--sk-radius-sm,6px);background:var(--sk-bg-card)}
+#eternal .et-c-verify-h{margin-bottom:var(--sk-s1,6px);font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut)}
+#eternal .et-c-verify ol{padding-left:var(--sk-s4,24px);display:grid;gap:var(--sk-s1,6px)}
+#eternal .et-c-verify code{font:400 12px/1.45 var(--sk-font-mono);color:var(--sk-ai);overflow-wrap:anywhere}
+#eternal .et-c-row{display:grid;grid-template-columns:1fr 1fr;gap:var(--sk-s2,12px);margin-top:var(--sk-s3,18px)}
+#eternal .et-c-ghost{display:flex;align-items:center;justify-content:center;min-height:52px;min-width:var(--sk-control-min,44px);padding:var(--sk-s1,6px);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius-sm,6px);color:var(--sk-ink);text-decoration:none;text-align:center;font:600 14px/1.2 var(--sk-font-mono)}
+#eternal .et-c-note{margin-top:var(--sk-s1,6px);font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut)}
+#eternal .et-c-field{display:block;width:100%;min-height:var(--sk-control-min,44px);padding:var(--sk-s1,6px) var(--sk-s2,12px);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius-sm,6px);background:var(--sk-bg-card);color:var(--sk-ink);font:400 14px/1.45 var(--sk-font-mono)}
+
+/* the OR board's own front pieces: the seat card (bee), the OR wheel (raver) */
+#eternal .et-b-detail{padding:var(--sk-s1,6px) var(--sk-s3,18px) var(--sk-s2,12px) calc(var(--sk-s3,18px) + 40px + var(--sk-s2,12px));border-bottom:1px solid var(--sk-line-soft);font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-seat{display:flex;align-items:center;gap:var(--sk-s2,12px);min-width:0}
+#eternal .et-b-seat span{display:block}
+#eternal .et-b-seat em{display:block;font:400 14px/1.4 var(--sk-font-bee-sans);font-style:normal;color:var(--sk-ink-mut)}
+#eternal .et-b-row.et-b-seatrow{min-height:var(--sk-control-person,60px)}
+#eternal .ws-track{fill:var(--sk-sovereign-wash);stroke:var(--sk-line);stroke-width:1}
+#eternal .ws-fill{fill:var(--sk-sovereign);stroke:none}
+#eternal .file .ws-track{stroke:var(--sk-sovereign-soft);stroke-dasharray:4 4}
+#eternal .c-nectar .ws-fill{fill:var(--sk-ai)}
+#eternal .c-honey .ws-fill{fill:var(--sk-sovereign)}
+#eternal .c-capped .ws-fill{fill:var(--sk-biomass)}
+#eternal [data-et-seat].sel .ws-track{stroke:var(--sk-you);stroke-width:3;stroke-dasharray:none}
+#eternal .ws-name{fill:var(--sk-ink);font:600 14px/1.25 var(--sk-font-raver-body);pointer-events:none}
+#eternal .wh-hive{fill:var(--sk-bg-card);stroke:var(--sk-you);stroke-width:2}
+#eternal .wh-t{fill:var(--sk-you);font:700 14px/1.25 var(--sk-font-raver-display);pointer-events:none}
+#eternal .wh-s{fill:var(--sk-ink-soft);font:400 14px/1.25 var(--sk-font-raver-body);pointer-events:none}
+#eternal .wh-sonar{fill:none;stroke:var(--sk-ai);stroke-width:1.5;opacity:0}
+#eternal .reading .wh-sonar{animation:et-sonar 2.4s ease-out infinite}
+#eternal .reading .wh-sonar.b{animation-delay:1.2s}
+@keyframes et-sonar{0%{r:44px;opacity:.9}100%{r:170px;opacity:0}}
+#eternal .moon{fill:var(--sk-bg);stroke:var(--sk-info);stroke-width:2}
+#eternal .moon.closed{fill:var(--sk-biomass);stroke:var(--sk-biomass)}
+#eternal .lg-file{border:1.5px dashed var(--sk-sovereign-soft)}
+#eternal .lg-fill{background:var(--sk-sovereign)}
+#eternal .et-r-legend i.lg-moon{width:12px;border:2px solid var(--sk-info);border-radius:var(--sk-radius-pill,999px)}
+#eternal .et-r-legend i.lg-fixed{width:12px;background:var(--sk-biomass);border-radius:var(--sk-radius-pill,999px)}
+
+/* ── THE WHOLE BOARD, dressed per register: the page's tokens.css variables mapped onto skaists ── */
+body[data-reg="bee"]{--bg0:var(--sk-bg);--bg1:var(--sk-bg-card);--bg2:var(--sk-bg-card);--well:var(--sk-bg);--ink:var(--sk-ink);--ink-hi:var(--sk-ink);--dim:var(--sk-ink-mut);--faint:var(--sk-ink-mut);--line:var(--sk-line);--gold:var(--sk-you);--amber:var(--sk-guard);--cyan:var(--sk-ai);--violet:var(--sk-sovereign);--ok:var(--sk-verified);--open:var(--sk-info);--flag:var(--sk-guard);background:var(--sk-bg);color:var(--sk-ink);font-family:var(--sk-font-bee-sans)}
+body[data-reg="raver"]{--bg0:var(--sk-bg);--bg1:var(--sk-bg-card);--bg2:var(--sk-bg-card);--well:var(--sk-bg);--ink:var(--sk-ink);--ink-hi:var(--sk-ink);--dim:var(--sk-ink-soft);--faint:var(--sk-ink-mut);--line:var(--sk-line);--gold:var(--sk-you);--amber:var(--sk-guard);--cyan:var(--sk-ai);--violet:var(--sk-sovereign-soft);--ok:var(--sk-verified);--open:var(--sk-info);--flag:var(--sk-guard);background:var(--sk-bg);color:var(--sk-ink);font-family:var(--sk-font-raver-body)}
+body[data-reg="cypherpunk"]{--bg0:var(--sk-bg);--bg1:var(--sk-bg-card);--bg2:var(--sk-bg-card);--well:var(--sk-bg);--ink:var(--sk-ink);--ink-hi:var(--sk-ink);--dim:var(--sk-ink-soft);--faint:var(--sk-ink-mut);--line:var(--sk-line);--gold:var(--sk-ai);--amber:var(--sk-guard);--cyan:var(--sk-ai);--violet:var(--sk-guard);--ok:var(--sk-verified);--open:var(--sk-info);--flag:var(--sk-guard);background:var(--sk-bg);color:var(--sk-ink);font-family:var(--sk-font-mono)}
+body[data-reg] :is(.crumbs,.kicker){text-transform:none;letter-spacing:normal}
+body[data-reg] section:not(#eternal){border-radius:var(--sk-radius-xl,18px)}
+body[data-reg="cypherpunk"] section:not(#eternal){border-radius:var(--sk-radius-sm,6px)}
+body[data-reg] :is(.seat,.orow,.bugrow,pre.boardlaw){border-radius:var(--sk-radius,12px)}
+body[data-reg] :is(.seat .ab,.seat .role,.orow .ochip,.bugrow .bs){border-radius:var(--sk-radius-pill,999px)}
+body[data-reg] #fallback{background:var(--sk-guard-wash);border-color:var(--sk-guard);color:var(--sk-guard);border-radius:var(--sk-radius,12px)}
+body[data-reg] .hx.capped{background:var(--sk-biomass);color:var(--sk-bg)}
+body[data-reg] .hx.honey{background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong);box-shadow:inset 0 0 0 1.5px var(--sk-sovereign)}
+body[data-reg] .hx.nectar{background:var(--sk-bg-card);color:var(--sk-ai);box-shadow:inset 0 0 0 1.5px var(--sk-ai)}
+body[data-reg] .seat .ab.profiled,body[data-reg] .orow .ochip.new{color:var(--sk-verified);border-color:var(--sk-verified)}
+body[data-reg] .seat .ab.marked{color:var(--sk-ai);border-color:var(--sk-ai)}
+body[data-reg] .seat .role,body[data-reg] .orow .ochip.sunsetting{color:var(--sk-sovereign-strong);border-color:var(--sk-sovereign)}
+body[data-reg] #hive-retry{min-height:var(--sk-control-min,44px)!important;border-color:var(--sk-ink)!important;border-radius:var(--sk-radius,12px)!important;padding:0 var(--sk-s3,18px)!important}
+body[data-reg="bee"] h1{background-image:none;color:var(--sk-ink);-webkit-text-fill-color:currentColor;font:400 28px/1.1 var(--sk-font-bee-serif)}
+body[data-reg="raver"] h1{background-image:var(--sk-rainbow);font:700 30px/1.1 var(--sk-font-raver-display);letter-spacing:-.01em}
+body[data-reg="cypherpunk"] h1{background-image:none;color:var(--sk-ink);-webkit-text-fill-color:currentColor;font:600 15px/1.45 var(--sk-font-mono)}
+body[data-reg] .crown-chip{color:var(--sk-you)}
+body[data-reg="cypherpunk"] .crown-chip{color:var(--sk-ai)}
+body[data-reg] :is(.crumbs a,.crown-chip a){display:inline-flex;align-items:center;min-height:var(--sk-control-min,44px)}
+body[data-reg]:not([data-reg="cypherpunk"]) :is(.crumbs,.kicker,.crown-chip,.crown-chip a,.comblegend,#fallback,.hx){font-size:14px}
+body[data-reg]:not([data-reg="cypherpunk"]) .hx{width:24px;height:26px}
+body[data-reg="bee"] .lede{font:400 16px/1.45 var(--sk-font-bee-sans)}
+body[data-reg="raver"] .lede{font:400 14px/1.4 var(--sk-font-raver-body)}
+body[data-reg="cypherpunk"] :is(.crumbs,.kicker,.crown-chip,.crown-chip a,.comblegend,#fallback,.hx){font-size:12px}
+body[data-reg="cypherpunk"] .lede{font:400 13px/1.45 var(--sk-font-mono)}
 </style>
+<link rel="stylesheet" href="skaists.css">
 </head>
 <body>
 <main>
 <nav class="crumbs" aria-label="you are here">
   <a href="index.html">beehive nature reserve</a><span>▸</span><span class="here" data-i18n="or.crumb">the OR board</span>
 </nav>
+<!-- ETERNAL FRONT (founder blueprint 2026-09-26, docs/design/eternal): three separate products in one
+     surface. ONE data layer (the board's own state window.__orboard: the live read door's answer, or the
+     labelled file floor, and its bug rows) drives all three. Every "check again" runs the page's own
+     readHive() against the keyless read door; a file row is never drawn as live presence. No keys. -->
+<section id="eternal" aria-label="who is working on the estate">
+
+  <!-- NEW BEE — a calm room: the helpers as plain rows, the problems as one row, one action -->
+  <div class="et-b">
+    <div class="et-b-step">
+      <div class="et-b-mark">the OR board</div>
+      <h2 class="et-b-h" data-etk="et.or-board.b.h">who is working on the estate</h2>
+      <p class="et-b-lede" data-etk="et.or-board.b.lede">the helpers building this site, most of them AI agents, and the problems they are fixing. this page only reads. there are no keys here.</p>
+      <div class="et-b-guard"><svg class="et-ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span id="etBeeGuard"></span></div>
+      <div class="et-b-rows" id="etBeeRows"><div class="et-b-more" data-etk="et.or-board.b.reading">reading the board…</div></div>
+      <div class="et-b-act">
+        <button type="button" class="et-b-primary" id="etBeeGo" data-etk="et.or-board.b.go">check the live board again</button>
+        <a class="et-b-link" href="#etArchive" data-etk="et.or-board.b.whole">see the whole board</a>
+        <p class="et-b-foot" id="etBeeFoot"></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- RAVER — the OR wheel: every seat a petal filled by its progress; bugs orbit as moons; tap the hive to listen -->
+  <div class="et-r">
+    <div class="et-r-top"><h2 class="et-r-h" data-etk="et.or-board.r.h">the OR wheel</h2><span class="et-r-hint" id="etRaverHint"></span></div>
+    <svg class="et-r-art" id="etArt" viewBox="-180 -180 360 360" role="group" aria-label="the seats as a wheel, the bugs as moons"></svg>
+    <div class="et-r-legend"><span><i class="lg-fill"></i><span data-etk="et.or-board.r.lgFill">fill = progress</span></span><span><i class="lg-file"></i><span data-etk="et.or-board.r.lgFile">dashed = file row, not live</span></span><span><i class="lg-moon"></i><span data-etk="et.or-board.r.lgMoon">open bug</span></span><span><i class="lg-fixed"></i><span data-etk="et.or-board.r.lgFixed">closed bug</span></span></div>
+    <div class="et-r-card" id="etRaverCard" aria-live="polite"></div>
+    <button type="button" class="et-r-pill" id="etRaverGo" data-etk="et.or-board.r.go">listen to the hive again</button>
+    <button type="button" class="et-r-ghost" id="etMotion" data-etk="et.or-board.r.pause">pause the motion</button>
+  </div>
+
+  <!-- CYPHERPUNK — the instrument: the read door, the seats, the bugs, the poll, all at first paint -->
+  <div class="et-c">
+    <div class="et-c-path" id="etCyPath">hive://</div>
+    <div class="et-c-chips" id="etChips"></div>
+    <div class="et-c-guard" id="etCyGuard"></div>
+    <h3 class="et-c-h" id="etCySeatH">seats</h3>
+    <table class="et-c-tab"><colgroup><col style="width:24%"><col><col style="width:17%"><col style="width:17%"></colgroup><thead><tr><th>seat</th><th>lane</th><th>state</th><th>src</th></tr></thead><tbody id="etSeats"></tbody></table>
+    <h3 class="et-c-h" id="etCyBugH">bugs</h3>
+    <table class="et-c-tab"><colgroup><col style="width:27%"><col><col style="width:33%"></colgroup><thead><tr><th>id</th><th>title</th><th>status</th></tr></thead><tbody id="etBugs"></tbody></table>
+    <h3 class="et-c-h" data-etk="et.or-board.c.pipeH">read pipeline · keyless</h3>
+    <ol class="et-c-pipe" id="etPipe"></ol>
+    <button type="button" class="et-c-primary" id="etCyGo" data-etk="et.or-board.c.go">GET board.json now</button>
+    <h3 class="et-c-h" data-etk="et.or-board.c.receiptH">receipt</h3>
+    <table class="et-c-kv" id="etReceipt"></table>
+    <div class="et-c-verify">
+      <div class="et-c-verify-h" data-etk="et.or-board.c.verifyH">verify · no trust in this page needed</div>
+      <ol><li><code>curl -s https://relay.skaists.dev/hive/board.json | jq '.seats | length'</code></li><li data-etk="et.or-board.c.v2">view source · #orboard-data is the file floor, byte for byte</li><li data-etk="et.or-board.c.v3">every file row says file; only the read door's answer is drawn as live</li></ol>
+    </div>
+    <div class="et-c-row">
+      <a class="et-c-ghost" href="https://github.com/beehive-nature/beehive-nature/tree/main/bugs" target="_blank" rel="noopener noreferrer" aria-label="the bugs in the tree (opens in a new tab)" data-etk="et.or-board.c.bugs">bugs/ in the tree ↗</a>
+      <a class="et-c-ghost" href="https://github.com/beehive-nature/beehive-nature/blob/main/surfaces/or-board.html" target="_blank" rel="noopener noreferrer" aria-label="fork the template (opens in a new tab)" data-etk="et.or-board.c.fork">fork the template ↗</a>
+    </div>
+    <p class="et-c-note" data-etk="et.or-board.c.note">↗ opens a new tab · no keys in this page, ever</p>
+  </div>
+</section>
+<h2 class="et-archive-h" id="etArchive" data-etk="et.or-board.archive">the whole board</h2>
+
 
 <header>
   <div class="kicker" data-i18n="or.kicker">the estate's operating room — every agent, live from the hive</div>
@@ -152,7 +420,7 @@ body:not([data-reg="cypherpunk"]) h2{font-size:14px}
     <span class="c"><span class="hx capped">⬡</span><span data-i18n="or.leg3">capped — profiled AND present in #general</span></span>
   </div>
   <div id="hive" data-i18n="or.opening">opening the read door…</div>
-  <div class="srcline" id="hivesrc">—</div>
+  <div class="srcline" id="hivesrc">source: not read yet</div>
 </section>
 
 <section>
@@ -255,6 +523,7 @@ function renderSeat(s){
     '<div class="pres">'+pres+'</div></div>';
 }
 function hiveFail(){
+  state.status='failed';
   /* the poll can outrun the register toggle's first mount — an unset register
      is the canon default (bee), never a reason to dump diagnostics on a stranger */
   var reg=document.body.dataset.reg||'bee';
@@ -268,7 +537,8 @@ function hiveFail(){
       ' <b>'+T('or.failTech2','file data, labeled')+'</b>. <a href="'+FEED+'" rel="noopener" style="color:var(--dim)">'+FEED+'</a></div>';
   var rb=$('hive-retry');
   if(rb)rb.addEventListener('click',function(){ $('hive').innerHTML=T('or.opening2','opening the read door…'); readHive(); });
-  $('hivesrc').textContent='—';
+  /* an absence says what it is, never a lone dash (the ETERNAL laws; footer-audit JUNK) */
+  $('hivesrc').textContent=T('et.or-board.srcFail','source: the read door did not answer · the rows below are the file');
 }
 /* a register switch repaints the failure in the new register's voice */
 document.addEventListener('bregister',function(){
@@ -276,10 +546,11 @@ document.addEventListener('bregister',function(){
   hiveFail();
 });
 function readHive(){
+  state.status='reading';
   fetch(FEED,{signal:AbortSignal.timeout(15000)})
    .then(function(r){if(!r.ok)throw 0;return r.json();})
    .then(function(j){
-      state.live=j;
+      state.live=j; state.status='live';
       $('fallback').classList.remove('show');
       $('hivegen').textContent='· '+(j.seats||[]).length+' seats · generated '+ago(j.generated);
       var rows=(j.seats||[]).map(renderSeat).join('');
@@ -299,7 +570,9 @@ function retireFileRows(){
     if(liveNames[n]){el.querySelector('.ometa').innerHTML+='<br><span style="color:var(--ok)">'+T('or.retired','live on the relay above — file row retired')+'</span>';}
   });
 }
-readHive(); setInterval(function(){document.visibilityState==='visible'&&readHive();},30000);
+/* the read door, its poll and its status, read by the ETERNAL fronts above (they re-read through readHive, never around it) */
+state.feed=FEED; state.pollMs=30000; state.read=readHive;
+readHive(); setInterval(function(){document.visibilityState==='visible'&&readHive();},state.pollMs);
 
 /* ── THE FILE — fallback rows (kept: same shape the board always had) ── */
 var data=JSON.parse($('orboard-data').textContent);
@@ -339,5 +612,147 @@ document.addEventListener('blang', function(){
 })();
 </script>
 <script src="tour.js?v=42"></script>
+<script>
+/* ETERNAL FRONT — one data layer, three renderers (docs/design/eternal). Facts come from the board's
+   own state (window.__orboard): the live read door's answer when it came, else the file floor from
+   #orboard-data, labelled; the bug rows; the feed and its poll. "check again" is the page's own
+   readHive(). A file row is never drawn as live presence, and nothing here holds a key. */
+(function(){
+  var $=function(id){return document.getElementById(id);};
+  var T=function(k,f){var t=window.BNRLanguage&&window.BNRLanguage.text;return t?t(k,f):f;};
+  var esc=function(v){return String(v==null?'':v).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});};
+  var fill=function(s,o){return String(s).replace(/\{(\w+)\}/g,function(m,k){return k in o?o[k]:m;});};
+  var CHEV='<svg class="et-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>';
+  var D={status:'reading',source:'reading',feed:'',pollS:0,generated:'',live:[],file:[],seats:[],retired:0,bugs:[],open:0,closed:0,keys:0};
+  var R={sel:0}, open={}, sig='';
+  var COMB={nectar:1/3,honey:2/3,capped:1};
+
+  function keyed(){document.querySelectorAll('#eternal [data-etk],.et-archive-h[data-etk]').forEach(function(e){if(e.dataset.etEn==null)e.dataset.etEn=e.textContent;e.textContent=T(e.dataset.etk,e.dataset.etEn);});}
+  function initials(n){return String(n).replace(/[^A-Za-z0-9]/g,'').slice(0,2);}
+  /* the one data layer */
+  function read(){
+    var st=window.__orboard||{};
+    D.status=st.status||'reading'; D.feed=st.feed||''; D.pollS=(st.pollMs||0)/1000;
+    var live=D.status==='live'&&st.live?st.live:null;
+    D.source=live?'live':D.status==='failed'?'file':'reading';
+    D.generated=live?String(live.generated||''):'';
+    D.live=(live&&live.seats||[]).map(function(s){var prof=null;try{prof=s.profile_10100?JSON.parse(s.profile_10100):null;}catch(e){}
+      return {name:String(s.name||''),comb:s.comb||'',agent:s.agent||'',role:s.roster_role||'',pk:String(s.pubkey||''),lane:prof&&prof.lane||'',model:prof&&prof.model||'',session:prof&&prof.session||'',presence:s.last_general||'',at:s.last_general_at||'',src:'live'};});
+    var liveNames={}; D.live.forEach(function(s){liveNames[s.name.toLowerCase()]=1;});
+    D.file=(st.file&&st.file.agents||[]).map(function(a){return {name:a.name,session:a.session,model:a.model,effort:a.effort,lane:a.lane,progress:+a.progress||0,receipt:a.lastReceipt||'',note:a.note||'',src:'file',retired:!!liveNames[String(a.name).toLowerCase()]};});
+    D.retired=D.file.filter(function(f){return f.retired;}).length;
+    D.seats=D.live.concat(D.file.filter(function(f){return !f.retired;}));
+    D.bugs=(st.file&&st.file.bugs||[]).map(function(b){return {id:b.id,title:b.title,status:b.status,file:b.file};});
+    D.closed=D.bugs.filter(function(b){return b.status==='closed';}).length; D.open=D.bugs.length-D.closed;
+    if(R.sel>=D.seats.length)R.sel=0;
+  }
+  function state(s){return s.src==='file'?s.progress+'%':s.comb;}
+  function combWord(c){return c==='capped'?T('et.or-board.b.capped','here now'):c==='honey'?T('et.or-board.b.honey','profiled, not here yet'):T('et.or-board.b.nectar','seen, no profile yet');}
+
+  /* ── the hand-off: the page's own readHive(), against the keyless read door ── */
+  function listen(){var st=window.__orboard;if(st&&typeof st.read==='function'){st.read();tick(true);}}
+
+  /* ── NEW BEE ── */
+  function renderBee(){
+    $('etBeeGuard').textContent=D.source==='live'?fill(T('et.or-board.b.live','live from the hive, checked every {s} seconds.'),{s:D.pollS}):D.source==='file'?T('et.or-board.b.file','the live board didn\'t answer. you are seeing the saved list, clearly marked.'):T('et.or-board.b.asking','asking the live board…');
+    var h=D.seats.map(function(s,i){var ex=!!open['s'+i];
+      var sub=s.src==='file'?fill(T('et.or-board.b.working','working on: {lane}'),{lane:s.lane}):(s.presence?fill(T('et.or-board.b.said','said: {msg}'),{msg:s.presence.slice(0,80)}):combWord(s.comb));
+      var val=s.src==='file'?fill(T('et.or-board.b.saved','{p}% · saved'),{p:s.progress}):combWord(s.comb);
+      var det=s.src==='file'?fill(T('et.or-board.b.detail','saved row, not live presence. {note}'),{note:s.note}):[s.role,s.agent,s.at&&fill(T('et.or-board.b.at','last post {at}'),{at:s.at})].filter(Boolean).join(' · ');
+      return '<button type="button" class="et-b-row et-b-seatrow" data-et-open="s'+i+'" aria-expanded="'+ex+'"><span class="et-b-seat"><i class="et-b-disc">'+esc(initials(s.name))+'</i><span>'+esc(s.name)+'<em>'+esc(sub)+'</em></span></span><small>'+esc(val)+CHEV+'</small></button>'+
+        (ex?'<div class="et-b-detail">'+esc(det)+'</div>':'');}).join('');
+    var bx=!!open.bugs;
+    h+='<button type="button" class="et-b-row" data-et-open="bugs" aria-expanded="'+bx+'"><span>'+esc(T('et.or-board.b.bugs','problems being fixed'))+'</span><small>'+esc(fill(T('et.or-board.b.bugsV','{n} · {c} fixed'),{n:D.bugs.length,c:D.closed}))+CHEV+'</small></button>';
+    if(bx)h+=D.bugs.map(function(b){return '<div class="et-b-detail">'+esc(b.id+': '+b.title+' · '+(b.status==='closed'?T('et.or-board.b.fixed','fixed'):T('et.or-board.b.planned','planned')))+'</div>';}).join('');
+    $('etBeeRows').innerHTML=h||'<div class="et-b-more">'+esc(T('et.or-board.b.noSeats','no seats on the board yet.'))+'</div>';
+    var go=$('etBeeGo'); go.disabled=D.status==='reading'; go.textContent=D.status==='reading'?T('et.or-board.b.checking','checking the live board…'):T('et.or-board.b.go','check the live board again');
+    $('etBeeFoot').textContent=D.source==='file'?T('et.or-board.b.footFile','saved rows are what the helpers wrote down, not live presence.'):T('et.or-board.b.foot','no keys on this page. it only reads.');
+  }
+
+  /* ── RAVER: the OR wheel ── */
+  function sector(r0,r1,a0,a1){var p=function(r,a){return (r*Math.cos(a)).toFixed(1)+' '+(r*Math.sin(a)).toFixed(1);},big=(a1-a0)>Math.PI?1:0;
+    return 'M'+p(r1,a0)+'A'+r1+' '+r1+' 0 '+big+' 1 '+p(r1,a1)+'L'+p(r0,a1)+'A'+r0+' '+r0+' 0 '+big+' 0 '+p(r0,a0)+'Z';}
+  function hex(r){var p=[];for(var k=0;k<6;k++){var a=Math.PI/3*k-Math.PI/2;p.push((r*Math.cos(a)).toFixed(1)+','+(r*Math.sin(a)).toFixed(1));}return p.join(' ');}
+  function art(){
+    var svg=$('etArt'); if(!svg)return;
+    var n=Math.max(D.seats.length,1), R0=52, R1=160, gap=n>1?0.04:0, h='';
+    D.seats.forEach(function(s,i){
+      var a0=-Math.PI/2+i*2*Math.PI/n+gap, a1=-Math.PI/2+(i+1)*2*Math.PI/n-gap, f=s.src==='file'?s.progress/100:(COMB[s.comb]||0), mid=(a0+a1)/2;
+      var lbl=s.name+' · '+(s.src==='file'?s.lane+' · '+s.progress+'% · '+T('et.or-board.r.fileRow','file row, not live'):s.comb+(s.lane?' · '+s.lane:''));
+      h+='<g role="button" tabindex="0" data-et-seat="'+i+'" class="'+(s.src==='file'?'file':'c-'+s.comb)+(R.sel===i?' sel':'')+'" aria-label="'+esc(lbl)+'">'+
+        '<path class="ws-track" d="'+sector(R0,R1,a0,a1)+'"/>'+(f>0?'<path class="ws-fill" d="'+sector(R0,R0+(R1-R0)*f,a0,a1)+'"/>':'')+
+        '<text class="ws-name" x="'+(118*Math.cos(mid)).toFixed(1)+'" y="'+(118*Math.sin(mid)+5).toFixed(1)+'" text-anchor="middle">'+esc(s.name.slice(0,8))+'</text></g>';});
+    D.bugs.forEach(function(b,j){var a=-Math.PI/2+Math.PI/n+j*0.22;h+='<circle class="moon'+(b.status==='closed'?' closed':'')+'" r="6" cx="'+(170*Math.cos(a)).toFixed(1)+'" cy="'+(170*Math.sin(a)).toFixed(1)+'"><title>'+esc(b.id+' · '+b.status)+'</title></circle>';});
+    var word=D.source==='live'?T('et.or-board.r.live','live'):D.source==='file'?T('et.or-board.r.file','file'):'…';
+    h+='<g class="'+(D.status==='reading'?'reading':'')+'"><circle class="wh-sonar" r="44"/><circle class="wh-sonar b" r="44"/></g>'+
+      '<g role="button" tabindex="0" data-et-hive="1" aria-label="'+esc(T('et.or-board.r.hiveL','the hive · tap to listen again'))+'"><polygon class="wh-hive" points="'+hex(46)+'"/><text class="wh-t" y="-2" text-anchor="middle">'+esc(word)+'</text><text class="wh-s" y="17" text-anchor="middle">'+esc(fill(T('et.or-board.r.seats','{n} seats'),{n:D.seats.length}))+'</text></g>';
+    svg.innerHTML=h;
+  }
+  function renderRaver(){
+    var hint=$('etRaverHint'); if(!hint)return;
+    hint.textContent=D.source==='live'?fill(T('et.or-board.r.hLive','{n} seats · live from the hive'),{n:D.seats.length}):D.source==='file'?fill(T('et.or-board.r.hFile','{n} seats · file floor · the hive didn\'t answer'),{n:D.seats.length}):T('et.or-board.r.hReading','listening to the hive…');
+    art();
+    var s=D.seats[R.sel], c=$('etRaverCard');
+    c.innerHTML=s?'<span class="rk">'+esc(initials(s.name))+'</span><div><b>'+esc(s.name)+'</b><span class="sub">'+esc(s.src==='file'?fill(T('et.or-board.r.cardFile','lane {lane} · {p}% · {model} · {effort} · file row, not live presence'),{lane:s.lane,p:s.progress,model:s.model,effort:s.effort}):[s.comb,s.agent,s.lane,s.presence].filter(Boolean).join(' · '))+'</span></div>':'<div><b>'+esc(T('et.or-board.r.none','no seats yet'))+'</b></div>';
+    var go=$('etRaverGo'); go.disabled=D.status==='reading'; go.textContent=D.status==='reading'?T('et.or-board.r.listening','listening…'):T('et.or-board.r.go','listen to the hive again');
+    $('etMotion').textContent=document.body.hasAttribute('data-motion-paused')?T('et.or-board.r.play','let it move'):T('et.or-board.r.pause','pause the motion');
+  }
+
+  /* ── CYPHERPUNK ── */
+  function cy(){
+    var tb=$('etSeats'); if(!tb)return;
+    $('etCyPath').textContent='hive://'+D.feed.replace(/^https:\/\//,'');
+    $('etChips').innerHTML='<span class="'+(D.source==='live'?'ok':'on')+'">source: '+(D.source==='live'?'live':D.source==='file'?'file · fallback':'reading')+'</span><span>poll '+D.pollS+' s · visible tab</span><span class="ok">keys 0</span>';
+    $('etCyGuard').innerHTML=D.source==='file'?'<span>GET board.json failed</span><b>every row below is file data, labeled</b>':D.source==='live'?'<span>live · generated '+esc(D.generated)+'</span><b>'+D.retired+' file rows retired</b>':'<span>reading the door</span><b>no row is live until it answers</b>';
+    $('etCySeatH').textContent=fill(T('et.or-board.c.seatH','seats · {l} live · {f} file'),{l:D.live.length,f:D.seats.length-D.live.length});
+    tb.innerHTML=D.seats.map(function(s,i){var st=s.src==='file'?'<span class="st-m">'+s.progress+'%</span>':'<span class="st-ok">'+esc(s.comb)+'</span>';
+      var sub=s.src==='file'?[s.session,'model '+s.model,'effort '+s.effort,s.note].join(' · '):['pk '+s.pk.slice(0,8)+'…'+s.pk.slice(-6),s.agent,s.role,s.presence&&('#general '+s.presence.slice(0,80)+' · '+s.at)].filter(Boolean).join(' · ');
+      return '<tr class="pick" tabindex="0" role="button" data-et-seat="'+i+'" aria-pressed="'+(R.sel===i)+'"><td>'+esc(s.name)+'</td><td>'+esc(s.lane||'no lane published')+'</td><td>'+st+'</td><td>'+(s.src==='file'?'<span class="st-g">file</span>':'<span class="st-ai">live</span>')+'</td></tr><tr class="sub"><td colspan="4">'+esc(sub)+'</td></tr>';}).join('')||'<tr><td colspan="4"><span class="st-m">no seats</span></td></tr>';
+    $('etCyBugH').textContent=fill(T('et.or-board.c.bugH','bugs · {o} scheduled · {c} closed · SOAP + operative report'),{o:D.open,c:D.closed});
+    $('etBugs').innerHTML=D.bugs.map(function(b){return '<tr><td>'+esc(b.id)+'</td><td>'+esc(b.title)+'</td><td>'+(b.status==='closed'?'<span class="st-ok">closed</span>':'<span class="st-i">'+esc(b.status)+'</span>')+'</td></tr>';}).join('');
+    var st=[
+      ['GET board.json · keyless read door',D.source==='live'?'200 · generated '+D.generated:D.source==='file'?'failed · no live rows':'reading',D.source==='live'?'done':D.source==='file'?'guard':'todo'],
+      ['parse seats · kind-10100 profiles + #general presence',D.live.length?D.live.length+' live seats':'none · the door did not answer',D.live.length?'done':'todo'],
+      ['retire file rows for live seats',D.retired+' retired',D.live.length?'done':'todo'],
+      ['render the file floor, labeled',(D.file.length-D.retired)+' file rows shown · each says file','done'],
+      ['poll every '+D.pollS+' s while the tab is visible','the page asks again on its own','done']
+    ];
+    var now=st.findIndex(function(s){return s[2]==='todo';});
+    $('etPipe').innerHTML=st.map(function(s,i){return '<li class="'+s[2]+(i===now?' now':'')+'"><b>'+esc(s[0])+'</b><p>'+esc(s[1])+'</p></li>';}).join('');
+    var go=$('etCyGo'); go.disabled=D.status==='reading'; go.textContent=D.status==='reading'?'reading board.json…':'GET board.json now';
+    $('etReceipt').innerHTML=[
+      ['feed',esc(D.feed)],
+      ['status',D.source==='live'?'<span class="yes">live</span>':D.source==='file'?'<span class="g">failed · file floor</span>':'<span class="no">reading</span>'],
+      ['generated',D.generated?esc(D.generated):'<span class="no">not read</span>'],
+      ['live seats',String(D.live.length)],
+      ['file rows',(D.file.length-D.retired)+' shown · '+D.retired+' retired · of '+D.file.length],
+      ['bugs',D.open+' scheduled · '+D.closed+' closed'],
+      ['keys','<span class="sig">0</span> · none in this page, ever']
+    ].map(function(r){return '<tr><th>'+r[0]+'</th><td>'+r[1]+'</td></tr>';}).join('');
+  }
+
+  function render(){renderBee();renderRaver();cy();}
+  function tick(force){read();var s=JSON.stringify([D.status,D.generated,D.seats,D.bugs,R.sel,open]);if(!force&&s===sig)return;sig=s;render();}
+  function wire(){
+    var ev=$('eternal'); if(!ev)return;
+    ev.addEventListener('click',function(e){
+      var o=e.target.closest('[data-et-open]'); if(o){var k=o.getAttribute('data-et-open');open[k]=!open[k];tick(true);return;}
+      var s=e.target.closest('[data-et-seat]'); if(s){R.sel=+s.getAttribute('data-et-seat');tick(true);return;}
+      if(e.target.closest('[data-et-hive]'))listen();
+    });
+    ev.addEventListener('keydown',function(e){if(e.key!=='Enter'&&e.key!==' ')return;var t=e.target.closest('[data-et-seat],[data-et-hive]');if(!t)return;e.preventDefault();t.dispatchEvent(new MouseEvent('click',{bubbles:true}));});
+    ['etBeeGo','etRaverGo','etCyGo'].forEach(function(id){$(id).addEventListener('click',listen);});
+    $('etMotion').addEventListener('click',function(){var b=document.body;if(b.hasAttribute('data-motion-paused'))b.removeAttribute('data-motion-paused');else b.setAttribute('data-motion-paused','');renderRaver();});
+    /* the board re-renders itself (the read door, the poll, a tongue switch); the fronts follow it */
+    var mo=new MutationObserver(function(){tick();});
+    ['hive','hivegen','agents','fallback'].forEach(function(id){var el=$(id);if(el)mo.observe(el,{childList:true,subtree:true,characterData:true,attributes:true});});
+    setInterval(function(){tick();},1000);
+    document.addEventListener('blang',function(){keyed();tick(true);});
+  }
+  try{if(localStorage.getItem('bnr.motion.paused')==='1')document.body.setAttribute('data-motion-paused','');}catch(e){}
+  keyed(); wire(); tick(true);
+  window.__eternal={data:D,raver:R};
+})();
+</script>
 </body>
 </html>

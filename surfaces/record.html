@@ -72,9 +72,263 @@ figcaption a.raw{display:inline-flex;align-items:center;min-height:44px;font-siz
 nav:empty{display:none}
 body:not([data-reg="cypherpunk"]) :is(.count,.date,.commit,figcaption,figcaption a.raw,.foot){font-size:14px}
 </style>
+<style id="eternal-css">
+/* ── ETERNAL FRONT (docs/design/eternal) — every value is a skaists token (surfaces/skaists.css,
+   compiled from docs/design/skaists/tokens.json): no hand-picked hex, size or corner. Measured by
+   e2e/skaists-conformance.mjs. One register visible at a time; new bee is the default. Every rule
+   is scoped under #eternal so the page's own bare h2/a/button/section rules never reach in. ── */
+#eternal{display:block;max-width:40rem;margin:var(--sk-s3,18px) auto var(--sk-s2,12px);padding:0;border:0;border-radius:0;background:transparent;text-align:start;color:var(--sk-ink)}
+#eternal>.et-r,#eternal>.et-c{display:none}
+body[data-reg="raver"] #eternal>.et-b,body[data-reg="cypherpunk"] #eternal>.et-b{display:none}
+body[data-reg="raver"] #eternal>.et-r{display:block}
+body[data-reg="cypherpunk"] #eternal>.et-c{display:block}
+#eternal [hidden]{display:none!important}
+#eternal *{box-sizing:border-box}
+#eternal h2,#eternal h3,#eternal p,#eternal ol,#eternal ul{margin:0;padding:0;letter-spacing:normal;text-transform:none}
+#eternal button,#eternal a{margin:0;text-transform:none;letter-spacing:normal}
+#eternal button{font:inherit;color:inherit;background:none;border:0;border-radius:0;padding:0;min-height:0;box-shadow:none;cursor:pointer}
+#eternal svg{display:block}
+#eternal :focus-visible{outline:2px solid var(--sk-focus);outline-offset:3px}
+#eternal .et-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.et-archive-h{max-width:40rem;margin:var(--sk-s5,36px) auto var(--sk-s2,12px);padding-top:var(--sk-s4,24px);border-top:1px solid var(--sk-line);color:var(--sk-ink);text-align:start;letter-spacing:normal;text-transform:none}
+body[data-reg="bee"] .et-archive-h{font:400 28px/1.1 var(--sk-font-bee-serif)}
+body[data-reg="raver"] .et-archive-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em}
+body[data-reg="cypherpunk"] .et-archive-h{font:600 15px/1.45 var(--sk-font-mono)}
+
+/* NEW BEE — a calm room: plain rows, one reassurance, one action */
+#eternal .et-b{display:flex;flex-direction:column;gap:var(--sk-s3,18px);color:var(--sk-ink);font:400 16px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-b-mark{font:400 18px/1.2 var(--sk-font-house);color:var(--sk-sovereign)}
+#eternal .et-b-h{font:400 40px/1.05 var(--sk-font-bee-serif);color:var(--sk-ink)}
+#eternal .et-b-lede{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink-mut);text-wrap:pretty}
+#eternal .et-b-guard{display:flex;align-items:center;gap:var(--sk-s2,12px);min-height:var(--sk-control-min,44px);padding:var(--sk-s1,6px) var(--sk-s3,18px);border-radius:var(--sk-radius);background:var(--sk-guard-wash);color:var(--sk-guard);font:600 15px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-b-guard svg,#eternal .et-ico{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+#eternal .et-b-rows{display:flex;flex-direction:column;background:var(--sk-bg-card);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl);overflow:hidden}
+#eternal .et-b-row{display:flex;align-items:center;justify-content:space-between;gap:var(--sk-s2,12px);width:100%;min-height:var(--sk-control-row,52px);padding:var(--sk-s1,6px) var(--sk-s3,18px);border:0;border-bottom:1px solid var(--sk-line-soft);background:transparent;text-align:start;font:500 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink);text-decoration:none}
+#eternal .et-b-row:last-child{border-bottom:0}
+#eternal .et-b-rows>.et-b-row:nth-last-child(2):has(+ .et-b-open[hidden]){border-bottom:0}
+#eternal button.et-b-row,#eternal a.et-b-row{cursor:pointer}
+#eternal .et-b-row small{display:flex;align-items:center;gap:var(--sk-s1,6px);flex:none;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut);text-align:end}
+#eternal .et-b-row[aria-expanded="true"],#eternal .et-b-row[aria-pressed="true"]{background:var(--sk-sovereign-tint);color:var(--sk-sovereign-strong);font-weight:600}
+#eternal .et-b-row[aria-expanded="true"] small,#eternal .et-b-row[aria-pressed="true"] small{color:var(--sk-sovereign-strong)}
+#eternal .et-b-row .chev{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;transition:transform var(--dur,.26s)}
+#eternal .et-b-row[aria-expanded="true"] .chev{transform:rotate(90deg)}
+#eternal .et-b-open{display:grid;gap:0;background:var(--sk-sovereign-tint);border-bottom:1px solid var(--sk-line-soft)}
+#eternal .et-b-person{display:flex;align-items:center;gap:var(--sk-s2,12px);min-height:var(--sk-control-person,60px);padding:var(--sk-s1,6px) var(--sk-s3,18px);border-top:1px solid var(--sk-line-soft)}
+#eternal .et-b-person:first-child{border-top:0}
+#eternal .et-b-person>i{display:flex;align-items:center;justify-content:center;width:40px;height:40px;flex:none;border-radius:var(--sk-radius-pill);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong);font:600 14px/1.4 var(--sk-font-bee-sans);font-style:normal}
+#eternal .et-b-person>div{min-width:0;flex:1}
+#eternal .et-b-person b{display:block;font:500 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink);overflow-wrap:anywhere}
+#eternal .et-b-person span{display:block;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut);overflow-wrap:anywhere}
+#eternal .et-b-person a{display:inline-flex;align-items:center;justify-content:center;min-height:var(--sk-control-min,44px);min-width:var(--sk-control-min,44px);flex:none;font:600 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-link);text-decoration:none}
+#eternal .et-b-person a:hover{color:var(--sk-link-hover)}
+#eternal .et-b-more{padding:var(--sk-s2,12px) var(--sk-s3,18px);font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut);border-top:1px solid var(--sk-line-soft)}
+#eternal .et-b-card{padding:var(--sk-s3,18px);background:var(--sk-bg-card);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl);display:grid;gap:var(--sk-s1,6px)}
+#eternal .et-b-card b{font:600 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-card p{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+#eternal .et-b-act{display:flex;flex-direction:column;gap:var(--sk-s1,6px);margin-top:var(--sk-s1,6px)}
+#eternal .et-b-primary{display:flex;align-items:center;justify-content:center;gap:var(--sk-s1,6px);width:100%;min-height:var(--sk-control-primary,54px);padding:0 var(--sk-s3,18px);border:0;border-radius:var(--sk-radius-lg);background:var(--sk-primary);color:var(--sk-on-primary);font:600 17px/1.2 var(--sk-font-bee-sans);text-align:center;text-decoration:none;cursor:pointer}
+#eternal .et-b-primary:disabled{background:var(--sk-bg-well);color:var(--sk-ink-mut);cursor:not-allowed}
+#eternal .et-b-link{display:flex;align-items:center;justify-content:center;min-height:var(--sk-control-min,44px);border:0;background:transparent;font:600 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-link);text-align:center;text-decoration:none;cursor:pointer}
+#eternal .et-b-link:hover{color:var(--sk-link-hover)}
+#eternal .et-b-foot{text-align:center;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-now{font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut);text-align:center}
+
+/* RAVER — the data is the art; lowercase is allowed joy; the numbers never change */
+#eternal .et-r{color:var(--sk-ink);font:600 14px/1.25 var(--sk-font-raver-body)}
+#eternal .et-r-top{display:flex;align-items:baseline;justify-content:space-between;gap:var(--sk-s2,12px);flex-wrap:wrap}
+#eternal .et-r-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em;color:var(--sk-ink)}
+#eternal .et-r-hint{font:400 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-art{width:100%;max-width:360px;height:auto;margin:var(--sk-s3,18px) auto var(--sk-s2,12px);filter:drop-shadow(var(--sk-glow-sovereign));touch-action:none;cursor:pointer}
+#eternal .et-r-art:focus{outline:none}
+#eternal .et-r-art:focus-visible{outline:2px solid var(--sk-focus);outline-offset:3px}
+#eternal .et-r-legend{display:flex;flex-wrap:wrap;justify-content:center;gap:var(--sk-s1,6px) var(--sk-s3,18px);margin:0 0 var(--sk-s2,12px);font:400 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-legend span{display:inline-flex;align-items:center;gap:var(--sk-s1,6px)}
+#eternal .et-r-legend i{display:inline-block;width:18px;height:12px;border-radius:var(--sk-radius-sm)}
+#eternal .et-r-card{display:flex;gap:var(--sk-s2,12px);align-items:center;min-height:var(--sk-control-person,60px);padding:var(--sk-s2,12px) var(--sk-s3,18px);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl);background:var(--sk-sovereign-tint)}
+#eternal .et-r-card .rk{display:flex;align-items:center;justify-content:center;min-width:44px;height:44px;padding:0 var(--sk-s1,6px);flex:none;border-radius:var(--sk-radius);background:var(--sk-sovereign-strong);color:var(--sk-bg);font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em}
+#eternal .et-r-card>div{min-width:0}
+#eternal .et-r-card b{display:block;font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink);overflow-wrap:anywhere}
+#eternal .et-r-card span{display:block;margin-top:var(--sk-s1,6px);font:400 14px/1.25 var(--sk-font-raver-body);color:var(--sk-sovereign-soft);overflow-wrap:anywhere}
+#eternal .et-r-chips{display:flex;flex-wrap:wrap;gap:var(--sk-s1,6px);justify-content:center;margin:var(--sk-s2,12px) 0}
+#eternal .et-r-chips button{min-height:var(--sk-control-min,44px);min-width:var(--sk-control-min,44px);padding:0 var(--sk-s3,18px);border-radius:var(--sk-radius-pill);border:1.5px solid var(--sk-sovereign);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong);font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em;cursor:pointer}
+#eternal .et-r-chips button[aria-pressed="true"]{border-color:var(--sk-you);background:var(--sk-sovereign-tint);color:var(--sk-ink);box-shadow:var(--sk-glow-sovereign)}
+#eternal .et-r-note{margin-top:var(--sk-s2,12px);text-align:center;font:400 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-big{margin:var(--sk-s2,12px) 0 var(--sk-s1,6px);text-align:center;font:700 60px/.95 var(--sk-font-raver-display);letter-spacing:-.02em;color:var(--sk-ink)}
+#eternal .et-r-pill{display:flex;align-items:center;justify-content:center;gap:var(--sk-s1,6px);width:100%;min-height:58px;margin-top:var(--sk-s4,24px);padding:0 var(--sk-s3,18px);border:0;border-radius:var(--sk-radius-pill);background:var(--sk-primary);color:var(--sk-on-primary);font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em;text-align:center;text-decoration:none;cursor:pointer}
+#eternal .et-r-ghost{display:flex;align-items:center;justify-content:center;min-height:var(--sk-control-min,44px);margin:var(--sk-s2,12px) auto 0;padding:0 var(--sk-s2,12px);border:0;background:none;color:var(--sk-link);font:400 14px/1.25 var(--sk-font-raver-body);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+#eternal .et-r-ghost:hover{color:var(--sk-link-hover)}
+@keyframes et-breathe{0%,100%{opacity:1}50%{opacity:.62}}
+@keyframes et-spin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){#eternal .breathe,#eternal .spin{animation:none!important}#eternal .et-b-row .chev{transition:none}}
+
+/* CYPHERPUNK — the instrument, complete at first paint; every row is a fact you can check */
+#eternal .et-c{font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink)}
+#eternal .et-c-path{font:600 15px/1.45 var(--sk-font-mono);color:var(--sk-ink);overflow-wrap:anywhere}
+#eternal .et-c-chips{display:flex;flex-wrap:wrap;gap:var(--sk-s1,6px);margin:var(--sk-s2,12px) 0}
+#eternal .et-c-chips span{padding:2px var(--sk-s1,6px);border:1px solid var(--sk-line);border-radius:4px;background:var(--sk-bg-card);font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-soft)}
+#eternal .et-c-chips span.on{border-color:var(--sk-guard);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong)}
+#eternal .et-c-chips span.ok{border-color:var(--sk-verified);color:var(--sk-verified)}
+#eternal .et-c-guard{display:flex;justify-content:space-between;align-items:center;gap:var(--sk-s1,6px) var(--sk-s2,12px);flex-wrap:wrap;min-height:var(--sk-control-min,44px);padding:var(--sk-s1,6px) var(--sk-s3,18px);border:1px dashed var(--sk-guard);border-radius:var(--sk-radius-sm);background:var(--sk-guard-wash);color:var(--sk-guard)}
+#eternal .et-c-guard b{font-weight:600;color:var(--sk-sovereign-strong)}
+#eternal .et-c-h{margin:var(--sk-s4,24px) 0 var(--sk-s2,12px);font:600 15px/1.45 var(--sk-font-mono);color:var(--sk-ink)}
+#eternal .et-c-tab{width:100%;margin:var(--sk-s2,12px) 0 var(--sk-s1,6px);border-collapse:separate;border-spacing:0;border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm);overflow:hidden;background:var(--sk-bg-card)}
+#eternal .et-c-tab th{padding:var(--sk-s1,6px) var(--sk-s2,12px);text-align:start;vertical-align:bottom;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);border:0;border-bottom:1px solid var(--sk-line);background:var(--sk-bg-well);letter-spacing:normal}
+#eternal .et-c-tab td{height:var(--sk-control-min,44px);padding:var(--sk-s1,6px) var(--sk-s2,12px);border:0;border-bottom:1px solid var(--sk-line);font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink);vertical-align:middle;overflow-wrap:anywhere}
+#eternal .et-c-tab tr:last-child td{border-bottom:0}
+#eternal .et-c-tab td.k{color:var(--sk-guard);white-space:nowrap}
+#eternal .et-c-tab td.v{white-space:nowrap;text-align:end}
+#eternal .et-c-tab tr.pick{cursor:pointer}
+#eternal .et-c-tab tr.pick:hover td{background:var(--sk-sovereign-tint)}
+#eternal .et-c-tab tr.more td{height:auto;padding:var(--sk-s1,6px) var(--sk-s2,12px) var(--sk-s2,12px);background:var(--sk-sovereign-tint);color:var(--sk-ink-soft)}
+#eternal .et-c-tab small{display:block;margin-top:2px;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut)}
+#eternal .et-c-tab a{display:inline-flex;align-items:center;min-height:var(--sk-control-min,44px);min-width:var(--sk-control-min,44px);color:var(--sk-link);font:500 12px/1.45 var(--sk-font-mono)}
+#eternal .t-ok{color:var(--sk-verified)}#eternal .t-part{color:var(--sk-info)}#eternal .t-guard{color:var(--sk-guard)}#eternal .t-you{color:var(--sk-you)}#eternal .t-ai{color:var(--sk-ai)}#eternal .t-mut{color:var(--sk-ink-mut)}
+#eternal .et-c-pipe{list-style:none;display:grid;gap:var(--sk-s2,12px);counter-reset:p}
+#eternal .et-c-pipe li{display:grid;grid-template-columns:36px minmax(0,1fr);gap:var(--sk-s1,6px) var(--sk-s2,12px);padding:var(--sk-s2,12px) var(--sk-s3,18px);border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm);background:var(--sk-bg-card);counter-increment:p}
+#eternal .et-c-pipe li::before{content:counter(p,decimal-leading-zero);color:var(--sk-guard);font-weight:600}
+#eternal .et-c-pipe li b{font-weight:600;color:var(--sk-ink);overflow-wrap:anywhere}
+#eternal .et-c-pipe li p{grid-column:2;color:var(--sk-ink-soft);overflow-wrap:anywhere}
+#eternal .et-c-pipe li.done b{color:var(--sk-verified)}
+#eternal .et-c-pipe li.guard{border-style:dashed;border-color:var(--sk-guard)}
+#eternal .et-c-pipe li.guard b{color:var(--sk-guard)}
+#eternal .et-c-pipe li.now{border-color:var(--sk-ai);box-shadow:inset 0 0 0 1px var(--sk-ai)}
+#eternal .et-c-pipe li.now b{color:var(--sk-ai)}
+#eternal .et-c-primary{display:flex;align-items:center;justify-content:center;gap:var(--sk-s1,6px);width:100%;min-height:52px;margin-top:var(--sk-s3,18px);padding:0 var(--sk-s2,12px);border:0;border-radius:var(--sk-radius-sm);background:var(--sk-primary);color:var(--sk-on-primary);font:600 14px/1.2 var(--sk-font-mono);text-align:center;text-decoration:none;cursor:pointer}
+#eternal .et-c-kv{width:100%;border-collapse:collapse;border:1px solid var(--sk-line);background:var(--sk-bg-card)}
+#eternal .et-c-kv th{width:120px;padding:var(--sk-s1,6px) var(--sk-s2,12px);text-align:start;vertical-align:top;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);border:0;border-bottom:1px solid var(--sk-line);letter-spacing:normal}
+#eternal .et-c-kv td{padding:var(--sk-s1,6px) var(--sk-s2,12px);border:0;border-bottom:1px solid var(--sk-line);font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink);overflow-wrap:anywhere}
+#eternal .et-c-verify{margin-top:var(--sk-s3,18px);padding:var(--sk-s3,18px);border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm);background:var(--sk-bg-card)}
+#eternal .et-c-verify-h{margin-bottom:var(--sk-s1,6px);font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut)}
+#eternal .et-c-verify ol{padding-inline-start:var(--sk-s4,24px);display:grid;gap:var(--sk-s1,6px);color:var(--sk-ink)}
+#eternal .et-c-verify code{font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ai);background:transparent;overflow-wrap:anywhere}
+#eternal .et-c-row{display:grid;grid-template-columns:1fr 1fr;gap:var(--sk-s2,12px);margin-top:var(--sk-s3,18px)}
+#eternal .et-c-ghost{display:flex;align-items:center;justify-content:center;min-height:52px;padding:0 var(--sk-s1,6px);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius-sm);background:transparent;color:var(--sk-ink);font:600 14px/1.2 var(--sk-font-mono);text-align:center;text-decoration:none;cursor:pointer}
+#eternal .et-c-seg{display:flex;flex-wrap:wrap;gap:var(--sk-s1,6px);margin:var(--sk-s2,12px) 0}
+#eternal .et-c-seg button{min-height:var(--sk-control-min,44px);min-width:var(--sk-control-min,44px);padding:0 var(--sk-s2,12px);border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm);background:var(--sk-bg-card);color:var(--sk-ink-soft);font:500 12px/1.45 var(--sk-font-mono);cursor:pointer}
+#eternal .et-c-seg button[aria-pressed="true"]{border-color:var(--sk-ai);color:var(--sk-ai)}
+
+/* record — the moments (bee), the reel you develop (raver), the index (cypherpunk) */
+#eternal .et-r-reel .fr{stroke-width:1.5;transition:opacity var(--dur,.26s)}
+#eternal .et-r-reel .fr.before{fill:var(--sk-sovereign-wash);stroke:var(--sk-sovereign)}
+#eternal .et-r-reel .fr.after{fill:var(--sk-sovereign);stroke:var(--sk-sovereign)}
+#eternal .et-r-reel .fr.alone{fill:none;stroke:var(--sk-biomass);stroke-dasharray:3 3}
+#eternal .et-r-reel .fr.named{fill:var(--sk-info);stroke:var(--sk-info)}
+#eternal .et-r-reel.picked .fr{opacity:.45}
+#eternal .et-r-reel.picked .fr.on{opacity:1}
+#eternal .et-r-reel .hole{fill:var(--sk-line)}
+#eternal .et-r-reel .arc{fill:none;stroke:var(--sk-you);stroke-width:4;stroke-linecap:round}
+#eternal .et-r-reel .hub{fill:var(--sk-bg-card);stroke:var(--sk-line);stroke-width:1.5}
+#eternal .et-r-reel text{fill:var(--sk-ink);color:var(--sk-ink)}
+#eternal .et-r-reel text.n{font:700 60px/.95 var(--sk-font-raver-display);letter-spacing:-.02em}
+#eternal .et-r-reel text.w{font:400 14px/1.25 var(--sk-font-raver-body);fill:var(--sk-ink-soft);color:var(--sk-ink-soft)}
+#eternal .et-r-reel text.d{font:600 13px/1.4 var(--sk-font-raver-body);fill:var(--sk-sovereign-soft);color:var(--sk-sovereign-soft)}
+#eternal .et-r-reel .breathe{animation:et-breathe 4s ease-in-out infinite}
+#eternal .et-r.paused .breathe{animation-play-state:paused}
+#eternal .et-r-legend .lg-before{background:var(--sk-sovereign-wash);border:1.5px solid var(--sk-sovereign)}
+#eternal .et-r-legend .lg-after{background:var(--sk-sovereign)}
+#eternal .et-r-legend .lg-alone{border:1.5px dashed var(--sk-biomass)}
+#eternal .et-r-legend .lg-named{background:var(--sk-info)}
+#eternal .et-r-hold{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;width:132px;height:132px;margin:var(--sk-s3,18px) auto 0;border:0;border-radius:var(--sk-radius-pill);background:var(--sk-sovereign-wash);color:var(--sk-ink);cursor:pointer;touch-action:none;user-select:none;-webkit-user-select:none}
+#eternal .et-r-hold svg{position:absolute;inset:0;width:100%;height:100%;transform:rotate(-90deg)}
+#eternal .et-r-hold .trk{fill:none;stroke:var(--sk-line);stroke-width:6}
+#eternal .et-r-hold .prg{fill:none;stroke:var(--sk-biomass);stroke-width:6;stroke-linecap:round;stroke-dasharray:370;stroke-dashoffset:370}
+#eternal .et-r-hold b{position:relative;display:block;font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em;color:var(--sk-ink)}
+#eternal .et-r-hold span{position:relative;display:block;margin-top:var(--sk-s1,6px);font:400 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-photo{max-width:none;margin:var(--sk-s3,18px) 0 0;padding:var(--sk-s1,6px);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl);background:var(--sk-bg-card)}
+#eternal .et-r-photo img{display:block;width:100%;height:auto;max-height:60vh;object-fit:contain;border-radius:var(--sk-radius);background:var(--sk-bg);animation:et-develop 1.6s ease-out}
+#eternal .et-r-photo figcaption{display:block;padding:var(--sk-s1,6px) var(--sk-s1,6px) 0;font:400 12px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+@keyframes et-develop{from{opacity:0}to{opacity:1}}
+@media (prefers-reduced-motion:reduce){#eternal .et-r-photo img{animation:none}}
+#eternal .et-c-tab td.n{width:36px;color:var(--sk-guard);white-space:nowrap}
+#eternal .et-c-tab td.day{width:62px;white-space:nowrap;color:var(--sk-ink-soft)}
+#eternal .et-c-tab td.f{width:52px;white-space:nowrap;text-align:end;color:var(--sk-ai)}
+#eternal .et-c-tab tr.more a{display:flex;align-items:center;justify-content:space-between;gap:var(--sk-s2,12px);width:100%;min-height:var(--sk-control-min,44px);color:var(--sk-link);font:400 13px/1.45 var(--sk-font-mono);overflow-wrap:anywhere}
+#eternal .et-c-tab tr.more a small{flex:none;margin:0}
+
+/* ── THE WHOLE RECORD, dressed per register: the page's own variables mapped onto skaists.
+   The shots themselves are never touched: they are the record, shown exactly as kept. ── */
+body[data-reg="bee"]{--bg0:var(--sk-bg);--bg1:var(--sk-bg);--bg2:var(--sk-bg);--bg3:var(--sk-bg-well);--well:var(--sk-bg-card);--ink:var(--sk-ink);--ink-hi:var(--sk-ink);--dim:var(--sk-ink-mut);--faint:var(--sk-ink-mut);
+ --line:var(--sk-line);--line-hi:var(--sk-ink-mut);--violet:var(--sk-sovereign);--idea:var(--sk-sovereign);--ok:var(--sk-verified);--amber:var(--sk-you);--glow:none;--mono:var(--sk-font-bee-sans);background:var(--sk-bg);background-image:none;color:var(--sk-ink)}
+body[data-reg="bee"] .wrap>h1{font:400 40px/1.05 var(--sk-font-bee-serif);letter-spacing:0;color:var(--sk-ink)}
+body[data-reg="bee"] .entry h2{font-family:var(--sk-font-bee-serif);font-weight:400;font-size:28px;color:var(--sk-sovereign-strong)}
+body[data-reg="bee"] figure{border-radius:var(--sk-radius-xl)}
+body[data-reg="bee"] .date,body[data-reg="bee"] .chip{border-radius:var(--sk-radius-pill)}
+body[data-reg="bee"] .chip.after{color:var(--sk-on-primary);background:var(--sk-sovereign)}
+body[data-reg="raver"]{--bg0:var(--sk-bg);--bg1:var(--sk-bg);--bg2:var(--sk-bg-card);--bg3:var(--sk-bg-card);--well:var(--sk-bg-card);--ink:var(--sk-ink);--ink-hi:var(--sk-ink);--dim:var(--sk-ink-soft);--faint:var(--sk-ink-mut);
+ --line:var(--sk-line);--line-hi:var(--sk-sovereign);--violet:var(--sk-sovereign-soft);--idea:var(--sk-sovereign);--ok:var(--sk-biomass);--amber:var(--sk-you);--glow:var(--sk-glow-sovereign);--mono:var(--sk-font-raver-body);background:var(--sk-bg);background-image:none;color:var(--sk-ink)}
+body[data-reg="raver"] .wrap>h1{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em;color:var(--sk-ink)}
+body[data-reg="raver"] .entry h2{font-family:var(--sk-font-raver-display);font-weight:700}
+body[data-reg="raver"] figure{border-radius:var(--sk-radius-xl)}
+body[data-reg="raver"] .date,body[data-reg="raver"] .chip{border-radius:var(--sk-radius-pill)}
+body[data-reg="raver"] .chip.after{color:var(--sk-on-primary);background:var(--sk-sovereign-soft)}
+body[data-reg="cypherpunk"]{--bg0:var(--sk-bg);--bg1:var(--sk-bg);--bg2:var(--sk-bg-card);--bg3:var(--sk-bg-card);--well:var(--sk-bg-card);--ink:var(--sk-ink);--ink-hi:var(--sk-ink);--dim:var(--sk-ink-soft);--faint:var(--sk-ink-mut);
+ --line:var(--sk-line);--line-hi:var(--sk-ink-mut);--violet:var(--sk-sovereign-soft);--idea:var(--sk-sovereign);--ok:var(--sk-verified);--amber:var(--sk-ai);--glow:none;--mono:var(--sk-font-mono);background:var(--sk-bg);background-image:none;color:var(--sk-ink)}
+body[data-reg="cypherpunk"] .wrap>h1{font:600 15px/1.45 var(--sk-font-mono);color:var(--sk-ink)}
+body[data-reg="cypherpunk"] figure,body[data-reg="cypherpunk"] .date{border-radius:var(--sk-radius-sm)}
+body[data-reg="cypherpunk"] .chip{border-radius:4px}
+body[data-reg="cypherpunk"] .chip.after{color:var(--sk-on-primary);background:var(--sk-sovereign-soft)}
+</style>
+<link rel="stylesheet" href="skaists.css">
 </head>
-<body>
+<body data-bee-theme="custom">
 <div class="wrap">
+<!-- ETERNAL FRONT (founder blueprint 2026-09-26, docs/design/eternal): three separate products in
+     one surface. ONE data layer: the record's own index (E and DIMS below) drives all three, so the
+     counts, the days and the files cannot drift. The record may be large, so no front loads a
+     picture at first paint: bee and cypherpunk show counts from the index, and the raver reel
+     develops ONE picture only when a person holds for it. Every "see it" is a same-tab link into
+     the record below, where the shots load lazily as you reach them. -->
+<section id="eternal" aria-label="every screenshot we ever kept">
+
+  <!-- NEW BEE — a calm room: the newest moments as plain rows, one way in -->
+  <div class="et-b">
+    <div class="et-b-mark" data-t="et.record.b.mark">the record</div>
+    <h2 class="et-b-h" data-t="et.record.b.title">every picture we kept</h2>
+    <p class="et-b-lede" id="etBeeLede">reading the index…</p>
+    <div class="et-b-guard"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="6" width="18" height="14" rx="2"/><circle cx="12" cy="13" r="4"/><path d="M8 6l2-3h4l2 3"/></svg><span data-t="et.record.b.guard">nothing here is retouched, cropped or rearranged.</span></div>
+    <div class="et-b-rows" id="etBeeRows"></div>
+    <div class="et-b-act">
+      <a class="et-b-primary" id="etBeeGo" href="#list" data-t="et.record.b.go">look at the newest change</a>
+      <a class="et-b-link" href="#list" data-t="et.record.b.all">every moment, newest first</a>
+      <p class="et-b-foot" data-t="et.record.b.foot">pictures load only when you scroll to them.</p>
+    </div>
+  </div>
+
+  <!-- RAVER — the record is a reel: every frame around one ring, a gap between moments; hold to develop -->
+  <div class="et-r">
+    <div class="et-r-top"><h2 class="et-r-h" data-t="et.record.r.title">the reel</h2><span class="et-r-hint" id="etRaverHint">tap a moment</span></div>
+    <svg class="et-r-art et-r-reel" id="etReel" viewBox="-200 -200 400 400" tabindex="0" role="slider" aria-label="the record as one reel: every photograph a frame, newest at the top" aria-valuemin="1" aria-valuemax="20" aria-valuenow="1"></svg>
+    <div class="et-r-legend" id="etLegend"></div>
+    <div class="et-r-card" id="etRaverCard" aria-live="polite"></div>
+    <button type="button" class="et-r-hold" id="etDevelop" aria-describedby="etDevelopHint"><svg viewBox="0 0 132 132" aria-hidden="true"><circle cx="66" cy="66" r="59" class="trk"/><circle cx="66" cy="66" r="59" class="prg" id="etDevelopProg"/></svg><b data-t="et.record.r.hold">hold</b><span data-t="et.record.r.develop">to develop</span></button>
+    <p class="et-r-note" id="etDevelopHint">hold 1 s · one picture loads, exactly as kept</p>
+    <figure class="et-r-photo" id="etPhoto" hidden><img id="etPhotoImg" alt="" decoding="async"><figcaption id="etPhotoCap"></figcaption></figure>
+    <a class="et-r-pill" id="etRaverGo" href="#list"><span id="etRaverGoL">see it in the record</span> <span aria-hidden="true">↓</span></a>
+    <button type="button" class="et-r-ghost" id="etGlow" aria-pressed="false">pause the glow</button>
+  </div>
+
+  <!-- CYPHERPUNK — the index as an instrument: every entry, every file, its size; how to check it -->
+  <div class="et-c">
+    <p class="et-c-path" id="etPath">record/ · reading the index…</p>
+    <div class="et-c-chips" id="etChips"></div>
+    <div class="et-c-guard"><span data-t="et.record.c.guard">edits = none · crops = none</span> <b data-t="et.record.c.guardB">if a shot is ugly, that is what it looked like</b></div>
+    <table class="et-c-kv" id="etReceipt"></table>
+    <a class="et-c-primary" href="#list" data-t="et.record.c.walk">walk the index ↓</a>
+    <h3 class="et-c-h" data-t="et.record.c.entriesH">entries · newest first · tap for files</h3>
+    <table class="et-c-tab"><thead><tr><th>#</th><th>day</th><th>moment</th><th>files</th></tr></thead><tbody id="etEntries"></tbody></table>
+    <h3 class="et-c-h" data-t="et.record.c.pipeH">pipeline · shot to shelf</h3>
+    <ol class="et-c-pipe" id="etPipe"></ol>
+    <div class="et-c-verify">
+      <div class="et-c-verify-h" data-t="et.record.c.verifyH">verify · no trust in this page needed</div>
+      <ol id="etVerify"></ol>
+    </div>
+    <div class="et-c-row">
+      <a class="et-c-ghost" href="https://github.com/beehive-nature/beehive-nature/tree/main/surfaces/record" target="_blank" rel="noopener noreferrer"><span data-t="et.record.c.folder">the folder ↗</span><span class="et-sr"> (opens in a new tab)</span></a>
+      <a class="et-c-ghost" href="https://github.com/beehive-nature/beehive-nature/blob/main/surfaces/record.html" target="_blank" rel="noopener noreferrer"><span data-t="et.record.c.fork">fork the template ↗</span><span class="et-sr"> (opens in a new tab)</span></a>
+    </div>
+  </div>
+</section>
+<h2 class="et-archive-h" id="etArchive" data-t="et.record.archive">the whole record</h2>
   <div class="hex" aria-hidden="true"></div>
   <h1>the record</h1>
   <p class="rule">Every screenshot the estate kept of its own pages — the newest at the top, newest first, scrolling. Each pair is the same page <b>before</b> and <b>after</b> a change, said in one line. A shot with no pair is shown alone. <b>Nothing here is ever retouched, cropped or rearranged. If a shot is ugly, that is what it looked like.</b> Tap any picture to see the file exactly as it was kept.</p>
@@ -152,7 +406,7 @@ var E=[
 ];
 (function(){
   var n=0;
-  var out=E.map(function(e){
+  var out=E.map(function(e,k){
     var figs=e.i.map(function(s){
       n++;
       var kind=s[1],chip,cls='';
@@ -163,11 +417,167 @@ var E=[
       return '<figure'+cls+'><a class="raw" href="record/'+s[0]+'" target="_blank" rel="noopener"><img src="record/'+s[0]+'" width="'+(DIMS[s[0]]||[390,700])[0]+'" height="'+(DIMS[s[0]]||[390,700])[1]+'" alt="'+s[2]+' \u2014 as kept, unretouched" loading="lazy"></a>'+
         '<figcaption>'+chip+'<span class="srf">'+s[2]+'</span><a class="raw" href="record/'+s[0]+'" target="_blank" rel="noopener">the file, untouched \u2197</a></figcaption></figure>';
     }).join('');
-    return '<section class="entry"><div class="ehead"><span class="date">'+e.d+'</span><h2>'+e.t+'</h2>'+(e.c?'<span class="commit">'+e.c+'</span>':'')+'</div><p class="line">'+e.l+'</p><div class="shots">'+figs+'</div></section>';
+    return '<section class="entry" id="rec-'+k+'"><div class="ehead"><span class="date">'+e.d+'</span><h2>'+e.t+'</h2>'+(e.c?'<span class="commit">'+e.c+'</span>':'')+'</div><p class="line">'+e.l+'</p><div class="shots">'+figs+'</div></section>';
   }).join('');
   document.getElementById('list').innerHTML=out;
   document.getElementById('count').textContent=n+' photographs \u00b7 newest first \u00b7 the record does not retouch';
   document.getElementById('foot').innerHTML='<b>the record</b> \u2014 a human surface of the beehive nature estate \u00b7 palette from tokens.css, purple for people \u00b7 every shot labelled, colour never alone<br>the shots are the record: never edited, never cropped, never retouched \u00b7 if a shot is ugly, that is what it looked like';
+})();
+</script>
+<script id="eternal-js">
+/* ETERNAL FRONT \u2014 one data layer, three renderers (docs/design/eternal). Every fact is counted from
+   the record's own index (E: the moments, DIMS: every file's size), never typed twice. The record is
+   large (13 MB), so no front asks for a picture on arrival: the one picture a front ever loads is
+   the one a person holds the raver's develop button for. Every "see it" is a same-tab link into the
+   record below, where the shots load lazily. Nothing is sent anywhere. */
+(function(){
+  if(!document.getElementById('eternal')||typeof E==='undefined'||typeof DIMS==='undefined') return;
+  var $=function(id){return document.getElementById(id);};
+  var T=function(k,f){var t=window.BNRLanguage&&window.BNRLanguage.text;return t?t(k,f):f;};
+  function esc(v){return String(v==null?'':v).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+  var KIND=function(k){return k==='before'||k==='after'||k==='alone'?k:'named';};
+  /* the ONE data layer */
+  var D={entries:E.map(function(e,k){return {k:k,day:e.d.slice(0,10),when:e.d,title:e.t,line:e.l,commit:e.c||'',
+      files:e.i.map(function(s){var d=DIMS[s[0]]||null;return {file:s[0],kind:s[1],cls:KIND(s[1]),label:s[2],w:d?d[0]:null,h:d?d[1]:null};})};}),
+    indexed:Object.keys(DIMS).length,kinds:{before:0,after:0,alone:0,named:0},photos:0,files:{},days:{},pixels:0,loaded:0};
+  D.entries.forEach(function(e){D.days[e.day]=(D.days[e.day]||0)+1;e.files.forEach(function(f){D.photos++;D.kinds[f.cls]++;D.files[f.file]=1;if(f.w)D.pixels+=f.w*f.h;});});
+  D.distinct=Object.keys(D.files).length; D.unsized=Object.keys(D.files).filter(function(f){return !DIMS[f];}).length;
+  D.commits=D.entries.map(function(e){return (e.commit.match(/\b[0-9a-f]{7}\b/)||[])[0];}).filter(Boolean).filter(function(c,i,a){return a.indexOf(c)===i;});
+  var R={sel:0,paused:false,developed:null}, C={open:{}};
+  function loadedNow(){var seen={};(performance.getEntriesByType?performance.getEntriesByType('resource'):[]).forEach(function(r){var m=r.name.match(/\/record\/([^\/?#]+\.png)/);if(m)seen[m[1]]=1;});return Object.keys(seen).length;}
+  function labels(){document.querySelectorAll('[data-t^="et.record."]').forEach(function(e){if(e.__en==null)e.__en=e.textContent;e.textContent=T(e.getAttribute('data-t'),e.__en);});}
+  function months(){return T('et.record.months','january,february,march,april,may,june,july,august,september,october,november,december').split(',');}
+  function human(day){var p=day.split('-');return (+p[2])+' '+(months()[+p[1]-1]||p[1]);}
+  function pics(n){return n+' '+(n===1?T('et.record.pic','picture'):T('et.record.pics','pictures'));}
+  function tally(e){var c={};e.files.forEach(function(f){c[f.kind]=(c[f.kind]||0)+1;});return Object.keys(c).map(function(k){return c[k]+' '+k;}).join(' \u00b7 ');}
+
+  /* \u2500\u2500 NEW BEE \u2500\u2500 */
+  function bee(){
+    $('etBeeLede').textContent=T('et.record.b.lede','{n} photographs of the estate\u2019s own pages, taken over {d} days, newest first. each change is shown as it looked before and after.').replace('{n}',D.photos).replace('{d}',Object.keys(D.days).length);
+    var chev='<svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>';
+    $('etBeeRows').innerHTML=D.entries.slice(0,5).map(function(e){return '<a class="et-b-row" href="#rec-'+e.k+'"><span>'+esc(e.title)+'</span><small>'+esc(human(e.day))+' \u00b7 '+esc(pics(e.files.length))+chev+'</small></a>';}).join('')+
+      '<a class="et-b-row" href="#list"><span>'+esc(T('et.record.b.every','every moment'))+'</span><small>'+esc(T('et.record.b.moments','{n} moments').replace('{n}',D.entries.length))+chev+'</small></a>';
+    $('etBeeGo').setAttribute('href','#rec-0');
+  }
+
+  /* \u2500\u2500 RAVER: the reel \u2500\u2500 */
+  var SLOTS=D.photos+D.entries.length*1.2, SLOT=2*Math.PI/SLOTS, SPAN=[];
+  function arc(r0,r1,a0,a1){var p=function(r,a){return (r*Math.cos(a)).toFixed(2)+' '+(r*Math.sin(a)).toFixed(2);},big=(a1-a0)>Math.PI?1:0;
+    return 'M'+p(r1,a0)+'A'+r1+' '+r1+' 0 '+big+' 1 '+p(r1,a1)+'L'+p(r0,a1)+'A'+r0+' '+r0+' 0 '+big+' 0 '+p(r0,a0)+'Z';}
+  function reel(){
+    var svg=$('etReel'), h='', pos=0.6; SPAN=[];
+    for(var s=0;s<SLOTS;s+=2){var a=-Math.PI/2+s*SLOT;h+='<circle class="hole" cx="'+(112*Math.cos(a)).toFixed(1)+'" cy="'+(112*Math.sin(a)).toFixed(1)+'" r="2.4"/>';}
+    D.entries.forEach(function(e){
+      var a0=pos;
+      e.files.forEach(function(f,i){var s0=-Math.PI/2+(pos+0.12)*SLOT,s1=-Math.PI/2+(pos+0.88)*SLOT;h+='<path class="fr '+f.cls+(e.k===R.sel?' on':'')+'" data-k="'+e.k+'" d="'+arc(126,178,s0,s1)+'"/>';pos++;});
+      SPAN.push([a0,pos]); pos+=1.2;
+    });
+    var sp=SPAN[R.sel]; if(sp) h+='<path class="arc breathe" d="M'+(190*Math.cos(-Math.PI/2+sp[0]*SLOT)).toFixed(2)+' '+(190*Math.sin(-Math.PI/2+sp[0]*SLOT)).toFixed(2)+'A190 190 0 '+((sp[1]-sp[0])*SLOT>Math.PI?1:0)+' 1 '+(190*Math.cos(-Math.PI/2+sp[1]*SLOT)).toFixed(2)+' '+(190*Math.sin(-Math.PI/2+sp[1]*SLOT)).toFixed(2)+'"/>';
+    var e=D.entries[R.sel];
+    h+='<circle class="hub" r="98"/><text class="n" y="4" text-anchor="middle">'+D.photos+'</text><text class="w" y="34" text-anchor="middle">'+esc(T('et.record.r.photos','photographs'))+'</text>'+(e?'<text class="d" y="62" text-anchor="middle">'+esc(e.day)+'</text>':'');
+    svg.innerHTML=h; svg.classList.add('picked');
+    svg.setAttribute('aria-valuemax',String(D.entries.length)); svg.setAttribute('aria-valuenow',String(R.sel+1));
+    if(e) svg.setAttribute('aria-valuetext',T('et.record.r.valueText','moment {n} of {m}: {t}, {d}').replace('{n}',R.sel+1).replace('{m}',D.entries.length).replace('{t}',e.title).replace('{d}',e.day));
+  }
+  function raver(){
+    var e=D.entries[R.sel]; if(!e) return;
+    $('etRaverHint').textContent=T('et.record.r.hint','{n} moments \u00b7 tap one').replace('{n}',D.entries.length);
+    $('etLegend').innerHTML=[['before',T('et.record.k.before','before')],['after',T('et.record.k.after','after')],['alone',T('et.record.k.alone','kept alone')],['named',T('et.record.k.named','two languages')]].map(function(k){return '<span><i class="lg-'+k[0]+'"></i>'+esc(k[1])+' \u00b7 '+D.kinds[k[0]]+'</span>';}).join('');
+    $('etRaverCard').innerHTML='<span class="rk">'+(R.sel+1)+'</span><div><b>'+esc(e.title)+'</b><span>'+esc(e.when)+' \u00b7 '+esc(tally(e))+'</span></div>';
+    $('etRaverGo').setAttribute('href','#rec-'+e.k);
+    $('etRaverGoL').textContent=T('et.record.r.go','see moment {n} in the record').replace('{n}',R.sel+1);
+    $('etDevelopHint').textContent=R.developed===R.sel?T('et.record.r.developed','developed \u00b7 the file, exactly as kept'):T('et.record.r.holdHint','hold 1 s \u00b7 one picture loads, exactly as kept');
+    $('etGlow').textContent=R.paused?T('et.record.r.resume','let it glow'):T('et.record.r.pause','pause the glow'); $('etGlow').setAttribute('aria-pressed',R.paused?'true':'false');
+    document.querySelector('#eternal .et-r').classList.toggle('paused',R.paused);
+    reel();
+  }
+  function pickAt(x,y){
+    var b=$('etReel').getBoundingClientRect(), dx=x-(b.left+b.width/2), dy=y-(b.top+b.height/2), a=Math.atan2(dy,dx)+Math.PI/2; if(a<0)a+=2*Math.PI;
+    var s=a/SLOT, best=R.sel, bd=1e9; SPAN.forEach(function(sp,k){var c=(sp[0]+sp[1])/2,d=Math.min(Math.abs(s-c),SLOTS-Math.abs(s-c));if(s>=sp[0]-0.6&&s<=sp[1]+0.6)d=0;if(d<bd){bd=d;best=k;}});
+    return best;
+  }
+  function develop(){
+    var e=D.entries[R.sel]; if(!e) return;
+    var f=e.files.filter(function(x){return x.kind==='after';})[0]||e.files[0], img=$('etPhotoImg');
+    if(f.w){img.setAttribute('width',f.w);img.setAttribute('height',f.h);}
+    img.alt=f.label+' \u2014 '+T('et.record.r.asKept','as kept, unretouched');
+    img.src='record/'+f.file;
+    $('etPhotoCap').textContent=f.file+(f.w?' \u00b7 '+f.w+'\u00d7'+f.h:'')+' \u00b7 '+f.kind+' \u00b7 '+T('et.record.r.asKept','as kept, unretouched');
+    $('etPhoto').hidden=false; R.developed=R.sel; raver();
+  }
+  var hold={t0:0,raf:0};
+  function holdStart(ev){
+    if(hold.raf) return; if(ev&&ev.preventDefault) ev.preventDefault();
+    var prog=$('etDevelopProg'); hold.t0=performance.now();
+    (function tick(now){var f=Math.min(1,(now-hold.t0)/1000);prog.style.strokeDashoffset=String(370*(1-f));
+      if(f>=1){hold.raf=0;develop();return;}hold.raf=requestAnimationFrame(tick);})(hold.t0);
+  }
+  function holdStop(){if(!hold.raf)return;cancelAnimationFrame(hold.raf);hold.raf=0;$('etDevelopProg').style.strokeDashoffset='370';}
+
+  /* \u2500\u2500 CYPHERPUNK \u2500\u2500 */
+  function cy(){
+    D.loaded=loadedNow();
+    $('etPath').textContent='record/ \u00b7 '+D.indexed+' '+T('et.record.c.files','files')+' \u00b7 '+D.entries.length+' '+T('et.record.c.entries','entries');
+    $('etChips').innerHTML='<span class="ok">'+esc(T('et.record.c.never','never retouched'))+'</span><span class="on">loading=lazy</span><span>'+esc(T('et.record.c.sized','width + height set'))+'</span><span>'+esc(T('et.record.c.newest','newest first'))+'</span>';
+    var first=D.entries[D.entries.length-1], last=D.entries[0];
+    $('etReceipt').innerHTML=[
+      ['index',D.indexed+' '+esc(T('et.record.c.sizedFiles','files sized (DIMS)'))+' \u00b7 '+D.entries.length+' '+esc(T('et.record.c.entries','entries'))],
+      ['listed',D.photos+' '+esc(T('et.record.c.photos','photographs'))+' \u00b7 '+D.distinct+' '+esc(T('et.record.c.distinct','distinct files'))+' \u00b7 '+(D.unsized?'<span class="t-guard">'+D.unsized+' '+esc(T('et.record.c.unsized','unsized'))+'</span>':'<span class="t-ok">\u2713 '+esc(T('et.record.c.allSized','every one sized'))+'</span>')],
+      ['pairs',esc(T('et.record.k.before','before'))+' '+D.kinds.before+' \u00b7 '+esc(T('et.record.k.after','after'))+' '+D.kinds.after],
+      ['alone',D.kinds.alone+' '+esc(T('et.record.c.alone','kept alone, not hidden'))],
+      ['named',D.kinds.named+' '+esc(T('et.record.c.named','named variants (english \u00b7 latvian)'))],
+      ['newest',esc(last.when)],['oldest',esc(first.when)],
+      ['commits',D.commits.length?esc(D.commits.join(' \u00b7 ')):'<span class="t-mut">'+esc(T('et.record.c.noCommits','none named'))+'</span>'],
+      ['pixels',(Math.round(D.pixels/1e5)/10)+' '+esc(T('et.record.c.mp','megapixels in the index'))],
+      ['loaded','<span id="etLoaded">'+D.loaded+'</span> '+esc(T('et.record.c.loaded','of {n} pictures loaded so far \u00b7 lazily, as you reach them').replace('{n}',D.photos))]
+    ].map(function(r){return '<tr><th>'+r[0]+'</th><td>'+r[1]+'</td></tr>';}).join('');
+    $('etEntries').innerHTML=D.entries.map(function(e){
+      var o=!!C.open[e.k];
+      return '<tr class="pick" data-k="'+e.k+'" tabindex="0" aria-expanded="'+(o?'true':'false')+'"><td class="n">'+(e.k+1)+'</td><td class="day">'+esc(e.day.slice(5))+'</td><td>'+esc(e.title)+'<small>'+esc(e.when.slice(13))+(e.commit?' \u00b7 '+esc(e.commit):'')+'</small></td><td class="f">'+e.files.length+'</td></tr>'+
+        '<tr class="more" data-k="'+e.k+'"'+(o?'':' hidden')+'><td colspan="4">'+e.files.map(function(f){return '<a href="record/'+esc(f.file)+'">'+esc(f.file)+'<small>'+esc(f.kind)+(f.w?' \u00b7 '+f.w+'\u00d7'+f.h:'')+'</small></a>';}).join('')+'</td></tr>';
+    }).join('');
+    $('etPipe').innerHTML=[
+      ['shoot',T('et.record.c.p1','an estate page, photographed at 390 px or wide'),'done'],
+      ['keep',T('et.record.c.p2','the png committed as it was \u00b7 surfaces/record/'),'done'],
+      ['index',T('et.record.c.p3','DIMS: width \u00d7 height for all {n} files, so nothing jumps while it loads').replace('{n}',D.indexed),'done'],
+      ['pair',T('et.record.c.p4','before \u00b7 after \u00b7 kept alone, said in one line per moment'),'done'],
+      ['render',T('et.record.c.p5','newest first \u00b7 loading=lazy \u00b7 {n} of {m} loaded so far').replace('{n}',D.loaded).replace('{m}',D.photos),'now'],
+      ['never retouch',T('et.record.c.p6','object-fit contain \u00b7 no crop, no edit, no reorder'),'guard']
+    ].map(function(s){return '<li class="'+s[2]+'"><b>'+esc(s[0])+'</b><p>'+esc(s[1])+'</p></li>';}).join('');
+    $('etVerify').innerHTML=['<li><code>ls surfaces/record | wc -l</code> \u2192 '+D.indexed+'</li>',
+      '<li><code>file surfaces/record/*.png</code> \u2192 '+esc(T('et.record.c.v2','the sizes in the index'))+'</li>',
+      '<li><code>git log --diff-filter=M -- surfaces/record</code> \u2192 '+esc(T('et.record.c.v3','prints nothing while no shot was ever edited'))+'</li>'].join('');
+  }
+  function live(){var n=loadedNow();if(n===D.loaded)return;D.loaded=n;var l=$('etLoaded');if(l)l.textContent=n;var li=document.querySelector('#etPipe li.now p');if(li)li.textContent=T('et.record.c.p5','newest first \u00b7 loading=lazy \u00b7 {n} of {m} loaded so far').replace('{n}',n).replace('{m}',D.photos);}
+
+  function all(){labels();bee();raver();cy();}
+  function wire(){
+    var ev=$('eternal');
+    ev.addEventListener('click',function(e){
+      var tr=e.target.closest('.et-c-tab tr.pick');
+      if(tr){var k=+tr.getAttribute('data-k');C.open[k]=!C.open[k];tr.setAttribute('aria-expanded',C.open[k]?'true':'false');var m=tr.nextElementSibling;if(m)m.hidden=!C.open[k];}
+    });
+    ev.addEventListener('keydown',function(e){var t=e.target.closest('.et-c-tab tr.pick');if(t&&(e.key==='Enter'||e.key===' ')){e.preventDefault();t.click();}});
+    var r=$('etReel'), down=false;
+    function pick(e){var k=pickAt(e.clientX,e.clientY);if(k!==R.sel){R.sel=k;raver();}}
+    r.addEventListener('pointerdown',function(e){down=true;try{r.setPointerCapture(e.pointerId);}catch(x){}pick(e);});
+    r.addEventListener('pointermove',function(e){if(down)pick(e);});
+    ['pointerup','pointercancel'].forEach(function(t){r.addEventListener(t,function(){down=false;});});
+    r.addEventListener('keydown',function(e){var s=R.sel,n=D.entries.length;
+      if(e.key==='ArrowRight'||e.key==='ArrowDown')s=Math.min(n-1,s+1);else if(e.key==='ArrowLeft'||e.key==='ArrowUp')s=Math.max(0,s-1);else if(e.key==='Home')s=0;else if(e.key==='End')s=n-1;else return;
+      e.preventDefault();R.sel=s;raver();});
+    var hb=$('etDevelop');
+    hb.addEventListener('pointerdown',function(e){try{hb.setPointerCapture(e.pointerId);}catch(x){}holdStart(e);});
+    ['pointerup','pointercancel','pointerleave'].forEach(function(t){hb.addEventListener(t,holdStop);});
+    hb.addEventListener('keydown',function(e){if((e.key===' '||e.key==='Enter')&&!e.repeat){e.preventDefault();holdStart(e);}});
+    hb.addEventListener('keyup',function(e){if(e.key===' '||e.key==='Enter')holdStop();});
+    hb.addEventListener('contextmenu',function(e){e.preventDefault();});
+    $('etGlow').addEventListener('click',function(){R.paused=!R.paused;raver();});
+    document.addEventListener('load',function(e){if(e.target&&e.target.tagName==='IMG')live();},true);
+    document.addEventListener('blang',all);
+  }
+  wire(); all();
+  window.__eternal={data:D,raver:R,cy:C,loadedNow:loadedNow,refresh:all};
 })();
 </script>
 </body>
