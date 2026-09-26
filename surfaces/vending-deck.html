@@ -255,7 +255,7 @@ details.facts dt{color:var(--quiet)}
   const D = window.bDeck, $ = (s, r) => (r || document).querySelector(s), $$ = (s, r) => [...(r || document).querySelectorAll(s)];
   const W = {}; $$('#words [data-i18n]').forEach(el => { W[el.getAttribute('data-i18n')] = el; el.dataset.i18nEn = el.textContent; });
   /* a sentence's english template lives on its element (data-i18n-en); the hidden #words block carries the ones the rows are built from */
-  const word = key => { const el = W[key] || document.querySelector('[data-i18n="' + key + '"]'); if (!el) return key; const en = el.dataset.i18nEn || el.textContent; return (window.BNRLanguage && typeof window.BNRLanguage.text === 'function') ? window.BNRLanguage.text(key, en) : en; };
+  const word = key => { const el = W[key] || document.querySelector('[data-i18n=' + JSON.stringify(key) + ']'); if (!el) return key; const en = el.dataset.i18nEn || el.textContent; return (window.BNRLanguage && typeof window.BNRLanguage.text === 'function') ? window.BNRLanguage.text(key, en) : en; };
   const say = (key, slots) => D.fill(word(key), slots || {});
   const lang = () => document.documentElement.lang || 'en';
   const nfmt = n => { try { return Number(n).toLocaleString(lang()); } catch (e) { return String(n); } };

@@ -111,6 +111,9 @@ node scripts/estate-check.mjs                    → PASS (hub static + embed in
 node e2e/door-counts.mjs                         → 9 passed
 node scripts/r5-surface-audit.mjs                → 122 scanned, ZERO human-gas asks
 node e2e/dock-claims.mjs                         → 8 passed
+node e2e/estate-source.mjs (after the commit)    → 11 passed, 0 failed
+  (10/11 on the first pass: the tree scanner read a querySelector string
+   built with the data-i18n prefix as a key — fixed, second commit)
 ```
 
 Rendered from `http://127.0.0.1:8842` in the in-app browser: new bee, raver
