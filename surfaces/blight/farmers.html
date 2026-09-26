@@ -122,11 +122,11 @@ nav:not(#tbar) button.on{color:var(--gold);border-color:#3d3410}
   the public market lives next door: <a href="./market.html" style="color:var(--cyan)">the DeMarketPlace</a> — USDC + exSat, inquire flow.</p>
 </div>
 
+<script src="../level-truth.js?v=2"></script> <!-- Z5: one svgCallData law (7e530f28) - market precedent -->
 <script>
 /* THE FARMERS MARKET MVP. Same engine discipline as the fleet: chain state, keyless,
    defensive decode, self-measured chrome. Stalls = the garden's finest; bAccords =
    real, artsy, sendable artifacts (canvas PNG + deep-link note). fUSD is the frame. */
-const W=v=>BigInt(v).toString(16).padStart(64,'0');
 const AD=a=>'0'.repeat(24)+a.replace(/^0x/,'').toLowerCase();
 const HOSTS=['https://base-rpc.publicnode.com','https://base.drpc.org'];
 const LOV='0xfbd201472d5a439f1f0e408eb5dfaf6ea3687876';
@@ -134,17 +134,9 @@ const COLS=[
  {sym:'FUNGI',c:'0x7d9CE55D54FF3FEddb611fC63fF63ec01F26D15F',sel:'422b9e23',lv:[0,21000,525000,1050000,1575000,2100000],base:0,ou:true},
  {sym:'$FROGGI',c:'0x88A78C5035BdC8C9A8bb5c029e6cfCDD14B822FE',sel:'422b9e23',lv:[0,1000,3000,10000,30000,60000,120000],base:0},
  {sym:'JELLI',c:'0xA1b9d812926a529D8B002E69FCd070c8275eC73c',sel:'422b9e23',lv:[0,1000,21000,105000,420000,1050000],base:0},
- {sym:'PEPI v2',c:'0x28a5e71BFc02723eAC17E39c84c5190415C0de9F',sel:'a435130b',lv:[0,11,22,33,44,56],base:1},
+ {sym:'PEPI v2',c:'0x28a5e71BFc02723eAC17E39c84c5190415C0de9F',sel:'a435130b',fields:3,lv:[0,11,22,33,44,56],base:1},
 ];
-function decodeString(hex){
-  const h=hex.replace(/^0x/,'');
-  const off=parseInt(h.slice(0,64),16); if(!(off===0x20)) throw 0;
-  const len=parseInt(h.slice(off*2,off*2+64),16); if(!(len>=0&&len<=16384)) throw 0;
-  let out='';
-  for(let i=0;i<len;i++){ const b=parseInt(h.slice((off+32+i)*2,(off+32+i)*2+2),16);
-    if(Number.isNaN(b)) throw 0; out+=String.fromCharCode(b); }
-  try{ return decodeURIComponent(escape(out)); }catch(e){ return out; }
-}
+
 async function rpc(calls){
   for(const h of HOSTS){
     const ctl=new AbortController(); const kill=setTimeout(()=>ctl.abort(),8000);
@@ -171,9 +163,9 @@ async function buildStalls(){
     const bal=await rpc([{to:col.c,data:'0x70a08231'+AD(LOV)}]);
     if(!bal||!bal[0]||bal[0]==='0x'||BigInt(bal[0])<=0n) continue;
     const seed=Number(BigInt(bal[0])/1000000000n);
-    const res=await rpc([{to:col.c,data:col.sel+W(0x20)+W(seed)+W(0)}]);
+    const res=await rpc([{to:col.c,data:LevelTruth.svgCallData(col,seed,0)}]);
     if(res&&res[0]&&res[0].length>200){
-      try{ found.push({svg:decodeString(res[0]),col,seed,lvln:lvlOf(seed,col)}); }catch(e){}
+      try{ found.push({svg:LevelTruth.decodeString(res[0]),col,seed,lvln:lvlOf(seed,col)}); }catch(e){}
     }
   }
   found.sort((a,b)=>((b.lvln??-1)-(a.lvln??-1))||((b.seed||0)-(a.seed||0)));
