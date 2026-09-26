@@ -75,16 +75,75 @@ const realDay = (v) => {
 };
 const unknownKeys = (o, keys, at) => Object.keys(o).filter((k) => !keys.includes(k)).map((k) => `${at}: unknown key ${k}`);
 
+// A RECORD is the mirror of the store maps below: unknownKeys reads OWN keys
+// only and every field check reads `o.k` bare, so a record built with
+// Object.create(proto) is admitted on fields nobody wrote into it. Measured at
+// all three gates, and the symptom is publication, not only admission: an
+// inherited `url` satisfies locatability and then leaves RAW through the
+// structural allowlist with no caller decision at all; an inherited `subject`
+// is the id publicView asks isPublicSubject about; an inherited `quote` leaves
+// on a binding whose own keys are ["schema"] alone.
+// JSON revival cannot build one — "__proto__" arrives as an OWN key and
+// unknownKeys names it — so the producer is a hand that calls Object.create,
+// which is the same hand the store-shape row already assumes.
+// Sources were bee-laborer's row, re-read at 05b8d93c; claims and bindings are
+// mine and reproduce identically, so this is one check shared by the three
+// record gates rather than one patch.
+// It RETURNS rather than pushing: every sentence below it is computed off the
+// record's own fields, and a verdict computed off an INHERITED field is the
+// defect being refused — the phantom-field half, one level in.
+// null is allowed for the reason it is at the store: Object.create(null)
+// inherits nothing. The modality is "can": an array carries Array.prototype and
+// inherits no listed key, so it is refused by this sentence instead of by its
+// missing fields — a shorter true refusal, not a different verdict.
+// DISCLOSED: `at` is built from the record's own id/ids, which on this shape may
+// themselves be inherited. The sentence names the object by what it answers to
+// and then says that is not its own, which is the honest pair.
+// The question is the prototype's SHAPE, never its IDENTITY. `=== Object.prototype`
+// is realm-local, and node:vm is a live idiom in this tree: a record built in
+// another realm carries THAT realm's Object.prototype -- same own keys, the same
+// inherited surface, ZERO inherited data fields -- and was refused with a
+// sentence that is false about it. Accepted here: no prototype at all, or one
+// level carrying exactly the names Object.prototype carries. That is sound
+// because NO key this module reads is among those names, which the battery
+// asserts mechanically with a control rather than arguing in prose: put a listed
+// key on the prototype and the name set no longer matches. A realm whose
+// Object.prototype has been extended is refused, which is the closed direction.
+// NOT cached per prototype: one cached as plain can gain a field afterwards.
+// Found by bee-laborer re-reading ff8746f6; arrived with that commit, not before.
+const PLAIN_PROTO_NAMES = Object.getOwnPropertyNames(Object.prototype).sort().join(",");
+const plainChain = (o) => {
+  const p = Object.getPrototypeOf(o);
+  if (p === null) return true;
+  if (Object.getPrototypeOf(p) !== null) return false; // Array.prototype, or a poisoned chain
+  return Object.getOwnPropertyNames(p).sort().join(",") === PLAIN_PROTO_NAMES;
+};
+const foreignProto = (o, at) => (plainChain(o) ? null
+  : `${at}: carries a prototype, so a field nobody wrote into this record can read as its own -- build it as a plain object`);
+
 // a claim subject is a person id, or "a|b" for a relationship between two
 export const parties = (subject) => String(subject).split("|");
 
+// Every map below is keyed by an id the CALLER chooses, so it carries no
+// prototype. On a plain object `sources["toString"]` answers with an inherited
+// function: a binding naming it passes the "is not held" test, passes
+// publicView's two filters, and publishes its quote while the caller's privacy
+// layer refused every subject and every source. The mirror is a false refusal —
+// adding a real source under one of those ids reported "already held" when
+// nothing was. Found by bee-laborer reviewing this PR.
+// `Object.create(null)` and not hasOwnProperty.call, because the call form
+// still cannot store one: on a plain object `o["__proto__"] = s` invokes the
+// setter and creates NO own key, so the add would report success and keep
+// nothing.
 export function createStore() {
-  return { sources: {}, claims: {}, bindings: [], leads: [] };
+  return { sources: Object.create(null), claims: Object.create(null), bindings: [], leads: [] };
 }
 
 export function sourceProblems(s) {
   const at = `source ${s?.id ?? "?"}`;
   if (!s || typeof s !== "object") return [`${at}: not an object`];
+  const shape = foreignProto(s, at);
+  if (shape) return [shape]; // above the lead check: s.type may itself be inherited
   if (NOT_A_SOURCE.includes(s.type) || NOT_A_SOURCE.includes(s.kind))
     return [`${at}: a ${s.type ?? s.kind} is a lead, not a source`];
   const out = unknownKeys(s, SOURCE_KEYS, at);
@@ -106,6 +165,8 @@ export function sourceProblems(s) {
 export function claimProblems(c) {
   const at = `claim ${c?.id ?? "?"}`;
   if (!c || typeof c !== "object") return [`${at}: not an object`];
+  const shape = foreignProto(c, at);
+  if (shape) return [shape];
   const out = unknownKeys(c, CLAIM_KEYS, at);
   if (c.schema !== CLAIM_SCHEMA) out.push(`${at}: schema must be ${CLAIM_SCHEMA}`);
   if (!text(c.id)) out.push(`${at}: no id`);
@@ -118,29 +179,226 @@ export function claimProblems(c) {
   return out;
 }
 
+// The two lookups below are the only place in this module where a
+// caller-chosen id indexes a map this module did not build. bindingProblems is
+// exported, so a caller reaches it without passing through validateStore, bind
+// or publicView, and on a hand-built or JSON-revived store a bare lookup
+// answers from the prototype. Measured, that is not only a missing refusal:
+// the inherited record's own fields reach the VERDICT -- "extracts birth; claim
+// is death" computed off a claim nobody holds, and "parish-register collection
+// proof needs a locator" off a source nobody holds. A caller-supplied
+// prototype supplies ARBITRARY ids, so a blocklist of the JavaScript names
+// never closes it.
+// hasOwnProperty.call here and Object.create(null) in createStore, and the
+// reason is reversed rather than inconsistent: this path only READS. The call
+// form's defect is that o["__proto__"] = s runs the setter and stores nothing,
+// which a function that stores nothing cannot hit.
+// Complementary to storeProblems, never a replacement -- strip either and the
+// other still answers. Found by bee-laborer re-reading a05f246d.
+// Scope, measured and unchanged: a sources/claims that is missing or null still
+// throws here (a different TypeError message, the same refusal), and one that
+// is a FUNCTION now reports its Function.prototype members as not held.
+const heldUnder = (map, id) => (Object.prototype.hasOwnProperty.call(map, id) ? map[id] : undefined);
+
+// A locator is NOT a map key. Two bindings on one source and one claim are two
+// entries when their locators differ, so a locator carries identity BY VALUE
+// and is left to JSON rather than coerced -- coercing it would join every
+// object locator on "[object Object]".
+// But JSON is not total over it. Measured at 14528dee across fourteen shapes: a
+// CIRCULAR locator and one holding a BIGINT made JSON.stringify THROW, and a
+// SYMBOL and an object whose toJSON returns undefined both serialise to nothing
+// inside the array, so two distinct ones joined. The throw is the worse half:
+// the exported door returned CLEAN for such a binding, and a store already
+// holding one threw a TypeError out of validateStore, claimStanding,
+// personSupport and publicView alike -- four gates failing by crash instead of
+// by refusal. A fail-closed path still owes a TRUE reason, and a crash is not
+// one. Found by bee-laborer re-reading 14528dee.
+// So the locator is serialised ALONE and the SERIALISATION is judged: a value
+// JSON cannot express, or expresses as nothing, cannot carry an identity and is
+// REFUSED BY NAME. Everything else joins on its own JSON text, which makes the
+// key TOTAL -- the outer stringify now sees three strings and cannot throw.
+// Nesting the text adds no join, because JSON quotes strings: the locator
+// string {"page":4} and the object {page:4} still key apart, asserted below.
+// NOT nonDataAt, though it is this module's own is-this-data instrument and
+// closes exactly these four shapes: its prototype tests are IDENTITY tests, so
+// it also refuses a cross-realm plain object, a cross-realm array, a Date and a
+// function locator -- four shapes that key correctly today, measured, and the
+// first of them is the realm-local defect this commit's parent repaired one
+// function over. A remedy that re-creates the defect it sits beside is not the
+// remedy; the cost table is in the receipt.
+// RESIDUAL, unchanged and disclosed: JSON text is key-ORDER sensitive, so
+// {a:1,b:2} and {b:2,a:1} are two entries. That was true of the join before
+// this commit and is not what this row repairs.
+// A refusal's cause is read off the throw, and a throw is not guaranteed to be
+// an Error. Measured at 8c467528: a toJSON that threw a string or threw null
+// produced "-- undefined", so the sentence printed the word undefined where the
+// cause belongs, inside the commit whose own law is that a fail-closed path owes
+// a TRUE reason. Found by bee-laborer re-reading 8c467528.
+// And the message can itself throw -- REACHABLE, measured: a locator whose
+// toJSON throws a value with a throwing `message` getter defeated the naive
+// reader and crashed the door, which is the class this very file repairs.
+// Deliberately NOT `e instanceof Error`: that is a realm-local identity test,
+// the defect repaired two functions up, and it would misdescribe a cross-realm
+// Error. The reader says what it could not get instead of naming a constructor.
+const causeOf = (e) => {
+  let m;
+  try { m = e?.message; } catch { return "reading its message threw as well"; }
+  if (typeof m === "string" && m !== "") return m.split("\n")[0];
+  return `it threw ${e === null ? "null" : typeof e === "object" ? "an object" : `a ${typeof e}`} with no message`;
+};
+
+const locatorKey = (v) => {
+  const raw = (typeof v === "object" && v !== null) || typeof v === "symbol" ? v : String(v);
+  let text;
+  try { text = JSON.stringify(raw); }
+  catch (e) { return { why: `locator cannot be part of a duplicate key -- ${causeOf(e)}` }; }
+  if (text === undefined) return { why: "locator does not survive serialisation, so two distinct locators would join" };
+  return { text };
+};
+
+// Every sentence this module says about a binding is built from its two ids, so
+// the ids are read BEFORE anything else -- and reading them is not free.
+// Measured at 8c467528: `binding ${sourceId}→${claimId}` is a template literal,
+// so a null-prototype id and an id whose toString throws made bind(), the
+// exported door, validateStore, claimStanding, personSupport and publicView ALL
+// fail by TypeError instead of by refusal. Six entries, the same shape the
+// locator half of this file closed one function up, in the field the comment
+// down in validateStore cleared -- and that sentence was mine and is deleted.
+// Pre-existing: `at` sits at 619e809c:122 unchanged. Found by bee-laborer
+// re-reading 8c467528.
+// A SYMBOL is a different defect in the same costume and the measurement moved
+// it: String(symbol) does NOT throw (only the template literal does), and a
+// symbol IS a property key, so the store holds two distinct symbols apart while
+// ToString names both "Symbol(sid)". That is a JOIN in the duplicate key, not a
+// crash at the door, so it is named where it joins and everything else about
+// the binding is still computed -- an ambiguous name does not stop the sentence
+// machine, an unbuildable one does.
+const nameId = (v) => {
+  if (typeof v === "symbol") return { text: String(v), joins: "is a symbol: the store holds two distinct symbols apart, and the duplicate key names both with one string" };
+  try { return { text: String(v) }; }
+  catch (e) { return { why: `cannot be named -- ${causeOf(e)}` }; }
+};
+
+// nameId guards the COERCION of a value. The property ACCESS that produces it
+// was outside every try in this file: `b.sourceId` is an accessor call, and an
+// accessor can throw. Measured at 92d57d93 across the nine declared binding
+// keys -- a throwing getter on any of eight of them made bind(), the exported
+// door, validateStore, claimStanding, personSupport and publicView ALL fail by
+// throw instead of by refusal. Six entries, the same door-versus-gate shape the
+// locator half of this file closed one function up, one level out: there the
+// value could not be SERIALISED, here it cannot be OBTAINED. Pre-existing for
+// the ids and `relation` in all three directions; for the LOCATOR it is this
+// branch's trade, because at 619e809c the door returned CLEAN on a binding that
+// crashed every gate. Found by bee-laborer re-reading 92d57d93.
+// The ninth key is why the pre-read covers the DECLARED set and not the fields
+// this function happens to read: `note` is never read here, so the door AND
+// validateStore both answered CLEAN while publicView -- which projects it --
+// crashed on the same binding. A guard shaped to one reader's appetite leaves
+// the next reader's open, and the projection is the reader that matters.
+// Each declared field is read ONCE and every sentence below is built from that
+// value, so this REPLACES the second read rather than adding a third (the
+// receipt counts the invocations before and after).
+// RESIDUAL, disclosed rather than discovered later: a getter that answers here
+// and differently afterwards is still two evaluations of one caller-supplied
+// value. publicView reads a binding's claimId SEVEN times and the projection's
+// read is not the filter's, so a flip-flopping id passes the privacy filter
+// under one claim and publishes under another -- measured at 619e809c too, the
+// same class as the double toJSON named at 8c467528. Reading each record once
+// at the edge and passing the value down is a shape decision, not this row.
+const readField = (o, k) => {
+  try { return { v: o?.[k] }; }
+  catch (e) { return { why: `${k} cannot be read -- ${causeOf(e)}` }; }
+};
+const readDeclared = (o, keys) => {
+  const v = {}, why = [], unread = new Set();
+  for (const k of keys) {
+    const r = readField(o, k);
+    if (r.why) { why.push(r.why); unread.add(k); } else v[k] = r.v;
+  }
+  return { v, why, unread };
+};
+
 export function bindingProblems(b, store) {
-  const at = `binding ${b?.sourceId ?? "?"}→${b?.claimId ?? "?"}`;
+  const f = readDeclared(b, BINDING_KEYS);
+  // "?" names exactly one thing from here on: an id that could not be PRODUCED
+  // -- unreadable above, or unnameable in nameId below -- so nothing was looked
+  // up under it and there is no name to give. A MISSING id is produced: it
+  // names `undefined`, which is the property key heldUnder actually asks the
+  // store for. `?? "?"` said `?` while the lookup used undefined, so a store
+  // holding a source under the id "?" was told, falsely, that it does not hold
+  // it -- and validateStore one function down named the same field `undefined`
+  // in the same run. Found by bee-laborer re-reading 92d57d93; the two names in
+  // one validateStore output are mine, measured in the same pass.
+  const sn = f.unread.has("sourceId") ? { text: "?" } : nameId(f.v.sourceId);
+  const cn = f.unread.has("claimId") ? { text: "?" } : nameId(f.v.claimId);
+  const at = `binding ${sn.text ?? "?"}→${cn.text ?? "?"}`;
+  // RETURN, never push, for the reason the unnameable id returns: every
+  // sentence below is computed off fields this object refused to hand over.
+  if (f.why.length) return f.why.map((w) => `${at}: ${w}`);
+  // RETURN, never push: heldUnder() coerces the id to a property key, so every
+  // sentence below is computed off a field that cannot be read at all.
+  if (sn.why || cn.why)
+    return [...(sn.why ? [`${at}: sourceId ${sn.why}`] : []), ...(cn.why ? [`${at}: claimId ${cn.why}`] : [])];
   if (!b || typeof b !== "object") return [`${at}: not an object`];
+  const shape = foreignProto(b, at);
+  if (shape) return [shape];
   const out = unknownKeys(b, BINDING_KEYS, at);
-  if (b.schema !== BINDING_SCHEMA) out.push(`${at}: schema must be ${BINDING_SCHEMA}`);
-  if (!RELATIONS.includes(b.relation)) out.push(`${at}: unknown relation ${b.relation}`);
-  const s = store.sources[b.sourceId], c = store.claims[b.claimId];
-  if (!s) out.push(`${at}: source ${b.sourceId} is not held`);
-  if (!c) out.push(`${at}: claim ${b.claimId} does not exist`);
-  if (b.relation === "mentions") return out;
+  if (f.v.schema !== BINDING_SCHEMA) out.push(`${at}: schema must be ${BINDING_SCHEMA}`);
+  if (!RELATIONS.includes(f.v.relation)) out.push(`${at}: unknown relation ${f.v.relation}`);
+  const s = heldUnder(store.sources, f.v.sourceId), c = heldUnder(store.claims, f.v.claimId);
+  // sn.text / cn.text, never the raw id: these two were template literals on the
+  // raw field, so they re-opened the same crash for a SYMBOL id one line below
+  // the reader that exists to close it. Measured -- the repair above was green
+  // for the unnameable ids and still threw here for the symbol.
+  if (!s) out.push(`${at}: source ${sn.text} is not held`);
+  if (!c) out.push(`${at}: claim ${cn.text} does not exist`);
+  // The exported door answers for the locator too, so a binding whose locator
+  // cannot carry an identity is named HERE and not only where the key is built
+  // -- that disagreement was the row: this returned clean while every gate that
+  // keys the store crashed on the same binding.
+  const lk = locatorKey(f.v.locator ?? "");
+  if (lk.why) out.push(`${at}: ${lk.why}`);
+  if (sn.joins) out.push(`${at}: sourceId ${sn.joins}`);
+  if (cn.joins) out.push(`${at}: claimId ${cn.joins}`);
+  if (f.v.relation === "mentions") return out;
   // supports / contradicts: the entry read, the assertion extracted, and the claim must line up
-  if (!PREDICATES.includes(b.context)) out.push(`${at}: context must name the entry read (got ${b.context})`);
-  if (!PREDICATES.includes(b.asserts)) out.push(`${at}: asserts must name the assertion extracted (got ${b.asserts})`);
-  else if (c && b.asserts !== c.predicate)
-    out.push(`${at}: extracts ${b.asserts}; claim is ${c.predicate} — assertions never convert`);
-  if (PREDICATES.includes(b.context) && PREDICATES.includes(b.asserts) && b.context !== b.asserts && !text(b.quote))
-    out.push(`${at}: a ${b.context} entry does not imply ${b.asserts}; quote the words that state it`);
-  if (s && s.scope !== "item" && !text(b.locator)) out.push(`${at}: ${s.type} collection proof needs a locator (page, entry, folio, image)`);
+  if (!PREDICATES.includes(f.v.context)) out.push(`${at}: context must name the entry read (got ${f.v.context})`);
+  if (!PREDICATES.includes(f.v.asserts)) out.push(`${at}: asserts must name the assertion extracted (got ${f.v.asserts})`);
+  else if (c && f.v.asserts !== c.predicate)
+    out.push(`${at}: extracts ${f.v.asserts}; claim is ${c.predicate} — assertions never convert`);
+  if (PREDICATES.includes(f.v.context) && PREDICATES.includes(f.v.asserts) && f.v.context !== f.v.asserts && !text(f.v.quote))
+    out.push(`${at}: a ${f.v.context} entry does not imply ${f.v.asserts}; quote the words that state it`);
+  if (s && s.scope !== "item" && !text(f.v.locator)) out.push(`${at}: ${s.type} collection proof needs a locator (page, entry, folio, image)`);
+  return out;
+}
+
+// The store's SHAPE is part of the contract, not only its contents. A map that
+// carries Object.prototype answers "held" for toString, constructor and
+// __proto__ -- the class closed above -- and cannot store a source under the id
+// "__proto__" at all. createStore() builds both maps prototype-free, but nothing
+// forces a caller to have used it: a hand-built literal and
+// JSON.parse(JSON.stringify(store)) both produce plain maps, and both bring that
+// class straight back (measured; the privacy half stays closed under every store
+// shape because publicView builds its own null-prototype maps). Found by
+// bee-laborer re-reading the repair above.
+// Refused by name rather than repaired, because repairing means mutating the
+// caller's store. COST, stated so it is not mistaken for free: a persisted store
+// cannot be revived by JSON.parse alone. There is no revive path here and no
+// caller that needs one; the hand that persists a store writes it.
+// Scope: the prototype only. A sources/claims that is missing or not an object
+// is left exactly as it behaves today and is not this row.
+export function storeProblems(store) {
+  const out = [];
+  for (const [name, reads] of [["sources", "a held source"], ["claims", "an existing claim"]]) {
+    const m = store?.[name];
+    if (m && typeof m === "object" && Object.getPrototypeOf(m) !== null)
+      out.push(`store.${name}: carries a prototype, so an id JavaScript puts on every object reads as ${reads} -- build it with createStore()`);
+  }
   return out;
 }
 
 export function validateStore(store) {
-  const out = [];
+  const out = storeProblems(store);
   for (const [k, s] of Object.entries(store.sources)) {
     out.push(...sourceProblems(s));
     if (s?.id !== k) out.push(`source ${k}: keyed under a different id`);
@@ -152,8 +410,38 @@ export function validateStore(store) {
   const seen = new Set();
   for (const b of store.bindings) {
     out.push(...bindingProblems(b, store));
-    const key = `${b?.sourceId}|${b?.claimId}|${b?.locator ?? ""}`;
-    if (seen.has(key)) out.push(`binding ${b?.sourceId}→${b?.claimId}: duplicate (one entry counted twice is not two sources)`);
+    // Joined, never concatenated. "|" is this module's OWN delimiter — parties()
+    // splits a two-party subject on it — so an id carrying one is ordinary here,
+    // not exotic, and three fields concatenated on it are ambiguous: ("S1",
+    // "ID-FA|FB", "p. 4") and ("S1", "ID-FA", "FB|p. 4") joined equal, and one
+    // honest pair of bindings then denied the whole store with a sentence that
+    // names a duplicate that does not exist. A "|" in free LOCATOR text is
+    // harmless; the trigger is a "|" in an ID. Found by bee-laborer re-reading
+    // 05b8d93c. A fail-closed path still owes a TRUE reason.
+    // Coerce each part the way the store keys it. An ID *is* a map key: these
+    // maps are indexed by PROPERTY KEY and ToPropertyKey is ToString for every
+    // non-symbol, so the source held under "5" is the one a binding names as 5,
+    // and an object id whose toString reads "S1" resolves to the source held
+    // under "S1". `part` exempted objects and symbols from that coercion for
+    // ALL THREE fields while the sentence licensing the exemption was about the
+    // LOCATOR alone, and one exemption produced both errors at once: an object
+    // id MISSED a duplicate -- the same entry bound twice, held twice and
+    // published as two bindings on one source -- while two DIFFERENT object ids
+    // joined on "{}" into a duplicate that does not exist. Found by bee-laborer
+    // re-reading 14528dee; the comment already stated the law the expression
+    // broke. The ids are named by nameId, the same reader the door uses, so an
+    // id the key cannot express is skipped here exactly as an unkeyable locator
+    // is -- both are already named above, and each sentence is said once.
+    // Through the same guarded reader as the door: a field that cannot be READ
+    // is skipped here exactly as an unnameable id or an unkeyable locator is --
+    // all three are already named above, and each sentence is said once.
+    const sr = readField(b, "sourceId"), cr = readField(b, "claimId"), lr = readField(b, "locator");
+    if (sr.why || cr.why || lr.why) continue;
+    const sk = nameId(sr.v), ck = nameId(cr.v);
+    const lk = locatorKey(lr.v ?? "");
+    if (sk.why || ck.why || sk.joins || ck.joins || lk.why) continue;
+    const key = JSON.stringify([sk.text, ck.text, lk.text]);
+    if (seen.has(key)) out.push(`binding ${sk.text}→${ck.text}: duplicate (one entry counted twice is not two sources)`);
     seen.add(key);
   }
   return out;
@@ -162,16 +450,20 @@ export function validateStore(store) {
 // adders refuse rather than store something invalid
 const refuse = (problems) => { if (problems.length) throw new Error(problems.join("; ")); };
 export function addSource(store, s) {
-  refuse(sourceProblems(s));
+  refuse([...storeProblems(store), ...sourceProblems(s)]);
   if (store.sources[s.id]) refuse([`source ${s.id}: already held`]);
   store.sources[s.id] = s;
 }
 export function addClaim(store, c) {
-  refuse(claimProblems(c));
+  refuse([...storeProblems(store), ...claimProblems(c)]);
   if (store.claims[c.id]) refuse([`claim ${c.id}: already exists`]);
   store.claims[c.id] = c;
 }
 export function bind(store, b) {
+  // The filter below keeps an unrelated invalid source from refusing every
+  // bind. A store-shape problem is not unrelated: it is what makes this
+  // binding's own existence lookups lie, and the filter would drop it.
+  refuse(storeProblems(store));
   const probe = { ...store, bindings: [...store.bindings, b] };
   refuse(validateStore(probe).filter((p) => p.startsWith("binding ")));
   store.bindings.push(b);
@@ -315,6 +607,13 @@ export function nonDataAt(v, path = "value", seen = new Set()) {
       }
       return null;
     }
+    // MEASURED AND NOT REPAIRED, so the two forms in this file are not an
+    // oversight: these two prototype tests are IDENTITY tests, like the record
+    // check was, and a cross-realm value is refused by them -- an array as
+    // "array subclass", a plain object as "Object object", both false about it.
+    // They fail CLOSED (a legitimate value is not published) where the record
+    // check failed a record with a false sentence, and widening what may be
+    // PUBLISHED is not a repair to take unasked. Named in the receipt.
     const proto = Object.getPrototypeOf(v);
     if (proto !== Object.prototype && proto !== null) return `${path}: ${v.constructor?.name ?? "non-plain"} object`;
     if (Object.getOwnPropertySymbols(v).length) return `${path}: symbol-keyed property`;
@@ -357,17 +656,20 @@ export function publicView(store, { isPublicSubject, isPublicSource, projectText
     return out;
   };
 
-  const claims = {};
+  // null-prototype for the same reason createStore is: these three are looked
+  // up by a binding's own sourceId/claimId below, and an inherited member reads
+  // as a published claim or a permitted source.
+  const claims = Object.create(null);
   for (const [id, c] of Object.entries(store.claims))
     if (parties(c.subject).every((p) => isPublicSubject(p) === true))
       claims[id] = project(c, "claim", id, { claimId: id, subject: c.subject, predicate: c.predicate });
-  const publicSource = {};
+  const publicSource = Object.create(null);
   for (const [id, s] of Object.entries(store.sources)) publicSource[id] = isPublicSource(id, s) === true;
   // a binding appears only when both its claim and its source may
   const bindings = store.bindings
     .filter((b) => claims[b.claimId] && publicSource[b.sourceId])
     .map((b) => project(b, "binding", `${b.sourceId}→${b.claimId}`));
-  const sources = {};
+  const sources = Object.create(null);
   for (const b of bindings) sources[b.sourceId] ??= project(store.sources[b.sourceId], "source", b.sourceId);
   return { sources, claims, bindings, leads: [] };
 }
