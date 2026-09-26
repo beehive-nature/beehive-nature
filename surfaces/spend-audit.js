@@ -311,7 +311,7 @@
     el.innerHTML =
       '<div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap">' +
       '<span style="font-size:26px;font-weight:600;color:var(--gold);font-variant-numeric:tabular-nums">' + fromS(tot) + ' A</span>' +
-      '<span style="font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint)">recomputed total — Σ quantity × rate, never the stored number</span></div>' +
+      '<span style="font-size:10px;letter-spacing:.14em;color:var(--faint)">recomputed total — Σ quantity × rate, never the stored number</span></div>' +
       '<div style="font-size:11.5px;color:var(--ink);margin-top:6px">' + T('sa.lead', 'Every bill re-checked here in your browser — open a receipt to see its proof.') + '</div>' +
       '<details class="tnote" data-reg-disclose style="margin-top:8px"><summary data-i18n="sa.d.comb">' + T('sa.d.comb', 'The receipts — one cell per bill, tap for its proof') + '</summary>' +
       '<div style="display:flex;gap:4px;flex-wrap:wrap;margin:10px 0 2px">' + cells + '</div>' +
