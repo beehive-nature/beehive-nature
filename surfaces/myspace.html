@@ -89,7 +89,7 @@
     display: none; position: fixed; inset: 0; background: rgba(12,20,18,.42);
     padding: 24px 12px 12px; align-items: flex-end; z-index: 60;
   }
-  body[data-state="delete"] .sheet-del, body[data-state="flip"] .sheet-flip { display: flex; }
+  body[data-state="delete"] .sheet-del, body[data-state="flip"] .sheet-flip, body[data-state="pay"] .sheet-pay { display: flex; }
   .sheet .card {
     width: 100%; max-width: 620px; margin: 0 auto; padding: 18px 16px 16px;
     border-radius: 20px 20px 12px 12px; background: var(--panel); border: 1px solid var(--line);
@@ -102,7 +102,8 @@
   body[data-state="empty"] .has-file { display: none !important; }
   body[data-state="file"] .empty-only,
   body[data-state="delete"] .empty-only,
-  body[data-state="flip"] .empty-only { display: none !important; }
+  body[data-state="flip"] .empty-only,
+  body[data-state="pay"] .empty-only { display: none !important; }
 
   /* bee is the palette above. raver and cypherpunk change character and density only —
      same facts, same storage, same routes. */
@@ -439,7 +440,7 @@ body[data-reg="cypherpunk"] :is(.primary,.ghost,.danger,.mode,.file,.sheet .card
       storage is an adapter, never this page: each rail runs in its own dedicated Web Worker behind SPEC-ADAPTER-CONTRACT-1, and this page holds the key, the signature, the retry and the index — nothing else.<br>
       you choose a <b>purpose</b>; the page picks a rail whose own declared terms answer it. Those terms — deletable? who reads? how long? who paid? — come from the rail's <code>describe</code>, and are printed on every file above. This page does not know them.<br>
       a keep-it-here purpose is never routed to a rail that declares any network, and the two rails that serve those purposes contain no network primitive at all. What they hold is AES-GCM ciphertext; the key stays in this page, so there is no key on that side to hold.<br>
-      a file kept forever is paid by you, from your own wallet. This page cannot take that payment yet: it refuses every price by name and asks your wallet for nothing. It never holds, derives or stores a wallet key.<br>
+      a file kept forever is paid by you, from your own wallet. The price the estate's door quoted is shown first, and your wallet is asked for nothing until you accept that exact price; then the plan — every confirmation your wallet will ask for — is shown before anything is signed. The approve is for that price and never unlimited. This page never holds, derives or stores a wallet key.<br>
       identity = a key generated once in this browser and kept here. No login, no session.
     </p>
   </details>
@@ -467,8 +468,20 @@ body[data-reg="cypherpunk"] :is(.primary,.ghost,.danger,.mode,.file,.sheet .card
   </div>
 </div>
 
+<div class="sheet sheet-pay" role="dialog" aria-modal="true" aria-labelledby="pay-title">
+  <div class="card">
+    <h2 id="pay-title"></h2>
+    <p id="pay-body"></p>
+    <div class="actions">
+      <button class="ghost" type="button" id="payNo"></button>
+      <button class="primary" type="button" id="payYes"></button>
+    </div>
+  </div>
+</div>
+
 <script src="onboarding/vendor/bnr-sign.js"></script>
 <script src="adapter-seam.js"></script>
+<script src="ant-pay.js"></script>
 <script src="myspace.js"></script>
 <script>
 /* ETERNAL FRONT — one data layer, three renderers (docs/design/eternal). Every fact is read from
