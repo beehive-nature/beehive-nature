@@ -36,12 +36,24 @@
 // bundle, whose equivalence to this copy is unproven until someone hashes
 // both. Fidelity is reported beside the structural verdict, never folded
 // into it: matching fonts and grounds does not make three experiences.
-//   FONT  share of visible text elements whose first-choice family is the
-//         register's own (bee: Instrument Sans/Serif; raver: Sora/Unbounded;
-//         cypherpunk: IBM Plex Mono), the house hand (burti), the sheet's
-//         zero-fetch `ui` stack (system-ui — sanctioned for live estate
-//         surfaces), or anything else.
+//   FONT  FIRST-CHOICE CSS-FAMILY fidelity, element-based: the share of
+//         visible text ELEMENTS whose computed font-family lists first the
+//         register's own family (bee: Instrument Sans/Serif; raver:
+//         Sora/Unbounded; cypherpunk: IBM Plex Mono), the house hand (burti),
+//         the sheet's zero-fetch `ui` stack (system-ui — sanctioned for live
+//         estate surfaces), or anything else. This is what the stylesheet
+//         ASKS for, per element, not what the renderer painted: a browser
+//         may fall back to another face, and characters are not counted.
+//         Rendered-glyph inspection (CDP CSS.getPlatformFontsForNode) is a
+//         separate measurement this instrument does not make.
 //   BG    body background equals the sheet's `bg` for that register.
+//
+// PROVENANCE is bound to the bytes parsed: the sheet is read once into a
+// buffer, and the header prints sha256 of that buffer, the git blob id
+// computed FROM that buffer (hash-object), and the blob id git holds at
+// HEAD for the path. "identical" means the working copy measured is the
+// committed one; "DIFFERS" means it is not and the committed blob is not
+// what was measured.
 import { chromium } from 'playwright';
 import { createServer } from 'node:http';
 import { readFile, readdir, writeFile } from 'node:fs/promises';
@@ -56,9 +68,14 @@ const SURFACES = join(ROOT, 'surfaces');
 
 // ---- the design sheet, and its provenance ---------------------------------
 const TOKENS_PATH = 'docs/design/skaists/tokens.json';
-const TOKENS = JSON.parse(await readFile(join(ROOT, TOKENS_PATH), 'utf8'));
-let tokensBlob = 'untracked';
-try { tokensBlob = execSync(`git rev-parse HEAD:${TOKENS_PATH}`, { cwd: ROOT, stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim(); } catch {}
+const TOKENS_BYTES = await readFile(join(ROOT, TOKENS_PATH));
+const TOKENS = JSON.parse(TOKENS_BYTES.toString('utf8'));
+// the digest of exactly what was parsed, two ways: sha256, and git's own blob id of the same bytes
+const tokensSha256 = createHash('sha256').update(TOKENS_BYTES).digest('hex');
+const tokensBlobOfBytes = createHash('sha1').update(`blob ${TOKENS_BYTES.length}\0`).update(TOKENS_BYTES).digest('hex');
+let tokensBlobAtHead = 'untracked';
+try { tokensBlobAtHead = execSync(`git rev-parse HEAD:${TOKENS_PATH}`, { cwd: ROOT, stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim(); } catch {}
+const tokensProvenance = tokensBlobOfBytes === tokensBlobAtHead ? 'identical to HEAD' : `DIFFERS from HEAD blob ${tokensBlobAtHead}`;
 const firstFamily = s => (s || '').split(',')[0].replace(/["']/g, '').trim().toLowerCase();
 const FAM = TOKENS.type.families;
 const groupFamily = name => { const g = TOKENS.type.groups.find(g => g.name === name); return g ? g.family : null; };
@@ -180,11 +197,11 @@ for (const r of results) counts[r.verdict] = (counts[r.verdict] || 0) + 1;
 const L = [];
 L.push(`# Register divergence — ${results.length} data-reg surfaces at 375×812, colour excluded`);
 L.push('');
-L.push(`Token fidelity measured against ${TOKENS_PATH} (git blob ${tokensBlob}; sheet meta.ref ${TOKENS.meta?.ref || '?'}, synced ${TOKENS.meta?.synced || '?'}). This is the repository copy of the sheet; its equivalence to the founder's original design-pass bundle is not established here. Expected first-choice families — bee: ${[...EXPECT.bee].join(' / ')}; raver: ${[...EXPECT.raver].join(' / ')}; cypherpunk: ${[...EXPECT.cypherpunk].join(' / ')}; house hand: ${[...HOUSE].join('')}; zero-fetch ui stack counted separately.`);
+L.push(`Token fidelity measured against the bytes parsed from ${TOKENS_PATH}: sha256 ${tokensSha256}; git blob of those bytes ${tokensBlobOfBytes} (${tokensProvenance}); sheet meta.ref ${TOKENS.meta?.ref || '?'}, synced ${TOKENS.meta?.synced || '?'}. This is the repository copy of the sheet; its equivalence to the founder's original design-pass bundle is not established here. FONT is first-choice CSS-family fidelity, element-based (what each visible text element asks for first, not what was painted). Expected first-choice families — bee: ${[...EXPECT.bee].join(' / ')}; raver: ${[...EXPECT.raver].join(' / ')}; cypherpunk: ${[...EXPECT.cypherpunk].join(' / ')}; house hand: ${[...HOUSE].join('')}; zero-fetch ui stack counted separately.`);
 L.push('');
 L.push(`Verdicts: ${Object.entries(counts).map(([k, v]) => `${k} ${v}`).join(', ')}. PASS = every register pair differs on ≥2 of HIER/ARR/DENS/GRAM. RECOLOR = at least one pair identical on all four. WEAK = a pair differs on one axis only. NO-REG = a register did not apply (body[data-reg] missing).`);
 L.push('');
-L.push('| surface | verdict | bee/raver same axes | bee/cypher same axes | raver/cypher same axes | density b/r/c (chars per 1000px) | visible els b/r/c | headings b/r/c | interactive (link,btn,input,sel,details open) b/r/c | median font px b/r/c | top font b / r / c | token font share reg/house/ui/other % b · r · c | bg = tokens b/r/c | dress |');
+L.push('| surface | verdict | bee/raver same axes | bee/cypher same axes | raver/cypher same axes | density b/r/c (chars per 1000px) | visible els b/r/c | headings b/r/c | interactive (link,btn,input,sel,details open) b/r/c | median font px b/r/c | top font b / r / c | first-choice CSS family, % of text elements: reg/house/ui/other b · r · c | bg = tokens b/r/c | dress |');
 L.push('|---|---|---|---|---|---|---|---|---|---|---|---|---|---|');
 const shareStr = s => `${s.reg}/${s.house}/${s.ui}/${s.other}`;
 const yn = b => b ? 'y' : 'n';
