@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // ── fs-signin: one command, one FamilySearch sign-in, every line walked ──────
-//   node tools/genealogy/fs-signin.mjs founder=L627-FH9 spouse-1=LNQ5-BS8 …
+//   node tools/genealogy/fs-signin.mjs founder=<person id> spouse-1=<person id> …
 // Reads the app registration from the PRIVATE store (never the repo):
 //   C:/Users/travi/family-lineage/fs-app.json
 //   { "appKey": "<FamilySearch app key>", "env": "integration" | "beta" | "production",
@@ -65,5 +65,6 @@ const server = createServer(async (req, res) => {
 });
 server.listen(Number(cb.port), cb.hostname, () => {
   console.log("opening FamilySearch sign-in …\n" + url);
-  execFile("cmd.exe", ["/c", "start", "", url]);
+  // rundll32 hands the URL to the default browser untouched (cmd.exe would split it at every "&")
+  execFile("rundll32.exe", ["url.dll,FileProtocolHandler", url]);
 });
