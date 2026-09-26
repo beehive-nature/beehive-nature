@@ -3,8 +3,11 @@
 // The spine terminus defaults to the earliest-birth bloodline person; pass a
 // name regex to pin it (e.g. "Sigurd Ring de Trondheim").
 import { readFileSync, writeFileSync } from "node:fs";
-import { createModel, addPerson, addEdge, addCouple, bloodline, spine, depths, validate, birthYear, evidenceClass } from "./model.mjs";
+import { existsSync } from "node:fs";
+import { createModel, bloodline, spine, depths, validate, birthYear, evidenceClass } from "./model.mjs";
 import { importWalk } from "./fs-adapter.mjs";
+import { publish } from "./publish.mjs";
+import { joinLine, emptyPart } from "./lines.mjs";
 
 const [rawPath, corpusOut, pageOut, spineRx, viaRx] = process.argv.slice(2);
 if (!rawPath || !corpusOut) {
@@ -15,6 +18,20 @@ if (!rawPath || !corpusOut) {
 const raw = JSON.parse(readFileSync(rawPath, "utf8"));
 const model = createModel({ root: raw.root, source: "familysearch" });
 importWalk(model, raw);
+
+// PRIVATE SPOUSE LINES (optional): mapping + walks live on estate-local disk,
+// never in the repo; the join law is lines.mjs (additive, founder root kept).
+const LINES_PRIVATE = "C:/Users/travi/family-lineage/lines-private.json";
+const lineIntake = {};
+if (existsSync(LINES_PRIVATE)) {
+  const spec = JSON.parse(readFileSync(LINES_PRIVATE, "utf8"));
+  for (const [key, line] of Object.entries(spec.lines || {})) {
+    if (!Array.isArray(line?.walks) || !line.walks.length) { console.error(`lines-private: ${key} names no walk — refusing`); process.exit(1); }
+    const parts = line.walks.map((p) => { const m = emptyPart(); importWalk(m, JSON.parse(readFileSync(p, "utf8"))); return m; });
+    try { lineIntake[key] = joinLine(model, key, line, parts); }
+    catch (e) { console.error(e.message); process.exit(1); }
+  }
+}
 
 // attested overlays: corrections patch walked persons (a LAYER over the
 // provider record — the provider flag survives in note, never silently
@@ -76,8 +93,20 @@ if (overlay)
   for (const [id, p] of Object.entries(overlay.persons || {}))
     if (p?.evidencePack) packIndex[id] = p.evidencePack;
 
-const problems = validate(model).filter((p) => !p.startsWith("unresolved:"));
-const unresolved = validate(model).length - problems.length;
+// PUBLISHABLE WITH DISCLOSURE — exactly two classes, and they are different
+// truths:
+//   unresolved:                 INCOMPLETE — a parent is named, not fetched
+//   cycle-component: / witness: DISPUTED — contradictory ancestry, someone is
+//                               their own ancestor along a path (G1, d47ba87f6)
+// Both are the provider tree's own shape and were already published; before
+// 2026-09-22 G1's report made every regeneration exit here, so no correction
+// could publish. Every OTHER problem stays fatal, and public privacy problems
+// are fatal without exception (below). The corpus discloses both classes in
+// meta, cycles with their witnesses, never as merely incomplete.
+const allProblems = validate(model);
+const REPORTED = /^(unresolved|cycle-component|witness):/;
+const problems = allProblems.filter((p) => !REPORTED.test(p));
+const unresolved = allProblems.filter((p) => p.startsWith("unresolved:")).length;
 if (problems.length) {
   console.error(`validation FAILED (${problems.length}):`);
   problems.slice(0, 10).forEach((p) => console.error("  - " + p));
@@ -106,47 +135,13 @@ const viaIds = viaRx ? viaRx.split(",").map((s) => s.trim()).filter(Boolean)
   .filter(Boolean) : [];
 const spineChain = terminus ? (spine(model, terminus.id, viaIds) || []) : [];
 
-// public corpus (privatized)
-// public set = deceased bloodline ∪ deceased spouses-of-bloodline (in-law
-// ancestry beyond the immediate couple stays private)
-const publishable = new Set(blood);
-for (const c of Object.values(model.couples)) {
-  if (blood.has(c.p1)) publishable.add(c.p2);
-  if (blood.has(c.p2)) publishable.add(c.p1);
-}
-if (overlay) for (const id of Object.keys(overlay.persons || {})) publishable.add(id);
-const pub = createModel({ root: model.root, source: model.source });
-let redacted = 0, stubs = 0, livingTotal = 0;
+// public corpus: scope + the ONE privacy law (publish.mjs → model.privatize).
+// The inline privacy copy that lived here until 2026-09-22 is deleted; the
+// baseline regeneration proved the two produce the same corpus.
+const { pub } = publish(model, { extraIds: overlay ? Object.keys(overlay.persons || {}) : [] });
+let livingTotal = 0;
 for (const p of Object.values(model.persons)) if (p.living) livingTotal++;
-// living bloodline persons → anonymous "Living" stubs (the comb must climb
-// from the founder); living off the root line → dropped entirely
-const onRootLine = new Set();
-{
-  let frontier = [model.root];
-  while (frontier.length) {
-    const next = [];
-    for (const id of frontier) {
-      if (onRootLine.has(id)) continue;
-      onRootLine.add(id);
-      for (const p of (model.edges[id] || [])) if (model.persons[p]) next.push(p);
-    }
-    frontier = next;
-  }
-}
-for (const [id, p] of Object.entries(model.persons)) {
-  if (!publishable.has(id)) continue;
-  if (p.living) {
-    if (onRootLine.has(id)) {
-      pub.persons[id] = { name: "Living", lifespan: null, gender: p.gender ?? null,
-        living: true, evidence: { era: "living", support: "unsourced-entry", class: "living", basis: "redacted stub" } };
-      stubs++;
-    } else redacted++;
-    continue;
-  }
-  addPerson(pub, { ...p, id });
-}
-for (const [child, ps] of Object.entries(model.edges)) if (pub.persons[child]) addEdge(pub, child, ps);
-for (const c of Object.values(model.couples)) if (pub.persons[c.p1] && pub.persons[c.p2]) addCouple(pub, c.p1, c.p2, c.marriage);
+const stubs = pub.meta.livingStubs;
 
 // ── FIRST-CLASS STAGED OBJECTS: every person gets a stable INTERNAL identity;
 // provider ids (FamilySearch, …) are retained as REFERENCES, never as the
@@ -204,6 +199,42 @@ pub.couples = Object.fromEntries(Object.entries(pub.couples)
     const p1 = idmap[c.p1] || c.p1, p2 = idmap[c.p2] || c.p2;
     return [[p1, p2].sort().join("|"), { p1, p2, ...(c.marriage ? { marriage: c.marriage } : {}) }];
   }));
+// DATE-REPAIR RECEIPTS REPLAY (founded by #218): repairs made to the published
+// corpus line-wise are carried in date-repairs-*.json, keyed by internal id.
+// A regeneration from the raw walk would silently undo them, so each receipt
+// row is replayed here: still "was" -> apply "now" and recompute the era;
+// already "now" (the provider was fixed) -> nothing; anything else -> DRIFT,
+// reported, never applied. The receipt is the authority; nothing is re-derived.
+const dateRepairs = { applied: 0, alreadyFixed: 0, drift: [] };
+{
+  const { readdirSync } = await import("node:fs");
+  const dir = "assets/profile-archive/lineage/";
+  for (const file of readdirSync(dir).filter((x) => /^date-repairs-.*\.json$/.test(x)).sort()) {
+    const receipt = JSON.parse(readFileSync(dir + file, "utf8"));
+    for (const row of receipt.repaired || []) {
+      const p = pub.persons[row.id];
+      if (!p) { dateRepairs.drift.push(`${file}: ${row.id} not published`); continue; }
+      if (p.lifespan === row.now) { dateRepairs.alreadyFixed++; continue; }
+      if (p.lifespan !== row.was) { dateRepairs.drift.push(`${file}: ${row.id} carries "${p.lifespan}", receipt expected "${row.was}"`); continue; }
+      p.lifespan = row.now;
+      const era = evidenceClass({ living: p.living, lifespan: p.lifespan });
+      p.evidence = { ...(p.evidence || {}), era, class: era };
+      dateRepairs.applied++;
+    }
+  }
+}
+// A third value means the source changed underneath an adjudicated repair.
+// It is neither overwritten nor published past: REVIEW BLOCK, before any
+// public artifact is written.
+if (dateRepairs.drift.length) {
+  console.error(`DATE-REPAIR DRIFT (${dateRepairs.drift.length}) — public regeneration refused pending review:`);
+  dateRepairs.drift.forEach((d) => console.error("  - " + d));
+  process.exit(1);
+}
+
+// published lines carry internal ids like everything else (the private
+// line mapping never ships: privatize() emits `lines`, never `roots`)
+if (pub.lines) pub.lines = pub.lines.map((l) => ({ ...l, root: idmap[l.root] || l.root, entries: l.entries.map((e) => idmap[e] || e).sort() }));
 const packIndexInternal = {};
 for (const [k, v] of Object.entries(packIndex)) if (!idmap[k] || !pub.persons[idmap[k]]?.living) packIndexInternal[idmap[k] || k] = v;
 for (const k of Object.keys(packIndex)) delete packIndex[k];
@@ -263,8 +294,25 @@ pub.meta = {
   })(),
   correctionsApplied,
   overlayPersons,
+  dateRepairs,
+  ...(Object.keys(lineIntake).length ? { lineIntake } : {}),
 };
-const pubProblems = validate(pub, { public: true }).filter((p) => !p.startsWith("unresolved:"));
+// privacy stays FATAL here; only the two disclosed classes pass
+const pubAll = validate(pub, { public: true });
+const pubProblems = pubAll.filter((p) => !REPORTED.test(p));
+{
+  const comps = pubAll.filter((p) => p.startsWith("cycle-component:")).map((p) => p.slice(16).trim().split(","));
+  pub.meta.disputedAncestry = {
+    law: "DISPUTED, not incomplete: each component is a set of people who become their own ancestors along a path in the provider tree. Published with disclosure; traversal stays safe (cyclicAncestryOf is the one cycle authority) and any relationship crossing a component is shown disputed.",
+    components: comps.length,
+    persons: new Set(comps.flat()).size,
+    witnesses: pubAll.filter((p) => p.startsWith("witness:")).map((p) => p.slice(8).trim().split(" -> ")),
+  };
+  pub.meta.incompleteFrontier = {
+    law: "INCOMPLETE: a parent named in the provider tree but not fetched; the tree stops where the archive stops.",
+    unresolvedParentRefs: pubAll.filter((p) => p.startsWith("unresolved:")).length,
+  };
+}
 if (pubProblems.length) {
   console.error(`PUBLIC validation FAILED (${pubProblems.length}):`);
   pubProblems.slice(0, 10).forEach((p) => console.error("  - " + p));

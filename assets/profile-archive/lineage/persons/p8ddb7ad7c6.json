@@ -15,10 +15,10 @@
   }
  ],
  "evidence": {
-  "era": "medieval",
+  "era": "saga",
   "support": "unsourced-entry",
   "basis": "era label from dates; support unsourced until sources are harvested",
-  "class": "medieval"
+  "class": "saga"
  },
  "research": {
   "status": "incomplete",
