@@ -68,9 +68,330 @@ nav:not(#tbar) button.on{color:var(--gold);border-color:#3d3410}
      just above the tour bar (anchored on the bar's published --tbar-h), so the
      page end reserves the bar plus the chip and nothing ever ends beneath either. */
   body{padding-bottom:calc(var(--tbar-h,50px) + 24px)!important}
+
+/* ── ETERNAL FRONT (docs/design/eternal) — three products in one surface. Every value is a skaists
+   token (../skaists.css, compiled from docs/design/skaists/tokens.json): no hand-picked hex, size or
+   corner (sizes carry a fallback for servers that never deliver the stylesheet). Measured by
+   e2e/skaists-conformance.mjs. One register visible at a time; new bee is the default. Every class
+   is et- prefixed and every rule is scoped to #eternal, so the page's own bare rules never reach in. ── */
+#eternal{box-sizing:border-box;position:relative;z-index:6;width:100%;max-width:600px;margin:0 auto var(--sk-s2,12px);padding:var(--sk-s3,18px) var(--sk-s3,18px) 0;text-align:left;letter-spacing:normal;text-transform:none;background:none;border:0;font-weight:400}
+#eternal *,#eternal *::before,#eternal *::after{box-sizing:border-box}
+#eternal>.et-r,#eternal>.et-c{display:none}
+body[data-reg="raver"] #eternal>.et-b,body[data-reg="cypherpunk"] #eternal>.et-b{display:none}
+body[data-reg="raver"] #eternal>.et-r{display:block}
+body[data-reg="cypherpunk"] #eternal>.et-c{display:block}
+#eternal [hidden]{display:none!important}
+#eternal button{margin:0;color:inherit;text-transform:none;letter-spacing:normal;min-width:0;box-shadow:none;-webkit-tap-highlight-color:transparent}
+#eternal svg{display:block;max-width:100%}
+#eternal a{text-decoration:none}
+#eternal :focus-visible{outline:2px solid var(--sk-focus);outline-offset:3px}
+#eternal h2,#eternal h3,#eternal p,#eternal ol,#eternal ul,#eternal table,#eternal figure{margin:0;padding:0;border:0;background:none;text-transform:none;letter-spacing:normal;text-shadow:none}
+#eternal table{border-collapse:separate;border-spacing:0;width:100%}
+#eternal th,#eternal td{border:0;padding:0;vertical-align:top;background:none;width:auto;text-align:left}
+#etArchive.et-archive-h{position:relative;z-index:6;box-sizing:border-box;max-width:600px;margin:var(--sk-s5,36px) auto var(--sk-s2,12px);padding:var(--sk-s4,24px) var(--sk-s3,18px) 0;border:0;border-top:1px solid var(--sk-line);color:var(--sk-ink);text-align:left;text-transform:none;letter-spacing:normal;background:none;text-shadow:none}
+body[data-reg="bee"] #etArchive.et-archive-h{font:400 28px/1.1 var(--sk-font-bee-serif)}
+body[data-reg="raver"] #etArchive.et-archive-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em}
+body[data-reg="cypherpunk"] #etArchive.et-archive-h{font:600 15px/1.45 var(--sk-font-mono)}
+
+/* NEW BEE — a calm room: plain rows, one reassurance, one magenta action, a link, a footnote */
+#eternal .et-b{display:flex;flex-direction:column;gap:var(--sk-s3,18px);color:var(--sk-ink);font:400 16px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-b-mark{font:400 18px/1.2 var(--sk-font-house);color:var(--sk-sovereign)}
+#eternal .et-b-h{font:400 40px/1.05 var(--sk-font-bee-serif);color:var(--sk-ink)}
+#eternal .et-b-lede{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink-mut);text-wrap:pretty}
+#eternal .et-b-guard{display:flex;align-items:center;gap:var(--sk-s2,12px);min-height:var(--sk-control-min,44px);padding:var(--sk-s1,6px) var(--sk-s3,18px);border-radius:var(--sk-radius,12px);background:var(--sk-guard-wash);color:var(--sk-guard);font:600 15px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-b-ic{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+#eternal .et-b-rows{display:flex;flex-direction:column;background:var(--sk-bg-card);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl,18px);overflow:hidden}
+#eternal .et-b-row{display:flex;align-items:center;justify-content:space-between;gap:var(--sk-s2,12px);width:100%;min-height:var(--sk-control-row,52px);padding:var(--sk-s1,6px) var(--sk-s3,18px);border:0;border-bottom:1px solid var(--sk-line-soft);border-radius:0;background:transparent;text-align:left;font:500 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+#eternal .et-b-row:last-child{border-bottom:0}
+#eternal button.et-b-row{cursor:pointer}
+#eternal button.et-b-row:hover{background:var(--sk-sovereign-tint);color:var(--sk-ink)}
+#eternal .et-b-row>span{flex:1 1 auto;min-width:0;overflow-wrap:anywhere}
+#eternal .et-b-row small{display:flex;align-items:center;justify-content:flex-end;gap:var(--sk-s1,6px);flex:none;max-width:52%;text-align:right;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-row small.et-out{color:var(--sk-guard)}
+#eternal .et-b-row small.et-ok{color:var(--sk-verified)}
+#eternal .et-b-row[aria-expanded="true"],#eternal .et-b-row[aria-pressed="true"]{background:var(--sk-sovereign-tint);color:var(--sk-sovereign-strong);font-weight:600}
+#eternal .et-b-row[aria-expanded="true"] small,#eternal .et-b-row[aria-pressed="true"] small{color:var(--sk-sovereign-strong)}
+#eternal .et-chev{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;flex:none;transition:transform var(--dur,.26s)}
+#eternal .et-b-row[aria-expanded="true"] .et-chev{transform:rotate(90deg)}
+#eternal .et-b-open{display:flex;flex-direction:column;gap:var(--sk-s1,6px);padding:var(--sk-s2,12px) var(--sk-s3,18px);background:var(--sk-sovereign-tint);border-bottom:1px solid var(--sk-line-soft)}
+#eternal .et-b-open div{font:400 15px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+#eternal .et-b-open div b{font-weight:600}
+#eternal .et-b-person{display:flex;align-items:center;gap:var(--sk-s2,12px);min-height:var(--sk-control-person,60px);padding:var(--sk-s1,6px) var(--sk-s3,18px);border-bottom:1px solid var(--sk-line-soft)}
+#eternal .et-b-person:last-child{border-bottom:0}
+#eternal .et-b-person i{width:40px;height:40px;border-radius:var(--sk-radius-pill,999px);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong);display:flex;align-items:center;justify-content:center;font:600 14px/1.4 var(--sk-font-bee-sans);font-style:normal;flex:none}
+#eternal .et-b-person i.et-dash{background:transparent;border:1.5px dashed var(--sk-ink-dim);color:var(--sk-ink-mut)}
+#eternal .et-b-person i.et-ok{background:var(--sk-verified-wash);color:var(--sk-verified)}
+#eternal .et-b-person i.et-no{background:var(--sk-guard-wash);color:var(--sk-guard)}
+#eternal .et-b-person b{display:block;font:500 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink);overflow-wrap:anywhere}
+#eternal .et-b-person span{display:block;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut);overflow-wrap:anywhere}
+#eternal .et-b-note{padding:var(--sk-s2,12px) var(--sk-s3,18px);font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-act{display:flex;flex-direction:column;gap:var(--sk-s1,6px);margin-top:var(--sk-s1,6px)}
+#eternal .et-b-primary{display:flex;align-items:center;justify-content:center;width:100%;min-height:var(--sk-control-primary,54px);padding:var(--sk-s1,6px) var(--sk-s3,18px);border:0;border-radius:var(--sk-radius-lg,16px);background:var(--sk-primary);color:var(--sk-on-primary)!important;font:600 17px/1.2 var(--sk-font-bee-sans)!important;text-align:center;cursor:pointer}
+#eternal .et-b-primary:hover{background:var(--sk-primary);color:var(--sk-on-primary)!important;filter:none}
+#eternal .et-b-primary:disabled{background:var(--sk-bg-well);color:var(--sk-ink-mut)!important;cursor:not-allowed}
+#eternal .et-b-link{display:flex;align-items:center;justify-content:center;width:100%;min-height:var(--sk-control-min,44px);padding:0 var(--sk-s2,12px);border:0;border-radius:var(--sk-radius,12px);background:transparent;font:600 16px/1.45 var(--sk-font-bee-sans)!important;color:var(--sk-link)!important;cursor:pointer;text-align:center}
+#eternal .et-b-link:hover{background:transparent;color:var(--sk-link-hover)!important}
+#eternal .et-b-foot{text-align:center;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-card{display:flex;flex-direction:column;gap:var(--sk-s1,6px);padding:var(--sk-s3,18px);background:var(--sk-bg-card);border:1px dashed var(--sk-ink-dim);border-radius:var(--sk-radius-xl,18px)}
+#eternal .et-b-card.et-ok{border:1px solid var(--sk-line);background:var(--sk-verified-wash)}
+#eternal .et-b-card.et-no{border:1px dashed var(--sk-guard);background:var(--sk-guard-wash)}
+#eternal .et-b-card.et-fam{border:1px solid var(--sk-line);background:var(--sk-sovereign-tint)}
+#eternal .et-b-card h3{font:400 28px/1.1 var(--sk-font-bee-serif);color:var(--sk-ink)}
+#eternal .et-b-card div{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-card.et-no div,#eternal .et-b-card.et-ok div,#eternal .et-b-card.et-fam div{color:var(--sk-ink)}
+#eternal .et-b-fig{font:400 32px/1 var(--sk-font-bee-serif);color:var(--sk-ink)}
+
+/* RAVER — the data is the art; lowercase is allowed joy; the numbers never change */
+#eternal .et-r{color:var(--sk-ink);font:400 14px/1.4 var(--sk-font-raver-body)}
+#eternal .et-r-top{display:flex;align-items:baseline;justify-content:space-between;gap:var(--sk-s2,12px);flex-wrap:wrap}
+#eternal .et-r-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em;color:var(--sk-ink)}
+#eternal .et-r-hint{font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-art{position:relative;width:100%;max-width:360px;margin:var(--sk-s3,18px) auto var(--sk-s2,12px)}
+#eternal .et-r-art>svg{width:100%;height:auto;filter:drop-shadow(var(--sk-glow-sovereign))}
+#eternal .et-r-art [role="button"]{cursor:pointer}
+#eternal .et-r-art [role="button"]:focus{outline:none}
+#eternal .et-r-art [role="button"]:focus-visible .et-hit{stroke:var(--sk-ink);stroke-width:1.5;stroke-dasharray:3 4}
+#eternal .et-hit{fill:transparent;stroke:none}
+#eternal .et-r-mid{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;text-align:center;pointer-events:none;max-width:40%}
+#eternal .et-r-mid b{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em;color:var(--sk-ink)}
+#eternal .et-r-mid span{font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-legend{display:flex;flex-wrap:wrap;justify-content:center;gap:var(--sk-s1,6px) var(--sk-s3,18px);margin:0 0 var(--sk-s3,18px)}
+#eternal .et-r-legend span{display:inline-flex;align-items:center;gap:var(--sk-s1,6px);font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-legend i{width:14px;height:14px;border-radius:var(--sk-radius-pill,999px);flex:none}
+#eternal .et-r-card{display:flex;gap:var(--sk-s2,12px);align-items:flex-start;padding:var(--sk-s2,12px) var(--sk-s3,18px);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl,18px);background:var(--sk-sovereign-tint);min-height:var(--sk-control-person,60px)}
+#eternal .et-r-card .et-rk{min-width:44px;height:44px;padding:0 var(--sk-s1,6px);border-radius:var(--sk-radius,12px);background:var(--sk-sovereign-strong);color:var(--sk-bg);display:flex;align-items:center;justify-content:center;font:700 15px/1.2 var(--sk-font-raver-display);flex:none}
+#eternal .et-r-card .et-rk.et-no{background:var(--sk-guard-wash);color:var(--sk-guard);border:1.5px dashed var(--sk-guard)}
+#eternal .et-r-card .et-rk.et-ok{background:var(--sk-biomass);color:var(--sk-bg)}
+#eternal .et-r-card>div{min-width:0}
+#eternal .et-r-card b{display:block;font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink);overflow-wrap:anywhere}
+#eternal .et-r-card span{display:block;margin-top:var(--sk-s1,6px);font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft);overflow-wrap:anywhere}
+#eternal .et-r-sub{margin:var(--sk-s4,24px) 0 var(--sk-s2,12px);font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em;color:var(--sk-ink)}
+#eternal .et-r-chips{display:flex;flex-wrap:wrap;justify-content:center;gap:var(--sk-s1,6px);margin:0 0 var(--sk-s3,18px)}
+#eternal .et-r-chip{display:inline-flex;align-items:center;justify-content:center;gap:var(--sk-s1,6px);min-height:var(--sk-control-min,44px);min-width:var(--sk-control-min,44px);padding:0 var(--sk-s2,12px);border-radius:var(--sk-radius-pill,999px);border:1px solid var(--sk-line);background:var(--sk-bg-card);color:var(--sk-ink-soft)!important;font:600 14px/1.25 var(--sk-font-raver-body)!important;cursor:pointer}
+#eternal .et-r-chip:hover{background:var(--sk-bg-card);color:var(--sk-ink)!important}
+#eternal .et-r-chip[aria-pressed="true"]{border-color:var(--sk-you);color:var(--sk-ink)!important;box-shadow:var(--sk-glow-sovereign)}
+#eternal .et-r-chip i{width:12px;height:12px;border-radius:var(--sk-radius-pill,999px);flex:none}
+#eternal .et-r-note{margin:var(--sk-s2,12px) 0 0;text-align:center;font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-pill{display:flex;align-items:center;justify-content:center;width:100%;min-height:58px;margin-top:var(--sk-s4,24px);padding:var(--sk-s1,6px) var(--sk-s3,18px);border:0;border-radius:var(--sk-radius-pill,999px);background:var(--sk-primary);color:var(--sk-on-primary)!important;font:700 15px/1.2 var(--sk-font-raver-display)!important;letter-spacing:.04em;text-align:center;cursor:pointer}
+#eternal .et-r-pill:hover{background:var(--sk-primary);color:var(--sk-on-primary)!important}
+#eternal .et-r-pill:disabled{background:var(--sk-sovereign-wash);color:var(--sk-sovereign-soft)!important;cursor:not-allowed}
+#eternal .et-r-ghost{display:flex;align-items:center;justify-content:center;margin:var(--sk-s2,12px) auto 0;min-height:var(--sk-control-min,44px);padding:0 var(--sk-s3,18px);border:1.5px solid var(--sk-biomass);border-radius:var(--sk-radius-pill,999px);background:transparent;color:var(--sk-biomass)!important;font:600 14px/1.25 var(--sk-font-raver-body)!important;cursor:pointer;text-align:center}
+#eternal .et-r-ghost:hover{background:transparent;color:var(--sk-ink)!important}
+#eternal .et-r-hold{position:relative;width:196px;height:196px;margin:var(--sk-s3,18px) auto 0}
+#eternal .et-r-hold>svg{position:absolute;inset:0;width:100%;height:100%;transform:rotate(-90deg);pointer-events:none;filter:none}
+#eternal .et-hold-track{fill:none;stroke:var(--sk-line);stroke-width:8}
+#eternal .et-hold-prog{fill:none;stroke:var(--sk-biomass);stroke-width:8;stroke-linecap:round;stroke-dasharray:578;stroke-dashoffset:578}
+#eternal .et-r-holdbtn{position:absolute;inset:22px;padding:0;border:0;border-radius:0;background:var(--sk-primary);color:var(--sk-on-primary)!important;clip-path:polygon(50% 0,93% 25%,93% 75%,50% 100%,7% 75%,7% 25%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--sk-s1,6px);cursor:pointer;touch-action:none;user-select:none;-webkit-user-select:none}
+#eternal .et-r-holdbtn:hover{background:var(--sk-primary);color:var(--sk-on-primary)!important}
+#eternal .et-r-holdbtn b{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em}
+#eternal .et-r-holdbtn span{font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em}
+#eternal .et-r-holdbtn:disabled{background:var(--sk-sovereign-wash);color:var(--sk-sovereign-soft)!important;cursor:not-allowed}
+@media (prefers-reduced-motion:reduce){#eternal *{transition:none!important;animation:none!important}}
+
+/* CYPHERPUNK — the instrument, complete at first paint: tables, a numbered pipeline, receipts */
+#eternal .et-c{font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink);overflow-wrap:anywhere}
+#eternal .et-c-path{font:600 15px/1.45 var(--sk-font-mono);color:var(--sk-ink);word-break:break-all}
+#eternal .et-c-chips{display:flex;flex-wrap:wrap;gap:var(--sk-s1,6px);margin:var(--sk-s2,12px) 0}
+#eternal .et-c-chips span{padding:2px var(--sk-s1,6px);border:1px solid var(--sk-line);border-radius:4px;background:var(--sk-bg-card);font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-soft)}
+#eternal .et-c-chips span.et-on{border-color:var(--sk-guard);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong)}
+#eternal .et-c-chips span.et-ok{border-color:var(--sk-verified);color:var(--sk-verified)}
+#eternal .et-c-chips span.et-no{border-color:var(--sk-info);color:var(--sk-info)}
+#eternal .et-c-guard{display:flex;justify-content:space-between;align-items:center;gap:var(--sk-s2,12px);flex-wrap:wrap;min-height:var(--sk-control-min,44px);padding:var(--sk-s1,6px) var(--sk-s3,18px);border:1px dashed var(--sk-guard);border-radius:var(--sk-radius-sm,6px);background:var(--sk-guard-wash);color:var(--sk-guard)}
+#eternal .et-c-guard b{font-weight:600;color:var(--sk-sovereign-strong)}
+#eternal .et-c-h{margin:var(--sk-s4,24px) 0 var(--sk-s2,12px)!important;font:600 15px/1.45 var(--sk-font-mono);color:var(--sk-ink)}
+#eternal .et-c-tab{width:100%;margin:var(--sk-s2,12px) 0 var(--sk-s1,6px)!important;border:1px solid var(--sk-line)!important;border-radius:var(--sk-radius-sm,6px);overflow:hidden;background:var(--sk-bg-card)!important;table-layout:auto}
+#eternal .et-c-tab th{padding:var(--sk-s1,6px) var(--sk-s2,12px)!important;text-align:left;white-space:nowrap;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);border-bottom:1px solid var(--sk-line)!important;background:var(--sk-bg-well)}
+#eternal .et-c-tab td{height:var(--sk-control-min,44px);padding:var(--sk-s1,6px) var(--sk-s2,12px)!important;border-bottom:1px solid var(--sk-line)!important;font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink);vertical-align:middle}
+#eternal .et-c-tab tr:last-child td{border-bottom:0!important}
+#eternal .et-c-tab td:first-child{color:var(--sk-guard)}
+#eternal .et-c-tab td:first-child,#eternal .et-c-tab th:first-child{white-space:nowrap;width:1%}
+#eternal .et-c-tab tr.et-pick{cursor:pointer}
+#eternal .et-c-tab tr.et-pick:hover td,#eternal .et-c-tab tr.et-pick[aria-selected="true"] td{background:var(--sk-sovereign-tint)}
+#eternal .et-c-tab tr.et-more td{height:auto;white-space:normal;width:auto;background:var(--sk-sovereign-tint);color:var(--sk-ink-soft)}
+#eternal .et-c-tab small,#eternal .et-c-kv small{display:block;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut)}
+#eternal .et-c-tab .et-nw{white-space:nowrap}
+#eternal .et-st-ok{color:var(--sk-verified)!important}
+#eternal .et-st-no{color:var(--sk-info)!important}
+#eternal .et-st-wait{color:var(--sk-ai)!important}
+#eternal .et-st-guard{color:var(--sk-guard)!important}
+#eternal .et-st-you{color:var(--sk-you)!important}
+#eternal .et-c-pipe{list-style:none;margin:0;padding:0;display:grid;gap:var(--sk-s2,12px);counter-reset:etp}
+#eternal .et-c-pipe li{display:grid;grid-template-columns:28px 1fr;gap:var(--sk-s1,6px) var(--sk-s2,12px);padding:var(--sk-s2,12px) var(--sk-s3,18px);border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm,6px);background:var(--sk-bg-card);counter-increment:etp}
+#eternal .et-c-pipe li::before{content:counter(etp,decimal-leading-zero);color:var(--sk-guard);font-weight:600}
+#eternal .et-c-pipe li b{font-weight:600;color:var(--sk-ink)}
+#eternal .et-c-pipe li div{grid-column:2;color:var(--sk-ink-soft)}
+#eternal .et-c-pipe li.et-done b{color:var(--sk-verified)}
+#eternal .et-c-pipe li.et-guard{border-style:dashed;border-color:var(--sk-guard)}
+#eternal .et-c-pipe li.et-guard b{color:var(--sk-guard)}
+#eternal .et-c-pipe li.et-now{border-color:var(--sk-ai);box-shadow:inset 0 0 0 1px var(--sk-ai)}
+#eternal .et-c-pipe li.et-now b{color:var(--sk-ai)}
+#eternal .et-c-pipe li.et-todo div{color:var(--sk-ink-mut)}
+#eternal .et-c-primary{display:flex;align-items:center;justify-content:center;width:100%;min-height:52px;margin-top:var(--sk-s3,18px);padding:var(--sk-s1,6px) var(--sk-s2,12px);border:0;border-radius:var(--sk-radius-sm,6px);background:var(--sk-primary);color:var(--sk-on-primary)!important;font:600 14px/1.2 var(--sk-font-mono)!important;text-align:center;cursor:pointer}
+#eternal .et-c-primary:hover{background:var(--sk-primary);color:var(--sk-on-primary)!important}
+#eternal .et-c-primary:disabled{background:var(--sk-bg-well);color:var(--sk-ink-mut)!important;border:1px dashed var(--sk-line);cursor:not-allowed}
+#eternal .et-c-kv{width:100%;border:1px solid var(--sk-line)!important;border-radius:var(--sk-radius-sm,6px);overflow:hidden;background:var(--sk-bg-card)!important}
+#eternal .et-c-kv th{width:104px;padding:var(--sk-s2,12px)!important;text-align:left;vertical-align:top;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);border-bottom:1px solid var(--sk-line)!important;background:transparent}
+#eternal .et-c-kv td{padding:var(--sk-s2,12px)!important;border-bottom:1px solid var(--sk-line)!important;font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink);word-break:break-word}
+#eternal .et-c-kv tr:last-child th,#eternal .et-c-kv tr:last-child td{border-bottom:0!important}
+#eternal .et-c-verify{margin-top:var(--sk-s3,18px);padding:var(--sk-s3,18px);border-radius:var(--sk-radius-sm,6px);background:var(--sk-bg-card);border:1px solid var(--sk-line)}
+#eternal .et-c-verify-h{font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);margin-bottom:var(--sk-s1,6px)}
+#eternal .et-c-verify ol{margin:0;padding-left:var(--sk-s4,24px)!important;display:grid;gap:var(--sk-s1,6px)}
+#eternal .et-c code{font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ai);background:none;padding:0;border:0;word-break:break-all}
+#eternal .et-c-row{display:grid;grid-template-columns:1fr 1fr;gap:var(--sk-s2,12px);margin-top:var(--sk-s3,18px)}
+#eternal .et-c-ghost{display:flex;align-items:center;justify-content:center;min-height:52px;padding:var(--sk-s1,6px);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius-sm,6px);background:transparent;color:var(--sk-ink)!important;text-align:center;font:600 14px/1.2 var(--sk-font-mono)!important;cursor:pointer}
+#eternal .et-c-ghost:hover{background:transparent;color:var(--sk-link-hover)!important}
+#eternal .et-c-well{margin-top:var(--sk-s2,12px);padding:var(--sk-s2,12px);border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm,6px);background:var(--sk-bg-well);font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink-soft);white-space:pre-wrap;word-break:break-all}
+#eternal .et-c-field{display:flex;align-items:center;gap:var(--sk-s1,6px);min-height:48px;margin-top:var(--sk-s2,12px);padding:0 var(--sk-s2,12px);border:1px solid var(--sk-ai);border-radius:var(--sk-radius-sm,6px);background:var(--sk-bg-card);cursor:text}
+#eternal .et-c-field span{flex:none;font:600 13px/1.45 var(--sk-font-mono);color:var(--sk-ai)}
+#eternal .et-c-field input{flex:1 1 auto;min-width:0;min-height:var(--sk-control-min,44px);border:0;outline:0;background:transparent;color:var(--sk-ink);font:400 13px/1.45 var(--sk-font-mono);padding:0}
+
+/* farmers front specifics: the sunflower's heart and the five rule tiles */
+#eternal .et-fm-heart{position:absolute;left:50%;top:50%;width:76px;height:76px;margin:-38px 0 0 -38px;padding:0;border:0;border-radius:var(--sk-radius-pill,999px);background:var(--sk-primary);color:var(--sk-on-primary)!important;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;touch-action:none;user-select:none;-webkit-user-select:none}
+#eternal .et-fm-heart:hover{background:var(--sk-primary);color:var(--sk-on-primary)!important}
+#eternal .et-fm-heart b{font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em}
+#eternal .et-fm-heart span{font:600 14px/1.25 var(--sk-font-raver-body)}
+#eternal .et-fm-heart:disabled{background:var(--sk-bg-card);color:var(--sk-ink)!important;border:1.5px dashed var(--sk-sovereign);cursor:not-allowed}
+#eternal .et-fm-heart:disabled span{color:var(--sk-ink-soft)}
+#eternal .et-petal[role="button"]{cursor:pointer}
+#eternal .et-petal:focus{outline:none}
+#eternal .et-petal:focus-visible .et-hit{stroke:var(--sk-ink);stroke-width:1.5;stroke-dasharray:3 4}
+#eternal .et-r-chip:disabled{border-style:dashed;color:var(--sk-ink-mut)!important;cursor:not-allowed;box-shadow:none}
+#eternal .et-r-tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:var(--sk-s2,12px);margin:0 0 var(--sk-s3,18px)}
+#eternal .et-r-tile{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--sk-s1,6px);min-height:96px;padding:var(--sk-s2,12px) var(--sk-s1,6px);border-radius:var(--sk-radius-xl,18px);border:1.5px solid var(--sk-sovereign);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong)!important;font:600 14px/1.25 var(--sk-font-raver-body)!important;text-align:center;cursor:pointer;transition:box-shadow var(--dur,.26s),border-color var(--dur,.26s)}
+#eternal .et-r-tile:hover{background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong)!important}
+#eternal .et-r-tile b{font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em}
+#eternal .et-r-tile[aria-pressed="true"]{border-color:var(--sk-biomass);box-shadow:var(--sk-glow-ok);color:var(--sk-ink)!important}
+
+/* ── THE WHOLE MARKET, dressed per register: the page's own variables mapped onto skaists tokens.
+   The stalls, the chain art, the accord card and the house rules are unchanged; the art keeps a dark
+   vitrine in every register (the chain draws it on black). ── */
+body[data-reg]{--bg:var(--sk-bg);--ink:var(--sk-ink);--leaf:var(--sk-verified);--gold:var(--sk-ink);--cyan:var(--sk-link);--dim:var(--sk-ink-mut);--line:var(--sk-line);--ok:var(--sk-verified);--warn:var(--sk-ink);--fusd:var(--sk-ink);background:var(--sk-bg);color:var(--sk-ink)}
+body[data-reg="bee"],body[data-reg="raver"]{background-image:none}
+body[data-reg] h1{color:var(--sk-ink);text-shadow:none;letter-spacing:normal}
+body[data-reg] header p{color:var(--sk-ink-mut);letter-spacing:normal}
+body[data-reg] .gate{margin:18px max(var(--sk-s3,18px),calc((100% - 680px) / 2));border:1px dashed var(--sk-ink-dim);color:var(--sk-ink-mut);border-radius:var(--sk-radius-xl,18px)}
+body[data-reg] .gate b{color:var(--sk-ink)}
+body[data-reg] nav:not(#tbar){background:var(--sk-bg);border-bottom-color:var(--sk-line)}
+body[data-reg] nav:not(#tbar) button{background:transparent;color:var(--sk-ink-mut);border:1px solid var(--sk-line)}
+body[data-reg] nav:not(#tbar) button.on{color:var(--sk-ink);border-color:var(--sk-ink)}
+body[data-reg] .stall{background:var(--sk-bg-card);border-color:var(--sk-line);border-radius:var(--sk-radius-xl,18px)}
+body[data-reg] .stall .art{background:var(--sk-b-chip)}
+body[data-reg] .stall .n{color:var(--sk-ink)}
+body[data-reg] .stall .m{color:var(--sk-ink-mut)}
+body[data-reg] .stall .m b{color:var(--sk-verified)}
+body[data-reg] .price{border-top-color:var(--sk-line)}
+body[data-reg] .price .p{color:var(--sk-ink)}
+body[data-reg] .price .u{color:var(--sk-ink-mut)}
+body[data-reg] .acts button{background:transparent;color:var(--sk-ink);border:1px solid var(--sk-ink-dim)}
+body[data-reg] .acts .deal{border-color:var(--sk-ink);color:var(--sk-ink)}
+body[data-reg] .acts .deal:hover,body[data-reg] .acts button:hover{background:var(--sk-bg-well);color:var(--sk-ink);border-color:var(--sk-ink)}
+body[data-reg] #accord{background:var(--sk-bg)}
+body[data-reg] #accord .close{background:var(--sk-bg-card);color:var(--sk-ink);border-color:var(--sk-line)}
+body[data-reg] .card{background:var(--sk-bg-card);border-color:var(--sk-line);border-radius:var(--sk-radius-xl,18px)}
+body[data-reg] .card h3{color:var(--sk-ink);letter-spacing:normal}
+body[data-reg] .card .row{border-bottom-color:var(--sk-line)}
+body[data-reg] .card .row .k,body[data-reg] .card .who{color:var(--sk-ink-mut)}
+body[data-reg] .card .row .v{color:var(--sk-ink)!important}
+body[data-reg] .card .sig{color:var(--sk-verified)}
+body[data-reg] .acts2 button{background:transparent;color:var(--sk-ink);border:1px solid var(--sk-ink)}
+body[data-reg] .acts2 button:hover{background:var(--sk-bg-well);color:var(--sk-ink)}
+body[data-reg] .acts2 button.ghostb,body[data-reg] .acts2 button:disabled{border-style:dashed;border-color:var(--sk-ink-dim);color:var(--sk-ink-mut)}
+body[data-reg] .note{color:var(--sk-ink-mut)}
+body[data-reg] #rules .r{border-bottom-color:var(--sk-line);color:var(--sk-ink-mut)}
+body[data-reg] #rules .r b{color:var(--sk-ink)}
+body[data-reg] #about{color:var(--sk-ink-mut)}
+body[data-reg] #about b{color:var(--sk-ink)!important}
+body[data-reg] #about a{color:var(--sk-link)!important}
+body[data-reg] #wall>p{color:var(--sk-ink-mut)!important}
+body[data-reg] #bnr-beta-badge a{background:var(--sk-bg-card)!important;color:var(--sk-link)!important;border-color:var(--sk-line)!important}
+body[data-reg="bee"]{font:400 16px/1.6 var(--sk-font-bee-sans)}
+body[data-reg="bee"] h1{font:400 40px/1.05 var(--sk-font-bee-serif)}
+body[data-reg="bee"] header p,body[data-reg="bee"] .gate,body[data-reg="bee"] #rules .r,body[data-reg="bee"] #about,body[data-reg="bee"] .card .row,body[data-reg="bee"] #wall>p{font:400 16px/1.6 var(--sk-font-bee-sans)!important}
+body[data-reg="bee"] .stall .m,body[data-reg="bee"] .price .u,body[data-reg="bee"] .note,body[data-reg="bee"] .card .who{font:400 14px/1.5 var(--sk-font-bee-sans)}
+body[data-reg="bee"] .stall .n,body[data-reg="bee"] .price .p{font:600 16px/1.45 var(--sk-font-bee-sans)}
+body[data-reg="bee"] .card h3{font:400 28px/1.1 var(--sk-font-bee-serif)}
+body[data-reg="bee"] .card .sig{font:400 17px/1.2 var(--sk-font-bee-sans)}
+body[data-reg="bee"] nav:not(#tbar) button,body[data-reg="bee"] .acts button,body[data-reg="bee"] .acts2 button,body[data-reg="bee"] #accord .close{font:600 14px/1.4 var(--sk-font-bee-sans);border-radius:var(--sk-radius-md,14px)}
+body[data-reg="bee"] #bnr-beta-badge{font:600 14px/1.4 var(--sk-font-bee-sans)!important}
+body[data-reg="raver"]{font:400 14px/1.6 var(--sk-font-raver-body)}
+body[data-reg="raver"] h1{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em}
+body[data-reg="raver"] header p,body[data-reg="raver"] .gate,body[data-reg="raver"] #rules .r,body[data-reg="raver"] #about,body[data-reg="raver"] .card .row,body[data-reg="raver"] .stall .m,body[data-reg="raver"] .price .u,body[data-reg="raver"] .note,body[data-reg="raver"] .card .who,body[data-reg="raver"] #wall>p{font:400 14px/1.6 var(--sk-font-raver-body)!important}
+body[data-reg="raver"] .stall .n,body[data-reg="raver"] .price .p,body[data-reg="raver"] .card h3{font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em}
+body[data-reg="raver"] .card .sig{font:700 15px/1.2 var(--sk-font-raver-display)}
+body[data-reg="raver"] nav:not(#tbar) button,body[data-reg="raver"] .acts button,body[data-reg="raver"] .acts2 button,body[data-reg="raver"] #accord .close{font:600 14px/1.25 var(--sk-font-raver-body);border-radius:var(--sk-radius-pill,999px)}
+body[data-reg="raver"] .stall{box-shadow:var(--sk-glow-sovereign)}
+body[data-reg="raver"] #bnr-beta-badge{font:600 14px/1.25 var(--sk-font-raver-body)!important}
+body[data-reg="cypherpunk"]{font:400 13px/1.6 var(--sk-font-mono)}
+body[data-reg="cypherpunk"] h1{font:600 15px/1.45 var(--sk-font-mono);color:var(--sk-ai)}
+body[data-reg="cypherpunk"] header p,body[data-reg="cypherpunk"] .gate,body[data-reg="cypherpunk"] #rules .r,body[data-reg="cypherpunk"] #about,body[data-reg="cypherpunk"] .card .row,body[data-reg="cypherpunk"] .stall .m,body[data-reg="cypherpunk"] #wall>p{font:400 13px/1.6 var(--sk-font-mono)!important}
+body[data-reg="cypherpunk"] .price .u,body[data-reg="cypherpunk"] .note,body[data-reg="cypherpunk"] .card .who{font:500 12px/1.6 var(--sk-font-mono)}
+body[data-reg="cypherpunk"] .stall .n,body[data-reg="cypherpunk"] .price .p,body[data-reg="cypherpunk"] .card h3,body[data-reg="cypherpunk"] .card .sig{font:600 15px/1.45 var(--sk-font-mono)}
+body[data-reg="cypherpunk"] nav:not(#tbar) button,body[data-reg="cypherpunk"] .acts button,body[data-reg="cypherpunk"] .acts2 button,body[data-reg="cypherpunk"] #accord .close{font:600 14px/1.2 var(--sk-font-mono);border-radius:var(--sk-radius-sm,6px)}
+body[data-reg="cypherpunk"] .stall,body[data-reg="cypherpunk"] .card,body[data-reg="cypherpunk"] .gate{border-radius:var(--sk-radius-sm,6px)}
+body[data-reg="cypherpunk"] #bnr-beta-badge a{border-radius:var(--sk-radius-sm,6px)!important}
+body[data-reg="cypherpunk"] #bnr-beta-badge{font:500 12px/1.45 var(--sk-font-mono)!important}
 </style>
+<link rel="stylesheet" href="../skaists.css">
 </head>
-<body>
+<body data-bee-theme="custom">
+<!-- ETERNAL FRONT (founder blueprint 2026-09-26, docs/design/eternal): three separate products in one
+     surface. ONE data layer (the market's own COLS, garden address, FUSD community prices and dealOf(),
+     the stalls buildStalls() read from the chain, the five house rules, and the accord card's own state)
+     drives all three, so the facts cannot drift. Nothing here moves money: fUSD settlement and the
+     escrow have not docked, the page's own sign button says so, and no register ever says otherwise.
+     Every handshake gesture opens the page's own accord card through the stall's own button. -->
+<section id="eternal" aria-label="the farmers market">
+
+  <!-- NEW BEE — a calm room: the stalls in plain rows, how it works, one button -->
+  <div class="et-b">
+    <div class="et-b-mark">bLighT farmers market</div>
+    <h2 class="et-b-h" data-etk="et.farmers.beeH">a market among friends</h2>
+    <p class="et-b-lede" data-etk="et.farmers.beeLede">farmers and artists offer their pieces to the community, priced in fUSD, the community's own money. an offer starts with a handshake card.</p>
+    <div class="et-b-guard"><svg class="et-b-ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span data-etk="et.farmers.beeGuard">no money moves here yet. the escrow that would hold it is still being built.</span></div>
+    <div class="et-b-rows" id="etFmBeeStalls" role="group" aria-label="the stalls"></div>
+    <div class="et-b-rows" id="etFmBeeHow"></div>
+    <div class="et-b-act">
+      <button type="button" class="et-b-primary" id="etFmBeeGo">open a handshake card</button>
+      <button type="button" class="et-b-link" id="etFmBeeRules" data-etk="et.farmers.beeRules">read the five house rules</button>
+      <p class="et-b-foot" data-etk="et.farmers.beeFoot">a handshake card is a picture and a note you keep and send. it is not a payment.</p>
+    </div>
+  </div>
+
+  <!-- RAVER — the data is the art: a sunflower. each petal is a stall, its length the fUSD price of one
+       unit; the inner ring is the five house rules. light the rules, pick a petal, hold to shake hands. -->
+  <div class="et-r">
+    <div class="et-r-top"><h2 class="et-r-h" data-etk="et.farmers.raverH">the sunflower</h2><span class="et-r-hint" id="etFmHint"></span></div>
+    <div class="et-r-art"><svg id="etFmFlower" viewBox="-200 -200 400 400" role="group" aria-label="the stalls as a sunflower"></svg><button type="button" class="et-fm-heart" id="etFmHold"><b id="etFmHoldB">hold</b><span id="etFmHoldS">to shake</span></button></div>
+    <div class="et-r-chips" id="etFmPetals" role="group" aria-label="the stalls"></div>
+    <div class="et-r-tiles" id="etFmRules" role="group" aria-label="the house rules"></div>
+    <div class="et-r-card" id="etFmCard" aria-live="polite"></div>
+    <p class="et-r-note" id="etFmNote"></p>
+  </div>
+
+  <!-- CYPHERPUNK — the instrument: the ledger, the price rule, the pipeline, the receipt -->
+  <div class="et-c">
+    <div class="et-c-path" id="etFmPath"></div>
+    <div class="et-c-chips" id="etFmChips"></div>
+    <div class="et-c-guard"><span data-etk="et.farmers.cyGuard">settlement · fUSD · not docked</span><b id="etFmGuardN"></b></div>
+    <h3 class="et-c-h" data-etk="et.farmers.cyColsH">stalls · the collections × the garden</h3>
+    <table class="et-c-tab"><thead><tr><th>#</th><th>piece · unit · contract · stall</th></tr></thead><tbody id="etFmTab"></tbody></table>
+    <div class="et-c-well" id="etFmRule"></div>
+    <h3 class="et-c-h" data-etk="et.farmers.cyPipeH">accord pipeline</h3>
+    <ol class="et-c-pipe" id="etFmPipe"></ol>
+    <button type="button" class="et-c-primary" id="etFmCyGo">open bAccord</button>
+    <h3 class="et-c-h" data-etk="et.farmers.cyRcptH">receipt · this page</h3>
+    <table class="et-c-kv" id="etFmReceipt"></table>
+    <div class="et-c-verify">
+      <div class="et-c-verify-h" data-etk="et.farmers.verifyH">verify · no trust in this page needed</div>
+      <ol id="etFmVerify"></ol>
+    </div>
+    <div class="et-c-row">
+      <a class="et-c-ghost" href="#wall" data-etk="et.farmers.cyWall">the stalls below</a>
+      <a class="et-c-ghost" href="https://github.com/beehive-nature/beehive-nature/blob/main/surfaces/blight/farmers.html" target="_blank" rel="noopener noreferrer" data-etk="et.farmers.cyFork">fork the template ↗ new tab</a>
+    </div>
+  </div>
+</section>
+<h2 class="et-archive-h" id="etArchive" data-etk="et.farmers.archive">the whole market</h2>
 <header>
   <h1>🌻 the Farmers Market</h1>
   <p>beehivenature.com · the community's private party · settles in fUSD · refereed by bQueenBee</p>
@@ -265,6 +586,208 @@ buildStalls().then(()=>{ renderWall();
   if(!stalls.length) $('wall').innerHTML='<p style="color:var(--dim);grid-column:1/-1;text-align:center;padding:40px 20px;font-size:15px">the stalls are resting — back shortly</p>'; });
 </script>
 <div id="bnr-beta-badge" style="position:fixed;right:.6rem;bottom:calc(var(--tbar-h,50px) + 10px);z-index:9997;font:14px ui-monospace,monospace"><a href="../" style="display:inline-flex;align-items:center;min-height:44px;color:#39c5cf;text-decoration:none;border:1px solid #30363d;border-radius:99px;padding:0 16px;background:#161b22">⌂ hub</a></div>
+<script>
+/* ETERNAL FRONT — one data layer, three renderers (docs/design/eternal). The facts are the market's own:
+   COLS, the garden address LOV, the FUSD community unit prices, dealOf() (the exact lot and its ask), the
+   stalls buildStalls() read from the chain (read back from `stalls` and #wall once the page is done),
+   the five house rules in #rules, and the accord card's own fields. Settlement is read from the page's
+   own sign button ("sign — when escrow docks"): until that changes, no register says money moved.
+   Every handshake opens the page's own accord card through the stall's own view button. */
+(function(){
+  var $=function(id){return document.getElementById(id);};
+  var T=function(k,f){var t=window.BNRLanguage&&window.BNRLanguage.text;return t?t(k,f):f;};
+  var K=function(k,f){return T('et.farmers.'+k,f);};
+  var esc=function(v){return String(v==null?'':v).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});};
+  var tok=function(n){return getComputedStyle(document.body).getPropertyValue('--sk-'+n).trim();};
+  var num=function(n){return Number(n).toLocaleString('en-US');};
+  var short=function(a){return a.slice(0,6)+'…'+a.slice(-4);};
+  var SRC=typeof COLS!=='undefined'?COLS:[], PRICE=typeof FUSD!=='undefined'?FUSD:{};
+
+  /* ── the data layer ── */
+  var D={garden:typeof LOV!=='undefined'?LOV:'',hosts:typeof HOSTS!=='undefined'?HOSTS.map(function(h){return h.replace(/^https?:\/\//,'');}):[],
+    cols:SRC.map(function(c,i){return {i:i,sym:c.sym,c:c.c,unit:PRICE[c.sym]||null,levels:c.lv?c.lv.length-1-c.base:null};}),
+    rules:[].map.call(document.querySelectorAll('#rules .r b'),function(b){return b.textContent.replace(/^\d+\s·\s/,'').replace(/\.$/,'').trim();}),
+    state:'reading',stalls:[],escrow:'',accord:null};
+  var R={pick:null,lit:{},hold:0};
+  function read(){
+    var wall=$('wall'), txt=wall?wall.textContent:'', live=typeof stalls!=='undefined'?stalls:[];
+    D.state=wall&&wall.querySelector('.stall')?'open':/resting/.test(txt)?'resting':'reading';
+    D.stalls=D.state==='open'?live.map(function(p,i){var L=typeof dealOf==='function'?dealOf(p):{whole:null,fusd:null};
+      return {i:i,sym:p.col.sym,seed:p.seed,level:p.lvln,max:typeof pipmax==='function'?pipmax(p.col):null,lot:L.whole,fusd:L.fusd};}):[];
+    var sign=$('aSign'); D.escrow=sign&&/when escrow docks|docking/.test(sign.textContent)?'not docked':sign?sign.textContent.trim():'';
+    var ac=$('accord'); D.accord=ac&&ac.classList.contains('open')?{piece:$('aPiece').textContent,ask:$('aAsk').textContent,amount:$('aAmt').textContent,from:$('aFrom').textContent,to:$('aTo').textContent}:null;
+    if(R.pick!=null&&!D.stalls[R.pick])R.pick=null;
+    if(R.pick==null&&D.stalls.length)R.pick=0;
+  }
+  function stallOf(sym){return D.stalls.filter(function(s){return s.sym===sym;})[0]||null;}
+  function allLit(){return D.rules.length&&D.rules.every(function(_,i){return R.lit[i];});}
+  function open(){
+    var s=D.stalls[R.pick]; if(!s)return;
+    var b=document.querySelector('#wall [data-v="'+s.i+'"]'); if(b)b.click();
+    all();
+  }
+  /* resting: ask the garden again through the page's own buildStalls() and renderWall(), with the
+     page's own waiting and resting words (its init, run once more) */
+  function reread(){
+    if(typeof buildStalls!=='function'||D.state==='reading')return;
+    var w=$('wall'); if(!w)return;
+    w.innerHTML='<p style="color:var(--dim);grid-column:1/-1;text-align:center;padding:40px">tending the garden\u2019s stalls…</p>';
+    buildStalls().then(function(){renderWall();
+      if(!stalls.length)w.innerHTML='<p style="color:var(--dim);grid-column:1/-1;text-align:center;padding:40px 20px;font-size:15px">the stalls are resting — back shortly</p>';});
+    all();
+  }
+  function act(){if(D.state==='resting')reread();else open();}
+  var STATE={reading:'reading the stalls from the garden…',resting:'the stalls are resting: no stall came back from the chain today',open:'{n} stalls open'};
+  function stateLine(){return K('st.'+D.state,STATE[D.state]).replace('{n}',D.stalls.length);}
+
+  /* ── NEW BEE ── */
+  function bee(){
+    var box=$('etFmBeeStalls');
+    box.innerHTML=D.state==='open'?D.stalls.map(function(s){
+      return '<button type="button" class="et-b-row" data-pick="'+s.i+'" aria-pressed="'+(R.pick===s.i)+'"><span>'+esc(s.sym)+'</span><small>'+esc(num(s.fusd)+' fUSD · '+K('b.lot','lot of')+' '+num(s.lot))+'</small></button>';}).join('')
+      :'<div class="et-b-row"><span>'+esc(K('b.stalls','the stalls'))+'</span><small class="'+(D.state==='resting'?'et-out':'')+'">'+esc(D.state==='resting'?K('b.resting','resting today'):K('b.reading','being read…'))+'</small></div>'+
+       (D.state==='resting'?'<div class="et-b-note">'+esc(K('b.restNote','no stall came back from the chain today, so there is nothing to shake on yet.'))+'</div>':'');
+    $('etFmBeeHow').innerHTML=[
+      [K('b.price','prices'),K('b.priceV','in fUSD, the community’s money')],
+      [K('b.hand','an offer'),K('b.handV','a handshake card you keep and send')],
+      [K('b.money','the money'),D.escrow==='not docked'?K('b.moneyV','moves only once the escrow is built'):D.escrow],
+      [K('b.ref','the referee'),'bQueenBee']
+    ].map(function(r){return '<div class="et-b-row"><span>'+esc(r[0])+'</span><small>'+esc(r[1])+'</small></div>';}).join('');
+    var go=$('etFmBeeGo'), s=D.stalls[R.pick];
+    go.disabled=D.state==='reading';
+    go.textContent=s?K('b.go','open a handshake card')+' · '+s.sym:D.state==='reading'?K('b.goWait','the stalls are being read…'):K('b.goAgain','ask the garden again');
+  }
+
+  /* ── RAVER ── a sunflower: each collection owns a quarter of the head, one petal per level of its
+     ladder; petal length = log of its fUSD unit price; a stall's petals fill up to the level the chain
+     gave it (the page's own pips); no stall = dashed. the inner ring: the five house rules, lit by
+     the reader */
+  var P0=78;
+  function plen(u){return u?44+(Math.log10(u)+4)*17:44;}
+  function flower(){
+    var svg=$('etFmFlower'); if(!svg)return;
+    var n=D.cols.length||1, h='', nr=D.rules.length||1;
+    D.rules.forEach(function(_,i){
+      var a0=(-90+i*360/nr+3)*Math.PI/180, a1=(-90+(i+1)*360/nr-3)*Math.PI/180, r0=50, r1=70;
+      var p=function(r,a){return (r*Math.cos(a)).toFixed(1)+' '+(r*Math.sin(a)).toFixed(1);};
+      h+='<path d="M'+p(r1,a0)+'A'+r1+' '+r1+' 0 0 1 '+p(r1,a1)+'L'+p(r0,a1)+'A'+r0+' '+r0+' 0 0 0 '+p(r0,a0)+'Z" fill="'+(R.lit[i]?tok('biomass'):tok('sovereign-wash'))+'" stroke="'+(R.lit[i]?tok('biomass'):tok('sovereign'))+'" stroke-width="1.5"/>';
+    });
+    var pp=function(r,a){return (r*Math.cos(a)).toFixed(1)+' '+(r*Math.sin(a)).toFixed(1);};
+    D.cols.forEach(function(c,ci){
+      var span=360/n, s0=-90+ci*span, lv=c.levels||1, L=plen(c.unit), r1=P0+L, rm=P0+L/2;
+      var st=stallOf(c.sym), sel=st&&D.stalls[R.pick]===st, col=sel?tok('you'):st?tok('biomass'):tok('ink-dim');
+      var w0=(s0+2)*Math.PI/180, w1=(s0+span-2)*Math.PI/180, rh=Math.min(r1+10,198);
+      h+='<g class="et-petal" data-sym="'+esc(c.sym)+'"'+(st?' role="button" tabindex="0" aria-pressed="'+sel+'"':'')+' aria-label="'+esc(c.sym+': '+(c.unit!=null?c.unit+' fUSD a unit':'no unit price')+' · '+(st?'level '+st.level+' of '+st.max+' · '+num(st.fusd)+' fUSD for a lot of '+num(st.lot):'no stall'))+'">';
+      h+='<path class="et-hit" d="M'+pp(P0-4,w0)+'A'+(P0-4)+' '+(P0-4)+' 0 0 1 '+pp(P0-4,w1)+'L'+pp(rh,w1)+'A'+rh+' '+rh+' 0 0 0 '+pp(rh,w0)+'Z"/>';
+      for(var k=0;k<lv;k++){
+        var a=(s0+span*(k+0.5)/lv)*Math.PI/180, cs=Math.cos(a), sn=Math.sin(a), w=Math.min(9,span/lv*0.9), on=st&&k<st.level;
+        var pt=function(r,o){return ((r*cs-o*sn)).toFixed(1)+' '+((r*sn+o*cs)).toFixed(1);};
+        h+='<path d="M'+pt(P0,0)+'Q'+pt(rm,w)+' '+pt(r1,0)+'Q'+pt(rm,-w)+' '+pt(P0,0)+'Z" fill="'+(on?col:'none')+'" stroke="'+col+'" stroke-width="1.5"'+(st?'':' stroke-dasharray="3 4"')+'/>';
+      }
+      h+='</g>';
+    });
+    var circ=2*Math.PI*44;
+    h+='<circle r="44" fill="none" stroke="'+tok('line')+'" stroke-width="5"/><circle r="44" fill="none" stroke="'+tok('biomass')+'" stroke-width="5" stroke-linecap="round" stroke-dasharray="'+circ.toFixed(1)+'" stroke-dashoffset="'+(circ*(1-R.hold)).toFixed(1)+'" transform="rotate(-90)"/>';
+    svg.innerHTML=h;
+  }
+  function progress(){var c=$('etFmFlower').lastElementChild,circ=2*Math.PI*44;if(c)c.setAttribute('stroke-dashoffset',(circ*(1-R.hold)).toFixed(1));}
+  function raver(){
+    flower();
+    var lit=D.rules.filter(function(_,i){return R.lit[i];}).length, s=D.stalls[R.pick];
+    $('etFmHint').textContent=D.stalls.length+' '+K('r.of','of')+' '+D.cols.length+' '+K('r.open','stalls open');
+    $('etFmPetals').innerHTML=D.cols.map(function(c){var st=stallOf(c.sym),sel=st&&D.stalls[R.pick]===st;
+      return '<button type="button" class="et-r-chip" data-sym="'+esc(c.sym)+'" aria-pressed="'+!!sel+'"'+(st?'':' disabled')+'><i style="'+(st?'background:'+(sel?tok('you'):tok('biomass')):'border:1.5px dashed '+tok('ink-dim'))+'"></i>'+esc(c.sym)+'</button>';}).join('');
+    $('etFmRules').innerHTML=D.rules.map(function(r,i){return '<button type="button" class="et-r-tile" data-rule="'+i+'" aria-pressed="'+!!R.lit[i]+'"><b>'+(i+1)+'</b>'+esc(r)+'</button>';}).join('');
+    var hb=$('etFmHold'); hb.disabled=D.state==='reading'||(D.state==='open'&&!(s&&allLit()));
+    $('etFmHoldB').textContent=K('r.hold','hold');
+    $('etFmHoldS').textContent=D.state==='resting'?K('r.again','to ask again'):D.state==='reading'?K('r.reading','reading'):allLit()?K('r.shake','to shake'):lit+' '+K('r.of','of')+' '+D.rules.length;
+    $('etFmCard').innerHTML=s?'<span class="et-rk et-ok">'+esc(s.level!=null?s.level:'?')+'</span><div><b>'+esc(s.sym+' · '+num(s.fusd)+' fUSD')+'</b><span>'+esc(K('r.lot','a lot of')+' '+num(s.lot)+' '+s.sym+' · '+K('r.seed','seed')+' '+num(s.seed)+' · '+K('r.level','level')+' '+s.level+' '+K('r.of','of')+' '+s.max)+'</span><span>'+esc(D.accord?K('r.opened','the card is open below: ')+D.accord.from+' · '+D.accord.to:K('r.light','light all five rules, then hold the heart'))+'</span></div>'
+      :'<span class="et-rk'+(D.state==='resting'?' et-no':'')+'">0</span><div><b>'+esc(stateLine())+'</b><span>'+esc(K('r.garden','the garden')+' '+short(D.garden))+'</span></div>';
+    $('etFmNote').textContent=D.state==='resting'?K('r.noteRest','dashed petals: no stall came back from the chain, so nothing is offered and nothing is made up. hold the heart to ask the garden again.'):K('r.noteOpen','a longer petal is a dearer unit. the card is a handshake, never a payment: the escrow has not docked.');
+  }
+
+  /* ── CYPHERPUNK ── */
+  function cy(){
+    $('etFmPath').textContent='farmers://garden/'+short(D.garden)+' · fUSD';
+    $('etFmChips').innerHTML='<span class="et-on">stalls '+D.stalls.length+'/'+D.cols.length+'</span><span class="'+(D.state==='resting'?'et-no':D.state==='open'?'et-ok':'')+'">'+esc(D.state)+'</span><span class="et-no">escrow '+esc(D.escrow||'?')+'</span><span>referee bQueenBee</span>';
+    $('etFmGuardN').textContent='no money moves · the card is a note';
+    $('etFmTab').innerHTML=D.cols.map(function(c){var st=stallOf(c.sym),sel=st&&D.stalls[R.pick]===st;
+      return '<tr'+(st?' class="et-pick" data-sym="'+esc(c.sym)+'" tabindex="0" aria-selected="'+!!sel+'"':'')+'><td>'+String(c.i+1).padStart(2,'0')+'</td><td><span class="et-nw">'+esc(c.sym)+'</span> · '+esc(c.unit!=null?c.unit+' fUSD / unit':'no unit price')+'<small>'+esc(c.c)+'</small>'+
+        (st?'<small class="et-st-ok">seed '+esc(num(st.seed))+' · level '+esc(st.level)+' of '+esc(st.max)+' · lot '+esc(num(st.lot))+' · ask '+esc(num(st.fusd))+' fUSD</small>':'<small class="'+(D.state==='reading'?'et-st-wait':'et-st-no')+'">'+esc(D.state==='reading'?'reading':'no stall · no balance came back')+'</small>')+'</td></tr>';}).join('');
+    $('etFmRule').textContent='dealOf(p): lot = max(1, floor(seed × 0.4)) · ask = max(1, round(lot × FUSD[sym], 2)) fUSD · exact amounts, art travels whole';
+    var s=D.stalls[R.pick];
+    var steps=[
+      ['balanceOf(garden) · per collection','eth_call 0x70a08231 · '+D.hosts.join(' → ')+' · '+(D.state==='reading'?'reading':D.stalls.length+' of '+D.cols.length+' came back'),D.state==='reading'?'et-now':D.state==='open'?'et-done':'et-guard'],
+      ['seed = balance / 1e9 · getSvg(seed)','the stall’s art, decoded from chain bytes',D.state==='open'?'et-done':'et-todo'],
+      ['lot + ask · dealOf()',s?s.sym+' lot '+num(s.lot)+' · ask '+num(s.fusd)+' fUSD':'no stall to price',s?'et-done':'et-todo'],
+      ['bAccord · card + note',D.accord?'open · '+D.accord.piece+' · '+D.accord.ask:'a PNG made in this browser + a note with a deep link · nothing sent',D.accord?'et-done':s?'et-now':'et-todo'],
+      ['sign · escrow',D.escrow==='not docked'?'not docked · the page’s sign button waits for the audited escrow':D.escrow,'et-guard'],
+      ['settle · fUSD',D.escrow==='not docked'?'not docked · no money moves on this page':'see the page','et-guard']
+    ];
+    $('etFmPipe').innerHTML=steps.map(function(x){return '<li class="'+x[2]+'"><b>'+esc(x[0])+'</b><div>'+esc(x[1])+'</div></li>';}).join('');
+    var go=$('etFmCyGo'); go.disabled=D.state==='reading'; go.textContent=s?'open bAccord · '+s.sym+' · '+num(s.fusd)+' fUSD':D.state==='reading'?'reading the garden · wait':'re-read the garden · balanceOf × '+D.cols.length;
+    var sp=function(c,t){return '<span class="'+c+'">'+esc(t)+'</span>';};
+    $('etFmReceipt').innerHTML=[
+      ['garden',esc(D.garden)],
+      ['stalls',D.state==='open'?sp('et-st-ok',D.stalls.map(function(x){return x.sym;}).join(' · ')):sp(D.state==='reading'?'et-st-wait':'et-st-no',D.state==='reading'?'reading':'resting · 0 came back')],
+      ['accord',D.accord?esc(D.accord.piece+' · '+D.accord.ask+' · '+D.accord.from+' · '+D.accord.to):sp('et-st-no','not opened')],
+      ['escrow',sp('et-st-guard',D.escrow||'?')],
+      ['settlement',sp('et-st-guard',D.escrow==='not docked'?'fUSD · not docked · nothing moved':'see the page')],
+      ['rules',esc(D.rules.length+' · #rules')]
+    ].map(function(r){return '<tr><th>'+r[0]+'</th><td>'+r[1]+'</td></tr>';}).join('');
+    var c0=D.cols[0];
+    $('etFmVerify').innerHTML=[
+      c0&&typeof AD==='function'?'curl -s https://'+(D.hosts[0]||'')+' -H "content-type: application/json" -d \'{"jsonrpc":"2.0","id":1,"method":"eth_call","params":[{"to":"'+c0.c+'","data":"0x70a08231'+AD(D.garden)+'"},"latest"]}\' → the garden’s '+c0.sym+' balance':'',
+      'seed = balance / 1e9 · lot = floor(seed × 0.4) · ask = lot × '+(c0&&c0.unit)+' fUSD for '+(c0&&c0.sym),
+      'view-source → const FUSD · function dealOf · the numbers above, nothing else'
+    ].filter(Boolean).map(function(x){return '<li><code>'+esc(x)+'</code></li>';}).join('');
+  }
+
+  function keyed(){[].forEach.call(document.querySelectorAll('#eternal [data-etk],#etArchive[data-etk]'),function(e){if(e.dataset.etEn==null)e.dataset.etEn=e.textContent;e.textContent=T(e.dataset.etk,e.dataset.etEn);});}
+  function all(){read();bee();raver();cy();}
+  var sched=0;function soon(){if(sched)return;sched=requestAnimationFrame(function(){sched=0;all();});}
+  function pickSym(sym){for(var i=0;i<D.stalls.length;i++)if(D.stalls[i].sym===sym){R.pick=i;all();return;}}
+
+  var hold={t0:0,raf:0};
+  function holdStart(e){
+    if($('etFmHold').disabled||hold.raf)return; if(e&&e.preventDefault)e.preventDefault();
+    hold.t0=performance.now();
+    (function tick(now){var f=Math.min(1,(now-hold.t0)/1000);R.hold=f;progress();
+      if(f>=1){hold.raf=0;R.hold=0;act();return;}hold.raf=requestAnimationFrame(tick);})(hold.t0);
+  }
+  function holdStop(){if(!hold.raf)return;cancelAnimationFrame(hold.raf);hold.raf=0;R.hold=0;progress();}
+
+  function wire(){
+    var ev=$('eternal'); if(!ev)return;
+    ev.addEventListener('click',function(e){
+      var p=e.target.closest('.et-b-row[data-pick]'); if(p){R.pick=+p.getAttribute('data-pick');all();return;}
+      var sy=e.target.closest('[data-sym]'); if(sy){pickSym(sy.getAttribute('data-sym'));return;}
+      var ru=e.target.closest('[data-rule]'); if(ru){var k=+ru.getAttribute('data-rule');R.lit[k]=!R.lit[k];raver();}
+    });
+    ev.addEventListener('keydown',function(e){
+      if(e.key!=='Enter'&&e.key!==' ')return;
+      var t=e.target.closest('.et-petal[role="button"],.et-c-tab tr.et-pick'); if(!t)return;
+      e.preventDefault(); t.dispatchEvent(new MouseEvent('click',{bubbles:true}));
+    });
+    $('etFmBeeGo').addEventListener('click',act);
+    $('etFmCyGo').addEventListener('click',act);
+    $('etFmBeeRules').addEventListener('click',function(){var t=$('tRules');if(t)t.click();var r=$('rules');if(r)r.scrollIntoView({block:'start'});});
+    var hb=$('etFmHold');
+    hb.addEventListener('pointerdown',function(e){try{hb.setPointerCapture(e.pointerId);}catch(x){}holdStart(e);});
+    ['pointerup','pointercancel','pointerleave'].forEach(function(t){hb.addEventListener(t,holdStop);});
+    hb.addEventListener('keydown',function(e){if((e.key===' '||e.key==='Enter')&&!e.repeat){e.preventDefault();holdStart(e);}});
+    hb.addEventListener('keyup',function(e){if(e.key===' '||e.key==='Enter')holdStop();});
+    hb.addEventListener('contextmenu',function(e){e.preventDefault();});
+    var mo=new MutationObserver(soon);
+    ['wall'].forEach(function(id){var el=$(id);if(el)mo.observe(el,{childList:true,subtree:true,characterData:true});});
+    ['accord'].forEach(function(id){var el=$(id);if(el)mo.observe(el,{attributes:true,attributeFilter:['class'],childList:true,subtree:true,characterData:true});});
+    document.addEventListener('blang',function(){keyed();all();});
+  }
+
+  keyed(); wire(); all();
+  window.__eternal={data:D,raver:R};
+})();
+</script>
 <script src="../tour.js?v=42"></script>
 </body>
 </html>
