@@ -1,0 +1,641 @@
+/* source-contract-audit.test.mjs — the battery for the independent reader.
+ *
+ * Three things are being proven here, and they are different things:
+ *
+ *  I  INDEPENDENCE. source-contract-audit.mjs imports nothing from the genealogy
+ *     implementation. An import would make it a third copy of the reading it
+ *     exists to cross. The scanner is proven capable of finding an import by
+ *     running it over a file that HAS them.
+ *
+ *  R  THE REAL ARCHIVE. Every clause is non-vacuous on the published corpus
+ *     (it inspected something), and the finding set equals a declared
+ *     BASELINE — both directions. A new finding fails by name; a repaired
+ *     finding ALSO fails, by name, and the fix is to delete its baseline line
+ *     in the same commit. A subset-only gate reports a dead entry never, and
+ *     a dead entry is how a reviewer inherits a reading nobody re-measured.
+ *
+ *  M  THE MUTATIONS. A clean synthetic fixture yields zero findings — that is
+ *     the CONTROL, and without it a battery of refusals proves nothing. Then
+ *     each clause is broken in turn and must fire ALONE. A mutation may make
+ *     several coordinated edits (breaking one law while keeping a declared
+ *     count honest); what is asserted is the set of codes that appear, never
+ *     that "something changed".
+ *
+ * Node --test, zero deps, DOM-free.
+ */
+
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { readFileSync, readdirSync, existsSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import { join, dirname } from 'node:path';
+
+import { checkSourceContract, findingKey, CLAUSE_CODES, declaredTiers } from './source-contract-audit.mjs';
+
+const HERE = dirname(fileURLToPath(import.meta.url));
+const ROOT = join(HERE, '..', '..');
+const L = join(ROOT, 'assets', 'profile-archive', 'lineage');
+
+/* ========================================================================
+ * BASELINE — the findings the published archive carries at this pin, each
+ * with the judgement attached. A line here is a KNOWN-OPEN row, never a
+ * dismissal: the checker keeps reporting it and the gate keeps both
+ * directions honest.
+ * ===================================================================== */
+const BASELINE = [
+  ['SRC-EDGE-OVERSTATED :: ovl-sigurd-snake-eye->pf5d40516b8',
+    'OPEN. attested-overlays.edgeNotes calls this edge "parents per tradition"; the staged person object and the person PAGE a stranger reads both label it "walked provider link" — the strongest tag in the hop vocabulary. surfaces/person-panel-corpus.mjs:217 computes the honest "overlay — tradition-carried" at render time, so the panel reader and the archive-door reader disagree about the same fact. Not repaired here: the staged objects are pipeline.mjs output and this lane may not touch it.'],
+  ['SRC-EDGE-OVERSTATED :: ovl-sigurd-snake-eye->p8bfb696a4b', 'OPEN. Same edge class, second parent (Queen Aslaug).'],
+  ['SRC-EDGE-OVERSTATED :: ovl-harthacnut-i->ovl-blaeja-of-northumbria',
+    'OPEN. Sharper than the other two: the overlay\'s own relationshipEvidence disputes the claim "Harthacnut is the son of Sigurd AND Blaeja", and the Sigurd half is staged "disputed — inspect in the comb" while the Blaeja half of the SAME disputed claim is staged "walked provider link". One claim, two provenance labels.'],
+  ['CLM-TIER-UNDECLARED :: unrecorded',
+    'OPEN, and narrower than it reads. "unrecorded" is a real sixth tier — surfaces/blood.html, surfaces/profile.html, surfaces/person-panel-corpus.mjs and the GUX-01 frontier dispatch all name it. What is missing is the CORPUS\'S OWN sentence: meta.confidenceTiers declares four classes and the corpus publishes 1,800 persons in a fifth. The defect is the declaration, not the data.', [1800]],
+  ['LNK-COUPLE-AND-EDGE :: p0b2a91a835|p59ca207357', 'OPEN — Probus Ferreolus di Roma / Syagria Papianilla, 4th c. Gaul.'],
+  ['LNK-COUPLE-AND-EDGE :: p59ca207357|p7b4ce90388', 'OPEN — Syagria Papianilla / Flavius Afranius Syagrius II. Syagria stands in two of the seven.'],
+  ['LNK-COUPLE-AND-EDGE :: p13f145e0f0|p41e853380c', 'OPEN — Menkare / Netikereti, 7th dynasty.'],
+  ['LNK-COUPLE-AND-EDGE :: p329cac0c1e|pd69d747cb1', 'OPEN — Bintanath / Ramesses II. A consanguineous marriage the historical record itself carries; the corpus is being faithful, not wrong.'],
+  ['LNK-COUPLE-AND-EDGE :: p321780663d|pe58481281a', 'OPEN — Cleopatra V Tryphaena / Ptolemy XII Auletes.'],
+  ['LNK-COUPLE-AND-EDGE :: p7c4314f0bf|p854fa8143e', 'OPEN — Eglon ben Balak / Orfa bat Eglon.'],
+  ['LNK-COUPLE-AND-EDGE :: p48d02fc52a|pebab1efcae', 'OPEN — "Mrs Aksumay Ramissu of Ethiopia" / "Aksumay Ramissu of ETHIOPIA": two provider records that read like one person, which is the OTHER way into this class. Whether each of the seven is a faithful marriage or a duplicate record is unresolved here and the row does not claim it.'],
+  ['LNK-FRONTIER-UNDISCLOSED :: meta.reconciliation',
+    'OPEN. 1,959 staged parent references point at persons the corpus did not publish. meta.reconciliation accounts for the raw walk minus the published corpus and says nothing about references the published corpus still carries INTO that excluded population. PR #222 adds the disclosure; this lane is ordered not to touch #222\'s changes, so the row is reported and left standing.', [1959]],
+];
+const BASELINE_KEYS = new Set(BASELINE.map(([k]) => k));
+
+/* ------------------------------------------------------------- magnitudes
+ * A baseline row pins a NAME (`code :: where`). R2 and R3 never read
+ * `f.detail`, so a row the baseline ALREADY names can change what it says by
+ * any amount and both directions stay green. Measured rather than feared:
+ * planting 3,000 unpublished parent refs into one staged person moves the
+ * frontier row from 1,959 to 4,959 and the whole shipped suite stays 46/46.
+ * The baseline's own note for that row reads "1,959 staged parent
+ * references", so the artifact would be carrying a false sentence with
+ * nothing red — the class this file exists to refuse, one layer up.
+ *
+ * The obvious gate is wrong, and it was measured wrong before it was written:
+ * a digit sweep over the NOTES returns five rows and only two of them are
+ * magnitudes the archive produces — "217" is a line anchor, "4" and "7" are
+ * centuries, "222" is a PR number. Three false reds out of five.
+ *
+ * So the census reads the READER'S OUTPUT and never the prose: a live finding
+ * whose DETAIL publishes a number owes a pin. Today exactly 2 of the 12 do,
+ * and the other 10 are what proves the extractor can say no.
+ */
+const MAGNITUDE = /\d[\d,]*/g;
+function detailMagnitudes(detail) {
+  return (String(detail).match(MAGNITUDE) || []).map((s) => Number(s.replace(/,/g, '')));
+}
+/* deterministic thousands grouping — no ICU, so a node built without it
+ * cannot silently turn this arm into a wildcard */
+function grouped(n) {
+  return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+}
+const BASELINE_MAG = new Map(BASELINE.filter(([, , m]) => m).map(([k, , m]) => [k, m]));
+const BASELINE_NOTE = new Map(BASELINE.map(([k, note]) => [k, note]));
+
+/* ---------------------------------------------------------------- loaders */
+function loadArchive() {
+  const corpus = JSON.parse(readFileSync(join(L, 'remington-bloodline.json'), 'utf8'));
+  const overlay = JSON.parse(readFileSync(join(L, 'attested-overlays.json'), 'utf8'));
+  const packPaths = new Set(Object.values((corpus.meta && corpus.meta.packs) || {}));
+  for (const p of Object.values(overlay.persons || {})) if (p && p.evidencePack) packPaths.add(p.evidencePack);
+  const packs = {};
+  for (const p of packPaths) if (existsSync(join(L, p))) packs[p] = JSON.parse(readFileSync(join(L, p), 'utf8'));
+  const staged = {};
+  for (const f of readdirSync(join(L, 'persons'))) {
+    if (f.endsWith('.json')) staged[f.slice(0, -5)] = JSON.parse(readFileSync(join(L, 'persons', f), 'utf8'));
+  }
+  return { corpus, overlay, packs, staged, packExists: (p) => existsSync(join(L, p)) };
+}
+
+const archive = loadArchive();
+const real = checkSourceContract(archive);
+
+/* ========================================================================
+ * I — INDEPENDENCE
+ * ===================================================================== */
+
+/* every static/dynamic import or require, whatever it points at. */
+const IMPORT_SCANNER = /(^|\n)\s*import\s|(^|[^\w.])require\s*\(|(^|[^\w.])import\s*\(/g;
+
+function importHits(src) {
+  const out = [];
+  for (const m of src.matchAll(IMPORT_SCANNER)) out.push(src.slice(m.index, m.index + 60).split('\n')[0].trim());
+  return out;
+}
+
+test('I1: the scanner can find an import — control on a file that has them', () => {
+  const control = readFileSync(join(HERE, 'agreement.test.mjs'), 'utf8');
+  const hits = importHits(control);
+  assert.ok(hits.length >= 5, `the import scanner found ${hits.length} imports in agreement.test.mjs — a scanner that finds nothing cannot report an absence`);
+});
+
+test('I2: source-contract-audit.mjs imports nothing at all', () => {
+  const src = readFileSync(join(HERE, 'source-contract-audit.mjs'), 'utf8');
+  const hits = importHits(src);
+  assert.deepEqual(hits, [], `the independent reader imports: ${JSON.stringify(hits)}`);
+});
+
+test('I3: source-contract-audit.mjs names no implementation module, even in prose-free code', () => {
+  const src = readFileSync(join(HERE, 'source-contract-audit.mjs'), 'utf8');
+  /* strip block and line comments: the header QUOTES these filenames on
+   * purpose, and a scan that cannot tell a citation from a dependency would
+   * fail on its own documentation. */
+  const code = src.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|\n)\s*\/\/[^\n]*/g, '');
+  for (const mod of ['model.mjs', 'pipeline.mjs', 'person-panel-corpus.mjs', 'archive-core.mjs', 'fs-adapter.mjs', 'gedcom.mjs']) {
+    assert.ok(!code.includes(mod), `${mod} is named in the CODE of the independent reader`);
+  }
+  /* non-vacuity: the same strip leaves real code behind. */
+  assert.ok(code.includes('checkSourceContract'), 'the comment strip removed the code as well as the comments');
+});
+
+test('I4: the reader is pure — checking the real archive twice gives the same answer, and does not move the archive', () => {
+  const before = JSON.stringify(archive.corpus.meta) + JSON.stringify(archive.overlay.law);
+  const again = checkSourceContract(archive);
+  assert.deepEqual(again.findings.map(findingKey).sort(), real.findings.map(findingKey).sort());
+  assert.equal(JSON.stringify(archive.corpus.meta) + JSON.stringify(archive.overlay.law), before);
+});
+
+/* ========================================================================
+ * R — THE REAL ARCHIVE
+ * ===================================================================== */
+
+test('R1: no clause is vacuous — every one of them inspected something', () => {
+  const vacuous = CLAUSE_CODES.filter((c) => !real.inspected[c]);
+  assert.deepEqual(vacuous, [], `clauses that inspected nothing (a clean verdict from these means nothing): ${vacuous.join(', ')}`);
+  /* and the sweep is the size of the archive, not of a sample */
+  assert.ok(real.inspected['LNK-RECIPROCITY'] > 20000, `reciprocity inspected ${real.inspected['LNK-RECIPROCITY']} rows`);
+  assert.ok(real.inspected['SRC-NO-PROVENANCE'] > 10000, `provenance inspected ${real.inspected['SRC-NO-PROVENANCE']} persons`);
+});
+
+test('R2: no finding outside the baseline', () => {
+  const extra = real.findings.filter((f) => !BASELINE_KEYS.has(findingKey(f)));
+  assert.deepEqual(extra.map((f) => `${findingKey(f)} — ${f.detail}`), [],
+    'the published archive carries a source/claim/linking finding this baseline does not declare');
+});
+
+test('R3: no dead baseline entry — a repaired row must be deleted from the baseline, not left standing', () => {
+  const live = new Set(real.findings.map(findingKey));
+  const dead = [...BASELINE_KEYS].filter((k) => !live.has(k));
+  assert.deepEqual(dead, [],
+    'these baseline rows are no longer produced — if the repair landed, delete the line in the same commit');
+});
+
+test('R4: the declared tier vocabulary is parsed out of the corpus, not hard-coded', () => {
+  const tiers = declaredTiers(archive.corpus.meta.confidenceTiers);
+  assert.deepEqual([...tiers].sort(), ['colonial', 'medieval', 'recorded', 'saga']);
+  /* the parser must be able to return a different answer, or it is a constant */
+  assert.deepEqual([...declaredTiers('era heuristic (saga <1000)')], ['saga']);
+  assert.deepEqual([...declaredTiers('')], []);
+});
+
+test('R5: a pinned row declares the MAGNITUDE its detail publishes — a name alone lets the number move by any amount', () => {
+  const live = new Map(real.findings.map((f) => [findingKey(f), detailMagnitudes(f.detail)]));
+  const liveWithMag = [...live].filter(([, m]) => m.length).map(([k]) => k).sort();
+  const liveWithout = [...live].filter(([, m]) => !m.length).map(([k]) => k);
+
+  /* NON-VACUITY, taken from the live archive in BOTH directions rather than
+   * from a synthetic control: an extractor that never hits makes the census
+   * empty, and one that always hits makes it a wildcard. */
+  assert.ok(liveWithMag.length > 0,
+    'no live finding detail carries a number — the extractor found nothing, so this census means nothing');
+  assert.ok(liveWithout.length > 0,
+    `every live finding detail carries a number — the extractor cannot say no: ${liveWithout.length} expected to be > 0`);
+
+  /* (a) THE CENSUS, both directions, BY NAME. A new number-publishing finding
+   * owes a pin; a pin whose row stopped publishing one must be deleted in the
+   * same commit, exactly as R3 requires of a repaired row. */
+  assert.deepEqual(liveWithMag, [...BASELINE_MAG.keys()].sort(),
+    'a finding detail publishing a number must pin it here, and a pin for a row that no longer publishes one is dead');
+
+  for (const [key, want] of BASELINE_MAG) {
+    /* (b) THE VALUE — the whole ordered list, not a first match. */
+    assert.deepEqual(live.get(key), want,
+      `${key}: the archive moved and the baseline did not — update the pin AND the note in the same edit`);
+
+    /* (c) THE NOTE. The prose beside the pin is a sentence ABOUT this number,
+     * and it is the part a reviewer actually reads. Requiring the number to
+     * appear in its own row's note is a POSITIVE marker over the two pinned
+     * rows — not the digit sweep refused above, which reddens three rows that
+     * never carried a magnitude at all.
+     * STATED COST: for a small magnitude this can be satisfied by an unrelated
+     * digit in the same note. It is a guard against a stale sentence, not a
+     * proof that the sentence is about this number. */
+    const note = BASELINE_NOTE.get(key) || '';
+    for (const n of want) {
+      assert.ok(note.includes(String(n)) || note.includes(grouped(n)),
+        `${key}: the pinned magnitude ${grouped(n)} appears nowhere in its own note, so the note is prose about a number the row no longer publishes`);
+    }
+  }
+});
+
+
+/* ---------------------------------------------------------- coverage floors
+ * R1 asks only whether a clause inspected SOMETHING. For 31 of the 33 that is
+ * a truthiness test, and a truthiness test cannot see a sweep COLLAPSE: cut
+ * the persons loop to its first row and CLM-ERA-AS-SUPPORT falls 10,259 -> 1
+ * with this whole suite green. Measured by bee-laborer attacking #225 on
+ * 2026-09-23, mutating the reader ON DISK and running the shipped battery —
+ * 10,259 -> 1 and 7,204 -> 5 both read clean. The M arms cannot supply the
+ * cover: they run on a small synthetic fixture, so whether a collapse trips
+ * one depends on where the fixture happened to put its planted defect. A
+ * surviving window of five rows — a 99.93% coverage loss on the real archive
+ * — puts every M arm back to green.
+ *
+ * The two floors R1 does carry are CHOSEN CONSTANTS (> 20000, > 10000). This
+ * table takes the number from the POPULATION THE CLAUSE SWEEPS instead, read
+ * out of the artifacts by this file rather than reported by the reader: a
+ * reader cannot be its own witness about how much of the archive it read. A
+ * derived number never needs editing when the corpus grows and it cannot be
+ * satisfied by a sample.
+ *
+ * EXACT, not a floor. A floor refuses a collapse; equality also refuses a
+ * DOUBLE COUNT, and an inflated inspected count is exactly what would hide a
+ * collapse elsewhere. STATED COST: adding a second sweep site for a covered
+ * clause reds this row until the population expression is updated — a real
+ * red with a named action, not one nobody can act on.
+ *
+ * WHAT IT DOES NOT GUARD, stated so the next editor does not read it as
+ * wider than it is: both sides are derived from the same artifacts, so a
+ * TRUNCATED CORPUS moves them together and stays green here. R2/R3/R5 read
+ * the corpus; this row reads the READER.
+ */
+const sumOf = (xs, f) => xs.reduce((n, x) => n + f(x), 0);
+const popPersons = (a) => Object.keys(a.corpus.persons || {}).length;
+const popOverlayPersons = (a) => Object.keys(a.overlay.persons || {}).length;
+const popPacks = (a) => Object.keys(a.packs).length;
+const popPackClaims = (a) => sumOf(Object.values(a.packs), (p) => ((p && p.claims) || []).length);
+const popSymbolic = (a) => ((a.overlay && a.overlay.symbolicLinks) || []).length;
+const popEdges = (a) => Object.keys(a.corpus.edges || {}).length;
+const popCouples = (a) => Object.keys(a.corpus.couples || {}).length;
+
+/* [code, the population this clause sweeps, how THIS file counts it] */
+const SWEEPS = [
+  ['SRC-PACK-UNDECLARED', 'overlay.persons', popOverlayPersons],
+  ['SRC-OVERLAY-CLASS', 'overlay.persons', popOverlayPersons],
+  ['SRC-PACK-NO-LAW', 'the packs on disk', popPacks],
+  ['SRC-PACK-FSID-UNRESOLVED', 'the packs on disk', popPacks],
+  ['SRC-PACK-CLAIM-UNSOURCED', 'every claim in every pack', popPackClaims],
+  ['CLM-VERIFICATION-LANGUAGE', 'every claim in every pack', popPackClaims],
+  ['SRC-META-PACK-UNKNOWN', 'meta.packs', (a) => Object.keys((a.corpus.meta || {}).packs || {}).length],
+  ['CLM-ERA-AS-SUPPORT', 'corpus.persons', popPersons],
+  ['CLM-SUPPORT-OVERSTATED', 'corpus.persons', popPersons],
+  ['LNK-OVERLAY-PREFIX', 'overlay.persons + corpus.persons', (a) => popOverlayPersons(a) + popPersons(a)],
+  ['CLM-SYMBOL-UNATTRIBUTED', 'overlay.symbolicLinks', popSymbolic],
+  ['CLM-SYMBOL-AS-EDGE', 'overlay.symbolicLinks', popSymbolic],
+  ['CLM-SYMBOL-DANGLING', 'every connects[] target of every symbolic link',
+    (a) => sumOf(((a.overlay && a.overlay.symbolicLinks) || []), (s) => ((s && s.connects) || []).length)],
+  ['CLM-MONEY-AS-BLOOD', 'overlay.moneyHistory.entries', (a) => (((a.overlay || {}).moneyHistory || {}).entries || []).length],
+  ['CLM-TESTIMONY-UNATTRIBUTED', 'overlay.testimony', (a) => ((a.overlay || {}).testimony || []).length],
+  ['CLM-DISPUTE-THIN', 'overlay.relationshipEvidence', (a) => Object.keys((a.overlay || {}).relationshipEvidence || {}).length],
+  ['LNK-CORRECTION-UNRESOLVED', 'overlay.corrections', (a) => Object.keys((a.overlay || {}).corrections || {}).length],
+  ['LNK-OVERLAY-EDGE-UNRESOLVED', 'every parent ref of every overlay edge',
+    (a) => sumOf(Object.values((a.overlay || {}).edges || {}), (refs) => (refs || []).length)],
+  ['LNK-SELF-PARENT', 'corpus.edges', popEdges],
+  ['LNK-EDGE-ORPHAN', 'corpus.edges', popEdges],
+  ['LNK-COUPLE-BROKEN', 'corpus.couples', popCouples],
+  ['LNK-COUPLE-AND-EDGE', 'corpus.couples', popCouples],
+  ['LNK-RECIPROCITY', 'every parent and child row of every staged person',
+    (a) => sumOf(Object.values(a.staged), (s) => {
+      const rel = (s && s.relationships) || {};
+      return ((rel.parents || []).length) + ((rel.children || []).length);
+    })],
+  /* BOTH lists, because the clause walks both: published persons for the
+   * missing-from-store side, staged ids for the extra-in-store side. The
+   * staged store alone was ALSO the reader's own bulk increment, so the
+   * equality compared a number to itself and no collapse could move it.
+   * The guard is the reader's: neither walk runs when the store is empty.
+   * STATED COST: that guard's false branch is unreachable from the published
+   * archive, whose store is not empty, so NO arm in this file can fall on it.
+   * It mirrors the reader's own condition so that an empty store reds nothing,
+   * and it is untested here rather than proven — said plainly instead of left
+   * for the next reader to find. */
+  ['LNK-STAGED-CORPUS-DIVERGE', 'corpus.persons + the staged objects on disk — the clause walks both',
+    (a) => (Object.keys(a.staged).length ? popPersons(a) + Object.keys(a.staged).length : 0)],
+];
+
+/* The rest, each with the BRANCH that decides its count. Deriving these here
+ * would mean re-implementing the reader's own condition inside the file that
+ * checks it, which is the one thing an independent reader may not do — so
+ * they are covered by R1's truthiness test alone, and that is written down
+ * rather than left for the next reader to discover. */
+const UNCOVERED_SWEEPS = [
+  ['SRC-PACK-MISSING', 'counted only for an overlay person that declares an evidencePack'],
+  ['SRC-NO-PROVENANCE', 'counted only for a staged person that is NOT a private-stub'],
+  ['SRC-STUB-CARRIES-REFS', 'counted only for a staged person that IS a private-stub'],
+  ['SRC-EDGE-OVERSTATED', 'counted only when an overlay parent ref resolves AND the staged child carries that parent row'],
+  ['CLM-TIER-UNDECLARED', 'counted once per DISTINCT evidence.class in use — a derived set, not an artifact population'],
+  ['CLM-DISPUTE-UNDISCLOSED', 'counted only for a relationshipEvidence entry that names a disputed claim'],
+  ['LNK-CORRECTION-NOT-APPLIED', 'counted only for a correction whose provider id resolves to a published person'],
+  ['LNK-FRONTIER-UNDISCLOSED', 'a singleton, reached only when the staged store is non-empty'],
+  ['META-COUNT-DIVERGE', 'one row per declared number, and the census keys are a UNION of declared and recomputed'],
+];
+
+test('R6: a clause sweeping an artifact population inspected ALL of it — a truthiness census cannot see a collapse', () => {
+  /* THE PARTITION. Every clause is filed as covered, or as covered-by-R1-only
+   * with its branch named; a new clause cannot arrive unfiled and none can sit
+   * in both lists. Without this the table is an allow-list, and an allow-list
+   * reports a missing entry never. */
+  const covered = SWEEPS.map(([c]) => c);
+  const uncovered = UNCOVERED_SWEEPS.map(([c]) => c);
+  assert.deepEqual(covered.filter((c) => uncovered.includes(c)), [],
+    'a clause is filed as both swept and unswept');
+  assert.deepEqual([...covered, ...uncovered].sort(), [...CLAUSE_CODES].sort(),
+    'every clause owes a population expression or a named reason it has none');
+
+  /* NON-VACUITY. An equality between two zeroes passes whatever the reader
+   * did, so every covered population must be something the archive holds.
+   * IT CANNOT FALL ALONE AND THAT IS BY CONSTRUCTION, measured rather than
+   * assumed: the covered set is a subset of CLAUSE_CODES (the partition
+   * above proves it), so any 0 === 0 state is also a clause that inspected
+   * nothing, which R1 already fails on. Blinding a population AND emptying
+   * the matching reader loop reds R1 and R6 together, and neutering this
+   * very assertion leaves that verdict unchanged. It is kept so that R6
+   * names its own vacuity instead of reading green while a sibling row
+   * reports something that sounds unrelated — not because it adds cover. */
+  const empty = SWEEPS.filter(([, , pop]) => pop(archive) === 0).map(([c, name]) => `${c} (${name})`);
+  assert.deepEqual(empty, [],
+    'these populations are empty in the archive, so their coverage check is 0 === 0 and proves nothing');
+
+  /* THE COUNT ITSELF. */
+  for (const [code, name, pop] of SWEEPS) {
+    assert.equal(real.inspected[code], pop(archive),
+      `${code} inspected ${real.inspected[code]} of the ${pop(archive)} rows in ${name} — the clause read a sample, not the archive`);
+  }
+});
+
+/* ========================================================================
+ * M — THE MUTATIONS
+ * ===================================================================== */
+
+function cleanFixture() {
+  const person = (over) => Object.assign({
+    name: 'Somebody', lifespan: '1900–1980', gender: 'MALE', living: false, source: 'familysearch',
+    evidence: { era: 'recorded', support: 'unsourced-entry', class: 'recorded', basis: 'era label from dates; support unsourced until sources are harvested' },
+    refs: [{ provider: 'familysearch', id: 'AAA-000' }],
+    research: { status: 'incomplete', basis: 'per-person source counts not yet harvested' },
+    publication: { status: 'public' },
+  }, over);
+  const ovlPerson = (id) => person({
+    name: id, living: false, source: undefined,
+    evidence: { era: 'saga', support: 'attested', class: 'saga', basis: 'attested-overlay: tradition' },
+    refs: [{ provider: 'attested-overlay', id }],
+    research: { status: 'tradition-entered', basis: 'per-person source counts not yet harvested' },
+    evidencePack: 'evidence/f.json',
+  });
+  const stagedOf = (id, parents, children, over) => Object.assign({
+    schema: 'skaists.person/1', internalId: id,
+    identity: { name: id, living: false },
+    refs: [{ provider: 'familysearch', id: 'AAA-000' }],
+    evidence: { era: 'recorded', support: 'unsourced-entry', class: 'recorded', basis: 'era label from dates' },
+    research: { status: 'incomplete', basis: 'per-person source counts not yet harvested' },
+    publication: { status: 'public' },
+    relationships: { parents, children, spouses: [] },
+    layers: { records: null, tradition: null, testimony: [], meaning: [] },
+  }, over);
+
+  const corpus = {
+    persons: {
+      pRoot: person({ name: 'Root', refs: [{ provider: 'familysearch', id: 'AAA-111' }] }),
+      pDad: person({
+        name: 'Dad', refs: [{ provider: 'familysearch', id: 'AAA-222' }],
+        corrected: { attested: 'founder order', note: 'attested deceased' },
+        research: { status: 'corrected-attested', basis: 'per-person source counts not yet harvested' },
+      }),
+      pMom: person({ name: 'Mom', refs: [{ provider: 'familysearch', id: 'AAA-333' }] }),
+      'ovl-a': ovlPerson('ovl-a'),
+      'ovl-b': ovlPerson('ovl-b'),
+      stub: person({
+        name: 'Living', living: true, refs: [], source: undefined,
+        evidence: { era: 'living', support: 'unsourced-entry', class: 'living', basis: 'redacted stub' },
+        publication: { status: 'private-stub', reason: 'living' },
+      }),
+    },
+    edges: { pRoot: ['pDad', 'pMom'], 'ovl-a': ['pDad'], 'ovl-b': ['ovl-a'] },
+    couples: { 'pDad|pMom': { p1: 'pDad', p2: 'pMom' } },
+    refsIndex: { 'AAA-111': 'pRoot', 'AAA-222': 'pDad', 'AAA-333': 'pMom' },
+    meta: {
+      stats: { deceasedPublished: 6 },
+      privacy: 'living persons redacted; root-line living survive as anonymous stubs',
+      confidenceTiers: 'era heuristic (recorded ≥1850 · colonial 1550–1850 · medieval 1000–1550 · saga <1000)',
+      claimPolicy: 'every person carries its evidence class',
+      packs: { 'ovl-a': 'evidence/f.json' },
+      reconciliation: { rawPersons: 9, published: 6 },
+      correctionsApplied: 1,
+      overlayPersons: 2,
+      stagedPersons: {
+        store: 'persons/', publicStaged: 6,
+        researchCounts: { incomplete: 3, 'corrected-attested': 1, 'tradition-entered': 2 },
+        publicationCounts: { public: 5, 'private-stub': 1 },
+      },
+    },
+  };
+
+  const overlay = {
+    schema: 'skaists.lineage-overlay/1',
+    persons: {
+      'ovl-a': { name: 'ovl-a', living: false, evidence: { class: 'saga', basis: 'attested-overlay: tradition' }, evidencePack: 'evidence/f.json' },
+      'ovl-b': { name: 'ovl-b', living: false, evidence: { class: 'saga', basis: 'attested-overlay: tradition' }, evidencePack: 'evidence/f.json' },
+    },
+    edges: { 'ovl-a': ['AAA-222'], 'ovl-b': ['ovl-a'] },
+    edgeNotes: { 'ovl-a': 'parents per tradition', 'ovl-b': 'parents per tradition' },
+    corrections: { 'AAA-222': { patch: { living: false }, note: 'attested deceased', attested: 'founder order' } },
+    relationshipEvidence: {
+      'ovl-b|ovl-a': {
+        claim: 'ovl-b is the child of ovl-a', status: 'disputed',
+        hypotheses: [{ id: 'h1', label: 'one' }, { id: 'h2', label: 'two' }],
+        contradictions: 'the two traditions are a century apart',
+        sources: ['https://example.invalid/a'],
+      },
+    },
+    testimony: [{ id: 't1', lens: 'testimony', subject: 'the line', author: 'family testimony', text: 'a story', status: 'attributed testimony — records pending' }],
+    moneyHistory: { law: 'never confused with parentage', entries: [{ ref: 't1', via: 'testimony' }] },
+    symbolicLinks: [{ id: 'sym-1', symbol: 'a crest', meaning: 'a meaning', connects: ['pRoot'], kind: 'meaning', attribution: 'founder-authored symbolism' }],
+    law: 'Overlay ids use the ovl- prefix',
+  };
+
+  const packs = {
+    'evidence/f.json': {
+      schema: 'skaists.evidence/1',
+      person: { name: 'Dad', lifespan: '1900–1980', fsid: 'AAA-222', tier: 'recorded', tierBasis: 'era label' },
+      summary: 'the pack',
+      claims: [{ claim: 'Record: Dad, provider person AAA-222, retrieved 2026-09-16.', source: 'FamilySearch Family Tree record', url: 'https://example.invalid/AAA-222' }],
+      law: 'This pack ATTRIBUTES the provider record. It does not assert independent verification.',
+    },
+  };
+
+  const staged = {
+    pRoot: stagedOf('pRoot', [{ id: 'pDad', name: 'Dad', evidence: 'walked provider link' }, { id: 'pMom', name: 'Mom', evidence: 'walked provider link' }], []),
+    pDad: stagedOf('pDad', [], [{ id: 'pRoot', name: 'Root' }, { id: 'ovl-a', name: 'ovl-a' }], { research: { status: 'corrected-attested', basis: 'per-person source counts not yet harvested' } }),
+    pMom: stagedOf('pMom', [], [{ id: 'pRoot', name: 'Root' }]),
+    'ovl-a': stagedOf('ovl-a', [{ id: 'pDad', name: 'Dad', evidence: 'overlay — tradition-carried' }], [{ id: 'ovl-b', name: 'ovl-b' }], {
+      refs: [{ provider: 'attested-overlay', id: 'ovl-a' }],
+      research: { status: 'tradition-entered', basis: 'per-person source counts not yet harvested' },
+      layers: { records: null, tradition: { pack: 'evidence/f.json' }, testimony: [], meaning: [] },
+    }),
+    'ovl-b': stagedOf('ovl-b', [{ id: 'ovl-a', name: 'ovl-a', evidence: 'disputed — inspect in the comb' }], [], {
+      refs: [{ provider: 'attested-overlay', id: 'ovl-b' }],
+      research: { status: 'tradition-entered', basis: 'per-person source counts not yet harvested' },
+      layers: { records: null, tradition: { pack: 'evidence/f.json' }, testimony: [], meaning: [] },
+    }),
+    stub: stagedOf('stub', [], [], {
+      identity: { name: 'Living', living: true }, refs: [],
+      publication: { status: 'private-stub', reason: 'living' },
+    }),
+  };
+
+  return { corpus, overlay, packs, staged, packExists: (p) => Object.prototype.hasOwnProperty.call(packs, p) };
+}
+
+function runFixture(mutate) {
+  const fx = cleanFixture();
+  /* packExists must follow the MUTATED pack map, not the one captured at build */
+  const state = { corpus: fx.corpus, overlay: fx.overlay, packs: fx.packs, staged: fx.staged };
+  if (mutate) mutate(state);
+  return checkSourceContract({
+    ...state,
+    packExists: (p) => Object.prototype.hasOwnProperty.call(state.packs, p),
+  });
+}
+
+test('M0 CONTROL: the clean fixture yields zero findings and no vacuous clause', () => {
+  const r = runFixture(null);
+  assert.deepEqual(r.findings.map((f) => `${findingKey(f)} — ${f.detail}`), [],
+    'the control fixture is not contract-clean, so every refusal below would be meaningless');
+  const vacuous = CLAUSE_CODES.filter((c) => !r.inspected[c]);
+  assert.deepEqual(vacuous, [], `the fixture never reaches these clauses, so their mutations prove nothing: ${vacuous.join(', ')}`);
+});
+
+const MUTATIONS = [
+  ['SRC-PACK-UNDECLARED', (s) => { delete s.overlay.persons['ovl-a'].evidencePack; }],
+  ['SRC-PACK-MISSING', (s) => { s.overlay.persons['ovl-a'].evidencePack = 'evidence/gone.json'; }],
+  ['SRC-OVERLAY-CLASS', (s) => { s.overlay.persons['ovl-a'].evidence.class = 'recorded'; }],
+  ['SRC-PACK-NO-LAW', (s) => { delete s.packs['evidence/f.json'].law; }],
+  ['SRC-PACK-CLAIM-UNSOURCED', (s) => { s.packs['evidence/f.json'].claims[0].source = ''; }],
+  ['SRC-PACK-FSID-UNRESOLVED', (s) => { s.packs['evidence/f.json'].person.fsid = 'ZZZ-999'; }],
+  ['SRC-META-PACK-UNKNOWN', (s) => { s.corpus.meta.packs.pGhost = 'evidence/f.json'; }],
+  ['SRC-NO-PROVENANCE', (s) => { s.staged.pRoot.refs = []; }],
+  ['SRC-STUB-CARRIES-REFS', (s) => { s.staged.stub.refs = [{ provider: 'familysearch', id: 'AAA-444' }]; }],
+  ['SRC-EDGE-OVERSTATED', (s) => { s.staged['ovl-a'].relationships.parents[0].evidence = 'walked provider link'; }],
+  ['CLM-VERIFICATION-LANGUAGE', (s) => { s.packs['evidence/f.json'].claims[0].claim += ' The descent is independently verified.'; }],
+  ['CLM-TIER-UNDECLARED', (s) => { s.corpus.persons.pRoot.evidence.class = 'unrecorded'; }],
+  ['CLM-ERA-AS-SUPPORT', (s) => { s.corpus.persons.pRoot.evidence.support = 'recorded'; }],
+  ['CLM-SUPPORT-OVERSTATED', (s) => { s.corpus.persons.pRoot.evidence.support = 'sourced'; }],
+  ['CLM-SYMBOL-UNATTRIBUTED', (s) => { s.overlay.symbolicLinks[0].attribution = ''; }],
+  ['CLM-SYMBOL-DANGLING', (s) => { s.overlay.symbolicLinks[0].connects = ['pNobody']; }],
+  ['CLM-SYMBOL-AS-EDGE', (s) => { s.overlay.symbolicLinks[0].id = 'pRoot'; }],
+  ['CLM-MONEY-AS-BLOOD', (s) => { s.overlay.moneyHistory.entries[0].ref = 'pRoot'; }],
+  ['CLM-TESTIMONY-UNATTRIBUTED', (s) => { s.overlay.testimony[0].author = ''; }],
+  ['CLM-DISPUTE-THIN', (s) => { s.overlay.relationshipEvidence['ovl-b|ovl-a'].hypotheses = [{ id: 'h1' }]; }],
+  /* NOT 'walked provider link': that would also break SRC-EDGE-OVERSTATED and
+   * the mutation would stop discriminating. The honest overlay tag is exactly
+   * the wrong answer here — the edge IS tradition-carried AND disputed. */
+  ['CLM-DISPUTE-UNDISCLOSED', (s) => { s.staged['ovl-b'].relationships.parents[0].evidence = 'overlay — tradition-carried'; }],
+  ['LNK-OVERLAY-PREFIX', (s) => {
+    s.overlay.persons.oa = { name: 'oa', living: false, evidence: { class: 'saga', basis: 'tradition' }, evidencePack: 'evidence/f.json' };
+    s.corpus.meta.overlayPersons = 3; /* keep the declared count honest so META-COUNT-DIVERGE stays silent */
+  }],
+  ['LNK-OVERLAY-EDGE-UNRESOLVED', (s) => { s.overlay.edges['ovl-a'] = ['NOPE-1']; }],
+  ['LNK-CORRECTION-UNRESOLVED', (s) => {
+    s.overlay.corrections['ZZZ-000'] = s.overlay.corrections['AAA-222'];
+    delete s.overlay.corrections['AAA-222'];
+  }],
+  ['LNK-CORRECTION-NOT-APPLIED', (s) => { delete s.corpus.persons.pDad.corrected; }],
+  ['LNK-SELF-PARENT', (s) => { s.corpus.edges.pRoot.push('pRoot'); }],
+  ['LNK-EDGE-ORPHAN', (s) => { s.corpus.edges.pGhost = ['pDad']; }],
+  ['LNK-COUPLE-BROKEN', (s) => { s.corpus.couples['pDad|pMom'].p2 = 'pNobody'; }],
+  ['LNK-COUPLE-AND-EDGE', (s) => { s.corpus.edges.pDad = ['pMom']; }],
+  ['LNK-RECIPROCITY', (s) => { s.staged.pDad.relationships.children = []; }],
+  ['LNK-STAGED-CORPUS-DIVERGE', (s) => {
+    s.staged.pExtra = JSON.parse(JSON.stringify(s.staged.pMom));
+    s.staged.pExtra.internalId = 'pExtra';
+    s.staged.pExtra.relationships = { parents: [], children: [], spouses: [] };
+    s.corpus.meta.stagedPersons.publicStaged = 7;
+    s.corpus.meta.stagedPersons.researchCounts.incomplete = 4;
+    s.corpus.meta.stagedPersons.publicationCounts.public = 6;
+  }],
+  ['LNK-FRONTIER-UNDISCLOSED', (s) => {
+    s.staged.pRoot.relationships.parents.push({ id: 'pGhost', name: 'unpublished', evidence: 'walked provider link' });
+  }],
+  ['META-COUNT-DIVERGE', (s) => { s.corpus.meta.stats.deceasedPublished = 99; }],
+];
+
+assert.equal(MUTATIONS.length, CLAUSE_CODES.length,
+  `every clause owes a mutation: ${CLAUSE_CODES.length} clauses, ${MUTATIONS.length} mutations`);
+
+for (const [code, mutate] of MUTATIONS) {
+  test(`M ${code}: breaking this clause fires it, and fires nothing else`, () => {
+    const r = runFixture(mutate);
+    const codes = [...new Set(r.findings.map((f) => f.code))].sort();
+    assert.deepEqual(codes, [code],
+      `expected ${code} alone; got ${JSON.stringify(r.findings.map((f) => `${findingKey(f)} — ${f.detail}`))}`);
+  });
+}
+
+test('M-REMEDY LNK-FRONTIER-UNDISCLOSED: declaring the frontier clears it — the row reads the DISCLOSURE, not the dangling ref', () => {
+  const withGhost = runFixture((s) => {
+    s.staged.pRoot.relationships.parents.push({ id: 'pGhost', name: 'unpublished', evidence: 'walked provider link' });
+  });
+  assert.deepEqual([...new Set(withGhost.findings.map((f) => f.code))], ['LNK-FRONTIER-UNDISCLOSED']);
+  const disclosed = runFixture((s) => {
+    s.staged.pRoot.relationships.parents.push({ id: 'pGhost', name: 'unpublished', evidence: 'walked provider link' });
+    s.corpus.meta.reconciliation.frontier = { unresolvedParentReferences: 1, note: 'the line stops here and the corpus says so' };
+  });
+  assert.deepEqual(disclosed.findings.map(findingKey), [],
+    'the clause must accept a stated frontier, or it is a ban on the archive having edges rather than a disclosure law');
+});
+
+test('M-REMEDY SRC-EDGE-OVERSTATED: the honest tag clears it, and a missing row is not silently a pass', () => {
+  const overstated = runFixture((s) => { s.staged['ovl-a'].relationships.parents[0].evidence = 'walked provider link'; });
+  assert.deepEqual([...new Set(overstated.findings.map((f) => f.code))], ['SRC-EDGE-OVERSTATED']);
+  const honest = runFixture((s) => { s.staged['ovl-a'].relationships.parents[0].evidence = 'overlay — tradition-carried'; });
+  assert.deepEqual(honest.findings.map(findingKey), []);
+  /* and the inspected count must fall when the row disappears, or "clean"
+   * would be indistinguishable from "never looked" */
+  const absent = runFixture((s) => { s.staged['ovl-a'].relationships.parents = []; });
+  assert.ok(absent.inspected['SRC-EDGE-OVERSTATED'] < runFixture(null).inspected['SRC-EDGE-OVERSTATED'],
+    'removing the staged row left the inspected count unchanged — the clause is counting something else');
+});
+
+test('M-REMEDY META-COUNT-DIVERGE: a DELETED census declaration fires by name — the clause used to fail open on exactly this', () => {
+  /* PRECONDITION: the fixture must actually publish a census under both
+   * fields, or a "fires" assertion below would be asserting the fixture. */
+  const clean = cleanFixture();
+  const sp = clean.corpus.meta.stagedPersons;
+  for (const key of ['researchCounts', 'publicationCounts']) {
+    const total = Object.values(sp[key]).reduce((n, v) => n + v, 0);
+    assert.ok(total > 0, `the fixture declares an EMPTY ${key}, so deleting it proves nothing`);
+  }
+
+  for (const key of ['researchCounts', 'publicationCounts']) {
+    const r = runFixture((s) => { delete s.corpus.meta.stagedPersons[key]; });
+    assert.deepEqual(r.findings.map(findingKey), [`META-COUNT-DIVERGE :: meta.stagedPersons.${key}`],
+      `deleting meta.stagedPersons.${key} must be reported BY NAME; a silent skip turns three real comparisons off and every gate stays green`);
+  }
+
+  /* the OTHER direction: a declaration that is present and honest stays silent,
+   * so the row above is not a ban on the field existing. */
+  assert.deepEqual(runFixture(null).findings.map(findingKey), []);
+
+  /* and the inspected count is not the instrument: it FALLS on the deletion,
+   * which is precisely why a truthiness test on it could not see the fail-open. */
+  const base = runFixture(null).inspected['META-COUNT-DIVERGE'];
+  const cut = runFixture((s) => { delete s.corpus.meta.stagedPersons.researchCounts; }).inspected['META-COUNT-DIVERGE'];
+  assert.ok(cut < base, `inspected did not fall (${base} -> ${cut}); the deletion never reached the clause`);
+});
+
+test('M-REMEDY META-COUNT-DIVERGE: an absent census over an EMPTY field is silent — the escape hatch owes a row too', () => {
+  /* Nothing is published under `research`, so there is no census to declare
+   * and an absent declaration states nothing false. Without this arm the
+   * `total === 0` branch is an untested off-switch. */
+  const r = runFixture((s) => {
+    delete s.corpus.meta.stagedPersons.researchCounts;
+    for (const obj of Object.values(s.staged)) delete obj.research;
+    for (const p of Object.values(s.corpus.persons)) delete p.research;
+  });
+  const metaRows = r.findings.filter((f) => f.code === 'META-COUNT-DIVERGE');
+  assert.deepEqual(metaRows.map(findingKey), [],
+    'an absent census over a field nobody publishes must not be reported — that would be a ban on the field being unused');
+  /* non-vacuity: the clause still ran. */
+  assert.ok(r.inspected['META-COUNT-DIVERGE'] > 0, 'the clause never executed, so its silence means nothing');
+});
