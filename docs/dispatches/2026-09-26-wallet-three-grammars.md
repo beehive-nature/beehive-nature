@@ -107,15 +107,19 @@ That branch freezes wallet.html as the register reference and ships the token se
 - **New bee's reading:** beyond the matrix, bee also got (a) the black-ground inline colours (amber, cyan, honey, leaf, violet) stepped darker inside their own ramps for paper, since a semantic colour is never repainted to another hue; (b) the sections' 38 filled "gold" buttons outlined until pressed, so a task never opens on a wall of primaries; (c) the engineering kicker kept out of the matriarch's first screen (it stays in raver and cypherpunk).
 - **44px floor:** enforced in **every** register, not just bee. 33 inline controls were cut to 26–34px.
 - **Honest states on the shared cards too:** the five balance placeholders and the Arweave refresh path wrote a bare "—". They now write nothing (the card hides its figure), and the stat line under each card already says why.
+- **Bee's paper adapter, measured:** a contrast audit of every visible text leaf in bee's "everything" view found **41 below AA**. Faint labels on the paper well sat at 4.05:1, and the sections' inline dark-ground chips (`background:#0e2d3a` buttons, `#E9F2EC` ladder labels) sat at 1.1–2.5:1. This defect predates this lane: #232 put the page on paper. Each hue now steps to its bee stop (DESIGN-CONSTRAINTS §13: a tool family migrates as a unit), leaving **0 below AA**. Raver and cypherpunk miss AA only through the sheet's one ruled exception (ink-dim on bg-card, 4.4:1, kept exact), 57 leaves each; the gate now holds both lines.
+- **The ru coverage floor for wallet.html was reset 42 → 23**, on the plur.html precedent (`e24ca8195`: "a replacement page starts fresh"). That floor is an absolute count of keyed strings visible at arrival. Measured for the wallet alone: main shows **506 visible, 60 keyed (12%), 446 unkeyed**; this branch shows **29 visible, 23 keyed (79%), 6 unkeyed**. The matriarch's first screen went from 12% translatable to 79%, and every string behind a row is still keyed. The ratchet resumes rising from 23.
 - **Heading casing:** the unkeyed authored capitals ("CONNECT —", "THE KEYCHAIN —", …) are lowercased per the casing law. The keyed ones (`wl.insc.h2`, `wl.vh2`, `wl.h.summary`) still carry capitals in all 29 tongues. Changing them is a corpus-wide edit, left open and named here.
 
 ## 7 · receipts (this branch, merged with main `fb8da542d`)
 
 | gate | result |
 |---|---|
-| `node e2e/wallet-registers.mjs` (golden dress contract harness + the three grammars) | **GREEN 66/66** |
+| `node e2e/wallet-registers.mjs` (golden dress contract harness + the three grammars + contrast) | **GREEN 69/69** |
 | wallet batteries: fund · vault · matrix · arweave · signer · adapter | 94 · 35 · 11 · 22 · 105 · 28, **0 failed** |
-| CI `node --test`: comprehension · orb-seat · bpay-policy-ownership | 9/9 · 4/4 · 2/2 (each was red on this branch before the tests were given the reader's real first step: a row tap or a deep link; no assertion loosened) |
+| CI `node --test`: comprehension · orb-seat · bpay-policy-ownership · tour-bar-clearance | 9/9 · 4/4 · 2/2 · 4/4 (the first three were red on this branch before they were given the reader's real first step: a row tap or a deep link; no assertion loosened) |
+| CI browser gates: bPay phase A · phase B · bData · polish-i18n · engineflow · no-page-errors | 18/18 · 17/17 (phase B deep-linked, same rule) · 100/100 · 25/25 · 30/30 · exit 0 |
+| CI i18n: coverage selftest · ru floors | exit 0 · PASS (wallet floor reset 42 → 23 with the measurement above) |
 | CI front-door static suite | 377/377 |
 | `scripts/estate-check.mjs` · `e2e/estate-source.mjs` | PASS · 11/11 (45 new keys × 28 tongues, machine-drafted ⚙, casing-clean) |
 | screenshots | `e2e/shots-wallet-registers/`: contract arrivals `wallet-390-{reg}.png` (unread), read arrivals `wallet-390-{reg}-read.png`, desktop `wallet-1280-{reg}.png`, a bee task, a raver deck |

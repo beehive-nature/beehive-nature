@@ -356,7 +356,21 @@ body[data-reg="bee"] main>section :is([style*="font-size:9"],[style*="font-size:
 /* the sections' own inline colours were drawn for the black ground; on paper
    each hue steps darker inside its OWN ramp (a semantic colour is never
    repainted to another hue): amber, ai cyan, honey, leaf, sovereign violet */
-body[data-reg="bee"]{--amber:#8a4b00;--cyan:#0f6f82;--gold:#7a5209;--leaf:#326b39;--violet:#6e3fb8;--line:#e6dfd2}
+body[data-reg="bee"]{--amber:#8a4b00;--cyan:#0f6f82;--gold:#7a5209;--leaf:#326b39;--violet:#6e3fb8;--line:#e6dfd2;--faint:#5a645e;--flag:#8a5a14}
+/* the rest of the family migrates as a unit (DESIGN-CONSTRAINTS §13): the
+   sections' inline dark-ground chips and ink-on-black labels were drawn for
+   #06110c; on paper each steps to its bee stop. Measured, not eyeballed: the
+   gate holds every visible text leaf of bee's "everything" view to AA. */
+body[data-reg="bee"] main>section :is([style*="background:#0"],[style*="background:#1"],[style*="background:#2"],[style*="background:#3"]){background:var(--well)!important}
+body[data-reg="bee"] main>section :is([style*="border-color:#1"],[style*="border-color:#2"],[style*="border-color:#4"],[style*="solid #1"],[style*="solid #2"],[style*="solid #4"]){border-color:var(--line2)!important}
+body[data-reg="bee"] main>section :is([style*="color:#E9F2EC"],[style*="color:#e9f2ec"]){color:var(--ink)!important}
+body[data-reg="bee"] main>section [style*="color:#6FA9E0"]{color:#4d759b!important}
+body[data-reg="bee"] main>section [style*="color:#86CC72"]{color:#2e6b1e!important}
+body[data-reg="bee"] main>section [style*="color:#D655BB"]{color:#a8238c!important}
+body[data-reg="bee"] #fund-sec .fund-launch{background:var(--well);border-color:var(--line2)}
+/* a field in bee is always a light well with ink, whatever inline dress it
+   was rendered with (bPay's quote-service field is drawn for the black) */
+body[data-reg="bee"] main>section :is(input:not([type="checkbox"]):not([type="radio"]),select,textarea){background:var(--well)!important;color:var(--ink)!important;border-color:var(--line2)!important}
 /* one filled action per view: in bee the sections' many "gold" buttons stand
    outlined until pressed, so no task opens on a wall of primaries */
 body[data-reg="bee"] main>section button.gold{background:var(--panel);color:var(--reg-primary);border:1.5px solid var(--reg-primary)}

@@ -290,6 +290,46 @@ ok('the STRUCTURE vector differs on every pair (not a recolour)', vec('bee') !==
     REGS.map(r => r + ':' + seen[r].unread.words.join()).join(' · '));
 }
 
+// 7b · CONTRAST, measured on every visible text leaf of the whole wallet
+// ("everything" view) against its effective background. Bee is paper, so the
+// sections' dark-ground inline palette must have migrated with it: AA, no
+// exceptions. Raver and cypherpunk may miss AA only by the sheet's ONE ruled
+// exception (ink-dim #648176 on bg-card #0c1412, kept exact, 4.4:1).
+{
+  const contrast = page => page.evaluate(() => {
+    const parse = c => { const m = c.match(/rgba?\(([^)]+)\)/); if (!m) return null; const p = m[1].split(',').map(s => parseFloat(s)); return { r: p[0], g: p[1], b: p[2], a: p.length > 3 ? p[3] : 1 }; };
+    const lum = c => { const f = v => { v /= 255; return v <= .03928 ? v / 12.92 : Math.pow((v + .055) / 1.055, 2.4); }; return .2126 * f(c.r) + .7152 * f(c.g) + .0722 * f(c.b); };
+    const bgOf = el => { for (let n = el; n; n = n.parentElement) { const c = parse(getComputedStyle(n).backgroundColor); if (c && c.a > .5) return c; } return parse(getComputedStyle(document.body).backgroundColor); };
+    const out = [];
+    document.querySelectorAll('main>section[data-wl-task] *').forEach(el => {
+      if (el.children.length || !el.textContent.trim() || !el.getClientRects().length) return;
+      const cs = getComputedStyle(el); if (cs.visibility === 'hidden' || parseFloat(cs.opacity) === 0) return;
+      if (el.closest('[aria-disabled="true"],:disabled')) return; // inactive controls are exempt (WCAG 1.4.3)
+      const fg = parse(cs.color), bg = bgOf(el); if (!fg || !bg) return;
+      const L1 = lum(fg), L2 = lum(bg), ratio = (Math.max(L1, L2) + .05) / (Math.min(L1, L2) + .05);
+      const min = parseFloat(cs.fontSize) >= 18.66 || (parseFloat(cs.fontSize) >= 14 && parseInt(cs.fontWeight, 10) >= 700) ? 3 : 4.5;
+      if (ratio < min) out.push({ t: el.textContent.trim().slice(0, 30), sec: el.closest('section').id, ratio: Math.round(ratio * 100) / 100, pair: cs.color + ' on ' + `rgb(${bg.r}, ${bg.g}, ${bg.b})` });
+    });
+    return out;
+  });
+  const low = {};
+  for (const reg of REGS) {
+    const { ctx, page } = await open(reg);
+    await page.evaluate(() => { document.body.setAttribute('data-wl-view', 'all'); });
+    await page.waitForTimeout(700);
+    low[reg] = await contrast(page);
+    await ctx.close();
+  }
+  ok('bee: every visible text leaf of the whole wallet holds AA contrast on paper', low.bee.length === 0,
+    low.bee.slice(0, 3).map(l => `${l.sec} "${l.t}" ${l.ratio} (${l.pair})`).join(' · '));
+  const ruled = l => l.pair === 'rgb(100, 129, 118) on rgb(12, 20, 18)';
+  for (const reg of ['raver', 'cypherpunk']) {
+    const other = low[reg].filter(l => !ruled(l));
+    ok(`${reg}: below AA only by the sheet's one ruled exception (ink-dim on bg-card)`, other.length === 0,
+      `${low[reg].length - other.length} ruled · ` + other.slice(0, 3).map(l => `${l.sec} "${l.t}" ${l.ratio} (${l.pair})`).join(' · '));
+  }
+}
+
 // 8 · nothing orphaned: every section is reachable from a bee row AND a raver glyph
 {
   const { ctx, page } = await open('bee', { fixture: false });
