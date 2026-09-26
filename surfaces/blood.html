@@ -297,7 +297,8 @@ body.gux #lenses,body.gux .listview,body.gux #rootnote{display:none!important} /
   var TIER_COLOR={recorded:'var(--verified)',colonial:'var(--info)',medieval:'var(--gold)',saga:'var(--violet)',living:'var(--dim)',unrecorded:'var(--dim)'};
   var esc=function(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});};
   function langText(key,fallback){var t=window.BNRLanguage&&window.BNRLanguage.text;return t?t(key,fallback):fallback;}
-  function byr(l){var m=String(l||'').match(/^(\d{3,4})/);return m?parseInt(m[1],10):null;}
+  /* byr MIRRORS tools/genealogy/lifespan.mjs birthYear (signed: BC negative, 1-4 digit years); a classic script cannot import it, so tools/genealogy/lifespan.test.mjs holds the two equal */
+  function byr(l){var m=String(l||'').match(/^(\d{1,4})(BC)?/);return m?(m[2]?-parseInt(m[1],10):parseInt(m[1],10)):null;}
 
   var S={persons:{},edges:{},children:{},spineIds:new Set(),root:null,curRoot:null,spineOn:false,stats:{},
     packs:{},packData:{},relEvidence:{},testimony:[],recon:null,lenses:{records:true,tradition:true,testimony:true,spiritual:true},
@@ -966,7 +967,7 @@ body.gux #lenses,body.gux .listview,body.gux #rootnote{display:none!important} /
     if(S.spineIds.has(id))chips+='<span class="chip" style="color:var(--gold)">'+esc(langText('blood.onspine','on the spine'))+'</span>';
     var cby=byr(p.lifespan);
     if(cby)(S.edges[id]||[]).forEach(function(x){var pb=byr(S.persons[x]&&S.persons[x].lifespan);
-      if(pb&&pb>=cby)chips+='<span class="chip" style="color:var(--rose)">⚠ impossible chronology (parent b. '+pb+')</span>';});
+      if(pb&&pb>=cby)chips+='<span class="chip" style="color:var(--rose)">⚠ impossible chronology (parent b. '+(pb<0?(-pb)+' BC':pb)+')</span>';});
     body.innerHTML='<div class="dname">'+esc(p.name||id)+'</div>'
       +(p.lifespan?'<div class="dyears">'+esc(p.lifespan)+'</div>':'')
       +'<div class="dchips">'+chips+'</div>'+rels+layersHtml(id,p)
