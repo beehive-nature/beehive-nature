@@ -634,7 +634,225 @@
     clearTimeout(freshTimer); freshTimer = null;
     var sel = chosen(), q = sel && !ask ? usableQuote(sel) : null, left = q ? FRESH_MS - (Date.now() - new Date(q.obtainedAt).getTime()) : 0;
     if (left > 0) freshTimer = setTimeout(render, left + 250);
+    eternal();
   }
+
+  /* ══ ETERNAL FRONT — one data layer, three renderers (docs/design/eternal, founder 2026-09-26) ══
+     The facts are the SAME state this whole page is drawn from: the reference invoice
+     (bpay-invoice.json), the store receipt (bdata-stored-bux-try-autonomi.json, believed only
+     when storeVerify() passes), the shared audience policy and this device's automation policy.
+     "stored" is drawn only on that verdict; nothing on this front pays, signs, uploads or
+     changes a policy. The only gestures are reading, lighting and handing off: "watch it"
+     opens bview.html at the receipt's address; "who can get it" hands off to the real
+     chooser below. Exposed as window.__eternal so tests read the same object. */
+  var ED = { ready: false }, ES = { open: {}, sel: 0, lit: {}, verified: null };
+  function atto2(x){ var s = antStr(x); return s === null ? null : s; }
+  function leadTail(s){ var i = s.indexOf('.'); if (i < 0 || s.length - i - 1 <= 4) return [s, '']; return [s.slice(0, i + 5), s.slice(i + 5)]; }
+  function tok(n){ return getComputedStyle(document.body).getPropertyValue('--sk-' + n).trim(); }
+  function etData(){
+    var D = { ready: invState === 'ready', invState: invState };
+    if (!D.ready) return D;
+    var d = INV.domain, a = d.artifact, pol = d.policy || {}, aud = pol.audience || {}, line = refLine() || {}, sel = chosen();
+    var sv = storedVerdict();
+    D.title = (d.media && d.media.title) || a.name; D.creator = (d.media && d.media.creator) || '';
+    D.name = a.name; D.bytes = Number(a.bytes); D.sha256 = String(a.sha256); D.network = d.network || '';
+    D.mb = Math.round(D.bytes / 1e6);
+    D.chunks = (d.chunks && Number(d.chunks.total)) || ((line.quotes || []).length) || 0;
+    D.quotes = (line.quotes || []).map(function(q){ return String(q.amount_atto); });
+    D.quoteHashes = (line.quotes || []).map(function(q){ return String(q.quote_hash || ''); });
+    D.refAtto = line.amountAtto ? String(line.amountAtto) : null;
+    try { D.quoteSum = D.quotes.reduce(function(s, q){ return s + BigInt(q); }, 0n).toString(); } catch(e){ D.quoteSum = null; }
+    D.quoteAt = (d.quote && d.quote.obtained_at) || '';
+    D.shape = d.payment_type || '';
+    D.access = aud.access || pol.access || '';
+    D.forget = pol.forgettability || '';
+    D.audience = (sel && sel.audience) || aud.selected || 'public';
+    D.audienceBy = sel ? (originHere(sel) ? 'you, in My Data' : 'you, elsewhere') : 'the machine reference';
+    D.unavailable = UNAVAIL.map(function(u){ return u.id; });
+    D.automation = st.automation.mode; D.bound = st.automation.boundAnt;
+    D.storedState = sv.state; D.stored = sv.state === 'stored';
+    D.address = D.stored ? bareHex(sv.receipt.data_map_address) : null;
+    D.evidence = [];
+    if (D.stored) {
+      D.evidence = sv.receipt.evidence.map(function(e){ return { state: e.state, at: String(e.at || ''), what: String(e.what || ''), source: String(e.source || ''), tx: e.tx ? String(e.tx) : '' }; });
+      var pur = D.evidence.filter(function(e){ return e.state === 'purchased'; })[0] || {}, up = D.evidence.filter(function(e){ return e.state === 'uploaded'; })[0] || {};
+      var m = /(\d+) atto/.exec(pur.what || ''); D.paidAtto = m ? m[1] : null;
+      var g = /gas ([\d.]+) ETH/.exec(pur.what || ''); D.gasEth = g ? g[1] : null;
+      D.tx = pur.tx || '';
+      var c = /(\d+) of (\d+) chunks stored/.exec(up.what || ''); D.storedChunks = c ? [Number(c[1]), Number(c[2])] : null;
+      D.storedAt = up.at || '';
+    }
+    return D;
+  }
+  function day(iso){ var dt = new Date(iso); if (isNaN(dt)) return ''; try { return new Intl.DateTimeFormat(lang(), { day:'numeric', month:'short', year:'numeric' }).format(dt); } catch(e){ return String(iso).slice(0, 10); } }
+  function setHTML(id, h){ var el = document.getElementById(id); if (el && el.innerHTML !== h) el.innerHTML = h; }
+  function chev(){ return '<svg class="chev" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2"/></svg>'; }
+
+  /* ── NEW BEE ── one file, four plain questions, one action */
+  function etBee(D){
+    if (!D.ready) { setHTML('etBeeRows', '<div class="et-b-wait">' + esc(D.invState === 'failed' ? T('et.bdata.b.fail', 'your files did not load. the whole page below can try again.') : T('et.bdata.b.wait', 'reading your files…')) + '</div>'); return; }
+    var paid = D.stored && D.paidAtto ? atto2(D.paidAtto) : null;
+    var rows = [
+      ['who', T('et.bdata.b.who', 'who can get it'), D.audience === 'public' ? T('et.bdata.b.whoV', 'anyone with the address') : esc(D.audience), '',
+        '<p>' + esc(T('et.bdata.b.whoOpen', 'it is public: anyone who has its address can open it. that is what keeps it free to share.')) + '</p>' +
+        '<p class="out">' + esc(T('et.bdata.b.onlyme', 'only me: not ready yet, so not offered.')) + '</p>' +
+        '<p class="out">' + esc(T('et.bdata.b.picked', 'people you pick: not ready yet, so not offered.')) + '</p>' +
+        '<p class="mut">' + esc(T('et.bdata.b.whoBy', 'chosen by {by}.').replace('{by}', D.audienceBy === 'the machine reference' ? T('et.bdata.b.byRef', 'the setup, not by you yet') : T('et.bdata.b.byYou', 'you'))) + '</p>'],
+      ['where', T('et.bdata.b.where', 'where it is kept'), D.stored ? '✓ ' + esc(T('et.bdata.b.whereV', 'on Autonomi')) : esc(T('et.bdata.b.whereNo', 'not stored yet')), D.stored ? 'ok' : '',
+        D.stored ? '<p>' + esc(T('et.bdata.b.whereOpen', 'kept on the Autonomi network since {day}: {n} of {m} pieces stored, then downloaded back and checked against the original.').replace('{day}', day(D.storedAt)).replace('{n}', D.storedChunks ? D.storedChunks[0] : D.chunks).replace('{m}', D.storedChunks ? D.storedChunks[1] : D.chunks)) + '</p>'
+                 : '<p>' + esc(T('et.bdata.b.whereNot', 'there is no store receipt this page can check, so it does not say stored.')) + '</p>'],
+      ['cost', T('et.bdata.b.cost', 'what it cost'), paid ? esc(T('et.bdata.b.costV', 'paid once')) : esc(T('et.bdata.b.costNo', 'nothing paid yet')), '',
+        paid ? '<p class="et-b-fig"><bdi>' + esc(leadTail(paid)[0]) + '<span>' + esc(leadTail(paid)[1]) + '</span> ANT</bdi></p>' +
+               '<p class="mut">' + esc(T('et.bdata.b.costOpen', 'one payment, no subscription. network gas was paid on the side, not folded in.')) + '</p>' +
+               '<p class="mut">' + esc(T('et.bdata.b.forever', 'forever means it cannot be taken down later.')) + '</p>'
+             : '<p>' + esc(T('et.bdata.b.costNot', 'the price is asked from the network only when you choose to keep it.')) + '</p>'],
+      ['helpers', T('et.bdata.b.help', 'your helpers may'), esc(D.automation === 'ask' ? T('et.bdata.b.ask', 'ask you first') : D.automation === 'auto' ? T('et.bdata.b.auto', 'act within your limit') : T('et.bdata.b.never', 'never spend')), '',
+        '<p>' + esc(D.automation === 'ask' ? T('et.bdata.b.askOpen', 'every payment asks you first, here on this page.') : D.automation === 'auto' ? T('et.bdata.b.autoOpen', 'they may keep things within {b} ANT each time. anything above asks you.').replace('{b}', D.bound) : T('et.bdata.b.neverOpen', 'nothing spends unless you press it yourself.')) + '</p>' +
+        '<p class="mut">' + esc(T('et.bdata.b.change', 'you can change this in the whole page below.')) + '</p>']
+    ];
+    var h = '<div class="et-b-file"><i aria-hidden="true">▶</i><div><b>' + esc(D.title) + '</b><span>' + esc(D.creator ? D.creator.split(' · ')[0] + ' · ' : '') + esc(T('et.bdata.b.video', 'a video')) + ' · ' + D.mb + ' MB</span></div></div>';
+    rows.forEach(function(r){
+      var open = !!ES.open[r[0]];
+      h += '<button type="button" class="et-b-row" data-ek="b-' + r[0] + '" aria-expanded="' + open + '"><span>' + esc(r[1]) + '</span><small' + (r[3] ? ' class="' + r[3] + '"' : '') + '>' + r[2] + chev() + '</small></button>';
+      h += '<div class="et-b-open" data-open="' + r[0] + '"' + (open ? '' : ' hidden') + '>' + r[4] + '</div>';
+    });
+    setHTML('etBeeRows', h);
+    var go = document.getElementById('etBeeGo');
+    if (D.stored) { go.setAttribute('href', 'bview.html#' + D.address); go.textContent = T('et.bdata.b.watch', 'watch it'); go.removeAttribute('data-handoff'); }
+    else { go.setAttribute('href', '#aud-h'); go.textContent = T('et.bdata.b.choose', 'choose who can get it'); go.setAttribute('data-handoff', 'who'); }
+    document.getElementById('etBeeTitle').textContent = D.stored ? T('et.bdata.b.h', 'your files, kept') : T('et.bdata.b.hNo', 'your files');
+  }
+
+  /* ── RAVER ── the video as a bloom: one petal per stored piece, its length its quoted price */
+  // a teardrop petal: narrow at the heart, widest two-thirds out, a point at its price
+  function petal(r0, r1, a0, a1){
+    var c = (a0 + a1) / 2, w = (a1 - a0) / 2, rm = r0 + (r1 - r0) * .62;
+    var p = function(r, a){ return (r * Math.cos(a)).toFixed(2) + ' ' + (r * Math.sin(a)).toFixed(2); };
+    return 'M' + p(r0, c) + 'Q' + p(rm, c - w * 1.9) + ' ' + p(r1, c) + 'Q' + p(rm, c + w * 1.9) + ' ' + p(r0, c) + 'Z';
+  }
+  function bands(D){
+    var v = D.quotes.map(function(q){ return Number(BigInt(q) / 1000000000000n) / 1e6; }).slice().sort(function(a, b){ return a - b; });
+    var q = function(f){ return v[Math.min(v.length - 1, Math.floor(f * v.length))]; };
+    return [q(.25), q(.5), q(.75)];
+  }
+  function band(x, B){ return x <= B[0] ? 0 : x <= B[1] ? 1 : x <= B[2] ? 2 : 3; }
+  function etRaver(D){
+    var svg = document.getElementById('etBloom'); if (!svg) return;
+    if (!D.ready || !D.quotes.length) { svg.innerHTML = ''; setHTML('etRaverCard', '<div><b>' + esc(T('et.bdata.r.wait', 'reading the pieces…')) + '</b></div>'); return; }
+    var n = D.quotes.length, vals = D.quotes.map(function(q){ return Number(BigInt(q) / 1000000000000n) / 1e6; });
+    var lo = Math.min.apply(null, vals), hi = Math.max.apply(null, vals), B = bands(D);
+    var RN = (tok('rainbow').match(/#[0-9a-f]{6}/gi) || []);
+    var kept = [RN[1], RN[2], RN[3], RN[4]];   // the kept palette, rim to centre: biomass, ai, info, sovereign
+    var h = '', step = 2 * Math.PI / n;
+    for (var i = 0; i < n; i++) {
+      var a0 = -Math.PI / 2 + i * step + 0.012, a1 = a0 + step - 0.024;
+      var r1 = 96 + (hi > lo ? (vals[i] - lo) / (hi - lo) : .5) * 92;
+      var sel = ES.sel === i, lit = !!ES.lit[i];
+      var fill = D.stored ? kept[band(vals[i], B)] : tok('sovereign-wash');
+      if (sel) fill = tok('sovereign-strong');
+      h += '<path class="pt" data-i="' + i + '" d="' + petal(66, r1, a0, a1) + '" fill="' + fill + '" opacity="' + (sel || lit ? 1 : (D.stored ? .78 : .9)) + '"' + (D.stored ? '' : ' stroke="' + tok('sovereign') + '" stroke-width="1"') + '/>';
+    }
+    h += '<circle r="58" fill="' + tok('bg-card') + '"/><circle r="50" fill="none" stroke="' + tok('sovereign') + '" stroke-dasharray="3 4"/>';
+    h += '<text y="-4" text-anchor="middle" fill="' + tok('ink') + '" style="font:700 15px/1.2 var(--sk-font-raver-display)">' + D.mb + ' MB</text>';
+    h += '<text y="18" text-anchor="middle" fill="' + tok('ink-soft') + '" style="font:400 14px/1.4 var(--sk-font-raver-body)">' + esc(T('et.bdata.r.one', '1 video')) + '</text>';
+    if (D.stored) h += '<circle r="196" fill="none" stroke="' + RN[0] + '" stroke-width="2" stroke-dasharray="2 6"/>';
+    svg.innerHTML = h;
+    var litN = Object.keys(ES.lit).length;
+    document.getElementById('etRaverTitle').textContent = n + ' ' + T('et.bdata.r.pieces', 'pieces');
+    document.getElementById('etRaverHint').textContent = D.stored ? T('et.bdata.r.hint', 'tap a petal · each one is stored') : T('et.bdata.r.hintNo', 'tap a petal · none stored yet');
+    var legend = document.getElementById('etLegend');
+    var fmt = function(x){ return x.toFixed(2); };
+    legend.innerHTML = [['≤ ' + fmt(B[0]), kept[0]], ['≤ ' + fmt(B[1]), kept[1]], ['≤ ' + fmt(B[2]), kept[2]], ['> ' + fmt(B[2]), kept[3]]].map(function(x){ return '<span><i style="background:' + (D.stored ? x[1] : tok('sovereign-wash')) + '"></i>' + esc(x[0]) + '</span>'; }).join('');
+    var i2 = ES.sel, hash = D.quoteHashes[i2] || '';
+    setHTML('etRaverCard', '<span class="rk">' + (i2 + 1) + '</span><div><b>' + esc(T('et.bdata.r.piece', 'piece {i} of {n}').replace('{i}', i2 + 1).replace('{n}', n)) + ' · ' + esc(vals[i2].toFixed(4)) + ' ANT</b><span>' + esc(D.stored ? T('et.bdata.r.stored', 'stored') : T('et.bdata.r.notStored', 'not stored yet')) + ' · ' + esc(T('et.bdata.r.quote', 'quote')) + ' ' + esc(hash.slice(0, 10)) + '…</span></div>');
+    document.getElementById('etRaverNote').textContent = litN + ' ' + T('et.bdata.r.lit', 'of {n} lit').replace('{n}', n) + ' · ' + (D.stored ? T('et.bdata.r.keptNote', 'colour = kept · petal length = its quoted price') : T('et.bdata.r.dimNote', 'dim = not stored · petal length = its quoted price'));
+    var go = document.getElementById('etRaverGo');
+    if (D.stored) { go.setAttribute('href', 'bview.html#' + D.address); go.textContent = T('et.bdata.r.watch', 'watch it'); go.removeAttribute('data-handoff'); }
+    else { go.setAttribute('href', '#aud-h'); go.textContent = T('et.bdata.r.choose', 'who can get it'); go.setAttribute('data-handoff', 'who'); }
+  }
+
+  /* ── CYPHERPUNK ── the object, the pipeline, the receipt, and a check you can run here */
+  function verifyHere(D){
+    var out = [], sv = storedVerdict(), r = sv.receipt || STO || {}, a = (INV && INV.domain && INV.domain.artifact) || {};
+    var ok = function(k, pass, got){ out.push({ k: k, pass: !!pass, got: got }); };
+    ok('receipt.artifact.name == invoice', r.artifact && r.artifact.name === a.name, (r.artifact && r.artifact.name) || T('et.bdata.c.absent', 'absent'));
+    ok('receipt.artifact.sha256 == invoice', r.artifact && r.artifact.sha256 === a.sha256, r.artifact ? String(r.artifact.sha256).slice(0, 16) + '…' : T('et.bdata.c.absent', 'absent'));
+    ok('receipt.artifact.bytes == invoice', r.artifact && Number(r.artifact.bytes) === Number(a.bytes), r.artifact ? String(r.artifact.bytes) : T('et.bdata.c.absent', 'absent'));
+    ok('receipt.data_map_address == invoice', bareHex(r.data_map_address) && bareHex(r.data_map_address) === bareHex(INV && INV.domain.data_map_address), bareHex(r.data_map_address).slice(0, 16) + (r.data_map_address ? '…' : T('et.bdata.c.absent', 'absent')));
+    ok('evidence cites purchased · uploaded · retrieved', Array.isArray(r.evidence) && ['purchased', 'uploaded', 'retrieved'].every(function(s){ return r.evidence.some(function(e){ return e && e.state === s && e.source; }); }), Array.isArray(r.evidence) ? r.evidence.length + ' rows' : T('et.bdata.c.absent', 'absent'));
+    ok('sum(' + D.quotes.length + ' quotes) == invoice line', D.quoteSum && D.quoteSum === D.refAtto, D.quoteSum ? atto2(D.quoteSum) + ' ANT' : T('et.bdata.c.unread', 'unread'));
+    return { at: new Date().toISOString(), rows: out, pass: out.every(function(x){ return x.pass; }) };
+  }
+  function etCy(D){
+    if (!D.ready) { setHTML('etCyPath', esc(T('et.bdata.c.wait', 'bdata://… reading bpay-invoice.json'))); return; }
+    setHTML('etCyPath', 'autonomi://' + esc(D.address || T('et.bdata.c.noaddr', 'no-address-until-stored')));
+    setHTML('etChips', '<span class="' + (D.stored ? 'ok' : '') + '">state ' + (D.stored ? 'stored ✓' : esc(D.storedState)) + '</span><span class="on">audience ' + esc(D.audience) + '</span><span>' + (D.stored ? 'immutable' : 'mutable') + '</span><span>' + esc(D.network) + '</span>');
+    setHTML('etCyGuard', '<span>audience only-me · selected-people</span><b>' + esc(T('et.bdata.c.refused', 'not qualified · not offered')) + '</b>');
+    var kv = [
+      ['name', esc(D.name)],
+      ['bytes', esc(D.bytes.toLocaleString('en-US')) + ' (' + D.mb + ' MB)'],
+      ['sha256', esc(D.sha256)],
+      ['address', D.address ? esc(D.address) : '<span class="no">' + esc(T('et.bdata.c.noStore', 'none · no verified store receipt')) + '</span>'],
+      ['access', esc(D.access)],
+      ['forget', esc(D.forget)],
+      ['automation', esc(D.automation) + (D.automation === 'auto' ? ' · bound ' + esc(D.bound) + ' ANT/op' : '') + ' · this device']
+    ];
+    setHTML('etObject', kv.map(function(r){ return '<tr><th>' + r[0] + '</th><td>' + r[1] + '</td></tr>'; }).join(''));
+    var ev = function(s){ return D.evidence.filter(function(e){ return e.state === s; })[0]; };
+    var pur = ev('purchased'), up = ev('uploaded'), ret = ev('retrieved');
+    var auth = st.authorization;
+    var steps = [
+      ['intake · registered', D.name + ' · ' + D.chunks + ' chunks · ' + D.shape, 'done'],
+      ['audience · ' + D.audience, 'bound by ' + D.audienceBy + ' · only-me / selected-people not qualified', D.audienceBy === 'the machine reference' ? 'done' : 'done you'],
+      ['quote · ' + D.quotes.length + ' chunk quotes', 'reference ' + (D.refAtto ? atto2(D.refAtto) : '?') + ' ANT · obtained ' + utc(D.quoteAt) + ' · gas separate (Arbitrum ETH)', 'done'],
+      ['authorize · phase C intent', auth ? auth.state + ' · ' + auth.id : (D.stored ? 'not used · the owner paid by hand (see purchased) · signing from this page is phase E' : 'no authorization on this device · signing is phase E'), auth ? 'done' : (D.stored ? 'skip' : 'todo')],
+      ['purchased', pur ? (D.paidAtto ? atto2(D.paidAtto) + ' ANT' : '') + (D.gasEth ? ' + gas ' + D.gasEth + ' ETH' : '') + ' · ' + utc(pur.at) + (pur.tx ? ' · tx ' + pur.tx : '') : 'not yet · no receipt row', pur ? 'done' : 'todo'],
+      ['uploaded', up ? up.what + ' · ' + utc(up.at) : 'not yet', up ? 'done' : 'todo'],
+      ['retrieved · hash-checked', ret ? ret.what + ' · ' + utc(ret.at) : 'not yet', ret ? 'done' : 'todo']
+    ];
+    var nowAt = steps.findIndex(function(s){ return s[2] === 'todo'; });
+    setHTML('etPipe', steps.map(function(s, i){ return '<li class="' + s[2] + (i === nowAt ? ' now' : '') + '"><b>' + esc(s[0]) + '</b><p>' + esc(s[1]) + '</p></li>'; }).join(''));
+    var sources = D.evidence.length ? D.evidence.map(function(e){ return e.state + ' ← ' + e.source.split(' — ')[0]; }) : [];
+    setHTML('etSources', sources.length ? sources.map(function(s){ return '<li>' + esc(s) + '</li>'; }).join('') : '<li>' + esc(T('et.bdata.c.noSources', 'no store receipt verified · nothing to cite')) + '</li>');
+    var V = ES.verified;
+    setHTML('etVerify', V ? V.rows.map(function(r){ return '<li class="' + (r.pass ? 'yes' : 'no') + '">' + (r.pass ? '✓ ' : '✗ ') + esc(r.k) + ' · <code>' + esc(r.got) + '</code></li>'; }).join('') + '<li>' + esc('ran here · ' + utc(V.at)) + '</li>' : '<li>' + esc(T('et.bdata.c.notRun', 'not run yet')) + '</li>');
+    setHTML('etByHand', D.address ? '<li><code>ant file download ' + esc(D.address) + ' out.mp4</code></li><li><code>sha256sum out.mp4</code> == <code>' + esc(D.sha256) + '</code></li>' : '<li>' + esc(T('et.bdata.c.noHand', 'nothing is stored yet, so there is nothing to fetch')) + '</li>');
+    var w = document.getElementById('etCyWatch');
+    if (D.address) { w.hidden = false; w.setAttribute('href', 'bview.html#' + D.address); } else w.hidden = true;
+  }
+
+  // the front's static words ride the same T(key, english) law: the English of record is kept once
+  function etWords(){ document.querySelectorAll('[data-etk]').forEach(function(el){ if (!el.hasAttribute('data-eten')) el.setAttribute('data-eten', el.textContent); el.textContent = T(el.getAttribute('data-etk'), el.getAttribute('data-eten')); }); }
+  function eternal(){
+    try {
+      etWords();
+      ED = etData();
+      if (ED.ready && ES.verified == null && stoState !== 'loading') ES.verified = verifyHere(ED);
+      etBee(ED); etRaver(ED); etCy(ED);
+      window.__eternal = { data: ED, ui: ES, verify: function(){ ES.verified = verifyHere(etData()); eternal(); return ES.verified; } };
+    } catch(e) { /* the front never takes the page down with it */ if (window.console) console.warn('eternal front', e); }
+  }
+  (function wireEternal(){
+    var ev = document.getElementById('eternal'); if (!ev) return;
+    ev.addEventListener('click', function(e){
+      var row = e.target.closest('.et-b-row[data-ek]');
+      if (row) { var k = row.getAttribute('data-ek').slice(2); ES.open[k] = !ES.open[k]; row.setAttribute('aria-expanded', String(ES.open[k])); var p = ev.querySelector('.et-b-open[data-open="' + k + '"]'); if (p) p.hidden = !ES.open[k]; return; }
+      var pt = e.target.closest('#etBloom .pt');
+      if (pt) { var i = +pt.getAttribute('data-i'); ES.sel = i; ES.lit[i] = true; etRaver(ED); return; }
+      var stp = e.target.closest('[data-step]');
+      if (stp && ED.quotes && ED.quotes.length) { var n = ED.quotes.length; ES.sel = (ES.sel + (+stp.getAttribute('data-step')) + n) % n; ES.lit[ES.sel] = true; etRaver(ED); return; }
+      var ho = e.target.closest('[data-handoff="who"]');
+      if (ho) {   // the one hand-off: the real audience chooser below owns the choice
+        e.preventDefault();
+        var real = document.querySelector('#shelf [data-act="public"]');
+        var h3 = document.getElementById('aud-h');
+        if (h3) h3.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        if (real) { try { real.focus({ preventScroll: true }); } catch(x){} }
+        return;
+      }
+      if (e.target.closest('#etCyVerify')) { ES.verified = verifyHere(etData()); etCy(ED); say(ES.verified.pass ? T('et.bdata.c.pass', 'every check passed') : T('et.bdata.c.failSay', 'a check did not pass')); }
+    });
+  })();
 
   /* ---------- listeners: delegated ONCE on the stable page, so no redraw can lose them ---------- */
   var root = document.getElementById('bdata') || document.body;
