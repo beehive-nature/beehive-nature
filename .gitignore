@@ -39,6 +39,9 @@ docs/design/*
 # ...and ETERNAL, the founder's three-UI blueprint (FOUNDER ORDER 2026-09-26): every surface is
 # rebuilt against it, so its screens, markup and law ride the tree (docs/design/eternal/README.md).
 !docs/design/eternal/
+# ...and skaists, the estate's graded design system (tokens.json + manifest, A- 2026-09-19): the one
+# source scripts/build-skaists.mjs compiles into surfaces/skaists.css.
+!docs/design/skaists/
 # ...and UI-LAW.md, the estate-wide confirmation laws (S26-0825 D1/D2): the
 # sprint-closing receipt re-derives its needles in CI, so the file rides the
 # repo like any other law. Everything else in docs/design/ stays a pen.

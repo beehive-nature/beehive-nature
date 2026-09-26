@@ -1,0 +1,433 @@
+{
+  "manifestVersion": 3,
+  "name": "skaists",
+  "namespace": "Skaists",
+  "files": [
+    "assets/Font/README.md",
+    "assets/Icons/README.md",
+    "assets/Logos/README.md",
+    "assets/Signs/README.md",
+    "components/Asking/README.md",
+    "components/BChip/README.md",
+    "components/Button/README.md",
+    "components/ConsentCheck/README.md",
+    "components/GuardRow/README.md",
+    "components/Icon/README.md",
+    "components/ListCard/README.md",
+    "components/PersonRow/README.md",
+    "components/PlainRow/README.md",
+    "components/RegisterToggle/README.md",
+    "components/Sign/README.md",
+    "components/StatusChip/README.md",
+    "components/TreeOfLife/README.md",
+    "components/Wordmark/README.md",
+    "components/bundle.css",
+    "components/bundle.js",
+    "components/index.d.ts",
+    "components/lib/react-dom.production.min.js",
+    "components/lib/react.production.min.js",
+    "fonts/IBMPlexMono-Medium.woff2",
+    "fonts/IBMPlexMono-Regular.woff2",
+    "fonts/IBMPlexMono-SemiBold.woff2",
+    "fonts/InstrumentSans-wght.woff2",
+    "fonts/InstrumentSerif-Regular.woff2",
+    "fonts/Sora-wght.woff2",
+    "fonts/Unbounded-wght.woff2",
+    "fonts/burti.woff2",
+    "licenses/OFL-IBMPlexMono.txt",
+    "licenses/OFL-InstrumentSans.txt",
+    "licenses/OFL-InstrumentSerif.txt",
+    "licenses/OFL-Sora.txt",
+    "licenses/OFL-Unbounded.txt",
+    "tokens.css"
+  ],
+  "libraries": [
+    {
+      "name": "react",
+      "version": "18.3.1",
+      "global": "React",
+      "file": "components/lib/react.production.min.js"
+    },
+    {
+      "name": "react-dom",
+      "version": "18.3.1",
+      "global": "ReactDOM",
+      "file": "components/lib/react-dom.production.min.js"
+    }
+  ],
+  "components": [
+    {
+      "name": "TreeOfLife",
+      "group": "the tree of life",
+      "summary": "austras koks — the latvian tree of life, drawn with the house crest's own branch — carrying a family line: 2 parents, 4 grandparents, 8, 16. one set of generat…"
+    },
+    {
+      "name": "RegisterToggle",
+      "group": "registers",
+      "summary": "the one control that changes how a page speaks: new bee · raver · cypherpunk, as three named pills with their marks, the pressed one filled with register-on."
+    },
+    {
+      "name": "Wordmark",
+      "group": "registers",
+      "summary": "sets a name exactly as the founder cases it — capitals heavy, small letters light — in the house hand, burti."
+    },
+    {
+      "name": "Sign",
+      "group": "the tree of life",
+      "summary": "the house's latvian signs, copied path for path from the crest: austras-koks, saule, auseklis, jumis, mara-cross, mara-water, cell, heart."
+    },
+    {
+      "name": "Button",
+      "group": "actions",
+      "summary": "three weights of press: primary is the one thing the view is for, outline is the other real choice, quiet is an action at the weight of a link."
+    },
+    {
+      "name": "ConsentCheck",
+      "group": "actions",
+      "summary": "the line a person ticks before a primary that cannot be undone: \"i understand, and i choose this.\""
+    },
+    {
+      "name": "ListCard",
+      "group": "rows",
+      "summary": "a card of rows: a thing on the left, its state on the right."
+    },
+    {
+      "name": "PersonRow",
+      "group": "rows",
+      "summary": "one ancestor: initials on a sovereign-wash disc, the name with its capitals, and how many sources stand behind it."
+    },
+    {
+      "name": "PlainRow",
+      "group": "rows",
+      "summary": "what cannot happen yet, said as a row of prose with its reason in sight. never a disabled button."
+    },
+    {
+      "name": "GuardRow",
+      "group": "laws",
+      "summary": "the living guard, in guard lilac: the system declined, and nothing broke."
+    },
+    {
+      "name": "StatusChip",
+      "group": "status",
+      "summary": "a word and a mark, then a colour: verified (settled, current), human (a family draft), guard (held out)."
+    },
+    {
+      "name": "Asking",
+      "group": "status",
+      "summary": "the honest waiting state: what is being asked, the seconds so far, and a way to stop."
+    },
+    {
+      "name": "BChip",
+      "group": "status",
+      "summary": "a b amount: honey on the dark chip. the only place b-value is ever used."
+    },
+    {
+      "name": "Icon",
+      "group": "marks",
+      "summary": "the ten 16px stroke marks, copied from the graded canvas: bee (the cell), raver (the burst), cypherpunk (the brackets), lock, eye, forever, no-undo, check, che…"
+    }
+  ],
+  "assetGroups": [
+    {
+      "name": "Logos",
+      "tile": "l",
+      "order": [
+        "bnature-logo.svg",
+        "bnature-logo.jpg"
+      ],
+      "files": [
+        {
+          "path": "assets/Logos/bnature-logo.svg",
+          "id": "d711466eb8c54f4d3b5e76671a0151b3"
+        },
+        {
+          "path": "assets/Logos/bnature-logo.jpg",
+          "id": "2207bcf66f13a09765735b3a73708670"
+        }
+      ]
+    },
+    {
+      "name": "Signs",
+      "tile": "s",
+      "order": [
+        "austras-koks.svg",
+        "saule.svg",
+        "auseklis.svg",
+        "jumis.svg",
+        "mara-cross.svg",
+        "mara-water.svg",
+        "cell.svg",
+        "heart.svg"
+      ],
+      "files": [
+        {
+          "path": "assets/Signs/austras-koks.svg",
+          "id": "a1afa2d97221dc1bfe6524d7896c7e2d"
+        },
+        {
+          "path": "assets/Signs/saule.svg",
+          "id": "e3b2ae806b7b6baf7ea033be9b5397a9"
+        },
+        {
+          "path": "assets/Signs/auseklis.svg",
+          "id": "e9fa2e5899cbc152def1d70e3b957133"
+        },
+        {
+          "path": "assets/Signs/jumis.svg",
+          "id": "1a45a160f165daf50ec4f31abfe029e4"
+        },
+        {
+          "path": "assets/Signs/mara-cross.svg",
+          "id": "11b876ae9e85b99f1043963a10e0d135"
+        },
+        {
+          "path": "assets/Signs/mara-water.svg",
+          "id": "a2752135bd02a08d4d46527bf4d0d97c"
+        },
+        {
+          "path": "assets/Signs/cell.svg",
+          "id": "5c9580173f9659a12fa1291979a775a9"
+        },
+        {
+          "path": "assets/Signs/heart.svg",
+          "id": "883fb09df567264ef3aad9449f163842"
+        }
+      ]
+    },
+    {
+      "name": "Font",
+      "tile": "l",
+      "order": [
+        "burti-specimen.png",
+        "burti.ttf",
+        "skaists-specimen.png",
+        "skaists.ttf"
+      ],
+      "files": [
+        {
+          "path": "assets/Font/burti-specimen.png",
+          "id": "fcf3e72ee03933627e6c01e2abdedb3f"
+        },
+        {
+          "path": "assets/Font/skaists-specimen.png",
+          "id": "10f20e404fe98df00492c48fd23d2a7d"
+        },
+        {
+          "path": "assets/Font/burti.ttf",
+          "id": "a4b394300220891191236a9f4691fa30"
+        },
+        {
+          "path": "assets/Font/skaists.ttf",
+          "id": "362e5913f11924059f80770513bbb813"
+        }
+      ]
+    },
+    {
+      "name": "Icons",
+      "tile": "xs",
+      "order": [
+        "bee.svg",
+        "raver.svg",
+        "cypherpunk.svg",
+        "lock.svg",
+        "eye.svg",
+        "forever.svg",
+        "no-undo.svg",
+        "check.svg",
+        "chevron-right.svg",
+        "chevron-left.svg"
+      ],
+      "files": [
+        {
+          "path": "assets/Icons/bee.svg",
+          "id": "bd9df0e5d67caa513d466f9ee634bc59"
+        },
+        {
+          "path": "assets/Icons/raver.svg",
+          "id": "9aa52e097579ab8b886043dffc708d47"
+        },
+        {
+          "path": "assets/Icons/cypherpunk.svg",
+          "id": "4f331d488b5de9ab50a70bd748fcdf13"
+        },
+        {
+          "path": "assets/Icons/lock.svg",
+          "id": "a9b2610849b8385770864a658aa53ba4"
+        },
+        {
+          "path": "assets/Icons/eye.svg",
+          "id": "47e01d3943c1caf5b616147163592fea"
+        },
+        {
+          "path": "assets/Icons/forever.svg",
+          "id": "a69e66b5be645b4f41e8e4b967786f94"
+        },
+        {
+          "path": "assets/Icons/no-undo.svg",
+          "id": "27211f83ad47eaa9d43dffc9d7432524"
+        },
+        {
+          "path": "assets/Icons/check.svg",
+          "id": "5984487f7a69ea0f7408517769543c9c"
+        },
+        {
+          "path": "assets/Icons/chevron-right.svg",
+          "id": "33a92fddd6fba7210417b2f0728f6419"
+        },
+        {
+          "path": "assets/Icons/chevron-left.svg",
+          "id": "74f96063bcc19a8024906225d79b5163"
+        }
+      ]
+    }
+  ],
+  "storage": {
+    "files": {
+      "assets/Font/burti-specimen.png": {
+        "store": "blob",
+        "id": "fcf3e72ee03933627e6c01e2abdedb3f",
+        "bytes": 110852,
+        "type": "image/png"
+      },
+      "assets/Font/burti.ttf": {
+        "store": "blob",
+        "id": "a4b394300220891191236a9f4691fa30",
+        "bytes": 26020,
+        "type": "font/ttf"
+      },
+      "assets/Font/skaists-specimen.png": {
+        "store": "blob",
+        "id": "10f20e404fe98df00492c48fd23d2a7d",
+        "bytes": 310100,
+        "type": "image/png"
+      },
+      "assets/Font/skaists.ttf": {
+        "store": "blob",
+        "id": "362e5913f11924059f80770513bbb813",
+        "bytes": 18724,
+        "type": "font/ttf"
+      },
+      "assets/Icons/bee.svg": {
+        "store": "blob",
+        "id": "bd9df0e5d67caa513d466f9ee634bc59",
+        "bytes": 239,
+        "type": "image/svg+xml"
+      },
+      "assets/Icons/check.svg": {
+        "store": "blob",
+        "id": "5984487f7a69ea0f7408517769543c9c",
+        "bytes": 243,
+        "type": "image/svg+xml"
+      },
+      "assets/Icons/chevron-left.svg": {
+        "store": "blob",
+        "id": "74f96063bcc19a8024906225d79b5163",
+        "bytes": 250,
+        "type": "image/svg+xml"
+      },
+      "assets/Icons/chevron-right.svg": {
+        "store": "blob",
+        "id": "33a92fddd6fba7210417b2f0728f6419",
+        "bytes": 250,
+        "type": "image/svg+xml"
+      },
+      "assets/Icons/cypherpunk.svg": {
+        "store": "blob",
+        "id": "4f331d488b5de9ab50a70bd748fcdf13",
+        "bytes": 268,
+        "type": "image/svg+xml"
+      },
+      "assets/Icons/eye.svg": {
+        "store": "blob",
+        "id": "47e01d3943c1caf5b616147163592fea",
+        "bytes": 294,
+        "type": "image/svg+xml"
+      },
+      "assets/Icons/forever.svg": {
+        "store": "blob",
+        "id": "a69e66b5be645b4f41e8e4b967786f94",
+        "bytes": 304,
+        "type": "image/svg+xml"
+      },
+      "assets/Icons/lock.svg": {
+        "store": "blob",
+        "id": "a9b2610849b8385770864a658aa53ba4",
+        "bytes": 279,
+        "type": "image/svg+xml"
+      },
+      "assets/Icons/no-undo.svg": {
+        "store": "blob",
+        "id": "27211f83ad47eaa9d43dffc9d7432524",
+        "bytes": 311,
+        "type": "image/svg+xml"
+      },
+      "assets/Icons/raver.svg": {
+        "store": "blob",
+        "id": "9aa52e097579ab8b886043dffc708d47",
+        "bytes": 250,
+        "type": "image/svg+xml"
+      },
+      "assets/Logos/bnature-logo.jpg": {
+        "store": "blob",
+        "id": "2207bcf66f13a09765735b3a73708670",
+        "bytes": 17041,
+        "type": "image/jpeg"
+      },
+      "assets/Logos/bnature-logo.svg": {
+        "store": "blob",
+        "id": "d711466eb8c54f4d3b5e76671a0151b3",
+        "bytes": 12602,
+        "type": "image/svg+xml"
+      },
+      "assets/Signs/auseklis.svg": {
+        "store": "blob",
+        "id": "e9fa2e5899cbc152def1d70e3b957133",
+        "bytes": 688,
+        "type": "image/svg+xml"
+      },
+      "assets/Signs/austras-koks.svg": {
+        "store": "blob",
+        "id": "a1afa2d97221dc1bfe6524d7896c7e2d",
+        "bytes": 664,
+        "type": "image/svg+xml"
+      },
+      "assets/Signs/cell.svg": {
+        "store": "blob",
+        "id": "5c9580173f9659a12fa1291979a775a9",
+        "bytes": 253,
+        "type": "image/svg+xml"
+      },
+      "assets/Signs/heart.svg": {
+        "store": "blob",
+        "id": "883fb09df567264ef3aad9449f163842",
+        "bytes": 314,
+        "type": "image/svg+xml"
+      },
+      "assets/Signs/jumis.svg": {
+        "store": "blob",
+        "id": "1a45a160f165daf50ec4f31abfe029e4",
+        "bytes": 388,
+        "type": "image/svg+xml"
+      },
+      "assets/Signs/mara-cross.svg": {
+        "store": "blob",
+        "id": "11b876ae9e85b99f1043963a10e0d135",
+        "bytes": 347,
+        "type": "image/svg+xml"
+      },
+      "assets/Signs/mara-water.svg": {
+        "store": "blob",
+        "id": "a2752135bd02a08d4d46527bf4d0d97c",
+        "bytes": 258,
+        "type": "image/svg+xml"
+      },
+      "assets/Signs/saule.svg": {
+        "store": "blob",
+        "id": "e3b2ae806b7b6baf7ea033be9b5397a9",
+        "bytes": 862,
+        "type": "image/svg+xml"
+      }
+    },
+    "blobBytesUsed": 501801
+  }
+}
