@@ -57,16 +57,7 @@ So a page on skaists.dev can never ask the daemon, and the card says exactly
 that, with the one line to run it locally. `vending-deck.js` mirrors the CORS
 predicate (`originMayAsk`) so the page refuses **before** asking.
 
-`scripts/vending-deck-local.mjs` (zero dependencies) serves the checkout from
-`http://127.0.0.1:8842/` (the page at `/surfaces/vending-deck.html`, the riders
-resolve `/surfaces/` by law) and, **only when a token file is named**
-(`--token-file <data_dir>/api-token`), answers `GET /x0x/session` by minting a
-session from it — read at request time, never kept, never printed. The page
-holds the short token in a closure; nothing touches storage (asserted). Without
-the flag the card asks for a pasted session token (password field, cleared once
-taken). The daemon door defaults to `127.0.0.1:12700` (`ops/x0x/x0xd-laptop.toml`);
-the laptop→box tunnel `127.0.0.1:18080` works the same way. It refuses loudly on
-a non-loopback door, an unreadable token file, a privileged port, an unknown flag.
+**No local server (founder, 2026-09-26): the runner that served the checkout on loopback was deleted; the page lives on skaists.dev, and the mesh card says only that the daemon answers loopback pages, with a field for a pasted session token.**
 
 **Not proven here:** a live x0x read. The laptop daemon is on-demand (the wifi
 law) and this seat does not start daemons or hold tokens. The card's wire-shape

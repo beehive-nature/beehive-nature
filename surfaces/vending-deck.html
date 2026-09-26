@@ -223,8 +223,8 @@ details.facts dt{color:var(--quiet)}
  <span data-i18n="deck.r.head">head block {n} · jungle4 rehearsal, read just now</span>
  <span data-i18n="deck.offline">this door is not answering right now; nothing is guessed in its place</span>
  <span data-i18n="deck.mem.gate">the funded write waits on the ANT custody review. a chunk cost about 0.085 ANT plus gas at the last reading, never nothing. until then your agent's memory is a signed genesis hash in its certificate, and no more.</span>
- <span data-i18n="deck.mesh.origin">the daemon answers only pages served from 127.0.0.1. this page is served from {origin}, so it cannot ask. run the deck locally with one line:</span>
- <span data-i18n="deck.mesh.notoken">no session token yet. paste one below, or run the local deck with the token file named and it will mint one for you.</span>
+ <span data-i18n="deck.mesh.origin">the daemon answers only pages served from 127.0.0.1. this page is served from {origin}, so it cannot ask.</span>
+ <span data-i18n="deck.mesh.notoken">no session token yet. paste one below.</span>
  <span data-i18n="deck.mesh.peers">x0x {v} · {n} peers · {s}</span>
  <span data-i18n="deck.mesh.group">{name} · {n} members</span>
  <span data-i18n="deck.mesh.nogroup">the daemon is up but has not seated hive-porch</span>
@@ -236,7 +236,6 @@ details.facts dt{color:var(--quiet)}
  <span data-i18n="deck.work.off">in Buzz, Projects and Workflows are preview features and start switched off, so the workspace panel is empty by design, not by fault. turn them on under settings, experiments, features.</span>
  <span data-i18n="deck.work.count">{n} preview switches in the manifest, {on} on by default</span>
  <span data-i18n="deck.repos.git">Buzz can host git over smart http, but the hive relay publishes no repository index yet, so no hive repository is listed here.</span>
- <span data-i18n="deck.local">one line to run it locally:</span>
 </div>
 
 <footer class="foot">
@@ -267,7 +266,6 @@ details.facts dt{color:var(--quiet)}
   const keyed = (key, slots, cls) => { const p = row('', cls); p.setAttribute('data-i18n', key); p.setAttribute('data-slots', ''); p.dataset.i18nEn = W[key] ? W[key].dataset.i18nEn : key; p.dataset.slotv = JSON.stringify(slots || {}); p.textContent = say(key, slots); return p; };
   const guard = (key, slots) => keyed(key, slots, 'guard');
   const msg = (m) => { const p = document.createElement('p'); p.className = 'msg'; const h = document.createElement('span'); h.className = 'who'; const b = document.createElement('b'); b.textContent = m.who || '·'; b.translate = false; b.dir = 'ltr'; h.append(b, ' ', when(m.at)); const body = document.createElement('span'); body.className = 'body'; body.translate = false; body.dir = 'auto'; body.textContent = m.body; p.append(h, body); return p; };
-  const line = (cmd) => { const p = document.createElement('p'); p.className = 'guard'; p.append(say('deck.local'), ' '); const c = document.createElement('code'); c.textContent = cmd; c.translate = false; c.dir = 'ltr'; p.append(c); return p; };
   const rows = (id, list) => { const box = $('[data-rows="' + id + '"]'); box.replaceChildren(...list); };
 
   /* ── states ── */
@@ -318,12 +316,11 @@ details.facts dt{color:var(--quiet)}
   function askMemory() { rows('mem', [guard('deck.mem.gate')]); set('mem', 'notyet', 'deck.mem.gate'); }
 
   /* ⬡ · x0x: the daemon answers loopback pages only; a token lives in this closure and nowhere else */
-  let token = null; const LINE = 'node scripts/vending-deck-local.mjs';
+  let token = null;
   async function askMesh() {
     const form = $('#meshdoor');
-    if (!D.originMayAsk(location.origin)) { form.hidden = true; rows('mesh', [guard('deck.mesh.origin', { origin: location.origin }), line(LINE)]); set('mesh', 'declined', 'deck.mesh.origin'); return; }
+    if (!D.originMayAsk(location.origin)) { form.hidden = true; rows('mesh', [guard('deck.mesh.origin', { origin: location.origin })]); set('mesh', 'declined', 'deck.mesh.origin'); return; }
     form.hidden = false;
-    if (!token) { try { const r = await get('mesh', 'x0x/session'); if (r.ok) { const j = await r.json(); if (j && typeof j.session_token === 'string') token = j.session_token; } } catch (e) {} }
     if (!token) { rows('mesh', [guard('deck.mesh.notoken')]); set('mesh', 'notyet', 'deck.mesh.notoken'); return; }
     set('mesh', 'asking');
     const door = ($('#door').value || D.LOOPBACK_DOOR).replace(/\/+$/, ''), H = { headers: { authorization: 'Bearer ' + token } };

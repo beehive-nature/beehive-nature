@@ -13,7 +13,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { spawnSync } from 'node:child_process';
 import vm from 'node:vm';
 import { extractKeyedText } from './i18n-extract.mjs';
 
@@ -141,13 +140,4 @@ test('the registry and the hub carry the deck', () => {
   const row = E.surfaces.find((s) => s.id === 'vending-deck');
   assert.ok(row, 'estate.json row'); assert.equal(row.path, 'surfaces/vending-deck.html'); assert.equal(row.state, 'LIVE');
   assert.match(read('surfaces/index.html'), /surfaces\/vending-deck\.html|vending-deck\.html/);
-});
-
-/* ── 3 · the runner ────────────────────────────────────────────────────── */
-test('the local runner refuses a non-loopback door and a missing token file before it serves', () => {
-  const run = (...a) => spawnSync(process.execPath, [ROOT + '/scripts/vending-deck-local.mjs', ...a], { encoding: 'utf8', timeout: 20000 });
-  let r = run('--door', 'http://10.0.0.5:12700'); assert.equal(r.status, 2); assert.match(r.stderr, /literal loopback/);
-  r = run('--token-file', ROOT + '/e2e/does-not-exist.token'); assert.equal(r.status, 2); assert.match(r.stderr, /cannot read a token/);
-  r = run('--port', '80'); assert.equal(r.status, 2);
-  r = run('--nope'); assert.equal(r.status, 2); assert.match(r.stderr, /unknown flag/);
 });
