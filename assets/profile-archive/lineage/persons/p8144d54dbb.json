@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p8144d54dbb",
+ "bnr": "bnr://skaists.dev/blood/p8144d54dbb",
+ "identity": {
+  "name": "Harsiese (Rival King) the LIBYAN  (900? BC - ?)",
+  "lifespan": "Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PSLS-QTF"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p2c6800854b",
+    "name": "Shoshenq II ben Osorkon I, 3rd Pharaoh 22nd Dynasty",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pc81cd93157",
+    "name": "Nesitanebtashru Egypt Queen",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p1733598038",
+    "name": "Karomat (Karomama) III  (897? BC - ?)"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p14c493ecb0",
+    "name": "Karomat II",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PSLS-QTF",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

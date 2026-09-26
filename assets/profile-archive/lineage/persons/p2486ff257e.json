@@ -1,0 +1,74 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p2486ff257e",
+ "bnr": "bnr://skaists.dev/blood/p2486ff257e",
+ "identity": {
+  "name": "Widelphe De Saxe Ou Von Sachen",
+  "lifespan": "0380–0408",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PF7R-FWX"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p7144d41e29",
+    "name": "Wittichius De Saxe Ou Von Sachen",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p588d06cf5f",
+    "name": "Wichtal De Saxe",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p29d3407185",
+    "name": "Wedelphe da Turíngia"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p6e7c9340f2",
+    "name": "Amalaberge Amal D'Ostrogothie",
+    "marriage": null
+   },
+   {
+    "id": "p672cd57778",
+    "name": "Babaidokhtar Sarmatha",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PF7R-FWX",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

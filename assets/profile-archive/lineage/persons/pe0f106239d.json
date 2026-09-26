@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pe0f106239d",
+ "bnr": "bnr://skaists.dev/blood/pe0f106239d",
+ "identity": {
+  "name": "Maria de Colembert",
+  "lifespan": "0902–Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GLBM-FWQ"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p157d79a5ae",
+    "name": "Guy de Colembert",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pbfc736cbbb",
+    "name": "Mrs. Guy de Colembert",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pa71cfcc978",
+    "name": "Wallerand de Desvres"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p7de0b51018",
+    "name": "Octavien de Desvres",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GLBM-FWQ",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

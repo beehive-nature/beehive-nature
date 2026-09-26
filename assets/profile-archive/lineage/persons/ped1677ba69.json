@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "ped1677ba69",
+ "bnr": "bnr://skaists.dev/blood/ped1677ba69",
+ "identity": {
+  "name": "William Merrick",
+  "lifespan": "1546–1596",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "M5QM-15N"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p1143bec3cb",
+    "name": "Sir John Merrick",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p1a5d9319d7",
+    "name": "Sage Griffith Davis",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p73cc8b2c34",
+    "name": "John Merrick"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p72eb792c8d",
+    "name": "Janet verch Lenen Trevillier",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/M5QM-15N",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

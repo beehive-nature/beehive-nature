@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pfbfad6870d",
+ "bnr": "bnr://skaists.dev/blood/pfbfad6870d",
+ "identity": {
+  "name": "Ann Holland",
+  "lifespan": "1574–1604",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LBVM-GMX"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pa509dbb7ef",
+    "name": "John Holland",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p73831d60a1",
+    "name": "Alice Matilda Regyls",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p9852980483",
+    "name": "Moses Simmons"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pc0e6870e8c",
+    "name": "William Symmons",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LBVM-GMX",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

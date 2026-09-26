@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p59ea08bffc",
+ "bnr": "bnr://skaists.dev/blood/p59ea08bffc",
+ "identity": {
+  "name": "Shebensopdet II bint Takelot II",
+  "lifespan": "Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "94RN-6PS"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pad36710842",
+    "name": "Takelot II ben Nimlot C, 2nd Pharaoh, 23rd Dynasty",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p896ae5e2c6",
+    "name": "unknown concubines",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pb51d5efd34",
+    "name": "Karomat V"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p0a51588dee",
+    "name": "Djeddjehutyefankh 4th Prophet of Amun",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/94RN-6PS",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pc18f172632",
+ "bnr": "bnr://skaists.dev/blood/pc18f172632",
+ "identity": {
+  "name": "Earl of Throndheim Hogne Eysteinsson",
+  "lifespan": "0700–0737",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G3ST-CT1"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "paf11a19e2c",
+    "name": "Eystein 'Hardråde, the Severe' Trondsson Petty King of Hedmark, Norway",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pe198c11a73",
+    "name": "Solveig Halfdansdatter de Solor",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p9d1a49eb00",
+    "name": "Dag Hognasson King of Vestmare"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p6d63de2258",
+    "name": "Fru Hogne",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G3ST-CT1",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

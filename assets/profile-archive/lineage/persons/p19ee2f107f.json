@@ -1,0 +1,78 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p19ee2f107f",
+ "bnr": "bnr://skaists.dev/blood/p19ee2f107f",
+ "identity": {
+  "name": "Thomas Canfield I",
+  "lifespan": "1596–1679",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LCJJ-VBR"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p15a360fe42",
+    "name": "Gregory Camfield",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p78a20cd1cd",
+    "name": "Joan Merrill",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p5630134621",
+    "name": "Thomas Canfield"
+   },
+   {
+    "id": "p119f5f2b2c",
+    "name": "Mary Canfield"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p88d388d6ca",
+    "name": "Agnes Procter",
+    "marriage": null
+   },
+   {
+    "id": "p6e9cedff0c",
+    "name": "Jane Raiment",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LCJJ-VBR",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

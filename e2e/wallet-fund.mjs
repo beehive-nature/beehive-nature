@@ -265,19 +265,18 @@ try {
     const capSize = await page.evaluate(() => parseFloat(getComputedStyle(document.querySelector('#ch-vaulta .cn')).fontSize));
     const capTransform = await page.evaluate(() => getComputedStyle(document.querySelector('#ch-vaulta .cn')).textTransform);
     ok('hero number ≥ 32px ON A PHONE', heroSize >= 32, heroSize + 'px');
-    ok('hero caption ≤ 11px uppercase', capSize <= 11 && capTransform === 'uppercase', capSize + 'px ' + capTransform);
-    const grad = await page.evaluate(() => {
+    // THE THREE REGISTERS (founder 2026-09-25): the default dress is new bee —
+    // paper ground, bee-label 14px secondary floor, and the CASING LAW: no
+    // text-transform anywhere (capitals are never decoration).
+    ok('hero caption ≥ 14px in bee with NO text-transform (bee-label floor + casing law)', capSize >= 14 && capTransform === 'none', capSize + 'px ' + capTransform);
+    const head = await page.evaluate(() => {
       const el = document.querySelector('h1 .h1-arg');
       const cs = getComputedStyle(el);
-      return { clip: cs.webkitBackgroundClip || cs.backgroundClip,
-               fill: cs.webkitTextFillColor, img: cs.backgroundImage };
+      return { img: cs.backgroundImage, color: cs.color };
     });
-    ok('headline gradient-CLIPPED (argument, not colour)', grad.clip === 'text' &&
-      (grad.fill === 'rgba(0, 0, 0, 0)' || grad.fill === 'transparent') &&
-      /linear-gradient/.test(grad.img), JSON.stringify(grad).slice(0, 90));
-    ok('headline stops use the page tokens (gold→leaf→cyan)',
-      /255, 215, 0/.test(grad.img) && /125, 223, 143/.test(grad.img) &&
-      /0, 229, 255/.test(grad.img), grad.img.slice(0, 80));
+    // honey is the colour of b and ONLY of b — never a heading; bee sets the
+    // argument in ink-dim with no gradient at all
+    ok('headline argument: bee solid ink-dim, no gradient, no gold in a heading', !/linear-gradient/.test(head.img) && head.color === 'rgb(74, 95, 85)', JSON.stringify(head).slice(0, 90));
     // the fold, on a phone: hero balance + ring ABOVE connect (form-kill law)
     const fold = await page.evaluate(() => {
       const top = el => Math.round(el.getBoundingClientRect().top + window.scrollY);

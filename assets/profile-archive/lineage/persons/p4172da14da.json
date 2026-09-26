@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p4172da14da",
+ "bnr": "bnr://skaists.dev/blood/p4172da14da",
+ "identity": {
+  "name": "Nero Claudius Drusus Germanicus of Rome",
+  "lifespan": "0038BC–0009BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L8FB-T94"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p3f37f85d48",
+    "name": "Tiberius Claudius Nero II",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pa8fb15dde3",
+    "name": "Livia Drusilla Iulia Augusta",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pd75791e3eb",
+    "name": "Emperor Tiberius Claudius Caesar Augustus Germanicus \"Claudius\""
+   },
+   {
+    "id": "p04cb0d6765",
+    "name": "Germanicus Julius Caesar"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pdf112b9acf",
+    "name": "Antonia Minor De Roma",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L8FB-T94",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

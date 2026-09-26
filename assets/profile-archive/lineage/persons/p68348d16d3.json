@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p68348d16d3",
+ "bnr": "bnr://skaists.dev/blood/p68348d16d3",
+ "identity": {
+  "name": "Lord Robert Hungerford",
+  "lifespan": "1405–1459",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L7F9-V2S"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p1401f3c896",
+    "name": "Sir Walter Hungerford KG KB",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p243e892761",
+    "name": "Lady Katherine Peverell",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p38f5a559e1",
+    "name": "Lady Catharine Hungerford"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p765d436c0f",
+    "name": "Margaret Botreaux",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L7F9-V2S",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

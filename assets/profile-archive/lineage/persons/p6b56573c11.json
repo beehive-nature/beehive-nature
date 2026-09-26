@@ -1,0 +1,64 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p6b56573c11",
+ "bnr": "bnr://skaists.dev/blood/p6b56573c11",
+ "identity": {
+  "name": "Jenneken Reinders",
+  "lifespan": "1587–1677",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G3GZ-2LM"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p6c9acd2db8",
+    "name": "Rein Ders",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p76da9b064c",
+    "name": "Gerritiszen Gerrit Stoffles"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p9c1f6531ff",
+    "name": "Willem Warren Stoffels",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G3GZ-2LM",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

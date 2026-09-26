@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p7c9266b0a3",
+ "bnr": "bnr://skaists.dev/blood/p7c9266b0a3",
+ "identity": {
+  "name": "Unknown wives or concubines",
+  "lifespan": "Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GHF5-SZW"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p35cc2bd1f4",
+    "name": "Eliab ben Jesse",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p20ca4d232a",
+    "name": "Ascaviana Sempronianaeris Pustilius",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pafd1f9fa8f",
+    "name": "Jerimoth ben David"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p8e8870340b",
+    "name": "King David of Israel",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GHF5-SZW",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

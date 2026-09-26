@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pee6956e74d",
+ "bnr": "bnr://skaists.dev/blood/pee6956e74d",
+ "identity": {
+  "name": "Harald Eysteinsson",
+  "lifespan": "0744–0804",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GMTL-YCG"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pe0aafdc05d",
+    "name": "Eystein Oystein «FretFjert» Halfdansson, Konge i Romerike og Vestfold",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pb0e7606b63",
+    "name": "Hilda Eriksdatter \"Petty Queen\" of Romerike, Norway",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p8b949a18b9",
+    "name": "King of Haithabu Halfdan Haroldsson"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p4d7edcfef5",
+    "name": "Imhild von Engern",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GMTL-YCG",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

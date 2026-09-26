@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p123814a49e",
+ "bnr": "bnr://skaists.dev/blood/p123814a49e",
+ "identity": {
+  "name": "Lucius Julius Jullus IV",
+  "lifespan": "0475BC–0430BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L5DN-KFF"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p98610617e7",
+    "name": "Vopiscus Julius Jullus",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p051f9561eb",
+    "name": "Cottina Victorius",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pd964591575",
+    "name": "Lucius Julius Jullus VI"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pcf5a399bea",
+    "name": "Caecilia Victorius",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L5DN-KFF",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

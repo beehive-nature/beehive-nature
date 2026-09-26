@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pb42f3d1742",
+ "bnr": "bnr://skaists.dev/blood/pb42f3d1742",
+ "identity": {
+  "name": "Sir Nicolas de Pinlin Williamson III",
+  "lifespan": "1551–1621",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PF23-Z4N"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p7f8c30e64a",
+    "name": "Thomas Williamson",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p1f6ab024cf",
+    "name": "Alice Annie Butte",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pfc33145269",
+    "name": "Margery Wylliamson"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "paa01432d58",
+    "name": "Lady Alice Denton",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PF23-Z4N",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

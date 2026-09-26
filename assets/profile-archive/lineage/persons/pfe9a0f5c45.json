@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pfe9a0f5c45",
+ "bnr": "bnr://skaists.dev/blood/pfe9a0f5c45",
+ "identity": {
+  "name": "Mary Hawley",
+  "lifespan": "1663–1731",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LTQG-YS4"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p17edbd31d8",
+    "name": "Captain Joseph Hawley Sr.",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p8eb4570398",
+    "name": "Catherine Birdsey",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p5bcba1b2bf",
+    "name": "Capt. John Coe Jr"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p0750f9714f",
+    "name": "Captain John Coe Sr",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LTQG-YS4",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

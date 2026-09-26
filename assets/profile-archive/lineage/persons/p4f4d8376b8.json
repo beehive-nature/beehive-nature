@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p4f4d8376b8",
+ "bnr": "bnr://skaists.dev/blood/p4f4d8376b8",
+ "identity": {
+  "name": "Margaret Courtenay",
+  "lifespan": "1342–1422",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LBY3-F59"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "MB49-XVM",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "LHWD-FRW",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p243e892761",
+    "name": "Lady Katherine Peverell"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p65fd30a4e4",
+    "name": "Sir Thomas Peverel",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LBY3-F59",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

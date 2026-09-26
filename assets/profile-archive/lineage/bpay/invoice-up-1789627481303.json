@@ -1,0 +1,107 @@
+{
+ "schema": "skaists.bpay-invoice/1",
+ "invoiceId": "inv-up-1789627481303",
+ "issuedAt": "2026-09-17T06:44:41.303Z",
+ "issuer": {
+  "service": "antd-bridge (keyless prepare — no key exists in the quoting path)",
+  "planSource": "live Autonomi network prepare"
+ },
+ "buyer": {
+  "role": "founder (Trezor custody)",
+  "note": "the paying address is never embedded in artifacts"
+ },
+ "subject": {
+  "archive": {
+   "name": "zBlood first public preservation snapshot",
+   "manifestSha256": "440b502a6e1ac2dc086902f743f9f750437e7079040dfd5e76c8dd42c7de4389", "hexLawNote": "PUBLIC-CONSTANT public chain data",
+   "files": 20537,
+   "contentBytes": 62139972,
+   "uploadObject": {
+    "name": "pkg3.tar",
+    "bytes": 80998400,
+    "sha256": "fec5fba8360d9de211c3b6c5966e93bc2462133099f651891d500b6a2ea98b9b", "hexLawNote": "PUBLIC-CONSTANT public chain data",
+    "deterministic": "--sort=name, fixed mtime 2026-09-16T22:35:14Z, numeric owner"
+   }
+  },
+  "encryptedChunks": 24,
+  "alreadyStoredChunks": 0
+ },
+ "service": {
+  "network": "Autonomi",
+  "route": "ANT",
+  "visibility": "public",
+  "destination": "Autonomi network storage — public DataMap address 0x5250aa2f8279656ae571caab0fba2f89b5cedddddfe9938aa07c07bbcbcacf81", "hexLawNote": "PUBLIC-CONSTANT public chain data"
+ },
+ "quote": {
+  "state": "quoted (live node quotes — not purchased)",
+  "lineItems": [
+   {
+    "kind": "network storage",
+    "asset": "ANT",
+    "amountAtto": "1979733840820312500",
+    "payments": 24,
+    "paymentType": "wave_batch"
+   },
+   {
+    "kind": "gas (authorized ceiling, settled at payment)",
+    "asset": "ETH",
+    "ceilingAtto": "200000000000000"
+   }
+  ],
+  "planIdentity": {
+   "uploadId": "up-1789627481303",
+   "dataMapAddress": "0x5250aa2f8279656ae571caab0fba2f89b5cedddddfe9938aa07c07bbcbcacf81", "hexLawNote": "PUBLIC-CONSTANT public chain data",
+   "digest": "sha256:3e85edff03bfcf3a40069de280a72d4bd9a0e12a1e451466b8933f640982fa2f", "hexLawNote": "PUBLIC-CONSTANT public chain data",
+   "artifactSha256": "fec5fba8360d9de211c3b6c5966e93bc2462133099f651891d500b6a2ea98b9b", "hexLawNote": "PUBLIC-CONSTANT public chain data",
+   "artifactBytes": 80998400
+  },
+  "persistence": {
+   "law": "persisted at prepare; survives bridge death (P1 recovery)"
+  },
+  "expiration": {
+   "model": "job-bound, not clock-bound",
+   "note": "the plan is bound to upload_id and persisted by the bridge; a force_fresh re-quote is a NEW plan with new quotes"
+  }
+ },
+ "authorization": {
+  "ceiling": {
+   "maxStorageANT": "3.2",
+   "maxGasETH": "0.0002"
+  },
+  "authorizedBy": "founder order 2026-09-17 (separated bounds, never one dollar figure)",
+  "stopConditions": [
+   "sha256(pkg3.tar) ≠ fec5fba8… at upload time",
+   "actual storage charge > 3.2 ANT",
+   "actual gas > 0.0002 ETH",
+   "client reports a different artifact or chunk count"
+  ],
+  "quoteWithinCeiling": true
+ },
+ "walletAction": {
+  "requested": [
+   {
+    "tx": "ERC-20 approve",
+    "token": "ANT",
+    "spender": "Autonomi payment vault"
+   },
+   {
+    "tx": "payForQuotes",
+    "contract": "Autonomi payment vault"
+   }
+  ],
+  "signer": "founder Trezor — device custody; neither blood.html nor antd-bridge ever holds a key",
+  "clearSigning": {
+   "erc20Approve": "likely covered (standard EVM) — not yet device-observed for this ceremony",
+   "payForQuotes": "UNVERIFIED — depends on the ERC-7730 registry; do NOT claim clear signing until device-tested"
+  }
+ },
+ "states": {
+  "quote": "quoted",
+  "invoice": "issued",
+  "authorization": "ceiling-recorded",
+  "settlement": "not-yet",
+  "receipt": "not-yet",
+  "reconciliation": "not-yet"
+ },
+ "state": "issued"
+}

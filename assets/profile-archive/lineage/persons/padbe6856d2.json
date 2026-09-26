@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "padbe6856d2",
+ "bnr": "bnr://skaists.dev/blood/padbe6856d2",
+ "identity": {
+  "name": "Lady Anséline Richelu de Saint Paul de Harlebeque Countess of Flanders",
+  "lifespan": "0820–0860",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "P447-6B7"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "P44Q-T1S",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "P44L-J1N",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pbef46f354b",
+    "name": "Ignode de Harlebec De Flanders"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p1453f84a07",
+    "name": "Odacre the Third van Vlaanderen",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/P447-6B7",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

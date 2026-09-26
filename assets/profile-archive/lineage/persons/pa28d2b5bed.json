@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pa28d2b5bed",
+ "bnr": "bnr://skaists.dev/blood/pa28d2b5bed",
+ "identity": {
+  "name": "Eutropius Markus Crispina",
+  "lifespan": "0220–0270",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GP91-N9Y"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pb15be87a82",
+    "name": "Sr Crispina",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pdcaff5e3d0",
+    "name": "Domitia Lucilla II",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pf3e86f259d",
+    "name": "Emperatriz Eutropia Augusta de Roma"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p7c63047541",
+    "name": "Flavia Claudia Crispina",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GP91-N9Y",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

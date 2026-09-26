@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pafd1f9fa8f",
+ "bnr": "bnr://skaists.dev/blood/pafd1f9fa8f",
+ "identity": {
+  "name": "Jerimoth ben David",
+  "lifespan": "0997BC–Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G6RP-N2X"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p8e8870340b",
+    "name": "King David of Israel",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p7c9266b0a3",
+    "name": "Unknown wives or concubines",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p0d68fe62ec",
+    "name": "Mahalath bat Jerimoth first wife of Rehoboam"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pebf81c4ef8",
+    "name": "Abihail bat Eliab",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G6RP-N2X",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

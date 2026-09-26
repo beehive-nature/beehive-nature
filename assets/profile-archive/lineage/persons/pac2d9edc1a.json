@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pac2d9edc1a",
+ "bnr": "bnr://skaists.dev/blood/pac2d9edc1a",
+ "identity": {
+  "name": "Apama De Bactriane Apama Ière de Pharnakéia",
+  "lifespan": "0339BC–0280BC",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LDTL-CDM"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p74b7c890ce",
+    "name": "Sátrapa Spitamenes I de Bactria",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p92c12f68db",
+    "name": "Apame (Amastris) of DASCYLIUM",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pddd77752de",
+    "name": "Achaeus Seleucid"
+   },
+   {
+    "id": "p2d2bfbe89f",
+    "name": "Antiochus I Soter Basileus of the Seleucid Empire"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pd451c010b1",
+    "name": "King of Seleucid Empire Seleucus Nicator I",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LDTL-CDM",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

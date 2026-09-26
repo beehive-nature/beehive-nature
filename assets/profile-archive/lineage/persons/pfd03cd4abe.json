@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pfd03cd4abe",
+ "bnr": "bnr://skaists.dev/blood/pfd03cd4abe",
+ "identity": {
+  "name": "Sir Thomas de Holand",
+  "lifespan": "1342–1397",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LBXV-7R4"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pfca209c0e8",
+    "name": "Thomas de Holand 1st Earl of Kent, K.G.",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pf78de67351",
+    "name": "Joan of Kent 4th Countess of Kent",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pde1c884182",
+    "name": "Margaret de Holland"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pf52e486549",
+    "name": "Lady Alice FitzAlan of Kent",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LBXV-7R4",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p075cab4b42",
+ "bnr": "bnr://skaists.dev/blood/p075cab4b42",
+ "identity": {
+  "name": "Aegidius Hannibalianus Syagrious",
+  "lifespan": "Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "P6FG-874"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p0e9ed90202",
+    "name": "Afranius Hannibalianus de Galatie",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p30079ba9ef",
+    "name": "Mrs Afranius Hannibalianus de Galatie",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p6247374629",
+    "name": "Flavius Afranius I Syagious"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p9af528ddd5",
+    "name": "Syagria of Syria",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/P6FG-874",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

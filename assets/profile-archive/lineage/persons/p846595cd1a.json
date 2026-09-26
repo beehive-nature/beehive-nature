@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p846595cd1a",
+ "bnr": "bnr://skaists.dev/blood/p846595cd1a",
+ "identity": {
+  "name": "Eadgifu of Wessex",
+  "lifespan": "0902–0955",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "MT39-VLW"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pa56a336a8f",
+    "name": "Edward the Elder, King of the English",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p76c37856e8",
+    "name": "Ælfflæd of Wiltshire",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pa1c6ad05f9",
+    "name": "Louis IV 'd'Outremer', Roi des Francs occidentale"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pa50f426ab6",
+    "name": "Charles III 'le Simple', Roi de France occidentale et de Lotharingie",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/MT39-VLW",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pe33d0f2993",
+ "bnr": "bnr://skaists.dev/blood/pe33d0f2993",
+ "identity": {
+  "name": "Johann Jacob Flender",
+  "lifespan": "1602–1672",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LH81-GVH"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p8f2d3ec63b",
+    "name": "Jacob Flender vor der Hardt",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pc9bf8ed3fb",
+    "name": "Anna Sprenger",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pf48b681a8d",
+    "name": "Henrich FLENDER"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p5135b53136",
+    "name": "Anna Buch",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LH81-GVH",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

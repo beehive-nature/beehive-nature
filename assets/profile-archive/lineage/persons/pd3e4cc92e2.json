@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pd3e4cc92e2",
+ "bnr": "bnr://skaists.dev/blood/pd3e4cc92e2",
+ "identity": {
+  "name": "Joan Chudleigh",
+  "lifespan": "1360–1423",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GWBH-4Q7"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "G352-58M",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "GGPY-751",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "paf282e1f7f",
+    "name": "Sir John St Aubyn"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p1d2b9cb93b",
+    "name": "Sir John St. Aubyn",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GWBH-4Q7",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

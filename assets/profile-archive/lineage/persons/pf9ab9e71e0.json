@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pf9ab9e71e0",
+ "bnr": "bnr://skaists.dev/blood/pf9ab9e71e0",
+ "identity": {
+  "name": "Liutgard von Luxemburg",
+  "lifespan": "0955–1005",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "945D-J9Y"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pf6415421b6",
+    "name": "Siegfried I. von Luxemburg, Graf im Moselgau",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p7f2f071f9f",
+    "name": "Hedwig",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p5f6b15b45c",
+    "name": "Adelheid van Holland"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p6c9620ef16",
+    "name": "Arnulf van Holland",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/945D-J9Y",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

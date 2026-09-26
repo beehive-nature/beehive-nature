@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pad50ab07cd",
+ "bnr": "bnr://skaists.dev/blood/pad50ab07cd",
+ "identity": {
+  "name": "Flavius Julius Crispus",
+  "lifespan": "0300–0326",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PWCZ-P63"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pa8f2b899f4",
+    "name": "Flavius Valerius Aurelio Constantinus Emperor of Rome",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p75d7473cd3",
+    "name": "Minervina",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pae2a9234c2",
+    "name": "Neratia \"La Jeune\" Galla Crispina de Rome"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pb1390131b3",
+    "name": "Elena",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PWCZ-P63",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

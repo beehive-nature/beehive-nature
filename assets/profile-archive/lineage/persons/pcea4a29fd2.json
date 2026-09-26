@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pcea4a29fd2",
+ "bnr": "bnr://skaists.dev/blood/pcea4a29fd2",
+ "identity": {
+  "name": "Puzur-Su'en 1st King of Kish, 4th Dynasty",
+  "lifespan": "–2370BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G33G-CX2"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pf924da3edc",
+    "name": "Lugal-mu IIème DYNASTIE de KISH",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pbd78eb8bb1",
+    "name": "Queen Kubaba , 3rd Dynasty of Kish",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p0bfa1c0079",
+    "name": "Ur-Zababa ben Puzur-Suen 2nd King of Kish"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p9cd34206cb",
+    "name": "Inena de MARI",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G33G-CX2",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

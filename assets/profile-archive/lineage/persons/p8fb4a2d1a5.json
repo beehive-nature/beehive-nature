@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p8fb4a2d1a5",
+ "bnr": "bnr://skaists.dev/blood/p8fb4a2d1a5",
+ "identity": {
+  "name": "King Asa ben Abijah 3rd King of Judea",
+  "lifespan": "0940BC–0871BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LD8H-7GM"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pf0e7181e80",
+    "name": "King Abijah ben Rehoboam",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p3f18dc12f9",
+    "name": "Arsah bat Ahimaz Ha-Naphtali",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pf12e4b9226",
+    "name": "Asa BINT ASA"
+   },
+   {
+    "id": "p0ff457f989",
+    "name": "King Jehosophat ben Asa"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p9b046f7dbb",
+    "name": "Azubah bint  Shilhi al-ʾEfrayim",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LD8H-7GM",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p34e4050418",
+ "bnr": "bnr://skaists.dev/blood/p34e4050418",
+ "identity": {
+  "name": "Bakenranef 2nd Pharaoh, 24th Dynasty",
+  "lifespan": "0754BC–0714BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "94RN-6LY"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pf277194603",
+    "name": "Tefnakht I Shepsere, 1st Pharaoh, 24th Dynasty",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pcb818de881",
+    "name": "NN",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p6491abfe34",
+    "name": "Tefnakt II Stephinates, Pharaoh during the Proto-Saite Dynasty"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p25a5765b40",
+    "name": "wife of Bakenranef of Meshwesh",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/94RN-6LY",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

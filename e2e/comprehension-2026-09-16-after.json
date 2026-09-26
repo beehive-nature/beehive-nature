@@ -1,0 +1,349 @@
+{
+ "generated": "2026-09-16T18:50:37.517Z",
+ "rows": [
+  {
+   "page": "wallet.html",
+   "walls": [
+    {
+     "tag": "div",
+     "id": "",
+     "w": 76,
+     "j": 3,
+     "t": "THE PUBLIC SPEND-RECEIPT RECORD — rehearsal copy. The live meter (scripts/buzz-meter/meter"
+    },
+    {
+     "tag": "div",
+     "id": "",
+     "w": 69,
+     "j": 1,
+     "t": "Your bridged account signs newaccount; the new account's owner and\n  active keys derive fr"
+    },
+    {
+     "tag": "div",
+     "id": "",
+     "w": 66,
+     "j": 1,
+     "t": "Every context derives its own key from your masterPRK: vaulta:names for\n  Vaulta account k"
+    },
+    {
+     "tag": "div",
+     "id": "",
+     "w": 65,
+     "j": 0,
+     "t": "Every rail the wallet will ever owe you, one row each: how it's read\n  (first-party path f"
+    },
+    {
+     "tag": "div",
+     "id": "",
+     "w": 57,
+     "j": 3,
+     "t": "① Choose your keypass.\n    This is the only thing standing between anyone with this browse"
+    }
+   ],
+   "jargonTotal": 8,
+   "touchSmall": [
+    {
+     "tag": "summary",
+     "id": "",
+     "t": "the intent shape — tithe a",
+     "h": 18,
+     "w": 344
+    },
+    {
+     "tag": "a-inline",
+     "t": "the hub",
+     "h": 12,
+     "w": 39
+    }
+   ],
+   "details": 18,
+   "sections": 18
+  },
+  {
+   "page": "b4b.html",
+   "walls": [],
+   "jargonTotal": 0,
+   "touchSmall": [
+    {
+     "tag": "a-inline",
+     "t": "the receipt",
+     "h": 11,
+     "w": 57
+    },
+    {
+     "tag": "a-inline",
+     "t": "the census",
+     "h": 11,
+     "w": 52
+    },
+    {
+     "tag": "a-inline",
+     "t": "the crate",
+     "h": 11,
+     "w": 47
+    },
+    {
+     "tag": "a-inline",
+     "t": "BiGen",
+     "h": 13,
+     "w": 29
+    },
+    {
+     "tag": "a-inline",
+     "t": "the repo",
+     "h": 12,
+     "w": 44
+    },
+    {
+     "tag": "a-inline",
+     "t": "docs/receipts",
+     "h": 12,
+     "w": 71
+    },
+    {
+     "tag": "a-inline",
+     "t": "source",
+     "h": 12,
+     "w": 33
+    }
+   ],
+   "details": 3,
+   "sections": 5
+  },
+  {
+   "page": "blight/museum.html",
+   "walls": [
+    {
+     "tag": "div",
+     "id": "",
+     "w": 63,
+     "j": 2,
+     "t": "Hence the rehearsal gate: upload order is a deploy-day check\n  (evmcheck.py exists; the te"
+    },
+    {
+     "tag": "div",
+     "id": "",
+     "w": 62,
+     "j": 1,
+     "t": "So the ancestor is more on-chain than most people think in one sense — the text is\n  compl"
+    },
+    {
+     "tag": "div",
+     "id": "pw1408note",
+     "w": 60,
+     "j": 0,
+     "t": "The v2 deployment is larger by 1,408 bytes, and the verified\n  ABIs say precisely what tha"
+    },
+    {
+     "tag": "div",
+     "id": "",
+     "w": 58,
+     "j": 0,
+     "t": "The museum's lineage starts on Bitcoin (Counterparty, 2014) and its classes were\n  built w"
+    },
+    {
+     "tag": "div",
+     "id": "",
+     "w": 53,
+     "j": 1,
+     "t": "Size and stroke width are left free, and no renderer is committed on-chain — not even a\n  "
+    },
+    {
+     "tag": "div",
+     "id": "",
+     "w": 53,
+     "j": 0,
+     "t": "Corrections are part of the exhibit. \"Random art maker\" is backwards — Autoglyphs\n  takes "
+    }
+   ],
+   "jargonTotal": 4,
+   "touchSmall": [
+    {
+     "tag": "a-inline",
+     "t": "pepi.sh",
+     "h": 14,
+     "w": 44
+    },
+    {
+     "tag": "a-inline",
+     "t": "its marketplace",
+     "h": 14,
+     "w": 95
+    },
+    {
+     "tag": "a-inline",
+     "t": "pepi.sh",
+     "h": 14,
+     "w": 44
+    },
+    {
+     "tag": "a-inline",
+     "t": "inscriptions.market",
+     "h": 14,
+     "w": 120
+    },
+    {
+     "tag": "a-inline",
+     "t": "inscriptions.market",
+     "h": 14,
+     "w": 120
+    },
+    {
+     "tag": "a-inline",
+     "t": "receipt",
+     "h": 14,
+     "w": 44
+    },
+    {
+     "tag": "a-inline",
+     "t": "inscriptions.market",
+     "h": 14,
+     "w": 120
+    },
+    {
+     "tag": "a-inline",
+     "t": "Inscript",
+     "h": 14,
+     "w": 51
+    },
+    {
+     "tag": "a-inline",
+     "t": "inscriptions.market",
+     "h": 14,
+     "w": 120
+    },
+    {
+     "tag": "a-inline",
+     "t": "inscriptions.market",
+     "h": 14,
+     "w": 120
+    },
+    {
+     "tag": "a-inline",
+     "t": "inscriptions.market",
+     "h": 14,
+     "w": 120
+    },
+    {
+     "tag": "a-inline",
+     "t": "⌂ hub",
+     "h": 21,
+     "w": 57
+    }
+   ],
+   "details": 8,
+   "sections": 0
+  },
+  {
+   "page": "blight/midi.html",
+   "walls": [
+    {
+     "tag": "p",
+     "id": "",
+     "w": 57,
+     "j": 0,
+     "t": "the swap popup builds the trade in this page and your wallet signs it — the page never see"
+    }
+   ],
+   "jargonTotal": 0,
+   "touchSmall": [
+    {
+     "tag": "a-inline",
+     "t": "◈ fLeeT",
+     "h": 15,
+     "w": 40
+    },
+    {
+     "tag": "a-inline",
+     "t": "◈ museum",
+     "h": 15,
+     "w": 56
+    },
+    {
+     "tag": "a-inline",
+     "t": "◈ catalog",
+     "h": 15,
+     "w": 50
+    },
+    {
+     "tag": "a-inline",
+     "t": "◈ gallery",
+     "h": 15,
+     "w": 47
+    },
+    {
+     "tag": "a-inline",
+     "t": "◈ explorer",
+     "h": 15,
+     "w": 54
+    },
+    {
+     "tag": "a-inline",
+     "t": "◈ bNRi",
+     "h": 15,
+     "w": 38
+    }
+   ],
+   "details": 7,
+   "sections": 3
+  },
+  {
+   "page": "blight/workbench.html",
+   "walls": [],
+   "jargonTotal": 0,
+   "touchSmall": [
+    {
+     "tag": "summary",
+     "id": "",
+     "t": "raw SVG",
+     "h": 19,
+     "w": 320
+    },
+    {
+     "tag": "a-inline",
+     "t": "⌂ hub",
+     "h": 21,
+     "w": 57
+    },
+    {
+     "tag": "a-inline",
+     "t": "◈fLeeT",
+     "h": 16,
+     "w": 62
+    },
+    {
+     "tag": "a-inline",
+     "t": "◈museum",
+     "h": 16,
+     "w": 69
+    },
+    {
+     "tag": "a-inline",
+     "t": "◈explorer",
+     "h": 16,
+     "w": 82
+    },
+    {
+     "tag": "a-inline",
+     "t": "◈studio gate",
+     "h": 16,
+     "w": 101
+    },
+    {
+     "tag": "a-inline",
+     "t": "◈C-1 aid",
+     "h": 16,
+     "w": 75
+    },
+    {
+     "tag": "a-inline",
+     "t": "◈vaulta reader",
+     "h": 16,
+     "w": 115
+    }
+   ],
+   "details": 4,
+   "sections": 0
+  }
+ ]
+}

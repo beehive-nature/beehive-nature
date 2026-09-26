@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p08d4a8ae67",
+ "bnr": "bnr://skaists.dev/blood/p08d4a8ae67",
+ "identity": {
+  "name": "Rachel Babbitt",
+  "lifespan": "1745–1820",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LCR5-HZV"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pbf43ee7df4",
+    "name": "Nathanial Babbitt",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pbe61ca2cea",
+    "name": "Mary Snallum",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p76d3e87b13",
+    "name": "Abigail Gilbert"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pef8915356c",
+    "name": "Josiah Gilbert",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LCR5-HZV",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

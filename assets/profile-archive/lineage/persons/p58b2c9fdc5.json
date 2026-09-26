@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p58b2c9fdc5",
+ "bnr": "bnr://skaists.dev/blood/p58b2c9fdc5",
+ "identity": {
+  "name": "Agnes Dyson",
+  "lifespan": "1559–Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "MVF3-3FT"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pfd3a92b77a",
+    "name": "Jacobi Edmundi Dyson",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p7aeb6b540e",
+    "name": "Jana Beaumont",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pd729949cea",
+    "name": "Matthew Mitchell"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pbafe029b05",
+    "name": "Thomas Mitchell",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/MVF3-3FT",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

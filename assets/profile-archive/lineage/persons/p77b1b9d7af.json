@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p77b1b9d7af",
+ "bnr": "bnr://skaists.dev/blood/p77b1b9d7af",
+ "identity": {
+  "name": "Jolante von Urach",
+  "lifespan": "1180–1218",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "KZ1Y-J69"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p92f373d097",
+    "name": "Egeno IV von Urach",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p9efa86c01d",
+    "name": "Agnes von Zähringen",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pee6d83c11c",
+    "name": "Agnes de Neuchâtel"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p37aa47905e",
+    "name": "Ulrich III. Comte de Neuchâtel",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/KZ1Y-J69",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

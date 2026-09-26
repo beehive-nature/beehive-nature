@@ -1,0 +1,77 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pe6dd7fdd54",
+ "bnr": "bnr://skaists.dev/blood/pe6dd7fdd54",
+ "identity": {
+  "name": "Anna I Enygeus bat Joseph of Arimathea",
+  "lifespan": "0001BC–76",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LZBZ-SW8"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p426ef7df29",
+    "name": "Joseph of Arimathea",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p1d615b89ec",
+    "name": "Anna Rachel bint Simon Eleazor ben Eliud ha David",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pf353e28cce",
+    "name": "Alubaya Eyad de Judée Arimathie"
+   },
+   {
+    "id": "pd304e00e3a",
+    "name": "Druid King Prasutagus of Britain's Icenians"
+   },
+   {
+    "id": "pefc8e35a06",
+    "name": "King of the Catuvellauni Caradog vel Caractacus Gweridd ap Bran of Siluria"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pbd2b0645ae",
+    "name": "King Bran \"The Blessed\" of the Britons",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LZBZ-SW8",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

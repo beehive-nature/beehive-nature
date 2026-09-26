@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p7a9b14a73c",
+ "bnr": "bnr://skaists.dev/blood/p7a9b14a73c",
+ "identity": {
+  "name": "Anna Bedmore",
+  "lifespan": "1420–1467",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PM5X-VKC"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p8162eb7e46",
+    "name": "Joseph Bedmore",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pc9fb3bcb91",
+    "name": "Margaret De Pechey",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p979935c97c",
+    "name": "Agnes Hunt"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p38c086636e",
+    "name": "Thomas Hunt",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PM5X-VKC",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

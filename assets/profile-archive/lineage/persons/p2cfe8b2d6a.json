@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p2cfe8b2d6a",
+ "bnr": "bnr://skaists.dev/blood/p2cfe8b2d6a",
+ "identity": {
+  "name": "Welf I. Graf in Bayern und Schwaben",
+  "lifespan": "0770–0825",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "9W4D-4YP"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pefe6c33953",
+    "name": "Rothard Graf im Argengau",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p681068c83d",
+    "name": "Ermanane",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pc5de640b9b",
+    "name": "Judith von Altdorf Fränkische Königin und Römische Kaiserin"
+   },
+   {
+    "id": "p5d0d56270f",
+    "name": "Konrad I. Graf im Argen- und Linzgau und von Auxerre"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p8a2f87f500",
+    "name": "Heilwig abbesse de Chelles",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/9W4D-4YP",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

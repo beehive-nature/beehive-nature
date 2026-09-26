@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p3e92884949",
+ "bnr": "bnr://skaists.dev/blood/p3e92884949",
+ "identity": {
+  "name": "Lothar I. König der Langobarden, Römischer Kaiser",
+  "lifespan": "0795–0855",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "KH28-TN6"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "paf36b10c53",
+    "name": "Louis I. Emperor Of The Holy Roman Empire",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pfa034577fc",
+    "name": "Ermengarde Princess Of Hesbaye",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p75d382459b",
+    "name": "Ludwig II. König von Italien römischer Kaiser"
+   },
+   {
+    "id": "p5e91cfc2d5",
+    "name": "Ermengarde de Lotharingie"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p5711f7a01c",
+    "name": "Ermengarde de Tours",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/KH28-TN6",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

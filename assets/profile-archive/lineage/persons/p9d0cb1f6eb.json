@@ -1,0 +1,77 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p9d0cb1f6eb",
+ "bnr": "bnr://skaists.dev/blood/p9d0cb1f6eb",
+ "identity": {
+  "name": "Junius Licinius Balbus",
+  "lifespan": "0180–0238",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LZBC-XP9"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p36eb6fb2d4",
+    "name": "Gaius Calpernius Piso",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pd9fad25e03",
+    "name": "Aurelia Fadilla Aurelier",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p7add3fbdbd",
+    "name": "Antonia Gordiana Balba"
+   },
+   {
+    "id": "p5033fd4e8e",
+    "name": "Marcus Antonius Gordian Gordianus III"
+   },
+   {
+    "id": "pdbf0dd3d57",
+    "name": "Eutropia Augusta de Galatie de Roma"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p649e3ea9d2",
+    "name": "Maecia Faustina Antonia Gordiana",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LZBC-XP9",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

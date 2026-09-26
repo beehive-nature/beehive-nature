@@ -1,0 +1,70 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p1587ce2f6e",
+ "bnr": "bnr://skaists.dev/blood/p1587ce2f6e",
+ "identity": {
+  "name": "Tsamiti ha David",
+  "lifespan": "0121BC–0059BC",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L5ND-MZ3"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [],
+  "children": [
+   {
+    "id": "pa72152d7a7",
+    "name": "Simeon ben Eleazar"
+   },
+   {
+    "id": "p46c04f17f8",
+    "name": "Pailine bint Eleazar"
+   },
+   {
+    "id": "p492ddca997",
+    "name": "Anna verch Eleazor"
+   },
+   {
+    "id": "p4a1e6af78a",
+    "name": "Matthan ben Eleazar"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pc5710e7333",
+    "name": "Eleazar ben Eliud Of Judea",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L5ND-MZ3",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

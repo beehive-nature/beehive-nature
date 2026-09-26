@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p785fc4b034",
+ "bnr": "bnr://skaists.dev/blood/p785fc4b034",
+ "identity": {
+  "name": "Stratonice bint Ariarathe IV of Cappadoce",
+  "lifespan": "0199BC–0139BC",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L2TZ-W8T"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pd3fe7a756c",
+    "name": "King Ariarathes Eusebes, IV of Cappadocia",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pf1c807097d",
+    "name": "Antiochis Bint Antiochus III",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p515ef1dd5f",
+    "name": "King Attalus III ben Eumene 6th King of Pergamon"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pc21ab908ee",
+    "name": "Eumenes II King Of Pergamon",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L2TZ-W8T",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

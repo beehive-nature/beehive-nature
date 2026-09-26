@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p5ea3ac7eef",
+ "bnr": "bnr://skaists.dev/blood/p5ea3ac7eef",
+ "identity": {
+  "name": "Richende de Bourges",
+  "lifespan": "0842–0870",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GGYM-M61"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p2dc7c57034",
+    "name": "Roger du Maine",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p521847c76c",
+    "name": "Mrs Roger du Maine",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p75acb5e45d",
+    "name": "Ms d`Orleans"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p476530df4f",
+    "name": "Theobald de Blois Vicomte de Tours",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GGYM-M61",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pec93eeec6d",
+ "bnr": "bnr://skaists.dev/blood/pec93eeec6d",
+ "identity": {
+  "name": "Robert Taylor",
+  "lifespan": "1633–1695",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LVM1-RMP"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pe7c03e10f7",
+    "name": "Thomas Taylor",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "paa5d429ff1",
+    "name": "Mary Barrow",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p57f198ce8d",
+    "name": "Thomas Paul Taylor Sr"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pdf6fb4d465",
+    "name": "Mary Hayes",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LVM1-RMP",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

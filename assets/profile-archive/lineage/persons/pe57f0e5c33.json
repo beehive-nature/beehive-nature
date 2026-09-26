@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pe57f0e5c33",
+ "bnr": "bnr://skaists.dev/blood/pe57f0e5c33",
+ "identity": {
+  "name": "Antigonus I Monophthalmus Macedon Basileus of the Antigonid Empire",
+  "lifespan": "0382BC–0301BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GPD4-SFK"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pc562012259",
+    "name": "Philip of Elimeia",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p0b908ab894",
+    "name": "Phila van Macedonië",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p9e60178fac",
+    "name": "King Demetrius I Poliorcetes of Macedon “Mesopotamia”"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p392c736524",
+    "name": "Estratónice hija de Corrhaeus",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GPD4-SFK",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p92ba2aa5b1",
+ "bnr": "bnr://skaists.dev/blood/p92ba2aa5b1",
+ "identity": {
+  "name": "Peter Courtenay Of Landrake",
+  "lifespan": "1536–1606",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L1WB-WJJ"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p610d6508bb",
+    "name": "Edward Courtenay II Of Landrake",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p999b693037",
+    "name": "Margaret Trethurfee",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p27bf44b9a3",
+    "name": "Margaret Courtenay"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p70ae3334f2",
+    "name": "Katherine Reskymer",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L1WB-WJJ",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": true,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

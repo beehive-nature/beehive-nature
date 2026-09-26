@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p004ffdca84",
+ "bnr": "bnr://skaists.dev/blood/p004ffdca84",
+ "identity": {
+  "name": "Elizabeth Arundell",
+  "lifespan": "1427–1481",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "9H13-QB7"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pac1db0347e",
+    "name": "Sir Thomas Arundell",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p42c7d8d0c4",
+    "name": "Elizabeth Paulet",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p2cf23f59fb",
+    "name": "John Reskimer Esquire"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pd8dfe70fb1",
+    "name": "William Reskimer",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/9H13-QB7",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,64 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p4fed73061d",
+ "bnr": "bnr://skaists.dev/blood/p4fed73061d",
+ "identity": {
+  "name": "Cerwyd ap Crydon of the Druids and Cornwall",
+  "lifespan": "0217BC–0100BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LV79-RR5"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pb04cac3697",
+    "name": "King Clydog ap Eliud of Britain",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p13224d4344",
+    "name": "Eneid Capior Digueil ap Cerwyd, Druid King of the Britons"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pb06c18d20a",
+    "name": "Kwxyd verch Manogan",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LV79-RR5",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

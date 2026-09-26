@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p0bb0a3105e",
+ "bnr": "bnr://skaists.dev/blood/p0bb0a3105e",
+ "identity": {
+  "name": "Geoffrey de Saye",
+  "lifespan": "1088–1145",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GLCZ-GVR"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p6964b1be5e",
+    "name": "Baron William de Saye",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p80fe7bac2f",
+    "name": "Agnes de Grandmesnil",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pe738fd916f",
+    "name": "William de Saye"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p8f868b345d",
+    "name": "Avis de Clare",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GLCZ-GVR",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,74 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p0d126de837",
+ "bnr": "bnr://skaists.dev/blood/p0d126de837",
+ "identity": {
+  "name": "Manlia Minor de Rome",
+  "lifespan": "0136–Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GW5S-7R6"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p93e2d638f9",
+    "name": "Aulus Lunius Rufi de Rome",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pad4dffbd84",
+    "name": "Triaria Vibiana Pomponia de Rome",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p71d9f777e5",
+    "name": "Marcus Maecius Probus Major"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p8a6b44f011",
+    "name": "Marcus Annius Severus",
+    "marriage": null
+   },
+   {
+    "id": "pe1ac62b040",
+    "name": "Marcus Laelius de Rome",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GW5S-7R6",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

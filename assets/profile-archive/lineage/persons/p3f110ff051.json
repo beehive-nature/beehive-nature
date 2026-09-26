@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p3f110ff051",
+ "bnr": "bnr://skaists.dev/blood/p3f110ff051",
+ "identity": {
+  "name": "William d'Aubigny IV",
+  "lifespan": "1175–1242",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "9CCY-1K2"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p555dd6d7c6",
+    "name": "William d'Aubigny III de Brito",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p6710af2028",
+    "name": "Margaret de Umfraville",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p660b1be47d",
+    "name": "Isabel d'Aubigny"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pbc7a789fe3",
+    "name": "Isabel",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/9CCY-1K2",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

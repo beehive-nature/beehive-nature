@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pecbe7bc22e",
+ "bnr": "bnr://skaists.dev/blood/pecbe7bc22e",
+ "identity": {
+  "name": "Lord John Wright",
+  "lifespan": "1450–1509",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LTCN-GS2"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p04fb855cfc",
+    "name": "Sir Henry Wright II",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pcfe06f62b3",
+    "name": "Anna Whitbread",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p164ff0b3df",
+    "name": "John Wright of Kelvedon"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p979935c97c",
+    "name": "Agnes Hunt",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LTCN-GS2",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

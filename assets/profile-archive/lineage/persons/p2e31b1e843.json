@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p2e31b1e843",
+ "bnr": "bnr://skaists.dev/blood/p2e31b1e843",
+ "identity": {
+  "name": "George Houlcroft",
+  "lifespan": "1589–1672",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "M63G-75F"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p26f68b05b0",
+    "name": "Henry Holcroft",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pbe89d90c28",
+    "name": "Joan or Johanne",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p6beac26654",
+    "name": "Elizabeth Holcroft"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pad03f935eb",
+    "name": "Elizabeth Corles",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/M63G-75F",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

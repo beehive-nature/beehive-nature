@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p00d5339512",
+ "bnr": "bnr://skaists.dev/blood/p00d5339512",
+ "identity": {
+  "name": "Thomas Chapman",
+  "lifespan": "1505–1560",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LZ1B-XM4"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p4703bf8341",
+    "name": "Alexander Chapman III",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p243a2d8a3d",
+    "name": "Alice Mynne",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pbdd3764afb",
+    "name": "Alice Chapman"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pd3e2597626",
+    "name": "Alice LeStrange",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LZ1B-XM4",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pe5eb232650",
+ "bnr": "bnr://skaists.dev/blood/pe5eb232650",
+ "identity": {
+  "name": "Joazar ben Zeredah",
+  "lifespan": "0278BC–0206BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LTF8-R8G"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pa1a65a4805",
+    "name": "R. Zeredah ben Antigone",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p6936134317",
+    "name": "Mrs Zeredah ibn Antigone",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pa569e04a4c",
+    "name": "R. Yohanan ibn Joazar"
+   },
+   {
+    "id": "pf44a83ca28",
+    "name": "Yossei I ibn Joezer of Judea"
+   }
+  ],
+  "spouses": []
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LTF8-R8G",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

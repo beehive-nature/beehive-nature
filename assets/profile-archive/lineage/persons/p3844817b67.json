@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p3844817b67",
+ "bnr": "bnr://skaists.dev/blood/p3844817b67",
+ "identity": {
+  "name": "Peter de Lichte",
+  "lifespan": "1531–1602",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L8Y4-9NC"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p9bda270bad",
+    "name": "Aert Licht",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p2f8c664ea3",
+    "name": "Katrine Licht",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pf6d7f6f021",
+    "name": "Tanneken Ann de Lichte"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p12c90edaa4",
+    "name": "Peternelle de Neve",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L8Y4-9NC",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p0626b0b210",
+ "bnr": "bnr://skaists.dev/blood/p0626b0b210",
+ "identity": {
+  "name": "Prince of Macedon Arrhidaeus III Argead",
+  "lifespan": "0450BC–Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GKQ6-492"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pda6e043ea1",
+    "name": "Prince of Macedon Amyntas II Argead",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p5e1f24d475",
+    "name": "Eurynoe De'Elimea",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pad99b5bdb4",
+    "name": "King of Macedon Amyntas III Argead"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p2c1f6c78e9",
+    "name": "Cleopatra Alexandrou De'Orestis",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GKQ6-492",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p5345acfed0",
+ "bnr": "bnr://skaists.dev/blood/p5345acfed0",
+ "identity": {
+  "name": "Reverend John Maxson Sr",
+  "lifespan": "1638–1720",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LZVY-GWQ"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p69359c16fb",
+    "name": "Richard Maxson",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "paf905dbe56",
+    "name": "Rebecca",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pc492839ec0",
+    "name": "Mary Maxson"
+   },
+   {
+    "id": "p0e5c835c47",
+    "name": "John M. Maxson"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pef2f1035fb",
+    "name": "Mary Mosher",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LZVY-GWQ",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

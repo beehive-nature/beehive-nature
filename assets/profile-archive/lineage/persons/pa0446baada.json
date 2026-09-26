@@ -1,0 +1,91 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pa0446baada",
+ "bnr": "bnr://skaists.dev/blood/pa0446baada",
+ "identity": {
+  "name": "Zorobabel ben Shealtiel ben Neri",
+  "lifespan": "0586BC–0510BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L447-F8C"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p09b730a618",
+    "name": "Salathial ben Neri",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pa07c02009c",
+    "name": "Hachalya bint Jeconiah",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pd14101ec86",
+    "name": "Meshullam ben Zorobabel 4th Exilarch and Leader of the Diaspora"
+   },
+   {
+    "id": "p308b78eb42",
+    "name": "Rhesa ben Zorobabel ben Shealtiel ben Neri"
+   },
+   {
+    "id": "p613e28637f",
+    "name": "Hananiah ben Zorobabel 5th Exilarch in Babylon"
+   },
+   {
+    "id": "pc0038a4320",
+    "name": "Shazrezzar ben Zorobabel"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p036cf8ae14",
+    "name": "Esthra Maukab bint Pedaiah",
+    "marriage": null
+   },
+   {
+    "id": "p662abeb018",
+    "name": "Rhodah bint Gobryas",
+    "marriage": null
+   },
+   {
+    "id": "p1acd12fad1",
+    "name": "Amytis the Babylonian",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L447-F8C",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

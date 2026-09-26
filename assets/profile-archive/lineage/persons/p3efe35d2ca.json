@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p3efe35d2ca",
+ "bnr": "bnr://skaists.dev/blood/p3efe35d2ca",
+ "identity": {
+  "name": "Cyrus I King Of Persia",
+  "lifespan": "0637BC–0580BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "9H1Y-451"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pc17dbbd778",
+    "name": "Tiespes, King of Anshan",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p2c55989271",
+    "name": "Mrs Tiespes",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p952ca2a6b0",
+    "name": "King Cambyses I Of Persia"
+   },
+   {
+    "id": "p1e7e23e8b7",
+    "name": "Atossa"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p157cf7c2c5",
+    "name": "Cassandane Shahbanu",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/9H1Y-451",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

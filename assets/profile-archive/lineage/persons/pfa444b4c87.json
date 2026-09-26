@@ -1,0 +1,78 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pfa444b4c87",
+ "bnr": "bnr://skaists.dev/blood/pfa444b4c87",
+ "identity": {
+  "name": "Duchess Leudefindis d'Alsace de Lorraine Friuli",
+  "lifespan": "0594–0688",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L2KY-J2H"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pa2f9d32bfc",
+    "name": "Grasulf DE FRIULI I",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pcab1ed6d91",
+    "name": "Ségolène DE BEZIERS",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p3140ecd9b6",
+    "name": "Leudesius Tours of Upper Alsace"
+   },
+   {
+    "id": "pc72f930063",
+    "name": "Berthe de Burgondie"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p09cd08aa2a",
+    "name": "Erchembaldus II d'Alsace",
+    "marriage": null
+   },
+   {
+    "id": "p1cbdc0b9e9",
+    "name": "Willibald I Aka Guillebald II Balthes von der Burgunds",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L2KY-J2H",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

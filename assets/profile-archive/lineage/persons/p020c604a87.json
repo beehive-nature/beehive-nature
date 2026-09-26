@@ -1,0 +1,74 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p020c604a87",
+ "bnr": "bnr://skaists.dev/blood/p020c604a87",
+ "identity": {
+  "name": "Kaheferre Sobekhotep IV Of Egypt",
+  "lifespan": "–1780",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PS44-9W2"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p103664d772",
+    "name": "Haankhef",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pfa67476afe",
+    "name": "Kemi",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pf6b241d4db",
+    "name": "Great Scribe of the Vizier Dedusobek Bebi,"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p4fd50ca2e7",
+    "name": "Hapyu Of Egypt",
+    "marriage": null
+   },
+   {
+    "id": "pd073d45770",
+    "name": "Queen Tjan",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PS44-9W2",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

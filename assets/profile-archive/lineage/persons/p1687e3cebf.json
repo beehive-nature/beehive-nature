@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p1687e3cebf",
+ "bnr": "bnr://skaists.dev/blood/p1687e3cebf",
+ "identity": {
+  "name": "Titus Sextius Africanus I De ROME",
+  "lifespan": "Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PMPB-Y2B"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p2a8239bf0b",
+    "name": "Titus Sextius De ROME",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pe3731ce04c",
+    "name": "? ?",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p1cdf3c4ab2",
+    "name": "Titus Sextius Africanus II De ROME"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p3b2186a2f3",
+    "name": "Vibia sextius",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PMPB-Y2B",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

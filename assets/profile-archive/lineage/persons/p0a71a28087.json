@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p0a71a28087",
+ "bnr": "bnr://skaists.dev/blood/p0a71a28087",
+ "identity": {
+  "name": "William Reskimer",
+  "lifespan": "1501–1565",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LRY8-Z6T"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p2cf23f59fb",
+    "name": "John Reskimer Esquire",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p1ed4349b32",
+    "name": "Catherine Trethurffe",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p70ae3334f2",
+    "name": "Katherine Reskymer"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p7f924e7ead",
+    "name": "Alice Denzell",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LRY8-Z6T",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

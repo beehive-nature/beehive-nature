@@ -1,0 +1,58 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p1c26c9bbf2",
+ "bnr": "bnr://skaists.dev/blood/p1c26c9bbf2",
+ "identity": {
+  "name": "Robert 'le Fort' d'Anjou, marquis de Neustrie  Comte d'Auxerre, Tours, Nevers et de Blois",
+  "lifespan": "0820–0866",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L4SB-2FB"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [],
+  "children": [
+   {
+    "id": "pf77b9f548c",
+    "name": "Robert Ier, Roi de Francie occidentale"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pbdc083b8c8",
+    "name": "Adélaïde de Tours",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L4SB-2FB",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

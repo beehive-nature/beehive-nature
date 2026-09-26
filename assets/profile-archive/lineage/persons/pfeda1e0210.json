@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pfeda1e0210",
+ "bnr": "bnr://skaists.dev/blood/pfeda1e0210",
+ "identity": {
+  "name": "Andromache De'Thesprotia",
+  "lifespan": "0440BC–Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PXCM-WPT"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pa3801f37be",
+    "name": "Thesprotes De'Thesprotia",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p8579dca456",
+    "name": "Hermione De'Thesprotia",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p1dc724db8c",
+    "name": "Laodameia Euthymidou De'Chaonia"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pa55a7d2541",
+    "name": "Euthymides De'Chaonia",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PXCM-WPT",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

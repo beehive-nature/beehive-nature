@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p1017107fa9",
+ "bnr": "bnr://skaists.dev/blood/p1017107fa9",
+ "identity": {
+  "name": "Adael Ben Behram",
+  "lifespan": "Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LRGG-DVN"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p7ef9f92815",
+    "name": "Ibzan HA-ZEBULON",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p2eaf375454",
+    "name": "Mrs Ibzan HA-ZEBULON",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pb64b70f67e",
+    "name": "Nitzevet bat Adael of Geshur"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p946b91e7d8",
+    "name": "Mrs Adael Ben Behram",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LRGG-DVN",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

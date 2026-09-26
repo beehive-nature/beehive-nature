@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pb05b5febde",
+ "bnr": "bnr://skaists.dev/blood/pb05b5febde",
+ "identity": {
+  "name": "Jane Dutch",
+  "lifespan": "1540–1610",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LRFD-2GT"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p49a9ef6959",
+    "name": "William Dutch",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p8fbff6763d",
+    "name": "Elizabeth Faber",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pef4db3d900",
+    "name": "Ralph Paine"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p55c8fd5291",
+    "name": "Thomas Paine-Payne",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LRFD-2GT",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pf7267af9b5",
+ "bnr": "bnr://skaists.dev/blood/pf7267af9b5",
+ "identity": {
+  "name": "Mummolin Maire du Palais de Neustrie",
+  "lifespan": "0534–0607",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L2S7-VJ3"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p6e9015742f",
+    "name": "Lord Mundéric of Vitrey-en-Perthois de Cologne",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pd5a056ae81",
+    "name": "Arthemia de Vitry de Koln de Geneve Gallo-Romains",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pcee23778b6",
+    "name": "Bobon Ratbod d'Austrasia"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p81aa1eee9c",
+    "name": "Countess Palatina d'Angouleme de Troyes",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L2S7-VJ3",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

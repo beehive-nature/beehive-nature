@@ -1,0 +1,22 @@
+{
+ "schema": "skaists.reconstruction/1",
+ "law": "MY CURRENT RECONSTRUCTION — the founder's chosen interpretation of disputed relationships, dated and explainable, carried ALONGSIDE the underlying records. Choosing never erases: every change appends a new version; earlier versions (including the walked record itself and Marilyn's work) remain fully readable. A reconstruction chooses among hypotheses; it never upgrades evidence classes.",
+ "current": {
+  "id": "v1",
+  "date": "2026-09-16",
+  "author": "zCode draft on founder order (default pending his own choice)",
+  "choices": {
+   "ovl-harthacnut-i|ovl-sigurd-snake-eye": "sigurd-father"
+  },
+  "note": "Default: follow the þáttr tradition (Sigurd Snake-in-the-Eye as Harthacnut's father) because it is the line the house stories ride; Adam of Bremen's 'Sven' stays visible as the competing hypothesis. One tap switches it."
+ },
+ "versions": [
+  {
+   "id": "v1",
+   "date": "2026-09-16",
+   "author": "zCode draft on founder order (default pending his own choice)",
+   "choices": { "ovl-harthacnut-i|ovl-sigurd-snake-eye": "sigurd-father" },
+   "note": "Initial reconstruction: þáttr default, Adam of Bremen contradiction carried."
+  }
+ ]
+}

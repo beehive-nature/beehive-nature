@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pf69120bcc3",
+ "bnr": "bnr://skaists.dev/blood/pf69120bcc3",
+ "identity": {
+  "name": "Richard Sanborn",
+  "lifespan": "1755–1828",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LHGG-PMZ"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pe497ca350a",
+    "name": "Ebenezer Sanborn I",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p2482b94e9b",
+    "name": "Martha Salter",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p32b2fde910",
+    "name": "Olive Sanborn"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p6e25fd6147",
+    "name": "Martha Morse",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LHGG-PMZ",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

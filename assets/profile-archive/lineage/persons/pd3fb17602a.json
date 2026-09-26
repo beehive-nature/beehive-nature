@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pd3fb17602a",
+ "bnr": "bnr://skaists.dev/blood/pd3fb17602a",
+ "identity": {
+  "name": "Sir John Baldwin",
+  "lifespan": "1470–1545",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LBJR-KPW"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p8dd3705786",
+    "name": "Sir William Henry Baldwin",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pd0a7231b3a",
+    "name": "Jane Aylesbury",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p7d878ffcbc",
+    "name": "Henry Baldwin"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pb905f47fe9",
+    "name": "Mrs John Baldwin",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LBJR-KPW",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

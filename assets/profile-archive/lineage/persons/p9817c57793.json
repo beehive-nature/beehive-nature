@@ -1,0 +1,72 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p9817c57793",
+ "bnr": "bnr://skaists.dev/blood/p9817c57793",
+ "identity": {
+  "name": "Omriyya al-Yasjar 6th King of the 10 Tribes of Israel",
+  "lifespan": "0950BC–0876BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LLCV-43Y"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pbef10dcdc9",
+    "name": "missing link to Banu Yasjar",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p810baf42b2",
+    "name": "Ahab ibn Omriyya al-Yasjar"
+   },
+   {
+    "id": "pb2f114735f",
+    "name": "Namsi ibn Omriyya al-Yasjar"
+   },
+   {
+    "id": "pc5167370e5",
+    "name": "Athaliah bint Omri, Queen of Judah"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p9b046f7dbb",
+    "name": "Azubah bint  Shilhi al-ʾEfrayim",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LLCV-43Y",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

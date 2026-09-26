@@ -1,0 +1,63 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pf4be1c588c",
+ "bnr": "bnr://skaists.dev/blood/pf4be1c588c",
+ "identity": {
+  "name": "Hasalda von Engern",
+  "lifespan": "0757–0854",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GN7T-YD1"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [],
+  "children": [
+   {
+    "id": "pa4cc64c9de",
+    "name": "Billung Graf von Sachsen"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p269ed3356d",
+    "name": "Brunhart II Herzog von Sachsen",
+    "marriage": null
+   },
+   {
+    "id": "p52d35e49df",
+    "name": "Ingram of Argengau von Sachsen I",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GN7T-YD1",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

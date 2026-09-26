@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p0db22ca719",
+ "bnr": "bnr://skaists.dev/blood/p0db22ca719",
+ "identity": {
+  "name": "Katherine Hoult",
+  "lifespan": "1596–1655",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LR4J-B93"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p6abd728d82",
+    "name": "Sir Edmund Holt",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pd13e1eab0f",
+    "name": "Elizabeth Charley",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p3e9c21eec3",
+    "name": "Elizabeth Mather"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p88e80bd676",
+    "name": "Richard Mather",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LR4J-B93",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pb2f114735f",
+ "bnr": "bnr://skaists.dev/blood/pb2f114735f",
+ "identity": {
+  "name": "Namsi ibn Omriyya al-Yasjar",
+  "lifespan": "0900BC–0841BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "94BJ-RX4"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p9817c57793",
+    "name": "Omriyya al-Yasjar 6th King of the 10 Tribes of Israel",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p9b046f7dbb",
+    "name": "Azubah bint  Shilhi al-ʾEfrayim",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pbb0d777698",
+    "name": "Josaphat ibn Namsi al-Yasjar"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pf12e4b9226",
+    "name": "Asa BINT ASA",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/94BJ-RX4",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

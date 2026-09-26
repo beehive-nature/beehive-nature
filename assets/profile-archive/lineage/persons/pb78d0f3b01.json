@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pb78d0f3b01",
+ "bnr": "bnr://skaists.dev/blood/pb78d0f3b01",
+ "identity": {
+  "name": "Richard de La Rupe of Tremoderet",
+  "lifespan": "1190–1283",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G7V4-J2Y"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "LRX4-17C",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "LRX4-12T",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pec8ec26906",
+    "name": "Eva de Rupe"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p77a82ea543",
+    "name": "Agnes de la Roche",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G7V4-J2Y",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p60d544aa42",
+ "bnr": "bnr://skaists.dev/blood/p60d544aa42",
+ "identity": {
+  "name": "Duke of the East Franks and Prince of the Sicambri Dagobert or Dagobertus",
+  "lifespan": "0230–0317",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LKS6-SYP"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p87e46e8b00",
+    "name": "Obaster Valdradus Gauthier Titurel DE SICAMBRIE DE TOXANDRIE Munsalvaesche",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p14ee806fb6",
+    "name": "Eurgen verch Llieffer",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pbbd915eca9",
+    "name": "Oriuna of Gaul"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p722ebe3746",
+    "name": "Ildegonde de Lombarie d'Alemanie",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LKS6-SYP",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

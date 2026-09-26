@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p4ba5199d6b",
+ "bnr": "bnr://skaists.dev/blood/p4ba5199d6b",
+ "identity": {
+  "name": "Sir Roger de Valognes",
+  "lifespan": "1081–1141",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G3PR-QC5"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p7c59eb2b08",
+    "name": "Piers de Valoignes Lord of Benington - Domesday Book",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pb45a2a92a8",
+    "name": "Albreda De Ryes-Gifford De Bolbec",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p54ff024c1f",
+    "name": "Robert de Valognes"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p10a4e4ece3",
+    "name": "Agnes FitzJohn",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G3PR-QC5",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": true,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

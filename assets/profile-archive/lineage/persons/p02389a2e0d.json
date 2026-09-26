@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p02389a2e0d",
+ "bnr": "bnr://skaists.dev/blood/p02389a2e0d",
+ "identity": {
+  "name": "King Antiochus VIII Grypos of the Seleucid Kingdom",
+  "lifespan": "0142BC–0096BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LKYS-H8N"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p36fc0bf8de",
+    "name": "Demetrius II Nicator",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p4511485b1e",
+    "name": "Cleopatra Thea Eueteria of Egypt III",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pe58481281a",
+    "name": "Pharaoh Ptolemy XII Auletes"
+   },
+   {
+    "id": "pa1de93c682",
+    "name": "Laodice VII Tea de Commagene"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p321780663d",
+    "name": "Cleopatra V Tryphaena, Queen from the Ptolemaic Dynasty of Egypt",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LKYS-H8N",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

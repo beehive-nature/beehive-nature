@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p23e87a398b",
+ "bnr": "bnr://skaists.dev/blood/p23e87a398b",
+ "identity": {
+  "name": "KING TAWASYA DEWS OF AXUM",
+  "lifespan": "–1013BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LYJD-ZNH"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p3e2a85014e",
+    "name": "* (NN) ... (NN) of ETHIOPIA",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pbb4ff4ac71",
+    "name": "*E MRS (NN) ... (NN) of ETHIOPIA",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p839f448411",
+    "name": "Makeda Nikaule, Queen of Saaba"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pd75d9e1ced",
+    "name": "Bashteth Agazyan (Raihana bint As-Sakan) Queen of Thebaid",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LYJD-ZNH",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

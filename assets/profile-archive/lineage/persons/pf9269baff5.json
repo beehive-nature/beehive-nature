@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pf9269baff5",
+ "bnr": "bnr://skaists.dev/blood/pf9269baff5",
+ "identity": {
+  "name": "King Fergus De Courcy King of Isle of Man",
+  "lifespan": "1195–1238",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G387-WWG"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p586722184e",
+    "name": "Sir John de Courcy",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p67207231a8",
+    "name": "Aufrick Godfredsdottir",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p454ed4eae5",
+    "name": "Isabella Ferquisia"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p8c82ec1fef",
+    "name": "Aufricia Fergus",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G387-WWG",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p262de9cf6a",
+ "bnr": "bnr://skaists.dev/blood/p262de9cf6a",
+ "identity": {
+  "name": "Lady Letice Itha de Faucigny, Countess",
+  "lifespan": "1060–1111",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LTTH-P6X"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "L1TH-WVP",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "9Q3T-9PC",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p154280884d",
+    "name": "Count Amédée de Genève"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pc709dc0185",
+    "name": "Comte Aymon Ier de Genève",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LTTH-P6X",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pa13b083506",
+ "bnr": "bnr://skaists.dev/blood/pa13b083506",
+ "identity": {
+  "name": "Éléanore d'Aquitaine",
+  "lifespan": "1122–1204",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "9C8T-V1R"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p1e66739339",
+    "name": "Guillaume X 'le Toulousain' d'Aquitaine, comte de Poitiers",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p4020787f52",
+    "name": "Eleanore de Châtellerault",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p42f4f5576a",
+    "name": "King John of England"
+   },
+   {
+    "id": "p51acb41e47",
+    "name": "Eleanor of England Reina Consorte de Castilla"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p82e3bc9d81",
+    "name": "King Henry II of England",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/9C8T-V1R",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

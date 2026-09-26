@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p76fe5f5b4a",
+ "bnr": "bnr://skaists.dev/blood/p76fe5f5b4a",
+ "identity": {
+  "name": "Gervais de CHÂTILLON",
+  "lifespan": "0915–1000",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LTJR-Y8L"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pbf02774f7c",
+    "name": "Hérivée de Châtillon",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p430c97dffb",
+    "name": "Gisèle de Cambrai",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p8be6d6aa64",
+    "name": "Emengarde de Châtillon"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p0ae20088a0",
+    "name": "Spouse Gervais de Chatillon",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LTJR-Y8L",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

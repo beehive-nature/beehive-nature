@@ -1,0 +1,62 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "padb58e980e",
+ "bnr": "bnr://skaists.dev/blood/padb58e980e",
+ "identity": {
+  "name": "Malthace of Samaria",
+  "lifespan": "0060BC–1",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L2Z4-6Y1"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [],
+  "children": [
+   {
+    "id": "pca882086fd",
+    "name": "Olympias bat Herod"
+   },
+   {
+    "id": "p0f5b7f8565",
+    "name": "Archelaus , King of Judea"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pbdbc98aaee",
+    "name": "King Herod ben Antipater",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L2Z4-6Y1",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

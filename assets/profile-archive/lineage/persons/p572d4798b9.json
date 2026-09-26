@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p572d4798b9",
+ "bnr": "bnr://skaists.dev/blood/p572d4798b9",
+ "identity": {
+  "name": "Publius Licinius Varus",
+  "lifespan": "–0330BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GGMT-WV4"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pad71b0f05b",
+    "name": "Gaius Licinus",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p6aee923aa4",
+    "name": "Mrs Gaius Licinus",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p86707d5445",
+    "name": "Publius Licinius"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p6d772b5026",
+    "name": "Mrs Publius Licinius Varus",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GGMT-WV4",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

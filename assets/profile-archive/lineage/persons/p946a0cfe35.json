@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p946a0cfe35",
+ "bnr": "bnr://skaists.dev/blood/p946a0cfe35",
+ "identity": {
+  "name": "Eucharia bat Akara",
+  "lifespan": "0065BC–0005BC",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "9HGC-TSD"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p214cee12cc",
+    "name": "Akara Akara",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pfa88893386",
+    "name": "Joseph ben Heli of Nazareth"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p9e340f3275",
+    "name": "Jacob Panthera ben Matthan",
+    "marriage": null
+   },
+   {
+    "id": "p2889423ed8",
+    "name": "Heli ben Matthat",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/9HGC-TSD",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

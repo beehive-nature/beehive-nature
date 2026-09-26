@@ -1,0 +1,78 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p4511485b1e",
+ "bnr": "bnr://skaists.dev/blood/p4511485b1e",
+ "identity": {
+  "name": "Cleopatra Thea Eueteria of Egypt III",
+  "lifespan": "0164BC–0121BC",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "KVLS-D54"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p889d4af04b",
+    "name": "Ptolemy VI Philometor",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p3a307bfbca",
+    "name": "Cleopatra II Philometor Soteira",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p321780663d",
+    "name": "Cleopatra V Tryphaena, Queen from the Ptolemaic Dynasty of Egypt"
+   },
+   {
+    "id": "p02389a2e0d",
+    "name": "King Antiochus VIII Grypos of the Seleucid Kingdom"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p712dbee451",
+    "name": "Ptolemy VIII Euergetes II, Pharaoh of Egypt",
+    "marriage": null
+   },
+   {
+    "id": "p36fc0bf8de",
+    "name": "Demetrius II Nicator",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/KVLS-D54",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

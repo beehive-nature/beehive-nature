@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p7e4c156b88",
+ "bnr": "bnr://skaists.dev/blood/p7e4c156b88",
+ "identity": {
+  "name": "King Clodomir II of the Sicambri",
+  "lifespan": "0189BC–0123BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "94Y7-MT7"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p71b1953c0e",
+    "name": "King Anthenor III Clodiusson of Sicambri",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p24f0ae5740",
+    "name": "Cambra De Orcades",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p543b337ddd",
+    "name": "King Merodachus of Sicambri"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p752165a1e2",
+    "name": "Mrs Clodomir II",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/94Y7-MT7",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

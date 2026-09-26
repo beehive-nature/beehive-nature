@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p59c6ff20ad",
+ "bnr": "bnr://skaists.dev/blood/p59c6ff20ad",
+ "identity": {
+  "name": "Sir, Lord John de Cogan",
+  "lifespan": "1169–1247",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LZ2Q-MQL"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pcf8c7c8aed",
+    "name": "Richard de Cogan",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p4a49bf27a2",
+    "name": "Basilia de Riddlesford",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p2208f564b8",
+    "name": "Johanna de Cogan"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pa8f7b0234d",
+    "name": "Mary Prendegast",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LZ2Q-MQL",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

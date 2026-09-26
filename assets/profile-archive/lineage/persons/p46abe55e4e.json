@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p46abe55e4e",
+ "bnr": "bnr://skaists.dev/blood/p46abe55e4e",
+ "identity": {
+  "name": "Mary Perrin",
+  "lifespan": "1649–1690",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "KG62-VGX"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p025fe50cb7",
+    "name": "John Perrin",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pa3d5309963",
+    "name": "Anna Hubert",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pfd6edfb7fd",
+    "name": "Mary Ormsby"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p15906264bd",
+    "name": "Jacob Ormsby",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/KG62-VGX",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

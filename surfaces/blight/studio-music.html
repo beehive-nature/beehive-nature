@@ -1,63 +1,318 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta http-equiv="Pragma" content="no-cache">
-<meta http-equiv="Expires" content="0">
-<title>bLighT Studio — music creation MVP (interoperable with the ERC-20i family)</title>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#fbf7f0">
+<title>Music studio · skaists</title>
 <style>
-:root{--bg:#0A0A0F;--crt:#00FF41;--cyan:#00E5FF;--pink:#FF3DB0;--dim:#5a6478}
-*{margin:0;padding:0;box-sizing:border-box}
-body{background:var(--bg);color:#cfe8d6;font:13px/1.6 'IBM Plex Mono',monospace;padding:24px 16px 64px;
-  background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="56" height="97"><g fill="none" stroke="%231a1a2a"><path d="M28 0 L56 16 L56 48 L28 64 L0 48 L0 16 Z"/><path d="M28 0 L56 16 L56 48 L28 64 L0 48 L0 16 Z" transform="translate(28,48)"/></g></svg>')}
-.wrap{max-width:940px;margin:0 auto}
-h1{color:var(--cyan);font-size:20px;text-shadow:0 0 10px rgba(0,229,255,.4)}
-.sub{color:var(--dim);font-size:11.5px;margin:6px 0 16px;line-height:1.7}
-.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
-input,select,button{font:inherit;background:#0d0d15;color:var(--crt);border:1px solid #262638;padding:7px 10px;border-radius:4px}
-button{cursor:pointer;border-color:var(--crt)} button:hover{background:var(--crt);color:#000}
-button.stop{border-color:var(--pink);color:var(--pink)} button.stop:hover{background:var(--pink);color:#000}
-button.ghost{border-color:#262638;color:var(--dim)} button.ghost:hover{background:#1a1a2a;color:var(--cyan)}
-#grid{display:grid;grid-template-columns:repeat(18,1fr);gap:3px;margin:12px 0}
-.cell{aspect-ratio:1;border:1px solid #262638;background:#0d0d15;border-radius:3px;cursor:pointer;min-width:0}
-.cell.on{background:var(--crt);box-shadow:0 0 8px rgba(0,255,65,.5)}
-.cell.now{outline:2px solid var(--cyan)}
-.deg{grid-column:span 2;font-size:9px;color:var(--dim);align-self:center;text-align:left}
-#status{font-size:11.5px;min-height:20px;color:#7e8c85}
-.foot{margin-top:18px;color:var(--dim);font-size:10.5px;line-height:1.7}
-a{color:var(--cyan)}
-</style>
-</head>
-<body><div class="wrap">
-<h1>bLighT Studio <span style="color:var(--dim)">// music creation MVP</span></h1>
-<div class="sub">A 16-step sequencer that speaks the ERC-20i family's language: import any piece's on-chain
-scale, compose, loop live, export the score as an inscription-ready payload. Console tiers (Beginner/
-Experienced/Pro, gated by your holdings) come with the booth — this MVP ships everything open with that noted.</div>
+:root{--bg:#101018;--panel:#1a1925;--well:#13131d;--ink:#f2eff8;--dim:#b9b4cb;--line:#464153;--accent:#ad91f0;--active:#86cc72;--on-ink:#102413;--info:#80cddd;--harm:#eab1cb;--font:system-ui,-apple-system,'Segoe UI',sans-serif}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:1rem/1.6 var(--font)}button,input,select,textarea{font:inherit}a{color:var(--info)}button,summary{cursor:pointer}button:disabled{opacity:.55;cursor:default}button,input,select,textarea{background:var(--well);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:10px 14px;min-height:44px}button:hover:not(:disabled){border-color:var(--accent)}button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,summary:focus-visible,a:focus-visible{outline:3px solid var(--info);outline-offset:3px}button.primary{background:var(--active);color:var(--on-ink);border-color:var(--active);font-weight:650}.stop{border-color:var(--harm)}[hidden]{display:none!important}.studio{max-width:1280px;margin:auto;padding:24px clamp(16px,3vw,40px) 60px}.studio-head{display:flex;justify-content:space-between;align-items:start;gap:20px;margin-bottom:20px}h1{font-size:clamp(1.8rem,4vw,3rem);line-height:1.12;letter-spacing:-.04em;margin:8px 0 14px}h1 span{display:none}body[data-reg=bee] h1 [data-view=bee],body[data-reg=raver] h1 [data-view=raver],body[data-reg=cypherpunk] h1 [data-view=cypherpunk]{display:block}.eyebrow{color:var(--accent);font-size:.875rem;margin:0}.sub{color:var(--dim);max-width:64ch;margin:0}.transport{display:flex;gap:12px;align-items:center;flex-wrap:wrap;padding:16px;background:var(--panel);border:1px solid var(--line);border-radius:16px;margin-bottom:16px}.transport button{min-width:100px}.transport label{display:flex;align-items:center;gap:10px;color:var(--dim);flex-wrap:wrap}.transport input{width:100px}.transport output{margin-inline-start:auto;color:var(--dim);font-variant-numeric:tabular-nums;font-size:.875rem}.workspace{display:grid;grid-template-columns:minmax(0,1fr);gap:20px}.grid-panel{min-width:0;background:var(--panel);padding:16px;border:1px solid var(--line);border-radius:16px;align-self:start}.grid-scroll{overflow-x:auto;overscroll-behavior-x:contain;padding:4px 3px 12px}#grid{display:grid;grid-template-columns:60px repeat(16,minmax(40px,1fr));gap:4px;min-width:760px}.cell{position:relative;padding:0;min-height:40px;border-radius:5px;background:var(--well);border-color:var(--line)}.cell.on{background:var(--active);color:var(--on-ink);border-color:var(--active)}.cell.on:after{content:'●';font-size:16px}.cell.now{outline:2px solid var(--info);outline-offset:-2px}.cell.now:before{content:'';position:absolute;inset-inline:4px;inset-block-start:3px;border-top:3px solid currentColor}.pitch,.step-label{font-size:.875rem;align-self:center;text-align:center;color:var(--dim);font-variant-numeric:tabular-nums}.pitch{text-align:start}.grid-caption{font-size:.875rem;color:var(--dim);margin:8px 0 0}#status{min-height:28px;color:var(--dim);margin:12px 0 0;overflow-wrap:anywhere}#status[data-tone=error]{color:var(--harm)}.panels{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;align-content:start}details.tool-panel{min-width:0;align-self:start;border:1px solid var(--line);background:var(--panel);border-radius:14px;padding:0 16px 16px}details:not([open]).tool-panel{padding-bottom:0}.tool-panel>summary{padding:16px 0;font-weight:600;min-height:56px}.fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.fields label{display:flex;flex-direction:column;gap:6px;min-width:0;font-size:.875rem;color:var(--dim)}.fields select,.fields input{width:100%;min-width:0}.fields .full{grid-column:1/-1}.actions{display:flex;gap:10px;flex-wrap:wrap}.actions>*{flex:1 1 130px}.small-note{font-size:.875rem;color:var(--dim);line-height:1.7;margin:12px 0 0}.source-facts{border-top:1px solid var(--line);margin-top:28px;padding-top:16px;font-size:.875rem;color:var(--dim)}.source-facts summary{min-height:44px}#score-preview{width:100%;height:230px;resize:vertical;font: .875rem/1.6 ui-monospace,Consolas,monospace}#share-fallback{margin-top:14px}#share-fallback textarea{width:100%;height:90px;overflow-wrap:anywhere}#import-palette{display:flex;gap:8px;margin-top:10px}#import-palette span{width:32px;height:24px;border:1px solid var(--line);border-radius:4px}.score-panel{grid-column:1/-1}
+body[data-reg=bee]{--bg:#fbf7f0;--panel:#fff;--well:#efe9dd;--ink:#0c1412;--dim:#4a5f55;--line:#e6dfd2;--accent:#65509a;--active:#0c1412;--on-ink:#fff;--info:#29628f;--harm:#8b3654;color-scheme:light}body[data-reg=bee] .transport button{padding:12px 24px;font-size:1.125rem}body[data-reg=bee] .studio{max-width:1160px}body[data-reg=bee] .grid-panel{padding:20px}
+body[data-reg=raver]{--bg:#111018;--panel:#201a2b;--well:#16121f;--line:#544362}body[data-reg=raver] .workspace{grid-template-columns:minmax(0,1fr) 280px}body[data-reg=raver] .panels{grid-template-columns:1fr}body[data-reg=raver] .transport{border-block-start:3px solid var(--accent)}body[data-reg=raver] .transport .primary{font-size:1.25rem;min-width:150px}body[data-reg=raver] .grid-panel{border-color:var(--accent);box-shadow:0 12px 48px #0003}body[data-reg=raver] h1{font-size:clamp(2rem,5vw,4.4rem)}
+body[data-reg=cypherpunk]{--bg:#0e141a;--panel:#151e26;--well:#101820;--line:#3f5260;--accent:#80cddd;--font:ui-monospace,'Cascadia Mono',Consolas,monospace}body[data-reg=cypherpunk] .studio{max-width:1600px}body[data-reg=cypherpunk] .workspace{grid-template-columns:minmax(0,1fr) 340px}body[data-reg=cypherpunk] .panels{grid-template-columns:1fr}body[data-reg=cypherpunk] :is(.grid-panel,.transport,.tool-panel,button,input,select,textarea){border-radius:3px}body[data-reg=cypherpunk] h1{font-size:clamp(1.6rem,3vw,2.25rem);letter-spacing:-.03em}body[data-reg=cypherpunk] .transport{padding:12px}
+@media(max-width:1000px){body[data-reg=raver] .workspace,body[data-reg=cypherpunk] .workspace{grid-template-columns:1fr}body[data-reg=raver] .panels,body[data-reg=cypherpunk] .panels{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:600px){.studio{padding:20px 12px 70px}.studio-head{display:block}.panels,body[data-reg=raver] .panels,body[data-reg=cypherpunk] .panels{grid-template-columns:1fr}.transport{gap:10px;padding:12px}.transport output{margin-inline-start:0;flex-basis:100%}.transport label{flex:1}.grid-panel,body[data-reg=bee] .grid-panel{padding:10px}.fields{grid-template-columns:1fr}.transport button{flex:1}.source-facts{overflow-wrap:anywhere}}@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}@media(forced-colors:active){.cell.on{border:3px solid Highlight}.cell.now{outline:3px dashed CanvasText}}
+[data-experience-nav]{display:flex;flex-wrap:wrap;gap:8px;padding:12px 16px}[data-experience-nav] a{display:inline-flex;align-items:center;min-height:44px;padding:8px 12px}[data-experience-nav] a[aria-current=page]{font-weight:650;text-decoration:underline}
+/* ── ETERNAL FRONT (docs/design/eternal) — three products in one surface. Every value is a skaists
+   token (../skaists.css, compiled from docs/design/skaists/tokens.json): no hand-picked hex, size or
+   corner. Measured by e2e/skaists-conformance.mjs. One register visible at a time; new bee is the
+   default. Every rule is scoped under #eternal so the page's own bare element rules never reach in. ── */
+#eternal{display:block;margin:0 0 var(--sk-s2);padding:0;border:0;background:transparent;font-size:16px;line-height:1.45;color:var(--sk-ink);text-align:left}
+#eternal>div{max-width:560px}
+#eternal>.et-r,#eternal>.et-c{display:none}
+body[data-reg="raver"] #eternal>.et-b,body[data-reg="cypherpunk"] #eternal>.et-b{display:none}
+body[data-reg="raver"] #eternal>.et-r{display:block}
+body[data-reg="cypherpunk"] #eternal>.et-c{display:block}
+#eternal [hidden]{display:none!important}
+#eternal *{box-sizing:border-box;text-transform:none}
+#eternal :is(button,input,select){appearance:none;-webkit-appearance:none;flex:0 1 auto;margin:0;padding:0;border:0;border-radius:0;background:transparent;color:inherit;font:inherit;letter-spacing:normal;min-height:0;min-width:0;box-shadow:none;text-shadow:none;transition:none}
+#eternal :is(p,h2,h3,ol,ul,table){margin:0}
+#eternal svg{display:block}
+#eternal :focus-visible{outline:2px solid var(--sk-focus);outline-offset:3px}
+#eternal a{text-decoration:none}
+#etArchive.et-archive-h{margin:var(--sk-s5) 0 var(--sk-s2);padding:var(--sk-s4) 0 0;border:0;border-top:1px solid var(--sk-line);color:var(--sk-ink);background:none;text-shadow:none;letter-spacing:normal;text-transform:none;-webkit-text-fill-color:currentColor}
+body[data-reg="bee"] #etArchive.et-archive-h{font:400 28px/1.1 var(--sk-font-bee-serif)}
+body[data-reg="raver"] #etArchive.et-archive-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em}
+body[data-reg="cypherpunk"] #etArchive.et-archive-h{font:600 15px/1.45 var(--sk-font-mono)}
 
-<div class="row">
-  <select id="scale"></select>
-  <select id="root"></select>
-  <label style="color:var(--dim);font-size:11px">BPM <input id="bpm" type="number" value="132" min="60" max="200" style="width:70px"></label>
-  <select id="wave"><option>triangle</option><option>square</option><option>sawtooth</option><option>sine</option></select>
-  <button id="play">▶ play loop</button>
-  <button id="stop" class="stop">■</button>
-  <button id="clear" class="ghost">clear</button>
-  <button id="dice" class="ghost">🎲 randomize</button>
-  <button id="export" class="ghost">⬇ export score (JSON)</button>
-  <button id="link" class="ghost">🔗 copy song-link</button>
+/* NEW BEE — a calm room: plain rows, one reassurance, one magenta action */
+#eternal .et-b{display:flex;flex-direction:column;gap:var(--sk-s3);color:var(--sk-ink);font:400 16px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-b-mark{font:400 18px/1.2 var(--sk-font-house);color:var(--sk-sovereign)}
+#eternal .et-b-h{font:400 40px/1.05 var(--sk-font-bee-serif);color:var(--sk-ink);letter-spacing:0}
+#eternal .et-b-lede{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink-mut);text-wrap:pretty}
+#eternal .et-b-guard{display:flex;align-items:center;gap:var(--sk-s2);min-height:var(--sk-control-min,44px);padding:var(--sk-s1) var(--sk-s3);border-radius:var(--sk-radius);background:var(--sk-guard-wash);color:var(--sk-guard);font:600 15px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-b-guard svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+#eternal .et-b-rows{display:flex;flex-direction:column;background:var(--sk-bg-card);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl);overflow:hidden}
+#eternal .et-b-row{display:flex;align-items:center;justify-content:space-between;gap:var(--sk-s2);min-height:var(--sk-control-row,52px);width:100%;padding:var(--sk-s1) var(--sk-s3);border:0;border-bottom:1px solid var(--sk-line-soft);background:transparent;text-align:left;font:500 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+#eternal .et-b-row:last-child{border-bottom:0}
+#eternal button.et-b-row{cursor:pointer}
+#eternal .et-b-row>span{flex:0 1 auto;min-width:0}
+#eternal .et-b-row>span:first-of-type{flex:0 0 auto;max-width:60%}
+#eternal .et-b-row small{display:flex;align-items:center;justify-content:flex-end;gap:var(--sk-s1);min-width:0;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut);text-align:right;overflow-wrap:anywhere}
+#eternal .et-b-row .chev{flex:none;width:16px;height:16px}
+#eternal .et-b-row[aria-checked="true"]{background:var(--sk-sovereign-tint);color:var(--sk-sovereign-strong);font-weight:600}
+#eternal .et-b-row[aria-checked="true"] small{color:var(--sk-sovereign-strong)}
+#eternal .et-b-field{min-height:var(--sk-control-min,44px);width:9.5em;max-width:55%;padding:0 var(--sk-s2);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius);background:var(--sk-bg-card);color:var(--sk-ink);font:400 16px/1.45 var(--sk-font-bee-sans);text-align:right}
+#eternal select.et-b-field{text-align:left;cursor:pointer}
+#eternal .et-b-now{padding:var(--sk-s2) var(--sk-s3);border-radius:var(--sk-radius);background:var(--sk-sovereign-tint);color:var(--sk-sovereign-strong);font:600 16px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-b-act{display:flex;flex-direction:column;gap:var(--sk-s1)}
+#eternal .et-b-primary{min-height:var(--sk-control-primary,54px);padding:0 var(--sk-s3);border:0;border-radius:var(--sk-radius-lg);background:var(--sk-primary);color:var(--sk-on-primary);font:600 17px/1.2 var(--sk-font-bee-sans);cursor:pointer}
+#eternal .et-b-primary:disabled{background:var(--sk-bg-well);color:var(--sk-ink-mut);cursor:not-allowed}
+#eternal .et-b-link{display:flex;align-items:center;justify-content:center;min-height:var(--sk-control-min,44px);padding:0 var(--sk-s2);border:0;background:transparent;color:var(--sk-link);font:600 16px/1.45 var(--sk-font-bee-sans);cursor:pointer}
+#eternal .et-b-link:hover{color:var(--sk-link-hover)}
+#eternal .et-b-foot{text-align:center;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+
+/* RAVER — the data is the art: one touchable graphic, a physical gesture, short literal words */
+#eternal .et-r{color:var(--sk-ink);font:400 14px/1.4 var(--sk-font-raver-body)}
+#eternal .et-r-top{display:flex;align-items:baseline;justify-content:space-between;gap:var(--sk-s2);flex-wrap:wrap}
+#eternal .et-r-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em;color:var(--sk-ink)}
+#eternal .et-r-hint{font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-art{width:100%;max-width:360px;height:auto;margin:var(--sk-s3) auto var(--sk-s1);filter:drop-shadow(var(--sk-glow-sovereign));touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+#eternal .et-r-art [role="button"]{cursor:pointer}
+#eternal .et-r-art [role="button"]:focus{outline:none}
+#eternal .et-r-art text{font:600 14px/1.25 var(--sk-font-raver-body);fill:var(--sk-ink);pointer-events:none}
+#eternal .et-r-legend{display:flex;justify-content:space-between;gap:var(--sk-s1);margin:var(--sk-s1) 0 var(--sk-s2);font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-legend span{display:flex;flex-direction:column;align-items:center;gap:var(--sk-s1);text-align:center}
+#eternal .et-r-legend i{display:block;width:28px;height:12px;border-radius:var(--sk-radius-sm)}
+#eternal .et-r-legend em{font-style:normal}
+#eternal .et-r-card{display:flex;gap:var(--sk-s2);align-items:center;min-height:var(--sk-control-person,60px);padding:var(--sk-s2) var(--sk-s3);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl);background:var(--sk-sovereign-tint)}
+#eternal .et-r-card .rk{display:flex;align-items:center;justify-content:center;flex:none;min-width:44px;height:44px;padding:0 var(--sk-s1);border-radius:var(--sk-radius);background:var(--sk-sovereign-strong);color:var(--sk-bg);font:700 15px/1.2 var(--sk-font-raver-display)}
+#eternal .et-r-card b{display:block;font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink)}
+#eternal .et-r-card span{font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-sovereign-soft)}
+#eternal .et-r-pill{position:relative;overflow:hidden;display:block;width:100%;height:58px;margin-top:var(--sk-s4);border:0;border-radius:var(--sk-radius-pill);background:var(--sk-primary);color:var(--sk-on-primary);font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em;cursor:pointer;touch-action:none;user-select:none;-webkit-user-select:none}
+#eternal .et-r-pill:disabled{background:var(--sk-sovereign-wash);color:var(--sk-sovereign-soft);cursor:not-allowed}
+#eternal .et-r-pill .fill{position:absolute;left:0;top:0;bottom:0;width:0;background:var(--sk-bg);opacity:.25}
+#eternal .et-r-pill .lbl{position:relative}
+#eternal .et-r-note{margin-top:var(--sk-s2);text-align:center;font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-duo{display:flex;justify-content:center;gap:var(--sk-s2);flex-wrap:wrap;margin-top:var(--sk-s1)}
+#eternal .et-r-ghost{display:inline-flex;align-items:center;justify-content:center;min-height:var(--sk-control-min,44px);min-width:44px;padding:0 var(--sk-s2);border:0;background:none;color:var(--sk-link);font:400 14px/1.4 var(--sk-font-raver-body);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+#eternal .et-r-ghost:disabled{color:var(--sk-ink-mut);text-decoration:none;cursor:default}
+#eternal .et-spin{transform-box:view-box;transform-origin:0 0;animation:etSpin var(--du,120s) linear infinite}
+@keyframes etSpin{to{transform:rotate(360deg)}}
+body.et-still #eternal .et-spin{animation-play-state:paused}
+@media (prefers-reduced-motion:reduce){#eternal .et-spin{animation:none}}
+
+/* CYPHERPUNK — the instrument, complete at first paint: tables, a numbered pipeline, receipts */
+#eternal .et-c{color:var(--sk-ink);font:400 13px/1.45 var(--sk-font-mono)}
+#eternal .et-c-path{font:600 15px/1.45 var(--sk-font-mono);overflow-wrap:anywhere}
+#eternal .et-c-chips{display:flex;flex-wrap:wrap;gap:var(--sk-s1);margin:var(--sk-s2) 0}
+#eternal .et-c-chips span{padding:2px var(--sk-s1);border:1px solid var(--sk-line);border-radius:4px;background:var(--sk-bg-card);font:600 12px/1.4 var(--sk-font-mono);color:var(--sk-ink)}
+#eternal .et-c-chips span.on{border-color:var(--sk-guard);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong)}
+#eternal .et-c-chips span.ok{border-color:var(--sk-verified);color:var(--sk-verified)}
+#eternal .et-c-chips span.no{border-color:var(--sk-guard);border-style:dashed;color:var(--sk-guard)}
+#eternal .et-c-knobs{display:grid;grid-template-columns:1fr 1fr;gap:var(--sk-s2);margin:0 0 var(--sk-s2)}
+#eternal .et-c-knobs label{display:flex;flex-direction:column;gap:2px;min-height:var(--sk-control-min,44px);font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut)}
+#eternal .et-c-field{width:100%;min-width:0;min-height:var(--sk-control-min,44px);padding:0 var(--sk-s1);border:1px solid var(--sk-ink-mut);border-radius:var(--sk-radius-sm);background:var(--sk-bg-card);color:var(--sk-ink);font:400 13px/1.45 var(--sk-font-mono)}
+#eternal .et-c-kv{width:100%;border-collapse:collapse;border:1px solid var(--sk-line);background:var(--sk-bg-card);font:400 13px/1.45 var(--sk-font-mono)}
+#eternal .et-c-kv th{width:104px;padding:var(--sk-s1) var(--sk-s2);text-align:left;vertical-align:top;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);border-bottom:1px solid var(--sk-line);background:transparent}
+#eternal .et-c-kv td{padding:var(--sk-s1) var(--sk-s2);border-bottom:1px solid var(--sk-line);overflow-wrap:anywhere;word-break:break-word;color:var(--sk-ink)}
+#eternal .et-c .no{color:var(--sk-info)}#eternal .et-c .yes{color:var(--sk-verified)}#eternal .et-c .sig{color:var(--sk-you)}#eternal .et-c .grd{color:var(--sk-guard)}
+#eternal .et-c-h{margin:var(--sk-s4) 0 var(--sk-s2);font:600 15px/1.45 var(--sk-font-mono);color:var(--sk-ink);letter-spacing:0}
+#eternal .et-c-tab{width:100%;border-collapse:collapse;border:1px solid var(--sk-line);background:var(--sk-bg-card);font:400 12px/1.45 var(--sk-font-mono)}
+#eternal .et-c-tab th{padding:var(--sk-s1);text-align:left;font:600 12px/1.4 var(--sk-font-mono);color:var(--sk-ink-mut);background:var(--sk-bg-well);border-bottom:1px solid var(--sk-line)}
+#eternal .et-c-tab td{padding:2px var(--sk-s1);border-bottom:1px solid var(--sk-line);color:var(--sk-ink-soft);font:400 12px/1.45 var(--sk-font-mono)}
+#eternal .et-c-tab td.on{color:var(--sk-verified)}
+#eternal .et-c-pipe{list-style:none;padding:0;display:grid;gap:var(--sk-s2);counter-reset:p}
+#eternal .et-c-pipe li{display:grid;grid-template-columns:30px 1fr;gap:var(--sk-s1) var(--sk-s2);padding:var(--sk-s2);border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm);background:var(--sk-bg-card);counter-increment:p}
+#eternal .et-c-pipe li::before{content:counter(p,decimal-leading-zero);color:var(--sk-guard);font-weight:600}
+#eternal .et-c-pipe li b{font-weight:600}
+#eternal .et-c-pipe li p{grid-column:2;color:var(--sk-ink-soft);overflow-wrap:anywhere}
+#eternal .et-c-pipe li.done b{color:var(--sk-verified)}
+#eternal .et-c-pipe li.fail{border-style:dashed;border-color:var(--sk-guard)}#eternal .et-c-pipe li.fail b{color:var(--sk-guard)}
+#eternal .et-c-pipe li.now{border-color:var(--sk-ai);box-shadow:inset 0 0 0 1px var(--sk-ai)}#eternal .et-c-pipe li.now b{color:var(--sk-ai)}
+#eternal .et-c-pipe li.todo p{color:var(--sk-ink-mut)}
+#eternal .et-c-primary{display:flex;align-items:center;justify-content:center;width:100%;height:52px;margin-top:var(--sk-s3);border:0;border-radius:var(--sk-radius-sm);background:var(--sk-primary);color:var(--sk-on-primary);font:600 14px/1.2 var(--sk-font-mono);cursor:pointer}
+#eternal .et-c-primary:disabled{background:var(--sk-bg-well);color:var(--sk-ink-mut);cursor:not-allowed}
+#eternal .et-c-verify{margin-top:var(--sk-s3);padding:var(--sk-s3);border-radius:var(--sk-radius-sm);background:var(--sk-bg-card)}
+#eternal .et-c-verify-h{margin-bottom:var(--sk-s1);font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut)}
+#eternal .et-c-verify ol{padding-left:var(--sk-s4);display:grid;gap:var(--sk-s1);overflow-wrap:anywhere}
+#eternal .et-c-verify code{font:400 12px/1.45 var(--sk-font-mono);color:var(--sk-ai);overflow-wrap:anywhere;word-break:break-all}
+#eternal .et-c-row{display:grid;grid-template-columns:1fr 1fr;gap:var(--sk-s2);margin-top:var(--sk-s3)}
+#eternal .et-c-ghost{display:flex;align-items:center;justify-content:center;min-height:52px;padding:0 var(--sk-s1);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius-sm);background:transparent;color:var(--sk-ink);text-align:center;font:600 14px/1.2 var(--sk-font-mono);cursor:pointer}
+#eternal .et-c-ghost:disabled{border-color:var(--sk-ink-mut);color:var(--sk-ink-mut);cursor:not-allowed}
+
+#eternal button:disabled{opacity:1}
+#eternal{margin-top:var(--sk-s2)}
+
+/* RAVER art — the loop is a wheel: sixteen spokes are the sixteen steps (left to right becomes once
+   round), eight rings on each spoke are the eight pitches. Tap a spoke, then light its pitches on the
+   pad below; the heart plays. While the loop plays one hand sweeps once per bar (under 1 Hz at the
+   studio's fastest 200 bpm); it pauses on the motion switch and never moves under reduced motion. */
+#eternal .et-s-spoke .hit{fill:transparent}
+#eternal .et-s-spoke .axis{fill:none;stroke:var(--sk-line);stroke-width:1.5}
+#eternal .et-s-spoke .dot{fill:var(--sk-bg-card);stroke:var(--sk-ink-dim);stroke-width:1}
+#eternal .et-s-spoke .dot.on{fill:var(--sk-sovereign);stroke:var(--sk-sovereign)}
+#eternal .et-s-spoke.sel .axis{stroke:var(--sk-you);stroke-width:2.5}
+#eternal .et-s-spoke.sel .dot.on{fill:var(--sk-you);stroke:var(--sk-you)}
+#eternal .et-s-spoke.sel .hit{fill:var(--sk-sovereign-tint)}
+#eternal .et-s-spoke:focus-visible .axis{stroke:var(--sk-ink);stroke-width:3}
+#eternal .et-s-spoke text{fill:var(--sk-ink-soft)}
+#eternal .et-s-hand{fill:none;stroke:var(--sk-you);stroke-width:3;stroke-linecap:round;opacity:0}
+#eternal .et-s-sweep{transform-box:view-box;transform-origin:0 0}
+#eternal .et-s-sweep.go .et-s-hand{opacity:.9}
+#eternal .et-s-sweep.go{animation:etSpin var(--du,2s) linear infinite}
+body.et-still #eternal .et-s-sweep.go{animation-play-state:paused}
+@media (prefers-reduced-motion:reduce){#eternal .et-s-sweep.go{animation:none}#eternal .et-s-sweep.go .et-s-hand{opacity:0}}
+#eternal .et-s-heart .hit{fill:transparent}
+#eternal .et-s-heart .hex{fill:var(--sk-sovereign-wash);stroke:var(--sk-sovereign);stroke-width:2}
+#eternal .et-s-heart text{fill:var(--sk-sovereign-strong)}
+#eternal .et-s-heart.on .hex{fill:var(--sk-you);stroke:var(--sk-you)}
+#eternal .et-s-heart.on text{fill:var(--sk-on-primary)}
+#eternal .et-s-heart:focus-visible .hex{stroke:var(--sk-ink);stroke-width:3}
+#eternal .et-r-pad{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--sk-s1);margin:var(--sk-s2) 0 0}
+#eternal .et-r-pad button{min-height:48px;border:1.5px solid var(--sk-sovereign);border-radius:var(--sk-radius-pill);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong);font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em;cursor:pointer}
+#eternal .et-r-pad button[aria-pressed="true"]{background:var(--sk-you);border-color:var(--sk-you);color:var(--sk-on-primary)}
+#eternal .lg-on{background:var(--sk-sovereign)}#eternal .lg-sel{background:var(--sk-you)}#eternal .lg-off{background:var(--sk-bg-card);border:1px solid var(--sk-line)}#eternal .lg-hand{border-top:3px solid var(--sk-you);height:3px!important}
+#eternal .et-c-knobs.four{grid-template-columns:1fr 1fr}
+#eternal .et-c-bits td{font:400 12px/1.45 var(--sk-font-mono);letter-spacing:.08em;color:var(--sk-ink-soft)}
+#eternal .et-c-bits td b{font-weight:600;color:var(--sk-verified)}
+
+/* ── THE WHOLE STUDIO, dressed per register: the studio's own variables mapped onto skaists tokens (its
+   own new bee was already paper and ink; raver and cypherpunk now wear the estate's black-green). The
+   grid's squares grow to the 44 px touch floor; the grid scrolls sideways inside its own panel. ── */
+body[data-reg="bee"]{--bg:var(--sk-bg);--panel:var(--sk-bg-card);--well:var(--sk-bg-well);--ink:var(--sk-ink);--dim:var(--sk-ink-mut);--line:var(--sk-line);--accent:var(--sk-sovereign);--active:var(--sk-ink);--on-ink:var(--sk-bg);--info:var(--sk-link);--harm:var(--sk-you);--font:var(--sk-font-bee-sans)}
+body[data-reg="raver"]{--bg:var(--sk-bg);--panel:var(--sk-bg-card);--well:var(--sk-bg-well);--ink:var(--sk-ink);--dim:var(--sk-ink-soft);--line:var(--sk-line);--accent:var(--sk-sovereign-soft);--active:var(--sk-biomass);--on-ink:var(--sk-bg);--info:var(--sk-ai);--harm:var(--sk-you);--font:var(--sk-font-raver-body)}
+body[data-reg="cypherpunk"]{--bg:var(--sk-bg);--panel:var(--sk-bg-card);--well:var(--sk-bg-well);--ink:var(--sk-ink);--dim:var(--sk-ink-soft);--line:var(--sk-line);--accent:var(--sk-ai);--active:var(--sk-verified);--on-ink:var(--sk-bg);--info:var(--sk-ai);--harm:var(--sk-you);--font:var(--sk-font-mono)}
+body[data-reg]{background:var(--sk-bg);color:var(--sk-ink)}
+@media(max-width:600px){body[data-reg] .studio{padding-left:var(--sk-s3);padding-right:var(--sk-s3)}}
+body[data-reg] :is(button,input,select,textarea):not(#eternal *){border-color:var(--sk-ink-mut)}
+body[data-reg] :is(button,input,select,textarea,summary){min-height:44px}
+body[data-reg] #grid{grid-template-columns:60px repeat(16,minmax(44px,1fr));min-width:820px}
+body[data-reg] #grid .cell{min-height:44px;min-width:44px;border-radius:var(--sk-radius-sm)}
+body[data-reg] .studio :is(.transport,.grid-panel){border-radius:var(--sk-radius-xl)}
+body[data-reg] details.tool-panel{border-radius:var(--sk-radius-xl)}
+body[data-reg] .studio :is(button,input,select,textarea){border-radius:var(--sk-radius)}
+body[data-reg] #import-palette span{border-radius:4px}
+body[data-reg] [data-experience-nav] a{border-radius:var(--sk-radius)}
+body[data-reg="bee"] .studio h1{font:400 40px/1.05 var(--sk-font-bee-serif);letter-spacing:0}
+body[data-reg="bee"] .studio :is(.eyebrow,.grid-caption,.small-note,.pitch,.step-label,.transport output,.fields label,.source-facts){font-size:14px}
+body[data-reg="bee"] .studio :is(button,input,select,textarea){font-size:16px}
+body[data-reg="bee"] .transport button{font-size:17px}
+body[data-reg="raver"] .studio h1{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em}
+body[data-reg="raver"] .studio :is(p,label,output,summary,.pitch,.step-label,.grid-caption,.small-note,.source-facts,button,input,select,textarea){font-size:14px}
+body[data-reg="raver"] .transport .primary{font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em}
+body[data-reg="raver"] .studio :is(button,input,select){border-radius:var(--sk-radius-pill)}
+body[data-reg="raver"] .studio #grid .cell{border-radius:var(--sk-radius-sm)}
+body[data-reg="raver"] .grid-panel{box-shadow:var(--sk-glow-sovereign)}
+body[data-reg="raver"] [data-experience-nav]{font:600 14px/1.25 var(--sk-font-raver-body)}
+body[data-reg="cypherpunk"] .studio h1{font:600 15px/1.45 var(--sk-font-mono)}
+body[data-reg="cypherpunk"] .studio :is(p,label,output,summary,button,input,select,textarea,.source-facts){font-size:13px}
+body[data-reg="cypherpunk"] .studio :is(.pitch,.step-label,.grid-caption,.small-note){font-size:12px}
+body[data-reg="cypherpunk"] :is(.grid-panel,.transport,.tool-panel,.studio button,.studio input,.studio select,.studio textarea,[data-experience-nav] a){border-radius:var(--sk-radius-sm)}
+body[data-reg="cypherpunk"] [data-experience-nav]{font-size:13px}
+</style>
+<link rel="stylesheet" href="../skaists.css">
+</head>
+<body data-reg="bee" data-bee-theme="custom" data-experience="music">
+<nav data-experience-nav aria-label="Explore skaists"><a href="../index.html" data-i18n="social.arrival.home">Home</a><a href="../blight/gallery.html" data-i18n="experience.gallery">Art gallery</a><a href="../blight/studio-music.html" data-i18n="experience.music" aria-current="page">Music studio</a><a href="../buzz-directory.html" data-i18n="atlas.peopleAction">Meet the hive</a><a href="../profile.html" data-i18n="experience.profile">People and names</a></nav>
+<noscript><p>Enable JavaScript to compose and play music in this browser.</p></noscript>
+<main class="studio">
+<!-- ETERNAL FRONT (founder blueprint 2026-09-26, docs/design/eternal): three separate products in
+     one surface. ONE data layer (the studio's own composition: pattern, score(), pitch(), tempo(), the
+     transport's playing flag and step, the undo state and the status line) drives all three, so the
+     facts cannot drift; each register has its own layout, graphic, gesture and voice. Nothing here
+     composes, plays or saves on its own: every gesture clicks the studio's real control below (a grid
+     square, #play, #stop, #dice, #undo, #export, #link, the sound selects) and the fronts read it back.
+     The script carries data-et-front so the engine-only unit rig (e2e/first-click.test.mjs) runs the
+     studio's own engine exactly as before. -->
+<section id="eternal" aria-label="the music studio">
+
+  <!-- NEW BEE — a calm room: how many notes, how it sounds, one plain step at a time -->
+  <div class="et-b">
+    <div class="et-b-mark">Music studio</div>
+    <h2 class="et-b-h" data-t="et.studiomusic.b.title">make a little music</h2>
+    <p class="et-b-lede" data-t="et.studiomusic.b.lede">each square is a note. rows go from low to high, and left to right is time. place a few, or let the studio surprise you, then press play.</p>
+    <div class="et-b-guard"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span data-t="et.studiomusic.b.guard">sound starts only when you press play. nothing is published.</span></div>
+    <div class="et-b-rows">
+      <div class="et-b-row"><span data-t="et.studiomusic.b.notes">your notes</span><small data-et="beeNotes">reading…</small></div>
+      <div class="et-b-row"><span data-t="et.studiomusic.b.sound">the sound</span><small data-et="beeSound">reading…</small></div>
+      <div class="et-b-row"><span data-t="et.studiomusic.b.speed">the speed</span><small data-et="beeSpeed">reading…</small></div>
+      <button type="button" class="et-b-row" id="etBeePlace"><span data-t="et.studiomusic.b.place">place notes yourself</span><small><span data-t="et.studiomusic.b.grid">the grid</span><svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2"/></svg></small></button>
+      <button type="button" class="et-b-row" id="etBeeKeep"><span data-t="et.studiomusic.b.keep">keep it</span><small><span data-t="et.studiomusic.b.keepV">download or copy a link</span><svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2"/></svg></small></button>
+    </div>
+    <p class="et-b-now" id="etBeeNow" aria-live="polite">reading…</p>
+    <div class="et-b-act">
+      <button type="button" class="et-b-primary" id="etBeeGo">play</button>
+      <button type="button" class="et-b-link" id="etBeeAlt">surprise me with a tune</button>
+      <p class="et-b-foot" data-t="et.studiomusic.b.foot">a link keeps the notes, not a recording.</p>
+    </div>
+  </div>
+
+  <!-- RAVER — the loop is a wheel: tap a spoke (a step), light its pitches on the pad, tap the heart to play -->
+  <div class="et-r">
+    <div class="et-r-top"><h2 class="et-r-h" id="etRaverTitle">the loop wheel</h2><span class="et-r-hint" id="etRaverHint">reading the loop…</span></div>
+    <svg class="et-r-art" id="etWheel" viewBox="-180 -180 360 360" role="group" aria-label="the loop as a wheel: sixteen steps round, eight pitches out"></svg>
+    <div class="et-r-legend" aria-label="what the marks mean">
+      <span><i class="lg-on"></i><em data-t="et.studiomusic.r.on">a note</em></span><span><i class="lg-sel"></i><em data-t="et.studiomusic.r.sel">your step</em></span><span><i class="lg-off"></i><em data-t="et.studiomusic.r.off">silent</em></span><span><i class="lg-hand"></i><em data-t="et.studiomusic.r.hand">the hand</em></span>
+    </div>
+    <div class="et-r-card" id="etRaverCard" aria-live="polite"></div>
+    <div class="et-r-pad" id="etPad" role="group" aria-label="the pitches of your step"></div>
+    <div class="et-r-duo">
+      <button type="button" class="et-r-ghost" id="etRaverDice" data-t="et.studiomusic.r.dice">surprise me</button>
+      <button type="button" class="et-r-ghost" id="etRaverUndo" data-t="et.studiomusic.r.undo">undo</button>
+      <button type="button" class="et-r-ghost" id="etMotion" aria-pressed="false">pause motion</button>
+    </div>
+  </div>
+
+  <!-- CYPHERPUNK — the score as an instrument: knobs, the pitch map, the bit rows, the transport pipeline -->
+  <div class="et-c">
+    <p class="et-c-path"><span data-et="path">score://v1</span></p>
+    <div class="et-c-chips" id="etChips"></div>
+    <div class="et-c-knobs four">
+      <label for="etCyScale">scale<select class="et-c-field" id="etCyScale"></select></label>
+      <label for="etCyRoot">key<select class="et-c-field" id="etCyRoot"></select></label>
+      <label for="etCyWave">wave<select class="et-c-field" id="etCyWave"></select></label>
+      <label for="etCyBpm">bpm · 60 to 200<input class="et-c-field" id="etCyBpm" type="number" min="60" max="200" step="1" inputmode="numeric"></label>
+    </div>
+    <button type="button" class="et-c-primary" id="etCyRun">run transport</button>
+    <h3 class="et-c-h" data-t="et.studiomusic.c.mapH">pitch map · row d → note</h3>
+    <table class="et-c-tab" id="etMap"></table>
+    <h3 class="et-c-h" data-t="et.studiomusic.c.bitsH">steps · score().steps, row by row</h3>
+    <table class="et-c-tab et-c-bits" id="etBits"></table>
+    <h3 class="et-c-h" data-t="et.studiomusic.c.pipeH">transport pipeline · in this browser</h3>
+    <ol class="et-c-pipe" id="etPipe"></ol>
+    <h3 class="et-c-h" data-t="et.studiomusic.c.receiptH">receipt</h3>
+    <table class="et-c-kv" id="etReceipt"></table>
+    <div class="et-c-verify">
+      <div class="et-c-verify-h" data-t="et.studiomusic.c.verifyH">verify · no trust in this page needed</div>
+      <ol><li>a song link is #score= base64 of the utf-8 JSON score</li><li>JSON.parse(atob(link)) → validateScore(): v 1, a known scale, key, wave, bpm 60 to 200, steps = 8 rows of 16 bits</li><li>pitch(d) = 48 + key + scale[d mod n] + 12 × ⌊d / n⌋ · compare the map above</li></ol>
+    </div>
+    <div class="et-c-row">
+      <button type="button" class="et-c-ghost" id="etCyExport">download score.json</button>
+      <button type="button" class="et-c-ghost" id="etCyLink">copy song link</button>
+      <button type="button" class="et-c-ghost" id="etCyUndo">undo</button>
+      <a class="et-c-ghost" href="https://github.com/beehive-nature/beehive-nature/blob/main/surfaces/blight/studio-music.html" target="_blank" rel="noopener noreferrer">fork the template ↗ new tab</a>
+    </div>
+  </div>
+</section>
+<h2 class="et-archive-h" id="etArchive" data-t="et.studiomusic.archive">the whole studio</h2>
+<header class="studio-head"><div><p class="eyebrow" data-i18n="experience.music">Music studio</p><h1><span data-view="bee" data-i18n="experience.music.bee">Make a little music.</span><span data-view="raver" data-i18n="experience.music.raver">Build your loop.</span><span data-view="cypherpunk" data-i18n="experience.music.cypher">16-step score workstation</span></h1><p class="sub" data-i18n="experience.compose">Choose squares, then press Play. Save your work before leaving this page.</p></div></header>
+<div class="transport" aria-label="Playback">
+ <button type="button" id="play" class="primary" aria-pressed="false"><span aria-hidden="true">▶ </span><span data-i18n="experience.play">Play</span></button>
+ <button type="button" id="stop" class="stop" disabled><span aria-hidden="true">■ </span><span data-i18n="experience.stop">Stop</span></button>
+ <label for="bpm"><span data-i18n="experience.tempo">Tempo (BPM)</span><input id="bpm" type="number" value="132" min="60" max="200" step="1" inputmode="numeric"></label>
+ <output id="transport-state" aria-live="off">Stopped · 16 steps</output>
 </div>
-<div class="row">
-  <input id="impAddr" placeholder="import: any family contract 0x…" style="flex:1;min-width:240px;color:var(--cyan)">
-  <input id="impSeed" type="number" value="1000" min="1" style="width:110px;color:var(--cyan)" placeholder="seed">
-  <button id="import" class="ghost">⬆ pull its scale from chain</button>
+<div class="workspace">
+ <section class="grid-panel" aria-label="Compose your loop">
+  <div class="grid-scroll" tabindex="0" role="region" aria-label="Eight pitch rows and sixteen steps; scroll horizontally on a small screen"><div id="grid" role="group" aria-label="Musical pattern"></div></div>
+  <p class="grid-caption">● = a note. Use arrow keys to move between squares; Space or Enter changes a note.</p>
+  <p id="status" role="status" aria-live="polite">Ready to compose.</p>
+ </section>
+ <aside class="panels" aria-label="Sound and score tools">
+  <details class="tool-panel" id="sound-panel" open><summary data-i18n="experience.soundSettings">Shape the sound</summary><div class="fields">
+   <label for="scale"><span data-i18n="experience.scale">Scale</span><select id="scale"></select></label>
+   <label for="root"><span data-i18n="experience.key">Key</span><select id="root"></select></label>
+   <label for="wave" class="full"><span data-i18n="experience.sound">Sound</span><select id="wave"><option>triangle</option><option>square</option><option>sawtooth</option><option>sine</option></select></label>
+  </div></details>
+  <details class="tool-panel" id="variation-panel" open><summary data-i18n="experience.variation">Try a variation</summary><div class="actions"><button type="button" id="dice" data-i18n="experience.random">Surprise me</button><button type="button" id="clear" data-i18n="experience.clear">Clear the notes</button><button type="button" id="undo" disabled data-i18n="experience.undo">Undo</button></div></details>
+  <details class="tool-panel" id="save-panel" open><summary data-i18n="experience.save">Save and share</summary><div class="actions"><button type="button" id="export" data-i18n="experience.download">Download score (JSON)</button><button type="button" id="link" data-i18n="experience.copy">Copy song link</button></div><p class="small-note">Saves the notes and settings, not an audio recording. A link carries the score; it does not publish an inscription.</p><div id="share-fallback" hidden><label for="share-text" data-i18n="experience.copyManually">Copy this link manually</label><textarea id="share-text" readonly></textarea></div></details>
+  <details class="tool-panel" id="import-panel"><summary data-i18n="experience.import">Import a collection’s scale</summary><div class="fields"><label for="impAddr" class="full"><span data-i18n="experience.contract">Contract address on Base</span><input id="impAddr" placeholder="0x…" spellcheck="false" autocomplete="off"></label><label for="impSeed"><span data-i18n="experience.seed">Seed</span><input id="impSeed" type="number" value="1000" min="1" step="1"></label><button type="button" id="import" data-i18n="experience.readScale">Read scale</button></div><p class="small-note" id="impnote">Optional, read-only lookup. Your notes stay in place. Some collections do not expose a compatible getMeta response.</p><div id="import-palette" aria-label="Imported collection colors"></div></details>
+  <details class="tool-panel score-panel" id="score-panel"><summary data-i18n="experience.score">Score data</summary><textarea id="score-preview" readonly aria-label="Current score JSON" spellcheck="false"></textarea><p class="small-note">Version 1 · eight pitch rows × sixteen steps. Imported metadata is retained separately from the current controls.</p></details>
+ </aside>
 </div>
-<div id="status">ready — click cells to compose. rows are scale degrees (low → high).</div>
-<div id="grid"></div>
-<div class="foot">Interop: <b>import</b> reads getMeta from any ERC-20i family contract (MiDi, FUNGI, FROGGI, JELLI…) and
-adopts its scale + colors. <b>Export</b> writes the score as the JSON payload the encoder will inscribe:
-{scale, root, bpm, wave, steps[]}. Same score, same song, forever — the seed doctrine, now for your own music.
-<span id="impnote"></span></div>
+<details class="source-facts"><summary data-i18n="atlas.source">Source &amp; limits</summary><p>Audio is synthesized in this browser after you press Play. Import reads Base through public RPC services. The JSON download and song link preserve a score; no blockchain write, wallet signature or message delivery happens here. All controls are available in every view.</p><a href="https://github.com/beehive-nature/beehive-nature/blob/main/surfaces/blight/studio-music.html" rel="noopener">Studio source ↗</a></details>
+</main>
+
 <script>
 const SCALES={'major':[0,2,4,5,7,9,11],'harmonic major':[0,2,4,5,7,8,11],'minor':[0,2,3,5,7,8,10],
  'harmonic minor':[0,2,3,5,7,8,11],'melodic minor':[0,2,3,5,7,9,11],'pentatonic':[0,3,5,7,10],
@@ -84,117 +339,273 @@ function dec(s){
   }
   try{ return decodeURIComponent(escape(out)); }catch(e){ return out; }
 }
+/* FIRST-CLICK ENGINE: one composition and one audio transport for every view. */
 const $=id=>document.getElementById(id);
-const DEGREES=8, STEPS=16;
+const DEGREES=8, STEPS=16, WAVES=['triangle','square','sawtooth','sine'];
 let pattern=Array.from({length:DEGREES},()=>Array(STEPS).fill(false));
-let ac=null, timer=null, playing=false, imported={};
+let ac=null, timer=null, playing=false, playTicket=0, imported={}, stepIndex=0, previous=null, focusedCell={d:0,s:0};
+const activeVoices=new Set();
 $('scale').innerHTML=Object.keys(SCALES).map(s=>'<option'+(s==='harmonic major'?' selected':'')+'>'+s+'</option>').join('');
 $('root').innerHTML=NOTES.map((n,i)=>'<option value="'+i+'"'+(i===9?' selected':'')+'>'+n+'</option>').join('');
+function status(message,error=false){$('status').textContent=message;$('status').dataset.tone=error?'error':'normal';}
+function tempo(){const n=Number($('bpm').value);return Number.isFinite(n)?Math.min(200,Math.max(60,Math.round(n))):132;}
+function pitch(d){const iv=SCALES[$('scale').value]||SCALES.major;return 48+(Number($('root').value)||0)+iv[d%iv.length]+12*Math.floor(d/iv.length);}
+function noteName(d){const n=pitch(d);return NOTES[n%12]+(Math.floor(n/12)-1);}
+function score(){return {v:1,scale:$('scale').value,root:NOTES[Number($('root').value)],bpm:tempo(),wave:$('wave').value,
+ steps:pattern.map(r=>r.map(c=>c?'1':'0').join('')).join('|'),imported:imported.meta||null};}
+function refreshScore(){$('score-preview').value=JSON.stringify(score(),null,2);}
+function snapshot(){previous=JSON.parse(JSON.stringify(score()));$('undo').disabled=false;}
+function applyPattern(s){$('scale').value=s.scale;$('root').value=String(NOTES.indexOf(s.root));$('bpm').value=s.bpm;$('wave').value=s.wave;
+ pattern=s.steps.split('|').map(row=>[...row].map(c=>c==='1'));imported=s.imported?{meta:s.imported}:{};renderPalette();buildGrid();refreshScore();}
+function validateScore(s){
+ if(!s||s.v!==1||!Object.hasOwn(SCALES,s.scale)||!NOTES.includes(s.root)||!WAVES.includes(s.wave)||!Number.isFinite(s.bpm)||s.bpm<60||s.bpm>200)throw Error('Invalid score settings');
+ if(typeof s.steps!=='string'||!/^([01]{16}\|){7}[01]{16}$/.test(s.steps))throw Error('Invalid pattern');
+ if(s.imported!==null&&s.imported!==undefined&&(typeof s.imported!=='object'||Array.isArray(s.imported)||JSON.stringify(s.imported).length>24000))throw Error('Invalid imported metadata');
+ return s;
+}
 function buildGrid(){
-  const g=$('grid'); g.innerHTML='';
-  for(let d=DEGREES-1;d>=0;d--){
-    const lab=document.createElement('div'); lab.className='deg'; lab.textContent='deg '+(d+1); g.appendChild(lab);
-    for(let s=0;s<STEPS;s++){
-      const c=document.createElement('div'); c.className='cell'+(pattern[d][s]?' on':'');
-      c.dataset.d=d; c.dataset.s=s;
-      if(imported.colors){ c.style.borderColor=(d%2?imported.colors[0]:imported.colors[1])+'55'; }
-      c.onclick=()=>{ pattern[d][s]=!pattern[d][s]; c.classList.toggle('on',pattern[d][s]); };
-      g.appendChild(c);
-    }
+ const g=$('grid'),hadFocus=g.contains(document.activeElement);g.innerHTML='';
+ const corner=document.createElement('span');corner.className='step-label';corner.textContent='♪';g.appendChild(corner);
+ for(let s=0;s<STEPS;s++){const n=document.createElement('span');n.className='step-label';n.textContent=String(s+1);g.appendChild(n);}
+ for(let d=DEGREES-1;d>=0;d--){
+  const lab=document.createElement('span');lab.className='pitch';lab.textContent=noteName(d);g.appendChild(lab);
+  for(let s=0;s<STEPS;s++){
+   const c=document.createElement('button');c.type='button';c.className='cell'+(pattern[d][s]?' on':'');c.dataset.d=d;c.dataset.s=s;
+   c.setAttribute('aria-label',noteName(d)+', step '+(s+1));c.setAttribute('aria-pressed',String(pattern[d][s]));c.tabIndex=d===focusedCell.d&&s===focusedCell.s?0:-1;
+   c.addEventListener('focus',()=>{focusedCell={d,s};g.querySelectorAll('.cell').forEach(n=>n.tabIndex=n===c?0:-1);});
+   c.onclick=()=>{snapshot();pattern[d][s]=!pattern[d][s];c.classList.toggle('on',pattern[d][s]);c.setAttribute('aria-pressed',String(pattern[d][s]));refreshScore();};
+   c.onkeydown=e=>{let nd=d,ns=s;if(e.key==='ArrowRight')ns=Math.min(15,s+1);else if(e.key==='ArrowLeft')ns=Math.max(0,s-1);else if(e.key==='ArrowUp')nd=Math.min(7,d+1);else if(e.key==='ArrowDown')nd=Math.max(0,d-1);else return;e.preventDefault();g.querySelector('.cell[data-d="'+nd+'"][data-s="'+ns+'"]').focus();};
+   g.appendChild(c);
   }
+ }
+ if(hadFocus)g.querySelector('.cell[data-d="'+focusedCell.d+'"][data-s="'+focusedCell.s+'"]').focus({preventScroll:true});
 }
-const freq=(semi)=>440*Math.pow(2,(semi-69)/12);
+const freq=semi=>440*Math.pow(2,(semi-69)/12);
 function step(){
-  const iv=SCALES[$('scale').value];
-  const root=48+(+$('root').value);
-  const stepIdx=+(timer?.dataset?.i||0);
-  document.querySelectorAll('.cell.now').forEach(e=>e.classList.remove('now'));
-  for(let d=0;d<DEGREES;d++){
-    const cell=document.querySelector('.cell[data-d="'+d+'"][data-s="'+stepIdx+'"]');
-    if(cell) cell.classList.add('now');
-    if(pattern[d][stepIdx]){
-      const semi=root+iv[d%iv.length]+12*Math.floor(d/iv.length);
-      const o=ac.createOscillator(), g=ac.createGain();
-      o.type=$('wave').value; o.frequency.value=freq(semi);
-      const T=ac.currentTime;
-      g.gain.setValueAtTime(0.0001,T);
-      g.gain.exponentialRampToValueAtTime(0.18,T+0.01);
-      g.gain.exponentialRampToValueAtTime(0.0001,T+60/ +$('bpm').value/4*0.9);
-      o.connect(g).connect(ac.destination); o.start(T); o.stop(T+60/ +$('bpm').value/4);
-    }
+ if(!playing)return;
+ document.querySelectorAll('.cell.now').forEach(e=>e.classList.remove('now'));
+ const beat=60/tempo()/4;
+ for(let d=0;d<DEGREES;d++){
+  const cell=document.querySelector('.cell[data-d="'+d+'"][data-s="'+stepIndex+'"]');if(cell)cell.classList.add('now');
+  if(pattern[d][stepIndex]){const o=ac.createOscillator(),g=ac.createGain();o.type=$('wave').value;o.frequency.value=freq(pitch(d));const T=ac.currentTime;
+   g.gain.setValueAtTime(.0001,T);g.gain.exponentialRampToValueAtTime(.12,T+.01);g.gain.exponentialRampToValueAtTime(.0001,T+beat*.9);
+   o.connect(g).connect(ac.destination);activeVoices.add(o);o.onended=()=>{activeVoices.delete(o);o.disconnect();g.disconnect();};o.start(T);o.stop(T+beat);
   }
-  timer.dataset.i=(stepIdx+1)%STEPS;
+ }
+ $('transport-state').textContent='Playing · '+(stepIndex+1)+' / 16';stepIndex=(stepIndex+1)%STEPS;
+ timer=setTimeout(step,60000/tempo()/4);
 }
-function play(){
-  if(playing) return;
-  ac=ac||new (window.AudioContext||window.webkitAudioContext)();
-  if(ac.state==='suspended') ac.resume();
-  playing=true;
-  timer=document.createElement('div'); timer.dataset.i=0; document.body.appendChild(timer);
-  const iv=()=>{ if(!playing) return; step(); setTimeout(iv,60000/ +$('bpm').value/4); };
-  iv();
+async function play(){
+ if(playing)return;const ticket=++playTicket;playing=true;$('play').disabled=true;$('stop').disabled=false;
+ try{const Audio=window.AudioContext||window.webkitAudioContext;if(!Audio)throw Error('Audio unavailable');ac=ac||new Audio();if(ac.state==='suspended')await ac.resume();if(!playing||ticket!==playTicket)return;
+  $('bpm').value=tempo();$('play').setAttribute('aria-pressed','true');$('stop').disabled=false;stepIndex=0;step();status('Playing your loop.');
+ }catch(e){if(ticket!==playTicket)return;stop();status('Audio could not start. Try Play again in a browser with audio enabled.',true);}
 }
-function stop(){ playing=false; if(timer) timer.remove(); document.querySelectorAll('.cell.now').forEach(e=>e.classList.remove('now')); }
-$('play').onclick=play; $('stop').onclick=stop;
-$('clear').onclick=()=>{ pattern=Array.from({length:DEGREES},()=>Array(STEPS).fill(false)); buildGrid(); };
-$('dice').onclick=()=>{
-  pattern=Array.from({length:DEGREES},()=>Array(STEPS).fill(false));
-  for(let s=0;s<STEPS;s++){ const d=Math.floor(Math.random()*DEGREES); if(Math.random()<0.45) pattern[d][s]=true; }
-  $('scale').selectedIndex=Math.floor(Math.random()*Object.keys(SCALES).length);
-  $('root').value=Math.floor(Math.random()*12);
-  buildGrid(); $('status').textContent='rolled a fresh song — press play';
-};
-function score(){ return {v:1,scale:$('scale').value,root:NOTES[+$('root').value],bpm:+$('bpm').value,
-  wave:$('wave').value,steps:pattern.map(r=>r.map(c=>c?1:0).join('')).join('|'),imported:imported.meta||null}; }
-$('export').onclick=()=>{
-  const b=new Blob([JSON.stringify(score(),null,2)],{type:'application/json'});
-  const a=document.createElement('a'); a.href=URL.createObjectURL(b);
-  a.download='blight-score-'+Date.now()+'.json'; a.click();
-  $('status').textContent='score exported — this JSON is the inscription payload';
-};
-$('link').onclick=()=>{
-  const b=btoa(JSON.stringify(score()));
-  const u=location.origin+location.pathname+'?score='+encodeURIComponent(b.slice(0,1800));
-  navigator.clipboard.writeText(u).then(()=>$('status').textContent='song-link copied');
-};
+function stop(){++playTicket;playing=false;clearTimeout(timer);timer=null;for(const o of activeVoices){try{o.stop();}catch{}}activeVoices.clear();
+ $('play').disabled=false;$('play').setAttribute('aria-pressed','false');$('stop').disabled=true;$('transport-state').textContent='Stopped · 16 steps';document.querySelectorAll('.cell.now').forEach(e=>e.classList.remove('now'));}
+$('play').onclick=play;$('stop').onclick=()=>{stop();status('Stopped. Your notes are still here.');};
+window.addEventListener('pagehide',stop);
+$('clear').onclick=()=>{snapshot();pattern=Array.from({length:DEGREES},()=>Array(STEPS).fill(false));buildGrid();refreshScore();status('Notes cleared. Undo restores your previous composition.');};
+$('dice').onclick=()=>{snapshot();pattern=Array.from({length:DEGREES},()=>Array(STEPS).fill(false));for(let s=0;s<STEPS;s++)if(Math.random()<.45)pattern[Math.floor(Math.random()*DEGREES)][s]=true;
+ $('scale').selectedIndex=Math.floor(Math.random()*Object.keys(SCALES).length);$('root').value=Math.floor(Math.random()*12);buildGrid();refreshScore();status('A new variation is ready. Undo restores the previous composition.');};
+$('undo').onclick=()=>{if(!previous)return;const saved=previous;previous=null;applyPattern(saved);$('undo').disabled=true;status('Previous composition restored.');};
+for(const id of ['scale','root','wave','bpm'])$(id).addEventListener('change',()=>{if(id==='bpm')$('bpm').value=tempo();buildGrid();refreshScore();});
+$('export').onclick=()=>{const b=new Blob([JSON.stringify(score(),null,2)],{type:'application/json'}),u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download='blight-score-'+Date.now()+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(u),1000);status('Score download requested. This is a JSON score, not an audio recording.');};
+function encodeScore(s){const bytes=new TextEncoder().encode(JSON.stringify(s));return btoa(Array.from(bytes,b=>String.fromCharCode(b)).join(''));}
+function decodeScore(s){if(s.length>48000)throw Error('Link too long');return validateScore(JSON.parse(new TextDecoder('utf-8',{fatal:true}).decode(Uint8Array.from(atob(s),c=>c.charCodeAt(0)))));}
+$('link').onclick=async()=>{const encoded=encodeScore(score());if(encoded.length>48000){status('This score is too large for a song link. Download the complete JSON instead.',true);return;}
+ const u=location.origin+location.pathname+'#score='+encodeURIComponent(encoded);$('share-text').value=u;
+ try{if(!navigator.clipboard)throw Error('Clipboard unavailable');await navigator.clipboard.writeText(u);$('share-fallback').hidden=true;status('Song link copied. Share it using the app of your choice.');}
+ catch{$('share-fallback').hidden=false;status('Clipboard access was unavailable. Copy the complete link below.',true);$('share-text').focus();$('share-text').select();}};
+function renderPalette(){const p=$('import-palette');p.replaceChildren();const m=imported.meta;if(!m)return;for(const color of [m.barColorTop,m.barColorBottom])if(/^#[0-9a-f]{6}$/i.test(color||'')){const s=document.createElement('span');s.style.backgroundColor=color;s.title=color;p.appendChild(s);}}
 $('import').onclick=async()=>{
-  const a=$('impAddr').value.trim().toLowerCase(), seed=Math.max(1,Math.floor(+$('impSeed').value||1));
-  const st=$('status');
-  if(!/^0x[0-9a-f]{40}$/.test(a)){ st.textContent='paste a full 0x… contract address'; return; }
-  st.textContent='reading chain…';
-  for(const h of HOSTS){
-    const ctl=new AbortController(); const kill=setTimeout(()=>ctl.abort(),8000);
-    try{
-      const r=await fetch(h,{method:'POST',headers:{'Content-Type':'application/json'},signal:ctl.signal,
-        body:JSON.stringify({jsonrpc:'2.0',id:1,method:'eth_call',params:[{to:a,data:'0xc3f4552a'+W(seed)+W(0)},'latest']})});
-      const j=await r.json(); clearTimeout(kill);
-      if(j.result&&j.result!=='0x'){
-        const m=JSON.parse(dec(j.result));
-        const sc=String(m.scale||'').toLowerCase();
-        if(SCALES[sc]) $('scale').value=sc;
-        imported={meta:m,colors:[m.barColorTop||'#13451D',m.barColorBottom||'#2e7d32']};
-        KNOWN[a]&&($('impnote').textContent=' imported from '+KNOWN[a]+' ');
-        st.textContent='imported '+(KNOWN[a]||a.slice(0,10)+'…')+' seed '+seed+': scale "'+(m.scale||'?')+'" — grid retinted with its bar colors';
-        buildGrid(); return;
-      }
-      if(j.error) st.textContent='host: '+String(j.error.message).slice(0,50)+' — trying next';
-    }catch(e){ clearTimeout(kill); st.textContent='unreachable — trying next host'; }
-  }
-  st.style.color='#e8b84a'; st.textContent='import failed — that contract may not speak getMeta (TRUFFI and PEPI keep traits in their SVGs)';
+ const a=$('impAddr').value.trim().toLowerCase(),seed=Number($('impSeed').value);
+ if(!/^0x[0-9a-f]{40}$/.test(a)||!Number.isSafeInteger(seed)||seed<1){status('Enter a full contract address and a positive whole-number seed.',true);return;}
+ $('import').disabled=true;status('Reading the scale from Base…');
+ try{for(const h of HOSTS){const ctl=new AbortController(),kill=setTimeout(()=>ctl.abort(),8000);
+  try{const r=await fetch(h,{method:'POST',headers:{'Content-Type':'application/json'},signal:ctl.signal,body:JSON.stringify({jsonrpc:'2.0',id:1,method:'eth_call',params:[{to:a,data:'0xc3f4552a'+W(seed)+W(0)},'latest']})});if(!r.ok)continue;
+   const j=await r.json();if(!j.result||j.result==='0x')continue;const m=JSON.parse(dec(j.result));if(!m||typeof m!=='object'||Array.isArray(m))continue;
+   validateScore({...score(),imported:m});const sc=String(m.scale||'').toLowerCase();snapshot();if(Object.hasOwn(SCALES,sc))$('scale').value=sc;imported={meta:m};renderPalette();buildGrid();refreshScore();
+   $('impnote').textContent='Imported '+(KNOWN[a]||a)+' · seed '+seed+' · metadata scale: '+String(m.scale||'not supplied')+'. Current sound controls remain editable.';
+   status(Object.hasOwn(SCALES,sc)?'Scale imported. Your notes are unchanged.':'Metadata loaded, but its scale is not supported. Your selected scale and notes are unchanged.');return;
+  }catch{}finally{clearTimeout(kill);}
+ }status('Import did not return compatible metadata. Check the address and connection, then try again. Your composition is unchanged.',true);
+ }finally{$('import').disabled=false;}
 };
-const q=new URLSearchParams(location.search);
-if(q.get('score')){ try{
-  const s=JSON.parse(atob(q.get('score')));
-  if(s.scale&&SCALES[s.scale]) $('scale').value=s.scale;
-  if(s.root) $('root').value=NOTES.indexOf(s.root);
-  if(s.bpm) $('bpm').value=s.bpm;
-  if(s.wave) $('wave').value=s.wave;
-  if(s.steps) s.steps.split('|').forEach((row,d)=>{ if(pattern[d]) pattern[d]=[...row].map(c=>c==='1'); });
-  $('status').textContent='song-link loaded — press play';
-}catch(e){ $('status').textContent='link score unreadable'; } }
-buildGrid();
+const q=new URLSearchParams(location.search),hash=new URLSearchParams(location.hash.slice(1)),sharedScore=hash.get('score')||q.get('score');
+if(sharedScore){try{applyPattern(decodeScore(sharedScore));status('Song link loaded. Press Play when you are ready.');}catch{status('This song link is incomplete or invalid. No part of it was applied.',true);}}
+buildGrid();refreshScore();
+/* Views change disclosure defaults only; composition/audio state is untouched. */
+const panelDefaults={bee:['save-panel'],raver:['sound-panel','variation-panel'],cypherpunk:['sound-panel','variation-panel','save-panel','import-panel','score-panel']};
+function restoreVisibleFocus(focus){
+ if(!focus?.isConnected)return;let target=focus;
+ for(let node=focus.parentElement;node;node=node.parentElement)if(node.tagName==='DETAILS'&&!node.open)target=node.querySelector('summary');
+ target?.focus({preventScroll:true});
+}
+const panelChoices=new Map();let lastView=null;
+function presentStudio(event){const view=event?.detail?.reg||document.body.dataset.reg||'bee';if(view===lastView)return;const focus=document.activeElement;
+ if(lastView)panelChoices.set(lastView,[...document.querySelectorAll('.tool-panel')].filter(p=>p.open).map(p=>p.id));
+ const open=panelChoices.get(view)||panelDefaults[view]||panelDefaults.bee;document.querySelectorAll('.tool-panel').forEach(p=>p.open=open.includes(p.id));lastView=view;restoreVisibleFocus(focus);}
+document.addEventListener('bregister',presentStudio);presentStudio();
+
 </script>
-</div><div id="bnr-beta-badge" style="position:fixed;right:.6rem;bottom:calc(.6rem + 46px);z-index:9997;font:12px ui-monospace,monospace;opacity:.75"><a href="../" style="color:#39c5cf;text-decoration:none;border:1px solid #30363d;border-radius:99px;padding:.15rem .7rem;background:#161b22">⌂ hub</a></div>
-<script src="../tour.js?v=34"></script>
+<script data-et-front>
+/* ETERNAL FRONT — one data layer, three renderers (docs/design/eternal). Facts come from the studio's
+   own composition engine: pattern, score(), pitch(d), noteName(d), tempo(), the playing flag, the undo
+   state, the imported metadata and the #status line. Nothing here composes, plays or saves on its own:
+   every gesture clicks the studio's real control (a #grid square, #play, #stop, #dice, #undo, #export,
+   #link) or sets its real select and fires its own change event; the fronts read the engine back. The
+   step counter is never mirrored (it ticks up to 13 times a second): "playing" is read from #play. */
+(function(){
+  var $=function(id){return document.getElementById(id);};
+  var T=function(k,f){var t=window.BNRLanguage&&window.BNRLanguage.text;return t?t(k,f):f;};
+  var D={pattern:[],notes:0,scale:'',intervals:[],root:'',wave:'',bpm:0,stepMs:0,loopS:0,playing:false,undo:false,status:'',tone:'normal',pitches:[],steps:'',linkChars:0,imported:null};
+  var R={sel:0};
+  function esc(v){return String(v==null?'':v).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+  function set(sel,txt){[].forEach.call(document.querySelectorAll('#eternal [data-et]'),function(e){if(e.getAttribute('data-et')===sel)e.textContent=txt;});}
+  function read(){
+    D.pattern=pattern.map(function(r){return r.slice();});
+    D.notes=D.pattern.reduce(function(a,r){return a+r.filter(Boolean).length;},0);
+    D.scale=$('scale').value; D.intervals=(SCALES[D.scale]||[]).slice(); D.root=NOTES[Number($('root').value)]; D.wave=$('wave').value;
+    D.bpm=tempo(); D.stepMs=Math.round(60000/D.bpm/4*10)/10; D.loopS=Math.round(16*60/D.bpm/4*100)/100;
+    D.playing=$('play').getAttribute('aria-pressed')==='true'||$('play').disabled&&!$('stop').disabled;
+    D.undo=!$('undo').disabled; D.status=($('status').textContent||'').trim(); D.tone=$('status').dataset.tone||'normal';
+    D.pitches=[];for(var d=0;d<DEGREES;d++){var m=pitch(d);D.pitches.push({d:d,midi:m,name:noteName(d),hz:Math.round(440*Math.pow(2,(m-69)/12)*10)/10,count:D.pattern[d].filter(Boolean).length});}
+    var sc=score(); D.steps=sc.steps; D.linkChars=encodeScore(sc).length;
+    D.imported=imported&&imported.meta?imported.meta:null;
+  }
+  function soundLine(){return D.root+' '+D.scale+', '+D.wave;}
+
+  /* ── NEW BEE ── */
+  function bee(){
+    set('beeNotes',D.notes?D.notes+' '+(D.notes===1?T('et.studiomusic.b.note1','note placed'):T('et.studiomusic.b.noteN','notes placed')):T('et.studiomusic.b.none','no notes yet'));
+    set('beeSound',soundLine()); set('beeSpeed',D.bpm+' '+T('et.studiomusic.b.bpm','beats a minute'));
+    $('etBeeNow').textContent=D.tone==='error'?D.status
+      :D.playing?T('et.studiomusic.b.playing','playing your loop, round and round. press stop to rest.')
+      :!D.notes?T('et.studiomusic.b.empty','no notes yet. let the studio surprise you, or place a few yourself.')
+      :T('et.studiomusic.b.ready','ready. press play when you are.');
+    $('etBeeGo').textContent=D.playing?T('et.studiomusic.b.stop','stop'):!D.notes?T('et.studiomusic.b.surprise','surprise me with a tune'):T('et.studiomusic.b.play','play');
+    $('etBeeAlt').textContent=!D.notes?T('et.studiomusic.b.placeLink','place notes yourself'):T('et.studiomusic.b.other','try a different tune');
+  }
+
+  /* ── RAVER ── */
+  var HEX=function(r){var p=[];for(var k=0;k<6;k++){var a=Math.PI/180*(60*k-30);p.push((r*Math.cos(a)).toFixed(1)+' '+(r*Math.sin(a)).toFixed(1));}return 'M'+p.join('L')+'Z';};
+  var P=function(r,a){return (r*Math.cos(a)).toFixed(1)+' '+(r*Math.sin(a)).toFixed(1);};
+  function wheel(){
+    var svg=$('etWheel'); if(!svg)return;
+    if(!svg.firstChild){
+      var h='';
+      for(var s=0;s<STEPS;s++){var a=-Math.PI/2+s*2*Math.PI/STEPS,w=Math.PI/STEPS*0.9;
+        h+='<g class="et-s-spoke" data-s="'+s+'" role="button" tabindex="0"><path class="hit" d="M'+P(44,a-w)+'L'+P(172,a-w)+'A172 172 0 0 1 '+P(172,a+w)+'L'+P(44,a+w)+'A44 44 0 0 0 '+P(44,a-w)+'Z"/><line class="axis" x1="'+(52*Math.cos(a)).toFixed(1)+'" y1="'+(52*Math.sin(a)).toFixed(1)+'" x2="'+(168*Math.cos(a)).toFixed(1)+'" y2="'+(168*Math.sin(a)).toFixed(1)+'"/>';
+        for(var d=0;d<DEGREES;d++){var r=60+d*15;h+='<circle class="dot" data-d="'+d+'" cx="'+(r*Math.cos(a)).toFixed(1)+'" cy="'+(r*Math.sin(a)).toFixed(1)+'" r="5"/>';}
+        h+='</g>';}
+      h+='<g class="et-s-sweep" id="etSweep"><line class="et-s-hand" x1="0" y1="-40" x2="0" y2="-174"/></g>';
+      h+='<g class="et-s-heart" role="button" tabindex="0"><circle class="hit" r="38"/><path class="hex" d="'+HEX(38)+'"/><text id="etHeartT" y="-2" text-anchor="middle"></text><text id="etHeartS" y="17" text-anchor="middle"></text></g>';
+      svg.innerHTML=h;
+    }
+    [].forEach.call(svg.querySelectorAll('.et-s-spoke'),function(g){var s=+g.getAttribute('data-s'),on=0;
+      [].forEach.call(g.querySelectorAll('.dot'),function(c){var d=+c.getAttribute('data-d'),v=D.pattern[d][s];if(v)on++;c.setAttribute('class','dot'+(v?' on':''));c.setAttribute('r',v?'6.5':'4');});
+      g.setAttribute('class','et-s-spoke'+(R.sel===s?' sel':''));
+      g.setAttribute('aria-label',T('et.studiomusic.r.stepA','step')+' '+(s+1)+', '+on+' '+(on===1?T('et.studiomusic.r.noteA','note'):T('et.studiomusic.r.notesA','notes')));
+      g.setAttribute('aria-pressed',String(R.sel===s));});
+    var sw=$('etSweep'); sw.style.setProperty('--du',D.loopS+'s'); sw.classList.toggle('go',D.playing);
+    var hr=svg.querySelector('.et-s-heart'); hr.setAttribute('class','et-s-heart'+(D.playing?' on':''));
+    hr.setAttribute('aria-label',D.playing?T('et.studiomusic.r.stopA','stop the loop'):T('et.studiomusic.r.playA','play the loop'));
+    $('etHeartT').textContent=D.playing?T('et.studiomusic.r.stop','stop'):T('et.studiomusic.r.play','play');
+    $('etHeartS').textContent=D.bpm+' bpm';
+  }
+  function pad(){
+    var box=$('etPad');
+    if(box.children.length!==DEGREES)box.innerHTML=D.pitches.slice().reverse().map(function(p){return '<button type="button" data-d="'+p.d+'" aria-pressed="false"></button>';}).join('');
+    [].forEach.call(box.children,function(b){var d=+b.getAttribute('data-d');b.textContent=D.pitches[d].name;b.setAttribute('aria-pressed',String(!!D.pattern[d][R.sel]));
+      b.setAttribute('aria-label',D.pitches[d].name+', '+T('et.studiomusic.r.stepA','step')+' '+(R.sel+1));});
+  }
+  function raver(){
+    $('etRaverTitle').textContent=D.playing?T('et.studiomusic.r.turnsH','it turns'):T('et.studiomusic.r.h','the loop wheel');
+    $('etRaverHint').textContent=D.notes+' '+T('et.studiomusic.r.notes','notes')+' · '+D.bpm+' bpm · '+T('et.studiomusic.r.tap','tap a spoke');
+    wheel(); pad();
+    var on=D.pitches.filter(function(p){return D.pattern[p.d][R.sel];}).map(function(p){return p.name;});
+    $('etRaverCard').innerHTML='<span class="rk">'+(R.sel+1)+'</span><div><b>'+esc(T('et.studiomusic.r.step','step')+' '+(R.sel+1)+' '+T('et.studiomusic.r.of16','of 16')+' · '+(on.length?on.join(' '):T('et.studiomusic.r.rest','a rest')))+'</b><span>'+esc(T('et.studiomusic.r.light','light a pitch below · the heart plays'))+'</span></div>';
+    var u=$('etRaverUndo'); u.disabled=!D.undo;
+  }
+
+  /* ── CYPHERPUNK ── */
+  function kv(rows){return rows.map(function(r){return '<tr><th>'+esc(r[0])+'</th><td>'+r[1]+'</td></tr>';}).join('');}
+  function mirror(id,src){var sel=$(id),o=$(src);if(sel.options.length!==o.options.length)sel.innerHTML=o.innerHTML;if(document.activeElement!==sel)sel.value=o.value;}
+  function cy(){
+    set('path','score://v1 · 8 × 16 · '+D.root+' '+D.scale+' · '+D.wave);
+    $('etChips').innerHTML='<span class="'+(D.playing?'ok':'')+'">'+(D.playing?'playing':'stopped')+'</span><span>'+D.bpm+' bpm</span><span class="on">notes '+D.notes+'</span><span>'+(D.undo?'undo ready':'no undo')+'</span>';
+    mirror('etCyScale','scale'); mirror('etCyRoot','root'); mirror('etCyWave','wave');
+    var b=$('etCyBpm'); if(document.activeElement!==b)b.value=String(D.bpm);
+    $('etMap').innerHTML='<tr><th>d</th><th>midi</th><th>note</th><th>hz</th><th>on</th></tr>'+D.pitches.slice().reverse().map(function(p){return '<tr><td>'+p.d+'</td><td>'+p.midi+'</td><td>'+esc(p.name)+'</td><td>'+p.hz+'</td><td class="'+(p.count?'on':'')+'">'+p.count+'</td></tr>';}).join('');
+    var rows=D.steps.split('|');
+    $('etBits').innerHTML='<tr><th>d</th><th>steps 1 to 16</th></tr>'+rows.map(function(r,d){return {d:d,r:r};}).reverse().map(function(x){return '<tr><td>'+x.d+'</td><td>'+x.r.split('').map(function(c){return c==='1'?'<b>1</b>':'0';}).join('')+'</td></tr>';}).join('');
+    var steps=[
+      ['compose','pattern 8 × 16 · '+D.notes+' notes',D.notes?'done':'now'],
+      ['pitch',D.scale+' ['+D.intervals.join(',')+'] · key '+D.root+' → midi '+D.pitches[0].midi+' to '+D.pitches[7].midi,'done'],
+      ['tempo',D.bpm+' bpm, clamped 60 to 200 → a step every '+D.stepMs+' ms · '+D.loopS+' s a bar','done'],
+      ['transport',D.playing?'setTimeout loop · running':'stopped · starts only on a press',D.playing?'done':'now'],
+      ['web audio',D.wave+' osc · gain 0.12 · 10 ms attack · exp decay',D.playing?'done':'todo'],
+      ['keep','JSON download or #score= link · '+D.linkChars.toLocaleString()+' of 48,000 chars · no write','todo']
+    ];
+    $('etPipe').innerHTML=steps.map(function(s){return '<li class="'+s[2]+'"><b>'+esc(s[0])+'</b><p>'+esc(s[1])+'</p></li>';}).join('');
+    $('etReceipt').innerHTML=kv([['writes','<span class="yes">none</span> · no chain write, no signature, no send'],['link',esc(D.linkChars.toLocaleString()+' chars · the score, not a recording')],
+      ['imported',D.imported?esc(String(D.imported.scale||'metadata')+' · kept beside the controls'):'<span class="no">none</span>'],['status',esc(D.status)]]);
+    $('etCyRun').textContent=D.playing?'stop transport':'run transport';
+    $('etCyUndo').disabled=!D.undo;
+  }
+
+  function labels(){[].forEach.call(document.querySelectorAll('#eternal [data-t]'),function(e){if(e.__en==null)e.__en=e.textContent;e.textContent=T(e.getAttribute('data-t'),e.__en);});}
+  function all(){read();bee();raver();cy();}
+
+  /* ── the hand-offs: the studio's own controls own every real step ── */
+  function click(el){if(el&&!el.disabled)el.click();}
+  function run(){read();click($(D.playing?'stop':'play'));setTimeout(all,0);}
+  function dice(){click($('dice'));all();}
+  function toggle(d,s){click(document.querySelector('#grid .cell[data-d="'+d+'"][data-s="'+s+'"]'));all();}
+  function setKnob(id,v){var el=$(id);el.value=v;el.dispatchEvent(new Event('change'));all();}
+  function panel(id){var p=$(id);if(p&&p.tagName==='DETAILS'){p.open=true;}var t=p&&(p.querySelector('summary')||p);if(t){t.scrollIntoView({block:'start'});t.focus({preventScroll:true});}}
+  var still=false; try{still=localStorage.getItem('bnr.motion.paused')==='true';}catch(x){}
+  function motion(){var reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+    document.body.classList.toggle('et-still',still||reduce);var b=$('etMotion');
+    b.setAttribute('aria-pressed',String(still||reduce));b.disabled=reduce;
+    b.textContent=reduce?T('et.studiomusic.r.stillOs','still · your device asks for less motion'):still?T('et.studiomusic.r.resume','resume motion'):T('et.studiomusic.r.pause','pause motion');}
+
+  function wire(){
+    var ev=$('eternal'); if(!ev)return;
+    $('etBeeGo').addEventListener('click',function(){read();if(!D.notes&&!D.playing)dice();else run();});
+    $('etBeeAlt').addEventListener('click',function(){read();if(!D.notes){var g=document.querySelector('#grid .cell[tabindex="0"]');if(g){g.scrollIntoView({block:'center'});g.focus({preventScroll:true});}}else dice();});
+    $('etBeePlace').addEventListener('click',function(){var g=document.querySelector('#grid .cell[tabindex="0"]');if(g){g.scrollIntoView({block:'center'});g.focus({preventScroll:true});}});
+    $('etBeeKeep').addEventListener('click',function(){panel('save-panel');});
+    $('etRaverDice').addEventListener('click',dice);
+    $('etRaverUndo').addEventListener('click',function(){click($('undo'));all();});
+    $('etCyRun').addEventListener('click',run);
+    $('etCyExport').addEventListener('click',function(){click($('export'));all();});
+    $('etCyLink').addEventListener('click',function(){click($('link'));setTimeout(all,50);});
+    $('etCyUndo').addEventListener('click',function(){click($('undo'));all();});
+    [['etCyScale','scale'],['etCyRoot','root'],['etCyWave','wave'],['etCyBpm','bpm']].forEach(function(k){$(k[0]).addEventListener('change',function(){setKnob(k[1],this.value);this.value=$(k[1]).value;});});
+    $('etPad').addEventListener('click',function(e){var b=e.target.closest('button[data-d]');if(b)toggle(+b.getAttribute('data-d'),R.sel);});
+    ev.addEventListener('click',function(e){
+      var sp=e.target.closest('#etWheel .et-s-spoke'); if(sp){R.sel=+sp.getAttribute('data-s');raver();return;}
+      if(e.target.closest('#etWheel .et-s-heart'))run();
+    });
+    ev.addEventListener('keydown',function(e){var t=e.target.closest&&e.target.closest('#etWheel [role="button"]');if(!t)return;
+      if(e.key==='Enter'||e.key===' '){e.preventDefault();t.dispatchEvent(new MouseEvent('click',{bubbles:true}));return;}
+      var sp=t.closest('.et-s-spoke'); if(sp&&(e.key==='ArrowRight'||e.key==='ArrowLeft')){e.preventDefault();var s=(+sp.getAttribute('data-s')+(e.key==='ArrowRight'?1:15))%STEPS;R.sel=s;raver();var n=$('etWheel').querySelector('.et-s-spoke[data-s="'+s+'"]');if(n)n.focus();}});
+    $('etMotion').addEventListener('click',function(){still=!still;try{localStorage.setItem('bnr.motion.paused',String(still));}catch(x){}motion();});
+    if(window.matchMedia)matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change',motion);
+    /* the studio speaks through its grid (aria-pressed, never the per-step highlight), its buttons and its status line */
+    new MutationObserver(function(){all();}).observe($('grid'),{childList:true,subtree:true,attributes:true,attributeFilter:['aria-pressed']});
+    var mo=new MutationObserver(function(){all();});
+    ['play','stop','undo'].forEach(function(id){mo.observe($(id),{attributes:true,attributeFilter:['disabled','aria-pressed']});});
+    mo.observe($('status'),{childList:true,characterData:true,subtree:true});
+    ['scale','root','wave','bpm'].forEach(function(id){$(id).addEventListener('change',function(){setTimeout(all,0);});});
+    document.addEventListener('blang',function(){labels();motion();all();});
+  }
+  labels(); wire(); motion(); all();
+  window.__eternal={data:D,raver:R,refresh:all};
+})();
+</script>
+<script src="../tour.js?v=42"></script>
 </body>
 </html>

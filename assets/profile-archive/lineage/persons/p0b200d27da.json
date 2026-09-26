@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p0b200d27da",
+ "bnr": "bnr://skaists.dev/blood/p0b200d27da",
+ "identity": {
+  "name": "Hans Martin Klein",
+  "lifespan": "1495–1558",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PHT5-FSN"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p9c64a85d87",
+    "name": "Hans Wolfgang Klein",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p0b91cd8b45",
+    "name": "Margretha Catharina Volcker",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pe59ffe3e7b",
+    "name": "Frantz Klein uff Hillnhütten"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p2761e30c2e",
+    "name": "Elsa Elizabeth Becken ulf Hillhuetten",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PHT5-FSN",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

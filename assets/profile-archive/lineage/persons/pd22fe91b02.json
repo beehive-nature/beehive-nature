@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pd22fe91b02",
+ "bnr": "bnr://skaists.dev/blood/pd22fe91b02",
+ "identity": {
+  "name": "George Panchard",
+  "lifespan": "1525–1575",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GD37-BMZ"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "GD3W-6T1",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "GD3W-9FL",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p44802bbf43",
+    "name": "Wylliam Panchard"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pa81dfa5af7",
+    "name": "Seanor Buckenham",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GD37-BMZ",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

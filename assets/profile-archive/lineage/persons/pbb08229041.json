@@ -1,0 +1,66 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pbb08229041",
+ "bnr": "bnr://skaists.dev/blood/pbb08229041",
+ "identity": {
+  "name": "Hugues de Tours duc de Haute Alsace",
+  "lifespan": "0765–0837",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "9CWV-CP1"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [],
+  "children": [
+   {
+    "id": "pbdc083b8c8",
+    "name": "Adélaïde de Tours"
+   },
+   {
+    "id": "p6a28898c0c",
+    "name": "Hugues de Tours"
+   },
+   {
+    "id": "p5711f7a01c",
+    "name": "Ermengarde de Tours"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p336b5f188d",
+    "name": "Countess Ava de Tours",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/9CWV-CP1",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pef36601c2d",
+ "bnr": "bnr://skaists.dev/blood/pef36601c2d",
+ "identity": {
+  "name": "Elisabeth Stauffer",
+  "lifespan": "1532–1597",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G8P1-TFK"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p40ee2f6973",
+    "name": "Joseph Stauffer",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pc62bf4c96c",
+    "name": "Catharine Acker",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p4cab6e448d",
+    "name": "Jakob Kaufmann"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pfafe7c562a",
+    "name": "Jacob Kauffmann",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G8P1-TFK",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

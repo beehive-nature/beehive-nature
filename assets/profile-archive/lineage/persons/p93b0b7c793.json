@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p93b0b7c793",
+ "bnr": "bnr://skaists.dev/blood/p93b0b7c793",
+ "identity": {
+  "name": "Margaret de Chesney",
+  "lifespan": "1165–1231",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L5FS-QQC"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pc168ff0603",
+    "name": "William de Chesney",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p478bb97689",
+    "name": "Albreda de Poynings",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pc650e80e5b",
+    "name": "Alice fitz Robert"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pa13407ae37",
+    "name": "Robert fitz Roger of Warkworth",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L5FS-QQC",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

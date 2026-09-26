@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pc16528131f",
+ "bnr": "bnr://skaists.dev/blood/pc16528131f",
+ "identity": {
+  "name": "John Chandler",
+  "lifespan": "1603–1684",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LHVY-5J5"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pefe33d3ed3",
+    "name": "Thomas Chandler",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pfd949f1fde",
+    "name": "Anne Downham",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p476de78da8",
+    "name": "George Chandler"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p3c4dc9cc29",
+    "name": "Ann Benger",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LHVY-5J5",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

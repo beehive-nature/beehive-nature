@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p052bf342bd",
+ "bnr": "bnr://skaists.dev/blood/p052bf342bd",
+ "identity": {
+  "name": "Blanca de Navarra, Reina consorte de Castilla",
+  "lifespan": "1133–1156",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LZ1V-V5P"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "L8T2-WFV",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "L8T2-WFG",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pc571f7d3fb",
+    "name": "Alfonso VIII \"El noble, El de las navas\" Rey de Castilla, Toledo et Extremadura."
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pc2ee161973",
+    "name": "Rey Sancho III de Castilla \"el Deseado\"",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LZ1V-V5P",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p18a0e7c695",
+ "bnr": "bnr://skaists.dev/blood/p18a0e7c695",
+ "identity": {
+  "name": "Lucius Valerius Maximus Valerius Maximus Basilius",
+  "lifespan": "0295–0337",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "P995-DP5"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pd579bff1d4",
+    "name": "Lucius Valerius Maximus Basilius De Rome",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p65e858d48b",
+    "name": "Septima de Rome",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pbd9ffe8f2d",
+    "name": "Lampadia DE ROME"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pbf9d24030c",
+    "name": "Vulcacia",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/P995-DP5",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p478bb97689",
+ "bnr": "bnr://skaists.dev/blood/p478bb97689",
+ "identity": {
+  "name": "Albreda de Poynings",
+  "lifespan": "1137–1174",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GCS7-GRJ"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "GH2M-VGN",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "G649-8LB",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p93b0b7c793",
+    "name": "Margaret de Chesney"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pc168ff0603",
+    "name": "William de Chesney",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GCS7-GRJ",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

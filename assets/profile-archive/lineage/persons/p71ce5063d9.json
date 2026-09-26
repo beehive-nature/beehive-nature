@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p71ce5063d9",
+ "bnr": "bnr://skaists.dev/blood/p71ce5063d9",
+ "identity": {
+  "name": "Sir Robert Thorley of Bypbeste",
+  "lifespan": "1370–Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GRCK-Z7H"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p32421377a1",
+    "name": "Roger Thorley Esq.",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p6dc31cedb0",
+    "name": "Mrs Roger Thorley",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p2b65b74f62",
+    "name": "Margaret Thorley"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p8153061cd0",
+    "name": "Anne de la Pole",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GRCK-Z7H",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

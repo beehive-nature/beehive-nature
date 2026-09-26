@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p387e02646c",
+ "bnr": "bnr://skaists.dev/blood/p387e02646c",
+ "identity": {
+  "name": "William Franceis II",
+  "lifespan": "1246–1287",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L5T4-6FL"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pccf35195e1",
+    "name": "John de Franceis I",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p804597905a",
+    "name": "Margaret Scolice",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p8a66670de4",
+    "name": "John Fraunceys"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pcfb9dd58e1",
+    "name": "Agnes De Tyckenhall",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L5T4-6FL",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

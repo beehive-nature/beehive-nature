@@ -105,8 +105,8 @@ ok('seed matches published vector',
 
 console.log('\n── Vaulta / EOSIO private keys ──');
 // Known-good WIF for secret 0x00…01 (uncompressed, mainnet 0x80).
-const WIF_UNCOMP = '5HpHagT65TZzG1PH3CSu63k8DbpvD8s5ip4nEB3kEsreAnchuDf';
-const WIF_COMP   = 'KwDiBf89QgGbjEhKnhXJuH7LrciVrZi3qYjgd9M7rFU73sVHnoWn';
+const WIF_UNCOMP = '5HpHagT65TZzG1PH3CSu63k8DbpvD8s5ip4nEB3kEsreAnchuDf'; // PUBLIC-CONSTANT: documented WIF test vector (privkey 1, uncompressed)
+const WIF_COMP   = 'KwDiBf89QgGbjEhKnhXJuH7LrciVrZi3qYjgd9M7rFU73sVHnoWn'; // PUBLIC-CONSTANT: published compressed WIF test vector
 r = await V.validateVaultaKey(WIF_UNCOMP);
 ok('accepts 51-char WIF', r.ok && r.format === 'WIF', r.error || r.format);
 r = await V.validateVaultaKey(WIF_COMP);

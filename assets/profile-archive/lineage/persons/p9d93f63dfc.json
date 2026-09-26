@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p9d93f63dfc",
+ "bnr": "bnr://skaists.dev/blood/p9d93f63dfc",
+ "identity": {
+  "name": "Philippe de Montfort - Seigneur de Tyre I",
+  "lifespan": "1204–1270",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L6RY-DR7"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p0cc02f0776",
+    "name": "comte Guy de Montfort - L'Amaury de Bigorre",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pa5bd769352",
+    "name": "Helvise d’Ibelin Comtesse de Sidon, Dame de Castres",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p8beb4f8b7e",
+    "name": "Philippe de Montfort II"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p25a882eb15",
+    "name": "Eléonore de Courtenay",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L6RY-DR7",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

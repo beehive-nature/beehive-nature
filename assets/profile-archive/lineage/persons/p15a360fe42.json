@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p15a360fe42",
+ "bnr": "bnr://skaists.dev/blood/p15a360fe42",
+ "identity": {
+  "name": "Gregory Camfield",
+  "lifespan": "1570–1635",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LZJB-LC5"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pa6b9c3bebd",
+    "name": "Richard Canfield (Camfield) (Calmfeilde)",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p8d7d262d98",
+    "name": "Joan Canfield",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p19ee2f107f",
+    "name": "Thomas Canfield I"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p78a20cd1cd",
+    "name": "Joan Merrill",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LZJB-LC5",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

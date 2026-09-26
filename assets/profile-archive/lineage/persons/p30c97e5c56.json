@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p30c97e5c56",
+ "bnr": "bnr://skaists.dev/blood/p30c97e5c56",
+ "identity": {
+  "name": "Ragnhild Sigurdsdatter of Ring",
+  "lifespan": "0625–0687",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G5ZQ-G3J"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pc04554559d",
+    "name": "Sigurd Ring de Trondheim",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pa93f7b27ce",
+    "name": "Wife of Sigurd Ring de Trondheim",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "paf11a19e2c",
+    "name": "Eystein 'Hardråde, the Severe' Trondsson Petty King of Hedmark, Norway"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pffef13ac1c",
+    "name": "Thrond Haraldsson de Heidmark",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G5ZQ-G3J",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

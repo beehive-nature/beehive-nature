@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p04193cb6d5",
+ "bnr": "bnr://skaists.dev/blood/p04193cb6d5",
+ "identity": {
+  "name": "Wigerich Pfalzgraf von Lothringen Graf im Bidgau",
+  "lifespan": "0870–0916",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LZPK-P7H"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pd178ecd54e",
+    "name": "von Lotheringen",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p4e7aeca7c3",
+    "name": "von Lotheringen",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pf6415421b6",
+    "name": "Siegfried I. von Luxemburg, Graf im Moselgau"
+   },
+   {
+    "id": "p4d56d9c9b7",
+    "name": "Liutgard von Lothringen"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pe5ffce6f1e",
+    "name": "Cunégonde de Luxembourg",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LZPK-P7H",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

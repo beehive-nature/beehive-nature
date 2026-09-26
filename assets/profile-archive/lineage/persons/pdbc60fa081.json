@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pdbc60fa081",
+ "bnr": "bnr://skaists.dev/blood/pdbc60fa081",
+ "identity": {
+  "name": "Lady Alice Ankaret de la Barre Talbot",
+  "lifespan": "1370–1436",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L8T8-MQL"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p6963d82f63",
+    "name": "Richard Talbot 4th Baron Talbot of Goodrich Castle",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p7980ba777f",
+    "name": "Lady Ankaret le Strange",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pdf131eca8c",
+    "name": "Baroness Elizabeth de la Barre of Buford"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p50a9688abd",
+    "name": "Sir Thomas de la Barre",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L8T8-MQL",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

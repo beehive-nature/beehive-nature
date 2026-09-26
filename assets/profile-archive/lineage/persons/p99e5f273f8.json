@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p99e5f273f8",
+ "bnr": "bnr://skaists.dev/blood/p99e5f273f8",
+ "identity": {
+  "name": "Baufra Baefra Baufre Baka Bicheris Bikka 8th Pharaoh of 4th Dynasty",
+  "lifespan": "Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PH9S-W7Q"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p1678b7c111",
+    "name": "Khufu Menes",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pb31c5d30e9",
+    "name": "Henutsen",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p08d4576c80",
+    "name": "Thamphthis Djedefptah Ptahdjedef 9th Pharaoh of 4th Dynasty"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p044f61998c",
+    "name": "Neferetiabet",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PH9S-W7Q",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

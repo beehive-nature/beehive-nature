@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p9bd5daa426",
+ "bnr": "bnr://skaists.dev/blood/p9bd5daa426",
+ "identity": {
+  "name": "Elizabeth Preston",
+  "lifespan": "1541–1604",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G8Y7-CGS"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pb991ed50cd",
+    "name": "Simon Preston",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p9792f14145",
+    "name": "Janet Bethune",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pd77bc484db",
+    "name": "John Stringer"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pd63823d197",
+    "name": "Peter Warren alias Stringer",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G8Y7-CGS",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

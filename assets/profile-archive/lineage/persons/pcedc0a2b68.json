@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pcedc0a2b68",
+ "bnr": "bnr://skaists.dev/blood/pcedc0a2b68",
+ "identity": {
+  "name": "Barbe Lemaire",
+  "lifespan": "1590–1685",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GVF7-NFF"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pb76c162b37",
+    "name": "Pierre Lemaire",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p702f5494c7",
+    "name": "Magdeleine Mazy",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p48badf4cde",
+    "name": "Pieter Pieterse Praa"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p713da29217",
+    "name": "Pierre du Prat",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GVF7-NFF",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

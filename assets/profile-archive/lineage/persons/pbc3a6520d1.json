@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pbc3a6520d1",
+ "bnr": "bnr://skaists.dev/blood/pbc3a6520d1",
+ "identity": {
+  "name": "Austrapius DE MENAPIE DE HASBAYE",
+  "lifespan": "0440–0508",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GZV8-2HH"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p6362eda3c1",
+    "name": "Landro DE MENAPIE DE HASBAYE",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pf83add9966",
+    "name": "Menapie",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "peaac2b315e",
+    "name": "Cunigunda"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pa321ac04ca",
+    "name": "Faustine Florentine",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GZV8-2HH",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

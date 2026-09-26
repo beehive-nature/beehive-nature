@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p91bf6defee",
+ "bnr": "bnr://skaists.dev/blood/p91bf6defee",
+ "identity": {
+  "name": "Mithridates",
+  "lifespan": "0356BC–0302BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L5LS-Y6K"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pd3acf7f84f",
+    "name": "Ariobarzanes II Of Phrygia",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p688379215f",
+    "name": "Mrs Ariobarzanes II Of Phyrigia",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p3455db6d7e",
+    "name": "Mithridates II"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p52b1850a48",
+    "name": "Mrs Mithridates",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L5LS-Y6K",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

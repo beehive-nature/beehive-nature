@@ -1,0 +1,64 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p930ed9bed9",
+ "bnr": "bnr://skaists.dev/blood/p930ed9bed9",
+ "identity": {
+  "name": "Irra bint Arrhabaeus",
+  "lifespan": "0425BC–Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G4M9-853"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p72aa1ab3df",
+    "name": "Arrhabaeus I of Lynkestis",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p22b2d0ddfa",
+    "name": "Queen of Macedon Eurydice Lyncestis I"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p30d7273d31",
+    "name": "Sirras of Taulantia , King of Elimiotis and Taulantia",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G4M9-853",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

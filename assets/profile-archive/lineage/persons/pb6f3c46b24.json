@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pb6f3c46b24",
+ "bnr": "bnr://skaists.dev/blood/pb6f3c46b24",
+ "identity": {
+  "name": "Rosella de Saint Pôl",
+  "lifespan": "0995–1062",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LHGL-6S6"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pbf03b83957",
+    "name": "Hugues de Saint-Pol comte de Saint-Pol et de Ternois",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p52eeff5551",
+    "name": "Aldegonde de Saint-Pol",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p6a9c64000e",
+    "name": "Eustache Ier de GUÎNES"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pcde4e3b818",
+    "name": "Chevalier Rodolphe Ier de GUINES",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LHGL-6S6",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

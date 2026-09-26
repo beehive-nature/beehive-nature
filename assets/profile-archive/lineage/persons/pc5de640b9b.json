@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pc5de640b9b",
+ "bnr": "bnr://skaists.dev/blood/pc5de640b9b",
+ "identity": {
+  "name": "Judith von Altdorf Fränkische Königin und Römische Kaiserin",
+  "lifespan": "0802–0843",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LZT6-KBL"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p2cfe8b2d6a",
+    "name": "Welf I. Graf in Bayern und Schwaben",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p8a2f87f500",
+    "name": "Heilwig abbesse de Chelles",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p891c09cd1f",
+    "name": "Charles II 'le Chauve' roi des Francs empereur d'Occident"
+   },
+   {
+    "id": "pe4def2fc1e",
+    "name": "Gisela Markgräfin von Friaul"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pd564482cfe",
+    "name": "Ludwig der Fromme König der Franken Römischer Kaiser",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LZT6-KBL",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

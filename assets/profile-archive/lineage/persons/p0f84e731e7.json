@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p0f84e731e7",
+ "bnr": "bnr://skaists.dev/blood/p0f84e731e7",
+ "identity": {
+  "name": "Manius Acilius Glabrio II",
+  "lifespan": "0139–0190",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GWPB-P23"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pf09bc07d9f",
+    "name": "Manlius Acilius Gnaes Cornelius Severuscornelius Severus GLABRIO",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p102e5221c0",
+    "name": "Annia Vibia Faustina de Rome",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p75314750b3",
+    "name": "Acilia Frestana"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pa54d2431cb",
+    "name": "Ummidia Commificia Faustina Antonia",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GWPB-P23",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

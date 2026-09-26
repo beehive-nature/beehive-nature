@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p61c7041073",
+ "bnr": "bnr://skaists.dev/blood/p61c7041073",
+ "identity": {
+  "name": "James Lang",
+  "lifespan": "1765–1852",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LFSG-QD9"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "9Q4J-R5T",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "MR4Q-Y6V",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p93f3b212a7",
+    "name": "Sarah Elizabeth Lang"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p335968ef01",
+    "name": "Margaret Aillie Wilson",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LFSG-QD9",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

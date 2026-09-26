@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p51aaebc50f",
+ "bnr": "bnr://skaists.dev/blood/p51aaebc50f",
+ "identity": {
+  "name": "Vaspasius I Thuedion Pollio 'Polla'",
+  "lifespan": "0043BC–0016BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "P7HM-RNN"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pcc7390df45",
+    "name": "Thuedion Pollio Yeshu",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p815d839178",
+    "name": "Mrs Thuedion Pollio Yeshu",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p055f1425db",
+    "name": "Vespasia Polla"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p9c7b83bb79",
+    "name": "Sconosciuta di Murcia",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/P7HM-RNN",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

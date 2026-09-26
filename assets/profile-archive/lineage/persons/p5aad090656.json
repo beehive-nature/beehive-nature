@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p5aad090656",
+ "bnr": "bnr://skaists.dev/blood/p5aad090656",
+ "identity": {
+  "name": "Ingelram van Harlebeek Governor of Flanders",
+  "lifespan": "0770–0825",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GMXF-5JP"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p696657e902",
+    "name": "Lydéric IV de Harlebeque",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pd660158a24",
+    "name": "Ermengarde de Roussillon",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p8ef5f2850e",
+    "name": "Odacre comte de Flandre"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p3ee3df6381",
+    "name": "Flandrine D'ANTOING",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GMXF-5JP",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

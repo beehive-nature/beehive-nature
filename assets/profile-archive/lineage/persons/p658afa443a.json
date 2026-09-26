@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p658afa443a",
+ "bnr": "bnr://skaists.dev/blood/p658afa443a",
+ "identity": {
+  "name": "Scribonia Uxor Augusti",
+  "lifespan": "0068BC–0016BC",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LD5Q-8B6"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p18b4d3a195",
+    "name": "Marcus Pilius",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pc4e2cf57d4",
+    "name": "Crassia Tertullia",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p992ac063e7",
+    "name": "Titus Flavius Petro"
+   },
+   {
+    "id": "p4c41e2f3fd",
+    "name": "Julia Malone de Rome"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p33a753aad0",
+    "name": "Gaius Octavious A de Rome",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LD5Q-8B6",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

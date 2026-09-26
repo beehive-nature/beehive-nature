@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p828d0f1cdf",
+ "bnr": "bnr://skaists.dev/blood/p828d0f1cdf",
+ "identity": {
+  "name": "Petronius Probinus",
+  "lifespan": "0305–0346",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GX1H-MVH"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p53fd300e3f",
+    "name": "Petronius Probianus Arianus de Rome",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pd143e58c34",
+    "name": "Anicia Anicia Dite Demetria DE ROME",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p6fc744a9aa",
+    "name": "Sextus Claudius Petronius Probus De Rome"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p065c725619",
+    "name": "Claudia Celsina Adelphia",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GX1H-MVH",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

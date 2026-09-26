@@ -1,0 +1,68 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pc70ef176db",
+ "bnr": "bnr://skaists.dev/blood/pc70ef176db",
+ "identity": {
+  "name": "Henry of Scotland Earl of Huntingdon",
+  "lifespan": "1114–1152",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LZB4-2C7"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "L8WY-WD4",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pe9b57fc237",
+    "name": "Matilda of Huntingdon",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pb5c93766d3",
+    "name": "William 'The Lion' King of Scotland"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p0c2dc3ff19",
+    "name": "Adelaide De Warenne",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LZB4-2C7",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

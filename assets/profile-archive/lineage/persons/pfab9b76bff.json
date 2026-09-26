@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pfab9b76bff",
+ "bnr": "bnr://skaists.dev/blood/pfab9b76bff",
+ "identity": {
+  "name": "Caia Asinia Julina de Rome",
+  "lifespan": "0115–Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GZTW-3ST"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p7bb921b695",
+    "name": "Gaius Asinus Frugi de Rome",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p0d89d8b83b",
+    "name": "Caia Asinia Julia de Rome",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p6d41ffad9b",
+    "name": "Caia Asinia Frugilla DE ROME-DE ROME"
+   },
+   {
+    "id": "pce1aa6f2d1",
+    "name": "Furius de ROME"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pb22422bf34",
+    "name": "Frugillus Fulvus de Roma",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GZTW-3ST",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

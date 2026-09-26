@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pb98f2d3000",
+ "bnr": "bnr://skaists.dev/blood/pb98f2d3000",
+ "identity": {
+  "name": "John Hamilton, 6th of Udston",
+  "lifespan": "1567–1628",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LKF2-JDJ"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pbbb7df6905",
+    "name": "John Hamilton V of Udston",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p6b79d8a086",
+    "name": "Margaret Dalzell",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p61d3957ebe",
+    "name": "James Hamilton, 1st of Barncleuch"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p7fa0a599d7",
+    "name": "Lady Margaret Muirhead",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LKF2-JDJ",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

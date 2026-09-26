@@ -1,0 +1,82 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p7c4314f0bf",
+ "bnr": "bnr://skaists.dev/blood/p7c4314f0bf",
+ "identity": {
+  "name": "King Eglon ben Balak",
+  "lifespan": "–1129BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LK98-HWL"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pb4950b5634",
+    "name": "King Balak ibn Zypher",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p9008e20fb2",
+    "name": "Amina of Moab",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p424cb7bf94",
+    "name": "Ruth bat Eglon of Moab"
+   },
+   {
+    "id": "pb13d1b54a3",
+    "name": "Principe Moabita"
+   },
+   {
+    "id": "p854fa8143e",
+    "name": "Orfa bat Eglon"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pa813e47502",
+    "name": "Naomi bint Yehozabad",
+    "marriage": null
+   },
+   {
+    "id": "p854fa8143e",
+    "name": "Orfa bat Eglon",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LK98-HWL",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

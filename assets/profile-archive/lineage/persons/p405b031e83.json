@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p405b031e83",
+ "bnr": "bnr://skaists.dev/blood/p405b031e83",
+ "identity": {
+  "name": "Simon \"the Just\" ben Onias I 38th High Priest",
+  "lifespan": "0325BC–Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L2ZF-VZQ"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p710837c8f8",
+    "name": "High Priest Onias Ben Juddua",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p7211c4e7c8",
+    "name": "Jecoliah Bat Ahab",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pfe4b355922",
+    "name": "Onias II ben Simon I 41st High Priest"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p9654c81611",
+    "name": "Mannaseh",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L2ZF-VZQ",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

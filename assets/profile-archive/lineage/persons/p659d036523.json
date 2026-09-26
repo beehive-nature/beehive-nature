@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p659d036523",
+ "bnr": "bnr://skaists.dev/blood/p659d036523",
+ "identity": {
+  "name": "Antonius ap Gwrwst 10th Duke of Cornwall",
+  "lifespan": "0720BC–Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G167-Q19"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p72dff2ffbe",
+    "name": "Gurgustius ap Rivallo 16th King of Britain",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p5483ff96b4",
+    "name": "Junargonde La France",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p07526775d0",
+    "name": "Aedd Mawr ap Antonius 11th Duke of Cornwall"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p3621e58752",
+    "name": "Caer Caesara",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G167-Q19",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pc325415ab6",
+ "bnr": "bnr://skaists.dev/blood/pc325415ab6",
+ "identity": {
+  "name": "Joan Baker",
+  "lifespan": "1518–1546",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L1WL-FYH"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "P8TT-C1P",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "LRLD-C29",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p470e7cf024",
+    "name": "John Warner"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pab6f7200be",
+    "name": "Thomas Lee Warner",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L1WL-FYH",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

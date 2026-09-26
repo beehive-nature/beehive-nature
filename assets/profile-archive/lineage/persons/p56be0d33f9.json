@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p56be0d33f9",
+ "bnr": "bnr://skaists.dev/blood/p56be0d33f9",
+ "identity": {
+  "name": "Deiotarix ben Attalus III",
+  "lifespan": "0140BC–0042BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L1MX-JGL"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p515ef1dd5f",
+    "name": "King Attalus III ben Eumene 6th King of Pergamon",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p7aae07eed7",
+    "name": "Berenike de Pergame of the Attalid dynasty",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p1970d402f4",
+    "name": "Sinorix I ben Deiotarix Tetrach of the Tolistobogii"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p891a240a1a",
+    "name": "Adobogiona 'the Elder'",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L1MX-JGL",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

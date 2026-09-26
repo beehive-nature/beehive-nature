@@ -1,0 +1,71 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p721a8cfe87",
+ "bnr": "bnr://skaists.dev/blood/p721a8cfe87",
+ "identity": {
+  "name": "Alice de Montgomery",
+  "lifespan": "1112–1176",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G1HX-7RY"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "9WQY-5BR",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "9CNJ-1WL",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pec0d33c17f",
+    "name": "Gerald FitzMaurice"
+   },
+   {
+    "id": "p3ba1f375ba",
+    "name": "Nesta FitzMaurice"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p1361540f89",
+    "name": "Maurice FitzGerald",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G1HX-7RY",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

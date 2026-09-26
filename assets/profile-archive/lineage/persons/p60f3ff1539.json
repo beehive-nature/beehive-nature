@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p60f3ff1539",
+ "bnr": "bnr://skaists.dev/blood/p60f3ff1539",
+ "identity": {
+  "name": "Eleanor Persall",
+  "lifespan": "1546–Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "KJCT-T9D"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p4ad8eac94d",
+    "name": "Henry Pershall",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p37737298a8",
+    "name": "Persall",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p3c98cf3c41",
+    "name": "Mary Hodgetts"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p8954b238de",
+    "name": "William Preston Hodgetts",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/KJCT-T9D",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

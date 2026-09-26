@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pde4f1ef1a2",
+ "bnr": "bnr://skaists.dev/blood/pde4f1ef1a2",
+ "identity": {
+  "name": "Mary Marie Gunner",
+  "lifespan": "1561–1649",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LB1S-SKR"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pa4d2f9cc5d",
+    "name": "Richard John Gunner",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p1045ad9b22",
+    "name": "Ann Gower",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pb58685ad1d",
+    "name": "Nancy J Stampe"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p64699c5086",
+    "name": "Timothy Stampe",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LB1S-SKR",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -13,8 +13,8 @@
 //
 // Doc shape: ymap 'piece' → { seed: string, 'param.<name>': number, … }
 // Each param is its OWN CRDT key — two artists turning two different knobs
-// concurrently merge; only same-knob edits resolve last-writer-wins (and
-// identically on every participant).
+// concurrently merge. Same-key conflicts resolve identically on every participant;
+// concurrent writes do not imply that the latest wall-clock turn wins.
 // Protocol: Y.doc updates are sent as-is over transport.send(bytes); receivers call
 // receive(bytes) which applies them with origin 'remote' so updates don't echo back.
 //
@@ -52,6 +52,8 @@ export function createSharedPiece({ Y, transport }) {
     setSeed(seed) { piece.set('seed', String(seed)); emit(); },
     setParam(name, value) { piece.set(PARAM(name), Number(value)); emit(); },
     state,
+    // A late joiner needs the complete causal history, not only future deltas.
+    snapshot() { return Y.encodeStateAsUpdate(doc); },
     onUpdate(fn) { listeners.add(fn); return () => listeners.delete(fn); },
     receive(update) { Y.applyUpdate(doc, update, 'remote'); emit(); },
     destroy() { listeners.clear(); doc.destroy(); },

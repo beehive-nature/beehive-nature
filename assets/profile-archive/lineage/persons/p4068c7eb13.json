@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p4068c7eb13",
+ "bnr": "bnr://skaists.dev/blood/p4068c7eb13",
+ "identity": {
+  "name": "Luitfriede d'Auxerre",
+  "lifespan": "0860–Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PMGM-CXD"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pc9dff5b7cb",
+    "name": "Rénaud de Woëvre I",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p8941c6c465",
+    "name": "Agnès Adélaïde de Bassingny",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pded1d3d2b5",
+    "name": "Hildegarde de Ferrette"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p499ce0f971",
+    "name": "Matfried II of METZ",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PMGM-CXD",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

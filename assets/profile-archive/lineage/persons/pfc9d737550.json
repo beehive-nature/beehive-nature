@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pfc9d737550",
+ "bnr": "bnr://skaists.dev/blood/pfc9d737550",
+ "identity": {
+  "name": "Hutin Gauchin",
+  "lifespan": "0874–0907",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G8MP-D4R"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p5ade03a50d",
+    "name": "Gauchin",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p41a6fc5039",
+    "name": "spouse Gauchin",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p0c2e8ad663",
+    "name": "Aldeberthe de Gauchin"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p272bc7131d",
+    "name": "Hilde",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G8MP-D4R",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

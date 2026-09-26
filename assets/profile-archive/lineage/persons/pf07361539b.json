@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pf07361539b",
+ "bnr": "bnr://skaists.dev/blood/pf07361539b",
+ "identity": {
+  "name": "Béatrix de Mandeville",
+  "lifespan": "1105–1197",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GJ5W-RHR"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pe4070e7f2d",
+    "name": "William de Mandeville",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pd7d8d142ad",
+    "name": "Marguerite de Rie",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pa69af61048",
+    "name": "William de Saye III"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pe738fd916f",
+    "name": "William de Saye",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GJ5W-RHR",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pff7da59ffc",
+ "bnr": "bnr://skaists.dev/blood/pff7da59ffc",
+ "identity": {
+  "name": "Lucius Probatus Justus Publius",
+  "lifespan": "0225–0255",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PCQD-4ML"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p34b177a595",
+    "name": "Marcus Publius",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pc88c1f4c9e",
+    "name": "Petronia Caecilius",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pff99dc93cf",
+    "name": "Lucius Publius Petronius Volusianus"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pcb867bc8ef",
+    "name": "Mrs Lucius Probatus Justus Publius",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PCQD-4ML",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

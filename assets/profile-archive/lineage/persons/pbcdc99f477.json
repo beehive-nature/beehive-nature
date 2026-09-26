@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pbcdc99f477",
+ "bnr": "bnr://skaists.dev/blood/pbcdc99f477",
+ "identity": {
+  "name": "Joan Wheeler",
+  "lifespan": "1534–1563",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LZXV-PG6"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p85b32de17f",
+    "name": "Thomas Wheeler",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p63d4efc83a",
+    "name": "Ellen",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p0947a0b540",
+    "name": "Thomas Lawton II"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p1a74a6301a",
+    "name": "Thomas Lawton I",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LZXV-PG6",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

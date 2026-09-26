@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p41ef20ba92",
+ "bnr": "bnr://skaists.dev/blood/p41ef20ba92",
+ "identity": {
+  "name": "Honorable Giles Slocum II",
+  "lifespan": "1647–1713",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LB7Q-VQ4"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p14b0bb9da4",
+    "name": "Giles Peleg Slocum I",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p11207ea6fc",
+    "name": "Joan Cook Bailey",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pcebd8dcbe3",
+    "name": "Martha Slocum"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p6ca1b44ecb",
+    "name": "Mary Paine",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LB7Q-VQ4",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

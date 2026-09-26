@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pcfe59d99ca",
+ "bnr": "bnr://skaists.dev/blood/pcfe59d99ca",
+ "identity": {
+  "name": "Ariaric Athanaric I de Wisigoths",
+  "lifespan": "0260–0321",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "P4QV-W3F"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p5fd22038f1",
+    "name": "Rey Gannabaud de los Godos tervingios",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p8ab3a508dc",
+    "name": "Mrs. Rey Gannabaud De los godos tervingios",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p75430d0801",
+    "name": "Reiks Aoric Rothesteus of the Thervengi Goths"
+   },
+   {
+    "id": "p80d29afd9d",
+    "name": "Sra de Ostrogodos"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pf770ece1ec",
+    "name": "Queen Clothilda De Dumarne",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/P4QV-W3F",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

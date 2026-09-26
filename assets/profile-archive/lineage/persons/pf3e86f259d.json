@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pf3e86f259d",
+ "bnr": "bnr://skaists.dev/blood/pf3e86f259d",
+ "identity": {
+  "name": "Emperatriz Eutropia Augusta de Roma",
+  "lifespan": "0260–0324",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LRVL-NDT"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pa28d2b5bed",
+    "name": "Eutropius Markus Crispina",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p7c63047541",
+    "name": "Flavia Claudia Crispina",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p83f6d061e4",
+    "name": "Empress Flavia Maxima Fausta \"Fausta\""
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p2aa631b734",
+    "name": "Maximian \"Herculius\"  as Marcus Aurelius Valerius Maximianus Emperor of Rome",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LRVL-NDT",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

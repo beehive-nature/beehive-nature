@@ -1,0 +1,62 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pc1c515203c",
+ "bnr": "bnr://skaists.dev/blood/pc1c515203c",
+ "identity": {
+  "name": "Lucius Nonius Asprenas",
+  "lifespan": "0088BC–0036BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G3BX-2GT"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p98b8e88f75",
+    "name": "Lucius Nonius Asprenas",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p854987e4b0",
+    "name": "Nonia Polla"
+   },
+   {
+    "id": "p64f54fe679",
+    "name": "Lucius Nonius Asprenas, suffect consul 36 bc"
+   }
+  ],
+  "spouses": []
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G3BX-2GT",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

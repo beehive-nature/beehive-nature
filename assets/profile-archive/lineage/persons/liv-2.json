@@ -1,0 +1,61 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "liv-2",
+ "bnr": "bnr://skaists.dev/blood/liv-2",
+ "identity": {
+  "name": "Living",
+  "lifespan": null,
+  "gender": "FEMALE",
+  "living": true
+ },
+ "refs": [],
+ "evidence": {
+  "era": "living",
+  "support": "unsourced-entry",
+  "class": "living",
+  "basis": "redacted stub"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "private-stub",
+  "reason": "living — anonymous root-line stub; provider id withheld"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p4ceb2ace98",
+    "name": "Don Ray Remington",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p455afa9256",
+    "name": "Marilyn Lowry",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "founder",
+    "name": "Living"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "liv-1",
+    "name": "Living",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": null,
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p5033fd4e8e",
+ "bnr": "bnr://skaists.dev/blood/p5033fd4e8e",
+ "identity": {
+  "name": "Marcus Antonius Gordian Gordianus III",
+  "lifespan": "0225–0244",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L7K9-JTG"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p9d0cb1f6eb",
+    "name": "Junius Licinius Balbus",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p649e3ea9d2",
+    "name": "Maecia Faustina Antonia Gordiana",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p0c07110dde",
+    "name": "Faustina Furia de Rome"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p4bf9bd25ef",
+    "name": "Furia Sabina Tranquillina de Rome",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L7K9-JTG",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p386a96723c",
+ "bnr": "bnr://skaists.dev/blood/p386a96723c",
+ "identity": {
+  "name": "Henry Burt Jr",
+  "lifespan": "1599–1662",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LDP6-6Y8"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p0ec07c062a",
+    "name": "Henry Burt",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p2952ea6cf2",
+    "name": "Mrs. Henry Burt",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p96d55dc59d",
+    "name": "Mary Burt"
+   },
+   {
+    "id": "p80d2f6c39a",
+    "name": "Elizabeth Burt"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pa3ed28ceb7",
+    "name": "Ulalia Marche",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LDP6-6Y8",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

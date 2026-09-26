@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p361cf28d41",
+ "bnr": "bnr://skaists.dev/blood/p361cf28d41",
+ "identity": {
+  "name": "Benjamin Smith",
+  "lifespan": "1631–1713",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LT28-BCQ"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pd602a06dcf",
+    "name": "Christopher  Lawrence Jr Smythe DGBA-14M",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p7d9d1a6d6d",
+    "name": "Mary  Alice Gibbs (Smith) DBGAAA-14F",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p2d5cc3d580",
+    "name": "Benjamin Smith Jr"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pbc49cecd84",
+    "name": "Lydia Carpenter",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LT28-BCQ",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

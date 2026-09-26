@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pdc29e83848",
+ "bnr": "bnr://skaists.dev/blood/pdc29e83848",
+ "identity": {
+  "name": "Richard Pearce VI",
+  "lifespan": "1615–1678",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LR4X-QPZ"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p24c0920364",
+    "name": "Richard Pearce V",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p3a0c0b6c7d",
+    "name": "Martha Jacobs",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pd159f9715e",
+    "name": "Hannah Pearce"
+   },
+   {
+    "id": "p6f0f66d962",
+    "name": "Susanna Pearce"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p3ea8283711",
+    "name": "Susannah Wright",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LR4X-QPZ",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

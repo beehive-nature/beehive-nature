@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pf548c9aa5e",
+ "bnr": "bnr://skaists.dev/blood/pf548c9aa5e",
+ "identity": {
+  "name": "Adalbert d'Alsace",
+  "lifespan": "0675–0722",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L8WY-72B"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p7ca780d7ea",
+    "name": "Duke Eticho Tours of Upper Alsace I",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p4cccc55285",
+    "name": "Bereswinde van de Franken",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p2a302e1337",
+    "name": "spouse Dietrich D'Ostphalie De Varmland-Gutreksson"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p36fda548cb",
+    "name": "Gerlinde , Duchess d'Alsace",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L8WY-72B",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

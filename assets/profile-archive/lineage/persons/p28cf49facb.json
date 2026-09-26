@@ -1,0 +1,64 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p28cf49facb",
+ "bnr": "bnr://skaists.dev/blood/p28cf49facb",
+ "identity": {
+  "name": "Titus Sextius Africanus",
+  "lifespan": "0139–0169",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GVHW-CRR"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pd9ae784ed2",
+    "name": "Titus Sextius Marcus Vibius Ovinius Secundus Lucius Volusius Toquatus Vestinus Lateranus De ROME",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p860c1e9fcd",
+    "name": "Sextia Cethegilla Di Roma"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p9cc17af8db",
+    "name": "Cornélia Cethegilla Gavii Di Roma",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GVHW-CRR",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

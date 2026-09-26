@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p7979a7c5f9",
+ "bnr": "bnr://skaists.dev/blood/p7979a7c5f9",
+ "identity": {
+  "name": "Saher de Quincy 1st Earl of Winchester",
+  "lifespan": "1155–1219",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LB2S-YQF"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "LDGP-6LG",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "KC5N-C3N",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pb63ca588b1",
+    "name": "Robert de Quincy the Younger"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p5ed190b3e4",
+    "name": "Margaret de Beaumont Countess Of Winchester",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LB2S-YQF",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

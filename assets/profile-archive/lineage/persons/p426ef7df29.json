@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p426ef7df29",
+ "bnr": "bnr://skaists.dev/blood/p426ef7df29",
+ "identity": {
+  "name": "Joseph of Arimathea",
+  "lifespan": "0038BC–82",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LJK2-DGY"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p496f28c8a1",
+    "name": "Matthat ben Levi",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p0d09eca0f8",
+    "name": "Rachel bint Eleazor",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pe6dd7fdd54",
+    "name": "Anna I Enygeus bat Joseph of Arimathea"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p1d615b89ec",
+    "name": "Anna Rachel bint Simon Eleazor ben Eliud ha David",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LJK2-DGY",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

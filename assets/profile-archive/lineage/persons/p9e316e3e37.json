@@ -1,0 +1,63 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p9e316e3e37",
+ "bnr": "bnr://skaists.dev/blood/p9e316e3e37",
+ "identity": {
+  "name": "Maftur ibn Yaqtan ibn `Abir",
+  "lifespan": "Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GTGD-49N"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p85f3e1a7c2",
+    "name": "Yaqtan ibn `Abir",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p27a2a4d480",
+    "name": "Yusha",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p87341dea7f",
+    "name": "Qanturah ibn Maftur"
+   }
+  ],
+  "spouses": []
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GTGD-49N",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

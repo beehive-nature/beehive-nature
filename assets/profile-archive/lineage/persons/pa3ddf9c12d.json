@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pa3ddf9c12d",
+ "bnr": "bnr://skaists.dev/blood/pa3ddf9c12d",
+ "identity": {
+  "name": "Sarah Potter",
+  "lifespan": "1639–1706",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "9ZH7-WWD"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p549750f104",
+    "name": "William Potter",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p6b849fa039",
+    "name": "Frances",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p5a8f368100",
+    "name": "Elizabeth Foote"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p1e4c9228f5",
+    "name": "Robert Foote",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/9ZH7-WWD",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

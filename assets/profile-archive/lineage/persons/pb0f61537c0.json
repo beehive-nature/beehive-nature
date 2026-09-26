@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pb0f61537c0",
+ "bnr": "bnr://skaists.dev/blood/pb0f61537c0",
+ "identity": {
+  "name": "Beatrice de Saye",
+  "lifespan": "1160–1197",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "9WP5-MSL"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pa69af61048",
+    "name": "William de Saye III",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pcf859f52bf",
+    "name": "Beatrice",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p3efb1300c6",
+    "name": "William de Mandeville"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p486d0c3509",
+    "name": "Geoffrey FitzPiers",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/9WP5-MSL",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,12 @@
+{
+  "candidate": "1df62813",
+  "public_mesh": false,
+  "shipped_fast_suite": {"total": 21, "failed": 0, "namespace_init_and_private_procfs": true},
+  "results": [
+    {"case": "healthy", "runner_exit": 0, "node_stop_marker": true, "cleanup_receipt_error_reported": false},
+    {"case": "cleanup-receipt-full", "runner_exit": 0, "node_stop_marker": true, "cleanup_receipt_error_reported": true},
+    {"case": "stop-ignores-term", "runner_exit": "still-running-after-10s", "node_stop_marker": false, "cleanup_receipt_error_reported": false},
+    {"case": "partial-start-cancel", "runner_exit": 130, "node_stop_marker": false, "cleanup_receipt_error_reported": false, "detached_test_node_alive": true}
+  ],
+  "deployment_findings": {"basis": "source inspection", "dedicated_user_missing_from_default_command": true, "log_directory_created_before_covering_mount": true}
+}

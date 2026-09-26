@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p7dee2427b0",
+ "bnr": "bnr://skaists.dev/blood/p7dee2427b0",
+ "identity": {
+  "name": "John Gray",
+  "lifespan": "1617–1663",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LYWH-DCQ"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pf931db829d",
+    "name": "William Gray",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p0d15ca48f6",
+    "name": "Mary Button",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p846ed64c7d",
+    "name": "Isaac Gray"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p69d8d5e2c5",
+    "name": "Elizabeth Frost",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LYWH-DCQ",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pef886929c2",
+ "bnr": "bnr://skaists.dev/blood/pef886929c2",
+ "identity": {
+  "name": "Lucius Calpurnius Piso the augur",
+  "lifespan": "0037BC–24",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GZPB-PJV"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pad9ea47f2a",
+    "name": "Gnaeus Calpurnius Piso II",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pda302c57fe",
+    "name": "Poppilia",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p703555421a",
+    "name": "Calpurnia Pisonis"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p89f00ed237",
+    "name": "Statilia L. Pisonis",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GZPB-PJV",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

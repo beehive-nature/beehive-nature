@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p9e00d00aff",
+ "bnr": "bnr://skaists.dev/blood/p9e00d00aff",
+ "identity": {
+  "name": "Sigibert 'der Lahme' von Köln rheinfränkischer König",
+  "lifespan": "0455–0509",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G66P-7RG"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p009fd1d6d6",
+    "name": "Chlodebaud   dit Pharamon DE FRANCIE DE COLOGNE",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p0baa0c735b",
+    "name": "Amalaberge DE COLOGNE DE SAXE",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p36ecb372dc",
+    "name": "Cloderic the Parricide,King of the Ripuarian Franks."
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p3b0047b804",
+    "name": "Théodelinde de Limoges-Burgondes-Cologne Queen of Burgundy",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G66P-7RG",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

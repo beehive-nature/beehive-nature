@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p574651da8d",
+ "bnr": "bnr://skaists.dev/blood/p574651da8d",
+ "identity": {
+  "name": "John Tilley",
+  "lifespan": "1571–1621",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L71L-S22"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pc75fe283af",
+    "name": "Robert Tilley",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pe62a8222b5",
+    "name": "Elizabeth",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pc878d564a1",
+    "name": "Elizabeth Tilley"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pb03d632e3b",
+    "name": "Joan Hurst",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L71L-S22",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

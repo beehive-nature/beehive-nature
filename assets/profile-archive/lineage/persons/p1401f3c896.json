@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p1401f3c896",
+ "bnr": "bnr://skaists.dev/blood/p1401f3c896",
+ "identity": {
+  "name": "Sir Walter Hungerford KG KB",
+  "lifespan": "1378–1449",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L5ZF-GQS"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p860c564816",
+    "name": "Thomas Hungerford",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p54410d3edb",
+    "name": "Joan Elinore Hussey",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p2ff4e2177d",
+    "name": "Lady Elizabeth Hungerford"
+   },
+   {
+    "id": "p68348d16d3",
+    "name": "Lord Robert Hungerford"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p243e892761",
+    "name": "Lady Katherine Peverell",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L5ZF-GQS",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

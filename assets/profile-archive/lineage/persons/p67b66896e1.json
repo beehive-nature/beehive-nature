@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p67b66896e1",
+ "bnr": "bnr://skaists.dev/blood/p67b66896e1",
+ "identity": {
+  "name": "Ghislain de la Vigne",
+  "lifespan": "1586–1632",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LR73-D5Q"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pd7f9538925",
+    "name": "Rev. Jean de la Vigne",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pfd6f930bea",
+    "name": "Jeanne Petitiau",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p2872e43dcc",
+    "name": "Christine de la Vigne"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p5bc7b00ab3",
+    "name": "Adrienne Cuvellier",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LR73-D5Q",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p6d2a50582a",
+ "bnr": "bnr://skaists.dev/blood/p6d2a50582a",
+ "identity": {
+  "name": "Elisabetha Maurer",
+  "lifespan": "1636–1678",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "9N5M-W54"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p77c85f7a4a",
+    "name": "Jacob Maurer",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p407bbe7edf",
+    "name": "Anna Barbara Krammer",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p80df85098a",
+    "name": "Hanss Jacob Miller"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p7e43afe2a0",
+    "name": "Ulrich Miller",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/9N5M-W54",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p4352086206",
+ "bnr": "bnr://skaists.dev/blood/p4352086206",
+ "identity": {
+  "name": "Adriaen Claesz van Adrichem",
+  "lifespan": "1503–1560",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "9HSW-R2B"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p3d8eec5798",
+    "name": "Nicolaas Adriaensz van Adrichem",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "ped70378183",
+    "name": "Machteld Claes Franckendr van de Bergh",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pf037aa2416",
+    "name": "Claas Adriaansz van Adrichem"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pcaaecd9ca3",
+    "name": "Baertgen Corssen van Vliet van der Woerd",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/9HSW-R2B",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pa5984712db",
+ "bnr": "bnr://skaists.dev/blood/pa5984712db",
+ "identity": {
+  "name": "Antistia",
+  "lifespan": "0200BC–Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LLM5-ZTJ"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pfc113b42c7",
+    "name": "Marcus Livius Drusus II de Rome Le Jeune",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p029a2fef0d",
+    "name": "Clavaria de Rome",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pb3e0d118a1",
+    "name": "Appius Claudius Pulcher II"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pb2c32d93a2",
+    "name": "Appius Claudius Pulcher I",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LLM5-ZTJ",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

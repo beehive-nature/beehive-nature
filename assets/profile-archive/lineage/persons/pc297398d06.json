@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pc297398d06",
+ "bnr": "bnr://skaists.dev/blood/pc297398d06",
+ "identity": {
+  "name": "Levi ben Simeon",
+  "lifespan": "0832BC–0750BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LKYS-4BL"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pe01752641a",
+    "name": "Simeon ben Judah",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p5902d4fb90",
+    "name": "Mrs. Simeon",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pab3d17004d",
+    "name": "Matthat ben Levi ben Simeon"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p3e8e31cd19",
+    "name": "Mrs Levi",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LKYS-4BL",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

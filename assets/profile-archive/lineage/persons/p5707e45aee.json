@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p5707e45aee",
+ "bnr": "bnr://skaists.dev/blood/p5707e45aee",
+ "identity": {
+  "name": "King Thrand Bjarnasson Jarl of Sula",
+  "lifespan": "0860–0886",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PC3F-4HS"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p2e9fe9bdd8",
+    "name": "Sæmingr av Hålogaland",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p869b1b1371",
+    "name": "Nauma född Odinsdatter",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p55253d3eb0",
+    "name": "Queen Ingeborg Thrandsdottir Of Sweden"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pb0fb180859",
+    "name": "Hallgrima Gilsdottir",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PC3F-4HS",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p44aba0851d",
+ "bnr": "bnr://skaists.dev/blood/p44aba0851d",
+ "identity": {
+  "name": "Maria Barents Christopher",
+  "lifespan": "1675–1711",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LWTK-PTY"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pc560344eab",
+    "name": "Johannes Hans Christoffelz or Christopher",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p2feae6e00d",
+    "name": "Tryntje Barent Blom",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p135314a5d9",
+    "name": "Peter Prall"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p5bd7671795",
+    "name": "Pieter Arentsz Prall",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LWTK-PTY",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,66 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p5244872fc2",
+ "bnr": "bnr://skaists.dev/blood/p5244872fc2",
+ "identity": {
+  "name": "Ešara- Hammat Queen of the Neo-Assyrian Empire",
+  "lifespan": "0713BC–0672BC",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GYDR-51Z"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [],
+  "children": [
+   {
+    "id": "p1fb38715fb",
+    "name": "King Assurbanipal II and IV Kandalu of Assyria"
+   },
+   {
+    "id": "pa28387cac4",
+    "name": "Ashursharrat Of Assyria queen of Assyria"
+   },
+   {
+    "id": "pb907471b2e",
+    "name": "Aššur-etel-šame-erseti-muballissu"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pc928818863",
+    "name": "Esarhaddon , King of the Neo-Assyrian Empire",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GYDR-51Z",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

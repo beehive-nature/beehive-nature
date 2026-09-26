@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p6dd30ec4f5",
+ "bnr": "bnr://skaists.dev/blood/p6dd30ec4f5",
+ "identity": {
+  "name": "Dorothea Bölsterli",
+  "lifespan": "1570–1602",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LJ2H-RR6"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p59db43bf0e",
+    "name": "Hans Bölsterli",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p4450551360",
+    "name": "Elsbeth Strupler",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pa575ec65ae",
+    "name": "Hans Jacob Nüssli"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p5cc55654cd",
+    "name": "Conradt Nüssli",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LJ2H-RR6",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

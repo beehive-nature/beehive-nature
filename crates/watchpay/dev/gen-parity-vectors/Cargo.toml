@@ -1,0 +1,16 @@
+# Standalone vector generator — NOT a workspace member (empty [workspace]
+# below makes it its own root). It exists so the parity vectors pinned in
+# ../../tests/parity_calldata.rs can be REGENERATED and verified against
+# the exact upstream helper. Run: cargo run --release (offline; the
+# calldata path never dials the provider).
+[package]
+name = "gen-parity-vectors"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[dependencies]
+evmlib = { version = "=0.9.1", features = ["external-signer"] }
+hex = "0.4"
+
+[workspace]

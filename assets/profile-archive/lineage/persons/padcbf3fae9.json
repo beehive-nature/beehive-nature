@@ -1,0 +1,58 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "padcbf3fae9",
+ "bnr": "bnr://skaists.dev/blood/padcbf3fae9",
+ "identity": {
+  "name": "Alexander Alchin",
+  "lifespan": "1567–1614",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "MSFY-HB8"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [],
+  "children": [
+   {
+    "id": "p1561d46c02",
+    "name": "Margaret Alchin"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p43659cc300",
+    "name": "Elizabeth Scotchford",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/MSFY-HB8",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

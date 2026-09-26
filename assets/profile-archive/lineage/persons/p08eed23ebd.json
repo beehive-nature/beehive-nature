@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p08eed23ebd",
+ "bnr": "bnr://skaists.dev/blood/p08eed23ebd",
+ "identity": {
+  "name": "Yehezqiyah ben Nuri ha-David",
+  "lifespan": "0380BC–0333BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LRJM-2MS"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pf8cf78e519",
+    "name": "Abb Yehezqiyah Ha-David",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p664a94fc1f",
+    "name": "Mrs Abb Yehezqiyah",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p1485e2917c",
+    "name": "Neariah ben Yehezqiyah ha-David"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p5668da652b",
+    "name": "Mrs Yehezqiyah ben Nuri",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LRJM-2MS",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

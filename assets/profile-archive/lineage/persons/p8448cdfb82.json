@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p8448cdfb82",
+ "bnr": "bnr://skaists.dev/blood/p8448cdfb82",
+ "identity": {
+  "name": "Thomas Trethurffe",
+  "lifespan": "1477–1529",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LZ71-8P3"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pfcd05048fd",
+    "name": "John Trethurffe Esq.",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pd1720f50f5",
+    "name": "Elizabeth de Courtenay",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p999b693037",
+    "name": "Margaret Trethurfee"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pbe5c9a8f64",
+    "name": "Mary Trevisa",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LZ71-8P3",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": true,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

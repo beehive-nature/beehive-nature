@@ -1,0 +1,64 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "paa7c8d26f1",
+ "bnr": "bnr://skaists.dev/blood/paa7c8d26f1",
+ "identity": {
+  "name": "f@ Kelen \\ Helen Robyns nee???",
+  "lifespan": "1516–1570",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "P6QD-SZ8"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p9d21a7ebad",
+    "name": "Helena Sullivan",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p2cf2eeed9e",
+    "name": "Jane Rose Roberts"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pb7f4951016",
+    "name": "Henry Robyns or Roberts",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/P6QD-SZ8",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

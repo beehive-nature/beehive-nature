@@ -1,0 +1,71 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p91b720604e",
+ "bnr": "bnr://skaists.dev/blood/p91b720604e",
+ "identity": {
+  "name": "Verica Cassandra des Arvernes",
+  "lifespan": "0050BC–Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LZBC-6ML"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "G8VG-CHH",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "GWW9-W65",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p49026c938e",
+    "name": "King Cymbeline ap Tenuantius"
+   },
+   {
+    "id": "pd690997ff2",
+    "name": "Anna Genvissa Cartismuanda of Wales"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p8c51c71627",
+    "name": "Tenuantius ap Lludd",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LZBC-6ML",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

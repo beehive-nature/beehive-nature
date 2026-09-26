@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pcf96f237b3",
+ "bnr": "bnr://skaists.dev/blood/pcf96f237b3",
+ "identity": {
+  "name": "Joan Durant",
+  "lifespan": "1272–1340",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G7S4-RH9"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pb9c204495f",
+    "name": "Sir Thomas Durant",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pad02e1e434",
+    "name": "Alice Bossell",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p1e8c30ecaf",
+    "name": "Stephen de Tynten"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p3bee33cf84",
+    "name": "Sir John Tynten",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G7S4-RH9",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

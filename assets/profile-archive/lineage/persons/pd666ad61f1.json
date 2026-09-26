@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pd666ad61f1",
+ "bnr": "bnr://skaists.dev/blood/pd666ad61f1",
+ "identity": {
+  "name": "Dorothy Lewis",
+  "lifespan": "1575–1645",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G85Q-GB7"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p8c89983dec",
+    "name": "Edward Lewis",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pf3af76ad47",
+    "name": "Margaret Jones",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pd43a5523c0",
+    "name": "Phillip Slocomb"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p9386a411c1",
+    "name": "Richard Slocombe",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G85Q-GB7",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

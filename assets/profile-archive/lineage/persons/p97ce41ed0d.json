@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p97ce41ed0d",
+ "bnr": "bnr://skaists.dev/blood/p97ce41ed0d",
+ "identity": {
+  "name": "Friedrich Latsch",
+  "lifespan": "1475–Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GCYQ-77L"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "GCYK-3JT",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "L195-6NB",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p03dda5a918",
+    "name": "Tillmann Latsch"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p791888a8b3",
+    "name": "N Sechs",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GCYQ-77L",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

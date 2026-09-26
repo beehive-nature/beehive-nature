@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pcf9b1c08a6",
+ "bnr": "bnr://skaists.dev/blood/pcf9b1c08a6",
+ "identity": {
+  "name": "Gaius Licinius C. f. P. n. Calvus Stolo Consul",
+  "lifespan": "0407BC–Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GGN8-8V8"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pb0f9b6c9c3",
+    "name": "Gaius Licinius Calvus",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p29b40a783f",
+    "name": "Mrs Gaius Licinius Calvus",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p496952c091",
+    "name": "Licinius Calvus Stolo"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p230ed07cae",
+    "name": "Fabia Minor",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GGN8-8V8",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

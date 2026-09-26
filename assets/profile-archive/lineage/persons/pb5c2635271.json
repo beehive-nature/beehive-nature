@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pb5c2635271",
+ "bnr": "bnr://skaists.dev/blood/pb5c2635271",
+ "identity": {
+  "name": "King of Macedon Philip Argead II",
+  "lifespan": "0382BC–0336BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "9W8M-K3G"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pad99b5bdb4",
+    "name": "King of Macedon Amyntas III Argead",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p22b2d0ddfa",
+    "name": "Queen of Macedon Eurydice Lyncestis I",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p3a5d28f571",
+    "name": "Αλέξανδρος Γ΄ ο Μακεδών Βασιλεὺς Μακεδόνων"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p16eb9175e6",
+    "name": "Queen of Macedon Olympias of Epirus",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/9W8M-K3G",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

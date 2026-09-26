@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p306d760248",
+ "bnr": "bnr://skaists.dev/blood/p306d760248",
+ "identity": {
+  "name": "Lucy de Pitres",
+  "lifespan": "1132–1220",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LYWB-P6K"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p69e945e69a",
+    "name": "Miles de Pitres",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p0d121acdc8",
+    "name": "Sybil de Neufmarché",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p90fb13f781",
+    "name": "Piers FitzHerbert Lord of Blaen Llyfni"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pe501af5512",
+    "name": "Lord Herbert FitzHerbert of Blane Llyfni",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LYWB-P6K",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

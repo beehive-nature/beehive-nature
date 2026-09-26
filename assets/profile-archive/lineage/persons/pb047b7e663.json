@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pb047b7e663",
+ "bnr": "bnr://skaists.dev/blood/pb047b7e663",
+ "identity": {
+  "name": "Huna V Ben-David",
+  "lifespan": "0480–0550",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "P71K-D8Z"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pf2799f4c21",
+    "name": "Haninai ben Zutra Ben-David",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pc50b87c633",
+    "name": "spouse Haninal ben Zutra Ben-David",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p1f16bb6b2b",
+    "name": "Haninai ben Huna Ben-David"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pb87e90f639",
+    "name": "spouse Huna V Ben-David",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/P71K-D8Z",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

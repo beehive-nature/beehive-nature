@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pbfefe53e6e",
+ "bnr": "bnr://skaists.dev/blood/pbfefe53e6e",
+ "identity": {
+  "name": "Frances Fulmerston",
+  "lifespan": "1540–1579",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PMBQ-BZD"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p454c8ad585",
+    "name": "Sir Richard Fulmerston",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p3628e9c223",
+    "name": "Alice Lonzam",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p88304da42b",
+    "name": "Anne Clere"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p871298dfe0",
+    "name": "Sir Edward Clere Burgess of Thetford and Grampound",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PMBQ-BZD",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

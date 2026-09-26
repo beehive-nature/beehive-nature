@@ -1,0 +1,77 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pd564482cfe",
+ "bnr": "bnr://skaists.dev/blood/pd564482cfe",
+ "identity": {
+  "name": "Ludwig der Fromme König der Franken Römischer Kaiser",
+  "lifespan": "0778–0840",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LZT6-KB5"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p52f0d2a81d",
+    "name": "Karl der Große König der Franken und Langobarden Römischer Kaiser",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p9c69ac98e2",
+    "name": "Hildegard, Königin der Franken",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p891c09cd1f",
+    "name": "Charles II 'le Chauve' roi des Francs empereur d'Occident"
+   },
+   {
+    "id": "pb37cbcf801",
+    "name": "Alpaïs de Paris Abbesse de Saint-Pierre-les-Dames à Reims"
+   },
+   {
+    "id": "pe4def2fc1e",
+    "name": "Gisela Markgräfin von Friaul"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pc5de640b9b",
+    "name": "Judith von Altdorf Fränkische Königin und Römische Kaiserin",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LZT6-KB5",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

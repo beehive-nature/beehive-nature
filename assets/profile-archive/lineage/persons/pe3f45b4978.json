@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pe3f45b4978",
+ "bnr": "bnr://skaists.dev/blood/pe3f45b4978",
+ "identity": {
+  "name": "zu Müsen",
+  "lifespan": "1524–1563",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LK9M-LH4"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pb7930c2412",
+    "name": "Hans zu Müsen",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p59e65e9139",
+    "name": "Apolonia Reimer",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p05b785c5cc",
+    "name": "Daniel Stähler"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p68d862fe13",
+    "name": "Hans Stähler",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LK9M-LH4",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

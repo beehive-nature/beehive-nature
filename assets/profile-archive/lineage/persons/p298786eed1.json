@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p298786eed1",
+ "bnr": "bnr://skaists.dev/blood/p298786eed1",
+ "identity": {
+  "name": "Harald Klak Halfdansson",
+  "lifespan": "0785–0852",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LDHS-886"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p8b949a18b9",
+    "name": "King of Haithabu Halfdan Haroldsson",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pc40624e3ad",
+    "name": "Helga Dagsdottir",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pa8c9303b79",
+    "name": "Gottfried von Friesland"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pa32168161a",
+    "name": "Solvor Hundolfsdatter",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LDHS-886",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

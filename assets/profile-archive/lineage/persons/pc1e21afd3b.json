@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pc1e21afd3b",
+ "bnr": "bnr://skaists.dev/blood/pc1e21afd3b",
+ "identity": {
+  "name": "Johann Peter Blanck",
+  "lifespan": "1520–1590",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LJ2G-673"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p73f9436500",
+    "name": "Berchtold Blanck",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p111ff1df1d",
+    "name": "Eva",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p1e15add07d",
+    "name": "Jost Blanck Blank  Plank Cunz"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p981c4aa68c",
+    "name": "Maria Margaretha Ebersole",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LJ2G-673",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

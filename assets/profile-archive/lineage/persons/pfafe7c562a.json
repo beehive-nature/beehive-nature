@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pfafe7c562a",
+ "bnr": "bnr://skaists.dev/blood/pfafe7c562a",
+ "identity": {
+  "name": "Jacob Kauffmann",
+  "lifespan": "1530–1605",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PFZ8-VB8"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pc5aa2f6528",
+    "name": "Jakob Kauffmann",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p5f78a8e544",
+    "name": "Barbara Büchler",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p4cab6e448d",
+    "name": "Jakob Kaufmann"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pef36601c2d",
+    "name": "Elisabeth Stauffer",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PFZ8-VB8",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

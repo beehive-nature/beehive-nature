@@ -1,0 +1,64 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pd602a06dcf",
+ "bnr": "bnr://skaists.dev/blood/pd602a06dcf",
+ "identity": {
+  "name": "Christopher  Lawrence Jr Smythe DGBA-14M",
+  "lifespan": "1592–1676",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PFR9-8JF"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p328ca184bc",
+    "name": "Dame  Alice",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p361cf28d41",
+    "name": "Benjamin Smith"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p7d9d1a6d6d",
+    "name": "Mary  Alice Gibbs (Smith) DBGAAA-14F",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PFR9-8JF",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

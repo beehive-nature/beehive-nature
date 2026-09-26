@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p92f7192f5e",
+ "bnr": "bnr://skaists.dev/blood/p92f7192f5e",
+ "identity": {
+  "name": "Alma Jane Miller",
+  "lifespan": "1862–1947",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LK3P-9BX"
+  }
+ ],
+ "evidence": {
+  "era": "recorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "recorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pa5247c9361",
+    "name": "Henry Miller",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p27d84864e5",
+    "name": "Mary M. Shane",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pe37406c4f3",
+    "name": "Henry Miller Sutphen"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pfa9d9be298",
+    "name": "Joshua Clark Sutphen",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LK3P-9BX",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

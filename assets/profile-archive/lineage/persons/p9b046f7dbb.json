@@ -1,0 +1,90 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p9b046f7dbb",
+ "bnr": "bnr://skaists.dev/blood/p9b046f7dbb",
+ "identity": {
+  "name": "Azubah bint  Shilhi al-ʾEfrayim",
+  "lifespan": "0919BC–0890BC",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "94KK-SDK"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p4e9b94fc8d",
+    "name": "Shilhi ibn Yeroboam al-ʾEfrayim",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p2f3f343ca4",
+    "name": "Asa bint Abijah",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p810baf42b2",
+    "name": "Ahab ibn Omriyya al-Yasjar"
+   },
+   {
+    "id": "pb2f114735f",
+    "name": "Namsi ibn Omriyya al-Yasjar"
+   },
+   {
+    "id": "pf12e4b9226",
+    "name": "Asa BINT ASA"
+   },
+   {
+    "id": "pc5167370e5",
+    "name": "Athaliah bint Omri, Queen of Judah"
+   },
+   {
+    "id": "p0ff457f989",
+    "name": "King Jehosophat ben Asa"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p9817c57793",
+    "name": "Omriyya al-Yasjar 6th King of the 10 Tribes of Israel",
+    "marriage": null
+   },
+   {
+    "id": "p8fb4a2d1a5",
+    "name": "King Asa ben Abijah 3rd King of Judea",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/94KK-SDK",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

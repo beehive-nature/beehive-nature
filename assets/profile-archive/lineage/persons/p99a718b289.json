@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p99a718b289",
+ "bnr": "bnr://skaists.dev/blood/p99a718b289",
+ "identity": {
+  "name": "Shetah bar Yossei, Rabbi Eleazar",
+  "lifespan": "0159BC–0067BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L5Y8-SVB"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p793c8ffd39",
+    "name": "Yossei ibn Yohanan",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pfa58a5c2ce",
+    "name": "unnamed bint Yossi",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pe501edd032",
+    "name": "Salomé Alexandra bat Shetach of Judea"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p535c242745",
+    "name": "Cypros I de Nabatea",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L5Y8-SVB",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

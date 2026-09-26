@@ -1,0 +1,64 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pa1bf52d6af",
+ "bnr": "bnr://skaists.dev/blood/pa1bf52d6af",
+ "identity": {
+  "name": "Lucius Cornelius Lentulus Cruscellio",
+  "lifespan": "0076BC–0038BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G3QK-WL9"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pc46d0aaca3",
+    "name": "Lucius Cornelius Lentulus Crus",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p74fc0ae1b1",
+    "name": "Gneaus Cornelius Lentulus consul of Rome"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pd619800acc",
+    "name": "Suplicia Scribonia Julia Crusiello",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G3QK-WL9",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

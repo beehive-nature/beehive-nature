@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pbc49cecd84",
+ "bnr": "bnr://skaists.dev/blood/pbc49cecd84",
+ "identity": {
+  "name": "Lydia Carpenter",
+  "lifespan": "1638–1711",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GD3F-X71"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p02df61b474",
+    "name": "Capt. William Carpenter",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p88f4d6e39a",
+    "name": "Elizabeth Arnold",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p2d5cc3d580",
+    "name": "Benjamin Smith Jr"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p361cf28d41",
+    "name": "Benjamin Smith",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GD3F-X71",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

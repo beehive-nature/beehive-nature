@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pe505a918bc",
+ "bnr": "bnr://skaists.dev/blood/pe505a918bc",
+ "identity": {
+  "name": "Flavius Julius Agricola",
+  "lifespan": "0365–0421",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LDWH-5MP"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p6ed9331253",
+    "name": "Anicius Hermogenianus Olybrius",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p235ba80afc",
+    "name": "Ennodia Minor",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p9c1f42981b",
+    "name": "Western Roman Emperor Marcus Maecilius Flavius Eparchius Avitus"
+   },
+   {
+    "id": "p6dece84987",
+    "name": "Padusia Flavius Julius Agricola of Rome"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pe5369c7af4",
+    "name": "Rusticana of Lyon",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LDWH-5MP",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

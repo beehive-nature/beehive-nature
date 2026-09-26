@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p281fa50e61",
+ "bnr": "bnr://skaists.dev/blood/p281fa50e61",
+ "identity": {
+  "name": "Ann Mennell",
+  "lifespan": "1812–1875",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "KWJT-B8M"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p3e040a0341",
+    "name": "Crispin Mennell",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "paecc76ef71",
+    "name": "Elizabeth Welburn",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pb0115492ae",
+    "name": "Martin Van Buren Taylor Sr."
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p15953333ad",
+    "name": "Benjamin Franklin Taylor",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/KWJT-B8M",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

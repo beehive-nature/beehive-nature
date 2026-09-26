@@ -1,0 +1,68 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pcc15e1f57e",
+ "bnr": "bnr://skaists.dev/blood/pcc15e1f57e",
+ "identity": {
+  "name": "Emma De Bois-l'evêque",
+  "lifespan": "0993–1050",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G7BJ-1DL"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pd118a7baca",
+    "name": "Eudes 'Le Seneshal' de Montfront",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pd2e409798d",
+    "name": "Albérie DE LA HAYE-CHAPPELL DE BOIS L'EVEQUE DE NORMANDIE"
+   },
+   {
+    "id": "pd118a7baca",
+    "name": "Eudes 'Le Seneshal' de Montfront"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p7ec4f4f097",
+    "name": "Turstin Haloup de la Haye de Bastembourg-de Balts",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G7BJ-1DL",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

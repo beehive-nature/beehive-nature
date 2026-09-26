@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p2c1b6ca727",
+ "bnr": "bnr://skaists.dev/blood/p2c1b6ca727",
+ "identity": {
+  "name": "Mutnodjmet bint Ay , Queen of Egypt",
+  "lifespan": "–1305BC",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "KJDB-T33"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pc5f09c535a",
+    "name": "Ay d'Ugarit Nubie, 14th Pharaoh of the 18th Dynasty of Egypt",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pce750805ed",
+    "name": "Tey",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pe77718f0cc",
+    "name": "Seti SETYMERAMEN Vizier Of Egypt"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pac945f5292",
+    "name": "Horemhab",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/KJDB-T33",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

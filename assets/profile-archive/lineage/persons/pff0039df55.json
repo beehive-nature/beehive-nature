@@ -1,0 +1,64 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pff0039df55",
+ "bnr": "bnr://skaists.dev/blood/pff0039df55",
+ "identity": {
+  "name": "Camissares Satrap of Cilicia",
+  "lifespan": "0427BC–0385BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GWP6-5X2"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p0fddc0cd7d",
+    "name": "Dathames",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pecfaacfd3e",
+    "name": "Datamnes ben Camissares of Caria"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p8443b79059",
+    "name": "Scythissa of Paphlagonia",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GWP6-5X2",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p15953333ad",
+ "bnr": "bnr://skaists.dev/blood/p15953333ad",
+ "identity": {
+  "name": "Benjamin Franklin Taylor",
+  "lifespan": "1805–1889",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "KWJC-CBJ"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pf6547de41f",
+    "name": "Jesse Wright Taylor",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p6020d4fadd",
+    "name": "Lucy Parker",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pb0115492ae",
+    "name": "Martin Van Buren Taylor Sr."
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p281fa50e61",
+    "name": "Ann Mennell",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/KWJC-CBJ",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

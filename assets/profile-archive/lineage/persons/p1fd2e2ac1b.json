@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p1fd2e2ac1b",
+ "bnr": "bnr://skaists.dev/blood/p1fd2e2ac1b",
+ "identity": {
+  "name": "Michael Field",
+  "lifespan": "1625–1662",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G8KQ-Z82"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pdd9c64f24b",
+    "name": "Nathaniel Field",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p71563812f8",
+    "name": "Mrs Nathaniel Field",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p3ea93f5999",
+    "name": "Anne Field"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pcdaa3e02cd",
+    "name": "Ann Feild",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G8KQ-Z82",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

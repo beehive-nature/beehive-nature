@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pdd5ae84258",
+ "bnr": "bnr://skaists.dev/blood/pdd5ae84258",
+ "identity": {
+  "name": "Pontia Sergia Pautilla",
+  "lifespan": "Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LXQN-27Y"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pad1585a1cb",
+    "name": "Lucius Sergius Plautus",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pc66b99db94",
+    "name": "Mrs Lucius Sergius Plautus",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p03bd3e0d99",
+    "name": "Sergius Octavius Laenas Pontianus"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p0079a650f1",
+    "name": "Laenus Lucius Octavius",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LXQN-27Y",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

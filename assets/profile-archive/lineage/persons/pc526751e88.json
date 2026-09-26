@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pc526751e88",
+ "bnr": "bnr://skaists.dev/blood/pc526751e88",
+ "identity": {
+  "name": "Anna Hanna Nishe",
+  "lifespan": "1658–1721",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LVN7-CT5"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p9bb7625d99",
+    "name": "Henry Clifton Nishe",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pcd0f5ac633",
+    "name": "Dorothea VOLCKERS",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p351113f037",
+    "name": "Anna Annatje Lott"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pb7d1dd72ce",
+    "name": "Peter LOTT II",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LVN7-CT5",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

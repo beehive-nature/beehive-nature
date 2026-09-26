@@ -1,0 +1,78 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p58772109e9",
+ "bnr": "bnr://skaists.dev/blood/p58772109e9",
+ "identity": {
+  "name": "Queen Ascylia Balthes Van Gallic von Toxandria",
+  "lifespan": "0320–0414",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LKCK-BZV"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pb1d3b99066",
+    "name": "Malaric I de Toxandrie Roi des Francs",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p4afc06293b",
+    "name": "Princess Ascyla Irmtrud D'Orleans \"la Gauloise\" Blessinda",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pc537d35e1f",
+    "name": "Walia I Rey de los Visigodos"
+   },
+   {
+    "id": "p9af2ea60c9",
+    "name": "King Himbald Of the Franks"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pefe156ec93",
+    "name": "Athenaric of The Visigoths King of the Thervingi",
+    "marriage": null
+   },
+   {
+    "id": "pb51ad9cfa7",
+    "name": "Mallobaudes I De Toxandrië Roi De Franks",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LKCK-BZV",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

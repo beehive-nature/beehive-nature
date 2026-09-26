@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p83abc560bb",
+ "bnr": "bnr://skaists.dev/blood/p83abc560bb",
+ "identity": {
+  "name": "Tobit ibn Hananya . twin with Onías",
+  "lifespan": "0400BC–0375BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LB69-S4P"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p15adbf52b9",
+    "name": "Hananiah 'Anani' ben Hattush 10th Palestinian Patriarch",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pbc3c31cfaa",
+    "name": "Mrs Hananiah ibn Hattush",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pf468d33c76",
+    "name": "Elías ibn Tobit"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p457921c7e0",
+    "name": "Mrs Tobit ibn Hananya",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LB69-S4P",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

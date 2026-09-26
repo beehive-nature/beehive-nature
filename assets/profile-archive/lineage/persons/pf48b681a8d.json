@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pf48b681a8d",
+ "bnr": "bnr://skaists.dev/blood/pf48b681a8d",
+ "identity": {
+  "name": "Henrich FLENDER",
+  "lifespan": "1629–1692",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GQL8-PYP"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pe33d0f2993",
+    "name": "Johann Jacob Flender",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p5135b53136",
+    "name": "Anna Buch",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pe8bed8d1a1",
+    "name": "Anna Maria FLENDER"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "paea6f27a8c",
+    "name": "Anna HIRSCH",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GQL8-PYP",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

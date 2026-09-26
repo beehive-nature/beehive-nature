@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p6ef37d42ed",
+ "bnr": "bnr://skaists.dev/blood/p6ef37d42ed",
+ "identity": {
+  "name": "Andreas Koblet",
+  "lifespan": "1520–Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LVG9-QBJ"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pc9c44bc1ed",
+    "name": "Andreas Koblet",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p039de06f53",
+    "name": "Eva Catharina Hartmann",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pbe1c696227",
+    "name": "Eva Koblett"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p2accfca2ea",
+    "name": "Barbara Holzmann",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LVG9-QBJ",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

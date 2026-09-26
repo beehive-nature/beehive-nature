@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p57548f616d",
+ "bnr": "bnr://skaists.dev/blood/p57548f616d",
+ "identity": {
+  "name": "Jedidah bat Adaiah",
+  "lifespan": "0689BC–0648BC",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GR6S-HNT"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p12a11ca232",
+    "name": "Adaiah of Boseath",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p0101299b14",
+    "name": "Mrs Adaiah of Boseath",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p7a489a4641",
+    "name": "King Josiah ben Amon"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p06b2e28c64",
+    "name": "King Amon ben Manasseh",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GR6S-HNT",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

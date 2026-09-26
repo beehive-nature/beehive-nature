@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p97cece5f08",
+ "bnr": "bnr://skaists.dev/blood/p97cece5f08",
+ "identity": {
+  "name": "Robert Ursus De'Champagne",
+  "lifespan": "Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PFTG-C62"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pa9814568cc",
+    "name": "Robert de Hesbaye III, Graf im Oberrheingau und im Wormsgau",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p27ed81b686",
+    "name": "Waldrade d'Orléans",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p7602483557",
+    "name": "Eude de Chatillon-sur-Marne"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p3a77165461",
+    "name": "Ava de Morvois",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PFTG-C62",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

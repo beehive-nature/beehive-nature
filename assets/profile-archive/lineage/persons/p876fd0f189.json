@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p876fd0f189",
+ "bnr": "bnr://skaists.dev/blood/p876fd0f189",
+ "identity": {
+  "name": "George Washington Bradley",
+  "lifespan": "1813–1891",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "KWJ8-HC4"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p4d8921d437",
+    "name": "Pierce James Bradley",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pb93ca0a8c9",
+    "name": "Abigail Abiah Richmond",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p6b0e4aad8c",
+    "name": "Betsy Louisa Bradley"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pff1b4894a4",
+    "name": "Elizabeth Ann Kroll",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/KWJ8-HC4",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

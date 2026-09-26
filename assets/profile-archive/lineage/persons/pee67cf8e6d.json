@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pee67cf8e6d",
+ "bnr": "bnr://skaists.dev/blood/pee67cf8e6d",
+ "identity": {
+  "name": "John Rathbone",
+  "lifespan": "1655–1723",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "MMZG-PKQ"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pfee9785169",
+    "name": "John Rathbun",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pc4d7bc7e59",
+    "name": "Margaret Acres",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p88f4ea83a8",
+    "name": "Joshua Rathbone"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p14a44beac5",
+    "name": "Ann Dodge",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/MMZG-PKQ",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

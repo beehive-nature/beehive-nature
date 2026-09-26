@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pa476744241",
+ "bnr": "bnr://skaists.dev/blood/pa476744241",
+ "identity": {
+  "name": "Hans Stauffer",
+  "lifespan": "1613–1695",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PFTY-HQC"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pdfd2203174",
+    "name": "Christian Stauffer",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p52cdbd3624",
+    "name": "Adelheid Oppliger",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p5939dd2b61",
+    "name": "Christen Stauffer"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p9dd72be2b7",
+    "name": "Barbara Galli",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PFTY-HQC",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p046ecf5763",
+ "bnr": "bnr://skaists.dev/blood/p046ecf5763",
+ "identity": {
+  "name": "Amnius Anicius Paulinus di Anicii,",
+  "lifespan": "0296–0335",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GKZM-LQG"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p0b2a6b0091",
+    "name": "Amnius Anicius Julianius De Rome",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p30c3ade7ae",
+    "name": "Caesonia Manilia Bassa",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p9c4f3e3a3f",
+    "name": "Anicius Auchenius Bassus"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p714b107146",
+    "name": "Caeionia Auchenia Bassa Nichomaza",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GKZM-LQG",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

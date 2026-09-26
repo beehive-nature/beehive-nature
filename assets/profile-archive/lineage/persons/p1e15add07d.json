@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p1e15add07d",
+ "bnr": "bnr://skaists.dev/blood/p1e15add07d",
+ "identity": {
+  "name": "Jost Blanck Blank  Plank Cunz",
+  "lifespan": "1555–1605",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PFDG-Q2X"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pc1e21afd3b",
+    "name": "Johann Peter Blanck",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p981c4aa68c",
+    "name": "Maria Margaretha Ebersole",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p190d8f6f7b",
+    "name": "Elsbeth Blanck"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pdc5e12a13a",
+    "name": "Elsbeth Elsie  Hebysen Hebyen Cunz",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PFDG-Q2X",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

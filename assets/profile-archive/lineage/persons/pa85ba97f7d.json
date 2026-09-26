@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pa85ba97f7d",
+ "bnr": "bnr://skaists.dev/blood/pa85ba97f7d",
+ "identity": {
+  "name": "Lucius Domitius Ahenobarbus van Rome",
+  "lifespan": "0048BC–25",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "9Z8F-9QK"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p1b7f5f9e31",
+    "name": "Gnaeus Domitius Ahenobarbus cos. 32 a.C",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pb8870b9310",
+    "name": "Aemilia Lepida Ahenobarbus",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p4f4b4545cf",
+    "name": "Domitia Lepida Minor van Rome"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p09171267b9",
+    "name": "Antonia Major Augusta",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/9Z8F-9QK",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

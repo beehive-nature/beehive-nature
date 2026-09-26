@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p68731713bd",
+ "bnr": "bnr://skaists.dev/blood/p68731713bd",
+ "identity": {
+  "name": "Eirene Tornikaina",
+  "lifespan": "1158–1185",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "KCZL-2LJ"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "M7KY-F3B",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "PQ5V-4YD",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pbfd7aea0c5",
+    "name": "Eirene Angelina von Byzanz Königin des Heiligen Römischen Reiches"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p83647326d7",
+    "name": "Isaakios Angelos Kantakouzenos II, Byzantine Emperor",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/KCZL-2LJ",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

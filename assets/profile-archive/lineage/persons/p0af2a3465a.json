@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p0af2a3465a",
+ "bnr": "bnr://skaists.dev/blood/p0af2a3465a",
+ "identity": {
+  "name": "Berenice II of Egypt Queen regnant of Cyrenaica Queen of Ptolemaic Egypt",
+  "lifespan": "0267BC–0221BC",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "93T3-MKM"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p1802bf1137",
+    "name": "Rey Magas Armintes of Cyrene",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pdf4a705e9c",
+    "name": "Apama II of Macedonia",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p4a101cfeb5",
+    "name": "Pharaoh Ptolemy IV Philopator of Egypt"
+   },
+   {
+    "id": "pb21ad2514e",
+    "name": "Arsinoe III Philopator, Queen of Egypt"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p4d392e531c",
+    "name": "Pharaoh of Egypt Ptolemy III Euergetes",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/93T3-MKM",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

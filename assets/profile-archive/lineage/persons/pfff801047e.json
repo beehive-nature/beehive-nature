@@ -1,0 +1,62 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pfff801047e",
+ "bnr": "bnr://skaists.dev/blood/pfff801047e",
+ "identity": {
+  "name": "Anna Don Mathonwy",
+  "lifespan": "0115BC–0068BC",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LZBX-3KN"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [],
+  "children": [
+   {
+    "id": "pb0787ce70f",
+    "name": "King Lludd ap Beli Mawr"
+   },
+   {
+    "id": "p245ec70431",
+    "name": "Anna verch Beli Mawr"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pc84c8f5ef8",
+    "name": "Beli Mawr ap Digueillus, King of the Britons",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LZBX-3KN",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

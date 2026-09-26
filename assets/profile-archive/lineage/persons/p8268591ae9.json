@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p8268591ae9",
+ "bnr": "bnr://skaists.dev/blood/p8268591ae9",
+ "identity": {
+  "name": "Sarah Boltwood",
+  "lifespan": "1649–1726",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "9C8V-QQ1"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pa3cf3dc218",
+    "name": "Sgt Robert Boltwood",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pf1aaa65cc8",
+    "name": "Mary Rice",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p1dfcb287c5",
+    "name": "Lydia Warner"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p07c31f000f",
+    "name": "Isaac Warner I",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/9C8V-QQ1",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pb78280e897",
+ "bnr": "bnr://skaists.dev/blood/pb78280e897",
+ "identity": {
+  "name": "Aleijda Magtilda Jans Grietgen",
+  "lifespan": "1598–1598",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GFTL-BXH"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p618f24991c",
+    "name": "Heijnrick Damasz Cornelius",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p13230a314d",
+    "name": "Marij Roelofs",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p4055a33ed5",
+    "name": "Elsje Jans"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p1b279d379f",
+    "name": "Jan ten Jansen \"jans\" Bramels",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GFTL-BXH",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

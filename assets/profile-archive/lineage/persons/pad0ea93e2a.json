@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pad0ea93e2a",
+ "bnr": "bnr://skaists.dev/blood/pad0ea93e2a",
+ "identity": {
+  "name": "Gaius Vettius II",
+  "lifespan": "0130–0210",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "P73S-ZQY"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p0ca09336cb",
+    "name": "Gaius Vettius I",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p1afd517991",
+    "name": "Mrs Gaius Vettius I",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pcc831dc78c",
+    "name": "Gaius III Vettius"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pdb18a22ffb",
+    "name": "Cornelia Cornelius",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/P73S-ZQY",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

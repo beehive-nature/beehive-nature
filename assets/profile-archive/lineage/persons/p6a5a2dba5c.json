@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p6a5a2dba5c",
+ "bnr": "bnr://skaists.dev/blood/p6a5a2dba5c",
+ "identity": {
+  "name": "Robert White",
+  "lifespan": "1560–1617",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "9H52-SFT"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p0b0e414e93",
+    "name": "Richard Robert White",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pf0ac2e178b",
+    "name": "Alice Rich",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p7fb325df75",
+    "name": "Mary White"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p12e0eedc02",
+    "name": "Bridget Allgar",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/9H52-SFT",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

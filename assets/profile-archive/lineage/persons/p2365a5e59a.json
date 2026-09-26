@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p2365a5e59a",
+ "bnr": "bnr://skaists.dev/blood/p2365a5e59a",
+ "identity": {
+  "name": "Mary Elizabeth Lawton",
+  "lifespan": "1644–1711",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LB1Y-9PH"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p89167cadb1",
+    "name": "George Lawton",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pcb050b1d1f",
+    "name": "Elizabeth Hazard",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p306dd85542",
+    "name": "James Babcock"
+   },
+   {
+    "id": "p9ff9bcd8e4",
+    "name": "Oliver Babcock"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p72222ceca1",
+    "name": "John Babcock",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LB1Y-9PH",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p35871cde22",
+ "bnr": "bnr://skaists.dev/blood/p35871cde22",
+ "identity": {
+  "name": "Lawrence Freeman",
+  "lifespan": "1485–1558",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "P66L-QHP"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p0e19887551",
+    "name": "John Freeman",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p1531ac2647",
+    "name": "Dorothy Isham",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pa8ecec5780",
+    "name": "Henry Freeman"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pde9bf32c21",
+    "name": "Anne Frebodye",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/P66L-QHP",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,71 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p9c69ac98e2",
+ "bnr": "bnr://skaists.dev/blood/p9c69ac98e2",
+ "identity": {
+  "name": "Hildegard, Königin der Franken",
+  "lifespan": "0758–0783",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L4BH-JYR"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "LDHS-NTG",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "LDVY-CZT",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pd564482cfe",
+    "name": "Ludwig der Fromme König der Franken Römischer Kaiser"
+   },
+   {
+    "id": "p51ded55744",
+    "name": "Pippin, König von Italien"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p52f0d2a81d",
+    "name": "Karl der Große König der Franken und Langobarden Römischer Kaiser",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L4BH-JYR",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

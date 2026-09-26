@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pa98fc7f354",
+ "bnr": "bnr://skaists.dev/blood/pa98fc7f354",
+ "identity": {
+  "name": "John Tripp",
+  "lifespan": "1550–1614",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PM5Y-YFS"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p09e0ee3adb",
+    "name": "George Tripp",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p4bcf75078c",
+    "name": "Margaret Ferriby",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pbaf6d16e9e",
+    "name": "John Tripp II"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p8c67827396",
+    "name": "Jane Bennett",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PM5Y-YFS",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

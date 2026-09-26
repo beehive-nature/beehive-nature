@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p093ba355f7",
+ "bnr": "bnr://skaists.dev/blood/p093ba355f7",
+ "identity": {
+  "name": "Publius Claudius Pulcher Consul of Rome",
+  "lifespan": "0283BC–0238BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PD1G-ZFL"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pccd98b1cdf",
+    "name": "Gaius Claudius Centho",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pdfd8d79237",
+    "name": "Claudia Pulcher"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pc211e94aa6",
+    "name": "Servilia Caeponis",
+    "marriage": null
+   },
+   {
+    "id": "pf170b0f3c2",
+    "name": "Mrs. Publius Claudius PULCHER CLAUDIUS",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PD1G-ZFL",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p2c86d05f71",
+ "bnr": "bnr://skaists.dev/blood/p2c86d05f71",
+ "identity": {
+  "name": "Darius I \"The Great\" of Persia, King of Kings of the Achaemenid Empire",
+  "lifespan": "0550BC–0486BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LVSJ-KQW"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p7a422bf6c2",
+    "name": "Hystaspes Persian Satrap of Bactria and Persis",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p662abeb018",
+    "name": "Rhodah bint Gobryas",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p307e2f6819",
+    "name": "Artabazos I Satrap of Dascylium"
+   },
+   {
+    "id": "pbe37715915",
+    "name": "Xerxes Assuerus I of Persia"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p4154af9969",
+    "name": "Atossa of Persia",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LVSJ-KQW",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

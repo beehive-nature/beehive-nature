@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p4212bbf31d",
+ "bnr": "bnr://skaists.dev/blood/p4212bbf31d",
+ "identity": {
+  "name": "Åsa Eysteinsdotter Queen of Vestfold",
+  "lifespan": "0700–0739",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L812-5Z5"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "paf11a19e2c",
+    "name": "Eystein 'Hardråde, the Severe' Trondsson Petty King of Hedmark, Norway",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pe198c11a73",
+    "name": "Solveig Halfdansdatter de Solor",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pe0aafdc05d",
+    "name": "Eystein Oystein «FretFjert» Halfdansson, Konge i Romerike og Vestfold"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p099ea90e01",
+    "name": "Halfdan Whitelegs Olafsson King of Vestfold",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L812-5Z5",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

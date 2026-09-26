@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p7beef70a08",
+ "bnr": "bnr://skaists.dev/blood/p7beef70a08",
+ "identity": {
+  "name": "Gerswinde d'Alemanie",
+  "lifespan": "0690–0758",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PX14-3CL"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p6b4419de3f",
+    "name": "Gontier Gunther d'Alemanie",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p8801aa37ae",
+    "name": "Gerswinda d‘Alsace",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p8461964128",
+    "name": "Princess de Ruige Kunhilde vel Gunelinde von Rügen"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p2978b8f401",
+    "name": "Gundehard Halvdansson Yngling-van Rügen",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PX14-3CL",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

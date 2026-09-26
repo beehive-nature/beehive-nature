@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p7510f32c42",
+ "bnr": "bnr://skaists.dev/blood/p7510f32c42",
+ "identity": {
+  "name": "Gaius Ummidius Quadratus Annianus Verus",
+  "lifespan": "0120–0186",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PSS9-VD6"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p0c2fe9d25b",
+    "name": "Severo de Roma Gais Ummidius Quadratus Sertorius",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p43a2bcf67a",
+    "name": "Ania Ummidia de Rome",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pa54d2431cb",
+    "name": "Ummidia Commificia Faustina Antonia"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p02a2813788",
+    "name": "Annia Cornificina Faustina",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PSS9-VD6",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

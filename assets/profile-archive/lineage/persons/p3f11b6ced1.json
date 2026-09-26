@@ -1,0 +1,64 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p3f11b6ced1",
+ "bnr": "bnr://skaists.dev/blood/p3f11b6ced1",
+ "identity": {
+  "name": "Prydain ap Aedd Mawr 12th Duke of Cornwall",
+  "lifespan": "0625BC–Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LZBC-63F"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p07526775d0",
+    "name": "Aedd Mawr ap Antonius 11th Duke of Cornwall",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pbb73d0dbd6",
+    "name": "King Dyfnarth or Cynfarch ap Prydain of Cornwall"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p74051c2777",
+    "name": "Olave Folta Caer Cesair Caesara",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LZBC-63F",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

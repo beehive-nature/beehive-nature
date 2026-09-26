@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pb3c9d7d399",
+ "bnr": "bnr://skaists.dev/blood/pb3c9d7d399",
+ "identity": {
+  "name": "John Hyrum Lowry",
+  "lifespan": "1870–1914",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "KWCK-2TQ"
+  }
+ ],
+ "evidence": {
+  "era": "recorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "recorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p77b0ff1f6e",
+    "name": "Abner Lowry",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p6b0e4aad8c",
+    "name": "Betsy Louisa Bradley",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p84f479da00",
+    "name": "Hyrum Deronda Lowry"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p19112ceebb",
+    "name": "Minnie LaDell Taylor",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/KWCK-2TQ",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

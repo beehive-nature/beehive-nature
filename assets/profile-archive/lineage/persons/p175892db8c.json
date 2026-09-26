@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p175892db8c",
+ "bnr": "bnr://skaists.dev/blood/p175892db8c",
+ "identity": {
+  "name": "James Willymott",
+  "lifespan": "1581–1662",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LCXZ-N7Q"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p7d14e6d667",
+    "name": "James Willmote",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pb8d87771e5",
+    "name": "Mary Wyburd",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p2ac293a26c",
+    "name": "Thomas Willmarth"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p44793b5eb3",
+    "name": "Elizabeth Morrison",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LCXZ-N7Q",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

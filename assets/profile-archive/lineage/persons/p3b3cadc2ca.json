@@ -1,0 +1,82 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p3b3cadc2ca",
+ "bnr": "bnr://skaists.dev/blood/p3b3cadc2ca",
+ "identity": {
+  "name": "Publius Aelius Hadrianus Marullinus Roman Senator",
+  "lifespan": "–86",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L6T3-MTH"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pae77e289cd",
+    "name": "Publius Aelius Hadrianus Marullinus d´Hispania",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p8c949c61e8",
+    "name": "Ulpia Aelia De Rome Plotina",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p0fd292c28a",
+    "name": "Aelia Domitia Lucilla Longina Aelius"
+   },
+   {
+    "id": "pac76671d01",
+    "name": "Aulus Gallus Larcius de Rome"
+   },
+   {
+    "id": "p4db56afe95",
+    "name": "Alfius de Rome"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pd33291bb3d",
+    "name": "Dominia Paulina Maior",
+    "marriage": null
+   },
+   {
+    "id": "pfbd7030911",
+    "name": "Ulpia Plotina",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L6T3-MTH",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

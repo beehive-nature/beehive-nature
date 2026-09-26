@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pe33e7062c1",
+ "bnr": "bnr://skaists.dev/blood/pe33e7062c1",
+ "identity": {
+  "name": "Lucius Caesonius Ovinius  Rufinius Bassus De Rome",
+  "lifespan": "0237–Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L2RH-MCX"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p1edca65ae2",
+    "name": "Lucius Caesonius Lucillus Macer Rufinus",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p5ef738cdeb",
+    "name": "Ovinia DE ROME",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p30c3ade7ae",
+    "name": "Caesonia Manilia Bassa"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p713f52f426",
+    "name": "Iunia Unii Maximi Junia",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L2RH-MCX",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

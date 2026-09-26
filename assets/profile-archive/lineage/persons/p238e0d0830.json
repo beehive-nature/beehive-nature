@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p238e0d0830",
+ "bnr": "bnr://skaists.dev/blood/p238e0d0830",
+ "identity": {
+  "name": "John Cottrell",
+  "lifespan": "1683–1721",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LZQR-M5H"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p5bfb1f327c",
+    "name": "John Cottrell",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p7858a2930d",
+    "name": "Elizabeth Penelope",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pb96745ddc5",
+    "name": "Hannah Cottrell"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pf74a13122f",
+    "name": "Elizabeth Colegrove",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LZQR-M5H",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

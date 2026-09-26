@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p94efe67329",
+ "bnr": "bnr://skaists.dev/blood/p94efe67329",
+ "identity": {
+  "name": "Agnes Emerson",
+  "lifespan": "1560–1630",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "MFHQ-LF1"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p5802bace2e",
+    "name": "George Emerson",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pa18514cfd0",
+    "name": "Agnes Frothsby",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p88d388d6ca",
+    "name": "Agnes Procter"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pd4d109e840",
+    "name": "Thomas Proctor",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/MFHQ-LF1",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

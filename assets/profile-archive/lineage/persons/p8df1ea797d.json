@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p8df1ea797d",
+ "bnr": "bnr://skaists.dev/blood/p8df1ea797d",
+ "identity": {
+  "name": "Hendrick Aert Bakelsman",
+  "lifespan": "1522–1557",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GGFM-8W1"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p0901ff0482",
+    "name": "Thomas aertszn Bakelmann",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p977adcea8b",
+    "name": "Margriet Bakelsman Van Bakel",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p21fa8d9dfe",
+    "name": "Guilame Bakelmans"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pb227583e95",
+    "name": "Luitgard jutta Roijmans",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GGFM-8W1",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

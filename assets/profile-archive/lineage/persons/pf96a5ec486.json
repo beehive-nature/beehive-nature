@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pf96a5ec486",
+ "bnr": "bnr://skaists.dev/blood/pf96a5ec486",
+ "identity": {
+  "name": "Fura de Rome",
+  "lifespan": "0200–Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GW5S-QWG"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pce1aa6f2d1",
+    "name": "Furius de ROME",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p5e0c9d373c",
+    "name": "Pontia Pontii",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p4bf9bd25ef",
+    "name": "Furia Sabina Tranquillina de Rome"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p7a94a3bce5",
+    "name": "Gaius Furius Sabinus Aquila Timesitheus",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GW5S-QWG",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

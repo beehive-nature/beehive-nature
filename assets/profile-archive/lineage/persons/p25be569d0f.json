@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p25be569d0f",
+ "bnr": "bnr://skaists.dev/blood/p25be569d0f",
+ "identity": {
+  "name": "Porcia Catonis",
+  "lifespan": "0089BC–Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GZG4-WLM"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "peb03346bde",
+    "name": "Marcus Porcius Cato",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pbddf166def",
+    "name": "Livia Drusilla Drusa",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p1b7f5f9e31",
+    "name": "Gnaeus Domitius Ahenobarbus cos. 32 a.C"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p667c84d926",
+    "name": "Lucius Domitius Ahenobarbus cos. 54 a.C",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GZG4-WLM",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

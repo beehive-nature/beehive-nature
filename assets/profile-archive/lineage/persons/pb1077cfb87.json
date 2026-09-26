@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pb1077cfb87",
+ "bnr": "bnr://skaists.dev/blood/pb1077cfb87",
+ "identity": {
+  "name": "Henricus Bakelmans",
+  "lifespan": "1568–1607",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LV66-6WJ"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p21fa8d9dfe",
+    "name": "Guilame Bakelmans",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p8d8e1159c7",
+    "name": "Anne Basilien",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pb39106e560",
+    "name": "Catharina Henricusse Bakelmans"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p828d0f367c",
+    "name": "Anna Elisabetha Bosensell",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LV66-6WJ",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

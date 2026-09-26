@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p60fdbfa492",
+ "bnr": "bnr://skaists.dev/blood/p60fdbfa492",
+ "identity": {
+  "name": "Publius Licinius Varus",
+  "lifespan": "0250BC–Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GBCW-55Z"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p74f5cc80bb",
+    "name": "Caius Licinius Varus Roman Consul",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p96d2b2e3d3",
+    "name": "Mrs Caius Licinius Varus",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p930bb9f763",
+    "name": "Gaius Licinius Varus"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p34d8205f2b",
+    "name": "Aura Moralisou",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GBCW-55Z",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

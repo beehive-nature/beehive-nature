@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pfd06fb763f",
+ "bnr": "bnr://skaists.dev/blood/pfd06fb763f",
+ "identity": {
+  "name": "Bivin de Vienne",
+  "lifespan": "0802–0863",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GSDB-V2T"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p6e77352b75",
+    "name": "Richard d'Amiens comte d'Amiens",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p76af53b324",
+    "name": "Ingeltude d’Auten",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p24ec66954f",
+    "name": "Boson de Provence, comte de Vienne"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pc8b11378ca",
+    "name": "Abbess Richilde D'Arles",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GSDB-V2T",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

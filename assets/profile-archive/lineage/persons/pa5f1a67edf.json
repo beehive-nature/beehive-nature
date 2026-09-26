@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pa5f1a67edf",
+ "bnr": "bnr://skaists.dev/blood/pa5f1a67edf",
+ "identity": {
+  "name": "Tewasya of ETHIOPIA II",
+  "lifespan": "–0820BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GGQL-SZP"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pc5c45f19d4",
+    "name": "KING AWESYO SERA II",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p9b863d74e5",
+    "name": "E MRS Awseyo Sera second of ETHIOPIA",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pa924d619d5",
+    "name": "Abralyus Wiyankihi of ETHIOPIA"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p7ed1ea9e48",
+    "name": "E MRS Tawasya II of ETHIOPIA",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GGQL-SZP",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

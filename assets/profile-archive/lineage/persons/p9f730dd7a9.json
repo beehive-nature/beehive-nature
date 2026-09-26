@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p9f730dd7a9",
+ "bnr": "bnr://skaists.dev/blood/p9f730dd7a9",
+ "identity": {
+  "name": "Elisabeth Godfrey",
+  "lifespan": "1704–1791",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L7G5-JKY"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pce2efd7785",
+    "name": "Richard Godfrey",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p8b24018d9e",
+    "name": "Lydia Freeman",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pba9bdd73a2",
+    "name": "Prince Doane"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p5dc51463c9",
+    "name": "Prence Doane",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L7G5-JKY",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

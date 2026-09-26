@@ -1,0 +1,77 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pc928818863",
+ "bnr": "bnr://skaists.dev/blood/pc928818863",
+ "identity": {
+  "name": "Esarhaddon , King of the Neo-Assyrian Empire",
+  "lifespan": "0713BC–0669BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "94BJ-LDB"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p28826fe0ec",
+    "name": "King Sennacherib, King of the Neo-Assyrian Empire",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p1ab4714fc7",
+    "name": "Tashmetum-sharrat Of Babylon princess of Babylon",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p1fb38715fb",
+    "name": "King Assurbanipal II and IV Kandalu of Assyria"
+   },
+   {
+    "id": "pa28387cac4",
+    "name": "Ashursharrat Of Assyria queen of Assyria"
+   },
+   {
+    "id": "pb907471b2e",
+    "name": "Aššur-etel-šame-erseti-muballissu"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p5244872fc2",
+    "name": "Ešara- Hammat Queen of the Neo-Assyrian Empire",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/94BJ-LDB",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

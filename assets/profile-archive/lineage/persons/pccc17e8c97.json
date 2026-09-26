@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pccc17e8c97",
+ "bnr": "bnr://skaists.dev/blood/pccc17e8c97",
+ "identity": {
+  "name": "Miriam Hadlock",
+  "lifespan": "1774–1861",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L8QJ-R7N"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p254f9ddf59",
+    "name": "Joseph Hadlock",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p8661c4f699",
+    "name": "Deborah Elizabeth Jones",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p0b09626ba6",
+    "name": "Archibald Gilchrist Hadlock"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pb8e0a7cd75",
+    "name": "Samuel Arthur Hadlock",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L8QJ-R7N",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

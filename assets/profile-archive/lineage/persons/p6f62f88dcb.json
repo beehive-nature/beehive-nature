@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p6f62f88dcb",
+ "bnr": "bnr://skaists.dev/blood/p6f62f88dcb",
+ "identity": {
+  "name": "Berthe d'Aumale",
+  "lifespan": "1015–1052",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GPQW-J8Z"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p7483d785fd",
+    "name": "Guérimfred d'Aumale",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p704eb6492b",
+    "name": "Jeanne De Saint Valéry",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pb9f96c70b1",
+    "name": "Enguerrand de Valoignes Count of Ponthieu"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p6763df8b76",
+    "name": "Hugues II de Ponthieu",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GPQW-J8Z",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

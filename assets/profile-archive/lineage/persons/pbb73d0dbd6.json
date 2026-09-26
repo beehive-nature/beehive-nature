@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pbb73d0dbd6",
+ "bnr": "bnr://skaists.dev/blood/pbb73d0dbd6",
+ "identity": {
+  "name": "King Dyfnarth or Cynfarch ap Prydain of Cornwall",
+  "lifespan": "0575BC–Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LDPF-Q8K"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p3f11b6ced1",
+    "name": "Prydain ap Aedd Mawr 12th Duke of Cornwall",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p74051c2777",
+    "name": "Olave Folta Caer Cesair Caesara",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p7c98f40bb1",
+    "name": "King Cloten ap Dyfnarth Fawr of Cambria"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pa18b8d0eb2",
+    "name": "Conwenna of Ancient Britain",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LDPF-Q8K",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

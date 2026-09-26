@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p9e4a8819cb",
+ "bnr": "bnr://skaists.dev/blood/p9e4a8819cb",
+ "identity": {
+  "name": "Lucius Valerius Priscillianus Thrasea Maximus",
+  "lifespan": "0140–0212",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LYG1-897"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pf2ee541339",
+    "name": "Lucius Valerius Poplicola Balbinus Maximus",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pbc01abf1fa",
+    "name": "Helvidia Priscilla",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pa14b77033f",
+    "name": "Lucius Valerius Claudius Acilius Maximus"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p15a0a0d2e0",
+    "name": "Coelia Vibulia Balbina",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LYG1-897",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

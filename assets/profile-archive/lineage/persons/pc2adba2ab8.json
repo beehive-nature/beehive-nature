@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pc2adba2ab8",
+ "bnr": "bnr://skaists.dev/blood/pc2adba2ab8",
+ "identity": {
+  "name": "Johannes Bobbet Sr.",
+  "lifespan": "1480–1510",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LHTN-MCP"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pd5f4029d80",
+    "name": "John Bobbet",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pd41f6588ac",
+    "name": "Margaret Ash",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pa39d0a3405",
+    "name": "Robert Bobbet"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pcd4a1c311b",
+    "name": "Celeste",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LHTN-MCP",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

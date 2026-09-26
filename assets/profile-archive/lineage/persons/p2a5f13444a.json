@@ -1,0 +1,74 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p2a5f13444a",
+ "bnr": "bnr://skaists.dev/blood/p2a5f13444a",
+ "identity": {
+  "name": "Warnachaire d'Aremberg",
+  "lifespan": "0465–0526",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G5C1-L9V"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pade42229e6",
+    "name": "Manneleubus d’Aremberg",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p5656808b2c",
+    "name": "Agrippine Caratène de Narbonne",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p361225a06f",
+    "name": "Arembert d'Aremberg"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p5845ffd95b",
+    "name": "Flavia der Burgunden",
+    "marriage": null
+   },
+   {
+    "id": "pfe9f7f3c91",
+    "name": "Gudrun Kreimhilde",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G5C1-L9V",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

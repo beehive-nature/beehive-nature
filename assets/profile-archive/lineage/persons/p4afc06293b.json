@@ -1,0 +1,81 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p4afc06293b",
+ "bnr": "bnr://skaists.dev/blood/p4afc06293b",
+ "identity": {
+  "name": "Princess Ascyla Irmtrud D'Orleans \"la Gauloise\" Blessinda",
+  "lifespan": "0290–0360",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GZB6-X5L"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p0e692c581b",
+    "name": "Fritigern von Thüringen II",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pc301eae1d5",
+    "name": "Chroca d'Alemanie",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p58772109e9",
+    "name": "Queen Ascylia Balthes Van Gallic von Toxandria"
+   },
+   {
+    "id": "p1798ad3a0a",
+    "name": "King of the Franks Priaros of Malaric de Toxandrie"
+   },
+   {
+    "id": "pb51ad9cfa7",
+    "name": "Mallobaudes I De Toxandrië Roi De Franks"
+   },
+   {
+    "id": "pe4b484f51a",
+    "name": "Ascyllius de Francs King of the Salian Franks"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pb1d3b99066",
+    "name": "Malaric I de Toxandrie Roi des Francs",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GZB6-X5L",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

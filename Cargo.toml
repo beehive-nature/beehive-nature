@@ -38,6 +38,7 @@ members = [
     "crates/onboarding",
     "crates/price-feed",
     "crates/reputation-engine",
+    "crates/royalreview",
     "crates/sense-atproto",
     "crates/shared-types",
     "crates/treasury-t0",
@@ -58,6 +59,7 @@ members = [
     "crates/reversibility",
     "crates/banchor",
     "crates/btrezor",
+    "crates/watchpay",
 ]
 
 [workspace.metadata]

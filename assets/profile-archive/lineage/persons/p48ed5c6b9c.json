@@ -1,0 +1,77 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p48ed5c6b9c",
+ "bnr": "bnr://skaists.dev/blood/p48ed5c6b9c",
+ "identity": {
+  "name": "Quintus Caecilius Metellus Caecilius Metellus Macedonicus",
+  "lifespan": "0243BC–0176BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G776-1GZ"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pb25eb9ea44",
+    "name": "Lucius Caecilius Metellus DE ROME",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pef93d8ea36",
+    "name": "Mrs. Lucius Caecilius Metellus De Rome",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pe637453fff",
+    "name": "Quintus Caecilius Metellus Macedonicus"
+   },
+   {
+    "id": "pbad4e9f599",
+    "name": "Lucius Caecillus Metellus Calvus Roman Consul - Govenor of Spain - Proconsul of Cisalpine"
+   },
+   {
+    "id": "pcb147bc29b",
+    "name": "Caecilia Metella"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p801e5fe6e7",
+    "name": "Leria de Cossyra",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G776-1GZ",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

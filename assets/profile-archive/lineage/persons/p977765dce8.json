@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p977765dce8",
+ "bnr": "bnr://skaists.dev/blood/p977765dce8",
+ "identity": {
+  "name": "Psamtik I Wahibre 1st Pharaoh 26th Dynasty",
+  "lifespan": "0684BC–0610BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LFJM-W6H"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p5f7669feca",
+    "name": "Necho I Memkheperre , Pharaoh during the Proto-Saite Dynasty",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pee37dca85a",
+    "name": "Amenirdis II bint Taharqa, God's Wife of Amun",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pc12bde3f7a",
+    "name": "Nékao II Wehemibre 2nd Pharaoh 26th Dynasty"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p4c31c44388",
+    "name": "Mehetenweskhet Of Heliopolis",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LFJM-W6H",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

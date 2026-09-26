@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p98a448047c",
+ "bnr": "bnr://skaists.dev/blood/p98a448047c",
+ "identity": {
+  "name": "Titus Flavius Sabinus VI",
+  "lifespan": "0200–0238",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LKTL-86H"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p3085211125",
+    "name": "Titus Flavius II Petroneus II",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p89d6a5eadb",
+    "name": "Flavia Julia Sabine",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p4bb4b21614",
+    "name": "Flavius Eutropius Sabinus Gordiani di Dardania"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p7add3fbdbd",
+    "name": "Antonia Gordiana Balba",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LKTL-86H",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

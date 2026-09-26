@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pb227583e95",
+ "bnr": "bnr://skaists.dev/blood/pb227583e95",
+ "identity": {
+  "name": "Luitgard jutta Roijmans",
+  "lifespan": "1523–Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GGFM-9D9"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pf1700ebc8b",
+    "name": "Peter Aert Roijmans",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pf6075d1c9f",
+    "name": "Gretken Maes",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p21fa8d9dfe",
+    "name": "Guilame Bakelmans"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p8df1ea797d",
+    "name": "Hendrick Aert Bakelsman",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GGFM-9D9",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

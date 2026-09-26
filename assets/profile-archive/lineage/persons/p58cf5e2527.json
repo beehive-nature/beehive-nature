@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p58cf5e2527",
+ "bnr": "bnr://skaists.dev/blood/p58cf5e2527",
+ "identity": {
+  "name": "Agnes de Milbourne",
+  "lifespan": "1440–Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L125-YWK"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p7d54c280eb",
+    "name": "Sir John Milbourne",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pf67353759c",
+    "name": "Elizabeth Anne Devereaux",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p97b0bde27d",
+    "name": "Emma Walwyn"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p3365c0ba1f",
+    "name": "Thomas Walwyn II",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L125-YWK",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

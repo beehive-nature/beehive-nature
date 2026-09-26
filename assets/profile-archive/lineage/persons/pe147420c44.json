@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pe147420c44",
+ "bnr": "bnr://skaists.dev/blood/pe147420c44",
+ "identity": {
+  "name": "Hydarnes III 'Idernes', Satrap of Armenia",
+  "lifespan": "0480BC–0410BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LRZ9-GTC"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p676f49b1cd",
+    "name": "Hydarnes II 'the younger' Satrap of Persia",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pb3dcc1bab3",
+    "name": "Mrs Hydarnes II Satrap of Persia",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pdcd0e1721a",
+    "name": "Stateira Queen of Persia"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p4a4c154f7c",
+    "name": "Mrs Hydarnes III Satrap of Armenia",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LRZ9-GTC",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

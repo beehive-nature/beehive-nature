@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p6963d82f63",
+ "bnr": "bnr://skaists.dev/blood/p6963d82f63",
+ "identity": {
+  "name": "Richard Talbot 4th Baron Talbot of Goodrich Castle",
+  "lifespan": "1360–1396",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "29Y9-CR1"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "LVDF-WPL",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "LDPW-677",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pdbc60fa081",
+    "name": "Lady Alice Ankaret de la Barre Talbot"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p7980ba777f",
+    "name": "Lady Ankaret le Strange",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/29Y9-CR1",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

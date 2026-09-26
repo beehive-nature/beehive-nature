@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pdc9ee84e45",
+ "bnr": "bnr://skaists.dev/blood/pdc9ee84e45",
+ "identity": {
+  "name": "Aert Jan Aersen Middagh",
+  "lifespan": "1677–1734",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "KC1H-4X7"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p7ea7593ed9",
+    "name": "Jan of the Ferry Aertsen",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pe330336c62",
+    "name": "Adriantje Cornelisse Bleljck",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pd234eca926",
+    "name": "Ariaantje Jane Aartsen"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p2b08e1b7e2",
+    "name": "Elizabeth Andries",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/KC1H-4X7",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

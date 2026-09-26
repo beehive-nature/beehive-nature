@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p0c6649231c",
+ "bnr": "bnr://skaists.dev/blood/p0c6649231c",
+ "identity": {
+  "name": "Rahil bint Labán ibn Buthwil",
+  "lifespan": "–1750BC",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LZXZ-WHM"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pfa81c03728",
+    "name": "Labán ibn Buthwil",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p434d67a47a",
+    "name": "Mrs Labán ibn Buthwil",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pc57da1e8e2",
+    "name": "Yosef ibn Ya'qub 11th Prophet of Islam"
+   },
+   {
+    "id": "p1a27891492",
+    "name": "Binyāmîn Bən-Yaʿaqōv (Yīšrāʾēl)"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p494c8cf790",
+    "name": "Yaʿqūb bin Ishaq 10th Prophet of Islam",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LZXZ-WHM",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

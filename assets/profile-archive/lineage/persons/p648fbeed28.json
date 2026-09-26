@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p648fbeed28",
+ "bnr": "bnr://skaists.dev/blood/p648fbeed28",
+ "identity": {
+  "name": "Sir Henry de Willington",
+  "lifespan": "1310–1349",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L8BZ-MJB"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p8d0a6fa4fc",
+    "name": "Henry de Willington",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pafef2fcf05",
+    "name": "Margaret Freville",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p26a1bcb4f3",
+    "name": "Sir John de Wilington"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p0844c6c2dd",
+    "name": "Isabel de Whalesborough",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L8BZ-MJB",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

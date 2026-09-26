@@ -1,0 +1,63 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "paabffd1461",
+ "bnr": "bnr://skaists.dev/blood/paabffd1461",
+ "identity": {
+  "name": "Publius Servilius Vatia Isauricus",
+  "lifespan": "0130BC–0044BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L19J-4MT"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p682099d03b",
+    "name": "Gaius Servilius Vatia Triumvir monetalis in 127",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p4300019da0",
+    "name": "Caecilia Metella Minor",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pb0d5940756",
+    "name": "Publius Servilius Isauricus"
+   }
+  ],
+  "spouses": []
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L19J-4MT",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

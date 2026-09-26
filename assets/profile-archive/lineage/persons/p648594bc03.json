@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p648594bc03",
+ "bnr": "bnr://skaists.dev/blood/p648594bc03",
+ "identity": {
+  "name": "William John Sheppard Basselle",
+  "lifespan": "1575–1605",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GLYC-5FN"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p75a9cf1c06",
+    "name": "Robert Baseley Basselle",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pad377c6114",
+    "name": "Elizabeth Brogdem",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p831914baf8",
+    "name": "Bassell Saunders"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p96e264bf30",
+    "name": "Mary Dunlop Basselle",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GLYC-5FN",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

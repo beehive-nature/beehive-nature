@@ -1,0 +1,68 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pc301eae1d5",
+ "bnr": "bnr://skaists.dev/blood/pc301eae1d5",
+ "identity": {
+  "name": "Chroca d'Alemanie",
+  "lifespan": "0250–Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PQTC-8W9"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p064e792eb2",
+    "name": "Marcomir Chrocus I de Toxandrie",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "PZQX-TFF",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p4afc06293b",
+    "name": "Princess Ascyla Irmtrud D'Orleans \"la Gauloise\" Blessinda"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p0e692c581b",
+    "name": "Fritigern von Thüringen II",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PQTC-8W9",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

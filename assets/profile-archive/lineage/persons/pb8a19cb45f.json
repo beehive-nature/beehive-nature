@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pb8a19cb45f",
+ "bnr": "bnr://skaists.dev/blood/pb8a19cb45f",
+ "identity": {
+  "name": "Robert Boltwood",
+  "lifespan": "1575–1596",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L87D-VGP"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pe94ffd1c99",
+    "name": "Mr Boltwood",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pdd75ab3772",
+    "name": "Mrs Boltwood",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p219df0fa67",
+    "name": "Thomas Boltwood"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p8661329fbf",
+    "name": "Marie Sheldon",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L87D-VGP",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

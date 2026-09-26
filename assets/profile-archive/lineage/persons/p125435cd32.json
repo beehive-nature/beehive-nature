@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p125435cd32",
+ "bnr": "bnr://skaists.dev/blood/p125435cd32",
+ "identity": {
+  "name": "Cornelius Hull",
+  "lifespan": "1687–1756",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "9QRJ-TQ1"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p278a4beb4e",
+    "name": "Joseph Hull",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pffffc6db40",
+    "name": "Elizabeth Farnham",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pa016029556",
+    "name": "Joseph Hull Sr"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p2407c11798",
+    "name": "Mehitable Graves",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/9QRJ-TQ1",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

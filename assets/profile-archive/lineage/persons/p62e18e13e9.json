@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p62e18e13e9",
+ "bnr": "bnr://skaists.dev/blood/p62e18e13e9",
+ "identity": {
+  "name": "Rachel Le Brocq",
+  "lifespan": "1656–1723",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LCYQ-T24"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pa0985164b2",
+    "name": "Philippe Le Brocq",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p760bd9fdc6",
+    "name": "Sara D'Auvergne",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p66cf59fd4f",
+    "name": "Sarah Grandin"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pfb00200337",
+    "name": "Daniel Grandin",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LCYQ-T24",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

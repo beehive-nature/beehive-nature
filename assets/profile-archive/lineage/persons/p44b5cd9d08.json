@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p44b5cd9d08",
+ "bnr": "bnr://skaists.dev/blood/p44b5cd9d08",
+ "identity": {
+  "name": "Matilde de Cuiseaux",
+  "lifespan": "1114–1137",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "P912-ZYG"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "LJY6-GFC",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "9CHN-FPK",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p29b35bfb5f",
+    "name": "Guillaume Ier de Genève"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p154280884d",
+    "name": "Count Amédée de Genève",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/P912-ZYG",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

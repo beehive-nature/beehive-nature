@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p722d6833fe",
+ "bnr": "bnr://skaists.dev/blood/p722d6833fe",
+ "identity": {
+  "name": "Margaret Raynes",
+  "lifespan": "1410–1457",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GLZK-715"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pdff2bd63c9",
+    "name": "William Raynes",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p652b04d7bd",
+    "name": "Mrs. William Raynes",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p81e2655e2e",
+    "name": "William Mede"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p1ac7ecf1b1",
+    "name": "Sir Thomas Mede V",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GLZK-715",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

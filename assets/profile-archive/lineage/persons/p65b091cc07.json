@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p65b091cc07",
+ "bnr": "bnr://skaists.dev/blood/p65b091cc07",
+ "identity": {
+  "name": "Margaretha van Limburg",
+  "lifespan": "1138–1172",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LBD6-WKV"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "99QR-DC6",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "LH73-PSR",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p65266cb5d8",
+    "name": "Hendrik I 'de Krijgshaftige' van Brabant hertog van Neder-Lotharingen"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p9a32396972",
+    "name": "Godfried III van Leuven-Brabant hertog van Neder-Lotharingen",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LBD6-WKV",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

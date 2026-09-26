@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pe6588a59e5",
+ "bnr": "bnr://skaists.dev/blood/pe6588a59e5",
+ "identity": {
+  "name": "Minnie Clarence Howe",
+  "lifespan": "1877–1949",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "KWCX-WX8"
+  }
+ ],
+ "evidence": {
+  "era": "recorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "recorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p651ee0fc40",
+    "name": "Joseph Saunders Howe",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pb4fe0578a3",
+    "name": "Ruth Ann Smith",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pa1c3bdd80d",
+    "name": "Lora Ann Humes"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p4383700101",
+    "name": "Willard Humes",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/KWCX-WX8",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

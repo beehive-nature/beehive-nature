@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pc23b2ebd84",
+ "bnr": "bnr://skaists.dev/blood/pc23b2ebd84",
+ "identity": {
+  "name": "Laberia Pompeiana",
+  "lifespan": "0130–Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LY9L-MRZ"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p31dd8db2da",
+    "name": "Quintus Mucius Scaevola Primus De ROME",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p80a23a73d6",
+    "name": "Mariana De ROME",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p9509156b72",
+    "name": "Marcus Claudius Macrinus Hermogenianus"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p4c5f1871c2",
+    "name": "Marcus Claudius Macrinus Vindex Hermogenianus",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LY9L-MRZ",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

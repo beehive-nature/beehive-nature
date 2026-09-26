@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p7d773af338",
+ "bnr": "bnr://skaists.dev/blood/p7d773af338",
+ "identity": {
+  "name": "Vipsania Agrippina",
+  "lifespan": "0035BC–20",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L6MK-WMZ"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pc6134667bc",
+    "name": "Marcus Vipsanius Agrippa",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p4c41e2f3fd",
+    "name": "Julia Malone de Rome",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p94ee70f53e",
+    "name": "Marcus Asinius Agrippa"
+   },
+   {
+    "id": "pae487a352a",
+    "name": "Drusus Julius Caesar"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p0ca1c67bbf",
+    "name": "Tiberius Julius Caesar Augustus",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L6MK-WMZ",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

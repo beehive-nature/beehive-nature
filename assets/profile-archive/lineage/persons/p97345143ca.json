@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p97345143ca",
+ "bnr": "bnr://skaists.dev/blood/p97345143ca",
+ "identity": {
+  "name": "Judith de Lens",
+  "lifespan": "1054–1090",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LDSS-ZMD"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p5fba27cc4e",
+    "name": "Lambert II de Boulogne comte de Lens",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p7c46a6cfb5",
+    "name": "Adélaïde de Normandie",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pe9b57fc237",
+    "name": "Matilda of Huntingdon"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pdf8245770b",
+    "name": "Walther of de Northumbria",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LDSS-ZMD",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

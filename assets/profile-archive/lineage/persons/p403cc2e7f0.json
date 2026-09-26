@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p403cc2e7f0",
+ "bnr": "bnr://skaists.dev/blood/p403cc2e7f0",
+ "identity": {
+  "name": "Björn Ragnarsson",
+  "lifespan": "0794–0891",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PMDZ-M97"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pf5d40516b8",
+    "name": "Ragnar Sigurdsson",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p8bfb696a4b",
+    "name": "Queen Aslaug Sigurdsdottir Of Norway, Sweden And Denmark",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p15b6f8e5f0",
+    "name": "Erik Bjornsson"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p67ff2405eb",
+    "name": "Thorvi Ragnarsson",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PMDZ-M97",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

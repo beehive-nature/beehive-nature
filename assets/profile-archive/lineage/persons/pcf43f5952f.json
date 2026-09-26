@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pcf43f5952f",
+ "bnr": "bnr://skaists.dev/blood/pcf43f5952f",
+ "identity": {
+  "name": "James Hamilton",
+  "lifespan": "1670–1716",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LXM5-Y2H"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p0969e2ba6d",
+    "name": "Sir Robert Hamilton \" Lord Presmennan\"",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p248d06dbca",
+    "name": "Lady Marion Denholm",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p5e98e426a3",
+    "name": "John Hamilton II"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p5412dcedc1",
+    "name": "Margaret Smyth",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LXM5-Y2H",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p2c6368ed95",
+ "bnr": "bnr://skaists.dev/blood/p2c6368ed95",
+ "identity": {
+  "name": "Susannah Jans",
+  "lifespan": "1616–1668",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L7F9-TDX"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pe62ffe2579",
+    "name": "Jan Van Schoenberg",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pfc3d8b9b58",
+    "name": "Aaltje Van Putten",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pe480a9473f",
+    "name": "Wyntje Arents"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p9c68c982bc",
+    "name": "Aert Teunissen Van Putten",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L7F9-TDX",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

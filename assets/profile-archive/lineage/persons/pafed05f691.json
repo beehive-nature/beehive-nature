@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pafed05f691",
+ "bnr": "bnr://skaists.dev/blood/pafed05f691",
+ "identity": {
+  "name": "Publius Cornelius Scipio Nasica Corculum Triumvir",
+  "lifespan": "0204BC–0140BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GJ19-S83"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p3ed04bdbf4",
+    "name": "Publius Cornelius Scipio Nasica Consul in 191 BC",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pcb147bc29b",
+    "name": "Caecilia Metella",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p70cc2f3aee",
+    "name": "Publius Cornelius Nasica Serapio SCIPIO DE ROME-SCIPIO DE ROME"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p97570b01e6",
+    "name": "Cornelia La Mayor",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GJ19-S83",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p990c3ba42c",
+ "bnr": "bnr://skaists.dev/blood/p990c3ba42c",
+ "identity": {
+  "name": "Elizabethe Heyward",
+  "lifespan": "1526–Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "P7DC-SLJ"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pd2e7073c98",
+    "name": "Joseph Heyward",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p4b56302395",
+    "name": "Elizabeth Dearnally",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p967170e43e",
+    "name": "Thomas Babbitt I"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pa39d0a3405",
+    "name": "Robert Bobbet",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/P7DC-SLJ",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

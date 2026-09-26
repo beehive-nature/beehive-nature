@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pbe48f63871",
+ "bnr": "bnr://skaists.dev/blood/pbe48f63871",
+ "identity": {
+  "name": "Captain Robert Angell",
+  "lifespan": "1490–1568",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L29V-6X6"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pb75f67ec6a",
+    "name": "Captain Roger De Angeli",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pd831d60d02",
+    "name": "Countess of Huntington Judith",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p35b63aff83",
+    "name": "Thomas Angell"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p3959255cb1",
+    "name": "Joan",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L29V-6X6",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

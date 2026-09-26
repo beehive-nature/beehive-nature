@@ -1,0 +1,77 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p9dfdc3d5c0",
+ "bnr": "bnr://skaists.dev/blood/p9dfdc3d5c0",
+ "identity": {
+  "name": "Leah bat Laban ibn Buthwil",
+  "lifespan": "–1745BC",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L2CR-N4H"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pfa81c03728",
+    "name": "Labán ibn Buthwil",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p434d67a47a",
+    "name": "Mrs Labán ibn Buthwil",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pd78b86b1c4",
+    "name": "Yehuda ibn Yaʿqūb"
+   },
+   {
+    "id": "p1af3978ecb",
+    "name": "Lawi ibn Yaʿqūb"
+   },
+   {
+    "id": "p9a03a72ca5",
+    "name": "Zabūlūn ibn Yaʿqūb"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p494c8cf790",
+    "name": "Yaʿqūb bin Ishaq 10th Prophet of Islam",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L2CR-N4H",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

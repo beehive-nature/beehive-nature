@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p06e1dbf1c8",
+ "bnr": "bnr://skaists.dev/blood/p06e1dbf1c8",
+ "identity": {
+  "name": "Jan Gijsbertsz",
+  "lifespan": "1587–Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PHNG-HHD"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "paa986513e9",
+    "name": "Gijsbert Jans",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p3d60372254",
+    "name": "Machtelt Jans",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p6fa006dbb8",
+    "name": "Lijsbet Gijsberts"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pf605373a59",
+    "name": "Lijsje Jans",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PHNG-HHD",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pac9a1d20a4",
+ "bnr": "bnr://skaists.dev/blood/pac9a1d20a4",
+ "identity": {
+  "name": "Aya ša La'ibum of Uruk",
+  "lifespan": "Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GW8J-WD9"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p3204142603",
+    "name": "La'ibum Utte-Bel of URUK",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p721f223ec4",
+    "name": "Azupirana",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pce427255e6",
+    "name": "Yamkuzzu-Halama AMORRITES"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pb9ae9f92be",
+    "name": "Tubti-Yamuta AMORRITES",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GW8J-WD9",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

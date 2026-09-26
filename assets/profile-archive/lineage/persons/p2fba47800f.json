@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p2fba47800f",
+ "bnr": "bnr://skaists.dev/blood/p2fba47800f",
+ "identity": {
+  "name": "Jacques Taelmann",
+  "lifespan": "1554–1628",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LV33-13T"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p217981e324",
+    "name": "Michiel Taleman",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pb2fa48706b",
+    "name": "Sara Berruwijns",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pc49a71430b",
+    "name": "Peter Taelmann"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pf6d7f6f021",
+    "name": "Tanneken Ann de Lichte",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LV33-13T",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

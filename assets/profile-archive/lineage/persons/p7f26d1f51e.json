@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p7f26d1f51e",
+ "bnr": "bnr://skaists.dev/blood/p7f26d1f51e",
+ "identity": {
+  "name": "William de Botreaux 2nd Baron Botreaux",
+  "lifespan": "1389–1462",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LYF4-BB9"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p18a7a5612d",
+    "name": "William Botreaux, 2nd Lord Botreaux",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p5f96254d94",
+    "name": "Elizabeth de Saint Loe",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p765d436c0f",
+    "name": "Margaret Botreaux"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pc1565f08f4",
+    "name": "Elizabeth de Beaumont",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LYF4-BB9",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

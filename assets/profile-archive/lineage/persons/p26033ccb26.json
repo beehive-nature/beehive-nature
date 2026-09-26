@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p26033ccb26",
+ "bnr": "bnr://skaists.dev/blood/p26033ccb26",
+ "identity": {
+  "name": "Pomponia Arria",
+  "lifespan": "0170–Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G37M-5NR"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pcafc004b4f",
+    "name": "Lucius Junius Rufinus Proculianus",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p0d34633591",
+    "name": "Arria Sextia Paulina",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "paf5609a6b7",
+    "name": "Marcus Pomponius Maecius Probus"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p71d9f777e5",
+    "name": "Marcus Maecius Probus Major",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G37M-5NR",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

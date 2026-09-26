@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p6ec2e44f97",
+ "bnr": "bnr://skaists.dev/blood/p6ec2e44f97",
+ "identity": {
+  "name": "Jan Geritsz van Lent",
+  "lifespan": "1615–1661",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PH6S-BPY"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p7077246a6e",
+    "name": "Gerrit Lent",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p6503c24c84",
+    "name": "Elsje Roelofs",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pe478c013ee",
+    "name": "Geertruyd Jans Van Lent"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p437e832a5e",
+    "name": "Lijsbeth Matthias Gravenwaert",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PH6S-BPY",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

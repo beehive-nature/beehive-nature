@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p72222ceca1",
+ "bnr": "bnr://skaists.dev/blood/p72222ceca1",
+ "identity": {
+  "name": "John Babcock",
+  "lifespan": "1644–1684",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "DY5K-6M8"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pd31e0236e0",
+    "name": "James Babcock",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pc13ccf5323",
+    "name": "Sarah",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p306dd85542",
+    "name": "James Babcock"
+   },
+   {
+    "id": "p9ff9bcd8e4",
+    "name": "Oliver Babcock"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p2365a5e59a",
+    "name": "Mary Elizabeth Lawton",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/DY5K-6M8",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

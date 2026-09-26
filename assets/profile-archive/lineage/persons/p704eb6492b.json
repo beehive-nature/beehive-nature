@@ -1,0 +1,74 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p704eb6492b",
+ "bnr": "bnr://skaists.dev/blood/p704eb6492b",
+ "identity": {
+  "name": "Jeanne De Saint Valéry",
+  "lifespan": "0998–1044",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GRZ5-FZN"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p40076bd4ba",
+    "name": "Bernard Ier DE MONTREUIL-SUR-MER",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p52afb8aedd",
+    "name": "Amicie De Tregoz",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p6f62f88dcb",
+    "name": "Berthe d'Aumale"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p7483d785fd",
+    "name": "Guérimfred d'Aumale",
+    "marriage": null
+   },
+   {
+    "id": "paf11f65ae3",
+    "name": "Guerinfrid d'Aumale",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GRZ5-FZN",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

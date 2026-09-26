@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p64e1673631",
+ "bnr": "bnr://skaists.dev/blood/p64e1673631",
+ "identity": {
+  "name": "Shuma Damqa Assyria",
+  "lifespan": "Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L2YZ-QHH"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [],
+  "children": [
+   {
+    "id": "p4d5eb07eb8",
+    "name": "Shammu ramat Semiramis"
+   },
+   {
+    "id": "pd644538fbb",
+    "name": "Marduk Balatsu Iqbi De Babylone Souverain de Babylone"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pbba545fffa",
+    "name": "Marduk Zakir Schumi",
+    "marriage": null
+   },
+   {
+    "id": "p6aadc36c59",
+    "name": "Govenor Nabu balatsu Iqbi of Syria",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L2YZ-QHH",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

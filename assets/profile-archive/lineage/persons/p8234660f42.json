@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p8234660f42",
+ "bnr": "bnr://skaists.dev/blood/p8234660f42",
+ "identity": {
+  "name": "Hans Schweißfurth",
+  "lifespan": "1470–1550",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PS3T-N77"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pe060ad8129",
+    "name": "Jakob Schweißfurth",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pf184e42190",
+    "name": "Gertha",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pd714a35671",
+    "name": "Johann der ältere Fuhrman zur Schweißfurth"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p95c7493fbd",
+    "name": "Schreyel",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PS3T-N77",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

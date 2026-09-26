@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pf12e4b9226",
+ "bnr": "bnr://skaists.dev/blood/pf12e4b9226",
+ "identity": {
+  "name": "Asa BINT ASA",
+  "lifespan": "0899BC–Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PXZY-2ZY"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p8fb4a2d1a5",
+    "name": "King Asa ben Abijah 3rd King of Judea",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p9b046f7dbb",
+    "name": "Azubah bint  Shilhi al-ʾEfrayim",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pbb0d777698",
+    "name": "Josaphat ibn Namsi al-Yasjar"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pb2f114735f",
+    "name": "Namsi ibn Omriyya al-Yasjar",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PXZY-2ZY",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

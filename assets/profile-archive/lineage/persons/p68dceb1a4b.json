@@ -1,0 +1,74 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p68dceb1a4b",
+ "bnr": "bnr://skaists.dev/blood/p68dceb1a4b",
+ "identity": {
+  "name": "Sybil de Mandeville",
+  "lifespan": "1264–1307",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G94Q-PV8"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p45fb6767bb",
+    "name": "Walter of Manderville",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p5775874441",
+    "name": "Alice de Giffard",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "padc5cee5b7",
+    "name": "Joan de Bodrugan"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "paa6a44103c",
+    "name": "Sir Henry de Bodrugan",
+    "marriage": null
+   },
+   {
+    "id": "pccb4fb8c16",
+    "name": "Peter le Poer",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G94Q-PV8",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": true,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

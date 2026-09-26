@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p9c47960105",
+ "bnr": "bnr://skaists.dev/blood/p9c47960105",
+ "identity": {
+  "name": "Catharina Wilhelmina Kaiser",
+  "lifespan": "1510–1575",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PDTG-6MS"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pd1217dbfb1",
+    "name": "Ulrich Kaiser",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pe05010953f",
+    "name": "Unknown",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p87afee96bb",
+    "name": "Elisbeth 1530 Elisabeht Elsbeth Elissabeht Cruetz Hebeisen"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p01926305ad",
+    "name": "Johann Gorg Cruetz \\ Creutz",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PDTG-6MS",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

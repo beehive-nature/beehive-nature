@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p1bb11470c7",
+ "bnr": "bnr://skaists.dev/blood/p1bb11470c7",
+ "identity": {
+  "name": "Sophia Stein",
+  "lifespan": "1540–1600",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LVH8-2SC"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p6352712c29",
+    "name": "Hans Stein",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p48693a5652",
+    "name": "Sophia Fitzhans Stein",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pbf7f67f6a5",
+    "name": "Johannes Hermann Klein von Hillnhuetter"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pe59ffe3e7b",
+    "name": "Frantz Klein uff Hillnhütten",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LVH8-2SC",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

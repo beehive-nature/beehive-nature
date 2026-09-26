@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p5206d9aa5c",
+ "bnr": "bnr://skaists.dev/blood/p5206d9aa5c",
+ "identity": {
+  "name": "Gunnor Comtesse de Rouen",
+  "lifespan": "0936–1031",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G39Q-HBK"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p7fb508b039",
+    "name": "forester in the Pais de Calais",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p6c30fc72cc",
+    "name": "Forester de Pais de Calais",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p448f7d4957",
+    "name": "Robert 'le Danois' de Normandie comte d'Évreux et archevêque de Rouen"
+   },
+   {
+    "id": "p5836517bed",
+    "name": "Richard II 'le Bon',  Duc de Normandie"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p9eda680973",
+    "name": "Richard Ier 'Sans Peur' de Normandie comte de Rouen",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G39Q-HBK",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

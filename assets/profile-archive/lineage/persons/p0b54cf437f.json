@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p0b54cf437f",
+ "bnr": "bnr://skaists.dev/blood/p0b54cf437f",
+ "identity": {
+  "name": "Elizabeth Bell",
+  "lifespan": "1530–1581",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L43D-YFP"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p4db6a9582a",
+    "name": "Robert Bell I",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p0f0fe2a9e5",
+    "name": "Elizabeth Cromwell Anderson",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pd3f4074cee",
+    "name": "Katherine Westbrome"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p8d8986d0c0",
+    "name": "Thomas Westbrome",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L43D-YFP",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

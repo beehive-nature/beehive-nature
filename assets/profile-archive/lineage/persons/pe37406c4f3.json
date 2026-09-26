@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pe37406c4f3",
+ "bnr": "bnr://skaists.dev/blood/pe37406c4f3",
+ "identity": {
+  "name": "Henry Miller Sutphen",
+  "lifespan": "1897–1972",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L4R4-43N"
+  }
+ ],
+ "evidence": {
+  "era": "recorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "recorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pfa9d9be298",
+    "name": "Joshua Clark Sutphen",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p92f7192f5e",
+    "name": "Alma Jane Miller",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p3d44ccaffd",
+    "name": "Jack Benedum Sutphen"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p745472e647",
+    "name": "Frances Belle Benidum",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L4R4-43N",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

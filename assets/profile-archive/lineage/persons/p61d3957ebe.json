@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p61d3957ebe",
+ "bnr": "bnr://skaists.dev/blood/p61d3957ebe",
+ "identity": {
+  "name": "James Hamilton, 1st of Barncleuch",
+  "lifespan": "1594–1632",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LZ2Z-LSG"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pb98f2d3000",
+    "name": "John Hamilton, 6th of Udston",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p7fa0a599d7",
+    "name": "Lady Margaret Muirhead",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p0969e2ba6d",
+    "name": "Sir Robert Hamilton \" Lord Presmennan\""
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pe362167df4",
+    "name": "Margaret Moffet",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LZ2Z-LSG",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

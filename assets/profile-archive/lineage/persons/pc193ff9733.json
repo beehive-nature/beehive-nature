@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pc193ff9733",
+ "bnr": "bnr://skaists.dev/blood/pc193ff9733",
+ "identity": {
+  "name": "John de Mowbray 2nd Baron Mowbray",
+  "lifespan": "1286–1322",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LYWF-C7S"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p2dd4081eeb",
+    "name": "Sir Roger de Mowbray 1st Lord Mowbray",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pa73d8579ea",
+    "name": "Rose de Clare",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pe23ea591fc",
+    "name": "John de Mowbray"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p8e5c3a0fb2",
+    "name": "Aline de Braose",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LYWF-C7S",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

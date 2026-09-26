@@ -1,0 +1,86 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pef2e5bde5f",
+ "bnr": "bnr://skaists.dev/blood/pef2e5bde5f",
+ "identity": {
+  "name": "Waraqah bint Lahij",
+  "lifespan": "Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GTLN-S5G"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p58ac57c5eb",
+    "name": "Lahij the Prophet",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p31424dc446",
+    "name": "Mrs Lahij",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p0d57672d41",
+    "name": "Sarah bint Buthwil"
+   },
+   {
+    "id": "p29a444c4fd",
+    "name": "Hazrat Lūṭ ibn Harán 7th Prophet of Islam"
+   },
+   {
+    "id": "p0ad7b24ac9",
+    "name": "Milcah bat Haran"
+   },
+   {
+    "id": "pfa81c03728",
+    "name": "Labán ibn Buthwil"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p4f5a654714",
+    "name": "Haran ben Terah",
+    "marriage": null
+   },
+   {
+    "id": "p41a1c8d119",
+    "name": "Buthwil ibn Nakhṓr",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GTLN-S5G",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

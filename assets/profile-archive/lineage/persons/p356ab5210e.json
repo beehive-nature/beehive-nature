@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p356ab5210e",
+ "bnr": "bnr://skaists.dev/blood/p356ab5210e",
+ "identity": {
+  "name": "Alice de Lucy",
+  "lifespan": "1129–1197",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LD4B-PM4"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p48fb256c4e",
+    "name": "Richard de Lucy",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p74f7f6f602",
+    "name": "Rohaise of Boulogne",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p6710af2028",
+    "name": "Margaret de Umfraville"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p2e46ed9bf7",
+    "name": "Baron Odinel de Umfreville II",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LD4B-PM4",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

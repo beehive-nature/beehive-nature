@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p278a4beb4e",
+ "bnr": "bnr://skaists.dev/blood/p278a4beb4e",
+ "identity": {
+  "name": "Joseph Hull",
+  "lifespan": "1652–1709",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LZX8-RNW"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p9e5b324815",
+    "name": "Lt. Josiah Hull",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p0200d2d679",
+    "name": "Elizabeth Loomis",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p125435cd32",
+    "name": "Cornelius Hull"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pffffc6db40",
+    "name": "Elizabeth Farnham",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LZX8-RNW",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

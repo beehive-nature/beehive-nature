@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pe59ffe3e7b",
+ "bnr": "bnr://skaists.dev/blood/pe59ffe3e7b",
+ "identity": {
+  "name": "Frantz Klein uff Hillnhütten",
+  "lifespan": "1530–1584",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "MS75-CFG"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p0b200d27da",
+    "name": "Hans Martin Klein",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p2761e30c2e",
+    "name": "Elsa Elizabeth Becken ulf Hillhuetten",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pbf7f67f6a5",
+    "name": "Johannes Hermann Klein von Hillnhuetter"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p1bb11470c7",
+    "name": "Sophia Stein",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/MS75-CFG",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p472f51bcec",
+ "bnr": "bnr://skaists.dev/blood/p472f51bcec",
+ "identity": {
+  "name": "Judith de Bretagne",
+  "lifespan": "0982–1017",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LDS9-GGV"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p309accc6cc",
+    "name": "Conan Ier de Rennes duc de Bretagne",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p100ba36a1b",
+    "name": "Ermengarde d'Anjou Régente de Bretagne Comtesse d'Angoulême",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p190e2c4372",
+    "name": "Robert Ier 'le Magnifique' Duc de Normandie"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p5836517bed",
+    "name": "Richard II 'le Bon',  Duc de Normandie",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LDS9-GGV",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

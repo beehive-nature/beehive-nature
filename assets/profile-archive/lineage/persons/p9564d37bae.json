@@ -1,0 +1,63 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p9564d37bae",
+ "bnr": "bnr://skaists.dev/blood/p9564d37bae",
+ "identity": {
+  "name": "Diederik Govertsz Meerman",
+  "lifespan": "1470–1544",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GGV1-Q6C"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "GT1R-1KB",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p611c1ff5cd",
+    "name": "Frans Dirck Govertsz Meerman"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p2a56eeccfa",
+    "name": "Maria Gerrits van Rotterdam",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GGV1-Q6C",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

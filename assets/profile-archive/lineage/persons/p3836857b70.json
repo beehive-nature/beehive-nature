@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p3836857b70",
+ "bnr": "bnr://skaists.dev/blood/p3836857b70",
+ "identity": {
+  "name": "King Mitridates II Of Pontus",
+  "lifespan": "0286BC–Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "9S2D-CQ2"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pc8da84f358",
+    "name": "Ariobarzanes I of Pontus",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p58cd137cd0",
+    "name": "Mrs Ariobarzanes II Pont",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p92249b9d96",
+    "name": "Reina Laódice Mitridátida"
+   },
+   {
+    "id": "pc7dbf042a2",
+    "name": "Rey de Pontos Pharnaces I ben Mithridates III"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p46373562b4",
+    "name": "Princesa Seleucida Leodice",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/9S2D-CQ2",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

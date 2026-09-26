@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p3ec5f0c921",
+ "bnr": "bnr://skaists.dev/blood/p3ec5f0c921",
+ "identity": {
+  "name": "King Uzziah Ben Judah",
+  "lifespan": "0788BC–0739BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PF8J-GSP"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p8d74764436",
+    "name": "King Uzziah Azariah",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p9341a4e98e",
+    "name": "Queen Jerushah Juda II",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p78fc6eddfa",
+    "name": "King Ahaz 7th King of Judah"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "peda6feec20",
+    "name": "Queen Uzziah Ben Judah",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PF8J-GSP",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

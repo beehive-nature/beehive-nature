@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p631181a577",
+ "bnr": "bnr://skaists.dev/blood/p631181a577",
+ "identity": {
+  "name": "Afrinia Germina Baebina de Rome",
+  "lifespan": "–0253",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GW5S-871"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p7b179f4a7e",
+    "name": "Afranius Flurianus",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p5d6a275d18",
+    "name": "Claudia Capitolina",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pc4ee701509",
+    "name": "Vibia Galla de Rome"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p676433acc8",
+    "name": "Vibius Veldumnianus de Rome",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GW5S-871",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

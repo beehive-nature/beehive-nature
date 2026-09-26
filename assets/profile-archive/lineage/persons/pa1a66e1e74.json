@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pa1a66e1e74",
+ "bnr": "bnr://skaists.dev/blood/pa1a66e1e74",
+ "identity": {
+  "name": "Mary Ellen Myddelton nee Moss Leycester",
+  "lifespan": "1520–1544",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "P6NN-J8Y"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pf9d3c12eec",
+    "name": "Sir George Moss Leicester",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p76292ac882",
+    "name": "Margrett Jones",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pa40b4d1287",
+    "name": "Lady Elizabeth Middleton"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p9f8cd95f10",
+    "name": "Sir David Middleton",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/P6NN-J8Y",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

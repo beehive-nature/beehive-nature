@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p79dd05f2e1",
+ "bnr": "bnr://skaists.dev/blood/p79dd05f2e1",
+ "identity": {
+  "name": "Jonas Willard Humes",
+  "lifespan": "1844–1897",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "K2QX-ZDX"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pe7f8934051",
+    "name": "Manning Humes",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p4e0cc3b493",
+    "name": "Lucy Chaffin",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p4383700101",
+    "name": "Willard Humes"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p9902d0bdb9",
+    "name": "Sarah Irinda Smith",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/K2QX-ZDX",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pfafbb4f733",
+ "bnr": "bnr://skaists.dev/blood/pfafbb4f733",
+ "identity": {
+  "name": "Richard Sheafe",
+  "lifespan": "1505–1557",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LCRJ-4LB"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "LCRJ-ZHC",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "LCRJ-45X",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p25fd422324",
+    "name": "Thomas Sheafe"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pff0fabb7c9",
+    "name": "Dame Elizabeth Andrews",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LCRJ-4LB",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

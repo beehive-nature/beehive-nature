@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pef77c302d3",
+ "bnr": "bnr://skaists.dev/blood/pef77c302d3",
+ "identity": {
+  "name": "Lucius Julius Caesar III",
+  "lifespan": "0135BC–0087BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L6FW-PQ4"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pf506fa54f2",
+    "name": "Lucius Julius Caesar II",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p8515289c76",
+    "name": "Poppilia Pompeius Magnus",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pa00eb67c07",
+    "name": "Julia Antonia Caesaria"
+   },
+   {
+    "id": "pcb6585ddca",
+    "name": "Servius Sulpicius Rufus de Rome"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pdffded3feb",
+    "name": "Fulvia Crossutia",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L6FW-PQ4",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

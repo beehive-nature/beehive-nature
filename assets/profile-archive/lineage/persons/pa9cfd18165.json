@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pa9cfd18165",
+ "bnr": "bnr://skaists.dev/blood/pa9cfd18165",
+ "identity": {
+  "name": "Joane Croft",
+  "lifespan": "1554–1591",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "MSVV-559"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p2260772338",
+    "name": "Sir James Croft",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p14ec4e73cf",
+    "name": "Alice Warnecombe",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pc8dacb66b1",
+    "name": "Joanne Jordan"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pbaf1b04fe8",
+    "name": "Nicholas Jordan",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/MSVV-559",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

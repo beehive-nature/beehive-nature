@@ -1,0 +1,74 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p4179af5338",
+ "bnr": "bnr://skaists.dev/blood/p4179af5338",
+ "identity": {
+  "name": "Joseph III ben Joseph of Idumea",
+  "lifespan": "0038BC–0004BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LJ17-JZM"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p2791f30c20",
+    "name": "Joseph ben Antipater",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p94dee6e533",
+    "name": "Mrs Joseph",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p9d2d8415c4",
+    "name": "Mariamne IV bat Joseph"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p202f41286a",
+    "name": "Miriam Magdalene",
+    "marriage": null
+   },
+   {
+    "id": "pca882086fd",
+    "name": "Olympias bat Herod",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LJ17-JZM",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

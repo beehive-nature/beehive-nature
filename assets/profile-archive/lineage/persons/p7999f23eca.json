@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p7999f23eca",
+ "bnr": "bnr://skaists.dev/blood/p7999f23eca",
+ "identity": {
+  "name": "Aristomachos Heraclid",
+  "lifespan": "–0479BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L5Y7-HND"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p1db226f9f3",
+    "name": "Aristomachos HERACLIDE Of Thebes",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p330ab75261",
+    "name": "Princess DE TIRHYNTHE",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p11cfb8d2fb",
+    "name": "King Procles de Sparta"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pe695d5d394",
+    "name": "Argia IV Princess of Thebes",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L5Y7-HND",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

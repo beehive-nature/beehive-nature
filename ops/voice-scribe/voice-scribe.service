@@ -4,7 +4,11 @@ After=network-online.target
 
 [Service]
 Type=simple
-User=ubuntu
+DynamicUser=yes
+User=voice-scribe
+RuntimeDirectory=voice-scribe
+RuntimeDirectoryMode=0700
+UMask=0077
 WorkingDirectory=/opt/voice-scribe
 ExecStart=/usr/bin/node /opt/voice-scribe/voice-scribe.mjs
 Environment=VOICE_BIND=172.18.0.1
@@ -12,8 +16,24 @@ Environment=VOICE_PORT=8093
 Environment=VOICE_CANONICAL_URL=https://skaists.buzz/voice
 Environment=VOICE_MODEL=/opt/voice-scribe/whisper.cpp/models/ggml-large-v3-turbo-q5_0.bin
 Environment=VOICE_LANGS=lv,th,ru,uk
+Environment=VOICE_SPOOL=/run/voice-scribe
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+RestrictSUIDSGID=yes
+CapabilityBoundingSet=
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+MemoryMax=3G
+CPUWeight=25
+TasksMax=64
 Restart=always
 RestartSec=3
+TimeoutStopSec=15
 
 [Install]
 WantedBy=multi-user.target

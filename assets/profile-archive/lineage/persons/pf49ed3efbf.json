@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pf49ed3efbf",
+ "bnr": "bnr://skaists.dev/blood/pf49ed3efbf",
+ "identity": {
+  "name": "* Eudemus of CORINTH",
+  "lifespan": "0900BC–0835BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GWRZ-G6Z"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pff90e86fc2",
+    "name": "Agelas II de Corinth",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pb059b42446",
+    "name": "*E MRS Agelas II of CORINTH",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p24116a4d66",
+    "name": "Aristomedes King Of Corinth"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p936e364ccc",
+    "name": "*E MRS Eudemus of CORINTH",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GWRZ-G6Z",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

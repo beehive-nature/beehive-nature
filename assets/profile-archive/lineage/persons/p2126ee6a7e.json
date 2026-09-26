@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p2126ee6a7e",
+ "bnr": "bnr://skaists.dev/blood/p2126ee6a7e",
+ "identity": {
+  "name": "Robert fitz Richard de Clare",
+  "lifespan": "1067–1136",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L6BK-3PX"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p83608a3e08",
+    "name": "Richard I FitzGilbert de Clare",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p5bfe846afb",
+    "name": "Rohese Giffard",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p8fb325eaf4",
+    "name": "Walter de Clare"
+   },
+   {
+    "id": "p2a728143aa",
+    "name": "Maud St. Liz de Senlis"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p7db30b708e",
+    "name": "Maud de Senlis",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L6BK-3PX",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

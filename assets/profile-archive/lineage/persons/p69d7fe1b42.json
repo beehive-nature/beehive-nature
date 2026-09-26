@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p69d7fe1b42",
+ "bnr": "bnr://skaists.dev/blood/p69d7fe1b42",
+ "identity": {
+  "name": "Elizabeth Chadderton",
+  "lifespan": "1536–1624",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L65Y-RJQ"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pa5d6599c01",
+    "name": "Edmund George Chadderton",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pce592c563c",
+    "name": "Margaret de Cliffe",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p53ee6d981f",
+    "name": "Archdeacon William Parker of Cornwall"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p7c77601b01",
+    "name": "Robert Redmayne Parker",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L65Y-RJQ",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

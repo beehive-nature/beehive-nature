@@ -1,0 +1,61 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p55e9ca2d9d",
+ "bnr": "bnr://skaists.dev/blood/p55e9ca2d9d",
+ "identity": {
+  "name": "Thomas Philpot",
+  "lifespan": "1410–1460",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GD74-VL2"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "GD74-PMQ",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "GZC5-VY9",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p2e1cb874ac",
+    "name": "Sir Richard Milwarde Philpott"
+   }
+  ],
+  "spouses": []
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GD74-VL2",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

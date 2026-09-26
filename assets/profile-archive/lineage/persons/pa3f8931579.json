@@ -1,0 +1,63 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pa3f8931579",
+ "bnr": "bnr://skaists.dev/blood/pa3f8931579",
+ "identity": {
+  "name": "Shepseskere Netjeruser 4th Pharaoh of the 5th Dynasty",
+  "lifespan": "–2460BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G5KD-F6X"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p40e2d1ac95",
+    "name": "Sahura Sahure 2nd Pharaoh of the 5th Dynasty",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p981648a139",
+    "name": "Neferethanebty",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p1816cf1ad2",
+    "name": "Queen Khentkaus II of Egypt"
+   }
+  ],
+  "spouses": []
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G5KD-F6X",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

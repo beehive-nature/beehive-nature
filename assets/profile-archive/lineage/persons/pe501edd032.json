@@ -1,0 +1,74 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pe501edd032",
+ "bnr": "bnr://skaists.dev/blood/pe501edd032",
+ "identity": {
+  "name": "Salomé Alexandra bat Shetach of Judea",
+  "lifespan": "0141BC–0067BC",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L5KD-PN9"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p99a718b289",
+    "name": "Shetah bar Yossei, Rabbi Eleazar",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p535c242745",
+    "name": "Cypros I de Nabatea",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pab31c04e78",
+    "name": "Mariamne I bat Alexander"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p8c057294bc",
+    "name": "Judah Aristobulus I ben John Hyrcanus 50th High Priest",
+    "marriage": null
+   },
+   {
+    "id": "pc41fe7774b",
+    "name": "Alexander Jannaeus ben Hyrcanus",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L5KD-PN9",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

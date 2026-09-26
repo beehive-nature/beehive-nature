@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p6add5cfa59",
+ "bnr": "bnr://skaists.dev/blood/p6add5cfa59",
+ "identity": {
+  "name": "Anavas Rei des Hérules",
+  "lifespan": "0029BC–28",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LV62-JM1"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p77e9800d80",
+    "name": "King Anthyrius of the Herulii I",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p71aa7c6e11",
+    "name": "Princess Cymbulla or Symbulla of the Goths",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "paf6c5a1f09",
+    "name": "Alimir vel Olimir of the Heruli"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pe5eb8bf482",
+    "name": "Queen Drithva born as Orethyia of Sarmathia of the Herulii",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LV62-JM1",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

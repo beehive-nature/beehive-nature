@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p87a9802e63",
+ "bnr": "bnr://skaists.dev/blood/p87a9802e63",
+ "identity": {
+  "name": "Titius Claudius Agrippinus CLAUDII",
+  "lifespan": "0120–Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G38W-CB4"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p29de93dbcb",
+    "name": "Titius Claudius Dryantianus CLAUDII",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p64113fe117",
+    "name": "Lulia Lysimache Lulii",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p61be8b5eca",
+    "name": "Titius Claudius Dryantianus Antoninus CLAUDII"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p2324912be4",
+    "name": "Aelia Platonis Matidia Aelii",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G38W-CB4",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

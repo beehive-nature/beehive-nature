@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p0b5fa73fd1",
+ "bnr": "bnr://skaists.dev/blood/p0b5fa73fd1",
+ "identity": {
+  "name": "Martin Kauffman",
+  "lifespan": "1708–1749",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L8WK-V5R"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pf767961c23",
+    "name": "Michel Kauffman",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p6786d2906d",
+    "name": "Anna Kneisley",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p10c6a1e195",
+    "name": "Anna Kauffman"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p02b0c87415",
+    "name": "Barbara Stauffer",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L8WK-V5R",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

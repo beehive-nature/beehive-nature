@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p75314750b3",
+ "bnr": "bnr://skaists.dev/blood/p75314750b3",
+ "identity": {
+  "name": "Acilia Frestana",
+  "lifespan": "–0205",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "P83G-CRQ"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p0f84e731e7",
+    "name": "Manius Acilius Glabrio II",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pa54d2431cb",
+    "name": "Ummidia Commificia Faustina Antonia",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p410e998b06",
+    "name": "Claudia Acilia Priscilliana"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p279697bee6",
+    "name": "Tiberius Claudius Cleobuls",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/P83G-CRQ",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

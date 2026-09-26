@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pc7fd69a409",
+ "bnr": "bnr://skaists.dev/blood/pc7fd69a409",
+ "identity": {
+  "name": "Caeionia Marina",
+  "lifespan": "0260–Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L16G-42H"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pcd4bc10d8b",
+    "name": "Marcus Silvanus Caeionius Varus",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p8e0b5a1331",
+    "name": "Rufia Procula de Rome",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p1eb2d5a1a6",
+    "name": "Amantia Marina di Rome"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p914172941a",
+    "name": "Crepereius Ceprieus Amantius",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L16G-42H",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

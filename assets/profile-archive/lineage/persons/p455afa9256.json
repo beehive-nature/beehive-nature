@@ -1,0 +1,74 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p455afa9256",
+ "bnr": "bnr://skaists.dev/blood/p455afa9256",
+ "identity": {
+  "name": "Marilyn Lowry",
+  "lifespan": "1932–2023",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LNQ5-BSF"
+  }
+ ],
+ "evidence": {
+  "era": "recorded",
+  "support": "sourced",
+  "basis": "obituary harvested 2026-09-22: born 16 March 1932, died 9 January 2023",
+  "class": "recorded"
+ },
+ "research": {
+  "status": "corrected-attested",
+  "basis": "per-person source counts not yet harvested",
+  "note": "The FamilySearch private-space record flagged Marilyn Lowry Remington living (the founder has since corrected it on FamilySearch). Death now SOURCED: her obituary gives 16 March 1932 to 9 January 2023. marriage date CONFLICTS between the two obituaries: 15 August 1955 (his) and 19 August 1955 (hers); recorded, not resolved; no date is published on the couple. Founder-attested: maternal grandmother, the tree's co-builder."
+ },
+ "publication": {
+  "status": "public"
+ },
+ "corrected": {
+  "attested": "founder order 2026-09-16: all four grandparents confirmed deceased; obituary delivered by the founder 2026-09-22",
+  "note": "The FamilySearch private-space record flagged Marilyn Lowry Remington living (the founder has since corrected it on FamilySearch). Death now SOURCED: her obituary gives 16 March 1932 to 9 January 2023. marriage date CONFLICTS between the two obituaries: 15 August 1955 (his) and 19 August 1955 (hers); recorded, not resolved; no date is published on the couple. Founder-attested: maternal grandmother, the tree's co-builder."
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p84f479da00",
+    "name": "Hyrum Deronda Lowry",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p0c99dde639",
+    "name": "Ardella Rockwood",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "liv-2",
+    "name": "Living"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p4ceb2ace98",
+    "name": "Don Ray Remington",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LNQ5-BSF",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

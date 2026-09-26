@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p7fb325df75",
+ "bnr": "bnr://skaists.dev/blood/p7fb325df75",
+ "identity": {
+  "name": "Mary White",
+  "lifespan": "1590–1652",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LZ2X-57M"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p6a5a2dba5c",
+    "name": "Robert White",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p12e0eedc02",
+    "name": "Bridget Allgar",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p0200d2d679",
+    "name": "Elizabeth Loomis"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p01e967d5d0",
+    "name": "Joseph Loomis Sr.",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LZ2X-57M",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

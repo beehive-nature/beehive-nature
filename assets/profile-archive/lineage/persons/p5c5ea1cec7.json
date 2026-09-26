@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p5c5ea1cec7",
+ "bnr": "bnr://skaists.dev/blood/p5c5ea1cec7",
+ "identity": {
+  "name": "Thomas Carminow of Boconnoc",
+  "lifespan": "1396–1442",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GY4B-Q49"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p6adcdf56a0",
+    "name": "Sir William de Carminow",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p85f17818ad",
+    "name": "Margaret Kelly",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p0163d915eb",
+    "name": "Margaret Carminow"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p0f9e85383b",
+    "name": "Jane Hill",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GY4B-Q49",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": true,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

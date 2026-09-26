@@ -1,0 +1,78 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p0f3b4b475a",
+ "bnr": "bnr://skaists.dev/blood/p0f3b4b475a",
+ "identity": {
+  "name": "Artaxerxes I",
+  "lifespan": "0491BC–0465BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L6GB-L4Q"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pbe37715915",
+    "name": "Xerxes Assuerus I of Persia",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pa0ce1f4237",
+    "name": "Amestris bint Otanes Queen of Persia",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p4108bc602b",
+    "name": "Darius II"
+   },
+   {
+    "id": "p5b1bdc7c2d",
+    "name": "Parysatis Achaemenid of Babylon"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pbc0f37282f",
+    "name": "Damaspia Queen of Persia",
+    "marriage": null
+   },
+   {
+    "id": "pb2887cee82",
+    "name": "Andia",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L6GB-L4Q",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

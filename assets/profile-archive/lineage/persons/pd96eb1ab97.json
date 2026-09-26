@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pd96eb1ab97",
+ "bnr": "bnr://skaists.dev/blood/pd96eb1ab97",
+ "identity": {
+  "name": "Lucius Aurelius Gallus IV",
+  "lifespan": "0140–0174",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GHB5-J5J"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p7345693ad7",
+    "name": "Lucius Aurelius Gallus III.",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pc6597810f2",
+    "name": "Mrs Lucius Aurelius Gallus I",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pb2e37d8275",
+    "name": "Aurelia"
+   },
+   {
+    "id": "pe499df7d98",
+    "name": "Lucius Iunius Macer"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p2f6df8823f",
+    "name": "Mrs Aurelius Gallus",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GHB5-J5J",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

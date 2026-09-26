@@ -1,0 +1,64 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pd31e0236e0",
+ "bnr": "bnr://skaists.dev/blood/pd31e0236e0",
+ "identity": {
+  "name": "James Babcock",
+  "lifespan": "1612–1679",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LRXP-GLL"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p04de983b26",
+    "name": "Babcock",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p72222ceca1",
+    "name": "John Babcock"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pc13ccf5323",
+    "name": "Sarah",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LRXP-GLL",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

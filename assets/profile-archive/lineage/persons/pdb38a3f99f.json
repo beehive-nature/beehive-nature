@@ -1,0 +1,77 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pdb38a3f99f",
+ "bnr": "bnr://skaists.dev/blood/pdb38a3f99f",
+ "identity": {
+  "name": "Marcus Livius Drusus \"the Elder\" Consul and Censor of Rome",
+  "lifespan": "0154BC–0107BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L2RQ-F7B"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pf04ec5ec86",
+    "name": "Gaius Livius Drusus Consul of Rome",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pb894792a73",
+    "name": "Aemilia Paula de Rome",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pbddf166def",
+    "name": "Livia Drusilla Drusa"
+   },
+   {
+    "id": "p5d19cbaa0f",
+    "name": "Aemilia Lepida Metellus Caprarius"
+   },
+   {
+    "id": "p60bd57aa2c",
+    "name": "Livia Drusa de Roma"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pf8f9a2897a",
+    "name": "Cornelia Scipiones",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L2RQ-F7B",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

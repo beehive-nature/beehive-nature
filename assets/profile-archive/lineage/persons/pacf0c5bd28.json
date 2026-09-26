@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pacf0c5bd28",
+ "bnr": "bnr://skaists.dev/blood/pacf0c5bd28",
+ "identity": {
+  "name": "Aert Symonszen DeHart",
+  "lifespan": "1607–1651",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LZCP-64F"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p218e90bb51",
+    "name": "Symon Jacobus Willemszen DeHart",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pccdb4100b0",
+    "name": "Jan Laenen Van Pelt",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pce5ad2c534",
+    "name": "Simon Aertszen"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p76da9b064c",
+    "name": "Gerritiszen Gerrit Stoffles",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LZCP-64F",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

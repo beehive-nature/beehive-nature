@@ -24,7 +24,7 @@
 importScripts('onboarding/vendor/bnr-sign.js?v=6');   // worker-relative: /surfaces/onboarding/…
 var BN = globalThis.BnrSign;
 
-var MAIN_HOSTS = ['https://eos.api.eosnation.io', 'https://eos.greymass.com', 'https://api.eosn.io'];
+var MAIN_HOSTS = ['https://eos.api.eosnation.io', 'https://eos.greymass.com'];
 var J4 = {
   hosts: ['https://jungle4.cryptolions.io', 'https://jungle4.eosphere.io', 'https://jungle4.api.eosnation.io'],
   chainId: '73e4385a2708e6d7048834fbc1079f2fabb17b3c125b146af438971e90716c4d' // PUBLIC-CONSTANT: Jungle4 chain id (live get_info)

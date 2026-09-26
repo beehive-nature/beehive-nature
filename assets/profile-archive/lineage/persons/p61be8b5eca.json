@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p61be8b5eca",
+ "bnr": "bnr://skaists.dev/blood/p61be8b5eca",
+ "identity": {
+  "name": "Titius Claudius Dryantianus Antoninus CLAUDII",
+  "lifespan": "0135–0195",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PMLX-FN9"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p87a9802e63",
+    "name": "Titius Claudius Agrippinus CLAUDII",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p2324912be4",
+    "name": "Aelia Platonis Matidia Aelii",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p83499ddfe4",
+    "name": "Claudia Vettia Agrippina Claudii"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p4884cccca9",
+    "name": "Avidia Alexandria",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PMLX-FN9",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

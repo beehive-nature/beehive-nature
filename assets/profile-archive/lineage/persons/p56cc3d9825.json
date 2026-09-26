@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p56cc3d9825",
+ "bnr": "bnr://skaists.dev/blood/p56cc3d9825",
+ "identity": {
+  "name": "Marguerite de Ramerupt de Breteuil",
+  "lifespan": "1043–1110",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GX7F-TKC"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pb46b9bb134",
+    "name": "Hilduin de Montdidier IV",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p487cf6d3b2",
+    "name": "Adélaïde de Roucy",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pb1a50967f5",
+    "name": "Adelise de Clermont"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p2924023747",
+    "name": "Hugues de Clermont",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GX7F-TKC",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

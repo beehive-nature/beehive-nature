@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p719c81bb58",
+ "bnr": "bnr://skaists.dev/blood/p719c81bb58",
+ "identity": {
+  "name": "Manassès Ier de Guînes",
+  "lifespan": "1075–1137",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PS98-97R"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p6e708a7424",
+    "name": "Baudouin I de Guînes",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pe06529eb6b",
+    "name": "Adelheid van Holland",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pee537f7b3c",
+    "name": "Sibylle Rose de Guines"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pdc21c7a286",
+    "name": "Emma d’Arques",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PS98-97R",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

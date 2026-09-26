@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p65d329c228",
+ "bnr": "bnr://skaists.dev/blood/p65d329c228",
+ "identity": {
+  "name": "Graaf Nordalah van Friesland",
+  "lifespan": "0765–0810",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PWQH-772"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pb5889c5b21",
+    "name": "Graaf Alfbard van Friesland",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pd38959bd66",
+    "name": "Austrasie de Friesland",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pfd30540dc8",
+    "name": "Graaf Gerulf van Friesland I, the Old"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pe27a5c9df3",
+    "name": "Westrichgouw",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PWQH-772",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

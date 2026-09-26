@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p2d8a59eeca",
+ "bnr": "bnr://skaists.dev/blood/p2d8a59eeca",
+ "identity": {
+  "name": "Harrison Edgar Davis",
+  "lifespan": "1855–1917",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "K234-B6X"
+  }
+ ],
+ "evidence": {
+  "era": "recorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "recorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p7d39efed14",
+    "name": "George West Davis",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p7530442f3c",
+    "name": "Zilphia Ann Williams",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pb1662d533d",
+    "name": "Fannie Susan Davis"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p10e83a0970",
+    "name": "Elizabeth Jane \"Eliza\" Boyd",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/K234-B6X",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

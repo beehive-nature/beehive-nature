@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p6e68139017",
+ "bnr": "bnr://skaists.dev/blood/p6e68139017",
+ "identity": {
+  "name": "Tommaso I de Savoie",
+  "lifespan": "1178–1233",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LY9J-4WR"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p072877d2f0",
+    "name": "Umberto III di Savoia",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p240bc9ad02",
+    "name": "Countess Béatrice de Vienne-Mâcon of Savoy",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pe5f5adaa1a",
+    "name": "Béatrix de Savoie Comtesse de Provence"
+   },
+   {
+    "id": "p59fe500cd9",
+    "name": "Tommaso di Savoia II"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pdcca98f17e",
+    "name": "Marguerite Béatrice de Genève Comtesse de Savoie",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LY9J-4WR",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

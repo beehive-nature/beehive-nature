@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pca1a927c28",
+ "bnr": "bnr://skaists.dev/blood/pca1a927c28",
+ "identity": {
+  "name": "Julia Fluvia Sabina di Roma",
+  "lifespan": "0152–0187",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "P7SY-M3R"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pc806638c22",
+    "name": "Gaius Rufius Festus I. de Rome",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p19d71181d2",
+    "name": "Postumia Festus de Rome",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p2b440eb823",
+    "name": "Titus Flavius Clemens de Rome"
+   },
+   {
+    "id": "p68cfca50f6",
+    "name": "Junius Balbus de Rome"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pafc90f1cea",
+    "name": "Flavius Titus VI Sabinus of the Gordiani",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/P7SY-M3R",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

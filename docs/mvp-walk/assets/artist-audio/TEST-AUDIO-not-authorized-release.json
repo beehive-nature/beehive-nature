@@ -1,0 +1,46 @@
+{
+  "schema": "bnr-audio-release/1",
+  "status": "prepared-local-only",
+  "preparedAt": "2026-09-07T00:00:00.000Z",
+  "title": "TEST AUDIO \u2014 not the authorized release",
+  "artist": "Beehive Nature development fixture (not an artist release)",
+  "sourceFile": "TEST-AUDIO-not-authorized-release.wav",
+  "content": {
+    "bytes": 144044,
+    "sha256": "0ed8a4bebadb82c99ebe8159f0e622046cdf1ea2c441dac113d4587b5b15cbf6", "digestNote": "PUBLIC-CONSTANT: source content digest",
+    "contentType": "audio/wav",
+    "durationSeconds": 1.5,
+    "streams": [
+      {
+        "codec": "pcm_s16le",
+        "sampleRate": 48000,
+        "channels": 1
+      }
+    ],
+    "validation": "generated fixture header + SHA-256; not a complete decode or a browser playback receipt"
+  },
+  "rights": {
+    "basis": "unconfirmed",
+    "statement": "Development-only generated tone. Not an authorized recording. Publication permission is pending. Do not treat this as CJ Bolland / Sugar Is Sweeter or any cleared release.",
+    "verification": "user statement; not independently verified"
+  },
+  "storage": {
+    "arweave": {
+      "status": "not-uploaded",
+      "transactionId": null,
+      "retrievedSha256": null
+    },
+    "autonomi": {
+      "status": "not-uploaded",
+      "address": null,
+      "retrievedSha256": null
+    }
+  },
+  "plan": {
+    "arweaveBrowserAdapter": "fixture is within current 256 KiB inline limit; quote/signing still required; upload not performed",
+    "autonomi": "review pinned uploader and resumable-finalize status before a full recording; upload not performed",
+    "fees": "not quoted",
+    "publication": "not performed",
+    "player": "this page plays the local development fixture only after a deliberate Play click; do not advertise a stored source"
+  }
+}

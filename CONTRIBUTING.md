@@ -86,3 +86,19 @@ through one door.
 - The pre-commit secret scan is mandatory: enable it once per clone with
   `git config core.hooksPath .githooks`. CI re-runs the same scan on
   every push.
+- State your commit identity explicitly, every time: `git -c
+  user.name='<seat>' -c user.email='<seat>@agents.skaists.buzz' commit`,
+  with the founder as author and the seat as committer, per the §7
+  identity shape. A fresh clone sets no local identity at all, so an
+  unstated one silently falls back to whatever global identity you
+  happen to carry. The seat worktrees on this estate's build box go
+  further: they share a gitdir that sets `user.name = probe` /
+  `user.email = probe@invalid`, and `.invalid` is a reserved,
+  non-routable TLD (RFC 2606), so an unstated identity fails loudly
+  there instead of landing under a plausible-looking stranger's name.
+  If your checkout carries it, that is a guard and not a
+  misconfiguration — do not replace it with a real-looking default.
+  Either way the pre-commit §7 arm refuses a non-founder author on its
+  own, and CI's §7 identity gate refuses it again over the pushed
+  range, so an unstated identity costs a refusal and never a wrong
+  attribution.

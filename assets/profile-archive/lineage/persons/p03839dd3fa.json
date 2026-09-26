@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p03839dd3fa",
+ "bnr": "bnr://skaists.dev/blood/p03839dd3fa",
+ "identity": {
+  "name": "Amedeo III 'il Crociato' di Savoia Conte di Savoia, Aosta e Moriana",
+  "lifespan": "1095–1148",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "KFLJ-TW7"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "93QC-WRW",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "LVD6-PLK",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p072877d2f0",
+    "name": "Umberto III di Savoia"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p7c24af3f37",
+    "name": "Mathilde Ou Mahaut de Albon",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/KFLJ-TW7",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

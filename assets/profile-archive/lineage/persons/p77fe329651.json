@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p77fe329651",
+ "bnr": "bnr://skaists.dev/blood/p77fe329651",
+ "identity": {
+  "name": "Adelphia Burdigala",
+  "lifespan": "0285–Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G6RP-PSJ"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pd8decfac4e",
+    "name": "Claudius Celsinus di Roma",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p905025752d",
+    "name": "Haberia Pomerane de Rome",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p2a3aeb721a",
+    "name": "Metronius Pontius Paulinus de Bordeaux"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p4b81404e74",
+    "name": "Pontius Paulinus I de Bordeaux",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G6RP-PSJ",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p245b2210ba",
+ "bnr": "bnr://skaists.dev/blood/p245b2210ba",
+ "identity": {
+  "name": "Loliana Heidii de Rome",
+  "lifespan": "0180–Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G6RG-T66"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p56ab9be38d",
+    "name": "Quintus Hedius Rufus Lollianus Gentianus HEDII",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pe40d9839ea",
+    "name": "Plautia Servilla Plautii",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p07b919cb4b",
+    "name": "Lucius Egnatius Victor Lollianus de Rome"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p1a9b4516e3",
+    "name": "Egnatius Lucillus Victor de Rome",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G6RG-T66",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

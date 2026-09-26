@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p7fb965e87f",
+ "bnr": "bnr://skaists.dev/blood/p7fb965e87f",
+ "identity": {
+  "name": "Roi Nabû Mukin Apli de Babylone the Elamite",
+  "lifespan": "–0944BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G3T3-5BH"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p670fb4669e",
+    "name": "Roi Mar-Biti-Apla-Usur De Babylone the Elamite",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pf90d3ba9c7",
+    "name": "Mrs Mar Biti Apla Usur De Babylone",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p752db40d2b",
+    "name": "Shamash Mudammig de Babylone the Elamite"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p8a0c86f830",
+    "name": "Mrs Nabû Mukin Apli De Babylone",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G3T3-5BH",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

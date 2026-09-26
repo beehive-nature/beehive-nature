@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "peaac2b315e",
+ "bnr": "bnr://skaists.dev/blood/peaac2b315e",
+ "identity": {
+  "name": "Cunigunda",
+  "lifespan": "–0517",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PXQ5-548"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pbc3a6520d1",
+    "name": "Austrapius DE MENAPIE DE HASBAYE",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pa321ac04ca",
+    "name": "Faustine Florentine",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p0d6044f8b0",
+    "name": "Utheric or Eutheric d'Ostrogothie"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p83feaafbf7",
+    "name": "Prince Wigeric or Wideric d'Ostrogothie",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PXQ5-548",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

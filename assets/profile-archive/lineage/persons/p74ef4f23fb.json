@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p74ef4f23fb",
+ "bnr": "bnr://skaists.dev/blood/p74ef4f23fb",
+ "identity": {
+  "name": "Urania d'Chalcis",
+  "lifespan": "0265–Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PST8-D6G"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p16c1c8c865",
+    "name": "Iamblichus d'Emesa of Chalcis",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p2280be8ef3",
+    "name": "Gune' Iamblichus d'Emesa of Chalcis",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p66ccb76ff2",
+    "name": "Artemius de Clermont-Ferrand"
+   },
+   {
+    "id": "p448fddd409",
+    "name": "Ἱμέριος"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pbcb48d2afd",
+    "name": "Sopater of Apamaea Imperial Counselor to Constantine",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PST8-D6G",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

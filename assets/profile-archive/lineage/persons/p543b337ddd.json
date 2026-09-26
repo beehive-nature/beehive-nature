@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p543b337ddd",
+ "bnr": "bnr://skaists.dev/blood/p543b337ddd",
+ "identity": {
+  "name": "King Merodachus of Sicambri",
+  "lifespan": "0169BC–0093BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LDZL-L2J"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p7e4c156b88",
+    "name": "King Clodomir II of the Sicambri",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p752165a1e2",
+    "name": "Mrs Clodomir II",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pb5864f9fb7",
+    "name": "King Cassander of Sicambria"
+   },
+   {
+    "id": "p8a011695a7",
+    "name": "King Cassander of the Sicambri"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p57c1ddd1bc",
+    "name": "Lady Of Boradachus Of Sicambri",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LDZL-L2J",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

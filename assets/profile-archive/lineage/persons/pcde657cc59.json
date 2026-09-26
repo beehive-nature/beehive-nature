@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pcde657cc59",
+ "bnr": "bnr://skaists.dev/blood/pcde657cc59",
+ "identity": {
+  "name": "Maud de Vaux",
+  "lifespan": "1260–1316",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LBJH-YGT"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pc4d2bb3971",
+    "name": "John de Vaux",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p0f6e8aa833",
+    "name": "Sybil de Longchamps",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pa70e06d4da",
+    "name": "William de Ros 2nd Baron Helmsley"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p8e4e9afc68",
+    "name": "William de Ros 1st Baron Helmsley",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LBJH-YGT",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

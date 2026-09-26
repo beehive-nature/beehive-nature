@@ -13,7 +13,7 @@
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta name="color-scheme" content="dark">
+<meta name="color-scheme" content="light dark">
 <link rel="stylesheet" href="tokens.css">
 <title>the BNR wallet — one soul, every chain</title>
   <link rel="icon" type="image/svg+xml" href="assets/house/house-seal-roundel.svg">
@@ -29,10 +29,10 @@
 *{margin:0;padding:0;box-sizing:border-box}
 body{background:var(--bg);color:var(--ink);font:13px/1.65 'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;padding:0 14px 90px}
 main{max-width:980px;margin:0 auto}
-.crumbs{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 0 9px;border-bottom:1px solid var(--line2);font-size:11px;letter-spacing:.12em;text-transform:uppercase}
+.crumbs{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 0 9px;border-bottom:1px solid var(--line2);font-size:11px;letter-spacing:.12em}
 .crumbs a{color:var(--dim)} .crumbs .here{color:var(--ink)} .crumbs .badge-live{margin-left:auto;display:inline-flex;align-items:center;gap:7px;color:var(--dim);font-size:10px;letter-spacing:.14em}
 .crumbs .badge-live i{width:8px;height:8px;border-radius:50%;background:#86CC72}
-.kicker{font-size:10px;letter-spacing:.34em;text-transform:uppercase;color:var(--faint);margin-top:22px}
+.kicker{font-size:10px;letter-spacing:.34em;color:var(--faint);margin-top:22px}
 header{margin-bottom:14px;padding-bottom:14px;position:relative}
 h1{font-size:clamp(30px,5.5vw,40px);font-weight:600;letter-spacing:-.01em;line-height:1.1;
   background:linear-gradient(92deg,#E9F2EC 55%,#86CC72);-webkit-background-clip:text;background-clip:text;color:transparent}
@@ -42,7 +42,7 @@ header p{color:var(--dim);font-size:11px;margin-top:8px;max-width:780px;margin-i
 section{background:var(--panel);border:1px solid var(--line2);border-radius:12px;padding:16px;margin-top:14px;position:relative}
 section::before{content:'';position:absolute;top:-1px;left:-1px;width:10px;height:10px;
  clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);background:#86CC72;opacity:.0}
-h2{font-size:13px;color:var(--ink);font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:9px;
+h2{font-size:13px;color:var(--ink);font-weight:700;letter-spacing:.08em;margin-bottom:9px;
  display:flex;align-items:center;gap:9px;flex-wrap:wrap}
 h2::before{content:'';width:10px;height:10px;flex:none;
  clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);background:#86CC72}
@@ -53,7 +53,7 @@ input{background:var(--well);color:var(--ink);border:1px solid var(--line2);bord
  padding:10px 12px;font:13px 'IBM Plex Mono',monospace;flex:1;min-width:180px}
 input.small{font-size:11px}
 button{background:var(--well);color:#86CC72;border:1px solid var(--line2);border-radius:8px;
- padding:10px 16px;cursor:pointer;font:12px 'IBM Plex Mono',monospace;min-height:40px}
+ padding:10px 16px;cursor:pointer;font:12px 'IBM Plex Mono',monospace;min-height:44px}
 button:hover{background:#86CC72;color:#06110C}
 button:disabled{opacity:.4;cursor:not-allowed}
 button.gold{background:#86CC72;color:#06110C;border-color:#86CC72}
@@ -73,7 +73,7 @@ button.green:hover{background:#86CC72;color:#06110C}
    10px uppercase caption, number 32px+ mobile-first (9.5vw on a phone),
    full-row on wide grids. CSS-only promotion of the live #v-bal read. */
 #ch-vaulta{grid-column:1/-1}
-#ch-vaulta .cn{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
+#ch-vaulta .cn{font-size:10px;letter-spacing:.14em;color:var(--dim)}
 #ch-vaulta .cn .badge{font-size:9px;margin-left:3px}
 #ch-vaulta .cb{font-size:clamp(34px,9.5vw,46px);line-height:1.15;color:var(--ink)}
 pre{background:var(--well);border:1px solid var(--line2);border-radius:8px;padding:11px 13px;font-size:9.5px;
@@ -110,7 +110,7 @@ pre b{color:var(--ink)}
 /* ── the receipt ladder (master design pass — copy lands word-for-word;
    the live lanes speak through the composer's own receipt line) ── */
 .ladder{margin:14px 0 4px}
-.lcap{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);margin-bottom:10px}
+.lcap{font-size:10px;letter-spacing:.14em;color:var(--faint);margin-bottom:10px}
 .lrow{display:flex;gap:14px;align-items:stretch}
 .ltrack{display:flex;flex-direction:column;align-items:center;width:26px;flex:none}
 .ldot{width:22px;height:24px;flex:none;display:flex;align-items:center;justify-content:center;
@@ -171,8 +171,141 @@ var WALLET_PROFILE = {
   }
 };
 </script>
+<style id="register-dress">
+/* ══ THE THREE REGISTERS — the wallet's three dresses (skaists design system,
+   ruled 2026-09-19; founder order 2026-09-25: THREE totally different UX/UIs
+   behind the one toggle). A register changes voice, density and dress — never
+   a number, a price, a limit, an address, or what a person may do. Token
+   values are the ruled sheet, columns bee / raver / cypherpunk.
+   bee: paper ground, ink, human purple, ONE magenta action; bee-serif titles
+        over bee-sans reading (16px, never smaller); soft corners; no glow.
+   raver: the black ground, you magenta, the purples as light; raver-display
+        over raver-body; pills everywhere; glow-sovereign is the one glow.
+   cypherpunk: the same black, mono top to bottom, ai teal for every action,
+        corners cut, dense — the pipeline is the interface. */
+:root{--reg-link:#86CC72;--reg-link-hover:#A9E29A}
+body[data-reg="bee"]{
+  --bg:#fbf7f0;--panel:#ffffff;--well:#efe9dd;--ink:#0c1412;--dim:#4a5f55;--faint:#6a736e;
+  --line2:#e6dfd2;
+  --sem-harm:#4a3aa8;--sem-solution:#2e6b1e;--sem-system:#4d759b;--sem-science:#0f6f82;
+  --sem-value:#7a5209; /* honey stepped darker INSIDE its own ramp for paper — honey never sits raw on a light ground (1.88:1) */
+  --reg-primary:#a8238c;--reg-on-primary:#ffffff;--reg-link:#6e3fb8;--reg-link-hover:#4f2a8c;
+  --reg-radius-card:20px;--reg-radius-btn:12px;--reg-glow:none;
+  --reg-font-body:system-ui,-apple-system,'Segoe UI',sans-serif;
+  --reg-font-title:Georgia,'Times New Roman',serif;
+  background:#fbf7f0;color:#0c1412;color-scheme:light;
+  font:16px/1.65 var(--reg-font-body);
+}
+body[data-reg="raver"]{
+  --bg:#06110c;--panel:#0c1412;--well:#0c1412;--ink:#e9f2ec;--dim:#8fa79c;--faint:#648176;
+  --line2:#1e2b26;
+  --sem-harm:#b7a8f7;--sem-solution:#86cc72;--sem-system:#6fa9e0;--sem-science:#45c2dc;
+  --sem-value:#e8b54b;
+  --reg-primary:#d655bb;--reg-on-primary:#06110c;--reg-link:#b79fe0;--reg-link-hover:#e4d6fa;
+  --reg-radius-card:28px;--reg-radius-btn:999px;
+  --reg-glow:0 0 0 1px #9c6fd61c,0 0 46px #17102899,0 0 130px #d655bb1f; /* glow-sovereign — raver's ONE glow, sovereign-edged */
+  --reg-font-body:system-ui,-apple-system,'Segoe UI',sans-serif;
+  --reg-font-title:system-ui,-apple-system,'Segoe UI',sans-serif;
+  /* the purples as light: a sovereign wash rises behind the fold and melts
+     into the black ground — light behind the page, never on the words */
+  background:radial-gradient(130% 80% at 50% -12%,#171028 0%,#0b0d1a 38%,#06110c 68%) #06110c;
+  color:#e9f2ec;color-scheme:dark;
+  font:15px/1.7 var(--reg-font-body);
+}
+body[data-reg="cypherpunk"]{
+  --bg:#06110c;--panel:#0c1412;--well:#0c1412;--ink:#e9f2ec;--dim:#8fa79c;--faint:#648176;
+  --line2:#1e2b26;
+  --sem-harm:#b7a8f7;--sem-solution:#86cc72;--sem-system:#6fa9e0;--sem-science:#45c2dc;
+  --sem-value:#e8b54b;
+  --reg-primary:#45c2dc;--reg-on-primary:#06110c;--reg-link:#45c2dc;--reg-link-hover:#8eddee;
+  --reg-radius-card:4px;--reg-radius-btn:4px;--reg-glow:none;
+  --reg-font-body:ui-monospace,'Cascadia Mono',Consolas,Menlo,monospace;
+  --reg-font-title:ui-monospace,'Cascadia Mono',Consolas,Menlo,monospace;
+  background:#06110c;color:#e9f2ec;color-scheme:dark;
+  font:13px/1.5 var(--reg-font-body);
+}
+/* ── the dress, every register ── */
+body[data-reg] section{border-radius:var(--reg-radius-card);box-shadow:var(--reg-glow)}
+body[data-reg] button{border-radius:var(--reg-radius-btn);color:var(--reg-primary);font-family:var(--reg-font-body)}
+/* the motion law: 140ms for a press, eased out — a press you can FEEL */
+body[data-reg] button,body[data-reg] .chip{transition:transform .14s ease,background-color .26s ease,border-color .26s ease,color .26s ease}
+body[data-reg] button:active{transform:scale(.97)}
+body[data-reg] button:hover{background:var(--reg-primary);color:var(--reg-on-primary)}
+body[data-reg] button.gold{background:var(--reg-primary);border-color:var(--reg-primary);color:var(--reg-on-primary)}
+body[data-reg] input,body[data-reg] select,body[data-reg] textarea{border-radius:var(--reg-radius-btn);font-family:var(--reg-font-body)}
+body[data-reg] a{color:var(--reg-link)}
+body[data-reg] a:hover{color:var(--reg-link-hover)}
+h2::before{background:var(--sem-solution)}
+.crumbs .badge-live i{background:var(--sem-solution)}
+/* new bee: serif titles over sans reading, generous, soft; reading text 16px */
+body[data-reg="bee"] h1{background:none;color:var(--ink);font-family:var(--reg-font-title);font-weight:700;letter-spacing:-.02em;font-size:clamp(34px,6.2vw,48px);text-wrap:balance}
+body[data-reg="bee"] h1 .h1-arg{background:none;color:var(--dim)}
+body[data-reg="bee"] h2{font-family:var(--reg-font-title);font-size:17px;letter-spacing:.01em}
+body[data-reg="bee"] #ch-vaulta .cb{font-size:clamp(38px,10.5vw,56px)} /* the thesis figure earns the room */
+body[data-reg="bee"] .law{font-size:14px;line-height:1.65}
+body[data-reg="bee"] #ch-vaulta .cn{font-size:14px;letter-spacing:.06em}
+body[data-reg="bee"] .crumbs,body[data-reg="bee"] .kicker,body[data-reg="bee"] .lcap{font-size:14px;letter-spacing:.06em}
+body[data-reg="bee"] header p{font-size:14px;line-height:1.7}
+body[data-reg="bee"] footer{font-size:14px}
+body[data-reg="bee"] input,body[data-reg="bee"] select,body[data-reg="bee"] textarea{font:16px/1.5 var(--reg-font-body)}
+body[data-reg="bee"] button{font:500 14px/1.4 var(--reg-font-body)}
+/* raver: display titles, you magenta as light, pills everywhere, the one glow */
+body[data-reg="raver"] h1{font-weight:800;letter-spacing:-.03em;color:transparent;font-size:clamp(32px,6.2vw,48px);text-wrap:balance;
+ background:linear-gradient(92deg,#e9f2ec 45%,#d655bb 72%,#9c6fd6);-webkit-background-clip:text;background-clip:text}
+body[data-reg="raver"] h1 .h1-arg{background:linear-gradient(92deg,#d655bb,#9c6fd6);-webkit-background-clip:text;background-clip:text;color:transparent}
+body[data-reg="raver"] h2{font-weight:800;letter-spacing:.02em}
+body[data-reg="raver"] #ch-vaulta .cb{font-size:clamp(38px,10.5vw,56px);text-shadow:0 0 26px #d655bb33} /* the figure carries the light */
+body[data-reg="raver"] button{font:500 14px/1.4 var(--reg-font-body)}
+body[data-reg="raver"] .crumbs,body[data-reg="raver"] .kicker,body[data-reg="raver"] .lcap{letter-spacing:.1em}
+/* cypherpunk: mono top to bottom, dense; ai teal for every action */
+body[data-reg="cypherpunk"] h1{font-weight:600}
+body[data-reg="cypherpunk"] h1 .h1-arg{background:linear-gradient(92deg,#45c2dc,#86cc72);-webkit-background-clip:text;background-clip:text;color:transparent}
+body[data-reg="cypherpunk"] section{padding:12px}
+body[data-reg="cypherpunk"] h2{letter-spacing:.08em}
+/* ── THE LOWER HALF AT 390 (2026-09-26, footer audit) ── the rail matrix,
+   the receipts, the composer ladder, the summary tiles and the footer were
+   drawn at 8.5–11.5 px, much of it by script with inline sizes, and the
+   secondary words sat in --faint (4.4:1 on raver/cypherpunk black, lower on
+   paper). A register changes dress and density, never what can be read: the
+   floor is 12 px in every register (cypherpunk stays the dense one), New bee
+   and raver read their secondary labels at 14 px, and --faint text lifts to
+   --dim. Inline sizes from the renderers are met here, page-scoped. */
+main :is(.law,.badge,.chain .cd,.chain .stat,pre,.rd .k,.stamp,.keycard .kt,.keycard .kp,.keycard .kd,.chip .cc,.chip .cv,.chip .cx,.lcap,.lbadge,.lline,input.small),footer{font-size:12px}
+main :is(.chain .cd,.rd .k,.keycard .kd,.chip .cx,.lcap,.lbadge),footer{color:var(--dim)}
+/* the estate hues this page reads straight from tokens.css (amber, leaf,
+   cyan, gold, violet) are neon for the black ground; on New bee's paper they
+   fell to 1.1–2.1:1. Paper steps inside each hue's own ramp, bee only. */
+body[data-reg="bee"]{--amber:#8a4b08;--leaf:#326b39;--cyan:#176879;--gold:#855b0b;--violet:#65509a;--line:#e6dfd2}
+main [style*="font-size:8"],main [style*="font-size:9"],main [style*="font-size:10"],main [style*="font-size:11px"],main [style*="font-size:11.5px"]{font-size:12px!important}
+main :is([style*="font:9"],[style*="font:10"],[style*="font:11px"]){font-size:12px!important}
+main [style*="color:var(--faint)"]{color:var(--dim)!important}
+/* paper steps for the hand-coloured ladder labels and the two dark-dressed
+   launch buttons (hex inline on the dark ground; 1.1–2.5:1 on paper) */
+body[data-reg="bee"] .llabel[style*="#E9F2EC"]{color:var(--ink)!important}
+body[data-reg="bee"] .llabel[style*="#D655BB"]{color:#a8238c!important}
+body[data-reg="bee"] :is(.llabel,.lbadge)[style*="#6FA9E0"]{color:#29628f!important;border-color:#29628f!important}
+body[data-reg="bee"] .llabel[style*="#86CC72"],body[data-reg="bee"] .ldot[style*="#86CC72"]{color:#326b39!important}
+body[data-reg="bee"] #arw-go{background:#e2f0ee!important;color:#176879!important;border-color:#176879!important}
+body[data-reg="bee"] #fund-sec .fund-launch{background:#f3ead6;border-color:#855b0b;color:#855b0b}
+main summary{min-height:44px;display:flex;align-items:center;gap:6px;cursor:pointer}
+/* the ladder badges were nowrap: "CONFIRMED — read back from the rail" pushed the
+   layout viewport to 466 px on a phone. They wrap under their label now. */
+.lbadge{white-space:normal;display:inline-block;max-width:100%;margin:4px 0 0 10px}
+footer a{padding-block:12px}
+footer{padding-bottom:12px}
+body:not([data-reg="cypherpunk"]) main :is(.law,.chain .cd,.chain .stat,.rd .k,.keycard .kt,.keycard .kd,.chip .cc,.chip .cx,.lcap,.lbadge,.lline),body:not([data-reg="cypherpunk"]) footer{font-size:14px}
+body:not([data-reg="cypherpunk"]) main :is([style*="font-size:8"],[style*="font-size:9"],[style*="font-size:10"],[style*="font-size:11px"],[style*="font-size:11.5px"]){font-size:14px!important}
+</style>
 </head>
-<body>
+<body data-bee-theme="custom" data-reg-dress="contract">
+<script>
+/* first paint in the reader's own register — register.js re-asserts on mount.
+   THE THREE REGISTERS (founder order 2026-09-25): bee / raver / cypherpunk are
+   three totally different UX/UIs behind the one toggle — the choice lands
+   BEFORE first paint, so no register ever flashes another's dress. */
+(function(){var r='bee';try{var v=localStorage.getItem('bregister');if(v==='raver'||v==='cypherpunk')r=v;}catch(e){}
+document.body.setAttribute('data-reg',r);document.documentElement.setAttribute('data-bee-light',String(r==='bee'));})();
+</script>
 <main>
 <nav class="crumbs" aria-label="you are here">
   <a href="index.html" data-i18n="hub.name">beehive nature reserve</a><span class="sub">▸</span><span class="here" data-i18n="wl.crumb">the wallet</span>
@@ -180,20 +313,20 @@ var WALLET_PROFILE = {
 </nav>
 <header>
   <div class="kicker" data-i18n="wl.kicker">zero storage · zero custody · first-party, adapter-native</div>
-  <h1><span aria-hidden="true">🗝</span> the BNR wallet <span class="h1-arg">— one soul, every chain</span></h1>
-  <p data-reg="bee">One identity, every chain. Your bzDiD is your wallet — connect it once
+  <h1><span aria-hidden="true">🗝</span> the BNR wallet <span class="h1-arg" data-i18n="wl.h1arg">— one soul, every chain</span></h1>
+  <p data-reg="bee" data-i18n="wl.reg.connect.bee">One identity, every chain. Your bzDiD is your wallet — connect it once
   and see your balances across all your chains, sign transactions, and hold your keys.
   Nothing leaves your browser.</p>
-  <p data-reg="raver">the multi-chain wallet — bzDiD soul connects, keyless reads show every
+  <p data-reg="raver" data-i18n="wl.reg.connect.raver">the multi-chain wallet — bzDiD soul connects, keyless reads show every
   balance, derived keys sign. First-party, adapter-native, zero custody.</p>
-  <p data-reg="cypherpunk">bzDiD masterPRK → near-infinite per-context derived keys
+  <p data-reg="cypherpunk" data-i18n="wl.reg.connect.cypher">bzDiD masterPRK → near-infinite per-context derived keys
   (secp256k1 for Vaulta AND 0x/EVM, ed25519 for bzDiD rails) → client-side eosjs serialization +
   signed here → sent onward via a public door. Your keys stay in this tab's memory — nothing saved, nothing held for you.
   New accounts are forged bzDiD-native — no exports, no imports, no manual keys, ever.</p>
 </header>
 
 <section style="border-color:var(--gold)">
-  <h2>🔗 CONNECT — your bzDiD is the wallet</h2>
+  <h2>🔗 CONNECT — <span data-i18n="wl.h.connect">your bzDiD is the wallet</span></h2>
   <div class="law">Connect your soul (your .b name or account). New here?
   <a href="./onboarding/">Create your bzDiD</a> — the held-hand ceremony takes 2 minutes.</div>
   <div class="row">
@@ -204,7 +337,7 @@ var WALLET_PROFILE = {
 </section>
 
 <section id="kc-sec">
-  <h2>🗝 THE KEYCHAIN — your bzDiD holds every key</h2>
+  <h2>🗝 THE KEYCHAIN — <span data-i18n="wl.h.keychain">your bzDiD holds every key</span></h2>
   <div class="law"><b>Automatic:</b> your first tap or keypress anywhere on this page connects the
   keychain by itself (the WebAuthn ceremony needs one touch of yours — browsers' law, not ours).
   The PRF ceremony re-derives your <b>masterPRK</b> in this tab's memory (never stored, never
@@ -278,7 +411,8 @@ var WALLET_PROFILE = {
         <div id="dm-body" style="margin-top:8px"></div>
         <div class="law" id="dm-stat" style="margin-top:6px">— registry not loaded —</div>
       </div>
-      <div class="law" style="margin-top:4px">The passkey must live in a <b>PRF-capable authenticator</b>:
+      <details class="tnote" data-reg-disclose><summary data-i18n="wl.d.passkey">Which devices and keys can make your bzDiD — the full compatibility check</summary>
+  <div class="law" style="margin-top:4px">The passkey must live in a <b>PRF-capable authenticator</b>:
       platform ones (Windows Hello, the Chrome profile, Google Password Manager, iCloud Keychain) work;
       most third-party managers (Bitwarden, 1Password &amp; friends) don't yet. <b>Create never takes a
       manager's word for it:</b> after the "confirmed" the wallet immediately re-touches the exact
@@ -297,6 +431,7 @@ var WALLET_PROFILE = {
       key still bridges you in: paste it once below.
       <b>Already hold a bzDiD elsewhere? Don't create a second — import it with your recovery phrase
       instead (a new passkey = a new soul).</b></div>
+  </details>
       <div class="row">
         <input id="kc-rec" class="small" type="password" placeholder="…or paste your 24-word recovery phrase / bdidrec code" spellcheck="false" autocomplete="off">
         <button id="kc-recgo">recover</button>
@@ -323,7 +458,8 @@ var WALLET_PROFILE = {
 </section>
 
 <section id="vault-sec" style="border-color:var(--cyan)">
-  <h2>🔐 THE VAULT — one keypass, every secret</h2>
+  <h2>🔐 THE VAULT — <span data-i18n="wl.h.vault">one keypass, every secret</span></h2>
+  <details class="tnote" data-reg-disclose><summary data-i18n="wl.d.import">Bringing keys you already hold — formats, and how they get sealed</summary>
   <div class="law">The keys you already hold — <b>seed phrases</b> from any wallet
   (12 · 15 · 18 · 21 · 24 words) and <b>Vaulta ACTIVE private keys</b>
   (5K… · L… · K… · PVT_K1_…) — sealed under a single <b>keypass</b> so you never handle
@@ -335,14 +471,17 @@ var WALLET_PROFILE = {
   plaintext juggling; it does not turn a browser key into a cold one, and it cannot protect you
   from a page that has been tampered with. For balances you would not accept losing, the answer
   is still a signing device.</div>
+  </details>
 
   <!-- ── state A: no vault on this browser ─────────────────────────────── -->
   <div id="vlt-new" style="display:none">
-    <div class="law" style="margin-top:12px;color:var(--ink)"><b>① Choose your keypass.</b>
+    <details class="tnote" data-reg-disclose><summary data-i18n="wl.d.keypass">Choosing your keypass — the one decision to take slowly</summary>
+  <div class="law" style="margin-top:12px;color:var(--ink)"><b>① Choose your keypass.</b>
     This is the only thing standing between anyone with this browser and every secret inside.
     Generate one — eight words from the BIP-39 list is 88 bits of real entropy, which no one
     is brute-forcing. Write it on paper. <b style="color:var(--amber)">There is no reset:</b>
     lose the keypass and the vault is unrecoverable by design.</div>
+  </details>
     <div class="row">
       <button id="vlt-gen" class="gold">⚄ generate a keypass</button>
       <select id="vlt-genlen" style="background:var(--well);color:var(--ink);border:1px solid var(--line);border-radius:7px;padding:10px 12px;font:12px 'IBM Plex Mono',monospace">
@@ -468,12 +607,14 @@ var WALLET_PROFILE = {
 </section>
 
 <section id="forge-sec">
-  <h2>♾ THE KEY FORGE — near infinite keys, one soul</h2>
+  <h2>♾ THE KEY FORGE — <span data-i18n="wl.h.forge">near infinite keys, one soul</span></h2>
+  <details class="tnote" data-reg-disclose><summary data-i18n="wl.d.forge2">How each context gets its own key — derivation, on demand</summary>
   <div class="law">Every context derives its own key from your masterPRK: <b>vaulta:names</b> for
   Vaulta account keys, <b>evm:names</b> for 0x addresses, any adapter context you can name.
   Derivation is instant, free, deterministic — the same context always yields the same key on
   every device. We persist <b>only the context list</b> (this browser), never a key; keys exist
   only while your keychain is connected. Tap a key to copy it.</div>
+  </details>
   <div class="chips" id="forge-chips">
     <div class="law">connect your keychain above to see your derived keys — or forge new ones below</div>
   </div>
@@ -488,7 +629,7 @@ var WALLET_PROFILE = {
 </section>
 
 <section>
-  <h2>⚡ BALANCES — every chain, keyless, live</h2>
+  <h2>⚡ BALANCES — <span data-i18n="wl.h.balances">every chain, keyless, live</span></h2>
   <div class="law">Read from public RPCs in your browser. Nothing stored, nothing sent.
   The chain is the source of truth.</div>
   <div class="chains" id="chains">
@@ -548,13 +689,15 @@ var WALLET_PROFILE = {
 </section>
 
 <section id="acct-sec" style="border-color:#2c4a5a">
-  <h2>🏭 THE ACCOUNT FORGE — Vaulta accounts born from your bzDiD</h2>
+  <h2>🏭 THE ACCOUNT FORGE — <span data-i18n="wl.h.acctforge">Vaulta accounts born from your bzDiD</span></h2>
+  <details class="tnote" data-reg-disclose><summary data-i18n="wl.d.acct">How a new account is born — your bridged key signs it into being</summary>
   <div class="law">Your <b>bridged</b> account signs <b>newaccount</b>; the new account's owner and
   active keys derive from your bzDiD (contexts <b>vaulta:&#8203;name/owner</b> and
   <b>vaulta:&#8203;name/active</b>) — no key is exported, written down, or imported, ever.
   Vaulta economics, stated honestly: <b>broadcasting draws on staked CPU/NET, not liquid</b>
   (a 0.0000 liquid balance does not block transactions); the <b>RAM purchase draws from liquid</b>
   (live price below). Near infinite: every account born this way signs with your keychain.</div>
+  </details>
   <div class="row">
     <input id="ac-name" placeholder="new account name — exactly 12 chars: a-z 1-5, starts with a letter" spellcheck="false" style="font-family:'IBM Plex Mono',monospace">
     <button id="ac-go" class="gold" style="background:#0e2d3a;color:var(--cyan);border-color:#1d4655">🏭 FORGE ACCOUNT</button>
@@ -567,7 +710,7 @@ var WALLET_PROFILE = {
   <pre id="ac-out" style="display:none"></pre>
 </section>
 <section id="pay-sec" style="border-color:#3a5a2c">
-  <h2>💸 PAY — send · receive · swap</h2>
+  <h2>💸 PAY — <span data-i18n="wl.h.pay">send · receive · swap</span></h2>
   <div class="row" style="margin-top:8px">
     <button id="pay-rx" class="gold">📥 receive</button>
     <button id="pay-tx" class="gold">📤 send</button>
@@ -714,6 +857,29 @@ var WALLET_PROFILE = {
   <div class="law" id="pay-stat" style="margin-top:6px;min-height:20px">— choose a lane above —</div>
 </section>
 
+<!-- ══ bPAY — the preservation invoice (Phase A: render-only; the carried quote
+     set is the commitment, native gas stays separate, and the authorization
+     route does not exist yet — recon1-oracle A9c owns that string until the
+     Phase C re-ruling). Policy rider 2026-09-17: the sharing choice is
+     first-class BEFORE quote; this panel records the policy the quote actually
+     bound — the founder's chooser gesture is chartered, never agent-inferred. ══ -->
+<section id="bpay-sec" style="border-color:#2c4a5a">
+  <h2>🧾 <span data-i18n="wl.bpay.h">bPay — the preservation invoice</span></h2>
+  <details class="tnote" data-reg-disclose><summary data-i18n="wl.bpay.law">the chooser comes first — every figure is carried from a live, keyless network quote; this panel renders, it cannot spend</summary>
+  <p class="law">the audience choice is yours, in the chooser, before any quote; selecting 🌐 Public and
+  asking for a fresh quote sends your resolved policy to the keyless bridge — no hidden network
+  default gets promoted into a choice. 🔒 private audiences stay visibly unavailable until their
+  paths are qualified. the view toggle (newbee / raver / cypherpunk) only changes what you can
+  inspect — never the audience, never your authority. no ANT figure is typed by anyone: the bridge
+  hashed the exact file and quoted every chunk; those quotes — each a <b>quote hash + amount</b>
+  pair — are the carried commitment (INVOICE-1 law: owed is <b>derived</b>, never asserted). native
+  gas is a <b>separate</b> wallet-side obligation. when the authorization surface is earned, your own
+  button press — and only that — crosses the waiting state; no chat text, no terminal, no agent
+  receipt substitutes for it.</p></details>
+  <div id="bpay-card" class="law" style="margin-top:10px;min-height:24px;overflow-wrap:anywhere">…</div>
+</section>
+<script src="bpay-invoice.js?v=3" defer></script>
+
 <!-- ══ INSCRIPTIONS — the garden, drawn on-chain. The art is the hero: the
      piece leads, the numbers stand beside it. Every SVG here is fetched from
      the collection's own contract at read time; nothing is cached, stored, or
@@ -737,13 +903,13 @@ var WALLET_PROFILE = {
 <!-- ══ THE VOUCHER — prepaid compute, the money engine with a face ══ -->
 <section id="voucher-sec" style="border-color:#2c4a3a">
   <h2>🎟 <span data-i18n="wl.vh2">THE VOUCHER — prepay compute, metered fair</span></h2>
-  <p data-reg="bee">Prepay for compute work — models, vRAM, whatever the estate meters —
+  <p data-reg="bee" data-i18n="wl.reg.voucher.bee">Prepay for compute work — models, vRAM, whatever the estate meters —
   and watch every last drop of it itemized here. Top up from either chain, spend at metered
   rates, and the estate's 10% tithe is always visible, never buried.</p>
-  <p data-reg="raver">Two rails in, one A balance, receipts with the tithe line — the same
+  <p data-reg="raver" data-i18n="wl.reg.voucher.raver">Two rails in, one A balance, receipts with the tithe line — the same
   hash-chained ledger the till meters with, rendered live from the estate oracle
   (skaists.buzz). Refusals read as sentences, not codes.</p>
-  <p data-reg="cypherpunk">voucher_escrow semantics, live: balances DERIVED from a
+  <p data-reg="cypherpunk" data-i18n="wl.reg.voucher.cypher">voucher_escrow semantics, live: balances DERIVED from a
   hash-chained append-only event log (never stored), refuse-before-write enforced at the
   engine, memo-native binding on the A rail (memo = meter key, no binding table), binding
   table on the USDC rail, every deposit cites its tx. This panel is a read-only view over
@@ -752,7 +918,7 @@ var WALLET_PROFILE = {
   <div class="row" style="align-items:center;flex-wrap:wrap">
     <input id="vc-key" placeholder="your meter key — e.g. bclau-paid-1" spellcheck="false" autocomplete="off" style="flex:2;min-width:200px">
     <button id="vc-go" class="gold" style="min-height:40px">look up</button>
-    <span style="font-size:10.5px;color:var(--faint)" id="vc-src">—</span>
+    <span style="font-size:10.5px;color:var(--faint)" id="vc-src"></span>
   </div>
 
   <div id="vc-panel" style="display:none;margin-top:12px">
@@ -808,7 +974,8 @@ var WALLET_PROFILE = {
 
 <!-- ══ RECEIPTS — the public spend record, recomputed here (SPEC-SPEND-RECEIPT-1) ══ -->
 <section id="receipts-sec" style="border-color:var(--gold)">
-  <h2>🧾 THE RECEIPTS — every bill recomputed here</h2>
+  <h2>🧾 THE RECEIPTS — <span data-i18n="wl.h.receipts">every bill recomputed here</span></h2>
+  <details class="tnote" data-reg-disclose><summary data-i18n="wl.d.receipts">How this panel checks every bill — recomputed here, never trusted</summary>
   <p class="law">the voucher panel above reads <b>your</b> balance live from the estate oracle; this panel
   reads the estate's <b>public</b> spend-receipt record (SPEC-SPEND-RECEIPT-1, the same shape the b-meter
   writes) and recomputes every bill in-page — <b>price × burned = owed</b>, summed from the line items,
@@ -818,6 +985,7 @@ var WALLET_PROFILE = {
   <b>no keys</b>: content hash, exact arithmetic and the forward-only chain are checked from the public
   record alone. private receipts never appear here — visibility is storage law (§3a): only rows marked
   public live in a public store. paste any receipt and the same auditor checks yours.</p>
+  </details>
   <div id="receiptsBody" style="margin-top:12px"></div>
 </section>
 
@@ -841,8 +1009,14 @@ var WALLET_PROFILE = {
     #fund-sec .fund-nojs{border:1px dashed var(--amber);color:var(--amber);border-radius:8px;
      padding:10px 12px;font-size:11px;margin-top:10px;line-height:1.8}
     @media (prefers-reduced-motion: reduce){#fund-sec .fund-coin{animation:none}}
-  </style>
-  <h2>💳 FUND — buy USDC, land it on an address you hold</h2>
+  
+/* comprehension touch floor (2026-09-16): the estate’s own 44px canon on phones */
+@media(max-width:520px){section :is(button,select,input){min-height:44px !important}
+  #cap-set,#cap-clear,#vc-go{min-height:44px}
+  #vcomb .cell{min-height:44px}}
+</style>
+  <h2>💳 FUND — <span data-i18n="wl.h.fund">buy USDC, land it on an address you hold</span></h2>
+  <details class="tnote" data-reg-disclose><summary data-i18n="wl.d.fiat">How the card checkout works — who holds what at each step</summary>
   <div class="law">The one lane this wallet cannot forge itself: licensed fiat. The buy runs on
   <b>Meld's hosted checkout</b> — it opens in its own tab; this page only builds the link.
   <b>No server of ours:</b> no BNR endpoint sits in this lane; this wallet signs nothing and
@@ -855,6 +1029,7 @@ var WALLET_PROFILE = {
   operator profiles who funds what. Honest limit: whichever provider you land on <b>can see
   the lookup</b> — your IP plus the name you asked about. <b>Pasting a raw 0x address skips
   resolution entirely</b> — if you'd rather not be seen asking, that is a real choice.</div>
+  </details>
   <noscript><div class="fund-nojs">💳 funding needs JavaScript — this panel builds the checkout
   link in your browser, so with scripting off it stays right here, asleep. Everything else on
   this page renders fine.</div></noscript>
@@ -1121,7 +1296,8 @@ var WALLET_PROFILE = {
 
 <!-- ══ PEER FUNNEL — the first mile in: fiat → USDC on Peer's escrow, estate = bare to ══ -->
 <section id="peer-sec" style="border-color:#2c4a3a">
-  <h2>🏧 FIAT IN — the Peer funnel (SPEC-PEER-FUNNEL-1)</h2>
+  <h2>🏧 FIAT IN — <span data-i18n="wl.h.fiat">the Peer funnel</span> (SPEC-PEER-FUNNEL-1)</h2>
+  <details class="tnote" data-reg-disclose><summary data-i18n="wl.d.funnel">The fiat funnel’s role — the estate sells, it never operates</summary>
   <p class="law">the estate is a <b>seller, not an operator</b>: its Base address below is a bare
   <b>to</b> on Peer's live escrow (EscrowV2 + OrchestratorV3 on Base) — it signs nothing, grants
   no allowance, runs no relayer. a customer's fiat (Venmo &amp; co.) settles as USDC straight
@@ -1132,6 +1308,7 @@ var WALLET_PROFILE = {
   was attached, the split still happens as ONE estate-side exact-multi instruction (seller +
   tithe in a single payment — the fallback, SPEC §receive). settlement finality is one vendor
   signature until the estate's own witness set exists — priced as such, never hidden.</p>
+  </details>
   <div class="row" style="align-items:center;flex-wrap:wrap;gap:8px">
     <span class="law">receive address (bare <b>to</b>):</span>
     <code style="word-break:break-all">0x89881F83A8C9CE06E34cbDD50A612909a784d7C6</code>
@@ -1258,7 +1435,8 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
 
 <!-- ══ ARWEAVE — publish & anchor (first-party signer · vault custody) ══ -->
 <section id="arw-sec" style="border-color:#4a3a1d">
-  <h2>📡 ARWEAVE — publish &amp; anchor, no middleman</h2>
+  <h2>📡 ARWEAVE — <span data-i18n="wl.h.arweave">publish &amp; anchor, no middleman</span></h2>
+  <details class="tnote" data-reg-disclose><summary data-i18n="wl.d.arweave">The Arweave lane — built and signed inside this page</summary>
   <div class="law">Another adapter on the wallet shell — balance, receive address, send, and
   one new capability: <b>PUBLISH</b>. The transaction is built and signed <b>in this page</b>
   with WebCrypto (format-2 data tx, RSA-PSS-SHA256, proven byte-equivalent to arweave-js),
@@ -1267,6 +1445,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   the free tier to keep the rail first-party. The JWK lives in <b>the vault</b> — sealed
   under your keypass, structurally verified before sealing, revealed only into the signing
   call. Reads are keyless; the gateway sees what any Arweave read sees.</div>
+  </details>
   <noscript><div class="fund-nojs">📡 publishing needs JavaScript — the tx is built and signed in
   your browser; with scripting off this panel stays asleep.</div></noscript>
   <div id="arw-js" hidden>
@@ -1403,7 +1582,8 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
 </section>
 
 <section>
-  <h2>✍ COMPOSER — the BNR contract surface, no Unicove</h2>
+  <h2>✍ COMPOSER — <span data-i18n="wl.h.composer">the BNR contract surface, no Unicove</span></h2>
+  <details class="tnote" data-reg-disclose><summary data-i18n="wl.d.composer">What the composer shows you before anything is signed</summary>
   <div class="law" id="sign-law">Give it contract + action and it fetches the live ABI, renders
   one field per argument, and <b>shows you exactly what you will sign</b> — action, authorization,
   parsed args, signer, endpoint — before anything broadcasts. ABI-driven: the six bnames actions
@@ -1411,6 +1591,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   the Jungle4 lane rehearses with a test key you paste (TESTNET-ONLY, memory-only). The Unicove
   dependency is dead — this is ours, on the adapter contract: the worker builds, the vault signs,
   the outbox persists, and nothing is called "sent" until the rail is read back.</div>
+  </details>
   <div class="ladder" id="receipt-ladder" aria-label="the receipt ladder — the order is law">
     <div class="lcap" data-i18n="wl.ld.cap">the receipt ladder — every state is a first-class visual · the order is law</div>
     <div class="lrow"><div class="ltrack"><span class="ldot">1</span><span class="ltail"></span></div>
@@ -1469,7 +1650,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
 </section>
 
 <section>
-  <h2>📤 OUTBOX — signed bytes persist here BEFORE they submit</h2>
+  <h2>📤 OUTBOX — <span data-i18n="wl.h.outbox">signed bytes persist here BEFORE they submit</span></h2>
   <div class="law">The order is law: <b>build → sign → persist → submit → confirm by reading the
   rail</b>. A retry resubmits the identical stored bytes — it never re-signs, never rebuilds.
   Nothing shows "sent" until a block read says so; the receipt names what was read.</div>
@@ -1477,23 +1658,25 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
 </section>
 
 <section>
-  <h2>🗺 CHAIN MATRIX — the sixteen rails, from data</h2>
+  <h2>🗺 CHAIN MATRIX — <span data-i18n="wl.h.matrix">the sixteen rails, from data</span></h2>
+  <details class="tnote" data-reg-disclose><summary data-i18n="wl.d.rails">Every rail, one row each — how it is read and signed</summary>
   <div class="law">Every rail the wallet will ever owe you, one row each: <b>how it's read</b>
   (first-party path first), <b>how it's signed</b> (custody tier), and <b>tonight's honest state</b>.
   Rendered from the data block below the fold — never typed prose — and every count you see is
   computed from it at render. The doctrine: PROTOCOL paths may be core, SERVICE degrades
   gracefully, gaps say they are gaps.</div>
+  </details>
   <div id="matrix-summary" style="display:flex;gap:8px;flex-wrap:wrap;margin:10px 0"></div>
   <div id="matrix-body"></div>
 </section>
 
 <section>
-  <h2>📊 SUMMARY</h2>
+  <h2>📊 <span data-i18n="wl.h.summary">SUMMARY</span></h2>
   <div class="readout">
-    <div class="rd"><div class="k">SOUL</div><div class="v" id="sum-soul" style="font-size:13px">—</div></div>
+    <div class="rd"><div class="k">SOUL</div><div class="v" id="sum-soul" style="font-size:13px">not yet</div></div>
     <div class="rd"><div class="k">CHAINS CONNECTED</div><div class="v" id="sum-chains">0</div></div>
     <div class="rd"><div class="k">KEYCHAIN</div><div class="v" id="sum-kc" style="font-size:12px;color:var(--amber)">not connected</div></div>
-    <div class="rd"><div class="k">VAULTA AUTHORITY</div><div class="v" id="sum-bridge" style="font-size:12px;color:var(--amber)">—</div></div>
+    <div class="rd"><div class="k">VAULTA AUTHORITY</div><div class="v" id="sum-bridge" style="font-size:12px;color:var(--amber)">not yet</div></div>
   </div>
 </section>
 
@@ -1503,7 +1686,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   static · derived keys live in tab memory only · vault secrets sealed with PBKDF2+AES-GCM · Rust core: crates/bnr-keys · AGPL-3.0-only · <a href="index.html">the hub</a> · this page: surfaces/wallet.html
 </footer>
 <script src="agent-dock.js?v=5"></script>
-<script src="tour.js?v=34"></script>
+<script src="tour.js?v=42"></script>
 <script src="onboarding/bzdid-key.js"></script>
 <script src="onboarding/vendor/bnr-sign.js?v=6"></script>
 <script src="onboarding/vendor/bnr-keys.js?v=1"></script>
@@ -1519,7 +1702,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
 <script>
 (function(){
   var $=function(i){return document.getElementById(i)};
-  var VH=['https://eos.api.eosnation.io','https://eos.greymass.com','https://api.eosn.io'];
+  var VH=['https://eos.api.eosnation.io','https://eos.greymass.com'];
   var HH='https://api.hive.blog';
   var LIVE_HOST=null;
   var SOUL=null;
@@ -2477,7 +2660,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       an.setAttribute('opacity','1')}
     else{n.setAttribute('stroke','#5f6f61');c.setAttribute('fill','#5f6f61');
       arc.setAttribute('opacity','0');an.setAttribute('opacity','0')}
-    $('sum-bridge').textContent=ok?'bridged ✓':(MPRK?'needs bridge':'—');
+    $('sum-bridge').textContent=ok?'bridged ✓':(MPRK?'needs bridge':'not yet');
     $('sum-bridge').style.color=ok?'var(--leaf)':'var(--amber)';
   }
 
@@ -3091,7 +3274,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     $('bridge-sec').style.display='none';
     $('kc-stat').textContent='— keychain scrubbed from memory —';
     $('sum-kc').textContent='not connected';$('sum-kc').style.color='var(--amber)';
-    $('sum-bridge').textContent='—';$('sum-bridge').style.color='var(--amber)';
+    $('sum-bridge').textContent='not yet';$('sum-bridge').style.color='var(--amber)';
     $('ethg').setAttribute('opacity','.45');$('ethnode').setAttribute('stroke-dasharray','2 3');
     renderForge();
   };
@@ -3729,7 +3912,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
           outboxPut(entry);
           say(c.phase === 'confirmed'
             ? 'CONFIRMED — read back from the rail: ' + (c.evidence && c.evidence.read) + (c.evidence && c.evidence.status ? ' · status ' + c.evidence.status : '') + ' · tx ' + entry.ref
-            : c.phase.toUpperCase() + ' — ' + JSON.stringify(c.evidence || {}),
+            : c.phase + ' — ' + JSON.stringify(c.evidence || {}),
             c.phase);
           return entry;
         }
@@ -4008,7 +4191,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     $('matrix-body').innerHTML = families.map(function (f) {
       var rows = CHAIN_MATRIX.filter(function (c) { return c.family === f });
       return '<div style="margin-bottom:10px">' +
-        '<div style="font-size:9.5px;color:var(--faint);letter-spacing:.09em;margin-bottom:5px">' + f.toUpperCase() + ' FAMILY — ' + rows.length + ' rail' + (rows.length === 1 ? '' : 's') + '</div>' +
+        '<div style="font-size:9.5px;color:var(--faint);letter-spacing:.09em;margin-bottom:5px">' + f + ' family — ' + rows.length + ' rail' + (rows.length === 1 ? '' : 's') + '</div>' +
         rows.map(function (c) {
           return '<div style="border:1px solid var(--line);border-radius:8px;padding:8px 10px;margin-bottom:5px;background:var(--well)">' +
             '<div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;align-items:baseline">' +
@@ -5286,7 +5469,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   prfNote();
 })();
 </script>
-<script src="spend-audit.js?v=1"></script>
+<script src="spend-audit.js?v=2"></script>
 <script>if (window.SpendAudit) SpendAudit.mountPanel(document.getElementById('receiptsBody'));</script>
 </body>
 </html>

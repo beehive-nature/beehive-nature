@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p3bde142c16",
+ "bnr": "bnr://skaists.dev/blood/p3bde142c16",
+ "identity": {
+  "name": "John Campe",
+  "lifespan": "1566–1630",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LL36-NKF"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p65c2aef938",
+    "name": "Robert Campe Sr.",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p795313a05d",
+    "name": "Joan Page",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p2ff78b0de4",
+    "name": "Nicholas Camp"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p605e63aeef",
+    "name": "Mary Goore",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LL36-NKF",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

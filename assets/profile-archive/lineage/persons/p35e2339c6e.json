@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p35e2339c6e",
+ "bnr": "bnr://skaists.dev/blood/p35e2339c6e",
+ "identity": {
+  "name": "Sophie Mieceslas",
+  "lifespan": "0860–Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "P7K6-M97"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p99213de916",
+    "name": "Eyle Mieceslas",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pd10b902a1b",
+    "name": "Prinzessin van Polatsk",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p4f8023f3bf",
+    "name": "King Olof Björnsson"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pd7b3e067f4",
+    "name": "Prince of Sweden Bjorn III Eriksson",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/P7K6-M97",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p5e73000bf0",
+ "bnr": "bnr://skaists.dev/blood/p5e73000bf0",
+ "identity": {
+  "name": "Sir Dreux de Montague II",
+  "lifespan": "1183–1216",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LYV5-5HF"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p4db462c7ff",
+    "name": "Dreux de Montague I",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pe0f9d1cb71",
+    "name": "Aliva de Basset",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p57a43fcf8b",
+    "name": "Sir William de Montague"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pd248806f4e",
+    "name": "Lady Aline Basset",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LYV5-5HF",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

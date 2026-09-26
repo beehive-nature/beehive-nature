@@ -1,0 +1,64 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pfabe4eb710",
+ "bnr": "bnr://skaists.dev/blood/pfabe4eb710",
+ "identity": {
+  "name": "James Hubbard",
+  "lifespan": "1578–1611",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "KD9D-9VH"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p9bb501d14a",
+    "name": "Thomas Hubbard",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p867146d10d",
+    "name": "Rev. Samuel Hubbard"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pe4cacbc297",
+    "name": "Naomi Cocke",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/KD9D-9VH",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

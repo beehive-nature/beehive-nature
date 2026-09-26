@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p49564734c4",
+ "bnr": "bnr://skaists.dev/blood/p49564734c4",
+ "identity": {
+  "name": "Alice Oldcastle",
+  "lifespan": "1368–1397",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LYCB-8ZD"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "GF2S-WNM",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "GKXQ-MLX",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p825640723f",
+    "name": "Elizabeth Maud Bromwich"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p859f6ebbfd",
+    "name": "Sir Thomas Bromwich",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LYCB-8ZD",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

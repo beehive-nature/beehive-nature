@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pf58bced28f",
+ "bnr": "bnr://skaists.dev/blood/pf58bced28f",
+ "identity": {
+  "name": "Ensign Nicholas  Hugh Ezekiel Mosher",
+  "lifespan": "1600–1694",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LNRG-1YF"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pfdc885a034",
+    "name": "Stephen Mosher",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p5aee8fcd54",
+    "name": "Anna MARY Farringston",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pef2f1035fb",
+    "name": "Mary Mosher"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p11da38bb8a",
+    "name": "Lydia Maxson",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LNRG-1YF",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

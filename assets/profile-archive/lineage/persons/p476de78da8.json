@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p476de78da8",
+ "bnr": "bnr://skaists.dev/blood/p476de78da8",
+ "identity": {
+  "name": "George Chandler",
+  "lifespan": "1633–1687",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "KC5Z-9ND"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pc16528131f",
+    "name": "John Chandler",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p3c4dc9cc29",
+    "name": "Ann Benger",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p9518f2585b",
+    "name": "George Chandler Jr"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pc0bce20a8c",
+    "name": "Jane Smith",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/KC5Z-9ND",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

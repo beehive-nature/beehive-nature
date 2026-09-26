@@ -1,0 +1,61 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "liv-1",
+ "bnr": "bnr://skaists.dev/blood/liv-1",
+ "identity": {
+  "name": "Living",
+  "lifespan": null,
+  "gender": "MALE",
+  "living": true
+ },
+ "refs": [],
+ "evidence": {
+  "era": "living",
+  "support": "unsourced-entry",
+  "class": "living",
+  "basis": "redacted stub"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "private-stub",
+  "reason": "living — anonymous root-line stub; provider id withheld"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p3d44ccaffd",
+    "name": "Jack Benedum Sutphen",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p7b1078c886",
+    "name": "Donna Ruth Lawton",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "founder",
+    "name": "Living"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "liv-2",
+    "name": "Living",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": null,
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

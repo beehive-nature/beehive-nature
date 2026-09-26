@@ -1,0 +1,74 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p2abfa55eec",
+ "bnr": "bnr://skaists.dev/blood/p2abfa55eec",
+ "identity": {
+  "name": "Egnatia Lolliana",
+  "lifespan": "0300–Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GV4R-97G"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p198795cbc2",
+    "name": "Quintus Flavius Maesius Egnatius Lollianus",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p2ad04db8df",
+    "name": "Flavia de Rome",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pca73946401",
+    "name": "Rufius Maecius Maecius Placidus Vir Consularis Romana"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p67641ebc50",
+    "name": "Postumius Rufius Festus Avienus Rufius Festus Avienus Console Romana",
+    "marriage": null
+   },
+   {
+    "id": "p5d50a65c85",
+    "name": "Rufius Caecina Postumianus",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GV4R-97G",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

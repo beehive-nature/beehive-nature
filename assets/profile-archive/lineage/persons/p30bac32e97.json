@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p30bac32e97",
+ "bnr": "bnr://skaists.dev/blood/p30bac32e97",
+ "identity": {
+  "name": "Zahna bat Akhtab Mar-Zutra II Ha-David",
+  "lifespan": "0485–Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "P377-36Y"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pd5b8ae2b88",
+    "name": "Akhtab Mar Zutra II ha-David",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p1f28ed540b",
+    "name": "Bat Merimar",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pf374fa5d8d",
+    "name": "Princess Adai bint Asad ibn Hashim"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pe33c443634",
+    "name": "Asad ibn Hashim ibn 'Abd Manaf",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/P377-36Y",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

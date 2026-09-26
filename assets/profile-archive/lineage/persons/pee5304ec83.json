@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pee5304ec83",
+ "bnr": "bnr://skaists.dev/blood/pee5304ec83",
+ "identity": {
+  "name": "Jeanne le Vavasseur dit Durell",
+  "lifespan": "1602–1662",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "K8M7-WGT"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p304860f3a9",
+    "name": "Michel Le Vavasseur dit Durell",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p08f3b69611",
+    "name": "Abrigail Bertran",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p134944a587",
+    "name": "Elie Grandin"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p7c602b2c45",
+    "name": "Elie Grandin",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/K8M7-WGT",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

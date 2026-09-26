@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p4ced0cabf8",
+ "bnr": "bnr://skaists.dev/blood/p4ced0cabf8",
+ "identity": {
+  "name": "Thomas de Grey",
+  "lifespan": "1509–1569",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G26P-VSX"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p8d51c35757",
+    "name": "Thomas de Grey",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p8191d24e56",
+    "name": "Elizabeth FitzLewis",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pa71131d77d",
+    "name": "Thomas de Graye IV"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pec7724a672",
+    "name": "Ursula Drewry",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G26P-VSX",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p41775b3f00",
+ "bnr": "bnr://skaists.dev/blood/p41775b3f00",
+ "identity": {
+  "name": "Ebald de Grandson",
+  "lifespan": "1154–1235",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L1ZG-QNN"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p943f849ba6",
+    "name": "Ebles Grandson",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pdeb9588460",
+    "name": "Jordane de Belmont",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p7780b239f4",
+    "name": "Pierre de Grandson"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p321f3bf9c8",
+    "name": "Beatrix de Genèva",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L1ZG-QNN",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pdb590933cf",
+ "bnr": "bnr://skaists.dev/blood/pdb590933cf",
+ "identity": {
+  "name": "le jeune II Tonantius Ferreolus Gallo-Roman Senator at Narbonne",
+  "lifespan": "0440–0517",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "P6FW-D5K"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p2ab9b9efc1",
+    "name": "Praetorian Prefect Tonantius Ferreolus I",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p1579eb9dd9",
+    "name": "Papianilla Clarissima Femina of Rome",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p5db7e63f9a",
+    "name": "Tonantius Ferréolus de Rodez Senator of Narbonne et Bishop of Uzés"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p39c7bdda28",
+    "name": "Princesse Industria de Narbo-Reims",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/P6FW-D5K",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p848f209439",
+ "bnr": "bnr://skaists.dev/blood/p848f209439",
+ "identity": {
+  "name": "Joseph Chapman",
+  "lifespan": "1673–1732",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LY7Z-5TF"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pc29b34b6bb",
+    "name": "John Bliss Chapman",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pe8e90a6581",
+    "name": "Elizabeth Hawley",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p344a0191fa",
+    "name": "Levi Chapman Sr."
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p726796a168",
+    "name": "Sarah Spencer",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LY7Z-5TF",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

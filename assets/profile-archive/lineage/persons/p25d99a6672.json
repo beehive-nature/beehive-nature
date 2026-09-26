@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p25d99a6672",
+ "bnr": "bnr://skaists.dev/blood/p25d99a6672",
+ "identity": {
+  "name": "Mathilde , gravin van Leuven",
+  "lifespan": "1006–1049",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LDSS-KHY"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p4433635ac6",
+    "name": "Lambert I met de Baard, graaf van Leuven-Henegouwen",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p5e022ad7e2",
+    "name": "Gerberge de Basse-Lotharingie",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p5fba27cc4e",
+    "name": "Lambert II de Boulogne comte de Lens"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p3fadcbd946",
+    "name": "Eustache de Boulogne I",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LDSS-KHY",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

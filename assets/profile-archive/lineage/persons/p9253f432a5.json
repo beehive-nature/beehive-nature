@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p9253f432a5",
+ "bnr": "bnr://skaists.dev/blood/p9253f432a5",
+ "identity": {
+  "name": "Goert van der Verschuer",
+  "lifespan": "1553–1596",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LKQ6-7GV"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pf91a86ee56",
+    "name": "Evert Goertz van der Schuer",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p65b59d4eab",
+    "name": "Margaretha Hermans Schrassert",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pf5aa0bf29d",
+    "name": "Wouter Geurtz Verschuer"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p933a986772",
+    "name": "Geert Hessels",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LKQ6-7GV",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

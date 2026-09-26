@@ -1,0 +1,74 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p4c5cadf160",
+ "bnr": "bnr://skaists.dev/blood/p4c5cadf160",
+ "identity": {
+  "name": "Marcus Livius Drusus \"the Elder\" Consul and Censor of Rome",
+  "lifespan": "0155BC–0108BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G6RP-6LT"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p3f207d0ea5",
+    "name": "Gaius Livius Drusus Consul of Rome",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p3f848fb6c8",
+    "name": "Cornelia",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pdf94b60099",
+    "name": "Marcus Livius Drusus III"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p9387aa6a1f",
+    "name": "Cornelia Scipio van Rome",
+    "marriage": null
+   },
+   {
+    "id": "pde127bff96",
+    "name": "Cornelia Scipionis",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G6RP-6LT",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

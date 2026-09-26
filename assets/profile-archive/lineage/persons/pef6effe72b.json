@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pef6effe72b",
+ "bnr": "bnr://skaists.dev/blood/pef6effe72b",
+ "identity": {
+  "name": "Sir Adam Francis",
+  "lifespan": "1326–1375",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LD6Q-KX9"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p000fdcbcbd",
+    "name": "John Francis",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p94a9f40d11",
+    "name": "Matilda Margaret de Beaufort",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pc63779fe12",
+    "name": "Maud Francis"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p7968c7134b",
+    "name": "Agnes Champneis",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LD6Q-KX9",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,943 @@
+{
+ "generated": "2026-09-15T23:19:48.907Z",
+ "rows": [
+  {
+   "page": "doors/beehivenature.html",
+   "top": [],
+   "bottom": [],
+   "orbMounted": false
+  },
+  {
+   "page": "doors/plur.html",
+   "top": [],
+   "bottom": [],
+   "orbMounted": false
+  },
+  {
+   "page": "doors/skaists.html",
+   "top": [],
+   "bottom": [],
+   "orbMounted": false
+  },
+  {
+   "page": "doors/bnature-social.html",
+   "top": [],
+   "bottom": [],
+   "orbMounted": false
+  },
+  {
+   "page": "doors/bnature-bio.html",
+   "top": [],
+   "bottom": [],
+   "orbMounted": false
+  },
+  {
+   "page": "doors/beehivebiomass.html",
+   "top": [],
+   "bottom": [],
+   "orbMounted": false
+  },
+  {
+   "page": "doors/skaists-buzz.html",
+   "top": [],
+   "bottom": [],
+   "orbMounted": false
+  },
+  {
+   "page": "doors/beehivenature-buzz.html",
+   "top": [],
+   "bottom": [],
+   "orbMounted": false
+  },
+  {
+   "page": "doors/index.html",
+   "top": [],
+   "bottom": [],
+   "orbMounted": false
+  },
+  {
+   "page": "b4b.html",
+   "top": [],
+   "bottom": [],
+   "orbMounted": false
+  },
+  {
+   "page": "biq.html",
+   "top": [],
+   "bottom": [],
+   "orbMounted": false
+  },
+  {
+   "page": "blight/bnri-gallery.html",
+   "top": [],
+   "bottom": [],
+   "orbMounted": false
+  },
+  {
+   "page": "blight/c1-aid.html",
+   "top": [],
+   "bottom": [],
+   "orbMounted": false
+  },
+  {
+   "page": "blight/compare.html",
+   "top": [],
+   "bottom": [],
+   "orbMounted": false
+  },
+  {
+   "page": "blight/gallery.html",
+   "top": [],
+   "bottom": [],
+   "orbMounted": false
+  },
+  {
+   "page": "blight/index.html",
+   "top": [],
+   "bottom": [],
+   "orbMounted": false
+  },
+  {
+   "page": "blight/inscription-explorer.html",
+   "top": [],
+   "bottom": [],
+   "orbMounted": false
+  },
+  {
+   "page": "blight/midi-organ.html",
+   "top": [],
+   "bottom": [],
+   "orbMounted": false
+  },
+  {
+   "page": "blight/museum.html",
+   "top": [],
+   "bottom": [],
+   "orbMounted": false
+  },
+  {
+   "page": "blight/pixelrefiner.html",
+   "top": [],
+   "bottom": [],
+   "orbMounted": false
+  },
+  {
+   "page": "blight/qrtree.html",
+   "top": [],
+   "bottom": [],
+   "orbMounted": false
+  },
+  {
+   "page": "blight/qrroses.html",
+   "top": [],
+   "bottom": [],
+   "orbMounted": false
+  },
+  {
+   "page": "blight/qrroses-smil.html",
+   "top": [],
+   "bottom": [],
+   "orbMounted": false
+  },
+  {
+   "page": "blight/profile.html",
+   "top": [],
+   "bottom": [],
+   "orbMounted": false
+  },
+  {
+   "page": "local-agent/index.html",
+   "top": [],
+   "bottom": [],
+   "orbMounted": false
+  },
+  {
+   "page": "record.html",
+   "top": [],
+   "bottom": [],
+   "orbMounted": false
+  },
+  {
+   "page": "blight/midi.html",
+   "top": [],
+   "bottom": [],
+   "orbMounted": false
+  },
+  {
+   "page": "blight/midiroom.html",
+   "top": [],
+   "bottom": [],
+   "orbMounted": false
+  },
+  {
+   "page": "blight/midivault.html",
+   "top": [],
+   "bottom": [],
+   "orbMounted": false
+  },
+  {
+   "page": "blight/vaulta-reader.html",
+   "top": [],
+   "bottom": [],
+   "orbMounted": false
+  },
+  {
+   "page": "blight/workbench.html",
+   "top": [],
+   "bottom": [],
+   "orbMounted": false
+  },
+  {
+   "page": "dock.html",
+   "top": [],
+   "bottom": [],
+   "orbMounted": false
+  },
+  {
+   "page": "fleet-hosted/index.html",
+   "top": [],
+   "bottom": [],
+   "orbRect": {
+    "x": 12,
+    "y": 793,
+    "w": 44,
+    "h": 44
+   },
+   "orbMounted": true
+  },
+  {
+   "page": "hardware/build.html",
+   "top": [],
+   "bottom": [],
+   "orbMounted": false
+  },
+  {
+   "page": "hardware/index.html",
+   "top": [],
+   "bottom": [],
+   "orbMounted": false
+  },
+  {
+   "page": "hardware/security.html",
+   "top": [],
+   "bottom": [],
+   "orbMounted": false
+  },
+  {
+   "page": "listening.html",
+   "top": [],
+   "bottom": [],
+   "orbMounted": false
+  },
+  {
+   "page": "onboarding/receive.html",
+   "top": [],
+   "bottom": [],
+   "orbMounted": false
+  },
+  {
+   "page": "recover.html",
+   "top": [],
+   "bottom": [],
+   "orbMounted": false
+  },
+  {
+   "page": "stack.html",
+   "top": [],
+   "bottom": [],
+   "orbMounted": false
+  },
+  {
+   "page": "wallet.html",
+   "top": [],
+   "bottom": [],
+   "orbRect": {
+    "x": 12,
+    "y": 793,
+    "w": 44,
+    "h": 44
+   },
+   "orbMounted": true
+  },
+  {
+   "page": "blight/demo.html",
+   "top": [],
+   "bottom": [],
+   "orbMounted": false
+  },
+  {
+   "page": "blight/farmers.html",
+   "top": [],
+   "bottom": [],
+   "orbMounted": false
+  },
+  {
+   "page": "bnames.html",
+   "top": [],
+   "bottom": [],
+   "orbRect": {
+    "x": 12,
+    "y": 793,
+    "w": 44,
+    "h": 44
+   },
+   "orbMounted": true
+  },
+  {
+   "page": "hardware/lab.html",
+   "top": [],
+   "bottom": [],
+   "orbMounted": false
+  },
+  {
+   "page": "keys/addresses.html",
+   "top": [],
+   "bottom": [],
+   "orbMounted": false
+  },
+  {
+   "page": "onboarding/index.html",
+   "top": [],
+   "bottom": [],
+   "orbMounted": false
+  },
+  {
+   "page": "blight/market.html",
+   "top": [],
+   "bottom": [],
+   "orbMounted": false
+  },
+  {
+   "page": "bset.html",
+   "top": [],
+   "bottom": [],
+   "orbMounted": false
+  },
+  {
+   "page": "festival/index.html",
+   "top": [],
+   "bottom": [],
+   "orbMounted": false
+  },
+  {
+   "page": "kandi.html",
+   "top": [],
+   "bottom": [],
+   "orbMounted": false
+  },
+  {
+   "page": "plur.html",
+   "top": [],
+   "bottom": [],
+   "orbMounted": false
+  },
+  {
+   "page": "blight/studio-gate.html",
+   "top": [],
+   "bottom": [],
+   "orbMounted": false
+  },
+  {
+   "page": "blight/studio-music.html",
+   "top": [],
+   "bottom": [],
+   "orbMounted": false
+  },
+  {
+   "page": "forge/hexfield.html",
+   "top": [],
+   "bottom": [],
+   "orbMounted": false
+  },
+  {
+   "page": "forge/index.html",
+   "top": [],
+   "bottom": [],
+   "orbMounted": false
+  },
+  {
+   "page": "forge/orbit.html",
+   "top": [],
+   "bottom": [],
+   "orbMounted": false
+  },
+  {
+   "page": "review.html",
+   "top": [],
+   "bottom": [],
+   "orbMounted": false
+  },
+  {
+   "page": "fleet-hosted/gallery/resonance.html",
+   "top": [],
+   "bottom": [],
+   "orbRect": {
+    "x": 12,
+    "y": 1910,
+    "w": 44,
+    "h": 44
+   },
+   "orbMounted": true
+  },
+  {
+   "page": "royalguard.html",
+   "top": [],
+   "bottom": [],
+   "orbRect": {
+    "x": 12,
+    "y": 793,
+    "w": 44,
+    "h": 44
+   },
+   "orbMounted": true
+  },
+  {
+   "page": "dao-dashboard/index.html",
+   "top": [],
+   "bottom": [],
+   "orbMounted": false
+  },
+  {
+   "page": "attest.html",
+   "top": [],
+   "bottom": [],
+   "orbMounted": false
+  },
+  {
+   "page": "blanguage.html",
+   "top": [],
+   "bottom": [],
+   "orbMounted": false
+  },
+  {
+   "page": "bsymposium.html",
+   "top": [],
+   "bottom": [],
+   "orbMounted": false
+  },
+  {
+   "page": "buzz-studio.html",
+   "top": [],
+   "bottom": [],
+   "orbMounted": false
+  },
+  {
+   "page": "devroom.html",
+   "top": [],
+   "bottom": [],
+   "orbMounted": false
+  },
+  {
+   "page": "forge/room.html",
+   "top": [],
+   "bottom": [],
+   "orbMounted": false
+  },
+  {
+   "page": "blight/hearth.html",
+   "top": [],
+   "bottom": [],
+   "orbMounted": false
+  },
+  {
+   "page": "blight/pulse.html",
+   "top": [],
+   "bottom": [],
+   "orbMounted": false
+  },
+  {
+   "page": "bqueenbee-live.html",
+   "top": [],
+   "bottom": [],
+   "orbMounted": false
+  },
+  {
+   "page": "btranslated.html",
+   "top": [],
+   "bottom": [],
+   "orbMounted": false
+  },
+  {
+   "page": "forge/huddle.html",
+   "top": [],
+   "bottom": [],
+   "orbMounted": false
+  },
+  {
+   "page": "bearth.html",
+   "top": [],
+   "bottom": [],
+   "orbMounted": false
+  },
+  {
+   "page": "bfood.html",
+   "top": [],
+   "bottom": [],
+   "orbMounted": false
+  },
+  {
+   "page": "bigen.html",
+   "top": [],
+   "bottom": [],
+   "orbMounted": false
+  },
+  {
+   "page": "blongevity.html",
+   "top": [],
+   "bottom": [],
+   "orbMounted": false
+  },
+  {
+   "page": "fleet-hosted/gallery/acid-cascade.html",
+   "top": [],
+   "bottom": [],
+   "orbRect": {
+    "x": 12,
+    "y": 861,
+    "w": 44,
+    "h": 44
+   },
+   "orbMounted": true
+  },
+  {
+   "page": "fleet-hosted/gallery/indigo-index.html",
+   "top": [],
+   "bottom": [],
+   "orbRect": {
+    "x": 12,
+    "y": 793,
+    "w": 44,
+    "h": 44
+   },
+   "orbMounted": true
+  },
+  {
+   "page": "fleet-hosted/lab/blend-lab.html",
+   "top": [],
+   "bottom": [],
+   "orbRect": {
+    "x": 12,
+    "y": 2070,
+    "w": 44,
+    "h": 44
+   },
+   "orbMounted": true
+  },
+  {
+   "page": "fleet-hosted/lab/edible-tracker.html",
+   "top": [],
+   "bottom": [],
+   "orbRect": {
+    "x": 12,
+    "y": 793,
+    "w": 44,
+    "h": 44
+   },
+   "orbMounted": true
+  },
+  {
+   "page": "fleet-hosted/lab/flower-lab.html",
+   "top": [],
+   "bottom": [],
+   "orbRect": {
+    "x": 12,
+    "y": 793,
+    "w": 44,
+    "h": 44
+   },
+   "orbMounted": true
+  },
+  {
+   "page": "fleet-hosted/lab/intake-tracker.html",
+   "top": [],
+   "bottom": [],
+   "orbRect": {
+    "x": 12,
+    "y": 793,
+    "w": 44,
+    "h": 44
+   },
+   "orbMounted": true
+  },
+  {
+   "page": "fleet-hosted/lab/spliff-lab.html",
+   "top": [],
+   "bottom": [],
+   "orbRect": {
+    "x": 12,
+    "y": 1971,
+    "w": 44,
+    "h": 44
+   },
+   "orbMounted": true
+  },
+  {
+   "page": "university/index.html",
+   "top": [],
+   "bottom": [],
+   "orbMounted": false
+  },
+  {
+   "page": "fleet-hosted/lab/bnr-dashboard.html",
+   "top": [],
+   "bottom": [],
+   "orbRect": {
+    "x": 12,
+    "y": 793,
+    "w": 44,
+    "h": 44
+   },
+   "orbMounted": true
+  },
+  {
+   "page": "bantfarm.html",
+   "top": [],
+   "bottom": [],
+   "orbMounted": false
+  },
+  {
+   "page": "blight/coop.html",
+   "top": [],
+   "bottom": [],
+   "orbMounted": false
+  },
+  {
+   "page": "bfactory.html",
+   "top": [],
+   "bottom": [],
+   "orbMounted": false
+  },
+  {
+   "page": "bmeshasi.html",
+   "top": [],
+   "bottom": [],
+   "orbRect": {
+    "x": 12,
+    "y": 793,
+    "w": 44,
+    "h": 44
+   },
+   "orbMounted": true
+  },
+  {
+   "page": "index.html",
+   "top": [],
+   "bottom": [
+    {
+     "tag": "div",
+     "id": "",
+     "cls": "side-house sk",
+     "pos": "static",
+     "t": "skaists33the rave heart — sets, festivals, k",
+     "x": 8,
+     "y": 527,
+     "w": 374,
+     "h": 72,
+     "coverPct": 30
+    },
+    {
+     "tag": "a",
+     "id": "",
+     "cls": "side-family",
+     "pos": "static",
+     "t": "the music universe — one seed, on-chain scor",
+     "x": 8,
+     "y": 563,
+     "w": 340,
+     "h": 35,
+     "coverPct": 27
+    },
+    {
+     "tag": "span",
+     "id": "",
+     "cls": "family-human",
+     "pos": "static",
+     "t": "the music universe — one seed, on-chain scor",
+     "x": 8,
+     "y": 563,
+     "w": 340,
+     "h": 35,
+     "coverPct": 27
+    },
+    {
+     "tag": "span",
+     "id": "",
+     "cls": "",
+     "pos": "static",
+     "t": "the music universe — one seed, on-chain scor",
+     "x": 8,
+     "y": 563,
+     "w": 340,
+     "h": 35,
+     "coverPct": 27
+    },
+    {
+     "tag": "a",
+     "id": "",
+     "cls": "side-org",
+     "pos": "static",
+     "t": "beehive-nature57",
+     "x": 8,
+     "y": 599,
+     "w": 111,
+     "h": 17,
+     "coverPct": 40
+    },
+    {
+     "tag": "span",
+     "id": "",
+     "cls": "",
+     "pos": "static",
+     "t": "beehive-nature",
+     "x": 8,
+     "y": 599,
+     "w": 95,
+     "h": 17,
+     "coverPct": 46
+    },
+    {
+     "tag": "a",
+     "id": "",
+     "cls": "side-family",
+     "pos": "static",
+     "t": "the organism itself — what it is, how it pro",
+     "x": 8,
+     "y": 599,
+     "w": 361,
+     "h": 35,
+     "coverPct": 70
+    },
+    {
+     "tag": "span",
+     "id": "",
+     "cls": "family-human",
+     "pos": "static",
+     "t": "the organism itself — what it is, how it pro",
+     "x": 8,
+     "y": 599,
+     "w": 361,
+     "h": 35,
+     "coverPct": 70
+    },
+    {
+     "tag": "span",
+     "id": "",
+     "cls": "",
+     "pos": "static",
+     "t": "the organism itself — what it is, how it pro",
+     "x": 8,
+     "y": 599,
+     "w": 361,
+     "h": 35,
+     "coverPct": 70
+    },
+    {
+     "tag": "a",
+     "id": "",
+     "cls": "side-family",
+     "pos": "static",
+     "t": "people and living systems — rooms to talk, h",
+     "x": 8,
+     "y": 617,
+     "w": 353,
+     "h": 35,
+     "coverPct": 30
+    },
+    {
+     "tag": "span",
+     "id": "",
+     "cls": "family-human",
+     "pos": "static",
+     "t": "people and living systems — rooms to talk, h",
+     "x": 8,
+     "y": 617,
+     "w": 353,
+     "h": 35,
+     "coverPct": 30
+    },
+    {
+     "tag": "span",
+     "id": "",
+     "cls": "",
+     "pos": "static",
+     "t": "people and living systems — rooms to talk, h",
+     "x": 8,
+     "y": 617,
+     "w": 353,
+     "h": 35,
+     "coverPct": 30
+    },
+    {
+     "tag": "footer",
+     "id": "",
+     "cls": "wrap footer",
+     "pos": "static",
+     "t": "skaists.devbeehive nature reservenew beethe ",
+     "x": 8,
+     "y": 477,
+     "w": 374,
+     "h": 175,
+     "coverPct": 100
+    },
+    {
+     "tag": "p",
+     "id": "",
+     "cls": "footer-count",
+     "pos": "static",
+     "t": "95 surfaces · 26 domains · every number comp",
+     "x": 8,
+     "y": 582,
+     "w": 374,
+     "h": 36,
+     "coverPct": 73
+    },
+    {
+     "tag": "span",
+     "id": "",
+     "cls": "",
+     "pos": "static",
+     "t": "surfaces",
+     "x": 28,
+     "y": 582,
+     "w": 52,
+     "h": 17,
+     "coverPct": 43
+    },
+    {
+     "tag": "span",
+     "id": "",
+     "cls": "",
+     "pos": "static",
+     "t": "every number computed from the registry",
+     "x": 8,
+     "y": 582,
+     "w": 364,
+     "h": 35,
+     "coverPct": 70
+    }
+   ],
+   "orbRect": {
+    "x": 51,
+    "y": 1704,
+    "w": 44,
+    "h": 44
+   },
+   "orbMounted": true
+  },
+  {
+   "page": "forge/orbit-v2.html",
+   "top": [],
+   "bottom": [],
+   "orbMounted": false
+  },
+  {
+   "page": "design-system.html",
+   "top": [],
+   "bottom": [],
+   "orbMounted": false
+  },
+  {
+   "page": "museum.html",
+   "top": [],
+   "bottom": [],
+   "orbMounted": false
+  },
+  {
+   "page": "fieldnotes.html",
+   "top": [],
+   "bottom": [],
+   "orbMounted": false
+  },
+  {
+   "page": "buzz-directory.html",
+   "top": [],
+   "bottom": [],
+   "orbMounted": false
+  },
+  {
+   "page": "or-board.html",
+   "top": [],
+   "bottom": [],
+   "orbMounted": false
+  },
+  {
+   "page": "ant-door.html",
+   "top": [],
+   "bottom": [],
+   "orbMounted": false
+  },
+  {
+   "page": "profile.html",
+   "top": [],
+   "bottom": [
+    {
+     "tag": "main",
+     "id": "",
+     "cls": "",
+     "pos": "static",
+     "t": "⬡ dynasty profile\n  published name records —",
+     "x": 0,
+     "y": 0,
+     "w": 390,
+     "h": 683,
+     "coverPct": 30
+    },
+    {
+     "tag": "footer",
+     "id": "",
+     "cls": "",
+     "pos": "static",
+     "t": "Published records. A guest can read with no ",
+     "x": 20,
+     "y": 611,
+     "w": 350,
+     "h": 72,
+     "coverPct": 30
+    }
+   ],
+   "orbRect": {
+    "x": 63,
+    "y": 2572,
+    "w": 44,
+    "h": 44
+   },
+   "orbMounted": true
+  },
+  {
+   "page": "comb.html",
+   "top": [],
+   "bottom": [],
+   "orbMounted": false
+  },
+  {
+   "page": "vending.html",
+   "top": [],
+   "bottom": [],
+   "orbMounted": false
+  },
+  {
+   "page": "privacy-lens.html",
+   "top": [],
+   "bottom": [],
+   "orbMounted": false
+  },
+  {
+   "page": "watch.html",
+   "top": [],
+   "bottom": [],
+   "orbMounted": false
+  },
+  {
+   "page": "music.html",
+   "top": [],
+   "bottom": [],
+   "orbMounted": false
+  },
+  {
+   "page": "jams.html",
+   "top": [],
+   "bottom": [],
+   "orbMounted": false
+  }
+ ]
+}

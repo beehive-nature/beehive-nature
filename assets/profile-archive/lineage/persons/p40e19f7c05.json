@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p40e19f7c05",
+ "bnr": "bnr://skaists.dev/blood/p40e19f7c05",
+ "identity": {
+  "name": "Mary Anne Saunders",
+  "lifespan": "1804–Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "MS86-NB5"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pf0ebba136a",
+    "name": "William Saunders",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pf2741d345d",
+    "name": "Elizabeth Flexman",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p651ee0fc40",
+    "name": "Joseph Saunders Howe"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pfe8685ae0a",
+    "name": "Joseph Howe",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/MS86-NB5",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,63 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pe76b78100b",
+ "bnr": "bnr://skaists.dev/blood/pe76b78100b",
+ "identity": {
+  "name": "Souser de los Hyksos de Tebas",
+  "lifespan": "Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "P41P-QV2"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p2b73dff343",
+    "name": "Yakusher de los Hyksos de Tebas",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p40c88be9e9",
+    "name": "N.N. de Ur o Urim",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p78ca29c3c7",
+    "name": "Nekhire Khamoudy de los Hyksos de Tebas"
+   }
+  ],
+  "spouses": []
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/P41P-QV2",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

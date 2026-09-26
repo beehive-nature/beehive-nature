@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pea3685448b",
+ "bnr": "bnr://skaists.dev/blood/pea3685448b",
+ "identity": {
+  "name": "Sir Edmund Beaufort Somerset CIE-19M",
+  "lifespan": "1406–1455",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "KPQH-LWX"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p67f772c124",
+    "name": "Sir John Beaufort 1st Earl of Somerset",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pde1c884182",
+    "name": "Margaret de Holland",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pab490a2a3f",
+    "name": "Henry Beaufort 3rd Duke of Somerset"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p82c95a350f",
+    "name": "Eleanor Beauchamp",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/KPQH-LWX",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

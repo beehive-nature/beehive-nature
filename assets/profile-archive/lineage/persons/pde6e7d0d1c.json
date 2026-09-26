@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pde6e7d0d1c",
+ "bnr": "bnr://skaists.dev/blood/pde6e7d0d1c",
+ "identity": {
+  "name": "Walderada, Prinzessin der Langobarden",
+  "lifespan": "0535–0572",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L4YH-J8R"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "L11F-65X",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "LZGG-BPS",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pbf000e36b3",
+    "name": "Theodelinde von Baiern"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p59e8cb18a2",
+    "name": "Garibald I. Herzog der Bajuwaren in Baiern",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L4YH-J8R",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

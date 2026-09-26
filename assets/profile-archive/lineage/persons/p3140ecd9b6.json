@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p3140ecd9b6",
+ "bnr": "bnr://skaists.dev/blood/p3140ecd9b6",
+ "identity": {
+  "name": "Leudesius Tours of Upper Alsace",
+  "lifespan": "0620–0670",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GGB1-1X8"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p09cd08aa2a",
+    "name": "Erchembaldus II d'Alsace",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pfa444b4c87",
+    "name": "Duchess Leudefindis d'Alsace de Lorraine Friuli",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p7ca780d7ea",
+    "name": "Duke Eticho Tours of Upper Alsace I"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pc72f930063",
+    "name": "Berthe de Burgondie",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GGB1-1X8",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

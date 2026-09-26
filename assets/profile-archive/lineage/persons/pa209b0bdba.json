@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pa209b0bdba",
+ "bnr": "bnr://skaists.dev/blood/pa209b0bdba",
+ "identity": {
+  "name": "Maud de Lacy",
+  "lifespan": "1223–1289",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "P3BC-J9P"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pf35a4c1c68",
+    "name": "Sir John de Lacy, 2nd Earl of Lincoln",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p7739cf99bb",
+    "name": "Margaret de Quincy",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pa73d8579ea",
+    "name": "Rose de Clare"
+   },
+   {
+    "id": "p300f750683",
+    "name": "Thomas de Clare"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "peaaf302241",
+    "name": "Richard de Clare",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/P3BC-J9P",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

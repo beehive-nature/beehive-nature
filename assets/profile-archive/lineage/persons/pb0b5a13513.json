@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pb0b5a13513",
+ "bnr": "bnr://skaists.dev/blood/pb0b5a13513",
+ "identity": {
+  "name": "Cleopatra of Pontus",
+  "lifespan": "0109BC–0057BC",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PMGY-TR4"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p3f83283645",
+    "name": "Mithradates VI Eupator ben Mithradates V",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pbfb7365674",
+    "name": "Laodice bat Mithradates V",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pacc66a76ae",
+    "name": "Artaxiad Of The Artashesian"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p13980f60c1",
+    "name": "Tigranes II D'ARMENIE",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PMGY-TR4",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

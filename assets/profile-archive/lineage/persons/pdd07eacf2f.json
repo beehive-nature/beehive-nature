@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pdd07eacf2f",
+ "bnr": "bnr://skaists.dev/blood/pdd07eacf2f",
+ "identity": {
+  "name": "Roman Consul Anicius Faustus Anicii",
+  "lifespan": "0240–0300",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LVDJ-4YC"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p52f0098831",
+    "name": "Quintus Anticus Paulinus II",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pd7b0da4381",
+    "name": "Cocceia Vibiana de Rome",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p0b2a6b0091",
+    "name": "Amnius Anicius Julianius De Rome"
+   },
+   {
+    "id": "pd143e58c34",
+    "name": "Anicia Anicia Dite Demetria DE ROME"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p9a48c43e70",
+    "name": "Mrs Amnia Demetria of Athens Anicii",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LVDJ-4YC",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

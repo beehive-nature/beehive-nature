@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p408f216585",
+ "bnr": "bnr://skaists.dev/blood/p408f216585",
+ "identity": {
+  "name": "Catherine de Grandison",
+  "lifespan": "1304–1349",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "9C3W-LX1"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p7cb88b173c",
+    "name": "William de Grandison, 1st Lord Grandison",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p8ff10678aa",
+    "name": "Blanche de Savoie-Vaud",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p63204745d0",
+    "name": "Philippa de Montagu"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p01c4dc922a",
+    "name": "William Montague",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/9C3W-LX1",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

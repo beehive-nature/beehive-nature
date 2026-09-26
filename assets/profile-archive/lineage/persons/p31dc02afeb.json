@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p31dc02afeb",
+ "bnr": "bnr://skaists.dev/blood/p31dc02afeb",
+ "identity": {
+  "name": "Judah ben Joseph",
+  "lifespan": "0870BC–0820BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "99PN-VS2"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p3acc096b47",
+    "name": "Joseph ben Jonan",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p098be109a4",
+    "name": "Mrs Joseph ben Eliezer",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pe01752641a",
+    "name": "Simeon ben Judah"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "ped61a7f9f2",
+    "name": "Mrs Judah",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/99PN-VS2",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

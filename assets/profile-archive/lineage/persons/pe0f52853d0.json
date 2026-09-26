@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pe0f52853d0",
+ "bnr": "bnr://skaists.dev/blood/pe0f52853d0",
+ "identity": {
+  "name": "Lydia Ripley Badger",
+  "lifespan": "1831–1906",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "K2HZ-X58"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p3f89522a96",
+    "name": "John Badger",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p9b0136704c",
+    "name": "Lydia Chamberlain",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p9946ae23f7",
+    "name": "Joseph Fuller Remington"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pf872409304",
+    "name": "Jerome Napoleon Remington",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/K2HZ-X58",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

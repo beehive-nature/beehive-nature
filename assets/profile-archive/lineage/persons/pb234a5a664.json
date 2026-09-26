@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pb234a5a664",
+ "bnr": "bnr://skaists.dev/blood/pb234a5a664",
+ "identity": {
+  "name": "King Corrhaeus de Thracia",
+  "lifespan": "0400BC–Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "9Z45-QS2"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pf68b8bebe4",
+    "name": "King Kersobleptes de THRACE",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p831531aa6e",
+    "name": "Mrs Kersobleptes de THRACE",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p392c736524",
+    "name": "Estratónice hija de Corrhaeus"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pd2844e5ca6",
+    "name": "Mrs Corrhaeus de Thracia",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/9Z45-QS2",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

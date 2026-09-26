@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p56a2fbf9b4",
+ "bnr": "bnr://skaists.dev/blood/p56a2fbf9b4",
+ "identity": {
+  "name": "Kiersten Nielsdatter",
+  "lifespan": "1731–1785",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L16T-B61"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "GMDP-ZSW",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "L7NQ-5YX",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p753fe00be1",
+    "name": "Anne Rasmusdatter Brok"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p73218a4130",
+    "name": "Rasmus Sørensen",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L16T-B61",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

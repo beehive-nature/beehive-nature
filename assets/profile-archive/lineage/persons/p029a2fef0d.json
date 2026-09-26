@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p029a2fef0d",
+ "bnr": "bnr://skaists.dev/blood/p029a2fef0d",
+ "identity": {
+  "name": "Clavaria de Rome",
+  "lifespan": "Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GKBS-SN1"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p3a1f647738",
+    "name": "Quintus Servilius \" The Younger\" Caepio",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p62bf6b59ef",
+    "name": "Livia Drusilla Julia Augusta Empress of the Roman Empire",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p5330765af7",
+    "name": "Mamercus Aemillus Lepidus Livianus"
+   },
+   {
+    "id": "pa5984712db",
+    "name": "Antistia"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pfc113b42c7",
+    "name": "Marcus Livius Drusus II de Rome Le Jeune",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GKBS-SN1",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

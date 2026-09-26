@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p9bcbadafdb",
+ "bnr": "bnr://skaists.dev/blood/p9bcbadafdb",
+ "identity": {
+  "name": "King Sunno of Saxony",
+  "lifespan": "0137–0235",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LDLH-NWW"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p3e7821aaed",
+    "name": "King Farabert Magnus de Toxandrie",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pc5a79e50e4",
+    "name": "Basila van de Rugi",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p49ce0f8394",
+    "name": "Hildéric \"Childéric\" I des Francs"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p7d7c54eb20",
+    "name": "Cesania Julianus Queen of the West Franks",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LDLH-NWW",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

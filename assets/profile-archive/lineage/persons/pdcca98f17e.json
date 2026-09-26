@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pdcca98f17e",
+ "bnr": "bnr://skaists.dev/blood/pdcca98f17e",
+ "identity": {
+  "name": "Marguerite Béatrice de Genève Comtesse de Savoie",
+  "lifespan": "1180–1257",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LBP9-Y7L"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p29b35bfb5f",
+    "name": "Guillaume Ier de Genève",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p57c05d6965",
+    "name": "Béatrice de Faucigny",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pe5f5adaa1a",
+    "name": "Béatrix de Savoie Comtesse de Provence"
+   },
+   {
+    "id": "p59fe500cd9",
+    "name": "Tommaso di Savoia II"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p6e68139017",
+    "name": "Tommaso I de Savoie",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LBP9-Y7L",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

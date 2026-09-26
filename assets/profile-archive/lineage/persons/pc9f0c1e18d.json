@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pc9f0c1e18d",
+ "bnr": "bnr://skaists.dev/blood/pc9f0c1e18d",
+ "identity": {
+  "name": "Baron Odinel de Umfreville I, of Prudhoe",
+  "lifespan": "1094–1166",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LD33-SRT"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "GQ6W-X4H",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "G2K9-FMN",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p2e46ed9bf7",
+    "name": "Baron Odinel de Umfreville II"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p3cdf55d12b",
+    "name": "Margareth Gilbert",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LD33-SRT",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

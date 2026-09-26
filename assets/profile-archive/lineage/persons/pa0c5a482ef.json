@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pa0c5a482ef",
+ "bnr": "bnr://skaists.dev/blood/pa0c5a482ef",
+ "identity": {
+  "name": "Gundred de la Ferte",
+  "lifespan": "1201–1237",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LZPK-PV4"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p9858956d7f",
+    "name": "William de la Ferte",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p1c5180ee69",
+    "name": "Margaret de Briwere",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pa0d9f6a298",
+    "name": "Patrick de Chaworth"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "paf35e88ddc",
+    "name": "Payne de Chaworth",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LZPK-PV4",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

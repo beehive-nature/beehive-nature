@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p02b0c87415",
+ "bnr": "bnr://skaists.dev/blood/p02b0c87415",
+ "identity": {
+  "name": "Barbara Stauffer",
+  "lifespan": "1711–1765",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L1S1-F84"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p6a950a686f",
+    "name": "Daniel Stauffer",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p3c704f038a",
+    "name": "Magdalena Krehbiel",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p10c6a1e195",
+    "name": "Anna Kauffman"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p0b5fa73fd1",
+    "name": "Martin Kauffman",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L1S1-F84",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

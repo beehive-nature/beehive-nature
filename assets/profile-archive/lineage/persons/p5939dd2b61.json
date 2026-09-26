@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p5939dd2b61",
+ "bnr": "bnr://skaists.dev/blood/p5939dd2b61",
+ "identity": {
+  "name": "Christen Stauffer",
+  "lifespan": "1663–1735",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "K8Q9-PLD"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pa476744241",
+    "name": "Hans Stauffer",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p9dd72be2b7",
+    "name": "Barbara Galli",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p6a950a686f",
+    "name": "Daniel Stauffer"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p26234f0b61",
+    "name": "Maria Barbara Brubacher",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/K8Q9-PLD",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

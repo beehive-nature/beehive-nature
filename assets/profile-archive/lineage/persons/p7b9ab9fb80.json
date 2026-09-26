@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p7b9ab9fb80",
+ "bnr": "bnr://skaists.dev/blood/p7b9ab9fb80",
+ "identity": {
+  "name": "Adélaïde de Bourgogne",
+  "lifespan": "0895–Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GLB2-PPV"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p5069d0a925",
+    "name": "Richard 'le Justicier' de Bourgogne",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p1a3d79935e",
+    "name": "Adélaïde d'Auxerre, duchesse de Bourgogne",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p025f611091",
+    "name": "Régnier III comte de Hainaut"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p0151c2ee17",
+    "name": "Régnier II, comte de Hainaut",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GLB2-PPV",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

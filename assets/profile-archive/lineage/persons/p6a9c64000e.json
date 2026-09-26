@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p6a9c64000e",
+ "bnr": "bnr://skaists.dev/blood/p6a9c64000e",
+ "identity": {
+  "name": "Eustache Ier de GUÎNES",
+  "lifespan": "1016–1065",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G6TJ-KHP"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pcde4e3b818",
+    "name": "Chevalier Rodolphe Ier de GUINES",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pb6f3c46b24",
+    "name": "Rosella de Saint Pôl",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p03a859efcc",
+    "name": "Guillaume de Guines seigneur de Bournonville"
+   },
+   {
+    "id": "p6e708a7424",
+    "name": "Baudouin I de Guînes"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pf847985b29",
+    "name": "Suzanne de Gramines",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G6TJ-KHP",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

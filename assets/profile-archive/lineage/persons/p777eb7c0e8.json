@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p777eb7c0e8",
+ "bnr": "bnr://skaists.dev/blood/p777eb7c0e8",
+ "identity": {
+  "name": "Heana AMORRITES",
+  "lifespan": "–2161BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G3QC-6LH"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pce427255e6",
+    "name": "Yamkuzzu-Halama AMORRITES",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p92d8fe5e4e",
+    "name": "*E MRS Yamkuzzu-Halama of AMORRU",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p869ccca40e",
+    "name": "Namzu the Elder AMORRITES"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pb808d90f87",
+    "name": "*E MRS Heana of AMORRU",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G3QC-6LH",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

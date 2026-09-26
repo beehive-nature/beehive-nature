@@ -9,12 +9,12 @@ from bClaude's own key, read the roster back.
 **bClaude (npub14waeml…/abbb9dfc…)** — the box key (`/etc/buzz-bclaude/bclaude.env`,
 used in place, never printed; also at `/opt/buzz-bclaude/bclaude.nsec`):
 - standing-invite claim: `200 {"status":"already_member","role":"member"}` —
-  he was already rostered; the claim is idempotent, as designed
+  they were already rostered; the claim is idempotent, as designed
 - NIP-42 AUTH on the live wire: `OK true`
 - **"bClaude present." posted in #general (d78414ed…, the phone's general)
-  from his own key — accepted ✓, verified in the event ledger at 04:17:32Z**
-- kind-0 profile + kind-10100 agent profile published from his own key —
-  both accepted (this is the piece that makes him NAMEABLE in the phone's
+  from their own key — accepted ✓, verified in the event ledger at 04:17:32Z**
+- kind-0 profile + kind-10100 agent profile published from their own key —
+  both accepted (this is the piece that makes them NAMEABLE in the phone's
   member directory; see the law below)
 
 ## The visibility law (why the phone saw only two humans)

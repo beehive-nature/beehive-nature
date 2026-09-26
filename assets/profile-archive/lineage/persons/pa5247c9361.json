@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pa5247c9361",
+ "bnr": "bnr://skaists.dev/blood/pa5247c9361",
+ "identity": {
+  "name": "Henry Miller",
+  "lifespan": "1805–1883",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LC5M-71F"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pf7fb0dd41d",
+    "name": "Abraham Miller",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p9b39057661",
+    "name": "Elizabeth Brumbach",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p92f7192f5e",
+    "name": "Alma Jane Miller"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p27d84864e5",
+    "name": "Mary M. Shane",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LC5M-71F",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

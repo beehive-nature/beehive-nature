@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p1d90266fc3",
+ "bnr": "bnr://skaists.dev/blood/p1d90266fc3",
+ "identity": {
+  "name": "Anne Bourne",
+  "lifespan": "1606–1666",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LZVV-65L"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pa7a9b0e13c",
+    "name": "Richard Bourne",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p34a140a459",
+    "name": "Martha Hallett",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pac00a7ec76",
+    "name": "George Brownell"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p3462325f0f",
+    "name": "Thomas Brownell Sr",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LZVV-65L",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

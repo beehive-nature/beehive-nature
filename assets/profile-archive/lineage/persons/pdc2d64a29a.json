@@ -1,0 +1,64 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pdc2d64a29a",
+ "bnr": "bnr://skaists.dev/blood/pdc2d64a29a",
+ "identity": {
+  "name": "Katherine de Roët",
+  "lifespan": "1350–1403",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "9C7T-V6M"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p2035f11ce0",
+    "name": "Sir Paon de Roët Knt.",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p67f772c124",
+    "name": "Sir John Beaufort 1st Earl of Somerset"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p1000d66ac4",
+    "name": "John of Gaunt Duke of Lancaster",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/9C7T-V6M",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

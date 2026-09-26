@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p54a93ecbb7",
+ "bnr": "bnr://skaists.dev/blood/p54a93ecbb7",
+ "identity": {
+  "name": "Sir Bartholomew Badlesmere",
+  "lifespan": "1275–1322",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LD9R-WJ3"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pcca7bee804",
+    "name": "Guncelin de Badlesmere",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pe178611720",
+    "name": "Joan FitzBernard",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p31f742ff58",
+    "name": "Margery Badlesmere"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pb600efefa8",
+    "name": "Margaret de Clare",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LD9R-WJ3",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

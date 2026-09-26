@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p9768e8ad3e",
+ "bnr": "bnr://skaists.dev/blood/p9768e8ad3e",
+ "identity": {
+  "name": "Alice Darfield",
+  "lifespan": "1178–Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "MXT6-T3T"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "LKT3-4MK",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "LKT3-4K3",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pad02e1e434",
+    "name": "Alice Bossell"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p755c51058d",
+    "name": "John Bossell",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/MXT6-T3T",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

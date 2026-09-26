@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pba18b5aacf",
+ "bnr": "bnr://skaists.dev/blood/pba18b5aacf",
+ "identity": {
+  "name": "Lodivicus Lodewick Lotte",
+  "lifespan": "1580–1647",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LJKY-TJJ"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p1f2d570842",
+    "name": "Pieter Lott",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p993a52cfe6",
+    "name": "Mrs Pieter Lott",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p23f7dc50a5",
+    "name": "Engelbert Pieters Lott"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p2e004a9da9",
+    "name": "Susanna Reast",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LJKY-TJJ",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pade42229e6",
+ "bnr": "bnr://skaists.dev/blood/pade42229e6",
+ "identity": {
+  "name": "Manneleubus d’Aremberg",
+  "lifespan": "0426–0487",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PZFS-8KQ"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pa7ce1e26d3",
+    "name": "Arembert d'Arembert I",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p538f892da7",
+    "name": "spouse Arenbert d'Arenberg I",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p2a5f13444a",
+    "name": "Warnachaire d'Aremberg"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p5656808b2c",
+    "name": "Agrippine Caratène de Narbonne",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PZFS-8KQ",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

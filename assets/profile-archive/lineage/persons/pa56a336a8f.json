@@ -1,0 +1,74 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pa56a336a8f",
+ "bnr": "bnr://skaists.dev/blood/pa56a336a8f",
+ "identity": {
+  "name": "Edward the Elder, King of the English",
+  "lifespan": "0871–0924",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LCDM-N61"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pd7dbfe893a",
+    "name": "Alfred 'the Great' of Wessex King of the Anglo-Saxons",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p4fb35d9b88",
+    "name": "Ealhswith of Mercia",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p846595cd1a",
+    "name": "Eadgifu of Wessex"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p76c37856e8",
+    "name": "Ælfflæd of Wiltshire",
+    "marriage": null
+   },
+   {
+    "id": "pcbee868b18",
+    "name": "Eadgifu of Kent",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LCDM-N61",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

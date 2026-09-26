@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p4071c5f875",
+ "bnr": "bnr://skaists.dev/blood/p4071c5f875",
+ "identity": {
+  "name": "Princess Jehosheba bat Jehoram",
+  "lifespan": "0860BC–0800BC",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "KFTT-T4C"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p3aeeaeb299",
+    "name": "King Jehoram ben Jehoshephat",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pc5167370e5",
+    "name": "Athaliah bint Omri, Queen of Judah",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p0e98947abb",
+    "name": "Joaddan"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p9ff6106737",
+    "name": "High Priest Jehoiada ben Amariah",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/KFTT-T4C",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

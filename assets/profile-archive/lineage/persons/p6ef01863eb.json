@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p6ef01863eb",
+ "bnr": "bnr://skaists.dev/blood/p6ef01863eb",
+ "identity": {
+  "name": "Isis Ta-Hemdjert of Egypt",
+  "lifespan": "–1151BC",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "KJJP-Q2L"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p7b4cfe3413",
+    "name": "NN",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pc8cfd470aa",
+    "name": "Hemdjert",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p47be9fbc8a",
+    "name": "Montjuhirkopshef ben Ramesses III"
+   },
+   {
+    "id": "pb91673fc37",
+    "name": "Ramesses VI 5th Pharaoh of the 20th Dynasty"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pc960b57b7b",
+    "name": "Ramesses III 2nd Pharaoh 20th Dynasty",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/KJJP-Q2L",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

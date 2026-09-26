@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pa322595c34",
+ "bnr": "bnr://skaists.dev/blood/pa322595c34",
+ "identity": {
+  "name": "Olhain d'Ollehain",
+  "lifespan": "0840–Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GBMW-9YZ"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pe716d38608",
+    "name": "unnamed d'Ollehain",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pc0fcf32eee",
+    "name": "unnamed",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p244e14148c",
+    "name": "Hermon d'Ollehain"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p14cbbedd42",
+    "name": "Mrs Olhain d'Ollehain",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GBMW-9YZ",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

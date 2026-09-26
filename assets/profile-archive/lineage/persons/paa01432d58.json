@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "paa01432d58",
+ "bnr": "bnr://skaists.dev/blood/paa01432d58",
+ "identity": {
+  "name": "Lady Alice Denton",
+  "lifespan": "1542–1585",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PZDC-61W"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p324ae3f5d8",
+    "name": "Sir John Thomas DENTON of Willesden, Buckinghamshire",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p86165d7a8c",
+    "name": "Margaret Mordaunt",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pfc33145269",
+    "name": "Margery Wylliamson"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pb42f3d1742",
+    "name": "Sir Nicolas de Pinlin Williamson III",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PZDC-61W",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

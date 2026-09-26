@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pc9e326a08e",
+ "bnr": "bnr://skaists.dev/blood/pc9e326a08e",
+ "identity": {
+  "name": "Reginald de Saint-Leger",
+  "lifespan": "1115–1176",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G3L1-RGF"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "G3WT-LV4",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "GZK3-7GC",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p00b1f81ca9",
+    "name": "Emma de Saint Léger"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p75960231e8",
+    "name": "Hélissende d'Eu",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G3L1-RGF",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

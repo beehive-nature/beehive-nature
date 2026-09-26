@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p1dcc1a76cd",
+ "bnr": "bnr://skaists.dev/blood/p1dcc1a76cd",
+ "identity": {
+  "name": "Valeria Fausta Maximina",
+  "lifespan": "0320–Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PX5T-NGC"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p9250b703a4",
+    "name": "Carausius II Dit Flavius Carausius DE BRETAGNE",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pe04240872b",
+    "name": "Oriuna DES BRITONS",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p9a766b4fa5",
+    "name": "Flavius Magnus Maximus"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pa8f2b899f4",
+    "name": "Flavius Valerius Aurelio Constantinus Emperor of Rome",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PX5T-NGC",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pf9fe2d433a",
+ "bnr": "bnr://skaists.dev/blood/pf9fe2d433a",
+ "identity": {
+  "name": "Sir Johanes Tayer or Thayer I",
+  "lifespan": "1503–1561",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "M56L-QJD"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p9b329708f2",
+    "name": "William Thayer III",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p81d8538b71",
+    "name": "Jone Mary Roberts",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "peb31a65802",
+    "name": "John Thayer Jr"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p300a0743d5",
+    "name": "Constance",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/M56L-QJD",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

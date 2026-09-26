@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pdda54c6c09",
+ "bnr": "bnr://skaists.dev/blood/pdda54c6c09",
+ "identity": {
+  "name": "Hilla vor der Hardt",
+  "lifespan": "1475–1554",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L21Y-R7Y"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "GPTN-WWB",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "GG8Y-JQ7",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p74bf164dac",
+    "name": "Franz - Busch Vor Der Hardt"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pd6d3b47480",
+    "name": "Gerhart - Godert Pusch Eydam Busch",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L21Y-R7Y",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

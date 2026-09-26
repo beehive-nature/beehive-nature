@@ -1,0 +1,77 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pab31c04e78",
+ "bnr": "bnr://skaists.dev/blood/pab31c04e78",
+ "identity": {
+  "name": "Mariamne I bat Alexander",
+  "lifespan": "0053BC–0025BC",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G38W-XXK"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p8c057294bc",
+    "name": "Judah Aristobulus I ben John Hyrcanus 50th High Priest",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pe501edd032",
+    "name": "Salomé Alexandra bat Shetach of Judea",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pa86437d173",
+    "name": "Aristobulus de Judea"
+   },
+   {
+    "id": "p4f9cfb2388",
+    "name": "Aristobulus IV ben Herod"
+   },
+   {
+    "id": "pe7434c7284",
+    "name": "Alexander ben Herod"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pbdbc98aaee",
+    "name": "King Herod ben Antipater",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G38W-XXK",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

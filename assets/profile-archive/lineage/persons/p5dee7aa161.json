@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p5dee7aa161",
+ "bnr": "bnr://skaists.dev/blood/p5dee7aa161",
+ "identity": {
+  "name": "Gerard Spencer",
+  "lifespan": "–1685",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "K4ZR-MHT"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p78e7f58a2f",
+    "name": "Gerard Spencer",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p19f8130e6c",
+    "name": "Alice Whitbread",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pd177723ce6",
+    "name": "Timothy Spencer"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p249152efc2",
+    "name": "Hannah",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/K4ZR-MHT",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p567fa84568",
+ "bnr": "bnr://skaists.dev/blood/p567fa84568",
+ "identity": {
+  "name": "Queen of the East Franks Eurgen verch Lleiffer Mawr",
+  "lifespan": "0125–0173",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PSKB-XYB"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pa31c3027cb",
+    "name": "Saint Lucius Lleuver Mawr Ap Coilus Blessed Sovereign",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p72fa6e29e4",
+    "name": "Queen Gladys The Elder ferch Eurgen",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pcfb5a39b49",
+    "name": "Catheloys Des Rois Pecheurs"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pe4c0925075",
+    "name": "Aminbab TINTAGEL",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PSKB-XYB",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

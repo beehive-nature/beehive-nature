@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pe8bed8d1a1",
+ "bnr": "bnr://skaists.dev/blood/pe8bed8d1a1",
+ "identity": {
+  "name": "Anna Maria FLENDER",
+  "lifespan": "1658–1692",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "4Q6P-1KY"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pf48b681a8d",
+    "name": "Henrich FLENDER",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "paea6f27a8c",
+    "name": "Anna HIRSCH",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pa7bdae76eb",
+    "name": "Christoffel BROMBACH"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p7c4b537dd2",
+    "name": "Caspar BROMBACH",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/4Q6P-1KY",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pedf5c588b6",
+ "bnr": "bnr://skaists.dev/blood/pedf5c588b6",
+ "identity": {
+  "name": "Consul Quintus Sulpicius Camerinus Pythicus of Rome",
+  "lifespan": "0010BC–67",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PZZB-7DB"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p6e7c1c53a5",
+    "name": "Quintus Sulpicius",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p15369e074a",
+    "name": "spouse Quintus Sulpicius Rufus",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pc5626e4e7f",
+    "name": "Sulpicia Kelero De ROME"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p410436a440",
+    "name": "Postumia Festa",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PZZB-7DB",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

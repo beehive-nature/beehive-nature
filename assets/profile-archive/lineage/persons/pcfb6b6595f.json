@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pcfb6b6595f",
+ "bnr": "bnr://skaists.dev/blood/pcfb6b6595f",
+ "identity": {
+  "name": "Elizabeth Tolderby",
+  "lifespan": "1577–1630",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "224H-FPN"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p143b69bc66",
+    "name": "Henry John Tolderby",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p2588a38022",
+    "name": "Anne Smith Elkington",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p05ad0fc430",
+    "name": "Thomas Prence"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p390f8787ec",
+    "name": "Thomas Prince",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/224H-FPN",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

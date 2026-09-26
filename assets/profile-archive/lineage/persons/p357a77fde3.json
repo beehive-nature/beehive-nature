@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p357a77fde3",
+ "bnr": "bnr://skaists.dev/blood/p357a77fde3",
+ "identity": {
+  "name": "Richard Anslechsson",
+  "lifespan": "0947–0994",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GG6S-RW5"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pd621ec91fd",
+    "name": "Lord Anslech DE BASTENBURG Of Bricquebec",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p3d701cd206",
+    "name": "Gerlotte Bertrand",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p7ec4f4f097",
+    "name": "Turstin Haloup de la Haye de Bastembourg-de Balts"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pfdb3f58fa9",
+    "name": "Emma de Balts",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GG6S-RW5",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,89 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p92249b9d96",
+ "bnr": "bnr://skaists.dev/blood/p92249b9d96",
+ "identity": {
+  "name": "Reina Laódice Mitridátida",
+  "lifespan": "0241BC–0191BC",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GTZS-6L2"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p3836857b70",
+    "name": "King Mitridates II Of Pontus",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p46373562b4",
+    "name": "Princesa Seleucida Leodice",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pf123da0a12",
+    "name": "Reina Consorte Cleópatra I Syra de Egipto Princesa de Siria"
+   },
+   {
+    "id": "pfd4f3f3844",
+    "name": "Seleucus IV Philopator"
+   },
+   {
+    "id": "p9f90a4d79b",
+    "name": "Queen consort of the Seleucid Empire Laodice IV"
+   },
+   {
+    "id": "pf0dcbce159",
+    "name": "Nysa"
+   },
+   {
+    "id": "pa013444fc5",
+    "name": "Antiochos IV Seleucide"
+   },
+   {
+    "id": "pf1c807097d",
+    "name": "Antiochis Bint Antiochus III"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pcc1cc25880",
+    "name": "Antiochus III. \"The Great,\" Megas Basileus of the Seleucid Empire",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GTZS-6L2",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p7b0e33263b",
+ "bnr": "bnr://skaists.dev/blood/p7b0e33263b",
+ "identity": {
+  "name": "Albreda de Harcourt",
+  "lifespan": "1134–1205",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LYLR-JSX"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "LY12-X5D",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "G76X-N3B",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pedcb427d72",
+    "name": "Rohese Trussebut"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p855da2e0b8",
+    "name": "William Trussebut the younger",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LYLR-JSX",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

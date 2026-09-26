@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p418b422833",
+ "bnr": "bnr://skaists.dev/blood/p418b422833",
+ "identity": {
+  "name": "Robert De Hurst Frances",
+  "lifespan": "1108–1179",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G1YH-MB9"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pa259bc6374",
+    "name": "Thomas de Frances",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pf45a21af13",
+    "name": "Agnes de Hurst",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p940ecdb273",
+    "name": "Sir Thomas de Franceis II"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p3a20817618",
+    "name": "Mabell de Luttchurch",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G1YH-MB9",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

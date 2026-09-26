@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p37805b1bad",
+ "bnr": "bnr://skaists.dev/blood/p37805b1bad",
+ "identity": {
+  "name": "Roiandrech De Cornouialle",
+  "lifespan": "0790–0860",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PH8J-DJF"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pe6a9ad65fb",
+    "name": "Lowenen de Cornouaille",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pf19506cf79",
+    "name": "Dama Lowenen de Cornouaille",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p1960b22c32",
+    "name": "Queen Marmoëc de Poher"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p13b175908a",
+    "name": "Riwallon III Comte de Poher",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PH8J-DJF",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

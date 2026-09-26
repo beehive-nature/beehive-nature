@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pfc33145269",
+ "bnr": "bnr://skaists.dev/blood/pfc33145269",
+ "identity": {
+  "name": "Margery Wylliamson",
+  "lifespan": "1580–1627",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LH83-4KC"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pb42f3d1742",
+    "name": "Sir Nicolas de Pinlin Williamson III",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "paa01432d58",
+    "name": "Lady Alice Denton",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p82c741ea2c",
+    "name": "George Smith"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "paeed6fd153",
+    "name": "Richard Smith",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LH83-4KC",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

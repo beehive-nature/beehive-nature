@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p4a718323f4",
+ "bnr": "bnr://skaists.dev/blood/p4a718323f4",
+ "identity": {
+  "name": "William Humphrey",
+  "lifespan": "1517–1573",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LZPS-5HK"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "MCV3-X5R",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "G8D1-Z75",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p548589abee",
+    "name": "William Humphrey"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p0e15021a72",
+    "name": "Hynson",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LZPS-5HK",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

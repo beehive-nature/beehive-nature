@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p76cadc09d5",
+ "bnr": "bnr://skaists.dev/blood/p76cadc09d5",
+ "identity": {
+  "name": "Patrick de Chaworth",
+  "lifespan": "1155–1199",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G2WN-RZX"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p536e93fb4a",
+    "name": "Patrick de Chaources III",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p82e46c4512",
+    "name": "Wilberga de Mundubleau",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "paf35e88ddc",
+    "name": "Payne de Chaworth"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p2c2fad5558",
+    "name": "Agnes",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G2WN-RZX",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

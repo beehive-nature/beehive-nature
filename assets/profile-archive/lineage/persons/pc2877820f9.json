@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pc2877820f9",
+ "bnr": "bnr://skaists.dev/blood/pc2877820f9",
+ "identity": {
+  "name": "Sir John de Arundel VI",
+  "lifespan": "1370–1435",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LRHS-25W"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pedc60b1c2f",
+    "name": "Sir John Arundell IV of Lanherne",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p4eacec8390",
+    "name": "Joan Luscote",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pac1db0347e",
+    "name": "Sir Thomas Arundell"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pc92e80cd7b",
+    "name": "Eleanor Lambourne",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LRHS-25W",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

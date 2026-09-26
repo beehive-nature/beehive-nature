@@ -1,0 +1,64 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "paac3a2d3a8",
+ "bnr": "bnr://skaists.dev/blood/paac3a2d3a8",
+ "identity": {
+  "name": "Sabinus Julia Sabinus of Rome",
+  "lifespan": "0144–0190",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GBCW-RR7"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p7b20dd8ad1",
+    "name": "Claudia Capitolina of Rome",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pfbfd3da807",
+    "name": "Titus Flavius Titanius II"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p14379a4334",
+    "name": "Titus Flavius Claudius Sulpicianus",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GBCW-RR7",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

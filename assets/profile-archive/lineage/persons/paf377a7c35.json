@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "paf377a7c35",
+ "bnr": "bnr://skaists.dev/blood/paf377a7c35",
+ "identity": {
+  "name": "Berthold König von Sachsen",
+  "lifespan": "0567–0633",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GFB8-7BV"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p32c2d5be23",
+    "name": "Bodicus König von Sachsen",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p85063cdef6",
+    "name": "Irmafreda of Kent",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pddf1bdb8c5",
+    "name": "King Sieghard oder Sigismund König von Ripuarien of the Saxons"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p4c5b189530",
+    "name": "Eiliswintha Königin von Sachsen -  von Alemannen",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GFB8-7BV",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

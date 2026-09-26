@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p5531ac2d53",
+ "bnr": "bnr://skaists.dev/blood/p5531ac2d53",
+ "identity": {
+  "name": "King of Macedon Aeropus I Argead",
+  "lifespan": "0564BC–0533BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "P3KS-DVM"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p324a983e10",
+    "name": "King of Macedon Philip I Argead",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p62da45be63",
+    "name": "Mrs Philip I Argead",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p3a17cc7bf1",
+    "name": "King of Macedon Alcetas I Argead"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p8a23f2d536",
+    "name": "Unknown",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/P3KS-DVM",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

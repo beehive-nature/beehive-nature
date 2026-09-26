@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p013c352825",
+ "bnr": "bnr://skaists.dev/blood/p013c352825",
+ "identity": {
+  "name": "Elizabeth Paulise Hoff",
+  "lifespan": "1651–1734",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LT3B-NR9"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pc6c3ac37fc",
+    "name": "Paulus Dircke Brinckerhoff",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p8cf5e127d9",
+    "name": "Gertie Jannetse Willemse",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pd18712d14a",
+    "name": "Jan Paulus VanderVoort"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p1cd952b22b",
+    "name": "Paulus Michaelse VanderVoort",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LT3B-NR9",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

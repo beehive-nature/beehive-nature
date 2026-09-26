@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p476de4dc40",
+ "bnr": "bnr://skaists.dev/blood/p476de4dc40",
+ "identity": {
+  "name": "Isabel Willington",
+  "lifespan": "1370–1424",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "MS9C-8PF"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p26a1bcb4f3",
+    "name": "Sir John de Wilington",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p5ad54dc5d6",
+    "name": "Matilda de Carminow",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p27f9a95482",
+    "name": "Matilda De Beaumont"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p7a9228d1ed",
+    "name": "William Beaumont",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/MS9C-8PF",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

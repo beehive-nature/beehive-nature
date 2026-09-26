@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pefe4076cfa",
+ "bnr": "bnr://skaists.dev/blood/pefe4076cfa",
+ "identity": {
+  "name": "William Fry",
+  "lifespan": "1548–1605",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GZ6T-LT8"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p20466dd270",
+    "name": "John Fry",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pe70433e728",
+    "name": "Anna Leins",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p568af867a3",
+    "name": "William Fry"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p0f9bca4c69",
+    "name": "Ann Brewer",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GZ6T-LT8",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

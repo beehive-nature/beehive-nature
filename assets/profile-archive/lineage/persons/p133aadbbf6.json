@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p133aadbbf6",
+ "bnr": "bnr://skaists.dev/blood/p133aadbbf6",
+ "identity": {
+  "name": "Vicomte Aubry DE NARBONNE DE GATINAIS , Ier",
+  "lifespan": "0825–0896",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GF1J-6GZ"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p6a28898c0c",
+    "name": "Hugues de Tours",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p7f756233da",
+    "name": "Liutfride D'ANJOU",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pf802a652c9",
+    "name": "Comte Geoffroy II DE GATINAIS"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pa9360a566d",
+    "name": "Comtesse Angèle D'ORLEANS",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GF1J-6GZ",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

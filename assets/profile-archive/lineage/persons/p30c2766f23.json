@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p30c2766f23",
+ "bnr": "bnr://skaists.dev/blood/p30c2766f23",
+ "identity": {
+  "name": "Rey Mithridates III Antiochus Epiphanes de Commagene",
+  "lifespan": "–0011BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "9CXH-Q9X"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p6a9ce18f27",
+    "name": "Rey Mithridates II Antiochus Epiphanes Philorhomaeus Philhellen Monocrites de Commagene",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p951f156359",
+    "name": "Lodicea Seludice",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pf2899808ae",
+    "name": "King Antiochus The Great III"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p58b91e2d02",
+    "name": "Iotape de Emesa Reina de Nabataea",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/9CXH-Q9X",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

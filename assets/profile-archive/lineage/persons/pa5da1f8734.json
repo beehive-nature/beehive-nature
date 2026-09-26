@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pa5da1f8734",
+ "bnr": "bnr://skaists.dev/blood/pa5da1f8734",
+ "identity": {
+  "name": "Odoacre DE CRÉQUY",
+  "lifespan": "0860–0924",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PW4P-SP5"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p010d73d934",
+    "name": "Arnould Ier DE CREQUY",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pbef46f354b",
+    "name": "Ignode de Harlebec De Flanders",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p5fe6709497",
+    "name": "Arnoul de Crequy II"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p16c8d09167",
+    "name": "Yolanda De Cleves",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PW4P-SP5",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

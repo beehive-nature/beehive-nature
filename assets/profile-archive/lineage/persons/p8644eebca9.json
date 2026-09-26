@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p8644eebca9",
+ "bnr": "bnr://skaists.dev/blood/p8644eebca9",
+ "identity": {
+  "name": "Etana 13th King of Kish",
+  "lifespan": "Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "9CHT-MRS"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pc4dc4da02f",
+    "name": "Arwium ben Mashda 12th King of Kish",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pd9ba2d492c",
+    "name": "Queen Arwium OF KISH",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pf9c63b6c95",
+    "name": "Balih ben Etana 14th King of Kish"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pe3b6804b2b",
+    "name": "Haziana",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/9CHT-MRS",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

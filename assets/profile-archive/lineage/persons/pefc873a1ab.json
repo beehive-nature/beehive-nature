@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pefc873a1ab",
+ "bnr": "bnr://skaists.dev/blood/pefc873a1ab",
+ "identity": {
+  "name": "King Bartherus of the Sicambrian Franks",
+  "lifespan": "0193–0272",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L812-PCB"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p49ce0f8394",
+    "name": "Hildéric \"Childéric\" I des Francs",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p9e44cd3aba",
+    "name": "Hastila Karana Julianus Quadratus van Belgie, van Lutetia",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pb364c7355e",
+    "name": "Clodius III of Sicambre De’Westphalia King Du West Franks"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p5a4cb81ae2",
+    "name": "Hatilla Hermentude Queen of the West Franks",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L812-PCB",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

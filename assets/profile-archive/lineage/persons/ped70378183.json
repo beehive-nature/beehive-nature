@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "ped70378183",
+ "bnr": "bnr://skaists.dev/blood/ped70378183",
+ "identity": {
+  "name": "Machteld Claes Franckendr van de Bergh",
+  "lifespan": "1475–1532",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LV45-BXQ"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "L6QR-7J6",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "L6QR-7VJ",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p4352086206",
+    "name": "Adriaen Claesz van Adrichem"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p3d8eec5798",
+    "name": "Nicolaas Adriaensz van Adrichem",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LV45-BXQ",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

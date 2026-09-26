@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pb92104939b",
+ "bnr": "bnr://skaists.dev/blood/pb92104939b",
+ "identity": {
+  "name": "Gunnora de Valognes",
+  "lifespan": "1166–1212",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GM5J-515"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p54ff024c1f",
+    "name": "Robert de Valognes",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p5267c07025",
+    "name": "Hawise x",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pa9acff4749",
+    "name": "Christine FitzRobert Countess Of Essex"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pa695cd705e",
+    "name": "Lord Robert FitzWalter 3rd Lord Fitzwalter of Dunmow",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GM5J-515",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": true,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p51cd1fe5b6",
+ "bnr": "bnr://skaists.dev/blood/p51cd1fe5b6",
+ "identity": {
+  "name": "Margaret Killigrew",
+  "lifespan": "1536–1610",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PZCY-33H"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p4094631ff0",
+    "name": "John Killigrew of Arwenack",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p48df6e2857",
+    "name": "Lady Elizabeth Mary Trewinnard pirate",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p3794f8c965",
+    "name": "William Torrey"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p37bd813c09",
+    "name": "Philip Torrey",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PZCY-33H",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

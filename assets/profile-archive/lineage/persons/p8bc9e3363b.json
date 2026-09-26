@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p8bc9e3363b",
+ "bnr": "bnr://skaists.dev/blood/p8bc9e3363b",
+ "identity": {
+  "name": "Aelia Silvana de Rome",
+  "lifespan": "0130–Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LVDZ-H9L"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pc1c5b87a78",
+    "name": "Consul Lucius Plautius Lamia Silvanus",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pd9fad25e03",
+    "name": "Aurelia Fadilla Aurelier",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p27688375ef",
+    "name": "Fabia Orestilla de Rome"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p247f9f6819",
+    "name": "Marcus Annius Severus Orestilla de Rome",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LVDZ-H9L",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

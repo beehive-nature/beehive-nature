@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p3a77165461",
+ "bnr": "bnr://skaists.dev/blood/p3a77165461",
+ "identity": {
+  "name": "Ava de Morvois",
+  "lifespan": "0830–0891",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L1GY-CMK"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pb1427e3360",
+    "name": "EOL Remy de Bourges",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p878b5c6f0d",
+    "name": "Mrs EOL Remy de Bourges",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p7602483557",
+    "name": "Eude de Chatillon-sur-Marne"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p97cece5f08",
+    "name": "Robert Ursus De'Champagne",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L1GY-CMK",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

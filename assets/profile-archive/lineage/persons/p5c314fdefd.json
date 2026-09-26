@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p5c314fdefd",
+ "bnr": "bnr://skaists.dev/blood/p5c314fdefd",
+ "identity": {
+  "name": "Pharaoh. Sekhemre-shedtawi Sebekemsaf I, King of Egypt",
+  "lifespan": "2180–Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G1FK-TVB"
+  }
+ ],
+ "evidence": {
+  "era": "recorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "recorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p983705c36a",
+    "name": "Pharaoh. Sekhemre Sankhtawy Neferhotep III, Pharaoh of Egypt",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p2d3e162981",
+    "name": "Mentuhotep of Egypt",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p4638ba4186",
+    "name": "Pharaoh. Nubkheperre Intef VI"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p5b7ecfda4d",
+    "name": "Queen consort. Nubkhas",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G1FK-TVB",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

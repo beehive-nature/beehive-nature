@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pa5d6599c01",
+ "bnr": "bnr://skaists.dev/blood/pa5d6599c01",
+ "identity": {
+  "name": "Edmund George Chadderton",
+  "lifespan": "1480–1535",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "MR5J-3ZY"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "GGTK-95H",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "G85P-WF7",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p69d7fe1b42",
+    "name": "Elizabeth Chadderton"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pce592c563c",
+    "name": "Margaret de Cliffe",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/MR5J-3ZY",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

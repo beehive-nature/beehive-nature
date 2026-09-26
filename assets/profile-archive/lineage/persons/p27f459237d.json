@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p27f459237d",
+ "bnr": "bnr://skaists.dev/blood/p27f459237d",
+ "identity": {
+  "name": "John Perrin I",
+  "lifespan": "1558–1615",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "MGVX-TRZ"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p121b039876",
+    "name": "Johes Perrin",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p3e8cb76200",
+    "name": "Jehanne Lebon",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p025fe50cb7",
+    "name": "John Perrin"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pd84668a20a",
+    "name": "Anne Bruneau",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/MGVX-TRZ",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

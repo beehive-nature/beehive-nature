@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pb672d753f1",
+ "bnr": "bnr://skaists.dev/blood/pb672d753f1",
+ "identity": {
+  "name": "Julia Quatratilla de Rome",
+  "lifespan": "0138–0213",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LVZ5-V2W"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p3ecb30cb1d",
+    "name": "Aulus Julius Claudius Charax Caius",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p80b080d8f9",
+    "name": "Julia Cillicia",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p65aaf5ef65",
+    "name": "Marcus Asinius Nicomachianus De'Asinius"
+   },
+   {
+    "id": "p3d6b7c8c27",
+    "name": "Gaius Julianus Asinius Quadratus of Belgium De'Asinius"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pca081efec4",
+    "name": "Gaius Asinius Nicomachus",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LVZ5-V2W",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

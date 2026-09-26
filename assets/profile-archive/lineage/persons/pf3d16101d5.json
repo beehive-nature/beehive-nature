@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pf3d16101d5",
+ "bnr": "bnr://skaists.dev/blood/pf3d16101d5",
+ "identity": {
+  "name": "King of the Lombards Aio Agio Ajonis Agilulf d'Alemanie",
+  "lifespan": "0265–Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "P618-Z5K"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pcdd4770247",
+    "name": "Co-King Ybor of the Lombards",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p950ae26032",
+    "name": "Sra de Chlodomer",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p43a2733eec",
+    "name": "Asilia Hastila de Lombardía"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p87725dc5fb",
+    "name": "Nu Iunii Neratii de Roma",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/P618-Z5K",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

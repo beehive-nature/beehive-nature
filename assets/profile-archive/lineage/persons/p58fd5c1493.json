@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p58fd5c1493",
+ "bnr": "bnr://skaists.dev/blood/p58fd5c1493",
+ "identity": {
+  "name": "John Denison",
+  "lifespan": "1534–1582",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LZBN-3WJ"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p1d4e21562f",
+    "name": "George Denison Sir Bishop",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p13d3117d4e",
+    "name": "Anne Borrodill Goode",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pefdc9e15af",
+    "name": "William Denison"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p3e0aae890d",
+    "name": "Agnes Wylie",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LZBN-3WJ",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

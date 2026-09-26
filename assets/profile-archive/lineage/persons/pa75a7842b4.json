@@ -1,0 +1,64 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pa75a7842b4",
+ "bnr": "bnr://skaists.dev/blood/pa75a7842b4",
+ "identity": {
+  "name": "Princesa De Gat",
+  "lifespan": "Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PFTL-WHF"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pd28255b13d",
+    "name": "Rei Áquis de Gate",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p50bcec37e7",
+    "name": "Ish Rav-Kelim Doharnefil"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p8f36115125",
+    "name": "Goliat De Gat",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PFTL-WHF",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

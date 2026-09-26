@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p0ce5aa57c3",
+ "bnr": "bnr://skaists.dev/blood/p0ce5aa57c3",
+ "identity": {
+  "name": "Kavkas ben Togarmah",
+  "lifespan": "Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GLR7-WZH"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p8c03fd33f3",
+    "name": "Togarmah ben Gomer",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p4d96fc9c15",
+    "name": "Mrs Togarmah",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p24a1848722",
+    "name": "x de Kovkan"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pdf630ef477",
+    "name": "Mrs Kavkaz AP TOGARMAH OF CAUCASUS",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GLR7-WZH",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

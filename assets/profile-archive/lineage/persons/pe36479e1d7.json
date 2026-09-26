@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pe36479e1d7",
+ "bnr": "bnr://skaists.dev/blood/pe36479e1d7",
+ "identity": {
+  "name": "Marcus Pompeius Titus I Gens Pomponii",
+  "lifespan": "0185BC–Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "P7DH-GGL"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pb81eb16029",
+    "name": "Aulus Pompeius I Gens-Pomponii",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p8dea8eb931",
+    "name": "Octavia Titus",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pa7e4a1e16a",
+    "name": "Marcus Pompeius Titus II Gens-Pomponii"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p1f924cae90",
+    "name": "Mrs Marcus Pompeius Titus I Gens Pomponii",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/P7DH-GGL",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

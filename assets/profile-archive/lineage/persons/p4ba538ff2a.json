@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p4ba538ff2a",
+ "bnr": "bnr://skaists.dev/blood/p4ba538ff2a",
+ "identity": {
+  "name": "Thomas Beauchamp II",
+  "lifespan": "1338–1401",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L218-3BC"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pe964467fa3",
+    "name": "Sir Thomas de Beauchamp",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p53fbb43eec",
+    "name": "Katherine de Mortimer",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "paa730fa64f",
+    "name": "Richard Beauchamp 13th Earl of Warwick"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p8b193ba580",
+    "name": "Margaret Ferrers Countess of Warwick",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L218-3BC",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p701d904846",
+ "bnr": "bnr://skaists.dev/blood/p701d904846",
+ "identity": {
+  "name": "Margareta van der Hagen",
+  "lifespan": "1511–1550",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L27K-FBX"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pe4253fa62f",
+    "name": "Michael Van Der Hagen",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p710e8149c7",
+    "name": "Livine Haegen",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p12c90edaa4",
+    "name": "Peternelle de Neve"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pccaeea24ec",
+    "name": "Anthonis de Neve",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L27K-FBX",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

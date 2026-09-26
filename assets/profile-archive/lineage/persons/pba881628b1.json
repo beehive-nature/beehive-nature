@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pba881628b1",
+ "bnr": "bnr://skaists.dev/blood/pba881628b1",
+ "identity": {
+  "name": "Juliana FitzMaurice",
+  "lifespan": "1263–1300",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LYZR-2Q4"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pd660f01eba",
+    "name": "Maurice FitzMaurice",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p773310c718",
+    "name": "Maud de Prendergast",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pb600efefa8",
+    "name": "Margaret de Clare"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p300f750683",
+    "name": "Thomas de Clare",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LYZR-2Q4",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

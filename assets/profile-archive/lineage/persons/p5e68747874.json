@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p5e68747874",
+ "bnr": "bnr://skaists.dev/blood/p5e68747874",
+ "identity": {
+  "name": "Calavia de Rome",
+  "lifespan": "–0120BC",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GKZ5-661"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p380433501d",
+    "name": "Pacuvius Calavius",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pdfd8d79237",
+    "name": "Claudia Pulcher",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p0ac10917f1",
+    "name": "Metalla Terentia Caepio de Rome"
+   },
+   {
+    "id": "p097f64a732",
+    "name": "Lucius Caecilius Metellus Dalmaticus Pontifex Maximus"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pbad4e9f599",
+    "name": "Lucius Caecillus Metellus Calvus Roman Consul - Govenor of Spain - Proconsul of Cisalpine",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GKZ5-661",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

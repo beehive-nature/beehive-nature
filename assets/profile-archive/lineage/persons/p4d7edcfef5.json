@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p4d7edcfef5",
+ "bnr": "bnr://skaists.dev/blood/p4d7edcfef5",
+ "identity": {
+  "name": "Imhild von Engern",
+  "lifespan": "0726–0787",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GS42-BRT"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pc07f2952ec",
+    "name": "Wernicke Von Engern kung av Sachsen, Graf von Engern",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p8461964128",
+    "name": "Princess de Ruige Kunhilde vel Gunelinde von Rügen",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p8b949a18b9",
+    "name": "King of Haithabu Halfdan Haroldsson"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pee6956e74d",
+    "name": "Harald Eysteinsson",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GS42-BRT",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

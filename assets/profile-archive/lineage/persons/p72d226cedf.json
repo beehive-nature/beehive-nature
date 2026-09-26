@@ -1,0 +1,80 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p72d226cedf",
+ "bnr": "bnr://skaists.dev/blood/p72d226cedf",
+ "identity": {
+  "name": "Albert Perry Rockwood",
+  "lifespan": "1805–1879",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "KWJ4-XBD"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "tradition-entered",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p55eb2f15c6",
+    "name": "Luther Rockwood",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p58ec9cc83d",
+    "name": "Ruth Perry",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pf234fbb24b",
+    "name": "Julius Apollus Rockwood"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pe1cceea23c",
+    "name": "Juliane Sophie Olsen",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/KWJ4-XBD",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": {
+   "pack": "evidence/albert-perry-rockwood.json"
+  },
+  "testimony": [
+   {
+    "id": "rockwood-account",
+    "lens": "testimony",
+    "subject": "Rockwood line",
+    "author": "family testimony, recorded 2026-09-16; corrected the same day by founder order",
+    "text": "Family testimony speaks of a Rockwood investment account connected to the Ancestry.com stake. CORRECTION THAT TRAVELS WITH IT: Ancestry's documented 2020 acquisition was by Blackstone-managed funds, NOT the LDS Church. No supporting records attached — this entry stays attributed family testimony and is never presented as independent verification.",
+    "status": "attributed testimony — records pending"
+   }
+  ],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

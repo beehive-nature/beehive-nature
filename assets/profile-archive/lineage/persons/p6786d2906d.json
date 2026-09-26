@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p6786d2906d",
+ "bnr": "bnr://skaists.dev/blood/p6786d2906d",
+ "identity": {
+  "name": "Anna Kneisley",
+  "lifespan": "1688–1758",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LRHD-VTV"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p9fcb34e747",
+    "name": "Anthony Kneisley",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pc8038db208",
+    "name": "Magdalena Hiestand",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p0b5fa73fd1",
+    "name": "Martin Kauffman"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pf767961c23",
+    "name": "Michel Kauffman",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LRHD-VTV",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

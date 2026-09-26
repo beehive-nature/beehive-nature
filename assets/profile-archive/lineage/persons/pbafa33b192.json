@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pbafa33b192",
+ "bnr": "bnr://skaists.dev/blood/pbafa33b192",
+ "identity": {
+  "name": "Gen. John Lambert Sr.",
+  "lifespan": "1617–1715",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LKK9-31Y"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p37025d8836",
+    "name": "Richard Lambert",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pcdad389ec3",
+    "name": "Rebecca Mead",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p8d896faaa8",
+    "name": "Jesse Lambert"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p1b841f34ef",
+    "name": "Joan Boswell",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LKK9-31Y",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

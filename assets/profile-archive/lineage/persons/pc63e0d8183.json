@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pc63e0d8183",
+ "bnr": "bnr://skaists.dev/blood/pc63e0d8183",
+ "identity": {
+  "name": "Orontès III d'Armenia",
+  "lifespan": "0335BC–0260BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PMGV-CTC"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p81c0213340",
+    "name": "Mithrénès d'Armenia",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p624b97c71b",
+    "name": "Mrs Mithrénès D'ARMENIE",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pda123b0999",
+    "name": "Samès Ier d'Armenia"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pd1a4034078",
+    "name": "Mrs Orontès III D'ARMENIE",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PMGV-CTC",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

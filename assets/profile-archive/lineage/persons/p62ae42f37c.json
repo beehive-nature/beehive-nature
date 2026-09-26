@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p62ae42f37c",
+ "bnr": "bnr://skaists.dev/blood/p62ae42f37c",
+ "identity": {
+  "name": "Alvin Osborn Owens",
+  "lifespan": "1775–1860",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LWFG-SSJ"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p9734ff3a69",
+    "name": "Elisha Blake Owens",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p76135be455",
+    "name": "Lucresh Hayden",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p351697141c",
+    "name": "Mary Marie Owens"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pa11c641498",
+    "name": "Hannah Lucretia Morton",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LWFG-SSJ",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

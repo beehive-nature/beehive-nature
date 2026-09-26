@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pa2bbc9d1ac",
+ "bnr": "bnr://skaists.dev/blood/pa2bbc9d1ac",
+ "identity": {
+  "name": "Ann Simpson",
+  "lifespan": "1753–1835",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L7FN-WGH"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "LZDG-9TM",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "LZDG-9P7",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "paecc76ef71",
+    "name": "Elizabeth Welburn"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p54bacd6b65",
+    "name": "William Wellburn",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L7FN-WGH",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

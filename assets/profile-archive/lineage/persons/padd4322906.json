@@ -1,0 +1,58 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "padd4322906",
+ "bnr": "bnr://skaists.dev/blood/padd4322906",
+ "identity": {
+  "name": "Ingen Jannigje Jansdr",
+  "lifespan": "1565–1622",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LJKF-ZW5"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [],
+  "children": [
+   {
+    "id": "pdeee921390",
+    "name": "Jannegjen Jans"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pc430395293",
+    "name": "Jacob Leenderts Besemer",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LJKF-ZW5",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

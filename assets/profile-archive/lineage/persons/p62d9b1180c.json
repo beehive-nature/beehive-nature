@@ -1,0 +1,57 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p62d9b1180c",
+ "bnr": "bnr://skaists.dev/blood/p62d9b1180c",
+ "identity": {
+  "name": "Magistrate Decimius \"The Elder\"",
+  "lifespan": "0250–0300",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PZY8-2PF"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "PZY8-YZV",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pefed2a43e0",
+    "name": "Decurion Decimius Rusticus \"The Earliest\""
+   }
+  ],
+  "spouses": []
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PZY8-2PF",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p4ab853cfdc",
+ "bnr": "bnr://skaists.dev/blood/p4ab853cfdc",
+ "identity": {
+  "name": "Ulrich Ueli Galli",
+  "lifespan": "1589–1666",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "P7WF-NNL"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p67e361d9bb",
+    "name": "Ulrich Galli",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "paf4f41b26f",
+    "name": "Madlena Zurflueh",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p9dd72be2b7",
+    "name": "Barbara Galli"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p64c2528775",
+    "name": "Barbli Neukommet",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/P7WF-NNL",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

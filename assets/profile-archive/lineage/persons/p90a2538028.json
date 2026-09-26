@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p90a2538028",
+ "bnr": "bnr://skaists.dev/blood/p90a2538028",
+ "identity": {
+  "name": "Hilarius",
+  "lifespan": "0300–Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GXTT-JHQ"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p326f804f1e",
+    "name": "Flavius Solinus Du Bosphore",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pb21d5990de",
+    "name": "Ausonia",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p7799ab7f83",
+    "name": "Flavius Afranius Aegidius Syagrious"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p19e78be609",
+    "name": "Flavius Afranius Syagrius",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GXTT-JHQ",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

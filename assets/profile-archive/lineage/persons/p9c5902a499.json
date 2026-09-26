@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p9c5902a499",
+ "bnr": "bnr://skaists.dev/blood/p9c5902a499",
+ "identity": {
+  "name": "Cecily Merbury",
+  "lifespan": "1364–1417",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LVBJ-GSN"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p604bf570cf",
+    "name": "Sir John de Merbury",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pe183709440",
+    "name": "Lady Ellen Daniel",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p2895e587ef",
+    "name": "Baron, Sir Edmund de Cornwall"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pc05855a5e3",
+    "name": "Richard Cornwall 5th Baron of Burford",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LVBJ-GSN",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

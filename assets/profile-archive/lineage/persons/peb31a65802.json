@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "peb31a65802",
+ "bnr": "bnr://skaists.dev/blood/peb31a65802",
+ "identity": {
+  "name": "John Thayer Jr",
+  "lifespan": "1530–1584",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LH7R-2FL"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pf9fe2d433a",
+    "name": "Sir Johanes Tayer or Thayer I",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p300a0743d5",
+    "name": "Constance",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p6196fd3719",
+    "name": "Richard Thayer"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p34f276c636",
+    "name": "Mary Roberts",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LH7R-2FL",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

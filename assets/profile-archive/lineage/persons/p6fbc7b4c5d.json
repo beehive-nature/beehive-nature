@@ -1,0 +1,64 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p6fbc7b4c5d",
+ "bnr": "bnr://skaists.dev/blood/p6fbc7b4c5d",
+ "identity": {
+  "name": "John Longe",
+  "lifespan": "1290–Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GV9C-K8K"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pa3d2947422",
+    "name": "Wykeham",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p63c4aad2e8",
+    "name": "Agnes Longe de Wykeham"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p861b4148a1",
+    "name": "Mary Terry",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GV9C-K8K",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

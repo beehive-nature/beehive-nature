@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p9bda270bad",
+ "bnr": "bnr://skaists.dev/blood/p9bda270bad",
+ "identity": {
+  "name": "Aert Licht",
+  "lifespan": "1500–1550",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PHRW-5DN"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pd63b6a630e",
+    "name": "Peter de Lichte",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pbaa8515b05",
+    "name": "Kateline Scheelkens",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p3844817b67",
+    "name": "Peter de Lichte"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p2f8c664ea3",
+    "name": "Katrine Licht",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PHRW-5DN",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

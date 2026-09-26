@@ -1,0 +1,68 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pdb401ec7de",
+ "bnr": "bnr://skaists.dev/blood/pdb401ec7de",
+ "identity": {
+  "name": "Alice Parkinson",
+  "lifespan": "1542–Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GD3G-KNT"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "L48B-L3G",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p6d02525d89",
+    "name": "Jane Null",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p287de3bbf5",
+    "name": "Rychard Corles"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p93f6ce174f",
+    "name": "John Corles",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GD3G-KNT",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

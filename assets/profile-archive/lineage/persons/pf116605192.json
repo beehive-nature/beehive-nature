@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pf116605192",
+ "bnr": "bnr://skaists.dev/blood/pf116605192",
+ "identity": {
+  "name": "Mabel de Malherbe",
+  "lifespan": "–1207",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G73D-2XZ"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pefde667f31",
+    "name": "John de Malherbe",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pcfd96a73d1",
+    "name": "Matilda FitzSwain",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p569ab5aa2c",
+    "name": "Henry de La Mare"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pe394cbc600",
+    "name": "William de la Mare",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G73D-2XZ",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

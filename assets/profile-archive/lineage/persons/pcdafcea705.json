@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pcdafcea705",
+ "bnr": "bnr://skaists.dev/blood/pcdafcea705",
+ "identity": {
+  "name": "David Lindsay Bishop of Ross",
+  "lifespan": "1531–1613",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GYBD-Y93"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pcf6d5cba36",
+    "name": "Sir David Lindsay 9th Earl of Crawford",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p577af6569f",
+    "name": "Rachel Barclay",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pcd0be2bdb6",
+    "name": "Thomas J. Carnegie-Lyndsay Earl of Southesk"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pc602fb6734",
+    "name": "Joneta Clattie Fifeshire Ramsey",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GYBD-Y93",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

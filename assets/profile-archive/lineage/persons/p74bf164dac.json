@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p74bf164dac",
+ "bnr": "bnr://skaists.dev/blood/p74bf164dac",
+ "identity": {
+  "name": "Franz - Busch Vor Der Hardt",
+  "lifespan": "1496–1565",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GCTR-HYR"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pd6d3b47480",
+    "name": "Gerhart - Godert Pusch Eydam Busch",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pdda54c6c09",
+    "name": "Hilla vor der Hardt",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p149233eb2d",
+    "name": "Chun Flender vor der Hardt"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p414f01e55f",
+    "name": "Sophie Zeyne vor der Hardt",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GCTR-HYR",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

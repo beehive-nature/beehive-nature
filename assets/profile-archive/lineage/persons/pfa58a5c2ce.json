@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pfa58a5c2ce",
+ "bnr": "bnr://skaists.dev/blood/pfa58a5c2ce",
+ "identity": {
+  "name": "unnamed bint Yossi",
+  "lifespan": "0180BC–Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GM5V-911"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pf44a83ca28",
+    "name": "Yossei I ibn Joezer of Judea",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pd2944ad320",
+    "name": "Mrs Yossei I ibn Joezer",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p99a718b289",
+    "name": "Shetah bar Yossei, Rabbi Eleazar"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p793c8ffd39",
+    "name": "Yossei ibn Yohanan",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GM5V-911",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

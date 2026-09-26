@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pb2a8bd0d7d",
+ "bnr": "bnr://skaists.dev/blood/pb2a8bd0d7d",
+ "identity": {
+  "name": "Sir William Marshal , 1st Earl of Pembroke, Regent of England",
+  "lifespan": "1146–1219",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LBGV-7WG"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pb5d8e6ad39",
+    "name": "John Fitz Gilbert Marshall of England",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pe191c51ecf",
+    "name": "Sybil de Salisbury",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pd9f424fede",
+    "name": "Lady Isabel Marshall, Countess of Cornwall"
+   },
+   {
+    "id": "pbf3bd2135e",
+    "name": "Lady Maud Marshall"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p204cf55ce3",
+    "name": "Isabel de Clare, 4th Countess of Pembroke",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LBGV-7WG",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pb9d045de8e",
+ "bnr": "bnr://skaists.dev/blood/pb9d045de8e",
+ "identity": {
+  "name": "Sergia Paulla Lucia of Rome",
+  "lifespan": "0180–0265",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L6GS-39K"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p4cc8d1e522",
+    "name": "Lucius Sergius Paullus de Pisidian Antioch IV",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p2d7a176b9a",
+    "name": "Julia Minor IV Vipsania",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p52f0098831",
+    "name": "Quintus Anticus Paulinus II"
+   },
+   {
+    "id": "p4d481484ce",
+    "name": "Sextus Anicius Faustus Paulinus de Rome"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pa16b6d65ae",
+    "name": "Quintus Anicius Faustus Sextus di Anicii",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L6GS-39K",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

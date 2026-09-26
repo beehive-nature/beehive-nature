@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p269ed3356d",
+ "bnr": "bnr://skaists.dev/blood/p269ed3356d",
+ "identity": {
+  "name": "Brunhart II Herzog von Sachsen",
+  "lifespan": "0756–0813",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "9HLL-QJ9"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p60f780a7bb",
+    "name": "Bruno I von Engern, 'Warlord von Sachsen'",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pc9f902c731",
+    "name": "Princess Svana von Asseburg von Sachsen",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pa4cc64c9de",
+    "name": "Billung Graf von Sachsen"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pf4be1c588c",
+    "name": "Hasalda von Engern",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/9HLL-QJ9",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

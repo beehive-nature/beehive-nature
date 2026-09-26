@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p1c49e49bf2",
+ "bnr": "bnr://skaists.dev/blood/p1c49e49bf2",
+ "identity": {
+  "name": "Edward Camp",
+  "lifespan": "1576–1682",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GSVS-SYV"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p65c2aef938",
+    "name": "Robert Campe Sr.",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p795313a05d",
+    "name": "Joan Page",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p2b9111d2da",
+    "name": "Edward Camp Jr"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p31b015b45e",
+    "name": "Grace Mott",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GSVS-SYV",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

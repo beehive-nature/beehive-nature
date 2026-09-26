@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pecfaacfd3e",
+ "bnr": "bnr://skaists.dev/blood/pecfaacfd3e",
+ "identity": {
+  "name": "Datamnes ben Camissares of Caria",
+  "lifespan": "0407BC–0362BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "9HB1-LT4"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pff0039df55",
+    "name": "Camissares Satrap of Cilicia",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p8443b79059",
+    "name": "Scythissa of Paphlagonia",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pcdb3d9c931",
+    "name": "Ariamnes I ben Datamnes of Cappadocia"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p5532084814",
+    "name": "MRS Datames of CARIA",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/9HB1-LT4",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

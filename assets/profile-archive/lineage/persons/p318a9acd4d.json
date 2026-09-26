@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p318a9acd4d",
+ "bnr": "bnr://skaists.dev/blood/p318a9acd4d",
+ "identity": {
+  "name": "Eva de Blanchminster",
+  "lifespan": "1207–1255",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LC24-S4X"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "G8WQ-DZV",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "9QQZ-W2Q",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pebfd63b014",
+    "name": "Joan Champernoun"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pa8c22a54e1",
+    "name": "William de Champernoun",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LC24-S4X",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

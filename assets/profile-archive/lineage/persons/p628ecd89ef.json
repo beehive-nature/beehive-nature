@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p628ecd89ef",
+ "bnr": "bnr://skaists.dev/blood/p628ecd89ef",
+ "identity": {
+  "name": "Joseph Downham",
+  "lifespan": "1525–Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GL72-JBB"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p3a4bce413e",
+    "name": "John Downham",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p30b97d3aea",
+    "name": "Ann",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pce32a314cd",
+    "name": "Richard Downham"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pb309f7ad6e",
+    "name": "Sarah Powell",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GL72-JBB",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

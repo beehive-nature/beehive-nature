@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p36fcd6c224",
+ "bnr": "bnr://skaists.dev/blood/p36fcd6c224",
+ "identity": {
+  "name": "Ellen Clarke",
+  "lifespan": "1839–1903",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "KZ1Z-4LC"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pb8d2701ce0",
+    "name": "Joshua J Clarke",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pe45604de86",
+    "name": "Adaline Doan",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pfa9d9be298",
+    "name": "Joshua Clark Sutphen"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p51954ee640",
+    "name": "Captain John Melanchton Sutphen",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/KZ1Z-4LC",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

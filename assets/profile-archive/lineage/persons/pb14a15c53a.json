@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pb14a15c53a",
+ "bnr": "bnr://skaists.dev/blood/pb14a15c53a",
+ "identity": {
+  "name": "Berilie de Rennes",
+  "lifespan": "0778–0790",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PW3B-1Z8"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "P78C-9TV",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "GW6F-5C7",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p90cc687511",
+    "name": "Queen Argentaël de Vannes"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p3b0e49d4cb",
+    "name": "Argant de Cornouaille",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PW3B-1Z8",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

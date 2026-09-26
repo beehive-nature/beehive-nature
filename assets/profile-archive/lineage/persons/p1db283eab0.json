@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p1db283eab0",
+ "bnr": "bnr://skaists.dev/blood/p1db283eab0",
+ "identity": {
+  "name": "Castor II de Galatie King of Galatia",
+  "lifespan": "0071BC–0036BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GG6R-KK8"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p99212a4941",
+    "name": "Castor",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pc776dd8a08",
+    "name": "Princesse ainée de Galatie",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p5eff166ebf",
+    "name": "Princess M bat Castor of the Tectosagi"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pd20f4ee45b",
+    "name": "Adobogiona bat  Mithradates VI",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GG6R-KK8",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

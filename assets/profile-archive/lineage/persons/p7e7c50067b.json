@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p7e7c50067b",
+ "bnr": "bnr://skaists.dev/blood/p7e7c50067b",
+ "identity": {
+  "name": "Naamá bint Amazyah",
+  "lifespan": "Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GRFT-HGL"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pc91bf2d601",
+    "name": "Amaziah ben Hilkiah",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p9ec927248f",
+    "name": "Mrs Amazyah ibn Hilquias",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p770750078d",
+    "name": "bint Yahath"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p2c8c922b34",
+    "name": "Yahath ibn Libni",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GRFT-HGL",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

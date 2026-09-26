@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p49026c938e",
+ "bnr": "bnr://skaists.dev/blood/p49026c938e",
+ "identity": {
+  "name": "King Cymbeline ap Tenuantius",
+  "lifespan": "0015BC–41",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LJRJ-V13"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p8c51c71627",
+    "name": "Tenuantius ap Lludd",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p91b720604e",
+    "name": "Verica Cassandra des Arvernes",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p40029ace2a",
+    "name": "King Arvirargus ap Cunobelin of Britain"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pd690997ff2",
+    "name": "Anna Genvissa Cartismuanda of Wales",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LJRJ-V13",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

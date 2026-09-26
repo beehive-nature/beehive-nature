@@ -1,0 +1,62 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pa8e8475613",
+ "bnr": "bnr://skaists.dev/blood/pa8e8475613",
+ "identity": {
+  "name": "St. Arnulf Bischof von Metz",
+  "lifespan": "0582–0641",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L5PF-TWQ"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [],
+  "children": [
+   {
+    "id": "p39b2040804",
+    "name": "Ansegisel von Metz Hausmeier von Austrasien und Neustrien"
+   },
+   {
+    "id": "p5c3e759389",
+    "name": "Chlodulf Bischof von Metz"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p56ef306273",
+    "name": "St. Doda",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L5PF-TWQ",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

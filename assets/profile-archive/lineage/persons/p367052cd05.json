@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p367052cd05",
+ "bnr": "bnr://skaists.dev/blood/p367052cd05",
+ "identity": {
+  "name": "Dorothy Danvers",
+  "lifespan": "1480–1560",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G17D-Z36"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "L6KR-3SG",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "GV5Y-9JB",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p41c71016e2",
+    "name": "William Benger"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p0e72c61f5c",
+    "name": "John Benger Esq.",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G17D-Z36",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

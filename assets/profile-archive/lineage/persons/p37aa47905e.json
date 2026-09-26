@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p37aa47905e",
+ "bnr": "bnr://skaists.dev/blood/p37aa47905e",
+ "identity": {
+  "name": "Ulrich III. Comte de Neuchâtel",
+  "lifespan": "1175–1225",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LZZS-HKM"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p10aa715589",
+    "name": "Ulrich II de Neuchâtel",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p3377cf4d5a",
+    "name": "Bertha von Grenchen",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pee6d83c11c",
+    "name": "Agnes de Neuchâtel"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p77b1b9d7af",
+    "name": "Jolante von Urach",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LZZS-HKM",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

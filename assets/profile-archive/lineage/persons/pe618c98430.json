@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pe618c98430",
+ "bnr": "bnr://skaists.dev/blood/pe618c98430",
+ "identity": {
+  "name": "Katherine Wright of Kelvedon",
+  "lifespan": "1506–1595",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "KNH8-WS2"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p164ff0b3df",
+    "name": "John Wright of Kelvedon",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p5066e08ced",
+    "name": "Olive",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p998222fec4",
+    "name": "Richard Greene"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p6482baf0a0",
+    "name": "John Greene of Bois Hall",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/KNH8-WS2",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

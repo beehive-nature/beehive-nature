@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p6730f2c4d5",
+ "bnr": "bnr://skaists.dev/blood/p6730f2c4d5",
+ "identity": {
+  "name": "Thomas Smith",
+  "lifespan": "1524–1594",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L62G-2VN"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p2d88ad49ae",
+    "name": "Robert Smythe",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p744bfe8950",
+    "name": "Catherine Blount",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pe0de77ef71",
+    "name": "Henry Smith"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pd254a035ed",
+    "name": "Blanche Isabella Colshill",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L62G-2VN",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

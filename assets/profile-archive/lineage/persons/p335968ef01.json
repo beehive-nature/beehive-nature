@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p335968ef01",
+ "bnr": "bnr://skaists.dev/blood/p335968ef01",
+ "identity": {
+  "name": "Margaret Aillie Wilson",
+  "lifespan": "1775–Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "96YG-C2Q"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "KH9D-LFG",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "M26F-KYV",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p93f3b212a7",
+    "name": "Sarah Elizabeth Lang"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p61c7041073",
+    "name": "James Lang",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/96YG-C2Q",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

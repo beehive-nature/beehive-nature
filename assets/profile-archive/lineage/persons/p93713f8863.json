@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p93713f8863",
+ "bnr": "bnr://skaists.dev/blood/p93713f8863",
+ "identity": {
+  "name": "Joshua Rathbun Jr",
+  "lifespan": "1722–1801",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LCMP-7C8"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p88f4ea83a8",
+    "name": "Joshua Rathbone",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pb480190a06",
+    "name": "Martha Card",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pe54789896c",
+    "name": "Dorcas Wells Rathbone"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p0819350c43",
+    "name": "Dorcas Wells",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LCMP-7C8",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

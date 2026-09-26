@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pdb39fe0f9d",
+ "bnr": "bnr://skaists.dev/blood/pdb39fe0f9d",
+ "identity": {
+  "name": "Nangishlishma 3rd King of Kish",
+  "lifespan": "Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L5YX-Q5Y"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p1258fb02bc",
+    "name": "Kullassina-bel 2nd King of Kish",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p3c2a749d72",
+    "name": "E MRS Kullassina-Bel OF KISH",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p16ca4ca585",
+    "name": "En-tarah-ana 4th King of Kish"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p0119e91b33",
+    "name": "E MRS Nangislishima OF KISH",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L5YX-Q5Y",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

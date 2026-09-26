@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p815a596b46",
+ "bnr": "bnr://skaists.dev/blood/p815a596b46",
+ "identity": {
+  "name": "Johann Jurg Kroll",
+  "lifespan": "1756–1823",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LZQR-29K"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "LZK4-7PK",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "KZF7-G5G",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p602523e724",
+    "name": "Jacob Kroll"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p3cbb21f7d2",
+    "name": "Deborah Ritter",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LZQR-29K",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

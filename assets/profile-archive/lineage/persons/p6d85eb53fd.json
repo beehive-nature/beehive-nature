@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p6d85eb53fd",
+ "bnr": "bnr://skaists.dev/blood/p6d85eb53fd",
+ "identity": {
+  "name": "Guillaume Bisson",
+  "lifespan": "1520–1566",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "9KG1-T8N"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pa93d29eca5",
+    "name": "Thomas Bisson",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p6df50f052d",
+    "name": "Catherine Seale",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pc531ca860f",
+    "name": "Richarde Bisson"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p3a157562d1",
+    "name": "Perrenelle Morel",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/9KG1-T8N",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

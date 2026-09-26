@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pd09f426e79",
+ "bnr": "bnr://skaists.dev/blood/pd09f426e79",
+ "identity": {
+  "name": "Queen Thora Herraudrsdottír Of Sweden",
+  "lifespan": "0765–Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "K8JQ-G9P"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p0586758f03",
+    "name": "Herrauðr Borgarthiort Geatish King of East Götaland, Sweden",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p4e558afb40",
+    "name": "Gudrun Herraudur",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p114923a3fe",
+    "name": "Alof Ragnarsdottír"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pf5d40516b8",
+    "name": "Ragnar Sigurdsson",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/K8JQ-G9P",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p4489f8bdd9",
+ "bnr": "bnr://skaists.dev/blood/p4489f8bdd9",
+ "identity": {
+  "name": "William Cullen III",
+  "lifespan": "1540–1592",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LZWW-813"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pf372cac824",
+    "name": "William G Cullen II",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p3d9abe8027",
+    "name": "Jone Ann Jane Drake Millard",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p2689323499",
+    "name": "Agnes Cullen"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pca55960330",
+    "name": "Joane Millard",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LZWW-813",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

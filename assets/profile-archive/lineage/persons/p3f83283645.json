@@ -1,0 +1,82 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p3f83283645",
+ "bnr": "bnr://skaists.dev/blood/p3f83283645",
+ "identity": {
+  "name": "Mithradates VI Eupator ben Mithradates V",
+  "lifespan": "0131BC–0062BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LKHL-G58"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p09c5271394",
+    "name": "Mithradates V ben Pharnaces I",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pdec26f5dfc",
+    "name": "Laodicé VI Seleucide",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pb0b5a13513",
+    "name": "Cleopatra of Pontus"
+   },
+   {
+    "id": "p8126149b29",
+    "name": "Athenais I Philostorgos"
+   },
+   {
+    "id": "pb29142a544",
+    "name": "Princess Berenice of Pergamum"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pbfb7365674",
+    "name": "Laodice bat Mithradates V",
+    "marriage": null
+   },
+   {
+    "id": "pb01c724963",
+    "name": "Princess Antiochis of PERGAMUM",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LKHL-G58",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

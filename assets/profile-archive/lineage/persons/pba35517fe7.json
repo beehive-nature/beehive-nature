@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pba35517fe7",
+ "bnr": "bnr://skaists.dev/blood/pba35517fe7",
+ "identity": {
+  "name": "Thomas Berkeley, 5th Baron Berkeley",
+  "lifespan": "1353–1417",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LDG5-FPH"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p8911b0f315",
+    "name": "Maurice Berkeley 4th Baron Berkeley",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p84ff2a9b0b",
+    "name": "Elizabeth Despenser",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p811dc2d2a4",
+    "name": "Elizabeth Berkeley"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p454f8ddab4",
+    "name": "Margaret de Lisle 3rd Baroness Lisle",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LDG5-FPH",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

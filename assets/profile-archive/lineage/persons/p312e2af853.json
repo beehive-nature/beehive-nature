@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p312e2af853",
+ "bnr": "bnr://skaists.dev/blood/p312e2af853",
+ "identity": {
+  "name": "Thutmose IV Menheprouré D'EGYPTE-DE MESOPOTAMIE",
+  "lifespan": "Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G6R5-W68"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pcacf8b3b7e",
+    "name": "Amenhotep III Nebma'atre' 9th Pharaoh 18th Dynasty",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p16a678c3db",
+    "name": "Egi Tiye d'Ugarit Nubie",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pcacf8b3b7e",
+    "name": "Amenhotep III Nebma'atre' 9th Pharaoh 18th Dynasty"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p5375175e03",
+    "name": "Queen Mutemwiya d'Égypte",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G6R5-W68",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

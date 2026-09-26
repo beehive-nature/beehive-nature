@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pcde4e3b818",
+ "bnr": "bnr://skaists.dev/blood/pcde4e3b818",
+ "identity": {
+  "name": "Chevalier Rodolphe Ier de GUINES",
+  "lifespan": "0991–1036",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LY98-75N"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p56e310617f",
+    "name": "Sir, Count, Lord Ardolf Ier de Guînes",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p9034ce00a3",
+    "name": "Mahaut de Boulogne",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p6a9c64000e",
+    "name": "Eustache Ier de GUÎNES"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pb6f3c46b24",
+    "name": "Rosella de Saint Pôl",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LY98-75N",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

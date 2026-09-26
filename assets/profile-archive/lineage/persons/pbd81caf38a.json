@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pbd81caf38a",
+ "bnr": "bnr://skaists.dev/blood/pbd81caf38a",
+ "identity": {
+  "name": "Heini Epprecht",
+  "lifespan": "1475–Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "9HLH-43P"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "9HLH-4QM",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "G97Y-XWY",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p69023cae45",
+    "name": "Epprecht"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pe92f4f5f44",
+    "name": "Hauri",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/9HLH-43P",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

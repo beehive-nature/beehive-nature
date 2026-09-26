@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pd7dc3bbfec",
+ "bnr": "bnr://skaists.dev/blood/pd7dc3bbfec",
+ "identity": {
+  "name": "Margery Bennett",
+  "lifespan": "1501–1578",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LTDL-LK4"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "paa0013bc10",
+    "name": "Sir Gylbert or Gilbert Bennett",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p552ce8d0ab",
+    "name": "Lady Margery Greenhurst",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p186ecd6e98",
+    "name": "William Fowler"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p8d89244979",
+    "name": "Sir Richard Fowler III",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LTDL-LK4",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

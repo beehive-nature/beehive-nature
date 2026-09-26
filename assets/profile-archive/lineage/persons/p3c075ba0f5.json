@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p3c075ba0f5",
+ "bnr": "bnr://skaists.dev/blood/p3c075ba0f5",
+ "identity": {
+  "name": "Jehoadah ben Ahaz",
+  "lifespan": "0970BC–Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "9H1R-TKJ"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pc466e2aabf",
+    "name": "Ahaz ben Micah",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pfe853c66b2",
+    "name": "Mrs Ahaz",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pcf10b88fbe",
+    "name": "Zimri ben Jehoadah"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p695914455e",
+    "name": "*E MRS JEHOADAH BEN AHAZ",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/9H1R-TKJ",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,73 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p836dddef40",
+ "bnr": "bnr://skaists.dev/blood/p836dddef40",
+ "identity": {
+  "name": "King Cyaxares Of Medes",
+  "lifespan": "0675BC–0585BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GMN8-J91"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p0a8b857595",
+    "name": "King Phraortes II Of Media",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p3a5d344c3d",
+    "name": "Mrs Phraortes II Of Media",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pa5de907c4a",
+    "name": "Amytis dokhtar az Cyaxares Princess of Media, Queen of Babylon"
+   },
+   {
+    "id": "p66f881477b",
+    "name": "King Astyages of Media"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p524621dbec",
+    "name": "N.N. Hija de Nabopolasar Princesa de Babilonia",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GMN8-J91",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

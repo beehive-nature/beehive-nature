@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p91ef7966a8",
+ "bnr": "bnr://skaists.dev/blood/p91ef7966a8",
+ "identity": {
+  "name": "Hultrude Ou Gerberge D'ALSACE DE BURGONDIE",
+  "lifespan": "0600–0645",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PZHL-MS8"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p7de332861e",
+    "name": "Mayor Aega of the Palace of Neustria and Burgundy",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pa279080e78",
+    "name": "Gerberge de Bourgogne",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p59fbbf22ed",
+    "name": "Godefried, Gottfried D'ALÉMANIE"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p6fc4206c34",
+    "name": "Leutharius D'ALÉMANIE II",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PZHL-MS8",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

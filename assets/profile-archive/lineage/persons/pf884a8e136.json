@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pf884a8e136",
+ "bnr": "bnr://skaists.dev/blood/pf884a8e136",
+ "identity": {
+  "name": "Athalia bar Jotham of Judah",
+  "lifespan": "0765BC–Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GFV1-QGR"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pb9218343f5",
+    "name": "Jotham ben Uzziah ben Amaziah",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p3d21c25f24",
+    "name": "Wife of Jotham",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p28826fe0ec",
+    "name": "King Sennacherib, King of the Neo-Assyrian Empire"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p017ec2014a",
+    "name": "King Sargon II 'Sharru-kinu' Sargonid of Assyria",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GFV1-QGR",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

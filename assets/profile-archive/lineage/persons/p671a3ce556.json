@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p671a3ce556",
+ "bnr": "bnr://skaists.dev/blood/p671a3ce556",
+ "identity": {
+  "name": "Arria Cornelius",
+  "lifespan": "0160–Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LV3Y-LN2"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pfc4300a966",
+    "name": "MARCUS NONIUS ARRIUS MUCIANUS",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pb5d967b1e6",
+    "name": "Sextia Asina Polla",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p12d2585277",
+    "name": "Cornelia Orfita Salvidiena Subinianus"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p6dddec0433",
+    "name": "Servius Cornelius Scipio Orfitus Scipio Salvidenus Orfitus",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LV3Y-LN2",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

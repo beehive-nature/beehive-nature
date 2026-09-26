@@ -1,0 +1,74 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p49afa19173",
+ "bnr": "bnr://skaists.dev/blood/p49afa19173",
+ "identity": {
+  "name": "Arkyaten Bint Ahimaz",
+  "lifespan": "0945BC–Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PX5R-VRY"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pe02270da95",
+    "name": "Ahimaz ben Araunah",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pfaff0dc620",
+    "name": "Sera I Tomai ben Menelik 101st Emperor of Ethiopia"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pb0c3c6b032",
+    "name": "Abijah ben Rehoboam 2nd King of Judah",
+    "marriage": null
+   },
+   {
+    "id": "p1d8aff98c7",
+    "name": "Abijah ben Rehoboam 2nd King of Judah",
+    "marriage": null
+   },
+   {
+    "id": "p5b8be58878",
+    "name": "Menelik Ben Solomon I King of Axum 99th King of Ethopia",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PX5R-VRY",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

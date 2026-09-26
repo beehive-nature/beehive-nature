@@ -1,0 +1,77 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p502f7ea6e1",
+ "bnr": "bnr://skaists.dev/blood/p502f7ea6e1",
+ "identity": {
+  "name": "Simon II ben Onias II 42nd High Priest",
+  "lifespan": "0248BC–0183BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LZBX-3NS"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pfe4b355922",
+    "name": "Onias II ben Simon I 41st High Priest",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p203f0bb6cb",
+    "name": "Mannaseh bint Hezekiah",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pb542d78211",
+    "name": "Anna bat Simon II"
+   },
+   {
+    "id": "p05456fb56e",
+    "name": "Yulpath bint Shimon II"
+   },
+   {
+    "id": "p32628e4645",
+    "name": "Asboada bint Simon II"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pf33e6c739d",
+    "name": "Mrs Simona ben Onias II",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LZBX-3NS",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

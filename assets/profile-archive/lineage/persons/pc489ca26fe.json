@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pc489ca26fe",
+ "bnr": "bnr://skaists.dev/blood/pc489ca26fe",
+ "identity": {
+  "name": "Marcia Qunitus Marcias",
+  "lifespan": "Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PFQW-YHQ"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p9a8d10ffde",
+    "name": "Quintas Marcias Calvina",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pf97ba5a2cc",
+    "name": "Rutillia DiRoma",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pb04d5270e4",
+    "name": "Lucius Verua"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p4d05d8757e",
+    "name": "Governor Marcus Ulpius Senator Ulpius Syria Traianus",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PFQW-YHQ",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

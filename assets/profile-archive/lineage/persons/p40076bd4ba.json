@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p40076bd4ba",
+ "bnr": "bnr://skaists.dev/blood/p40076bd4ba",
+ "identity": {
+  "name": "Bernard Ier DE MONTREUIL-SUR-MER",
+  "lifespan": "0965–1035",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G6FR-98T"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p3c7ea85462",
+    "name": "Guillaume I de Montreuil",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pf4cde83ea5",
+    "name": "Mathilde de Normandie Countess of Ponthieu",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p704eb6492b",
+    "name": "Jeanne De Saint Valéry"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p52afb8aedd",
+    "name": "Amicie De Tregoz",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G6FR-98T",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p3c3ccbcec9",
+ "bnr": "bnr://skaists.dev/blood/p3c3ccbcec9",
+ "identity": {
+  "name": "Mabel de Clare",
+  "lifespan": "1157–1203",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LV7T-RKT"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p29c9fb3044",
+    "name": "Roger de Clare, 2nd Earl of Hertford",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pc0c728f2b0",
+    "name": "Maud de Saint-Hilaire",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pcecd178231",
+    "name": "William de Mowbray"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pd16a5c026d",
+    "name": "Nigel de Mowbray",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LV7T-RKT",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

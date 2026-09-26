@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p0d15c51378",
+ "bnr": "bnr://skaists.dev/blood/p0d15c51378",
+ "identity": {
+  "name": "Edward de Courtenay I of Powderham",
+  "lifespan": "1451–1510",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LHK1-F1W"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pdde013fe77",
+    "name": "Sir William de Courtenay of Powderham Castle",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pb1926b9174",
+    "name": "Lady Margaret Bonville",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p610d6508bb",
+    "name": "Edward Courtenay II Of Landrake"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pe2024973f9",
+    "name": "Alice Wotton",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LHK1-F1W",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

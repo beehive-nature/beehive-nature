@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p34ce3db3cb",
+ "bnr": "bnr://skaists.dev/blood/p34ce3db3cb",
+ "identity": {
+  "name": "William Symes",
+  "lifespan": "1570–1627",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L18C-PKV"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p7e460b53ec",
+    "name": "William Symes",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p41e8b99313",
+    "name": "Elizabeth Maria Hill",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pdbe469324c",
+    "name": "Elizabeth Symes"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pa11cfe9227",
+    "name": "Mary Ingleram",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L18C-PKV",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

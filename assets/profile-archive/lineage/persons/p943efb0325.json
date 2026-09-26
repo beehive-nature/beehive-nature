@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p943efb0325",
+ "bnr": "bnr://skaists.dev/blood/p943efb0325",
+ "identity": {
+  "name": "William Few",
+  "lifespan": "1599–Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G3XP-BV5"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p03ff872d0b",
+    "name": "Jeffery Few",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p58615b18f3",
+    "name": "Elinor Elizabeth Pierce",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pe870e137f9",
+    "name": "Richard Few II"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pba618eab37",
+    "name": "Paz Pineiro Rivera",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G3XP-BV5",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

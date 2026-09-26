@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p8b193ba580",
+ "bnr": "bnr://skaists.dev/blood/p8b193ba580",
+ "identity": {
+  "name": "Margaret Ferrers Countess of Warwick",
+  "lifespan": "1347–1407",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LT91-TWS"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p9ce87a23a4",
+    "name": "William Ferrers 3rd Baron of Groby",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p4dfc275485",
+    "name": "Margaret de Ufford",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "paa730fa64f",
+    "name": "Richard Beauchamp 13th Earl of Warwick"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p4ba538ff2a",
+    "name": "Thomas Beauchamp II",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LT91-TWS",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

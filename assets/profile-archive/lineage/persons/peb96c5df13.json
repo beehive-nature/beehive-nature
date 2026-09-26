@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "peb96c5df13",
+ "bnr": "bnr://skaists.dev/blood/peb96c5df13",
+ "identity": {
+  "name": "Theodard d'Oeren de Maastricht II Bishop de Maastricht",
+  "lifespan": "0620–0680",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GFC2-M43"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p8d3e37815f",
+    "name": "Duke Theotar,  Echternach de Franks",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pd7d42ed29b",
+    "name": "Sighild D'ARDENNES",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p58926f2de0",
+    "name": "Ragnetrude Ou Râegentrude DE BAVIÁERE"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p9ba39b6d57",
+    "name": "Regintrude Austrasia II",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GFC2-M43",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

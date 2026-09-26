@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pe0556e5003",
+ "bnr": "bnr://skaists.dev/blood/pe0556e5003",
+ "identity": {
+  "name": "Pippin II. der Mittlere, Hausmeier von Austrasien und Neustrien",
+  "lifespan": "0635–0714",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LDSS-4ZY"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p39b2040804",
+    "name": "Ansegisel von Metz Hausmeier von Austrasien und Neustrien",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pab29ce8f1e",
+    "name": "St. Begga, Äbtissin von Andenne",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p004d67b747",
+    "name": "Karl Martell Hausmeier von Neustrien und Austrasien, Dux et Princeps Francorum"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p307536769a",
+    "name": "Chalpaida",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LDSS-4ZY",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

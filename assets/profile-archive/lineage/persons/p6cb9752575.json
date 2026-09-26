@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p6cb9752575",
+ "bnr": "bnr://skaists.dev/blood/p6cb9752575",
+ "identity": {
+  "name": "Marcus Licinius Crassus",
+  "lifespan": "0114BC–0053BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LV92-2NP"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p6b33f85665",
+    "name": "Marcus Licinius Crassus Agelastus",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p3b80ec1194",
+    "name": "Venuela",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pc4e2cf57d4",
+    "name": "Crassia Tertullia"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p562f35e4a0",
+    "name": "Tertulla Lucellus Major De ROME",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LV92-2NP",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

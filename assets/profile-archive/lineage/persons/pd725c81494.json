@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pd725c81494",
+ "bnr": "bnr://skaists.dev/blood/pd725c81494",
+ "identity": {
+  "name": "Herluin D'Aumale",
+  "lifespan": "0870–Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GFPT-FJ7"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p52cb9308d7",
+    "name": "Druon Ier D'Aumale",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p254350753c",
+    "name": "Arbamagila",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p18141b64e4",
+    "name": "Roger D'Aumale"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p6e0d2c6f28",
+    "name": "Mrs. Herluin d' Aumale",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GFPT-FJ7",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

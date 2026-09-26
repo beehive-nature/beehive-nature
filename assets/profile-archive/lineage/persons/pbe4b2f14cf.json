@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pbe4b2f14cf",
+ "bnr": "bnr://skaists.dev/blood/pbe4b2f14cf",
+ "identity": {
+  "name": "Ralph Gorham",
+  "lifespan": "1575–1642",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "KN7D-Q8K"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p0a7d848f69",
+    "name": "Frederick James Gorham II.",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p1d8f5128d7",
+    "name": "Lady Agnes Bernington",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pb254f6b698",
+    "name": "John Gorham Sr"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p5f5f0cf394",
+    "name": "Margaret Stephenson",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/KN7D-Q8K",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

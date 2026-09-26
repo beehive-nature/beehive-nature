@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pf9f02db689",
+ "bnr": "bnr://skaists.dev/blood/pf9f02db689",
+ "identity": {
+  "name": "Acilius Glabrio Sibidius Spedius",
+  "lifespan": "0377–0416",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G1TX-SYN"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pa79728d6aa",
+    "name": "Rufius Valerius Messala",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p0791e2ce88",
+    "name": "Probiana Probianus",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p7615f1daef",
+    "name": "Rufia Probanus"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pd3e37c334a",
+    "name": "Synesia Gennadia",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G1TX-SYN",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

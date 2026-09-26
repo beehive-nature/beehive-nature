@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p03bd3e0d99",
+ "bnr": "bnr://skaists.dev/blood/p03bd3e0d99",
+ "identity": {
+  "name": "Sergius Octavius Laenas Pontianus",
+  "lifespan": "0101–0131",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L2S3-LSC"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p0079a650f1",
+    "name": "Laenus Lucius Octavius",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pdd5ae84258",
+    "name": "Pontia Sergia Pautilla",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p4cc8d1e522",
+    "name": "Lucius Sergius Paullus de Pisidian Antioch IV"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p52ea69f97d",
+    "name": "Paulla de Rome",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L2S3-LSC",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pe440ece745",
+ "bnr": "bnr://skaists.dev/blood/pe440ece745",
+ "identity": {
+  "name": "Nicolai Waffenschmitt",
+  "lifespan": "1630–Deceased",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "KCZC-3N7"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p0c54f86595",
+    "name": "Johannes Döppenschmitt",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p60d22cd00f",
+    "name": "Maria Dreisbach",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pe6645eb624",
+    "name": "Johannes Waffenschmidt"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pfa8c222bea",
+    "name": "Margaretha Lutzen",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/KCZC-3N7",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

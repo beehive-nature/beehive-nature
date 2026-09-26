@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p7cf2a07838",
+ "bnr": "bnr://skaists.dev/blood/p7cf2a07838",
+ "identity": {
+  "name": "Accia de Rome",
+  "lifespan": "0135–Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "GVZ6-672"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p26699eec8f",
+    "name": "Accius Iulianus",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p3b43740b76",
+    "name": "Mrs Accius Iulianus",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p805bb462f0",
+    "name": "Naratia Prisca"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p8823fef17d",
+    "name": "Lucius Neratius Priscus",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/GVZ6-672",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

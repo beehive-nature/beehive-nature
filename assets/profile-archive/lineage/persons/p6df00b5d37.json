@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p6df00b5d37",
+ "bnr": "bnr://skaists.dev/blood/p6df00b5d37",
+ "identity": {
+  "name": "Elisabeth Voorhees",
+  "lifespan": "1738–Deceased",
+  "gender": "FEMALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "KHZJ-HC2"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p9eea45b48d",
+    "name": "Albert Jansen Voorhees",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pa19996b0ad",
+    "name": "Ariantje Vander Voort",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pb5ca06a93d",
+    "name": "Albert Jacobus Sutphen"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p328f7e9f24",
+    "name": "Jacobus James Sutphen",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/KHZJ-HC2",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

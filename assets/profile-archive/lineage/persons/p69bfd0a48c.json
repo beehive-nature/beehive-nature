@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p69bfd0a48c",
+ "bnr": "bnr://skaists.dev/blood/p69bfd0a48c",
+ "identity": {
+  "name": "Caeso Fabius Ambustus",
+  "lifespan": "0450BC–0390BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "PCP4-15P"
+  }
+ ],
+ "evidence": {
+  "era": "saga",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "saga"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pbfb0bc94c4",
+    "name": "Marcus Fabius Ambustus",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p4d59dc9737",
+    "name": "Mrs Marcus Fabius Ambustus",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p8a1b71a10f",
+    "name": "Marcus Fabius Ambustus"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p46d4db1580",
+    "name": "Mrs Caeso Fabius Ambustus",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/PCP4-15P",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

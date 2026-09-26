@@ -1,0 +1,81 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p823d97f068",
+ "bnr": "bnr://skaists.dev/blood/p823d97f068",
+ "identity": {
+  "name": "Lugalbanda 3rd King of Uruk",
+  "lifespan": "–2614BC",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "G2FJ-N94"
+  }
+ ],
+ "evidence": {
+  "era": "unrecorded",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "unrecorded"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p9e14374f8a",
+    "name": "King Enmerkar Kish of Uruk",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pb05d33b99a",
+    "name": "Enmerkarzi Cush",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pd1c4dfde85",
+    "name": "Sulgi Ière DYNASTIE d'URIM"
+   },
+   {
+    "id": "p6bef4021f0",
+    "name": "Gilgamesh 5th King of Uruk"
+   },
+   {
+    "id": "pb6005d1171",
+    "name": "Dumuzid the Fisherman 4th King of Uruk"
+   },
+   {
+    "id": "p035972c96c",
+    "name": "Zababa of Uruk"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pbfa594244b",
+    "name": "Ninsun bat Anu",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/G2FJ-N94",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pa20cfeeefb",
+ "bnr": "bnr://skaists.dev/blood/pa20cfeeefb",
+ "identity": {
+  "name": "Gautier de Giffard",
+  "lifespan": "1010–1084",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LTF2-JTC"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p4a34fe5044",
+    "name": "Osberne Giffard de Bolbec",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pa308e3581b",
+    "name": "Aveline",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p5bfe846afb",
+    "name": "Rohese Giffard"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p131806610c",
+    "name": "Lady Agnes Ermengarde de Flaitel",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LTF2-JTC",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

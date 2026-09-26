@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "pf136736497",
+ "bnr": "bnr://skaists.dev/blood/pf136736497",
+ "identity": {
+  "name": "Comte Alfons II de Provença",
+  "lifespan": "1175–1209",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "K2VH-K8W"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "pc96347aa90",
+    "name": "Rey Alfonso II de Aragon \"El Casto\"",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p550a67a981",
+    "name": "Reina Sancha de Castilla",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pdb5cecc47f",
+    "name": "Raymond Berenguer IV de Provence"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p86bf3d32cd",
+    "name": "Garsende de Sabran comtesse de Forcalquier",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/K2VH-K8W",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p9ff10a0963",
+ "bnr": "bnr://skaists.dev/blood/p9ff10a0963",
+ "identity": {
+  "name": "Richard Fitzgilbert de Clare Earl Of Pembroke",
+  "lifespan": "1130–1176",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "M667-BQB"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "K4N3-S1R",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "L1QY-HVS",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p204cf55ce3",
+    "name": "Isabel de Clare, 4th Countess of Pembroke"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p4671d6ac07",
+    "name": "Princess Aoife MacMurrough Of Leinster",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/M667-BQB",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

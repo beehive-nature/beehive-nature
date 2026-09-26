@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p21724c2e03",
+ "bnr": "bnr://skaists.dev/blood/p21724c2e03",
+ "identity": {
+  "name": "Johan Michel Kaufmann",
+  "lifespan": "1620–1711",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LV1L-DDZ"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p5d51567132",
+    "name": "Nicklaus Kaufmann",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "p190d8f6f7b",
+    "name": "Elsbeth Blanck",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "pe2134ca3ad",
+    "name": "Michel Kauffman"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "p4913cae908",
+    "name": "Anna Brändli",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LV1L-DDZ",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,69 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p702ea826d3",
+ "bnr": "bnr://skaists.dev/blood/p702ea826d3",
+ "identity": {
+  "name": "William Freeman",
+  "lifespan": "1662–1687",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "LVYR-RVJ"
+  }
+ ],
+ "evidence": {
+  "era": "colonial",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "colonial"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "p81c4b169e8",
+    "name": "Maj. John Freeman",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "pef2e307981",
+    "name": "Mercy Prence",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p8b24018d9e",
+    "name": "Lydia Freeman"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pb2d29a80ca",
+    "name": "Lydia Sparrow",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/LVYR-RVJ",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}

@@ -1,0 +1,67 @@
+{
+ "schema": "skaists.person/1",
+ "internalId": "p49a1f51a96",
+ "bnr": "bnr://skaists.dev/blood/p49a1f51a96",
+ "identity": {
+  "name": "Christopher Hunt",
+  "lifespan": "1375–1452",
+  "gender": "MALE",
+  "living": false
+ },
+ "refs": [
+  {
+   "provider": "familysearch",
+   "id": "L1W4-GKR"
+  }
+ ],
+ "evidence": {
+  "era": "medieval",
+  "support": "unsourced-entry",
+  "basis": "era label from dates; support unsourced until sources are harvested",
+  "class": "medieval"
+ },
+ "research": {
+  "status": "incomplete",
+  "basis": "per-person source counts not yet harvested"
+ },
+ "publication": {
+  "status": "public"
+ },
+ "relationships": {
+  "parents": [
+   {
+    "id": "PM5X-3R6",
+    "evidence": "walked provider link"
+   },
+   {
+    "id": "PM5X-VS1",
+    "evidence": "walked provider link"
+   }
+  ],
+  "children": [
+   {
+    "id": "p38c086636e",
+    "name": "Thomas Hunt"
+   }
+  ],
+  "spouses": [
+   {
+    "id": "pc63779fe12",
+    "name": "Maud Francis",
+    "marriage": null
+   }
+  ]
+ },
+ "layers": {
+  "records": {
+   "provider": "familysearch",
+   "recordUrl": "https://www.familysearch.org/tree/person/details/L1W4-GKR",
+   "retrieved": "2026-09-16T17:59:16.202Z"
+  },
+  "tradition": null,
+  "testimony": [],
+  "meaning": []
+ },
+ "onSpine": false,
+ "generatedFrom": "the shared staged object (pipeline v3) — corpus, pages, fractal views, and manifests derive from this"
+}
