@@ -143,14 +143,218 @@ body:not([data-reg="bee"]) footer>div>a:first-child{margin-inline-start:-6px}
 body[data-reg="raver"] footer>div>a:first-child{margin-inline-start:-4px}
 body[data-reg="raver"] :is(a.t b,a.t.big b){font-size:16px}
 </style>
-</head>
+</head><link rel="stylesheet" href="../skaists.css">
+<style>
+/* ── ETERNAL FRONT (founder blueprint 2026-09-26, docs/design/eternal) — three products in one door.
+   Every value is a skaists token (../skaists.css, compiled from docs/design/skaists/tokens.json): no
+   hand-picked hex, size or corner. Measured by e2e/skaists-conformance.mjs --only doors/beehivebiomass.html.
+   The fronts come first (as on every door); the whole door, as it was, follows under "the whole
+   door", its hex-band masthead byte-true. One register shows at a time; new bee is the default. ── */
+#eternal{position:relative;max-width:var(--max,1080px);margin:0 auto;padding:var(--sk-s2,12px) var(--sk-s3,18px) 0;background:none;border:0;border-radius:0;color:var(--sk-ink)}
+#eternal>div{max-width:600px}
+#eternal>.et-r,#eternal>.et-c{display:none}
+body[data-reg="raver"] #eternal>.et-b,body[data-reg="cypherpunk"] #eternal>.et-b{display:none}
+body[data-reg="raver"] #eternal>.et-r,body[data-reg="cypherpunk"] #eternal>.et-c{display:block}
+html[data-et-bare] #eternal,html[data-et-bare] .et-archive-h{display:none}
+#eternal [hidden]{display:none!important}
+#eternal :is(h2,h3,p,ol,ul,li,table){margin:0;padding:0}
+#eternal button{margin:0;padding:0;border:0;background:none;color:inherit;font:inherit;cursor:pointer;text-align:inherit}
+#eternal a{color:inherit;text-decoration:none}
+#eternal svg{display:block}
+#eternal :focus-visible{outline:2px solid var(--sk-focus);outline-offset:3px}
+#eternal .chev{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;transition:transform .26s}
+[dir="rtl"] #eternal .chev{transform:scaleX(-1)}
+.et-archive-h{margin:var(--sk-s5,36px) 0 var(--sk-s3,18px);padding-top:var(--sk-s4,24px);border-top:1px solid var(--sk-line);color:var(--sk-ink);font:400 28px/1.1 var(--sk-font-bee-serif)}
+body[data-reg="raver"] .et-archive-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em}
+body[data-reg="cypherpunk"] .et-archive-h{font:600 15px/1.45 var(--sk-font-mono)}
+
+/* NEW BEE — a calm room for one person: plain rows, one magenta action, plain words */
+#eternal .et-b{display:flex;flex-direction:column;gap:var(--sk-s3,18px);color:var(--sk-ink);font:400 16px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-b-mark{font:400 18px/1.2 var(--sk-font-house);color:var(--sk-sovereign)}
+#eternal .et-b-h{font:400 40px/1.05 var(--sk-font-bee-serif);color:var(--sk-ink);letter-spacing:0}
+#eternal .et-b-lede{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-guard{display:flex;align-items:center;gap:var(--sk-s2,12px);min-height:var(--sk-control-min,44px);padding:var(--sk-s1,6px) var(--sk-s3,18px);border-radius:var(--sk-radius);background:var(--sk-guard-wash);color:var(--sk-guard);font:600 15px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-b-guard svg{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+#eternal .et-b-rows{display:flex;flex-direction:column;background:var(--sk-bg-card);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl);overflow:hidden}
+#eternal .et-b-row{display:flex;align-items:center;justify-content:space-between;gap:var(--sk-s2,12px);width:100%;min-height:var(--sk-control-row,52px);padding:var(--sk-s1,6px) var(--sk-s3,18px);border-bottom:1px solid var(--sk-line-soft);text-align:start;font:500 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+#eternal .et-b-rows>:last-child{border-bottom:0}
+#eternal .et-b-row small{display:flex;align-items:center;gap:var(--sk-s1,6px);flex:none;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-row small.out{color:var(--sk-guard);font-weight:600}
+#eternal .et-b-row[aria-expanded="true"]{background:var(--sk-sovereign-tint);color:var(--sk-sovereign-strong);font-weight:600}
+#eternal .et-b-row[aria-expanded="true"] small{color:var(--sk-sovereign-strong)}
+#eternal .et-b-row[aria-expanded="true"] .chev{transform:rotate(90deg)}
+#eternal .et-b-open{display:flex;flex-direction:column;background:var(--sk-sovereign-tint);border-bottom:1px solid var(--sk-line-soft)}
+#eternal .et-b-page{display:flex;align-items:center;justify-content:space-between;gap:var(--sk-s2,12px);min-height:var(--sk-control-row,52px);padding:var(--sk-s1,6px) var(--sk-s3,18px) var(--sk-s1,6px) var(--sk-s4,24px);border-top:1px solid var(--sk-line-soft);color:var(--sk-ink);font:400 16px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-b-page>span{display:flex;flex-direction:column}
+#eternal .et-b-page em{font:600 14px/1.4 var(--sk-font-bee-sans);font-style:normal;color:var(--sk-guard)}
+#eternal .et-b-page .chev{color:var(--sk-link)}
+#eternal .et-b-top{padding-left:var(--sk-s3,18px);border-top:0;border-bottom:1px solid var(--sk-line-soft)}
+#eternal .et-b-page:hover{color:var(--sk-sovereign-strong)}
+#eternal .et-b-act{display:flex;flex-direction:column;gap:var(--sk-s1,6px)}
+#eternal .et-b-primary{display:flex;align-items:center;justify-content:center;min-height:var(--sk-control-primary,54px);padding:0 var(--sk-s3,18px);border-radius:var(--sk-radius-lg);background:var(--sk-primary);color:var(--sk-on-primary);font:600 17px/1.2 var(--sk-font-bee-sans);text-align:center}
+#eternal .et-b-link{display:flex;align-items:center;justify-content:center;min-height:var(--sk-control-min,44px);font:600 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-link);text-align:center}
+#eternal .et-b-link:hover{color:var(--sk-link-hover)}
+#eternal .et-b-foot{text-align:center;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+
+/* RAVER — the door as art: every page behind it is a cell you can light */
+#eternal .et-r{color:var(--sk-ink);font:600 14px/1.25 var(--sk-font-raver-body)}
+#eternal .et-r-top{display:flex;align-items:baseline;justify-content:space-between;gap:var(--sk-s1,6px) var(--sk-s2,12px);flex-wrap:wrap}
+#eternal .et-r-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em;color:var(--sk-ink)}
+#eternal .et-r-hint{font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-who{margin-top:var(--sk-s1,6px);font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-sovereign-soft)}
+#eternal .et-r-art{width:100%;max-width:360px;margin:var(--sk-s3,18px) auto var(--sk-s2,12px);filter:drop-shadow(var(--sk-glow-sovereign))}
+#eternal .et-r-art .cell{cursor:pointer}
+#eternal .et-r-art .cell polygon,#eternal .et-r-art .cell path{transition:transform .26s,opacity .26s;transform-box:fill-box;transform-origin:center}
+#eternal .et-r-art .cell[aria-pressed="true"] :is(polygon,path){transform:scale(1.07)}
+#eternal .et-r-art .cell:focus{outline:none}
+#eternal .et-r-art .cell:focus-visible :is(polygon,path){stroke:var(--sk-ink);stroke-width:3}
+#eternal .et-r-legend{display:flex;flex-wrap:wrap;justify-content:center;gap:var(--sk-s1,6px) var(--sk-s3,18px);font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-legend span{display:flex;align-items:center;gap:var(--sk-s1,6px)}
+#eternal .et-r-legend svg{width:16px;height:18px}
+#eternal .et-r-card{display:flex;gap:var(--sk-s2,12px);align-items:center;margin-top:var(--sk-s3,18px);padding:var(--sk-s2,12px) var(--sk-s3,18px);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl);background:var(--sk-sovereign-tint);min-height:var(--sk-control-person,60px)}
+#eternal .et-r-card .rk{width:44px;height:44px;flex:none;border-radius:var(--sk-radius);background:var(--sk-sovereign-strong);color:var(--sk-bg);display:flex;align-items:center;justify-content:center;font:700 15px/1.2 var(--sk-font-raver-display)}
+#eternal .et-r-card .rk svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+#eternal .et-r-card b{display:block;font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink)}
+#eternal .et-r-card span{display:block;margin-top:2px;font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-sovereign-soft);overflow-wrap:anywhere}
+#eternal .et-r-card em{display:block;margin-top:2px;font:600 14px/1.4 var(--sk-font-raver-body);font-style:normal;color:var(--sk-guard)}
+#eternal .et-r-pill{display:flex;align-items:center;justify-content:center;width:100%;min-height:58px;margin-top:var(--sk-s4,24px);padding:0 var(--sk-s3,18px);border-radius:var(--sk-radius-pill);background:var(--sk-primary);color:var(--sk-on-primary);font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em;text-align:center}
+#eternal .et-r-note{margin-top:var(--sk-s4,24px);text-align:center;font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+@media (prefers-reduced-motion:reduce){#eternal .et-r-art .cell :is(polygon,path),#eternal .chev{transition:none}}
+
+/* CYPHERPUNK — the instrument: every tile a row, every count checked live, the source one tap away */
+#eternal .et-c{font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink)}
+#eternal .et-c-path{font:600 15px/1.45 var(--sk-font-mono);color:var(--sk-ink);overflow-wrap:anywhere}
+#eternal .et-c-sub{margin-top:var(--sk-s1,6px);font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut)}
+#eternal .et-c-chips{display:flex;flex-wrap:wrap;gap:var(--sk-s1,6px);margin:var(--sk-s2,12px) 0}
+#eternal .et-c-chips span{padding:2px var(--sk-s1,6px);border:1px solid var(--sk-line);border-radius:4px;background:var(--sk-bg-card);font:600 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-soft)}
+#eternal .et-c-chips .ok{border-color:var(--sk-verified);color:var(--sk-verified)}
+#eternal .et-c-chips .on{border-color:var(--sk-guard);color:var(--sk-guard)}
+#eternal .et-c-chips .no{border-color:var(--sk-info);color:var(--sk-info)}
+#eternal .et-c-guard{display:flex;justify-content:space-between;align-items:center;gap:var(--sk-s1,6px) var(--sk-s2,12px);flex-wrap:wrap;min-height:var(--sk-control-min,44px);padding:var(--sk-s1,6px) var(--sk-s3,18px);border:1px dashed var(--sk-guard);border-radius:var(--sk-radius-sm);background:var(--sk-guard-wash);color:var(--sk-guard)}
+#eternal .et-c-guard b{font-weight:600;color:var(--sk-sovereign-strong)}
+#eternal .et-c-h{margin:var(--sk-s4,24px) 0 var(--sk-s2,12px);font:600 15px/1.45 var(--sk-font-mono);color:var(--sk-ink)}
+#eternal .et-c-tab{width:100%;border-collapse:separate;border-spacing:0;border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm);overflow:hidden;background:var(--sk-bg-card);table-layout:fixed}
+#eternal .et-c-tab th{padding:var(--sk-s1,6px) var(--sk-s2,12px);text-align:start;font:600 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);border-bottom:1px solid var(--sk-line);background:var(--sk-bg-well)}
+#eternal .et-c-tab td{padding:0 var(--sk-s2,12px);border-bottom:1px solid var(--sk-line);font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink);vertical-align:middle;overflow-wrap:anywhere}
+#eternal .et-c-tab tr:last-child td{border-bottom:0}
+#eternal .et-c-tab :is(th,td):first-child{width:42px;color:var(--sk-ink-mut)}
+#eternal .et-c-tab :is(th,td):last-child{width:92px}
+#eternal .et-c-tab td a{display:flex;flex-direction:column;justify-content:center;min-height:var(--sk-control-min,44px);padding:var(--sk-s1,6px) 0;color:var(--sk-link)}
+#eternal .et-c-tab td a:hover{color:var(--sk-link-hover)}
+#eternal .et-c-tab td .nm{display:block;padding:var(--sk-s1,6px) 0;color:var(--sk-ink)}
+#eternal .et-c-tab td small{display:block;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-soft)}
+#eternal .et-c-tab .st-open{color:var(--sk-verified)}#eternal .et-c-tab .st-lim{color:var(--sk-guard)}#eternal .et-c-tab .st-not{color:var(--sk-info)}
+#eternal .et-c-pipe{list-style:none;display:grid;gap:var(--sk-s1,6px);counter-reset:p}
+#eternal .et-c-pipe li{display:grid;grid-template-columns:30px minmax(0,1fr);gap:2px var(--sk-s2,12px);padding:var(--sk-s2,12px);border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm);background:var(--sk-bg-card);counter-increment:p}
+#eternal .et-c-pipe li::before{content:counter(p,decimal-leading-zero);color:var(--sk-ink-mut);font-weight:600}
+#eternal .et-c-pipe li b{font-weight:600;color:var(--sk-ink);overflow-wrap:anywhere}
+#eternal .et-c-pipe li p{grid-column:2;color:var(--sk-ink-soft);overflow-wrap:anywhere}
+#eternal .et-c-pipe li.done b{color:var(--sk-verified)}
+#eternal .et-c-pipe li.now{border-color:var(--sk-ai)}#eternal .et-c-pipe li.now b{color:var(--sk-ai)}
+#eternal .et-c-pipe li.guard{border-style:dashed;border-color:var(--sk-guard)}#eternal .et-c-pipe li.guard b{color:var(--sk-guard)}
+#eternal .et-c-pipe li.fail{border-style:dashed;border-color:var(--sk-info)}#eternal .et-c-pipe li.fail b{color:var(--sk-info)}
+#eternal .et-c-pipe li.todo p{color:var(--sk-ink-mut)}
+#eternal .et-c-primary{display:flex;align-items:center;justify-content:center;width:100%;min-height:52px;margin-top:var(--sk-s3,18px);padding:0 var(--sk-s3,18px);border-radius:var(--sk-radius-sm);background:var(--sk-primary);color:var(--sk-on-primary);font:600 14px/1.2 var(--sk-font-mono);text-align:center}
+#eternal .et-c-kv{width:100%;border-collapse:collapse;border:1px solid var(--sk-line);background:var(--sk-bg-card);table-layout:fixed}
+#eternal .et-c-kv th{width:92px;padding:var(--sk-s1,6px) var(--sk-s2,12px);text-align:start;vertical-align:top;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);border-bottom:1px solid var(--sk-line)}
+#eternal .et-c-kv td{padding:var(--sk-s1,6px) var(--sk-s2,12px);border-bottom:1px solid var(--sk-line);font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink);overflow-wrap:anywhere}
+#eternal .et-c-kv tr:last-child :is(th,td){border-bottom:0}
+#eternal .et-c-verify{margin-top:var(--sk-s3,18px);padding:var(--sk-s2,12px) var(--sk-s3,18px);border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm);background:var(--sk-bg-card)}
+#eternal .et-c-verify-h{font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut)}
+#eternal .et-c-verify li{list-style:none;margin-top:var(--sk-s1,6px)}
+#eternal .et-c-verify code{display:block;font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink);overflow-wrap:anywhere}
+#eternal .et-c-verify small{display:block;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-soft)}
+#eternal .et-c-row{display:grid;grid-template-columns:1fr 1fr;gap:var(--sk-s2,12px);margin-top:var(--sk-s3,18px)}
+#eternal .et-c-ghost{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:52px;padding:var(--sk-s1,6px);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius-sm);color:var(--sk-ink);text-align:center;font:600 14px/1.2 var(--sk-font-mono)}
+#eternal .et-c-ghost small{font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut)}
+/* ── THE WHOLE DOOR, dressed per register: the door's own variables mapped onto skaists. new bee
+   rides register.js's shared paper (its rules sit at body[..][..][..]), so ours carry one more
+   element to land after it; raver and cypherpunk keep the door's black-green ground. The band line
+   and its CSS block are untouched. ── */
+html>body[data-reg="bee"][data-bee-theme="shared"][data-bee-adapter="door"]{--void:var(--sk-bg);--panel:var(--sk-bg-card);--tile:var(--sk-bg-card);--inset:var(--sk-bg-well);--lift:var(--sk-bg-well);--ink:var(--sk-ink);--dim:var(--sk-ink-mut);--dimmer:var(--sk-ink-mut);--line:var(--sk-line);--hot:var(--sk-ink-dim);--gold:var(--sk-guard);--accent:var(--sk-biomass);--bee-font:var(--sk-font-bee-sans);--mono:var(--sk-font-bee-sans);background:var(--sk-bg)}
+html>body[data-reg="bee"][data-bee-theme="shared"] header h1{font:400 40px/1.05 var(--sk-font-bee-serif);letter-spacing:0;color:var(--sk-ink)}
+body[data-reg="raver"]{--void:var(--sk-bg);--panel:var(--sk-bg-card);--tile:var(--sk-bg-card);--inset:var(--sk-bg);--lift:var(--sk-sovereign-tint);--ink:var(--sk-ink);--dim:var(--sk-ink-soft);--dimmer:var(--sk-ink-mut);--line:var(--sk-line);--hot:var(--sk-ink-dim);--gold:var(--sk-guard);--accent:var(--sk-biomass);--mono:var(--sk-font-raver-body);background:var(--sk-bg)}
+body[data-reg="raver"] :is(header h1,.shead h2,a.t b,.act b,.notyet h2){font-family:var(--sk-font-raver-display);letter-spacing:-.01em}
+body[data-reg="raver"] header h1{font-size:28px;line-height:1.1;font-weight:700}
+header h1{overflow-wrap:break-word}
+body[data-reg="cypherpunk"]{--void:var(--sk-bg);--panel:var(--sk-bg-card);--tile:var(--sk-bg-card);--inset:var(--sk-bg);--lift:var(--sk-sovereign-tint);--ink:var(--sk-ink);--dim:var(--sk-ink-soft);--dimmer:var(--sk-ink-mut);--line:var(--sk-line);--hot:var(--sk-ink-dim);--gold:var(--sk-guard);--accent:var(--sk-biomass);--mono:var(--sk-font-mono);background:var(--sk-bg)}
+body[data-reg="cypherpunk"] header h1{font-size:28px;line-height:1.1;font-weight:600;letter-spacing:0}
+body[data-reg="raver"] :is(.eyebrow,.act em){font-size:14px;letter-spacing:.02em}
+body[data-reg="raver"] :is(a.t b,a.t.big b,.act b){font-size:15px}
+body[data-reg="cypherpunk"] :is(.eyebrow,.act em){font-size:12px;letter-spacing:.02em}
+body[data-reg="cypherpunk"] .act b{font-size:15px}
+body[data-reg] .notyet li a{display:inline-flex;align-items:center;min-height:44px;padding:0 2px;vertical-align:middle}
+@media (max-width:600px){.wrap{padding:0 var(--sk-s3,18px)}}
+</style>
+
 <body>
 <div id="veil" aria-hidden="true"></div>
+<!-- ETERNAL FRONT (founder blueprint 2026-09-26, docs/design/eternal): three separate products in one
+     door, all written for the door's one person (the eyebrow below: someone with a machine to
+     contribute). ONE data layer reads the door's own tiles (section.d a.t), its count (.shead .n), its
+     named limits (⚠), its not-built list and the act's own words, plus the index row in
+     doors/index.html, so the facts cannot drift from the door. Every gesture is navigation to a page
+     that is really open; a seed (not built) offers nothing to open. No front runs a node: the door's
+     own words say a node docks locally, never through a hosted page. -->
+<section id="eternal" aria-label="beehivebiomass.com">
+
+  <!-- NEW BEE — a calm room: one question, the two open pages, the four honest not-yets -->
+  <div class="et-b">
+    <div class="et-b-mark">beehivebiomass.com</div>
+    <h2 class="et-b-h" data-etk="et.beehivebiomass.bH">a machine to give?</h2>
+    <div class="et-b-lede" data-etk="et.beehivebiomass.bLede">the network our data lives on runs on ordinary machines. start by reading the farm and the two treasuries that pay for it. anyone can read them, right now.</div>
+    <div class="et-b-guard"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span data-etk="et.beehivebiomass.bGuard">no page here runs your machine. a node starts only on your own computer.</span></div>
+    <div class="et-b-rows" id="etBeeRows"><div class="et-b-row"><span data-etk="et.door.reading">reading the door…</span></div></div>
+    <div class="et-b-act">
+      <a class="et-b-primary" id="etBeeGo" href="../bantfarm.html" data-etk="et.beehivebiomass.bGo">read the farm</a>
+      <a class="et-b-link" href="#etArchive" data-etk="et.door.bAll">see the whole door</a>
+      <div class="et-b-foot" data-etk="et.beehivebiomass.bFoot">when a live read fails, the page shows the gap. a gap is data too.</div>
+    </div>
+  </div>
+
+  <!-- RAVER — the door is a seed head: what is open has bloomed, what is not built is still a seed -->
+  <div class="et-r">
+    <div class="et-r-top"><h2 class="et-r-h" data-etk="et.beehivebiomass.rH">the organism</h2><span class="et-r-hint" id="etRHint"></span></div>
+    <div class="et-r-who" id="etRWho"></div>
+    <svg class="et-r-art" id="etSeed" viewBox="-180 -180 360 360" role="group" aria-label="every page behind this door as a petal; what is not built yet is still a seed"></svg>
+    <div class="et-r-legend" id="etLegend"></div>
+    <div class="et-r-card" id="etRCard" aria-live="polite"></div>
+    <a class="et-r-pill" id="etRGo" href="../bantfarm.html">read the farm</a>
+    <div class="et-r-note" id="etRNote" hidden></div>
+  </div>
+
+  <!-- CYPHERPUNK — the instrument: every tile and every not-yet a row, every count read live -->
+  <div class="et-c">
+    <div class="et-c-path">beehivebiomass.com → surfaces/doors/beehivebiomass.html</div>
+    <div class="et-c-sub" id="etCWho"></div>
+    <div class="et-c-chips" id="etChips"></div>
+    <div class="et-c-guard"><span data-etk="et.door.cLaw">a door may not claim what the estate does not do</span><b id="etCGuardN"></b></div>
+    <h3 class="et-c-h" id="etCTabH"></h3>
+    <table class="et-c-tab"><thead><tr><th>#</th><th data-etk="et.door.cPage">page</th><th data-etk="et.door.cState">state</th></tr></thead><tbody id="etTab"></tbody></table>
+    <h3 class="et-c-h" data-etk="et.door.cChecksH">honesty checks · read live</h3>
+    <ol class="et-c-pipe" id="etPipe"></ol>
+    <a class="et-c-primary" id="etCGo" href="../bantfarm.html">open bantfarm.html</a>
+    <h3 class="et-c-h" data-etk="et.door.cDoorH">the door</h3>
+    <table class="et-c-kv" id="etKv"></table>
+    <div class="et-c-verify">
+      <div class="et-c-verify-h" data-etk="et.door.cVerifyH">verify · no trust in this page needed</div>
+      <ol>
+        <li><code>node e2e/door-counts.mjs</code><small data-etk="et.door.cVerify1">the index row, the door's own count and the real anchors must agree</small></li>
+        <li><code>node e2e/doors.mjs</code><small data-etk="et.door.cVerify2">every link a door lists answers 200 and renders body text</small></li>
+      </ol>
+    </div>
+    <div class="et-c-row">
+      <a class="et-c-ghost" href="#etArchive"><span data-etk="et.door.cWhole">the whole door ↓</span></a>
+      <a class="et-c-ghost" href="https://github.com/beehive-nature/beehive-nature/blob/main/surfaces/doors/beehivebiomass.html" target="_blank" rel="noopener noreferrer"><span data-etk="et.door.cFork">fork the template ↗</span><small data-etk="et.door.newTab">opens in a new tab</small></a>
+    </div>
+  </div>
+</section>
+<div class="wrap"><h2 class="et-archive-h" id="etArchive" data-etk="et.door.archive">the whole door</h2></div>
 <header style="--bandh:69px">
   <div id="bandwrap" aria-hidden="true"><div class="band" style="top:-14px;left:-80px;opacity:1.00;animation-duration:15s;animation-name:hexdrift;--step:52px"><i style="background:#D655BB;animation-duration:2.4s;animation-delay:0.00s"></i><i style="background:#86CC72;animation-duration:2.9s;animation-delay:0.19s"></i><i style="background:#45C2DC;animation-duration:3.3s;animation-delay:0.38s"></i><i style="background:#9C6FD6;animation-duration:3.8s;animation-delay:0.57s"></i><i style="background:#E8B54B;animation-duration:4.2s;animation-delay:0.76s"></i><i style="background:#6FA9E0;animation-duration:2.4s;animation-delay:0.95s"></i><i style="background:#B79FE0;animation-duration:2.9s;animation-delay:1.14s"></i><i style="background:#D655BB;animation-duration:3.3s;animation-delay:0.00s"></i><i style="background:#86CC72;animation-duration:3.8s;animation-delay:0.19s"></i><i style="background:#45C2DC;animation-duration:4.2s;animation-delay:0.38s"></i><i style="background:#9C6FD6;animation-duration:2.4s;animation-delay:0.57s"></i><i style="background:#E8B54B;animation-duration:2.9s;animation-delay:0.76s"></i><i style="background:#6FA9E0;animation-duration:3.3s;animation-delay:0.95s"></i><i style="background:#B79FE0;animation-duration:3.8s;animation-delay:1.14s"></i><i style="background:#D655BB;animation-duration:4.2s;animation-delay:0.00s"></i><i style="background:#86CC72;animation-duration:2.4s;animation-delay:0.19s"></i><i style="background:#45C2DC;animation-duration:2.9s;animation-delay:0.38s"></i><i style="background:#9C6FD6;animation-duration:3.3s;animation-delay:0.57s"></i><i style="background:#E8B54B;animation-duration:3.8s;animation-delay:0.76s"></i><i style="background:#6FA9E0;animation-duration:4.2s;animation-delay:0.95s"></i><i style="background:#B79FE0;animation-duration:2.4s;animation-delay:1.14s"></i><i style="background:#D655BB;animation-duration:2.9s;animation-delay:0.00s"></i><i style="background:#86CC72;animation-duration:3.3s;animation-delay:0.19s"></i><i style="background:#45C2DC;animation-duration:3.8s;animation-delay:0.38s"></i><i style="background:#9C6FD6;animation-duration:4.2s;animation-delay:0.57s"></i><i style="background:#E8B54B;animation-duration:2.4s;animation-delay:0.76s"></i><i style="background:#6FA9E0;animation-duration:2.9s;animation-delay:0.95s"></i><i style="background:#B79FE0;animation-duration:3.3s;animation-delay:1.14s"></i><i style="background:#D655BB;animation-duration:3.8s;animation-delay:0.00s"></i><i style="background:#86CC72;animation-duration:4.2s;animation-delay:0.19s"></i><i style="background:#45C2DC;animation-duration:2.4s;animation-delay:0.38s"></i><i style="background:#9C6FD6;animation-duration:2.9s;animation-delay:0.57s"></i><i style="background:#E8B54B;animation-duration:3.3s;animation-delay:0.76s"></i><i style="background:#6FA9E0;animation-duration:3.8s;animation-delay:0.95s"></i><i style="background:#B79FE0;animation-duration:4.2s;animation-delay:1.14s"></i><i style="background:#D655BB;animation-duration:2.4s;animation-delay:0.00s"></i><i style="background:#86CC72;animation-duration:2.9s;animation-delay:0.19s"></i><i style="background:#45C2DC;animation-duration:3.3s;animation-delay:0.38s"></i><i style="background:#9C6FD6;animation-duration:3.8s;animation-delay:0.57s"></i><i style="background:#E8B54B;animation-duration:4.2s;animation-delay:0.76s"></i><i style="background:#6FA9E0;animation-duration:2.4s;animation-delay:0.95s"></i><i style="background:#B79FE0;animation-duration:2.9s;animation-delay:1.14s"></i><i style="background:#D655BB;animation-duration:3.3s;animation-delay:0.00s"></i><i style="background:#86CC72;animation-duration:3.8s;animation-delay:0.19s"></i><i style="background:#45C2DC;animation-duration:4.2s;animation-delay:0.38s"></i><i style="background:#9C6FD6;animation-duration:2.4s;animation-delay:0.57s"></i><i style="background:#E8B54B;animation-duration:2.9s;animation-delay:0.76s"></i><i style="background:#6FA9E0;animation-duration:3.3s;animation-delay:0.95s"></i><i style="background:#B79FE0;animation-duration:3.8s;animation-delay:1.14s"></i></div></div>
   <div class="wrap">
     <p class="eyebrow" data-i18n="d.biomass.who">for someone with a machine to contribute</p>
-    <h1>beehivebiomass.com</h1>
+    <h1>beehivebiomass<wbr>.com</h1>
     <p class="what" data-i18n="d.biomass.what">Feed the organism. The storage network our data lives on runs on ordinary machines, and the two treasuries that pay for it are readable by anyone, keylessly, right now.</p>
     <a class="act" href="../bantfarm.html"><em>one thing to do</em><b data-i18n="d.biomass.act">Read the farm and the two treasuries →</b><s data-i18n="d.biomass.actsub">Live reads against real hosts, with failover — and a failed read renders amber and breaks the line, because a gap is data. Running a node itself docks locally (antd), never through a hosted page.</s></a>
   </div>
@@ -183,6 +387,214 @@ body[data-reg="raver"] :is(a.t b,a.t.big b){font-size:16px}
   <div>write to us · <a href="mailto:LoVis@skaists.dev">LoVis@skaists.dev</a></div>
 </footer>
 
+<script>
+/* ETERNAL FRONT — one data layer, three renderers (docs/design/eternal). Every fact is read from this
+   door's own markup (the tiles in section.d, the .shead count, the ⚠ caveats, the not-built list) and
+   from this door's row in doors/index.html, so no front can say anything the door does not. Nothing
+   here writes, pays, signs or runs a node: every gesture is a link to a page that is open right now,
+   and a seed (not built) has nothing to open. */
+(function(){
+  var $=function(id){return document.getElementById(id);};
+  var T=function(k,f){var t=window.BNRLanguage&&window.BNRLanguage.text;return t?t(k,f):f;};
+  var FILE='beehivebiomass.html';
+  var D={host:'beehivebiomass.com',file:FILE,who:'',act:{href:'',label:'',sub:''},tiles:[],count:null,anchors:0,limits:0,notyet:[],index:{state:'reading',n:null,why:''}};
+  var R={sel:0};
+  var esc=function(v){return String(v==null?'':v).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});};
+  var txt=function(e){return e?e.textContent.replace(/\s+/g,' ').trim():'';};
+  var tok=function(n){return getComputedStyle(document.body).getPropertyValue('--sk-'+n).trim();};
+  var two=function(i){return (i<9?'0':'')+(i+1);};
+  var CHEV='<svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>';
+  var LOCK='<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>';
+
+  /* ── the one data layer: the door, read from itself ── */
+  function group(path){return /^fleet-hosted\/gallery\//.test(path)?'gallery':/^fleet-hosted\/lab\//.test(path)?'lab':'read';}
+  function read(){
+    var sec=document.querySelector('section.d'), act=document.querySelector('header a.act'), n=sec&&sec.querySelector('.shead .n');
+    D.who=txt(document.querySelector('header .eyebrow'));
+    D.act={href:act?act.getAttribute('href'):'',label:txt(act&&act.querySelector('b')),sub:txt(act&&act.querySelector('s'))};
+    D.count=n&&/^\d+$/.test(txt(n))?+txt(n):null;
+    D.tiles=[].map.call(sec?sec.querySelectorAll('a.t'):[],function(a,i){
+      var path=txt(a.querySelector('s')), u=a.querySelector('u'), name=txt(a.querySelector('b'));
+      var cav=u?txt(u).replace(/^⚠\s*/,''):'';
+      return {i:i,href:a.getAttribute('href'),name:name,path:path,group:group(path),limit:!!u,caveat:cav,caveatIsName:!!u&&cav.toLowerCase()===name.toLowerCase(),act:a.getAttribute('href')===D.act.href};
+    });
+    D.anchors=D.tiles.length; D.limits=D.tiles.filter(function(t){return t.limit;}).length;
+    D.notyet=[].map.call(document.querySelectorAll('.notyet li'),function(li){
+      var name=txt(li.querySelector('b')), link=li.querySelector('a'), all=txt(li), says=all.slice(all.indexOf(name)+name.length);
+      if(link) says=says.replace(txt(link),'');
+      return {name:name,says:says.replace(/^\s*—\s*/,'').trim(),plan:link?link.getAttribute('href'):null};
+    });
+    /* a not-built thing that is also an open tile would be a door promising it: count, never assume */
+    D.overlap=D.notyet.filter(function(n){return D.tiles.some(function(t){return t.name.toLowerCase()===n.name.toLowerCase();});}).length;
+  }
+  function index(){
+    fetch('index.html',{cache:'no-store'}).then(function(r){if(!r.ok)throw new Error(T('et.door.answered','answered')+' '+r.status);return r.text();})
+    .then(function(h){
+      var doc=new DOMParser().parseFromString(h,'text/html');
+      var row=[].filter.call(doc.querySelectorAll('section.d a.t'),function(a){return a.getAttribute('href')===FILE;})[0];
+      var m=row&&/(\d+)\s+open now/.exec(row.textContent);
+      D.index=m?{state:'read',n:+m[1],why:''}:{state:'failed',n:null,why:T('et.door.noRow','no row there names this door')};
+    }).catch(function(e){D.index={state:'failed',n:null,why:String(e&&e.message||e)};}).then(function(){cy();words();});
+  }
+
+  /* ── NEW BEE: the open pages as plain rows, then the honest not-yets ── */
+  function bee(){
+    var h=D.tiles.map(function(t){
+      var note=t.limit?(t.caveatIsName?T('et.door.limitNamed','its limit is named on the page'):T('et.door.note','note:')+' '+t.caveat):'';
+      return '<a class="et-b-page et-b-top" href="'+esc(t.href)+'"><span>'+esc(t.name)+(note?'<em>'+esc(note)+'</em>':'')+'</span>'+CHEV+'</a>';
+    }).join('');
+    D.notyet.forEach(function(n){h+='<div class="et-b-row"><span>'+esc(n.name)+'</span><small class="out">'+esc(T('et.door.notBuilt','not built yet'))+'</small></div>';});
+    $('etBeeRows').innerHTML=h;
+    $('etBeeGo').setAttribute('href',D.act.href);
+  }
+
+  /* ── RAVER: the seed head. The door's one thing to do is the heart; every other open page is a
+     petal in bloom; every not-built thing is a hollow, locked seed. Petals follow the door's order. ── */
+  function hex(cx,cy,r){var p=[];for(var i=0;i<6;i++){var a=Math.PI/3*i-Math.PI/2;p.push((cx+r*Math.cos(a)).toFixed(1)+','+(cy+r*Math.sin(a)).toFixed(1));}return p.join(' ');}
+  function cells(){
+    var act=D.tiles.filter(function(t){return t.act;})[0], L=act?[act]:[];
+    D.tiles.forEach(function(t){if(t!==act)L.push(t);});
+    var out=L.map(function(t){return {kind:'tile',t:t};});
+    D.notyet.forEach(function(n,i){out.push({kind:'not',n:n,i:i});});
+    return out;
+  }
+  function look(c){
+    if(c.kind==='not') return {fill:'none',stroke:tok('ink-mut'),w:2,dash:'4 5'};
+    var t=c.t, fill=t.act?tok('you'):tok('biomass');
+    return t.limit?{fill:fill,stroke:tok('guard'),w:3,dash:'6 4'}:{fill:fill,stroke:'none',w:0,dash:''};
+  }
+  var f1=function(v){return v.toFixed(1);};
+  function leaf(a,r0,r1,w){
+    var L=r1-r0, c=Math.cos(a), s=Math.sin(a), P=function(x,y){return f1(x*c-y*s)+' '+f1(x*s+y*c);};
+    return 'M'+P(r0,0)+'C'+P(r0+0.2*L,-w)+' '+P(r0+0.75*L,-w*0.9)+' '+P(r1,0)+'C'+P(r0+0.75*L,w*0.9)+' '+P(r0+0.2*L,w)+' '+P(r0,0)+'Z';
+  }
+  function seed(){
+    var svg=$('etSeed'), L=cells(), m=Math.max(1,L.length-1), w=Math.min(40,Math.PI*100/m*0.55), h='';
+    L.forEach(function(c,k){
+      var lk=look(c), lab;
+      if(c.kind==='tile') lab=c.t.name+(c.t.act?' · '+T('et.door.theOne','the one thing to do'):'')+(c.t.limit?' · '+T('et.door.limit','named limit'):'');
+      else lab=c.n.name+' · '+T('et.door.notBuilt','not built yet');
+      var shape, extra='';
+      if(k===0&&c.kind==='tile'){
+        shape='<polygon points="'+hex(0,0,46)+'" fill="'+lk.fill+'" data-stroke="'+lk.stroke+'" data-w="'+lk.w+'" data-dash="'+lk.dash+'"/>';
+        extra='<polygon class="inner" points="'+hex(0,0,22)+'" fill="none" stroke="'+tok('bg')+'" stroke-width="2.5"/>';
+      } else {
+        var a=-Math.PI/2+(k-1)*2*Math.PI/m;
+        shape='<path d="'+leaf(a,56,c.kind==='not'?136:172,c.kind==='not'?w*0.8:w)+'" fill="'+lk.fill+'" data-stroke="'+lk.stroke+'" data-w="'+lk.w+'" data-dash="'+lk.dash+'"/>';
+        if(c.kind==='not'){var x=Math.cos(a)*98, y=Math.sin(a)*98;
+          extra='<path d="M'+f1(x-7)+' '+f1(y-1)+'h14v10h-14zM'+f1(x-4)+' '+f1(y-1)+'v-4a4 4 0 0 1 8 0v4" fill="none" stroke="'+tok('ink-mut')+'" stroke-width="2" stroke-linejoin="round"/>';}
+      }
+      h+='<g class="cell" data-k="'+k+'" role="button" tabindex="0" aria-pressed="false" aria-label="'+esc(lab)+'">'+shape+extra+'</g>';
+    });
+    var X=[-50,50],Y=[-50,50];
+    L.forEach(function(c,k){if(k===0&&c.kind==='tile')return;var a=-Math.PI/2+(k-1)*2*Math.PI/m, r1=c.kind==='not'?136:172, ww=(c.kind==='not'?w*0.8:w)*0.8;
+      [[r1,0],[80,ww],[80,-ww],[120,ww],[120,-ww]].forEach(function(q){X.push(q[0]*Math.cos(a)-q[1]*Math.sin(a));Y.push(q[0]*Math.sin(a)+q[1]*Math.cos(a));});});
+    var x0=Math.min.apply(0,X)-14,x1=Math.max.apply(0,X)+14,y0=Math.min.apply(0,Y)-14,y1=Math.max.apply(0,Y)+14;
+    svg.setAttribute('viewBox',[x0,y0,x1-x0,y1-y0].map(f1).join(' '));
+    svg.innerHTML=h;
+    paint();
+  }
+  /* light the chosen cell in place (no rebuild, so focus and the transition survive) */
+  function paint(){
+    [].forEach.call(document.querySelectorAll('#etSeed .cell'),function(g){
+      var on=+g.getAttribute('data-k')===R.sel, p=g.querySelector('polygon,path');
+      g.setAttribute('aria-pressed',String(on));
+      p.setAttribute('opacity',on?'1':'0.62');
+      var st=on?tok('ink'):p.getAttribute('data-stroke'), w=on?'3':p.getAttribute('data-w'), dash=on?'':p.getAttribute('data-dash');
+      p.setAttribute('stroke',st); p.setAttribute('stroke-width',w);
+      if(dash) p.setAttribute('stroke-dasharray',dash); else p.removeAttribute('stroke-dasharray');
+    });
+    card();
+  }
+  function legend(){
+    var sw=function(f,s,d){return '<svg viewBox="-10 -11 20 22" aria-hidden="true"><polygon points="'+hex(0,0,8.4)+'" fill="'+f+'"'+(s?' stroke="'+s+'" stroke-width="2" stroke-dasharray="'+d+'"':'')+'/></svg>';};
+    var h='<span>'+sw(tok('you'))+esc(T('et.door.lgOne','the one thing to do'))+'</span>';
+    if(D.tiles.some(function(t){return !t.act;})) h+='<span>'+sw(tok('biomass'))+esc(T('et.beehivebiomass.lgBloom','in bloom · open'))+'</span>';
+    if(D.limits) h+='<span>'+sw('none',tok('guard'),'3 2')+esc(T('et.door.lgLimit','named limit'))+'</span>';
+    if(D.notyet.length) h+='<span>'+sw('none',tok('ink-mut'),'2 3')+esc(T('et.beehivebiomass.lgSeed','a seed · not built'))+'</span>';
+    $('etLegend').innerHTML=h;
+  }
+  function card(){
+    var L=cells(), c=L[R.sel]||L[0], go=$('etRGo'), note=$('etRNote'), h; if(!c) return;
+    if(c.kind==='tile'){
+      var t=c.t;
+      h='<span class="rk">'+two(t.i)+'</span><div><b>'+esc(t.name)+'</b><span>'+esc((t.act?T('et.door.theOne','the one thing to do')+' · ':'')+t.path)+'</span>'+(t.limit&&!t.caveatIsName?'<em>'+esc('⚠ '+t.caveat)+'</em>':t.limit?'<em>'+esc('⚠ '+T('et.door.limit','named limit'))+'</em>':'')+'</div>';
+      go.hidden=false; go.setAttribute('href',t.href);
+      go.textContent=t.act?T('et.beehivebiomass.rGoHeart','read the farm'):T('et.beehivebiomass.rGo','open this petal');
+      note.hidden=true;
+    } else {
+      h='<span class="rk">'+LOCK+'</span><div><b>'+esc(c.n.name)+'</b><span>'+esc(T('et.door.notBuilt','not built yet'))+'</span>'+(c.n.says?'<em>'+esc(c.n.says)+'</em>':'')+'</div>';
+      go.hidden=true; note.hidden=false;
+      note.textContent=T('et.beehivebiomass.rNothing','still a seed: nothing to open yet. the door names it so it never promises it.');
+    }
+    $('etRCard').innerHTML=h;
+  }
+  function raver(){
+    $('etRWho').textContent=D.who;
+    $('etRHint').textContent=D.anchors+' '+T('et.door.rOpen','open')+' · '+D.notyet.length+' '+T('et.beehivebiomass.rSeeds','still seeds')+' · '+T('et.beehivebiomass.rTap','tap one');
+    legend(); seed();
+  }
+
+  /* ── CYPHERPUNK ── */
+  function cy(){
+    var idx=D.index, agree=D.count===D.anchors;
+    var idxOk=idx.state==='read'&&idx.n===D.anchors&&agree;
+    var three=idx.state==='reading'?T('et.door.reading2','reading'):idx.state==='failed'?T('et.door.notRead','not read'):idxOk?T('et.door.agree','agree'):T('et.door.differ','differ');
+    $('etCWho').textContent=D.who;
+    $('etChips').innerHTML='<span class="ok">'+esc(T('et.door.cOpen','open')+' '+D.anchors)+'</span>'+(D.limits?'<span class="on">'+esc('⚠ '+D.limits)+'</span>':'')+
+      '<span class="no">'+esc(T('et.door.rNot','not built')+' '+D.notyet.length)+'</span><span class="'+(idxOk?'ok':'no')+'">'+esc(T('et.door.three','three numbers')+' '+three)+'</span>';
+    $('etCGuardN').textContent=T('et.door.rNot','not built')+' · '+D.notyet.length+' '+T('et.door.named','named');
+    $('etCTabH').textContent=T('et.door.cBehind','behind this door')+' · '+D.anchors+' '+T('et.door.cOpen','open');
+    var rows=D.tiles.map(function(t){
+      return '<tr><td>'+two(t.i)+'</td><td><a href="'+esc(t.href)+'">'+esc(t.path)+'<small>'+esc(t.name)+'</small></a></td><td class="'+(t.limit?'st-lim':'st-open')+'">'+esc(t.limit?T('et.door.cOpen','open')+' ⚠':T('et.door.cOpen','open'))+(t.act?'<small>'+esc(T('et.door.cTheOne','the one'))+'</small>':'')+'</td></tr>';
+    });
+    D.notyet.forEach(function(n,i){rows.push('<tr><td>'+esc('n'+(i+1))+'</td><td><span class="nm">'+esc(n.name)+(n.says?'<small>'+esc(n.says)+'</small>':'')+'</span>'+(n.plan?'<a href="'+esc(n.plan)+'">'+esc(n.plan.replace(/^\.\.\//,''))+'<small>'+esc(T('et.beehivebiomass.cPlan','the plan, not the thing'))+'</small></a>':'')+'</td><td class="st-not">'+esc(T('et.door.rNot','not built'))+'</td></tr>');});
+    $('etTab').innerHTML=rows.join('');
+    var says=T('et.door.says','says'), agrees=T('et.door.agreesAnchors','agrees with the anchors'), but=T('et.door.anchorsSay','the anchors say');
+    var steps=[
+      ['section.d · a.t',D.anchors+' '+T('et.door.anchorsOne','anchors, one per open page'),'done'],
+      ['.shead .n',says+' '+(D.count==null?T('et.door.nothing','nothing'):D.count)+' · '+(agree?agrees:but+' '+D.anchors),agree?'done':'fail'],
+      ['doors/index.html',idx.state==='reading'?T('et.door.idxReading','reading the index row…'):idx.state==='failed'?T('et.door.notRead','not read')+' · '+idx.why:says+' "'+idx.n+' open now" · '+(idx.n===D.anchors?agrees:but+' '+D.anchors),idx.state==='reading'?'now':idx.state==='failed'||idx.n!==D.anchors?'fail':'done'],
+      ['⚠ '+T('et.door.limitsH','named limits'),D.limits?D.tiles.filter(function(t){return t.limit;}).map(function(t){return t.path+': '+t.caveat;}).join(' · '):T('et.door.none','none on this door'),'guard'],
+      ['.notyet',D.notyet.length+' '+T('et.door.named','named')+(D.notyet.length?': '+D.notyet.map(function(n){return n.name;}).join(' · '):'')+' · '+(D.overlap?D.overlap+' '+T('et.door.alsoOpen','also listed as open'):T('et.door.noneOpen','none listed as open')),D.overlap?'fail':'guard'],
+      ['links → 200',T('et.door.notChecked','not checked from the browser · the command below checks every one'),'todo']
+    ];
+    $('etPipe').innerHTML=steps.map(function(s){return '<li class="'+s[2]+'"><b>'+esc(s[0])+'</b><p>'+esc(s[1])+'</p></li>';}).join('');
+    var go=$('etCGo'); go.setAttribute('href',D.act.href); go.textContent=T('et.door.cGo','open')+' '+D.act.href.replace(/^\.\.\//,'');
+    $('etKv').innerHTML=[
+      [T('et.door.kPerson','person'),D.who],
+      [T('et.door.kOne','one thing'),D.act.label+' · '+D.act.href],
+      [T('et.beehivebiomass.kWhy','its own words'),D.act.sub],
+      [T('et.door.kFile','file'),'surfaces/doors/'+FILE],
+      [T('et.door.kRow','registry'),'surfaces/estate.json · doors-beehivebiomass']
+    ].map(function(r){return '<tr><th>'+esc(r[0])+'</th><td>'+esc(r[1])+'</td></tr>';}).join('');
+  }
+
+  function words(){[].forEach.call(document.querySelectorAll('#eternal [data-etk],.et-archive-h[data-etk]'),function(e){if(e.__en==null)e.__en=e.textContent;e.textContent=T(e.getAttribute('data-etk'),e.__en);});}
+  function all(){bee();raver();cy();words();}
+
+  function wire(){
+    var ev=$('eternal'); if(!ev) return;
+    ev.addEventListener('click',function(e){
+      var cell=e.target.closest('#etSeed .cell');
+      if(cell){R.sel=+cell.getAttribute('data-k');paint();}
+    });
+    ev.addEventListener('keydown',function(e){
+      if(e.key!=='Enter'&&e.key!==' ')return;
+      var c=e.target.closest('#etSeed .cell'); if(!c)return;
+      e.preventDefault(); c.dispatchEvent(new MouseEvent('click',{bubbles:true}));
+    });
+    document.addEventListener('blang',function(){read();all();});
+    document.addEventListener('bregister',function(){raver();});
+  }
+
+  /* one file on a host without the design system (skaists.css missing): the fronts stand down and
+     the door shows exactly as it did, rather than a half-dressed front */
+  if(!tok('bg')) document.documentElement.setAttribute('data-et-bare','');
+  wire(); read(); all(); index();
+  window.__eternal={data:D,raver:R,cells:cells};
+})();
+</script>
 <script src="../tour.js?v=42"></script>
 </body>
 </html>

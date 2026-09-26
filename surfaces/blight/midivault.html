@@ -88,9 +88,297 @@ body:not([data-reg="cypherpunk"]) .foot,body:not([data-reg="cypherpunk"]) detail
 body:not([data-reg="cypherpunk"]) .mode small{font-size:13px}
 body[data-reg="bee"] .msg,body[data-reg="bee"] .foot{font-size:16px}
 body[data-reg="cypherpunk"] .foot{font-family:ui-monospace,Menlo,Consolas,monospace}
+/* ── ETERNAL FRONT (docs/design/eternal) — three products in one surface. Every value is a skaists
+   token (../skaists.css, compiled from docs/design/skaists/tokens.json): no hand-picked hex, size or
+   corner. Measured by e2e/skaists-conformance.mjs. One register visible at a time; new bee is the
+   default. Every rule is scoped under #eternal so the page's own bare element rules never reach in. ── */
+#eternal{display:block;margin:0 0 var(--sk-s2);padding:0;border:0;background:transparent;font-size:16px;line-height:1.45;color:var(--sk-ink);text-align:left}
+#eternal>div{max-width:560px}
+#eternal>.et-r,#eternal>.et-c{display:none}
+body[data-reg="raver"] #eternal>.et-b,body[data-reg="cypherpunk"] #eternal>.et-b{display:none}
+body[data-reg="raver"] #eternal>.et-r{display:block}
+body[data-reg="cypherpunk"] #eternal>.et-c{display:block}
+#eternal [hidden]{display:none!important}
+#eternal *{box-sizing:border-box;text-transform:none}
+#eternal :is(button,input,select){appearance:none;-webkit-appearance:none;flex:0 1 auto;margin:0;padding:0;border:0;border-radius:0;background:transparent;color:inherit;font:inherit;letter-spacing:normal;min-height:0;min-width:0;box-shadow:none;text-shadow:none;transition:none}
+#eternal :is(p,h2,h3,ol,ul,table){margin:0}
+#eternal svg{display:block}
+#eternal :focus-visible{outline:2px solid var(--sk-focus);outline-offset:3px}
+#eternal a{text-decoration:none}
+#etArchive.et-archive-h{margin:var(--sk-s5) 0 var(--sk-s2);padding:var(--sk-s4) 0 0;border:0;border-top:1px solid var(--sk-line);color:var(--sk-ink);background:none;text-shadow:none;letter-spacing:normal;text-transform:none;-webkit-text-fill-color:currentColor}
+body[data-reg="bee"] #etArchive.et-archive-h{font:400 28px/1.1 var(--sk-font-bee-serif)}
+body[data-reg="raver"] #etArchive.et-archive-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em}
+body[data-reg="cypherpunk"] #etArchive.et-archive-h{font:600 15px/1.45 var(--sk-font-mono)}
+
+/* NEW BEE — a calm room: plain rows, one reassurance, one magenta action */
+#eternal .et-b{display:flex;flex-direction:column;gap:var(--sk-s3);color:var(--sk-ink);font:400 16px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-b-mark{font:400 18px/1.2 var(--sk-font-house);color:var(--sk-sovereign)}
+#eternal .et-b-h{font:400 40px/1.05 var(--sk-font-bee-serif);color:var(--sk-ink);letter-spacing:0}
+#eternal .et-b-lede{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink-mut);text-wrap:pretty}
+#eternal .et-b-guard{display:flex;align-items:center;gap:var(--sk-s2);min-height:var(--sk-control-min,44px);padding:var(--sk-s1) var(--sk-s3);border-radius:var(--sk-radius);background:var(--sk-guard-wash);color:var(--sk-guard);font:600 15px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-b-guard svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+#eternal .et-b-rows{display:flex;flex-direction:column;background:var(--sk-bg-card);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl);overflow:hidden}
+#eternal .et-b-row{display:flex;align-items:center;justify-content:space-between;gap:var(--sk-s2);min-height:var(--sk-control-row,52px);width:100%;padding:var(--sk-s1) var(--sk-s3);border:0;border-bottom:1px solid var(--sk-line-soft);background:transparent;text-align:left;font:500 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+#eternal .et-b-row:last-child{border-bottom:0}
+#eternal button.et-b-row{cursor:pointer}
+#eternal .et-b-row>span{flex:0 1 auto;min-width:0}
+#eternal .et-b-row>span:first-of-type{flex:0 0 auto;max-width:60%}
+#eternal .et-b-row small{display:flex;align-items:center;justify-content:flex-end;gap:var(--sk-s1);min-width:0;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut);text-align:right;overflow-wrap:anywhere}
+#eternal .et-b-row .chev{flex:none;width:16px;height:16px}
+#eternal .et-b-row[aria-checked="true"]{background:var(--sk-sovereign-tint);color:var(--sk-sovereign-strong);font-weight:600}
+#eternal .et-b-row[aria-checked="true"] small{color:var(--sk-sovereign-strong)}
+#eternal .et-b-field{min-height:var(--sk-control-min,44px);width:9.5em;max-width:55%;padding:0 var(--sk-s2);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius);background:var(--sk-bg-card);color:var(--sk-ink);font:400 16px/1.45 var(--sk-font-bee-sans);text-align:right}
+#eternal select.et-b-field{text-align:left;cursor:pointer}
+#eternal .et-b-now{padding:var(--sk-s2) var(--sk-s3);border-radius:var(--sk-radius);background:var(--sk-sovereign-tint);color:var(--sk-sovereign-strong);font:600 16px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-b-act{display:flex;flex-direction:column;gap:var(--sk-s1)}
+#eternal .et-b-primary{min-height:var(--sk-control-primary,54px);padding:0 var(--sk-s3);border:0;border-radius:var(--sk-radius-lg);background:var(--sk-primary);color:var(--sk-on-primary);font:600 17px/1.2 var(--sk-font-bee-sans);cursor:pointer}
+#eternal .et-b-primary:disabled{background:var(--sk-bg-well);color:var(--sk-ink-mut);cursor:not-allowed}
+#eternal .et-b-link{display:flex;align-items:center;justify-content:center;min-height:var(--sk-control-min,44px);padding:0 var(--sk-s2);border:0;background:transparent;color:var(--sk-link);font:600 16px/1.45 var(--sk-font-bee-sans);cursor:pointer}
+#eternal .et-b-link:hover{color:var(--sk-link-hover)}
+#eternal .et-b-foot{text-align:center;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+
+/* RAVER — the data is the art: one touchable graphic, a physical gesture, short literal words */
+#eternal .et-r{color:var(--sk-ink);font:400 14px/1.4 var(--sk-font-raver-body)}
+#eternal .et-r-top{display:flex;align-items:baseline;justify-content:space-between;gap:var(--sk-s2);flex-wrap:wrap}
+#eternal .et-r-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em;color:var(--sk-ink)}
+#eternal .et-r-hint{font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-art{width:100%;max-width:360px;height:auto;margin:var(--sk-s3) auto var(--sk-s1);filter:drop-shadow(var(--sk-glow-sovereign));touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+#eternal .et-r-art [role="button"]{cursor:pointer}
+#eternal .et-r-art [role="button"]:focus{outline:none}
+#eternal .et-r-art text{font:600 14px/1.25 var(--sk-font-raver-body);fill:var(--sk-ink);pointer-events:none}
+#eternal .et-r-legend{display:flex;justify-content:space-between;gap:var(--sk-s1);margin:var(--sk-s1) 0 var(--sk-s2);font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-legend span{display:flex;flex-direction:column;align-items:center;gap:var(--sk-s1);text-align:center}
+#eternal .et-r-legend i{display:block;width:28px;height:12px;border-radius:var(--sk-radius-sm)}
+#eternal .et-r-legend em{font-style:normal}
+#eternal .et-r-card{display:flex;gap:var(--sk-s2);align-items:center;min-height:var(--sk-control-person,60px);padding:var(--sk-s2) var(--sk-s3);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl);background:var(--sk-sovereign-tint)}
+#eternal .et-r-card .rk{display:flex;align-items:center;justify-content:center;flex:none;min-width:44px;height:44px;padding:0 var(--sk-s1);border-radius:var(--sk-radius);background:var(--sk-sovereign-strong);color:var(--sk-bg);font:700 15px/1.2 var(--sk-font-raver-display)}
+#eternal .et-r-card b{display:block;font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink)}
+#eternal .et-r-card span{font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-sovereign-soft)}
+#eternal .et-r-pill{position:relative;overflow:hidden;display:block;width:100%;height:58px;margin-top:var(--sk-s4);border:0;border-radius:var(--sk-radius-pill);background:var(--sk-primary);color:var(--sk-on-primary);font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em;cursor:pointer;touch-action:none;user-select:none;-webkit-user-select:none}
+#eternal .et-r-pill:disabled{background:var(--sk-sovereign-wash);color:var(--sk-sovereign-soft);cursor:not-allowed}
+#eternal .et-r-pill .fill{position:absolute;left:0;top:0;bottom:0;width:0;background:var(--sk-bg);opacity:.25}
+#eternal .et-r-pill .lbl{position:relative}
+#eternal .et-r-note{margin-top:var(--sk-s2);text-align:center;font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-duo{display:flex;justify-content:center;gap:var(--sk-s2);flex-wrap:wrap;margin-top:var(--sk-s1)}
+#eternal .et-r-ghost{display:inline-flex;align-items:center;justify-content:center;min-height:var(--sk-control-min,44px);min-width:44px;padding:0 var(--sk-s2);border:0;background:none;color:var(--sk-link);font:400 14px/1.4 var(--sk-font-raver-body);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+#eternal .et-r-ghost:disabled{color:var(--sk-ink-mut);text-decoration:none;cursor:default}
+#eternal .et-spin{transform-box:view-box;transform-origin:0 0;animation:etSpin var(--du,120s) linear infinite}
+@keyframes etSpin{to{transform:rotate(360deg)}}
+body.et-still #eternal .et-spin{animation-play-state:paused}
+@media (prefers-reduced-motion:reduce){#eternal .et-spin{animation:none}}
+
+/* CYPHERPUNK — the instrument, complete at first paint: tables, a numbered pipeline, receipts */
+#eternal .et-c{color:var(--sk-ink);font:400 13px/1.45 var(--sk-font-mono)}
+#eternal .et-c-path{font:600 15px/1.45 var(--sk-font-mono);overflow-wrap:anywhere}
+#eternal .et-c-chips{display:flex;flex-wrap:wrap;gap:var(--sk-s1);margin:var(--sk-s2) 0}
+#eternal .et-c-chips span{padding:2px var(--sk-s1);border:1px solid var(--sk-line);border-radius:4px;background:var(--sk-bg-card);font:600 12px/1.4 var(--sk-font-mono);color:var(--sk-ink)}
+#eternal .et-c-chips span.on{border-color:var(--sk-guard);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong)}
+#eternal .et-c-chips span.ok{border-color:var(--sk-verified);color:var(--sk-verified)}
+#eternal .et-c-chips span.no{border-color:var(--sk-guard);border-style:dashed;color:var(--sk-guard)}
+#eternal .et-c-knobs{display:grid;grid-template-columns:1fr 1fr;gap:var(--sk-s2);margin:0 0 var(--sk-s2)}
+#eternal .et-c-knobs label{display:flex;flex-direction:column;gap:2px;min-height:var(--sk-control-min,44px);font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut)}
+#eternal .et-c-field{width:100%;min-width:0;min-height:var(--sk-control-min,44px);padding:0 var(--sk-s1);border:1px solid var(--sk-ink-mut);border-radius:var(--sk-radius-sm);background:var(--sk-bg-card);color:var(--sk-ink);font:400 13px/1.45 var(--sk-font-mono)}
+#eternal .et-c-kv{width:100%;border-collapse:collapse;border:1px solid var(--sk-line);background:var(--sk-bg-card);font:400 13px/1.45 var(--sk-font-mono)}
+#eternal .et-c-kv th{width:104px;padding:var(--sk-s1) var(--sk-s2);text-align:left;vertical-align:top;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);border-bottom:1px solid var(--sk-line);background:transparent}
+#eternal .et-c-kv td{padding:var(--sk-s1) var(--sk-s2);border-bottom:1px solid var(--sk-line);overflow-wrap:anywhere;word-break:break-word;color:var(--sk-ink)}
+#eternal .et-c .no{color:var(--sk-info)}#eternal .et-c .yes{color:var(--sk-verified)}#eternal .et-c .sig{color:var(--sk-you)}#eternal .et-c .grd{color:var(--sk-guard)}
+#eternal .et-c-h{margin:var(--sk-s4) 0 var(--sk-s2);font:600 15px/1.45 var(--sk-font-mono);color:var(--sk-ink);letter-spacing:0}
+#eternal .et-c-tab{width:100%;border-collapse:collapse;border:1px solid var(--sk-line);background:var(--sk-bg-card);font:400 12px/1.45 var(--sk-font-mono)}
+#eternal .et-c-tab th{padding:var(--sk-s1);text-align:left;font:600 12px/1.4 var(--sk-font-mono);color:var(--sk-ink-mut);background:var(--sk-bg-well);border-bottom:1px solid var(--sk-line)}
+#eternal .et-c-tab td{padding:2px var(--sk-s1);border-bottom:1px solid var(--sk-line);color:var(--sk-ink-soft);font:400 12px/1.45 var(--sk-font-mono)}
+#eternal .et-c-tab td.on{color:var(--sk-verified)}
+#eternal .et-c-pipe{list-style:none;padding:0;display:grid;gap:var(--sk-s2);counter-reset:p}
+#eternal .et-c-pipe li{display:grid;grid-template-columns:30px 1fr;gap:var(--sk-s1) var(--sk-s2);padding:var(--sk-s2);border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm);background:var(--sk-bg-card);counter-increment:p}
+#eternal .et-c-pipe li::before{content:counter(p,decimal-leading-zero);color:var(--sk-guard);font-weight:600}
+#eternal .et-c-pipe li b{font-weight:600}
+#eternal .et-c-pipe li p{grid-column:2;color:var(--sk-ink-soft);overflow-wrap:anywhere}
+#eternal .et-c-pipe li.done b{color:var(--sk-verified)}
+#eternal .et-c-pipe li.fail{border-style:dashed;border-color:var(--sk-guard)}#eternal .et-c-pipe li.fail b{color:var(--sk-guard)}
+#eternal .et-c-pipe li.now{border-color:var(--sk-ai);box-shadow:inset 0 0 0 1px var(--sk-ai)}#eternal .et-c-pipe li.now b{color:var(--sk-ai)}
+#eternal .et-c-pipe li.todo p{color:var(--sk-ink-mut)}
+#eternal .et-c-primary{display:flex;align-items:center;justify-content:center;width:100%;height:52px;margin-top:var(--sk-s3);border:0;border-radius:var(--sk-radius-sm);background:var(--sk-primary);color:var(--sk-on-primary);font:600 14px/1.2 var(--sk-font-mono);cursor:pointer}
+#eternal .et-c-primary:disabled{background:var(--sk-bg-well);color:var(--sk-ink-mut);cursor:not-allowed}
+#eternal .et-c-verify{margin-top:var(--sk-s3);padding:var(--sk-s3);border-radius:var(--sk-radius-sm);background:var(--sk-bg-card)}
+#eternal .et-c-verify-h{margin-bottom:var(--sk-s1);font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut)}
+#eternal .et-c-verify ol{padding-left:var(--sk-s4);display:grid;gap:var(--sk-s1);overflow-wrap:anywhere}
+#eternal .et-c-verify code{font:400 12px/1.45 var(--sk-font-mono);color:var(--sk-ai);overflow-wrap:anywhere;word-break:break-all}
+#eternal .et-c-row{display:grid;grid-template-columns:1fr 1fr;gap:var(--sk-s2);margin-top:var(--sk-s3)}
+#eternal .et-c-ghost{display:flex;align-items:center;justify-content:center;min-height:52px;padding:0 var(--sk-s1);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius-sm);background:transparent;color:var(--sk-ink);text-align:center;font:600 14px/1.2 var(--sk-font-mono);cursor:pointer}
+#eternal .et-c-ghost:disabled{border-color:var(--sk-ink-mut);color:var(--sk-ink-mut);cursor:not-allowed}
+
+/* NEW BEE — who can open it: three plain choices as a radio card */
+#eternal .et-b-row[role="radio"]{justify-content:flex-start}
+#eternal .et-b-row[role="radio"] i{flex:none;width:20px;height:20px;border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius-pill);background:var(--sk-bg-card)}
+#eternal .et-b-row[role="radio"][aria-checked="true"] i{border:6px solid var(--sk-sovereign-strong)}
+#eternal .et-b-row[role="radio"] small{margin-left:auto}
+#eternal .et-b-sub{padding:var(--sk-s2) var(--sk-s3) var(--sk-s1);font:600 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut);border-bottom:1px solid var(--sk-line-soft)}
+
+/* RAVER art — the comb: the recording at the heart, every kept item a cell around it, coloured by who
+   can open it; empty cells wait dashed. The heart breathes once in 6 s (far under 3 Hz), pauses on the
+   motion switch and stands still under reduced motion. */
+#eternal .et-v-cell .hex{fill:none;stroke:var(--sk-ink-dim);stroke-width:1.5;stroke-dasharray:4 5}
+#eternal .et-v-cell.k-public .hex{fill:var(--sk-biomass);stroke:var(--sk-biomass);stroke-dasharray:none}
+#eternal .et-v-cell.k-private .hex{fill:var(--sk-sovereign);stroke:var(--sk-sovereign);stroke-dasharray:none}
+#eternal .et-v-cell.k-privileged .hex{fill:var(--sk-info);stroke:var(--sk-info);stroke-dasharray:none}
+#eternal .et-v-cell.fresh .hex{stroke:var(--sk-ink);stroke-width:3}
+#eternal .et-v-cell.sel .hex{stroke:var(--sk-ink);stroke-width:3}
+#eternal .et-v-cell:focus-visible .hex{stroke:var(--sk-ink);stroke-width:3}
+#eternal .et-v-cell text{fill:var(--sk-bg)}
+#eternal .et-v-heart .hex{fill:var(--sk-you);stroke:var(--sk-you);stroke-width:2}
+#eternal .et-v-heart text{fill:var(--sk-on-primary)}
+#eternal .et-v-heart .ring{fill:none;stroke:var(--sk-sovereign-soft);stroke-width:1.5;stroke-dasharray:3 5}
+#eternal .et-breath{transform-box:fill-box;transform-origin:center;animation:etBreath 6s ease-in-out infinite}
+@keyframes etBreath{0%,100%{transform:scale(.97)}50%{transform:scale(1)}}
+body.et-still #eternal .et-breath{animation-play-state:paused}
+@media (prefers-reduced-motion:reduce){#eternal .et-breath{animation:none}}
+#eternal .lg-public{background:var(--sk-biomass)}#eternal .lg-private{background:var(--sk-sovereign)}#eternal .lg-privileged{background:var(--sk-info)}#eternal .lg-empty{border:1.5px dashed var(--sk-ink-dim)}
+#eternal .et-r-tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--sk-s1);margin:var(--sk-s3) 0 0}
+#eternal .et-r-tiles button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--sk-s1);min-height:96px;padding:var(--sk-s1);border:1.5px solid var(--sk-sovereign);border-radius:var(--sk-radius-xl);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong);font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em;cursor:pointer;opacity:.7}
+#eternal .et-r-tiles button small{font:400 14px/1.25 var(--sk-font-raver-body);letter-spacing:0;color:var(--sk-ink-soft)}
+#eternal .et-r-tiles button[aria-pressed="true"]{opacity:1;border-color:var(--sk-you);box-shadow:var(--sk-glow-sovereign)}
+#eternal .et-r-tiles svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+
+/* ── THE WHOLE VAULT, dressed per register: the page's own variables mapped onto skaists tokens. The
+   words, the store, the keys and the probe are unchanged. Addresses and numbers leave honey (honey is
+   for b amounts only) for info blue; the SIMULATED banner keeps its words. ── */
+body[data-reg]{--you:var(--sk-you);--biomass:var(--sk-biomass);--ai:var(--sk-ai);--info:var(--sk-info);--guard:var(--sk-guard);--sovereign:var(--sk-sovereign);
+  --sem-value:var(--sk-info);--sem-solution:var(--sk-verified);--sem-harm:var(--sk-guard);--sem-system:var(--sk-info);--sem-science:var(--sk-ai);
+  --bg:var(--sk-bg);--bg-card:var(--sk-bg-card);--bg-well:var(--sk-bg-well);--ink:var(--sk-ink);--ink-mut:var(--sk-ink-mut);--ink-dim:var(--sk-ink-mut);--line:var(--sk-line);--radius:var(--sk-radius-xl);
+  background:var(--sk-bg);color:var(--sk-ink)}
+html:has(body[data-reg]){background:var(--sk-bg)}
+body[data-reg]{padding-left:var(--sk-s3);padding-right:var(--sk-s3)}
+body[data-reg] a,body[data-reg] .law b{color:var(--sk-link)}
+body[data-reg] h1.grad{background:none;-webkit-background-clip:border-box;background-clip:border-box;color:var(--sk-ink);-webkit-text-fill-color:currentColor}
+body[data-reg] .stat b{color:var(--sk-sovereign-strong)}
+body[data-reg] .panel,body[data-reg] .stat{border-radius:var(--sk-radius-xl)}
+body[data-reg] :is(.well,.item,.cap,input[type=text]){border-radius:var(--sk-radius)}
+body[data-reg] button.act{min-height:44px;background:var(--sk-primary);color:var(--sk-on-primary);border-radius:var(--sk-radius)}
+body[data-reg] button.act.ghost{background:var(--sk-bg-card);color:var(--sk-ink);border:1px solid var(--sk-ink-mut)}
+body[data-reg] input[type=text]{min-height:44px;background:var(--sk-bg-card);border-color:var(--sk-ink-mut);color:var(--sk-ink)}
+body[data-reg] .item button{min-height:44px;min-width:44px;color:var(--sk-link)}
+body[data-reg] .item button:hover{color:var(--sk-link-hover)}
+body[data-reg] .mode{display:inline-flex;flex-direction:column;justify-content:center;min-height:44px;border-color:var(--sk-ink-mut);color:var(--sk-ink-mut)}
+body[data-reg] .mode.on{border-color:var(--sk-you);color:var(--sk-you)}
+body[data-reg] .mode small{color:var(--sk-ink-mut)}
+body[data-reg] .item .badge{border-radius:4px}
+body[data-reg] .item .grow{min-width:0}
+body[data-reg] .item span.meta{overflow-wrap:anywhere;word-break:break-all}
+body[data-reg] .cap{border-color:var(--sk-guard)}
+body[data-reg] canvas{border-radius:var(--sk-radius)}
+body[data-reg="bee"]{font:400 16px/1.6 var(--sk-font-bee-sans)}
+body[data-reg="bee"] h1.grad{font:400 40px/1.05 var(--sk-font-bee-serif);letter-spacing:0}
+body[data-reg="bee"] .law{font-size:16px;color:var(--sk-ink-soft)}
+body[data-reg="bee"] h3{font:600 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+body[data-reg="bee"] .stat b{font:400 32px/1 var(--sk-font-bee-serif)}
+body[data-reg="bee"] .stat.science b{font:400 28px/1.1 var(--sk-font-bee-serif)}
+body[data-reg="bee"] .stat .l,body[data-reg="bee"] .mode small,body[data-reg="bee"] .item span.meta,body[data-reg="bee"] .item .badge,body[data-reg="bee"] .cap,body[data-reg="bee"] .link input,body[data-reg="bee"] details.tnote>summary{font-size:14px}
+body[data-reg="bee"] :is(input[type=text],button.act,.mode,.item b.nm,.item button){font-family:var(--sk-font-bee-sans);font-size:16px}
+body[data-reg="bee"] #wavinfo{font:400 15px/1.4 var(--sk-font-mono)!important}
+body[data-reg="raver"]{font:400 14px/1.6 var(--sk-font-raver-body)}
+body[data-reg="raver"] h1.grad{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em;background:var(--sk-rainbow);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent}
+body[data-reg="raver"] .law{font-size:14px;color:var(--sk-ink-soft)}
+body[data-reg="raver"] h3{font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em;color:var(--sk-ink)}
+body[data-reg="raver"] .stat b{font:700 30px/1 var(--sk-font-raver-display)}
+body[data-reg="raver"] .stat.science b{font:700 15px/1.2 var(--sk-font-raver-display)}
+body[data-reg="raver"] :is(.stat .l,.mode small,.item span.meta,.item .badge,.cap,.link input,input[type=text],button.act,.mode,.item b.nm,.item button,.msg,.foot){font-family:var(--sk-font-raver-body);font-size:14px}
+body[data-reg="raver"] :is(button.act,.item button){border-radius:var(--sk-radius-pill)}
+body[data-reg="raver"] #wavinfo{font:400 14px/1.4 var(--sk-font-raver-body)!important}
+body[data-reg="cypherpunk"]{font:400 13px/1.6 var(--sk-font-mono)}
+body[data-reg="cypherpunk"] h1.grad{font:600 15px/1.45 var(--sk-font-mono)}
+body[data-reg="cypherpunk"] :is(.law,.msg){font-size:13px}
+body[data-reg="cypherpunk"] h3{font:600 13px/1.45 var(--sk-font-mono);color:var(--sk-ink)}
+body[data-reg="cypherpunk"] .stat b{font:600 15px/1.45 var(--sk-font-mono)}
+body[data-reg="cypherpunk"] .stat.science b{font:600 15px/1.45 var(--sk-font-mono)}
+body[data-reg="cypherpunk"] :is(input[type=text],button.act,.mode,.item b.nm,.item button){font-family:var(--sk-font-mono);font-size:13px}
+body[data-reg="cypherpunk"] :is(.panel,.stat,.well,.item,.cap,input[type=text],button.act,canvas){border-radius:var(--sk-radius-sm)}
+body[data-reg="cypherpunk"] .mode{border-radius:5px}
+body[data-reg="cypherpunk"] #wavinfo{font:400 12px/1.45 var(--sk-font-mono)!important}
 </style>
+<link rel="stylesheet" href="../skaists.css">
 </head>
-<body>
+<body data-bee-theme="custom">
+<!-- ETERNAL FRONT (founder blueprint 2026-09-26, docs/design/eternal): three separate products in
+     one surface. ONE data layer (the vault's own current artifact, MODE, MANIFEST, BACKEND and its
+     message lines) drives all three, so the facts cannot drift; each register has its own layout,
+     graphic, gesture and voice. Nothing here stores, renders or probes on its own: every gesture
+     clicks the vault's real control below (.mode, #store, #renderwav, #probe) and the fronts read the
+     manifest back. The store is SIMULATED (this browser's own store) until an antd daemon answers
+     and its routes are verified; no register ever says a recording is on the Autonomi network. -->
+<section id="eternal" aria-label="the vault">
+
+  <!-- NEW BEE — a calm room: the recording, who can open it, keep it -->
+  <div class="et-b">
+    <div class="et-b-mark">the vault</div>
+    <h2 class="et-b-h" data-t="et.midivault.b.title">keep a recording</h2>
+    <p class="et-b-lede" data-t="et.midivault.b.lede">a recording here is the number that makes a song, with its settings. choose who can open it, then keep it in your vault.</p>
+    <div class="et-b-guard"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span data-t="et.midivault.b.guard">for now your vault lives in this browser only. it is not on the Autonomi network yet.</span></div>
+    <div class="et-b-rows">
+      <div class="et-b-row"><span data-t="et.midivault.b.rec">the recording</span><small data-et="beeRec">reading…</small></div>
+      <div class="et-b-row"><span data-t="et.midivault.b.sound">its sound</span><small data-et="beeSound">reading…</small></div>
+      <label class="et-b-row" for="etBeeName"><span data-t="et.midivault.b.name">its name</span><input class="et-b-field" id="etBeeName" type="text" autocomplete="off" spellcheck="false"></label>
+      <div class="et-b-row"><span data-t="et.midivault.b.kept">in your vault</span><small data-et="beeCount">nothing yet</small></div>
+    </div>
+    <div class="et-b-rows" role="radiogroup" aria-labelledby="etBeeWho">
+      <div class="et-b-sub" id="etBeeWho" data-t="et.midivault.b.who">who can open it</div>
+      <button type="button" class="et-b-row" role="radio" aria-checked="false" data-m="public"><i aria-hidden="true"></i><span data-t="et.midivault.b.public">anyone with its address</span></button>
+      <button type="button" class="et-b-row" role="radio" aria-checked="false" data-m="private"><i aria-hidden="true"></i><span data-t="et.midivault.b.private">only you</span></button>
+      <button type="button" class="et-b-row" role="radio" aria-checked="false" data-m="privileged"><i aria-hidden="true"></i><span data-t="et.midivault.b.privileged">you, and one person you choose</span></button>
+    </div>
+    <p class="et-b-now" id="etBeeNow" aria-live="polite">ready to keep.</p>
+    <div class="et-b-act">
+      <button type="button" class="et-b-primary" id="etBeeKeep">keep this recording</button>
+      <button type="button" class="et-b-link" id="etBeeSee" data-t="et.midivault.b.see">see everything in your vault</button>
+      <p class="et-b-foot" data-t="et.midivault.b.foot">nothing leaves this device until your own Autonomi node is connected.</p>
+    </div>
+  </div>
+
+  <!-- RAVER — the comb: every kept item is a cell around the recording; choose who opens it, hold to seal -->
+  <div class="et-r">
+    <div class="et-r-top"><h2 class="et-r-h" id="etRaverTitle">the comb</h2><span class="et-r-hint" id="etRaverHint">reading the vault…</span></div>
+    <svg class="et-r-art" id="etComb" viewBox="-180 -180 360 360" role="group" aria-label="the vault as a comb: the recording at the heart, kept items around it"></svg>
+    <div class="et-r-legend" aria-label="what the colours mean">
+      <span><i class="lg-public"></i><em data-t="et.midivault.r.public">public</em></span><span><i class="lg-private"></i><em data-t="et.midivault.r.private">private</em></span><span><i class="lg-privileged"></i><em data-t="et.midivault.r.privileged">privileged</em></span><span><i class="lg-empty"></i><em data-t="et.midivault.r.empty">empty</em></span>
+    </div>
+    <div class="et-r-card" id="etRaverCard" aria-live="polite"></div>
+    <div class="et-r-tiles" id="etTiles" role="group" aria-label="who can open it">
+      <button type="button" aria-pressed="false" data-m="public"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>public<small data-t="et.midivault.r.publicS">the address opens it</small></button>
+      <button type="button" aria-pressed="false" data-m="private"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>private<small data-t="et.midivault.r.privateS">the key stays here</small></button>
+      <button type="button" aria-pressed="false" data-m="privileged"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="15" r="4"/><path d="M11 12l9-9M16 7l3 3"/></svg>privileged<small data-t="et.midivault.r.privilegedS">you hand the key</small></button>
+    </div>
+    <button type="button" class="et-r-pill" id="etHold" aria-describedby="etHoldHint"><span class="fill" id="etHoldFill"></span><span class="lbl" id="etHoldLbl">hold to seal it in</span></button>
+    <p class="et-r-note" id="etHoldHint">hold 1.2 s · this browser's store · not the network</p>
+    <div class="et-r-duo"><button type="button" class="et-r-ghost" id="etMotion" aria-pressed="false">pause motion</button></div>
+  </div>
+
+  <!-- CYPHERPUNK — the manifest as an instrument: the artifact, the adapter, the pipeline, the receipt -->
+  <div class="et-c">
+    <p class="et-c-path"><span data-et="path">vault://manifest · localStorage bmidi-vault</span></p>
+    <div class="et-c-chips" id="etChips"></div>
+    <div class="et-c-knobs">
+      <label for="etCyName">name<input class="et-c-field" id="etCyName" type="text" autocomplete="off" spellcheck="false"></label>
+      <label for="etCyMode">mode<select class="et-c-field" id="etCyMode"><option value="public">public</option><option value="private">private</option><option value="privileged">privileged</option></select></label>
+    </div>
+    <table class="et-c-kv" id="etArtifact"></table>
+    <button type="button" class="et-c-primary" id="etCyStore">store · simulated</button>
+    <h3 class="et-c-h" data-t="et.midivault.c.manH">manifest · the vault is this list</h3>
+    <table class="et-c-tab" id="etManifest"></table>
+    <h3 class="et-c-h" data-t="et.midivault.c.pipeH">store pipeline</h3>
+    <ol class="et-c-pipe" id="etPipe"></ol>
+    <h3 class="et-c-h" data-t="et.midivault.c.receiptH">receipt</h3>
+    <table class="et-c-kv" id="etReceipt"></table>
+    <div class="et-c-verify">
+      <div class="et-c-verify-h" data-t="et.midivault.c.verifyH">verify · no trust in this page needed</div>
+      <ol><li>localStorage.getItem('bmidi-vault') → the manifest, key by key</li><li>address = 4 × 32-bit fold of the stored bytes → 'ant' + 32 hex · a content hash in this page's store, not a network address</li><li>private items: first 12 bytes are the AES-GCM iv; only the manifest's key opens the rest</li></ol>
+    </div>
+    <div class="et-c-row">
+      <button type="button" class="et-c-ghost" id="etCyWav">render WAV · 8 s</button>
+      <button type="button" class="et-c-ghost" id="etCyProbe">probe antd</button>
+      <button type="button" class="et-c-ghost" id="etCyLib">open the library</button>
+      <a class="et-c-ghost" href="https://github.com/beehive-nature/beehive-nature/blob/main/surfaces/blight/midivault.html" target="_blank" rel="noopener noreferrer">fork the template ↗ new tab</a>
+    </div>
+  </div>
+</section>
+<h2 class="et-archive-h" id="etArchive" data-t="et.midivault.archive">the whole vault</h2>
 <h1 class="grad">the vault</h1>
 <p class="law">record a performance, store it on <b>Autonomi</b>, share it three ways — <b>public</b> (the
 address is the door), <b>private</b> (encrypted; only your manifest holds the key), <b>privileged</b>
@@ -447,6 +735,174 @@ renderLib();
 hexFace($('cv'),20260826);
 $('artifact').value='20260826';
 readArtifact();
+</script>
+<script data-et-front>
+/* ETERNAL FRONT — one data layer, three renderers (docs/design/eternal). Facts come from the vault
+   itself: the artifact it read (current, with its buildPattern score), MODE, MANIFEST (the vault IS
+   this list), BACKEND and the #rmsg / #bmsg lines its store and probe write. Nothing here stores,
+   renders or probes on its own: every gesture clicks the vault's real control (.mode, #store,
+   #renderwav, #probe) and the fronts read the manifest back. The backend is SIMULATED until an antd
+   daemon answers and its routes are verified, so no register ever says "on the network". */
+(function(){
+  var $=function(id){return document.getElementById(id);};
+  var T=function(k,f){var t=window.BNRLanguage&&window.BNRLanguage.text;return t?t(k,f):f;};
+  var D={seed:null,source:'',modeName:'',root:0,rootName:'',bpm:0,shape:'',wave:'',sym:0,delayBeats:0,mode:'public',name:'',scoreBytes:0,wavBytes:0,
+    backend:'SIMULATED',endpoint:'',probe:'not probed',items:[],count:0,bytes:0,msg:'',storing:false,onNetwork:false};
+  var R={sel:null,base:null,sealed:false};
+  function esc(v){return String(v==null?'':v).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+  function set(sel,txt){[].forEach.call(document.querySelectorAll('#eternal [data-et]'),function(e){if(e.getAttribute('data-et')===sel)e.textContent=txt;});}
+  function bytes(n){return n>1048576?(n/1048576).toFixed(1)+' MB':n>1024?(n/1024).toFixed(1)+' KB':n+' B';}
+  function read(){
+    var c=window.current, P=c&&c.P;
+    D.seed=c?c.seed:null; D.source=c?(c.patch?'seed + patch':'pure seed'):'';
+    if(P){D.modeName=P.mode.n;D.root=P.root;D.rootName=noteName(P.root);D.bpm=P.bpm;D.shape=P.shape;D.wave=P.wave;D.sym=P.sym;D.delayBeats=P.delayBeats;
+      D.scoreBytes=new TextEncoder().encode(JSON.stringify({seed:c.seed,patch:c.patch,voice:c.voice,meta:{mode:P.mode.n,root:P.root,bpm:P.bpm,shape:P.shape}})).length;}
+    D.mode=window.MODE; D.wavBytes=window.wavBytes?window.wavBytes.length:0;
+    D.backend=window.BACKEND.name; D.endpoint=$('endpoint').value.trim();
+    var b=($('bmsg').textContent||'').trim();
+    D.probe=/^probing/.test(b)?'probing':/^answered/.test(b)?'answered':/^no daemon/.test(b)?'no daemon':'not probed';
+    var M=window.MANIFEST||[];
+    D.items=M.map(function(m){return {name:m.name,kind:m.kind,mode:m.mode,addr:m.addr,bytes:m.bytes,key:!!m.key,at:m.at};});
+    D.count=D.items.length; D.bytes=D.items.reduce(function(a,m){return a+m.bytes;},0);
+    if(R.base==null)R.base=D.count;
+    D.msg=($('rmsg').textContent||'').replace(/\s+/g,' ').trim(); D.storing=/^storing on/.test(D.msg);
+    D.name=$('name').value;
+    D.onNetwork=false; /* the adapter's live path throws until antd's routes are verified: nothing here reaches Autonomi */
+  }
+  function soundLine(){return D.seed==null?T('et.midivault.b.none','nothing read yet'):D.modeName+' '+T('et.midivault.b.in','in')+' '+D.rootName.replace(/-?\d+$/,'')+', '+D.bpm+' '+T('et.midivault.b.bpm','beats a minute');}
+  function recLine(){return D.seed==null?T('et.midivault.b.none','nothing read yet'):T('et.midivault.b.seed','seed')+' '+D.seed+' · '+soundLine();}
+
+  /* ── NEW BEE ── */
+  function bee(){
+    set('beeRec',D.seed==null?T('et.midivault.b.none','nothing read yet'):T('et.midivault.b.seed','seed')+' '+D.seed);
+    set('beeSound',soundLine());
+    set('beeCount',D.count?D.count+' '+(D.count===1?T('et.midivault.b.one','recording'):T('et.midivault.b.many','recordings'))+' · '+bytes(D.bytes):T('et.midivault.b.nothing','nothing yet'));
+    var f=$('etBeeName'); if(document.activeElement!==f)f.value=D.name; f.placeholder=T('et.midivault.b.namePh','seed')+' '+(D.seed==null?'':D.seed);
+    [].forEach.call(document.querySelectorAll('#eternal .et-b [role="radio"]'),function(b){b.setAttribute('aria-checked',String(b.getAttribute('data-m')===D.mode));});
+    var kept=D.count>R.base, last=D.items[0];
+    $('etBeeNow').textContent=D.storing?T('et.midivault.b.keeping','keeping it…')
+      :kept&&last?(T('et.midivault.b.keptNow','kept in your vault, in this browser.')+' '+(last.key?T('et.midivault.b.locked','it is locked with a key only this device holds.'):T('et.midivault.b.open','anyone with its address can open it.')))
+      :D.seed==null?T('et.midivault.b.readFirst','read a recording first.')
+      :T('et.midivault.b.ready','ready to keep. it stays in this browser.');
+    $('etBeeKeep').disabled=D.seed==null||D.storing;
+  }
+
+  /* ── RAVER ── */
+  var HEX=function(r){var p=[];for(var k=0;k<6;k++){var a=Math.PI/180*(60*k-30);p.push((r*Math.cos(a)).toFixed(1)+' '+(r*Math.sin(a)).toFixed(1));}return 'M'+p.join('L')+'Z';};
+  var SIZE=36, SLOTS=(function(){var out=[],dirs=[[1,0],[1,-1],[0,-1],[-1,0],[-1,1],[0,1]];
+    for(var k=1;k<=2;k++){var q=-k,r=k;for(var i=0;i<6;i++)for(var j=0;j<k;j++){out.push([SIZE*Math.sqrt(3)*(q+r/2),SIZE*1.5*r]);q+=dirs[i][0];r+=dirs[i][1];}}
+    return out;})();
+  function comb(){
+    var svg=$('etComb'); if(!svg)return;
+    var fresh=D.count-R.base, h='';
+    SLOTS.forEach(function(xy,i){var it=D.items[i],t='translate('+xy[0].toFixed(1)+' '+xy[1].toFixed(1)+')';
+      if(it)h+='<g class="et-v-cell k-'+esc(it.mode)+(i<fresh?' fresh':'')+(R.sel===i?' sel':'')+'" data-i="'+i+'" role="button" tabindex="0" aria-label="'+esc(it.name+', '+it.kind+', '+it.mode)+'" transform="'+t+'"><path class="hex" d="'+HEX(33)+'"/><text y="5" text-anchor="middle">'+esc(it.kind)+'</text></g>';
+      else h+='<g class="et-v-cell" transform="'+t+'"><path class="hex" d="'+HEX(33)+'"/></g>';});
+    h+='<g class="et-v-heart" role="button" tabindex="0" aria-label="'+esc(T('et.midivault.r.heartA','the recording')+': '+recLine())+'"><g class="et-breath"><path class="hex" d="'+HEX(33)+'"/></g><text y="-3" text-anchor="middle">'+esc(D.rootName)+'</text><text y="15" text-anchor="middle">'+esc(D.bpm+' bpm')+'</text></g>';
+    svg.innerHTML=h;
+  }
+  function raver(){
+    $('etRaverTitle').textContent=R.sealed&&D.count>R.base?T('et.midivault.r.sealedH','sealed in'):T('et.midivault.r.h','the comb');
+    $('etRaverHint').textContent=D.count+' '+(D.count===1?T('et.midivault.r.cell','cell'):T('et.midivault.r.cells','cells'))+' · '+(D.backend==='SIMULATED'?T('et.midivault.r.local','this browser only'):T('et.midivault.r.antd','antd seen · routes pending'))+(D.count>SLOTS.length?' · +'+(D.count-SLOTS.length)+' '+T('et.midivault.r.more','in the library'):'');
+    comb();
+    var c=$('etRaverCard'), it=R.sel!=null&&D.items[R.sel];
+    if(it)c.innerHTML='<span class="rk">'+esc(it.kind)+'</span><div><b>'+esc(it.name)+'</b><span>'+esc(it.mode+' · '+bytes(it.bytes)+' · '+it.addr.slice(0,14)+'… · '+T('et.midivault.r.here','in this browser'))+'</span></div>';
+    else c.innerHTML='<span class="rk">'+esc(D.bpm)+'</span><div><b>'+esc(recLine())+'</b><span>'+esc(D.shape+' · '+T('et.midivault.r.will','kept as')+' '+D.mode+' · '+D.scoreBytes+' B '+T('et.midivault.r.score','score'))+'</span></div>';
+    [].forEach.call(document.querySelectorAll('#etTiles button'),function(b){b.setAttribute('aria-pressed',String(b.getAttribute('data-m')===D.mode));});
+    var p=$('etHold'); p.disabled=D.seed==null||D.storing;
+    $('etHoldLbl').textContent=D.storing?T('et.midivault.r.sealing','sealing…'):T('et.midivault.r.hold','hold to seal it in');
+  }
+
+  /* ── CYPHERPUNK ── */
+  function kv(rows){return rows.map(function(r){return '<tr><th>'+esc(r[0])+'</th><td>'+r[1]+'</td></tr>';}).join('');}
+  function cy(){
+    $('etChips').innerHTML='<span class="no">backend '+esc(D.backend)+'</span><span class="on">mode '+esc(D.mode)+'</span><span>items '+D.count+'</span><span class="'+(D.probe==='answered'?'ok':D.probe==='no daemon'?'no':'')+'">antd '+esc(D.probe)+'</span>';
+    var cn=$('etCyName'); if(document.activeElement!==cn)cn.value=D.name; cn.placeholder='seed '+(D.seed==null?'':D.seed);
+    $('etCyMode').value=D.mode;
+    var enc=D.mode==='public';
+    $('etArtifact').innerHTML=kv([
+      ['seed',D.seed==null?'<span class="no">not read</span>':esc(D.seed+' · '+D.source)],
+      ['score',esc(D.modeName+' · root '+D.root+' ('+D.rootName+') · '+D.bpm+' bpm · '+D.shape)],
+      ['voice',esc(D.wave+' · delay '+D.delayBeats+' beat · C'+D.sym+'n')],
+      ['bytes',esc(D.scoreBytes+' B score JSON'+(D.wavBytes?' + '+bytes(D.wavBytes)+' WAV · 8.00 s · stereo 16-bit':' · WAV not rendered'))],
+      ['key',enc?'<span class="yes">none</span> · public: the address is the door':'AES-GCM 256 · random per item · held in the manifest only'],
+      ['backend','<span class="no">'+esc(D.backend)+'</span> · localStorage vault-&lt;addr&gt; · first 32 KiB']]);
+    $('etManifest').innerHTML='<tr><th>#</th><th>kind</th><th>mode</th><th>bytes</th><th>addr</th></tr>'+(D.items.map(function(m,i){
+      return '<tr><td>'+(i+1)+'</td><td>'+esc(m.kind)+'</td><td>'+esc(m.mode)+'</td><td>'+m.bytes+'</td><td>'+esc(m.addr.slice(0,11))+'…</td></tr>';}).join('')||'<tr><td colspan="5">empty · nothing stored yet</td></tr>');
+    var stored=D.count>0;
+    var steps=[
+      ['read artifact',D.seed==null?'no seed read':'mulberry32(seed ^ 0x5EED) → '+D.modeName+' · '+D.bpm+' bpm · '+D.shape,D.seed==null?'now':'done'],
+      ['encode',D.scoreBytes+' B score JSON'+(D.wavBytes?' + '+bytes(D.wavBytes)+' WAV':''),D.seed==null?'todo':'done'],
+      ['encrypt',enc?'skipped · public: the address is the door':'AES-GCM · 12-byte iv · a fresh key per item',enc?'done':stored?'done':'todo'],
+      ['put · '+D.backend,'ADAPTER.put → this browser’s localStorage · content address, not a network address',stored?'done':D.storing?'now':'now'],
+      ['manifest',D.count+' entries · the keys live only in this list',stored?'done':'todo'],
+      ['network · antd :8082',D.probe==='no daemon'?'no daemon at '+D.endpoint+' · nothing reaches Autonomi':D.probe==='answered'?'antd answered · live routes pending verification · the simulation still carries the flow':D.probe==='probing'?'probing '+D.endpoint:'not probed · routes pending live verification',D.probe==='no daemon'?'fail':'todo']
+    ];
+    $('etPipe').innerHTML=steps.map(function(s){return '<li class="'+s[2]+'"><b>'+esc(s[0])+'</b><p>'+esc(s[1])+'</p></li>';}).join('');
+    var L=D.items[0];
+    $('etReceipt').innerHTML=kv(L?[['name',esc(L.name)],['addr',esc(L.addr)],['mode',esc(L.mode)],['key',L.key?'<span class="sig">held here</span> · never sent':'<span class="yes">none</span> · public'],['bytes',esc(L.bytes+' B · '+L.kind)],['network','<span class="no">no</span> · simulated store in this browser']]
+      :[['last','<span class="no">nothing stored yet</span>'],['network','<span class="no">no</span> · simulated store in this browser']]);
+    var st=$('etCyStore'); st.disabled=D.seed==null||D.storing; st.textContent=D.storing?'storing…':'store · '+D.backend.toLowerCase();
+    var pr=$('etCyProbe'); pr.disabled=D.probe==='probing'; pr.textContent=D.probe==='probing'?'probing…':'probe antd';
+  }
+
+  function labels(){[].forEach.call(document.querySelectorAll('#eternal [data-t]'),function(e){if(e.__en==null)e.__en=e.textContent;e.textContent=T(e.getAttribute('data-t'),e.__en);});}
+  function all(){read();bee();raver();cy();}
+
+  /* ── the hand-offs: the vault's own controls own every real step ── */
+  function click(el){if(el&&!el.disabled)el.click();}
+  function setMode(m){click([].filter.call(document.querySelectorAll('.mode'),function(e){return e.dataset.m===m;})[0]);all();}
+  function setName(v){$('name').value=v;read();}
+  function keep(){read();if(D.seed==null||D.storing)return;click($('store'));all();}
+  function library(){var l=$('lib'),sec=l&&l.closest('section');if(sec){sec.setAttribute('tabindex','-1');sec.scrollIntoView({block:'start'});sec.focus({preventScroll:true});}}
+  var hold={t0:0,raf:0};
+  function holdStart(e){
+    if(hold.raf||$('etHold').disabled)return; if(e&&e.preventDefault)e.preventDefault();
+    hold.t0=performance.now();
+    (function tick(now){var f=Math.min(1,(now-hold.t0)/1200);$('etHoldFill').style.width=(f*100)+'%';
+      if(f>=1){hold.raf=0;$('etHoldFill').style.width='0';R.sealed=true;keep();return;}hold.raf=requestAnimationFrame(tick);})(hold.t0);
+  }
+  function holdStop(){if(!hold.raf)return;cancelAnimationFrame(hold.raf);hold.raf=0;$('etHoldFill').style.width='0';}
+  var still=false; try{still=localStorage.getItem('bnr.motion.paused')==='true';}catch(x){}
+  function motion(){var reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+    document.body.classList.toggle('et-still',still||reduce);var b=$('etMotion');
+    b.setAttribute('aria-pressed',String(still||reduce));b.disabled=reduce;
+    b.textContent=reduce?T('et.midivault.r.stillOs','still · your device asks for less motion'):still?T('et.midivault.r.resume','resume motion'):T('et.midivault.r.pause','pause motion');}
+
+  function wire(){
+    var ev=$('eternal'); if(!ev)return;
+    $('etBeeKeep').addEventListener('click',keep);
+    $('etCyStore').addEventListener('click',keep);
+    $('etBeeSee').addEventListener('click',library);
+    $('etCyLib').addEventListener('click',library);
+    $('etCyWav').addEventListener('click',function(){click($('renderwav'));all();});
+    $('etCyProbe').addEventListener('click',function(){click($('probe'));all();});
+    $('etCyMode').addEventListener('change',function(){setMode(this.value);});
+    ['etBeeName','etCyName'].forEach(function(id){$(id).addEventListener('input',function(){setName(this.value);});});
+    ev.addEventListener('click',function(e){
+      var m=e.target.closest('#eternal [role="radio"],#etTiles button'); if(m){setMode(m.getAttribute('data-m'));return;}
+      var cell=e.target.closest('#etComb .et-v-cell[role="button"]'); if(cell){var i=+cell.getAttribute('data-i');R.sel=R.sel===i?null:i;raver();return;}
+      if(e.target.closest('#etComb .et-v-heart')){R.sel=null;raver();}
+    });
+    ev.addEventListener('keydown',function(e){var t=e.target.closest&&e.target.closest('#etComb [role="button"]');if(t&&(e.key==='Enter'||e.key===' ')){e.preventDefault();t.dispatchEvent(new MouseEvent('click',{bubbles:true}));}});
+    var hb=$('etHold');
+    hb.addEventListener('pointerdown',function(e){try{hb.setPointerCapture(e.pointerId);}catch(x){}holdStart(e);});
+    ['pointerup','pointercancel','pointerleave'].forEach(function(t){hb.addEventListener(t,holdStop);});
+    hb.addEventListener('keydown',function(e){if((e.key===' '||e.key==='Enter')&&!e.repeat){e.preventDefault();holdStart(e);}});
+    hb.addEventListener('keyup',function(e){if(e.key===' '||e.key==='Enter')holdStop();});
+    hb.addEventListener('contextmenu',function(e){e.preventDefault();});
+    $('etMotion').addEventListener('click',function(){still=!still;try{localStorage.setItem('bnr.motion.paused',String(still));}catch(x){}motion();});
+    if(window.matchMedia)matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change',motion);
+    /* the vault speaks through its own lines and its own controls: the fronts listen, they never guess */
+    var mo=new MutationObserver(function(){all();});
+    ['rmsg','lmsg','bmsg','st-mode','lib','wavbox'].forEach(function(id){if($(id))mo.observe($(id),{childList:true,characterData:true,subtree:true,attributes:true});});
+    document.addEventListener('click',function(e){if(e.target.closest&&e.target.closest('.mode'))setTimeout(all,0);});
+    $('name').addEventListener('input',all);
+    document.addEventListener('blang',function(){labels();motion();all();});
+  }
+  labels(); wire(); motion(); all();
+  window.__eternal={data:D,raver:R,refresh:all};
+})();
 </script>
 <script src="../tour.js?v=42"></script>
 </body>

@@ -173,13 +173,272 @@ body:not([data-reg="cypherpunk"]) .wall .why{font-size:14px}
 body:not([data-reg="cypherpunk"]) .chip{font-size:13px}
 body[data-reg="bee"] :is(.wall,.lawline,.demoline,.foot p){font-size:16px;line-height:1.7}
 body[data-reg="bee"] .foot .src{font-size:14px}
+/* ── ETERNAL FRONT (docs/design/eternal) — every value is a skaists token (skaists.css, compiled
+   from docs/design/skaists/tokens.json): no hand-picked hex, size or corner. Measured by
+   e2e/skaists-conformance.mjs. One register visible at a time; new bee is the default.
+   THE PRIVATE NOTE (ETERNAL wave 2, the keys ruling): the fronts never read the view key or the note
+   secret (#ovk #osk), never touch a demo note's keys (state.demo, state.localNotes), and make no
+   request. They draw only the public reads the lens below already made, and hand off to its own
+   lens buttons (#lstranger #lowner). ── */
+#eternal{width:100%;max-width:30rem;margin:var(--sk-s2) auto 0;box-sizing:border-box;text-align:start}
+#eternal *{box-sizing:border-box}
+#eternal>.et-r,#eternal>.et-c{display:none}
+body[data-reg="raver"] #eternal>.et-b,body[data-reg="cypherpunk"] #eternal>.et-b{display:none}
+body[data-reg="raver"] #eternal>.et-r{display:block}
+body[data-reg="cypherpunk"] #eternal>.et-c{display:block}
+#eternal [hidden]{display:none!important}
+#eternal button{margin:0;color:inherit;font:inherit;padding:0;background:none;border:0;border-radius:0}
+#eternal p{margin:0}
+#eternal svg{display:block}
+#eternal :focus-visible{outline:2px solid var(--sk-focus);outline-offset:3px}
+#eternal .et-center{text-align:center}
+.et-archive-h{width:100%;max-width:30rem;margin:var(--sk-s5) auto var(--sk-s1);padding-top:var(--sk-s4);border-top:1px solid var(--sk-line);color:var(--sk-ink);box-sizing:border-box}
+body[data-reg="bee"] .et-archive-h{font:400 28px/1.1 var(--sk-font-bee-serif)}
+body[data-reg="raver"] .et-archive-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em}
+body[data-reg="cypherpunk"] .et-archive-h{font:600 15px/1.45 var(--sk-font-mono)}
+
+/* NEW BEE — a calm room: who can see your note? two plain rows, one magenta action */
+#eternal .et-b{color:var(--sk-ink);display:flex;flex-direction:column;gap:var(--sk-s3);font-family:var(--sk-font-bee-sans)}
+#eternal .et-b-step{display:flex;flex-direction:column;gap:var(--sk-s3)}
+#eternal .et-b-mark{font:400 18px/1.2 var(--sk-font-house);color:var(--sk-sovereign)}
+#eternal .et-b-h{margin:0;font:400 40px/1.05 var(--sk-font-bee-serif);color:var(--sk-ink);letter-spacing:0}
+#eternal .et-b-lede{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink-mut);text-wrap:pretty}
+#eternal .et-b-guard{display:flex;align-items:center;gap:var(--sk-s2);min-height:var(--sk-control-min,44px);padding:var(--sk-s1) var(--sk-s3);border-radius:var(--sk-radius);background:var(--sk-guard-wash);color:var(--sk-guard);font:600 16px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-b-guard svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+#eternal .et-b-rows{display:flex;flex-direction:column;background:var(--sk-bg-card);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl);overflow:hidden}
+#eternal .et-b-row{display:flex;align-items:center;justify-content:space-between;gap:var(--sk-s2);width:100%;min-height:var(--sk-control-row,52px);padding:var(--sk-s1) var(--sk-s3);border-bottom:1px solid var(--sk-line-soft);background:transparent;text-align:start;font:500 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink);cursor:pointer}
+#eternal .et-b-row:last-child,#eternal .et-b-more:last-child{border-bottom:0}
+#eternal .et-b-row small{display:flex;align-items:center;gap:var(--sk-s1);flex:none;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-row[aria-expanded="true"]{background:var(--sk-sovereign-tint);color:var(--sk-sovereign-strong);font-weight:600}
+#eternal .et-b-row[aria-expanded="true"] small{color:var(--sk-sovereign-strong)}
+#eternal .et-b-row .chev{flex:none;transition:transform var(--dur,.26s)}
+#eternal .et-b-row[aria-expanded="true"] .chev{transform:rotate(90deg)}
+#eternal .et-b-more{padding:var(--sk-s2) var(--sk-s3);border-bottom:1px solid var(--sk-line-soft);background:var(--sk-sovereign-tint);font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+#eternal .et-b-act{display:flex;flex-direction:column;gap:var(--sk-s1);margin-top:var(--sk-s1)}
+#eternal .et-b-primary{display:flex;align-items:center;justify-content:center;width:100%;height:var(--sk-control-primary,54px);padding:0 var(--sk-s3);border-radius:var(--sk-radius-lg);background:var(--sk-primary);color:var(--sk-on-primary);font:600 17px/1.2 var(--sk-font-bee-sans);cursor:pointer;text-align:center}
+#eternal .et-b-link{display:flex;align-items:center;justify-content:center;min-height:var(--sk-control-min,44px);font:600 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-link);text-decoration:none;cursor:pointer;text-align:center}
+#eternal .et-b-link:hover{color:var(--sk-link-hover)}
+#eternal .et-b-foot{text-align:center;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-tick{width:78px;height:78px;margin:var(--sk-s2) auto 0;border-radius:var(--sk-radius-pill);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong);display:flex;align-items:center;justify-content:center;font:400 40px/1 var(--sk-font-bee-serif)}
+#eternal .et-b-tick.ok{background:var(--sk-verified-wash);color:var(--sk-verified)}
+#eternal .et-b-card{background:var(--sk-sovereign-tint);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl);padding:var(--sk-s3)}
+#eternal .et-b-card h3{margin:0 0 var(--sk-s1);font:400 28px/1.1 var(--sk-font-bee-serif);color:var(--sk-sovereign-strong)}
+#eternal .et-b-card div{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+
+/* RAVER — the glass: three flows across a lens, four kinds of seeing; hold the lens to turn it */
+#eternal .et-r{color:var(--sk-ink);font-family:var(--sk-font-raver-body)}
+#eternal .et-r-top{display:flex;align-items:baseline;justify-content:space-between;gap:var(--sk-s2);flex-wrap:wrap}
+#eternal .et-r-h{margin:0;font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em;color:var(--sk-ink)}
+#eternal .et-r-hint{font:400 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-art{width:100%;max-width:360px;margin:var(--sk-s3) auto var(--sk-s1);filter:drop-shadow(var(--sk-glow-sovereign));touch-action:manipulation}
+#eternal .et-r-art .seg{transition:fill var(--dur,.26s),opacity var(--dur,.26s),stroke var(--dur,.26s)}
+#eternal .et-r-art [role="button"]{cursor:pointer}
+#eternal .et-r-art .seg{pointer-events:all}
+#eternal .et-r-art [role="button"]:focus{outline:none}
+#eternal .et-r-art [role="button"]:focus-visible .seg{stroke:var(--sk-ink);stroke-width:2}
+#eternal .et-r-legend{display:flex;justify-content:center;flex-wrap:wrap;gap:var(--sk-s1) var(--sk-s3);margin:var(--sk-s1) 0 var(--sk-s2);font:400 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-legend span{display:flex;align-items:center;gap:var(--sk-s1)}
+#eternal .et-r-legend i{width:24px;height:12px;border-radius:var(--sk-radius-sm)}
+#eternal .et-r-legend .lg-yours{border:1.5px dashed var(--sk-sovereign-soft)}
+#eternal .et-r-legend .lg-dim{background:var(--sk-sovereign-wash);border:1px solid var(--sk-line)}
+#eternal .et-r-legend .lg-lit{background:var(--sk-sovereign-strong)}
+#eternal .et-r-legend b{font-weight:400}
+#eternal .et-r-card{display:flex;gap:var(--sk-s2);align-items:center;padding:var(--sk-s2) var(--sk-s3);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl);background:var(--sk-sovereign-tint);min-height:var(--sk-control-person,60px)}
+#eternal .et-r-card .rk{width:44px;height:44px;border-radius:var(--sk-radius);background:var(--sk-sovereign-strong);color:var(--sk-bg);display:flex;align-items:center;justify-content:center;font:700 15px/1.2 var(--sk-font-raver-display);flex:none}
+#eternal .et-r-card b{display:block;font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink)}
+#eternal .et-r-card span{font:400 14px/1.25 var(--sk-font-raver-body);color:var(--sk-sovereign-soft)}
+#eternal .et-r-note{margin:var(--sk-s2) 0 0;text-align:center;font:400 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-big{margin:var(--sk-s2) 0 var(--sk-s1);text-align:center;font:700 60px/.95 var(--sk-font-raver-display);letter-spacing:-.02em;color:var(--sk-ink)}
+#eternal .et-r-pill{display:flex;align-items:center;justify-content:center;width:100%;height:58px;margin-top:var(--sk-s4);border-radius:var(--sk-radius-pill);background:var(--sk-primary);color:var(--sk-on-primary);font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em;cursor:pointer}
+#eternal .et-r-ghost{display:flex;width:max-content;max-width:100%;align-items:center;justify-content:center;margin:var(--sk-s2) auto 0;min-height:var(--sk-control-min,44px);padding:0 var(--sk-s2);color:var(--sk-link);font:400 14px/1.25 var(--sk-font-raver-body);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+
+/* CYPHERPUNK — the instrument: every field and its class, the flows as a pipeline, a live receipt */
+#eternal .et-c{font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink)}
+#eternal .et-c-path{font:600 15px/1.45 var(--sk-font-mono);word-break:break-all;color:var(--sk-ink)}
+#eternal .et-c-chips{display:flex;flex-wrap:wrap;gap:var(--sk-s1);margin:var(--sk-s2) 0}
+#eternal .et-c-chips span{padding:2px var(--sk-s1);border:1px solid var(--sk-line);border-radius:4px;background:var(--sk-bg-card);font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-soft)}
+#eternal .et-c-chips span.ok{border-color:var(--sk-verified);color:var(--sk-verified)}
+#eternal .et-c-chips span.no{border-color:var(--sk-info);color:var(--sk-info)}
+#eternal .et-c-guard{display:flex;justify-content:space-between;align-items:center;gap:var(--sk-s2);flex-wrap:wrap;min-height:var(--sk-control-min,44px);padding:var(--sk-s1) var(--sk-s3);border:1px dashed var(--sk-guard);border-radius:var(--sk-radius-sm);background:var(--sk-guard-wash);color:var(--sk-guard)}
+#eternal .et-c-guard b{font-weight:600;color:var(--sk-sovereign-strong)}
+#eternal .et-c-tab{width:100%;margin:var(--sk-s2) 0 var(--sk-s1);border-collapse:separate;border-spacing:0;border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm);overflow:hidden;background:var(--sk-bg-card)}
+#eternal .et-c-tab th{padding:var(--sk-s1) var(--sk-s2);text-align:start;font:600 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);border-bottom:1px solid var(--sk-line);background:var(--sk-bg-well)}
+#eternal .et-c-tab td{height:var(--sk-control-min,44px);padding:var(--sk-s1) var(--sk-s2);border-bottom:1px solid var(--sk-line);font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink);vertical-align:middle;overflow-wrap:anywhere}
+#eternal .et-c-tab tr:last-child td{border-bottom:0}
+#eternal .et-c-tab td:first-child{color:var(--sk-guard);white-space:nowrap}
+#eternal .et-c-tab td.fn{color:var(--sk-ai)}
+#eternal .et-c-h{margin:var(--sk-s4) 0 var(--sk-s2);font:600 15px/1.45 var(--sk-font-mono);color:var(--sk-ink);letter-spacing:0}
+#eternal .et-c-pipe{list-style:none;margin:0;padding:0;display:grid;gap:var(--sk-s2);counter-reset:p}
+#eternal .et-c-pipe li{display:grid;grid-template-columns:30px 1fr;gap:var(--sk-s1) var(--sk-s2);padding:var(--sk-s2) var(--sk-s3);border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm);background:var(--sk-bg-card);counter-increment:p}
+#eternal .et-c-pipe li::before{content:counter(p,decimal-leading-zero);color:var(--sk-guard);font-weight:600}
+#eternal .et-c-pipe li b{font-weight:600;color:var(--sk-ink);overflow-wrap:anywhere}
+#eternal .et-c-pipe li div{grid-column:2;color:var(--sk-ink-soft);overflow-wrap:anywhere}
+#eternal .et-c-pipe li.done b{color:var(--sk-verified)}
+#eternal .et-c-pipe li.guard{border-style:dashed;border-color:var(--sk-guard)}
+#eternal .et-c-pipe li.guard b{color:var(--sk-guard)}
+#eternal .et-c-pipe li.now{border-color:var(--sk-ai);box-shadow:inset 0 0 0 1px var(--sk-ai)}
+#eternal .et-c-pipe li.now b{color:var(--sk-ai)}
+#eternal .et-c-pipe li.todo div{color:var(--sk-ink-mut)}
+#eternal .et-c-primary{display:flex;align-items:center;justify-content:center;width:100%;min-height:52px;margin-top:var(--sk-s3);padding:0 var(--sk-s2);border-radius:var(--sk-radius-sm);background:var(--sk-primary);color:var(--sk-on-primary);font:600 14px/1.2 var(--sk-font-mono);cursor:pointer;text-align:center}
+#eternal .et-c-kv{width:100%;border-collapse:collapse;border:1px solid var(--sk-line);background:var(--sk-bg-card)}
+#eternal .et-c-kv th{width:96px;padding:var(--sk-s2) var(--sk-s3);text-align:start;vertical-align:top;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);border-bottom:1px solid var(--sk-line)}
+#eternal .et-c-kv td{padding:var(--sk-s2) var(--sk-s3);border-bottom:1px solid var(--sk-line);overflow-wrap:anywhere;color:var(--sk-ink)}
+#eternal .et-c-kv .no{color:var(--sk-info)}#eternal .et-c-kv .yes{color:var(--sk-verified)}#eternal .et-c-kv .gd{color:var(--sk-guard)}
+#eternal .et-c-verify{margin-top:var(--sk-s3);padding:var(--sk-s3);border-radius:var(--sk-radius-sm);background:var(--sk-bg-card)}
+#eternal .et-c-verify-h{font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);margin-bottom:var(--sk-s1)}
+#eternal .et-c-verify ol{margin:0;padding-inline-start:var(--sk-s4);display:grid;grid-template-columns:minmax(0,1fr);gap:var(--sk-s1);color:var(--sk-ink)}
+#eternal .et-c-verify li{overflow-wrap:anywhere}
+#eternal .et-c-verify code{font:inherit;color:var(--sk-ai);overflow-wrap:anywhere;word-break:break-all}
+#eternal .et-c-row{display:grid;grid-template-columns:1fr 1fr;gap:var(--sk-s2);margin-top:var(--sk-s3)}
+#eternal .et-c-ghost{display:flex;align-items:center;justify-content:center;min-height:52px;padding:0 var(--sk-s1);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius-sm);color:var(--sk-ink);text-decoration:none;text-align:center;font:600 14px/1.2 var(--sk-font-mono)}
+
+#eternal .et-b-q{font:600 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+#eternal .et-b-row>span{display:flex;flex-direction:column;min-width:0;flex:1}
+#eternal .et-b-row em{font-style:normal;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-row .dot{width:22px;height:22px;flex:none;border-radius:var(--sk-radius-pill);border:1.5px solid var(--sk-ink-mut);display:flex;align-items:center;justify-content:center}
+#eternal .et-b-row[aria-checked="true"]{background:var(--sk-sovereign-tint);color:var(--sk-sovereign-strong);font-weight:600}
+#eternal .et-b-row[aria-checked="true"] :is(small,em){color:var(--sk-sovereign-strong)}
+#eternal .et-b-row[aria-checked="true"] .dot{border-color:var(--sk-sovereign-strong)}
+#eternal .et-b-row[aria-checked="true"] .dot::after{content:"";width:12px;height:12px;border-radius:var(--sk-radius-pill);background:var(--sk-sovereign-strong)}
+#eternal .et-b-card small{display:block;margin-top:var(--sk-s1);font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-r-legend i.g{width:auto;height:auto;border-radius:0;font:700 15px/1.2 var(--sk-font-raver-display);font-style:normal}
+#eternal .et-r-art .lens-hold{touch-action:none;user-select:none;-webkit-user-select:none}
+#eternal .et-r-card .rk.flow{background:var(--sk-ai)}#eternal .et-r-card .rk.cls{background:var(--sk-sovereign-strong)}#eternal .et-r-card .rk.owner{background:var(--sk-you)}
+#eternal .et-c-tab td.pub{color:var(--sk-ai)}#eternal .et-c-tab td.priv{color:var(--sk-sovereign-strong)}#eternal .et-c-tab td.pm5{color:var(--sk-info)}#eternal .et-c-tab td.nev{color:var(--sk-ink)}
+#eternal .et-c-kv .tx{word-break:break-all}
+
+/* ── THE WHOLE LENS, dressed per register: tokens.css variables mapped onto skaists ── */
+body[data-reg]{--bg0:var(--sk-bg);--bg1:var(--sk-bg-card);--bg2:var(--sk-bg-card);--bg3:var(--sk-bg-well);--well:var(--sk-bg-well);--ink:var(--sk-ink);--ink-hi:var(--sk-ink);--dim:var(--sk-ink-mut);--faint:var(--sk-ink-mut);--line:var(--sk-line);--line-hi:var(--sk-line);
+ --gold:var(--sk-sovereign);--cyan:var(--sk-ai);--violet:var(--sk-sovereign-strong);--amber:var(--sk-info);--ok:var(--sk-verified);--leaf:var(--sk-verified);--flag:var(--sk-guard);--glow-gold:none;background:var(--sk-bg);color:var(--sk-ink)}
+body[data-reg] h1{background-image:none;color:var(--sk-ink);-webkit-text-fill-color:currentColor}
+body[data-reg="raver"] h1{background-image:var(--sk-rainbow);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent}
+body[data-reg] .chip.pub{color:var(--sk-ai);border-color:var(--sk-ai)}
+body[data-reg] .chip.priv{color:var(--sk-sovereign-strong);border-color:var(--sk-sovereign-strong)}
+body[data-reg] .chip.pm5{color:var(--sk-info);border-color:var(--sk-info)}
+body[data-reg] .chip.nev{color:var(--sk-ink);border-color:var(--sk-ink)}
+body[data-reg] .hex.nectar{background:var(--sk-bg-card);color:var(--sk-ai);box-shadow:inset 0 0 0 1.5px var(--sk-ai)}
+body[data-reg] .hex.nectar.live{animation-name:et-lens-nectar}
+body[data-reg] .hex.honey{background:var(--sk-bg-card);color:var(--sk-info);box-shadow:inset 0 0 0 1.5px var(--sk-info)}
+body[data-reg] .hex.honey.live{animation-name:et-lens-honey}
+body[data-reg] .hex.capped{background:var(--sk-verified);color:var(--sk-bg)}
+@keyframes et-lens-nectar{0%,100%{background:var(--sk-bg-card)}50%{background:var(--sk-sovereign-wash)}}
+@keyframes et-lens-honey{0%,100%{background:var(--sk-bg-card)}50%{background:var(--sk-sovereign-tint)}}
+body[data-reg] .lenses button{min-height:var(--sk-control-min,44px);background:var(--sk-bg-card);color:var(--sk-ink-mut);border-color:var(--sk-line)}
+body[data-reg] .lenses button small{color:var(--sk-ink-mut)}
+body[data-reg] .lenses button[aria-pressed="true"]{color:var(--sk-ink);border-color:var(--sk-ink);box-shadow:none;background:var(--sk-sovereign-tint)}
+body[data-reg] .ownkey input{min-height:var(--sk-control-min,44px);background:var(--sk-bg-well);color:var(--sk-ink)!important;border-color:var(--sk-ink-mut)}
+body[data-reg] .ownkey button{min-height:var(--sk-control-min,44px);background:var(--sk-primary);color:var(--sk-on-primary)}
+body[data-reg] .ownkey button.ghost{background:transparent;color:var(--sk-ink);border-color:var(--sk-ink)}
+body[data-reg] .ownkey button:hover{background:var(--sk-primary);filter:brightness(1.08)}
+body[data-reg] .ownkey button.ghost:hover{background:transparent}
+body[data-reg] :is(.frow .fv a,.tx a){color:var(--sk-link);border-bottom-color:var(--sk-link)}
+body[data-reg] .tx,body[data-reg] .frow .fv span[style]{color:var(--sk-ink)!important}
+body[data-reg] .act .nm .dot{color:var(--sk-ai)}
+body[data-reg] .foot a{color:var(--sk-link)}
+body[data-reg] .crumbs a{color:var(--sk-link);display:inline-block;padding-block:14px;margin-block:-14px}
+body[data-reg] .chip i{font-size:14px}
+body[data-reg="cypherpunk"] .chip i{font-size:12px}
+body[data-reg] .arrow,body[data-reg] .hex .seal{font-size:18px}
+body[data-reg] details.raw summary{min-height:var(--sk-control-min,44px);display:flex;align-items:center}
+body[data-reg] .cell a{min-height:var(--sk-control-min,44px)}
+body[data-reg="bee"]{font:400 16px/1.45 var(--sk-font-bee-sans)}
+body[data-reg="bee"] h1{font:400 40px/1.05 var(--sk-font-bee-serif)}
+body[data-reg="bee"] :is(.crumbs,.kicker){font:400 14px/1.4 var(--sk-font-bee-sans);letter-spacing:0}
+body[data-reg="bee"] .lede{font:400 16px/1.45 var(--sk-font-bee-sans)}
+body[data-reg="bee"] .lenses button{border-radius:var(--sk-radius-md);font:600 16px/1.45 var(--sk-font-bee-sans)}
+body[data-reg="bee"] .lenses button small{font:400 14px/1.4 var(--sk-font-bee-sans)}
+body[data-reg="bee"] .card{border-radius:var(--sk-radius-xl);background:var(--sk-bg-card)}
+body[data-reg="bee"] :is(.act,.note-row,.wall,.tx,.demoline,.two .col,details.raw pre){border-radius:var(--sk-radius)}
+body[data-reg="bee"] .card>h2{font:600 16px/1.45 var(--sk-font-bee-sans);letter-spacing:0}
+body[data-reg="bee"] :is(.cell .l,.act .nm,.note-row .nh b){font:600 16px/1.45 var(--sk-font-bee-sans)}
+body[data-reg="bee"] :is(.cell .s,.checked,.act .cpu,.hex,.chip,.two .col h4,.legend,.foot .src){font-size:14px;letter-spacing:0}
+body[data-reg="bee"] :is(.frow,.plumb,.tx,.note-row,.two .col,details.raw summary,details.raw pre){font-size:14px}
+body[data-reg="bee"] .ownkey input{border-radius:var(--sk-radius);font:400 15px/1.4 var(--sk-font-mono)}
+body[data-reg="bee"] .ownkey button{border-radius:var(--sk-radius-lg);font:600 17px/1.2 var(--sk-font-bee-sans)}
+body[data-reg="bee"] .ownkey button.ghost{border-radius:var(--sk-radius-md);font:600 16px/1.45 var(--sk-font-bee-sans)}
+body[data-reg="raver"]{font:400 14px/1.25 var(--sk-font-raver-body)}
+body[data-reg="raver"] h1{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em}
+body[data-reg="raver"] :is(.crumbs,.kicker,.lede,.cell .s,.checked,.act .cpu,.hex,.legend,.chip,.two .col h4,.foot .src,.frow,.plumb,.tx,.note-row,.two .col,details.raw summary,details.raw pre){font-size:14px;letter-spacing:0}
+body[data-reg="raver"] :is(.lede,.frow,.plumb,.note-row,.wall,.lawline,.demoline,.foot){font-family:var(--sk-font-raver-body)}
+body[data-reg="raver"] .lenses button{border-radius:var(--sk-radius-pill);font:700 15px/1.2 var(--sk-font-raver-display)}
+body[data-reg="raver"] .lenses button small{font:400 14px/1.25 var(--sk-font-raver-body)}
+body[data-reg="raver"] .card>h2{font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em}
+body[data-reg="raver"] :is(.cell .l,.act .nm,.note-row .nh b){font:600 14px/1.25 var(--sk-font-raver-body)}
+body[data-reg="raver"] :is(.card,.act,.note-row,.wall,.tx,.demoline,.two .col,details.raw pre){border-radius:var(--sk-radius-xl)}
+body[data-reg="raver"] .ownkey :is(input,button){border-radius:var(--sk-radius-pill);font:400 14px/1.25 var(--sk-font-raver-body)}
+body[data-reg="raver"] .ownkey button{font:700 15px/1.2 var(--sk-font-raver-display)}
+body[data-reg="cypherpunk"]{font:400 13px/1.45 var(--sk-font-mono)}
+body[data-reg="cypherpunk"] h1{font:600 15px/1.45 var(--sk-font-mono);color:var(--sk-ai);-webkit-text-fill-color:currentColor}
+body[data-reg="cypherpunk"] :is(.crumbs,.kicker,.cell .s,.checked,.act .cpu,.hex,.legend,.chip,.two .col h4,.foot .src){font-size:12px;letter-spacing:0}
+body[data-reg="cypherpunk"] :is(.lede,.cell .l,.act .nm,.note-row .nh b){font-size:13px}
+body[data-reg="cypherpunk"] .lenses button{border-radius:var(--sk-radius-sm);font:600 14px/1.2 var(--sk-font-mono)}
+body[data-reg="cypherpunk"] .lenses button small{font:500 12px/1.45 var(--sk-font-mono)}
+body[data-reg="cypherpunk"] :is(.card,.act,.note-row,.wall,.tx,.demoline,.two .col,details.raw pre,.ownkey input,.ownkey button){border-radius:var(--sk-radius-sm)}
+body[data-reg="cypherpunk"] .ownkey :is(input,button){font:600 13px/1.45 var(--sk-font-mono)}
 </style>
+<link rel="stylesheet" href="skaists.css">
 </head>
-<body>
+<body data-bee-theme="custom">
 <main>
 <nav class="crumbs" aria-label="you are here">
   <a href="index.html">beehive nature reserve</a><span>▸</span><span class="here">the privacy lens</span>
 </nav>
+
+<!-- ETERNAL FRONT (founder blueprint 2026-09-26, docs/design/eternal): three separate products in
+     one surface. ONE data layer (the lens's own public reads of notelab11111 on jungle4, its
+     receipted flow txids, its four chip classes and the field schema its ledger draws) drives all
+     three. The private note stays private: no front reads the view key or the note secret, or any
+     demo note's keys, and no front makes a request. Every "look" hands off to the lens below. -->
+<section id="eternal" aria-label="the privacy lens: who can see your note">
+
+  <!-- NEW BEE — a calm room: whose eyes would you like to borrow? two rows, one magenta action -->
+  <div class="et-b">
+    <div class="et-b-mark">the privacy lens</div>
+    <h2 class="et-b-h" data-etk="et.lens.b.title">who can see your note?</h2>
+    <p class="et-b-lede" data-etk="et.lens.b.lede">one private note, looked at twice: once by a stranger, once by you. the world can see that money moved. never whose it was.</p>
+    <div class="et-b-guard"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span data-etk="et.lens.b.guard">only your key opens your note. not even we can.</span></div>
+    <p class="et-b-q" id="etBeeQ" data-etk="et.lens.b.q">whose eyes would you like to borrow?</p>
+    <div class="et-b-rows" id="etBeeRows" role="radiogroup" aria-labelledby="etBeeQ"></div>
+    <div class="et-b-act">
+      <button type="button" class="et-b-primary" id="etBeeGo">look through a stranger's eyes</button>
+      <button type="button" class="et-b-link" id="etBeeDemo" data-etk="et.lens.b.demo">try it with a pretend note</button>
+    </div>
+    <div class="et-b-card"><h3 data-etk="et.lens.b.reh">this is a rehearsal.</h3><div id="etBeeRehearsal"></div><small id="etBeeRead"></small></div>
+    <p class="et-b-foot" data-etk="et.lens.b.foot">your key never leaves this page. the lens checks it right here.</p>
+  </div>
+
+  <!-- RAVER — the glass: three flows across a lens, four kinds of seeing; hold the lens to turn it -->
+  <div class="et-r">
+    <div class="et-r-top"><h2 class="et-r-h" id="etRaverTitle">the glass</h2><span class="et-r-hint" id="etRaverHint">tap a cell · hold the glass to turn it</span></div>
+    <svg class="et-r-art" id="etArt" viewBox="-180 -180 360 360" role="group" aria-label="the note contract seen through a lens: three flows across it, four kinds of seeing below, the wall between the chain and your key"></svg>
+    <div class="et-r-legend" id="etLegend"></div>
+    <div class="et-r-card" id="etRaverCard" aria-live="polite"></div>
+    <button type="button" class="et-r-pill" id="etRaverGo">look through it</button>
+  </div>
+
+  <!-- CYPHERPUNK — the instrument: every field and its class, the flows as a pipeline, a live receipt -->
+  <div class="et-c">
+    <div class="et-c-path">jungle4://<span data-et="acct">notelab11111</span> · rehearsal</div>
+    <div class="et-c-chips" id="etChips"></div>
+    <div class="et-c-guard"><span data-etk="et.lens.c.guard">view key · note secret</span> <b data-etk="et.lens.c.guardB">never read by this front</b></div>
+    <table class="et-c-tab"><thead><tr><th>flow</th><th>field</th><th>class</th></tr></thead><tbody id="etFields"></tbody></table>
+    <h3 class="et-c-h" data-etk="et.lens.c.pipeH">the note's life · public path, then your key</h3>
+    <ol class="et-c-pipe" id="etPipe"></ol>
+    <button type="button" class="et-c-primary" id="etCyGo">open the owner's lens · #powner</button>
+    <div class="et-c-row"><button type="button" class="et-c-ghost" id="etCyStranger" data-etk="et.lens.c.stranger">open the stranger's lens</button><button type="button" class="et-c-ghost" id="etCyDemo" data-etk="et.lens.c.demo">go to the demo mint</button></div>
+    <h3 class="et-c-h" data-etk="et.lens.c.recH">receipt · read by the lens below, now</h3>
+    <table class="et-c-kv" id="etReceipt"></table>
+    <div class="et-c-verify">
+      <div class="et-c-verify-h" data-etk="et.lens.c.verifyH">verify · no trust in this page needed</div>
+      <ol><li><code>curl -s https://jungle4.greymass.com/v1/chain/get_table_rows -d '{"json":true,"code":"notelab11111","scope":"notelab11111","table":"commitments"}'</code></li><li data-etk="et.lens.c.v2">monitor.jungletestnet.io: open each txid in the receipt</li><li data-etk="et.lens.c.v3">node contracts/privacy/m3.js: the same sha3 note arithmetic, outside this page</li></ol>
+    </div>
+    <div class="et-c-row">
+      <a class="et-c-ghost" href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/specs/SPEC-PRIVACY-1.md" target="_blank" rel="noopener noreferrer" title="opens in a new tab" data-etk="et.lens.c.spec">SPEC-PRIVACY-1 ↗ new tab</a>
+      <a class="et-c-ghost" href="https://github.com/beehive-nature/beehive-nature/blob/main/surfaces/privacy-lens.html" target="_blank" rel="noopener noreferrer" title="opens in a new tab" data-etk="et.lens.c.fork">fork the template ↗ new tab</a>
+    </div>
+  </div>
+</section>
+<h2 class="et-archive-h" id="etArchive" data-etk="et.lens.whole">the whole lens, both sides of the glass</h2>
 
 <header class="hd">
   <div class="kicker">⬡ full understanding · the private note, both sides of the glass</div>
@@ -449,6 +708,7 @@ async function tickInfo(){
   try { const i = await post('/v1/chain/get_info', {}); state.info = i;
     $('vchecked').textContent = `checked just now · head ${i.head_block_num.toLocaleString('en-US')} · irreversible through ${i.last_irreversible_block_num.toLocaleString('en-US')} · jungle4`;
   } catch { $('vchecked').textContent = 'chain check unreachable — n/m'; }
+  try { document.dispatchEvent(new CustomEvent('lens:info')); } catch (e) {}
 }
 
 /* ═══ the stranger's lens ═══ */
@@ -616,10 +876,198 @@ setLens(new URLSearchParams(location.search).get('lens'));
 /* boot */
 (async () => {
   tickInfo(); setInterval(tickInfo, 15000);
-  try { await readAll(); } catch (e) {
+  state.read = 'pending';
+  try { await readAll(); state.read = 'ok'; } catch (e) {
+    state.read = 'failed';
+    ['deposit', 'transfer', 'withdraw'].forEach(n => { $('f-' + n + '-s').textContent = 'not read · the chain did not answer'; });
+    $('vplumb').textContent = 'sponsor actions not read · the chain did not answer';
     $('vacts').textContent = 'chain unread — the lens shows nothing it did not read (n/m)';
     $('onotes').textContent = 'chain unread (n/m)';
   }
+  /* ETERNAL FRONT hook (additive): the three fronts above redraw from the same public reads */
+  try { document.dispatchEvent(new CustomEvent('lens:read')); } catch (e) {}
+})();
+</script>
+<script>
+/* ETERNAL FRONT — one data layer, three renderers (docs/design/eternal). THE PRIVATE NOTE: this
+   script never reads the view key or the note secret (#ovk #osk), never touches a demo note
+   (state.demo, state.localNotes) and makes no request. Its facts are the lens's own PUBLIC reads,
+   copied field by field from window.__lens (acts, commits, nulls, info, law, the SHA3 self-check,
+   the read state and which lens is open), the page's receipted constants (ACCT, RPC, FLOWS), the
+   four chip classes from the page's legend, and the field schema renderStranger() draws. Crypto
+   facts cite privacy-lens.html · derive (mirrors contracts/privacy/m3.js). */
+(function(){
+  var $=function(id){return document.getElementById(id);};
+  var T=function(k,f){var t=window.BNRLanguage&&window.BNRLanguage.text;return t?t(k,f):f;};
+  var tok=function(n){return getComputedStyle(document.body).getPropertyValue('--sk-'+n).trim();};
+  function esc(v){return String(v==null?'':v).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+  var L=window.__lens||{};
+  var FL=(typeof FLOWS!=='undefined')?FLOWS:{};
+  /* what each flow shows a stranger, class by class — exactly the rows renderStranger() draws */
+  var SCHEMA={deposit:[['amount in','pub'],['commitment','pub'],['view tag','pub'],['who owns it','priv']],
+    transfer:[['fee','pub'],['nullifier','nev'],['to-amount','pm5'],['to-commitment','pub'],['which note it spent','priv']],
+    withdraw:[['amount out','pub'],['recipient','pub'],['fee','pub'],['nullifier','nev']]};
+  var WORD={pub:'public',priv:'private',pm5:'private after m5',nev:'never hidden'};
+  var MEAN={pub:'anyone, from the chain, forever',priv:'only the key-holder: the chain cannot derive it',pm5:'open in this rehearsal row, private once m5 governs',nev:'the audit skeleton, kept visible by design'};
+  var FLOWWORD={deposit:['in','value walks in'],transfer:['moves','value moves, sealed'],withdraw:['out','value walks out']};
+  var D={account:'',rpc:'',read:'pending',flows:[],classes:[],counts:{},commits:null,nulls:null,head:null,lib:null,sha3:'',sha3ok:false,lens:'stranger',law:null};
+  var R={sel:'deposit',turned:false};
+
+  function read(){
+    D.account=(typeof ACCT!=='undefined')?ACCT:''; D.rpc=(typeof RPC!=='undefined')?RPC.replace(/^https?:\/\//,''):'';
+    D.read=L.read||'pending';
+    D.flows=['deposit','transfer','withdraw'].map(function(n){
+      var tx=FL[n]||'', a=(L.acts||[]).filter(function(x){return x.trx===tx;})[0];
+      var st=D.read==='failed'?'unread':D.read!=='ok'?'reading':!a?'unseen':a.irrev?'final':'block';
+      return {name:n,tx:tx,status:st,block:a?a.block:0};
+    });
+    D.classes=[].map.call(document.querySelectorAll('.legend .chip'),function(c){var k=['pub','priv','pm5','nev'].filter(function(x){return c.classList.contains(x);})[0];return {k:k,glyph:(c.querySelector('i')||{}).textContent||''};});
+    D.counts={pub:0,priv:0,pm5:0,nev:0}; Object.keys(SCHEMA).forEach(function(f){SCHEMA[f].forEach(function(r){D.counts[r[1]]++;});});
+    D.commits=D.read==='ok'?(L.commits||[]).length:null; D.nulls=D.read==='ok'?(L.nulls||[]).length:null;
+    var I=L.info||{}; D.head=typeof I.head_block_num==='number'?I.head_block_num:null; D.lib=typeof I.last_irreversible_block_num==='number'?I.last_irreversible_block_num:null;
+    D.law=(D.read==='ok'&&L.law)?{commit:L.law.alg_commit,proof:L.law.alg_proof}:null;
+    D.sha3=L.sha3||''; D.sha3ok=/passed/.test(D.sha3);
+    D.lens=L.lens==='owner'?'owner':'stranger';
+  }
+  function glyph(k){for(var i=0;i<D.classes.length;i++)if(D.classes[i].k===k)return D.classes[i].glyph;return '';}
+  var finals=function(){return D.flows.filter(function(f){return f.status==='final';}).length;};
+  function stWord(f){return {unread:T('et.lens.st.unread','not read · the test chain did not answer'),reading:T('et.lens.st.reading','reading the test chain…'),unseen:T('et.lens.st.unseen','not seen on chain yet'),block:T('et.lens.st.block','in a block · sealing'),final:T('et.lens.st.final','final · irreversible')}[f.status];}
+
+  /* ── NEW BEE ── */
+  var BEE={stranger:['a stranger','sees that money moved, when, and the fee. never whose it was.','public'],owner:['you, with your key','see which note is yours and what is in it.','private']};
+  function bee(){
+    var box=$('etBeeRows'); if(!box) return;
+    box.innerHTML=['stranger','owner'].map(function(k){var on=k===D.lens,b=BEE[k];
+      return '<button type="button" class="et-b-row" role="radio" aria-checked="'+on+'" data-lens="'+k+'"><span class="dot" aria-hidden="true"></span><span>'+esc(T('et.lens.b.'+k,b[0]))+'<em>'+esc(T('et.lens.b.'+k+'D',b[1]))+'</em></span><small>'+esc(T('et.lens.b.'+k+'V',b[2]))+'</small></button>';}).join('');
+    $('etBeeGo').textContent=D.lens==='owner'?T('et.lens.b.goOwner','look through your key'):T('et.lens.b.goStranger','look through a stranger\'s eyes');
+    $('etBeeRehearsal').textContent=T('et.lens.b.rehText','it runs on {chain}, a public test chain, with play money. the note contract is {acct}.').replace('{chain}','jungle4').replace('{acct}',D.account);
+    $('etBeeRead').textContent=D.read==='ok'?T('et.lens.b.readOk','we just read it: {n} of 3 steps are final.').replace('{n}',finals()):D.read==='failed'?T('et.lens.b.readFail','the test chain did not answer just now, so nothing here is guessed.'):T('et.lens.b.reading','reading the test chain…');
+  }
+
+  /* ── RAVER: the glass ── */
+  var HX={deposit:-104,transfer:0,withdraw:104}, GX={pub:-96,priv:-32,pm5:32,nev:96};
+  function hexPts(cx,cy,r){return [0,1,2,3,4,5].map(function(k){var a=(-90+60*k)*Math.PI/180;return (cx+r*Math.cos(a)).toFixed(1)+','+(cy+r*Math.sin(a)).toFixed(1);}).join(' ');}
+  function art(){
+    var svg=$('etArt'); if(!svg) return; var own=D.lens==='owner', h='';
+    h+='<g class="lens-hold" role="button" tabindex="0" aria-label="'+esc(T('et.lens.r.holdAria','hold the glass to turn it between the stranger and your key'))+'">'+
+      '<circle r="168" fill="'+tok('bg-card')+'" stroke="'+(own?tok('you'):tok('sovereign-soft'))+'" stroke-width="3"/>'+
+      '<path d="M0 -150L0 150" stroke="'+tok('guard')+'" stroke-width="1.5" stroke-dasharray="4 5"/>'+
+      '<text x="-84" y="-118" text-anchor="middle" fill="'+(own?tok('ink-mut'):tok('ink'))+'" style="font:600 14px/1.25 var(--sk-font-raver-body)">'+esc(T('et.lens.r.chain','the chain'))+'</text>'+
+      '<text x="84" y="-118" text-anchor="middle" fill="'+(own?tok('ink'):tok('ink-mut'))+'" style="font:600 14px/1.25 var(--sk-font-raver-body)">'+esc(T('et.lens.r.key','your key'))+'</text></g>';
+    h+='<circle id="etHoldProg" r="168" fill="none" stroke="'+tok('biomass')+'" stroke-width="5" stroke-linecap="round" stroke-dasharray="1056" stroke-dashoffset="1056" transform="rotate(-90)" pointer-events="none"/>';
+    h+='<path d="M-70 -40L-34 -40M34 -40L70 -40" stroke="'+tok('line')+'" stroke-width="2" pointer-events="none"/>';
+    D.flows.forEach(function(f){
+      var x=HX[f.name], sel=R.sel===f.name, fill=f.status==='final'?tok('verified'):f.status==='block'?tok('info'):tok('bg-card'), filled=f.status==='final'||f.status==='block';
+      h+='<g class="ring" data-cell="'+f.name+'" role="button" tabindex="0" aria-pressed="'+sel+'" aria-label="'+esc(f.name+': '+stWord(f))+'"><polygon class="seg" points="'+hexPts(x,-40,34)+'" fill="'+fill+'" stroke="'+(sel?tok('ink'):filled?fill:tok('ai'))+'" stroke-width="'+(sel?2.5:1.5)+'" stroke-dasharray="'+(filled?'0':'4 4')+'"/>'+
+        '<text x="'+x+'" y="-35" text-anchor="middle" fill="'+(filled?tok('bg'):tok('ink'))+'" style="font:600 14px/1.25 var(--sk-font-raver-body)">'+esc(T('et.lens.r.f.'+f.name,FLOWWORD[f.name][0]))+'</text></g>';
+    });
+    ['pub','priv','pm5','nev'].forEach(function(k){
+      var x=GX[k], seen=own||k==='pub'||k==='nev', sel=R.sel===k, o=seen?1:0.35, c={pub:tok('ai'),priv:tok('sovereign-strong'),pm5:tok('info'),nev:tok('ink')}[k], g='';
+      if(k==='pub') g='<circle class="seg" cx="'+x+'" cy="62" r="22" fill="'+tok('bg-card')+'" stroke="'+c+'" stroke-width="3"/>';
+      else if(k==='priv') g='<circle class="seg" cx="'+x+'" cy="62" r="22" fill="'+c+'" stroke="'+c+'" stroke-width="3"/>';
+      else if(k==='pm5') g='<circle class="seg" cx="'+x+'" cy="62" r="22" fill="'+tok('bg-card')+'" stroke="'+c+'" stroke-width="3"/><path class="seg" d="M'+x+' 40A22 22 0 0 1 '+x+' 84Z" fill="'+c+'"/>';
+      else g='<circle class="seg" cx="'+x+'" cy="62" r="22" fill="'+tok('bg-card')+'" stroke="'+c+'" stroke-width="3"/><circle class="seg" cx="'+x+'" cy="62" r="10" fill="'+c+'"/>';
+      h+='<g class="ring" data-cell="'+k+'" role="button" tabindex="0" aria-pressed="'+sel+'" aria-label="'+esc(WORD[k]+': '+D.counts[k]+' fields · '+MEAN[k])+'" opacity="'+o+'">'+g+
+        (sel?'<circle cx="'+x+'" cy="62" r="28" fill="none" stroke="'+tok('ink')+'" stroke-width="2"/>':'')+
+        '<text x="'+x+'" y="112" text-anchor="middle" fill="'+tok('ink')+'" style="font:700 15px/1.2 var(--sk-font-raver-display)">'+D.counts[k]+'</text></g>';
+    });
+    svg.innerHTML=h;
+  }
+  function raverCard(){
+    var c=$('etRaverCard'), f=null; if(!c) return;
+    D.flows.forEach(function(x){if(x.name===R.sel)f=x;});
+    if(f){var shows=SCHEMA[f.name].map(function(r){return r[0]+' '+glyph(r[1]);}).join(' · ');
+      c.innerHTML='<span class="rk flow">'+esc(T('et.lens.r.f.'+f.name,FLOWWORD[f.name][0]))+'</span><div><b>'+esc(f.name+' · '+T('et.lens.r.fd.'+f.name,FLOWWORD[f.name][1]))+'</b><span>'+esc(stWord(f)+' · '+T('et.lens.r.shows','shows')+' '+shows)+'</span></div>';return;}
+    var k=R.sel; c.innerHTML='<span class="rk cls">'+esc(glyph(k))+'</span><div><b>'+esc(T('et.lens.r.w.'+k,WORD[k])+' · '+D.counts[k]+' '+T('et.lens.r.fields','fields'))+'</b><span>'+esc(T('et.lens.r.m.'+k,MEAN[k]))+'</span></div>';
+  }
+  function raver(){
+    var own=D.lens==='owner';
+    $('etRaverTitle').textContent=own?T('et.lens.r.tOwn','your lens'):T('et.lens.r.t','the glass');
+    $('etRaverHint').textContent=own?T('et.lens.r.hOwn','all four lit · hold to turn back'):T('et.lens.r.h','tap a cell · hold the glass to turn it');
+    $('etLegend').innerHTML=['pub','priv','pm5','nev'].map(function(k){return '<span><i class="g">'+esc(glyph(k))+'</i><b>'+esc(T('et.lens.r.w.'+k,WORD[k]))+'</b></span>';}).join('');
+    $('etRaverGo').textContent=own?T('et.lens.r.goOwn','look through your key'):T('et.lens.r.go','look through the stranger\'s lens');
+    art(); raverCard();
+  }
+  var hold={t0:0,raf:0};
+  function holdStart(e){
+    if(hold.raf)return; if(e&&e.preventDefault)e.preventDefault();
+    var prog=$('etHoldProg'); if(!prog)return; hold.t0=performance.now();
+    (function tick(now){var f=Math.min(1,(now-hold.t0)/1200);prog.style.strokeDashoffset=String(1056*(1-f));
+      if(f>=1){hold.raf=0;R.turned=true;look(D.lens==='owner'?'stranger':'owner',false);return;}hold.raf=requestAnimationFrame(tick);})(hold.t0);
+  }
+  function holdStop(){if(!hold.raf)return;cancelAnimationFrame(hold.raf);hold.raf=0;var p=$('etHoldProg');if(p)p.style.strokeDashoffset='1056';}
+
+  /* ── CYPHERPUNK ── */
+  function short(tx){return tx?tx.slice(0,8)+'…'+tx.slice(-6):'';}
+  function cy(){
+    var tb=$('etFields'); if(!tb) return;
+    document.querySelectorAll('#eternal [data-et="acct"]').forEach(function(e){e.textContent=D.account;});
+    $('etChips').innerHTML='<span>rpc '+esc(D.rpc)+'</span><span class="'+(D.read==='ok'?'ok':'no')+'">read '+esc(D.read)+'</span><span class="'+(D.sha3ok?'ok':'no')+'">sha3 '+(D.sha3ok?'self-check passed':D.sha3?'self-check failed':'not checked')+'</span>';
+    tb.innerHTML=Object.keys(SCHEMA).map(function(f){return SCHEMA[f].map(function(r,i){return '<tr><td>'+(i?'':esc(f))+'</td><td>'+esc(r[0])+'</td><td class="'+r[1]+'">'+esc(glyph(r[1])+' '+WORD[r[1]])+'</td></tr>';}).join('');}).join('');
+    var st=function(f){return f.status==='final'?'done':'todo';};
+    var steps=D.flows.map(function(f){return [f.name+' · '+FLOWWORD[f.name][1],'tx '+short(f.tx)+' · '+stWord(f)+(f.block?' · blk '+f.block:''),st(f)];}).concat([
+      ['owner · view-tag match','sha3-256(viewkey ‖ commitment)[0..4] == row.viewtag · runs on this page, never sent','now'],
+      ['prove · note secret','sha3-256(secret ‖ amount) == commitment · nullifier = sha3-256(secret ‖ "null-v1")','todo'],
+      ['m5 · payment statement','membership + conservation, Poseidon tree, PLONK · amounts move into the note (SPEC-PRIVACY-1 §m5)','guard']
+    ]);
+    $('etPipe').innerHTML=steps.map(function(s){return '<li class="'+s[2]+'"><b>'+esc(s[0])+'</b><div>'+esc(s[1])+'</div></li>';}).join('');
+    var nr=function(v,w){return v==null?'<span class="no">'+esc(w)+'</span>':esc(v);};
+    $('etReceipt').innerHTML=[
+      ['account',esc(D.account)+' · jungle4 · rehearsal'],
+      ['rpc',esc(D.rpc)],
+      ['read','<span class="'+(D.read==='ok'?'yes':'no')+'">'+esc(D.read==='ok'?'ok · '+finals()+' of 3 flows final':D.read==='failed'?'failed · the chain did not answer · nothing guessed':'reading')+'</span>'],
+      ['head',D.head==null?nr(null,'not read'):esc(D.head.toLocaleString('en-US'))+' · irreversible '+esc((D.lib||0).toLocaleString('en-US'))],
+      ['commits',nr(D.commits,'not read')],
+      ['nullifiers',nr(D.nulls,'not read')],
+      ['sha3','<span class="'+(D.sha3ok?'yes':'no')+'">'+esc(D.sha3||'not checked')+'</span>'],
+      ['tx',D.flows.map(function(f){return esc(f.name)+' <span class="tx">'+esc(f.tx)+'</span>';}).join('<br>')],
+      ['math','privacy-lens.html · derive · mirrors contracts/privacy/m3.js'],
+      ['front','<span class="gd">0 keys read · 0 requests</span>']
+    ].map(function(r){return '<tr><th>'+r[0]+'</th><td>'+r[1]+'</td></tr>';}).join('');
+  }
+
+  /* ── the one hand-off: the lens below owns both sides of the glass ── */
+  function look(which,scroll){
+    var b=$(which==='owner'?'lowner':'lstranger'); if(b) b.click();
+    sync();
+    if(scroll){var p=$(which==='owner'?'powner':'pstranger'); if(p) p.scrollIntoView({block:'start'});}
+  }
+  function toDemo(){look('owner',false);var m=$('omint');if(m){m.scrollIntoView({block:'center'});try{m.focus({preventScroll:true});}catch(x){m.focus();}}}
+  function words(){document.querySelectorAll('#eternal [data-etk],.et-archive-h[data-etk]').forEach(function(e){if(e.__en==null)e.__en=e.textContent;e.textContent=T(e.getAttribute('data-etk'),e.__en);});}
+  function sync(){read();bee();raver();cy();}
+  function all(){read();words();bee();raver();cy();}
+
+  function wire(){
+    var ev=$('eternal'); if(!ev) return;
+    ev.addEventListener('click',function(e){
+      var r=e.target.closest('[data-lens]'); if(r){look(r.getAttribute('data-lens'),false);return;}
+      var c=e.target.closest('#etArt [data-cell]'); if(c){R.sel=c.getAttribute('data-cell');raver();}
+    });
+    ev.addEventListener('keydown',function(e){
+      if(e.key!=='Enter'&&e.key!==' ')return;
+      var t=e.target.closest('#etArt [data-cell]'); if(!t)return;
+      e.preventDefault(); t.dispatchEvent(new MouseEvent('click',{bubbles:true}));
+    });
+    var svg=$('etArt');
+    svg.addEventListener('pointerdown',function(e){if(e.target.closest('[data-cell]')||!e.target.closest('.lens-hold'))return;try{svg.setPointerCapture(e.pointerId);}catch(x){}holdStart(e);});
+    ['pointerup','pointercancel','pointerleave'].forEach(function(t){svg.addEventListener(t,holdStop);});
+    svg.addEventListener('keydown',function(e){if(e.target.closest('.lens-hold')&&(e.key===' '||e.key==='Enter')&&!e.repeat){e.preventDefault();holdStart(e);}});
+    svg.addEventListener('keyup',function(e){if(e.key===' '||e.key==='Enter')holdStop();});
+    svg.addEventListener('contextmenu',function(e){if(e.target.closest('.lens-hold'))e.preventDefault();});
+    $('etBeeGo').addEventListener('click',function(){look(D.lens,true);});
+    $('etBeeDemo').addEventListener('click',toDemo);
+    $('etRaverGo').addEventListener('click',function(){look(D.lens,true);});
+    $('etCyGo').addEventListener('click',function(){look('owner',true);});
+    $('etCyStranger').addEventListener('click',function(){look('stranger',true);});
+    $('etCyDemo').addEventListener('click',toDemo);
+    ['lstranger','lowner'].forEach(function(id){var b=$(id);if(b)b.addEventListener('click',function(){setTimeout(sync,0);});});
+    document.addEventListener('lens:read',sync);
+    document.addEventListener('lens:info',function(){read();cy();});
+    document.addEventListener('blang',all);
+    document.addEventListener('bregister',function(){setTimeout(art,0);});
+  }
+  wire(); all();
+  window.__eternal={data:D,raver:R};
 })();
 </script>
 <script src="tour.js?v=42"></script>

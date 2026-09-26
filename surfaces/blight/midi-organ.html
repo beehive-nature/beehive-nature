@@ -35,9 +35,271 @@ button.ghost{border-color:#34344a;color:#a9b5ae} button.ghost:hover{background:#
      just above the tour bar (anchored on the bar's published --tbar-h), so the
      page end reserves the bar plus the chip and nothing ever ends beneath either. */
   body{padding-bottom:calc(var(--tbar-h,50px) + 24px)!important}
+/* ── ETERNAL FRONT (docs/design/eternal) — three products in one surface. Every value is a skaists
+   token (../skaists.css, compiled from docs/design/skaists/tokens.json): no hand-picked hex, size or
+   corner. Measured by e2e/skaists-conformance.mjs. One register visible at a time; new bee is the
+   default. Every rule is scoped under #eternal so the page's own bare element rules never reach in. ── */
+#eternal{display:block;margin:0 0 var(--sk-s2);padding:0;border:0;background:transparent;font-size:16px;line-height:1.45;color:var(--sk-ink);text-align:left}
+#eternal>div{max-width:560px}
+#eternal>.et-r,#eternal>.et-c{display:none}
+body[data-reg="raver"] #eternal>.et-b,body[data-reg="cypherpunk"] #eternal>.et-b{display:none}
+body[data-reg="raver"] #eternal>.et-r{display:block}
+body[data-reg="cypherpunk"] #eternal>.et-c{display:block}
+#eternal [hidden]{display:none!important}
+#eternal *{box-sizing:border-box;text-transform:none}
+#eternal :is(button,input,select){appearance:none;-webkit-appearance:none;flex:0 1 auto;margin:0;padding:0;border:0;border-radius:0;background:transparent;color:inherit;font:inherit;letter-spacing:normal;min-height:0;min-width:0;box-shadow:none;text-shadow:none;transition:none}
+#eternal :is(p,h2,h3,ol,ul,table){margin:0}
+#eternal svg{display:block}
+#eternal :focus-visible{outline:2px solid var(--sk-focus);outline-offset:3px}
+#eternal a{text-decoration:none}
+#etArchive.et-archive-h{margin:var(--sk-s5) 0 var(--sk-s2);padding:var(--sk-s4) 0 0;border:0;border-top:1px solid var(--sk-line);color:var(--sk-ink);background:none;text-shadow:none;letter-spacing:normal;text-transform:none;-webkit-text-fill-color:currentColor}
+body[data-reg="bee"] #etArchive.et-archive-h{font:400 28px/1.1 var(--sk-font-bee-serif)}
+body[data-reg="raver"] #etArchive.et-archive-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em}
+body[data-reg="cypherpunk"] #etArchive.et-archive-h{font:600 15px/1.45 var(--sk-font-mono)}
+
+/* NEW BEE — a calm room: plain rows, one reassurance, one magenta action */
+#eternal .et-b{display:flex;flex-direction:column;gap:var(--sk-s3);color:var(--sk-ink);font:400 16px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-b-mark{font:400 18px/1.2 var(--sk-font-house);color:var(--sk-sovereign)}
+#eternal .et-b-h{font:400 40px/1.05 var(--sk-font-bee-serif);color:var(--sk-ink);letter-spacing:0}
+#eternal .et-b-lede{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink-mut);text-wrap:pretty}
+#eternal .et-b-guard{display:flex;align-items:center;gap:var(--sk-s2);min-height:var(--sk-control-min,44px);padding:var(--sk-s1) var(--sk-s3);border-radius:var(--sk-radius);background:var(--sk-guard-wash);color:var(--sk-guard);font:600 15px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-b-guard svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+#eternal .et-b-rows{display:flex;flex-direction:column;background:var(--sk-bg-card);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl);overflow:hidden}
+#eternal .et-b-row{display:flex;align-items:center;justify-content:space-between;gap:var(--sk-s2);min-height:var(--sk-control-row,52px);width:100%;padding:var(--sk-s1) var(--sk-s3);border:0;border-bottom:1px solid var(--sk-line-soft);background:transparent;text-align:left;font:500 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+#eternal .et-b-row:last-child{border-bottom:0}
+#eternal button.et-b-row{cursor:pointer}
+#eternal .et-b-row>span{flex:0 1 auto;min-width:0}
+#eternal .et-b-row>span:first-of-type{flex:0 0 auto;max-width:60%}
+#eternal .et-b-row small{display:flex;align-items:center;justify-content:flex-end;gap:var(--sk-s1);min-width:0;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut);text-align:right;overflow-wrap:anywhere}
+#eternal .et-b-row .chev{flex:none;width:16px;height:16px}
+#eternal .et-b-row[aria-checked="true"]{background:var(--sk-sovereign-tint);color:var(--sk-sovereign-strong);font-weight:600}
+#eternal .et-b-row[aria-checked="true"] small{color:var(--sk-sovereign-strong)}
+#eternal .et-b-field{min-height:var(--sk-control-min,44px);width:9.5em;max-width:55%;padding:0 var(--sk-s2);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius);background:var(--sk-bg-card);color:var(--sk-ink);font:400 16px/1.45 var(--sk-font-bee-sans);text-align:right}
+#eternal select.et-b-field{text-align:left;cursor:pointer}
+#eternal .et-b-now{padding:var(--sk-s2) var(--sk-s3);border-radius:var(--sk-radius);background:var(--sk-sovereign-tint);color:var(--sk-sovereign-strong);font:600 16px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-b-act{display:flex;flex-direction:column;gap:var(--sk-s1)}
+#eternal .et-b-primary{min-height:var(--sk-control-primary,54px);padding:0 var(--sk-s3);border:0;border-radius:var(--sk-radius-lg);background:var(--sk-primary);color:var(--sk-on-primary);font:600 17px/1.2 var(--sk-font-bee-sans);cursor:pointer}
+#eternal .et-b-primary:disabled{background:var(--sk-bg-well);color:var(--sk-ink-mut);cursor:not-allowed}
+#eternal .et-b-link{display:flex;align-items:center;justify-content:center;min-height:var(--sk-control-min,44px);padding:0 var(--sk-s2);border:0;background:transparent;color:var(--sk-link);font:600 16px/1.45 var(--sk-font-bee-sans);cursor:pointer}
+#eternal .et-b-link:hover{color:var(--sk-link-hover)}
+#eternal .et-b-foot{text-align:center;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+
+/* RAVER — the data is the art: one touchable graphic, a physical gesture, short literal words */
+#eternal .et-r{color:var(--sk-ink);font:400 14px/1.4 var(--sk-font-raver-body)}
+#eternal .et-r-top{display:flex;align-items:baseline;justify-content:space-between;gap:var(--sk-s2);flex-wrap:wrap}
+#eternal .et-r-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em;color:var(--sk-ink)}
+#eternal .et-r-hint{font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-art{width:100%;max-width:360px;height:auto;margin:var(--sk-s3) auto var(--sk-s1);filter:drop-shadow(var(--sk-glow-sovereign));touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+#eternal .et-r-art [role="button"]{cursor:pointer}
+#eternal .et-r-art [role="button"]:focus{outline:none}
+#eternal .et-r-art text{font:600 14px/1.25 var(--sk-font-raver-body);fill:var(--sk-ink);pointer-events:none}
+#eternal .et-r-legend{display:flex;justify-content:space-between;gap:var(--sk-s1);margin:var(--sk-s1) 0 var(--sk-s2);font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-legend span{display:flex;flex-direction:column;align-items:center;gap:var(--sk-s1);text-align:center}
+#eternal .et-r-legend i{display:block;width:28px;height:12px;border-radius:var(--sk-radius-sm)}
+#eternal .et-r-legend em{font-style:normal}
+#eternal .et-r-card{display:flex;gap:var(--sk-s2);align-items:center;min-height:var(--sk-control-person,60px);padding:var(--sk-s2) var(--sk-s3);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl);background:var(--sk-sovereign-tint)}
+#eternal .et-r-card .rk{display:flex;align-items:center;justify-content:center;flex:none;min-width:44px;height:44px;padding:0 var(--sk-s1);border-radius:var(--sk-radius);background:var(--sk-sovereign-strong);color:var(--sk-bg);font:700 15px/1.2 var(--sk-font-raver-display)}
+#eternal .et-r-card b{display:block;font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink)}
+#eternal .et-r-card span{font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-sovereign-soft)}
+#eternal .et-r-pill{position:relative;overflow:hidden;display:block;width:100%;height:58px;margin-top:var(--sk-s4);border:0;border-radius:var(--sk-radius-pill);background:var(--sk-primary);color:var(--sk-on-primary);font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em;cursor:pointer;touch-action:none;user-select:none;-webkit-user-select:none}
+#eternal .et-r-pill:disabled{background:var(--sk-sovereign-wash);color:var(--sk-sovereign-soft);cursor:not-allowed}
+#eternal .et-r-pill .fill{position:absolute;left:0;top:0;bottom:0;width:0;background:var(--sk-bg);opacity:.25}
+#eternal .et-r-pill .lbl{position:relative}
+#eternal .et-r-note{margin-top:var(--sk-s2);text-align:center;font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-duo{display:flex;justify-content:center;gap:var(--sk-s2);flex-wrap:wrap;margin-top:var(--sk-s1)}
+#eternal .et-r-ghost{display:inline-flex;align-items:center;justify-content:center;min-height:var(--sk-control-min,44px);min-width:44px;padding:0 var(--sk-s2);border:0;background:none;color:var(--sk-link);font:400 14px/1.4 var(--sk-font-raver-body);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+#eternal .et-r-ghost:disabled{color:var(--sk-ink-mut);text-decoration:none;cursor:default}
+#eternal .et-spin{transform-box:view-box;transform-origin:0 0;animation:etSpin var(--du,120s) linear infinite}
+@keyframes etSpin{to{transform:rotate(360deg)}}
+body.et-still #eternal .et-spin{animation-play-state:paused}
+@media (prefers-reduced-motion:reduce){#eternal .et-spin{animation:none}}
+
+/* CYPHERPUNK — the instrument, complete at first paint: tables, a numbered pipeline, receipts */
+#eternal .et-c{color:var(--sk-ink);font:400 13px/1.45 var(--sk-font-mono)}
+#eternal .et-c-path{font:600 15px/1.45 var(--sk-font-mono);overflow-wrap:anywhere}
+#eternal .et-c-chips{display:flex;flex-wrap:wrap;gap:var(--sk-s1);margin:var(--sk-s2) 0}
+#eternal .et-c-chips span{padding:2px var(--sk-s1);border:1px solid var(--sk-line);border-radius:4px;background:var(--sk-bg-card);font:600 12px/1.4 var(--sk-font-mono);color:var(--sk-ink)}
+#eternal .et-c-chips span.on{border-color:var(--sk-guard);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong)}
+#eternal .et-c-chips span.ok{border-color:var(--sk-verified);color:var(--sk-verified)}
+#eternal .et-c-chips span.no{border-color:var(--sk-guard);border-style:dashed;color:var(--sk-guard)}
+#eternal .et-c-knobs{display:grid;grid-template-columns:1fr 1fr;gap:var(--sk-s2);margin:0 0 var(--sk-s2)}
+#eternal .et-c-knobs label{display:flex;flex-direction:column;gap:2px;min-height:var(--sk-control-min,44px);font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut)}
+#eternal .et-c-field{width:100%;min-width:0;min-height:var(--sk-control-min,44px);padding:0 var(--sk-s1);border:1px solid var(--sk-ink-mut);border-radius:var(--sk-radius-sm);background:var(--sk-bg-card);color:var(--sk-ink);font:400 13px/1.45 var(--sk-font-mono)}
+#eternal .et-c-kv{width:100%;border-collapse:collapse;border:1px solid var(--sk-line);background:var(--sk-bg-card);font:400 13px/1.45 var(--sk-font-mono)}
+#eternal .et-c-kv th{width:104px;padding:var(--sk-s1) var(--sk-s2);text-align:left;vertical-align:top;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);border-bottom:1px solid var(--sk-line);background:transparent}
+#eternal .et-c-kv td{padding:var(--sk-s1) var(--sk-s2);border-bottom:1px solid var(--sk-line);overflow-wrap:anywhere;word-break:break-word;color:var(--sk-ink)}
+#eternal .et-c .no{color:var(--sk-info)}#eternal .et-c .yes{color:var(--sk-verified)}#eternal .et-c .sig{color:var(--sk-you)}#eternal .et-c .grd{color:var(--sk-guard)}
+#eternal .et-c-h{margin:var(--sk-s4) 0 var(--sk-s2);font:600 15px/1.45 var(--sk-font-mono);color:var(--sk-ink);letter-spacing:0}
+#eternal .et-c-tab{width:100%;border-collapse:collapse;border:1px solid var(--sk-line);background:var(--sk-bg-card);font:400 12px/1.45 var(--sk-font-mono)}
+#eternal .et-c-tab th{padding:var(--sk-s1);text-align:left;font:600 12px/1.4 var(--sk-font-mono);color:var(--sk-ink-mut);background:var(--sk-bg-well);border-bottom:1px solid var(--sk-line)}
+#eternal .et-c-tab td{padding:2px var(--sk-s1);border-bottom:1px solid var(--sk-line);color:var(--sk-ink-soft);font:400 12px/1.45 var(--sk-font-mono)}
+#eternal .et-c-tab td.on{color:var(--sk-verified)}
+#eternal .et-c-pipe{list-style:none;padding:0;display:grid;gap:var(--sk-s2);counter-reset:p}
+#eternal .et-c-pipe li{display:grid;grid-template-columns:30px 1fr;gap:var(--sk-s1) var(--sk-s2);padding:var(--sk-s2);border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm);background:var(--sk-bg-card);counter-increment:p}
+#eternal .et-c-pipe li::before{content:counter(p,decimal-leading-zero);color:var(--sk-guard);font-weight:600}
+#eternal .et-c-pipe li b{font-weight:600}
+#eternal .et-c-pipe li p{grid-column:2;color:var(--sk-ink-soft);overflow-wrap:anywhere}
+#eternal .et-c-pipe li.done b{color:var(--sk-verified)}
+#eternal .et-c-pipe li.fail{border-style:dashed;border-color:var(--sk-guard)}#eternal .et-c-pipe li.fail b{color:var(--sk-guard)}
+#eternal .et-c-pipe li.now{border-color:var(--sk-ai);box-shadow:inset 0 0 0 1px var(--sk-ai)}#eternal .et-c-pipe li.now b{color:var(--sk-ai)}
+#eternal .et-c-pipe li.todo p{color:var(--sk-ink-mut)}
+#eternal .et-c-primary{display:flex;align-items:center;justify-content:center;width:100%;height:52px;margin-top:var(--sk-s3);border:0;border-radius:var(--sk-radius-sm);background:var(--sk-primary);color:var(--sk-on-primary);font:600 14px/1.2 var(--sk-font-mono);cursor:pointer}
+#eternal .et-c-primary:disabled{background:var(--sk-bg-well);color:var(--sk-ink-mut);cursor:not-allowed}
+#eternal .et-c-verify{margin-top:var(--sk-s3);padding:var(--sk-s3);border-radius:var(--sk-radius-sm);background:var(--sk-bg-card)}
+#eternal .et-c-verify-h{margin-bottom:var(--sk-s1);font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut)}
+#eternal .et-c-verify ol{padding-left:var(--sk-s4);display:grid;gap:var(--sk-s1);overflow-wrap:anywhere}
+#eternal .et-c-verify code{font:400 12px/1.45 var(--sk-font-mono);color:var(--sk-ai);overflow-wrap:anywhere;word-break:break-all}
+#eternal .et-c-row{display:grid;grid-template-columns:1fr 1fr;gap:var(--sk-s2);margin-top:var(--sk-s3)}
+#eternal .et-c-ghost{display:flex;align-items:center;justify-content:center;min-height:52px;padding:0 var(--sk-s1);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius-sm);background:transparent;color:var(--sk-ink);text-align:center;font:600 14px/1.2 var(--sk-font-mono);cursor:pointer}
+#eternal .et-c-ghost:disabled{border-color:var(--sk-ink-mut);color:var(--sk-ink-mut);cursor:not-allowed}
+
+/* RAVER art — the key wheel: twelve keys, the root lit, the scale the chain names, the seed's bits
+   round the rim. The rim turns once in 120 s (far under 3 Hz); the melody thread draws once over the
+   song's own length while it plays; both pause on the motion switch and stand still under reduced motion. */
+#eternal .et-o-bit{fill:var(--sk-line)}
+#eternal .et-o-bit.on{fill:var(--sk-sovereign-soft)}
+#eternal .et-o-thread{fill:none;stroke:var(--sk-sovereign-soft);stroke-width:1.5;stroke-linejoin:round;opacity:.85}
+#eternal .et-o-thread.run{stroke-dasharray:var(--len,2000);animation:etDraw var(--song,4s) linear 1 both}
+@keyframes etDraw{from{stroke-dashoffset:var(--len,2000)}to{stroke-dashoffset:0}}
+body.et-still #eternal .et-o-thread.run{animation-play-state:paused}
+@media (prefers-reduced-motion:reduce){#eternal .et-o-thread.run{animation:none;stroke-dasharray:none}}
+#eternal .et-o-key .hit{fill:transparent}
+#eternal .et-o-key .hex{fill:var(--sk-bg-card);stroke:var(--sk-line);stroke-width:1.5}
+#eternal .et-o-key text{fill:var(--sk-ink-soft)}
+#eternal .et-o-key.k-in .hex{fill:var(--sk-sovereign-wash);stroke:var(--sk-sovereign)}
+#eternal .et-o-key.k-in text{fill:var(--sk-sovereign-strong)}
+#eternal .et-o-key.k-unread .hex{stroke:var(--sk-sovereign-soft);stroke-dasharray:4 4}
+#eternal .et-o-key.k-root .hex{fill:var(--sk-you);stroke:var(--sk-you)}
+#eternal .et-o-key.k-root text{fill:var(--sk-on-primary)}
+#eternal .et-o-key.sel .hex{stroke:var(--sk-ink);stroke-width:3;stroke-dasharray:none}
+#eternal .et-o-key:focus-visible .hex{stroke:var(--sk-ink);stroke-width:3}
+#eternal .et-o-heart .hit{fill:transparent}
+#eternal .et-o-heart .hex{fill:var(--sk-sovereign-wash);stroke:var(--sk-sovereign);stroke-width:2}
+#eternal .et-o-heart text{fill:var(--sk-sovereign-strong)}
+#eternal .et-o-heart.on .hex{fill:var(--sk-you);stroke:var(--sk-you)}
+#eternal .et-o-heart.on text{fill:var(--sk-on-primary)}
+#eternal .et-o-heart.off{cursor:default}
+#eternal .et-o-heart.off .hex{stroke-dasharray:4 4}
+#eternal .et-o-heart:focus-visible .hex{stroke:var(--sk-ink);stroke-width:3}
+#eternal .lg-root{background:var(--sk-you)}#eternal .lg-in{background:var(--sk-sovereign-wash);border:1.5px solid var(--sk-sovereign)}
+#eternal .lg-out{background:var(--sk-bg-card);border:1px solid var(--sk-line)}#eternal .lg-bit{background:var(--sk-sovereign-soft)}
+
+/* ── THE WHOLE ORGAN, dressed per register: the page's own variables mapped onto skaists tokens.
+   The words, the chain read and the synth are unchanged; the bars keep the colours the contract
+   answers with (they are the art). The read's own warning and error inks become guard lilac and
+   info blue: a declined read is never an alarm. ── */
+body[data-reg]{--bg:var(--sk-bg);--crt:var(--sk-verified);--cyan:var(--sk-ai);--pink:var(--sk-you);--dim:var(--sk-ink-mut);background:var(--sk-bg);color:var(--sk-ink)}
+body[data-reg] h1{text-shadow:none;color:var(--sk-ink)}
+body[data-reg] .wrap :is(input,select,button){background:var(--sk-bg-card);color:var(--sk-ink);border:1px solid var(--sk-ink-mut);border-radius:var(--sk-radius-sm)}
+body[data-reg] .row button{min-width:44px}
+body[data-reg] .wrap button:hover{background:var(--sk-sovereign-tint);color:var(--sk-ink)}
+body[data-reg] .wrap button.stop{border-color:var(--sk-you);color:var(--sk-you)}
+body[data-reg] .wrap button.ghost{border-color:var(--sk-ink-mut);color:var(--sk-ink-soft)}
+body[data-reg] .wrap input[type=number]{color:var(--sk-ai)}
+body[data-reg] #stage{background:var(--sk-bg-card);border-color:var(--sk-line);border-radius:var(--sk-radius)}
+body[data-reg] .chip{border-color:var(--sk-line);border-radius:4px}
+body[data-reg] .hint b{color:var(--sk-ink)}
+body[data-reg] .foot{border-top-color:var(--sk-line)}
+body[data-reg] #meta[style*="232, 184, 74"]{color:var(--sk-guard)!important}
+body[data-reg] #meta[style*="255, 91, 110"]{color:var(--sk-info)!important}
+body[data-reg] #bnr-beta-badge a{background:var(--sk-bg-card)!important;color:var(--sk-link)!important;border-color:var(--sk-line)!important}
+body[data-reg="bee"]{font:400 16px/1.6 var(--sk-font-bee-sans)}
+body[data-reg="bee"] h1{font:400 40px/1.05 var(--sk-font-bee-serif)}
+body[data-reg="bee"] h1 span{font-size:28px}
+body[data-reg="bee"] :is(.sub,.hint,#meta){font-size:16px}
+body[data-reg="bee"] :is(.foot,.chip){font-size:14px}
+body[data-reg="bee"] .wrap :is(input,select,button){font:500 16px/1.45 var(--sk-font-bee-sans);border-radius:var(--sk-radius)}
+body[data-reg="bee"] #bnr-beta-badge{font:600 14px/1.4 var(--sk-font-bee-sans)!important}
+body[data-reg="raver"]{font:400 14px/1.6 var(--sk-font-raver-body)}
+body[data-reg="raver"] h1{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em}
+body[data-reg="raver"] h1 span{font:400 14px/1.4 var(--sk-font-raver-body)}
+body[data-reg="raver"] :is(.sub,.hint,#meta,.foot,.chip){font-size:14px}
+body[data-reg="raver"] .wrap :is(input,select,button){font:600 14px/1.25 var(--sk-font-raver-body);border-radius:var(--sk-radius-pill)}
+body[data-reg="raver"] .wrap select{border-radius:var(--sk-radius)}
+body[data-reg="raver"] #bnr-beta-badge{font:600 14px/1.25 var(--sk-font-raver-body)!important}
+body[data-reg="cypherpunk"]{font:400 13px/1.6 var(--sk-font-mono)}
+body[data-reg="cypherpunk"] h1{font:600 15px/1.45 var(--sk-font-mono)}
+body[data-reg="cypherpunk"] :is(.sub,.hint,#meta){font-size:13px}
+body[data-reg="cypherpunk"] :is(.foot,.chip){font-size:12px}
+body[data-reg="cypherpunk"] .wrap :is(input,select,button){font:400 13px/1.45 var(--sk-font-mono)}
+body[data-reg="cypherpunk"] #bnr-beta-badge{font:500 12px/1.45 var(--sk-font-mono)!important}
+body[data-reg="cypherpunk"] #bnr-beta-badge a{border-radius:var(--sk-radius-sm)!important}
 </style>
+<link rel="stylesheet" href="../skaists.css">
 </head>
-<body><div class="wrap">
+<body data-bee-theme="custom"><div class="wrap">
+<!-- ETERNAL FRONT (founder blueprint 2026-09-26, docs/design/eternal): three separate products in
+     one surface. ONE data layer (the organ's own DEPLOYS, HOSTS, SCALES, the #s seed, the #c deploy,
+     the META the chain answered and the #meta status line) drives all three, so the facts cannot
+     drift; each register has its own layout, graphic, gesture and voice. Nothing here reads, plays
+     or stops on its own: every gesture clicks the organ's real control below (#read, #play, #stop,
+     #roll, #link) and the fronts read the result back. The chain is asked only by a press. -->
+<section id="eternal" aria-label="the organ">
+
+  <!-- NEW BEE — a calm room: your number, which collection, its song; one plain step at a time -->
+  <div class="et-b">
+    <div class="et-b-mark">bLighT Organ</div>
+    <h2 class="et-b-h" data-t="et.midiorgan.b.title">every number is a song</h2>
+    <p class="et-b-lede" data-t="et.midiorgan.b.lede">pick a number. the organ asks the MiDi collection for that number's song, then plays it here. the same number always plays the same song.</p>
+    <div class="et-b-guard"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span data-t="et.midiorgan.b.guard">reading only. nothing to sign, nothing to pay.</span></div>
+    <div class="et-b-rows">
+      <label class="et-b-row" for="etBeeSeed"><span data-t="et.midiorgan.b.number">your number</span><input class="et-b-field" id="etBeeSeed" type="number" min="1" step="1" inputmode="numeric"></label>
+      <label class="et-b-row" for="etBeeDeploy"><span data-t="et.midiorgan.b.which">which collection</span><select class="et-b-field" id="etBeeDeploy"></select></label>
+      <div class="et-b-row"><span data-t="et.midiorgan.b.song">its song</span><small data-et="beeSong">not asked yet</small></div>
+    </div>
+    <p class="et-b-now" id="etBeeNow" aria-live="polite">press the button to ask for this number's song.</p>
+    <div class="et-b-act">
+      <button type="button" class="et-b-primary" id="etBeeGo">ask for its song</button>
+      <button type="button" class="et-b-link" id="etBeeRoll" data-t="et.midiorgan.b.roll">try a random number</button>
+      <p class="et-b-foot" data-t="et.midiorgan.b.foot">sound starts only when you press play.</p>
+    </div>
+  </div>
+
+  <!-- RAVER — the key wheel: twelve keys, the root lit, the scale the chain names; hold to ask -->
+  <div class="et-r">
+    <div class="et-r-top"><h2 class="et-r-h" id="etRaverTitle">the key wheel</h2><span class="et-r-hint" id="etRaverHint">reading the seed…</span></div>
+    <svg class="et-r-art" id="etWheel" viewBox="-180 -180 360 360" role="group" aria-label="the seed as a wheel of twelve keys"></svg>
+    <div class="et-r-legend" aria-label="what the colours mean">
+      <span><i class="lg-root"></i><em data-t="et.midiorgan.r.root">root</em></span><span><i class="lg-in"></i><em data-t="et.midiorgan.r.in">in the scale</em></span><span><i class="lg-out"></i><em data-t="et.midiorgan.r.out">not in it</em></span><span><i class="lg-bit"></i><em data-t="et.midiorgan.r.bit">seed bit</em></span>
+    </div>
+    <div class="et-r-card" id="etRaverCard" aria-live="polite"></div>
+    <button type="button" class="et-r-pill" id="etHold" aria-describedby="etHoldHint"><span class="fill" id="etHoldFill"></span><span class="lbl" id="etHoldLbl">hold to ask the chain</span></button>
+    <p class="et-r-note" id="etHoldHint">hold 1.2 s · a read, never a write</p>
+    <div class="et-r-duo">
+      <button type="button" class="et-r-ghost" id="etRaverRoll" data-t="et.midiorgan.r.roll">roll a seed</button>
+      <button type="button" class="et-r-ghost" id="etMotion" aria-pressed="false">pause motion</button>
+    </div>
+  </div>
+
+  <!-- CYPHERPUNK — the read as an instrument: the request, the response, the derivation, the pipeline -->
+  <div class="et-c">
+    <p class="et-c-path"><span data-et="path">eth_call · base · getMeta</span></p>
+    <div class="et-c-chips" id="etChips"></div>
+    <div class="et-c-knobs">
+      <label for="etCySeed">seed<input class="et-c-field" id="etCySeed" type="number" min="1" step="1" inputmode="numeric"></label>
+      <label for="etCyDeploy">deploy<select class="et-c-field" id="etCyDeploy"></select></label>
+    </div>
+    <table class="et-c-kv" id="etRequest"></table>
+    <button type="button" class="et-c-primary" id="etCyRead">eth_call getMeta</button>
+    <h3 class="et-c-h" data-t="et.midiorgan.c.respH">response · getMeta</h3>
+    <table class="et-c-kv" id="etResponse"></table>
+    <h3 class="et-c-h" data-t="et.midiorgan.c.deriveH">render · derived in this page</h3>
+    <table class="et-c-kv" id="etDerive"></table>
+    <h3 class="et-c-h" data-t="et.midiorgan.c.pipeH">read pipeline · keyless</h3>
+    <ol class="et-c-pipe" id="etPipe"></ol>
+    <div class="et-c-verify">
+      <div class="et-c-verify-h" data-t="et.midiorgan.c.verifyH">verify · no trust in this page needed</div>
+      <ol id="etVerify"></ol>
+    </div>
+    <div class="et-c-row">
+      <button type="button" class="et-c-ghost" id="etCyPlay">play</button>
+      <button type="button" class="et-c-ghost" id="etCyLink" data-t="et.midiorgan.c.link">copy song-link</button>
+      <a class="et-c-ghost" id="etCyScan" href="https://basescan.org/" target="_blank" rel="noopener noreferrer">contract ↗ new tab</a>
+      <a class="et-c-ghost" href="https://github.com/beehive-nature/beehive-nature/blob/main/surfaces/blight/midi-organ.html" target="_blank" rel="noopener noreferrer">fork the template ↗ new tab</a>
+    </div>
+  </div>
+</section>
+<h2 class="et-archive-h" id="etArchive" data-t="et.midiorgan.archive">the whole organ</h2>
 <h1>bLighT Organ <span style="color:var(--dim)">// the seed becomes sound</span></h1>
 <div class="sub">The music-inscription modality, given wind. Traits are read live from the MiDi contracts —
 deployed May 2024, heard for minutes, silent since June 3. The seed is the score: it picks the key,
@@ -177,6 +439,231 @@ $('link').onclick=()=>{
 if(q.get('seed')) read();
 </script>
 </div><div id="bnr-beta-badge" style="position:fixed;right:.6rem;bottom:calc(var(--tbar-h,50px) + 10px);z-index:9997;font:14px ui-monospace,monospace"><a href="../" style="display:inline-flex;align-items:center;min-height:44px;color:#39c5cf;text-decoration:none;border:1px solid #30363d;border-radius:99px;padding:0 16px;background:#161b22">⌂ hub</a></div>
+<script data-et-front>
+/* ETERNAL FRONT — one data layer, three renderers (docs/design/eternal). Facts come from the organ
+   itself: DEPLOYS, HOSTS and SCALES (its constants), the #s seed and #c deploy, the META object the
+   chain answered (null until a read lands) and the #meta status line the read writes. Nothing here
+   asks the chain, plays or stops on its own: every gesture clicks the organ's real control (#read,
+   #play, #stop, #roll, #link) and the fronts read the result back. A song is shown only from META;
+   "playing" lasts exactly the length the organ scheduled (notes × note length). */
+(function(){
+  var $=function(id){return document.getElementById(id);};
+  var T=function(k,f){var t=window.BNRLanguage&&window.BNRLanguage.text;return t?t(k,f):f;};
+  var NOTE=['C','C♯','D','D♯','E','F','F♯','G','G♯','A','A♯','B'];
+  var SEL='0xc3f4552a';
+  var W=function(v){return BigInt(v).toString(16).padStart(64,'0');};
+  var D={deploys:[],deploy:0,addr:'',label:'',seed:1,root:0,rootMidi:48,key:'',hosts:[],timeoutS:8,selector:SEL,calldata:'',
+    state:'idle',status:'',meta:null,metaFor:null,fresh:false,scale:'',scaleKnown:false,intervals:[],notes:0,noteMs:0,songS:0,melody:[],playing:false};
+  var R={sel:null};
+  var playUntil=0,lastMeta=null;
+  function esc(v){return String(v==null?'':v).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+  function set(sel,txt){[].forEach.call(document.querySelectorAll('#eternal [data-et]'),function(e){if(e.getAttribute('data-et')===sel)e.textContent=txt;});}
+  function pageMeta(){try{return META;}catch(e){return null;}}
+  function classify(t){
+    if(/^reading chain/.test(t))return 'reading';
+    if(/trying next/.test(t))return 'retrying';
+    if(/both hosts went quiet|unreachable right now/.test(t))return 'unreachable';
+    if(/would not parse/.test(t))return 'unparsed';
+    if(/read the traits first/.test(t))return 'needread';
+    return 'idle';
+  }
+  function read(){
+    D.deploys=DEPLOYS.map(function(d){return {label:d[0],addr:d[1]};});
+    D.deploy=Math.max(0,Math.min(D.deploys.length-1,+$('c').value||0));
+    D.addr=D.deploys[D.deploy].addr; D.label=D.deploys[D.deploy].label;
+    D.seed=Math.max(1,Math.floor(+$('s').value||1));
+    D.root=D.seed%12; D.rootMidi=48+D.root; D.key=NOTE[D.root]+'3';
+    D.hosts=HOSTS.slice(); D.calldata=SEL+W(D.seed)+W(0);
+    var m=pageMeta();
+    if(m&&m!==lastMeta){lastMeta=m;D.metaFor={seed:D.seed,deploy:D.deploy};}
+    D.meta=m||null;
+    D.status=($('meta').textContent||'').replace(/\s+/g,' ').trim();
+    var st=classify(D.status);
+    D.state=st!=='idle'?st:(D.meta&&$('meta').querySelector('.chip')?'read':'idle');
+    D.fresh=!!(D.meta&&D.metaFor&&D.metaFor.seed===D.seed&&D.metaFor.deploy===D.deploy);
+    if(D.meta){
+      var sc=String(D.meta.scale||'major').toLowerCase(); D.scale=sc; D.scaleKnown=Object.prototype.hasOwnProperty.call(SCALES,sc);
+      D.intervals=(SCALES[sc]||SCALES.major).slice();
+      D.notes=Math.max(8,Math.min(28,Number(D.meta.duration||150))); D.noteMs=Math.max(120,Number(D.meta.durationMs||625));
+      D.songS=Math.round(D.notes*D.noteMs/100)/10;
+      /* the organ's own walk (play()): seed bits pick the degree, higher bits the octave */
+      var big=BigInt(D.seed); D.melody=[];
+      for(var i=0;i<D.notes;i++){var deg=Number((big>>BigInt(i))%BigInt(D.intervals.length)),oct=Number((big>>BigInt(i+8))%3n);
+        D.melody.push({deg:deg,oct:oct,midi:D.rootMidi+D.intervals[deg]+12*oct,pc:(D.root+D.intervals[deg])%12});}
+    } else {D.scale='';D.scaleKnown=false;D.intervals=[];D.notes=0;D.noteMs=0;D.songS=0;D.melody=[];}
+    D.playing=performance.now()<playUntil;
+  }
+  function stateWords(){
+    return {idle:T('et.midiorgan.s.idle','not asked yet'),reading:T('et.midiorgan.s.reading','asking the chain…'),retrying:T('et.midiorgan.s.retrying','the first host did not answer, trying the second…'),
+      unreachable:T('et.midiorgan.s.unreachable','the network did not answer'),unparsed:T('et.midiorgan.s.unparsed','an answer came back but could not be read'),
+      needread:T('et.midiorgan.s.needread','its song has to be read first'),read:T('et.midiorgan.s.read','read')}[D.state];
+  }
+  function songLine(){
+    if(D.meta&&D.fresh)return D.scale+' · '+NOTE[D.root]+' · '+D.notes+' '+T('et.midiorgan.b.notes','notes')+' · '+D.songS+' s';
+    if(D.meta&&!D.fresh)return T('et.midiorgan.b.stale','the last song read was for another number');
+    return stateWords();
+  }
+
+  /* ── NEW BEE ── */
+  function fill(sel){if(sel.options.length!==D.deploys.length)sel.innerHTML=D.deploys.map(function(d,i){return '<option value="'+i+'">'+esc(d.label.split(' — ')[0])+'</option>';}).join('');sel.value=String(D.deploy);}
+  function bee(){
+    var f=$('etBeeSeed'); if(document.activeElement!==f)f.value=String(D.seed);
+    fill($('etBeeDeploy'));
+    set('beeSong',songLine());
+    var now=D.playing?T('et.midiorgan.b.nowPlaying','playing {n} notes, {s} seconds in all.').replace('{n}',D.notes).replace('{s}',D.songS)
+      :D.meta&&D.fresh?T('et.midiorgan.b.nowRead','its song is read: {scale}, starting on {key}. press play when you are ready.').replace('{scale}',D.scale).replace('{key}',NOTE[D.root])
+      :D.state==='reading'||D.state==='retrying'?T('et.midiorgan.b.nowAsking','asking the collection for this number’s song…')
+      :D.state==='unreachable'?T('et.midiorgan.b.nowDown','the network did not answer just now, so there is no song to play yet. nothing is broken: ask again in a moment.')
+      :D.state==='unparsed'?T('et.midiorgan.b.nowOdd','an answer came back that the organ could not read, so nothing will play for this number.')
+      :T('et.midiorgan.b.nowIdle','press the button to ask for this number’s song.');
+    $('etBeeNow').textContent=now;
+    var g=$('etBeeGo'), busy=D.state==='reading'||D.state==='retrying';
+    g.disabled=busy&&!(D.meta&&D.fresh);
+    g.textContent=D.playing?T('et.midiorgan.b.stop','stop the song'):D.meta&&D.fresh?T('et.midiorgan.b.play','play the song'):busy?T('et.midiorgan.b.asking','asking…'):T('et.midiorgan.b.ask','ask for its song');
+  }
+
+  /* ── RAVER ── */
+  var HEX=function(r){var p=[];for(var k=0;k<6;k++){var a=Math.PI/180*(60*k-30);p.push((r*Math.cos(a)).toFixed(1)+' '+(r*Math.sin(a)).toFixed(1));}return 'M'+p.join('L')+'Z';};
+  var KEYR=118, built='';
+  function keyXY(pc){var a=-Math.PI/2+pc*2*Math.PI/12;return [KEYR*Math.cos(a),KEYR*Math.sin(a)];}
+  function wheel(){
+    var svg=$('etWheel'); if(!svg)return;
+    var sig=D.seed+'|'+(D.meta&&D.fresh?D.scale+D.notes:'-');
+    if(built!==sig){
+      var h='<g class="et-spin" style="--du:120s">';
+      for(var b=0;b<32;b++){var a=-Math.PI/2+b*2*Math.PI/32;h+='<circle class="et-o-bit'+((Math.floor(D.seed/Math.pow(2,b))%2)?' on':'')+'" cx="'+(168*Math.cos(a)).toFixed(1)+'" cy="'+(168*Math.sin(a)).toFixed(1)+'" r="3.5"/>';}
+      h+='</g>';
+      if(D.melody.length&&D.fresh){var pts=D.melody.map(function(n){return keyXY(n.pc);}),d='M'+pts.map(function(p){return p[0].toFixed(1)+' '+p[1].toFixed(1);}).join('L'),len=0;
+        for(var i=1;i<pts.length;i++)len+=Math.hypot(pts[i][0]-pts[i-1][0],pts[i][1]-pts[i-1][1]);
+        h+='<path class="et-o-thread" id="etThread" d="'+d+'" style="--len:'+Math.ceil(len)+';--song:'+D.songS+'s"/>';}
+      for(var pc=0;pc<12;pc++){var xy=keyXY(pc);
+        h+='<g class="et-o-key" data-k="'+pc+'" role="button" tabindex="0" transform="translate('+xy[0].toFixed(1)+' '+xy[1].toFixed(1)+')"><circle class="hit" r="27"/><path class="hex" d="'+HEX(27)+'"/><text y="5" text-anchor="middle">'+NOTE[pc]+'</text></g>';}
+      h+='<g class="et-o-heart" role="button" tabindex="0"><circle class="hit" r="56"/><path class="hex" d="'+HEX(56)+'"/><text id="etHeartT" y="-2" text-anchor="middle"></text><text id="etHeartS" y="20" text-anchor="middle"></text></g>';
+      svg.innerHTML=h; built=sig;
+    }
+    var ivs=D.fresh?D.intervals.map(function(x){return (D.root+x)%12;}):[];
+    [].forEach.call(svg.querySelectorAll('.et-o-key'),function(k){var pc=+k.getAttribute('data-k'),root=pc===D.root,inn=ivs.indexOf(pc)>=0;
+      k.setAttribute('class','et-o-key'+(root?' k-root':inn?' k-in':D.fresh?'':' k-unread')+(R.sel===pc?' sel':''));
+      k.setAttribute('aria-label',NOTE[pc]+(root?', '+T('et.midiorgan.r.rootA','the root'):inn?', '+T('et.midiorgan.r.inA','in the scale'):D.fresh?', '+T('et.midiorgan.r.outA','not in the scale'):', '+T('et.midiorgan.r.unreadA','scale not read yet')));});
+    var hr=svg.querySelector('.et-o-heart');
+    hr.setAttribute('class','et-o-heart'+(D.playing?' on':'')+(D.meta&&D.fresh?'':' off'));
+    hr.setAttribute('aria-disabled',String(!(D.meta&&D.fresh)));
+    hr.setAttribute('aria-label',D.playing?T('et.midiorgan.r.stopA','stop the song'):D.meta&&D.fresh?T('et.midiorgan.r.playA','play the song'):T('et.midiorgan.r.lockedA','play waits for the chain to name the scale'));
+    $('etHeartT').textContent=D.playing?T('et.midiorgan.r.stop','stop'):D.meta&&D.fresh?T('et.midiorgan.r.play','play'):T('et.midiorgan.r.wait','waits');
+    $('etHeartS').textContent=String(D.seed);
+    var th=$('etThread'); if(th)th.classList.toggle('run',D.playing);
+  }
+  function raver(){
+    $('etRaverTitle').textContent=D.playing?T('et.midiorgan.r.singsH','it sings'):T('et.midiorgan.r.h','the key wheel');
+    $('etRaverHint').textContent=T('et.midiorgan.r.seed','seed')+' '+D.seed+' · '+T('et.midiorgan.r.rootW','root')+' '+NOTE[D.root]+' · '+(D.meta&&D.fresh?D.scale:T('et.midiorgan.r.noScale','scale not read'));
+    wheel();
+    var c=$('etRaverCard');
+    if(R.sel!=null){var pc=R.sel,up=((pc-D.root)+12)%12,ivs=D.fresh?D.intervals:[],inn=ivs.indexOf(up)>=0,uses=D.fresh?D.melody.filter(function(n){return n.pc===pc;}).length:0;
+      c.innerHTML='<span class="rk">'+esc(NOTE[pc])+'</span><div><b>'+esc(up===0?T('et.midiorgan.r.isRoot','the root · seed mod 12 = ')+D.root:up+' '+T('et.midiorgan.r.above','semitones above the root'))+'</b><span>'+esc(!D.fresh?T('et.midiorgan.r.unknown','the scale is not read yet · hold the pill'):inn?T('et.midiorgan.r.inCard','in the scale')+' · '+uses+' '+T('et.midiorgan.r.of','of')+' '+D.notes+' '+T('et.midiorgan.r.notesW','notes'):T('et.midiorgan.r.outCard','not in this scale'))+'</span></div>';}
+    else c.innerHTML='<span class="rk">'+esc(NOTE[D.root])+'</span><div><b>'+esc(D.label.split(' — ')[0]+' · '+songLine())+'</b><span>'+esc(D.state==='unreachable'?T('et.midiorgan.r.dark','the chain went quiet · hold again later'):T('et.midiorgan.r.tap','tap a key · the heart plays'))+'</span></div>';
+    var p=$('etHold'), busy=D.state==='reading'||D.state==='retrying';
+    p.disabled=busy;
+    $('etHoldLbl').textContent=D.playing?T('et.midiorgan.r.holdStop','tap to stop'):D.meta&&D.fresh?T('et.midiorgan.r.holdPlay','hold to play'):busy?T('et.midiorgan.r.holdBusy','asking the chain…'):T('et.midiorgan.r.holdAsk','hold to ask the chain');
+    $('etHoldHint').textContent=D.meta&&D.fresh?T('et.midiorgan.r.hintPlay','hold 1.2 s · sound only by your hand'):T('et.midiorgan.r.hintAsk','hold 1.2 s · a read, never a write');
+  }
+
+  /* ── CYPHERPUNK ── */
+  function kv(rows){return rows.map(function(r){return '<tr><th>'+esc(r[0])+'</th><td>'+r[1]+'</td></tr>';}).join('');}
+  function cy(){
+    set('path','eth_call · base · '+D.addr.slice(0,8)+'…'+D.addr.slice(-4)+' · getMeta('+D.seed+', 0)');
+    var sw={read:'<span class="ok">read ✓</span>',reading:'<span class="on">reading</span>',retrying:'<span class="on">host 2</span>',unreachable:'<span class="no">read failed</span>',unparsed:'<span class="no">decode refused</span>',needread:'<span class="no">not read</span>',idle:'<span>not read</span>'}[D.state];
+    $('etChips').innerHTML=sw+(D.meta&&!D.fresh?'<span class="no">meta stale</span>':'')+'<span>hosts '+D.hosts.length+'</span><span>timeout '+D.timeoutS+' s</span><span class="'+(D.playing?'ok':'')+'">'+(D.playing?'playing':'silent')+'</span>';
+    var cs=$('etCySeed'); if(document.activeElement!==cs)cs.value=String(D.seed); fill($('etCyDeploy'));
+    $('etRequest').innerHTML=kv([['to',esc(D.addr)],['deploy',esc(D.label)],['selector',esc(SEL+' · getMeta(uint256,uint256)')],['calldata',esc(D.calldata)],['hosts',D.hosts.map(esc).join('<br>')],['timeout',esc(D.timeoutS+' s a host · AbortController · watchdog 10 s')]]);
+    var metaRows=D.meta?Object.keys(D.meta).map(function(k){return [k,esc(D.meta[k])];}):[['result','<span class="no">'+esc(D.state==='idle'?'not asked yet':D.status)+'</span>']];
+    $('etResponse').innerHTML=kv(metaRows);
+    var need='<span class="no">needs the chain</span>';
+    $('etDerive').innerHTML=kv([
+      ['key',esc('seed mod 12 = '+D.root+' → '+D.key+' · midi '+D.rootMidi)],
+      ['scale',D.meta?esc(D.scale+' → ['+D.intervals.join(',')+']'+(D.scaleKnown?'':' · unmapped, major used')):need],
+      ['notes',D.meta?esc(D.notes+' = clamp(8, 28, duration) · '+D.noteMs+' ms each · '+D.songS+' s'):need],
+      ['walk',D.meta&&D.fresh?esc(D.melody.map(function(n){return n.deg;}).join(' ')):need],
+      ['octaves',D.meta&&D.fresh?esc(D.melody.map(function(n){return n.oct;}).join(' ')):need],
+      ['voice','triangle osc · 12 ms attack · exp decay'],['writes','<span class="yes">none</span> · eth_call is a read']]);
+    var fail=D.state==='unreachable'||D.state==='unparsed', ok=!!(D.meta&&D.fresh);
+    var steps=[
+      ['deploy',D.label,'done'],
+      ['calldata',SEL+' ‖ seed ‖ 0 · '+(D.calldata.length-2)/2+' bytes','done'],
+      ['eth_call · host 1',D.hosts[0]+(ok?' · answered':D.state==='retrying'||fail?' · no answer':D.state==='reading'?' · asking':' · waits for a press'),ok?'done':D.state==='retrying'||fail?'fail':D.state==='reading'?'now':'todo'],
+      ['eth_call · host 2',D.hosts[1]+(fail?' · no answer':D.state==='retrying'?' · asking':' · fallback'),fail?'fail':D.state==='retrying'?'now':ok?'done':'todo'],
+      ['decode · abi string','offset 0x20 · length ≤ 8192 · utf-8 → JSON',ok?'done':D.state==='unparsed'?'fail':'todo'],
+      ['render · web audio',D.playing?'playing · '+D.notes+' notes':ok?'ready · starts only on a press':'waits for the traits',D.playing?'now':ok?'now':'todo']
+    ];
+    $('etPipe').innerHTML=steps.map(function(s){return '<li class="'+s[2]+'"><b>'+esc(s[0])+'</b><p>'+esc(s[1])+'</p></li>';}).join('');
+    var body='{"jsonrpc":"2.0","id":1,"method":"eth_call","params":[{"to":"'+D.addr+'","data":"'+D.calldata+'"},"latest"]}';
+    $('etVerify').innerHTML='<li><code>'+esc("curl -s "+D.hosts[0]+" -H 'content-type: application/json' -d '"+body+"'")+'</code></li><li>'+esc('result: word 0 = offset 0x20, word 1 = byte length, then the utf-8 JSON')+'</li><li>'+esc('compare scale, duration and durationMs with the response table above')+'</li>';
+    var r=$('etCyRead'); r.disabled=D.state==='reading'||D.state==='retrying'; r.textContent=r.disabled?'eth_call · asking…':'eth_call getMeta';
+    var pl=$('etCyPlay'); pl.disabled=!ok; pl.textContent=D.playing?'stop':ok?'play':'play · needs traits';
+    $('etCyScan').href='https://basescan.org/address/'+D.addr;
+  }
+
+  function labels(){[].forEach.call(document.querySelectorAll('#eternal [data-t]'),function(e){if(e.__en==null)e.__en=e.textContent;e.textContent=T(e.getAttribute('data-t'),e.__en);});}
+  function all(){read();bee();raver();cy();}
+
+  /* ── the hand-offs: the organ's own controls own every real step ── */
+  function click(id){var b=$(id);if(b&&!b.disabled)b.click();}
+  function ask(){if(D.state==='reading'||D.state==='retrying')return;click('read');all();}
+  function play(){if(!(D.meta&&D.fresh))return;click('play');all();}
+  function stop(){click('stop');all();}
+  function act(){read();if(D.playing)stop();else if(D.meta&&D.fresh)play();else ask();}
+  function setSeed(v){var n=Math.floor(+v);if(!(n>=1))return;$('s').value=String(n);all();}
+  function setDeploy(v){$('c').value=String(v);all();}
+  var hold={t0:0,raf:0};
+  function holdStart(e){
+    if(hold.raf||$('etHold').disabled)return; if(e&&e.preventDefault)e.preventDefault();
+    read(); if(D.playing){stop();return;}
+    hold.t0=performance.now();
+    (function tick(now){var f=Math.min(1,(now-hold.t0)/1200);$('etHoldFill').style.width=(f*100)+'%';
+      if(f>=1){hold.raf=0;$('etHoldFill').style.width='0';act();return;}hold.raf=requestAnimationFrame(tick);})(hold.t0);
+  }
+  function holdStop(){if(!hold.raf)return;cancelAnimationFrame(hold.raf);hold.raf=0;$('etHoldFill').style.width='0';}
+  /* motion: the rim's slow turn and the thread's one sweep pause on the switch (the estate-wide preference) */
+  var still=false; try{still=localStorage.getItem('bnr.motion.paused')==='true';}catch(x){}
+  function motion(){var reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+    document.body.classList.toggle('et-still',still||reduce);var b=$('etMotion');
+    b.setAttribute('aria-pressed',String(still||reduce));b.disabled=reduce;
+    b.textContent=reduce?T('et.midiorgan.r.stillOs','still · your device asks for less motion'):still?T('et.midiorgan.r.resume','resume motion'):T('et.midiorgan.r.pause','pause motion');}
+
+  function wire(){
+    var ev=$('eternal'); if(!ev)return;
+    $('etBeeGo').addEventListener('click',act);
+    $('etBeeRoll').addEventListener('click',function(){click('roll');all();});
+    $('etRaverRoll').addEventListener('click',function(){click('roll');all();});
+    $('etCyRead').addEventListener('click',ask);
+    $('etCyPlay').addEventListener('click',function(){read();if(D.playing)stop();else play();});
+    $('etCyLink').addEventListener('click',function(){click('link');});
+    ['etBeeSeed','etCySeed'].forEach(function(id){$(id).addEventListener('change',function(){setSeed(this.value);});$(id).addEventListener('input',function(){if(+this.value>=1){$('s').value=String(Math.floor(+this.value));read();bee();raver();cy();}});});
+    ['etBeeDeploy','etCyDeploy'].forEach(function(id){$(id).addEventListener('change',function(){setDeploy(this.value);});});
+    ev.addEventListener('click',function(e){
+      var k=e.target.closest('#etWheel .et-o-key'); if(k){var pc=+k.getAttribute('data-k');R.sel=R.sel===pc?null:pc;raver();return;}
+      if(e.target.closest('#etWheel .et-o-heart')){read();if(D.playing)stop();else play();}
+    });
+    ev.addEventListener('keydown',function(e){var t=e.target.closest&&e.target.closest('#etWheel [role="button"]');if(t&&(e.key==='Enter'||e.key===' ')){e.preventDefault();t.dispatchEvent(new MouseEvent('click',{bubbles:true}));}});
+    var hb=$('etHold');
+    hb.addEventListener('pointerdown',function(e){try{hb.setPointerCapture(e.pointerId);}catch(x){}holdStart(e);});
+    ['pointerup','pointercancel','pointerleave'].forEach(function(t){hb.addEventListener(t,holdStop);});
+    hb.addEventListener('keydown',function(e){if((e.key===' '||e.key==='Enter')&&!e.repeat){e.preventDefault();holdStart(e);}});
+    hb.addEventListener('keyup',function(e){if(e.key===' '||e.key==='Enter')holdStop();});
+    hb.addEventListener('contextmenu',function(e){e.preventDefault();});
+    $('etMotion').addEventListener('click',function(){still=!still;try{localStorage.setItem('bnr.motion.paused',String(still));}catch(x){}motion();});
+    if(window.matchMedia)matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change',motion);
+    /* the organ's own controls, pressed from anywhere: play schedules notes × note length; stop ends it */
+    $('play').addEventListener('click',function(){var m=pageMeta();if(!m)return;read();playUntil=performance.now()+D.notes*D.noteMs+120;setTimeout(all,D.notes*D.noteMs+200);setTimeout(all,0);});
+    $('stop').addEventListener('click',function(){playUntil=0;setTimeout(all,0);});
+    ['s','c'].forEach(function(id){$(id).addEventListener('input',all);$(id).addEventListener('change',all);});
+    /* the read speaks through #meta: the fronts listen, they never guess */
+    new MutationObserver(all).observe($('meta'),{childList:true,characterData:true,subtree:true,attributes:true});
+    document.addEventListener('blang',function(){labels();motion();all();});
+  }
+  labels(); wire(); motion(); all();
+  window.__eternal={data:D,raver:R,refresh:all};
+})();
+</script>
 <script src="../tour.js?v=42"></script>
 </body>
 </html>

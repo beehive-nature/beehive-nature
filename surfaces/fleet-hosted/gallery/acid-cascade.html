@@ -52,8 +52,247 @@ body{background:#0a0a14;color:#eee;font-family:Arial,sans-serif}
 .stat-mini{background:#080820;border-radius:6px;padding:8px;text-align:center}
 .stat-mini .v{font-size:16px;font-weight:bold}.stat-mini .l{font-size:8px;color:#666;text-transform:uppercase}
 </style>
+<link rel="stylesheet" href="../../skaists.css">
+<style>
+/* ── ETERNAL FRONT (docs/design/eternal) — three products in one surface. Every value is a skaists
+   token (skaists.css, compiled from docs/design/skaists/tokens.json): no hand-picked hex, size or
+   corner. Measured by e2e/skaists-conformance.mjs. One register at a time; new bee is the default.
+   Every class is et- prefixed so the page's own bare rules never reach in; sizes that matter carry a
+   fallback for a server that sends .css as octet-stream. ── */
+#eternal{box-sizing:border-box;display:block;width:100%;max-width:none;margin:0;padding:var(--sk-s4,24px) var(--sk-s3,18px);border:0;border-radius:0;background:var(--sk-bg);color:var(--sk-ink);text-align:left;letter-spacing:normal;text-transform:none;box-shadow:none}
+#eternal *,#eternal *::before,#eternal *::after{box-sizing:border-box}
+#eternal>div{max-width:600px;margin:0 auto}
+#eternal>.et-r,#eternal>.et-c{display:none}
+body[data-reg="raver"] #eternal>.et-b,body[data-reg="cypherpunk"] #eternal>.et-b{display:none}
+body[data-reg="raver"] #eternal>.et-r{display:block}
+body[data-reg="cypherpunk"] #eternal>.et-c{display:block}
+#eternal [hidden]{display:none!important}
+#eternal button{margin:0;color:inherit;text-transform:none;letter-spacing:normal;min-width:0;background:none;border:0;font:inherit}
+#eternal input{font:inherit;color:inherit}
+#eternal svg{display:block;max-width:100%}
+#eternal a{text-decoration:none}
+#eternal :focus-visible{outline:2px solid var(--sk-focus);outline-offset:3px}
+#eternal h2,#eternal h3,#eternal p,#eternal ol,#eternal ul,#eternal table{margin:0;padding:0;border:0;background:none;text-transform:none;letter-spacing:normal}
+#eternal table{width:100%;border-collapse:separate;border-spacing:0;font-size:inherit}
+#eternal th,#eternal td{border:0;padding:0;vertical-align:top;text-transform:none;letter-spacing:normal}
+#eternal code{background:none;padding:0}
+.et-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.et-archive-h{display:block;box-sizing:border-box;width:100%;margin:0;padding:var(--sk-s4,24px) max(var(--sk-s3,18px),calc(50% - 300px));border:0;border-top:1px solid var(--sk-line);background:var(--sk-bg);color:var(--sk-ink);text-align:left;text-transform:none;letter-spacing:normal;font:400 28px/1.1 var(--sk-font-bee-serif)}
+body[data-reg="raver"] .et-archive-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em}
+body[data-reg="cypherpunk"] .et-archive-h{font:600 15px/1.45 var(--sk-font-mono)}
+
+/* NEW BEE — a calm room: plain rows, one reassurance, one magenta action, a link, a footnote */
+#eternal .et-b{display:flex;flex-direction:column;gap:var(--sk-s3,18px);color:var(--sk-ink);font:400 16px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-b-step{display:flex;flex-direction:column;gap:var(--sk-s3,18px)}
+#eternal .et-b-mark{font:400 18px/1.2 var(--sk-font-house);color:var(--sk-sovereign)}
+#eternal .et-b-h{font:400 40px/1.05 var(--sk-font-bee-serif);color:var(--sk-ink)}
+#eternal .et-b-lede{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink-mut);text-wrap:pretty}
+#eternal .et-b-guard{display:flex;align-items:center;gap:var(--sk-s2,12px);min-height:var(--sk-control-min,44px);padding:var(--sk-s1,6px) var(--sk-s3,18px);border-radius:var(--sk-radius,12px);background:var(--sk-guard-wash);color:var(--sk-guard);font:600 15px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-ic{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+#eternal .et-b-rows{display:flex;flex-direction:column;background:var(--sk-bg-card);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl,18px);overflow:hidden}
+#eternal .et-b-group{padding:var(--sk-s2,12px) var(--sk-s3,18px) var(--sk-s1,6px);border-bottom:1px solid var(--sk-line-soft);font:600 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-row{display:flex;align-items:center;justify-content:space-between;gap:var(--sk-s2,12px);width:100%;min-height:var(--sk-control-row,52px);padding:var(--sk-s1,6px) var(--sk-s3,18px);border:0;border-bottom:1px solid var(--sk-line-soft);border-radius:0;background:transparent;text-align:left;font:500 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+#eternal .et-b-row:last-child{border-bottom:0}
+#eternal button.et-b-row,#eternal a.et-b-row{cursor:pointer}
+#eternal .et-b-row>span{flex:1 1 auto;min-width:0}
+#eternal .et-b-row>span>small{display:block;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-row>small{display:flex;align-items:center;gap:var(--sk-s1,6px);flex:none;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-row>small.et-ok{color:var(--sk-verified)}
+#eternal .et-b-row>small.et-out{color:var(--sk-guard)}
+#eternal .et-b-row[aria-expanded="true"]{background:var(--sk-sovereign-tint);color:var(--sk-sovereign-strong);font-weight:600}
+#eternal .et-b-row[aria-expanded="true"] small{color:var(--sk-sovereign-strong)}
+#eternal .et-chev{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;flex:none;transition:transform var(--dur,.26s)}
+#eternal .et-b-row[aria-expanded="true"] .et-chev{transform:rotate(90deg)}
+#eternal .et-b-open{padding:var(--sk-s2,12px) var(--sk-s3,18px);background:var(--sk-sovereign-tint);border-bottom:1px solid var(--sk-line-soft);font:400 15px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+#eternal .et-b-act{display:flex;flex-direction:column;gap:var(--sk-s1,6px);margin-top:var(--sk-s1,6px)}
+#eternal .et-b-primary{display:flex;align-items:center;justify-content:center;width:100%;min-height:var(--sk-control-primary,54px);padding:0 var(--sk-s3,18px);border:0;border-radius:var(--sk-radius-lg,16px);background:var(--sk-primary);color:var(--sk-on-primary)!important;font:600 17px/1.2 var(--sk-font-bee-sans)!important;text-align:center;cursor:pointer}
+#eternal .et-b-primary:disabled{background:var(--sk-bg-well);color:var(--sk-ink-mut)!important;cursor:not-allowed}
+#eternal .et-b-link{display:flex;align-items:center;justify-content:center;min-height:var(--sk-control-min,44px);border:0;background:transparent;font:600 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-link)!important;cursor:pointer;text-align:center}
+#eternal .et-b-link:hover{color:var(--sk-link-hover)!important}
+#eternal .et-b-foot{text-align:center;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-back{align-self:flex-start;display:flex;align-items:center;min-height:var(--sk-control-min,44px);padding:0;border:0;background:none;font:600 16px/1.45 var(--sk-font-bee-sans)!important;color:var(--sk-link)!important;cursor:pointer}
+#eternal .et-b-card{display:flex;flex-direction:column;gap:var(--sk-s1,6px);padding:var(--sk-s3,18px);background:var(--sk-sovereign-tint);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl,18px)}
+#eternal .et-b-card h3{font:400 28px/1.1 var(--sk-font-bee-serif);color:var(--sk-sovereign-strong)}
+#eternal .et-b-card p{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+#eternal .et-b-card p.et-b-src{font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-fig{font:400 32px/1 var(--sk-font-bee-serif);color:var(--sk-ink)}
+#eternal .et-b-step-row{display:flex;align-items:center;justify-content:space-between;gap:var(--sk-s2,12px);padding:var(--sk-s2,12px) var(--sk-s3,18px);background:var(--sk-bg-card);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl,18px)}
+#eternal .et-b-step-row>div{flex:1 1 auto;text-align:center}
+#eternal .et-b-step-row small{display:block;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-btn{display:flex;align-items:center;justify-content:center;min-width:48px;min-height:48px;padding:0 var(--sk-s2,12px);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius-md,14px);background:var(--sk-bg-card);color:var(--sk-ink)!important;font:600 16px/1.45 var(--sk-font-bee-sans)!important;cursor:pointer}
+#eternal .et-b-btn:disabled{border-color:var(--sk-line);color:var(--sk-ink-mut)!important;cursor:not-allowed}
+
+/* RAVER — the data is the art; lowercase is allowed joy; the numbers never change */
+#eternal .et-r{color:var(--sk-ink);font:400 14px/1.4 var(--sk-font-raver-body)}
+#eternal .et-r-top{display:flex;align-items:baseline;justify-content:space-between;gap:var(--sk-s2,12px);flex-wrap:wrap}
+#eternal .et-r-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em;color:var(--sk-ink)}
+#eternal .et-r-hint{font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-art{position:relative;width:100%;max-width:380px;margin:var(--sk-s3,18px) auto var(--sk-s2,12px)}
+#eternal .et-r-art>svg{width:100%;height:auto;filter:drop-shadow(var(--sk-glow-sovereign))}
+#eternal .et-r-art [role="button"]{cursor:pointer}
+#eternal .et-r-art [role="button"]:focus{outline:none}
+#eternal .et-r-art [role="button"]:focus-visible .et-ring-focus{stroke:var(--sk-ink);stroke-width:2}
+#eternal .et-hit{fill:transparent;stroke:none}
+#eternal svg line{fill:none}
+#eternal .et-r-mid{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;text-align:center;pointer-events:none;max-width:34%}
+#eternal .et-r-mid b{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em;color:var(--sk-ink)}
+#eternal .et-r-mid span{font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-legend{display:flex;flex-wrap:wrap;justify-content:center;gap:var(--sk-s1,6px) var(--sk-s3,18px);margin:0 0 var(--sk-s3,18px)}
+#eternal .et-r-legend span{display:inline-flex;align-items:center;gap:var(--sk-s1,6px);font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-legend i{width:14px;height:14px;border-radius:var(--sk-radius-pill,999px);flex:none}
+#eternal .et-r-card{display:flex;gap:var(--sk-s2,12px);align-items:flex-start;padding:var(--sk-s2,12px) var(--sk-s3,18px);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl,18px);background:var(--sk-sovereign-tint);min-height:var(--sk-control-person,60px)}
+#eternal .et-r-card .et-rk{display:flex;align-items:center;justify-content:center;min-width:44px;height:44px;padding:0 var(--sk-s1,6px);border-radius:var(--sk-radius,12px);background:var(--sk-sovereign-strong);color:var(--sk-bg);font:700 15px/1.2 var(--sk-font-raver-display);flex:none}
+#eternal .et-r-card b{display:block;font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink)}
+#eternal .et-r-card span{display:block;margin-top:var(--sk-s1,6px);font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-note{margin:var(--sk-s2,12px) 0 0;text-align:center;font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-big{text-align:center;font:700 60px/.95 var(--sk-font-raver-display);letter-spacing:-.02em;color:var(--sk-ink)}
+#eternal .et-r-pill{display:flex;align-items:center;justify-content:center;width:100%;min-height:58px;margin-top:var(--sk-s4,24px);padding:0 var(--sk-s3,18px);border:0;border-radius:var(--sk-radius-pill,999px);background:var(--sk-primary);color:var(--sk-on-primary)!important;font:700 15px/1.2 var(--sk-font-raver-display)!important;letter-spacing:.04em;text-align:center;cursor:pointer;touch-action:manipulation}
+#eternal .et-r-pill:disabled{background:var(--sk-sovereign-wash);color:var(--sk-sovereign-soft)!important;cursor:not-allowed}
+#eternal .et-r-ghost{display:flex;align-items:center;justify-content:center;gap:var(--sk-s1,6px);margin:var(--sk-s2,12px) auto 0;min-height:var(--sk-control-min,44px);padding:0 var(--sk-s3,18px);border:1.5px solid var(--sk-sovereign);border-radius:var(--sk-radius-pill,999px);background:transparent;color:var(--sk-sovereign-strong)!important;font:600 14px/1.25 var(--sk-font-raver-body)!important;cursor:pointer}
+#eternal .et-r-ghost[aria-pressed="true"]{border-color:var(--sk-you);box-shadow:var(--sk-glow-sovereign)}
+#eternal .et-r-row{display:flex;justify-content:center;flex-wrap:wrap;gap:var(--sk-s2,12px)}
+#eternal .et-r-row .et-r-ghost{margin:var(--sk-s2,12px) 0 0}
+@media (prefers-reduced-motion:reduce){#eternal *{transition:none!important;animation:none!important}}
+
+/* CYPHERPUNK — the instrument, complete at first paint: tables, a numbered pipeline, receipts */
+#eternal .et-c{font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink);overflow-wrap:anywhere}
+#eternal .et-c-path{font:600 15px/1.45 var(--sk-font-mono);color:var(--sk-ink);word-break:break-all}
+#eternal .et-c-chips{display:flex;flex-wrap:wrap;gap:var(--sk-s1,6px);margin:var(--sk-s2,12px) 0}
+#eternal .et-c-chips span{padding:2px var(--sk-s1,6px);border:1px solid var(--sk-line);border-radius:4px;background:var(--sk-bg-card);font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-soft)}
+#eternal .et-c-chips span.et-on{border-color:var(--sk-guard);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong)}
+#eternal .et-c-chips span.et-ok{border-color:var(--sk-verified);color:var(--sk-verified)}
+#eternal .et-c-chips span.et-no{border-color:var(--sk-info);color:var(--sk-info)}
+#eternal .et-c-h{margin:var(--sk-s4,24px) 0 var(--sk-s2,12px)!important;font:600 15px/1.45 var(--sk-font-mono);color:var(--sk-ink)}
+#eternal .et-c-tab{margin:var(--sk-s2,12px) 0 var(--sk-s1,6px)!important;border:1px solid var(--sk-line)!important;border-radius:var(--sk-radius-sm,6px);overflow:hidden;background:var(--sk-bg-card)!important}
+#eternal .et-c-tab th{padding:var(--sk-s1,6px) var(--sk-s2,12px)!important;text-align:left;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);border-bottom:1px solid var(--sk-line)!important;background:var(--sk-bg-well)}
+#eternal .et-c-tab td{height:var(--sk-control-min,44px);padding:var(--sk-s1,6px) var(--sk-s2,12px)!important;border-bottom:1px solid var(--sk-line)!important;font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink);vertical-align:middle}
+#eternal .et-c-tab tr:last-child td{border-bottom:0!important}
+#eternal .et-c-tab tbody td:first-child{color:var(--sk-guard);white-space:nowrap;width:1%}
+#eternal .et-c-tab th:first-child{white-space:nowrap;width:1%}
+#eternal .et-c-tab tr.et-pick{cursor:pointer}
+#eternal .et-c-tab tr.et-pick:hover td{background:var(--sk-sovereign-tint)}
+#eternal .et-c-tab tr.et-more td{height:auto;background:var(--sk-sovereign-tint);color:var(--sk-ink-soft)}
+#eternal .et-c-tab small{display:block;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut)}
+#eternal .et-c-tab .et-num{text-align:right;white-space:nowrap}
+#eternal .et-c-tab .et-nw{white-space:nowrap;overflow-wrap:normal}
+#eternal .et-c-tab tbody td.et-wrap{white-space:normal;width:auto}
+#eternal .et-c-tab td,#eternal .et-c-tab th{overflow-wrap:break-word}
+#eternal .et-c-tab tfoot td{height:auto;background:var(--sk-bg-well);color:var(--sk-ink-soft);font:500 12px/1.45 var(--sk-font-mono)}
+#eternal .et-st-ok{color:var(--sk-verified)}#eternal .et-st-no{color:var(--sk-info)}#eternal .et-st-wait{color:var(--sk-ai)}#eternal .et-st-guard{color:var(--sk-guard)}
+#eternal .et-c-pipe{list-style:none;margin:0;padding:0;display:grid;gap:var(--sk-s2,12px);counter-reset:etp}
+#eternal .et-c-pipe li{display:grid;grid-template-columns:28px 1fr;gap:var(--sk-s1,6px) var(--sk-s2,12px);padding:var(--sk-s2,12px) var(--sk-s3,18px);border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm,6px);background:var(--sk-bg-card);counter-increment:etp}
+#eternal .et-c-pipe li::before{content:counter(etp,decimal-leading-zero);color:var(--sk-guard);font-weight:600}
+#eternal .et-c-pipe li b{font-weight:600;color:var(--sk-ink)}
+#eternal .et-c-pipe li p{grid-column:2;color:var(--sk-ink-soft)}
+#eternal .et-c-pipe li.et-done b{color:var(--sk-verified)}
+#eternal .et-c-pipe li.et-guard{border-style:dashed;border-color:var(--sk-guard)}
+#eternal .et-c-pipe li.et-guard b{color:var(--sk-guard)}
+#eternal .et-c-pipe li.et-now{border-color:var(--sk-ai);box-shadow:inset 0 0 0 1px var(--sk-ai)}
+#eternal .et-c-pipe li.et-now b{color:var(--sk-ai)}
+#eternal .et-c-primary{display:flex;align-items:center;justify-content:center;width:100%;min-height:52px;margin-top:var(--sk-s3,18px);padding:0 var(--sk-s2,12px);border:0;border-radius:var(--sk-radius-sm,6px);background:var(--sk-primary);color:var(--sk-on-primary)!important;font:600 14px/1.2 var(--sk-font-mono)!important;text-align:center;cursor:pointer}
+#eternal .et-c-primary:disabled{background:var(--sk-bg-well);color:var(--sk-ink-mut)!important;cursor:not-allowed}
+#eternal .et-c-note{margin-top:var(--sk-s2,12px);font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-soft)}
+#eternal .et-c-kv{border:1px solid var(--sk-line)!important;border-radius:var(--sk-radius-sm,6px);overflow:hidden;background:var(--sk-bg-card)!important}
+#eternal .et-c-kv th{width:112px;padding:var(--sk-s2,12px)!important;text-align:left;vertical-align:top;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);border-bottom:1px solid var(--sk-line)!important;background:transparent}
+#eternal .et-c-kv td{padding:var(--sk-s2,12px)!important;border-bottom:1px solid var(--sk-line)!important;font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink);word-break:break-word}
+#eternal .et-c-kv tr:last-child th,#eternal .et-c-kv tr:last-child td{border-bottom:0!important}
+#eternal .et-c-verify{margin-top:var(--sk-s3,18px);padding:var(--sk-s3,18px);border-radius:var(--sk-radius-sm,6px);background:var(--sk-bg-card);border:1px solid var(--sk-line)}
+#eternal .et-c-verify-h{font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);margin-bottom:var(--sk-s1,6px)}
+#eternal .et-c-verify ol{margin:0;padding-left:var(--sk-s4,24px)!important;display:grid;gap:var(--sk-s1,6px)}
+#eternal .et-c-verify code,#eternal .et-c-code{font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ai);word-break:break-all}
+#eternal .et-c-quote{margin-top:var(--sk-s2,12px);padding:var(--sk-s2,12px) var(--sk-s3,18px);border:1px dashed var(--sk-guard);border-radius:var(--sk-radius-sm,6px);background:var(--sk-guard-wash);color:var(--sk-guard);font:400 13px/1.45 var(--sk-font-mono)}
+#eternal .et-c-quote b{color:var(--sk-sovereign-strong);font-weight:600}
+#eternal .et-c-row{display:grid;grid-template-columns:1fr 1fr;gap:var(--sk-s2,12px);margin-top:var(--sk-s3,18px)}
+#eternal .et-c-ghost{display:flex;align-items:center;justify-content:center;min-height:52px;padding:0 var(--sk-s1,6px);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius-sm,6px);background:transparent;color:var(--sk-ink)!important;text-align:center;font:600 14px/1.2 var(--sk-font-mono)!important;cursor:pointer}
+#eternal .et-c-a{display:inline-flex;align-items:center;min-height:var(--sk-control-min,44px);color:var(--sk-link)}
+#eternal .et-c-a:hover{color:var(--sk-link-hover)}
+#eternal .et-c-in{display:flex;align-items:center;gap:var(--sk-s2,12px);flex-wrap:wrap;margin-top:var(--sk-s2,12px)}
+#eternal .et-c-in label{display:flex;align-items:center;gap:var(--sk-s1,6px);min-height:var(--sk-control-min,44px);font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut)}
+#eternal .et-c-in input{width:96px;min-height:var(--sk-control-min,44px);padding:0 var(--sk-s1,6px);border:1.5px solid var(--sk-ai);border-radius:var(--sk-radius-sm,6px);background:var(--sk-bg-card);color:var(--sk-ink);font:400 13px/1.45 var(--sk-font-mono)}
+
+/* the cascade (raver): every mark is a token; steps and pool drops are role=button with 50 px hit discs */
+#etFall .et-flow{fill:none;stroke:var(--sk-line);stroke-width:3;stroke-linecap:round}
+#etFall .et-flow.et-lit{stroke:var(--sk-sovereign-soft)}
+#etFall .et-loop{fill:none;stroke:var(--sk-guard);stroke-width:2;stroke-dasharray:5 6;opacity:.55}
+#etFall .et-loop.et-lit{opacity:1}
+#etFall .et-surface{stroke:var(--sk-line);stroke-width:2}
+#etFall .et-node{fill:var(--sk-sovereign-wash);stroke:var(--sk-sovereign-soft);stroke-width:2;transition:fill var(--dur,.4s)}
+#etFall .et-step.et-lit .et-node{fill:var(--sk-sovereign);stroke:var(--sk-sovereign-strong)}
+#etFall .et-step[aria-pressed="true"] .et-node{stroke:var(--sk-you);stroke-width:3}
+#etFall .et-step:focus-visible .et-node,#etFall .et-drop:focus-visible .et-bub{stroke:var(--sk-ink);stroke-width:3}
+#etFall .et-num{fill:var(--sk-ink);font:700 18px/1 var(--sk-font-raver-display);pointer-events:none}
+#etFall .et-bub{fill:var(--sk-info);opacity:.38;stroke:none;transition:opacity var(--dur,.4s)}
+#etFall.et-pool .et-bub{opacity:1}
+#etFall .et-drop[aria-pressed="true"] .et-bub{stroke:var(--sk-ink);stroke-width:2;opacity:1}
+#eternal .et-lg-step{background:var(--sk-sovereign)}
+#eternal .et-lg-loop{background:transparent;border:2px dashed var(--sk-guard)}
+#eternal .et-lg-pool{background:var(--sk-info)}
+#eternal #etFallEnd{margin-top:var(--sk-s4,24px)}
+</style>
 </head>
 <body>
+<!-- ETERNAL FRONT (founder blueprint 2026-09-26, docs/design/eternal): three separate products above the
+     founder's piece, which stays below exactly as hosted (fleet-hosted ruling: the art and its chart
+     keep working; register.js keeps its own canvas in every view). ONE data layer reads the piece
+     itself (its seven cascade steps, its disease rows, its live Chart.js data and its own disclaimer),
+     so no front can say more than the piece says. Nothing here advises; every "read" goes to the piece. -->
+<section id="eternal" aria-label="ACiD, the argument">
+
+  <!-- NEW BEE — a calm reading: seven plain steps, the piece's own caution, one way into the piece -->
+  <div class="et-b">
+    <div class="et-b-mark">ACiD</div>
+    <h2 class="et-b-h" data-et-t="et.acid.b.h">one argument, seven steps</h2>
+    <p class="et-b-lede" id="etBeeLede">a theory of where chronic disease begins, told in seven steps.</p>
+    <div class="et-b-guard"><svg class="et-ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg><span id="etBeeGuard">this is research, not medical advice.</span></div>
+    <div class="et-b-rows" id="etBeeRows"><div class="et-b-row"><span data-et-t="et.acid.b.reading">reading the piece…</span></div></div>
+    <div class="et-b-card" id="etBeeSure" hidden>
+      <h3 data-et-t="et.acid.b.sureH">how sure is it?</h3>
+      <p id="etBeeSureP"></p>
+      <p class="et-b-src" id="etBeeSureSrc"></p>
+    </div>
+    <div class="et-b-act">
+      <button type="button" class="et-b-primary" id="etBeeRead" data-et-t="et.acid.b.go">read the whole argument</button>
+      <button type="button" class="et-b-link" id="etBeeSureGo" aria-expanded="false" aria-controls="etBeeSure" data-et-t="et.acid.b.sure">how sure is it?</button>
+      <p class="et-b-foot" data-et-t="et.acid.b.foot">the piece is below, unchanged by this page.</p>
+    </div>
+  </div>
+
+  <!-- RAVER — the cascade is the art: seven steps you let fall, a pool of the diseases it names -->
+  <div class="et-r">
+    <div class="et-r-top"><h2 class="et-r-h" data-et-t="et.acid.r.h">the cascade</h2><span class="et-r-hint" id="etFallHint">tap a step · hold to let it fall</span></div>
+    <div class="et-r-art"><svg id="etFall" viewBox="0 0 360 560" role="group" aria-label="the cascade: seven steps falling into the diseases the piece names"></svg></div>
+    <div class="et-r-legend"><span><i class="et-lg-step"></i><span data-et-t="et.acid.r.lgStep">a step</span></span><span><i class="et-lg-loop"></i><span data-et-t="et.acid.r.lgLoop">the loop it names</span></span><span><i class="et-lg-pool"></i><span data-et-t="et.acid.r.lgPool">millions affected</span></span></div>
+    <div class="et-r-card" id="etFallCard" aria-live="polite"></div>
+    <div id="etFallEnd" hidden><div class="et-r-big" id="etFallBig">90%+</div><p class="et-r-note" id="etFallBigNote"></p></div>
+    <button type="button" class="et-r-pill" id="etFallHold">hold to let it fall</button>
+    <button type="button" class="et-r-pill" id="etFallRead" hidden data-et-t="et.acid.r.read">into the whole argument</button>
+    <p class="et-r-note" id="etFallNote"></p>
+  </div>
+
+  <!-- CYPHERPUNK — the instrument: every claim as stated, every figure checked against the live chart -->
+  <div class="et-c">
+    <div class="et-c-path" id="etcPath">fleet-hosted/gallery/acid-cascade.html</div>
+    <div class="et-c-chips" id="etcChips"></div>
+    <h3 class="et-c-h" data-et-t="et.acid.c.stepsH">the cascade · as the piece states it</h3>
+    <ol class="et-c-pipe" id="etcSteps"></ol>
+    <h3 class="et-c-h" data-et-t="et.acid.c.rowsH">downstream · US figures as stated</h3>
+    <table class="et-c-tab" id="etcRows"><thead><tr><th>disease · stated</th><th>cost/yr</th><th>chart</th></tr></thead><tbody></tbody><tfoot></tfoot></table>
+    <p class="et-c-note" id="etcRowsNote"></p>
+    <button type="button" class="et-c-primary" id="etcRead" data-et-t="et.acid.c.go">open the whole argument ↓</button>
+    <h3 class="et-c-h" data-et-t="et.acid.c.receiptH">receipt · the piece's own terms</h3>
+    <table class="et-c-kv" id="etcReceipt"></table>
+    <div class="et-c-quote" id="etcQuote"></div>
+    <div class="et-c-verify">
+      <div class="et-c-verify-h" data-et-t="et.acid.c.selfH">verify · no trust in this page needed</div>
+      <ol><li><code>Chart.getChart('diseaseChart').data</code></li><li><code>diff surfaces/fleet/acid-cascade.html surfaces/fleet-hosted/gallery/acid-cascade.html</code></li><li id="etcSelf3">check each figure against a primary source; the piece names fields, not studies</li></ol>
+    </div>
+    <div class="et-c-row">
+      <a class="et-c-ghost" href="../../fleet/acid-cascade.html" data-et-t="et.acid.c.orig">the original</a>
+      <a class="et-c-ghost" href="https://github.com/beehive-nature/beehive-nature/blob/main/surfaces/fleet-hosted/gallery/acid-cascade.html" target="_blank" rel="noopener noreferrer"><span data-et-t="et.acid.c.src">view the source ↗</span><span class="et-sr"> (opens in a new tab)</span></a>
+    </div>
+  </div>
+</section>
+<h2 class="et-archive-h" id="etArchive" tabindex="-1" data-et-t="et.acid.archive">the whole argument</h2>
 <div class="hdr">
 <h1>ACiD — Artificial Chronic Inflammatory Disease</h1>
 <p>The TERT-ECS-Telomere Disease Cascade | Upstream Medicine | bnature.social/BiGen v1.0</p>
@@ -241,6 +480,167 @@ options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',
 scales:{x:{title:{display:true,text:'Millions of Americans',color:'#888'},ticks:{color:'#888'},grid:{color:'#1a1a33'}},
 y:{ticks:{color:'#aaa',font:{size:10}},grid:{display:false}}},
 plugins:{legend:{display:false}}}});
+</script>
+<script>
+/* ETERNAL FRONT — one data layer, three renderers (docs/design/eternal). Every fact is read from the
+   piece below: its seven cascade steps, its headline cards, its disease rows, the live Chart.js data
+   and its own disclaimer (author, basis, the [A]..[D] range, "research, not medical advice"). The
+   fronts carry the piece's claims as the piece's claims, never stronger, and every "read" scrolls
+   to the piece itself. Nothing here fetches, stores or advises. */
+(function(){
+  var $=function(id){return document.getElementById(id);};
+  var T=function(k,f){var t=window.BNRLanguage&&window.BNRLanguage.text;return t?t(k,f):f;};
+  var esc=function(v){return String(v==null?'':v).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});};
+  var fill=function(s,o){return String(s).replace(/\{(\w+)\}/g,function(m,k){return o[k]==null?m:o[k];});};
+  var KEEP={TERT:1,ECS:1,SASP:1,ACiD:1,CB1:1,CB2:1,US:1,DNA:1,RNA:1};
+  /* the piece sets its step titles in capitals; bee and raver read them in the estate's lower-case
+     voice with the acronyms kept, cypherpunk quotes them exactly */
+  var plain=function(t){return String(t||'').split(/\s+/).map(function(w){var core=w.replace(/[^A-Za-z0-9]/g,'');return KEEP[core]?w:w.toLowerCase();}).join(' ');};
+  var num=function(s){var m=/([\d][\d.,]*)/.exec(s||'');return m?parseFloat(m[1].replace(/,/g,'')):NaN;};
+  var billions=function(s){var m=/\$([\d.,]+)\s*([BT])/i.exec(s||'');return m?parseFloat(m[1].replace(/,/g,''))*(m[2].toUpperCase()==='T'?1000:1):NaN;};
+  var key=function(s){return String(s||'').toLowerCase().split(/[\s/(]/)[0];};
+  var D={title:'',sub:'',hero:[],steps:[],rows:[],total:'',sumB:0,chart:{id:'diseaseChart',read:false,labels:[],data:[]},agree:0,links:0,status:{}};
+  var R={sel:null,fell:0,complete:false,timer:0};
+
+  /* ── the one data layer: the piece, read where it stands ── */
+  function read(){
+    var q=function(el,s){var e=el&&el.querySelector(s);return e?e.textContent.replace(/\s+/g,' ').trim():'';};
+    var art=function(sel){return [].filter.call(document.querySelectorAll(sel),function(e){return !e.closest('#eternal');});};
+    D.title=q(document,'.hdr h1');D.sub=q(document,'.hdr p');
+    D.hero=art('.hero .hero-card').map(function(c){return {big:q(c,'.mega'),line:q(c,'.sub')};});
+    D.steps=art('.cascade .cascade-step').map(function(s,i){var t=q(s,'.cascade-content b');return {n:i+1,title:t,plain:plain(t),line:q(s,'.cascade-content small')};});
+    var names=art('.disease-name'),stats=art('.disease-stat');
+    D.rows=[];D.total='';D.sumB=0;
+    names.forEach(function(n,i){
+      var name=n.textContent.trim(),st=stats[i];if(!st)return;
+      if(/^total$/i.test(name)){D.total=st.textContent.trim();return;}
+      var cost=(st.firstChild&&st.firstChild.nodeType===3?st.firstChild.textContent:st.textContent).trim();
+      var sm=st.querySelector('small'),fl=n.parentNode&&n.parentNode.querySelector('.disease-fill');
+      var stated=(sm&&sm.textContent.trim())||(fl&&fl.textContent.trim())||'';
+      D.rows.push({name:name,plain:name.toLowerCase(),cost:cost,stated:stated,statedM:num(stated),chartM:null,agree:false});
+      D.sumB+=billions(cost)||0;
+    });
+    var ch=window.Chart&&Chart.getChart&&Chart.getChart('diseaseChart');
+    if(ch&&ch.data&&ch.data.datasets&&ch.data.datasets[0]){
+      D.chart={id:'diseaseChart',read:true,type:ch.config&&ch.config.type||'bar',labels:ch.data.labels.slice(),data:ch.data.datasets[0].data.slice(),label:ch.data.datasets[0].label||''};
+      D.rows.forEach(function(r){var i=D.chart.labels.map(key).indexOf(key(r.name));if(i>=0){r.chartM=D.chart.data[i];r.agree=Math.abs(r.chartM-r.statedM)<0.05;}});
+    }
+    D.agree=D.rows.filter(function(r){return r.agree;}).length;
+    var dis=q(document,'.disclaimer'),m=function(re){var x=re.exec(dis);return x?x[1].trim():'';};
+    D.status={text:dis,kind:m(/is a (theoretical framework)/i),author:m(/proposed by (.+?), based on/),basis:m(/based on (.+?)\.\s/),
+      fields:m(/synthesizes (.+?)\.\s/),gradeA:m(/\[A\]\s*\(([^)]+)\)/),gradeD:m(/\[D\]\s*\(([^)]+)\)/),
+      advice:m(/(This is research, not medical advice\.)/),consult:m(/(Consult qualified practitioners[^.]*\.)/)};
+    var artRoot=[].filter.call(document.body.children,function(e){return e.id!=='eternal'&&e.id!=='etArchive'&&!/^(SCRIPT|STYLE)$/.test(e.tagName);});
+    D.links=0;artRoot.forEach(function(e){D.links+=e.querySelectorAll('a[href]').length;if(/\bet al\b|doi\.org|PMID/i.test(e.textContent))D.links++;});
+  }
+  var bill=function(b){return '$'+Math.round(b).toLocaleString('en')+'B/yr';};
+
+  /* ── NEW BEE ── */
+  function bee(){
+    var S=D.status;
+    $('etBeeLede').textContent=fill(T('et.acid.b.lede','a {kind} of where chronic disease begins, told in {n} steps. proposed by {author}, based on {basis}.'),{kind:S.kind||T('et.acid.b.theory','theory'),n:D.steps.length,author:S.author,basis:S.basis});
+    $('etBeeGuard').textContent=S.advice?T('et.acid.b.guard','this is research, not medical advice. talk to a qualified practitioner about your own health.'):T('et.acid.b.noGuard','the piece\'s own caution could not be read here; read it below before anything else.');
+    var chev='<svg class="et-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>',h='';
+    D.steps.forEach(function(s,i){
+      var open=R.beeOpen===i;
+      h+='<button type="button" class="et-b-row" data-k="'+i+'" aria-expanded="'+open+'"><span>'+s.n+' · '+esc(s.plain)+'</span><small>'+chev+'</small></button>';
+      h+='<div class="et-b-open" data-k="'+i+'"'+(open?'':' hidden')+'>'+esc(s.line)+'</div>';
+    });
+    $('etBeeRows').innerHTML=h||'<div class="et-b-row"><span>'+esc(T('et.acid.b.none','the steps could not be read here; the piece is below.'))+'</span></div>';
+    $('etBeeSureP').textContent=fill(T('et.acid.b.sureP','the piece says its claims range from [A], {a}, to [D], {d}. it does not grade each step.'),{a:S.gradeA,d:S.gradeD});
+    $('etBeeSureSrc').textContent=fill(T('et.acid.b.sureSrc','it draws on {f}: fields of study, not single studies.'),{f:S.fields});
+  }
+
+  /* ── RAVER: the cascade you let fall ── */
+  var NX=[110,250],NY=function(k){return 30+50*k;},SURF=366;
+  function fallArt(){
+    var svg=$('etFall');if(!svg)return;
+    var n=D.steps.length,h='',P=function(k){return [NX[k%2],NY(k)];};
+    for(var k=0;k+1<n;k++){var a=P(k),b=P(k+1);h+='<path class="et-flow'+(R.fell>k+1?' et-lit':'')+'" d="M'+a[0]+' '+a[1]+'C'+a[0]+' '+(a[1]+30)+' '+b[0]+' '+(b[1]-30)+' '+b[0]+' '+b[1]+'"/>';}
+    if(n){var z=P(n-1);h+='<path class="et-flow'+(R.fell>=n?' et-lit':'')+'" d="M'+z[0]+' '+z[1]+'L'+z[0]+' '+SURF+'"/>';}
+    if(n>=6)h+='<path class="et-loop'+(R.fell>=6?' et-lit':'')+'" d="M269 '+NY(5)+'C352 '+(NY(5)-14)+' 352 '+(NY(1)+14)+' 269 '+NY(1)+'"/>';
+    h+='<line class="et-surface" x1="8" y1="'+SURF+'" x2="352" y2="'+SURF+'"/>';
+    var pool=D.rows.slice().sort(function(a,b){return (b.chartM!=null?b.chartM:b.statedM)-(a.chartM!=null?a.chartM:a.statedM);});
+    var max=Math.max.apply(null,pool.map(function(r){return r.chartM!=null?r.chartM:(r.statedM||0);}).concat([1]));
+    pool.forEach(function(r,i){
+      var v=r.chartM!=null?r.chartM:(r.statedM||0),cx=40+70*(i%5),cy=SURF+44+66*Math.floor(i/5),rad=Math.max(5,30*Math.sqrt(v/max));
+      h+='<g class="et-drop" role="button" tabindex="0" data-d="'+esc(r.name)+'" aria-pressed="'+(R.sel==='d:'+r.name)+'" aria-label="'+esc(r.plain+', '+v+' million affected')+'" transform="translate('+cx+' '+cy+')"><circle class="et-hit" r="28"/><circle class="et-bub" r="'+rad.toFixed(1)+'"/></g>';
+    });
+    D.steps.forEach(function(s,k){var p=P(k);
+      h+='<g class="et-step'+(R.fell>k?' et-lit':'')+'" role="button" tabindex="0" data-s="'+k+'" aria-pressed="'+(R.sel==='s:'+k)+'" aria-label="'+esc(s.n+': '+s.plain)+'" transform="translate('+p[0]+' '+p[1]+')"><circle class="et-hit" r="26"/><circle class="et-node" r="19"/><text class="et-num" y="6" text-anchor="middle">'+s.n+'</text></g>';});
+    svg.setAttribute('viewBox','0 0 360 '+(SURF+44+66*Math.ceil(Math.max(pool.length,1)/5)));
+    svg.classList.toggle('et-pool',R.fell>=n&&n>0);
+    svg.innerHTML=h;
+  }
+  function raver(){
+    var n=D.steps.length,S=D.status,card=$('etFallCard'),sel=R.sel||'';
+    $('etFallHint').textContent=R.complete?T('et.acid.r.hDone','all seven fell · tap the pool'):R.fell?fill(T('et.acid.r.hFell','{f} of {n} fallen'),{f:R.fell,n:n}):T('et.acid.r.hint','tap a step · hold to let it fall');
+    if(sel.indexOf('s:')===0){var s=D.steps[+sel.slice(2)];card.innerHTML='<span class="et-rk">'+s.n+'</span><div><b>'+esc(s.plain)+'</b><span>'+esc(s.line)+'</span></div>';}
+    else if(sel.indexOf('d:')===0){var r=D.rows.filter(function(x){return x.name===sel.slice(2);})[0];
+      card.innerHTML='<span class="et-rk">'+esc((r.chartM!=null?r.chartM:r.statedM)+'M')+'</span><div><b>'+esc(r.plain)+'</b><span>'+esc(fill(T('et.acid.r.drop','{v} million affected in the US, per the piece\'s chart · {c} · stated: {s}'),{v:r.chartM!=null?r.chartM:T('et.acid.r.noChart','not charted'),c:r.cost,s:r.stated}))+'</span></div>';}
+    else card.innerHTML='<span class="et-rk">'+n+'</span><div><b>'+esc(fill(T('et.acid.r.cardH','{n} steps, one direction'),{n:n}))+'</b><span>'+esc(T('et.acid.r.cardS','tap a step to read it as the piece states it · hold the pill to let it fall'))+'</span></div>';
+    var hero=D.hero[0]||{};
+    $('etFallEnd').hidden=!R.complete;
+    $('etFallBig').textContent=hero.big||'';
+    $('etFallBigNote').textContent=fill(T('et.acid.r.bigNote','{line}: the piece\'s own headline claim'),{line:plain(hero.line)});
+    $('etFallHold').hidden=R.complete;
+    $('etFallHold').textContent=R.fell?fill(T('et.acid.r.holdOn','keep holding · {f} of {n}'),{f:R.fell,n:n}):T('et.acid.r.hold','hold to let it fall');
+    $('etFallRead').hidden=!R.complete;
+    $('etFallNote').textContent=fill(T('et.acid.r.note','a {kind} · grades [A] to [D] · research, not medical advice'),{kind:S.kind||T('et.acid.b.theory','theory')});
+    fallArt();
+  }
+  function advance(){if(R.fell<D.steps.length){R.fell++;if(R.fell>=D.steps.length)stopHold();raver();}}
+  function stopHold(){if(R.timer){clearInterval(R.timer);R.timer=0;}if(R.fell>=D.steps.length&&D.steps.length&&!R.complete){R.complete=true;raver();}}
+
+  /* ── CYPHERPUNK ── */
+  function cy(){
+    var S=D.status;
+    $('etcPath').textContent='fleet-hosted/gallery/acid-cascade.html · '+D.title;
+    $('etcChips').innerHTML='<span class="et-on">'+esc(S.kind||'status unread')+'</span><span>evidence [A] → [D]</span><span class="et-no">'+esc(S.advice?'not medical advice':'caution unread')+'</span><span>'+esc(fill(T('et.acid.c.links','links to studies · {n}'),{n:D.links}))+'</span>';
+    $('etcSteps').innerHTML=D.steps.map(function(s){return '<li><b>'+esc(s.title)+'</b><p>'+esc(s.line)+'</p></li>';}).join('');
+    var tb=$('etcRows');
+    tb.querySelector('tbody').innerHTML=D.rows.map(function(r){
+      return '<tr><td>'+esc(r.name)+'<small>'+esc(r.stated)+'</small></td><td class="et-num">'+esc(r.cost)+'</td><td class="et-num '+(r.chartM==null?'et-st-no':r.agree?'et-st-ok':'et-st-wait')+'">'+(r.chartM==null?esc(T('et.acid.c.noChart','not charted')):esc(r.chartM+'M')+(r.agree?' ✓':' ≠'))+'</td></tr>';
+    }).join('');
+    tb.querySelector('tfoot').innerHTML='<tr><td colspan="3">'+esc(fill(T('et.acid.c.sum','rows sum {s} · stated total {t} · the gap is not itemised on this page'),{s:bill(D.sumB),t:D.total}))+'</td></tr>';
+    $('etcRowsNote').textContent=D.chart.read?fill(T('et.acid.c.agree','{a} of {n} rows state the same count as the live chart (#{id}, "{l}"); ≠ marks a row whose stated count differs.'),{a:D.agree,n:D.rows.length,id:D.chart.id,l:D.chart.label}):T('et.acid.c.chartUnread','the chart did not load here, so no row is checked against it.');
+    var hero=D.hero.map(function(x){return x.big+' '+x.line;}).join(' · ');
+    $('etcReceipt').innerHTML=[
+      ['piece',D.title],['subtitle',D.sub],['proposed by',S.author+' (as stated)'],['basis',S.basis],['draws on',S.fields+' · fields, no study cited by title'],
+      ['evidence','[A] '+S.gradeA+' → [D] '+S.gradeD+' · no grade per claim'],['headline',hero],
+      ['chart',D.chart.read?'#'+D.chart.id+' · '+D.chart.type+' · '+D.chart.data.length+' values · read live from Chart.getChart()':T('et.acid.c.chartUnread','the chart did not load here, so no row is checked against it.')],
+      ['original','surfaces/fleet/acid-cascade.html · untouched']
+    ].map(function(r){return '<tr><th>'+esc(r[0])+'</th><td>'+esc(r[1])+'</td></tr>';}).join('');
+    $('etcQuote').innerHTML='<b>'+esc(T('et.acid.c.quote','the piece\'s own words'))+'</b> · '+esc(S.text);
+  }
+
+  function toPiece(){var h=$('etArchive');if(!h)return;var still=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;h.scrollIntoView({behavior:still?'auto':'smooth',block:'start'});try{h.focus({preventScroll:true});}catch(e){}}
+  var EN={};
+  function words(){[].forEach.call(document.querySelectorAll('#eternal [data-et-t],#etArchive[data-et-t]'),function(e){var k=e.getAttribute('data-et-t');if(!(k in EN))EN[k]=e.textContent;e.textContent=T(k,EN[k]);});}
+  function all(){words();bee();raver();cy();}
+  function wire(){
+    var ev=$('eternal');if(!ev)return;
+    ev.addEventListener('click',function(e){
+      var row=e.target.closest('.et-b-row[data-k]');
+      if(row){var i=+row.getAttribute('data-k');R.beeOpen=R.beeOpen===i?null:i;bee();var f=ev.querySelector('.et-b-row[data-k="'+i+'"]');if(f)f.focus({preventScroll:true});return;}
+      var st=e.target.closest('#etFall .et-step');if(st){var k='s:'+st.getAttribute('data-s');R.sel=R.sel===k?null:k;raver();return;}
+      var dr=e.target.closest('#etFall .et-drop');if(dr){var d='d:'+dr.getAttribute('data-d');R.sel=R.sel===d?null:d;raver();}
+    });
+    ev.addEventListener('keydown',function(e){if(e.key!=='Enter'&&e.key!==' ')return;var t=e.target.closest('#etFall [role="button"]');if(!t)return;e.preventDefault();t.dispatchEvent(new MouseEvent('click',{bubbles:true}));});
+    var hb=$('etFallHold');
+    hb.addEventListener('pointerdown',function(e){if(R.complete)return;e.preventDefault();try{hb.setPointerCapture(e.pointerId);}catch(x){}advance();if(!R.timer&&!R.complete)R.timer=setInterval(advance,520);}); /* 520 ms a step: under 2 Hz */
+    ['pointerup','pointercancel','lostpointercapture'].forEach(function(t){hb.addEventListener(t,stopHold);});
+    hb.addEventListener('click',function(e){if(e.detail===0)advance();stopHold();}); /* keyboard and assistive taps step once */
+    hb.addEventListener('contextmenu',function(e){e.preventDefault();});
+    $('etFallRead').addEventListener('click',toPiece);
+    $('etBeeRead').addEventListener('click',toPiece);
+    $('etcRead').addEventListener('click',toPiece);
+    $('etBeeSureGo').addEventListener('click',function(){var c=$('etBeeSure');c.hidden=!c.hidden;this.setAttribute('aria-expanded',String(!c.hidden));});
+    document.addEventListener('blang',all);
+  }
+  read();wire();all();
+  window.__eternal={data:D,raver:R};
+})();
 </script>
 <script src="../../agent-dock.js?v=4"></script>
 <script src="../../tour.js?v=42"></script>
