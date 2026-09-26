@@ -730,7 +730,7 @@ jobs:
       - name: ETERNAL fronts — three products, one set of facts (bGENEaLOGy + the reading rooms)
         if: always()
         working-directory: e2e
-        run: node --test blood-eternal.test.mjs bigen-eternal.test.mjs bfood-eternal.test.mjs bearth-eternal.test.mjs blongevity-eternal.test.mjs austras-koks-eternal.test.mjs buzz-directory-eternal.test.mjs bnames-eternal.test.mjs bnamesday-eternal.test.mjs bdata-eternal.test.mjs vending-eternal.test.mjs profile-eternal.test.mjs
+        run: node --test blood-eternal.test.mjs bigen-eternal.test.mjs bfood-eternal.test.mjs bearth-eternal.test.mjs blongevity-eternal.test.mjs austras-koks-eternal.test.mjs buzz-directory-eternal.test.mjs bnames-eternal.test.mjs bnamesday-eternal.test.mjs bdata-eternal.test.mjs vending-eternal.test.mjs profile-eternal.test.mjs bview-eternal.test.mjs museum-eternal.test.mjs watch-eternal.test.mjs
       # SKAISTS, THE DESIGN SYSTEM IN CODE (founder, 2026-09-26: "there is real UX/UI/standards metrics").
       # surfaces/skaists.css is compiled from docs/design/skaists/tokens.json (graded A- 2026-09-19) and must
       # stay fresh; a three-UI front must score 100% on the standards meter per register: every painted
@@ -742,7 +742,7 @@ jobs:
       - name: Skaists — the standards meter (three-UI fronts score 100%)
         if: always()
         working-directory: e2e
-        run: node skaists-conformance.mjs --only blood.html,bigen.html,bfood.html,bearth.html,blongevity.html,austras-koks.html,buzz-directory.html,bnames.html,bnamesday.html,bdata.html,vending.html,profile.html --min 100
+        run: node skaists-conformance.mjs --only blood.html,bigen.html,bfood.html,bearth.html,blongevity.html,austras-koks.html,buzz-directory.html,bnames.html,bnamesday.html,bdata.html,vending.html,profile.html,bview.html,museum.html,watch.html --min 100
       # SHARED-POLICY FIELD OWNERSHIP (ceremony-blocking repair, 2026-09-17):
       # a View change in a stale wallet tab must NEVER erase newer founder
       # policy from the shared key — every writer merges with the latest
