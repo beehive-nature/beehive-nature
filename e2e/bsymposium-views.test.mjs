@@ -121,7 +121,7 @@ test('language-first shell hosts register and language; cypher masthead cannot l
   assert.match(bar, /data-language-host/);
   assert.doesNotMatch(bar, DENSE);
   assert.match(tour, /assetBase\+'register\.js\?v=11'/);
-  assert.match(tour, /assetBase\+'lang\.js\?v=26'/);
+  assert.match(tour, /assetBase\+'lang\.js\?v=27'/);
 });
 
 test('beats and sources disclosure remember per view instead of resetting', () => {

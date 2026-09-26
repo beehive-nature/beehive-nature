@@ -205,7 +205,7 @@ if(typeof document!=='undefined') (function(){
     sel.setAttribute('aria-label','language');
     sel.style.cssText='background:#0d1410;color:#8a9a8a;border:1px solid #243026;'
       +'border-radius:6px;font:10px "IBM Plex Mono",monospace;padding:2px 4px;max-width:110px;'
-      +'margin:0;min-height:0;height:auto;box-sizing:border-box';
+      +'margin:0;min-height:24px;height:auto;box-sizing:border-box';
     sel.innerHTML='<option value="" disabled>🌐</option>'+LANGS.map(function(L){
       return '<option value="'+L[0]+'"'+(L[2]?' title="'+L[2]+'"':'')+'>'+L[1]+'</option>'; }).join('');
     sel.addEventListener('change',function(){ setPref(sel.value); });

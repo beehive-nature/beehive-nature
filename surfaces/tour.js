@@ -201,7 +201,7 @@
   function loadLanguage(){
     if(document.getElementById('blangctl')) return;
     var s2=document.createElement('script');
-    s2.src=assetBase+'lang.js?v=26';
+    s2.src=assetBase+'lang.js?v=27';
     document.body.appendChild(s2);
   }
   /* Mount view labels before language scans them. Independent async loads
@@ -217,7 +217,7 @@
      LIVE rails (founder word, 2026-08-22). Rides the tbar like the registers. */
   if(!document.getElementById('railsbadge')){
     var s3=document.createElement('script');
-    s3.src=assetBase+'rails-badge.js?v=4';
+    s3.src=assetBase+'rails-badge.js?v=5';
     document.body.appendChild(s3);
   }
 })();
