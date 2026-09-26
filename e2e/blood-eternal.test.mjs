@@ -167,23 +167,58 @@ test('the laws hold on the front: no dash for a value, no forced capitals, 44 px
 });
 
 /* zbData: the private branch is declared with its governed reason, and nothing in it can be operated.
-   The condition as cut in CORE (7b7d9a63), repaired for arm 13 (8f60093c, e608744d, 4c3dbb2d, 1ae9793c):
+   The condition as cut in CORE (7b7d9a63), repaired for arm 13 (8f60093c .. 1ae9793c) and for the #245
+   reviewer attack (a9bc9692 .. 555a255c):
    - instrument: a plain DOM query inside page.evaluate, never Playwright actionability. The register switch
      hides whole fronts, and an actionability count cannot tell "hidden by register" from "no control here".
      So the absence gate runs in all three registers and must give the same answer in each.
-   - shape 2: the absence region is LOCATED by a literal held in this file (ZB_NEEDLE), so a docs edit can
-     never blind it. Conformance to docs/CONTRACT.md:12 is a separate named test. The derivation from
-     CONTRACT.md asserts its own output before it is used: missing, empty or stub -> the test refuses in a
-     sentence that blames docs/CONTRACT.md, never the page.
-   - non-vacuity: #etCySign, counted by the same function in the same evaluate, must read operable by tag
-     AND by recorded listener. A broken selector or a dead listener record then goes red, never green.
+   - the needle: the declaration is FOUND by a literal held in this file (ZB_NEEDLE), so a docs edit can never
+     blind it. Conformance to docs/CONTRACT.md:12 is a separate named test whose derivation asserts itself.
+   - region B': the direct child of the cypherpunk front that holds the declaration. It never reads #etCySign
+     to find its bound (a landmark used to locate lets the landmark move the region); #etCySign is used only
+     to ASSERT (tight). If that child is the declaration itself, no block wraps it and the gate REFUSES in
+     that sentence, never in a false one. This replaces carriers[0].parentElement (the A6 false green).
+   - inventory: every operable element of the front, THE ROOT INCLUDED (a handler delegated on .et-c shows
+     as the root's own row), pinned and compared as a COUNTED multiset, name -> count (ZB_PIN). It needs no
+     region, so no locator hole can hide a new control (F1, F2), and counting sees a reused name (G1) or a
+     second row under a pinned name (G2) that a set of names cannot. The label is `tag#id [why]`, classes
+     never: a class in the label would red on every CSS rename of a front control (the D2 false red B'
+     was chosen to avoid). The `span [cursor]` pin is the span.et-sr that sits in the fork anchor
+     (a.et-c-ghost, target=_blank), measured at ab4db03a.
+     Region and inventory are blind in opposite directions: the inventory cannot see a pinned control MOVED
+     in (D1) or a swap of equals (G3); the region cannot see a control beside a declaration with no box
+     (F2). Both are required.
+   - the definition is this file's why(), nobody else's. e2e/skaists-conformance.mjs press() is narrower on
+     this front today (no cursor arm), and the two sets cross the day a <label> reaches the front (press()
+     matches LABEL, why() does not; the page carries labels outside the front already). footer-audit
+     speaks for itself.
+   - ZB_PIN is a HARD-CODED LITERAL of 4 entries (root slot empty today) and must never be derived at run
+     time: a walk that caught its own error would return [] on both sides and the gate would be its own
+     witness. The non-zero literal is what makes an empty or partial inventory red (non-vacuity).
+   - ZB_UNPINNED is load-bearing: at ab4db03a it removes 42 of the 46 elements why() sees on this front
+     (the manifest table's rows; 35 of the 42 are seen only by why(), 7 also by press()). Tidy that
+     selector and they all become pins in one stroke; the gate prints the live count.
+   - NOT COVERED, by ruling (G5): a control's LABEL TEXT. A pinned control relabelled in place outside the
+     branch keeps its signature, and neither half reads text; closing it means pinning label text against
+     the corpus, which is a ruled choice, not a quiet addition. The G5 test below keeps the gap executable.
+     Also not covered: a handler delegated from document onto an element with no tag, tabindex, listener
+     or pointer cursor. Costs: every new front control is a ZB_PIN edit.
+   - non-vacuity: #etCySign must be UNIQUE before it is used (a control selected by a non-unique key can be
+     captured by the thing it controls for, G1); then, read by the same function in the same evaluate, it
+     must be operable by tag AND by recorded listener; every arm test first runs the gate green.
+   - every clause that fails is reported, each in a sentence that is true of the page and names the file
+     the next seat must open.
    Coupling cost, named: relabelling zbData in docs/CONTRACT.md:12 moves the contract, this page's
    declaration, and 87 corpus strings across 3 keys (flow.r.state.in, flow.p.boundary.cy, flow.p.state.rav;
    29 entries each, every one carrying the token; measured at bdd34ed9). On that day the conformance test
    goes red and says so; the absence test does not move. */
-const ZB_DEF = 'private encrypted bytes';   // docs/CONTRACT.md:12 at bdd34ed9, held literally
+const ZB_DEF = 'private encrypted bytes';   // docs/CONTRACT.md:12, held literally
 const ZB_NEEDLE = 'zbData = ' + ZB_DEF;
 const ZB_COST = 'a zbData relabel moves docs/CONTRACT.md:12, surfaces/blood.html and 87 corpus strings across 3 keys (flow.r.state.in, flow.p.boundary.cy, flow.p.state.rav)';
+// the cypherpunk front's operable inventory at ab4db03a, identical in all three registers: name -> count
+// a literal, never derived at run time (see above)
+const ZB_PIN = { 'a [tag,cursor]': 2, 'button#etCySign [tag,listener,cursor]': 1, 'span [cursor]': 1 };   // span = span.et-sr in the fork anchor
+const ZB_UNPINNED = '.et-c-tab, .et-c-chips, .et-c-guard';   // data-driven rows, excluded by selector
 function deriveZb(text) {
   // every refusal names docs/CONTRACT.md: the seat that trips it is editing the contract, not the page
   if (typeof text !== 'string') return { ok: false, why: 'docs/CONTRACT.md is missing or unreadable' };
@@ -191,56 +226,84 @@ function deriveZb(text) {
   if (!line) return { ok: false, why: 'docs/CONTRACT.md has no "**zbData** = ..." definition line' };
   const def = (line.match(/^\*\*zbData\*\*\s*=\s*([^(]*)/) || [, ''])[1].trim().replace(/\.$/, '').trim();
   if (!def) return { ok: false, why: 'docs/CONTRACT.md defines zbData as an empty string' };
-  if (def.length < 12 || !/private/i.test(def) || !/encrypt/i.test(def))
-    return { ok: false, why: 'docs/CONTRACT.md defines zbData as a stub ("' + def + '"): under 12 characters, or without the private + encrypted meaning' };
-  return { ok: true, def };
+  if (def.length < 12) return { ok: false, why: 'docs/CONTRACT.md defines zbData as a stub ("' + def + '", under 12 characters)' };
+  return { ok: true, def };   // any other wording is a definition; if it differs it is a RELABEL (test 8)
 }
 let CONTRACT = null;
 try { CONTRACT = await readFile(join(ROOT, 'docs/CONTRACT.md'), 'utf8'); } catch {}
 const BOUND = ['click', 'dblclick', 'auxclick', 'mousedown', 'mouseup', 'pointerdown', 'pointerup', 'touchstart', 'touchend', 'keydown', 'keyup', 'keypress', 'change', 'input', 'submit', 'contextmenu'];
 
+// the gate, one in-page function: region B' + counted inventory. Returns every failed clause as a sentence.
+function zbGate([needle, pin, unpinned, onScreen]) {
+  const norm = s => s.replace(/\s+/g, ' ').trim(), bound = window.__bound;
+  if (!bound) return { hook: false };
+  // ONE instrument for the region, the inventory and the control: why is this element operable?
+  const why = el => {
+    const w = [];
+    if (el.matches('button,input,select,textarea,summary,a[href]:not([href="#"]),[role=button],[role=link],[role=checkbox],[role=switch],[role=menuitem],[contenteditable=""],[contenteditable="true"],[onclick],[data-go]')) w.push('tag');
+    if (el.hasAttribute('tabindex') && el.getAttribute('tabindex') !== '-1') w.push('tabindex');
+    if (bound.has(el) || typeof el.onclick === 'function') w.push('listener');
+    if (getComputedStyle(el).cursor === 'pointer') w.push('cursor');
+    return w;
+  };
+  const operable = root => [root, ...root.querySelectorAll('*')].map(el => ({ el, w: why(el) })).filter(x => x.w.length);
+  const label = el => el.tagName.toLowerCase() + (el.id ? '#' + el.id : '') + (el.classList.length ? '.' + [...el.classList].join('.') : '');
+  const front = document.querySelector('#eternal>.et-c');
+  // the inventory label: tag#id [why], never classes (ruled, 7872c439)
+  const name = x => x.el.tagName.toLowerCase() + (x.el.id ? '#' + x.el.id : '') + ' [' + x.w + ']';
+  // the control must be unique before it is used: a duplicate id earlier in the page would be measured instead
+  const signs = document.querySelectorAll('[id="etCySign"]'), sign = signs.length === 1 ? signs[0] : null;
+  const bad = [];
+  if (signs.length > 1) bad.push('surfaces/blood.html: #etCySign is not unique (' + signs.length + ' elements carry id="etCySign"); the non-vacuity control could be captured by what it controls for, so the gate refuses to use it');
+  const ctl = sign ? why(sign) : null;
+  // 1. inventory: the whole front, COUNTED (name -> count), never deduplicated to a set of names
+  const inv = {}; let excluded = 0, census = 0;
+  for (const x of operable(front)) { census++; if (x.el.closest(unpinned)) { excluded++; continue; } const k = name(x); inv[k] = (inv[k] || 0) + 1; }
+  const keys = [...new Set([...Object.keys(pin), ...Object.keys(inv)])].sort();
+  const drift = keys.filter(k => (inv[k] || 0) !== (pin[k] || 0)).map(k => k + ': ' + (inv[k] || 0) + ' ≠ ' + (pin[k] || 0));
+  if (drift.length) bad.push('surfaces/blood.html: the front\'s operable inventory moved: ' + drift.join('; ') +
+    ' (counted multiset, root included, by e2e/blood-eternal.test.mjs why(); skaists-conformance press() is narrower on this front today: no cursor arm, and it matches <label>, which why() does not; ' +
+    'ZB_UNPINNED removes ' + excluded + ' of the ' + census + ' elements why() sees). If the change is intended, re-pin ZB_PIN in e2e/blood-eternal.test.mjs.');
+  const setSame = Object.keys(inv).sort().join('|') === Object.keys(pin).sort().join('|');
+  // 2. region B': the direct child of the front that holds the declaration
+  const carriers = [...front.querySelectorAll('*')].filter(el => norm(el.textContent).includes(needle) &&
+    ![...el.children].some(c => norm(c.textContent).includes(needle)));
+  let region = null, inside = null;
+  if (carriers.length !== 1) bad.push('surfaces/blood.html: exactly one element on the cypherpunk front carries "' + needle + '", found ' + carriers.length);
+  else {
+    region = carriers[0];
+    while (region.parentElement !== front) region = region.parentElement;
+    if (region === carriers[0]) {
+      bad.push('REFUSED: the region resolved to the carrier itself (' + label(region) + ') - surfaces/blood.html has no block wrapping the zbData declaration');
+      region = null;
+    } else {
+      const where = ' (region ' + label(region) + ')', text = norm(region.textContent), box = region.getBoundingClientRect();
+      if (sign && region.contains(sign)) bad.push('surfaces/blood.html: the private branch is not a tight block: it contains #etCySign' + where);
+      if (!/not wired yet/.test(text)) bad.push('surfaces/blood.html: the private branch does not say "not wired yet"' + where);
+      if (!/reason: \S.{20,}/.test(text)) bad.push('surfaces/blood.html: the private branch gives no "reason:" clause' + where);
+      inside = operable(region).map(name);
+      if (inside.length) bad.push('surfaces/blood.html: something in the private branch can be operated: ' + JSON.stringify(inside) + where);
+      if (onScreen && !(box.width > 0 && box.height > 0 && getComputedStyle(front).display !== 'none' && getComputedStyle(region).visibility === 'visible'))
+        bad.push('surfaces/blood.html: the declaration is not on screen in cypherpunk' + where);
+      region = label(region);
+    }
+  }
+  return { hook: true, ctl, bad, inv, setSame, region, inside, excluded };
+}
+const gateArgs = reg => [ZB_NEEDLE, ZB_PIN, ZB_UNPINNED, reg === 'cypherpunk'];
+
 test('zbData: the private branch is declared with its reason, and nothing in it can be operated', async () => {
   assert.ok(ZB_NEEDLE.length > 'zbData = '.length + 11, 'the locator literal is not a stub');
   for (const reg of ['cypherpunk', 'bee', 'raver']) {
     const { ctx, p, errs } = await open(reg, BOUND);
-    const r = await p.evaluate(reason => {
-      const norm = s => s.replace(/\s+/g, ' ').trim(), bound = window.__bound;
-      if (!bound) return { hook: false };
-      // ONE instrument for the region and the control: why is this element operable?
-      const why = el => {
-        const w = [];
-        if (el.matches('button,input,select,textarea,summary,a[href]:not([href="#"]),[role=button],[role=link],[role=checkbox],[role=switch],[role=menuitem],[contenteditable=""],[contenteditable="true"],[onclick],[data-go]')) w.push('tag');
-        if (el.hasAttribute('tabindex') && el.getAttribute('tabindex') !== '-1') w.push('tabindex');
-        if (bound.has(el) || typeof el.onclick === 'function') w.push('listener');
-        if (getComputedStyle(el).cursor === 'pointer') w.push('cursor');
-        return w;
-      };
-      const operable = root => [root, ...root.querySelectorAll('*')].map(el => ({ el, w: why(el) })).filter(x => x.w.length);
-      const name = x => x.el.tagName.toLowerCase() + (x.el.id ? '#' + x.el.id : '') + ' [' + x.w + ']';
-      const front = document.querySelector('#eternal>.et-c'), sign = document.getElementById('etCySign');
-      const ctl = sign ? operable(sign).filter(x => x.el === sign).map(x => x.w)[0] || [] : null;
-      const carriers = [...front.querySelectorAll('*')].filter(el => norm(el.textContent).includes(reason) &&
-        ![...el.children].some(c => norm(c.textContent).includes(reason)));
-      if (carriers.length !== 1) return { hook: true, ctl, carriers: carriers.length };
-      const region = carriers[0].parentElement, box = region.getBoundingClientRect();
-      return {
-        hook: true, ctl, carriers: 1, text: norm(region.textContent), inside: operable(region).map(name),
-        tight: region !== front && front.contains(region) && !(sign && region.contains(sign)),
-        laid: box.width > 0 && box.height > 0 && getComputedStyle(front).display !== 'none' && getComputedStyle(region).visibility === 'visible',
-      };
-    }, ZB_NEEDLE);
-    assert.ok(r.hook, reg + ': the listener record is installed');
+    const r = await p.evaluate(zbGate, gateArgs(reg));
+    assert.ok(r.hook, reg + ': e2e/blood-eternal.test.mjs: the listener record is installed');
     // non-vacuity first: the same instrument, in the same run, sees the live control, and the listener arm
     // must fire on its own (the tag arm is guaranteed on a <button> and cannot witness it)
-    assert.ok(r.ctl, reg + ': #etCySign exists');
-    assert.ok(r.ctl.includes('tag') && r.ctl.includes('listener'), reg + ': the instrument sees #etCySign by tag and by listener, got ' + JSON.stringify(r.ctl));
-    // the region is where the reason is, and nowhere else
-    assert.equal(r.carriers, 1, reg + ': surfaces/blood.html: exactly one block on the cypherpunk front carries "' + ZB_NEEDLE + '"');
-    assert.ok(r.tight, reg + ': the region is a tight block, not the front and not around #etCySign');
-    assert.match(r.text, /not wired yet/, reg + ': the branch says it is not wired');
-    assert.match(r.text, /reason: \S.{20,}/, reg + ': and says why');
-    assert.deepEqual(r.inside, [], reg + ': nothing in the private branch can be operated');
-    if (reg === 'cypherpunk') assert.ok(r.laid, 'cypherpunk: the declaration is on screen');
+    assert.ok(r.ctl, reg + ': surfaces/blood.html: exactly one #etCySign exists | ' + r.bad.join(' | '));
+    assert.ok(r.ctl.includes('tag') && r.ctl.includes('listener'), reg + ': surfaces/blood.html #etCySign, or the listener record in e2e/blood-eternal.test.mjs: the instrument sees #etCySign by tag and by listener, got ' + JSON.stringify(r.ctl));
+    assert.deepEqual(r.bad, [], reg + ': ' + r.bad.join(' | '));
+    assert.equal(r.region, 'div.et-c-branch', reg + ': surfaces/blood.html: the region is the dashed private-branch block');
     assert.equal(errs.length, 0, errs.join(' | '));
     await ctx.close();
   }
@@ -249,10 +312,79 @@ test('zbData: the private branch is declared with its reason, and nothing in it 
 test('zbData: the page names the noun exactly as docs/CONTRACT.md:12 defines it', async () => {
   const d = deriveZb(CONTRACT);
   assert.ok(d.ok, 'REFUSED, not a page fault: ' + d.why + '. Fix docs/CONTRACT.md:12.');
-  assert.equal(d.def, ZB_DEF, 'docs/CONTRACT.md:12 now defines zbData as "' + d.def + '", this gate holds "' + ZB_DEF + '". Coupling cost: ' + ZB_COST + '.');
+  const kept = /private/i.test(d.def) && /encrypt/i.test(d.def);
+  assert.equal(d.def, ZB_DEF, 'docs/CONTRACT.md:12 relabels zbData as "' + d.def + '"' + (kept ? '' : ', dropping the private + encrypted meaning') + '; this gate holds "' + ZB_DEF + '". Relabel coupling cost: ' + ZB_COST + '.');
   const { ctx, p, errs } = await open('cypherpunk');
   const front = await p.evaluate(() => document.querySelector('#eternal>.et-c').textContent.replace(/\s+/g, ' '));
   assert.ok(front.includes('zbData = ' + d.def + ' (docs/CONTRACT.md)'), 'surfaces/blood.html: the cypherpunk front cites "zbData = ' + d.def + ' (docs/CONTRACT.md)"');
+  assert.equal(errs.length, 0, errs.join(' | '));
+  await ctx.close();
+});
+
+/* The reviewer arms (#245: a9bc9692, 6e5d0ab8, f7b7994e, 52ffb62f, 6331e724, dec8cec8, 555a255c), planted
+   in-page so blood.html is never edited. Each arm first runs the gate green on the pristine page, then plants,
+   then must see the gate go red IN THE NAMED SENTENCE. `blind` says which half cannot see the arm, and the
+   test asserts that half stays silent: the other half is what catches it, so neither half is redundant.
+   None may produce the A4 false reason ("not wired yet" missing when the page still says it). */
+const EVIL = `const b = document.createElement('button'); b.type = 'button'; b.className = 'et-c-primary'; b.id = 'zbEvil'; b.textContent = 'export the private branch';`;
+const INNER = `const br = document.querySelector('.et-c-branch'), inner = document.createElement('div'); inner.className = 'zb-inner'; inner.append(...br.childNodes);`;
+const ZB_ARMS = [
+  { arm: 'A6', what: 'inner wrapper around the declaration, operable button as its sibling inside the box',
+    plant: `${INNER} br.append(inner); ${EVIL} br.append(b);`,
+    want: [/something in the private branch can be operated: .*button#zbEvil/, /inventory moved.*button#zbEvil \[tag,cursor\]: 1 ≠ 0/] },
+  { arm: 'F1', what: 'the box flattened away, declaration loose in the front, button beside it',
+    plant: `const br = document.querySelector('.et-c-branch'); ${EVIL} br.after(b); br.replaceWith(...br.childNodes);`,
+    want: [/REFUSED: the region resolved to the carrier itself .* no block wrapping the zbData declaration/, /inventory moved.*button#zbEvil \[tag,cursor\]: 1 ≠ 0/] },
+  { arm: 'F2', what: 'the box deleted, an inner wrapper kept, button beside it',
+    plant: `${INNER} br.replaceWith(inner); ${EVIL} inner.after(b);`,
+    want: [/inventory moved.*button#zbEvil \[tag,cursor\]: 1 ≠ 0/], blind: 'region' },
+  { arm: 'D1', what: 'a named control (#etCySign) moved into the box',
+    plant: `document.querySelector('.et-c-branch').append(document.getElementById('etCySign'));`,
+    want: [/not a tight block: it contains #etCySign/, /something in the private branch can be operated: .*button#etCySign/], blind: 'inventory' },
+  { arm: 'G1', what: 'a second real button reusing the pinned name #etCySign, inside the box',
+    plant: `${EVIL} b.id = 'etCySign'; b.addEventListener('click', () => {}); document.querySelector('.et-c-branch').append(b);`,
+    want: [/inventory moved.*button#etCySign \[tag,listener,cursor\]: 2 ≠ 1/, /#etCySign is not unique \(2 elements/, /something in the private branch can be operated: .*button#etCySign/], setBlind: true },
+  { arm: 'G1-F2', what: 'the reused name beside a box-less declaration: only the count can see it',
+    plant: `${INNER} br.replaceWith(inner); ${EVIL} b.id = 'etCySign'; b.addEventListener('click', () => {}); inner.after(b);`,
+    want: [/inventory moved.*button#etCySign \[tag,listener,cursor\]: 2 ≠ 1/, /#etCySign is not unique \(2 elements/], blind: 'region', setBlind: true },
+  { arm: 'G2', what: 'a cursor-only span, handler delegated from document, inside the box',
+    plant: `const s = document.createElement('span'); s.className = 'zb-evil'; s.style.cursor = 'pointer'; s.textContent = 'export'; document.querySelector('.et-c-branch').append(s); document.addEventListener('click', e => e.target.closest('.zb-evil'));`,
+    want: [/inventory moved.*span \[cursor\]: 2 ≠ 1/, /something in the private branch can be operated: .*span \[cursor\]/], setBlind: true },
+  { arm: 'G2-F2', what: 'the delegated cursor span beside a box-less declaration: only the count can see it',
+    plant: `${INNER} br.replaceWith(inner); const s = document.createElement('span'); s.className = 'zb-evil'; s.style.cursor = 'pointer'; s.textContent = 'export'; inner.after(s); document.addEventListener('click', e => e.target.closest('.zb-evil'));`,
+    want: [/inventory moved.*span \[cursor\]: 2 ≠ 1/], blind: 'region', setBlind: true },
+  { arm: 'G2-root', what: 'the cursor span in the box with its handler delegated on the front itself: the root is in the inventory',
+    plant: `const s = document.createElement('span'); s.className = 'zb-evil'; s.style.cursor = 'pointer'; s.textContent = 'export'; document.querySelector('.et-c-branch').append(s); document.querySelector('#eternal>.et-c').addEventListener('click', e => e.target.closest('.zb-evil'));`,
+    want: [/inventory moved.*div \[listener\]: 1 ≠ 0/, /something in the private branch can be operated/] },
+  { arm: 'G3', what: 'a swap of equals: one pinned link removed from the front, a same-shaped link added in the box',
+    plant: `const v = document.querySelector('.et-c-row a[download]'); if (v.querySelector('*')) throw new Error('G3 victim has an operable descendant'); const a = document.createElement('a'); a.href = v.getAttribute('href'); a.textContent = 'export the private branch'; v.remove(); document.querySelector('.et-c-branch').append(a);`,
+    want: [/something in the private branch can be operated: .*a \[tag,cursor\]/], blind: 'inventory', setBlind: true },
+];
+test('zbData: NOT covered, by ruling (G5): a pinned control relabelled in place outside the branch stays green, label text is not guarded', async () => {
+  const { ctx, p, errs } = await open('cypherpunk', BOUND);
+  assert.deepEqual((await p.evaluate(zbGate, gateArgs('cypherpunk'))).bad, [], 'G5: the gate is green on the pristine page first');
+  await p.evaluate(`document.querySelector('.et-c-row a[download]').textContent = 'export the private branch';`);
+  const r = await p.evaluate(zbGate, gateArgs('cypherpunk'));
+  // if this ever goes red, label text has become guarded: rule it, then move G5 into ZB_ARMS
+  assert.deepEqual(r.bad, [], 'G5 is a ruled gap: neither half reads a control\'s text; the gate said ' + JSON.stringify(r.bad));
+  assert.equal(errs.length, 0, errs.join(' | '));
+  await ctx.close();
+});
+for (const a of ZB_ARMS) test('zbData arm ' + a.arm + ': ' + a.what, async () => {
+  const { ctx, p, errs } = await open('cypherpunk', BOUND);
+  const r0 = await p.evaluate(zbGate, gateArgs('cypherpunk'));
+  assert.deepEqual(r0.bad, [], a.arm + ': the gate is green on the pristine page first');
+  await p.evaluate(a.plant);
+  const r = await p.evaluate(zbGate, gateArgs('cypherpunk'));
+  const said = ' | the gate said: ' + JSON.stringify(r.bad);
+  for (const re of a.want) assert.ok(r.bad.some(s => re.test(s)), a.arm + ': red in the named sentence ' + re + said);
+  const unnamed = r.bad.filter(s => !/surfaces\/blood\.html|e2e\/blood-eternal\.test\.mjs|docs\/CONTRACT\.md/.test(s));
+  assert.deepEqual(unnamed, [], a.arm + ': every failure sentence names the file the next seat must open' + said);
+  assert.ok(!r.bad.some(s => /not wired yet|no "reason:"/.test(s)), a.arm + ': no false reason (the page still carries the declaration)' + said);
+  if (a.blind === 'region') assert.ok(!r.bad.some(s => /private branch|REFUSED|exactly one element/.test(s)), a.arm + ': the region half is blind here by construction, the inventory is what catches it' + said);
+  if (a.blind === 'inventory') assert.ok(r.inv && !r.bad.some(s => /inventory moved/.test(s)), a.arm + ': the inventory half is blind here by construction (the tally is preserved), the region is what catches it' + said);
+  assert.ok(r.inv, a.arm + ': the gate computes a counted inventory' + said);
+  if (a.setBlind) assert.equal(r.setSame, true, a.arm + ': a set of names would not see this arm; the comparison must be counted' + said);
   assert.equal(errs.length, 0, errs.join(' | '));
   await ctx.close();
 });
