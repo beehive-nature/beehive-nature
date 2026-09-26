@@ -94,12 +94,8 @@ footer{max-width:1020px;margin:22px auto 0;color:var(--faint);font-size:10px;tex
 <main>
 <header>
   <h1>👑 <span data-i18n="bnm.h1">the .b name desk</span></h1>
-  <p data-reg="bee" data-i18n="bnm.bee">Names on our chain, for humans and the things they love. Type any name and
-  watch the desk check it — live, right now, from the chain itself. Reserving costs
-  <b>zero fee</b> today; you only pay the chain's memory it sits in, and it's
-  <b style="color:var(--gold)">yours to sell back</b>. This desk never holds keys — it writes
-  nothing; it composes what <b>you</b> sign.
-        <span style="display:block;margin-top:8px;color:var(--dim,#8a9a8a)">What the desk cannot vouch for is the registry behind it: every <b>.b</b> name answers to the keys behind <code>kingbeelovis</code> — today <b>three independent single-key paths</b> to full control (either <code>active</code> key, or the <code>owner</code> key that outranks it). Any one alone can replace the contract (<code>setcode</code>). <b style="color:var(--amber,#ffb347)">Hardening and reproducible source are not yet published</b> — until they are, a <b>.b</b> name is <b>operator-trusted, not trustless</b>.</span></p>
+  <p data-reg="bee" data-i18n="bnm.bee">a name of your own, on our chain. type it and see, live. nothing is signed here; the desk only composes what you sign.</p>
+  <details data-reg="bee" data-reg-disclose style="max-width:820px;margin:8px auto 0;text-align:start"><summary>what this desk cannot vouch for</summary><p style="margin-top:6px"><span style="display:block;margin-top:8px;color:var(--dim,#8a9a8a)">What the desk cannot vouch for is the registry behind it: every <b>.b</b> name answers to the keys behind <code>kingbeelovis</code> — today <b>three independent single-key paths</b> to full control (either <code>active</code> key, or the <code>owner</code> key that outranks it). Any one alone can replace the contract (<code>setcode</code>). <b style="color:var(--amber,#ffb347)">Hardening and reproducible source are not yet published</b> — until they are, a <b>.b</b> name is <b>operator-trusted, not trustless</b>.</span></p></details>
   <p data-reg="raver" data-i18n="bnm.rav">the .b desk — reserve · transfer · trade · resolve: a living constellation
   of the registry, animated availability, paste-ready actions with the REAL ABI shape, one-year
   terms, renew/repoint/multi-chain resolve lanes — all keyless reads in your browser.</p>
@@ -112,22 +108,11 @@ footer{max-width:1020px;margin:22px auto 0;color:var(--faint);font-size:10px;tex
 </header>
 
 
-<section>
-  <h2>🌌 <span data-i18n="bnm.h.live">THE REGISTRY, ALIVE — every name on chain, drawn live</span></h2>
-  <div class="law" data-i18n="bnm.live.law">The constellation below is not a picture of the registry — it <b>is</b> the
-  registry, read live from the chain as this page opened and drawn as it answered. The crowned
-  node is <b>king.b</b>; the pulsing ghosts are the open crown jewels. Touch any node.</div>
-  <div id="constwrap">
-    <svg id="const" viewBox="0 0 960 300" role="img" aria-label="live .b registry constellation"></svg>
-    <div class="tip" id="ctip"></div>
-  </div>
-</section>
-
 <section style="border-color:var(--gold)">
   <h2>🔑 <span data-i18n="bnm.h.secure">SECURE YOUR .b NAME — search, consent, sign</span></h2>
   <div class="law" data-i18n="bnm.secure.law">Three steps. One name per soul.</div>
   <div class="row" style="margin-top:10px">
-    <input id="q" placeholder="type your name — e.g. k" value="k" spellcheck="false" style="flex:1;font-size:16px;padding:12px 14px">
+    <input id="q" placeholder="your name" value="" autofocus autocomplete="off" spellcheck="false" style="flex:1;font-size:16px;padding:12px 14px">
     <button id="go" style="font-size:14px;padding:12px 20px" data-i18n="bnm.search">search</button>
   </div>
   <div class="verdict" id="vwrap"><div class="vtext" style="color:var(--dim)">—</div></div>
@@ -185,17 +170,27 @@ footer{max-width:1020px;margin:22px auto 0;color:var(--faint);font-size:10px;tex
   </div>
 </section>
 
-<section>
-  <h2>👑 <span data-i18n="bnm.h.jewels">THE CROWN JEWELS — king · k · q, breathing live</span></h2>
+<section><details data-reg-disclose><summary>🌌 <span data-i18n="bnm.h.live">THE REGISTRY, ALIVE — every name on chain, drawn live</span></summary>
+  <div class="law" data-i18n="bnm.live.law">The constellation below is not a picture of the registry — it <b>is</b> the
+  registry, read live from the chain as this page opened and drawn as it answered. The crowned
+  node is <b>king.b</b>; the pulsing ghosts are the open crown jewels. Touch any node.</div>
+  <div id="constwrap">
+    <svg id="const" viewBox="0 0 960 300" role="img" aria-label="live .b registry constellation"></svg>
+    <div class="tip" id="ctip"></div>
+  </div>
+</details></section>
+
+
+
+<section><details data-reg-disclose><summary>👑 <span data-i18n="bnm.h.jewels">THE CROWN JEWELS — king · k · q, breathing live</span></summary>
   <div class="jewels">
     <div class="jewel" id="j-king"><div class="jn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M3 8l4 4 5-7 5 7 4-4-2 12H5L3 8z" fill="#FFD700"/></svg>king.b</div><div class="st">checking…</div><div class="meta"></div></div>
     <div class="jewel" id="j-k"><div class="jn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#7ddf8f" stroke-width="2"/><circle cx="12" cy="12" r="3.5" fill="#7ddf8f"/></svg>k.b</div><div class="st">checking…</div><div class="meta"></div></div>
     <div class="jewel" id="j-q"><div class="jn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#7ddf8f" stroke-width="2"/><circle cx="12" cy="12" r="3.5" fill="#7ddf8f"/></svg>q.b</div><div class="st">checking…</div><div class="meta"></div></div>
   </div>
-</section>
+</details></section>
 
-<section>
-  <h2>🧾 <span data-i18n="bnm.h.composer">THE COMPOSER — paste-ready, REAL action shape, you sign it (never this page)</span></h2>
+<section><details data-reg-disclose><summary>🧾 <span data-i18n="bnm.h.composer">THE COMPOSER — paste-ready, REAL action shape, you sign it (never this page)</span></summary>
   <div class="law" data-i18n="bnm.composer.law">Fields from the registry's live ABI — not invented, not approximated.
   The desk composes; <b>signing is founder hands or the wallet-gate lane</b> (MX-5).</div>
   <div class="row">
@@ -205,10 +200,9 @@ footer{max-width:1020px;margin:22px auto 0;color:var(--faint);font-size:10px;tex
     <button id="compose">compose</button>
   </div>
   <pre id="recipe">— compose to see the paste-ready action —</pre>
-</section>
+</details></section>
 
-<section>
-  <h2>🛠 <span data-i18n="bnm.h.workshop">THE FULL WORKSHOP — tap any action to compose it (live ABI, 2026-08-22)</span></h2>
+<section><details data-reg-disclose><summary>🛠 <span data-i18n="bnm.h.workshop">THE FULL WORKSHOP — tap any action to compose it (live ABI, 2026-08-22)</span></summary>
   <div class="law" data-i18n="bnm.workshop.law">Every card is now an instrument — tap to expand, fill the fields
   (pre-filled from your connected soul where possible), compose the paste-ready action.
   You sign it; this page never does.</div>
@@ -245,10 +239,9 @@ footer{max-width:1020px;margin:22px auto 0;color:var(--faint);font-size:10px;tex
     <button class="act" style="margin-top:10px;background:#26123a;color:var(--violet);border:1px solid var(--line);border-radius:8px;padding:8px 14px;cursor:pointer;font:11px 'IBM Plex Mono',monospace" id="cz-compose">compose the action</button>
     <pre id="cz-out" style="margin-top:8px"></pre>
   </div>
-</section>
+</details></section>
 
-<section>
-  <h2>🌍 <span data-i18n="bnm.h.scale">THE 10-BILLION-USER · 1,000-YEAR DESIGN — ruled after testing every option</span></h2>
+<section><details data-reg-disclose><summary>🌍 <span data-i18n="bnm.h.scale">THE 10-BILLION-USER · 1,000-YEAR DESIGN — ruled after testing every option</span></summary>
   <div class="law" data-i18n="bnm.scale.law">We tested every architecture against the chain's real arithmetic and
   <b>only one way scales</b> —
   <a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/bdomain-scaling.md">the full analysis</a>:</div>
@@ -266,10 +259,9 @@ footer{max-width:1020px;margin:22px auto 0;color:var(--faint);font-size:10px;tex
       evolving the live contract costs <b>under a dollar at 13 rows</b>, impossible at 13 million.
       Ten billion users = ten billion <b>keypairs, not accounts</b> — only anchors take rows.</div>
   </div>
-</section>
+</details></section>
 
-<section>
-  <h2>🎁 <span data-i18n="bnm.h.devs">WHY THIS IS CHRISTMAS FOR DEVS</span></h2>
+<section><details data-reg-disclose><summary>🎁 <span data-i18n="bnm.h.devs">WHY THIS IS CHRISTMAS FOR DEVS</span></summary>
   <div class="law" data-reg="bee" data-i18n="bnm.devs.bee">One name, every chain, no subscription server in sight — and
   every number on this page is live from the chain with its source printed. Free to check,
   nearly free to hold, yours to sell back.</div>
@@ -279,7 +271,7 @@ footer{max-width:1020px;margin:22px auto 0;color:var(--faint);font-size:10px;tex
   <div class="law" data-reg="cypherpunk" data-i18n="bnm.devs.cy">public-RPC failover; compose-only (zero write paths);
   live ABI pinned 2026-08-22; two-track law rides (A = mainnet reads, b = Jungle per MX-7);
   name cost cross-validated crate↔page (0.8421).</div>
-</section>
+</details></section>
 
 </main>
 <footer>
@@ -550,8 +542,8 @@ footer{max-width:1020px;margin:22px auto 0;color:var(--faint);font-size:10px;tex
     st.textContent=row?'✕':'✓';
     if(!n){ wrap.innerHTML='<div class="vtext" style="color:var(--dim)">—</div>'; return; }
     tx.innerHTML = row
-      ? '<b>'+n+'.b is TAKEN</b> — owner '+row.owner+' · expires '+row.expires.slice(0,10)
-      : '<b>'+n+'.b is AVAILABLE</b> — fee '+(live.fee||'?')+' · RAM ~'+(live.ramCost?live.ramCost.toFixed(4):'?')+' core (resellable) · term '+(live.days||365)+' days';
+      ? '<b>'+n+'.b is taken</b> — held by '+row.owner+' · expires '+row.expires.slice(0,10)
+      : '<b>'+n+'.b is free</b> — fee '+(live.fee||'?')+' · RAM ~'+(live.ramCost?live.ramCost.toFixed(4):'?')+' core (resellable) · term '+(live.days||365)+' days';
     wrap.appendChild(st); wrap.appendChild(tx);
     // show/hide consent card
     var cc=$('consent-card');
