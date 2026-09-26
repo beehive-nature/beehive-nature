@@ -8,7 +8,7 @@
 
 [![tests](https://github.com/beehive-nature/beehive-nature/actions/workflows/tests.yml/badge.svg)](https://github.com/beehive-nature/beehive-nature/actions/workflows/tests.yml)
 [![secret-scan](https://github.com/beehive-nature/beehive-nature/actions/workflows/secret-scan.yml/badge.svg)](https://github.com/beehive-nature/beehive-nature/actions/workflows/secret-scan.yml)
-[![license: AGPL-3.0-only](https://img.shields.io/badge/license-AGPL--3.0--only-blue)](./LICENSE)
+[![license: AGPL-3.0-only kernel](https://img.shields.io/badge/license-AGPL--3.0--only%20kernel-blue)](./LICENSES/AGPL-3.0-only.txt)
 
 It lets two strangers complete a trade without trusting each other or a
 middleman: the payment waits in a Zano escrow that only a **Trezor** can
@@ -123,10 +123,19 @@ This repo is built to be audited. The fastest orientation:
 
 ## License
 
-Code: **AGPL-3.0-only** ([LICENSE](./LICENSE)) — copyleft at the kernel,
-by design; see [docs/LICENSING.md](./docs/LICENSING.md) for the
-anti-capture rationale and the standing intent that client SDK crates
-ship MIT OR Apache-2.0 when split out.
+The tree carries more than one license, by ruling (founder, 2026-08-29;
+[docs/LICENSING-PROPOSAL-2026-08-29.md](./docs/LICENSING-PROPOSAL-2026-08-29.md)):
+
+- **Kernel crates** (`Cargo.toml` workspace, `ui/`): **AGPL-3.0-only**,
+  text in [LICENSES/AGPL-3.0-only.txt](./LICENSES/AGPL-3.0-only.txt).
+  Copyleft at the kernel, by design; see
+  [docs/LICENSING.md](./docs/LICENSING.md) for the anti-capture rationale.
+- **Rails and primitives** named in the ruling (and client SDK crates when
+  split out): **Apache-2.0**, root [LICENSE](./LICENSE) plus [NOTICE](./NOTICE).
+- **`scripts/buzz-meter/`**: **BSL 1.1**, converting to GPL-2.0-or-later on
+  its Change Date, 2030-08-29 ([its LICENSE](./scripts/buzz-meter/LICENSE)).
+- Any path that carries its own `license` field or LICENSE file follows that
+  file.
 
 Documents: `CONSTITUTION.md` and `docs/` are **CC-BY-4.0**.
 

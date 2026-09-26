@@ -27,10 +27,17 @@ steward coup can undo it.
 
 Client SDK crates — the thin libraries applications embed to *talk to*
 the network (wallet adapters, event-bus clients, type bindings) — will
-ship **MIT OR Apache-2.0** when they are split out. Copyleft at the
+ship **Apache-2.0** when they are split out (ruled 2026-08-29: the MIT
+template is retired; the root `LICENSE` and `NOTICE` carry it). Copyleft at the
 kernel protects the commons; permissive at the edges lets anyone build
 on it without license anxiety. The boundary is deliberate: the network
 itself is a commons, an app talking to the network is the builder's own.
+
+## Where each text lives
+
+- AGPL-3.0-only (kernel): `LICENSES/AGPL-3.0-only.txt`
+- Apache-2.0 (rails, primitives, SDK edges): root `LICENSE` + `NOTICE`
+- BSL 1.1 -> GPL-2.0-or-later on 2030-08-29: `scripts/buzz-meter/LICENSE`
 
 ## Documents
 
