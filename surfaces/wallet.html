@@ -203,10 +203,13 @@ body[data-reg="raver"]{
   --sem-value:#e8b54b;
   --reg-primary:#d655bb;--reg-on-primary:#06110c;--reg-link:#b79fe0;--reg-link-hover:#e4d6fa;
   --reg-radius-card:28px;--reg-radius-btn:999px;
-  --reg-glow:0 0 42px #17102855,0 0 96px #17102822; /* glow-sovereign — raver's ONE glow */
+  --reg-glow:0 0 0 1px #9c6fd61c,0 0 46px #17102899,0 0 130px #d655bb1f; /* glow-sovereign — raver's ONE glow, sovereign-edged */
   --reg-font-body:system-ui,-apple-system,'Segoe UI',sans-serif;
   --reg-font-title:system-ui,-apple-system,'Segoe UI',sans-serif;
-  background:#06110c;color:#e9f2ec;color-scheme:dark;
+  /* the purples as light: a sovereign wash rises behind the fold and melts
+     into the black ground — light behind the page, never on the words */
+  background:radial-gradient(130% 80% at 50% -12%,#171028 0%,#0b0d1a 38%,#06110c 68%) #06110c;
+  color:#e9f2ec;color-scheme:dark;
   font:15px/1.7 var(--reg-font-body);
 }
 body[data-reg="cypherpunk"]{
@@ -224,6 +227,9 @@ body[data-reg="cypherpunk"]{
 /* ── the dress, every register ── */
 body[data-reg] section{border-radius:var(--reg-radius-card);box-shadow:var(--reg-glow)}
 body[data-reg] button{border-radius:var(--reg-radius-btn);color:var(--reg-primary);font-family:var(--reg-font-body)}
+/* the motion law: 140ms for a press, eased out — a press you can FEEL */
+body[data-reg] button,body[data-reg] .chip{transition:transform .14s ease,background-color .26s ease,border-color .26s ease,color .26s ease}
+body[data-reg] button:active{transform:scale(.97)}
 body[data-reg] button:hover{background:var(--reg-primary);color:var(--reg-on-primary)}
 body[data-reg] button.gold{background:var(--reg-primary);border-color:var(--reg-primary);color:var(--reg-on-primary)}
 body[data-reg] input,body[data-reg] select,body[data-reg] textarea{border-radius:var(--reg-radius-btn);font-family:var(--reg-font-body)}
@@ -232,9 +238,10 @@ body[data-reg] a:hover{color:var(--reg-link-hover)}
 h2::before{background:var(--sem-solution)}
 .crumbs .badge-live i{background:var(--sem-solution)}
 /* new bee: serif titles over sans reading, generous, soft; reading text 16px */
-body[data-reg="bee"] h1{background:none;color:var(--ink);font-family:var(--reg-font-title);font-weight:700;letter-spacing:-.02em}
+body[data-reg="bee"] h1{background:none;color:var(--ink);font-family:var(--reg-font-title);font-weight:700;letter-spacing:-.02em;font-size:clamp(34px,6.2vw,48px);text-wrap:balance}
 body[data-reg="bee"] h1 .h1-arg{background:none;color:var(--dim)}
 body[data-reg="bee"] h2{font-family:var(--reg-font-title);font-size:17px;letter-spacing:.01em}
+body[data-reg="bee"] #ch-vaulta .cb{font-size:clamp(38px,10.5vw,56px)} /* the thesis figure earns the room */
 body[data-reg="bee"] .law{font-size:14px;line-height:1.65}
 body[data-reg="bee"] #ch-vaulta .cn{font-size:14px;letter-spacing:.06em}
 body[data-reg="bee"] .crumbs,body[data-reg="bee"] .kicker,body[data-reg="bee"] .lcap{font-size:14px;letter-spacing:.06em}
@@ -243,10 +250,11 @@ body[data-reg="bee"] footer{font-size:14px}
 body[data-reg="bee"] input,body[data-reg="bee"] select,body[data-reg="bee"] textarea{font:16px/1.5 var(--reg-font-body)}
 body[data-reg="bee"] button{font:500 14px/1.4 var(--reg-font-body)}
 /* raver: display titles, you magenta as light, pills everywhere, the one glow */
-body[data-reg="raver"] h1{font-weight:800;letter-spacing:-.03em;color:transparent;
+body[data-reg="raver"] h1{font-weight:800;letter-spacing:-.03em;color:transparent;font-size:clamp(32px,6.2vw,48px);text-wrap:balance;
  background:linear-gradient(92deg,#e9f2ec 45%,#d655bb 72%,#9c6fd6);-webkit-background-clip:text;background-clip:text}
 body[data-reg="raver"] h1 .h1-arg{background:linear-gradient(92deg,#d655bb,#9c6fd6);-webkit-background-clip:text;background-clip:text;color:transparent}
 body[data-reg="raver"] h2{font-weight:800;letter-spacing:.02em}
+body[data-reg="raver"] #ch-vaulta .cb{font-size:clamp(38px,10.5vw,56px);text-shadow:0 0 26px #d655bb33} /* the figure carries the light */
 body[data-reg="raver"] button{font:500 14px/1.4 var(--reg-font-body)}
 body[data-reg="raver"] .crumbs,body[data-reg="raver"] .kicker,body[data-reg="raver"] .lcap{letter-spacing:.1em}
 /* cypherpunk: mono top to bottom, dense; ai teal for every action */
