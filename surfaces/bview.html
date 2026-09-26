@@ -89,6 +89,8 @@ document.addEventListener('DOMContentLoaded',function(){
   <p class="say" id="s-slow" data-i18n="bview.slow" hidden>Fetching from the network. The first seconds can take a while.</p>
   <progress id="pg" max="1" value="0" aria-labelledby="s-slow" hidden></progress>
   <p class="got" id="got" translate="no" dir="ltr" aria-live="off" hidden></p>
+  <p class="got" id="eta" hidden><span id="eta-in" data-i18n="bview.readyIn">Ready in</span><span id="eta-full" data-i18n="bview.readyFull" hidden>Whole file first — ready in</span> <span id="eta-n" translate="no" dir="ltr"></span></p>
+  <p class="say" id="s-decode" data-i18n="bview.decodeWarn" hidden>This device reports it cannot decode this video smoothly — playback may stutter.</p>
   <p class="say" id="s-fail" data-i18n="bview.fail" hidden>The network door did not answer, or this file is not a video. Try again in a few minutes.</p>
   <section id="out" aria-live="polite" hidden>
     <video id="v" controls playsinline preload="auto"></video>
@@ -109,6 +111,7 @@ document.addEventListener('DOMContentLoaded',function(){
           <div><dt data-i18n="bview.n.ttff">Time to first frame</dt><dd id="n-ttff" translate="no">—</dd></div>
           <div><dt data-i18n="bview.n.path">Path</dt><dd id="n-path" translate="no">—</dd></div>
           <div><dt data-i18n="bview.n.sha">SHA-256</dt><dd id="n-sha" translate="no">—</dd></div>
+          <div><dt data-i18n="bview.n.pre">Playback rule</dt><dd id="n-pre" translate="no" dir="ltr">—</dd></div>
           <div class="nm"><dt data-i18n="bview.n.chunks">Chunks</dt><dd data-i18n="bview.notMeasured">not measured</dd></div>
           <div class="nm"><dt data-i18n="bview.n.chunkReq">Chunk requests answered</dt><dd data-i18n="bview.notMeasured">not measured</dd></div>
           <div class="nm"><dt data-i18n="bview.n.lookup">Lookup answers</dt><dd data-i18n="bview.notMeasured">not measured</dd></div>
@@ -144,7 +147,10 @@ document.addEventListener('DOMContentLoaded',function(){
 (() => {
   const DOOR = 'https://relay.skaists.dev/ant/v1/data/public/';
   const HEAD = '{"data":"', STREAM_PROBE = 450, BLOB_WAIT = 20000;
-  const EARLY_MDAT = 256 << 10, SEGMENT = 8 << 20, STUB_CL = 128 << 10, PLAY_MIN = 12 << 20;
+  const EARLY_MDAT = 256 << 10, SEGMENT = 8 << 20, STUB_CL = 128 << 10;
+  // Prebuffer rule (2026-09-26): start early only when the MEASURED pipe can
+  // carry playback to the finish line without meeting the frozen Blob edge.
+  const SUSTAIN_MARGIN = 1.15, BUFFER_AHEAD = 3, START_FLOOR = 1536 << 10;
   const $ = id => document.getElementById(id), says = ['s-bad', 's-slow', 's-fail'];
   const say = id => says.forEach(s => $(s).hidden = s !== id);
   const parse = raw => { const m = /^\s*(?:autonomi:\/\/)?([0-9a-f]{64})\s*$/i.exec(raw || ''); return m ? m[1].toLowerCase() : null; };
@@ -155,12 +161,12 @@ document.addEventListener('DOMContentLoaded',function(){
   const dash = '\u2014';
   const metrics = {
     addr: '', path: '', cl: null, acceptRanges: null, firstChunk: null,
-    ttfbMs: null, ttffMs: null, bytes: 0, rateMbs: null, sha: null, t0: 0, doneMs: null
+    ttfbMs: null, ttffMs: null, bytes: 0, rateMbs: null, sha: null, t0: 0, doneMs: null, got: 0
   };
   const resetMetrics = () => {
     metrics.addr = ''; metrics.path = ''; metrics.cl = null; metrics.acceptRanges = null;
     metrics.firstChunk = null; metrics.ttfbMs = null; metrics.ttffMs = null;
-    metrics.bytes = 0; metrics.rateMbs = null; metrics.sha = null; metrics.t0 = 0; metrics.doneMs = null;
+    metrics.bytes = 0; metrics.rateMbs = null; metrics.sha = null; metrics.t0 = 0; metrics.doneMs = null; metrics.got = 0;
   };
   const fmtMs = ms => ms == null ? dash : (ms < 1000 ? Math.round(ms) + ' ms' : (ms / 1000).toFixed(2) + ' s');
   const fmtMb = n => n == null ? dash : ((n / 1048576) >= 10 ? (n / 1048576).toFixed(0) : (n / 1048576).toFixed(1)) + ' MB';
@@ -306,6 +312,66 @@ document.addEventListener('DOMContentLoaded',function(){
       paintNerd();
     }
   };
+  // Device decode report (2026-09-26): the browser's own mediaCapabilities
+  // verdict at the measured dimensions -- the honest warning while the bulk
+  // is still ahead. The probe cites the H.264 High profile at the real frame
+  // size; it is the browser's report, never a client invention.
+  let decodeReport = null;
+  async function probeDecode() {
+    if (decodeReport) return decodeReport;
+    const mc = navigator.mediaCapabilities;
+    if (!mc || typeof mc.decodingInfo !== 'function') return { probe: 'unavailable' };
+    const bps = metrics.cl && v.duration > 0 && isFinite(v.duration) ? Math.round(metrics.cl / v.duration * 8) : 0;
+    const cfg = { type: 'file', video: {
+      contentType: 'video/mp4; codecs="avc1.640033"',
+      width: v.videoWidth || 1920, height: v.videoHeight || 1080,
+      bitrate: Math.max(bps, 1), framerate: 30 } };
+    try {
+      const r = await mc.decodingInfo(cfg);
+      decodeReport = { probe: 'mediaCapabilities', supported: !!r.supported, smooth: !!r.smooth, powerEfficient: !!r.powerEfficient };
+    } catch { decodeReport = { probe: 'unavailable' }; }
+    return decodeReport;
+  }
+  // The prebuffer plan (2026-09-26): null while its inputs are unmeasured;
+  // otherwise the honest rule and the whole-second countdown for #eta. Words
+  // are keyed in the corpus (bview.readyIn / bview.readyFull); numbers stay
+  // translate="no". The fixed 12 MiB start died here: it was 1-2 s of 8K, so
+  // playback caught the frozen Blob edge and stalled until the file landed.
+  // Now: rate >= 1.15x the play rate (Content-Length / moov duration) AND the
+  // buffer ahead covers the rest of the download -- else no fake start, the
+  // whole-file countdown runs and the finish line plays.
+  const pb = { mode: '', ratio: null };
+  const resetPb = () => { pb.mode = ''; pb.ratio = null; };
+  const planPrebuffer = bytes => {
+    const dur = v.duration, cl = metrics.cl;
+    if (!(dur > 0 && isFinite(dur)) || !(cl > 0)) return null;
+    const rate = (metrics.rateMbs || 0) * 1048576;
+    if (!(rate > 0)) return null;
+    const total = metrics.path === 'envelope' && metrics.got > 0 ? Math.round(cl * bytes / metrics.got) : cl;
+    const bitrate = total / dur, ratio = rate / bitrate;
+    pb.ratio = ratio;
+    if (ratio < SUSTAIN_MARGIN) return { mode: 'full', ok: false, etaS: Math.max(0, (total - bytes) / rate) };
+    const need = Math.max(bitrate * BUFFER_AHEAD, START_FLOOR, bitrate * total / (rate + bitrate));
+    return { mode: 'sustain', ok: bytes >= need, etaS: Math.max(0, (need - bytes) / rate), need };
+  };
+  const paintEta = plan => {
+    const el = $('eta'), n = $('eta-n'), wordsIn = $('eta-in'), wordsFull = $('eta-full');
+    if (!el || !n || !wordsIn || !wordsFull) return;
+    if (!plan || plan.etaS == null || plan.ok) { el.hidden = true; n.textContent = ''; return; }
+    const s = plan.etaS;
+    n.textContent = '~' + (s >= 10 ? String(Math.round(s)) : String(Math.max(1, Math.ceil(s)))) + ' s';
+    const full = plan.mode === 'full';
+    wordsIn.hidden = full; wordsFull.hidden = !full;
+    el.hidden = false;
+  };
+  const paintPre = plan => {
+    const el = $('n-pre');
+    if (!el) return;
+    if (!plan || pb.ratio == null) { el.textContent = dash; return; }
+    const r = '×' + (pb.ratio >= 10 ? pb.ratio.toFixed(0) : pb.ratio.toFixed(1)) + ' rate/play';
+    el.textContent = plan.mode === 'full' ? r + ' · whole file first'
+      : r + ' · start @ ' + (plan.need / 1048576).toFixed(1) + ' MB';
+  };
   // Shared early paint: contiguous snap once moov + EARLY_MDAT are in hand.
   async function flushEarlyPaint(parts, bytes, state, my) {
     if (my !== job || bytes < 32) return;
@@ -331,11 +397,23 @@ document.addEventListener('DOMContentLoaded',function(){
       playing = my;
       markFirstFrame();
       say(null); // clear "Fetching…" — frame is up; bar + rate still show progress
+      // The bulk is still ahead -- ask the browser now whether it can decode
+      // this smoothly, and warn the viewer if it reports it cannot.
+      probeDecode().then(rep => {
+        if (my !== job || !rep || rep.probe === 'unavailable') return;
+        if (!rep.supported || !rep.smooth) { const el = $('s-decode'); if (el) el.hidden = false; }
+      }).catch(() => {});
       return;
     }
 
-    // Phase B -- one playable Blob once enough mdat is local, then leave it alone until finishBinary.
-    if (state.sounded || bytes < PLAY_MIN) return;
+    // Phase B -- one playable Blob once the prebuffer rule says the download
+    // can stay ahead of playback; otherwise the honest whole-file countdown
+    // runs and the finish line plays. Then leave it alone until finishBinary.
+    if (state.sounded) return;
+    const plan = planPrebuffer(bytes);
+    paintEta(plan); paintPre(plan);
+    if (plan) v.dataset.prebuffer = plan.mode === 'full' ? 'whole-file' : (plan.ok ? 'sustained' : 'waiting');
+    if (!plan || !plan.ok) return;
     const snap = prefixOf(parts, bytes, bytes);
     const ok = await paintBlob(new Blob([snap], { type: state.mime }), BLOB_WAIT);
     if (!(my === job && ok && v.videoWidth > 0)) return;
@@ -362,6 +440,7 @@ document.addEventListener('DOMContentLoaded',function(){
     metrics.doneMs = metrics.t0 ? performance.now() - metrics.t0 : null;
     metrics.sha = await hashBlob(full);
     paintNerd();
+    paintEta(null);
     if (playing === my || state.preview) {
       const ok = await paintBlob(full, BLOB_WAIT);
       if (ok) {
@@ -497,6 +576,7 @@ document.addEventListener('DOMContentLoaded',function(){
         }
         parts.push(part); held += part.length; bytes += part.length;
         if (held >= SEGMENT) held = 0;
+        metrics.got = got;
         if (my === job) showGot(bytes);
         await flushEarlyPaint(parts, bytes, state, my);
       }
@@ -517,6 +597,9 @@ document.addEventListener('DOMContentLoaded',function(){
     const busy = on => { pg.hidden = $('got').hidden = !on; };
     busy(false); pg.value = 0; $('got').textContent = ''; playing = 0; keepAt = 0; resetRate();
     resetMetrics(); paintNerd();
+    resetPb(); decodeReport = null; paintEta(null);
+    const dec = $('s-decode'); if (dec) dec.hidden = true;
+    v.removeAttribute('data-prebuffer');
     if (!a) { $('out').hidden = true; v.removeAttribute('src'); v.load(); say('s-bad'); return; }
     metrics.addr = a; metrics.t0 = performance.now();
     $('shown').textContent = 'autonomi://' + a; $('out').hidden = false; say('s-slow'); if (tap) tap.hidden = true;

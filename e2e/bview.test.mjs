@@ -415,3 +415,114 @@ test('cypherpunk sheet: honest path/size fields only — no invented Autonomi ne
   assert.deepEqual(hits.stray, []); assert.deepEqual(errs, []);
   await ctx.close();
 });
+
+// -- the seconds-based prebuffer (2026-09-26) --------------------------------
+// The fixed 12 MiB start was 1-2 s of 8K: playback caught the frozen Blob edge
+// and stalled until the whole download landed. The rule now starts early only
+// when the MEASURED pipe can carry playback to the finish; a pipe that cannot
+// stay ahead gets an honest whole-file countdown and plays at the finish line.
+
+test('prebuffer: a pipe that cannot stay ahead waits with an honest countdown and never fake-starts', async () => {
+  const { ctx, p, errs, hits } = await open({
+    stream: () => ({ status: 200, headers: { ...cors, 'content-type': 'application/octet-stream', 'content-length': String(BIG.length) }, body: BIG }),
+    json: () => 'abort',
+  });
+  await ctx.addInitScript(door => {
+    const real = window.fetch;
+    window.fetch = async (u, o) => {
+      const r = await real(u, o);
+      if (!String(u).startsWith(door) || !String(u).endsWith('/stream')) return r;
+      const h = new Headers(r.headers);
+      const slow = r.body.pipeThrough(new TransformStream({ async transform(c, out) {
+        for (let i = 0; i < c.length; i += 65536) { await new Promise(z => setTimeout(z, 40)); out.enqueue(c.subarray(i, i + 65536)); }
+      } }));
+      return new Response(slow, { status: r.status, headers: h });
+    };
+  }, DOOR);
+  await p.goto(`${ORIGIN}/surfaces/bview.html`, { waitUntil: 'domcontentloaded' });
+  await watch(p, A1);
+  if (!(await hasCodec(p))) { await ctx.close(); return; }
+  // the rule computes mid-download and the honest whole-file countdown runs
+  await p.waitForFunction(() => {
+    const v = document.getElementById('v');
+    return v.videoWidth > 0 && v.dataset.prebuffer === 'whole-file';
+  }, null, { timeout: 60000, polling: 50 });
+  const e1 = await p.evaluate(() => document.getElementById('eta-n').textContent);
+  assert.match(e1, /^~\d+ s$/, 'a whole-second ETA is shown (' + e1 + ')');
+  const s1 = parseFloat(e1.slice(1));
+  assert.ok(s1 > 0, 'the countdown is not pretending to be ready');
+  await p.waitForTimeout(2500);
+  const s2 = await p.evaluate(() => parseFloat(document.getElementById('eta-n').textContent.slice(1)));
+  assert.ok(s2 < s1, 'the countdown counts down (' + s1 + ' -> ' + s2 + ')');
+  // and the player has NOT fake-started: paused on the preview, playhead ~0
+  const mid = await p.evaluate(() => {
+    const v = document.getElementById('v');
+    return { paused: v.paused, t: v.currentTime, tap: !document.getElementById('tap').hidden };
+  });
+  assert.ok(mid.paused || mid.tap, 'not started while the pipe is behind');
+  assert.ok(mid.t < 0.5, 'the playhead is not running into a stall (' + mid.t + ' s)');
+  await settles(p, done, 120000);
+  await plays(p);
+  assert.equal(await p.evaluate(() => document.getElementById('eta').hidden), true, 'countdown retires at the finish line');
+  assert.deepEqual(hits.stray, []); assert.deepEqual(errs, []);
+  await ctx.close();
+});
+
+test('prebuffer: a pipe that stays ahead starts before the whole file and plays stall-free', async () => {
+  const { ctx, p, errs, hits } = await open({
+    stream: () => ({ status: 200, headers: { ...cors, 'content-type': 'application/octet-stream', 'content-length': String(BIG.length) }, body: BIG }),
+    json: () => 'abort',
+  });
+  await ctx.addInitScript(door => {
+    const real = window.fetch;
+    window.fetch = async (u, o) => {
+      const r = await real(u, o);
+      if (!String(u).startsWith(door) || !String(u).endsWith('/stream')) return r;
+      const h = new Headers(r.headers);
+      const fast = r.body.pipeThrough(new TransformStream({ async transform(c, out) {
+        for (let i = 0; i < c.length; i += 65536) { await new Promise(z => setTimeout(z, 25)); out.enqueue(c.subarray(i, i + 65536)); }
+      } }));
+      return new Response(fast, { status: r.status, headers: h });
+    };
+  }, DOOR);
+  await p.goto(`${ORIGIN}/surfaces/bview.html`, { waitUntil: 'domcontentloaded' });
+  await watch(p, A1);
+  if (!(await hasCodec(p))) { await ctx.close(); return; }
+  await p.waitForFunction(() => document.getElementById('v').dataset.prebuffer === 'sustained', null, { timeout: 60000, polling: 50 });
+  const mid = await p.evaluate(() => ({
+    bar: !document.getElementById('pg').hidden,
+    got: document.getElementById('got').textContent,
+  }));
+  assert.equal(mid.bar, true, 'still downloading at the sustained start');
+  assert.match(mid.got, /^[1-8](\.\d)? MB/, 'started while bytes were still arriving (' + mid.got + ')');
+  // sound needs the gesture in headless -- the tap is the honest path
+  if (await p.evaluate(() => !document.getElementById('tap').hidden)) await p.click('#tap');
+  await settles(p, done, 120000);
+  // stall-free: from a fresh seek on the full Blob the clock runs unclamped
+  await p.evaluate(async () => { const v = document.getElementById('v'); v.muted = true; try { await v.play(); } catch {} v.currentTime = 1; });
+  const t1 = await p.evaluate(() => document.getElementById('v').currentTime);
+  await p.waitForTimeout(1500);
+  const t2 = await p.evaluate(() => document.getElementById('v').currentTime);
+  assert.ok(t2 > t1 + 0.5, 'no stall: the clock advanced ' + (t2 - t1).toFixed(2) + ' s in 1.5 s');
+  assert.equal(await p.evaluate(() => !document.getElementById('s-decode').hidden), false, 'no decode warning when the browser reports smooth');
+  assert.deepEqual(hits.stray, []); assert.deepEqual(errs, []);
+  await ctx.close();
+});
+
+test('device decode report: a not-smooth browser verdict warns the viewer', async () => {
+  const { ctx, p, errs, hits } = await open({
+    stream: () => ({ status: 200, headers: { ...cors, 'content-type': 'application/octet-stream', 'content-length': String(MP4.length) }, body: MP4 }),
+    json: () => 'abort',
+  });
+  await ctx.addInitScript(() => {
+    try { Object.defineProperty(navigator, 'mediaCapabilities', { configurable: true, value: { decodingInfo: async () => ({ supported: true, smooth: false, powerEfficient: false }) } }); } catch {}
+  });
+  await p.goto(`${ORIGIN}/surfaces/bview.html`, { waitUntil: 'domcontentloaded' });
+  await watch(p, A1);
+  if (!(await hasCodec(p))) { await ctx.close(); return; }
+  await p.waitForFunction(() => !document.getElementById('s-decode').hidden, null, { timeout: 20000, polling: 100 });
+  const txt = (await p.locator('#s-decode').textContent()).trim();
+  assert.ok(txt.length > 20, 'the warning carries the keyed sentence');
+  assert.deepEqual(hits.stray, []); assert.deepEqual(errs, []);
+  await ctx.close();
+});
