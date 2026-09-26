@@ -15,7 +15,7 @@
 --bee-font:system-ui,-apple-system,'Segoe UI',sans-serif}
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{overflow-x:hidden}
-body{background:var(--bg);color:var(--ink);font:13px/1.6 'IBM Plex Mono',monospace;min-height:100vh;padding:0 0 90px}
+body{background:var(--bg);color:var(--ink);font:max(13px,var(--fmin,12px))/1.6 'IBM Plex Mono',monospace;min-height:100vh;padding:0 0 90px}
 main{max-width:920px;margin:0 auto;padding-inline:16px}
 /* Estate register scoping — INLINE so a cypher-only leaf cannot FOUC or leak
    if register.js is late or fails. Same contract as surfaces/register.js.
@@ -29,13 +29,13 @@ header::after{content:'';position:absolute;left:50%;bottom:0;transform:translate
   background:linear-gradient(90deg,transparent,var(--gold),transparent);opacity:.5}
 h1{font-size:clamp(19px,4.5vw,27px);color:var(--gold);font-weight:400;letter-spacing:.04em;
   text-shadow:0 0 18px rgba(255,215,0,.22)}
-.sub{color:var(--dim);font-size:11px;margin-top:8px;max-width:780px;margin-left:auto;margin-right:auto;line-height:1.85}
+.sub{color:var(--dim);font-size:max(11px,var(--fmin,12px));margin-top:8px;max-width:780px;margin-left:auto;margin-right:auto;line-height:1.85}
 section{background:#111a14;border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-top:16px}
-section h2{font-size:12px;color:var(--violet);font-weight:400;letter-spacing:.08em;margin-bottom:8px}
-.law{color:var(--dim);font-size:10px;line-height:1.7}
+section h2{font-size:max(12px,var(--fmin,12px));color:var(--violet);font-weight:400;letter-spacing:.08em;margin-bottom:8px}
+.law{color:var(--dim);font-size:max(10px,var(--fmin,12px));line-height:1.7}
 .law b{color:var(--ink)}
 a{color:var(--cyan)}
-.badge{display:inline-block;font-size:9px;letter-spacing:.1em;border:1px solid var(--line);border-radius:4px;padding:1px 6px;color:var(--gold)}
+.badge{display:inline-block;font-size:max(9px,var(--fmin,12px));letter-spacing:.1em;border:1px solid var(--line);border-radius:4px;padding:1px 6px;color:var(--gold)}
 .badge.hyp{color:var(--amber);border-color:#4a3a1a}
 .badge.rec{color:var(--leaf)}
 /* ── THE FAT ASSEMBLY LINE ── */
@@ -45,11 +45,11 @@ a{color:var(--cyan)}
 .stage:nth-child(1){animation-delay:.1s}.stage:nth-child(3){animation-delay:.55s}.stage:nth-child(5){animation-delay:1s}
 .stage:nth-child(7){animation-delay:1.45s}.stage:nth-child(9){animation-delay:1.9s}.stage:nth-child(11){animation-delay:2.35s}
 @keyframes arrive{to{opacity:1;transform:none}}
-.stage .sn{font-size:9px;color:var(--dim);letter-spacing:.14em}
-.stage .st{font-size:13px;color:var(--ink);margin-top:3px;line-height:1.65}
+.stage .sn{font-size:max(9px,var(--fmin,12px));color:var(--dim);letter-spacing:.14em}
+.stage .st{font-size:max(13px,var(--fmin,12px));color:var(--ink);margin-top:3px;line-height:1.65}
 .stage .st b{font-weight:400}
-.stage .sc{font-size:9.5px;color:var(--dim);margin-top:5px;line-height:1.7}
-.stat{display:inline-block;background:#141207;border:1px solid #3d3410;border-radius:6px;padding:3px 9px;font-size:10px;color:var(--gold);margin-top:6px}
+.stage .sc{font-size:max(9.5px,var(--fmin,12px));color:var(--dim);margin-top:5px;line-height:1.7}
+.stat{display:inline-block;background:#141207;border:1px solid #3d3410;border-radius:6px;padding:3px 9px;font-size:max(10px,var(--fmin,12px));color:var(--gold);margin-top:6px}
 .flowline{height:24px;display:flex;justify-content:center;align-items:center}
 .flowline svg{width:16px;height:24px}
 .flowline path{stroke:var(--dim);stroke-width:1.7;fill:none;stroke-dasharray:4 5;animation:flow 1.1s linear infinite}
@@ -59,45 +59,45 @@ body.reversed .flowline path{animation-direction:reverse;stroke:var(--amber)}
 .brick{flex:1;min-width:180px;border-radius:9px;padding:9px 11px;border:1px solid var(--line);position:relative}
 .brick.n6{border-color:#4a3a1a;background:#120e06}
 .brick.n3{border-color:#1d4f58;background:#061012}
-.brick .bt{font-size:12px}
+.brick .bt{font-size:max(12px,var(--fmin,12px))}
 .brick.n6 .bt b{color:var(--n6)}.brick.n3 .bt b{color:var(--n3)}
-.brick .bs{font-size:9.5px;color:var(--dim);margin-top:3px;line-height:1.65}
+.brick .bs{font-size:max(9.5px,var(--fmin,12px));color:var(--dim);margin-top:3px;line-height:1.65}
 .brick .dot{position:absolute;top:8px;right:9px;width:8px;height:8px;border-radius:50%;background:var(--ess);animation:pulse 2.2s ease-in-out infinite}
 @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(63,156,85,.5)}50%{box-shadow:0 0 0 7px rgba(63,156,85,0)}}
 .rx{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px}
 .rx .stn{flex:1;min-width:170px;border:1px solid #3d3410;background:#120e06;border-radius:9px;padding:9px 11px}
 .rx .stn.cb2{border-color:#34104a;background:#0e0612}
-.rx .stn .rt{font-size:12px}
+.rx .stn .rt{font-size:max(12px,var(--fmin,12px))}
 .rx .stn.cb1 .rt b{color:var(--cyan)}.rx .stn.cb2 .rt b{color:var(--cb)}
-.rx .stn .rs{font-size:9.5px;color:var(--dim);margin-top:3px;line-height:1.65}
+.rx .stn .rs{font-size:max(9.5px,var(--fmin,12px));color:var(--dim);margin-top:3px;line-height:1.65}
 .stage.acid{border-color:#4a3a1a;background:#141008}
 .stage.acid .st{color:var(--acid)}
 .hyp{display:none}
 body.reversed .stage .hyp{display:inline}
-#revBtn{background:#2a230a;color:var(--gold);border:1px solid #4a3a1a;border-radius:var(--r-pill,99px);padding:9px 20px;cursor:pointer;font:11.5px 'IBM Plex Mono',monospace;margin-top:12px;transition:background var(--dur,260ms),color var(--dur,260ms),box-shadow var(--dur,260ms)}
+#revBtn{background:#2a230a;color:var(--gold);border:1px solid #4a3a1a;border-radius:var(--r-pill,99px);padding:9px 20px;cursor:pointer;font:max(11.5px,var(--fmin,12px)) 'IBM Plex Mono',monospace;margin-top:12px;transition:background var(--dur,260ms),color var(--dur,260ms),box-shadow var(--dur,260ms)}
 #revBtn:hover{background:var(--gold);color:#000;box-shadow:var(--glow-gold,0 0 14px rgba(255,215,0,.12))}
 /* ── essential classes ── */
 #classes{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:10px;margin-top:10px}
 .cgroup{background:#0a0f0b;border:1px solid var(--line);border-radius:10px;padding:11px 13px}
 .cgroup.ess{border-color:#2b4a34;animation:essglow 3s ease-in-out infinite}
 @keyframes essglow{0%,100%{box-shadow:0 0 0 0 rgba(63,156,85,.22)}50%{box-shadow:0 0 14px 2px rgba(63,156,85,.10)}}
-.cgroup.non{opacity:.62}
-.cgroup h3{font-size:11px;font-weight:400;color:var(--ink)}
-.cgroup .ch{font-size:9.5px;color:var(--dim);margin:2px 0 6px}
-.cgroup .rows{font-size:10.5px;color:var(--dim);line-height:1.9}
+.cgroup.non{opacity:.86} /* dimmed as "not required", still past 4.5:1 */
+.cgroup h3{font-size:max(11px,var(--fmin,12px));font-weight:400;color:var(--ink)}
+.cgroup .ch{font-size:max(9.5px,var(--fmin,12px));color:var(--dim);margin:2px 0 6px}
+.cgroup .rows{font-size:max(10.5px,var(--fmin,12px));color:var(--dim);line-height:1.9}
 .cgroup .rows b{color:var(--ink);font-weight:400}
 .cgroup.ess .rows b{color:var(--ess)}
 /* ── the mirror ── */
 .mtile{background:#0a0f0b;border:1px solid var(--line);border-radius:10px;padding:11px 13px;position:relative;overflow:hidden}
 .mtile::after{content:'';position:absolute;inset:auto 0 0 0;height:2px;background:linear-gradient(90deg,var(--n6),var(--n3));opacity:.7}
 .mtile .mv{font-size:clamp(22px,5vw,31px);line-height:1.12;color:var(--ink);font-variant-numeric:tabular-nums;letter-spacing:.01em}
-.mtile .mv small{font-size:12px;color:var(--dim)}
-.mtile .ml{font-size:9.5px;color:var(--dim);margin-top:3px;line-height:1.65}
+.mtile .mv small{font-size:max(12px,var(--fmin,12px));color:var(--dim)}
+.mtile .ml{font-size:max(9.5px,var(--fmin,12px));color:var(--dim);margin-top:3px;line-height:1.65}
 .mtile .ml b{color:var(--gold);font-weight:400}
 .mtile.n3t .mv{color:var(--n3)} .mtile.n6t .mv{color:var(--n6)}
 /* ── DIAAS, demoted to the attention hook ── */
 #diaas{display:flex;flex-wrap:wrap;gap:5px 10px;margin-top:8px}
-.dchip{font-size:9.5px;color:var(--dim);border:1px solid var(--line);border-radius:5px;padding:2px 7px}
+.dchip{font-size:max(9.5px,var(--fmin,12px));color:var(--dim);border:1px solid var(--line);border-radius:5px;padding:2px 7px}
 .dchip b{color:var(--ink);font-weight:400}
 .dchip.hemp{border-color:#2b4a34;color:var(--ess)}
 @media (prefers-reduced-motion: reduce){
@@ -105,7 +105,7 @@ body.reversed .stage .hyp{display:inline}
   .flowline path,.brick .dot,.cgroup.ess{animation:none}
   body.reversed .flowline path{stroke:var(--amber)}
 }
-footer{max-width:920px;margin:22px auto 0;padding-inline:16px;color:var(--dim);font-size:10px;text-align:center;line-height:1.8}
+footer{max-width:920px;margin:22px auto 0;padding-inline:16px;color:var(--dim);font-size:max(10px,var(--fmin,12px));text-align:center;line-height:1.8}
 
 [hidden]{display:none!important}
 .door{appearance:none;display:inline-flex;align-items:center;justify-content:center;min-height:44px;
@@ -179,6 +179,8 @@ body[data-reg="cypherpunk"] #sources-panel{border:1px dashed var(--line);border-
 body[data-reg="cypherpunk"] #sources-panel summary{cursor:pointer;min-height:44px;display:flex;align-items:center}
 #sources-panel{margin-top:14px}
 #sources-panel summary{cursor:pointer;min-height:44px;display:flex;align-items:center;color:var(--violet)}
+/* the ledger's heading sits in a summary, outside `section h2`: give it the same voice as its siblings */
+#sources-panel summary h2{font-size:max(12px,var(--fmin,12px));font-weight:400;letter-spacing:.08em;color:var(--violet)}
 
 /* Page-owned language+view chrome (atlas mast-nav / gallery top-nav).
    lang.js mounts #blangctl into [data-language-host]; register.js mounts
@@ -191,7 +193,13 @@ body[data-reg="cypherpunk"] #sources-panel summary{cursor:pointer;min-height:44p
   background:var(--reg-bg,var(--panel,var(--bg)))!important;color:var(--reg-ink,var(--ink))!important;
   border:1px solid var(--reg-line,var(--line))!important;font:inherit!important
 }
-.blong-language #blangnote{white-space:normal!important;color:var(--reg-ink,var(--dim))!important;font:.75rem/1.4 inherit!important}
+.blong-language #blangnote{white-space:normal!important;color:var(--reg-ink,var(--dim))!important;font:max(.75rem,var(--fmin,12px))/1.4 inherit!important}
+/* footer links are controls: a thumb-sized row, not text-height slivers */
+footer a{padding-block:14px} /* a 44 px tap target that leaves the line rhythm alone */
+/* Lower-half floor (2026-09-26, 390 px phone review): every small size on this page
+   reads max(its own size, --fmin) — 12 px in cypherpunk's dense mono, 14 px for new bee
+   and raver, so no register ever draws reading text a phone cannot hold. */
+body[data-reg="bee"],body[data-reg="raver"]{--fmin:14px}
 </style>
 </head>
 <body data-reg="bee" data-bee-theme="custom" data-blong-beat="arrival">
@@ -397,10 +405,10 @@ body[data-reg="cypherpunk"] #sources-panel summary{cursor:pointer;min-height:44p
   for life — no body outgrows its bricks. the long-horizon part is the hypothesis you can
   <a href="bfood.html#quests">join as a quest</a>, graded honestly.</div>
   <div style="margin-top:8px">
-    <label style="font-size:10px;color:var(--dim)">your weight (kg)
-      <input id="m-wt" type="number" min="30" max="250" value="80" style="background:#0a0f0b;color:var(--ink);border:1px solid var(--line);border-radius:7px;padding:5px 9px;font:12px 'IBM Plex Mono',monospace;width:84px"></label>
-    <label style="font-size:10px;color:var(--dim);margin-left:12px">sex (sets your AI denominators)
-      <select id="m-sex" style="background:#0a0f0b;color:var(--ink);border:1px solid var(--line);border-radius:7px;padding:5px 9px;font:12px 'IBM Plex Mono',monospace">
+    <label style="font-size:max(10px,var(--fmin,12px));color:var(--dim)">your weight (kg)
+      <input id="m-wt" type="number" min="30" max="250" value="80" style="background:#0a0f0b;color:var(--ink);border:1px solid var(--line);border-radius:7px;padding:5px 9px;font:max(12px,var(--fmin,12px)) 'IBM Plex Mono',monospace;width:84px"></label>
+    <label style="font-size:max(10px,var(--fmin,12px));color:var(--dim);margin-left:12px">sex (sets your AI denominators)
+      <select id="m-sex" style="background:#0a0f0b;color:var(--ink);border:1px solid var(--line);border-radius:7px;padding:5px 9px;font:max(12px,var(--fmin,12px)) 'IBM Plex Mono',monospace">
         <option value="m">male</option><option value="f">female</option></select></label>
   </div>
   <div id="mirror" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:9px;margin-top:10px"></div>

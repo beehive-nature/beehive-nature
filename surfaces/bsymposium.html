@@ -18,7 +18,7 @@
 --bee-font:system-ui,-apple-system,'Segoe UI',sans-serif}
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{overflow-x:hidden}
-body{background:var(--bg);color:var(--ink);font:13px/1.6 'IBM Plex Mono',monospace;min-height:100vh;padding:0 0 90px}
+body{background:var(--bg);color:var(--ink);font:max(13px,var(--fmin,12px))/1.6 'IBM Plex Mono',monospace;min-height:100vh;padding:0 0 90px}
 main{max-width:900px;margin:0 auto;padding-inline:16px}
 /* Estate register scoping — INLINE so a cypher-only leaf cannot FOUC or leak
    if register.js is late or fails. Same contract as surfaces/register.js.
@@ -29,35 +29,35 @@ body[data-reg="raver"] [data-reg="raver"],
 body[data-reg="cypherpunk"] [data-reg="cypherpunk"]{display:revert}
 header{text-align:center;margin-bottom:10px}
 h1{font-size:clamp(17px,4vw,24px);color:var(--gold);font-weight:400;letter-spacing:.05em}
-header p,.sub{color:var(--dim);font-size:11px;margin-top:6px;max-width:720px;margin-left:auto;margin-right:auto}
+header p,.sub{color:var(--dim);font-size:max(11px,var(--fmin,12px));margin-top:6px;max-width:720px;margin-left:auto;margin-right:auto}
 section{background:#111a14;border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-top:16px}
-section h2{font-size:12px;color:var(--violet);font-weight:400;letter-spacing:.08em;margin-bottom:8px}
-.law{color:var(--dim);font-size:10px;line-height:1.7}
+section h2{font-size:max(12px,var(--fmin,12px));color:var(--violet);font-weight:400;letter-spacing:.08em;margin-bottom:8px}
+.law{color:var(--dim);font-size:max(10px,var(--fmin,12px));line-height:1.7}
 .law b{color:var(--ink)}
 a{color:var(--cyan)}
-table{width:100%;border-collapse:collapse;margin-top:8px;font-size:10.5px}
+table{width:100%;border-collapse:collapse;margin-top:8px;font-size:max(10.5px,var(--fmin,12px))}
 td,th{border-bottom:1px solid var(--line);padding:7px 8px;text-align:left;color:var(--dim);vertical-align:top}
-th{color:var(--violet);font-weight:400;font-size:9.5px;letter-spacing:.05em}
+th{color:var(--violet);font-weight:400;font-size:max(9.5px,var(--fmin,12px));letter-spacing:.05em}
 td.n{color:var(--ink)}
 .st{white-space:nowrap;font-weight:400}
 .st i{display:inline-block;width:8px;height:8px;border-radius:2px;margin-inline-end:5px;vertical-align:-1px}
-.cite{font-size:9px;color:var(--dim)}
-.lk{font-size:8.5px;letter-spacing:.03em;border:1px solid;border-radius:3px;padding:0 4px;white-space:nowrap;display:inline-block}
+.cite{font-size:max(9px,var(--fmin,12px));color:var(--dim)}
+.lk{font-size:max(8.5px,var(--fmin,12px));letter-spacing:.03em;border:1px solid;border-radius:3px;padding:0 4px;white-space:nowrap;display:inline-block}
 .lk.ok{color:#63c97c;border-color:#2b5a39}
 .lk.bad{color:#ff8f5a;border-color:#6b3a1e}
 .lk.unk{color:#93a493;border-color:#3a4a3c}
 .fetchnote{margin-top:14px;padding:11px 13px;border:1px solid #6b4710;border-left:3px solid #ffb347;
- border-radius:8px;font-size:10.5px;line-height:1.85;color:var(--dim)}
+ border-radius:8px;font-size:max(10.5px,var(--fmin,12px));line-height:1.85;color:var(--dim)}
 .fetchnote b{color:var(--ink)}
-.quote{background:#0a0f0b;border:1px solid var(--line);border-radius:9px;padding:10px 12px;margin-top:10px;font-size:11px;line-height:1.8}
-.quote .who{color:var(--gold);font-size:9.5px;letter-spacing:.06em}
+.quote{background:#0a0f0b;border:1px solid var(--line);border-radius:9px;padding:10px 12px;margin-top:10px;font-size:max(11px,var(--fmin,12px));line-height:1.8}
+.quote .who{color:var(--gold);font-size:max(9.5px,var(--fmin,12px));letter-spacing:.06em}
 .lane{background:#0a0f0b;border:1px solid var(--line);border-radius:10px;padding:11px 13px;margin-top:10px}
-.lane h3{font-size:11.5px;color:var(--ink);font-weight:400}
-.lane .sm{font-size:10.5px;color:var(--dim);line-height:1.75;margin-top:5px}
+.lane h3{font-size:max(11.5px,var(--fmin,12px));color:var(--ink);font-weight:400}
+.lane .sm{font-size:max(10.5px,var(--fmin,12px));color:var(--dim);line-height:1.75;margin-top:5px}
 .lane .sm b{color:var(--ink)}
-footer{max-width:900px;margin:22px auto 0;padding-inline:16px;color:var(--dim);font-size:10px;text-align:center;line-height:1.8}
-.badge{display:inline-block;font-size:9px;letter-spacing:.1em;border:1px solid var(--line);border-radius:4px;padding:1px 6px;color:var(--gold)}
-#legend{margin-top:8px;font-size:10px;color:var(--dim)}
+footer{max-width:900px;margin:22px auto 0;padding-inline:16px;color:var(--dim);font-size:max(10px,var(--fmin,12px));text-align:center;line-height:1.8}
+.badge{display:inline-block;font-size:max(9px,var(--fmin,12px));letter-spacing:.1em;border:1px solid var(--line);border-radius:4px;padding:1px 6px;color:var(--gold)}
+#legend{margin-top:8px;font-size:max(10px,var(--fmin,12px));color:var(--dim)}
 #legend span{margin-right:14px;white-space:nowrap}
 #legend i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:5px;vertical-align:-1px}
 
@@ -95,7 +95,7 @@ body[data-reg="bee"] .door.primary{background:#a8238c;color:#fff;border-color:#0
 body[data-reg="bee"] #tbar{background:#fbf7f0!important;border-top-color:#e6dfd2!important}
 body[data-reg="bee"] #tbar a{color:#0c1412!important}
 body[data-reg="bee"] section{background:#fff;border-color:var(--line)}
-body[data-reg="bee"] .quote,.lane{background:#efe9dd}
+body[data-reg="bee"] .quote,body[data-reg="bee"] .lane{background:#efe9dd}
 
 /* Raver — two voices, one shared plate, a soft room. Not a debate stage. */
 body[data-reg="raver"]{--bg:#16120e;--ink:#f3efe4;--dim:#c4b8a4;--line:#3a3228;--gold:#e6c27a;--violet:#c9a0ff;--cyan:#d8c4ff;
@@ -127,6 +127,8 @@ body[data-reg="cypherpunk"] #sources-panel{border:1px dashed var(--line);border-
 body[data-reg="cypherpunk"] #sources-panel summary{cursor:pointer;min-height:44px;display:flex;align-items:center}
 #sources-panel{margin-top:14px}
 #sources-panel summary{cursor:pointer;min-height:44px;display:flex;align-items:center;color:var(--violet)}
+/* the record's heading sits in a summary, outside `section h2`: give it its siblings' voice */
+#sources-panel summary h2{font-size:max(12px,var(--fmin,12px));font-weight:400;letter-spacing:.08em;color:var(--violet)}
 
 .meet-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin-top:18px}
 .meet-card{background:#0a0f0b;border:1px solid var(--line);border-radius:12px;padding:14px 16px;text-align:start}
@@ -146,7 +148,13 @@ body[data-reg="bee"] .meet-card{background:#fff}
   background:var(--reg-bg,var(--bg))!important;color:var(--reg-ink,var(--ink))!important;
   border:1px solid var(--reg-line,var(--line))!important;font:inherit!important
 }
-.bsymp-language #blangnote{white-space:normal!important;color:var(--reg-ink,var(--dim))!important;font:.75rem/1.4 inherit!important}
+.bsymp-language #blangnote{white-space:normal!important;color:var(--reg-ink,var(--dim))!important;font:max(.75rem,var(--fmin,12px))/1.4 inherit!important}
+/* footer links are controls: a thumb-sized row, not text-height slivers */
+footer a{padding-block:14px} /* a 44 px tap target that leaves the line rhythm alone */
+/* Lower-half floor (2026-09-26, 390 px phone review): every small size on this page
+   reads max(its own size, --fmin) — 12 px in cypherpunk's dense mono, 14 px for new bee
+   and raver, so no register ever draws reading text a phone cannot hold. */
+body[data-reg="bee"],body[data-reg="raver"]{--fmin:14px}
 </style>
 </head>
 <body data-reg="bee" data-bee-theme="custom" data-bsymp-beat="arrival">

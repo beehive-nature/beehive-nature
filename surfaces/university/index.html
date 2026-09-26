@@ -117,7 +117,7 @@ body[data-reg="bee"] #tbar{background:#fbf7f0!important;border-top-color:#e6dfd2
 body[data-reg="bee"] #tbar a{color:#0c1412!important}
 body[data-reg="bee"] section{background:#fff;border-color:var(--line)}
 body[data-reg="bee"] .charter{background:#f3efe2;border-color:#d4c4a0;color:#855b0b}
-body[data-reg="bee"] .ex,.rline{background:#efe9dd;border-color:var(--line)}
+body[data-reg="bee"] .ex,body[data-reg="bee"] .rline{background:#efe9dd;border-color:var(--line)}
 body[data-reg="bee"] .ex input[type=number],body[data-reg="bee"] select,body[data-reg="bee"] input[type=text]{background:#fff;color:var(--ink);border-color:var(--line)}
 
 /* Raver — quiet floor; checking our own material is the dance. */
@@ -173,6 +173,17 @@ body[data-reg="cypherpunk"] #sources-panel summary{cursor:pointer;min-height:44p
 .lesson-context{max-width:42rem;margin:20px auto;text-align:start;border:1px solid var(--line);border-radius:16px;padding:16px 20px}
 .lesson-context summary{cursor:pointer;min-height:44px;display:flex;align-items:center}
 body[data-reg="raver"] .lesson-example{background:linear-gradient(135deg,#281b36,#102c28)}
+
+/* THE LOWER HALF AT 390 (2026-09-26, footer audit): the cypherpunk
+   instrument kept 9–11.5 px laws, exercises, tables and footer, with 17–30 px
+   buttons. Floor 12 px (still the densest register); every exercise button is
+   a 44 px target; links inside the laws keep their line but take a taller
+   tap area (inline padding does not move text). */
+.law,.charter,.badge,.machine,.ex h3,.ex .q,.ex label,.fb,.rline,table,.swatch,.dE,footer{font-size:12px}
+.tgl button,.ex button{font-size:12px;min-height:44px}
+.swatch button{font-size:12px;min-height:44px;min-width:44px}
+.law a,.charter a,.prose a,.ex a,footer a,td a{padding-block:12px}
+footer{padding-bottom:14px}
 </style>
 </head>
 <body data-reg="bee" data-bee-theme="custom" data-uni-beat="arrival">
@@ -428,7 +439,7 @@ body[data-reg="raver"] .lesson-example{background:linear-gradient(135deg,#281b36
 </main>
 <footer>
   <span data-i18n="uni.foot.door">Education — cite, or silent.</span>
-  · <span data-reg="cypherpunk">doctrine: <a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/dispatches/COMMISSION_BEEHIVE_UNIVERSITY_2026-08-20.md" target="_blank" rel="noopener noreferrer">COMMISSION_BEEHIVE_UNIVERSITY_2026-08-20</a> ·
+  <span data-reg="cypherpunk">· doctrine: <a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/dispatches/COMMISSION_BEEHIVE_UNIVERSITY_2026-08-20.md" target="_blank" rel="noopener noreferrer">COMMISSION_BEEHIVE_UNIVERSITY_2026-08-20</a> ·
   landing receipt: <a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/dispatches/RECEIPT_BEEHIVE_UNIVERSITY_LANDING_2026-08-20.md" target="_blank" rel="noopener noreferrer">RECEIPT_BEEHIVE_UNIVERSITY_LANDING_2026-08-20</a> ·
   inherited: <a href="../hardware/build.html">the producer ladder</a> · <a href="../hardware/lab.html">the lab charter</a> ·
   <a href="../blight/museum.html">the museum's show-the-errors doctrine</a> · <a href="../bigen.html">BiGen's methodology</a>

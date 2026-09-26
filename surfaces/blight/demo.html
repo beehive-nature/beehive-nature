@@ -42,15 +42,17 @@ h1 b{background:var(--rainbow);-webkit-background-clip:text;background-clip:text
 .grid{display:grid;grid-template-columns:1fr;gap:var(--s3)}
 @media(min-width:56rem){.grid{grid-template-columns:1.05fr .95fr}}
 .panel{background:var(--bg-card);border:1px solid var(--line);border-radius:var(--radius);padding:var(--s3)}
-.muted{color:var(--ink-dim);font-size:.8rem}
+.muted{color:var(--ink-mut);font-size:.875rem}
 .btn{appearance:none;font:inherit;font-weight:650;min-height:46px;border-radius:var(--radius);
   border:1px solid transparent;cursor:pointer;padding:0 var(--s3);margin:0 8px 8px 0}
 .btn.primary{background:var(--primary);color:#150512}
 .btn.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
 .btn.on{border-color:var(--ai);color:var(--ai)}
-.gauge{display:flex;gap:8px;align-items:flex-start;font-size:.85rem;color:var(--ink-mut);padding:5px 0}
-.gauge .s{font-size:.64rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;
-  padding:2px 7px;border-radius:6px;flex:none;margin-top:2px;border:1px solid var(--line)}
+/* the label chip rides inline at the head of its sentence, so a long gauge
+   (the demo-link note) wraps as one paragraph instead of splitting into columns */
+.gauge{display:block;font-size:1rem;line-height:1.55;color:var(--ink-mut);padding:6px 0}
+.gauge .s{display:inline-block;font-size:.875rem;font-weight:700;letter-spacing:.02em;line-height:1.3;
+  padding:1px 8px;border-radius:6px;margin-right:6px;vertical-align:1px;border:1px solid var(--line)}
 .g-stale .s{color:var(--ink-mut);border-style:dashed} .g-live .s{color:var(--info)}
 .g-known .s{color:var(--verified)} .g-absent .s{color:var(--guard)}
 
@@ -70,8 +72,8 @@ h1 b{background:var(--rainbow);-webkit-background-clip:text;background-clip:text
   margin-bottom:var(--s2)}
 .guide b{color:var(--ink)}
 .steps{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
-.steps span{font-size:.7rem;padding:3px 9px;border-radius:var(--radius-pill);
-  border:1px solid var(--line);color:var(--ink-dim)}
+.steps span{font-size:.8rem;padding:3px 9px;border-radius:var(--radius-pill);
+  border:1px solid var(--line);color:var(--ink-mut)}
 .steps span.now{border-color:var(--ai);color:var(--ai)}
 .progress{height:7px;border-radius:var(--radius-pill);background:var(--line);overflow:hidden;margin:var(--s2) 0}
 .progress i{display:block;height:100%;width:0;background:var(--rainbow);transition:width .18s}
@@ -85,7 +87,12 @@ h1 b{background:var(--rainbow);-webkit-background-clip:text;background-clip:text
 .plug .ic{width:30px;height:30px;border-radius:8px;display:grid;place-items:center;
   background:color-mix(in srgb,var(--ai) 16%,transparent);flex:none}
 pre{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px;
-  font-size:.72rem;overflow:auto;max-height:120px;color:var(--ink-mut);margin:var(--s2) 0 0}
+  font-size:.875rem;overflow:auto;max-height:140px;color:var(--ink-mut);margin:var(--s2) 0 0}
+
+  /* LOWER HALF at 390px (2026-09-26): the hub chip is a 44px control floating
+     just above the tour bar (anchored on the bar's published --tbar-h), so the
+     page end reserves the bar plus the chip and nothing ever ends beneath either. */
+  body{padding-bottom:calc(var(--tbar-h,50px) + 24px)!important}
 </style>
 </head>
 <body>
@@ -1816,7 +1823,7 @@ function heard(kind,html){
 showBits('bLighTnetWorK · bLiGhTbeAM · ready');
 step(1);
 </script>
-<div id="bnr-beta-badge" style="position:fixed;right:.6rem;bottom:calc(.6rem + 46px);z-index:9997;font:12px ui-monospace,monospace;opacity:.75"><a href="../" style="color:#39c5cf;text-decoration:none;border:1px solid #30363d;border-radius:99px;padding:.15rem .7rem;background:#161b22">⌂ hub</a></div>
+<div id="bnr-beta-badge" style="position:fixed;right:.6rem;bottom:calc(var(--tbar-h,50px) + 10px);z-index:9997;font:14px ui-monospace,monospace"><a href="../" style="display:inline-flex;align-items:center;min-height:44px;color:#39c5cf;text-decoration:none;border:1px solid #30363d;border-radius:99px;padding:0 16px;background:#161b22">⌂ hub</a></div>
 <script src="../tour.js?v=42"></script>
 </body>
 </html>

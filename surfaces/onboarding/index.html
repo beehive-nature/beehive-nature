@@ -254,6 +254,14 @@ body[data-reg="cypherpunk"] #instrument>.foot{margin-block-start:0;margin-block-
 #foot-quiet{display:block}
 body[data-reg="cypherpunk"] #foot-quiet,
 body[data-onb-beat="deeper"] #foot-quiet{display:none}
+
+/* the page end at 390 px (2026-09-26 lower-half pass): the quiet foot line
+   reads at 14 px; on a light-scheme device the cypherpunk primary action wears
+   new bee's deeper magenta with a white label, so it keeps 4.5:1. Badges, tags and gauge
+   states read as written (casing law) at 13 px. */
+.foot{font-size:.875rem;line-height:1.6}
+@media (prefers-color-scheme:light){body[data-reg="cypherpunk"] .btn.primary{background:#a8238c;color:#fff}}
+.badge,.tag,.gauge .s{text-transform:none;letter-spacing:.02em;font-size:.8125rem}
 </style>
 </head>
 <body data-reg="bee" data-bee-theme="custom" data-onb-beat="arrival">

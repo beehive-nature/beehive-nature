@@ -1,0 +1,770 @@
+{
+ "page": "(outside the tree) bview-before.html",
+ "bytes": 31735975,
+ "dur": 30,
+ "rateBps": 528933,
+ "samples": [
+  {
+   "s": 1,
+   "fed": 0.2,
+   "got": "0.2 MB · 0.2 MB/s",
+   "t": 0,
+   "paused": true,
+   "err": 0,
+   "rows": [
+    "s-slow: Fetching from the network. The first seconds can take a while."
+   ]
+  },
+  {
+   "s": 2,
+   "fed": 0.7,
+   "got": "0.7 MB · 0.5 MB/s",
+   "t": 0,
+   "paused": true,
+   "err": 0,
+   "rows": [
+    "s-slow: Fetching from the network. The first seconds can take a while."
+   ]
+  },
+  {
+   "s": 3,
+   "fed": 1.2,
+   "got": "1.2 MB · 0.5 MB/s",
+   "t": 0,
+   "paused": true,
+   "err": 0,
+   "rows": [
+    "s-slow: Fetching from the network. The first seconds can take a while."
+   ]
+  },
+  {
+   "s": 4,
+   "fed": 1.8,
+   "got": "1.8 MB · 0.5 MB/s",
+   "t": 0,
+   "paused": true,
+   "err": 0,
+   "rows": []
+  },
+  {
+   "s": 5,
+   "fed": 2.3,
+   "got": "2.3 MB · 0.5 MB/s",
+   "t": 0,
+   "paused": true,
+   "err": 0,
+   "rows": []
+  },
+  {
+   "s": 6,
+   "fed": 2.8,
+   "got": "2.8 MB · 0.5 MB/s",
+   "t": 0,
+   "paused": true,
+   "err": 0,
+   "rows": []
+  },
+  {
+   "s": 7,
+   "fed": 3.3,
+   "got": "3.3 MB · 0.5 MB/s",
+   "t": 0,
+   "paused": true,
+   "err": 0,
+   "rows": []
+  },
+  {
+   "s": 8,
+   "fed": 3.8,
+   "got": "3.8 MB",
+   "t": 0,
+   "paused": true,
+   "err": 0,
+   "rows": []
+  },
+  {
+   "s": 9,
+   "fed": 4.3,
+   "got": "4.3 MB · 0.5 MB/s",
+   "t": 0,
+   "paused": true,
+   "err": 0,
+   "rows": []
+  },
+  {
+   "s": 10,
+   "fed": 4.8,
+   "got": "4.8 MB · 0.5 MB/s",
+   "t": 0,
+   "paused": true,
+   "err": 0,
+   "rows": []
+  },
+  {
+   "s": 11,
+   "fed": 5.3,
+   "got": "5.3 MB · 0.5 MB/s",
+   "t": 0,
+   "paused": true,
+   "err": 0,
+   "rows": []
+  },
+  {
+   "s": 12,
+   "fed": 5.8,
+   "got": "5.8 MB · 0.5 MB/s",
+   "t": 0,
+   "paused": true,
+   "err": 0,
+   "rows": []
+  },
+  {
+   "s": 13,
+   "fed": 6.3,
+   "got": "6.3 MB · 0.5 MB/s",
+   "t": 0,
+   "paused": true,
+   "err": 0,
+   "rows": []
+  },
+  {
+   "s": 14,
+   "fed": 6.8,
+   "got": "6.8 MB · 0.5 MB/s",
+   "t": 0,
+   "paused": true,
+   "err": 0,
+   "rows": []
+  },
+  {
+   "s": 15,
+   "fed": 7.3,
+   "got": "7.3 MB · 0.5 MB/s",
+   "t": 0,
+   "paused": true,
+   "err": 0,
+   "rows": []
+  },
+  {
+   "s": 16,
+   "fed": 7.8,
+   "got": "7.8 MB",
+   "t": 0,
+   "paused": true,
+   "err": 0,
+   "rows": []
+  },
+  {
+   "s": 17,
+   "fed": 8.3,
+   "got": "8.3 MB · 0.5 MB/s",
+   "t": 0,
+   "paused": true,
+   "err": 0,
+   "rows": []
+  },
+  {
+   "s": 18,
+   "fed": 8.8,
+   "got": "8.8 MB · 0.5 MB/s",
+   "t": 0,
+   "paused": true,
+   "err": 0,
+   "rows": []
+  },
+  {
+   "s": 19,
+   "fed": 9.3,
+   "got": "9.3 MB · 0.5 MB/s",
+   "t": 0,
+   "paused": true,
+   "err": 0,
+   "rows": []
+  },
+  {
+   "s": 20,
+   "fed": 9.8,
+   "got": "9.8 MB · 0.5 MB/s",
+   "t": 0,
+   "paused": true,
+   "err": 0,
+   "rows": []
+  },
+  {
+   "s": 21,
+   "fed": 10.3,
+   "got": "10 MB",
+   "t": 0,
+   "paused": true,
+   "err": 0,
+   "rows": []
+  },
+  {
+   "s": 22,
+   "fed": 10.8,
+   "got": "11 MB · 0.5 MB/s",
+   "t": 0,
+   "paused": true,
+   "err": 0,
+   "rows": []
+  },
+  {
+   "s": 23,
+   "fed": 11.3,
+   "got": "11 MB · 0.5 MB/s",
+   "t": 0,
+   "paused": true,
+   "err": 0,
+   "rows": []
+  },
+  {
+   "s": 24,
+   "fed": 11.8,
+   "got": "12 MB · 0.5 MB/s",
+   "t": 0,
+   "paused": true,
+   "err": 0,
+   "rows": []
+  },
+  {
+   "s": 25,
+   "fed": 12.3,
+   "got": "12 MB · 0.5 MB/s",
+   "t": 0.45,
+   "paused": false,
+   "err": 0,
+   "rows": []
+  },
+  {
+   "s": 26,
+   "fed": 12.8,
+   "got": "13 MB · 0.5 MB/s",
+   "t": 1.45,
+   "paused": false,
+   "err": 0,
+   "rows": []
+  },
+  {
+   "s": 27,
+   "fed": 13.3,
+   "got": "13 MB · 0.5 MB/s",
+   "t": 2.46,
+   "paused": false,
+   "err": 0,
+   "rows": []
+  },
+  {
+   "s": 28,
+   "fed": 13.8,
+   "got": "14 MB · 0.5 MB/s",
+   "t": 3.46,
+   "paused": false,
+   "err": 0,
+   "rows": []
+  },
+  {
+   "s": 29,
+   "fed": 14.3,
+   "got": "14 MB",
+   "t": 4.45,
+   "paused": false,
+   "err": 0,
+   "rows": []
+  },
+  {
+   "s": 30,
+   "fed": 14.8,
+   "got": "15 MB · 0.5 MB/s",
+   "t": 5.45,
+   "paused": false,
+   "err": 0,
+   "rows": []
+  },
+  {
+   "s": 31,
+   "fed": 15.3,
+   "got": "15 MB · 0.5 MB/s",
+   "t": 6.45,
+   "paused": false,
+   "err": 0,
+   "rows": []
+  },
+  {
+   "s": 32,
+   "fed": 15.8,
+   "got": "16 MB · 0.5 MB/s",
+   "t": 7.46,
+   "paused": false,
+   "err": 0,
+   "rows": []
+  },
+  {
+   "s": 33,
+   "fed": 16.3,
+   "got": "16 MB · 0.5 MB/s",
+   "t": 8.45,
+   "paused": false,
+   "err": 0,
+   "rows": []
+  },
+  {
+   "s": 34,
+   "fed": 16.8,
+   "got": "17 MB · 0.5 MB/s",
+   "t": 9.45,
+   "paused": false,
+   "err": 0,
+   "rows": []
+  },
+  {
+   "s": 35,
+   "fed": 17.3,
+   "got": "17 MB · 0.5 MB/s",
+   "t": 10.45,
+   "paused": false,
+   "err": 0,
+   "rows": []
+  },
+  {
+   "s": 36,
+   "fed": 17.8,
+   "got": "18 MB · 0.5 MB/s",
+   "t": 10.54,
+   "paused": true,
+   "err": 3,
+   "rows": []
+  },
+  {
+   "s": 37,
+   "fed": 18.3,
+   "got": "18 MB",
+   "t": 10.54,
+   "paused": true,
+   "err": 3,
+   "rows": []
+  },
+  {
+   "s": 38,
+   "fed": 18.8,
+   "got": "19 MB · 0.5 MB/s",
+   "t": 10.54,
+   "paused": true,
+   "err": 3,
+   "rows": []
+  },
+  {
+   "s": 39,
+   "fed": 19.3,
+   "got": "19 MB · 0.5 MB/s",
+   "t": 10.54,
+   "paused": true,
+   "err": 3,
+   "rows": []
+  },
+  {
+   "s": 40,
+   "fed": 19.8,
+   "got": "20 MB · 0.5 MB/s",
+   "t": 10.54,
+   "paused": true,
+   "err": 3,
+   "rows": []
+  },
+  {
+   "s": 41,
+   "fed": 20.3,
+   "got": "20 MB · 0.5 MB/s",
+   "t": 10.54,
+   "paused": true,
+   "err": 3,
+   "rows": []
+  },
+  {
+   "s": 42,
+   "fed": 20.8,
+   "got": "21 MB",
+   "t": 10.54,
+   "paused": true,
+   "err": 3,
+   "rows": []
+  },
+  {
+   "s": 43,
+   "fed": 21.3,
+   "got": "21 MB · 0.5 MB/s",
+   "t": 10.54,
+   "paused": true,
+   "err": 3,
+   "rows": []
+  },
+  {
+   "s": 44,
+   "fed": 21.8,
+   "got": "22 MB · 0.5 MB/s",
+   "t": 10.54,
+   "paused": true,
+   "err": 3,
+   "rows": []
+  },
+  {
+   "s": 45,
+   "fed": 22.3,
+   "got": "22 MB · 0.5 MB/s",
+   "t": 10.54,
+   "paused": true,
+   "err": 3,
+   "rows": []
+  },
+  {
+   "s": 46,
+   "fed": 22.9,
+   "got": "23 MB · 0.5 MB/s",
+   "t": 10.54,
+   "paused": true,
+   "err": 3,
+   "rows": []
+  },
+  {
+   "s": 47,
+   "fed": 23.4,
+   "got": "23 MB · 0.5 MB/s",
+   "t": 10.54,
+   "paused": true,
+   "err": 3,
+   "rows": []
+  },
+  {
+   "s": 48,
+   "fed": 23.9,
+   "got": "24 MB · 0.5 MB/s",
+   "t": 10.54,
+   "paused": true,
+   "err": 3,
+   "rows": []
+  },
+  {
+   "s": 49,
+   "fed": 24.4,
+   "got": "24 MB · 0.5 MB/s",
+   "t": 10.54,
+   "paused": true,
+   "err": 3,
+   "rows": []
+  },
+  {
+   "s": 50,
+   "fed": 24.9,
+   "got": "25 MB",
+   "t": 10.54,
+   "paused": true,
+   "err": 3,
+   "rows": []
+  },
+  {
+   "s": 51,
+   "fed": 25.4,
+   "got": "25 MB · 0.5 MB/s",
+   "t": 10.54,
+   "paused": true,
+   "err": 3,
+   "rows": []
+  },
+  {
+   "s": 52,
+   "fed": 25.9,
+   "got": "26 MB · 0.5 MB/s",
+   "t": 10.54,
+   "paused": true,
+   "err": 3,
+   "rows": []
+  },
+  {
+   "s": 53,
+   "fed": 26.4,
+   "got": "26 MB · 0.5 MB/s",
+   "t": 10.54,
+   "paused": true,
+   "err": 3,
+   "rows": []
+  },
+  {
+   "s": 54,
+   "fed": 26.9,
+   "got": "27 MB · 0.5 MB/s",
+   "t": 10.54,
+   "paused": true,
+   "err": 3,
+   "rows": []
+  },
+  {
+   "s": 55,
+   "fed": 27.4,
+   "got": "27 MB · 0.5 MB/s",
+   "t": 10.54,
+   "paused": true,
+   "err": 3,
+   "rows": []
+  },
+  {
+   "s": 56,
+   "fed": 27.9,
+   "got": "28 MB · 0.5 MB/s",
+   "t": 10.54,
+   "paused": true,
+   "err": 3,
+   "rows": []
+  },
+  {
+   "s": 57,
+   "fed": 28.4,
+   "got": "28 MB · 0.5 MB/s",
+   "t": 10.54,
+   "paused": true,
+   "err": 3,
+   "rows": []
+  },
+  {
+   "s": 58,
+   "fed": 28.9,
+   "got": "29 MB",
+   "t": 10.54,
+   "paused": true,
+   "err": 3,
+   "rows": []
+  },
+  {
+   "s": 59,
+   "fed": 29.4,
+   "got": "29 MB · 0.5 MB/s",
+   "t": 10.54,
+   "paused": true,
+   "err": 3,
+   "rows": []
+  },
+  {
+   "s": 60,
+   "fed": 29.9,
+   "got": "30 MB · 0.5 MB/s",
+   "t": 10.54,
+   "paused": true,
+   "err": 3,
+   "rows": []
+  },
+  {
+   "s": 61,
+   "fed": 30.3,
+   "got": "30 MB · 0.5 MB/s",
+   "t": 0,
+   "paused": true,
+   "err": 0,
+   "rows": []
+  },
+  {
+   "s": 62,
+   "fed": 30.3,
+   "got": "30 MB · 0.5 MB/s",
+   "t": 11.26,
+   "paused": false,
+   "err": 0,
+   "rows": []
+  },
+  {
+   "s": 63,
+   "fed": 30.3,
+   "got": "30 MB · 0.5 MB/s",
+   "t": 12.26,
+   "paused": false,
+   "err": 0,
+   "rows": []
+  },
+  {
+   "s": 64,
+   "fed": 30.3,
+   "got": "30 MB · 0.5 MB/s",
+   "t": 13.27,
+   "paused": false,
+   "err": 0,
+   "rows": []
+  },
+  {
+   "s": 65,
+   "fed": 30.3,
+   "got": "30 MB · 0.5 MB/s",
+   "t": 14.26,
+   "paused": false,
+   "err": 0,
+   "rows": []
+  },
+  {
+   "s": 66,
+   "fed": 30.3,
+   "got": "30 MB · 0.5 MB/s",
+   "t": 15.26,
+   "paused": false,
+   "err": 0,
+   "rows": []
+  },
+  {
+   "s": 67,
+   "fed": 30.3,
+   "got": "30 MB · 0.5 MB/s",
+   "t": 16.26,
+   "paused": false,
+   "err": 0,
+   "rows": []
+  },
+  {
+   "s": 68,
+   "fed": 30.3,
+   "got": "30 MB · 0.5 MB/s",
+   "t": 17.26,
+   "paused": false,
+   "err": 0,
+   "rows": []
+  },
+  {
+   "s": 69,
+   "fed": 30.3,
+   "got": "30 MB · 0.5 MB/s",
+   "t": 18.26,
+   "paused": false,
+   "err": 0,
+   "rows": []
+  },
+  {
+   "s": 70,
+   "fed": 30.3,
+   "got": "30 MB · 0.5 MB/s",
+   "t": 19.26,
+   "paused": false,
+   "err": 0,
+   "rows": []
+  },
+  {
+   "s": 71,
+   "fed": 30.3,
+   "got": "30 MB · 0.5 MB/s",
+   "t": 20.26,
+   "paused": false,
+   "err": 0,
+   "rows": []
+  },
+  {
+   "s": 72,
+   "fed": 30.3,
+   "got": "30 MB · 0.5 MB/s",
+   "t": 21.26,
+   "paused": false,
+   "err": 0,
+   "rows": []
+  },
+  {
+   "s": 73,
+   "fed": 30.3,
+   "got": "30 MB · 0.5 MB/s",
+   "t": 22.26,
+   "paused": false,
+   "err": 0,
+   "rows": []
+  },
+  {
+   "s": 74,
+   "fed": 30.3,
+   "got": "30 MB · 0.5 MB/s",
+   "t": 23.26,
+   "paused": false,
+   "err": 0,
+   "rows": []
+  },
+  {
+   "s": 75,
+   "fed": 30.3,
+   "got": "30 MB · 0.5 MB/s",
+   "t": 24.27,
+   "paused": false,
+   "err": 0,
+   "rows": []
+  },
+  {
+   "s": 76,
+   "fed": 30.3,
+   "got": "30 MB · 0.5 MB/s",
+   "t": 25.26,
+   "paused": false,
+   "err": 0,
+   "rows": []
+  },
+  {
+   "s": 77,
+   "fed": 30.3,
+   "got": "30 MB · 0.5 MB/s",
+   "t": 26.26,
+   "paused": false,
+   "err": 0,
+   "rows": []
+  },
+  {
+   "s": 78,
+   "fed": 30.3,
+   "got": "30 MB · 0.5 MB/s",
+   "t": 27.27,
+   "paused": false,
+   "err": 0,
+   "rows": []
+  },
+  {
+   "s": 79,
+   "fed": 30.3,
+   "got": "30 MB · 0.5 MB/s",
+   "t": 28.26,
+   "paused": false,
+   "err": 0,
+   "rows": []
+  },
+  {
+   "s": 80,
+   "fed": 30.3,
+   "got": "30 MB · 0.5 MB/s",
+   "t": 29.26,
+   "paused": false,
+   "err": 0,
+   "rows": []
+  },
+  {
+   "s": 81,
+   "fed": 30.3,
+   "got": "30 MB · 0.5 MB/s",
+   "t": 30,
+   "paused": true,
+   "err": 0,
+   "rows": []
+  },
+  {
+   "s": 82,
+   "fed": 30.3,
+   "got": "30 MB · 0.5 MB/s",
+   "t": 30,
+   "paused": true,
+   "err": 0,
+   "rows": []
+  },
+  {
+   "s": 83,
+   "fed": 30.3,
+   "got": "30 MB · 0.5 MB/s",
+   "t": 30,
+   "paused": true,
+   "err": 0,
+   "rows": []
+  },
+  {
+   "s": 84,
+   "fed": 30.3,
+   "got": "30 MB · 0.5 MB/s",
+   "t": 30,
+   "paused": true,
+   "err": 0,
+   "rows": []
+  }
+ ]
+}

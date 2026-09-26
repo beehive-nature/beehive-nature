@@ -36,6 +36,29 @@ button:hover{background:var(--violet);color:#000}
 .big{font-size:clamp(26px,7vw,40px);color:var(--gold);text-align:center;line-height:1.3;margin-top:6px}
 .big s{font-size:13px;color:var(--dim);text-decoration:none;display:block}
 footer{max-width:900px;margin:22px auto 0;color:var(--faint);font-size:10px;text-align:center;line-height:2}
+/* lower half at 390 px — reading sizes, contrast and tap heights (founder phone review, 2026-09-26) */
+:root{--faint:#8a9a8a}
+section h2{font-size:13px;letter-spacing:.04em;line-height:1.5}
+.law{font-size:13.5px;line-height:1.8}
+table{font-size:12.5px}
+th{font-size:12px;letter-spacing:.02em}
+pre{font-size:12px}
+.big s{font-size:14px;line-height:1.5;margin-top:4px}
+button{font-size:14px;min-height:44px;padding:10px 16px}
+footer{color:var(--dim);font-size:13px;line-height:1.6;padding:0 8px}
+footer{line-height:2.1}
+footer a{padding-block:12px;text-underline-offset:3px}
+body[data-reg="bee"] .law{font:16px/1.7 system-ui,-apple-system,'Segoe UI',sans-serif}
+body[data-reg="bee"] .law code,body[data-reg="bee"] .law i{font-size:14px}
+body[data-reg="bee"] section h2{font:600 16px/1.4 system-ui,-apple-system,'Segoe UI',sans-serif;letter-spacing:normal}
+body[data-reg="bee"] table{font:14px/1.6 system-ui,-apple-system,'Segoe UI',sans-serif}
+body[data-reg="bee"] th{font-size:14px;letter-spacing:normal}
+body[data-reg="bee"] footer,body[data-reg="bee"] .big s{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;font-size:14px}
+body[data-reg="bee"] button{font:15px system-ui,-apple-system,'Segoe UI',sans-serif}
+body[data-reg="raver"] .law{font-size:14.5px}
+body[data-reg="raver"] table,body[data-reg="raver"] th{font-size:14px}
+body[data-reg="raver"] section h2{font-size:14px}
+body[data-reg="raver"] footer{font-size:14px}
 </style>
 </head>
 <body>
@@ -64,7 +87,7 @@ footer{max-width:900px;margin:22px auto 0;color:var(--faint);font-size:10px;text
 </section>
 
 <section>
-  <h2>THE BOARD — live, read from the same file the pickers read</h2>
+  <h2>the board — live, read from the same file the pickers read</h2>
   <div class="scroll"><table id="board"><tr><th>tongue</th><th>strings docked</th><th>status</th><th>why this one matters</th></tr></table></div>
   <div class="law" style="margin-top:8px">the ⭐ ten are <b>founder-ordered deployment coordinates</b> (2026-08-21): Russian → Latvian →
   Ukrainian → Gàidhlig → Czech (Trezor's home) → Chinese → Korean (new to the corpus by his word) →
@@ -73,7 +96,7 @@ footer{max-width:900px;margin:22px auto 0;color:var(--faint);font-size:10px;text
 </section>
 
 <section>
-  <h2>HOW — one evening, four steps, no account</h2>
+  <h2>how — one evening, four steps, no account</h2>
   <div class="law">
   <b>1 ·</b> open <a href="blanguage.html#workshop">the DOCK workshop</a>, pick <b>🔀 merge</b>,
   choose your tongue — every line prefills beside its English.<br>
@@ -94,7 +117,7 @@ footer{max-width:900px;margin:22px auto 0;color:var(--faint);font-size:10px;text
 </section>
 
 <section>
-  <h2>SPREAD THE CALL — composed for the founder's rails, carried by human hands</h2>
+  <h2>spread the call — composed for the founder's rails, carried by human hands</h2>
   <pre id="call">🌐 ONE TONGUE, ONE EVENING — help us make a small piece of history.
 
 Our whole open-source estate (46 dApps: on-chain art, nutrition science, learning,
@@ -161,7 +184,7 @@ fetch(R+'lang-corpus.json?v=9').then(function(r){return r.json()}).then(function
       +'<td>'+(WHY[code]||'')+'</td>';
     t.appendChild(tr);
   });
-}).catch(function(){ $('tally').innerHTML='—<s>the corpus could not be fetched; a failure, never a zero</s>'; });
+}).catch(function(){ $('tally').innerHTML='not read<s>the corpus could not be fetched; a failure, never a zero</s>'; });
 (function(){ /* the call's tongue list renders from the live corpus — additions never stale it */
   fetch(R+'lang-corpus.json?v=9').then(function(r){return r.json()}).then(function(j){
     var names={ru:'русский',lv:'latviešu',uk:'українська',gd:'Gàidhlig',cs:'čeština',zh:'中文',ko:'한국어',th:'ไทย',ar:'العربية','nl-be':'Vlaams',es:'español',nl:'Nederlands',de:'Deutsch',fr:'français',he:'עברית',hi:'हिन्दी',bn:'বাংলা',fa:'فارسی',ja:'日本語',ur:'اردو',tr:'Türkçe',hu:'magyar',da:'dansk',nb:'norsk',sv:'svenska',fi:'suomi'};

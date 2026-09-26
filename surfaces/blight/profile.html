@@ -90,10 +90,6 @@ button.do:active{transform:translateY(1px)}
 .gaps{border:1.5px dashed var(--sovereign);border-radius:var(--radius);padding:var(--s3);margin-top:var(--s2)}
 .gaps h2{font-size:13px;color:var(--sovereign-soft);text-transform:uppercase;letter-spacing:1px}
 .gaps p{font-size:12px;color:var(--ink-mut);margin-top:4px}
-.gaps ul{list-style:none;margin-top:10px;display:grid;gap:8px}
-.gaps li{font-size:12.5px;color:var(--ink-mut)}
-.gaps li b{color:var(--ink)}
-.gaps li i{font-style:normal;color:var(--ink-dim);font-size:11px}
 .record{margin-top:var(--s2);font-size:12px;color:var(--ink);background:var(--bg-well);border-left:3px solid var(--sem-system);border-radius:0 9px 9px 0;padding:10px 12px}
 .scope{font-size:11px;color:var(--ink-dim);margin-top:10px}
 .foot{margin-top:var(--s3);font-size:11px;color:var(--ink-dim)}
@@ -141,6 +137,48 @@ nav#fleetnav{margin-top:var(--s4);font-size:11.5px;color:var(--ink-dim)}
   .stat b{font-size:30px}
   .wall{grid-template-columns:repeat(auto-fill,minmax(130px,1fr))}
 }
+/* ── the page's end, read on a phone (footer pass 2026-09-26) ────────────
+   casing law: no forced capitals; nothing under 12 px; dim ink lifted to
+   4.5:1 on the card; bee and raver read at 14 px, bee paragraphs at 16;
+   the fleet row is a 44 px tap row. */
+:root{--ink-dim:#76948a}
+.pfptag,.stat .l,.piece .lab .crownword,.gaps h2,.cap .tag{text-transform:none}
+.cap .tag{font-size:12px;letter-spacing:.02em;padding:2px 10px;line-height:1.5}
+.cap h3{padding-right:0}
+.cap p{font-size:13px}
+.cap .honest{font-size:12px}
+.hint,.hint code,.scope,.foot{font-size:12px}
+.hint{color:var(--ink-mut)}
+.stat .l{font-size:12px;letter-spacing:.2px}
+.stat b#st-pieces:not(:empty){overflow-wrap:anywhere}
+.gaps h2{font-size:15px;letter-spacing:.2px}
+.scope,.foot{color:var(--ink-mut);line-height:1.65}
+.foot{padding-top:14px;border-top:1px solid var(--line)}
+.foot b{color:var(--ink)}
+nav#fleetnav{display:flex;flex-wrap:wrap;align-items:center;gap:0 10px;font-size:12px;margin-top:14px;color:var(--ink-dim)}
+nav#fleetnav a{display:inline-flex;align-items:center;min-height:44px;text-decoration:none}
+body:not([data-reg="cypherpunk"]) .cap p,body:not([data-reg="cypherpunk"]) .cap .honest,
+body:not([data-reg="cypherpunk"]) .hint,body:not([data-reg="cypherpunk"]) .hint code,
+body:not([data-reg="cypherpunk"]) .stat .l,body:not([data-reg="cypherpunk"]) .gaps p,
+body:not([data-reg="cypherpunk"]) .record,body:not([data-reg="cypherpunk"]) .msg,
+body:not([data-reg="cypherpunk"]) .scope,body:not([data-reg="cypherpunk"]) .foot,
+body:not([data-reg="cypherpunk"]) nav#fleetnav{font-size:14px}
+body[data-reg="bee"] .cap p:not(.honest),body[data-reg="bee"] .gaps p,body[data-reg="bee"] .record,
+body[data-reg="bee"] .scope,body[data-reg="bee"] .foot{font-size:16px}
+body[data-reg="cypherpunk"] .scope,body[data-reg="cypherpunk"] .foot{font-family:var(--font-mono)}
+/* the second-half list reads as term over meaning on a phone: the term on
+   its own line, its meaning beneath (the separating dash stays in the text
+   for screen readers and copy, drawn at zero size) */
+.cap p>a:only-child{display:inline-flex;align-items:center;min-height:44px}
+.gaps h2{margin-bottom:4px}
+/* the half that needs somewhere to live: a term above its meaning, a real definition list */
+.gaps dl{display:grid;gap:12px;margin:14px 0 0}
+.gaps dl>div{padding-left:12px;border-left:2px solid var(--line)}
+.gaps dt{color:var(--ink);font-weight:700;font-size:13px;line-height:1.4}
+.gaps dd{margin:1px 0 0;color:var(--ink-mut);font-size:12.5px;line-height:1.5}
+body:not([data-reg="cypherpunk"]) .gaps dt{font-size:15px}
+body:not([data-reg="cypherpunk"]) .gaps dd{font-size:14px}
+.scope{margin-top:18px}
 </style>
 </head>
 <body>
@@ -272,7 +310,7 @@ straight from the chain. this is a HUMAN surface: the purple rim is the person,
 </section>
 
 <div class="stats">
-  <div class="stat pstat"><b data-hero-number id="st-pieces">—</b><span class="l">pieces held · from chain</span></div>
+  <div class="stat pstat"><b data-hero-number id="st-pieces">not yet</b><span class="l">pieces held · from chain</span></div>
   <div class="stat science"><b id="st-reads">0</b><span class="l">chain reads · eth_call</span></div>
   <div class="stat"><b id="st-tokens">0</b><span class="l">tokens with balance</span></div>
 </div>
@@ -286,13 +324,13 @@ because the chain is the record — this page keeps no state, sets no cookie, wr
   <h2>the half that needs somewhere to live</h2>
   <p>the chain knows what you <b>hold</b>. it cannot know what you <b>did here</b> —
   these live only where someone writes them down, and naming them is this page's second half:</p>
-  <ul>
-    <li><b>nickname</b> — <i>a name people call you: a write, not a balance</i></li>
-    <li><b>quest streaks</b> — <i>time-crossing state; chains price that in gas</i></li>
-    <li><b>referrals</b> — <i>who brought whom: a social edge, off-chain by nature</i></li>
-    <li><b>claim tracking</b> — <i>claimed-today lives in a day, not an address</i></li>
-    <li><b>gallery submissions</b> — <i>curation is a choice, and choices need a keeper</i></li>
-  </ul>
+  <dl>
+    <div><dt>nickname</dt><dd>a name people call you: a write, not a balance</dd></div>
+    <div><dt>quest streaks</dt><dd>time-crossing state; chains price that in gas</dd></div>
+    <div><dt>referrals</dt><dd>who brought whom: a social edge, off-chain by nature</dd></div>
+    <div><dt>claim tracking</dt><dd>claimed-today lives in a day, not an address</dd></div>
+    <div><dt>gallery submissions</dt><dd>curation is a choice, and choices need a keeper</dd></div>
+  </dl>
 </div>
 
 <p class="scope">scope, honestly: the estate's own bNRi insignias live as off-chain hex manifests — no public

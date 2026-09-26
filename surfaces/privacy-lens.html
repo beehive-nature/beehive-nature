@@ -150,6 +150,29 @@ details.raw pre{font-size:9.5px;line-height:1.7;color:var(--faint);white-space:p
 .foot b{color:var(--dim)}
 .foot a{color:var(--dim)}
 @media (prefers-reduced-motion:reduce){.hex.nectar.live,.hex.honey.live{animation:none}}
+/* THE LOWER HALF AT 390 (2026-09-26, footer audit): the ledger, the wall,
+   the M5 line and the footer were drawn at 9–11 px in --faint (4.2:1), with
+   forced capitals on the card heads. Casing law: text-transform is gone —
+   capitals stay only where the source writes them (the chip semantics).
+   Floor 12 px everywhere (cypherpunk keeps its density); New bee and raver
+   read at 14 px, New bee prose at 16 px; secondary text lifts from --faint to
+   --dim so it clears 4.5:1. */
+.crumbs,.kicker,.card>h2,.tx .k,.two .col h4{text-transform:none;letter-spacing:.02em}
+.card>h2{font-size:12px}
+.chip{font-size:12px;padding:2px 8px 2px 6px;letter-spacing:.02em}
+.chip i{font-size:11px}
+.wall,.plumb,.frow,.note-row,.act .cpu,.tx,.two .col,.two .col h4,details.raw summary,details.raw pre{font-size:12px}
+.lawline,.demoline,.foot{font-size:12px;color:var(--dim)}
+.wall .why{font-size:12px;color:var(--dim);margin-top:4px}
+.foot{padding-bottom:16px}
+.foot p+p{margin-top:10px}
+.foot .src{color:var(--dim)}
+.foot a{display:inline-block;padding-block:12px;margin-block:-12px;color:var(--gold)}
+body:not([data-reg="cypherpunk"]) :is(.card>h2,.wall,.plumb,.frow,.note-row,.lawline,.demoline,.foot,.tx,.two .col,details.raw summary){font-size:14px}
+body:not([data-reg="cypherpunk"]) .wall .why{font-size:14px}
+body:not([data-reg="cypherpunk"]) .chip{font-size:13px}
+body[data-reg="bee"] :is(.wall,.lawline,.demoline,.foot p){font-size:16px;line-height:1.7}
+body[data-reg="bee"] .foot .src{font-size:14px}
 </style>
 </head>
 <body>
@@ -292,17 +315,19 @@ details.raw pre{font-size:9.5px;line-height:1.7;color:var(--faint);white-space:p
 </section>
 
 <footer class="foot">
-  <b>new bee:</b> the world can see THAT your money moved — never whose it was,
-  and after M5 never how much. · <b>raver:</b> your key is the only door; lose it
+  <p><b>new bee:</b> the world can see THAT your money moved — never whose it was,
+  and after M5 never how much.</p>
+  <p><b>raver:</b> your key is the only door; lose it
   and even we cannot open your notes — that's not a bug in the support flow,
-  it's the product. · <b>cypherpunk:</b> keccak-v1 commitments, nullifier set
+  it's the product.</p>
+  <p><b>cypherpunk:</b> keccak-v1 commitments, nullifier set
   with no public link, view tags = Zano's auditable-wallet pattern, M5 =
   Poseidon(secret, leaf_index) membership + conservation behind a PLONK gate
-  measured ≈9–11 ms on-chain — <a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/specs/SPEC-PRIVACY-1.md">SPEC-PRIVACY-1</a>,
-  every claim receipted.<br>
-  read live from jungle4 (notelab11111 · rehearsal net · law row alg_commit 1 ·
+  measured ≈9–11 ms on-chain — <a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/specs/SPEC-PRIVACY-1.md" target="_blank" rel="noopener noreferrer" title="opens in a new tab">SPEC-PRIVACY-1 ↗</a>,
+  every claim receipted.</p>
+  <p class="src">read live from jungle4 (notelab11111 · rehearsal net · law row alg_commit 1 ·
   alg_proof 1) · the M5 payment statement landed on the rehearsal chain as
-  notepay2222 — old and new rows distinguishable forever (crypto-agility law)
+  notepay2222 — old and new rows distinguishable forever (crypto-agility law)</p>
 </footer>
 </main>
 

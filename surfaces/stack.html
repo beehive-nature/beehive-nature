@@ -129,6 +129,37 @@ footer{max-width:960px;margin:22px auto 0;color:var(--faint);font-size:10px;text
 
 /* comprehension touch floor (2026-09-16): 44px canon on phones */
 @media(max-width:520px){button,select,input{min-height:44px !important}}
+
+/* THE LOWER HALF AT 390 (2026-09-26, footer audit). The door table, the
+   organ board, the file loop, the licensing and FAQ tables and the footer ran
+   9–11.5 px, with forced capitals on the organ words, the loop's field labels
+   and the legend, secondary text in --faint, and table links 11–15 px tall.
+   Casing law: no text-transform. Floor 12 px everywhere (cypherpunk keeps the
+   dense instrument); New bee and raver read at 14 px, New bee prose at 16.
+   Tables stay inside their own horizontal scrollers. Links keep their line
+   and take a taller tap area (inline padding does not move text). */
+.herofig .cap,.frow .fl,.organ .oword,.legend .lw{text-transform:none;letter-spacing:.04em}
+h2,.law,table,th,.chip,.tier .d,.door .dd,.fstage .fc,.floopback,.fdetail .freg,.frow,.fnext,.fnext a,.fex h3,.fexgrid,
+.fexboard .fbs,.fex .fprov,footer,.organ .oword,.organ .omeans,.organ .onm,.organ .paths,.legend .li,.reread,.stamp{font-size:12px}
+.frow .fl,.c-zero,.w-notyet,.fex .fprov,.stamp,.organ .onm,footer,.down{color:var(--dim)}
+.reread{min-height:44px}
+.c-hive{color:#ff5a72}
+td a,.law a,.fnext a,.organ a,.legend a,footer a{padding-block:12px}
+footer{padding:0 6px 8px}
+body:not([data-reg="cypherpunk"]) :is(h2,.law,table,th,.tier .d,.door .dd,.fstage .fc,.floopback,.fdetail .freg,.frow,.fnext,.fnext a,.fex h3,.fexgrid,.fexboard .fbs,.fex .fprov,footer,.organ .oword,.organ .omeans,.organ .onm,.organ .paths,.legend .li,.reread){font-size:14px}
+body:not([data-reg="cypherpunk"]) .chip{font-size:13px}
+body[data-reg="bee"] .law{font-size:16px;line-height:1.75}
+/* on a phone the three reference tables read as stacked rows instead of a
+   560–600 px sheet cut at the screen edge: the first cell leads, the rest
+   follow beneath it; the header row is the section's own heading there */
+@media (max-width:600px){
+ .scroll table{min-width:0!important}
+ .scroll table,.scroll tbody,.scroll tr,.scroll td{display:block;width:auto!important}
+ .scroll tr:first-child:has(th){display:none}
+ .scroll tr{padding:10px 0;border-bottom:1px solid var(--line)}
+ .scroll td{border:0;padding:2px 0}
+ .scroll td:first-child{color:var(--ink)}
+}
 </style>
 </head>
 <body>

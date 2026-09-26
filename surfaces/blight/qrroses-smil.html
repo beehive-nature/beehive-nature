@@ -56,6 +56,22 @@ nav:not(#tbar){margin-top:24px;display:flex;gap:14px;flex-wrap:wrap;font-size:11
 nav:not(#tbar) a{color:var(--dim);text-decoration:none}
 nav:not(#tbar) a:hover{color:var(--violet)}
 @media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
+/* ── the page's end, read on a phone (footer pass 2026-09-26) ────────────
+   casing law: no forced capitals; nothing under 12 px; the fleet row is a
+   44 px tap row; bee and raver read the end at 14 px. */
+.herofig .cap{text-transform:none;letter-spacing:.04em;font-size:12px}
+.pane h3{letter-spacing:.3px}
+.pane .by{font-size:12px}
+.facts,.status{font-size:12.5px}
+.foot{font-size:12px;padding-top:16px;border-top:1px solid var(--line)}
+nav:not(#tbar){gap:0 14px;font-size:12px;align-items:center;margin-top:16px;color:var(--dim)}
+nav:not(#tbar) a{display:inline-flex;align-items:center;min-height:44px}
+body:not([data-reg="cypherpunk"]) .facts,body:not([data-reg="cypherpunk"]) .status,
+body:not([data-reg="cypherpunk"]) .foot,body:not([data-reg="cypherpunk"]) nav:not(#tbar),
+body:not([data-reg="cypherpunk"]) .pane .by{font-size:14px}
+body:not([data-reg="cypherpunk"]) .herofig .cap{font-size:13px}
+.split>*{min-width:0}
+.facts i{overflow-wrap:anywhere}
 </style>
 </head>
 <body>
@@ -75,10 +91,10 @@ still scans. Beside the <a href="./qrroses.html">canvas original</a>, never inst
 </div>
 
 <div class="split">
-  <section class="pane"><h3>THE GARDEN — declarative skin, frozen core</h3>
+  <section class="pane"><h3>the garden — declarative skin, frozen core</h3>
     <div class="by">stems rise · leaves arrive · blooms open late · bees cross the data middle</div>
     <div class="well art" id="well"></div></section>
-  <section class="pane"><h3>THE CODE, FROZEN</h3><div class="by">what never moves</div>
+  <section class="pane"><h3>the code, frozen</h3><div class="by">what never moves</div>
     <div class="herofig"><span class="num" id="heroN" data-hero-number>—</span>
       <span class="cap" data-hero-caption>modules per side · ECC H · every frame scans</span></div>
     <div class="facts" id="facts">—</div>

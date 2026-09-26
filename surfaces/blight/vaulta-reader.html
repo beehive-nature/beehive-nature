@@ -54,6 +54,20 @@
   .ok{color:var(--ok)} .bad{color:var(--bad)} .warn{color:var(--accent)} .cy{color:var(--cyan)}
   pre.raw{white-space:pre-wrap;font-size:10.5px;color:var(--cyan);background:#000;border-radius:8px;
     padding:12px;margin:10px 0 0;max-height:340px;overflow:auto}
+  /* ── the page's end, read on a phone (footer pass 2026-09-26) ──────────
+     casing law: no forced capitals; nothing under 12 px; the preset links,
+     inputs and the read button are 44 px; bee and raver read at 14 px. */
+  h1{text-transform:none;letter-spacing:.06em}
+  label,.presets,table{font-size:12px}
+  .note{font-size:12.5px}
+  pre.raw{font-size:12px}
+  input,select{min-height:44px;font-size:13px}
+  button{min-height:44px;font-size:13px}
+  .presets{display:flex;flex-wrap:wrap;align-items:center;gap:0 14px}
+  .presets a{display:inline-flex;align-items:center;min-height:44px;margin-right:0}
+  .presets #domid{margin-left:0!important;flex:1 1 100%;width:100%!important}
+  body:not([data-reg="cypherpunk"]) .note,body:not([data-reg="cypherpunk"]) .presets,
+  body:not([data-reg="cypherpunk"]) label{font-size:14px}
 </style>
 </head>
 <body><div class="wrap">

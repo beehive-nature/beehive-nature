@@ -12,7 +12,8 @@
   var css=document.createElement('style');
   css.textContent=`
     #adOrb,#adWin,#adWin *{box-sizing:border-box}
-    #adOrb{position:fixed;left:16px;bottom:66px;z-index:9999;width:52px;height:52px;min-height:44px;padding:0;margin:0;border:1px solid #729889;border-radius:50%;background:#0e1b19;color:#8cdae0;font:26px/1 system-ui;display:grid;place-items:center;cursor:pointer;box-shadow:0 3px 16px #0002}
+    #adOrb{position:fixed;left:16px;bottom:66px;z-index:9999;width:52px;height:52px;min-height:44px;padding:0;margin:0;border:1px solid #729889;border-radius:50%;background:#0e1b19;color:#8cdae0;font:26px/1 system-ui;display:grid;place-items:center;cursor:grab;box-shadow:0 3px 16px #0002;touch-action:none;user-select:none;-webkit-user-select:none;transition:left .26s ease,right .26s ease,bottom .26s ease}
+    #adOrb.ad-drag{cursor:grabbing;transition:none;box-shadow:0 8px 28px #0005;transform:scale(1.06)}
     #adWin{--ad-bg:#10191c;--ad-panel:#18252a;--ad-ink:#eef7f2;--ad-dim:#b8ccc7;--ad-line:#526e72;--ad-accent:#b9a4f5;--ad-on:#18132b;--ad-font:system-ui,-apple-system,'Segoe UI',sans-serif;position:fixed;left:12px;bottom:82px;z-index:10000;width:min(520px,calc(100% - 24px));height:min(680px,calc(100dvh - 96px));min-height:0;display:none;flex-direction:column;margin:0;padding:0;overflow:hidden;border:1px solid var(--ad-line);border-radius:18px;background:var(--ad-bg);color:var(--ad-ink);font:16px/1.5 var(--ad-font);text-align:start;letter-spacing:normal;box-shadow:0 16px 50px #0004;color-scheme:dark}
     #adWin.on{display:flex}#adWin.is-expanded{width:min(920px,calc(100% - 24px))}#adWin [hidden]{display:none!important}
     #adWin button,#adWin textarea,#adWin a{font:inherit;letter-spacing:normal;text-transform:none;box-shadow:none}
@@ -45,7 +46,7 @@
   `;
   document.head.appendChild(css);
   function make(tag,id){var el=document.createElement(tag);if(id)el.id=id;return el;}
-  var orb=make('button','adOrb');orb.type='button';orb.textContent='⚙';orb.title='Agent dock · Alt+/';orb.setAttribute('aria-label','Open the agent dock');orb.setAttribute('aria-controls','adWin');orb.setAttribute('aria-expanded','false');
+  var orb=make('button','adOrb');orb.type='button';orb.textContent='⚙';orb.title='Agent dock · Alt+/ · drag, or arrow keys, to move it';orb.setAttribute('aria-label','Open the agent dock');orb.setAttribute('aria-controls','adWin');orb.setAttribute('aria-expanded','false');
   var win=make('div','adWin');win.setAttribute('role','dialog');win.setAttribute('aria-labelledby','adTitle');
   win.innerHTML='<div id="adHead"><h2 id="adTitle">Agent dock</h2><button id="adHelpButton" type="button" aria-pressed="false">Help</button><button id="adExpand" type="button" aria-pressed="false" aria-label="Expand the agent dock">Expand</button><button id="adClose" type="button" aria-label="Close the agent dock">✕</button></div><div id="adAgents" role="group" aria-label="Choose an agent"></div><div id="adBody"></div><div id="adContext"><span id="adNote"></span><a id="adOpenPage" target="_blank" rel="noopener noreferrer">Open page ↗ (new tab)</a></div><form id="adFoot"><textarea id="adPrompt" rows="2" maxlength="4000" aria-label="Message" aria-describedby="adStatus" placeholder="What would you like to explore?"></textarea><button id="adSend" type="submit">Send</button></form><p id="adStatus" role="status" aria-live="polite">Conversations stay in this page until you leave or reload.</p>';
   document.body.appendChild(orb);document.body.appendChild(win);
@@ -183,70 +184,64 @@
     var bar=$('tbar'),rect=bar&&getComputedStyle(bar).position==='fixed'?bar.getBoundingClientRect():null;
     var h=rect&&rect.height>0&&rect.bottom>0&&rect.top<window.innerHeight?Math.ceil(window.innerHeight-Math.max(0,rect.top)):0;
     var bottom=Math.min(Math.max(bar?18:66,h+10-keyboard),Math.max(12,vh-64));
-    if(!seated)orb.style.bottom=(keyboard+bottom)+'px';
+    if(!seated&&!dragging){var lift=Math.max(0,Math.min((spot&&spot.lift)||0,vh-bottom-64));orb.style.bottom=(keyboard+bottom+lift)+'px';}
     var tight=window.innerWidth<=520||vh<=600,dialogBottom=expanded||tight?8:Math.min(bottom+64,Math.max(12,vh*.25));
     win.style.bottom=(keyboard+dialogBottom)+'px';win.style.height=Math.max(0,Math.min(expanded?vh:680,vh-dialogBottom-12))+'px';
     var need=h?h+22:0;
     /* floating on a phone with no fixed bar: reserve the orb's corner zone so
        the last content can always scroll clear of it */
     if(!h&&window.innerWidth<=520&&!seated)need=Math.max(need,140);
+    /* a phone with the fixed bar: the floating orb rests just above it, so the page end
+       scrolls clear of the orb too (bar + 10 + orb + a breath) */
+    if(h&&window.innerWidth<=520)need=Math.max(need,h+78);
     if(need){var cur=parseFloat(getComputedStyle(document.body).paddingBottom)||0;if(cur<need)document.body.style.paddingBottom=need+'px';}
   };
-  /* THE MOBILE SEAT (founder order 2026-09-13): the floating orb covered the
-     bottom-left corner of the content column on phones — wallet's chain
-     matrix had its 🐜 Autonomi ANT card 87% hidden at first paint. On mobile
-     the orb now RIDES the fixed tour bar's reserved row (geometry inline,
-     colors keep the register stylesheet) — it covers nothing and stays one
-     tap away. Where the bar is inline (hub, profile: a closed directory),
-     the orb floats bottom-RIGHT and fitDock reserves scroll-end room.
-     Desktop keeps the classic bottom-left float. */
-  var seatMq=window.matchMedia?matchMedia('(max-width:520px)'):null,seated=null;
-  function unseat(){
-    if(seated){orb.style.cssText='';if(orb.parentElement!==document.body)document.body.appendChild(orb);}
-    seated=null;
-  }
-  function seatOrb(){
-    var mobile=!!(seatMq&&seatMq.matches);
-    var bar=$('tbar');
-    var barFixed=!!(bar&&getComputedStyle(bar).position==='fixed');
-    if(mobile&&barFixed){
-      if(seated!=='bar'){
-        unseat();seated='bar';
-        orb.style.cssText='position:static;width:44px;height:44px;min-width:44px;min-height:44px;flex:0 0 44px;margin:0 6px 0 0;font:22px/1 system-ui;box-sizing:border-box';
-        bar.insertBefore(orb,bar.firstChild);
-      }
-    }else if(mobile){
-      /* inline tour host (hub, profile): the closed directory cannot host the
-         orb, so it rides the directory's VISIBLE summary row — in-flow chrome,
-         covers nothing. The register bar is the fallback; a bare right-float
-         with the fitDock reservation is the last resort. */
-      var host=document.querySelector('[data-tour-host]');
-      var sum=host&&host.closest('details')?host.closest('details').querySelector('summary'):document.querySelector('details.room-navigation>summary');
-      if(sum){
-        if(seated!=='summary'){
-          unseat();seated='summary';
-          orb.style.cssText='position:relative;z-index:3;display:inline-block;vertical-align:middle;width:44px;height:44px;min-width:44px;min-height:44px;margin:0 0 0 10px;font:22px/1 system-ui;box-sizing:border-box';
-          sum.insertBefore(orb,sum.firstChild);
-        }
-      }else{
-        var regbar=document.getElementById('bregbar')||document.querySelector('[data-register-host]');
-        if(regbar){
-          if(seated!=='reg'){
-            unseat();seated='reg';
-            orb.style.cssText='position:relative;z-index:3;width:44px;height:44px;min-width:44px;min-height:44px;margin:8px 0 0 2px;font:22px/1 system-ui;box-sizing:border-box';
-            regbar.appendChild(orb);
-          }
-        }else{
-          unseat();
-          orb.style.left='auto';orb.style.right='16px';
-        }
-      }
-    }else{
-      unseat();
-      orb.style.left='';orb.style.right='';
+  /* THE MOVABLE ORB (founder 2026-09-26: "the AI glob … I like better … should be moveable?").
+     The orb floats again on every screen: the 2026-09-13 seat inside the tour bar made it one more
+     cramped strip item, and the founder prefers the orb. What the seat solved (the orb resting on
+     content) is solved by the reader instead: drag it anywhere; on release it settles against the
+     nearer side, never lower than just above the tour bar, and the spot is remembered estate-wide
+     (localStorage bnr.orb = {side, lift}). A tap opens the dock; a drag never does. With focus,
+     arrow keys move it (up/down lift it, left/right change side). Phones rest it bottom-right,
+     desktops bottom-left, until the reader chooses. */
+  var seated=null,dragging=false,spot={};
+  try{spot=JSON.parse(localStorage.getItem('bnr.orb')||'{}')||{};}catch(e){spot={};}
+  function keep(){try{localStorage.setItem('bnr.orb',JSON.stringify({side:spot.side,lift:Math.round(spot.lift||0)}));}catch(e){}}
+  function sideOf(){return spot.side||(seatMq&&seatMq.matches?'right':'left');}
+  function applySide(){var s=sideOf();orb.style.left=s==='left'?'16px':'auto';orb.style.right=s==='right'?'16px':'auto';}
+  var seatMq=window.matchMedia?matchMedia('(max-width:520px)'):null;
+  function seatOrb(){if(orb.parentElement!==document.body)document.body.appendChild(orb);orb.style.position='';applySide();fitDock();}
+  var grab=null,justDragged=false;
+  function restBottom(){var b=parseFloat(orb.style.bottom)||0;return b-(spot.lift||0);}
+  orb.addEventListener('pointerdown',function(e){if(e.button)return;var r=orb.getBoundingClientRect();grab={id:e.pointerId,x:e.clientX,y:e.clientY,dx:e.clientX-r.left,dy:e.clientY-r.top,rest:restBottom()};
+    /* capture at the press, not at the threshold: a quick flick leaves the 52 px orb before it has moved 6 px, and the moves went elsewhere */
+    try{orb.setPointerCapture(e.pointerId);}catch(x){}});
+  orb.addEventListener('pointermove',function(e){
+    if(!grab||e.pointerId!==grab.id)return;
+    if(!dragging){if(Math.hypot(e.clientX-grab.x,e.clientY-grab.y)<6)return;dragging=true;orb.classList.add('ad-drag');}
+    e.preventDefault();
+    var W=window.innerWidth,H=window.innerHeight,sz=orb.offsetWidth||52;
+    var x=Math.max(8,Math.min(W-sz-8,e.clientX-grab.dx)),top=e.clientY-grab.dy;
+    var bottom=Math.max(grab.rest,Math.min(H-sz-8,H-top-sz));
+    orb.style.right='auto';orb.style.left=x+'px';orb.style.bottom=bottom+'px';
+  });
+  function drop(e){
+    if(!grab||(e&&e.pointerId!==grab.id))return;
+    if(dragging){
+      var r=orb.getBoundingClientRect(),W=window.innerWidth;
+      spot.side=(r.left+r.width/2)<W/2?'left':'right';spot.lift=Math.max(0,(parseFloat(orb.style.bottom)||0)-grab.rest);keep();
+      dragging=false;orb.classList.remove('ad-drag');justDragged=true;setTimeout(function(){justDragged=false;},0);
+      applySide();fitDock();
     }
-    fitDock();
+    grab=null;
   }
+  orb.addEventListener('pointerup',drop);orb.addEventListener('pointercancel',drop);
+  orb.addEventListener('click',function(e){if(justDragged){e.stopImmediatePropagation();e.preventDefault();justDragged=false;}},true);
+  orb.addEventListener('keydown',function(e){
+    var k=e.key;if(e.altKey||e.ctrlKey||e.metaKey)return;
+    if(k==='ArrowUp'||k==='ArrowDown'){e.preventDefault();spot.lift=Math.max(0,(spot.lift||0)+(k==='ArrowUp'?32:-32));keep();fitDock();}
+    else if(k==='ArrowLeft'||k==='ArrowRight'){e.preventDefault();spot.side=k==='ArrowLeft'?'left':'right';keep();applySide();}
+  });
   fitDock();addEventListener('resize',fitDock);if(window.visualViewport){window.visualViewport.addEventListener('resize',fitDock);window.visualViewport.addEventListener('scroll',fitDock);}
   var bar=$('tbar');if(bar&&window.ResizeObserver)new ResizeObserver(fitDock).observe(bar);
   if(!bar){var mo=new MutationObserver(function(){var b=$('tbar');if(b){mo.disconnect();seatOrb();if(window.ResizeObserver)new ResizeObserver(fitDock).observe(b);}});mo.observe(document.documentElement,{childList:true,subtree:true});}

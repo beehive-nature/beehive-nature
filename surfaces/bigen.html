@@ -69,7 +69,7 @@ td.cl{color:var(--ink)}
 .cb{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px;margin-top:8px;font-size:10.5px;color:var(--dim)}
 .cb b{color:var(--ink);font-weight:400}
 details{margin-top:10px}
-summary{cursor:pointer;color:var(--violet);font-size:10.5px}
+main summary{cursor:pointer;color:var(--violet);font-size:10.5px}
 pre{background:#0a0f0b;border:1px solid var(--line);border-radius:8px;padding:10px;margin-top:8px;font-size:9.5px;line-height:1.6;overflow-x:auto;color:var(--dim)}
 footer{max-width:880px;margin:22px auto 0;padding-inline:16px;color:var(--dim);font-size:10px;text-align:center;line-height:1.8}
 
@@ -114,7 +114,7 @@ body[data-reg="bee"] #tbar{background:#fbf7f0!important;border-top-color:#e6dfd2
 body[data-reg="bee"] #tbar a{color:#0c1412!important}
 body[data-reg="bee"] section{background:#fff;border-color:var(--line)}
 body[data-reg="bee"] .banner{background:#f3efe2;border-color:#d4c4a0;color:#855b0b}
-body[data-reg="bee"] .card,.ib div,.rcg,pre{background:#efe9dd;border-color:var(--line)}
+body[data-reg="bee"] :is(.card,.ib div,.rcg,pre){background:#efe9dd;border-color:var(--line)}
 
 /* Raver — library-as-garden, not a courtroom. Feeling first; the map one tap away. */
 body[data-reg="raver"]{--bg:#0c1412;--ink:#e9f2ec;--dim:#b7c9be;--line:#2a3a34;--gold:#c9a0ff;--violet:#c9a0ff;--cyan:#7ee0d0;
@@ -160,6 +160,55 @@ body[data-reg="cypherpunk"] #sources-panel summary{cursor:pointer;min-height:44p
   border:1px solid var(--reg-line,var(--line))!important;font:inherit!important
 }
 .bigen-language #blangnote{white-space:normal!important;color:var(--reg-ink,var(--dim))!important;font:.75rem/1.4 inherit!important}
+/* lower half at 390 px — the instrument's reading floor (founder phone review, 2026-09-26):
+   12px+ everywhere incl. cypherpunk, 44px footer doors and toggles */
+section h2{font-size:12.5px;letter-spacing:.05em;line-height:1.5}
+.law{font-size:12.5px;line-height:1.75}
+.banner{font-size:12.5px}
+table{font-size:12px}
+.rnote{font-size:12px;color:var(--dim);margin-top:3px;line-height:1.6}
+.cite{font-size:12px}
+.tgl button{font-size:12.5px;min-height:44px;padding:8px 14px}
+#state-prose{font-size:13px}
+.gm{font-size:12px}.gm .h{font-size:12px}
+.card h3{font-size:13px}.card h3 .what{font-size:12px}
+.ib div{font-size:12px}
+.rcg,.cb{font-size:12px}
+main summary{font-size:12.5px}
+main details:not([data-reg-disclose]):not(#sources-panel)>summary{padding-block:12px}
+pre{font-size:12px}
+footer{font-size:12.5px;line-height:1.7}
+footer{line-height:2.1}
+footer a{padding-block:12px;text-underline-offset:3px}
+body[data-reg="bee"] :is(.law,#state-prose,.banner){font:16px/1.7 var(--bee-font)}
+body[data-reg="bee"] :is(table,.rnote,.cite,.tgl button,.gm,.gm .h,.card h3 .what,.ib div,.rcg,.cb,main summary,footer){font-family:var(--bee-font);font-size:14px;letter-spacing:normal}
+body[data-reg="bee"] main summary{font-size:16px}
+body[data-reg="bee"] .card h3{font:600 15px/1.5 var(--bee-font)}
+body[data-reg="bee"] section h2{font:600 16px/1.4 var(--bee-font);letter-spacing:normal}
+body[data-reg="raver"] :is(.law,#state-prose,.banner){font-size:14.5px}
+body[data-reg="raver"] :is(table,.rnote,.cite,.tgl button,.gm,.gm .h,.card h3,.card h3 .what,.ib div,.rcg,.cb,main summary,footer,section h2){font-size:14px}
+#srctab td:last-child a,td.cite a{display:inline-flex;align-items:center;min-height:44px;text-underline-offset:3px}
+@media (max-width:520px){
+ /* the claim tables read as cards on a phone: claim across the full width, verdict + sources beneath it */
+ :is(#tiers,#tiers2) tr:first-child{display:none}
+ :is(#tiers,#tiers2) tr{display:grid;grid-template-columns:auto 1fr;align-items:center;column-gap:12px;border-bottom:1px solid var(--line);padding:6px 0}
+ :is(#tiers,#tiers2) td{border-bottom:0}
+ :is(#tiers,#tiers2) td.cl{grid-column:1/-1;padding-bottom:2px}
+ :is(#tiers,#tiers2) td.cite{white-space:normal;text-align:end}
+}
+@media (max-width:520px){
+ /* the sources table as cards: key + title across, what it is and its link beneath */
+ #srctab tr:has(th){display:none}
+ #srctab tr{display:grid;grid-template-columns:auto 1fr auto;grid-template-areas:"k c c" "k t l";align-items:start;column-gap:10px;border-bottom:1px solid var(--line);padding:6px 0}
+ #srctab td{border-bottom:0;padding:2px 0}
+ #srctab td:nth-child(1){grid-area:k}
+ #srctab td:nth-child(2){grid-area:c}
+ #srctab td:nth-child(3){grid-area:t}
+ #srctab td:nth-child(4){grid-area:l;text-align:end;max-width:9em;overflow-wrap:anywhere}
+}
+#sources-panel>summary h2{font-size:13px;font-weight:400;letter-spacing:.05em;color:var(--violet)}
+body[data-reg="bee"] #sources-panel>summary h2{font:600 16px/1.4 var(--bee-font);letter-spacing:normal}
+body[data-reg="raver"] #sources-panel>summary h2{font-size:15px}
 </style>
 </head>
 <body data-reg="bee" data-bee-theme="custom" data-bigen-beat="arrival">
@@ -525,7 +574,7 @@ var tb=$('tiers');
 ROWS.forEach(function(r){
  var tr=document.createElement('tr');
  var t=TIER[r.t];
- tr.innerHTML='<td class="cl">'+r.cl+(r.note?'<div style="font-size:9.5px;color:var(--dim);margin-top:3px">'+r.note+'</div>':'')+'</td>'
+ tr.innerHTML='<td class="cl">'+r.cl+(r.note?'<div class="rnote">'+r.note+'</div>':'')+'</td>'
   +'<td class="tier"><i style="background:'+t.c+'"></i>'+t.m+' '+t.n+'</td>'
   +'<td class="cite">'+(r.s.length?S.apply(null,r.s):'<span style="font-style:italic">none — that is the verdict</span>')+'</td>';
  tb.appendChild(tr);
@@ -553,7 +602,7 @@ var tb2=$('tiers2');
 ROWS2.forEach(function(r){
  var tr=document.createElement('tr');
  var t=TIER[r.t];
- tr.innerHTML='<td class="cl">'+r.cl+(r.note?'<div style="font-size:9.5px;color:var(--dim);margin-top:3px">'+r.note+'</div>':'')+'</td>'
+ tr.innerHTML='<td class="cl">'+r.cl+(r.note?'<div class="rnote">'+r.note+'</div>':'')+'</td>'
   +'<td class="tier"><i style="background:'+t.c+'"></i>'+t.m+' '+t.n+'</td>'
   +'<td class="cite">'+r.s.join(' ')+'</td>';
  tb2.appendChild(tr);

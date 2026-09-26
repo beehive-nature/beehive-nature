@@ -94,6 +94,28 @@ footer{max-width:900px;margin:26px auto 0;color:var(--dim);font-size:10px;text-a
   section{padding:13px 13px}
 }
 @media(prefers-reduced-motion:reduce){.card{transition:none}}
+/* lower-half finish (2026-09-26, 390 px phone review): the cards' name, line
+   and time were inline spans that ran together ("resonanceThe frequency
+   argument.04:23"); they now stack. Type lifted from 9.5–10.5 px to the register
+   floors (bee 16 px prose / 14 px labels, raver 14 px, cypherpunk 13 px, never
+   under 12 px); casing law restored on the section heads and hero labels; the
+   footer links are 44 px touch targets. */
+body{--fz-law:14px;--fz-lab:14px}
+body[data-reg="bee"]{--fz-law:16px;--fz-lab:14px}
+body[data-reg="cypherpunk"]{--fz-law:13px;--fz-lab:12px}
+.pstat.hero .l{text-transform:none;letter-spacing:.03em;font-size:max(12px,var(--fz-lab))}
+section h2{text-transform:none;font-size:15px;letter-spacing:.04em;margin-bottom:6px}
+section .note{font-size:var(--fz-law);line-height:1.7}
+.art .n,.art .d,.art .t{display:block}
+.art{padding:14px}
+.art .n{font-size:15px}
+.art .d{font-size:var(--fz-lab);line-height:1.6}
+.art .t{font-size:var(--fz-lab);letter-spacing:.03em}
+.rail,.proof,.absent{font-size:var(--fz-law);line-height:1.75}
+footer{font-size:var(--fz-lab);line-height:1.7}
+footer p+p{margin-top:8px}
+footer p{text-wrap:pretty}
+footer a{display:inline-block;padding:11px 2px}
 </style>
 </head>
 <body>

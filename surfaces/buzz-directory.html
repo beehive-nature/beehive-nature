@@ -12,7 +12,7 @@
 --bee-font:system-ui,-apple-system,'Segoe UI',sans-serif}
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{overflow-x:hidden}
-body{background:var(--bg);color:var(--ink);font:13px/1.6 'IBM Plex Mono',monospace;min-height:100vh;padding:0 0 90px}
+body{background:var(--bg);color:var(--ink);font:max(13px,var(--fmin,12px))/1.6 'IBM Plex Mono',monospace;min-height:100vh;padding:0 0 90px}
 /* Estate register scoping — INLINE so a cypher-only leaf cannot FOUC or leak
    if register.js is late or fails. Same contract as surfaces/register.js. */
 [data-reg]:not(body){display:none}
@@ -21,52 +21,52 @@ body[data-reg="raver"] [data-reg="raver"],
 body[data-reg="cypherpunk"] [data-reg="cypherpunk"]{display:revert}
 header{text-align:center;margin-bottom:8px;padding-bottom:12px}
 h1{font-size:clamp(17px,4vw,24px);color:var(--gold);font-weight:400;letter-spacing:.05em}
-header p,.sub{color:var(--dim);font-size:11px;margin-top:6px;max-width:720px;margin-left:auto;margin-right:auto;line-height:1.85}
+header p,.sub{color:var(--dim);font-size:max(11px,var(--fmin,12px));margin-top:6px;max-width:720px;margin-left:auto;margin-right:auto;line-height:1.85}
 main{max-width:860px;margin:0 auto;padding-inline:16px}
 section{background:#111a14;border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-top:16px}
-section h2{font-size:12px;color:var(--violet);font-weight:400;letter-spacing:.08em;margin-bottom:8px}
-.law{color:var(--dim);font-size:10px;line-height:1.7;margin-bottom:10px}
+section h2{font-size:max(12px,var(--fmin,12px));color:var(--violet);font-weight:400;letter-spacing:.08em;margin-bottom:8px}
+.law{color:var(--dim);font-size:max(10px,var(--fmin,12px));line-height:1.7;margin-bottom:10px}
 .listing{background:var(--well);border:1px solid var(--line);border-radius:10px;padding:12px 13px;margin-top:10px}
 .listing .lh{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap}
-.listing .lname{font-size:13px;color:var(--ink)}
-.listing .lrelay{font-size:10.5px;color:var(--dim);margin-top:4px;word-break:break-all}
-.listing .chip{display:inline-flex;align-items:center;gap:5px;font-size:9.5px;padding:2px 8px;border-radius:99px;margin-left:auto;white-space:nowrap}
+.listing .lname{font-size:max(13px,var(--fmin,12px));color:var(--ink)}
+.listing .lrelay{font-size:max(10.5px,var(--fmin,12px));color:var(--dim);margin-top:4px;word-break:break-all}
+.listing .chip{display:inline-flex;align-items:center;gap:5px;font-size:max(9.5px,var(--fmin,12px));padding:2px 8px;border-radius:99px;margin-left:auto;white-space:nowrap}
 .listing .chip.ok{background:rgba(134,204,114,.12);color:var(--verified);border:1px solid rgba(134,204,114,.2)}
 .listing .chip.bad{background:rgba(183,168,247,.08);color:var(--guard);border:1px solid rgba(183,168,247,.15)}
 .listing .chip i{width:6px;height:6px;border-radius:50%}
 .listing .chip.ok i{background:var(--verified)}
 .listing .chip.bad i{background:var(--guard)}
-.listing .a-link{margin-top:6px;display:inline-block;font-size:10.5px;color:var(--cyan);text-decoration:none;border:1px solid var(--line);border-radius:6px;padding:4px 10px}
+.listing .a-link{margin-top:6px;display:inline-block;min-height:44px;line-height:1.45;font-size:max(10.5px,var(--fmin,12px));color:var(--cyan);text-decoration:none;border:1px solid var(--line);border-radius:6px;padding:12px 12px}
 .note{background:var(--well);border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-top:14px}
-.note .nt{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin-bottom:6px}
-.note .nb{font-size:10.5px;color:var(--dim);line-height:1.8}
-.hivedivider{margin-top:18px;padding-top:10px;border-top:1px solid var(--line);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
-.who{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);margin-left:8px}
-.seat-note{font-size:10.5px;color:var(--dim);margin-top:6px;line-height:1.7}
-.door-help>summary,.connection-details>summary,.name-history>summary,.record-about>summary{min-height:44px;cursor:pointer}
+.note .nt{font-size:max(10px,var(--fmin,12px));letter-spacing:.04em;text-transform:none;color:var(--gold);margin-bottom:6px}
+.note .nb{font-size:max(10.5px,var(--fmin,12px));color:var(--dim);line-height:1.8}
+.hivedivider{margin-top:18px;padding-top:10px;border-top:1px solid var(--line);font-size:max(9.5px,var(--fmin,12px));letter-spacing:.04em;text-transform:none;color:var(--dim)}
+.who{font-size:max(10px,var(--fmin,12px));letter-spacing:.04em;text-transform:none;color:var(--gold);margin-left:8px}
+.seat-note{font-size:max(10.5px,var(--fmin,12px));color:var(--dim);margin-top:6px;line-height:1.7}
+.door-help>summary,.connection-details>summary,.name-history>summary,.record-about>summary,[data-view-disclosure]>summary{min-height:44px;cursor:pointer}
 .hive-action{display:inline-flex;align-items:center;min-height:44px;padding:8px 16px;border:1px solid var(--line);border-radius:9px;background:var(--well);color:var(--ink);font-weight:650;text-decoration:none}
 .house{background:#111a14;border:1px solid var(--line);border-radius:11px;padding:16px;margin-top:16px}
 .house.current{border-color:var(--gold)}
 .hname{font-size:18px;color:var(--ink);font-weight:600;margin-bottom:2px}
-.htype{font-size:9px;letter-spacing:.14em;text-transform:uppercase;margin-top:2px}
+.htype{font-size:max(9px,var(--fmin,12px));letter-spacing:.04em;text-transform:none;margin-top:2px}
 .htype.human{color:var(--verified)}
 .htype.baigentic{color:var(--violet)}
 .holder{display:flex;gap:12px;align-items:flex-start;margin-top:10px}
 .holder .art{width:52px;height:52px;border-radius:8px;background:#C41E3A;flex:none;display:flex;align-items:center;justify-content:center;font-size:20px;color:#fff}
-.holder .bio .bname{font-size:13px;color:var(--ink)}
-.holder .bio .bdesc{font-size:10.5px;color:var(--dim);margin-top:2px;line-height:1.7}
-.holder .bio .bmeta{font-size:9.5px;color:var(--dim);margin-top:3px}
+.holder .bio .bname{font-size:max(13px,var(--fmin,12px));color:var(--ink)}
+.holder .bio .bdesc{font-size:max(10.5px,var(--fmin,12px));color:var(--dim);margin-top:2px;line-height:1.7}
+.holder .bio .bmeta{font-size:max(9.5px,var(--fmin,12px));color:var(--dim);margin-top:3px}
 .holder .bio .wallet{color:#E8B54B;font-family:monospace}
-.badge{display:inline-flex;align-items:center;gap:4px;font-size:8.5px;padding:1px 7px;border-radius:99px;margin-left:6px}
+.badge{display:inline-flex;align-items:center;gap:4px;font-size:max(8.5px,var(--fmin,12px));padding:1px 7px;border-radius:99px;margin-left:6px}
 .genline{margin-top:8px;padding:8px 10px;background:var(--well);border:1px solid var(--line);border-radius:8px}
-.genlabel{font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);margin:10px 0 6px}
-.email{font-size:9.5px;color:var(--info);margin-top:4px}
+.genlabel{font-size:max(9px,var(--fmin,12px));letter-spacing:.04em;text-transform:none;color:var(--dim);margin:10px 0 6px}
+.email{font-size:max(9.5px,var(--fmin,12px));color:var(--info);margin-top:4px}
 .record-caution{padding:10px 14px;border-inline-start:3px solid var(--guard);font-size:.875rem;color:var(--guard);line-height:1.6;margin:16px 0}
 .story-door{display:flex;gap:16px;align-items:flex-start;padding:16px;border:1px solid var(--line);border-radius:16px;background:var(--well);margin-top:14px;text-align:start}
 .story-door .art{width:64px;height:64px;border-radius:16px;display:grid;place-items:center;font-size:2rem;flex:none;background:#e8ede2}
 .portrait{width:min(100%,280px);margin:12px auto;display:block}
 a{color:var(--cyan)}
-footer{max-width:860px;margin:22px auto 0;padding-inline:16px;color:var(--dim);font-size:10px;text-align:center;line-height:1.8}
+footer{max-width:860px;margin:22px auto 0;padding-inline:16px;color:var(--dim);font-size:max(10px,var(--fmin,12px));text-align:center;line-height:1.8}
 [hidden]{display:none!important}
 .door{appearance:none;display:inline-flex;align-items:center;justify-content:center;min-height:44px;
  padding:10px 18px;border-radius:8px;border:1px solid var(--line);background:var(--well);color:var(--ink);
@@ -107,7 +107,7 @@ body[data-reg="bee"] .door{font:500 1rem/1.4 var(--bee-font);border-radius:16px;
 body[data-reg="bee"] .door.primary{background:#a8238c;color:#fff;border-color:#0c1412}
 body[data-reg="bee"] #tbar{background:#fbf7f0!important;border-top-color:#e6dfd2!important}
 body[data-reg="bee"] #tbar a{color:#0c1412!important}
-body[data-reg="bee"] section,.house{background:#fff;border-color:var(--line)}
+body[data-reg="bee"] section,body[data-reg="bee"] .house{background:#fff;border-color:var(--line)}
 /* F4 (z1.a release patch): routine New bee labels read at ≥14px — relay lines
    and status chips. Bee-scoped only; Cypherpunk keeps its compact instrument. */
 body[data-reg="bee"] .listing .lrelay{font-size:.875rem;line-height:1.7}
@@ -147,12 +147,18 @@ body[data-reg="cypherpunk"] .connection-details[open]{border:1px dashed var(--li
   border:1px solid var(--reg-line,var(--line))!important;font:inherit!important
 }
 .room-table{overflow:auto;max-width:100%}
-table{width:100%;border-collapse:collapse;margin-top:10px;font-size:10.5px}
+table{width:100%;border-collapse:collapse;margin-top:10px;font-size:max(10.5px,var(--fmin,12px))}
 td,th{border-bottom:1px solid var(--line);padding:5px 6px;text-align:left;color:var(--dim)}
 th{color:var(--violet);font-weight:400} td.n{color:var(--ink)}
 [data-experience-nav]{display:flex;flex-wrap:wrap;gap:8px;padding:12px 16px}
 [data-experience-nav] a{display:inline-flex;align-items:center;min-height:44px;padding:8px 12px}
 
+/* footer links are controls: a thumb-sized row, not text-height slivers */
+footer a{padding-block:14px} /* a 44 px tap target that leaves the line rhythm alone */
+/* Lower-half floor (2026-09-26, 390 px phone review): every small size on this page
+   reads max(its own size, --fmin) — 12 px in cypherpunk's dense mono, 14 px for new bee
+   and raver, so no register ever draws reading text a phone cannot hold. */
+body[data-reg="bee"],body[data-reg="raver"]{--fmin:14px}
 </style>
 </head>
 <body data-reg="bee" data-bee-theme="custom" data-dir-beat="arrival" data-experience="directory">

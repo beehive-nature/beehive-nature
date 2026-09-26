@@ -12,7 +12,7 @@
   --sem-harm:var(--guard); --sem-solution:var(--biomass); --sem-value:var(--b-value);
   --sem-system:var(--info); --sem-science:var(--ai);
   --bg:#06110C; --bg-card:#0C1412; --bg-well:#08100D;
-  --ink:#E9F2EC; --ink-mut:#8FA79C; --ink-dim:#648176; --line:#1E2B26;
+  --ink:#E9F2EC; --ink-mut:#8FA79C; --ink-dim:#7C978B; --line:#1E2B26;
   --radius:12px;
 }
 *{box-sizing:border-box;margin:0}
@@ -22,23 +22,23 @@ body{font:13px/1.6 ui-sans-serif,system-ui,"Segoe UI",Roboto,sans-serif;color:va
 a{color:#B79FE0}
 h1{font-size:clamp(22px,6vw,30px);letter-spacing:-.4px;line-height:1.2}
 h1.grad{background:linear-gradient(92deg,var(--sovereign),var(--you));-webkit-background-clip:text;background-clip:text;color:transparent}
-.law{color:var(--ink-mut);font-size:12.5px;margin-top:2px}
+.law{color:var(--ink-mut);font-size:14px;margin-top:2px}
 .law b{color:#B79FE0}
 .panel{background:var(--bg-card);border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin-top:12px}
 .bar{display:flex;gap:6px;flex-wrap:wrap}
-.bar input{flex:1;min-width:200px;background:var(--bg-well);border:1px solid var(--line);border-radius:9px;color:var(--ink);font:12.5px ui-monospace,Menlo,Consolas,monospace;padding:10px 12px}
+.bar input{flex:1;min-width:200px;background:var(--bg-well);border:1px solid var(--line);border-radius:9px;color:var(--ink);font:14px ui-monospace,Menlo,Consolas,monospace;padding:10px 12px}
 .bar input:focus{outline:none;border-color:var(--you)}
 button.act{background:var(--you);border:0;color:#1a0716;font:600 13px ui-sans-serif,system-ui,sans-serif;padding:10px 16px;border-radius:9px;cursor:pointer}
 button.act:active{transform:translateY(1px)}
-.hint{font-size:11px;color:var(--ink-dim);margin-top:6px}
-.msg{font-size:12px;color:var(--ink-mut);margin-top:8px;min-height:1.2em}
+.hint{font-size:14px;line-height:1.6;color:var(--ink-mut);margin-top:8px}
+.msg{font-size:14px;color:var(--ink-mut);margin-top:8px;min-height:1.2em}
 .stats{display:flex;gap:12px;margin-top:12px;flex-wrap:wrap}
 .stat{flex:1;min-width:130px;background:var(--bg-card);border:1px solid var(--line);border-radius:var(--radius);padding:12px 16px}
 .stat.pstat{background:var(--bg-well)}
 .stat b{display:block;font-size:30px;line-height:1.1;font-family:ui-monospace,Menlo,Consolas,monospace;color:#B79FE0;word-break:break-all}
 .stat b.seed{color:var(--sem-value)}
 .stat.science b{color:var(--sem-science);font-size:17px;padding-top:6px}
-.stat .l{display:block;font-size:10px;color:var(--ink-dim);text-transform:uppercase;letter-spacing:.9px;margin-top:2px}
+.stat .l{display:block;font-size:12px;color:var(--ink-dim);letter-spacing:.3px;margin-top:2px}
 /* the level ladder — resolution is the piece */
 .ladder{display:flex;gap:6px;margin-top:12px;flex-wrap:wrap}
 .rung{flex:1;min-width:96px;border:1px solid var(--line);border-radius:9px;padding:7px 10px;font-size:10.5px;color:var(--ink-dim);background:var(--bg-well)}
@@ -53,14 +53,16 @@ button.voice.off{background:var(--bg-well);color:var(--ink-mut);border:1px solid
 button.voice:disabled{background:var(--bg-well);color:var(--ink-dim);border:1px dashed var(--guard);cursor:not-allowed;box-shadow:none}
 button.voice.sub{font:600 12px/1.2 ui-sans-serif,system-ui,sans-serif;padding:10px 16px;box-shadow:none;background:var(--bg-well);color:var(--ink-mut);border:1px solid var(--line)}
 button.voice.sub:not(.off):not(:disabled){border-color:var(--you);color:var(--ink)}
-.plain{font-size:11px;color:var(--ink-dim);text-align:center;max-width:460px}
+.plain{font-size:14px;line-height:1.55;color:var(--ink-mut);text-align:center;max-width:460px}
 .legend{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
-.lg{display:flex;align-items:center;gap:6px;font-size:10.5px;color:var(--ink-mut);border:1px solid var(--line);border-radius:999px;padding:3px 10px}
+.lg{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--ink-mut);border:1px solid var(--line);border-radius:999px;padding:3px 10px}
 .lg i{width:12px;height:12px;display:inline-block;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%)}
-.record{margin-top:12px;font-size:12px;color:var(--ink);background:var(--bg-well);border-left:3px solid var(--sem-system);border-radius:0 9px 9px 0;padding:10px 12px}
-.foot{margin-top:18px;font-size:11px;color:var(--ink-dim)}
+.record{margin-top:14px;font-size:15px;line-height:1.6;color:var(--ink);background:var(--bg-well);border-left:3px solid var(--sem-system);border-radius:0 9px 9px 0;padding:10px 12px}
+.foot{margin-top:18px;font-size:14px;line-height:1.65;color:var(--ink-mut)}
 .foot b{color:var(--ink-mut)}
-nav#fleetnav{margin-top:24px;font-size:11.5px;color:var(--ink-dim)}
+nav#fleetnav{margin-top:28px;padding-top:8px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:0 20px;font-size:14px}
+nav#fleetnav a{display:inline-flex;align-items:center;min-height:44px;text-decoration:none}
+nav#fleetnav a:hover{text-decoration:underline}
 /* ── the scratch pad, the prompt window, the pitch ── */
 .padhead{display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap}
 .padhead h2{font-size:13px;font-weight:650;letter-spacing:.4px;color:var(--ink-mut)}
@@ -69,13 +71,13 @@ nav#fleetnav{margin-top:24px;font-size:11.5px;color:var(--ink-dim)}
 .container.idle{color:var(--ink-dim)}
 .progress{height:3px;background:var(--bg-well);border-radius:2px;overflow:hidden;margin-top:8px}
 .progress i{display:block;height:100%;width:0%;background:linear-gradient(90deg,var(--sovereign),var(--you));border-radius:2px;transition:width .2s linear}
-.chat{margin-top:10px;background:var(--bg-well);border:1px solid var(--line);border-radius:9px;padding:10px 12px;max-height:170px;overflow-y:auto;font-size:12.5px}
+.chat{margin-top:10px;background:var(--bg-well);border:1px solid var(--line);border-radius:9px;padding:10px 12px;max-height:170px;overflow-y:auto;font-size:14px}
 .chat p{margin:0 0 6px;line-height:1.5}
 .chat p:last-child{margin-bottom:0}
 .chat p.you{color:var(--ink-mut)}
-.chat p.you::before{content:"you · ";color:var(--ink-dim);font-size:10px;letter-spacing:.5px}
+.chat p.you::before{content:"you · ";color:var(--ink-dim);font-size:12px;letter-spacing:.5px}
 .chat p.agent{color:var(--ink)}
-.chat p.agent::before{content:"bMiDi · ";color:var(--you);font-size:10px;letter-spacing:.5px}
+.chat p.agent::before{content:"bMiDi · ";color:var(--you);font-size:12px;letter-spacing:.5px}
 .pitch{border-left:3px solid var(--sem-value)}
 .pitch h2{font-size:13px;font-weight:650;letter-spacing:.4px;color:var(--ink-mut)}
 .pitch h2 b{color:var(--ink)}
@@ -83,18 +85,18 @@ nav#fleetnav{margin-top:24px;font-size:11.5px;color:var(--ink-dim)}
 .pitch .num{background:var(--bg-well);border:1px solid var(--line);border-radius:9px;padding:8px 10px}
 .pitch .num b{display:block;font:650 16px ui-monospace,Menlo,Consolas,monospace;color:var(--sem-value);word-break:break-all}
 .pitch .num b.ok{color:var(--sem-solution)}
-.pitch .num span{font-size:10px;color:var(--ink-dim)}
-button.copy{background:var(--bg-well);border:1px solid var(--line);color:var(--ink);font:600 11px ui-monospace,Menlo,Consolas,monospace;padding:7px 12px;border-radius:8px;cursor:pointer;margin-top:10px}
+.pitch .num span{display:block;font-size:13px;line-height:1.5;color:var(--ink-mut);margin-top:2px}
+button.copy{background:var(--bg-well);border:1px solid var(--line);color:var(--ink);font:600 14px ui-monospace,Menlo,Consolas,monospace;min-height:44px;padding:8px 14px;border-radius:8px;cursor:pointer;margin-top:10px}
 /* the swap popup — first-party chrome, the depth ladder's top rung */
 .modal{position:fixed;inset:0;background:rgba(3,8,6,.78);display:flex;align-items:flex-start;justify-content:center;padding:9vh 14px 20px;z-index:50}
 .modal[hidden]{display:none}
 .sheet{background:var(--bg-card);border:1px solid var(--line);border-radius:14px;padding:16px;max-width:430px;width:100%;box-shadow:0 18px 60px rgba(0,0,0,.5)}
 .sheet-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}
 .sheet-head b{font-size:14px}
-.sheet-head .x{background:var(--bg-well);border:1px solid var(--line);color:var(--ink-mut);border-radius:8px;width:28px;height:28px;cursor:pointer;font-size:12px}
+.sheet-head .x{background:var(--bg-well);border:1px solid var(--line);color:var(--ink-mut);border-radius:8px;width:44px;height:44px;cursor:pointer;font-size:14px}
 .sw-line{font-size:12px;color:var(--ink-mut);margin:6px 0}
-.sw-note{font-size:11px;color:var(--ink-dim);margin:8px 0 0}
-.sw-lab{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.9px;color:var(--ink-dim);margin-top:10px}
+.sw-note{font-size:13px;color:var(--ink-dim);margin:8px 0 0}
+.sw-lab{display:block;font-size:13px;letter-spacing:.3px;color:var(--ink-dim);margin-top:10px}
 #sw-eth{width:100%;background:var(--bg-well);border:1px solid var(--line);border-radius:9px;color:var(--ink);font:13px ui-monospace,Menlo,Consolas,monospace;padding:10px 12px;margin-top:4px}
 #sw-eth:focus{outline:none;border-color:var(--you)}
 .sw-quote{font-size:12.5px;color:var(--ink);background:var(--bg-well);border-left:3px solid var(--sem-value);border-radius:0 9px 9px 0;padding:9px 12px;margin-top:10px;min-height:1.4em}
@@ -108,8 +110,6 @@ button.copy:active{transform:translateY(1px)}
 <body>
 <h1 class="grad">bMiDi · the score the contract already wrote</h1>
 <details class="tnote" data-reg-disclose><summary data-i18n="md.d.compose">What bMiDi does and does not do — it paints, never composes</summary>
-  <details class="tnote" data-reg-disclose><summary data-i18n="md.d.compose">What bMiDi does and does not do — it paints, never composes</summary>
-  <details class="tnote" data-reg-disclose><summary data-i18n="md.d.compose">What bMiDi does and does not do — it paints, never composes</summary>
   <p class="law">bMiDi does not compose. it <b>paints a score that already exists</b>: the MiDi
 inscription contract on Base answers each seed with its scale, tempo and instrument — the page reads
 that answer from the chain and performs it. the picture is <b>hexagonal</b>, the collection's own
@@ -118,8 +118,6 @@ estate's. and the level ladder is the piece's <b>resolution</b>: the same score 
 at level zero it is still animated static, no music; as a balance rises through the thresholds it
 resolves, hex by hex, voice by voice, until level five carries the full ensemble. same seed, same
 performance, every time, forever.</p>
-  </details>
-  </details>
   </details>
 
 <section class="panel">
@@ -168,9 +166,7 @@ performance, every time, forever.</p>
 <section class="panel pitch" id="pitch">
   <h2><b>the pitch</b> — why hold MiDi at all</h2>
   <details class="tnote" data-reg-disclose><summary data-i18n="md.d.balance">Every balance is the same piece, at a higher resolution</summary>
-  <details class="tnote" data-reg-disclose><summary data-i18n="md.d.balance">Every balance is the same piece, at a higher resolution</summary>
-  <details class="tnote" data-reg-disclose><summary data-i18n="md.d.balance">Every balance is the same piece, at a higher resolution</summary>
-  <p style="font-size:12.5px;margin-top:6px;color:var(--ink-mut)">every balance is the same piece at a higher
+  <p style="font-size:15px;line-height:1.6;margin-top:8px;color:var(--ink-mut)">every balance is the same piece at a higher
   resolution — and only <b style="color:var(--sem-value)">1,050,000+ whole MiDi</b> carries the <b>level-5
   container: a 3:33 psytrance journey at 162 BPM</b>, the full ensemble, hex by hex. this page reads the
   chain; the swap popup below is the one write it can ever propose — your wallet signs it, the page never
@@ -180,8 +176,6 @@ performance, every time, forever.</p>
   are instrument contracts, your balance sets your level wherever it lives, and future deployments can be
   added live: say <i>contract 0x…</i> to bMiDi and it validates the candidate against the chain before it
   joins the switcher. B is the canonical holding: the only MiDi renounced with a live pool.</p>
-  </details>
-  </details>
   </details>
   <div class="nums">
     <div class="num"><b id="pi-owner">…</b><span>owner — renounced means nobody can mint or change the score</span></div>
@@ -864,7 +858,7 @@ $('voice').addEventListener('click',function(){startPlayback(S.tier===5?'contain
 $('voice2').addEventListener('click',function(){startPlayback('score')});
 $('fleetnav').innerHTML=(window.FLEET_NAV||[
  '<a href="./index.html">◈ fLeeT</a>','<a href="./museum.html">◈ museum</a>','<a href="./compare.html">◈ catalog</a>',
- '<a href="./gallery.html">◈ gallery</a>','<a href="./inscription-explorer.html">◈ explorer</a>','<a href="./bnri-gallery.html">◈ bNRi</a>']).join(' · ');
+ '<a href="./gallery.html">◈ gallery</a>','<a href="./inscription-explorer.html">◈ explorer</a>','<a href="./bnri-gallery.html">◈ bNRi</a>']).join('');
 /* ══ THE SCRATCH PAD ENGINE — always on, never two bursts ═══════════════════
    the old page only drew while the audio played, so the visuals lasted one
    melody cycle and died. now the pad breathes forever: an ambient field in
@@ -1261,12 +1255,12 @@ function renderPitch(){
   var on=function(id,txt,cls){var el=$(id);el.textContent=txt;if(cls)el.className=cls};
   var active=CONTRACTS.filter(function(c){return c.addr===MIDI_C})[0]||{k:'B'};
   if(!PITCH.ok){
-    on('pi-owner','unreadable');on('pi-burn','—');on('pi-pool','—');on('pi-supply','—');
+    on('pi-owner','unreadable');on('pi-burn','not read');on('pi-pool','not read');on('pi-supply','not read');
     $('msg').textContent='the pitch numbers could not be read live right now — nothing is invented here; refresh to try again.';
     return;
   }
   on('pi-owner',PITCH.renounced?'RENOUNCED':'owner live',PITCH.renounced?'ok':'');
-  on('pi-burn',PITCH.burn!=null?Math.round(PITCH.burn).toLocaleString()+' ('+(100*PITCH.burn/PITCH.supply).toFixed(1)+'%)':'—');
+  on('pi-burn',PITCH.burn!=null?Math.round(PITCH.burn).toLocaleString()+' ('+(100*PITCH.burn/PITCH.supply).toFixed(1)+'%)':'not measured');
   on('pi-pool',PITCH.weth!=null?PITCH.weth.toFixed(2)+' WETH ↔ '+Math.round(PITCH.poolMidi).toLocaleString()+' MiDi':(PITCH.poolAddr?'pool found':'no pool found'));
   on('pi-supply',Math.round(PITCH.supply).toLocaleString());
   PITCH_SAY='MiDi '+active.k+' — '+(PITCH.renounced?'the owner is renounced, ':'the owner is live, ')+

@@ -10,29 +10,37 @@
 <style>
 :root{--bg:#0d1410;--ink:#e2efdb;--cyan:#00E5FF;--gold:#FFD700;--violet:#c9a0ff;--dim:#8a9a8a;--line:#243026;--leaf:#7ddf8f;--amber:#ffb347}
 *{margin:0;padding:0;box-sizing:border-box}
-body{background:var(--bg);color:var(--ink);font:13px/1.6 'IBM Plex Mono',monospace;min-height:100vh;padding:36px 16px 90px}
+body{background:var(--bg);color:var(--ink);font:max(13px,var(--fmin,12px))/1.6 'IBM Plex Mono',monospace;min-height:100vh;padding:36px 16px 90px}
 header{text-align:center;margin-bottom:10px}
 h1{font-size:clamp(17px,4vw,24px);color:var(--gold);font-weight:400;letter-spacing:.05em}
-header p{color:var(--dim);font-size:11px;margin-top:6px;max-width:700px;margin-left:auto;margin-right:auto}
+header p{color:var(--dim);font-size:max(11px,var(--fmin,12px));margin-top:6px;max-width:700px;margin-left:auto;margin-right:auto}
 main{max-width:860px;margin:0 auto}
 section{background:#111a14;border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-top:16px}
-section h2{font-size:12px;color:var(--violet);font-weight:400;letter-spacing:.08em;margin-bottom:8px}
-.law{color:var(--dim);font-size:10px;line-height:1.7}
-select,input{background:#0a0f0b;color:var(--ink);border:1px solid var(--line);border-radius:7px;padding:6px 9px;font:12px 'IBM Plex Mono',monospace}
-.badge{display:inline-block;font-size:9px;letter-spacing:.1em;border:1px solid var(--line);border-radius:4px;padding:1px 6px;color:var(--gold)}
-.machine{color:var(--dim);font-size:9px;border:1px dashed var(--line);border-radius:4px;padding:0 5px;margin-left:6px}
-.chip{display:inline-flex;align-items:center;gap:6px;background:#0a0f0b;border:1px solid var(--line);border-radius:8px;padding:6px 10px;margin:4px 6px 4px 0;font-size:11px}
+section h2{font-size:max(12px,var(--fmin,12px));color:var(--violet);font-weight:400;letter-spacing:.08em;margin-bottom:8px}
+.law{color:var(--dim);font-size:max(10px,var(--fmin,12px));line-height:1.7}
+select,input{background:#0a0f0b;color:var(--ink);border:1px solid var(--line);border-radius:7px;padding:6px 9px;font:max(12px,var(--fmin,12px)) 'IBM Plex Mono',monospace}
+.badge{display:inline-block;font-size:max(9px,var(--fmin,12px));letter-spacing:.1em;border:1px solid var(--line);border-radius:4px;padding:1px 6px;color:var(--gold)}
+.machine{color:var(--dim);font-size:max(9px,var(--fmin,12px));border:1px dashed var(--line);border-radius:4px;padding:0 5px;margin-left:6px}
+.chip{display:inline-flex;align-items:center;gap:6px;background:#0a0f0b;border:1px solid var(--line);border-radius:8px;padding:6px 10px;margin:4px 6px 4px 0;font-size:max(11px,var(--fmin,12px))}
 .chip i{display:inline-block;width:9px;height:9px;border-radius:2px}
-table{width:100%;border-collapse:collapse;margin-top:8px;font-size:10.5px}
+table{width:100%;border-collapse:collapse;margin-top:8px;font-size:max(10.5px,var(--fmin,12px))}
 td,th{border-bottom:1px solid var(--line);padding:5px 6px;text-align:left;color:var(--dim)}
 th{color:var(--violet);font-weight:400} td.n{color:var(--ink)}
-.flow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:10px;font-size:11px}
+.flow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:10px;font-size:max(11px,var(--fmin,12px))}
 .fnode{background:#0a0f0b;border:1px solid var(--line);border-radius:8px;padding:8px 12px}
-.fnode .fk{font-size:9px;color:var(--dim);letter-spacing:.08em}
+.fnode .fk{font-size:max(9px,var(--fmin,12px));color:var(--dim);letter-spacing:.08em}
 .farrow{color:var(--dim)}
 .withdrawn{border:1px dashed var(--violet);border-radius:10px;padding:12px 14px;margin-top:10px}
-footer{max-width:860px;margin:22px auto 0;color:var(--dim);font-size:10px;text-align:center;line-height:1.8}
+footer{max-width:860px;margin:22px auto 0;color:var(--dim);font-size:max(10px,var(--fmin,12px));text-align:center;line-height:1.8}
 a{color:var(--cyan)}
+/* footer links are controls: a thumb-sized row, not text-height slivers */
+footer a{padding-block:14px} /* a 44 px tap target that leaves the line rhythm alone */
+/* on a phone the language table scrolls sideways inside its card instead of running off the edge */
+@media (max-width:600px){section table{display:block;max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}}
+/* Lower-half floor (2026-09-26, 390 px phone review): every small size on this page
+   reads max(its own size, --fmin) — 12 px in cypherpunk's dense mono, 14 px for new bee
+   and raver, so no register ever draws reading text a phone cannot hold. */
+body[data-reg="bee"],body[data-reg="raver"]{--fmin:14px}
 </style>
 </head>
 <body>
@@ -50,7 +58,7 @@ a{color:var(--cyan)}
   preference ever syncs it rides a persona binding, never the bzDiD root. the father set
   below is the hardcoded bridge — a rare mother tongue enters <i>through</i> it, with BLAI
   drafting renderings that are always labeled as machine drafts until a community attests.</div>
-  <label style="font-size:10px;color:var(--dim)">father tongue
+  <label style="font-size:max(10px,var(--fmin,12px));color:var(--dim)">father tongue
     <select id="father">
       <option value="en">English (en)</option>
       <option value="es">Español (es)</option>
@@ -60,10 +68,10 @@ a{color:var(--cyan)}
       <option value="ar">العربية (ar) · founder-hardwired</option>
     </select>
   </label>
-  <label style="font-size:10px;color:var(--dim);margin-left:12px">mother language — chosen, not native (any — the corpus is gateless)
+  <label style="font-size:max(10px,var(--fmin,12px));color:var(--dim);margin-left:12px">mother language — chosen, not native (any — the corpus is gateless)
     <input id="mother" placeholder="e.g. latviešu — the genesis reference" size="24">
   </label>
-  <label style="font-size:10px;color:var(--dim);margin-left:12px">student language(s) — comma-separated
+  <label style="font-size:max(10px,var(--fmin,12px));color:var(--dim);margin-left:12px">student language(s) — comma-separated
     <input id="students" placeholder="e.g. ru, th" size="12">
   </label>
   <div class="law" id="prefState" style="margin-top:8px">no preference stored yet</div>
@@ -80,7 +88,7 @@ a{color:var(--cyan)}
 <section>
   <h2>3 · <span data-i18n="h.111">WITHDRAWAL — a first-class state, receipt-shaped</span></h2>
   <div class="withdrawn">
-    <div style="color:var(--violet);font-size:11px">⊘ this rendering was withdrawn by its language community <span class="badge">SPECIMEN</span></div>
+    <div style="color:var(--violet);font-size:max(11px,var(--fmin,12px))">⊘ this rendering was withdrawn by its language community <span class="badge">SPECIMEN</span></div>
     <div class="law" style="margin-top:4px">withdrawal date on the receipt · history preserved on the eternal ring ·
     <b>the canonical name is untouched and still resolves</b> · a redemption-window cadence shows this
     receipt before rendering stops — no rug-pull UX even when the withdrawal is legitimate.
