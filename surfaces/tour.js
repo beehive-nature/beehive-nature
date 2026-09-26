@@ -64,7 +64,7 @@
      drawer on a phone, inline where there is room. */
   var lane=document.createElement('div');lane.id='tlinks';
   var css=document.createElement('style');css.id='tbarstyle';
-  css.textContent='#tbar{position:fixed;bottom:0;left:0;right:0;max-width:100vw;z-index:9998;display:flex;flex-wrap:nowrap;align-items:center;gap:6px;padding:4px 8px;background:#0b0d0c;border-top:1px solid #1c211e;font:500 13px/1 ui-sans-serif,system-ui,sans-serif;box-sizing:border-box}'
+  css.textContent='#tbar{position:fixed;bottom:0;left:0;right:0;max-width:100vw;z-index:9998;display:flex;flex-wrap:nowrap;align-items:center;gap:6px;padding:4px 8px;background:#0b0d0c;color:#d7dcd9;border-top:1px solid #1c211e;font:500 13px/1 ui-sans-serif,system-ui,sans-serif;box-sizing:border-box}'
     +'#tlinks{flex:1 1 auto;min-width:0;display:flex;flex-wrap:nowrap;align-items:center;gap:0 2px;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 28px),transparent);mask-image:linear-gradient(90deg,#000 calc(100% - 28px),transparent)}'
     +'#tlinks::-webkit-scrollbar{display:none}'
     +'#tlinks a{min-height:44px!important;padding:0 10px!important}'
@@ -148,12 +148,23 @@
     var cur=parseFloat(getComputedStyle(document.body).paddingBottom)||0;
     if(cur<need) document.body.style.paddingBottom=need+'px';
   }
+  /* YOU ARE HERE, WHOLE (2026-09-26): the current page's link must never be the half word
+     under the lane's fade ("museu"). When the lane scrolls, it is brought fully into view,
+     clear of the fade; nothing moves when it already fits. */
+  function showHere(){
+    if(inlineHost||open) return;
+    var a=lane.querySelector('a[aria-current="page"]'); if(!a) return;
+    var fade=36, l=a.offsetLeft-lane.offsetLeft, r=l+a.offsetWidth;
+    if(r>lane.scrollLeft+lane.clientWidth-fade) lane.scrollLeft=Math.max(0,r-lane.clientWidth+fade);
+    else if(l<lane.scrollLeft) lane.scrollLeft=Math.max(0,l-8);
+  }
   if(!inlineHost) document.body.style.paddingBottom='69px'; /* fail-safe before measurement */
   else document.documentElement.style.setProperty('--tbar-h','0px'); /* in-flow bar takes no fixed room */
   fitPad();
   document.addEventListener('bregister',function(){sync();fitPad();});
   setTimeout(fitPad,500);   /* after register/lang/rails mount into the bar */
   setTimeout(fitPad,1500);
+  setTimeout(showHere,520); setTimeout(showHere,1520);
   addEventListener('resize',fitPad);
 
   /* MODAL RETREAT (2026-09-20, measured on the live MY SPACE page at 390x844):

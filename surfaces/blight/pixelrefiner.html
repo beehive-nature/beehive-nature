@@ -63,6 +63,17 @@ nav:not(#tbar) a:hover{color:var(--cyan)}
   background:linear-gradient(100deg,transparent 30%,rgba(134,204,114,.25) 50%,transparent 70%);
   background-size:220% 100%;animation:sweep .9s ease-out 1}
 @keyframes sweep{from{background-position:180% 0}to{background-position:-80% 0}}}
+/* ── the page's end, read on a phone (footer pass 2026-09-26) ────────────
+   nothing under 12 px; the end-of-page grey lifted to 4.5:1+; the fleet row
+   is a 44 px tap row; bee and raver read the end at 14 px. */
+.status{font-size:12.5px;color:#9aa3b5}
+.foot{font-size:12px;color:#9aa3b5}
+.foot a{color:#b5bdcc;text-decoration:underline;text-underline-offset:2px}
+.pane .by,.field,.lockline,.well.empty::after{font-size:12px}
+nav:not(#tbar){gap:0 14px;font-size:12px;align-items:center;margin-top:18px;padding-top:10px;border-top:1px solid var(--line);color:#5f6a80}
+nav:not(#tbar) a{display:inline-flex;align-items:center;min-height:44px;color:#9aa3b5}
+body:not([data-reg="cypherpunk"]) .status,body:not([data-reg="cypherpunk"]) .foot,
+body:not([data-reg="cypherpunk"]) nav:not(#tbar){font-size:14px}
 </style>
 </head>
 <body>
@@ -107,16 +118,16 @@ detected from the image's own run-lengths, or forced by hand when the guess land
 <div class="lockline" id="lockline">hex-top + the two hex dithers: locked because cells = square — the words, not just the grey.</div>
 
 <div class="split">
-  <div class="pane"><h3>INPUT — as it arrived</h3><div class="by" id="inSize">nothing loaded</div>
+  <div class="pane"><h3>input — as it arrived</h3><div class="by" id="inSize">nothing loaded</div>
     <div class="well empty" id="inWell" data-hint="drop an image, or press FUNGI SHEET for the demo — a 1536px smear of a 96-cell sheet, synthesized right here"><canvas id="inCv" width="8" height="8" hidden></canvas></div></div>
-  <div class="pane" id="outPane"><h3>RESULT — cells, re-snapped</h3><div class="by" id="outSize">—</div>
+  <div class="pane" id="outPane"><h3>result — cells, re-snapped</h3><div class="by" id="outSize">nothing yet</div>
     <div class="well empty" id="outWell" data-hint="the refined grid lands here"><canvas id="outCv" width="8" height="8" hidden></canvas></div></div>
 </div>
 <div class="status" id="status">The engine is local. The refine button is honest even in airplane mode.</div>
 
 <div class="foot"><b>Provenance.</b> Engine: <a href="https://github.com/beehive-nature/PixelRefiner">PixelRefiner v0.11.1</a> by Happy Onigiri, <b>MIT</b>, mirrored in our org and vendored whole — detector, quantizer (Oklab k-means; Floyd–Steinberg; Bayer 2×2/4×4/8×8), flood-fill, outline, processor — types stripped, one file, no build step, no worker, no dependencies. The FUNGI sheet button composes sprites read live from the FUNGI contract (getSvg seeds 1 &amp; 7, Base mainnet, census-verified selector) and smears them the way screenshots do — every pixel of the demo is made on your device.
-<br><b>Hex cells</b> are a MODE alongside square, never a replacement — same engine, same palette, the artist picks. The lattice path (lane/hex) re-lattices the refined grid onto equal-area hexes in Oklab and re-snaps through the same quantizer; its dithers are serpentine tone-dependent error diffusion per Jodoin &amp; Ostromoukhov, <i>Halftoning Over a Hexagonal Grid</i>, Proc. SPIE 5008 (2003), DOI <a href="https://doi.org/10.1117/12.473230" style="color:var(--cyan)">10.1117/12.473230</a>, and a void-and-cluster hex blue-noise mask (Ulichney 1993) — five dependency-free modules inlined under the same one-file-zero-calls law. Picking a square dither with hex cells dithers the square pass first, then hexifies — an option, not a swap.
-<br>Auto-detect reads run-lengths and <b>can land near-but-wrong on fine cells</b> (a 96-cell sheet at 16px cells reads 92). That is why W × H sits in the open: correct it, and force takes over.</div>
+<br><br><b>Hex cells</b> are a MODE alongside square, never a replacement — same engine, same palette, the artist picks. The lattice path (lane/hex) re-lattices the refined grid onto equal-area hexes in Oklab and re-snaps through the same quantizer; its dithers are serpentine tone-dependent error diffusion per Jodoin &amp; Ostromoukhov, <i>Halftoning Over a Hexagonal Grid</i>, Proc. SPIE 5008 (2003), DOI <a href="https://doi.org/10.1117/12.473230" style="color:var(--cyan)">10.1117/12.473230</a>, and a void-and-cluster hex blue-noise mask (Ulichney 1993) — five dependency-free modules inlined under the same one-file-zero-calls law. Picking a square dither with hex cells dithers the square pass first, then hexifies — an option, not a swap.
+<br><br>Auto-detect reads run-lengths and <b>can land near-but-wrong on fine cells</b> (a 96-cell sheet at 16px cells reads 92). That is why W × H sits in the open: correct it, and force takes over.</div>
 <nav id="fleetnav"></nav>
 </div>
 
@@ -4336,7 +4347,7 @@ function loadBlob(blob){
     cur=toRaw(bm);
     drawTo(inCv,$('inWell'),cur);
     $('inSize').textContent=cur.width+' × '+cur.height+' px';
-    $('outSize').textContent='—';$('outWell').classList.add('empty');$('dl').disabled=true;$('dlsvg').disabled=true;
+    $('outSize').textContent='nothing yet';$('outWell').classList.add('empty');$('dl').disabled=true;$('dlsvg').disabled=true;
     setStatus('loaded — <i>'+cur.width+'×'+cur.height+'</i>. refining with auto-detect…');
     refine(true);
   });
@@ -4432,7 +4443,7 @@ function fungiSheet(){
     cur=toRaw(big);
     drawTo(inCv,$('inWell'),cur);
     $('inSize').textContent='1536 × 1536 px — the smear';
-    $('outSize').textContent='—';$('outWell').classList.add('empty');$('dl').disabled=true;$('dlsvg').disabled=true;
+    $('outSize').textContent='nothing yet';$('outWell').classList.add('empty');$('dl').disabled=true;$('dlsvg').disabled=true;
     $('mode').value='auto';$('fw').value='';$('fh').value='';
     setStatus('FUNGI sheet synthesized locally (seeds 1 &amp; 7, read from the contract) and smeared ×16 — <i>true grid 96×96</i>. refining…');
     refine(true);

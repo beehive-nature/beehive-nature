@@ -51,6 +51,22 @@ nav:not(#tbar) a:hover{color:var(--violet)}
 .herofig{display:flex;flex-direction:column;gap:2px;margin:10px 0 2px}.herofig .num{font-size:38px;line-height:1;font-weight:600;font-variant-numeric:tabular-nums;color:var(--rose)}.herofig .cap{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
 .pstat{background:var(--well)}
 @media (max-width:600px){body{padding:14px 10px 80px}.wrap{padding:16px 12px 110px}h1{font-size:24px}}
+/* ── the page's end, read on a phone (footer pass 2026-09-26) ────────────
+   casing law: no forced capitals; nothing under 12 px; the fleet row is a
+   44 px tap row; bee and raver read the end at 14 px. */
+.herofig .cap{text-transform:none;letter-spacing:.04em;font-size:12px}
+.pane h3{letter-spacing:.3px}
+.pane .by{font-size:12px}
+.facts,.status{font-size:12.5px}
+.foot{font-size:12px;padding-top:16px;border-top:1px solid var(--line)}
+nav:not(#tbar){gap:0 14px;font-size:12px;align-items:center;margin-top:16px;color:var(--dim)}
+nav:not(#tbar) a{display:inline-flex;align-items:center;min-height:44px}
+body:not([data-reg="cypherpunk"]) .facts,body:not([data-reg="cypherpunk"]) .status,
+body:not([data-reg="cypherpunk"]) .foot,body:not([data-reg="cypherpunk"]) nav:not(#tbar),
+body:not([data-reg="cypherpunk"]) .pane .by{font-size:14px}
+body:not([data-reg="cypherpunk"]) .herofig .cap{font-size:13px}
+.split>*{min-width:0}
+.facts i{overflow-wrap:anywhere}
 </style>
 </head>
 <body>
@@ -71,10 +87,10 @@ every frame must scan. The blooms are ROSES — layered spiralling petals in <b>
 </div>
 
 <div class="split">
-  <div class="pane"><h3>THE GARDEN — still core, living skin</h3>
+  <div class="pane"><h3>the garden — still core, living skin</h3>
     <div class="by" id="phase">the garden grows</div>
     <div class="well pstat"><canvas id="cv" width="760" height="760"></canvas></div></div>
-  <div class="pane"><h3>THE CODE, FROZEN</h3><div class="by">what never moves</div>
+  <div class="pane"><h3>the code, frozen</h3><div class="by">what never moves</div>
     <div class="facts" id="facts">—</div>
     <div class="status" id="status">planting…</div></div>
 </div>

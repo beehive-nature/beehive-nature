@@ -116,6 +116,38 @@ footer .m{margin-top:6px;max-width:72ch}
   section{padding:14px 12px}
   main{padding:0 12px 70px}
 }
+
+/* THE LOWER HALF AT 390 (2026-09-26, footer audit). The page's own chrome
+   (section notes, axis lines, spec captions, badges, chips, buttons, the
+   comet law, the footer) read at 9.5–11.5 px in forced capitals and --faint
+   at 4.4:1. Casing law: no text-transform on chrome. Floors: 12 px
+   everywhere (cypherpunk is the dense register), 14 px in new bee and raver,
+   16 px for the comet law's prose in new bee. Colour dress stays this page's
+   one dark dress. The section-head and footer-index specimens now mirror the
+   doors as they are today (sentence case, dim, 44 px footer targets). The
+   label and eyebrow SPECIMENS in 03 keep the exact size/casing their keyed
+   captions state: they are the documented values, not chrome. */
+.kicker,.shead h2,.shead em,.axis,.spec .cap,.crumbdemo{text-transform:none}
+.shead h2{letter-spacing:.01em}
+.shead em{font-size:12px;letter-spacing:.04em;color:var(--dim)}
+.axis{font-size:12px;letter-spacing:.02em;color:var(--dim)}
+.spec .cap{font-size:12px;letter-spacing:.02em;color:var(--dim)}
+.crumbdemo{font-size:12px;letter-spacing:.04em}
+.crumbdemo a.crumb{display:inline-flex;align-items:center;min-height:44px}
+.pill .n{color:var(--dim)}
+.pill{display:inline-flex;align-items:center;gap:6px;min-height:44px}
+.baddges>span{font-size:12px!important;padding:6px 10px!important}
+.btn{font-size:12px}
+.stat-chips span{font-size:12px}
+.doordemo .rs{font-size:12px}
+.comet-law{font-size:12px}
+footer{color:var(--dim)}
+body:is([data-reg="bee"],[data-reg="raver"]) :is(.shead em,.axis,.spec .cap,.crumbdemo,.btn,.stat-chips span,.doordemo .rs,.comet-law,footer,.gnote,.idprose,.fidx,.crumbdemo span,.pill,.demo-h em,.demo-h span[style*="margin-left:auto"]){font-size:14px!important}
+body:is([data-reg="bee"],[data-reg="raver"]) .baddges>span{font-size:14px!important}
+body[data-reg="bee"] :is(.comet-law,.idprose){font-size:16px!important;line-height:1.75!important}
+body:is([data-reg="bee"],[data-reg="raver"]) .shead h2{font-size:15px}
+body:is([data-reg="bee"],[data-reg="raver"]) input[type=search]{font-size:14px}
+.fidx a{white-space:nowrap}
 </style>
 </head>
 <body>
@@ -192,7 +224,7 @@ footer .m{margin-top:6px;max-width:72ch}
     <div><div style="font-size:13px;color:#E9F2EC">body — human words on a stranger's first fold. 13px on 1.65, muted <span style="color:#8FA79C">#8FA79C</span> for the second voice.</div><div class="cap" data-i18n="ds.t.body.cap">13px/1.65 · 400</div></div>
     <div><div style="font-size:11.5px;color:#8FA79C;letter-spacing:.12em;text-transform:uppercase">label — the panel's job, stated once</div><div class="cap" data-i18n="ds.t.label.cap">11.5px · .12em · uppercase · --ink-mut</div></div>
     <div><div style="font-size:10px;color:#648176;letter-spacing:.34em;text-transform:uppercase">eyebrow — zero network · no password · no name</div><div class="cap" data-i18n="ds.t.eyebrow.cap">10px · .34em · uppercase · --ink-dim</div></div>
-    <div><div style="font-size:38px;line-height:1;font-weight:600;font-variant-numeric:tabular-nums" data-hero-number>1,247</div><div class="cap" data-hero-caption> data-i18n="ds.t.hero.cap">hero figure — 38px · tabular-nums · every count COMPUTED, never typed</div></div>
+    <div><div style="font-size:38px;line-height:1;font-weight:600;font-variant-numeric:tabular-nums" data-hero-number>1,247</div><div class="cap" data-hero-caption data-i18n="ds.t.hero.cap">hero figure — 38px · tabular-nums · every count COMPUTED, never typed</div></div>
   </div>
 </section>
 
@@ -202,7 +234,7 @@ footer .m{margin-top:6px;max-width:72ch}
     <div style="flex:none">
       <svg viewBox="-60 -60 120 120" width="132" height="132" role="img" aria-label="the bComb mandala — 91 cells" id="mandala"></svg>
     </div>
-    <div style="flex:1 1 280px;font-size:11.5px;color:#8FA79C;line-height:1.85">the mandala is the estate's mark — the same lattice the beam transmits. as chrome it appears only two ways: the <b style="color:#E9F2EC;font-weight:400">hex dot</b> <span style="display:inline-block;width:10px;height:10px;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);background:#86CC72;vertical-align:-1px"></span> marking a section head, and the pulsing <b style="color:#E9F2EC;font-weight:400">hex band</b> riding a masthead. as art it is the comet below — kept, working, un-tamed.</div>
+    <div class="idprose" style="flex:1 1 280px;font-size:12px;color:#8FA79C;line-height:1.85">the mandala is the estate's mark — the same lattice the beam transmits. as chrome it appears only two ways: the <b style="color:#E9F2EC;font-weight:400">hex dot</b> <span style="display:inline-block;width:10px;height:10px;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);background:#86CC72;vertical-align:-1px"></span> marking a section head, and the pulsing <b style="color:#E9F2EC;font-weight:400">hex band</b> riding a masthead. as art it is the comet below — kept, working, un-tamed.</div>
   </div>
 </section>
 
@@ -210,8 +242,8 @@ footer .m{margin-top:6px;max-width:72ch}
   <div class="shead"><span class="dot"></span><h2 data-i18n="ds.s05">05 · menus &amp; navigation</h2><em>one crumb bar · pills for families · footer as index</em></div>
   <p class="axis" style="margin:0 0 8px">the crumb bar — every surface's first line: where you are, what state it is in</p>
   <nav class="crumbdemo" aria-label="crumb bar demo">
-    <a href="#nav">the hive</a><span style="color:#648176">▸</span><span style="color:#E9F2EC">wallet</span>
-    <span style="margin-left:auto;display:inline-flex;align-items:center;gap:7px;color:#8FA79C;font-size:10px"><span style="width:8px;height:8px;border-radius:50%;background:#86CC72"></span>static · zero network</span>
+    <a href="#nav" class="crumb">the hive</a><span style="color:#648176">▸</span><span style="color:#E9F2EC">wallet</span>
+    <span style="margin-left:auto;display:inline-flex;align-items:center;gap:7px;color:#8FA79C;font-size:12px"><span style="width:8px;height:8px;border-radius:50%;background:#86CC72"></span>static · zero network</span>
   </nav>
   <p class="axis" style="margin:14px 0 8px">family jump pills — counts computed from the registry</p>
   <div class="pillrow">
@@ -224,15 +256,15 @@ footer .m{margin-top:6px;max-width:72ch}
   <div class="demo-h">
     <span style="width:10px;height:10px;flex:none;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);background:#86CC72"></span>
     <b>everything behind this door</b>
-    <em style="font-style:normal;font-size:9.5px;letter-spacing:.18em;color:#648176;text-transform:uppercase">open now · ⚠ marks a named limit</em>
-    <span style="margin-left:auto;font-size:9.5px;letter-spacing:.14em;color:#648176;text-transform:uppercase">4</span>
+    <em style="font-style:normal;font-size:12px;letter-spacing:.04em;color:#8FA79C">open now · ⚠ marks a named limit</em>
+    <span style="margin-left:auto;font-size:12px;letter-spacing:.04em;color:#8FA79C">4</span>
   </div>
-  <p class="axis" style="margin:14px 0 8px">the footer index — every room names its siblings, dim, uppercase, 32px touch targets</p>
-  <footer style="border-top:1px solid #1E2B26;padding-top:12px;color:#648176;font-size:10px;letter-spacing:.1em;line-height:2.2;text-transform:uppercase">
-    <a href="index.html" style="display:inline-flex;align-items:center;min-height:32px;padding:0 5px;color:#8FA79C">the hub</a> ·
-    <a href="wallet.html" style="display:inline-flex;align-items:center;min-height:32px;padding:0 5px;color:#8FA79C">the wallet</a> ·
-    <a href="buzz-studio.html" style="display:inline-flex;align-items:center;min-height:32px;padding:0 5px;color:#8FA79C">the buzz room</a> ·
-    <a href="../estate.json" style="display:inline-flex;align-items:center;min-height:32px;padding:0 5px;color:#8FA79C">the registry</a>
+  <p class="axis" style="margin:14px 0 8px">the footer index — every room names its siblings, dim, sentence case, 44px touch targets</p>
+  <footer class="fidx" style="border-top:1px solid #1E2B26;padding-top:12px;color:#8FA79C;font-size:12px;line-height:2.6">
+    <a href="index.html" style="padding:15px 6px;color:#E9F2EC">the hub</a>&nbsp;·
+    <a href="wallet.html" style="padding:15px 6px;color:#E9F2EC">the wallet</a>&nbsp;·
+    <a href="buzz-studio.html" style="padding:15px 6px;color:#E9F2EC">the buzz room</a>&nbsp;·
+    <a href="../estate.json" style="padding:15px 6px;color:#E9F2EC">the registry</a>
   </footer>
 </section>
 
@@ -241,7 +273,7 @@ footer .m{margin-top:6px;max-width:72ch}
   <div class="baddges">
     <span style="font-size:11px;padding:3px 9px;border-radius:6px;border:1px solid #86CC72;color:#8FA79C">skaists.dev<span style="margin-left:6px;color:#86CC72">LIVE</span></span>
     <span style="font-size:11px;padding:3px 9px;border-radius:6px;border:1px solid #1E2B26;color:#8FA79C">skaists.buzz<span style="margin-left:6px;color:#45C2DC">DNS-PENDING</span></span>
-    <span style="font-size:11px;padding:3px 9px;border-radius:6px;border:1px solid #1E2B26;color:#8FA79C">skaists.social<span style="margin-left:6px;color:#648176">SEAT-OPEN</span></span>
+    <span style="font-size:11px;padding:3px 9px;border-radius:6px;border:1px solid #1E2B26;color:#8FA79C">skaists.social<span style="margin-left:6px;color:#8FA79C">SEAT-OPEN</span></span>
     <span style="font-size:11px;padding:3px 9px;border-radius:6px;border:1px solid #1E2B26;color:#8FA79C">onboarding<span style="margin-left:6px;color:#45C2DC">⚠ named limit</span></span>
     <span style="font-size:11px;padding:3px 9px;border-radius:6px;border:1px solid #1E2B26;color:#8FA79C"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#648176;margin-right:7px;vertical-align:1px"></span>staged — first boot pending</span>
     <span style="font-size:11px;padding:3px 9px;border-radius:6px;border:1px solid #1E2B26;color:#8FA79C"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#86CC72;margin-right:7px;vertical-align:1px"></span>live</span>
@@ -274,7 +306,7 @@ footer .m{margin-top:6px;max-width:72ch}
         <code class="wire">wss://skaists.buzz</code>
         <button type="button" class="btn">copy</button>
       </div>
-      <div style="font-size:10px;color:#648176;margin-top:8px">the guarantee door: name · state · join render with ZERO page-open network. the wire is cyan because it is a wire.</div>
+      <div class="gnote" style="font-size:12px;color:#8FA79C;margin-top:8px">the guarantee door: name · state · join render with ZERO page-open network. the wire is cyan because it is a wire.</div>
     </div>
   </div>
 </section>

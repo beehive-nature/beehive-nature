@@ -27,9 +27,11 @@
       'border-radius:999px;color:#d7dcd9;text-decoration:none}'+
       '#fleet-nav a:hover{border-color:#f1df29;color:#f1df29}#fleet-nav a.here{color:#16edf5;border-color:#16edf5}'+
       '#fleet-nav .tag{color:inherit;opacity:.7}'+
-      'body[data-reg="bee"] #fleet-nav a{color:#0c1412;background:#fffdf8;border-color:#d9d0c1}'+
-      'body[data-reg="bee"] #fleet-nav a.here{color:#6e3fb8;border-color:#6e3fb8}'+
-      'body[data-reg="bee"] #fleet-nav a:hover{color:#a8238c;border-color:#a8238c}'+
+      /* bee takes its colours FROM the page: several blight pages stay dark in bee, and a paper
+         pill on a dark page read as a pasted sticker (lead review 2026-09-26) */
+      'body[data-reg="bee"] #fleet-nav a{color:inherit;background:transparent;border-color:color-mix(in srgb,currentColor 38%,transparent)}'+
+      'body[data-reg="bee"] #fleet-nav a.here{font-weight:700;border-color:currentColor}'+
+      'body[data-reg="bee"] #fleet-nav a:hover{border-color:currentColor;text-decoration:underline;text-underline-offset:3px}'+
       'body[data-reg="cypherpunk"] #fleet-nav{font:13px/1.3 ui-monospace,Menlo,Consolas,monospace}'+
       'body[data-reg="cypherpunk"] #fleet-nav a{border-radius:4px}';
     document.head.appendChild(css);

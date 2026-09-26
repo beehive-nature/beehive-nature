@@ -29,6 +29,18 @@
   .note { color: #828a82; font-size: .78rem; margin-top: .7rem; line-height: 1.5; }
   footer { margin-top: 2rem; color: #687068; font-size: .72rem; line-height: 1.6; }
   @media (prefers-reduced-motion: no-preference) { .dot.live { animation: p 2.4s infinite; } @keyframes p { 50% { opacity:.55; } } }
+
+  /* THE LOWER HALF AT 390 (2026-09-26, footer audit): new bee is dressed by
+     register.js; raver and cypherpunk kept an 11.5 px footer at 3.8:1 and
+     forced capitals. Casing law: no text-transform. Raver reads at 14 px,
+     cypherpunk stays denser at 13 px. */
+  .hex, .card h2 { text-transform: none; }
+  .hex { letter-spacing: .12em; }
+  .card h2 { letter-spacing: .02em; }
+  body:not([data-reg="bee"]) footer { color: #9a9a92; font-size: .8125rem; line-height: 1.7; }
+  body:not([data-reg="bee"]) .note { font-size: .8125rem; line-height: 1.6; }
+  body[data-reg="raver"] :is(footer, .note, .card h2) { font-size: .875rem; }
+  button { min-height: 44px; }
 </style>
 </head>
 <body>

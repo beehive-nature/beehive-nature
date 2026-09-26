@@ -23,7 +23,7 @@
 //   BROKEN   an image that did not load
 //   JUNK     undefined / NaN / null / [object …] / a lone dash shown as a value
 //   CAPS     forced capitals (text-transform), against the casing law
-//   TINY     a link or button under 32 px tall (touch)
+//   TINY     a link or button under 32 px tall (touch); links inside running prose are exempt (WCAG 2.5.8)
 // External requests are refused (nothing leaves the box). Screens of the bottom 220 px go to
 // --shots <dir> for the contact sheet. Exit 1 on any finding unless --report.
 // CI runs it as a ratchet: --baseline e2e/footer-audit.baseline.json fails when any page × register
@@ -101,6 +101,9 @@ function measure() {
   }
   if (low && low.b > br.top + 1) out.push(['UNDER', `${low.el.tagName.toLowerCase()} "${(low.el.textContent || '').trim().slice(0, 30)}" ends at ${Math.round(low.b)} under the bar top ${Math.round(br.top)}`]);
   if (document.documentElement.scrollWidth > W + 1) out.push(['WIDE', `page ${document.documentElement.scrollWidth} px wide`]);
+  // a phone widens its LAYOUT viewport to fit overflowing content even under body{overflow-x:hidden}
+  // (the page is then zoomed out and the bar sits partly off-screen): innerWidth itself grows past 390
+  else if (innerWidth > 391) out.push(['WIDE', `layout viewport ${innerWidth} px (content overflows 390)`]);
   return { out, mode: 'fixed', bar: Math.round(br.height) };
 }
 // The lower half: every element whose box lies below the page's middle, measured in document coordinates.
@@ -130,7 +133,11 @@ function lowerHalf() {
       if (!scroller) out.push(['OFFSIDE', say(el) + ` right ${Math.round(r.right)}`]);
     }
     if (el.tagName === 'IMG' && el.complete && !el.naturalWidth) out.push(['BROKEN', 'img ' + (el.getAttribute('src') || '').slice(0, 60)]);
-    if (/^(A|BUTTON|SUMMARY)$/.test(el.tagName) && r.height < 32 && (el.textContent || '').trim()) out.push(['TINY', say(el) + ` ${Math.round(r.height)} px`]);
+    // WCAG 2.5.8's inline exception: a link inside running prose is sized by the sentence. Prose =
+    // the parent still holds 20+ characters once every link in it is taken out (a row of links
+    // separated by dots is NOT prose and stays measured).
+    const inProse = e => { if (e.tagName !== 'A' || getComputedStyle(e).display !== 'inline') return false; const par = e.parentElement; if (!par) return false; let t = (par.textContent || '').length; for (const x of par.querySelectorAll('a')) t -= (x.textContent || '').length; return t >= 20; };
+    if (/^(A|BUTTON|SUMMARY)$/.test(el.tagName) && r.height < 32 && (el.textContent || '').trim() && !inProse(el)) out.push(['TINY', say(el) + ` ${Math.round(r.height)} px`]);
     const own = [...el.childNodes].filter(n => n.nodeType === 3 && n.textContent.trim()).map(n => n.textContent.trim()).join(' ');
     if (!own) continue;
     if (/\b(undefined|NaN|null)\b|\[object \w+\]/.test(own) || /^[—–-]$/.test(own)) out.push(['JUNK', say(el)]);
@@ -168,7 +175,8 @@ async function run(page, reg) {
   try {
     await p.goto(`${ORIGIN}/surfaces/${page}`, { waitUntil: 'load', timeout: 20000 });
     await p.waitForTimeout(1700);   // tour.js re-fits at 500 and 1500 ms, after the riders mount
-    await p.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+    // instant, whatever the page's scroll-behavior: a smooth scroll is still moving when we measure
+    await p.evaluate(() => window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'instant' }));
     await p.waitForTimeout(350);
     const m = await p.evaluate(measure);
     // lower half: walk it from the middle down, so everything is laid out, then measure it all at once
