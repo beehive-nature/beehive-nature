@@ -129,7 +129,11 @@ test('honest gestures: rows, ring and tiles read the data; they never fetch, pla
 
   const { ctx: c2, p: r2, door: d2, errs } = await open('raver');
   const before = await r2.evaluate(() => window.__eternal.raver.mode);
-  await r2.click('#etRing .dial');
+  // the dial breathes (its spokes scale, 1.6 s): a person taps it mid-breath, so the tap does not wait
+  // for a still frame. Under a full parallel battery Playwright never saw two equal frames in 30 s
+  // (2026-09-26). The tap is still a real pointer click at the same point, and the next line still
+  // proves it landed.
+  await r2.click('#etRing .dial', { force: true });
   assert.notEqual(await r2.evaluate(() => window.__eternal.raver.mode), before, 'tapping the ring reads it another way');
   await r2.click('#etTiles button[data-mode="flow"]');
   assert.equal(await r2.evaluate(() => window.__eternal.raver.mode), 'flow');

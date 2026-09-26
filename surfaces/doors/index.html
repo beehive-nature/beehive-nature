@@ -142,10 +142,231 @@ footer>div>a:first-child{margin-inline-start:-5px}
 body:not([data-reg="bee"]) footer>div>a:first-child{margin-inline-start:-6px}
 body[data-reg="raver"] footer>div>a:first-child{margin-inline-start:-4px}
 body[data-reg="raver"] :is(a.t b,a.t.big b){font-size:16px}
+
+/* ── ETERNAL FRONT (docs/design/eternal) — every value is a skaists token (../skaists.css, compiled
+   from docs/design/skaists/tokens.json): no hand-picked hex, size or corner. Measured by
+   e2e/skaists-conformance.mjs. One register visible at a time; new bee is the default. The front
+   sits above the door's scanline veil on its own ground; the door itself follows below. ── */
+#eternal{position:relative;z-index:4;margin:0;padding:var(--sk-s2) var(--sk-s3) var(--sk-s5);background:var(--sk-bg);border:0;border-radius:0;color:var(--sk-ink);scroll-margin-top:0}
+#eternal>div{max-width:560px;margin:0 auto}
+#eternal>.et-r,#eternal>.et-c{display:none}
+body[data-reg="raver"] #eternal>.et-b,body[data-reg="cypherpunk"] #eternal>.et-b{display:none}
+body[data-reg="raver"] #eternal>.et-r{display:block}
+body[data-reg="cypherpunk"] #eternal>.et-c{display:block}
+#eternal [hidden]{display:none!important}
+#eternal button{background:none;border:0;color:inherit;cursor:pointer;text-align:inherit}
+#eternal a{text-decoration:none}
+#eternal svg{display:block}
+#eternal :focus-visible{outline:2px solid var(--sk-focus);outline-offset:3px}
+#eternal .et-art [role="button"]:focus-visible{outline:none}
+#eternal .et-b-rows :focus-visible{outline-offset:-3px}
+.et-archive-h{max-width:var(--max);margin:0 auto;padding:var(--sk-s4) var(--sk-s3) var(--sk-s3);border-top:1px solid var(--sk-line);color:var(--sk-ink);position:relative}
+
+/* NEW BEE — one question at a time, plain words, one magenta action */
+#eternal .et-b{display:flex;flex-direction:column;gap:var(--sk-s3);color:var(--sk-ink)}
+#eternal .et-b-mark{font:400 18px/1.2 var(--sk-font-house);color:var(--sk-sovereign)}
+#eternal .et-b-h{margin:0;font:400 40px/1.05 var(--sk-font-bee-serif);color:var(--sk-ink);letter-spacing:0}
+#eternal .et-b-lede{margin:0;font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink-mut);text-wrap:pretty}
+#eternal .et-b-guard{display:flex;align-items:center;gap:var(--sk-s2);min-height:var(--sk-control-min,44px);padding:var(--sk-s1) var(--sk-s3);border-radius:var(--sk-radius);background:var(--sk-guard-wash);color:var(--sk-guard);font:600 15px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-b-guard svg,#eternal .et-b-row svg.ico{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+#eternal .et-b-rows{display:flex;flex-direction:column;background:var(--sk-bg-card);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl);overflow:hidden}
+#eternal .et-b-row{display:flex;align-items:center;justify-content:space-between;gap:var(--sk-s2);width:100%;min-height:var(--sk-control-row,52px);padding:var(--sk-s1) var(--sk-s3);border:0;border-bottom:1px solid var(--sk-line-soft);background:var(--sk-bg-card);text-align:left;font:500 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+#eternal .et-b-row:last-child{border-bottom:0}
+#eternal .et-b-row{color:var(--sk-ink)}
+#eternal .et-b-row>span:first-child{min-width:0}
+#eternal .et-b-row small{display:flex;align-items:center;gap:var(--sk-s1);flex:none;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-row .chev{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;transition:transform var(--et-dur,.26s)}
+#eternal .et-b-row[aria-expanded="true"],#eternal .et-b-row[aria-pressed="true"]{background:var(--sk-sovereign-tint);color:var(--sk-sovereign-strong);font-weight:600}
+#eternal .et-b-row[aria-expanded="true"],#eternal .et-b-row[aria-pressed="true"]{color:var(--sk-sovereign-strong)}
+#eternal .et-b-row[aria-expanded="true"] small,#eternal .et-b-row[aria-pressed="true"] small{color:var(--sk-sovereign-strong)}
+#eternal .et-b-row[aria-expanded="true"] .chev{transform:rotate(90deg)}
+#eternal .et-b-more{display:flex;flex-direction:column;gap:var(--sk-s1);padding:var(--sk-s2) var(--sk-s3);border-bottom:1px solid var(--sk-line-soft);background:var(--sk-sovereign-tint);font:400 15px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+#eternal .et-b-more:last-child{border-bottom:0}
+#eternal .et-b-more b{display:block;font:600 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+#eternal .et-b-more span{display:block;font:400 15px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-more a{display:flex;align-items:center;min-height:var(--sk-control-min,44px);font:600 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-link)}
+#eternal .et-b-more a:hover{color:var(--sk-link-hover)}
+#eternal .et-b-act{display:flex;flex-direction:column;gap:var(--sk-s1);margin-top:var(--sk-s1)}
+#eternal .et-b-primary{display:flex;align-items:center;justify-content:center;min-height:var(--sk-control-primary,54px);padding:var(--sk-s1) var(--sk-s3);border:0;border-radius:var(--sk-radius-lg);background:var(--sk-primary);color:var(--sk-on-primary);font:600 17px/1.2 var(--sk-font-bee-sans);text-align:center}
+#eternal .et-b-link{display:flex;align-items:center;justify-content:center;min-height:var(--sk-control-min,44px);border:0;background:transparent;font:600 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-link);text-align:center}
+#eternal .et-b-link:hover{color:var(--sk-link-hover)}
+#eternal .et-b-foot{margin:0;text-align:center;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-say{margin:0;padding:var(--sk-s2) var(--sk-s3);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl);background:var(--sk-bg-card);font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+
+/* RAVER — the door's data is the art; tap to light; motion under 3 Hz, pausable, still when asked */
+#eternal .et-r{color:var(--sk-ink);font-family:var(--sk-font-raver-body)}
+#eternal .et-r-top{display:flex;align-items:baseline;justify-content:space-between;gap:var(--sk-s1) var(--sk-s2);flex-wrap:wrap}
+#eternal .et-r-h{margin:0;font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em;color:var(--sk-ink)}
+#eternal .et-r-who{margin:var(--sk-s1) 0 0;font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-sovereign-soft)}
+#eternal .et-r-hint{font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-art{width:100%;max-width:372px;margin:var(--sk-s3) auto var(--sk-s2);filter:drop-shadow(var(--sk-glow-sovereign));touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+#eternal .et-r-art [role="button"]{cursor:pointer}
+#eternal .et-r-art .hit{fill:transparent;stroke:none}
+#eternal .et-r-legend{display:flex;flex-wrap:wrap;justify-content:center;gap:var(--sk-s1) var(--sk-s3);margin:0 0 var(--sk-s3);font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-legend span{display:inline-flex;align-items:center;gap:var(--sk-s1)}
+#eternal .et-r-legend em{font-style:normal}
+#eternal .et-r-legend i{display:inline-block;width:var(--sk-s2);height:var(--sk-s2);border-radius:var(--sk-radius-pill);background:var(--sk-sovereign)}
+#eternal .et-r-legend i.lg-dash{background:transparent;border:1.5px dashed var(--sk-sovereign-soft)}
+#eternal .et-r-legend i.lg-ghost{background:transparent;border:1.5px dashed var(--sk-ink-mut)}
+#eternal .et-r-card{display:flex;gap:var(--sk-s2);align-items:center;padding:var(--sk-s2) var(--sk-s3);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl);background:var(--sk-sovereign-tint);min-height:var(--sk-control-person,60px)}
+#eternal .et-r-card .rk{width:var(--sk-control-min,44px);height:var(--sk-control-min,44px);flex:none;clip-path:polygon(50% 0,93% 25%,93% 75%,50% 100%,7% 75%,7% 25%);background:var(--et-hue,var(--sk-sovereign))}
+#eternal .et-r-card .rk.ghost{background:var(--sk-line)}
+#eternal .et-r-card b{display:block;font:600 15px/1.25 var(--sk-font-raver-body);color:var(--sk-ink);overflow-wrap:anywhere}
+#eternal .et-r-card span{display:block;font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-sovereign-soft)}
+#eternal .et-r-card span.lim{color:var(--sk-guard)}
+#eternal .et-r-pill{display:flex;align-items:center;justify-content:center;width:100%;min-height:58px;margin-top:var(--sk-s4);padding:var(--sk-s1) var(--sk-s4);border:0;border-radius:var(--sk-radius-pill);background:var(--sk-primary);color:var(--sk-on-primary);font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em;text-align:center}
+#eternal .et-r-ghost{display:flex;align-items:center;justify-content:center;margin:var(--sk-s2) auto 0;min-height:var(--sk-control-min,44px);min-width:var(--sk-control-min,44px);padding:0 var(--sk-s2);color:var(--sk-link);font:400 14px/1.4 var(--sk-font-raver-body);text-decoration:underline;text-underline-offset:3px}
+#eternal .et-r-note{margin:var(--sk-s2) 0 0;text-align:center;font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+/* the door hues: each door and each kind wears the token of what it is */
+#eternal .et-hue-you{--et-hue:var(--sk-you)}#eternal .et-hue-sov{--et-hue:var(--sk-sovereign)}#eternal .et-hue-soft{--et-hue:var(--sk-sovereign-soft)}#eternal .et-hue-strong{--et-hue:var(--sk-sovereign-strong)}
+#eternal .et-hue-info{--et-hue:var(--sk-info)}#eternal .et-hue-ai{--et-hue:var(--sk-ai)}#eternal .et-hue-bio{--et-hue:var(--sk-biomass)}#eternal .et-hue-rim{--et-hue:var(--et-rim,var(--sk-sovereign-strong))}
+@keyframes et-breathe{0%,100%{opacity:1}50%{opacity:.62}}
+#eternal .et-r-art .on .breath{animation:et-breathe 4s ease-in-out infinite}
+#eternal.et-still .et-r-art *{animation:none!important;transition:none!important}
+@media (prefers-reduced-motion:reduce){#eternal .et-r-art *{animation:none!important;transition:none!important}}
+
+/* CYPHERPUNK — the instrument: every row is a fact you can check, complete at first paint */
+#eternal .et-c{font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink)}
+#eternal .et-c-path{margin:0;font:600 15px/1.45 var(--sk-font-mono);color:var(--sk-ink);overflow-wrap:anywhere}
+#eternal .et-c-chips{display:flex;flex-wrap:wrap;gap:var(--sk-s1);margin:var(--sk-s2) 0}
+#eternal .et-c-chips span{padding:2px var(--sk-s1);border:1px solid var(--sk-line);border-radius:4px;background:var(--sk-bg-card);font:600 12px/1.45 var(--sk-font-mono);color:var(--sk-ink)}
+#eternal .et-c-chips span.on{border-color:var(--sk-guard);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong)}
+#eternal .et-c-chips span.ok{border-color:var(--sk-verified);color:var(--sk-verified)}
+#eternal .et-c-guard{display:flex;justify-content:space-between;align-items:center;gap:var(--sk-s1) var(--sk-s2);flex-wrap:wrap;min-height:var(--sk-control-min,44px);padding:var(--sk-s1) var(--sk-s3);border:1px dashed var(--sk-guard);border-radius:var(--sk-radius-sm);background:var(--sk-guard-wash);color:var(--sk-guard)}
+#eternal .et-c-guard b{font-weight:600;color:var(--sk-sovereign-strong)}
+#eternal .et-c-tab{width:100%;margin:var(--sk-s2) 0 var(--sk-s1);border-collapse:separate;border-spacing:0;border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm);overflow:hidden;background:var(--sk-bg-card);table-layout:fixed}
+#eternal .et-c-tab th{padding:var(--sk-s1) var(--sk-s2);text-align:left;font:600 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);border-bottom:1px solid var(--sk-line);background:var(--sk-bg-well)}
+#eternal .et-c-tab td{padding:var(--sk-s1) var(--sk-s2);border-bottom:1px solid var(--sk-line);font:400 13px/1.45 var(--sk-font-mono);vertical-align:middle;overflow-wrap:anywhere;color:var(--sk-ink)}
+#eternal .et-c-tab tr:last-child td{border-bottom:0}
+#eternal .et-c-tab td small{display:block;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut)}
+#eternal .et-c-tab a{display:flex;flex-direction:column;justify-content:center;min-height:var(--sk-control-min,44px);color:var(--sk-link)}
+#eternal .et-c-tab a:hover{color:var(--sk-link-hover)}
+#eternal .et-c-tab tr.pick{cursor:pointer}
+#eternal .et-c-tab tr.pick td{height:var(--sk-control-min,44px)}
+#eternal .et-c-tab tr.pick:hover td,#eternal .et-c-tab tr.pick[aria-expanded="true"] td{background:var(--sk-sovereign-tint)}
+#eternal .et-c-tab tr.sub td{background:var(--sk-sovereign-tint)}
+#eternal .et-c-tab .ok{color:var(--sk-verified)}#eternal .et-c-tab .lim{color:var(--sk-guard)}#eternal .et-c-tab .no{color:var(--sk-info)}#eternal .et-c-tab .num{text-align:right}
+#eternal .et-c-h{margin:var(--sk-s4) 0 var(--sk-s2);font:600 15px/1.45 var(--sk-font-mono);color:var(--sk-ink)}
+#eternal .et-c-pipe{list-style:none;margin:0;padding:0;display:grid;gap:var(--sk-s2);counter-reset:p}
+#eternal .et-c-pipe li{display:grid;grid-template-columns:var(--sk-s5) 1fr;gap:var(--sk-s1) var(--sk-s2);padding:var(--sk-s2) var(--sk-s3);border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm);background:var(--sk-bg-card);counter-increment:p}
+#eternal .et-c-pipe li::before{content:counter(p,decimal-leading-zero);color:var(--sk-guard);font-weight:600}
+#eternal .et-c-pipe li b{font-weight:600;color:var(--sk-ink)}
+#eternal .et-c-pipe li p{grid-column:2;margin:0;font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink-soft);overflow-wrap:anywhere}
+#eternal .et-c-pipe li.done b{color:var(--sk-verified)}
+#eternal .et-c-pipe li.guard{border-style:dashed;border-color:var(--sk-guard)}#eternal .et-c-pipe li.guard b{color:var(--sk-guard)}
+#eternal .et-c-pipe li.now{border-color:var(--sk-ai);box-shadow:inset 0 0 0 1px var(--sk-ai)}#eternal .et-c-pipe li.now b{color:var(--sk-ai)}
+#eternal .et-c-pipe li.todo p{color:var(--sk-ink-mut)}
+#eternal .et-c-primary{display:flex;align-items:center;justify-content:center;width:100%;min-height:52px;margin-top:var(--sk-s3);border:0;border-radius:var(--sk-radius-sm);background:var(--sk-primary);color:var(--sk-on-primary);font:600 14px/1.2 var(--sk-font-mono);text-align:center}
+#eternal .et-c-kv{width:100%;border-collapse:collapse;border:1px solid var(--sk-line);background:var(--sk-bg-card);table-layout:fixed}
+#eternal .et-c-kv th{width:30%;padding:var(--sk-s2);text-align:left;vertical-align:top;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);border-bottom:1px solid var(--sk-line)}
+#eternal .et-c-kv td{padding:var(--sk-s2);border-bottom:1px solid var(--sk-line);font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink);overflow-wrap:anywhere}
+#eternal .et-c-kv a{display:flex;align-items:center;min-height:var(--sk-control-min,44px);color:var(--sk-link)}
+#eternal .et-c-kv a:hover{color:var(--sk-link-hover)}
+#eternal .et-c-kv .ok{color:var(--sk-verified)}#eternal .et-c-kv .no{color:var(--sk-info)}#eternal .et-c-kv .lim{color:var(--sk-guard)}
+#eternal .et-c-verify{margin-top:var(--sk-s3);padding:var(--sk-s3);border-radius:var(--sk-radius-sm);background:var(--sk-bg-card)}
+#eternal .et-c-verify-h{margin-bottom:var(--sk-s1);font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut)}
+#eternal .et-c-verify ol{margin:0;padding-left:var(--sk-s4);display:grid;gap:var(--sk-s1)}
+#eternal .et-c-verify li{font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink);overflow-wrap:anywhere}
+#eternal .et-c-row{display:grid;grid-template-columns:1fr 1fr;gap:var(--sk-s2);margin-top:var(--sk-s3)}
+#eternal .et-c-ghost{display:flex;align-items:center;justify-content:center;min-height:52px;padding:var(--sk-s1);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius-sm);color:var(--sk-ink);text-align:center;font:600 14px/1.2 var(--sk-font-mono)}
+#eternal .et-c-ghost:hover{border-color:var(--sk-ai);color:var(--sk-ai)}
+#eternal .et-c-state{margin:var(--sk-s1) 0 0;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut)}
+/* the six doors' art: six combs around you, one cell per page open behind each door */
+#eternal .et-flower .plot{fill:none;stroke:var(--et-hue);stroke-opacity:.55;stroke-width:1.5;stroke-dasharray:4 5}
+#eternal .et-flower .door.on .plot{stroke-opacity:1;stroke-width:2;stroke-dasharray:none}
+#eternal .et-flower .door:focus-visible .plot{stroke:var(--sk-ink);stroke-width:2.5;stroke-dasharray:none}
+#eternal .et-flower .cell{fill:var(--et-hue);opacity:.5;transition:opacity .5s ease}
+#eternal .et-flower .door.on .cell{opacity:1}
+#eternal .et-flower .you path{fill:var(--sk-sovereign-wash);stroke:var(--sk-you);stroke-width:1.5;stroke-dasharray:3 4}
+#eternal .et-flower .you text{fill:var(--sk-you);font:400 18px/1.2 var(--sk-font-house)}
+#eternal .et-r-legend i.lg-cell{border-radius:0;clip-path:polygon(25% 0,75% 0,100% 50%,75% 100%,25% 100%,0 50%);background:var(--sk-sovereign-soft)}
+#eternal .et-r-legend i.lg-dash{border-color:var(--sk-you)}
+#eternal .et-r-card span:last-child{color:var(--sk-ink-soft)}
+
+/* ── THE SIX DOORS, dressed per register: the list's own variables mapped onto skaists. The hex
+   band and its CSS block above are the doors' byte-true masthead (lifted into the hub by
+   scripts/build-atlas.mjs) and are never touched here. ── */
+html body[data-reg="bee"][data-bee-theme][data-bee-adapter]{--void:var(--sk-bg);--panel:var(--sk-bg-card);--tile:var(--sk-bg-card);--inset:var(--sk-bg-well);--lift:var(--sk-bg-well);--ink:var(--sk-ink);--dim:var(--sk-ink-mut);--dimmer:var(--sk-ink-mut);--line:var(--sk-line);--hot:var(--sk-ink-dim);
+ --magenta:var(--sk-you);--green:var(--sk-verified);--cyan:var(--sk-ai);--lilac:var(--sk-sovereign);--blue:var(--sk-info);--gold:var(--sk-guard);--accent:var(--sk-you);background:var(--sk-bg);color:var(--sk-ink);font-family:var(--sk-font-bee-sans)}
+html body[data-reg="bee"][data-bee-theme] h1{font:400 40px/1.05 var(--sk-font-bee-serif);letter-spacing:0}
+html body[data-reg="bee"] .et-archive-h{font:400 28px/1.1 var(--sk-font-bee-serif)}
+html body[data-reg="bee"] section.d a.t[href="beehivenature.html"]{border-left-color:var(--sk-you)!important}
+html body[data-reg="bee"] section.d a.t[href="plur.html"]{border-left-color:var(--sk-sovereign)!important}
+html body[data-reg="bee"] section.d a.t[href="skaists.html"]{border-left-color:var(--sk-info)!important}
+html body[data-reg="bee"] section.d a.t[href="bnature-social.html"]{border-left-color:var(--sk-ai)!important}
+html body[data-reg="bee"] section.d a.t[href="bnature-bio.html"]{border-left-color:var(--sk-verified)!important}
+html body[data-reg="bee"] section.d a.t[href="beehivebiomass.html"]{border-left-color:var(--sk-guard)!important}
+html body[data-reg="raver"]{--void:var(--sk-bg);--panel:var(--sk-bg-card);--tile:var(--sk-bg-card);--inset:var(--sk-bg-well);--lift:var(--sk-sovereign-tint);--ink:var(--sk-ink);--dim:var(--sk-ink-soft);--dimmer:var(--sk-ink-mut);--line:var(--sk-line);--hot:var(--sk-ink-dim);background:var(--sk-bg);font-family:var(--sk-font-raver-body)}
+html body[data-reg="raver"] h1{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em}
+html body[data-reg="raver"] .et-archive-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em}
+html body[data-reg="raver"] :is(.shead h2,a.t b,a.t.big b){font-family:var(--sk-font-raver-display);font-size:15px}
+html body[data-reg="raver"] :is(.eyebrow,.what){font-size:15px}
+html body[data-reg="cypherpunk"]{--void:var(--sk-bg);--panel:var(--sk-bg-card);--tile:var(--sk-bg-card);--inset:var(--sk-bg-well);--lift:var(--sk-sovereign-tint);--ink:var(--sk-ink);--dim:var(--sk-ink-soft);--dimmer:var(--sk-ink-mut);--line:var(--sk-line);--hot:var(--sk-ink-dim);--mono:var(--sk-font-mono);background:var(--sk-bg);font-family:var(--sk-font-mono)}
+html body[data-reg="cypherpunk"] h1{font-size:28px}
+html body[data-reg="cypherpunk"] .et-archive-h{font:600 15px/1.45 var(--sk-font-mono)}
+html body[data-reg="cypherpunk"] .eyebrow{font-size:12px}
+html body[data-reg="cypherpunk"] .what{font-size:13px}
 </style>
+<link rel="stylesheet" href="../skaists.css">
 </head>
 <body>
 <div id="veil" aria-hidden="true"></div>
+<!-- ETERNAL FRONT (founder blueprint 2026-09-26, docs/design/eternal): three separate products in
+     one surface, for the stranger who does not yet know which door is theirs. ONE data layer (the
+     six rows of this page's own list, section.d below, plus each door page read same-origin for its
+     own count and its one thing to do) drives all three, so the facts cannot drift from the list the
+     door-counts gate checks. Every gesture is navigation: nothing here signs, pays or sends. -->
+<section id="eternal" aria-label="which door is yours">
+
+  <!-- NEW BEE — a calm question: six sentences, choose the one that sounds like you, then open it -->
+  <div class="et-b">
+    <div class="et-b-mark" data-t="et.door-index.b.mark">six doors, one hive</div>
+    <h2 class="et-b-h" data-t="et.door-index.b.title">which door is yours?</h2>
+    <p class="et-b-lede" data-t="et.door-index.b.lede">six ways in. each door is written for one kind of person. choose the sentence that sounds like you.</p>
+    <div class="et-b-guard"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l7 4v5c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V7z"/><path d="M9 12l2 2 4-4"/></svg><span data-t="et.door-index.b.guard">no door promises what is not built. it names it instead.</span></div>
+    <div class="et-b-rows" id="etBeeRows" role="group" aria-label="the six doors"><div class="et-b-row"><span data-t="et.door-index.b.reading">reading the six doors…</span></div></div>
+    <div class="et-b-act">
+      <a class="et-b-primary" id="etBeeGo" href="beehivenature.html">open the first door</a>
+      <a class="et-b-link" href="../" data-t="et.door-index.b.hub">or see the whole estate at once</a>
+      <p class="et-b-foot" data-t="et.door-index.b.foot">the six names are paths for now. none is a live web address yet.</p>
+    </div>
+  </div>
+
+  <!-- RAVER — the hive as a flower: six combs around you, one cell per page you can open; tap a comb to light it -->
+  <div class="et-r">
+    <div class="et-r-top"><h2 class="et-r-h" data-t="et.door-index.r.title">six doors</h2><span class="et-r-hint" id="etRaverHint">reading the hive…</span></div>
+    <p class="et-r-who" data-t="et.door-index.r.who">six doors, six different strangers</p>
+    <svg class="et-r-art et-art et-flower" id="etFlower" viewBox="-200 -200 400 400" role="group" aria-label="six doors as six combs around you, one cell for each page open behind the door"></svg>
+    <div class="et-r-legend"><span><i class="lg-cell"></i><em data-t="et.door-index.r.lgCell">one cell = one page open now</em></span><span><i class="lg-dash"></i><em data-t="et.door-index.r.lgYou">you at the heart</em></span></div>
+    <div class="et-r-card" id="etRaverCard" aria-live="polite"></div>
+    <a class="et-r-pill" id="etRaverGo" href="beehivenature.html">enter</a>
+    <button type="button" class="et-r-ghost" id="etMotion" aria-pressed="false" data-t="et.door-index.r.pause">pause motion</button>
+  </div>
+
+  <!-- CYPHERPUNK — the instrument: the six rows, each door recounted here, the gates that keep them honest -->
+  <div class="et-c">
+    <p class="et-c-path" id="etPath">doors/index.html</p>
+    <div class="et-c-chips" id="etChips"></div>
+    <div class="et-c-guard"><span data-t="et.door-index.c.law">a door may not claim what the estate does not do</span><b id="etAgree">reading</b></div>
+    <table class="et-c-tab" aria-label="the six doors, recounted"><colgroup><col style="width:50%"><col style="width:17%"><col style="width:33%"></colgroup>
+      <thead><tr><th>door · for</th><th class="num">open</th><th>row·.n·a.t</th></tr></thead><tbody id="etTable"></tbody></table>
+    <p class="et-c-state" id="etState">reading each door from this origin…</p>
+    <button type="button" class="et-c-primary" id="etRecount" data-t="et.door-index.c.recount">recount here</button>
+    <h3 class="et-c-h" data-t="et.door-index.c.pipeH">how a door keeps its count honest</h3>
+    <ol class="et-c-pipe" id="etPipe"></ol>
+    <h3 class="et-c-h" data-t="et.door-index.c.receiptH">receipt</h3>
+    <table class="et-c-kv" id="etReceipt"></table>
+    <div class="et-c-verify">
+      <div class="et-c-verify-h" data-t="et.door-index.c.verifyH">verify · no trust in this page needed</div>
+      <ol><li>document.querySelectorAll('section.d a.t').length · on each door</li><li>node e2e/door-counts.mjs · three numbers, the odd one named</li><li>node e2e/doors.mjs · every listed link answers 200 with body text</li><li id="etVerifyHash">curl -s this page | sha256sum</li></ol>
+    </div>
+    <div class="et-c-row">
+      <button type="button" class="et-c-ghost" id="etExport" data-t="et.door-index.c.export">export counts</button>
+      <a class="et-c-ghost" href="https://github.com/beehive-nature/beehive-nature/blob/main/surfaces/doors/index.html" target="_blank" rel="noopener noreferrer" data-t="et.door-index.c.fork">fork the template ↗ new tab</a>
+    </div>
+  </div>
+</section>
+<h2 class="et-archive-h" id="etArchive" data-t="et.door-index.archive">the six doors, as a list</h2>
 <header style="--bandh:149px">
   <div id="bandwrap" aria-hidden="true"><div class="band" style="top:-14px;left:-80px;opacity:1.00;animation-duration:15s;animation-name:hexdrift;--step:52px"><i style="background:#D655BB;animation-duration:2.4s;animation-delay:0.00s"></i><i style="background:#86CC72;animation-duration:2.9s;animation-delay:0.19s"></i><i style="background:#45C2DC;animation-duration:3.3s;animation-delay:0.38s"></i><i style="background:#9C6FD6;animation-duration:3.8s;animation-delay:0.57s"></i><i style="background:#E8B54B;animation-duration:4.2s;animation-delay:0.76s"></i><i style="background:#6FA9E0;animation-duration:2.4s;animation-delay:0.95s"></i><i style="background:#B79FE0;animation-duration:2.9s;animation-delay:1.14s"></i><i style="background:#D655BB;animation-duration:3.3s;animation-delay:0.00s"></i><i style="background:#86CC72;animation-duration:3.8s;animation-delay:0.19s"></i><i style="background:#45C2DC;animation-duration:4.2s;animation-delay:0.38s"></i><i style="background:#9C6FD6;animation-duration:2.4s;animation-delay:0.57s"></i><i style="background:#E8B54B;animation-duration:2.9s;animation-delay:0.76s"></i><i style="background:#6FA9E0;animation-duration:3.3s;animation-delay:0.95s"></i><i style="background:#B79FE0;animation-duration:3.8s;animation-delay:1.14s"></i><i style="background:#D655BB;animation-duration:4.2s;animation-delay:0.00s"></i><i style="background:#86CC72;animation-duration:2.4s;animation-delay:0.19s"></i><i style="background:#45C2DC;animation-duration:2.9s;animation-delay:0.38s"></i><i style="background:#9C6FD6;animation-duration:3.3s;animation-delay:0.57s"></i><i style="background:#E8B54B;animation-duration:3.8s;animation-delay:0.76s"></i><i style="background:#6FA9E0;animation-duration:4.2s;animation-delay:0.95s"></i><i style="background:#B79FE0;animation-duration:2.4s;animation-delay:1.14s"></i><i style="background:#D655BB;animation-duration:2.9s;animation-delay:0.00s"></i><i style="background:#86CC72;animation-duration:3.3s;animation-delay:0.19s"></i><i style="background:#45C2DC;animation-duration:3.8s;animation-delay:0.38s"></i><i style="background:#9C6FD6;animation-duration:4.2s;animation-delay:0.57s"></i><i style="background:#E8B54B;animation-duration:2.4s;animation-delay:0.76s"></i><i style="background:#6FA9E0;animation-duration:2.9s;animation-delay:0.95s"></i><i style="background:#B79FE0;animation-duration:3.3s;animation-delay:1.14s"></i><i style="background:#D655BB;animation-duration:3.8s;animation-delay:0.00s"></i><i style="background:#86CC72;animation-duration:4.2s;animation-delay:0.19s"></i><i style="background:#45C2DC;animation-duration:2.4s;animation-delay:0.38s"></i><i style="background:#9C6FD6;animation-duration:2.9s;animation-delay:0.57s"></i><i style="background:#E8B54B;animation-duration:3.3s;animation-delay:0.76s"></i><i style="background:#6FA9E0;animation-duration:3.8s;animation-delay:0.95s"></i><i style="background:#B79FE0;animation-duration:4.2s;animation-delay:1.14s"></i><i style="background:#D655BB;animation-duration:2.4s;animation-delay:0.00s"></i><i style="background:#86CC72;animation-duration:2.9s;animation-delay:0.19s"></i><i style="background:#45C2DC;animation-duration:3.3s;animation-delay:0.38s"></i><i style="background:#9C6FD6;animation-duration:3.8s;animation-delay:0.57s"></i><i style="background:#E8B54B;animation-duration:4.2s;animation-delay:0.76s"></i><i style="background:#6FA9E0;animation-duration:2.4s;animation-delay:0.95s"></i><i style="background:#B79FE0;animation-duration:2.9s;animation-delay:1.14s"></i><i style="background:#D655BB;animation-duration:3.3s;animation-delay:0.00s"></i><i style="background:#86CC72;animation-duration:3.8s;animation-delay:0.19s"></i><i style="background:#45C2DC;animation-duration:4.2s;animation-delay:0.38s"></i><i style="background:#9C6FD6;animation-duration:2.4s;animation-delay:0.57s"></i><i style="background:#E8B54B;animation-duration:2.9s;animation-delay:0.76s"></i><i style="background:#6FA9E0;animation-duration:3.3s;animation-delay:0.95s"></i><i style="background:#B79FE0;animation-duration:3.8s;animation-delay:1.14s"></i></div><div class="band" style="top:26px;left:-54px;opacity:0.84;animation-duration:21s;animation-name:hexdriftb;--step:52px"><i style="background:#9C6FD6;animation-duration:2.9s;animation-delay:0.38s"></i><i style="background:#E8B54B;animation-duration:3.3s;animation-delay:0.57s"></i><i style="background:#6FA9E0;animation-duration:3.8s;animation-delay:0.76s"></i><i style="background:#B79FE0;animation-duration:4.2s;animation-delay:0.95s"></i><i style="background:#D655BB;animation-duration:2.4s;animation-delay:1.14s"></i><i style="background:#86CC72;animation-duration:2.9s;animation-delay:0.00s"></i><i style="background:#45C2DC;animation-duration:3.3s;animation-delay:0.19s"></i><i style="background:#9C6FD6;animation-duration:3.8s;animation-delay:0.38s"></i><i style="background:#E8B54B;animation-duration:4.2s;animation-delay:0.57s"></i><i style="background:#6FA9E0;animation-duration:2.4s;animation-delay:0.76s"></i><i style="background:#B79FE0;animation-duration:2.9s;animation-delay:0.95s"></i><i style="background:#D655BB;animation-duration:3.3s;animation-delay:1.14s"></i><i style="background:#86CC72;animation-duration:3.8s;animation-delay:0.00s"></i><i style="background:#45C2DC;animation-duration:4.2s;animation-delay:0.19s"></i><i style="background:#9C6FD6;animation-duration:2.4s;animation-delay:0.38s"></i><i style="background:#E8B54B;animation-duration:2.9s;animation-delay:0.57s"></i><i style="background:#6FA9E0;animation-duration:3.3s;animation-delay:0.76s"></i><i style="background:#B79FE0;animation-duration:3.8s;animation-delay:0.95s"></i><i style="background:#D655BB;animation-duration:4.2s;animation-delay:1.14s"></i><i style="background:#86CC72;animation-duration:2.4s;animation-delay:0.00s"></i><i style="background:#45C2DC;animation-duration:2.9s;animation-delay:0.19s"></i><i style="background:#9C6FD6;animation-duration:3.3s;animation-delay:0.38s"></i><i style="background:#E8B54B;animation-duration:3.8s;animation-delay:0.57s"></i><i style="background:#6FA9E0;animation-duration:4.2s;animation-delay:0.76s"></i><i style="background:#B79FE0;animation-duration:2.4s;animation-delay:0.95s"></i><i style="background:#D655BB;animation-duration:2.9s;animation-delay:1.14s"></i><i style="background:#86CC72;animation-duration:3.3s;animation-delay:0.00s"></i><i style="background:#45C2DC;animation-duration:3.8s;animation-delay:0.19s"></i><i style="background:#9C6FD6;animation-duration:4.2s;animation-delay:0.38s"></i><i style="background:#E8B54B;animation-duration:2.4s;animation-delay:0.57s"></i><i style="background:#6FA9E0;animation-duration:2.9s;animation-delay:0.76s"></i><i style="background:#B79FE0;animation-duration:3.3s;animation-delay:0.95s"></i><i style="background:#D655BB;animation-duration:3.8s;animation-delay:1.14s"></i><i style="background:#86CC72;animation-duration:4.2s;animation-delay:0.00s"></i><i style="background:#45C2DC;animation-duration:2.4s;animation-delay:0.19s"></i><i style="background:#9C6FD6;animation-duration:2.9s;animation-delay:0.38s"></i><i style="background:#E8B54B;animation-duration:3.3s;animation-delay:0.57s"></i><i style="background:#6FA9E0;animation-duration:3.8s;animation-delay:0.76s"></i><i style="background:#B79FE0;animation-duration:4.2s;animation-delay:0.95s"></i><i style="background:#D655BB;animation-duration:2.4s;animation-delay:1.14s"></i><i style="background:#86CC72;animation-duration:2.9s;animation-delay:0.00s"></i><i style="background:#45C2DC;animation-duration:3.3s;animation-delay:0.19s"></i><i style="background:#9C6FD6;animation-duration:3.8s;animation-delay:0.38s"></i><i style="background:#E8B54B;animation-duration:4.2s;animation-delay:0.57s"></i><i style="background:#6FA9E0;animation-duration:2.4s;animation-delay:0.76s"></i><i style="background:#B79FE0;animation-duration:2.9s;animation-delay:0.95s"></i><i style="background:#D655BB;animation-duration:3.3s;animation-delay:1.14s"></i><i style="background:#86CC72;animation-duration:3.8s;animation-delay:0.00s"></i><i style="background:#45C2DC;animation-duration:4.2s;animation-delay:0.19s"></i></div><div class="band" style="top:66px;left:-80px;opacity:0.68;animation-duration:27s;animation-name:hexdrift;--step:52px"><i style="background:#B79FE0;animation-duration:3.3s;animation-delay:0.76s"></i><i style="background:#D655BB;animation-duration:3.8s;animation-delay:0.95s"></i><i style="background:#86CC72;animation-duration:4.2s;animation-delay:1.14s"></i><i style="background:#45C2DC;animation-duration:2.4s;animation-delay:0.00s"></i><i style="background:#9C6FD6;animation-duration:2.9s;animation-delay:0.19s"></i><i style="background:#E8B54B;animation-duration:3.3s;animation-delay:0.38s"></i><i style="background:#6FA9E0;animation-duration:3.8s;animation-delay:0.57s"></i><i style="background:#B79FE0;animation-duration:4.2s;animation-delay:0.76s"></i><i style="background:#D655BB;animation-duration:2.4s;animation-delay:0.95s"></i><i style="background:#86CC72;animation-duration:2.9s;animation-delay:1.14s"></i><i style="background:#45C2DC;animation-duration:3.3s;animation-delay:0.00s"></i><i style="background:#9C6FD6;animation-duration:3.8s;animation-delay:0.19s"></i><i style="background:#E8B54B;animation-duration:4.2s;animation-delay:0.38s"></i><i style="background:#6FA9E0;animation-duration:2.4s;animation-delay:0.57s"></i><i style="background:#B79FE0;animation-duration:2.9s;animation-delay:0.76s"></i><i style="background:#D655BB;animation-duration:3.3s;animation-delay:0.95s"></i><i style="background:#86CC72;animation-duration:3.8s;animation-delay:1.14s"></i><i style="background:#45C2DC;animation-duration:4.2s;animation-delay:0.00s"></i><i style="background:#9C6FD6;animation-duration:2.4s;animation-delay:0.19s"></i><i style="background:#E8B54B;animation-duration:2.9s;animation-delay:0.38s"></i><i style="background:#6FA9E0;animation-duration:3.3s;animation-delay:0.57s"></i><i style="background:#B79FE0;animation-duration:3.8s;animation-delay:0.76s"></i><i style="background:#D655BB;animation-duration:4.2s;animation-delay:0.95s"></i><i style="background:#86CC72;animation-duration:2.4s;animation-delay:1.14s"></i><i style="background:#45C2DC;animation-duration:2.9s;animation-delay:0.00s"></i><i style="background:#9C6FD6;animation-duration:3.3s;animation-delay:0.19s"></i><i style="background:#E8B54B;animation-duration:3.8s;animation-delay:0.38s"></i><i style="background:#6FA9E0;animation-duration:4.2s;animation-delay:0.57s"></i><i style="background:#B79FE0;animation-duration:2.4s;animation-delay:0.76s"></i><i style="background:#D655BB;animation-duration:2.9s;animation-delay:0.95s"></i><i style="background:#86CC72;animation-duration:3.3s;animation-delay:1.14s"></i><i style="background:#45C2DC;animation-duration:3.8s;animation-delay:0.00s"></i><i style="background:#9C6FD6;animation-duration:4.2s;animation-delay:0.19s"></i><i style="background:#E8B54B;animation-duration:2.4s;animation-delay:0.38s"></i><i style="background:#6FA9E0;animation-duration:2.9s;animation-delay:0.57s"></i><i style="background:#B79FE0;animation-duration:3.3s;animation-delay:0.76s"></i><i style="background:#D655BB;animation-duration:3.8s;animation-delay:0.95s"></i><i style="background:#86CC72;animation-duration:4.2s;animation-delay:1.14s"></i><i style="background:#45C2DC;animation-duration:2.4s;animation-delay:0.00s"></i><i style="background:#9C6FD6;animation-duration:2.9s;animation-delay:0.19s"></i><i style="background:#E8B54B;animation-duration:3.3s;animation-delay:0.38s"></i><i style="background:#6FA9E0;animation-duration:3.8s;animation-delay:0.57s"></i><i style="background:#B79FE0;animation-duration:4.2s;animation-delay:0.76s"></i><i style="background:#D655BB;animation-duration:2.4s;animation-delay:0.95s"></i><i style="background:#86CC72;animation-duration:2.9s;animation-delay:1.14s"></i><i style="background:#45C2DC;animation-duration:3.3s;animation-delay:0.00s"></i><i style="background:#9C6FD6;animation-duration:3.8s;animation-delay:0.19s"></i><i style="background:#E8B54B;animation-duration:4.2s;animation-delay:0.38s"></i><i style="background:#6FA9E0;animation-duration:2.4s;animation-delay:0.57s"></i></div></div>
   <div class="wrap">
@@ -174,6 +395,226 @@ body[data-reg="raver"] :is(a.t b,a.t.big b){font-size:16px}
   <div><a href="../">the hub</a> · <a href="https://github.com/beehive-nature/beehive-nature/blob/main/surfaces/estate.json" rel="noopener">the registry</a></div>
   <div>write to us · <a href="mailto:LoVis@skaists.dev">LoVis@skaists.dev</a></div>
 </footer>
+<script id="etFrontScript">
+/* ETERNAL FRONT — one data layer, three renderers (docs/design/eternal). The facts are this page's
+   own: the six rows of section.d (host, who it is for, "N open now"), read from the DOM the
+   door-counts gate reads. Each door page is then read from this same origin for its own .n, its
+   real anchors (a.t inside section.d) and its one thing to do, so the recount is the gate's own
+   three numbers, done here in the reader's browser. Every gesture only chooses and opens a door. */
+(function(){
+  var $=function(id){return document.getElementById(id);};
+  var T=function(k,f){var t=window.BNRLanguage&&window.BNRLanguage.text;return t&&k?t(k,f):f;};
+  var esc=function(v){return String(v==null?'':v).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});};
+  /* the English of a keyed element, even after lang.js has swapped it (lang.js keeps it in data-i18n-en) */
+  function en(el){
+    if(!el) return '';
+    var s=el.dataset&&el.dataset.i18nEn!==undefined?el.dataset.i18nEn:el.textContent;
+    if(el.dataset&&el.dataset.i18nRich){var d=document.createElement('div');d.innerHTML=s;s=d.textContent;}
+    return String(s).replace(/\s+/g,' ').trim();
+  }
+  var bare=function(s){return String(s||'').replace(/\s*→\s*$/,'');};
+  var HUES={'beehivenature.html':'you','plur.html':'soft','skaists.html':'info','bnature-social.html':'ai','bnature-bio.html':'bio','beehivebiomass.html':'rim'};
+  var D={doors:[],total:0,listed:null,read:'reading',checked:0,agree:0,at:''};
+  var R={sel:0,still:false};
+
+  /* ── the one data layer ── */
+  function read(){
+    var sec=document.querySelector('section.d'); if(!sec) return;
+    var n=sec.querySelector('.shead .n'); D.listed=n?parseInt(n.textContent,10):null;
+    D.doors=[].map.call(sec.querySelectorAll('a.t'),function(a){
+      var b=a.querySelector('b'), ss=[].slice.call(a.querySelectorAll('s'));
+      var who=ss.filter(function(s){return s.dataset.i18n;})[0]||ss[0];
+      var cnt=ss.filter(function(s){return /\d+\s+open now/.test(en(s));})[0];
+      var href=a.getAttribute('href');
+      return {href:href,host:en(b),who:en(who),whoKey:who&&who.dataset.i18n||'',open:cnt?parseInt(en(cnt),10):null,hue:HUES[href]||'sov',live:{state:'reading'}};
+    });
+    D.total=D.doors.reduce(function(s,d){return s+(d.open||0);},0);
+  }
+  function readDoor(d){
+    return fetch(d.href,{cache:'no-store'}).then(function(r){if(!r.ok)throw new Error('http '+r.status);return r.text();}).then(function(html){
+      var doc=new DOMParser().parseFromString(html,'text/html'), s=doc.querySelector('section.d');
+      var n=s&&s.querySelector('.n'), act=doc.querySelector('a.act'), lab=act&&(act.querySelector('b')||act.querySelector('strong'));
+      d.live={state:'read',n:n?parseInt(n.textContent,10):null,anchors:s?s.querySelectorAll('a.t').length:0,
+        act:lab?lab.textContent.replace(/\s+/g,' ').trim():'',actKey:lab&&lab.getAttribute('data-i18n')||'',actHref:act?act.getAttribute('href'):''};
+    }).catch(function(e){d.live={state:'failed',why:String(e&&e.message||e)};});
+  }
+  /* door-counts' own verdict: three numbers, the odd one out by name, or no majority */
+  function verdict(d){
+    var L=d.live; if(L.state!=='read') return null;
+    var a=d.open,b=L.n,c=L.anchors;
+    if(a===b&&b===c) return {agree:true,odd:''};
+    var odd=a===b?'a.t':b===c?'row':a===c?'.n':'none';
+    return {agree:false,odd:odd};
+  }
+  function recount(){
+    D.read='reading'; D.doors.forEach(function(d){d.live={state:'reading'};}); render();
+    return Promise.all(D.doors.map(readDoor)).then(function(){
+      D.checked=D.doors.filter(function(d){return d.live.state==='read';}).length;
+      D.agree=D.doors.filter(function(d){var v=verdict(d);return v&&v.agree;}).length;
+      D.read=D.checked===D.doors.length?'read':D.checked?'partly':'failed';
+      D.at=new Date().toISOString().slice(11,19)+'Z';
+      render();
+    });
+  }
+  function first(d){
+    var L=d.live;
+    if(L.state==='read'&&L.act) return T('et.door-index.first','first thing there: {act}').replace('{act}',bare(T(L.actKey,L.act)));
+    if(L.state==='failed') return T('et.door-index.firstNo','its first step shows when you open it.');
+    return T('et.door-index.firstReading','reading its first step…');
+  }
+  var pages=function(n){return n+' '+(n===1?T('et.door-index.page','page open now'):T('et.door-index.pages','pages open now'));};
+
+  /* ── NEW BEE ── */
+  var CHEV='<svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>';
+  function bee(){
+    var box=$('etBeeRows'); if(!box||!D.doors.length) return;
+    box.innerHTML=D.doors.map(function(d,i){
+      var on=i===R.sel;
+      return '<button type="button" class="et-b-row" aria-pressed="'+on+'" data-i="'+i+'"><span>'+esc(T(d.whoKey,d.who))+'</span><small>'+esc(T('et.door-index.b.open','{n} open').replace('{n}',d.open))+CHEV+'</small></button>'+
+        (on?'<div class="et-b-more" aria-live="polite"><b>'+esc(d.host)+'</b><span>'+esc(pages(d.open))+'</span><span>'+esc(first(d))+'</span></div>':'');
+    }).join('');
+    var d=D.doors[R.sel], go=$('etBeeGo'); go.href=d.href; go.textContent=T('et.door-index.b.go','open {host}').replace('{host}',d.host);
+  }
+
+  /* ── RAVER: six combs around you; the plots are flat-top hexagons that tile like a honeycomb ── */
+  var DIRS=[[1,0],[1,-1],[0,-1],[-1,0],[-1,1],[0,1]];
+  function spiral(n){
+    var out=[[0,0]];
+    for(var r=1;out.length<n;r++){var q=DIRS[4][0]*r,s=DIRS[4][1]*r;for(var i=0;i<6;i++)for(var j=0;j<r;j++){out.push([q,s]);q+=DIRS[i][0];s+=DIRS[i][1];}}
+    return out.slice(0,n);
+  }
+  function hex(cx,cy,r){var p=[];for(var k=0;k<6;k++){var a=Math.PI/3*k;p.push((cx+r*Math.cos(a)).toFixed(2)+' '+(cy+r*Math.sin(a)).toFixed(2));}return 'M'+p.join('L')+'Z';}
+  function flower(){
+    var svg=$('etFlower'); if(!svg) return;
+    var sig=D.doors.length+':'+D.total+':'+(document.documentElement.lang||'en');
+    if(svg.getAttribute('data-et-built')!==sig){
+      var step=13, rc=step/Math.sqrt(3)*0.88, h='';
+      D.doors.forEach(function(d,i){
+        var a=(-90+60*i)*Math.PI/180, cx=128*Math.cos(a), cy=128*Math.sin(a);
+        h+='<g class="door et-hue-'+d.hue+'" data-i="'+i+'" role="button" tabindex="0" aria-pressed="false" aria-label="'+esc(d.host+' · '+T(d.whoKey,d.who)+' · '+pages(d.open))+'">'+
+          '<path class="hit" d="'+hex(cx,cy,64)+'"/><path class="plot breath" d="'+hex(cx,cy,62)+'"/>';
+        spiral(d.open||0).forEach(function(c){
+          var x=cx+step*Math.sqrt(3)/2*c[0], y=cy+step*(c[1]+c[0]/2);
+          h+='<path class="cell" d="'+hex(x,y,rc)+'"/>';
+        });
+        h+='</g>';
+      });
+      h+='<g class="you" aria-hidden="true"><path d="'+hex(0,0,36)+'"/><text y="6" text-anchor="middle">'+esc(T('et.door-index.r.you','you'))+'</text></g>';
+      svg.innerHTML=h; svg.setAttribute('data-et-built',sig);
+    }
+    /* light the chosen comb: its cells come up one after another from its heart outward */
+    [].forEach.call(svg.querySelectorAll('.door'),function(g){
+      var on=+g.getAttribute('data-i')===R.sel, was=g.classList.contains('on');
+      if(on!==was)[].forEach.call(g.querySelectorAll('.cell'),function(c,k){c.style.transitionDelay=(on?k*16:0)+'ms';});
+      g.classList.toggle('on',on); g.setAttribute('aria-pressed',String(on));
+    });
+  }
+  function raver(){
+    if(!D.doors.length) return;
+    var d=D.doors[R.sel];
+    $('etRaverHint').textContent=T('et.door-index.r.hint','{n} pages · tap a door').replace('{n}',D.total);
+    flower();
+    $('etRaverCard').innerHTML='<i class="rk et-hue-'+d.hue+'" aria-hidden="true"></i><div><b>'+esc(d.host)+'</b><span>'+esc(T(d.whoKey,d.who))+'</span><span>'+esc(pages(d.open))+'</span><span>'+esc(first(d))+'</span></div>';
+    var go=$('etRaverGo'); go.href=d.href; go.textContent=T('et.door-index.r.go','enter {host}').replace('{host}',d.host);
+  }
+
+  /* the page's own bytes, hashed here: a fact anyone can check with curl and sha256sum */
+  function selfHash(){
+    var url=location.href.split('#')[0];
+    if(!(window.crypto&&crypto.subtle)){D.sha={state:'failed',why:T('et.door-index.c.noSubtle','no secure context here, so no hash'),url:url};render();return;}
+    D.sha={state:'reading',url:url};
+    fetch(url,{cache:'no-store'}).then(function(r){if(!r.ok)throw new Error('http '+r.status);return r.arrayBuffer();}).then(function(b){
+      return crypto.subtle.digest('SHA-256',b).then(function(h){D.sha={state:'read',url:url,bytes:b.byteLength,hex:[].map.call(new Uint8Array(h),function(x){return ('0'+x.toString(16)).slice(-2);}).join('')};});
+    }).catch(function(e){D.sha={state:'failed',why:String(e&&e.message||e),url:url};}).then(render);
+  }
+  var shaCell=function(){var s=D.sha||{};return s.state==='read'?'<span>'+esc(s.hex)+'</span>':'<span class="no">'+esc(s.state==='failed'?T('et.door-index.c.notMeasured','not measured')+' · '+s.why:T('et.door-index.c.reading','reading'))+'</span>';};
+  /* ── CYPHERPUNK ── */
+  function cell(d){
+    var L=d.live, v=verdict(d);
+    if(L.state==='reading') return '<td class="no">'+esc(T('et.door-index.c.reading','reading'))+'</td>';
+    if(L.state==='failed') return '<td class="lim">'+esc(T('et.door-index.c.notRead','not read'))+'<small>'+esc(L.why)+'</small></td>';
+    return '<td class="'+(v.agree?'ok':'lim')+'">'+esc(d.open+'·'+L.n+'·'+L.anchors)+(v.agree?' ✓':'<small>'+esc(T('et.door-index.c.odd','odd one: {x}').replace('{x}',v.odd))+'</small>')+'</td>';
+  }
+  function cy(){
+    if(!D.doors.length) return;
+    $('etPath').textContent='doors/index.html · '+D.doors.length+' '+T('et.door-index.c.doors','doors')+' · '+D.total+' '+T('et.door-index.c.pagesShort','pages');
+    $('etChips').innerHTML='<span class="on">'+esc(D.doors.length+' '+T('et.door-index.c.doors','doors'))+'</span><span>'+esc(D.total+' '+T('et.door-index.c.open','open now'))+'</span><span>'+esc(T('et.door-index.c.dns','paths for now · no dns'))+'</span>';
+    $('etAgree').textContent=D.read==='reading'?T('et.door-index.c.reading','reading'):D.checked?T('et.door-index.c.agree','{a} of {n} agree').replace('{a}',D.agree).replace('{n}',D.doors.length):T('et.door-index.c.notRead','not read');
+    $('etTable').innerHTML=D.doors.map(function(d){
+      return '<tr><td><a href="'+esc(d.href)+'"><span>'+esc(d.host)+'</span><small>'+esc(T(d.whoKey,d.who))+'</small></a></td><td class="num">'+esc(d.open)+'</td>'+cell(d)+'</tr>';
+    }).join('');
+    $('etState').textContent=D.read==='reading'?T('et.door-index.c.stReading','reading each door from this origin…')
+      :D.read==='failed'?T('et.door-index.c.stFailed','no door page could be read from here. the rows above are this page\'s own; the recount waits for a server.')
+      :T('et.door-index.c.stRead','read {k} of {n} door pages from this origin at {t}').replace('{k}',D.checked).replace('{n}',D.doors.length).replace('{t}',D.at);
+    var sumA=D.doors.reduce(function(s,d){return s+(d.live.state==='read'?d.live.anchors:0);},0);
+    var steps=[
+      ['rows · this page','"N open now" on each of the '+D.doors.length+' rows · '+D.total+' in all','done'],
+      ['.n · each door','its own count in section.d · '+D.checked+' of '+D.doors.length+' read',D.checked===D.doors.length?'done':'todo'],
+      ['a.t · each door','the real anchors inside section.d, counted here · '+(D.checked?sumA:T('et.door-index.c.notRead','not read')),D.checked===D.doors.length?'done':'todo'],
+      ['verdict · three numbers',D.checked?D.agree+' of '+D.doors.length+' agree · an odd one is named by which number it is':T('et.door-index.c.waits','waits for the door pages'),D.checked&&D.agree===D.doors.length?'done':'todo'],
+      ['gates · ci','e2e/door-counts.mjs and e2e/doors.mjs run in ci · not run by this page','guard']
+    ];
+    var now=steps.findIndex(function(s){return s[2]==='todo';});
+    $('etPipe').innerHTML=steps.map(function(s,i){return '<li class="'+s[2]+(i===now?' now':'')+'"><b>'+esc(s[0])+'</b><p>'+esc(s[1])+'</p></li>';}).join('');
+    $('etReceipt').innerHTML=[
+      ['doors',esc(D.doors.length)],
+      ['open · rows',esc(D.total)],
+      ['anchors',D.checked?esc(sumA)+(D.checked<D.doors.length?' <span class="no">· '+esc(D.checked+' of '+D.doors.length+' read')+'</span>':''):'<span class="no">'+esc(T('et.door-index.c.notRead','not read'))+'</span>'],
+      ['agree',D.checked?'<span class="'+(D.agree===D.doors.length?'ok':'lim')+'">'+esc(D.agree+' of '+D.doors.length)+'</span>':'<span class="no">'+esc(T('et.door-index.c.notRead','not read'))+'</span>'],
+      ['dns','<span class="no">'+esc(T('et.door-index.c.dnsNone','none · paths for now, nothing at the registrar'))+'</span>'],
+      ['read at',D.at?esc(D.at):'<span class="no">'+esc(T('et.door-index.c.notYet','not yet'))+'</span>'],
+      ['sha256',shaCell()],
+      ['bytes',D.sha&&D.sha.bytes?esc(D.sha.bytes):'<span class="no">'+esc(T('et.door-index.c.notMeasured','not measured'))+'</span>']
+    ].map(function(r){return '<tr><th>'+r[0]+'</th><td>'+r[1]+'</td></tr>';}).join('');
+    var vh=$('etVerifyHash'); if(vh) vh.textContent='curl -s '+((D.sha&&D.sha.url)||'<this page>')+' | sha256sum · '+T('et.door-index.c.shaSame','the same sha256 as the receipt');
+  }
+
+  function render(){bee();raver();cy();}
+  function statics(){
+    [].forEach.call(document.querySelectorAll('#eternal [data-t],#etArchive[data-t]'),function(e){
+      if(e.dataset.en===undefined) e.dataset.en=e.textContent;
+      e.textContent=T(e.dataset.t,e.dataset.en);
+    });
+    var m=$('etMotion'); if(m) m.textContent=R.still?T('et.door-index.r.play','play motion'):T('et.door-index.r.pause','pause motion');
+  }
+  function rim(){
+    var g=getComputedStyle(document.body).getPropertyValue('--sk-rainbow'), m=g&&g.match(/#[0-9a-f]{6}/i);
+    if(m) $('eternal').style.setProperty('--et-rim',m[0]);
+  }
+  function pick(i){if(i==null||isNaN(i))return;R.sel=i;render();}
+
+  function wire(){
+    var ev=$('eternal'); if(!ev) return;
+    ev.addEventListener('click',function(e){
+      var row=e.target.closest('.et-b-row[data-i]'); if(row){pick(+row.getAttribute('data-i'));var again=ev.querySelector('.et-b-row[data-i="'+R.sel+'"]');if(again)again.focus();return;}
+      var door=e.target.closest('#etFlower .door'); if(door){pick(+door.getAttribute('data-i'));}
+    });
+    ev.addEventListener('keydown',function(e){
+      var door=e.target.closest('#etFlower .door'); if(!door) return;
+      var i=+door.getAttribute('data-i'), n=D.doors.length;
+      if(e.key==='Enter'||e.key===' '){e.preventDefault();pick(i);}
+      else if(e.key==='ArrowRight'||e.key==='ArrowDown'||e.key==='ArrowLeft'||e.key==='ArrowUp'){e.preventDefault();pick((i+(e.key==='ArrowRight'||e.key==='ArrowDown'?1:n-1))%n);}
+      else return;
+      var g=ev.querySelector('#etFlower .door[data-i="'+R.sel+'"]'); if(g) g.focus();
+    });
+    $('etMotion').addEventListener('click',function(){
+      R.still=!R.still; ev.classList.toggle('et-still',R.still); this.setAttribute('aria-pressed',String(R.still));
+      this.textContent=R.still?T('et.door-index.r.play','play motion'):T('et.door-index.r.pause','pause motion');
+    });
+    $('etRecount').addEventListener('click',function(){recount();});
+    $('etExport').addEventListener('click',function(){
+      var out={page:'surfaces/doors/index.html',read_at:D.at||null,page_sha256:D.sha&&D.sha.hex||null,page_bytes:D.sha&&D.sha.bytes||null,doors:D.doors.map(function(d){var v=verdict(d);return {door:d.href,host:d.host,for:d.who,row:d.open,n:d.live.n==null?null:d.live.n,anchors:d.live.anchors==null?null:d.live.anchors,state:d.live.state,agree:v?v.agree:null};})};
+      var a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([JSON.stringify(out,null,1)],{type:'application/json'})); a.download='doors-counts.json';
+      document.body.appendChild(a); a.click(); setTimeout(function(){URL.revokeObjectURL(a.href);a.remove();},0);
+    });
+    document.addEventListener('blang',function(){statics();render();});
+    document.addEventListener('bregister',function(){rim();render();});
+  }
+
+  read(); wire(); statics(); rim(); render(); recount(); selfHash();
+  window.__eternal={data:D,raver:R,recount:recount};
+})();
+</script>
 <script src="../tour.js?v=42"></script>
 </body>
 </html>
