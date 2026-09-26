@@ -64,6 +64,29 @@ example-vs-imp shape mismatch; AV-6a retry ceiling unreachable at the live
 seam). Full evidence:
 [receipt](../dispatches/2026-09-17-gesture-d-stop-at-boot-receipt.md).
 
+**Founder disposition (2026-09-17, board recorded verbatim):**
+- **Gesture D: BLOCKED_INTERNAL** — door boot deadlock.
+- **D(testnet): not earned.**
+- **Base Sepolia signature boundary: partially crossed via static
+  verification** — real key custody → real EIP-712 domain → real signature →
+  real Base Sepolia USDC contract validation, by a non-mutating static call
+  (no nonce consumed); payment and settlement NOT crossed. That is exactly how
+  the ledger records it.
+- **Production: untouched/unauthorized.**
+- **AV-6b: specified only.**
+- **Next owner: fresh deadlock builder** —
+  [ORDER](../dispatches/2026-09-17-ORDER-x402-door-boot-deadlock-builder-mission.md)
+  (red-first; "do not weaken single-process exclusivity" is the binding
+  sentence; no Base Sepolia transaction; no Gesture-D promotion; GREEN returns
+  to the Gesture-D seat, which reuses the staged kit and order unchanged).
+- **Gesture-D seat: WAIT.**
+- The four further findings are separate queue items, architecture
+  reconciliation BEFORE implementation (they may change the ceremony's
+  assumptions): [INTEGRATION-FINDINGS-QUEUE](INTEGRATION-FINDINGS-QUEUE.md).
+- Verdict on the pass: *"a successful failed ceremony"* — it prevented
+  integration-test confidence from laundering into a claim about a binary
+  that, in its real exclusive-journal configuration, could not finish booting.
+
 **Standing (no ceremony):** AV-11's CI step — live now.
 
 ## 3 · Smallest ordered plan
