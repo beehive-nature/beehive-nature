@@ -73,6 +73,142 @@ body[data-reg="bee"] section h2{font:600 16px/1.4 system-ui,-apple-system,'Segoe
 body[data-reg="raver"] :is(.law,.banner){font-size:14.5px}
 body[data-reg="raver"] :is(table,.fine,td.fine,.cb div,main summary,footer,section h2,.card h3){font-size:14px}
 #srctab td:last-child a{display:inline-flex;align-items:center;min-height:44px;text-underline-offset:3px}
+
+/* ── ETERNAL FRONT (docs/design/eternal) — the language dock as three products. Every value is a
+   skaists token (skaists.css, compiled from docs/design/skaists/tokens.json): no hand-picked hex,
+   size or corner. Measured by e2e/skaists-conformance.mjs --only blanguage.html. ── */
+#eternal{max-width:880px;margin:0 auto var(--sk-s4);padding:0;border:0;border-radius:0;background:none}
+#eternal>.et-r,#eternal>.et-c{display:none}
+body[data-reg="raver"] #eternal>.et-b,body[data-reg="cypherpunk"] #eternal>.et-b{display:none}
+body[data-reg="raver"] #eternal>.et-r,body[data-reg="cypherpunk"] #eternal>.et-c{display:block}
+#eternal [hidden]{display:none!important}
+#eternal :is(h2,h3,p,ol,ul,table){margin:0;padding:0;letter-spacing:normal}
+#eternal :is(td,th){white-space:normal;vertical-align:top}
+#eternal button{margin:0;padding:0;border:0;background:none;color:inherit;font:inherit;border-radius:0;cursor:pointer}
+#eternal a{color:inherit}
+#eternal svg{display:block}
+#eternal :focus-visible{outline:2px solid var(--sk-focus);outline-offset:3px}
+[dir="rtl"] #eternal .chev{transform:scaleX(-1)}
+.et-archive-h{max-width:880px;margin:var(--sk-s5) auto var(--sk-s2);padding-top:var(--sk-s4);border-top:1px solid var(--sk-line);color:var(--sk-ink);text-align:start}
+body[data-reg="bee"] .et-archive-h{font:400 28px/1.1 var(--sk-font-bee-serif)}
+body[data-reg="raver"] .et-archive-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em}
+body[data-reg="cypherpunk"] .et-archive-h{font:600 15px/1.45 var(--sk-font-mono)}
+
+/* NEW BEE — a calm room: your language, one row at a time; one magenta action */
+#eternal .et-b{display:flex;flex-direction:column;gap:var(--sk-s3);color:var(--sk-ink);text-align:start}
+#eternal .et-b-mark{font:400 18px/1.2 var(--sk-font-house);color:var(--sk-sovereign)}
+#eternal .et-b-h{font:400 40px/1.05 var(--sk-font-bee-serif);color:var(--sk-ink)}
+#eternal .et-b-lede{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-guard{display:flex;align-items:center;gap:var(--sk-s2);min-height:var(--sk-control-min);padding:var(--sk-s1) var(--sk-s3);border-radius:var(--sk-radius);background:var(--sk-guard-wash);color:var(--sk-guard);font:600 15px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-b-guard svg{width:18px;height:18px;flex:none;fill:none;stroke:var(--sk-guard);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+#eternal .et-b-rows{display:flex;flex-direction:column;background:var(--sk-bg-card);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl);overflow:hidden}
+#eternal .et-b-row{display:flex;align-items:center;justify-content:space-between;gap:var(--sk-s2);width:100%;min-height:var(--sk-control-row);padding:0 var(--sk-s3);border-bottom:1px solid var(--sk-line-soft);text-align:start;font:500 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+#eternal .et-b-rows>:last-child{border-bottom:0}
+#eternal .et-b-row small{display:flex;align-items:center;gap:var(--sk-s1);flex:none;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-row[aria-expanded="true"]{background:var(--sk-sovereign-tint);color:var(--sk-sovereign-strong);font-weight:600}
+#eternal .et-b-row[aria-expanded="true"] small{color:var(--sk-sovereign-strong)}
+#eternal .et-b-row .chev{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;transition:transform .26s}
+#eternal .et-b-row[aria-expanded="true"] .chev{transform:rotate(90deg)}
+#eternal .et-b-row .you{padding:2px var(--sk-s1);border-radius:var(--sk-radius-pill);background:var(--sk-verified-wash);color:var(--sk-verified);font:600 14px/1.4 var(--sk-font-bee-sans)}
+#eternal .et-b-open{display:flex;flex-direction:column;gap:var(--sk-s1);padding:var(--sk-s2) var(--sk-s3);border-bottom:1px solid var(--sk-line-soft);background:var(--sk-sovereign-tint)}
+#eternal .et-b-open p{font:400 15px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+#eternal .et-b-use{align-self:flex-start;min-height:var(--sk-control-min);padding:0 var(--sk-s3);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius-md);background:var(--sk-bg-card);color:var(--sk-ink);font:600 16px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-b-more{justify-content:center;color:var(--sk-link);font-weight:600}
+#eternal .et-b-act{display:flex;flex-direction:column;gap:var(--sk-s1)}
+#eternal .et-b-primary{height:var(--sk-control-primary);border-radius:var(--sk-radius-lg);background:var(--sk-primary);color:var(--sk-on-primary);font:600 17px/1.2 var(--sk-font-bee-sans)}
+#eternal .et-b-link{display:flex;align-items:center;justify-content:center;min-height:var(--sk-control-min);font:600 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-link);text-decoration:none}
+#eternal .et-b-foot{text-align:center;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+
+/* RAVER — a sun of tongues: one ray per docked tongue, its length the lines drafted, its seed a
+   speaker's signature (hollow until one signs). tap a ray; hold the heart to read the estate in it */
+#eternal .et-r{color:var(--sk-ink);font:600 14px/1.25 var(--sk-font-raver-body);text-align:start}
+#eternal .et-r-top{display:flex;align-items:baseline;justify-content:space-between;gap:var(--sk-s2);flex-wrap:wrap}
+#eternal .et-r-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em;color:var(--sk-ink)}
+#eternal .et-r-hint{font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-stage{position:relative;width:100%;max-width:380px;margin:var(--sk-s3) auto var(--sk-s1);aspect-ratio:1}
+#eternal .et-r-sun{width:100%;height:100%;filter:drop-shadow(var(--sk-glow-sovereign))}
+#eternal .et-r-sun .ray{cursor:pointer}
+#eternal .et-r-sun .ray line{fill:none;stroke-linecap:round;transition:stroke .26s,stroke-width .26s}
+#eternal .et-r-sun .ray .hit{stroke:var(--sk-bg);stroke-width:14;opacity:0}
+#eternal .et-r-sun .ray circle{transition:fill .26s}
+#eternal .et-r-sun .ray:focus{outline:none}
+#eternal .et-r-sun .ray:focus-visible line.petal{stroke:var(--sk-ink)}
+#eternal .et-r-prog{position:absolute;inset:0;width:100%;height:100%;transform:rotate(-90deg);pointer-events:none}
+#eternal .et-r-prog circle{fill:none;stroke-width:3}
+#eternal .et-r-prog .fill{stroke:var(--sk-biomass);stroke-linecap:round;stroke-dasharray:352;stroke-dashoffset:352}
+#eternal #etRHeart{position:absolute;inset:31%;border-radius:var(--sk-radius-pill);background:var(--sk-sovereign-wash);border:1.5px solid var(--sk-sovereign);color:var(--sk-ink);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:var(--sk-s1);touch-action:none;user-select:none;-webkit-user-select:none;text-align:center;overflow:hidden}
+#eternal #etRHeart b{font:400 22px/1.2 var(--sk-font-house);color:var(--sk-sovereign-strong);max-width:100%;overflow-wrap:anywhere}
+#eternal #etRHeart span{font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-card{display:flex;gap:var(--sk-s2);align-items:center;min-height:var(--sk-control-person);padding:var(--sk-s2) var(--sk-s3);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl);background:var(--sk-sovereign-tint)}
+#eternal .et-r-card .rk{min-width:var(--sk-control-min);height:var(--sk-control-min);padding:0 var(--sk-s1);border-radius:var(--sk-radius);background:var(--sk-sovereign-strong);color:var(--sk-bg);display:flex;align-items:center;justify-content:center;font:700 15px/1.2 var(--sk-font-raver-display);flex:none}
+#eternal .et-r-card b{display:block;font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink)}
+#eternal .et-r-card span{font:600 14px/1.4 var(--sk-font-raver-body);color:var(--sk-sovereign-soft)}
+#eternal .et-r-legend{display:flex;justify-content:center;flex-wrap:wrap;gap:var(--sk-s2) var(--sk-s3);margin:var(--sk-s3) 0 0;font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-legend span{display:flex;align-items:center;gap:var(--sk-s1)}
+#eternal .et-r-legend i{width:22px;height:6px;border-radius:var(--sk-radius-pill)}
+#eternal .lg-ltr{background:var(--sk-sovereign)}#eternal .lg-rtl{background:var(--sk-ai)}#eternal .lg-seed{width:12px!important;height:12px!important;border:1.5px solid var(--sk-biomass)}
+#eternal .et-r-pill{display:block;width:100%;height:58px;margin-top:var(--sk-s4);border-radius:var(--sk-radius-pill);background:var(--sk-primary);color:var(--sk-on-primary);font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em}
+#eternal .et-r-note{margin-top:var(--sk-s2);text-align:center;font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+@media (prefers-reduced-motion:reduce){#eternal .et-r-sun .ray line,#eternal .et-r-sun .ray circle,#eternal .et-b-row .chev{transition:none}}
+
+/* CYPHERPUNK — the instrument: the corpus as a table, the law as a pipeline, the numbers as a receipt */
+#eternal .et-c{font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink);text-align:start}
+#eternal .et-c-path{font:600 15px/1.45 var(--sk-font-mono);color:var(--sk-ink);overflow-wrap:anywhere}
+#eternal .et-c-chips{display:flex;flex-wrap:wrap;gap:var(--sk-s1);margin:var(--sk-s2) 0}
+#eternal .et-c-chips span{padding:2px var(--sk-s1);border:1px solid var(--sk-line);border-radius:4px;background:var(--sk-bg-card);color:var(--sk-ink);font:500 12px/1.45 var(--sk-font-mono)}
+#eternal .et-c-chips span.guard{border-color:var(--sk-guard);color:var(--sk-guard)}
+#eternal .et-c-chips span.ok{border-color:var(--sk-verified);color:var(--sk-verified)}
+#eternal .et-c-h{margin:var(--sk-s4) 0 var(--sk-s2);font:600 15px/1.45 var(--sk-font-mono);color:var(--sk-ink)}
+#eternal .et-c-tab{width:100%;border-collapse:separate;border-spacing:0;border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm);overflow:hidden;background:var(--sk-bg-card)}
+#eternal .et-c-tab th{padding:var(--sk-s1) var(--sk-s2);text-align:start;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);border-bottom:1px solid var(--sk-line);background:var(--sk-bg-well)}
+#eternal .et-c-tab td{height:var(--sk-control-min);padding:0 var(--sk-s2);vertical-align:middle;border-bottom:1px solid var(--sk-line);font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink)}
+#eternal .et-c-tab tr:last-child td{border-bottom:0}
+#eternal .et-c-tab td:last-child{white-space:nowrap}
+#eternal .et-c-tab td:first-child{color:var(--sk-sovereign-soft)}
+#eternal .et-c-tab tr.pick{cursor:pointer}
+#eternal .et-c-tab tr.cur td{background:var(--sk-sovereign-tint)}
+#eternal .et-c-tab .draft{color:var(--sk-info)}#eternal .et-c-tab .att{color:var(--sk-verified)}#eternal .et-c-tab .wd{color:var(--sk-guard)}
+#eternal .et-c-pipe{list-style:none;display:grid;gap:var(--sk-s1);counter-reset:p}
+#eternal .et-c-pipe li{display:grid;grid-template-columns:30px minmax(0,1fr);gap:2px var(--sk-s2);padding:var(--sk-s2);border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm);background:var(--sk-bg-card);counter-increment:p}
+#eternal .et-c-pipe li::before{content:counter(p,decimal-leading-zero);color:var(--sk-ink-mut);font-weight:600}
+#eternal .et-c-pipe li b{font-weight:600;color:var(--sk-ink);overflow-wrap:anywhere}
+#eternal .et-c-pipe li p{grid-column:2;color:var(--sk-ink-soft);overflow-wrap:anywhere}
+#eternal .et-c-pipe li.done b{color:var(--sk-verified)}
+#eternal .et-c-pipe li.now{border-color:var(--sk-ai)}#eternal .et-c-pipe li.now b{color:var(--sk-ai)}
+#eternal .et-c-pipe li.guard{border-style:dashed;border-color:var(--sk-guard)}#eternal .et-c-pipe li.guard b{color:var(--sk-guard)}
+#eternal .et-c-primary{display:flex;align-items:center;justify-content:center;width:100%;height:52px;margin-top:var(--sk-s3);border-radius:var(--sk-radius-sm);background:var(--sk-primary);color:var(--sk-on-primary);font:600 14px/1.2 var(--sk-font-mono)}
+#eternal .et-c-kv{width:100%;border-collapse:collapse;border:1px solid var(--sk-line);background:var(--sk-bg-card);table-layout:fixed}
+#eternal .et-c-kv th{width:104px;padding:var(--sk-s1) var(--sk-s2);text-align:start;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);border-bottom:1px solid var(--sk-line)}
+#eternal .et-c-kv td{padding:var(--sk-s1) var(--sk-s2);border-bottom:1px solid var(--sk-line);font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink);overflow-wrap:anywhere}
+#eternal .et-c-kv tr:last-child :is(th,td){border-bottom:0}
+#eternal .et-c-verify{margin-top:var(--sk-s3);padding:var(--sk-s2) var(--sk-s3);border-radius:var(--sk-radius-sm);background:var(--sk-bg-card);border:1px solid var(--sk-line)}
+#eternal .et-c-verify b{display:block;margin-bottom:var(--sk-s1);font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut)}
+#eternal .et-c-verify code{display:block;font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink);overflow-wrap:anywhere}
+#eternal .et-c-row{display:grid;grid-template-columns:1fr 1fr;gap:var(--sk-s2);margin-top:var(--sk-s3)}
+#eternal .et-c-ghost{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:var(--sk-control-min);padding:var(--sk-s1);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius-sm);color:var(--sk-ink);text-decoration:none;text-align:center;font:600 14px/1.2 var(--sk-font-mono)}
+#eternal .et-c-ghost .et-c-nt{font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut)}
+
+/* ── THE WHOLE DOCK, dressed per register: the page's own variables mapped onto skaists ── */
+body[data-reg]{--bg:var(--sk-bg);--ink:var(--sk-ink);--line:var(--sk-line);--leaf:var(--sk-verified);--field:var(--sk-bg-card);--btn:var(--sk-sovereign-wash);--btn-gold:var(--sk-bg-well);background:var(--sk-bg)}
+body[data-reg="bee"]{--cyan:var(--sk-link);--gold:var(--sk-sovereign);--violet:var(--sk-sovereign-strong);--dim:var(--sk-ink-mut);--amber:var(--sk-info);font-family:var(--sk-font-bee-sans)}
+body[data-reg="raver"]{--cyan:var(--sk-link);--gold:var(--sk-sovereign-strong);--violet:var(--sk-sovereign-soft);--dim:var(--sk-ink-soft);--amber:var(--sk-info);font:14px/1.6 var(--sk-font-raver-body)}
+body[data-reg="cypherpunk"]{--cyan:var(--sk-ai);--gold:var(--sk-sovereign-strong);--violet:var(--sk-sovereign-soft);--dim:var(--sk-ink-soft);--amber:var(--sk-info);font-family:var(--sk-font-mono)}
+body[data-reg] section{background:var(--sk-bg-card);border-color:var(--sk-line)}
+body[data-reg] :is(.card,pre,.cb div){background:var(--sk-bg-well);border-color:var(--sk-line)}
+body[data-reg] .banner{background:var(--sk-sovereign-tint);border-color:var(--sk-line);color:var(--sk-sovereign-strong)}
+body[data-reg="bee"] :is(.card,pre,.cb div){background:var(--sk-bg)}
+body[data-reg="bee"] header h1{font:400 40px/1.05 var(--sk-font-bee-serif);color:var(--sk-ink)}
+body[data-reg="raver"] header h1{font:700 30px/1.1 var(--sk-font-raver-display);letter-spacing:-.01em;color:var(--sk-ink)}
+body[data-reg="cypherpunk"] header h1{font:600 15px/1.45 var(--sk-font-mono);letter-spacing:normal;color:var(--sk-ink)}
+body[data-reg="bee"] .dock-start{font:400 17px/1.7 var(--sk-font-bee-sans)}
+body[data-reg="raver"] .dock-start{font:400 15px/1.7 var(--sk-font-raver-body)}
+.dock-start a{border-radius:var(--sk-radius-pill)}
+section{border-radius:var(--sk-radius)}
+:is(.card,.banner){border-radius:var(--sk-radius)}
+:is(pre,.cb div){border-radius:var(--sk-radius-sm)}
+body[data-reg="raver"] :is(section h2,.law,.banner,table,.fine,td.fine,.cb div,main summary,footer,.card h3,header p){font-size:14px}
+body[data-reg="cypherpunk"] :is(section h2,.law,.banner,main summary,footer,header p){font-size:12px}
+body[data-reg="cypherpunk"] .card h3{font-size:13px}
 @media (max-width:520px){
  /* the sources table reads as cards on a phone: the source across the full width, what it is for and its link beneath */
  #srctab tr:first-child{display:none}
@@ -82,8 +218,62 @@ body[data-reg="raver"] :is(table,.fine,td.fine,.cb div,main summary,footer,secti
  #srctab td:last-child{text-align:end;overflow-wrap:anywhere;max-width:11em}
 }
 </style>
+<link rel="stylesheet" href="skaists.css">
 </head>
 <body data-reg="bee">
+<!-- ETERNAL FRONT (founder blueprint 2026-09-26, docs/design/eternal): the dock as three separate
+     products in one surface. ONE data layer (lang-corpus.json, the file every page's language picker
+     reads, plus the picker itself) drives all three, so the counts cannot drift. The gestures hand
+     off to the real flows: "read in this tongue" is the estate's own picker (#blangsel, lang.js), and
+     "dock your tongue" opens this page's workshop (#workshop), which composes a fragment and never posts. -->
+<section id="eternal" aria-label="a place for your language">
+
+  <!-- NEW BEE — a calm room: your language first, then the others, one plain choice -->
+  <div class="et-b">
+    <div class="et-b-mark" translate="no">bLanguage</div>
+    <h2 class="et-b-h" id="etBTitle">a place for your language</h2>
+    <p class="et-b-lede" id="etBLede">the estate speaks <b data-et="tongues">…</b> languages. choose yours to read in it, or bring one that is missing.</p>
+    <div class="et-b-guard"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l7 3v6c0 4-3 7-7 9-4-2-7-5-7-9V6z"/></svg><span id="etBGuard">every translation is marked as a draft until a speaker checks it.</span></div>
+    <div class="et-b-rows" id="etBRows"><div class="et-b-row"><span id="etBReading">reading the languages…</span></div></div>
+    <div class="et-b-act">
+      <button type="button" class="et-b-primary" id="etBDock" data-et-dock>bring your language</button>
+      <a class="et-b-link" href="#skaists" id="etBWord">see one word, up close</a>
+      <p class="et-b-foot" id="etBFoot">nothing you write here is sent anywhere. a person carries it.</p>
+    </div>
+  </div>
+
+  <!-- RAVER — a sun of tongues: each ray is a language, its length the lines drafted, its seed a speaker's signature -->
+  <div class="et-r">
+    <div class="et-r-top"><h2 class="et-r-h" id="etRTitle">every tongue</h2><span class="et-r-hint" id="etRHint">tap a ray · hold the heart</span></div>
+    <div class="et-r-stage">
+      <svg class="et-r-sun" id="etRSun" viewBox="-200 -200 400 400" role="group" aria-label="the docked languages as rays"></svg>
+      <svg class="et-r-prog" viewBox="0 0 120 120" aria-hidden="true"><circle class="fill" id="etRProg" cx="60" cy="60" r="56"/></svg>
+      <button type="button" id="etRHeart" aria-describedby="etRNote"><b id="etRHeartName">…</b><span id="etRHeartSub">hold to read in it</span></button>
+    </div>
+    <div class="et-r-card" id="etRCard" aria-live="polite"></div>
+    <div class="et-r-legend"><span><i class="lg-ltr"></i><span id="etRLgL">left to right</span></span><span><i class="lg-rtl"></i><span id="etRLgR">right to left</span></span><span><i class="lg-seed"></i><span id="etRLgS">hollow = no speaker yet</span></span></div>
+    <p class="et-r-note" id="etRNote"></p>
+    <button type="button" class="et-r-pill" id="etRDock" data-et-dock>dock your tongue</button>
+  </div>
+
+  <!-- CYPHERPUNK — the instrument: the corpus as a table, the law as a pipeline, verify it yourself -->
+  <div class="et-c">
+    <h2 class="et-c-path" id="etCPath">surfaces/lang-corpus.json</h2>
+    <div class="et-c-chips" id="etCChips"></div>
+    <table class="et-c-tab"><thead><tr><th>code</th><th id="etCThName">name</th><th>dir</th><th id="etCThCells">cells</th><th id="etCThState">state</th></tr></thead><tbody id="etCRows"></tbody></table>
+    <h3 class="et-c-h" id="etCPipeH">the corpus law · one string's path</h3>
+    <ol class="et-c-pipe" id="etCPipe"></ol>
+    <button type="button" class="et-c-primary" id="etCDock" data-et-dock>compose a docking fragment</button>
+    <h3 class="et-c-h" id="etCRecH">receipt</h3>
+    <table class="et-c-kv" id="etCRec"></table>
+    <div class="et-c-verify"><b id="etCVerH">verify · no trust in this page needed</b><code id="etCCurl"></code></div>
+    <div class="et-c-row">
+      <a class="et-c-ghost" href="lang-corpus.json" download id="etCExport">export corpus</a>
+      <a class="et-c-ghost" href="https://github.com/beehive-nature/beehive-nature/blob/main/surfaces/lang-corpus.json" target="_blank" rel="noopener noreferrer"><span id="etCFork">fork the corpus ↗</span><span class="et-c-nt" id="etCNew">opens in a new tab</span></a>
+    </div>
+  </div>
+</section>
+<h2 class="et-archive-h" id="etArchive">the whole dock</h2>
 <header>
   <h1 data-reg="bee"><span data-i18n="plur.dockWelcome">A place for your language.</span></h1><h1 data-reg="raver"><span data-i18n="plur.dockFloor">Your words belong on this floor.</span></h1><h1 data-reg="cypherpunk">🌐 <span data-i18n="bld.title">the BlanguageDOCK</span></h1><div class="dock-start" data-reg="bee"><p><span data-i18n="plur.dockIntro">Explore a word, hear a greeting, or help a language find its place here.</span></p><a href="plur.html#words"><span data-i18n="plur.words">Explore the words</span> →</a><a href="plur.html#talk"><span data-i18n="plur.conversation">Try a conversation</span> →</a><a href="#skaists">skaists · beautiful</a></div><div class="dock-start" data-reg="raver"><p><span data-i18n="plur.raverIntro">Trade a greeting. Bring a friend. Carry the music across languages.</span></p><a href="plur.html">PLUR →</a><a href="music.html">SKAISTS mUsiC →</a></div>
   <p data-reg="cypherpunk" data-i18n="bld.lede">the organism's language corpus, run as a permissionless dock — decentralized, self-healing, and read by
@@ -619,6 +809,167 @@ $('ws-compose').addEventListener('click',function(){
 $('ws-copy').addEventListener('click',function(){
   navigator.clipboard.writeText($('ws-out').textContent).then(function(){ $('ws-copy').textContent='✓ copied'; });
 });
+})();
+</script>
+<script>
+/* ETERNAL FRONT — one data layer, three renderers (docs/design/eternal). Every number is counted
+   from lang-corpus.json (the file lang.js reads for every page), every name is the picker's own
+   (#blangsel), and "reading now" is the document's own language. Gestures hand off: a tongue is
+   chosen through the estate's picker (lang.js persists and applies it), and docking opens this
+   page's workshop, which composes a fragment and never posts. A failed read says so: never zero. */
+(function(){
+  var $=function(id){return document.getElementById(id);};
+  var T=function(k,f){var t=window.BNRLanguage&&window.BNRLanguage.text;return t?t(k,f):f;};
+  var R2=location.pathname.indexOf('/beehive-nature/')===0?'/beehive-nature/surfaces/':'/surfaces/';
+  var D={loaded:false,failed:false,keys:0,tongues:0,langs:[],attested:0,withdrawn:0,rtl:[],bytes:0,drafted:0,current:'en'};
+  var R={sel:null,openAll:false,open:{}};
+  function esc(v){return String(v==null?'':v).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+  function fmt(n){return String(n).replace(/\B(?=(\d{3})+(?!\d))/g,',');}
+  function nameOf(code){var o=document.querySelector('#blangsel option[value="'+code+'"]');return o?o.textContent.replace(/\s*🕊$/,''):code;}
+  function current(){var l=(document.documentElement.lang||'en').toLowerCase();return D.langs.some(function(L){return L.code===l;})?l:'en';}
+  function set(k,v){document.querySelectorAll('#eternal [data-et="'+k+'"]').forEach(function(e){e.textContent=v;});}
+
+  function build(j){
+    var keys=Object.keys(j.strings||{}), M=j._meta||{}, rtl=M.rtl||[], wd=M.withdrawn||{}, att=M.attested||{};
+    D.keys=keys.length; D.rtl=rtl.slice(); D.bytes=D.bytes||new TextEncoder().encode(JSON.stringify(j)).length;
+    D.langs=[{code:'en',rtl:false,cells:keys.length,pct:1,attested:false,withdrawn:false,source:true}].concat((M.langs||[]).map(function(c){
+      var n=0; keys.forEach(function(k){var v=j.strings[k][c]; if(typeof v==='string'&&v.trim()) n++;});
+      return {code:c,rtl:rtl.indexOf(c)>=0,cells:n,pct:keys.length?n/keys.length:0,attested:!!att[c],withdrawn:!!wd[c],source:false};
+    }));
+    D.tongues=D.langs.length; D.attested=Object.keys(att).length; D.withdrawn=Object.keys(wd).length;
+    D.drafted=D.langs.slice(1).reduce(function(a,L){return a+L.cells;},0);
+    D.loaded=true;
+  }
+  function pctOf(L){return Math.floor(L.pct*1000)/10;}
+  function stateOf(L){return L.source?T('et.lang.source','source'):L.withdrawn?T('et.lang.withdrawn','withdrawn · history kept'):L.attested?T('et.lang.attested','signed by a speaker'):T('et.lang.draft','machine draft');}
+
+  /* ── NEW BEE ── */
+  function bee(){
+    var box=$('etBRows');
+    if(D.failed){box.innerHTML='<div class="et-b-row"><span>'+esc(T('et.lang.failed','the language list could not be read. nothing is shown as zero. try again.'))+'</span></div>';return;}
+    if(!D.loaded) return;
+    var cur=D.current, list=D.langs.slice().sort(function(a,b){return (b.code===cur)-(a.code===cur);});
+    var show=R.openAll?list:list.slice(0,6), h='';
+    show.forEach(function(L){
+      var o=!!R.open[L.code], here=L.code===cur, nm=nameOf(L.code);
+      h+='<button type="button" class="et-b-row" data-code="'+L.code+'" aria-expanded="'+o+'"><span lang="'+L.code+'" dir="auto">'+esc(nm)+'</span><small>'+
+        (here?'<span class="you">'+esc(T('et.lang.b.now','reading now'))+'</span>':esc(L.source?T('et.lang.b.src','the source'):T('et.lang.b.draft','a draft')))+
+        '<svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></small></button>';
+      if(o) h+='<div class="et-b-open"><p>'+esc(L.source?T('et.lang.b.enOpen','english is the source. every line on the estate starts here.'):
+          L.withdrawn?T('et.lang.b.wdOpen','this language was withdrawn by its people. its history is kept.'):
+          T('et.lang.b.open','{c} of {k} lines are drafted by a machine. no speaker has checked them yet.').replace('{c}',fmt(L.cells)).replace('{k}',fmt(D.keys)))+'</p>'+
+          (here?'':'<button type="button" class="et-b-use" data-use="'+L.code+'">'+esc(T('et.lang.b.use','read the estate in {n}').replace('{n}',nm))+'</button>')+'</div>';
+    });
+    if(!R.openAll) h+='<button type="button" class="et-b-row et-b-more" data-all="1"><span>'+esc(T('et.lang.b.all','all {n} languages').replace('{n}',D.tongues))+'</span></button>';
+    box.innerHTML=h;
+  }
+
+  /* ── RAVER: the sun of tongues ── */
+  function sun(){
+    var svg=$('etRSun'); if(!D.loaded){svg.innerHTML='';return;}
+    var n=D.langs.length, h='', cur=D.current, step=Math.PI*2/n;
+    D.langs.forEach(function(L,i){
+      var a=-Math.PI/2+i*step, c=Math.cos(a), s=Math.sin(a), r0=96, r1=r0+Math.max(6,92*L.pct), sel=R.sel===L.code;
+      var w0=a-step/2, w1=a+step/2, P=function(r,t){return (r*Math.cos(t)).toFixed(1)+' '+(r*Math.sin(t)).toFixed(1);};
+      var col=L.withdrawn?'guard':sel?'sovereign-strong':L.rtl?'ai':'sovereign';
+      h+='<g class="ray" data-code="'+L.code+'" aria-label="'+esc(nameOf(L.code)+' · '+pctOf(L)+'%')+'">'+
+        '<path class="hit" d="M'+P(84,w0)+'L'+P(198,w0)+'A198 198 0 0 1 '+P(198,w1)+'L'+P(84,w1)+'A84 84 0 0 0 '+P(84,w0)+'Z" style="fill:var(--sk-bg)" opacity="0"/>'+
+        '<line class="petal" x1="'+(r0*c).toFixed(1)+'" y1="'+(r0*s).toFixed(1)+'" x2="'+(r1*c).toFixed(1)+'" y2="'+(r1*s).toFixed(1)+'" stroke-width="'+(sel?9:6)+'" style="stroke:var(--sk-'+col+')"/>'+
+        '<circle cx="'+(84*c).toFixed(1)+'" cy="'+(84*s).toFixed(1)+'" r="4" stroke-width="1.5" style="stroke:var(--sk-biomass);fill:var(--sk-'+(L.attested?'biomass':'bg')+')"/>'+
+        (L.code===cur?'<circle cx="'+((r1+10)*c).toFixed(1)+'" cy="'+((r1+10)*s).toFixed(1)+'" r="4" style="fill:var(--sk-you)"/>':'')+'</g>';
+    });
+    svg.innerHTML=h;
+  }
+  function raver(){
+    if(!D.loaded&&!D.failed) return;
+    if(D.failed){$('etRHeartName').textContent=T('et.lang.r.silent','silent');$('etRHeartSub').textContent=T('et.lang.r.failed','the corpus did not answer');$('etRCard').innerHTML='';$('etRNote').textContent=T('et.lang.failed','the language list could not be read. nothing is shown as zero. try again.');sun();return;}
+    if(!R.sel) R.sel=D.current;
+    var L=D.langs.filter(function(x){return x.code===R.sel;})[0]||D.langs[0], here=L.code===D.current;
+    $('etRHeartName').textContent=nameOf(L.code);
+    $('etRHeartName').setAttribute('lang',L.code);
+    $('etRHeartSub').textContent=here?T('et.lang.r.here','reading now'):T('et.lang.r.hold','hold to read in it');
+    $('etRHeart').setAttribute('aria-label',nameOf(L.code)+' · '+(here?T('et.lang.r.here','reading now'):T('et.lang.r.hold','hold to read in it')));
+    $('etRCard').innerHTML='<button type="button" class="rk" data-step="-1" aria-label="'+esc(T('et.lang.r.prev','previous tongue'))+'">‹</button><div style="flex:1"><b lang="'+L.code+'" dir="auto">'+esc(nameOf(L.code))+' · '+esc(L.code)+'</b><span>'+
+      esc(L.source?T('et.lang.r.src','the source · {k} lines').replace('{k}',fmt(D.keys)):T('et.lang.r.card','{p}% drafted · {c} lines · {d}').replace('{p}',pctOf(L)).replace('{c}',fmt(L.cells)).replace('{d}',L.rtl?T('et.lang.r.rtl','right to left'):T('et.lang.r.ltr','left to right')))+'</span></div>'+
+      '<button type="button" class="rk" data-step="1" aria-label="'+esc(T('et.lang.r.next','next tongue'))+'">›</button>';
+    $('etRNote').textContent=T('et.lang.r.note','{n} tongues · {k} lines in the source · {a} signed by a speaker').replace('{n}',D.tongues).replace('{k}',fmt(D.keys)).replace('{a}',D.attested);
+    sun();
+  }
+
+  /* ── CYPHERPUNK ── */
+  function cy(){
+    if(D.failed){$('etCRows').innerHTML='<tr><td colspan="5">'+esc(T('et.lang.c.failed','fetch failed · a failed read is a failure, never an empty corpus'))+'</td></tr>';$('etCChips').innerHTML='<span class="guard">corpus · not read</span>';return;}
+    if(!D.loaded) return;
+    $('etCChips').innerHTML='<span>tongues '+(D.tongues-1)+' + en</span><span>keys '+D.keys+'</span><span class="'+(D.attested?'ok':'guard')+'">attested '+D.attested+'</span><span>withdrawn '+D.withdrawn+'</span><span>rtl '+esc(D.rtl.join(' '))+'</span><span class="ok">now '+esc(D.current)+'</span>';
+    $('etCRows').innerHTML=D.langs.map(function(L){
+      var st=L.source?'<span>source</span>':L.withdrawn?'<span class="wd">🕊 withdrawn</span>':L.attested?'<span class="att">✓ attested</span>':'<span class="draft">⚙ draft</span>';
+      return '<tr class="pick'+(L.code===D.current?' cur':'')+'" data-use="'+L.code+'" tabindex="0" aria-label="'+esc(nameOf(L.code))+'"><td>'+L.code+'</td><td lang="'+L.code+'" dir="auto">'+esc(nameOf(L.code))+'</td><td>'+(L.rtl?'rtl':'ltr')+'</td><td>'+L.cells+'</td><td>'+st+'</td></tr>';
+    }).join('');
+    var steps=[
+      ['key','a data-i18n key on the element · '+D.keys+' keys','done'],
+      ['source','english is carried by the page itself · no fetch needed','done'],
+      ['draft · ⚙ machine',D.drafted+' of '+(D.keys*(D.tongues-1))+' cells drafted · the label never comes off by itself','done'],
+      ['attest · a speaker signs',D.attested+' signed so far · the attested map is open',D.attested?'done':'now'],
+      ['withdraw · honoured',D.withdrawn+' withdrawn · history kept · no one removes another’s','guard'],
+      ['render · lang.js','empty cell → english, visibly · '+D.rtl.join(' ')+' set dir=rtl','done']
+    ];
+    $('etCPipe').innerHTML=steps.map(function(s){return '<li class="'+s[2]+'"><b>'+esc(s[0])+'</b><p>'+esc(s[1])+'</p></li>';}).join('');
+    $('etCRec').innerHTML=[
+      ['file','surfaces/lang-corpus.json'],['size',(D.bytes/1024).toFixed(1)+' kB'],['keys',D.keys],['tongues',(D.tongues-1)+' + en'],
+      ['cells',D.drafted+' / '+(D.keys*(D.tongues-1))+' drafted'],['attested',D.attested],['withdrawn',D.withdrawn],['rtl',D.rtl.join(' ')],['reading',D.current]
+    ].map(function(r){return '<tr><th>'+r[0]+'</th><td>'+esc(r[1])+'</td></tr>';}).join('');
+    $('etCCurl').textContent="curl -s "+location.origin+R2+"lang-corpus.json | jq '._meta.langs | length'";
+  }
+
+  var WORDS={etBTitle:['et.lang.b.title','a place for your language'],etBGuard:['et.lang.b.guard','every translation is marked as a draft until a speaker checks it.'],
+    etBDock:['et.lang.b.dock','bring your language'],etBWord:['et.lang.b.word','see one word, up close'],etBFoot:['et.lang.b.foot','nothing you write here is sent anywhere. a person carries it.'],
+    etRTitle:['et.lang.r.title','every tongue'],etRHint:['et.lang.r.hint','tap a ray · hold the heart'],etRLgL:['et.lang.r.lgL','left to right'],etRLgR:['et.lang.r.lgR','right to left'],
+    etRLgS:['et.lang.r.lgS','hollow = no speaker yet'],etRDock:['et.lang.r.dock','dock your tongue'],etCPipeH:['et.lang.c.pipeH','the corpus law · one string’s path'],
+    etCDock:['et.lang.c.dock','compose a docking fragment'],etCRecH:['et.lang.c.recH','receipt'],etCVerH:['et.lang.c.verH','verify · no trust in this page needed'],
+    etCExport:['et.lang.c.export','export corpus'],etCFork:['et.lang.c.fork','fork the corpus ↗'],etCNew:['et.lang.c.newTab','opens in a new tab'],etArchive:['et.lang.archive','the whole dock']};
+  function words(){
+    Object.keys(WORDS).forEach(function(id){var e=$(id);if(e&&!e.children.length)e.textContent=T(WORDS[id][0],WORDS[id][1]);});
+    var l=$('etBLede'); if(l) l.innerHTML=esc(T('et.lang.b.lede','the estate speaks {n} languages. choose yours to read in it, or bring one that is missing.')).replace('{n}','<b data-et="tongues">'+(D.loaded?D.tongues:'…')+'</b>');
+  }
+  function all(){D.current=current();words();bee();raver();cy();}
+
+  function use(code){var sel=$('blangsel');if(!sel||!D.langs.some(function(L){return L.code===code;}))return false;sel.value=code;sel.dispatchEvent(new Event('change'));return true;}
+  function dock(){var v=document.querySelector('#workshop [data-verb="create"]'),w=$('workshop');if(v)v.click();if(w)w.scrollIntoView({block:'start'});return !!v;}
+  var hold={t0:0,raf:0};
+  function holdStart(e){
+    if(hold.raf||!D.loaded||R.sel===D.current) return; if(e&&e.preventDefault)e.preventDefault();
+    var prog=$('etRProg'); hold.t0=performance.now();
+    (function tick(now){var f=Math.min(1,(now-hold.t0)/900);prog.style.strokeDashoffset=String(352*(1-f));
+      if(f>=1){hold.raf=0;use(R.sel);setTimeout(function(){prog.style.strokeDashoffset='352';},400);return;}hold.raf=requestAnimationFrame(tick);})(hold.t0);
+  }
+  function holdStop(){if(!hold.raf)return;cancelAnimationFrame(hold.raf);hold.raf=0;$('etRProg').style.strokeDashoffset='352';}
+  function stepSel(d){var i=D.langs.findIndex(function(L){return L.code===R.sel;});R.sel=D.langs[(i+d+D.langs.length)%D.langs.length].code;raver();}
+
+  function wire(){
+    var ev=$('eternal');
+    ev.addEventListener('click',function(e){
+      var u=e.target.closest('[data-use]'); if(u){use(u.getAttribute('data-use'));return;}
+      if(e.target.closest('[data-et-dock]')){dock();return;}
+      if(e.target.closest('[data-all]')){R.openAll=true;bee();return;}
+      var row=e.target.closest('.et-b-row[data-code]'); if(row){var c=row.getAttribute('data-code');R.open[c]=!R.open[c];bee();var n=$('etBRows').querySelector('[data-code="'+c+'"]');if(n)n.focus();return;}
+      var st=e.target.closest('[data-step]'); if(st){stepSel(+st.getAttribute('data-step'));return;}
+      var ray=e.target.closest('.ray'); if(ray){R.sel=ray.getAttribute('data-code');raver();}
+    });
+    ev.addEventListener('keydown',function(e){if(e.key!=='Enter'&&e.key!==' ')return;var t=e.target.closest('tr.pick');if(!t)return;e.preventDefault();use(t.getAttribute('data-use'));});
+    var hb=$('etRHeart');
+    hb.addEventListener('pointerdown',function(e){try{hb.setPointerCapture(e.pointerId);}catch(x){}holdStart(e);});
+    ['pointerup','pointercancel','pointerleave'].forEach(function(t){hb.addEventListener(t,holdStop);});
+    hb.addEventListener('keydown',function(e){if((e.key===' '||e.key==='Enter')&&!e.repeat){e.preventDefault();holdStart(e);}});
+    hb.addEventListener('keyup',function(e){if(e.key===' '||e.key==='Enter')holdStop();});
+    hb.addEventListener('contextmenu',function(e){e.preventDefault();});
+    document.addEventListener('blang',function(){R.sel=null;all();});
+  }
+  wire(); all();
+  fetch(R2+'lang-corpus.json?v=2').then(function(r){if(!r.ok)throw 0;return r.text();}).then(function(t){D.bytes=new TextEncoder().encode(t).length;build(JSON.parse(t));all();})
+    .catch(function(){D.failed=true;all();});
+  /* the picker is mounted by lang.js after tour.js loads: re-read its names once it is there */
+  (function wait(n){if(document.getElementById('blangsel')){all();return;}if(n<40)setTimeout(function(){wait(n+1);},150);})(0);
+  window.__eternal={data:D,raver:R,use:use,dock:dock};
 })();
 </script>
 

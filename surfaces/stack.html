@@ -161,9 +161,317 @@ body[data-reg="bee"] .law{font-size:16px;line-height:1.75}
  .scroll td:first-child{color:var(--ink)}
 }
 </style>
+<style id="et-style">
+/* ── ETERNAL FRONT (docs/design/eternal) — three products in one surface. Every value is a skaists
+   token (../skaists.css, compiled from docs/design/skaists/tokens.json): no hand-picked hex, size or
+   corner. Measured by e2e/skaists-conformance.mjs. One register visible at a time; new bee is the
+   default. Every class is et- prefixed so the page's own bare rules never reach in. ── */
+#eternal{box-sizing:border-box;display:block;width:100%;max-width:600px;margin:0 auto var(--sk-s2,12px);padding:var(--sk-s2,12px) 0 0;border:0;border-radius:0;background:none;box-shadow:none;text-align:left;letter-spacing:normal;text-transform:none}
+#eternal *,#eternal *::before,#eternal *::after{box-sizing:border-box}
+#eternal>.et-r,#eternal>.et-c{display:none}
+body[data-reg="raver"] #eternal>.et-b,body[data-reg="cypherpunk"] #eternal>.et-b{display:none}
+body[data-reg="raver"] #eternal>.et-r{display:block}
+body[data-reg="cypherpunk"] #eternal>.et-c{display:block}
+#eternal [hidden]{display:none!important}
+#eternal button{margin:0;color:inherit;text-transform:none;letter-spacing:normal;min-width:0}
+#eternal svg{display:block;max-width:100%}
+#eternal a{text-decoration:none}
+#eternal a:hover{text-decoration:none}
+#eternal :focus-visible{outline:2px solid var(--sk-focus);outline-offset:3px}
+#eternal h2,#eternal h3,#eternal p,#eternal ol,#eternal ul,#eternal table{margin:0;padding:0;border:0;background:none;text-transform:none;letter-spacing:normal;min-width:0;max-width:none;text-shadow:none}
+#eternal table{width:100%;border-collapse:separate;border-spacing:0}
+#eternal th,#eternal td{border:0;padding:0;vertical-align:top;text-align:left;background:none;letter-spacing:normal}
+#eternal code{font:inherit;background:none;padding:0;border:0}
+#etArchive.et-archive-h{max-width:600px;margin:var(--sk-s5,36px) auto var(--sk-s2,12px);padding:var(--sk-s4,24px) 0 0;border:0;border-top:1px solid var(--sk-line);background:none;color:var(--sk-ink);text-transform:none;letter-spacing:normal;text-shadow:none;-webkit-text-fill-color:currentColor;text-align:left}
+body[data-reg="bee"] #etArchive.et-archive-h{font:400 28px/1.1 var(--sk-font-bee-serif)}
+body[data-reg="raver"] #etArchive.et-archive-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em}
+body[data-reg="cypherpunk"] #etArchive.et-archive-h{font:600 15px/1.45 var(--sk-font-mono)}
+
+/* NEW BEE — a calm room: plain rows, one reassurance, one magenta action, a link, a footnote */
+#eternal .et-b{display:flex;flex-direction:column;gap:var(--sk-s3,18px);color:var(--sk-ink);font:400 16px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-b-step{display:flex;flex-direction:column;gap:var(--sk-s3,18px)}
+#eternal .et-b-mark{font:400 18px/1.2 var(--sk-font-house);color:var(--sk-sovereign)}
+#eternal .et-b-h{font:400 40px/1.05 var(--sk-font-bee-serif);color:var(--sk-ink)}
+#eternal .et-b-h2{font:400 28px/1.1 var(--sk-font-bee-serif);color:var(--sk-ink)}
+#eternal .et-b-lede{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink-mut);text-wrap:pretty}
+#eternal .et-b-guard{display:flex;align-items:center;gap:var(--sk-s2,12px);min-height:var(--sk-control-min,44px);padding:var(--sk-s1,6px) var(--sk-s3,18px);border-radius:var(--sk-radius,12px);background:var(--sk-guard-wash);color:var(--sk-guard);font:600 15px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-ic{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+#eternal .et-b-rows{display:flex;flex-direction:column;background:var(--sk-bg-card);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl,18px);overflow:hidden}
+#eternal .et-b-row{display:flex;align-items:center;justify-content:space-between;gap:var(--sk-s2,12px);width:100%;min-height:var(--sk-control-row,52px);padding:var(--sk-s1,6px) var(--sk-s3,18px);border:0;border-bottom:1px solid var(--sk-line-soft);border-radius:0;background:transparent;text-align:left;font:500 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+#eternal .et-b-row:last-child{border-bottom:0}
+#eternal button.et-b-row,#eternal a.et-b-row{cursor:pointer}
+#eternal .et-b-rl{display:flex;flex-direction:column;flex:1 1 auto;min-width:0}
+#eternal .et-b-rl b{font:500 16px/1.45 var(--sk-font-bee-sans);color:inherit}
+#eternal .et-b-rl small{font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-rv{display:flex;align-items:center;gap:var(--sk-s1,6px);flex:none;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut);text-align:right}
+#eternal .et-b-rv.et-out{color:var(--sk-guard)}
+#eternal .et-b-rv.et-ok{color:var(--sk-verified)}
+#eternal .et-chev{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;flex:none;transition:transform var(--dur,.26s)}
+#eternal .et-b-row[aria-expanded="true"],#eternal .et-b-row[aria-pressed="true"]{background:var(--sk-sovereign-tint);color:var(--sk-sovereign-strong)}
+#eternal .et-b-row[aria-expanded="true"] .et-b-rl b,#eternal .et-b-row[aria-pressed="true"] .et-b-rl b{font-weight:600}
+#eternal .et-b-row[aria-expanded="true"] .et-b-rv,#eternal .et-b-row[aria-pressed="true"] .et-b-rv,#eternal .et-b-row[aria-expanded="true"] .et-b-rl small,#eternal .et-b-row[aria-pressed="true"] .et-b-rl small{color:var(--sk-sovereign-strong)}
+#eternal .et-b-row[aria-expanded="true"] .et-chev{transform:rotate(90deg)}
+#eternal .et-b-open{display:flex;flex-direction:column;gap:var(--sk-s1,6px);padding:var(--sk-s2,12px) var(--sk-s3,18px);background:var(--sk-sovereign-tint);border-bottom:1px solid var(--sk-line-soft)}
+#eternal .et-b-open:last-child{border-bottom:0}
+#eternal .et-b-open>div{font:400 15px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+#eternal .et-b-open>div.et-b-src{font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-item{display:flex;align-items:center;gap:var(--sk-s2,12px);width:100%;min-height:var(--sk-control-person,60px);padding:var(--sk-s1,6px) var(--sk-s3,18px);border:0;border-bottom:1px solid var(--sk-line-soft);border-radius:0;background:transparent;text-align:left;color:var(--sk-ink);font:400 16px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-b-item:last-child{border-bottom:0}
+#eternal button.et-b-item{cursor:pointer}
+#eternal .et-b-item[aria-pressed="true"]{background:var(--sk-sovereign-tint)}
+#eternal .et-b-item i{width:40px;height:40px;border-radius:var(--sk-radius-pill,999px);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong);display:flex;align-items:center;justify-content:center;font:600 14px/1.4 var(--sk-font-bee-sans);font-style:normal;flex:none}
+#eternal .et-b-item i.et-dash{background:transparent;border:1.5px dashed var(--sk-guard);color:var(--sk-guard)}
+#eternal .et-b-item i.et-ok{background:var(--sk-verified-wash);color:var(--sk-verified)}
+#eternal .et-b-item>span{display:flex;flex-direction:column;min-width:0;flex:1 1 auto}
+#eternal .et-b-item b{display:block;font:500 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+#eternal .et-b-item small{display:block;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-term{display:flex;gap:var(--sk-s2,12px);align-items:flex-start;padding:var(--sk-s2,12px) var(--sk-s3,18px);border-bottom:1px solid var(--sk-line-soft)}
+#eternal .et-b-term:last-child{border-bottom:0}
+#eternal .et-b-term>i{width:36px;height:36px;border-radius:var(--sk-radius-pill,999px);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong);display:flex;align-items:center;justify-content:center;flex:none;font:600 14px/1.4 var(--sk-font-bee-sans);font-style:normal}
+#eternal .et-b-term>i.et-ok{background:var(--sk-verified-wash);color:var(--sk-verified)}
+#eternal .et-b-term>i.et-dash{background:transparent;border:1.5px dashed var(--sk-guard);color:var(--sk-guard)}
+#eternal .et-b-term>div{display:flex;flex-direction:column;min-width:0}
+#eternal .et-b-term b{display:block;font:600 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+#eternal .et-b-term span{font:400 15px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-consent{display:flex;align-items:center;gap:var(--sk-s2,12px);min-height:var(--sk-control-min,44px);font:600 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink);cursor:pointer}
+#eternal .et-b-consent input{width:var(--sk-control-check,24px);height:var(--sk-control-check,24px);margin:0;flex:none;accent-color:var(--sk-primary)}
+#eternal .et-b-act{display:flex;flex-direction:column;gap:var(--sk-s1,6px);margin-top:var(--sk-s1,6px)}
+#eternal .et-b-primary{display:flex;align-items:center;justify-content:center;width:100%;min-height:var(--sk-control-primary,54px);padding:var(--sk-s1,6px) var(--sk-s3,18px);border:0;border-radius:var(--sk-radius-lg,16px);background:var(--sk-primary);color:var(--sk-on-primary)!important;font:600 17px/1.2 var(--sk-font-bee-sans)!important;text-align:center;cursor:pointer}
+#eternal .et-b-primary:disabled{background:var(--sk-bg-well);color:var(--sk-ink-mut)!important;cursor:not-allowed}
+#eternal .et-b-link{display:flex;align-items:center;justify-content:center;min-height:var(--sk-control-min,44px);padding:0 var(--sk-s2,12px);border:0;background:transparent;font:600 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-link)!important;cursor:pointer;text-align:center}
+#eternal .et-b-link:hover{color:var(--sk-link-hover)!important}
+#eternal .et-b-foot{text-align:center;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-status{padding:var(--sk-s2,12px) var(--sk-s3,18px);border-radius:var(--sk-radius,12px);background:var(--sk-verified-wash);color:var(--sk-verified);font:600 14px/1.4 var(--sk-font-bee-sans)}
+#eternal .et-b-status.et-no{background:var(--sk-guard-wash);color:var(--sk-guard)}
+#eternal .et-b-back{align-self:flex-start;display:flex;align-items:center;min-height:var(--sk-control-min,44px);padding:0;border:0;background:none;font:600 16px/1.45 var(--sk-font-bee-sans)!important;color:var(--sk-link)!important;cursor:pointer}
+#eternal .et-b-card{display:flex;flex-direction:column;gap:var(--sk-s1,6px);padding:var(--sk-s3,18px);background:var(--sk-sovereign-tint);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl,18px)}
+#eternal .et-b-card h3{font:400 28px/1.1 var(--sk-font-bee-serif);color:var(--sk-sovereign-strong)}
+#eternal .et-b-card>div{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+#eternal .et-b-card.et-dash{background:var(--sk-bg-card);border:1px dashed var(--sk-ink-dim)}
+
+/* RAVER — the data is the art; lowercase is allowed joy; the numbers never change */
+#eternal .et-r{color:var(--sk-ink);font:400 14px/1.4 var(--sk-font-raver-body)}
+#eternal .et-r-top{display:flex;align-items:baseline;justify-content:space-between;gap:var(--sk-s2,12px);flex-wrap:wrap}
+#eternal .et-r-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em;color:var(--sk-ink)}
+#eternal .et-r-hint{font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-art{position:relative;width:100%;max-width:360px;margin:var(--sk-s3,18px) auto var(--sk-s2,12px)}
+#eternal .et-r-art>svg{width:100%;height:auto;filter:drop-shadow(var(--sk-glow-sovereign))}
+#eternal .et-r-art [role="button"]{cursor:pointer}
+#eternal .et-r-art [role="button"]:focus{outline:none}
+#eternal .et-r-art [role="button"]:focus-visible>*{stroke:var(--sk-ink);stroke-width:2}
+#eternal .et-r-legend{display:flex;flex-wrap:wrap;justify-content:center;gap:var(--sk-s1,6px) var(--sk-s3,18px);margin:0 0 var(--sk-s3,18px)}
+#eternal .et-r-legend span{display:inline-flex;align-items:center;gap:var(--sk-s1,6px);font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-legend i{width:14px;height:14px;border-radius:var(--sk-radius-pill,999px);flex:none}
+#eternal .et-r-card{display:flex;gap:var(--sk-s2,12px);align-items:flex-start;padding:var(--sk-s2,12px) var(--sk-s3,18px);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl,18px);background:var(--sk-sovereign-tint);min-height:var(--sk-control-person,60px)}
+#eternal .et-r-card .et-rk{min-width:44px;height:44px;padding:0 var(--sk-s1,6px);border-radius:var(--sk-radius,12px);background:var(--sk-sovereign-strong);color:var(--sk-bg);display:flex;align-items:center;justify-content:center;font:700 15px/1.2 var(--sk-font-raver-display);flex:none}
+#eternal .et-r-card>div{min-width:0;flex:1 1 auto}
+#eternal .et-r-card b{display:block;font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink)}
+#eternal .et-r-card span{display:block;margin-top:var(--sk-s1,6px);font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-card span.et-src{color:var(--sk-sovereign-soft)}
+#eternal .et-r-sub{margin:var(--sk-s4,24px) 0 var(--sk-s2,12px);font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em;color:var(--sk-ink)}
+#eternal .et-r-tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--sk-s2,12px)}
+#eternal .et-r-tile{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--sk-s1,6px);min-height:96px;padding:var(--sk-s2,12px) var(--sk-s1,6px);border-radius:var(--sk-radius-xl,18px);border:1.5px solid var(--sk-sovereign);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong)!important;font:600 14px/1.25 var(--sk-font-raver-body);text-align:center;cursor:pointer;opacity:.7;transition:opacity var(--dur,.26s),box-shadow var(--dur,.26s)}
+#eternal .et-r-tile.et-dash{border-style:dashed;border-color:var(--sk-guard);background:var(--sk-guard-wash);color:var(--sk-guard)!important}
+#eternal .et-r-tile[aria-pressed="true"]{opacity:1;border-color:var(--sk-you);box-shadow:var(--sk-glow-sovereign)}
+#eternal .et-r-tile svg{width:26px;height:26px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+#eternal .et-r-note{margin:var(--sk-s2,12px) 0 0;text-align:center;font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-pill{display:flex;align-items:center;justify-content:center;width:100%;min-height:58px;margin-top:var(--sk-s4,24px);padding:var(--sk-s1,6px) var(--sk-s3,18px);border:0;border-radius:var(--sk-radius-pill,999px);background:var(--sk-primary);color:var(--sk-on-primary)!important;font:700 15px/1.2 var(--sk-font-raver-display)!important;letter-spacing:.04em;text-align:center;cursor:pointer}
+#eternal .et-r-pill:disabled{background:var(--sk-sovereign-wash);color:var(--sk-sovereign-soft)!important;cursor:not-allowed}
+#eternal .et-r-ghost{display:flex;align-items:center;justify-content:center;margin:var(--sk-s2,12px) auto 0;min-height:var(--sk-control-min,44px);padding:0 var(--sk-s2,12px);border:0;background:none;color:var(--sk-link)!important;font:600 14px/1.25 var(--sk-font-raver-body)!important;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+#eternal .et-r-still{display:inline-flex;align-items:center;justify-content:center;gap:var(--sk-s1,6px);min-height:var(--sk-control-min,44px);min-width:var(--sk-control-min,44px);padding:0 var(--sk-s2,12px);border:1.5px solid var(--sk-line);border-radius:var(--sk-radius-pill,999px);background:var(--sk-bg-card);color:var(--sk-ink-soft)!important;font:600 14px/1.25 var(--sk-font-raver-body)!important;cursor:pointer}
+#eternal .et-r-still[aria-pressed="true"]{border-color:var(--sk-sovereign);color:var(--sk-sovereign-strong)!important}
+#eternal .et-r-bar{display:flex;align-items:center;justify-content:space-between;gap:var(--sk-s2,12px);flex-wrap:wrap}
+@keyframes et-breathe{0%,100%{opacity:1}50%{opacity:.55}}
+@keyframes et-drift{from{transform:translateX(0)}to{transform:translateX(var(--et-run,300px))}}
+#eternal .et-r.et-still-on *{animation-play-state:paused!important}
+@media (prefers-reduced-motion:reduce){#eternal .et-r *,#eternal .et-b *,#eternal .et-c *{transition:none!important;animation:none!important}}
+
+/* CYPHERPUNK — the instrument, complete at first paint: tables, a numbered pipeline, receipts */
+#eternal .et-c{font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink);overflow-wrap:break-word}
+#eternal .et-c-path{font:600 15px/1.45 var(--sk-font-mono);color:var(--sk-ink);word-break:break-all}
+#eternal .et-c-chips{display:flex;flex-wrap:wrap;gap:var(--sk-s1,6px);margin:var(--sk-s2,12px) 0}
+#eternal .et-c-chips span{padding:2px var(--sk-s1,6px);border:1px solid var(--sk-line);border-radius:4px;background:var(--sk-bg-card);font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-soft)}
+#eternal .et-c-chips span.et-on{border-color:var(--sk-guard);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong)}
+#eternal .et-c-chips span.et-ok{border-color:var(--sk-verified);color:var(--sk-verified)}
+#eternal .et-c-chips span.et-no{border-color:var(--sk-info);color:var(--sk-info)}
+#eternal .et-c-guard{display:flex;justify-content:space-between;align-items:center;gap:var(--sk-s1,6px) var(--sk-s2,12px);flex-wrap:wrap;min-height:var(--sk-control-min,44px);padding:var(--sk-s1,6px) var(--sk-s3,18px);border:1px dashed var(--sk-guard);border-radius:var(--sk-radius-sm,6px);background:var(--sk-guard-wash);color:var(--sk-guard)}
+#eternal .et-c-guard b{font-weight:600;color:var(--sk-sovereign-strong)}
+#eternal .et-c-h{margin:var(--sk-s4,24px) 0 var(--sk-s2,12px)!important;font:600 15px/1.45 var(--sk-font-mono);color:var(--sk-ink)}
+#eternal .et-c-tab{width:100%;margin:var(--sk-s2,12px) 0 var(--sk-s1,6px)!important;border:1px solid var(--sk-line)!important;border-radius:var(--sk-radius-sm,6px);overflow:hidden;background:var(--sk-bg-card)!important;table-layout:auto}
+#eternal .et-c-tab th{padding:var(--sk-s1,6px) var(--sk-s2,12px)!important;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);border-bottom:1px solid var(--sk-line)!important;background:var(--sk-bg-well)}
+#eternal .et-c-tab td{height:var(--sk-control-min,44px);padding:var(--sk-s1,6px) var(--sk-s2,12px)!important;border-bottom:1px solid var(--sk-line)!important;font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink);vertical-align:middle}
+#eternal .et-c-tab tr:last-child td{border-bottom:0!important}
+#eternal .et-c-tab td:first-child{color:var(--sk-guard)}
+#eternal .et-c-tab td:first-child,#eternal .et-c-tab th:first-child{white-space:nowrap;width:1%}
+#eternal .et-c-tab tr.et-pick{cursor:pointer}
+#eternal .et-c-tab tr.et-pick:hover td,#eternal .et-c-tab tr.et-pick[aria-expanded="true"] td,#eternal .et-c-tab tr.et-pick[aria-pressed="true"] td{background:var(--sk-sovereign-tint)}
+#eternal .et-c-tab tr.et-more td{height:auto;background:var(--sk-sovereign-tint);color:var(--sk-ink-soft)}
+#eternal .et-c-tab small{display:block;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut)}
+#eternal .et-c-tab .et-nw{white-space:nowrap}
+#eternal .et-st-ok{color:var(--sk-verified)}#eternal .et-st-no{color:var(--sk-info)}#eternal .et-st-wait{color:var(--sk-ai)}#eternal .et-st-guard{color:var(--sk-guard)}#eternal .et-st-dim{color:var(--sk-ink-mut)}
+#eternal .et-c-pipe{list-style:none;margin:0;padding:0;display:grid;gap:var(--sk-s2,12px);counter-reset:etp}
+#eternal .et-c-pipe li{display:grid;grid-template-columns:28px 1fr;gap:var(--sk-s1,6px) var(--sk-s2,12px);padding:var(--sk-s2,12px) var(--sk-s3,18px);border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm,6px);background:var(--sk-bg-card);counter-increment:etp}
+#eternal .et-c-pipe li::before{content:counter(etp,decimal-leading-zero);color:var(--sk-guard);font-weight:600}
+#eternal .et-c-pipe li b{font-weight:600;color:var(--sk-ink)}
+#eternal .et-c-pipe li p,#eternal .et-c-pipe li>div{grid-column:2;color:var(--sk-ink-soft)}
+#eternal .et-c-pipe li.et-done b{color:var(--sk-verified)}
+#eternal .et-c-pipe li.et-guard{border-style:dashed;border-color:var(--sk-guard)}
+#eternal .et-c-pipe li.et-guard b{color:var(--sk-guard)}
+#eternal .et-c-pipe li.et-now{border-color:var(--sk-ai);box-shadow:inset 0 0 0 1px var(--sk-ai)}
+#eternal .et-c-pipe li.et-now b{color:var(--sk-ai)}
+#eternal .et-c-pipe li.et-todo p,#eternal .et-c-pipe li.et-todo>div{color:var(--sk-ink-mut)}
+#eternal .et-c-primary{display:flex;align-items:center;justify-content:center;width:100%;min-height:52px;margin-top:var(--sk-s3,18px);padding:var(--sk-s1,6px) var(--sk-s2,12px);border:0;border-radius:var(--sk-radius-sm,6px);background:var(--sk-primary);color:var(--sk-on-primary)!important;font:600 14px/1.2 var(--sk-font-mono)!important;text-align:center;cursor:pointer}
+#eternal .et-c-primary:disabled{background:var(--sk-bg-well);color:var(--sk-ink-mut)!important;border:1px dashed var(--sk-line);cursor:not-allowed}
+#eternal .et-c-kv{width:100%;border:1px solid var(--sk-line)!important;border-radius:var(--sk-radius-sm,6px);overflow:hidden;background:var(--sk-bg-card)!important}
+#eternal .et-c-kv th{width:104px;padding:var(--sk-s2,12px)!important;vertical-align:top;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);border-bottom:1px solid var(--sk-line)!important;background:transparent}
+#eternal .et-c-kv td{padding:var(--sk-s2,12px)!important;border-bottom:1px solid var(--sk-line)!important;font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink);word-break:break-word}
+#eternal .et-c-kv tr:last-child th,#eternal .et-c-kv tr:last-child td{border-bottom:0!important}
+#eternal .et-c-kv .et-no{color:var(--sk-info)}#eternal .et-c-kv .et-yes{color:var(--sk-verified)}#eternal .et-c-kv .et-g{color:var(--sk-guard)}
+#eternal .et-c-verify{margin-top:var(--sk-s3,18px);padding:var(--sk-s3,18px);border-radius:var(--sk-radius-sm,6px);background:var(--sk-bg-card);border:1px solid var(--sk-line)}
+#eternal .et-c-verify-h{font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);margin-bottom:var(--sk-s1,6px)}
+#eternal .et-c-verify ol{margin:0;padding-left:var(--sk-s4,24px)!important;display:grid;gap:var(--sk-s1,6px)}
+#eternal .et-c-verify code{font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ai);word-break:break-all}
+#eternal .et-c-row{display:grid;grid-template-columns:1fr 1fr;gap:var(--sk-s2,12px);margin-top:var(--sk-s3,18px)}
+#eternal .et-c-ghost{display:flex;align-items:center;justify-content:center;min-height:52px;padding:var(--sk-s1,6px);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius-sm,6px);background:transparent;color:var(--sk-ink)!important;text-align:center;font:600 14px/1.2 var(--sk-font-mono)!important;cursor:pointer}
+#eternal .et-c-a{display:inline-flex;align-items:center;min-height:var(--sk-control-min,44px);min-width:var(--sk-control-min,44px);color:var(--sk-link)!important}
+#eternal .et-c-a:hover{color:var(--sk-link-hover)!important}
+/* addresses and hashes wrap anywhere; words never break mid-word */
+#eternal .et-c-a,#eternal .et-c-verify li,#eternal .et-c-kv td,#eternal .et-c code{overflow-wrap:anywhere}
+#eternal .et-c-kv .et-c-a{display:flex;min-width:0}
+#eternal .et-c-fixed{table-layout:fixed}
+#eternal .et-c-fixed td,#eternal .et-c-fixed th{overflow-wrap:break-word}
+#eternal .et-c-fixed td:first-child,#eternal .et-c-fixed th:first-child{width:auto;white-space:normal}
+
+/* raver: the engine, drawn — root, kernel, rails, doors, heartbeats, and the scaffolding dashed */
+#eternal #etStEngine [role="button"]{cursor:pointer}
+#eternal #etStEngine .et-root{fill:var(--sk-sovereign-wash);stroke:var(--sk-you);stroke-width:2}
+#eternal #etStEngine [aria-pressed="true"]>.et-root{fill:var(--sk-sovereign-tint);stroke-width:3}
+#eternal #etStEngine .et-kernel{fill:none;stroke:var(--sk-sovereign);stroke-width:9}
+#eternal #etStEngine .et-rail{stroke:var(--sk-bg);stroke-width:2}
+#eternal #etStEngine .et-r-ar{fill:var(--sk-info)}#eternal #etStEngine .et-r-ant{fill:var(--sk-you)}#eternal #etStEngine .et-r-vaulta{fill:var(--sk-biomass)}
+#eternal #etStEngine .et-r-evm{fill:var(--sk-ai)}#eternal #etStEngine .et-r-btc{fill:var(--sk-cat-bug)}#eternal #etStEngine .et-r-hive{fill:var(--sk-cat-idea)}
+#eternal #etStEngine .et-r-social{fill:var(--sk-sovereign-wash);stroke:var(--sk-sovereign-soft);stroke-width:2;stroke-dasharray:5 4}
+#eternal #etStEngine.et-picked .et-railg[aria-pressed="false"],#eternal #etStEngine.et-picked .et-door[aria-pressed="false"]{opacity:.45}
+#eternal #etStEngine .et-railg[aria-pressed="true"] .et-rail{stroke:var(--sk-ink);stroke-width:2.5}
+#eternal #etStEngine text{fill:var(--sk-on-primary);font:700 15px/1.2 var(--sk-font-raver-display)}
+#eternal #etStEngine text.et-lt{fill:var(--sk-ink);font:600 14px/1.25 var(--sk-font-raver-body)}
+#eternal #etStEngine .et-r-social+text,#eternal #etStEngine text.et-on-wash{fill:var(--sk-sovereign-strong)}
+#eternal #etStEngine .et-dnode{fill:var(--sk-bg-card);stroke:var(--sk-sovereign-soft);stroke-width:2}
+#eternal #etStEngine .et-dnode.et-zero{stroke:var(--sk-ink-dim);stroke-dasharray:4 3}
+#eternal #etStEngine .et-door[aria-pressed="true"] .et-dnode{fill:var(--sk-sovereign-tint);stroke:var(--sk-sovereign-strong);stroke-width:3}
+#eternal #etStEngine .et-chord{stroke:var(--sk-sovereign-soft);stroke-width:1.5;opacity:.35;fill:none}
+#eternal #etStEngine .et-chord.et-on{stroke:var(--sk-sovereign-strong);stroke-width:2.5;opacity:1;animation:et-breathe 3s ease-in-out infinite}
+#eternal #etStEngine .et-beat{stroke-width:2}
+#eternal #etStEngine .et-beat.s-ok{fill:var(--sk-biomass);stroke:var(--sk-biomass);animation:et-breathe 2.4s ease-in-out infinite}
+#eternal #etStEngine .et-beat.s-guard{fill:var(--sk-bg);stroke:var(--sk-guard);stroke-dasharray:3 2}
+#eternal #etStEngine .et-beat.s-info{fill:var(--sk-info);stroke:var(--sk-info)}
+#eternal #etStEngine .et-beat.s-dim,#eternal #etStEngine .et-beat.s-harm{fill:var(--sk-bg);stroke:var(--sk-ink-dim)}
+#eternal #etStEngine .et-beat.s-harm{stroke:var(--sk-guard);fill:var(--sk-guard)}
+#eternal #etStEngine .et-scaf{fill:none;stroke:var(--sk-guard);stroke-width:1.5;stroke-dasharray:2 6}
+#eternal .et-lg-alive{background:var(--sk-biomass)}#eternal .et-lg-quiet{border:2px dashed var(--sk-guard)}#eternal .et-lg-nw{border:2px solid var(--sk-ink-dim)}#eternal .et-lg-scaf{border:1.5px dotted var(--sk-guard)}
+#eternal .et-b-row.et-live{font:500 16px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-st-chip{display:inline-block;margin:0 var(--sk-s1,6px) 2px 0;color:var(--sk-ink-soft)}
+#eternal .et-st-org th:nth-child(2){width:32%}
+#eternal .et-st-doors th:nth-child(1){width:44px}#eternal .et-st-doors th:nth-child(3){width:34%}
+
+/* ── THE WHOLE ENGINE ROOM, dressed per register: the page's own variables mapped onto skaists.
+   Meanings stay as the page chose them (alive = verified, no answer = guard, never red); the rail
+   identity chips keep glyph + word and take token hues. ── */
+body[data-reg]{--bg:var(--sk-bg);--panel:var(--sk-bg-card);--well:var(--sk-bg-well);--ink:var(--sk-ink);--dim:var(--sk-ink-soft);--faint:var(--sk-ink-mut);--line:var(--sk-line);
+ --cyan:var(--sk-link);--gold:var(--sk-sovereign-strong);--leaf:var(--sk-biomass);--violet:var(--sk-sovereign-soft);--verified:var(--sk-verified);--guard:var(--sk-guard);--info:var(--sk-info);
+ --sem-harm:var(--sk-guard);--sem-solution:var(--sk-verified);--sem-value:var(--sk-sovereign);--sem-system:var(--sk-info);--sem-science:var(--sk-ai);--ink-dim:var(--sk-ink-dim);
+ --r-ant:var(--sk-you);--r-ar:var(--sk-info);--r-vaulta:var(--sk-verified);--r-hive:var(--sk-sovereign);--r-evm:var(--sk-ai);--r-btc:var(--sk-sovereign-strong);--r-social:var(--sk-sovereign-soft);
+ background:var(--sk-bg);color:var(--sk-ink)}
+body[data-reg="bee"]{--dim:var(--sk-ink-mut);--violet:var(--sk-sovereign);--ink-dim:var(--sk-ink-mut);font-family:var(--sk-font-bee-sans)}
+body[data-reg="raver"]{font-family:var(--sk-font-raver-body)}
+body[data-reg="cypherpunk"]{font-family:var(--sk-font-mono)}
+body[data-reg] .chip{border-color:currentColor}
+body[data-reg] .c-hive{color:var(--r-hive)}
+body[data-reg] .tier.root{border-color:var(--sk-sovereign);background:var(--sk-sovereign-tint)}
+body[data-reg] :is(section,.tier,.door,.fstage,.fdetail,.fex,.organ,.reread){border-radius:var(--sk-radius-xl)}
+body[data-reg="cypherpunk"] :is(section,.tier,.door,.fstage,.fdetail,.fex,.organ,.reread){border-radius:var(--sk-radius-sm)}
+body[data-reg] main>header h1{background:none;-webkit-text-fill-color:currentColor;color:var(--sk-ink)}
+body[data-reg="bee"] main>header h1{font:400 40px/1.05 var(--sk-font-bee-serif)}
+body[data-reg="raver"] main>header h1{font:700 30px/1.05 var(--sk-font-raver-display);letter-spacing:-.01em;background-image:var(--sk-rainbow);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent}
+body[data-reg="cypherpunk"] main>header h1{font:600 15px/1.45 var(--sk-font-mono)}
+body[data-reg="bee"] .herofig .num{font:400 52px/1 var(--sk-font-bee-serif)}
+body[data-reg="raver"] .herofig .num{font:700 60px/.95 var(--sk-font-raver-display);letter-spacing:-.02em}
+body[data-reg="cypherpunk"] .herofig .num{font:600 15px/1.45 var(--sk-font-mono)}
+body[data-reg="bee"] main section h2{font:400 28px/1.1 var(--sk-font-bee-serif);letter-spacing:0;color:var(--sk-ink)}
+body[data-reg="raver"] main section h2{font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em;color:var(--sk-sovereign-soft)}
+body[data-reg="cypherpunk"] main section h2{font:600 15px/1.45 var(--sk-font-mono);letter-spacing:0}
+body[data-reg="bee"] .sub,body[data-reg="bee"] .tier .t,body[data-reg="bee"] .door .dt,body[data-reg="bee"] .fstage,body[data-reg="bee"] .organ .oname{font-size:16px}
+body[data-reg="raver"] .sub,body[data-reg="raver"] .tier .t,body[data-reg="raver"] .door .dt,body[data-reg="raver"] .fstage,body[data-reg="raver"] .organ .oname{font-size:14px}
+body[data-reg="cypherpunk"] .sub,body[data-reg="cypherpunk"] .tier .t,body[data-reg="cypherpunk"] .door .dt,body[data-reg="cypherpunk"] .fstage,body[data-reg="cypherpunk"] .organ .oname{font-size:13px}
+body[data-reg] .fstage{font-family:inherit}
+body[data-reg] .reread{font-family:inherit}
+/* a rail chip reads on the card, not the well: new bee's well is too dark for info and lilac words */
+body[data-reg="bee"] .chip{background:var(--sk-bg-card)}
+</style>
+<link rel="stylesheet" href="skaists.css">
+
 </head>
 <body>
 <main>
+<!-- ETERNAL FRONT (founder blueprint 2026-09-26, docs/design/eternal): "one engine diagram, honest
+     parts included", as three separate products in one surface. ONE data layer (this page's own
+     four tiers, its rails, its measured door table, its honest parts, its licensing rows, its data
+     loop, the live organ board below and the one real file's receipt) drives all three, so the facts
+     cannot drift. The honest parts are drawn in every register. The one real action is the organ
+     board's own re-read (#reread): every "check now" presses that button, and the answer shown is
+     the board's own answer, read from where you sit. -->
+<section id="eternal" aria-label="the engine room">
+
+  <!-- NEW BEE — a calm room: four layers in plain words, the honest parts, one live check -->
+  <div class="et-b">
+    <div class="et-b-mark" data-etk="et.stack.mark">the engine room</div>
+    <h2 class="et-b-h" data-etk="et.stack.beeH">what runs under all this</h2>
+    <div class="et-b-lede" data-etk="et.stack.beeLede">one picture of what actually runs under every door here, in plain words, with the honest parts included.</div>
+    <div class="et-b-guard"><svg class="et-ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span data-etk="et.stack.beeGuard">your identity sits at the bottom. everything above it can be replaced.</span></div>
+    <div class="et-b-rows" id="etStLayers"><div class="et-b-row"><span data-etk="et.stack.reading">reading the engine…</span></div></div>
+    <div class="et-b-card" id="etStHonest"></div>
+    <div class="et-b-rows"><div class="et-b-row" id="etStLive" aria-live="polite"></div></div>
+    <div class="et-b-act">
+      <button type="button" class="et-b-primary" id="etStCheck" data-etk="et.stack.beeCheck">check what answers right now</button>
+      <a class="et-b-link" href="#etAutonomi" data-etk="et.stack.beeAnt">where Autonomi runs here</a>
+      <div class="et-b-foot" data-etk="et.stack.beeFoot">every claim here is linked to its record or marked as a debt.</div>
+    </div>
+  </div>
+
+  <!-- RAVER — the engine, drawn: the root at the heart, the kernel, the rails, the doors, the heartbeats -->
+  <div class="et-r">
+    <div class="et-r-top"><h2 class="et-r-h" data-etk="et.stack.raverH">the engine</h2><span class="et-r-hint" id="etStHint"></span></div>
+    <div class="et-r-art"><svg id="etStEngine" viewBox="-177 -177 354 354" role="group" aria-label="the engine: the identity root at the heart, the rust kernel around it, seven rails, seven rows of doors, the organs' heartbeats on the rim, and the scaffolding drawn dashed"></svg></div>
+    <div class="et-r-legend" id="etStLegend"><span><i class="et-lg-alive"></i><span data-etk="et.stack.lgAlive">answered</span></span><span><i class="et-lg-quiet"></i><span data-etk="et.stack.lgQuiet">no answer</span></span><span><i class="et-lg-nw"></i><span data-etk="et.stack.lgNw">not watched</span></span><span><i class="et-lg-scaf"></i><span data-etk="et.stack.lgScaf">scaffolding</span></span></div>
+    <div class="et-r-card" id="etStCard" aria-live="polite"></div>
+    <button type="button" class="et-r-pill" id="etStPill" data-etk="et.stack.raverGo">read the heartbeats now</button>
+    <div class="et-r-bar"><button type="button" class="et-r-still" id="etStStill" aria-pressed="false">pause the light</button><a class="et-r-ghost" href="#dataflow" data-etk="et.stack.raverFlow">follow one file</a></div>
+  </div>
+
+  <!-- CYPHERPUNK — the instrument: the tiers as a pipeline, organs live, doors measured, debts named -->
+  <div class="et-c">
+    <div class="et-c-path">bnr://engine</div>
+    <div class="et-c-chips" id="etStChips"></div>
+    <div class="et-c-guard"><span data-etk="et.stack.cyGuard">debts named, not hidden</span><b id="etStDebts"></b></div>
+    <h3 class="et-c-h" data-etk="et.stack.cyTierH">tiers · root below, everything else above</h3>
+    <ol class="et-c-pipe" id="etStTiers"></ol>
+    <button type="button" class="et-c-primary" id="etStCyGo" data-etk="et.stack.cyGo">re-read the organs now</button>
+    <h3 class="et-c-h" id="etStOrgH"></h3>
+    <table class="et-c-tab et-c-fixed et-st-org"><thead><tr><th>organ · roads</th><th>state</th></tr></thead><tbody id="etStOrgans"></tbody></table>
+    <h3 class="et-c-h" id="etStDoorH"></h3>
+    <table class="et-c-tab et-c-fixed et-st-doors"><thead><tr><th>#</th><th>doors</th><th>rails</th></tr></thead><tbody id="etStDoors"></tbody></table>
+    <h3 class="et-c-h" data-etk="et.stack.cyDebtH">debts and dates · as stated</h3>
+    <table class="et-c-kv" id="etStDebtTab"></table>
+    <h3 class="et-c-h" data-etk="et.stack.cyFileH">one real file · read from the generated receipt</h3>
+    <table class="et-c-kv" id="etStFile"></table>
+    <div class="et-c-verify">
+      <div class="et-c-verify-h" data-etk="et.stack.cyVerifyH">verify · no trust in this page needed</div>
+      <ol id="etStVerify"></ol>
+    </div>
+    <div class="et-c-row"><a class="et-c-ghost" href="#dataflow" data-etk="et.stack.cyFlow">follow one file ↓</a><a class="et-c-ghost" href="https://github.com/beehive-nature/beehive-nature/blob/main/surfaces/stack.html" target="_blank" rel="noopener noreferrer" data-etk="et.stack.cyFork">fork the template ↗ (new tab)</a></div>
+  </div>
+</section>
+<h2 class="et-archive-h" id="etArchive" data-etk="et.stack.archive">the whole engine room</h2>
 <header>
   <h1>⚙ <span data-i18n="stack.h1">the Engine Room</span></h1>
   <details class="tnote" data-reg-disclose data-reg="bee"><summary data-i18n="stk.d.visitor">A visitor asked the best possible question — and the answer</summary>
@@ -272,7 +580,7 @@ body[data-reg="bee"] .law{font-size:16px;line-height:1.75}
 </section>
 
 <section>
-  <h2><span data-i18n="h.171">WHERE AUTONOMI IS IN THIS ESTATE, RIGHT NOW — the direct answer</span></h2>
+  <h2 id="etAutonomi"><span data-i18n="h.171">WHERE AUTONOMI IS IN THIS ESTATE, RIGHT NOW — the direct answer</span></h2>
   <div class="law">
   <b>1 · The founder's own vault runs on it today</b> — personal data storage through the
   Autonomi App, with a hardware-wallet payment lane spec'd so that <b>no key ever leaves the
@@ -514,7 +822,8 @@ var EN={
  'st.nw.polls':'internal organs — no public eye; the receipts are the record.',
  'st.nw.mail':'a browser cannot speak to a mail room — port 25 has no web eye.',
  'st.nw.alby':'the lightning heart keeps its own counsel — no public probe, by design.',
- 'st.p.brand':'brand road','st.p.fallback':'backup road','st.p.this':'this origin',
+ 'st.p.brand':'brand road','st.p.fallback':'backup road','st.p.this':'this origin','st.stamp':'read',
+
  'st.p.ok':'answered','st.p.no':'no answer'
 };
 function T_(k){ return EN[k] || k; }
@@ -734,6 +1043,182 @@ fetch('stack-dataflow-example.json',{cache:'no-store'}).then(function(r){ return
 })();
 </script>
 
+<script>
+/* ETERNAL FRONT — one data layer, three renderers (docs/design/eternal). "One engine diagram, honest
+   parts included." Every fact is read from this page's own walls below: the four tiers of the shape,
+   the rails' chips, the measured door table, the honest parts, the licensing rows, the eight stages
+   of the data loop, the "where Autonomi is" answers, and the organ board, mirrored live as the board
+   itself reads it (nothing here probes on its own). The one real file comes from the same generated
+   receipt the evidence card reads (stack-dataflow-example.json); when it cannot be read, it says so.
+   The one real action is the board's own re-read button: every "check now" presses it. */
+(function(){
+  var $=function(id){return document.getElementById(id);};
+  var T=function(k,f){var t=window.BNRLanguage&&window.BNRLanguage.text;return t?t(k,f):f;};
+  var K=function(k,f){return T('et.stack.'+k,f);};
+  var esc=function(v){return String(v==null?'':v).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});};
+  var txt=function(e){return (e&&e.textContent||'').replace(/\s+/g,' ').trim();};
+  var keyed=function(k){return [].filter.call(document.querySelectorAll('[data-i18n]'),function(e){return e.dataset.i18n===k;})[0];};
+  var first=function(s){var m=/^(.*?[.!?])(\s|$)/.exec(s||'');return m?m[1]:(s||'');};
+  var CHEV='<svg class="et-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>';
+  var RAIL=['ar','ant','vaulta','evm','btc','hive','social'];
+
+  /* ── the data layer ── */
+  var D={tiers:[],rails:[],doors:[],measured:'',organs:[],alive:null,asking:false,stamp:'',honest:[],loop:[],licence:[],autonomi:[],file:null,fileState:'reading',page:'stack.html'};
+  var B={open:null}, R={sel:null,still:false};
+
+  /* a block's words as a reader sees them: chips keep their space, link labels stay with the links */
+  function words(el){if(!el)return '';var c=el.cloneNode(true);c.querySelectorAll('a').forEach(function(a){a.remove();});c.querySelectorAll('.chip').forEach(function(x){x.textContent=' '+x.textContent+' ';});return txt(c);}
+  function tableAfter(key){var s=keyed(key);if(!s)return null;for(var e=s.closest('h2').nextElementSibling;e;e=e.nextElementSibling){var t=e.tagName==='TABLE'?e:e.querySelector&&e.querySelector('table');if(t)return t;}return null;}
+  function railOf(chip){var c=(/\bc-(ar|ant|vaulta|evm|btc|hive|social|zero)\b/.exec(chip.className)||[])[1];return c||'';}
+  function readPage(){
+    D.tiers=[].map.call(document.querySelectorAll('#flow .tier'),function(t,i){
+      var tt=t.querySelector('.t'), title=txt(tt.querySelector('[data-i18n]')||tt);
+      return {n:i+1,title:title,d:words(t.querySelector('.d')),root:t.classList.contains('root'),links:[].map.call(t.querySelectorAll('.d > a,.d a[href]'),function(a){return {href:a.getAttribute('href'),abs:a.href,text:txt(a)};}).filter(function(l,j,a){return a.map(function(x){return x.href;}).indexOf(l.href)===j;})};
+    });
+    D.rails=[].map.call(document.querySelectorAll('#flow .tier .chip'),function(c){var s=txt(c);return {k:railOf(c),glyph:s.split(' ')[0],name:s.replace(/^\S+\s*/,'')};});
+    var dt=tableAfter('h.172'), dh=keyed('h.172');
+    D.measured=((dh&&/measured\s+(\d{4}-\d{2}-\d{2})/.exec(txt(dh)))||['',''])[1];
+    D.doors=dt?[].filter.call(dt.querySelectorAll('tr'),function(r){return !r.querySelector('th');}).map(function(r,i){var td=r.querySelectorAll('td');
+      return {n:i+1,doors:[].map.call(td[0].querySelectorAll('a'),function(a){return {text:txt(a),href:a.getAttribute('href')};}),
+        rails:[].map.call(td[1].querySelectorAll('.chip'),function(c){return {k:railOf(c),text:txt(c)};}),what:txt(td[2])};}):[];
+    D.honest=[{lead:txt(keyed('st.hon.2')),said:txt(keyed('st.hon.3'))},{lead:'',said:txt(keyed('st.hon.5'))}].filter(function(h){return h.said;});
+    D.loop=[].map.call(document.querySelectorAll('#flowLoop .fstage'),function(b){return {id:b.getAttribute('data-stage'),name:txt(b.querySelector('.fname'))};});
+    var lt=tableAfter('stack.lic.h2');
+    D.licence=lt?[].filter.call(lt.querySelectorAll('tr'),function(r){return !r.querySelector('th');}).map(function(r){var td=r.querySelectorAll('td');return {path:txt(td[0]),licence:txt(td[1]),opens:txt(td[2])};}):[];
+    var ah=keyed('h.171'), al=ah&&ah.closest('section').querySelector('.law');
+    D.autonomi=al?[].map.call(al.querySelectorAll('b'),function(b){return txt(b);}).filter(function(s){return /^\d\s·/.test(s);}):[];
+    organs();
+  }
+  /* the organ board, mirrored exactly as the board below has drawn it */
+  function organs(){
+    D.organs=[].map.call(document.querySelectorAll('#organBoard .organ'),function(o){var w=o.querySelector('.oword');
+      return {name:txt(o.querySelector('.oname')),word:txt(w),looking:!!(w&&w.getAttribute('data-i18n')==='st.w.looking'),cls:((w&&/\bs-(ok|guard|info|harm|dim)\b/.exec(w.className))||['','dim'])[1],paths:[].map.call(o.querySelectorAll('.paths>span'),function(x){return txt(x);}).join('; ')};});
+    var n=txt($('organCount')); D.alive=/^\d+$/.test(n)?+n:null; D.stamp=(/\d{1,2}[:.]\d{2}(?:[:.]\d{2})?(?:\s?[AP]M)?/i.exec(txt($('stamp')))||[''])[0];
+    D.asking=D.alive==null||!D.organs.length||D.organs.some(function(o){return o.looking||!o.word;});
+  }
+  var railName=function(k){var r=D.rails.filter(function(x){return x.k===k||(k==='evm'&&x.k==='evm');})[0];return r?r.glyph+' '+r.name:k;};
+  var doorsOn=function(k){return D.doors.filter(function(d){return d.rails.some(function(r){return r.k===k;});});};
+  var liveLine=function(){
+    if(D.asking) return K('asking','asking the organs from where you sit…');
+    var watched=D.organs.filter(function(o){return o.cls!=='dim';}).length;
+    return D.alive+' '+K('of','of')+' '+watched+' '+K('watched','watched parts answered, from where you sit')+(D.stamp?' · '+K('at','at')+' '+D.stamp:'')+' · '+(D.organs.length-watched)+' '+K('nw','not watched');
+  };
+
+  /* ── NEW BEE ── */
+  var PLAIN=[['your identity, at the root','it survives the loss of any layer above'],['the engine','a public workspace in rust'],['the rails that carry files and money','seven of them'],['the pages you open','no logins, nothing to breach']];
+  function bee(){
+    var box=$('etStLayers'); if(!box) return;
+    var order=D.tiers.slice().reverse();
+    box.innerHTML=order.map(function(t){var p=PLAIN[t.n-1]||[t.title,''], open=B.open===t.n;
+      var sub=t.n===3?D.rails.length+' '+K('railsN','rails'):K('p'+t.n+'s',p[1]);
+      return '<button type="button" class="et-b-row" data-tier="'+t.n+'" aria-expanded="'+(open?'true':'false')+'"><span class="et-b-rl"><b>'+esc(K('p'+t.n,p[0]))+'</b><small>'+esc(sub)+'</small></span><span class="et-b-rv">'+CHEV+'</span></button>'+
+        (open?'<div class="et-b-open"><div>'+esc(t.d.split(/(?<=\.)\s+/).slice(0,2).join(' '))+'</div><div class="et-b-src">'+esc(K('page','on this page:')+' '+t.title)+'</div></div>':'');
+    }).join('');
+    $('etStHonest').innerHTML='<h3>'+esc(K('honestH','the honest parts'))+'</h3>'+D.honest.map(function(h){return '<div>'+esc((h.lead?h.lead+' ':'')+h.said+'.')+'</div>';}).join('');
+    var lv=$('etStLive'); lv.className='et-b-row et-live'; lv.innerHTML='<span class="et-b-rl"><b>'+esc(K('rightNow','right now'))+'</b><small>'+esc(liveLine())+'</small></span><span class="et-b-rv '+(D.asking?'':(D.alive?'et-ok':'et-out'))+'">'+esc(D.asking?K('askingShort','asking'):String(D.alive))+'</span>';
+    $('etStCheck').disabled=D.asking;
+  }
+
+  /* ── RAVER: the engine, drawn ── */
+  function arc(r0,r1,a0,a1){var p=function(r,a){return (r*Math.cos(a)).toFixed(1)+' '+(r*Math.sin(a)).toFixed(1);};var big=(a1-a0)>Math.PI?1:0;
+    return 'M'+p(r1,a0)+'A'+r1+' '+r1+' 0 '+big+' 1 '+p(r1,a1)+'L'+p(r0,a1)+'A'+r0+' '+r0+' 0 '+big+' 0 '+p(r0,a0)+'Z';}
+  function engine(){
+    var svg=$('etStEngine'); if(!svg) return;
+    var h='', n=D.rails.length||1, gap=0.04, R0=58, R1=102, RD=134, mid={};
+    var sel=R.sel, selRail=sel&&sel.t==='rail'?sel.k:null, selDoor=sel&&sel.t==='door'?sel.n:null;
+    /* the scaffolding, said out loud: a dashed arc over the top, where the bootstrap host sits */
+    h+='<path class="et-scaf" d="M'+(-172*Math.cos(Math.PI/6)).toFixed(1)+' '+(-172*Math.sin(Math.PI/6)).toFixed(1)+'A172 172 0 0 1 '+(172*Math.cos(Math.PI/6)).toFixed(1)+' '+(-172*Math.sin(Math.PI/6)).toFixed(1)+'"/>';
+    /* chords: each door row to the rails the measured table puts under it */
+    var dang=function(i){return -Math.PI/2+(i+.5)*2*Math.PI/D.doors.length;};
+    D.rails.forEach(function(r,i){var a=-Math.PI/2+(i+.5)*2*Math.PI/n;mid[r.k]={x:R1*Math.cos(a),y:R1*Math.sin(a),a:a};});
+    D.doors.forEach(function(d,i){var a=dang(i),x=(RD-22)*Math.cos(a),y=(RD-22)*Math.sin(a);
+      d.rails.forEach(function(rr){var m=mid[rr.k];if(!m)return;var on=selDoor===d.n||selRail===rr.k;
+        h+='<path class="et-chord'+(on?' et-on':'')+'" d="M'+x.toFixed(1)+' '+y.toFixed(1)+'Q'+(m.x*.55).toFixed(1)+' '+(m.y*.55).toFixed(1)+' '+m.x.toFixed(1)+' '+m.y.toFixed(1)+'"/>';});});
+    /* the kernel ring and the root at the heart */
+    h+='<circle class="et-kernel" r="44"/>';
+    h+='<g role="button" tabindex="0" data-sel="root" aria-pressed="'+(sel&&sel.t==='root'?'true':'false')+'" aria-label="'+esc((D.tiers[0]||{}).title||'root')+'"><polygon class="et-root" points="'+[0,1,2,3,4,5].map(function(k){var a=Math.PI/180*(60*k-90);return (30*Math.cos(a)).toFixed(1)+','+(30*Math.sin(a)).toFixed(1);}).join(' ')+'"/><text class="et-on-wash" y="6" text-anchor="middle">root</text></g>';
+    /* the rails: one arc each, the pending relays dashed */
+    D.rails.forEach(function(r,i){var a0=-Math.PI/2+i*2*Math.PI/n+gap,a1=-Math.PI/2+(i+1)*2*Math.PI/n-gap,m=mid[r.k],lx=((R0+R1)/2)*Math.cos(m.a),ly=((R0+R1)/2)*Math.sin(m.a);
+      h+='<g class="et-railg" role="button" tabindex="0" data-sel="rail:'+r.k+'" aria-pressed="'+(selRail===r.k?'true':'false')+'" aria-label="'+esc(r.glyph+' '+r.name+': '+doorsOn(r.k).length+' door rows')+'"><path class="et-rail et-r-'+r.k+'" d="'+arc(R0,R1,a0,a1)+'"/><text'+(r.k==='social'?' class="et-on-wash"':'')+' x="'+lx.toFixed(1)+'" y="'+(ly+6).toFixed(1)+'" text-anchor="middle">'+esc(r.glyph)+'</text></g>';});
+    /* the doors, as the measured table groups them */
+    D.doors.forEach(function(d,i){var a=dang(i),x=RD*Math.cos(a),y=RD*Math.sin(a),zero=d.rails.every(function(r){return r.k==='zero';});
+      h+='<g class="et-door" role="button" tabindex="0" data-sel="door:'+d.n+'" aria-pressed="'+(selDoor===d.n?'true':'false')+'" aria-label="'+esc(d.doors.map(function(x){return x.text;}).join(', ')+': '+d.rails.map(function(x){return x.text;}).join(', '))+'"><circle class="et-dnode'+(zero?' et-zero':'')+'" cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="22"/><text class="et-lt" x="'+x.toFixed(1)+'" y="'+(y+5).toFixed(1)+'" text-anchor="middle">'+(zero?'∅':d.n)+'</text></g>';});
+    /* the heartbeats on the rim: the organ board's own states */
+    D.organs.forEach(function(o,i){var a=-Math.PI/2+(i+.5)*2*Math.PI/Math.max(D.organs.length,1);
+      h+='<circle class="et-beat s-'+o.cls+'" cx="'+(163*Math.cos(a)).toFixed(1)+'" cy="'+(163*Math.sin(a)).toFixed(1)+'" r="6"><title>'+esc(o.name+' · '+o.word)+'</title></circle>';});
+    svg.innerHTML=h;
+    svg.classList.toggle('et-picked',!!(selRail||selDoor));
+  }
+  function raver(){
+    if(!$('etStEngine')) return;
+    engine();
+    $('etStHint').textContent=D.tiers.length+' '+K('hTiers','layers')+' · '+D.rails.length+' '+K('hRails','rails')+' · '+D.doors.length+' '+K('hDoors','door rows');
+    var c=$('etStCard'), s=R.sel;
+    if(s&&s.t==='rail'){var r=D.rails.filter(function(x){return x.k===s.k;})[0], ds=doorsOn(s.k);
+      c.innerHTML='<span class="et-rk">'+esc(r.glyph)+'</span><div><b>'+esc(r.name)+'</b><span>'+esc(ds.length+' '+(ds.length===1?K('rowUnder','door row runs on it'):K('rowsUnder','door rows run on it'))+(ds.length?': '+ds.map(function(d){return d.doors.map(function(x){return x.text;}).join(' · ');}).join(' · '):''))+'</span>'+(s.k==='social'&&D.honest[1]?'<span class="et-src">'+esc(D.honest[1].said)+'</span>':'')+'</div>';}
+    else if(s&&s.t==='door'){var d=D.doors[s.n-1];
+      c.innerHTML='<span class="et-rk">'+(d.rails.every(function(x){return x.k==='zero';})?'∅':d.n)+'</span><div><b>'+esc(d.doors.map(function(x){return x.text;}).join(' · '))+'</b><span>'+esc(d.what)+'</span><span class="et-src">'+esc(d.rails.map(function(x){return x.text;}).join('  '))+'</span></div>';}
+    else if(s&&s.t==='root'){var t=D.tiers[0]||{};c.innerHTML='<span class="et-rk">1</span><div><b>'+esc(t.title)+'</b><span>'+esc(first(t.d))+'</span></div>';}
+    else c.innerHTML='<span class="et-rk">'+(D.asking?'…':esc(String(D.alive)))+'</span><div><b>'+esc(liveLine())+'</b>'+D.honest.map(function(h){return '<span class="et-src">'+esc((h.lead?h.lead+' ':'')+h.said)+'</span>';}).join('')+'</div>';
+    $('etStPill').disabled=D.asking;
+    $('etStPill').textContent=D.asking?K('asking2','asking from where you sit…'):K('raverGo','read the heartbeats now');
+    $('etStStill').setAttribute('aria-pressed',R.still?'true':'false');
+    $('etStStill').textContent=R.still?K('play','play the light'):K('still','pause the light');
+    document.querySelector('#eternal .et-r').classList.toggle('et-still-on',R.still);
+  }
+
+  /* ── CYPHERPUNK ── */
+  function cy(){
+    if(!$('etStTiers')) return;
+    var watched=D.organs.filter(function(o){return o.cls!=='dim';}).length;
+    $('etStChips').innerHTML='<span class="et-on">tiers '+D.tiers.length+'</span><span>rails '+D.rails.length+'</span><span>door rows '+D.doors.length+(D.measured?' · measured '+D.measured:'')+'</span><span>loop stages '+D.loop.length+'</span><span class="'+(D.asking?'et-no':'et-ok')+'">organs '+(D.asking?'asking':D.alive+'/'+watched+' answered')+' · '+(D.organs.length-watched)+' not watched</span>';
+    $('etStDebts').textContent=D.honest.length+' '+K('debts','debts named');
+    $('etStTiers').innerHTML=D.tiers.map(function(t){return '<li class="'+(t.root?'et-guard':'et-todo')+'"><b>'+esc(t.title)+'</b><div>'+esc(t.d)+'</div>'+(t.links.length?'<div>'+t.links.map(function(l){return '<a class="et-c-a" href="'+esc(l.href)+'"'+(/^https?:/.test(l.href)?' target="_blank" rel="noopener noreferrer"':'')+'>'+esc(l.text+(/^https?:/.test(l.href)?' ↗':''))+'</a>';}).join(' · ')+'</div>':'')+'</li>';}).join('');
+    $('etStCyGo').disabled=D.asking; $('etStCyGo').textContent=D.asking?K('cyAsking','asking… no-cors reach + NIP-11, from your browser'):K('cyGo','re-read the organs now');
+    $('etStOrgH').textContent=K('cyOrgH','organs · live, from your browser')+(D.stamp?' · '+D.stamp:'');
+    $('etStOrgans').innerHTML=D.organs.map(function(o){return '<tr><td>'+esc(o.name)+(o.paths?'<small>'+esc(o.paths)+'</small>':'')+'</td><td class="'+({ok:'et-st-ok',guard:'et-st-guard',info:'et-st-no',harm:'et-st-guard',dim:'et-st-dim'}[o.cls]||'et-st-dim')+'">'+esc(o.word)+'</td></tr>';}).join('');
+    $('etStDoorH').textContent=K('cyDoorH','doors → rails')+(D.measured?' · '+K('measured','measured')+' '+D.measured:'');
+    $('etStDoors').innerHTML=D.doors.map(function(d){return '<tr><td>'+String(d.n).padStart(2,'0')+'</td><td>'+esc(d.doors.map(function(x){return x.text;}).join(' · '))+'<small>'+esc(first(d.what))+'</small></td><td>'+d.rails.map(function(r){return '<span class="et-st-chip">'+esc(r.text)+'</span>';}).join('')+'</td></tr>';}).join('');
+    $('etStDebtTab').innerHTML=D.honest.map(function(h,i){return '<tr><th>'+(i?'relays':'bootstrap')+'</th><td class="et-g">'+esc((h.lead?h.lead+' ':'')+h.said)+'</td></tr>';}).join('')+
+      D.licence.map(function(l){return '<tr><th>'+esc(l.licence)+'</th><td>'+esc(l.path)+'<br><span class="et-no">'+esc(l.opens)+'</span></td></tr>';}).join('');
+    var f=D.file;
+    $('etStFile').innerHTML=f&&f.file?[['file',f.file.name],['bytes',String(f.file.bytes)],['sha256',f.file.sha256Short],['shape',f.file.shape],['duration',f.file.durationSec+' s'],['playback',(f.file.playback||{}).verdict+' ('+(f.file.playback||{}).checks+')'],
+        ['quote',f.quote?f.quote.amountAnt+' ANT · '+f.quote.quotes+' '+f.quote.paymentType:K('noQuote','no quote in the receipt')],
+        ['states',(f.stateBoard||[]).map(function(s){return s.status;}).reduce(function(a,s){a[s]=(a[s]||0)+1;return a;},{})],
+        ['source',(f.sources||[]).join(' · ')]].map(function(r){var v=r[1];if(typeof v==='object')v=Object.keys(v).map(function(k){return k+' '+v[k];}).join(' · ');return '<tr><th>'+r[0]+'</th><td>'+esc(v)+'</td></tr>';}).join('')
+      :'<tr><th>file</th><td class="et-no">'+esc(D.fileState==='reading'?K('fileReading','reading the receipt…'):K('fileNo','the receipt could not be read just now; no number is guessed'))+'</td></tr>';
+    $('etStVerify').innerHTML=[K('v1','every door row is an endpoint and content sweep of the page’s code, dated')+' '+(D.measured||''),K('v2','re-read: your browser asks each road with a no-cors reach and a NIP-11 identity; a silent road is a guard, never red'),f&&f.law?f.law:K('v3','the one real file is parsed from its receipt by scripts/build-stack-dataflow.mjs')].map(function(s){return '<li>'+esc(s)+'</li>';}).join('');
+  }
+
+  function keyedCopy(){document.querySelectorAll('#eternal [data-etk]').forEach(function(e){if(e.dataset.etEn==null)e.dataset.etEn=e.textContent;e.textContent=T(e.dataset.etk,e.dataset.etEn);});}
+  function all(){keyedCopy();bee();raver();cy();}
+  /* the one real action: the board's own button; its answer arrives through the board */
+  function reread(){var b=$('reread');if(!b||D.asking)return;b.click();organs();D.asking=true;bee();raver();cy();}
+  function wire(){
+    var ev=$('eternal'); if(!ev) return;
+    ev.addEventListener('click',function(e){
+      var t=e.target;
+      var row=t.closest('.et-b-row[data-tier]'); if(row){var n=+row.getAttribute('data-tier');B.open=B.open===n?null:n;bee();var b=ev.querySelector('.et-b-row[data-tier="'+n+'"]');if(b)b.focus({preventScroll:true});return;}
+      if(t.closest('#etStCheck,#etStPill,#etStCyGo')){reread();return;}
+      var s=t.closest('[data-sel]'); if(s){var v=s.getAttribute('data-sel'),p=v.split(':');var nx=p[0]==='root'?{t:'root'}:p[0]==='rail'?{t:'rail',k:p[1]}:{t:'door',n:+p[1]};
+        R.sel=(R.sel&&JSON.stringify(R.sel)===JSON.stringify(nx))?null:nx;raver();return;}
+      if(t.closest('#etStStill')){R.still=!R.still;raver();return;}
+    });
+    ev.addEventListener('keydown',function(e){
+      if(e.key!=='Enter'&&e.key!==' ')return;
+      var t=e.target.closest('[data-sel]'); if(!t)return;
+      e.preventDefault(); t.dispatchEvent(new MouseEvent('click',{bubbles:true}));
+    });
+    /* mirror the board: whenever it redraws, the three fronts redraw from what it now says */
+    var sched=0, mo=new MutationObserver(function(){if(sched)return;sched=requestAnimationFrame(function(){sched=0;organs();bee();raver();cy();});});
+    ['organBoard','organCount','stamp'].forEach(function(id){var e=$(id);if(e)mo.observe(e,{childList:true,subtree:true,characterData:true,attributes:true,attributeFilter:['class']});});
+    document.addEventListener('blang',all);
+  }
+  readPage(); wire(); all();
+  fetch('stack-dataflow-example.json').then(function(r){return r.ok?r.json():null;}).then(function(j){D.file=j;D.fileState=j?'read':'failed';cy();}).catch(function(){D.fileState='failed';cy();});
+  window.__eternal={data:D,bee:B,raver:R};
+})();
+</script>
 <script src="tour.js?v=42"></script>
 </body>
 </html>

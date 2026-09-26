@@ -1,11 +1,6 @@
 {
  "_law": "footer-audit ratchet: counts may only fall. Regenerate with --write-baseline after a fix.",
  "views": {
-  "design-system.html [cypherpunk]": {
-   "CAPS": 1,
-   "FAINT": 1,
-   "SMALL": 1
-  },
   "forge/orbit.html [bee]": {
    "FAINT": 4,
    "SMALL": 7

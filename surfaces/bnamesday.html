@@ -149,6 +149,176 @@ footer a{padding-block:14px} /* a 44 px tap target that leaves the line rhythm a
    and raver, so no register ever draws reading text a phone cannot hold. */
 body[data-reg="bee"],body[data-reg="raver"]{--fmin:14px}
 </style>
+<link rel="stylesheet" href="skaists.css">
+<style>
+/* ── ETERNAL FRONT (docs/design/eternal) — every value is a skaists token (surfaces/skaists.css,
+   compiled from docs/design/skaists/tokens.json): no hand-picked hex, size or corner. Measured by
+   e2e/skaists-conformance.mjs. One register visible at a time; new bee is the default. Every rule
+   rides #eternal so the page's own element styles (buttons, links, inputs) never leak in. ── */
+#eternal{margin:var(--sk-s2) auto var(--sk-s2);max-width:620px;text-align:start;letter-spacing:0}
+#eternal *{box-sizing:border-box}
+#eternal>.et-r,#eternal>.et-c{display:none}
+body[data-reg="raver"] #eternal>.et-b,body[data-reg="cypherpunk"] #eternal>.et-b{display:none}
+body[data-reg="raver"] #eternal>.et-r{display:block}
+body[data-reg="cypherpunk"] #eternal>.et-c{display:block}
+#eternal [hidden]{display:none!important}
+#eternal :is(button,a,input){margin:0;box-shadow:none;transform:none;text-shadow:none;animation:none}
+#eternal button{appearance:none;background:none;border:0;border-radius:0;padding:0;min-height:0;cursor:pointer;color:inherit;font:inherit;text-align:inherit}
+#eternal button:hover{background:none;color:inherit;transform:none}
+#eternal a{color:var(--sk-link);text-decoration-thickness:1px;text-underline-offset:3px}
+#eternal a:hover{color:var(--sk-link-hover)}
+#eternal svg{display:block}
+#eternal p,#eternal h2,#eternal h3,#eternal ol,#eternal ul{margin:0}
+#eternal h2,#eternal h3{letter-spacing:0}
+#eternal :focus-visible{outline:2px solid var(--sk-focus);outline-offset:3px}
+#eternal .et-center{text-align:center}
+#eternal .et-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.et-archive-h{margin:var(--sk-s5) auto var(--sk-s1);padding-top:var(--sk-s4);border-top:1px solid var(--sk-line);color:var(--sk-ink);max-width:620px;letter-spacing:0;text-align:start}
+body[data-reg="bee"] .et-archive-h{font:400 28px/1.1 var(--sk-font-bee-serif)}
+body[data-reg="raver"] .et-archive-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em}
+body[data-reg="cypherpunk"] .et-archive-h{font:600 15px/1.45 var(--sk-font-mono)}
+
+/* NEW BEE — a calm room: one question, plain rows, one magenta action */
+#eternal .et-b{color:var(--sk-ink);display:flex;flex-direction:column;gap:var(--sk-s3);font:400 16px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-b-mark{font:400 18px/1.2 var(--sk-font-house);color:var(--sk-sovereign)}
+#eternal .et-b-mark b{font-weight:700}
+#eternal .et-b-h{font:400 40px/1.05 var(--sk-font-bee-serif);color:var(--sk-ink)}
+#eternal .et-b-lede{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink-mut);text-wrap:pretty}
+#eternal .et-b-guard{display:flex;align-items:center;gap:var(--sk-s2);min-height:var(--sk-control-min);padding:var(--sk-s1) var(--sk-s3);border-radius:var(--sk-radius);background:var(--sk-guard-wash);color:var(--sk-guard);font:600 15px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-b-guard svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+#eternal .et-b-rows{display:flex;flex-direction:column;background:var(--sk-bg-card);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl);overflow:hidden}
+#eternal .et-b-row{display:flex;align-items:center;justify-content:space-between;gap:var(--sk-s2);width:100%;min-height:var(--sk-control-row);padding:var(--sk-s1) var(--sk-s3);border-bottom:1px solid var(--sk-line-soft);background:transparent;text-align:start;font:500 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink);text-decoration:none}
+#eternal .et-b-row:last-child{border-bottom:0}
+#eternal .et-b-row small{display:flex;align-items:center;gap:var(--sk-s1);font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut);text-align:end}
+#eternal .et-b-row small.out{color:var(--sk-guard)}
+#eternal .et-b-row small.ok{color:var(--sk-verified)}
+#eternal .et-b-row[aria-expanded="true"]{background:var(--sk-sovereign-tint);color:var(--sk-sovereign-strong);font-weight:600}
+#eternal .et-b-row[aria-expanded="true"] small{color:var(--sk-sovereign-strong)}
+#eternal .et-b-row .chev{flex:none;transition:transform .26s}
+#eternal .et-b-row[aria-expanded="true"] .chev{transform:rotate(90deg)}
+#eternal .et-b-person{display:flex;align-items:center;gap:var(--sk-s2);min-height:var(--sk-control-person);padding:var(--sk-s1) var(--sk-s3);border-bottom:1px solid var(--sk-line-soft)}
+#eternal .et-b-person:last-child{border-bottom:0}
+#eternal .et-b-person i{width:40px;height:40px;border-radius:var(--sk-radius-pill);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong);display:flex;align-items:center;justify-content:center;font:600 14px/1.4 var(--sk-font-bee-sans);font-style:normal;flex:none}
+#eternal .et-b-person b{display:block;font:500 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+#eternal .et-b-person span{display:block;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-more{padding:var(--sk-s2) var(--sk-s3);font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut);border-top:1px solid var(--sk-line-soft)}
+#eternal .et-b-act{display:flex;flex-direction:column;gap:var(--sk-s1);margin-top:var(--sk-s1)}
+#eternal .et-b-primary{display:flex;align-items:center;justify-content:center;width:100%;min-height:var(--sk-control-primary);padding:0 var(--sk-s3);border-radius:var(--sk-radius-lg);border:0;background:var(--sk-primary);color:var(--sk-on-primary);font:600 17px/1.2 var(--sk-font-bee-sans);text-align:center;text-decoration:none;cursor:pointer}
+#eternal .et-b-primary:hover{background:var(--sk-primary);color:var(--sk-on-primary)}
+#eternal .et-b-primary:disabled{background:var(--sk-bg-well);color:var(--sk-ink-mut);cursor:not-allowed}
+#eternal .et-b-link{min-height:var(--sk-control-min);display:flex;align-items:center;justify-content:center;border:0;background:transparent;font:600 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-link);text-decoration:none;text-align:center;cursor:pointer}
+#eternal .et-b-link:hover{color:var(--sk-link-hover)}
+#eternal .et-b-foot{text-align:center;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-field{display:grid;gap:var(--sk-s1);font:600 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-field input{width:100%;min-height:var(--sk-control-row);padding:0 var(--sk-s3);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius-md);background:var(--sk-bg-card);color:var(--sk-ink);font:400 16px/1.45 var(--sk-font-bee-sans);outline-offset:3px}
+#eternal .et-b-field input:focus{border-color:var(--sk-ink);box-shadow:none}
+#eternal .et-b-answer{padding:var(--sk-s3);border-radius:var(--sk-radius-xl);background:var(--sk-sovereign-tint);border:1px solid var(--sk-line);display:grid;gap:var(--sk-s1)}
+#eternal .et-b-answer b{font:400 28px/1.1 var(--sk-font-bee-serif);color:var(--sk-sovereign-strong)}
+#eternal .et-b-answer span{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+#eternal .et-b-answer small{font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-answer.out b{color:var(--sk-guard)}
+
+/* RAVER — the data is the art; the gesture is physical; lower case is allowed joy */
+#eternal .et-r{color:var(--sk-ink);font:400 14px/1.4 var(--sk-font-raver-body)}
+#eternal .et-r-top{display:flex;align-items:baseline;justify-content:space-between;gap:var(--sk-s2);flex-wrap:wrap}
+#eternal .et-r-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em;color:var(--sk-ink)}
+#eternal .et-r-hint{font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-art{width:100%;max-width:360px;height:auto;margin:var(--sk-s3) auto var(--sk-s1);filter:drop-shadow(var(--sk-glow-sovereign))}
+#eternal .et-r-art [role="button"]{cursor:pointer}
+#eternal .et-r-art [role="button"]:focus{outline:none}
+#eternal .et-r-art [role="button"]:focus-visible .hit{stroke:var(--sk-ink);stroke-width:2}
+#eternal .et-r-art .cell{transition:opacity .26s,fill .26s}
+#eternal .et-r-legend{display:flex;justify-content:center;flex-wrap:wrap;gap:var(--sk-s1) var(--sk-s3);margin:var(--sk-s1) 0 var(--sk-s2);font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-legend span{display:flex;align-items:center;gap:var(--sk-s1)}
+#eternal .et-r-legend i{width:14px;height:14px;border-radius:var(--sk-radius-pill);flex:none}
+#eternal .et-r-card{display:flex;gap:var(--sk-s2);align-items:center;padding:var(--sk-s2) var(--sk-s3);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl);background:var(--sk-sovereign-tint);min-height:var(--sk-control-person)}
+#eternal .et-r-card .rk{min-width:44px;height:44px;padding:0 var(--sk-s1);border-radius:var(--sk-radius);background:var(--sk-sovereign-strong);color:var(--sk-bg);display:flex;align-items:center;justify-content:center;font:700 15px/1.2 var(--sk-font-raver-display);flex:none}
+#eternal .et-r-card b{display:block;font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink)}
+#eternal .et-r-card span{display:block;font:600 14px/1.4 var(--sk-font-raver-body);color:var(--sk-sovereign-soft)}
+#eternal .et-r-pill{display:flex;align-items:center;justify-content:center;width:100%;min-height:58px;margin-top:var(--sk-s4);padding:0 var(--sk-s3);border:0;border-radius:var(--sk-radius-pill);background:var(--sk-primary);color:var(--sk-on-primary);font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em;text-align:center;text-decoration:none;cursor:pointer}
+#eternal .et-r-pill:hover{background:var(--sk-primary);color:var(--sk-on-primary)}
+#eternal .et-r-ghost{display:flex;align-items:center;justify-content:center;margin:var(--sk-s2) auto 0;min-height:var(--sk-control-min);padding:0 var(--sk-s2);border:0;background:none;color:var(--sk-link);font:400 14px/1.4 var(--sk-font-raver-body);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+#eternal .et-r-note{margin:var(--sk-s2) 0 0;text-align:center;font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-big{margin:var(--sk-s2) 0 var(--sk-s1);text-align:center;font:700 60px/.95 var(--sk-font-raver-display);letter-spacing:-.02em;color:var(--sk-ink)}
+#eternal .et-r-pause{display:flex;align-items:center;justify-content:center;min-width:var(--sk-control-min);min-height:var(--sk-control-min);padding:0 var(--sk-s2);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius-pill);font:600 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink)}
+@media (prefers-reduced-motion:reduce){#eternal .et-r-art .cell,#eternal .et-b-row .chev{transition:none}}
+
+/* CYPHERPUNK — the instrument, complete at first paint; every row a fact you can check */
+#eternal .et-c{font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink)}
+#eternal .et-c-path{font:600 15px/1.45 var(--sk-font-mono);word-break:break-all;color:var(--sk-ink)}
+#eternal .et-c-chips{display:flex;flex-wrap:wrap;gap:var(--sk-s1);margin:var(--sk-s2) 0}
+#eternal .et-c-chips span{padding:2px var(--sk-s1);border:1px solid var(--sk-line);border-radius:4px;background:var(--sk-bg-card);font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink)}
+#eternal .et-c-chips span.on{border-color:var(--sk-guard);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong)}
+#eternal .et-c-chips span.ok{border-color:var(--sk-verified);color:var(--sk-verified)}
+#eternal .et-c-chips span.no{border-color:var(--sk-guard);color:var(--sk-guard)}
+#eternal .et-c-guard{display:flex;justify-content:space-between;align-items:center;gap:var(--sk-s2);flex-wrap:wrap;min-height:var(--sk-control-min);padding:var(--sk-s1) var(--sk-s3);border:1px dashed var(--sk-guard);border-radius:var(--sk-radius-sm);background:var(--sk-guard-wash);color:var(--sk-guard)}
+#eternal .et-c-guard b{font-weight:600;color:var(--sk-sovereign-strong)}
+#eternal .et-c-tab{width:100%;margin:var(--sk-s2) 0 var(--sk-s1);border-collapse:separate;border-spacing:0;border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm);overflow:hidden;background:var(--sk-bg-card)}
+#eternal .et-c-tab th{padding:var(--sk-s1) var(--sk-s2);text-align:start;font:600 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);border-bottom:1px solid var(--sk-line);background:var(--sk-bg-well);position:static}
+#eternal .et-c-tab td{height:var(--sk-control-min);padding:var(--sk-s1) var(--sk-s2);border-bottom:1px solid var(--sk-line);font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink);vertical-align:middle;word-break:break-word}
+#eternal .et-c-tab tr:last-child td{border-bottom:0}
+#eternal .et-c-tab td:first-child{color:var(--sk-guard)}
+#eternal .et-c-tab tr.pick{cursor:pointer}
+#eternal .et-c-tab tr.pick:hover td{background:var(--sk-sovereign-tint)}
+#eternal .et-c-tab tr.names td{height:auto;background:var(--sk-sovereign-tint);color:var(--sk-ink)}
+#eternal .et-c-tab small{display:block;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut)}
+#eternal .et-c-tab .ok{color:var(--sk-verified)}#eternal .et-c-tab .no{color:var(--sk-guard)}#eternal .et-c-tab .part{color:var(--sk-info)}
+#eternal .et-c-h{margin:var(--sk-s4) 0 var(--sk-s2);font:600 15px/1.45 var(--sk-font-mono);color:var(--sk-ink)}
+#eternal .et-c-pipe{list-style:none;margin:0;padding:0;display:grid;gap:var(--sk-s2);counter-reset:p}
+#eternal .et-c-pipe li{display:grid;grid-template-columns:36px 1fr;gap:var(--sk-s1) var(--sk-s2);padding:var(--sk-s2) var(--sk-s3);border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm);background:var(--sk-bg-card);counter-increment:p}
+#eternal .et-c-pipe li::before{content:counter(p,decimal-leading-zero);color:var(--sk-guard);font-weight:600}
+#eternal .et-c-pipe li b{font-weight:600;color:var(--sk-ink)}
+#eternal .et-c-pipe li p{grid-column:2;margin:0;color:var(--sk-ink-soft);word-break:break-word}
+#eternal .et-c-pipe li.done b{color:var(--sk-verified)}
+#eternal .et-c-pipe li.guard{border-style:dashed;border-color:var(--sk-guard)}#eternal .et-c-pipe li.guard b{color:var(--sk-guard)}
+#eternal .et-c-pipe li.now{border-color:var(--sk-ai);box-shadow:inset 0 0 0 1px var(--sk-ai)}#eternal .et-c-pipe li.now b{color:var(--sk-ai)}
+#eternal .et-c-pipe li.todo p{color:var(--sk-ink-mut)}
+#eternal .et-c-primary{display:flex;align-items:center;justify-content:center;width:100%;min-height:52px;margin-top:var(--sk-s3);padding:0 var(--sk-s2);border:0;border-radius:var(--sk-radius-sm);background:var(--sk-primary);color:var(--sk-on-primary);font:600 14px/1.2 var(--sk-font-mono);text-align:center;text-decoration:none;cursor:pointer}
+#eternal .et-c-primary:hover{background:var(--sk-primary);color:var(--sk-on-primary)}
+#eternal .et-c-kv{width:100%;border-collapse:collapse;border:1px solid var(--sk-line);background:var(--sk-bg-card)}
+#eternal .et-c-kv th{width:104px;padding:var(--sk-s2) var(--sk-s2);text-align:start;vertical-align:top;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);border-bottom:1px solid var(--sk-line);background:transparent;position:static}
+#eternal .et-c-kv td{padding:var(--sk-s2) var(--sk-s2);border-bottom:1px solid var(--sk-line);word-break:break-word;font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink)}
+#eternal .et-c-kv .no{color:var(--sk-info)}#eternal .et-c-kv .yes{color:var(--sk-verified)}#eternal .et-c-kv .held{color:var(--sk-guard)}
+#eternal .et-c-verify{margin-top:var(--sk-s3);padding:var(--sk-s3);border-radius:var(--sk-radius-sm);background:var(--sk-bg-card);border:1px solid var(--sk-line)}
+#eternal .et-c-verify-h{font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);margin-bottom:var(--sk-s1)}
+#eternal .et-c-verify ol{margin:0;padding-inline-start:var(--sk-s4);display:grid;gap:var(--sk-s1);color:var(--sk-ink)}
+#eternal .et-c-verify code{font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ai);word-break:break-all;background:none;padding:0}
+#eternal .et-c-row{display:grid;grid-template-columns:1fr 1fr;gap:var(--sk-s2);margin-top:var(--sk-s3)}
+#eternal .et-c-ghost{display:flex;align-items:center;justify-content:center;min-height:52px;padding:0 var(--sk-s1);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius-sm);color:var(--sk-ink);text-decoration:none;text-align:center;font:600 14px/1.2 var(--sk-font-mono);background:transparent}
+#eternal .et-c-ghost:hover{color:var(--sk-ink);background:transparent}
+#eternal .et-c-field{display:flex;gap:var(--sk-s1);margin-top:var(--sk-s2)}
+#eternal .et-c-field input{flex:1;min-width:0;min-height:var(--sk-control-min);padding:0 var(--sk-s2);border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm);background:var(--sk-bg-card);color:var(--sk-ink);font:400 13px/1.45 var(--sk-font-mono)}
+#eternal .et-c-field input:focus{border-color:var(--sk-ai);box-shadow:none}
+#eternal .et-c-field button{min-height:var(--sk-control-min);min-width:var(--sk-control-min);padding:0 var(--sk-s2);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius-sm);font:600 14px/1.2 var(--sk-font-mono);color:var(--sk-ink)}
+/* bNames Day, the front's own pieces */
+#eternal .et-b-mark{font-size:22px}
+#eternal .et-b-names{display:flex;flex-wrap:wrap;gap:var(--sk-s1);padding:var(--sk-s2) var(--sk-s3);border-top:1px solid var(--sk-line-soft)}
+#eternal .et-b-names span{padding:2px var(--sk-s2);border-radius:var(--sk-radius-pill);background:var(--sk-sovereign-tint);font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink)}
+#eternal .et-name{font-family:var(--sk-font-house)}
+#eternal .et-r-art .petal{cursor:pointer}
+#eternal .et-r-art .hit{fill:transparent;stroke:none}
+#eternal .et-r-art text{pointer-events:none}
+#eternal .et-r-art .dnum{font:700 30px/1 var(--sk-font-raver-display);fill:var(--sk-ink)}
+#eternal .et-r-art .dmon{font:600 14px/1.4 var(--sk-font-raver-body);fill:var(--sk-ink-soft)}
+#eternal .et-r-art .bloom{transform-origin:180px 180px;transform-box:view-box}
+@keyframes et-bnd-breathe{0%,100%{transform:rotate(0deg) scale(1)}50%{transform:rotate(3deg) scale(1.02)}}
+#eternal .et-r-art .bloom.alive{animation:et-bnd-breathe 9s ease-in-out infinite}
+#eternal .et-r.still .et-r-art .bloom{animation-play-state:paused}
+@media (prefers-reduced-motion:reduce){#eternal .et-r-art .bloom.alive{animation:none}}
+#eternal .lg-t{background:var(--sk-sovereign)}#eternal .lg-x{background:var(--sk-sovereign-soft)}#eternal .lg-lit{background:var(--sk-you)}
+#eternal .et-r-walk{display:flex;align-items:center;justify-content:center;gap:var(--sk-s2);margin-top:var(--sk-s2)}
+#eternal .et-r-field{display:flex;gap:var(--sk-s1);margin-top:var(--sk-s3)}
+#eternal .et-r-field input{flex:1;min-width:0;min-height:var(--sk-control-min);padding:0 var(--sk-s3);border:1.5px solid var(--sk-sovereign);border-radius:var(--sk-radius-pill);background:var(--sk-bg-card);color:var(--sk-ink);font:600 14px/1.25 var(--sk-font-raver-body)}
+#eternal .et-r-field input:focus{border-color:var(--sk-ink);box-shadow:none}
+
+/* ── THE WHOLE CALENDAR, dressed per register: its colours are already the skaists values (the house
+   test pins them); here each register also takes its own faces from skaists ── */
+body[data-reg="bee"]{font-family:var(--sk-font-bee-sans)}
+body[data-reg="raver"]{font-family:var(--sk-font-raver-body)}
+body[data-reg="cypherpunk"]{font-family:var(--sk-font-mono)}
+body[data-reg="bee"] .b-card h2{font:400 28px/1.1 var(--sk-font-bee-serif);letter-spacing:0}
+body[data-reg="raver"] .r-say{font-family:var(--sk-font-raver-body)}
+</style>
 </head>
 <body data-experience="bnamesday" data-bee-theme="custom" data-reg="bee">
 <script>/* first paint in the reader's own register — no flash of another view */try{var r0=localStorage.getItem('bregister');if(r0==='raver'||r0==='cypherpunk')document.body.setAttribute('data-reg',r0)}catch(e){}</script>
@@ -163,6 +333,70 @@ body[data-reg="bee"],body[data-reg="raver"]{--fmin:14px}
 <div id="loadfail" class="nodata" hidden role="alert" data-i18n="bnd.loadfail"><b>the calendar didn’t load.</b> this page reads <code>bnamesday-data.json</code> from beside itself and could not. nothing is shown rather than something guessed. reload, or open the page from a web address rather than a file.</div>
 
 <main id="main">
+<!-- ETERNAL FRONT (founder blueprint 2026-09-26, docs/design/eternal): three separate products in one
+     surface. ONE data layer — the page's own calendar read (bnamesday-data.json, handed over by the script
+     below once it has read it) and the pure core in bnamesday.js — drives all three, so no front can
+     disagree with the views under it. Nothing here reads anything else, and nothing leaves the device. -->
+<section id="eternal" aria-label="whose day is today">
+
+ <!-- NEW BEE — one question: whose day is it today, and when is mine? -->
+ <div class="et-b">
+  <div class="et-b-mark" aria-label="bNames Day">b<b>N</b>ames <b>D</b>ay</div>
+  <h2 class="et-b-h" data-t="et.bnamesday.b.title">whose day is today?</h2>
+  <p class="et-b-lede" id="etBeeLede">reading the calendar…</p>
+  <div class="et-b-guard"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span data-t="et.bnamesday.b.private">nothing you type here leaves this device.</span></div>
+  <div class="et-b-rows" id="etBeeRows"></div>
+  <label class="et-b-field"><span data-t="et.bnamesday.b.label">a first name</span><input id="etBeeName" autocomplete="off" spellcheck="false" placeholder="Jānis, Līga, Anna…" enterkeyhint="search"></label>
+  <div class="et-b-answer" id="etBeeAnswer" aria-live="polite" hidden></div>
+  <div class="et-b-act">
+   <button type="button" class="et-b-primary" id="etBeeFind" data-t="et.bnamesday.b.find">find its day</button>
+   <button type="button" class="et-b-link" id="etBeeMore" data-t="et.bnamesday.b.more">keep your family's days, below</button>
+   <p class="et-b-foot" id="etBeeFoot">the calendar is the State Language Centre's.</p>
+  </div>
+ </div>
+
+ <!-- RAVER — the day in bloom: every petal a name; tap one, walk the days, find yours -->
+ <div class="et-r">
+  <div class="et-r-top"><h2 class="et-r-h" data-t="et.bnamesday.r.title">in bloom</h2><button type="button" class="et-r-pause" id="etPause" aria-pressed="false">pause</button></div>
+  <svg class="et-r-art" id="etBloom" viewBox="0 0 360 360" role="group" aria-label="the day as a flower: every petal a name"></svg>
+  <div class="et-r-legend"><span><i class="lg-t"></i>the calendar</span><span><i class="lg-x"></i>the long list</span><span><i class="lg-lit"></i>lit</span></div>
+  <div class="et-r-walk"><button type="button" class="et-r-pause" id="etPrev" aria-label="the day before">‹</button><button type="button" class="et-r-pause" id="etToday">today</button><button type="button" class="et-r-pause" id="etNext" aria-label="the day after">›</button></div>
+  <div class="et-r-card" id="etRaverCard" aria-live="polite"><span class="rk">⬡</span><div><b>reading the calendar…</b></div></div>
+  <div class="et-r-field"><input id="etRaverName" autocomplete="off" spellcheck="false" aria-label="a name" placeholder="your name"></div>
+  <button type="button" class="et-r-pill" id="etRaverFind">bloom its day</button>
+  <p class="et-r-note" id="etRaverNote">a petal is a name · its day is its bloom</p>
+ </div>
+
+ <!-- CYPHERPUNK — the payload, the query, the rule, the receipt -->
+ <div class="et-c">
+  <div class="et-c-path" id="etPath">bnamesday-data.json#/days</div>
+  <div class="et-c-chips" id="etChips"></div>
+  <div class="et-c-guard">private lane = localStorage only <b>0 third-party requests · 0 cookies</b></div>
+  <h3 class="et-c-h" id="etDayH">day</h3>
+  <table class="et-c-tab"><thead><tr><th>list</th><th>names</th><th>n</th></tr></thead><tbody id="etDay"></tbody></table>
+  <table class="et-c-kv" id="etThai"></table>
+  <div class="et-c-field"><input id="etCyName" autocomplete="off" spellcheck="false" aria-label="findName query" placeholder="query · diacritics folded"></div>
+  <button type="button" class="et-c-primary" id="etCyFind">findName(ix, query)</button>
+  <table class="et-c-tab" id="etHits" hidden><thead><tr><th>name</th><th>day</th><th>list</th></tr></thead><tbody></tbody></table>
+  <h3 class="et-c-h" data-t="et.bnamesday.c.pipe">data flow · public lane</h3>
+  <ol class="et-c-pipe" id="etPipe"></ol>
+  <h3 class="et-c-h" data-t="et.bnamesday.c.receipt">receipt</h3>
+  <table class="et-c-kv" id="etReceipt"></table>
+  <div class="et-c-verify">
+   <div class="et-c-verify-h" data-t="et.bnamesday.c.verify">verify · no trust in this page needed</div>
+   <ol>
+    <li>download the two CSV files from data.gov.lv and run <code>sha256sum</code>: compare with the receipt</li>
+    <li><code>node --test e2e/bnamesday.test.mjs</code> holds the payload to the Centre's own numbers</li>
+    <li>open the network panel: two same-origin reads, and nothing else</li>
+   </ol>
+  </div>
+  <div class="et-c-row">
+   <a class="et-c-ghost" href="https://data.gov.lv/dati/lv/dataset/latviesu-tradicionalais-un-paplasinatais-kalendarvardu-saraksts" target="_blank" rel="noopener noreferrer">the source · new tab</a>
+   <a class="et-c-ghost" href="https://github.com/beehive-nature/beehive-nature/blob/main/surfaces/bnamesday.js" target="_blank" rel="noopener noreferrer">fork the template · new tab</a>
+  </div>
+ </div>
+</section>
+<h2 class="et-archive-h" id="etArchive" data-t="et.bnamesday.whole">the whole calendar</h2>
 <!-- ══════════════ NEW BEE ══════════════
      THE WORDS LAW (skaists · translation): every sentence below is a key in the estate's one dictionary
      (lang-corpus.json, bnd.*). the english here IS the corpus's `en` cell — e2e/bnamesday.test.mjs holds them equal.
@@ -384,6 +618,8 @@ const dl=(name,mime,text)=>{const a=document.createElement('a');a.href=URL.creat
 try{const r=await fetch('bnamesday-data.json',{cache:'no-cache'});if(!r.ok)throw new Error(r.status);S.data=await r.json();if(S.data.v!==1||!S.data.days)throw new Error('payload');}
 catch(e){$('#loadfail').hidden=false;$('#main').hidden=true;return;}
 S.ix=B.buildIndex(S.data);
+/* the eternal front above reads this same calendar (never a second read of its own) */
+window.__bndCore={data:S.data,ix:S.ix};try{document.dispatchEvent(new Event('bnd:ready'))}catch(e){}
 /* the sky is a second payload; if it fails the calendar still stands and the page says what is missing */
 try{const r2=await fetch('bnamesday-sky.json',{cache:'no-cache'});if(!r2.ok)throw new Error(r2.status);window.bNamesSky.load(await r2.json());S.skyOK=window.bNamesSky.wheelIsBinary()}catch(e){S.skyOK=false}
 try{const raw=localStorage.getItem(KEY);if(raw)S.people=B.cleanPeople(JSON.parse(raw)).people;}catch(e){S.people=[];}
@@ -706,6 +942,142 @@ try{const dl0=$('#tzlist');(Intl.supportedValuesOf?Intl.supportedValuesOf('timeZ
 $$('input[name=tz]').forEach(i=>{if(!i.value)i.value=HOMETZ});
 buildWheel();runQuery({q:'',list:'t',end:'',month:TKEY.slice(0,2)});$$('form[data-form="cq"]').forEach(f=>{f.list.value='t';f.month.value=TKEY.slice(0,2)});
 document.addEventListener('bregister',render);document.addEventListener('blang',fillSlots);render();
+})();
+</script>
+<script>
+/* ETERNAL FRONT — one data layer, three renderers (docs/design/eternal). The calendar is the one the
+   page script already read (window.__bndCore, handed over on 'bnd:ready'); every answer comes from the
+   pure core (window.bNamesDay: findName, thaiDay, nextOccurrence), exactly as the views below use it.
+   This script reads nothing of its own and stores nothing. */
+(function(){
+  'use strict';
+  var $=function(id){return document.getElementById(id);};
+  var T=function(k,f){var t=window.BNRLanguage&&window.BNRLanguage.text;return t?t(k,f):f;};
+  var esc=function(v){return String(v==null?'':v).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});};
+  var B=window.bNamesDay, now=new Date();
+  var TODAY={y:now.getFullYear(),m:now.getMonth()+1,d:now.getDate()};
+  var MON=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  var D={state:'reading',today:null,key:null,sel:null,t:[],x:[],thai:null,note:null,meta:null,query:{q:'',exact:[],near:[]}};
+  var R={lit:null,still:false};
+  var label=function(k){return (+k.slice(3))+' '+MON[+k.slice(0,2)-1];};
+  var inDays=function(n){return n===0?T('et.bnamesday.today','today'):n===1?T('et.bnamesday.tomorrow','tomorrow'):T('et.bnamesday.inDays','in {n} days').replace('{n}',n);};
+  function day(k){
+    var C=window.__bndCore, dd=C.data.days[k]||{t:[],x:[]}; D.sel=k; D.t=dd.t.slice(); D.x=dd.x.slice();
+    D.note=C.data.notes&&C.data.notes[k]?C.data.notes[k]:null;
+    var m=+k.slice(0,2), d=+k.slice(3);
+    D.thai=(m===2&&d===29&&!B.isLeap(TODAY.y))?null:(function(t){return {index:t.index,id:t.day.id,en:t.day.en,colorName:t.day.colorName,planet:t.day.planet.en,glyph:t.day.planet.glyph,th:t.day.th};})(B.thaiDay(TODAY.y,m,d));
+    D.next=B.nextOccurrence(k,TODAY).inDays;
+  }
+  function find(q){
+    var C=window.__bndCore; if(!C||!C.ix) return D.query;
+    var r=B.findName(C.ix,q), pick=function(e){return {name:e.name,key:e.key,list:e.list,next:B.nextOccurrence(e.key,TODAY).inDays};};
+    D.query={q:q,exact:r.exact.map(pick),near:r.near.map(pick)}; return D.query;
+  }
+  function boot(){
+    var C=window.__bndCore; if(!C||!C.data) return;
+    D.state='ready'; D.today=TODAY; D.key=B.keyOf(TODAY.m,TODAY.d);
+    var M=C.data._meta||{}; D.meta={publisher:M.publisher,licence:M.licence,retrieved:M.retrieved,counts:M.counts,caveat:M.caveat,sha:M.source_files||{}};
+    day(D.key); all();
+  }
+  function words(){document.querySelectorAll('#eternal [data-t],#etArchive[data-t]').forEach(function(e){if(!e.dataset.en)e.dataset.en=e.textContent;e.textContent=T(e.dataset.t,e.dataset.en);});}
+  var listWord=function(l){return l==='t'?T('et.bnamesday.t','the calendar'):T('et.bnamesday.x','the long list');};
+  var thaiLine=function(){return D.thai?T('et.bnamesday.thai','in Thailand, {day}: {colour}, {planet} {glyph}').replace('{day}',D.thai.en).replace('{colour}',D.thai.colorName).replace('{planet}',D.thai.planet).replace('{glyph}',D.thai.glyph):T('et.bnamesday.noThai','29 February is not in this year');};
+
+  /* ── NEW BEE ── */
+  function answer(el){
+    var q=D.query; if(!q.q){el.hidden=true;return;}
+    el.hidden=false;
+    if(q.exact.length){var e=q.exact[0];el.className='et-b-answer';
+      el.innerHTML='<b>'+esc(e.name)+'</b><span>'+esc(T('et.bnamesday.b.dayIs','{name}’s day is {date}, {when}.').replace('{name}',e.name).replace('{date}',label(e.key)).replace('{when}',inDays(e.next)))+'</span><small>'+esc(listWord(e.list)+(q.exact.length>1?' · '+T('et.bnamesday.b.alsoOn','also on {dates}').replace('{dates}',q.exact.slice(1).map(function(x){return label(x.key);}).join(', ')):''))+'</small>';}
+    else{el.className='et-b-answer out';
+      el.innerHTML='<b>'+esc(T('et.bnamesday.b.may','22 May'))+'</b><span>'+esc(T('et.bnamesday.b.none','no calendar has written {name} down, so 22 May is its day: the day for every unusual name.').replace('{name}',q.q))+'</span>'+(q.near.length?'<small>'+esc(T('et.bnamesday.b.near','close: {names}').replace('{names}',q.near.slice(0,4).map(function(x){return x.name+' '+label(x.key);}).join(' · ')))+'</small>':'');}
+  }
+  function bee(){
+    if(D.state!=='ready'){$('etBeeRows').innerHTML='';return;}
+    $('etBeeLede').textContent=T('et.bnamesday.b.lede','{date}. in Latvia, a name has a day, and today these names have theirs.').replace('{date}',label(D.key));
+    var h=D.t.map(function(n){return '<div class="et-b-person"><i>'+esc(n.slice(0,2))+'</i><div><b class="et-name">'+esc(n)+'</b><span>'+esc(listWord('t'))+'</span></div></div>';}).join('');
+    if(!D.t.length) h='<div class="et-b-row"><span>'+esc(D.note?D.note.en||D.note.lv:T('et.bnamesday.b.empty','no names have this day'))+'</span></div>';
+    if(D.x.length) h+='<button type="button" class="et-b-row" id="etBeeX" aria-expanded="false"><span>'+esc(T('et.bnamesday.b.xN','the long list adds {n} more').replace('{n}',D.x.length))+'</span><small><svg class="chev" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2"/></svg></small></button><div class="et-b-names" id="etBeeXList" hidden>'+D.x.map(function(n){return '<span class="et-name">'+esc(n)+'</span>';}).join('')+'</div>';
+    h+='<div class="et-b-row"><span>'+esc(thaiLine())+'</span></div>';
+    $('etBeeRows').innerHTML=h;
+    answer($('etBeeAnswer'));
+    $('etBeeFoot').textContent=T('et.bnamesday.b.foot','the calendar is the State Language Centre’s, read on {date}.').replace('{date}',(function(r){var p=String(r||'').split('-');return p.length===3?(+p[2])+' '+MON[+p[1]-1]+' '+p[0]:T('et.bnamesday.undated','a date not recorded');})(D.meta.retrieved));
+  }
+
+  /* ── RAVER: the day in bloom ── */
+  function bloom(){
+    var svg=$('etBloom'); if(D.state!=='ready'){svg.innerHTML='';return;}
+    var tok=function(n){return getComputedStyle(document.body).getPropertyValue('--sk-'+n).trim();};
+    var h='<g class="bloom'+(R.still?'':' alive')+'">', nt=D.t.length, nx=D.x.length;
+    D.x.forEach(function(n,i){var a=-Math.PI/2+2*Math.PI*(i+.5)/nx, x=180+140*Math.cos(a), y=180+140*Math.sin(a), lit=R.lit===n;
+      h+='<g class="petal" role="button" tabindex="0" data-name="'+esc(n)+'" aria-pressed="'+lit+'" aria-label="'+esc(n+', '+listWord('x'))+'"><circle class="hit" cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="22"/><circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="'+(lit?15:11)+'" fill="'+tok(lit?'you':'sovereign-soft')+'" opacity="'+(R.lit&&!lit?.6:1)+'"/></g>';});
+    D.t.forEach(function(n,i){var deg=-90+360*i/Math.max(nt,1), lit=R.lit===n;
+      h+='<g class="petal" role="button" tabindex="0" data-name="'+esc(n)+'" aria-pressed="'+lit+'" aria-label="'+esc(n+', '+listWord('t'))+'" transform="rotate('+deg.toFixed(1)+' 180 180)"><rect class="hit" x="200" y="152" width="100" height="56"/><ellipse cx="248" cy="180" rx="50" ry="'+(nt>4?18:24)+'" fill="'+tok(lit?'you':'sovereign')+'" opacity="'+(R.lit&&!lit?.6:1)+'"/></g>';});
+    h+='</g><circle cx="180" cy="180" r="46" fill="'+tok('bg-card')+'" stroke="'+tok('sovereign-soft')+'" stroke-dasharray="3 4"/>';
+    h+='<text class="dnum" x="180" y="184" text-anchor="middle">'+(+D.sel.slice(3))+'</text><text class="dmon" x="180" y="206" text-anchor="middle">'+esc(MON[+D.sel.slice(0,2)-1].toLowerCase())+'</text>';
+    svg.innerHTML=h;
+  }
+  function raver(){
+    bloom(); if(D.state!=='ready') return;
+    var n=R.lit, card=$('etRaverCard'), inT=D.t.indexOf(n)>=0;
+    if(n&&(inT||D.x.indexOf(n)>=0)) card.innerHTML='<span class="rk">'+esc(n.slice(0,2))+'</span><div><b class="et-name">'+esc(n)+'</b><span>'+esc(label(D.sel)+' · '+listWord(inT?'t':'x')+' · '+inDays(D.next))+'</span></div>';
+    else card.innerHTML='<span class="rk">'+(+D.sel.slice(3))+'</span><div><b>'+esc(T('et.bnamesday.r.count','{t} on the calendar · {x} on the long list').replace('{t}',D.t.length).replace('{x}',D.x.length))+'</b><span>'+esc(label(D.sel)+' · '+inDays(D.next)+' · '+thaiLine())+'</span></div>';
+    $('etToday').hidden=D.sel===D.key;
+    $('etPause').textContent=R.still?T('et.bnamesday.r.play','play'):T('et.bnamesday.r.pause','pause');
+    $('etPause').setAttribute('aria-pressed',String(R.still));
+    document.querySelector('#eternal .et-r').classList.toggle('still',R.still);
+  }
+
+  /* ── CYPHERPUNK ── */
+  function cy(){
+    if(D.state!=='ready') return;
+    $('etPath').textContent='bnamesday-data.json#/days/'+D.sel;
+    $('etChips').innerHTML='<span class="on">v1</span><span class="ok">'+esc(D.meta.licence)+'</span><span>days '+esc(D.meta.counts.days)+'</span><span>reads 2 · same origin</span>';
+    $('etDayH').textContent='day '+D.sel+' · '+label(D.sel)+' · in '+D.next+' d';
+    $('etDay').innerHTML='<tr><td>t</td><td>'+(D.t.map(esc).join(' · ')||'<small>no names on this day</small>')+'</td><td>'+D.t.length+'</td></tr><tr><td>x</td><td>'+(D.x.map(esc).join(' · ')||'<small>none</small>')+'</td><td>'+D.x.length+'</td></tr>';
+    $('etThai').innerHTML=D.thai?[['thaiDay()','y '+TODAY.y+' · index '+D.thai.index+' · '+esc(D.thai.id)],['colour',esc(D.thai.colorName)],['planet',esc(D.thai.planet)+' '+esc(D.thai.glyph)],['rule','the day turns at 06:00 · Wed 18:00 → Thu 06:00 = Rahu · a date alone leaves dawn open']].map(function(r){return '<tr><th>'+r[0]+'</th><td>'+r[1]+'</td></tr>';}).join(''):'<tr><th>thaiDay()</th><td>29 February: not in '+TODAY.y+'</td></tr>';
+    var q=D.query, hits=$('etHits');
+    hits.hidden=!q.q;
+    if(q.q) hits.querySelector('tbody').innerHTML=(q.exact.length?q.exact:q.near).map(function(e){return '<tr><td>'+esc(e.name)+'</td><td>'+e.key+' · in '+e.next+' d</td><td>'+(e.list==='t'?'<span class="ok">t</span>':'<span class="part">x</span>')+'</td></tr>';}).join('')||'<tr><td colspan="3">no match · fold("'+esc(q.q)+'") · rule: 05-22 holds every unwritten name</td></tr>';
+    var sha=function(k){var v=D.meta.sha[k]||'';return v?v.slice(0,12)+'…':'not recorded';};
+    var steps=[['data.gov.lv · 2 × CSV','traditional + extended lists · CC0 · sha256 '+sha('traditional_sha256_PUBLIC-CONSTANT'),'done'],
+      ['build-bnamesday-data','asserts the counts, then writes · '+D.meta.counts.traditional+' t · '+D.meta.counts.extended_only+' x','done'],
+      ['bnamesday-data.json · v1','366 days · read once, same origin','done'],
+      ['caveat · additions from 2026-01-01','not in the portal files, so not here · said, not hidden','guard'],
+      ['buildIndex · findName(fold)','diacritics folded · exact first, then the same opening',q.q?'done':'todo'],
+      ['your people · localStorage only','never on the wire · leaves only as a file you save','todo']];
+    var now=steps.findIndex(function(s){return s[2]==='todo';});
+    $('etPipe').innerHTML=steps.map(function(s,i){return '<li class="'+s[2]+(i===now?' now':'')+'"><b>'+esc(s[0])+'</b><p>'+esc(s[1])+'</p></li>';}).join('');
+    $('etReceipt').innerHTML=[['publisher',esc(D.meta.publisher)],['licence',esc(D.meta.licence)],['retrieved',esc(D.meta.retrieved)],
+      ['counts',D.meta.counts.traditional+' traditional · '+D.meta.counts.extended_only+' extended'],['sha256 t',esc(D.meta.sha['traditional_sha256_PUBLIC-CONSTANT']||'not recorded')],
+      ['sha256 x',esc(D.meta.sha['extended_sha256_PUBLIC-CONSTANT']||'not recorded')],['caveat','<span class="held">'+esc(D.meta.caveat)+'</span>']].map(function(r){return '<tr><th>'+r[0]+'</th><td>'+r[1]+'</td></tr>';}).join('');
+  }
+  function all(){words();bee();raver();cy();}
+  function go(q){q=String(q||'').trim();if(!q)return;find(q);var e=D.query.exact[0];if(e){day(e.key);R.lit=e.name;}all();return D.query;}
+  function walk(n){var s=(B.seatOf(D.sel)+n+366)%366;day(B.keyOfSeat(s));R.lit=null;all();}
+  function wire(){
+    var ev=$('eternal');
+    ev.addEventListener('click',function(e){
+      var p=e.target.closest('#etBloom .petal'); if(p){var n=p.getAttribute('data-name');R.lit=R.lit===n?null:n;raver();return;}
+      if(e.target.closest('#etBeeX')){var b=$('etBeeX'),o=b.getAttribute('aria-expanded')!=='true';b.setAttribute('aria-expanded',String(o));$('etBeeXList').hidden=!o;}
+    });
+    ev.addEventListener('keydown',function(e){if(e.key!=='Enter'&&e.key!==' ')return;var t=e.target.closest('#etBloom .petal');if(!t)return;e.preventDefault();t.dispatchEvent(new MouseEvent('click',{bubbles:true}));});
+    $('etBeeFind').addEventListener('click',function(){go($('etBeeName').value);});
+    $('etBeeName').addEventListener('keydown',function(e){if(e.key==='Enter')go(this.value);});
+    $('etRaverFind').addEventListener('click',function(){go($('etRaverName').value);});
+    $('etRaverName').addEventListener('keydown',function(e){if(e.key==='Enter')go(this.value);});
+    $('etCyFind').addEventListener('click',function(){go($('etCyName').value);});
+    $('etCyName').addEventListener('keydown',function(e){if(e.key==='Enter')go(this.value);});
+    $('etPrev').addEventListener('click',function(){walk(-1);});$('etNext').addEventListener('click',function(){walk(1);});
+    $('etToday').addEventListener('click',function(){day(D.key);R.lit=null;all();});
+    $('etPause').addEventListener('click',function(){R.still=!R.still;raver();});
+    $('etBeeMore').addEventListener('click',function(){var h=$('b-h3');if(h){h.scrollIntoView({block:'start'});}});
+    document.addEventListener('bnd:ready',boot);
+    document.addEventListener('blang',all);
+    document.addEventListener('bregister',function(){setTimeout(raver,0);});
+  }
+  wire(); words(); boot();
+  window.__eternal={data:D,raver:R,find:go};
 })();
 </script>
 <script src="tour.js?v=42"></script>

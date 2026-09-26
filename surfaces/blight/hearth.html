@@ -37,9 +37,309 @@ header p{color:var(--dim);font-size:14px;margin-top:6px}
      just above the tour bar (anchored on the bar's published --tbar-h), so the
      page end reserves the bar plus the chip and nothing ever ends beneath either. */
   body{padding-bottom:calc(var(--tbar-h,50px) + 24px)!important}
+
+/* ── ETERNAL FRONT (docs/design/eternal) — three products in one surface. Every value is a skaists
+   token (../skaists.css, compiled from docs/design/skaists/tokens.json): no hand-picked hex, size or
+   corner (sizes carry a fallback for servers that never deliver the stylesheet). Measured by
+   e2e/skaists-conformance.mjs. One register visible at a time; new bee is the default. Every class
+   is et- prefixed and every rule is scoped to #eternal, so the page's own bare rules never reach in. ── */
+#eternal{box-sizing:border-box;position:relative;z-index:6;width:100%;max-width:600px;margin:0 auto var(--sk-s2,12px);padding:var(--sk-s3,18px) var(--sk-s3,18px) 0;text-align:left;letter-spacing:normal;text-transform:none;background:none;border:0;font-weight:400}
+#eternal *,#eternal *::before,#eternal *::after{box-sizing:border-box}
+#eternal>.et-r,#eternal>.et-c{display:none}
+body[data-reg="raver"] #eternal>.et-b,body[data-reg="cypherpunk"] #eternal>.et-b{display:none}
+body[data-reg="raver"] #eternal>.et-r{display:block}
+body[data-reg="cypherpunk"] #eternal>.et-c{display:block}
+#eternal [hidden]{display:none!important}
+#eternal button{margin:0;color:inherit;text-transform:none;letter-spacing:normal;min-width:0;box-shadow:none;-webkit-tap-highlight-color:transparent}
+#eternal svg{display:block;max-width:100%}
+#eternal a{text-decoration:none}
+#eternal :focus-visible{outline:2px solid var(--sk-focus);outline-offset:3px}
+#eternal h2,#eternal h3,#eternal p,#eternal ol,#eternal ul,#eternal table,#eternal figure{margin:0;padding:0;border:0;background:none;text-transform:none;letter-spacing:normal;text-shadow:none}
+#eternal table{border-collapse:separate;border-spacing:0;width:100%}
+#eternal th,#eternal td{border:0;padding:0;vertical-align:top;background:none;width:auto;text-align:left}
+#etArchive.et-archive-h{position:relative;z-index:6;box-sizing:border-box;max-width:600px;margin:var(--sk-s5,36px) auto var(--sk-s2,12px);padding:var(--sk-s4,24px) var(--sk-s3,18px) 0;border:0;border-top:1px solid var(--sk-line);color:var(--sk-ink);text-align:left;text-transform:none;letter-spacing:normal;background:none;text-shadow:none}
+body[data-reg="bee"] #etArchive.et-archive-h{font:400 28px/1.1 var(--sk-font-bee-serif)}
+body[data-reg="raver"] #etArchive.et-archive-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em}
+body[data-reg="cypherpunk"] #etArchive.et-archive-h{font:600 15px/1.45 var(--sk-font-mono)}
+
+/* NEW BEE — a calm room: plain rows, one reassurance, one magenta action, a link, a footnote */
+#eternal .et-b{display:flex;flex-direction:column;gap:var(--sk-s3,18px);color:var(--sk-ink);font:400 16px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-b-mark{font:400 18px/1.2 var(--sk-font-house);color:var(--sk-sovereign)}
+#eternal .et-b-h{font:400 40px/1.05 var(--sk-font-bee-serif);color:var(--sk-ink)}
+#eternal .et-b-lede{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink-mut);text-wrap:pretty}
+#eternal .et-b-guard{display:flex;align-items:center;gap:var(--sk-s2,12px);min-height:var(--sk-control-min,44px);padding:var(--sk-s1,6px) var(--sk-s3,18px);border-radius:var(--sk-radius,12px);background:var(--sk-guard-wash);color:var(--sk-guard);font:600 15px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-b-ic{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+#eternal .et-b-rows{display:flex;flex-direction:column;background:var(--sk-bg-card);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl,18px);overflow:hidden}
+#eternal .et-b-row{display:flex;align-items:center;justify-content:space-between;gap:var(--sk-s2,12px);width:100%;min-height:var(--sk-control-row,52px);padding:var(--sk-s1,6px) var(--sk-s3,18px);border:0;border-bottom:1px solid var(--sk-line-soft);border-radius:0;background:transparent;text-align:left;font:500 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+#eternal .et-b-row:last-child{border-bottom:0}
+#eternal button.et-b-row{cursor:pointer}
+#eternal button.et-b-row:hover{background:var(--sk-sovereign-tint);color:var(--sk-ink)}
+#eternal .et-b-row>span{flex:1 1 auto;min-width:0;overflow-wrap:anywhere}
+#eternal .et-b-row small{display:flex;align-items:center;justify-content:flex-end;gap:var(--sk-s1,6px);flex:none;max-width:52%;text-align:right;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-row small.et-out{color:var(--sk-guard)}
+#eternal .et-b-row small.et-ok{color:var(--sk-verified)}
+#eternal .et-b-row[aria-expanded="true"],#eternal .et-b-row[aria-pressed="true"]{background:var(--sk-sovereign-tint);color:var(--sk-sovereign-strong);font-weight:600}
+#eternal .et-b-row[aria-expanded="true"] small,#eternal .et-b-row[aria-pressed="true"] small{color:var(--sk-sovereign-strong)}
+#eternal .et-chev{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;flex:none;transition:transform var(--dur,.26s)}
+#eternal .et-b-row[aria-expanded="true"] .et-chev{transform:rotate(90deg)}
+#eternal .et-b-open{display:flex;flex-direction:column;gap:var(--sk-s1,6px);padding:var(--sk-s2,12px) var(--sk-s3,18px);background:var(--sk-sovereign-tint);border-bottom:1px solid var(--sk-line-soft)}
+#eternal .et-b-open div{font:400 15px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+#eternal .et-b-open div b{font-weight:600}
+#eternal .et-b-person{display:flex;align-items:center;gap:var(--sk-s2,12px);min-height:var(--sk-control-person,60px);padding:var(--sk-s1,6px) var(--sk-s3,18px);border-bottom:1px solid var(--sk-line-soft)}
+#eternal .et-b-person:last-child{border-bottom:0}
+#eternal .et-b-person i{width:40px;height:40px;border-radius:var(--sk-radius-pill,999px);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong);display:flex;align-items:center;justify-content:center;font:600 14px/1.4 var(--sk-font-bee-sans);font-style:normal;flex:none}
+#eternal .et-b-person i.et-dash{background:transparent;border:1.5px dashed var(--sk-ink-dim);color:var(--sk-ink-mut)}
+#eternal .et-b-person i.et-ok{background:var(--sk-verified-wash);color:var(--sk-verified)}
+#eternal .et-b-person i.et-no{background:var(--sk-guard-wash);color:var(--sk-guard)}
+#eternal .et-b-person b{display:block;font:500 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink);overflow-wrap:anywhere}
+#eternal .et-b-person span{display:block;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut);overflow-wrap:anywhere}
+#eternal .et-b-note{padding:var(--sk-s2,12px) var(--sk-s3,18px);font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-act{display:flex;flex-direction:column;gap:var(--sk-s1,6px);margin-top:var(--sk-s1,6px)}
+#eternal .et-b-primary{display:flex;align-items:center;justify-content:center;width:100%;min-height:var(--sk-control-primary,54px);padding:var(--sk-s1,6px) var(--sk-s3,18px);border:0;border-radius:var(--sk-radius-lg,16px);background:var(--sk-primary);color:var(--sk-on-primary)!important;font:600 17px/1.2 var(--sk-font-bee-sans)!important;text-align:center;cursor:pointer}
+#eternal .et-b-primary:hover{background:var(--sk-primary);color:var(--sk-on-primary)!important;filter:none}
+#eternal .et-b-primary:disabled{background:var(--sk-bg-well);color:var(--sk-ink-mut)!important;cursor:not-allowed}
+#eternal .et-b-link{display:flex;align-items:center;justify-content:center;width:100%;min-height:var(--sk-control-min,44px);padding:0 var(--sk-s2,12px);border:0;border-radius:var(--sk-radius,12px);background:transparent;font:600 16px/1.45 var(--sk-font-bee-sans)!important;color:var(--sk-link)!important;cursor:pointer;text-align:center}
+#eternal .et-b-link:hover{background:transparent;color:var(--sk-link-hover)!important}
+#eternal .et-b-foot{text-align:center;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-card{display:flex;flex-direction:column;gap:var(--sk-s1,6px);padding:var(--sk-s3,18px);background:var(--sk-bg-card);border:1px dashed var(--sk-ink-dim);border-radius:var(--sk-radius-xl,18px)}
+#eternal .et-b-card.et-ok{border:1px solid var(--sk-line);background:var(--sk-verified-wash)}
+#eternal .et-b-card.et-no{border:1px dashed var(--sk-guard);background:var(--sk-guard-wash)}
+#eternal .et-b-card.et-fam{border:1px solid var(--sk-line);background:var(--sk-sovereign-tint)}
+#eternal .et-b-card h3{font:400 28px/1.1 var(--sk-font-bee-serif);color:var(--sk-ink)}
+#eternal .et-b-card div{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-card.et-no div,#eternal .et-b-card.et-ok div,#eternal .et-b-card.et-fam div{color:var(--sk-ink)}
+#eternal .et-b-fig{font:400 32px/1 var(--sk-font-bee-serif);color:var(--sk-ink)}
+
+/* RAVER — the data is the art; lowercase is allowed joy; the numbers never change */
+#eternal .et-r{color:var(--sk-ink);font:400 14px/1.4 var(--sk-font-raver-body)}
+#eternal .et-r-top{display:flex;align-items:baseline;justify-content:space-between;gap:var(--sk-s2,12px);flex-wrap:wrap}
+#eternal .et-r-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em;color:var(--sk-ink)}
+#eternal .et-r-hint{font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-art{position:relative;width:100%;max-width:360px;margin:var(--sk-s3,18px) auto var(--sk-s2,12px)}
+#eternal .et-r-art>svg{width:100%;height:auto;filter:drop-shadow(var(--sk-glow-sovereign))}
+#eternal .et-r-art [role="button"]{cursor:pointer}
+#eternal .et-r-art [role="button"]:focus{outline:none}
+#eternal .et-r-art [role="button"]:focus-visible .et-hit{stroke:var(--sk-ink);stroke-width:1.5;stroke-dasharray:3 4}
+#eternal .et-hit{fill:transparent;stroke:none}
+#eternal .et-r-mid{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;text-align:center;pointer-events:none;max-width:40%}
+#eternal .et-r-mid b{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em;color:var(--sk-ink)}
+#eternal .et-r-mid span{font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-legend{display:flex;flex-wrap:wrap;justify-content:center;gap:var(--sk-s1,6px) var(--sk-s3,18px);margin:0 0 var(--sk-s3,18px)}
+#eternal .et-r-legend span{display:inline-flex;align-items:center;gap:var(--sk-s1,6px);font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-legend i{width:14px;height:14px;border-radius:var(--sk-radius-pill,999px);flex:none}
+#eternal .et-r-card{display:flex;gap:var(--sk-s2,12px);align-items:flex-start;padding:var(--sk-s2,12px) var(--sk-s3,18px);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl,18px);background:var(--sk-sovereign-tint);min-height:var(--sk-control-person,60px)}
+#eternal .et-r-card .et-rk{min-width:44px;height:44px;padding:0 var(--sk-s1,6px);border-radius:var(--sk-radius,12px);background:var(--sk-sovereign-strong);color:var(--sk-bg);display:flex;align-items:center;justify-content:center;font:700 15px/1.2 var(--sk-font-raver-display);flex:none}
+#eternal .et-r-card .et-rk.et-no{background:var(--sk-guard-wash);color:var(--sk-guard);border:1.5px dashed var(--sk-guard)}
+#eternal .et-r-card .et-rk.et-ok{background:var(--sk-biomass);color:var(--sk-bg)}
+#eternal .et-r-card>div{min-width:0}
+#eternal .et-r-card b{display:block;font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink);overflow-wrap:anywhere}
+#eternal .et-r-card span{display:block;margin-top:var(--sk-s1,6px);font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft);overflow-wrap:anywhere}
+#eternal .et-r-sub{margin:var(--sk-s4,24px) 0 var(--sk-s2,12px);font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em;color:var(--sk-ink)}
+#eternal .et-r-chips{display:flex;flex-wrap:wrap;justify-content:center;gap:var(--sk-s1,6px);margin:0 0 var(--sk-s3,18px)}
+#eternal .et-r-chip{display:inline-flex;align-items:center;justify-content:center;gap:var(--sk-s1,6px);min-height:var(--sk-control-min,44px);min-width:var(--sk-control-min,44px);padding:0 var(--sk-s2,12px);border-radius:var(--sk-radius-pill,999px);border:1px solid var(--sk-line);background:var(--sk-bg-card);color:var(--sk-ink-soft)!important;font:600 14px/1.25 var(--sk-font-raver-body)!important;cursor:pointer}
+#eternal .et-r-chip:hover{background:var(--sk-bg-card);color:var(--sk-ink)!important}
+#eternal .et-r-chip[aria-pressed="true"]{border-color:var(--sk-you);color:var(--sk-ink)!important;box-shadow:var(--sk-glow-sovereign)}
+#eternal .et-r-chip i{width:12px;height:12px;border-radius:var(--sk-radius-pill,999px);flex:none}
+#eternal .et-r-note{margin:var(--sk-s2,12px) 0 0;text-align:center;font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-pill{display:flex;align-items:center;justify-content:center;width:100%;min-height:58px;margin-top:var(--sk-s4,24px);padding:var(--sk-s1,6px) var(--sk-s3,18px);border:0;border-radius:var(--sk-radius-pill,999px);background:var(--sk-primary);color:var(--sk-on-primary)!important;font:700 15px/1.2 var(--sk-font-raver-display)!important;letter-spacing:.04em;text-align:center;cursor:pointer}
+#eternal .et-r-pill:hover{background:var(--sk-primary);color:var(--sk-on-primary)!important}
+#eternal .et-r-pill:disabled{background:var(--sk-sovereign-wash);color:var(--sk-sovereign-soft)!important;cursor:not-allowed}
+#eternal .et-r-ghost{display:flex;align-items:center;justify-content:center;margin:var(--sk-s2,12px) auto 0;min-height:var(--sk-control-min,44px);padding:0 var(--sk-s3,18px);border:1.5px solid var(--sk-biomass);border-radius:var(--sk-radius-pill,999px);background:transparent;color:var(--sk-biomass)!important;font:600 14px/1.25 var(--sk-font-raver-body)!important;cursor:pointer;text-align:center}
+#eternal .et-r-ghost:hover{background:transparent;color:var(--sk-ink)!important}
+#eternal .et-r-hold{position:relative;width:196px;height:196px;margin:var(--sk-s3,18px) auto 0}
+#eternal .et-r-hold>svg{position:absolute;inset:0;width:100%;height:100%;transform:rotate(-90deg);pointer-events:none;filter:none}
+#eternal .et-hold-track{fill:none;stroke:var(--sk-line);stroke-width:8}
+#eternal .et-hold-prog{fill:none;stroke:var(--sk-biomass);stroke-width:8;stroke-linecap:round;stroke-dasharray:578;stroke-dashoffset:578}
+#eternal .et-r-holdbtn{position:absolute;inset:22px;padding:0;border:0;border-radius:0;background:var(--sk-primary);color:var(--sk-on-primary)!important;clip-path:polygon(50% 0,93% 25%,93% 75%,50% 100%,7% 75%,7% 25%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--sk-s1,6px);cursor:pointer;touch-action:none;user-select:none;-webkit-user-select:none}
+#eternal .et-r-holdbtn:hover{background:var(--sk-primary);color:var(--sk-on-primary)!important}
+#eternal .et-r-holdbtn b{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em}
+#eternal .et-r-holdbtn span{font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em}
+#eternal .et-r-holdbtn:disabled{background:var(--sk-sovereign-wash);color:var(--sk-sovereign-soft)!important;cursor:not-allowed}
+@media (prefers-reduced-motion:reduce){#eternal *{transition:none!important;animation:none!important}}
+
+/* CYPHERPUNK — the instrument, complete at first paint: tables, a numbered pipeline, receipts */
+#eternal .et-c{font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink);overflow-wrap:anywhere}
+#eternal .et-c-path{font:600 15px/1.45 var(--sk-font-mono);color:var(--sk-ink);word-break:break-all}
+#eternal .et-c-chips{display:flex;flex-wrap:wrap;gap:var(--sk-s1,6px);margin:var(--sk-s2,12px) 0}
+#eternal .et-c-chips span{padding:2px var(--sk-s1,6px);border:1px solid var(--sk-line);border-radius:4px;background:var(--sk-bg-card);font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-soft)}
+#eternal .et-c-chips span.et-on{border-color:var(--sk-guard);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong)}
+#eternal .et-c-chips span.et-ok{border-color:var(--sk-verified);color:var(--sk-verified)}
+#eternal .et-c-chips span.et-no{border-color:var(--sk-info);color:var(--sk-info)}
+#eternal .et-c-guard{display:flex;justify-content:space-between;align-items:center;gap:var(--sk-s2,12px);flex-wrap:wrap;min-height:var(--sk-control-min,44px);padding:var(--sk-s1,6px) var(--sk-s3,18px);border:1px dashed var(--sk-guard);border-radius:var(--sk-radius-sm,6px);background:var(--sk-guard-wash);color:var(--sk-guard)}
+#eternal .et-c-guard b{font-weight:600;color:var(--sk-sovereign-strong)}
+#eternal .et-c-h{margin:var(--sk-s4,24px) 0 var(--sk-s2,12px)!important;font:600 15px/1.45 var(--sk-font-mono);color:var(--sk-ink)}
+#eternal .et-c-tab{width:100%;margin:var(--sk-s2,12px) 0 var(--sk-s1,6px)!important;border:1px solid var(--sk-line)!important;border-radius:var(--sk-radius-sm,6px);overflow:hidden;background:var(--sk-bg-card)!important;table-layout:auto}
+#eternal .et-c-tab th{padding:var(--sk-s1,6px) var(--sk-s2,12px)!important;text-align:left;white-space:nowrap;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);border-bottom:1px solid var(--sk-line)!important;background:var(--sk-bg-well)}
+#eternal .et-c-tab td{height:var(--sk-control-min,44px);padding:var(--sk-s1,6px) var(--sk-s2,12px)!important;border-bottom:1px solid var(--sk-line)!important;font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink);vertical-align:middle}
+#eternal .et-c-tab tr:last-child td{border-bottom:0!important}
+#eternal .et-c-tab td:first-child{color:var(--sk-guard)}
+#eternal .et-c-tab td:first-child,#eternal .et-c-tab th:first-child{white-space:nowrap;width:1%}
+#eternal .et-c-tab tr.et-pick{cursor:pointer}
+#eternal .et-c-tab tr.et-pick:hover td,#eternal .et-c-tab tr.et-pick[aria-selected="true"] td{background:var(--sk-sovereign-tint)}
+#eternal .et-c-tab tr.et-more td{height:auto;white-space:normal;width:auto;background:var(--sk-sovereign-tint);color:var(--sk-ink-soft)}
+#eternal .et-c-tab small,#eternal .et-c-kv small{display:block;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut)}
+#eternal .et-c-tab .et-nw{white-space:nowrap}
+#eternal .et-st-ok{color:var(--sk-verified)!important}
+#eternal .et-st-no{color:var(--sk-info)!important}
+#eternal .et-st-wait{color:var(--sk-ai)!important}
+#eternal .et-st-guard{color:var(--sk-guard)!important}
+#eternal .et-st-you{color:var(--sk-you)!important}
+#eternal .et-c-pipe{list-style:none;margin:0;padding:0;display:grid;gap:var(--sk-s2,12px);counter-reset:etp}
+#eternal .et-c-pipe li{display:grid;grid-template-columns:28px 1fr;gap:var(--sk-s1,6px) var(--sk-s2,12px);padding:var(--sk-s2,12px) var(--sk-s3,18px);border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm,6px);background:var(--sk-bg-card);counter-increment:etp}
+#eternal .et-c-pipe li::before{content:counter(etp,decimal-leading-zero);color:var(--sk-guard);font-weight:600}
+#eternal .et-c-pipe li b{font-weight:600;color:var(--sk-ink)}
+#eternal .et-c-pipe li div{grid-column:2;color:var(--sk-ink-soft)}
+#eternal .et-c-pipe li.et-done b{color:var(--sk-verified)}
+#eternal .et-c-pipe li.et-guard{border-style:dashed;border-color:var(--sk-guard)}
+#eternal .et-c-pipe li.et-guard b{color:var(--sk-guard)}
+#eternal .et-c-pipe li.et-now{border-color:var(--sk-ai);box-shadow:inset 0 0 0 1px var(--sk-ai)}
+#eternal .et-c-pipe li.et-now b{color:var(--sk-ai)}
+#eternal .et-c-pipe li.et-todo div{color:var(--sk-ink-mut)}
+#eternal .et-c-primary{display:flex;align-items:center;justify-content:center;width:100%;min-height:52px;margin-top:var(--sk-s3,18px);padding:var(--sk-s1,6px) var(--sk-s2,12px);border:0;border-radius:var(--sk-radius-sm,6px);background:var(--sk-primary);color:var(--sk-on-primary)!important;font:600 14px/1.2 var(--sk-font-mono)!important;text-align:center;cursor:pointer}
+#eternal .et-c-primary:hover{background:var(--sk-primary);color:var(--sk-on-primary)!important}
+#eternal .et-c-primary:disabled{background:var(--sk-bg-well);color:var(--sk-ink-mut)!important;border:1px dashed var(--sk-line);cursor:not-allowed}
+#eternal .et-c-kv{width:100%;border:1px solid var(--sk-line)!important;border-radius:var(--sk-radius-sm,6px);overflow:hidden;background:var(--sk-bg-card)!important}
+#eternal .et-c-kv th{width:104px;padding:var(--sk-s2,12px)!important;text-align:left;vertical-align:top;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);border-bottom:1px solid var(--sk-line)!important;background:transparent}
+#eternal .et-c-kv td{padding:var(--sk-s2,12px)!important;border-bottom:1px solid var(--sk-line)!important;font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink);word-break:break-word}
+#eternal .et-c-kv tr:last-child th,#eternal .et-c-kv tr:last-child td{border-bottom:0!important}
+#eternal .et-c-verify{margin-top:var(--sk-s3,18px);padding:var(--sk-s3,18px);border-radius:var(--sk-radius-sm,6px);background:var(--sk-bg-card);border:1px solid var(--sk-line)}
+#eternal .et-c-verify-h{font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);margin-bottom:var(--sk-s1,6px)}
+#eternal .et-c-verify ol{margin:0;padding-left:var(--sk-s4,24px)!important;display:grid;gap:var(--sk-s1,6px)}
+#eternal .et-c code{font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ai);background:none;padding:0;border:0;word-break:break-all}
+#eternal .et-c-row{display:grid;grid-template-columns:1fr 1fr;gap:var(--sk-s2,12px);margin-top:var(--sk-s3,18px)}
+#eternal .et-c-ghost{display:flex;align-items:center;justify-content:center;min-height:52px;padding:var(--sk-s1,6px);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius-sm,6px);background:transparent;color:var(--sk-ink)!important;text-align:center;font:600 14px/1.2 var(--sk-font-mono)!important;cursor:pointer}
+#eternal .et-c-ghost:hover{background:transparent;color:var(--sk-link-hover)!important}
+#eternal .et-c-well{margin-top:var(--sk-s2,12px);padding:var(--sk-s2,12px);border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm,6px);background:var(--sk-bg-well);font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink-soft);white-space:pre-wrap;word-break:break-all}
+#eternal .et-c-field{display:flex;align-items:center;gap:var(--sk-s1,6px);min-height:48px;margin-top:var(--sk-s2,12px);padding:0 var(--sk-s2,12px);border:1px solid var(--sk-ai);border-radius:var(--sk-radius-sm,6px);background:var(--sk-bg-card);cursor:text}
+#eternal .et-c-field span{flex:none;font:600 13px/1.45 var(--sk-font-mono);color:var(--sk-ai)}
+#eternal .et-c-field input{flex:1 1 auto;min-width:0;min-height:var(--sk-control-min,44px);border:0;outline:0;background:transparent;color:var(--sk-ink);font:400 13px/1.45 var(--sk-font-mono);padding:0}
+
+/* hearth front specifics: the body already carries a 16 px gutter; inside the agent dock the hearth is
+   the conversation only (the dock hides the page's header the same way), so the fronts step aside */
+#eternal,#etArchive.et-archive-h{padding-left:0;padding-right:0}
+html.ad-embedded #eternal,html.ad-embedded #etArchive{display:none!important}
+#eternal .et-ht-ember{position:absolute;left:50%;top:50%;width:96px;height:96px;margin:-48px 0 0 -48px;padding:0;border:0;border-radius:var(--sk-radius-pill,999px);background:var(--sk-primary);color:var(--sk-on-primary)!important;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;touch-action:none;user-select:none;-webkit-user-select:none}
+#eternal .et-ht-ember:hover{background:var(--sk-primary);color:var(--sk-on-primary)!important}
+#eternal .et-ht-ember b{font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em}
+#eternal .et-ht-ember span{font:600 14px/1.25 var(--sk-font-raver-body)}
+#eternal .et-ht-ember:disabled{background:var(--sk-bg-card);color:var(--sk-ink)!important;border:1.5px dashed var(--sk-ai);cursor:default}
+#eternal #etHtRoutes{margin:var(--sk-s3,18px) 0 0}
+#eternal #etHtScales{margin:0 0 var(--sk-s3,18px)}
+#eternal #etHtClass{margin-top:var(--sk-s2,12px)}
+
+/* ── THE WHOLE HEARTH, dressed per register: the page's own variables mapped onto skaists tokens.
+   The router, the chat and the chain art are unchanged; the art keeps a dark vitrine in every
+   register (the chain draws it on black). ── */
+body[data-reg]{--bg:var(--sk-bg);--ink:var(--sk-ink);--cyan:var(--sk-link);--gold:var(--sk-ink);--violet:var(--sk-sovereign);--dim:var(--sk-ink-mut);--line:var(--sk-line);background:var(--sk-bg);background-image:none;color:var(--sk-ink)}
+body[data-reg] header{max-width:600px;margin-left:auto;margin-right:auto}
+body[data-reg] h1{color:var(--sk-ink);text-shadow:none;letter-spacing:normal}
+body[data-reg] header p,body[data-reg] .note{color:var(--sk-ink-mut)}
+body[data-reg] #chat,body[data-reg] #ask,body[data-reg] #seeds,body[data-reg] .note{max-width:600px}
+body[data-reg] .msg.user{background:var(--sk-sovereign-tint);color:var(--sk-ink);border:1px solid var(--sk-line)}
+body[data-reg] .msg.ai{background:var(--sk-bg-card);color:var(--sk-ink);border:1px solid var(--sk-line)}
+body[data-reg] .msg.ai .art{background:var(--sk-b-chip);border-radius:var(--sk-radius,12px)}
+body[data-reg] .msg.ai .link{color:var(--sk-ink-mut)}
+body[data-reg] .msg.ai .link a{color:var(--sk-link)}
+body[data-reg] #chat pre{color:var(--sk-ink)!important}
+body[data-reg] #ask input{background:var(--sk-bg-card);color:var(--sk-ink);border:1.5px solid var(--sk-ink-dim)}
+body[data-reg] #ask input:focus{border-color:var(--sk-ink)}
+body[data-reg] #ask button{background:var(--sk-primary);color:var(--sk-on-primary);border:0}
+body[data-reg] #ask button:hover{background:var(--sk-primary);color:var(--sk-on-primary)}
+body[data-reg] #seeds button{background:transparent;color:var(--sk-ink);border:1.5px solid var(--sk-line)}
+body[data-reg] #seeds button:hover{color:var(--sk-ink);border-color:var(--sk-ink)}
+body[data-reg] #bnr-beta-badge a{background:var(--sk-bg-card)!important;color:var(--sk-link)!important;border-color:var(--sk-line)!important}
+body[data-reg="bee"]{font:400 16px/1.6 var(--sk-font-bee-sans)}
+body[data-reg="bee"] h1{font:400 40px/1.05 var(--sk-font-bee-serif)}
+body[data-reg="bee"] header p,body[data-reg="bee"] .msg,body[data-reg="bee"] #ask input{font:400 16px/1.6 var(--sk-font-bee-sans)}
+body[data-reg="bee"] .note,body[data-reg="bee"] .msg.ai .link,body[data-reg="bee"] #seeds button{font:400 14px/1.5 var(--sk-font-bee-sans)}
+body[data-reg="bee"] #chat pre{font:400 15px/1.4 var(--sk-font-mono)!important}
+body[data-reg="bee"] #ask button{font:600 17px/1.2 var(--sk-font-bee-sans);border-radius:var(--sk-radius-lg,16px)}
+body[data-reg="bee"] #ask input,body[data-reg="bee"] #seeds button{border-radius:var(--sk-radius-md,14px)}
+body[data-reg="bee"] .msg{border-radius:var(--sk-radius-xl,18px)}
+body[data-reg="bee"] #bnr-beta-badge{font:600 14px/1.4 var(--sk-font-bee-sans)!important}
+body[data-reg="raver"]{font:400 14px/1.6 var(--sk-font-raver-body)}
+body[data-reg="raver"] h1{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em}
+body[data-reg="raver"] header p,body[data-reg="raver"] .msg,body[data-reg="raver"] .note,body[data-reg="raver"] .msg.ai .link,body[data-reg="raver"] #seeds button,body[data-reg="raver"] #ask input{font:400 14px/1.6 var(--sk-font-raver-body)}
+body[data-reg="raver"] #chat pre{font:400 14px/1.4 var(--sk-font-mono)!important}
+body[data-reg="raver"] #ask button{font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em}
+body[data-reg="raver"] #ask input,body[data-reg="raver"] #ask button,body[data-reg="raver"] #seeds button{border-radius:var(--sk-radius-pill,999px)}
+body[data-reg="raver"] .msg{border-radius:var(--sk-radius-xl,18px)}
+body[data-reg="raver"] .msg.ai{box-shadow:var(--sk-glow-sovereign)}
+body[data-reg="raver"] #bnr-beta-badge{font:600 14px/1.25 var(--sk-font-raver-body)!important}
+body[data-reg="cypherpunk"]{font:400 13px/1.6 var(--sk-font-mono)}
+body[data-reg="cypherpunk"] h1{font:600 15px/1.45 var(--sk-font-mono);color:var(--sk-ai)}
+body[data-reg="cypherpunk"] header p,body[data-reg="cypherpunk"] .note,body[data-reg="cypherpunk"] .msg.ai .link{font:500 12px/1.6 var(--sk-font-mono)}
+body[data-reg="cypherpunk"] .msg,body[data-reg="cypherpunk"] #seeds button,body[data-reg="cypherpunk"] #ask input{font:400 13px/1.6 var(--sk-font-mono)}
+body[data-reg="cypherpunk"] #chat pre{font:500 12px/1.45 var(--sk-font-mono)!important}
+body[data-reg="cypherpunk"] #ask button{font:600 14px/1.2 var(--sk-font-mono)}
+body[data-reg="cypherpunk"] .msg,body[data-reg="cypherpunk"] #ask input,body[data-reg="cypherpunk"] #ask button,body[data-reg="cypherpunk"] #seeds button,body[data-reg="cypherpunk"] .msg.ai .art{border-radius:var(--sk-radius-sm,6px)}
+body[data-reg="cypherpunk"] #bnr-beta-badge a{border-radius:var(--sk-radius-sm,6px)!important}
+body[data-reg="cypherpunk"] #bnr-beta-badge{font:500 12px/1.45 var(--sk-font-mono)!important}
 </style>
+<link rel="stylesheet" href="../skaists.css">
 </head>
-<body>
+<body data-bee-theme="custom">
+<!-- ETERNAL FRONT (founder blueprint 2026-09-26, docs/design/eternal): three separate products in one
+     surface. ONE data layer (the hearth's own route() table, its four seed asks, its SCALES, and the
+     conversation read back from #chat) drives all three, so the facts cannot drift. Nothing here asks,
+     reads the chain or makes a sound on arrival: every ask goes through the page's own seed buttons or
+     #q + #send below, and the fronts read the answer back from the chat. No model runs here yet: the
+     hearth is a deterministic router to the estate's own makers, and every register says so. -->
+<section id="eternal" aria-label="the hearth">
+
+  <!-- NEW BEE — a calm room: four things to make, one button, the answer in plain words -->
+  <div class="et-b">
+    <div class="et-b-mark">bLighT hearth</div>
+    <h2 class="et-b-h" data-etk="et.hearth.beeH">make something together</h2>
+    <p class="et-b-lede" data-etk="et.hearth.beeLede">pick one, and the hearth asks the estate's own makers for it: a mushroom, a melody, the founder's crown, or an offer note.</p>
+    <div class="et-b-guard"><svg class="et-b-ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span data-etk="et.hearth.beeGuard">nothing is asked until you choose. a melody plays only when you ask for one.</span></div>
+    <div class="et-b-rows" id="etHtBeeRows" role="group" aria-label="what to make"></div>
+    <div class="et-b-card" id="etHtBeeAnswer" hidden></div>
+    <div class="et-b-act">
+      <button type="button" class="et-b-primary" id="etHtBeeGo">ask the hearth</button>
+      <a class="et-b-link" href="#ask" id="etHtBeeOwn" data-etk="et.hearth.beeOwn">or type your own words below</a>
+      <p class="et-b-foot" data-etk="et.hearth.beeFoot">no AI model runs here yet. the hearth matches your words to the estate's own makers.</p>
+    </div>
+  </div>
+
+  <!-- RAVER — the data is the art: the twelve-note wheel. a scale is a shape you light; a melody the
+       hearth played is drawn on it from its own seed. hold the ember to ask. -->
+  <div class="et-r">
+    <div class="et-r-top"><h2 class="et-r-h" data-etk="et.hearth.raverH">the hearth</h2><span class="et-r-hint" id="etHtHint"></span></div>
+    <div class="et-r-chips" id="etHtRoutes" role="group" aria-label="what to ask for"></div>
+    <div class="et-r-art"><svg id="etHtWheel" viewBox="-180 -180 360 360" role="img" aria-label="the twelve-note wheel"></svg><button type="button" class="et-ht-ember" id="etHtHold"><b id="etHtHoldB">hold</b><span id="etHtHoldS">to ask</span></button></div>
+    <div class="et-r-chips" id="etHtScales" role="group" aria-label="the scale"></div>
+    <div class="et-r-card" id="etHtCard" aria-live="polite"></div>
+    <p class="et-r-note" id="etHtNote"></p>
+  </div>
+
+  <!-- CYPHERPUNK — the instrument: the router, its engines, a live classifier, the receipt -->
+  <div class="et-c">
+    <div class="et-c-path" id="etHtPath">hearth://route(q)</div>
+    <div class="et-c-chips" id="etHtChips"></div>
+    <div class="et-c-guard"><span data-etk="et.hearth.cyGuard">model · not docked · deterministic router</span><b id="etHtGuardN"></b></div>
+    <label class="et-c-field"><span>q&gt;</span><input id="etHtQ" type="text" spellcheck="false" autocomplete="off" aria-label="words to route"></label>
+    <table class="et-c-kv" id="etHtClass"></table>
+    <button type="button" class="et-c-primary" id="etHtCyGo">route + send</button>
+    <h3 class="et-c-h" data-etk="et.hearth.cySeedsH">seed asks · #seeds</h3>
+    <table class="et-c-tab"><thead><tr><th>#</th><th>q</th><th>route · engine</th></tr></thead><tbody id="etHtSeedTab"></tbody></table>
+    <h3 class="et-c-h" data-etk="et.hearth.cyPipeH">ask pipeline</h3>
+    <ol class="et-c-pipe" id="etHtPipe"></ol>
+    <h3 class="et-c-h" data-etk="et.hearth.cyScalesH">scales · semitones from the root</h3>
+    <table class="et-c-tab"><thead><tr><th>scale</th><th>steps</th></tr></thead><tbody id="etHtScaleTab"></tbody></table>
+    <h3 class="et-c-h" data-etk="et.hearth.cyRcptH">receipt · this conversation</h3>
+    <table class="et-c-kv" id="etHtReceipt"></table>
+    <div class="et-c-verify">
+      <div class="et-c-verify-h" data-etk="et.hearth.verifyH">verify · no trust in this page needed</div>
+      <ol id="etHtVerify"></ol>
+    </div>
+    <div class="et-c-row">
+      <a class="et-c-ghost" href="#chat" data-etk="et.hearth.cyChat">the conversation below</a>
+      <a class="et-c-ghost" href="https://github.com/beehive-nature/beehive-nature/blob/main/surfaces/blight/hearth.html" target="_blank" rel="noopener noreferrer" data-etk="et.hearth.cyFork">fork the template ↗ new tab</a>
+    </div>
+  </div>
+</section>
+<h2 class="et-archive-h" id="etArchive" data-etk="et.hearth.archive">the whole hearth</h2>
 <header>
   <h1>🔥 the hearth</h1>
   <p>Explore creative prompts with BNR’s existing generators.</p>
@@ -106,8 +406,10 @@ function route(q){
   if(/pepi|frog|pepe/.test(q)) return {kind:'art',col:COLS.pepi,
     seed:56,say:'a PEPI at the top rung — 56 of 13,370, the whole ladder in one seed:'};
   if(/song|play|music|melody|scale/.test(q)){
-    var scale='harmonic major';
-    for(var s in SCALES) if(q.indexOf(s)>-1) scale=s;
+    var scale='harmonic major',best=0;
+    /* the longest scale named in the ask wins: "harmonic major" also contains "major" (the
+       last-match rule played major for the page's own harmonic-major seed ask) */
+    for(var s in SCALES) if(q.indexOf(s)>-1&&s.length>best){scale=s;best=s.length;}
     return {kind:'song',scale:scale,seed:1000+Math.floor(Math.random()*99999),
       say:'composed for you \u2014 press the link, it plays in the organ:'};
   }
@@ -182,6 +484,194 @@ document.getElementById('q').addEventListener('keydown',function(e){ if(e.key===
 document.querySelectorAll('#seeds button').forEach(function(b){ b.onclick=function(){ document.getElementById('q').value=b.dataset.q; ask(); }; });
 </script>
 <div id="bnr-beta-badge" style="position:fixed;right:.6rem;bottom:calc(var(--tbar-h,50px) + 10px);z-index:9997;font:14px ui-monospace,monospace"><a href="../" style="display:inline-flex;align-items:center;min-height:44px;color:#39c5cf;text-decoration:none;border:1px solid #30363d;border-radius:99px;padding:0 16px;background:#161b22">⌂ hub</a></div>
+<script>
+/* ETERNAL FRONT — one data layer, three renderers (docs/design/eternal). The facts: the hearth's own
+   route() (called here on the page's four seed asks, and on whatever the cypherpunk types: it is a pure
+   word match, it sends nothing), its SCALES, its chain HOSTS and COLS, and the conversation read back
+   from #chat. Nothing here asks, reads the chain or makes a sound on arrival: the bee's button clicks
+   the page's own seed button, the raver's hold and the cypherpunk's action fill #q and click #send,
+   exactly as typing does. A picture is said to be drawn only when the reply carries one. */
+(function(){
+  var $=function(id){return document.getElementById(id);};
+  var T=function(k,f){var t=window.BNRLanguage&&window.BNRLanguage.text;return t?t(k,f):f;};
+  var K=function(k,f){return T('et.hearth.'+k,f);};
+  var esc=function(v){return String(v==null?'':v).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});};
+  var tok=function(n){return getComputedStyle(document.body).getPropertyValue('--sk-'+n).trim();};
+  var ROUTE=typeof route==='function'?route:function(){return {kind:'help',say:''};};
+  var SC=typeof SCALES!=='undefined'?SCALES:{};
+  var PC=['c','c♯','d','d♯','e','f','f♯','g','g♯','a','a♯','b'];
+
+  /* ── the data layer ── */
+  function classify(q){
+    var r=ROUTE(String(q||'')), r2=ROUTE(String(q||''));
+    var fixed=r.kind==='art'&&r.seed===r2.seed;
+    return {kind:r.kind,say:r.say,sym:r.col?r.col.sym:null,scale:r.scale||null,seed:fixed?r.seed:null,
+      what:r.kind==='art'?(fixed?'crown':'grow'):r.kind};
+  }
+  var D={seeds:[].map.call(document.querySelectorAll('#seeds button'),function(b,i){
+      var c=classify(b.dataset.q);return {i:i,q:b.dataset.q,label:b.textContent.trim(),kind:c.kind,what:c.what,say:c.say,sym:c.sym,scale:c.scale,seed:c.seed};}),
+    scales:Object.keys(SC).map(function(n){return {name:n,steps:SC[n].slice()};}),
+    hosts:typeof HOSTS!=='undefined'?HOSTS.map(function(h){return h.replace(/^https?:\/\//,'');}):[],
+    model:'deterministic router · no model docked',ex:[],pending:false,probe:null};
+  /* the shared pick starts on the melody: the one maker that needs nothing but this browser */
+  var R={pick:Math.max(0,D.seeds.map(function(x){return x.kind;}).indexOf('song')),scale:D.scales.length?D.scales[0].name:'',hold:0};
+  function engine(c){return c.kind==='art'?(c.sym||'?')+' getSvg · eth_call on Base':c.kind==='song'?'WebAudio · 8 notes · this browser':c.kind==='deal'?'pointers.js PTR.room · a note to copy':'words only';}
+  function readChat(){
+    var ex=[];
+    [].forEach.call(document.querySelectorAll('#chat > .msg'),function(m){
+      if(m.classList.contains('user')){ex.push({q:m.textContent.trim(),c:classify(m.textContent),reply:null});return;}
+      var o={say:(m.firstElementChild||m).textContent.trim(),art:!!m.querySelector('.art svg'),link:'',note:''};
+      var l=m.querySelector('.link'); if(l)o.link=l.textContent.trim();
+      var pre=m.querySelector('pre'); if(pre)o.note=pre.textContent.trim();
+      var a=o.link.match(/^(.+?) seed ([\d,]+) level (\d+)/); if(a){o.sym=a[1];o.seed=+a[2].replace(/,/g,'');o.level=+a[3];}
+      var s=o.link.match(/^seed (\d+) in (.+?) · /); if(s){o.seed=+s[1];o.scale=s[2];}
+      var last=ex[ex.length-1]; if(last&&!last.reply)last.reply=o; else ex.push({q:'',c:null,reply:o});
+    });
+    D.ex=ex; D.pending=!!(ex.length&&!ex[ex.length-1].reply);
+  }
+  function lastEx(){return D.ex[D.ex.length-1]||null;}
+  function lastSong(){for(var i=D.ex.length-1;i>=0;i--){var r=D.ex[i].reply;if(r&&r.scale&&SC[r.scale])return r;}return null;}
+  /* the melody respond() played, re-derived from its own seed with its own rule: root = seed mod 12,
+     note i = SCALES[scale][(seed >> i) mod n]; octaves fold onto the wheel */
+  function melody(r){var iv=SC[r.scale],root=r.seed%12,out=[];for(var i=0;i<8;i++)out.push((root+iv[(r.seed>>i)%iv.length])%12);return {root:root,pcs:out};}
+  function said(x){
+    if(!x)return '';
+    if(!x.reply)return K('s.asking','asking…');
+    var r=x.reply;
+    if(r.sym&&r.seed!=null)return r.sym+' '+K('s.seed','seed')+' '+r.seed.toLocaleString('en-US')+' · '+K('s.level','level')+' '+r.level+' · '+(r.art?K('s.drawn','drawn from the chain'):K('s.noArt','the chain did not answer here, so no picture'));
+    if(r.scale)return K('s.song','8 notes in {s}, composed from seed {n}').replace('{s}',r.scale).replace('{n}',r.seed);
+    if(r.note)return K('s.deal','an offer note to copy: ')+r.note.split('\n')[0].slice(0,72)+'…';
+    return r.say;
+  }
+  function prompt(){var s=D.seeds[R.pick];if(!s)return '';return s.kind==='song'?'play me a song in '+R.scale:s.q;}
+  function ask(q){var qi=$('q'),sb=$('send');if(!qi||!sb||!q)return;qi.value=q;sb.click();all();}
+
+  /* ── NEW BEE ── */
+  var PLAIN={grow:['a mushroom, grown from the chain','reads the chain'],crown:['the founder’s crown','reads the chain'],song:['a short melody','plays here'],deal:['an offer note','to copy anywhere'],help:['what it can do','words only']};
+  function bee(){
+    $('etHtBeeRows').innerHTML=D.seeds.map(function(s){var p=PLAIN[s.what]||PLAIN.help;
+      return '<button type="button" class="et-b-row" data-pick="'+s.i+'" aria-pressed="'+(R.pick===s.i)+'"><span>'+esc(K('b.'+s.what,p[0]))+'</span><small>'+esc(K('b.'+s.what+'W',p[1]))+'</small></button>';}).join('');
+    var x=lastEx(), box=$('etHtBeeAnswer');
+    box.hidden=!x;
+    if(x){box.className='et-b-card '+(!x.reply?'':x.reply.sym&&!x.reply.art?'et-no':'et-fam');
+      box.innerHTML='<h3>'+esc(x.reply?K('b.answered','the hearth answered'):K('b.asking','asking…'))+'</h3><div>'+esc(K('b.you','you asked')+': '+(x.q||''))+'</div><div>'+esc(said(x))+'</div>';}
+    var go=$('etHtBeeGo'); go.disabled=D.pending; go.textContent=D.pending?K('b.wait','the hearth is answering…'):x?K('b.again','ask for this one'):K('b.go','ask the hearth');
+  }
+
+  /* ── RAVER ── */
+  var RW=128;
+  function pt(pc,r){var a=(-90+pc*30)*Math.PI/180;return [(r*Math.cos(a)).toFixed(1),(r*Math.sin(a)).toFixed(1)];}
+  function wheel(){
+    var svg=$('etHtWheel'); if(!svg)return;
+    var s=D.seeds[R.pick], song=s&&s.kind==='song', iv=SC[R.scale]||[], h='';
+    var sg=lastSong(), mel=sg&&sg.scale===R.scale?melody(sg):null;
+    h+='<circle r="'+RW+'" fill="none" stroke="'+tok('line')+'" stroke-width="1.5"/>';
+    h+='<g opacity="'+(song?1:0.35)+'">';
+    if(iv.length){h+='<polygon points="'+iv.map(function(st){return pt(st,RW).join(',');}).join(' ')+'" fill="'+tok('sovereign-wash')+'" stroke="'+tok('sovereign')+'" stroke-width="2" stroke-linejoin="round"/>';}
+    if(mel){h+='<polyline points="'+mel.pcs.map(function(pc){return pt(pc,RW-34).join(',');}).join(' ')+'" fill="none" stroke="'+tok('you')+'" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>';
+      mel.pcs.forEach(function(pc,i){var q=pt(pc,RW-34);h+='<circle cx="'+q[0]+'" cy="'+q[1]+'" r="'+(i===0?6:4)+'" fill="'+tok('you')+'"/>';});}
+    for(var pc=0;pc<12;pc++){var on=iv.indexOf(pc)>=0, p=pt(pc,RW), root=mel&&pc===mel.root;
+      h+='<circle cx="'+p[0]+'" cy="'+p[1]+'" r="'+(root?13:on?10:6)+'" fill="'+(on?tok('sovereign'):tok('bg'))+'" stroke="'+(root?tok('you'):on?tok('sovereign-strong'):tok('ink-dim'))+'" stroke-width="2"/>';}
+    h+='</g>';
+    var circ=2*Math.PI*54;
+    h+='<circle r="54" fill="none" stroke="'+tok('line')+'" stroke-width="5"/><circle r="54" fill="none" stroke="'+tok('biomass')+'" stroke-width="5" stroke-linecap="round" stroke-dasharray="'+circ.toFixed(1)+'" stroke-dashoffset="'+(circ*(1-R.hold)).toFixed(1)+'" transform="rotate(-90)"/>';
+    svg.innerHTML=h;
+    svg.setAttribute('aria-label',song?R.scale+': '+iv.map(function(x){return PC[x];}).join(' '):K('r.dim','the wheel rests unless you ask for a melody'));
+  }
+  function progress(){var c=$('etHtWheel').lastElementChild,circ=2*Math.PI*54;if(c)c.setAttribute('stroke-dashoffset',(circ*(1-R.hold)).toFixed(1));}
+  function raver(){
+    var s=D.seeds[R.pick], song=s&&s.kind==='song';
+    $('etHtHint').textContent=D.seeds.length+' '+K('r.makers','makers')+' · '+D.scales.length+' '+K('r.scales','scales');
+    $('etHtRoutes').innerHTML=D.seeds.map(function(x){return '<button type="button" class="et-r-chip" data-pick="'+x.i+'" aria-pressed="'+(R.pick===x.i)+'">'+esc(x.label)+'</button>';}).join('');
+    var sc=$('etHtScales'); sc.hidden=!song;
+    sc.innerHTML=D.scales.map(function(x){return '<button type="button" class="et-r-chip" data-scale="'+esc(x.name)+'" aria-pressed="'+(R.scale===x.name)+'"><i style="background:'+(R.scale===x.name?tok('you'):tok('sovereign'))+'"></i>'+esc(x.name)+'</button>';}).join('');
+    wheel();
+    var hb=$('etHtHold'); hb.disabled=D.pending||!s;
+    $('etHtHoldB').textContent=D.pending?K('r.wait','…'):K('r.hold','hold');
+    $('etHtHoldS').textContent=D.pending?K('r.answering','answering'):K('r.toAsk','to ask');
+    var q=prompt(), c=classify(q), x=lastEx(), mine=x&&x.q===q;
+    var card=$('etHtCard');
+    card.innerHTML='<span class="et-rk'+(mine&&x.reply&&x.reply.sym&&!x.reply.art?' et-no':mine&&x.reply?' et-ok':'')+'">'+esc(song?(D.scales.map(function(y){return y.name;}).indexOf(R.scale)+1):(R.pick+1))+'</span><div><b>“'+esc(q)+'”</b><span>'+esc(mine?said(x):K('r.back','comes back')+': '+c.say.replace(/[:—]\s*$/,'').trim())+'</span>'+(song&&SC[R.scale]?'<span>'+esc(SC[R.scale].map(function(v){return PC[v];}).join(' · '))+'</span>':'')+'</div>';
+    $('etHtNote').textContent=song?K('r.noteSong','the shape is the scale. after you ask, the melody it played is drawn inside, from its own seed.'):K('r.noteOther','nothing is sent until you hold the ember. no model runs here: a word match picks the maker.');
+  }
+
+  /* ── CYPHERPUNK ── */
+  function cy(){
+    var x=lastEx();
+    $('etHtPath').textContent='hearth://route(q) · '+D.seeds.length+' seeds · '+D.scales.length+' scales';
+    $('etHtChips').innerHTML='<span class="et-on">model not docked</span><span>asks '+D.ex.filter(function(e){return e.q;}).length+'</span><span>rpc '+D.hosts.length+' hosts · art only</span>'+(D.pending?'<span class="et-st-wait">answering</span>':'');
+    $('etHtGuardN').textContent=K('c.guardN','route() is a word match · sends nothing');
+    var v=$('etHtQ').value, c=v.trim()?classify(v):null; D.probe=c;
+    $('etHtClass').innerHTML=(c?[['route',c.kind+(c.what!==c.kind?' · '+c.what:'')],['engine',engine(c)],['network',c.kind==='art'?'yes · eth_call via '+D.hosts.join(' → '):'none · this browser only'],['scale',c.scale||'n/a'],['says',c.say]]
+      :[['route','type words above · route(q) runs here, sends nothing']]).map(function(r){return '<tr><th>'+esc(r[0])+'</th><td>'+esc(r[1])+'</td></tr>';}).join('');
+    var go=$('etHtCyGo'); go.disabled=!v.trim()||D.pending; go.textContent=D.pending?'answering · wait for the reply':'route + send';
+    $('etHtSeedTab').innerHTML=D.seeds.map(function(s){return '<tr><td>'+String(s.i+1).padStart(2,'0')+'</td><td>'+esc(s.q)+'</td><td>'+esc(s.kind+(s.what!==s.kind?' · '+s.what:''))+'<small>'+esc(engine(s)+(s.seed!=null?' · seed '+s.seed:s.kind==='art'?' · seed random':'')+(s.scale?' · plays '+s.scale:''))+'</small></td></tr>';}).join('');
+    var r=x&&x.reply, k=x&&x.c?x.c.kind:null;
+    var steps=[
+      ['route(q) · regex, first match wins',x?'"'+x.q+'" → '+(k||'?'):'deal · art (grow, crown, pepi) · song · help',x?'et-done':'et-todo'],
+      ['engine',x?engine(x.c||{kind:'help'}):'art → getSvg · song → WebAudio · deal → PTR.room',r?'et-done':x?'et-now':'et-todo'],
+      ['chain read · art only',k==='art'?(r?(r.art?'eth_call answered · svg decoded':'no answer from '+D.hosts.join(' → ')+' · no picture shown'):'eth_call '+D.hosts.join(' → ')+' · 8 s abort each'):'not needed for this ask',k==='art'?(r?(r.art?'et-done':'et-guard'):'et-now'):'et-todo'],
+      ['render · reply in #chat',r?said(x):'the reply, its link, its address',r?'et-done':'et-todo'],
+      ['address','art → gallery.html · song → midi-organ.html?seed= · deal → a [bX room] pointer',r&&(r.link||r.note)?'et-done':'et-todo']
+    ];
+    $('etHtPipe').innerHTML=steps.map(function(s){return '<li class="'+s[2]+'"><b>'+esc(s[0])+'</b><div>'+esc(s[1])+'</div></li>';}).join('');
+    $('etHtScaleTab').innerHTML=D.scales.map(function(s){return '<tr><td class="et-nw">'+esc(s.name)+'</td><td>'+esc(s.steps.join(' '))+'<small>'+esc(s.steps.map(function(v){return PC[v];}).join(' '))+'</small></td></tr>';}).join('');
+    var sp=function(cl,t){return '<span class="'+cl+'">'+esc(t)+'</span>';};
+    $('etHtReceipt').innerHTML=[
+      ['last ask',x?esc(x.q):sp('et-st-no','nothing asked · nothing sent')],
+      ['route',x&&x.c?esc(x.c.kind+(x.c.what!==x.c.kind?' · '+x.c.what:'')):sp('et-st-no','none')],
+      ['reply',r?(r.sym&&!r.art?sp('et-st-guard',said(x)):sp('et-st-ok',said(x))):x?sp('et-st-wait','answering'):sp('et-st-no','none')],
+      ['link',r&&r.link?esc(r.link.slice(0,120)):sp('et-st-no','none')],
+      ['model',sp('et-st-no','not docked · '+D.model)]
+    ].map(function(r){return '<tr><th>'+r[0]+'</th><td>'+r[1]+'</td></tr>';}).join('');
+    var crown=D.seeds.filter(function(s){return s.what==='crown';})[0], col=typeof COLS!=='undefined'?COLS.fungi:null;
+    $('etHtVerify').innerHTML=[
+      'view-source → function route(q) · the whole router, no model',
+      col&&crown&&typeof W==='function'?'curl -s https://'+(D.hosts[0]||'base-rpc.publicnode.com')+' -H "content-type: application/json" -d \'{"jsonrpc":"2.0","id":1,"method":"eth_call","params":[{"to":"'+col.c+'","data":"0x'+col.sel+W(0x20)+W(crown.seed)+W(0)+'"},"latest"]}\' → an abi string · decode → the crown svg (seed '+crown.seed+')':'',
+      'midi-organ.html?seed=<n> plays the same seed the hearth composed'
+    ].filter(Boolean).map(function(s){return '<li><code>'+esc(s)+'</code></li>';}).join('');
+  }
+
+  function keyed(){[].forEach.call(document.querySelectorAll('#eternal [data-etk],#etArchive[data-etk]'),function(e){if(e.dataset.etEn==null)e.dataset.etEn=e.textContent;e.textContent=T(e.dataset.etk,e.dataset.etEn);});}
+  function all(){readChat();bee();raver();cy();}
+  var sched=0;function soon(){if(sched)return;sched=requestAnimationFrame(function(){sched=0;all();});}
+
+  var hold={t0:0,raf:0};
+  function holdStart(e){
+    if($('etHtHold').disabled||hold.raf)return; if(e&&e.preventDefault)e.preventDefault();
+    hold.t0=performance.now();
+    (function tick(now){var f=Math.min(1,(now-hold.t0)/1000);R.hold=f;progress();
+      if(f>=1){hold.raf=0;R.hold=0;ask(prompt());return;}hold.raf=requestAnimationFrame(tick);})(hold.t0);
+  }
+  function holdStop(){if(!hold.raf)return;cancelAnimationFrame(hold.raf);hold.raf=0;R.hold=0;progress();}
+
+  function wire(){
+    var ev=$('eternal'); if(!ev)return;
+    ev.addEventListener('click',function(e){
+      var p=e.target.closest('[data-pick]');
+      if(p){R.pick=+p.getAttribute('data-pick');all();return;}
+      var s=e.target.closest('[data-scale]');
+      if(s){R.scale=s.getAttribute('data-scale');all();}
+    });
+    $('etHtBeeGo').addEventListener('click',function(){var b=document.querySelectorAll('#seeds button')[R.pick];if(b&&!D.pending){b.click();all();}});
+    $('etHtBeeOwn').addEventListener('click',function(){var q=$('q');if(q)setTimeout(function(){q.focus({preventScroll:true});},0);});
+    $('etHtCyGo').addEventListener('click',function(){var v=$('etHtQ').value.trim();if(v&&!D.pending){ask(v);$('etHtQ').value='';all();}});
+    $('etHtQ').addEventListener('input',cy);
+    $('etHtQ').addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();$('etHtCyGo').click();}});
+    var hb=$('etHtHold');
+    hb.addEventListener('pointerdown',function(e){try{hb.setPointerCapture(e.pointerId);}catch(x){}holdStart(e);});
+    ['pointerup','pointercancel','pointerleave'].forEach(function(t){hb.addEventListener(t,holdStop);});
+    hb.addEventListener('keydown',function(e){if((e.key===' '||e.key==='Enter')&&!e.repeat){e.preventDefault();holdStart(e);}});
+    hb.addEventListener('keyup',function(e){if(e.key===' '||e.key==='Enter')holdStop();});
+    hb.addEventListener('contextmenu',function(e){e.preventDefault();});
+    var chat=$('chat'); if(chat)new MutationObserver(soon).observe(chat,{childList:true,subtree:true,characterData:true});
+    document.addEventListener('blang',function(){keyed();all();});
+  }
+
+  keyed(); wire(); all();
+  window.__eternal={data:D,raver:R};
+})();
+</script>
 <script src="../tour.js?v=42"></script>
 </body>
 </html>

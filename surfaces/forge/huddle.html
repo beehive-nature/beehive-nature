@@ -53,8 +53,315 @@ a{color:var(--cyan)}
 #join .note{font-size:var(--fz-lab);color:#9aa6b8;line-height:1.7}
 #err{font-size:var(--fz-lab)}
 </style>
+<link rel="stylesheet" href="../skaists.css">
+<style>
+/* ── ETERNAL FRONT (docs/design/eternal) — three products in one surface. Every value is a skaists
+   token (../skaists.css, compiled from docs/design/skaists/tokens.json): no hand-picked hex, size or
+   corner. Measured by e2e/skaists-conformance.mjs. One register visible at a time; new bee is the
+   default. Sizes that matter carry their token's own value as a fallback. ── */
+#eternal{margin:0 0 var(--sk-s2,12px);text-align:start}
+#eternal>.et-r,#eternal>.et-c{display:none}
+body[data-reg="raver"] #eternal>.et-b,body[data-reg="cypherpunk"] #eternal>.et-b{display:none}
+body[data-reg="raver"] #eternal>.et-r{display:block}
+body[data-reg="cypherpunk"] #eternal>.et-c{display:block}
+#eternal [hidden]{display:none!important}
+#eternal button,#eternal input{font:inherit;color:inherit;letter-spacing:normal;text-transform:none;box-shadow:none;margin:0}
+#eternal svg,#eternal canvas{display:block}
+#eternal :focus-visible{outline:2px solid var(--sk-focus);outline-offset:3px}
+#eternal p{margin:0}
+.et-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+#etArchive.et-archive-h{margin:var(--sk-s5,36px) 0 var(--sk-s2,12px);padding:var(--sk-s4,24px) 0 0;border:0;border-top:1px solid var(--sk-line);color:var(--sk-ink);text-transform:none;text-shadow:none;background:none}
+body[data-reg="bee"] #etArchive.et-archive-h{font:400 28px/1.1 var(--sk-font-bee-serif);letter-spacing:normal}
+body[data-reg="raver"] #etArchive.et-archive-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em}
+body[data-reg="cypherpunk"] #etArchive.et-archive-h{font:600 15px/1.45 var(--sk-font-mono);letter-spacing:normal}
+
+/* NEW BEE — a calm room: one question, plain rows, one magenta action */
+.et-b{color:var(--sk-ink);display:flex;flex-direction:column;gap:var(--sk-s3,18px);font:400 16px/1.45 var(--sk-font-bee-sans)}
+.et-b-mark{font:400 18px/1.2 var(--sk-font-house);color:var(--sk-sovereign)}
+.et-b-h{margin:0;font:400 40px/1.05 var(--sk-font-bee-serif);color:var(--sk-ink);letter-spacing:normal}
+.et-b-lede{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink-mut);text-wrap:pretty}
+.et-b-guard{display:flex;align-items:center;gap:var(--sk-s2,12px);min-height:var(--sk-control-min,44px);padding:var(--sk-s1,6px) var(--sk-s3,18px);border-radius:var(--sk-radius,12px);background:var(--sk-guard-wash);color:var(--sk-guard);font:600 15px/1.45 var(--sk-font-bee-sans)}
+.et-b-guard svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.et-b-rows{display:flex;flex-direction:column;background:var(--sk-bg-card);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl,18px);overflow:hidden}
+.et-b-row{display:flex;align-items:center;justify-content:space-between;gap:var(--sk-s2,12px);min-height:var(--sk-control-row,52px);padding:0 var(--sk-s3,18px);border:0;border-bottom:1px solid var(--sk-line-soft);background:transparent;text-align:start;width:100%;font:500 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink);text-decoration:none;box-sizing:border-box}
+.et-b-row:last-child{border-bottom:0}
+button.et-b-row,a.et-b-row{cursor:pointer}
+.et-b-row small{display:flex;align-items:center;gap:var(--sk-s1,6px);font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut);text-align:end}
+.et-b-row[aria-expanded="true"]{background:var(--sk-sovereign-tint);color:var(--sk-sovereign-strong);font-weight:600}
+.et-b-row[aria-expanded="true"] small{color:var(--sk-sovereign-strong)}
+.et-b-row .chev{flex:none;transition:transform .26s}
+.et-b-row[aria-expanded="true"] .chev{transform:rotate(90deg)}
+.et-b-more{padding:var(--sk-s2,12px) var(--sk-s3,18px);font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink-mut);border-bottom:1px solid var(--sk-line-soft);background:var(--sk-sovereign-tint)}
+.et-b-act{display:flex;flex-direction:column;gap:var(--sk-s1,6px);margin-top:var(--sk-s1,6px)}
+.et-b-primary{display:flex;align-items:center;justify-content:center;width:100%;height:var(--sk-control-primary,54px);border-radius:var(--sk-radius-lg,16px);border:0;background:var(--sk-primary);color:var(--sk-on-primary)!important;font:600 17px/1.2 var(--sk-font-bee-sans)!important;text-decoration:none;cursor:pointer}
+.et-b-primary:disabled{background:var(--sk-bg-well);color:var(--sk-ink-mut)!important;cursor:not-allowed}
+.et-b-link{min-height:var(--sk-control-min,44px);display:flex;align-items:center;justify-content:center;border:0;background:transparent;font:600 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-link)!important;text-decoration:none;cursor:pointer}
+.et-b-link:hover{color:var(--sk-link-hover)!important}
+.et-b-foot{text-align:center;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+.et-b-said{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+.et-b-said:empty{display:none}
+.et-b-addr{display:block;margin-top:var(--sk-s1,6px);font:400 15px/1.4 var(--sk-font-mono);color:var(--sk-ink);word-break:break-all}
+
+/* RAVER — the data is the art; the gesture is physical; motion under 3 Hz, pausable, still when asked */
+.et-r{color:var(--sk-ink);font:400 14px/1.4 var(--sk-font-raver-body)}
+.et-r-top{display:flex;align-items:baseline;justify-content:space-between;gap:var(--sk-s2,12px);flex-wrap:wrap}
+.et-r-h{margin:0;font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em;color:var(--sk-ink)}
+.et-r-hint{font:400 13px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+.et-r-card{display:flex;gap:var(--sk-s2,12px);align-items:center;padding:var(--sk-s2,12px) var(--sk-s3,18px);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl,18px);background:var(--sk-sovereign-tint);min-height:var(--sk-control-person,60px);margin-top:var(--sk-s2,12px)}
+.et-r-card b{display:block;font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink)}
+.et-r-card span{display:block;font:600 13px/1.4 var(--sk-font-raver-body);color:var(--sk-sovereign-soft)}
+.et-r-pill{display:flex;align-items:center;justify-content:center;width:100%;height:58px;margin-top:var(--sk-s4,24px);border:0;border-radius:var(--sk-radius-pill,999px);background:var(--sk-primary);color:var(--sk-on-primary)!important;font:700 15px/1.2 var(--sk-font-raver-display)!important;letter-spacing:.04em;text-decoration:none;cursor:pointer}
+.et-r-pill:disabled{background:var(--sk-sovereign-wash);color:var(--sk-sovereign-soft)!important;cursor:not-allowed}
+.et-r-ghost{display:inline-flex;align-items:center;justify-content:center;min-height:var(--sk-control-min,44px);min-width:var(--sk-control-min,44px);padding:0 var(--sk-s2,12px);border:0;background:none;color:var(--sk-link)!important;font:600 13px/1.4 var(--sk-font-raver-body)!important;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.et-r-row{display:flex;justify-content:center;flex-wrap:wrap;gap:var(--sk-s1,6px) var(--sk-s2,12px);margin-top:var(--sk-s2,12px)}
+.et-r-note{margin-top:var(--sk-s2,12px);text-align:center;font:400 13px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+.et-r-note:empty{display:none}
+.et-r-legend{display:flex;justify-content:center;flex-wrap:wrap;gap:var(--sk-s1,6px) var(--sk-s3,18px);margin:var(--sk-s2,12px) 0 0;font:400 12px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+.et-r-legend span{display:inline-flex;align-items:center;gap:var(--sk-s1,6px)}
+.et-r-legend b{font:600 13px/1.4 var(--sk-font-raver-body);color:var(--sk-ink)}
+.et-r-tile{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--sk-s1,6px);min-height:var(--sk-control-min,44px);padding:var(--sk-s2,12px);border-radius:var(--sk-radius-xl,18px);border:1.5px solid var(--sk-sovereign);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong)!important;font:700 13px/1.4 var(--sk-font-raver-body);cursor:pointer;opacity:.7;transition:opacity .26s}
+.et-r-tile[aria-pressed="true"]{opacity:1;border-color:var(--sk-you);box-shadow:var(--sk-glow-sovereign)}
+@media (prefers-reduced-motion:reduce){#eternal *{transition:none!important}}
+
+/* CYPHERPUNK — the instrument, complete at first paint: tables, a numbered pipeline, receipts */
+.et-c{font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink)}
+.et-c-path{font:600 15px/1.45 var(--sk-font-mono);overflow-wrap:anywhere;color:var(--sk-ink)}
+.et-c-chips{display:flex;flex-wrap:wrap;gap:var(--sk-s1,6px);margin:var(--sk-s2,12px) 0}
+.et-c-chips span{padding:2px var(--sk-s1,6px);border:1px solid var(--sk-line);border-radius:4px;background:var(--sk-bg-card);font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-soft)}
+.et-c-chips span.on{border-color:var(--sk-guard);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong)}
+.et-c-chips span.ok{border-color:var(--sk-verified);color:var(--sk-verified)}
+.et-c-guard{display:flex;justify-content:space-between;align-items:center;gap:var(--sk-s2,12px);flex-wrap:wrap;min-height:var(--sk-control-min,44px);padding:var(--sk-s1,6px) var(--sk-s3,18px);border:1px dashed var(--sk-guard);border-radius:var(--sk-radius-sm,6px);background:var(--sk-guard-wash);color:var(--sk-guard)}
+.et-c-guard b{font-weight:600;color:var(--sk-sovereign-strong)}
+.et-c-h{margin:var(--sk-s4,24px) 0 var(--sk-s2,12px);font:600 15px/1.45 var(--sk-font-mono);color:var(--sk-ink);letter-spacing:normal;text-transform:none;border:0;padding:0;background:none}
+.et-c-tab{width:100%;margin:var(--sk-s2,12px) 0 var(--sk-s1,6px);border-collapse:separate;border-spacing:0;border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm,6px);overflow:hidden;background:var(--sk-bg-card)}
+.et-c-tab th{padding:var(--sk-s1,6px) var(--sk-s2,12px);text-align:start;font:600 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);border-bottom:1px solid var(--sk-line);background:var(--sk-bg-well)}
+.et-c-tab td{height:var(--sk-control-min,44px);padding:0 var(--sk-s2,12px);border-bottom:1px solid var(--sk-line);font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink);vertical-align:middle}
+.et-c-tab tr:last-child td{border-bottom:0}
+.et-c-tab td:first-child{color:var(--sk-guard)}
+.et-c-tab td small{display:block;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut)}
+.et-c-tab .ok{color:var(--sk-verified)}.et-c-tab .no{color:var(--sk-info)}.et-c-tab .ai{color:var(--sk-ai)}
+.et-c-in{width:100%;min-width:0;min-height:var(--sk-control-min,44px);padding:0 var(--sk-s1,6px);border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm,6px);background:var(--sk-bg);color:var(--sk-ai)!important;font:400 13px/1.45 var(--sk-font-mono)!important;box-sizing:border-box}
+.et-c-pipe{list-style:none;margin:0;padding:0;display:grid;gap:var(--sk-s2,12px);counter-reset:p}
+.et-c-pipe li{display:grid;grid-template-columns:30px 1fr;gap:var(--sk-s1,6px) var(--sk-s2,12px);padding:var(--sk-s2,12px);border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm,6px);background:var(--sk-bg-card);counter-increment:p}
+.et-c-pipe li::before{content:counter(p,decimal-leading-zero);color:var(--sk-guard);font-weight:600}
+.et-c-pipe li b{font-weight:600;color:var(--sk-ink)}
+.et-c-pipe li p{grid-column:2;margin:0;color:var(--sk-ink-soft);word-break:break-word}
+.et-c-pipe li.done b{color:var(--sk-verified)}
+.et-c-pipe li.guard{border-style:dashed;border-color:var(--sk-guard)}.et-c-pipe li.guard b{color:var(--sk-guard)}
+.et-c-pipe li.now{border-color:var(--sk-ai);box-shadow:inset 0 0 0 1px var(--sk-ai)}.et-c-pipe li.now b{color:var(--sk-ai)}
+.et-c-pipe li.todo p{color:var(--sk-ink-mut)}
+.et-c-pipe li.fail{border-color:var(--sk-info)}.et-c-pipe li.fail b{color:var(--sk-info)}
+.et-c-primary{display:flex;align-items:center;justify-content:center;width:100%;height:52px;margin-top:var(--sk-s3,18px);border:0;border-radius:var(--sk-radius-sm,6px);background:var(--sk-primary);color:var(--sk-on-primary)!important;font:600 14px/1.2 var(--sk-font-mono)!important;text-decoration:none;cursor:pointer}
+.et-c-primary:disabled{background:var(--sk-bg-well);color:var(--sk-ink-mut)!important;cursor:not-allowed}
+.et-c-kv{width:100%;border-collapse:collapse;border:1px solid var(--sk-line);background:var(--sk-bg-card)}
+.et-c-kv th{width:96px;padding:var(--sk-s2,12px);text-align:start;vertical-align:top;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);border-bottom:1px solid var(--sk-line)}
+.et-c-kv td{padding:var(--sk-s2,12px);border-bottom:1px solid var(--sk-line);overflow-wrap:anywhere;font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink)}
+.et-c-kv .no{color:var(--sk-info)}.et-c-kv .yes{color:var(--sk-verified)}.et-c-kv .sig{color:var(--sk-you)}.et-c-kv .ai{color:var(--sk-ai)}
+.et-c-verify{margin-top:var(--sk-s3,18px);padding:var(--sk-s3,18px);border-radius:var(--sk-radius-sm,6px);background:var(--sk-bg-card);border:1px solid var(--sk-line)}
+.et-c-verify-h{font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);margin-bottom:var(--sk-s1,6px)}
+.et-c-verify ol{margin:0;padding-inline-start:var(--sk-s4,24px);display:grid;gap:var(--sk-s1,6px)}
+.et-c-verify code{font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ai);word-break:break-all}
+.et-c-row{display:grid;grid-template-columns:1fr 1fr;gap:var(--sk-s2,12px);margin-top:var(--sk-s3,18px)}
+.et-c-ghost{display:flex;align-items:center;justify-content:center;min-height:52px;padding:0 var(--sk-s1,6px);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius-sm,6px);background:transparent;color:var(--sk-ink)!important;text-decoration:none;text-align:center;font:600 14px/1.2 var(--sk-font-mono)!important;cursor:pointer}
+.et-c-said{margin-top:var(--sk-s2,12px);color:var(--sk-ink-soft);word-break:break-all}
+.et-c-said:empty{display:none}
+
+/* the huddle — a calm door (bee), an orbit you hold to enter (raver), the protocol bench (cypherpunk) */
+#eternal input{box-sizing:border-box;width:100%}
+#eternal input::placeholder{color:var(--sk-ink-mut);opacity:1}
+.et-b-form{display:flex;flex-direction:column;gap:var(--sk-s3,18px);padding:var(--sk-s3,18px);background:var(--sk-bg-card);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl,18px)}
+.et-b-field{display:flex;flex-direction:column;gap:2px;font:600 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+.et-b-field small{font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-field input{margin-top:var(--sk-s1,6px);min-height:var(--sk-control-row,52px);padding:0 var(--sk-s2,12px);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius,12px);background:var(--sk-bg-card);color:var(--sk-ink);font:400 16px/1.45 var(--sk-font-bee-sans)}
+.et-b-said.ok,.et-b-said.off{padding:var(--sk-s2,12px) var(--sk-s3,18px);border-radius:var(--sk-radius,12px);color:var(--sk-ink)}
+.et-b-said.off{background:var(--sk-guard-wash)}
+.et-b-said.ok{background:var(--sk-verified-wash)}
+.et-b-said b{font-weight:600}
+.et-b-said small{display:block;margin-top:var(--sk-s1,6px);font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut);overflow-wrap:anywhere}
+.et-r-fields{display:grid;grid-template-columns:1fr 1fr;gap:var(--sk-s2,12px);margin-top:var(--sk-s3,18px)}
+.et-r-field{display:flex;flex-direction:column;gap:var(--sk-s1,6px);font:600 13px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-field input{min-height:var(--sk-control-min,44px);padding:0 var(--sk-s3,18px);border:1.5px solid var(--sk-sovereign);border-radius:var(--sk-radius-pill,999px);background:var(--sk-sovereign-wash);color:var(--sk-ink);font:600 14px/1.25 var(--sk-font-raver-body)}
+.et-r-orbit{position:relative;width:100%;max-width:330px;aspect-ratio:1;margin:var(--sk-s3,18px) auto 0}
+.et-r-orbit>svg{position:absolute;inset:0;width:100%;height:100%}
+#etHdOrbit .ring{fill:none;stroke:var(--sk-sovereign);stroke-width:1.5;opacity:.55}
+#etHdOrbit .ring.idle{stroke-dasharray:3 7;stroke:var(--sk-sovereign-soft)}
+#etHdOrbit .ring.lit{stroke:var(--sk-sovereign-strong);opacity:1}
+#etHdOrbit .ring.off{stroke:var(--sk-guard);stroke-dasharray:2 6;opacity:1}
+#etHdOrbit .hand polygon{fill:var(--sk-sovereign);stroke:var(--sk-sovereign-strong);stroke-width:1.5}
+#etHdOrbit .hand text{fill:var(--sk-ink);font:600 13px/1.4 var(--sk-font-raver-body);text-anchor:middle}
+#etHdOrbit .seatfree polygon{fill:none;stroke:var(--sk-sovereign-soft);stroke-width:1.5;stroke-dasharray:4 4}
+.et-r-ring{transform:rotate(-90deg);width:62%!important;height:62%!important;inset:19%!important}
+.hold-track{fill:none;stroke:var(--sk-line);stroke-width:8}
+.hold-prog{fill:none;stroke:var(--sk-biomass);stroke-width:8;stroke-linecap:round;stroke-dasharray:578;stroke-dashoffset:578}
+#etHdHold{position:absolute;left:25%;top:25%;width:50%;height:50%;margin:0;padding:0;border:0;background:var(--sk-primary);color:var(--sk-on-primary)!important;clip-path:polygon(50% 0,93% 25%,93% 75%,50% 100%,7% 75%,7% 25%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;touch-action:none;user-select:none;-webkit-user-select:none}
+#etHdHold b{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em}
+#etHdHold span{font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em}
+#etHdHold:disabled{background:var(--sk-sovereign-wash);color:var(--sk-sovereign-soft)!important;cursor:not-allowed}
+#etHdHold.in{background:var(--sk-verified);color:var(--sk-on-primary)!important}
+.et-r-note.off{color:var(--sk-guard)}
+.et-r-note.ok{color:var(--sk-verified)}
+.et-c-params{table-layout:fixed}
+.et-c-params th:first-child{width:72px}
+.et-c-tab td.inp{padding:0 var(--sk-s1,6px)}
+
+/* ── THE WHOLE HUDDLE, dressed per register: the page's own variables mapped onto skaists
+   tokens. The stage keeps its black in every register: the art is drawn on black. ── */
+body[data-reg]{--bg:var(--sk-bg);--crt:var(--sk-ai);--cyan:var(--sk-ai);--pink:var(--sk-you);--dim:var(--sk-ink-mut);background:var(--sk-bg);color:var(--sk-ink)}
+body[data-reg] h1{color:var(--sk-ink);text-shadow:none;letter-spacing:normal}
+body[data-reg] h1 .gear{color:var(--sk-you)}
+body[data-reg] h1 span[style]{color:var(--sk-ink-mut)!important}
+body[data-reg] .sub{color:var(--sk-ink-mut)}
+body[data-reg] .sub b,body[data-reg] .hint b{color:var(--sk-ink)}
+body[data-reg] .wrap :is(.row,#join) :is(input,button){min-height:var(--sk-control-min,44px);background:var(--sk-bg-card);color:var(--sk-ink);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius,12px)}
+body[data-reg] .wrap .row input[type=range]{accent-color:var(--sk-primary);border:0;background:transparent;border-radius:0}
+body[data-reg] .wrap :is(.row,#join) button:hover{background:var(--sk-bg-well);color:var(--sk-ink)}
+body[data-reg] label.ctl{min-height:var(--sk-control-min,44px);color:var(--sk-ink-mut)}
+body[data-reg] label.ctl span{color:var(--sk-ink-soft)}
+body[data-reg] canvas#stage{background:var(--sk-bg-card);border-color:var(--sk-line);border-radius:var(--sk-radius,12px)}
+body[data-reg] #meta{color:var(--sk-ink-soft)}
+body[data-reg] .hint{color:var(--sk-ink-mut)}
+body[data-reg] .hint code{color:var(--sk-ai);font-family:var(--sk-font-mono)}
+body[data-reg] .foot{color:var(--sk-ink-mut);border-top-color:var(--sk-line)}
+body[data-reg] a{color:var(--sk-link)}
+body[data-reg] #bnr-beta-badge{opacity:1!important}
+body[data-reg] #bnr-beta-badge a{display:inline-flex;align-items:center;min-height:44px;padding:0 16px!important;background:var(--sk-bg-card)!important;color:var(--sk-link)!important;border-color:var(--sk-line)!important}
+/* NEW BEE — a daylight studio: paper, serif title, generous reading text */
+body[data-reg="bee"]{font:400 16px/1.6 var(--sk-font-bee-sans)}
+body[data-reg="bee"] h1{font:400 28px/1.1 var(--sk-font-bee-serif)}
+body[data-reg="bee"] h1 .gear{font-size:28px}
+body[data-reg="bee"] .sub,body[data-reg="bee"] .hint{font:400 16px/1.6 var(--sk-font-bee-sans)}
+body[data-reg="bee"] .wrap :is(.row,#join) :is(input,button){font:400 16px/1.45 var(--sk-font-bee-sans)}
+body[data-reg="bee"] label.ctl,body[data-reg="bee"] #meta,body[data-reg="bee"] .foot{font:400 14px/1.6 var(--sk-font-bee-sans)}
+body[data-reg="bee"] .hint code{font-size:15px}
+body[data-reg="bee"] #bnr-beta-badge{font:600 14px/1.4 var(--sk-font-bee-sans)!important}
+body[data-reg="bee"] #bnr-beta-badge a{border-radius:var(--sk-radius-pill)!important}
+/* RAVER — the studio at night: display title, round controls */
+body[data-reg="raver"]{font:400 14px/1.6 var(--sk-font-raver-body)}
+body[data-reg="raver"] h1{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em}
+body[data-reg="raver"] h1 .gear{font-size:30px}
+body[data-reg="raver"] .sub,body[data-reg="raver"] .hint{font:400 14px/1.6 var(--sk-font-raver-body)}
+body[data-reg="raver"] .wrap :is(.row,#join) :is(input,button){font:600 13px/1.4 var(--sk-font-raver-body);border-radius:var(--sk-radius-pill)}
+body[data-reg="raver"] .wrap .row input[type=range]{border-radius:0}
+body[data-reg="raver"] label.ctl,body[data-reg="raver"] #meta,body[data-reg="raver"] .foot{font:400 13px/1.6 var(--sk-font-raver-body)}
+body[data-reg="raver"] .hint code{font-size:14px}
+body[data-reg="raver"] canvas#stage{border-radius:var(--sk-radius-xl);box-shadow:var(--sk-glow-sovereign)}
+body[data-reg="raver"] #bnr-beta-badge{font:600 13px/1.4 var(--sk-font-raver-body)!important}
+body[data-reg="raver"] #bnr-beta-badge a{border-radius:var(--sk-radius-pill)!important}
+/* CYPHERPUNK — the bench: mono throughout, dense, never under 12 px, cut corners */
+body[data-reg="cypherpunk"]{font:400 13px/1.6 var(--sk-font-mono)}
+body[data-reg="cypherpunk"] h1{font:600 15px/1.45 var(--sk-font-mono)}
+body[data-reg="cypherpunk"] h1 .gear{font-size:15px}
+body[data-reg="cypherpunk"] .sub,body[data-reg="cypherpunk"] .hint,body[data-reg="cypherpunk"] .hint code{font:400 13px/1.6 var(--sk-font-mono)}
+body[data-reg="cypherpunk"] .wrap :is(.row,#join) :is(input,button){font:400 13px/1.45 var(--sk-font-mono);border-radius:var(--sk-radius-sm)}
+body[data-reg="cypherpunk"] .wrap .row input[type=range]{border-radius:0}
+body[data-reg="cypherpunk"] label.ctl,body[data-reg="cypherpunk"] #meta,body[data-reg="cypherpunk"] .foot{font:500 12px/1.6 var(--sk-font-mono)}
+body[data-reg="cypherpunk"] canvas#stage{border-radius:var(--sk-radius-sm)}
+body[data-reg="cypherpunk"] #bnr-beta-badge{font:500 12px/1.45 var(--sk-font-mono)!important}
+body[data-reg="cypherpunk"] #bnr-beta-badge a{border-radius:var(--sk-radius-sm)!important}
+/* the huddle's own pieces: the join card, the chips, the error line (guard lilac, never red) */
+body[data-reg] #join{background:var(--sk-bg-card);border-color:var(--sk-line);border-radius:var(--sk-radius-xl,18px)}
+body[data-reg] #join h2{color:var(--sk-ink)}
+body[data-reg] #join .note{color:var(--sk-ink-mut)}
+body[data-reg] #join label.ctl{width:100%}
+body[data-reg] #join input{width:100%!important}
+body[data-reg] #err{color:var(--sk-guard)}
+body[data-reg] #room-bar{color:var(--sk-ink-mut)}
+body[data-reg] .chip{border-color:var(--sk-line);color:var(--sk-ink);border-radius:var(--sk-radius-sm,6px)}
+body[data-reg] .chip.me{border-color:var(--sk-ai);color:var(--sk-ai)}
+body[data-reg] .hint a,body[data-reg] #join .note a{display:inline-block;padding-block:12px}
+body[data-reg="bee"] #join h2{font:400 28px/1.1 var(--sk-font-bee-serif)}
+body[data-reg="bee"] #join .note,body[data-reg="bee"] #err{font:400 16px/1.6 var(--sk-font-bee-sans)}
+body[data-reg="bee"] .chip,body[data-reg="bee"] #room-bar{font:400 14px/1.6 var(--sk-font-bee-sans)}
+body[data-reg="raver"] #join h2{font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em}
+body[data-reg="raver"] #join .note,body[data-reg="raver"] #err{font:400 14px/1.6 var(--sk-font-raver-body)}
+body[data-reg="raver"] .chip,body[data-reg="raver"] #room-bar{font:400 13px/1.6 var(--sk-font-raver-body)}
+body[data-reg="raver"] #join{box-shadow:var(--sk-glow-sovereign)}
+body[data-reg="cypherpunk"] #join h2{font:600 15px/1.45 var(--sk-font-mono)}
+body[data-reg="cypherpunk"] #join .note,body[data-reg="cypherpunk"] #err{font:400 13px/1.6 var(--sk-font-mono)}
+body[data-reg="cypherpunk"] .chip,body[data-reg="cypherpunk"] #room-bar{font:500 12px/1.6 var(--sk-font-mono)}
+body[data-reg="cypherpunk"] #join{border-radius:var(--sk-radius-sm,6px)}
+body[data-reg="bee"]{background-image:none}
+</style>
 </head>
 <body><div class="wrap">
+<!-- ETERNAL FRONT (founder blueprint 2026-09-26, docs/design/eternal): three separate products in
+     one surface. ONE data layer (the page's own join form, its own error line, its own stage and
+     peer chips, and its own byte counters) drives all three, so the facts cannot drift. Every
+     front writes INTO the page's own form and presses the page's own "join the huddle": the venue
+     is the one the reader brings, and "joined" is drawn only when the page's own stage opens. -->
+<section id="eternal" aria-label="the huddle: the forge room across machines">
+
+  <!-- NEW BEE — a calm door: where to meet, your pass, your name, one button -->
+  <div class="et-b">
+    <div class="et-b-mark">bBuzz forge</div>
+    <h2 class="et-b-h" data-etk="et.hud.beeH">play together, far apart.</h2>
+    <p class="et-b-lede" data-etk="et.hud.beeLede">the same field as the two-tab room, shared across machines: people and helpers anywhere, turning the same knobs.</p>
+    <div class="et-b-guard"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span data-etk="et.hud.beeGuard">what you type stays on this page. it goes only to the place you choose.</span></div>
+    <div class="et-b-form">
+      <label class="et-b-field"><span data-etk="et.hud.beeUrl">the place to meet</span><small data-etk="et.hud.beeUrlNote">a venue address, from whoever runs the venue</small><input id="etHdBeeUrl" type="text" inputmode="url" autocomplete="off" spellcheck="false" placeholder="wss://"></label>
+      <label class="et-b-field"><span data-etk="et.hud.beeTok">your pass</span><small data-etk="et.hud.beeTokNote">a join token, from the same person</small><input id="etHdBeeTok" type="text" autocomplete="off" spellcheck="false"></label>
+      <label class="et-b-field"><span data-etk="et.hud.beeName">your name</span><input id="etHdBeeName" type="text" autocomplete="off" spellcheck="false" placeholder="artist"></label>
+    </div>
+    <div class="et-b-rows">
+      <div class="et-b-row"><span data-etk="et.hud.beeRoom">the room</span><small id="etHdBeeRoom"></small></div>
+      <div class="et-b-row"><span data-etk="et.hud.beePeople">people here</span><small id="etHdBeePeople"></small></div>
+    </div>
+    <div class="et-b-said" id="etHdBeeSaid" aria-live="polite"></div>
+    <div class="et-b-act">
+      <button type="button" class="et-b-primary" id="etHdBeeJoin" disabled>join the huddle</button>
+      <a class="et-b-link" href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/runbooks/huddle-venue.sh" target="_blank" rel="noopener noreferrer"><span data-etk="et.hud.beeHow">no place yet? how to start one ↗</span><span class="et-sr"> (opens in a new tab)</span></a>
+      <p class="et-b-foot" data-etk="et.hud.beeFoot">your pass never goes in the address bar, so a shared link cannot carry it.</p>
+    </div>
+  </div>
+
+  <!-- RAVER — the huddle as an orbit: you at the heart, every hand on the ring; hold to step in -->
+  <div class="et-r">
+    <div class="et-r-top"><h2 class="et-r-h" data-etk="et.hud.raverH">the huddle</h2><span class="et-r-hint" id="etHdHint" aria-live="polite"></span></div>
+    <div class="et-r-fields">
+      <label class="et-r-field"><span data-etk="et.hud.rUrl">venue</span><input id="etHdRvUrl" type="text" inputmode="url" autocomplete="off" spellcheck="false" placeholder="wss://"></label>
+      <label class="et-r-field"><span data-etk="et.hud.rTok">pass</span><input id="etHdRvTok" type="text" autocomplete="off" spellcheck="false"></label>
+    </div>
+    <div class="et-r-orbit">
+      <svg id="etHdOrbit" viewBox="0 0 330 330" role="img" aria-label="the huddle as an orbit: you at the heart, every other hand on the ring"></svg>
+      <svg class="et-r-ring" viewBox="0 0 200 200" aria-hidden="true"><circle cx="100" cy="100" r="92" class="hold-track"/><circle cx="100" cy="100" r="92" class="hold-prog" id="etHdHoldProg"/></svg>
+      <button type="button" id="etHdHold" disabled aria-describedby="etHdRaverSaid"><b>hold</b><span>to step in</span></button>
+    </div>
+    <div class="et-r-legend" id="etHdLegend"></div>
+    <div class="et-r-note" id="etHdRaverSaid" aria-live="polite"></div>
+  </div>
+
+  <!-- CYPHERPUNK — the protocol bench: the form bound, the join as a pipeline, the receipt -->
+  <div class="et-c">
+    <div class="et-c-path" id="etHdPath">livekit://</div>
+    <div class="et-c-chips"><span class="on">livekit-client 2.13.5</span><span>yjs 13.6.20</span><span>data channel · reliable</span></div>
+    <div class="et-c-guard"><span data-etk="et.hud.cGuard">keys held by this page = none · server of ours = none</span><b data-etk="et.hud.cGuardB">the venue is yours</b></div>
+    <h3 class="et-c-h" data-etk="et.hud.cFormH">join · the page's own form, bound</h3>
+    <table class="et-c-tab et-c-params"><thead><tr><th>field</th><th>value</th></tr></thead><tbody>
+      <tr><td>url</td><td class="inp"><input class="et-c-in" id="etHdCyUrl" type="text" inputmode="url" autocomplete="off" spellcheck="false" aria-label="venue url, wss or ws" placeholder="wss://"></td></tr>
+      <tr><td>token</td><td class="inp"><input class="et-c-in" id="etHdCyTok" type="text" autocomplete="off" spellcheck="false" aria-label="join token"></td></tr>
+      <tr><td>room</td><td class="inp"><input class="et-c-in" id="etHdCyRoom" type="text" autocomplete="off" spellcheck="false" aria-label="room name"></td></tr>
+      <tr><td>name</td><td class="inp"><input class="et-c-in" id="etHdCyName" type="text" autocomplete="off" spellcheck="false" aria-label="your name" placeholder="artist"></td></tr>
+    </tbody></table>
+    <h3 class="et-c-h" data-etk="et.hud.cPipeH">join · in order</h3>
+    <ol class="et-c-pipe" id="etHdPipe"></ol>
+    <button type="button" class="et-c-primary" id="etHdCyJoin" disabled>connect</button>
+    <h3 class="et-c-h" data-etk="et.hud.cRcptH">receipt · this page</h3>
+    <table class="et-c-kv" id="etHdReceipt"></table>
+    <div class="et-c-verify">
+      <div class="et-c-verify-h" data-etk="et.hud.cVerifyH">verify · no trust in this page needed</div>
+      <ol>
+        <li><code>docs/runbooks/huddle-venue.sh</code> <span data-etk="et.hud.cV1">· a local dev venue, well-known dev keys, never production</span></li>
+        <li><code>node e2e/huddle-local.mjs</code> <span data-etk="et.hud.cV2">· two browsers join it and converge on one field over the data channel</span></li>
+        <li data-etk="et.hud.cV3">watch the network panel: the token rides the websocket to your venue, and nowhere else</li>
+      </ol>
+    </div>
+    <div class="et-c-row">
+      <a class="et-c-ghost" href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/runbooks/huddle-venue.sh" target="_blank" rel="noopener noreferrer"><span data-etk="et.hud.cRunbook">the runbook ↗</span><span class="et-sr"> (opens in a new tab)</span></a>
+      <a class="et-c-ghost" href="https://github.com/beehive-nature/beehive-nature/blob/main/surfaces/forge/huddle.html" target="_blank" rel="noopener noreferrer"><span data-etk="et.hud.cFork">fork the template ↗</span><span class="et-sr"> (opens in a new tab)</span></a>
+    </div>
+  </div>
+</section>
+<h2 class="et-archive-h" id="etArchive" data-etk="et.hud.archive">the whole huddle</h2>
 <h1>the huddle <span class="gear">⚙</span> <span style="color:var(--dim)">// the forge room, across machines</span></h1>
 <div class="sub">The two-tab room's big sibling: same shared composition, but the transport is a
 <b>LiveKit</b> data channel — real rooms, real distance, humans and bAiGenTs as ordinary
@@ -246,6 +553,153 @@ async function join(){
   }
 }
 if(q.get('autostart') === '1') join();
+</script>
+<script>
+/* ETERNAL FRONT — one data layer, three renderers (docs/design/eternal). The facts come from the
+   page itself: its own join form (#vUrl, #vTok, #vRoom, #vName), its own error line (#err), its own
+   stage (#stage-wrap opens only once the venue answered and the field rendered), its own peer chips
+   (#peers) and its own byte counters (window.__hk). Every front writes INTO that form and presses the
+   page's own #connect; nothing here stores, logs or sends the pass anywhere but into that field. */
+(function(){
+  'use strict';
+  var $=function(id){return document.getElementById(id);};
+  var T=function(k,f){var t=window.BNRLanguage&&window.BNRLanguage.text;return t?t(k,f):f;};
+  var F=[['url','vUrl',['etHdBeeUrl','etHdRvUrl','etHdCyUrl']],['token','vTok',['etHdBeeTok','etHdRvTok','etHdCyTok']],['room','vRoom',['etHdCyRoom']],['name','vName',['etHdBeeName','etHdCyName']]];
+  var D={ready:false,state:'idle',step:'',reason:'',url:'',token:false,tokenLen:0,room:'',name:'',fromAddress:false,peers:[],sent:null,recv:null,seed:'',params:null};
+  var R={holding:false};
+  var q=new URLSearchParams(location.search);
+  var joining=q.get('autostart')==='1',hold={t0:0,raf:0};   /* ?autostart=1 joins at load (the local-venue receipt) */
+  function esc(v){return String(v==null?'':v).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+  function fill(s,o){return String(s).replace(/\{(\w+)\}/g,function(_,k){return o[k]==null?'':o[k];});}
+  function keyed(){document.querySelectorAll('[data-etk]').forEach(function(e){if(e.dataset.etEn==null)e.dataset.etEn=e.textContent;e.textContent=T(e.dataset.etk,e.dataset.etEn);});}
+
+  /* ── THE ONE DATA LAYER: the page's own form, error line, stage, chips and counters ── */
+  function read(){
+    D.url=$('vUrl').value.trim();var tk=$('vTok').value.trim();D.token=!!tk;D.tokenLen=tk.length;
+    D.room=$('vRoom').value.trim()||'forge';D.name=$('vName').value.trim();
+    D.fromAddress=!!(q.get('url')||q.get('token'));
+    var joined=!$('stage-wrap').classList.contains('hidden'),err=$('err').style.display==='block';
+    D.reason=err?$('err').textContent:'';
+    D.step=!err?'':/both needed/.test(D.reason)?'validate':/SDK failed to load/.test(D.reason)?'sdk':'connect';
+    if(joined||err)joining=false;
+    D.state=joined?'joined':err?'failed':joining?'joining':'idle';
+    D.peers=joined?[].map.call($('peers').querySelectorAll('.chip'),function(c){return c.textContent;}).filter(function(t){return !/^just you/.test(t);}):[];
+    D.sent=window.__hk?window.__hk.sent:null;D.recv=window.__hk?window.__hk.recv:null;
+    D.seed=joined?$('seed').value:'';
+    D.params=joined?{density:+$('pDensity').value,hueBase:+$('pHue').value,hueDrift:+$('pDrift').value,symmetry:+$('pSym').value}:null;
+    D.ready=true;
+  }
+  function can(){return (D.url||q.get('url'))&&(D.token||q.get('token'))&&D.state!=='joining'&&D.state!=='joined';}
+  function host(u){try{var x=new URL(u);return x.protocol+'//'+x.host;}catch(e){return u;}}
+  function scheme(u){return /^wss:\/\//i.test(u)?'wss · encrypted':/^ws:\/\//i.test(u)?'ws · plain, local tries only':T('et.hud.cSchemeBad','not a ws(s) address');}
+
+  /* ── NEW BEE ── */
+  function bee(){
+    $('etHdBeeRoom').textContent='“'+D.room+'”';
+    $('etHdBeePeople').textContent=D.state==='joined'?(D.peers.length?fill(T('et.hud.bPeopleN','you and {n} more'),{n:D.peers.length}):T('et.hud.bPeopleYou','just you, so far')):T('et.hud.bPeopleNot','not joined yet');
+    var s=$('etHdBeeSaid'),b=$('etHdBeeJoin');
+    s.className='et-b-said'+(D.state==='failed'?' off':D.state==='joined'?' ok':'');
+    var why=D.step==='validate'?T('et.hud.bWhyBoth','a place to meet and a pass are both needed.'):D.step==='sdk'?T('et.hud.bWhySdk','the part that talks to venues could not load in this browser. it comes from a public library online: check the connection and try again.'):T('et.hud.bWhyVenue','the venue did not let us in. check the address and the pass with whoever runs it.');
+    s.innerHTML=D.state==='joined'?esc(T('et.hud.bJoined','you are in. the shared field is open below.')):D.state==='failed'?'<b>'+esc(T('et.hud.bFailed','could not join.'))+'</b> '+esc(why)+'<small>'+esc(T('et.hud.bHeard','what the page heard:'))+' '+esc(D.reason)+'</small>':D.state==='joining'?esc(T('et.hud.bJoining','knocking on the venue…')):'';
+    b.textContent=D.state==='joined'?T('et.hud.bGoField','go to the shared field'):D.state==='joining'?T('et.hud.bJoiningBtn','joining…'):T('et.hud.bJoin','join the huddle');
+    b.disabled=!(can()||D.state==='joined');
+  }
+  /* ── RAVER ── */
+  function orbit(){
+    var cx=165,cy=165,h='',n=D.peers.length,st=D.state;
+    [150,122].forEach(function(r,i){h+='<circle class="ring '+(st==='joined'?'lit':st==='failed'?'off':'idle')+'" cx="'+cx+'" cy="'+cy+'" r="'+r+'"/>';});
+    var seats=Math.max(6,n);
+    for(var i=0;i<seats;i++){
+      var a=-Math.PI/2+i*2*Math.PI/seats,x=cx+136*Math.cos(a),y=cy+136*Math.sin(a),p=[];
+      for(var j=0;j<6;j++){var b=Math.PI/180*(60*j-90);p.push((x+15*Math.cos(b)).toFixed(1)+','+(y+15*Math.sin(b)).toFixed(1));}
+      if(i<n)h+='<g class="hand"><polygon points="'+p.join(' ')+'"/><title>'+esc(D.peers[i])+'</title></g>';
+      else if(st!=='failed')h+='<g class="seatfree"><polygon points="'+p.join(' ')+'"/></g>';
+    }
+    $('etHdOrbit').innerHTML=h;
+  }
+  function raver(){
+    var st=D.state;
+    $('etHdHint').textContent=st==='joined'?fill(T(D.peers.length===1?'et.hud.rHintOne':'et.hud.rHintMany',D.peers.length===1?'1 other hand on the ring':'{n} other hands on the ring'),{n:D.peers.length}):st==='failed'?T('et.hud.rHintFail','the venue did not open'):st==='joining'?T('et.hud.rHintJoin','stepping in…'):T('et.hud.rHintIdle','no venue yet · the ring is empty');
+    orbit();
+    var bits=[[T('et.hud.rVenue','venue'),D.url?host(D.url):T('et.hud.rUnset','not set')],[T('et.hud.rPass','pass'),D.token?T('et.hud.rHeld','held here'):T('et.hud.rUnset','not set')],[T('et.hud.rRoom','room'),D.room]];
+    if(st==='joined')bits.push([T('et.hud.rSent','sent'),String(D.sent)],[T('et.hud.rRecv','heard'),String(D.recv)]);
+    $('etHdLegend').innerHTML=bits.map(function(b){return '<span>'+esc(b[0])+' <b>'+esc(b[1])+'</b></span>';}).join('');
+    var hb=$('etHdHold'),inn=st==='joined';hb.disabled=!(can()||inn);hb.classList.toggle('in',inn);
+    hb.querySelector('b').textContent=inn?T('et.hud.rIn','in'):st==='joining'?T('et.hud.rWait','wait'):T('et.hud.rHold','hold');
+    hb.querySelector('span').textContent=inn?T('et.hud.rInSub','tap for the field'):st==='joining'?T('et.hud.rWaitSub','knocking'):T('et.hud.rHoldSub','to step in');
+    var n=$('etHdRaverSaid');n.className='et-r-note'+(st==='failed'?' off':st==='joined'?' ok':'');
+    n.textContent=st==='joined'?T('et.hud.rJoined','in · the field below is everyone\'s'):st==='failed'?D.reason:st==='joining'?'':!can()?T('et.hud.rNeed','a venue and a pass light the heart · then hold it'):T('et.hud.rReady','hold the heart to step in · your hold is the knock');
+  }
+  /* ── CYPHERPUNK ── */
+  function cy(){
+    var st=D.state,u=q.get('url')||D.url;
+    $('etHdPath').textContent='livekit://'+(u?host(u).replace(/^wss?:\/\//,''):T('et.hud.cNoVenue','(no venue)'))+'/'+D.room;
+    var fail=function(k){return st==='failed'&&D.step===k;},past=function(k){var o=['validate','sdk','connect'];return st==='joined'||(st==='failed'&&o.indexOf(D.step)>o.indexOf(k));};
+    var steps=[
+      ['validate · url + token',D.fromAddress?T('et.hud.cFromAddr','read from the address (?url, ?token): local receipts only'):(u&&(D.token||q.get('token'))?fill(T('et.hud.cBoth','both present · token {n} chars, not repeated here'),{n:D.tokenLen}):T('et.hud.cMissing','waiting · a venue url and a join token are both needed')),fail('validate')?'fail':past('validate')||(st==='joining')?'done':'todo'],
+      ["import · livekit-client@2.13.5/+esm (jsDelivr)",fail('sdk')?D.reason:past('sdk')?T('et.hud.cLoaded','loaded'):T('et.hud.cNotYet','not yet'),fail('sdk')?'fail':past('sdk')?'done':'todo'],
+      ['connect · room.connect(url, token, { roomName: '+JSON.stringify(D.room)+' })',fail('connect')?D.reason:st==='joined'?T('et.hud.cConnected','connected'):T('et.hud.cNotYet','not yet'),fail('connect')?'fail':st==='joined'?'done':'todo'],
+      ['seam · shared.js + yjs@13.6.20 · createSharedPiece',st==='joined'?T('et.hud.cSeamOk','transport.send = publishData(bytes, { reliable: true })'):T('et.hud.cNotYet','not yet'),st==='joined'?'done':'todo'],
+      ['listen · DataReceived → piece.receive(bytes)',st==='joined'?fill(T('et.hud.cListen','sent {s} · received {r}'),{s:D.sent,r:D.recv}):T('et.hud.cNotYet','not yet'),st==='joined'?'done':'todo'],
+      ['render · the hexfield CORE, in every machine',st==='joined'?'seed '+JSON.stringify(D.seed):T('et.hud.cNotYet','not yet'),st==='joined'?'done':'todo']
+    ];
+    var now=st==='failed'?-1:steps.findIndex(function(s){return s[2]==='todo';});
+    $('etHdPipe').innerHTML=steps.map(function(s,i){return '<li class="'+s[2]+(i===now?' now':'')+'"><b>'+esc(s[0])+'</b><p>'+esc(s[1])+'</p></li>';}).join('');
+    var no=function(t){return '<span class="no">'+esc(t)+'</span>';};
+    $('etHdReceipt').innerHTML=[
+      ['state',st==='joined'?'<span class="yes">'+esc(T('et.hud.cJoined','joined'))+'</span>':st==='failed'?no(T('et.hud.cFailed','not joined · failed')):no(st==='joining'?T('et.hud.cJoining','joining'):T('et.hud.cIdle','not joined'))],
+      ['venue',u?esc(host(u))+' · '+esc(scheme(u)):no(T('et.hud.cUnset','not set'))],
+      ['token',D.token||q.get('token')?esc(fill(T('et.hud.cTok','present · {n} chars · not repeated here, never in the address'),{n:D.tokenLen||String(q.get('token')||'').length})):no(T('et.hud.cUnset','not set'))],
+      ['room',esc(JSON.stringify(D.room))],
+      ['name',D.name?esc(JSON.stringify(D.name)):no(T('et.hud.cNameAuto','not set · the page picks artist-xxx on join'))],
+      ['peers',st==='joined'?(D.peers.length?esc(D.peers.join(' · ')):esc(T('et.hud.cJustYou','none yet · just you'))):no(T('et.hud.cNotJoined','not joined'))],
+      ['bytes',st==='joined'?'sent '+D.sent+' · received '+D.recv:no(T('et.hud.cNotJoined','not joined'))],
+      ['stored',esc(T('et.hud.cStored','nothing · no storage, no log, no cookie from this form'))]
+    ].map(function(r){return '<tr><th>'+r[0]+'</th><td>'+r[1]+'</td></tr>';}).join('');
+    var b=$('etHdCyJoin');b.disabled=!(can()||st==='joined');b.textContent=st==='joined'?T('et.hud.cBtnJoined','connected · the stage is open below'):st==='joining'?T('et.hud.cBtnJoining','connecting…'):T('et.hud.cBtn','connect');
+  }
+  function sync(){F.forEach(function(f){var v=$(f[1]).value;f[2].forEach(function(id){var el=$(id);if(document.activeElement!==el&&el.value!==v)el.value=v;});});}
+  function paint(){read();sync();bee();raver();cy();}
+
+  /* ── the one hand-off: the page's own form and its own button do the joining ── */
+  function join(){
+    if(D.state==='joined'){$('stage-wrap').scrollIntoView({behavior:'smooth',block:'start'});return;}
+    if(!can())return;
+    joining=true;paint();
+    $('connect').click();
+  }
+  var hp=null;
+  function holdStart(e){
+    var b=$('etHdHold');if(b.disabled||hold.raf)return;if(e&&e.preventDefault)e.preventDefault();
+    if(D.state==='joined'){join();return;}   /* already in: the heart takes you to the shared field */
+    hp=$('etHdHoldProg');hold.t0=performance.now();R.holding=true;
+    (function tick(now){var f=Math.min(1,(now-hold.t0)/1200);hp.style.strokeDashoffset=String(578*(1-f));
+      if(f>=1){hold.raf=0;R.holding=false;hp.style.strokeDashoffset='578';join();return;}hold.raf=requestAnimationFrame(tick);})(hold.t0);
+  }
+  function holdStop(){if(!hold.raf)return;cancelAnimationFrame(hold.raf);hold.raf=0;R.holding=false;$('etHdHoldProg').style.strokeDashoffset='578';}
+  function wire(){
+    F.forEach(function(f){
+      f[2].forEach(function(id){$(id).addEventListener('input',function(){$(f[1]).value=this.value;paint();});});
+      $(f[1]).addEventListener('input',paint);
+    });
+    $('connect').addEventListener('click',function(){joining=true;setTimeout(paint,0);},true);
+    var mo=new MutationObserver(paint);
+    [['err',{attributes:true,childList:true,characterData:true,subtree:true}],['stage-wrap',{attributes:true,attributeFilter:['class']}],['peers',{childList:true,subtree:true,characterData:true}],['meta',{childList:true,characterData:true,subtree:true}]].forEach(function(o){mo.observe($(o[0]),o[1]);});
+    $('etHdBeeJoin').addEventListener('click',join);
+    $('etHdCyJoin').addEventListener('click',join);
+    var hb=$('etHdHold');
+    hb.addEventListener('pointerdown',function(e){try{hb.setPointerCapture(e.pointerId);}catch(x){}holdStart(e);});
+    ['pointerup','pointercancel','pointerleave'].forEach(function(t){hb.addEventListener(t,holdStop);});
+    hb.addEventListener('keydown',function(e){if((e.key===' '||e.key==='Enter')&&!e.repeat){e.preventDefault();holdStart(e);}});
+    hb.addEventListener('keyup',function(e){if(e.key===' '||e.key==='Enter')holdStop();});
+    hb.addEventListener('contextmenu',function(e){e.preventDefault();});
+    document.addEventListener('bregister',function(){setTimeout(paint,0);});
+    document.addEventListener('blang',function(){keyed();paint();});
+    setInterval(function(){if(D.state==='joined')paint();},2000);   /* the byte counters have no event of their own */
+  }
+  keyed();wire();paint();
+  window.__eternal={data:D,raver:R};
+})();
 </script>
 </div></body>
 </html>

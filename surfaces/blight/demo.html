@@ -94,8 +94,309 @@ pre{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:
      page end reserves the bar plus the chip and nothing ever ends beneath either. */
   body{padding-bottom:calc(var(--tbar-h,50px) + 24px)!important}
 </style>
+<style>
+/* ── ETERNAL FRONT (docs/design/eternal) — three products in one surface. Every value is a skaists
+   token (../skaists.css, compiled from docs/design/skaists/tokens.json): no hand-picked hex, size or
+   corner. Measured by e2e/skaists-conformance.mjs. One register visible at a time; new bee is the
+   default. Every class is et- prefixed and every control is reset here, so the page's own bare
+   rules (button, input, h1, section) never reach in. ── */
+#eternal{box-sizing:border-box;width:100%;max-width:600px;margin:0 auto var(--sk-s2);padding:var(--sk-s2) 0 0;text-align:left;letter-spacing:normal;text-transform:none;line-height:1.45;background:none;border:0;border-radius:0}
+#eternal *,#eternal *::before,#eternal *::after{box-sizing:border-box;text-transform:none}
+#eternal>.et-r,#eternal>.et-c{display:none}
+body[data-reg="raver"] #eternal>.et-b,body[data-reg="cypherpunk"] #eternal>.et-b{display:none}
+body[data-reg="raver"] #eternal>.et-r{display:block}
+body[data-reg="cypherpunk"] #eternal>.et-c{display:block}
+#eternal [hidden]{display:none!important}
+#eternal button{margin:0;padding:0;border:0;border-radius:0;background:none;color:inherit;font:inherit;letter-spacing:normal;min-width:0;box-shadow:none;cursor:pointer;text-align:center}
+#eternal button:disabled{cursor:not-allowed}
+#eternal input,#eternal select{margin:0;min-width:0;letter-spacing:normal;box-shadow:none}
+#eternal svg,#eternal canvas,#eternal img{display:block;max-width:100%}
+#eternal a{text-decoration:none}
+#eternal :focus-visible{outline:2px solid var(--sk-focus);outline-offset:3px}
+#eternal h2,#eternal h3,#eternal p,#eternal ol,#eternal ul,#eternal table,#eternal figure,#eternal label{margin:0;padding:0;border:0;background:none;letter-spacing:normal;text-shadow:none}
+#eternal h2,#eternal h3{-webkit-text-fill-color:currentColor;background-image:none}
+#eternal table{border-collapse:separate;border-spacing:0}
+#eternal th,#eternal td{border:0;padding:0;vertical-align:top;max-width:none;overflow:visible;white-space:normal;text-overflow:clip}
+#eternal code{background:none;padding:0;border:0}
+#etArchive.et-archive-h{margin:var(--sk-s5) 0 var(--sk-s2);padding:var(--sk-s4) 0 0;border:0;border-top:1px solid var(--sk-line);color:var(--sk-ink);text-transform:none;letter-spacing:normal;background:none;-webkit-text-fill-color:currentColor;text-shadow:none}
+body[data-reg="bee"] #etArchive.et-archive-h{font:400 28px/1.1 var(--sk-font-bee-serif)}
+body[data-reg="raver"] #etArchive.et-archive-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em}
+body[data-reg="cypherpunk"] #etArchive.et-archive-h{font:600 15px/1.45 var(--sk-font-mono)}
+
+/* NEW BEE — a calm room: plain rows, one reassurance, one magenta action, a link, a footnote */
+#eternal .et-b{display:flex;flex-direction:column;gap:var(--sk-s3);color:var(--sk-ink);font:400 16px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-b-mark{font:400 18px/1.2 var(--sk-font-house);color:var(--sk-sovereign)}
+#eternal .et-b-h{font:400 40px/1.05 var(--sk-font-bee-serif);color:var(--sk-ink)}
+#eternal .et-b-lede{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink-mut);text-wrap:pretty}
+#eternal .et-b-guard{display:flex;align-items:center;gap:var(--sk-s2);min-height:var(--sk-control-min,44px);padding:var(--sk-s1) var(--sk-s3);border-radius:var(--sk-radius);background:var(--sk-guard-wash);color:var(--sk-guard);font:600 15px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-ic{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+#eternal .et-b-rows{display:flex;flex-direction:column;background:var(--sk-bg-card);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl);overflow:hidden}
+#eternal .et-b-row{display:flex;align-items:center;justify-content:space-between;gap:var(--sk-s2);width:100%;min-height:var(--sk-control-row,52px);padding:var(--sk-s1) var(--sk-s3);border:0;border-bottom:1px solid var(--sk-line-soft);border-radius:0;background:var(--sk-bg-card);text-align:left;font:500 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+#eternal .et-b-row:last-child{border-bottom:0}
+#eternal .et-b-row>span{flex:1 1 auto}
+#eternal .et-b-row small{display:flex;align-items:center;gap:var(--sk-s1);flex:none;max-width:55%;text-align:right;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-row small.et-ok{color:var(--sk-verified)}
+#eternal .et-b-row small.et-out{color:var(--sk-guard)}
+#eternal .et-b-row[aria-expanded="true"]{background:var(--sk-sovereign-tint);color:var(--sk-sovereign-strong);font-weight:600}
+#eternal .et-b-row[aria-expanded="true"] small{color:var(--sk-sovereign-strong)}
+#eternal .et-chev{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;flex:none;transition:transform var(--dur,.26s)}
+#eternal .et-b-row[aria-expanded="true"] .et-chev{transform:rotate(90deg)}
+#eternal .et-b-open{padding:var(--sk-s2) var(--sk-s3);background:var(--sk-sovereign-tint);border-bottom:1px solid var(--sk-line-soft);font:400 15px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+#eternal .et-b-person{display:flex;align-items:center;gap:var(--sk-s2);min-height:var(--sk-control-person,60px);padding:var(--sk-s1) var(--sk-s3);border-bottom:1px solid var(--sk-line-soft);background:var(--sk-bg-card)}
+#eternal .et-b-person:last-child{border-bottom:0}
+#eternal .et-b-person i{width:40px;height:40px;border-radius:var(--sk-radius-pill);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong);display:flex;align-items:center;justify-content:center;font:600 14px/1.4 var(--sk-font-bee-sans);font-style:normal;flex:none}
+#eternal .et-b-person i.et-ok{background:var(--sk-verified-wash);color:var(--sk-verified)}
+#eternal .et-b-person i.et-dash{background:var(--sk-bg-card);border:1.5px dashed var(--sk-ink-dim);color:var(--sk-ink-mut)}
+#eternal .et-b-person b{display:block;font:500 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink);overflow-wrap:anywhere}
+#eternal .et-b-person span{display:block;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut);overflow-wrap:anywhere}
+#eternal .et-b-act{display:flex;flex-direction:column;gap:var(--sk-s1);margin-top:var(--sk-s1)}
+#eternal .et-b-primary{display:flex;align-items:center;justify-content:center;width:100%;min-height:var(--sk-control-primary,54px);padding:0 var(--sk-s3);border:0;border-radius:var(--sk-radius-lg);background:var(--sk-primary);color:var(--sk-on-primary);font:600 17px/1.2 var(--sk-font-bee-sans);text-align:center;cursor:pointer}
+#eternal .et-b-primary:disabled{background:var(--sk-bg-well);color:var(--sk-ink-mut)}
+#eternal .et-b-link{display:flex;align-items:center;justify-content:center;min-height:var(--sk-control-min,44px);padding:0 var(--sk-s2);border:0;background:none;font:600 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-link);cursor:pointer;text-align:center}
+#eternal .et-b-link:hover{color:var(--sk-link-hover)}
+#eternal .et-b-foot{text-align:center;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-card{display:flex;flex-direction:column;gap:var(--sk-s1);padding:var(--sk-s3);background:var(--sk-bg-card);border:1px dashed var(--sk-ink-dim);border-radius:var(--sk-radius-xl)}
+#eternal .et-b-card.et-ok{border:1px solid var(--sk-line);background:var(--sk-verified-wash)}
+#eternal .et-b-card.et-guard{border:1px dashed var(--sk-guard);background:var(--sk-guard-wash)}
+#eternal .et-b-card h3{font:400 28px/1.1 var(--sk-font-bee-serif);color:var(--sk-ink)}
+#eternal .et-b-card.et-guard h3,#eternal .et-b-card.et-guard p{color:var(--sk-guard)}
+#eternal .et-b-card p{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-field{display:flex;flex-direction:column;gap:var(--sk-s1)}
+#eternal .et-b-field>span{font:600 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-input{width:100%;height:var(--sk-control-primary,54px);padding:0 var(--sk-s3);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius-md);background:var(--sk-bg-card);color:var(--sk-ink);font:400 15px/1.4 var(--sk-font-mono);outline-offset:3px}
+
+/* RAVER — the data is the art; lowercase is allowed joy; the numbers never change */
+#eternal .et-r{color:var(--sk-ink);font:400 14px/1.4 var(--sk-font-raver-body)}
+#eternal .et-r-top{display:flex;align-items:baseline;justify-content:space-between;gap:var(--sk-s2);flex-wrap:wrap}
+#eternal .et-r-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em;color:var(--sk-ink)}
+#eternal .et-r-hint{font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-art{position:relative;width:100%;max-width:360px;margin:var(--sk-s3) auto var(--sk-s2)}
+#eternal .et-r-art>svg{width:100%;height:auto;filter:drop-shadow(var(--sk-glow-sovereign))}
+#eternal .et-r-art [role="button"]{cursor:pointer}
+#eternal .et-r-art [role="button"]:focus{outline:none}
+#eternal .et-r-art [role="button"]:focus-visible .et-hit{stroke:var(--sk-ink);stroke-width:2}
+#eternal .et-r-mid{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;text-align:center;pointer-events:none;max-width:42%}
+#eternal .et-r-mid b{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em;color:var(--sk-ink)}
+#eternal .et-r-mid span{font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-legend{display:flex;flex-wrap:wrap;justify-content:center;gap:var(--sk-s1) var(--sk-s3);margin:0 0 var(--sk-s3)}
+#eternal .et-r-legend span{display:inline-flex;align-items:center;gap:var(--sk-s1);font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-legend i{width:14px;height:14px;border-radius:var(--sk-radius-pill);flex:none}
+#eternal .et-r-card{display:flex;gap:var(--sk-s2);align-items:flex-start;padding:var(--sk-s2) var(--sk-s3);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl);background:var(--sk-sovereign-tint);min-height:var(--sk-control-person,60px)}
+#eternal .et-r-card .et-rk{min-width:44px;height:44px;padding:0 var(--sk-s1);border-radius:var(--sk-radius);background:var(--sk-sovereign-strong);color:var(--sk-bg);display:flex;align-items:center;justify-content:center;font:700 15px/1.2 var(--sk-font-raver-display);flex:none}
+#eternal .et-r-card b{display:block;font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink);overflow-wrap:anywhere}
+#eternal .et-r-card span{display:block;margin-top:var(--sk-s1);font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft);overflow-wrap:anywhere}
+#eternal .et-r-sub{margin:var(--sk-s4) 0 var(--sk-s2);font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em;color:var(--sk-ink)}
+#eternal .et-r-tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:var(--sk-s2)}
+#eternal .et-r-tile{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--sk-s1);min-height:96px;padding:var(--sk-s2) var(--sk-s1);border-radius:var(--sk-radius-xl);border:1.5px solid var(--sk-sovereign);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong);font:600 14px/1.25 var(--sk-font-raver-body);text-align:center;cursor:pointer;transition:border-color var(--dur,.26s),box-shadow var(--dur,.26s)}
+#eternal .et-r-tile.et-dash{border-style:dashed;border-color:var(--sk-ink-dim);background:var(--sk-bg-card);color:var(--sk-ink-soft)}
+#eternal .et-r-tile.et-on{border-color:var(--sk-verified);box-shadow:var(--sk-glow-ok);color:var(--sk-ink)}
+#eternal .et-r-tile[aria-pressed="true"]{border-color:var(--sk-you);box-shadow:var(--sk-glow-sovereign);color:var(--sk-ink)}
+#eternal .et-r-tile svg{width:26px;height:26px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+#eternal .et-r-tile small{font:400 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-note{margin:var(--sk-s2) 0 0;text-align:center;font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-pill{display:flex;align-items:center;justify-content:center;width:100%;min-height:58px;margin-top:var(--sk-s4);padding:0 var(--sk-s3);border:0;border-radius:var(--sk-radius-pill);background:var(--sk-primary);color:var(--sk-on-primary);font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em;text-align:center;cursor:pointer}
+#eternal .et-r-pill:disabled{background:var(--sk-sovereign-wash);color:var(--sk-sovereign-soft)}
+#eternal .et-r-ghost{display:flex;align-items:center;justify-content:center;margin:var(--sk-s2) auto 0;min-height:var(--sk-control-min,44px);padding:0 var(--sk-s2);border:0;background:none;color:var(--sk-link);font:600 14px/1.25 var(--sk-font-raver-body);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+#eternal .et-r-input{width:100%;height:var(--sk-control-primary,54px);margin-top:var(--sk-s3);padding:0 var(--sk-s3);border:1.5px solid var(--sk-sovereign-soft);border-radius:var(--sk-radius-pill);background:var(--sk-bg-card);color:var(--sk-ink);font:400 14px/1.4 var(--sk-font-raver-body)}
+#eternal .et-r-hold{position:relative;width:176px;height:176px;margin:var(--sk-s3) auto 0}
+#eternal .et-r-hold>svg{position:absolute;inset:0;width:100%;height:100%;transform:rotate(-90deg);pointer-events:none}
+#eternal .et-r-hold .et-track{fill:none;stroke:var(--sk-line);stroke-width:8}
+#eternal .et-r-hold .et-prog{fill:none;stroke:var(--sk-biomass);stroke-width:8;stroke-linecap:round;stroke-dasharray:578;stroke-dashoffset:578}
+#eternal .et-r-hold>button{position:absolute;inset:20px;border:0;background:var(--sk-primary);color:var(--sk-on-primary);clip-path:polygon(50% 0,93% 25%,93% 75%,50% 100%,7% 75%,7% 25%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--sk-s1);cursor:pointer;touch-action:none;user-select:none;-webkit-user-select:none}
+#eternal .et-r-hold>button b{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em}
+#eternal .et-r-hold>button span{font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em}
+#eternal .et-r-hold>button:disabled{background:var(--sk-sovereign-wash);color:var(--sk-sovereign-soft)}
+@media (prefers-reduced-motion:reduce){#eternal *{transition:none!important;animation:none!important}}
+
+/* CYPHERPUNK — the instrument, complete at first paint: tables, a numbered pipeline, receipts */
+#eternal .et-c{font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink);overflow-wrap:anywhere}
+#eternal .et-c-path{font:600 15px/1.45 var(--sk-font-mono);color:var(--sk-ink);word-break:break-all}
+#eternal .et-c-sub{margin-top:var(--sk-s1);font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut)}
+#eternal .et-c-chips{display:flex;flex-wrap:wrap;gap:var(--sk-s1);margin:var(--sk-s2) 0}
+#eternal .et-c-chips span{padding:2px var(--sk-s1);border:1px solid var(--sk-line);border-radius:4px;background:var(--sk-bg-card);font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-soft)}
+#eternal .et-c-chips span.et-on{border-color:var(--sk-guard);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong)}
+#eternal .et-c-chips span.et-ok{border-color:var(--sk-verified);color:var(--sk-verified)}
+#eternal .et-c-chips span.et-no{border-color:var(--sk-info);color:var(--sk-info)}
+#eternal .et-c-guard{display:flex;justify-content:space-between;align-items:center;gap:var(--sk-s2);flex-wrap:wrap;min-height:var(--sk-control-min,44px);padding:var(--sk-s1) var(--sk-s3);border:1px dashed var(--sk-guard);border-radius:var(--sk-radius-sm);background:var(--sk-guard-wash);color:var(--sk-guard)}
+#eternal .et-c-guard b{font-weight:600;color:var(--sk-sovereign-strong)}
+#eternal .et-c-h{margin:var(--sk-s4) 0 var(--sk-s2);font:600 15px/1.45 var(--sk-font-mono);color:var(--sk-ink)}
+#eternal .et-c-tab{width:100%;margin:var(--sk-s2) 0 var(--sk-s1);border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm);overflow:hidden;background:var(--sk-bg-card);table-layout:auto}
+#eternal .et-c-tab th{padding:var(--sk-s1) var(--sk-s2);text-align:left;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);border-bottom:1px solid var(--sk-line);background:var(--sk-bg-well)}
+#eternal .et-c-tab td{height:var(--sk-control-min,44px);padding:var(--sk-s1) var(--sk-s2);border-bottom:1px solid var(--sk-line);font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink);vertical-align:middle;word-break:break-word}
+#eternal .et-c-tab tr:last-child td{border-bottom:0}
+#eternal .et-c-tab td:first-child,#eternal .et-c-tab th:first-child{white-space:nowrap;width:1%;color:var(--sk-guard)}
+#eternal .et-c-tab th:first-child{color:var(--sk-ink-mut)}
+#eternal .et-c-tab small{display:block;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut)}
+#eternal .et-c-tab .et-nw{white-space:nowrap}
+#eternal .et-c-tab tr.et-pick{cursor:pointer}
+#eternal .et-c-tab tr.et-pick:hover td{background:var(--sk-sovereign-tint)}
+#eternal .et-c-tab tr.et-sel td{background:var(--sk-sovereign-tint)}
+#eternal .et-st-ok{color:var(--sk-verified)}
+#eternal .et-st-no{color:var(--sk-info)}
+#eternal .et-st-wait{color:var(--sk-ai)}
+#eternal .et-st-guard{color:var(--sk-guard)}
+#eternal .et-c-pipe{list-style:none;margin:0;padding:0;display:grid;gap:var(--sk-s2);counter-reset:etp}
+#eternal .et-c-pipe li{display:grid;grid-template-columns:28px 1fr;gap:var(--sk-s1) var(--sk-s2);padding:var(--sk-s2) var(--sk-s3);border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm);background:var(--sk-bg-card);counter-increment:etp}
+#eternal .et-c-pipe li::before{content:counter(etp,decimal-leading-zero);color:var(--sk-guard);font-weight:600}
+#eternal .et-c-pipe li b{font-weight:600;color:var(--sk-ink)}
+#eternal .et-c-pipe li p{grid-column:2;color:var(--sk-ink-soft)}
+#eternal .et-c-pipe li.et-done b{color:var(--sk-verified)}
+#eternal .et-c-pipe li.et-guard{border-style:dashed;border-color:var(--sk-guard)}
+#eternal .et-c-pipe li.et-guard b{color:var(--sk-guard)}
+#eternal .et-c-pipe li.et-now{border-color:var(--sk-ai);box-shadow:inset 0 0 0 1px var(--sk-ai)}
+#eternal .et-c-pipe li.et-now b{color:var(--sk-ai)}
+#eternal .et-c-pipe li.et-todo p{color:var(--sk-ink-mut)}
+#eternal .et-c-primary{display:flex;align-items:center;justify-content:center;width:100%;min-height:52px;margin-top:var(--sk-s3);padding:0 var(--sk-s2);border:0;border-radius:var(--sk-radius-sm);background:var(--sk-primary);color:var(--sk-on-primary);font:600 14px/1.2 var(--sk-font-mono);text-align:center;cursor:pointer}
+#eternal .et-c-primary:disabled{background:var(--sk-bg-well);color:var(--sk-ink-mut);border:1px dashed var(--sk-line)}
+#eternal .et-c-kv{width:100%;border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm);overflow:hidden;background:var(--sk-bg-card)}
+#eternal .et-c-kv th{width:104px;padding:var(--sk-s2);text-align:left;vertical-align:top;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);border-bottom:1px solid var(--sk-line);background:var(--sk-bg-card)}
+#eternal .et-c-kv td{padding:var(--sk-s2);border-bottom:1px solid var(--sk-line);font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink);word-break:break-word}
+#eternal .et-c-kv tr:last-child th,#eternal .et-c-kv tr:last-child td{border-bottom:0}
+#eternal .et-c-verify{margin-top:var(--sk-s3);padding:var(--sk-s3);border-radius:var(--sk-radius-sm);background:var(--sk-bg-card);border:1px solid var(--sk-line)}
+#eternal .et-c-verify-h{font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);margin-bottom:var(--sk-s1)}
+#eternal .et-c-verify ol{margin:0;padding-left:var(--sk-s4);display:grid;gap:var(--sk-s1)}
+#eternal .et-c-verify code{font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ai);word-break:break-all}
+#eternal .et-c-out{margin-top:var(--sk-s2);font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink-soft)}
+#eternal .et-c-row{display:grid;grid-template-columns:1fr 1fr;gap:var(--sk-s2);margin-top:var(--sk-s3)}
+#eternal .et-c-ghost{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:52px;padding:var(--sk-s1);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius-sm);background:none;color:var(--sk-ink);text-align:center;font:600 14px/1.2 var(--sk-font-mono);cursor:pointer}
+#eternal .et-c-ghost small{font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut)}
+#eternal .et-c-in{display:flex;gap:var(--sk-s1);margin-top:var(--sk-s2)}
+#eternal .et-c-input{flex:1 1 auto;width:100%;height:var(--sk-control-min,44px);padding:0 var(--sk-s2);border:1px solid var(--sk-ink-mut);border-radius:var(--sk-radius-sm);background:var(--sk-bg-card);color:var(--sk-ink);font:400 13px/1.45 var(--sk-font-mono)}
+#eternal .et-c-btn{flex:none;min-width:var(--sk-control-min,44px);min-height:var(--sk-control-min,44px);padding:0 var(--sk-s2);border:1.5px solid var(--sk-ai);border-radius:var(--sk-radius-sm);background:none;color:var(--sk-ai);font:600 14px/1.2 var(--sk-font-mono)}
+#eternal .et-c-a{display:inline-flex;align-items:center;min-height:var(--sk-control-min,44px);min-width:var(--sk-control-min,44px);color:var(--sk-link)}
+#eternal .et-c-a:hover{color:var(--sk-link-hover)}
+
+/* the fleet bar and the hub chip (shared, untouched) worn in this page's register */
+body[data-reg] #fleet-nav{border-top-color:var(--sk-line)!important;color:var(--sk-ink-soft)!important}
+body[data-reg] #fleet-nav a{color:var(--sk-ink-soft)!important;border-color:var(--sk-line)!important;background:transparent!important}
+body[data-reg] #fleet-nav a.here{color:var(--sk-link)!important;border-color:var(--sk-link)!important}
+body[data-reg] #fleet-nav a:hover{color:var(--sk-link-hover)!important;border-color:var(--sk-link-hover)!important}
+body[data-reg="bee"] #fleet-nav,body[data-reg="bee"] #fleet-nav a{font:500 14px/1.4 var(--sk-font-bee-sans)!important}
+body[data-reg="raver"] #fleet-nav,body[data-reg="raver"] #fleet-nav a{font:600 14px/1.25 var(--sk-font-raver-body)!important}
+body[data-reg="cypherpunk"] #fleet-nav,body[data-reg="cypherpunk"] #fleet-nav a{font:500 13px/1.45 var(--sk-font-mono)!important}
+body[data-reg] #bnr-beta-badge{opacity:1!important}
+body[data-reg] #bnr-beta-badge a{background:var(--sk-bg-card)!important;color:var(--sk-link)!important;border-color:var(--sk-line)!important;display:inline-flex;align-items:center;min-height:44px;padding:0 16px!important}
+body[data-reg="bee"] #bnr-beta-badge{font:600 14px/1.4 var(--sk-font-bee-sans)!important}
+body[data-reg="raver"] #bnr-beta-badge{font:600 14px/1.25 var(--sk-font-raver-body)!important}
+body[data-reg="cypherpunk"] #bnr-beta-badge{font:500 12px/1.45 var(--sk-font-mono)!important}
+body[data-reg="cypherpunk"] #bnr-beta-badge a{border-radius:var(--sk-radius-sm)!important}
+/* demo specifics: the necklace of pieces, the hold pill; the page's body is a centred column */
+#eternal{align-self:stretch;max-width:600px}
+#etArchive.et-archive-h{width:100%;max-width:62rem;align-self:center}
+#eternal .et-hold{position:relative;overflow:hidden;touch-action:none;user-select:none;-webkit-user-select:none}
+#eternal .et-hold>.et-fill{position:absolute;left:0;top:0;bottom:0;width:0;background:var(--sk-sovereign-strong);opacity:.55;pointer-events:none}
+#eternal .et-hold>.et-lab{position:relative}
+#eternal .et-r-tiles{grid-template-columns:1fr 1fr}
+#eternal .et-r-tile:disabled{opacity:.62;cursor:not-allowed}
+#eternal .et-r-art .et-bead{transition:fill var(--dur,.6s),stroke var(--dur,.6s)}
+/* 390 px fix (found by this pass, present on HEAD): once a payload is assembled, the receiver's
+   one-line JSON preview has no break point and widened the one-column grid to 575 px, so a phone
+   zoomed out mid-beam. The column may now shrink and the preview wraps; the stage is untouched. */
+.grid>*{min-width:0}
+#installed .muted{overflow-wrap:anywhere}
+
+/* ── THE WHOLE BEAM, dressed per register: the page's own variables mapped onto skaists tokens.
+   The logo is the transmission: its two canvases, its codec and its loop are untouched, and the
+   stage keeps the dark ground the at-rest mandala was drawn for, in every register. ── */
+body[data-reg]{--bg:var(--sk-bg);--bg-card:var(--sk-bg-card);--ink:var(--sk-ink);--ink-mut:var(--sk-ink-mut);--ink-dim:var(--sk-ink-dim);--line:var(--sk-line);
+  --ai:var(--sk-ai);--biomass:var(--sk-biomass);--sovereign:var(--sk-sovereign);--you:var(--sk-you);--primary:var(--sk-primary);--info:var(--sk-info);--verified:var(--sk-verified);--guard:var(--sk-guard);
+  background:var(--sk-bg);color:var(--sk-ink)}
+body[data-reg] .btn.primary{color:var(--sk-on-primary)}
+body[data-reg] .panel,body[data-reg] .guide,body[data-reg] .app{border-radius:var(--sk-radius-xl)}
+body[data-reg="bee"]{color-scheme:light;font-family:var(--sk-font-bee-sans)}
+body[data-reg="bee"] .stage{background:var(--sk-ink);border-radius:var(--sk-radius-xl)}
+body[data-reg="bee"] h1{font:400 40px/1.05 var(--sk-font-bee-serif)}
+body[data-reg="bee"] h1 b{background:none;color:var(--sk-sovereign);-webkit-text-fill-color:currentColor}
+body[data-reg="bee"] .sub,body[data-reg="bee"] .muted{font-size:16px;color:var(--sk-ink-mut)}
+body[data-reg="bee"] .steps span{font-size:14px}
+body[data-reg="bee"] .btn{border-radius:var(--sk-radius-lg);font:600 16px/1.2 var(--sk-font-bee-sans)}
+body[data-reg="bee"] .btn.ghost{border-color:var(--sk-ink)}
+body[data-reg="bee"] pre{background:var(--sk-bg-well);color:var(--sk-ink-soft)}
+body[data-reg="raver"]{font-family:var(--sk-font-raver-body)}
+body[data-reg="raver"] h1{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em}
+body[data-reg="raver"] .btn{border-radius:var(--sk-radius-pill);font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em}
+body[data-reg="raver"] .sub,body[data-reg="raver"] .muted,body[data-reg="raver"] .steps span{font-size:14px;color:var(--sk-ink-soft)}
+body[data-reg="raver"] .wrap{font-size:14px}
+body[data-reg="raver"] .gauge{font-size:14px}
+body[data-reg="raver"] .app h3{font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em}
+body[data-reg="raver"] pre{border-radius:var(--sk-radius)}
+body[data-reg="cypherpunk"]{font-family:var(--sk-font-mono)}
+body[data-reg="cypherpunk"] h1{font:600 15px/1.45 var(--sk-font-mono)}
+body[data-reg="cypherpunk"] h1 b{background:none;color:var(--sk-ai);-webkit-text-fill-color:currentColor}
+body[data-reg="cypherpunk"] .panel,body[data-reg="cypherpunk"] .guide,body[data-reg="cypherpunk"] .app,body[data-reg="cypherpunk"] .btn,body[data-reg="cypherpunk"] pre{border-radius:var(--sk-radius-sm)}
+body[data-reg="cypherpunk"] .btn{font:600 14px/1.2 var(--sk-font-mono)}
+body[data-reg="cypherpunk"] .sub,body[data-reg="cypherpunk"] .muted,body[data-reg="cypherpunk"] .gauge{font-size:13px}
+</style>
+<link rel="stylesheet" href="../skaists.css">
 </head>
 <body>
+
+<!-- ETERNAL FRONT (founder blueprint 2026-09-26, docs/design/eternal): three separate products in one
+     surface. THE LOGO IS THE TRANSMISSION, so no front draws on it, times it or changes its codec:
+     the two canvases below (#beam, #qr), the bComb codec and the loop are exactly as they were. ONE
+     data layer (the codec's own geometry and frame layout from window.bcomb, the page's own
+     payloads, and the live loop state the page keeps: the beam on or off, the pieces its in-page
+     receiver has caught, its self-verify line) drives all three. Every gesture presses the page's
+     own buttons: send/stop, payload, mode. -->
+<section id="eternal" aria-label="the bLiGhTbeAM">
+
+  <!-- NEW BEE — a calm room: what it sends, how it travels, one button to start -->
+  <div class="et-b">
+    <div class="et-b-mark">bLighTnetWorK</div>
+    <h2 class="et-b-h" data-etk="et.demo.beeH">send something by light</h2>
+    <p class="et-b-lede" data-etk="et.demo.beeLede">this screen can pass a small message to a phone using only light. no wifi, no pairing, nothing to install.</p>
+    <div class="et-b-guard"><svg class="et-ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span data-etk="et.demo.beeGuard">nothing crosses a network. the light stays in the room.</span></div>
+    <div class="et-b-rows" id="etDmBRows"></div>
+    <div class="et-b-act">
+      <button type="button" class="et-b-primary" id="etDmBGo">start the beam</button>
+      <button type="button" class="et-b-link" id="etDmBMode">use any phone camera instead</button>
+      <p class="et-b-foot" data-etk="et.demo.beeFoot">these are sample messages. their signatures say preview; nothing is signed for real.</p>
+    </div>
+  </div>
+
+  <!-- RAVER — the message as a necklace of pieces around the beam; each piece lights as it is caught -->
+  <div class="et-r">
+    <div class="et-r-top"><h2 class="et-r-h" data-etk="et.demo.raverH">the necklace</h2><span class="et-r-hint" id="etDmRHint"></span></div>
+    <div class="et-r-art">
+      <svg id="etDmSky" viewBox="-200 -200 400 400" role="img" aria-label="the message as a ring of pieces; a piece lights when this page's receiver catches it"></svg>
+      <div class="et-r-mid" aria-hidden="true"><b id="etDmMid"></b><span id="etDmMidS"></span></div>
+    </div>
+    <div class="et-r-legend" id="etDmLegend"></div>
+    <div class="et-r-tiles" id="etDmTiles"></div>
+    <button type="button" class="et-r-pill et-hold" id="etDmRGo" aria-describedby="etDmRSay"><span class="et-fill" id="etDmRFill"></span><span class="et-lab" id="etDmRGoL">hold to beam</span></button>
+    <p class="et-r-note" id="etDmRSay"></p>
+  </div>
+
+  <!-- CYPHERPUNK — the codec as an instrument: geometry, frame layout, pipeline, receipt, self-test -->
+  <div class="et-c">
+    <div class="et-c-path" id="etDmPath">bcomb://mono-v2</div>
+    <div class="et-c-sub" data-etk="et.demo.cySub">luminance only · no network · loops until stopped · one screen, any number of cameras</div>
+    <div class="et-c-chips" id="etDmChips"></div>
+    <div class="et-c-guard"><span data-etk="et.demo.cyGuard">hue carries 0 bits · the decoder never reads a colour</span><b data-etk="et.demo.cyGuardB">rim + halo = decoration</b></div>
+    <button type="button" class="et-c-primary" id="etDmCyGo">▶ beam · loop until stopped</button>
+    <h3 class="et-c-h" data-etk="et.demo.cyGeoH">geometry · flat-top axial hex, 6 rings</h3>
+    <table class="et-c-tab"><thead><tr><th>ring</th><th>role</th><th class="et-nw">cells</th></tr></thead><tbody id="etDmGeo"></tbody></table>
+    <h3 class="et-c-h" data-etk="et.demo.cyFrameH">frame · one comb, one frame</h3>
+    <table class="et-c-tab"><thead><tr><th>#</th><th>field</th><th>bits</th></tr></thead><tbody id="etDmFrame"></tbody></table>
+    <h3 class="et-c-h" data-etk="et.demo.cyPayH">payloads · tap to choose</h3>
+    <table class="et-c-tab"><thead><tr><th>#</th><th>kind · bytes</th><th class="et-nw">frames</th></tr></thead><tbody id="etDmPays"></tbody></table>
+    <h3 class="et-c-h" data-etk="et.demo.cyPipeH">beam pipeline</h3>
+    <ol class="et-c-pipe" id="etDmPipe"></ol>
+    <h3 class="et-c-h" data-etk="et.demo.cyRcptH">receipt · this beam</h3>
+    <table class="et-c-kv" id="etDmReceipt"></table>
+    <div class="et-c-verify">
+      <div class="et-c-verify-h" data-etk="et.demo.verifyH">verify · no camera needed</div>
+      <ol id="etDmVerify"></ol>
+      <button type="button" class="et-c-ghost" id="etDmSelf" style="margin-top:var(--sk-s2);width:100%"><span data-etk="et.demo.cySelf">run bcomb.selfTest() here</span><small data-etk="et.demo.cySelfS">its own canvas · the logo is not touched</small></button>
+      <div class="et-c-out" id="etDmSelfOut" aria-live="polite"></div>
+    </div>
+    <div class="et-c-row">
+      <a class="et-c-ghost" href="#stage" data-etk="et.demo.cyStage">the beam below ↓</a>
+      <a class="et-c-ghost" href="https://github.com/beehive-nature/beehive-nature/blob/main/surfaces/blight/demo.html" target="_blank" rel="noopener noreferrer"><span data-etk="et.demo.cyFork">fork the template ↗</span><small data-etk="et.demo.newTab">opens in a new tab</small></a>
+    </div>
+  </div>
+</section>
+<h2 class="et-archive-h" id="etArchive" data-etk="et.demo.archive">the whole beam</h2>
 <div class="wrap">
   <h1><b>bLighTnetWorK</b> · the bLiGhTbeAM</h1>
   <p class="sub">The logo <b>is</b> the transmission. Every lit hexagon is one bit of the live frame;
@@ -1824,6 +2125,179 @@ showBits('bLighTnetWorK · bLiGhTbeAM · ready');
 step(1);
 </script>
 <div id="bnr-beta-badge" style="position:fixed;right:.6rem;bottom:calc(var(--tbar-h,50px) + 10px);z-index:9997;font:14px ui-monospace,monospace"><a href="../" style="display:inline-flex;align-items:center;min-height:44px;color:#39c5cf;text-decoration:none;border:1px solid #30363d;border-radius:99px;padding:0 16px;background:#161b22">⌂ hub</a></div>
+<script>
+/* ETERNAL FRONT — one data layer, three renderers (docs/design/eternal). The facts are the page's
+   own: the codec's geometry and frame layout (window.bcomb: CELLS, DATA_BITS, PAYLOAD_BYTES,
+   MAX_BEAM_BYTES, framesFor), the payloads (PAYLOADS, CHUNK) and the live loop the page keeps
+   (timer, P, K, got, qrMode, loops, lastSelfOk). The logo is the transmission: nothing here draws on
+   #beam or #qr, changes the tick, or touches the codec. Every gesture presses the page's own button. */
+(function(){
+  var $=function(id){return document.getElementById(id);};
+  var T=function(k,f){var t=window.BNRLanguage&&window.BNRLanguage.text;return t?t(k,f):f;};
+  var K_=function(k,f){return T('et.demo.'+k,f);};
+  var esc=function(v){return String(v==null?'':v).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});};
+  var tok=function(n){return getComputedStyle(document.body).getPropertyValue('--sk-'+n).trim();};
+  var TICK_MS=240; /* send()'s own interval, quoted here, never re-timed */
+  var SAY={plugin:'a plugin',bzdid:'an identity',presence:'a hello for the room',consent:'a yes to an offer'};
+  var SHORT={plugin:'plugin',bzdid:'bzDiD',presence:'presence',consent:'consent'};
+
+  /* ── the data layer ── */
+  var D={geo:[],cells:0,dataBits:0,payloadBytes:0,maxBytes:0,frame:[],payloads:[],sel:'',beaming:false,beamKey:'',K:0,have:0,got:[],qr:false,loops:0,selfOk:'',selfSeen:false};
+  function consts(){
+    var B=window.bcomb; if(!B)return;
+    var byRing=[0,0,0,0,0,0,0]; B.CELLS.forEach(function(c){byRing[c.ring]++;});
+    D.cells=B.CELLS.length; D.dataBits=B.DATA_BITS; D.payloadBytes=B.PAYLOAD_BYTES; D.maxBytes=B.MAX_BEAM_BYTES;
+    D.geo=[
+      {ring:'0',role:'finder core · always lit',cells:byRing[0]},
+      {ring:'1',role:'finder collar · always dark',cells:byRing[1]},
+      {ring:'2–5',role:'data · 1 bit per cell · '+byRing.slice(2,6).join(' + '),cells:byRing[2]+byRing[3]+byRing[4]+byRing[5]},
+      {ring:'6',role:'rim · always lit · 0 bits',cells:byRing[6]}
+    ];
+    D.frame=[['index',6],['total − 1',6],['payload · '+B.PAYLOAD_BYTES+' bytes',B.PAYLOAD_BYTES*8],['crc-8',8]];
+    D.payloads=Object.keys(typeof PAYLOADS!=='undefined'?PAYLOADS:{}).map(function(k){
+      var body=JSON.stringify(PAYLOADS[k].obj), bytes=new TextEncoder().encode(body).length, fr=0;
+      try{fr=B.framesFor(body).length;}catch(e){fr=0;}
+      return {key:k,kind:PAYLOADS[k].obj.kind,bytes:bytes,frames:fr,chunks:Math.ceil(body.length/(typeof CHUNK!=='undefined'?CHUNK:28)),sig:PAYLOADS[k].obj.sig||'none'};
+    });
+  }
+  function live(){
+    D.sel=typeof payloadKey!=='undefined'?payloadKey:'';
+    D.beaming=typeof timer!=='undefined'&&!!timer;
+    D.qr=typeof qrMode!=='undefined'&&!!qrMode;
+    var beamed=typeof P!=='undefined'&&P?D.payloads.filter(function(x){return PAYLOADS[x.key]===P;})[0]:null;
+    D.beamKey=beamed?beamed.key:'';
+    D.K=typeof K!=='undefined'?K:0; D.got=(typeof got!=='undefined'?got:[]).map(Boolean); D.have=D.got.filter(Boolean).length;
+    D.loops=typeof loops!=='undefined'?loops:0;
+    D.selfOk=typeof lastSelfOk!=='undefined'?String(lastSelfOk).replace(/^ · /,''):'';
+    if(!D.beaming)D.selfSeen=D.selfSeen&&!!D.beamKey; if(/✓/.test(D.selfOk))D.selfSeen=true;
+  }
+  var pay=function(k){return D.payloads.filter(function(x){return x.key===k;})[0]||{};};
+  var sig=function(){return [D.sel,D.beaming,D.beamKey,D.qr,D.K,D.have,D.loops,D.selfOk].join('|');};
+
+  /* the one hand-off: the page's own buttons */
+  function beam(){var g=$('go');if(g)g.click();}
+  function choose(k){if(D.beaming)return;for(var n=0;n<6&&typeof payloadKey!=='undefined'&&payloadKey!==k;n++)$('payload').click();all();}
+
+  /* ── NEW BEE ── */
+  function bee(){
+    var s=pay(D.sel), chev='<svg class="et-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>';
+    $('etDmBRows').innerHTML=
+      '<button type="button" class="et-b-row" id="etDmBWhat"'+(D.beaming?' disabled':'')+'><span>'+esc(K_('b.what','what it sends'))+'</span><small>'+esc(K_('b.say.'+D.sel,SAY[D.sel]||D.sel))+chev+'</small></button>'+
+      '<div class="et-b-row"><span>'+esc(K_('b.long','how long it runs'))+'</span><small>'+esc(K_('b.untilStop','until you stop it'))+'</small></div>'+
+      '<div class="et-b-row"><span>'+esc(K_('b.who','who can catch it'))+'</span><small>'+esc(D.qr?K_('b.anyCam','any phone camera'):K_('b.bnr','the BNR receiver'))+'</small></div>'+
+      '<div class="et-b-row"><span>'+esc(K_('b.caught','caught on this page'))+'</span><small class="'+(D.beaming&&D.have===D.K&&D.K?'et-ok':'')+'">'+esc(D.beaming?K_('b.pieces','{h} of {k} pieces').replace('{h}',D.have).replace('{k}',D.K):K_('b.notStarted','not started'))+'</small></div>';
+    $('etDmBGo').textContent=D.beaming?K_('b.stop','stop the beam'):K_('b.start','start the beam');
+    $('etDmBMode').textContent=D.qr?K_('b.hexBack','back to the hexagon beam'):K_('b.anyCamLink','use any phone camera instead');
+    void s;
+  }
+
+  /* ── RAVER ── the message is a ring of pieces; the 84 bits of one frame are the fine ring inside */
+  var KEPT=['biomass','ai','info','sovereign'];
+  function hexPts(cx,cy,r){var p=[];for(var k=0;k<6;k++){var a=Math.PI/3*k;p.push((cx+r*Math.cos(a)).toFixed(1)+','+(cy+r*Math.sin(a)).toFixed(1));}return p.join(' ');}
+  function sky(){
+    var svg=$('etDmSky'); if(!svg) return;
+    var key=D.beaming?D.beamKey:D.sel, n=D.beaming?D.K:(pay(key).chunks||0), h='';
+    for(var b=0;b<D.dataBits;b++){var a=-Math.PI/2+b*2*Math.PI/D.dataBits;
+      h+='<circle cx="'+(104*Math.cos(a)).toFixed(1)+'" cy="'+(104*Math.sin(a)).toFixed(1)+'" r="2.4" fill="'+tok('ink-dim')+'"/>';}
+    var size=Math.min(40,Math.max(9,Math.PI*150/Math.max(n,1)*0.78));
+    for(var i=0;i<n;i++){
+      var a2=-Math.PI/2+i*2*Math.PI/n, cx=150*Math.cos(a2), cy=150*Math.sin(a2), lit=D.beaming&&D.got[i];
+      h+='<polygon class="et-bead" points="'+hexPts(cx,cy,size)+'" fill="'+(lit?tok(KEPT[i%4]):tok('bg'))+'" stroke="'+(lit?tok('bg'):tok('sovereign-soft'))+'" stroke-width="2"'+(lit?'':' stroke-dasharray="4 4"')+'/>';
+    }
+    svg.innerHTML=h;
+    if(D.beaming){$('etDmMid').textContent=D.have+'/'+D.K;$('etDmMidS').textContent=K_('r.caughtHere','caught here');}
+    else{$('etDmMid').textContent=String(n);$('etDmMidS').textContent=K_('r.piecesOf','pieces · {k}').replace('{k}',SHORT[key]||key);}
+  }
+  function raver(){
+    sky();
+    $('etDmRHint').textContent=D.beaming?K_('r.hintLive','looping · join any time'):K_('r.hint','pick a message · hold to beam');
+    $('etDmLegend').innerHTML='<span><i style="background:'+tok('biomass')+'"></i>'+esc(K_('r.lgLit','caught'))+'</span><span><i style="border:1.5px dashed '+tok('sovereign-soft')+'"></i>'+esc(K_('r.lgWait','coming round'))+'</span><span><i style="background:'+tok('ink-dim')+'"></i>'+esc(K_('r.lgBits','{n} bits a frame').replace('{n}',D.dataBits))+'</span>';
+    $('etDmTiles').innerHTML=D.payloads.map(function(x){var on=x.key===(D.beaming?D.beamKey:D.sel);
+      return '<button type="button" class="et-r-tile" data-pay="'+x.key+'" aria-pressed="'+on+'"'+(D.beaming?' disabled':'')+'><span>'+esc(SHORT[x.key]||x.key)+'</span><small>'+esc(K_('r.tile','{b} bytes · {f} pieces').replace('{b}',x.bytes).replace('{f}',x.chunks))+'</small></button>';}).join('');
+    $('etDmRGoL').textContent=D.beaming?K_('r.stop','tap to stop'):K_('r.hold','hold to beam');
+    $('etDmRSay').textContent=D.beaming?K_('r.sayLive','loop {l} · the logo below carries it in black and white · colour here is only the story').replace('{l}',D.loops+1)
+      :K_('r.say','it runs until you stop it · nothing crosses a network');
+  }
+
+  /* ── CYPHERPUNK ── */
+  function cy(){
+    var key=D.beaming?D.beamKey:D.sel, x=pay(key);
+    $('etDmPath').textContent='bcomb://mono-v2/'+(x.kind||key);
+    $('etDmChips').innerHTML='<span class="'+(D.beaming?'et-ok':'')+'">state '+(D.beaming?'beaming':'idle')+'</span><span>mode '+(D.qr?'qr':'bcomb')+'</span><span>payload '+esc(key)+'</span><span class="'+(D.selfSeen?'et-ok':'')+'">self-verify '+(D.selfSeen?'✓':'not yet')+'</span><span class="et-on">network none</span>';
+    $('etDmCyGo').textContent=D.beaming?'■ stop the beam':'▶ beam · loop until stopped';
+    $('etDmGeo').innerHTML=D.geo.map(function(g){return '<tr><td>'+esc(g.ring)+'</td><td>'+esc(g.role)+'</td><td class="et-nw">'+g.cells+'</td></tr>';}).join('')+'<tr><td>Σ</td><td>cells</td><td>'+D.cells+'</td></tr>';
+    $('etDmFrame').innerHTML=D.frame.map(function(f,i){return '<tr><td>'+String(i+1).padStart(2,'0')+'</td><td>'+esc(f[0])+'</td><td>'+f[1]+'</td></tr>';}).join('')+'<tr><td>Σ</td><td>data cells</td><td>'+D.frame.reduce(function(a,f){return a+f[1];},0)+'</td></tr>';
+    $('etDmPays').innerHTML=D.payloads.map(function(p,i){var on=p.key===key;return '<tr class="et-pick'+(on?' et-sel':'')+'" data-pay="'+p.key+'" tabindex="0"><td>'+String(i+1).padStart(2,'0')+'</td><td>'+esc(p.kind)+'<small>'+p.bytes+' B · sig '+esc(p.sig)+'</small></td><td class="et-nw">'+p.frames+' · qr '+p.chunks+'</td></tr>';}).join('');
+    var bits=D.dataBits, rate=Math.round(bits*1000/TICK_MS);
+    var steps=[
+      ['payload → utf-8',(x.bytes||0)+' bytes of JSON · max '+D.maxBytes+' per beam','et-done'],
+      ['envelope','2 B length + payload + 4 B crc-32 over the whole message · a systematic misread cannot pass','et-done'],
+      ['frames',(x.frames||0)+' × '+D.payloadBytes+' B · each carries its index, the total and a crc-8 · '+bits+' bits','et-done'],
+      ['draw',D.cells+' hexes · lit = 1, dark = 0 · luminance only · black ground',D.beaming?'et-done':'et-todo'],
+      ['loop · every '+TICK_MS+' ms','until stopped · join at any frame, in any order · '+(D.beaming?'loop '+(D.loops+1):'not running'),D.beaming?'et-done':'et-todo'],
+      ['self-verify','every 8th frame decoded back off this screen · '+(D.selfOk||'not yet'),D.selfSeen?'et-done':'et-todo']
+    ];
+    var nowAt=D.beaming?(D.selfSeen?-1:5):3;
+    $('etDmPipe').innerHTML=steps.map(function(s,i){return '<li class="'+s[2]+(i===nowAt?' et-now':'')+'"><b>'+esc(s[0])+'</b><p>'+esc(s[1])+'</p></li>';}).join('');
+    $('etDmReceipt').innerHTML=[
+      ['payload',x.kind||key],['bytes',String(x.bytes||0)],['bcomb frames',String(x.frames||0)],['qr chunks',String(x.chunks||0)+' × 28 B · the in-page receiver counts these'],
+      ['tick',TICK_MS+' ms (send())'],['rate here',bits+' bits × '+(1000/TICK_MS).toFixed(2)+' frames/s = '+rate+' bits/s'],['codec claim','588 bits/s at 7 frames/s (bcomb.js header) · the tick here is slower'],
+      ['caught here',D.beaming?D.have+' / '+D.K+' chunks':'not started'],['self-verify',D.selfOk||'not yet'],['signature',(x.sig||'none')+' · a preview, not a signature']
+    ].map(function(r){return '<tr><th>'+esc(r[0])+'</th><td>'+esc(r[1])+'</td></tr>';}).join('');
+    $('etDmVerify').innerHTML=[
+      'bcomb.selfTest(): every frame drawn on its own canvas, decoded back, text compared',
+      'while beaming, the line under the logo reports every 8th frame read back off this screen',
+      'a real phone: the BNR receiver reads the same bytes; ▦ QR mode lets any stock camera read them'
+    ].map(function(s){return '<li><code>'+esc(s)+'</code></li>';}).join('');
+  }
+
+  function keyed(){document.querySelectorAll('#eternal [data-etk]').forEach(function(e){if(e.dataset.etEn==null)e.dataset.etEn=e.textContent;e.textContent=T(e.dataset.etk,e.dataset.etEn);});}
+  var last=''; function all(force){live();var s=sig();if(!force&&s===last)return;last=s;bee();raver();cy();}
+  var sched=0; function soon(){if(sched)return;sched=requestAnimationFrame(function(){sched=0;all();});}
+
+  function holdable(btn,fill,ms,ok,done){
+    var t0=0,raf=0;
+    function stop(){if(!raf)return;cancelAnimationFrame(raf);raf=0;fill.style.width='0';}
+    function start(e){if(btn.disabled||raf||!ok())return;if(e&&e.preventDefault)e.preventDefault();t0=performance.now();
+      (function tick(now){var f=Math.min(1,(now-t0)/ms);fill.style.width=(f*100)+'%';if(f>=1){raf=0;fill.style.width='0';done();return;}raf=requestAnimationFrame(tick);})(t0);}
+    btn.addEventListener('pointerdown',function(e){try{btn.setPointerCapture(e.pointerId);}catch(x){}start(e);});
+    ['pointerup','pointercancel','pointerleave'].forEach(function(t){btn.addEventListener(t,stop);});
+    btn.addEventListener('keydown',function(e){if((e.key===' '||e.key==='Enter')&&!e.repeat&&ok()){e.preventDefault();start(e);}});
+    btn.addEventListener('keyup',function(e){if(e.key===' '||e.key==='Enter')stop();});
+    btn.addEventListener('contextmenu',function(e){e.preventDefault();});
+  }
+
+  function wire(){
+    var ev=$('eternal'); if(!ev) return;
+    ev.addEventListener('click',function(e){
+      var w=e.target.closest('#etDmBWhat');
+      if(w&&!D.beaming){var ks=D.payloads.map(function(x){return x.key;});choose(ks[(ks.indexOf(D.sel)+1)%ks.length]);return;}
+      var t=e.target.closest('[data-pay]');
+      if(t&&!t.disabled)choose(t.getAttribute('data-pay'));
+    });
+    ev.addEventListener('keydown',function(e){
+      if(e.key!=='Enter'&&e.key!==' ')return;
+      var t=e.target.closest('.et-c-tab tr.et-pick'); if(!t)return;
+      e.preventDefault(); t.dispatchEvent(new MouseEvent('click',{bubbles:true}));
+    });
+    $('etDmBGo').addEventListener('click',function(){var was=D.beaming;beam();all(true);if(!was){var st=$('stage');if(st)st.scrollIntoView({block:'center',behavior:'smooth'});}});
+    $('etDmBMode').addEventListener('click',function(){$('mode').click();all(true);});
+    $('etDmCyGo').addEventListener('click',function(){beam();all(true);});
+    var heldAt=0; /* the release that ends a hold is not also a tap */
+    holdable($('etDmRGo'),$('etDmRFill'),900,function(){return !D.beaming;},function(){heldAt=performance.now();beam();all(true);});
+    $('etDmRGo').addEventListener('click',function(){if(performance.now()-heldAt<700)return;if(D.beaming&&typeof timer!=='undefined'&&timer){beam();all(true);}});
+    $('etDmSelf').addEventListener('click',function(){
+      var r=null;try{r=window.bcomb&&bcomb.selfTest();}catch(err){r=null;}
+      $('etDmSelfOut').innerHTML=r?'<span class="'+(r.ok?'et-st-ok':'et-st-no')+'">frames '+r.frames+' · decoded '+r.decoded+' · text '+(r.ok?'recovered exactly ✓':'NOT recovered')+' · '+r.bitsPerFrame+' bits a frame</span>':'<span class="et-st-no">the codec is not loaded · nothing ran</span>';
+    });
+    var mo=new MutationObserver(soon);
+    ['cells','go','payload','mode','txt'].forEach(function(id){var e=$(id);if(e)mo.observe(e,{childList:true,subtree:true,characterData:true,attributes:true,attributeFilter:['class']});});
+    document.addEventListener('blang',function(){keyed();all(true);});
+  }
+  consts(); keyed(); wire(); all(true);
+  window.__eternal={data:D};
+})();
+</script>
 <script src="../tour.js?v=42"></script>
 </body>
 </html>

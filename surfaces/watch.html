@@ -39,6 +39,154 @@ body[data-experience="watch"] [data-view]{display:none}body[data-experience="wat
 .privacy-sources{row-gap:0}
 .foot+details>summary{min-height:44px;padding-block:10px;box-sizing:border-box;cursor:pointer}
 </style>
+<style>
+/* ── ETERNAL FRONT (founder blueprint 2026-09-26, docs/design/eternal): three products around ONE room.
+   new bee is a calm room of plain rows; raver is the room's pulse, every health answer a tick of light;
+   cypherpunk is the instrument: the endpoints, the pipeline, the manifest and the receipt. One real
+   action, the room pass (#access, the page's own field and Watch button), travels into the front that is
+   showing. Every value is a skaists token (skaists.css): no hand-picked hex, size or corner. ── */
+#eternal{margin-block:var(--sk-s2) var(--sk-s2);max-inline-size:640px}
+body #eternal>.et-r,body #eternal>.et-c{display:none}
+body[data-reg="raver"] #eternal>.et-b,body[data-reg="cypherpunk"] #eternal>.et-b{display:none}
+body[data-reg="raver"] #eternal>.et-r,body[data-reg="cypherpunk"] #eternal>.et-c{display:flex}
+#eternal [hidden]{display:none!important}
+#eternal svg{display:block}
+#eternal p{max-inline-size:none}
+#eternal :focus-visible{outline:2px solid var(--sk-focus);outline-offset:3px}
+.et-archive-h{margin:var(--sk-s5) 0 0;padding-top:var(--sk-s4);border-top:1px solid var(--sk-line);color:var(--sk-ink);font:400 28px/1.1 var(--sk-font-bee-serif)}
+body[data-reg="raver"] .et-archive-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em}
+body[data-reg="cypherpunk"] .et-archive-h{font:600 15px/1.45 var(--sk-font-mono)}
+/* the pass, wherever it sits */
+#eternal #access{border:1px solid var(--sk-line);background:var(--sk-bg-card);overflow:visible}
+#eternal #access h2{font-size:inherit;color:var(--sk-ink)}
+#eternal #access .helper,#eternal #access .gauge-name,#eternal #access .field label{color:var(--sk-ink-mut)}
+#eternal #access .no-room{border-color:var(--sk-guard);color:var(--sk-ink)}
+#eternal #access .gauges{border-top-color:var(--sk-line)}
+#eternal #access .chip{color:var(--sk-ink)}
+#eternal #sess{min-height:var(--sk-control-row);border:1.5px solid var(--sk-ink-mut);background:var(--sk-bg);color:var(--sk-ink)}
+#eternal #go{min-height:var(--sk-control-primary);border:0;background:var(--sk-primary);color:var(--sk-on-primary)}
+
+/* NEW BEE — a calm room */
+#eternal .et-b{display:flex;flex-direction:column;gap:var(--sk-s3);color:var(--sk-ink);font-family:var(--sk-font-bee-sans)}
+#eternal .et-b-mark{font:400 18px/1.2 var(--sk-font-house);color:var(--sk-sovereign)}
+#eternal .et-b-h{font:400 40px/1.05 var(--sk-font-bee-serif);color:var(--sk-ink)}
+#eternal .et-b-lede{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-guard{display:flex;align-items:center;gap:var(--sk-s2);min-height:var(--sk-control-min);padding:var(--sk-s1) var(--sk-s3);border-radius:var(--sk-radius);background:var(--sk-guard-wash);color:var(--sk-guard);font:600 15px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-b svg.i{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+#eternal .et-b-rows{display:flex;flex-direction:column;background:var(--sk-bg-card);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl);overflow:hidden}
+#eternal .et-b-row{display:flex;align-items:center;justify-content:space-between;gap:var(--sk-s2);min-height:var(--sk-control-row);padding:var(--sk-s1) var(--sk-s3);border-bottom:1px solid var(--sk-line-soft);font:500 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+#eternal .et-b-row:last-child{border-bottom:0}
+#eternal .et-b-row small{font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut);text-align:right}
+#eternal .et-b-row small.out{color:var(--sk-guard)}#eternal .et-b-row small.ok{color:var(--sk-verified)}
+#eternal .et-b #access{border-radius:var(--sk-radius-xl);padding:var(--sk-s3)}
+#eternal .et-b #access h2{font:400 28px/1.1 var(--sk-font-bee-serif)}
+#eternal .et-b #access .helper,#eternal .et-b #access .field label,#eternal .et-b #access .chip,#eternal .et-b #nums{font:400 14px/1.4 var(--sk-font-bee-sans)}
+#eternal .et-b #access .field label{font-weight:600}
+#eternal .et-b #access .no-room{font:400 16px/1.45 var(--sk-font-bee-sans);border-radius:var(--sk-radius)}
+#eternal .et-b #access .gauge-name{font:600 14px/1.4 var(--sk-font-bee-sans);letter-spacing:0}
+#eternal .et-b #sess{border-radius:var(--sk-radius);font:400 15px/1.4 var(--sk-font-mono)}
+#eternal .et-b #go{flex:1 0 100%;border-radius:var(--sk-radius-lg);font:600 17px/1.2 var(--sk-font-bee-sans)}
+#eternal .et-b-primary{display:flex;align-items:center;justify-content:center;height:var(--sk-control-primary);border-radius:var(--sk-radius-lg);background:var(--sk-primary);color:var(--sk-on-primary);font:600 17px/1.2 var(--sk-font-bee-sans);text-decoration:none}
+#eternal .et-b-link{align-self:center;display:flex;align-items:center;min-height:var(--sk-control-min);font:600 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-link);text-decoration:none}
+#eternal .et-b-foot{text-align:center;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+body:not([data-room="none"]) .et-none{display:none}
+body[data-room="none"] .et-hosted{display:none}
+
+/* RAVER — the room's pulse: every health answer a tick of light */
+#eternal .et-r{display:flex;flex-direction:column;gap:var(--sk-s3);color:var(--sk-ink);font-family:var(--sk-font-raver-body)}
+#eternal .et-r-top{display:flex;align-items:baseline;justify-content:space-between;gap:var(--sk-s2);flex-wrap:wrap}
+#eternal .et-r-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em;color:var(--sk-ink)}
+#eternal .et-r-hint{font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-pulse{width:100%;max-width:340px;margin:0 auto;filter:drop-shadow(var(--sk-glow-sovereign))}
+#eternal .et-r-pulse .orbit{fill:none;stroke:var(--sk-line);stroke-width:1.5;stroke-dasharray:2 6}
+#eternal .et-r-pulse .core{fill:var(--sk-bg-card);stroke:var(--sk-sovereign);stroke-width:1.5}
+#eternal .et-r-pulse .word{font:700 30px/1 var(--sk-font-raver-display);fill:var(--sk-ink)}
+#eternal .et-r-pulse .sub{font:400 14px/1.4 var(--sk-font-raver-body);fill:var(--sk-ink-soft)}
+#eternal .et-r-pulse .tick{cursor:pointer}#eternal .et-r-pulse .tick:focus{outline:none}#eternal .et-r-pulse .tick:focus-visible .t{stroke:var(--sk-ink);stroke-width:2}
+#eternal .et-r-pulse .hit{fill:transparent}
+#eternal .et-r-pulse .t{fill:var(--sk-sovereign-wash);stroke:var(--sk-line);stroke-width:1}
+#eternal .et-r-pulse .t.live{fill:var(--sk-biomass)}#eternal .et-r-pulse .t.offline{fill:var(--sk-sovereign)}#eternal .et-r-pulse .t.none{fill:none;stroke:var(--sk-guard);stroke-width:1.5;stroke-dasharray:3 3}#eternal .et-r-pulse .t.local{fill:var(--sk-info)}#eternal .et-r-pulse .t.sel{fill:var(--sk-sovereign-strong)}
+#eternal .et-r-card{display:flex;gap:var(--sk-s2);align-items:center;padding:var(--sk-s2) var(--sk-s3);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl);background:var(--sk-sovereign-tint);min-height:var(--sk-control-person)}
+#eternal .et-r-card b{display:block;font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink)}#eternal .et-r-card span{display:block;font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-sovereign-soft)}
+#eternal .et-r-now{display:grid;grid-template-columns:1fr 1fr;gap:var(--sk-s2)}
+#eternal .et-r-now div{padding:var(--sk-s2) var(--sk-s3);border:1.5px solid var(--sk-line);border-radius:var(--sk-radius-xl);background:var(--sk-sovereign-wash)}
+#eternal .et-r-now b{display:block;font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em;color:var(--sk-sovereign-strong)}#eternal .et-r-now span{font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink)}
+#eternal .et-r #access{border-radius:var(--sk-radius-xl);padding:var(--sk-s3);box-shadow:var(--sk-glow-sovereign)}
+#eternal .et-r #access h2{font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em}
+#eternal .et-r #access .helper,#eternal .et-r #access .field label,#eternal .et-r #access .chip,#eternal .et-r #nums,#eternal .et-r #access .gauge-name,#eternal .et-r #access .no-room{font:400 14px/1.4 var(--sk-font-raver-body);letter-spacing:0}
+#eternal .et-r #sess{border-radius:var(--sk-radius-pill);background:var(--sk-bg);font:400 14px/1.4 var(--sk-font-mono);padding-inline:var(--sk-s3)}
+#eternal .et-r #go{flex:1 0 100%;height:58px;border-radius:var(--sk-radius-pill);font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em}
+#eternal .et-r #access .no-room{border-radius:var(--sk-radius-xl)}
+#eternal .et-r-pill{display:flex;align-items:center;justify-content:center;width:100%;height:58px;border:0;border-radius:var(--sk-radius-pill);background:var(--sk-primary);color:var(--sk-on-primary);font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em;cursor:pointer}
+#eternal .et-r-ghost{align-self:center;min-height:var(--sk-control-min);padding:0 var(--sk-s3);border:1.5px solid var(--sk-sovereign-soft);border-radius:var(--sk-radius-pill);background:transparent;color:var(--sk-ink-soft);font:400 14px/1.4 var(--sk-font-raver-body)}
+#eternal .et-r-foot{text-align:center;font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+@media(prefers-reduced-motion:no-preference){body[data-reg="raver"]:not([data-motion-paused]) .et-r-pulse .t.last{animation:etbeat 2.4s ease-in-out infinite}@keyframes etbeat{50%{opacity:.45}}}
+@media(prefers-reduced-motion:reduce){#etPulseMotion{display:none}}
+
+/* CYPHERPUNK — the instrument */
+#eternal .et-c{display:flex;flex-direction:column;gap:var(--sk-s2);font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink)}
+#eternal .et-c-path{font:600 15px/1.45 var(--sk-font-mono);word-break:break-all}
+#eternal .et-c-chips{display:flex;flex-wrap:wrap;gap:var(--sk-s1)}
+#eternal .et-c-chips span{padding:var(--sk-s1) var(--sk-s2);border:1px solid var(--sk-line);border-radius:4px;background:var(--sk-bg-card);font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-soft)}
+#eternal .et-c-chips span.ok{border-color:var(--sk-verified);color:var(--sk-verified)}#eternal .et-c-chips span.guard{border-color:var(--sk-guard);color:var(--sk-guard)}#eternal .et-c-chips span.on{border-color:var(--sk-ai);color:var(--sk-ai)}
+#eternal .et-c-h{margin-top:var(--sk-s2);font:600 15px/1.45 var(--sk-font-mono);color:var(--sk-ink)}
+#eternal .et-c-tab{width:100%;border-collapse:separate;border-spacing:0;border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm);overflow:hidden;background:var(--sk-bg-card);table-layout:fixed}
+#eternal .et-c-tab th{padding:var(--sk-s1) var(--sk-s2);text-align:left;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);border-bottom:1px solid var(--sk-line);background:var(--sk-bg-well)}
+#eternal .et-c-tab td{padding:var(--sk-s1) var(--sk-s2);border-bottom:1px solid var(--sk-line);font:400 13px/1.45 var(--sk-font-mono);vertical-align:top;overflow-wrap:anywhere}
+#eternal .et-c-tab tr:last-child td{border-bottom:0}
+#eternal .et-c-tab td small{display:block;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut)}
+#eternal .et-c-tab th:last-child,#eternal .et-c-tab td:last-child{width:104px}
+.st-ok{color:var(--sk-verified)}.st-no{color:var(--sk-guard)}.st-wait{color:var(--sk-ink-mut)}.st-info{color:var(--sk-info)}
+#eternal .et-c-pipe{list-style:none;margin:0;padding:0;display:grid;gap:var(--sk-s1);counter-reset:p}
+#eternal .et-c-pipe li{display:grid;grid-template-columns:30px 1fr;gap:0 var(--sk-s2);padding:var(--sk-s2) var(--sk-s3);border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm);background:var(--sk-bg-card);counter-increment:p}
+#eternal .et-c-pipe li::before{content:counter(p,decimal-leading-zero);color:var(--sk-guard);font-weight:600}
+#eternal .et-c-pipe li b{font-weight:600;min-width:0;overflow-wrap:anywhere}#eternal .et-c-pipe li p{grid-column:2;min-width:0;overflow-wrap:anywhere;color:var(--sk-ink-soft)}
+#eternal .et-c-pipe li.done b{color:var(--sk-verified)}#eternal .et-c-pipe li.guard{border-style:dashed;border-color:var(--sk-guard)}#eternal .et-c-pipe li.guard b{color:var(--sk-guard)}
+#eternal .et-c-pipe li.now{border-color:var(--sk-ai);box-shadow:inset 0 0 0 1px var(--sk-ai)}#eternal .et-c-pipe li.now b{color:var(--sk-ai)}
+#eternal .et-c #access{border-radius:var(--sk-radius-sm);padding:var(--sk-s3)}
+#eternal .et-c #access h2{font:600 15px/1.45 var(--sk-font-mono)}
+#eternal .et-c #access .helper,#eternal .et-c #access .field label,#eternal .et-c #access .gauge-name,#eternal .et-c #nums{font:500 12px/1.45 var(--sk-font-mono);letter-spacing:0}
+#eternal .et-c #access .chip,#eternal .et-c #access .no-room{font:400 13px/1.45 var(--sk-font-mono)}
+#eternal .et-c #access .no-room{border-radius:var(--sk-radius-sm)}
+#eternal .et-c #sess{border-radius:var(--sk-radius-sm);background:var(--sk-bg-card);font:400 13px/1.45 var(--sk-font-mono)}
+#eternal .et-c #go{height:52px;border-radius:var(--sk-radius-sm);font:600 14px/1.2 var(--sk-font-mono)}
+#eternal .et-c-primary{display:flex;align-items:center;justify-content:center;width:100%;height:52px;border:0;border-radius:var(--sk-radius-sm);background:var(--sk-primary);color:var(--sk-on-primary);font:600 14px/1.2 var(--sk-font-mono);cursor:pointer}
+#eternal .et-c-kv{width:100%;border-collapse:collapse;border:1px solid var(--sk-line);background:var(--sk-bg-card);table-layout:fixed}
+#eternal .et-c-kv th{width:104px;padding:var(--sk-s1) var(--sk-s2);text-align:left;vertical-align:top;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);border-bottom:1px solid var(--sk-line)}
+#eternal .et-c-kv td{padding:var(--sk-s1) var(--sk-s2);border-bottom:1px solid var(--sk-line);font:400 13px/1.45 var(--sk-font-mono);overflow-wrap:anywhere}
+#eternal .et-c-verify{padding:var(--sk-s2) var(--sk-s3);border:1px dashed var(--sk-line);border-radius:var(--sk-radius-sm)}
+#eternal .et-c-verify p{font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);margin-bottom:var(--sk-s1)}
+#eternal .et-c-verify ol{margin:0;padding-left:var(--sk-s4);display:grid;gap:var(--sk-s1);font:400 13px/1.45 var(--sk-font-mono);overflow-wrap:anywhere}
+#eternal .et-c-row{display:grid;grid-template-columns:1fr 1fr;gap:var(--sk-s2)}
+#eternal .et-c-ghost{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:52px;padding:var(--sk-s1);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius-sm);color:var(--sk-ink);text-decoration:none;text-align:center;font:600 14px/1.2 var(--sk-font-mono)}
+#eternal .et-c-ghost small{font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut)}
+
+/* ── THE WHOLE ROOM, dressed per register: the page's own variables mapped onto skaists ── */
+body[data-reg="bee"]{--bg0:var(--sk-bg);--bg1:var(--sk-bg-card);--bg2:var(--sk-bg-well);--panel:var(--sk-bg-card);--line:var(--sk-line);--ink:var(--sk-ink);--ink-hi:var(--sk-ink);--dim:var(--sk-ink-mut);--muted:var(--sk-ink-mut);
+ --accent:var(--sk-sovereign);--primary:var(--sk-primary);--on-accent:var(--sk-on-primary);--gold:var(--sk-sovereign-strong);--cyan:var(--sk-ai);--violet:var(--sk-sovereign);--leaf:var(--sk-verified);--amber:var(--sk-sovereign-strong);
+ --screen:var(--sk-ink);--screen-ink:var(--sk-bg);--screen-muted:var(--sk-line);background:var(--sk-bg);color:var(--sk-ink);font-family:var(--sk-font-bee-sans)}
+body[data-reg="bee"] h1{font-family:var(--sk-font-bee-serif);font-weight:400}
+body[data-reg="raver"]{--bg0:var(--sk-bg);--bg1:var(--sk-bg-card);--bg2:var(--sk-bg-well);--panel:var(--sk-bg-card);--line:var(--sk-line);--ink:var(--sk-ink);--ink-hi:var(--sk-ink);--dim:var(--sk-ink-soft);--muted:var(--sk-ink-soft);
+ --accent:var(--sk-sovereign-soft);--primary:var(--sk-primary);--on-accent:var(--sk-on-primary);--screen:var(--sk-bg-card);--screen-ink:var(--sk-ink);--screen-muted:var(--sk-ink-soft);background:var(--sk-bg);color:var(--sk-ink);font-family:var(--sk-font-raver-body)}
+body[data-reg="raver"] h1{font-family:var(--sk-font-raver-display);font-weight:700;letter-spacing:-.01em}
+body[data-reg="cypherpunk"]{--bg0:var(--sk-bg);--bg1:var(--sk-bg-card);--bg2:var(--sk-bg-well);--panel:var(--sk-bg-card);--line:var(--sk-line);--ink:var(--sk-ink);--ink-hi:var(--sk-ink);--dim:var(--sk-ink-soft);--muted:var(--sk-ink-soft);
+ --accent:var(--sk-ai);--primary:var(--sk-primary);--on-accent:var(--sk-on-primary);--screen:var(--sk-bg-card);--screen-ink:var(--sk-ink);--screen-muted:var(--sk-ink-soft);background:var(--sk-bg);color:var(--sk-ink);font-family:var(--sk-font-mono)}
+/* the whole room onto the type scale, corners and 44 px targets of skaists (outside the front) */
+.brand{font-size:22px}
+.tile{border-radius:var(--sk-radius-xl)}
+body[data-reg="cypherpunk"] .tile{border-radius:var(--sk-radius-sm)}
+.cell{border-radius:var(--sk-radius-sm)}
+main li:not(#eternal *){border-radius:var(--sk-radius)}
+.privacy-sources a,.room-links a,.local-nav a,.foot a{min-height:var(--sk-control-min);min-width:var(--sk-control-min);display:inline-flex;align-items:center}
+body[data-reg="bee"] main :is(small,.stamp,.gauge-name,.cell .l,.cell .s):not(#eternal *){font-size:14px}
+body[data-reg="raver"] h1{font-size:30px}
+body[data-reg="bee"] .screen-caption span{font-size:14px}
+body[data-reg="cypherpunk"] main h2:not(#eternal *){font-size:15px!important} /* one h2 carries an inline 1rem */
+body[data-reg="raver"] main :is(summary,strong,b,span,.no-room,small,.stamp,.gauge-name,.cell .l,.cell .s,p):not(#eternal *){font-size:14px}
+body[data-reg="cypherpunk"] h1,body[data-reg="cypherpunk"] main :is(h2,h3,.cell .h):not(#eternal *){font-size:15px}
+body[data-reg="cypherpunk"] main :is(summary,strong,b,span,.no-room,p,small,.stamp,.gauge-name,.cell .l,.cell .s):not(#eternal *){font-size:13px}
+</style>
+<link rel="stylesheet" href="skaists.css">
 </head>
 <body data-experience="watch" data-bee-theme="shared" data-reg="bee">
 <header class="topbar"><div class="shell topbar-inner">
@@ -47,6 +195,54 @@ body[data-experience="watch"] [data-view]{display:none}body[data-experience="wat
 </div></header>
 <main class="shell">
 <nav class="local-nav" aria-label="Media rooms"><a href="watch.html" aria-current="page" data-i18n="watch.title">Watch together</a><a href="music.html">SKAISTS mUsiC</a><a href="plur.html">PLUR</a><a href="#projects" data-i18n="watch.projects">Independent projects</a></nav>
+<!-- ETERNAL FRONT (founder blueprint 2026-09-26, docs/design/eternal): three products, one room. The
+     room pass (#access) is the page's own field and Watch button; it moves into the front that is showing.
+     Every fact below is read from the room's own state (the health answers, the ticker, the receipt, the
+     manifest); nothing here connects, pays or claims a stream the room did not report. -->
+<section id="eternal" aria-label="the room at a glance">
+<div class="et-b">
+<div class="et-b-mark">SKAISTS</div>
+<h2 class="et-b-h" data-et-t="et.watch.b.h">watch with your people</h2>
+<p class="et-b-lede" data-et-t="et.watch.b.lede">one screen, one room, good company. your host gives you a room pass; that is all you need.</p>
+<div class="et-b-guard"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span data-et-t="et.watch.b.guard">no account. your pass stays on this device.</span></div>
+<div class="et-b-rows" id="etBeeRows"></div>
+<div class="et-slot" data-slot="bee"></div>
+<a class="et-b-primary et-none" href="music.html" data-et-t="et.watch.b.music">listen in the music room instead</a>
+<a class="et-b-link" href="#privacy-details" data-et-t="et.watch.b.privacy">what this room can see</a>
+<p class="et-b-foot" data-et-t="et.watch.b.foot">chat opens only when you choose it.</p>
+</div>
+<div class="et-r">
+<div class="et-r-top"><h2 class="et-r-h" data-et-t="et.watch.r.h">the pulse</h2><span class="et-r-hint" id="etPulseHint"></span></div>
+<svg class="et-r-pulse" id="etPulse" viewBox="-170 -170 340 340" role="group" aria-label="the room's pulse: every health answer a tick"></svg>
+<div class="et-r-card" id="etPulseCard" aria-live="polite"></div>
+<div class="et-r-now" id="etNow"></div>
+<div class="et-slot" data-slot="raver"></div>
+<button type="button" class="et-r-pill et-none" id="etRecheck" data-et-t="et.watch.r.recheck">check the room again</button>
+<button type="button" class="et-r-ghost" id="etPulseMotion" data-et-t="et.watch.r.pause">pause the motion</button>
+<p class="et-r-foot" data-et-t="et.watch.r.foot">one tick per answer from the room · chat stays closed until you open it</p>
+</div>
+<div class="et-c">
+<div class="et-c-path" translate="no">room://general · <span id="etOrigin"></span></div>
+<div class="et-c-chips" id="etWChips"></div>
+<div class="et-slot" data-slot="cypherpunk"></div>
+<button type="button" class="et-c-primary et-none" id="etCyRecheck">GET /live/health again</button>
+<h3 class="et-c-h">endpoints · what this page asks, and when</h3>
+<table class="et-c-tab"><thead><tr><th>request</th><th>state</th></tr></thead><tbody id="etEndpoints"></tbody></table>
+<h3 class="et-c-h">session pipeline</h3>
+<ol class="et-c-pipe" id="etWPipe"></ol>
+<h3 class="et-c-h">receipt · manifest</h3>
+<table class="et-c-kv" id="etWReceipt"></table>
+<div class="et-c-verify">
+<p>verify · no trust in this page needed</p>
+<ol translate="no"><li>curl -s &lt;origin&gt;/live/health</li><li>curl -s &lt;origin&gt;/live/session/&lt;pass&gt;.json</li><li>the manifest: fixtures/connect-store-manifest-envelope-v1.json, shape-checked before a field is shown</li></ol>
+</div>
+<div class="et-c-row">
+<a class="et-c-ghost" href="#room-details"><span>room details</span></a>
+<a class="et-c-ghost" href="https://github.com/beehive-nature/beehive-nature/blob/main/surfaces/watch.html" target="_blank" rel="noopener noreferrer"><span>fork the template ↗</span><small>opens a new tab</small></a>
+</div>
+</div>
+</section>
+<h2 class="et-archive-h" id="etArchive" data-et-t="et.watch.archive">the whole room</h2>
 <section class="intro"><div><p class="eyebrow">SKAISTS · SOCIAL / MEDIA</p><h1 data-i18n="watch.title">Watch together</h1><p class="view-lead" data-view="bee" data-i18n="watch.beeLead">A shared screen. Good company.</p><p class="view-lead" data-view="raver" data-i18n="watch.raverLead">Find your people. Press play.</p><p class="view-lead" data-view="cypherpunk" data-i18n="watch.cypherLead">Inspect the stream, session and checkpoint.</p></div><div class="status" role="status"><span class="dot" id="dot"></span><span id="st" data-i18n="watch.checking">Checking connection</span></div></section>
 <div class="stage">
 <section class="left" aria-label="Watch">
@@ -410,6 +606,138 @@ let saved=null; try { saved=localStorage.getItem('watch.session'); } catch {};
 if (saved) { $('sess').value = saved; }
 setInterval(async () => { if (state.sess) { const j = await readSession(state.sess); if (j) paintStrip(j); } }, 4000);
 litAudit(null);
+</script>
+<script>
+/* ETERNAL FRONT — one data layer, three renderers (docs/design/eternal). The facts are the room's own:
+   the connection line (#st and its corpus key, set by pollHealth), whether a room host answered
+   (ROOM_HOST, body[data-room]), the ticker, the meter receipt (#chip, #nums), the audit cell and the
+   example manifest (#manifest-*). They are read here once and drawn three ways. The room pass (#access)
+   moves into the front that is showing. "check again" re-runs the page's own pollHealth; nothing else
+   here opens a connection. */
+(function(){
+  var g=function(id){return document.getElementById(id);};
+  var T=function(k,f){var t=window.BNRLanguage&&window.BNRLanguage.text;var v=t?t(k,f):f;return v||f;};
+  var esc=function(v){return String(v==null?'':v).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});};
+  var KEY={'watch.live':'live','watch.offline':'offline','watch.unavailable':'unavailable','watch.preview':'none','watch.local':'local','watch.checking':'asking'};
+  var D={room:'asking',stream:'asking',now:'',next:'',set:'',pass:'',receipt:'',chip:'nosess',audit:'',manifest:{},polls:[]};
+  var R={sel:-1};
+  var tk=function(id){var e=g(id);return e&&!e.classList.contains('none')&&e.textContent.trim()!=='—'?e.textContent.trim():'';};
+
+  function read(){
+    var st=g('st'), key=st&&st.getAttribute('data-i18n'), local=typeof LOCAL_PREVIEW!=='undefined'&&LOCAL_PREVIEW, host=typeof ROOM_HOST!=='undefined'?ROOM_HOST:null;
+    D.room=local?'local':host===true?'hosted':host===false||document.body.dataset.room==='none'?'none':(key==='watch.unavailable'?'unavailable':'asking');
+    D.stream=KEY[key]||(key?'asking':'said');
+    D.line=st?st.textContent.trim():'';
+    D.now=tk('tk-now'); D.next=tk('tk-next'); D.set=tk('tk-set');
+    var s=g('sess'); D.pass=s&&s.value.trim()?'entered':'';
+    var chip=g('chip'); D.chip=chip?(chip.classList.contains('active')?'active':chip.classList.contains('paused')?'paused':'nosess'):'nosess';
+    D.receipt=(g('nums')||{}).textContent||'';
+    var lit=document.querySelector('.cell.lit'); D.audit=lit?lit.id.replace('c-',''):'';
+    D.manifest={state:(g('manifest-state')||{}).textContent||'',channel:(g('manifest-channel')||{}).textContent||'',sequence:(g('manifest-sequence')||{}).textContent||'',checkpoint:(g('manifest-checkpoint')||{}).textContent||'',items:(g('manifest-items')||{}).textContent||''};
+  }
+  var ROOMW={hosted:['et.watch.room.hosted','open'],none:['et.watch.room.none','no room hosted here yet'],local:['et.watch.room.local','a local preview; nothing connects'],asking:['et.watch.room.asking','asking the room'],unavailable:['et.watch.room.unavailable','the room did not answer']};
+  var roomWord=function(){var x=ROOMW[D.room];return T(x[0],x[1]);};
+  var nowWord=function(v){return v||(D.room==='hosted'?T('et.watch.nothing','nothing announced'):T('et.watch.notRead','not read yet'));};
+
+  /* ── NEW BEE ── */
+  function bee(){
+    var b=g('etBeeRows'); if(!b) return;
+    var rows=[[T('et.watch.b.room','the room'),'<span data-et="room" data-room="'+D.room+'">'+esc(roomWord())+'</span>',D.room==='hosted'?'ok':D.room==='none'?'out':''],
+      [T('et.watch.b.now','playing now'),'<span data-et="now">'+esc(nowWord(D.now))+'</span>',''],
+      [T('et.watch.b.next','up next'),'<span data-et="next">'+esc(nowWord(D.next))+'</span>',''],
+      [T('et.watch.b.pass','your pass'),esc(D.pass?T('et.watch.b.passIn','entered on this device'):T('et.watch.b.passNo','not entered')),''],
+      [T('et.watch.b.price','price'),'<span data-et="price">'+esc(T('watch.unquoted','Not quoted'))+'</span>','']];
+    b.innerHTML=rows.map(function(r){return '<div class="et-b-row"><span>'+esc(r[0])+'</span><small class="'+r[2]+'">'+r[1]+'</small></div>';}).join('');
+  }
+
+  /* ── RAVER: 16 ticks around the room, one per health answer, newest at the top ── */
+  var N=16;
+  function pulse(){
+    var svg=g('etPulse'); if(!svg) return;
+    var P=D.polls.slice(-N), h='<circle class="orbit" r="150"/>';
+    for(var i=0;i<N;i++){
+      var p=P[P.length-1-i], a=-Math.PI/2-i*2*Math.PI/N, x=(128*Math.cos(a)).toFixed(1), y=(128*Math.sin(a)).toFixed(1), rot=(a*180/Math.PI+90).toFixed(1);
+      var cls='t'+(p?' '+p.s:'')+(i===0&&p?' last':'')+(p&&R.sel===i?' sel':'');
+      h+=p?'<g class="tick" role="button" tabindex="0" data-i="'+i+'" aria-label="'+esc(p.s+' · '+ago(p.t))+'" transform="translate('+x+' '+y+') rotate('+rot+')"><rect class="hit" x="-24" y="-24" width="48" height="48"/><rect class="'+cls+'" x="-6" y="-16" width="12" height="32" rx="6"/></g>'
+        :'<g transform="translate('+x+' '+y+') rotate('+rot+')"><rect class="t" x="-4" y="-10" width="8" height="20" rx="4"/></g>';
+    }
+    var word={live:T('et.watch.r.live','live'),offline:T('et.watch.r.quiet','quiet'),none:T('et.watch.r.none','no room'),local:T('et.watch.r.local','local'),unavailable:T('et.watch.r.gone','no answer'),asking:T('et.watch.r.asking','asking'),said:T('et.watch.r.said','said')}[D.stream]||D.stream;
+    h+='<circle class="core" r="74"/><text class="word" y="8" text-anchor="middle" data-et="stream" data-stream="'+D.stream+'">'+esc(word)+'</text><text class="sub" y="36" text-anchor="middle">'+esc(D.polls.length+' '+(D.polls.length===1?T('et.watch.r.answer','answer'):T('et.watch.r.answers','answers')))+'</text>';
+    svg.innerHTML=h;
+    g('etPulseHint').textContent=T('et.watch.r.hint','tap a tick');
+    var sel=R.sel>=0?P[P.length-1-R.sel]:null;
+    g('etPulseCard').innerHTML=sel?'<div><b>'+esc(sel.line)+'</b><span>'+esc(ago(sel.t))+' · '+esc(sel.s)+'</span></div>'
+      :'<div><b data-et="room" data-room="'+D.room+'">'+esc(roomWord())+'</b><span>'+esc(D.line||T('et.watch.notRead','not read yet'))+'</span></div>';
+    g('etNow').innerHTML='<div><b>'+esc(T('et.watch.r.now','now'))+'</b><span data-et="now">'+esc(nowWord(D.now))+'</span></div><div><b>'+esc(T('et.watch.r.next','next'))+'</b><span data-et="next">'+esc(nowWord(D.next))+'</span></div>';
+    g('etPulseMotion').textContent=document.body.hasAttribute('data-motion-paused')?T('et.watch.r.move','let it move'):T('et.watch.r.pause','pause the motion');
+  }
+  function ago(t){var s=Math.max(0,Math.round((Date.now()-t)/1000));return s<2?T('et.watch.justNow','just now'):s+' s '+T('et.watch.ago','ago');}
+
+  /* ── CYPHERPUNK ── */
+  function cy(){
+    var o=g('etOrigin'); if(!o) return;
+    o.textContent=location.protocol==='file:'?'file://':location.host;
+    var st=function(c,t){return '<span class="'+c+'">'+esc(t)+'</span>';};
+    g('etWChips').innerHTML='<span class="'+(D.room==='hosted'?'ok':D.room==='none'||D.room==='unavailable'?'guard':'on')+'" data-et="room" data-room="'+D.room+'">room '+esc(D.room)+'</span><span data-et="stream" data-stream="'+D.stream+'">stream '+esc(D.stream)+'</span><span>session '+esc(D.chip)+'</span><span>audit '+esc(D.audit||'no verdict')+'</span>';
+    var live=D.room==='hosted', none=D.room==='none', local=D.room==='local';
+    var rows=[
+      ['GET /live/health','every 5 s from arrival',local?st('st-wait','off · local preview'):none?st('st-no','no room host'):live?st('st-ok','answering'):st('st-wait','asking')],
+      ['GET /live/ticker/general.json','every 5 s, only when a host answered',live?st('st-ok','polling'):st('st-wait','not asked')],
+      ['GET /live/general/master.m3u8?session=…','on Watch, with your pass',state&&state.sess?st('st-ok','attached'):st('st-wait','not asked')],
+      ['GET /live/session/<pass>.json','on Watch, then every 4 s',state&&state.sess?st('st-ok','reading'):st('st-wait','not asked')],
+      ['iframe /join/','only on Open chat',g('roomframe')&&!g('roomframe').hidden?st('st-ok','open'):st('st-wait','closed')]
+    ];
+    g('etEndpoints').innerHTML=rows.map(function(r){return '<tr><td>'+esc(r[0])+'<small>'+esc(r[1])+'</small></td><td>'+r[2]+'</td></tr>';}).join('');
+    var steps=[
+      ['health',local?'local file: no request is made':none?'no room host answered /live/health · this page is a preview':live?'a room host answered · stream '+D.stream:'asking /live/health',local||none?'guard':live?'done':'todo'],
+      ['pass','digits only · remembered as watch.session in this browser',state&&state.sess?'done':'todo'],
+      ['playlist','hls.js attaches master.m3u8 · a refused playlist pauses, never kills',state&&state.mode==='live'?'done':'todo'],
+      ['meter','credit − burned = left · 0 left pauses the picture · amounts are exact decimals',D.chip==='active'?'done':'todo'],
+      ['chat','opt-in: /join/ loads only after Open chat',g('roomframe')&&!g('roomframe').hidden?'done':'todo']
+    ];
+    var now=steps.findIndex(function(s){return s[2]==='todo';});
+    g('etWPipe').innerHTML=steps.map(function(s,i){return '<li class="'+s[2]+(i===now&&!(local||none)?' now':'')+'"><b>'+esc(s[0])+'</b><p>'+esc(s[1])+'</p></li>';}).join('');
+    var M=D.manifest, v=function(x){return x?esc(x):st('st-wait','not read yet');};
+    g('etWReceipt').innerHTML=[['session',D.chip==='nosess'?st('st-wait','not connected'):esc(D.chip)],['receipt',D.receipt?esc(D.receipt):st('st-wait','no receipt read')],['audit',D.audit?esc(D.audit):st('st-wait','no verdict yet')],['price','<span data-et="price">'+esc(T('watch.unquoted','Not quoted'))+'</span>'],
+      ['manifest',v(M.state)],['channel',v(M.channel)],['sequence',v(M.sequence)],['checkpoint',v(M.checkpoint)],['items',v(M.items)]]
+      .map(function(r){return '<tr><th>'+r[0]+'</th><td>'+r[1]+'</td></tr>';}).join('');
+  }
+
+  /* ── the dock: the room pass travels into the front that is showing ── */
+  function place(){
+    var reg=document.body.getAttribute('data-reg')||'bee', slot=document.querySelector('#eternal .et-slot[data-slot="'+reg+'"]'), a=g('access');
+    if(slot&&a&&a.parentNode!==slot) slot.appendChild(a);
+  }
+  function words(){document.querySelectorAll('#eternal [data-et-t],#etArchive[data-et-t]').forEach(function(e){if(!e.dataset.etEn)e.dataset.etEn=e.textContent;e.textContent=T(e.dataset.etT,e.dataset.etEn);});}
+  var q=0; function paint(){read();bee();pulse();cy();}
+  function soon(){if(q)return;q=requestAnimationFrame(function(){q=0;paint();});}
+  function recheck(){if(typeof LOCAL_PREVIEW!=='undefined'&&LOCAL_PREVIEW)return;try{ROOM_HOST=null;delete document.body.dataset.room;pollHealth();}catch(e){}}
+
+  function wire(){
+    var ev=g('eternal');
+    ev.addEventListener('click',function(e){
+      var t=e.target.closest('#etPulse .tick'); if(t){var i=+t.getAttribute('data-i');R.sel=R.sel===i?-1:i;pulse();return;}
+      if(e.target.closest('#etRecheck,#etCyRecheck')){recheck();return;}
+      if(e.target.closest('#etPulseMotion')){var p=!document.body.hasAttribute('data-motion-paused');document.body.toggleAttribute('data-motion-paused',p);try{localStorage.setItem('bnr.motion.paused',p?'1':'0');}catch(x){}pulse();return;}
+      var pr=e.target.closest('a[href="#privacy-details"]'); if(pr){var d=g('privacy-details');if(d)d.open=true;}
+    });
+    ev.addEventListener('keydown',function(e){if((e.key==='Enter'||e.key===' ')&&e.target.closest('#etPulse .tick')){e.preventDefault();e.target.dispatchEvent(new MouseEvent('click',{bubbles:true}));}});
+    /* a tick per health answer: pollHealth rewrites #st on every answer (and once when no room answers) */
+    var st=g('st'), last='';
+    new MutationObserver(function(){read();var key=st.getAttribute('data-i18n')||'',pv=D.polls[D.polls.length-1];if(!key&&st.textContent===last)return;last=st.textContent;if(pv&&pv.s===(KEY[key]||'said')&&Date.now()-pv.t<400)return;
+      D.polls.push({t:Date.now(),s:KEY[key]||'said',line:st.textContent.trim()});if(D.polls.length>96)D.polls.shift();soon();}).observe(st,{childList:true,characterData:true,subtree:true,attributes:true,attributeFilter:['data-i18n']});
+    var mine=function(n){var el=n&&n.nodeType===1?n:n&&n.parentNode;return !!(el&&el.closest&&el.closest('#eternal')&&!el.closest('#access'));};
+    new MutationObserver(function(ms){if(ms.some(function(m){return !mine(m.target);}))soon();})
+      .observe(document.querySelector('main'),{childList:true,characterData:true,subtree:true,attributes:true,attributeFilter:['class','hidden']});
+    new MutationObserver(function(){place();soon();}).observe(document.body,{attributes:true,attributeFilter:['data-reg','data-room']});
+    var s=g('sess'); if(s) s.addEventListener('input',soon);
+    document.addEventListener('blang',function(){words();paint();});
+    document.addEventListener('bregister',function(){place();paint();});
+  }
+  try{if(localStorage.getItem('bnr.motion.paused')==='1')document.body.setAttribute('data-motion-paused','');}catch(e){}
+  words(); place(); wire(); paint();
+  window.__eternal={data:D,raver:R,paint:paint};
+})();
 </script>
 <script src="tour.js?v=42"></script>
 </body>

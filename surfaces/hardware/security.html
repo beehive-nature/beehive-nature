@@ -40,45 +40,531 @@ footer{font-size:.875rem;line-height:1.6;padding-bottom:.5rem}
 footer a{display:inline-block;padding:11px 0}
 body[data-reg="bee"] :is(p,.doctrine,.law,.means){font-size:1rem}
 .kind{font-size:.875rem;padding:.15rem .7rem}.date{font-size:.875rem}
-</style></head><body><main>
+</style>
+<style id="et-style">
+/* ── ETERNAL FRONT (docs/design/eternal) — three products in one surface. Every value is a skaists
+   token (../skaists.css, compiled from docs/design/skaists/tokens.json): no hand-picked hex, size or
+   corner. Measured by e2e/skaists-conformance.mjs. One register visible at a time; new bee is the
+   default. Every class is et- prefixed so the page's own bare rules never reach in. ── */
+#eternal{box-sizing:border-box;display:block;width:100%;max-width:600px;margin:0 auto var(--sk-s2,12px);padding:var(--sk-s2,12px) 0 0;border:0;border-radius:0;background:none;box-shadow:none;text-align:left;letter-spacing:normal;text-transform:none}
+#eternal *,#eternal *::before,#eternal *::after{box-sizing:border-box}
+#eternal>.et-r,#eternal>.et-c{display:none}
+body[data-reg="raver"] #eternal>.et-b,body[data-reg="cypherpunk"] #eternal>.et-b{display:none}
+body[data-reg="raver"] #eternal>.et-r{display:block}
+body[data-reg="cypherpunk"] #eternal>.et-c{display:block}
+#eternal [hidden]{display:none!important}
+#eternal button{margin:0;color:inherit;text-transform:none;letter-spacing:normal;min-width:0}
+#eternal svg{display:block;max-width:100%}
+#eternal a{text-decoration:none}
+#eternal a:hover{text-decoration:none}
+#eternal :focus-visible{outline:2px solid var(--sk-focus);outline-offset:3px}
+#eternal h2,#eternal h3,#eternal p,#eternal ol,#eternal ul,#eternal table{margin:0;padding:0;border:0;background:none;text-transform:none;letter-spacing:normal;min-width:0;max-width:none;text-shadow:none}
+#eternal table{width:100%;border-collapse:separate;border-spacing:0}
+#eternal th,#eternal td{border:0;padding:0;vertical-align:top;text-align:left;background:none;letter-spacing:normal}
+#eternal code{font:inherit;background:none;padding:0;border:0}
+#etArchive.et-archive-h{max-width:600px;margin:var(--sk-s5,36px) auto var(--sk-s2,12px);padding:var(--sk-s4,24px) 0 0;border:0;border-top:1px solid var(--sk-line);background:none;color:var(--sk-ink);text-transform:none;letter-spacing:normal;text-shadow:none;-webkit-text-fill-color:currentColor;text-align:left}
+body[data-reg="bee"] #etArchive.et-archive-h{font:400 28px/1.1 var(--sk-font-bee-serif)}
+body[data-reg="raver"] #etArchive.et-archive-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em}
+body[data-reg="cypherpunk"] #etArchive.et-archive-h{font:600 15px/1.45 var(--sk-font-mono)}
+
+/* NEW BEE — a calm room: plain rows, one reassurance, one magenta action, a link, a footnote */
+#eternal .et-b{display:flex;flex-direction:column;gap:var(--sk-s3,18px);color:var(--sk-ink);font:400 16px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-b-step{display:flex;flex-direction:column;gap:var(--sk-s3,18px)}
+#eternal .et-b-mark{font:400 18px/1.2 var(--sk-font-house);color:var(--sk-sovereign)}
+#eternal .et-b-h{font:400 40px/1.05 var(--sk-font-bee-serif);color:var(--sk-ink)}
+#eternal .et-b-h2{font:400 28px/1.1 var(--sk-font-bee-serif);color:var(--sk-ink)}
+#eternal .et-b-lede{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink-mut);text-wrap:pretty}
+#eternal .et-b-guard{display:flex;align-items:center;gap:var(--sk-s2,12px);min-height:var(--sk-control-min,44px);padding:var(--sk-s1,6px) var(--sk-s3,18px);border-radius:var(--sk-radius,12px);background:var(--sk-guard-wash);color:var(--sk-guard);font:600 15px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-ic{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+#eternal .et-b-rows{display:flex;flex-direction:column;background:var(--sk-bg-card);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl,18px);overflow:hidden}
+#eternal .et-b-row{display:flex;align-items:center;justify-content:space-between;gap:var(--sk-s2,12px);width:100%;min-height:var(--sk-control-row,52px);padding:var(--sk-s1,6px) var(--sk-s3,18px);border:0;border-bottom:1px solid var(--sk-line-soft);border-radius:0;background:transparent;text-align:left;font:500 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+#eternal .et-b-row:last-child{border-bottom:0}
+#eternal button.et-b-row,#eternal a.et-b-row{cursor:pointer}
+#eternal .et-b-rl{display:flex;flex-direction:column;flex:1 1 auto;min-width:0}
+#eternal .et-b-rl b{font:500 16px/1.45 var(--sk-font-bee-sans);color:inherit}
+#eternal .et-b-rl small{font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-rv{display:flex;align-items:center;gap:var(--sk-s1,6px);flex:none;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut);text-align:right}
+#eternal .et-b-rv.et-out{color:var(--sk-guard)}
+#eternal .et-b-rv.et-ok{color:var(--sk-verified)}
+#eternal .et-chev{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;flex:none;transition:transform var(--dur,.26s)}
+#eternal .et-b-row[aria-expanded="true"],#eternal .et-b-row[aria-pressed="true"]{background:var(--sk-sovereign-tint);color:var(--sk-sovereign-strong)}
+#eternal .et-b-row[aria-expanded="true"] .et-b-rl b,#eternal .et-b-row[aria-pressed="true"] .et-b-rl b{font-weight:600}
+#eternal .et-b-row[aria-expanded="true"] .et-b-rv,#eternal .et-b-row[aria-pressed="true"] .et-b-rv,#eternal .et-b-row[aria-expanded="true"] .et-b-rl small,#eternal .et-b-row[aria-pressed="true"] .et-b-rl small{color:var(--sk-sovereign-strong)}
+#eternal .et-b-row[aria-expanded="true"] .et-chev{transform:rotate(90deg)}
+#eternal .et-b-open{display:flex;flex-direction:column;gap:var(--sk-s1,6px);padding:var(--sk-s2,12px) var(--sk-s3,18px);background:var(--sk-sovereign-tint);border-bottom:1px solid var(--sk-line-soft)}
+#eternal .et-b-open:last-child{border-bottom:0}
+#eternal .et-b-open>div{font:400 15px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+#eternal .et-b-open>div.et-b-src{font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-item{display:flex;align-items:center;gap:var(--sk-s2,12px);width:100%;min-height:var(--sk-control-person,60px);padding:var(--sk-s1,6px) var(--sk-s3,18px);border:0;border-bottom:1px solid var(--sk-line-soft);border-radius:0;background:transparent;text-align:left;color:var(--sk-ink);font:400 16px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-b-item:last-child{border-bottom:0}
+#eternal button.et-b-item{cursor:pointer}
+#eternal .et-b-item[aria-pressed="true"]{background:var(--sk-sovereign-tint)}
+#eternal .et-b-item i{width:40px;height:40px;border-radius:var(--sk-radius-pill,999px);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong);display:flex;align-items:center;justify-content:center;font:600 14px/1.4 var(--sk-font-bee-sans);font-style:normal;flex:none}
+#eternal .et-b-item i.et-dash{background:transparent;border:1.5px dashed var(--sk-guard);color:var(--sk-guard)}
+#eternal .et-b-item i.et-ok{background:var(--sk-verified-wash);color:var(--sk-verified)}
+#eternal .et-b-item>span{display:flex;flex-direction:column;min-width:0;flex:1 1 auto}
+#eternal .et-b-item b{display:block;font:500 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+#eternal .et-b-item small{display:block;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-term{display:flex;gap:var(--sk-s2,12px);align-items:flex-start;padding:var(--sk-s2,12px) var(--sk-s3,18px);border-bottom:1px solid var(--sk-line-soft)}
+#eternal .et-b-term:last-child{border-bottom:0}
+#eternal .et-b-term>i{width:36px;height:36px;border-radius:var(--sk-radius-pill,999px);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong);display:flex;align-items:center;justify-content:center;flex:none;font:600 14px/1.4 var(--sk-font-bee-sans);font-style:normal}
+#eternal .et-b-term>i.et-ok{background:var(--sk-verified-wash);color:var(--sk-verified)}
+#eternal .et-b-term>i.et-dash{background:transparent;border:1.5px dashed var(--sk-guard);color:var(--sk-guard)}
+#eternal .et-b-term>div{display:flex;flex-direction:column;min-width:0}
+#eternal .et-b-term b{display:block;font:600 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+#eternal .et-b-term span{font:400 15px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-consent{display:flex;align-items:center;gap:var(--sk-s2,12px);min-height:var(--sk-control-min,44px);font:600 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink);cursor:pointer}
+#eternal .et-b-consent input{width:var(--sk-control-check,24px);height:var(--sk-control-check,24px);margin:0;flex:none;accent-color:var(--sk-primary)}
+#eternal .et-b-act{display:flex;flex-direction:column;gap:var(--sk-s1,6px);margin-top:var(--sk-s1,6px)}
+#eternal .et-b-primary{display:flex;align-items:center;justify-content:center;width:100%;min-height:var(--sk-control-primary,54px);padding:var(--sk-s1,6px) var(--sk-s3,18px);border:0;border-radius:var(--sk-radius-lg,16px);background:var(--sk-primary);color:var(--sk-on-primary)!important;font:600 17px/1.2 var(--sk-font-bee-sans)!important;text-align:center;cursor:pointer}
+#eternal .et-b-primary:disabled{background:var(--sk-bg-well);color:var(--sk-ink-mut)!important;cursor:not-allowed}
+#eternal .et-b-link{display:flex;align-items:center;justify-content:center;min-height:var(--sk-control-min,44px);padding:0 var(--sk-s2,12px);border:0;background:transparent;font:600 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-link)!important;cursor:pointer;text-align:center}
+#eternal .et-b-link:hover{color:var(--sk-link-hover)!important}
+#eternal .et-b-foot{text-align:center;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-status{padding:var(--sk-s2,12px) var(--sk-s3,18px);border-radius:var(--sk-radius,12px);background:var(--sk-verified-wash);color:var(--sk-verified);font:600 14px/1.4 var(--sk-font-bee-sans)}
+#eternal .et-b-status.et-no{background:var(--sk-guard-wash);color:var(--sk-guard)}
+#eternal .et-b-back{align-self:flex-start;display:flex;align-items:center;min-height:var(--sk-control-min,44px);padding:0;border:0;background:none;font:600 16px/1.45 var(--sk-font-bee-sans)!important;color:var(--sk-link)!important;cursor:pointer}
+#eternal .et-b-card{display:flex;flex-direction:column;gap:var(--sk-s1,6px);padding:var(--sk-s3,18px);background:var(--sk-sovereign-tint);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl,18px)}
+#eternal .et-b-card h3{font:400 28px/1.1 var(--sk-font-bee-serif);color:var(--sk-sovereign-strong)}
+#eternal .et-b-card>div{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+#eternal .et-b-card.et-dash{background:var(--sk-bg-card);border:1px dashed var(--sk-ink-dim)}
+
+/* RAVER — the data is the art; lowercase is allowed joy; the numbers never change */
+#eternal .et-r{color:var(--sk-ink);font:400 14px/1.4 var(--sk-font-raver-body)}
+#eternal .et-r-top{display:flex;align-items:baseline;justify-content:space-between;gap:var(--sk-s2,12px);flex-wrap:wrap}
+#eternal .et-r-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em;color:var(--sk-ink)}
+#eternal .et-r-hint{font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-art{position:relative;width:100%;max-width:360px;margin:var(--sk-s3,18px) auto var(--sk-s2,12px)}
+#eternal .et-r-art>svg{width:100%;height:auto;filter:drop-shadow(var(--sk-glow-sovereign))}
+#eternal .et-r-art [role="button"]{cursor:pointer}
+#eternal .et-r-art [role="button"]:focus{outline:none}
+#eternal .et-r-art [role="button"]:focus-visible>*{stroke:var(--sk-ink);stroke-width:2}
+#eternal .et-r-legend{display:flex;flex-wrap:wrap;justify-content:center;gap:var(--sk-s1,6px) var(--sk-s3,18px);margin:0 0 var(--sk-s3,18px)}
+#eternal .et-r-legend span{display:inline-flex;align-items:center;gap:var(--sk-s1,6px);font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-legend i{width:14px;height:14px;border-radius:var(--sk-radius-pill,999px);flex:none}
+#eternal .et-r-card{display:flex;gap:var(--sk-s2,12px);align-items:flex-start;padding:var(--sk-s2,12px) var(--sk-s3,18px);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl,18px);background:var(--sk-sovereign-tint);min-height:var(--sk-control-person,60px)}
+#eternal .et-r-card .et-rk{min-width:44px;height:44px;padding:0 var(--sk-s1,6px);border-radius:var(--sk-radius,12px);background:var(--sk-sovereign-strong);color:var(--sk-bg);display:flex;align-items:center;justify-content:center;font:700 15px/1.2 var(--sk-font-raver-display);flex:none}
+#eternal .et-r-card>div{min-width:0;flex:1 1 auto}
+#eternal .et-r-card b{display:block;font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink)}
+#eternal .et-r-card span{display:block;margin-top:var(--sk-s1,6px);font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-card span.et-src{color:var(--sk-sovereign-soft)}
+#eternal .et-r-sub{margin:var(--sk-s4,24px) 0 var(--sk-s2,12px);font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em;color:var(--sk-ink)}
+#eternal .et-r-tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--sk-s2,12px)}
+#eternal .et-r-tile{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--sk-s1,6px);min-height:96px;padding:var(--sk-s2,12px) var(--sk-s1,6px);border-radius:var(--sk-radius-xl,18px);border:1.5px solid var(--sk-sovereign);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong)!important;font:600 14px/1.25 var(--sk-font-raver-body);text-align:center;cursor:pointer;opacity:.7;transition:opacity var(--dur,.26s),box-shadow var(--dur,.26s)}
+#eternal .et-r-tile.et-dash{border-style:dashed;border-color:var(--sk-guard);background:var(--sk-guard-wash);color:var(--sk-guard)!important}
+#eternal .et-r-tile[aria-pressed="true"]{opacity:1;border-color:var(--sk-you);box-shadow:var(--sk-glow-sovereign)}
+#eternal .et-r-tile svg{width:26px;height:26px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+#eternal .et-r-note{margin:var(--sk-s2,12px) 0 0;text-align:center;font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-pill{display:flex;align-items:center;justify-content:center;width:100%;min-height:58px;margin-top:var(--sk-s4,24px);padding:var(--sk-s1,6px) var(--sk-s3,18px);border:0;border-radius:var(--sk-radius-pill,999px);background:var(--sk-primary);color:var(--sk-on-primary)!important;font:700 15px/1.2 var(--sk-font-raver-display)!important;letter-spacing:.04em;text-align:center;cursor:pointer}
+#eternal .et-r-pill:disabled{background:var(--sk-sovereign-wash);color:var(--sk-sovereign-soft)!important;cursor:not-allowed}
+#eternal .et-r-ghost{display:flex;align-items:center;justify-content:center;margin:var(--sk-s2,12px) auto 0;min-height:var(--sk-control-min,44px);padding:0 var(--sk-s2,12px);border:0;background:none;color:var(--sk-link)!important;font:600 14px/1.25 var(--sk-font-raver-body)!important;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+#eternal .et-r-still{display:inline-flex;align-items:center;justify-content:center;gap:var(--sk-s1,6px);min-height:var(--sk-control-min,44px);min-width:var(--sk-control-min,44px);padding:0 var(--sk-s2,12px);border:1.5px solid var(--sk-line);border-radius:var(--sk-radius-pill,999px);background:var(--sk-bg-card);color:var(--sk-ink-soft)!important;font:600 14px/1.25 var(--sk-font-raver-body)!important;cursor:pointer}
+#eternal .et-r-still[aria-pressed="true"]{border-color:var(--sk-sovereign);color:var(--sk-sovereign-strong)!important}
+#eternal .et-r-bar{display:flex;align-items:center;justify-content:space-between;gap:var(--sk-s2,12px);flex-wrap:wrap}
+@keyframes et-breathe{0%,100%{opacity:1}50%{opacity:.55}}
+@keyframes et-drift{from{transform:translateX(0)}to{transform:translateX(var(--et-run,300px))}}
+#eternal .et-r.et-still-on *{animation-play-state:paused!important}
+@media (prefers-reduced-motion:reduce){#eternal .et-r *,#eternal .et-b *,#eternal .et-c *{transition:none!important;animation:none!important}}
+
+/* CYPHERPUNK — the instrument, complete at first paint: tables, a numbered pipeline, receipts */
+#eternal .et-c{font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink);overflow-wrap:break-word}
+#eternal .et-c-path{font:600 15px/1.45 var(--sk-font-mono);color:var(--sk-ink);word-break:break-all}
+#eternal .et-c-chips{display:flex;flex-wrap:wrap;gap:var(--sk-s1,6px);margin:var(--sk-s2,12px) 0}
+#eternal .et-c-chips span{padding:2px var(--sk-s1,6px);border:1px solid var(--sk-line);border-radius:4px;background:var(--sk-bg-card);font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-soft)}
+#eternal .et-c-chips span.et-on{border-color:var(--sk-guard);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong)}
+#eternal .et-c-chips span.et-ok{border-color:var(--sk-verified);color:var(--sk-verified)}
+#eternal .et-c-chips span.et-no{border-color:var(--sk-info);color:var(--sk-info)}
+#eternal .et-c-guard{display:flex;justify-content:space-between;align-items:center;gap:var(--sk-s1,6px) var(--sk-s2,12px);flex-wrap:wrap;min-height:var(--sk-control-min,44px);padding:var(--sk-s1,6px) var(--sk-s3,18px);border:1px dashed var(--sk-guard);border-radius:var(--sk-radius-sm,6px);background:var(--sk-guard-wash);color:var(--sk-guard)}
+#eternal .et-c-guard b{font-weight:600;color:var(--sk-sovereign-strong)}
+#eternal .et-c-h{margin:var(--sk-s4,24px) 0 var(--sk-s2,12px)!important;font:600 15px/1.45 var(--sk-font-mono);color:var(--sk-ink)}
+#eternal .et-c-tab{width:100%;margin:var(--sk-s2,12px) 0 var(--sk-s1,6px)!important;border:1px solid var(--sk-line)!important;border-radius:var(--sk-radius-sm,6px);overflow:hidden;background:var(--sk-bg-card)!important;table-layout:auto}
+#eternal .et-c-tab th{padding:var(--sk-s1,6px) var(--sk-s2,12px)!important;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);border-bottom:1px solid var(--sk-line)!important;background:var(--sk-bg-well)}
+#eternal .et-c-tab td{height:var(--sk-control-min,44px);padding:var(--sk-s1,6px) var(--sk-s2,12px)!important;border-bottom:1px solid var(--sk-line)!important;font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink);vertical-align:middle}
+#eternal .et-c-tab tr:last-child td{border-bottom:0!important}
+#eternal .et-c-tab td:first-child{color:var(--sk-guard)}
+#eternal .et-c-tab td:first-child,#eternal .et-c-tab th:first-child{white-space:nowrap;width:1%}
+#eternal .et-c-tab tr.et-pick{cursor:pointer}
+#eternal .et-c-tab tr.et-pick:hover td,#eternal .et-c-tab tr.et-pick[aria-expanded="true"] td,#eternal .et-c-tab tr.et-pick[aria-pressed="true"] td{background:var(--sk-sovereign-tint)}
+#eternal .et-c-tab tr.et-more td{height:auto;background:var(--sk-sovereign-tint);color:var(--sk-ink-soft)}
+#eternal .et-c-tab small{display:block;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut)}
+#eternal .et-c-tab .et-nw{white-space:nowrap}
+#eternal .et-st-ok{color:var(--sk-verified)}#eternal .et-st-no{color:var(--sk-info)}#eternal .et-st-wait{color:var(--sk-ai)}#eternal .et-st-guard{color:var(--sk-guard)}#eternal .et-st-dim{color:var(--sk-ink-mut)}
+#eternal .et-c-pipe{list-style:none;margin:0;padding:0;display:grid;gap:var(--sk-s2,12px);counter-reset:etp}
+#eternal .et-c-pipe li{display:grid;grid-template-columns:28px 1fr;gap:var(--sk-s1,6px) var(--sk-s2,12px);padding:var(--sk-s2,12px) var(--sk-s3,18px);border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm,6px);background:var(--sk-bg-card);counter-increment:etp}
+#eternal .et-c-pipe li::before{content:counter(etp,decimal-leading-zero);color:var(--sk-guard);font-weight:600}
+#eternal .et-c-pipe li b{font-weight:600;color:var(--sk-ink)}
+#eternal .et-c-pipe li p,#eternal .et-c-pipe li>div{grid-column:2;color:var(--sk-ink-soft)}
+#eternal .et-c-pipe li.et-done b{color:var(--sk-verified)}
+#eternal .et-c-pipe li.et-guard{border-style:dashed;border-color:var(--sk-guard)}
+#eternal .et-c-pipe li.et-guard b{color:var(--sk-guard)}
+#eternal .et-c-pipe li.et-now{border-color:var(--sk-ai);box-shadow:inset 0 0 0 1px var(--sk-ai)}
+#eternal .et-c-pipe li.et-now b{color:var(--sk-ai)}
+#eternal .et-c-pipe li.et-todo p,#eternal .et-c-pipe li.et-todo>div{color:var(--sk-ink-mut)}
+#eternal .et-c-primary{display:flex;align-items:center;justify-content:center;width:100%;min-height:52px;margin-top:var(--sk-s3,18px);padding:var(--sk-s1,6px) var(--sk-s2,12px);border:0;border-radius:var(--sk-radius-sm,6px);background:var(--sk-primary);color:var(--sk-on-primary)!important;font:600 14px/1.2 var(--sk-font-mono)!important;text-align:center;cursor:pointer}
+#eternal .et-c-primary:disabled{background:var(--sk-bg-well);color:var(--sk-ink-mut)!important;border:1px dashed var(--sk-line);cursor:not-allowed}
+#eternal .et-c-kv{width:100%;border:1px solid var(--sk-line)!important;border-radius:var(--sk-radius-sm,6px);overflow:hidden;background:var(--sk-bg-card)!important}
+#eternal .et-c-kv th{width:104px;padding:var(--sk-s2,12px)!important;vertical-align:top;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);border-bottom:1px solid var(--sk-line)!important;background:transparent}
+#eternal .et-c-kv td{padding:var(--sk-s2,12px)!important;border-bottom:1px solid var(--sk-line)!important;font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink);word-break:break-word}
+#eternal .et-c-kv tr:last-child th,#eternal .et-c-kv tr:last-child td{border-bottom:0!important}
+#eternal .et-c-kv .et-no{color:var(--sk-info)}#eternal .et-c-kv .et-yes{color:var(--sk-verified)}#eternal .et-c-kv .et-g{color:var(--sk-guard)}
+#eternal .et-c-verify{margin-top:var(--sk-s3,18px);padding:var(--sk-s3,18px);border-radius:var(--sk-radius-sm,6px);background:var(--sk-bg-card);border:1px solid var(--sk-line)}
+#eternal .et-c-verify-h{font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);margin-bottom:var(--sk-s1,6px)}
+#eternal .et-c-verify ol{margin:0;padding-left:var(--sk-s4,24px)!important;display:grid;gap:var(--sk-s1,6px)}
+#eternal .et-c-verify code{font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ai);word-break:break-all}
+#eternal .et-c-row{display:grid;grid-template-columns:1fr 1fr;gap:var(--sk-s2,12px);margin-top:var(--sk-s3,18px)}
+#eternal .et-c-ghost{display:flex;align-items:center;justify-content:center;min-height:52px;padding:var(--sk-s1,6px);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius-sm,6px);background:transparent;color:var(--sk-ink)!important;text-align:center;font:600 14px/1.2 var(--sk-font-mono)!important;cursor:pointer}
+#eternal .et-c-a{display:inline-flex;align-items:center;min-height:var(--sk-control-min,44px);min-width:var(--sk-control-min,44px);color:var(--sk-link)!important}
+#eternal .et-c-a:hover{color:var(--sk-link-hover)!important}
+/* addresses and hashes wrap anywhere; words never break mid-word */
+#eternal .et-c-a,#eternal .et-c-verify li,#eternal .et-c-kv td,#eternal .et-c code{overflow-wrap:anywhere}
+#eternal .et-c-kv .et-c-a{display:flex;min-width:0}
+#eternal .et-c-fixed{table-layout:fixed}
+#eternal .et-c-fixed td,#eternal .et-c-fixed th{overflow-wrap:break-word}
+#eternal .et-c-fixed td:first-child,#eternal .et-c-fixed th:first-child{width:auto;white-space:normal}
+
+#eternal .et-b-q{font:600 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+#eternal .et-b-term .et-b-src{margin-top:var(--sk-s1,6px);font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-term a.et-b-src{display:inline-flex;align-items:center;min-height:var(--sk-control-min,44px);font:600 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-link)!important}
+/* raver: silence, then sound — a line per entry through time */
+#eternal #etScWave .et-lane{cursor:pointer}
+#eternal #etScWave .et-hit{fill:var(--sk-bg-card);stroke:var(--sk-line);stroke-width:1}
+#eternal #etScWave .et-lane[aria-pressed="true"] .et-hit{fill:var(--sk-sovereign-tint);stroke:var(--sk-sovereign-strong)}
+#eternal #etScWave.et-picked .et-lane[aria-pressed="false"]{opacity:.5}
+#eternal #etScWave .et-quiet{stroke:var(--sk-guard);stroke-width:2.5;stroke-dasharray:5 5;fill:none}
+#eternal #etScWave .et-stand{stroke:var(--sk-info);stroke-width:3;fill:none}
+#eternal #etScWave .et-told{stroke:var(--sk-biomass);stroke-width:2.5;fill:none;stroke-linejoin:round}
+#eternal #etScWave .et-open{fill:var(--sk-bg);stroke:var(--sk-guard);stroke-width:2.5}
+#eternal #etScWave .et-lane[aria-pressed="true"] .et-open{animation:et-breathe 2.8s ease-in-out infinite}
+#eternal #etScWave .et-start{fill:var(--sk-sovereign-soft)}
+#eternal #etScWave text{fill:var(--sk-ink);font:600 14px/1.25 var(--sk-font-raver-body)}
+#eternal #etScWave text.et-yr{fill:var(--sk-ink-soft);font:400 14px/1.25 var(--sk-font-raver-body)}
+#eternal #etScWave .et-grid{stroke:var(--sk-line);stroke-width:1}
+#eternal #etScWave .et-now{stroke:var(--sk-you);stroke-width:1.5;stroke-dasharray:2 4}
+#eternal #etScWave .et-scan{stroke:var(--sk-sovereign-strong);stroke-width:1.5;opacity:.55;animation:et-drift 9s linear infinite}
+#eternal .et-lg-quiet{border:2px dashed var(--sk-guard)}#eternal .et-lg-told{background:var(--sk-biomass)}#eternal .et-lg-stand{background:var(--sk-info)}#eternal .et-lg-open{border:2.5px solid var(--sk-guard)}
+
+/* ── THE WHOLE PAGE, dressed per register: the page's own variables mapped onto skaists (paper and
+   ink for new bee; black-green with Sora and Unbounded for raver; black and Plex Mono for
+   cypherpunk). Warnings wear info, never amber; "bad" wears guard lilac, never red. ── */
+body[data-reg]{--bg:var(--sk-bg);--panel:var(--sk-bg-card);--line:var(--sk-line);--ink:var(--sk-ink);--mut:var(--sk-ink-mut);--ok:var(--sk-verified);--warn:var(--sk-info);--bad:var(--sk-guard);--teal:var(--sk-link);--b:var(--sk-ink);--vio:var(--sk-sovereign);--mag:var(--sk-you);background:var(--sk-bg);color:var(--sk-ink)}
+body[data-reg="bee"]{font-family:var(--sk-font-bee-sans)}
+body[data-reg="raver"]{font-family:var(--sk-font-raver-body)}
+body[data-reg="cypherpunk"]{font-family:var(--sk-font-mono)}
+body[data-reg] main h1{background:none;-webkit-text-fill-color:currentColor;text-shadow:none;color:var(--sk-ink)}
+body[data-reg="bee"] main h1{font:400 40px/1.05 var(--sk-font-bee-serif);letter-spacing:0}
+body[data-reg="raver"] main h1{font:700 30px/1.05 var(--sk-font-raver-display);letter-spacing:-.01em;background-image:var(--sk-rainbow);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent}
+body[data-reg="cypherpunk"] main h1{font:600 15px/1.45 var(--sk-font-mono)}
+body[data-reg="bee"] main h2{font-family:var(--sk-font-bee-serif);font-weight:400;font-size:28px;line-height:1.1}
+body[data-reg="raver"] main h2{font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em}
+body[data-reg="cypherpunk"] main h2{font:600 15px/1.45 var(--sk-font-mono)}
+body[data-reg="bee"] :is(.sub,p,.doctrine,.law,.means){font-size:16px;line-height:1.6}
+body[data-reg="raver"] :is(.sub,p,.doctrine,.law,.means){font-size:14px;line-height:1.6}
+body[data-reg="cypherpunk"] :is(.sub,p,.doctrine,.law,.means){font-size:13px;line-height:1.6}
+body[data-reg="bee"] :is(.links,table,td,th,footer,.gauge,.kind,.date,.rung,.disc,.axes,.combcap){font-size:14px}
+body[data-reg="raver"] :is(.links,table,td,th,footer,.gauge,.kind,.date,.rung,.disc,.axes,.combcap){font-size:14px}
+body[data-reg="cypherpunk"] :is(.links,table,td,th,footer,.gauge,.kind,.date,.rung,.disc,.axes,.combcap){font-size:12px}
+body[data-reg] .panel{border-radius:var(--sk-radius-xl)}
+body[data-reg="cypherpunk"] .panel{border-radius:var(--sk-radius-sm)}
+body[data-reg] :is(.gauge,.kind){border-color:currentColor}
+body[data-reg] nav:not(#tbar) a{display:inline-flex;align-items:center;min-height:var(--sk-control-min,44px);font-size:14px;color:var(--sk-ink-soft);border-color:var(--sk-line)}
+body[data-reg="cypherpunk"] nav:not(#tbar) a{font-size:12px;border-radius:var(--sk-radius-sm)}
+body[data-reg] nav:not(#tbar) a.here{color:var(--sk-link);border-color:var(--sk-link)}
+body[data-reg] footer{color:var(--sk-ink-mut)}
+body[data-reg] footer a{color:var(--sk-link)}
+/* the page's own pieces: a vulnerability wears guard lilac (never red), a disclosure wears verified */
+body[data-reg] .panel[style*="border-color"]{border-color:var(--sk-guard)!important}
+body[data-reg] .kind.k-gap{color:var(--sk-ink-mut)}
+body[data-reg] .means{border-left-color:var(--sk-link)}
+body[data-reg] .date{color:var(--sk-ink-mut)}
+body[data-reg] .sub b[style*="--ok"]{color:var(--sk-verified)!important}
+</style>
+<link rel="stylesheet" href="../skaists.css">
+</head><body><main>
 <nav><a href="../">⌂ hub</a><a href="index.html">🐝 open hardware guide</a><a class="here" href="security.html">🛡 security events</a><a href="build.html">🔧 become a producer</a><a href="lab.html">⬡ the lab</a></nav>
+<!-- ETERNAL FRONT (founder blueprint 2026-09-26, docs/design/eternal): three separate products in
+     one surface. ONE data layer (this page's own hand-curated entries: each one's dates, kinds,
+     title, account and "what it means for you", plus the sources its footer names) drives all
+     three, so the facts cannot drift. Security claims keep the page's law: a source is linked, or
+     the entry says UNVERIFIED here. Nothing here is fetched or ingested; the only outside step is
+     a source link the reader opens in a new tab. -->
+<section id="eternal" aria-label="security events, read honestly">
+
+  <!-- NEW BEE — a calm room: which device do you have, what happened, what it means for you -->
+  <div class="et-b">
+    <div class="et-b-step" data-step="home">
+      <div class="et-b-mark" data-etk="et.security.mark">security events</div>
+      <h2 class="et-b-h" data-etk="et.security.beeH">is my device okay?</h2>
+      <div class="et-b-lede" id="etScLede"></div>
+      <div class="et-b-guard"><svg class="et-ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span data-etk="et.security.beeGuard">a published flaw is the system working. silence is the warning sign.</span></div>
+      <div class="et-b-q" data-etk="et.security.beeQ">which device do you have?</div>
+      <div class="et-b-rows" id="etScDevs"><div class="et-b-row"><span data-etk="et.security.reading">reading the entries…</span></div></div>
+      <div class="et-b-act">
+        <button type="button" class="et-b-primary" id="etScAll"></button>
+        <a class="et-b-link" href="#etLaw" data-etk="et.security.beeLaw">how this page reads an event</a>
+        <div class="et-b-foot" data-etk="et.security.beeFoot">fear sells hardware. this page doesn't.</div>
+      </div>
+    </div>
+    <div class="et-b-step" data-step="device" hidden>
+      <button type="button" class="et-b-back" data-go="home" data-etk="et.security.beeBack">‹ which device</button>
+      <h2 class="et-b-h" id="etScDevH"></h2>
+      <div class="et-b-lede" id="etScDevL"></div>
+      <div class="et-b-rows" id="etScEvents"></div>
+      <div class="et-b-act" id="etScDevAct"></div>
+    </div>
+  </div>
+
+  <!-- RAVER — silence, then sound: each entry a line through time, dashed while silent, a burst when told -->
+  <div class="et-r">
+    <div class="et-r-top"><h2 class="et-r-h" data-etk="et.security.raverH">silence, then sound</h2><span class="et-r-hint" id="etScHint"></span></div>
+    <div class="et-r-art"><svg id="etScWave" viewBox="0 0 354 336" role="group" aria-label="each entry as a line through time: dashed while nobody was told, a burst when it was disclosed, an open end while it stands"></svg></div>
+    <div class="et-r-legend"><span><i class="et-lg-quiet"></i><span data-etk="et.security.lgQuiet">silent</span></span><span><i class="et-lg-told"></i><span data-etk="et.security.lgTold">disclosed</span></span><span><i class="et-lg-stand"></i><span data-etk="et.security.lgStand">standing</span></span><span><i class="et-lg-open"></i><span data-etk="et.security.lgOpen">still open</span></span></div>
+    <div class="et-r-card" id="etScCard" aria-live="polite"></div>
+    <div id="etScPillBox"></div>
+    <div class="et-r-bar"><button type="button" class="et-r-still" id="etScStill" aria-pressed="false">pause the light</button><a class="et-r-ghost" href="#etArchive" data-etk="et.security.raverAll">every entry</a></div>
+  </div>
+
+  <!-- CYPHERPUNK — the instrument: every entry, audited against the page's own law, with its sources -->
+  <div class="et-c">
+    <div class="et-c-path">sec://events · hand-curated</div>
+    <div class="et-c-chips" id="etScChips"></div>
+    <div class="et-c-guard"><span data-etk="et.security.cyGuard">hand-curated · never auto-ingested</span><b data-etk="et.security.cyGuardB">reputation is not evidence</b></div>
+    <h3 class="et-c-h" data-etk="et.security.cyEvH">entries · tap a row for what it means</h3>
+    <table class="et-c-tab"><thead><tr><th>#</th><th>entry · when</th><th>kind</th></tr></thead><tbody id="etScTab"></tbody></table>
+    <h3 class="et-c-h" data-etk="et.security.cyAuditH">audit · each entry against this page's own law</h3>
+    <table class="et-c-tab"><thead><tr><th>#</th><th>access</th><th>told by</th><th>source</th></tr></thead><tbody id="etScAudit"></tbody></table>
+    <h3 class="et-c-h" data-etk="et.security.cyLawH">the law · every entry must state</h3>
+    <ol class="et-c-pipe" id="etScLaw"></ol>
+    <div id="etScCyGo"></div>
+    <h3 class="et-c-h" data-etk="et.security.cySrcH">sources · as the footer names them</h3>
+    <table class="et-c-kv" id="etScSrc"></table>
+    <div class="et-c-verify">
+      <div class="et-c-verify-h" data-etk="et.security.cyVerifyH">verify · no trust in this page needed</div>
+      <ol id="etScVerify"></ol>
+    </div>
+    <div class="et-c-row"><a class="et-c-ghost" href="#etEvent1" data-etk="et.security.cyAll">every entry ↓</a><a class="et-c-ghost" href="https://github.com/beehive-nature/beehive-nature/blob/main/surfaces/hardware/security.html" target="_blank" rel="noopener noreferrer" data-etk="et.security.cyFork">fork the template ↗ (new tab)</a></div>
+  </div>
+</section>
+<h2 class="et-archive-h" id="etArchive" data-etk="et.security.archive">every entry, in full</h2>
 <h1>Security events, read honestly</h1>
 <div class="sub">How to read this page: in open hardware, <b style="color:var(--ok)">a published attack is the system working</b> — researchers probe, vendors disclose, firmware patches, everyone learns. The red flag is never the disclosure; it is the vendor you never hear from. Each entry names what <i>kind</i> of event it was, because "hack" gets used for four different things.</div>
 
-<div class="panel" style="border-color:color-mix(in srgb,var(--bad) 45%,var(--line))"><span class="date">regression Mar 2021 · disclosed Jul 30 2026 · actively exploited</span>
+<div class="panel" id="etEvent1" style="border-color:color-mix(in srgb,var(--bad) 45%,var(--line))"><span class="date">regression Mar 2021 · disclosed Jul 30 2026 · actively exploited</span>
 <span class="kind k-vuln">critical vulnerability</span><span class="kind k-disc">disclosed by Block + independent researchers</span>
 <h2><span data-i18n="h.140">Coldcard RNG failure — five years of weak seeds</span></h2>
 <p>A 2021 firmware change silently disabled the hardware RNG path: a build flag was set to zero but the code checked whether the flag <i>existed</i>, not whether it was <i>on</i>, so seed generation fell back to a non-cryptographic software generator. Mk2/Mk3 (v4.x) seeds became near-deterministic given observable device state; Mk4/Q/Mk5 (v5.x+) added only a 32-bit reseed — at most 2³² possible streams, brute-forceable. Everything drawing on that stream was touched: seeds, paper-wallet keys, seed-XOR masks, backup encryption. Funds were being actively drained when Block's engineering team published, five years after the regression landed.</p>
 <div class="means">What it means for you: <b>updating firmware cannot repair a seed that was already generated weak</b> — affected users must move funds to a wallet created on patched firmware (or different hardware) and follow Coinkite's migration guidance. Exposure follows the firmware version at <i>generation time</i>, not the device's age. And the structural lesson this page exists for: entropy cannot be audited after the fact, closed review cultures repel the researchers who would have caught this in year one, and no maker's reputation — anyone's — is a substitute for reproducible verification. Don't trust; verify.</div></div>
 
-<div class="panel"><span class="date">attack Jan 2026 · disclosed Jun 2026</span>
+<div class="panel" id="etEvent2"><span class="date">attack Jan 2026 · disclosed Jun 2026</span>
 <span class="kind k-vuln">vulnerability research</span><span class="kind k-disc">vendor disclosed</span>
 <h2><span data-i18n="h.141">TROPIC01 laser fault-injection (Trezor Safe 7)</span></h2>
 <p>Ledger's Donjon research lab demonstrated a laser fault-injection attack against the TROPIC01 auditable secure element; Trezor disclosed publicly in June 2026. Physical-access attack class, lab-grade equipment. A separate event from the Coldcard RNG failure above — different vendor, different class: this one needs the device in hand and a laser bench; that one shipped weak seeds to everyone.</p>
 <div class="means">What it means for you: this is why the Safe 7 stacks <b>two heterogeneous secure elements plus a passphrase</b> — no single chip is the last line. Keep a passphrase on high-value seeds; physical-access attacks are exactly what it exists for. And note the deeper lesson: an auditable chip got probed <i>in public</i> and everyone learned. Closed chips get probed too — you just never hear.</div></div>
 
-<div class="panel"><span class="date">standing since 2023</span>
+<div class="panel" id="etEvent3"><span class="date">standing since 2023</span>
 <span class="kind k-arch">architecture decision</span>
 <h2><span data-i18n="h.142">Ledger Recover (all Ledger devices)</span></h2>
 <p>Ledger shipped an opt-in service in which device firmware shards and exports encrypted seed material to third-party custodians. Not a bug and not a breach — a deliberate architecture decision that proved the firmware <i>can</i> move seed material off-device.</p>
 <div class="means">What it means for you: the boundary you rely on is what the firmware <b>can</b> do, not what settings currently say. This is the event that moved Ledger to our excluded list — architecture, not incident.</div></div>
 
-<div class="panel"><span class="date">2021 → present</span>
+<div class="panel" id="etEvent4"><span class="date">2021 → present</span>
 <span class="kind k-lic">license change</span>
 <h2><span data-i18n="h.143">Coldcard leaves open source</span></h2>
 <p>Coldcard began as GPLv3 — itself incorporating GPLv3 Trezor code, exercising exactly the freedoms FOSS grants. When Foundation exercised those same freedoms in 2020 (porting GPL components into Passport, with attribution, under GPLv3), Coinkite removed the GPL code and moved new Coldcard code to MIT + Commons Clause — whose own FAQ answers "is this open source?" with "No." That license wall then made code exchange in either direction legally impossible. A license event, not a vulnerability — but its consequences for independent review were not abstract, as the entry above shows.</p>
 <div class="means">What it means for you: source-<i>visible</i> lets you read; open <i>source</i> lets the community fork, patch, audit, and outlive the vendor. For thousand-year custody, only the second counts — and a project that walls out its reviewers is quietly walling out the people who find RNG bugs in year one instead of year five.</div></div>
 
-<div class="panel"><span class="date">observed 2026, unresolved</span>
+<div class="panel" id="etEvent5"><span class="date">observed 2026, unresolved</span>
 <span class="kind k-gap kind">vendor gap</span>
 <h2><span data-i18n="h.144">Safe 7 authenticity root missing upstream</span></h2>
 <p>Trezor's device-authenticity endpoint for the Safe 7 generation (<span style="color:var(--ink)">t3w1/authenticity.json</span>) returns 404 while prior generations resolve. Any flow that attests device genuineness is blocked on a vendor publication no one else controls.</p>
 <div class="means">What it means for you: verify your device by the seal ritual and signed-firmware check at setup. For the BNR fleet: bSAFE 7 publishes its own signed definitions and authenticity chain rather than waiting — a fork must own its trust root anyway.</div></div>
 
-<div class="panel doctrine">
+<div class="panel doctrine" id="etLaw">
+
 <b style="color:var(--ink)">The editorial law of this page.</b> Every future entry must state: the event <b>kind</b> (vulnerability / disclosure / license / architecture / supply-chain / gap), the <b>access required</b> (remote, local, physical, lab), whether the vendor <b>disclosed or was outed</b>, and one concrete <b>"what it means for you."</b> No entry ships without a primary source. Fear sells hardware; this page doesn't. And one law above the others, learned the hard way by the whole industry in 2026: <b style="color:var(--ink)">reputation is not evidence.</b> No founder's confidence, no podcast consensus, no years of recommendations substitute for reproducible builds and independent review — apply the same scrutiny to friends, sponsors, favorites, and us.
 </div>
 
 <footer><a href="index.html">← the guide</a> · sources: <a href="https://engineering.block.xyz/blog/predictable-rng-fallback-and-32-bit-reseed-in-coldcard-firmware" rel="noopener">Block engineering advisory (Jul 2026)</a>, Coinkite migration guidance, Trezor TROPIC01 disclosure (Jun 2026), Ledger Recover documentation, Commons Clause FAQ · <a href="build.html">become a producer →</a> · <a href="../onboarding/">🔑 onboard ceremony</a> · <a href="../recover.html">📄 recovery tool</a> · <a href="../blight/demo.html">💡 the beam</a> · <a href="https://github.com/beehive-nature/beehive-nature/blob/main/surfaces/hardware/security.html" rel="noopener">view source</a></footer>
-</main><script src="../tour.js?v=42"></script>
+</main><script>
+/* ETERNAL FRONT — one data layer, three renderers (docs/design/eternal). Every fact is read from
+   this page's own hand-curated entries below (dates, kinds, title, account, "what it means for
+   you") and from the sources its footer names. Sources are matched to entries by the words they
+   share; a source the page links is linked here too, and every entry without a linked source says
+   UNVERIFIED here (AGENTS.md: security claims cite their source or say UNVERIFIED). Nothing is
+   fetched, scored or rated: the only outside step is a source the reader opens in a new tab. */
+(function(){
+  var $=function(id){return document.getElementById(id);};
+  var T=function(k,f){var t=window.BNRLanguage&&window.BNRLanguage.text;return t?t(k,f):f;};
+  var K=function(k,f){return T('et.security.'+k,f);};
+  var esc=function(v){return String(v==null?'':v).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});};
+  var txt=function(e){return (e&&e.textContent||'').replace(/\s+/g,' ').trim();};
+  var first=function(s){var m=/^(.*?[.!?])(\s|$)/.exec(s||'');return m?m[1]:(s||'');};
+  var CHEV='<svg class="et-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>';
+  var MON={jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,oct:9,nov:10,dec:11};
+  var DEVICES=[['Coldcard',/coldcard/i],['Trezor Safe 7',/safe 7/i],['Ledger',/ledger(?!'s donjon)/i]];
+  var NOW=(function(){var d=new Date();return d.getFullYear()+(d.getMonth()+d.getDate()/31)/12;})();
+
+  /* ── the data layer ── */
+  var D={events:[],sources:[],law:[],page:'hardware/security.html'};
+  var B={step:'home',dev:null}, R={sel:null,still:false}, C={open:null};
+
+  function when(s){ /* the page's own date words → years on a line; "disclosed …" ends the silence */
+    var toks=[],re=/\b(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\s+(?:(\d{1,2})\s+)?(\d{4})|\b(20\d\d)\b/g,m;
+    while((m=re.exec(s))){toks.push({at:m.index,y:m[3]?(+m[3])+(MON[m[1].toLowerCase()]+(m[2]?(+m[2]-1)/31:0))/12:+m[4]});}
+    var dis=/disclosed\s/i.exec(s), end=null;
+    if(dis){var after=toks.filter(function(t){return t.at>dis.index;})[0];if(after)end=after.y;}
+    return {start:toks.length?toks[0].y:null,end:end,open:/present|unresolved|standing/i.test(s),exploited:/actively exploited/i.test(s)};
+  }
+  function readPage(){
+    D.events=[].map.call(document.querySelectorAll('main .panel .kind'),function(k){return k.closest('.panel');}).filter(function(p,i,a){return a.indexOf(p)===i;}).map(function(p,i){
+      var date=txt(p.querySelector('.date')), kinds=[].map.call(p.querySelectorAll('.kind'),function(k){var c=(/k-(vuln|disc|lic|arch|gap)/.exec(k.className)||[])[1]||'';return {t:txt(k),cls:c};});
+      var title=txt(p.querySelector('h2')), text=txt(p.querySelector('p')), means=txt(p.querySelector('.means')).replace(/^What it means for you:\s*/,'');
+      var main=kinds.filter(function(k){return k.cls!=='disc';})[0]||kinds[0]||{t:'',cls:''};
+      var told=kinds.filter(function(k){return k.cls==='disc';})[0];
+      var access=/physical-access/i.test(text)?'physical'+(/lab-grade/i.test(text)?' · lab-grade':''):'';
+      return {n:i+1,id:p.id||'',date:date,kind:main.t,cls:main.cls,told:told?told.t:'',title:title,text:text,means:means,access:access,
+        devices:DEVICES.filter(function(d){return d[1].test(title);}).map(function(d){return d[0];}),w:when(date),sources:[]};
+    });
+    /* the footer's source list: "sources: a, b (Jul 2026), c · …"; a named source links only if the page links it */
+    var ft=document.querySelector('main footer'), m=ft&&/sources:\s*(.*?)\s·\s/.exec(txt(ft));
+    var names=m?m[1].split(/,\s*(?![^()]*\))/):[];
+    D.sources=names.map(function(n){
+      var a=[].filter.call(ft.querySelectorAll('a'),function(x){return txt(x)===n;})[0];
+      var token=n.replace(/\(.*?\)/g,'').replace(/\b(engineering|advisory|guidance|disclosure|documentation|FAQ)\b/gi,'').replace(/\s+/g,' ').trim();
+      var words=token.split(' ');
+      var hits=D.events.filter(function(e){var hay=(e.title+' '+e.text+' '+e.means+' '+e.told).replace(/[’']s\b/g,'');
+        return words.every(function(w){return new RegExp('\\b'+w.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'\\b','i').test(hay);});}).map(function(e){return e.n;});
+      var s={name:n,href:a?a.href:null,events:hits};
+      hits.forEach(function(k){D.events[k-1].sources.push(s);});
+      return s;
+    });
+    D.events.forEach(function(e){e.src=e.sources.some(function(s){return s.href;})?'linked':e.sources.length?'named':'none';});
+    var law=document.getElementById('etLaw')||document.querySelector('main .panel.doctrine');
+    var lt=txt(law);
+    D.law=[['kind',(/\(([^)]*)\)/.exec(lt)||['',''])[1]],['access required',''],['disclosed or outed',''],['what it means for you',''],['primary source',(/No entry ships without a primary source/i.test(lt)?'no entry ships without one':'')]];
+    var acc=/access required\s*\(([^)]*)\)/i.exec(lt); if(acc)D.law[1][1]=acc[1];
+  }
+  var KIND={vuln:'a lab attack, found in public',arch:'a design choice',lic:'a licence change',gap:'something missing from the maker'};
+  var plain=function(e){return e.cls==='vuln'&&/critical/i.test(e.kind)?K('k.critical','a serious flaw'):K('k.'+e.cls,KIND[e.cls]||e.kind);};
+  var yr=function(y){return y==null?'':String(Math.floor(y));};
+  var span=function(e){var a=yr(e.w.start), b=e.w.end!=null?yr(e.w.end):(e.w.open?K('now','now'):'');return b&&b!==a?a+' → '+b:a;};
+  var srcLine=function(e){return e.src==='linked'?K('srcLinked','source linked'):e.src==='named'?K('srcNamed','source named, not linked here · UNVERIFIED'):K('srcNone','no source named · UNVERIFIED');};
+  var linked=function(e){return e.sources.filter(function(s){return s.href;})[0]||null;};
+
+  /* ── NEW BEE ── */
+  function beeStep(s){B.step=s;document.querySelectorAll('#eternal .et-b-step').forEach(function(e){e.hidden=e.getAttribute('data-step')!==s;});}
+  function bee(){
+    if(!$('etScDevs')) return;
+    $('etScLede').textContent=D.events.length+' '+K('beeLede','things that happened to hardware wallets, and what each one means for you.');
+    var devs=DEVICES.map(function(d){return {name:d[0],n:D.events.filter(function(e){return e.devices.indexOf(d[0])>=0;}).length};});
+    $('etScDevs').innerHTML=devs.map(function(d){return '<button type="button" class="et-b-row" data-dev="'+esc(d.name)+'"><span class="et-b-rl"><b>'+esc(d.name)+'</b></span><span class="et-b-rv">'+d.n+' '+esc(d.n===1?K('entry','entry'):K('entries','entries'))+CHEV+'</span></button>';}).join('')+
+      '<button type="button" class="et-b-row" data-dev="other"><span class="et-b-rl"><b>'+esc(K('other','something else'))+'</b></span><span class="et-b-rv">'+CHEV+'</span></button>';
+    $('etScAll').textContent=K('beeAll','show me all')+' '+D.events.length;
+    beeDev();
+  }
+  function beeDev(){
+    if(B.dev==null) return;
+    var list=B.dev==='all'?D.events:D.events.filter(function(e){return e.devices.indexOf(B.dev)>=0;});
+    $('etScDevH').textContent=B.dev==='all'?K('allH','every entry'):B.dev==='other'?K('otherH','something else'):B.dev;
+    $('etScDevL').textContent=B.dev==='other'?K('otherL','nothing on this page names it. that is not a clean bill of health: the warning sign is a maker you never hear from.'):list.length+' '+(list.length===1?K('oneL','entry on this page names it.'):B.dev==='all'?K('allL','entries, in the order the page keeps them.'):K('manyL','entries on this page name it.'));
+    $('etScEvents').hidden=!list.length||B.dev==='other';
+    $('etScEvents').innerHTML=(B.dev==='other'?[]:list).map(function(e){var l=linked(e);
+      return '<div class="et-b-term"><i class="'+(e.cls==='vuln'?'et-dash':'')+'" aria-hidden="true">'+e.n+'</i><div><b>'+esc(plain(e)+' · '+span(e))+'</b><span>'+esc(first(e.means))+'</span>'+
+        (l?'<a class="et-b-src" href="'+esc(l.href)+'" target="_blank" rel="noopener noreferrer">'+esc(K('howKnow','how we know:')+' '+l.name+' ↗ '+K('newTab','(new\u00a0tab)'))+'</a>':'<span class="et-b-src">'+esc(K('howKnow','how we know:')+' '+srcLine(e))+'</span>')+'</div></div>';}).join('');
+    var withLink=list.filter(linked)[0];
+    $('etScDevAct').innerHTML=(withLink&&B.dev!=='other'?'<a class="et-b-primary" id="etScGo" href="'+esc(linked(withLink).href)+'" target="_blank" rel="noopener noreferrer">'+esc(K('beeSrc','read the source')+' '+K('newTab','(new\u00a0tab)'))+'</a>':'<a class="et-b-primary" id="etScGo" href="#'+esc((list[0]||D.events[0]||{}).id)+'">'+esc(K('beeRead','read the whole entry below'))+'</a>')+
+      '<div class="et-b-foot">'+esc(K('beeFoot2','updating firmware cannot repair a seed that was already generated weak. the entry below says what to do.'))+'</div>';
+    if(B.dev==='other'||!list.some(function(e){return e.devices.indexOf('Coldcard')>=0;})) $('etScDevAct').querySelector('.et-b-foot').textContent=K('beeFoot','fear sells hardware. this page doesn\u2019t.');
+  }
+
+  /* ── RAVER: silence, then sound ── */
+  function wave(){
+    var svg=$('etScWave'); if(!svg) return;
+    var x0=16,x1=338,y0=2020.5,top=12,lane=56,base=top+D.events.length*lane+8;
+    var X=function(y){return x0+(Math.min(y,NOW)-y0)/(NOW-y0)*(x1-x0);};
+    var h='';
+    for(var y=2021;y<=Math.floor(NOW);y++){h+='<line class="et-grid" x1="'+X(y).toFixed(1)+'" x2="'+X(y).toFixed(1)+'" y1="'+top+'" y2="'+base+'"/><text class="et-yr" x="'+X(y).toFixed(1)+'" y="'+(base+22)+'" text-anchor="middle">\u2019'+String(y).slice(2)+'</text>';}
+    h+='<line class="et-now" x1="'+X(NOW).toFixed(1)+'" x2="'+X(NOW).toFixed(1)+'" y1="'+top+'" y2="'+base+'"/>';
+    D.events.forEach(function(e,i){
+      var yt=top+i*lane, cy=yt+36, s=e.w.start!=null?X(e.w.start):x0, sel=R.sel===e.n;
+      var short=e.title.split(/\s+—\s+|\s+\(/)[0];
+      h+='<g class="et-lane" role="button" tabindex="0" data-ev="'+e.n+'" aria-pressed="'+(sel?'true':'false')+'" aria-label="'+esc(e.title+' · '+e.date)+'">';
+      h+='<rect class="et-hit" x="2" y="'+(yt+2)+'" width="350" height="'+(lane-4)+'" rx="10"/>';
+      h+='<text x="12" y="'+(yt+20)+'">'+esc(short)+'</text>';
+      h+='<circle class="et-start" cx="'+s.toFixed(1)+'" cy="'+cy+'" r="3.5"/>';
+      if(e.w.end!=null){ /* silent until told: dashed, then the burst of the disclosure */
+        var ex=X(e.w.end), amp=e.w.exploited?13:9, pts=[];
+        h+='<line class="et-quiet" x1="'+s.toFixed(1)+'" x2="'+ex.toFixed(1)+'" y1="'+cy+'" y2="'+cy+'"/>';
+        for(var k=0;k<=6;k++)pts.push((ex-6+k*2).toFixed(1)+','+(cy+(k%2?-amp:amp)*(k===0||k===6?0:1)).toFixed(1));
+        h+='<polyline class="et-told" points="'+pts.join(' ')+'"/>';
+        if(X(NOW)-ex>2)h+='<line class="et-stand" x1="'+ex.toFixed(1)+'" x2="'+X(NOW).toFixed(1)+'" y1="'+cy+'" y2="'+cy+'" opacity=".45"/>';
+      } else if(e.cls==='gap'){ h+='<line class="et-quiet" x1="'+s.toFixed(1)+'" x2="'+X(NOW).toFixed(1)+'" y1="'+cy+'" y2="'+cy+'"/><circle class="et-open" cx="'+X(NOW).toFixed(1)+'" cy="'+cy+'" r="6"/>'; }
+      else { h+='<line class="et-stand" x1="'+s.toFixed(1)+'" x2="'+X(NOW).toFixed(1)+'" y1="'+cy+'" y2="'+cy+'"/>'+(e.w.open?'<circle class="et-open" cx="'+X(NOW).toFixed(1)+'" cy="'+cy+'" r="6"/>':''); }
+      h+='</g>';
+    });
+    h+='<line class="et-scan" x1="'+x0+'" x2="'+x0+'" y1="'+top+'" y2="'+base+'" style="--et-run:'+(x1-x0)+'px"/>';
+    svg.setAttribute('viewBox','0 0 354 '+(base+34));
+    svg.innerHTML=h;
+    svg.classList.toggle('et-picked',R.sel!=null);
+  }
+  function raver(){
+    if(!$('etScWave')) return;
+    $('etScHint').textContent=D.events.length+' '+K('hint','entries · tap a line');
+    wave();
+    var e=R.sel?D.events[R.sel-1]:null, c=$('etScCard');
+    if(e){var yrs=e.w.end!=null?(Math.round((e.w.end-(e.w.start||e.w.end))*10)/10):null;
+      c.innerHTML='<span class="et-rk">'+esc(span(e))+'</span><div><b>'+esc(e.title)+'</b><span>'+esc(plain(e)+(yrs&&yrs>=1?' · '+K('silent','silent for about')+' '+Math.round(yrs)+' '+K('years','years'):'')+(e.w.exploited?' · '+K('exploited','actively exploited'):''))+'</span><span>'+esc(first(e.means))+'</span><span class="et-src">'+esc(srcLine(e))+'</span></div>';}
+    else c.innerHTML='<span class="et-rk">'+D.events.length+'</span><div><b>'+esc(K('rCardH','the dashed stretch is the silence.'))+'</b><span>'+esc(K('rCardP','a burst is the moment it was disclosed: the system working. a solid line is a standing fact; an open ring is still unresolved.'))+'</span></div>';
+    var l=e&&linked(e);
+    $('etScPillBox').innerHTML=l?'<a class="et-r-pill" id="etScPill" href="'+esc(l.href)+'" target="_blank" rel="noopener noreferrer">'+esc(K('rSrc','open the source ↗')+' '+K('newTab','(new\u00a0tab)'))+'</a>':'<a class="et-r-pill" id="etScPill" href="#'+esc((e||D.events[0]||{}).id)+'">'+esc(e?K('rRead','read this entry ↓'):K('rAll','read the entries ↓'))+'</a>';
+    $('etScStill').setAttribute('aria-pressed',R.still?'true':'false');
+    $('etScStill').textContent=R.still?K('play','play the light'):K('still','pause the light');
+    document.querySelector('#eternal .et-r').classList.toggle('et-still-on',R.still);
+  }
+
+  /* ── CYPHERPUNK ── */
+  function cy(){
+    if(!$('etScTab')) return;
+    var by={};D.events.forEach(function(e){by[e.cls]=(by[e.cls]||0)+1;});
+    var nl=D.events.filter(function(e){return e.src==='linked';}).length;
+    $('etScChips').innerHTML=Object.keys(by).map(function(k){return '<span>'+k+' '+by[k]+'</span>';}).join('')+'<span class="et-on">entries '+D.events.length+'</span><span class="'+(nl===D.events.length?'et-ok':'et-no')+'">linked sources '+nl+'/'+D.events.length+'</span>';
+    $('etScTab').innerHTML=D.events.map(function(e){var o=C.open===e.n;
+      return '<tr class="et-pick" tabindex="0" data-cev="'+e.n+'" aria-expanded="'+(o?'true':'false')+'"><td>'+String(e.n).padStart(2,'0')+'</td><td>'+esc(e.title)+'<small>'+esc(e.date)+'</small></td><td class="'+(e.cls==='vuln'?'et-st-guard':e.cls==='gap'?'et-st-dim':'et-st-no')+'">'+esc(e.kind)+'</td></tr>'+
+        (o?'<tr class="et-more"><td colspan="3">'+esc(e.means)+(e.told?'<small>'+esc(e.told)+'</small>':'')+'</td></tr>':'');}).join('');
+    $('etScAudit').innerHTML=D.events.map(function(e){
+      return '<tr><td>'+String(e.n).padStart(2,'0')+'</td><td class="'+(e.access?'et-st-ok':'et-st-dim')+'">'+esc(e.access||K('notStated','not stated'))+'</td><td class="'+(e.told?'et-st-ok':'et-st-dim')+'">'+esc(e.told||K('notStated','not stated'))+'</td><td class="'+(e.src==='linked'?'et-st-ok':'et-st-guard')+'">'+esc(e.src==='linked'?'linked':e.src==='named'?'named · UNVERIFIED':'none · UNVERIFIED')+'</td></tr>';}).join('');
+    $('etScLaw').innerHTML=D.law.map(function(l,i){var have=[D.events.filter(function(e){return e.kind;}).length,D.events.filter(function(e){return e.access;}).length,D.events.filter(function(e){return e.told;}).length,D.events.filter(function(e){return e.means;}).length,nl][i];
+      return '<li class="'+(have===D.events.length?'et-done':'et-guard')+'"><b>'+esc(l[0])+' · '+have+'/'+D.events.length+'</b>'+(l[1]?'<div>'+esc(l[1])+'</div>':'')+'</li>';}).join('');
+    var l=D.sources.filter(function(s){return s.href;})[0];
+    $('etScCyGo').innerHTML=l?'<a class="et-c-primary" id="etScCyOpen" href="'+esc(l.href)+'" target="_blank" rel="noopener noreferrer">'+esc(K('cyOpen','open')+' '+l.name+' ↗ '+K('newTab','(new\u00a0tab)'))+'</a>':'';
+    $('etScSrc').innerHTML=D.sources.map(function(s){return '<tr><th>'+esc(s.name)+'</th><td>'+(s.href?'<a class="et-c-a" href="'+esc(s.href)+'" target="_blank" rel="noopener noreferrer">'+esc(s.href)+'</a>':'<span class="et-g">'+esc(K('cyNamed','named, not linked on this page · UNVERIFIED here'))+'</span>')+'<br><span class="et-no">'+esc('entry '+(s.events.length?s.events.map(function(n){return String(n).padStart(2,'0');}).join(' · '):K('noEntry','none matched')))+'</span></td></tr>';}).join('')+
+      D.events.filter(function(e){return e.src==='none';}).map(function(e){return '<tr><th>'+esc('entry '+String(e.n).padStart(2,'0'))+'</th><td class="et-g">'+esc(K('cyNone','no source named · UNVERIFIED here'))+'</td></tr>';}).join('');
+    var gen=D.events.filter(function(e){return /generation time/i.test(e.means);})[0];
+    $('etScVerify').innerHTML=[K('v1','open each linked source and match its date to the entry'),K('v2','an entry with no linked source stays UNVERIFIED here, however sure it sounds'),gen?(/Exposure follows[^.]*\./.exec(gen.means)||[''])[0]:''].filter(Boolean).map(function(s){return '<li>'+esc(s)+'</li>';}).join('');
+  }
+
+  function keyedCopy(){document.querySelectorAll('#eternal [data-etk]').forEach(function(e){if(e.dataset.etEn==null)e.dataset.etEn=e.textContent;e.textContent=T(e.dataset.etk,e.dataset.etEn);});}
+  function all(){keyedCopy();bee();raver();cy();}
+  function wire(){
+    var ev=$('eternal'); if(!ev) return;
+    ev.addEventListener('click',function(e){
+      var t=e.target;
+      var go=t.closest('.et-b [data-go]'); if(go){beeStep(go.getAttribute('data-go'));return;}
+      var dv=t.closest('.et-b-row[data-dev]'); if(dv){B.dev=dv.getAttribute('data-dev');beeDev();beeStep('device');ev.scrollIntoView({block:'start'});return;}
+      if(t.closest('#etScAll')){B.dev='all';beeDev();beeStep('device');ev.scrollIntoView({block:'start'});return;}
+      var ln=t.closest('[data-ev]'); if(ln){var n=+ln.getAttribute('data-ev');R.sel=R.sel===n?null:n;raver();return;}
+      if(t.closest('#etScStill')){R.still=!R.still;raver();return;}
+      var tr=t.closest('tr[data-cev]'); if(tr){var k=+tr.getAttribute('data-cev');C.open=C.open===k?null:k;cy();return;}
+    });
+    ev.addEventListener('keydown',function(e){
+      if(e.key!=='Enter'&&e.key!==' ')return;
+      var t=e.target.closest('[data-ev],tr[data-cev]'); if(!t)return;
+      e.preventDefault(); t.dispatchEvent(new MouseEvent('click',{bubbles:true}));
+    });
+    document.addEventListener('blang',all);
+  }
+  readPage(); wire(); all();
+  window.__eternal={data:D,bee:B,raver:R,cy:C};
+})();
+</script>
+<script src="../tour.js?v=42"></script>
 </body></html>

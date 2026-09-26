@@ -147,7 +147,191 @@
   .mode { min-width: 0; }
   .kicker, body[data-reg="raver"] h1, body[data-reg="cypherpunk"] h1 { text-transform: none; }
   details.tech .hash { line-height: 1.65; }
+/* ── ETERNAL FRONT (docs/design/eternal) — every value is a skaists token (skaists.css, compiled
+   from docs/design/skaists/tokens.json): no hand-picked hex, size or corner. Measured by
+   e2e/skaists-conformance.mjs. One register visible at a time; new bee is the default. ── */
+#eternal{width:100%;max-width:30rem;margin:var(--sk-s2) auto 0;padding:0 var(--sk-s3);box-sizing:border-box;text-align:start}
+#eternal *{box-sizing:border-box}
+#eternal>.et-r,#eternal>.et-c{display:none}
+body[data-reg="raver"] #eternal>.et-b,body[data-reg="cypherpunk"] #eternal>.et-b{display:none}
+body[data-reg="raver"] #eternal>.et-r{display:block}
+body[data-reg="cypherpunk"] #eternal>.et-c{display:block}
+#eternal [hidden]{display:none!important}
+#eternal button{margin:0;color:inherit}
+#eternal p{margin:0}
+#eternal svg{display:block}
+#eternal :focus-visible{outline:2px solid var(--sk-focus);outline-offset:3px}
+.et-center{text-align:center}
+.et-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.et-archive-h{width:100%;max-width:30rem;margin:var(--sk-s5) auto var(--sk-s1);padding:var(--sk-s4) var(--sk-s3) 0;border-top:1px solid var(--sk-line);color:var(--sk-ink);box-sizing:border-box}
+body[data-reg="bee"] .et-archive-h{font:400 28px/1.1 var(--sk-font-bee-serif)}
+body[data-reg="raver"] .et-archive-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em}
+body[data-reg="cypherpunk"] .et-archive-h{font:600 15px/1.45 var(--sk-font-mono)}
+.et-bchip{display:inline-flex;align-items:baseline;gap:var(--sk-s1);padding:0 var(--sk-s2);border-radius:var(--sk-radius-pill);background:var(--sk-b-chip);color:var(--sk-b-value)!important;font-weight:600;white-space:nowrap}
+
+/* NEW BEE — one question at a time */
+.et-b{color:var(--sk-ink);display:flex;flex-direction:column;gap:var(--sk-s3);font-family:var(--sk-font-bee-sans)}
+.et-b-step{display:flex;flex-direction:column;gap:var(--sk-s3)}
+.et-b-mark{font:400 18px/1.2 var(--sk-font-house);color:var(--sk-sovereign)}
+.et-b-h{margin:0;font:400 40px/1.05 var(--sk-font-bee-serif);color:var(--sk-ink);letter-spacing:0}
+.et-b-lede{margin:0;font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink-mut);text-wrap:pretty}
+.et-b-q{margin:0;font:600 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+.et-b-guard{display:flex;align-items:center;gap:var(--sk-s2);min-height:var(--sk-control-min);padding:var(--sk-s1) var(--sk-s3);border-radius:var(--sk-radius);background:var(--sk-guard-wash);color:var(--sk-guard);font:600 16px/1.45 var(--sk-font-bee-sans)}
+.et-b-guard svg,.et-b-term i svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.et-b-rows{display:flex;flex-direction:column;background:var(--sk-bg-card);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl);overflow:hidden}
+.et-b-row{display:flex;align-items:center;justify-content:space-between;gap:var(--sk-s2);min-height:var(--sk-control-row);padding:var(--sk-s1) var(--sk-s3);border:0;border-bottom:1px solid var(--sk-line-soft);background:transparent;text-align:start;width:100%;font:500 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink);border-radius:0}
+.et-b-row:last-child{border-bottom:0}
+button.et-b-row{cursor:pointer}
+.et-b-row>span{display:flex;flex-direction:column;min-width:0}
+.et-b-row em{font-style:normal;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+.et-b-row small{display:flex;align-items:center;gap:var(--sk-s1);flex:none;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+.et-b-row small.free{color:var(--sk-verified)}
+.et-b-row[aria-pressed="true"],.et-b-row[aria-expanded="true"]{background:var(--sk-sovereign-tint);color:var(--sk-sovereign-strong);font-weight:600}
+.et-b-row[aria-pressed="true"] :is(small,em),.et-b-row[aria-expanded="true"] :is(small,em){color:var(--sk-sovereign-strong)}
+.et-b-row .chev{flex:none;transition:transform var(--dur,.26s)}
+.et-b-row[aria-expanded="true"] .chev{transform:rotate(90deg)}
+.et-b-row .dot{width:22px;height:22px;flex:none;border-radius:var(--sk-radius-pill);border:1.5px solid var(--sk-ink-mut);display:flex;align-items:center;justify-content:center}
+.et-b-row[aria-pressed="true"] .dot{border-color:var(--sk-sovereign-strong)}
+.et-b-row[aria-pressed="true"] .dot::after{content:"";width:12px;height:12px;border-radius:var(--sk-radius-pill);background:var(--sk-sovereign-strong)}
+.et-b-act{display:flex;flex-direction:column;gap:var(--sk-s1);margin-top:var(--sk-s1)}
+.et-b-primary{display:flex;align-items:center;justify-content:center;width:100%;height:var(--sk-control-primary);padding:0 var(--sk-s3);border-radius:var(--sk-radius-lg);border:0;background:var(--sk-primary);color:var(--sk-on-primary)!important;font:600 17px/1.2 var(--sk-font-bee-sans)!important;cursor:pointer;text-decoration:none;text-align:center}
+.et-b-primary:disabled{background:var(--sk-bg-well);color:var(--sk-ink-mut)!important;cursor:not-allowed}
+.et-b-link{min-height:var(--sk-control-min);display:flex;align-items:center;justify-content:center;border:0;background:transparent;font:600 16px/1.45 var(--sk-font-bee-sans)!important;color:var(--sk-link)!important;text-decoration:none;cursor:pointer;text-align:center}
+.et-b-link:hover{color:var(--sk-link-hover)!important}
+.et-b-foot{margin:0;text-align:center;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+.et-b-back{align-self:flex-start;min-height:var(--sk-control-min);border:0;background:none;font:600 16px/1.45 var(--sk-font-bee-sans)!important;color:var(--sk-link)!important;cursor:pointer;padding:0}
+.et-b-term{display:flex;gap:var(--sk-s2);align-items:flex-start;padding:var(--sk-s2) var(--sk-s3);border-bottom:1px solid var(--sk-line-soft)}
+.et-b-term:last-child{border-bottom:0}
+.et-b-term i{width:36px;height:36px;border-radius:var(--sk-radius-pill);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong);display:flex;align-items:center;justify-content:center;flex:none;font-style:normal}
+.et-b-term b{display:block;font:600 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+.et-b-term span{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+.et-b-tick{width:78px;height:78px;margin:var(--sk-s2) auto 0;border-radius:var(--sk-radius-pill);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong);display:flex;align-items:center;justify-content:center;font:400 40px/1 var(--sk-font-bee-serif)}
+.et-b-card{background:var(--sk-sovereign-tint);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl);padding:var(--sk-s3)}
+.et-b-card h3{margin:0 0 var(--sk-s1);font:400 28px/1.1 var(--sk-font-bee-serif);color:var(--sk-sovereign-strong)}
+.et-b-card p{margin:0;font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+
+/* RAVER — everything through art; lowercase is allowed joy; the numbers never change */
+.et-r{color:var(--sk-ink);font-family:var(--sk-font-raver-body)}
+.et-r-top{display:flex;align-items:baseline;justify-content:space-between;gap:var(--sk-s2);flex-wrap:wrap}
+.et-r-h{margin:0;font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em;color:var(--sk-ink)}
+.et-r-hint{font:400 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+.et-r-art{width:100%;max-width:360px;margin:var(--sk-s3) auto var(--sk-s1);filter:drop-shadow(var(--sk-glow-sovereign));touch-action:manipulation}
+.et-r-art .seg{transition:fill var(--dur,.26s),opacity var(--dur,.26s)}
+.et-r-art [role="button"]{cursor:pointer}
+.et-r-art [role="button"]:focus{outline:none}
+.et-r-art [role="button"]:focus-visible .seg{stroke:var(--sk-ink);stroke-width:2}
+.et-r-legend{display:flex;justify-content:center;flex-wrap:wrap;gap:var(--sk-s1) var(--sk-s3);margin:var(--sk-s1) 0 var(--sk-s2);font:400 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+.et-r-legend span{display:flex;align-items:center;gap:var(--sk-s1)}
+.et-r-legend i{width:24px;height:12px;border-radius:var(--sk-radius-sm)}
+.et-r-card{display:flex;gap:var(--sk-s2);align-items:center;padding:var(--sk-s2) var(--sk-s3);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl);background:var(--sk-sovereign-tint);min-height:var(--sk-control-person)}
+.et-r-card .rk{width:44px;height:44px;border-radius:var(--sk-radius);background:var(--sk-sovereign-strong);color:var(--sk-bg);display:flex;align-items:center;justify-content:center;font:700 15px/1.2 var(--sk-font-raver-display);flex:none}
+.et-r-card b{display:block;font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink)}
+.et-r-card span{font:400 14px/1.25 var(--sk-font-raver-body);color:var(--sk-sovereign-soft)}
+.et-r-tiles{display:grid;grid-template-columns:1fr 1fr;gap:var(--sk-s2);margin:var(--sk-s1) 0 var(--sk-s3)}
+.et-r-tiles button{min-height:108px;padding:var(--sk-s2);border-radius:var(--sk-radius-xl);border:1.5px solid var(--sk-sovereign);background:var(--sk-sovereign-wash);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--sk-s1);font:700 14px/1.25 var(--sk-font-raver-body);color:var(--sk-sovereign-strong)!important;cursor:pointer;opacity:.62;transition:opacity var(--dur,.26s),box-shadow var(--dur,.26s);text-align:center}
+.et-r-tiles button small{font:400 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+.et-r-tiles button.et-dash{border:1.5px dashed var(--sk-guard);background:var(--sk-guard-wash);color:var(--sk-guard)!important}
+.et-r-tiles button[aria-pressed="true"]{opacity:1;border-color:var(--sk-you);box-shadow:var(--sk-glow-sovereign)}
+.et-r-tiles svg{width:26px;height:26px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.et-r-hold{position:relative;width:216px;height:216px;margin:0 auto}
+.et-r-hold svg{position:absolute;inset:0;width:100%;height:100%;transform:rotate(-90deg)}
+.et-r-hold .hold-track{fill:none;stroke:var(--sk-line);stroke-width:8}
+.et-r-hold .hold-prog{fill:none;stroke:var(--sk-biomass);stroke-width:8;stroke-linecap:round;stroke-dasharray:578;stroke-dashoffset:578}
+.et-r-holdbtn{position:absolute;inset:24px;border:0;background:var(--sk-primary);color:var(--sk-on-primary)!important;clip-path:polygon(50% 0,93% 25%,93% 75%,50% 100%,7% 75%,7% 25%);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;touch-action:none;user-select:none;-webkit-user-select:none;border-radius:0}
+.et-r-holdbtn b{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em}
+.et-r-holdbtn span{font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em}
+.et-r-holdbtn:disabled{background:var(--sk-sovereign-wash);color:var(--sk-sovereign-soft)!important;cursor:not-allowed}
+.et-r-note{margin:var(--sk-s2) 0 0;text-align:center;font:400 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+.et-r-big{margin:var(--sk-s2) 0 var(--sk-s1);text-align:center;font:700 60px/.95 var(--sk-font-raver-display);letter-spacing:-.02em;color:var(--sk-ink)}
+.et-r-pill{display:flex;align-items:center;justify-content:center;width:100%;height:58px;margin-top:var(--sk-s4);border:0;border-radius:var(--sk-radius-pill);background:var(--sk-primary);color:var(--sk-on-primary)!important;font:700 15px/1.2 var(--sk-font-raver-display)!important;letter-spacing:.04em;cursor:pointer;text-decoration:none}
+.et-r-ghost{display:flex;width:max-content;max-width:100%;align-items:center;justify-content:center;margin:var(--sk-s2) auto 0;min-height:var(--sk-control-min);padding:0 var(--sk-s2);border:0;background:none;color:var(--sk-link)!important;font:400 14px/1.25 var(--sk-font-raver-body)!important;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+@media (prefers-reduced-motion:reduce){.et-r-art .seg,.et-r-tiles button,.et-b-row .chev{transition:none}}
+
+/* CYPHERPUNK — the pipeline is the interface; every row is a fact you can check */
+.et-c{font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink)}
+.et-c-path{font:600 15px/1.45 var(--sk-font-mono);word-break:break-all;color:var(--sk-ink)}
+.et-c-chips{display:flex;flex-wrap:wrap;gap:var(--sk-s1);margin:var(--sk-s2) 0}
+.et-c-chips span{padding:2px var(--sk-s1);border:1px solid var(--sk-line);border-radius:4px;background:var(--sk-bg-card);font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-soft)}
+.et-c-chips span.on{border-color:var(--sk-guard);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong)}
+.et-c-chips span.ok{border-color:var(--sk-verified);color:var(--sk-verified)}
+.et-c-chips span.no{border-color:var(--sk-info);color:var(--sk-info)}
+.et-c-guard{display:flex;justify-content:space-between;align-items:center;gap:var(--sk-s2);flex-wrap:wrap;min-height:var(--sk-control-min);padding:var(--sk-s1) var(--sk-s3);border:1px dashed var(--sk-guard);border-radius:var(--sk-radius-sm);background:var(--sk-guard-wash);color:var(--sk-guard)}
+.et-c-guard b{font-weight:600;color:var(--sk-sovereign-strong)}
+.et-c-tab{width:100%;margin:var(--sk-s2) 0 var(--sk-s1);border-collapse:separate;border-spacing:0;border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm);overflow:hidden;background:var(--sk-bg-card);table-layout:auto}
+.et-c-tab th{padding:var(--sk-s1) var(--sk-s2);text-align:start;font:600 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);border-bottom:1px solid var(--sk-line);background:var(--sk-bg-well)}
+.et-c-tab td{height:var(--sk-control-min);padding:var(--sk-s1) var(--sk-s2);border-bottom:1px solid var(--sk-line);font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink);vertical-align:middle}
+.et-c-tab tr:last-child td{border-bottom:0}
+.et-c-tab td:first-child{color:var(--sk-guard)}
+.et-c-tab tr.pick{cursor:pointer}
+.et-c-tab tr.pick:hover td,.et-c-tab tr[aria-selected="true"] td{background:var(--sk-sovereign-tint)}
+.et-c-tab tr[aria-selected="true"] td:first-child{color:var(--sk-you)}
+.et-c-tab .ok{color:var(--sk-verified)}.et-c-tab .no{color:var(--sk-info)}.et-c-tab .gd{color:var(--sk-guard)}
+.et-c-h{margin:var(--sk-s4) 0 var(--sk-s2);font:600 15px/1.45 var(--sk-font-mono);color:var(--sk-ink);letter-spacing:0}
+.et-c-pipe{list-style:none;margin:0;padding:0;display:grid;gap:var(--sk-s2);counter-reset:p}
+.et-c-pipe li{display:grid;grid-template-columns:30px 1fr;gap:var(--sk-s1) var(--sk-s2);padding:var(--sk-s2) var(--sk-s3);border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm);background:var(--sk-bg-card);counter-increment:p}
+.et-c-pipe li::before{content:counter(p,decimal-leading-zero);color:var(--sk-guard);font-weight:600}
+.et-c-pipe li b{font-weight:600;color:var(--sk-ink)}
+.et-c-pipe li p{grid-column:2;margin:0;color:var(--sk-ink-soft)}
+.et-c-pipe li.done b{color:var(--sk-verified)}
+.et-c-pipe li.guard{border-style:dashed;border-color:var(--sk-guard)}
+.et-c-pipe li.guard b{color:var(--sk-guard)}
+.et-c-pipe li.now{border-color:var(--sk-ai);box-shadow:inset 0 0 0 1px var(--sk-ai)}
+.et-c-pipe li.now b{color:var(--sk-ai)}
+.et-c-pipe li.todo p{color:var(--sk-ink-mut)}
+.et-c-primary{display:flex;align-items:center;justify-content:center;width:100%;min-height:52px;margin-top:var(--sk-s3);padding:0 var(--sk-s2);border:0;border-radius:var(--sk-radius-sm);background:var(--sk-primary);color:var(--sk-on-primary)!important;font:600 14px/1.2 var(--sk-font-mono)!important;cursor:pointer;text-decoration:none;text-align:center}
+.et-c-primary:disabled{background:var(--sk-bg-well);color:var(--sk-ink-mut)!important;cursor:not-allowed}
+.et-c-kv{width:100%;border-collapse:collapse;border:1px solid var(--sk-line);background:var(--sk-bg-card)}
+.et-c-kv th{width:96px;padding:var(--sk-s2) var(--sk-s3);text-align:start;vertical-align:top;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);border-bottom:1px solid var(--sk-line)}
+.et-c-kv td{padding:var(--sk-s2) var(--sk-s3);border-bottom:1px solid var(--sk-line);word-break:break-word;color:var(--sk-ink)}
+.et-c-kv .no{color:var(--sk-info)}.et-c-kv .yes{color:var(--sk-verified)}.et-c-kv .sig{color:var(--sk-you)}.et-c-kv .gd{color:var(--sk-guard)}
+.et-c-verify{margin-top:var(--sk-s3);padding:var(--sk-s3);border-radius:var(--sk-radius-sm);background:var(--sk-bg-card)}
+.et-c-verify-h{font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);margin-bottom:var(--sk-s1)}
+.et-c-verify ol{margin:0;padding-inline-start:var(--sk-s4);display:grid;gap:var(--sk-s1);color:var(--sk-ink)}
+.et-c-row{display:grid;grid-template-columns:1fr 1fr;gap:var(--sk-s2);margin-top:var(--sk-s3)}
+.et-c-ghost{display:flex;align-items:center;justify-content:center;min-height:52px;padding:0 var(--sk-s1);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius-sm);background:transparent;color:var(--sk-ink)!important;text-decoration:none;text-align:center;font:600 14px/1.2 var(--sk-font-mono)!important;cursor:pointer}
+/* my space's own front details */
+main>#eternal{padding:0;margin-top:0}
+main>.et-archive-h{padding-inline:0;margin-bottom:var(--sk-s3)}
+.et-b-rowt{flex:1}
+.et-b-row small.here{color:var(--sk-verified)}
+.et-b-link[aria-disabled="true"]{color:var(--sk-ink-mut)!important;cursor:default}
+.et-r-legend .lg-here{background:var(--sk-biomass)}.et-r-legend .lg-out{background:var(--sk-sovereign)}.et-r-legend .lg-file{width:12px;border-radius:var(--sk-radius-pill);background:var(--sk-ink)}.et-r-legend .lg-off{border:1.5px dashed var(--sk-ink-mut)}
+.et-r-pill:disabled,.et-c-primary:disabled{background:var(--sk-bg-well);color:var(--sk-ink-mut)!important;cursor:not-allowed}
+.et-r-art .orbit .seg{transition:stroke-width var(--dur,.26s),opacity var(--dur,.26s)}
+.et-r-art .heart{cursor:pointer}
+.et-c-tab td:nth-child(3){font-size:12px;color:var(--sk-ink-soft);word-break:break-word}
+.et-c-kv td{word-break:break-all}
+@media (prefers-reduced-motion:reduce){.et-r-art .orbit .seg{transition:none}}
+
+/* ── THE WHOLE PAGE, dressed per register: the page's own variables mapped onto skaists ── */
+body[data-reg="bee"]{--bg:var(--sk-bg);--ink:var(--sk-ink);--dim:var(--sk-ink-mut);--panel:var(--sk-bg-card);--well:var(--sk-bg-well);--line:var(--sk-line);
+ --active:var(--sk-register-on);--on:var(--sk-bg);--accent:var(--sk-you);--ok:var(--sk-verified);--warn:var(--sk-info);--font:var(--sk-font-bee-sans);--radius:var(--sk-radius-lg)}
+body[data-reg="bee"] h1{font:400 40px/1.05 var(--sk-font-bee-serif);letter-spacing:0}
+body[data-reg="bee"] :is(.badge,.file .hash){font-size:14px}
+body[data-reg="bee"] .primary{border-radius:var(--sk-radius-lg);color:var(--sk-on-primary);min-height:var(--sk-control-primary)}
+body[data-reg="bee"] :is(.ghost,.danger,.mode){border-radius:var(--sk-radius)}
+body[data-reg="bee"] .ghost{border-color:var(--sk-ink)}
+body[data-reg="raver"]{--bg:var(--sk-bg);--ink:var(--sk-ink);--dim:var(--sk-ink-soft);--panel:var(--sk-bg-card);--well:var(--sk-bg-well);--line:var(--sk-line);
+ --active:var(--sk-register-on);--on:var(--sk-on-primary);--accent:var(--sk-you);--ok:var(--sk-verified);--warn:var(--sk-guard);--font:var(--sk-font-raver-body);--radius:var(--sk-radius-xl);font-size:15px}
+body[data-reg="raver"] h1{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em}
+body[data-reg="raver"] .drop{border-color:var(--sk-sovereign)}
+body[data-reg="raver"] :is(.drop p,.mode b,.file .why,.sheet p,.lede){font-size:15px}
+body[data-reg="raver"] :is(.mode span,.count,.law,.note,.file .meta,details.tech summary,.badge){font-size:14px}
+body[data-reg="raver"] :is(.file .hash){font-size:13px}
+body[data-reg="raver"] .sheet h2{font:700 30px/1 var(--sk-font-raver-display)}
+body[data-reg="raver"] .primary{color:var(--sk-on-primary);font-family:var(--sk-font-raver-display);font-weight:700}
+body[data-reg="raver"] :is(.ghost,.danger,.mode,.file,.sheet .card){border-radius:var(--sk-radius-xl)}
+body[data-reg="raver"] :is(.ghost,.danger,.primary){border-radius:var(--sk-radius-pill)}
+body[data-reg="cypherpunk"]{--bg:var(--sk-bg);--ink:var(--sk-ink);--dim:var(--sk-ink-mut);--panel:var(--sk-bg-card);--well:var(--sk-bg-well);--line:var(--sk-line);
+ --active:var(--sk-register-on);--on:var(--sk-on-primary);--accent:var(--sk-ai);--ok:var(--sk-verified);--warn:var(--sk-guard);--font:var(--sk-font-mono);--radius:var(--sk-radius-sm);--ctl-radius:var(--sk-radius-sm);font-size:13px}
+body[data-reg="cypherpunk"] h1{font:600 15px/1.45 var(--sk-font-mono);letter-spacing:0}
+body[data-reg="cypherpunk"] :is(.lede,.drop p,.mode b,.file .name,.file .why,.sheet p){font-size:14px}
+body[data-reg="cypherpunk"] :is(.kicker,.count,.law,.note,.mode span,.file .meta,.badge,details.tech summary,.file .hash){font-size:12px}
+body[data-reg="cypherpunk"] .sheet h2{font:600 15px/1.45 var(--sk-font-mono)}
+body[data-reg="cypherpunk"] .primary{color:var(--sk-on-primary)}
+body[data-reg="cypherpunk"] :is(.primary,.ghost,.danger,.mode,.file,.sheet .card){border-radius:var(--sk-radius-sm)}
 </style>
+<link rel="stylesheet" href="skaists.css">
 </head>
 <!-- `data-busy` and `data-busy-seq` start at 0 so both exist before the first
      act. A reader that has to tell "not busy" from "not published yet" is
@@ -155,6 +339,64 @@
 <body data-reg="bee" data-state="empty" data-bee-theme="shared" data-busy="0" data-busy-seq="0">
 
 <main>
+<!-- ETERNAL FRONT (founder blueprint 2026-09-26, docs/design/eternal): three separate products in
+     one surface. ONE data layer (window.__myspace: the purposes the attached rails can answer, each
+     rail's DECLARED terms, and the device index's own rows) drives all three, so the facts cannot
+     drift; each register has its own layout, graphic, gesture and voice. Nothing here stores a byte:
+     a purpose is chosen by pressing the page's own purpose button (#mode-*), and "add a file" opens
+     the page's own picker, so every store, price and refusal stays with myspace.js below. -->
+<section id="eternal" aria-label="my space">
+
+  <!-- NEW BEE — a calm room: what is the next file for? one magenta action -->
+  <div class="et-b">
+    <div class="et-b-step">
+      <div class="et-b-mark" data-etk="et.ms.my-space">my space</div>
+      <h2 class="et-b-h" data-etk="et.ms.your-files-your-say">your files, your say</h2>
+      <div class="et-b-lede" data-etk="et.ms.keep-a-photo-or-a-document-o">keep a photo or a document on this phone, or share it. you choose who can open it, and for how long.</div>
+      <div class="et-b-guard"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span data-etk="et.ms.no-account-this-phone-rememb">no account. this phone remembers.</span></div>
+      <div class="et-b-q" id="etBeeQ" data-etk="et.ms.what-is-the-next-file-for">what is the next file for?</div>
+      <div class="et-b-rows" id="etBeeRows" role="radiogroup" aria-labelledby="etBeeQ"><div class="et-b-row"><span data-etk="et.ms.asking-what-this-phone-can-o">asking what this phone can offer…</span></div></div>
+      <div class="et-b-act">
+        <button type="button" class="et-b-primary" id="etBeeAdd" data-etk="et.ms.add-a-file">add a file</button>
+        <a class="et-b-link" href="#list" id="etBeeFiles">…</a>
+        <div class="et-b-foot" id="etBeeFoot" data-etk="et.ms.nothing-leaves-this-phone-un">nothing leaves this phone unless you choose to share it.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RAVER — how far it travels: four orbits around you, your files glowing on theirs -->
+  <div class="et-r">
+    <div class="et-r-top"><h2 class="et-r-h" id="etRaverTitle">my space</h2><span class="et-r-hint" id="etRaverHint">tap an orbit · tap the heart</span></div>
+    <svg class="et-r-art" id="etOrbits" viewBox="-200 -200 400 400" role="group" aria-label="how far a file travels: four orbits around you, one per purpose, your files on theirs"></svg>
+    <div class="et-r-legend" id="etLegend"><span><i class="lg-here"></i>stays here</span><span><i class="lg-out"></i>goes out</span><span><i class="lg-file"></i>a file</span><span><i class="lg-off"></i>not offered</span></div>
+    <div class="et-r-card" id="etRaverCard" aria-live="polite"></div>
+    <button type="button" class="et-r-pill" id="etRaverAdd" data-etk="et.ms.drop-a-file-in">drop a file in</button>
+    <p class="et-r-note" id="etRaverNote">…</p>
+  </div>
+
+  <!-- CYPHERPUNK — the instrument: purposes as predicates over declared terms, the rail each resolves to, the index -->
+  <div class="et-c">
+    <div class="et-c-path">myspace://device-index/<span id="etCyKey">…</span></div>
+    <div class="et-c-chips" id="etChips"></div>
+    <div class="et-c-guard">keep-here purposes → networked rails = refused <b data-etk="et.ms.by-construction">by construction</b></div>
+    <table class="et-c-tab"><thead><tr><th>purpose</th><th>rail</th><th>declared terms</th></tr></thead><tbody id="etPurposes"></tbody></table>
+    <h3 class="et-c-h">write path · <span id="etCyPick">…</span></h3>
+    <ol class="et-c-pipe" id="etPipe"></ol>
+    <button type="button" class="et-c-primary" id="etCyAdd" data-etk="et.ms.attach">attach</button>
+    <h3 class="et-c-h" data-etk="et.ms.index-read-from-this-device">index · read from this device, now</h3>
+    <table class="et-c-kv" id="etReceipt"></table>
+    <div class="et-c-verify">
+      <div class="et-c-verify-h" data-etk="et.ms.verify-no-trust-in-this-page">verify · no trust in this page needed</div>
+      <ol><li data-etk="et.ms.devtools-application-indexed">devtools → application → indexeddb → myspace → files: the rows above</li><li data-etk="et.ms.devtools-network-while-keepi">devtools → network while keeping a file here: zero requests</li><li data-etk="et.ms.read-each-adapter-s-describe">read each adapter's describe(): the terms in the table are its own</li></ol>
+    </div>
+    <div class="et-c-row">
+      <a class="et-c-ghost" href="#list" data-etk="et.ms.the-rows-below">the rows below</a>
+      <a class="et-c-ghost" href="https://github.com/beehive-nature/beehive-nature/blob/main/surfaces/myspace.js" target="_blank" rel="noopener noreferrer">fork the template ↗ <span class="et-sr" data-etk="et.ms.opens-in-a-new-tab">(opens in a new tab)</span></a>
+    </div>
+  </div>
+</section>
+<h2 class="et-archive-h" id="etArchive" data-etk="et.ms.the-whole-space">the whole space</h2>
+
   <p class="kicker" data-reg-copy="kicker">My Space</p>
   <h1 data-reg-copy="title">My Space</h1>
   <p class="lede" data-reg-copy="lede">Your files live on this phone.</p>
@@ -228,6 +470,153 @@
 <script src="onboarding/vendor/bnr-sign.js"></script>
 <script src="adapter-seam.js"></script>
 <script src="myspace.js"></script>
+<script>
+/* ETERNAL FRONT — one data layer, three renderers (docs/design/eternal). Every fact is read from
+   window.__myspace (myspace.js): which purposes an attached rail can answer, the rail each one
+   resolves to, that rail's DECLARED terms (readers · lifetime · deletable · payer) and networks,
+   the device key and the device index's rows. The front never stores, prices or sends: choosing a
+   purpose presses the page's own #mode-* button, and "add a file" opens the page's own #picker. */
+(function(){
+  var $=function(id){return document.getElementById(id);};
+  var T=function(k,f){var t=window.BNRLanguage&&window.BNRLanguage.text;return t?t(k,f):f;};
+  var tok=function(n){return getComputedStyle(document.body).getPropertyValue('--sk-'+n).trim();};
+  function esc(v){return String(v==null?'':v).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+  function kb(n){return n<1024?n+' B':n<1048576?Math.round(n/1024)+' KB':(n/1048576).toFixed(1)+' MB';}
+  var ORDER=['now','keep','share','forever'];
+  /* each register's words for the same purposes and the same declared values */
+  var NAME={bee:{now:'just for now',keep:'keep it here',share:'show the world',forever:'keep it forever'},raver:{now:'just now',keep:'keep it',share:'show it',forever:'forever'}};
+  var WB={readers:{'this-device':'only this phone opens it.','link-holders':'anyone with the link opens it.',everyone:'anyone can read it.'},lifetime:{'until-this-tab-closes':'gone when you close this tab.','until-you-delete-it':'stays until you remove it.','while-the-store-keeps-it':'stays while the hive keeps it.',permanent:'lasts forever.'},payer:{you:'you pay, from your own wallet.'},deletable:{no:'nobody can delete it.'}};
+  var WR={readers:{'this-device':'this phone only','link-holders':'the link opens it',everyone:'anyone reads it'},lifetime:{'until-this-tab-closes':'gone when this tab closes','until-you-delete-it':'stays till you drop it','while-the-store-keeps-it':'stays while the hive holds it',permanent:'lasts forever'}};
+  var D={ready:false,purposes:[],pick:null,rows:[],count:0,key:null,signer:false,rails:[],busy:false,status:''};
+
+  function read(){
+    var M=window.__myspace; if(!M) return Promise.resolve();
+    var open=M.purposes(), ads=M.adapters()||{};
+    D.rails=Object.keys(ads).map(function(s){var a=ads[s];return {scheme:s,attached:!!(a&&a.attached),networks:(a&&a.caps&&a.caps.networks)||[]};});
+    D.purposes=ORDER.map(function(id){
+      var on=open.indexOf(id)>=0, rail=on?M.railFor(id):null, t=rail?M.terms(rail):null, a=rail&&ads[rail];
+      return {id:id,offered:on,rail:rail,terms:t,networks:(a&&a.caps&&a.caps.networks)||[]};
+    });
+    var pressed=document.querySelector('#modes .mode[aria-pressed="true"]');
+    D.pick=pressed?pressed.getAttribute('data-purpose'):(open[0]||null);
+    D.key=M.devicePubkey(); D.signer=!!D.key;
+    D.busy=document.body.getAttribute('data-busy')==='1';
+    var st=$('status'); D.status=st&&!st.hidden?st.textContent:'';
+    return M.rows().then(function(rows){
+      D.rows=(rows||[]).slice().sort(function(a,b){return b.ts-a.ts;}).map(function(r){return {name:r.name,size:r.size,purpose:r.purpose,scheme:r.addr&&r.addr.scheme||null};});
+      D.count=D.rows.length; D.ready=true;
+    }).catch(function(){D.ready=true;});
+  }
+  function P(id){for(var i=0;i<D.purposes.length;i++)if(D.purposes[i].id===id)return D.purposes[i];return null;}
+  function out(p){return !!(p&&p.networks.length);}
+  function beeTerms(p){var t=p.terms;if(!t)return '';var s=T('et.ms.b.r.'+t.readers,WB.readers[t.readers]||t.readers)+' '+T('et.ms.b.l.'+t.lifetime,WB.lifetime[t.lifetime]||t.lifetime);if(t.deletable===false)s+=' '+T('et.ms.b.nodel',WB.deletable.no);if(t.payer==='you')s+=' '+T('et.ms.b.pay',WB.payer.you);return s;}
+  function raverTerms(p){var t=p.terms;if(!t)return T('et.ms.r.off','not offered on this page');return T('et.ms.r.r.'+t.readers,WR.readers[t.readers]||t.readers)+' · '+T('et.ms.r.l.'+t.lifetime,WR.lifetime[t.lifetime]||t.lifetime)+(t.deletable===false?' · '+T('et.ms.r.nodel','no delete'):'')+(t.payer==='you'?' · '+T('et.ms.r.pay','you pay'):'');}
+  function choose(id){var b=$('mode-'+id);if(b&&!b.disabled)b.click();}
+  function add(){var pk=$('picker');if(pk)pk.click();}
+
+  /* ── NEW BEE ── */
+  function bee(){
+    var box=$('etBeeRows'); if(!box||!D.ready) return;
+    var offered=D.purposes.filter(function(p){return p.offered;});
+    box.innerHTML=offered.length?offered.map(function(p){
+      var on=p.id===D.pick;
+      return '<button type="button" class="et-b-row" role="radio" aria-pressed="'+on+'" aria-checked="'+on+'" data-et-purpose="'+p.id+'"><span class="dot" aria-hidden="true"></span><span class="et-b-rowt">'+esc(T('et.ms.b.'+p.id,NAME.bee[p.id]))+'<em>'+esc(beeTerms(p))+'</em></span><small class="'+(out(p)?'':'here')+'">'+esc(out(p)?T('et.ms.b.goes','goes out'):T('et.ms.b.stays','stays here'))+'</small></button>';
+    }).join(''):'<div class="et-b-row"><span>'+esc(T('et.ms.b.none','this phone could not load a place to keep files. nothing was stored.'))+'</span></div>';
+    var f=$('etBeeFiles'); f.textContent=D.count?(D.count===1?T('et.ms.b.one','1 file on this phone'):D.count+' '+T('et.ms.b.many','files on this phone'))+' ›':T('et.ms.b.zero','nothing here yet');
+    if(!D.count){f.removeAttribute('href');f.setAttribute('aria-disabled','true');}else{f.setAttribute('href','#list');f.removeAttribute('aria-disabled');}
+    var add=$('etBeeAdd'); add.disabled=!offered.length||D.busy; add.textContent=D.busy?T('et.ms.b.busy','putting it away…'):T('et.ms.b.add','add a file');
+  }
+
+  /* ── RAVER: how far it travels ── */
+  var RO=[62,100,138,176];
+  function orbits(){
+    var svg=$('etOrbits'); if(!svg||!D.ready) return;
+    var h='';
+    D.purposes.forEach(function(p,i){
+      var r=RO[i], sel=p.id===D.pick;
+      if(!p.offered){h+='<circle r="'+r+'" fill="none" stroke="'+tok('ink-dim')+'" stroke-width="1.5" stroke-dasharray="3 6"/>';return;}
+      var col=sel?tok('sovereign-strong'):out(p)?tok('sovereign'):tok('biomass');
+      h+='<g class="orbit" data-et-purpose="'+p.id+'" role="button" tabindex="0" aria-pressed="'+sel+'" aria-label="'+esc(T('et.ms.r.'+p.id,NAME.raver[p.id])+': '+raverTerms(p))+'">'+
+        '<circle class="hit" r="'+r+'" fill="none" stroke="transparent" stroke-width="34"/>'+
+        '<circle class="seg" r="'+r+'" fill="none" stroke="'+col+'" stroke-width="'+(sel?16:12)+'" opacity="'+(sel?1:0.62)+'"/></g>';
+    });
+    D.purposes.forEach(function(p,i){
+      var mine=D.rows.filter(function(r){return r.purpose===p.id;}), n=mine.length;
+      mine.slice(0,24).forEach(function(r,k){var a=-Math.PI/2+(k+0.5)*2*Math.PI/Math.max(n,6);h+='<circle class="file" r="7" cx="'+(RO[i]*Math.cos(a)).toFixed(1)+'" cy="'+(RO[i]*Math.sin(a)).toFixed(1)+'" fill="'+tok('ink')+'" stroke="'+tok('bg')+'" stroke-width="2"><title>'+esc(r.name)+'</title></circle>';});
+    });
+    h+='<g class="heart" role="button" tabindex="0" aria-label="'+esc(T('et.ms.r.heartAria','drop a file in'))+'"><circle r="38" fill="'+tok('primary')+'"/><path d="M0 -14V14M-14 0H14" fill="none" stroke="'+tok('on-primary')+'" stroke-width="4" stroke-linecap="round"/></g>';
+    svg.innerHTML=h;
+  }
+  function raver(){
+    if(!D.ready) return;
+    var p=P(D.pick), i=ORDER.indexOf(D.pick), c=$('etRaverCard');
+    c.innerHTML=p?'<span class="rk">o'+(i+1)+'</span><div><b>'+esc(T('et.ms.r.'+p.id,NAME.raver[p.id]))+(p.rail?' · '+esc(p.rail):'')+'</b><span>'+esc(raverTerms(p))+'</span></div>':'<span class="rk">o</span><div><b>'+esc(T('et.ms.r.noPick','nothing to choose yet'))+'</b></div>';
+    $('etRaverHint').textContent=D.purposes.filter(function(x){return x.offered;}).length+' '+T('et.ms.r.hint','orbits · tap one · tap the heart');
+    $('etRaverNote').textContent=D.status||(D.count?D.count+' '+(D.count===1?T('et.ms.r.one','file glowing on its orbit'):T('et.ms.r.many','files glowing on their orbits')):T('et.ms.r.zero','no files yet · the heart opens your picker'));
+    var add=$('etRaverAdd'); add.disabled=!p||D.busy; add.textContent=D.busy?T('et.ms.r.busy','stashing…'):T('et.ms.r.add','drop a file in');
+    var off=$('etLegend').querySelector('.lg-off');if(off)off.parentNode.hidden=D.purposes.every(function(x){return x.offered;});
+    orbits();
+  }
+
+  /* ── CYPHERPUNK ── */
+  function cy(){
+    if(!D.ready) return;
+    $('etCyKey').textContent=D.key||T('et.ms.c.nokey','no signer · device key not derivable');
+    var att=D.rails.filter(function(r){return r.attached;});
+    $('etChips').innerHTML='<span class="on">rows '+D.count+'</span><span class="'+(att.length===D.rails.length?'ok':'no')+'">rails '+att.length+'/'+D.rails.length+' attached</span><span class="'+(D.signer?'ok':'no')+'">signer '+(D.signer?'present':'absent')+'</span><span>account none</span>';
+    $('etPurposes').innerHTML=D.purposes.map(function(p){
+      var t=p.terms, terms=t?'readers '+t.readers+' · lifetime '+t.lifetime+' · deletable '+(t.deletable?'yes':'no')+' · payer '+t.payer+' · net '+(p.networks.length?p.networks.join(', '):'none'):'no rail answers · not offered';
+      return '<tr class="'+(p.offered?'pick':'')+'" data-et-purpose="'+p.id+'"'+(p.offered?' tabindex="0"':'')+' aria-selected="'+(p.id===D.pick)+'"><td>'+p.id+'</td><td class="'+(p.rail?'':'gd')+'">'+esc(p.rail||'none')+'</td><td>'+esc(terms)+'</td></tr>';
+    }).join('');
+    var p=P(D.pick)||{id:'',terms:null,networks:[],rail:null}, t=p.terms||{}, net=out(p);
+    $('etCyPick').textContent=p.id||'none';
+    var pred={now:'survives_reload = false ∧ readers = this-device',keep:'survives_reload = true ∧ readers = this-device',share:'readers = link-holders',forever:'readers = everyone ∧ lifetime = permanent ∧ deletable = false'}[p.id]||'';
+    var steps=[
+      ['purpose · '+p.id,'predicate over declared terms: '+pred,'now'],
+      ['resolve · '+(p.rail||'none'),net?'first rail whose terms answer · talks to '+p.networks.join(', '):'first rail whose terms answer · networks [] · networked rails skipped',p.rail?'todo':'guard'],
+      [net?'sign · schnorr':'seal · aes-gcm',net?'the device key signs the adapter\'s digest · the adapter holds no key':'encrypted in this page · the key never reaches the rail','todo'],
+      ['put · worker','dedicated web worker · SPEC-ADAPTER-CONTRACT-1 · a fault is one dead rail','todo'],
+      ['index · indexeddb','row {addr, name, size, purpose, keyref, ts} in myspace v2 · this device is the truth','todo'],
+      [t.payer==='you'?'pay · your wallet':'pay · '+(t.payer||'none'),t.payer==='you'?'refused by name today · this page asks your wallet for nothing':'nothing to pay · payer '+(t.payer||'none'),t.payer==='you'?'guard':'todo']
+    ];
+    $('etPipe').innerHTML=steps.map(function(s){return '<li class="'+s[2]+'"><b>'+esc(s[0])+'</b><p>'+esc(s[1])+'</p></li>';}).join('');
+    var nets=D.rails.filter(function(r){return r.networks.length;}).map(function(r){return r.scheme+' → '+r.networks.join(', ');});
+    $('etReceipt').innerHTML=[
+      ['device key',D.key?'<span class="yes">'+esc(D.key)+'</span>':'<span class="no">not derivable in this browser</span>'],
+      ['rows',String(D.count)+(D.rows.length?' · '+D.rows.slice(0,3).map(function(r){return esc(r.name)+' '+kb(r.size||0)+' '+esc(r.purpose);}).join(' · ')+(D.rows.length>3?' · +'+(D.rows.length-3):''):'')],
+      ['rails',esc(att.map(function(r){return r.scheme;}).join(', ')||'none attached')],
+      ['network',nets.length?esc(nets.join(' · ')):'<span class="yes">none declared</span>'],
+      ['account','<span class="gd">none · no login, no session</span>'],
+      ['state',D.busy?'<span class="sig">writing</span>':esc(D.status||'idle')]
+    ].map(function(r){return '<tr><th>'+r[0]+'</th><td>'+r[1]+'</td></tr>';}).join('');
+    var add=$('etCyAdd'); add.disabled=!p.rail||D.busy; add.textContent=D.busy?'writing to rail…':'attach · '+(p.id||'none');
+  }
+
+  function words(){document.querySelectorAll('#eternal [data-etk],.et-archive-h[data-etk]').forEach(function(e){if(e.__en==null)e.__en=e.textContent;e.textContent=T(e.getAttribute('data-etk'),e.__en);});}
+  var pending=0;
+  function refresh(){if(pending)return;pending=1;setTimeout(function(){read().then(function(){pending=0;bee();raver();cy();});},30);}
+
+  function wire(){
+    var ev=$('eternal'); if(!ev) return;
+    ev.addEventListener('click',function(e){
+      var pk=e.target.closest('[data-et-purpose]'); if(pk){choose(pk.getAttribute('data-et-purpose'));return;}
+      if(e.target.closest('.heart')){add();return;}
+    });
+    ev.addEventListener('keydown',function(e){
+      if(e.key!=='Enter'&&e.key!==' ')return;
+      var t=e.target.closest('.orbit,.heart,.et-c-tab tr.pick'); if(!t)return;
+      e.preventDefault(); t.dispatchEvent(new MouseEvent('click',{bubbles:true}));
+    });
+    $('etBeeAdd').addEventListener('click',add); $('etRaverAdd').addEventListener('click',add); $('etCyAdd').addEventListener('click',add);
+    var mo=new MutationObserver(refresh);
+    ['modes','list','count','status'].forEach(function(id){var n=$(id);if(n)mo.observe(n,{childList:true,subtree:true,attributes:true,characterData:true});});
+    mo.observe(document.body,{attributes:true,attributeFilter:['data-state','data-busy','data-reg']});
+    document.addEventListener('blang',function(){words();refresh();});
+  }
+  wire(); words(); refresh();
+  window.__eternal={data:D,refresh:refresh};
+})();
+</script>
 <script src="tour.js?v=42"></script>
 </body>
 </html>

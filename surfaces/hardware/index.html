@@ -44,8 +44,366 @@ body[data-reg="bee"] :is(p,.doctrine,.law,.means){font-size:1rem}
 .gauge{font-size:.875rem;padding:.15rem .7rem}
 .rung{text-transform:none;letter-spacing:normal;font-size:.875rem}
 .links{display:flex;flex-wrap:wrap;align-items:center;column-gap:1rem;font-size:.875rem}.links a{margin-right:0;display:inline-flex;align-items:center;min-height:44px}
-</style></head><body><main>
+</style>
+<style id="et-style">
+/* ── ETERNAL FRONT (docs/design/eternal) — three products in one surface. Every value is a skaists
+   token (../skaists.css, compiled from docs/design/skaists/tokens.json): no hand-picked hex, size or
+   corner. Measured by e2e/skaists-conformance.mjs. One register visible at a time; new bee is the
+   default. Every class is et- prefixed so the page's own bare rules never reach in. ── */
+#eternal{box-sizing:border-box;display:block;width:100%;max-width:600px;margin:0 auto var(--sk-s2,12px);padding:var(--sk-s2,12px) 0 0;border:0;border-radius:0;background:none;box-shadow:none;text-align:left;letter-spacing:normal;text-transform:none}
+#eternal *,#eternal *::before,#eternal *::after{box-sizing:border-box}
+#eternal>.et-r,#eternal>.et-c{display:none}
+body[data-reg="raver"] #eternal>.et-b,body[data-reg="cypherpunk"] #eternal>.et-b{display:none}
+body[data-reg="raver"] #eternal>.et-r{display:block}
+body[data-reg="cypherpunk"] #eternal>.et-c{display:block}
+#eternal [hidden]{display:none!important}
+#eternal button{margin:0;color:inherit;text-transform:none;letter-spacing:normal;min-width:0}
+#eternal svg{display:block;max-width:100%}
+#eternal a{text-decoration:none}
+#eternal a:hover{text-decoration:none}
+#eternal :focus-visible{outline:2px solid var(--sk-focus);outline-offset:3px}
+#eternal h2,#eternal h3,#eternal p,#eternal ol,#eternal ul,#eternal table{margin:0;padding:0;border:0;background:none;text-transform:none;letter-spacing:normal;min-width:0;max-width:none;text-shadow:none}
+#eternal table{width:100%;border-collapse:separate;border-spacing:0}
+#eternal th,#eternal td{border:0;padding:0;vertical-align:top;text-align:left;background:none;letter-spacing:normal}
+#eternal code{font:inherit;background:none;padding:0;border:0}
+#etArchive.et-archive-h{max-width:600px;margin:var(--sk-s5,36px) auto var(--sk-s2,12px);padding:var(--sk-s4,24px) 0 0;border:0;border-top:1px solid var(--sk-line);background:none;color:var(--sk-ink);text-transform:none;letter-spacing:normal;text-shadow:none;-webkit-text-fill-color:currentColor;text-align:left}
+body[data-reg="bee"] #etArchive.et-archive-h{font:400 28px/1.1 var(--sk-font-bee-serif)}
+body[data-reg="raver"] #etArchive.et-archive-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em}
+body[data-reg="cypherpunk"] #etArchive.et-archive-h{font:600 15px/1.45 var(--sk-font-mono)}
+
+/* NEW BEE — a calm room: plain rows, one reassurance, one magenta action, a link, a footnote */
+#eternal .et-b{display:flex;flex-direction:column;gap:var(--sk-s3,18px);color:var(--sk-ink);font:400 16px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-b-step{display:flex;flex-direction:column;gap:var(--sk-s3,18px)}
+#eternal .et-b-mark{font:400 18px/1.2 var(--sk-font-house);color:var(--sk-sovereign)}
+#eternal .et-b-h{font:400 40px/1.05 var(--sk-font-bee-serif);color:var(--sk-ink)}
+#eternal .et-b-h2{font:400 28px/1.1 var(--sk-font-bee-serif);color:var(--sk-ink)}
+#eternal .et-b-lede{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink-mut);text-wrap:pretty}
+#eternal .et-b-guard{display:flex;align-items:center;gap:var(--sk-s2,12px);min-height:var(--sk-control-min,44px);padding:var(--sk-s1,6px) var(--sk-s3,18px);border-radius:var(--sk-radius,12px);background:var(--sk-guard-wash);color:var(--sk-guard);font:600 15px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-ic{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+#eternal .et-b-rows{display:flex;flex-direction:column;background:var(--sk-bg-card);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl,18px);overflow:hidden}
+#eternal .et-b-row{display:flex;align-items:center;justify-content:space-between;gap:var(--sk-s2,12px);width:100%;min-height:var(--sk-control-row,52px);padding:var(--sk-s1,6px) var(--sk-s3,18px);border:0;border-bottom:1px solid var(--sk-line-soft);border-radius:0;background:transparent;text-align:left;font:500 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+#eternal .et-b-row:last-child{border-bottom:0}
+#eternal button.et-b-row,#eternal a.et-b-row{cursor:pointer}
+#eternal .et-b-rl{display:flex;flex-direction:column;flex:1 1 auto;min-width:0}
+#eternal .et-b-rl b{font:500 16px/1.45 var(--sk-font-bee-sans);color:inherit}
+#eternal .et-b-rl small{font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-rv{display:flex;align-items:center;gap:var(--sk-s1,6px);flex:none;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut);text-align:right}
+#eternal .et-b-rv.et-out{color:var(--sk-guard)}
+#eternal .et-b-rv.et-ok{color:var(--sk-verified)}
+#eternal .et-chev{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;flex:none;transition:transform var(--dur,.26s)}
+#eternal .et-b-row[aria-expanded="true"],#eternal .et-b-row[aria-pressed="true"]{background:var(--sk-sovereign-tint);color:var(--sk-sovereign-strong)}
+#eternal .et-b-row[aria-expanded="true"] .et-b-rl b,#eternal .et-b-row[aria-pressed="true"] .et-b-rl b{font-weight:600}
+#eternal .et-b-row[aria-expanded="true"] .et-b-rv,#eternal .et-b-row[aria-pressed="true"] .et-b-rv,#eternal .et-b-row[aria-expanded="true"] .et-b-rl small,#eternal .et-b-row[aria-pressed="true"] .et-b-rl small{color:var(--sk-sovereign-strong)}
+#eternal .et-b-row[aria-expanded="true"] .et-chev{transform:rotate(90deg)}
+#eternal .et-b-open{display:flex;flex-direction:column;gap:var(--sk-s1,6px);padding:var(--sk-s2,12px) var(--sk-s3,18px);background:var(--sk-sovereign-tint);border-bottom:1px solid var(--sk-line-soft)}
+#eternal .et-b-open:last-child{border-bottom:0}
+#eternal .et-b-open>div{font:400 15px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+#eternal .et-b-open>div.et-b-src{font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-item{display:flex;align-items:center;gap:var(--sk-s2,12px);width:100%;min-height:var(--sk-control-person,60px);padding:var(--sk-s1,6px) var(--sk-s3,18px);border:0;border-bottom:1px solid var(--sk-line-soft);border-radius:0;background:transparent;text-align:left;color:var(--sk-ink);font:400 16px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-b-item:last-child{border-bottom:0}
+#eternal button.et-b-item{cursor:pointer}
+#eternal .et-b-item[aria-pressed="true"]{background:var(--sk-sovereign-tint)}
+#eternal .et-b-item i{width:40px;height:40px;border-radius:var(--sk-radius-pill,999px);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong);display:flex;align-items:center;justify-content:center;font:600 14px/1.4 var(--sk-font-bee-sans);font-style:normal;flex:none}
+#eternal .et-b-item i.et-dash{background:transparent;border:1.5px dashed var(--sk-guard);color:var(--sk-guard)}
+#eternal .et-b-item i.et-ok{background:var(--sk-verified-wash);color:var(--sk-verified)}
+#eternal .et-b-item>span{display:flex;flex-direction:column;min-width:0;flex:1 1 auto}
+#eternal .et-b-item b{display:block;font:500 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+#eternal .et-b-item small{display:block;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-term{display:flex;gap:var(--sk-s2,12px);align-items:flex-start;padding:var(--sk-s2,12px) var(--sk-s3,18px);border-bottom:1px solid var(--sk-line-soft)}
+#eternal .et-b-term:last-child{border-bottom:0}
+#eternal .et-b-term>i{width:36px;height:36px;border-radius:var(--sk-radius-pill,999px);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong);display:flex;align-items:center;justify-content:center;flex:none;font:600 14px/1.4 var(--sk-font-bee-sans);font-style:normal}
+#eternal .et-b-term>i.et-ok{background:var(--sk-verified-wash);color:var(--sk-verified)}
+#eternal .et-b-term>i.et-dash{background:transparent;border:1.5px dashed var(--sk-guard);color:var(--sk-guard)}
+#eternal .et-b-term>div{display:flex;flex-direction:column;min-width:0}
+#eternal .et-b-term b{display:block;font:600 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+#eternal .et-b-term span{font:400 15px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-consent{display:flex;align-items:center;gap:var(--sk-s2,12px);min-height:var(--sk-control-min,44px);font:600 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink);cursor:pointer}
+#eternal .et-b-consent input{width:var(--sk-control-check,24px);height:var(--sk-control-check,24px);margin:0;flex:none;accent-color:var(--sk-primary)}
+#eternal .et-b-act{display:flex;flex-direction:column;gap:var(--sk-s1,6px);margin-top:var(--sk-s1,6px)}
+#eternal .et-b-primary{display:flex;align-items:center;justify-content:center;width:100%;min-height:var(--sk-control-primary,54px);padding:var(--sk-s1,6px) var(--sk-s3,18px);border:0;border-radius:var(--sk-radius-lg,16px);background:var(--sk-primary);color:var(--sk-on-primary)!important;font:600 17px/1.2 var(--sk-font-bee-sans)!important;text-align:center;cursor:pointer}
+#eternal .et-b-primary:disabled{background:var(--sk-bg-well);color:var(--sk-ink-mut)!important;cursor:not-allowed}
+#eternal .et-b-link{display:flex;align-items:center;justify-content:center;min-height:var(--sk-control-min,44px);padding:0 var(--sk-s2,12px);border:0;background:transparent;font:600 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-link)!important;cursor:pointer;text-align:center}
+#eternal .et-b-link:hover{color:var(--sk-link-hover)!important}
+#eternal .et-b-foot{text-align:center;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-status{padding:var(--sk-s2,12px) var(--sk-s3,18px);border-radius:var(--sk-radius,12px);background:var(--sk-verified-wash);color:var(--sk-verified);font:600 14px/1.4 var(--sk-font-bee-sans)}
+#eternal .et-b-status.et-no{background:var(--sk-guard-wash);color:var(--sk-guard)}
+#eternal .et-b-back{align-self:flex-start;display:flex;align-items:center;min-height:var(--sk-control-min,44px);padding:0;border:0;background:none;font:600 16px/1.45 var(--sk-font-bee-sans)!important;color:var(--sk-link)!important;cursor:pointer}
+#eternal .et-b-card{display:flex;flex-direction:column;gap:var(--sk-s1,6px);padding:var(--sk-s3,18px);background:var(--sk-sovereign-tint);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl,18px)}
+#eternal .et-b-card h3{font:400 28px/1.1 var(--sk-font-bee-serif);color:var(--sk-sovereign-strong)}
+#eternal .et-b-card>div{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+#eternal .et-b-card.et-dash{background:var(--sk-bg-card);border:1px dashed var(--sk-ink-dim)}
+
+/* RAVER — the data is the art; lowercase is allowed joy; the numbers never change */
+#eternal .et-r{color:var(--sk-ink);font:400 14px/1.4 var(--sk-font-raver-body)}
+#eternal .et-r-top{display:flex;align-items:baseline;justify-content:space-between;gap:var(--sk-s2,12px);flex-wrap:wrap}
+#eternal .et-r-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em;color:var(--sk-ink)}
+#eternal .et-r-hint{font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-art{position:relative;width:100%;max-width:360px;margin:var(--sk-s3,18px) auto var(--sk-s2,12px)}
+#eternal .et-r-art>svg{width:100%;height:auto;filter:drop-shadow(var(--sk-glow-sovereign))}
+#eternal .et-r-art [role="button"]{cursor:pointer}
+#eternal .et-r-art [role="button"]:focus{outline:none}
+#eternal .et-r-art [role="button"]:focus-visible>*{stroke:var(--sk-ink);stroke-width:2}
+#eternal .et-r-legend{display:flex;flex-wrap:wrap;justify-content:center;gap:var(--sk-s1,6px) var(--sk-s3,18px);margin:0 0 var(--sk-s3,18px)}
+#eternal .et-r-legend span{display:inline-flex;align-items:center;gap:var(--sk-s1,6px);font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-legend i{width:14px;height:14px;border-radius:var(--sk-radius-pill,999px);flex:none}
+#eternal .et-r-card{display:flex;gap:var(--sk-s2,12px);align-items:flex-start;padding:var(--sk-s2,12px) var(--sk-s3,18px);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl,18px);background:var(--sk-sovereign-tint);min-height:var(--sk-control-person,60px)}
+#eternal .et-r-card .et-rk{min-width:44px;height:44px;padding:0 var(--sk-s1,6px);border-radius:var(--sk-radius,12px);background:var(--sk-sovereign-strong);color:var(--sk-bg);display:flex;align-items:center;justify-content:center;font:700 15px/1.2 var(--sk-font-raver-display);flex:none}
+#eternal .et-r-card>div{min-width:0;flex:1 1 auto}
+#eternal .et-r-card b{display:block;font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink)}
+#eternal .et-r-card span{display:block;margin-top:var(--sk-s1,6px);font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-card span.et-src{color:var(--sk-sovereign-soft)}
+#eternal .et-r-sub{margin:var(--sk-s4,24px) 0 var(--sk-s2,12px);font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em;color:var(--sk-ink)}
+#eternal .et-r-tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--sk-s2,12px)}
+#eternal .et-r-tile{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--sk-s1,6px);min-height:96px;padding:var(--sk-s2,12px) var(--sk-s1,6px);border-radius:var(--sk-radius-xl,18px);border:1.5px solid var(--sk-sovereign);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong)!important;font:600 14px/1.25 var(--sk-font-raver-body);text-align:center;cursor:pointer;opacity:.7;transition:opacity var(--dur,.26s),box-shadow var(--dur,.26s)}
+#eternal .et-r-tile.et-dash{border-style:dashed;border-color:var(--sk-guard);background:var(--sk-guard-wash);color:var(--sk-guard)!important}
+#eternal .et-r-tile[aria-pressed="true"]{opacity:1;border-color:var(--sk-you);box-shadow:var(--sk-glow-sovereign)}
+#eternal .et-r-tile svg{width:26px;height:26px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+#eternal .et-r-note{margin:var(--sk-s2,12px) 0 0;text-align:center;font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-pill{display:flex;align-items:center;justify-content:center;width:100%;min-height:58px;margin-top:var(--sk-s4,24px);padding:var(--sk-s1,6px) var(--sk-s3,18px);border:0;border-radius:var(--sk-radius-pill,999px);background:var(--sk-primary);color:var(--sk-on-primary)!important;font:700 15px/1.2 var(--sk-font-raver-display)!important;letter-spacing:.04em;text-align:center;cursor:pointer}
+#eternal .et-r-pill:disabled{background:var(--sk-sovereign-wash);color:var(--sk-sovereign-soft)!important;cursor:not-allowed}
+#eternal .et-r-ghost{display:flex;align-items:center;justify-content:center;margin:var(--sk-s2,12px) auto 0;min-height:var(--sk-control-min,44px);padding:0 var(--sk-s2,12px);border:0;background:none;color:var(--sk-link)!important;font:600 14px/1.25 var(--sk-font-raver-body)!important;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+#eternal .et-r-still{display:inline-flex;align-items:center;justify-content:center;gap:var(--sk-s1,6px);min-height:var(--sk-control-min,44px);min-width:var(--sk-control-min,44px);padding:0 var(--sk-s2,12px);border:1.5px solid var(--sk-line);border-radius:var(--sk-radius-pill,999px);background:var(--sk-bg-card);color:var(--sk-ink-soft)!important;font:600 14px/1.25 var(--sk-font-raver-body)!important;cursor:pointer}
+#eternal .et-r-still[aria-pressed="true"]{border-color:var(--sk-sovereign);color:var(--sk-sovereign-strong)!important}
+#eternal .et-r-bar{display:flex;align-items:center;justify-content:space-between;gap:var(--sk-s2,12px);flex-wrap:wrap}
+@keyframes et-breathe{0%,100%{opacity:1}50%{opacity:.55}}
+@keyframes et-drift{from{transform:translateX(0)}to{transform:translateX(var(--et-run,300px))}}
+#eternal .et-r.et-still-on *{animation-play-state:paused!important}
+@media (prefers-reduced-motion:reduce){#eternal .et-r *,#eternal .et-b *,#eternal .et-c *{transition:none!important;animation:none!important}}
+
+/* CYPHERPUNK — the instrument, complete at first paint: tables, a numbered pipeline, receipts */
+#eternal .et-c{font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink);overflow-wrap:break-word}
+#eternal .et-c-path{font:600 15px/1.45 var(--sk-font-mono);color:var(--sk-ink);word-break:break-all}
+#eternal .et-c-chips{display:flex;flex-wrap:wrap;gap:var(--sk-s1,6px);margin:var(--sk-s2,12px) 0}
+#eternal .et-c-chips span{padding:2px var(--sk-s1,6px);border:1px solid var(--sk-line);border-radius:4px;background:var(--sk-bg-card);font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-soft)}
+#eternal .et-c-chips span.et-on{border-color:var(--sk-guard);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong)}
+#eternal .et-c-chips span.et-ok{border-color:var(--sk-verified);color:var(--sk-verified)}
+#eternal .et-c-chips span.et-no{border-color:var(--sk-info);color:var(--sk-info)}
+#eternal .et-c-guard{display:flex;justify-content:space-between;align-items:center;gap:var(--sk-s1,6px) var(--sk-s2,12px);flex-wrap:wrap;min-height:var(--sk-control-min,44px);padding:var(--sk-s1,6px) var(--sk-s3,18px);border:1px dashed var(--sk-guard);border-radius:var(--sk-radius-sm,6px);background:var(--sk-guard-wash);color:var(--sk-guard)}
+#eternal .et-c-guard b{font-weight:600;color:var(--sk-sovereign-strong)}
+#eternal .et-c-h{margin:var(--sk-s4,24px) 0 var(--sk-s2,12px)!important;font:600 15px/1.45 var(--sk-font-mono);color:var(--sk-ink)}
+#eternal .et-c-tab{width:100%;margin:var(--sk-s2,12px) 0 var(--sk-s1,6px)!important;border:1px solid var(--sk-line)!important;border-radius:var(--sk-radius-sm,6px);overflow:hidden;background:var(--sk-bg-card)!important;table-layout:auto}
+#eternal .et-c-tab th{padding:var(--sk-s1,6px) var(--sk-s2,12px)!important;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);border-bottom:1px solid var(--sk-line)!important;background:var(--sk-bg-well)}
+#eternal .et-c-tab td{height:var(--sk-control-min,44px);padding:var(--sk-s1,6px) var(--sk-s2,12px)!important;border-bottom:1px solid var(--sk-line)!important;font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink);vertical-align:middle}
+#eternal .et-c-tab tr:last-child td{border-bottom:0!important}
+#eternal .et-c-tab td:first-child{color:var(--sk-guard)}
+#eternal .et-c-tab td:first-child,#eternal .et-c-tab th:first-child{white-space:nowrap;width:1%}
+#eternal .et-c-tab tr.et-pick{cursor:pointer}
+#eternal .et-c-tab tr.et-pick:hover td,#eternal .et-c-tab tr.et-pick[aria-expanded="true"] td,#eternal .et-c-tab tr.et-pick[aria-pressed="true"] td{background:var(--sk-sovereign-tint)}
+#eternal .et-c-tab tr.et-more td{height:auto;background:var(--sk-sovereign-tint);color:var(--sk-ink-soft)}
+#eternal .et-c-tab small{display:block;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut)}
+#eternal .et-c-tab .et-nw{white-space:nowrap}
+#eternal .et-st-ok{color:var(--sk-verified)}#eternal .et-st-no{color:var(--sk-info)}#eternal .et-st-wait{color:var(--sk-ai)}#eternal .et-st-guard{color:var(--sk-guard)}#eternal .et-st-dim{color:var(--sk-ink-mut)}
+#eternal .et-c-pipe{list-style:none;margin:0;padding:0;display:grid;gap:var(--sk-s2,12px);counter-reset:etp}
+#eternal .et-c-pipe li{display:grid;grid-template-columns:28px 1fr;gap:var(--sk-s1,6px) var(--sk-s2,12px);padding:var(--sk-s2,12px) var(--sk-s3,18px);border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm,6px);background:var(--sk-bg-card);counter-increment:etp}
+#eternal .et-c-pipe li::before{content:counter(etp,decimal-leading-zero);color:var(--sk-guard);font-weight:600}
+#eternal .et-c-pipe li b{font-weight:600;color:var(--sk-ink)}
+#eternal .et-c-pipe li p,#eternal .et-c-pipe li>div{grid-column:2;color:var(--sk-ink-soft)}
+#eternal .et-c-pipe li.et-done b{color:var(--sk-verified)}
+#eternal .et-c-pipe li.et-guard{border-style:dashed;border-color:var(--sk-guard)}
+#eternal .et-c-pipe li.et-guard b{color:var(--sk-guard)}
+#eternal .et-c-pipe li.et-now{border-color:var(--sk-ai);box-shadow:inset 0 0 0 1px var(--sk-ai)}
+#eternal .et-c-pipe li.et-now b{color:var(--sk-ai)}
+#eternal .et-c-pipe li.et-todo p,#eternal .et-c-pipe li.et-todo>div{color:var(--sk-ink-mut)}
+#eternal .et-c-primary{display:flex;align-items:center;justify-content:center;width:100%;min-height:52px;margin-top:var(--sk-s3,18px);padding:var(--sk-s1,6px) var(--sk-s2,12px);border:0;border-radius:var(--sk-radius-sm,6px);background:var(--sk-primary);color:var(--sk-on-primary)!important;font:600 14px/1.2 var(--sk-font-mono)!important;text-align:center;cursor:pointer}
+#eternal .et-c-primary:disabled{background:var(--sk-bg-well);color:var(--sk-ink-mut)!important;border:1px dashed var(--sk-line);cursor:not-allowed}
+#eternal .et-c-kv{width:100%;border:1px solid var(--sk-line)!important;border-radius:var(--sk-radius-sm,6px);overflow:hidden;background:var(--sk-bg-card)!important}
+#eternal .et-c-kv th{width:104px;padding:var(--sk-s2,12px)!important;vertical-align:top;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);border-bottom:1px solid var(--sk-line)!important;background:transparent}
+#eternal .et-c-kv td{padding:var(--sk-s2,12px)!important;border-bottom:1px solid var(--sk-line)!important;font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink);word-break:break-word}
+#eternal .et-c-kv tr:last-child th,#eternal .et-c-kv tr:last-child td{border-bottom:0!important}
+#eternal .et-c-kv .et-no{color:var(--sk-info)}#eternal .et-c-kv .et-yes{color:var(--sk-verified)}#eternal .et-c-kv .et-g{color:var(--sk-guard)}
+#eternal .et-c-verify{margin-top:var(--sk-s3,18px);padding:var(--sk-s3,18px);border-radius:var(--sk-radius-sm,6px);background:var(--sk-bg-card);border:1px solid var(--sk-line)}
+#eternal .et-c-verify-h{font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);margin-bottom:var(--sk-s1,6px)}
+#eternal .et-c-verify ol{margin:0;padding-left:var(--sk-s4,24px)!important;display:grid;gap:var(--sk-s1,6px)}
+#eternal .et-c-verify code{font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ai);word-break:break-all}
+#eternal .et-c-row{display:grid;grid-template-columns:1fr 1fr;gap:var(--sk-s2,12px);margin-top:var(--sk-s3,18px)}
+#eternal .et-c-ghost{display:flex;align-items:center;justify-content:center;min-height:52px;padding:var(--sk-s1,6px);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius-sm,6px);background:transparent;color:var(--sk-ink)!important;text-align:center;font:600 14px/1.2 var(--sk-font-mono)!important;cursor:pointer}
+#eternal .et-c-a{display:inline-flex;align-items:center;min-height:var(--sk-control-min,44px);min-width:var(--sk-control-min,44px);color:var(--sk-link)!important}
+#eternal .et-c-a:hover{color:var(--sk-link-hover)!important}
+/* addresses and hashes wrap anywhere; words never break mid-word */
+#eternal .et-c-a,#eternal .et-c-verify li,#eternal .et-c-kv td,#eternal .et-c code{overflow-wrap:anywhere}
+#eternal .et-c-kv .et-c-a{display:flex;min-width:0}
+#eternal .et-c-fixed{table-layout:fixed}
+#eternal .et-c-fixed td,#eternal .et-c-fixed th{overflow-wrap:break-word}
+#eternal .et-c-fixed td:first-child,#eternal .et-c-fixed th:first-child{width:auto;white-space:normal}
+
+/* the guide's own front pieces */
+#eternal .et-b-q{font:600 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+/* raver: the climb — treads rise with the price; each device is a light on its tread */
+#eternal .et-hw-climb .et-tread{cursor:pointer}
+#eternal .et-hw-climb .et-body{fill:var(--sk-sovereign-wash);stroke:var(--sk-line);stroke-width:1}
+#eternal .et-hw-climb .et-tread[aria-pressed="true"] .et-body{fill:var(--sk-sovereign-tint);stroke:var(--sk-sovereign-strong);stroke-width:1.5}
+#eternal .et-hw-climb.et-picked .et-tread[aria-pressed="false"]{opacity:.55}
+#eternal .et-hw-climb .et-lip1{fill:var(--sk-biomass)}#eternal .et-hw-climb .et-lip2{fill:var(--sk-ai)}#eternal .et-hw-climb .et-lip3{fill:var(--sk-info)}
+#eternal .et-hw-climb .et-lip4{fill:var(--sk-sovereign)}#eternal .et-hw-climb .et-lip5{fill:var(--sk-you)}#eternal .et-hw-climb .et-lip6{fill:var(--sk-sovereign-soft)}
+#eternal .et-hw-climb .et-hex{fill:var(--sk-sovereign);stroke:var(--sk-bg);stroke-width:1.5}
+#eternal .et-hw-climb .et-hex.et-phone{fill:none;stroke:var(--sk-ink-soft);stroke-dasharray:3 3}
+#eternal .et-hw-climb .et-tread[aria-pressed="true"] .et-hex{fill:var(--sk-sovereign-strong)}
+#eternal .et-hw-climb .et-tread[aria-pressed="true"] .et-hex.et-on{fill:var(--sk-you)}
+#eternal .et-hw-climb .et-tread[aria-pressed="true"] .et-hex.et-phone{fill:none;stroke:var(--sk-sovereign-strong)}
+#eternal .et-hw-climb .et-dot-ok{fill:var(--sk-biomass)}
+#eternal .et-hw-climb .et-dot-warn{fill:none;stroke:var(--sk-guard);stroke-width:1.5;stroke-dasharray:2 2}
+#eternal .et-hw-climb .et-tread[aria-pressed="true"] .et-dots{animation:et-breathe 3.2s ease-in-out infinite}
+#eternal .et-hw-climb .et-price{fill:var(--sk-ink);font:600 14px/1.25 var(--sk-font-raver-body)}
+#eternal .et-hw-climb .et-floor{stroke:var(--sk-line);stroke-width:1}
+#eternal .et-lg-ok{background:var(--sk-biomass)}
+#eternal .et-lg-warn{border:1.5px dashed var(--sk-guard)}
+#eternal .et-lg-sel{background:var(--sk-sovereign-strong)}
+#eternal .et-hw-chips{display:flex;flex-wrap:wrap;gap:var(--sk-s1,6px)}
+#eternal .et-hw-chip{display:inline-flex;align-items:center;min-height:var(--sk-control-min,44px);padding:0 var(--sk-s3,18px);border:1.5px solid var(--sk-sovereign);border-radius:var(--sk-radius-pill,999px);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong)!important;font:600 14px/1.25 var(--sk-font-raver-body);cursor:pointer}
+#eternal .et-hw-chip.et-dash{border-style:dashed;border-color:var(--sk-guard);background:var(--sk-guard-wash);color:var(--sk-guard)!important}
+#eternal .et-hw-chip[aria-pressed="true"]{border-color:var(--sk-you);box-shadow:var(--sk-glow-sovereign)}
+#eternal .et-hw-devs{display:flex;flex-wrap:wrap;gap:var(--sk-s1,6px);margin-top:var(--sk-s2,12px)}
+#eternal .et-hw-ladder th:nth-child(1){width:80px}#eternal .et-hw-ladder th:nth-child(3){width:36%}
+#eternal .et-r-card span.et-src{margin-top:2px}
+
+/* ── THE WHOLE PAGE, dressed per register: the page's own variables mapped onto skaists (paper and
+   ink for new bee; black-green with Sora and Unbounded for raver; black and Plex Mono for
+   cypherpunk). Warnings wear info, never amber; "bad" wears guard lilac, never red. ── */
+body[data-reg]{--bg:var(--sk-bg);--panel:var(--sk-bg-card);--line:var(--sk-line);--ink:var(--sk-ink);--mut:var(--sk-ink-mut);--ok:var(--sk-verified);--warn:var(--sk-info);--bad:var(--sk-guard);--teal:var(--sk-link);--b:var(--sk-ink);--vio:var(--sk-sovereign);--mag:var(--sk-you);background:var(--sk-bg);color:var(--sk-ink)}
+body[data-reg="bee"]{font-family:var(--sk-font-bee-sans)}
+body[data-reg="raver"]{font-family:var(--sk-font-raver-body)}
+body[data-reg="cypherpunk"]{font-family:var(--sk-font-mono)}
+body[data-reg] main h1{background:none;-webkit-text-fill-color:currentColor;text-shadow:none;color:var(--sk-ink)}
+body[data-reg="bee"] main h1{font:400 40px/1.05 var(--sk-font-bee-serif);letter-spacing:0}
+body[data-reg="raver"] main h1{font:700 30px/1.05 var(--sk-font-raver-display);letter-spacing:-.01em;background-image:var(--sk-rainbow);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent}
+body[data-reg="cypherpunk"] main h1{font:600 15px/1.45 var(--sk-font-mono)}
+body[data-reg="bee"] main h2{font-family:var(--sk-font-bee-serif);font-weight:400;font-size:28px;line-height:1.1}
+body[data-reg="raver"] main h2{font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em}
+body[data-reg="cypherpunk"] main h2{font:600 15px/1.45 var(--sk-font-mono)}
+body[data-reg="bee"] :is(.sub,p,.doctrine,.law,.means){font-size:16px;line-height:1.6}
+body[data-reg="raver"] :is(.sub,p,.doctrine,.law,.means){font-size:14px;line-height:1.6}
+body[data-reg="cypherpunk"] :is(.sub,p,.doctrine,.law,.means){font-size:13px;line-height:1.6}
+body[data-reg="bee"] :is(.links,table,td,th,footer,.gauge,.kind,.date,.rung,.disc,.axes,.combcap){font-size:14px}
+body[data-reg="raver"] :is(.links,table,td,th,footer,.gauge,.kind,.date,.rung,.disc,.axes,.combcap){font-size:14px}
+body[data-reg="cypherpunk"] :is(.links,table,td,th,footer,.gauge,.kind,.date,.rung,.disc,.axes,.combcap){font-size:12px}
+body[data-reg] .panel{border-radius:var(--sk-radius-xl)}
+body[data-reg="cypherpunk"] .panel{border-radius:var(--sk-radius-sm)}
+body[data-reg] :is(.gauge,.kind){border-color:currentColor}
+body[data-reg] nav:not(#tbar) a{display:inline-flex;align-items:center;min-height:var(--sk-control-min,44px);font-size:14px;color:var(--sk-ink-soft);border-color:var(--sk-line)}
+body[data-reg="cypherpunk"] nav:not(#tbar) a{font-size:12px;border-radius:var(--sk-radius-sm)}
+body[data-reg] nav:not(#tbar) a.here{color:var(--sk-link);border-color:var(--sk-link)}
+body[data-reg] footer{color:var(--sk-ink-mut)}
+body[data-reg] footer a{color:var(--sk-link)}
+/* the guide's own pieces: the excluded panel reads as a guard (dashed lilac, never red); the
+   manufacturer shelves carry inline hex, so each painted value is dressed onto its token here */
+body[data-reg] .panel.x{border-color:var(--sk-guard);border-style:dashed}
+body[data-reg] .dev .price{color:var(--sk-ink-soft)}
+body[data-reg] .shelves h2{color:var(--sk-ink)!important;margin-bottom:var(--sk-s1)!important}
+body[data-reg="bee"] .shelves h2{font:400 28px/1.1 var(--sk-font-bee-serif)!important}
+body[data-reg="raver"] .shelves h2{font:700 15px/1.2 var(--sk-font-raver-display)!important;letter-spacing:.04em}
+body[data-reg="cypherpunk"] .shelves h2{font:600 15px/1.45 var(--sk-font-mono)!important}
+body[data-reg] .shelves :is(p,div,a){font-family:inherit!important}
+body[data-reg="bee"] .shelves p{font-size:16px!important}
+body[data-reg="cypherpunk"] .shelves p{font-size:13px!important}
+body[data-reg] .shelves p,body[data-reg] .shelves [style*="#8b949e"]{color:var(--sk-ink-mut)!important}
+body[data-reg] .shelves [style*="#00E5FF"]{color:var(--sk-link)!important}
+body[data-reg] .shelves [style*="#9FFF3D"]{color:var(--sk-verified)!important}
+body[data-reg] .shelves a{background:var(--sk-bg-card)!important;border-color:var(--sk-line)!important;color:var(--sk-ink)!important;border-radius:var(--sk-radius-xl)!important}
+body[data-reg="cypherpunk"] .shelves a{border-radius:var(--sk-radius-sm)!important}
+body[data-reg] .shelves img,body[data-reg] .shelves a>div[style*="aspect-ratio"]{background:var(--sk-bg-well)!important}
+body[data-reg="cypherpunk"] .shelves a div[style*="font-size:14px"]{font-size:13px!important}
+</style>
+<link rel="stylesheet" href="../skaists.css">
+</head><body><main>
 <nav><a href="../">⌂ hub</a><a class="here" href="index.html">🐝 open hardware guide</a><a href="security.html">🛡 security events</a><a href="build.html">🔧 become a producer</a><a href="lab.html">⬡ the lab</a></nav>
+<!-- ETERNAL FRONT (founder blueprint 2026-09-26, docs/design/eternal): three separate products in
+     one surface. ONE data layer (this guide's own ladder table, device panels, excluded list and
+     three rules, read from the page below) drives all three, so the facts cannot drift. Nothing
+     here buys, sells or earns: every "order direct" is the maker's own link from the panels below,
+     opened in a new tab, and the $0 rung is the estate's own onboarding ceremony. -->
+<section id="eternal" aria-label="open hardware for your keys">
+
+  <!-- NEW BEE — a calm room: how much to spend, the device, three habits, then the maker -->
+  <div class="et-b">
+    <div class="et-b-step" data-step="ladder">
+      <div class="et-b-mark" data-etk="et.hardware.mark">open hardware guide</div>
+      <h2 class="et-b-h" data-etk="et.hardware.beeH">a safe home for your keys</h2>
+      <div class="et-b-lede" data-etk="et.hardware.beeLede">small devices that keep your keys off the internet. every one here can be read and checked, and you buy it from the people who make it.</div>
+      <div class="et-b-guard"><svg class="et-ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span data-etk="et.hardware.beeFloor">your 24 written words are what really matter. they outlive every device.</span></div>
+      <div class="et-b-q" data-etk="et.hardware.beeQ">how much would you like to spend?</div>
+      <div class="et-b-rows" id="etHwRungs"><div class="et-b-row"><span data-etk="et.hardware.reading">reading the guide…</span></div></div>
+      <div class="et-b-act">
+        <a class="et-b-primary" id="etHwFree" href="../onboarding/" data-etk="et.hardware.beeFree">start free, with a phone you already have</a>
+        <button type="button" class="et-b-link" id="etHwOutBtn" aria-expanded="false" aria-controls="etHwOut" data-etk="et.hardware.beeOutBtn">why some devices are not here</button>
+        <div class="et-b-rows" id="etHwOut" hidden></div>
+        <div class="et-b-foot" data-etk="et.hardware.beeFoot">we show, we never sell. every link goes to the maker.</div>
+      </div>
+    </div>
+    <div class="et-b-step" data-step="rung" hidden>
+      <button type="button" class="et-b-back" data-go="ladder" data-etk="et.hardware.beeBack">‹ all the steps</button>
+      <h2 class="et-b-h" id="etHwRungH"></h2>
+      <div class="et-b-lede" id="etHwRungL"></div>
+      <div class="et-b-rows" id="etHwDevs"></div>
+      <div class="et-b-q" id="etHwChecksQ"></div>
+      <div class="et-b-rows" id="etHwChecks"></div>
+      <div class="et-b-act" id="etHwNextBox"></div>
+    </div>
+    <div class="et-b-step" data-step="rules" hidden>
+      <button type="button" class="et-b-back" data-go="rung" data-etk="et.hardware.beeBack2">‹ back to the device</button>
+      <h2 class="et-b-h" data-etk="et.hardware.beeRulesH">before you spend a dollar</h2>
+      <div class="et-b-lede" data-etk="et.hardware.beeRulesLede">three habits from this guide. they cost nothing.</div>
+      <div class="et-b-rows" id="etHwRules"></div>
+      <label class="et-b-consent"><input type="checkbox" id="etHwOk"> <span data-etk="et.hardware.beeOk">i will order direct, keep my words, and check what arrives.</span></label>
+      <div class="et-b-act">
+        <button type="button" class="et-b-primary" id="etHwWait" disabled></button>
+        <a class="et-b-primary" id="etHwGo" href="#" target="_blank" rel="noopener noreferrer" hidden></a>
+        <div class="et-b-status" id="etHwSaid" role="status" hidden></div>
+        <div class="et-b-foot" data-etk="et.hardware.beeNothing">nothing is bought on this page.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RAVER — the climb: six treads rising with the price, each device a light on its step -->
+  <div class="et-r">
+    <div class="et-r-top"><h2 class="et-r-h" data-etk="et.hardware.raverH">the climb</h2><span class="et-r-hint" id="etHwHint"></span></div>
+    <div class="et-r-art"><svg id="etHwClimb" class="et-hw-climb" viewBox="0 0 354 300" role="group" aria-label="the ladder as a staircase: each tread is a step, taller as it costs more"></svg></div>
+    <div class="et-r-legend">
+      <span><i class="et-lg-ok"></i><span data-etk="et.hardware.lgOk">open</span></span><span><i class="et-lg-warn"></i><span data-etk="et.hardware.lgWarn">worth knowing</span></span><span><i class="et-lg-sel"></i><span data-etk="et.hardware.lgSel">your step</span></span>
+    </div>
+    <div class="et-r-card" id="etHwCard" aria-live="polite"></div>
+    <h3 class="et-r-sub" data-etk="et.hardware.raverAlso">also open, no step of its own</h3>
+    <div class="et-hw-chips" id="etHwAlso"></div>
+    <h3 class="et-r-sub" data-etk="et.hardware.raverLeft">left out, reason named</h3>
+    <div class="et-hw-chips" id="etHwLeft"></div>
+    <div id="etHwRite">
+      <h3 class="et-r-sub" data-etk="et.hardware.raverRules">light the three rules</h3>
+      <div class="et-r-tiles" id="etHwTiles">
+        <button type="button" class="et-r-tile" aria-pressed="false" data-t="1"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9l9-6 9 6v11H3z"/><path d="M9 20v-6h6v6"/></svg><span data-etk="et.hardware.t1">order direct</span></button>
+        <button type="button" class="et-r-tile" aria-pressed="false" data-t="2"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16M4 10h16M4 15h10M4 20h7"/></svg><span data-etk="et.hardware.t2">24 words</span></button>
+        <button type="button" class="et-r-tile" aria-pressed="false" data-t="3"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7z"/><path d="M9 12l2 2 4-4"/></svg><span data-etk="et.hardware.t3">check it</span></button>
+      </div>
+      <p class="et-r-note" id="etHwLit"></p>
+    </div>
+    <button type="button" class="et-r-pill" id="etHwPillWait" disabled></button>
+    <a class="et-r-pill" id="etHwPill" href="#" target="_blank" rel="noopener noreferrer" hidden></a>
+    <p class="et-r-note" id="etHwRaverSaid" role="status"></p>
+    <div class="et-r-bar"><button type="button" class="et-r-still" id="etHwStill" aria-pressed="false" data-etk="et.hardware.still">pause the light</button><a class="et-r-ghost" href="#etArchive" data-etk="et.hardware.raverAll">the whole guide</a></div>
+  </div>
+
+  <!-- CYPHERPUNK — the instrument: the ladder, every device's gauges, the order path, the receipt -->
+  <div class="et-c">
+    <div class="et-c-path" id="etHwPath">hw://guide/ladder</div>
+    <div class="et-c-chips" id="etHwChips"></div>
+    <div class="et-c-guard"><span data-etk="et.hardware.cyGuard">closed = excluded · reason named · never a silent skip</span><b id="etHwHeld"></b></div>
+    <h3 class="et-c-h" data-etk="et.hardware.cyLadderH">ladder · price → rung → device</h3>
+    <table class="et-c-tab et-c-fixed et-hw-ladder"><thead><tr><th>$</th><th>rung · device</th><th>air-gap</th></tr></thead><tbody id="etHwLadder"></tbody></table>
+    <h3 class="et-c-h" data-etk="et.hardware.cyDevH">devices · gauges read from the panels</h3>
+    <table class="et-c-tab"><thead><tr><th>#</th><th>device</th><th>ok</th><th>note</th></tr></thead><tbody id="etHwDevTab"></tbody></table>
+    <h3 class="et-c-h" id="etHwPipeH"></h3>
+    <ol class="et-c-pipe" id="etHwPipe"></ol>
+    <div id="etHwCyGo"></div>
+    <h3 class="et-c-h" data-etk="et.hardware.cyRcptH">receipt · the selected device</h3>
+    <table class="et-c-kv" id="etHwRcpt"></table>
+    <h3 class="et-c-h" data-etk="et.hardware.cyOutH">excluded · reason named</h3>
+    <table class="et-c-kv" id="etHwOutTab"></table>
+    <div class="et-c-verify">
+      <div class="et-c-verify-h" data-etk="et.hardware.cyVerifyH">verify · no trust in this page needed</div>
+      <ol id="etHwVerify"></ol>
+    </div>
+    <div class="et-c-row" id="etHwCyRow"></div>
+  </div>
+</section>
+<h2 class="et-archive-h" id="etArchive" data-etk="et.hardware.archive">the whole guide</h2>
 <h1>Own your keys on hardware you can read</h1>
 <div class="sub">Every device below is open enough to audit: firmware you can build, designs you can study, and a maker who sells to you directly. Everything closed is in the excluded list at the bottom — with its reason named, because a silent skip teaches nothing. Same bzDiD at every rung; this is a climb, not a restart.</div>
 
@@ -116,5 +474,282 @@ body[data-reg="bee"] :is(p,.doctrine,.law,.means){font-size:1rem}
 
 
 <section class="shelves" style="margin:26px 0"><h2 style="color:#00FF41;font:600 1.05rem ui-monospace,monospace;margin-bottom:4px"><span data-i18n="h.134">the manufacturer shelves</span></h2><p style="color:#8b949e;font:.9rem/1.6 ui-monospace,monospace;margin-bottom:14px">Every card opens the manufacturer's own product page in a new window. We show, we never middleman.</p><div style="font:.875rem ui-monospace,monospace;color:#00E5FF;margin:10px 0 8px">Trezor — trezor.io</div><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px"><a href="https://trezor.io/trezor-safe-7-charcoal-black" target="_blank" rel="noopener noreferrer" style="display:block;background:#0d0d15;border:1px solid #262638;border-radius:8px;overflow:hidden;text-decoration:none;color:#cfe8d6;font:12px/1.5 ui-monospace,Menlo,monospace"><img src="https://imagedelivery.net/dvYzklbs_b5YaLRtI16Mnw/84d631c0-88ee-46d1-4a1e-5cd7ec0a4e00/560x560" loading="lazy" alt="Trezor Safe 7" style="width:100%;aspect-ratio:1;object-fit:contain;background:#000;display:block" onerror="this.style.display='none'"><div style="padding:10px 12px"><div style="color:#00E5FF;font-size:15px">Trezor Safe 7</div><div style="color:#8b949e;font-size:14px;line-height:1.5;margin-top:4px">Advanced future-proof crypto security with wireless freedom</div><div style="color:#9FFF3D;font-size:14px;margin-top:8px">the new flagship ↗</div></div></a><a href="https://trezor.io/trezor-safe-5-black-graphite" target="_blank" rel="noopener noreferrer" style="display:block;background:#0d0d15;border:1px solid #262638;border-radius:8px;overflow:hidden;text-decoration:none;color:#cfe8d6;font:12px/1.5 ui-monospace,Menlo,monospace"><img src="https://imagedelivery.net/dvYzklbs_b5YaLRtI16Mnw/e05a7bf5-a123-4241-535f-571363943e00/560x560" loading="lazy" alt="Trezor Safe 5" style="width:100%;aspect-ratio:1;object-fit:contain;background:#000;display:block" onerror="this.style.display='none'"><div style="padding:10px 12px"><div style="color:#00E5FF;font-size:15px">Trezor Safe 5</div><div style="color:#8b949e;font-size:14px;line-height:1.5;margin-top:4px">Touchscreen ease for everyday crypto management</div><div style="color:#9FFF3D;font-size:14px;margin-top:8px">the bSAFE target rung ↗</div></div></a><a href="https://trezor.io/trezor-safe-3-cosmic-black" target="_blank" rel="noopener noreferrer" style="display:block;background:#0d0d15;border:1px solid #262638;border-radius:8px;overflow:hidden;text-decoration:none;color:#cfe8d6;font:12px/1.5 ui-monospace,Menlo,monospace"><img src="https://imagedelivery.net/dvYzklbs_b5YaLRtI16Mnw/2c1e9ecc-e35b-4ffc-9b36-e01d62fa7e00/560x560" loading="lazy" alt="Trezor Safe 3" style="width:100%;aspect-ratio:1;object-fit:contain;background:#000;display:block" onerror="this.style.display='none'"><div style="padding:10px 12px"><div style="color:#00E5FF;font-size:15px">Trezor Safe 3</div><div style="color:#8b949e;font-size:14px;line-height:1.5;margin-top:4px">Simple, reliable crypto security with a two-button pad</div><div style="color:#9FFF3D;font-size:14px;margin-top:8px">the workhorse ↗</div></div></a><a href="https://trezor.io/trezor-safe-7-bitcoin-only" target="_blank" rel="noopener noreferrer" style="display:block;background:#0d0d15;border:1px solid #262638;border-radius:8px;overflow:hidden;text-decoration:none;color:#cfe8d6;font:12px/1.5 ui-monospace,Menlo,monospace"><img src="https://imagedelivery.net/dvYzklbs_b5YaLRtI16Mnw/b3c831b9-61ba-477d-2586-aab5d2178f00/560x560" loading="lazy" alt="Safe 7 · BTC-only" style="width:100%;aspect-ratio:1;object-fit:contain;background:#000;display:block" onerror="this.style.display='none'"><div style="padding:10px 12px"><div style="color:#00E5FF;font-size:15px">Safe 7 · BTC-only</div><div style="color:#8b949e;font-size:14px;line-height:1.5;margin-top:4px">Bitcoin-only firmware variant</div><div style="color:#9FFF3D;font-size:14px;margin-top:8px">the purist ↗</div></div></a><a href="https://trezor.io/trezor-safe-5-bitcoin-only" target="_blank" rel="noopener noreferrer" style="display:block;background:#0d0d15;border:1px solid #262638;border-radius:8px;overflow:hidden;text-decoration:none;color:#cfe8d6;font:12px/1.5 ui-monospace,Menlo,monospace"><img src="https://imagedelivery.net/dvYzklbs_b5YaLRtI16Mnw/431032dd-91a2-4c0c-ce80-6844050fc600/560x560" loading="lazy" alt="Safe 5 · BTC-only" style="width:100%;aspect-ratio:1;object-fit:contain;background:#000;display:block" onerror="this.style.display='none'"><div style="padding:10px 12px"><div style="color:#00E5FF;font-size:15px">Safe 5 · BTC-only</div><div style="color:#8b949e;font-size:14px;line-height:1.5;margin-top:4px">Bitcoin-only firmware variant</div><div style="color:#9FFF3D;font-size:14px;margin-top:8px">the purist ↗</div></div></a><a href="https://trezor.io/trezor-safe-3-bitcoin-only" target="_blank" rel="noopener noreferrer" style="display:block;background:#0d0d15;border:1px solid #262638;border-radius:8px;overflow:hidden;text-decoration:none;color:#cfe8d6;font:12px/1.5 ui-monospace,Menlo,monospace"><img src="https://imagedelivery.net/dvYzklbs_b5YaLRtI16Mnw/e85d2143-e80a-462c-d8be-c5e22f8f4100/560x560" loading="lazy" alt="Safe 3 · BTC-only" style="width:100%;aspect-ratio:1;object-fit:contain;background:#000;display:block" onerror="this.style.display='none'"><div style="padding:10px 12px"><div style="color:#00E5FF;font-size:15px">Safe 3 · BTC-only</div><div style="color:#8b949e;font-size:14px;line-height:1.5;margin-top:4px">Bitcoin-only firmware variant</div><div style="color:#9FFF3D;font-size:14px;margin-top:8px">the purist ↗</div></div></a></div><div style="font:.875rem ui-monospace,monospace;color:#00E5FF;margin:16px 0 8px">Foundation — foundation.xyz (was foundationdevices.com)</div><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px"><a href="https://foundation.xyz/products/passport-prime" target="_blank" rel="noopener noreferrer" style="display:block;background:#0d0d15;border:1px solid #262638;border-radius:8px;overflow:hidden;text-decoration:none;color:#cfe8d6;font:12px/1.5 ui-monospace,Menlo,monospace"><div style="width:100%;aspect-ratio:1;display:flex;align-items:center;justify-content:center;background:#000;color:#8b949e;font:14px/1.5 ui-monospace,monospace;text-align:center;padding:16px">foundation.xyz — reachable from your browser</div><div style="padding:10px 12px"><div style="color:#00E5FF;font-size:15px">Passport Prime</div><div style="color:#8b949e;font-size:14px;line-height:1.5;margin-top:4px">The newest Foundation hardware wallet — air-gapped signing lineage. Site image withheld: foundation.xyz refuses our reader (ECONNRESET ×3); link is founder-verified.</div><div style="color:#9FFF3D;font-size:14px;margin-top:8px">manufacturer ↗</div></div></a><a href="https://github.com/Foundation-Devices" target="_blank" rel="noopener noreferrer" style="display:block;background:#0d0d15;border:1px solid #262638;border-radius:8px;overflow:hidden;text-decoration:none;color:#cfe8d6;font:12px/1.5 ui-monospace,Menlo,monospace"><div style="width:100%;aspect-ratio:1;display:flex;align-items:center;justify-content:center;background:#000;color:#8b949e;font:14px/1.5 ui-monospace,monospace;text-align:center;padding:16px">github.com/Foundation-Devices</div><div style="padding:10px 12px"><div style="color:#00E5FF;font-size:15px">Foundation on GitHub</div><div style="color:#8b949e;font-size:14px;line-height:1.5;margin-top:4px">Open-source firmware and tools — the repos behind every Passport. For the hardware lab's open-review doctrine.</div><div style="color:#9FFF3D;font-size:14px;margin-top:8px">manufacturer ↗</div></div></a></div></section>
-<footer>Part of the BNR onboarding surface · open tech only · order direct · your phrase is the floor · <a href="security.html">security events →</a> · <a href="../onboarding/">🔑 onboard ceremony</a> · <a href="../recover.html">📄 recovery tool</a> · <a href="../blight/demo.html">💡 the beam</a> · <a href="https://github.com/beehive-nature/beehive-nature/blob/main/surfaces/hardware/index.html" rel="noopener">view source</a></footer></main><script src="../tour.js?v=42"></script>
+<footer>Part of the BNR onboarding surface · open tech only · order direct · your phrase is the floor · <a href="security.html">security events →</a> · <a href="../onboarding/">🔑 onboard ceremony</a> · <a href="../recover.html">📄 recovery tool</a> · <a href="../blight/demo.html">💡 the beam</a> · <a href="https://github.com/beehive-nature/beehive-nature/blob/main/surfaces/hardware/index.html" rel="noopener">view source</a></footer></main><script>
+/* ETERNAL FRONT — one data layer, three renderers (docs/design/eternal). Every fact is read from
+   this guide's own walls below: the ladder table, the device panels (price, rung, gauges, maker
+   and source links), the excluded panel and the three rules. The one real action is the maker's
+   own link, opened in a new tab (or, at $0, the estate's onboarding ceremony). Nothing here buys,
+   records or claims an order: the only thing said after a tap is that a page was opened. */
+(function(){
+  var $=function(id){return document.getElementById(id);};
+  var T=function(k,f){var t=window.BNRLanguage&&window.BNRLanguage.text;return t?t(k,f):f;};
+  var K=function(k,f){return T('et.hardware.'+k,f);};
+  var esc=function(v){return String(v==null?'':v).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});};
+  var txt=function(e){return (e&&e.textContent||'').replace(/\s+/g,' ').trim();};
+  var host=function(u){try{return new URL(u,location.href).host.replace(/^www\./,'');}catch(e){return String(u||'');}};
+  var ext=function(u){return /^https?:/i.test(u)&&host(u)!==location.host;};
+  var keyed=function(k){return [].filter.call(document.querySelectorAll('[data-i18n]'),function(e){return e.dataset.i18n===k;})[0];};
+  var initials=function(n){var w=String(n||'').replace(/[^A-Za-z0-9 ]/g,' ').trim().split(/\s+/);return ((w[0]||'')[0]||'')+((w[1]||'')[0]||'');};
+  var CHEV='<svg class="et-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>';
+
+  /* ── the data layer ── */
+  var D={rungs:[],devices:[],excluded:[],rules:[],quorum:'',shelves:[],page:'hardware/index.html'};
+  var B={step:'ladder',rung:null,dev:null,out:false,ok:false,said:''};
+  var R={rung:null,dev:null,lit:{},still:false,said:''};
+  var C={dev:0};
+
+  /* chunks of a block split at <br>: each chunk is its <b> head and the words after it */
+  function chunks(el){
+    var out=[],cur=null;
+    [].forEach.call(el.childNodes,function(n){
+      if(n.nodeName==='BR'){cur=null;return;}
+      if(!cur){cur={head:'',rest:'',lead:''};out.push(cur);}
+      if(n.nodeName==='B'&&!cur.head){cur.head=txt(n);return;}
+      if(!cur.head)cur.lead+=n.textContent;else cur.rest+=n.textContent;
+    });
+    return out.map(function(c){return {lead:c.lead.replace(/\s+/g,' ').trim(),head:c.head.replace(/\.$/,''),rest:c.rest.replace(/\s+/g,' ').replace(/^\s*[—–-]\s*/,'').trim()};}).filter(function(c){return c.head;});
+  }
+  function readPage(){
+    /* the device panels, in page order; a panel naming several devices is split by its own links */
+    var devs=[];
+    document.querySelectorAll('main .panel.dev').forEach(function(p){
+      var name=txt(p.querySelector('h2')), price=txt(p.querySelector('.price')), tier=txt(p.querySelector('.rung'));
+      var checks=[].map.call(p.querySelectorAll('.gauge'),function(g){return {t:txt(g),ok:g.classList.contains('g-ok')};});
+      var blurb=txt(p.querySelector('p'));
+      var links=[].map.call(p.querySelectorAll('.links a'),function(a){return {href:a.href,text:txt(a)};});
+      var makers=links.filter(function(l){return !/source/i.test(l.text);}), sources=links.filter(function(l){return /source/i.test(l.text);});
+      var names=name.split(/\s+·\s+/);
+      if(names.length>1&&makers.length===names.length){
+        names.forEach(function(n,i){
+          var m=new RegExp('(^|\\.\\s+)'+n.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+':\\s*([^]*?)(?=\\s+[A-Z][\\w ]+:\\s|$)').exec(blurb);
+          devs.push({name:n,price:price,tier:tier,checks:checks,blurb:m?m[2].trim():blurb,maker:makers[i],source:sources[i]||null,group:name});
+        });
+      } else devs.push({name:name,price:price,tier:tier,checks:checks,blurb:blurb,maker:makers[0]||null,source:sources[0]||null,group:name});
+    });
+    D.devices=devs.map(function(d,i){d.i=i;return d;});
+    /* the ladder table: price, rung, device, air-gap — each rung finds its panels by name */
+    var h=keyed('h.125'), tb=null;
+    for(var e=h&&h.closest('h2');e;e=e.nextElementSibling){if(e.tagName==='TABLE'){tb=e;break;}}
+    var core=function(s){return s.replace(/\(.*?\)/g,'').replace(/\s+/g,' ').trim().toLowerCase();};
+    D.rungs=tb?[].filter.call(tb.querySelectorAll('tr'),function(r){return !r.querySelector('th');}).map(function(r,i){
+      var td=r.querySelectorAll('td'), dev=txt(td[2]);
+      var picks=dev.split(/\s+·\s+/).map(function(tok){var c=core(tok);
+        return D.devices.filter(function(d){var n=core(d.name);return n===c||n.indexOf(c)>=0||c.indexOf(n)>=0;})[0];}).filter(Boolean);
+      var top=(txt(td[0]).match(/\d+/g)||['0']).map(Number).pop();
+      return {n:i+1,price:txt(td[0]),rung:txt(td[1]),device:dev,airgap:txt(td[3]),devs:picks.map(function(d){return d.i;}),free:top===0,top:top};
+    }):[];
+    /* devices on no rung (the honourable mentions) ride as "also open" */
+    var onRung={};D.rungs.forEach(function(r){r.devs.forEach(function(i){onRung[i]=1;});});
+    D.also=D.devices.filter(function(d){return !onRung[d.i];}).map(function(d){return d.i;});
+    /* the excluded panel and the three rules, head by head */
+    var x=document.querySelector('main .panel.x p'); D.excluded=x?chunks(x).map(function(c){return {name:c.head,reason:c.rest};}):[];
+    /* a rule whose bold head runs on into a small-letter clause keeps that clause with its head */
+    var rules=document.querySelector('main .panel.doctrine'); D.rules=rules?chunks(rules).filter(function(c){return /^\d/.test(c.lead);}).map(function(c){
+      var head=c.head,text=c.rest,m=/^[a-z]/.test(text)&&/^([^.]*\.)\s*([^]*)$/.exec(text);
+      if(m){head=c.head+' '+m[1];text=m[2];}
+      return {n:+c.lead.replace(/\D/g,''),head:head,text:text};}):[];
+    var doc=document.querySelectorAll('main .panel.doctrine'); D.quorum=doc.length>1?txt(doc[doc.length-1]).replace(/^For the largest holdings:\s*/,''):'';
+    D.shelves=[].map.call(document.querySelectorAll('main .shelves a[href]'),function(a){return {href:a.href,host:host(a.href)};});
+  }
+
+  var rungOf=function(di){return D.rungs.filter(function(r){return r.devs.indexOf(di)>=0;})[0]||null;};
+  var outLink=function(href,label,cls,id){return '<a class="'+cls+'"'+(id?' id="'+id+'"':'')+' href="'+esc(href)+'"'+(ext(href)?' target="_blank" rel="noopener noreferrer"':'')+'>'+esc(label+(ext(href)?' '+K('newTab','(new\u00a0tab)'):''))+'</a>';};
+  function opened(h){return K('opened','{host} opened in a new tab. nothing was bought here.').replace('{host}',h);}
+
+  /* ── NEW BEE ── */
+  function beeStep(s){B.step=s;document.querySelectorAll('#eternal .et-b-step').forEach(function(e){e.hidden=e.getAttribute('data-step')!==s;});}
+  function bee(){
+    var box=$('etHwRungs'); if(!box) return;
+    box.innerHTML=D.rungs.map(function(r){
+      return '<button type="button" class="et-b-row" data-rung="'+r.n+'"><span class="et-b-rl"><b>'+esc(r.rung)+'</b><small>'+esc(r.free?K('yourPhone','a phone you already have'):r.device)+'</small></span><span class="et-b-rv">'+esc(r.price)+CHEV+'</span></button>';
+    }).join('')+(D.also.length?'<button type="button" class="et-b-row" data-rung="also"><span class="et-b-rl"><b>'+esc(K('alsoOpen','also open'))+'</b><small>'+esc(D.also.map(function(i){return D.devices[i].name;}).join(' · '))+'</small></span><span class="et-b-rv">'+esc(D.devices[D.also[0]].price)+CHEV+'</span></button>':'');
+    $('etHwOut').innerHTML=D.excluded.map(function(x){return '<div class="et-b-term"><i class="et-dash" aria-hidden="true">×</i><div><b>'+esc(x.name)+'</b><span>'+esc(x.reason)+'</span></div></div>';}).join('');
+    $('etHwOut').hidden=!B.out; $('etHwOutBtn').setAttribute('aria-expanded',B.out?'true':'false');
+    beeRung();
+  }
+  function beeRungDevs(){
+    if(B.rung==='also') return D.also;
+    var r=D.rungs[B.rung-1]; return r?r.devs:[];
+  }
+  function beeRung(){
+    if(B.rung==null) return;
+    var r=B.rung==='also'?null:D.rungs[B.rung-1], devs=beeRungDevs();
+    $('etHwRungH').textContent=r?r.price:D.devices[devs[0]].price;
+    $('etHwRungL').textContent=r?(r.rung+' · '+K('airgap','connects by')+' '+r.airgap):K('alsoLede','open firmware, no step of their own on the ladder.');
+    if(r&&r.free){
+      $('etHwDevs').innerHTML='<div class="et-b-item"><i class="et-dash" aria-hidden="true">⬡</i><span><b>'+esc(K('phoneName','a spare phone'))+'</b><small>'+esc(r.device)+'</small></span></div>';
+      $('etHwChecksQ').textContent=''; $('etHwChecks').hidden=true;
+      $('etHwNextBox').innerHTML='<a class="et-b-primary" id="etHwNext" href="../onboarding/">'+esc(K('beeCeremony','open the onboarding ceremony'))+'</a><div class="et-b-foot">'+esc(K('beeFreeFoot','it costs nothing. nothing to order.'))+'</div>';
+      return;
+    }
+    if(B.dev==null||devs.indexOf(B.dev)<0) B.dev=devs[0];
+    $('etHwDevs').innerHTML=devs.map(function(i){var d=D.devices[i];
+      return '<button type="button" class="et-b-item" data-dev="'+i+'" aria-pressed="'+(i===B.dev?'true':'false')+'"><i aria-hidden="true">'+esc(initials(d.name))+'</i><span><b>'+esc(d.name)+'</b><small>'+esc(d.price+' · '+(d.maker?host(d.maker.href):K('noMaker','no maker link')))+'</small></span></button>';
+    }).join('');
+    var d=D.devices[B.dev];
+    $('etHwChecksQ').textContent=K('checksQ','what you get with')+' '+d.name;
+    $('etHwChecks').hidden=false;
+    $('etHwChecks').innerHTML=d.checks.map(function(c){return '<div class="et-b-term"><i class="'+(c.ok?'et-ok':'')+'" aria-hidden="true">'+(c.ok?'✓':'i')+'</i><div><b>'+esc(c.t)+'</b><span>'+esc(c.ok?K('okWord','in its favour'):K('warnWord','worth knowing'))+'</span></div></div>';}).join('');
+    $('etHwNextBox').innerHTML='<button type="button" class="et-b-primary" id="etHwNext" data-go="rules">'+esc(K('beeNext','this one, and the three habits'))+'</button><div class="et-b-foot">'+esc(K('beeMakerFoot','next you open the maker’s own page:')+' '+(d.maker?host(d.maker.href):''))+'</div>';
+    beeRules();
+  }
+  function beeRules(){
+    var d=D.devices[B.dev]; if(!d) return;
+    $('etHwRules').innerHTML=D.rules.map(function(r){return '<div class="et-b-term"><i aria-hidden="true">'+r.n+'</i><div><b>'+esc(r.head)+'</b><span>'+esc(r.text)+'</span></div></div>';}).join('');
+    var h=d.maker?host(d.maker.href):'';
+    $('etHwWait').textContent=K('beeTick','tick the box to open')+' '+h;
+    var go=$('etHwGo'); go.href=d.maker?d.maker.href:'#'; go.textContent=K('beeOpen','open')+' '+h+' '+K('newTab','(new\u00a0tab)');
+    $('etHwOk').checked=B.ok; $('etHwWait').hidden=B.ok; go.hidden=!B.ok||!d.maker;
+    var s=$('etHwSaid'); s.hidden=!B.said; s.textContent=B.said;
+  }
+
+  /* ── RAVER: the climb ── */
+  var NS='http://www.w3.org/2000/svg';
+  function climb(){
+    var svg=$('etHwClimb'); if(!svg) return;
+    var n=D.rungs.length||1, W=354, base=282, pad=4, w=(W-pad*(n+1))/n, h='';
+    var max=Math.max.apply(null,D.rungs.map(function(r){return r.top;}).concat([1]));
+    h+='<line class="et-floor" x1="0" x2="'+W+'" y1="'+(base+.5)+'" y2="'+(base+.5)+'"/>';
+    D.rungs.forEach(function(r,i){
+      var th=26+Math.sqrt(r.top/max)*196, x=pad+i*(w+pad), top=base-th, sel=R.rung===r.n;
+      var lab=esc(r.price+' · '+r.rung+(r.devs.length?' · '+r.devs.map(function(k){return D.devices[k].name;}).join(', '):' · '+K('yourPhone','a phone you already have')));
+      h+='<g class="et-tread" role="button" tabindex="0" data-rung="'+r.n+'" aria-pressed="'+(sel?'true':'false')+'" aria-label="'+lab+'">';
+      h+='<rect class="et-body" x="'+x.toFixed(1)+'" y="'+top.toFixed(1)+'" width="'+w.toFixed(1)+'" height="'+th.toFixed(1)+'" rx="8"/>';
+      h+='<rect class="et-lip'+(((i)%6)+1)+'" x="'+x.toFixed(1)+'" y="'+top.toFixed(1)+'" width="'+w.toFixed(1)+'" height="6" rx="3"/>';
+      var cx=x+w/2;
+      if(!r.devs.length){ h+=hex(cx,top-20,14,'et-hex et-phone'); }
+      r.devs.forEach(function(di,k){var d=D.devices[di], hy=top-20-k*32, cols=r.devs.length, dotx=x+w*(cols>1?(k===0?.2:.46):.36);
+        h+=hex(cx,hy,13,'et-hex'+(sel&&R.dev===di?' et-on':''));
+        /* the device's gauges as a column of lights inside its tread: filled = open, dashed = worth knowing */
+        h+='<g class="et-dots">'+d.checks.map(function(c,j){var cy=top+20+j*13;return cy>base-8?'':'<circle class="'+(c.ok?'et-dot-ok':'et-dot-warn')+'" cx="'+dotx.toFixed(1)+'" cy="'+cy.toFixed(1)+'" r="4"/>';}).join('')+'</g>';
+      });
+      var ly=base-10;
+      if(th>92) h+='<text class="et-price" transform="translate('+(x+w-5).toFixed(1)+' '+ly+') rotate(-90)">'+esc(r.price)+'</text>';
+      else if(th<40) h+='<text class="et-price" x="'+cx.toFixed(1)+'" y="'+(base-7)+'" text-anchor="middle">'+esc(r.price)+'</text>';
+      h+='</g>';
+    });
+    svg.innerHTML=h;
+    svg.classList.toggle('et-picked',R.rung!=null);
+  }
+  function hex(cx,cy,r,cls){var p=[];for(var i=0;i<6;i++){var a=Math.PI/180*(60*i-30);p.push((cx+r*Math.cos(a)).toFixed(1)+','+(cy+r*Math.sin(a)).toFixed(1));}return '<polygon class="'+cls+'" points="'+p.join(' ')+'"/>';}
+  function raverDev(){ if(R.dev!=null) return D.devices[R.dev]; return null; }
+  function raver(){
+    if(!$('etHwClimb')) return;
+    var lit=[1,2,3].filter(function(k){return R.lit[k];}).length;
+    $('etHwHint').textContent=D.rungs.length+' '+K('hintSteps','steps · tap one to light it');
+    climb();
+    var c=$('etHwCard'), r=R.rung!=null&&R.rung!=='also'?D.rungs[R.rung-1]:null, d=raverDev();
+    if(R.rung==null&&R.dev==null){
+      c.innerHTML='<span class="et-rk">'+D.rungs.length+'</span><div><b>'+esc(K('rCardH','height is price. lights are the gauges.'))+'</b><span>'+esc(K('rCardP','tap a step. filled lights are open, dashed ones are worth knowing.'))+'</span></div>';
+    } else if(r&&r.free){
+      c.innerHTML='<span class="et-rk">'+esc(r.price)+'</span><div><b>'+esc(r.rung)+'</b><span>'+esc(r.device+' · '+r.airgap)+'</span></div>';
+    } else if(d){
+      var devs=r?r.devs:[d.i];
+      c.innerHTML='<span class="et-rk">'+esc(d.price.replace(/\s.*$/,''))+'</span><div><b>'+esc(d.name)+'</b><span>'+esc((r?r.rung+' · ':'')+d.checks.filter(function(x){return x.ok;}).length+' '+K('open','open')+' · '+d.checks.filter(function(x){return !x.ok;}).length+' '+K('worth','worth knowing'))+'</span>'+d.checks.map(function(x){return '<span class="et-src">'+(x.ok?'● ':'○ ')+esc(x.t)+'</span>';}).join('')+
+        (devs.length>1?'<div class="et-hw-devs">'+devs.map(function(i){return '<button type="button" class="et-hw-chip" data-rdev="'+i+'" aria-pressed="'+(i===R.dev?'true':'false')+'">'+esc(D.devices[i].name)+'</button>';}).join('')+'</div>':'')+'</div>';
+    }
+    $('etHwAlso').innerHTML=D.also.map(function(i){return '<button type="button" class="et-hw-chip" data-rdev="'+i+'" data-also="1" aria-pressed="'+(R.rung==='also'&&R.dev===i?'true':'false')+'">'+esc(D.devices[i].name)+'</button>';}).join('');
+    $('etHwLeft').innerHTML=D.excluded.map(function(x,i){return '<button type="button" class="et-hw-chip et-dash" data-left="'+i+'" aria-pressed="'+(R.left===i?'true':'false')+'">'+esc(x.name)+'</button>';}).join('');
+    if(R.left!=null&&D.excluded[R.left]){var x=D.excluded[R.left];c.innerHTML='<span class="et-rk">×</span><div><b>'+esc(x.name)+'</b><span>'+esc(x.reason)+'</span><span class="et-src">'+esc(K('noLink','no store link, by law of this guide.'))+'</span></div>';}
+    var free=r&&r.free, pill=$('etHwPill'), wait=$('etHwPillWait');
+    $('etHwRite').hidden=!!free;
+    document.querySelectorAll('#etHwTiles button').forEach(function(b){b.setAttribute('aria-pressed',R.lit[b.getAttribute('data-t')]?'true':'false');});
+    $('etHwLit').textContent=lit+' '+K('ofThree','of 3 lit');
+    if(free){pill.href='../onboarding/';pill.removeAttribute('target');pill.removeAttribute('rel');pill.textContent=K('rCeremony','open the onboarding ceremony');pill.hidden=false;wait.hidden=true;}
+    else{
+      var ok=!!(d&&d.maker&&lit===3&&R.left==null);
+      pill.setAttribute('target','_blank');pill.setAttribute('rel','noopener noreferrer');
+      if(d&&d.maker){pill.href=d.maker.href;pill.textContent=K('rGo','go to')+' '+host(d.maker.href)+' ↗ '+K('newTab','(new\u00a0tab)');}
+      pill.hidden=!ok; wait.hidden=ok;
+      wait.textContent=!d||R.left!=null?K('rPick','tap a step first'):K('rLight','light all three rules');
+    }
+    $('etHwRaverSaid').textContent=R.said;
+    $('etHwStill').setAttribute('aria-pressed',R.still?'true':'false');
+    $('etHwStill').textContent=R.still?K('play','play the light'):K('still','pause the light');
+    document.querySelector('#eternal .et-r').classList.toggle('et-still-on',R.still);
+  }
+
+  /* ── CYPHERPUNK ── */
+  function cy(){
+    var tb=$('etHwLadder'); if(!tb) return;
+    var d=D.devices[C.dev]||null, r=d?rungOf(d.i):null, free=C.dev==='free';
+    var linked=D.devices.filter(function(x){return x.maker;}).length;
+    $('etHwPath').textContent='hw://guide/'+(free?'rung-1/your-phone':(d?d.name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,''):'ladder'));
+    $('etHwChips').innerHTML='<span class="et-on">rungs '+D.rungs.length+'</span><span>devices '+D.devices.length+'</span><span class="et-ok">maker links '+linked+'/'+D.devices.length+'</span><span>shelf links '+D.shelves.length+'</span><span class="et-no">excluded '+D.excluded.length+'</span>';
+    $('etHwHeld').textContent=D.excluded.length+' '+K('held','held out');
+    tb.innerHTML=D.rungs.map(function(x){var on=free?x.free:(r&&r.n===x.n);
+      return '<tr class="et-pick" tabindex="0" data-crung="'+x.n+'" aria-pressed="'+(on?'true':'false')+'"><td class="et-nw">'+esc(x.price)+'</td><td>'+esc(x.rung)+'<small>'+esc(x.device)+'</small></td><td>'+esc(x.airgap)+'</td></tr>';}).join('');
+    $('etHwDevTab').innerHTML=D.devices.map(function(x){var ok=x.checks.filter(function(c){return c.ok;}).length, no=x.checks.length-ok;
+      return '<tr class="et-pick" tabindex="0" data-cdev="'+x.i+'" aria-pressed="'+(x.i===C.dev?'true':'false')+'"><td>'+String(x.i+1).padStart(2,'0')+'</td><td>'+esc(x.name)+'<small>'+esc(x.price)+'</small></td><td class="et-st-ok">'+ok+'</td><td class="'+(no?'et-st-no':'et-st-dim')+'">'+no+'</td></tr>';}).join('');
+    var rule=function(n){return D.rules.filter(function(x){return x.n===n;})[0]||{head:'',text:''};};
+    var steps;
+    if(free){var r1=D.rungs.filter(function(x){return x.free;})[0]||{};
+      steps=[['rung · '+r1.price+' · '+r1.rung,r1.device+' · '+r1.airgap,'et-done'],['open · ../onboarding/','the estate’s own ceremony · same tab · nothing to order','et-now'],['floor · 24 words',rule(2).head+' '+rule(2).text,'et-guard']];
+    } else if(d){
+      steps=[['rung · '+(r?r.price+' · '+r.rung:d.tier),d.name+' · '+d.price,'et-done'],
+        ['order direct · '+(d.maker?host(d.maker.href):'no maker link'),rule(1).text,'et-now'],
+        ['verify on arrival',rule(3).head+' '+rule(3).text,'et-todo'],
+        ['floor · 24 words',rule(2).head+' '+rule(2).text,'et-guard'],
+        ['large holdings · 2-of-3',D.quorum,'et-todo']];
+    } else steps=[];
+    $('etHwPipeH').textContent=K('cyPipeH','order path ·')+' '+(free?'$0':(d?d.name:''));
+    $('etHwPipe').innerHTML=steps.map(function(s){return '<li class="'+s[2]+'"><b>'+esc(s[0])+'</b><div>'+esc(s[1])+'</div></li>';}).join('');
+    var go=free?'../onboarding/':(d&&d.maker?d.maker.href:null);
+    $('etHwCyGo').innerHTML=go?outLink(go,free?K('cyCeremony','open the onboarding ceremony →'):K('cyOrder','order direct →')+' '+host(go)+(ext(go)?' ↗':''),'et-c-primary','etHwCyOrder'):'<button type="button" class="et-c-primary" disabled>'+esc(K('cyNoMaker','no maker link on this panel'))+'</button>';
+    var yes=function(a){return a.length?'<span class="et-yes">'+esc(a.join(' · '))+'</span>':'<span class="et-no">'+esc(K('none','none listed'))+'</span>';};
+    $('etHwRcpt').innerHTML=free?[['rung','$0 · '+esc((D.rungs[0]||{}).rung||'')],['device',esc((D.rungs[0]||{}).device||'')],['air-gap',esc((D.rungs[0]||{}).airgap||'')],['maker','<span class="et-yes">this estate · ../onboarding/</span>']].map(function(x){return '<tr><th>'+x[0]+'</th><td>'+x[1]+'</td></tr>';}).join('')
+      :d?[['device',esc(d.name)],['price',esc(d.price)],['tier',esc(d.tier)],['open',yes(d.checks.filter(function(c){return c.ok;}).map(function(c){return c.t;}))],['note',d.checks.some(function(c){return !c.ok;})?'<span class="et-no">'+esc(d.checks.filter(function(c){return !c.ok;}).map(function(c){return c.t;}).join(' · '))+'</span>':'<span class="et-yes">'+esc(K('noneNoted','none noted on the panel'))+'</span>'],
+        ['maker',d.maker?'<a class="et-c-a" href="'+esc(d.maker.href)+'" target="_blank" rel="noopener noreferrer">'+esc(d.maker.href)+'</a>':'<span class="et-no">'+esc(K('noMaker','no maker link'))+'</span>'],
+        ['source',d.source?'<a class="et-c-a" href="'+esc(d.source.href)+'" target="_blank" rel="noopener noreferrer">'+esc(d.source.href)+'</a>':'<span class="et-no">'+esc(K('noSource','not linked on this panel'))+'</span>']].map(function(x){return '<tr><th>'+x[0]+'</th><td>'+x[1]+'</td></tr>';}).join(''):'';
+    $('etHwOutTab').innerHTML=D.excluded.map(function(x){return '<tr><th>'+esc(x.name)+'</th><td class="et-g">'+esc(x.reason)+'</td></tr>';}).join('');
+    $('etHwVerify').innerHTML=(free?[K('v0','open ../onboarding/ and read its own receipt; this rung buys nothing')]:[
+      K('v1','type the maker’s address yourself and compare:')+' '+(d&&d.maker?host(d.maker.href):''),
+      K('v2','read the firmware before you trust it:')+' '+(d&&d.source?d.source.href:K('noSource','not linked on this panel')),
+      K('v3','on first boot, confirm the firmware signature the maker documents')]).map(function(s){return '<li>'+esc(s)+'</li>';}).join('');
+    $('etHwCyRow').innerHTML=(d&&d.source&&!free?outLink(d.source.href,K('cySource','firmware source ↗'),'et-c-ghost'):'<a class="et-c-ghost" href="#etArchive">'+esc(K('cyAll','the whole guide ↓'))+'</a>')+
+      outLink('https://github.com/beehive-nature/beehive-nature/blob/main/surfaces/hardware/index.html',K('cyFork','fork the template ↗'),'et-c-ghost');
+  }
+
+  function keyedCopy(){document.querySelectorAll('#eternal [data-etk]').forEach(function(e){if(e.dataset.etEn==null)e.dataset.etEn=e.textContent;e.textContent=T(e.dataset.etk,e.dataset.etEn);});}
+  function all(){keyedCopy();bee();raver();cy();}
+
+  function pickRung(n){ /* one hand for the hash and the rows: the same rung in all three */
+    var r=D.rungs[n-1]; if(!r) return;
+    B.rung=n;B.dev=r.devs[0]!=null?r.devs[0]:null;B.ok=false;B.said='';
+    R.rung=n;R.dev=r.devs[0]!=null?r.devs[0]:null;R.left=null;
+    C.dev=r.free?'free':(r.devs[0]!=null?r.devs[0]:C.dev);
+  }
+  function wire(){
+    var ev=$('eternal'); if(!ev) return;
+    ev.addEventListener('click',function(e){
+      var t=e.target;
+      var go=t.closest('[data-go]'); if(go&&go.closest('.et-b')){beeStep(go.getAttribute('data-go'));if(B.step==='rules')beeRules();ev.scrollIntoView({block:'start'});return;}
+      var row=t.closest('.et-b-row[data-rung]'); if(row){var k=row.getAttribute('data-rung');if(k==='also'){B.rung='also';B.dev=D.also[0];B.ok=false;B.said='';}else pickRung(+k);beeRung();beeStep('rung');raver();cy();return;}
+      var it=t.closest('.et-b-item[data-dev]'); if(it){B.dev=+it.getAttribute('data-dev');B.ok=false;B.said='';beeRung();return;}
+      if(t.closest('#etHwOutBtn')){B.out=!B.out;bee();return;}
+      if(t.closest('#etHwGo')){var d=D.devices[B.dev];B.said=opened(d&&d.maker?host(d.maker.href):'');beeRules();return;}
+      var tr=t.closest('.et-tread'); if(tr){var n=+tr.getAttribute('data-rung');pickRung(n);raver();cy();return;}
+      var rd=t.closest('[data-rdev]'); if(rd){R.dev=+rd.getAttribute('data-rdev');R.left=null;if(rd.hasAttribute('data-also')){R.rung='also';}R.said='';C.dev=R.dev;raver();cy();return;}
+      var lf=t.closest('[data-left]'); if(lf){var i=+lf.getAttribute('data-left');R.left=R.left===i?null:i;raver();return;}
+      var tile=t.closest('#etHwTiles button'); if(tile){var q=tile.getAttribute('data-t');R.lit[q]=!R.lit[q];raver();return;}
+      if(t.closest('#etHwPill')){var dd=raverDev();if(dd&&dd.maker){R.said=opened(host(dd.maker.href));setTimeout(raver,0);}return;}
+      if(t.closest('#etHwStill')){R.still=!R.still;raver();return;}
+      var cr=t.closest('tr[data-crung]'); if(cr){pickRung(+cr.getAttribute('data-crung'));cy();return;}
+      var cd=t.closest('tr[data-cdev]'); if(cd){C.dev=+cd.getAttribute('data-cdev');cy();return;}
+    });
+    ev.addEventListener('keydown',function(e){
+      if(e.key!=='Enter'&&e.key!==' ')return;
+      var t=e.target.closest('.et-tread,tr[data-crung],tr[data-cdev]'); if(!t)return;
+      e.preventDefault(); t.dispatchEvent(new MouseEvent('click',{bubbles:true}));
+    });
+    $('etHwOk').addEventListener('change',function(){B.ok=this.checked;B.said='';beeRules();});
+    document.addEventListener('blang',all);
+  }
+
+  readPage(); wire(); all();
+  var m=/^#rung-(\d+)$/.exec(location.hash||''); if(m&&D.rungs[+m[1]-1]){pickRung(+m[1]);beeRung();beeStep('rung');raver();cy();}
+  window.__eternal={data:D,bee:B,raver:R,cy:C};
+})();
+</script>
+<script src="../tour.js?v=42"></script>
 </body></html>

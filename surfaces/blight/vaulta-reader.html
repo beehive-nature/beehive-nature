@@ -69,15 +69,313 @@
   body:not([data-reg="cypherpunk"]) .note,body:not([data-reg="cypherpunk"]) .presets,
   body:not([data-reg="cypherpunk"]) label{font-size:14px}
 </style>
+<style>
+/* ── ETERNAL FRONT (docs/design/eternal) — three products in one surface. Every value is a skaists
+   token (../skaists.css, compiled from docs/design/skaists/tokens.json): no hand-picked hex, size or
+   corner. Measured by e2e/skaists-conformance.mjs. One register visible at a time; new bee is the
+   default. Every class is et- prefixed and every control is reset here, so the page's own bare
+   rules (button, input, h1, section) never reach in. ── */
+#eternal{box-sizing:border-box;width:100%;max-width:600px;margin:0 auto var(--sk-s2);padding:var(--sk-s2) 0 0;text-align:left;letter-spacing:normal;text-transform:none;line-height:1.45;background:none;border:0;border-radius:0}
+#eternal *,#eternal *::before,#eternal *::after{box-sizing:border-box;text-transform:none}
+#eternal>.et-r,#eternal>.et-c{display:none}
+body[data-reg="raver"] #eternal>.et-b,body[data-reg="cypherpunk"] #eternal>.et-b{display:none}
+body[data-reg="raver"] #eternal>.et-r{display:block}
+body[data-reg="cypherpunk"] #eternal>.et-c{display:block}
+#eternal [hidden]{display:none!important}
+#eternal button{margin:0;padding:0;border:0;border-radius:0;background:none;color:inherit;font:inherit;letter-spacing:normal;min-width:0;box-shadow:none;cursor:pointer;text-align:center}
+#eternal button:disabled{cursor:not-allowed}
+#eternal input,#eternal select{margin:0;min-width:0;letter-spacing:normal;box-shadow:none}
+#eternal svg,#eternal canvas,#eternal img{display:block;max-width:100%}
+#eternal a{text-decoration:none}
+#eternal :focus-visible{outline:2px solid var(--sk-focus);outline-offset:3px}
+#eternal h2,#eternal h3,#eternal p,#eternal ol,#eternal ul,#eternal table,#eternal figure,#eternal label{margin:0;padding:0;border:0;background:none;letter-spacing:normal;text-shadow:none}
+#eternal h2,#eternal h3{-webkit-text-fill-color:currentColor;background-image:none}
+#eternal table{border-collapse:separate;border-spacing:0}
+#eternal th,#eternal td{border:0;padding:0;vertical-align:top;max-width:none;overflow:visible;white-space:normal;text-overflow:clip}
+#eternal code{background:none;padding:0;border:0}
+#etArchive.et-archive-h{margin:var(--sk-s5) 0 var(--sk-s2);padding:var(--sk-s4) 0 0;border:0;border-top:1px solid var(--sk-line);color:var(--sk-ink);text-transform:none;letter-spacing:normal;background:none;-webkit-text-fill-color:currentColor;text-shadow:none}
+body[data-reg="bee"] #etArchive.et-archive-h{font:400 28px/1.1 var(--sk-font-bee-serif)}
+body[data-reg="raver"] #etArchive.et-archive-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em}
+body[data-reg="cypherpunk"] #etArchive.et-archive-h{font:600 15px/1.45 var(--sk-font-mono)}
+
+/* NEW BEE — a calm room: plain rows, one reassurance, one magenta action, a link, a footnote */
+#eternal .et-b{display:flex;flex-direction:column;gap:var(--sk-s3);color:var(--sk-ink);font:400 16px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-b-mark{font:400 18px/1.2 var(--sk-font-house);color:var(--sk-sovereign)}
+#eternal .et-b-h{font:400 40px/1.05 var(--sk-font-bee-serif);color:var(--sk-ink)}
+#eternal .et-b-lede{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink-mut);text-wrap:pretty}
+#eternal .et-b-guard{display:flex;align-items:center;gap:var(--sk-s2);min-height:var(--sk-control-min,44px);padding:var(--sk-s1) var(--sk-s3);border-radius:var(--sk-radius);background:var(--sk-guard-wash);color:var(--sk-guard);font:600 15px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-ic{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+#eternal .et-b-rows{display:flex;flex-direction:column;background:var(--sk-bg-card);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl);overflow:hidden}
+#eternal .et-b-row{display:flex;align-items:center;justify-content:space-between;gap:var(--sk-s2);width:100%;min-height:var(--sk-control-row,52px);padding:var(--sk-s1) var(--sk-s3);border:0;border-bottom:1px solid var(--sk-line-soft);border-radius:0;background:var(--sk-bg-card);text-align:left;font:500 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+#eternal .et-b-row:last-child{border-bottom:0}
+#eternal .et-b-row>span{flex:1 1 auto}
+#eternal .et-b-row small{display:flex;align-items:center;gap:var(--sk-s1);flex:none;max-width:55%;text-align:right;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-row small.et-ok{color:var(--sk-verified)}
+#eternal .et-b-row small.et-out{color:var(--sk-guard)}
+#eternal .et-b-row[aria-expanded="true"]{background:var(--sk-sovereign-tint);color:var(--sk-sovereign-strong);font-weight:600}
+#eternal .et-b-row[aria-expanded="true"] small{color:var(--sk-sovereign-strong)}
+#eternal .et-chev{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;flex:none;transition:transform var(--dur,.26s)}
+#eternal .et-b-row[aria-expanded="true"] .et-chev{transform:rotate(90deg)}
+#eternal .et-b-open{padding:var(--sk-s2) var(--sk-s3);background:var(--sk-sovereign-tint);border-bottom:1px solid var(--sk-line-soft);font:400 15px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+#eternal .et-b-person{display:flex;align-items:center;gap:var(--sk-s2);min-height:var(--sk-control-person,60px);padding:var(--sk-s1) var(--sk-s3);border-bottom:1px solid var(--sk-line-soft);background:var(--sk-bg-card)}
+#eternal .et-b-person:last-child{border-bottom:0}
+#eternal .et-b-person i{width:40px;height:40px;border-radius:var(--sk-radius-pill);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong);display:flex;align-items:center;justify-content:center;font:600 14px/1.4 var(--sk-font-bee-sans);font-style:normal;flex:none}
+#eternal .et-b-person i.et-ok{background:var(--sk-verified-wash);color:var(--sk-verified)}
+#eternal .et-b-person i.et-dash{background:var(--sk-bg-card);border:1.5px dashed var(--sk-ink-dim);color:var(--sk-ink-mut)}
+#eternal .et-b-person b{display:block;font:500 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink);overflow-wrap:anywhere}
+#eternal .et-b-person span{display:block;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut);overflow-wrap:anywhere}
+#eternal .et-b-act{display:flex;flex-direction:column;gap:var(--sk-s1);margin-top:var(--sk-s1)}
+#eternal .et-b-primary{display:flex;align-items:center;justify-content:center;width:100%;min-height:var(--sk-control-primary,54px);padding:0 var(--sk-s3);border:0;border-radius:var(--sk-radius-lg);background:var(--sk-primary);color:var(--sk-on-primary);font:600 17px/1.2 var(--sk-font-bee-sans);text-align:center;cursor:pointer}
+#eternal .et-b-primary:disabled{background:var(--sk-bg-well);color:var(--sk-ink-mut)}
+#eternal .et-b-link{display:flex;align-items:center;justify-content:center;min-height:var(--sk-control-min,44px);padding:0 var(--sk-s2);border:0;background:none;font:600 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-link);cursor:pointer;text-align:center}
+#eternal .et-b-link:hover{color:var(--sk-link-hover)}
+#eternal .et-b-foot{text-align:center;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-card{display:flex;flex-direction:column;gap:var(--sk-s1);padding:var(--sk-s3);background:var(--sk-bg-card);border:1px dashed var(--sk-ink-dim);border-radius:var(--sk-radius-xl)}
+#eternal .et-b-card.et-ok{border:1px solid var(--sk-line);background:var(--sk-verified-wash)}
+#eternal .et-b-card.et-guard{border:1px dashed var(--sk-guard);background:var(--sk-guard-wash)}
+#eternal .et-b-card h3{font:400 28px/1.1 var(--sk-font-bee-serif);color:var(--sk-ink)}
+#eternal .et-b-card.et-guard h3,#eternal .et-b-card.et-guard p{color:var(--sk-guard)}
+#eternal .et-b-card p{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-field{display:flex;flex-direction:column;gap:var(--sk-s1)}
+#eternal .et-b-field>span{font:600 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-input{width:100%;height:var(--sk-control-primary,54px);padding:0 var(--sk-s3);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius-md);background:var(--sk-bg-card);color:var(--sk-ink);font:400 15px/1.4 var(--sk-font-mono);outline-offset:3px}
+
+/* RAVER — the data is the art; lowercase is allowed joy; the numbers never change */
+#eternal .et-r{color:var(--sk-ink);font:400 14px/1.4 var(--sk-font-raver-body)}
+#eternal .et-r-top{display:flex;align-items:baseline;justify-content:space-between;gap:var(--sk-s2);flex-wrap:wrap}
+#eternal .et-r-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em;color:var(--sk-ink)}
+#eternal .et-r-hint{font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-art{position:relative;width:100%;max-width:360px;margin:var(--sk-s3) auto var(--sk-s2)}
+#eternal .et-r-art>svg{width:100%;height:auto;filter:drop-shadow(var(--sk-glow-sovereign))}
+#eternal .et-r-art [role="button"]{cursor:pointer}
+#eternal .et-r-art [role="button"]:focus{outline:none}
+#eternal .et-r-art [role="button"]:focus-visible .et-hit{stroke:var(--sk-ink);stroke-width:2}
+#eternal .et-r-mid{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;text-align:center;pointer-events:none;max-width:42%}
+#eternal .et-r-mid b{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em;color:var(--sk-ink)}
+#eternal .et-r-mid span{font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-legend{display:flex;flex-wrap:wrap;justify-content:center;gap:var(--sk-s1) var(--sk-s3);margin:0 0 var(--sk-s3)}
+#eternal .et-r-legend span{display:inline-flex;align-items:center;gap:var(--sk-s1);font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-legend i{width:14px;height:14px;border-radius:var(--sk-radius-pill);flex:none}
+#eternal .et-r-card{display:flex;gap:var(--sk-s2);align-items:flex-start;padding:var(--sk-s2) var(--sk-s3);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl);background:var(--sk-sovereign-tint);min-height:var(--sk-control-person,60px)}
+#eternal .et-r-card .et-rk{min-width:44px;height:44px;padding:0 var(--sk-s1);border-radius:var(--sk-radius);background:var(--sk-sovereign-strong);color:var(--sk-bg);display:flex;align-items:center;justify-content:center;font:700 15px/1.2 var(--sk-font-raver-display);flex:none}
+#eternal .et-r-card b{display:block;font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink);overflow-wrap:anywhere}
+#eternal .et-r-card span{display:block;margin-top:var(--sk-s1);font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft);overflow-wrap:anywhere}
+#eternal .et-r-sub{margin:var(--sk-s4) 0 var(--sk-s2);font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em;color:var(--sk-ink)}
+#eternal .et-r-tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:var(--sk-s2)}
+#eternal .et-r-tile{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--sk-s1);min-height:96px;padding:var(--sk-s2) var(--sk-s1);border-radius:var(--sk-radius-xl);border:1.5px solid var(--sk-sovereign);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong);font:600 14px/1.25 var(--sk-font-raver-body);text-align:center;cursor:pointer;transition:border-color var(--dur,.26s),box-shadow var(--dur,.26s)}
+#eternal .et-r-tile.et-dash{border-style:dashed;border-color:var(--sk-ink-dim);background:var(--sk-bg-card);color:var(--sk-ink-soft)}
+#eternal .et-r-tile.et-on{border-color:var(--sk-verified);box-shadow:var(--sk-glow-ok);color:var(--sk-ink)}
+#eternal .et-r-tile[aria-pressed="true"]{border-color:var(--sk-you);box-shadow:var(--sk-glow-sovereign);color:var(--sk-ink)}
+#eternal .et-r-tile svg{width:26px;height:26px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+#eternal .et-r-tile small{font:400 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-note{margin:var(--sk-s2) 0 0;text-align:center;font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-pill{display:flex;align-items:center;justify-content:center;width:100%;min-height:58px;margin-top:var(--sk-s4);padding:0 var(--sk-s3);border:0;border-radius:var(--sk-radius-pill);background:var(--sk-primary);color:var(--sk-on-primary);font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em;text-align:center;cursor:pointer}
+#eternal .et-r-pill:disabled{background:var(--sk-sovereign-wash);color:var(--sk-sovereign-soft)}
+#eternal .et-r-ghost{display:flex;align-items:center;justify-content:center;margin:var(--sk-s2) auto 0;min-height:var(--sk-control-min,44px);padding:0 var(--sk-s2);border:0;background:none;color:var(--sk-link);font:600 14px/1.25 var(--sk-font-raver-body);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+#eternal .et-r-input{width:100%;height:var(--sk-control-primary,54px);margin-top:var(--sk-s3);padding:0 var(--sk-s3);border:1.5px solid var(--sk-sovereign-soft);border-radius:var(--sk-radius-pill);background:var(--sk-bg-card);color:var(--sk-ink);font:400 14px/1.4 var(--sk-font-raver-body)}
+#eternal .et-r-hold{position:relative;width:176px;height:176px;margin:var(--sk-s3) auto 0}
+#eternal .et-r-hold>svg{position:absolute;inset:0;width:100%;height:100%;transform:rotate(-90deg);pointer-events:none}
+#eternal .et-r-hold .et-track{fill:none;stroke:var(--sk-line);stroke-width:8}
+#eternal .et-r-hold .et-prog{fill:none;stroke:var(--sk-biomass);stroke-width:8;stroke-linecap:round;stroke-dasharray:578;stroke-dashoffset:578}
+#eternal .et-r-hold>button{position:absolute;inset:20px;border:0;background:var(--sk-primary);color:var(--sk-on-primary);clip-path:polygon(50% 0,93% 25%,93% 75%,50% 100%,7% 75%,7% 25%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--sk-s1);cursor:pointer;touch-action:none;user-select:none;-webkit-user-select:none}
+#eternal .et-r-hold>button b{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em}
+#eternal .et-r-hold>button span{font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em}
+#eternal .et-r-hold>button:disabled{background:var(--sk-sovereign-wash);color:var(--sk-sovereign-soft)}
+@media (prefers-reduced-motion:reduce){#eternal *{transition:none!important;animation:none!important}}
+
+/* CYPHERPUNK — the instrument, complete at first paint: tables, a numbered pipeline, receipts */
+#eternal .et-c{font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink);overflow-wrap:anywhere}
+#eternal .et-c-path{font:600 15px/1.45 var(--sk-font-mono);color:var(--sk-ink);word-break:break-all}
+#eternal .et-c-sub{margin-top:var(--sk-s1);font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut)}
+#eternal .et-c-chips{display:flex;flex-wrap:wrap;gap:var(--sk-s1);margin:var(--sk-s2) 0}
+#eternal .et-c-chips span{padding:2px var(--sk-s1);border:1px solid var(--sk-line);border-radius:4px;background:var(--sk-bg-card);font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-soft)}
+#eternal .et-c-chips span.et-on{border-color:var(--sk-guard);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong)}
+#eternal .et-c-chips span.et-ok{border-color:var(--sk-verified);color:var(--sk-verified)}
+#eternal .et-c-chips span.et-no{border-color:var(--sk-info);color:var(--sk-info)}
+#eternal .et-c-guard{display:flex;justify-content:space-between;align-items:center;gap:var(--sk-s2);flex-wrap:wrap;min-height:var(--sk-control-min,44px);padding:var(--sk-s1) var(--sk-s3);border:1px dashed var(--sk-guard);border-radius:var(--sk-radius-sm);background:var(--sk-guard-wash);color:var(--sk-guard)}
+#eternal .et-c-guard b{font-weight:600;color:var(--sk-sovereign-strong)}
+#eternal .et-c-h{margin:var(--sk-s4) 0 var(--sk-s2);font:600 15px/1.45 var(--sk-font-mono);color:var(--sk-ink)}
+#eternal .et-c-tab{width:100%;margin:var(--sk-s2) 0 var(--sk-s1);border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm);overflow:hidden;background:var(--sk-bg-card);table-layout:auto}
+#eternal .et-c-tab th{padding:var(--sk-s1) var(--sk-s2);text-align:left;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);border-bottom:1px solid var(--sk-line);background:var(--sk-bg-well)}
+#eternal .et-c-tab td{height:var(--sk-control-min,44px);padding:var(--sk-s1) var(--sk-s2);border-bottom:1px solid var(--sk-line);font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink);vertical-align:middle;word-break:break-word}
+#eternal .et-c-tab tr:last-child td{border-bottom:0}
+#eternal .et-c-tab td:first-child,#eternal .et-c-tab th:first-child{white-space:nowrap;width:1%;color:var(--sk-guard)}
+#eternal .et-c-tab th:first-child{color:var(--sk-ink-mut)}
+#eternal .et-c-tab small{display:block;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut)}
+#eternal .et-c-tab .et-nw{white-space:nowrap}
+#eternal .et-c-tab tr.et-pick{cursor:pointer}
+#eternal .et-c-tab tr.et-pick:hover td{background:var(--sk-sovereign-tint)}
+#eternal .et-c-tab tr.et-sel td{background:var(--sk-sovereign-tint)}
+#eternal .et-st-ok{color:var(--sk-verified)}
+#eternal .et-st-no{color:var(--sk-info)}
+#eternal .et-st-wait{color:var(--sk-ai)}
+#eternal .et-st-guard{color:var(--sk-guard)}
+#eternal .et-c-pipe{list-style:none;margin:0;padding:0;display:grid;gap:var(--sk-s2);counter-reset:etp}
+#eternal .et-c-pipe li{display:grid;grid-template-columns:28px 1fr;gap:var(--sk-s1) var(--sk-s2);padding:var(--sk-s2) var(--sk-s3);border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm);background:var(--sk-bg-card);counter-increment:etp}
+#eternal .et-c-pipe li::before{content:counter(etp,decimal-leading-zero);color:var(--sk-guard);font-weight:600}
+#eternal .et-c-pipe li b{font-weight:600;color:var(--sk-ink)}
+#eternal .et-c-pipe li p{grid-column:2;color:var(--sk-ink-soft)}
+#eternal .et-c-pipe li.et-done b{color:var(--sk-verified)}
+#eternal .et-c-pipe li.et-guard{border-style:dashed;border-color:var(--sk-guard)}
+#eternal .et-c-pipe li.et-guard b{color:var(--sk-guard)}
+#eternal .et-c-pipe li.et-now{border-color:var(--sk-ai);box-shadow:inset 0 0 0 1px var(--sk-ai)}
+#eternal .et-c-pipe li.et-now b{color:var(--sk-ai)}
+#eternal .et-c-pipe li.et-todo p{color:var(--sk-ink-mut)}
+#eternal .et-c-primary{display:flex;align-items:center;justify-content:center;width:100%;min-height:52px;margin-top:var(--sk-s3);padding:0 var(--sk-s2);border:0;border-radius:var(--sk-radius-sm);background:var(--sk-primary);color:var(--sk-on-primary);font:600 14px/1.2 var(--sk-font-mono);text-align:center;cursor:pointer}
+#eternal .et-c-primary:disabled{background:var(--sk-bg-well);color:var(--sk-ink-mut);border:1px dashed var(--sk-line)}
+#eternal .et-c-kv{width:100%;border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm);overflow:hidden;background:var(--sk-bg-card)}
+#eternal .et-c-kv th{width:104px;padding:var(--sk-s2);text-align:left;vertical-align:top;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);border-bottom:1px solid var(--sk-line);background:var(--sk-bg-card)}
+#eternal .et-c-kv td{padding:var(--sk-s2);border-bottom:1px solid var(--sk-line);font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink);word-break:break-word}
+#eternal .et-c-kv tr:last-child th,#eternal .et-c-kv tr:last-child td{border-bottom:0}
+#eternal .et-c-verify{margin-top:var(--sk-s3);padding:var(--sk-s3);border-radius:var(--sk-radius-sm);background:var(--sk-bg-card);border:1px solid var(--sk-line)}
+#eternal .et-c-verify-h{font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);margin-bottom:var(--sk-s1)}
+#eternal .et-c-verify ol{margin:0;padding-left:var(--sk-s4);display:grid;gap:var(--sk-s1)}
+#eternal .et-c-verify code{font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ai);word-break:break-all}
+#eternal .et-c-out{margin-top:var(--sk-s2);font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink-soft)}
+#eternal .et-c-row{display:grid;grid-template-columns:1fr 1fr;gap:var(--sk-s2);margin-top:var(--sk-s3)}
+#eternal .et-c-ghost{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:52px;padding:var(--sk-s1);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius-sm);background:none;color:var(--sk-ink);text-align:center;font:600 14px/1.2 var(--sk-font-mono);cursor:pointer}
+#eternal .et-c-ghost small{font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut)}
+#eternal .et-c-in{display:flex;gap:var(--sk-s1);margin-top:var(--sk-s2)}
+#eternal .et-c-input{flex:1 1 auto;width:100%;height:var(--sk-control-min,44px);padding:0 var(--sk-s2);border:1px solid var(--sk-ink-mut);border-radius:var(--sk-radius-sm);background:var(--sk-bg-card);color:var(--sk-ink);font:400 13px/1.45 var(--sk-font-mono)}
+#eternal .et-c-btn{flex:none;min-width:var(--sk-control-min,44px);min-height:var(--sk-control-min,44px);padding:0 var(--sk-s2);border:1.5px solid var(--sk-ai);border-radius:var(--sk-radius-sm);background:none;color:var(--sk-ai);font:600 14px/1.2 var(--sk-font-mono)}
+#eternal .et-c-a{display:inline-flex;align-items:center;min-height:var(--sk-control-min,44px);min-width:var(--sk-control-min,44px);color:var(--sk-link)}
+#eternal .et-c-a:hover{color:var(--sk-link-hover)}
+
+/* the fleet bar and the hub chip (shared, untouched) worn in this page's register */
+body[data-reg] #fleet-nav{border-top-color:var(--sk-line)!important;color:var(--sk-ink-soft)!important}
+body[data-reg] #fleet-nav a{color:var(--sk-ink-soft)!important;border-color:var(--sk-line)!important;background:transparent!important}
+body[data-reg] #fleet-nav a.here{color:var(--sk-link)!important;border-color:var(--sk-link)!important}
+body[data-reg] #fleet-nav a:hover{color:var(--sk-link-hover)!important;border-color:var(--sk-link-hover)!important}
+body[data-reg="bee"] #fleet-nav,body[data-reg="bee"] #fleet-nav a{font:500 14px/1.4 var(--sk-font-bee-sans)!important}
+body[data-reg="raver"] #fleet-nav,body[data-reg="raver"] #fleet-nav a{font:600 14px/1.25 var(--sk-font-raver-body)!important}
+body[data-reg="cypherpunk"] #fleet-nav,body[data-reg="cypherpunk"] #fleet-nav a{font:500 13px/1.45 var(--sk-font-mono)!important}
+body[data-reg] #bnr-beta-badge{opacity:1!important}
+body[data-reg] #bnr-beta-badge a{background:var(--sk-bg-card)!important;color:var(--sk-link)!important;border-color:var(--sk-line)!important;display:inline-flex;align-items:center;min-height:44px;padding:0 16px!important}
+body[data-reg="bee"] #bnr-beta-badge{font:600 14px/1.4 var(--sk-font-bee-sans)!important}
+body[data-reg="raver"] #bnr-beta-badge{font:600 14px/1.25 var(--sk-font-raver-body)!important}
+body[data-reg="cypherpunk"] #bnr-beta-badge{font:500 12px/1.45 var(--sk-font-mono)!important}
+body[data-reg="cypherpunk"] #bnr-beta-badge a{border-radius:var(--sk-radius-sm)!important}
+/* vaulta reader specifics: the constellation of rows, the ladder rim, the hold pill, the request form */
+#eternal .et-r-art .et-star{transition:opacity var(--dur,.26s)}
+#eternal .et-hold{position:relative;overflow:hidden;touch-action:none;user-select:none;-webkit-user-select:none}
+#eternal .et-hold>.et-fill{position:absolute;left:0;top:0;bottom:0;width:0;background:var(--sk-sovereign-strong);opacity:.55;pointer-events:none}
+#eternal .et-hold>.et-lab{position:relative}
+#eternal .et-c-form{display:grid;grid-template-columns:1fr 1fr;gap:var(--sk-s1) var(--sk-s2);margin-top:var(--sk-s3)}
+#eternal .et-c-f{display:flex;flex-direction:column;gap:2px}
+#eternal .et-c-f>span{font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut)}
+#eternal .et-c-form .et-c-primary{grid-column:1/-1;margin-top:var(--sk-s1)}
+
+/* ── THE WHOLE READER, dressed per register: the page's own variables mapped onto skaists tokens.
+   The words, the request and the live read are unchanged; a failure keeps its own words. ── */
+body[data-reg]{--bg:var(--sk-bg);--panel:var(--sk-bg-card);--line:var(--sk-line);--ink:var(--sk-ink);--dim:var(--sk-ink-mut);--accent:var(--sk-sovereign);--accent2:var(--sk-sovereign);--ok:var(--sk-verified);--bad:var(--sk-info);--cyan:var(--sk-ai);background:var(--sk-bg);color:var(--sk-ink)}
+body[data-reg] .panel{background:var(--sk-bg-card);border-color:var(--sk-line);border-radius:var(--sk-radius-xl)}
+body[data-reg] .grid4 label{display:flex;align-items:flex-end;min-height:44px;margin:0}
+body[data-reg] input:not(#eternal *),body[data-reg] select:not(#eternal *){background:var(--sk-bg-card);color:var(--sk-ink);border:1px solid var(--sk-ink-mut);border-radius:var(--sk-radius-md)}
+body[data-reg] button:not(#eternal *){background:var(--sk-bg-card);color:var(--sk-ai);border:1.5px solid var(--sk-ai);border-radius:var(--sk-radius-pill)}
+body[data-reg] pre.raw{background:var(--sk-bg-well);color:var(--sk-ink-soft);border-radius:var(--sk-radius)}
+body[data-reg] .warn{color:var(--sk-guard)}
+body[data-reg] .ok{color:var(--sk-verified)}
+body[data-reg] .bad{color:var(--sk-info)}
+body[data-reg] .cy,body[data-reg] .presets a{color:var(--sk-link)}
+body[data-reg] h1 span{color:var(--sk-sovereign)}
+body[data-reg] code{color:var(--sk-ai)}
+body[data-reg="bee"]{font:400 16px/1.6 var(--sk-font-bee-sans)}
+body[data-reg="bee"] h1{font:400 40px/1.05 var(--sk-font-bee-serif);letter-spacing:normal;margin:0 0 .35em}
+body[data-reg="bee"] .lede{font:400 16px/1.6 var(--sk-font-bee-sans);color:var(--sk-ink-soft)}
+body[data-reg="bee"] .note,body[data-reg="bee"] label,body[data-reg="bee"] .presets{font:400 15px/1.55 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+body[data-reg="bee"] table{font:400 14px/1.5 var(--sk-font-mono)}
+body[data-reg="bee"] button:not(#eternal *){font:600 16px/1.2 var(--sk-font-bee-sans);color:var(--sk-sovereign);border-color:var(--sk-ink)}
+body[data-reg="raver"]{font:400 14px/1.6 var(--sk-font-raver-body)}
+body[data-reg="raver"] h1{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em}
+body[data-reg="raver"] h1 span{color:var(--sk-you)}
+body[data-reg="raver"] .lede,body[data-reg="raver"] .note,body[data-reg="raver"] label,body[data-reg="raver"] .presets,body[data-reg="raver"] table{font-family:var(--sk-font-raver-body);font-size:14px;color:var(--sk-ink-soft)}
+body[data-reg="raver"] button:not(#eternal *){font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em;color:var(--sk-on-primary);background:var(--sk-primary);border-color:var(--sk-primary)}
+body[data-reg="cypherpunk"]{font:400 13px/1.6 var(--sk-font-mono)}
+body[data-reg="cypherpunk"] h1{font:600 15px/1.45 var(--sk-font-mono);letter-spacing:normal}
+body[data-reg="cypherpunk"] .lede{font-size:13px;color:var(--sk-ink-soft)}
+body[data-reg="cypherpunk"] .panel,body[data-reg="cypherpunk"] pre.raw{border-radius:var(--sk-radius-sm)}
+body[data-reg="cypherpunk"] input:not(#eternal *),body[data-reg="cypherpunk"] select:not(#eternal *),body[data-reg="cypherpunk"] button:not(#eternal *){border-radius:var(--sk-radius-sm);font-family:var(--sk-font-mono)}
+</style>
+<link rel="stylesheet" href="../skaists.css">
 </head>
 <body><div class="wrap">
+<!-- ETERNAL FRONT (founder blueprint 2026-09-26, docs/design/eternal): three separate products in one
+     surface. ONE data layer (the page's own read, published by read() as window.__vaultaRead, plus
+     its own constants: the endpoint ladder VAPI and the scope encoder u64ToName) drives all three,
+     so the facts cannot drift. No front fetches anything: every "read" hands the request to the
+     reader below (its own inputs and its own read button). A failed read is said, never drawn. -->
+<section id="eternal" aria-label="the vaulta reader">
+
+  <!-- NEW BEE — a calm room: one list, what came back, one way to ask again -->
+  <div class="et-b">
+    <div class="et-b-mark">bLighT vaulta reader</div>
+    <h2 class="et-b-h" data-etk="et.vaulta.beeH">the .b names, straight from the source</h2>
+    <p class="et-b-lede" data-etk="et.vaulta.beeLede">every .b name is written in a public list on the Vaulta network. this page opens that list for you, fresh, each time you ask.</p>
+    <div class="et-b-guard"><svg class="et-ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span data-etk="et.vaulta.beeGuard">no account, no key. a list that can't be reached is never filled in.</span></div>
+    <div class="et-b-card" id="etVaBState" aria-live="polite"></div>
+    <div class="et-b-rows" id="etVaBNames" hidden></div>
+    <div class="et-b-rows" id="etVaBAsk"></div>
+    <div class="et-b-act">
+      <button type="button" class="et-b-primary" id="etVaBGo" data-etk="et.vaulta.beeGo">open the list again</button>
+      <button type="button" class="et-b-link" id="etVaBOther" data-etk="et.vaulta.beeOther">read a different list</button>
+      <p class="et-b-foot" data-etk="et.vaulta.beeFoot">nothing is saved. every read is fresh.</p>
+    </div>
+  </div>
+
+  <!-- RAVER — the table is a constellation: one star per row, the ladder of doors as the rim; hold to read -->
+  <div class="et-r">
+    <div class="et-r-top"><h2 class="et-r-h" id="etVaRH">the list</h2><span class="et-r-hint" id="etVaRHint"></span></div>
+    <div class="et-r-art">
+      <svg id="etVaSky" viewBox="-200 -200 400 400" role="group" aria-label="the rows as stars, the public doors as the rim"></svg>
+      <div class="et-r-mid" aria-hidden="true"><b id="etVaMid"></b><span id="etVaMidS"></span></div>
+    </div>
+    <div class="et-r-legend" id="etVaLegend"></div>
+    <div class="et-r-card" id="etVaRCard" aria-live="polite"></div>
+    <button type="button" class="et-r-pill et-hold" id="etVaRHold" aria-describedby="etVaRSay"><span class="et-fill" id="etVaRFill"></span><span class="et-lab" data-etk="et.vaulta.raverHold">hold to read the list</span></button>
+    <p class="et-r-note" id="etVaRSay"></p>
+  </div>
+
+  <!-- CYPHERPUNK — the instrument: the request, the ladder, the rows, the receipt, verify it yourself -->
+  <div class="et-c">
+    <div class="et-c-path" id="etVaPath">vaulta://</div>
+    <div class="et-c-sub" data-etk="et.vaulta.cySub">get_table_rows · public · keyless · no server of ours · nothing cached</div>
+    <div class="et-c-chips" id="etVaChips"></div>
+    <div class="et-c-guard"><span data-etk="et.vaulta.cyGuard">empty table ≡ missing table in this API</span><b data-etk="et.vaulta.cyGuardB">0 rows is never proof of absence</b></div>
+    <form class="et-c-form" id="etVaForm">
+      <div class="et-c-f"><span id="etVaFCode">code</span><input class="et-c-input" id="etVaCode" aria-labelledby="etVaFCode" spellcheck="false" autocomplete="off"></div>
+      <div class="et-c-f"><span id="etVaFScope">scope</span><input class="et-c-input" id="etVaScope" aria-labelledby="etVaFScope" spellcheck="false" autocomplete="off"></div>
+      <div class="et-c-f"><span id="etVaFTable">table</span><input class="et-c-input" id="etVaTable" aria-labelledby="etVaFTable" spellcheck="false" autocomplete="off"></div>
+      <div class="et-c-f"><span id="etVaFLimit">limit · per page</span><input class="et-c-input" id="etVaLimit" aria-labelledby="etVaFLimit" type="number" min="1" max="100" inputmode="numeric"></div>
+      <button type="submit" class="et-c-primary" id="etVaCyGo">POST /v1/chain/get_table_rows</button>
+    </form>
+    <h3 class="et-c-h" data-etk="et.vaulta.cyRowsH">rows · this read</h3>
+    <table class="et-c-tab"><thead><tr><th>#</th><th id="etVaCol1">row</th><th id="etVaCol2">fields</th></tr></thead><tbody id="etVaRows"></tbody></table>
+    <h3 class="et-c-h" data-etk="et.vaulta.cyHostsH">the ladder · rotated on failure</h3>
+    <table class="et-c-tab"><thead><tr><th>#</th><th>host</th><th>this read</th></tr></thead><tbody id="etVaHosts"></tbody></table>
+    <h3 class="et-c-h" data-etk="et.vaulta.cyPipeH">read pipeline</h3>
+    <ol class="et-c-pipe" id="etVaPipe"></ol>
+    <h3 class="et-c-h" data-etk="et.vaulta.cyRcptH">receipt · last read</h3>
+    <table class="et-c-kv" id="etVaReceipt"></table>
+    <div class="et-c-verify">
+      <div class="et-c-verify-h" data-etk="et.vaulta.verifyH">verify · no trust in this page needed</div>
+      <ol id="etVaVerify"></ol>
+      <button type="button" class="et-c-ghost" id="etVaCtl" style="margin-top:var(--sk-s2);width:100%" data-etk="et.vaulta.cyCtl">run the scope control here · no network</button>
+      <div class="et-c-out" id="etVaCtlOut" aria-live="polite"></div>
+    </div>
+    <div class="et-c-row">
+      <a class="et-c-ghost" href="#etArchive" id="etVaRaw" data-etk="et.vaulta.cyRaw">the reader below ↓</a>
+      <a class="et-c-ghost" href="https://github.com/beehive-nature/beehive-nature/blob/main/surfaces/blight/vaulta-reader.html" target="_blank" rel="noopener noreferrer"><span data-etk="et.vaulta.cyFork">fork the template ↗</span><small data-etk="et.vaulta.newTab">opens in a new tab</small></a>
+    </div>
+  </div>
+</section>
+<h2 class="et-archive-h" id="etArchive" data-etk="et.vaulta.archive">the whole reader</h2>
 
 <h1>bLighT <span>Vaulta Reader</span></h1>
 <div class="lede">
   The b-indexer is a rebuildable derived view; the chain is the truth. This page
   reads <b>any Vaulta table</b> through public keyless APIs — the read path the
   <code>.b</code> resolver proved (B-2), generalized. No server of ours, no key,
-  three rotating endpoints, every state honest.
+  two rotating endpoints, every state honest.
 </div>
 
 <div class="panel">
@@ -128,6 +426,11 @@ function u64ToName(v){
   for(let i=0;i<=12;i++){ s=CH[Number(v&(i===0?0x0Fn:0x1Fn))]+s; v>>=(i===0?4n:5n); }
   return s.replace(/\.+$/,'');
 }
+/* ETERNAL hook (2026-09-26): read() publishes what it actually did, host by host, so the three
+   fronts above show this same read without a second request. Nothing here fetches. */
+const VREAD={state:'idle',code:'',scope:'',table:'',limit:0,rows:[],cols:[],pages:0,per:0,more:false,capped:false,error:'',hosts:{},at:0};
+window.__vaultaRead=VREAD;
+function vpub(o){Object.assign(VREAD,o,{at:Date.now()});document.dispatchEvent(new CustomEvent('vaulta:read'));}
 async function vpost(body){
   const errs=[];
   for(let i=0;i<VAPI.length;i++){
@@ -135,9 +438,9 @@ async function vpost(body){
     try{
       const r=await fetch(h+'/v1/chain/get_table_rows',{method:'POST',
         headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
-      if(r.ok) return await r.json();
-      errs.push(h+' HTTP '+r.status);
-    }catch(e){ errs.push(h+' unreachable'); }
+      if(r.ok){ VREAD.hosts[h]='answered'; return await r.json(); }
+      errs.push(h+' HTTP '+r.status); VREAD.hosts[h]='HTTP '+r.status;
+    }catch(e){ errs.push(h+' unreachable'); VREAD.hosts[h]='unreachable'; }
   }
   vidx=(vidx+1)%VAPI.length;
   return {__error:errs.join('; ')};
@@ -147,6 +450,7 @@ async function read(code,scope,table,limit){
   $('status').textContent='reading '+code+' / '+scope+' / '+table+' …';
   $('status').className='note';
   $('out').style.display='none';
+  vpub({state:'reading',code,scope,table,limit:limit|0||10,rows:[],cols:[],pages:0,per:0,more:false,capped:false,error:'',hosts:{}});
   /* paginates while more=true — up to 10 pages. FIXED 2026-08-22: the old single-shot
      read truncated the .b registry silently — at 13 names, king.b sat on page 2 of a
      limit-10 read and the preset never showed it (founder report, same night; king's
@@ -160,6 +464,7 @@ async function read(code,scope,table,limit){
     const r=await vpost(body);
     if(r.__error){
       $('status').innerHTML='<span class="bad">all Vaulta endpoints failed — '+esc(r.__error)+'</span> — nothing cached, nothing invented';
+      vpub({state:'failed',error:r.__error,rows:[],cols:[],pages,per});
       return;
     }
     rows=rows.concat(r.rows||[]);
@@ -174,10 +479,11 @@ async function read(code,scope,table,limit){
   $('meta').innerHTML = rows.length+' row(s) fetched in '+pages+' page(s) of '+per
     +(capped?' · <span class="warn">page cap ('+MAXPAGES+') reached — rows still remain beyond; raise the limit</span>'
       :(more?' · more=true':' · more=false — the whole table is on screen'))
-    +' · read via public Vaulta API (ladder of 3, keyless)';
+    +' · read via public Vaulta API (ladder of '+VAPI.length+', keyless)';
   $('raw').textContent=JSON.stringify(rows,null,1).slice(0,6000);
   $('out').style.display='block';
   $('status').innerHTML='<span class="ok">read complete</span>';
+  vpub({state:rows.length?'ok':'empty',rows,cols,pages,per,more,capped});
 }
 (function init(){
   $('go').onclick=()=>read($('code').value.trim(),$('scope').value.trim(),$('table').value.trim(),+$('limit').value);
@@ -194,6 +500,223 @@ async function read(code,scope,table,limit){
   };
   // load the registry preset on open — the page arrives already proving it works
   read('kingbeelovis','kingbeelovis','domains',10);
+})();
+</script>
+<script>
+/* ETERNAL FRONT — one data layer, three renderers (docs/design/eternal). The facts are the reader's
+   own: the read that read() published (window.__vaultaRead: request, state, rows, pages, hosts),
+   the endpoint ladder (VAPI) and the scope encoder (u64ToName) from the script above. No front
+   fetches: every gesture writes the request into the reader's own inputs and presses its own read
+   button. A failed read is "not read", never zero; an empty read is "empty or missing", never absent. */
+(function(){
+  var $=function(id){return document.getElementById(id);};
+  var T=function(k,f){var t=window.BNRLanguage&&window.BNRLanguage.text;return t?t(k,f):f;};
+  var K=function(k,f){return T('et.vaulta.'+k,f);};
+  var esc=function(v){return String(v==null?'':v).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});};
+  var tok=function(n){return getComputedStyle(document.body).getPropertyValue('--sk-'+n).trim();};
+  var CTL={id:'6830934878284532282',want:'fva5q53rzb53e'}; /* the page's own control: remington.b's live scope */
+
+  /* ── the data layer ── */
+  var D={req:{code:'',scope:'',table:'',limit:0},state:'idle',rows:[],cols:[],pages:0,per:0,more:false,capped:false,error:'',hosts:[],endpoints:[],at:0};
+  var R={star:null};
+  function sync(){
+    var V=window.__vaultaRead||{};
+    D.endpoints=(typeof VAPI!=='undefined'?VAPI:[]).slice();
+    D.req={code:V.code||'',scope:V.scope||'',table:V.table||'',limit:V.limit||0};
+    D.state=V.state||'idle'; D.rows=(V.rows||[]).slice(); D.cols=(V.cols||[]).slice();
+    D.pages=V.pages||0; D.per=V.per||0; D.more=!!V.more; D.capped=!!V.capped; D.error=V.error||''; D.at=V.at||0;
+    D.hosts=D.endpoints.map(function(h){return {host:h,state:(V.hosts&&V.hosts[h])||'not asked'};});
+    if(R.star!=null&&R.star>=D.rows.length)R.star=null;
+  }
+  var answered=function(){return D.hosts.filter(function(h){return h.state==='answered';}).length;};
+  var shut=function(){return D.hosts.filter(function(h){return h.state!=='answered'&&h.state!=='not asked';}).length;};
+  function label(row){
+    if(!row||typeof row!=='object')return String(row);
+    if(row.domain_name)return row.domain_name+'.b';
+    for(var k in row){var v=row[k];if(typeof v==='string'&&v)return v;}
+    for(k in row){if(row[k]!=null&&typeof row[k]!=='object')return String(row[k]);}
+    return K('r.row','a row');
+  }
+  function fields(row,n){
+    if(!row||typeof row!=='object')return '';
+    return Object.keys(row).slice(0,n||4).map(function(k){var v=row[k];return k+' '+(v instanceof Object?JSON.stringify(v):String(v));}).join(' · ');
+  }
+  function initials(s){var p=String(s).replace(/\.b$/,'').split(/[^a-z0-9]+/i).filter(Boolean);return ((p[0]||'?')[0]+((p[1]||p[0]||'')[1]||'')).toLowerCase();}
+  var isRegistry=function(){return D.req.code==='kingbeelovis'&&D.req.table==='domains';};
+
+  /* the one hand-off: the reader's own inputs, the reader's own button */
+  function ask(code,scope,table,limit){
+    if(code!=null){$('code').value=code;$('scope').value=scope;$('table').value=table;$('limit').value=limit;}
+    var go=$('go'); if(go) go.click();
+  }
+
+  /* ── NEW BEE ── */
+  var open=null;
+  var ASK=[
+    {k:'where',q:'where the list comes from',a:'the Vaulta network keeps it. this page knocks on one of {n} public doors, and tries the next if one is shut.'},
+    {k:'empty',q:'what an empty list means',a:'the list is empty, or it isn’t there at all. the network answers both the same way, so this page never guesses which.'},
+    {k:'why',q:'why read it here',a:'other tools build their pages from this list. the list itself is the truth, so it is read here first, with nothing in between.'}
+  ];
+  function bee(){
+    var n=D.rows.length, st=$('etVaBState'), what=isRegistry()?K('b.names','names'):K('b.rows','rows');
+    var tone='', h='', p='';
+    if(D.state==='reading'){h=K('b.readingH','asking the network…');p=K('b.readingP','the list is being read fresh, right now.');}
+    else if(D.state==='ok'){tone='et-ok';h=K('b.okH','{n} {what} read just now.').replace('{n}',n).replace('{what}',what);
+      p=D.capped||D.more?K('b.okMore','straight from the public list. there are more beyond these; the reader below says how many pages it fetched.'):K('b.okAll','straight from the public list. that is the whole list.');}
+    else if(D.state==='empty'){h=K('b.emptyH','the list came back empty.');p=K('b.emptyP','empty, or not there: the network can’t tell which, so neither do we.');}
+    else if(D.state==='failed'){tone='et-guard';h=K('b.failH','the network didn’t answer.');p=(D.endpoints.length===2?K('b.failP2','both public doors were tried. nothing was filled in, and nothing old is shown.'):K('b.failP','all {n} public doors were tried. nothing was filled in, and nothing old is shown.').replace('{n}',D.endpoints.length));}
+    else {h=K('b.idleH','not read yet.');p=K('b.idleP','press the button below and the list is read fresh.');}
+    st.className='et-b-card'+(tone?' '+tone:''); st.innerHTML='<h3>'+esc(h)+'</h3><p>'+esc(p)+'</p>';
+    var nm=$('etVaBNames');
+    nm.hidden=D.state!=='ok';
+    nm.innerHTML=D.rows.slice(0,6).map(function(r){var l=label(r);
+      var sub=r.expires?K('b.until','kept until {d}').replace('{d}',String(r.expires).slice(0,10)):fields(r,2);
+      return '<div class="et-b-person"><i aria-hidden="true">'+esc(initials(l))+'</i><div><b>'+esc(l)+'</b><span>'+esc(sub)+'</span></div></div>';}).join('')+
+      (n>6?'<div class="et-b-person"><i class="et-dash" aria-hidden="true">+</i><div><b>'+esc(K('b.moreN','{n} more in the reader below').replace('{n}',n-6))+'</b></div></div>':'');
+    $('etVaBAsk').innerHTML=ASK.map(function(A){var o=open===A.k;
+      return '<button type="button" class="et-b-row" data-ask="'+A.k+'" aria-expanded="'+o+'"><span>'+esc(K('b.q.'+A.k,A.q))+'</span><small><svg class="et-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></small></button>'+
+        (o?'<div class="et-b-open">'+esc(K('b.a.'+A.k,A.a).replace('{n}',D.endpoints.length))+'</div>':'');}).join('');
+    var go=$('etVaBGo'); go.disabled=D.state==='reading';
+    go.textContent=D.state==='idle'?K('beeGoFirst','open the list'):K('beeGo','open the list again');
+  }
+
+  /* ── RAVER ── the rows are a constellation on a golden spiral; the doors are the rim */
+  function hash(s){var h=2166136261;for(var i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)>>>0;}return h;}
+  var KEPT=['biomass','ai','info','sovereign'];
+  function sky(){
+    var svg=$('etVaSky'); if(!svg) return;
+    var h='', n=Math.min(D.rows.length,96), E=D.endpoints.length||1, gap=0.06;
+    D.hosts.forEach(function(H,i){
+      var a0=-Math.PI/2+i*2*Math.PI/E+gap, a1=-Math.PI/2+(i+1)*2*Math.PI/E-gap, r=186;
+      var p=function(a){return (r*Math.cos(a)).toFixed(1)+' '+(r*Math.sin(a)).toFixed(1);};
+      var ok=H.state==='answered', no=!ok&&H.state!=='not asked';
+      h+='<path d="M'+p(a0)+'A'+r+' '+r+' 0 '+((a1-a0)>Math.PI?1:0)+' 1 '+p(a1)+'" fill="none" stroke="'+tok(ok?'biomass':no?'guard':'line')+'" stroke-width="10" stroke-linecap="round"'+(no?' stroke-dasharray="3 12"':'')+'/>';
+      var am=(a0+a1)/2, nm=H.host.replace(/^https:\/\//,'').split('.').filter(function(x){return !/^(eos|api|com|io|www)$/.test(x);})[0]||H.host;
+      if(!D.rows.length)h+='<text x="'+(166*Math.cos(am)).toFixed(1)+'" y="'+(166*Math.sin(am)+5).toFixed(1)+'" text-anchor="'+(Math.cos(am)>0.3?'end':Math.cos(am)<-0.3?'start':'middle')+'" fill="'+tok(ok?'biomass':no?'guard':'ink-soft')+'" style="font:600 14px/1.25 var(--sk-font-raver-body)">'+esc(nm)+'</text>';
+    });
+    var GA=Math.PI*(3-Math.sqrt(5));
+    for(var i=0;i<n;i++){
+      var rr=(n<=16?70:40)+(n<=16?86:122)*Math.sqrt((i+0.5)/n), a=i*GA-Math.PI/2, x=(rr*Math.cos(a)).toFixed(1), y=(rr*Math.sin(a)).toFixed(1);
+      var l=label(D.rows[i]), sel=R.star===i, c=tok(KEPT[hash(l)%4]), big=n<=16;
+      h+='<g class="et-star" data-i="'+i+'" role="button" tabindex="0" aria-pressed="'+sel+'" aria-label="'+esc(l)+'">'+
+        '<circle class="et-hit" cx="'+x+'" cy="'+y+'" r="26" fill="transparent"/>'+
+        '<circle cx="'+x+'" cy="'+y+'" r="'+(sel?13:big?10:7)+'" fill="'+(sel?tok('ink'):c)+'" stroke="'+tok('bg')+'" stroke-width="2.5"/>'+
+        (big?'<text x="'+x+'" y="'+(+y+27).toFixed(1)+'" text-anchor="middle" fill="'+tok(sel?'ink':'ink-soft')+'" style="font:600 14px/1.25 var(--sk-font-raver-body)">'+esc(l.length>12?l.slice(0,11)+'…':l)+'</text>':'')+'</g>';
+    }
+    if(!n)h+='<circle r="118" fill="none" stroke="'+tok('ink-dim')+'" stroke-width="1.5" stroke-dasharray="2 9"/>';
+    svg.innerHTML=h;
+    var mid=$('etVaMid'), ms=$('etVaMidS');
+    if(D.state==='ok'){mid.textContent=String(D.rows.length);ms.textContent=K('r.rows','rows');}
+    else if(D.state==='empty'){mid.textContent='0';ms.textContent=K('r.emptyS','empty or missing');}
+    else if(D.state==='failed'){mid.textContent=K('r.shut','shut');ms.textContent=K('r.shutS','not read');}
+    else if(D.state==='reading'){mid.textContent=K('r.asking','asking');ms.textContent='';}
+    else {mid.textContent='';ms.textContent=K('r.idle','not read yet');}
+  }
+  function raver(){
+    sky();
+    $('etVaRH').textContent=D.req.table||K('r.h','the list');
+    $('etVaRHint').textContent=D.state==='ok'?K('r.hintOk','{n} stars · tap one').replace('{n}',Math.min(D.rows.length,96)):K('r.hint','one star per row');
+    $('etVaLegend').innerHTML='<span><i style="background:'+tok('info')+'"></i>'+esc(K('r.lgRow','a row'))+'</span><span><i style="background:'+tok('biomass')+'"></i>'+esc(K('r.lgOk','a door answered'))+'</span><span><i style="border:1.5px dashed '+tok('guard')+'"></i>'+esc(K('r.lgNo','a door shut'))+'</span>';
+    var c=$('etVaRCard');
+    if(R.star!=null&&D.rows[R.star]){var row=D.rows[R.star];
+      c.innerHTML='<span class="et-rk">'+(R.star+1)+'</span><div><b>'+esc(label(row))+'</b><span>'+esc(fields(row,6))+'</span></div>';}
+    else if(D.state==='failed')c.innerHTML='<span class="et-rk">0/'+D.endpoints.length+'</span><div><b>'+esc(K('r.failB','no door answered'))+'</b><span>'+esc(K('r.failS','nothing cached, nothing invented. the sky stays dark until the list is really read.'))+'</span></div>';
+    else if(D.state==='empty')c.innerHTML='<span class="et-rk">0</span><div><b>'+esc(K('r.emptyB','the read worked, and found nothing'))+'</b><span>'+esc(K('r.emptyC','an empty list and a missing list look the same from here.'))+'</span></div>';
+    else if(D.state==='ok')c.innerHTML='<span class="et-rk">'+D.rows.length+'</span><div><b>'+esc(D.req.code+' · '+D.req.scope)+'</b><span>'+esc(K('r.okS','{p} page(s) · {m}').replace('{p}',D.pages).replace('{m}',D.capped?K('r.capped','page cap reached, more remain'):D.more?K('r.more','more remain'):K('r.all','the whole table')))+'</span></div>';
+    else c.innerHTML='<span class="et-rk">…</span><div><b>'+esc(K('r.waitB','the doors are being knocked on'))+'</b></div>';
+    $('etVaRSay').textContent=D.state==='idle'?K('r.sayIdle','nothing read yet'):K('r.say','{a} of {n} doors answered this read').replace('{a}',answered()).replace('{n}',D.endpoints.length);
+    $('etVaRHold').disabled=D.state==='reading';
+  }
+
+  /* ── CYPHERPUNK ── */
+  function cy(){
+    var q=D.req, n=D.rows.length;
+    $('etVaPath').textContent='vaulta://'+(q.code||'?')+'/'+(q.scope||'?')+'/'+(q.table||'?');
+    var stc=D.state==='ok'?'et-ok':D.state==='failed'?'et-no':D.state==='empty'?'et-on':'';
+    $('etVaChips').innerHTML='<span class="'+stc+'">state '+esc(D.state)+'</span>'+(D.state==='ok'||D.state==='empty'?'<span>rows '+n+'</span><span>pages '+D.pages+' × '+D.per+'</span>':'')+'<span>ladder '+D.endpoints.length+'</span><span class="et-on">cache none</span><span>key none</span>';
+    var f=document.activeElement&&document.activeElement.closest&&document.activeElement.closest('#etVaForm');
+    if(!f){$('etVaCode').value=q.code||$('code').value;$('etVaScope').value=q.scope||$('scope').value;$('etVaTable').value=q.table||$('table').value;$('etVaLimit').value=q.limit||$('limit').value;}
+    $('etVaRows').innerHTML=n?D.rows.slice(0,12).map(function(r,i){
+      return '<tr class="et-pick'+(R.star===i?' et-sel':'')+'" data-i="'+i+'" tabindex="0"><td>'+String(i+1).padStart(2,'0')+'</td><td>'+esc(label(r))+'</td><td>'+esc(fields(r,3))+'</td></tr>';}).join('')+
+      (n>12?'<tr><td>+</td><td colspan="2">'+esc((n-12)+' more rows in the reader below')+'</td></tr>':'')
+      :'<tr><td>00</td><td colspan="2" class="'+(D.state==='failed'?'et-st-no':D.state==='empty'?'et-st-guard':'')+'">'+esc(D.state==='failed'?'no rows · every host failed · nothing cached':D.state==='empty'?'0 rows · the read succeeded · empty or nonexistent, indistinguishable':D.state==='reading'?'reading · pages follow next_key':'not read yet')+'</td></tr>';
+    $('etVaHosts').innerHTML=D.hosts.map(function(H,i){var c=H.state==='answered'?'et-st-ok':H.state==='not asked'?'':'et-st-no';
+      return '<tr><td>'+String(i+1).padStart(2,'0')+'</td><td>'+esc(H.host.replace(/^https:\/\//,''))+'</td><td class="et-nw '+c+'">'+esc(H.state)+'</td></tr>';}).join('');
+    var did=D.state!=='idle', fin=D.state==='ok'||D.state==='empty';
+    var steps=[
+      ['request · keyless POST','{"json":true,"code":"'+q.code+'","scope":"'+q.scope+'","table":"'+q.table+'","limit":'+(D.per||q.limit)+'}',did?'et-done':'et-todo'],
+      ['ladder · '+D.endpoints.length+' hosts','round-robin start, next host on any failure · '+answered()+' answered · '+shut()+' failed this read',D.state==='failed'?'et-guard':fin?'et-done':'et-todo'],
+      ['paginate · next_key','follows more=true with lower_bound=next_key · cap 10 pages · '+(fin?D.pages+' fetched'+(D.capped?' · cap reached':''):'not yet'),fin?'et-done':'et-todo'],
+      ['decode · in this browser','JSON rows straight into the table · no server of ours · no index in between',fin?'et-done':'et-todo'],
+      ['ambiguity · stated','0 rows = empty OR nonexistent · reported as exactly that, never as absence',D.state==='empty'?'et-guard':fin?'et-done':'et-todo'],
+      ['derived view','the b-indexer rebuilds from rows like these · the chain is the truth',fin?'et-done':'et-todo']
+    ];
+    var nowAt=D.state==='reading'?1:-1;
+    $('etVaPipe').innerHTML=steps.map(function(s,i){return '<li class="'+s[2]+(i===nowAt?' et-now':'')+'"><b>'+esc(s[0])+'</b><p>'+esc(s[1])+'</p></li>';}).join('');
+    var when=D.at?new Date(D.at).toISOString().replace('T',' ').slice(0,19)+' UTC':'not read yet';
+    $('etVaReceipt').innerHTML=[
+      ['request',q.code?q.code+' / '+q.scope+' / '+q.table:'not sent yet'],
+      ['state',D.state],
+      ['rows',fin?String(n):D.state==='failed'?'not read':'not read yet'],
+      ['pages',fin?D.pages+' of '+D.per+(D.capped?' · cap 10 reached':D.more?' · more=true':' · more=false'):'not read'],
+      ['hosts',D.hosts.map(function(H){return H.host.replace(/^https:\/\//,'')+' '+H.state;}).join(' · ')],
+      ['error',D.error||'none'],
+      ['at',when]
+    ].map(function(r){return '<tr><th>'+esc(r[0])+'</th><td>'+esc(r[1])+'</td></tr>';}).join('');
+    var body=JSON.stringify({json:true,code:q.code||'kingbeelovis',scope:q.scope||'kingbeelovis',table:q.table||'domains',limit:D.per||q.limit||10});
+    $('etVaVerify').innerHTML=[
+      'curl -s '+(D.endpoints[0]||'')+'/v1/chain/get_table_rows -d \''+body+'\'',
+      'compare its rows with the table above, row for row',
+      'scope for a domain id: u64ToName('+CTL.id+') = '+CTL.want+' (remington.b)'
+    ].map(function(s){return '<li><code>'+esc(s)+'</code></li>';}).join('');
+    $('etVaCyGo').disabled=D.state==='reading';
+  }
+
+  function keyed(){document.querySelectorAll('#eternal [data-etk]').forEach(function(e){if(e.dataset.etEn==null)e.dataset.etEn=e.textContent;e.textContent=T(e.dataset.etk,e.dataset.etEn);});}
+  function all(){sync();bee();raver();cy();}
+
+  /* the hold: 900 ms of intent, released early does nothing */
+  function holdable(btn,fill,ms,done){
+    var t0=0,raf=0;
+    function stop(){if(!raf)return;cancelAnimationFrame(raf);raf=0;fill.style.width='0';}
+    function start(e){if(btn.disabled||raf)return;if(e&&e.preventDefault)e.preventDefault();t0=performance.now();
+      (function tick(now){var f=Math.min(1,(now-t0)/ms);fill.style.width=(f*100)+'%';if(f>=1){raf=0;fill.style.width='0';done();return;}raf=requestAnimationFrame(tick);})(t0);}
+    btn.addEventListener('pointerdown',function(e){try{btn.setPointerCapture(e.pointerId);}catch(x){}start(e);});
+    ['pointerup','pointercancel','pointerleave'].forEach(function(t){btn.addEventListener(t,stop);});
+    btn.addEventListener('keydown',function(e){if((e.key===' '||e.key==='Enter')&&!e.repeat){e.preventDefault();start(e);}});
+    btn.addEventListener('keyup',function(e){if(e.key===' '||e.key==='Enter')stop();});
+    btn.addEventListener('contextmenu',function(e){e.preventDefault();});
+  }
+
+  function wire(){
+    var ev=$('eternal'); if(!ev) return;
+    ev.addEventListener('click',function(e){
+      var a=e.target.closest('[data-ask]');
+      if(a){var k=a.getAttribute('data-ask');open=open===k?null:k;bee();var b=[].filter.call(ev.querySelectorAll('[data-ask]'),function(x){return x.getAttribute('data-ask')===k;})[0];if(b)b.focus({preventScroll:true});return;}
+      var s=e.target.closest('.et-star');
+      if(s){var i=+s.getAttribute('data-i');R.star=R.star===i?null:i;raver();cy();return;}
+      var tr=e.target.closest('.et-c-tab tr.et-pick');
+      if(tr){var j=+tr.getAttribute('data-i');R.star=R.star===j?null:j;raver();cy();}
+    });
+    ev.addEventListener('keydown',function(e){
+      if(e.key!=='Enter'&&e.key!==' ')return;
+      var t=e.target.closest('.et-star,.et-c-tab tr.et-pick'); if(!t)return;
+      e.preventDefault(); t.dispatchEvent(new MouseEvent('click',{bubbles:true}));
+    });
+    /* bee: the list is the .b registry, asked through the reader's own preset */
+    $('etVaBGo').addEventListener('click',function(){var p=document.querySelector('.presets a[data-code]');if(p)p.click();else ask();});
+    $('etVaBOther').addEventListener('click',function(){var c=$('code');if(c){c.scrollIntoView({block:'center'});c.focus({preventScroll:true});}});
+    holdable($('etVaRHold'),$('etVaRFill'),900,function(){ask();});
+    $('etVaForm').addEventListener('submit',function(e){e.preventDefault();ask($('etVaCode').value.trim(),$('etVaScope').value.trim(),$('etVaTable').value.trim(),+$('etVaLimit').value||10);});
+    $('etVaCtl').addEventListener('click',function(){
+      var got=typeof u64ToName==='function'?u64ToName(CTL.id):'';
+      $('etVaCtlOut').innerHTML=got===CTL.want?'<span class="et-st-ok">u64ToName('+CTL.id+') = '+esc(got)+' · matches the control ✓</span>':'<span class="et-st-no">u64ToName('+CTL.id+') = '+esc(got||'not available')+' · does not match '+CTL.want+'</span>';
+    });
+    document.addEventListener('vaulta:read',all);
+    document.addEventListener('blang',function(){keyed();all();});
+  }
+  keyed(); wire(); all();
+  window.__eternal={data:D,raver:R,label:label};
 })();
 </script>
 <script src="./fleet.js"></script>

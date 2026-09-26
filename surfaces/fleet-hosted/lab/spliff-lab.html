@@ -42,8 +42,303 @@ select,input[type=text]{width:100%;background:#0d1117;border:1px solid #444;colo
 .thc-target .v{font-size:20px;color:#8E44AD;font-weight:bold}
 .thc-target .l{font-size:9px;color:#666;text-transform:uppercase}
 </style>
+<link rel="stylesheet" href="../../skaists.css">
+<style>
+/* ── ETERNAL FRONT (docs/design/eternal) — three products in one surface. Every value is a skaists
+   token (skaists.css, compiled from docs/design/skaists/tokens.json): no hand-picked hex, size or
+   corner. Measured by e2e/skaists-conformance.mjs. One register at a time; new bee is the default.
+   Every class is et- prefixed so the lab's own bare rules (label, input, select, .btn, .card) never
+   reach in; sizes that matter carry a fallback for a server that sends .css as octet-stream. ── */
+#eternal{box-sizing:border-box;display:block;width:100%;max-width:none;margin:0;padding:var(--sk-s4,24px) var(--sk-s3,18px);border:0;border-radius:0;background:var(--sk-bg);color:var(--sk-ink);text-align:left;letter-spacing:normal;text-transform:none;box-shadow:none;font-weight:400}
+#eternal *,#eternal *::before,#eternal *::after{box-sizing:border-box}
+#eternal>div{max-width:600px;margin:0 auto}
+#eternal>.et-r,#eternal>.et-c{display:none}
+body[data-reg="raver"] #eternal>.et-b,body[data-reg="cypherpunk"] #eternal>.et-b{display:none}
+body[data-reg="raver"] #eternal>.et-r{display:block}
+body[data-reg="cypherpunk"] #eternal>.et-c{display:block}
+#eternal [hidden]{display:none!important}
+#eternal button{margin:0;color:inherit;text-transform:none;letter-spacing:normal;min-width:0;background:none;border:0;font:inherit;width:auto;padding:0;text-align:inherit}
+#eternal input,#eternal select{display:block;margin:0;font:inherit;color:inherit;text-transform:none;letter-spacing:normal;opacity:1}
+#eternal label{display:block;margin:0;padding:0;background:none;text-transform:none;letter-spacing:normal;width:auto}
+#eternal svg{display:block;max-width:100%}
+#eternal a{text-decoration:none}
+#eternal :focus-visible{outline:2px solid var(--sk-focus);outline-offset:3px}
+#eternal h2,#eternal h3,#eternal p,#eternal ol,#eternal ul,#eternal table{margin:0;padding:0;border:0;background:none;text-transform:none;letter-spacing:normal}
+#eternal table{width:100%;border-collapse:separate;border-spacing:0;font-size:inherit}
+#eternal th,#eternal td{border:0;padding:0;vertical-align:top;text-transform:none;letter-spacing:normal}
+#eternal code{background:none;padding:0}
+#eternal strong{font-weight:600}
+.et-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.et-archive-h{display:block;box-sizing:border-box;width:100%;margin:0;padding:var(--sk-s4,24px) max(var(--sk-s3,18px),calc(50% - 300px));border:0;border-top:1px solid var(--sk-line);background:var(--sk-bg);color:var(--sk-ink);text-align:left;text-transform:none;letter-spacing:normal;font:400 28px/1.1 var(--sk-font-bee-serif)}
+body[data-reg="raver"] .et-archive-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em}
+body[data-reg="cypherpunk"] .et-archive-h{font:600 15px/1.45 var(--sk-font-mono)}
+
+/* NEW BEE — a calm room: plain rows, one reassurance, one magenta action, a link, a footnote */
+#eternal .et-b{color:var(--sk-ink);font:400 16px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-b-step{display:flex;flex-direction:column;gap:var(--sk-s3,18px)}
+#eternal .et-b-mark{font:400 18px/1.2 var(--sk-font-house);color:var(--sk-sovereign)}
+#eternal .et-b-h{font:400 40px/1.05 var(--sk-font-bee-serif);color:var(--sk-ink)}
+#eternal .et-b-lede{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink-mut);text-wrap:pretty}
+#eternal .et-b-guard{display:flex;align-items:center;gap:var(--sk-s2,12px);min-height:var(--sk-control-min,44px);padding:var(--sk-s2,12px) var(--sk-s3,18px);border-radius:var(--sk-radius,12px);background:var(--sk-guard-wash);color:var(--sk-guard);font:600 15px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-ic{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+#eternal .et-b-rows{display:flex;flex-direction:column;background:var(--sk-bg-card);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl,18px);overflow:hidden}
+#eternal .et-b-group{padding:var(--sk-s2,12px) var(--sk-s3,18px) var(--sk-s1,6px);border-bottom:1px solid var(--sk-line-soft);font:600 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-row{display:flex;align-items:center;justify-content:space-between;gap:var(--sk-s2,12px);width:100%;min-height:var(--sk-control-row,52px);padding:var(--sk-s1,6px) var(--sk-s3,18px);border:0;border-bottom:1px solid var(--sk-line-soft);border-radius:0;background:transparent;text-align:left;font:500 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+#eternal .et-b-row:last-child{border-bottom:0}
+#eternal button.et-b-row{cursor:pointer}
+#eternal .et-b-row>span{flex:1 1 auto;min-width:0}
+#eternal .et-b-row>span>small{display:block;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-row>small{display:flex;align-items:center;gap:var(--sk-s1,6px);flex:none;max-width:55%;text-align:right;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-row>small.et-ok{color:var(--sk-verified)}
+#eternal .et-b-row>small.et-out{color:var(--sk-guard)}
+#eternal .et-b-row[aria-pressed="true"]{background:var(--sk-sovereign-tint);color:var(--sk-sovereign-strong);font-weight:600}
+#eternal .et-b-row[aria-pressed="true"] small{color:var(--sk-sovereign-strong)}
+#eternal .et-chev{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;flex:none}
+#eternal .et-b-act{display:flex;flex-direction:column;gap:var(--sk-s1,6px);margin-top:var(--sk-s1,6px)}
+#eternal .et-b-primary{display:flex;align-items:center;justify-content:center;width:100%;min-height:var(--sk-control-primary,54px);padding:0 var(--sk-s3,18px);border:0;border-radius:var(--sk-radius-lg,16px);background:var(--sk-primary);color:var(--sk-on-primary)!important;font:600 17px/1.2 var(--sk-font-bee-sans)!important;text-align:center;cursor:pointer}
+#eternal .et-b-primary:disabled{background:var(--sk-bg-well);color:var(--sk-ink-mut)!important;cursor:not-allowed}
+#eternal .et-b-link{display:flex;align-items:center;justify-content:center;width:100%;min-height:var(--sk-control-min,44px);border:0;background:transparent;font:600 16px/1.45 var(--sk-font-bee-sans)!important;color:var(--sk-link)!important;cursor:pointer;text-align:center}
+#eternal .et-b-link:hover{color:var(--sk-link-hover)!important}
+#eternal .et-b-foot{text-align:center;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-back{align-self:flex-start;display:flex;align-items:center;gap:var(--sk-s1,6px);min-height:var(--sk-control-min,44px);min-width:var(--sk-control-min,44px);padding:0;border:0;background:none;font:600 16px/1.45 var(--sk-font-bee-sans)!important;color:var(--sk-link)!important;cursor:pointer}
+#eternal .et-b-card{display:flex;flex-direction:column;gap:var(--sk-s1,6px);padding:var(--sk-s3,18px);background:var(--sk-sovereign-tint);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl,18px)}
+#eternal .et-b-card h3{font:400 28px/1.1 var(--sk-font-bee-serif);color:var(--sk-sovereign-strong)}
+#eternal .et-b-card p{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+#eternal .et-b-card p.et-b-src{font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-fig{font:400 32px/1 var(--sk-font-bee-serif);color:var(--sk-ink)}
+#eternal .et-b-sum{display:flex;flex-direction:column;gap:var(--sk-s1,6px);padding:var(--sk-s3,18px);background:var(--sk-bg-card);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl,18px)}
+#eternal .et-b-sum small{font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-stepper{display:flex;align-items:center;justify-content:space-between;gap:var(--sk-s2,12px);min-height:var(--sk-control-row,52px);padding:var(--sk-s1,6px) var(--sk-s3,18px);border-bottom:1px solid var(--sk-line-soft);color:var(--sk-ink);font:500 16px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-b-stepper:last-child{border-bottom:0}
+#eternal .et-b-stepper>span{flex:1 1 auto;min-width:0;font:500 16px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-b-stepper>span>small{display:block;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-stepper>b{min-width:64px;text-align:center;font:600 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+#eternal .et-b-btn{display:flex;align-items:center;justify-content:center;flex:none;min-width:var(--sk-control-min,44px);min-height:var(--sk-control-min,44px);padding:0 var(--sk-s2,12px);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius-md,14px);background:var(--sk-bg-card);color:var(--sk-ink)!important;font:600 16px/1.45 var(--sk-font-bee-sans)!important;cursor:pointer}
+#eternal .et-b-btn:disabled{border-color:var(--sk-line);color:var(--sk-ink-mut)!important;cursor:not-allowed}
+#eternal .et-b-field{flex:none;width:148px;min-height:var(--sk-control-min,44px);padding:0 var(--sk-s2,12px);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius,12px);background:var(--sk-bg-card);color:var(--sk-ink);font:400 16px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-b-check{display:flex;align-items:center;gap:var(--sk-s2,12px);min-height:var(--sk-control-min,44px);padding:var(--sk-s1,6px) var(--sk-s3,18px);border-bottom:1px solid var(--sk-line-soft);font:500 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink);cursor:pointer}
+#eternal .et-b-check:last-child{border-bottom:0}
+#eternal .et-b-check input{width:var(--sk-control-check,24px);height:var(--sk-control-check,24px);flex:none;accent-color:var(--sk-you)}
+#eternal .et-b-tick{width:78px;height:78px;margin:var(--sk-s2,12px) auto 0;border-radius:var(--sk-radius-pill,999px);background:var(--sk-verified-wash);color:var(--sk-verified);display:flex;align-items:center;justify-content:center;font:400 40px/1 var(--sk-font-bee-serif)}
+#eternal .et-b-done{text-align:center;font:400 52px/1 var(--sk-font-bee-serif);color:var(--sk-ink)}
+#eternal .et-b-said{text-align:center;font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-stars{display:flex;justify-content:space-between;gap:var(--sk-s1,6px);padding:var(--sk-s1,6px) var(--sk-s3,18px)}
+#eternal .et-b-stars button{flex:1 1 0;min-width:var(--sk-control-min,44px);min-height:var(--sk-control-min,44px);border:1.5px solid var(--sk-line);border-radius:var(--sk-radius,12px);background:var(--sk-bg-card);color:var(--sk-ink-mut)!important;font:600 16px/1.45 var(--sk-font-bee-sans)!important;text-align:center;cursor:pointer}
+#eternal .et-b-stars button[aria-pressed="true"]{border-color:var(--sk-you);background:var(--sk-sovereign-tint);color:var(--sk-sovereign-strong)!important}
+
+/* RAVER — the data is the art; lowercase is allowed joy; the numbers never change */
+#eternal .et-r{color:var(--sk-ink);font:400 14px/1.4 var(--sk-font-raver-body)}
+#eternal .et-r-top{display:flex;align-items:baseline;justify-content:space-between;gap:var(--sk-s2,12px);flex-wrap:wrap}
+#eternal .et-r-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em;color:var(--sk-ink)}
+#eternal .et-r-hint{font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-art{position:relative;width:100%;max-width:380px;margin:var(--sk-s3,18px) auto var(--sk-s2,12px)}
+#eternal .et-r-art>svg{width:100%;height:auto;filter:drop-shadow(var(--sk-glow-sovereign))}
+#eternal .et-r-art [role="button"]{cursor:pointer}
+#eternal .et-r-art [role="button"]:focus{outline:none}
+#eternal .et-hit{fill:transparent;stroke:none}
+#eternal svg line{fill:none}
+#eternal .et-r-mid{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;text-align:center;pointer-events:none;max-width:40%}
+#eternal .et-r-mid b{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em;color:var(--sk-ink)}
+#eternal .et-r-mid span{font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-legend{display:flex;flex-wrap:wrap;justify-content:center;gap:var(--sk-s1,6px) var(--sk-s3,18px);margin:0 0 var(--sk-s3,18px)}
+#eternal .et-r-legend span{display:inline-flex;align-items:center;gap:var(--sk-s1,6px);font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-lgb{display:inline-flex;align-items:center;gap:var(--sk-s1,6px);min-height:var(--sk-control-min,44px);padding:0 var(--sk-s2,12px)!important;border:1.5px solid var(--sk-line)!important;border-radius:var(--sk-radius-pill,999px);font:600 14px/1.25 var(--sk-font-raver-body)!important;color:var(--sk-ink-soft)!important;cursor:pointer}
+#eternal .et-r-lgb[aria-pressed="true"]{border-color:var(--sk-you)!important;color:var(--sk-ink)!important;box-shadow:var(--sk-glow-sovereign)}
+#eternal .et-r-lgb:disabled{cursor:default}
+#eternal .et-r-legend i{width:14px;height:14px;border-radius:var(--sk-radius-pill,999px);flex:none}
+#eternal .et-r-card{display:flex;gap:var(--sk-s2,12px);align-items:flex-start;padding:var(--sk-s2,12px) var(--sk-s3,18px);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl,18px);background:var(--sk-sovereign-tint);min-height:var(--sk-control-person,60px)}
+#eternal .et-r-card .et-rk{display:flex;align-items:center;justify-content:center;min-width:44px;height:44px;padding:0 var(--sk-s1,6px);border-radius:var(--sk-radius,12px);background:var(--sk-sovereign-strong);color:var(--sk-bg);font:700 15px/1.2 var(--sk-font-raver-display);flex:none}
+#eternal .et-r-card b{display:block;font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink)}
+#eternal .et-r-card span{display:block;margin-top:var(--sk-s1,6px);font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-note{margin:var(--sk-s2,12px) 0 0;text-align:center;font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-big{text-align:center;font:700 60px/.95 var(--sk-font-raver-display);letter-spacing:-.02em;color:var(--sk-ink)}
+#eternal .et-r-pill{display:flex;align-items:center;justify-content:center;width:100%;min-height:58px;margin-top:var(--sk-s4,24px);padding:0 var(--sk-s3,18px);border:0;border-radius:var(--sk-radius-pill,999px);background:var(--sk-primary);color:var(--sk-on-primary)!important;font:700 15px/1.2 var(--sk-font-raver-display)!important;letter-spacing:.04em;text-align:center;cursor:pointer;touch-action:manipulation}
+#eternal .et-r-pill:disabled{background:var(--sk-sovereign-wash);color:var(--sk-sovereign-soft)!important;cursor:not-allowed}
+#eternal .et-r-ghost{display:inline-flex;align-items:center;justify-content:center;gap:var(--sk-s1,6px);margin:var(--sk-s2,12px) auto 0;min-height:var(--sk-control-min,44px);min-width:var(--sk-control-min,44px);padding:0 var(--sk-s3,18px);border:1.5px solid var(--sk-sovereign);border-radius:var(--sk-radius-pill,999px);background:transparent;color:var(--sk-sovereign-strong)!important;font:600 14px/1.25 var(--sk-font-raver-body)!important;cursor:pointer}
+#eternal .et-r-ghost[aria-pressed="true"]{border-color:var(--sk-you);background:var(--sk-sovereign-wash);box-shadow:var(--sk-glow-sovereign)}
+#eternal .et-r-ghost:disabled{border-color:var(--sk-line);color:var(--sk-ink-mut)!important;cursor:not-allowed}
+#eternal .et-r-row{display:flex;justify-content:center;flex-wrap:wrap;gap:var(--sk-s2,12px)}
+#eternal .et-r-row .et-r-ghost{margin:var(--sk-s2,12px) 0 0}
+#eternal .et-r-tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--sk-s2,12px);margin:var(--sk-s2,12px) 0}
+#eternal .et-r-tiles button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--sk-s1,6px);min-height:88px;padding:var(--sk-s1,6px);border:1.5px solid var(--sk-sovereign);border-radius:var(--sk-radius-xl,18px);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong)!important;font:700 14px/1.2 var(--sk-font-raver-display)!important;letter-spacing:normal;text-align:center;cursor:pointer;opacity:.72;transition:opacity var(--dur,.26s),box-shadow var(--dur,.26s)}
+#eternal .et-r-tiles button[aria-pressed="true"]{opacity:1;border-color:var(--sk-you);box-shadow:var(--sk-glow-sovereign)}
+#eternal .et-r-tiles button small{font:400 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink-soft);letter-spacing:normal}
+#eternal .et-r-tiles svg{width:26px;height:26px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+#eternal .et-r-chip{display:flex;justify-content:center;align-items:center;flex-wrap:wrap;gap:var(--sk-s2,12px);margin:var(--sk-s2,12px) auto;padding:var(--sk-s1,6px) var(--sk-s3,18px);border:1px solid var(--sk-line);border-radius:var(--sk-radius-pill,999px);background:var(--sk-bg-card);width:max-content;max-width:100%;min-height:var(--sk-control-min,44px);text-align:center}
+#eternal .et-r-chip b{font:700 15px/1.2 var(--sk-font-raver-display);color:var(--sk-ink)}
+#eternal .et-r-chip span{font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-verified)}
+#eternal .et-r-chip span.et-off{color:var(--sk-guard)}
+#eternal .et-r-hold{position:relative;width:216px;height:216px;margin:var(--sk-s3,18px) auto 0}
+#eternal .et-r-hold svg{position:absolute;inset:0;width:100%;height:100%;transform:rotate(-90deg)}
+#eternal .et-hold-track{fill:none;stroke:var(--sk-line);stroke-width:8}
+#eternal .et-hold-prog{fill:none;stroke:var(--sk-biomass);stroke-width:8;stroke-linecap:round;stroke-dasharray:578;stroke-dashoffset:578}
+#eternal .et-r-holdbtn{position:absolute;inset:24px;border:0;background:var(--sk-primary);color:var(--sk-on-primary)!important;clip-path:polygon(50% 0,93% 25%,93% 75%,50% 100%,7% 75%,7% 25%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--sk-s1,6px);cursor:pointer;touch-action:none;user-select:none;-webkit-user-select:none;text-align:center}
+#eternal .et-r-holdbtn b{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em}
+#eternal .et-r-holdbtn span{font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em}
+#eternal .et-r-holdbtn:disabled{background:var(--sk-sovereign-wash);color:var(--sk-sovereign-soft)!important;cursor:not-allowed}
+@media (prefers-reduced-motion:reduce){#eternal *{transition:none!important;animation:none!important}}
+
+/* CYPHERPUNK — the instrument, complete at first paint: tables, a numbered pipeline, receipts */
+#eternal .et-c{font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink);overflow-wrap:anywhere}
+#eternal .et-c-path{font:600 15px/1.45 var(--sk-font-mono);color:var(--sk-ink);word-break:break-all}
+#eternal .et-c-chips{display:flex;flex-wrap:wrap;gap:var(--sk-s1,6px);margin:var(--sk-s2,12px) 0}
+#eternal .et-c-chips span{padding:2px var(--sk-s1,6px);border:1px solid var(--sk-line);border-radius:4px;background:var(--sk-bg-card);font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-soft)}
+#eternal .et-c-chips span.et-on{border-color:var(--sk-guard);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong)}
+#eternal .et-c-chips span.et-ok{border-color:var(--sk-verified);color:var(--sk-verified)}
+#eternal .et-c-chips span.et-no{border-color:var(--sk-info);color:var(--sk-info)}
+#eternal .et-c-h{margin:var(--sk-s4,24px) 0 var(--sk-s2,12px)!important;font:600 15px/1.45 var(--sk-font-mono);color:var(--sk-ink)}
+#eternal .et-c-tab{margin:var(--sk-s2,12px) 0 var(--sk-s1,6px)!important;border:1px solid var(--sk-line)!important;border-radius:var(--sk-radius-sm,6px);overflow:hidden;background:var(--sk-bg-card)!important}
+#eternal .et-c-tab th{padding:var(--sk-s1,6px) var(--sk-s2,12px)!important;text-align:left;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);border-bottom:1px solid var(--sk-line)!important;background:var(--sk-bg-well)}
+#eternal .et-c-tab td{height:var(--sk-control-min,44px);padding:var(--sk-s1,6px) var(--sk-s2,12px)!important;border-bottom:1px solid var(--sk-line)!important;font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink);vertical-align:middle}
+#eternal .et-c-tab tr:last-child td{border-bottom:0!important}
+#eternal .et-c-tab tbody td:first-child{color:var(--sk-guard);white-space:nowrap;width:1%}
+#eternal .et-c-tab th:first-child{white-space:nowrap;width:1%}
+#eternal .et-c-tab small{display:block;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut)}
+#eternal .et-c-tab .et-num{text-align:right;white-space:nowrap}
+#eternal .et-c-tab tbody td.et-wrap{white-space:normal;width:auto}
+#eternal .et-c-tab td,#eternal .et-c-tab th{overflow-wrap:break-word}
+#eternal .et-c-tab tfoot td{height:auto;background:var(--sk-bg-well);color:var(--sk-ink-soft);font:500 12px/1.45 var(--sk-font-mono)}
+#eternal .et-c-tab input{width:72px;min-height:var(--sk-control-min,44px);padding:0 var(--sk-s1,6px);border:1.5px solid var(--sk-ai);border-radius:var(--sk-radius-sm,6px);background:var(--sk-bg);color:var(--sk-ink);font:400 13px/1.45 var(--sk-font-mono);text-align:right}
+#eternal .et-st-ok{color:var(--sk-verified)}#eternal .et-st-no{color:var(--sk-info)}#eternal .et-st-wait{color:var(--sk-ai)}#eternal .et-st-guard{color:var(--sk-guard)}
+#eternal .et-c-pipe{list-style:none;margin:0;padding:0;display:grid;gap:var(--sk-s2,12px);counter-reset:etp}
+#eternal .et-c-pipe li{display:grid;grid-template-columns:28px 1fr;gap:var(--sk-s1,6px) var(--sk-s2,12px);padding:var(--sk-s2,12px) var(--sk-s3,18px);border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm,6px);background:var(--sk-bg-card);counter-increment:etp}
+#eternal .et-c-pipe li::before{content:counter(etp,decimal-leading-zero);color:var(--sk-guard);font-weight:600}
+#eternal .et-c-pipe li b{font-weight:600;color:var(--sk-ink)}
+#eternal .et-c-pipe li p{grid-column:2;color:var(--sk-ink-soft)}
+#eternal .et-c-pipe li.et-done b{color:var(--sk-verified)}
+#eternal .et-c-pipe li.et-guard{border-style:dashed;border-color:var(--sk-guard)}
+#eternal .et-c-pipe li.et-guard b{color:var(--sk-guard)}
+#eternal .et-c-pipe li.et-now{border-color:var(--sk-ai);box-shadow:inset 0 0 0 1px var(--sk-ai)}
+#eternal .et-c-pipe li.et-now b{color:var(--sk-ai)}
+#eternal .et-c-primary{display:flex;align-items:center;justify-content:center;width:100%;min-height:52px;margin-top:var(--sk-s3,18px);padding:0 var(--sk-s2,12px);border:0;border-radius:var(--sk-radius-sm,6px);background:var(--sk-primary);color:var(--sk-on-primary)!important;font:600 14px/1.2 var(--sk-font-mono)!important;text-align:center;cursor:pointer}
+#eternal .et-c-primary:disabled{background:var(--sk-bg-well);color:var(--sk-ink-mut)!important;cursor:not-allowed}
+#eternal .et-c-note{margin-top:var(--sk-s2,12px);font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-soft)}
+#eternal .et-c-kv{border:1px solid var(--sk-line)!important;border-radius:var(--sk-radius-sm,6px);overflow:hidden;background:var(--sk-bg-card)!important}
+#eternal .et-c-kv th{width:112px;padding:var(--sk-s2,12px)!important;text-align:left;vertical-align:top;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);border-bottom:1px solid var(--sk-line)!important;background:transparent}
+#eternal .et-c-kv td{padding:var(--sk-s2,12px)!important;border-bottom:1px solid var(--sk-line)!important;font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink);word-break:break-word}
+#eternal .et-c-kv tr:last-child th,#eternal .et-c-kv tr:last-child td{border-bottom:0!important}
+#eternal .et-c-verify{margin-top:var(--sk-s3,18px);padding:var(--sk-s3,18px);border-radius:var(--sk-radius-sm,6px);background:var(--sk-bg-card);border:1px solid var(--sk-line)}
+#eternal .et-c-verify-h{font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);margin-bottom:var(--sk-s1,6px)}
+#eternal .et-c-verify ol{margin:0;padding-left:var(--sk-s4,24px)!important;display:grid;gap:var(--sk-s1,6px)}
+#eternal .et-c-verify code,#eternal .et-c-code{font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ai);word-break:break-all}
+#eternal .et-c-quote{margin-top:var(--sk-s2,12px);padding:var(--sk-s2,12px) var(--sk-s3,18px);border:1px dashed var(--sk-guard);border-radius:var(--sk-radius-sm,6px);background:var(--sk-guard-wash);color:var(--sk-guard);font:400 13px/1.45 var(--sk-font-mono)}
+#eternal .et-c-quote b{color:var(--sk-sovereign-strong);font-weight:600}
+#eternal .et-c-row{display:grid;grid-template-columns:1fr 1fr;gap:var(--sk-s2,12px);margin-top:var(--sk-s3,18px)}
+#eternal .et-c-ghost{display:flex;align-items:center;justify-content:center;min-height:52px;padding:0 var(--sk-s1,6px);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius-sm,6px);background:transparent;color:var(--sk-ink)!important;text-align:center;font:600 14px/1.2 var(--sk-font-mono)!important;cursor:pointer}
+#eternal .et-c-a{display:inline-flex;align-items:center;min-height:var(--sk-control-min,44px);color:var(--sk-link)}
+#eternal .et-c-a:hover{color:var(--sk-link-hover)}
+#eternal .et-c-in{display:flex;align-items:center;gap:var(--sk-s2,12px);flex-wrap:wrap;margin-top:var(--sk-s2,12px)}
+#eternal .et-c-in label{display:flex;align-items:center;gap:var(--sk-s1,6px);min-height:var(--sk-control-min,44px);font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut)}
+#eternal .et-c-in input,#eternal .et-c-in select{width:96px;min-height:var(--sk-control-min,44px);padding:0 var(--sk-s1,6px);border:1.5px solid var(--sk-ai);border-radius:var(--sk-radius-sm,6px);background:var(--sk-bg-card);color:var(--sk-ink);font:400 13px/1.45 var(--sk-font-mono)}
+#eternal .et-c-in select{width:auto;min-width:132px}
+#eternal .et-c-in .et-c-ghost{min-height:var(--sk-control-min,44px);padding:0 var(--sk-s2,12px)}
+
+/* three rings (raver): discs whose areas are the lab's per-spliff figures: thca in it, thc after heat,
+   absorbed; the dashed ring is the intention; the stones around it are the lab's seven intentions. */
+#etRg .et-rg-bed{fill:var(--sk-bg-card);stroke:var(--sk-line);stroke-width:1.5}
+#etRg .et-rg-thca{fill:var(--sk-sovereign-soft);fill-opacity:.22;stroke:var(--sk-sovereign-soft);stroke-width:1.5;transition:r var(--dur,.4s)}
+#etRg .et-rg-thc{fill:var(--sk-sovereign);fill-opacity:.5;stroke:var(--sk-sovereign);stroke-width:1.5;transition:r var(--dur,.4s)}
+#etRg .et-rg-abs{fill:var(--sk-info);stroke:var(--sk-bg);stroke-width:2;transition:r var(--dur,.4s)}
+#etRg .et-rg-abs.et-in{fill:var(--sk-biomass)}
+#etRg .et-rg-target{fill:none;stroke:var(--sk-ink);stroke-width:2.5;stroke-dasharray:6 7}
+#etRg .et-rg-target-under{fill:none;stroke:var(--sk-bg);stroke-width:6;stroke-opacity:.7}
+#etRg .et-rg-stone{cursor:pointer}
+#etRg .et-rg-st{fill:var(--sk-sovereign-wash);stroke:var(--sk-sovereign);stroke-width:1.5}
+#etRg .et-rg-mg{fill:var(--sk-sovereign-strong);font:700 15px/1 var(--sk-font-raver-display)}
+#etRg .et-rg-stone[aria-pressed="true"] .et-rg-st{fill:var(--sk-you);stroke:var(--sk-you)}
+#etRg .et-rg-stone[aria-pressed="true"] .et-rg-mg{fill:var(--sk-on-primary)}
+#etRg .et-rg-stone:focus-visible .et-rg-st{stroke:var(--sk-ink);stroke-width:3}
+#eternal .et-lg-thca{background:var(--sk-sovereign-soft)}#eternal .et-lg-thc{background:var(--sk-sovereign)}#eternal .et-lg-abs{background:var(--sk-info)}#eternal .et-lg-abs.et-in{background:var(--sk-biomass)}
+#eternal .et-lg-target{border:2px dashed var(--sk-ink);background:transparent}
+#eternal #etRgPresets{margin:var(--sk-s3,18px) 0 var(--sk-s2,12px)}
+#eternal #etRgPresets .et-r-ghost{margin:0}
+#eternal .et-r-tiles .et-rg-tile{display:flex;flex-direction:column;align-items:flex-start;justify-content:space-between;gap:var(--sk-s1,6px);min-height:96px;padding:var(--sk-s2,12px)!important;border:1.5px solid var(--sk-sovereign)!important;border-radius:var(--sk-radius-xl,18px);background:var(--sk-sovereign-wash)!important;color:var(--sk-ink)!important;text-align:left!important;cursor:pointer;touch-action:none;user-select:none;-webkit-user-select:none;opacity:1}
+#eternal .et-r-tiles .et-rg-tile[aria-pressed="true"]{border-color:var(--sk-you)!important;box-shadow:var(--sk-glow-sovereign)}
+#eternal .et-rg-tile span{font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink)}
+#eternal .et-rg-tile b{font:700 15px/1.2 var(--sk-font-raver-display);color:var(--sk-sovereign-strong)}
+#eternal .et-fl-dot{width:14px;height:14px;border-radius:var(--sk-radius-pill,999px)}
+#eternal .et-rg-d0{background:var(--sk-sovereign-soft)}#eternal .et-rg-d1{background:var(--sk-sovereign)}#eternal .et-rg-d2{background:var(--sk-info)}#eternal .et-rg-d3{background:var(--sk-ai)}#eternal .et-rg-d4{background:var(--sk-biomass)}#eternal .et-rg-d5{background:var(--sk-sovereign-strong)}
+#eternal #etcPresets .et-c-ghost{min-height:var(--sk-control-min,44px);padding:0 var(--sk-s2,12px)}
+#eternal .et-c-tab td.et-num input{margin-left:auto}
+#eternal #etcIntent{min-width:180px}
+#eternal #etcFinding{border-color:var(--sk-ai);background:var(--sk-bg-card);color:var(--sk-ink-soft)}
+#eternal #etcFinding b{color:var(--sk-ai)}
+</style>
 </head>
 <body>
+<!-- ETERNAL FRONT (founder blueprint 2026-09-26, docs/design/eternal): three separate products above the
+     founder's spliff lab, which stays below exactly as hosted (fleet-hosted ruling: preserve dress, 0 lines
+     removed; fleet-pixels.mjs stays green). ONE data layer reads the lab's own model (TOB, CAN, INTENT, PRESETS,
+     DECARB, BIOAVAIL) and the numbers its doUpdate() prints. Every change goes through the lab's own controls:
+     its intention select (doIntention), its preset buttons (doPreset) and its gram inputs (doUpdate). The lab
+     writes no storage and neither does any front. The fronts carry the lab's own figures and its own caution,
+     and add no advice. Nothing is sent. -->
+<section id="eternal" aria-label="the spliff lab, what each spliff holds">
+
+  <!-- NEW BEE — a calm room: choose how strong, read the lab's estimate in plain rows -->
+  <div class="et-b">
+    <div class="et-b-step">
+      <div class="et-b-mark" data-et-t="et.spliff.b.mark">spliff lab</div>
+      <h2 class="et-b-h" data-et-t="et.spliff.b.h">your spliff</h2>
+      <p class="et-b-lede" data-et-t="et.spliff.b.lede">choose how strong each spliff should be. the lab sizes the cannabis in the batch and shows its own estimate of what is absorbed.</p>
+      <div class="et-b-guard"><svg class="et-ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg><span id="etBeeCaution"></span></div>
+      <div class="et-b-rows" id="etBeeIntent" role="group" aria-label="the lab's intentions"></div>
+      <div class="et-b-rows" id="etBeeSum"></div>
+      <div class="et-b-rows" id="etBeeHow"></div>
+      <div class="et-b-rows" id="etBeePresets" role="group" aria-label="the lab's recipes"></div>
+      <div class="et-b-act">
+        <button type="button" class="et-b-primary" id="etBeeGrams" data-et-t="et.spliff.b.grams">fine-tune the grams in the lab</button>
+        <button type="button" class="et-b-link" id="etBeeSci" data-et-t="et.spliff.b.sci">see the lab's own dose calculation</button>
+        <p class="et-b-foot" data-et-t="et.spliff.b.foot">the lab measures nothing in your body. every figure here is its arithmetic, shown as it gives it.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- RAVER — three rings: what is in a spliff, what heat makes of it, what the lab says is absorbed; tap a stone -->
+  <div class="et-r">
+    <div class="et-r-top"><h2 class="et-r-h" data-et-t="et.spliff.r.h">three rings</h2><span class="et-r-hint" id="etRgHint"></span></div>
+    <div class="et-r-art">
+      <svg id="etRg" viewBox="-200 -200 400 400" role="group" aria-label="one spliff as three rings: thca in it, thc after heat, absorbed; the dashed ring is the intention; the stones set it"></svg>
+    </div>
+    <div class="et-r-legend" id="etRgLegend"></div>
+    <div class="et-r-card" id="etRgCard" aria-live="polite"></div>
+    <div class="et-r-row" id="etRgPresets" role="group" aria-label="the lab's recipes"></div>
+    <div class="et-r-tiles" id="etRgStrains" role="group" aria-label="cannabis · tap to choose, hold to pour"></div>
+    <p class="et-r-note" id="etRgNote"></p>
+    <button type="button" class="et-r-pill" id="etRgGo" data-et-t="et.spliff.r.go">the whole mix · in the lab</button>
+  </div>
+
+  <!-- CYPHERPUNK — the instrument: both tables, the dose pipeline with its constants, the receipt -->
+  <div class="et-c">
+    <div class="et-c-path" id="etcPath">fleet-hosted/lab/spliff-lab.html</div>
+    <div class="et-c-chips" id="etcChips"></div>
+    <div class="et-c-in">
+      <label><span>intention</span><select id="etcIntent"></select></label>
+      <label><span>batchcount</span><select id="etcBatch"></select></label>
+    </div>
+    <div class="et-c-in" id="etcPresets" role="group" aria-label="doPreset"></div>
+    <h3 class="et-c-h" data-et-t="et.spliff.c.tobH">tobacco · TOB · g drives doUpdate()</h3>
+    <table class="et-c-tab" id="etcTob"><thead><tr><th>id</th><th>$/lb</th><th class="et-num">g</th></tr></thead><tbody></tbody></table>
+    <h3 class="et-c-h" data-et-t="et.spliff.c.canH">cannabis · CAN · g drives doUpdate()</h3>
+    <table class="et-c-tab" id="etcCan"><thead><tr><th>id</th><th>thca · $/oz</th><th class="et-num">g</th></tr></thead><tbody></tbody></table>
+    <h3 class="et-c-h" data-et-t="et.spliff.c.pipeH">the dose · as doUpdate() does it</h3>
+    <ol class="et-c-pipe" id="etcPipe"></ol>
+    <button type="button" class="et-c-primary" id="etcRun">doIntention() · size the cannabis for the intention</button>
+    <h3 class="et-c-h" data-et-t="et.spliff.c.receiptH">receipt · recomputed against the page</h3>
+    <table class="et-c-kv" id="etcReceipt"></table>
+    <div class="et-c-quote" id="etcQuote"></div>
+    <div class="et-c-quote" id="etcFinding"></div>
+    <div class="et-c-verify">
+      <div class="et-c-verify-h" data-et-t="et.spliff.c.selfH">verify · no trust in this page needed</div>
+      <ol><li><code>[DECARB, BIOAVAIL, INTENT]</code> in this page's console</li><li><code>Object.keys(localStorage).filter(k =&gt; k.startsWith('bn'))</code> · this lab adds none</li><li><code>diff surfaces/fleet/spliff-lab.html surfaces/fleet-hosted/lab/spliff-lab.html</code></li></ol>
+    </div>
+    <div class="et-c-row">
+      <button type="button" class="et-c-ghost" id="etcToLab" data-et-t="et.spliff.c.toLab">the lab's science panel</button>
+      <a class="et-c-ghost" href="https://github.com/beehive-nature/beehive-nature/blob/main/surfaces/fleet-hosted/lab/spliff-lab.html" target="_blank" rel="noopener noreferrer"><span data-et-t="et.spliff.c.src">fork the template ↗</span><span class="et-sr"> (opens in a new tab)</span></a>
+    </div>
+  </div>
+</section>
+<h2 class="et-archive-h" id="etArchive" tabindex="-1" data-et-t="et.spliff.archive">the whole spliff lab</h2>
 <div class="hdr"><h1>BN Spliff Lab</h1><p>bnature.social - Science-Based Tobacco + Cannabis Blender v2.0</p></div>
 <div class="wrap">
 
@@ -245,6 +540,185 @@ scales:{r:{beginAtZero:true,max:10,ticks:{color:'#555',backdropColor:'transparen
 plugins:{legend:{labels:{color:'#bbb',font:{size:10}}}}}});
 doUpdate();
 };
+</script>
+<script>
+/* ETERNAL FRONT — one data layer, three renderers (docs/design/eternal). The lab's own model is the source:
+   TOB, CAN, TIDS, CIDS, INTENT, PRESETS, DECARB and BIOAVAIL (its globals), its gram inputs and selects, and
+   the numbers doUpdate() prints. Every change goes through the lab's own controls: the intention is its own
+   select (change -> doIntention), a recipe is its own button (doPreset), a gram is its own input (input ->
+   doUpdate). The lab writes no storage and no front does. Its figures and its own caution are carried as it
+   gives them; no front adds advice. */
+(function(){
+  var $=function(id){return document.getElementById(id);};
+  var T=function(k,f){var t=window.BNRLanguage&&window.BNRLanguage.text;return t?t(k,f):f;};
+  var esc=function(v){return String(v==null?'':v).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});};
+  var fill=function(s,o){return String(s).replace(/\{(\w+)\}/g,function(m,k){return o[k]==null?m:o[k];});};
+  var r1=function(x){return Math.round(x*10)/10;};
+  var money=function(x){return '$'+x.toFixed(2);};
+  var D={ok:false,tob:[],can:[],T:0,C:0,total:0,spliffs:0,ratio:'',avgThca:0,thca:0,thc:0,abs:0,target:0,match:false,cost:0,per:0,intent:'',intents:[],batch:0,batches:[],presets:[],preset:'',page:{},want:{},agree:false,caution:'',varies:''};
+  var R={sel:'',pour:0,pourWait:0,poured:false};
+
+  /* ── the one data layer: the lab's own model, read where it lives ── */
+  var g=function(id){var e=$('g_'+id);return e?parseFloat(e.value)||0:0;};
+  var nameOf=function(id){var e=$('g_'+id),c=e&&e.closest('.card'),b=c&&c.querySelector('b');return b?b.textContent.trim():id;};
+  function labButtons(){return [].filter.call(document.querySelectorAll('button'),function(b){return !b.closest('#eternal');});}
+  function read(){
+    var TB=window.TOB||{},CN=window.CAN||{},TI=window.TIDS||[],CI=window.CIDS||[],IN=window.INTENT||{},PR=window.PRESETS||{},DC=window.DECARB,BA=window.BIOAVAIL;
+    D.decarb=DC;D.bioavail=BA;
+    D.tob=TI.map(function(id){return {id:id,n:nameOf(id),p:TB[id].p,g:g(id)};});
+    D.can=CI.map(function(id){return {id:id,n:nameOf(id),p:CN[id].p,t:CN[id].t,g:g(id)};});
+    D.T=D.tob.reduce(function(a,x){return a+x.g;},0);D.C=D.can.reduce(function(a,x){return a+x.g;},0);D.total=D.T+D.C;
+    D.spliffs=Math.round(D.total/0.9);
+    D.ratio=Math.round(D.T>0?D.T/(D.T+D.C)*100:0)+':'+Math.round(D.C>0?D.C/(D.T+D.C)*100:0);
+    var w=0;D.can.forEach(function(x){w+=x.t*x.g;});D.avgThca=D.C>0?w/D.C:0;
+    var tm=D.C*D.avgThca/100*1000,th=tm*DC,ab=th*BA;
+    D.thca=D.spliffs>0?tm/D.spliffs:0;D.thc=D.spliffs>0?th/D.spliffs:0;D.abs=D.spliffs>0?ab/D.spliffs:0;
+    var sel=$('intention');D.intent=sel?sel.value:'';D.target=(IN[D.intent]||{}).mg||0;D.intentName=(IN[D.intent]||{}).name||'';
+    D.match=Math.abs(D.abs-D.target)<D.target*0.3;
+    D.intents=sel?[].map.call(sel.options,function(o){var m=/\(~(\d+)mg(\+?)\)/.exec(o.textContent);return {k:o.value,full:o.textContent.trim(),name:o.textContent.split(' (')[0].replace(/\s+-\s+/,' · ').trim().toLowerCase(),mg:(IN[o.value]||{}).mg,plus:!!(m&&m[2])};}):[];
+    var bs=$('batchcount');D.batch=bs?parseInt(bs.value)||50:50;D.batches=bs?[].map.call(bs.options,function(o){return o.value;}):[];
+    var c=0;D.tob.forEach(function(x){if(x.g>0)c+=x.g*(x.p/454);});D.can.forEach(function(x){if(x.g>0)c+=x.g*(x.p/28);});D.cost=c;D.per=D.spliffs>0?c/D.spliffs:0;
+    var btns=labButtons();
+    D.presets=Object.keys(PR).map(function(k){var b=btns.filter(function(x){return x.getAttribute('onclick')==="doPreset('"+k+"')";})[0],full=b?b.textContent.trim():k,p=PR[k];
+      return {k:k,name:full.split(' - ')[0].toLowerCase(),sub:(full.split(' - ')[1]||'').toLowerCase(),intent:p.int,match:p.int===D.intent&&D.tob.every(function(x){return (p.t[x.id]||0)===x.g;})&&D.can.every(function(x){return (p.c[x.id]||0)===x.g;})};});
+    D.preset=(D.presets.filter(function(p){return p.match;})[0]||{}).k||'';
+    var t=function(id){var e=$(id);return e?e.textContent.trim():'';};
+    var sp=$('sciencePanel'),calcs=sp?[].map.call(sp.querySelectorAll('.calc'),function(e){return e.textContent.trim();}):[],notes=sp?[].map.call(sp.querySelectorAll('.note'),function(e){return e.textContent.trim();}):[];
+    D.page={total:t('show_total'),spliffs:t('show_spliffs'),ratio:t('show_ratio'),thcaLine:calcs[1]||'',thcLine:calcs[2]||'',result:sp&&sp.querySelector('.result')?sp.querySelector('.result').textContent.trim():'',targetLine:notes[1]||'',cost:t('totalCost'),per:t('perSpliff')};
+    D.want={total:Math.round(D.total)+'g',spliffs:String(D.spliffs),ratio:D.ratio,thcaLine:'THCA per spliff: '+Math.round(D.thca)+'mg',thcLine:'After decarb (x0.877): '+Math.round(D.thc)+'mg THC',result:Math.round(D.abs)+'mg absorbed THC per spliff',targetLine:'Target: '+D.target+'mg ('+D.intentName+') — Currently '+(D.match?'ON TARGET':'ADJUST NEEDED'),cost:money(D.cost),per:money(D.per)};
+    D.agree=Object.keys(D.want).every(function(k){return D.page[k]===D.want[k];});
+    D.caution=notes[0]||'';var vm=/(Actual varies[^.]*\.)/.exec(D.caution);D.varies=vm?vm[1]:'';
+    D.ok=D.tob.length>0&&D.can.length>0&&typeof DC==='number'&&typeof BA==='number';
+  }
+
+  /* ── the lab's own controls: every change goes through them ── */
+  function intent(k){var s=$('intention');if(!s)return;s.value=k;s.dispatchEvent(new Event('change',{bubbles:true}));update();}
+  function preset(k){var b=labButtons().filter(function(x){return x.getAttribute('onclick')==="doPreset('"+k+"')";})[0];if(b)b.click();update();}
+  function setG(id,v){var e=$('g_'+id);if(!e)return;e.value=String(Math.max(0,v));e.dispatchEvent(new Event('input',{bubbles:true}));update();}
+  function pour(id,d){setG(id,r1(g(id)+d));}
+  function batch(v){var s=$('batchcount');if(!s)return;s.value=String(v);s.dispatchEvent(new Event('change',{bubbles:true}));update();}
+  function toLab(el,focus){if(!el)return;var still=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;el.scrollIntoView({behavior:still?'auto':'smooth',block:'start'});if(focus)try{focus.focus({preventScroll:true});}catch(e){}}
+  var about=function(i){return i.plus?fill(T('et.spliff.aboutPlus','about {mg} mg or more'),{mg:i.mg}):fill(T('et.spliff.about','about {mg} mg'),{mg:i.mg});};
+  var band=function(){return D.match?T('et.spliff.inBand','within the lab\'s 30% band'):T('et.spliff.outBand','outside the lab\'s 30% band');};
+
+  /* ── NEW BEE ── */
+  function row(l,v,c,sub){return '<div class="et-b-row"><span>'+esc(l)+(sub?'<small>'+esc(sub)+'</small>':'')+'</span><small'+(c?' class="'+c+'"':'')+'>'+esc(v)+'</small></div>';}
+  var chev='<svg class="et-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>';
+  function bee(){
+    $('etBeeCaution').textContent=D.varies?fill(T('et.spliff.b.caution','an estimate. in the lab\'s words: “{v}”'),{v:D.varies}):T('et.spliff.b.cautionNone','an estimate. the lab\'s own caution sits in its dose calculation below.');
+    $('etBeeIntent').innerHTML='<div class="et-b-group">'+esc(T('et.spliff.b.intentH','how strong, absorbed in each spliff'))+'</div>'+D.intents.map(function(i){var on=i.k===D.intent;return '<button type="button" class="et-b-row" data-i="'+esc(i.k)+'" aria-pressed="'+on+'"><span>'+esc(i.name)+'<small>'+esc(about(i))+'</small></span><small>'+(on?'✓':chev)+'</small></button>';}).join('');
+    $('etBeeSum').innerHTML='<div class="et-b-group">'+esc(T('et.spliff.b.sumH','this batch, as the lab works it out'))+'</div>'+
+      row(T('et.spliff.b.abs','absorbed in each spliff'),Math.round(D.abs)+' mg',D.match?'et-ok':'',T('et.spliff.b.absS','the lab\'s estimate'))+
+      row(T('et.spliff.b.target','the intention'),D.target+' mg','',band())+
+      row(T('et.spliff.b.spliffs','spliffs in the batch'),D.spliffs,'',fill(T('et.spliff.b.spliffsS','{g} g at 0.9 g each'),{g:Math.round(D.total)}))+
+      row(T('et.spliff.b.ratio','tobacco to cannabis'),D.ratio)+
+      row(T('et.spliff.b.per','each spliff costs'),money(D.per));
+    $('etBeeHow').innerHTML='<div class="et-b-group">'+esc(T('et.spliff.b.howH','how the lab gets there, for one spliff'))+'</div>'+
+      row(T('et.spliff.b.thca','thca in it'),Math.round(D.thca)+' mg')+
+      row(T('et.spliff.b.thc','after heat turns it to thc'),Math.round(D.thc)+' mg','',fill(T('et.spliff.b.thcS','× {d}, the lab\'s figure'),{d:D.decarb}))+
+      row(T('et.spliff.b.absorbed','absorbed'),Math.round(D.abs)+' mg','',fill(T('et.spliff.b.absorbedS','about {b}%, the lab\'s average'),{b:Math.round(D.bioavail*100)}));
+    $('etBeePresets').innerHTML='<div class="et-b-group">'+esc(T('et.spliff.b.presets','or start from one of the lab\'s recipes'))+'</div>'+D.presets.map(function(p){var on=p.k===D.preset;return '<button type="button" class="et-b-row" data-p="'+esc(p.k)+'" aria-pressed="'+on+'"><span>'+esc(p.name)+'<small>'+esc(p.sub)+'</small></span><small>'+(on?'✓':chev)+'</small></button>';}).join('');
+  }
+
+  /* ── RAVER: three rings ── */
+  var RMAX=138,RSTONE=174;
+  function pt(r,deg){var a=(deg-90)*Math.PI/180;return [(r*Math.cos(a)).toFixed(2),(r*Math.sin(a)).toFixed(2)];}
+  function rings(){
+    var svg=$('etRg');if(!svg)return;var h='',k=RMAX/Math.sqrt(Math.max(D.thca,D.target,1)),rr=function(mg){return Math.max(0,k*Math.sqrt(Math.max(0,mg)));};
+    h+='<circle class="et-rg-bed" r="'+(RMAX+8)+'"/>';
+    h+='<circle class="et-rg-thca" r="'+rr(D.thca).toFixed(1)+'"/><circle class="et-rg-thc" r="'+rr(D.thc).toFixed(1)+'"/><circle class="et-rg-abs'+(D.match?' et-in':'')+'" r="'+rr(D.abs).toFixed(1)+'"/>';
+    h+='<circle class="et-rg-target-under" r="'+rr(D.target).toFixed(1)+'"/><circle class="et-rg-target" r="'+rr(D.target).toFixed(1)+'"/>';
+    var n=D.intents.length,span=270;
+    D.intents.forEach(function(i,j){var a=-135+(n>1?span*j/(n-1):0),c=pt(RSTONE,a),on=i.k===D.intent;
+      h+='<g class="et-rg-stone" role="button" tabindex="0" data-i="'+esc(i.k)+'" aria-pressed="'+on+'" aria-label="'+esc(i.name+', '+about(i))+'" transform="translate('+c[0]+' '+c[1]+')"><circle class="et-hit" r="26"/><circle class="et-rg-st" r="21"/><text class="et-rg-mg" y="5" text-anchor="middle">'+esc(i.mg)+'</text></g>';});
+    svg.innerHTML=h;
+  }
+  function raver(){
+    var cur=D.intents.filter(function(i){return i.k===D.intent;})[0]||{name:''};
+    $('etRgHint').textContent=fill(T('et.spliff.r.hint','{n} · tap a stone'),{n:cur.name.split(' · ')[0]});
+    $('etRgLegend').innerHTML='<span><i class="et-lg-thca"></i>'+esc(fill(T('et.spliff.r.lgThca','thca in it · {x} mg'),{x:Math.round(D.thca)}))+'</span><span><i class="et-lg-thc"></i>'+esc(fill(T('et.spliff.r.lgThc','after heat · {x} mg'),{x:Math.round(D.thc)}))+'</span><span><i class="et-lg-abs'+(D.match?' et-in':'')+'"></i>'+esc(fill(T('et.spliff.r.lgAbs','absorbed · {x} mg'),{x:Math.round(D.abs)}))+'</span><span><i class="et-lg-target"></i>'+esc(fill(T('et.spliff.r.lgTarget','intention · {x} mg'),{x:D.target}))+'</span>';
+    var card=$('etRgCard'),s=D.can.filter(function(x){return x.id===R.sel;})[0];
+    if(s)card.innerHTML='<span class="et-rk">'+esc(r1(s.g))+'</span><div><b>'+esc(s.n.toLowerCase()+' · '+r1(s.g)+' g')+'</b><span>'+esc(fill(T('et.spliff.r.strainS','{t}% thca · ${p} an ounce · hold to pour 0.1 g'),{t:s.t.toFixed(1),p:s.p}))+'</span></div>';
+    else card.innerHTML='<span class="et-rk">'+esc(Math.round(D.abs))+'</span><div><b>'+esc(fill(T('et.spliff.r.cardH','{x} mg absorbed · {band}'),{x:Math.round(D.abs),band:band()}))+'</b><span>'+esc(fill(T('et.spliff.r.cardS','{n} spliffs of 0.9 g · {r} tobacco to cannabis · {c} each · {v}'),{n:D.spliffs,r:D.ratio,c:money(D.per),v:D.varies?D.varies.toLowerCase():T('et.spliff.r.est','the lab\'s estimate')}))+'</span></div>';
+    $('etRgPresets').innerHTML=D.presets.map(function(p){return '<button type="button" class="et-r-ghost" data-p="'+esc(p.k)+'" aria-pressed="'+(p.k===D.preset)+'">'+esc(p.name)+'</button>';}).join('');
+    $('etRgStrains').innerHTML=D.can.map(function(x,i){return '<button type="button" class="et-rg-tile" data-s="'+esc(x.id)+'" aria-pressed="'+(R.sel===x.id)+'"><i class="et-fl-dot et-rg-d'+i+'"></i><span>'+esc(x.n.toLowerCase())+'</span><b>'+esc(r1(x.g)+' g')+'</b></button>';}).join('');
+    $('etRgNote').textContent=fill(T('et.spliff.r.note','a stone sets the lab\'s intention and it sizes the cannabis for {b} spliffs · hold a strain to pour 0.1 g at a time'),{b:D.batch});
+    rings();
+  }
+  function pourStart(id){pourStop();R.poured=false;R.pourWait=setTimeout(function(){R.pour=setInterval(function(){R.poured=true;R.sel=id;pour(id,0.1);},400);},450);}
+  function pourStop(){clearTimeout(R.pourWait);clearInterval(R.pour);R.pourWait=0;R.pour=0;}
+
+  /* ── CYPHERPUNK ── */
+  function cy(){
+    $('etcPath').textContent='fleet-hosted/lab/spliff-lab.html · '+(D.page.result?'doUpdate() ran':'doUpdate() not run yet');
+    $('etcChips').innerHTML='<span class="et-on">writes no storage</span><span>'+esc('intention '+D.intent+' · '+D.target+' mg')+'</span><span>'+esc('DECARB '+D.decarb+' · BIOAVAIL '+D.bioavail)+'</span><span class="'+(D.agree?'et-ok':'et-no')+'">'+esc(D.agree?'agrees with the page ✓':'differs from the page')+'</span>';
+    var is=$('etcIntent');if(is.options.length!==D.intents.length)is.innerHTML=D.intents.map(function(i){return '<option value="'+esc(i.k)+'">'+esc(i.k+' · '+i.mg+' mg')+'</option>';}).join('');if(document.activeElement!==is)is.value=D.intent;
+    var bs=$('etcBatch');if(bs.options.length!==D.batches.length)bs.innerHTML=D.batches.map(function(b){return '<option value="'+esc(b)+'">'+esc(b)+'</option>';}).join('');if(document.activeElement!==bs)bs.value=String(D.batch);
+    $('etcPresets').innerHTML=D.presets.map(function(p){return '<button type="button" class="et-c-ghost" data-p="'+esc(p.k)+'">'+esc("doPreset('"+p.k+"')")+'</button>';}).join('');
+    var table=function(id,rows,sub){var tb=$(id).querySelector('tbody');if(tb.children.length!==rows.length)tb.innerHTML=rows.map(function(x){return '<tr><td>'+esc(x.id)+'</td><td class="et-wrap">'+esc(sub(x))+'</td><td class="et-num"><input type="number" min="0" step="'+(id==='etcTob'?'1':'0.1')+'" inputmode="decimal" data-g="'+esc(x.id)+'" aria-label="'+esc(x.n+' grams')+'"></td></tr>';}).join('');
+      [].forEach.call(tb.querySelectorAll('input[data-g]'),function(inp){if(document.activeElement!==inp)inp.value=g(inp.getAttribute('data-g'));});};
+    table('etcTob',D.tob,function(x){return '$'+x.p;});table('etcCan',D.can,function(x){return x.t.toFixed(1)+'% · $'+x.p;});
+    $('etcPipe').innerHTML=[
+      ['totals',fill('tobacco {t} g + cannabis {c} g = {s} g',{t:r1(D.T),c:r1(D.C),s:r1(D.total)})],
+      ['spliffs',fill('round({s} / 0.9) = {n}',{s:r1(D.total),n:D.spliffs})],
+      ['thca, weighted',D.C>0?fill('Σ thca × g / {c} = {a}%',{c:r1(D.C),a:D.avgThca.toFixed(2)}):'no cannabis → 0'],
+      ['thca per spliff',fill('{c} × {a}% × 1000 / {n} = {x} mg',{c:r1(D.C),a:D.avgThca.toFixed(2),n:D.spliffs,x:D.thca.toFixed(1)})],
+      ['after heat',fill('× DECARB {d} = {x} mg thc',{d:D.decarb,x:D.thc.toFixed(1)})],
+      ['absorbed',fill('× BIOAVAIL {b} = {x} mg · the lab\'s own estimate',{b:D.bioavail,x:D.abs.toFixed(1)})],
+      ['target',fill('|{x} − {t}| < 0.3 × {t} → {v}',{x:D.abs.toFixed(1),t:D.target,v:D.match?'on target':'adjust needed'})],
+      ['cost',fill('Σ tobacco g × $/lb / 454 + Σ cannabis g × $/oz / 28 = {c} · / {n} = {p} a spliff',{c:money(D.cost),n:D.spliffs,p:money(D.per)})]
+    ].map(function(s,i){return '<li class="'+(i===6?(D.match?'et-done':'et-now'):'et-done')+'"><b>'+esc(s[0])+'</b><p>'+esc(s[1])+'</p></li>';}).join('');
+    var yn=function(a,b){return esc(a)+' · '+esc(b)+(String(a)===String(b)?' <span class="et-st-ok">✓</span>':' <span class="et-st-wait">≠</span>');};
+    /* the page's own strings, read as numbers so the receipt keeps one voice; D.agree compares them whole */
+    var norm=function(k,v){if(!v)return 'not read';var m;
+      if(k==='total')return v.replace(/g$/,' g');
+      if(k==='thcaLine'&&(m=/(\d+)mg/.exec(v)))return m[1]+' mg thca';
+      if(k==='thcLine'&&(m=/:\s*(\d+)mg/.exec(v)))return m[1]+' mg thc';
+      if(k==='result'&&(m=/^(\d+)mg/.exec(v)))return m[1]+' mg absorbed';
+      if(k==='targetLine'&&(m=/Target: (\d+)mg.*Currently (ON TARGET|ADJUST NEEDED)/.exec(v)))return m[1]+' mg · '+m[2].toLowerCase();
+      return v;};
+    $('etcReceipt').innerHTML=[['show_total','total'],['show_spliffs','spliffs'],['show_ratio','ratio'],['thca line','thcaLine'],['decarb line','thcLine'],['result','result'],['target line','targetLine'],['totalCost','cost'],['perSpliff','per']].map(function(r){return '<tr><th>'+esc(r[0])+'</th><td>'+yn(norm(r[1],D.page[r[1]]),norm(r[1],D.want[r[1]]))+'</td></tr>';}).join('')+'<tr><th>writes</th><td>'+esc('none · no localStorage key, no request')+'</td></tr>';
+    $('etcQuote').innerHTML='<b>'+esc(T('et.spliff.c.quoteH','the lab\'s own caution'))+'</b> · '+esc(D.caution||T('et.spliff.c.noQuote','not read here'));
+    $('etcFinding').innerHTML='<b>'+esc(T('et.spliff.c.findH','two spliff counts'))+'</b> · '+esc(D.batch!==D.spliffs?fill(T('et.spliff.c.find','doIntention() sizes the cannabis for batchcount {b} spliffs; doUpdate() divides by round(total / 0.9) = {n}. the two counts differ, so the absorbed figure reads {x} mg against the {t} mg intention. doBatch() only re-runs doUpdate(): changing batchcount alone moves no gram.'),{b:D.batch,n:D.spliffs,x:Math.round(D.abs),t:D.target}):fill(T('et.spliff.c.findSame','batchcount {b} equals round(total / 0.9): the two counts agree. doBatch() only re-runs doUpdate(): changing batchcount alone moves no gram.'),{b:D.batch}));
+  }
+
+  function update(){read();render();}
+  var EN={};
+  function tr(){[].forEach.call(document.querySelectorAll('#eternal [data-et-t],#etArchive[data-et-t]'),function(e){var k=e.getAttribute('data-et-t');if(!(k in EN))EN[k]=e.textContent;e.textContent=T(k,EN[k]);});}
+  function render(){bee();raver();cy();}
+  function all(){tr();render();}
+  function wire(){
+    var ev=$('eternal');if(!ev)return;
+    /* bee */
+    $('etBeeIntent').addEventListener('click',function(e){var b=e.target.closest('[data-i]');if(b)intent(b.getAttribute('data-i'));});
+    $('etBeePresets').addEventListener('click',function(e){var b=e.target.closest('[data-p]');if(b)preset(b.getAttribute('data-p'));});
+    $('etBeeGrams').addEventListener('click',function(){toLab($('g_pineapple')&&$('g_pineapple').closest('.card'),$('g_pineapple'));});
+    $('etBeeSci').addEventListener('click',function(){toLab($('sciencePanel'));});
+    /* raver */
+    $('etRg').addEventListener('click',function(e){var s=e.target.closest('.et-rg-stone');if(s){R.sel='';intent(s.getAttribute('data-i'));}});
+    $('etRg').addEventListener('keydown',function(e){if(e.key!=='Enter'&&e.key!==' ')return;var s=e.target.closest('.et-rg-stone');if(!s)return;e.preventDefault();var k=s.getAttribute('data-i');intent(k);var n=document.querySelector('#etRg .et-rg-stone[data-i="'+k+'"]');if(n)n.focus();});
+    $('etRgPresets').addEventListener('click',function(e){var b=e.target.closest('[data-p]');if(b){R.sel='';preset(b.getAttribute('data-p'));}});
+    var st=$('etRgStrains');
+    st.addEventListener('pointerdown',function(e){var b=e.target.closest('[data-s]');if(!b)return;try{b.setPointerCapture(e.pointerId);}catch(x){}pourStart(b.getAttribute('data-s'));});
+    ['pointerup','pointercancel','pointerleave'].forEach(function(t){st.addEventListener(t,pourStop);});
+    st.addEventListener('contextmenu',function(e){if(e.target.closest('[data-s]'))e.preventDefault();});
+    st.addEventListener('click',function(e){var b=e.target.closest('[data-s]');if(!b)return;pourStop();if(R.poured){R.poured=false;return;}var id=b.getAttribute('data-s');R.sel=R.sel===id?'':id;raver();});
+    $('etRgGo').addEventListener('click',function(){toLab($('g_pineapple')&&$('g_pineapple').closest('.card'),$('g_pineapple'));});
+    /* cypherpunk */
+    $('etcIntent').addEventListener('change',function(){intent(this.value);});
+    $('etcBatch').addEventListener('change',function(){batch(this.value);});
+    $('etcPresets').addEventListener('click',function(e){var b=e.target.closest('[data-p]');if(b)preset(b.getAttribute('data-p'));});
+    ['etcTob','etcCan'].forEach(function(id){$(id).addEventListener('change',function(e){var i=e.target.closest('input[data-g]');if(i)setG(i.getAttribute('data-g'),parseFloat(i.value)||0);});});
+    $('etcRun').addEventListener('click',function(){intent($('etcIntent').value);});
+    $('etcToLab').addEventListener('click',function(){toLab($('sciencePanel'));});
+    /* the lab's own controls move the fronts too */
+    ['input','change','click'].forEach(function(t){document.addEventListener(t,function(e){if(e.target&&e.target.closest&&!e.target.closest('#eternal'))update();});});
+    document.addEventListener('blang',all);
+  }
+  function boot(){read();wire();all();window.__eternal={data:D,raver:R,intent:intent,preset:preset};}
+  /* after the lab's own window.onload (its chart and first doUpdate): that handler was set first */
+  if(document.readyState==='complete')boot();else window.addEventListener('load',boot);
+})();
 </script>
 <script src="../../agent-dock.js?v=4"></script>
 <script src="../../tour.js?v=42"></script>

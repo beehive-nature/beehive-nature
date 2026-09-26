@@ -140,10 +140,248 @@ footer a{display:inline-block;padding-block:12px;margin-block:-12px}
 [style*="letter-spacing:.06em"]+.law{margin-top:6px}
 body[data-reg="raver"] h2{font-size:1rem}
 body[data-reg="cypherpunk"] h2{font-size:.875rem}
-</style></head><body data-reg="bee" data-bee-theme="shared">
+/* ── ETERNAL FRONT (docs/design/eternal) — every value is a skaists token (skaists.css, compiled
+   from docs/design/skaists/tokens.json): no hand-picked hex, size or corner. Measured by
+   e2e/skaists-conformance.mjs. One register visible at a time; new bee is the default. ── */
+#eternal{width:100%;max-width:30rem;margin:var(--sk-s2) auto 0;padding:0 var(--sk-s3);box-sizing:border-box;text-align:start}
+#eternal *{box-sizing:border-box}
+#eternal>.et-r,#eternal>.et-c{display:none}
+body[data-reg="raver"] #eternal>.et-b,body[data-reg="cypherpunk"] #eternal>.et-b{display:none}
+body[data-reg="raver"] #eternal>.et-r{display:block}
+body[data-reg="cypherpunk"] #eternal>.et-c{display:block}
+#eternal [hidden]{display:none!important}
+#eternal button{margin:0;color:inherit}
+#eternal p{margin:0}
+#eternal svg{display:block}
+#eternal :focus-visible{outline:2px solid var(--sk-focus);outline-offset:3px}
+.et-center{text-align:center}
+.et-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.et-archive-h{width:100%;max-width:30rem;margin:var(--sk-s5) auto var(--sk-s1);padding:var(--sk-s4) var(--sk-s3) 0;border-top:1px solid var(--sk-line);color:var(--sk-ink);box-sizing:border-box}
+body[data-reg="bee"] .et-archive-h{font:400 28px/1.1 var(--sk-font-bee-serif)}
+body[data-reg="raver"] .et-archive-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em}
+body[data-reg="cypherpunk"] .et-archive-h{font:600 15px/1.45 var(--sk-font-mono)}
+.et-bchip{display:inline-flex;align-items:baseline;gap:var(--sk-s1);padding:0 var(--sk-s2);border-radius:var(--sk-radius-pill);background:var(--sk-b-chip);color:var(--sk-b-value)!important;font-weight:600;white-space:nowrap}
+
+/* NEW BEE — one question at a time */
+.et-b{color:var(--sk-ink);display:flex;flex-direction:column;gap:var(--sk-s3);font-family:var(--sk-font-bee-sans)}
+.et-b-step{display:flex;flex-direction:column;gap:var(--sk-s3)}
+.et-b-mark{font:400 18px/1.2 var(--sk-font-house);color:var(--sk-sovereign)}
+.et-b-h{margin:0;font:400 40px/1.05 var(--sk-font-bee-serif);color:var(--sk-ink);letter-spacing:0}
+.et-b-lede{margin:0;font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink-mut);text-wrap:pretty}
+.et-b-q{margin:0;font:600 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+.et-b-guard{display:flex;align-items:center;gap:var(--sk-s2);min-height:var(--sk-control-min);padding:var(--sk-s1) var(--sk-s3);border-radius:var(--sk-radius);background:var(--sk-guard-wash);color:var(--sk-guard);font:600 16px/1.45 var(--sk-font-bee-sans)}
+.et-b-guard svg,.et-b-term i svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.et-b-rows{display:flex;flex-direction:column;background:var(--sk-bg-card);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl);overflow:hidden}
+.et-b-row{display:flex;align-items:center;justify-content:space-between;gap:var(--sk-s2);min-height:var(--sk-control-row);padding:var(--sk-s1) var(--sk-s3);border:0;border-bottom:1px solid var(--sk-line-soft);background:transparent;text-align:start;width:100%;font:500 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink);border-radius:0}
+.et-b-row:last-child{border-bottom:0}
+button.et-b-row{cursor:pointer}
+.et-b-row>span{display:flex;flex-direction:column;min-width:0}
+.et-b-row em{font-style:normal;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+.et-b-row small{display:flex;align-items:center;gap:var(--sk-s1);flex:none;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+.et-b-row small.free{color:var(--sk-verified)}
+.et-b-row[aria-pressed="true"],.et-b-row[aria-expanded="true"]{background:var(--sk-sovereign-tint);color:var(--sk-sovereign-strong);font-weight:600}
+.et-b-row[aria-pressed="true"] :is(small,em),.et-b-row[aria-expanded="true"] :is(small,em){color:var(--sk-sovereign-strong)}
+.et-b-row .chev{flex:none;transition:transform var(--dur,.26s)}
+.et-b-row[aria-expanded="true"] .chev{transform:rotate(90deg)}
+.et-b-row .dot{width:22px;height:22px;flex:none;border-radius:var(--sk-radius-pill);border:1.5px solid var(--sk-ink-mut);display:flex;align-items:center;justify-content:center}
+.et-b-row[aria-pressed="true"] .dot{border-color:var(--sk-sovereign-strong)}
+.et-b-row[aria-pressed="true"] .dot::after{content:"";width:12px;height:12px;border-radius:var(--sk-radius-pill);background:var(--sk-sovereign-strong)}
+.et-b-act{display:flex;flex-direction:column;gap:var(--sk-s1);margin-top:var(--sk-s1)}
+.et-b-primary{display:flex;align-items:center;justify-content:center;width:100%;height:var(--sk-control-primary);padding:0 var(--sk-s3);border-radius:var(--sk-radius-lg);border:0;background:var(--sk-primary);color:var(--sk-on-primary)!important;font:600 17px/1.2 var(--sk-font-bee-sans)!important;cursor:pointer;text-decoration:none;text-align:center}
+.et-b-primary:disabled{background:var(--sk-bg-well);color:var(--sk-ink-mut)!important;cursor:not-allowed}
+.et-b-link{min-height:var(--sk-control-min);display:flex;align-items:center;justify-content:center;border:0;background:transparent;font:600 16px/1.45 var(--sk-font-bee-sans)!important;color:var(--sk-link)!important;text-decoration:none;cursor:pointer;text-align:center}
+.et-b-link:hover{color:var(--sk-link-hover)!important}
+.et-b-foot{margin:0;text-align:center;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+.et-b-back{align-self:flex-start;min-height:var(--sk-control-min);border:0;background:none;font:600 16px/1.45 var(--sk-font-bee-sans)!important;color:var(--sk-link)!important;cursor:pointer;padding:0}
+.et-b-term{display:flex;gap:var(--sk-s2);align-items:flex-start;padding:var(--sk-s2) var(--sk-s3);border-bottom:1px solid var(--sk-line-soft)}
+.et-b-term:last-child{border-bottom:0}
+.et-b-term i{width:36px;height:36px;border-radius:var(--sk-radius-pill);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong);display:flex;align-items:center;justify-content:center;flex:none;font-style:normal}
+.et-b-term b{display:block;font:600 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+.et-b-term span{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+.et-b-tick{width:78px;height:78px;margin:var(--sk-s2) auto 0;border-radius:var(--sk-radius-pill);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong);display:flex;align-items:center;justify-content:center;font:400 40px/1 var(--sk-font-bee-serif)}
+.et-b-card{background:var(--sk-sovereign-tint);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl);padding:var(--sk-s3)}
+.et-b-card h3{margin:0 0 var(--sk-s1);font:400 28px/1.1 var(--sk-font-bee-serif);color:var(--sk-sovereign-strong)}
+.et-b-card p{margin:0;font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+
+/* RAVER — everything through art; lowercase is allowed joy; the numbers never change */
+.et-r{color:var(--sk-ink);font-family:var(--sk-font-raver-body)}
+.et-r-top{display:flex;align-items:baseline;justify-content:space-between;gap:var(--sk-s2);flex-wrap:wrap}
+.et-r-h{margin:0;font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em;color:var(--sk-ink)}
+.et-r-hint{font:400 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+.et-r-art{width:100%;max-width:360px;margin:var(--sk-s3) auto var(--sk-s1);filter:drop-shadow(var(--sk-glow-sovereign));touch-action:manipulation}
+.et-r-art .seg{transition:fill var(--dur,.26s),opacity var(--dur,.26s)}
+.et-r-art [role="button"]{cursor:pointer}
+.et-r-art [role="button"]:focus{outline:none}
+.et-r-art [role="button"]:focus-visible .seg{stroke:var(--sk-ink);stroke-width:2}
+.et-r-legend{display:flex;justify-content:center;flex-wrap:wrap;gap:var(--sk-s1) var(--sk-s3);margin:var(--sk-s1) 0 var(--sk-s2);font:400 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+.et-r-legend span{display:flex;align-items:center;gap:var(--sk-s1)}
+.et-r-legend i{width:24px;height:12px;border-radius:var(--sk-radius-sm)}
+.et-r-card{display:flex;gap:var(--sk-s2);align-items:center;padding:var(--sk-s2) var(--sk-s3);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl);background:var(--sk-sovereign-tint);min-height:var(--sk-control-person)}
+.et-r-card .rk{width:44px;height:44px;border-radius:var(--sk-radius);background:var(--sk-sovereign-strong);color:var(--sk-bg);display:flex;align-items:center;justify-content:center;font:700 15px/1.2 var(--sk-font-raver-display);flex:none}
+.et-r-card b{display:block;font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink)}
+.et-r-card span{font:400 14px/1.25 var(--sk-font-raver-body);color:var(--sk-sovereign-soft)}
+.et-r-tiles{display:grid;grid-template-columns:1fr 1fr;gap:var(--sk-s2);margin:var(--sk-s1) 0 var(--sk-s3)}
+.et-r-tiles button{min-height:108px;padding:var(--sk-s2);border-radius:var(--sk-radius-xl);border:1.5px solid var(--sk-sovereign);background:var(--sk-sovereign-wash);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--sk-s1);font:700 14px/1.25 var(--sk-font-raver-body);color:var(--sk-sovereign-strong)!important;cursor:pointer;opacity:.62;transition:opacity var(--dur,.26s),box-shadow var(--dur,.26s);text-align:center}
+.et-r-tiles button small{font:400 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+.et-r-tiles button.et-dash{border:1.5px dashed var(--sk-guard);background:var(--sk-guard-wash);color:var(--sk-guard)!important}
+.et-r-tiles button[aria-pressed="true"]{opacity:1;border-color:var(--sk-you);box-shadow:var(--sk-glow-sovereign)}
+.et-r-tiles svg{width:26px;height:26px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.et-r-hold{position:relative;width:216px;height:216px;margin:0 auto}
+.et-r-hold svg{position:absolute;inset:0;width:100%;height:100%;transform:rotate(-90deg)}
+.et-r-hold .hold-track{fill:none;stroke:var(--sk-line);stroke-width:8}
+.et-r-hold .hold-prog{fill:none;stroke:var(--sk-biomass);stroke-width:8;stroke-linecap:round;stroke-dasharray:578;stroke-dashoffset:578}
+.et-r-holdbtn{position:absolute;inset:24px;border:0;background:var(--sk-primary);color:var(--sk-on-primary)!important;clip-path:polygon(50% 0,93% 25%,93% 75%,50% 100%,7% 75%,7% 25%);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;touch-action:none;user-select:none;-webkit-user-select:none;border-radius:0}
+.et-r-holdbtn b{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em}
+.et-r-holdbtn span{font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em}
+.et-r-holdbtn:disabled{background:var(--sk-sovereign-wash);color:var(--sk-sovereign-soft)!important;cursor:not-allowed}
+.et-r-note{margin:var(--sk-s2) 0 0;text-align:center;font:400 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+.et-r-big{margin:var(--sk-s2) 0 var(--sk-s1);text-align:center;font:700 60px/.95 var(--sk-font-raver-display);letter-spacing:-.02em;color:var(--sk-ink)}
+.et-r-pill{display:flex;align-items:center;justify-content:center;width:100%;height:58px;margin-top:var(--sk-s4);border:0;border-radius:var(--sk-radius-pill);background:var(--sk-primary);color:var(--sk-on-primary)!important;font:700 15px/1.2 var(--sk-font-raver-display)!important;letter-spacing:.04em;cursor:pointer;text-decoration:none}
+.et-r-ghost{display:flex;width:max-content;max-width:100%;align-items:center;justify-content:center;margin:var(--sk-s2) auto 0;min-height:var(--sk-control-min);padding:0 var(--sk-s2);border:0;background:none;color:var(--sk-link)!important;font:400 14px/1.25 var(--sk-font-raver-body)!important;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+@media (prefers-reduced-motion:reduce){.et-r-art .seg,.et-r-tiles button,.et-b-row .chev{transition:none}}
+
+/* CYPHERPUNK — the pipeline is the interface; every row is a fact you can check */
+.et-c{font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink)}
+.et-c-path{font:600 15px/1.45 var(--sk-font-mono);word-break:break-all;color:var(--sk-ink)}
+.et-c-chips{display:flex;flex-wrap:wrap;gap:var(--sk-s1);margin:var(--sk-s2) 0}
+.et-c-chips span{padding:2px var(--sk-s1);border:1px solid var(--sk-line);border-radius:4px;background:var(--sk-bg-card);font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-soft)}
+.et-c-chips span.on{border-color:var(--sk-guard);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong)}
+.et-c-chips span.ok{border-color:var(--sk-verified);color:var(--sk-verified)}
+.et-c-chips span.no{border-color:var(--sk-info);color:var(--sk-info)}
+.et-c-guard{display:flex;justify-content:space-between;align-items:center;gap:var(--sk-s2);flex-wrap:wrap;min-height:var(--sk-control-min);padding:var(--sk-s1) var(--sk-s3);border:1px dashed var(--sk-guard);border-radius:var(--sk-radius-sm);background:var(--sk-guard-wash);color:var(--sk-guard)}
+.et-c-guard b{font-weight:600;color:var(--sk-sovereign-strong)}
+.et-c-tab{width:100%;margin:var(--sk-s2) 0 var(--sk-s1);border-collapse:separate;border-spacing:0;border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm);overflow:hidden;background:var(--sk-bg-card);table-layout:auto}
+.et-c-tab th{padding:var(--sk-s1) var(--sk-s2);text-align:start;font:600 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);border-bottom:1px solid var(--sk-line);background:var(--sk-bg-well)}
+.et-c-tab td{height:var(--sk-control-min);padding:var(--sk-s1) var(--sk-s2);border-bottom:1px solid var(--sk-line);font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink);vertical-align:middle}
+.et-c-tab tr:last-child td{border-bottom:0}
+.et-c-tab td:first-child{color:var(--sk-guard)}
+.et-c-tab tr.pick{cursor:pointer}
+.et-c-tab tr.pick:hover td,.et-c-tab tr[aria-selected="true"] td{background:var(--sk-sovereign-tint)}
+.et-c-tab tr[aria-selected="true"] td:first-child{color:var(--sk-you)}
+.et-c-tab .ok{color:var(--sk-verified)}.et-c-tab .no{color:var(--sk-info)}.et-c-tab .gd{color:var(--sk-guard)}
+.et-c-h{margin:var(--sk-s4) 0 var(--sk-s2);font:600 15px/1.45 var(--sk-font-mono);color:var(--sk-ink);letter-spacing:0}
+.et-c-pipe{list-style:none;margin:0;padding:0;display:grid;gap:var(--sk-s2);counter-reset:p}
+.et-c-pipe li{display:grid;grid-template-columns:30px 1fr;gap:var(--sk-s1) var(--sk-s2);padding:var(--sk-s2) var(--sk-s3);border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm);background:var(--sk-bg-card);counter-increment:p}
+.et-c-pipe li::before{content:counter(p,decimal-leading-zero);color:var(--sk-guard);font-weight:600}
+.et-c-pipe li b{font-weight:600;color:var(--sk-ink)}
+.et-c-pipe li p{grid-column:2;margin:0;color:var(--sk-ink-soft)}
+.et-c-pipe li.done b{color:var(--sk-verified)}
+.et-c-pipe li.guard{border-style:dashed;border-color:var(--sk-guard)}
+.et-c-pipe li.guard b{color:var(--sk-guard)}
+.et-c-pipe li.now{border-color:var(--sk-ai);box-shadow:inset 0 0 0 1px var(--sk-ai)}
+.et-c-pipe li.now b{color:var(--sk-ai)}
+.et-c-pipe li.todo p{color:var(--sk-ink-mut)}
+.et-c-primary{display:flex;align-items:center;justify-content:center;width:100%;min-height:52px;margin-top:var(--sk-s3);padding:0 var(--sk-s2);border:0;border-radius:var(--sk-radius-sm);background:var(--sk-primary);color:var(--sk-on-primary)!important;font:600 14px/1.2 var(--sk-font-mono)!important;cursor:pointer;text-decoration:none;text-align:center}
+.et-c-primary:disabled{background:var(--sk-bg-well);color:var(--sk-ink-mut)!important;cursor:not-allowed}
+.et-c-kv{width:100%;border-collapse:collapse;border:1px solid var(--sk-line);background:var(--sk-bg-card)}
+.et-c-kv th{width:96px;padding:var(--sk-s2) var(--sk-s3);text-align:start;vertical-align:top;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);border-bottom:1px solid var(--sk-line)}
+.et-c-kv td{padding:var(--sk-s2) var(--sk-s3);border-bottom:1px solid var(--sk-line);word-break:break-word;color:var(--sk-ink)}
+.et-c-kv .no{color:var(--sk-info)}.et-c-kv .yes{color:var(--sk-verified)}.et-c-kv .sig{color:var(--sk-you)}.et-c-kv .gd{color:var(--sk-guard)}
+.et-c-verify{margin-top:var(--sk-s3);padding:var(--sk-s3);border-radius:var(--sk-radius-sm);background:var(--sk-bg-card)}
+.et-c-verify-h{font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);margin-bottom:var(--sk-s1)}
+.et-c-verify ol{margin:0;padding-inline-start:var(--sk-s4);display:grid;gap:var(--sk-s1);color:var(--sk-ink)}
+.et-c-row{display:grid;grid-template-columns:1fr 1fr;gap:var(--sk-s2);margin-top:var(--sk-s3)}
+.et-c-ghost{display:flex;align-items:center;justify-content:center;min-height:52px;padding:0 var(--sk-s1);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius-sm);background:transparent;color:var(--sk-ink)!important;text-decoration:none;text-align:center;font:600 14px/1.2 var(--sk-font-mono)!important;cursor:pointer}
+/* the kandi bar's own front details: the bar styles bare section/h2/button, so the front names itself */
+section#eternal{background:none;border:0;border-radius:0;padding:0;margin:0 auto var(--sk-s2);max-width:30rem}
+main>.et-archive-h{padding-inline:0;letter-spacing:0}
+#eternal .et-b-h{font:400 40px/1.05 var(--sk-font-bee-serif);letter-spacing:0;color:var(--sk-ink)}
+#eternal .et-r-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em;color:var(--sk-ink)}
+#eternal .et-c-h{font:600 15px/1.45 var(--sk-font-mono);letter-spacing:0;color:var(--sk-ink)}
+body[data-reg="bee"] .et-archive-h{font:400 28px/1.1 var(--sk-font-bee-serif);letter-spacing:0}
+body[data-reg="raver"] .et-archive-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em}
+body[data-reg="cypherpunk"] .et-archive-h{font:600 15px/1.45 var(--sk-font-mono);letter-spacing:0}
+#eternal button:disabled{opacity:1;cursor:default}
+.et-b-rowt{flex:1}
+.et-b-people{border-bottom:1px solid var(--sk-line-soft)}
+.et-b-person{display:flex;align-items:center;gap:var(--sk-s2);min-height:var(--sk-control-person);padding:var(--sk-s1) var(--sk-s3);border-top:1px solid var(--sk-line-soft)}
+.et-b-person i{width:40px;height:40px;border-radius:var(--sk-radius-pill);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong);display:flex;align-items:center;justify-content:center;font:600 14px/1.4 var(--sk-font-bee-sans);font-style:normal;flex:none}
+.et-b-person b{display:block;font:500 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+.et-b-person span{display:block;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+.et-b-more{padding:var(--sk-s2) var(--sk-s3);font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut);border-top:1px solid var(--sk-line-soft)}
+.et-r-legend .lg-right{background:var(--sk-biomass)}.et-r-legend .lg-cross{background:var(--sk-ai)}.et-r-legend .lg-left{background:var(--sk-sovereign)}.et-r-legend .lg-given{border:1.5px dashed var(--sk-ink-mut)}
+.et-r-art .bead,.et-r-art .make{cursor:pointer}
+.et-c-tab tr.names td{height:auto;padding:var(--sk-s1) var(--sk-s2);background:var(--sk-sovereign-tint);color:var(--sk-ink);font:500 12px/1.45 var(--sk-font-mono);word-break:break-all}
+
+/* ── THE WHOLE PAGE, dressed per register: the bar's own variables mapped onto skaists ── */
+html body[data-reg="bee"],html body[data-reg="bee"][data-bee-theme="shared"]{--bg:var(--sk-bg);--panel:var(--sk-bg-card);--well:var(--sk-bg-well);--line:var(--sk-line);--ink:var(--sk-ink);--dim:var(--sk-ink-mut);--faint:var(--sk-ink-mut);
+ --p:var(--sk-ai);--l:var(--sk-you);--u:var(--sk-info);--r:var(--sk-sovereign);--ok:var(--sk-verified);--amber:var(--sk-guard);--cyan:var(--sk-ai);--o:var(--sk-you);--s:var(--sk-info);background:var(--sk-bg);color:var(--sk-ink);font-family:var(--sk-font-bee-sans)}
+html body[data-reg="bee"] h1{font:400 40px/1.05 var(--sk-font-bee-serif);letter-spacing:0}
+html body[data-reg="bee"] main>section:not(#eternal){border-radius:var(--sk-radius-xl);background:var(--sk-bg-card)}
+html body[data-reg="bee"][data-bee-theme="shared"] button.act{background:var(--sk-bg-card);color:var(--sk-sovereign);border-color:var(--sk-ink);border-radius:var(--sk-radius)}
+html body[data-reg="raver"]{--bg:var(--sk-bg);--panel:var(--sk-bg-card);--well:var(--sk-bg-well);--line:var(--sk-line);--ink:var(--sk-ink);--dim:var(--sk-ink-soft);--faint:var(--sk-ink-mut);
+ --p:var(--sk-ai);--l:var(--sk-you);--u:var(--sk-info);--r:var(--sk-sovereign-soft);--ok:var(--sk-verified);--amber:var(--sk-guard);--cyan:var(--sk-ai);--o:var(--sk-you);--s:var(--sk-info);background:var(--sk-bg);font-family:var(--sk-font-raver-body)}
+html body[data-reg="raver"] h1{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em;text-shadow:none}
+html body[data-reg="raver"] main>section:not(#eternal){border-radius:var(--sk-radius-xl)}
+html body[data-reg="raver"] button.act{background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong);border-color:var(--sk-sovereign);border-radius:var(--sk-radius-pill);font-family:var(--sk-font-raver-body);font-size:14px}
+html body[data-reg="cypherpunk"]{--bg:var(--sk-bg);--panel:var(--sk-bg-card);--well:var(--sk-bg-well);--line:var(--sk-line);--ink:var(--sk-ink);--dim:var(--sk-ink-soft);--faint:var(--sk-ink-mut);
+ --p:var(--sk-ai);--l:var(--sk-you);--u:var(--sk-info);--r:var(--sk-sovereign-soft);--ok:var(--sk-verified);--amber:var(--sk-guard);--cyan:var(--sk-ai);--o:var(--sk-you);--s:var(--sk-info);background:var(--sk-bg);font-family:var(--sk-font-mono)}
+html body[data-reg="cypherpunk"] h1{font:600 15px/1.45 var(--sk-font-mono);letter-spacing:0;text-shadow:none}
+html body[data-reg="cypherpunk"] main>section:not(#eternal){border-radius:var(--sk-radius-sm)}
+html body[data-reg="cypherpunk"] button.act{background:transparent;color:var(--sk-ai);border-color:var(--sk-ai);border-radius:var(--sk-radius-sm);font-size:13px}
+</style>
+<link rel="stylesheet" href="skaists.css">
+</head><body data-reg="bee" data-bee-theme="shared">
 <main>
 <div class="arrival" id="arrival"></div>
 <canvas id="comet" aria-hidden="true"></canvas>
+<!-- ETERNAL FRONT (founder blueprint 2026-09-26, docs/design/eternal): three separate products in
+     one surface. ONE data layer (the bar's own committed arms, read through window.__kandi) drives
+     all three, so the facts cannot drift; each register has its own layout, graphic, gesture and
+     voice. Nothing here strings, gifts or keeps a piece: "make" opens the composer below, and
+     "gift it" presses that piece's own gift button, so every write stays with the bar's locked
+     transaction engine. -->
+<section id="eternal" aria-label="your kandi">
+
+  <!-- NEW BEE — a calm room: your arms as plain rows, one magenta action -->
+  <div class="et-b">
+    <div class="et-b-step">
+      <div class="et-b-mark" data-etk="et.kd.the-kandi-bar">the kandi bar</div>
+      <h2 class="et-b-h" data-etk="et.kd.your-kandi">your kandi</h2>
+      <div class="et-b-lede" data-etk="et.kd.string-beads-into-a-bracelet">string beads into a bracelet, name it, and hand it to a friend. it lives in this browser. no account.</div>
+      <div class="et-b-guard"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span data-etk="et.kd.what-someone-made-for-you-st">what someone made for you stays yours. it never trades.</span></div>
+      <div class="et-b-rows" id="etBeeRows"><div class="et-b-row"><span data-etk="et.kd.reading-your-arms">reading your arms…</span></div></div>
+      <div class="et-b-act">
+        <button type="button" class="et-b-primary" id="etBeeMake" data-etk="et.kd.make-a-kandi">make a kandi</button>
+        <button type="button" class="et-b-link" id="etBeeRcv" data-etk="et.kd.someone-gave-you-one-open-it">someone gave you one? open it here</button>
+        <div class="et-b-foot" data-etk="et.kd.nothing-leaves-your-arm-unti">nothing leaves your arm until you say you handed it over.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RAVER — every piece is a bead on one big bracelet: right arm, crossing, left arm, handed over -->
+  <div class="et-r">
+    <div class="et-r-top"><h2 class="et-r-h" id="etRaverTitle">your arms</h2><span class="et-r-hint" id="etRaverHint">tap a bead</span></div>
+    <svg class="et-r-art" id="etBrace" viewBox="-200 -200 400 400" role="group" aria-label="every piece you hold is one bead on this bracelet"></svg>
+    <div class="et-r-legend" id="etLegend"><span><i class="lg-right"></i>right · trades</span><span><i class="lg-cross"></i>crossing</span><span><i class="lg-left"></i>left · keeps</span><span><i class="lg-given"></i>handed over</span></div>
+    <div class="et-r-card" id="etRaverCard" aria-live="polite"></div>
+    <button type="button" class="et-r-pill" id="etRaverGo">make one</button>
+    <button type="button" class="et-r-ghost" id="etRaverMake" data-etk="et.kd.string-a-new-one">string a new one</button>
+  </div>
+
+  <!-- CYPHERPUNK — the instrument: the arms as a table, the handshake as a pipeline, the store as a receipt -->
+  <div class="et-c">
+    <div class="et-c-path" data-etk="et.kd.kandi-localstorage-bkandi">kandi://localStorage/bkandi</div>
+    <div class="et-c-chips" id="etChips"></div>
+    <div class="et-c-guard">left arm · rcv = true → gift, cross = refused <b data-etk="et.kd.by-code">by code</b></div>
+    <table class="et-c-tab"><thead><tr><th>arm</th><th>by → for</th><th>beads</th></tr></thead><tbody id="etArms"></tbody></table>
+    <h3 class="et-c-h" data-etk="et.kd.handshake-pipeline-knd1">handshake pipeline · KND1</h3>
+    <ol class="et-c-pipe" id="etPipe"></ol>
+    <button type="button" class="et-c-primary" id="etCyGo">compose</button>
+    <h3 class="et-c-h" data-etk="et.kd.store-read-from-this-browser">store · read from this browser, now</h3>
+    <table class="et-c-kv" id="etReceipt"></table>
+    <div class="et-c-verify">
+      <div class="et-c-verify-h" data-etk="et.kd.verify-no-trust-in-this-page">verify · no trust in this page needed</div>
+      <ol><li data-etk="et.kd.localstorage-getitem-bkandi">localStorage.getItem('bkandi') → the rows above</li><li data-etk="et.kd.fnv-1a-32-over-knd1-maker-fo">fnv-1a/32 over KND1|maker|for|ts36|beads, base36 == the sixth field</li><li data-etk="et.kd.a-checksum-not-a-signature-i">a checksum, not a signature: it catches a typo, not a forgery</li></ol>
+    </div>
+    <div class="et-c-row">
+      <button type="button" class="et-c-ghost" id="etCyRcv" data-etk="et.kd.paste-a-string">paste a string</button>
+      <a class="et-c-ghost" href="https://github.com/beehive-nature/beehive-nature/blob/main/surfaces/kandi.html" target="_blank" rel="noopener noreferrer">fork the template ↗ <span class="et-sr" data-etk="et.kd.opens-in-a-new-tab">(opens in a new tab)</span></a>
+    </div>
+  </div>
+</section>
+<h2 class="et-archive-h" id="etArchive" data-etk="et.kd.the-whole-bar">the whole bar</h2>
+
 <header>
   <h1>🍬 the kandi bar</h1>
   <div class="sub"><span data-i18n="kandi.bar">the kandi bar — make it, name it, gift it, cross it, show it</span></div>
@@ -1009,6 +1247,8 @@ function applyReading(){
 }
 document.addEventListener('bregister',applyReading);
 applyReading();
+/* read-only window for the ETERNAL front: a copy of the committed arms and the bar's own encoder */
+window.__kandi={state:function(){return cloneK(S);},encode:encode};
 
 paint(); arms(); initializeStore();
 })();
@@ -1106,6 +1346,143 @@ paint(); arms(); initializeStore();
   }
   requestAnimationFrame(frame);
   addEventListener('resize',build);
+})();
+</script>
+<script>
+/* ETERNAL FRONT — one data layer, three renderers (docs/design/eternal). Every fact is the bar's
+   own committed state, read through window.__kandi (a copy of S and the bar's own KND1 encoder):
+   the right arm, the crossing, the left arm and the memory lines. The front never writes: "make"
+   opens the composer, "open it here" the receive box, and "gift it" / "cross it" press that
+   piece's own buttons, so every change goes through the bar's locked transaction. */
+(function(){
+  var $=function(id){return document.getElementById(id);};
+  var T=function(k,f){var t=window.BNRLanguage&&window.BNRLanguage.text;return t?t(k,f):f;};
+  var tok=function(n){return getComputedStyle(document.body).getPropertyValue('--sk-'+n).trim();};
+  function esc(v){return String(v==null?'':v).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+  function initials(n){var p=String(n||'').trim().split(/\s+/);return (((p[0]||'')[0]||'')+((p.length>1?p[p.length-1]:'')[0]||'')).toLowerCase()||'k';}
+  var ARMS=['right','cross','left','given'];
+  var D={ready:false,right:[],cross:[],left:[],given:[],pieces:[],bytes:0,locks:false};
+  var R={sel:0};
+  var open={};
+
+  function read(){
+    var K=window.__kandi; if(!K) return;
+    var S=K.state(), raw=null; try{raw=localStorage.getItem('bkandi');}catch(e){raw=null;}
+    D.bytes=raw?raw.length:0; D.locks=!!(navigator.locks&&typeof navigator.locks.request==='function');
+    var mk=function(arm){return function(k,i){return {arm:arm,i:i,maker:k.maker||'',madefor:k.madefor||k.to||'',beads:String(k.beads||''),rcv:!!k.rcv,crossed:!!k.crossed,
+      export:arm==='given'?(k.export||''):K.encode(k)};};};
+    D.right=S.right.map(mk('right')); D.cross=(S.cross||[]).map(mk('cross')); D.left=S.left.map(mk('left')); D.given=S.given.map(mk('given'));
+    D.pieces=D.right.concat(D.cross,D.left,D.given); D.ready=true;
+    if(R.sel>=D.pieces.length)R.sel=0;
+  }
+  var ARMW={right:'right arm',cross:'the crossing',left:'left arm',given:'handed over'};
+  function by(p){return p.maker||T('et.kd.stranger','a stranger at the bar');}
+  function make(){var w=$('word');if(w){w.scrollIntoView({block:'center'});w.focus({preventScroll:true});}}
+  function receive(){var r=$('rcv');if(r){r.scrollIntoView({block:'center'});r.focus({preventScroll:true});}}
+  function press(p){ /* the piece's own buttons, built by the bar: right = [gift, offer, show], cross = [cross, take back, show] */
+    var box=$(p.arm), cards=box?box.querySelectorAll('.kc'):[], card=cards[p.i], b=card&&card.querySelectorAll('.xrow button')[0];
+    if(b){card.scrollIntoView({block:'center'});b.click();}
+  }
+
+  /* ── NEW BEE ── */
+  function bee(){
+    var box=$('etBeeRows'); if(!box||!D.ready) return;
+    var label={right:T('et.kd.b.right','on your right arm'),cross:T('et.kd.b.cross','offered to the crossing'),left:T('et.kd.b.left','on your left arm'),given:T('et.kd.b.given','handed over')};
+    var unit={right:[T('et.kd.b.u1','to give or trade'),T('et.kd.b.un','to give or trade')],cross:[T('et.kd.b.x1','waiting for a swap'),T('et.kd.b.xn','waiting for a swap')],left:[T('et.kd.b.l1','keepsake'),T('et.kd.b.ln','keepsakes')],given:[T('et.kd.b.g1','memory'),T('et.kd.b.gn','memories')]};
+    box.innerHTML=ARMS.map(function(a){
+      var list=D[a], n=list.length, o=!!open[a]&&n>0;
+      var h='<button type="button" class="et-b-row" data-arm="'+a+'" aria-expanded="'+o+'"'+(n?'':' disabled')+'><span class="et-b-rowt">'+esc(label[a])+'</span><small>'+n+' '+esc(unit[a][n===1?0:1])+(n?'<svg class="chev" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2"/></svg>':'')+'</small></button>';
+      if(o)h+='<div class="et-b-people">'+list.slice(0,6).map(function(p){
+        var sub=(a==='given'?(p.crossed?T('et.kd.b.crossedWith','crossed with'):T('et.kd.b.givenTo','given to'))+' '+(p.madefor||T('et.kd.b.someone','someone')):(p.madefor?T('et.kd.b.for','for')+' '+p.madefor:T('et.kd.b.forAnyone','for anyone')))+' · '+p.beads.length+' '+T('et.kd.b.beads','beads');
+        return '<div class="et-b-person"><i>'+esc(initials(p.maker||'k'))+'</i><div><b>'+esc(T('et.kd.b.by','by')+' '+by(p))+'</b><span>'+esc(sub)+'</span></div></div>';
+      }).join('')+(n>6?'<div class="et-b-more">'+esc(T('et.kd.b.more','and {n} more below').replace('{n}',n-6))+'</div>':'')+'</div>';
+      return h;
+    }).join('');
+  }
+
+  /* ── RAVER: one big bracelet, a bead per piece ── */
+  var MAXB=18;
+  function brace(){
+    var svg=$('etBrace'); if(!svg||!D.ready) return;
+    var list=D.pieces.slice(0,MAXB), n=list.length, h='<circle r="150" fill="none" stroke="'+tok('line')+'" stroke-width="3"/>';
+    var r=n>12?16:n>6?20:24, col={right:tok('biomass'),cross:tok('ai'),left:tok('sovereign')};
+    list.forEach(function(p,k){
+      var a=-Math.PI/2+k*2*Math.PI/Math.max(n,1), x=(150*Math.cos(a)).toFixed(1), y=(150*Math.sin(a)).toFixed(1), sel=k===R.sel;
+      var fill=p.arm==='given'?'none':sel?tok('sovereign-strong'):col[p.arm];
+      h+='<g class="bead" data-k="'+k+'" role="button" tabindex="0" aria-pressed="'+sel+'" aria-label="'+esc(ARMW[p.arm]+': '+T('et.kd.r.by','by')+' '+by(p)+', '+p.beads.length+' '+T('et.kd.r.beads','beads'))+'">'+
+        '<circle class="hit" cx="'+x+'" cy="'+y+'" r="25" fill="transparent"/>'+
+        '<circle class="seg" cx="'+x+'" cy="'+y+'" r="'+(sel?r+4:r)+'" fill="'+fill+'"'+(p.arm==='given'?' stroke="'+tok('ink-mut')+'" stroke-width="2" stroke-dasharray="3 4"':' stroke="'+tok('bg')+'" stroke-width="3"')+' opacity="'+(sel?1:0.8)+'"/>'+
+        /* the piece's own string, bead for bead: letter beads are white, like the real thing; colour beads take the arm's colour */
+        p.beads.split('').map(function(ch,j,all){var b=2*Math.PI*j/all.length-Math.PI/2,rr=(sel?r+4:r)+7;return '<circle cx="'+(+x+rr*Math.cos(b)).toFixed(1)+'" cy="'+(+y+rr*Math.sin(b)).toFixed(1)+'" r="'+(all.length>24?2:3)+'" fill="'+(/[A-Z]/.test(ch)?tok('ink'):p.arm==='given'?tok('ink-mut'):col[p.arm])+'"/>';}).join('')+'</g>';
+    });
+    h+='<g class="make" role="button" tabindex="0" aria-label="'+esc(T('et.kd.r.makeAria','make a kandi'))+'"><circle r="48" fill="'+tok('primary')+'"/><path d="M0 -16V16M-16 0H16" fill="none" stroke="'+tok('on-primary')+'" stroke-width="4" stroke-linecap="round"/></g>';
+    svg.innerHTML=h;
+  }
+  function raver(){
+    if(!D.ready) return;
+    var p=D.pieces[R.sel], c=$('etRaverCard');
+    $('etRaverHint').textContent=D.pieces.length+' '+(D.pieces.length===1?T('et.kd.r.one','piece · tap it'):T('et.kd.r.many','pieces · tap a bead'))+(D.pieces.length>MAXB?' · '+MAXB+' '+T('et.kd.r.shown','shown'):'');
+    var tag={right:p&&p.madefor?T('et.kd.r.ded','made for them · gift it'):T('et.kd.r.trade','tradeable'),cross:T('et.kd.r.xing','crosses only for another piece'),left:T('et.kd.r.keep','keepsake · never re-trades'),given:T('et.kd.r.gone','handed over · a memory stays')};
+    c.innerHTML=p?'<span class="rk">'+esc({right:'r',cross:'x',left:'l',given:'g'}[p.arm])+(p.i+1)+'</span><div><b>'+esc(T('et.kd.r.by','by')+' '+by(p)+(p.madefor?' → '+p.madefor:''))+'</b><span>'+esc(p.beads.length+' '+T('et.kd.r.beads','beads')+' · '+ARMW[p.arm]+' · '+tag[p.arm])+'</span></div>':'<span class="rk">k</span><div><b>'+esc(T('et.kd.r.empty','no kandi yet'))+'</b><span>'+esc(T('et.kd.r.emptyHint','tap the + to string one'))+'</span></div>';
+    var go=$('etRaverGo');
+    go.textContent=p&&p.arm==='right'?T('et.kd.r.gift','gift it'):p&&p.arm==='cross'?T('et.kd.r.cross','cross it'):T('et.kd.r.make','make one');
+    $('etRaverMake').hidden=!(p&&(p.arm==='right'||p.arm==='cross'));
+    brace();
+  }
+
+  /* ── CYPHERPUNK ── */
+  function cy(){
+    if(!D.ready) return;
+    $('etChips').innerHTML='<span class="on">v1</span><span>pieces '+(D.right.length+D.cross.length+D.left.length)+'</span><span>memories '+D.given.length+'</span><span class="'+(D.locks?'ok':'no')+'">web locks '+(D.locks?'present':'absent · read-only')+'</span>';
+    $('etArms').innerHTML=D.pieces.map(function(p,k){
+      var o=!!open['c'+k];
+      return '<tr class="pick" data-k="'+k+'" tabindex="0" aria-expanded="'+o+'"><td>'+p.arm+(p.arm==='left'&&p.rcv?' · rcv':'')+'</td><td>'+esc(by(p))+' → '+esc(p.madefor||'any')+'</td><td>'+p.beads.length+'</td></tr>'+
+        (o?'<tr class="names"><td colspan="3">'+esc(p.export||'older memory · no export saved')+'</td></tr>':'');
+    }).join('')||'<tr><td colspan="3">0 pieces · the composer is open below</td></tr>';
+    var steps=[
+      ['compose · [0-9A-Z]{1,40}','ten colour beads + letter beads · the draft lives in this page only','todo'],
+      ['name · maker, for ≤ 24','any language · rendered as text, never markup','todo'],
+      ['string · right arm',D.right.length+' on the right arm · written under a web lock, one storage write',D.right.length?'done':'now'],
+      ['prepare · KND1 export','KND1|maker|for|ts36|beads|fnv · a copy, not a token','todo'],
+      ['hand over · you carry it','clipboard write ≠ received · no inbox, no relay, no escrow','guard'],
+      ['retire · memory line',D.given.length+' handed over · the piece leaves the arm, the export stays',D.given.length?'done':'todo']
+    ];
+    var now=steps.findIndex(function(s){return s[2]==='now';});
+    $('etPipe').innerHTML=steps.map(function(s,i){return '<li class="'+s[2]+(i===now?' now':'')+'"><b>'+esc(s[0])+'</b><p>'+esc(s[1])+'</p></li>';}).join('');
+    $('etReceipt').innerHTML=[
+      ['store',D.bytes?'<span class="yes">localStorage bkandi · '+D.bytes+' bytes</span>':'<span class="no">not written yet · nothing saved</span>'],
+      ['right',String(D.right.length)],['crossing',String(D.cross.length)],['left',String(D.left.length)+' · rcv '+D.left.filter(function(p){return p.rcv;}).length],['given',String(D.given.length)],
+      ['network','<span class="yes">none on load</span> · ↻ asks only on tap'],
+      ['trust','<span class="gd">fnv-1a/32 checksum · not a signature</span>']
+    ].map(function(r){return '<tr><th>'+r[0]+'</th><td>'+r[1]+'</td></tr>';}).join('');
+  }
+
+  function words(){document.querySelectorAll('#eternal [data-etk],.et-archive-h[data-etk]').forEach(function(e){if(e.__en==null)e.__en=e.textContent;e.textContent=T(e.getAttribute('data-etk'),e.__en);});}
+  function all(){read();bee();raver();cy();}
+
+  function wire(){
+    var ev=$('eternal'); if(!ev) return;
+    ev.addEventListener('click',function(e){
+      var row=e.target.closest('.et-b-row[data-arm]'); if(row){var a=row.getAttribute('data-arm');open[a]=!open[a];bee();return;}
+      var bd=e.target.closest('.bead'); if(bd){R.sel=+bd.getAttribute('data-k');raver();return;}
+      if(e.target.closest('.make')){make();return;}
+      var tr=e.target.closest('.et-c-tab tr.pick'); if(tr){var k='c'+tr.getAttribute('data-k');open[k]=!open[k];cy();}
+    });
+    ev.addEventListener('keydown',function(e){
+      if(e.key!=='Enter'&&e.key!==' ')return;
+      var t=e.target.closest('.bead,.make,.et-c-tab tr.pick'); if(!t)return;
+      e.preventDefault(); t.dispatchEvent(new MouseEvent('click',{bubbles:true}));
+    });
+    $('etBeeMake').addEventListener('click',make); $('etRaverMake').addEventListener('click',make); $('etCyGo').addEventListener('click',make);
+    $('etBeeRcv').addEventListener('click',receive); $('etCyRcv').addEventListener('click',receive);
+    $('etRaverGo').addEventListener('click',function(){var p=D.pieces[R.sel];if(p&&(p.arm==='right'||p.arm==='cross'))press(p);else make();});
+    var mo=new MutationObserver(function(){read();bee();raver();cy();});
+    ['right','left','cross','givenlog'].forEach(function(id){var n=$(id);if(n)mo.observe(n,{childList:true});});
+    document.addEventListener('blang',function(){words();all();});
+    window.addEventListener('storage',function(e){if(e.key==='bkandi'||e.key===null)setTimeout(all,0);});
+  }
+  wire(); words(); all(); setTimeout(all,800);
+  window.__eternal={data:D,raver:R};
 })();
 </script>
 <script src="blight/pointers.js"></script>

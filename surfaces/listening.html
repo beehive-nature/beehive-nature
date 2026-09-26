@@ -7,6 +7,7 @@
 <meta http-equiv="Expires" content="0">
 <meta name="color-scheme" content="dark">
 <link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="skaists.css">
 <title>the Listening Room — on-chain sound, forkable art</title>
 <style>
 :root{--bg:#0d1410;--ink:#e2efdb;--cyan:#00E5FF;--gold:#FFD700;--violet:#c9a0ff;--dim:#8a9a8a;--line:#243026;--leaf:#7ddf8f;--amber:#ffb347}
@@ -81,12 +82,212 @@ footer{max-width:920px;margin:22px auto 0;color:var(--dim);font-size:12.5px;text
 .badge,.machine{font-size:14px;letter-spacing:.04em}
 footer{font-size:14px}
 footer a{display:inline-block;padding-block:12px;margin-block:-12px}
+/* ── ETERNAL FRONT (docs/design/eternal) — every value is a skaists token (surfaces/skaists.css,
+   compiled from docs/design/skaists/tokens.json): no hand-picked hex, size or corner. Measured by
+   e2e/skaists-conformance.mjs. One register visible at a time; new bee is the default. ── */
+#eternal{margin:0 0 var(--sk-s2);padding:0;border:0;border-radius:0;background:transparent;font-size:16px;line-height:1.45}
+#eternal>.et-r,#eternal>.et-c{display:none}
+body[data-reg="raver"] #eternal>.et-b,body[data-reg="cypherpunk"] #eternal>.et-b{display:none}
+body[data-reg="raver"] #eternal>.et-r{display:block}
+body[data-reg="cypherpunk"] #eternal>.et-c{display:block}
+#eternal [hidden]{display:none!important}
+#eternal button{transition:none}
+#eternal svg{display:block}
+#eternal :focus-visible{outline:2px solid var(--sk-focus);outline-offset:3px}
+.et-archive-h{margin:var(--sk-s5) 0 var(--sk-s2);padding-top:var(--sk-s4);border-top:1px solid var(--sk-line);color:var(--sk-ink)}
+body[data-reg="bee"] .et-archive-h{font:400 28px/1.1 var(--sk-font-bee-serif)}
+body[data-reg="raver"] .et-archive-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em}
+body[data-reg="cypherpunk"] .et-archive-h{font:600 15px/1.45 var(--sk-font-mono)}
+
+/* NEW BEE — a calm room: one piece, one button, plain words */
+.et-b{color:var(--sk-ink);display:flex;flex-direction:column;gap:var(--sk-s3);font-family:var(--sk-font-bee-sans)}
+.et-b-mark{font:400 18px/1.2 var(--sk-font-house);color:var(--sk-sovereign)}
+.et-b-h{margin:0;font:400 40px/1.05 var(--sk-font-bee-serif);color:var(--sk-ink);letter-spacing:0}
+.et-b-lede{margin:0;font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink-mut);text-wrap:pretty}
+.et-b-guard{display:flex;align-items:center;gap:var(--sk-s2);min-height:var(--sk-control-min);padding:var(--sk-s1) var(--sk-s3);border-radius:var(--sk-radius);background:var(--sk-guard-wash);color:var(--sk-guard);font:600 15px/1.45 var(--sk-font-bee-sans)}
+.et-b-guard svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.et-b-rows{display:flex;flex-direction:column;background:var(--sk-bg-card);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl);overflow:hidden}
+.et-b-row{display:flex;align-items:center;justify-content:space-between;gap:var(--sk-s2);min-height:var(--sk-control-row);padding:0 var(--sk-s3);border:0;border-bottom:1px solid var(--sk-line-soft);background:transparent;text-align:left;width:100%;font:500 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink);text-decoration:none}
+.et-b-row:last-child{border-bottom:0}
+a.et-b-row{cursor:pointer}
+.et-b-row small{display:flex;align-items:center;gap:var(--sk-s1);font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut);text-align:right}
+.et-b-row .chev{flex:none}
+.et-b-now{margin:0;padding:var(--sk-s2) var(--sk-s3);border-radius:var(--sk-radius);background:var(--sk-sovereign-tint);color:var(--sk-sovereign-strong);font:600 16px/1.45 var(--sk-font-bee-sans)}
+.et-b-act{display:flex;flex-direction:column;gap:var(--sk-s1)}
+.et-b-primary{height:var(--sk-control-primary);border-radius:var(--sk-radius-lg);border:0;background:var(--sk-primary);color:var(--sk-on-primary)!important;font:600 17px/1.2 var(--sk-font-bee-sans)!important;cursor:pointer;padding:0 var(--sk-s3)}
+.et-b-link{min-height:var(--sk-control-min);display:flex;align-items:center;justify-content:center;border:0;background:transparent;font:600 16px/1.45 var(--sk-font-bee-sans)!important;color:var(--sk-link)!important;text-decoration:none;cursor:pointer;padding:0}
+.et-b-link:hover{color:var(--sk-link-hover)!important;background:transparent}
+.et-b-foot{margin:0;text-align:center;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+
+/* RAVER — the seed is a ring of 32 notes: tap the heart to play, tap a petal to read it,
+   hold the pill to fork. The ring breathes once every 6 s (well under 3 Hz), pauses on the
+   motion switch and stands still under prefers-reduced-motion. */
+.et-r{color:var(--sk-ink);font-family:var(--sk-font-raver-body)}
+.et-r-top{display:flex;align-items:baseline;justify-content:space-between;gap:var(--sk-s2);flex-wrap:wrap}
+.et-r-h{margin:0;font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em;color:var(--sk-ink)}
+.et-r-hint{font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+.et-r-ring{width:100%;max-width:360px;margin:var(--sk-s3) auto var(--sk-s1);filter:drop-shadow(var(--sk-glow-sovereign))}
+.et-r-ring .pet{cursor:pointer;opacity:.5}
+.et-r-ring .pet.on{opacity:1}
+.et-r-ring .pet.sel{stroke:var(--sk-ink);stroke-width:2}
+.et-r-ring .p0{fill:var(--sk-cat-works)}.et-r-ring .p1{fill:var(--sk-cat-gap)}.et-r-ring .p2{fill:var(--sk-cat-idea)}.et-r-ring .p3{fill:var(--sk-cat-bug)}
+.et-r-ring .halo{fill:none;stroke:var(--sk-sovereign);stroke-width:1.5;stroke-dasharray:2 6}
+.et-r-ring .heart{cursor:pointer}
+.et-r-ring .heart .disc{fill:var(--sk-bg-card)}
+.et-r-ring .heart .hex{fill:var(--sk-sovereign-wash);stroke:var(--sk-sovereign);stroke-width:2}
+.et-r-ring .heart text{fill:var(--sk-sovereign-strong);font:600 14px/1.25 var(--sk-font-raver-body)}
+.et-r-ring .heart:focus{outline:none}.et-r-ring .heart:focus-visible .hex{stroke:var(--sk-ink);stroke-width:3}
+.et-r-breath{transform-box:fill-box;transform-origin:center;animation:etBreath 6s ease-in-out infinite}
+@keyframes etBreath{0%,100%{transform:scale(.985)}50%{transform:scale(1)}}
+body.et-still .et-r-breath{animation-play-state:paused}
+@media (prefers-reduced-motion:reduce){.et-r-breath{animation:none}}
+.et-r-legend{display:flex;justify-content:space-between;gap:var(--sk-s1);margin:var(--sk-s1) 0 var(--sk-s2);font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+.et-r-legend span{display:flex;flex-direction:column;align-items:center;gap:var(--sk-s1)}
+.et-r-legend i{width:28px;height:12px;border-radius:var(--sk-radius-sm)}
+.et-r-legend em{font-style:normal}
+.lg0{background:var(--sk-cat-works)}.lg1{background:var(--sk-cat-gap)}.lg2{background:var(--sk-cat-idea)}.lg3{background:var(--sk-cat-bug)}
+.et-r-card{display:flex;gap:var(--sk-s2);align-items:center;padding:var(--sk-s2) var(--sk-s3);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl);background:var(--sk-sovereign-tint);min-height:var(--sk-control-person)}
+.et-r-card .rk{min-width:44px;height:44px;padding:0 var(--sk-s1);border-radius:var(--sk-radius);background:var(--sk-sovereign-strong);color:var(--sk-bg);display:flex;align-items:center;justify-content:center;font:700 15px/1.2 var(--sk-font-raver-display);flex:none}
+.et-r-card b{display:block;font:600 14px/1.25 var(--sk-font-raver-body)}.et-r-card span{font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-sovereign-soft)}
+.et-r-forks{display:flex;flex-wrap:wrap;gap:var(--sk-s1);margin:var(--sk-s2) 0 0}
+.et-r-forks span{padding:var(--sk-s1) var(--sk-s2);border:1px solid var(--sk-line);border-radius:var(--sk-radius-pill);background:var(--sk-bg-card);font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+.et-r-pill{position:relative;overflow:hidden;display:block;width:100%;height:58px;margin-top:var(--sk-s4);border:0;border-radius:var(--sk-radius-pill);background:var(--sk-primary);color:var(--sk-on-primary)!important;font:700 15px/1.2 var(--sk-font-raver-display)!important;letter-spacing:.04em;cursor:pointer;touch-action:none;user-select:none;-webkit-user-select:none;padding:0}
+.et-r-pill:hover{background:var(--sk-primary)}
+.et-r-pill .fill{position:absolute;left:0;top:0;bottom:0;width:0;background:var(--sk-bg);opacity:.25}
+.et-r-pill .lbl{position:relative}
+.et-r-note{margin:var(--sk-s2) 0 0;text-align:center;font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+.et-r-ghost{display:block;margin:var(--sk-s1) auto 0;min-height:var(--sk-control-min);padding:0 var(--sk-s2);border:0;background:none;color:var(--sk-link)!important;font:400 14px/1.4 var(--sk-font-raver-body)!important;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.et-r-ghost:hover{background:none}
+
+/* CYPHERPUNK — the renderer as an instrument: every derived number, the pipeline, the receipt */
+.et-c{font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink)}
+.et-c-path{font:600 15px/1.45 var(--sk-font-mono);overflow-wrap:anywhere;margin:0}
+.et-c-chips{display:flex;flex-wrap:wrap;gap:var(--sk-s1);margin:var(--sk-s2) 0}
+.et-c-chips span{padding:2px var(--sk-s1);border:1px solid var(--sk-line);border-radius:4px;background:var(--sk-bg-card);font:600 12px/1.4 var(--sk-font-mono)}
+.et-c-chips span.on{border-color:var(--sk-guard);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong)}
+.et-c-chips span.ok{border-color:var(--sk-verified);color:var(--sk-verified)}
+.et-c-kv{width:100%;margin:0;border-collapse:collapse;border:1px solid var(--sk-line);background:var(--sk-bg-card);font:400 13px/1.45 var(--sk-font-mono)}
+.et-c-kv th{width:104px;padding:var(--sk-s1) var(--sk-s2);text-align:left;vertical-align:top;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);border-bottom:1px solid var(--sk-line);background:transparent}
+.et-c-kv td{padding:var(--sk-s1) var(--sk-s2);border-bottom:1px solid var(--sk-line);word-break:break-word;color:var(--sk-ink)}
+.et-c-kv .no{color:var(--sk-info)}.et-c-kv .yes{color:var(--sk-verified)}.et-c-kv .sig{color:var(--sk-you)}
+.et-c-h{margin:var(--sk-s4) 0 var(--sk-s2);font:600 15px/1.45 var(--sk-font-mono);color:var(--sk-ink);letter-spacing:0}
+.et-c-notes{width:100%;border-collapse:collapse;border:1px solid var(--sk-line);background:var(--sk-bg-card);font:400 12px/1.45 var(--sk-font-mono)}
+.et-c-notes th{padding:var(--sk-s1);text-align:left;font:600 12px/1.4 var(--sk-font-mono);color:var(--sk-ink-mut);background:var(--sk-bg-well);border-bottom:1px solid var(--sk-line)}
+.et-c-notes td{padding:2px var(--sk-s1);border-bottom:1px solid var(--sk-line);color:var(--sk-ink-soft);white-space:nowrap}
+.et-c-notes td.on{color:var(--sk-verified)}
+.et-c-pipe{list-style:none;margin:0;padding:0;display:grid;gap:var(--sk-s2);counter-reset:p}
+.et-c-pipe li{display:grid;grid-template-columns:30px 1fr;gap:var(--sk-s1) var(--sk-s2);padding:var(--sk-s2);border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm);background:var(--sk-bg-card);counter-increment:p}
+.et-c-pipe li::before{content:counter(p,decimal-leading-zero);color:var(--sk-guard);font-weight:600}
+.et-c-pipe li b{font-weight:600}.et-c-pipe li p{grid-column:2;margin:0;color:var(--sk-ink-soft);word-break:break-word}
+.et-c-pipe li.done b{color:var(--sk-verified)}
+.et-c-pipe li.now{border-color:var(--sk-ai);box-shadow:inset 0 0 0 1px var(--sk-ai)}.et-c-pipe li.now b{color:var(--sk-ai)}
+.et-c-primary{display:flex;align-items:center;justify-content:center;width:100%;height:52px;margin-top:var(--sk-s3);border:0;border-radius:var(--sk-radius-sm);background:var(--sk-primary);color:var(--sk-on-primary)!important;font:600 14px/1.2 var(--sk-font-mono)!important;cursor:pointer;padding:0}
+.et-c-primary:hover{background:var(--sk-primary)}
+.et-c-verify{margin-top:var(--sk-s3);padding:var(--sk-s3);border-radius:var(--sk-radius-sm);background:var(--sk-bg-card)}
+.et-c-verify-h{font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);margin-bottom:var(--sk-s1)}
+.et-c-verify ol{margin:0;padding-left:var(--sk-s4);display:grid;gap:var(--sk-s1);overflow-wrap:anywhere}
+.et-c-row{display:grid;grid-template-columns:1fr 1fr;gap:var(--sk-s2);margin-top:var(--sk-s3)}
+.et-c-ghost{display:flex;align-items:center;justify-content:center;min-height:52px;padding:0 var(--sk-s1);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius-sm);background:transparent;color:var(--sk-ink)!important;text-decoration:none;text-align:center;font:600 14px/1.2 var(--sk-font-mono)!important;cursor:pointer}
+.et-c-ghost:hover{background:transparent}
+/* ── THE WHOLE ROOM, dressed per register: the page's own variables mapped onto skaists ── */
+section,details[data-reg-disclose]{background:var(--panel,#111a14)}
+input[type=text]{background:var(--well,#0a0f0b)}
+button{background:var(--btn,#26123a);color:var(--btn-ink,#c9a0ff)}
+button:hover{background:var(--btn-hover,#c9a0ff);color:var(--btn-hover-ink,#000)}
+button.gold{background:var(--gold-bg,#2a230a);border-color:var(--gold-line,#4a3a1a)}
+button.gold:hover{background:var(--gold);color:var(--btn-hover-ink,#000)}
+body[data-reg="bee"]{--bg:var(--sk-bg);--panel:var(--sk-bg-card);--well:var(--sk-bg-well);--ink:var(--sk-ink);--cyan:var(--sk-link);--gold:var(--sk-sovereign-strong);--violet:var(--sk-sovereign);--dim:var(--sk-ink-mut);--line:var(--sk-line);--leaf:var(--sk-verified);--amber:var(--sk-info);
+ --btn:var(--sk-bg-card);--btn-ink:var(--sk-ink);--btn-hover:var(--sk-sovereign-tint);--btn-hover-ink:var(--sk-ink);--gold-bg:var(--sk-sovereign-wash);--gold-line:var(--sk-sovereign);
+ background:var(--sk-bg);color:var(--sk-ink);font-family:var(--sk-font-bee-sans);color-scheme:light}
+body[data-reg="bee"] h1{font:400 40px/1.05 var(--sk-font-bee-serif);letter-spacing:0;text-shadow:none;color:var(--sk-ink)}
+body[data-reg="bee"] button,body[data-reg="bee"] input[type=text]{font-family:var(--sk-font-bee-sans);border-color:var(--sk-ink)}
+body[data-reg="bee"] main :is(section h2,details[data-reg-disclose]>summary){font:600 16px/1.45 var(--sk-font-bee-sans);letter-spacing:0}
+body[data-reg="raver"]{--bg:var(--sk-bg);--panel:var(--sk-bg-card);--well:var(--sk-bg);--ink:var(--sk-ink);--cyan:var(--sk-link);--gold:var(--sk-you);--violet:var(--sk-sovereign-soft);--dim:var(--sk-ink-soft);--line:var(--sk-line);--leaf:var(--sk-verified);--amber:var(--sk-info);
+ --btn:var(--sk-sovereign-wash);--btn-ink:var(--sk-sovereign-strong);--btn-hover:var(--sk-sovereign-strong);--btn-hover-ink:var(--sk-bg);--gold-bg:var(--sk-bg-card);--gold-line:var(--sk-you);
+ background:var(--sk-bg);color:var(--sk-ink);font-family:var(--sk-font-raver-body)}
+body[data-reg="raver"] h1{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em;text-shadow:none;color:var(--sk-ink)}
+body[data-reg="raver"] :is(button,input[type=text]){font-family:var(--sk-font-raver-body)}
+body[data-reg="raver"] main :is(section h2,details[data-reg-disclose]>summary){font:600 14px/1.25 var(--sk-font-raver-body);letter-spacing:0}
+body[data-reg="cypherpunk"]{--bg:var(--sk-bg);--panel:var(--sk-bg-card);--well:var(--sk-bg);--ink:var(--sk-ink);--cyan:var(--sk-link);--gold:var(--sk-ai);--violet:var(--sk-sovereign-strong);--dim:var(--sk-ink-soft);--line:var(--sk-line);--leaf:var(--sk-verified);--amber:var(--sk-info);
+ --btn:var(--sk-bg-card);--btn-ink:var(--sk-ink);--btn-hover:var(--sk-ai);--btn-hover-ink:var(--sk-bg);--gold-bg:var(--sk-bg);--gold-line:var(--sk-ai);
+ background:var(--sk-bg);color:var(--sk-ink);font-family:var(--sk-font-mono)}
+body[data-reg="cypherpunk"] h1{font:600 15px/1.45 var(--sk-font-mono);letter-spacing:0;text-shadow:none;color:var(--sk-ink)}
+body[data-reg="cypherpunk"] :is(button,input[type=text]){font-family:var(--sk-font-mono);border-radius:var(--sk-radius-sm)}
+body[data-reg="cypherpunk"] :is(section,details[data-reg-disclose],#viz,.forkrow){border-radius:var(--sk-radius-sm)}
+body[data-reg="cypherpunk"] main :is(section h2,details[data-reg-disclose]>summary){font:600 13px/1.45 var(--sk-font-mono);letter-spacing:0}
+body:is([data-reg="bee"],[data-reg="raver"]) :is(section,details[data-reg-disclose]){border-radius:var(--sk-radius-xl)}
+body:is([data-reg="bee"],[data-reg="raver"]) :is(#viz,input[type=text],.forkrow){border-radius:var(--sk-radius)}
+body[data-reg] .badge{border-radius:4px}
 </style>
 </head>
 <body>
 <nav class="back" aria-label="return to the music room">
   <a href="music.html" data-i18n="music.back">← Music</a>
 </nav>
+<!-- ETERNAL FRONT (founder blueprint 2026-09-26, docs/design/eternal): three separate products in
+     one surface. ONE data layer (the renderer's own derive(seed) + the engine's live state) drives
+     all three, so the facts cannot drift; each register has its own layout, graphic, gesture and
+     voice. Nothing here plays on its own: every play, stop and fork hands off to the room's real
+     controls below (#play, #stop, #fork), and the status is read back from the engine. -->
+<section id="eternal" aria-label="the listening room">
+
+  <!-- NEW BEE — a calm room: one piece, one button, plain words -->
+  <div class="et-b">
+    <div class="et-b-mark">SKAISTS mUsiC</div>
+    <h2 class="et-b-h" data-t="et.listening.b.title">the listening room</h2>
+    <p class="et-b-lede" data-t="et.listening.b.lede">one short piece of music and one picture, both made from the same seed. press play to hear it.</p>
+    <div class="et-b-guard"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span data-t="et.listening.b.guard">nothing is bought, sent or kept from this page.</span></div>
+    <div class="et-b-rows" id="etBeeRows">
+      <div class="et-b-row"><span data-t="et.listening.b.piece">the piece</span><small data-et="beeNotes">reading the seed…</small></div>
+      <div class="et-b-row"><span data-t="et.listening.b.key">the key</span><small data-et="key">reading the seed…</small></div>
+      <a class="et-b-row" href="#viz"><span data-t="et.listening.b.picture">the picture</span><small><span data-t="et.listening.b.pictureV">drawn from the same seed</span><svg class="chev" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2"/></svg></small></a>
+      <a class="et-b-row" href="#lineage"><span data-t="et.listening.b.versions">new versions</span><small><span data-et="beeForks">none yet</span><svg class="chev" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2"/></svg></small></a>
+    </div>
+    <p class="et-b-now" id="etBeeNow" aria-live="polite">ready when you are.</p>
+    <div class="et-b-act">
+      <button type="button" class="et-b-primary" id="etBeePlay">play the piece</button>
+      <button type="button" class="et-b-link" id="etBeeFork">make a new version</button>
+      <p class="et-b-foot" data-t="et.listening.b.foot">sound starts only when you press play.</p>
+    </div>
+  </div>
+
+  <!-- RAVER — the seed is the art: a ring of 32 notes; tap the heart, hold to fork -->
+  <div class="et-r">
+    <div class="et-r-top"><h2 class="et-r-h" id="etRaverTitle">the ring</h2><span class="et-r-hint" id="etRaverHint">32 notes · tap the heart</span></div>
+    <svg class="et-r-ring" id="etRing" viewBox="-200 -200 400 400" role="group" aria-label="the seed as a ring of 32 notes, you at the heart"></svg>
+    <div class="et-r-legend" aria-label="colour is the beat in the bar">
+      <span><i class="lg0"></i><em data-t="et.listening.r.beat1">beat 1</em></span><span><i class="lg1"></i><em data-t="et.listening.r.beat2">beat 2</em></span><span><i class="lg2"></i><em data-t="et.listening.r.beat3">beat 3</em></span><span><i class="lg3"></i><em data-t="et.listening.r.beat4">beat 4</em></span>
+    </div>
+    <div class="et-r-card" id="etRaverCard" aria-live="polite"></div>
+    <div class="et-r-forks" id="etRaverForks"></div>
+    <button type="button" class="et-r-pill" id="etForkHold" aria-describedby="etForkHint"><span class="fill" id="etForkFill"></span><span class="lbl" data-t="et.listening.r.hold">hold to fork</span></button>
+    <p class="et-r-note" id="etForkHint" data-t="et.listening.r.holdHint">hold 1.2 s · one nibble flips · the parent never changes</p>
+    <button type="button" class="et-r-ghost" id="etMotion" aria-pressed="false">pause motion</button>
+  </div>
+
+  <!-- CYPHERPUNK — the renderer as an instrument: every derived number, the pipeline, the receipt -->
+  <div class="et-c">
+    <p class="et-c-path"><span data-et="path">seed://…</span></p>
+    <div class="et-c-chips" id="etChips"></div>
+    <table class="et-c-kv" id="etDerive"></table>
+    <button type="button" class="et-c-primary" id="etCyRun">run renderer</button>
+    <h3 class="et-c-h" data-t="et.listening.c.pipeH">render pipeline · deterministic</h3>
+    <ol class="et-c-pipe" id="etPipe"></ol>
+    <h3 class="et-c-h" data-t="et.listening.c.notesH">notes · step hz</h3>
+    <table class="et-c-notes" id="etNotes"></table>
+    <h3 class="et-c-h" data-t="et.listening.c.receiptH">receipt</h3>
+    <table class="et-c-kv" id="etReceipt"></table>
+    <div class="et-c-verify">
+      <div class="et-c-verify-h" data-t="et.listening.c.verifyH">verify · same seed, same piece, any client</div>
+      <ol><li>h = fnv-1a 32 (seed)</li><li>xorshift32 from h → scale, then 32 degrees and velocities</li><li>base = 220 · 2^((h mod 12)/12) Hz; compare the table above</li></ol>
+    </div>
+    <div class="et-c-row">
+      <button type="button" class="et-c-ghost" id="etCyFork" data-t="et.listening.c.fork">fork · nibble+1</button>
+      <a class="et-c-ghost" href="https://github.com/beehive-nature/beehive-nature/blob/main/surfaces/listening.html" target="_blank" rel="noopener noreferrer">fork the template ↗ new tab</a>
+    </div>
+  </div>
+</section>
+<h2 class="et-archive-h" id="etArchive" data-t="et.listening.archive">the whole listening room</h2>
 <header>
   <h1>🎧 the Listening Room</h1>
   <p><b style="color:var(--ink)">one seed, two arts:</b> the same bits drive the sound you hear and the
@@ -171,10 +372,16 @@ function rng(seed){ var a=seed>>>0; return function(){ a^=a<<13;a>>>=0;a^=a>>>17
 var SCALES=[[0,2,4,5,7,9,11],[0,2,3,5,7,8,10],[0,2,4,7,9],[0,1,5,7,8],[0,3,5,7,10]];
 var HEX=['#3f9c55','#0092a6','#a476ec','#c07f1c']; // the validated set, reused in order
 var ac=null,timer=null,step=0,notes=[];
-function buildPiece(seedStr){
+/* derive: the renderer's pure half - the same seed gives the same piece, with no side effect,
+   so the three fronts above (and any client) can read the facts the engine will play */
+function derive(seedStr){
   var h=hash32(seedStr), r=rng(h);
-  var scale=SCALES[Math.floor(r()*SCALES.length)], base=220*Math.pow(2,(h%12)/12);
-  notes=[];for(var i=0;i<32;i++){notes.push({t:i,d:0.22+((i%4===0)?0.13:0),f:base*Math.pow(2,scale[Math.floor(r()*scale.length)]/12),v:0.12+r()*0.1,hex:HEX[i%4]});}
+  var si=Math.floor(r()*SCALES.length), scale=SCALES[si], base=220*Math.pow(2,(h%12)/12);
+  var out=[];for(var i=0;i<32;i++){out.push({t:i,d:0.22+((i%4===0)?0.13:0),f:base*Math.pow(2,scale[Math.floor(r()*scale.length)]/12),v:0.12+r()*0.1,hex:HEX[i%4]});}
+  return {seed:seedStr,hash:h,scaleIndex:si,scale:scale.slice(),semitone:h%12,base:base,stepMs:160,notes:out};
+}
+function buildPiece(seedStr){
+  notes=derive(seedStr).notes;
   return notes;
 }
 function beep(n){
@@ -241,7 +448,8 @@ function play(){
 /* inspectable state, cypherpunk register style: the page's own claim about
    itself is checkable from outside (and by the e2e proof) without any
    test-only backdoor into the engine. */
-window.listeningDemo={ get audioState(){return ac?ac.state:'none';}, get steps(){return step;}, get total(){return totalSteps;}, get playing(){return !!timer;} };
+window.listeningDemo={ get audioState(){return ac?ac.state:'none';}, get steps(){return step;}, get total(){return totalSteps;}, get playing(){return !!timer;},
+  derive:derive, get forks(){return forks;}, get lineage(){return lineage.map(function(x){return {p:x.p,c:x.c,pos:x.pos};});} };
 /* ── the fork: child = parent with ONE nibble flipped; lineage records the divergence ── */
 var forks=0,lineage=[];
 function flipNibble(s,pos){
@@ -265,6 +473,186 @@ $('play').onclick=play;$('stop').onclick=function(){stop(true);};
 $('rand').onclick=function(){var s='';for(var i=0;i<32;i++)s+='0123456789abcdef'[Math.floor(Math.random()*16)];$('seed').value=s;play();};
 $('fork').onclick=forkPiece;
 drawViz($('seed').value);
+})();
+</script>
+<script>
+/* ETERNAL FRONT — one data layer, three renderers (docs/design/eternal). Facts come from the
+   room's own renderer (window.listeningDemo.derive(seed): the same pure function the engine plays)
+   and the engine's live state (listeningDemo + the #now status line). Nothing here plays, stops or
+   forks on its own: every gesture clicks the room's real control (#play, #stop, #fork) and the
+   fronts read the result back. "playing" is shown only while the engine's timer is running. */
+(function(){
+  var $=function(id){return document.getElementById(id);};
+  var T=function(k,f){var t=window.BNRLanguage&&window.BNRLanguage.text;return t?t(k,f):f;};
+  var SCALE=['major','natural minor','major pentatonic','in (miyako-bushi)','minor pentatonic'];
+  var NOTE=['C','C♯','D','D♯','E','F','F♯','G','G♯','A','A♯','B'];
+  var D={seed:'',hash:0,scaleIndex:0,scale:[],semitone:0,base:0,stepMs:160,notes:[],key:'',durationS:0,
+    state:'idle',steps:0,total:32,playing:false,audio:'none',now:'',forks:0,lineage:[]};
+  var R={sel:null};
+  function esc(v){return String(v==null?'':v).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+  function set(sel,txt){document.querySelectorAll('#eternal [data-et="'+sel+'"]').forEach(function(e){e.textContent=txt;});}
+  function name(f){var m=Math.round(69+12*Math.log2(f/440));return NOTE[((m%12)+12)%12]+(Math.floor(m/12)-1);}
+  function hex8(n){return ('00000000'+(n>>>0).toString(16)).slice(-8);}
+  /* the engine's own sentence, read back and classified — never invented */
+  function classify(t){
+    if(/^playing/.test(t))return 'playing'; if(/^waiting/.test(t))return 'waiting';
+    if(/^completed/.test(t))return 'completed'; if(/^stopped/.test(t))return 'stopped';
+    if(/^suspended/.test(t))return 'suspended'; if(/^failed/.test(t))return 'failed';
+    if(/^audio unavailable/.test(t))return 'unavailable'; return 'idle';
+  }
+  function read(){
+    var L=window.listeningDemo, seed=($('seed')&&$('seed').value.trim())||'0';
+    if(!L||!L.derive)return false;
+    if(seed!==D.seed){var d=L.derive(seed);['seed','hash','scaleIndex','scale','semitone','base','stepMs','notes'].forEach(function(k){D[k]=d[k];});
+      D.key=NOTE[(9+D.semitone)%12]+' '+SCALE[D.scaleIndex]; D.durationS=Math.round(D.notes.length*D.stepMs/10)/100; R.sel=null;}
+    D.now=($('now')&&$('now').textContent)||''; D.state=classify(D.now);
+    D.steps=L.steps; D.total=L.total; D.playing=L.playing; D.audio=L.audioState; D.forks=L.forks; D.lineage=L.lineage;
+    return true;
+  }
+  function played(){return D.state==='playing'||D.state==='completed'||D.state==='stopped'||D.state==='suspended'||D.state==='failed'?Math.min(D.steps,D.notes.length):0;}
+
+  /* ── NEW BEE ── */
+  function bee(){
+    set('beeNotes',D.notes.length+' '+T('et.listening.b.notes','notes · about {s} seconds').replace('{s}',Math.round(D.durationS)));
+    set('key',D.key);
+    set('beeForks',D.forks?D.forks+' '+(D.forks===1?T('et.listening.b.fork1','version made'):T('et.listening.b.forkN','versions made')):T('et.listening.b.none','none yet'));
+    var n=played(), m={
+      idle:T('et.listening.b.idle','ready when you are.'),
+      waiting:T('et.listening.b.waiting','asking your browser for sound…'),
+      playing:T('et.listening.b.playing','playing · {n} of {t} notes').replace('{n}',n).replace('{t}',D.total),
+      completed:T('et.listening.b.completed','played all {t} notes.').replace('{t}',D.total),
+      stopped:T('et.listening.b.stopped','stopped after {n} of {t} notes.').replace('{n}',n).replace('{t}',D.total),
+      suspended:T('et.listening.b.suspended','your browser paused the sound. press play to try again.'),
+      failed:T('et.listening.b.failed','the sound stopped part way. nothing is playing now.'),
+      unavailable:T('et.listening.b.unavailable','this browser has no sound engine, so nothing can play here. the picture and new versions still work.')
+    };
+    $('etBeeNow').textContent=m[D.state];
+    $('etBeePlay').textContent=D.playing?T('et.listening.b.stop','stop'):T('et.listening.b.play','play the piece');
+    $('etBeeFork').textContent=T('et.listening.b.forkGo','make a new version');
+  }
+
+  /* ── RAVER ── */
+  function wedge(r0,r1,a0,a1){
+    var p=function(r,a){return (r*Math.cos(a)).toFixed(2)+' '+(r*Math.sin(a)).toFixed(2);};
+    return 'M'+p(r1,a0)+'A'+r1+' '+r1+' 0 0 1 '+p(r1,a1)+'L'+p(r0,a1)+'A'+r0+' '+r0+' 0 0 0 '+p(r0,a0)+'Z';
+  }
+  var built='';
+  function ring(){
+    var svg=$('etRing'); if(!svg)return;
+    var n=D.notes.length, on=played();
+    if(built!==D.seed){ /* build once per seed, so the breath never restarts; later renders only toggle classes */
+      var h='<g class="et-r-breath"><circle class="halo" r="196"/>';
+      D.notes.forEach(function(N,i){
+        var deg=12*Math.log2(N.f/D.base), r1=110+deg*7.6, span=2*Math.PI/n, gap=i%4===0?0.018:0.05;
+        var a0=-Math.PI/2+i*span+gap, a1=-Math.PI/2+(i+1)*span-gap;
+        h+='<path class="pet p'+(i%4)+'" data-i="'+i+'" d="'+wedge(66,r1,a0,a1)+'"/>';
+      });
+      h+='</g><g class="heart" role="button" tabindex="0"><circle class="disc" r="58"/><path class="hex" d="M0 -46L40 -23L40 23L0 46L-40 23L-40 -23Z"/><text y="5" text-anchor="middle"></text></g>';
+      svg.innerHTML=h; built=D.seed;
+    }
+    svg.querySelectorAll('.pet').forEach(function(el,i){el.classList.toggle('on',i<on);el.classList.toggle('sel',R.sel===i);});
+    var heart=svg.querySelector('.heart');
+    heart.setAttribute('aria-label',D.playing?T('et.listening.r.stopA','stop the ring'):T('et.listening.r.playA','play the ring'));
+    heart.querySelector('text').textContent=D.playing?T('et.listening.r.stop','stop'):T('et.listening.r.play','play');
+  }
+  function raver(){
+    var n=played();
+    $('etRaverTitle').textContent=D.playing?T('et.listening.r.playingH','it sings'):D.state==='completed'?T('et.listening.r.doneH','all 32 lit'):T('et.listening.r.h','the ring');
+    $('etRaverHint').textContent=D.playing?n+' '+T('et.listening.r.of','of')+' '+D.total+' '+T('et.listening.r.lit','lit'):D.notes.length+' '+T('et.listening.r.hint','notes · tap the heart · tap a petal');
+    ring();
+    var c=$('etRaverCard');
+    if(R.sel!=null&&D.notes[R.sel]){var N=D.notes[R.sel];
+      c.innerHTML='<span class="rk">'+esc(name(N.f))+'</span><div><b>'+esc(T('et.listening.r.step','step')+' '+(R.sel+1)+' · '+N.f.toFixed(1)+' Hz · '+T('et.listening.r.beat','beat')+' '+(R.sel%4+1))+'</b><span>'+esc(Math.round(N.d*1000)+' ms · '+T('et.listening.r.vel','velocity')+' '+N.v.toFixed(2))+'</span></div>';}
+    else c.innerHTML='<span class="rk">'+esc(NOTE[(9+D.semitone)%12])+'</span><div><b>'+esc(D.key)+'</b><span>'+esc(T('et.listening.r.seed','seed')+' '+D.seed.slice(0,12)+'… · '+D.durationS+' s')+'</span></div>';
+    var f=$('etRaverForks');
+    f.innerHTML=D.lineage.slice(-3).reverse().map(function(x){return '<span>⑂ '+esc(T('et.listening.r.nibble','nibble')+' '+x.pos+' +1')+'</span>';}).join('')+
+      (D.forks?'<span>'+esc(D.forks+' '+(D.forks===1?T('et.listening.r.fork1','fork'):T('et.listening.r.forkN','forks')))+'</span>':'<span>'+esc(T('et.listening.r.noFork','no forks yet'))+'</span>');
+  }
+
+  /* ── CYPHERPUNK ── */
+  function cy(){
+    set('path','seed://'+D.seed);
+    $('etChips').innerHTML='<span class="on">engine '+esc(D.audio)+'</span><span class="'+(D.playing?'ok':'')+'">'+esc(D.state)+'</span><span>'+esc(D.forks+' '+(D.forks===1?'fork':'forks'))+'</span>';
+    var kv=function(rows){return rows.map(function(r){return '<tr><th>'+esc(r[0])+'</th><td>'+r[1]+'</td></tr>';}).join('');};
+    $('etDerive').innerHTML=kv([
+      ['seed',esc(D.seed)],['fnv-1a 32','0x'+hex8(D.hash)],
+      ['scale',esc(D.scaleIndex+' · '+SCALE[D.scaleIndex]+' · ['+D.scale.join(',')+']')],
+      ['base',esc(D.base.toFixed(2)+' Hz · '+name(D.base)+' · h mod 12 = '+D.semitone)],
+      ['notes',esc(D.notes.length+' · step '+D.stepMs+' ms · '+D.durationS+' s')],
+      ['voice','triangle osc · 20 ms attack · exp decay']]);
+    var n=played(), st=D.state;
+    var steps=[
+      ['seed','"'+D.seed+'" · '+D.seed.length+' chars','done'],
+      ['hash · fnv-1a 32','0x'+hex8(D.hash),'done'],
+      ['rng · xorshift32','scale '+D.scaleIndex+' then '+D.notes.length+' degrees + velocities','done'],
+      ['sight · hex field','drawn from seed + "viz" · canvas #viz','done'],
+      ['sound · web audio',st==='playing'?'running · step '+n+' of '+D.total:st==='unavailable'?'no audio engine in this browser':st==='suspended'?'suspended by the browser · nothing plays':st==='completed'?'completed · all '+D.total+' steps':st==='stopped'?'stopped at '+n+' of '+D.total:'idle · starts only on a press (autoplay law)',st==='completed'?'done':'now'],
+      ['fork · nibble+1',D.forks?D.forks+' divergence receipts · parent untouched':'no fork yet · the parent never mutates','todo']
+    ];
+    $('etPipe').innerHTML=steps.map(function(s){return '<li class="'+s[2]+'"><b>'+esc(s[0])+'</b><p>'+esc(s[1])+'</p></li>';}).join('');
+    var rows='<tr><th>i</th><th>hz</th><th>i</th><th>hz</th><th>i</th><th>hz</th><th>i</th><th>hz</th></tr>';
+    for(var r=0;r<8;r++){rows+='<tr>';for(var c=0;c<4;c++){var i=c*8+r,N=D.notes[i];rows+=N?'<td class="'+(i<n?'on':'')+'">'+(i+1)+'</td><td class="'+(i<n?'on':'')+'">'+N.f.toFixed(1)+'</td>':'<td></td><td></td>';}rows+='</tr>';}
+    $('etNotes').innerHTML=rows;
+    var last=D.lineage[D.lineage.length-1];
+    $('etReceipt').innerHTML=kv([
+      ['engine',esc(D.audio)+(D.playing?' · <span class="yes">timer running</span>':' · <span class="no">no timer</span>')],
+      ['steps',esc(n+' / '+D.total)],
+      ['status',esc(D.now)],
+      ['forks',esc(String(D.forks))],
+      ['last fork',last?esc(last.p.slice(0,12)+'… → '+last.c.slice(0,12)+'… · nibble['+last.pos+']+1'):'<span class="no">none yet</span>'],
+      ['writes','<span class="yes">none</span> · nothing minted, sent or stored']]);
+    $('etCyRun').textContent=D.playing?T('et.listening.c.stop','stop renderer'):T('et.listening.c.run','run renderer');
+  }
+
+  function labels(){document.querySelectorAll('[data-t^="et.listening."]').forEach(function(e){if(e.__en==null)e.__en=e.textContent;e.textContent=T(e.getAttribute('data-t'),e.__en);});}
+  function all(){if(!read())return;bee();raver();cy();}
+
+  /* ── the hand-offs: the room's own controls own every real step ── */
+  function playOrStop(){var b=$(D.playing?'stop':'play');if(b)b.click();setTimeout(all,30);}
+  function fork(){var b=$('fork');if(b)b.click();setTimeout(all,30);}
+  var hold={t0:0,raf:0};
+  function holdStart(e){
+    if(hold.raf)return; if(e&&e.preventDefault)e.preventDefault();
+    hold.t0=performance.now();
+    (function tick(now){var f=Math.min(1,(now-hold.t0)/1200);$('etForkFill').style.width=(f*100)+'%';
+      if(f>=1){hold.raf=0;$('etForkFill').style.width='0';fork();return;}hold.raf=requestAnimationFrame(tick);})(hold.t0);
+  }
+  function holdStop(){if(!hold.raf)return;cancelAnimationFrame(hold.raf);hold.raf=0;$('etForkFill').style.width='0';}
+  /* motion: the ring's slow breath (0.17 Hz) pauses on the switch and the estate-wide preference */
+  var still=false; try{still=localStorage.getItem('bnr.motion.paused')==='true';}catch(x){}
+  function motion(){var reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+    document.body.classList.toggle('et-still',still||reduce);var b=$('etMotion');
+    b.setAttribute('aria-pressed',String(still||reduce));b.disabled=reduce;
+    b.textContent=reduce?T('et.listening.r.stillOs','still · your device asks for less motion'):still?T('et.listening.r.resume','resume motion'):T('et.listening.r.pause','pause motion');}
+
+  function wire(){
+    var ev=$('eternal'); if(!ev)return;
+    $('etBeePlay').addEventListener('click',playOrStop);
+    $('etCyRun').addEventListener('click',playOrStop);
+    $('etBeeFork').addEventListener('click',fork);
+    $('etCyFork').addEventListener('click',fork);
+    ev.addEventListener('click',function(e){
+      if(e.target.closest('#etRing .heart')){playOrStop();return;}
+      var p=e.target.closest('#etRing .pet'); if(p){var i=+p.getAttribute('data-i');R.sel=R.sel===i?null:i;raver();}
+    });
+    ev.addEventListener('keydown',function(e){if((e.key==='Enter'||e.key===' ')&&e.target.closest('#etRing .heart')){e.preventDefault();playOrStop();}});
+    var hb=$('etForkHold');
+    hb.addEventListener('pointerdown',function(e){try{hb.setPointerCapture(e.pointerId);}catch(x){}holdStart(e);});
+    ['pointerup','pointercancel','pointerleave'].forEach(function(t){hb.addEventListener(t,holdStop);});
+    hb.addEventListener('keydown',function(e){if((e.key===' '||e.key==='Enter')&&!e.repeat){e.preventDefault();holdStart(e);}});
+    hb.addEventListener('keyup',function(e){if(e.key===' '||e.key==='Enter')holdStop();});
+    hb.addEventListener('contextmenu',function(e){e.preventDefault();});
+    $('etMotion').addEventListener('click',function(){still=!still;try{localStorage.setItem('bnr.motion.paused',String(still));}catch(x){}motion();});
+    if(window.matchMedia)matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change',motion);
+    /* the engine speaks through #now and the lineage; the fronts listen, they never guess */
+    var mo=new MutationObserver(all); ['now','forkcount'].forEach(function(id){if($(id))mo.observe($(id),{childList:true,characterData:true,subtree:true});});
+    if($('seed'))$('seed').addEventListener('input',all);
+    /* while the engine's timer runs, the lit count follows it at 2 Hz (under the 3 Hz law) */
+    setInterval(function(){if(window.listeningDemo&&(window.listeningDemo.playing||D.playing))all();},500);
+    document.addEventListener('blang',function(){labels();motion();all();});
+  }
+  labels(); wire(); motion(); all();
+  window.__eternal={data:D,raver:R,refresh:all};
 })();
 </script>
 </body>

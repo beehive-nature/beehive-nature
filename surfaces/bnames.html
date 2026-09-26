@@ -95,44 +95,251 @@ footer a{padding-block:14px} /* a 44 px tap target that leaves the line rhythm a
 body[data-reg="bee"],body[data-reg="raver"]{--fmin:14px}
 </style>
 <link rel="stylesheet" href="skaists.css">
-<link rel="stylesheet" href="eternal-front.css">
 <style>
-/* the desk's three-UI front (docs/design/eternal): every value a skaists token; the rest of the
-   page keeps its own dress under the folds and is mapped onto the register's tokens */
-body[data-reg="bee"]{--bg:var(--sk-bg);--panel:var(--sk-bg-card);--well:var(--sk-bg-well);--ink:var(--sk-ink);--dim:var(--sk-ink-mut);--faint:var(--sk-ink-mut);--line:var(--sk-line);--cyan:var(--sk-ai);--gold:var(--sk-you);--violet:var(--sk-sovereign);--leaf:var(--sk-verified);--amber:var(--sk-guard);background:var(--sk-bg);font-family:var(--sk-font-bee-sans)}
-body[data-reg="bee"] h1{color:var(--sk-ink);font-family:var(--sk-font-bee-serif);font-weight:400}
-body[data-reg="raver"]{--bg:var(--sk-bg);--panel:var(--sk-bg-card);--well:var(--sk-bg-well);--line:var(--sk-line);--ink:var(--sk-ink);--dim:var(--sk-ink-soft);--faint:var(--sk-ink-mut);--gold:var(--sk-you);--violet:var(--sk-sovereign-soft);--cyan:var(--sk-ai);--leaf:var(--sk-verified);--amber:var(--sk-guard);background:var(--sk-bg);font-family:var(--sk-font-raver-body)}
-body[data-reg="raver"] h1{color:var(--sk-ink);font-family:var(--sk-font-raver-display);font-weight:700;letter-spacing:-.01em}
-body[data-reg="cypherpunk"]{--bg:var(--sk-bg);--panel:var(--sk-bg-card);--well:var(--sk-bg-well);--line:var(--sk-line);--ink:var(--sk-ink);--dim:var(--sk-ink-soft);--faint:var(--sk-ink-mut);--cyan:var(--sk-ai);--gold:var(--sk-ai);--violet:var(--sk-sovereign-soft);--leaf:var(--sk-verified);--amber:var(--sk-guard);background:var(--sk-bg)}
-body[data-reg="cypherpunk"] h1{color:var(--sk-ink)}
-#eternal{margin:var(--sk-s3) auto var(--sk-s4);max-width:520px}
-#eternal .et-c{max-width:none}
-/* the one question: a field per register, its own shape */
-.et-b-field{display:flex;flex-direction:column;gap:var(--sk-s1)}
-.et-b-field label{display:flex;align-items:center;min-height:var(--sk-control-min);font:600 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
-.et-b-field input{height:var(--sk-control-primary);min-height:var(--sk-control-primary);box-sizing:border-box;width:100%;min-width:0;flex:none;padding:0 var(--sk-s3);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius-lg);background:var(--sk-bg-card);color:var(--sk-ink);font:400 16px/1.45 var(--sk-font-bee-sans)}
-.et-b-verdict{display:flex;flex-direction:column;justify-content:center;gap:2px;min-height:var(--sk-control-person);padding:var(--sk-s1) var(--sk-s3);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl);background:var(--sk-bg-card)}
-.et-b-verdict b{font:600 16px/1.45 var(--sk-font-bee-sans)}.et-b-verdict span{font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
-.et-b-verdict.free b{color:var(--sk-verified)}.et-b-verdict.taken{border-style:dashed;border-color:var(--sk-guard);background:var(--sk-guard-wash)}.et-b-verdict.taken b{color:var(--sk-guard)}
-.et-b-term.guard i{background:var(--sk-guard-wash);color:var(--sk-guard)}.et-b-term.guard b{color:var(--sk-guard)}
-.et-b-refuse{display:flex;gap:var(--sk-s2);align-items:center;min-height:var(--sk-control-min);padding:var(--sk-s1) var(--sk-s3);border:1.5px dashed var(--sk-guard);border-radius:var(--sk-radius);background:var(--sk-guard-wash);color:var(--sk-guard);font:600 15px/1.45 var(--sk-font-bee-sans)}
-.et-b-where code{white-space:pre-wrap}
-.et-r-field{display:flex;gap:var(--sk-s2);align-items:center;margin:var(--sk-s2) 0}
-.et-r-field input{flex:1;min-width:0;height:var(--sk-control-min);padding:0 var(--sk-s3);border:1.5px solid var(--sk-sovereign);border-radius:var(--sk-radius-pill);background:var(--sk-bg-card);color:var(--sk-ink);font:600 14px/1.25 var(--sk-font-raver-body)}
-.et-r-mandala .cell{cursor:pointer;transition:opacity var(--dur,.26s)}
-.et-r-mandala .cell:focus-visible{outline:none;stroke:var(--sk-ink);stroke-width:2}
-.et-c-field{display:flex;gap:var(--sk-s1);margin:var(--sk-s2) 0}
-.et-c-field input{flex:1;min-width:0;height:var(--sk-control-min);padding:0 var(--sk-s2);border:1px solid var(--sk-ai);border-radius:var(--sk-radius-sm);background:var(--sk-bg-card);color:var(--sk-ink);font:400 13px/1.45 var(--sk-font-mono)}
-.et-c-kv code{font:400 13px/1.45 var(--sk-font-mono);white-space:pre-wrap;word-break:break-all}
+/* ── ETERNAL FRONT (docs/design/eternal) — every value is a skaists token (surfaces/skaists.css,
+   compiled from docs/design/skaists/tokens.json): no hand-picked hex, size or corner. Measured by
+   e2e/skaists-conformance.mjs. One register visible at a time; new bee is the default. Every rule
+   rides #eternal so the page's own element styles (buttons, links, inputs) never leak in. ── */
+#eternal{margin:var(--sk-s2) auto var(--sk-s2);max-width:620px;text-align:start;letter-spacing:0}
+#eternal *{box-sizing:border-box}
+#eternal>.et-r,#eternal>.et-c{display:none}
+body[data-reg="raver"] #eternal>.et-b,body[data-reg="cypherpunk"] #eternal>.et-b{display:none}
+body[data-reg="raver"] #eternal>.et-r{display:block}
+body[data-reg="cypherpunk"] #eternal>.et-c{display:block}
+#eternal [hidden]{display:none!important}
+#eternal :is(button,a,input){margin:0;box-shadow:none;transform:none;text-shadow:none;animation:none}
+#eternal button{appearance:none;background:none;border:0;border-radius:0;padding:0;min-height:0;cursor:pointer;color:inherit;font:inherit;text-align:inherit}
+#eternal button:hover{background:none;color:inherit;transform:none}
+#eternal a{color:var(--sk-link);text-decoration-thickness:1px;text-underline-offset:3px}
+#eternal a:hover{color:var(--sk-link-hover)}
+#eternal svg{display:block}
+#eternal p,#eternal h2,#eternal h3,#eternal ol,#eternal ul{margin:0}
+#eternal h2,#eternal h3{letter-spacing:0}
+#eternal :focus-visible{outline:2px solid var(--sk-focus);outline-offset:3px}
+#eternal .et-center{text-align:center}
+#eternal .et-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.et-archive-h{margin:var(--sk-s5) auto var(--sk-s1);padding-top:var(--sk-s4);border-top:1px solid var(--sk-line);color:var(--sk-ink);max-width:620px;letter-spacing:0;text-align:start}
+body[data-reg="bee"] .et-archive-h{font:400 28px/1.1 var(--sk-font-bee-serif)}
+body[data-reg="raver"] .et-archive-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em}
+body[data-reg="cypherpunk"] .et-archive-h{font:600 15px/1.45 var(--sk-font-mono)}
+
+/* NEW BEE — a calm room: one question, plain rows, one magenta action */
+#eternal .et-b{color:var(--sk-ink);display:flex;flex-direction:column;gap:var(--sk-s3);font:400 16px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-b-mark{font:400 18px/1.2 var(--sk-font-house);color:var(--sk-sovereign)}
+#eternal .et-b-mark b{font-weight:700}
+#eternal .et-b-h{font:400 40px/1.05 var(--sk-font-bee-serif);color:var(--sk-ink)}
+#eternal .et-b-lede{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink-mut);text-wrap:pretty}
+#eternal .et-b-guard{display:flex;align-items:center;gap:var(--sk-s2);min-height:var(--sk-control-min);padding:var(--sk-s1) var(--sk-s3);border-radius:var(--sk-radius);background:var(--sk-guard-wash);color:var(--sk-guard);font:600 15px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-b-guard svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+#eternal .et-b-rows{display:flex;flex-direction:column;background:var(--sk-bg-card);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl);overflow:hidden}
+#eternal .et-b-row{display:flex;align-items:center;justify-content:space-between;gap:var(--sk-s2);width:100%;min-height:var(--sk-control-row);padding:var(--sk-s1) var(--sk-s3);border-bottom:1px solid var(--sk-line-soft);background:transparent;text-align:start;font:500 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink);text-decoration:none}
+#eternal .et-b-row:last-child{border-bottom:0}
+#eternal .et-b-row small{display:flex;align-items:center;gap:var(--sk-s1);font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut);text-align:end}
+#eternal .et-b-row small.out{color:var(--sk-guard)}
+#eternal .et-b-row small.ok{color:var(--sk-verified)}
+#eternal .et-b-row[aria-expanded="true"]{background:var(--sk-sovereign-tint);color:var(--sk-sovereign-strong);font-weight:600}
+#eternal .et-b-row[aria-expanded="true"] small{color:var(--sk-sovereign-strong)}
+#eternal .et-b-row .chev{flex:none;transition:transform .26s}
+#eternal .et-b-row[aria-expanded="true"] .chev{transform:rotate(90deg)}
+#eternal .et-b-person{display:flex;align-items:center;gap:var(--sk-s2);min-height:var(--sk-control-person);padding:var(--sk-s1) var(--sk-s3);border-bottom:1px solid var(--sk-line-soft)}
+#eternal .et-b-person:last-child{border-bottom:0}
+#eternal .et-b-person i{width:40px;height:40px;border-radius:var(--sk-radius-pill);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong);display:flex;align-items:center;justify-content:center;font:600 14px/1.4 var(--sk-font-bee-sans);font-style:normal;flex:none}
+#eternal .et-b-person b{display:block;font:500 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+#eternal .et-b-person span{display:block;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-more{padding:var(--sk-s2) var(--sk-s3);font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut);border-top:1px solid var(--sk-line-soft)}
+#eternal .et-b-act{display:flex;flex-direction:column;gap:var(--sk-s1);margin-top:var(--sk-s1)}
+#eternal .et-b-primary{display:flex;align-items:center;justify-content:center;width:100%;min-height:var(--sk-control-primary);padding:0 var(--sk-s3);border-radius:var(--sk-radius-lg);border:0;background:var(--sk-primary);color:var(--sk-on-primary);font:600 17px/1.2 var(--sk-font-bee-sans);text-align:center;text-decoration:none;cursor:pointer}
+#eternal .et-b-primary:hover{background:var(--sk-primary);color:var(--sk-on-primary)}
+#eternal .et-b-primary:disabled{background:var(--sk-bg-well);color:var(--sk-ink-mut);cursor:not-allowed}
+#eternal .et-b-link{min-height:var(--sk-control-min);display:flex;align-items:center;justify-content:center;border:0;background:transparent;font:600 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-link);text-decoration:none;text-align:center;cursor:pointer}
+#eternal .et-b-link:hover{color:var(--sk-link-hover)}
+#eternal .et-b-foot{text-align:center;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-field{display:grid;gap:var(--sk-s1);font:600 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-field input{width:100%;min-height:var(--sk-control-row);padding:0 var(--sk-s3);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius-md);background:var(--sk-bg-card);color:var(--sk-ink);font:400 16px/1.45 var(--sk-font-bee-sans);outline-offset:3px}
+#eternal .et-b-field input:focus{border-color:var(--sk-ink);box-shadow:none}
+#eternal .et-b-answer{padding:var(--sk-s3);border-radius:var(--sk-radius-xl);background:var(--sk-sovereign-tint);border:1px solid var(--sk-line);display:grid;gap:var(--sk-s1)}
+#eternal .et-b-answer b{font:400 28px/1.1 var(--sk-font-bee-serif);color:var(--sk-sovereign-strong)}
+#eternal .et-b-answer span{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+#eternal .et-b-answer small{font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-answer.out b{color:var(--sk-guard)}
+
+/* RAVER — the data is the art; the gesture is physical; lower case is allowed joy */
+#eternal .et-r{color:var(--sk-ink);font:400 14px/1.4 var(--sk-font-raver-body)}
+#eternal .et-r-top{display:flex;align-items:baseline;justify-content:space-between;gap:var(--sk-s2);flex-wrap:wrap}
+#eternal .et-r-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em;color:var(--sk-ink)}
+#eternal .et-r-hint{font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-art{width:100%;max-width:360px;height:auto;margin:var(--sk-s3) auto var(--sk-s1);filter:drop-shadow(var(--sk-glow-sovereign))}
+#eternal .et-r-art [role="button"]{cursor:pointer}
+#eternal .et-r-art [role="button"]:focus{outline:none}
+#eternal .et-r-art [role="button"]:focus-visible .hit{stroke:var(--sk-ink);stroke-width:2}
+#eternal .et-r-art .cell{transition:opacity .26s,fill .26s}
+#eternal .et-r-legend{display:flex;justify-content:center;flex-wrap:wrap;gap:var(--sk-s1) var(--sk-s3);margin:var(--sk-s1) 0 var(--sk-s2);font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-legend span{display:flex;align-items:center;gap:var(--sk-s1)}
+#eternal .et-r-legend i{width:14px;height:14px;border-radius:var(--sk-radius-pill);flex:none}
+#eternal .et-r-card{display:flex;gap:var(--sk-s2);align-items:center;padding:var(--sk-s2) var(--sk-s3);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl);background:var(--sk-sovereign-tint);min-height:var(--sk-control-person)}
+#eternal .et-r-card .rk{min-width:44px;height:44px;padding:0 var(--sk-s1);border-radius:var(--sk-radius);background:var(--sk-sovereign-strong);color:var(--sk-bg);display:flex;align-items:center;justify-content:center;font:700 15px/1.2 var(--sk-font-raver-display);flex:none}
+#eternal .et-r-card b{display:block;font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink)}
+#eternal .et-r-card span{display:block;font:600 14px/1.4 var(--sk-font-raver-body);color:var(--sk-sovereign-soft)}
+#eternal .et-r-pill{display:flex;align-items:center;justify-content:center;width:100%;min-height:58px;margin-top:var(--sk-s4);padding:0 var(--sk-s3);border:0;border-radius:var(--sk-radius-pill);background:var(--sk-primary);color:var(--sk-on-primary);font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em;text-align:center;text-decoration:none;cursor:pointer}
+#eternal .et-r-pill:hover{background:var(--sk-primary);color:var(--sk-on-primary)}
+#eternal .et-r-ghost{display:flex;align-items:center;justify-content:center;margin:var(--sk-s2) auto 0;min-height:var(--sk-control-min);padding:0 var(--sk-s2);border:0;background:none;color:var(--sk-link);font:400 14px/1.4 var(--sk-font-raver-body);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+#eternal .et-r-note{margin:var(--sk-s2) 0 0;text-align:center;font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-big{margin:var(--sk-s2) 0 var(--sk-s1);text-align:center;font:700 60px/.95 var(--sk-font-raver-display);letter-spacing:-.02em;color:var(--sk-ink)}
+#eternal .et-r-pause{display:flex;align-items:center;justify-content:center;min-width:var(--sk-control-min);min-height:var(--sk-control-min);padding:0 var(--sk-s2);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius-pill);font:600 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink)}
+@media (prefers-reduced-motion:reduce){#eternal .et-r-art .cell,#eternal .et-b-row .chev{transition:none}}
+
+/* CYPHERPUNK — the instrument, complete at first paint; every row a fact you can check */
+#eternal .et-c{font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink)}
+#eternal .et-c-path{font:600 15px/1.45 var(--sk-font-mono);word-break:break-all;color:var(--sk-ink)}
+#eternal .et-c-chips{display:flex;flex-wrap:wrap;gap:var(--sk-s1);margin:var(--sk-s2) 0}
+#eternal .et-c-chips span{padding:2px var(--sk-s1);border:1px solid var(--sk-line);border-radius:4px;background:var(--sk-bg-card);font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink)}
+#eternal .et-c-chips span.on{border-color:var(--sk-guard);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong)}
+#eternal .et-c-chips span.ok{border-color:var(--sk-verified);color:var(--sk-verified)}
+#eternal .et-c-chips span.no{border-color:var(--sk-guard);color:var(--sk-guard)}
+#eternal .et-c-guard{display:flex;justify-content:space-between;align-items:center;gap:var(--sk-s2);flex-wrap:wrap;min-height:var(--sk-control-min);padding:var(--sk-s1) var(--sk-s3);border:1px dashed var(--sk-guard);border-radius:var(--sk-radius-sm);background:var(--sk-guard-wash);color:var(--sk-guard)}
+#eternal .et-c-guard b{font-weight:600;color:var(--sk-sovereign-strong)}
+#eternal .et-c-tab{width:100%;margin:var(--sk-s2) 0 var(--sk-s1);border-collapse:separate;border-spacing:0;border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm);overflow:hidden;background:var(--sk-bg-card)}
+#eternal .et-c-tab th{padding:var(--sk-s1) var(--sk-s2);text-align:start;font:600 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);border-bottom:1px solid var(--sk-line);background:var(--sk-bg-well);position:static}
+#eternal .et-c-tab td{height:var(--sk-control-min);padding:var(--sk-s1) var(--sk-s2);border-bottom:1px solid var(--sk-line);font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink);vertical-align:middle;word-break:break-word}
+#eternal .et-c-tab tr:last-child td{border-bottom:0}
+#eternal .et-c-tab td:first-child{color:var(--sk-guard)}
+#eternal .et-c-tab tr.pick{cursor:pointer}
+#eternal .et-c-tab tr.pick:hover td{background:var(--sk-sovereign-tint)}
+#eternal .et-c-tab tr.names td{height:auto;background:var(--sk-sovereign-tint);color:var(--sk-ink)}
+#eternal .et-c-tab small{display:block;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut)}
+#eternal .et-c-tab .ok{color:var(--sk-verified)}#eternal .et-c-tab .no{color:var(--sk-guard)}#eternal .et-c-tab .part{color:var(--sk-info)}
+#eternal .et-c-h{margin:var(--sk-s4) 0 var(--sk-s2);font:600 15px/1.45 var(--sk-font-mono);color:var(--sk-ink)}
+#eternal .et-c-pipe{list-style:none;margin:0;padding:0;display:grid;gap:var(--sk-s2);counter-reset:p}
+#eternal .et-c-pipe li{display:grid;grid-template-columns:36px 1fr;gap:var(--sk-s1) var(--sk-s2);padding:var(--sk-s2) var(--sk-s3);border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm);background:var(--sk-bg-card);counter-increment:p}
+#eternal .et-c-pipe li::before{content:counter(p,decimal-leading-zero);color:var(--sk-guard);font-weight:600}
+#eternal .et-c-pipe li b{font-weight:600;color:var(--sk-ink)}
+#eternal .et-c-pipe li p{grid-column:2;margin:0;color:var(--sk-ink-soft);word-break:break-word}
+#eternal .et-c-pipe li.done b{color:var(--sk-verified)}
+#eternal .et-c-pipe li.guard{border-style:dashed;border-color:var(--sk-guard)}#eternal .et-c-pipe li.guard b{color:var(--sk-guard)}
+#eternal .et-c-pipe li.now{border-color:var(--sk-ai);box-shadow:inset 0 0 0 1px var(--sk-ai)}#eternal .et-c-pipe li.now b{color:var(--sk-ai)}
+#eternal .et-c-pipe li.todo p{color:var(--sk-ink-mut)}
+#eternal .et-c-primary{display:flex;align-items:center;justify-content:center;width:100%;min-height:52px;margin-top:var(--sk-s3);padding:0 var(--sk-s2);border:0;border-radius:var(--sk-radius-sm);background:var(--sk-primary);color:var(--sk-on-primary);font:600 14px/1.2 var(--sk-font-mono);text-align:center;text-decoration:none;cursor:pointer}
+#eternal .et-c-primary:hover{background:var(--sk-primary);color:var(--sk-on-primary)}
+#eternal .et-c-kv{width:100%;border-collapse:collapse;border:1px solid var(--sk-line);background:var(--sk-bg-card)}
+#eternal .et-c-kv th{width:104px;padding:var(--sk-s2) var(--sk-s2);text-align:start;vertical-align:top;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);border-bottom:1px solid var(--sk-line);background:transparent;position:static}
+#eternal .et-c-kv td{padding:var(--sk-s2) var(--sk-s2);border-bottom:1px solid var(--sk-line);word-break:break-word;font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink)}
+#eternal .et-c-kv .no{color:var(--sk-info)}#eternal .et-c-kv .yes{color:var(--sk-verified)}#eternal .et-c-kv .held{color:var(--sk-guard)}
+#eternal .et-c-verify{margin-top:var(--sk-s3);padding:var(--sk-s3);border-radius:var(--sk-radius-sm);background:var(--sk-bg-card);border:1px solid var(--sk-line)}
+#eternal .et-c-verify-h{font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);margin-bottom:var(--sk-s1)}
+#eternal .et-c-verify ol{margin:0;padding-inline-start:var(--sk-s4);display:grid;gap:var(--sk-s1);color:var(--sk-ink)}
+#eternal .et-c-verify code{font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ai);word-break:break-all;background:none;padding:0}
+#eternal .et-c-row{display:grid;grid-template-columns:1fr 1fr;gap:var(--sk-s2);margin-top:var(--sk-s3)}
+#eternal .et-c-ghost{display:flex;align-items:center;justify-content:center;min-height:52px;padding:0 var(--sk-s1);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius-sm);color:var(--sk-ink);text-decoration:none;text-align:center;font:600 14px/1.2 var(--sk-font-mono);background:transparent}
+#eternal .et-c-ghost:hover{color:var(--sk-ink);background:transparent}
+#eternal .et-c-field{display:flex;gap:var(--sk-s1);margin-top:var(--sk-s2)}
+#eternal .et-c-field input{flex:1;min-width:0;min-height:var(--sk-control-min);padding:0 var(--sk-s2);border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm);background:var(--sk-bg-card);color:var(--sk-ink);font:400 13px/1.45 var(--sk-font-mono)}
+#eternal .et-c-field input:focus{border-color:var(--sk-ai);box-shadow:none}
+#eternal .et-c-field button{min-height:var(--sk-control-min);min-width:var(--sk-control-min);padding:0 var(--sk-s2);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius-sm);font:600 14px/1.2 var(--sk-font-mono);color:var(--sk-ink)}
+/* the .b name desk, the front's own pieces */
+#eternal .et-b-answer.wait b{color:var(--sk-ink-mut)}
+#eternal .et-r-art .jewel{cursor:pointer}
+#eternal .et-r-art .hit{fill:transparent;stroke:none}
+#eternal .et-r-art text{font:600 14px/1.4 var(--sk-font-raver-body);pointer-events:none}
+#eternal .et-r-art text.big{font:700 15px/1.2 var(--sk-font-raver-display)}
+#eternal .lg-held{background:var(--sk-sovereign)}#eternal .lg-free{border:1.5px solid var(--sk-biomass)}
+#eternal .lg-dark{border:1.5px dashed var(--sk-guard)}#eternal .lg-lit{background:var(--sk-sovereign-strong)}
+#eternal .et-r-field{display:flex;gap:var(--sk-s1);margin-top:var(--sk-s3)}
+#eternal .et-r-field input{flex:1;min-width:0;min-height:var(--sk-control-min);padding:0 var(--sk-s3);border:1.5px solid var(--sk-sovereign);border-radius:var(--sk-radius-pill);background:var(--sk-bg-card);color:var(--sk-ink);font:600 14px/1.25 var(--sk-font-raver-body)}
+#eternal .et-r-field input:focus{border-color:var(--sk-ink);box-shadow:none}
+
+/* ── THE WHOLE DESK, dressed per register: the page's own variables mapped onto skaists ── */
+body[data-reg]{--bg:var(--sk-bg);--panel:var(--sk-bg-card);--well:var(--sk-bg-well);--ink:var(--sk-ink);--line:var(--sk-line);
+ --gold:var(--sk-sovereign-strong);--violet:var(--sk-sovereign);--cyan:var(--sk-link);--leaf:var(--sk-verified);--amber:var(--sk-guard);
+ background:var(--sk-bg);color:var(--sk-ink)}
+body[data-reg="bee"]{--dim:var(--sk-ink-mut);--faint:var(--sk-ink-mut);font-family:var(--sk-font-bee-sans);color-scheme:light}
+body[data-reg="raver"]{--dim:var(--sk-ink-soft);--faint:var(--sk-ink-mut);font-family:var(--sk-font-raver-body)}
+body[data-reg="cypherpunk"]{--dim:var(--sk-ink-soft);--faint:var(--sk-ink-mut);font-family:var(--sk-font-mono)}
+body[data-reg] h1{text-shadow:none;letter-spacing:0;color:var(--sk-ink)}
+body[data-reg="bee"] h1{font:400 40px/1.05 var(--sk-font-bee-serif)}
+body[data-reg="raver"] h1{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em}
+body[data-reg="cypherpunk"] h1{font:600 15px/1.45 var(--sk-font-mono)}
+body[data-reg] section:not(#eternal){border-radius:var(--sk-radius);background:var(--sk-bg-card)}
+body[data-reg] :is(.jewel,.rd,.act,pre,input){border-radius:var(--sk-radius)}
+body[data-reg] button:not(#eternal button){background:var(--sk-bg-card);color:var(--sk-link);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius);min-height:var(--sk-control-min)}
+body[data-reg] button:not(#eternal button):hover{background:var(--sk-sovereign-tint);color:var(--sk-sovereign-strong)}
+body[data-reg] pre,body[data-reg] #constwrap .tip{background:var(--sk-bg-well)}
+body[data-reg] #cust{background:var(--sk-guard-wash)!important}
+body[data-reg="bee"] #sky{display:none}
 </style>
 </head>
 <body>
+<script>/* first paint in the reader's own register — register.js re-asserts on mount */try{var r0=localStorage.getItem('bregister');document.body.setAttribute('data-reg',r0==='raver'||r0==='cypherpunk'?r0:'bee')}catch(e){document.body.setAttribute('data-reg','bee')}</script>
 <canvas id="sky"></canvas>
 <main>
+<!-- ETERNAL FRONT (founder blueprint 2026-09-26, docs/design/eternal): three separate products in one
+     surface. ONE data layer — the desk's own live reads (the `live` object below: registry rows, config,
+     the RAM market, and whether the chain answered at all) — drives all three. Every "check" hands the
+     name to the desk's real search (#q, #go); nothing here signs, holds a key, or writes to the chain. -->
+<section id="eternal" aria-label="find your .b name">
+
+  <!-- NEW BEE — one question: is my name free? -->
+  <div class="et-b">
+    <div class="et-b-mark">the .b name desk</div>
+    <h2 class="et-b-h" data-t="et.bnames.b.title">find your .b name</h2>
+    <p class="et-b-lede" data-t="et.bnames.b.lede">a name on our chain, for you and the things you love. the desk asks the chain live, and you sign it yourself.</p>
+    <div class="et-b-guard"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span data-t="et.bnames.b.keys">this desk never holds your keys. it writes nothing.</span></div>
+    <label class="et-b-field"><span data-t="et.bnames.b.label">a name</span><input id="etBeeName" autocomplete="off" spellcheck="false" placeholder="your name" enterkeyhint="search"></label>
+    <div class="et-b-answer wait" id="etBeeAnswer" aria-live="polite"><b data-t="et.bnames.b.ask">type a name, then check it.</b><span id="etBeeAnswerLine">the answer comes from the chain, not from this page.</span></div>
+    <div class="et-b-rows" id="etBeeRows"></div>
+    <div class="et-b-act">
+      <button type="button" class="et-b-primary" id="etBeeCheck" data-t="et.bnames.b.check">check this name</button>
+      <button type="button" class="et-b-link" id="etBeeSecure" data-t="et.bnames.b.secure">how to secure a name</button>
+      <p class="et-b-foot" data-t="et.bnames.b.foot">registration is open to the founder's own accounts until hardening ships.</p>
+    </div>
+  </div>
+
+  <!-- RAVER — the registry as a crown: every name a cell; tap one, the chain answers -->
+  <div class="et-r">
+    <div class="et-r-top"><h2 class="et-r-h" data-t="et.bnames.r.title">the crown</h2><span class="et-r-hint" id="etRaverHint">asking the chain…</span></div>
+    <svg class="et-r-art" id="etCrown" viewBox="0 0 360 360" role="group" aria-label="the registry drawn as a crown: king.b at the heart, the open jewels beside it"></svg>
+    <div class="et-r-legend"><span><i class="lg-held"></i>held</span><span><i class="lg-free"></i>open jewel</span><span><i class="lg-dark"></i>chain silent</span><span><i class="lg-lit"></i>lit</span></div>
+    <div class="et-r-card" id="etRaverCard" aria-live="polite"><span class="rk">.b</span><div><b>asking the chain…</b></div></div>
+    <div class="et-r-field"><input id="etRaverName" autocomplete="off" spellcheck="false" aria-label="a name" placeholder="any name"></div>
+    <button type="button" class="et-r-pill" id="etRaverCheck">ask the chain</button>
+    <p class="et-r-note" data-t="et.bnames.r.note">the desk composes · you sign · the chain remembers</p>
+  </div>
+
+  <!-- CYPHERPUNK — the instrument: tables, hosts, the gate's arithmetic, the receipt -->
+  <div class="et-c">
+    <div class="et-c-path">kingbeelovis::domains · vaulta · keyless read</div>
+    <div class="et-c-chips" id="etChips"></div>
+    <div class="et-c-guard">custody = operator-trusted <b>3 single-key paths · reproducible source 0 of 2</b></div>
+    <h3 class="et-c-h" data-t="et.bnames.c.live">live reads</h3>
+    <table class="et-c-tab"><thead><tr><th>table</th><th>field</th><th>value</th></tr></thead><tbody id="etReads"></tbody></table>
+    <div class="et-c-field"><input id="etCyName" autocomplete="off" spellcheck="false" aria-label="domain_name" placeholder="domain_name"></div>
+    <button type="button" class="et-c-primary" id="etCyCheck">get_table_rows · check domain_name</button>
+    <h3 class="et-c-h" data-t="et.bnames.c.pipe">secure pipeline · compose-only</h3>
+    <ol class="et-c-pipe" id="etPipe"></ol>
+    <h3 class="et-c-h" data-t="et.bnames.c.receipt">receipt</h3>
+    <table class="et-c-kv" id="etReceipt"></table>
+    <div class="et-c-verify">
+      <div class="et-c-verify-h" data-t="et.bnames.c.verify">verify · no trust in this page needed</div>
+      <ol>
+        <li><code>cleos -u https://eos.greymass.com get table kingbeelovis kingbeelovis domains</code></li>
+        <li><code>cleos -u https://eos.greymass.com get table kingbeelovis kingbeelovis config</code></li>
+        <li><code>cleos -u https://eos.greymass.com get account kingbeelovis</code>: count the keys that alone can <code>setcode</code></li>
+      </ol>
+    </div>
+    <div class="et-c-row">
+      <a class="et-c-ghost" href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/bdomain-scaling.md" target="_blank" rel="noopener noreferrer">the 10B design · new tab</a>
+      <a class="et-c-ghost" href="https://github.com/beehive-nature/beehive-nature/blob/main/surfaces/bnames.html" target="_blank" rel="noopener noreferrer">fork the template · new tab</a>
+    </div>
+  </div>
+</section>
+<h2 class="et-archive-h" id="etArchive" data-t="et.bnames.whole">the whole desk</h2>
 <header>
   <h1>👑 <span data-i18n="bnm.h1">the .b name desk</span></h1>
-  <p data-reg="bee" data-i18n="bnm.bee">a name of your own, on our chain. type it and see, live. nothing is signed here; the desk only composes what you sign.</p>
-  <details data-reg="bee" data-reg-disclose style="max-width:820px;margin:8px auto 0;text-align:start"><summary>what this desk cannot vouch for</summary><p style="margin-top:6px"><span style="display:block;margin-top:8px;color:var(--dim,#8a9a8a)">What the desk cannot vouch for is the registry behind it: every <b>.b</b> name answers to the keys behind <code>kingbeelovis</code> — today <b>three independent single-key paths</b> to full control (either <code>active</code> key, or the <code>owner</code> key that outranks it). Any one alone can replace the contract (<code>setcode</code>). <b style="color:var(--amber,#ffb347)">Hardening and reproducible source are not yet published</b> — until they are, a <b>.b</b> name is <b>operator-trusted, not trustless</b>.</span></p></details>
+  <p data-reg="bee" data-i18n="bnm.bee">Names on our chain, for humans and the things they love. Type any name and
+  watch the desk check it — live, right now, from the chain itself. Reserving costs
+  <b>zero fee</b> today; you only pay the chain's memory it sits in, and it's
+  <b style="color:var(--gold)">yours to sell back</b>. This desk never holds keys — it writes
+  nothing; it composes what <b>you</b> sign.
+        <span style="display:block;margin-top:8px;color:var(--dim,#8a9a8a)">What the desk cannot vouch for is the registry behind it: every <b>.b</b> name answers to the keys behind <code>kingbeelovis</code> — today <b>three independent single-key paths</b> to full control (either <code>active</code> key, or the <code>owner</code> key that outranks it). Any one alone can replace the contract (<code>setcode</code>). <b style="color:var(--amber,#ffb347)">Hardening and reproducible source are not yet published</b> — until they are, a <b>.b</b> name is <b>operator-trusted, not trustless</b>.</span></p>
   <p data-reg="raver" data-i18n="bnm.rav">the .b desk — reserve · transfer · trade · resolve: a living constellation
   of the registry, animated availability, paste-ready actions with the REAL ABI shape, one-year
   terms, renew/repoint/multi-chain resolve lanes — all keyless reads in your browser.</p>
@@ -143,127 +350,24 @@ body[data-reg="cypherpunk"] h1{color:var(--sk-ink)}
   <code>setchain</code>. Names stored SUFFIXLESS. Zero writes from this page — compose-only;
   today's actions are the live Tier-1 shape, not the 10B/1k-year destination.</p>
 </header>
-<section id="eternal" aria-label="a name of your own">
 
-  <!-- NEW BEE — one question at a time: the name, is it free, keep it, sign it -->
-  <div class="et-b">
-    <div class="et-b-step" data-step="name">
-      <div class="et-b-mark">.b</div>
-      <h2 class="et-b-h">a name of your own</h2>
-      <p class="et-b-lede">type it and see if it is free, live from the chain. nothing is signed until you say so.</p>
-      <div class="et-b-field"><label for="etBeeName">the name</label><input id="etBeeName" type="text" autocomplete="off" spellcheck="false" placeholder="honey" data-et-name></div>
-      <div class="et-b-verdict" id="etBeeVerdict"><b>type a name to see if it is free</b><span>every check reads the registry itself, as it stands right now.</span></div>
-      <div class="et-b-act">
-        <button type="button" class="et-b-primary" id="etBeeKeep" data-go="keep" disabled>keep this name</button>
-        <a class="et-b-link" href="#bnm-more">how names work</a>
-        <p class="et-b-foot">nothing is signed until you say so.</p>
-      </div>
-    </div>
-    <div class="et-b-step" data-step="keep" hidden>
-      <button type="button" class="et-b-back" data-go="name">‹ the name</button>
-      <h2 class="et-b-h">keep it?</h2>
-      <p class="et-b-lede">three things to know first. the choice is yours alone.</p>
-      <div class="et-b-rows">
-        <div class="et-b-term"><i><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg></i><div><b>one name, one soul.</b><span>this is your one .b name on this registry. people who keep to this are remembered for it.</span></div></div>
-        <div class="et-b-term"><i><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 8c-3 0-5 2-5 4s2 4 5 4c4 0 6-8 10-8 3 0 5 2 5 4s-2 4-5 4c-4 0-6-8-10-8z"/></svg></i><div><b>yours for a year, then renew.</b><span><span data-et="days">a year</span>, renewable. you can pass it on or sell it back.</span></div></div>
-        <div class="et-b-term guard"><i><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></i><div><b>today the registry is operator-trusted.</b><span>one person's keys could take a name back until hardening is published. that is said here, not hidden.</span></div></div>
-      </div>
-      <div class="et-b-price">
-        <div class="et-b-price-l">one payment, for the room it takes on chain. no fee today.</div>
-        <div class="et-b-price-v"><span data-et="ram">…</span></div>
-        <div class="et-b-price-n"><span data-et="beeQuote">reading the price from the chain…</span></div>
-      </div>
-      <div class="et-b-field"><label for="etBeeAcct">your Vaulta account, the one that signs</label><input id="etBeeAcct" type="text" autocomplete="off" spellcheck="false" placeholder="your account" data-et-acct></div>
-      <div class="et-b-refuse" id="etBeeRefuse" hidden><svg viewBox="0 0 24 24" aria-hidden="true" style="width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span>until the registry is hardened, only the founder's own accounts may register. nothing is broken; the door is held.</span></div>
-      <label class="et-b-consent"><input type="checkbox" id="etBeeOk"> <span>i understand, and i choose this.</span></label>
-      <div class="et-b-act">
-        <button type="button" class="et-b-primary" id="etBeeCompose" data-go="ready" disabled>compose what i sign</button>
-        <p class="et-b-foot">nothing moves until your wallet signs it.</p>
-      </div>
-    </div>
-    <div class="et-b-step" data-step="ready" hidden>
-      <button type="button" class="et-b-back" data-go="keep">‹ keep it?</button>
-      <div class="et-b-tick" aria-hidden="true">⬡</div>
-      <h2 class="et-b-h et-center">ready to sign.</h2>
-      <p class="et-b-lede et-center">this is the exact action your wallet signs. the desk never signs, never holds a key.</p>
-      <div class="et-b-where"><b>the action, whole</b><code data-et="action">…</code></div>
-      <div class="et-b-act">
-        <a class="et-b-primary" id="etBeeWallet" href="#" style="display:flex;align-items:center;justify-content:center;text-decoration:none">open your wallet to sign</a>
-        <p class="et-b-foot">this page watches the registry; when your name lands, it says so.</p>
-      </div>
-    </div>
-    <div class="et-b-step" data-step="kept" hidden>
-      <div class="et-b-tick" aria-hidden="true">✓</div>
-      <h2 class="et-b-h et-center">kept.</h2>
-      <p class="et-b-lede et-center"><span data-et="keptName">your name</span> is on the registry, in your account's name.</p>
-      <div class="et-b-where"><b>where it lives</b><code data-et="keptRow">…</code></div>
-      <div class="et-b-card"><h3>one name, every chain.</h3><p>point it at an address on any registered chain, and people reach you by the name alone.</p></div>
-    </div>
-  </div>
 
-  <!-- RAVER — the registry is the art: every name a cell around yours; light the terms; hold to compose -->
-  <div class="et-r" data-et="line">
-    <div class="et-r-top"><h2 class="et-r-h" id="etRaverTitle">your name</h2><span class="et-r-hint" id="etRaverHint">type it · tap a cell</span></div>
-    <div class="et-r-field"><input id="etRaverName" type="text" autocomplete="off" spellcheck="false" placeholder="honey" data-et-name aria-label="the name"></div>
-    <svg class="et-r-mandala" id="etNameMandala" viewBox="-200 -200 400 400" role="group" aria-label="the registry as cells around your name"></svg>
-    <div class="et-r-legend">
-      <span><i class="lg-found"></i>taken</span><span><i class="lg-not"></i>open</span><span><i class="lg-sel"></i>yours</span><span><i class="lg-living"></i>held</span>
-    </div>
-    <div class="et-r-card" id="etRaverCard" aria-live="polite"></div>
-    <div class="et-r-seal" hidden>
-      <div class="et-r-tiles" id="etNameTiles">
-        <button type="button" aria-pressed="false" data-t="1"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>one soul</button>
-        <button type="button" aria-pressed="false" data-t="2"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 8c-3 0-5 2-5 4s2 4 5 4c4 0 6-8 10-8 3 0 5 2 5 4s-2 4-5 4c-4 0-6-8-10-8z"/></svg>a year, renew</button>
-        <button type="button" aria-pressed="false" data-t="3"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h16M12 4l8 8-8 8"/></svg>pass it on</button>
-        <button type="button" aria-pressed="false" data-t="4" class="et-dash"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>operator-trusted</button>
-      </div>
-      <div class="et-r-field"><input id="etRaverAcct" type="text" autocomplete="off" spellcheck="false" placeholder="your account" data-et-acct aria-label="your Vaulta account"></div>
-      <div class="et-r-price"><b data-et="ramShort">…</b> <span data-et="raverQuote">reading</span></div>
-      <div class="et-r-hold">
-        <svg viewBox="0 0 200 200" aria-hidden="true"><circle cx="100" cy="100" r="92" class="hold-track"/><circle cx="100" cy="100" r="92" class="hold-prog" id="etNameHoldProg"/></svg>
-        <button type="button" id="etNameHold" disabled aria-describedby="etNameSealHint"><b>hold</b><span>to compose</span></button>
-      </div>
-      <p class="et-r-note" id="etNameSealHint">light all four</p>
-      <button type="button" class="et-r-ghost" data-go="line">back to the names</button>
-    </div>
-    <div class="et-r-kept" hidden>
-      <div class="et-r-big">composed</div>
-      <p class="et-r-note" id="etRaverKeptNote">your wallet signs it · the desk never does</p>
-      <a class="et-r-pill" id="etRaverWallet" href="#" style="display:flex;align-items:center;justify-content:center;text-decoration:none">sign it in your wallet</a>
-    </div>
-    <button type="button" class="et-r-pill" id="etRaverGo" disabled>claim it</button>
-  </div>
-
-  <!-- CYPHERPUNK — the instrument: the row, the law rows, the pipeline, the action, verifiable -->
-  <div class="et-c">
-    <div class="et-c-path" id="etCyPath">kingbeelovis::domains[…]</div>
-    <div class="et-c-field"><input id="etCyName" type="text" autocomplete="off" spellcheck="false" placeholder="domain_name" data-et-name aria-label="domain_name"><input id="etCyAcct" type="text" autocomplete="off" spellcheck="false" placeholder="registrant" data-et-acct aria-label="registrant"></div>
-    <div class="et-c-chips" id="etCyChips"></div>
-    <div class="et-c-guard"><span>hardened = false · registrant ∈ founder accounts</span><b>guard · <span id="etCyVerifiers">0</span> verifiers</b></div>
-    <table class="et-c-tab"><thead><tr><th>domain_name</th><th>owner</th><th>expires</th></tr></thead><tbody id="etCyRows"></tbody></table>
-    <h3 class="et-c-h">register pipeline · compose-only</h3>
-    <ol class="et-c-pipe" id="etCyPipe"></ol>
-    <button type="button" class="et-c-primary" id="etCyCompose">compose registeracc</button>
-    <h3 class="et-c-h">the action</h3>
-    <table class="et-c-kv" id="etCyReceipt"></table>
-    <div class="et-c-verify">
-      <div class="et-c-verify-h">verify · no trust in this page needed</div>
-      <ol><li>get_table_rows kingbeelovis/domains → rows</li><li>find domain_name == yours</li><li>owner == your account · expires &gt; now</li></ol>
-    </div>
-    <div class="et-c-row">
-      <a class="et-c-ghost" id="etCyWallet" href="#">sign in wallet</a>
-      <a class="et-c-ghost" href="https://github.com/beehive-nature/b-domain" target="_blank" rel="noopener noreferrer">the contract ↗ <span class="et-sr">(opens in a new tab)</span></a>
-    </div>
+<section>
+  <h2>🌌 <span data-i18n="bnm.h.live">THE REGISTRY, ALIVE — every name on chain, drawn live</span></h2>
+  <div class="law" data-i18n="bnm.live.law">The constellation below is not a picture of the registry — it <b>is</b> the
+  registry, read live from the chain as this page opened and drawn as it answered. The crowned
+  node is <b>king.b</b>; the pulsing ghosts are the open crown jewels. Touch any node.</div>
+  <div id="constwrap">
+    <svg id="const" viewBox="0 0 960 300" role="img" aria-label="live .b registry constellation"></svg>
+    <div class="tip" id="ctip"></div>
   </div>
 </section>
-<div id="bnm-more"></div>
 
-
-
-<section style="border-color:var(--gold)"><details data-reg-disclose><summary>🔑 <span data-i18n="bnm.h.secure">SECURE YOUR .b NAME — search, consent, sign</span></summary>
+<section style="border-color:var(--gold)">
+  <h2>🔑 <span data-i18n="bnm.h.secure">SECURE YOUR .b NAME — search, consent, sign</span></h2>
   <div class="law" data-i18n="bnm.secure.law">Three steps. One name per soul.</div>
   <div class="row" style="margin-top:10px">
-    <input id="q" placeholder="your name" value="" autofocus autocomplete="off" spellcheck="false" style="flex:1;font-size:16px;padding:12px 14px">
+    <input id="q" placeholder="type your name — e.g. k" value="k" spellcheck="false" style="flex:1;font-size:16px;padding:12px 14px">
     <button id="go" style="font-size:14px;padding:12px 20px" data-i18n="bnm.search">search</button>
   </div>
   <div class="verdict" id="vwrap"><div class="vtext" style="color:var(--dim)">—</div></div>
@@ -304,10 +408,10 @@ body[data-reg="cypherpunk"] h1{color:var(--sk-ink)}
   </div>
 
   <div class="readout" style="margin-top:12px">
-    <div class="rd"><div class="k" data-i18n="bnm.k.names">NAMES ON REGISTRY (live)</div><div class="v" id="count">—</div></div>
-    <div class="rd"><div class="k" data-i18n="bnm.k.fee">FEE</div><div class="v" id="fee">—</div></div>
-    <div class="rd"><div class="k" data-i18n="bnm.k.ram">RAM COST (live)</div><div class="v" id="ram">—</div></div>
-    <div class="rd"><div class="k" data-i18n="bnm.k.term">TERM</div><div class="v" id="days">—</div></div>
+    <div class="rd"><div class="k" data-i18n="bnm.k.names">NAMES ON REGISTRY (live)</div><div class="v" id="count">asking the chain…</div></div>
+    <div class="rd"><div class="k" data-i18n="bnm.k.fee">FEE</div><div class="v" id="fee">not read yet</div></div>
+    <div class="rd"><div class="k" data-i18n="bnm.k.ram">RAM COST (live)</div><div class="v" id="ram">not read yet</div></div>
+    <div class="rd"><div class="k" data-i18n="bnm.k.term">TERM</div><div class="v" id="days">not read yet</div></div>
   </div>
 
   <div id="soul-strip" style="display:none;margin-top:10px">
@@ -319,29 +423,19 @@ body[data-reg="cypherpunk"] h1{color:var(--sk-ink)}
     <a href="./onboarding/" style="align-self:center;font-size:max(10px,var(--fmin,12px));color:var(--cyan);margin-left:6px;text-decoration:none">+ create your bzDiD</a>
     </div>
   </div>
-</details></section>
+</section>
 
-<section><details data-reg-disclose><summary>🌌 <span data-i18n="bnm.h.live">THE REGISTRY, ALIVE — every name on chain, drawn live</span></summary>
-  <div class="law" data-i18n="bnm.live.law">The constellation below is not a picture of the registry — it <b>is</b> the
-  registry, read live from the chain as this page opened and drawn as it answered. The crowned
-  node is <b>king.b</b>; the pulsing ghosts are the open crown jewels. Touch any node.</div>
-  <div id="constwrap">
-    <svg id="const" viewBox="0 0 960 300" role="img" aria-label="live .b registry constellation"></svg>
-    <div class="tip" id="ctip"></div>
-  </div>
-</details></section>
-
-
-
-<section><details data-reg-disclose><summary>👑 <span data-i18n="bnm.h.jewels">THE CROWN JEWELS — king · k · q, breathing live</span></summary>
+<section>
+  <h2>👑 <span data-i18n="bnm.h.jewels">THE CROWN JEWELS — king · k · q, breathing live</span></h2>
   <div class="jewels">
     <div class="jewel" id="j-king"><div class="jn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M3 8l4 4 5-7 5 7 4-4-2 12H5L3 8z" fill="#FFD700"/></svg>king.b</div><div class="st">checking…</div><div class="meta"></div></div>
     <div class="jewel" id="j-k"><div class="jn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#7ddf8f" stroke-width="2"/><circle cx="12" cy="12" r="3.5" fill="#7ddf8f"/></svg>k.b</div><div class="st">checking…</div><div class="meta"></div></div>
     <div class="jewel" id="j-q"><div class="jn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#7ddf8f" stroke-width="2"/><circle cx="12" cy="12" r="3.5" fill="#7ddf8f"/></svg>q.b</div><div class="st">checking…</div><div class="meta"></div></div>
   </div>
-</details></section>
+</section>
 
-<section><details data-reg-disclose><summary>🧾 <span data-i18n="bnm.h.composer">THE COMPOSER — paste-ready, REAL action shape, you sign it (never this page)</span></summary>
+<section>
+  <h2>🧾 <span data-i18n="bnm.h.composer">THE COMPOSER — paste-ready, REAL action shape, you sign it (never this page)</span></h2>
   <div class="law" data-i18n="bnm.composer.law">Fields from the registry's live ABI — not invented, not approximated.
   The desk composes; <b>signing is founder hands or the wallet-gate lane</b> (MX-5).</div>
   <div class="row">
@@ -351,9 +445,10 @@ body[data-reg="cypherpunk"] h1{color:var(--sk-ink)}
     <button id="compose">compose</button>
   </div>
   <pre id="recipe">— compose to see the paste-ready action —</pre>
-</details></section>
+</section>
 
-<section><details data-reg-disclose><summary>🛠 <span data-i18n="bnm.h.workshop">THE FULL WORKSHOP — tap any action to compose it (live ABI, 2026-08-22)</span></summary>
+<section>
+  <h2>🛠 <span data-i18n="bnm.h.workshop">THE FULL WORKSHOP — tap any action to compose it (live ABI, 2026-08-22)</span></h2>
   <div class="law" data-i18n="bnm.workshop.law">Every card is now an instrument — tap to expand, fill the fields
   (pre-filled from your connected soul where possible), compose the paste-ready action.
   You sign it; this page never does.</div>
@@ -390,9 +485,10 @@ body[data-reg="cypherpunk"] h1{color:var(--sk-ink)}
     <button class="act" style="margin-top:10px;background:#26123a;color:var(--violet);border:1px solid var(--line);border-radius:8px;padding:8px 14px;cursor:pointer;font:max(11px,var(--fmin,12px)) 'IBM Plex Mono',monospace" id="cz-compose">compose the action</button>
     <pre id="cz-out" style="margin-top:8px"></pre>
   </div>
-</details></section>
+</section>
 
-<section><details data-reg-disclose><summary>🌍 <span data-i18n="bnm.h.scale">THE 10-BILLION-USER · 1,000-YEAR DESIGN — ruled after testing every option</span></summary>
+<section>
+  <h2>🌍 <span data-i18n="bnm.h.scale">THE 10-BILLION-USER · 1,000-YEAR DESIGN — ruled after testing every option</span></h2>
   <div class="law" data-i18n="bnm.scale.law">We tested every architecture against the chain's real arithmetic and
   <b>only one way scales</b> —
   <a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/bdomain-scaling.md">the full analysis</a>:</div>
@@ -410,9 +506,10 @@ body[data-reg="cypherpunk"] h1{color:var(--sk-ink)}
       evolving the live contract costs <b>under a dollar at 13 rows</b>, impossible at 13 million.
       Ten billion users = ten billion <b>keypairs, not accounts</b> — only anchors take rows.</div>
   </div>
-</details></section>
+</section>
 
-<section><details data-reg-disclose><summary>🎁 <span data-i18n="bnm.h.devs">WHY THIS IS CHRISTMAS FOR DEVS</span></summary>
+<section>
+  <h2>🎁 <span data-i18n="bnm.h.devs">WHY THIS IS CHRISTMAS FOR DEVS</span></h2>
   <div class="law" data-reg="bee" data-i18n="bnm.devs.bee">One name, every chain, no subscription server in sight — and
   every number on this page is live from the chain with its source printed. Free to check,
   nearly free to hold, yours to sell back.</div>
@@ -422,7 +519,7 @@ body[data-reg="cypherpunk"] h1{color:var(--sk-ink)}
   <div class="law" data-reg="cypherpunk" data-i18n="bnm.devs.cy">public-RPC failover; compose-only (zero write paths);
   live ABI pinned 2026-08-22; two-track law rides (A = mainnet reads, b = Jungle per MX-7);
   name cost cross-validated crate↔page (0.8421).</div>
-</details></section>
+</section>
 
 </main>
 <footer>
@@ -625,10 +722,10 @@ body[data-reg="cypherpunk"] h1{color:var(--sk-ink)}
       var b={json:true,code:'kingbeelovis',scope:'kingbeelovis',table:'domains',limit:500};
       if(nextk)b.lower_bound=nextk;
       var d=await post('/v1/chain/get_table_rows',b);
-      if(!d){ $('count').textContent='couldn’t reach the chain'; $('count').title='couldn’t reach the chain from your network — the page is fine, the data isn’t loading (public endpoints can be blocked; a VPN or another network may reach it)'; return; }
+      if(!d){ live.reach='failed'; $('count').textContent='couldn’t reach the chain'; $('count').title='couldn’t reach the chain from your network — the page is fine, the data isn’t loading (public endpoints can be blocked; a VPN or another network may reach it)'; return; }
       rows=rows.concat(d.rows||[]); more=d.more; nextk=d.next_key;
     }
-    live.rows=rows; live.byName={};
+    live.rows=rows; live.byName={}; live.reach='ok';
     rows.forEach(function(r){ live.byName[r.domain_name]=r; });
     flash('count',rows.length);
   }
@@ -692,9 +789,12 @@ body[data-reg="cypherpunk"] h1{color:var(--sk-ink)}
     st.className='stamp '+(row?'no':'ok'); tx.className='vtext '+(row?'no':'ok');
     st.textContent=row?'✕':'✓';
     if(!n){ wrap.innerHTML='<div class="vtext" style="color:var(--dim)">—</div>'; return; }
+    if(live.reach==='failed'){ st.className='stamp no'; st.textContent='?'; tx.className='vtext no';
+      tx.innerHTML='<b>couldn’t reach the chain</b> — so the desk can’t say whether '+n+'.b is free. nothing is guessed.';
+      wrap.appendChild(st); wrap.appendChild(tx); $('consent-card').style.display='none'; return; }
     tx.innerHTML = row
-      ? '<b>'+n+'.b is taken</b> — held by '+row.owner+' · expires '+row.expires.slice(0,10)
-      : '<b>'+n+'.b is free</b> — fee '+(live.fee||'not yet read')+' · '+(live.ramCost?'RAM ~'+live.ramCost.toFixed(4)+' core':'RAM not yet read')+' (resellable) · term '+(live.days||365)+' days';
+      ? '<b>'+n+'.b is TAKEN</b> — owner '+row.owner+' · expires '+row.expires.slice(0,10)
+      : '<b>'+n+'.b is AVAILABLE</b> — fee '+(live.fee||'not yet read')+' · '+(live.ramCost?'RAM ~'+live.ramCost.toFixed(4)+' core':'RAM not yet read')+' (resellable) · term '+(live.days||365)+' days';
     wrap.appendChild(st); wrap.appendChild(tx);
     // show/hide consent card
     var cc=$('consent-card');
@@ -760,6 +860,7 @@ body[data-reg="cypherpunk"] h1{color:var(--sk-ink)}
   function jewel(id,n){
     var el=$(id), row=live.byName[n];
     var st=el.querySelector('.st'), meta=el.querySelector('.meta');
+    if(live.reach==='failed'){ el.className='jewel'; st.textContent='○ UNKNOWN'; meta.textContent='couldn’t reach the chain, so this jewel’s state is not known. nothing is guessed.'; return; }
     if(row){ el.className='jewel held'; st.textContent='● HELD';
       meta.textContent='owner '+row.owner+' · expires '+row.expires.slice(0,10); }
     else { el.className='jewel avail'; st.textContent='◉ AVAILABLE';
@@ -841,116 +942,148 @@ body[data-reg="cypherpunk"] h1{color:var(--sk-ink)}
   };
   $('soul-out').onclick=function(){ SOUL=null; soulApply(); };
   try{ var saved=localStorage.getItem('bnr_soul'); if(saved){ SOUL=saved; $('soul-in').value=saved; } }catch(e){}
-
-  /* ── ETERNAL FRONT for the desk (docs/design/eternal): one data layer — live, strip,
-     registrantAllowed, walletAction — and three renderers. The facts never differ. ── */
-  var esc=function(x){return String(x==null?'':x).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});};
-  var ET={name:'',acct:'',step:'name',mode:'line',lit:{},holdT:null,sel:null,composed:false};
-  function etFacts(){
-    var n=strip(ET.name), row=n?live.byName[n]:null, reg=ET.acct||(typeof SOUL!=='undefined'&&SOUL)||'';
-    var params={registrant:reg||'[your account]',domain_name:n,target:reg||'[your account]'};
-    return {name:n,row:row,free:n?!row:null,fee:live.fee,ram:live.ramCost,days:live.days,count:live.rows.length,
-      registrant:reg,allowed:registrantAllowed(reg),params:params,
-      action:{account:'kingbeelovis',name:'registeracc',authorization:[{actor:reg||'[your account]',permission:'active'}],data:params},
-      href:walletAction('registeracc',params)};
-  }
-  var etRam=function(F){return F.ram!=null?F.ram.toFixed(4)+' core':'room on chain not yet read';};
-  var etFee=function(F){return F.fee!=null?'fee '+F.fee:'fee not yet read';};
-  var etDays=function(F){return F.days!=null?F.days+' days':'term not yet read';};
-  var etExp=function(r){return r&&r.expires?String(r.expires).slice(0,10):'not yet read';};
-  var etText=function(el,t){if(el)el.textContent=t;};
-  function etStep(st){ET.step=st;document.querySelectorAll('#eternal .et-b-step').forEach(function(e){e.hidden=e.getAttribute('data-step')!==st;});}
-  function etBee(F){
-    var v=$('etBeeVerdict'); v.className='et-b-verdict'+(F.free===true?' free':F.free===false?' taken':'');
-    if(!F.name) v.innerHTML='<b>type a name to see if it is free</b><span>every check reads the registry itself, as it stands right now.</span>';
-    else if(F.row) v.innerHTML='<b>'+esc(F.name)+'.b is taken</b><span>held by '+esc(F.row.owner)+' · until '+esc(etExp(F.row))+'</span>';
-    else v.innerHTML='<b>'+esc(F.name)+'.b is free</b><span>'+esc(etFee(F))+' · '+esc(etRam(F))+' · '+esc(etDays(F))+'</span>';
-    $('etBeeKeep').disabled=F.free!==true;
-    document.querySelectorAll('[data-et="days"]').forEach(function(e){e.textContent=F.days!=null?F.days+' days':'a year';});
-    document.querySelectorAll('[data-et="ram"]').forEach(function(e){e.textContent=F.ram!=null?F.ram.toFixed(4)+' core':'not read yet';});
-    document.querySelectorAll('[data-et="beeQuote"]').forEach(function(e){e.textContent=F.ram!=null?'current · read from the chain as this page opened · '+etFee(F):'the price is being read from the chain';});
-    var refuse=$('etBeeRefuse'); refuse.hidden=!(F.registrant&&!F.allowed);
-    $('etBeeCompose').disabled=!(F.free===true&&$('etBeeOk').checked&&F.registrant&&F.allowed);
-    document.querySelectorAll('[data-et="action"]').forEach(function(e){e.textContent=JSON.stringify(F.action,null,1);});
-    $('etBeeWallet').href=F.href;
-    if(ET.step==='ready'&&F.row&&F.row.owner===F.registrant){ etText(document.querySelector('[data-et="keptName"]'),F.name+'.b'); etText(document.querySelector('[data-et="keptRow"]'),'owner '+F.row.owner+'\nexpires '+etExp(F.row)); etStep('kept'); }
-  }
-  var HEX=function(cx,cy,r){var p='';for(var k=0;k<6;k++){var a=Math.PI/3*k+Math.PI/6;p+=(k?'L':'M')+(cx+r*Math.cos(a)).toFixed(1)+','+(cy+r*Math.sin(a)).toFixed(1);}return p+'Z';};
-  function etRaver(F){
-    var svg=$('etNameMandala'); if(!svg) return;
-    var ns='http://www.w3.org/2000/svg', rows=live.rows.slice(0,48), N=Math.max(rows.length,1);
-    svg.textContent='';
-    var you=document.createElementNS(ns,'path'); you.setAttribute('d',HEX(0,0,46)); you.setAttribute('class','cell you');
-    you.setAttribute('fill',F.free===true?'var(--sk-you)':F.free===false?'var(--sk-guard-wash)':'var(--sk-sovereign-wash)');
-    you.setAttribute('stroke',F.free===false?'var(--sk-guard)':'var(--sk-sovereign)'); you.setAttribute('stroke-width','2'); if(F.free===false) you.setAttribute('stroke-dasharray','6 4');
-    you.setAttribute('tabindex','0'); you.setAttribute('role','button'); you.setAttribute('aria-label',F.name?F.name+'.b, '+(F.free?'free':'taken'):'your name');
-    svg.appendChild(you);
-    rows.forEach(function(r,i){var a=Math.PI*2*i/N-Math.PI/2, R=rows.length>24?150:130, x=R*Math.cos(a), y=R*Math.sin(a);
-      var p=document.createElementNS(ns,'path'); p.setAttribute('d',HEX(x,y,rows.length>24?14:20)); p.setAttribute('class','cell');
-      var mine=r.domain_name===F.name; p.setAttribute('fill',mine?'var(--sk-sovereign-strong)':'var(--sk-sovereign)'); p.setAttribute('opacity',ET.sel&&ET.sel!==r.domain_name?'0.6':'1');
-      p.setAttribute('tabindex','0'); p.setAttribute('role','button'); p.setAttribute('aria-label',r.domain_name+'.b, held by '+r.owner);
-      p.addEventListener('click',function(){ET.sel=r.domain_name;etRender();}); p.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();ET.sel=r.domain_name;etRender();}});
-      svg.appendChild(p);});
-    var card=$('etRaverCard'); var selRow=ET.sel?live.byName[ET.sel]:null;
-    if(selRow) card.innerHTML='<div class="rk">'+esc(ET.sel.slice(0,2))+'</div><div><b>'+esc(ET.sel)+'.b</b><span>held by '+esc(selRow.owner)+' · until '+esc(etExp(selRow))+'</span></div>';
-    else if(F.name) card.innerHTML='<div class="rk">'+esc(F.name.slice(0,2))+'</div><div><b>'+esc(F.name)+'.b · '+(F.free?'open':'taken')+'</b><span>'+esc(F.free?etRam(F)+' · '+etDays(F):'held by '+(F.row?F.row.owner:''))+'</span></div>';
-    else card.innerHTML='<div class="rk">'+F.count+'</div><div><b>'+F.count+' names on the registry</b><span>type yours · the centre lights when it is free</span></div>';
-    etText($('etRaverHint'),ET.mode==='seal'?'light the four · then hold':ET.mode==='kept'?'composed · sign it in your wallet':'type it · tap a cell');
-    $('etRaverGo').disabled=F.free!==true; $('etRaverGo').hidden=ET.mode!=='line';
-    document.querySelector('#eternal .et-r-seal').hidden=ET.mode!=='seal'; document.querySelector('#eternal .et-r-kept').hidden=ET.mode!=='kept';
-    document.querySelectorAll('[data-et="ramShort"]').forEach(function(e){e.textContent=F.ram!=null?F.ram.toFixed(4)+' core':'price not read';});
-    document.querySelectorAll('[data-et="raverQuote"]').forEach(function(e){e.textContent=F.ram!=null?'current · '+etFee(F):'reading';});
-    var lit=Object.keys(ET.lit).length; etText($('etNameSealHint'),lit<4?lit+' of 4 lit':(F.registrant?(F.allowed?'hold to compose':'held · founder accounts only until hardened'):'your account, then hold'));
-    $('etNameHold').disabled=!(lit===4&&F.registrant&&F.allowed); $('etRaverWallet').href=F.href;
-  }
-  function etCy(F){
-    etText($('etCyPath'),'kingbeelovis::domains["'+(F.name||'…')+'"]');
-    var chips=[['rows '+F.count,'ok'],[etFee(F),F.fee!=null?'ok':''],[etRam(F),F.ram!=null?'ok':''],[etDays(F),F.days!=null?'ok':''],['hardened false','on'],[F.name?(F.free?'free':'taken'):'no name','']];
-    $('etCyChips').innerHTML=chips.map(function(c){return '<span class="'+c[1]+'">'+esc(c[0])+'</span>';}).join('');
-    etText($('etCyVerifiers'),String(N_VERIFIERS));
-    var rows=live.rows.slice(0,10); if(F.row&&rows.indexOf(F.row)<0) rows.unshift(F.row);
-    $('etCyRows').innerHTML=rows.map(function(r){return '<tr'+(r.domain_name===F.name?' class="names"':'')+'><td>'+esc(r.domain_name)+'</td><td>'+esc(r.owner)+'</td><td>'+esc(etExp(r))+'</td></tr>';}).join('')||'<tr><td colspan="3">registry not read yet</td></tr>';
-    var steps=[
-      ['canonical name',F.name?'"'+F.name+'" · trimmed · lowercase · suffixless':'type domain_name',F.name?'done':'todo'],
-      ['get_table_rows domains',F.name?(F.free?'no row → free':'row exists → taken'):'waits for a name',F.name?'done':'todo'],
-      ['registeracc(registrant, domain_name, target)',F.registrant?(F.allowed?'registrant '+F.registrant:'registrant refused: hardened=false, founder accounts only'):'registrant not named',F.registrant&&!F.allowed?'guard':F.registrant?'now':'todo'],
-      ['sign in your wallet','never this page · compose-only','consent'],
-      ['row on chain','owner == registrant · expires = now + '+etDays(F),'todo']];
-    $('etCyPipe').innerHTML=steps.map(function(x){return '<li class="'+x[2]+'"><b>'+esc(x[0])+'</b><p>'+esc(x[1])+'</p></li>';}).join('');
-    var kv=[['action','<code>'+esc(JSON.stringify(F.action,null,1))+'</code>'],['fee',esc(etFee(F))],['ram',esc(etRam(F))],['term',esc(etDays(F))],['gate','<span class="'+(F.allowed?'yes':'no')+'">'+(F.allowed?'registrant allowed':'refused until hardened')+'</span>'],['signer','<span class="sig">your wallet</span> · the desk holds no key']];
-    $('etCyReceipt').innerHTML=(ET.composed?kv:kv.slice(1)).map(function(x){return '<tr><th>'+x[0]+'</th><td>'+x[1]+'</td></tr>';}).join('');
-    $('etCyWallet').href=F.href;
-  }
-  function etRender(){ var F=etFacts(); etBee(F); etRaver(F); etCy(F); }
-  (function(){
-    var box=$('eternal'); if(!box) return;
-    box.querySelectorAll('[data-et-name]').forEach(function(i){i.addEventListener('input',function(){ET.name=i.value;box.querySelectorAll('[data-et-name]').forEach(function(o){if(o!==i)o.value=i.value;});var q=$('q');if(q){q.value=i.value;}ET.sel=null;etRender();});});
-    box.querySelectorAll('[data-et-acct]').forEach(function(i){i.addEventListener('input',function(){ET.acct=i.value.trim().toLowerCase();box.querySelectorAll('[data-et-acct]').forEach(function(o){if(o!==i)o.value=i.value;});etRender();});});
-    $('etBeeOk').addEventListener('change',etRender);
-    box.addEventListener('click',function(e){
-      var go=e.target.closest('[data-go]'); if(go&&go.closest('.et-b')){ if(!go.disabled){ etStep(go.getAttribute('data-go')); etRender(); } return; }
-      if(go&&go.closest('.et-r')){ ET.mode='line'; ET.lit={}; etRender(); return; }
-      if(e.target.closest('#etRaverGo')){ ET.mode='seal'; etRender(); return; }
-      var t=e.target.closest('#etNameTiles button'); if(t){ var k=t.getAttribute('data-t'); if(ET.lit[k]) delete ET.lit[k]; else ET.lit[k]=1; t.setAttribute('aria-pressed',ET.lit[k]?'true':'false'); etRender(); return; }
-      if(e.target.closest('#etCyCompose')){ ET.composed=true; etRender(); return; }
-    });
-    var hold=$('etNameHold'), prog=$('etNameHoldProg'), t0=0, raf=0;
-    function holdStart(e){ if(hold.disabled) return; e.preventDefault(); t0=performance.now(); (function tick(){ var p=Math.min(1,(performance.now()-t0)/1200); prog.style.strokeDashoffset=String(578*(1-p)); if(p>=1){ ET.mode='kept'; etRender(); return; } raf=requestAnimationFrame(tick); })(); }
-    function holdEnd(){ cancelAnimationFrame(raf); if(ET.mode!=='kept') prog.style.strokeDashoffset='578'; }
-    hold.addEventListener('pointerdown',holdStart); hold.addEventListener('pointerup',holdEnd); hold.addEventListener('pointerleave',holdEnd); hold.addEventListener('pointercancel',holdEnd);
-    hold.addEventListener('keydown',function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); if(!hold.disabled){ ET.mode='kept'; etRender(); } } });
-    /* the registry is re-read while a name is being kept, so "kept." is the chain's word, not this page's */
-    setInterval(function(){ if(document.visibilityState==='visible'&&(ET.step==='ready'||ET.mode==='kept')) loadRegistry().then(etRender).catch(function(){}); }, 20000);
-    etRender();
-  })();
+  /* the eternal front reads the desk's own live state and gate constants (read-only; it never writes them) */
+  window.__bnamesDesk={live:live,hosts:HOSTS.slice(),gate:{quorum:QUORUM,verifiers:N_VERIFIERS,get hardened(){return HARDENED;}}};
   (async function(){
     await Promise.all([loadRegistry(),loadConfig(),loadRamCost()]);
+    try{document.dispatchEvent(new Event('bnames:live'));}catch(e){}
     soulApply();
     drawConst();
     ['king','k','q'].forEach(function(n){ jewel('j-'+n,n); });
     check($('q').value);
-    if(typeof etRender==='function') etRender();
   })();
+})();
+</script>
+<script>
+/* ETERNAL FRONT — one data layer, three renderers (docs/design/eternal). Every fact is the desk's own
+   live read (window.__bnamesDesk: the registry rows, config, the RAM market, whether the chain answered,
+   and the custody gate's own constants). A check hands the name to the desk's real search (#q → #go);
+   "free" is said only when the chain answered and holds no row for it. Nothing here signs or writes. */
+(function(){
+  var $=function(id){return document.getElementById(id);};
+  var T=function(k,f){var t=window.BNRLanguage&&window.BNRLanguage.text;return t?t(k,f):f;};
+  var esc=function(v){return String(v==null?'':v).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});};
+  var strip=function(n){return (n||'').trim().toLowerCase().replace(/\.b$/,'');};
+  var D={reach:'asking',rows:null,names:[],fee:null,days:null,ram:null,jewels:{},gate:null,hosts:[],query:{name:'',state:'idle'}};
+  var R={sel:'king'};
+  function build(){
+    var B=window.__bnamesDesk; if(!B) return;
+    var L=B.live; D.reach=L.reach||'asking'; D.hosts=B.hosts; D.gate=B.gate;
+    D.rows=D.reach==='ok'?L.rows.length:null; D.names=L.rows.map(function(r){return r.domain_name;});
+    D.fee=L.fee; D.days=L.days; D.ram=L.ramCost;
+    ['king','k','q'].forEach(function(n){var r=L.byName[n];D.jewels[n]=D.reach!=='ok'?{state:'unknown'}:r?{state:'held',owner:r.owner,expires:String(r.expires||'').slice(0,10)}:{state:'free'};});
+  }
+  function state(n){
+    var L=window.__bnamesDesk&&window.__bnamesDesk.live; if(!n) return {name:'',state:'idle'};
+    if(!L||D.reach!=='ok') return {name:n,state:D.reach==='asking'?'asking':'unknown'};
+    var r=L.byName[n]; return r?{name:n,state:'held',owner:r.owner,expires:String(r.expires||'').slice(0,10)}:{name:n,state:'free'};
+  }
+  var ramText=function(){return D.ram!=null?D.ram.toFixed(4)+' core · resellable':T('et.bnames.notRead','not read yet');};
+  var said=function(q){
+    if(q.state==='held') return [T('et.bnames.held','{n}.b is taken').replace('{n}',q.name),T('et.bnames.heldLine','held by {o} until {d}.').replace('{o}',q.owner).replace('{d}',q.expires)];
+    if(q.state==='free') return [T('et.bnames.free','{n}.b is free today').replace('{n}',q.name),T('et.bnames.freeLine','the chain holds no row for it. securing it is founder-only for now.')];
+    if(q.state==='unknown') return [T('et.bnames.unknown','the chain did not answer'),T('et.bnames.unknownLine','so the desk cannot say whether {n}.b is free. nothing is guessed.').replace('{n}',q.name||'a name')];
+    if(q.state==='asking') return [T('et.bnames.asking','asking the chain…'),T('et.bnames.askingLine','the answer comes from the chain, not from this page.')];
+    return [T('et.bnames.b.ask','type a name, then check it.'),T('et.bnames.askingLine','the answer comes from the chain, not from this page.')];
+  };
+  function words(){document.querySelectorAll('#eternal [data-t],#etArchive[data-t]').forEach(function(e){if(!e.dataset.en)e.dataset.en=e.textContent;e.textContent=T(e.dataset.t,e.dataset.en);});}
+
+  /* ── NEW BEE ── */
+  function bee(){
+    var s=said(D.query), a=$('etBeeAnswer');
+    a.className='et-b-answer'+(D.query.state==='held'||D.query.state==='unknown'?' out':D.query.state==='free'?'':' wait');
+    a.innerHTML='<b>'+esc(s[0])+'</b><span>'+esc(s[1])+'</span>';
+    var row=function(k,v,cls){return '<div class="et-b-row"><span>'+esc(k)+'</span><small'+(cls?' class="'+cls+'"':'')+'>'+esc(v)+'</small></div>';};
+    var nr=T('et.bnames.notRead','not read yet');
+    $('etBeeRows').innerHTML=
+      row(T('et.bnames.b.rows','names on the chain today'),D.reach==='ok'?String(D.rows):D.reach==='failed'?T('et.bnames.silent','the chain did not answer'):T('et.bnames.asking','asking the chain…'),D.reach==='failed'?'out':'')+
+      row(T('et.bnames.b.fee','fee'),D.fee!=null?String(D.fee):nr)+
+      row(T('et.bnames.b.term','a name is yours for'),D.days!=null?D.days+' '+T('et.bnames.days','days, renewable'):nr)+
+      row(T('et.bnames.b.ram','chain memory, paid once'),ramText())+
+      row(T('et.bnames.b.who','who could take a name back'),T('et.bnames.b.whoV','the operator’s keys, for now'),'out');
+  }
+
+  /* ── RAVER: the crown ── */
+  function hexPath(cx,cy,r){var p='';for(var k=0;k<6;k++){var a=Math.PI/3*k+Math.PI/6;p+=(k?'L':'M')+(cx+r*Math.cos(a)).toFixed(1)+' '+(cy+r*Math.sin(a)).toFixed(1);}return p+'Z';}
+  function cells(){
+    var out=[{n:'king',x:180,y:170,r:40,jewel:true},{n:'k',x:96,y:170,r:28,jewel:true},{n:'q',x:264,y:170,r:28,jewel:true}];
+    var others=D.names.filter(function(n){return n!=='king'&&n!=='k'&&n!=='q';});
+    var ring=D.reach==='ok'?others:new Array(12).fill(null);
+    ring.forEach(function(n,i){var a=-Math.PI/2+2*Math.PI*i/Math.max(ring.length,1), rad=ring.length>18?156:140;out.push({n:n,x:180+rad*Math.cos(a),y:170+rad*Math.sin(a)*0.92,r:ring.length>18?14:19});});
+    return out;
+  }
+  function crown(){
+    var tok=function(n){return getComputedStyle(document.body).getPropertyValue('--sk-'+n).trim();};
+    var h='';
+    cells().forEach(function(c,i){
+      var q=c.n?state(c.n):{state:'unknown'}, lit=c.n&&R.sel===c.n, fill='none', stroke=tok('guard'), dash=' stroke-dasharray="4 4"';
+      if(q.state==='held'){fill=tok(lit?'sovereign-strong':'sovereign');stroke='none';dash='';}
+      else if(q.state==='free'){fill=lit?tok('sovereign-strong'):'none';stroke=tok('biomass');dash='';}
+      else if(lit){fill=tok('guard-wash');}
+      var ink=q.state==='held'||(q.state==='free'&&lit)?tok('on-primary'):tok('ink');
+      h+=c.n?'<g class="jewel" role="button" tabindex="0" data-n="'+esc(c.n)+'" aria-pressed="'+!!lit+'" aria-label="'+esc(c.n+'.b, '+(q.state==='held'?'held':q.state==='free'?'free':'state unknown'))+'"><path class="hit" d="'+hexPath(c.x,c.y,Math.max(c.r,24))+'"/>':'<g>';
+      h+='<path class="cell" d="'+hexPath(c.x,c.y,c.r)+'" fill="'+fill+'" stroke="'+stroke+'" stroke-width="1.5"'+dash+' opacity="'+(lit||!R.sel?1:0.62)+'"/>';
+      if(c.jewel) h+='<text class="'+(c.n==='king'?'big':'')+'" x="'+c.x+'" y="'+(c.y+5)+'" text-anchor="middle" fill="'+ink+'">'+esc(c.n)+'.b</text>';
+      h+='</g>';
+    });
+    $('etCrown').innerHTML=h;
+  }
+  function raver(){
+    crown();
+    var q=state(R.sel), s=said(q);
+    $('etRaverCard').innerHTML='<span class="rk">.b</span><div><b>'+esc(s[0])+'</b><span>'+esc(s[1])+'</span></div>';
+    $('etRaverHint').textContent=D.reach==='ok'?T('et.bnames.r.hint','{n} names · tap a jewel').replace('{n}',D.rows):D.reach==='failed'?T('et.bnames.r.silent','the chain is silent · nothing guessed'):T('et.bnames.asking','asking the chain…');
+    var v=strip($('etRaverName').value)||R.sel;
+    $('etRaverCheck').textContent=T('et.bnames.r.check','ask the chain for {n}.b').replace('{n}',v);
+  }
+
+  /* ── CYPHERPUNK ── */
+  function cy(){
+    var g=D.gate||{quorum:null,verifiers:null,hardened:false};
+    $('etChips').innerHTML='<span class="'+(D.reach==='ok'?'ok':D.reach==='failed'?'no':'on')+'">rpc '+(D.reach==='ok'?'reached':D.reach==='failed'?'unreachable':'asking')+'</span><span>writes 0</span><span class="on">gate '+(g.hardened?'open':'founder-only')+'</span>';
+    var nr='not read yet', rows=[
+      ['domains','rows',D.reach==='ok'?String(D.rows):D.reach==='failed'?'<span class="no">unreachable</span>':'asking'],
+      ['config','registration_fee',D.fee!=null?esc(D.fee):nr],['config','registration_days',D.days!=null?esc(D.days):nr],
+      ['eosio::rammarket','2537 B',D.ram!=null?D.ram.toFixed(4)+' core':nr]];
+    D.hosts.forEach(function(h){rows.push(['host',esc(h.replace('https://','')),D.reach==='ok'?'<span class="ok">failover set</span>':D.reach==='failed'?'<span class="no">no answer</span>':'asking']);});
+    $('etReads').innerHTML=rows.map(function(r){return '<tr><td>'+r[0]+'</td><td>'+r[1]+'</td><td>'+r[2]+'</td></tr>';}).join('');
+    var q=D.query, steps=[
+      ['read · get_table_rows domains',D.reach==='ok'?D.rows+' rows · paged 500':D.reach==='failed'?'every host failed · nothing guessed':'asking',D.reach==='ok'?'done':'todo'],
+      ['check · '+(q.name?q.name+'.b':'domain_name'),q.state==='held'?'taken · owner '+q.owner+' · expires '+q.expires:q.state==='free'?'no row · free today':q.state==='unknown'?'unknown · the chain did not answer':'not checked yet',q.state==='held'||q.state==='free'?'done':'todo'],
+      ['consent · one name, one soul','two boxes, ticked by you','todo'],
+      ['gate · HARDENED='+(g.hardened?'true':'false'),'needs '+g.quorum+' independent verifiers · has '+g.verifiers+' · until met: founder accounts only','guard'],
+      ['compose · kingbeelovis::registeracc','registrant, domain_name, target · the wallet shows exactly what you sign','todo'],
+      ['sign · your wallet','never this page · the manual step is the bot protection','todo']];
+    var now=steps.findIndex(function(s){return s[2]==='todo';});
+    $('etPipe').innerHTML=steps.map(function(s,i){return '<li class="'+s[2]+(i===now?' now':'')+'"><b>'+esc(s[0])+'</b><p>'+esc(s[1])+'</p></li>';}).join('');
+    $('etReceipt').innerHTML=[['registry','kingbeelovis · vaulta'],['rpc',D.reach==='ok'?'<span class="yes">reached</span>':D.reach==='failed'?'<span class="no">unreachable</span>':'asking'],
+      ['names',D.reach==='ok'?String(D.rows):'<span class="no">not read</span>'],['custody','<span class="held">operator-trusted · 3 single-key paths</span>'],
+      ['gate',(g.hardened?'open':'founder-only')+' · verifiers '+g.verifiers+' of '+g.quorum+' needed'],['writes','0 · compose-only'],['keys held','0']].map(function(r){return '<tr><th>'+r[0]+'</th><td>'+r[1]+'</td></tr>';}).join('');
+  }
+  function all(){words();build();D.query=state(D.query.name);bee();raver();cy();}
+  /* the one hand-off: the desk's own search owns the check */
+  function check(name){
+    var n=strip(name); if(!n) return;
+    var q=$('q'), go=$('go'); if(q&&go){q.value=n;go.click();}
+    D.query=state(n); R.sel=n; all(); return D.query;
+  }
+  function wire(){
+    var ev=$('eternal');
+    ev.addEventListener('click',function(e){var g=e.target.closest('#etCrown .jewel');if(g){R.sel=g.getAttribute('data-n');$('etRaverName').value='';raver();}});
+    ev.addEventListener('keydown',function(e){if(e.key!=='Enter'&&e.key!==' ')return;var t=e.target.closest('#etCrown .jewel');if(!t)return;e.preventDefault();t.dispatchEvent(new MouseEvent('click',{bubbles:true}));});
+    $('etBeeCheck').addEventListener('click',function(){check($('etBeeName').value);});
+    $('etBeeName').addEventListener('keydown',function(e){if(e.key==='Enter')check(this.value);});
+    $('etRaverName').addEventListener('input',raver);
+    $('etRaverCheck').addEventListener('click',function(){check(strip($('etRaverName').value)||R.sel);});
+    $('etCyCheck').addEventListener('click',function(){check($('etCyName').value);});
+    $('etCyName').addEventListener('keydown',function(e){if(e.key==='Enter')check(this.value);});
+    $('etBeeSecure').addEventListener('click',function(){var s=$('q');if(s){s.closest('section').scrollIntoView({block:'start'});s.focus({preventScroll:true});}});
+    document.addEventListener('bnames:live',all);
+    document.addEventListener('blang',all);
+    document.addEventListener('bregister',function(){setTimeout(raver,0);});
+  }
+  wire(); all();
+  window.__eternal={data:D,raver:R,check:check};
 })();
 </script>
 </body>
