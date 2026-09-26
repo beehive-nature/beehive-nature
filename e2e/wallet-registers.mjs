@@ -12,12 +12,18 @@
 //
 // Matrix: docs/dispatches/2026-09-26-wallet-three-grammars.md
 //
+// The golden dress contract (#235) runs first, through its shared instrument
+// e2e/register-contract.mjs: token fidelity to register.js, the dress vector,
+// motion, persistence, casing. The dress is the contract's; the grammar is
+// this surface's own contribution, measured after it.
+//
 //   node e2e/wallet-registers.mjs
 import { createServer } from 'node:http';
 import { readFile, mkdir } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { dirname, join, extname } from 'node:path';
 import { chromium } from 'playwright';
+import { assertRegisterContract } from './register-contract.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const SURFACES = join(here, '..', 'surfaces');
@@ -83,45 +89,42 @@ const arrival = page => page.evaluate(() => {
   };
 });
 
-// 1 · the toggle (unchanged law)
+// 1–2 · THE GOLDEN DRESS CONTRACT, by the shared instrument (toggle, token
+// fidelity to register.js, dress vector, motion, voice, persistence, casing,
+// unread-state receipts), then the wallet's own dress rulings
 {
   const { ctx, page } = await open('bee', { fixture: false });
-  await ctx.clearCookies();
-  await page.evaluate(() => localStorage.removeItem('bregister'));
-  const toggle = await page.evaluate(() => ['bee', 'raver', 'cypherpunk'].map(r => {
-    const b = document.getElementById('breg-' + r);
-    return { r, present: !!b, h: b ? Math.round(b.getBoundingClientRect().height) : 0, pressed: b ? b.getAttribute('aria-pressed') : null };
-  }));
-  ok('the RegisterToggle is in the masthead: three named pills, each ≥ 44px', toggle.every(t => t.present && t.h >= 44), JSON.stringify(toggle.map(t => t.h)));
-  ok('new bee is the standing default (aria-pressed on bee only)', toggle.find(t => t.r === 'bee').pressed === 'true' && toggle.filter(t => t.pressed === 'true').length === 1);
-  await ctx.close();
-}
-
-// 2 · the dress (the golden-dress contract's axes — still true, no longer the whole claim)
-const dress = {};
-for (const reg of REGS) {
-  const { ctx, page } = await open(reg, { fixture: false });
-  dress[reg] = await page.evaluate(() => {
-    const cs = el => getComputedStyle(el);
-    const sec = document.getElementById('connect-sec'), btn = document.getElementById('wgo'), h1 = document.querySelector('h1');
-    return { bg: cs(document.body).backgroundColor, bodyFont: cs(document.body).fontFamily, h1Font: cs(h1).fontFamily, h1Weight: cs(h1).fontWeight,
-      cardRadius: cs(sec).borderRadius, btnColor: cs(btn).color, btnRadius: cs(btn).borderRadius, glow: cs(sec).boxShadow };
+  const seen = await assertRegisterContract(page, {
+    ok, pageErrors, shotsDir: SHOTS, stem: 'wallet-390',
+    voiceProbe: async p => {
+      // bee and raver lead with DIFFERENT prose (each visible in its own
+      // register) while h1, the fact line, stays byte-identical
+      await p.click('#breg-bee'); await p.waitForTimeout(300);
+      const bee = await p.evaluate(() => { const el = document.querySelector('p[data-reg="bee"]'); return { vis: el.getBoundingClientRect().height > 0, text: el.textContent.trim(), h1: document.querySelector('h1').textContent }; });
+      await p.click('#breg-raver'); await p.waitForTimeout(300);
+      const raver = await p.evaluate(() => { const el = document.querySelector('p[data-reg="raver"]'); return { vis: el.getBoundingClientRect().height > 0, text: el.textContent.trim(), h1: document.querySelector('h1').textContent }; });
+      return { beeText: bee.vis ? bee.text : '', raverText: raver.vis ? raver.text : '', beeFact: bee.h1, raverFact: raver.h1 };
+    },
   });
+  ok('bee reads in SERIF titles over SANS body', /Georgia/.test(seen.bee.h1Font) && /system-ui/.test(seen.bee.bodyFont), seen.bee.h1Font.split(',')[0]);
+  ok('bee corners are SOFT (20px cards, 12px controls)', seen.bee.cardRadius === '20px' && seen.bee.btnRadius === '12px', seen.bee.cardRadius);
+  ok('bee action is the ONE magenta (rgb(168, 35, 140))', seen.bee.btnColor === 'rgb(168, 35, 140)', seen.bee.btnColor);
+  ok('raver shouts in a heavy display title', parseInt(seen.raver.h1Weight, 10) >= 700, 'weight ' + seen.raver.h1Weight);
+  ok('raver controls are PILLS (999px)', seen.raver.btnRadius === '999px', seen.raver.btnRadius);
+  ok('raver carries glow-sovereign (the ONE glow) and the purples-as-light wash', seen.raver.glow !== 'none' && /gradient/.test(seen.raver.bgImage), (seen.raver.glow || '').slice(0, 60));
+  ok('raver action is you magenta (rgb(214, 85, 187))', seen.raver.btnColor === 'rgb(214, 85, 187)', seen.raver.btnColor);
+  ok('cypherpunk is MONO top to bottom', /mono/i.test(seen.cypherpunk.bodyFont) && /mono/i.test(seen.cypherpunk.h1Font), seen.cypherpunk.bodyFont.split(',')[0]);
+  ok('cypherpunk corners are CUT (4px cards, 4px controls)', seen.cypherpunk.cardRadius === '4px' && seen.cypherpunk.btnRadius === '4px', seen.cypherpunk.cardRadius);
+  ok('cypherpunk action is ai teal (rgb(69, 194, 220))', seen.cypherpunk.btnColor === 'rgb(69, 194, 220)', seen.cypherpunk.btnColor);
   await ctx.close();
 }
-ok('dress: bee is paper with serif titles', dress.bee.bg === 'rgb(251, 247, 240)' && /Georgia/.test(dress.bee.h1Font), dress.bee.bg);
-ok('dress: raver is the ruled black with the one glow and pills', dress.raver.bg === 'rgb(6, 17, 12)' && dress.raver.glow !== 'none' && dress.raver.btnRadius === '999px');
-ok('dress: cypherpunk is mono top to bottom with cut corners', /mono/i.test(dress.cypherpunk.bodyFont) && /mono/i.test(dress.cypherpunk.h1Font) && dress.cypherpunk.cardRadius === '4px' && dress.cypherpunk.btnRadius === '4px');
-ok('dress: the action colour follows the register (bee magenta / raver you-magenta / cy ai-teal)',
-  dress.bee.btnColor === 'rgb(168, 35, 140)' && dress.raver.btnColor === 'rgb(214, 85, 187)' && dress.cypherpunk.btnColor === 'rgb(69, 194, 220)',
-  `${dress.bee.btnColor} / ${dress.raver.btnColor} / ${dress.cypherpunk.btnColor}`);
 
 // 3 · the grammar: what ARRIVES differs, register by register (390px phone)
 const arr = {};
 for (const reg of REGS) {
   const { ctx, page } = await open(reg);
   arr[reg] = await arrival(page);
-  await page.screenshot({ path: join(SHOTS, `wallet-${reg}-390.png`) });
+  await page.screenshot({ path: join(SHOTS, `wallet-390-${reg}-read.png`) });
   await ctx.close();
 }
 ok('bee arrives on its home list, no section open (one question at a time)',
@@ -169,7 +172,7 @@ ok('the STRUCTURE vector differs on every pair (not a recolour)', vec('bee') !==
     return [...document.querySelectorAll('main>section[data-wl-task] button')].filter(b => b.getClientRects().length && getComputedStyle(b).backgroundColor === rgb).map(b => b.id || b.textContent.trim().slice(0, 20));
   });
   ok('bee: a task opens with at most one filled action (not a wall of primaries)', filled.length <= 1, filled.join(', ') || 'none filled at rest');
-  await page.screenshot({ path: join(SHOTS, 'wallet-bee-task-390.png') });
+  await page.screenshot({ path: join(SHOTS, 'wallet-390-bee-task.png') });
   await page.click('#wl-bar [data-wl-go="home"]');
   await page.waitForTimeout(350);
   const back = await page.evaluate(() => ({ view: document.body.dataset.wlView, focus: document.activeElement && document.activeElement.dataset.wlGo }));
@@ -205,7 +208,7 @@ ok('the STRUCTURE vector differs on every pair (not a recolour)', vec('bee') !==
   }));
   ok('raver: the "add" glyph swaps the deck in place (fund + fiat in + voucher; the stage steps aside)',
     deck.view === 'add' && deck.sections.join() === 'voucher-sec,fund-sec,peer-sec' && !deck.stage && deck.pressed.join() === 'add', JSON.stringify(deck));
-  await page.screenshot({ path: join(SHOTS, 'wallet-raver-deck-390.png') });
+  await page.screenshot({ path: join(SHOTS, 'wallet-390-raver-deck.png') });
   await page.focus('#wl-dock [data-wl-go="add"]');
   await page.keyboard.press('ArrowRight');
   await page.waitForTimeout(400);
@@ -231,7 +234,7 @@ ok('the STRUCTURE vector differs on every pair (not a recolour)', vec('bee') !==
   ok('cypherpunk (desktop): the console is a sticky rail beside the pipeline', rail.pos === 'sticky' && rail.left, JSON.stringify(rail));
   const small = await page.evaluate(() => [...document.querySelectorAll('main button, main select')].filter(b => b.getClientRects().length && b.getBoundingClientRect().height < 44).map(b => (b.id || b.textContent.trim().slice(0, 16)) + ':' + Math.round(b.getBoundingClientRect().height)));
   ok('every press in the whole open pipeline is ≥ 44px (the floor holds in the densest register)', small.length === 0, small.slice(0, 5).join(' '));
-  await page.screenshot({ path: join(SHOTS, 'wallet-cypherpunk-1280.png') });
+  await page.screenshot({ path: join(SHOTS, 'wallet-1280-cypherpunk.png') });
   await page.keyboard.press('j');
   await page.waitForTimeout(500);
   const j1 = await page.evaluate(() => document.activeElement && document.activeElement.id);
@@ -351,10 +354,10 @@ for (const reg of REGS) {
   const { ctx, page } = await open(reg, { width: 1280, height: 800 });
   const bad = await page.evaluate(() => [...document.querySelectorAll('main, main *')].filter(el => getComputedStyle(el).textTransform !== 'none').map(el => el.tagName + '.' + el.className).slice(0, 4));
   ok(`no text-transform anywhere in ${reg} (capitals are a signal channel, never decoration)`, bad.length === 0, bad.join(','));
-  if (reg !== 'cypherpunk') await page.screenshot({ path: join(SHOTS, `wallet-${reg}-1280.png`) });
+  if (reg !== 'cypherpunk') await page.screenshot({ path: join(SHOTS, `wallet-1280-${reg}.png`) });
   await ctx.close();
 }
-ok('receipts banked: arrival at 390 and 1280 for each register, plus a bee task, a raver deck and the cypherpunk rail', true, 'e2e/shots-wallet-registers/');
+ok('receipts banked: arrival with read balances at 390 and 1280 for each register, a bee task, a raver deck and the cypherpunk rail', true, 'e2e/shots-wallet-registers/');
 
 ok('no page errors across all three registers', pageErrors.length === 0, pageErrors.slice(0, 2).join(' | ').slice(0, 200));
 
@@ -363,5 +366,5 @@ server.close();
 const failed = results.filter(r => !r.pass);
 console.log(failed.length
   ? `\nWALLET REGISTERS GATE: ${failed.length} FAILED of ${results.length}`
-  : `\nWALLET REGISTERS GATE: GREEN — ${results.length}/${results.length} (three grammars measured; the facts identical in all three)`);
+  : `\nWALLET REGISTERS GATE: GREEN — ${results.length}/${results.length} (the golden dress contract holds; three grammars measured; the facts identical in all three)`);
 process.exit(failed.length ? 1 : 0);

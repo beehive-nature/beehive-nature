@@ -93,6 +93,31 @@ The verdict follows from the numbers. The three registers are the same document 
 
 The functional batteries (fund, vault, arweave, signer, adapter, matrix) test the pipeline, so their pipeline contexts pin `bregister=cypherpunk`. Bee-dress assertions stay in bee. Nothing in a battery is loosened to pass.
 
-## 5 · interaction with the golden-dress contract (zcode, unmerged `zcode/register-contract-2026-09-26@d13646c27`)
+## 5 · interaction with the golden-dress contract (zcode, `zcode/register-contract-2026-09-26@d13646c27`)
 
 That branch freezes wallet.html as the register reference and ships the token sets from `register.js`. **This work keeps every token value, so contract token fidelity is unaffected.** But the founder has now rejected the reference's grammar, and the contract's harness proves dress only. The contract's rollout ("roll outward by behavior contract") should carry the grammar axes in §4, not just token fidelity. Otherwise it rolls the recolour estate-wide. **This is escalated by name to zcode here rather than resolved; this lane does not touch that branch.**
+
+*Update, same day:* the contract landed on main as **#235 (`fb8da542d`)** while this lane was building, and this branch merged it. The contract runs **first** inside `e2e/wallet-registers.mjs`, through its own instrument, and passes whole. One generic fix went into the instrument itself. `collectDress` sampled the first `main button` as a register's action colour, and on a surface with register-owned navigation that is the bee home row, which is deliberately not a filled action. It now samples **shared content only** (`!el.closest('[data-reg]:not(body)')`), because a register's own blocks differ per register by design. The escalation above stands: the rollout should adopt the grammar axes of §4 alongside the dress.
+
+## 6 · as built: where the code departed from the matrix, and why
+
+- **Cypherpunk on a phone:** the console comes *after* the hero balance and the ring, not first. The ruled phone fold law ("form-kill", master design pass) puts the balance and the ring above everything; in cypherpunk, where the pipeline *is* the page, that law stands. On desktop the console is the sticky rail beside the pipeline, as the matrix said.
+- **Work survives a switch:** it carries by **the field the reader last worked in** (focus or input), not by scroll position. The toggle sits at the top of the page, so every reader scrolls up to reach it; scroll position could never say what they were doing. Where they typed can.
+- **Raver hint:** "tap a light below" was wrong, because the dock sits *above* the stage. It now reads "the glyphs above open each part of the wallet".
+- **New bee's reading:** beyond the matrix, bee also got (a) the black-ground inline colours (amber, cyan, honey, leaf, violet) stepped darker inside their own ramps for paper, since a semantic colour is never repainted to another hue; (b) the sections' 38 filled "gold" buttons outlined until pressed, so a task never opens on a wall of primaries; (c) the engineering kicker kept out of the matriarch's first screen (it stays in raver and cypherpunk).
+- **44px floor:** enforced in **every** register, not just bee. 33 inline controls were cut to 26–34px.
+- **Honest states on the shared cards too:** the five balance placeholders and the Arweave refresh path wrote a bare "—". They now write nothing (the card hides its figure), and the stat line under each card already says why.
+- **Heading casing:** the unkeyed authored capitals ("CONNECT —", "THE KEYCHAIN —", …) are lowercased per the casing law. The keyed ones (`wl.insc.h2`, `wl.vh2`, `wl.h.summary`) still carry capitals in all 29 tongues. Changing them is a corpus-wide edit, left open and named here.
+
+## 7 · receipts (this branch, merged with main `fb8da542d`)
+
+| gate | result |
+|---|---|
+| `node e2e/wallet-registers.mjs` (golden dress contract harness + the three grammars) | **GREEN 66/66** |
+| wallet batteries: fund · vault · matrix · arweave · signer · adapter | 94 · 35 · 11 · 22 · 105 · 28, **0 failed** |
+| CI `node --test`: comprehension · orb-seat · bpay-policy-ownership | 9/9 · 4/4 · 2/2 (each was red on this branch before the tests were given the reader's real first step: a row tap or a deep link; no assertion loosened) |
+| CI front-door static suite | 377/377 |
+| `scripts/estate-check.mjs` · `e2e/estate-source.mjs` | PASS · 11/11 (45 new keys × 28 tongues, machine-drafted ⚙, casing-clean) |
+| screenshots | `e2e/shots-wallet-registers/`: contract arrivals `wallet-390-{reg}.png` (unread), read arrivals `wallet-390-{reg}-read.png`, desktop `wallet-1280-{reg}.png`, a bee task, a raver deck |
+
+**Not claimed:** no human (and no matriarch) has used these three grammars yet, and the gate proves only its named properties (DESIGN-CONSTRAINTS §13). No live chain was read. Balances in the receipts are injected fixtures (`12.3456 A`, `7.000 HIVE`), written into the sections' own nodes where a chain read would land.

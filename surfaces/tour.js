@@ -208,7 +208,7 @@
      could otherwise leave the newly inserted buttons in English. */
   if(!document.getElementById('bregctl')){
     var s=document.createElement('script');
-    s.src=assetBase+'register.js?v=10';
+    s.src=assetBase+'register.js?v=11';
     s.onload=loadLanguage; s.onerror=loadLanguage;
     document.body.appendChild(s);
   }else loadLanguage();
