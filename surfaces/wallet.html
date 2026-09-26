@@ -140,6 +140,7 @@ pre b{color:var(--ink)}
 .qr-pulse{animation:qr-pulse-k 2.4s ease-in-out infinite}
 @keyframes qr-pulse-k{0%,100%{opacity:.85}50%{opacity:.25}}
 footer{max-width:980px;margin:22px auto 0;color:var(--faint);font-size:10px;text-align:center;line-height:2}
+footer .wl-foot>summary{justify-content:center}
 </style>
 <script>
 /* ══ THE KIT PROFILE — every estate-only fact this surface carries lives HERE,
@@ -1339,7 +1340,7 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
   <div class="row" style="align-items:center;flex-wrap:wrap">
     <input id="vc-key" placeholder="your meter key — e.g. bclau-paid-1" spellcheck="false" autocomplete="off" style="flex:2;min-width:200px">
     <button id="vc-go" class="gold" style="min-height:40px">look up</button>
-    <span style="font-size:10.5px;color:var(--faint)" id="vc-src"></span>
+    <span style="font-size:10.5px;color:var(--faint)" id="vc-src" data-wl-tech></span>
   </div>
 
   <div id="vc-panel" style="display:none;margin-top:12px">
@@ -1356,7 +1357,7 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
         <div class="law" style="margin-top:4px" data-i18n="wl.vc.a.send">send any amount of A to:</div>
         <div class="row" style="gap:6px"><code id="vc-a-dest" style="flex:1;word-break:break-all">—</code>
           <button class="gold vc-copy" style="min-height:32px;font-size:10px" data-copy="">copy</button></div>
-        <div class="law" style="margin-top:6px"><span data-i18n="wl.vc.memo1">with this EXACT memo (the memo IS the binding —</span>
+        <div class="law" id="vc-memo-law" style="margin-top:6px"><span data-i18n="wl.vc.memo1">with this EXACT memo (the memo IS the binding —</span>
         <b style="color:var(--amber)"><span data-i18n="wl.vc.memo2">no memo, no credit, money lost</span></b><span data-i18n="wl.vc.memo3">):</span></div>
         <div class="row" style="gap:6px"><code id="vc-a-memo" style="flex:1;word-break:break-all;color:var(--ink)">—</code>
           <button class="gold vc-copy" style="min-height:32px;font-size:10px" data-copy="">copy memo</button></div>
@@ -1367,7 +1368,7 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
         <div class="row" style="gap:6px"><code id="vc-u-dest" style="flex:1;word-break:break-all">—</code>
           <button class="gold vc-copy" style="min-height:32px;font-size:10px" data-copy="">copy</button></div>
         <div class="law" id="vc-u-rate" style="margin-top:6px" data-i18n="wl.vc.usdc.rate">credited at — A per USDC (rate cited below)</div>
-        <div class="law" id="vc-u-ref" style="color:var(--faint)">rate: —</div>
+        <div class="law" id="vc-u-ref" style="color:var(--faint)" data-wl-tech>rate: —</div>
         <div class="law" style="margin-top:4px;color:var(--faint)" data-i18n="wl.vc.usdc.nomemo">no memo needed on this rail — your bound address credits you</div>
       </div>
     </div>
@@ -1628,11 +1629,11 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
           if (!keyOk) {
             go.setAttribute('aria-disabled', 'true');
             go.setAttribute('href', '#');
-            stat.innerHTML = '<b style="color:var(--amber)">\u26a0 funding not configured</b>: the public ' +
-              'Meld Checkout key is not set on this deployment (BNR_MELD_PUBLIC_KEY / data-meld-public-key). ' +
-              'The launch button stays asleep until it is; nothing else on this page is affected. ' +
-              'Environment selected: <b>' + BNR_MELD_ENV + '</b>' +
-              (BNR_MELD_ENV === 'production' ? ' (real money)' : ' (sb.meldcrypto.com, test rails)') + '.';
+            stat.innerHTML = '<b style="color:var(--amber)">\u26a0 funding not configured</b>: card checkout is not switched on here yet. ' +
+              'The button stays asleep until it is; nothing else on this page is affected.' +
+              '<span data-wl-tech> Why: the public Meld Checkout key is not set on this deployment ' +
+              '(BNR_MELD_PUBLIC_KEY / data-meld-public-key). Environment selected: <b>' + BNR_MELD_ENV + '</b>' +
+              (BNR_MELD_ENV === 'production' ? ' (real money)' : ' (sb.meldcrypto.com, test rails)') + '.</span>';
             return;
           }
           var a = addr.value.trim();
@@ -2105,8 +2106,11 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
 
 </main>
 <footer>
-  🗝 the BNR wallet · bzDiD is the wallet · <span id="core-badge">core: checking…</span> · action translation: vendored eosjs (ABI serializer)<br>
-  static · derived keys live in tab memory only · vault secrets sealed with PBKDF2+AES-GCM · Rust core: crates/bnr-keys · AGPL-3.0-only · <a href="index.html">the hub</a> · this page: surfaces/wallet.html
+  🗝 the BNR wallet · bzDiD is the wallet · <a href="index.html">the hub</a>
+  <details class="wl-foot" data-reg-disclose><summary data-i18n="wl.foot.how">how this page is built</summary>
+  <span id="core-badge">core: checking…</span> · action translation: vendored eosjs (ABI serializer)<br>
+  static · derived keys live in tab memory only · vault secrets sealed with PBKDF2+AES-GCM · Rust core: crates/bnr-keys · AGPL-3.0-only · this page: surfaces/wallet.html
+  </details>
 </footer>
 <script src="agent-dock.js?v=5"></script>
 <script src="tour.js?v=42"></script>
@@ -4508,7 +4512,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
         if (!r.ok || d.message) { $v('vc-panel').style.display = 'none';
           err(d.message || ('the oracle answered HTTP ' + r.status)); return }
         $v('vc-balance').textContent = d.balance;
-        $v('vc-sub').textContent = 'your voucher balance — live from the hash-chained ledger';
+        $v('vc-sub').innerHTML = 'your voucher balance<span data-wl-tech>: live from the hash-chained ledger</span>';
         var a = d.topup.rail_a, u = d.topup.rail_usdc;
         $v('vc-a-dest').textContent = a.send_to || '—';
         $v('vc-a-memo').textContent = a.memo || key;

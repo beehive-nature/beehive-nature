@@ -352,6 +352,8 @@ ok('on a phone the first screen holds a different KIND of thing: bee choices, ra
   const bodies = {};
   for (const reg of REGS) {
     const { ctx, page } = await open(reg);
+    // the contract audit's method: the dress stripped, so only structure and words can differ
+    await page.addStyleTag({ content: '*,*::before,*::after{color:#000!important;background:#fff!important;font-family:Arial!important;border-radius:0!important;box-shadow:none!important;text-shadow:none!important;animation:none!important;transition:none!important;border-color:#000!important} svg *{fill:#000!important;stroke:#000!important}' });
     bodies[reg] = {};
     for (const [task, ids] of Object.entries(TASKS)) {
       if (reg === 'bee') await page.click(`#wl-bee [data-wl-go="${task}"]`);
@@ -372,7 +374,7 @@ ok('on a phone the first screen holds a different KIND of thing: bee choices, ra
     await ctx.close();
   }
   const tasks = Object.keys(TASKS);
-  ok('one tap in (the reader\'s own row or glyph), raver deals CARDS and shows no section, while bee shows the task’s sections: never the same page under a different header',
+  ok('dress stripped, one tap in (the reader\'s own row or glyph), raver deals CARDS and shows no section, while bee shows the task’s sections: never the same page under a different header',
     tasks.every(t => bodies.raver[t].shownSecs.length === 0 && bodies.raver[t].cardsShown === TASKS[t].length && bodies.bee[t].shownSecs.length >= 1 && bodies.bee[t].cardsShown === 0),
     tasks.map(t => `${t}: bee ${bodies.bee[t].shownSecs.length} sections · raver ${bodies.raver[t].cardsShown} cards`).join(' · '));
   const all = [].concat(...tasks.map(t => TASKS[t]));
@@ -723,6 +725,65 @@ ok('on a phone the first screen holds a different KIND of thing: bee choices, ra
   await ctx.close();
 }
 
+// 4e · THE CONTENT, NOT ITS LENGTH, with the dress stripped (the contract audit's own method:
+// every colour, font, radius, shadow and animation forced to one value). One tap into
+// "add money" and the footer, per register, and the actual engineering strings checked:
+// bee and raver keep them folded (one tap away), cypherpunk shows them; the plain facts
+// (the balance, the memo warning, the buy button, the checkout state) show everywhere.
+{
+  const STRIP = '*,*::before,*::after{color:#000!important;background:#fff!important;font-family:Arial!important;border-radius:0!important;box-shadow:none!important;text-shadow:none!important;animation:none!important;transition:none!important;border-color:#000!important} svg *{fill:#000!important;stroke:#000!important}';
+  const VOUCHER = { balance: '12.5000', topup: { rail_a: { send_to: 'bnrvoucher11', memo: 'gatekey' }, rail_usdc: { send_to: '0x' + '1'.repeat(40), rate_a_per_usdc: '4.2', rate_ref: 'RATE-REF-FIXTURE' } },
+    spent_total: '1.0000', deposited_total: '13.5000', tithe_total: '0.1000', receipts: [], source: 'SOURCE-FIXTURE-HOST' };
+  const ENG = { voucher: ['SOURCE-FIXTURE-HOST', 'hash-chained ledger', 'RATE-REF-FIXTURE'], fund: ['BNR_MELD_PUBLIC_KEY', 'data-meld-public-key', 'sb.meldcrypto.com'], footer: ['PBKDF2+AES-GCM', 'crates/bnr-keys', 'vendored eosjs'] };
+  const PLAIN = { voucher: ['12.5000', 'no memo, no credit'], fund: ['buy USDC', 'card checkout is not switched on here yet'], footer: ['the BNR wallet', 'how this page is built'] };
+  const seen = (page, sel) => page.evaluate(sel => {
+    const folded = e => { for (let d = e.closest('details'); d; d = d.parentElement && d.parentElement.closest('details')) { const sm = d.querySelector(':scope>summary'); if (!d.open && !(sm && sm.contains(e))) return true; } return false; };
+    const root = document.querySelector(sel), w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT); let t = '', n;
+    while ((n = w.nextNode())) { const p = n.parentElement; if (p && p.getClientRects().length && getComputedStyle(p).visibility !== 'hidden' && !folded(p)) t += ' ' + n.textContent; }
+    return t.replace(/\s+/g, ' ');
+  }, sel);
+  const has = (text, list) => list.filter(m => text.includes(m));
+  const res = {};
+  for (const reg of REGS) {
+    const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
+    await ctx.addInitScript(r => { try { localStorage.setItem('bregister', r); } catch (e) {} }, reg);
+    await ctx.route(url => !url.href.startsWith(origin), r => /\/voucher\/v1\/voucher\//.test(r.request().url())
+      ? r.fulfill({ status: 200, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: JSON.stringify(VOUCHER) }) : r.abort());
+    const page = await ctx.newPage();
+    page.on('pageerror', e => pageErrors.push(reg + ': ' + String(e)));
+    await page.goto(origin + '/wallet.html', { waitUntil: 'load' });
+    await page.waitForSelector('#breg-cypherpunk'); await page.addStyleTag({ content: STRIP }); await page.waitForTimeout(400);
+    const r = res[reg] = {};
+    // the footer at arrival, then one tap on its summary
+    r.footer = await seen(page, 'footer');
+    if (reg !== 'cypherpunk') { await page.click('footer .wl-foot>summary'); await page.waitForTimeout(150); r.footerTap = await seen(page, 'footer'); }
+    // one tap into "add money": bee's row, raver's glyph and then each card; cypherpunk is already open
+    if (reg === 'bee') await page.click('#wl-bee [data-wl-go="add"]');
+    if (reg === 'raver') await page.click('#wl-dock [data-wl-go="add"]');
+    await page.waitForTimeout(350);
+    for (const [part, id] of [['voucher', 'voucher-sec'], ['fund', 'fund-sec']]) {
+      if (reg === 'raver') { await page.click(`#wl-cards .wlr-card[data-wl-card-for="${id}"]`); await page.waitForTimeout(300); }
+      if (part === 'voucher') { await page.fill('#vc-key', 'gatekey'); await page.click('#vc-go'); await page.waitForFunction(() => document.getElementById('vc-panel').style.display === 'block', null, { timeout: 5000 }); }
+      r[part] = await seen(page, '#' + id);
+      if (reg !== 'cypherpunk') { await page.click(`#${id} .wl-more`); await page.waitForTimeout(150); r[part + 'Tap'] = await seen(page, '#' + id); await page.click(`#${id} .wl-more`); await page.waitForTimeout(100); }
+      if (reg === 'raver') { await page.click(`#wl-cards .wlr-card[data-wl-card-for="${id}"]`); await page.waitForTimeout(150); }
+    }
+    await ctx.close();
+  }
+  const parts = ['voucher', 'fund', 'footer'];
+  const leak = (reg) => parts.flatMap(p => has(res[reg][p], ENG[p]).map(m => p + ':' + m));
+  ok('dress stripped, one tap in: bee and raver show NONE of the voucher, fund and footer engineering at rest (source host, rate citation, ledger internals, key names, sandbox host, crypto and build notes)',
+    leak('bee').length === 0 && leak('raver').length === 0, `bee ${leak('bee').join(', ') || 'none'} · raver ${leak('raver').join(', ') || 'none'}`);
+  const missing = reg => parts.flatMap(p => ENG[p].filter(m => !res[reg][p].includes(m)).map(m => p + ':' + m));
+  ok('cypherpunk shows every one of those engineering strings open, with no tap', missing('cypherpunk').length === 0, missing('cypherpunk').join(', ') || 'all open');
+  const far = reg => parts.flatMap(p => ENG[p].filter(m => !res[reg][p + 'Tap'].includes(m)).map(m => p + ':' + m));
+  ok('in bee and raver each one is ONE tap away (the section\'s own toggle, the footer\'s summary): moved, never deleted',
+    far('bee').length === 0 && far('raver').length === 0, `bee ${far('bee').join(', ') || 'all reached'} · raver ${far('raver').join(', ') || 'all reached'}`);
+  const lost = reg => parts.flatMap(p => PLAIN[p].filter(m => !res[reg][p].includes(m)).map(m => p + ':' + m));
+  ok('the plain facts show at rest in every register: the voucher balance, the memo warning, the buy button, the checkout state, the footer\'s name and its way in',
+    REGS.every(r => lost(r).length === 0), REGS.map(r => `${r} ${lost(r).join(', ') || 'all shown'}`).join(' · '));
+}
+
 // 9b · bee's "show the details" is bee's: a register switch starts every section folded, and the toggle is not work
 {
   const { ctx, page } = await open('bee');
@@ -757,11 +818,11 @@ ok('on a phone the first screen holds a different KIND of thing: bee choices, ra
       const r = await open(reg, { path: '/wallet.html#qr=' + q.toString('base64url'), fixture: false });
       await r.page.waitForTimeout(800);
       await r.page.waitForTimeout(400); // past the re-land
-      got[reg] = await r.page.evaluate(() => { const e = document.getElementById('qr-sec'), b = e.getBoundingClientRect(); return { painted: e.getClientRects().length > 0, top: Math.round(b.top), title: document.getElementById('qr-title').textContent.slice(0, 40) }; });
+      got[reg] = await r.page.evaluate(() => { const e = document.getElementById('qr-sec'), b = e.getBoundingClientRect(), t = document.getElementById('qr-title').getBoundingClientRect(); return { painted: e.getClientRects().length > 0, top: Math.round(b.top), titleBottom: Math.round(t.bottom), vh: innerHeight, title: document.getElementById('qr-title').textContent.slice(0, 40) }; });
       await r.ctx.close();
     }
-    ok('#qr= lands on the QR bridge sheet ("a desktop is waiting"), painted and in view, in every register',
-      REGS.every(r => got[r].painted && got[r].top >= 0 && got[r].top < 200 && /waiting/.test(got[r].title)), JSON.stringify(got));
+    ok('#qr= lands on the QR bridge sheet ("a desktop is waiting"), painted, its top and its title inside the first screen, in every register',
+      REGS.every(r => got[r].painted && got[r].top >= 0 && got[r].titleBottom <= got[r].vh && /waiting/.test(got[r].title)), JSON.stringify(got));
   }
   // record the FIRST view the body ever wears: a #section link must never flash home
   const b = await (async () => {

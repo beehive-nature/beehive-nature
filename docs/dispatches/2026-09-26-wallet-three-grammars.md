@@ -226,3 +226,24 @@ Round 4 re-ran on `79f9ff95` (main and #240 merged in, no conflicts). It confirm
 **Dashes as punctuation: closed in the next commit.** Measured by a probe that walks every visible text node in the three registers, once at rest and once with every fold and note open (raver taps every card): **159 distinct nodes carried — or – before, 2 after.** Those two are a service `name` inside the ledger receipts. The receipts are content-hashed, so the name is data, not copy, and it stays. The rules: a heading's dash becomes a colon; a status wrapped in dashes loses them; an explanatory dash becomes a colon, a comma or a full stop; a list's dashes become ·. 35 keys were redrafted in all 28 tongues, each in that tongue's own marks (zh and ja `：`, ar, fa and ur `،`, hi, bn and sa `।`, French's spaced ` : `, ru, uk and tt copula dashes rephrased), and the machine-drafted note was added to `_meta.drafted`. Two assertions follow copy, not data, and are just as strict: the matrix battery's family headers (`EVM family: 6 rails`) and one reviewed "below" entry whose capture window moved by one character. The matrix's `FIRMWARE GAP:` keeps its capitals, because in cypherpunk capitals are a signal. The dashes left in place on purpose are post-action states that tests pin (`CONFIRMED — read back…`, `vaulta — down`), attributes and placeholders, and a lone "—" that page logic uses to mean empty.
 
 **Still open:** `wl.bpay.law` in 28 tongues still translates the older "Phase A…" wording. The English now says the chooser comes first, and this pass changed punctuation only. tt, sa and gd are the least certain drafts. Casing of the keyed headings is still the corpus-wide edit named in §6.
+
+### 12b · round 4 was not closed by the first answer: F1 and F2
+
+The founder's read of #242 at `bacc9b50`: round 4 was still open. Two findings remained.
+
+- **F1: the voucher's and the fund's engineering showed in new bee.** The fund's unconfigured state printed `BNR_MELD_PUBLIC_KEY / data-meld-public-key` and the sandbox host into the matriarch's "add money", and raver's fund card did the same. The voucher's source host, its rate citation and "live from the hash-chained ledger" showed after a lookup. The length gate could not see any of this, because a long plain line and a short engineering line weigh the same to a character count.
+  **Fix:** each of those strings is now `data-wl-tech`, so it folds in bee and raver and stays open in cypherpunk. The fund's plain state reads "⚠ funding not configured: card checkout is not switched on here yet" (the fund battery pins that honest state, unchanged). The memo warning ("no memo, no credit, money lost") is a safety instruction, not engineering: it carries an id so that raver's word fold never hides it.
+- **F2: the technical footer was open in every register.** It held the core badge, the eosjs note, the crypto, the Rust core, the licence and the file path.
+  **Fix:** the footer keeps its name and the hub link. Everything else sits behind `<details data-reg-disclose>` ("how this page is built", new key `wl.foot.how`, 29 cells ⚙). register.js's shared law opens it in cypherpunk only; in bee and raver it is one tap away.
+
+**The gate now checks content, not length (§4e).** The dress is stripped, using the contract audit's own CSS. The gate makes one real tap into "add money" in each register, and in raver it opens each card. It performs a real voucher lookup against a fixture oracle. It then looks for the actual strings (source host, rate citation, ledger internals, key names, sandbox host, crypto and build notes) and requires all of these:
+- they are absent at rest in bee and raver
+- they are present with no tap in cypherpunk
+- they are reached by exactly one tap in bee and raver
+- the plain facts (balance, memo warning, buy button, checkout state, the footer's name and its way in) show in every register
+
+§4d (all six tasks, real taps) now runs with the dress stripped too. The QR row's first-screen bound became "its top and title inside the first screen": collapsing the footer shortens the page, so raver can no longer scroll the sheet to y=0, and the old `< 200` was a number, not the claim.
+
+**Also corrected:** the corpus's `_meta.drafted` note from the dash commit named a model. It no longer does.
+
+wallet-registers **GREEN 109/109**, dress stripped. Batteries: fund 94 · vault 35 · matrix 11 · arweave 22 · signer 105 · adapter 28. CI gates: estate-check · estate-source 11/11 · static 377/377 · i18n selftest + ru floors · footer-audit 0 worse · no-page-errors 113/0 · polish 25/25 · bPay A 18/18 · B 17/17 · bData 100/100 · orb-seat 5/5 · tour-bar 4/4 · comprehension 9/9 · bpay-policy 2/2 · engineflow 30/30 · comb-eternal 8/8 · skaists-conformance · build-skaists check.
