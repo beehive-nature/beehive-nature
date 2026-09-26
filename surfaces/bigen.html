@@ -209,7 +209,158 @@ body[data-reg="raver"] :is(table,.rnote,.cite,.tgl button,.gm,.gm .h,.card h3,.c
 #sources-panel>summary h2{font-size:13px;font-weight:400;letter-spacing:.05em;color:var(--violet)}
 body[data-reg="bee"] #sources-panel>summary h2{font:600 16px/1.4 var(--bee-font);letter-spacing:normal}
 body[data-reg="raver"] #sources-panel>summary h2{font-size:15px}
+/* ── ETERNAL FRONT (docs/design/eternal) — the reading-room front. Every value is a skaists token
+   (surfaces/skaists.css, compiled from docs/design/skaists/tokens.json): no hand-picked hex, size
+   or corner. Measured by e2e/skaists-conformance.mjs. One register visible at a time. ── */
+#eternal{display:block;margin:var(--sk-s3) 0 var(--sk-s2);padding:0;border:0;border-radius:0;background:transparent;text-align:start;max-width:40rem;margin-inline:auto}
+#eternal>.et-r,#eternal>.et-c{display:none}
+body[data-reg="raver"] #eternal>.et-b,body[data-reg="cypherpunk"] #eternal>.et-b{display:none}
+body[data-reg="raver"] #eternal>.et-r{display:block}
+body[data-reg="cypherpunk"] #eternal>.et-c{display:block}
+#eternal [hidden]{display:none!important}
+#eternal *{box-sizing:border-box}
+#eternal h2,#eternal h3,#eternal p{margin:0;letter-spacing:normal}
+#eternal button{color:inherit;font:inherit}
+#eternal svg{display:block}
+#eternal :focus-visible{outline:2px solid var(--sk-focus);outline-offset:3px}
+.et-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.et-archive-h{max-width:40rem;margin:var(--sk-s5) auto var(--sk-s2);padding-top:var(--sk-s4);border-top:1px solid var(--sk-line);color:var(--sk-ink);text-align:start}
+body[data-reg="bee"] .et-archive-h{font:400 28px/1.1 var(--sk-font-bee-serif)}
+body[data-reg="raver"] .et-archive-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em}
+body[data-reg="cypherpunk"] .et-archive-h{font:600 15px/1.45 var(--sk-font-mono)}
+
+/* NEW BEE — a calm room: plain rows, one reassurance, one action */
+.et-b{color:var(--sk-ink);display:flex;flex-direction:column;gap:var(--sk-s3);font:400 16px/1.45 var(--sk-font-bee-sans)}
+.et-b-mark{font:400 18px/1.2 var(--sk-font-house);color:var(--sk-sovereign)}
+#eternal .et-b-h{font:400 40px/1.05 var(--sk-font-bee-serif);color:var(--sk-ink)}
+.et-b-lede{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink-mut);text-wrap:pretty}
+.et-b-fig{display:flex;align-items:baseline;gap:var(--sk-s2);flex-wrap:wrap;padding:var(--sk-s3);background:var(--sk-bg-card);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl)}
+.et-b-fig b{font:400 52px/1 var(--sk-font-bee-serif);color:var(--sk-ink)}
+.et-b-fig span{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+.et-b-guard{display:flex;align-items:center;gap:var(--sk-s2);min-height:var(--sk-control-min);padding:var(--sk-s1) var(--sk-s3);border-radius:var(--sk-radius);background:var(--sk-guard-wash);color:var(--sk-guard);font:600 15px/1.45 var(--sk-font-bee-sans)}
+.et-b-guard svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.et-b-rows{display:flex;flex-direction:column;background:var(--sk-bg-card);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl);overflow:hidden}
+.et-b-row{display:flex;align-items:center;justify-content:space-between;gap:var(--sk-s2);min-height:var(--sk-control-row);padding:var(--sk-s1) var(--sk-s3);border:0;border-bottom:1px solid var(--sk-line-soft);background:transparent;text-align:start;width:100%;font:500 16px/1.45 var(--sk-font-bee-sans)!important;color:var(--sk-ink)!important;cursor:pointer}
+.et-b-row:last-child{border-bottom:0}
+.et-b-row small{display:flex;align-items:center;gap:var(--sk-s1);flex:none;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut);text-align:end}
+.et-b-row[aria-expanded="true"]{background:var(--sk-sovereign-tint);color:var(--sk-sovereign-strong)!important;font-weight:600!important}
+.et-b-row[aria-expanded="true"] small{color:var(--sk-sovereign-strong)}
+.et-b-row .chev{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;transition:transform var(--dur,.26s)}
+.et-b-row[aria-expanded="true"] .chev{transform:rotate(90deg)}
+.et-b-open{padding:var(--sk-s2) var(--sk-s3) var(--sk-s3);background:var(--sk-sovereign-tint);border-bottom:1px solid var(--sk-line-soft);display:grid;gap:var(--sk-s1)}
+.et-b-open p{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+.et-b-open small{display:block;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+.et-b-dot{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:var(--sk-radius-pill);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong);font:600 14px/1.4 var(--sk-font-bee-sans);flex:none}
+.et-b-act{display:flex;flex-direction:column;gap:var(--sk-s1);margin-top:var(--sk-s1)}
+.et-b-primary{display:flex;align-items:center;justify-content:center;width:100%;height:var(--sk-control-primary);border-radius:var(--sk-radius-lg);border:0;background:var(--sk-primary);color:var(--sk-on-primary)!important;font:600 17px/1.2 var(--sk-font-bee-sans)!important;cursor:pointer;text-decoration:none}
+.et-b-link{min-height:var(--sk-control-min);display:flex;align-items:center;justify-content:center;border:0;background:transparent;font:600 16px/1.45 var(--sk-font-bee-sans)!important;color:var(--sk-link)!important;text-decoration:none;cursor:pointer}
+.et-b-link:hover{color:var(--sk-link-hover)!important}
+.et-b-foot{text-align:center;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+
+/* RAVER — the data is the art; lowercase is allowed joy; the numbers never change */
+.et-r{color:var(--sk-ink);font:600 14px/1.25 var(--sk-font-raver-body)}
+.et-r-top{display:flex;align-items:baseline;justify-content:space-between;gap:var(--sk-s2);flex-wrap:wrap}
+#eternal .et-r-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em;color:var(--sk-ink)}
+.et-r-hint{font:400 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+.et-r-art{width:100%;max-width:360px;height:auto;margin:var(--sk-s3) auto var(--sk-s2);filter:drop-shadow(var(--sk-glow-sovereign));touch-action:manipulation}
+.et-r-art [role="button"]{cursor:pointer}
+.et-r-art [role="button"]:focus{outline:none}
+.et-r-art [role="button"]:focus-visible .hit{stroke:var(--sk-ink);stroke-width:2}
+.et-r-legend{display:flex;flex-wrap:wrap;justify-content:center;gap:var(--sk-s1) var(--sk-s3);margin:0 0 var(--sk-s2);font:400 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+.et-r-legend span{display:inline-flex;align-items:center;gap:var(--sk-s1)}
+.et-r-legend i{display:inline-block;width:18px;height:12px;border-radius:var(--sk-radius-sm)}
+.et-r-card{display:flex;gap:var(--sk-s2);align-items:center;padding:var(--sk-s2) var(--sk-s3);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl);background:var(--sk-sovereign-tint);min-height:var(--sk-control-person)}
+.et-r-card .rk{min-width:44px;height:44px;padding:0 var(--sk-s1);border-radius:var(--sk-radius);background:var(--sk-sovereign-strong);color:var(--sk-bg);display:flex;align-items:center;justify-content:center;font:700 15px/1.2 var(--sk-font-raver-display);flex:none}
+.et-r-card b{display:block;font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink)}
+.et-r-card span{display:block;margin-top:var(--sk-s1);font:400 14px/1.25 var(--sk-font-raver-body);color:var(--sk-sovereign-soft)}
+.et-r-chips{display:flex;flex-wrap:wrap;gap:var(--sk-s1);justify-content:center;margin:var(--sk-s2) 0}
+.et-r-chips button{min-height:var(--sk-control-min);min-width:var(--sk-control-min);padding:0 var(--sk-s3);border-radius:var(--sk-radius-pill);border:1.5px solid var(--sk-sovereign);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong)!important;font:700 15px/1.2 var(--sk-font-raver-display)!important;letter-spacing:.04em;cursor:pointer}
+.et-r-chips button[aria-pressed="true"]{border-color:var(--sk-you);background:var(--sk-sovereign-tint);color:var(--sk-ink)!important;box-shadow:var(--sk-glow-sovereign)}
+.et-r-note{margin-top:var(--sk-s2)!important;text-align:center;font:400 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-big{margin:var(--sk-s2) 0 var(--sk-s1)!important;text-align:center;font:700 60px/.95 var(--sk-font-raver-display);letter-spacing:-.02em;color:var(--sk-ink)}
+.et-r-pill{display:flex;align-items:center;justify-content:center;width:100%;height:58px;margin-top:var(--sk-s4);border:0;border-radius:var(--sk-radius-pill);background:var(--sk-primary);color:var(--sk-on-primary)!important;font:700 15px/1.2 var(--sk-font-raver-display)!important;letter-spacing:.04em;cursor:pointer;text-decoration:none}
+.et-r-ghost{display:flex;align-items:center;justify-content:center;margin:var(--sk-s2) auto 0;min-height:var(--sk-control-min);padding:0 var(--sk-s2);border:0;background:none;color:var(--sk-link)!important;font:400 14px/1.25 var(--sk-font-raver-body)!important;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.et-r-hold{position:relative;display:block;width:132px;height:132px;margin:var(--sk-s3) auto 0;border:0;border-radius:var(--sk-radius-pill);background:var(--sk-sovereign-wash);color:var(--sk-ink)!important;cursor:pointer;touch-action:none;user-select:none;-webkit-user-select:none}
+.et-r-hold svg{position:absolute;inset:0;width:100%;height:100%;transform:rotate(-90deg)}
+.et-r-hold .trk{fill:none;stroke:var(--sk-line);stroke-width:6}
+.et-r-hold .prg{fill:none;stroke:var(--sk-biomass);stroke-width:6;stroke-linecap:round;stroke-dasharray:370;stroke-dashoffset:370}
+.et-r-hold b{position:relative;display:block;font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em}
+.et-r-hold span{position:relative;display:block;margin-top:var(--sk-s1);font:400 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+@keyframes et-breathe{0%,100%{opacity:1}50%{opacity:.62}}
+.et-r .breathe{animation:et-breathe 4s ease-in-out infinite}
+body[data-motion-paused="true"] #eternal .breathe{animation-play-state:paused}
+@media (prefers-reduced-motion:reduce){.et-r .breathe{animation:none}.et-b-row .chev{transition:none}}
+
+/* CYPHERPUNK — the instrument, complete at first paint; every row is a fact you can check */
+.et-c{font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink)}
+.et-c-path{font:600 15px/1.45 var(--sk-font-mono);word-break:break-all;color:var(--sk-ink)}
+.et-c-chips{display:flex;flex-wrap:wrap;gap:var(--sk-s1);margin:var(--sk-s2) 0}
+.et-c-chips span{padding:2px var(--sk-s1);border:1px solid var(--sk-line);border-radius:4px;background:var(--sk-bg-card);font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-soft)}
+.et-c-chips span.on{border-color:var(--sk-guard);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong)}
+.et-c-chips span.ok{border-color:var(--sk-verified);color:var(--sk-verified)}
+.et-c-guard{display:flex;justify-content:space-between;align-items:center;gap:var(--sk-s2);flex-wrap:wrap;min-height:var(--sk-control-min);padding:var(--sk-s1) var(--sk-s3);border:1px dashed var(--sk-guard);border-radius:var(--sk-radius-sm);background:var(--sk-guard-wash);color:var(--sk-guard)}
+.et-c-guard b{font-weight:600;color:var(--sk-sovereign-strong)}
+#eternal .et-c-h{margin:var(--sk-s4) 0 var(--sk-s2)!important;font:600 15px/1.45 var(--sk-font-mono);color:var(--sk-ink)}
+.et-c-tab{width:100%;margin:var(--sk-s2) 0 var(--sk-s1);border-collapse:separate;border-spacing:0;border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm);overflow:hidden;background:var(--sk-bg-card);table-layout:auto}
+.et-c-tab th{padding:var(--sk-s1) var(--sk-s2);text-align:start;vertical-align:bottom;white-space:normal;font:500 12px/1.45 var(--sk-font-mono)!important;color:var(--sk-ink-mut)!important;border-bottom:1px solid var(--sk-line)!important;background:var(--sk-bg-well)}
+.et-c-tab td{height:var(--sk-control-min);padding:var(--sk-s1) var(--sk-s2);border-bottom:1px solid var(--sk-line)!important;font:400 13px/1.45 var(--sk-font-mono)!important;color:var(--sk-ink)!important;vertical-align:middle}
+.et-c-tab tr:last-child td{border-bottom:0!important}
+.et-c-tab td.k{color:var(--sk-guard)!important;white-space:nowrap}
+.et-c-tab td.v{white-space:nowrap;text-align:end}
+.et-c-tab tr.pick{cursor:pointer}.et-c-tab tr.pick:hover td{background:var(--sk-sovereign-tint)}
+.et-c-tab tr.more td{height:auto;padding:var(--sk-s1) var(--sk-s2) var(--sk-s2);background:var(--sk-sovereign-tint);color:var(--sk-ink-soft)!important}
+.et-c-tab tr.more small{display:block;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut)}
+.et-c-tab tr.more a{display:inline-flex;align-items:center;min-height:var(--sk-control-min);min-width:var(--sk-control-min);margin-inline-end:var(--sk-s2);color:var(--sk-link)!important;font:500 12px/1.45 var(--sk-font-mono)}
+.t-ok{color:var(--sk-verified)!important}.t-part{color:var(--sk-info)!important}.t-guard{color:var(--sk-guard)!important}.t-you{color:var(--sk-you)!important}.t-ai{color:var(--sk-ai)!important}.t-mut{color:var(--sk-ink-mut)!important}
+.et-c-pipe{list-style:none;margin:0;padding:0;display:grid;gap:var(--sk-s2);counter-reset:p}
+.et-c-pipe li{display:grid;grid-template-columns:36px minmax(0,1fr);gap:var(--sk-s1) var(--sk-s2);padding:var(--sk-s2) var(--sk-s3);border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm);background:var(--sk-bg-card);counter-increment:p}
+.et-c-pipe li::before{content:counter(p,decimal-leading-zero);color:var(--sk-guard);font-weight:600}
+.et-c-pipe li b{font-weight:600;color:var(--sk-ink)}.et-c-pipe li p{grid-column:2;color:var(--sk-ink-soft);overflow-wrap:anywhere}
+.et-c-pipe li.done b{color:var(--sk-verified)}.et-c-pipe li.guard{border-style:dashed;border-color:var(--sk-guard)}.et-c-pipe li.guard b{color:var(--sk-guard)}
+.et-c-pipe li.now{border-color:var(--sk-ai);box-shadow:inset 0 0 0 1px var(--sk-ai)}.et-c-pipe li.now b{color:var(--sk-ai)}
+.et-c-primary{display:flex;align-items:center;justify-content:center;width:100%;height:52px;margin-top:var(--sk-s3);border:0;border-radius:var(--sk-radius-sm);background:var(--sk-primary);color:var(--sk-on-primary)!important;font:600 14px/1.2 var(--sk-font-mono)!important;cursor:pointer;text-decoration:none;text-align:center;padding:0 var(--sk-s2)}
+.et-c-kv{width:100%;border-collapse:collapse;border:1px solid var(--sk-line);background:var(--sk-bg-card)}
+.et-c-kv th{width:120px;padding:var(--sk-s1) var(--sk-s2);text-align:start;vertical-align:top;font:500 12px/1.45 var(--sk-font-mono)!important;color:var(--sk-ink-mut)!important;border-bottom:1px solid var(--sk-line)!important;white-space:normal}
+.et-c-kv td{padding:var(--sk-s1) var(--sk-s2);border-bottom:1px solid var(--sk-line)!important;font:400 13px/1.45 var(--sk-font-mono)!important;color:var(--sk-ink)!important;overflow-wrap:anywhere}
+.et-c-verify{margin-top:var(--sk-s3);padding:var(--sk-s3);border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm);background:var(--sk-bg-card)}
+.et-c-verify-h{font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);margin-bottom:var(--sk-s1)}
+.et-c-verify ol{margin:0;padding-inline-start:var(--sk-s4);display:grid;gap:var(--sk-s1);color:var(--sk-ink)}
+.et-c-verify code{font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ai);overflow-wrap:anywhere;background:transparent}
+.et-c-row{display:grid;grid-template-columns:1fr 1fr;gap:var(--sk-s2);margin-top:var(--sk-s3)}
+.et-c-ghost{display:flex;align-items:center;justify-content:center;min-height:52px;padding:0 var(--sk-s1);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius-sm);background:transparent;color:var(--sk-ink)!important;text-decoration:none;text-align:center;font:600 14px/1.2 var(--sk-font-mono)!important;cursor:pointer}
+.et-c-seg{display:flex;gap:var(--sk-s1);flex-wrap:wrap;margin:var(--sk-s2) 0}
+.et-c-seg button{min-height:var(--sk-control-min);padding:0 var(--sk-s2);border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm);background:var(--sk-bg-card);color:var(--sk-ink-soft)!important;font:500 12px/1.45 var(--sk-font-mono)!important;cursor:pointer}
+.et-c-seg button[aria-pressed="true"]{border-color:var(--sk-ai);color:var(--sk-ai)!important}
+.et-c-tab tr.pick small{display:block;margin-top:2px;font:500 12px/1.45 var(--sk-font-mono)}
+.et-c-tab td.k{white-space:normal}
+#eternal table{min-width:0!important;width:100%;max-width:100%}
+#eternal .room-table{overflow:visible}
+/* ── THE WHOLE LIBRARY, dressed per register: the page's own variables mapped onto skaists.
+   The tier set stays the page's validated categorical set (it IS skaists' cat-* four). ── */
+html body[data-reg="bee"]{--bg:var(--sk-bg);--panel:var(--sk-bg-card);--well:var(--sk-bg-well);--ink:var(--sk-ink);--dim:var(--sk-ink-mut);--faint:var(--sk-ink-mut);--line:var(--sk-line);
+ --gold:var(--sk-sovereign-strong);--violet:var(--sk-sovereign);--cyan:var(--sk-ai);--leaf:var(--sk-verified);--bee-font:var(--sk-font-bee-sans);background:var(--sk-bg);color:var(--sk-ink)}
+html body[data-reg="bee"] #masthead h1{font-family:var(--sk-font-bee-serif);font-weight:400}
+html body[data-reg="bee"] .banner{background:var(--sk-guard-wash);border-color:var(--sk-guard);color:var(--sk-guard)}
+html body[data-reg="bee"] :is(.card,.ib div,.rcg,pre){background:var(--sk-bg-well);border-color:var(--sk-line)}
+html body[data-reg="bee"] .door.primary{background:var(--sk-primary);color:var(--sk-on-primary);border-color:var(--sk-primary)}
+html body[data-reg="bee"] .door:not(.primary){background:var(--sk-bg-card);border-color:var(--sk-ink);color:var(--sk-ink)}
+html body[data-reg="bee"] .take{color:var(--sk-sovereign)}
+html body[data-reg="raver"],html body[data-reading-room][data-reg="raver"]{--bg:var(--sk-bg);--panel:var(--sk-bg-card);--well:var(--sk-bg-well);--ink:var(--sk-ink);--dim:var(--sk-ink-soft);--faint:var(--sk-ink-mut);--line:var(--sk-line);
+ --gold:var(--sk-sovereign-soft);--violet:var(--sk-sovereign-soft);--cyan:var(--sk-ai);--leaf:var(--sk-sovereign-soft);--amber:var(--sk-cat-bug);background:var(--sk-bg)!important;color:var(--sk-ink);font-family:var(--sk-font-raver-body)}
+html body[data-reg="raver"] #first-raver{background:var(--sk-bg-card);box-shadow:var(--sk-glow-sovereign)}
+html body[data-reg="raver"] #first-raver .feel,html body[data-reg="raver"] .take{font-family:var(--sk-font-raver-display);color:var(--sk-ink)}
+html body[data-reg="raver"] .door.primary,html body[data-reading-room][data-reg="raver"] #first-raver .door.primary{background:var(--sk-primary);border-color:var(--sk-primary);color:var(--sk-on-primary)}
+html body[data-reg="raver"] .door:not(.primary){background:transparent;border-color:var(--sk-ink);color:var(--sk-ink)}
+html body[data-reg="raver"] :is(section,.card,.ib div,.rcg,pre,.banner){background:var(--sk-bg-card);border-color:var(--sk-line)}
+html body[data-reg="raver"] .banner{color:var(--sk-guard)}
+html body[data-reg="cypherpunk"]{--bg:var(--sk-bg);--panel:var(--sk-bg-card);--well:var(--sk-bg-well);--ink:var(--sk-ink);--dim:var(--sk-ink-mut);--faint:var(--sk-ink-mut);--line:var(--sk-line);
+ --gold:var(--sk-ai);--violet:var(--sk-sovereign-soft);--cyan:var(--sk-ai);--leaf:var(--sk-verified);--amber:var(--sk-cat-bug);background:var(--sk-bg);color:var(--sk-ink);font-family:var(--sk-font-mono)}
+html body[data-reg="cypherpunk"] :is(section,.card,.ib div,.rcg,pre,.tgl button){background:var(--sk-bg-card);border-color:var(--sk-line)}
+html body[data-reg="cypherpunk"] .banner{background:var(--sk-bg);border-color:var(--sk-guard);color:var(--sk-guard)}
+html body[data-reg="cypherpunk"] .tgl button[aria-pressed="true"]{border-color:var(--sk-ai);color:var(--sk-ai)}
+html body[data-reg="cypherpunk"] #masthead h1{color:var(--sk-ai);font-family:var(--sk-font-mono)}
 </style>
+<link rel="stylesheet" href="skaists.css">
 </head>
 <body data-reg="bee" data-bee-theme="custom" data-bigen-beat="arrival">
 <div id="bregbar">
@@ -219,6 +370,62 @@ body[data-reg="raver"] #sources-panel>summary h2{font-size:15px}
   <span class="bigen-language" data-language-host></span>
 </div>
 <main>
+<!-- ETERNAL FRONT (founder blueprint 2026-09-26, docs/design/eternal): three separate products in
+     one surface. ONE data layer (the library's own claim table, gap map, sources and register,
+     exposed by the instrument script as window.__bigen) drives all three, so the verdicts cannot
+     drift. Every gesture hands off to the library's own beats (data-bigen-go) or to a source. -->
+<section id="eternal" aria-label="what the evidence says">
+
+  <!-- NEW BEE — a calm reading room: the verdicts as plain rows, one choice -->
+  <div class="et-b">
+    <div class="et-b-mark">BiGen</div>
+    <h2 class="et-b-h" id="etBeeTitle">what the evidence says</h2>
+    <p class="et-b-lede" id="etBeeLede">claims about cannabis and cancer, each graded against its sources.</p>
+    <div class="et-b-guard"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span id="etBeeGuard">not medical advice. early research is not proof.</span></div>
+    <div class="et-b-rows" id="etBeeRows"></div>
+    <div class="et-b-act">
+      <button type="button" class="et-b-primary" data-bigen-go="map" id="etBeeGo">open the map</button>
+      <button type="button" class="et-b-link" data-bigen-go="deeper" id="etBeeDeeper">read every source</button>
+      <p class="et-b-foot" id="etBeeFoot"></p>
+    </div>
+  </div>
+
+  <!-- RAVER — the verdict wheel: each petal a claim, its length its sources, the heart empty on purpose -->
+  <div class="et-r">
+    <div class="et-r-top"><h2 class="et-r-h" id="etRaverTitle">the verdict wheel</h2><span class="et-r-hint" id="etRaverHint">tap a petal</span></div>
+    <div class="et-r-chips" id="etExhibits" role="group" aria-label="exhibit"></div>
+    <svg class="et-r-art" id="etWheel" viewBox="-180 -180 360 360" role="group" aria-label="the claims as petals around an empty heart"></svg>
+    <div class="et-r-legend" id="etLegend"></div>
+    <div class="et-r-card" id="etRaverCard" aria-live="polite"></div>
+    <button type="button" class="et-r-pill" data-bigen-go="map" id="etRaverGo">open the gap map</button>
+    <button type="button" class="et-r-ghost" data-bigen-go="deeper" id="etRaverDeeper">every source, below</button>
+  </div>
+
+  <!-- CYPHERPUNK — the instrument: the map as data, the register, the sweep, the receipt -->
+  <div class="et-c">
+    <div class="et-c-path" id="etPath">bigen://evidence-maps/</div>
+    <div class="et-c-chips" id="etChips"></div>
+    <div class="et-c-guard" id="etGuard"></div>
+    <div class="et-c-seg" id="etSeg" role="group" aria-label="exhibit"></div>
+    <table class="et-c-tab"><thead><tr><th>id</th><th>claim · tier · sources</th></tr></thead><tbody id="etClaims"></tbody></table>
+    <h3 class="et-c-h" id="etGapH">gap map · the empty cells are the finding</h3>
+    <table class="et-c-tab"><thead id="etGapHead"></thead><tbody id="etGap"></tbody></table>
+    <h3 class="et-c-h" id="etPipeH">register pipeline · standing, not stale</h3>
+    <ol class="et-c-pipe" id="etPipe"></ol>
+    <a class="et-c-primary" id="etQuery" href="https://pubmed.ncbi.nlm.nih.gov/" target="_blank" rel="noopener noreferrer"><span id="etQueryL">run the standing query on pubmed ↗</span><span class="et-sr"> (opens in a new tab)</span></a>
+    <h3 class="et-c-h" id="etRecH">receipt</h3>
+    <table class="et-c-kv" id="etReceipt"></table>
+    <div class="et-c-verify">
+      <div class="et-c-verify-h" id="etVerifyH">verify · no trust in this page needed</div>
+      <ol id="etVerify"></ol>
+    </div>
+    <div class="et-c-row">
+      <button type="button" class="et-c-ghost" id="etYaml">read the yaml ↓</button>
+      <a class="et-c-ghost" href="https://github.com/beehive-nature/beehive-nature/blob/main/surfaces/bigen.html" target="_blank" rel="noopener noreferrer"><span id="etFork">fork the template ↗</span><span class="et-sr"> (opens in a new tab)</span></a>
+    </div>
+  </div>
+</section>
+<h2 class="et-archive-h" id="etArchive">the whole library</h2>
 <header id="masthead">
   <h1>⌕ <span data-i18n="bigen.mark">BiGen — the evidence library</span></h1>
   <p class="eyebrow pair" data-i18n="bigen.pair">graded evidence, not a brochure</p>
@@ -624,22 +831,25 @@ GM.rows.forEach(function(row){
  gm.innerHTML+=h;
 });
 
-/* register: executable search strategy + sweep receipts */
+/* register: executable search strategy + sweep receipts — ONE record (REG), read by the
+   register text below, the yaml, and the ETERNAL front (window.__bigen) */
+var REG={query:'(cannabinoid OR cannabidiol OR dronabinol OR nabilone OR cannabis) AND (cancer OR oncology OR tumour OR tumor OR antineoplastic) AND (randomized controlled trial[pt] OR meta-analysis[pt] OR systematic review[pt])',
+ schedule:'weekly',last_run:'2026-08-19',new_since_last:0,swept:13,flagged:0,manual:1,manual_who:'Hussein 2014'};
 $('queries').textContent=
 '- id: cannabinoid-cancer-oncology\n'+
 '  pubmed:\n'+
 '    query: "(cannabinoid OR cannabidiol OR dronabinol OR nabilone OR cannabis)\n'+
 '            AND (cancer OR oncology OR tumour OR tumor OR antineoplastic)\n'+
 '            AND (randomized controlled trial[pt] OR meta-analysis[pt] OR systematic review[pt])"\n'+
-'  schedule: weekly\n'+
-'  last_run: 2026-08-19\n'+
-'  new_since_last: 0          # corpus seeded this run\n'+
+'  schedule: '+REG.schedule+'\n'+
+'  last_run: '+REG.last_run+'\n'+
+'  new_since_last: '+REG.new_since_last+'          # corpus seeded this run\n'+
 '- id: integrity-sweep-cancer\n'+
 '  type: retraction_check     # PubMed "Retracted Publication"[pt] on every uid\n'+
 '  targets: all_included_studies\n'+
-'  schedule: weekly\n'+
-'  last_run: 2026-08-19\n'+
-'  result: 13 swept · 0 flagged · 1 manual-watch (Hussein 2014, not indexed)\n'+
+'  schedule: '+REG.schedule+'\n'+
+'  last_run: '+REG.last_run+'\n'+
+'  result: '+REG.swept+' swept · '+REG.flagged+' flagged · '+REG.manual+' manual-watch ('+REG.manual_who+', not indexed)\n'+
 '  on_change: open_amendment  # a retraction is an AMENDMENTS event, never a silent edit';
 
 /* study cards: one integrity block per study, fields only where verified */
@@ -741,6 +951,144 @@ function setLevel(v){
 }
 setLevel('p');
 window.setLevel=setLevel;
+/* the one data layer the ETERNAL front reads (never a second copy of a verdict) */
+window.__bigen={SRC:SRC,TIER:TIER,ROWS:ROWS,ROWS2:ROWS2,GM:GM,REG:REG};
+})();
+</script>
+<script id="eternal-js">
+/* ETERNAL FRONT — one data layer, three renderers (docs/design/eternal). The facts are the
+   library's own: window.__bigen, exposed by the instrument script above (the claim tables ROWS and
+   ROWS2, the tier set, the gap map GM, the sources SRC and the register REG). Nothing here grades,
+   pools or re-words a verdict: each register draws the same rows. Every gesture hands off to the
+   library's own beats (data-bigen-go) or opens a source in a new tab. */
+(function(){
+  var $=function(id){return document.getElementById(id);};
+  var T=function(k,f){var t=window.BNRLanguage&&window.BNRLanguage.text;return t?t(k,f):f;};
+  var B=window.__bigen; if(!B||!document.getElementById('eternal')) return;
+  var ORDER=['sup','mix','unt','ref','runiv'];
+  var TOK={sup:'cat-works',mix:'cat-bug',unt:'cat-gap',ref:'cat-idea',runiv:'cat-idea'};
+  var WORD={sup:'supported',mix:'mixed',unt:'untested',ref:'refuted',runiv:'refuted as universal'};
+  var EX=[{id:'001',topic:'cannabis & cancer',file:'cannabis-cancer.yaml',rows:B.ROWS},
+          {id:'002',topic:'the panel undercount',file:'cannabinoid-panel-undercount',rows:B.ROWS2}];
+  function esc(v){return String(v==null?'':v).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+  function plain(h){var d=document.createElement('div');d.innerHTML=h;return d.textContent;}
+  function word(t){return T('et.bigen.tier.'+t,WORD[t]);}
+
+  /* the data layer: derived once from the page's own tables, read by all three renderers */
+  var D={exhibits:EX.map(function(x){
+    var claims=x.rows.map(function(r,i){return {id:'c'+String(i+1).padStart(2,'0'),claim:r.cl,tier:r.t,mark:B.TIER[r.t].m,src:r.s.length,note:r.note||'',links:(r.s||[]).map(function(s){return B.SRC[s]?B.SRC[s].l:s;})};});
+    var tiers={};ORDER.forEach(function(t){tiers[t]=claims.filter(function(c){return c.tier===t;}).length;});
+    return {id:x.id,topic:x.topic,file:x.file,claims:claims,tiers:tiers};
+  }),
+  gap:B.GM.rows.map(function(r){return {row:r.r.split(' — ')[0],cells:r.cells.map(function(c){return c.split('|')[0];})};}),
+  cols:B.GM.cols.map(function(c){return c.split(' (')[0];}),
+  sources:Object.keys(B.SRC).length, reg:B.REG};
+  D.gapEmpty=D.gap.reduce(function(a,r){return a+r.cells.filter(function(c){return c==='empty';}).length;},0);
+  D.gapCells=D.gap.length*D.cols.length;
+  var R={ex:0,sel:0};
+
+  /* ── NEW BEE ── */
+  function bee(){
+    var X=D.exhibits[0], h='';
+    $('etBeeLede').textContent=T('et.bigen.b.lede','{n} claims about cannabis and cancer, each graded against its sources. an empty cell is a finding, not a failure.').replace('{n}',X.claims.length);
+    ORDER.forEach(function(t){
+      var mine=X.claims.filter(function(c){return c.tier===t;}); if(!mine.length) return;
+      h+='<button type="button" class="et-b-row" aria-expanded="false" data-t="'+t+'"><span>'+esc(word(t))+'</span><small>'+mine.length+' '+esc(mine.length===1?T('et.bigen.b.claim','claim'):T('et.bigen.b.claims','claims'))+'<svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></small></button>'+
+        '<div class="et-b-open" data-t="'+t+'" hidden>'+mine.map(function(c){return '<p><span class="et-b-dot" aria-hidden="true">'+esc(c.mark)+'</span> '+esc(c.claim)+'<small>'+esc(c.src?c.src+' '+(c.src===1?T('et.bigen.b.source','source'):T('et.bigen.b.sources','sources')):T('et.bigen.b.nosource','no study has asked this yet. that is the verdict.'))+'</small></p>';}).join('')+'</div>';
+    });
+    h+='<button type="button" class="et-b-row" aria-expanded="false" data-t="gap"><span>'+esc(T('et.bigen.b.gap','the empty cells'))+'</span><small>'+D.gapEmpty+' '+esc(T('et.bigen.b.of','of'))+' '+D.gapCells+'<svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></small></button>'+
+      '<div class="et-b-open" data-t="gap" hidden><p>'+esc(T('et.bigen.b.gapLine','no trial of a synthetic isolate against tumours exists, and no trial of CBD alone in cancer exists for any purpose.'))+'<small>'+esc(T('et.bigen.b.gapNote','an empty cell is information, not a gap in the work.'))+'</small></p></div>';
+    $('etBeeRows').innerHTML=h;
+    $('etBeeFoot').textContent=T('et.bigen.b.foot','every claim links its source, checked against PubMed on {date}.').replace('{date}',D.reg.last_run);
+  }
+
+  /* ── RAVER ── the verdict wheel */
+  function petal(r0,r1,a0,a1){
+    var p=function(r,a){return (r*Math.cos(a)).toFixed(2)+' '+(r*Math.sin(a)).toFixed(2);};
+    return 'M'+p(r0,a0)+'L'+p(r1,a0)+'A'+r1+' '+r1+' 0 0 1 '+p(r1,a1)+'L'+p(r0,a1)+'A'+r0+' '+r0+' 0 0 0 '+p(r0,a0)+'Z';
+  }
+  function wheel(){
+    var X=D.exhibits[R.ex], n=X.claims.length, h='';
+    X.claims.forEach(function(c,i){
+      var gap=0.05, a0=-Math.PI/2+i*2*Math.PI/n+gap, a1=-Math.PI/2+(i+1)*2*Math.PI/n-gap;
+      var r1=Math.min(172,96+Math.max(1,c.src)*19), sel=i===R.sel, hollow=c.tier==='unt';
+      h+='<g role="button" tabindex="0" data-i="'+i+'" aria-pressed="'+sel+'" aria-label="'+esc(c.id+' · '+word(c.tier)+' · '+c.src+' '+T('et.bigen.r.sources','sources')+' · '+c.claim)+'">'+
+        '<path class="hit'+(sel?' breathe':'')+'" d="'+petal(52,r1,a0,a1)+'" style="fill:'+(hollow?'var(--sk-bg-card)':'var(--sk-'+TOK[c.tier]+')')+';stroke:'+(sel?'var(--sk-ink)':'var(--sk-'+TOK[c.tier]+')')+';stroke-width:'+(sel?2:1.5)+';'+(hollow?'stroke-dasharray:5 5;':'')+'opacity:'+(sel?1:0.72)+'"/></g>';
+    });
+    h+='<circle r="44" style="fill:var(--sk-bg-card);stroke:var(--sk-sovereign);stroke-dasharray:3 5"/>'+
+      '<text y="-6" text-anchor="middle" style="fill:var(--sk-ink-soft);font:600 14px/1.25 var(--sk-font-raver-body)">'+esc(T('et.bigen.r.heart1','no pooled'))+'</text>'+
+      '<text y="14" text-anchor="middle" style="fill:var(--sk-ink-soft);font:600 14px/1.25 var(--sk-font-raver-body)">'+esc(T('et.bigen.r.heart2','number'))+'</text>';
+    $('etWheel').innerHTML=h;
+  }
+  function raver(){
+    var X=D.exhibits[R.ex], c=X.claims[R.sel];
+    $('etExhibits').innerHTML=D.exhibits.map(function(x,i){return '<button type="button" data-ex="'+i+'" aria-pressed="'+(i===R.ex)+'">'+esc(x.id)+'</button>';}).join('');
+    $('etRaverHint').textContent=X.claims.length+' '+T('et.bigen.r.hint','petals · tap one to light it');
+    $('etLegend').innerHTML=ORDER.filter(function(t){return t!=='runiv';}).map(function(t){return '<span><i style="'+(t==='unt'?'border:1.5px dashed var(--sk-cat-gap)':'background:var(--sk-'+TOK[t]+')')+'"></i>'+esc(t==='ref'?T('et.bigen.r.refuted','refuted · either kind'):word(t))+'</span>';}).join('')+'<span>'+esc(T('et.bigen.r.len','longer = more sources'))+'</span>';
+    $('etRaverCard').innerHTML='<span class="rk">'+esc(c.mark)+'</span><div><b>'+esc(c.claim)+'</b><span>'+esc(word(c.tier)+' · '+c.src+' '+(c.src===1?T('et.bigen.b.source','source'):T('et.bigen.b.sources','sources'))+' · '+X.id+' '+X.topic)+'</span></div>';
+    wheel();
+  }
+
+  /* ── CYPHERPUNK ── */
+  function cy(){
+    var X=D.exhibits[R.ex];
+    $('etPath').textContent='bigen://evidence-maps/'+X.file;
+    $('etChips').innerHTML='<span class="on">poolable false</span><span>'+X.claims.length+' claims · '+D.sources+' sources</span><span class="ok">verified '+esc(D.reg.last_run)+'</span>';
+    $('etGuard').innerHTML=esc(T('et.bigen.c.guard','pooled estimate = never rendered'))+' <b>'+esc(T('et.bigen.c.guardWhy','a category error on an evidence map'))+'</b>';
+    $('etSeg').innerHTML=D.exhibits.map(function(x,i){return '<button type="button" data-ex="'+i+'" aria-pressed="'+(i===R.ex)+'">exhibit '+esc(x.id)+' · '+esc(x.topic)+'</button>';}).join('');
+    var cls={sup:'t-ok',mix:'t-part',unt:'t-ai',ref:'t-guard',runiv:'t-guard'};
+    $('etClaims').innerHTML=X.claims.map(function(c,i){
+      return '<tr class="pick" data-i="'+i+'" tabindex="0" aria-expanded="false"><td class="k">'+c.id+'</td><td>'+esc(c.claim)+'<small class="'+cls[c.tier]+'">'+esc(c.mark+' '+B.TIER[c.tier].n.toLowerCase()+' · src '+c.src)+'</small></td></tr>'+
+        '<tr class="more" data-i="'+i+'" hidden><td colspan="2">'+esc(c.note)+(c.links.length?'<small>'+c.links.join(' ')+'</small>':'<small>'+esc(T('et.bigen.c.none','sources: [] · none is the verdict'))+'</small>')+'</td></tr>';
+    }).join('');
+    $('etGapHead').innerHTML='<tr><th>formulation</th>'+D.gap.map(function(r){return '<th>'+esc(r.row)+'</th>';}).join('')+'</tr>';
+    var cw={full:'<span class="t-ok">occupied</span>',early:'<span class="t-part">early-phase</span>',empty:'<span class="t-guard">empty</span>'};
+    $('etGap').innerHTML=D.cols.map(function(col,j){return '<tr><td class="k">'+esc(col)+'</td>'+D.gap.map(function(r){return '<td>'+cw[r.cells[j]]+'</td>';}).join('')+'</tr>';}).join('');
+    var g=D.reg;
+    $('etPipe').innerHTML=[
+      ['done','standing query · pubmed · '+g.schedule,'last_run '+g.last_run+' · new_since_last '+g.new_since_last],
+      ['done','corpus · '+D.sources+' sources','R01…R'+D.sources+' · every row links its PMID or DOI'],
+      ['done','grade · ✓ ≈ ? ✗ ⊘','untested = no study has asked the question · not a negative result'],
+      ['done','integrity sweep · retraction check',g.swept+' swept · '+g.flagged+' flagged · '+g.manual+' manual watch ('+g.manual_who+', not indexed)'],
+      ['guard','render · poolable false','no pooled estimate is defined, ever · a published pooled analysis is cited as theirs'],
+      ['now','dissent · fork the yaml','change a verdict, show your work · that is the dissent mechanism']
+    ].map(function(s){return '<li class="'+s[0]+'"><b>'+esc(s[1])+'</b><p>'+esc(s[2])+'</p></li>';}).join('');
+    $('etQuery').href='https://pubmed.ncbi.nlm.nih.gov/?term='+encodeURIComponent(g.query);
+    $('etReceipt').innerHTML=[
+      ['map',esc(X.file)+' · exhibit '+esc(X.id)],
+      ['claims',D.exhibits.map(function(x){return x.id+' '+x.claims.length;}).join(' · ')],
+      ['tiers',ORDER.map(function(t){return esc(t)+' '+X.tiers[t];}).join(' · ')],
+      ['gap cells',D.gapEmpty+' of '+D.gapCells+' empty'],
+      ['retraction',g.swept+' swept / '+g.flagged+' flagged / '+g.manual+' manual watch'],
+      ['verified','<span class="t-ok">'+esc(g.last_run)+'</span> · pubmed e-utilities'],
+      ['pooled','<span class="t-guard">never rendered</span>']
+    ].map(function(r){return '<tr><th>'+r[0]+'</th><td>'+r[1]+'</td></tr>';}).join('');
+    $('etVerify').innerHTML=['open any source row above → read the abstract yourself',
+      'run the standing query → compare the corpus with <code>new_since_last '+g.new_since_last+'</code>',
+      'append <code>AND "Retracted Publication"[pt]</code> → expect '+g.flagged+' hits'].map(function(s){return '<li>'+s+'</li>';}).join('');
+  }
+
+  function all(){bee();raver();cy();}
+  var ev=$('eternal');
+  ev.addEventListener('click',function(e){
+    var row=e.target.closest('.et-b-row[data-t]');
+    if(row){var o=row.getAttribute('aria-expanded')!=='true';row.setAttribute('aria-expanded',String(o));var p=ev.querySelector('.et-b-open[data-t="'+row.getAttribute('data-t')+'"]');if(p)p.hidden=!o;return;}
+    var ex=e.target.closest('[data-ex]');
+    if(ex){R.ex=+ex.getAttribute('data-ex');R.sel=0;raver();cy();return;}
+    var pt=e.target.closest('#etWheel [data-i]');
+    if(pt){R.sel=+pt.getAttribute('data-i');raver();var f=ev.querySelector('#etWheel [data-i="'+R.sel+'"]');if(f&&e.detail===0)f.focus();return;}
+    var tr=e.target.closest('.et-c-tab tr.pick');
+    if(tr&&!e.target.closest('a')){var o2=tr.getAttribute('aria-expanded')!=='true';tr.setAttribute('aria-expanded',String(o2));var m=ev.querySelector('.et-c-tab tr.more[data-i="'+tr.getAttribute('data-i')+'"]');if(m)m.hidden=!o2;}
+  });
+  ev.addEventListener('keydown',function(e){
+    if(e.key!=='Enter'&&e.key!==' ')return;
+    var t=e.target.closest('#etWheel [data-i],.et-c-tab tr.pick'); if(!t)return;
+    e.preventDefault(); t.dispatchEvent(new MouseEvent('click',{bubbles:true}));
+  });
+  $('etYaml').addEventListener('click',function(){var y=$('yaml'),d=y&&y.closest('details');if(d)d.open=true;if(y)y.scrollIntoView({block:'start'});});
+  document.addEventListener('blang',all);
+  all();
+  window.__eternal={data:D,raver:R};
 })();
 </script>
 </body>

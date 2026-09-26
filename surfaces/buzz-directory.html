@@ -160,6 +160,188 @@ footer a{padding-block:14px} /* a 44 px tap target that leaves the line rhythm a
    and raver, so no register ever draws reading text a phone cannot hold. */
 body[data-reg="bee"],body[data-reg="raver"]{--fmin:14px}
 </style>
+<link rel="stylesheet" href="skaists.css">
+<style>
+/* ── ETERNAL FRONT (docs/design/eternal) — every value is a skaists token (surfaces/skaists.css,
+   compiled from docs/design/skaists/tokens.json): no hand-picked hex, size or corner. Measured by
+   e2e/skaists-conformance.mjs. One register visible at a time; new bee is the default. Every rule
+   rides #eternal so the page's own element styles (buttons, links, inputs) never leak in. ── */
+#eternal{margin:var(--sk-s2) auto var(--sk-s2);max-width:620px;text-align:start;letter-spacing:0}
+#eternal *{box-sizing:border-box}
+#eternal>.et-r,#eternal>.et-c{display:none}
+body[data-reg="raver"] #eternal>.et-b,body[data-reg="cypherpunk"] #eternal>.et-b{display:none}
+body[data-reg="raver"] #eternal>.et-r{display:block}
+body[data-reg="cypherpunk"] #eternal>.et-c{display:block}
+#eternal [hidden]{display:none!important}
+#eternal :is(button,a,input){margin:0;box-shadow:none;transform:none;text-shadow:none;animation:none}
+#eternal button{appearance:none;background:none;border:0;border-radius:0;padding:0;min-height:0;cursor:pointer;color:inherit;font:inherit;text-align:inherit}
+#eternal button:hover{background:none;color:inherit;transform:none}
+#eternal a{color:var(--sk-link);text-decoration-thickness:1px;text-underline-offset:3px}
+#eternal a:hover{color:var(--sk-link-hover)}
+#eternal svg{display:block}
+#eternal p,#eternal h2,#eternal h3,#eternal ol,#eternal ul{margin:0}
+#eternal h2,#eternal h3{letter-spacing:0}
+#eternal :focus-visible{outline:2px solid var(--sk-focus);outline-offset:3px}
+#eternal .et-center{text-align:center}
+#eternal .et-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.et-archive-h{margin:var(--sk-s5) auto var(--sk-s1);padding-top:var(--sk-s4);border-top:1px solid var(--sk-line);color:var(--sk-ink);max-width:620px;letter-spacing:0;text-align:start}
+body[data-reg="bee"] .et-archive-h{font:400 28px/1.1 var(--sk-font-bee-serif)}
+body[data-reg="raver"] .et-archive-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em}
+body[data-reg="cypherpunk"] .et-archive-h{font:600 15px/1.45 var(--sk-font-mono)}
+
+/* NEW BEE — a calm room: one question, plain rows, one magenta action */
+#eternal .et-b{color:var(--sk-ink);display:flex;flex-direction:column;gap:var(--sk-s3);font:400 16px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-b-mark{font:400 18px/1.2 var(--sk-font-house);color:var(--sk-sovereign)}
+#eternal .et-b-mark b{font-weight:700}
+#eternal .et-b-h{font:400 40px/1.05 var(--sk-font-bee-serif);color:var(--sk-ink)}
+#eternal .et-b-lede{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink-mut);text-wrap:pretty}
+#eternal .et-b-guard{display:flex;align-items:center;gap:var(--sk-s2);min-height:var(--sk-control-min);padding:var(--sk-s1) var(--sk-s3);border-radius:var(--sk-radius);background:var(--sk-guard-wash);color:var(--sk-guard);font:600 15px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-b-guard svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+#eternal .et-b-rows{display:flex;flex-direction:column;background:var(--sk-bg-card);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl);overflow:hidden}
+#eternal .et-b-row{display:flex;align-items:center;justify-content:space-between;gap:var(--sk-s2);width:100%;min-height:var(--sk-control-row);padding:var(--sk-s1) var(--sk-s3);border-bottom:1px solid var(--sk-line-soft);background:transparent;text-align:start;font:500 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink);text-decoration:none}
+#eternal .et-b-row:last-child{border-bottom:0}
+#eternal .et-b-row small{display:flex;align-items:center;gap:var(--sk-s1);font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut);text-align:end}
+#eternal .et-b-row small.out{color:var(--sk-guard)}
+#eternal .et-b-row small.ok{color:var(--sk-verified)}
+#eternal .et-b-row[aria-expanded="true"]{background:var(--sk-sovereign-tint);color:var(--sk-sovereign-strong);font-weight:600}
+#eternal .et-b-row[aria-expanded="true"] small{color:var(--sk-sovereign-strong)}
+#eternal .et-b-row .chev{flex:none;transition:transform .26s}
+#eternal .et-b-row[aria-expanded="true"] .chev{transform:rotate(90deg)}
+#eternal .et-b-person{display:flex;align-items:center;gap:var(--sk-s2);min-height:var(--sk-control-person);padding:var(--sk-s1) var(--sk-s3);border-bottom:1px solid var(--sk-line-soft)}
+#eternal .et-b-person:last-child{border-bottom:0}
+#eternal .et-b-person i{width:40px;height:40px;border-radius:var(--sk-radius-pill);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong);display:flex;align-items:center;justify-content:center;font:600 14px/1.4 var(--sk-font-bee-sans);font-style:normal;flex:none}
+#eternal .et-b-person b{display:block;font:500 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+#eternal .et-b-person span{display:block;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-more{padding:var(--sk-s2) var(--sk-s3);font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut);border-top:1px solid var(--sk-line-soft)}
+#eternal .et-b-act{display:flex;flex-direction:column;gap:var(--sk-s1);margin-top:var(--sk-s1)}
+#eternal .et-b-primary{display:flex;align-items:center;justify-content:center;width:100%;min-height:var(--sk-control-primary);padding:0 var(--sk-s3);border-radius:var(--sk-radius-lg);border:0;background:var(--sk-primary);color:var(--sk-on-primary);font:600 17px/1.2 var(--sk-font-bee-sans);text-align:center;text-decoration:none;cursor:pointer}
+#eternal .et-b-primary:hover{background:var(--sk-primary);color:var(--sk-on-primary)}
+#eternal .et-b-primary:disabled{background:var(--sk-bg-well);color:var(--sk-ink-mut);cursor:not-allowed}
+#eternal .et-b-link{min-height:var(--sk-control-min);display:flex;align-items:center;justify-content:center;border:0;background:transparent;font:600 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-link);text-decoration:none;text-align:center;cursor:pointer}
+#eternal .et-b-link:hover{color:var(--sk-link-hover)}
+#eternal .et-b-foot{text-align:center;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-field{display:grid;gap:var(--sk-s1);font:600 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-field input{width:100%;min-height:var(--sk-control-row);padding:0 var(--sk-s3);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius-md);background:var(--sk-bg-card);color:var(--sk-ink);font:400 16px/1.45 var(--sk-font-bee-sans);outline-offset:3px}
+#eternal .et-b-field input:focus{border-color:var(--sk-ink);box-shadow:none}
+#eternal .et-b-answer{padding:var(--sk-s3);border-radius:var(--sk-radius-xl);background:var(--sk-sovereign-tint);border:1px solid var(--sk-line);display:grid;gap:var(--sk-s1)}
+#eternal .et-b-answer b{font:400 28px/1.1 var(--sk-font-bee-serif);color:var(--sk-sovereign-strong)}
+#eternal .et-b-answer span{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+#eternal .et-b-answer small{font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-answer.out b{color:var(--sk-guard)}
+
+/* RAVER — the data is the art; the gesture is physical; lower case is allowed joy */
+#eternal .et-r{color:var(--sk-ink);font:400 14px/1.4 var(--sk-font-raver-body)}
+#eternal .et-r-top{display:flex;align-items:baseline;justify-content:space-between;gap:var(--sk-s2);flex-wrap:wrap}
+#eternal .et-r-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em;color:var(--sk-ink)}
+#eternal .et-r-hint{font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-art{width:100%;max-width:360px;height:auto;margin:var(--sk-s3) auto var(--sk-s1);filter:drop-shadow(var(--sk-glow-sovereign))}
+#eternal .et-r-art [role="button"]{cursor:pointer}
+#eternal .et-r-art [role="button"]:focus{outline:none}
+#eternal .et-r-art [role="button"]:focus-visible .hit{stroke:var(--sk-ink);stroke-width:2}
+#eternal .et-r-art .cell{transition:opacity .26s,fill .26s}
+#eternal .et-r-legend{display:flex;justify-content:center;flex-wrap:wrap;gap:var(--sk-s1) var(--sk-s3);margin:var(--sk-s1) 0 var(--sk-s2);font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-legend span{display:flex;align-items:center;gap:var(--sk-s1)}
+#eternal .et-r-legend i{width:14px;height:14px;border-radius:var(--sk-radius-pill);flex:none}
+#eternal .et-r-card{display:flex;gap:var(--sk-s2);align-items:center;padding:var(--sk-s2) var(--sk-s3);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl);background:var(--sk-sovereign-tint);min-height:var(--sk-control-person)}
+#eternal .et-r-card .rk{min-width:44px;height:44px;padding:0 var(--sk-s1);border-radius:var(--sk-radius);background:var(--sk-sovereign-strong);color:var(--sk-bg);display:flex;align-items:center;justify-content:center;font:700 15px/1.2 var(--sk-font-raver-display);flex:none}
+#eternal .et-r-card b{display:block;font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink)}
+#eternal .et-r-card span{display:block;font:600 14px/1.4 var(--sk-font-raver-body);color:var(--sk-sovereign-soft)}
+#eternal .et-r-pill{display:flex;align-items:center;justify-content:center;width:100%;min-height:58px;margin-top:var(--sk-s4);padding:0 var(--sk-s3);border:0;border-radius:var(--sk-radius-pill);background:var(--sk-primary);color:var(--sk-on-primary);font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em;text-align:center;text-decoration:none;cursor:pointer}
+#eternal .et-r-pill:hover{background:var(--sk-primary);color:var(--sk-on-primary)}
+#eternal .et-r-ghost{display:flex;align-items:center;justify-content:center;margin:var(--sk-s2) auto 0;min-height:var(--sk-control-min);padding:0 var(--sk-s2);border:0;background:none;color:var(--sk-link);font:400 14px/1.4 var(--sk-font-raver-body);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+#eternal .et-r-note{margin:var(--sk-s2) 0 0;text-align:center;font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-big{margin:var(--sk-s2) 0 var(--sk-s1);text-align:center;font:700 60px/.95 var(--sk-font-raver-display);letter-spacing:-.02em;color:var(--sk-ink)}
+#eternal .et-r-pause{display:flex;align-items:center;justify-content:center;min-width:var(--sk-control-min);min-height:var(--sk-control-min);padding:0 var(--sk-s2);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius-pill);font:600 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink)}
+@media (prefers-reduced-motion:reduce){#eternal .et-r-art .cell,#eternal .et-b-row .chev{transition:none}}
+
+/* CYPHERPUNK — the instrument, complete at first paint; every row a fact you can check */
+#eternal .et-c{font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink)}
+#eternal .et-c-path{font:600 15px/1.45 var(--sk-font-mono);word-break:break-all;color:var(--sk-ink)}
+#eternal .et-c-chips{display:flex;flex-wrap:wrap;gap:var(--sk-s1);margin:var(--sk-s2) 0}
+#eternal .et-c-chips span{padding:2px var(--sk-s1);border:1px solid var(--sk-line);border-radius:4px;background:var(--sk-bg-card);font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink)}
+#eternal .et-c-chips span.on{border-color:var(--sk-guard);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong)}
+#eternal .et-c-chips span.ok{border-color:var(--sk-verified);color:var(--sk-verified)}
+#eternal .et-c-chips span.no{border-color:var(--sk-guard);color:var(--sk-guard)}
+#eternal .et-c-guard{display:flex;justify-content:space-between;align-items:center;gap:var(--sk-s2);flex-wrap:wrap;min-height:var(--sk-control-min);padding:var(--sk-s1) var(--sk-s3);border:1px dashed var(--sk-guard);border-radius:var(--sk-radius-sm);background:var(--sk-guard-wash);color:var(--sk-guard)}
+#eternal .et-c-guard b{font-weight:600;color:var(--sk-sovereign-strong)}
+#eternal .et-c-tab{width:100%;margin:var(--sk-s2) 0 var(--sk-s1);border-collapse:separate;border-spacing:0;border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm);overflow:hidden;background:var(--sk-bg-card)}
+#eternal .et-c-tab th{padding:var(--sk-s1) var(--sk-s2);text-align:start;font:600 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);border-bottom:1px solid var(--sk-line);background:var(--sk-bg-well);position:static}
+#eternal .et-c-tab td{height:var(--sk-control-min);padding:var(--sk-s1) var(--sk-s2);border-bottom:1px solid var(--sk-line);font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink);vertical-align:middle;word-break:break-word}
+#eternal .et-c-tab tr:last-child td{border-bottom:0}
+#eternal .et-c-tab td:first-child{color:var(--sk-guard)}
+#eternal .et-c-tab tr.pick{cursor:pointer}
+#eternal .et-c-tab tr.pick:hover td{background:var(--sk-sovereign-tint)}
+#eternal .et-c-tab tr.names td{height:auto;background:var(--sk-sovereign-tint);color:var(--sk-ink)}
+#eternal .et-c-tab small{display:block;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut)}
+#eternal .et-c-tab .ok{color:var(--sk-verified)}#eternal .et-c-tab .no{color:var(--sk-guard)}#eternal .et-c-tab .part{color:var(--sk-info)}
+#eternal .et-c-h{margin:var(--sk-s4) 0 var(--sk-s2);font:600 15px/1.45 var(--sk-font-mono);color:var(--sk-ink)}
+#eternal .et-c-pipe{list-style:none;margin:0;padding:0;display:grid;gap:var(--sk-s2);counter-reset:p}
+#eternal .et-c-pipe li{display:grid;grid-template-columns:36px 1fr;gap:var(--sk-s1) var(--sk-s2);padding:var(--sk-s2) var(--sk-s3);border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm);background:var(--sk-bg-card);counter-increment:p}
+#eternal .et-c-pipe li::before{content:counter(p,decimal-leading-zero);color:var(--sk-guard);font-weight:600}
+#eternal .et-c-pipe li b{font-weight:600;color:var(--sk-ink)}
+#eternal .et-c-pipe li p{grid-column:2;margin:0;color:var(--sk-ink-soft);word-break:break-word}
+#eternal .et-c-pipe li.done b{color:var(--sk-verified)}
+#eternal .et-c-pipe li.guard{border-style:dashed;border-color:var(--sk-guard)}#eternal .et-c-pipe li.guard b{color:var(--sk-guard)}
+#eternal .et-c-pipe li.now{border-color:var(--sk-ai);box-shadow:inset 0 0 0 1px var(--sk-ai)}#eternal .et-c-pipe li.now b{color:var(--sk-ai)}
+#eternal .et-c-pipe li.todo p{color:var(--sk-ink-mut)}
+#eternal .et-c-primary{display:flex;align-items:center;justify-content:center;width:100%;min-height:52px;margin-top:var(--sk-s3);padding:0 var(--sk-s2);border:0;border-radius:var(--sk-radius-sm);background:var(--sk-primary);color:var(--sk-on-primary);font:600 14px/1.2 var(--sk-font-mono);text-align:center;text-decoration:none;cursor:pointer}
+#eternal .et-c-primary:hover{background:var(--sk-primary);color:var(--sk-on-primary)}
+#eternal .et-c-kv{width:100%;border-collapse:collapse;border:1px solid var(--sk-line);background:var(--sk-bg-card)}
+#eternal .et-c-kv th{width:104px;padding:var(--sk-s2) var(--sk-s2);text-align:start;vertical-align:top;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);border-bottom:1px solid var(--sk-line);background:transparent;position:static}
+#eternal .et-c-kv td{padding:var(--sk-s2) var(--sk-s2);border-bottom:1px solid var(--sk-line);word-break:break-word;font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink)}
+#eternal .et-c-kv .no{color:var(--sk-info)}#eternal .et-c-kv .yes{color:var(--sk-verified)}#eternal .et-c-kv .held{color:var(--sk-guard)}
+#eternal .et-c-verify{margin-top:var(--sk-s3);padding:var(--sk-s3);border-radius:var(--sk-radius-sm);background:var(--sk-bg-card);border:1px solid var(--sk-line)}
+#eternal .et-c-verify-h{font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);margin-bottom:var(--sk-s1)}
+#eternal .et-c-verify ol{margin:0;padding-inline-start:var(--sk-s4);display:grid;gap:var(--sk-s1);color:var(--sk-ink)}
+#eternal .et-c-verify code{font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ai);word-break:break-all;background:none;padding:0}
+#eternal .et-c-row{display:grid;grid-template-columns:1fr 1fr;gap:var(--sk-s2);margin-top:var(--sk-s3)}
+#eternal .et-c-ghost{display:flex;align-items:center;justify-content:center;min-height:52px;padding:0 var(--sk-s1);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius-sm);color:var(--sk-ink);text-decoration:none;text-align:center;font:600 14px/1.2 var(--sk-font-mono);background:transparent}
+#eternal .et-c-ghost:hover{color:var(--sk-ink);background:transparent}
+#eternal .et-c-field{display:flex;gap:var(--sk-s1);margin-top:var(--sk-s2)}
+#eternal .et-c-field input{flex:1;min-width:0;min-height:var(--sk-control-min);padding:0 var(--sk-s2);border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm);background:var(--sk-bg-card);color:var(--sk-ink);font:400 13px/1.45 var(--sk-font-mono)}
+#eternal .et-c-field input:focus{border-color:var(--sk-ai);box-shadow:none}
+#eternal .et-c-field button{min-height:var(--sk-control-min);min-width:var(--sk-control-min);padding:0 var(--sk-s2);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius-sm);font:600 14px/1.2 var(--sk-font-mono);color:var(--sk-ink)}
+/* buzz directory, the front's own pieces */
+#eternal{background:none;border:0;border-radius:0;padding:0;margin-top:var(--sk-s2)}
+#eternal .et-name{font:400 18px/1.2 var(--sk-font-house);color:var(--sk-sovereign-strong)}
+#eternal .et-name b{font-weight:700}
+#eternal .et-b-row small .nt{font:400 14px/1.4 var(--sk-font-bee-sans)}
+#eternal .et-b-seats{display:flex;flex-direction:column}
+#eternal .et-b-seat{display:flex;flex-direction:column;gap:2px;padding:var(--sk-s2) var(--sk-s3);border-top:1px solid var(--sk-line-soft)}
+#eternal .et-b-seat span{font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-r-art .comb{cursor:pointer}
+#eternal .et-r-art .hit{fill:transparent;stroke:none}
+#eternal .et-r-art text{font:600 14px/1.4 var(--sk-font-raver-body);pointer-events:none}
+#eternal .lg-open{background:var(--sk-sovereign)}#eternal .lg-home{background:var(--sk-you)}
+#eternal .lg-exp{border:1.5px dashed var(--sk-guard)}#eternal .lg-lit{background:var(--sk-sovereign-strong)}
+#eternal .et-c-tab .et-name{font-size:18px}
+
+/* ── THE WHOLE PAGE, dressed per register: the page's own variables mapped onto skaists ── */
+body[data-reg]{--bg:var(--sk-bg);--panel:var(--sk-bg-card);--well:var(--sk-bg-well);--ink:var(--sk-ink);--line:var(--sk-line);
+ --gold:var(--sk-sovereign-strong);--violet:var(--sk-sovereign);--cyan:var(--sk-link);--leaf:var(--sk-verified);--amber:var(--sk-guard);
+ --verified:var(--sk-verified);--guard:var(--sk-guard);--info:var(--sk-info);background:var(--sk-bg);color:var(--sk-ink)}
+body[data-reg="bee"]{--dim:var(--sk-ink-mut);--faint:var(--sk-ink-mut);font-family:var(--sk-font-bee-sans)}
+body[data-reg="raver"]{--dim:var(--sk-ink-soft);--faint:var(--sk-ink-mut);font-family:var(--sk-font-raver-body)}
+body[data-reg="cypherpunk"]{--dim:var(--sk-ink-soft);--faint:var(--sk-ink-mut);font-family:var(--sk-font-mono)}
+body[data-reg] section:not(#eternal),body[data-reg] .house{background:var(--sk-bg-card);border-color:var(--sk-line)}
+body[data-reg] .story-door .art{background:var(--sk-bg-well)}
+body[data-reg] .door{border-color:var(--sk-ink);background:var(--sk-bg-card);color:var(--sk-ink)}
+body[data-reg] .door.primary{background:var(--sk-primary);border-color:var(--sk-primary);color:var(--sk-on-primary)}
+body[data-reg="bee"] h1{font:400 40px/1.05 var(--sk-font-bee-serif);letter-spacing:0;color:var(--sk-ink)}
+body[data-reg="raver"] h1{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em;color:var(--sk-ink)}
+body[data-reg="cypherpunk"] h1{font:600 15px/1.45 var(--sk-font-mono);letter-spacing:0;color:var(--sk-ink)}
+body[data-reg="raver"] .feel{color:var(--sk-ink);font-family:var(--sk-font-raver-display)}
+body[data-reg] :is(section:not(#eternal),.listing,.note,.house,.genline,.hive-action,.a-link,.story-door,.story-door .art){border-radius:var(--sk-radius)}
+body[data-reg] [data-experience-nav] a{border-radius:var(--sk-radius-sm);color:var(--sk-link)}
+body[data-reg="bee"] .door{border-radius:var(--sk-radius-lg)}
+body[data-reg="raver"] .door{border-radius:var(--sk-radius-pill)}
+body[data-reg="cypherpunk"] .door{border-radius:var(--sk-radius-sm)}
+body[data-reg] .support,body[data-reg] .eyebrow{color:var(--sk-ink-mut)}
+body[data-reg="bee"] h1 span{font-size:inherit}
+/* the shared reading-room dress (register.js) paints raver violet-night with !important; on this page the
+   raver ground is skaists black-green, so the eternal front and the room below stand on one ground */
+html body[data-reading-room][data-reg="raver"]{--bg:var(--sk-bg);--panel:var(--sk-bg-card);--well:var(--sk-bg-well);--ink:var(--sk-ink);--dim:var(--sk-ink-soft);--line:var(--sk-line);--cyan:var(--sk-link);--violet:var(--sk-sovereign);background:var(--sk-bg)!important;color:var(--sk-ink)}
+</style>
 </head>
 <body data-reg="bee" data-bee-theme="custom" data-dir-beat="arrival" data-experience="directory">
 <div id="bregbar">
@@ -170,6 +352,67 @@ body[data-reg="bee"],body[data-reg="raver"]{--fmin:14px}
 </div>
 <nav data-experience-nav aria-label="Explore skaists"><a href="index.html" data-i18n="social.arrival.home">Home</a><a href="blight/gallery.html" data-i18n="experience.gallery">Art gallery</a><a href="blight/studio-music.html" data-i18n="experience.music">Music studio</a><a href="buzz-directory.html" data-i18n="atlas.peopleAction" aria-current="page">Meet the hive</a><a href="profile.html" data-i18n="experience.profile">People and names</a></nav>
 <main>
+<!-- ETERNAL FRONT (founder blueprint 2026-09-26, docs/design/eternal): three separate products in one
+     surface. ONE data layer — read at load from this page's own hand-checked records below (#our-hives,
+     #public-directory, #people-agents), so the fronts can never drift from the receipts — drives all
+     three. Every door is the real link the record carries; this page still fetches nothing. -->
+<section id="eternal" aria-label="come meet the hive">
+
+  <!-- NEW BEE — a front porch: two rooms we keep, one door to walk through -->
+  <div class="et-b">
+    <div class="et-b-mark">buzz directory</div>
+    <h2 class="et-b-h" data-t="et.buzz.b.title">come meet the hive</h2>
+    <p class="et-b-lede" data-t="et.buzz.b.lede">two community rooms the estate keeps, and the public rooms we checked by hand. talk happens in the Buzz app.</p>
+    <div class="et-b-guard"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg><span data-t="et.buzz.b.guard">this list cannot see who is online, and it does not pretend to.</span></div>
+    <div class="et-b-rows" id="etBeeRows"><div class="et-b-row"><span>reading the records on this page…</span></div></div>
+    <div class="et-b-act">
+      <a class="et-b-primary" id="etBeeDoor" href="https://relay.skaists.dev/" target="_blank" rel="noopener noreferrer">visit the founder's hive</a>
+      <button type="button" class="et-b-link" id="etBeeAll" data-dir-go="deeper" data-t="et.buzz.b.all">see every room, checked by hand</button>
+      <p class="et-b-foot" id="etBeeFoot">the door opens in a new tab. this page fetches nothing.</p>
+    </div>
+  </div>
+
+  <!-- RAVER — the comb is the directory: every cell a room; tap one, walk in -->
+  <div class="et-r">
+    <div class="et-r-top"><h2 class="et-r-h" data-t="et.buzz.r.title">find your people</h2><span class="et-r-hint" id="etRaverHint">tap a cell · walk in</span></div>
+    <svg class="et-r-art" id="etComb" viewBox="0 0 360 360" role="group" aria-label="the rooms as a honeycomb: the two estate hives at the heart"></svg>
+    <div class="et-r-legend"><span><i class="lg-home"></i>our hives</span><span><i class="lg-open"></i>open</span><span><i class="lg-exp"></i>invite expired</span><span><i class="lg-lit"></i>lit</span></div>
+    <div class="et-r-card" id="etRaverCard" aria-live="polite"><span class="rk">⬡</span><div><b>reading the records…</b></div></div>
+    <a class="et-r-pill" id="etRaverDoor" href="https://relay.skaists.dev/" target="_blank" rel="noopener noreferrer">walk in</a>
+    <p class="et-r-note" id="etRaverNote">the comb shows doors, never who is in the room</p>
+  </div>
+
+  <!-- CYPHERPUNK — the instrument: hosts, invites, expiry, the receipt law, how to check it yourself -->
+  <div class="et-c">
+    <div class="et-c-path" id="etPath">buzz.directory ⇄ estate · snapshot</div>
+    <div class="et-c-chips" id="etChips"></div>
+    <div class="et-c-guard">presence = not claimed <b>fetches 0 · proxy none · mirror none</b></div>
+    <h3 class="et-c-h" data-t="et.buzz.c.hives">estate hives · dual-homed</h3>
+    <table class="et-c-tab"><thead><tr><th>hive</th><th>primary</th><th>fallback</th></tr></thead><tbody id="etHives"></tbody></table>
+    <h3 class="et-c-h" data-t="et.buzz.c.rooms">public rooms · pages 1–2</h3>
+    <table class="et-c-tab"><thead><tr><th>room</th><th>join</th><th>state</th></tr></thead><tbody id="etRooms"></tbody></table>
+    <h3 class="et-c-h" data-t="et.buzz.c.seats">named seats · not a roster of who is in</h3>
+    <table class="et-c-tab"><thead><tr><th>seat</th><th>kind</th></tr></thead><tbody id="etSeats"></tbody></table>
+    <h3 class="et-c-h" data-t="et.buzz.c.pipe">check pipeline · by hand, at publish</h3>
+    <ol class="et-c-pipe" id="etPipe"></ol>
+    <a class="et-c-primary" id="etCyDoor" href="#public-directory" data-dir-go="deeper">open the full door instrument</a>
+    <h3 class="et-c-h" data-t="et.buzz.c.receipt">receipt</h3>
+    <table class="et-c-kv" id="etReceipt"></table>
+    <div class="et-c-verify">
+      <div class="et-c-verify-h" data-t="et.buzz.c.verify">verify · no trust in this page needed</div>
+      <ol>
+        <li>take a join link's <code>code=v2.…</code> and base64url-decode what follows <code>v2.</code></li>
+        <li>read <code>e</code>: the expiry, in epoch seconds; past it the relay says no</li>
+        <li>check the relay keeps its <code>wss://</code> scheme whole, then compare with the source page</li>
+      </ol>
+    </div>
+    <div class="et-c-row">
+      <a class="et-c-ghost" href="https://buzz.directory/" target="_blank" rel="noopener noreferrer">the source · new tab</a>
+      <a class="et-c-ghost" href="https://github.com/beehive-nature/beehive-nature/blob/main/surfaces/buzz-directory.html" target="_blank" rel="noopener noreferrer">fork the template · new tab</a>
+    </div>
+  </div>
+</section>
+<h2 class="et-archive-h" id="etArchive" data-t="et.buzz.whole">the whole front porch</h2>
 <header id="masthead">
   <h1>⬡ <span data-i18n="dir.mark">buzz directory</span></h1>
   <p class="eyebrow pair" data-reg="cypherpunk">the estate's hives and the public directory, verified by hand</p>
@@ -599,6 +842,126 @@ function restoreVisibleFocus(focus){
     if((document.body.getAttribute('data-reg')||'bee')!=='cypherpunk') setBeat('deeper');
   }
   applyReading();
+})();
+</script>
+<script>
+/* ETERNAL FRONT — one data layer, three renderers (docs/design/eternal). The facts are READ from this
+   page's own hand-checked records (#our-hives, #public-directory, #people-agents): the same markup the
+   door instrument shows, so the three fronts cannot say anything the receipts do not. Every door is
+   the record's own link; nothing here fetches, pings, or claims who is online. */
+(function(){
+  var $=function(id){return document.getElementById(id);};
+  var T=function(k,f){var t=window.BNRLanguage&&window.BNRLanguage.text;return t?t(k,f):f;};
+  var esc=function(v){return String(v==null?'':v).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});};
+  /* the house hand: a name exactly as it is cased, capitals heavy, small letters light */
+  var wm=function(n){return '<span class="et-name">'+esc(n).replace(/[A-Z]+/g,function(m){return '<b>'+m+'</b>';})+'</span>';};
+  var txt=function(el){return el?el.textContent.replace(/\s+/g,' ').trim():'';};
+  var field=function(L,label){var hit=null;L.querySelectorAll('.lrelay').forEach(function(r){var b=r.querySelector('b');if(!hit&&b&&txt(b).indexOf(label)===0)hit=txt(r).slice(txt(b).length).trim();});return hit;};
+  var D={checked:null,hives:[],rooms:[],seats:[],fetches:0};
+  var R={sel:0};
+  function read(){
+    document.querySelectorAll('#our-hives .listing').forEach(function(L){
+      var nm=txt(L.querySelector('.lname')), door=L.querySelector('a[href^="https"]');
+      D.hives.push({name:nm.split(' — ')[0],role:nm.split(' — ')[1]||'',primary:field(L,'relay host'),fallback:field(L,'fallback'),door:door?door.getAttribute('href'):null,state:txt(L.querySelector('.chip')).replace(/^✓\s*/,'')});
+    });
+    document.querySelectorAll('#public-directory .listing').forEach(function(L){
+      var chip=L.querySelector('.chip'), ok=chip&&chip.classList.contains('ok'), c=txt(chip);
+      var join=L.querySelector('a.a-link[href^="buzz:"]'), src=L.querySelector('a[href^="https://buzz.directory"]');
+      var type=field(L,'type:')||'', dm=/(\d{4}-\d\d-\d\d)/.exec(c), em=/expired (\d{4}-\d\d-\d\d)/.exec(type);
+      D.rooms.push({name:txt(L.querySelector('.lname')),ok:ok,verified:ok&&dm?dm[1]:null,why:ok?null:c.replace(/^✗\s*failing:\s*/,''),expired:em?em[1]:null,
+        relay:field(L,'relay:'),code:/join code/.test(type),join:join?join.getAttribute('href'):null,source:src?src.getAttribute('href'):null});
+      if(ok&&dm&&!D.checked)D.checked=dm[1];
+    });
+    document.querySelectorAll('#people-agents .listing').forEach(function(L){
+      D.seats.push({names:txt(L.querySelector('.lname')),kind:txt(L.querySelector('.who')),role:txt(L.querySelector('.chip'))});
+    });
+    D.open=D.rooms.filter(function(r){return r.ok;}).length; D.expired=D.rooms.length-D.open;
+    D.cells=[{home:true,i:0},{home:true,i:1}].concat(D.rooms.map(function(r,i){return {home:false,i:i};}));
+  }
+  var MON=['january','february','march','april','may','june','july','august','september','october','november','december'];
+  var day=function(iso){if(!iso)return T('et.buzz.notDated','not dated on the record');var p=iso.split('-');return (+p[2])+' '+MON[+p[1]-1]+' '+p[0];};
+  function words(){document.querySelectorAll('#eternal [data-t],#etArchive[data-t]').forEach(function(e){if(!e.dataset.en)e.dataset.en=e.textContent;e.textContent=T(e.dataset.t,e.dataset.en);});}
+  var CHEV='<svg class="chev" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2"/></svg>';
+
+  /* ── NEW BEE ── */
+  function bee(){
+    var h=D.hives.map(function(v){return '<a class="et-b-row" href="'+esc(v.door)+'" target="_blank" rel="noopener noreferrer"><span>'+esc(v.name)+'<br><small class="nt">'+esc(v.role)+'</small></span><small>'+esc(T('et.buzz.b.newtab','opens in a new tab'))+CHEV+'</small></a>';}).join('');
+    h+='<button type="button" class="et-b-row" data-dir-go="deeper" data-go="rooms"><span>'+esc(T('et.buzz.b.rooms','public rooms, checked by hand'))+'</span><small>'+esc(T('et.buzz.b.roomsN','{n} rooms · {o} open').replace('{n}',D.rooms.length).replace('{o}',D.open))+CHEV+'</small></button>';
+    h+='<div class="et-b-row"><span>'+esc(T('et.buzz.b.expired','invites that have expired'))+'</span><small class="out">'+esc(D.expired)+'</small></div>';
+    h+='<button type="button" class="et-b-row" id="etBeeSeatsBtn" aria-expanded="false"><span>'+esc(T('et.buzz.b.seats','named seats'))+'</span><small>'+esc(T('et.buzz.b.seatsN','{n} on the roster').replace('{n}',D.seats.length))+CHEV+'</small></button>';
+    h+='<div class="et-b-seats" id="etBeeSeats" hidden>'+D.seats.map(function(s){return '<div class="et-b-seat">'+wm(s.names)+'<span>'+esc(s.kind+' · '+s.role)+'</span></div>';}).join('')+'<div class="et-b-more">'+esc(T('et.buzz.b.notIn','a seat is a name on the roster. it never says who is in a room.'))+'</div></div>';
+    $('etBeeRows').innerHTML=h;
+    var home=D.hives[0]; if(home&&home.door) $('etBeeDoor').setAttribute('href',home.door);
+    $('etBeeDoor').textContent=T('et.buzz.b.door','visit the founder\u2019s hive');
+    $('etBeeFoot').textContent=T('et.buzz.b.foot','checked by hand on {date}. the door opens in a new tab. this page fetches nothing.').replace('{date}',day(D.checked));
+  }
+
+  /* ── RAVER: the comb ── */
+  /* a whole comb: every axial cell within radius 3, the heart first, then ring by ring, clockwise */
+  var HEX=(function(){var out=[];for(var q=-3;q<=3;q++)for(var r=-3;r<=3;r++){var d=Math.max(Math.abs(q),Math.abs(r),Math.abs(q+r));if(d<=3)out.push([q,r,d,Math.atan2(1.5*r,Math.sqrt(3)*(q+r/2))]);}
+    return out.sort(function(a,b){return a[2]-b[2]||a[3]-b[3];});})();
+  function hexPath(cx,cy,r){var p='';for(var k=0;k<6;k++){var a=Math.PI/3*k+Math.PI/6;p+=(k?'L':'M')+(cx+r*Math.cos(a)).toFixed(1)+' '+(cy+r*Math.sin(a)).toFixed(1);}return p+'Z';}
+  function comb(){
+    var svg=$('etComb'); var tok=function(n){return getComputedStyle(document.body).getPropertyValue('--sk-'+n).trim();};
+    var r=D.cells.length>19?24:31, h='';
+    D.cells.forEach(function(c,k){
+      var q=HEX[k]; if(!q) return;
+      var x=180+r*Math.sqrt(3)*(q[0]+q[1]/2)-r*Math.sqrt(3)/4, y=180+r*1.5*q[1];
+      var room=c.home?null:D.rooms[c.i], lit=R.sel===k, fill, stroke='none', dash='';
+      if(c.home){fill=lit?tok('sovereign-strong'):tok('you');}
+      else if(room.ok){fill=lit?tok('sovereign-strong'):tok('sovereign');}
+      else {fill=lit?tok('guard-wash'):'none';stroke=tok('guard');dash=' stroke-dasharray="4 4"';}
+      var label=c.home?D.hives[c.i].name:room.name;
+      h+='<g class="comb" role="button" tabindex="0" data-k="'+k+'" aria-pressed="'+lit+'" aria-label="'+esc(label+(c.home?', an estate hive':room.ok?', open':', invite expired'))+'">'+
+        '<path class="hit" d="'+hexPath(x,y,r)+'"/><path class="cell" d="'+hexPath(x,y,r-3)+'" fill="'+fill+'" stroke="'+stroke+'" stroke-width="1.5"'+dash+' opacity="'+(R.sel==null||lit?1:0.6)+'"/>'+
+        (c.home?'<text x="'+x.toFixed(1)+'" y="'+(y+5).toFixed(1)+'" text-anchor="middle" fill="'+tok('on-primary')+'">⬡</text>':'')+'</g>';
+    });
+    svg.innerHTML=h;
+  }
+  function raver(){
+    comb();
+    var c=D.cells[R.sel], card=$('etRaverCard'), pill=$('etRaverDoor'), name, line, href, label;
+    if(c.home){var v=D.hives[c.i];name=v.name;line=v.role+' · '+T('et.buzz.r.dual','dual-homed');href=v.door;label=T('et.buzz.r.web','walk in through the web door');}
+    else{var m=D.rooms[c.i];name=m.name;
+      line=m.ok?(m.code?T('et.buzz.r.code','join code'):T('et.buzz.r.openRoom','open room'))+' · '+T('et.buzz.r.checked','checked {date}').replace('{date}',day(m.verified)):T('et.buzz.r.exp','the invite expired {date}').replace('{date}',day(m.expired));
+      href=m.ok?m.join:m.source;label=m.ok?T('et.buzz.r.app','open {name} in the Buzz app').replace('{name}',m.name):T('et.buzz.r.src','look again on buzz.directory');}
+    card.innerHTML='<span class="rk">⬡</span><div><b>'+esc(name)+'</b><span>'+esc(line)+'</span></div>';
+    pill.setAttribute('href',href||'#public-directory');
+    if(/^https:/.test(href||'')){pill.setAttribute('target','_blank');pill.setAttribute('rel','noopener noreferrer');label+=' · '+T('et.buzz.newtab','new tab');}
+    else{pill.removeAttribute('target');pill.removeAttribute('rel');}
+    pill.textContent=label;
+    $('etRaverHint').textContent=T('et.buzz.r.hint','{n} doors · tap a cell · walk in').replace('{n}',D.cells.length);
+  }
+
+  /* ── CYPHERPUNK ── */
+  function cy(){
+    $('etPath').textContent='buzz.directory ⇄ estate · snapshot '+(D.checked||'undated');
+    $('etChips').innerHTML='<span class="on">records '+(D.hives.length+D.rooms.length)+'</span><span class="ok">open '+D.open+'</span><span class="no">expired '+D.expired+'</span><span>live api none</span>';
+    $('etHives').innerHTML=D.hives.map(function(v){return '<tr><td>'+esc(v.name)+'</td><td>'+esc(v.primary)+'</td><td>'+esc(v.fallback)+'</td></tr>';}).join('');
+    $('etRooms').innerHTML=D.rooms.map(function(m){return '<tr><td>'+esc(m.name)+'</td><td>'+(m.code?'code v2':'open')+'</td><td>'+(m.ok?'<span class="ok">verified '+esc(m.verified)+'</span>':'<span class="no">'+esc(m.why)+(m.expired?' '+esc(m.expired):'')+'</span>')+'</td></tr>';}).join('');
+    $('etSeats').innerHTML=D.seats.map(function(s){return '<tr><td>'+wm(s.names)+'</td><td>'+esc(s.kind)+' · '+esc(s.role)+'</td></tr>';}).join('');
+    var steps=[['read','buzz.directory pages 1–2 · '+D.rooms.length+' listings, by hand','done'],['decode','each invite payload · base64url after v2.','done'],['scheme','wss:// intact · truncated s:// refused','done'],
+      ['expiry','the e field against the check date · '+D.expired+' expired','guard'],['publish','a static snapshot · '+(D.checked||'undated')+' · fetches 0','done'],['join','in the Buzz app · your device, your move','todo']];
+    var now=steps.findIndex(function(s){return s[2]==='todo';});
+    $('etPipe').innerHTML=steps.map(function(s,i){return '<li class="'+s[2]+(i===now?' now':'')+'"><b>'+esc(s[0])+'</b><p>'+esc(s[1])+'</p></li>';}).join('');
+    $('etReceipt').innerHTML=[['checked',esc(D.checked||'not dated')],['hives',D.hives.length+' · dual-homed'],['rooms',D.rooms.length+' · <span class="yes">'+D.open+' open</span> · <span class="held">'+D.expired+' expired</span>'],
+      ['seats',D.seats.length+' named · presence not claimed'],['fetches','0 · links only'],['source','buzz.directory · linked, not mirrored']].map(function(r){return '<tr><th>'+r[0]+'</th><td>'+r[1]+'</td></tr>';}).join('');
+  }
+  function all(){words();bee();raver();cy();}
+  function toRooms(){setTimeout(function(){var t=$('public-directory');if(t)t.scrollIntoView({block:'start'});},0);}
+  function wire(){
+    var ev=$('eternal');
+    ev.addEventListener('click',function(e){
+      var g=e.target.closest('#etComb .comb'); if(g){R.sel=+g.getAttribute('data-k');raver();return;}
+      if(e.target.closest('#etBeeSeatsBtn')){var b=$('etBeeSeatsBtn'),o=b.getAttribute('aria-expanded')!=='true';b.setAttribute('aria-expanded',String(o));$('etBeeSeats').hidden=!o;return;}
+      if(e.target.closest('[data-go="rooms"],#etBeeAll')) toRooms();
+    });
+    ev.addEventListener('keydown',function(e){if(e.key!=='Enter'&&e.key!==' ')return;var t=e.target.closest('#etComb .comb');if(!t)return;e.preventDefault();t.dispatchEvent(new MouseEvent('click',{bubbles:true}));});
+    document.addEventListener('blang',all);
+    document.addEventListener('bregister',function(){setTimeout(raver,0);});
+  }
+  read(); wire(); all();
+  window.__eternal={data:D,raver:R};
 })();
 </script>
 <script src="tour.js?v=42"></script>

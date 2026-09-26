@@ -184,7 +184,175 @@ body[data-reg="raver"] .lesson-example{background:linear-gradient(135deg,#281b36
 .swatch button{font-size:12px;min-height:44px;min-width:44px}
 .law a,.charter a,.prose a,.ex a,footer a,td a{padding-block:12px}
 footer{padding-bottom:14px}
+/* ── ETERNAL FRONT (docs/design/eternal) — Beehive University as three products. Every value is a
+   skaists token (skaists.css, compiled from docs/design/skaists/tokens.json): no hand-picked hex,
+   size or corner. Measured by e2e/skaists-conformance.mjs --only university/index.html. ── */
+#eternal{margin:var(--sk-s2) 0 var(--sk-s4);padding:0;border:0;border-radius:0;background:none}
+#eternal>.et-r,#eternal>.et-c{display:none}
+body[data-reg="raver"] #eternal>.et-b,body[data-reg="cypherpunk"] #eternal>.et-b{display:none}
+body[data-reg="raver"] #eternal>.et-r,body[data-reg="cypherpunk"] #eternal>.et-c{display:block}
+#eternal [hidden]{display:none!important}
+#eternal :is(h2,h3,p,ol,ul,table){margin:0;padding:0;letter-spacing:normal}
+#eternal button{margin:0;padding:0;border:0;background:none;color:inherit;font:inherit;border-radius:0;cursor:pointer;min-height:0}
+#eternal button:hover{background:none;color:inherit}
+#eternal :is(select,input,textarea){margin:0;min-height:0}
+#eternal label{display:block;margin:0}
+#eternal a{color:inherit}
+#eternal svg{display:block}
+#eternal :focus-visible{outline:2px solid var(--sk-focus);outline-offset:3px}
+[dir="rtl"] #eternal .chev{transform:scaleX(-1)}
+.et-archive-h{margin:var(--sk-s5) 0 var(--sk-s2);padding-top:var(--sk-s4);border-top:1px solid var(--sk-line);color:var(--sk-ink);text-align:start}
+body[data-reg="bee"] .et-archive-h{font:400 28px/1.1 var(--sk-font-bee-serif)}
+body[data-reg="raver"] .et-archive-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em}
+body[data-reg="cypherpunk"] .et-archive-h{font:600 15px/1.45 var(--sk-font-mono)}
+
+/* NEW BEE — a calm room: one page, one mark, a few words; one magenta action */
+#eternal .et-b{display:flex;flex-direction:column;gap:var(--sk-s3);color:var(--sk-ink);text-align:start}
+#eternal .et-b-h{font:400 40px/1.05 var(--sk-font-bee-serif);color:var(--sk-ink)}
+#eternal .et-b-lede{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-guard{display:flex;align-items:center;gap:var(--sk-s2);min-height:var(--sk-control-min);padding:var(--sk-s1) var(--sk-s3);border-radius:var(--sk-radius);background:var(--sk-guard-wash);color:var(--sk-guard);font:600 15px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-b-guard svg{width:18px;height:18px;flex:none;fill:none;stroke:var(--sk-guard);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+#eternal .et-b-q{font:600 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-field{display:flex;flex-direction:column;gap:var(--sk-s1);font:600 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-select,#eternal .et-b-note{width:100%;min-height:var(--sk-control-row);padding:var(--sk-s2) var(--sk-s3);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius-md);background:var(--sk-bg-card);color:var(--sk-ink);font:400 16px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-b-note{min-height:96px;resize:vertical}
+#eternal .et-b-count{align-self:flex-end;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-rows{display:flex;flex-direction:column;background:var(--sk-bg-card);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl);overflow:hidden}
+#eternal .et-b-row{display:flex;align-items:center;justify-content:space-between;gap:var(--sk-s2);width:100%;min-height:var(--sk-control-row);padding:0 var(--sk-s3);border-bottom:1px solid var(--sk-line-soft);text-align:start;font:500 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+#eternal .et-b-rows>:last-child{border-bottom:0}
+#eternal .et-b-row i{width:28px;height:28px;flex:none;border-radius:var(--sk-radius-pill);display:flex;align-items:center;justify-content:center;font:600 14px/1.4 var(--sk-font-bee-sans);font-style:normal;background:var(--sk-bg-well);color:var(--sk-ink-mut)}
+#eternal .et-b-row[aria-pressed="true"]{background:var(--sk-sovereign-tint);color:var(--sk-sovereign-strong);font-weight:600}
+#eternal .et-b-row[aria-pressed="true"] i{background:var(--sk-sovereign-strong);color:var(--sk-bg-card)}
+#eternal .et-b-act{display:flex;flex-direction:column;gap:var(--sk-s1)}
+#eternal .et-b-primary{height:var(--sk-control-primary);border-radius:var(--sk-radius-lg);background:var(--sk-primary);color:var(--sk-on-primary);font:600 17px/1.2 var(--sk-font-bee-sans)}
+#eternal .et-b-outline{min-height:48px;padding:0 var(--sk-s3);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius-md);background:var(--sk-bg-card);color:var(--sk-ink);font:600 16px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-b-link{display:flex;align-items:center;justify-content:center;min-height:var(--sk-control-min);font:600 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-link);text-decoration:none}
+#eternal .et-b-foot{text-align:center;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-draft{display:flex;flex-direction:column;gap:var(--sk-s2);padding:var(--sk-s3);border-radius:var(--sk-radius-xl);background:var(--sk-bg-card);border:1px solid var(--sk-line)}
+#eternal .et-b-draft b{font:400 28px/1.1 var(--sk-font-bee-serif);color:var(--sk-ink)}
+#eternal .et-b-draft code{display:block;padding:var(--sk-s2);border-radius:var(--sk-radius);background:var(--sk-bg);font:400 15px/1.4 var(--sk-font-mono);color:var(--sk-ink);white-space:pre-wrap;overflow-wrap:anywhere}
+#eternal .et-b-draft span{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-draft span.ok{color:var(--sk-verified)}
+
+/* RAVER — every page of the estate is a star; tap one, light a mark, hold to draft your gift */
+#eternal .et-r{color:var(--sk-ink);font:600 14px/1.25 var(--sk-font-raver-body);text-align:start}
+#eternal .et-r-top{display:flex;align-items:baseline;justify-content:space-between;gap:var(--sk-s2);flex-wrap:wrap}
+#eternal .et-r-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em;color:var(--sk-ink)}
+#eternal .et-r-hint{font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-sky{width:100%;max-width:360px;margin:var(--sk-s3) auto var(--sk-s1);filter:drop-shadow(var(--sk-glow-sovereign));cursor:pointer;touch-action:manipulation}
+#eternal .et-r-sky circle{transition:r .26s}
+#eternal .et-r-card{display:flex;gap:var(--sk-s2);align-items:center;min-height:var(--sk-control-person);padding:var(--sk-s2);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl);background:var(--sk-sovereign-tint)}
+#eternal .et-r-card .rk{width:var(--sk-control-min);height:var(--sk-control-min);flex:none;border-radius:var(--sk-radius);background:var(--sk-sovereign-strong);color:var(--sk-bg);display:flex;align-items:center;justify-content:center;font:700 15px/1.2 var(--sk-font-raver-display)}
+#eternal .et-r-card div{flex:1;min-width:0}
+#eternal .et-r-card b{display:block;font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink);overflow-wrap:anywhere}
+#eternal .et-r-card span{font:600 14px/1.4 var(--sk-font-raver-body);color:var(--sk-sovereign-soft)}
+#eternal .et-r-legend{display:flex;justify-content:center;flex-wrap:wrap;gap:var(--sk-s1) var(--sk-s3);margin:var(--sk-s2) 0;font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-legend span{display:flex;align-items:center;gap:var(--sk-s1)}
+#eternal .et-r-legend i{width:10px;height:10px;border-radius:var(--sk-radius-pill)}
+#eternal .lg-door{background:var(--sk-sovereign-strong)}#eternal .lg-blight{background:var(--sk-ai)}#eternal .lg-top{background:var(--sk-sovereign)}#eternal .lg-deep{background:var(--sk-info)}
+#eternal .et-r-tiles{display:grid;grid-template-columns:1fr 1fr;gap:var(--sk-s2);margin:var(--sk-s3) 0}
+#eternal .et-r-tiles button{height:96px;border-radius:var(--sk-radius-xl);border:1.5px solid var(--sk-sovereign);background:var(--sk-sovereign-wash);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--sk-s1);color:var(--sk-sovereign-strong);font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em;opacity:.7;transition:opacity .26s,box-shadow .26s}
+#eternal .et-r-tiles button b{font:700 30px/1 var(--sk-font-raver-display)}
+#eternal .et-r-tiles button[aria-pressed="true"]{opacity:1;border-color:var(--sk-you);box-shadow:var(--sk-glow-sovereign)}
+#eternal .et-r-input{width:100%;height:var(--sk-control-primary);padding:0 var(--sk-s3);border:1.5px solid var(--sk-sovereign-soft);border-radius:var(--sk-radius-pill);background:var(--sk-bg-card);color:var(--sk-ink);font:400 14px/1.4 var(--sk-font-raver-body)}
+#eternal .et-r-hold{position:relative;width:176px;height:176px;margin:var(--sk-s4) auto 0}
+#eternal .et-r-hold svg{position:absolute;inset:0;width:100%;height:100%;transform:rotate(-90deg)}
+#eternal .et-r-hold circle{fill:none;stroke-width:5}
+#eternal .et-r-hold .track{stroke:var(--sk-line)}
+#eternal .et-r-hold .fill{stroke:var(--sk-biomass);stroke-linecap:round;stroke-dasharray:540;stroke-dashoffset:540}
+#eternal #etRHold{position:absolute;inset:18px;border-radius:var(--sk-radius-pill);background:var(--sk-primary);color:var(--sk-on-primary);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;touch-action:none;user-select:none;-webkit-user-select:none;font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em}
+#eternal #etRHold span{font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em}
+#eternal .et-r-note{margin-top:var(--sk-s2);text-align:center;font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-gift{margin-top:var(--sk-s3);padding:var(--sk-s3);border-radius:var(--sk-radius-xl);border:1.5px solid var(--sk-you);background:var(--sk-sovereign-tint)}
+#eternal .et-r-gift code{display:block;font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink);white-space:pre-wrap;overflow-wrap:anywhere}
+#eternal .et-r-ghost{display:flex;align-items:center;justify-content:center;width:100%;min-height:var(--sk-control-primary);margin-top:var(--sk-s2);border-radius:var(--sk-radius-pill);border:1.5px solid var(--sk-sovereign);color:var(--sk-sovereign-strong);font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em}
+@media (prefers-reduced-motion:reduce){#eternal .et-r-sky circle,#eternal .et-r-tiles button{transition:none}}
+
+/* CYPHERPUNK — the instrument: the grammar, the receipt, its hash, the pipeline to a guard */
+#eternal .et-c{font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink);text-align:start}
+#eternal .et-c-path{font:600 15px/1.45 var(--sk-font-mono);color:var(--sk-ink);overflow-wrap:anywhere}
+#eternal .et-c-sub{margin-top:var(--sk-s1);font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut)}
+#eternal .et-c-form{display:grid;gap:var(--sk-s1);margin-top:var(--sk-s3)}
+#eternal .et-c-form label{font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);display:flex;flex-direction:column;gap:2px}
+#eternal .et-c-in{width:100%;min-height:var(--sk-control-min);padding:var(--sk-s1) var(--sk-s2);border:1px solid var(--sk-ink-mut);border-radius:var(--sk-radius-sm);background:var(--sk-bg-card);color:var(--sk-ink);font:400 13px/1.45 var(--sk-font-mono)}
+#eternal .et-c-primary{display:flex;align-items:center;justify-content:center;width:100%;height:52px;margin-top:var(--sk-s2);border-radius:var(--sk-radius-sm);background:var(--sk-primary);color:var(--sk-on-primary);font:600 14px/1.2 var(--sk-font-mono)}
+#eternal .et-c-h{margin:var(--sk-s4) 0 var(--sk-s2);font:600 15px/1.45 var(--sk-font-mono);color:var(--sk-ink)}
+#eternal .et-c-kv{width:100%;border-collapse:collapse;border:1px solid var(--sk-line);background:var(--sk-bg-card);table-layout:fixed}
+#eternal .et-c-kv th{width:84px;padding:var(--sk-s1) var(--sk-s2);text-align:start;vertical-align:top;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);border-bottom:1px solid var(--sk-line)}
+#eternal .et-c-kv td{padding:var(--sk-s1) var(--sk-s2);border-bottom:1px solid var(--sk-line);font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink);overflow-wrap:anywhere;white-space:pre-wrap}
+#eternal .et-c-kv tr:last-child :is(th,td){border-bottom:0}
+#eternal .et-c-kv .ok{color:var(--sk-verified)}#eternal .et-c-kv .no{color:var(--sk-info)}#eternal .et-c-kv .guard{color:var(--sk-guard)}
+#eternal .et-c-pipe{list-style:none;display:grid;gap:var(--sk-s1);counter-reset:p}
+#eternal .et-c-pipe li{display:grid;grid-template-columns:30px minmax(0,1fr);gap:2px var(--sk-s2);padding:var(--sk-s2);border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm);background:var(--sk-bg-card);counter-increment:p}
+#eternal .et-c-pipe li::before{content:counter(p,decimal-leading-zero);color:var(--sk-ink-mut);font-weight:600}
+#eternal .et-c-pipe li b{font-weight:600;color:var(--sk-ink);overflow-wrap:anywhere}
+#eternal .et-c-pipe li p{grid-column:2;color:var(--sk-ink-soft);overflow-wrap:anywhere}
+#eternal .et-c-pipe li.done b{color:var(--sk-verified)}
+#eternal .et-c-pipe li.now{border-color:var(--sk-ai)}#eternal .et-c-pipe li.now b{color:var(--sk-ai)}
+#eternal .et-c-pipe li.guard{border-style:dashed;border-color:var(--sk-guard)}#eternal .et-c-pipe li.guard b{color:var(--sk-guard)}
+#eternal .et-c-pipe li.you b{color:var(--sk-you)}
+#eternal .et-c-pipe li.todo p{color:var(--sk-ink-mut)}
+#eternal .et-c-verify{margin-top:var(--sk-s3);padding:var(--sk-s2) var(--sk-s3);border-radius:var(--sk-radius-sm);background:var(--sk-bg-card);border:1px solid var(--sk-line)}
+#eternal .et-c-verify b{display:block;margin-bottom:var(--sk-s1);font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut)}
+#eternal .et-c-verify ol{padding-inline-start:var(--sk-s4);display:grid;gap:var(--sk-s1);color:var(--sk-ink)}
+#eternal .et-c-row{display:grid;grid-template-columns:1fr 1fr;gap:var(--sk-s2);margin-top:var(--sk-s3)}
+#eternal .et-c-ghost{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:var(--sk-control-min);padding:var(--sk-s1);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius-sm);color:var(--sk-ink);text-decoration:none;text-align:center;font:600 14px/1.2 var(--sk-font-mono)}
+#eternal .et-c-ghost .et-c-nt{font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut)}
+
+#eternal .et-c-tab{width:100%;border-collapse:separate;border-spacing:0;border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm);overflow:hidden;background:var(--sk-bg-card)}
+#eternal .et-c-tab th{padding:var(--sk-s1) var(--sk-s2);text-align:start;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);border-bottom:1px solid var(--sk-line);background:var(--sk-bg-well)}
+#eternal .et-c-tab td{height:var(--sk-control-min);padding:0 var(--sk-s2);vertical-align:middle;border-bottom:1px solid var(--sk-line);font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink)}
+#eternal .et-c-tab tr:last-child td{border-bottom:0}
+#eternal .et-c-tab td:last-child{white-space:nowrap}
+#eternal .et-c-tab td:first-child{color:var(--sk-sovereign-soft)}
+#eternal .et-c-tab tr.pick{cursor:pointer}
+#eternal .et-c-tab tr.cur td{background:var(--sk-sovereign-tint)}
+#eternal .et-c-tab .draft{color:var(--sk-info)}#eternal .et-c-tab .att{color:var(--sk-verified)}#eternal .et-c-tab .wd{color:var(--sk-guard)}
+/* university: the curriculum as an orbit of seven lessons around the one sample */
+#eternal .et-b-prog{display:flex;align-items:center;gap:var(--sk-s2);font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-prog b{font:400 32px/1 var(--sk-font-bee-serif);color:var(--sk-ink)}
+#eternal .et-b-row small{display:flex;align-items:center;gap:var(--sk-s1);flex:none;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-row small.ok{color:var(--sk-verified)}
+#eternal .et-b-row .chev{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2}
+#eternal .et-b-row span{display:flex;align-items:center;gap:var(--sk-s2)}
+#eternal .et-r-orbit{position:relative;width:100%;max-width:360px;margin:var(--sk-s3) auto var(--sk-s1)}
+#eternal .et-r-orbit svg{width:100%;filter:drop-shadow(var(--sk-glow-sovereign))}
+#eternal .et-r-orbit .node{cursor:pointer}
+#eternal .et-r-orbit .node:focus{outline:none}
+#eternal .et-r-orbit .node:focus-visible circle.disc{stroke:var(--sk-ink);stroke-width:3}
+#eternal .et-r-orbit text{font:700 30px/1 var(--sk-font-raver-display)}
+#eternal .et-r-orbit text.lbl{font:700 15px/1.2 var(--sk-font-raver-display)}
+#eternal .et-r-orbit text.sm{font:600 14px/1.25 var(--sk-font-raver-body)}
+#eternal .et-r-pill{display:block;width:100%;height:58px;margin-top:var(--sk-s4);border-radius:var(--sk-radius-pill);background:var(--sk-primary);color:var(--sk-on-primary);font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em}
+#eternal .et-r-card{flex-wrap:wrap}
+#eternal .et-r-card a{display:flex;align-items:center;min-height:var(--sk-control-min);font:600 14px/1.4 var(--sk-font-raver-body);color:var(--sk-link)}
+#eternal .et-c-tab td:nth-child(3){white-space:nowrap}
+#eternal .et-c-tab .ok{color:var(--sk-verified)}#eternal .et-c-tab .open{color:var(--sk-info)}
+#eternal .et-c-grad{display:block;margin-top:var(--sk-s2);padding:var(--sk-s2);border:1px dashed var(--sk-line);border-radius:var(--sk-radius-sm);background:var(--sk-bg-card);font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink);white-space:pre-wrap;overflow-wrap:anywhere}
+/* ── THE WHOLE UNIVERSITY, dressed per register: the page's own variables mapped onto skaists ── */
+body[data-reg]{--bg:var(--sk-bg);--panel:var(--sk-bg-card);--well:var(--sk-bg-well);--ink:var(--sk-ink);--line:var(--sk-line);--leaf:var(--sk-verified);--amber:var(--sk-info);
+ --c-works:var(--sk-cat-works);--c-idea:var(--sk-cat-idea);--c-bug:var(--sk-cat-bug);--c-gap:var(--sk-cat-gap);background:var(--sk-bg)}
+body[data-reg="bee"]{--dim:var(--sk-ink-mut);--faint:var(--sk-ink-mut);--gold:var(--sk-sovereign);--violet:var(--sk-sovereign-strong);--cyan:var(--sk-link);--bee-font:var(--sk-font-bee-sans)}
+body[data-reg="raver"]{--dim:var(--sk-ink-soft);--gold:var(--sk-sovereign-strong);--violet:var(--sk-sovereign-soft);--cyan:var(--sk-link);--leaf:var(--sk-primary);--bee-font:var(--sk-font-raver-body);font-family:var(--sk-font-raver-body)}
+body[data-reg="raver"][data-uni-beat="arrival"]{background:var(--sk-bg)}
+body[data-reg="cypherpunk"]{--dim:var(--sk-ink-soft);--gold:var(--sk-sovereign-strong);--violet:var(--sk-sovereign-soft);--cyan:var(--sk-ai);font-family:var(--sk-font-mono)}
+html body[data-reading-room][data-reg="raver"]{--bg:var(--sk-bg);--panel:var(--sk-bg-card);--well:var(--sk-bg-well);--ink:var(--sk-ink);--dim:var(--sk-ink-soft);--line:var(--sk-line);--cyan:var(--sk-link);--violet:var(--sk-sovereign-soft);background:var(--sk-bg)!important;color:var(--sk-ink)}
+body[data-reg] :is(section,.ex,.rline,.swatch){background:var(--sk-bg-card);border-color:var(--sk-line)}
+body[data-reg] .charter{background:var(--sk-sovereign-tint);border-color:var(--sk-line);color:var(--sk-sovereign-strong)}
+body[data-reg] :is(select,input){background:var(--sk-bg-well);color:var(--sk-ink);border-color:var(--sk-ink-mut)}
+body[data-reg] :is(.ex button,.tgl button,.swatch button){background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong);border-color:var(--sk-line);border-radius:var(--sk-radius-sm)}
+body[data-reg] .ex button.gold{background:var(--sk-bg-well);color:var(--sk-ink);border-color:var(--sk-ink)}
+body[data-reg] .tgl button[aria-pressed="true"]{background:var(--sk-sovereign-tint);color:var(--sk-ink);border-color:var(--sk-sovereign)}
+body[data-reg="raver"] .door.primary{background:var(--sk-primary);color:var(--sk-on-primary);border-color:var(--sk-primary)}
+body[data-reg="bee"] .door:not(.primary){color:var(--sk-ink);border-color:var(--sk-ink);background:var(--sk-bg-card)}
+body[data-reg="cypherpunk"] :is(section,.ex,.rline,.swatch,.charter){border-radius:var(--sk-radius-sm)}
+body[data-reg="bee"] #masthead h1{font:400 40px/1.05 var(--sk-font-bee-serif);color:var(--sk-ink)}
+body[data-reg="raver"] #masthead h1{font:700 30px/1.1 var(--sk-font-raver-display);letter-spacing:-.01em;color:var(--sk-ink)}
+body[data-reg="cypherpunk"] #masthead h1{font:600 15px/1.45 var(--sk-font-mono);letter-spacing:normal;color:var(--sk-ink)}
+body[data-reg="raver"] :where(.law,.charter,.badge,.machine,.ex h3,.ex .q,.ex label,.fb,.rline,table,.swatch,.dE,footer,.prose,section h2){font-size:14px}
+body[data-reg="cypherpunk"] :where(section h2,.prose){font-size:13px}
 </style>
+<link rel="stylesheet" href="../skaists.css">
 </head>
 <body data-reg="bee" data-bee-theme="custom" data-uni-beat="arrival">
 <div id="bregbar">
@@ -194,6 +362,55 @@ footer{padding-bottom:14px}
   <span class="uni-language" data-language-host></span>
 </div>
 <main>
+<!-- ETERNAL FRONT (founder blueprint 2026-09-26, docs/design/eternal): Beehive University as three
+     separate products in one surface. ONE data layer (the page's own curriculum, progress and gates,
+     exported as window.BeehiveUni by the script below) drives all three. The gestures hand off to the
+     page's own beats and acts: the first lesson (data-uni-go="lesson"), a course in the instrument,
+     and the graduation line (gradLine). Nothing here grades, mints or sends. -->
+<section id="eternal" aria-label="learn to check a claim">
+
+  <!-- NEW BEE — a calm room: seven short lessons as a list, one first step -->
+  <div class="et-b">
+    <h2 class="et-b-h" id="etBTitle">learn to check a claim</h2>
+    <p class="et-b-lede" id="etBLede">short lessons, each on a real record of ours. every one ends with something you can check yourself.</p>
+    <div class="et-b-guard"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span id="etBGuard">no grades, no account. what you do stays in this browser.</span></div>
+    <div class="et-b-prog" id="etBProg"></div>
+    <div class="et-b-rows" id="etBRows"></div>
+    <div class="et-b-act">
+      <button type="button" class="et-b-primary" id="etBGo" data-uni-go="lesson">start with a lab report</button>
+      <a class="et-b-link" href="../review.html" id="etBReview">tell us what you noticed</a>
+      <p class="et-b-foot" id="etBFoot">a graduate holds receipts they published, not a certificate.</p>
+    </div>
+  </div>
+
+  <!-- RAVER — the curriculum as an orbit: seven lessons around the one sample; done lessons take colour -->
+  <div class="et-r">
+    <div class="et-r-top"><h2 class="et-r-h" id="etRTitle">the orbit</h2><span class="et-r-hint" id="etRHint">tap a lesson · colour = done</span></div>
+    <div class="et-r-orbit"><svg id="etROrbit" viewBox="-200 -200 400 400" role="group" aria-label="seven lessons around one sample"></svg></div>
+    <div class="et-r-card" id="etRCard" aria-live="polite"></div>
+    <button type="button" class="et-r-pill" id="etRGo" data-uni-go="lesson">explore a small mystery</button>
+    <p class="et-r-note" id="etRNote"></p>
+  </div>
+
+  <!-- CYPHERPUNK — the instrument: courses, acts and gates as tables; the path from act to published receipt -->
+  <div class="et-c">
+    <h2 class="et-c-path" id="etCPath">surfaces/university · the curriculum is the receipts</h2>
+    <p class="et-c-sub" id="etCSub">a view, not a store · cite or silent · local-only transcript</p>
+    <table class="et-c-tab"><thead><tr><th>id</th><th id="etCThCourse">course</th><th id="etCThState">state</th></tr></thead><tbody id="etCRows"></tbody></table>
+    <h3 class="et-c-h" id="etCPipeH">pipeline · lesson to credential</h3>
+    <ol class="et-c-pipe" id="etCPipe"></ol>
+    <button type="button" class="et-c-primary" id="etCGo">compose graduation line</button>
+    <code class="et-c-grad" id="etCGrad" hidden></code>
+    <h3 class="et-c-h" id="etCGatesH">gates · open questions are exhibits</h3>
+    <table class="et-c-kv" id="etCGates"></table>
+    <div class="et-c-verify"><b id="etCVerH">verify · no trust in this page needed</b><ol><li>every course links its receipt in the tree</li><li>every act's arithmetic is in this page's source</li><li>a credential is a signed [bX review] you publish</li></ol></div>
+    <div class="et-c-row">
+      <a class="et-c-ghost" href="../review.html" id="etCDeck">sign at the deck</a>
+      <a class="et-c-ghost" href="https://github.com/beehive-nature/beehive-nature/blob/main/surfaces/university/index.html" target="_blank" rel="noopener noreferrer"><span id="etCFork">fork the template ↗</span><span class="et-c-nt" id="etCNew">opens in a new tab</span></a>
+    </div>
+  </div>
+</section>
+<h2 class="et-archive-h" id="etArchive">the whole university</h2>
 <header id="masthead">
   <h1>🎓 <span data-i18n="uni.mark">Beehive University</span></h1>
   <p class="eyebrow pair" data-reg="cypherpunk" data-i18n="uni.pair">the curriculum is the receipts</p>
@@ -984,8 +1201,105 @@ $('q-wt').addEventListener('input',renderQ);
 $('q-compose').addEventListener('click',composeQuest);
 renderCorpus(); renderStatus(); renderGrad(); renderQ();
 applyReading();
+/* the ETERNAL front reads the one curriculum, never a copy */
+window.BeehiveUni={courses:COURSES.map(function(c){return {id:c.id,name:c.name,stub:!!c.stub,src:c.srcl};}),total:TOTAL_ACTS,
+  done:function(){return COURSES.filter(function(c){return done[c.id];}).map(function(c){return c.id;});},gradLine:gradLine};
 /* restore prior-session lines without re-marking done courses */
 COURSES.forEach(function(c){ if(done[c.id]) addTranscript(c.act.rline(),c); else { var l=$('line-'+c.id); if(l) l.style.display='none'; } });
+})();
+</script>
+<script>
+/* ETERNAL FRONT — one data layer, three renderers (docs/design/eternal). The facts are the page's
+   own: its curriculum and progress (window.BeehiveUni: COURSES, TOTAL_ACTS, the local buni_progress
+   the acts write) and its gates (#g-u1..3). Gestures hand off: the first lesson is the page's own
+   beat (data-uni-go="lesson"), a course opens in the instrument, and the graduation line is
+   gradLine()'s own. Nothing here grades, mints or sends; "done" is only what an act recorded. */
+(function(){
+  var $=function(id){return document.getElementById(id);};
+  var T=function(k,f){var t=window.BNRLanguage&&window.BNRLanguage.text;return t?t(k,f):f;};
+  var U=window.BeehiveUni||{courses:[],total:0,done:function(){return [];}};
+  var D={courses:U.courses,total:U.total,done:[],gates:[],grad:''};
+  var R={sel:U.courses[0]?U.courses[0].id:null};
+  var KEPT=['biomass','ai','info','sovereign'];
+  function esc(v){return String(v==null?'':v).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+  function read(){
+    D.done=U.done();
+    D.gates=['u1','u2','u3'].map(function(g){var e=$('g-'+g);return {id:g.toUpperCase().replace('U','U-'),state:e?e.textContent.trim():T('et.uni.notRead','not read yet')};});
+    var g=$('gradOut'); D.grad=g&&g.style.display==='block'?g.textContent:'';
+  }
+  function isDone(id){return D.done.indexOf(id)>=0;}
+  function openCourse(id){
+    var b=document.querySelector('#first-bee [data-uni-go="deeper"]'); if(b) b.click();
+    var st=$('st-'+id), sec=st&&st.closest('section'); if(sec) sec.scrollIntoView({block:'start'});
+    return !!sec;
+  }
+  /* ── NEW BEE ── */
+  function bee(){
+    $('etBProg').innerHTML='<b>'+D.done.length+'</b><span>'+esc(T('et.uni.b.prog','of {n} lessons done in this browser').replace('{n}',D.total))+'</span>';
+    $('etBRows').innerHTML=D.courses.map(function(c,i){var d=isDone(c.id);
+      return '<button type="button" class="et-b-row" data-open="'+c.id+'"><span><i aria-hidden="true">'+(i+1)+'</i>'+esc(T('et.uni.c.'+c.id,c.name))+'</span><small class="'+(d?'ok':'')+'">'+
+        esc(d?T('et.uni.b.done','done'):c.stub?T('et.uni.b.soon','coming'):T('et.uni.b.open','open'))+'<svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></small></button>';}).join('');
+  }
+  /* ── RAVER: the orbit ── */
+  function orbit(){
+    var n=D.courses.length, h='<circle r="138" fill="none" stroke-width="1.5" stroke-dasharray="2 7" style="stroke:var(--sk-line)"/>';
+    h+='<circle r="62" style="fill:var(--sk-bg-card);stroke:var(--sk-sovereign)" stroke-width="1.5"/>'+
+      '<text y="4" text-anchor="middle" style="fill:var(--sk-ink)">'+D.done.length+'/'+D.total+'</text>'+
+      '<text class="sm" y="30" text-anchor="middle" style="fill:var(--sk-ink-soft)">'+esc(T('et.uni.r.done','done'))+'</text>';
+    D.courses.forEach(function(c,i){
+      var a=-Math.PI/2+i*2*Math.PI/n, x=138*Math.cos(a), y=138*Math.sin(a), sel=R.sel===c.id, d=isDone(c.id);
+      var fill=d?KEPT[i%4]:sel?'sovereign-strong':'sovereign-wash', ink=d||sel?'bg':'sovereign-strong';
+      h+='<g class="node" data-id="'+c.id+'" role="button" tabindex="0" aria-pressed="'+sel+'" aria-label="'+esc((i+1)+' · '+c.name+(d?' · done':''))+'">'+
+        '<circle class="disc" cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="30" stroke-width="1.5" style="fill:var(--sk-'+fill+');stroke:var(--sk-'+(sel?'you':'sovereign')+')"/>'+
+        '<text class="lbl" x="'+x.toFixed(1)+'" y="'+(y+5).toFixed(1)+'" text-anchor="middle" style="fill:var(--sk-'+ink+')">'+(i+1)+'</text></g>';
+    });
+    $('etROrbit').innerHTML=h;
+  }
+  function raver(){
+    orbit();
+    var i=D.courses.findIndex(function(c){return c.id===R.sel;}), c=D.courses[i];
+    $('etRCard').innerHTML=c?'<span class="rk">'+(i+1)+'</span><div><b>'+esc(T('et.uni.c.'+c.id,c.name))+'</b><span>'+esc(isDone(c.id)?T('et.uni.r.isDone','done · your receipt is in the transcript'):T('et.uni.r.notDone','not yet · one act, one receipt'))+'</span></div>'+
+      '<button type="button" class="et-r-ghost" data-open="'+c.id+'">'+esc(T('et.uni.r.open','go deeper on this one'))+'</button>':'';
+    $('etRNote').textContent=T('et.uni.r.note','{d} of {n} done · nothing graded · nothing sent').replace('{d}',D.done.length).replace('{n}',D.total);
+  }
+  /* ── CYPHERPUNK ── */
+  function cy(){
+    $('etCRows').innerHTML=D.courses.map(function(c){var d=isDone(c.id);
+      return '<tr class="pick" data-open="'+c.id+'" tabindex="0"><td>'+c.id+'</td><td>'+esc(c.name)+'</td><td>'+(d?'<span class="ok">✓ receipted</span>':c.stub?'<span class="open">stub</span>':'<span class="open">○ open</span>')+'</td></tr>';}).join('');
+    var steps=[
+      ['read · prose per register','bee / raver / cypherpunk from one constants table K · numbers cannot diverge','done'],
+      ['act · on our own material','an exercise with a right answer · checked in this page',D.done.length?'done':'now'],
+      ['receipt · [bUni · cN]',D.done.length+' of '+D.total+' composed this browser',D.done.length?'done':'todo'],
+      ['transcript · localStorage','buni_progress · never a server · yours to clear','done'],
+      ['sign · at the deck','review.html binds a passkey · ed25519 · the page holds no keys','you'],
+      ['publish · your rail','the signed receipt is the whole credential · nothing mints (U-3)','todo']
+    ];
+    $('etCPipe').innerHTML=steps.map(function(x){return '<li class="'+x[2]+'"><b>'+esc(x[0])+'</b><p>'+esc(x[1])+'</p></li>';}).join('');
+    $('etCGates').innerHTML=D.gates.map(function(g){return '<tr><th>'+esc(g.id)+'</th><td class="'+(/^RULED/.test(g.state)?'ok':'guard')+'">'+esc(g.state)+'</td></tr>';}).join('');
+    var gr=$('etCGrad'); gr.hidden=!D.grad; gr.textContent=D.grad;
+  }
+  var WORDS={etBTitle:['et.uni.b.title','learn to check a claim'],etBLede:['et.uni.b.lede','short lessons, each on a real record of ours. every one ends with something you can check yourself.'],
+    etBGuard:['et.uni.b.guard','no grades, no account. what you do stays in this browser.'],etBGo:['et.uni.b.go','start with a lab report'],etBReview:['et.uni.b.review','tell us what you noticed'],
+    etBFoot:['et.uni.b.foot','a graduate holds receipts they published, not a certificate.'],etRTitle:['et.uni.r.title','the orbit'],etRHint:['et.uni.r.hint','tap a lesson · colour = done'],
+    etRGo:['et.uni.r.go','explore a small mystery'],etCSub:['et.uni.c.sub','a view, not a store · cite or silent · local-only transcript'],etCPipeH:['et.uni.c.pipeH','pipeline · lesson to credential'],
+    etCGo:['et.uni.c.go','compose graduation line'],etCGatesH:['et.uni.c.gatesH','gates · open questions are exhibits'],etCVerH:['et.uni.c.verH','verify · no trust in this page needed'],
+    etCDeck:['et.uni.c.deck','sign at the deck'],etCFork:['et.uni.c.fork','fork the template ↗'],etCNew:['et.uni.c.newTab','opens in a new tab'],etArchive:['et.uni.archive','the whole university']};
+  function words(){Object.keys(WORDS).forEach(function(id){var e=$(id);if(e&&!e.children.length)e.textContent=T(WORDS[id][0],WORDS[id][1]);});}
+  function all(){read();bee();raver();cy();}
+  function wire(){
+    var ev=$('eternal');
+    ev.addEventListener('click',function(e){
+      var o=e.target.closest('[data-open]'); if(o){openCourse(o.getAttribute('data-open'));return;}
+      var n=e.target.closest('.node'); if(n){R.sel=n.getAttribute('data-id');raver();return;}
+    });
+    ev.addEventListener('keydown',function(e){if(e.key!=='Enter'&&e.key!==' ')return;var t=e.target.closest('.node,tr.pick');if(!t)return;e.preventDefault();t.dispatchEvent(new MouseEvent('click',{bubbles:true}));});
+    $('etCGo').addEventListener('click',function(){if(U.gradLine)U.gradLine();all();});
+    var mo=new MutationObserver(function(){all();});
+    ['tstate','gradOut'].forEach(function(id){var e=$(id);if(e)mo.observe(e,{childList:true,characterData:true,subtree:true,attributes:true});});
+    document.addEventListener('blang',function(){words();all();});
+  }
+  wire(); words(); all();
+  window.__eternal={data:D,raver:R,openCourse:openCourse};
 })();
 </script>
 </body>

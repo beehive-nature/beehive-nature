@@ -721,28 +721,6 @@ jobs:
         if: always()
         working-directory: e2e
         run: node --test bview.test.mjs
-      # ETERNAL (founder blueprint 2026-09-26, docs/design/eternal): bGENEaLOGy is three products in
-      # one surface. At 390 px each register shows only its own front in its own dress (paper +
-      # Instrument Serif / black-green + Unbounded mandala / Plex Mono instrument); all three carry
-      # the same facts (the line walked from the model, the living guard, the storage receipt); the
-      # gestures are honest (bee consent box, raver four terms + a full hold, cypherpunk sign) and
-      # every one hands off to the preservation flow — "kept" is drawn only from the receipt.
-      - name: bGENEaLOGy — three products, one set of facts (eternal blueprint)
-        if: always()
-        working-directory: e2e
-        run: node --test blood-eternal.test.mjs
-      # SKAISTS, THE DESIGN SYSTEM IN CODE (founder, 2026-09-26: "there is real UX/UI/standards metrics").
-      # surfaces/skaists.css is compiled from docs/design/skaists/tokens.json (graded A- 2026-09-19) and must
-      # stay fresh; a three-UI front must score 100% on the standards meter per register: every painted
-      # colour a token of that register, every size on its type scale, every corner a radius token,
-      # every target >= 44 px, text >= 4.5:1 (WCAG 2.2 AA), no text-transform.
-      - name: Skaists — the design system is compiled, not hand-copied
-        if: always()
-        run: node scripts/build-skaists.mjs --check
-      - name: Skaists — the standards meter (three-UI fronts score 100%)
-        if: always()
-        working-directory: e2e
-        run: node skaists-conformance.mjs --only blood.html --min 100
       # SHARED-POLICY FIELD OWNERSHIP (ceremony-blocking repair, 2026-09-17):
       # a View change in a stale wallet tab must NEVER erase newer founder
       # policy from the shared key — every writer merges with the latest
@@ -793,3 +771,44 @@ jobs:
       # Annotation (if:always()) is something the next person must remember;
       # a job a suite red cannot reach is something they cannot forget.
       # Their new home: the static job, below, with the same comments.
+
+  # ETERNAL + SKAISTS (2026-09-26): its own job, in parallel with node. Wave 1 put 31 three-UI fronts
+  # (≈200 browser cases + the meter at 3 registers × 31 pages) behind the gate, which pushed the node
+  # job past its 20-min hang cap (run 36234571171: every step green, cancelled at the cap mid-battery).
+  # The cap stays the cap; the batteries split instead, so each job keeps its own bound.
+  eternal:
+    timeout-minutes: 20
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22
+      - name: shared setup — install (exempt from always())
+        working-directory: e2e
+        run: |
+          npm ci
+          npx playwright --version
+          npx playwright install --with-deps chromium
+      # ETERNAL (founder blueprint 2026-09-26, docs/design/eternal): bGENEaLOGy is three products in
+      # one surface. At 390 px each register shows only its own front in its own dress (paper +
+      # Instrument Serif / black-green + Unbounded mandala / Plex Mono instrument); all three carry
+      # the same facts (the line walked from the model, the living guard, the storage receipt); the
+      # gestures are honest (bee consent box, raver four terms + a full hold, cypherpunk sign) and
+      # every one hands off to the preservation flow — "kept" is drawn only from the receipt.
+      - name: ETERNAL fronts — three products, one set of facts (bGENEaLOGy + the reading rooms)
+        if: always()
+        working-directory: e2e
+        run: node --test blood-eternal.test.mjs bigen-eternal.test.mjs bfood-eternal.test.mjs bearth-eternal.test.mjs blongevity-eternal.test.mjs austras-koks-eternal.test.mjs buzz-directory-eternal.test.mjs bnames-eternal.test.mjs bnamesday-eternal.test.mjs bdata-eternal.test.mjs vending-eternal.test.mjs profile-eternal.test.mjs bview-eternal.test.mjs museum-eternal.test.mjs watch-eternal.test.mjs music-eternal.test.mjs listening-eternal.test.mjs festival-eternal.test.mjs plur-eternal.test.mjs blight-museum-eternal.test.mjs blight-index-eternal.test.mjs blight-gallery-eternal.test.mjs blight-market-eternal.test.mjs read-eternal.test.mjs blanguage-eternal.test.mjs review-eternal.test.mjs university-eternal.test.mjs onboarding-eternal.test.mjs receive-eternal.test.mjs myspace-eternal.test.mjs kandi-eternal.test.mjs
+      # SKAISTS, THE DESIGN SYSTEM IN CODE (founder, 2026-09-26: "there is real UX/UI/standards metrics").
+      # surfaces/skaists.css is compiled from docs/design/skaists/tokens.json (graded A- 2026-09-19) and must
+      # stay fresh; a three-UI front must score 100% on the standards meter per register: every painted
+      # colour a token of that register, every size on its type scale, every corner a radius token,
+      # every target >= 44 px, text >= 4.5:1 (WCAG 2.2 AA), no text-transform.
+      - name: Skaists — the design system is compiled, not hand-copied
+        if: always()
+        run: node scripts/build-skaists.mjs --check
+      - name: Skaists — the standards meter (three-UI fronts score 100%)
+        if: always()
+        working-directory: e2e
+        run: node skaists-conformance.mjs --only blood.html,bigen.html,bfood.html,bearth.html,blongevity.html,austras-koks.html,buzz-directory.html,bnames.html,bnamesday.html,bdata.html,vending.html,profile.html,bview.html,museum.html,watch.html,music.html,listening.html,festival/index.html,plur.html,blight/museum.html,blight/index.html,blight/gallery.html,blight/market.html,read.html,blanguage.html,review.html,university/index.html,onboarding/index.html,onboarding/receive.html,myspace.html,kandi.html --min 100
