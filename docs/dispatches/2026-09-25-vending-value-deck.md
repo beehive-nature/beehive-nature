@@ -153,6 +153,40 @@ this seat's own action classifier (a signing surface on a local server), so
 the page names the line instead of pressing it. A live jungle4 mint was not
 run: the seat key is not in this environment and this seat holds no keys.
 
+## Round 3 — the agentic vending machine (founder: "just give me something to hand a real agent")
+
+**Approve mints, in the page, with no server.** The member's ed25519 key is
+made in the browser (WebCrypto); the a1 genesis and the birth certificate are
+composed by `surfaces/vending-cert.js` (held byte-for-byte to `tool/cert.mjs`
+in `e2e/vending-cert.test.mjs`); the certificate is signed as an ANS-104 item
+with the member key as OWNER by `surfaces/ans104.js` (no library; held to
+`@dha-team/arbundles` in `e2e/ans104.test.mjs`) and uploaded through Turbo's
+free door (`upload.ardrive.io/v1/tx`, CORS `*`, free ≤ 107,520 B). The door's
+status is read (CONFIRMED within seconds) and a gateway read-back is re-hashed
+when it seeds (arweave.net took longer than 15 minutes for both items tonight —
+said on the card, never faked). The member gets their key as a file and their
+agent: `local-agent/index.html?agent=<name>&cert=<id>` reads the certificate
+(the copy the mint left in this browser first, then the permaweb), refuses
+unless it hashes true, wears it as the system turn, and keeps every exchange
+as a memory row in the browser.
+
+**Receipts (in-app browser, 2026-09-26):** `bee` →
+`ar://efqq-z8zkh3D7TbJLXgQK2187Yxl8x4-rTgXDo6loFU` · `bee two` →
+`ar://QpwCYL3F5m9xZ50mLxCy46kZrmMCR-CwU5Z26jvrceY` — both `CONFIRMED` at the
+door, winc 0, owner = member key.
+
+**The chain row** is the one act the page cannot sign; it is queued in the
+browser and `scripts/vending-machine.mjs --row <name> <id>` writes it from the
+seat (fetch, re-hash, refuse on mismatch, then mint/update).
+
+**bPay only (founder law 2026-09-26):** the USDC/PYUSD rails, the EIP-681 link,
+the injected-wallet path and their constants are gone from vending.html; one
+held bPay row says in words that the seat is not named yet.
+
+**The registers:** vending.html is still a single dark presentation; the
+raver and new bee readings the founder demands on every surface are not yet
+authored for it — named here, not hidden.
+
 ## Not done, said plainly
 
 - No live x0x read (no daemon started, no token held — by law).

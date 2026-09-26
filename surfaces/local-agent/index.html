@@ -228,8 +228,43 @@ const MODEL_ID = 'Qwen2.5-0.5B-Instruct-q4f16_1-MLC';
 const MODEL_DOOR = 'https://relay.skaists.dev/model/Qwen2.5-0.5B-Instruct-q4f16_1-MLC';
 const P1_DOOR = 'https://relay.skaists.dev/compute/v1/chat/completions';
 
-const S = { gpu: null, engine: null, wakeT0: 0, wire: [], sri: {}, route: null };
+const S = { gpu: null, engine: null, wakeT0: 0, wire: [], sri: {}, route: null, agent: null };
 window.__localAgent = S;                       // the gates' readback hook
+
+/* ── a minted agent arrives with ?agent=<name>&cert=<ar id>: the mind wears
+   its birth certificate. The record is fetched from a gateway, its hash is
+   re-derived and compared (the resurrection gate), and only a hash-true
+   record becomes the system turn. Memory rows live in this browser under
+   the agent's name. Nothing model-shaped moves until the reader wakes it. */
+(async () => {
+  const q = new URLSearchParams(location.search);
+  const name = (q.get('agent') || '').trim(), cert = (q.get('cert') || '').trim();
+  if (!name || !/^[A-Za-z0-9_-]{43}$/.test(cert)) return;
+  const h1 = document.querySelector('header h1'); if (h1) h1.innerHTML = esc(name) + '<span>.a</span>';
+  document.title = name + '.a · your agent';
+  const out = $('answer'); out.classList.add('show'); out.textContent = 'fetching ' + name + '.a’s birth certificate…';
+  let rec = null, from = null;
+  /* the copy the vending page left in this browser comes first (the permaweb
+     copy seeds over minutes); either copy must hash true below */
+  try { const local = localStorage.getItem('agent.cert.' + cert); if (local) { rec = JSON.parse(local); from = 'this browser (minted here)'; } } catch {}
+  if (!rec) for (const g of ['https://arweave.net']) {
+    try { const r = await fetch(g + '/' + cert, { cache: 'no-store' }); if (!r.ok) continue; rec = await r.json(); from = g; break; } catch {}
+  }
+  if (!rec) { out.innerHTML = '<span style="color:var(--amber)">the certificate ar://' + esc(cert) + ' is not readable from a gateway yet — try again in a minute; the id is permanent.</span>'; return; }
+  /* the hash law, in this page too */
+  const sortDeep = v => Array.isArray(v) ? v.map(sortDeep) : (v && typeof v === 'object') ? Object.keys(v).sort().reduce((o, k) => (o[k] = sortDeep(v[k]), o), {}) : v;
+  const copy = JSON.parse(JSON.stringify(rec)); if (copy.hash) delete copy.hash.value;
+  const d = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(JSON.stringify(sortDeep(copy))));
+  const hash = [...new Uint8Array(d)].map(b => b.toString(16).padStart(2, '0')).join('');
+  if (!rec.hash || hash !== rec.hash.value || !rec.agent || rec.agent.name !== name) { out.innerHTML = '<span style="color:var(--amber)">the record at ar://' + esc(cert) + ' does not hash true for ' + esc(name) + ' — refused.</span>'; return; }
+  const memKey = 'agent.memory.' + name + '.' + cert.slice(0, 8);
+  let memory = []; try { memory = JSON.parse(localStorage.getItem(memKey) || '[]'); } catch {}
+  const owner = rec.answers && rec.answers.who_owns_it ? rec.answers.who_owns_it.member_key_ed25519_hex : '';
+  S.agent = { name, cert, record: rec, memKey, memory,
+    system: `You are ${name}.a, an agent of the skaists .a house, minted ${rec.answers.when_minted_utc} for the member whose ed25519 key is ${owner}. Your birth certificate is permanent at ar://${cert} (sha256 ${rec.hash.value}). You speak ${rec.agent.tongue} and English, plainly and truthfully, in short answers. You are ${rec.answers.what_is_this}. You never claim to be a person.` };
+  out.innerHTML = '<b>' + esc(name) + '.a</b> — birth certificate read from ' + esc(from.replace('https://', '')) + ', hash true · minted ' + esc(rec.answers.when_minted_utc) + ' · memory ' + memory.length + ' row(s) in this browser.<br>wake the mind and it answers as ' + esc(name) + '.a.';
+  $('prompt').value = 'who are you, and who owns you?';
+})();
 
 /* ── the wire: every resource request since page-open, host-censused ── */
 try {
@@ -359,8 +394,15 @@ async function ask() {
   const out = $('answer'); out.classList.add('show');
   out.textContent = '…'; let toks = 0, t0 = 0, first = 0;
   try {
+    /* a minted agent wears its certificate: the system turn is its identity,
+       and every exchange is kept as a memory row in this browser (a1 shape,
+       unsigned here — the member's key is not in this tab) */
+    const msgs = [];
+    if (S.agent) msgs.push({ role: 'system', content: S.agent.system });
+    if (S.agent) S.agent.memory.slice(-6).forEach(m => { msgs.push({ role: 'user', content: m.q }); msgs.push({ role: 'assistant', content: m.a }); });
+    msgs.push({ role: 'user', content: q });
     const stream = await S.engine.chat.completions.create({
-      messages: [{ role: 'user', content: q }], max_tokens: 220, stream: true, temperature: 0.7
+      messages: msgs, max_tokens: 220, stream: true, temperature: 0.7
     });
     let text = '';
     for await (const chunk of stream) {
@@ -371,6 +413,7 @@ async function ask() {
     addStat('tokens', toks + '');
     if (dt > 0 && toks > 1) addStat('speed', (toks / dt).toFixed(1) + ' tok/s');
     addStat('path', 'local · 0 requests to answer');
+    if (S.agent) { S.agent.memory.push({ rev: S.agent.memory.length + 1, q, a: text, ts: new Date().toISOString() }); try { localStorage.setItem(S.agent.memKey, JSON.stringify(S.agent.memory)); } catch {} addStat('memory', S.agent.memory.length + ' rows'); }
   } catch (e) {
     out.innerHTML = '<span style="color:var(--amber)">the local mind refused: ' + esc(String(e && e.message || e)).slice(0, 200) + '</span>';
   }

@@ -133,9 +133,34 @@ export async function mint({ name, tongue = 'latvian', template = 'bqueenbee-gen
   return { canonical: canon, member_key: k.pubHex, hash, bytes: bytes.length, ar_id: up.id, owner: up.owner, trx: row.trx, action: row.action, minted: mintedIso };
 }
 
-/* CLI: node scripts/vending-machine.mjs <name> [tongue] [template] [--dry-run] */
+/* the pointer row alone, for a certificate the page already put on the
+   permaweb (the page cannot sign the row; the seat can): fetch, re-hash,
+   refuse on mismatch, then mint/update. */
+export async function row({ name, arId, tongue = 'latvian', template = 'bqueenbee-genesis-1', report = () => {} }) {
+  const canon = canonicalName(name, tongue);
+  if (!/^[A-Za-z0-9_-]{43}$/.test(arId)) throw refuse('arweave', 'not a 43-character arweave id');
+  let rec = null;
+  for (const g of ['https://arweave.net']) {
+    try { const r = await fetch(g + '/' + arId, { signal: AbortSignal.timeout(15000) }); if (r.ok) { rec = await r.json(); report('fetched', { from: g }); break; } } catch {}
+  }
+  if (!rec) throw refuse('arweave', 'the certificate is not readable from a gateway yet');
+  const v = cert.verifyCertificate(rec);
+  if (!v.ok || !rec.agent || rec.agent.name !== canon) throw refuse('hash', 'the record does not hash true for ' + canon);
+  const pubHex = rec.answers.who_owns_it.member_key_ed25519_hex;
+  report('verified', { hash: v.hash, member_key: pubHex });
+  const out = await writePointerRow({ canon, pubHex, arId, hash: v.hash, template: rec.agent.template || template, tongue: rec.agent.tongue || tongue });
+  report('row', out); return { canonical: canon, ar_id: arId, hash: v.hash, ...out };
+}
+
+/* CLI: node scripts/vending-machine.mjs <name> [tongue] [template] [--dry-run]
+        node scripts/vending-machine.mjs --row <name> <ar id>            */
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
   const args = process.argv.slice(2); const dryRun = args.includes('--dry-run'); const pos = args.filter((a) => !a.startsWith('--'));
+  if (args.includes('--row')) {
+    try { const out = await row({ name: pos[0], arId: pos[1], report: (s, d) => console.log(s + ':', JSON.stringify(d)) }); console.log('ROW-DONE', JSON.stringify(out)); }
+    catch (e) { console.error('REFUSED at ' + (e.step || 'unknown') + ': ' + e.message); process.exit(1); }
+    process.exit(0);
+  }
   if (!pos[0]) { console.error('usage: node scripts/vending-machine.mjs <name> [tongue] [template] [--dry-run]'); process.exit(2); }
   try {
     const out = await mint({ name: pos[0], tongue: pos[1], template: pos[2], dryRun, report: (s, d) => console.log(s + ':', JSON.stringify(d)) });
