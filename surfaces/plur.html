@@ -266,9 +266,206 @@
   body[data-reg="bee"]{--rose-lift:#a31c35}
   body:not([data-reg="bee"]) .w .mute{color:var(--guard)}
   body[data-reg="bee"] .w .mute{color:#65509a}
+/* ── ETERNAL FRONT (docs/design/eternal) — every value is a skaists token (surfaces/skaists.css,
+   compiled from docs/design/skaists/tokens.json): no hand-picked hex, size or corner. Measured by
+   e2e/skaists-conformance.mjs. One register visible at a time; new bee is the default. ── */
+#eternal{margin:0 auto var(--sk-s2);padding:var(--sk-s4) var(--sk-s3) 0;border:0;border-radius:0;background:transparent;font-size:16px;line-height:1.45;max-width:596px}
+.et-archive-h{max-width:596px;margin-inline:auto!important;padding-inline:var(--sk-s3)}
+#eternal>.et-r,#eternal>.et-c{display:none}
+body[data-reg="raver"] #eternal>.et-b,body[data-reg="cypherpunk"] #eternal>.et-b{display:none}
+body[data-reg="raver"] #eternal>.et-r{display:block}
+body[data-reg="cypherpunk"] #eternal>.et-c{display:block}
+#eternal [hidden]{display:none!important}
+#eternal button{transition:none}
+#eternal svg{display:block}
+#eternal :focus-visible{outline:2px solid var(--sk-focus);outline-offset:3px}
+.et-archive-h{margin:var(--sk-s5) 0 var(--sk-s2);padding-top:var(--sk-s4);border-top:1px solid var(--sk-line);color:var(--sk-ink)}
+body[data-reg="bee"] .et-archive-h{font:400 28px/1.1 var(--sk-font-bee-serif)}
+body[data-reg="raver"] .et-archive-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em}
+body[data-reg="cypherpunk"] .et-archive-h{font:600 15px/1.45 var(--sk-font-mono)}
+
+/* NEW BEE — a calm welcome: four words, where they live, one plain step */
+.et-b{color:var(--sk-ink);display:flex;flex-direction:column;gap:var(--sk-s3);font-family:var(--sk-font-bee-sans)}
+.et-b-mark{font:400 18px/1.2 var(--sk-font-house);color:var(--sk-sovereign)}
+.et-b-h{margin:0;font:400 40px/1.05 var(--sk-font-bee-serif);color:var(--sk-ink);letter-spacing:0}
+.et-b-lede{margin:0;font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink-mut);text-wrap:pretty}
+.et-b-guard{display:flex;align-items:center;gap:var(--sk-s2);min-height:var(--sk-control-min);padding:var(--sk-s1) var(--sk-s3);border-radius:var(--sk-radius);background:var(--sk-guard-wash);color:var(--sk-guard);font:600 15px/1.45 var(--sk-font-bee-sans)}
+.et-b-guard svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.et-b-rows{display:flex;flex-direction:column;background:var(--sk-bg-card);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl);overflow:hidden}
+.et-b-row{display:flex;align-items:center;justify-content:space-between;gap:var(--sk-s2);min-height:var(--sk-control-row);padding:0 var(--sk-s3);border:0;border-bottom:1px solid var(--sk-line-soft);background:transparent;text-align:left;width:100%;font:500 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink);text-decoration:none}
+.et-b-row:last-child{border-bottom:0}
+a.et-b-row{cursor:pointer}
+.et-b-row small{display:flex;align-items:center;gap:var(--sk-s1);font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut);text-align:right}
+.et-b-row .chev{flex:none}
+.et-b-now{margin:0;padding:var(--sk-s2) var(--sk-s3);border-radius:var(--sk-radius);background:var(--sk-sovereign-tint);color:var(--sk-sovereign-strong);font:600 16px/1.45 var(--sk-font-bee-sans)}
+.et-b-act{display:flex;flex-direction:column;gap:var(--sk-s1)}
+.et-b-primary{height:var(--sk-control-primary);border-radius:var(--sk-radius-lg);border:0;background:var(--sk-primary);color:var(--sk-on-primary)!important;font:600 17px/1.2 var(--sk-font-bee-sans)!important;cursor:pointer;padding:0 var(--sk-s3)}
+.et-b-link{min-height:var(--sk-control-min);display:flex;align-items:center;justify-content:center;border:0;background:transparent;font:600 16px/1.45 var(--sk-font-bee-sans)!important;color:var(--sk-link)!important;text-decoration:none;cursor:pointer;padding:0}
+.et-b-link:hover{color:var(--sk-link-hover)!important;background:transparent}
+.et-b-foot{margin:0;text-align:center;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+
+/* RAVER — the words are a constellation: four fields, one star per spoken word, filled where
+   this browser has a voice, hollow where it has none. Tap a field, tap a word to hear it. The sky
+   turns once in three minutes (far under 3 Hz), pauses on the switch, and is still under
+   prefers-reduced-motion. */
+.et-r{color:var(--sk-ink);font-family:var(--sk-font-raver-body)}
+.et-r-top{display:flex;align-items:baseline;justify-content:space-between;gap:var(--sk-s2);flex-wrap:wrap}
+.et-r-h{margin:0;font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em;color:var(--sk-ink)}
+.et-r-hint{font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+.et-r-stars{width:100%;max-width:360px;margin:var(--sk-s3) auto var(--sk-s1);filter:drop-shadow(var(--sk-glow-sovereign))}
+.et-r-stars .field-w{cursor:pointer}
+.et-r-stars .field-w .zone{fill:var(--sk-bg-card);stroke:var(--sk-line);stroke-width:1.5}
+.et-r-stars .field-w.sel .zone{fill:var(--sk-sovereign-tint);stroke:var(--sk-sovereign-soft)}
+.et-r-stars .field-w:focus{outline:none}.et-r-stars .field-w:focus-visible .zone{stroke:var(--sk-ink);stroke-width:3}
+.et-r-stars .star{stroke-width:2}
+.et-r-stars .star.mute{fill:none!important}
+.et-r-stars .k-peace .star{fill:var(--sk-guard);stroke:var(--sk-guard)}.et-r-stars .k-love .star{fill:var(--sk-you);stroke:var(--sk-you)}
+.et-r-stars .k-unity .star{fill:var(--sk-sovereign);stroke:var(--sk-sovereign)}.et-r-stars .k-respect .star{fill:var(--sk-info);stroke:var(--sk-info)}
+.et-r-stars .star.root{stroke:var(--sk-ink)}
+.et-r-stars .lbl-w{font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em}
+.et-r-stars .k-peace .lbl-w{fill:var(--sk-guard)}.et-r-stars .k-love .lbl-w{fill:var(--sk-you)}.et-r-stars .k-unity .lbl-w{fill:var(--sk-sovereign-soft)}.et-r-stars .k-respect .lbl-w{fill:var(--sk-info)}
+.et-r-stars .core{fill:var(--sk-bg);stroke:var(--sk-sovereign);stroke-width:1.5;stroke-dasharray:3 5}
+.et-r-stars .core-t{fill:var(--sk-ink);font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em}
+.et-r-turn{transform-origin:0 0;animation:etTurn 180s linear infinite}
+@keyframes etTurn{to{transform:rotate(360deg)}}
+body.et-still .et-r-turn{animation-play-state:paused}
+@media (prefers-reduced-motion:reduce){.et-r-turn{animation:none}}
+.et-r-chips{display:flex;flex-wrap:wrap;gap:var(--sk-s1);margin-top:var(--sk-s2)}
+.et-r-chips button{min-width:var(--sk-control-min);min-height:var(--sk-control-min);padding:0 var(--sk-s2);border:1.5px solid var(--sk-sovereign);border-radius:var(--sk-radius-pill);background:var(--sk-sovereign-wash);color:var(--sk-ink);font:600 14px/1.25 var(--sk-font-raver-body);cursor:pointer}
+.et-r-chips button.mute{border-style:dashed;border-color:var(--sk-ink-dim);background:var(--sk-bg-card);color:var(--sk-ink-soft)}
+.et-r-chips button[aria-pressed="true"]{border-color:var(--sk-you);box-shadow:var(--sk-glow-sovereign)}
+.et-r-card .et-r-word{display:block;font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em;color:var(--sk-ink);margin-bottom:var(--sk-s1)}
+.et-c-fields td{height:var(--sk-control-min)}
+.et-c-fields .st-ok{color:var(--sk-verified)}.et-c-fields .st-no{color:var(--sk-guard)}
+.et-r-legend{display:flex;justify-content:space-between;gap:var(--sk-s1);margin:var(--sk-s1) 0 var(--sk-s2);font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+.et-r-legend span{display:flex;flex-direction:column;align-items:center;gap:var(--sk-s1)}
+.et-r-legend i{width:28px;height:12px;border-radius:var(--sk-radius-sm)}
+.et-r-legend em{font-style:normal}
+.lg-voice{background:var(--sk-sovereign)}.lg-mute{border:1.5px solid var(--sk-sovereign)}.lg-root{background:var(--sk-sovereign);border:2px solid var(--sk-ink)}
+.et-r-card{display:flex;gap:var(--sk-s2);align-items:center;padding:var(--sk-s2) var(--sk-s3);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl);background:var(--sk-sovereign-tint);min-height:var(--sk-control-person)}
+.et-r-card .rk{min-width:44px;height:44px;padding:0 var(--sk-s1);border-radius:var(--sk-radius);background:var(--sk-sovereign-strong);color:var(--sk-bg);display:flex;align-items:center;justify-content:center;font:700 15px/1.2 var(--sk-font-raver-display);flex:none}
+.et-r-card b{display:block;font:600 14px/1.25 var(--sk-font-raver-body)}.et-r-card span{font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-sovereign-soft)}
+.et-r-forks{display:flex;flex-wrap:wrap;gap:var(--sk-s1);margin:var(--sk-s2) 0 0}
+.et-r-forks span{padding:var(--sk-s1) var(--sk-s2);border:1px solid var(--sk-line);border-radius:var(--sk-radius-pill);background:var(--sk-bg-card);font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+.et-r-pill{position:relative;overflow:hidden;display:block;width:100%;height:58px;margin-top:var(--sk-s4);border:0;border-radius:var(--sk-radius-pill);background:var(--sk-primary);color:var(--sk-on-primary)!important;font:700 15px/1.2 var(--sk-font-raver-display)!important;letter-spacing:.04em;cursor:pointer;touch-action:none;user-select:none;-webkit-user-select:none;padding:0}
+.et-r-pill:hover{background:var(--sk-primary)}
+.et-r-pill .fill{position:absolute;left:0;top:0;bottom:0;width:0;background:var(--sk-bg);opacity:.25}
+.et-r-pill .lbl{position:relative}
+.et-r-note{margin:var(--sk-s2) 0 0;text-align:center;font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+.et-r-ghost{display:block;margin:var(--sk-s1) auto 0;min-height:var(--sk-control-min);padding:0 var(--sk-s2);border:0;background:none;color:var(--sk-link)!important;font:400 14px/1.4 var(--sk-font-raver-body)!important;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.et-r-ghost:hover{background:none}
+
+/* CYPHERPUNK — the corpus and its boundaries: counts, voices, the data flow, the tutor */
+.et-c{font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink)}
+.et-c-path{font:600 15px/1.45 var(--sk-font-mono);word-break:break-all;margin:0}
+.et-c-chips{display:flex;flex-wrap:wrap;gap:var(--sk-s1);margin:var(--sk-s2) 0}
+.et-c-chips span{padding:2px var(--sk-s1);border:1px solid var(--sk-line);border-radius:4px;background:var(--sk-bg-card);font:600 12px/1.4 var(--sk-font-mono)}
+.et-c-chips span.on{border-color:var(--sk-guard);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong)}
+.et-c-chips span.ok{border-color:var(--sk-verified);color:var(--sk-verified)}
+.et-c-kv{width:100%;margin:0;border-collapse:collapse;border:1px solid var(--sk-line);background:var(--sk-bg-card);font:400 13px/1.45 var(--sk-font-mono)}
+.et-c-kv th{width:104px;padding:var(--sk-s1) var(--sk-s2);text-align:left;vertical-align:top;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);border-bottom:1px solid var(--sk-line);background:transparent}
+.et-c-kv td{padding:var(--sk-s1) var(--sk-s2);border-bottom:1px solid var(--sk-line);word-break:break-word;color:var(--sk-ink)}
+.et-c-kv .no{color:var(--sk-info)}.et-c-kv .yes{color:var(--sk-verified)}.et-c-kv .sig{color:var(--sk-you)}
+.et-c-h{margin:var(--sk-s4) 0 var(--sk-s2);font:600 15px/1.45 var(--sk-font-mono);color:var(--sk-ink);letter-spacing:0}
+.et-c-notes{width:100%;border-collapse:collapse;border:1px solid var(--sk-line);background:var(--sk-bg-card);font:400 12px/1.45 var(--sk-font-mono)}
+.et-c-notes th{padding:var(--sk-s1);text-align:left;font:600 12px/1.4 var(--sk-font-mono);color:var(--sk-ink-mut);background:var(--sk-bg-well);border-bottom:1px solid var(--sk-line)}
+.et-c-notes td{padding:2px var(--sk-s1);border-bottom:1px solid var(--sk-line);color:var(--sk-ink-soft);white-space:nowrap}
+.et-c-notes td.on{color:var(--sk-verified)}
+.et-c-pipe{list-style:none;margin:0;padding:0;display:grid;gap:var(--sk-s2);counter-reset:p}
+.et-c-pipe li{display:grid;grid-template-columns:30px 1fr;gap:var(--sk-s1) var(--sk-s2);padding:var(--sk-s2);border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm);background:var(--sk-bg-card);counter-increment:p}
+.et-c-pipe li::before{content:counter(p,decimal-leading-zero);color:var(--sk-guard);font-weight:600}
+.et-c-pipe li b{font-weight:600}.et-c-pipe li p{grid-column:2;margin:0;color:var(--sk-ink-soft);word-break:break-word}
+.et-c-pipe li.done b{color:var(--sk-verified)}
+.et-c-pipe li.now{border-color:var(--sk-ai);box-shadow:inset 0 0 0 1px var(--sk-ai)}.et-c-pipe li.now b{color:var(--sk-ai)}
+.et-c-primary{display:flex;align-items:center;justify-content:center;width:100%;height:52px;margin-top:var(--sk-s3);border:0;border-radius:var(--sk-radius-sm);background:var(--sk-primary);color:var(--sk-on-primary)!important;font:600 14px/1.2 var(--sk-font-mono)!important;cursor:pointer;padding:0}
+.et-c-primary:hover{background:var(--sk-primary)}
+.et-c-verify{margin-top:var(--sk-s3);padding:var(--sk-s3);border-radius:var(--sk-radius-sm);background:var(--sk-bg-card)}
+.et-c-verify-h{font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);margin-bottom:var(--sk-s1)}
+.et-c-verify ol{margin:0;padding-left:var(--sk-s4);display:grid;gap:var(--sk-s1);overflow-wrap:anywhere}
+.et-c-row{display:grid;grid-template-columns:1fr 1fr;gap:var(--sk-s2);margin-top:var(--sk-s3)}
+.et-c-ghost{display:flex;align-items:center;justify-content:center;min-height:52px;padding:0 var(--sk-s1);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius-sm);background:transparent;color:var(--sk-ink)!important;text-decoration:none;text-align:center;font:600 14px/1.2 var(--sk-font-mono)!important;cursor:pointer}
+.et-c-ghost:hover{background:transparent}
+/* ── THE WHOLE FLOOR, dressed per register: the page's own variables mapped onto skaists. The
+   four words take the cornerstone's own colours (peace = guard, love = you, unity = sovereign,
+   respect = info); honey stays for b amounts only. ── */
+body[data-reg]{--ai:var(--sk-ai);--biomass:var(--sk-verified);--sovereign:var(--sk-sovereign);--sovereign-soft:var(--sk-sovereign-soft);--you:var(--sk-you);--info:var(--sk-info);--guard:var(--sk-guard);
+ --bg:var(--sk-bg);--ink:var(--sk-ink);--ink-mut:var(--sk-ink-mut);--ink-dim:var(--sk-ink-dim);--line:var(--sk-line);background:var(--sk-bg);color:var(--sk-ink)}
+body[data-reg] .f-peace{--hue:var(--sk-guard)}body[data-reg] .f-love{--hue:var(--sk-you)}body[data-reg] .f-unity{--hue:var(--sk-sovereign)}body[data-reg] .f-respect{--hue:var(--sk-info)}
+body[data-reg] .stone .dock a{color:var(--sk-link);border-bottom-color:var(--sk-link)}
+body[data-reg="bee"]{--font:var(--sk-font-bee-sans);--mono:var(--sk-font-mono);color-scheme:light}
+body[data-reg="bee"] .plur,body[data-reg="bee"] .field .en{color:var(--sk-sovereign)}
+body[data-reg="bee"] .view-title{font:400 40px/1.05 var(--sk-font-bee-serif);letter-spacing:0}
+body[data-reg="bee"] footer .m,body[data-reg="bee"] .w .mute{color:var(--sk-sovereign)}
+body[data-reg="bee"] .voicebox,body[data-reg="bee"] .voicebox select{background:var(--sk-bg-card);color:var(--sk-ink)}
+body[data-reg="raver"]{--font:var(--sk-font-raver-body);--mono:var(--sk-font-raver-body)}
+body[data-reg="raver"] :is(.view-title,.plur,.field .en,.roses h2,.talk h2,.stone h2){font-family:var(--sk-font-raver-display)}
+body[data-reg="raver"] .plur-actions a:nth-child(2){background:var(--sk-primary);color:var(--sk-on-primary);border-color:var(--sk-primary)}
+body[data-reg="cypherpunk"]{--font:var(--sk-font-mono);--mono:var(--sk-font-mono);font-family:var(--sk-font-mono)}
+body[data-reg="cypherpunk"] :is(.voicebox,.voicebox button,.voicebox select,.privacy-note,.msg,.pillar,.composer input,.composer button,.tongues select,.seeds button,.oddpick button,.roselinks a,.plur-actions a){border-radius:var(--sk-radius-sm)}
+body[data-reg] #eternal{border:0;padding-bottom:0}
 </style>
+<link rel="stylesheet" href="skaists.css">
 </head>
 <body data-reg="bee" data-bee-theme="custom">
+
+<!-- ETERNAL FRONT (founder blueprint 2026-09-26, docs/design/eternal): three separate products in
+     one surface. ONE data layer (the word cards this page carries, the browser's own voices as the
+     page's bvoice module found them, the tutor's last real answer) drives all three, so the facts
+     cannot drift; each register has its own layout, graphic, gesture and voice. Nothing here speaks
+     or sends on its own: a word is heard by pressing the page's own word card (bvoice), the pair by
+     #vsalam, and the conversation is the page's #talk, where sending is the reader's choice. -->
+<section id="eternal" aria-label="four words, every mouth">
+
+  <!-- NEW BEE — a calm welcome: four words, where they live, one plain step -->
+  <div class="et-b">
+    <div class="et-b-mark">PLUR</div>
+    <h2 class="et-b-h" data-t="et.plur.b.title">four words, every language</h2>
+    <p class="et-b-lede" data-t="et.plur.b.lede">peace, love, unity and respect, written the way people say them around the world. start with one word.</p>
+    <div class="et-b-guard"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span data-t="et.plur.b.guard">nothing plays until you press it. no account needed.</span></div>
+    <div class="et-b-rows" id="etBeeRows"><div class="et-b-row"><span data-t="et.plur.b.reading">reading the words…</span></div></div>
+    <p class="et-b-now" id="etBeeNow" aria-live="polite">checking your browser's voices…</p>
+    <div class="et-b-act">
+      <button type="button" class="et-b-primary" id="etBeeStart">start with peace</button>
+      <button type="button" class="et-b-link" data-go="talk" data-t="et.plur.b.talk">try a conversation</button>
+      <p class="et-b-foot" data-t="et.plur.b.foot">come as you are. we accept you.</p>
+    </div>
+  </div>
+
+  <!-- RAVER — the words are a constellation: four fields of stars; tap a field, tap a word -->
+  <div class="et-r">
+    <div class="et-r-top"><h2 class="et-r-h" id="etRaverTitle">one floor</h2><span class="et-r-hint" id="etRaverHint">reading the stars…</span></div>
+    <svg class="et-r-stars" id="etStars" viewBox="-200 -200 400 400" role="group" aria-label="the four words as a constellation, one star per spoken word"></svg>
+    <div class="et-r-legend" aria-label="what the stars mean">
+      <span><i class="lg-voice"></i><em data-t="et.plur.r.voice">has a voice</em></span><span><i class="lg-mute"></i><em data-t="et.plur.r.mute">no voice here</em></span><span><i class="lg-root"></i><em data-t="et.plur.r.root">root word</em></span>
+    </div>
+    <div class="et-r-card" id="etRaverCard" aria-live="polite"></div>
+    <div class="et-r-chips" id="etChipsR"></div>
+    <button type="button" class="et-r-pill" id="etRaverTalk">say it back</button>
+    <p class="et-r-note" data-t="et.plur.r.talkHint">the tutor answers in both tongues · sending is your choice</p>
+    <button type="button" class="et-r-ghost" id="etMotion" aria-pressed="false">pause motion</button>
+  </div>
+
+  <!-- CYPHERPUNK — the corpus and its boundaries: counts, voices, the data flow, the tutor's state -->
+  <div class="et-c">
+    <p class="et-c-path"><span data-et="path">plur://four-words · embedded word cards</span></p>
+    <div class="et-c-chips" id="etChips"></div>
+    <table class="et-c-notes et-c-fields" id="etFields"></table>
+    <button type="button" class="et-c-primary" id="etCyTalk">open the conversation</button>
+    <h3 class="et-c-h" data-t="et.plur.c.flowH">data flow · current implementation</h3>
+    <ol class="et-c-pipe" id="etPipe"></ol>
+    <h3 class="et-c-h" data-t="et.plur.c.receiptH">receipt</h3>
+    <table class="et-c-kv" id="etReceipt"></table>
+    <div class="et-c-verify">
+      <div class="et-c-verify-h" data-t="et.plur.c.verifyH">verify · in your own console</div>
+      <ol><li>speechSynthesis.getVoices() → the voices this page can use</li><li>document.querySelectorAll('.w.novoice').length → the words left silent</li><li>watch the network tab: nothing leaves until you press send</li></ol>
+    </div>
+    <div class="et-c-row">
+      <button type="button" class="et-c-ghost" id="etCyPair">hear the pair</button>
+      <a class="et-c-ghost" href="https://github.com/beehive-nature/beehive-nature/blob/main/surfaces/plur.html" target="_blank" rel="noopener noreferrer">fork the template ↗ new tab</a>
+    </div>
+  </div>
+</section>
+<h2 class="et-archive-h" id="etArchive" data-t="et.plur.archive">the whole floor</h2>
 
 <section class="open">
   <div class="glow"></div>
@@ -961,6 +1158,137 @@
   }
 
   st.textContent=T('plur.st.pick', 'pick your tongues, then touch a seed above ↑');
+})();
+</script>
+<script>
+/* ETERNAL FRONT — one data layer, three renderers (docs/design/eternal). Facts come from the page
+   itself: the word cards it carries (.field .w: the word, its tongue, its romanisation), the voices
+   the page's bvoice module found in this browser (.w.novoice, #vsalam), speech recognition's
+   presence, and the tutor's last real answer in #thread. Nothing here speaks or sends on its own: a
+   word is heard by pressing the page's own card, the pair by #vsalam, and the conversation is the
+   page's #talk, where sending stays the reader's choice. */
+(function(){
+  var $=function(id){return document.getElementById(id);};
+  var T=function(k,f){var t=window.BNRLanguage&&window.BNRLanguage.text;return t?t(k,f):f;};
+  var KEYS=['peace','love','unity','respect'];
+  var D={fields:[],total:0,tongues:0,voiced:0,voices:0,pair:false,recognition:false,tutor:'not verified',engine:false};
+  var R={sel:0,word:null};
+  function esc(v){return String(v==null?'':v).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+  function set(sel,txt){document.querySelectorAll('#eternal [data-et="'+sel+'"]').forEach(function(e){e.textContent=txt;});}
+  function cards(k){return [].slice.call(document.querySelectorAll('.field.f-'+k+' .constellation .w'));}
+  function read(){
+    var all=new Set();
+    D.fields=KEYS.map(function(k){var ws=cards(k).map(function(w){all.add((w.dataset.lang||'').split('-')[0]);
+      return {say:w.dataset.say,lang:w.dataset.lang,rom:((w.querySelector('.r')||{}).textContent||'').trim(),voice:!w.classList.contains('novoice'),root:w.classList.contains('root'),sz:w.dataset.sz||'m'};});
+      return {key:k,n:ws.length,tongues:new Set(ws.map(function(w){return w.lang.split('-')[0];})).size,voiced:ws.filter(function(w){return w.voice;}).length,words:ws};});
+    D.total=D.fields.reduce(function(a,f){return a+f.n;},0); D.tongues=all.size;
+    D.voiced=D.fields.reduce(function(a,f){return a+f.voiced;},0);
+    D.engine=!!window.speechSynthesis; D.voices=D.engine?(speechSynthesis.getVoices()||[]).length:0;
+    D.pair=!!($('vsalam')&&!$('vsalam').disabled);
+    D.recognition=!!(window.SpeechRecognition||window.webkitSpeechRecognition);
+    var th=$('thread'); D.tutor=th&&th.querySelector('.msg.hive:not(:has(.thinking))')?'answered':th&&th.querySelector('.msg.sys')?'unavailable':'not verified';
+  }
+  function fieldName(k){return T('plur.'+k,k);}
+
+  /* ── NEW BEE ── */
+  function bee(){
+    $('etBeeRows').innerHTML=D.fields.map(function(f){
+      return '<button type="button" class="et-b-row" data-go="f-'+f.key+'"><span>'+esc(fieldName(f.key))+'</span><small>'+esc(f.n+' '+T('et.plur.b.ways','ways to say it'))+'<svg class="chev" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2"/></svg></small></button>';}).join('');
+    $('etBeeNow').textContent=!D.engine?T('et.plur.b.noEngine','this browser cannot speak, so the words stay written. every one of them is here to read.')
+      :D.voiced?T('et.plur.b.voiced','your browser can say {n} of these {t} words out loud. press one to hear it.').replace('{n}',D.voiced).replace('{t}',D.total)
+      :T('et.plur.b.silent','your browser has no voices for these words yet, so they stay written. every one of them is here to read.');
+    $('etBeeStart').textContent=T('et.plur.b.start','start with peace');
+  }
+
+  /* ── RAVER ── */
+  var built='';
+  function stars(){
+    var svg=$('etStars'); if(!svg)return;
+    var sig=D.fields.map(function(f){return f.words.map(function(w){return w.voice?1:0;}).join('');}).join('|');
+    if(sig!==built){
+      var h='<g class="et-r-turn">';
+      D.fields.forEach(function(f,k){
+        var a0=-Math.PI/2+k*Math.PI/2+0.06, a1=a0+Math.PI/2-0.12, p=function(r,a){return (r*Math.cos(a)).toFixed(1)+' '+(r*Math.sin(a)).toFixed(1);};
+        h+='<g class="field-w k-'+f.key+'" data-k="'+k+'" role="button" tabindex="0" aria-label="'+esc(fieldName(f.key)+': '+f.n+' words, '+f.voiced+' with a voice here')+'">';
+        h+='<path class="zone" d="M'+p(58,a0)+'A58 58 0 0 1 '+p(58,a1)+'L'+p(194,a1)+'A194 194 0 0 0 '+p(194,a0)+'Z"/>';
+        f.words.forEach(function(w,i){var a=a0+(i+0.5)*(a1-a0)/f.n, r=88+(i%4)*27, s={xl:9,l:7.5,m:6,s:5}[w.sz]||6;
+          h+='<circle class="star'+(w.voice?'':' mute')+(w.root?' root':'')+'" cx="'+(r*Math.cos(a)).toFixed(1)+'" cy="'+(r*Math.sin(a)).toFixed(1)+'" r="'+s+'"/>';});
+        var am=(a0+a1)/2; h+='<text class="lbl-w" x="'+(75*Math.cos(am)).toFixed(1)+'" y="'+(75*Math.sin(am)+5).toFixed(1)+'" text-anchor="middle">'+esc(f.key[0])+'</text></g>';
+      });
+      h+='</g><circle class="core" r="44"/><text class="core-t" y="5" text-anchor="middle">PLUR</text>';
+      svg.innerHTML=h; built=sig;
+    }
+    svg.querySelectorAll('.field-w').forEach(function(g){g.classList.toggle('sel',+g.getAttribute('data-k')===R.sel);});
+  }
+  function raver(){
+    $('etRaverHint').textContent=D.total+' '+T('et.plur.r.words','words')+' · '+D.tongues+' '+T('et.plur.r.tongues','tongues')+' · '+D.voiced+' '+T('et.plur.r.voiced','with a voice');
+    stars();
+    var f=D.fields[R.sel], c=$('etRaverCard'), w=f&&R.word!=null&&f.words[R.word];
+    if(w)c.innerHTML='<span class="rk">'+esc(w.lang)+'</span><div><span class="et-r-word" dir="auto">'+esc(w.say)+'</span><span>'+esc(w.rom+' · '+(w.voice?T('et.plur.r.heard','sent to your voice'):T('et.plur.r.noVoice','no voice for this tongue here · the word stays written')))+'</span></div>';
+    else if(f)c.innerHTML='<span class="rk">'+esc(f.n)+'</span><div><b>'+esc(fieldName(f.key))+'</b><span>'+esc(f.tongues+' '+T('et.plur.r.tongues','tongues')+' · '+f.voiced+' '+T('et.plur.r.voiced','with a voice')+' · '+T('et.plur.r.tap','tap a word'))+'</span></div>';
+    $('etChipsR').innerHTML=f?f.words.map(function(w,i){return '<button type="button" class="'+(w.voice?'':'mute')+'" data-w="'+i+'" aria-pressed="'+(R.word===i)+'" lang="'+esc(w.lang)+'" dir="auto">'+esc(w.say)+'</button>';}).join(''):'';
+    $('etRaverTitle').textContent=T('et.plur.r.h','one floor');
+  }
+
+  /* ── CYPHERPUNK ── */
+  function cy(){
+    $('etChips').innerHTML='<span class="'+(D.voiced?'ok':'on')+'">voiced '+D.voiced+'/'+D.total+'</span><span>'+D.tongues+' tongues</span><span class="on">tutor '+esc(D.tutor)+'</span>';
+    $('etFields').innerHTML='<tr><th>word</th><th>cards</th><th>tongues</th><th>voiced</th></tr>'+D.fields.map(function(f){
+      return '<tr><td>'+esc(f.key)+'</td><td>'+f.n+'</td><td>'+f.tongues+'</td><td class="'+(f.voiced?'st-ok':'st-no')+'">'+f.voiced+'/'+f.n+'</td></tr>';}).join('')+
+      '<tr><td>total</td><td>'+D.total+'</td><td>'+D.tongues+'</td><td class="'+(D.voiced?'st-ok':'st-no')+'">'+D.voiced+'/'+D.total+'</td></tr>';
+    var steps=[
+      ['browser · word cards',D.total+' cards embedded in this document · register and tongue kept on this origin','done'],
+      ['voice engine',!D.engine?'no speechSynthesis in this browser · every card labelled silent':D.voices+' installed voices · '+D.voiced+' of '+D.total+' cards can speak · local-only audio not established',D.engine?'done':'guard'],
+      ['voice in',D.recognition?'SpeechRecognition present · may use a browser vendor service':'no SpeechRecognition · the mic stays off',D.recognition?'done':'guard'],
+      ['ai provider',D.tutor==='answered'?'api.anthropic.com/v1/messages answered':D.tutor==='unavailable'?'api.anthropic.com/v1/messages refused · the message was not answered':'api.anthropic.com/v1/messages · no auth header configured · not verified · nothing sent until you press send',D.tutor==='answered'?'done':'now']
+    ];
+    $('etPipe').innerHTML=steps.map(function(s){return '<li class="'+s[2]+'"><b>'+esc(s[0])+'</b><p>'+esc(s[1])+'</p></li>';}).join('');
+    var kv=function(rows){return rows.map(function(r){return '<tr><th>'+esc(r[0])+'</th><td>'+r[1]+'</td></tr>';}).join('');};
+    $('etReceipt').innerHTML=kv([
+      ['voices',esc(String(D.voices))],['voiced',esc(D.voiced+' / '+D.total)],
+      ['pair',D.pair?'<span class="yes">a Hebrew or Arabic voice exists</span>':'<span class="no">no Hebrew or Arabic voice · the example stays silent</span>'],
+      ['tutor',D.tutor==='answered'?'<span class="yes">answered</span>':'<span class="no">'+esc(D.tutor)+'</span>'],
+      ['sent','<span class="yes">nothing</span> · until you press send'],
+      ['unverified','provider retention · relay privacy · end-to-end encryption']]);
+    var b=$('etCyPair'); b.disabled=!D.pair; b.textContent=D.pair?T('et.plur.c.pair','hear the pair'):T('et.plur.c.noPair','hear the pair · no voice');
+  }
+
+  function labels(){document.querySelectorAll('[data-t^="et.plur."]').forEach(function(e){if(e.__en==null)e.__en=e.textContent;e.textContent=T(e.getAttribute('data-t'),e.__en);});}
+  function all(){read();bee();raver();cy();}
+
+  /* ── the hand-offs: the page owns every real step ── */
+  function goField(k){var s=document.querySelector('.field.f-'+k);if(!s)return;s.scrollIntoView({block:'start'});var w=s.querySelector('.w');if(w)w.focus({preventScroll:true});}
+  function talk(){var t=$('talk');if(t)t.scrollIntoView({block:'start'});var i=$('say');if(i)i.focus({preventScroll:true});}
+  function hear(k,i){var w=cards(KEYS[k])[i];if(w)w.click();}
+  var still=false; try{still=localStorage.getItem('bnr.motion.paused')==='true';}catch(x){}
+  function motion(){var reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+    document.body.classList.toggle('et-still',still||reduce);var b=$('etMotion');
+    b.setAttribute('aria-pressed',String(still||reduce));b.disabled=reduce;
+    b.textContent=reduce?T('et.plur.r.stillOs','still · your device asks for less motion'):still?T('et.plur.r.resume','resume motion'):T('et.plur.r.pause','pause motion');}
+
+  function wire(){
+    var ev=$('eternal'); if(!ev)return;
+    $('etBeeStart').addEventListener('click',function(){goField('peace');});
+    $('etRaverTalk').addEventListener('click',talk);
+    $('etCyTalk').addEventListener('click',talk);
+    $('etCyPair').addEventListener('click',function(){var b=$('vsalam');if(b&&!b.disabled)b.click();});
+    $('etMotion').addEventListener('click',function(){still=!still;try{localStorage.setItem('bnr.motion.paused',String(still));}catch(x){}motion();});
+    ev.addEventListener('click',function(e){
+      if(e.target.closest('[data-go="talk"]')){talk();return;}
+      var row=e.target.closest('.et-b-row[data-go]'); if(row){goField(row.getAttribute('data-go').slice(2));return;}
+      var f=e.target.closest('#etStars .field-w'); if(f){R.sel=+f.getAttribute('data-k');R.word=null;raver();return;}
+      var c=e.target.closest('#etChipsR button'); if(c){R.word=+c.getAttribute('data-w');hear(R.sel,R.word);raver();}
+    });
+    ev.addEventListener('keydown',function(e){var f=e.target.closest&&e.target.closest('#etStars .field-w');if(f&&(e.key==='Enter'||e.key===' ')){e.preventDefault();f.dispatchEvent(new MouseEvent('click',{bubbles:true}));}});
+    /* the page speaks through its own nodes: voices re-index the cards, the tutor answers in #thread */
+    var mo=new MutationObserver(function(){all();});
+    document.querySelectorAll('.field .constellation').forEach(function(c){mo.observe(c,{attributes:true,subtree:true,attributeFilter:['class']});});
+    if($('vsalam'))mo.observe($('vsalam'),{attributes:true,attributeFilter:['disabled']});
+    if($('thread'))mo.observe($('thread'),{childList:true,subtree:true});
+    document.addEventListener('blang',function(){labels();motion();all();});
+  }
+  labels(); wire(); motion(); all();
+  window.__eternal={data:D,raver:R,refresh:all};
 })();
 </script>
 <script src="tour.js?v=42"></script>

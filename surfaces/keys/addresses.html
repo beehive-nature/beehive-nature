@@ -46,9 +46,242 @@ body[data-reg="bee"][data-bee-theme="shared"] input{background:#fff;color:var(--
 body[data-reg="bee"][data-bee-theme="shared"] button{background:#a8238c;color:#fff;border-color:#a8238c;min-height:44px}
 body[data-reg="bee"][data-bee-theme="shared"] button:hover{background:#8a1c73;color:#fff}
 body[data-reg="bee"][data-bee-theme="shared"] footer a{color:#176879!important}
+/* ── ETERNAL FRONT (docs/design/eternal) — every value is a skaists token (../skaists.css, compiled
+   from docs/design/skaists/tokens.json): no hand-picked hex, size or corner. Measured by
+   e2e/skaists-conformance.mjs. One register visible at a time; new bee is the default.
+   ZERO CUSTODY (ETERNAL wave 2, the keys ruling): the fronts never read the box below (#root) or
+   anything the shape-maker writes (#plcDoc #plcAka #npubV #nip05), and make no request. They
+   explain, then hand off to the shape-maker, which is untouched. ── */
+#eternal{width:100%;max-width:30rem;margin:var(--sk-s2) auto 0;box-sizing:border-box;text-align:start}
+#eternal *{box-sizing:border-box}
+#eternal>.et-r,#eternal>.et-c{display:none}
+body[data-reg="raver"] #eternal>.et-b,body[data-reg="cypherpunk"] #eternal>.et-b{display:none}
+body[data-reg="raver"] #eternal>.et-r{display:block}
+body[data-reg="cypherpunk"] #eternal>.et-c{display:block}
+#eternal [hidden]{display:none!important}
+#eternal button{margin:0;color:inherit;font:inherit;padding:0;background:none;border:0;border-radius:0}
+#eternal p{margin:0}
+#eternal svg{display:block}
+#eternal :focus-visible{outline:2px solid var(--sk-focus);outline-offset:3px}
+#eternal .et-center{text-align:center}
+.et-archive-h{width:100%;max-width:30rem;margin:var(--sk-s5) auto var(--sk-s1);padding-top:var(--sk-s4);border-top:1px solid var(--sk-line);color:var(--sk-ink);box-sizing:border-box}
+body[data-reg="bee"] .et-archive-h{font:400 28px/1.1 var(--sk-font-bee-serif)}
+body[data-reg="raver"] .et-archive-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em}
+body[data-reg="cypherpunk"] .et-archive-h{font:600 15px/1.45 var(--sk-font-mono)}
+
+/* NEW BEE — a calm room: four plain rows, one magenta action, nothing technical */
+#eternal .et-b{color:var(--sk-ink);display:flex;flex-direction:column;gap:var(--sk-s3);font-family:var(--sk-font-bee-sans)}
+#eternal .et-b-step{display:flex;flex-direction:column;gap:var(--sk-s3)}
+#eternal .et-b-mark{font:400 18px/1.2 var(--sk-font-house);color:var(--sk-sovereign)}
+#eternal .et-b-h{margin:0;font:400 40px/1.05 var(--sk-font-bee-serif);color:var(--sk-ink);letter-spacing:0}
+#eternal .et-b-lede{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink-mut);text-wrap:pretty}
+#eternal .et-b-guard{display:flex;align-items:center;gap:var(--sk-s2);min-height:var(--sk-control-min,44px);padding:var(--sk-s1) var(--sk-s3);border-radius:var(--sk-radius);background:var(--sk-guard-wash);color:var(--sk-guard);font:600 16px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-b-guard svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+#eternal .et-b-rows{display:flex;flex-direction:column;background:var(--sk-bg-card);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl);overflow:hidden}
+#eternal .et-b-row{display:flex;align-items:center;justify-content:space-between;gap:var(--sk-s2);width:100%;min-height:var(--sk-control-row,52px);padding:var(--sk-s1) var(--sk-s3);border-bottom:1px solid var(--sk-line-soft);background:transparent;text-align:start;font:500 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink);cursor:pointer}
+#eternal .et-b-row:last-child,#eternal .et-b-more:last-child{border-bottom:0}
+#eternal .et-b-row small{display:flex;align-items:center;gap:var(--sk-s1);flex:none;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-row[aria-expanded="true"]{background:var(--sk-sovereign-tint);color:var(--sk-sovereign-strong);font-weight:600}
+#eternal .et-b-row[aria-expanded="true"] small{color:var(--sk-sovereign-strong)}
+#eternal .et-b-row .chev{flex:none;transition:transform var(--dur,.26s)}
+#eternal .et-b-row[aria-expanded="true"] .chev{transform:rotate(90deg)}
+#eternal .et-b-more{padding:var(--sk-s2) var(--sk-s3);border-bottom:1px solid var(--sk-line-soft);background:var(--sk-sovereign-tint);font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+#eternal .et-b-act{display:flex;flex-direction:column;gap:var(--sk-s1);margin-top:var(--sk-s1)}
+#eternal .et-b-primary{display:flex;align-items:center;justify-content:center;width:100%;height:var(--sk-control-primary,54px);padding:0 var(--sk-s3);border-radius:var(--sk-radius-lg);background:var(--sk-primary);color:var(--sk-on-primary);font:600 17px/1.2 var(--sk-font-bee-sans);cursor:pointer;text-align:center}
+#eternal .et-b-link{display:flex;align-items:center;justify-content:center;min-height:var(--sk-control-min,44px);font:600 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-link);text-decoration:none;cursor:pointer;text-align:center}
+#eternal .et-b-link:hover{color:var(--sk-link-hover)}
+#eternal .et-b-foot{text-align:center;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-tick{width:78px;height:78px;margin:var(--sk-s2) auto 0;border-radius:var(--sk-radius-pill);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong);display:flex;align-items:center;justify-content:center;font:400 40px/1 var(--sk-font-bee-serif)}
+#eternal .et-b-tick.ok{background:var(--sk-verified-wash);color:var(--sk-verified)}
+#eternal .et-b-card{background:var(--sk-sovereign-tint);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl);padding:var(--sk-s3)}
+#eternal .et-b-card h3{margin:0 0 var(--sk-s1);font:400 28px/1.1 var(--sk-font-bee-serif);color:var(--sk-sovereign-strong)}
+#eternal .et-b-card div{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+
+/* RAVER — two rails: two rings of light that meet where the root's signed note binds them */
+#eternal .et-r{color:var(--sk-ink);font-family:var(--sk-font-raver-body)}
+#eternal .et-r-top{display:flex;align-items:baseline;justify-content:space-between;gap:var(--sk-s2);flex-wrap:wrap}
+#eternal .et-r-h{margin:0;font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em;color:var(--sk-ink)}
+#eternal .et-r-hint{font:400 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-art{width:100%;max-width:360px;margin:var(--sk-s3) auto var(--sk-s1);filter:drop-shadow(var(--sk-glow-sovereign));touch-action:manipulation}
+#eternal .et-r-art .seg{transition:fill var(--dur,.26s),opacity var(--dur,.26s),stroke var(--dur,.26s)}
+#eternal .et-r-art [role="button"]{cursor:pointer}
+#eternal .et-r-art .seg{pointer-events:all}
+#eternal .et-r-art [role="button"]:focus{outline:none}
+#eternal .et-r-art [role="button"]:focus-visible .seg{stroke:var(--sk-ink);stroke-width:2}
+#eternal .et-r-legend{display:flex;justify-content:center;flex-wrap:wrap;gap:var(--sk-s1) var(--sk-s3);margin:var(--sk-s1) 0 var(--sk-s2);font:400 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-legend span{display:flex;align-items:center;gap:var(--sk-s1)}
+#eternal .et-r-legend i{width:24px;height:12px;border-radius:var(--sk-radius-sm)}
+#eternal .et-r-legend .lg-yours{border:1.5px dashed var(--sk-sovereign-soft)}
+#eternal .et-r-legend .lg-dim{background:var(--sk-sovereign-wash);border:1px solid var(--sk-line)}
+#eternal .et-r-legend .lg-lit{background:var(--sk-sovereign-strong)}
+#eternal .et-r-legend b{font-weight:400}
+#eternal .et-r-card{display:flex;gap:var(--sk-s2);align-items:center;padding:var(--sk-s2) var(--sk-s3);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl);background:var(--sk-sovereign-tint);min-height:var(--sk-control-person,60px)}
+#eternal .et-r-card .rk{width:44px;height:44px;border-radius:var(--sk-radius);background:var(--sk-sovereign-strong);color:var(--sk-bg);display:flex;align-items:center;justify-content:center;font:700 15px/1.2 var(--sk-font-raver-display);flex:none}
+#eternal .et-r-card b{display:block;font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink)}
+#eternal .et-r-card span{font:400 14px/1.25 var(--sk-font-raver-body);color:var(--sk-sovereign-soft)}
+#eternal .et-r-note{margin:var(--sk-s2) 0 0;text-align:center;font:400 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-big{margin:var(--sk-s2) 0 var(--sk-s1);text-align:center;font:700 60px/.95 var(--sk-font-raver-display);letter-spacing:-.02em;color:var(--sk-ink)}
+#eternal .et-r-pill{display:flex;align-items:center;justify-content:center;width:100%;height:58px;margin-top:var(--sk-s4);border-radius:var(--sk-radius-pill);background:var(--sk-primary);color:var(--sk-on-primary);font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em;cursor:pointer}
+#eternal .et-r-ghost{display:flex;width:max-content;max-width:100%;align-items:center;justify-content:center;margin:var(--sk-s2) auto 0;min-height:var(--sk-control-min,44px);padding:0 var(--sk-s2);color:var(--sk-link);font:400 14px/1.25 var(--sk-font-raver-body);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+
+/* CYPHERPUNK — the instrument: every field of both rails, the binding pipeline, a receipt */
+#eternal .et-c{font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink)}
+#eternal .et-c-path{font:600 15px/1.45 var(--sk-font-mono);word-break:break-all;color:var(--sk-ink)}
+#eternal .et-c-chips{display:flex;flex-wrap:wrap;gap:var(--sk-s1);margin:var(--sk-s2) 0}
+#eternal .et-c-chips span{padding:2px var(--sk-s1);border:1px solid var(--sk-line);border-radius:4px;background:var(--sk-bg-card);font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-soft)}
+#eternal .et-c-chips span.ok{border-color:var(--sk-verified);color:var(--sk-verified)}
+#eternal .et-c-chips span.no{border-color:var(--sk-info);color:var(--sk-info)}
+#eternal .et-c-guard{display:flex;justify-content:space-between;align-items:center;gap:var(--sk-s2);flex-wrap:wrap;min-height:var(--sk-control-min,44px);padding:var(--sk-s1) var(--sk-s3);border:1px dashed var(--sk-guard);border-radius:var(--sk-radius-sm);background:var(--sk-guard-wash);color:var(--sk-guard)}
+#eternal .et-c-guard b{font-weight:600;color:var(--sk-sovereign-strong)}
+#eternal .et-c-tab{width:100%;margin:var(--sk-s2) 0 var(--sk-s1);border-collapse:separate;border-spacing:0;border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm);overflow:hidden;background:var(--sk-bg-card)}
+#eternal .et-c-tab th{padding:var(--sk-s1) var(--sk-s2);text-align:start;font:600 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);border-bottom:1px solid var(--sk-line);background:var(--sk-bg-well)}
+#eternal .et-c-tab td{height:var(--sk-control-min,44px);padding:var(--sk-s1) var(--sk-s2);border-bottom:1px solid var(--sk-line);font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink);vertical-align:middle;overflow-wrap:anywhere}
+#eternal .et-c-tab tr:last-child td{border-bottom:0}
+#eternal .et-c-tab td:first-child{color:var(--sk-guard);white-space:nowrap}
+#eternal .et-c-tab td.fn{color:var(--sk-ai)}
+#eternal .et-c-h{margin:var(--sk-s4) 0 var(--sk-s2);font:600 15px/1.45 var(--sk-font-mono);color:var(--sk-ink);letter-spacing:0}
+#eternal .et-c-pipe{list-style:none;margin:0;padding:0;display:grid;gap:var(--sk-s2);counter-reset:p}
+#eternal .et-c-pipe li{display:grid;grid-template-columns:30px 1fr;gap:var(--sk-s1) var(--sk-s2);padding:var(--sk-s2) var(--sk-s3);border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm);background:var(--sk-bg-card);counter-increment:p}
+#eternal .et-c-pipe li::before{content:counter(p,decimal-leading-zero);color:var(--sk-guard);font-weight:600}
+#eternal .et-c-pipe li b{font-weight:600;color:var(--sk-ink);overflow-wrap:anywhere}
+#eternal .et-c-pipe li div{grid-column:2;color:var(--sk-ink-soft);overflow-wrap:anywhere}
+#eternal .et-c-pipe li.done b{color:var(--sk-verified)}
+#eternal .et-c-pipe li.guard{border-style:dashed;border-color:var(--sk-guard)}
+#eternal .et-c-pipe li.guard b{color:var(--sk-guard)}
+#eternal .et-c-pipe li.now{border-color:var(--sk-ai);box-shadow:inset 0 0 0 1px var(--sk-ai)}
+#eternal .et-c-pipe li.now b{color:var(--sk-ai)}
+#eternal .et-c-pipe li.todo div{color:var(--sk-ink-mut)}
+#eternal .et-c-primary{display:flex;align-items:center;justify-content:center;width:100%;min-height:52px;margin-top:var(--sk-s3);padding:0 var(--sk-s2);border-radius:var(--sk-radius-sm);background:var(--sk-primary);color:var(--sk-on-primary);font:600 14px/1.2 var(--sk-font-mono);cursor:pointer;text-align:center}
+#eternal .et-c-kv{width:100%;border-collapse:collapse;border:1px solid var(--sk-line);background:var(--sk-bg-card)}
+#eternal .et-c-kv th{width:96px;padding:var(--sk-s2) var(--sk-s3);text-align:start;vertical-align:top;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);border-bottom:1px solid var(--sk-line)}
+#eternal .et-c-kv td{padding:var(--sk-s2) var(--sk-s3);border-bottom:1px solid var(--sk-line);overflow-wrap:anywhere;color:var(--sk-ink)}
+#eternal .et-c-kv .no{color:var(--sk-info)}#eternal .et-c-kv .yes{color:var(--sk-verified)}#eternal .et-c-kv .gd{color:var(--sk-guard)}
+#eternal .et-c-verify{margin-top:var(--sk-s3);padding:var(--sk-s3);border-radius:var(--sk-radius-sm);background:var(--sk-bg-card)}
+#eternal .et-c-verify-h{font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);margin-bottom:var(--sk-s1)}
+#eternal .et-c-verify ol{margin:0;padding-inline-start:var(--sk-s4);display:grid;grid-template-columns:minmax(0,1fr);gap:var(--sk-s1);color:var(--sk-ink)}
+#eternal .et-c-verify li{overflow-wrap:anywhere}
+#eternal .et-c-row{display:grid;grid-template-columns:1fr 1fr;gap:var(--sk-s2);margin-top:var(--sk-s3)}
+#eternal .et-c-ghost{display:flex;align-items:center;justify-content:center;min-height:52px;padding:0 var(--sk-s1);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius-sm);color:var(--sk-ink);text-decoration:none;text-align:center;font:600 14px/1.2 var(--sk-font-mono)}
+
+#eternal .et-r-legend .lg-plc{background:var(--sk-info)}
+#eternal .et-r-legend .lg-npub{background:var(--sk-sovereign)}
+#eternal .et-r-legend .lg-root{border:1.5px dashed var(--sk-guard)}
+#eternal .et-r-card .rk.plc{background:var(--sk-info)}#eternal .et-r-card .rk.npub{background:var(--sk-sovereign)}#eternal .et-r-card .rk.bind{background:var(--sk-you)}#eternal .et-r-card .rk.root{background:var(--sk-guard)}
+#eternal .et-c-tab td.gd{color:var(--sk-guard)}
+#eternal .et-c-tab tr.rail td{background:var(--sk-bg-well);color:var(--sk-ink-mut);font:600 12px/1.45 var(--sk-font-mono);height:auto}
+#eternal .et-c-kv code,#eternal .et-c-verify code{font:inherit;color:var(--sk-ai);overflow-wrap:anywhere;word-break:break-all}
+
+/* ── THE WHOLE PAGE, dressed per register: the page's own variables mapped onto skaists ── */
+body[data-reg]{--bg:var(--sk-bg);--ink:var(--sk-ink);--cyan:var(--sk-ai);--violet:var(--sk-sovereign);--gold:var(--sk-sovereign-strong);--dim:var(--sk-ink-mut);--line:var(--sk-line);background:var(--sk-bg);color:var(--sk-ink)}
+body[data-reg] header h1{letter-spacing:0;color:var(--sk-ink)}
+body[data-reg] header p{color:var(--sk-ink-mut)}
+body[data-reg] .card{background:var(--sk-bg-card);border-color:var(--sk-line)}
+body[data-reg] .card h3{letter-spacing:0}
+body[data-reg] .card:not(.plc):not(.npub) h3{color:var(--sk-you)!important}
+body[data-reg] input{min-height:var(--sk-control-min,44px);background:var(--sk-bg-well);color:var(--sk-ink);border-color:var(--sk-ink-mut)}
+body[data-reg] form button{min-height:var(--sk-control-min,44px);background:var(--sk-primary);color:var(--sk-on-primary);border-color:var(--sk-primary)}
+body[data-reg] form button{white-space:nowrap}
+body[data-reg] input{min-width:0}
+body[data-reg] form button:hover{background:var(--sk-primary);color:var(--sk-on-primary);filter:brightness(1.08)}
+body[data-reg] footer a{color:var(--sk-link)!important}
+body[data-reg] #bnr-beta-badge{opacity:1!important}
+body[data-reg] #bnr-beta-badge a{display:inline-flex!important;align-items:center;min-height:var(--sk-control-min,44px);padding:0 var(--sk-s2)!important;color:var(--sk-link)!important;background:var(--sk-bg-card)!important;border-color:var(--sk-line)!important;border-radius:var(--sk-radius-pill)!important}
+body[data-reg="bee"]{font:400 16px/1.45 var(--sk-font-bee-sans)}
+body[data-reg="bee"] header h1{font:400 40px/1.05 var(--sk-font-bee-serif)}
+body[data-reg="bee"] header p{font:400 16px/1.45 var(--sk-font-bee-sans)}
+body[data-reg="bee"] .card{border-radius:var(--sk-radius-xl)}
+body[data-reg="bee"] .card h3{font:600 16px/1.45 var(--sk-font-bee-sans)}
+body[data-reg="bee"] .row{font:400 14px/1.4 var(--sk-font-bee-sans)}
+body[data-reg="bee"] .row .v{font-size:16px;line-height:1.45}
+body[data-reg="bee"] .mono{font:400 15px/1.4 var(--sk-font-mono)!important}
+body[data-reg="bee"] .note{font:400 16px/1.45 var(--sk-font-bee-sans)}
+body[data-reg="bee"] input{border-radius:var(--sk-radius);background:var(--sk-bg-card);font:400 16px/1.45 var(--sk-font-bee-sans)}
+body[data-reg="bee"] form button{border-radius:var(--sk-radius-lg);font:600 17px/1.2 var(--sk-font-bee-sans)}
+body[data-reg="bee"] footer,body[data-reg="bee"] #bnr-beta-badge a{font:400 14px/1.4 var(--sk-font-bee-sans)!important}
+body[data-reg="raver"]{font:400 14px/1.25 var(--sk-font-raver-body)}
+body[data-reg="raver"] header h1{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em}
+body[data-reg="raver"] header p,body[data-reg="raver"] .row,body[data-reg="raver"] .note,body[data-reg="raver"] footer{font-family:var(--sk-font-raver-body);font-size:14px}
+body[data-reg="raver"] .card{border-radius:var(--sk-radius-xl)}
+body[data-reg="raver"] .card h3{font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em}
+body[data-reg="raver"] .mono{font-size:14px}
+body[data-reg="raver"] input{border-radius:var(--sk-radius-pill);font:400 14px/1.25 var(--sk-font-raver-body);padding-inline:var(--sk-s3)}
+body[data-reg="raver"] form button{border-radius:var(--sk-radius-pill);font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em}
+body[data-reg="raver"] #bnr-beta-badge a{font:400 14px/1.25 var(--sk-font-raver-body)!important}
+body[data-reg="cypherpunk"]{font:400 13px/1.45 var(--sk-font-mono)}
+body[data-reg="cypherpunk"] header h1{font:600 15px/1.45 var(--sk-font-mono);color:var(--sk-ai)}
+body[data-reg="cypherpunk"] header p{font-size:12px}
+body[data-reg="cypherpunk"] .card{border-radius:var(--sk-radius-sm)}
+body[data-reg="cypherpunk"] .card h3{font:600 13px/1.45 var(--sk-font-mono)}
+body[data-reg="cypherpunk"] input,body[data-reg="cypherpunk"] form button{border-radius:var(--sk-radius-sm);font:600 13px/1.45 var(--sk-font-mono)}
+body[data-reg="cypherpunk"] form button{font:600 14px/1.2 var(--sk-font-mono)}
+body[data-reg="cypherpunk"] footer{font-size:12px}
+body[data-reg="cypherpunk"] #bnr-beta-badge a{font:500 12px/1.45 var(--sk-font-mono)!important}
 </style>
+<link rel="stylesheet" href="../skaists.css">
 </head>
-<body data-bee-theme="shared">
+<body data-bee-theme="custom">
+<!-- ETERNAL FRONT (founder blueprint 2026-09-26, docs/design/eternal): three separate products in
+     one surface. ONE data layer (this page's own cards, read at load from the rows the shape-maker
+     never writes, plus the page's own sha256hex() on its documented empty-box default) drives all
+     three. Zero custody: no front reads the box (#root) or the rows the shape-maker fills; every
+     "try it" hands off to the form below, and the real addresses are made in the wallet. -->
+<section id="eternal" aria-label="your two addresses">
+
+  <!-- NEW BEE — a calm room: four plain rows, one magenta action -->
+  <div class="et-b">
+    <div class="et-b-step" data-step="ask">
+      <div class="et-b-mark">bzDiD</div>
+      <h2 class="et-b-h" data-etk="et.addresses.b.title">your two addresses</h2>
+      <p class="et-b-lede" data-etk="et.addresses.b.lede">one you, two ways to be reached: one on bluesky, one on nostr. both grow from the same root, and neither of them is the root.</p>
+      <div class="et-b-guard"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span data-etk="et.addresses.b.guard">the secret half is never shown on this page.</span></div>
+      <div class="et-b-rows" id="etBeeRows"><div class="et-b-more" data-etk="et.addresses.b.reading">reading this page…</div></div>
+      <div class="et-b-act">
+        <button type="button" class="et-b-primary" id="etBeeGo" data-etk="et.addresses.b.go">try it with any word</button>
+        <a class="et-b-link" href="../wallet.html" data-etk="et.addresses.b.wallet">make your real ones in the wallet</a>
+        <p class="et-b-foot" data-etk="et.addresses.b.foot">never type your recovery words here. any word shows the shape.</p>
+      </div>
+    </div>
+    <div class="et-b-step" data-step="asked" hidden>
+      <div class="et-b-tick" aria-hidden="true">⬡</div>
+      <h2 class="et-b-h et-center" data-etk="et.addresses.b.askedTitle">the box is just below.</h2>
+      <p class="et-b-lede et-center" data-etk="et.addresses.b.askedText">type any word, like a nickname, then press derive the shape. you'll see what your two addresses look like.</p>
+      <div class="et-b-card"><h3 data-etk="et.addresses.b.shape">only a shape.</h3><div data-etk="et.addresses.b.shapeText">these are not your real addresses. your real ones are made in the wallet, from your own root.</div></div>
+      <div class="et-b-act"><button type="button" class="et-b-link" data-go="ask" data-etk="et.addresses.b.back">back to the start</button></div>
+    </div>
+  </div>
+
+  <!-- RAVER — two rails: light both rings and they meet where the root's signed note binds them -->
+  <div class="et-r">
+    <div class="et-r-top"><h2 class="et-r-h" id="etRaverTitle">two rails</h2><span class="et-r-hint" id="etRaverHint">tap a ring · light both</span></div>
+    <svg class="et-r-art" id="etArt" viewBox="-200 -200 400 400" role="group" aria-label="your two addresses as two rings of light that overlap where one signed note binds them, the root at the heart"></svg>
+    <div class="et-r-legend" id="etLegend"><span><i class="lg-plc"></i><b data-etk="et.addresses.r.lgPlc">bluesky · did:plc</b></span><span><i class="lg-npub"></i><b data-etk="et.addresses.r.lgNpub">nostr · npub</b></span><span><i class="lg-root"></i><b data-etk="et.addresses.r.lgRoot">the root · never here</b></span></div>
+    <div class="et-r-card" id="etRaverCard" aria-live="polite"></div>
+    <button type="button" class="et-r-pill" id="etRaverGo">try the shape with any word</button>
+    <button type="button" class="et-r-ghost" id="etRaverBack" hidden data-etk="et.addresses.r.back">back to the rings</button>
+  </div>
+
+  <!-- CYPHERPUNK — the instrument: every field of both rails, the binding pipeline, a receipt -->
+  <div class="et-c">
+    <div class="et-c-path">bzDiD://root → did:plc + npub</div>
+    <div class="et-c-chips" id="etChips"></div>
+    <div class="et-c-guard"><span data-etk="et.addresses.c.guard">custody = self</span> <b data-etk="et.addresses.c.guardB">this front reads 0 fields · holds 0 keys</b></div>
+    <table class="et-c-tab"><thead><tr><th>field</th><th>value, as this page states it</th></tr></thead><tbody id="etFields"></tbody></table>
+    <h3 class="et-c-h" data-etk="et.addresses.c.pipeH">binding pipeline · one root, two rails</h3>
+    <ol class="et-c-pipe" id="etPipe"></ol>
+    <button type="button" class="et-c-primary" id="etCyGo">focus #root · derive the shape</button>
+    <h3 class="et-c-h" data-etk="et.addresses.c.recH">receipt · read from this page, now</h3>
+    <table class="et-c-kv" id="etReceipt"></table>
+    <div class="et-c-verify">
+      <div class="et-c-verify-h" data-etk="et.addresses.c.verifyH">verify · no trust in this page needed</div>
+      <ol><li><code id="etVerifyCmd">printf %s bnr.b/did-plc/demo-root | sha256sum | cut -c1-24</code> <span data-etk="et.addresses.c.v1">equals the shape an empty box draws</span></li><li data-etk="et.addresses.c.v2">wallet.html → npubFromSeed: the real npub is NIP-19 bech32 of the x-only secp256k1 key</li><li data-etk="et.addresses.c.v3">view source: this front calls sha256hex on a constant, never on the box</li></ol>
+    </div>
+    <div class="et-c-row">
+      <a class="et-c-ghost" href="https://github.com/beehive-nature/beehive-nature/blob/main/surfaces/keys/addresses.html" target="_blank" rel="noopener noreferrer" title="opens in a new tab" data-etk="et.addresses.c.src">view source ↗ new tab</a>
+      <a class="et-c-ghost" href="https://github.com/beehive-nature/beehive-nature/tree/main/surfaces/keys" target="_blank" rel="noopener noreferrer" title="opens in a new tab" data-etk="et.addresses.c.fork">fork the template ↗ new tab</a>
+    </div>
+  </div>
+</section>
+<h2 class="et-archive-h" id="etArchive" data-etk="et.addresses.whole">the whole binding surface</h2>
 <header>
   <h1>🗝 your two addresses</h1>
   <p>one bzDiD root · two mailing rails — bsky (did:plc) and nostr (npub) · TASKS 1+2 of the comms ledger</p>
@@ -120,6 +353,173 @@ async function derive(){
   document.getElementById('npubV').textContent=bech32('npub',n.slice(0,52));
   document.getElementById('nip05').textContent=(v.replace(/[^a-z0-9.-]/gi,'')||'name')+'@beehive.nature';
 }
+</script>
+<script>
+/* ETERNAL FRONT — one data layer, three renderers (docs/design/eternal). ZERO CUSTODY: this
+   script never reads the box (#root) or the four rows the shape-maker writes (#plcDoc #plcAka
+   #npubV #nip05), and makes no request. Its facts are this page's own cards, read once at load
+   from the rows nobody writes, and one value it computes itself with the page's own sha256hex()
+   on the page's documented empty-box default ("demo-root", see derive()). Every "try it" focuses
+   #root; the form's own derive() is the only thing that ever reads it. Crypto sources:
+   keys/addresses.html · derive(), bech32(); wallet.html · npubFromSeed(). */
+(function(){
+  var $=function(id){return document.getElementById(id);};
+  var T=function(k,f){var t=window.BNRLanguage&&window.BNRLanguage.text;return t?t(k,f):f;};
+  var tok=function(n){return getComputedStyle(document.body).getPropertyValue('--sk-'+n).trim();};
+  function esc(v){return String(v==null?'':v).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+  var WRITTEN={plcDoc:1,plcAka:1,npubV:1,nip05:1}; /* rows the shape-maker writes: never read here */
+  var PLC_LEN=24, NPUB_BYTES=32, DEMO='demo-root'; /* derive(): h.slice(0,24) and its empty-box default; NIP-19: 32-byte x-only key */
+  var D={rails:[],fields:[],demo:'',asked:false,reads:0};
+  var R={mode:'rings',sel:'plc',lit:{}};
+
+  function card(sel){
+    var c=document.querySelector('.wrap > '+sel); if(!c) return null;
+    var h=c.querySelector('h3 span');
+    return {title:h?h.textContent.trim():'',rows:[].map.call(c.querySelectorAll('.row'),function(r){
+      var v=r.querySelector('.v'); var w=!!(v&&WRITTEN[v.id]);
+      return {k:r.querySelector('.k').textContent.trim(),v:w?'':v.textContent.trim(),written:w};
+    })};
+  }
+  function val(rail,k){var r=(rail&&rail.rows||[]).filter(function(x){return x.k===k;})[0];return r?r.v:'';}
+  function read(){
+    var cs=document.querySelectorAll('.wrap > .card');
+    D.rails=[card('.card.plc'),card('.card.npub'),cs[2]?card('.card:nth-of-type(3)'):null].filter(Boolean);
+    var ev=val(D.rails[2],'attestation event'), m=ev.match(/\{([^}]*)\}/);
+    D.fields=m?m[1].split(',').map(function(x){return x.trim();}):[];
+  }
+  var P=function(){return D.rails[0];}, N=function(){return D.rails[1];}, B=function(){return D.rails[2];};
+
+  /* ── NEW BEE ── */
+  function bee(){
+    var box=$('etBeeRows'); if(!box) return;
+    var rows=[
+      ['plc',T('et.addresses.b.r1','your bluesky address'),'did:plc',T('et.addresses.b.r1d','a name that points back to you. if you lose it, your root vouches for a new one.')],
+      ['npub',T('et.addresses.b.r2','your nostr address'),'npub',T('et.addresses.b.r2d','the public half of a key made from your root. the secret half is never shown here.')],
+      ['bind',T('et.addresses.b.r3','the note that ties them'),D.fields.length+' '+T('et.addresses.b.parts','parts'),T('et.addresses.b.r3d','one note, signed by your root, says both addresses are yours. it costs nothing to keep.')],
+      ['page',T('et.addresses.b.r4','what this page does'),T('et.addresses.b.r4v','shows the shape'),T('et.addresses.b.r4d','type any word below to see the shape of your two addresses. nothing is made, kept or sent.')]
+    ];
+    var open={}; box.querySelectorAll('.et-b-row[aria-expanded="true"]').forEach(function(r){open[r.getAttribute('data-row')]=1;});
+    box.innerHTML=rows.map(function(r){var o=!!open[r[0]];
+      return '<button type="button" class="et-b-row" data-row="'+r[0]+'" aria-expanded="'+o+'"><span>'+esc(r[1])+'</span><small>'+esc(r[2])+'<svg class="chev" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2"/></svg></small></button>'+
+        '<div class="et-b-more" data-more="'+r[0]+'"'+(o?'':' hidden')+'>'+esc(r[3])+'</div>';}).join('');
+  }
+  function beeStep(s){document.querySelectorAll('#eternal .et-b-step').forEach(function(e){e.hidden=e.getAttribute('data-step')!==s;});}
+
+  /* ── RAVER: two rings of light (bluesky left, nostr right) stitched by the signed note's fields;
+     the root below, dashed, never here ── */
+  function arc(cx,r0,r1,a0,a1){
+    var p=function(r,a){return (cx+r*Math.cos(a)).toFixed(2)+' '+(r*Math.sin(a)).toFixed(2);};
+    return 'M'+p(r1,a0)+'A'+r1+' '+r1+' 0 0 1 '+p(r1,a1)+'L'+p(r0,a1)+'A'+r0+' '+r0+' 0 0 0 '+p(r0,a0)+'Z';
+  }
+  function cards(){return {
+    plc:['r1','plc',T('et.addresses.r.plc','your bluesky address · did:plc'),T('et.addresses.r.plcS','{n} characters · a handle, not the root · lose it and the root vouches anew').replace('{n}',PLC_LEN)],
+    npub:['r2','npub',T('et.addresses.r.npub','your nostr address · npub'),T('et.addresses.r.npubS','{n}-byte public half · secp256k1 · the secret half is never shown').replace('{n}',NPUB_BYTES)],
+    bind:['⬡','bind',T('et.addresses.r.bind','the note that binds · {n} fields').replace('{n}',D.fields.length),(R.lit.plc&&R.lit.npub)?D.fields.join(' · ')+' · '+T('et.addresses.r.bindS','free at stake'):T('et.addresses.r.bindWait','light both rings · they meet here')],
+    root:['·','root',T('et.addresses.r.root','the root · never here'),T('et.addresses.r.rootS','it vouches for both · this page never holds it')]
+  };}
+  function art(){
+    var svg=$('etArt'); if(!svg) return;
+    var both=R.lit.plc&&R.lit.npub, h='';
+    [['plc',-60,PLC_LEN,tok('info')],['npub',60,NPUB_BYTES,tok('sovereign')]].forEach(function(L){
+      var k=L[0], on=!!R.lit[k], sel=R.sel===k, n=L[2], g=0.03;
+      h+='<g class="ring" data-ring="'+k+'" role="button" tabindex="0" aria-pressed="'+on+'" aria-label="'+esc(cards()[k][2]+': '+cards()[k][3])+'">';
+      for(var i=0;i<n;i++){var a0=-Math.PI/2+i*2*Math.PI/n+g, a1=-Math.PI/2+(i+1)*2*Math.PI/n-g;
+        h+='<path class="seg" d="'+arc(L[1],98,126,a0,a1)+'" fill="'+(on?L[3]:tok('sovereign-wash'))+'" stroke="'+L[3]+'" stroke-width="'+(sel?2:1)+'" opacity="'+(on?1:0.62)+'"/>';}
+      h+='</g>';
+    });
+    var ys=D.fields.map(function(_,i){return -64+i*(128/Math.max(1,D.fields.length-1));});
+    h+='<g class="lens" data-ring="bind" role="button" tabindex="0" aria-pressed="'+!!both+'" aria-label="'+esc(cards().bind[2]+': '+cards().bind[3])+'"><path class="seg" d="M0 -110.8A126 126 0 0 1 0 110.8A126 126 0 0 1 0 -110.8Z" fill="'+(both?tok('sovereign-tint'):'none')+'" stroke="'+(both?tok('you'):tok('line'))+'" stroke-width="1.5" stroke-dasharray="'+(both?'0':'4 5')+'"/>';
+    ys.forEach(function(y){h+='<path class="seg" d="M-26 '+y.toFixed(1)+'L26 '+y.toFixed(1)+'" stroke="'+(both?tok('you'):tok('sovereign-soft'))+'" stroke-width="'+(both?4:2)+'" stroke-linecap="round" stroke-dasharray="'+(both?'0':'3 5')+'" opacity="'+(both?1:0.62)+'"/>';});
+    h+='</g>';
+    var hex=[0,1,2,3,4,5].map(function(k){var a=(-90+60*k)*Math.PI/180;return (33*Math.cos(a)).toFixed(1)+','+(164+33*Math.sin(a)).toFixed(1);}).join(' ');
+    h+='<g class="root" data-ring="root" role="button" tabindex="0" aria-label="'+esc(cards().root[2]+': '+cards().root[3])+'"><path class="seg" d="M0 112L0 131" stroke="'+tok('guard')+'" stroke-width="1.5" stroke-dasharray="3 4"/><polygon class="seg" points="'+hex+'" fill="'+tok('bg-card')+'" stroke="'+tok('guard')+'" stroke-width="1.5" stroke-dasharray="4 4"/><text x="0" y="169" text-anchor="middle" fill="'+tok('guard')+'" style="font:600 14px/1.25 var(--sk-font-raver-body)">root</text></g>';
+    svg.innerHTML=h;
+  }
+  function raverCard(){
+    var c=$('etRaverCard'); if(!c) return; var k=cards()[R.sel]||cards().plc;
+    c.innerHTML='<span class="rk '+k[1]+'">'+esc(k[0])+'</span><div><b>'+esc(k[2])+'</b><span>'+esc(k[3])+'</span></div>';
+  }
+  function raver(){
+    var open=R.mode==='open', both=R.lit.plc&&R.lit.npub;
+    $('etRaverTitle').textContent=open?T('et.addresses.r.tOpen','the box is open'):both?T('et.addresses.r.tBound','bound'):T('et.addresses.r.tRings','two rails');
+    $('etRaverHint').textContent=open?T('et.addresses.r.hOpen','any word · never your recovery words'):both?T('et.addresses.r.hBound','tap where they meet'):T('et.addresses.r.hRings','tap a ring · light both');
+    $('etRaverBack').hidden=!open;
+    $('etRaverGo').textContent=T('et.addresses.r.go','try the shape with any word');
+    art(); raverCard();
+  }
+
+  /* ── CYPHERPUNK ── */
+  function cy(){
+    var tb=$('etFields'); if(!tb) return;
+    $('etChips').innerHTML='<span class="no">shape only</span><span class="ok">0 keys held</span><span class="ok">nsec never rendered</span>';
+    var head=['did:plc · bluesky','npub · nostr','did-bind · on-chain row'];
+    tb.innerHTML=D.rails.map(function(r,i){
+      return '<tr class="rail"><td colspan="2">'+esc(head[i]||r.title)+'</td></tr>'+r.rows.map(function(x){
+        return '<tr><td>'+esc(x.k)+'</td><td'+(x.written?' class="gd"':'')+'>'+(x.written?'written by the shape-maker below · never read here':esc(x.v))+'</td></tr>';}).join('');
+    }).join('');
+    var steps=[
+      ['root · the bzDiD ceremony','the root never leaves the ceremony (keys/, onboarding/) · this page never holds it','guard'],
+      ['plc · '+val(P(),'derivation role'),'shape here: sha256("bnr.b/did-plc/" ‖ box)[0..'+PLC_LEN+'] · the real did:plc derivation is UNVERIFIED in this tree','now'],
+      ['npub · '+val(N(),'key scheme'),'real: wallet.html npubFromSeed(BZDIDKEY.deriveK1Key(mprk, "nostr:"+soul)) · NIP-19 · shape here: sha256("bnr.b/nostr-npub/" ‖ box), no checksum','todo'],
+      ['bind · did-bind {'+D.fields.join(', ')+'}','signed by the root · not written by this page','todo'],
+      ['publish · '+val(B(),'where'),val(B(),'cost')+' · not written by this page','todo'],
+      ['revoke · re-derive','both revocable, both re-derivable from the ceremony','todo']
+    ];
+    $('etPipe').innerHTML=steps.map(function(s){return '<li class="'+s[2]+'"><b>'+esc(s[0])+'</b><div>'+esc(s[1])+'</div></li>';}).join('');
+    $('etReceipt').innerHTML=[
+      ['shape','sha256hex · WebCrypto · first '+PLC_LEN+' hex · derive()'],
+      ['empty box',D.demo?'<code>did:plc:'+esc(D.demo)+'</code> · sha256hex("bnr.b/did-plc/'+DEMO+'"), computed now':'<span class="no">not computed · no web crypto in this context</span>'],
+      ['npub shape','<span class="no">not a valid bech32 · no 5-bit regroup, no checksum · bech32() here</span>'],
+      ['real npub','<span class="yes">wallet.html · npubFromSeed · NIP-19</span>'],
+      ['real plc','<span class="gd">UNVERIFIED · not derived in this tree</span>'],
+      ['nsec',esc(val(N(),'nsec (secret)'))],
+      ['front','<span class="gd">0 fields read · 0 requests · 0 keys</span>']
+    ].map(function(r){return '<tr><th>'+r[0]+'</th><td>'+r[1]+'</td></tr>';}).join('');
+    $('etCyGo').textContent=D.asked?'open · #root is focused below':'focus #root · derive the shape';
+  }
+
+  /* ── the one hand-off: the shape-maker below owns the box ── */
+  function handoff(from){
+    D.asked=true;
+    if(from==='bee')beeStep('asked');
+    R.mode='open';
+    var i=$('root'); if(i){i.scrollIntoView({block:'center'});try{i.focus({preventScroll:true});}catch(x){i.focus();}}
+    raver(); cy();
+  }
+  function words(){document.querySelectorAll('#eternal [data-etk],.et-archive-h[data-etk]').forEach(function(e){if(e.__en==null)e.__en=e.textContent;e.textContent=T(e.getAttribute('data-etk'),e.__en);});}
+  function all(){read();words();bee();raver();cy();}
+
+  function wire(){
+    var ev=$('eternal'); if(!ev) return;
+    ev.addEventListener('click',function(e){
+      var go=e.target.closest('[data-go]');
+      if(go){beeStep(go.getAttribute('data-go'));return;}
+      var row=e.target.closest('.et-b-row[data-row]');
+      if(row){var o=row.getAttribute('aria-expanded')!=='true';row.setAttribute('aria-expanded',String(o));var m=ev.querySelector('[data-more="'+row.getAttribute('data-row')+'"]');if(m)m.hidden=!o;return;}
+      var t=e.target.closest('#etArt [data-ring]');
+      if(t){var k=t.getAttribute('data-ring');
+        if(k==='plc'||k==='npub'){R.lit[k]=!R.lit[k];R.sel=k;}
+        else if(k==='bind'){R.sel='bind';}
+        else R.sel='root';
+        raver();}
+    });
+    ev.addEventListener('keydown',function(e){
+      if(e.key!=='Enter'&&e.key!==' ')return;
+      var t=e.target.closest('#etArt [role="button"]'); if(!t)return;
+      e.preventDefault(); t.dispatchEvent(new MouseEvent('click',{bubbles:true}));
+    });
+    $('etBeeGo').addEventListener('click',function(){handoff('bee');});
+    $('etRaverGo').addEventListener('click',function(){handoff('raver');});
+    $('etRaverBack').addEventListener('click',function(){R.mode='rings';raver();});
+    $('etCyGo').addEventListener('click',function(){handoff('cy');});
+    document.addEventListener('blang',all);
+    document.addEventListener('bregister',function(){setTimeout(art,0);});
+  }
+  wire(); all();
+  /* one value computed here, by the page's own function, on a constant: never on the box */
+  if(typeof sha256hex==='function'&&window.crypto&&crypto.subtle) sha256hex('bnr.b/did-plc/'+DEMO).then(function(h){D.demo=h.slice(0,PLC_LEN);cy();}).catch(function(){});
+  window.__eternal={data:D,raver:R};
+})();
 </script>
 <div id="bnr-beta-badge" style="position:fixed;right:.6rem;bottom:calc(.6rem + 46px);z-index:9997;font:12px ui-monospace,monospace;opacity:.75"><a href="../" style="color:#39c5cf;text-decoration:none;border:1px solid #30363d;border-radius:99px;padding:.15rem .7rem;background:#161b22">⌂ hub</a></div>
 <script src="../tour.js?v=42"></script>

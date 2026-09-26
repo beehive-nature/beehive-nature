@@ -204,3 +204,76 @@ A contract audit was posted on #237 at `4d3c108b2`. It applies the founder's pas
 - Dashes elsewhere in the shared copy (for example "unset — no limit", keyed headings like `wl.bpay.h`) remain, and are named here as open.
 
 **Not claimed:** no human (and no matriarch) has used these three grammars yet, and the gate proves only its named properties (DESIGN-CONSTRAINTS §13). No live chain was read. Balances in the receipts are injected fixtures (`12.3456 A`, `7.000 HIVE`), written into the sections' own nodes where a chain read would land.
+
+## 12 · fresh-eyes review, round 4: REQUEST CHANGES, and what changed
+
+Round 4 re-ran on `79f9ff95` (main and #240 merged in, no conflicts). It confirmed the round-4 test on the real page: tapped with the dress stripped, all 18 sections read differently in bee and raver. The merge-delta check also passed on all five points: the wallet hunks, the corpus union (0 keys lost, 0 silent overwrites), the orb-seat test, bee's 16px `.law`, and #233's lower half. What it found, and what changed:
+
+| # | finding | fix |
+|---|---|---|
+| 1 | blocker: in raver, `?compose=` and `#qr=` landed on a set of cards with the target hidden | Both open their card in raver. The QR sheet re-lands after the content above it renders, the same pattern as the composer (in cypherpunk that content first pushed it 825px out of view). Gated in all three registers. |
+| 2 | blocker: "raver (controls first)" was printed and never measured. The forge, receipts and matrix cards opened with no controls | Raver folds words, never controls: a `[data-wl-tech]` block or a note that holds a control stays. The spend-cap label folds by id (`#cap-lbl`) and its controls stay. The gate now measures controls: every raver card whose section has controls opens with one showing. The receipts' note summary counts as that control, and the claim says so. |
+| 3 | bee's receipts engineering was not folded | spend-audit's caption, CARE block and ledger note carry `data-wl-tech`. `receipts-sec` joins the gate's folded list. A new row checks that no `[data-wl-tech]` block without a control shows at rest in bee or raver. |
+| 4 | the honey check read the top border only; text colour was unmeasured | All four borders are checked, plus a new row for text colour. The wallet feeds spend-audit its accents through `--sa-figure`, `--sa-care` and `--sa-care-line`; comb.html keeps its gold by fallback. Every gold text listed in the §4 inventory is ink, amber or cyan now, including states reached only after an action. The gate does not render those; the text-colour row says so. |
+| 5 | "one tap in" never tapped; `/s+/` regex; "to the character" compared lengths | §4d drives the reader's own taps: bee's row, raver's glyph, then each card. The words exclude control labels and anything inside a closed note (this Chromium keeps layout boxes for a closed note's content). Bodies are compared as strings. |
+| 6 | bee's "show the details" carried into raver, and pressing it counted as work | A register switch folds every section again, and the toggle is not work. Gated. |
+| 7 | raver's "audit it" read at 12px | Raver sets it to its 14px button type. |
+
+**A battery was red and the receipts had said green.** `e2e/wallet-arweave.mjs` failed from the #233 merge (`b63c00c1`) onward. It passed at `0eef8ce6` and on main. Its press on `#vault-sec` at (8, 8) landed under the sticky "real home" banner, which the page pins when served off the kit's home. The battery now scrolls the section clear of the banner before the same press. No assertion changed.
+
+**Receipts (this round):** wallet-registers **GREEN 105/105**. Wallet batteries: fund 94, vault 35, matrix 11, arweave 22, signer 105, adapter 28, 0 failed. CI gates: estate-check PASS; estate-source 11/11; static suite 377/377; bPay A 18/18; bPay B 17/17; bData 100/100; no-page-errors 113 surfaces with 0 errors; i18n selftest and ru floors PASS; polish 25/25; profile 53/53; orb-seat 5/5; tour-bar 4/4; bpay-policy 2/2; comprehension 9/9; engineflow 30/30; comb-eternal 8/8.
+
+**Dashes as punctuation: closed in the next commit.** Measured by a probe that walks every visible text node in the three registers, once at rest and once with every fold and note open (raver taps every card): **159 distinct nodes carried — or – before, 2 after.** Those two are a service `name` inside the ledger receipts. The receipts are content-hashed, so the name is data, not copy, and it stays. The rules: a heading's dash becomes a colon; a status wrapped in dashes loses them; an explanatory dash becomes a colon, a comma or a full stop; a list's dashes become ·. 35 keys were redrafted in all 28 tongues, each in that tongue's own marks (zh and ja `：`, ar, fa and ur `،`, hi, bn and sa `।`, French's spaced ` : `, ru, uk and tt copula dashes rephrased), and the machine-drafted note was added to `_meta.drafted`. Two assertions follow copy, not data, and are just as strict: the matrix battery's family headers (`EVM family: 6 rails`) and one reviewed "below" entry whose capture window moved by one character. The matrix's `FIRMWARE GAP:` keeps its capitals, because in cypherpunk capitals are a signal. The dashes left in place on purpose are post-action states that tests pin (`CONFIRMED — read back…`, `vaulta — down`), attributes and placeholders, and a lone "—" that page logic uses to mean empty.
+
+**Still open:** `wl.bpay.law` in 28 tongues still translates the older "Phase A…" wording. The English now says the chooser comes first, and this pass changed punctuation only. tt, sa and gd are the least certain drafts. Casing of the keyed headings is still the corpus-wide edit named in §6.
+
+### 12b · round 4 was not closed by the first answer: F1 and F2
+
+The founder's read of #242 at `bacc9b50`: round 4 was still open. Two findings remained.
+
+- **F1: the voucher's and the fund's engineering showed in new bee.** The fund's unconfigured state printed `BNR_MELD_PUBLIC_KEY / data-meld-public-key` and the sandbox host into the matriarch's "add money", and raver's fund card did the same. The voucher's source host, its rate citation and "live from the hash-chained ledger" showed after a lookup. The length gate could not see any of this, because a long plain line and a short engineering line weigh the same to a character count.
+  **Fix:** each of those strings is now `data-wl-tech`, so it folds in bee and raver and stays open in cypherpunk. The fund's plain state reads "⚠ funding not configured: card checkout is not switched on here yet" (the fund battery pins that honest state, unchanged). The memo warning ("no memo, no credit, money lost") is a safety instruction, not engineering: it carries an id so that raver's word fold never hides it.
+- **F2: the technical footer was open in every register.** It held the core badge, the eosjs note, the crypto, the Rust core, the licence and the file path.
+  **Fix:** the footer keeps its name and the hub link. Everything else sits behind `<details data-reg-disclose>` ("how this page is built", new key `wl.foot.how`, 29 cells ⚙). register.js's shared law opens it in cypherpunk only; in bee and raver it is one tap away.
+
+**The gate now checks content, not length (§4e).** The dress is stripped, using the contract audit's own CSS. The gate makes one real tap into "add money" in each register, and in raver it opens each card. It performs a real voucher lookup against a fixture oracle. It then looks for the actual strings (source host, rate citation, ledger internals, key names, sandbox host, crypto and build notes) and requires all of these:
+- they are absent at rest in bee and raver
+- they are present with no tap in cypherpunk
+- they are reached by exactly one tap in bee and raver
+- the plain facts (balance, memo warning, buy button, checkout state, the footer's name and its way in) show in every register
+
+§4d (all six tasks, real taps) now runs with the dress stripped too. The QR row's first-screen bound became "its top and title inside the first screen": collapsing the footer shortens the page, so raver can no longer scroll the sheet to y=0, and the old `< 200` was a number, not the claim.
+
+**Also corrected:** the corpus's `_meta.drafted` note from the dash commit named a model. It no longer does.
+
+wallet-registers **GREEN 109/109**, dress stripped. Batteries: fund 94 · vault 35 · matrix 11 · arweave 22 · signer 105 · adapter 28. CI gates: estate-check · estate-source 11/11 · static 377/377 · i18n selftest + ru floors · footer-audit 0 worse · no-page-errors 113/0 · polish 25/25 · bPay A 18/18 · B 17/17 · bData 100/100 · orb-seat 5/5 · tour-bar 4/4 · comprehension 9/9 · bpay-policy 2/2 · engineflow 30/30 · comb-eternal 8/8 · skaists-conformance · build-skaists check.
+
+### 12c · the closeout gates as the founder wrote them (comment on #242)
+
+The founder's bar: `F1 PASS · F2 PASS · color-free audit PASS · wallet gates GREEN`. F1 was wider than 12b answered. Bee's "add money" still opened on "THE VOUCHER: prepay compute, metered fair" and "fund: buy USDC, land it on an address you hold". A gate that counts characters cannot see that. So F1 now covers **every opening a bee task makes**, and the gate reads it as words.
+
+- **§4f, new bee's opening copy.** It runs at 390 and 1280 with the dress stripped, with one real row tap per task. For each visible section, it reads the visible heading and the intro under it. It fails on:
+  - a capital-as-shout, meaning any all-caps word that is not a ticker. The ticker list is stated in the gate: USDC, ETH, ANT, HIVE, HBD, HP, AR, BTC, BCH, ZEC, XMR, BNR, EVM, QR.
+  - any dash
+  - any machine word from a stated list: rpc, keyless, vram, spec-, bytes, persist, contract surface, unicove, abi, prf, jwk, wasm, oracle, hash-chained, derivation, endpoint, eosjs, sandbox, escrow, orchestrator, metadata, masterprk, funnel
+
+  Its first run failed on eight sections: balances, summary, outbox, voucher, fund, peer, inscriptions and composer. It also failed on the balance cards' descriptions (RAM, JWK, "public metadata", keyless) and on the outbox's empty line ("persists … BEFORE it is submitted").
+- **The fix is one pattern, moved and never deleted.** Each of those engineering headings carries `data-wl-tech`, and new bee gets its own plain heading in its place (`data-reg="bee"`, 8 keys `wl.bee.h.*` × 29 cells ⚙):
+  - what you hold, on every chain
+  - at a glance
+  - waiting to be sent
+  - prepay for compute
+  - buy USDC with a card
+  - money in, person to person
+  - your garden, drawn on the chain
+  - write an action and see it before you sign
+
+  Also folded in bee: the balances intro ("Read from public RPCs…"), bee's voucher paragraph (vRAM), and the balance cards' descriptions (`.chain .cd`). They sit behind the section's own "show the details". The outbox says "nothing is waiting to be sent" in bee (`wl.bee.outbox.empty`), and the precise line stays for cypherpunk. Raver and cypherpunk are unchanged: raver already folds every h2, and cypherpunk shows everything.
+- **§4e now runs at 390 and 1280.** Each width must hold on its own (a string found at one width does not excuse its absence at the other). It also banks colour and stripped receipts of the add task per register per width: `wallet-{390,1280}-{reg}-add-{colour,stripped}.png`. Read side by side, they show no overlap in either.
+
+**Receipts (this closeout):** wallet-registers **GREEN 110/110**. Batteries: fund 94 · vault 35 · matrix 11 · arweave 22 · signer 105 · adapter 28. CI gates: estate-check · estate-source 11/11 · static 377/377 · i18n selftest + ru floors · footer-audit 0 worse · no-page-errors 113/0 · polish 25/25 · profile 53/53 · bPay A 18/18 · B 17/17 · bData 100/100 · orb-seat 5/5 · tour-bar 4/4 · comprehension 9/9 · bpay-policy 2/2 · engineflow 30/30 · comb-eternal 8/8 · skaists-conformance · build-skaists check.
+
+**Still open and named, as the review allows:**
+- Dashes and capitals in keyed runtime copy reached only after an action: the voucher panel's `wl.vc.*` ("the memo IS the binding —", "A · Vaulta — gasless").
+- The keyed headings' casing in the corpus. Bee no longer shows those headings at rest; cypherpunk still does.
+- The stale "Phase A" label in 28 tongues.

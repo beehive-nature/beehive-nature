@@ -126,9 +126,297 @@ body:not([data-reg="cypherpunk"]) .ev,body:not([data-reg="cypherpunk"]) .foot,
 body:not([data-reg="cypherpunk"]) .lg{font-size:14px}
 body[data-reg="bee"] .plain,body[data-reg="bee"] .msg,body[data-reg="bee"] .foot{font-size:16px}
 body[data-reg="cypherpunk"] .foot{font-family:ui-monospace,Menlo,Consolas,monospace}
+/* ── ETERNAL FRONT (docs/design/eternal) — three products in one surface. Every value is a skaists
+   token (../skaists.css, compiled from docs/design/skaists/tokens.json): no hand-picked hex, size or
+   corner. Measured by e2e/skaists-conformance.mjs. One register visible at a time; new bee is the
+   default. Every rule is scoped under #eternal so the page's own bare element rules never reach in. ── */
+#eternal{display:block;margin:0 0 var(--sk-s2);padding:0;border:0;background:transparent;font-size:16px;line-height:1.45;color:var(--sk-ink);text-align:left}
+#eternal>div{max-width:560px}
+#eternal>.et-r,#eternal>.et-c{display:none}
+body[data-reg="raver"] #eternal>.et-b,body[data-reg="cypherpunk"] #eternal>.et-b{display:none}
+body[data-reg="raver"] #eternal>.et-r{display:block}
+body[data-reg="cypherpunk"] #eternal>.et-c{display:block}
+#eternal [hidden]{display:none!important}
+#eternal *{box-sizing:border-box;text-transform:none}
+#eternal :is(button,input,select){appearance:none;-webkit-appearance:none;flex:0 1 auto;margin:0;padding:0;border:0;border-radius:0;background:transparent;color:inherit;font:inherit;letter-spacing:normal;min-height:0;min-width:0;box-shadow:none;text-shadow:none;transition:none}
+#eternal :is(p,h2,h3,ol,ul,table){margin:0}
+#eternal svg{display:block}
+#eternal :focus-visible{outline:2px solid var(--sk-focus);outline-offset:3px}
+#eternal a{text-decoration:none}
+#etArchive.et-archive-h{margin:var(--sk-s5) 0 var(--sk-s2);padding:var(--sk-s4) 0 0;border:0;border-top:1px solid var(--sk-line);color:var(--sk-ink);background:none;text-shadow:none;letter-spacing:normal;text-transform:none;-webkit-text-fill-color:currentColor}
+body[data-reg="bee"] #etArchive.et-archive-h{font:400 28px/1.1 var(--sk-font-bee-serif)}
+body[data-reg="raver"] #etArchive.et-archive-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em}
+body[data-reg="cypherpunk"] #etArchive.et-archive-h{font:600 15px/1.45 var(--sk-font-mono)}
+
+/* NEW BEE — a calm room: plain rows, one reassurance, one magenta action */
+#eternal .et-b{display:flex;flex-direction:column;gap:var(--sk-s3);color:var(--sk-ink);font:400 16px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-b-mark{font:400 18px/1.2 var(--sk-font-house);color:var(--sk-sovereign)}
+#eternal .et-b-h{font:400 40px/1.05 var(--sk-font-bee-serif);color:var(--sk-ink);letter-spacing:0}
+#eternal .et-b-lede{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink-mut);text-wrap:pretty}
+#eternal .et-b-guard{display:flex;align-items:center;gap:var(--sk-s2);min-height:var(--sk-control-min,44px);padding:var(--sk-s1) var(--sk-s3);border-radius:var(--sk-radius);background:var(--sk-guard-wash);color:var(--sk-guard);font:600 15px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-b-guard svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+#eternal .et-b-rows{display:flex;flex-direction:column;background:var(--sk-bg-card);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl);overflow:hidden}
+#eternal .et-b-row{display:flex;align-items:center;justify-content:space-between;gap:var(--sk-s2);min-height:var(--sk-control-row,52px);width:100%;padding:var(--sk-s1) var(--sk-s3);border:0;border-bottom:1px solid var(--sk-line-soft);background:transparent;text-align:left;font:500 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+#eternal .et-b-row:last-child{border-bottom:0}
+#eternal button.et-b-row{cursor:pointer}
+#eternal .et-b-row>span{flex:0 1 auto;min-width:0}
+#eternal .et-b-row>span:first-of-type{flex:0 0 auto;max-width:60%}
+#eternal .et-b-row small{display:flex;align-items:center;justify-content:flex-end;gap:var(--sk-s1);min-width:0;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut);text-align:right;overflow-wrap:anywhere}
+#eternal .et-b-row .chev{flex:none;width:16px;height:16px}
+#eternal .et-b-row[aria-checked="true"]{background:var(--sk-sovereign-tint);color:var(--sk-sovereign-strong);font-weight:600}
+#eternal .et-b-row[aria-checked="true"] small{color:var(--sk-sovereign-strong)}
+#eternal .et-b-field{min-height:var(--sk-control-min,44px);width:9.5em;max-width:55%;padding:0 var(--sk-s2);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius);background:var(--sk-bg-card);color:var(--sk-ink);font:400 16px/1.45 var(--sk-font-bee-sans);text-align:right}
+#eternal select.et-b-field{text-align:left;cursor:pointer}
+#eternal .et-b-now{padding:var(--sk-s2) var(--sk-s3);border-radius:var(--sk-radius);background:var(--sk-sovereign-tint);color:var(--sk-sovereign-strong);font:600 16px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-b-act{display:flex;flex-direction:column;gap:var(--sk-s1)}
+#eternal .et-b-primary{min-height:var(--sk-control-primary,54px);padding:0 var(--sk-s3);border:0;border-radius:var(--sk-radius-lg);background:var(--sk-primary);color:var(--sk-on-primary);font:600 17px/1.2 var(--sk-font-bee-sans);cursor:pointer}
+#eternal .et-b-primary:disabled{background:var(--sk-bg-well);color:var(--sk-ink-mut);cursor:not-allowed}
+#eternal .et-b-link{display:flex;align-items:center;justify-content:center;min-height:var(--sk-control-min,44px);padding:0 var(--sk-s2);border:0;background:transparent;color:var(--sk-link);font:600 16px/1.45 var(--sk-font-bee-sans);cursor:pointer}
+#eternal .et-b-link:hover{color:var(--sk-link-hover)}
+#eternal .et-b-foot{text-align:center;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+
+/* RAVER — the data is the art: one touchable graphic, a physical gesture, short literal words */
+#eternal .et-r{color:var(--sk-ink);font:400 14px/1.4 var(--sk-font-raver-body)}
+#eternal .et-r-top{display:flex;align-items:baseline;justify-content:space-between;gap:var(--sk-s2);flex-wrap:wrap}
+#eternal .et-r-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em;color:var(--sk-ink)}
+#eternal .et-r-hint{font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-art{width:100%;max-width:360px;height:auto;margin:var(--sk-s3) auto var(--sk-s1);filter:drop-shadow(var(--sk-glow-sovereign));touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+#eternal .et-r-art [role="button"]{cursor:pointer}
+#eternal .et-r-art [role="button"]:focus{outline:none}
+#eternal .et-r-art text{font:600 14px/1.25 var(--sk-font-raver-body);fill:var(--sk-ink);pointer-events:none}
+#eternal .et-r-legend{display:flex;justify-content:space-between;gap:var(--sk-s1);margin:var(--sk-s1) 0 var(--sk-s2);font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-legend span{display:flex;flex-direction:column;align-items:center;gap:var(--sk-s1);text-align:center}
+#eternal .et-r-legend i{display:block;width:28px;height:12px;border-radius:var(--sk-radius-sm)}
+#eternal .et-r-legend em{font-style:normal}
+#eternal .et-r-card{display:flex;gap:var(--sk-s2);align-items:center;min-height:var(--sk-control-person,60px);padding:var(--sk-s2) var(--sk-s3);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl);background:var(--sk-sovereign-tint)}
+#eternal .et-r-card .rk{display:flex;align-items:center;justify-content:center;flex:none;min-width:44px;height:44px;padding:0 var(--sk-s1);border-radius:var(--sk-radius);background:var(--sk-sovereign-strong);color:var(--sk-bg);font:700 15px/1.2 var(--sk-font-raver-display)}
+#eternal .et-r-card b{display:block;font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink)}
+#eternal .et-r-card span{font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-sovereign-soft)}
+#eternal .et-r-pill{position:relative;overflow:hidden;display:block;width:100%;height:58px;margin-top:var(--sk-s4);border:0;border-radius:var(--sk-radius-pill);background:var(--sk-primary);color:var(--sk-on-primary);font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em;cursor:pointer;touch-action:none;user-select:none;-webkit-user-select:none}
+#eternal .et-r-pill:disabled{background:var(--sk-sovereign-wash);color:var(--sk-sovereign-soft);cursor:not-allowed}
+#eternal .et-r-pill .fill{position:absolute;left:0;top:0;bottom:0;width:0;background:var(--sk-bg);opacity:.25}
+#eternal .et-r-pill .lbl{position:relative}
+#eternal .et-r-note{margin-top:var(--sk-s2);text-align:center;font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-duo{display:flex;justify-content:center;gap:var(--sk-s2);flex-wrap:wrap;margin-top:var(--sk-s1)}
+#eternal .et-r-ghost{display:inline-flex;align-items:center;justify-content:center;min-height:var(--sk-control-min,44px);min-width:44px;padding:0 var(--sk-s2);border:0;background:none;color:var(--sk-link);font:400 14px/1.4 var(--sk-font-raver-body);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+#eternal .et-r-ghost:disabled{color:var(--sk-ink-mut);text-decoration:none;cursor:default}
+#eternal .et-spin{transform-box:view-box;transform-origin:0 0;animation:etSpin var(--du,120s) linear infinite}
+@keyframes etSpin{to{transform:rotate(360deg)}}
+body.et-still #eternal .et-spin{animation-play-state:paused}
+@media (prefers-reduced-motion:reduce){#eternal .et-spin{animation:none}}
+
+/* CYPHERPUNK — the instrument, complete at first paint: tables, a numbered pipeline, receipts */
+#eternal .et-c{color:var(--sk-ink);font:400 13px/1.45 var(--sk-font-mono)}
+#eternal .et-c-path{font:600 15px/1.45 var(--sk-font-mono);overflow-wrap:anywhere}
+#eternal .et-c-chips{display:flex;flex-wrap:wrap;gap:var(--sk-s1);margin:var(--sk-s2) 0}
+#eternal .et-c-chips span{padding:2px var(--sk-s1);border:1px solid var(--sk-line);border-radius:4px;background:var(--sk-bg-card);font:600 12px/1.4 var(--sk-font-mono);color:var(--sk-ink)}
+#eternal .et-c-chips span.on{border-color:var(--sk-guard);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong)}
+#eternal .et-c-chips span.ok{border-color:var(--sk-verified);color:var(--sk-verified)}
+#eternal .et-c-chips span.no{border-color:var(--sk-guard);border-style:dashed;color:var(--sk-guard)}
+#eternal .et-c-knobs{display:grid;grid-template-columns:1fr 1fr;gap:var(--sk-s2);margin:0 0 var(--sk-s2)}
+#eternal .et-c-knobs label{display:flex;flex-direction:column;gap:2px;min-height:var(--sk-control-min,44px);font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut)}
+#eternal .et-c-field{width:100%;min-width:0;min-height:var(--sk-control-min,44px);padding:0 var(--sk-s1);border:1px solid var(--sk-ink-mut);border-radius:var(--sk-radius-sm);background:var(--sk-bg-card);color:var(--sk-ink);font:400 13px/1.45 var(--sk-font-mono)}
+#eternal .et-c-kv{width:100%;border-collapse:collapse;border:1px solid var(--sk-line);background:var(--sk-bg-card);font:400 13px/1.45 var(--sk-font-mono)}
+#eternal .et-c-kv th{width:104px;padding:var(--sk-s1) var(--sk-s2);text-align:left;vertical-align:top;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);border-bottom:1px solid var(--sk-line);background:transparent}
+#eternal .et-c-kv td{padding:var(--sk-s1) var(--sk-s2);border-bottom:1px solid var(--sk-line);overflow-wrap:anywhere;word-break:break-word;color:var(--sk-ink)}
+#eternal .et-c .no{color:var(--sk-info)}#eternal .et-c .yes{color:var(--sk-verified)}#eternal .et-c .sig{color:var(--sk-you)}#eternal .et-c .grd{color:var(--sk-guard)}
+#eternal .et-c-h{margin:var(--sk-s4) 0 var(--sk-s2);font:600 15px/1.45 var(--sk-font-mono);color:var(--sk-ink);letter-spacing:0}
+#eternal .et-c-tab{width:100%;border-collapse:collapse;border:1px solid var(--sk-line);background:var(--sk-bg-card);font:400 12px/1.45 var(--sk-font-mono)}
+#eternal .et-c-tab th{padding:var(--sk-s1);text-align:left;font:600 12px/1.4 var(--sk-font-mono);color:var(--sk-ink-mut);background:var(--sk-bg-well);border-bottom:1px solid var(--sk-line)}
+#eternal .et-c-tab td{padding:2px var(--sk-s1);border-bottom:1px solid var(--sk-line);color:var(--sk-ink-soft);font:400 12px/1.45 var(--sk-font-mono)}
+#eternal .et-c-tab td.on{color:var(--sk-verified)}
+#eternal .et-c-pipe{list-style:none;padding:0;display:grid;gap:var(--sk-s2);counter-reset:p}
+#eternal .et-c-pipe li{display:grid;grid-template-columns:30px 1fr;gap:var(--sk-s1) var(--sk-s2);padding:var(--sk-s2);border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm);background:var(--sk-bg-card);counter-increment:p}
+#eternal .et-c-pipe li::before{content:counter(p,decimal-leading-zero);color:var(--sk-guard);font-weight:600}
+#eternal .et-c-pipe li b{font-weight:600}
+#eternal .et-c-pipe li p{grid-column:2;color:var(--sk-ink-soft);overflow-wrap:anywhere}
+#eternal .et-c-pipe li.done b{color:var(--sk-verified)}
+#eternal .et-c-pipe li.fail{border-style:dashed;border-color:var(--sk-guard)}#eternal .et-c-pipe li.fail b{color:var(--sk-guard)}
+#eternal .et-c-pipe li.now{border-color:var(--sk-ai);box-shadow:inset 0 0 0 1px var(--sk-ai)}#eternal .et-c-pipe li.now b{color:var(--sk-ai)}
+#eternal .et-c-pipe li.todo p{color:var(--sk-ink-mut)}
+#eternal .et-c-primary{display:flex;align-items:center;justify-content:center;width:100%;height:52px;margin-top:var(--sk-s3);border:0;border-radius:var(--sk-radius-sm);background:var(--sk-primary);color:var(--sk-on-primary);font:600 14px/1.2 var(--sk-font-mono);cursor:pointer}
+#eternal .et-c-primary:disabled{background:var(--sk-bg-well);color:var(--sk-ink-mut);cursor:not-allowed}
+#eternal .et-c-verify{margin-top:var(--sk-s3);padding:var(--sk-s3);border-radius:var(--sk-radius-sm);background:var(--sk-bg-card)}
+#eternal .et-c-verify-h{margin-bottom:var(--sk-s1);font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut)}
+#eternal .et-c-verify ol{padding-left:var(--sk-s4);display:grid;gap:var(--sk-s1);overflow-wrap:anywhere}
+#eternal .et-c-verify code{font:400 12px/1.45 var(--sk-font-mono);color:var(--sk-ai);overflow-wrap:anywhere;word-break:break-all}
+#eternal .et-c-row{display:grid;grid-template-columns:1fr 1fr;gap:var(--sk-s2);margin-top:var(--sk-s3)}
+#eternal .et-c-ghost{display:flex;align-items:center;justify-content:center;min-height:52px;padding:0 var(--sk-s1);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius-sm);background:transparent;color:var(--sk-ink);text-align:center;font:600 14px/1.2 var(--sk-font-mono);cursor:pointer}
+#eternal .et-c-ghost:disabled{border-color:var(--sk-ink-mut);color:var(--sk-ink-mut);cursor:not-allowed}
+
+/* NEW BEE — the ask, as a plain question with plain answers */
+#eternal .et-b-ask{display:flex;gap:var(--sk-s1);align-items:center}
+#eternal .et-b-ask .et-b-field{flex:1 1 auto;width:auto;max-width:none;text-align:left}
+#eternal .et-b-ask .et-b-link{flex:none}
+#eternal .et-b-sub{padding:var(--sk-s2) var(--sk-s3) var(--sk-s1);font:600 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut);border-bottom:1px solid var(--sk-line-soft)}
+
+/* RAVER art — the room as a record: the 32-step score is a ring of spokes (length is pitch, ink is
+   velocity) round a hexagon heart; the setlist orbits as discs. The ring turns once per 32 steps only
+   while the room sounds (about 0.1 Hz), pauses on the motion switch and never turns under reduced motion
+   (the room is silent then too). */
+#eternal .et-m-orbit{fill:none;stroke:var(--sk-line);stroke-width:1.5;stroke-dasharray:3 6}
+#eternal .et-m-spoke{stroke-width:5;stroke-linecap:round;fill:none}
+#eternal .et-m-spoke.v-hi{stroke:var(--sk-sovereign-strong)}#eternal .et-m-spoke.v-md{stroke:var(--sk-sovereign)}#eternal .et-m-spoke.v-lo{stroke:var(--sk-sovereign-soft)}
+#eternal .et-m-spoke.off{stroke:var(--sk-line)}#eternal .et-m-spoke.soft{stroke-dasharray:3 4}
+#eternal .et-m-turn{transform-box:view-box;transform-origin:0 0}
+#eternal .et-m-turn.go{animation:etSpin var(--du,10s) linear infinite}
+body.et-still #eternal .et-m-turn.go{animation-play-state:paused}
+@media (prefers-reduced-motion:reduce){#eternal .et-m-turn.go{animation:none}}
+#eternal .et-m-heart .hit{fill:transparent}
+#eternal .et-m-heart .hex{fill:var(--sk-sovereign-wash);stroke:var(--sk-sovereign);stroke-width:2}
+#eternal .et-m-heart text{fill:var(--sk-sovereign-strong)}
+#eternal .et-m-heart.on .hex{fill:var(--sk-you);stroke:var(--sk-you)}
+#eternal .et-m-heart.on text{fill:var(--sk-on-primary)}
+#eternal .et-m-heart.off{cursor:default}#eternal .et-m-heart.off .hex{stroke-dasharray:4 4}
+#eternal .et-m-heart:focus-visible .hex{stroke:var(--sk-ink);stroke-width:3}
+#eternal .et-m-disc .hit{fill:transparent}
+#eternal .et-m-disc .rec{fill:var(--sk-bg-card);stroke:var(--sk-sovereign-soft);stroke-width:2}
+#eternal .et-m-disc text{fill:var(--sk-ink)}
+#eternal .et-m-disc.now .rec{fill:var(--sk-you);stroke:var(--sk-you)}
+#eternal .et-m-disc.now text{fill:var(--sk-on-primary)}
+#eternal .et-m-disc.sel .rec{stroke:var(--sk-ink);stroke-width:3}
+#eternal .et-m-disc:focus-visible .rec{stroke:var(--sk-ink);stroke-width:3}
+#eternal .lg-hi{background:var(--sk-sovereign-strong)}#eternal .lg-lo{background:var(--sk-sovereign-soft)}#eternal .lg-disc{border:2px solid var(--sk-sovereign-soft);border-radius:var(--sk-radius-pill)!important}#eternal .lg-now{background:var(--sk-you)}
+
+/* ── THE WHOLE ROOM, dressed per register: the page's own variables mapped onto skaists tokens. The
+   room's art keeps its own ladder of hues on the canvas (the art is the room's); the chrome, the words
+   and the controls wear the register. Numbers leave honey (honey is for b amounts only). ── */
+body[data-reg]{--you:var(--sk-you);--biomass:var(--sk-biomass);--ai:var(--sk-ai);--info:var(--sk-info);--guard:var(--sk-guard);--sovereign:var(--sk-sovereign);
+  --sem-value:var(--sk-info);--sem-solution:var(--sk-verified);--sem-harm:var(--sk-guard);--sem-system:var(--sk-info);--sem-science:var(--sk-ai);--sovereign-soft:var(--sk-sovereign-soft);
+  --bg:var(--sk-bg);--bg-card:var(--sk-bg-card);--bg-well:var(--sk-bg-well);--ink:var(--sk-ink);--ink-mut:var(--sk-ink-mut);--ink-dim:var(--sk-ink-mut);--line:var(--sk-line);--radius:var(--sk-radius-xl);
+  background:var(--sk-bg);color:var(--sk-ink);padding-left:var(--sk-s3);padding-right:var(--sk-s3)}
+html:has(body[data-reg]){background:var(--sk-bg)}
+body[data-reg] a,body[data-reg] .law b{color:var(--sk-link)}
+body[data-reg] h1.grad{background:none;-webkit-background-clip:border-box;background-clip:border-box;color:var(--sk-ink);-webkit-text-fill-color:currentColor}
+body[data-reg] .stat b{color:var(--sk-sovereign-strong)}
+body[data-reg] .stat b{word-break:normal;overflow-wrap:anywhere}
+@media(max-width:600px){body[data-reg] .stats .stat{flex:1 1 100%}}
+body[data-reg] :is(.panel,.stat){border-radius:var(--sk-radius-xl)}
+body[data-reg] :is(.well,.qitem,.prop,.patchbox,.ask input,#kitname,.levels){border-radius:var(--sk-radius)}
+body[data-reg] .levels button{min-height:44px;color:var(--sk-ink-mut);border-radius:var(--sk-radius)}
+body[data-reg] .levels button.on{background:var(--sk-bg-card);color:var(--sk-you)}
+body[data-reg] button.voice{min-height:54px;background:var(--sk-primary);color:var(--sk-on-primary);border-radius:var(--sk-radius-lg);box-shadow:none}
+body[data-reg] button.voice.off{background:var(--sk-bg-card);color:var(--sk-ink);border:1px solid var(--sk-ink-mut)}
+body[data-reg] button.voice:disabled{background:var(--sk-bg-card);color:var(--sk-ink-mut);border:1px dashed var(--sk-guard)}
+body[data-reg] button.act{min-height:44px;background:var(--sk-primary);color:var(--sk-on-primary);border-radius:var(--sk-radius)}
+body[data-reg] button.act.ghost{background:var(--sk-bg-card);color:var(--sk-ink);border:1px solid var(--sk-ink-mut)}
+body[data-reg] :is(.ask input,#kitname){min-height:44px;background:var(--sk-bg-card)!important;border-color:var(--sk-ink-mut)!important;color:var(--sk-ink)!important}
+body[data-reg] .qitem button{min-height:44px;min-width:44px;color:var(--sk-link)}
+body[data-reg] .pad{min-height:44px;border-radius:var(--sk-radius);background:var(--sk-bg-card);color:var(--sk-ink);border-color:var(--sk-ink-mut)}
+body[data-reg] .knob input[type=range]{min-height:44px;accent-color:var(--sk-ai)}
+body[data-reg] .st.hi{background:var(--sk-biomass);border-color:var(--sk-biomass)}
+body[data-reg] .st.md{background:color-mix(in srgb,var(--sk-biomass) 55%,transparent);border-color:color-mix(in srgb,var(--sk-biomass) 55%,transparent)}
+body[data-reg] .st.lo{background:color-mix(in srgb,var(--sk-biomass) 22%,transparent);border-color:color-mix(in srgb,var(--sk-biomass) 22%,transparent)}
+body[data-reg] .st{border-radius:4px}
+body[data-reg] .ev .k,body[data-reg] .lg{border-radius:4px}
+body[data-reg] .lg{border-radius:var(--sk-radius-pill)}
+body[data-reg] .lg i{border-radius:4px}
+body[data-reg] .prop b,body[data-reg] .qitem b{color:var(--sk-info)}
+body[data-reg] .prop .q,body[data-reg] .ev .f{color:var(--sk-link)}
+body[data-reg] canvas{border-radius:var(--sk-radius)}
+body[data-reg="bee"]{font:400 16px/1.6 var(--sk-font-bee-sans)}
+body[data-reg="bee"] h1.grad{font:400 40px/1.05 var(--sk-font-bee-serif);letter-spacing:0}
+body[data-reg="bee"] .law{font-size:16px;color:var(--sk-ink-soft)}
+body[data-reg="bee"] h3{font:600 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+body[data-reg="bee"] .stat b{font:400 32px/1 var(--sk-font-bee-serif)}
+body[data-reg="bee"] .stat.science b{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+body[data-reg="bee"] :is(.stat .l,.levels button small,.prop span,.prop .q,.qitem span,.knob,.patchbox,.ev .k,.ev .f,.lg){font-size:14px}
+body[data-reg="bee"] :is(.levels button,button.voice,button.act,.pad,.prop b,.qitem b,.knob b,.ask input,#kitname,.qitem button){font-family:var(--sk-font-bee-sans)!important;font-size:16px!important}
+body[data-reg="raver"]{font:400 14px/1.6 var(--sk-font-raver-body)}
+body[data-reg="raver"] h1.grad{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em;background:var(--sk-rainbow);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent}
+body[data-reg="raver"] .law{font-size:14px;color:var(--sk-ink-soft)}
+body[data-reg="raver"] h3{font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em;color:var(--sk-ink)}
+body[data-reg="raver"] .stat b{font:700 30px/1 var(--sk-font-raver-display)}
+body[data-reg="raver"] .stat.science b{font:700 15px/1.2 var(--sk-font-raver-display)}
+body[data-reg="raver"] :is(.stat .l,.levels button,.levels button small,.prop b,.prop span,.prop .q,.qitem b,.qitem span,.knob,.knob b,.patchbox,.ev .k,.ev .f,.lg,.ask input,#kitname,button.act,.pad,.qitem button,.plain,.msg,.foot){font-family:var(--sk-font-raver-body)!important;font-size:14px!important}
+body[data-reg="raver"] button.voice{font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em;border-radius:var(--sk-radius-pill)}
+body[data-reg="raver"] :is(button.act,.qitem button,.pad){border-radius:var(--sk-radius-pill)}
+body[data-reg="cypherpunk"]{font:400 13px/1.6 var(--sk-font-mono)}
+body[data-reg="cypherpunk"] h1.grad{font:600 15px/1.45 var(--sk-font-mono)}
+body[data-reg="cypherpunk"] :is(.law,.msg,.plain){font-size:13px}
+body[data-reg="cypherpunk"] h3{font:600 13px/1.45 var(--sk-font-mono);color:var(--sk-ink)}
+body[data-reg="cypherpunk"] .stat b{font:600 15px/1.45 var(--sk-font-mono)}
+body[data-reg="cypherpunk"] :is(.stat .l,.levels button small,.prop span,.prop .q,.qitem span,.knob,.patchbox,.ev .k,.ev .f,.lg){font-size:12px}
+body[data-reg="cypherpunk"] :is(.levels button,button.voice,button.act,.pad,.prop b,.qitem b,.knob b,.ask input,#kitname,.qitem button,.ev){font-family:var(--sk-font-mono)!important;font-size:13px!important}
+body[data-reg="cypherpunk"] :is(.panel,.stat,.well,.qitem,.prop,.patchbox,.ask input,#kitname,.levels,.levels button,button.voice,button.act,.pad,canvas){border-radius:var(--sk-radius-sm)}
 </style>
+<link rel="stylesheet" href="../skaists.css">
 </head>
-<body>
+<body data-bee-theme="custom">
+<!-- ETERNAL FRONT (founder blueprint 2026-09-26, docs/design/eternal): three separate products in
+     one surface. ONE data layer (the room's own seed, its buildPattern score, the setlist queue, the
+     patch, the voice, the sounding flag and the room log) drives all three, so the facts cannot drift;
+     each register has its own layout, graphic, gesture and voice. Nothing here plays, asks or queues on
+     its own: every gesture clicks the room's real control below (#voice, #ask, a proposal, a setlist ▶)
+     and the fronts read the room back. Sound starts only by a press; under reduced motion the room
+     rests silent, and so do the fronts. -->
+<section id="eternal" aria-label="the room">
+
+  <!-- NEW BEE — a calm room: what is playing, what is next, a plain question for a new mood -->
+  <div class="et-b">
+    <div class="et-b-mark">bMiDi · the room</div>
+    <h2 class="et-b-h" data-t="et.midiroom.b.title">music from one number</h2>
+    <p class="et-b-lede" data-t="et.midiroom.b.lede">every song in this room grows from a single number. press play to listen, or ask for a different mood in your own words.</p>
+    <div class="et-b-guard"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span data-t="et.midiroom.b.guard">sound starts only when you press. everything stays on this device.</span></div>
+    <div class="et-b-rows">
+      <div class="et-b-row"><span data-t="et.midiroom.b.now">in the room now</span><small data-et="beeSeed">reading…</small></div>
+      <div class="et-b-row"><span data-t="et.midiroom.b.mood">its mood</span><small data-et="beeMood">reading…</small></div>
+      <div class="et-b-row"><span data-t="et.midiroom.b.next">lined up next</span><small data-et="beeNext">reading…</small></div>
+    </div>
+    <div class="et-b-rows" id="etBeeAsk">
+      <div class="et-b-sub" data-t="et.midiroom.b.askH">ask for a mood</div>
+      <div class="et-b-row et-b-ask"><input class="et-b-field" id="etBeeQ" type="text" autocomplete="off" spellcheck="false" aria-label="ask for a mood"><button type="button" class="et-b-link" id="etBeeAskGo" data-t="et.midiroom.b.askGo">ask</button></div>
+      <div id="etBeeProps"></div>
+    </div>
+    <p class="et-b-now" id="etBeeNow" aria-live="polite">press play when you are ready.</p>
+    <div class="et-b-act">
+      <button type="button" class="et-b-primary" id="etBeePlay">play the room</button>
+      <p class="et-b-foot" data-t="et.midiroom.b.foot">the same number always plays the same song.</p>
+    </div>
+  </div>
+
+  <!-- RAVER — the record: the score as a ring of spokes, the setlist orbiting as discs; hold to drop the needle -->
+  <div class="et-r">
+    <div class="et-r-top"><h2 class="et-r-h" id="etRaverTitle">the record</h2><span class="et-r-hint" id="etRaverHint">reading the room…</span></div>
+    <svg class="et-r-art" id="etRecord" viewBox="-180 -180 360 360" role="group" aria-label="the room as a record: the score as spokes, the setlist as discs"></svg>
+    <div class="et-r-legend" aria-label="what the marks mean">
+      <span><i class="lg-hi"></i><em data-t="et.midiroom.r.loud">loud step</em></span><span><i class="lg-lo"></i><em data-t="et.midiroom.r.soft">soft step</em></span><span><i class="lg-disc"></i><em data-t="et.midiroom.r.disc">lined up</em></span><span><i class="lg-now"></i><em data-t="et.midiroom.r.now">on now</em></span>
+    </div>
+    <div class="et-r-card" id="etRaverCard" aria-live="polite"></div>
+    <button type="button" class="et-r-pill" id="etHold" aria-describedby="etHoldHint"><span class="fill" id="etHoldFill"></span><span class="lbl" id="etHoldLbl">hold to drop the needle</span></button>
+    <p class="et-r-note" id="etHoldHint">hold 1.2 s</p>
+    <div class="et-r-duo"><button type="button" class="et-r-ghost" id="etMotion" aria-pressed="false">pause motion</button></div>
+  </div>
+
+  <!-- CYPHERPUNK — the room as an instrument: the draw, the 32 steps, the setlist, the pipeline -->
+  <div class="et-c">
+    <p class="et-c-path"><span data-et="path">bmidi://room</span></p>
+    <div class="et-c-chips" id="etChips"></div>
+    <table class="et-c-kv" id="etDraw"></table>
+    <button type="button" class="et-c-primary" id="etCyRun">run the room</button>
+    <h3 class="et-c-h" data-t="et.midiroom.c.scoreH">score · 32 steps</h3>
+    <table class="et-c-tab" id="etScore"></table>
+    <h3 class="et-c-h" data-t="et.midiroom.c.setH">setlist · the room's memory of tonight</h3>
+    <table class="et-c-tab" id="etSet"></table>
+    <div class="et-c-knobs" style="margin-top:var(--sk-s2)">
+      <label for="etCyQ">ask · plain words in, seeds out<input class="et-c-field" id="etCyQ" type="text" autocomplete="off" spellcheck="false"></label>
+      <label for="etCyAsk">scan seed space<button type="button" class="et-c-ghost" id="etCyAsk">ask bMiDi</button></label>
+    </div>
+    <h3 class="et-c-h" data-t="et.midiroom.c.pipeH">room pipeline · deterministic</h3>
+    <ol class="et-c-pipe" id="etPipe"></ol>
+    <h3 class="et-c-h" data-t="et.midiroom.c.receiptH">receipt</h3>
+    <table class="et-c-kv" id="etReceipt"></table>
+    <div class="et-c-verify">
+      <div class="et-c-verify-h" data-t="et.midiroom.c.verifyH">verify · same seed, same room, any client</div>
+      <ol><li>r = mulberry32(seed ^ 0x5EED)</li><li>root = 36 + ⌊r·22⌋ · mode = [Dorian, Lydian, Phrygian][⌊r·3⌋] · bpm = 72 + ⌊r·61⌋ · shape = ⌊r·4⌋</li><li>32 steps: degree by shape, octave, dur ∈ {0.5, 1, 1, 2}, vel 0.5 to 1 · compare the score table above</li></ol>
+    </div>
+    <div class="et-c-row">
+      <button type="button" class="et-c-ghost" id="etCyLog">open the room log</button>
+      <a class="et-c-ghost" href="https://github.com/beehive-nature/beehive-nature/blob/main/surfaces/blight/midiroom.html" target="_blank" rel="noopener noreferrer">fork the template ↗ new tab</a>
+    </div>
+  </div>
+</section>
+<h2 class="et-archive-h" id="etArchive" data-t="et.midiroom.archive">the whole room</h2>
 <h1 class="grad">bMiDi · the room</h1>
 <p class="law">one organism, <b>three densities</b> — the same performance whether you came to listen,
 to DJ, or to produce. the synergy is the gold: you say what you want in plain words, bMiDi searches
@@ -804,6 +1092,184 @@ var opening=scanSeeds({mode:'lydian',bpm:96},3);
 opening.forEach(g=>queueSeed(g.seed,'bMiDi\'s opening set'));
 $('askmsg').textContent='bMiDi already queued an opening set — ask for anything in plain words.';
 renderQueue();
+</script>
+<script data-et-front>
+/* ETERNAL FRONT — one data layer, three renderers (docs/design/eternal). Facts come from the room
+   itself: currentSeed and its buildPattern score (P), the patch, VOICE, the setlist (queue), the
+   sounding flag, REDUCED, RELAY, the density LEVEL, bMiDi's proposals and the room log. Nothing here
+   plays, asks or queues on its own: every gesture clicks the room's real control (#voice, #ask, a
+   .prop card, a setlist ▶) and the fronts read the room back. "on" is drawn only while sounding. */
+(function(){
+  var $=function(id){return document.getElementById(id);};
+  var T=function(k,f){var t=window.BNRLanguage&&window.BNRLanguage.text;return t?t(k,f):f;};
+  var D={seed:null,modeName:'',root:0,rootName:'',bpm:0,shape:'',drawnWave:'',playedWave:'',sym:0,delayBeats:0,stepDur:0,steps:[],patched:0,
+    queue:[],nowIndex:-1,sounding:false,reduced:false,relay:'',level:'beginner',props:[],log:0,lastLog:'',kits:0,askMsg:''};
+  var R={sel:null};
+  function esc(v){return String(v==null?'':v).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+  function set(sel,txt){[].forEach.call(document.querySelectorAll('#eternal [data-et]'),function(e){if(e.getAttribute('data-et')===sel)e.textContent=txt;});}
+  function n(x){return Number(x).toLocaleString();}
+  function read(){
+    var P=window.P;
+    D.seed=window.currentSeed||null;
+    if(P){D.modeName=P.mode.n;D.root=P.root;D.rootName=noteName(P.root);D.bpm=P.bpm;D.shape=P.shape;D.drawnWave=P.wave;D.sym=P.sym;D.delayBeats=P.delayBeats;D.stepDur=P.stepDur;
+      var pv=window.patch?window.patch.v:null;
+      D.steps=P.pat.map(function(s,i){var w=pv?pv[i]:1;return {midi:s.midi,name:noteName(s.midi),dur:s.dur,vel:s.vel,weight:w};});
+      D.patched=pv?pv.filter(function(v){return v!==1;}).length:0;}
+    D.playedWave=WAVES[VOICE.wave];
+    D.queue=(window.queue||[]).map(function(q){var p=buildPattern(q.seed);return {seed:q.seed,why:q.why,modeName:p.mode.n,bpm:p.bpm,shape:p.shape};});
+    D.nowIndex=D.queue.findIndex(function(q){return q.seed===D.seed;});
+    D.sounding=!!window.sounding; D.reduced=!!REDUCED; D.relay=RELAY||''; D.level=LEVEL;
+    D.props=[].map.call(document.querySelectorAll('#proposals .prop'),function(el){var b=el.querySelectorAll('span');return {seed:+(el.querySelector('b').textContent.replace(/\D/g,'')),line:(b[0]||{}).textContent||'',more:(b[1]||{}).textContent||''};});
+    var evs=document.querySelectorAll('#room .ev'); D.log=evs.length; D.lastLog=evs[0]?[].map.call(evs[0].children,function(c){return c.textContent.trim();}).join(' · '):'';
+    D.kits=loadKits().length; D.askMsg=($('askmsg').textContent||'').trim();
+  }
+  function mood(){return D.modeName+' '+T('et.midiroom.b.in','in')+' '+D.rootName.replace(/-?\d+$/,'')+', '+D.bpm+' '+T('et.midiroom.b.bpm','beats a minute')+', '+D.shape;}
+  function nextSong(){var q=D.queue;if(!q.length)return null;var i=D.nowIndex>=0?D.nowIndex+1:0;return q[i<q.length?i:0].seed===D.seed&&q.length===1?null:q[i<q.length?i:0];}
+
+  /* ── NEW BEE ── */
+  function bee(){
+    set('beeSeed',D.seed?T('et.midiroom.b.song','song')+' '+n(D.seed):T('et.midiroom.b.none','nothing yet'));
+    set('beeMood',D.seed?mood():T('et.midiroom.b.none','nothing yet'));
+    var left=D.queue.filter(function(q){return q.seed!==D.seed;}).length;
+    set('beeNext',left?left+' '+(left===1?T('et.midiroom.b.one','song'):T('et.midiroom.b.many','songs')):T('et.midiroom.b.empty','nothing lined up'));
+    $('etBeeProps').innerHTML=D.props.map(function(pr,i){return '<button type="button" class="et-b-row" data-prop="'+i+'"><span>'+esc(pr.line)+'</span><small>'+esc(T('et.midiroom.b.add','add'))+' <svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="2"/></svg></small></button>';}).join('');
+    $('etBeeNow').textContent=D.reduced?T('et.midiroom.b.reduced','your device asks for less motion, so the room stays still and silent. a quiet one, not a lesser one.')
+      :D.sounding?T('et.midiroom.b.playing','the room is playing song {s}. press again to let it rest.').replace('{s}',n(D.seed))
+      :D.props.length&&/searched/.test(D.askMsg)?T('et.midiroom.b.found','here are songs that match. add one and it joins the line.')
+      :/nothing in seed space/.test(D.askMsg)?T('et.midiroom.b.nomatch','nothing matched those words. try fewer or simpler ones.')
+      :T('et.midiroom.b.ready','press play when you are ready. nothing sounds until then.');
+    var b=$('etBeePlay'); b.disabled=D.reduced||!D.seed;
+    b.textContent=D.reduced?T('et.midiroom.b.rests','the room rests'):D.sounding?T('et.midiroom.b.rest','let the room rest'):T('et.midiroom.b.play','play the room');
+    var q=$('etBeeQ'); q.placeholder=T('et.midiroom.b.askPh','slow and dreamy, around 90');
+  }
+
+  /* ── RAVER ── */
+  var HEX=function(r){var p=[];for(var k=0;k<6;k++){var a=Math.PI/180*(60*k-30);p.push((r*Math.cos(a)).toFixed(1)+' '+(r*Math.sin(a)).toFixed(1));}return 'M'+p.join('L')+'Z';};
+  var built='';
+  function record(){
+    var svg=$('etRecord'); if(!svg||!D.seed)return;
+    var sig=D.seed+'|'+D.queue.map(function(q){return q.seed;}).join(',')+'|'+D.steps.map(function(s){return s.weight;}).join('');
+    if(built!==sig){
+      var lo=Math.min.apply(null,D.steps.map(function(s){return s.midi;})),hi=Math.max.apply(null,D.steps.map(function(s){return s.midi;})),h='<circle class="et-m-orbit" r="152"/><g class="et-m-turn" id="etTurn">';
+      D.steps.forEach(function(s,i){var a=-Math.PI/2+i*2*Math.PI/32,r0=52,r1=r0+18+(s.midi-lo)/Math.max(1,hi-lo)*72;
+        var cls='et-m-spoke '+(s.weight===0?'off':(s.vel>=0.83?'v-hi':s.vel>=0.66?'v-md':'v-lo')+(s.weight===0.5?' soft':''));
+        h+='<line class="'+cls+'" x1="'+(r0*Math.cos(a)).toFixed(1)+'" y1="'+(r0*Math.sin(a)).toFixed(1)+'" x2="'+(r1*Math.cos(a)).toFixed(1)+'" y2="'+(r1*Math.sin(a)).toFixed(1)+'"/>';});
+      h+='</g>';
+      D.queue.slice(0,10).forEach(function(q,i,arr){var a=-Math.PI/2+i*2*Math.PI/Math.max(arr.length,3),x=152*Math.cos(a),y=152*Math.sin(a);
+        h+='<g class="et-m-disc" data-i="'+i+'" role="button" tabindex="0" transform="translate('+x.toFixed(1)+' '+y.toFixed(1)+')"><circle class="hit" r="25"/><circle class="rec" r="23"/><text y="5" text-anchor="middle">'+q.bpm+'</text></g>';});
+      h+='<g class="et-m-heart" role="button" tabindex="0"><circle class="hit" r="44"/><path class="hex" d="'+HEX(44)+'"/><text id="etHeartT" y="-2" text-anchor="middle"></text><text id="etHeartS" y="18" text-anchor="middle"></text></g>';
+      svg.innerHTML=h; built=sig;
+    }
+    var t=$('etTurn'); t.style.setProperty('--du',(32*D.stepDur).toFixed(2)+'s'); t.classList.toggle('go',D.sounding);
+    [].forEach.call(svg.querySelectorAll('.et-m-disc'),function(d){var i=+d.getAttribute('data-i'),q=D.queue[i];
+      d.setAttribute('class','et-m-disc'+(q&&q.seed===D.seed?' now':'')+(R.sel===i?' sel':''));
+      d.setAttribute('aria-label',T('et.midiroom.r.discA','seed')+' '+n(q.seed)+', '+q.modeName+', '+q.bpm+' bpm'+(q.seed===D.seed?', '+T('et.midiroom.r.onA','on now'):''));});
+    var hr=svg.querySelector('.et-m-heart');
+    hr.setAttribute('class','et-m-heart'+(D.sounding?' on':'')+(D.reduced?' off':''));
+    hr.setAttribute('aria-disabled',String(D.reduced));
+    hr.setAttribute('aria-label',D.reduced?T('et.midiroom.r.restsA','the room rests silent under reduced motion'):D.sounding?T('et.midiroom.r.restA','let the room rest'):T('et.midiroom.r.playA','play the room'));
+    $('etHeartT').textContent=D.reduced?T('et.midiroom.r.still','still'):D.sounding?T('et.midiroom.r.rest','rest'):T('et.midiroom.r.play','play');
+    $('etHeartS').textContent=D.bpm+' bpm';
+  }
+  function target(){return R.sel!=null&&D.queue[R.sel]?D.queue[R.sel]:nextSong();}
+  function raver(){
+    $('etRaverTitle').textContent=D.sounding?T('et.midiroom.r.spinH','it spins'):T('et.midiroom.r.h','the record');
+    $('etRaverHint').textContent=n(D.seed)+' · '+D.modeName+' · C'+D.sym+'n · '+D.queue.length+' '+T('et.midiroom.r.lined','lined up');
+    record();
+    var c=$('etRaverCard'), q=R.sel!=null?D.queue[R.sel]:null;
+    if(q)c.innerHTML='<span class="rk">'+q.bpm+'</span><div><b>'+esc(T('et.midiroom.r.seed','seed')+' '+n(q.seed)+' · '+q.modeName+' · '+q.shape)+'</b><span>'+esc((q.seed===D.seed?T('et.midiroom.r.onNow','on now')+' · ':'')+(q.why||''))+'</span></div>';
+    else c.innerHTML='<span class="rk">'+D.bpm+'</span><div><b>'+esc(T('et.midiroom.r.seed','seed')+' '+n(D.seed)+' · '+D.modeName+' · '+D.rootName+' · '+D.shape)+'</b><span>'+esc(D.reduced?T('et.midiroom.r.quiet','reduced motion · the room rests silent'):T('et.midiroom.r.tap','tap a disc · the heart plays'))+'</span></div>';
+    var t=target(), p=$('etHold');
+    p.disabled=!t||D.reduced&&false;
+    $('etHoldLbl').textContent=t?(t.seed===D.seed?T('et.midiroom.r.onAlready','this one is on'):T('et.midiroom.r.drop','hold to drop the needle')):T('et.midiroom.r.emptySet','the setlist is empty');
+    if(t&&t.seed===D.seed)p.disabled=true;
+    $('etHoldHint').textContent=t?T('et.midiroom.r.holdN','hold 1.2 s · next')+': '+n(t.seed)+' · '+t.modeName+' · '+t.bpm+' bpm':T('et.midiroom.r.holdE','ask bMiDi to line songs up');
+  }
+
+  /* ── CYPHERPUNK ── */
+  function kv(rows){return rows.map(function(r){return '<tr><th>'+esc(r[0])+'</th><td>'+r[1]+'</td></tr>';}).join('');}
+  function cy(){
+    set('path','bmidi://room · seed '+D.seed);
+    $('etChips').innerHTML='<span class="'+(D.relay?'ok':'on')+'">relay '+esc(D.relay||'LOCAL')+'</span><span class="'+(D.sounding?'ok':D.reduced?'no':'')+'">'+(D.sounding?'sounding':D.reduced?'reduced · silent':'silent')+'</span><span>density '+esc(D.level)+'</span><span>setlist '+D.queue.length+'</span>';
+    $('etDraw').innerHTML=kv([
+      ['seed',esc(D.seed+' · mulberry32(seed ^ 0x5EED)')],
+      ['draw',esc(D.modeName+' · root '+D.root+' ('+D.rootName+') · '+D.bpm+' bpm · '+D.shape)],
+      ['voice',esc('played '+D.playedWave+' (the wave slider) · drawn '+D.drawnWave)],
+      ['time',esc('step '+(D.stepDur*1000).toFixed(1)+' ms · delay '+D.delayBeats+' beat · 32 steps = '+(32*D.stepDur).toFixed(2)+' s')],
+      ['symmetry',esc('C'+D.sym+'n · hex lattice, pointy-top axial')],
+      ['patch',D.patched?esc(D.patched+' of 32 steps reshaped'):'<span class="yes">none</span> · the pure seed plays']]);
+    var rows='<tr><th>i</th><th>note</th><th>i</th><th>note</th><th>i</th><th>note</th><th>i</th><th>note</th></tr>';
+    for(var r=0;r<8;r++){rows+='<tr>';for(var c=0;c<4;c++){var i=c*8+r,S=D.steps[i];rows+=S?'<td>'+(i+1)+'</td><td class="'+(S.weight===1&&S.vel>=0.83?'on':'')+'">'+esc(S.name+(S.weight===0?' off':S.weight===0.5?' soft':''))+'</td>':'<td></td><td></td>';}rows+='</tr>';}
+    $('etScore').innerHTML=rows;
+    $('etSet').innerHTML='<tr><th>#</th><th>seed</th><th>mode</th><th>bpm</th><th>shape</th></tr>'+(D.queue.map(function(q,i){return '<tr><td>'+(i+1)+'</td><td class="'+(q.seed===D.seed?'on':'')+'">'+q.seed+'</td><td>'+esc(q.modeName)+'</td><td>'+q.bpm+'</td><td>'+esc(q.shape)+'</td></tr>';}).join('')||'<tr><td colspan="5">empty</td></tr>');
+    var steps=[
+      ['seed',D.seed+' → mulberry32','done'],
+      ['draw',D.modeName+' · '+D.rootName+' · '+D.bpm+' bpm · '+D.shape,'done'],
+      ['score','32 steps'+(D.patched?' · patch on '+D.patched:' · no patch'),'done'],
+      ['lattice','forms seeded per step · C'+D.sym+'n · drawn on the canvas below','done'],
+      ['web audio',D.reduced?'silent · reduced motion asks for a still room':D.sounding?'sounding · '+D.playedWave+' + drone':'idle · starts only on a press',D.reduced?'fail':'now'],
+      ['room log',(D.relay?'read-only relay '+D.relay:'LOCAL · no socket')+' · '+D.log+' lines','todo']
+    ];
+    $('etPipe').innerHTML=steps.map(function(s){return '<li class="'+s[2]+'"><b>'+esc(s[0])+'</b><p>'+esc(s[1])+'</p></li>';}).join('');
+    $('etReceipt').innerHTML=kv([['writes','<span class="yes">none</span> · nothing stored, nothing fetched'],['relay',D.relay?esc(D.relay+' · read-only'):'<span class="no">LOCAL</span> · every line stays on this device'],
+      ['kits',esc(D.kits+' on this device · localStorage bmidi-kits')],['log',D.lastLog?esc(D.lastLog):'<span class="no">empty</span>']]);
+    var b=$('etCyRun'); b.disabled=D.reduced||!D.seed; b.textContent=D.reduced?'silent · reduced motion':D.sounding?'rest the room':'run the room';
+  }
+
+  function labels(){[].forEach.call(document.querySelectorAll('#eternal [data-t]'),function(e){if(e.__en==null)e.__en=e.textContent;e.textContent=T(e.getAttribute('data-t'),e.__en);});}
+  function all(){read();bee();raver();cy();}
+
+  /* ── the hand-offs: the room's own controls own every real step ── */
+  function click(el){if(el&&!el.disabled)el.click();}
+  function voice(){read();if(D.reduced)return;click($('voice'));all();}
+  function ask(q){q=String(q||'').trim();if(!q)return;$('askin').value=q;click($('ask'));all();}
+  function putOn(i){var el=document.querySelectorAll('#queue .qitem')[i];if(el)click(el.querySelector('button'));R.sel=null;all();}
+  var hold={t0:0,raf:0};
+  function holdStart(e){
+    if(hold.raf||$('etHold').disabled)return; if(e&&e.preventDefault)e.preventDefault();
+    hold.t0=performance.now();
+    (function tick(now){var f=Math.min(1,(now-hold.t0)/1200);$('etHoldFill').style.width=(f*100)+'%';
+      if(f>=1){hold.raf=0;$('etHoldFill').style.width='0';read();var t=target();if(t)putOn(D.queue.indexOf(t));return;}hold.raf=requestAnimationFrame(tick);})(hold.t0);
+  }
+  function holdStop(){if(!hold.raf)return;cancelAnimationFrame(hold.raf);hold.raf=0;$('etHoldFill').style.width='0';}
+  var still=false; try{still=localStorage.getItem('bnr.motion.paused')==='true';}catch(x){}
+  function motion(){var reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+    document.body.classList.toggle('et-still',still||reduce);var b=$('etMotion');
+    b.setAttribute('aria-pressed',String(still||reduce));b.disabled=reduce;
+    b.textContent=reduce?T('et.midiroom.r.stillOs','still · your device asks for less motion'):still?T('et.midiroom.r.resume','resume motion'):T('et.midiroom.r.pause','pause motion');}
+
+  function wire(){
+    var ev=$('eternal'); if(!ev)return;
+    $('etBeePlay').addEventListener('click',voice);
+    $('etCyRun').addEventListener('click',voice);
+    $('etBeeAskGo').addEventListener('click',function(){ask($('etBeeQ').value);});
+    $('etBeeQ').addEventListener('keydown',function(e){if(e.key==='Enter')ask(this.value);});
+    $('etCyAsk').addEventListener('click',function(){ask($('etCyQ').value);});
+    $('etCyQ').addEventListener('keydown',function(e){if(e.key==='Enter')ask(this.value);});
+    $('etCyLog').addEventListener('click',function(){var r=$('room'),sec=r&&r.closest('section');if(sec){sec.setAttribute('tabindex','-1');sec.scrollIntoView({block:'start'});sec.focus({preventScroll:true});}});
+    ev.addEventListener('click',function(e){
+      var pr=e.target.closest('#etBeeProps [data-prop]'); if(pr){click(document.querySelectorAll('#proposals .prop')[+pr.getAttribute('data-prop')]);all();return;}
+      var d=e.target.closest('#etRecord .et-m-disc'); if(d){var i=+d.getAttribute('data-i');R.sel=R.sel===i?null:i;raver();return;}
+      if(e.target.closest('#etRecord .et-m-heart'))voice();
+    });
+    ev.addEventListener('keydown',function(e){var t=e.target.closest&&e.target.closest('#etRecord [role="button"]');if(t&&(e.key==='Enter'||e.key===' ')){e.preventDefault();t.dispatchEvent(new MouseEvent('click',{bubbles:true}));}});
+    var hb=$('etHold');
+    hb.addEventListener('pointerdown',function(e){try{hb.setPointerCapture(e.pointerId);}catch(x){}holdStart(e);});
+    ['pointerup','pointercancel','pointerleave'].forEach(function(t){hb.addEventListener(t,holdStop);});
+    hb.addEventListener('keydown',function(e){if((e.key===' '||e.key==='Enter')&&!e.repeat){e.preventDefault();holdStart(e);}});
+    hb.addEventListener('keyup',function(e){if(e.key===' '||e.key==='Enter')holdStop();});
+    hb.addEventListener('contextmenu',function(e){e.preventDefault();});
+    $('etMotion').addEventListener('click',function(){still=!still;try{localStorage.setItem('bnr.motion.paused',String(still));}catch(x){}motion();});
+    if(window.matchMedia)matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change',motion);
+    /* the room speaks through its stats, its voice button, its proposals, its setlist and its log */
+    var mo=new MutationObserver(function(){all();});
+    ['st-seed','voice','proposals','queue','askmsg','room','patchbox'].forEach(function(id){if($(id))mo.observe($(id),{childList:true,characterData:true,subtree:true,attributes:true});});
+    $('levels').addEventListener('click',function(){setTimeout(all,0);});
+    document.addEventListener('blang',function(){labels();motion();all();});
+  }
+  labels(); wire(); motion(); all();
+  window.__eternal={data:D,raver:R,refresh:all};
+})();
 </script>
 <script src="../tour.js?v=42"></script>
 </body>

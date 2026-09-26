@@ -56,8 +56,269 @@
   body[data-reg="cypherpunk"] .three div { font-size: 13.5px; }
   body[data-reg="cypherpunk"] footer { font-size: 13px; }
 </style>
+<link rel="stylesheet" href="skaists.css">
+<style>
+/* ── ETERNAL FRONT (founder blueprint 2026-09-26, docs/design/eternal) — three products in one door
+   to the Autonomi network. Every value is a skaists token (skaists.css, compiled from
+   docs/design/skaists/tokens.json): no hand-picked hex, size or corner. Measured by
+   e2e/skaists-conformance.mjs --only ant-door.html. The read is the page's own single GET; when it
+   fails (this box has no outside network, and a copy away from the door has no /ant route), the
+   failure is drawn as calmly and as truly as the bytes would be. One register at a time. ── */
+#eternal{position:relative;margin:0;padding:0;color:var(--sk-ink)}
+#eternal>div{max-width:600px}
+#eternal>.et-r,#eternal>.et-c{display:none}
+body[data-reg="raver"] #eternal>.et-b,body[data-reg="cypherpunk"] #eternal>.et-b{display:none}
+body[data-reg="raver"] #eternal>.et-r,body[data-reg="cypherpunk"] #eternal>.et-c{display:block}
+html[data-et-bare] #eternal,html[data-et-bare] .et-archive-h{display:none}
+#eternal [hidden]{display:none!important}
+#eternal :is(h2,h3,p,ol,ul,li,table){margin:0;padding:0}
+#eternal button{margin:0;padding:0;border:0;background:none;color:inherit;font:inherit;cursor:pointer;text-align:inherit}
+#eternal a{color:inherit;text-decoration:none}
+#eternal svg{display:block}
+#eternal :focus-visible{outline:2px solid var(--sk-focus);outline-offset:3px}
+#eternal .chev{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;transition:transform .26s}
+[dir="rtl"] #eternal .chev{transform:scaleX(-1)}
+.et-archive-h{margin:var(--sk-s4,24px) 0 0;padding-top:var(--sk-s4,24px);border-top:1px solid var(--sk-line);color:var(--sk-ink);font:400 28px/1.1 var(--sk-font-bee-serif)}
+body[data-reg="raver"] .et-archive-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em}
+body[data-reg="cypherpunk"] .et-archive-h{font:600 15px/1.45 var(--sk-font-mono)}
+
+/* NEW BEE — a calm room for one person: plain rows, one magenta action, plain words */
+#eternal .et-b{display:flex;flex-direction:column;gap:var(--sk-s3,18px);color:var(--sk-ink);font:400 16px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-b-mark{font:400 18px/1.2 var(--sk-font-house);color:var(--sk-sovereign)}
+#eternal .et-b-h{font:400 40px/1.05 var(--sk-font-bee-serif);color:var(--sk-ink);letter-spacing:0}
+#eternal .et-b-lede{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-guard{display:flex;align-items:center;gap:var(--sk-s2,12px);min-height:var(--sk-control-min,44px);padding:var(--sk-s1,6px) var(--sk-s3,18px);border-radius:var(--sk-radius);background:var(--sk-guard-wash);color:var(--sk-guard);font:600 15px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-b-guard svg{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+#eternal .et-b-rows{display:flex;flex-direction:column;background:var(--sk-bg-card);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl);overflow:hidden}
+#eternal .et-b-row{display:flex;align-items:center;justify-content:space-between;gap:var(--sk-s2,12px);width:100%;min-height:var(--sk-control-row,52px);padding:var(--sk-s1,6px) var(--sk-s3,18px);border-bottom:1px solid var(--sk-line-soft);text-align:start;font:500 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+#eternal .et-b-rows>:last-child{border-bottom:0}
+#eternal .et-b-row small{display:flex;align-items:center;gap:var(--sk-s1,6px);flex:none;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-row small.out{color:var(--sk-guard);font-weight:600}
+#eternal .et-b-row[aria-expanded="true"]{background:var(--sk-sovereign-tint);color:var(--sk-sovereign-strong);font-weight:600}
+#eternal .et-b-row[aria-expanded="true"] small{color:var(--sk-sovereign-strong)}
+#eternal .et-b-row[aria-expanded="true"] .chev{transform:rotate(90deg)}
+#eternal .et-b-open{display:flex;flex-direction:column;background:var(--sk-sovereign-tint);border-bottom:1px solid var(--sk-line-soft)}
+#eternal .et-b-page{display:flex;align-items:center;justify-content:space-between;gap:var(--sk-s2,12px);min-height:var(--sk-control-row,52px);padding:var(--sk-s1,6px) var(--sk-s3,18px) var(--sk-s1,6px) var(--sk-s4,24px);border-top:1px solid var(--sk-line-soft);color:var(--sk-ink);font:400 16px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-b-page>span{display:flex;flex-direction:column}
+#eternal .et-b-page em{font:600 14px/1.4 var(--sk-font-bee-sans);font-style:normal;color:var(--sk-guard)}
+#eternal .et-b-page .chev{color:var(--sk-link)}
+#eternal .et-b-top{padding-left:var(--sk-s3,18px);border-top:0;border-bottom:1px solid var(--sk-line-soft)}
+#eternal .et-b-page:hover{color:var(--sk-sovereign-strong)}
+#eternal .et-b-act{display:flex;flex-direction:column;gap:var(--sk-s1,6px)}
+#eternal .et-b-primary{display:flex;align-items:center;justify-content:center;min-height:var(--sk-control-primary,54px);padding:0 var(--sk-s3,18px);border-radius:var(--sk-radius-lg);background:var(--sk-primary);color:var(--sk-on-primary);font:600 17px/1.2 var(--sk-font-bee-sans);text-align:center}
+#eternal .et-b-link{display:flex;align-items:center;justify-content:center;min-height:var(--sk-control-min,44px);font:600 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-link);text-align:center}
+#eternal .et-b-link:hover{color:var(--sk-link-hover)}
+#eternal .et-b-foot{text-align:center;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+
+/* RAVER — the bytes are the art: a ring of 256 values; the hold is the request */
+#eternal .et-r{color:var(--sk-ink);font:600 14px/1.25 var(--sk-font-raver-body)}
+#eternal .et-r-top{display:flex;align-items:baseline;justify-content:space-between;gap:var(--sk-s1,6px) var(--sk-s2,12px);flex-wrap:wrap}
+#eternal .et-r-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em;color:var(--sk-ink)}
+#eternal .et-r-hint{font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-art{width:100%;max-width:360px;margin:var(--sk-s3,18px) auto var(--sk-s2,12px);filter:drop-shadow(var(--sk-glow-sovereign))}
+#eternal .et-r-art .cell{cursor:pointer}
+#eternal .et-r-art .cell polygon,#eternal .et-r-art .cell path{transition:transform .26s,opacity .26s;transform-box:fill-box;transform-origin:center}
+#eternal .et-r-art .cell[aria-pressed="true"] :is(polygon,path){transform:scale(1.07)}
+#eternal .et-r-art .cell:focus{outline:none}
+#eternal .et-r-art .cell:focus-visible :is(polygon,path){stroke:var(--sk-ink);stroke-width:3}
+#eternal .et-r-legend{display:flex;flex-wrap:wrap;justify-content:center;gap:var(--sk-s1,6px) var(--sk-s3,18px);font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-legend span{display:flex;align-items:center;gap:var(--sk-s1,6px)}
+#eternal .et-r-legend svg{width:16px;height:18px}
+#eternal .et-r-card{display:flex;gap:var(--sk-s2,12px);align-items:center;margin-top:var(--sk-s3,18px);padding:var(--sk-s2,12px) var(--sk-s3,18px);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl);background:var(--sk-sovereign-tint);min-height:var(--sk-control-person,60px)}
+#eternal .et-r-card .rk{width:44px;height:44px;flex:none;border-radius:var(--sk-radius);background:var(--sk-sovereign-strong);color:var(--sk-bg);display:flex;align-items:center;justify-content:center;font:700 15px/1.2 var(--sk-font-raver-display)}
+#eternal .et-r-card .rk svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+#eternal .et-r-card b{display:block;font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink)}
+#eternal .et-r-card span{display:block;margin-top:2px;font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-sovereign-soft);overflow-wrap:anywhere}
+#eternal .et-r-card em{display:block;margin-top:2px;font:600 14px/1.4 var(--sk-font-raver-body);font-style:normal;color:var(--sk-guard)}
+#eternal .et-r-pill{display:flex;align-items:center;justify-content:center;width:100%;min-height:58px;margin-top:var(--sk-s4,24px);padding:0 var(--sk-s3,18px);border-radius:var(--sk-radius-pill);background:var(--sk-primary);color:var(--sk-on-primary);font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em;text-align:center}
+#eternal .et-r-note{margin-top:var(--sk-s4,24px);text-align:center;font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+@media (prefers-reduced-motion:reduce){#eternal .et-r-art .cell :is(polygon,path),#eternal .chev{transition:none}}
+
+/* CYPHERPUNK — the instrument: the request, the pipeline, the hash against the receipt */
+#eternal .et-c{font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink)}
+#eternal .et-c-path{font:600 15px/1.45 var(--sk-font-mono);color:var(--sk-ink);overflow-wrap:anywhere}
+#eternal .et-c-sub{margin-top:var(--sk-s1,6px);font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut)}
+#eternal .et-c-chips{display:flex;flex-wrap:wrap;gap:var(--sk-s1,6px);margin:var(--sk-s2,12px) 0}
+#eternal .et-c-chips span{padding:2px var(--sk-s1,6px);border:1px solid var(--sk-line);border-radius:4px;background:var(--sk-bg-card);font:600 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-soft)}
+#eternal .et-c-chips .ok{border-color:var(--sk-verified);color:var(--sk-verified)}
+#eternal .et-c-chips .on{border-color:var(--sk-guard);color:var(--sk-guard)}
+#eternal .et-c-chips .no{border-color:var(--sk-info);color:var(--sk-info)}
+#eternal .et-c-guard{display:flex;justify-content:space-between;align-items:center;gap:var(--sk-s1,6px) var(--sk-s2,12px);flex-wrap:wrap;min-height:var(--sk-control-min,44px);padding:var(--sk-s1,6px) var(--sk-s3,18px);border:1px dashed var(--sk-guard);border-radius:var(--sk-radius-sm);background:var(--sk-guard-wash);color:var(--sk-guard)}
+#eternal .et-c-guard b{font-weight:600;color:var(--sk-sovereign-strong)}
+#eternal .et-c-h{margin:var(--sk-s4,24px) 0 var(--sk-s2,12px);font:600 15px/1.45 var(--sk-font-mono);color:var(--sk-ink)}
+#eternal .et-c-tab{width:100%;border-collapse:separate;border-spacing:0;border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm);overflow:hidden;background:var(--sk-bg-card);table-layout:fixed}
+#eternal .et-c-tab th{padding:var(--sk-s1,6px) var(--sk-s2,12px);text-align:start;font:600 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);border-bottom:1px solid var(--sk-line);background:var(--sk-bg-well)}
+#eternal .et-c-tab td{padding:0 var(--sk-s2,12px);border-bottom:1px solid var(--sk-line);font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink);vertical-align:middle;overflow-wrap:anywhere}
+#eternal .et-c-tab tr:last-child td{border-bottom:0}
+#eternal .et-c-tab :is(th,td):first-child{width:42px;color:var(--sk-ink-mut)}
+#eternal .et-c-tab :is(th,td):last-child{width:92px}
+#eternal .et-c-tab td a{display:flex;flex-direction:column;justify-content:center;min-height:var(--sk-control-min,44px);padding:var(--sk-s1,6px) 0;color:var(--sk-link)}
+#eternal .et-c-tab td a:hover{color:var(--sk-link-hover)}
+#eternal .et-c-tab td .nm{display:block;padding:var(--sk-s1,6px) 0;color:var(--sk-ink)}
+#eternal .et-c-tab td small{display:block;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-soft)}
+#eternal .et-c-tab .st-open{color:var(--sk-verified)}#eternal .et-c-tab .st-lim{color:var(--sk-guard)}#eternal .et-c-tab .st-not{color:var(--sk-info)}
+#eternal .et-c-pipe{list-style:none;display:grid;gap:var(--sk-s1,6px);counter-reset:p}
+#eternal .et-c-pipe li{display:grid;grid-template-columns:30px minmax(0,1fr);gap:2px var(--sk-s2,12px);padding:var(--sk-s2,12px);border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm);background:var(--sk-bg-card);counter-increment:p}
+#eternal .et-c-pipe li::before{content:counter(p,decimal-leading-zero);color:var(--sk-ink-mut);font-weight:600}
+#eternal .et-c-pipe li b{font-weight:600;color:var(--sk-ink);overflow-wrap:anywhere}
+#eternal .et-c-pipe li p{grid-column:2;color:var(--sk-ink-soft);overflow-wrap:anywhere}
+#eternal .et-c-pipe li.done b{color:var(--sk-verified)}
+#eternal .et-c-pipe li.now{border-color:var(--sk-ai)}#eternal .et-c-pipe li.now b{color:var(--sk-ai)}
+#eternal .et-c-pipe li.guard{border-style:dashed;border-color:var(--sk-guard)}#eternal .et-c-pipe li.guard b{color:var(--sk-guard)}
+#eternal .et-c-pipe li.fail{border-style:dashed;border-color:var(--sk-info)}#eternal .et-c-pipe li.fail b{color:var(--sk-info)}
+#eternal .et-c-pipe li.todo p{color:var(--sk-ink-mut)}
+#eternal .et-c-primary{display:flex;align-items:center;justify-content:center;width:100%;min-height:52px;margin-top:var(--sk-s3,18px);padding:0 var(--sk-s3,18px);border-radius:var(--sk-radius-sm);background:var(--sk-primary);color:var(--sk-on-primary);font:600 14px/1.2 var(--sk-font-mono);text-align:center}
+#eternal .et-c-kv{width:100%;border-collapse:collapse;border:1px solid var(--sk-line);background:var(--sk-bg-card);table-layout:fixed}
+#eternal .et-c-kv th{width:92px;padding:var(--sk-s1,6px) var(--sk-s2,12px);text-align:start;vertical-align:top;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);border-bottom:1px solid var(--sk-line)}
+#eternal .et-c-kv td{padding:var(--sk-s1,6px) var(--sk-s2,12px);border-bottom:1px solid var(--sk-line);font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink);overflow-wrap:anywhere}
+#eternal .et-c-kv tr:last-child :is(th,td){border-bottom:0}
+#eternal .et-c-verify{margin-top:var(--sk-s3,18px);padding:var(--sk-s2,12px) var(--sk-s3,18px);border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm);background:var(--sk-bg-card)}
+#eternal .et-c-verify-h{font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut)}
+#eternal .et-c-verify li{list-style:none;margin-top:var(--sk-s1,6px)}
+#eternal .et-c-verify code{display:block;font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink);overflow-wrap:anywhere}
+#eternal .et-c-verify small{display:block;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-soft)}
+#eternal .et-c-row{display:grid;grid-template-columns:1fr 1fr;gap:var(--sk-s2,12px);margin-top:var(--sk-s3,18px)}
+#eternal .et-c-ghost{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:52px;padding:var(--sk-s1,6px);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius-sm);color:var(--sk-ink);text-align:center;font:600 14px/1.2 var(--sk-font-mono)}
+#eternal .et-c-ghost small{font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut)}
+
+/* the Autonomi door's own pieces */
+#eternal .et-b-frame{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--sk-s2,12px);min-height:220px;padding:var(--sk-s4,24px) var(--sk-s3,18px);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl);background:var(--sk-bg-well);text-align:center}
+#eternal .et-b-frame[data-state="live"]{padding:var(--sk-s2,12px);background:var(--sk-bg-card)}
+#eternal .et-b-frame img{display:block;width:100%;height:auto;border-radius:var(--sk-radius)}
+#eternal .et-b-frame svg{width:52px;height:60px;fill:none;stroke-width:2}
+#eternal .et-b-frame b{font:400 28px/1.1 var(--sk-font-bee-serif);color:var(--sk-ink)}
+#eternal .et-b-frame span{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-frame small{font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-say{padding:var(--sk-s2,12px) var(--sk-s3,18px);border-top:1px solid var(--sk-line-soft);font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+#eternal button.et-b-primary{width:100%}
+#eternal .et-b-primary:disabled{background:var(--sk-bg-well);color:var(--sk-ink-mut);cursor:progress}
+#eternal .et-b-link small{display:block;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-link{flex-direction:column}
+#eternal .et-r-stage{position:relative;width:100%;max-width:340px;aspect-ratio:1;margin:var(--sk-s3,18px) auto var(--sk-s2,12px)}
+#eternal .et-r-spec{position:absolute;inset:0;width:100%;height:100%;filter:drop-shadow(var(--sk-glow-sovereign))}
+#eternal .et-r-spec .ring{cursor:crosshair}
+#eternal .et-r-spec .ring:focus{outline:none}
+#eternal .et-r-spec .ring:focus-visible .edge{stroke:var(--sk-ink);stroke-width:2}
+#eternal .et-r-prog{position:absolute;left:27%;top:27%;width:46%;height:46%;transform:rotate(-90deg);pointer-events:none}
+#eternal .et-r-prog circle{fill:none;stroke-width:5}
+#eternal .et-r-prog .track{stroke:var(--sk-line)}
+#eternal .et-r-prog .fill{stroke:var(--sk-biomass);stroke-linecap:round;stroke-dasharray:289;stroke-dashoffset:289}
+#eternal #etHold{position:absolute;left:31%;top:31%;width:38%;height:38%;background:var(--sk-primary);color:var(--sk-on-primary);clip-path:polygon(50% 0,93% 25%,93% 75%,50% 100%,7% 75%,7% 25%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;touch-action:none;user-select:none;-webkit-user-select:none;font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em;text-align:center}
+#eternal #etHold span{font:600 14px/1.25 var(--sk-font-raver-body);letter-spacing:0}
+#eternal #etHold:disabled{background:var(--sk-sovereign-wash);color:var(--sk-sovereign-soft);cursor:progress}
+#eternal .et-r-pic{display:grid;grid-template-columns:88px minmax(0,1fr);gap:var(--sk-s2,12px);align-items:center;margin-top:var(--sk-s2,12px);padding:var(--sk-s2,12px);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl);background:var(--sk-bg-card)}
+#eternal .et-r-pic img{width:88px;height:88px;object-fit:cover;border-radius:var(--sk-radius)}
+#eternal .et-r-pic b{display:block;font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink)}
+#eternal .et-r-pic span{display:block;margin-top:2px;font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-rim{height:4px;margin:var(--sk-s3,18px) 0 var(--sk-s1,6px);border-radius:var(--sk-radius-pill);background:var(--sk-rainbow)}
+#eternal .et-r-rim[data-match="no"]{background:none;border-top:2px dashed var(--sk-guard);height:0}
+#eternal .et-r-verdict{text-align:center;font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-verdict[data-match="yes"]{color:var(--sk-verified)}#eternal .et-r-verdict[data-match="no"]{color:var(--sk-guard)}
+#eternal .et-r-legend i{display:block;width:4px;height:16px;border-radius:var(--sk-radius-pill);background:var(--sk-sovereign)}
+#eternal .et-r-legend i.lg-ghost{height:6px;background:var(--sk-ink-dim)}
+#eternal .et-r-legend i.lg-ring{width:16px;height:16px;border:1.5px dashed var(--sk-guard);background:none}
+#eternal .et-r-ghostlink{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:var(--sk-control-primary,54px);margin-top:var(--sk-s2,12px);padding:var(--sk-s1,6px) var(--sk-s3,18px);border:1.5px solid var(--sk-sovereign-soft);border-radius:var(--sk-radius-pill);color:var(--sk-sovereign-strong);font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em;text-align:center}
+#eternal .et-r-ghostlink small{font:400 14px/1.4 var(--sk-font-raver-body);letter-spacing:0;color:var(--sk-ink-soft)}
+#eternal button.et-c-primary{width:100%}
+#eternal .et-c-primary:disabled{background:var(--sk-bg-card);color:var(--sk-ink-mut);border:1px solid var(--sk-line);cursor:progress}
+#eternal .et-c-kv .ok{color:var(--sk-verified)}#eternal .et-c-kv .no{color:var(--sk-info)}#eternal .et-c-kv .guard{color:var(--sk-guard)}
+#eternal .et-c-verify a{display:flex;flex-direction:column;justify-content:center;min-height:var(--sk-control-min,44px);color:var(--sk-link);overflow-wrap:anywhere}
+#eternal .et-c-verify a small{color:var(--sk-ink-mut)}
+@media (prefers-reduced-motion:reduce){#eternal .et-r-prog .fill{transition:none}}
+/* ── THE WHOLE DOOR, dressed per register: the page's own variables (tokens.css names) mapped onto
+   skaists, and its few written-in values replaced by tokens. ── */
+body[data-reg="bee"]{--bg:var(--sk-bg);--fg:var(--sk-ink);--dim:var(--sk-ink-mut);--line:var(--sk-line);--panel:var(--sk-bg-card);--amber:var(--sk-sovereign);--flag:var(--sk-guard);background:var(--sk-bg);color:var(--sk-ink);font-family:var(--sk-font-bee-sans)}
+body[data-reg="raver"]{--bg:var(--sk-bg);--fg:var(--sk-ink);--dim:var(--sk-ink-soft);--line:var(--sk-line);--panel:var(--sk-bg-card);--amber:var(--sk-sovereign-soft);--flag:var(--sk-guard);background:var(--sk-bg);color:var(--sk-ink);font-family:var(--sk-font-raver-body)}
+body[data-reg="cypherpunk"]{--bg:var(--sk-bg);--fg:var(--sk-ink);--dim:var(--sk-ink-soft);--line:var(--sk-line);--panel:var(--sk-bg-card);--amber:var(--sk-ai);--flag:var(--sk-guard);background:var(--sk-bg);color:var(--sk-ink);font-family:var(--sk-font-mono)}
+:root:has(body[data-reg="bee"]){color-scheme:light}
+body[data-reg="bee"] h1{font:400 40px/1.05 var(--sk-font-bee-serif);letter-spacing:0}
+body[data-reg="raver"] h1{font:700 28px/1.1 var(--sk-font-raver-display);letter-spacing:-.01em}
+body[data-reg="cypherpunk"] h1{font:600 28px/1.1 var(--sk-font-mono);letter-spacing:0}
+body[data-reg] .addr{background:var(--sk-bg-well);color:var(--sk-ink-mut)}
+body[data-reg="bee"] .addr{font-size:15px}
+body[data-reg="raver"] .addr{font-size:14px}
+body[data-reg] .badge{letter-spacing:.04em}
+body:is([data-reg="bee"],[data-reg="raver"]) .badge{font-size:14px}
+body[data-reg="cypherpunk"] .badge{font-size:12px}
+body[data-reg="cypherpunk"] .sub{font-size:13px}
+body[data-reg="cypherpunk"] .three div{font-size:13px}
+body[data-reg] :is(img#content,.placeholder){border-radius:var(--sk-radius)}
+body[data-reg="cypherpunk"] :is(img#content,.placeholder,.card){border-radius:var(--sk-radius-sm)}
+body[data-reg] footer a{display:inline-flex;align-items:center;min-height:44px;padding-block:0;color:var(--sk-link)}
+</style>
 </head>
 <body>
+  <!-- ETERNAL FRONT (founder blueprint 2026-09-26, docs/design/eternal): three separate products in one
+       door. The page already speaks to three audiences (the neighbor, the builder, the cypherpunk); each
+       now has a whole front. ONE data layer holds the page's own single read (GET /ant/v1/data/public/…,
+       same origin) and the receipt on record (docs/dispatches/2026-09-21-zcode-antd-read-door-restore.md),
+       so the facts cannot drift. Every gesture is that same real read, asked again; nothing is "live" or
+       "matches" unless the bytes arrived and the hash says so. -->
+  <section id="eternal" aria-label="the Autonomi door">
+
+    <!-- NEW BEE — the neighbor: a picture, where it lives, one plain way to ask again -->
+    <div class="et-b">
+      <div class="et-b-mark" data-etk="et.ant-door.bMark">the Autonomi door</div>
+      <h2 class="et-b-h" data-etk="et.ant-door.bH">a picture from the network</h2>
+      <div class="et-b-lede" data-etk="et.ant-door.bLede">this picture lives on the Autonomi network, not on our servers. your browser asks for it through the estate's door. nothing to install.</div>
+      <div class="et-b-guard"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span data-etk="et.ant-door.bGuard">public data, public reads. we hold no keys here.</span></div>
+      <div class="et-b-frame" id="etFrame" data-state="reading" aria-live="polite"></div>
+      <div class="et-b-rows">
+        <button type="button" class="et-b-row" aria-expanded="false" data-say="1"><span data-etk="et.ant-door.q1">where does it live?</span><svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
+        <div class="et-b-say" data-say="1" hidden data-etk="et.ant-door.a1">on the Autonomi network, not on our servers. it is found by one long address, written in the whole door below.</div>
+        <button type="button" class="et-b-row" aria-expanded="false" data-say="2"><span data-etk="et.ant-door.q2">how did it get here?</span><svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
+        <div class="et-b-say" data-say="2" hidden data-etk="et.ant-door.a2">your browser makes one request, to this address. the estate's door passes it to the network and brings the picture back. nothing to install, nothing to set up.</div>
+        <button type="button" class="et-b-row" aria-expanded="false" data-say="3"><span data-etk="et.ant-door.q3">what comes next?</span><svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
+        <div class="et-b-say" data-say="3" hidden data-etk="et.ant-door.a3">when Autonomi's browser client ships, this page will read the network by itself and the door will retire.</div>
+      </div>
+      <div class="et-b-act">
+        <button type="button" class="et-b-primary" id="etBeeAsk" data-etk="et.ant-door.bAsk">ask the network again</button>
+        <a class="et-b-link" id="etBeeThere" href="https://relay.skaists.dev/ant-door.html" target="_blank" rel="noopener noreferrer"><span data-etk="et.ant-door.bThere">open it where the door runs</span><small data-etk="et.ant-door.newTab">relay.skaists.dev · opens in a new tab</small></a>
+        <div class="et-b-foot" data-etk="et.ant-door.bFoot">one request, to this address only.</div>
+      </div>
+    </div>
+
+    <!-- RAVER — the bytes are the art: every value 0 to 255 is a ray, as long as it is common; hold to ask -->
+    <div class="et-r">
+      <div class="et-r-top"><h2 class="et-r-h" id="etRH"></h2><span class="et-r-hint" id="etRHint"></span></div>
+      <div class="et-r-stage">
+        <svg class="et-r-spec" id="etSpec" viewBox="-170 -170 340 340" role="group" aria-label="the bytes as a ring of 256 rays"></svg>
+        <svg class="et-r-prog" viewBox="0 0 100 100" aria-hidden="true"><circle class="track" cx="50" cy="50" r="46"/><circle class="fill" id="etHoldProg" cx="50" cy="50" r="46"/></svg>
+        <button type="button" id="etHold" aria-describedby="etRHint"><b id="etHoldB">hold</b><span id="etHoldS">to ask</span></button>
+      </div>
+      <div class="et-r-legend" id="etLegend"></div>
+      <div class="et-r-card" id="etRCard" aria-live="polite"></div>
+      <div class="et-r-pic" id="etRPic" hidden></div>
+      <div class="et-r-rim" id="etRim" hidden></div>
+      <div class="et-r-verdict" id="etVerdict" hidden></div>
+      <a class="et-r-ghostlink" href="https://relay.skaists.dev/ant-door.html" target="_blank" rel="noopener noreferrer"><span data-etk="et.ant-door.rThere">see it where the door runs</span><small data-etk="et.ant-door.newTab">relay.skaists.dev · opens in a new tab</small></a>
+    </div>
+
+    <!-- CYPHERPUNK — the instrument: the request, the bridge as a pipeline, the hash against the receipt -->
+    <div class="et-c">
+      <div class="et-c-path" id="etCPath"></div>
+      <div class="et-c-sub" data-etk="et.ant-door.cSub">public DataMap · mainnet · read same-origin through the estate's GET-only door</div>
+      <div class="et-c-chips" id="etChips"></div>
+      <div class="et-c-guard"><span data-etk="et.ant-door.cGuard">keys held by the estate here = none</span><b data-etk="et.ant-door.cGuardB">public data, public reads</b></div>
+      <h3 class="et-c-h" data-etk="et.ant-door.cReqH">the request · this page, now</h3>
+      <table class="et-c-kv" id="etKv"></table>
+      <h3 class="et-c-h" data-etk="et.ant-door.cPipeH">the read · five steps this page sees</h3>
+      <ol class="et-c-pipe" id="etPipe"></ol>
+      <div class="et-c-sub" data-etk="et.ant-door.cBehind">behind the door, by design and not observable from this page: Caddy passes GET /ant/* to a local read-only antd (every other method refused), which reads the DataMap from Autonomi mainnet.</div>
+      <button type="button" class="et-c-primary" id="etCGet" data-etk="et.ant-door.cGet">GET again</button>
+      <h3 class="et-c-h" data-etk="et.ant-door.cRcptH">the receipt on record · not live</h3>
+      <table class="et-c-kv" id="etRcpt"></table>
+      <div class="et-c-verify">
+        <div class="et-c-verify-h" data-etk="et.ant-door.cVerifyH">verify · no trust in this page needed</div>
+        <ol id="etVerify"></ol>
+      </div>
+      <div class="et-c-row">
+        <a class="et-c-ghost" href="#etArchive"><span data-etk="et.ant-door.cWhole">the whole door ↓</span></a>
+        <a class="et-c-ghost" href="https://github.com/beehive-nature/beehive-nature/blob/main/surfaces/ant-door.html" target="_blank" rel="noopener noreferrer"><span data-etk="et.ant-door.cFork">fork the template ↗</span><small data-etk="et.ant-door.newTab2">opens in a new tab</small></a>
+      </div>
+    </div>
+  </section>
+  <h2 class="et-archive-h" id="etArchive" data-etk="et.ant-door.archive">the whole door</h2>
   <h1><span class="bee">⬡</span> the Autonomi door</h1>
   <p class="sub">estate page · reads Autonomi bytes same-origin — no plugin, no visitor-side daemon</p>
 
@@ -83,27 +344,209 @@
   </footer>
 
 <script>
-(async () => {
+/* THE DOOR'S OWN READ, now also the one data layer for its three fronts (ETERNAL, 2026-09-26).
+   One same-origin GET, exactly as before: the card below (#stage, #state-badge, img#content) paints
+   what it always painted, and the fronts read the same bytes. The only new work is on bytes already
+   in the page: a histogram (the raver ring), the first three bytes (the type), and sha256 through
+   crypto.subtle.digest, compared with the receipt on record. Asking again is the same GET, and only
+   on a person's gesture. Nothing here holds a key, writes, or talks to any other origin. */
+(function(){
   const ADDR = "711c7e20006ff3e0ac6c1f3063286a0c1a3e4c409642e8c526173fa60bb7078a"; // PUBLIC-CONSTANT: mainnet public DataMap
-  const stage = document.getElementById("stage");
-  const badge = document.getElementById("state-badge");
-  try {
-    const res = await fetch(`/ant/v1/data/public/${ADDR}`);   // SAME-ORIGIN: no CORS, no daemon
-    if (!res.ok) throw new Error(`door answered ${res.status}`);
-    const { data } = await res.json();          // the door answers a JSON envelope: {data: base64}
-    const bytes = Uint8Array.from(atob(data), c => c.charCodeAt(0));
-    const img = new Image();
-    img.id = "content"; img.alt = "public Autonomi data (JPEG)";
-    // data: URL, not a blob: object URL — Brave Shields (default ON) can refuse
-    // the blob: paint; a data: URL with the explicit MIME paints everywhere.
-    img.src = "data:image/jpeg;base64," + data;
-    stage.replaceWith(img);
-    badge.textContent = `${bytes.length.toLocaleString()} BYTES · SAME-ORIGIN · LIVE`;
-  } catch (e) {
-    stage.classList.add("err");
-    stage.textContent = "the door did not answer — " + e.message;
-    badge.textContent = "UNREACHABLE";
+  var PIN={bytes:138931,sha:'98f657d987d339c302295e79907e7a4abc1564bd6b42300ea8d59ccd2148fd17',at:'2026-09-21',src:'docs/dispatches/2026-09-21-zcode-antd-read-door-restore.md'}; // PUBLIC-CONSTANT: decoded-object sha256 pin from the antd read-door receipt
+  var $=function(id){return document.getElementById(id);};
+  var T=function(k,f){var t=window.BNRLanguage&&window.BNRLanguage.text;return t?t(k,f):f;};
+  var esc=function(v){return String(v==null?'':v).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});};
+  var tok=function(n){return getComputedStyle(document.body).getPropertyValue('--sk-'+n).trim();};
+  var num=function(n){return Number(n).toLocaleString('en-US');};
+  var D={addr:ADDR,path:'/ant/v1/data/public/'+ADDR,origin:location.origin,door:'relay.skaists.dev',state:'reading',status:null,why:'',
+    bytes:0,type:'',head:'',sha:'',hashed:null,match:null,hist:null,max:0,url:'',ms:null,reads:0,pin:PIN};
+  var R={pick:null};
+
+  /* ── the one read (the door's own, unchanged in what it asks and what the card shows) ── */
+  async function read(){
+    if(D.state==='reading'&&D.reads) return;
+    var slot=$('content')||$('stage'), badge=$('state-badge');
+    D.state='reading'; D.reads++; D.why=''; render();
+    if(D.reads>1){var ph=document.createElement('div');ph.id='stage';ph.className='placeholder';ph.textContent='fetching through the estate’s door…';slot.replaceWith(ph);slot=ph;badge.textContent='· · ·';}
+    var t0=performance.now();
+    try{
+      const res=await fetch(D.path);   // SAME-ORIGIN: no CORS, no daemon
+      D.status=res.status;
+      if(!res.ok) throw new Error(`door answered ${res.status}`);
+      const { data } = await res.json();          // the door answers a JSON envelope: {data: base64}
+      const bytes=Uint8Array.from(atob(data),c=>c.charCodeAt(0));
+      const img=new Image();
+      img.id='content'; img.alt='public Autonomi data (JPEG)';
+      // data: URL, not a blob: object URL — Brave Shields (default ON) can refuse
+      // the blob: paint; a data: URL with the explicit MIME paints everywhere.
+      img.src='data:image/jpeg;base64,'+data;
+      slot.replaceWith(img);
+      badge.textContent=`${bytes.length.toLocaleString()} BYTES · SAME-ORIGIN · LIVE`;
+      D.ms=Math.round(performance.now()-t0); D.bytes=bytes.length; D.url=img.src;
+      var h=new Array(256).fill(0); for(var i=0;i<bytes.length;i++) h[bytes[i]]++;
+      D.hist=h; D.max=Math.max.apply(0,h);
+      D.head=[].slice.call(bytes,0,3).map(function(b){return (b<16?'0':'')+b.toString(16);}).join(' ');
+      D.type=bytes[0]===0xff&&bytes[1]===0xd8&&bytes[2]===0xff?'jpeg':'';
+      D.state='live'; R.pick=null;
+      try{
+        if(window.crypto&&crypto.subtle){
+          var dg=new Uint8Array(await crypto.subtle.digest('SHA-256',bytes));
+          D.sha=[].map.call(dg,function(b){return (b<16?'0':'')+b.toString(16);}).join('');
+          D.hashed=true; D.match=D.sha===PIN.sha&&D.bytes===PIN.bytes;
+        } else { D.hashed=false; D.match=null; }
+      }catch(x){ D.hashed=false; D.match=null; }
+    }catch(e){
+      D.ms=Math.round(performance.now()-t0);
+      slot.classList.add('err');
+      slot.textContent='the door did not answer — '+e.message;
+      badge.textContent='UNREACHABLE';
+      D.state='failed'; D.why=e.message; D.bytes=0; D.hist=null; D.max=0; D.url=''; D.sha=''; D.hashed=null; D.match=null; D.type=''; D.head='';
+    }
+    render();
   }
+
+  /* one fact, said per register */
+  function verdict(){
+    if(D.state!=='live') return null;
+    if(D.match===true) return {k:'yes',bee:T('et.ant-door.vYes','the same picture the estate recorded, byte for byte.'),raver:T('et.ant-door.rvYes','same bytes as the receipt'),cy:T('et.ant-door.cvYes','match · sha256 and length equal the receipt')};
+    if(D.match===false) return {k:'no',bee:T('et.ant-door.vNo','these bytes are not the ones the estate recorded.'),raver:T('et.ant-door.rvNo','not the receipt\'s bytes'),cy:T('et.ant-door.cvNo','differs from the receipt')};
+    return {k:'na',bee:T('et.ant-door.vNa','this browser could not check it against the estate\'s record.'),raver:T('et.ant-door.rvNa','not compared here'),cy:T('et.ant-door.cvNa','not compared · no crypto.subtle in this context')};
+  }
+  var HEX='<svg viewBox="-26 -30 52 60" aria-hidden="true"><polygon points="0,-28 24,-14 24,14 0,28 -24,14 -24,-14" stroke-dasharray="5 4"/></svg>';
+
+  /* ── NEW BEE ── */
+  function bee(){
+    var f=$('etFrame'), v=verdict(); f.setAttribute('data-state',D.state);
+    if(D.state==='live') f.innerHTML='<img src="'+D.url+'" alt="'+esc(T('et.ant-door.alt','the picture, read from the Autonomi network'))+'"><span>'+esc(num(D.bytes)+' '+T('et.ant-door.bBytes','bytes, read just now'))+'</span><small>'+esc(v.bee)+'</small>';
+    else if(D.state==='reading') f.innerHTML=HEX.replace('<svg','<svg style="stroke:var(--sk-ai)"')+'<b>'+esc(T('et.ant-door.bAsking','asking the network…'))+'</b><span>'+esc(T('et.ant-door.bAskingS','the door is fetching it now.'))+'</span>';
+    else f.innerHTML=HEX.replace('<svg','<svg style="stroke:var(--sk-guard)"')+'<b>'+esc(T('et.ant-door.bQuiet','quiet, for now'))+'</b><span>'+esc(T('et.ant-door.bQuietS','the door didn\'t answer from here just now, so there is no picture to show. you can ask again.'))+'</span>';
+    var ask=$('etBeeAsk'); ask.disabled=D.state==='reading';
+    ask.textContent=D.state==='reading'?T('et.ant-door.bAskIng','asking…'):D.state==='live'?T('et.ant-door.bAgain','read it again'):T('et.ant-door.bAsk','ask the network again');
+    $('etBeeThere').hidden=location.hostname===D.door;
+  }
+
+  /* ── RAVER: 256 rays, one per byte value, as long as that value is common; a silent ring when none came ── */
+  function stops(){return (tok('rainbow').match(/#[0-9a-f]{6}/gi)||[]);}
+  function spectrum(){
+    var svg=$('etSpec'), live=D.state==='live', st=stops(), h='';
+    h+='<circle class="edge" r="80" fill="none" stroke="'+(live?tok('line'):D.state==='reading'?tok('ai'):tok('guard'))+'" stroke-width="1.5"'+(live?'':' stroke-dasharray="3 5"')+'/>';
+    for(var i=0;i<256;i++){
+      var a=i/256*2*Math.PI-Math.PI/2, len, col, w=1.6, op=1;
+      if(live){len=5+72*Math.sqrt(D.hist[i]/D.max);col=st[Math.min(st.length-1,Math.floor(i/256*st.length))]||tok('sovereign');if(R.pick!=null){op=R.pick===i?1:0.5;if(R.pick===i)w=3.2;}}
+      else {len=i%16===0?9:4;col=tok('ink-dim');}
+      var c=Math.cos(a), s=Math.sin(a);
+      h+='<line x1="'+(c*86).toFixed(1)+'" y1="'+(s*86).toFixed(1)+'" x2="'+(c*(86+len)).toFixed(1)+'" y2="'+(s*(86+len)).toFixed(1)+'" stroke="'+col+'" stroke-width="'+w+'" stroke-linecap="round" fill="none" opacity="'+op+'"/>';
+    }
+    if(live) h+='<g class="ring" role="button" tabindex="0" aria-label="'+esc(T('et.ant-door.rRing','the 256 byte values: tap a ray, or use the arrow keys'))+'"><circle r="166" fill="transparent" stroke="none" pointer-events="all"/></g>';
+    svg.innerHTML=h;
+  }
+  function raver(){
+    var live=D.state==='live', v=verdict();
+    $('etRH').textContent=live?num(D.bytes)+' '+T('et.ant-door.rBytes','bytes'):D.state==='reading'?T('et.ant-door.rListen','listening…'):T('et.ant-door.rSilence','silence');
+    $('etRHint').textContent=live?T('et.ant-door.rHintLive','tap the ring · hold to read again'):D.state==='reading'?T('et.ant-door.rHintRead','the door is asking the network'):T('et.ant-door.rHintFail','the door said')+' '+(D.status||T('et.ant-door.nothing','nothing'))+' · '+T('et.ant-door.rHintHold','hold to ask again');
+    $('etLegend').innerHTML=live?'<span><i></i>'+esc(T('et.ant-door.lgRay','a ray = one byte value, long when common'))+'</span>':'<span><i class="lg-ghost"></i>'+esc(T('et.ant-door.lgGhost','no bytes yet'))+'</span><span><i class="lg-ring"></i>'+esc(T('et.ant-door.lgRing','the door, quiet'))+'</span>';
+    var c=$('etRCard'), h;
+    if(live&&R.pick!=null){var n=D.hist[R.pick];h='<span class="rk">'+esc((R.pick<16?'0':'')+R.pick.toString(16))+'</span><div><b>'+esc(T('et.ant-door.rByte','byte')+' 0x'+(R.pick<16?'0':'')+R.pick.toString(16)+' · '+num(n)+' '+T('et.ant-door.rTimes','times'))+'</b><span>'+esc((n/D.bytes*100).toFixed(2)+'% '+T('et.ant-door.rOf','of')+' '+num(D.bytes))+'</span></div>';}
+    else if(live) h='<span class="rk">'+esc(D.type||'?')+'</span><div><b>'+esc(num(D.bytes)+' '+T('et.ant-door.rBytesIn','bytes in, same origin'))+'</b><span>'+esc(T('et.ant-door.rTapRay','tap a ray to see its count'))+'</span></div>';
+    else if(D.state==='reading') h='<span class="rk">…</span><div><b>'+esc(T('et.ant-door.rAsking','asking the network'))+'</b><span>'+esc(T('et.ant-door.rAskingS','one request, this origin'))+'</span></div>';
+    else h='<span class="rk">'+(D.status?esc(D.status):'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9z" stroke-dasharray="3 3"/></svg>')+'</span><div><b>'+esc(T('et.ant-door.rNoBytes','no bytes, no picture'))+'</b><span>'+esc(T('et.ant-door.rNoBytesS','the door said')+' '+(D.status||D.why))+'</span><em>'+esc(T('et.ant-door.rNoBytesE','the ring stays silent until the network answers'))+'</em></div>';
+    c.innerHTML=h;
+    var pic=$('etRPic'); pic.hidden=!live;
+    if(live) pic.innerHTML='<img src="'+D.url+'" alt="'+esc(T('et.ant-door.alt','the picture, read from the Autonomi network'))+'"><div><b>'+esc(T('et.ant-door.rDraw','what the bytes draw'))+'</b><span>'+esc(D.type?'jpeg · '+D.head:D.head)+'</span></div>';
+    var rim=$('etRim'), vd=$('etVerdict'); rim.hidden=vd.hidden=!v;
+    if(v){rim.setAttribute('data-match',v.k);vd.setAttribute('data-match',v.k);vd.textContent=v.raver;}
+    var hb=$('etHold'); hb.disabled=D.state==='reading';
+    $('etHoldB').textContent=D.state==='reading'?T('et.ant-door.rWait','asking'):T('et.ant-door.rHold','hold');
+    $('etHoldS').textContent=D.state==='reading'?T('et.ant-door.rWaitS','the network'):T('et.ant-door.rToAsk','to ask');
+    spectrum();
+  }
+  var hold={t0:0,raf:0};
+  function holdStart(e){
+    if($('etHold').disabled||hold.raf) return; if(e&&e.preventDefault) e.preventDefault();
+    var prog=$('etHoldProg'), still=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+    hold.t0=performance.now();
+    (function tick(now){
+      var f=Math.min(1,(now-hold.t0)/1200);
+      prog.style.strokeDashoffset=String(289*(1-(still?(f<1?0:1):f)));
+      if(still) $('etHoldS').textContent=f<1?T('et.ant-door.rKeep','keep holding'):$('etHoldS').textContent;
+      if(f>=1){hold.raf=0;prog.style.strokeDashoffset='289';read();return;}
+      hold.raf=requestAnimationFrame(tick);
+    })(hold.t0);
+  }
+  function holdStop(){if(!hold.raf)return;cancelAnimationFrame(hold.raf);hold.raf=0;$('etHoldProg').style.strokeDashoffset='289';raver();}
+
+  /* ── CYPHERPUNK ── */
+  function cy(){
+    var st=D.state, live=st==='live', v=verdict();
+    $('etCPath').textContent='autonomi://'+D.addr;
+    $('etChips').innerHTML='<span class="on">GET-only</span><span class="on">same-origin</span><span>'+esc(T('et.ant-door.cKeys','keys none'))+'</span><span class="'+(live?'ok':st==='reading'?'':'no')+'">'+esc(live?'200 · '+num(D.bytes)+' B':st==='reading'?T('et.ant-door.cReading','reading'):String(D.status||T('et.ant-door.cNoAnswer','no answer')))+'</span>';
+    var kv=[
+      ['method','GET'],
+      ['path',esc('/ant/v1/data/public/'+D.addr)],
+      ['origin',esc(D.origin)],
+      ['status',st==='reading'?esc(T('et.ant-door.cReading2','reading…')):D.status==null?'<span class="no">'+esc(T('et.ant-door.cNoAnswer','no answer')+' · '+D.why)+'</span>':'<span class="'+(D.status===200?'ok':'no')+'">'+esc(D.status)+'</span>'+(D.ms!=null?' · '+esc(D.ms)+' ms':'')],
+      ['bytes',live?esc(num(D.bytes)):'<span class="no">'+esc(T('et.ant-door.cNotRead','not read'))+'</span>'],
+      ['type',live?esc((D.type||T('et.ant-door.cNotJpeg','not jpeg'))+' · '+D.head):'<span class="no">'+esc(T('et.ant-door.cNotRead','not read'))+'</span>'],
+      ['sha256',live&&D.hashed?esc(D.sha):'<span class="no">'+esc(live?T('et.ant-door.cNoHash','not computed · no crypto.subtle here'):T('et.ant-door.cNotRead','not read'))+'</span>'],
+      [T('et.ant-door.cCompare','vs receipt'),v?'<span class="'+(v.k==='yes'?'ok':v.k==='no'?'guard':'no')+'">'+esc(v.cy)+'</span>':'<span class="no">'+esc(T('et.ant-door.cNotCompared','not compared · no bytes'))+'</span>']
+    ];
+    $('etKv').innerHTML=kv.map(function(r){return '<tr><th>'+esc(r[0])+'</th><td>'+r[1]+'</td></tr>';}).join('');
+    var fail=st==='failed', ok=st==='live';
+    /* only what this page can observe; the hops behind the door are said separately, as design */
+    var pipe=[
+      [D.reads?'done':'now','GET '+T('et.ant-door.p1h','this origin'),T('et.ant-door.p1','one request, no plugin, no daemon')],
+      [ok?'done':fail?'fail':'now',T('et.ant-door.p2h','the door answers'),ok?'200':fail?T('et.ant-door.p2fail','no door open at this origin')+' · '+(D.status||D.why):T('et.ant-door.p2read','waiting for the door')],
+      [ok?'done':'todo','{data: base64}',ok?num(D.bytes)+' '+T('et.ant-door.p3ok','bytes decoded'):T('et.ant-door.notReached','not reached')],
+      [ok&&D.hashed?'done':'todo','sha256',ok&&D.hashed?T('et.ant-door.p4ok','crypto.subtle.digest in this page, compared with the receipt'):ok?T('et.ant-door.p5nohash','not hashed in this context'):T('et.ant-door.notReached','not reached')],
+      [ok?'done':'todo',T('et.ant-door.p5h','paint'),ok?T('et.ant-door.p5ok','a data: URL with the jpeg type, never blob:'):T('et.ant-door.notReached','not reached')]
+    ];
+    $('etPipe').innerHTML=pipe.map(function(s){return '<li class="'+s[0]+'"><b>'+esc(s[1])+'</b><p>'+esc(s[2])+'</p></li>';}).join('');
+    var g=$('etCGet'); g.disabled=st==='reading'; g.textContent=st==='reading'?T('et.ant-door.cGetting','GET in flight…'):T('et.ant-door.cGet','GET again');
+    $('etRcpt').innerHTML=[
+      ['bytes',num(PIN.bytes)],['sha256',PIN.sha],['read',PIN.at+' · '+T('et.ant-door.cRcptRead','foreign origin, 200, after a restart')],['source',PIN.src]
+    ].map(function(r){return '<tr><th>'+esc(r[0])+'</th><td>'+esc(r[1])+'</td></tr>';}).join('');
+    $('etVerify').innerHTML=[
+      '<li><code>'+esc('curl -s https://'+D.door+'/ant/v1/data/public/'+D.addr+' | jq -r .data | base64 -d | sha256sum')+'</code><small>'+esc(T('et.ant-door.v1','should print the receipt\'s sha256 above'))+'</small></li>',
+      '<li><a href="https://github.com/beehive-nature/beehive-nature/blob/main/'+PIN.src+'" target="_blank" rel="noopener noreferrer">'+esc(PIN.src)+'<small>'+esc(T('et.ant-door.v2','the receipt itself · opens in a new tab'))+'</small></a></li>',
+      '<li><small>'+esc(T('et.ant-door.v3','the door is a bridge: when Autonomi\'s WASM client ships, the page reads peer to peer and this door retires'))+'</small></li>'
+    ].join('');
+  }
+
+  function words(){[].forEach.call(document.querySelectorAll('#eternal [data-etk],.et-archive-h[data-etk]'),function(e){if(e.__en==null)e.__en=e.textContent;e.textContent=T(e.getAttribute('data-etk'),e.__en);});}
+  function render(){bee();raver();cy();}
+
+  function wire(){
+    var ev=$('eternal'); if(!ev) return;
+    ev.addEventListener('click',function(e){
+      var row=e.target.closest('.et-b-row[data-say]');
+      if(row){var o=row.getAttribute('aria-expanded')!=='true';row.setAttribute('aria-expanded',String(o));var say=ev.querySelector('.et-b-say[data-say="'+row.getAttribute('data-say')+'"]');if(say)say.hidden=!o;return;}
+      if(e.target.closest('#etBeeAsk,#etCGet')){read();return;}
+      var ring=e.target.closest('#etSpec .ring');
+      if(ring&&D.state==='live'){
+        var svg=$('etSpec'), b=svg.getBoundingClientRect(), x=e.clientX-(b.left+b.width/2), y=e.clientY-(b.top+b.height/2);
+        var a=Math.atan2(y,x)+Math.PI/2; if(a<0)a+=2*Math.PI;
+        R.pick=Math.round(a/(2*Math.PI)*256)%256; raver();
+      }
+    });
+    ev.addEventListener('keydown',function(e){
+      var ring=e.target.closest('#etSpec .ring'); if(!ring||D.state!=='live') return;
+      var d=e.key==='ArrowRight'||e.key==='ArrowUp'?1:e.key==='ArrowLeft'||e.key==='ArrowDown'?-1:0; if(!d) return;
+      e.preventDefault(); R.pick=((R.pick==null?0:R.pick+d)+256)%256; raver(); var r2=document.querySelector('#etSpec .ring'); if(r2) r2.focus();
+    });
+    var hb=$('etHold');
+    hb.addEventListener('pointerdown',function(e){try{hb.setPointerCapture(e.pointerId);}catch(x){}holdStart(e);});
+    ['pointerup','pointercancel','pointerleave'].forEach(function(t){hb.addEventListener(t,holdStop);});
+    hb.addEventListener('keydown',function(e){if((e.key===' '||e.key==='Enter')&&!e.repeat){e.preventDefault();holdStart(e);}});
+    hb.addEventListener('keyup',function(e){if(e.key===' '||e.key==='Enter')holdStop();});
+    hb.addEventListener('contextmenu',function(e){e.preventDefault();});
+    document.addEventListener('blang',function(){words();render();});
+    document.addEventListener('bregister',function(){raver();});
+  }
+
+  /* served as one file where the design system is absent, the fronts stand down and the door shows as it was */
+  if(!tok('bg')) document.documentElement.setAttribute('data-et-bare','');
+  wire(); words(); read();
+  window.__eternal={data:D,raver:R};
 })();
 </script>
 <script src="tour.js?v=42"></script>
