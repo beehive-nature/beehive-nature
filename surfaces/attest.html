@@ -59,10 +59,243 @@ body[data-reg="raver"] .law{font-size:14.5px}
 body[data-reg="raver"] table,body[data-reg="raver"] th{font-size:14px}
 body[data-reg="raver"] section h2{font-size:14px}
 body[data-reg="raver"] footer{font-size:14px}
+/* ── ETERNAL FRONT (docs/design/eternal) — every value is a skaists token (skaists.css, compiled
+   from docs/design/skaists/tokens.json): no hand-picked hex, size or corner. Measured by
+   e2e/skaists-conformance.mjs. One register visible at a time; new bee is the default.
+   The fronts draw from the page's own single corpus read (window.__attest) and hand off to the
+   DOCK workshop (blanguage.html#workshop), where every real step happens. Nothing here signs. ── */
+#eternal{width:100%;max-width:30rem;margin:var(--sk-s2) auto 0;box-sizing:border-box;text-align:start;background:none;border:0;border-radius:0;padding:0}
+#eternal *{box-sizing:border-box}
+#eternal>.et-r,#eternal>.et-c{display:none}
+body[data-reg="raver"] #eternal>.et-b,body[data-reg="cypherpunk"] #eternal>.et-b{display:none}
+body[data-reg="raver"] #eternal>.et-r{display:block}
+body[data-reg="cypherpunk"] #eternal>.et-c{display:block}
+#eternal [hidden]{display:none!important}
+#eternal button{margin:0;color:inherit;font:inherit;padding:0;background:none;border:0;border-radius:0}
+#eternal p{margin:0}
+#eternal svg{display:block}
+#eternal :focus-visible{outline:2px solid var(--sk-focus);outline-offset:3px}
+#eternal .et-center{text-align:center}
+.et-archive-h{width:100%;max-width:30rem;margin:var(--sk-s5) auto var(--sk-s1);padding-top:var(--sk-s4);border-top:1px solid var(--sk-line);color:var(--sk-ink);box-sizing:border-box}
+body[data-reg="bee"] .et-archive-h{font:400 28px/1.1 var(--sk-font-bee-serif)}
+body[data-reg="raver"] .et-archive-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em}
+body[data-reg="cypherpunk"] .et-archive-h{font:600 15px/1.45 var(--sk-font-mono)}
+
+/* NEW BEE — a calm room: which language do you live in? plain rows, one magenta action */
+#eternal .et-b{color:var(--sk-ink);display:flex;flex-direction:column;gap:var(--sk-s3);font-family:var(--sk-font-bee-sans)}
+#eternal .et-b-step{display:flex;flex-direction:column;gap:var(--sk-s3)}
+#eternal .et-b-mark{font:400 18px/1.2 var(--sk-font-house);color:var(--sk-sovereign)}
+#eternal .et-b-h{margin:0;font:400 40px/1.05 var(--sk-font-bee-serif);color:var(--sk-ink);letter-spacing:0}
+#eternal .et-b-lede{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink-mut);text-wrap:pretty}
+#eternal .et-b-guard{display:flex;align-items:center;gap:var(--sk-s2);min-height:var(--sk-control-min,44px);padding:var(--sk-s1) var(--sk-s3);border-radius:var(--sk-radius);background:var(--sk-guard-wash);color:var(--sk-guard);font:600 16px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-b-guard svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+#eternal .et-b-rows{display:flex;flex-direction:column;background:var(--sk-bg-card);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl);overflow:hidden}
+#eternal .et-b-row{display:flex;align-items:center;justify-content:space-between;gap:var(--sk-s2);width:100%;min-height:var(--sk-control-row,52px);padding:var(--sk-s1) var(--sk-s3);border-bottom:1px solid var(--sk-line-soft);background:transparent;text-align:start;font:500 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink);cursor:pointer}
+#eternal .et-b-row:last-child,#eternal .et-b-more:last-child{border-bottom:0}
+#eternal .et-b-row small{display:flex;align-items:center;gap:var(--sk-s1);flex:none;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-row[aria-expanded="true"]{background:var(--sk-sovereign-tint);color:var(--sk-sovereign-strong);font-weight:600}
+#eternal .et-b-row[aria-expanded="true"] small{color:var(--sk-sovereign-strong)}
+#eternal .et-b-row .chev{flex:none;transition:transform var(--dur,.26s)}
+#eternal .et-b-row[aria-expanded="true"] .chev{transform:rotate(90deg)}
+#eternal .et-b-more{padding:var(--sk-s2) var(--sk-s3);border-bottom:1px solid var(--sk-line-soft);background:var(--sk-sovereign-tint);font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+#eternal .et-b-act{display:flex;flex-direction:column;gap:var(--sk-s1);margin-top:var(--sk-s1)}
+#eternal .et-b-primary{display:flex;align-items:center;justify-content:center;width:100%;height:var(--sk-control-primary,54px);padding:0 var(--sk-s3);border-radius:var(--sk-radius-lg);background:var(--sk-primary);color:var(--sk-on-primary);font:600 17px/1.2 var(--sk-font-bee-sans);cursor:pointer;text-align:center}
+#eternal .et-b-link{display:flex;align-items:center;justify-content:center;min-height:var(--sk-control-min,44px);font:600 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-link);text-decoration:none;cursor:pointer;text-align:center}
+#eternal .et-b-link:hover{color:var(--sk-link-hover)}
+#eternal .et-b-foot{text-align:center;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-tick{width:78px;height:78px;margin:var(--sk-s2) auto 0;border-radius:var(--sk-radius-pill);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong);display:flex;align-items:center;justify-content:center;font:400 40px/1 var(--sk-font-bee-serif)}
+#eternal .et-b-tick.ok{background:var(--sk-verified-wash);color:var(--sk-verified)}
+#eternal .et-b-card{background:var(--sk-sovereign-tint);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl);padding:var(--sk-s3)}
+#eternal .et-b-card h3{margin:0 0 var(--sk-s1);font:400 28px/1.1 var(--sk-font-bee-serif);color:var(--sk-sovereign-strong)}
+#eternal .et-b-card div{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+
+/* RAVER — the constellation: every tongue a star, the founder's ten joined in order; tap yours */
+#eternal .et-r{color:var(--sk-ink);font-family:var(--sk-font-raver-body)}
+#eternal .et-r-top{display:flex;align-items:baseline;justify-content:space-between;gap:var(--sk-s2);flex-wrap:wrap}
+#eternal .et-r-h{margin:0;font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em;color:var(--sk-ink)}
+#eternal .et-r-hint{font:400 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-art{width:100%;max-width:360px;margin:var(--sk-s3) auto var(--sk-s1);filter:drop-shadow(var(--sk-glow-sovereign));touch-action:manipulation}
+#eternal .et-r-art .seg{transition:fill var(--dur,.26s),opacity var(--dur,.26s),stroke var(--dur,.26s)}
+#eternal .et-r-art [role="button"]{cursor:pointer}
+#eternal .et-r-art .seg{pointer-events:all}
+#eternal .et-r-art [role="button"]:focus{outline:none}
+#eternal .et-r-art [role="button"]:focus-visible .seg{stroke:var(--sk-ink);stroke-width:2}
+#eternal .et-r-legend{display:flex;justify-content:center;flex-wrap:wrap;gap:var(--sk-s1) var(--sk-s3);margin:var(--sk-s1) 0 var(--sk-s2);font:400 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-legend span{display:flex;align-items:center;gap:var(--sk-s1)}
+#eternal .et-r-legend i{width:24px;height:12px;border-radius:var(--sk-radius-sm)}
+#eternal .et-r-legend .lg-yours{border:1.5px dashed var(--sk-sovereign-soft)}
+#eternal .et-r-legend .lg-dim{background:var(--sk-sovereign-wash);border:1px solid var(--sk-line)}
+#eternal .et-r-legend .lg-lit{background:var(--sk-sovereign-strong)}
+#eternal .et-r-legend b{font-weight:400}
+#eternal .et-r-card{display:flex;gap:var(--sk-s2);align-items:center;padding:var(--sk-s2) var(--sk-s3);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl);background:var(--sk-sovereign-tint);min-height:var(--sk-control-person,60px)}
+#eternal .et-r-card .rk{width:44px;height:44px;border-radius:var(--sk-radius);background:var(--sk-sovereign-strong);color:var(--sk-bg);display:flex;align-items:center;justify-content:center;font:700 15px/1.2 var(--sk-font-raver-display);flex:none}
+#eternal .et-r-card b{display:block;font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink)}
+#eternal .et-r-card span{font:400 14px/1.25 var(--sk-font-raver-body);color:var(--sk-sovereign-soft)}
+#eternal .et-r-note{margin:var(--sk-s2) 0 0;text-align:center;font:400 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-big{margin:var(--sk-s2) 0 var(--sk-s1);text-align:center;font:700 60px/.95 var(--sk-font-raver-display);letter-spacing:-.02em;color:var(--sk-ink)}
+#eternal .et-r-pill{display:flex;align-items:center;justify-content:center;width:100%;height:58px;margin-top:var(--sk-s4);border-radius:var(--sk-radius-pill);background:var(--sk-primary);color:var(--sk-on-primary);font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em;cursor:pointer}
+#eternal .et-r-ghost{display:flex;width:max-content;max-width:100%;align-items:center;justify-content:center;margin:var(--sk-s2) auto 0;min-height:var(--sk-control-min,44px);padding:0 var(--sk-s2);color:var(--sk-link);font:400 14px/1.25 var(--sk-font-raver-body);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+
+/* CYPHERPUNK — the instrument: the board, the attestation pipeline, a receipt from the corpus */
+#eternal .et-c{font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink)}
+#eternal .et-c-path{font:600 15px/1.45 var(--sk-font-mono);word-break:break-all;color:var(--sk-ink)}
+#eternal .et-c-chips{display:flex;flex-wrap:wrap;gap:var(--sk-s1);margin:var(--sk-s2) 0}
+#eternal .et-c-chips span{padding:2px var(--sk-s1);border:1px solid var(--sk-line);border-radius:4px;background:var(--sk-bg-card);font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-soft)}
+#eternal .et-c-chips span.ok{border-color:var(--sk-verified);color:var(--sk-verified)}
+#eternal .et-c-chips span.no{border-color:var(--sk-info);color:var(--sk-info)}
+#eternal .et-c-guard{display:flex;justify-content:space-between;align-items:center;gap:var(--sk-s2);flex-wrap:wrap;min-height:var(--sk-control-min,44px);padding:var(--sk-s1) var(--sk-s3);border:1px dashed var(--sk-guard);border-radius:var(--sk-radius-sm);background:var(--sk-guard-wash);color:var(--sk-guard)}
+#eternal .et-c-guard b{font-weight:600;color:var(--sk-sovereign-strong)}
+#eternal .et-c-tab{width:100%;margin:var(--sk-s2) 0 var(--sk-s1);border-collapse:separate;border-spacing:0;border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm);overflow:hidden;background:var(--sk-bg-card)}
+#eternal .et-c-tab th{padding:var(--sk-s1) var(--sk-s2);text-align:start;font:600 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);border-bottom:1px solid var(--sk-line);background:var(--sk-bg-well)}
+#eternal .et-c-tab td{height:var(--sk-control-min,44px);padding:var(--sk-s1) var(--sk-s2);border-bottom:1px solid var(--sk-line);font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink);vertical-align:middle;overflow-wrap:anywhere}
+#eternal .et-c-tab tr:last-child td{border-bottom:0}
+#eternal .et-c-tab td:first-child{color:var(--sk-guard);white-space:nowrap}
+#eternal .et-c-tab td.fn{color:var(--sk-ai)}
+#eternal .et-c-h{margin:var(--sk-s4) 0 var(--sk-s2);font:600 15px/1.45 var(--sk-font-mono);color:var(--sk-ink);letter-spacing:0}
+#eternal .et-c-pipe{list-style:none;margin:0;padding:0;display:grid;gap:var(--sk-s2);counter-reset:p}
+#eternal .et-c-pipe li{display:grid;grid-template-columns:30px 1fr;gap:var(--sk-s1) var(--sk-s2);padding:var(--sk-s2) var(--sk-s3);border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm);background:var(--sk-bg-card);counter-increment:p}
+#eternal .et-c-pipe li::before{content:counter(p,decimal-leading-zero);color:var(--sk-guard);font-weight:600}
+#eternal .et-c-pipe li b{font-weight:600;color:var(--sk-ink);overflow-wrap:anywhere}
+#eternal .et-c-pipe li div{grid-column:2;color:var(--sk-ink-soft);overflow-wrap:anywhere}
+#eternal .et-c-pipe li.done b{color:var(--sk-verified)}
+#eternal .et-c-pipe li.guard{border-style:dashed;border-color:var(--sk-guard)}
+#eternal .et-c-pipe li.guard b{color:var(--sk-guard)}
+#eternal .et-c-pipe li.now{border-color:var(--sk-ai);box-shadow:inset 0 0 0 1px var(--sk-ai)}
+#eternal .et-c-pipe li.now b{color:var(--sk-ai)}
+#eternal .et-c-pipe li.todo div{color:var(--sk-ink-mut)}
+#eternal .et-c-primary{display:flex;align-items:center;justify-content:center;width:100%;min-height:52px;margin-top:var(--sk-s3);padding:0 var(--sk-s2);border-radius:var(--sk-radius-sm);background:var(--sk-primary);color:var(--sk-on-primary);font:600 14px/1.2 var(--sk-font-mono);cursor:pointer;text-align:center}
+#eternal .et-c-kv{width:100%;border-collapse:collapse;border:1px solid var(--sk-line);background:var(--sk-bg-card)}
+#eternal .et-c-kv th{width:96px;padding:var(--sk-s2) var(--sk-s3);text-align:start;vertical-align:top;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);border-bottom:1px solid var(--sk-line)}
+#eternal .et-c-kv td{padding:var(--sk-s2) var(--sk-s3);border-bottom:1px solid var(--sk-line);overflow-wrap:anywhere;color:var(--sk-ink)}
+#eternal .et-c-kv .no{color:var(--sk-info)}#eternal .et-c-kv .yes{color:var(--sk-verified)}#eternal .et-c-kv .gd{color:var(--sk-guard)}
+#eternal .et-c-verify{margin-top:var(--sk-s3);padding:var(--sk-s3);border-radius:var(--sk-radius-sm);background:var(--sk-bg-card)}
+#eternal .et-c-verify-h{font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);margin-bottom:var(--sk-s1)}
+#eternal .et-c-verify ol{margin:0;padding-inline-start:var(--sk-s4);display:grid;grid-template-columns:minmax(0,1fr);gap:var(--sk-s1);color:var(--sk-ink)}
+#eternal .et-c-verify li{overflow-wrap:anywhere}
+#eternal .et-c-verify code{font:inherit;color:var(--sk-ai);overflow-wrap:anywhere;word-break:break-all}
+#eternal .et-c-row{display:grid;grid-template-columns:1fr 1fr;gap:var(--sk-s2);margin-top:var(--sk-s3)}
+#eternal .et-c-ghost{display:flex;align-items:center;justify-content:center;min-height:52px;padding:0 var(--sk-s1);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius-sm);color:var(--sk-ink);text-decoration:none;text-align:center;font:600 14px/1.2 var(--sk-font-mono)}
+
+#eternal .et-b-q{font:600 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+#eternal .et-b-row>span{display:flex;flex-direction:column;min-width:0;flex:1}
+#eternal .et-b-row em{font-style:normal;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-row .dot{width:22px;height:22px;flex:none;border-radius:var(--sk-radius-pill);border:1.5px solid var(--sk-ink-mut);display:flex;align-items:center;justify-content:center}
+#eternal .et-b-row[aria-checked="true"]{background:var(--sk-sovereign-tint);color:var(--sk-sovereign-strong);font-weight:600}
+#eternal .et-b-row[aria-checked="true"] :is(small,em){color:var(--sk-sovereign-strong)}
+#eternal .et-b-row[aria-checked="true"] .dot{border-color:var(--sk-sovereign-strong)}
+#eternal .et-b-row[aria-checked="true"] .dot::after{content:"";width:12px;height:12px;border-radius:var(--sk-radius-pill);background:var(--sk-sovereign-strong)}
+#eternal .et-b-row small.ok{color:var(--sk-verified)}
+#eternal .et-b-row.more{justify-content:center;color:var(--sk-link);font-weight:600}
+#eternal .et-b-card small{display:block;margin-top:var(--sk-s1);font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal a.et-b-primary,#eternal a.et-r-pill,#eternal a.et-c-primary{text-decoration:none}
+#eternal .et-r-legend .lg-wait{border:1.5px solid var(--sk-sovereign-soft);border-radius:var(--sk-radius-pill);width:12px}
+#eternal .et-r-legend .lg-signed{background:var(--sk-biomass);border-radius:var(--sk-radius-pill);width:12px}
+#eternal .et-r-legend .lg-ten{border-top:2px dashed var(--sk-sovereign);height:0;border-radius:0}
+#eternal .et-c-tab tr.pick{cursor:pointer}
+#eternal .et-c-tab tr.pick:hover td,#eternal .et-c-tab tr[aria-selected="true"] td{background:var(--sk-sovereign-tint)}
+#eternal .et-c-tab tr[aria-selected="true"] td:first-child{color:var(--sk-you)}
+#eternal .et-c-tab td.ok{color:var(--sk-verified)}#eternal .et-c-tab td.no{color:var(--sk-ink-mut)}
+#eternal table{min-width:0}
+#eternal .et-c-tab td small{display:block;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-soft)}
+
+/* ── THE WHOLE CAMPAIGN, dressed per register: the page's own variables mapped onto skaists ── */
+body[data-reg]{--bg:var(--sk-bg);--panel:var(--sk-bg-card);--well:var(--sk-bg-well);--ink:var(--sk-ink);--dim:var(--sk-ink-mut);--faint:var(--sk-ink-mut);--line:var(--sk-line);
+ --cyan:var(--sk-link);--gold:var(--sk-you);--violet:var(--sk-sovereign);--leaf:var(--sk-verified);--amber:var(--sk-info);background:var(--sk-bg);color:var(--sk-ink)}
+body[data-reg] button#copycall{min-height:var(--sk-control-min,44px);background:transparent;color:var(--sk-ink);border:1.5px solid var(--sk-ink)}
+body[data-reg] button#copycall:hover{background:var(--sk-sovereign-tint);color:var(--sk-ink)}
+body[data-reg] footer a{color:var(--sk-link)}
+body[data-reg] :is(.law a,footer a){display:inline-block;padding-block:14px;margin-block:-14px}
+body[data-reg="bee"]{font-family:var(--sk-font-bee-sans)}
+body[data-reg="bee"] h1{font:400 40px/1.05 var(--sk-font-bee-serif);color:var(--sk-ink)}
+body[data-reg="bee"] .sub{font:400 16px/1.45 var(--sk-font-bee-sans)}
+body[data-reg="bee"] section{border-radius:var(--sk-radius-xl)}
+body[data-reg="bee"] section h2{font:600 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-sovereign)}
+body[data-reg="bee"] .law{font:400 16px/1.45 var(--sk-font-bee-sans)}
+body[data-reg="bee"] .law code,body[data-reg="bee"] .law i{font-size:15px}
+body[data-reg="bee"] table,body[data-reg="bee"] th{font:400 14px/1.4 var(--sk-font-bee-sans)}
+body[data-reg="bee"] .big{font:400 52px/1 var(--sk-font-bee-serif);color:var(--sk-ink)}
+body[data-reg="bee"] .big s{font:400 14px/1.4 var(--sk-font-bee-sans)}
+body[data-reg="bee"] pre{font:400 15px/1.4 var(--sk-font-mono);border-radius:var(--sk-radius)}
+body[data-reg="bee"] button#copycall{border-radius:var(--sk-radius-md);font:600 16px/1.45 var(--sk-font-bee-sans)}
+body[data-reg="bee"] footer{font:400 14px/1.4 var(--sk-font-bee-sans)}
+body[data-reg="raver"]{font-family:var(--sk-font-raver-body)}
+body[data-reg="raver"] h1{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em;color:var(--sk-ink)}
+body[data-reg="raver"] .sub,body[data-reg="raver"] .law,body[data-reg="raver"] table,body[data-reg="raver"] th,body[data-reg="raver"] footer,body[data-reg="raver"] pre{font-family:var(--sk-font-raver-body);font-size:14px}
+body[data-reg="raver"] .law code{font-size:14px}
+body[data-reg="raver"] section{border-radius:var(--sk-radius-xl)}
+body[data-reg="raver"] section h2{font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em;color:var(--sk-sovereign-soft)}
+body[data-reg="raver"] .big{font:700 60px/.95 var(--sk-font-raver-display);letter-spacing:-.02em;color:var(--sk-ink)}
+body[data-reg="raver"] .big s{font:400 14px/1.25 var(--sk-font-raver-body)}
+body[data-reg="raver"] pre{border-radius:var(--sk-radius-xl);font-family:var(--sk-font-mono)}
+body[data-reg="raver"] button#copycall{border-radius:var(--sk-radius-pill);font:700 15px/1.2 var(--sk-font-raver-display)}
+body[data-reg="cypherpunk"]{font-family:var(--sk-font-mono)}
+body[data-reg="cypherpunk"] h1{font:600 15px/1.45 var(--sk-font-mono);color:var(--sk-ai)}
+body[data-reg="cypherpunk"] .sub,body[data-reg="cypherpunk"] .law,body[data-reg="cypherpunk"] table{font-size:13px}
+body[data-reg="cypherpunk"] section h2{font:600 13px/1.45 var(--sk-font-mono)}
+body[data-reg="cypherpunk"] section,body[data-reg="cypherpunk"] pre,body[data-reg="cypherpunk"] button#copycall{border-radius:var(--sk-radius-sm)}
+body[data-reg="cypherpunk"] .big{font:600 28px/1.1 var(--sk-font-mono);color:var(--sk-ai)}
+body[data-reg="cypherpunk"] .big s{font-size:12px}
+body[data-reg="cypherpunk"] button#copycall{font:600 14px/1.2 var(--sk-font-mono)}
+body[data-reg="cypherpunk"] footer{font-size:12px}
 </style>
+<link rel="stylesheet" href="skaists.css">
 </head>
-<body>
+<body data-bee-theme="custom">
 <main>
+<!-- ETERNAL FRONT (founder blueprint 2026-09-26, docs/design/eternal): three separate products in
+     one surface. ONE data layer (the page's own single read of lang-corpus.json: its tongues, lines,
+     _meta.attested, the founder-ordered ten and why each matters) drives all three. Nothing here
+     signs or attests: every "go" is a same-tab link to the DOCK workshop, where a person does. -->
+<section id="eternal" aria-label="one tongue, one evening">
+
+  <!-- NEW BEE — a calm room: which language do you live in? plain rows, one magenta action -->
+  <div class="et-b">
+    <div class="et-b-mark" data-etk="et.attest.b.mark">one tongue, one evening</div>
+    <h2 class="et-b-h" data-etk="et.attest.b.title">is this your language?</h2>
+    <p class="et-b-lede" data-etk="et.attest.b.lede">every page here already speaks many languages, drafted by a machine and marked ⚙ so you know. we are looking for one person per language to read it and sign it. one evening each.</p>
+    <div class="et-b-guard"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span data-etk="et.attest.b.guard">no account. your name, or your silence, goes on the record.</span></div>
+    <p class="et-b-q" id="etBeeQ" data-etk="et.attest.b.q">which language do you live in?</p>
+    <div class="et-b-rows" id="etBeeRows" role="radiogroup" aria-labelledby="etBeeQ"><div class="et-b-more" data-etk="et.attest.b.reading">reading the language file…</div></div>
+    <div class="et-b-act">
+      <a class="et-b-primary" id="etBeeGo" href="blanguage.html#workshop">read it in the workshop</a>
+      <a class="et-b-link" href="#how" data-etk="et.attest.b.how">how it works, in four steps</a>
+    </div>
+    <div class="et-b-card"><h3 id="etBeeTally">…</h3><div data-etk="et.attest.b.first">the first signature takes the first place in history, whatever the order.</div><small id="etBeeSrc"></small></div>
+    <p class="et-b-foot" data-etk="et.attest.b.foot">a machine draft never decides a consent. those lines wait for their own, stricter process.</p>
+  </div>
+
+  <!-- RAVER — the constellation: every tongue a star, the founder's ten joined in order; tap yours -->
+  <div class="et-r">
+    <div class="et-r-top"><h2 class="et-r-h" id="etRaverTitle">every tongue</h2><span class="et-r-hint" id="etRaverHint">tap your star</span></div>
+    <svg class="et-r-art" id="etArt" viewBox="-180 -180 360 360" role="group" aria-label="every docked tongue as a star: the founder's ten joined in order inside, the rest around them; a filled star is signed by a person"></svg>
+    <div class="et-r-legend" id="etLegend"><span><i class="lg-wait"></i><b data-etk="et.attest.r.lgWait">machine draft · waiting</b></span><span><i class="lg-signed"></i><b data-etk="et.attest.r.lgSigned">signed</b></span><span><i class="lg-ten"></i><b data-etk="et.attest.r.lgTen">the founder's ten, in order</b></span></div>
+    <div class="et-r-card" id="etRaverCard" aria-live="polite"></div>
+    <a class="et-r-pill" id="etRaverGo" href="blanguage.html#workshop">carry it to the workshop</a>
+  </div>
+
+  <!-- CYPHERPUNK — the instrument: the board, the attestation pipeline, a receipt from the corpus -->
+  <div class="et-c">
+    <div class="et-c-path">bnr://lang-corpus.json · _meta.attested</div>
+    <div class="et-c-chips" id="etChips"></div>
+    <div class="et-c-guard"><span data-etk="et.attest.c.guard">ceremony strings = excluded</span> <b data-etk="et.attest.c.guardB">a machine draft never finalizes a consent</b></div>
+    <table class="et-c-tab"><thead><tr><th>tongue</th><th>lines</th><th>state</th></tr></thead><tbody id="etBoard"></tbody></table>
+    <h3 class="et-c-h" data-etk="et.attest.c.pipeH">attestation · a pull request, enforced by the renderer</h3>
+    <ol class="et-c-pipe" id="etPipe"></ol>
+    <a class="et-c-primary" id="etCyGo" href="blanguage.html#workshop">open the workshop · merge</a>
+    <div class="et-c-row"><button type="button" class="et-c-ghost" id="etCyCall" data-etk="et.attest.c.call">the call, below</button><a class="et-c-ghost" href="#how" data-etk="et.attest.c.how">the four steps, below</a></div>
+    <h3 class="et-c-h" data-etk="et.attest.c.recH">receipt · read from the corpus, now</h3>
+    <table class="et-c-kv" id="etReceipt"></table>
+    <div class="et-c-verify">
+      <div class="et-c-verify-h" data-etk="et.attest.c.verifyH">verify · no trust in this page needed</div>
+      <ol><li><code>jq '._meta.attested' surfaces/lang-corpus.json</code></li><li><code>jq '._meta.langs | length' surfaces/lang-corpus.json</code></li><li data-etk="et.attest.c.v3">surfaces/lang.js, the picker note: ✓ only when _meta.attested holds the tongue, ⚙ otherwise</li></ol>
+    </div>
+    <div class="et-c-row">
+      <a class="et-c-ghost" href="https://github.com/beehive-nature/beehive-nature/blob/main/surfaces/lang-corpus.json" target="_blank" rel="noopener noreferrer" title="opens in a new tab" data-etk="et.attest.c.corpus">the corpus ↗ new tab</a>
+      <a class="et-c-ghost" href="https://github.com/beehive-nature/beehive-nature/blob/main/surfaces/attest.html" target="_blank" rel="noopener noreferrer" title="opens in a new tab" data-etk="et.attest.c.fork">fork the template ↗ new tab</a>
+    </div>
+  </div>
+</section>
+<h2 class="et-archive-h" id="etArchive" data-etk="et.attest.whole">the whole campaign</h2>
 <header>
   <h1>✍🌐 one tongue, one evening</h1>
   <div class="sub" data-reg="bee">Every page of this estate already speaks your language — but by
@@ -95,7 +328,7 @@ body[data-reg="raver"] footer{font-size:14px}
   wins the first place in history regardless of order</b> — attest what you live in.</div>
 </section>
 
-<section>
+<section id="how">
   <h2>how — one evening, four steps, no account</h2>
   <div class="law">
   <b>1 ·</b> open <a href="blanguage.html#workshop">the DOCK workshop</a>, pick <b>🔀 merge</b>,
@@ -184,7 +417,12 @@ fetch(R+'lang-corpus.json?v=9').then(function(r){return r.json()}).then(function
       +'<td>'+(WHY[code]||'')+'</td>';
     t.appendChild(tr);
   });
-}).catch(function(){ $('tally').innerHTML='not read<s>the corpus could not be fetched; a failure, never a zero</s>'; });
+  /* ETERNAL FRONT hook (additive): the three fronts above draw from this same single read */
+  window.__attest={state:'ok',corpus:j,langs:langs,pri:PRI,names:NAMES,why:WHY};
+  try{ document.dispatchEvent(new CustomEvent('attest:corpus')); }catch(e){}
+}).catch(function(){ $('tally').innerHTML='not read<s>the corpus could not be fetched; a failure, never a zero</s>';
+  window.__attest={state:'failed',pri:PRI,names:NAMES,why:WHY};
+  try{ document.dispatchEvent(new CustomEvent('attest:corpus')); }catch(e){} });
 (function(){ /* the call's tongue list renders from the live corpus — additions never stale it */
   fetch(R+'lang-corpus.json?v=9').then(function(r){return r.json()}).then(function(j){
     var names={ru:'русский',lv:'latviešu',uk:'українська',gd:'Gàidhlig',cs:'čeština',zh:'中文',ko:'한국어',th:'ไทย',ar:'العربية','nl-be':'Vlaams',es:'español',nl:'Nederlands',de:'Deutsch',fr:'français',he:'עברית',hi:'हिन्दी',bn:'বাংলা',fa:'فارسی',ja:'日本語',ur:'اردو',tr:'Türkçe',hu:'magyar',da:'dansk',nb:'norsk',sv:'svenska',fi:'suomi'};
@@ -197,6 +435,139 @@ fetch(R+'lang-corpus.json?v=9').then(function(r){return r.json()}).then(function
 $('copycall').onclick=function(){
   navigator.clipboard.writeText($('call').textContent).then(function(){ $('copycall').textContent='✓ copied — founder’s hands from here'; });
 };
+})();
+</script>
+<script>
+/* ETERNAL FRONT — one data layer, three renderers (docs/design/eternal). The facts are the page's
+   own single read of lang-corpus.json (window.__attest, set by the board's fetch above): every
+   docked tongue, how many of the corpus lines each carries, _meta.attested (who signed, when), the
+   founder-ordered ten (PRI) and why each matters (WHY). No second request is made. Nothing here
+   signs or attests: every "go" is a same-tab link to the DOCK workshop (blanguage.html#workshop). */
+(function(){
+  var $=function(id){return document.getElementById(id);};
+  var T=function(k,f){var t=window.BNRLanguage&&window.BNRLanguage.text;return t?t(k,f):f;};
+  var tok=function(n){return getComputedStyle(document.body).getPropertyValue('--sk-'+n).trim();};
+  function esc(v){return String(v==null?'':v).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+  var D={state:'pending',tongues:0,keys:0,signed:0,withdrawn:0,langs:[],pri:[],pick:'',more:false};
+  var WORKSHOP='blanguage.html#workshop';
+
+  function read(){
+    var A=window.__attest; if(!A) return;
+    D.state=A.state; D.pri=A.pri||[];
+    if(A.state==='ok'&&A.corpus){
+      var j=A.corpus, K=Object.keys(j.strings||{}), att=(j._meta&&j._meta.attested)||{};
+      D.keys=K.length; D.signed=Object.keys(att).length; D.withdrawn=Object.keys((j._meta&&j._meta.withdrawn)||{}).length;
+      D.langs=(A.langs||[]).map(function(c){var n=0;K.forEach(function(k){if(j.strings[k][c])n++;});
+        return {code:c,name:String((A.names||{})[c]||c).replace(/\s*⭐\s*$/,''),n:n,pri:D.pri.indexOf(c),why:(A.why||{})[c]||'',att:att[c]||null};});
+      D.tongues=D.langs.length;
+    }
+    if(!D.pick||!lang(D.pick)){var hl=(document.documentElement.lang||'').toLowerCase();D.pick=lang(hl)?hl:(D.pri.filter(function(c){return lang(c);})[0]||(D.langs[0]||{}).code||'');}
+  }
+  function lang(c){for(var i=0;i<D.langs.length;i++)if(D.langs[i].code===c)return D.langs[i];return null;}
+  var cur=function(){return lang(D.pick)||{code:'',name:'',n:0,pri:-1,why:'',att:null};};
+  function status(l){return l.att?T('et.attest.signedBy','signed by {by}').replace('{by}',l.att.by||'silence')+(l.att.date?' · '+l.att.date:''):T('et.attest.draft','machine draft · {n} of {k} lines').replace('{n}',l.n.toLocaleString('en')).replace('{k}',D.keys.toLocaleString('en'));}
+
+  /* ── NEW BEE ── */
+  function bee(){
+    var box=$('etBeeRows'); if(!box) return;
+    if(D.state!=='ok'){box.innerHTML='<div class="et-b-more">'+esc(D.state==='failed'?T('et.attest.b.fail','the language file could not be read just now. a failure, never a zero.'):T('et.attest.b.reading','reading the language file…'))+'</div>';}
+    else{
+      var ten=D.langs.filter(function(l){return l.pri>=0;}).sort(function(a,b){return a.pri-b.pri;}), rest=D.langs.filter(function(l){return l.pri<0;});
+      var row=function(l){var on=l.code===D.pick;return '<button type="button" class="et-b-row" role="radio" aria-checked="'+on+'" data-code="'+esc(l.code)+'"><span class="dot" aria-hidden="true"></span><span>'+esc(l.name)+'<em>'+esc(status(l))+'</em></span><small class="'+(l.att?'ok':'')+'">'+(l.att?'✓ '+esc(T('et.attest.b.signed','signed')):'⚙ '+esc(T('et.attest.b.waits','waits')))+'</small></button>';};
+      box.innerHTML=ten.map(row).join('')+(D.more?rest.map(row).join(''):'')+
+        '<button type="button" class="et-b-row more" id="etBeeMore" aria-expanded="'+D.more+'">'+esc(D.more?T('et.attest.b.fewer','show the ten first'):T('et.attest.b.moreN','{n} more languages').replace('{n}',rest.length))+'</button>';
+    }
+    var c=cur(); $('etBeeGo').textContent=c.name?T('et.attest.b.go','read {name} in the workshop').replace('{name}',c.name):T('et.attest.b.go0','open the workshop');
+    $('etBeeTally').textContent=D.state==='ok'?T('et.attest.b.tally','{s} of {n} signed so far.').replace('{s}',D.signed).replace('{n}',D.tongues):T('et.attest.b.notRead','not read yet.');
+    $('etBeeSrc').textContent=D.state==='ok'?T('et.attest.b.src','read from the language file, just now'):D.state==='failed'?T('et.attest.b.srcFail','the language file could not be read · a failure, never a zero'):T('et.attest.b.reading','reading the language file…');
+  }
+
+  /* ── RAVER: the constellation ── */
+  function pos(r,deg){var a=deg*Math.PI/180;return [r*Math.cos(a),r*Math.sin(a)];}
+  function art(){
+    var svg=$('etArt'); if(!svg) return; var h='';
+    h+='<circle r="118" fill="none" stroke="'+tok('line')+'" stroke-width="1" stroke-dasharray="2 6"/>';
+    if(D.state==='ok'){
+      var ten=D.langs.filter(function(l){return l.pri>=0;}).sort(function(a,b){return a.pri-b.pri;}), rest=D.langs.filter(function(l){return l.pri<0;}), P={};
+      ten.forEach(function(l,i){P[l.code]=pos(88,-90+i*36);});
+      rest.forEach(function(l,i){P[l.code]=pos(148,-90+(i+0.5)*360/Math.max(1,rest.length));});
+      h+='<path d="'+ten.map(function(l,i){return (i?'L':'M')+P[l.code][0].toFixed(1)+' '+P[l.code][1].toFixed(1);}).join('')+'" fill="none" stroke="'+tok('sovereign')+'" stroke-width="1.5" stroke-dasharray="3 5" pointer-events="none"/>';
+      D.langs.forEach(function(l){
+        var p=P[l.code], sel=l.code===D.pick, r=5+9*(D.keys?l.n/D.keys:0), lab=l.pri>=0?pos(114,-90+l.pri*36):null;
+        h+='<g class="ring" data-code="'+esc(l.code)+'" role="button" tabindex="0" aria-pressed="'+sel+'" aria-label="'+esc(l.name+': '+status(l))+'">'+
+          '<circle cx="'+p[0].toFixed(1)+'" cy="'+p[1].toFixed(1)+'" r="23" fill="transparent"/>'+
+          '<circle class="seg" cx="'+p[0].toFixed(1)+'" cy="'+p[1].toFixed(1)+'" r="'+r.toFixed(1)+'" fill="'+(l.att?tok('biomass'):tok('bg-card'))+'" stroke="'+(sel?tok('you'):l.att?tok('biomass'):tok('sovereign-soft'))+'" stroke-width="'+(sel?3:1.5)+'"/>'+
+          (sel?'<circle cx="'+p[0].toFixed(1)+'" cy="'+p[1].toFixed(1)+'" r="'+(r+7).toFixed(1)+'" fill="none" stroke="'+tok('you')+'" stroke-width="1.5" stroke-dasharray="2 3"/>':'')+
+          (lab?'<text x="'+lab[0].toFixed(1)+'" y="'+(lab[1]+5).toFixed(1)+'" text-anchor="middle" fill="'+(sel?tok('ink'):tok('ink-soft'))+'" style="font:600 14px/1.25 var(--sk-font-raver-body)">'+esc(l.code)+'</text>':'')+'</g>';
+      });
+      h+='<text y="6" text-anchor="middle" fill="'+tok('ink')+'" style="font:700 30px/1 var(--sk-font-raver-display)" pointer-events="none">'+D.signed+'</text><text y="30" text-anchor="middle" fill="'+tok('ink-soft')+'" style="font:400 14px/1.25 var(--sk-font-raver-body)" pointer-events="none">'+esc(T('et.attest.r.ofSigned','of {n} signed').replace('{n}',D.tongues))+'</text>';
+    } else {
+      h+='<text y="6" text-anchor="middle" fill="'+tok('ink-soft')+'" style="font:400 14px/1.25 var(--sk-font-raver-body)">'+esc(D.state==='failed'?T('et.attest.r.fail','the sky could not be read'):T('et.attest.r.reading','reading the sky…'))+'</text>';
+    }
+    svg.innerHTML=h;
+  }
+  function raver(){
+    var c=cur(), card=$('etRaverCard');
+    $('etRaverTitle').textContent=T('et.attest.r.t','every tongue');
+    $('etRaverHint').textContent=D.state==='ok'?D.tongues+' '+T('et.attest.r.h','stars · tap yours'):T('et.attest.r.hWait','tap your star');
+    card.innerHTML=D.state==='ok'&&c.code?'<span class="rk">'+esc(c.code)+'</span><div><b>'+esc(c.name+(c.pri>=0?' · '+T('et.attest.r.ofTen','{i} of the ten').replace('{i}',c.pri+1):''))+'</b><span>'+esc((c.att?'✓ ':'⚙ ')+status(c)+(c.why?' · '+c.why:''))+'</span></div>'
+      :'<span class="rk">⚙</span><div><b>'+esc(T('et.attest.r.noRead','the language file'))+'</b><span>'+esc(D.state==='failed'?T('et.attest.r.failS','could not be read · a failure, never a zero'):T('et.attest.r.readS','reading…'))+'</span></div>';
+    $('etRaverGo').textContent=c.name?T('et.attest.r.go','carry {name} to the workshop').replace('{name}',c.name):T('et.attest.r.go0','carry it to the workshop');
+    art();
+  }
+
+  /* ── CYPHERPUNK ── */
+  function cy(){
+    var tb=$('etBoard'); if(!tb) return; var c=cur(), code=c.code||'xx';
+    var rd=D.state==='ok';
+    $('etChips').innerHTML='<span class="'+(rd?'ok':'no')+'">corpus '+esc(rd?'read':D.state==='failed'?'not read':'reading')+'</span><span>attested '+(rd?D.signed+'/'+D.tongues:'not read')+'</span><span>keys '+(rd?D.keys.toLocaleString('en'):'not read')+'</span>';
+    tb.innerHTML=D.state==='ok'?D.langs.map(function(l){var on=l.code===D.pick;return '<tr class="pick" data-code="'+esc(l.code)+'" tabindex="0" aria-selected="'+on+'"><td>'+esc(l.code)+(l.pri>=0?' · '+(l.pri+1):'')+'<small>'+esc(l.name)+'</small></td><td>'+l.n.toLocaleString('en')+'</td><td class="'+(l.att?'ok':'no')+'">'+(l.att?'✓ '+esc(l.att.by||'silence'):'⚙ open')+'</td></tr>';}).join('')
+      :'<tr><td colspan="3">'+esc(D.state==='failed'?'corpus not read · a failure, never a zero':'reading…')+'</td></tr>';
+    var steps=[
+      ['open · '+WORKSHOP+' → merge → '+code,'every line prefills beside its English','now'],
+      ['read + fix','~15–25 s/string ≈ 1–2 h per tongue · most lines need nothing','todo'],
+      ['compose · the attested entry','{"attested":{"'+code+'":{"by":"your name or silence","date":"YYYY-MM-DD"}}}','todo'],
+      ['carry · a pull request','against surfaces/lang-corpus.json, or hand the fragment to any hive member','todo'],
+      ['merge · the picker renders ✓ for '+code,'enforced by lang.js from _meta.attested, never claimed by a page',c.att?'done':'todo'],
+      ['withdraw · honoured','history kept · the dock forgets nothing','guard']
+    ];
+    $('etPipe').innerHTML=steps.map(function(s){return '<li class="'+s[2]+'"><b>'+esc(s[0])+'</b><div>'+esc(s[1])+'</div></li>';}).join('');
+    var ok=D.state==='ok';
+    $('etReceipt').innerHTML=[
+      ['corpus','lang-corpus.json · '+(ok?'<span class="yes">read</span>':'<span class="no">'+esc(D.state==='failed'?'not read · a failure, never a zero':'reading')+'</span>')],
+      ['tongues',ok?String(D.tongues):'<span class="no">not read</span>'],
+      ['keys',ok?D.keys.toLocaleString('en'):'<span class="no">not read</span>'],
+      ['picked',ok&&c.code?esc(c.code+' · '+c.n.toLocaleString('en')+' of '+D.keys.toLocaleString('en')+' lines'):'<span class="no">none yet</span>'],
+      ['attested',ok?(D.signed?esc(D.langs.filter(function(l){return l.att;}).map(function(l){return l.code+' · '+(l.att.by||'silence');}).join(' · ')):'<span class="no">{} · empty until a person signs</span>'):'<span class="no">not read</span>'],
+      ['withdrawn',ok?String(D.withdrawn):'<span class="no">not read</span>'],
+      ['the ten',esc(D.pri.join(' → '))],
+      ['front','<span class="gd">0 signatures made here · same-tab links only</span>']
+    ].map(function(r){return '<tr><th>'+r[0]+'</th><td>'+r[1]+'</td></tr>';}).join('');
+    $('etCyGo').textContent='open the workshop · merge '+code;
+  }
+
+  function choose(code){if(!lang(code))return;D.pick=code;bee();raver();cy();}
+  function words(){document.querySelectorAll('#eternal [data-etk],.et-archive-h[data-etk]').forEach(function(e){if(e.__en==null)e.__en=e.textContent;e.textContent=T(e.getAttribute('data-etk'),e.__en);});}
+  function sync(){read();bee();raver();cy();}
+  function all(){read();words();bee();raver();cy();}
+  function wire(){
+    var ev=$('eternal'); if(!ev) return;
+    ev.addEventListener('click',function(e){
+      if(e.target.closest('#etBeeMore')){D.more=!D.more;bee();return;}
+      var r=e.target.closest('[data-code]'); if(r) choose(r.getAttribute('data-code'));
+    });
+    ev.addEventListener('keydown',function(e){
+      if(e.key!=='Enter'&&e.key!==' ')return;
+      var t=e.target.closest('#etArt [data-code],.et-c-tab tr.pick'); if(!t)return;
+      e.preventDefault(); t.dispatchEvent(new MouseEvent('click',{bubbles:true}));
+    });
+    $('etCyCall').addEventListener('click',function(){var c=$('call');if(c)c.scrollIntoView({block:'start'});var b=$('copycall');if(b){try{b.focus({preventScroll:true});}catch(x){b.focus();}}});
+    document.addEventListener('attest:corpus',sync);
+    document.addEventListener('blang',all);
+    document.addEventListener('bregister',function(){setTimeout(art,0);});
+  }
+  wire(); all();
+  window.__eternal={data:D};
 })();
 </script>
 </body>
