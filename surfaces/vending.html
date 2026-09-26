@@ -327,10 +327,11 @@ main{max-width:462px;margin:0 auto}
       <div class="total"><span class="sub">you pay, once</span><span class="big" id="p-total">—</span></div>
       <h3>what happens after you approve</h3>
       <div class="what">
-        <div>you pay the total above — <b>one tap in your wallet</b>; nothing is
-        charged, signed, or sent before this approval</div>
-        <div>the machine writes your row on Vaulta (jungle4 rehearsal today) under
-        your own name-key — collision ⇒ refused, never hijacked</div>
+        <div>on the jungle4 rehearsal <b>nothing is paid and this page signs nothing</b>;
+        the money rails open when the founder names the seat</div>
+        <div>the machine writes your row on Vaulta (jungle4 rehearsal today) from
+        one line on the machine that holds the seat key, under your own member
+        key — collision ⇒ refused, never hijacked</div>
         <div>the birth certificate goes to Arweave, permanent, carrying the recipe</div>
         <div>your agent stands: .a house, your tongue, your key — watch it land
         below, then keep it forever</div>
@@ -556,7 +557,7 @@ function renderLand() {
   if (!m) {
     $('c-honey-s').textContent = $('c-capped-s').textContent = '—';
     $('vtx').textContent = state.certs.length
-      ? 'the ledger has rows but the history walk found no mint yet — re-walking'
+      ? `${state.certs.length} row(s) on chain; the history door (v1/history/get_actions) is not answering, so no transaction id can be shown — the rows above are the truth`
       : 'no mints yet — the machine is brand new';
     return;
   }
@@ -722,18 +723,33 @@ $('papprove').addEventListener('click', async () => {
   const hold = why => door.innerHTML = `<span class="held">the door held — nothing moved.</span><br>${why}`;
   const total = payTotal();
   if (rail === 'a') {
-    door.innerHTML = `<span class="held">rehearsal rail armed — testnet A, the memo is the binding.</span><br>
-      send <code>${((state.law.basisA + RAM_BASIS_A + state.law.basisA * state.law.titheBp / 10000).toFixed(4))} A</code>
-      on jungle4 to <code>bnrapolltest</code> with memo <code>vending:${esc(state.canonName)}</code> —
-      the poller below will catch your mint the moment it lands in a block.`;
-    /* watching mode: the nectar cell lives while we wait for the member's mint */
+    /* THE TRUTH (founder catch 2026-09-25, "imagine that none of it works"):
+       the contract has no token-receipt path — vending.cpp's only writer is
+       `mint`, and it wants the owner's own signature. Sending A with a memo
+       never minted anything, and this page signs nothing. The machine that
+       mints is scripts/vending-machine.mjs, run on the estate machine whose
+       environment holds the seat key (BNRAPOLL_WIF); one line, every step
+       reported, refusal before any upload if the key is absent. This screen
+       now says exactly that and then watches the chain's own certs table
+       (the history door the old poller read answers 500). */
+    const line = `node scripts/vending-machine.mjs "${state.canonName}" ${$('vtongue').value || 'latvian'} ${$('vline').value || 'bqueenbee-genesis-1'}`;
+    door.innerHTML = `<span class="held">this page signs nothing — nothing moved.</span><br>
+      the row is written by the machine's own seat, from one line on the estate machine that holds the seat key:<br>
+      <code class="code" style="color:var(--gold);user-select:all">${esc(line)}</code><br>
+      the rate <code>${(state.law.basisA).toFixed(4)} A</code> and the tithe <code>${(state.law.titheBp / 100).toFixed(2)}%</code> are the law rows above;
+      on the jungle4 rehearsal no A changes hands — the money rails wait for the founder's seat. this screen watches the chain for your row.`;
+    /* watching mode: the nectar cell lives while we wait for the row on chain */
     const hexN = document.querySelector('#c-nectar .hex');
-    hexN.classList.add('live'); $('c-nectar-s').textContent = 'watching for ' + (state.canonName || 'your mint');
-    const was = state.mints.map(m => m.trx);
+    hexN.classList.add('live'); $('c-nectar-s').textContent = 'watching the chain for ' + (state.canonName || 'your row');
+    const mine = state.canonName;
     const watch = setInterval(async () => {
-      await walkMints().catch(() => {});
-      const fresh = state.mints.find(m => !was.includes(m.trx));
-      if (fresh) { clearInterval(watch); hexN.classList.remove('live'); renderLand(); }
+      try { await readCerts(); } catch { return; }
+      const row = state.certs.find(r => r.agent_name === mine);
+      if (row) { clearInterval(watch); hexN.classList.remove('live');
+        $('c-nectar-s').textContent = 'it was written'; $('c-nectar').classList.add('past');
+        $('c-honey-s').textContent = 'row on chain · ' + String(row.minted || '').replace('T', ' ') + ' UTC'; $('c-honey').classList.add('past');
+        $('c-capped-s').textContent = 'certificate ' + row.ar_id.slice(0, 8) + '…';
+        state.cert = row; renderCert(); walkMints().catch(() => {}); }
     }, 12000);
     return;
   }

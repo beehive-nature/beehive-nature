@@ -124,6 +124,35 @@ runner now serves the checkout root for exactly that reason). Corpus: 58
 textually after the `read.*` block (layout untouched; slots verified per
 tongue). Registered as `vending-deck` (104 counted). CI list gained the test.
 
+## Round 2 — "imagine that none of it works" (founder, same night)
+
+Traced and true: **the vending page could not mint.** `vending.cpp` has no
+token-receipt path — `mint` is its only writer and wants the owner's own
+signature — so "send A with memo vending:<name>, the poller will catch your
+mint" never minted anything; the approve button signed nothing; and the
+history door the poller read (`jungle4.greymass.com/v1/history/get_actions`)
+answers HTTP 500. The two receipted mints came from `tool/mint.mjs` with the
+seat key in `BNRAPOLL_WIF`, over SSH to the box for the upload.
+
+What landed:
+- `scripts/vending-machine.mjs` — the mint as a machine, one line: canonical
+  name → member ed25519 key (vault under `%LOCALAPPDATA%\skaists-vending\
+  members`, never returned) → a1 genesis → certificate + hash → Arweave via
+  Turbo **from this machine** (both doors answer 200 here; no SSH) with the
+  member key as owner → pointer row on jungle4 signed with the seat key from
+  `BNRAPOLL_WIF`. Every step is a named row; without the key it **refuses at
+  `sign` before any upload**; `--dry-run` proves everything up to the hash.
+  Dry-run receipt: `bee test` → 3231 B, hash `69e357c3…5035dc`.
+- the page's rail-A approve now tells the truth and names the line, then
+  watches the chain's `certs` table for the row (the part of the chain that
+  answers).
+- `e2e/vending-machine.test.mjs` (4 tests) — in the CI front-door list.
+
+Not done: a loopback HTTP door from the page into the machine was refused by
+this seat's own action classifier (a signing surface on a local server), so
+the page names the line instead of pressing it. A live jungle4 mint was not
+run: the seat key is not in this environment and this seat holds no keys.
+
 ## Not done, said plainly
 
 - No live x0x read (no daemon started, no token held — by law).
