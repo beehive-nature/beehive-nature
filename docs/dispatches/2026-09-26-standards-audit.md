@@ -105,3 +105,7 @@ Reading the table:
 1. Design seat: the `#5f6f61` caption ink and the `#00e5ff`-on-light action ink (one token decision, ~250 nodes). Then the 9 critical `label`/`select-name` nodes, which are `aria-label` one-liners.
 2. Design seat, via #237's shape: a raver reading that differs from bee in structure on the 12 RECOLOR surfaces, and the raver/bee type systems the contract names. `register-divergence.mjs` is the acceptance instrument; it should go one tap deep next (click each first-screen action, fingerprint again), which is the #237 seat's finding turned into a gate.
 3. This lane: wire `standards-audit.mjs` into `tests.yml` as an informational step first (prints, does not fail), then ratchet: zero critical, then no new contrast nodes per surface.
+
+## 5. §7 identity correction (CI static job, run 36230037484)
+
+The first commit on this lane (9fd446a9) was authored as `Claude <noreply@anthropic.com>` and the estate's §7 check failed it: the author of every commit is the founder, the seat self-identifies as committer, and author≠committer commits require a Co-authored-by trailer. This seat had not exported the identities. Cured the estate way, by a descendant in the correct shape, not by rewriting the pushed commit. Seat committer identity from here: `bFable5.1 (Claude Fable 5.1) <noreply@anthropic.com>`, following the `bOPus5 (Claude Opus 5)` pattern already on main.
