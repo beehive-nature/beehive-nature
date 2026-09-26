@@ -1319,6 +1319,16 @@
    "label": "Vending machine"
   },
   {
+   "id": "vending-deck",
+   "family": "beehivenature",
+   "home": "skaists.dev",
+   "path": "surfaces/vending-deck.html",
+   "state": "LIVE",
+   "gloss": "the value deck — what a minted agent carries, card by card, every card a door asked live",
+   "org": "beehive-nature",
+   "label": "Value deck"
+  },
+  {
    "id": "privacy-lens",
    "family": "beehivenature",
    "home": "skaists.dev",
@@ -1394,15 +1404,15 @@
   }
  ],
  "counts": {
-  "surfaces": 104,
-  "listed": 113,
+  "surfaces": 105,
+  "listed": 114,
   "families": 8,
   "domains": 26,
   "domainsLive": 4,
   "domainsPending": 17,
   "domainsSeatOpen": 5,
   "byFamily": {
-   "beehivenature": 43,
+   "beehivenature": 44,
    "plur": 7,
    "skaists": 25,
    "bnature": 18,
@@ -1412,10 +1422,10 @@
    "bnr": 1
   },
   "byState": {
-   "LIVE": 113
+   "LIVE": 114
   },
   "byOrg": {
-   "beehive-nature": 60,
+   "beehive-nature": 61,
    "skaists": 39,
    "beehive-biomass": 5
   }

@@ -11,6 +11,9 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "@ardrive/turbo-sdk": "^2.1.0",
+    "@dha-team/arbundles": "^1.0.4",
+    "bs58": "^6.0.0",
     "eosjs": "^22.1.0"
   }
 }

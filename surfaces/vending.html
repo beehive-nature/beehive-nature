@@ -254,11 +254,7 @@ body:not([data-reg="cypherpunk"]) :is(.lawline,.tx,.checked,.kv,.foot,.rail .rd,
   <div class="line"><span><span data-i18n="v.l.cert">its birth certificate</span><small data-i18n="v.l.certsub">Arweave · permanent · Turbo free tier carries it today</small></span><b>$0.00</b></div>
   <div class="total"><span class="sub" id="v-total-sub" data-i18n="v.total">you pay, once</span><span class="big" id="v-total">—</span></div>
   <button class="btn" id="vmintbtn" disabled>Mint — reading the live price…</button>
-  <p class="note" data-i18n="v.note2">Rehearsal is free today — <b>testnet A, memo-bound</b>. The paid rails
-  (<b>USDC on Base, PYUSD on its official chains</b>) are <b>held</b> until the founder names
-  the machine's payment seat. <b>Card and PayPal are not available</b> — no card processor is
-  wired, and nothing here touches a PayPal account (PYUSD is PayPal-issued, but it rides its
-  own chains). Nothing moves until you approve the plan on the next screen.</p>  <div class="lawline" id="afterplan" style="display:none;margin-top:8px"></div>
+  <p class="note" data-i18n="v.note2">Rehearsal is free today — nothing is paid. When the founder names the machine's seat, the price above is paid through <b>bPay</b>, the estate's one payment door, and nothing else. Nothing moves until you approve the plan on the next screen.</p>  <div class="lawline" id="afterplan" style="display:none;margin-top:8px"></div>
 </section>
 
 <!-- ── 3 · WATCH IT LAND ───────────────────────────────────────── -->
@@ -349,10 +345,11 @@ body:not([data-reg="cypherpunk"]) :is(.lawline,.tx,.checked,.kv,.foot,.rail .rd,
       <div class="total"><span class="sub">you pay, once</span><span class="big" id="p-total">—</span></div>
       <h3>what happens after you approve</h3>
       <div class="what">
-        <div>you pay the total above — <b>one tap in your wallet</b>; nothing is
-        charged, signed, or sent before this approval</div>
-        <div>the machine writes your row on Vaulta (jungle4 rehearsal today) under
-        your own name-key — collision ⇒ refused, never hijacked</div>
+        <div>on the jungle4 rehearsal <b>nothing is paid and this page signs nothing</b>;
+        the money rails open when the founder names the seat</div>
+        <div>the machine writes your row on Vaulta (jungle4 rehearsal today) from
+        one line on the machine that holds the seat key, under your own member
+        key — collision ⇒ refused, never hijacked</div>
         <div>the birth certificate goes to Arweave, permanent, carrying the recipe</div>
         <div>your agent stands: .a house, your tongue, your key — watch it land
         below, then keep it forever</div>
@@ -360,20 +357,15 @@ body:not([data-reg="cypherpunk"]) :is(.lawline,.tx,.checked,.kv,.foot,.rail .rd,
       <h3>the door</h3>
       <div class="rails" id="vrails">
         <label class="rail pick"><input type="radio" name="vrail" value="a" checked>
-          <span><span class="rn">A · Vaulta — the rehearsal rail, live today</span>
-          <span class="rd">jungle4 testnet A to the machine's own public seat
-          <b>bnrapolltest</b>, memo-bound — <b>the memo is the binding</b>.
-          Testnet money, real law rows.</span></span></label>
-        <label class="rail"><input type="radio" name="vrail" value="usdc">
-          <span><span class="rn">USDC · Base — <b>held</b> until the founder names the seat</span>
-          <span class="rd">native USDC on Base, one tap when the seat is named. PayPal's PYUSD is
-          <b>not issued on Base</b> (read at docs.paxos.com, 2026-09-03 — Ethereum,
-          Arbitrum, Polygon, X Layer only); on Base the door takes USDC.</span></span></label>
-        <label class="rail"><input type="radio" name="vrail" value="pyusd">
-          <span><span class="rn">PYUSD — <b>held</b> until the founder names the seat</span>
-          <span class="rd">PYUSD rides Ethereum, Arbitrum, Polygon or X Layer —
-          Paxos-issued, address cited in-source. Not a PayPal checkout: the stablecoin,
-          not the account.</span></span></label>
+          <span><span class="rn">the rehearsal rail — live today, nothing to pay</span>
+          <span class="rd">your key is made here, your certificate goes to the permaweb from
+          this page, and your agent wakes in your tab. the chain row follows from the
+          machine's seat. the law rows above are real; the money is not asked for yet.</span></span></label>
+        <label class="rail"><input type="radio" name="vrail" value="bpay" disabled>
+          <span><span class="rn">bPay — <b>held</b> until the founder names the seat</span>
+          <span class="rd">the one payment door of the estate. when the seat is named, the
+          price above is paid through bPay and nothing else; until then this row holds and
+          says so.</span></span></label>
       </div>
       <div id="doorstate"></div>
       <div class="btns">
@@ -395,17 +387,12 @@ const MONITOR_TX = 'https://monitor.jungletestnet.io/#accountActions:';
 const AR = 'https://arweave.net';
 const CG = 'https://api.coingecko.com/api/v3/simple/price?ids=vaulta&vs_currencies=usd';
 /* money-rail constants — each cited at source, none invented */
-const USDC_BASE   = '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913'; // PUBLIC-CONSTANT native USDC on Base (chain-confirmed, wallet.html rail)
-const PYUSD_ETH   = '0x6c3ea9036406852006290770BEdFcAbA0e23A0e8'; // PUBLIC-CONSTANT PYUSD on Ethereum (Paxos docs)
-const PYUSD_ARB   = '0x46850aD61C2B7d64d08c9C754F45254596696984'; // PUBLIC-CONSTANT PYUSD on Arbitrum One (Paxos docs)
 const CHAINS = { 1:'Ethereum', 42161:'Arbitrum One', 8453:'Base', 137:'Polygon PoS', 914:'X Layer' };
-const CHAIN_HEX = { 1:'0x1', 42161:'0xa4b1', 8453:'0x2105', 137:'0x89', 914:'0x392' };
 /* the machine's money seat on the paid rails is a FOUNDER CEREMONY
    (SPEC-VENDING-2 §money: the first paid mint is the door's first receipt).
    The rail's own law: unbound senders never auto-credit — so the door holds
    until the founder names the seat. The e2e harness may set one to exercise
    the one-tap path. */
-const PAY_SEAT = window.__VENDING_PAY_SEAT || null;
 const RAM_BASIS_A = 0.16;   /* cert row ≈ 462 B ≈ 0.16 A — SPEC-VENDING-2 §sizing,
                                read 2026-09-01; storage moves, the basis is cited */
 const PRICE_FALLBACK = 0.074832; /* A→USD measured 2026-09-01 (SPEC-VENDING-2 §sizing) — used only if the live price is unreachable, and then labeled */
@@ -578,7 +565,7 @@ function renderLand() {
   if (!m) {
     $('c-honey-s').textContent = $('c-capped-s').textContent = '—';
     $('vtx').textContent = state.certs.length
-      ? 'the ledger has rows but the history walk found no mint yet — re-walking'
+      ? `${state.certs.length} row(s) on chain; the history door (v1/history/get_actions) is not answering, so no transaction id can be shown — the rows above are the truth`
       : 'no mints yet — the machine is brand new';
     return;
   }
@@ -730,60 +717,139 @@ $('prefuse').addEventListener('click', () => closePlan('refused — nothing move
 plan.addEventListener('click', e => { if (e.target === plan) closePlan('dismissed — nothing moved'); });
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && plan.classList.contains('open')) closePlan('dismissed — nothing moved'); });
 
-const erc20Transfer = (to, units) =>   // selector(4) + address(32) + amount(32)
-  '0xa9059cbb' + to.replace(/^0x/, '').toLowerCase().padStart(64, '0') + units.toString(16).padStart(64, '0');
 const payTotal = () => { const L = state.law, p = state.price;
   return (L.basisA + RAM_BASIS_A + L.basisA * L.titheBp / 10000) * (p || PRICE_FALLBACK); };
 
-/* the one-tap door. Rail A = rehearsal (testnet, memo-bound). USDC/PYUSD =
-   the money rails: EIP-681 one-tap + injected-wallet path when the seat is
-   named; until the founder names it the door HOLDS and says so. */
+/* the door: the rehearsal rail mints in the page; bPay holds until the seat is named */
 $('papprove').addEventListener('click', async () => {
   const rail = document.querySelector('input[name=vrail]:checked').value;
   const door = $('doorstate'); door.classList.add('show');
   const hold = why => door.innerHTML = `<span class="held">the door held — nothing moved.</span><br>${why}`;
   const total = payTotal();
   if (rail === 'a') {
-    door.innerHTML = `<span class="held">rehearsal rail armed — testnet A, the memo is the binding.</span><br>
-      send <code>${((state.law.basisA + RAM_BASIS_A + state.law.basisA * state.law.titheBp / 10000).toFixed(4))} A</code>
-      on jungle4 to <code>bnrapolltest</code> with memo <code>vending:${esc(state.canonName)}</code> —
-      the poller below will catch your mint the moment it lands in a block.`;
-    /* watching mode: the nectar cell lives while we wait for the member's mint */
+    /* THE MACHINE, IN THE PAGE (2026-09-26): approve mints. The member's
+       ed25519 key is made here; the a1 genesis and the birth certificate are
+       composed here (vending-cert.js, held to cert.mjs's hash); the
+       certificate goes to the permaweb as an ANS-104 item signed by that key
+       (ans104.js, held to the reference library), through Turbo's free door,
+       with no server between the member and Arweave; then it is read back
+       from a gateway and re-hashed. The one thing this page cannot do is
+       sign the chain's pointer row — that needs the machine seat's key, so
+       the row is queued for the seat and the key road (owner = member key,
+       Member-Key tag) already finds the certificate without it. The agent
+       is handed over at the end: a mind in your tab, wearing this
+       certificate. */
+    try { await mintInPage(door); } catch (e) { hold('the mint stopped at <b>' + esc(String(e.step || 'unknown')) + '</b> — <i>' + esc(String(e.message || e).slice(0, 160)) + '</i>. nothing partial was kept.'); }
+    return;
+  }
+  if (rail === 'a-legacy') {
+    /* THE TRUTH (founder catch 2026-09-25, "imagine that none of it works"):
+       the contract has no token-receipt path — vending.cpp's only writer is
+       `mint`, and it wants the owner's own signature. Sending A with a memo
+       never minted anything, and this page signs nothing. The machine that
+       mints is scripts/vending-machine.mjs, run on the estate machine whose
+       environment holds the seat key (BNRAPOLL_WIF); one line, every step
+       reported, refusal before any upload if the key is absent. This screen
+       now says exactly that and then watches the chain's own certs table
+       (the history door the old poller read answers 500). */
+    const line = `node scripts/vending-machine.mjs "${state.canonName}" ${$('vtongue').value || 'latvian'} ${$('vline').value || 'bqueenbee-genesis-1'}`;
+    door.innerHTML = `<span class="held">this page signs nothing — nothing moved.</span><br>
+      the row is written by the machine's own seat, from one line on the estate machine that holds the seat key:<br>
+      <code class="code" style="color:var(--gold);user-select:all">${esc(line)}</code><br>
+      the rate <code>${(state.law.basisA).toFixed(4)} A</code> and the tithe <code>${(state.law.titheBp / 100).toFixed(2)}%</code> are the law rows above;
+      on the jungle4 rehearsal no A changes hands — the money rails wait for the founder's seat. this screen watches the chain for your row.`;
+    /* watching mode: the nectar cell lives while we wait for the row on chain */
     const hexN = document.querySelector('#c-nectar .hex');
-    hexN.classList.add('live'); $('c-nectar-s').textContent = 'watching for ' + (state.canonName || 'your mint');
-    const was = state.mints.map(m => m.trx);
+    hexN.classList.add('live'); $('c-nectar-s').textContent = 'watching the chain for ' + (state.canonName || 'your row');
+    const mine = state.canonName;
     const watch = setInterval(async () => {
-      await walkMints().catch(() => {});
-      const fresh = state.mints.find(m => !was.includes(m.trx));
-      if (fresh) { clearInterval(watch); hexN.classList.remove('live'); renderLand(); }
+      try { await readCerts(); } catch { return; }
+      const row = state.certs.find(r => r.agent_name === mine);
+      if (row) { clearInterval(watch); hexN.classList.remove('live');
+        $('c-nectar-s').textContent = 'it was written'; $('c-nectar').classList.add('past');
+        $('c-honey-s').textContent = 'row on chain · ' + String(row.minted || '').replace('T', ' ') + ' UTC'; $('c-honey').classList.add('past');
+        $('c-capped-s').textContent = 'certificate ' + row.ar_id.slice(0, 8) + '…';
+        state.cert = row; renderCert(); walkMints().catch(() => {}); }
     }, 12000);
     return;
   }
-  if (!PAY_SEAT) {
-    hold(`the machine's payment seat on the money rails is named by the founder at the
-      first paid mint (SPEC-VENDING-2 §money — the rail's own law: unbound senders
-      never auto-credit). Your plan stands: <b>$${total.toFixed(2)}</b>. Nothing was
-      charged, nothing signed.`);
-    return;
-  }
-  const cfg = rail === 'usdc'
-    ? { chain: 8453, token: USDC_BASE, decimals: 6, label: 'USDC on Base' }
-    : { chain: 1, token: PYUSD_ETH, decimals: 18, label: 'PYUSD on Ethereum' };
-  const units = BigInt(Math.round(total * 10 ** cfg.decimals));
-  const data = erc20Transfer(PAY_SEAT, units);
-  /* the one-tap link works in any mobile wallet, no dapp browser needed */
-  door.innerHTML = `one tap: <a class="code" style="color:var(--gold)" href="ethereum:${cfg.token}@${cfg.chain}/transfer?address=${PAY_SEAT}&uint256=${units}">open ${cfg.label} in your wallet →</a><br>sending <b>$${total.toFixed(2)}</b> to the machine seat <code>${PAY_SEAT.slice(0, 10)}…</code>`;
-  const eth = window.ethereum;
-  if (!eth) { door.innerHTML += '<br><span class="held">no injected wallet on this page — the link above is the door on your phone.</span>'; return; }
-  try {
-    await eth.request({ method: 'wallet_switchEthereumChain',
-      params: [{ chainId: CHAIN_HEX[cfg.chain] }] });
-    const tx = await eth.request({ method: 'eth_sendTransaction', params: [{
-      from: (await eth.request({ method: 'eth_accounts' }))[0],
-      to: cfg.token, value: '0x0', data }] });
-    door.innerHTML += `<br><span class="moved">sent — ${esc(String(tx).slice(0, 20))}…</span> the machine is watching for your mint to land.`;
-  } catch (e) { hold('the wallet refused or was unavailable — <i>' + esc(String(e.message || e).slice(0, 90)) + '</i>'); }
+  /* every other door is bPay, held until the founder names the seat (founder
+     law 2026-09-26: no payment rail but bPay, ever) */
+  hold('bPay is the only payment door of this estate, and its seat is not named yet. your plan stands: <b>$'+total.toFixed(2)+'</b>. nothing was charged, nothing signed.');
 });
+
+/* ── the mint, in the page ── */
+const GATEWAYS = ['https://arweave.net'];
+async function mintInPage(door) {
+  const A = window.ANS104, C = window.VendingCert;
+  const step = (s, e) => { e.step = s; return e; };
+  const name = state.canonName, tongue = $('vtongue').value || 'latvian', template = $('vline').value || 'bqueenbee-genesis-1';
+  if (!name) throw step('name', new Error('name the agent first'));
+  const hexN = document.querySelector('#c-nectar .hex'); hexN.classList.add('live');
+  const say = html => { door.innerHTML = html; };
+  const cells = (n, h, c) => { if (n) $('c-nectar-s').textContent = n; if (h) $('c-honey-s').textContent = h; if (c) $('c-capped-s').textContent = c; };
+  ['c-nectar', 'c-honey', 'c-capped'].forEach(id => $(id).classList.remove('past'));
+  cells('making your key', '—', '—');
+  say('<span class="held">minting — nothing to pay on the rehearsal rail.</span><br>1 · your key');
+  /* 1 · the member's key, made here, handed to them below */
+  let key; try { key = await A.generateKey(); } catch (e) { throw step('key', new Error('this browser cannot make an Ed25519 key (WebCrypto): ' + e.message)); }
+  /* 2 · memory genesis + the certificate */
+  const genesis = await C.genesisRevision({ agent: name, body: { note: 'a1 genesis — memory begins empty; the store funds later under this binding' }, memberPrivateKey: key.privateKey });
+  const binding = C.storeBinding(genesis, await C.hashRevision(genesis));
+  const mintedIso = new Date().toISOString();
+  const record = await C.composeCertificate({ agentName: name, house: 'a', tongue, template, memberKeyHex: key.publicHex, memberAccount: CONTRACT, mintedIso, storeBinding: binding });
+  const bytes = new TextEncoder().encode(C.canonicalJson(record));
+  say(door.innerHTML + ` ✓<br>2 · certificate · ${bytes.length} B · sha256 ${esc(record.hash.value.slice(0, 12))}…`);
+  cells('it was signed', 'uploading…', null); $('c-nectar').classList.add('past');
+  /* 3 · sign as an ANS-104 item with the member key as owner, and upload */
+  let item, up;
+  try { item = await A.sign(key, bytes, C.certTags({ agentName: name, memberKeyHex: key.publicHex, spec: 'SPEC-VENDING-1' })); }
+  catch (e) { throw step('sign', e); }
+  try { up = await A.upload(item); } catch (e) { throw step('arweave', e); }
+  say(door.innerHTML + ` ✓<br>3 · on the permaweb · <a href="${AR}/${esc(up.id)}" target="_blank" rel="noopener">ar://${esc(up.id)}</a>`);
+  cells(null, 'permaweb id ' + up.id.slice(0, 8) + '…', 'reading it back…'); $('c-honey').classList.add('past');
+  /* 4 · the door's own status (CORS-open), then a gateway read-back with the
+     hash re-derived — the resurrection gate. A fresh item is CONFIRMED at the
+     door within seconds and seeds to arweave.net over minutes; both are said. */
+  let status = null, verified = null;
+  try { const r = await fetch(`https://upload.ardrive.io/v1/tx/${up.id}/status`, { signal: AbortSignal.timeout(8000), cache: 'no-store' }); if (r.ok) status = (await r.json()).status || null; } catch (e) {}
+  if (status) cells(null, null, 'door says ' + status + ' · reading it back…');
+  for (let i = 0; i < 6 && !verified; i++) {
+    for (const g of GATEWAYS) {
+      try { const r = await fetch(`${g}/${up.id}`, { signal: AbortSignal.timeout(8000), cache: 'no-store' });
+        if (!r.ok) continue; const back = await r.json(); const v = await C.verifyCertificate(back);
+        if (v.ok && v.hash === record.hash.value) { verified = g; break; } } catch (e) {}
+    }
+    if (!verified) await new Promise(r => setTimeout(r, 5000));
+  }
+  if (verified) { cells(null, null, 'read back from ' + verified.replace('https://', '') + ' · hash true'); $('c-capped').classList.add('past'); $('c-capped-l').innerHTML = 'final <span class="tick">✓</span>'; }
+  else if (status) { cells(null, null, 'the door says ' + status + ' · gateways seed it within minutes'); $('c-capped').classList.add('past'); }
+  else cells(null, null, 'not readable from a gateway yet — the id is yours, gateways seed within minutes');
+  hexN.classList.remove('live');
+  /* 5 · the chain row: queued for the machine seat (it alone can sign it) */
+  const pending = { name, tongue, template, member_key: key.publicHex, ar_id: up.id, content_hash: record.hash.value, minted: mintedIso, owner: up.owner };
+  /* the record itself rides to the agent page in this browser, so the agent
+     wakes now — gateways seed the permaweb copy over minutes, and the agent
+     page still re-hashes whichever copy it reads */
+  try { localStorage.setItem('agent.cert.' + up.id, C.canonicalJson(record)); } catch (e) {}
+  try { const q = JSON.parse(localStorage.getItem('vending.rows.pending') || '[]'); q.push(pending); localStorage.setItem('vending.rows.pending', JSON.stringify(q)); } catch (e) {}
+  $('vtx').innerHTML = `certificate landed · the chain pointer row waits for the machine seat's signature (queued in this browser); until then the key road finds it: owner <code>${esc(up.owner)}</code>`;
+  /* 6 · yours to keep: the certificate card, the key file, the agent */
+  state.cert = { agent_name: name, member_key: key.publicHex, ar_id: up.id, content_hash: record.hash.value, minted: mintedIso, template_id: template, tongue };
+  renderCert(); $('vcert-q').textContent = '"' + record.answers.what_is_this + '"';
+  const keyFile = new Blob([JSON.stringify({ agent: name + '.a', member_key_ed25519_hex: key.publicHex, seed_hex: A.hex(key.seed), certificate: 'ar://' + up.id, content_hash: record.hash.value, minted: mintedIso, note: 'your key. the certificate\'s owner. keep it; the machine does not have a copy.' }, null, 2)], { type: 'application/json' });
+  const keyUrl = URL.createObjectURL(keyFile);
+  const agentUrl = `local-agent/index.html?agent=${encodeURIComponent(name)}&cert=${encodeURIComponent(up.id)}`;
+  say(door.innerHTML + ` ✓<br>4 · ${verified ? 'read back and hash-true' : 'id issued'}<br><br>
+    <a class="code" style="color:var(--gold)" href="${keyUrl}" download="${esc(name)}.a.key.json">↓ keep your key (${esc(name)}.a.key.json)</a> · the certificate's owner; the machine keeps no copy<br>
+    <a class="code" style="color:var(--gold)" href="${agentUrl}">⏵ wake your agent — a mind in your tab wearing this certificate</a>`);
+  const wake = document.createElement('a'); wake.className = 'btn2'; wake.href = agentUrl; wake.textContent = '⏵ wake ' + name + '.a'; wake.style.marginTop = '8px';
+  $('vrebuild').insertAdjacentElement('beforebegin', wake);
+  const keep = document.createElement('a'); keep.className = 'btn2'; keep.href = keyUrl; keep.download = name + '.a.key.json'; keep.textContent = '↓ keep your key'; keep.style.marginTop = '8px';
+  $('vrebuild').insertAdjacentElement('beforebegin', keep);
+  closePlan('minted — ' + name + '.a is on the permaweb; keep your key, then wake it');
+  document.getElementById('vcert-name').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
 
 /* ── boot: everything reads live; failures degrade to named n/m states ── */
 (async () => {
@@ -801,6 +867,8 @@ $('papprove').addEventListener('click', async () => {
    answers, and the pure 9-check audit runs either way — keylessly. Failure
    degrades to a named state, never a fake verdict. */
 </script>
+<script src="ans104.js?v=1"></script>
+<script src="vending-cert.js?v=1"></script>
 <script src="x402-meter.js?v=1"></script>
 <script>
 (async () => {

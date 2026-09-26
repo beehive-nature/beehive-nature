@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#fbf7f0">
+<title>the value deck · skaists vending</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%230c1412'/%3E%3Cpath d='M16 5l9.5 5.5v11L16 27l-9.5-5.5v-11Z' fill='none' stroke='%23e8b54b' stroke-width='2'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="tokens.css">
+<style>
+/* THE VALUE DECK — what a minted agent carries, card by card (laya's shape:
+   a local-first stack of cards, each one a source the page just asked).
+   skaists design system (claude.ai/artifact/FAw4pbmMfrKNX6ffA1cDsj): one set
+   of facts read three ways; lowercase; guard is lilac and never red; honey is
+   the colour of b only; an unknown is a word, never 0, never a dash; one
+   primary per view; 44px floor; estate surfaces fetch no fonts (burti rides
+   beside the page). Entity colours: you = magenta (the one acting), ai =
+   teal (the network), sovereign = purple (people). */
+@font-face{font-family:burti;src:url(fonts/burti.woff2) format("woff2");font-display:swap}
+*{box-sizing:border-box}[hidden]{display:none!important}
+body{margin:0;min-height:100dvh;font:1rem/1.6 system-ui,-apple-system,'Segoe UI',sans-serif;
+ --bg:#fbf7f0;--card:#fff;--well:#efe9dd;--line:#e6dfd2;--edge:#857d70;--ink:#0c1412;--quiet:#4a5f55;--dim:#6a736e;
+ --accent:#6e3fb8;--primary:#a8238c;--on-primary:#fff;--focus:#0c1412;--sov:#6e3fb8;--you:#a8238c;--ai:#0f6f82;--info:#4d759b;
+ --guard:#4a3aa8;--guard-wash:#ece8fa;--ok:#2e6b1e;--ok-wash:#e4f1df;--r:14px;--r-lg:16px;--r-pill:999px;
+ background:var(--bg);color:var(--ink)}
+body[data-reg="raver"]{--bg:#06110c;--card:#0c1412;--well:#0c1412;--line:#1e2b26;--edge:#648176;--ink:#e9f2ec;--quiet:#8fa79c;--dim:#648176;
+ --accent:#9c6fd6;--primary:#d655bb;--on-primary:#06110c;--focus:#e9f2ec;--sov:#9c6fd6;--you:#d655bb;--ai:#45c2dc;--info:#6fa9e0;
+ --guard:#b7a8f7;--guard-wash:#12102a;--ok:#86cc72;--ok-wash:#0c1412;--r:22px;--r-lg:999px}
+body[data-reg="cypherpunk"]{--bg:#06110c;--card:#0c1412;--well:#0c1412;--line:#1e2b26;--edge:#648176;--ink:#e9f2ec;--quiet:#8fa79c;--dim:#648176;
+ --accent:#45c2dc;--primary:#45c2dc;--on-primary:#06110c;--focus:#e9f2ec;--sov:#9c6fd6;--you:#d655bb;--ai:#45c2dc;--info:#6fa9e0;
+ --guard:#b7a8f7;--guard-wash:#06110c;--ok:#86cc72;--ok-wash:#0c1412;--r:4px;--r-lg:4px;--r-pill:4px;
+ font-family:ui-monospace,'Cascadia Mono',Consolas,monospace;font-size:.9375rem}
+a{color:var(--accent);text-underline-offset:.2em}button,input{font:inherit;color:inherit}
+:is(a,button,input,summary,[tabindex]):focus-visible{outline:2px solid var(--focus);outline-offset:3px}
+button{cursor:pointer;min-height:44px;padding:6px 18px;border:1.5px solid var(--ink);border-radius:var(--r);background:var(--card)}
+button.primary,a.primary{display:inline-flex;align-items:center;justify-content:center;min-height:54px;padding:6px 26px;border-radius:var(--r-lg);background:var(--primary);border:1.5px solid var(--primary);color:var(--on-primary);font-weight:600;text-decoration:none}
+input{min-height:46px;padding:10px 14px;border:1px solid var(--edge);border-radius:var(--r);background:var(--card);min-width:0;width:100%}
+label{font-size:.9375rem;color:var(--quiet);display:grid;gap:6px;min-width:0}
+p,h1,h2,h3,dl,dd,dt,ol,ul{margin:0}ol,ul{padding:0;list-style:none}
+.shell{max-width:920px;margin-inline:auto;padding:0 clamp(16px,4vw,48px) 56px}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;padding-block:14px}
+.brand{display:flex;align-items:center;gap:10px;min-height:44px;text-decoration:none;color:var(--ink);font-family:burti,system-ui,sans-serif;font-size:1.35rem}
+.brand svg{width:30px;height:30px}
+.crumbs{display:flex;gap:8px;flex-wrap:wrap;font-size:.9375rem;color:var(--quiet);padding-block:6px}
+h1{font:400 clamp(2rem,6vw,3.2rem)/1.05 burti,system-ui,sans-serif;margin-top:18px}
+.lead{margin-top:12px;max-width:62ch;color:var(--quiet)}
+.brief{display:flex;flex-wrap:wrap;gap:12px 24px;align-items:center;margin-top:24px;padding:18px;border:1px solid var(--line);border-radius:var(--r);background:var(--card)}
+.brief .words{flex:1 1 260px;display:grid;gap:4px}.brief .clock{color:var(--quiet);font-size:.9375rem}
+.brief .acts{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.deck{display:grid;gap:18px;margin-top:24px}
+.card{display:grid;grid-template-columns:56px 1fr;gap:6px 18px;padding:18px;border:1px solid var(--line);border-radius:var(--r);background:var(--card);border-inline-start:6px solid var(--c)}
+.card[data-entity="you"]{--c:var(--you)}.card[data-entity="ai"]{--c:var(--ai)}.card[data-entity="sovereign"]{--c:var(--sov)}
+.glyph{grid-row:1/span 3;width:56px;height:56px;display:grid;place-items:center;border:1.5px solid var(--c);border-radius:50%;color:var(--c);font:400 1.4rem/1 burti,system-ui,sans-serif}
+body[data-reg="raver"] .glyph{box-shadow:0 0 18px color-mix(in srgb,var(--c) 45%,transparent)}
+body[data-reg="cypherpunk"] .glyph{border-radius:4px}
+.card h2{font:600 1.25rem/1.3 system-ui,-apple-system,'Segoe UI',sans-serif}body[data-reg="cypherpunk"] .card h2{font-family:inherit}
+body[data-reg="raver"] .card h2{font-size:1.4rem;letter-spacing:.01em}
+.card .v{color:var(--quiet)}
+.st{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:6px;font-size:.9375rem}
+.chip{display:inline-flex;align-items:center;gap:8px;min-height:32px;padding:4px 14px;border-radius:var(--r-pill);border:1px solid var(--line);background:var(--well)}
+.chip.answered{color:var(--ok);background:var(--ok-wash);border-color:var(--ok)}
+.chip.asking{color:var(--ai);border-color:var(--ai)}
+.chip.declined,.chip.notyet{color:var(--guard);border-color:var(--guard);border-style:dashed;background:var(--guard-wash)}
+.chip .dot{inline-size:.6em;block-size:.6em;border-radius:50%;background:currentColor}
+.chip.asking .dot{animation:pulse 1.4s ease-in-out infinite}@keyframes pulse{50%{opacity:.25}}
+@media (prefers-reduced-motion:reduce){.chip.asking .dot{animation:none}}
+.rows{grid-column:2;display:grid;gap:8px;margin-top:8px}
+.rows p{padding:10px 14px;border:1px solid var(--line);border-radius:var(--r);background:var(--bg);overflow-wrap:anywhere}
+.rows p.guard{border:1.5px dashed var(--guard);background:var(--guard-wash)}.rows p.guard b{color:var(--guard)}
+.rows p b{font-weight:600}.rows p time,.rows p .who{color:var(--quiet);font-size:.9375rem}
+.rows .msg{display:grid;gap:2px}.rows .msg .body{white-space:pre-wrap}
+.rows code{font-family:ui-monospace,'Cascadia Mono',Consolas,monospace;font-size:.9375rem;padding:2px 6px;border:1px solid var(--line);border-radius:6px;background:var(--card)}
+.door{grid-column:2;display:grid;gap:10px;margin-top:8px}.door .row{display:flex;gap:10px;flex-wrap:wrap;align-items:end}.door .row>label{flex:1 1 200px}
+.acts{grid-column:2;display:flex;gap:12px;flex-wrap:wrap;margin-top:10px}
+.card a.act{display:inline-flex;align-items:center;min-height:44px;padding:6px 18px;border:1.5px solid var(--ink);border-radius:var(--r);text-decoration:none;color:var(--ink)}
+details.facts{grid-column:2;margin-top:10px;border-top:1px solid var(--line);padding-top:6px}
+details.facts summary{color:var(--quiet)}
+details.facts dl{display:grid;grid-template-columns:max-content 1fr;gap:6px 14px;margin-top:8px;font-size:.9375rem;overflow-wrap:anywhere}
+details.facts dt{color:var(--quiet)}
+.foot{margin-top:40px;padding-top:18px;border-top:1px solid var(--line);font-size:.9375rem;color:var(--quiet);display:grid;gap:8px}
+[data-tour-host]{margin-top:18px;padding-block:14px;border-top:1px solid var(--line);max-inline-size:100%;overflow-x:clip}
+#blangsel{min-height:44px!important}
+@media (max-width:520px){.card{grid-template-columns:44px 1fr;padding:14px}.glyph{width:44px;height:44px;font-size:1.15rem}}
+</style>
+</head>
+<body data-experience="vending-deck" data-bee-theme="custom" data-reg="bee">
+<script>/* first paint in the reader's own register */try{var r0=localStorage.getItem('bregister');if(r0==='raver'||r0==='cypherpunk')document.body.setAttribute('data-reg',r0)}catch(e){}</script>
+<div class="shell">
+<header class="topbar">
+ <a class="brand" href="index.html" aria-label="skaists, back to the hub">
+  <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 3l11 6.4v13.2L16 29 5 22.6V9.4Z" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>
+  skaists</a>
+ <div data-register-host></div>
+</header>
+<nav class="crumbs" aria-label="where this page sits"><a href="index.html" data-i18n="deck.crumb.hub">the hub</a><span aria-hidden="true">›</span><a href="vending.html" data-i18n="deck.crumb.vending">the vending machine</a><span aria-hidden="true">›</span><span data-i18n="deck.crumb">the value deck</span></nav>
+
+<main id="main">
+<h1 data-i18n="deck.title">the value deck</h1>
+<p class="lead" data-i18n="deck.lead">what a minted agent carries, card by card. every card is a door this page just asked; nothing here is a stored promise.</p>
+
+<section class="brief" aria-labelledby="brief-h">
+ <div class="words">
+  <p id="brief-h" data-i18n="deck.brief" data-slots data-i18n-en="{n} of {m} doors answering">{n} of {m} doors answering</p>
+  <p class="clock" id="clock" data-i18n="deck.asked" data-slots data-i18n-en="asked {n} seconds ago">asked {n} seconds ago</p>
+ </div>
+ <div class="acts">
+  <button type="button" id="again" data-i18n="deck.again">ask every door again</button>
+  <a class="primary" href="vending.html" data-i18n="deck.mint">mint one</a>
+ </div>
+</section>
+
+<!-- THE STACK. Each card: a glyph (numerals and signs only, never a word),
+     a title, the value in one sentence, a state chip WITH ITS WORD, live rows,
+     one quiet action, and the facts behind it (open for cypherpunk, one tap
+     away for new bee and raver: the comprehension law). -->
+<ol class="deck" id="deck">
+
+<li class="card" data-card="cert" data-entity="you" aria-labelledby="h-cert">
+ <span class="glyph" aria-hidden="true">1</span>
+ <h2 id="h-cert" data-i18n="deck.c.cert.t">the agent you keep</h2>
+ <p class="v" data-i18n="deck.c.cert.v">a birth certificate on Arweave, found from your own name or key, hash-checked when it comes back.</p>
+ <p class="st" data-st="cert"></p>
+ <div class="rows" data-rows="cert"></div>
+ <details class="facts" data-reg-disclose><summary data-i18n="deck.more">the facts behind this card</summary>
+  <dl><dt>door</dt><dd><code>https://jungle4.greymass.com/v1/chain/get_table_rows</code> · <code>bnrapolltest</code> · <code>certs</code></dd>
+   <dt>fields</dt><dd><code>name</code> <code>owner</code> <code>ar_id</code> <code>content_hash</code> <code>minted</code></dd>
+   <dt>law</dt><dd>SPEC-VENDING-2 §certificate, §pointer-law: name road and key road, both estate-free; three copies of the hash compared at resurrection</dd></dl></details>
+</li>
+
+<li class="card" data-card="law" data-entity="ai" aria-labelledby="h-law">
+ <span class="glyph" aria-hidden="true">3</span>
+ <h2 id="h-law" data-i18n="deck.c.law.t">the meter and the law</h2>
+ <p class="v" data-i18n="deck.c.law.v">the rate and the tithe live on chain and are read here live; the tithe rides every row and is never buried.</p>
+ <p class="st" data-st="law"></p>
+ <div class="rows" data-rows="law"></div>
+ <details class="facts" data-reg-disclose><summary data-i18n="deck.more">the facts behind this card</summary>
+  <dl><dt>door</dt><dd>the same door · tables <code>rates</code> <code>tithe</code> <code>config</code></dd>
+   <dt>fields</dt><dd><code>rail</code> <code>basis</code> · <code>percent_bp</code> <code>destination</code> · <code>max_certs</code> <code>count</code></dd>
+   <dt>law</dt><dd>SPEC-VENDING-2 §contract: governed-mutable by founder word, no redeploy; the tithe is founder-word-only. jungle4 is the rehearsal; mainnet is a founder ceremony</dd></dl></details>
+</li>
+
+<li class="card" data-card="mem" data-entity="you" aria-labelledby="h-mem">
+ <span class="glyph" aria-hidden="true">2</span>
+ <h2 id="h-mem" data-i18n="deck.c.mem.t">the working memory</h2>
+ <p class="v" data-i18n="deck.c.mem.v">an append-only log on Autonomi under your own key. it can forget.</p>
+ <p class="st" data-st="mem"></p>
+ <div class="rows" data-rows="mem"></div>
+ <details class="facts" data-reg-disclose><summary data-i18n="deck.more">the facts behind this card</summary>
+  <dl><dt>format</dt><dd>a1-log v1 · <code>contracts/vending/tool/a1.mjs</code> · hash-linked, owner-signed ed25519, highest valid revision wins</dd>
+   <dt>gate</dt><dd>SPEC-VENDING-2 §memory: the funded write waits on the ANT custody review (storage-substrate-split item 8); R3 says never price it at nothing</dd></dl></details>
+</li>
+
+<li class="card" data-card="mesh" data-entity="ai" aria-labelledby="h-mesh">
+ <span class="glyph" aria-hidden="true">⬡</span>
+ <h2 id="h-mesh" data-i18n="deck.c.mesh.t">the hive on the mesh</h2>
+ <p class="v" data-i18n="deck.c.mesh.v">hive-porch on x0x: post-quantum, invite-only, no server anywhere. the community your agent sits in.</p>
+ <p class="st" data-st="mesh"></p>
+ <div class="rows" data-rows="mesh"></div>
+ <form class="door" id="meshdoor" hidden>
+  <div class="row">
+   <label><span data-i18n="deck.mesh.door">the daemon's door</span><input id="door" value="http://127.0.0.1:12700" inputmode="url" autocomplete="off" spellcheck="false" dir="ltr"></label>
+   <label><span data-i18n="deck.mesh.token">a session token (kept in memory only, gone when you close the page)</span><input id="token" type="password" autocomplete="off" dir="ltr"></label>
+  </div>
+  <div><button type="submit" data-i18n="deck.mesh.open">open the door</button></div>
+ </form>
+ <details class="facts" data-reg-disclose><summary data-i18n="deck.more">the facts behind this card</summary>
+  <dl><dt>door</dt><dd>x0x daemon REST on loopback · <code>/health</code> <code>/groups</code> <code>/groups/:id/members</code> <code>/groups/:id/messages</code></dd>
+   <dt>who may ask</dt><dd>the daemon's CORS predicate admits literal loopback origins only (<code>127.0.0.0/8</code>, <code>[::1]</code>; <code>localhost</code> refused) and every route wants a bearer; a session token lives ten minutes</dd>
+   <dt>fields</dt><dd><code>status</code> <code>version</code> <code>peers</code> · <code>name</code> <code>member_count</code> · <code>author_agent_id</code> <code>kind</code> <code>body</code> <code>timestamp</code></dd>
+   <dt>law</dt><dd>docs/dispatches/2026-09-05-x0x-box-mesh.md: the box seat hive-box joined hive-porch; the laptop daemon is on-demand (wifi law); remote exec stays disabled</dd></dl></details>
+</li>
+
+<li class="card" data-card="buzz" data-entity="sovereign" aria-labelledby="h-buzz">
+ <span class="glyph" aria-hidden="true">♡</span>
+ <h2 id="h-buzz" data-i18n="deck.c.buzz.t">the rooms</h2>
+ <p class="v" data-i18n="deck.c.buzz.v">the hive's open Buzz channels, readable without the app. people talk here.</p>
+ <p class="st" data-st="buzz"></p>
+ <div class="rows" data-rows="buzz"></div>
+ <div class="acts"><a class="act" href="read.html" data-i18n="deck.read">read a room</a><a class="act" href="doors/skaists-buzz.html" data-i18n="deck.join">join the hive</a></div>
+ <details class="facts" data-reg-disclose><summary data-i18n="deck.more">the facts behind this card</summary>
+  <dl><dt>door</dt><dd><code>https://relay.skaists.dev/hive/public/index.json</code> and <code>&lt;channel&gt;.json</code> · CORS pinned to <code>https://skaists.dev</code></dd>
+   <dt>rule</dt><dd>channels with <code>visibility = open</code> only; private, DM and kind 1059 never leave the box</dd>
+   <dt>law</dt><dd>docs/dispatches/2026-09-20-read-a-buzz-message.md: a guest reads without the app; message text is set as text, never markup</dd></dl></details>
+</li>
+
+<li class="card" data-card="work" data-entity="ai" aria-labelledby="h-work">
+ <span class="glyph" aria-hidden="true">✚</span>
+ <h2 id="h-work" data-i18n="deck.c.work.t">the workspace</h2>
+ <p class="v" data-i18n="deck.c.work.v">projects and workflows for your agent, inside Buzz.</p>
+ <p class="st" data-st="work"></p>
+ <div class="rows" data-rows="work"></div>
+ <details class="facts" data-reg-disclose><summary data-i18n="deck.more">the facts behind this card</summary>
+  <dl><dt>door</dt><dd><code>https://raw.githubusercontent.com/block/buzz/main/preview-features.json</code></dd>
+   <dt>rule</dt><dd><code>desktop/src/shared/features/resolveEnabled.ts</code>: an explicit override wins, otherwise false. the installed desktop is the estate's own build from the same tree (wt-zcode-nip42-r1, 2026-09-18) and carries the same five switches</dd>
+   <dt>where</dt><dd>Buzz · settings · experiments · features: Projects (git repository browser and collaboration), Workflows (yaml automations with approval gates)</dd></dl></details>
+</li>
+
+<li class="card" data-card="repos" data-entity="ai" aria-labelledby="h-repos">
+ <span class="glyph" aria-hidden="true">‡</span>
+ <h2 id="h-repos" data-i18n="deck.c.repos.t">the repositories</h2>
+ <p class="v" data-i18n="deck.c.repos.v">the estate's code is public; your agent is built from it, and anyone can rebuild the machine.</p>
+ <p class="st" data-st="repos"></p>
+ <div class="rows" data-rows="repos"></div>
+ <details class="facts" data-reg-disclose><summary data-i18n="deck.more">the facts behind this card</summary>
+  <dl><dt>door</dt><dd><code>https://api.github.com/repos/&lt;owner&gt;/&lt;name&gt;</code> · <code>pushed_at</code> <code>default_branch</code></dd>
+   <dt>law</dt><dd>CLAUDE.md §4: beehive-nature, LOVErnment-DAO and b-domain are public (LOVErnment-DAO under the skaists org, the other two under beehive-nature). Buzz can host git over smart http (NIP-34), but the hive relay publishes no repository index yet</dd></dl></details>
+</li>
+</ol>
+
+<!-- slot sentences the rows are built from: every one a corpus key, whole,
+     with the number in a {slot} so word order stays the translator's -->
+<div id="words" hidden>
+ <span data-i18n="deck.s.answered">answering</span>
+ <span data-i18n="deck.s.asking">asking</span>
+ <span data-i18n="deck.s.declined">not answering, and why</span>
+ <span data-i18n="deck.s.notyet">not ready yet, and why</span>
+ <span data-i18n="deck.asking.clock">asking for {n} seconds</span>
+ <span data-i18n="deck.stop">stop waiting</span>
+ <span data-i18n="deck.r.minted">agents minted so far: {n} of {m}</span>
+ <span data-i18n="deck.r.latest">latest minted: {name}</span>
+ <span data-i18n="deck.r.none">no agent has been minted on this rehearsal chain yet</span>
+ <span data-i18n="deck.r.rate">mint basis {a} A · tithe {p}% to {dest}</span>
+ <span data-i18n="deck.r.head">head block {n} · jungle4 rehearsal, read just now</span>
+ <span data-i18n="deck.offline">this door is not answering right now; nothing is guessed in its place</span>
+ <span data-i18n="deck.mem.gate">the funded write waits on the ANT custody review. a chunk cost about 0.085 ANT plus gas at the last reading, never nothing. until then your agent's memory is a signed genesis hash in its certificate, and no more.</span>
+ <span data-i18n="deck.mesh.origin">the daemon answers only pages served from 127.0.0.1. this page is served from {origin}, so it cannot ask.</span>
+ <span data-i18n="deck.mesh.notoken">no session token yet. paste one below.</span>
+ <span data-i18n="deck.mesh.peers">x0x {v} · {n} peers · {s}</span>
+ <span data-i18n="deck.mesh.group">{name} · {n} members</span>
+ <span data-i18n="deck.mesh.nogroup">the daemon is up but has not seated hive-porch</span>
+ <span data-i18n="deck.mesh.quiet">hive-porch has no public message in its history yet</span>
+ <span data-i18n="deck.mesh.refused">the door refused: {why}</span>
+ <span data-i18n="deck.buzz.rooms">{n} open rooms, checked just now</span>
+ <span data-i18n="deck.buzz.origin">the relay's public feed answers only skaists.dev; this page is served from {origin}. open the live page to read it.</span>
+ <span data-i18n="deck.buzz.quiet">the room is open and has no recent message</span>
+ <span data-i18n="deck.work.off">in Buzz, Projects and Workflows are preview features and start switched off, so the workspace panel is empty by design, not by fault. turn them on under settings, experiments, features.</span>
+ <span data-i18n="deck.work.count">{n} preview switches in the manifest, {on} on by default</span>
+ <span data-i18n="deck.repos.git">Buzz can host git over smart http, but the hive relay publishes no repository index yet, so no hive repository is listed here.</span>
+</div>
+
+<footer class="foot">
+ <p data-i18n="deck.foot">every number on this page was read from its door at the time shown, and is thrown away when you leave. the three registers change the words and the dress, never a number.</p>
+ <p><a href="vending.html" data-i18n="deck.crumb.vending">the vending machine</a> · <a href="buzz-directory.html" data-i18n="deck.dir">the buzz directory</a> · <a href="read.html" data-i18n="deck.read">read a room</a></p>
+</footer>
+<div data-tour-host></div>
+</main>
+</div>
+<script src="vending-deck.js"></script>
+<script>
+/* the app: asks every door, turns answers into rows through bDeck, and says
+   plainly which door is silent and why. No token is ever stored; no message
+   is ever set as markup. */
+(() => {
+  const D = window.bDeck, $ = (s, r) => (r || document).querySelector(s), $$ = (s, r) => [...(r || document).querySelectorAll(s)];
+  const W = {}; $$('#words [data-i18n]').forEach(el => { W[el.getAttribute('data-i18n')] = el; el.dataset.i18nEn = el.textContent; });
+  /* a sentence's english template lives on its element (data-i18n-en); the hidden #words block carries the ones the rows are built from */
+  const word = key => { const el = W[key] || document.querySelector('[data-i18n=' + JSON.stringify(key) + ']'); if (!el) return key; const en = el.dataset.i18nEn || el.textContent; return (window.BNRLanguage && typeof window.BNRLanguage.text === 'function') ? window.BNRLanguage.text(key, en) : en; };
+  const say = (key, slots) => D.fill(word(key), slots || {});
+  const lang = () => document.documentElement.lang || 'en';
+  const nfmt = n => { try { return Number(n).toLocaleString(lang()); } catch (e) { return String(n); } };
+  const ago = at => { if (!at) return null; try { return new Intl.RelativeTimeFormat(lang(), { numeric: 'auto' }).format(Math.round((at * 1000 - Date.now()) / 864e5), 'day'); } catch (e) { return new Date(at * 1000).toLocaleDateString(); } };
+  const when = at => { const t = document.createElement('time'); if (at) { const d = new Date(at * 1000); t.dateTime = d.toISOString(); t.textContent = d.toLocaleString(lang()); } return t; };
+
+  /* ── rows (text only; https links only) ── */
+  const row = (text, cls) => { const p = document.createElement('p'); if (cls) p.className = cls; p.textContent = text; return p; };
+  const keyed = (key, slots, cls) => { const p = row('', cls); p.setAttribute('data-i18n', key); p.setAttribute('data-slots', ''); p.dataset.i18nEn = W[key] ? W[key].dataset.i18nEn : key; p.dataset.slotv = JSON.stringify(slots || {}); p.textContent = say(key, slots); return p; };
+  const guard = (key, slots) => keyed(key, slots, 'guard');
+  const msg = (m) => { const p = document.createElement('p'); p.className = 'msg'; const h = document.createElement('span'); h.className = 'who'; const b = document.createElement('b'); b.textContent = m.who || '·'; b.translate = false; b.dir = 'ltr'; h.append(b, ' ', when(m.at)); const body = document.createElement('span'); body.className = 'body'; body.translate = false; body.dir = 'auto'; body.textContent = m.body; p.append(h, body); return p; };
+  const rows = (id, list) => { const box = $('[data-rows="' + id + '"]'); box.replaceChildren(...list); };
+
+  /* ── states ── */
+  const S = {}; const T0 = {}; let asked = null;
+  function set(id, kind, reason) {
+    S[id] = D.state(kind, reason, Date.now());
+    const st = $('[data-st="' + id + '"]'); st.replaceChildren();
+    const chip = document.createElement('span'); chip.className = 'chip ' + kind; const dot = document.createElement('i'); dot.className = 'dot'; dot.setAttribute('aria-hidden', 'true');
+    const w = document.createElement('span'); w.setAttribute('data-i18n', 'deck.s.' + kind); w.dataset.i18nEn = W['deck.s.' + kind].dataset.i18nEn; w.textContent = say('deck.s.' + kind);
+    chip.append(dot, w); st.append(chip);
+    if (kind === 'asking') { T0[id] = Date.now(); const k = document.createElement('span'); k.className = 'clock'; k.dataset.clock = id; k.textContent = say('deck.asking.clock', { n: 0 }); const stop = document.createElement('button'); stop.type = 'button'; stop.textContent = word('deck.stop'); stop.onclick = () => { ctl[id] && ctl[id].abort(); }; st.append(k, stop); }
+    brief();
+  }
+  function brief() {
+    const b = D.briefing(S); const el = $('#brief-h'); el.dataset.slotv = JSON.stringify({ n: b.answering, m: b.total }); el.textContent = say('deck.brief', { n: b.answering, m: b.total });
+    document.title = (b.total ? b.answering + '/' + b.total + ' · ' : '') + 'the value deck · skaists vending';
+  }
+  setInterval(() => {
+    if (asked) { const el = $('#clock'); const n = Math.round((Date.now() - asked) / 1000); el.dataset.slotv = JSON.stringify({ n }); el.textContent = say('deck.asked', { n }); }
+    $$('[data-clock]').forEach(k => { k.textContent = say('deck.asking.clock', { n: Math.round((Date.now() - T0[k.dataset.clock]) / 1000) }); });
+  }, 1000);
+  /* on a language change lang.js restores every keyed template and fires blang; refill the slots from what each row remembers */
+  document.addEventListener('blang', () => { $$('[data-slots]').forEach(el => { let v = {}; try { v = JSON.parse(el.dataset.slotv || '{}'); } catch (e) {} el.textContent = D.fill(el.textContent, v); }); });
+
+  const ctl = {};
+  const get = async (id, url, init) => { ctl[id] = new AbortController(); const t = setTimeout(() => ctl[id].abort(), 20000); try { const r = await fetch(url, { cache: 'no-store', credentials: 'omit', referrerPolicy: 'no-referrer', ...init, signal: ctl[id].signal }); return r; } finally { clearTimeout(t); } };
+  const RPC = 'https://jungle4.greymass.com', CONTRACT = 'bnrapolltest';
+  const table = (id, t, limit) => get(id, RPC + '/v1/chain/get_table_rows', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ json: true, code: CONTRACT, scope: CONTRACT, table: t, limit }) }).then(r => { if (!r.ok) throw new Error(String(r.status)); return r.json(); });
+
+  /* 1 + 3 · the chain: certificate pointers and the law rows */
+  async function askChain() {
+    set('cert', 'asking'); set('law', 'asking');
+    try {
+      const [rates, tithe, config, certs, info] = await Promise.all([table('law', 'rates', 10), table('law', 'tithe', 1), table('law', 'config', 1), table('cert', 'certs', 100), get('law', RPC + '/v1/chain/get_info').then(r => r.json())]);
+      const L = D.law(rates, tithe, config), C = D.certs(certs);
+      const lr = [];
+      if (L.basisA != null && L.titheBp != null) lr.push(keyed('deck.r.rate', { a: L.basisA.toFixed(4), p: (L.titheBp / 100).toFixed(2), dest: L.titheDest }));
+      if (info && info.head_block_num) lr.push(keyed('deck.r.head', { n: nfmt(info.head_block_num) }));
+      rows('law', lr); set('law', lr.length ? 'answered' : 'declined', lr.length ? null : 'deck.offline'); if (!lr.length) rows('law', [guard('deck.offline')]);
+      const cr = [];
+      if (L.count != null && L.maxCerts != null) cr.push(keyed('deck.r.minted', { n: nfmt(L.count), m: nfmt(L.maxCerts) }));
+      if (C.length) cr.push(keyed('deck.r.latest', { name: C[0].name })); else cr.push(keyed('deck.r.none', {}));
+      rows('cert', cr); set('cert', 'answered');
+    } catch (e) { rows('cert', [guard('deck.offline')]); rows('law', [guard('deck.offline')]); set('cert', 'declined', 'deck.offline'); set('law', 'declined', 'deck.offline'); }
+  }
+
+  /* 2 · the memory: gated by law, said plainly */
+  function askMemory() { rows('mem', [guard('deck.mem.gate')]); set('mem', 'notyet', 'deck.mem.gate'); }
+
+  /* ⬡ · x0x: the daemon answers loopback pages only; a token lives in this closure and nowhere else */
+  let token = null;
+  async function askMesh() {
+    const form = $('#meshdoor');
+    if (!D.originMayAsk(location.origin)) { form.hidden = true; rows('mesh', [guard('deck.mesh.origin', { origin: location.origin })]); set('mesh', 'declined', 'deck.mesh.origin'); return; }
+    form.hidden = false;
+    if (!token) { rows('mesh', [guard('deck.mesh.notoken')]); set('mesh', 'notyet', 'deck.mesh.notoken'); return; }
+    set('mesh', 'asking');
+    const door = ($('#door').value || D.LOOPBACK_DOOR).replace(/\/+$/, ''), H = { headers: { authorization: 'Bearer ' + token } };
+    try {
+      const hr = await get('mesh', door + '/health', H); if (!hr.ok) throw new Error('health ' + hr.status);
+      const h = D.health(await hr.json()); const out = [keyed('deck.mesh.peers', { v: h.version || '?', n: h.peers == null ? '?' : nfmt(h.peers), s: h.status || '?' })];
+      const gr = await get('mesh', door + '/groups', H); if (!gr.ok) throw new Error('groups ' + gr.status);
+      const g = D.hive(D.groups(await gr.json()));
+      if (!g) out.push(guard('deck.mesh.nogroup'));
+      else {
+        out.push(keyed('deck.mesh.group', { name: g.name, n: g.members == null ? '?' : nfmt(g.members) }));
+        const mr = await get('mesh', door + '/groups/' + encodeURIComponent(g.id) + '/messages', H);
+        if (mr.ok) { const ms = D.messages(await mr.json(), 6); if (ms.length) ms.forEach(m => out.push(msg(m))); else out.push(row(word('deck.mesh.quiet'))); }
+      }
+      rows('mesh', out); set('mesh', 'answered');
+    } catch (e) { rows('mesh', [guard('deck.mesh.refused', { why: String(e && e.message || e) })]); set('mesh', 'declined', 'deck.mesh.refused'); }
+  }
+  $('#meshdoor').addEventListener('submit', e => { e.preventDefault(); const v = $('#token').value.trim(); if (v) token = v; $('#token').value = ''; askMesh(); });
+
+  /* ♡ · the rooms: the relay's public feed */
+  const FEED = 'https://relay.skaists.dev/hive/public/';
+  async function askBuzz() {
+    set('buzz', 'asking');
+    try {
+      const ir = await get('buzz', FEED + 'index.json'); if (!ir.ok) throw new Error(String(ir.status));
+      const rs = D.rooms(await ir.json()); const out = [keyed('deck.buzz.rooms', { n: nfmt(rs.length) })];
+      const g = D.room(rs, 'general');
+      if (g) { const fr = await get('buzz', FEED + g.id + '.json'); if (fr.ok) { const fs = D.feed(await fr.json(), 5); if (fs.length) fs.forEach(m => out.push(msg(m))); else out.push(row(word('deck.buzz.quiet'))); } }
+      rows('buzz', out); set('buzz', 'answered');
+    } catch (e) {
+      const home = location.origin === 'https://skaists.dev';
+      rows('buzz', [guard(home ? 'deck.offline' : 'deck.buzz.origin', { origin: location.origin })]); set('buzz', 'declined', home ? 'deck.offline' : 'deck.buzz.origin');
+    }
+  }
+
+  /* ✚ · the workspace: why it is empty in Buzz, from the manifest itself */
+  async function askWork() {
+    set('work', 'asking');
+    try {
+      const r = await get('work', 'https://raw.githubusercontent.com/block/buzz/main/preview-features.json'); if (!r.ok) throw new Error(String(r.status));
+      const p = D.previews(await r.json());
+      rows('work', [keyed('deck.work.count', { n: nfmt(p.length), on: nfmt(p.filter(x => x.on).length) }), guard('deck.work.off')]); set('work', 'notyet', 'deck.work.off');
+    } catch (e) { rows('work', [guard('deck.work.off'), guard('deck.offline')]); set('work', 'declined', 'deck.offline'); }
+  }
+
+  /* ‡ · the repositories: public, and last pushed when */
+  async function askRepos() {
+    set('repos', 'asking');
+    const out = []; let ok = 0;
+    for (const r of D.REPOS) {
+      const p = document.createElement('p'); const a = document.createElement('a'); a.href = r.url; a.rel = 'noopener noreferrer'; a.target = '_blank'; a.textContent = r.name; a.translate = false; p.append(a, ' · ' + r.what);
+      try { const g = await get('repos', 'https://api.github.com/repos/' + r.owner + '/' + r.name, { headers: { accept: 'application/vnd.github+json' } }); if (g.ok) { const j = await g.json(); if (j.pushed_at) { const at = Math.floor(Date.parse(j.pushed_at) / 1000); p.append(' · ', when(at)); ok++; } } } catch (e) {}
+      out.push(p);
+    }
+    out.push(guard('deck.repos.git'));
+    rows('repos', out); set('repos', ok ? 'answered' : 'declined', ok ? null : 'deck.offline');
+  }
+
+  async function askAll() { asked = Date.now(); await Promise.all([askChain(), askMemory(), askMesh(), askBuzz(), askWork(), askRepos()]); }
+  $('#again').addEventListener('click', askAll);
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && asked && Date.now() - asked > 60000) askAll(); });
+  setInterval(() => { if (document.visibilityState === 'visible' && asked && Date.now() - asked > 60000) askAll(); }, 15000);
+  askAll();
+})();
+</script>
+<script src="tour.js?v=42"></script>
+</body>
+</html>
