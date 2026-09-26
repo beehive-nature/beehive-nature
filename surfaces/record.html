@@ -54,6 +54,23 @@ a.raw{font-size:9.5px;color:var(--faint)}
 nav{margin-top:26px;display:flex;gap:14px;flex-wrap:wrap;font-size:11px}
 nav a{color:var(--dim);text-decoration:none}
 nav a:hover{color:var(--violet)}
+/* THE LOWER HALF AT 390 (2026-09-26, footer audit): captions, chips and the
+   foot were 9.5–10 px in --faint with forced capitals and a 15 px "the file"
+   link. Casing law: the chips say before / after in their own case now.
+   Floor 12 px everywhere (cypherpunk keeps its density); New bee and raver
+   read at 14 px. The file link is a real 44 px target. Figures in one row
+   no longer stretch to the tallest neighbour (a landscape shot beside a
+   phone shot drew a long empty frame under its caption). */
+.shots{align-items:flex-start}
+.count,.date,.chip{text-transform:none;letter-spacing:.03em}
+.count,.date,.commit,figcaption,.foot{font-size:12px}
+.count,.commit,.foot{color:var(--dim)}
+.chip.alonechip{color:var(--dim);border-color:var(--dim)}
+figcaption{row-gap:0}
+figcaption a.raw{display:inline-flex;align-items:center;min-height:44px;font-size:12px;color:var(--dim)}
+.foot{letter-spacing:.02em;line-height:1.8}
+nav:empty{display:none}
+body:not([data-reg="cypherpunk"]) :is(.count,.date,.commit,figcaption,figcaption a.raw,.foot){font-size:14px}
 </style>
 </head>
 <body>

@@ -53,6 +53,12 @@ const hung = new Set();
 
 const refInvoice = JSON.parse(await readFile(join(SURFACES, 'bpay-invoice.json'), 'utf8'));
 const corpus = JSON.parse(await readFile(join(SURFACES, 'lang-corpus.json'), 'utf8'));
+// THE STORE RECEIPT (founder order 2026-09-25): the Bux video IS on Autonomi
+// mainnet — the founder paid and uploaded by his own hand. The page may say
+// STORED only when this receipt verifies against the invoice, line by line;
+// the negative controls below mutate every pin and refuse the file itself.
+const storeReceipt = JSON.parse(await readFile(join(SURFACES, 'bdata-stored-bux-try-autonomi.json'), 'utf8'));
+const bareAddr = String(storeReceipt.data_map_address).replace(/^0x/, '');
 // the mock speaks the CURRENT founder invoice's language (same total, same
 // carried quotes) so the gate exercises the REAL cross-check: cached price vs
 // current invoice. Its figure is long enough to exercise the lead/tail typography.
@@ -164,6 +170,15 @@ check('object renders with mechanical identity', text.includes(refInvoice.domain
 const bytesAttr = await val(page, '[data-bdata-bytes]', e => e.dataset.bdataBytes);
 check('bytes machine-exact', bytesAttr === String(refInvoice.domain.artifact.bytes), bytesAttr);
 
+// 1b · THE STORED TRUTH — the receipt verifies against the invoice, so the page
+// says what the founder's own upload made true: ✓ Stored on Autonomi, the whole
+// address (bee-address law: never an ellipsis), and a Watch press, in EVERY register.
+await page.waitForSelector('[data-bdata-stored]', { timeout: 8000 }).catch(() => {});
+const storedText = await words(page, '[data-bdata-stored]');
+check('stored card renders: ✓ Stored on Autonomi + the whole data-map address', /Stored on Autonomi/i.test(storedText) && (await words(page, '[data-bdata-stored-address]')).includes(bareAddr) && !/…/.test(await words(page, '[data-bdata-stored-address]')), storedText.replace(/\s+/g, ' ').slice(0, 80));
+const watchHref = await val(page, '[data-bdata-watch]', e => e.getAttribute('href'));
+check('Watch link targets bview.html with the BARE address (no 0x anywhere in it)', watchHref === 'bview.html#' + bareAddr && !watchHref.includes('0x'), watchHref);
+
 // 2 · the canvas — New bee is light and readable; controls are thumb-sized
 const canvas = await page.evaluate(() => ({ reg: document.body.dataset.reg, bg: getComputedStyle(document.body).backgroundColor, size: parseFloat(getComputedStyle(document.body).fontSize), theme: document.body.dataset.beeTheme }));
 check('New bee renders the hub\'s light canvas (no dark page under a light toolbar)', canvas.reg === 'bee' && canvas.bg === 'rgb(251, 247, 240)' && canvas.theme === 'shared', JSON.stringify(canvas));
@@ -227,7 +242,7 @@ tiny = await smallType(page);
 check('no visible type below the 14px secondary floor (priced)', tiny.length === 0, tiny.slice(0, 3).join(' | '));
 await page.screenshot({ path: join(here, 'shots-bdata', 'bdata-390.png'), fullPage: false });
 check('caused-by-your-choice line present, and labelled current while fresh', /current price — caused by your choice/i.test(priced) && (await val(page, '[data-bdata-price-age]', e => e.dataset.bdataPriceAge)) === 'current');
-check('nothing-paid line present', /Nothing has been paid/i.test(priced) && !!(await page.$('[data-bdata-nothing-paid]')));
+check('nothing-paid line present, scoped to this page (the founder paid elsewhere — the page vouches for itself only)', /Nothing has been paid from this page/i.test(priced) && !!(await page.$('[data-bdata-nothing-paid]')));
 check('gas stays a SEPARATE asset on the consent surface', !!(await page.$('[data-bdata-gas-separate]')) && /Arbitrum ETH/.test(priced));
 check('the obtained price is evidence: a quote edition returns to history', (await historyKinds(page)).join(',') === 'quote,auto.mode,audience.chosen', (await historyKinds(page)).join(','));
 small = await touchFloor();
@@ -245,7 +260,7 @@ check('review shows audience = founder-selected, origin My Data', /founder-selec
 check('review: ANT ceiling is the FULL figure — exact, never above', panelText.includes(MOCK_ANT) && /exact, never above/i.test(panelText));
 check('review: gas separate', /separate/i.test(panelText) && /Arbitrum/i.test(panelText));
 check('review: freshness + single-use (digest wall) + stop conditions', /single-use/i.test(panelText) && /re-quote voids/i.test(panelText) && /stop conditions/i.test(panelText));
-check('review: nothing paid + the intent cannot move value', /Nothing has been paid/i.test(panelText) && /cannot move value/i.test(panelText));
+check('review: nothing paid FROM THIS PAGE + the intent cannot move value', /Nothing has been paid from this page/i.test(panelText) && /cannot move value/i.test(panelText));
 check('NO signing path exposed (no pay route strings)', !/Review & Pay|review-pay|bpay-invoice-review-pay/i.test(panelText));
 tiny = await smallType(page); small = await touchFloor();
 check('the review holds the type floor, the touch floor and the 390px width', tiny.length === 0 && small.length === 0 && (await overflow()) <= 0, tiny.concat(small.map(x => `${x.t}=${x.h}px`)).slice(0, 3).join(' | '));
@@ -287,11 +302,16 @@ await tap(page, '#breg-cypherpunk');
 await page.waitForTimeout(300);
 const anatomy = await val(page, '#cyber', e => ({ shown: e.checkVisibility({ contentVisibilityAuto: true }), ok: /Payload/.test(e.innerText) && /Authority/.test(e.innerText) && /Evidence/.test(e.innerText), sects: e.querySelectorAll('.sect').length }));
 check('the TOP-BAR cypherpunk button opens the anatomy (8 sections)', anatomy.shown && anatomy.ok && anatomy.sects === 8, JSON.stringify(anatomy));
+const anatText = (await words(page, '#cyber')).replace(/\s+/g, ' ');
+check('anatomy Storage row = STORED on Autonomi, whole address, Watch press (cypherpunk)', /Stored on Autonomi/i.test(anatText) && anatText.includes(bareAddr) && !!(await page.$('#cyber [data-bdata-watch]')));
+check('anatomy Evidence row NAMES the receipts (store receipt rows + invoice pin)', /bdata-stored-bux-try-autonomi\.json/.test(anatText) && /bpay-invoice\.json/.test(anatText) && /purchased/i.test(anatText) && /uploaded/i.test(anatText) && /retrieved/i.test(anatText));
+check('stored truth shows in cypherpunk too (unmarked content, every register)', (await val(page, 'main [data-bdata-stored]', e => e.checkVisibility({ contentVisibilityAuto: true }))) === true);
 check('cypherpunk shows the quote-service field and the dark canvas', (await val(page, '[data-bdata-bridge-row]', e => e.getClientRects().length > 0)) && (await page.evaluate(() => getComputedStyle(document.body).backgroundColor)) !== 'rgb(246, 247, 242)');
 check('same facts in every register: the figure is unchanged', (await val(page, '[data-bdata-fresh-atto]', e => e.dataset.bdataFreshAtto)) === MOCK_TOTAL);
 await tap(page, '#breg-bee');
 await page.waitForTimeout(300);
 check('New bee folds the anatomy away; policy untouched', (await val(page, '#cyber', e => !e.checkVisibility({ contentVisibilityAuto: true }))) && (await val(page, '[data-bdata-auto-mode]', e => e.dataset.bdataAutoMode)) === 'never' && (await sharedKey(page)).audience === 'public');
+check('stored truth shows in New bee too — the card is unmarked content (every register)', (await val(page, 'main [data-bdata-stored]', e => e.checkVisibility({ contentVisibilityAuto: true }))) === true);
 // the language select re-words the JS-drawn page (it used to change five static lines only)
 await page.selectOption('#blangsel', 'ru', { timeout: 4000 }).catch(() => {});
 await page.waitForFunction(want => { const e = document.querySelector('[data-bdata-price-refresh] [data-i18n]'); return e && e.textContent === want; }, corpus.strings['bd.price.refresh'].ru, { timeout: 20000 }).catch(() => {});
@@ -363,7 +383,7 @@ await tap(dead, '[data-bdata-aud="public"]');
 await dead.waitForSelector('[data-bdata-fail]', { timeout: 6000 }).catch(() => {});
 const deadText = await words(dead, '[data-bdata-price-state]');
 check('an unreachable quote service is named as such — never blamed on Autonomi', (await val(dead, '[data-bdata-fail]', e => e.dataset.bdataFail)) === 'unreachable' && /quote service on this device did not answer/i.test(deadText) && !/Autonomi did not answer/i.test(deadText));
-check('it fails fast (no pointless retry) and still says nothing was paid', hits.dead === 1 && /Nothing has been paid/i.test(deadText), `requests=${hits.dead}`);
+check('it fails fast and still says nothing was paid from this page', hits.dead === 1 && /Nothing has been paid from this page/i.test(deadText), `requests=${hits.dead}`);
 await tap(dead, '[data-bdata-quote-go]');
 await dead.waitForTimeout(150);
 check('…the press fired exactly one more request', hits.dead === 2, `requests=${hits.dead}`);
@@ -378,6 +398,55 @@ await tap(bare, '[data-bdata-aud="public"]');
 await bare.waitForTimeout(500);
 check('an automated browser with NO seeded mock is refused in words — the live quote service is never touched', (await val(bare, '[data-bdata-fail]', e => e.dataset.bdataFail).catch(() => 'none')) === 'automation' && liveBridgeTouches === 0, `live-bridge touches=${liveBridgeTouches}`);
 await bareCtx.close();
+
+// 1c · THE NEGATIVE CONTROLS (founder order 2026-09-25): the page says STORED
+// only on a line-by-line match — a 404, a wrong size, sha, address, network,
+// audience or a missing upload evidence row all render EXACTLY AS BEFORE; an
+// UNREADABLE receipt is NAMED and Try again really recovers.
+async function storedVariant(name, { mutate, status } = {}) {
+  const c = await openContext(null);
+  if (status || mutate) {
+    await c.route('**/bdata-stored-bux-try-autonomi.json*', route => {
+      if (status) return route.fulfill({ status, body: 'MOCK: ' + name });
+      const r = JSON.parse(JSON.stringify(storeReceipt));
+      mutate(r);
+      return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(r) });
+    });
+  }
+  const p = await openPage(c);
+  await p.waitForTimeout(600);   // the receipt fetch settles (or fails) — then the verdict is stable
+  const res = {
+    stored: !!(await p.$('[data-bdata-stored]')),
+    err: (await val(p, '[data-bdata-stored-err]', e => e.innerText)) || '',
+    retry: !!(await p.$('[data-act="reload-stored"]')),
+    ctx: c, page: p,
+  };
+  return res;
+}
+const flip = s => (s[0] === 'a' ? 'b' : 'a') + s.slice(1);
+
+for (const [name, opt] of [
+  ['404 — no receipt on file', { status: 404 }],
+  ['wrong size', { mutate: r => { r.artifact.bytes = r.artifact.bytes + 1; } }],
+  ['wrong sha256', { mutate: r => { r.artifact.sha256 = flip(r.artifact.sha256); } }],
+  ['wrong data-map address', { mutate: r => { r.data_map_address = '0x' + flip(bareAddr); } }],
+  ['wrong network', { mutate: r => { r.network = 'autonomi-testnet'; } }],
+  ['wrong audience', { mutate: r => { r.audience = 'only-me'; } }],
+  ['no upload evidence row', { mutate: r => { r.evidence = r.evidence.filter(e => e.state !== 'uploaded'); } }],
+]) {
+  const v = await storedVariant(name, opt);
+  check(`negative control · ${name}: renders exactly as before (no STORED claim, no alarm)`, !v.stored && !v.err && !v.retry, v.err.slice(0, 60));
+  await v.ctx.close();
+}
+
+// an unreadable receipt is NAMED in words — and Try again recovers to the truth
+const bad = await storedVariant('HTTP 500 garbage', { status: 500 });
+check('negative control · unreadable receipt: NAMED, never silent, never STORED', !bad.stored && /could not be read/i.test(bad.err) && /HTTP 500/.test(bad.err) && bad.retry, bad.err.replace(/\s+/g, ' ').slice(0, 90));
+await bad.ctx.unroute('**/bdata-stored-bux-try-autonomi.json*');
+await tap(bad.page, '[data-act="reload-stored"]');
+await bad.page.waitForSelector('[data-bdata-stored]', { timeout: 8000 }).catch(() => {});
+check('Try again really recovers: the good receipt lands and STORED shows', !!(await bad.page.$('[data-bdata-stored]')) && !(await bad.page.$('[data-bdata-stored-err]')));
+await bad.ctx.close();
 
 // 10 · laws
 check('no pay-route strings anywhere (A9c law)', !/Review & Pay|review-pay|bpay-invoice-review-pay/i.test(fullHtml));

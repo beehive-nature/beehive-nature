@@ -69,7 +69,22 @@
   .note{color:var(--dim);font-size:11.5px}
   .bad{color:var(--bad)} .ok{color:var(--ok)} .warn{color:var(--accent)}
   legend{color:var(--dim);font-size:10.5px;letter-spacing:.08em}
-</style>
+  /* ── the page's end, read on a phone (footer pass 2026-09-26) ──────────
+     casing law: no forced capitals; nothing under 12 px; figures use the
+     panel's full width; controls are 44 px; bee and raver read at 14 px. */
+  h1,h2{text-transform:none}
+  h1{letter-spacing:.06em}
+  h2{letter-spacing:.04em;font-size:15px}
+  figure{margin:0}
+  figcaption,.drop small,label,legend{font-size:12px}
+  .stats,.note,table{font-size:12.5px}
+  .afix{font-size:12px}
+  label:has(#substrate){min-height:44px;cursor:pointer}
+  #substrate{width:20px!important;height:20px;flex:none;accent-color:var(--accent)}
+  #dl{min-height:44px;font-size:13px!important}
+  body:not([data-reg="cypherpunk"]) figcaption,body:not([data-reg="cypherpunk"]) .stats,
+  body:not([data-reg="cypherpunk"]) .note,body:not([data-reg="cypherpunk"]) label{font-size:14px}
+  </style>
 </head>
 <body><div class="wrap">
 

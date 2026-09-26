@@ -30,6 +30,8 @@ h1.grad{background:linear-gradient(92deg,var(--sovereign),var(--you));-webkit-ba
 .well{background:var(--bg-well);border:1px solid var(--line);border-radius:9px;padding:10px}
 h3{font-size:11px;text-transform:uppercase;letter-spacing:1.2px;color:var(--ink-dim);margin-bottom:8px}
 .stats{display:flex;gap:10px;margin-top:10px;flex-wrap:wrap}
+/* a stat is as wide as its value: "SIMULATED" overflowed an 84 px card and widened the phone page to 407 px; now it takes its own row when it must */
+.stats .stat{flex:1 1 auto}
 .stat{flex:1;min-width:110px;background:var(--bg-card);border:1px solid var(--line);border-radius:var(--radius);padding:10px 14px}
 .stat.pstat{background:var(--bg-well)}
 .stat b{display:block;font-size:clamp(17px,7.5vw,32px);line-height:1.1;font-family:ui-monospace,Menlo,Consolas,monospace;color:#B79FE0}
@@ -67,6 +69,25 @@ canvas{width:88px;height:88px;display:block;border-radius:8px;image-rendering:pi
 .foot{margin-top:16px;font-size:10.5px;color:var(--ink-dim)}
 .foot b{color:var(--ink-mut)}
 @media (max-width:600px){.stat b{font-size:24px}.stat b.seed{font-size:20px}}
+/* ── the page's end, read on a phone (footer pass 2026-09-26) ────────────
+   casing law: no forced capitals; nothing under 12 px; dim ink lifted to
+   4.5:1 on the card; bee and raver read at 14 px, bee paragraphs at 16. */
+:root{--ink-dim:#76948a}
+h3,.stat .l{text-transform:none}
+h3{font-size:13px;letter-spacing:.2px;line-height:1.4}
+.law,.msg,.mode{font-size:13px}
+.mode small,.stat .l,.item span.meta,.cap,.link input{font-size:12px}
+.item .badge{font-size:12px}
+.foot{font-size:12px;line-height:1.65;color:var(--ink-mut);margin-top:10px}
+.foot b{color:var(--ink)}
+details.tnote{margin-top:18px;padding-top:6px;border-top:1px solid var(--line)}
+details.tnote>summary{color:var(--ink-mut)}
+body:not([data-reg="cypherpunk"]) h3{font-size:14px}
+body:not([data-reg="cypherpunk"]) .msg,body:not([data-reg="cypherpunk"]) .mode,
+body:not([data-reg="cypherpunk"]) .foot,body:not([data-reg="cypherpunk"]) details.tnote>summary{font-size:14px}
+body:not([data-reg="cypherpunk"]) .mode small{font-size:13px}
+body[data-reg="bee"] .msg,body[data-reg="bee"] .foot{font-size:16px}
+body[data-reg="cypherpunk"] .foot{font-family:ui-monospace,Menlo,Consolas,monospace}
 </style>
 </head>
 <body>
@@ -101,7 +122,7 @@ chunks; the keys never leave your device unless you send them.</p>
   </div>
   <div class="row" style="margin-top:10px">
     <button class="act" id="renderwav">render 8s WAV (the audio itself)</button>
-    <button class="act ghost" id="store">STORE ON AUTONOMI</button>
+    <button class="act ghost" id="store">store on autonomi</button>
   </div>
   <p class="msg" id="rmsg">the score artifact is a few hundred bytes; the WAV render is ~1.4 MB — both store the same way.</p>
   <div class="well" id="wavbox" hidden><span id="wavinfo" style="font:11px ui-monospace,Menlo,monospace;color:var(--sem-science)"></span></div>
@@ -320,7 +341,7 @@ $('renderwav').addEventListener('click',async()=>{
   wavBytes=bytes;
   $('wavbox').hidden=false;
   $('wavinfo').textContent='WAV rendered: '+fmtB(bytes.length)+' · 8.00s · stereo 16-bit — ready to store beside (or instead of) the score';
-  $('rmsg').textContent='rendered. STORE puts the score artifact'+(wavBytes?' and the WAV':'')+' on the backend, mode: '+MODE+'.';
+  $('rmsg').textContent='rendered. “store on autonomi” puts the score artifact'+(wavBytes?' and the WAV':'')+' on the backend, mode: '+MODE+'.';
 });
 $('store').addEventListener('click',async()=>{
   if(!current){$('rmsg').textContent='nothing to store — read a seed first.';return}

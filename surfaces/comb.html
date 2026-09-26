@@ -17,31 +17,32 @@
 :root{
   --sem-value:var(--gold); --sem-solution:var(--leaf); --sem-system:var(--cyan);
   --sem-science:var(--violet); --sem-harm:var(--flag);
+  --faint:#879788; /* tokens.css #6f7f71 reads 4.2:1 on the wells; this page lifts it past 4.5 */
 }
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{overflow-x:hidden}
-body{background:var(--bg0);color:var(--ink);font:13px/1.7 'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;padding:30px 14px 96px}
+body{background:var(--bg0);color:var(--ink);font:max(13px,var(--fmin,12px))/1.7 'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;padding:30px 14px 96px}
 main{max-width:880px;margin:0 auto}
-.crumbs{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:0 0 9px;border-bottom:1px solid var(--line);font-size:11px;letter-spacing:.12em;text-transform:uppercase}
+.crumbs{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:0 0 9px;border-bottom:1px solid var(--line);font-size:max(11px,var(--fmin,12px));letter-spacing:.04em;text-transform:none}
 .crumbs a{color:var(--dim)} .crumbs .here{color:var(--ink)}
-.kicker{font-size:10px;letter-spacing:.3em;text-transform:uppercase;color:var(--faint);margin-top:20px}
+.kicker{font-size:max(10px,var(--fmin,12px));letter-spacing:.04em;text-transform:none;color:var(--faint);margin-top:20px}
 h1{font-size:clamp(28px,6vw,40px);line-height:1.1;margin:8px 0 6px;font-weight:600;
  background-image:linear-gradient(92deg,var(--ink) 40%,var(--gold) 92%);
  -webkit-background-clip:text;background-clip:text;color:transparent}
-.lede{color:var(--dim);font-size:12px;max-width:72ch;line-height:1.85}
+.lede{color:var(--dim);font-size:max(12px,var(--fmin,12px));max-width:72ch;line-height:1.85}
 .herofig{display:flex;flex-direction:column;gap:2px;margin:14px 0 4px}
 .herofig b{font-size:38px;line-height:1;font-weight:600;font-variant-numeric:tabular-nums;color:var(--gold)}
-.herofig span{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
+.herofig span{font-size:max(10.5px,var(--fmin,12px));letter-spacing:.04em;text-transform:none;color:var(--faint)}
 section{background:var(--bg2);border:1px solid var(--line);border-radius:var(--r-lg);padding:16px;margin-top:16px}
-h2{font-size:12px;color:var(--violet);font-weight:400;letter-spacing:.09em;margin-bottom:9px}
+h2{font-size:max(12px,var(--fmin,12px));color:var(--violet);font-weight:400;letter-spacing:.09em;margin-bottom:9px}
 h2 b{color:var(--ink);font-weight:600}
 /* THE STAGE — the comb fills it at every zoom */
 #stage{position:relative;height:clamp(380px,62vh,640px);background:var(--bg0);border:1px solid var(--line);border-radius:var(--r-md);overflow:hidden;touch-action:none;cursor:grab}
 #stage:active{cursor:grabbing}
 #stage:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
 #comb{display:block;width:100%;height:100%}
-.hud{position:absolute;top:10px;left:10px;z-index:2;background:rgba(7,9,11,.78);border:1px solid var(--line);border-radius:var(--r-sm);padding:9px 11px;max-width:250px;font-size:10px;line-height:1.75;color:var(--dim)}
-.hud .crumb{color:var(--ink);font-size:10.5px}
+.hud{position:absolute;top:10px;left:10px;z-index:2;background:rgba(7,9,11,.78);border:1px solid var(--line);border-radius:var(--r-sm);padding:9px 11px;max-width:250px;font-size:max(10px,var(--fmin,12px));line-height:1.75;color:var(--dim)}
+.hud .crumb{color:var(--ink);font-size:max(10.5px,var(--fmin,12px))}
 .hud .mode em{font-style:normal;color:var(--cyan)}
 .fbar{display:flex;height:6px;border-radius:3px;overflow:hidden;border:1px solid var(--line);margin:5px 0 3px}
 .fbar i{display:block;height:100%}
@@ -50,38 +51,49 @@ h2 b{color:var(--ink);font-weight:600}
 .ctrls button{min-width:40px;min-height:34px;background:rgba(7,9,11,.78);border:1px solid var(--line);border-radius:var(--r-sm);color:var(--dim);font:600 14px/1 ui-monospace,Menlo,Consolas,monospace;cursor:pointer}
 .ctrls button:hover{color:var(--gold);border-color:var(--gold)}
 /* THE LEGEND — the state key lives with the art it keys */
-.art{background:var(--well);border:1px solid var(--line);border-radius:var(--r-md);padding:10px 12px;margin-top:10px;font-size:10.5px;color:var(--dim);line-height:1.9}
+.art{background:var(--well);border:1px solid var(--line);border-radius:var(--r-md);padding:10px 12px;margin-top:10px;font-size:max(10.5px,var(--fmin,12px));color:var(--dim);line-height:1.9}
 .art .row{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap}
 .art .dot{display:inline-block;width:11px;height:11px;border-radius:2px;transform:translateY(1.5px);border:1px solid var(--line)}
 .art .d-n{background:var(--cyan);opacity:.3}.art .d-h{background:var(--amber);opacity:.8}.art .d-c{background:var(--gold)}
 .art b{color:var(--ink);font-weight:400}
 .art .hint{color:var(--faint)}
 /* CANON + GEOMETRY panels */
-.law{color:var(--dim);font-size:11.5px;line-height:1.9}
+.law{color:var(--dim);font-size:max(11.5px,var(--fmin,12px));line-height:1.9}
 .law b{color:var(--ink);font-weight:400}
 .law .glyph{color:var(--gold)}
 .vocab{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin-top:10px}
 .v{background:var(--well);border:1px solid var(--line);border-radius:var(--r-md);padding:11px 12px}
-.v b{display:block;font-size:12px;color:var(--gold);font-weight:600;letter-spacing:.04em}
-.v span{display:block;font-size:10.5px;color:var(--dim);line-height:1.8;margin-top:4px}
-.care{margin-top:12px;background:var(--well);border:1px solid var(--line);border-left:3px solid var(--gold);border-radius:var(--r-sm);padding:11px 13px;font-size:11px;color:var(--ink);line-height:1.85}
+.v b{display:block;font-size:max(12px,var(--fmin,12px));color:var(--gold);font-weight:600;letter-spacing:.04em}
+.v span{display:block;font-size:max(10.5px,var(--fmin,12px));color:var(--dim);line-height:1.8;margin-top:4px}
+.care{margin-top:12px;background:var(--well);border:1px solid var(--line);border-left:3px solid var(--gold);border-radius:var(--r-sm);padding:11px 13px;font-size:max(11px,var(--fmin,12px));color:var(--ink);line-height:1.85}
 .care b{color:var(--gold);letter-spacing:.18em;font-weight:600}
-.srclink{margin-top:10px;font-size:10.5px}
+.srclink{margin-top:10px;font-size:max(10.5px,var(--fmin,12px))}
 .srclink a{color:var(--cyan)}
 .geo{display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start}
 .geo svg{flex:0 0 232px;width:232px;max-width:100%;height:auto;background:var(--bg0);border:1px solid var(--line);border-radius:var(--r-md)}
 .geo .txt{flex:1 1 260px;min-width:240px}
-.rings{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px;font-size:10px;color:var(--faint)}
+.rings{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px;font-size:max(10px,var(--fmin,12px));color:var(--faint)}
 .rings i{font-style:normal;background:var(--well);border:1px solid var(--line);border-radius:var(--r-pill);padding:3px 9px}
-footer{max-width:880px;margin:22px auto 0;color:var(--faint);font-size:10px;text-align:center;line-height:1.95;border-top:1px solid var(--line);padding-top:14px}
+footer{max-width:880px;margin:22px auto 0;color:var(--faint);font-size:max(10px,var(--fmin,12px));text-align:center;line-height:1.95;border-top:1px solid var(--line);padding-top:14px}
 footer a{color:var(--dim)}
 @media (max-width:600px){
   body{padding:14px 10px 84px}
   section{padding:13px 12px;border-radius:var(--r-md)}
   #stage{height:clamp(340px,58vh,520px)}
-  .hud{max-width:200px;padding:7px 9px;font-size:9.5px}
+  .hud{max-width:200px;padding:7px 9px;font-size:max(9.5px,var(--fmin,12px))}
   .geo svg{flex-basis:100%}
 }
+/* The verifier panel is rendered by the shared spend-audit.js with inline 9–11.5 px sizes;
+   on this page it reads at the same floor as everything else (its 26 px total is untouched). */
+#verifierBody :is([style*="font-size:9px"],[style*="font-size:9.5px"],[style*="font-size:10px"],[style*="font-size:11px"],[style*="font-size:11.5px"]){font-size:var(--fmin,12px)!important}
+#verifierBody [style*="font:11px"]{font-size:var(--fmin,12px)!important}
+#verifierBody #sa-paste-go{min-height:44px}
+footer a{padding-block:14px} /* a 44 px tap target that leaves the line rhythm alone */
+.srclink a{padding-block:14px}
+/* Lower-half floor (2026-09-26, 390 px phone review): every small size on this page
+   reads max(its own size, --fmin) — 12 px in cypherpunk's dense mono, 14 px for new bee
+   and raver, so no register ever draws reading text a phone cannot hold. */
+body[data-reg="bee"],body[data-reg="raver"]{--fmin:14px}
 </style>
 </head>
 <body>
@@ -169,11 +181,15 @@ footer a{color:var(--dim)}
           <polygon points="-8.66,-25 0,-20 0,-10 -8.66,-5 -17.32,-10 -17.32,-20" fill="#ffb347" fill-opacity=".10"/>
         </g>
       </g>
-      <text x="28" y="-7" font-size="6.5" fill="#8a9a8a">ring 1 · six neighbours</text>
-      <text x="45.5" y="-7" font-size="6.5" fill="#8a9a8a">ring 2</text>
-      <text x="62.8" y="-7" font-size="6.5" fill="#8a9a8a">ring 3</text>
-      <text x="80.1" y="-7" font-size="6.5" fill="#8a9a8a">ring 4</text>
-      <text x="97.4" y="-7" font-size="6.5" fill="#8a9a8a" text-anchor="end" dx="-2">ring 5</text>
+      <!-- ring labels sit on each ring's own top edge (they used to share one baseline and
+           overprint each other); ring 1's name rides beneath the frame -->
+      <g font-size="9" fill="#8a9a8a" text-anchor="middle">
+        <text x="0" y="-40">ring 2</text>
+        <text x="0" y="-55">ring 3</text>
+        <text x="0" y="-70">ring 4</text>
+        <text x="0" y="-85">ring 5</text>
+        <text x="0" y="99">ring 1 · six neighbours</text>
+      </g>
     </svg>
     <div class="txt">
       <p class="law"><b>a frame draws as five nested rings of six.</b> six neighbours around one cell,

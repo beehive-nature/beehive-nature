@@ -47,8 +47,14 @@
   .three { display: grid; gap: 8px; margin-top: 8px; }
   .three div { font-size: 13.5px; padding-left: 12px; border-left: 2px solid var(--line, #2c2822); }
   .three b { color: var(--amber, #d9a441); font-weight: 600; }
-  footer { margin-top: auto; padding-top: 18px; font-size: 12px; color: var(--dim, #9a8f7a); }
-  footer a { color: var(--amber, #d9a441); }
+  footer { margin-top: auto; padding-top: 18px; font-size: 14px; line-height: 2; color: var(--dim, #9a8f7a); }
+  footer a { color: var(--amber, #d9a441); padding-block: 12px; text-underline-offset: 3px; }
+  /* lower half at 390 px: reading sizes per register (bee reads at 16, raver at 15, cypherpunk dense mono) */
+  body[data-reg="bee"] .three div, body[data-reg="bee"] .note { font-size: 16px; }
+  body[data-reg="raver"] .three div, body[data-reg="raver"] .note { font-size: 15px; }
+  body[data-reg="cypherpunk"] .three div, body[data-reg="cypherpunk"] footer { font-family: ui-monospace, 'Cascadia Mono', Consolas, monospace; }
+  body[data-reg="cypherpunk"] .three div { font-size: 13.5px; }
+  body[data-reg="cypherpunk"] footer { font-size: 13px; }
 </style>
 </head>
 <body>
@@ -56,14 +62,14 @@
   <p class="sub">estate page · reads Autonomi bytes same-origin — no plugin, no visitor-side daemon</p>
 
   <div class="card">
-    <h2>PUBLIC DATA FROM THE NETWORK</h2>
+    <h2>public data from the network</h2>
     <div id="stage" class="placeholder">fetching through the estate's door…</div>
     <div class="addr" id="addr">autonomi://711c7e20006ff3e0ac6c1f3063286a0c1a3e4c409642e8c526173fa60bb7078a</div> <!-- PUBLIC-CONSTANT: mainnet public DataMap (docs example) -->
     <span class="badge" id="state-badge">· · ·</span>
   </div>
 
   <div class="card">
-    <h2>WHAT YOU ARE LOOKING AT — THREE AUDIENCES</h2>
+    <h2>what you are looking at — three audiences</h2>
     <div class="three">
       <div><b>the neighbor</b> — this image lives on the Autonomi network, not on our servers. Your browser fetched it through the estate's door, in one same-origin request. Nothing to install, nothing to configure.</div>
       <div><b>the builder</b> — the page calls <span id="apiref">/ant/v1/data/public/&lt;address&gt;</span> on this origin; Caddy proxies to a local read-only antd gateway (GET-only, all other endpoints refused). Open your network tab: one request, this origin, no third parties.</div>

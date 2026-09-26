@@ -135,6 +135,18 @@
   body[data-reg="cypherpunk"] .badge { border-radius: 2px; }
   body[data-reg="cypherpunk"] .drop { border-style: dashed; min-height: 108px; }
   body[data-reg="cypherpunk"] .hash { font-size: 12px; }
+
+  /* the page end at 390 px (2026-09-26 lower-half pass). Four purposes in four
+     columns left one word per line on a phone; two columns keep every sentence
+     readable (an odd last purpose takes the full row). Casing law: headings read
+     as written in every view, never re-cased by text-transform. */
+  @media (max-width: 560px) {
+    .modes { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .modes > .mode:last-child:nth-child(odd) { grid-column: 1 / -1; }
+  }
+  .mode { min-width: 0; }
+  .kicker, body[data-reg="raver"] h1, body[data-reg="cypherpunk"] h1 { text-transform: none; }
+  details.tech .hash { line-height: 1.65; }
 </style>
 </head>
 <!-- `data-busy` and `data-busy-seq` start at 0 so both exist before the first

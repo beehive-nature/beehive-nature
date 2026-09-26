@@ -195,6 +195,15 @@ body:not([data-reg="cypherpunk"]) #review-result,.review-share{font:1rem/1.6 var
 #mark-words .mark-glyph{font-size:1.8rem;color:inherit}
 body[data-reg="raver"] #mark-words .mark{background:linear-gradient(145deg,#312040,#152d29)}
 body[data-reg="raver"] #mark-words .mark[aria-pressed="true"]{background:#c9a0ff;color:#241431}
+/* THE LOWER HALF AT 390 (2026-09-26, footer audit): cypherpunk kept the
+   10 px labels, laws, the W-1 dock and the footer; the floor is 12 px there
+   now (still the densest register). The status lines broke words mid-word
+   ("re ady") — they wrap at spaces first now. The footer links were 11–18 px
+   tall; they carry a 44 px tap box without moving the line. */
+section .law,label,.st,.note,.note .t,footer,table{font-size:12px}
+.st{word-break:normal;overflow-wrap:anywhere}
+footer{padding-bottom:12px}
+footer a,.law a[href$="pointers.js"]{display:inline-block;padding-block:12px;margin-block:-12px}
 </style>
 </head>
 <body data-reg="bee" data-bee-theme="custom" data-review-beat="arrival">
@@ -390,7 +399,7 @@ body[data-reg="raver"] #mark-words .mark[aria-pressed="true"]{background:#c9a0ff
 
   <div class="note" style="margin-top:14px">
     <span class="t">W-1 DOCKED — THE IN-BROWSER MODEL (2026-09-04)</span>
-    <p style="font-size:10.5px;line-height:1.75;color:var(--dim)">a local model runs
+    <p style="line-height:1.75;color:var(--dim)">a local model runs
     <b style="color:var(--ink)">in this tab</b> — no box, no server — so the pocket works
     even when the compute node is unreachable. the model loads
     <b style="color:var(--gold)">≈204 MB once</b>, caches in this browser, and answers

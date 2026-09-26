@@ -54,53 +54,68 @@
      once, grouped on the '—' dividers that were already there. Same markup, same
      links, same active state — CSS decides the shape, so there is one nav to
      maintain and not two. */
-  b.style.cssText='position:fixed;bottom:0;left:0;right:0;max-width:100vw;z-index:9998;display:flex;flex-wrap:nowrap;overflow-x:auto;gap:0 4px;padding:7px 12px;background:#0b0d0c;border-top:1px solid #1c211e;font:500 12px/1 ui-sans-serif,system-ui,sans-serif;-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 34px),transparent);mask-image:linear-gradient(90deg,#000 calc(100% - 34px),transparent)';
-  b.innerHTML=L.map(function(x){
+  /* THE CLEAN EDGE (founder review 2026-09-26: "bugs all over the place in the bottom/footer").
+     Measured at 390 px on all 104 surfaces × 3 views: the one-line strip ran 70 links, the
+     language picker and the rails badge in a single scroller under a separately floated ☰, so a
+     half word ("explor") was cut by the ☰ on every page, the picker and the badge sat off-screen,
+     and the links were 32 px tall. Now the bar is three lanes: the LINKS scroll in their own lane
+     and fade out inside it; the riders (language, rails) and the ☰ sit after it at fixed spots, so
+     nothing is ever cut; every target is 44 px. The rails line is a sentence — it lives in the
+     drawer on a phone, inline where there is room. */
+  var lane=document.createElement('div');lane.id='tlinks';
+  var css=document.createElement('style');css.id='tbarstyle';
+  css.textContent='#tbar{position:fixed;bottom:0;left:0;right:0;max-width:100vw;z-index:9998;display:flex;flex-wrap:nowrap;align-items:center;gap:6px;padding:4px 8px;background:#0b0d0c;color:#d7dcd9;border-top:1px solid #1c211e;font:500 13px/1 ui-sans-serif,system-ui,sans-serif;box-sizing:border-box}'
+    +'#tlinks{flex:1 1 auto;min-width:0;display:flex;flex-wrap:nowrap;align-items:center;gap:0 2px;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 28px),transparent);mask-image:linear-gradient(90deg,#000 calc(100% - 28px),transparent)}'
+    +'#tlinks::-webkit-scrollbar{display:none}'
+    +'#tlinks a{min-height:44px!important;padding:0 10px!important}'
+    +'#tbarMore{order:99;flex:none}'
+    /* the old floating "⌂ hub" pill (30 pages) repeats the bar's own ⌂ and sat where the orb floats: the bar is the one way home */
+    +'#bnr-beta-badge{display:none!important}'
+    +'@media(max-width:520px){#tbar:not(.t-open) #railsbadge{display:none!important}}'
+    +'#tbar.t-open{flex-wrap:wrap;align-items:flex-start;max-height:78vh;overflow-y:auto;padding:8px 56px 10px 8px;row-gap:8px}'
+    +'#tbar.t-open #tlinks{flex:1 1 100%;flex-wrap:wrap;overflow:visible;row-gap:4px;-webkit-mask-image:none;mask-image:none}'
+    +'#tbar.t-open #tlinks .tsep{width:100%!important;height:1px!important;align-self:auto!important;margin:2px 0!important}'
+    +'#tbar.t-open #tbarMore{position:absolute;top:8px;right:8px}'
+    +'#tbar.t-open #railsbadge{order:-1;display:block!important;flex:1 1 100%;margin:0!important;padding:0!important;border:0!important;line-height:1.6}'
+    +'#tbar.t-open #blangctl{order:-2;border:0!important;padding:0!important}'
+    +'#blangsel{color:inherit!important;background:transparent!important;border:1px solid rgba(140,150,145,.55)!important}'
+    +'#blangsel option{color:#0c1412;background:#fff}';
+  document.head.appendChild(css);
+  b.appendChild(lane);
+  lane.innerHTML=L.map(function(x){
     if(x==='—')return '<span class="tsep" style="align-self:stretch;width:1px;background:#333;margin:0 4px;flex-shrink:0"></span>';
     var h=(R+x[1])===location.pathname.replace(/index.html$/,'');
-    return '<a'+(h?' aria-current="page"':'')+' href="'+R+x[1]+'" style="color:'+(h?'#6f6':'#888')+';background:'+(h?'#16241d':'transparent')+';box-shadow:'+(h?'inset 0 0 0 1px #2b4a3b':'none')+';border-radius:6px;text-decoration:none;padding:6px 9px;min-height:32px;display:inline-flex;align-items:center;flex-shrink:0">'+x[0]+'</a>';
+    return '<a'+(h?' aria-current="page"':'')+' href="'+R+x[1]+'" style="color:'+(h?'#6f6':'#9aa39d')+';background:'+(h?'#16241d':'transparent')+';box-shadow:'+(h?'inset 0 0 0 1px #2b4a3b':'none')+';border-radius:6px;text-decoration:none;display:inline-flex;align-items:center;flex-shrink:0;white-space:nowrap">'+x[0]+'</a>';
   }).join('');
   if(inlineHost){
-    b.style.cssText='display:flex;flex-wrap:wrap;gap:8px;padding:16px 0;font:14px/1.5 system-ui,sans-serif';
+    b.style.cssText='position:static;display:flex;flex-wrap:wrap;gap:8px;padding:16px 0;font:14px/1.5 system-ui,sans-serif;background:none;border:0';
+    lane.style.cssText='flex-wrap:wrap;overflow:visible;gap:8px;-webkit-mask-image:none;mask-image:none';
     inlineHost.appendChild(b);
   }else document.body.appendChild(b);
 
-  /* the toggle: only earns its place when the strip actually overflows */
+  /* the toggle: in the bar, after the riders; only earns its place when the links overflow */
   var tg=document.createElement('button');tg.id='tbarMore';tg.type='button';
   tg.setAttribute('aria-controls','tbar');tg.setAttribute('aria-expanded','false');
   tg.setAttribute('aria-label','Show all navigation');
-  tg.style.cssText='position:fixed;right:6px;z-index:9999;min-width:34px;min-height:32px;border:1px solid #2b4a3b;border-radius:6px;background:#0f1512;color:#8fbf9f;font:600 13px/1 ui-sans-serif,system-ui,sans-serif;cursor:pointer;display:none;align-items:center;justify-content:center';
-  document.body.appendChild(tg);
+  tg.style.cssText='min-width:44px;min-height:44px;border:1px solid #2b4a3b;border-radius:8px;background:#0f1512;color:#8fbf9f;font:600 16px/1 ui-sans-serif,system-ui,sans-serif;cursor:pointer;display:none;align-items:center;justify-content:center;margin:0;padding:0 10px';
+  b.appendChild(tg);
 
   /* MOBILE-FIRST: if the strip cannot fit, the grid is the DEFAULT, not a tap away.
      All 39 land on screen at 390px; the toggle then COLLAPSES to the strip. */
   var open=null;
-  function seatToggle(){ tg.style.bottom=Math.max(7,Math.round((b.getBoundingClientRect().height-(tg.getBoundingClientRect().height||32))/2))+'px'; }
-  function overflowing(){ return b.scrollWidth>b.clientWidth+2; }
+  function overflowing(){ return lane.scrollWidth>lane.clientWidth+2; }
   function apply(){
     if(inlineHost){ tg.style.display='none'; return; }
+    b.classList.toggle('t-open',!!open);
     if(open){
-      b.style.flexWrap='wrap'; b.style.overflowX='hidden'; b.style.overflowY='auto';
-      b.style.maxHeight='78vh'; b.style.rowGap='6px'; b.style.paddingRight='46px';
-      b.style.webkitMaskImage='none'; b.style.maskImage='none';
-      /* dividers become full-width rules, so each group starts its own row */
-      [].forEach.call(b.querySelectorAll('.tsep'),function(s){
-        s.style.width='100%';s.style.height='1px';s.style.alignSelf='auto';s.style.margin='2px 0';});
       tg.textContent='×'; tg.style.background='#0f1512'; tg.style.color='#8fbf9f'; tg.setAttribute('aria-expanded','true'); tg.setAttribute('aria-label','Hide navigation');
     }else{
-      b.style.flexWrap='nowrap'; b.style.overflowX='auto'; b.style.overflowY='hidden';
-      b.style.maxHeight=''; b.style.rowGap=''; b.style.paddingRight='';
-      b.style.webkitMaskImage='linear-gradient(90deg,#000 calc(100% - 34px),transparent)';
-      b.style.maskImage='linear-gradient(90deg,#000 calc(100% - 34px),transparent)';
-      [].forEach.call(b.querySelectorAll('.tsep'),function(s){
-        s.style.width='1px';s.style.height='';s.style.alignSelf='stretch';s.style.margin='0 4px';});
       tg.textContent='☰'; tg.style.background='#16241d'; tg.style.color='#6f6'; tg.setAttribute('aria-expanded','false'); tg.setAttribute('aria-label','Show all navigation');
     }
-    seatToggle();
   }
-  function sync(){ if(inlineHost) return; tg.style.display = (open||overflowing()) ? 'inline-flex' : 'none'; seatToggle(); }
+  function sync(){ if(inlineHost) return; tg.style.display = (open||overflowing()||window.innerWidth<=520) ? 'inline-flex' : 'none'; }
   tg.addEventListener('click',function(){ open=!open; apply(); sync(); });
-  addEventListener('resize',function(){ if(!open) sync(); else seatToggle(); });
+  addEventListener('resize',function(){ if(!open) sync(); });
   /* DRAWER, not a permanent grid. Open-by-default measured 379px at 390px — 47%
      of the viewport, fixed, forever. That trades "cannot find a link" for "cannot
      see the page", which is not a better nav. Closed is the compact strip; ONE tap
@@ -133,12 +148,23 @@
     var cur=parseFloat(getComputedStyle(document.body).paddingBottom)||0;
     if(cur<need) document.body.style.paddingBottom=need+'px';
   }
+  /* YOU ARE HERE, WHOLE (2026-09-26): the current page's link must never be the half word
+     under the lane's fade ("museu"). When the lane scrolls, it is brought fully into view,
+     clear of the fade; nothing moves when it already fits. */
+  function showHere(){
+    if(inlineHost||open) return;
+    var a=lane.querySelector('a[aria-current="page"]'); if(!a) return;
+    var fade=36, l=a.offsetLeft-lane.offsetLeft, r=l+a.offsetWidth;
+    if(r>lane.scrollLeft+lane.clientWidth-fade) lane.scrollLeft=Math.max(0,r-lane.clientWidth+fade);
+    else if(l<lane.scrollLeft) lane.scrollLeft=Math.max(0,l-8);
+  }
   if(!inlineHost) document.body.style.paddingBottom='69px'; /* fail-safe before measurement */
   else document.documentElement.style.setProperty('--tbar-h','0px'); /* in-flow bar takes no fixed room */
   fitPad();
   document.addEventListener('bregister',function(){sync();fitPad();});
   setTimeout(fitPad,500);   /* after register/lang/rails mount into the bar */
   setTimeout(fitPad,1500);
+  setTimeout(showHere,520); setTimeout(showHere,1520);
   addEventListener('resize',fitPad);
 
   /* MODAL RETREAT (2026-09-20, measured on the live MY SPACE page at 390x844):
@@ -208,7 +234,7 @@
      could otherwise leave the newly inserted buttons in English. */
   if(!document.getElementById('bregctl')){
     var s=document.createElement('script');
-    s.src=assetBase+'register.js?v=10';
+    s.src=assetBase+'register.js?v=11';
     s.onload=loadLanguage; s.onerror=loadLanguage;
     document.body.appendChild(s);
   }else loadLanguage();

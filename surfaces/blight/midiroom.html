@@ -102,6 +102,30 @@ button.act.ghost{background:var(--bg-well);color:var(--ink-mut);border:1px solid
 .msg{font-size:11.5px;color:var(--ink-mut);margin-top:6px;min-height:1.2em}
 @media (max-width:600px){.stat b{font-size:22px}.stat.science b{font-size:14px}.steps{grid-template-columns:repeat(16,1fr)}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+/* ── the page's end, read on a phone (footer pass 2026-09-26) ────────────
+   casing law: no forced capitals; nothing under 12 px; dim ink lifted to
+   4.5:1 on the card; bee and raver read at 14 px, bee paragraphs at 16. */
+:root{--ink-dim:#76948a}
+.levels button,h3,.stat .l,.knob{text-transform:none}
+.levels button{letter-spacing:.2px}.levels button small{font-size:12px}
+h3{font-size:13px;letter-spacing:.2px;line-height:1.4}
+.law,.plain,.msg,.foot{font-size:13px}
+.prop span,.prop .q,.qitem span,.stat .l,.knob{font-size:12px}
+.patchbox{font-size:12px}
+.ev{font-size:13px;flex-wrap:wrap;row-gap:2px}
+.ev .k{font-size:12px;padding:1px 6px}
+.ev .f{font-size:12px}
+.ev .c{flex:1 1 60%;min-width:0}
+.legend{gap:8px;margin-top:14px}
+.lg{font-size:12px;padding:4px 11px}
+.foot{margin-top:22px;padding-top:14px;border-top:1px solid var(--line);line-height:1.65;color:var(--ink-mut)}
+.foot b{color:var(--ink)}
+body:not([data-reg="cypherpunk"]) h3{font-size:14px}
+body:not([data-reg="cypherpunk"]) .plain,body:not([data-reg="cypherpunk"]) .msg,
+body:not([data-reg="cypherpunk"]) .ev,body:not([data-reg="cypherpunk"]) .foot,
+body:not([data-reg="cypherpunk"]) .lg{font-size:14px}
+body[data-reg="bee"] .plain,body[data-reg="bee"] .msg,body[data-reg="bee"] .foot{font-size:16px}
+body[data-reg="cypherpunk"] .foot{font-family:ui-monospace,Menlo,Consolas,monospace}
 </style>
 </head>
 <body>
@@ -577,12 +601,12 @@ function playSeed(seed,why){
     $('plainwords').textContent='your device asks for reduced motion: the room stays whole and still, and nothing sounds. a quiet one, not a lesser one.';
   }else{
     v.disabled=false;v.classList.remove('off');
-    v.textContent=wasSounding?'SILENCE — let the room rest':'PLAY THE ROOM — nothing sounds until you press this';
+    v.textContent=wasSounding?'silence — let the room rest':'play the room — nothing sounds until you press this';
     if(wasSounding){v.classList.add('off')}
   }
   renderQueue();
   updatePatchbox();
-  roomEvent('play',wasSounding?'you':'—',wasSounding?'now playing seed '+seed.toLocaleString():('stage set to seed '+seed.toLocaleString()+(why?' — '+why:'')));
+  roomEvent('play',wasSounding?'you':'the room',wasSounding?'now playing seed '+seed.toLocaleString():('stage set to seed '+seed.toLocaleString()+(why?' — '+why:'')));
   if(wasSounding){$('voice').click()}
 }
 function renderQueue(){
@@ -755,11 +779,11 @@ $('askin').addEventListener('keydown',e=>{if(e.key==='Enter')askBMiDi()});
 $('voice').addEventListener('click',function(){
   if(!P||REDUCED)return;
   if(!sounding){
-    sounding=true;this.classList.remove('off');this.textContent='SILENCE — let the room rest';
+    sounding=true;this.classList.remove('off');this.textContent='silence — let the room rest';
     $('pad1').disabled=$('pad2').disabled=$('pad3').disabled=$('pad4').disabled=false;
     startSound();roomEvent('play','you','the room opens — sound by your hand only');
   }else{
-    stopSound();this.classList.add('off');this.textContent='PLAY THE ROOM — nothing sounds until you press this';
+    stopSound();this.classList.add('off');this.textContent='play the room — nothing sounds until you press this';
     $('pad1').disabled=$('pad2').disabled=$('pad3').disabled=$('pad4').disabled=true;
     roomEvent('play','you','silence — the room rests');
   }

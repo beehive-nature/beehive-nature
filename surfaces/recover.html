@@ -22,6 +22,12 @@ textarea{min-height:5.5rem}button{background:var(--teal);color:#04262a;border:0;
 .badge{display:inline-block;border:1px solid var(--line);border-radius:99px;padding:.1rem .6rem;font-size:.75rem;color:var(--mut);margin-right:.4rem}
 .badge.ok{color:var(--ok);border-color:var(--ok)}
 #offline-proof{color:var(--warn)}
+/* the page end at 390 (2026-09-26 footer audit): labels lose forced capitals
+   (casing law), the two links read as links on this dark ground (they were
+   browser-default blue, 2:1) and carry a 44 px tap box without moving the line */
+.k{text-transform:none;letter-spacing:.02em;font-size:.875rem}.mut{font-size:.875rem}
+p.mut a{color:var(--teal);display:inline-block;padding-block:12px;margin-block:-12px}
+p.mut a:visited{color:var(--teal)}
 </style></head><body><main>
 <h1>bzDiD offline recovery<small>your 24 words → your keys, with no service alive. This page makes zero network requests.</small></h1>
 <div class="panel">
@@ -41,7 +47,7 @@ textarea{min-height:5.5rem}button{background:var(--teal);color:#04262a;border:0;
     <div class="v mut" id="sig"></div></div>
   <div class="row mut">The 32-byte private material stays in this page's memory and is scrubbed when you leave. Nothing is saved.</div>
 </div>
-<p class="mut"><a href="./">⌂ BNR hub</a> · <a href="https://github.com/beehive-nature/beehive-nature/blob/main/surfaces/recover.html" rel="noopener">view source</a> · save this file locally — it works offline forever.</p>
+<p class="mut"><a href="./">⌂ BNR hub</a> · <a href="https://github.com/beehive-nature/beehive-nature/blob/main/surfaces/recover.html" target="_blank" rel="noopener noreferrer" title="opens in a new tab">view source ↗</a> · save this file locally — it works offline forever.</p>
 <p class="mut">If this shows a different fingerprint than your other device: you typed a wrong word (a valid checksum can still hide one error in rare cases — re-check against paper), or the context differs.</p>
 <script>var BZDIDKEY = (() => {
   var __defProp = Object.defineProperty;

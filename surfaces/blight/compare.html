@@ -11,7 +11,7 @@
 :root{
   --bg:#0A0A0F; --panel:#14141f; --panel2:#0d0d15; --line:#262638;
   --crt:#00FF41; --cyan:#00E5FF; --pink:#FF3DB0; --purple:#A24BFF; --lime:#9FFF3D;
-  --dim:#5a6478; --ink:#cfe8d6;
+  --dim:#8b95a8; --ink:#cfe8d6;
   --mono:'IBM Plex Mono','Consolas',monospace;
 }
 *{margin:0;padding:0;box-sizing:border-box}
@@ -27,28 +27,39 @@ h2{font-size:15px;color:var(--crt);margin:30px 0 10px;letter-spacing:1px}
 @media(max-width:860px){.split{grid-template-columns:1fr}}
 .pane{background:var(--panel);border:1px solid var(--line);padding:14px 16px}
 .pane h3{color:var(--pink);font-size:14px;letter-spacing:1px;margin-bottom:2px}
-.pane .by{color:var(--dim);font-size:11px;margin-bottom:10px}
-table{width:100%;border-collapse:collapse;font-size:12px}
-td{padding:4px 0;border-bottom:1px dotted #23233a;vertical-align:top}
+.pane .by{color:var(--dim);font-size:13px;margin-bottom:10px}
+table{width:100%;border-collapse:collapse;font-size:14px}
+td{padding:7px 0;border-bottom:1px dotted #23233a;vertical-align:top}
 td:first-child{color:var(--dim);width:38%;padding-right:10px}
 .pend{color:var(--purple)}
 .lad{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 2px}
-.rung{border:1px solid var(--line);padding:2px 8px;font-size:11px;color:var(--ink)}
+.rung{border:1px solid var(--line);padding:2px 8px;font-size:13px;color:var(--ink)}
 .rung.top{border-color:var(--lime);color:var(--lime);box-shadow:0 0 10px rgba(159,255,61,.35)}
 .bar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:18px}
 select{background:var(--panel2);border:1px solid var(--cyan);color:var(--cyan);font:inherit;padding:6px 10px}
 button{background:none;border:1px solid var(--crt);color:var(--crt);font:inherit;padding:6px 14px;cursor:pointer}
 button:hover{background:var(--crt);color:#000}
 .live{color:var(--lime)}
-.foot{margin-top:34px;color:var(--dim);font-size:10.5px;line-height:1.7}
+.foot{margin-top:34px;color:var(--dim);font-size:14px;line-height:1.65;overflow-wrap:anywhere}
 .foot b{color:var(--ink)}
 .ok{color:var(--lime)} .warn{color:var(--pink)}
 /* every nav rule below is scoped :not(#tbar): tour.js injects <nav id="tbar">
    into every surface, and a bare-element nav rule restyles that injected bar —
    on this page it buried the content under a viewport-sized nav. */
-nav:not(#tbar){margin-top:40px;display:flex;gap:14px;flex-wrap:wrap;font-size:11px}
-nav:not(#tbar) a{color:var(--dim);text-decoration:none}
+nav:not(#tbar){margin-top:36px;padding-top:8px;border-top:1px solid var(--line);display:flex;gap:0 20px;flex-wrap:wrap;font-size:14px}
+nav:not(#tbar) a{color:#a9b5ae;text-decoration:none;display:inline-flex;align-items:center;min-height:44px}
 nav:not(#tbar) a:hover{color:var(--cyan)}
+
+  /* LOWER HALF at 390px (2026-09-26): the hub chip is a 44px control floating
+     just above the tour bar (anchored on the bar's published --tbar-h), so the
+     page end reserves the bar plus the chip and nothing ever ends beneath either. */
+  body{padding-bottom:calc(var(--tbar-h,50px) + 24px)!important}
+  /* the family table is an intentional sideways scroller: rows stay one line
+     tall (no digits running into the next column), only the seed shape wraps */
+  #fam{width:auto;min-width:100%}
+  #fam td{white-space:nowrap;padding:8px 18px 8px 0}
+  #fam td:first-child{width:auto;padding-right:18px}
+  #fam td:nth-child(3){white-space:normal;min-width:240px}
 </style>
 </head>
 <body>
@@ -244,9 +255,9 @@ $('srcs').innerHTML='<b>Sources.</b> FUNGI: ToddStool/fungi <i>Generator.sol:10-
 // fleet nav (idempotent with fleet.js when landed)
 $('fleet').innerHTML=(window.FLEET_NAV||[
  '<a href="./index.html">◈ fLeeT</a>','<a href="./museum.html">◈ museum</a>','<a href="./inscription-explorer.html">◈ explorer</a>',
- '<a href="./studio-gate.html">◈ studio gate</a>','<a href="./c1-aid.html">◈ C-1 aid</a>','<a href="./vaulta-reader.html">◈ vaulta reader</a>']).join(' · ');
+ '<a href="./studio-gate.html">◈ studio gate</a>','<a href="./c1-aid.html">◈ C-1 aid</a>','<a href="./vaulta-reader.html">◈ vaulta reader</a>']).join('');
 </script>
-<div id="bnr-beta-badge" style="position:fixed;right:.6rem;bottom:calc(.6rem + 46px);z-index:9997;font:12px ui-monospace,monospace;opacity:.75"><a href="../" style="color:#39c5cf;text-decoration:none;border:1px solid #30363d;border-radius:99px;padding:.15rem .7rem;background:#161b22">⌂ hub</a></div>
+<div id="bnr-beta-badge" style="position:fixed;right:.6rem;bottom:calc(var(--tbar-h,50px) + 10px);z-index:9997;font:14px ui-monospace,monospace"><a href="../" style="display:inline-flex;align-items:center;min-height:44px;color:#39c5cf;text-decoration:none;border:1px solid #30363d;border-radius:99px;padding:0 16px;background:#161b22">⌂ hub</a></div>
 <script src="../tour.js?v=42"></script>
 </body>
 </html>
