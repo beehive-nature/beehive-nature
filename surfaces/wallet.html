@@ -296,7 +296,8 @@ body[data-wl-view="home"] #wl-bar{display:none!important}
    their own homes, so there the title and their navigation come first. */
 :is(body[data-reg="bee"],body[data-reg="raver"]) main>.crumbs{order:-7}
 :is(body[data-reg="bee"],body[data-reg="raver"]) main>header{order:-6}
-#wl-bar,#wl-dock{order:-5} #wl-bee,#wl-rave{order:-4}
+#wl-bar,#wl-dock{order:-5} #wl-bee,#wl-rave,#wl-deck{order:-4}
+:is(body[data-reg="bee"],body[data-reg="raver"]) main>section:is(#bal-sec,#kc-sec){order:0}
 #wl-bee h2::before,#wl-bar h2::before{display:none}
 /* 44px is the floor for anything that takes a press, in every register — the
    sections carried 33 inline controls cut to 26–34px */
@@ -417,6 +418,10 @@ body[data-reg="bee"] .ring-key{font-size:14px}
 #kc-sec svg [stroke="#FFD700"]{stroke:#9c6fd6} #kc-sec svg [fill="#FFD700"]{fill:#9c6fd6}
 body[data-reg="bee"] #kc-sec svg [stroke="#FFD700"]{stroke:#6e3fb8} body[data-reg="bee"] #kc-sec svg [fill="#FFD700"]{fill:#6e3fb8}
 .wlb-un a{display:inline-flex;align-items:center;min-height:44px;font-size:16px}
+.wlb-stat{display:block;font-size:16px;color:var(--dim)}
+body[data-wl-soul="true"] .wlb-connect,body:not([data-wl-soul="true"]) .wlb-stat{display:none}
+body[data-reg] #fund-sec .fund-coin{background:radial-gradient(circle at 35% 30%,#dbeafb,#6fa9e0 62%,#29628f);border-color:#29628f;animation:none}
+body[data-reg] #fund-sec .fund-coin::after{color:#0c1412;font-size:14px}
 .wlb-stale{font-size:14px;color:var(--dim);margin-top:4px}
 .wlr-caps .wl-stale{font-size:13px;color:#b7a8f7}
 .wlr-caps li[data-err="true"]{box-shadow:0 0 0 1px #b7a8f766}
@@ -489,7 +494,7 @@ body[data-reg="cypherpunk"] main>section>h2[data-wl-n]::after{content:"§" attr(
   body[data-reg="cypherpunk"] main>#wl-cy{grid-column:1;grid-row:1/span 40;position:sticky;top:8px;max-height:calc(100vh - 16px);overflow:auto}
 }
 @media (prefers-reduced-motion:reduce){
-  .wlr-orbit,.wlr-soul,main>section[data-wl-task]{animation:none!important}
+  .wlr-orbit,.wlr-soul,main>section[data-wl-task],.wld-orb,.wld-orb::before,.wld-orb::after{animation:none!important}
   #wl-dock .g{transition:none}
 }
 </style>
@@ -503,16 +508,21 @@ body[data-reg="cypherpunk"] main>section>h2[data-wl-n]::after{content:"§" attr(
    view the reader did not ask for. */
 (function(){var r='bee';try{var v=localStorage.getItem('bregister');if(v==='raver'||v==='cypherpunk')r=v;}catch(e){}
 document.body.setAttribute('data-reg',r);document.documentElement.setAttribute('data-bee-light',String(r==='bee'));
-var w='home';try{w=sessionStorage.getItem('wl.view')||'home';}catch(e){}
+/* a history entry carries its own view: a Back into an entry a previous
+   document pushed is a full load, and must paint THAT entry's view */
+var w='home',own=null;try{own=history.state&&history.state.wlView;w=own||sessionStorage.getItem('wl.view')||'home';}catch(e){}
 /* the section-to-task map, stated here too so a #section deep link paints in its
    own task at FIRST paint; the gate proves it equals the data-wl-task attributes */
 var T={'connect-sec':'have','kc-sec':'key','vault-sec':'key','forge-sec':'key','bal-sec':'have','bridge-sec':'key','acct-sec':'key','pay-sec':'move','bpay-sec':'keep','insc-sec':'keep','voucher-sec':'add','receipts-sec':'proof','fund-sec':'add','peer-sec':'add','arw-sec':'keep','composer-sec':'proof','outbox-sec':'move','matrix-sec':'proof','summary-sec':'have'};
 window.WL_TASK_OF=T;
-if(/[?&]compose=/.test(location.search))w='proof';else if(location.hash.indexOf('#qr=')===0)w='key';else if(T[location.hash.slice(1)])w=T[location.hash.slice(1)];
+if(!own){if(/[?&]compose=/.test(location.search))w='proof';else if(location.hash.indexOf('#qr=')===0)w='key';else if(T[location.hash.slice(1)])w=T[location.hash.slice(1)];}
 document.body.setAttribute('data-wl-view',/^(home|all|have|move|add|keep|key|proof)$/.test(w)?w:'home');})();
 /* a message that sends the reader to another part of the wallet NAMES it as a
    link, never by direction ("above", "below"): bee and raver show one task at a
    time, so there is often nothing above or below. Built as DOM, never HTML. */
+/* a balance read marks its own stat line: failed or not. "err" is a colour the
+   page also uses for "live, but short of a fee", so the mirrors never guess from it */
+window.wlRead=function(el,ok){if(!el)return;if(ok)el.removeAttribute('data-read-failed');else el.setAttribute('data-read-failed','true');};
 window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(function(p){if(typeof p==='string')el.appendChild(document.createTextNode(p));else{var a=document.createElement('a');a.href='#'+p.to;a.textContent=p.t;el.appendChild(a);}});};
 </script>
 <main>
@@ -541,7 +551,7 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
   <div class="wlb-card" data-wl-card data-wl-stat="v-stat">
     <div class="wlb-cap" data-i18n="wl.bee.fig">on Vaulta, your home chain</div>
     <div class="wlb-fig wl-fig" data-wl-src="v-bal" data-wl-value></div>
-    <div class="wlb-un wl-un"><b data-i18n="wl.bee.unread">not read yet</b><a href="#connect-sec" data-i18n="wl.bee.connect">connect your name or account to read it</a></div>
+    <div class="wlb-un wl-un"><b data-i18n="wl.bee.unread">not read yet</b><a href="#connect-sec" class="wlb-connect" data-i18n="wl.bee.connect">connect your name or account to read it</a><span class="wlb-stat" data-wl-src="v-stat"></span></div>
     <div class="wlb-stale wl-stale" data-i18n="wl.bee.stale">the last read failed, so this figure may be out of date</div>
   </div>
   <h2 class="wlb-q" data-i18n="wl.bee.ask">what would you like to do?</h2>
@@ -606,7 +616,7 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
 </div>
 
 <aside id="wl-cy" data-reg="cypherpunk" aria-labelledby="wl-cy-state">
-  <div class="cy-h" id="wl-cy-state"><b data-i18n="wl.cy.state">state</b><span data-i18n="wl.cy.state.s">mirrored from the sections below, never fetched twice</span></div>
+  <div class="cy-h" id="wl-cy-state"><b data-i18n="wl.cy.state">state</b><span data-i18n="wl.cy.state.s">mirrored from the wallet's sections, never fetched twice</span></div>
   <table class="cy-t">
     <thead><tr><th data-i18n="wl.cy.rail">rail</th><th data-i18n="wl.cy.value">value</th><th data-i18n="wl.cy.status">status</th></tr></thead>
     <tbody>
@@ -642,7 +652,7 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
 
 <section id="kc-sec" data-wl-task="key">
   <h2>🗝 the keychain — <span data-i18n="wl.h.keychain">your bzDiD holds every key</span></h2>
-  <div class="law"><b>Automatic:</b> your first tap or keypress anywhere on this page connects the
+  <div class="law"><b>Automatic:</b> your first tap or keypress on a control of this page (moving between its parts does not count) connects the
   keychain by itself (the WebAuthn ceremony needs one touch of yours — browsers' law, not ours).
   The PRF ceremony re-derives your <b>masterPRK</b> in this tab's memory (never stored, never
   sent). From it we derive: the <b>ed25519 soul record key</b> (context <b>bnr.b</b>, same as
@@ -1050,7 +1060,7 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
     <b>same masterPRK</b> by context tag — Vaulta, one 0x address serving <b>both</b> EVM rails (Base and
     Arbitrum share it), Solana, Bitcoin L1, Lightning, nostr. There is no second seed, no import, and no
     "connect a wallet" step anywhere: a new bzDiD is never a keyless supplicant. A fresh address for any
-    rail can be forged in the key forge above (<b>evm:</b>name, <b>sol:</b>name, <b>btc:</b>name …).
+    rail can be forged in <a href="#forge-sec">the key forge</a> (<b>evm:</b>name, <b>sol:</b>name, <b>btc:</b>name …).
     QRs are drawn locally — nothing leaves this page. Where a rail cannot be derived honestly the card says
     so and shows <b>no address</b>: a wrong receive address is the one mistake that cannot be undone.</div>
   </div>
@@ -1283,7 +1293,7 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
 <section id="receipts-sec" data-wl-task="proof" style="border-color:var(--gold)">
   <h2>🧾 the receipts — <span data-i18n="wl.h.receipts">every bill recomputed here</span></h2>
   <details class="tnote" data-reg-disclose><summary data-i18n="wl.d.receipts">How this panel checks every bill — recomputed here, never trusted</summary>
-  <p class="law">the voucher panel above reads <b>your</b> balance live from the estate oracle; this panel
+  <p class="law"><a href="#voucher-sec">the voucher panel</a> reads <b>your</b> balance live from the estate oracle; this panel
   reads the estate's <b>public</b> spend-receipt record (SPEC-SPEND-RECEIPT-1, the same shape the b-meter
   writes) and recomputes every bill in-page — <b>price × burned = owed</b>, summed from the line items,
   never from a stored total. each receipt's verdict is drawn as a comb cell:
@@ -1818,7 +1828,9 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
               (need / 1e12) + ' AR (gateway-quoted)' + (spot ? ' · 1 AR ≈ $' + parseFloat(spot).toFixed(2) : '') +
               (winston < need ? ' — ⚠ short by ' + ((need - winston) / 1e12) + ' AR: fund the address, the tx is ready' : ' — funded, ready'));
             go.disabled = winston < need;
+            wlRead(statEl, true);   /* a read that SUCCEEDED, even when short of the anchor fee */
           } catch (err) {
+            if (statEl) { statEl.textContent = 'read failed'; wlRead(statEl, false); }
             paint('gateway read failed: ' + (err && err.message ? err.message : err), 'var(--amber)');
           }
         }
@@ -2313,18 +2325,18 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       var eth=parseInt(wei,16)/1e18;
       $('a-bal').textContent=eth.toFixed(6)+' ETH';
       $('a-info').textContent=addr;
-      $('a-stat').textContent='✓ live';$('a-stat').className='stat ok';
+      $('a-stat').textContent='✓ live';$('a-stat').className='stat ok';wlRead($('a-stat'),true);
       $('ch-arb').classList.add('connected');
-    } else { $('a-stat').textContent='arbitrum read failed';$('a-stat').className='stat err'; }
+    } else { $('a-stat').textContent='arbitrum read failed';$('a-stat').className='stat err';wlRead($('a-stat'),false); }
     // ANT balanceOf — honest EVM lane (the old vaulta-side read never worked)
     $('ant-info').textContent='ANT of '+addr.slice(0,10)+'…';$('ant-stat').textContent='reading…';
     var bal=await evmCall('eth_call',[{to:ANT,data:'0x70a08231'+'0'.repeat(24)+addr.slice(2)},'latest']);
     if(bal!==null&&/^0x[0-9a-f]+$/i.test(bal)){
       var ant=parseInt(bal,16)/1e18;
       $('ant-bal').textContent=ant.toFixed(4)+' ANT';
-      $('ant-stat').textContent='✓ live';$('ant-stat').className='stat ok';
+      $('ant-stat').textContent='✓ live';$('ant-stat').className='stat ok';wlRead($('ant-stat'),true);
       $('ch-autonomi').classList.add('connected');
-    } else { $('ant-stat').textContent='ANT read failed';$('ant-stat').className='stat err'; }
+    } else { $('ant-stat').textContent='ANT read failed';$('ant-stat').className='stat err';wlRead($('ant-stat'),false); }
     $('sum-chains').textContent=document.querySelectorAll('.chain.connected').length;
   }
 
@@ -3651,7 +3663,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       await setSoul(target);
     } else if(ownsActive.length>1){
       stat.innerHTML='this key runs several accounts: '+ownsActive.map(function(o){return '<b>'+o.account+'</b>'}).join(', ')+
-        ' — press BRIDGE again after picking the account in the name field above (the wallet is on '+SOUL+' now).';
+        ' — press BRIDGE again after picking the account in <a href="#connect-sec">the name field</a> (the wallet is on '+SOUL+' now).';
       $('br-wif').value='';
       return;
     }
@@ -3670,7 +3682,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     if(!pastedPub||!existing.some(function(k){return canon(k.key)===canon(pastedPub)})){
       stat.innerHTML='✗ <b>this key ('+((pastedPub||'?').slice(0,14))+'…) is NOT on '+SOUL+
         '@active</b> — that account is controlled by '+existing.map(function(k){return k.key.slice(0,12)+'…'}).join(', ')+
-        '. Paste the ACTIVE private key of <b>'+SOUL+'</b>, or fix the account name above (it currently targets '+
+        '. Paste the ACTIVE private key of <b>'+SOUL+'</b>, or fix <a href="#connect-sec">the account name</a> (it currently targets '+
         '<b>'+SOUL+'</b> — typing a .b name strips the .b and targets the raw account).';
       $('br-wif').value='';
       return;
@@ -4771,7 +4783,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   function svRefresh(){
     var liq=(LAST_ACC&&LAST_ACC.core_liquid_balance)||null;
     $('sv-stat').innerHTML='liquid: <b>'+(liq!==null?liq:'<a href="#bal-sec">not read yet</a>')+'</b>'+
-      (BRIDGED?' · bridge ✓ (K1 signs)':' · <b style="color:var(--amber)">not bridged — <a href="#bridge-sec">the bridge</a> adds your bzDiD key first</b>');
+      (BRIDGED?' · bridge ✓ (K1 signs)':!K1?' · <b style="color:var(--amber)">not connected — <a href="#kc-sec">your keychain</a> comes first</b>':' · <b style="color:var(--amber)">not bridged — <a href="#bridge-sec">the bridge</a> adds your bzDiD key first</b>');
   }
   function validAcct(s){ return /^[a-z1-5]{1,12}$/.test(s||'')&&/[a-z]/.test(s||'') }
   /* ── SPEND CAP — the owner's optional tool, enforced at SIGN time. A per-unit
@@ -4853,7 +4865,8 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     if(!SOUL){payStat('connect your soul first');return}
     if(!validAcct(to)){$('sv-stat').textContent='recipient must be a Vaulta account: 1-12 chars a-z 1-5';return}
     if(!(amt>0)){$('sv-stat').textContent='amount must be > 0';return}
-    if(!K1||!BRIDGED){wlSay($('sv-stat'),['your bzDiD key is not on '+SOUL+'@active yet — run ',{to:'bridge-sec',t:'the bridge'},' first']);return}
+    if(!K1){wlSay($('sv-stat'),['connect ',{to:'kc-sec',t:'your keychain'},' first']);return}
+    if(!BRIDGED){wlSay($('sv-stat'),['your bzDiD key is not on '+SOUL+'@active yet — run ',{to:'bridge-sec',t:'the bridge'},' first']);return}
     if(!capGate('A',amt))return;
     var q=amt.toFixed(4)+' A';
     $('sv-stat').textContent='1/4 serializing transfer…';
@@ -5121,7 +5134,8 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     swQuote(); };
   $('sw-amt').addEventListener('input',function(){ if($('sw-panel').style.display!=='none')swQuote() });
   $('sw-go').onclick=async function(){
-    if(!SOUL||!K1||!BRIDGED){wlSay($('sw-stat'),['needs your bridged bzDiD key — run ',{to:'bridge-sec',t:'the bridge'},' first']);return}
+    if(!SOUL||!K1){wlSay($('sw-stat'),['connect ',{to:'kc-sec',t:'your keychain'},' first']);return}
+    if(!BRIDGED){wlSay($('sw-stat'),['needs your bridged bzDiD key — run ',{to:'bridge-sec',t:'the bridge'},' first']);return}
     var n=parseInt($('sw-amt').value,10)||0;
     if(!(n>0)){$('sw-stat').textContent='enter bytes of RAM';return}
     var swCapCost=null;
@@ -5157,12 +5171,12 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   /* ── balances (keyless, unchanged lane) ───────────────────── */
   async function readVaulta(acct){
     var d=await post(VH,'/v1/chain/get_account',{account_name:acct});
-    if(!d){ $('v-stat').textContent='read failed'; $('v-stat').className='stat err'; return; }
+    if(!d){ $('v-stat').textContent='read failed'; $('v-stat').className='stat err'; wlRead($('v-stat'),false); return; }
     LAST_ACC=d;
     $('v-bal').textContent=d.core_liquid_balance||'0.0000';
     $('v-info').textContent='RAM '+(d.ram_usage/1024).toFixed(1)+'/'+(d.ram_quota/1024).toFixed(0)+' KB · '+
       'CPU '+((d.cpu_limit&&d.cpu_limit.used)||0)+'μs · perms '+(d.permissions||[]).map(function(p){return p.perm_name}).join('/');
-    $('v-stat').textContent='✓ live'; $('v-stat').className='stat ok';
+    $('v-stat').textContent='✓ live'; $('v-stat').className='stat ok'; wlRead($('v-stat'),true);
     $('ch-vaulta').classList.add('connected');
     if(SOUL===acct)refreshAcctPanel();
   }
@@ -5177,10 +5191,10 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
         var hp=(parseFloat(a.vesting_shares)||0).toFixed(3);
         $('h-bal').textContent=(parseFloat(a.balance)||0).toFixed(3)+' HIVE';
         $('h-info').textContent=hp+' HP · '+(parseFloat(a.hbd_balance)||0).toFixed(3)+' HBD · rep '+a.reputation;
-        $('h-stat').textContent='✓ live'; $('h-stat').className='stat ok';
+        $('h-stat').textContent='✓ live'; $('h-stat').className='stat ok'; wlRead($('h-stat'),true);
         $('ch-hive').classList.add('connected');
-      } else { $('h-stat').textContent='account not found on Hive'; $('h-stat').className='stat err'; }
-    }catch(e){ $('h-stat').textContent='read failed'; $('h-stat').className='stat err'; }
+      } else { $('h-stat').textContent='account not found on Hive'; $('h-stat').className='stat err'; wlRead($('h-stat'),false); }
+    }catch(e){ $('h-stat').textContent='read failed'; $('h-stat').className='stat err'; wlRead($('h-stat'),false); }
   }
 
   async function readAll(){
@@ -5188,7 +5202,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     $('wstat').innerHTML='✓ connected as <b style="color:var(--leaf)">'+SOUL+'</b> — reading balances…';
     await Promise.all([readVaulta(SOUL), readHive(SOUL)]);
     $('wstat').innerHTML='✓ connected as <b style="color:var(--leaf)">'+SOUL+'</b> · balances live';
-    $('sum-soul').textContent=SOUL+'.b';
+    $('sum-soul').textContent=SOUL+'.b';document.body.setAttribute('data-wl-soul','true');
     $('sum-chains').textContent=document.querySelectorAll('.chain.connected').length;
     if(K1)checkBridge();
   }
@@ -5806,7 +5820,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
      (stat "err") stays on screen but is said to be possibly out of date, and
      its rail on the stage does not light */
   var STAT={'v-bal':'v-stat','h-bal':'h-stat','a-bal':'a-stat','ant-bal':'ant-stat','ar-bal':'ar-stat'};
-  function failed(id){var st=document.getElementById(STAT[id]||'');return !!st&&st.classList.contains('err')}
+  function failed(id){var st=document.getElementById(STAT[id]||'');return !!st&&st.getAttribute('data-read-failed')==='true'}
   var mirrors=[].slice.call(document.querySelectorAll('[data-wl-src]'));
   function sync(id){
     var src=document.getElementById(id), t=src?src.textContent.trim():'', read=!unread(t), err=failed(id);
@@ -5828,7 +5842,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     new MutationObserver(function(){sync(id)}).observe(src,{childList:true,characterData:true,subtree:true});
     var st=document.getElementById(STAT[id]||'');
     if(st&&st!==src){
-      new MutationObserver(function(){sync(id)}).observe(st,{attributes:true,attributeFilter:['class'],childList:true,characterData:true,subtree:true});
+      new MutationObserver(function(){sync(id)}).observe(st,{attributes:true,attributeFilter:['data-read-failed'],childList:true,characterData:true,subtree:true});
     }
   });
 
@@ -5851,8 +5865,8 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     body.setAttribute('data-wl-view',v);
     try{sessionStorage.setItem('wl.view',v)}catch(e){}
     paintDock();
-    if(how.push&&was!==v){try{history.pushState({wlView:v,wlIdx:idx()+1},'')}catch(e){}}
-    else if(how.replace){try{history.replaceState({wlView:v,wlIdx:idx()},'')}catch(e){}}
+    if(how.push&&was!==v){try{history.pushState({wlView:v,wlIdx:idx()+1},'',how.url)}catch(e){}}
+    else if(how.replace){try{history.replaceState({wlView:v,wlIdx:idx()},'',how.url)}catch(e){}}
     if(how.arrive)arrive(v);
     paintIndex();
   }
@@ -5889,11 +5903,14 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     var el=document.getElementById(h), t=taskOf(el);
     if(!t)return;
     e.preventDefault();
-    try{history.replaceState(history.state,'','#'+h)}catch(x){}
-    /* a cross-reference REPLACES the task, it never deepens the stack: "‹ wallet"
-       keeps meaning the wallet's home */
-    if(reg()!=='cypherpunk'&&view()!=='all'&&view()!==t)setView(t,{replace:true});
+    /* a cross-reference between tasks REPLACES the task ("‹ wallet" keeps meaning
+       home); leaving bee's home is a step down the stack. The hash is written to
+       the entry that SHOWS the target, never to the one left behind */
+    if(reg()!=='cypherpunk'&&view()!=='all'&&view()!==t){
+      if(reg()==='bee'&&view()==='home')setView(t,{push:true,url:'#'+h});else setView(t,{replace:true,url:'#'+h});
+    } else { try{history.replaceState(history.state,'','#'+h)}catch(x){} }
     requestAnimationFrame(function(){
+      if(!shown(el)){arrive(t);return}   /* the page holds the target hidden: land on its task, never on nothing */
       el.scrollIntoView({block:'start',behavior:(reduced()||reg()==='cypherpunk')?'auto':'smooth'});
       var s=el.closest('main>section');if(s)s.focus({preventScroll:true});
     });
@@ -5901,12 +5918,12 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
 
   /* a deep link lands in the task that holds its target, in every register */
   function taskOf(el){var s=el&&el.closest&&el.closest('main>section[data-wl-task]');return s?s.getAttribute('data-wl-task'):null}
-  function landHash(){
+  function landHash(keepView){
     var h=location.hash.slice(1);
     if(!h||h.indexOf('qr=')===0)return;
     var el=null;try{el=document.getElementById(decodeURIComponent(h))}catch(e){}
     var t=taskOf(el);if(!t)return;
-    if(reg()!=='cypherpunk'&&view()!=='all'&&view()!==t)setView(t,{replace:true});
+    if(keepView!==true&&reg()!=='cypherpunk'&&view()!=='all'&&view()!==t)setView(t,{replace:true});
     requestAnimationFrame(function(){el.scrollIntoView({block:'start'})});
   }
   window.addEventListener('hashchange',landHash);
@@ -5917,7 +5934,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
      they focused or typed in becomes the bee/raver task, and a bee/raver task
      becomes cypherpunk's place. */
   var workTask=null;
-  function noteWork(e){var t=taskOf(e.target);if(t)workTask=t}
+  function noteWork(e){if(e.target&&e.target.matches&&e.target.matches('main>section'))return;var t=taskOf(e.target);if(t)workTask=t}
   document.addEventListener('focusin',noteWork);
   document.addEventListener('input',noteWork);
   function current(){
@@ -6016,8 +6033,9 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   buildIndex();
   document.addEventListener('blang',buildIndex);
   paintDock();
-  try{history.replaceState({wlView:view(),wlIdx:0},'')}catch(e){}
-  landHash();
+  var ownState=!!(history.state&&history.state.wlView);   /* a Back/Forward/reload into an entry that knows its view */
+  try{history.replaceState({wlView:view(),wlIdx:(history.state&&history.state.wlIdx)||0},'')}catch(e){}
+  landHash(ownState);
   /* a ?compose= link (bnames' walletAction) arrives for the composer itself:
      it lands ON the composer, not at the top of its task */
   if(/[?&]compose=/.test(location.search)){

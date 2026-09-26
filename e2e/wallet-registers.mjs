@@ -86,13 +86,17 @@ const arrival = page => page.evaluate(() => {
     firstScreenControls: ctrls.filter(inFirst).length,
     notesOpen: notes.filter(d => d.open).length, notes: notes.length,
     own: { bee: shown(document.getElementById('wl-bee')), raver: shown(document.getElementById('wl-rave')) && shown(document.getElementById('wl-dock')), cypherpunk: shown(document.getElementById('wl-cy')) },
-    // what KIND of thing arrives, measured from what is on screen, not from which block is flagged
-    kinds: {
-      rows: [...document.querySelectorAll('main .wlb-row')].filter(shown).length,
-      art: [...document.querySelectorAll('main svg.wlr-art')].filter(shown).reduce((a, s) => a + s.getBoundingClientRect().width * s.getBoundingClientRect().height, 0),
-      index: [...document.querySelectorAll('#wl-cy-idx a')].filter(shown).length,
-      tableRows: [...document.querySelectorAll('main table.cy-t tr')].filter(shown).length,
-    },
+    // what KIND of thing is in the FIRST SCREEN (inside the viewport), not merely rendered somewhere
+    kinds: (() => {
+      const vis = el => { const r = el.getBoundingClientRect(); return { top: Math.max(0, r.top), bottom: Math.min(innerHeight, r.bottom), w: r.width }; };
+      const area = el => { const v = vis(el); return v.bottom > v.top ? (v.bottom - v.top) * v.w : 0; };
+      return {
+        rows: [...document.querySelectorAll('main .wlb-row')].filter(inFirst).length,
+        art: Math.round([...document.querySelectorAll('main svg.wlr-art')].filter(inFirst).reduce((a, s) => a + area(s), 0)),
+        index: [...document.querySelectorAll('#wl-cy-idx a')].filter(inFirst).length,
+        sections: [...document.querySelectorAll('main>section[data-wl-task]')].filter(inFirst).map(s => s.id),
+      };
+    })(),
     mainWidth: Math.round(document.querySelector('main').getBoundingClientRect().width),
   };
 });
@@ -144,13 +148,15 @@ ok('cypherpunk arrives with the whole pipeline open (18 sections, every note) an
   arr.cypherpunk.notesOpen === arr.cypherpunk.notes && arr.cypherpunk.notes >= 14, JSON.stringify(arr.cypherpunk));
 ok('bee and raver keep every technical note folded (one tap away, never deleted)', arr.bee.notesOpen === 0 && arr.raver.notesOpen === 0 && arr.bee.notes === arr.cypherpunk.notes);
 // not "which block is flagged" (that differs by construction): what KIND of
-// thing is on screen at arrival: bee a list of rows, raver a picture,
-// cypherpunk a console of tables and an index over the open pipeline
+// thing is IN THE FIRST SCREEN of a phone. Bee: choices (list rows) and no
+// section. Raver: a picture and no section. Cypherpunk: the pipeline itself,
+// hero balance first by the ruled phone fold law (its console sits beside it
+// on desktop, checked in 6).
 const k = r => arr[r].kinds;
-ok('each register arrives on a different KIND of thing: bee a list, raver a picture, cypherpunk a console over the open pipeline',
-  k('bee').rows >= 7 && k('bee').art === 0 && k('bee').index === 0 && k('bee').tableRows === 0 &&
-  k('raver').rows === 0 && k('raver').art > 50000 && k('raver').index === 0 && k('raver').tableRows === 0 &&
-  k('cypherpunk').rows === 0 && k('cypherpunk').art === 0 && k('cypherpunk').index >= 18 && k('cypherpunk').tableRows >= 10,
+ok('on a phone the first screen holds a different KIND of thing: bee choices, raver a picture, cypherpunk the pipeline itself (hero balance first)',
+  k('bee').rows >= 2 && k('bee').art === 0 && k('bee').sections.length === 0 &&
+  k('raver').rows === 0 && k('raver').art > 30000 && k('raver').sections.length === 0 &&
+  k('cypherpunk').rows === 0 && k('cypherpunk').art === 0 && k('cypherpunk').sections.includes('bal-sec'),
   REGS.map(r => r + ' ' + JSON.stringify(k(r))).join(' · '));
 
 // 4 · new bee: a navigation stack. A row pushes one task; back pops it.
@@ -214,12 +220,79 @@ ok('each register arrives on a different KIND of thing: bee a list, raver a pict
   await page.click('#wl-bar [data-wl-go="home"]'); await page.waitForTimeout(400);
   ok('bee: after the browser\'s Forward, "‹ wallet" pops again (the stack index lives in history, not a counter)',
     fwd.view === 'key' && await page.evaluate(() => document.body.dataset.wlView) === 'home', JSON.stringify(fwd));
+  // from HOME, the card's link is a step down the stack: browser Back returns home, not out of the wallet
+  await page.evaluate(() => { document.getElementById('v-bal').textContent = ''; });
+  await page.waitForTimeout(150);
+  await page.click('#wl-bee .wlb-connect'); await page.waitForTimeout(500);
+  const fromHome = await page.evaluate(() => ({ view: document.body.dataset.wlView, idx: history.state && history.state.wlIdx, wq: document.getElementById('wq').getClientRects().length > 0 }));
+  await page.goBack(); await page.waitForTimeout(400);
+  ok('bee: the unread card\'s "connect your name" link opens the connect field one step down; Back returns home',
+    fromHome.view === 'have' && fromHome.idx === 1 && fromHome.wq && await page.evaluate(() => document.body.dataset.wlView) === 'home', JSON.stringify(fromHome));
+  // a link whose target the page itself holds hidden (the bridge, before any keychain) lands on its task, focus kept
+  await page.click('#wl-bee [data-wl-go="move"]'); await page.waitForTimeout(350);
+  await page.evaluate(() => { const a = document.createElement('a'); a.href = '#bridge-sec'; a.id = 'gate-hidden'; a.textContent = 'the bridge'; document.getElementById('pay-sec').appendChild(a); });
+  await page.click('#gate-hidden'); await page.waitForTimeout(500);
+  const hid = await page.evaluate(() => ({ view: document.body.dataset.wlView, bridge: document.getElementById('bridge-sec').getClientRects().length > 0, focus: document.activeElement && document.activeElement.id }));
+  ok('bee: a link to a part the page holds hidden lands on its task with focus on the task title, never on nothing',
+    hid.view === 'key' && !hid.bridge && hid.focus === 'wl-bar-title', JSON.stringify(hid));
+  // a reload on a task keeps its place in the stack: "‹ wallet" still pops home
+  await page.reload({ waitUntil: 'load' }); await page.waitForTimeout(500);
+  const reloaded = await page.evaluate(() => ({ view: document.body.dataset.wlView, idx: history.state && history.state.wlIdx }));
+  // a Back into an entry the pre-reload document pushed is a full load: wait for the view, bounded
+  await page.click('#wl-bar [data-wl-go="home"]'); await page.waitForFunction(() => document.body && document.body.dataset.wlView === 'home', null, { timeout: 5000 }).catch(() => {});
+  ok('bee: a reload keeps the stack index; "‹ wallet" then pops home (no dead Back press)',
+    reloaded.view === 'key' && reloaded.idx === 1 && await page.evaluate(() => document.body.dataset.wlView) === 'home',
+    JSON.stringify(reloaded) + ' → ' + JSON.stringify(await page.evaluate(() => ({ view: document.body.dataset.wlView, state: history.state, len: history.length, url: location.pathname + location.hash }))));
   await ctx.close();
 }
 {
   const src = await readFile(join(SURFACES, 'wallet.html'), 'utf8');
-  const stray = src.match(/(THE BRIDGE|THE VAULT|BALANCES|receive|the gold button|auto-connect) (above|below)/gi) || [];
-  ok('no message sends a reader to another part of the wallet by direction (the one-task views have no "above")', stray.length === 0, stray.join(', '));
+  // EVERY user-facing "above"/"below" (comments stripped) must be on this
+  // reviewed list: each points WITHIN its own section or task, in the task's
+  // own order, so it is true in every register. A new one fails until someone
+  // reviews it: across tasks, a message names its target as a link instead.
+  const REVIEWED = [
+    ['the glyphs above open each part', 'raver stage: the dock sits above it'],
+    ['more as you forge below', 'keychain → key forge, same task, after it'],
+    ['paste it once below', 'within the keychain'],
+    ['Any device in the list above', 'within the vault'],
+    ['connect your keychain above to see your derived keys', 'key forge ← keychain, same task, before it'],
+    ['orge new ones below', 'within the key forge'],
+    ['(live price below)', 'within the account forge'],
+    ['addresses below are yours to hand out', 'within pay'],
+    ['Each address above falls out of the', 'within pay'],
+    ['choose a lane above', 'within pay'],
+    ['(rate cited below)', 'within the voucher'],
+    ['The key in the config below is', 'within fund'],
+    ['its Base address below is a bare', 'within fiat in'],
+    ['data block below the fold', 'the chain matrix names its own source-code data block'],
+    ['phrases belong in the recovery lane above', 'bridge/vault paste ← keychain recovery, same task, before it'],
+    ['no contexts yet — forge one below', 'within the key forge'],
+    ['NOT YET on chain — bridge below', 'keychain → bridge, same task, after it'],
+    ['use the recovery lane below', 'within the keychain'],
+    ['open the public link in the banner above', 'the origin banner heads main in every view'],
+    ['create one here, or use recovery below', 'within the keychain'],
+    ['the Vaulta tx passkey lane below', 'keychain → account forge passkey, same task, after it'],
+    ['(passkey above or recovery below)', 'within the keychain (the QR bridge)'],
+    ['first (above)', 'account forge ← bridge, same task, before it'],
+    ['(the 12-char test actor above)', 'within the composer'],
+    ['the TESTNET key you paste below', 'within the composer'],
+    ['Raise or clear it above', 'within pay (the spend cap)'],
+    ['set one above and this lane obeys it too', 'within pay (the sats cap)'],
+    ['filled into both fields below', 'within the vault'],
+    ['connect your keychain above to use it', 'vault → keychain, same task, before it'],
+    ['bridge field below', 'vault → bridge, same task, after it'],
+    ['select the text above and copy it manually', 'within the vault'],
+    ['unlock with a keypass below', 'within the vault'],
+  ];
+  const blank = m => m.replace(/[^\n]/g, ' ');
+  let code = src.replace(/\/\*[\s\S]*?\*\//g, blank).replace(/<!--[\s\S]*?-->/g, blank);
+  code = code.split('\n').map(l => l.replace(/(^|\s)\/\/\s.*$/, (m, p) => p + blank(m.slice(p.length)))).join('\n');
+  const found = [];
+  code.split('\n').forEach((l, i) => { const re = /[^.;:!?<>'"]{0,48}\b(above|below)\b[^.;:!?<>'"]{0,32}/gi; let x; while ((x = re.exec(l))) found.push({ line: i + 1, text: x[0].trim() }); });
+  const unreviewed = found.filter(f => !REVIEWED.some(([snip]) => f.text.includes(snip.trim())));
+  ok(`every "above"/"below" a reader can see (${found.length}) is a reviewed within-task reference; across tasks a message names its target as a link`,
+    unreviewed.length === 0 && found.length > 0, unreviewed.slice(0, 4).map(u => u.line + ': ' + u.text).join(' · '));
 }
 
 // 5 · raver: a stage and a dock. A glyph swaps the deck in place; arrows and a swipe move along it.
@@ -241,12 +314,19 @@ ok('each register arrives on a different KIND of thing: bee a list, raver a pict
   }));
   ok('raver: the "add" glyph swaps the deck in place (fund + fiat in + voucher; the stage steps aside)',
     deck.view === 'add' && deck.sections.join() === 'voucher-sec,fund-sec,peer-sec' && !deck.stage && deck.pressed.join() === 'add', JSON.stringify(deck));
-  const art = await page.evaluate(() => {
-    const orb = document.querySelector('#wl-deck .wld-orb'), g = [...document.querySelectorAll('#wl-deck [data-wl-for]')].filter(s => s.getClientRects().length);
-    const first = [...document.querySelectorAll('main>*')].filter(e => e.getClientRects().length && e.id !== 'wl-dock').sort((a, b) => a.getBoundingClientRect().top - b.getBoundingClientRect().top)[0];
-    return { orb: !!orb && orb.getClientRects().length > 0, glyph: g.map(s => s.textContent).join(), leads: first && first.id };
-  });
-  ok('raver: a deck opens on ART, its glyph lit large before any section (not bee in raver dress)', art.orb && art.glyph === '💳' && art.leads === 'wl-deck', JSON.stringify(art));
+  // EVERY deck, on a phone: the first thing under the dock is art, never a section
+  const leads = {};
+  for (const go of ['have', 'move', 'add', 'keep', 'key', 'proof', 'all']) {
+    await page.click(`#wl-dock [data-wl-go="${go}"]`); await page.waitForTimeout(250);
+    leads[go] = await page.evaluate(() => {
+      const first = [...document.querySelectorAll('main>*')].filter(e => e.getClientRects().length && e.id !== 'wl-dock').sort((a, b) => a.getBoundingClientRect().top - b.getBoundingClientRect().top)[0];
+      const g = [...document.querySelectorAll('#wl-deck [data-wl-for]')].filter(s => s.getClientRects().length).map(s => s.textContent).join();
+      return (first && first.id) + (g ? ':' + g : '');
+    });
+  }
+  ok('raver: EVERY deck opens on art before any section (have on the stage, the rest on their lit glyph)',
+    leads.have === 'wl-rave' && ['move', 'add', 'keep', 'key', 'proof', 'all'].every(g => leads[g].startsWith('wl-deck:')), JSON.stringify(leads));
+  await page.click('#wl-dock [data-wl-go="add"]'); await page.waitForTimeout(600);
   const filled = async () => page.evaluate(() => {
     const probe = document.createElement('i'); probe.style.color = getComputedStyle(document.body).getPropertyValue('--reg-primary').trim(); document.body.appendChild(probe);
     const rgb = getComputedStyle(probe).color; probe.remove();
@@ -274,6 +354,21 @@ ok('each register arrives on a different KIND of thing: bee a list, raver a pict
   await page.keyboard.press('End'); await page.waitForTimeout(700);
   const inView = await page.evaluate(() => { const d = document.getElementById('wl-dock').getBoundingClientRect(), b = document.querySelector('#wl-dock [aria-pressed="true"]').getBoundingClientRect(); return { go: document.body.dataset.wlView, inside: b.left >= d.left - 1 && b.right <= d.right + 1 }; });
   ok('raver: on a narrow dock the lit glyph scrolls into view (the last glyph, "all", is never off-screen when lit)', inView.go === 'all' && inView.inside, JSON.stringify(inView));
+  await ctx.close();
+}
+{
+  // under reduced motion every raver piece holds a still (the orb, its rings, the orbit, the soul)
+  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, reducedMotion: 'reduce' });
+  await ctx.addInitScript(() => { try { localStorage.setItem('bregister', 'raver'); sessionStorage.setItem('wl.view', 'move'); } catch (e) {} });
+  await ctx.route(url => !url.href.startsWith(origin), r => r.abort());
+  const page = await ctx.newPage();
+  await page.goto(origin + '/wallet.html', { waitUntil: 'load' }); await page.waitForTimeout(500);
+  const still = await page.evaluate(() => {
+    const orb = document.querySelector('.wld-orb');
+    return [getComputedStyle(orb).animationName, getComputedStyle(orb, '::before').animationName, getComputedStyle(orb, '::after').animationName,
+      getComputedStyle(document.querySelector('.wlr-orbit')).animationName, getComputedStyle(document.querySelector('.wlr-soul')).animationName];
+  });
+  ok('raver under reduced motion: the orb, its rings, the orbit and the soul all hold still', still.every(a => a === 'none'), still.join(','));
   await ctx.close();
 }
 
@@ -341,7 +436,8 @@ ok('each register arrives on a different KIND of thing: bee a list, raver a pict
     // a LATER read that fails leaves the old figure in the card: it must never pass for current
     seen[reg].stale = await page.evaluate(v => {
       document.getElementById('v-bal').textContent = v;
-      const st = document.getElementById('v-stat'); st.textContent = 'read failed'; st.className = 'stat err';
+      // exactly what the page's own failure branch does: the text, the colour, and the read's own mark
+      const st = document.getElementById('v-stat'); st.textContent = 'read failed'; st.className = 'stat err'; window.wlRead(st, false);
       return new Promise(r => setTimeout(() => {
         const vis = sel => [...document.querySelectorAll(sel)].filter(e => e.getClientRects().length).map(e => e.textContent.trim());
         r({ figs: vis('#wl-bee .wlb-fig, #wl-rave li:first-child .wl-fig, #wl-cy tbody:first-of-type tr:first-child .wl-fig'),
@@ -349,6 +445,26 @@ ok('each register arrives on a different KIND of thing: bee a list, raver a pict
             lit: document.querySelector('.wlr-node[data-wl-rail="v-bal"]').getAttribute('data-lit') });
       }, 100));
     }, FIXTURE['v-bal']);
+    // Arweave paints "stat err" for a read that SUCCEEDED but is short of the anchor fee: not a failure
+    seen[reg].short = await page.evaluate(() => {
+      document.getElementById('ar-bal').textContent = '0.5 AR';
+      const st = document.getElementById('ar-stat'); st.className = 'stat err'; st.textContent = 'live · short 0.1 AR for the anchor'; window.wlRead(st, true);
+      return new Promise(r => setTimeout(() => r({
+        lit: document.querySelector('.wlr-node[data-wl-rail="ar-bal"]').getAttribute('data-lit'),
+        staleShown: [...document.querySelectorAll('#wl-rave li[data-wl-stat="ar-stat"] .wl-stale')].filter(e => e.getClientRects().length).length,
+      }), 100));
+    });
+    if (reg === 'bee') {
+      // a CONNECTED reader whose read is still in flight sees the read's own state, never "connect your name"
+      seen.bee.soul = await page.evaluate(() => {
+        document.getElementById('v-bal').textContent = ''; window.wlRead(document.getElementById('v-stat'), true);
+        document.getElementById('v-stat').textContent = 'reading…'; document.body.setAttribute('data-wl-soul', 'true');
+        return new Promise(r => setTimeout(() => {
+          const vis = sel => [...document.querySelectorAll(sel)].filter(e => e.getClientRects().length).map(e => e.textContent.trim());
+          r({ connect: vis('#wl-bee .wlb-connect'), stat: vis('#wl-bee .wlb-stat') });
+        }, 100));
+      });
+    }
     await ctx.close();
   }
   const all = REGS.flatMap(r => [seen[r].card, ...seen[r].bee, ...seen[r].raver, ...seen[r].cy]);
@@ -358,6 +474,10 @@ ok('each register arrives on a different KIND of thing: bee a list, raver a pict
   ok('an unread balance hides every figure and is said in words, in all three registers',
     REGS.every(r => seen[r].unread.figs.length === 0 && seen[r].unread.words.length === 1 && seen[r].unread.words[0].length > 3),
     REGS.map(r => r + ':' + seen[r].unread.words.join()).join(' · '));
+  ok('a read that succeeds short of a fee ("live · short …", painted err) is NOT called failed: its rail stays lit, no stale line',
+    REGS.every(r => seen[r].short.lit === 'true' && seen[r].short.staleShown === 0), REGS.map(r => r + ':' + JSON.stringify(seen[r].short)).join(' · '));
+  ok('bee: a connected reader whose read is in flight sees "reading…", never "connect your name"',
+    seen.bee.soul.connect.length === 0 && seen.bee.soul.stat.join() === 'reading…', JSON.stringify(seen.bee.soul));
   ok('a failed LATER read keeps its old figure but says so in every register, and its rail goes dark',
     REGS.every(r => seen[r].stale.figs.length === 1 && seen[r].stale.said.length === 1 && seen[r].stale.said[0].length > 5 && seen[r].stale.lit === 'false'),
     REGS.map(r => r + ':' + seen[r].stale.said.join()).join(' · '));
@@ -374,11 +494,16 @@ ok('each register arrives on a different KIND of thing: bee a list, raver a pict
     const lum = c => { const f = v => { v /= 255; return v <= .03928 ? v / 12.92 : Math.pow((v + .055) / 1.055, 2.4); }; return .2126 * f(c.r) + .7152 * f(c.g) + .0722 * f(c.b); };
     const bgOf = el => { for (let n = el; n; n = n.parentElement) { const c = parse(getComputedStyle(n).backgroundColor); if (c && c.a > .5) return c; } return parse(getComputedStyle(document.body).backgroundColor); };
     const out = [], small = [], dash = [];
-    document.querySelectorAll('main>section[data-wl-task] *').forEach(el => {
-      if (el.children.length || !el.textContent.trim() || !el.getClientRects().length) return;
+    // every visible TEXT NODE, so the own text of a mixed-content parent counts
+    // too (CSS-generated content is not text and is not measured)
+    const els = new Set(), walk = document.createTreeWalker(document.querySelector('main'), NodeFilter.SHOW_TEXT);
+    while (walk.nextNode()) { const n = walk.currentNode, p = n.parentElement; if (n.textContent.trim() && p && p.closest('main>section[data-wl-task]')) els.add(p); }
+    els.forEach(el => {
+      if (!el.getClientRects().length) return;
       const cs = getComputedStyle(el); if (cs.visibility === 'hidden' || parseFloat(cs.opacity) === 0) return;
-      const where = { t: el.textContent.trim().slice(0, 30), sec: el.closest('section').id };
-      if (el.textContent.trim() === '—' || el.textContent.trim() === '-') dash.push(where);
+      const own = [...el.childNodes].filter(n => n.nodeType === 3).map(n => n.textContent).join('').trim();
+      const where = { t: own.slice(0, 30), sec: el.closest('section').id };
+      if (own === '—' || own === '-') dash.push(where);
       if (parseFloat(cs.fontSize) < 14) small.push({ ...where, px: parseFloat(cs.fontSize) });
       if (el.closest('[aria-disabled="true"],:disabled')) return; // inactive controls are exempt (WCAG 1.4.3)
       // SVG text paints with FILL, never color: measure what is actually painted
@@ -398,11 +523,11 @@ ok('each register arrives on a different KIND of thing: bee a list, raver a pict
     low[reg] = audit[reg].out;
     await ctx.close();
   }
-  ok('bee: nothing visible anywhere in the whole wallet reads under the 14px label floor (SVG and script-set styles included)', audit.bee.small.length === 0,
+  ok('bee: no visible text node at rest in the whole wallet (every task open, notes folded) reads under the 14px label floor, SVG and script-set styles included', audit.bee.small.length === 0,
     audit.bee.small.slice(0, 4).map(l => `${l.sec} "${l.t}" ${l.px}px`).join(' · '));
-  ok('no register shows a bare dash standing for a value anywhere in the whole wallet (never 0, never a dash)', REGS.every(r => audit[r].dash.length === 0),
+  ok('no register shows a bare dash standing for a value in any visible text node at rest of the whole wallet (never 0, never a dash)', REGS.every(r => audit[r].dash.length === 0),
     REGS.map(r => r + ' ' + audit[r].dash.slice(0, 3).map(l => `${l.sec} "${l.t}"`).join(',')).join(' · '));
-  ok('bee: every visible text leaf of the whole wallet holds AA contrast on paper', low.bee.length === 0,
+  ok('bee: every visible text node at rest of the whole wallet holds AA contrast on paper (SVG measured by fill)', low.bee.length === 0,
     low.bee.slice(0, 3).map(l => `${l.sec} "${l.t}" ${l.ratio} (${l.pair})`).join(' · '));
   const ruled = l => l.pair === 'rgb(100, 129, 118) on rgb(12, 20, 18)';
   for (const reg of ['raver', 'cypherpunk']) {
@@ -444,6 +569,12 @@ ok('each register arrives on a different KIND of thing: bee a list, raver a pict
   ok('a cypherpunk reader who worked nowhere switches to bee and lands on bee home', await page.evaluate(() => document.body.dataset.wlView) === 'home');
   await page.click('#breg-cypherpunk');
   await page.waitForTimeout(300);
+  // moving through the console (j, an index row) is browsing, not work
+  await page.keyboard.press('j'); await page.keyboard.press('j'); await page.waitForTimeout(200);
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await page.click('#breg-bee'); await page.waitForTimeout(300);
+  ok('browsing the console with j is not work: switching to bee still lands home', await page.evaluate(() => document.body.dataset.wlView) === 'home');
+  await page.click('#breg-cypherpunk'); await page.waitForTimeout(300);
   await page.fill('#wq', 'gatesoul');
   await page.click('#breg-bee');
   await page.waitForTimeout(400);

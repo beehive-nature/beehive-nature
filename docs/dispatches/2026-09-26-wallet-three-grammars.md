@@ -71,11 +71,11 @@ The verdict follows from the numbers. The three registers are the same document 
 
 | task | bee row / raver glyph | sections |
 |---|---|---|
-| `have` | see what i have / ⚡ | balances · summary |
+| `have` | see what i have / ⚡ | balances · summary (+ connect, moved here in review round 1, §8) |
 | `move` | pay or get paid / 💸 | pay · outbox |
 | `add` | add money / 💳 | fund · fiat in (Peer) · voucher |
 | `keep` | keep something forever / 📡 | bPay invoice · Arweave · inscriptions |
-| `key` | my key and my safe / 🗝 | connect · keychain · vault · key forge · bridge · account forge |
+| `key` | my key and my safe / 🗝 | ~~connect~~ · keychain · vault · key forge · bridge · account forge |
 | `proof` | see how it works / 🗺 | receipts · composer · chain matrix |
 
 ## 4 · what the new gate must prove (it replaces the dress-only gate)
@@ -115,7 +115,7 @@ That branch freezes wallet.html as the register reference and ships the token se
 
 | gate | result |
 |---|---|
-| `node e2e/wallet-registers.mjs` (golden dress contract harness + the three grammars + whole-wallet contrast, size and dash audits, history, links, stale reads) | **GREEN 83/83** (69 before the round-1 review) |
+| `node e2e/wallet-registers.mjs` (golden dress contract harness + the three grammars + whole-wallet contrast, size and dash audits, history, links, stale reads) | **GREEN 90/90** (69 before review round 1, 83 after it; every other row below re-run green on the round-2 fixes) |
 | wallet batteries: fund · vault · matrix · arweave · signer · adapter | 94 · 35 · 11 · 22 · 105 · 28, **0 failed** |
 | CI `node --test`: comprehension · orb-seat · bpay-policy-ownership · tour-bar-clearance | 9/9 · 4/4 · 2/2 · 4/4 (the first three were red on this branch before they were given the reader's real first step: a row tap or a deep link; no assertion loosened) |
 | CI browser gates: bPay phase A · phase B · bData · polish-i18n · engineflow · no-page-errors | 18/18 · 17/17 (phase B deep-linked, same rule) · 100/100 · 25/25 · 30/30 · exit 0 |
@@ -146,5 +146,24 @@ An independent read-only reviewer (it did not write this code) confirmed that th
 | 14 | auto-connect fired on navigation | Bee rows, the raver dock, the console and its `j`/`k`/`g`/`o` keys no longer start the passkey ceremony; the first press on a real control still does (the founder's auto-connect law). A sideways swipe still counts as a press, since it can't be told apart at pointerdown. |
 | 15 | three gate lines over-claimed | "structure vector" is replaced by **what kind of thing arrives** (bee rows, raver art area, cypherpunk index and tables). The cypherpunk console is checked to be in the first screen on desktop. The 44px floor covers summaries and link-buttons, and spend-audit's 20px receipt rows are lifted. |
 | 16 | leftovers | The fixture writes the stat a real read writes ("✓ live"). The `?` key map was **not built**: the key map is always visible in the console, so a toggle for it would hide nothing. The ring's decorative gold is sovereign purple (honey is b's colour only). The ru floor reset stands as documented in §6. |
+
+## 9 · fresh-eyes review, round 2: REQUEST CHANGES again, and what changed
+
+Round 1's blocker was confirmed fixed and nine of the sixteen findings were closed. Round 2 found three **new** gate lines over-claiming (N1, the same class, smaller) and six small regressions from this lane's own round-1 changes. All are fixed:
+
+| # | finding | fix |
+|---|---|---|
+| N1 | **blocker:** the "kinds" check counted what was rendered, not the first screen. The "no directions" check listed six phrases. "every deck opens on art" was gated for one deck only. | "kinds" counts only what is **in the first screen**, and states the phone truth: cypherpunk arrives on the pipeline itself, hero balance first by the fold law, with its console beside it on desktop. The directions check is **exhaustive**: every visible "above"/"below" (comments stripped) must sit on a **reviewed list** of within-task references, each with its reason, or the gate fails. The art check loops over **every** deck. |
+| 2 | four cross-task directions were left (the key forge, the voucher panel, and two bridge messages naming the connect field) | All four are links now. The console caption drops "below", since on a phone the balances sit above it; its English and its 28 tongues were redrafted. |
+| N2 | raver's "key" and "all" decks opened on sections at 390px | The deck orb takes the stage's flex order. The old universal fold order (balances, ring) now applies in cypherpunk only, where the pipeline is the page. |
+| N3 | the orb ignored reduced motion | The orb and its rings join the reduced-motion block. Gated: orb, rings, orbit and soul all hold still. |
+| N4 | Arweave paints `stat err` on a *successful* read that is short of the anchor fee | Each read marks its own stat line through `wlRead()` in its success and failure branches. The mirrors read that mark, never the colour. A gateway failure now says "read failed". Gated both ways. |
+| N5 | a connected reader still saw "connect your name…" | The page marks a connected soul (`data-wl-soul`). The card then shows the read's own state ("reading…", "read failed"). Gated. |
+| N6 | bridge links could land on a hidden bridge | With no keychain yet, the messages link to the keychain. A link whose target the page holds hidden lands on its task with focus on the title. Gated. |
+| N7 | from home, the card link replaced the entry | Leaving bee's home is a push, so Back returns home. Gated. |
+| N8 | a reload reset the stack index | The index is preserved. The same test exposed a deeper bug: a Back into an entry the pre-reload document pushed is a full load, and the hash overrode that entry's own view. Now an entry's own `history.state` outranks its hash, at first paint and at presenter boot, and a pushed link writes its hash to the **new** entry only. Gated end to end. |
+| N9 | browsing the console counted as work | Focus landing on a section (j/k, index) is not work. Gated. |
+| N10 | the audits' wording claimed more than they measure | They walk every visible **text node** (mixed-content parents included), and the claims say "at rest" and "CSS-generated content excluded". |
+| N11 | doc drift | §3 annotated. The keychain's copy no longer says "anywhere" (navigation does not count). The receipts are restated in §7. The USDC coin is money blue, not honey. |
 
 **Not claimed:** no human (and no matriarch) has used these three grammars yet, and the gate proves only its named properties (DESIGN-CONSTRAINTS §13). No live chain was read. Balances in the receipts are injected fixtures (`12.3456 A`, `7.000 HIVE`), written into the sections' own nodes where a chain read would land.
