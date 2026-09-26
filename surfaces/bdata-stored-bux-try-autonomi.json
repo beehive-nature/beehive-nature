@@ -1,0 +1,36 @@
+{
+ "schema": "bdata.store-receipt/1",
+ "receiptId": "bdata-stored-bux-try-autonomi",
+ "issuedAt": "2026-09-21T07:31:30Z",
+ "_law": "My Data shows STORED only when this receipt verifies against bpay-invoice.json line by line: artifact name, sha256 and bytes exactly as domain.artifact; data_map_address; network; audience; and all three evidence rows (purchased / uploaded / retrieved), each citing its source. Sources are the founder's own upload receipt of 2026-09-21 — the founder pressed pay and uploaded by his own hand; no seat moved funds, no seat pressed pay.",
+ "artifact": {
+  "name": "try_autonomi.mp4",
+  "sha256": "338b486874f6a8f86afe6537143548fb99594038b9ee7de918794db9e744207e", "scan": "PUBLIC-CONSTANT: public content sha256 pin (same pin as bpay-invoice.json domain.artifact)",
+  "bytes": 214091829
+ },
+ "data_map_address": "0x7c4f61ed1c7b950a3043b8a2d1aa9974a24ac6ca274c330e4da1b3a6a61bbb78", "scan": "PUBLIC-CONSTANT: public self-encrypted data-map address (same address as bpay-invoice.json domain.data_map_address)",
+ "network": "autonomi-mainnet",
+ "audience": "public",
+ "evidence": [
+  {
+   "state": "purchased",
+   "at": "2026-09-21T07:26:37Z",
+   "what": "storage paid in full before upload: 4.2125503974609375 ANT (4212550397460937500 atto) + gas 0.000044461821504 ETH on Arbitrum One; funded by the founder from his own wallet, 21 ANT to an upload-only wallet, verified from chain logs",
+   "tx": "0x4dae344cd342c9be514217a01fe0d4ce08f3a85870061079d5ba85aca414db73", "txScan": "PUBLIC-CONSTANT: public Arbitrum One funding transaction",
+   "source": "docs/dispatches/RECEIPT-ANT-VIDEO-UPLOAD-2026-09-21.md — the founder's own PowerShell upload, exit 0, costs in the verbatim uploader output"
+  },
+  {
+   "state": "uploaded",
+   "at": "2026-09-21T07:31:30Z",
+   "what": "56 of 56 chunks stored, 0 failed, 0 retries, 293 s; data-map address 7c4f61ed1c7b950a3043b8a2d1aa9974a24ac6ca274c330e4da1b3a6a61bbb78", "scan": "PUBLIC-CONSTANT: public data-map address in the verbatim uploader output",
+   "source": "docs/dispatches/RECEIPT-ANT-VIDEO-UPLOAD-2026-09-21.md — raw uploader output, verbatim, exit 0"
+  },
+  {
+   "state": "retrieved",
+   "at": "2026-09-21T07:33:00Z",
+   "what": "round-trip download from Autonomi to a separate folder in 1.9 min; sha256 of the download equals the original 338b486874f6a8f86afe6537143548fb99594038b9ee7de918794db9e744207e", "scan": "PUBLIC-CONSTANT: public content sha256, download equals original",
+   "watch": "https://www.ants.tube/watch/7c4f61ed1c7b950a3043b8a2d1aa9974a24ac6ca274c330e4da1b3a6a61bbb78", "watchScan": "PUBLIC-CONSTANT: public watch page carrying the data-map address",
+   "source": "docs/dispatches/RECEIPT-ANT-VIDEO-UPLOAD-2026-09-21.md — round-trip paragraph (Claude Code seat, independent of the uploader)"
+  }
+ ]
+}

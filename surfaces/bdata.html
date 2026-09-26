@@ -107,6 +107,10 @@ details.card>summary{color:var(--ink);font-weight:600}
 .sect{border-top:1px solid var(--line);padding:10px 0 4px;font-size:.875rem;line-height:1.6}
 .sect b{color:var(--ink)}
 .hist{font-size:.875rem;color:var(--dim);border-inline-start:2px solid var(--line);padding-block:2px;padding-inline-start:10px;margin-top:6px}
+/* the store receipt: ✓ Stored on Autonomi, the whole address, the Watch press */
+.stored{margin-top:14px;display:flex;flex-direction:column;align-items:flex-start;gap:10px}
+.stored .mono{font-size:.875rem}
+.stored .badge{margin-top:0}
 /* register scoping before register.js lands (same two rules it ships) */
 [data-reg]:not(body){display:none}
 body[data-reg="bee"] [data-reg="bee"],body[data-reg="raver"] [data-reg="raver"],body[data-reg="cypherpunk"] [data-reg="cypherpunk"]{display:revert}
@@ -148,6 +152,6 @@ document.body.setAttribute('data-reg',r);document.documentElement.setAttribute('
   <div id="bdata-live" class="sr-only" role="status" aria-live="polite"></div>
 </main>
 <script src="tour.js?v=42"></script>
-<script src="bdata.js?v=3" defer></script>
+<script src="bdata.js?v=4" defer></script>
 </body>
 </html>
