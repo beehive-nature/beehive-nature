@@ -148,7 +148,189 @@ body[data-reg="bee"] :is(.comet-law,.idprose){font-size:16px!important;line-heig
 body:is([data-reg="bee"],[data-reg="raver"]) .shead h2{font-size:15px}
 body:is([data-reg="bee"],[data-reg="raver"]) input[type=search]{font-size:14px}
 .fidx a{white-space:nowrap}
+/* ── ETERNAL FRONT (docs/design/eternal) — three products in one surface. Every value is a skaists
+   token (skaists.css, compiled from docs/design/skaists/tokens.json): no hand-picked hex, size or
+   corner. Measured by e2e/skaists-conformance.mjs. One register visible at a time; new bee is the
+   default. Every class is et- prefixed so the page's own bare rules never reach in. ── */
+#eternal{box-sizing:border-box;display:block;width:100%;max-width:600px;margin:0 auto var(--sk-s2,12px);padding:var(--sk-s2,12px) 0 0;border:0;border-radius:0;background:none;box-shadow:none;text-align:left;letter-spacing:normal;text-transform:none;font-size:16px;line-height:1.45}
+#eternal *,#eternal *::before,#eternal *::after{box-sizing:border-box}
+#eternal>.et-r,#eternal>.et-c{display:none}
+body[data-reg="raver"] #eternal>.et-b,body[data-reg="cypherpunk"] #eternal>.et-b{display:none}
+body[data-reg="raver"] #eternal>.et-r{display:block}
+body[data-reg="cypherpunk"] #eternal>.et-c{display:block}
+#eternal [hidden]{display:none!important}
+#eternal button{margin:0;color:inherit;text-transform:none;letter-spacing:normal;min-width:0}
+#eternal svg{display:block;max-width:100%}
+#eternal a{text-decoration:none;border:0;padding-block:0}
+#eternal a:hover,#eternal a:focus{text-decoration:none}
+#eternal :focus-visible{outline:2px solid var(--sk-focus);outline-offset:3px}
+#eternal h2,#eternal h3,#eternal p,#eternal ol,#eternal ul,#eternal table{margin:0;padding:0;border:0;background:none;text-transform:none;letter-spacing:normal;min-width:0;max-width:none;text-shadow:none}
+#eternal table{width:100%;border-collapse:separate;border-spacing:0}
+#eternal th,#eternal td{border:0;padding:0;vertical-align:top;text-align:left;background:none;letter-spacing:normal}
+#eternal code{font:inherit;background:none;padding:0;border:0;color:inherit}
+#etArchive.et-archive-h{box-sizing:border-box;max-width:600px;margin:var(--sk-s5,36px) auto var(--sk-s2,12px);padding:var(--sk-s4,24px) 0 0;border:0;border-top:1px solid var(--sk-line);background:none;color:var(--sk-ink);text-transform:none;letter-spacing:normal;text-shadow:none;-webkit-text-fill-color:currentColor;text-align:left}
+body[data-reg="bee"] #etArchive.et-archive-h{font:400 28px/1.1 var(--sk-font-bee-serif)}
+body[data-reg="raver"] #etArchive.et-archive-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em}
+body[data-reg="cypherpunk"] #etArchive.et-archive-h{font:600 15px/1.45 var(--sk-font-mono)}
+
+/* NEW BEE — a calm room: plain rows, one reassurance, one magenta action, a link, a footnote */
+#eternal .et-b{display:flex;flex-direction:column;gap:var(--sk-s3,18px);color:var(--sk-ink);font:400 16px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-b-mark{font:400 18px/1.2 var(--sk-font-house);color:var(--sk-sovereign)}
+#eternal .et-b-h{font:400 40px/1.05 var(--sk-font-bee-serif);color:var(--sk-ink)}
+#eternal .et-b-lede{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink-mut);text-wrap:pretty}
+#eternal .et-b-guard{display:flex;align-items:center;gap:var(--sk-s2,12px);min-height:var(--sk-control-min,44px);padding:var(--sk-s1,6px) var(--sk-s3,18px);border-radius:var(--sk-radius,12px);background:var(--sk-guard-wash);color:var(--sk-guard);font:600 15px/1.45 var(--sk-font-bee-sans)}
+#eternal .et-ic{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+#eternal .et-b-rows{display:flex;flex-direction:column;background:var(--sk-bg-card);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl,18px);overflow:hidden}
+#eternal .et-b-row{display:flex;align-items:center;justify-content:space-between;gap:var(--sk-s2,12px);width:100%;min-height:var(--sk-control-row,52px);padding:var(--sk-s1,6px) var(--sk-s3,18px);border:0;border-bottom:1px solid var(--sk-line-soft);border-radius:0;background:transparent;text-align:left;font:500 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+#eternal .et-b-row:last-child{border-bottom:0}
+#eternal button.et-b-row{cursor:pointer}
+#eternal .et-b-rl{display:flex;flex-direction:column;flex:1 1 auto;min-width:0}
+#eternal .et-b-rl b{font:500 16px/1.45 var(--sk-font-bee-sans);color:inherit}
+#eternal .et-b-rl small{font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-rv{display:flex;align-items:center;gap:var(--sk-s1,6px);flex:none;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut);text-align:right}
+#eternal .et-b-rv.et-ok{color:var(--sk-verified)}
+#eternal .et-b-rv.et-out{color:var(--sk-guard)}
+#eternal .et-chev{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;flex:none;transition:transform var(--dur,.26s)}
+#eternal .et-b-row[aria-expanded="true"]{background:var(--sk-sovereign-tint);color:var(--sk-sovereign-strong)}
+#eternal .et-b-row[aria-expanded="true"] .et-b-rl b{font-weight:600}
+#eternal .et-b-row[aria-expanded="true"] .et-b-rv,#eternal .et-b-row[aria-expanded="true"] .et-b-rl small{color:var(--sk-sovereign-strong)}
+#eternal .et-b-row[aria-expanded="true"] .et-chev{transform:rotate(90deg)}
+#eternal .et-b-open{display:flex;flex-direction:column;gap:var(--sk-s2,12px);padding:var(--sk-s2,12px) var(--sk-s3,18px) var(--sk-s3,18px);background:var(--sk-sovereign-tint);border-bottom:1px solid var(--sk-line-soft)}
+#eternal .et-b-open:last-child{border-bottom:0}
+#eternal .et-b-open>div{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+#eternal .et-b-open>div.et-b-src{font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-q{padding-left:var(--sk-s2,12px);border-left:2px solid var(--sk-sovereign-soft)}
+#eternal .et-b-act{display:flex;flex-direction:column;gap:var(--sk-s1,6px);margin-top:var(--sk-s1,6px)}
+#eternal .et-b-primary{display:flex;align-items:center;justify-content:center;width:100%;min-height:var(--sk-control-primary,54px);padding:var(--sk-s1,6px) var(--sk-s3,18px);border:0;border-radius:var(--sk-radius-lg,16px);background:var(--sk-primary);color:var(--sk-on-primary)!important;font:600 17px/1.2 var(--sk-font-bee-sans)!important;text-align:center;cursor:pointer}
+#eternal .et-b-link{display:flex;align-items:center;justify-content:center;min-height:var(--sk-control-min,44px);padding:0 var(--sk-s2,12px);border:0;background:transparent;font:600 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-link)!important;cursor:pointer;text-align:center}
+#eternal .et-b-link:hover{color:var(--sk-link-hover)!important}
+#eternal .et-b-foot{text-align:center;font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-card{display:flex;flex-direction:column;gap:var(--sk-s1,6px);padding:var(--sk-s3,18px);background:var(--sk-sovereign-tint);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl,18px)}
+#eternal .et-b-card h3{font:400 28px/1.1 var(--sk-font-bee-serif);color:var(--sk-sovereign-strong)}
+#eternal .et-b-card>div{font:400 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+
+/* RAVER — the data is the art; lowercase is allowed joy; the numbers never change */
+#eternal .et-r{color:var(--sk-ink);font:400 14px/1.4 var(--sk-font-raver-body)}
+#eternal .et-r-top{display:flex;align-items:baseline;justify-content:space-between;gap:var(--sk-s2,12px);flex-wrap:wrap}
+#eternal .et-r-h{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em;color:var(--sk-ink)}
+#eternal .et-r-hint{font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-art{position:relative;width:100%;max-width:360px;margin:var(--sk-s3,18px) auto var(--sk-s2,12px)}
+#eternal .et-r-art>svg{width:100%;height:auto;filter:drop-shadow(var(--sk-glow-sovereign))}
+#eternal .et-r-art [role="button"]{cursor:pointer}
+#eternal .et-r-art [role="button"]:focus{outline:none}
+#eternal .et-r-art [role="button"]:focus-visible>*{stroke:var(--sk-ink);stroke-width:2}
+#eternal .et-r-legend{display:flex;flex-wrap:wrap;justify-content:center;gap:var(--sk-s1,6px) var(--sk-s3,18px);margin:0 0 var(--sk-s3,18px)}
+#eternal .et-r-legend span{display:inline-flex;align-items:center;gap:var(--sk-s1,6px);font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-legend i{width:14px;height:14px;border-radius:var(--sk-radius-pill,999px);flex:none}
+#eternal .et-r-card{display:flex;gap:var(--sk-s2,12px);align-items:flex-start;padding:var(--sk-s2,12px) var(--sk-s3,18px);border:1px solid var(--sk-line);border-radius:var(--sk-radius-xl,18px);background:var(--sk-sovereign-tint);min-height:var(--sk-control-person,60px)}
+#eternal .et-r-card .et-rk{min-width:44px;height:44px;padding:0 var(--sk-s1,6px);border-radius:var(--sk-radius,12px);background:var(--sk-sovereign-strong);color:var(--sk-bg);display:flex;align-items:center;justify-content:center;font:700 15px/1.2 var(--sk-font-raver-display);flex:none}
+#eternal .et-r-card>div{min-width:0;flex:1 1 auto}
+#eternal .et-r-card b{display:block;font:600 14px/1.25 var(--sk-font-raver-body);color:var(--sk-ink)}
+#eternal .et-r-card span{display:block;margin-top:var(--sk-s1,6px);font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-card span.et-src{color:var(--sk-sovereign-soft)}
+#eternal .et-r-tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--sk-s2,12px);margin:0 0 var(--sk-s3,18px)}
+#eternal .et-r-tile{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--sk-s1,6px);min-height:96px;padding:var(--sk-s2,12px) var(--sk-s1,6px);border-radius:var(--sk-radius-xl,18px);border:1.5px solid var(--sk-sovereign);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong)!important;font:600 14px/1.25 var(--sk-font-raver-body);text-align:center;cursor:pointer;opacity:.7;transition:opacity var(--dur,.26s),box-shadow var(--dur,.26s)}
+#eternal .et-r-tile b{font:700 30px/1 var(--sk-font-raver-display);letter-spacing:-.01em;color:var(--sk-ink)}
+#eternal .et-r-tile[aria-pressed="true"]{opacity:1;border-color:var(--sk-you);box-shadow:var(--sk-glow-sovereign)}
+#eternal .et-r-note{margin:var(--sk-s2,12px) 0 0;text-align:center;font:400 14px/1.4 var(--sk-font-raver-body);color:var(--sk-ink-soft)}
+#eternal .et-r-pill{display:flex;align-items:center;justify-content:center;width:100%;min-height:58px;margin-top:var(--sk-s4,24px);padding:var(--sk-s1,6px) var(--sk-s3,18px);border:0;border-radius:var(--sk-radius-pill,999px);background:var(--sk-primary);color:var(--sk-on-primary)!important;font:700 15px/1.2 var(--sk-font-raver-display)!important;letter-spacing:.04em;text-align:center;cursor:pointer}
+#eternal .et-r-ghost{display:flex;align-items:center;justify-content:center;min-height:var(--sk-control-min,44px);padding:0 var(--sk-s2,12px);border:0;background:none;color:var(--sk-link)!important;font:600 14px/1.25 var(--sk-font-raver-body)!important;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+#eternal .et-r-still{display:inline-flex;align-items:center;justify-content:center;gap:var(--sk-s1,6px);min-height:var(--sk-control-min,44px);min-width:var(--sk-control-min,44px);padding:0 var(--sk-s2,12px);border:1.5px solid var(--sk-line);border-radius:var(--sk-radius-pill,999px);background:var(--sk-bg-card);color:var(--sk-ink-soft)!important;font:600 14px/1.25 var(--sk-font-raver-body)!important;cursor:pointer}
+#eternal .et-r-still[aria-pressed="true"]{border-color:var(--sk-sovereign);color:var(--sk-sovereign-strong)!important}
+#eternal .et-r-bar{display:flex;align-items:center;justify-content:space-between;gap:var(--sk-s2,12px);flex-wrap:wrap;margin-top:var(--sk-s2,12px)}
+@keyframes et-breathe{0%,100%{opacity:1}50%{opacity:.55}}
+#eternal .et-r.et-still-on *{animation-play-state:paused!important}
+@media (prefers-reduced-motion:reduce){#eternal .et-r *,#eternal .et-b *,#eternal .et-c *{transition:none!important;animation:none!important}}
+
+/* CYPHERPUNK — the instrument, complete at first paint: tables, a numbered pipeline, receipts */
+#eternal .et-c{font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink);overflow-wrap:break-word}
+#eternal .et-c-path{font:600 15px/1.45 var(--sk-font-mono);color:var(--sk-ink);word-break:break-all}
+#eternal .et-c-chips{display:flex;flex-wrap:wrap;gap:var(--sk-s1,6px);margin:var(--sk-s2,12px) 0}
+#eternal .et-c-chips span{padding:2px var(--sk-s1,6px);border:1px solid var(--sk-line);border-radius:4px;background:var(--sk-bg-card);font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-soft)}
+#eternal .et-c-chips span.et-on{border-color:var(--sk-guard);background:var(--sk-sovereign-wash);color:var(--sk-sovereign-strong)}
+#eternal .et-c-chips span.et-ok{border-color:var(--sk-verified);color:var(--sk-verified)}
+#eternal .et-c-chips span.et-no{border-color:var(--sk-info);color:var(--sk-info)}
+#eternal .et-c-guard{display:flex;justify-content:space-between;align-items:center;gap:var(--sk-s1,6px) var(--sk-s2,12px);flex-wrap:wrap;min-height:var(--sk-control-min,44px);padding:var(--sk-s1,6px) var(--sk-s3,18px);border:1px dashed var(--sk-guard);border-radius:var(--sk-radius-sm,6px);background:var(--sk-guard-wash);color:var(--sk-guard)}
+#eternal .et-c-guard b{font-weight:600;color:var(--sk-sovereign-strong)}
+#eternal .et-c-h{margin:var(--sk-s4,24px) 0 var(--sk-s2,12px)!important;font:600 15px/1.45 var(--sk-font-mono);color:var(--sk-ink)}
+#eternal .et-c-tab{width:100%;margin:0 0 var(--sk-s1,6px)!important;border:1px solid var(--sk-line)!important;border-radius:var(--sk-radius-sm,6px);overflow:hidden;background:var(--sk-bg-card)!important;table-layout:auto}
+#eternal .et-c-tab th{padding:var(--sk-s1,6px) var(--sk-s2,12px)!important;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);border-bottom:1px solid var(--sk-line)!important;background:var(--sk-bg-well)}
+#eternal .et-c-tab td{height:var(--sk-control-min,44px);padding:var(--sk-s1,6px) var(--sk-s2,12px)!important;border-bottom:1px solid var(--sk-line)!important;font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink);vertical-align:middle}
+#eternal .et-c-tab tr:last-child td{border-bottom:0!important}
+#eternal .et-c-tab td:first-child{color:var(--sk-guard)}
+#eternal .et-c-tab td:first-child,#eternal .et-c-tab th:first-child{white-space:nowrap;width:1%}
+#eternal .et-c-tab tr.et-pick{cursor:pointer}
+#eternal .et-c-tab tr.et-pick:hover td,#eternal .et-c-tab tr.et-pick[aria-expanded="true"] td{background:var(--sk-sovereign-tint)}
+#eternal .et-c-tab tr.et-more td{height:auto;width:auto;white-space:normal;background:var(--sk-sovereign-tint);color:var(--sk-ink-soft)}
+#eternal .et-c-tab small{display:block;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut)}
+#eternal .et-st-ok{color:var(--sk-verified)}#eternal .et-st-no{color:var(--sk-info)}#eternal .et-st-wait{color:var(--sk-ai)}#eternal .et-st-guard{color:var(--sk-guard)}#eternal .et-st-dim{color:var(--sk-ink-mut)}
+#eternal .et-c-pipe{list-style:none;margin:0;padding:0;display:grid;gap:var(--sk-s2,12px);counter-reset:etp}
+#eternal .et-c-pipe li{display:grid;grid-template-columns:28px 1fr;gap:var(--sk-s1,6px) var(--sk-s2,12px);padding:var(--sk-s2,12px) var(--sk-s3,18px);border:1px solid var(--sk-line);border-radius:var(--sk-radius-sm,6px);background:var(--sk-bg-card);counter-increment:etp}
+#eternal .et-c-pipe li::before{content:counter(etp,decimal-leading-zero);color:var(--sk-guard);font-weight:600}
+#eternal .et-c-pipe li b{font-weight:600;color:var(--sk-ink)}
+#eternal .et-c-pipe li>div{grid-column:2;color:var(--sk-ink-soft)}
+#eternal .et-c-pipe li.et-done b{color:var(--sk-verified)}
+#eternal .et-c-pipe li.et-guard{border-style:dashed;border-color:var(--sk-guard)}
+#eternal .et-c-pipe li.et-guard b{color:var(--sk-guard)}
+#eternal .et-c-pipe li.et-now{border-color:var(--sk-ai);box-shadow:inset 0 0 0 1px var(--sk-ai)}
+#eternal .et-c-pipe li.et-now b{color:var(--sk-ai)}
+#eternal .et-c-pipe code{color:var(--sk-ai);overflow-wrap:anywhere}
+#eternal .et-c-primary{display:flex;align-items:center;justify-content:center;width:100%;min-height:52px;margin-top:var(--sk-s3,18px);padding:var(--sk-s1,6px) var(--sk-s2,12px);border:0;border-radius:var(--sk-radius-sm,6px);background:var(--sk-primary);color:var(--sk-on-primary)!important;font:600 14px/1.2 var(--sk-font-mono)!important;text-align:center;cursor:pointer}
+#eternal .et-c-note{margin-top:var(--sk-s1,6px);font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut)}
+#eternal .et-c-note.et-ok{color:var(--sk-verified)}#eternal .et-c-note.et-no{color:var(--sk-info)}
+#eternal .et-c-kv{width:100%;border:1px solid var(--sk-line)!important;border-radius:var(--sk-radius-sm,6px);overflow:hidden;background:var(--sk-bg-card)!important}
+#eternal .et-c-kv th{width:104px;padding:var(--sk-s2,12px)!important;vertical-align:top;font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);border-bottom:1px solid var(--sk-line)!important;background:transparent}
+#eternal .et-c-kv td{padding:var(--sk-s2,12px)!important;border-bottom:1px solid var(--sk-line)!important;font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ink);word-break:break-word}
+#eternal .et-c-kv tr:last-child th,#eternal .et-c-kv tr:last-child td{border-bottom:0!important}
+#eternal .et-c-kv .et-no{color:var(--sk-info)}#eternal .et-c-kv .et-yes{color:var(--sk-verified)}#eternal .et-c-kv .et-g{color:var(--sk-guard)}
+#eternal .et-c-verify{margin-top:var(--sk-s3,18px);padding:var(--sk-s3,18px);border-radius:var(--sk-radius-sm,6px);background:var(--sk-bg-card);border:1px solid var(--sk-line)}
+#eternal .et-c-verify-h{font:500 12px/1.45 var(--sk-font-mono);color:var(--sk-ink-mut);margin-bottom:var(--sk-s1,6px)}
+#eternal .et-c-verify ol{margin:0;padding-left:var(--sk-s4,24px)!important;display:grid;gap:var(--sk-s1,6px)}
+#eternal .et-c-verify code{font:400 13px/1.45 var(--sk-font-mono);color:var(--sk-ai);word-break:break-all}
+#eternal .et-c-row{display:grid;grid-template-columns:1fr 1fr;gap:var(--sk-s2,12px);margin-top:var(--sk-s3,18px)}
+#eternal .et-c-ghost{display:flex;align-items:center;justify-content:center;min-height:52px;padding:var(--sk-s1,6px);border:1.5px solid var(--sk-ink);border-radius:var(--sk-radius-sm,6px);background:transparent;color:var(--sk-ink)!important;text-align:center;font:600 14px/1.2 var(--sk-font-mono)!important;cursor:pointer}
+#eternal .et-c-a{display:inline-flex;align-items:center;min-height:var(--sk-control-min,44px);color:var(--sk-link)!important}
+#eternal .et-c-a:hover{color:var(--sk-link-hover)!important}
+#eternal .et-c-kv td,#eternal .et-c-verify li,#eternal .et-c code,#eternal .et-c-a{overflow-wrap:anywhere}
+
+/* the system's own front pieces. The specimen sheet keeps its one dark dress in every register (its
+   chips are specimens of the dark ground and must sit on it); new bee's front is a paper room set
+   into it. The raver graphic is the bComb lattice's first three rings (1 + 6 + 12 cells): "you" at
+   the heart, who-is-who around it, states and grounds outside, the senary rhythm as ripples. */
+body[data-reg="bee"] #eternal{background:var(--sk-bg);color:var(--sk-ink);padding:var(--sk-s4,24px) var(--sk-s3,18px);border-radius:var(--sk-radius-xl,18px);margin-top:var(--sk-s3,18px)}
+#eternal .et-ds-sw{display:inline-block;width:24px;height:24px;border-radius:var(--sk-radius-pill,999px);border:1px solid var(--sk-line);flex:none}
+#eternal .et-ds-sw.et-none{background:transparent;border:1.5px dashed var(--sk-ink-dim)}
+#eternal .et-ds-sw.et-rain{background:var(--sk-rainbow)}
+#eternal .et-ds-sw.et-bchip{background:var(--sk-b-value);border:6px solid var(--sk-b-chip)}
+#eternal .et-ds-item{display:flex;align-items:flex-start;gap:var(--sk-s2,12px)}
+#eternal .et-ds-item>div{display:flex;flex-direction:column;min-width:0}
+#eternal .et-ds-item b{font:600 16px/1.45 var(--sk-font-bee-sans);color:var(--sk-ink)}
+#eternal .et-ds-item small{font:400 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal .et-b-open .et-b-lab{font:600 14px/1.4 var(--sk-font-bee-sans);color:var(--sk-ink-mut)}
+#eternal #etDsComb .et-cell{cursor:pointer}
+#eternal #etDsComb .et-cell polygon{stroke:var(--sk-line);stroke-width:1.5;transition:opacity var(--dur,.26s)}
+#eternal #etDsComb .et-cell.et-none polygon{fill:var(--sk-bg);stroke:var(--sk-ink-soft);stroke-dasharray:4 3}
+#eternal #etDsComb .et-cell[aria-pressed="true"] polygon{stroke:var(--sk-ink);stroke-width:3;animation:et-breathe 3.4s ease-in-out infinite}
+#eternal #etDsComb.et-lawon .et-cell:not(.et-lit) polygon{opacity:.3}
+#eternal #etDsComb.et-lawon .et-cell.et-lit polygon{stroke:var(--sk-ink);stroke-width:2.5}
+#eternal #etDsComb .et-ripple{fill:none;stroke:var(--sk-line);stroke-width:1.5}
+#eternal #etDsComb .et-ripple.et-on{stroke:var(--sk-sovereign-strong);stroke-width:2.5;stroke-dasharray:6 5}
+#eternal #etDsComb text{fill:var(--sk-bg);font:700 15px/1.2 var(--sk-font-raver-display);letter-spacing:.04em;pointer-events:none}
+#eternal #etDsLaws{grid-template-columns:1fr 1fr;margin-top:var(--sk-s3,18px)}
+#eternal #etDsLaws .et-r-tile{min-height:88px;font:600 14px/1.25 var(--sk-font-raver-body)}
+#eternal .et-ds-rhythm{display:grid;grid-template-columns:repeat(6,1fr);gap:var(--sk-s1,6px);margin:0 0 var(--sk-s2,12px)}
+#eternal .et-ds-step{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:var(--sk-s1,6px);min-height:var(--sk-control-person,60px);padding:var(--sk-s1,6px) 0;border:1.5px solid var(--sk-line);border-radius:var(--sk-radius,12px);background:var(--sk-bg-card);color:var(--sk-ink-soft)!important;font:600 14px/1.25 var(--sk-font-raver-body);cursor:pointer}
+#eternal .et-ds-step i{display:block;height:6px;border-radius:var(--sk-radius-pill,999px);background:var(--sk-sovereign)}
+#eternal .et-ds-step[aria-pressed="true"]{border-color:var(--sk-you);color:var(--sk-ink)!important;box-shadow:var(--sk-glow-sovereign)}
+#eternal #etDsTab td:nth-child(2){white-space:nowrap}
+#eternal #etDsTab tr.et-more td{padding:var(--sk-s2,12px)!important}
+#eternal #etDsTab tr.et-more small+small{margin-top:var(--sk-s1,6px)}
+#eternal #etDsTab td:first-child{color:var(--sk-ink)}
+#eternal .et-c-pipe .et-ds-names{grid-column:2;color:var(--sk-ink-mut);font:500 12px/1.45 var(--sk-font-mono)}
+/* the archive heading sits on the sheet's dark ground in every register */
+body[data-reg="bee"] #etArchive.et-archive-h{color:var(--ink);border-top-color:var(--line)}
 </style>
+<link rel="stylesheet" href="skaists.css">
 </head>
 <body>
 <header class="mast" data-art>
@@ -227,6 +409,69 @@ body:is([data-reg="bee"],[data-reg="raver"]) input[type=search]{font-size:14px}
     <div><div style="font-size:38px;line-height:1;font-weight:600;font-variant-numeric:tabular-nums" data-hero-number>1,247</div><div class="cap" data-hero-caption data-i18n="ds.t.hero.cap">hero figure — 38px · tabular-nums · every count COMPUTED, never typed</div></div>
   </div>
 </section>
+
+<!-- ETERNAL FRONT (founder blueprint 2026-09-26, docs/design/eternal): three separate products in
+     one surface. This page is the design system's own specimen sheet, and its label and eyebrow
+     specimens in 03 keep their documented casing and size (a pending founder decision). Placed above
+     them, any front pushes those specimens into the half of the page e2e/footer-audit.mjs measures,
+     and its ratchet (e2e/footer-audit.baseline.json) may only go down. So on this page the fronts
+     come right after the type sheet: the specimens stay exactly as they are and where they are.
+     ONE data layer (the sheet's own palette, grounds, rhythm, hue laws and lattice, read from the
+     specimens above, cross-checked against the compiled skaists.css this page loads) drives all
+     three, so the facts cannot drift. -->
+<section id="eternal" aria-label="the system, three ways">
+
+  <!-- NEW BEE — a calm room: what the colours mean, in plain rows, one way to see them on their ground -->
+  <div class="et-b">
+    <div class="et-b-mark" data-etk="et.design.mark">the system</div>
+    <h2 class="et-b-h" data-etk="et.design.beeH">how the estate looks, and why</h2>
+    <div class="et-b-lede" data-etk="et.design.beeLede">every page on the estate shares one set of colours, sizes and spaces. each colour means one thing.</div>
+    <div class="et-b-guard"><svg class="et-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z"/></svg><span id="etDsGuard"></span></div>
+    <div class="et-b-rows" id="etDsRows"><div class="et-b-row"><span data-etk="et.design.reading">reading the sheet…</span></div></div>
+    <div class="et-b-act">
+      <button type="button" class="et-b-primary" data-go="palette" data-etk="et.design.beeGo">see every colour on its real ground</button>
+      <a class="et-b-link" href="#etArchive" data-etk="et.design.beeRest">the rest of the system</a>
+      <div class="et-b-foot" id="etDsFoot"></div>
+    </div>
+  </div>
+
+  <!-- RAVER — the palette as the estate's own mark: "you" at the heart, who-is-who around it, the
+       states and grounds on the outer ring, the six-step rhythm as ripples. Tap a colour, a law or a
+       step and it lights. -->
+  <div class="et-r">
+    <div class="et-r-top"><h2 class="et-r-h" data-etk="et.design.raverH">one blood</h2><span class="et-r-hint" data-etk="et.design.raverHint">tap a colour · a law lights its cells</span></div>
+    <div class="et-r-art"><svg id="etDsComb" viewBox="-180 -180 360 360" role="group" aria-label="the palette as the bComb lattice: you at the heart, who is who around it, states and grounds outside"></svg></div>
+    <div class="et-r-card" id="etDsCard" aria-live="polite"></div>
+    <div class="et-r-tiles" id="etDsLaws"></div>
+    <div class="et-ds-rhythm" id="etDsRhythm" role="group" aria-label="the six-step rhythm"></div>
+    <button type="button" class="et-r-pill" data-go="palette" data-etk="et.design.raverGo">see it on its real ground</button>
+    <div class="et-r-bar"><button type="button" class="et-r-still" id="etDsStill" aria-pressed="false" data-etk="et.design.still">pause the light</button><a class="et-r-ghost" href="#etArchive" data-etk="et.design.raverAll">the rest of the system</a></div>
+  </div>
+
+  <!-- CYPHERPUNK — the instrument: the sheet cross-checked against skaists.css, token by token -->
+  <div class="et-c">
+    <div class="et-c-path">design-system.html ⇄ skaists.css</div>
+    <div class="et-c-chips" id="etDsChips"></div>
+    <div class="et-c-guard"><span id="etDsState"></span><b data-etk="et.design.cyGuardB">read from the sheet above</b></div>
+    <h3 class="et-c-h" data-etk="et.design.cyPalH">palette · sheet ⇄ skaists · tap a row</h3>
+    <table class="et-c-tab"><thead><tr><th>token</th><th>sheet</th><th>skaists raver</th></tr></thead><tbody id="etDsTab"></tbody></table>
+    <h3 class="et-c-h" data-etk="et.design.cyRhyH">rhythm · senary</h3>
+    <table class="et-c-tab" id="etDsRhy"><thead><tr><th>step</th><th>sheet</th><th>skaists</th></tr></thead><tbody></tbody></table>
+    <h3 class="et-c-h" data-etk="et.design.cyLawsH">the four hue laws</h3>
+    <ol class="et-c-pipe" id="etDsLawList"></ol>
+    <button type="button" class="et-c-primary" id="etDsCopy" data-etk="et.design.cyCopy">copy the stylesheet link</button>
+    <div class="et-c-note" id="etDsCopied" aria-live="polite"></div>
+    <h3 class="et-c-h" data-etk="et.design.cyLatH">lattice · the mark</h3>
+    <table class="et-c-kv" id="etDsLat"></table>
+    <div class="et-c-verify">
+      <div class="et-c-verify-h" data-etk="et.design.cyVerifyH">verify · no trust in this page needed</div>
+      <ol id="etDsVerify"></ol>
+    </div>
+    <div class="et-c-row"><button type="button" class="et-c-ghost" data-go="palette" data-etk="et.design.cySheet">the sheet ↑</button><a class="et-c-ghost" href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/design/skaists/tokens.json" target="_blank" rel="noopener noreferrer" data-etk="et.design.cyFork">fork the template ↗ (new tab)</a></div>
+  </div>
+</section>
+<h2 class="et-archive-h" id="etArchive" data-etk="et.design.archive">the rest of the system</h2>
+
 
 <section>
   <div class="shead"><span class="dot"></span><h2 data-i18n="ds.s04">04 · identity — the bComb lattice</h2><em>rings 0..5 · 1,6,12,18,24,30 · 91 cells</em></div>
@@ -434,6 +679,180 @@ body:is([data-reg="bee"],[data-reg="raver"]) input[type=search]{font-size:14px}
   }
   requestAnimationFrame(frame);
   addEventListener('resize',build);
+})();
+</script>
+<script>
+/* ETERNAL FRONT — one data layer, three renderers (docs/design/eternal). Every fact is read from the
+   specimen sheet above (01 palette and grounds, 02 rhythm, the four hue laws, 04 the lattice) and
+   cross-checked against the compiled skaists.css this page loads (read through the CSSOM: its
+   :root block is new bee, its [data-reg] blocks raver and cypherpunk). The specimens themselves are
+   never touched. The one gesture that touches anything is copy, and it reports what the browser did. */
+(function(){
+  var $=function(id){return document.getElementById(id);};
+  var T=function(k,f){var t=window.BNRLanguage&&window.BNRLanguage.text;return t?t(k,f):f;};
+  var K=function(k,f){return T('et.design.'+k,f);};
+  var esc=function(v){return String(v==null?'':v).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});};
+  var txt=function(e){return (e&&e.textContent||'').replace(/\s+/g,' ').trim();};
+  var keyed=function(k){return [].filter.call(document.querySelectorAll('[data-i18n]'),function(e){return e.dataset.i18n===k;})[0]||null;};
+  var CHEV='<svg class="et-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>';
+  var NOT=function(){return K('notRead','not read from this page');};
+  var REGS=['bee','raver','cypherpunk'];
+  var LINK='<link rel="stylesheet" href="skaists.css">';
+
+  /* ── the data layer ── */
+  var D={who:[],state:[],grounds:[],rhythm:[],laws:[],lawsHead:'',lattice:null,chipLaw:'',stateLaw:'',sk:{},page:'design-system.html'};
+  var R={cell:null,law:null,step:null,still:false}, B={open:null}, C={open:null};
+
+  function skaists(){
+    var out={bee:{},raver:{},cypherpunk:{}}, sh=[].filter.call(document.styleSheets,function(s){return /skaists\.css/.test(s.href||'');})[0];
+    try{[].forEach.call(sh?sh.cssRules:[],function(r){if(!r.style)return;var reg=r.selectorText===':root'?'bee':/raver/.test(r.selectorText||'')?'raver':/cypherpunk/.test(r.selectorText||'')?'cypherpunk':null;if(!reg)return;
+      for(var i=0;i<r.style.length;i++){var p=r.style[i];if(p.indexOf('--sk-')===0)out[reg][p.slice(5)]=r.style.getPropertyValue(p).trim();}});}catch(e){}
+    ['raver','cypherpunk'].forEach(function(g){for(var k in out.bee)if(!(k in out[g]))out[g][k]=out.bee[k];});
+    return out;
+  }
+  function chip(box,axis){
+    var cn=txt(box.querySelector('.cn')), cd=txt(box.querySelector('.cd')), m=/^--([\w-]+)\s*(?:·\s*(#[0-9a-f]{6})|→\s*var\(--([\w-]+)\))?/i.exec(cn)||[];
+    return {name:m[1]||cn,value:m[2]||(m[3]?'var(--'+m[3]+')':''),alias:m[3]||'',meaning:cd,axis:axis,printed:cn};
+  }
+  function readPage(){
+    D.sk=skaists();
+    var s1=keyed('ds.s01'), sec=s1&&s1.closest('section'), axis='';
+    D.who=[];D.state=[];D.grounds=[];
+    if(sec){[].forEach.call(sec.children,function(el){
+      if(el.classList.contains('axis'))axis=/^axis b/.test(txt(el))?'b':/^axis a/.test(txt(el))?'a':'chrome';
+      if(el.classList.contains('grid'))[].forEach.call(el.querySelectorAll('.chipbox'),function(b){(axis==='b'?D.who:D.state).push(chip(b,axis));});
+      if(el.classList.contains('chromerow'))[].forEach.call(el.querySelectorAll('span'),function(sp){var t=txt(sp),m=/^--([\w-]+)\s+(#[0-9a-f]{6})\s*(?:·\s*(.*))?$/i.exec(t)||[];D.grounds.push({name:m[1]||t,value:m[2]||'',alias:'',meaning:m[3]||'',axis:'chrome',printed:t});});
+      if(el.classList.contains('laws')){var t=txt(el),h=txt(el.querySelector('b'));D.lawsHead=h;D.laws=t.slice(h.length).trim().split(/(?<=\.)\s+/).filter(Boolean);}
+    });
+    D.chipLaw=txt(sec.querySelector('.shead em'));}
+    var s2=keyed('ds.s02'), sec2=s2&&s2.closest('section');
+    D.rhythm=sec2?[].map.call(sec2.querySelectorAll('.rhythm .r span'),function(sp){var m=/--(s\d)\s*·\s*(\d+)px/.exec(txt(sp))||[];return {name:m[1]||txt(sp),px:m[2]?+m[2]:null};}):[];
+    D.rhythmNote=sec2?txt(sec2.querySelector('.rhythm').previousElementSibling):'';
+    var s4=keyed('ds.s04'), em=s4&&s4.closest('.shead').querySelector('em'), lm=/rings\s+(\d+)\.\.(\d+)\s*·\s*([\d,]+)\s*·\s*(\d+)\s*cells/.exec(txt(em))||null;
+    D.lattice=lm?{from:+lm[1],to:+lm[2],rings:lm[3].split(',').map(Number),total:+lm[4]}:null;
+    var s6=keyed('ds.s06'); D.stateLaw=s6?txt(s6.closest('.shead').querySelector('em')):'';
+    /* each colour: does skaists carry a token of that name, and what does each register wear */
+    D.who.concat(D.state,D.grounds).forEach(function(c){var n=c.alias?c.name:c.name;c.sk=(D.sk.bee&&n in D.sk.bee)?{bee:D.sk.bee[n],raver:D.sk.raver[n],cypherpunk:D.sk.cypherpunk[n]}:null;});
+    D.laws=D.laws.map(function(l){var names=D.who.concat(D.state).filter(function(c){return (c.value&&l.toLowerCase().indexOf(c.value.toLowerCase())>=0)||new RegExp('\\b'+c.name.replace('-','[- ]')+'\\b','i').test(l);}).map(function(c){return c.name;});
+      return {text:l,short:l.replace(/\s*#[0-9a-f]{6}/gi,'').split(/,|\(| — |\.(?:\s|$)/)[0].trim(),names:names};});
+  }
+  var all3=function(){return D.who.concat(D.state,D.grounds);};
+  var sameHex=function(a,b){return String(a||'').toLowerCase()===String(b||'').toLowerCase();};
+
+  /* ── NEW BEE ── */
+  function item(c){var sw=c.sk?(c.name==='rainbow'?'<i class="et-ds-sw et-rain"></i>':c.name==='b-value'?'<i class="et-ds-sw et-bchip"></i>':'<i class="et-ds-sw" style="background:var(--sk-'+esc(c.name)+')"></i>'):'<i class="et-ds-sw et-none"></i>';
+    return '<div class="et-ds-item">'+sw+'<div><b>'+esc(c.name)+'</b><small>'+esc([c.meaning,c.sk?'':K('sheetOnly','this sheet only')].filter(Boolean).join(' · '))+'</small></div></div>';}
+  function bee(){
+    var box=$('etDsRows'); if(!box) return;
+    var refusal=D.laws.filter(function(l){return /never error-red/i.test(l.text);})[0];
+    $('etDsGuard').textContent=refusal?K('guard','a refusal is never shown in red here.'):NOT();
+    $('etDsFoot').textContent=D.chipLaw;
+    var rows=[
+      {k:'who',b:K('bWho','who is who'),v:D.who.length+' '+K('colours','colours'),body:D.who.map(item).join('')+'<div class="et-b-src">'+esc(K('bTone','new bee wears each colour in its paper tone; the sheet above shows the dark one.'))+'</div>'},
+      {k:'state',b:K('bState','what state a thing is in'),v:D.state.length+' '+K('colours','colours'),body:D.state.map(item).join('')},
+      {k:'grounds',b:K('bGrounds','grounds and inks'),v:D.grounds.length+' '+K('tones','tones'),body:D.grounds.map(item).join('')},
+      {k:'rhythm',b:K('bRhythm','one rhythm of space'),v:D.rhythm.length+' '+K('steps','steps'),body:'<div>'+esc(D.rhythm.map(function(r){return r.px;}).join(', ')+' px')+'</div><div class="et-b-src">'+esc(D.rhythmNote)+'</div>'},
+      {k:'laws',b:K('bLaws','rules for colour'),v:D.laws.length+' '+K('rules','rules'),body:D.laws.map(function(l){return '<div class="et-b-q">'+esc(l.text)+'</div>';}).join('')},
+      {k:'mark',b:K('bMark','the mark'),v:(D.lattice?D.lattice.total:'')+' '+K('cells','cells'),body:D.lattice?'<div>'+esc(K('bMarkT','a honeycomb of {n} cells in {r} rings: {list}.').replace('{n}',D.lattice.total).replace('{r}',D.lattice.rings.length).replace('{list}',D.lattice.rings.join(', ')))+'</div>':'<div>'+esc(NOT())+'</div>'}
+    ];
+    box.innerHTML=rows.map(function(r){var o=B.open===r.k;
+      return '<button type="button" class="et-b-row" data-row="'+r.k+'" aria-expanded="'+(o?'true':'false')+'"><span class="et-b-rl"><b>'+esc(r.b)+'</b><small>'+esc(r.v)+'</small></span><span class="et-b-rv">'+CHEV+'</span></button><div class="et-b-open" data-row="'+r.k+'"'+(o?'':' hidden')+'>'+r.body+'</div>';}).join('');
+  }
+
+  /* ── RAVER: rings 0..2 of the bComb lattice ── */
+  function hex(cx,cy,r){var p=[];for(var j=0;j<6;j++){var b=Math.PI/3*j;p.push((cx+r*Math.cos(b)).toFixed(1)+','+(cy+r*Math.sin(b)).toFixed(1));}return p.join(' ');}
+  function cells(){
+    var you=D.who.filter(function(c){return c.name==='you';})[0], inner=D.who.filter(function(c){return c!==you;}), outer=D.state.concat(D.grounds);
+    return {rings:[you?[you]:[],inner,outer]};
+  }
+  function comb(){
+    var svg=$('etDsComb'); if(!svg) return;
+    var stops=(getComputedStyle(document.body).getPropertyValue('--sk-rainbow').match(/#[0-9a-f]{6}/gi)||[]);
+    var h='<defs><linearGradient id="etDsRain" x1="0" x2="1">'+stops.map(function(s,i){return '<stop offset="'+(stops.length>1?i/(stops.length-1):0)+'" stop-color="'+s+'"/>';}).join('')+'</linearGradient></defs>';
+    var SP=60, HR=28, lit=R.law!=null&&D.laws[R.law]?D.laws[R.law].names:[];
+    D.rhythm.forEach(function(r,i){if(r.px)h+='<circle class="et-ripple'+(R.step===i?' et-on':'')+'" r="'+(r.px*3.5)+'"/>';});
+    cells().rings.forEach(function(ring,k){ring.forEach(function(c,i){
+      var a=k===0?0:(Math.PI*2/ring.length)*i-Math.PI/2, cx=Math.cos(a)*k*SP, cy=Math.sin(a)*k*SP, id=c.name, on=R.cell===id;
+      var fill=!c.sk?'':c.name==='rainbow'?'url(#etDsRain)':'var(--sk-'+c.name+')';
+      h+='<g class="et-cell'+(c.sk?'':' et-none')+(lit.indexOf(id)>=0?' et-lit':'')+'" data-cell="'+esc(id)+'" role="button" tabindex="0" aria-pressed="'+(on?'true':'false')+'" aria-label="'+esc(c.name+' · '+(c.meaning||''))+'"><polygon points="'+hex(cx,cy,HR)+'"'+(fill?' style="fill:'+fill+'"':'')+'/></g>';
+    });});
+    svg.innerHTML=h;
+    svg.classList.toggle('et-lawon',R.law!=null);
+  }
+  function card(){
+    var c=$('etDsCard'); if(!c) return;
+    var x=all3().filter(function(q){return q.name===R.cell;})[0], law=R.law!=null?D.laws[R.law]:null, st=R.step!=null?D.rhythm[R.step]:null;
+    if(law){c.innerHTML='<span class="et-rk">'+(R.law+1)+'</span><div><b>'+esc(law.short)+'</b><span>'+esc(law.text)+'</span><span class="et-src">'+esc(K('lights','lights')+': '+(law.names.join(' · ')||K('noCell','no colour cell')))+'</span></div>';return;}
+    if(st){c.innerHTML='<span class="et-rk">'+esc(st.px)+'</span><div><b>--'+esc(st.name+' · '+st.px+'px')+'</b><span>'+esc(D.rhythmNote)+'</span></div>';return;}
+    if(!x){c.innerHTML='<div><b>'+esc(K('rTap','tap a cell: every colour here means one thing'))+'</b><span>'+esc(D.chipLaw)+'</span></div>';return;}
+    c.innerHTML='<span class="et-rk">'+esc(x.axis==='chrome'?'◐':x.axis)+'</span><div><b>'+esc(x.name)+'</b><span>'+esc(x.meaning||'')+'</span><span class="et-src">'+esc(x.sk?K('inSk','a skaists token in every register'):K('notSk','this sheet only · no skaists token of this name'))+'</span></div>';
+  }
+  function lawTiles(){
+    var box=$('etDsLaws'); if(!box) return;
+    box.innerHTML=D.laws.map(function(l,i){return '<button type="button" class="et-r-tile" data-law="'+i+'" aria-pressed="'+(R.law===i)+'">'+esc(l.short)+'</button>';}).join('');
+    var rb=$('etDsRhythm');
+    rb.innerHTML=D.rhythm.map(function(r,i){return '<button type="button" class="et-ds-step" data-step="'+i+'" aria-pressed="'+(R.step===i)+'" aria-label="'+esc(r.name+' '+r.px+'px')+'"><i style="width:'+(r.px||0)+'px"></i>'+esc(r.px)+'</button>';}).join('');
+  }
+  function raver(){comb();card();lawTiles();}
+
+  /* ── CYPHERPUNK ── */
+  function cy(){
+    var tb=$('etDsTab'); if(!tb) return;
+    var list=all3(), inSk=list.filter(function(c){return c.sk;}).length, rOk=D.rhythm.filter(function(r){return D.sk.bee&&D.sk.bee[r.name]===r.px+'px';}).length;
+    var lat=D.lattice, sum=lat?lat.rings.reduce(function(a,b){return a+b;},0):0;
+    $('etDsChips').innerHTML='<span class="et-on">palette '+(D.who.length+D.state.length)+'</span><span>grounds '+D.grounds.length+'</span><span class="'+(inSk===list.length?'et-ok':'et-no')+'">in skaists '+inSk+' of '+list.length+'</span><span class="'+(rOk===D.rhythm.length?'et-ok':'et-no')+'">rhythm '+rOk+' of '+D.rhythm.length+' agree</span><span class="'+(lat&&sum===lat.total?'et-ok':'et-no')+'">lattice '+(lat?lat.rings.join('+')+' = '+sum:NOT())+'</span>';
+    $('etDsState').textContent=D.stateLaw||NOT();
+    var sk=function(c){if(!c.sk)return '<span class="et-st-guard">none</span>';var v=c.sk.raver;
+      if(c.alias)return '<span class="et-st-ok">alias → '+esc(c.alias)+'</span>';
+      if(/gradient/.test(v))return '<span class="et-st-ok">gradient</span>';
+      return sameHex(v,c.value)?'<span class="et-st-ok">= '+esc(v.toLowerCase())+'</span>':'<span class="et-st-no">≠ '+esc(v)+'</span>';};
+    tb.innerHTML=list.map(function(c,i){var o=C.open===i;
+      return '<tr class="et-pick" data-i="'+i+'" tabindex="0" aria-expanded="'+(o?'true':'false')+'"><td>--'+esc(c.name)+'</td><td>'+esc(c.alias?'→ '+c.alias:(c.value||'gradient'))+'</td><td>'+sk(c)+'</td></tr>'+
+        '<tr class="et-more" data-i="'+i+'"'+(o?'':' hidden')+'><td colspan="3"><small>'+esc(c.printed)+'</small>'+(c.meaning?'<small>'+esc(c.meaning)+'</small>':'')+(c.sk?'<small>'+esc(REGS.map(function(g){return g+' '+c.sk[g];}).join(' · '))+'</small>':'<small>'+esc(K('notSk','this sheet only · no skaists token of this name'))+'</small>')+'</td></tr>';}).join('');
+    $('etDsRhy').querySelector('tbody').innerHTML=D.rhythm.map(function(r){var v=D.sk.bee?D.sk.bee[r.name]:'';return '<tr><td>--'+esc(r.name)+'</td><td>'+esc(r.px+'px')+'</td><td>'+(v===r.px+'px'?'<span class="et-st-ok">= '+esc(v)+'</span>':'<span class="et-st-no">'+esc(v||NOT())+'</span>')+'</td></tr>';}).join('');
+    $('etDsLawList').innerHTML=D.laws.map(function(l){return '<li class="'+(/refusal/.test(l.text)?'et-guard':'')+'"><b>'+esc(l.text)+'</b><div class="et-ds-names">'+esc(l.names.length?'names: '+l.names.join(' · '):'names no palette token')+'</div></li>';}).join('');
+    $('etDsLat').innerHTML=lat?[['rings',lat.from+'..'+lat.to],['cells',lat.rings.join(' · ')],['sum',sum+(sum===lat.total?' = '+lat.total+' as printed':' ≠ '+lat.total+' as printed')],['raver draws','rings 0..2 · '+cells().rings.map(function(r){return r.length;}).join(' + ')+' cells · you, who is who, states and grounds']].map(function(r){return '<tr><th>'+esc(r[0])+'</th><td>'+esc(r[1])+'</td></tr>';}).join(''):'<tr><th>lattice</th><td class="et-no">'+esc(NOT())+'</td></tr>';
+    $('etDsVerify').innerHTML=['<code>node scripts/build-skaists.mjs --check</code> · '+esc(K('v1','skaists.css is fresh from tokens.json')),
+      '<code>node e2e/skaists-conformance.mjs --only design-system.html</code> · '+esc(K('v2','the front speaks only tokens')),
+      esc(K('v3','compare each row above with its chip on the sheet: the sheet is docs/tokens.css, skaists is docs/design/skaists/tokens.json'))].map(function(x){return '<li>'+x+'</li>';}).join('');
+  }
+
+  function keyedCopy(){document.querySelectorAll('#eternal [data-etk],#etArchive[data-etk]').forEach(function(e){if(e.dataset.etEn==null)e.dataset.etEn=e.textContent;e.textContent=T(e.dataset.etk,e.dataset.etEn);});}
+  function all(){readPage();keyedCopy();bee();raver();cy();}
+
+  function wire(){
+    var ev=$('eternal'); if(!ev) return;
+    ev.addEventListener('click',function(e){
+      var go=e.target.closest('[data-go="palette"]');
+      if(go){var s=keyed('ds.s01');if(s)s.closest('section').scrollIntoView({block:'start'});return;}
+      var row=e.target.closest('.et-b-row[data-row]');
+      if(row){var k=row.getAttribute('data-row');B.open=B.open===k?null:k;bee();return;}
+      var cell=e.target.closest('#etDsComb .et-cell');
+      if(cell){R.cell=cell.getAttribute('data-cell');R.law=null;R.step=null;raver();return;}
+      var law=e.target.closest('#etDsLaws [data-law]');
+      if(law){var i=+law.getAttribute('data-law');R.law=R.law===i?null:i;R.step=null;raver();return;}
+      var st=e.target.closest('#etDsRhythm [data-step]');
+      if(st){var j=+st.getAttribute('data-step');R.step=R.step===j?null:j;R.law=null;raver();return;}
+      var tr=e.target.closest('#etDsTab tr.et-pick');
+      if(tr){var n=+tr.getAttribute('data-i');C.open=C.open===n?null:n;cy();return;}
+    });
+    ev.addEventListener('keydown',function(e){
+      if(e.key!=='Enter'&&e.key!==' ')return;
+      var t=e.target.closest('#etDsComb .et-cell,#etDsTab tr.et-pick'); if(!t)return;
+      e.preventDefault(); t.dispatchEvent(new MouseEvent('click',{bubbles:true}));
+    });
+    $('etDsStill').addEventListener('click',function(){R.still=!R.still;this.setAttribute('aria-pressed',String(R.still));ev.querySelector('.et-r').classList.toggle('et-still-on',R.still);this.textContent=R.still?K('play','let it breathe'):K('still','pause the light');});
+    $('etDsCopy').addEventListener('click',function(){
+      var out=$('etDsCopied'), say=function(ok,m){out.className='et-c-note '+(ok?'et-ok':'et-no');out.textContent=m;};
+      if(!(navigator.clipboard&&navigator.clipboard.writeText)){say(false,K('copyNo','this browser has no clipboard here · the tag is')+' '+LINK);return;}
+      navigator.clipboard.writeText(LINK).then(function(){say(true,K('copyOk','copied')+' · '+LINK);},function(){say(false,K('copyRefused','the browser refused the clipboard · nothing was copied · the tag is')+' '+LINK);});
+    });
+    document.addEventListener('blang',all);
+  }
+  wire();
+  /* skaists.css is linked after this page's own style; wait for it before reading its CSSOM */
+  if(document.readyState==='complete')all(); else addEventListener('load',all);
+  window.__eternal={data:D,raver:R,bee:B,cy:C};
 })();
 </script>
 <script src="tour.js?v=42"></script>
