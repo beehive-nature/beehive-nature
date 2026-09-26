@@ -15,7 +15,7 @@
     --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
   }
   *{box-sizing:border-box;margin:0;padding:0}
-  html{scroll-behavior:smooth}
+  @media (prefers-reduced-motion:no-preference){html{scroll-behavior:smooth}}
   body{background:var(--bg);color:var(--ink);font-family:var(--font);overflow-x:hidden;
     padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);}
 
@@ -232,9 +232,43 @@
   body[data-reg="cypherpunk"] .open{min-height:0;padding:40px 22px;text-align:start}body[data-reg="cypherpunk"] .plur{font:700 2rem var(--mono);color:var(--biomass);background:none}
   body[data-reg="cypherpunk"] .open p{max-width:80ch;margin-inline:0}body[data-reg="cypherpunk"] .glow{display:none}
   @media(max-width:640px){.flow{grid-template-columns:1fr}.plur-actions a{flex:1 1 40%;font-size:.95rem}.expand{letter-spacing:.12em}.w{min-height:48px}.boundary{padding:30px 18px}}
+
+  /* THE LOWER HALF AT 390 (2026-09-26, footer audit). The word fields'
+     romanisations were 10 px and every "no voice" mark 8 px (drawn over the
+     word's corner); the mono labels (.gloss, the odd-number law, the pillar
+     roles, the note heads) were forced capitals at 10–11 px in --ink-dim
+     (3.9:1, and 2:1 for the footer motto on New bee's paper). Casing law:
+     no text-transform. Floor 12 px everywhere; New bee and raver read their
+     secondary labels at 14 px. The "no voice" mark now sits under its word in
+     the flow instead of floating over the corner. */
+  .expand,.hint,.field .gloss,.note h3,.oddlaw{text-transform:none}
+  .field .gloss,.oddlaw,.hint{letter-spacing:.06em;font-size:12px;color:var(--ink-mut)}
+  .w .r{font-size:12px;letter-spacing:.02em}
+  .w .mute{position:static;display:block;font-size:12px;letter-spacing:.02em;color:var(--ink-mut);margin-top:1px}
+  .note h3{font-size:12px;letter-spacing:.08em}
+  .talk h2 .who{font-size:12px;letter-spacing:.12em}
+  .tongues{color:var(--ink-mut)}
+  .talkst{font-size:12px;letter-spacing:.04em;color:var(--ink-mut)}
+  .pillar .is{font-size:12px;letter-spacing:.06em;color:var(--ink-mut)}
+  .voicebox .st{font-size:12px;color:var(--ink-mut)}
+  .voicebox .vnote{color:var(--ink-mut)}
+  .msg .tag{font-size:12px}
+  .oddpick button{color:var(--ink);min-height:44px}
+  .roselinks a{display:inline-flex;align-items:center;min-height:44px}
+  .seeds button{min-height:44px}
+  .stone .dock{line-height:2}
+  .stone .dock a{padding-block:12px}
+  footer .m{letter-spacing:.08em}
+  body:not([data-reg="cypherpunk"]) :is(.w .r,.w .mute,.field .gloss,.oddlaw,.note h3,.talk h2 .who,.talkst,.pillar .is,.voicebox .st,.tongues,.msg .tag,.stone .dock){font-size:14px}
+  body:not([data-reg="cypherpunk"]) :is(.roselinks a,.seeds button){font-size:14px}
+  footer{color:var(--ink-mut)}
+  body[data-reg="bee"] footer .m{color:#65509a;font-size:.875rem}
+  body[data-reg="bee"]{--rose-lift:#a31c35}
+  body:not([data-reg="bee"]) .w .mute{color:var(--guard)}
+  body[data-reg="bee"] .w .mute{color:#65509a}
 </style>
 </head>
-<body data-reg="bee">
+<body data-reg="bee" data-bee-theme="custom">
 
 <section class="open">
   <div class="glow"></div>

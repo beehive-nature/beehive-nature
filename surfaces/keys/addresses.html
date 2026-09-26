@@ -20,7 +20,7 @@ header p{color:var(--dim);font-size:11.5px;margin-top:8px}
 .card.plc h3{color:var(--cyan)} .card.npub h3{color:var(--violet)}
 .row{display:flex;justify-content:space-between;gap:14px;padding:8px 0;border-bottom:1px dotted var(--line);font-size:11.5px}
 .row .k{color:var(--dim);flex-shrink:0}
-.row .v{text-align:right;word-break:break-all}
+.row .v{text-align:right;overflow-wrap:anywhere}
 .mono{font-size:10.5px;color:var(--gold)}
 .note{color:var(--dim);font-size:10.5px;line-height:1.8;margin-top:10px}
 .note b{color:var(--ink);font-weight:400}
@@ -29,9 +29,26 @@ input{flex:1;background:#0a100c;color:var(--cyan);border:1px solid var(--line);b
 button{background:#12301a;color:#9FFF3D;border:1px solid #2c4418;border-radius:8px;padding:10px 18px;cursor:pointer;font:12px 'IBM Plex Mono',monospace}
 button:hover{background:#9FFF3D;color:#000}
 footer{max-width:760px;margin:26px auto 0;color:var(--dim);font-size:10px;text-align:center;line-height:1.8}
+/* the page end at 390 px (2026-09-26 lower-half pass). Rows, values, laws and
+   the footer read at 14 px (cypherpunk keeps a dense 13 px mono); the footer
+   link is a 44 px target.
+   New bee reads this page on the light paper canvas through the shared
+   contract (register.js), with the page's hues respoken at light contrast. */
+.row,.mono,.note,footer{font-size:14px}
+body[data-reg="cypherpunk"] :is(.row,.mono,.note,footer){font-size:13px}
+.row .k{max-width:42%}
+footer a{display:inline-block;padding-block:12px;margin-block:-12px}
+body[data-reg="bee"][data-bee-theme="shared"]{--cyan:#176879;--violet:#65509a;--gold:#855b0b}
+body[data-reg="bee"][data-bee-theme="shared"] :is(.note,footer){font-family:var(--bee-font);line-height:1.65}
+body[data-reg="bee"][data-bee-theme="shared"] .note{font-size:16px}
+body[data-reg="bee"][data-bee-theme="shared"] .card{background:var(--panel)}
+body[data-reg="bee"][data-bee-theme="shared"] input{background:#fff;color:var(--ink);border-color:#857d70}
+body[data-reg="bee"][data-bee-theme="shared"] button{background:#a8238c;color:#fff;border-color:#a8238c;min-height:44px}
+body[data-reg="bee"][data-bee-theme="shared"] button:hover{background:#8a1c73;color:#fff}
+body[data-reg="bee"][data-bee-theme="shared"] footer a{color:#176879!important}
 </style>
 </head>
-<body>
+<body data-bee-theme="shared">
 <header>
   <h1>🗝 your two addresses</h1>
   <p>one bzDiD root · two mailing rails — bsky (did:plc) and nostr (npub) · TASKS 1+2 of the comms ledger</p>

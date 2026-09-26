@@ -213,10 +213,12 @@
   function seatOrb(){if(orb.parentElement!==document.body)document.body.appendChild(orb);orb.style.position='';applySide();fitDock();}
   var grab=null,justDragged=false;
   function restBottom(){var b=parseFloat(orb.style.bottom)||0;return b-(spot.lift||0);}
-  orb.addEventListener('pointerdown',function(e){if(e.button)return;var r=orb.getBoundingClientRect();grab={id:e.pointerId,x:e.clientX,y:e.clientY,dx:e.clientX-r.left,dy:e.clientY-r.top,rest:restBottom()};});
+  orb.addEventListener('pointerdown',function(e){if(e.button)return;var r=orb.getBoundingClientRect();grab={id:e.pointerId,x:e.clientX,y:e.clientY,dx:e.clientX-r.left,dy:e.clientY-r.top,rest:restBottom()};
+    /* capture at the press, not at the threshold: a quick flick leaves the 52 px orb before it has moved 6 px, and the moves went elsewhere */
+    try{orb.setPointerCapture(e.pointerId);}catch(x){}});
   orb.addEventListener('pointermove',function(e){
     if(!grab||e.pointerId!==grab.id)return;
-    if(!dragging){if(Math.hypot(e.clientX-grab.x,e.clientY-grab.y)<6)return;dragging=true;orb.classList.add('ad-drag');try{orb.setPointerCapture(e.pointerId);}catch(x){}}
+    if(!dragging){if(Math.hypot(e.clientX-grab.x,e.clientY-grab.y)<6)return;dragging=true;orb.classList.add('ad-drag');}
     e.preventDefault();
     var W=window.innerWidth,H=window.innerHeight,sz=orb.offsetWidth||52;
     var x=Math.max(8,Math.min(W-sz-8,e.clientX-grab.dx)),top=e.clientY-grab.dy;

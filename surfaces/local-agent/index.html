@@ -115,6 +115,19 @@ main{max-width:462px;margin:0 auto}
 #sriRows .h{color:var(--faint);font-variant-numeric:tabular-nums}
 @media (max-width:390px){.note{font-size:11px}.stat{font-size:9px}}
 @media (prefers-reduced-motion:reduce){.hd .r,.route .dot{animation:none}}
+/* the page end at 390 px (2026-09-26 lower-half pass). Casing law: labels
+   read as written, never shouted by text-transform. Type floor: notes, the
+   wire, the custody rows and the foot read at 13-14 px on a phone; the foot's
+   links are 44 px targets without moving a line. */
+.crumbs,.hd small,.step,.pstat .l,.field label{text-transform:none;letter-spacing:.03em}
+.pstat .l{font-size:12px}
+.step{font-size:13px}
+.note,.note b,.route .rt,.answer,.wire,.chip,.foot{font-size:14px}
+.stat{font-size:13px}
+#sriRows .row{font-size:13px;padding:5px 0}
+.field label{font-size:13px;width:92px}
+.foot a{display:inline-block;padding-block:12px;margin-block:-12px}
+@media (max-width:390px){.note{font-size:14px}.stat{font-size:13px}}
 </style>
 </head>
 <body>
@@ -202,7 +215,7 @@ main{max-width:462px;margin:0 auto}
   <b>engine</b> @mlc-ai/web-llm 0.2.84, Apache-2.0, L-VERIFY'd 2026-09-04 — vendored
   same-origin (<a href="../blight/web-llm.mjs">bytes</a> · <a href="../blight/web-llm.LICENSE">LICENSE</a>);
   its bundled TVMjs runtime is @mlc-ai/web-runtime (Apache-2.0 at
-  <a href="https://github.com/apache/tvm">apache/tvm</a>, L-VERIFY'd 2026-09-05 —
+  <a href="https://github.com/apache/tvm" target="_blank" rel="noopener noreferrer">apache/tvm ↗</a>, L-VERIFY'd 2026-09-05 —
   <a href="../blight/tvmjs.LICENSE">LICENSE</a>).<br>
   <b>mind</b> Qwen2.5-0.5B-Instruct (weights Apache-2.0, read at the model card
   2026-09-05) · MLC q4f16 build ≈277 MB once, then cached.<br>
@@ -212,7 +225,7 @@ main{max-width:462px;margin:0 auto}
   word</b> — the upload door answered with an x402 invoice (0.241453 USDC-Base per
   5 MB; ≈13 USDC for the mind), a founder-gesture-class spend this seat does not
   make unruled.<br>
-  <a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/dispatches/2026-09-05-local-agent-webllm.md">the receipt is in the estate tree</a>
+  <a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/dispatches/2026-09-05-local-agent-webllm.md" target="_blank" rel="noopener noreferrer">the receipt is in the estate tree ↗</a>
 </footer>
 </main>
 

@@ -36,6 +36,9 @@ docs/design/*
 # surfaces + Fable's pointers reference, and implementation reads from it. The
 # rest of docs/design/ stays a deferred holding pen.
 !docs/design/non-value-states.md
+# ...and ETERNAL, the founder's three-UI blueprint (FOUNDER ORDER 2026-09-26): every surface is
+# rebuilt against it, so its screens, markup and law ride the tree (docs/design/eternal/README.md).
+!docs/design/eternal/
 # ...and UI-LAW.md, the estate-wide confirmation laws (S26-0825 D1/D2): the
 # sprint-closing receipt re-derives its needles in CI, so the file rides the
 # repo like any other law. Everything else in docs/design/ stays a pen.

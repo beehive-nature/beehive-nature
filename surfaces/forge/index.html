@@ -26,6 +26,21 @@ li b{color:#cfe8d6}
 .small{font-size:11px;color:var(--dim);line-height:1.7}
 a{color:var(--cyan)}
 .foot{margin-top:24px;color:var(--dim);font-size:10.5px;line-height:1.8}
+/* lower-half finish (2026-09-26, 390 px phone review): prose was 13 px, the
+   receipts and rulings rows 11 px in #5a6478 (3.3:1), the card tags 10 px in
+   forced capitals. Lifted to the register floors (bee 16 px prose / 14 px labels,
+   raver 14 px, cypherpunk 13 px, never under 12 px); the link rows are 44 px
+   touch rows. */
+body{--fz-law:14px;--fz-lab:14px}
+body[data-reg="bee"]{--fz-law:16px;--fz-lab:14px}
+body[data-reg="cypherpunk"]{--fz-law:13px;--fz-lab:13px}
+p,ul{font-size:var(--fz-law)}
+.law{font-size:var(--fz-law);line-height:1.75}
+a.card .d{font-size:var(--fz-lab)}
+a.card .tag{font-size:max(12px,calc(var(--fz-lab) - 1px));padding:2px 8px}
+.small{font-size:var(--fz-lab);color:#9aa6b8;line-height:1.7}
+.small a{display:inline-block;padding:11px 0}
+.foot{font-size:max(12px,calc(var(--fz-lab) - 1px));color:#8b97aa;line-height:1.75;margin-top:26px;padding-top:14px;border-top:1px solid #1a1a2a}
 </style>
 </head>
 <body><div class="wrap">
@@ -55,10 +70,10 @@ copy the link — and the parent stays untouched, forever. The community's fork-
 
 <h2>go play — the sight side (live on this fleet)</h2>
 <div class="cards">
-<a class="card" href="hexfield.html"><div class="t">⬡ hexfield</div><div class="d">a seeded hex lattice on Canvas — roll seeds, steer palette and symmetry, copy fork-links. The Tinker note on the page teaches the first edit.</div><div class="tag">CANVAS · SEED = SCORE</div></a>
-<a class="card" href="orbit.html"><div class="t">✳ orbit</div><div class="d">seeded rose curves in SVG — petals, twist, layered light. Same law: same seed, same orbit, forever.</div><div class="tag">SVG · SEED = SCORE</div></a>
-<a class="card" href="room.html"><div class="t">👥 the two-tab room</div><div class="d">multiplayer you can feel, zero servers: open two tabs, turn a knob in one, watch the field move in both. The CRDT seam the LiveKit huddle will plug into.</div><div class="tag">BROADCASTCHANNEL + YJS</div></a>
-<a class="card" href="huddle.html"><div class="t">📡 the huddle</div><div class="d">the same room across machines — a real LiveKit venue, humans and bAiGenTs as ordinary participants, anywhere on Earth. Bring a venue URL + token (the runbook mints them for a local try).</div><div class="tag">NEW · LIVEKIT · ACROSS MACHINES</div></a>
+<a class="card" href="hexfield.html"><div class="t">⬡ hexfield</div><div class="d">a seeded hex lattice on Canvas — roll seeds, steer palette and symmetry, copy fork-links. The Tinker note on the page teaches the first edit.</div><div class="tag">Canvas · seed = score</div></a>
+<a class="card" href="orbit.html"><div class="t">✳ orbit</div><div class="d">seeded rose curves in SVG — petals, twist, layered light. Same law: same seed, same orbit, forever.</div><div class="tag">SVG · seed = score</div></a>
+<a class="card" href="room.html"><div class="t">👥 the two-tab room</div><div class="d">multiplayer you can feel, zero servers: open two tabs, turn a knob in one, watch the field move in both. The CRDT seam the LiveKit huddle will plug into.</div><div class="tag">BroadcastChannel + Yjs</div></a>
+<a class="card" href="huddle.html"><div class="t">📡 the huddle</div><div class="d">the same room across machines — a real LiveKit venue, humans and bAiGenTs as ordinary participants, anywhere on Earth. Bring a venue URL + token (the runbook mints them for a local try).</div><div class="tag">new · LiveKit · across machines</div></a>
 </div>
 
 <h2>the sound side</h2>

@@ -40,6 +40,27 @@ button.gold{background:#2a230a;color:var(--gold)} button.gold:hover{background:v
 .out{background:#0a0f0b;border:1px dashed var(--line);border-radius:8px;padding:11px 13px;margin-top:10px;font-size:11px;white-space:pre-wrap;word-break:break-word;display:none}
 .never{border:1px dashed #3d3410;background:#141207;border-radius:8px;padding:9px 12px;font-size:10.5px;color:var(--gold);line-height:1.7;margin-top:10px}
 footer{max-width:860px;margin:22px auto 0;color:var(--dim);font-size:10px;text-align:center;line-height:1.8}
+/* lower half at 390 px — reading sizes and tap heights (founder phone review, 2026-09-26) */
+section h2{font-size:13px;letter-spacing:.04em;line-height:1.5}
+.law{font-size:13px;line-height:1.75}
+table{font-size:12.5px}
+.badge{font-size:12px;letter-spacing:.04em}
+select,input:not([type=checkbox]):not([type=radio]),textarea{font-size:13px;min-height:44px}
+button{font-size:13.5px;min-height:44px;padding:10px 16px}
+.sent .stx{font-size:13px}
+.sent .scit{font-size:12px;margin-top:2px;overflow-wrap:anywhere}
+.sent .scit a{display:inline-flex;align-items:center;min-height:44px;text-underline-offset:3px}
+.flag,.okline,.never{font-size:13px}
+.out{font-size:12.5px}
+footer{font-size:13px;line-height:1.7;padding:0 8px}
+footer{line-height:2.1}
+footer a{padding-block:12px;text-underline-offset:3px}
+body[data-reg="bee"] :is(.law,.sent .stx,.flag,.okline,.never){font:16px/1.7 system-ui,-apple-system,'Segoe UI',sans-serif}
+body[data-reg="bee"] :is(table,.badge,.sent .scit,button,footer){font-family:system-ui,-apple-system,'Segoe UI',sans-serif;font-size:14px;letter-spacing:normal}
+body[data-reg="bee"] button{font-size:15px}
+body[data-reg="bee"] section h2{font:600 16px/1.4 system-ui,-apple-system,'Segoe UI',sans-serif;letter-spacing:normal}
+body[data-reg="raver"] :is(.law,.sent .stx,.flag,.okline,.never){font-size:14.5px}
+body[data-reg="raver"] :is(table,.badge,.sent .scit,button,footer,section h2){font-size:14px}
 </style>
 </head>
 <body>

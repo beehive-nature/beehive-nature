@@ -16,12 +16,13 @@
 //   TALL     the resting bar taller than 64 px (it eats the page)
 // and, over everything in the lower half of the page (from mid-page to the end):
 //   CUT      text cut by its own box (overflow hidden/ellipsis on real words)
-//   OVERLAP  two pieces of text drawn over each other
+//   OVERLAP  two pieces of text drawn over each other (as clipped on screen; fixed/sticky layers excluded)
 //   OFFSIDE  an element sticking out past the 390 px screen
 //   SMALL    reading text under 12 px
 //   FAINT    text contrast under 4.5:1 against what is behind it
 //   BROKEN   an image that did not load
-//   JUNK     undefined / NaN / null / [object …] / a lone dash shown as a value
+//   JUNK     a value slot showing undefined / NaN / null / [object …] / a lone dash (words that
+//            merely contain the token, and a dash between words, are not values)
 //   CAPS     forced capitals (text-transform), against the casing law
 //   TINY     a link or button under 32 px tall (touch); links inside running prose are exempt (WCAG 2.5.8)
 // External requests are refused (nothing leaves the box). Screens of the bottom 220 px go to
@@ -140,16 +141,34 @@ function lowerHalf() {
     if (/^(A|BUTTON|SUMMARY)$/.test(el.tagName) && r.height < 32 && (el.textContent || '').trim() && !inProse(el)) out.push(['TINY', say(el) + ` ${Math.round(r.height)} px`]);
     const own = [...el.childNodes].filter(n => n.nodeType === 3 && n.textContent.trim()).map(n => n.textContent.trim()).join(' ');
     if (!own) continue;
-    if (/\b(undefined|NaN|null)\b|\[object \w+\]/.test(own) || /^[—–-]$/.test(own)) out.push(['JUNK', say(el)]);
-    const fs = parseFloat(cs.fontSize); if (fs < 12 && /[A-Za-z\u00C0-\uFFFF]{3}/.test(own)) out.push(['SMALL', say(el) + ` ${fs}px`]);
+    // JUNK is a VALUE SLOT showing a broken value: the whole run is the token (optionally with a unit,
+    // "NaN MB"), or a lone dash that is not punctuation between words ("<b>label</b> — text").
+    const loneDash = /^[—–-]$/.test(own) && ![...el.childNodes].some(n => n.nodeType === 1 && (n.textContent || '').trim());
+    if (/^(undefined|NaN|null)(\s*[%A-Za-z]{0,4})?$/.test(own) || /\[object \w+\]/.test(own) || loneDash) out.push(['JUNK', say(el)]);
+    let fs = parseFloat(cs.fontSize);
+    if (el.ownerSVGElement) { const m = el.getScreenCTM && el.getScreenCTM(); if (m) fs *= Math.hypot(m.a, m.b); } // SVG text: the size on screen
+    if (fs < 12 && /[A-Za-z\u00C0-\uFFFF]{3}/.test(own)) out.push(['SMALL', say(el) + ` ${Math.round(fs * 10) / 10}px`]);
     if ((cs.overflow === 'hidden' || cs.textOverflow === 'ellipsis' || cs.overflowX === 'hidden') && el.scrollWidth > el.clientWidth + 2 && own.length > 3) out.push(['CUT', say(el) + ` ${el.scrollWidth}>${el.clientWidth}`]);
     const fg = lum(cs.color), bg = bgOf(el);
     if (fg && bg != null && fg.a > .5) { const [a, b] = [fg.L, bg].sort((x, y) => y - x); const ratio = (a + .05) / (b + .05); if (ratio < 4.5 && fs < 24) out.push(['FAINT', say(el) + ` ${ratio.toFixed(2)}:1`]); }
     // glyph boxes of this element's own text, one per line
-    for (const n of el.childNodes) {
+    // (a) a layer — fixed or sticky — is MEANT to sit over content scrolling under it: not an overlap;
+    // (b) a glyph is only drawn where its overflow ancestors let it be: clip to them (rows below a
+    //     scroll box's edge are not on screen); (c) off-screen text (a skip link parked at -9999) is not drawn.
+    let layer = false, clip = { l: 0, t: -1e9, r: W, b: 1e9 };
+    for (let a = el; a && a !== document.body; a = a.parentElement) {
+      const acs = getComputedStyle(a);
+      if (acs.position === 'fixed' || acs.position === 'sticky') { layer = true; break; }
+      if (a !== el && (acs.overflowX !== 'visible' || acs.overflowY !== 'visible')) { const ar = a.getBoundingClientRect(); clip = { l: Math.max(clip.l, ar.left), t: Math.max(clip.t, ar.top), r: Math.min(clip.r, ar.right), b: Math.min(clip.b, ar.bottom) }; }
+    }
+    if (!layer) for (const n of el.childNodes) {
       if (n.nodeType !== 3 || !n.textContent.trim()) continue;
       const rg = document.createRange(); rg.selectNodeContents(n);
-      for (const q of rg.getClientRects()) if (q.width > 2 && q.height > 2) texts.push({ el, n, r: q });
+      for (const q0 of rg.getClientRects()) {
+        const q = { left: Math.max(q0.left, clip.l), top: Math.max(q0.top, clip.t), right: Math.min(q0.right, clip.r), bottom: Math.min(q0.bottom, clip.b) };
+        q.width = q.right - q.left; q.height = q.bottom - q.top;
+        if (q.width > 2 && q.height > 2) texts.push({ el, n, r: q });
+      }
     }
   }
   // OVERLAP: glyph boxes of two different text runs drawn over each other (bucketed by row)

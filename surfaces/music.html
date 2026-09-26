@@ -276,6 +276,41 @@
   .boundary-dl dd { margin:0; color:var(--dim); overflow-wrap:anywhere; }
   @media(max-width:720px){ .boundary-dl { grid-template-columns:1fr; gap:2px; } .boundary-dl dd { margin-bottom:8px; } }
 
+  /* ── the page end, read on a phone (2026-09-26 lower-half pass) ────────
+     Casing law: headings and labels read as written, never shouted by
+     text-transform. Type floor: new bee and raver read at 14 px (bee
+     paragraphs 16 px), cypherpunk stays dense at 12–13 px mono. Controls
+     reach 44 px. Same facts, same order, same colours in every view. */
+  .eyebrow, .card h2, .pill, .fact label, .meta label, .src label { text-transform:none; }
+  .eyebrow { letter-spacing:.06em; }
+  .card h2 { letter-spacing:.01em; }
+  .fact label, .meta label, .src label { letter-spacing:.02em; }
+  .store-action, #play-here { min-height:44px; }
+  footer { padding-bottom:8px; }
+  .meta, .facts { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .meta div, .fact { min-width:0; }
+  .card-head { flex-wrap:wrap; }
+  .card-head > div { flex:1 1 220px; min-width:0; }
+  .gate .row { flex-wrap:wrap; row-gap:0; }
+  .gate .row > :last-child { margin-left:auto; text-align:right; }
+  footer a, .independent a, .law a { display:inline-block; padding-block:12px; margin-block:-12px; }
+  footer a { text-decoration:underline; text-decoration-color:var(--line-hi); text-underline-offset:4px; white-space:nowrap; }
+  body:not([data-reg="cypherpunk"]) .card h2:not(#room-title) { font-size:17px; }
+  body:not([data-reg="cypherpunk"]) :is(.eyebrow, .sub, .independent, .statusline, .colorlaw, .item small,
+    .ready, .store-state, .store-action, .fact label, .meta label, .gate, .credit small, .event, .event b,
+    .law, .notrack, .src label, .src a, .src .none, .src small, #play-here, .artist-note, .roomfoot small,
+    .nav a, button.pill, .pill, .plur-strip, footer) { font-size:14px; }
+  body:not([data-reg="cypherpunk"]) .item b { font-size:15px; }
+  body:not([data-reg="cypherpunk"]) .meta strong { font:600 14px/1.5 var(--mono); }
+  body:not([data-reg="cypherpunk"]) .notrack b { font-size:15px; }
+  body[data-reg="bee"] :is(.sub, .law, .notrack, .artist-note, .independent) { font-size:16px; line-height:1.6; }
+  body[data-reg="cypherpunk"] :is(.eyebrow, .sub, .independent, .statusline, .colorlaw, .item small,
+    .ready, .store-state, .store-action, .fact label, .meta label, .gate, .credit small, .event, .event b,
+    .law, .notrack, .src label, .src a, .src .none, .src small, #play-here, .artist-note, .roomfoot small,
+    .nav a, button.pill, .pill, .plur-strip, .boundary-dl, footer) { font-size:12.5px; }
+  body[data-reg="cypherpunk"] :is(.item b, .meta strong, .card h2:not(#room-title)) { font-size:13.5px; }
+  body[data-reg="raver"] .intro { font-size:15px; }
+
   /* ── motion laws ───────────────────────────────────────────────────────
      Ambient artwork stops for anyone who asks the OS for less motion, and
      the pause control (Raver) stops it for everyone else. The canvas meter

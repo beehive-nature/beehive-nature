@@ -179,6 +179,28 @@ main{max-width:462px;margin:0 auto}
 .dotted{border-bottom:1px dashed var(--faint)}
 @media (max-width:390px){.cell .s{font-size:9px}}
 @media (prefers-reduced-motion:reduce){.hex.nectar.live,.hex.honey.live,.sep{animation:none}}
+
+/* THE LOWER HALF AT 390 (2026-09-26, footer audit). The metered-session
+   panel (drawn by x402-meter.js with inline 9.5–11 px sizes, forced capitals
+   and --faint timestamps at 4.2:1) and the footer ran under the floor; the
+   ledger's tx links were 12 px tall. This page lifts them without touching
+   the shared engine: floor 12 px everywhere (cypherpunk keeps its density),
+   14 px for New bee and raver; no text-transform; --faint lifts to --dim.
+   The footer's three register lines stand as their own lines. */
+.crumbs,.hd small,.step,.field label,.tx .k,.cert .t,.res .head,#plan .bar,#plan h3{text-transform:none;letter-spacing:.04em}
+#x402body{font-size:12px}
+#x402body [style*="font-size:9"],#x402body [style*="font-size:10"],#x402body [style*="font-size:11px"]{font-size:12px!important}
+#x402body [style*="text-transform:uppercase"]{text-transform:none!important;letter-spacing:.04em!important}
+#x402body [style*="color:var(--faint)"]{color:var(--dim)!important}
+#x402body a{padding-block:12px;border-bottom:0!important;text-decoration:underline dashed;text-underline-offset:3px}
+.lawline,.line span small,.line b .a,.total .sub,.tx,.tx .k,.checked,.cert .t,.kv,.kv b,.res .head,.foot,.rail .rd,#doorstate code,.cell .s{font-size:12px}
+.lawline,.line span small,.line b .a,.total .sub,.tx .k,.tx .when,.checked,.kv,.res li .m,.foot,.rail .rd,.cell .s{color:var(--dim)}
+.foot p+p{margin-top:8px}
+.foot a{padding-block:12px;color:var(--gold)}
+.foot{padding-bottom:12px}
+@media (max-width:390px){.cell .s{font-size:12px}}
+body:not([data-reg="cypherpunk"]) #x402body [style*="font-size:9"],body:not([data-reg="cypherpunk"]) #x402body [style*="font-size:10"],body:not([data-reg="cypherpunk"]) #x402body [style*="font-size:11px"]{font-size:14px!important}
+body:not([data-reg="cypherpunk"]) :is(.lawline,.tx,.checked,.kv,.foot,.rail .rd,#x402body){font-size:14px}
 </style>
 </head>
 <body>
@@ -291,18 +313,18 @@ main{max-width:462px;margin:0 auto}
   (<a href="https://github.com/beehive-nature/beehive-nature/blob/main/contracts/vending/tool/x402audit.mjs">tool/x402audit.mjs</a>,
   held to this page's engine by a parity gate). Tap a cell to see each of the four
   verifier states demonstrated, not asserted.</p>
-  <div id="x402body" aria-live="polite" style="color:var(--dim);font-size:11px">reading the meter session…</div>
+  <div id="x402body" aria-live="polite" style="color:var(--dim)">reading the meter session…</div>
 </section>
 
 <footer class="foot">
-  <b data-i18n="v.care.bee">new bee:</b> <span data-i18n="v.care.bees">you just made an AI that's yours.</span> ·
-  <b data-i18n="v.care.raver">raver:</b> <span data-i18n="v.care.ravers">it speaks your tongue and lives in the hive.</span> ·
-  <b data-i18n="v.care.cypher">cypherpunk:</b> <span data-i18n="v.care.cyphers">Arweave record, ed25519 owner, sha256 over canonical JSON, pointer derived not stored</span> —
-  <a href="https://monitor.jungletestnet.io/#accountOverview:bnrapolltest" data-i18n="v.verify">verify it yourself</a>.<br>
-  law rows read live from the vending contract on jungle4 (bnrapolltest · rehearsal
+  <p><b data-i18n="v.care.bee">new bee:</b> <span data-i18n="v.care.bees">you just made an AI that's yours.</span></p>
+  <p><b data-i18n="v.care.raver">raver:</b> <span data-i18n="v.care.ravers">it speaks your tongue and lives in the hive.</span></p>
+  <p><b data-i18n="v.care.cypher">cypherpunk:</b> <span data-i18n="v.care.cyphers">Arweave record, ed25519 owner, sha256 over canonical JSON, pointer derived not stored</span> —
+  <a href="https://monitor.jungletestnet.io/#accountOverview:bnrapolltest" data-i18n="v.verify">verify it yourself</a>.</p>
+  <p class="src">law rows read live from the vending contract on jungle4 (bnrapolltest · rehearsal
   net) · A price <span id="vpricedate">live</span> · spec
   <a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/specs/SPEC-VENDING-1.md" data-i18n="v.spec">SPEC-VENDING-1/2 in the estate tree</a> ·
-  the meter receipt <a href="#x402-sec" data-i18n="v.audited">audited in your page</a>
+  the meter receipt <a href="#x402-sec" data-i18n="v.audited">audited in your page</a></p>
 </footer>
 </main>
 

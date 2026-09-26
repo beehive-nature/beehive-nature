@@ -8,18 +8,18 @@
 <meta name="color-scheme" content="dark">
 <title>🎧 the set I build to — what's in the headphones while all of this gets made</title>
 <style>
-:root{--bg:#07090b;--panel:#0e1611;--well:#0a0f0b;--ink:#e2efdb;--dim:#8a9a8a;--faint:#5f6f61;
+:root{--bg:#07090b;--panel:#0e1611;--well:#0a0f0b;--ink:#e2efdb;--dim:#8a9a8a;--faint:#879787;
  --line:#243026;--cyan:#00E5FF;--gold:#FFD700;--violet:#c9a0ff;--leaf:#7ddf8f;--amber:#ffb347}
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{overflow-x:hidden}
-body{background:var(--bg);color:var(--ink);font:13px/1.65 'IBM Plex Mono',monospace;padding:30px 14px 90px}
+body{background:var(--bg);color:var(--ink);font:max(13px,var(--fmin,12px))/1.65 'IBM Plex Mono',monospace;padding:30px 14px 90px}
 main{max-width:900px;margin:0 auto}
 header{text-align:center;margin-bottom:8px}
 h1{font-size:clamp(19px,5vw,28px);color:var(--gold);font-weight:400}
-.sub{color:var(--dim);font-size:11.5px;margin-top:8px;max-width:680px;margin-inline:auto;line-height:1.8}
+.sub{color:var(--dim);font-size:max(11.5px,var(--fmin,12px));margin-top:8px;max-width:680px;margin-inline:auto;line-height:1.8}
 section{background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:15px 16px;margin-top:14px}
-h2{font-size:11.5px;color:var(--violet);font-weight:400;letter-spacing:.09em;margin-bottom:9px}
-.law{color:var(--dim);font-size:10.5px;line-height:1.85}
+h2{font-size:max(11.5px,var(--fmin,12px));color:var(--violet);font-weight:400;letter-spacing:.09em;margin-bottom:9px}
+.law{color:var(--dim);font-size:max(10.5px,var(--fmin,12px));line-height:1.85}
 .law b{color:var(--ink)}
 a{color:var(--cyan)}
 .track{display:flex;gap:12px;align-items:center;background:var(--well);border:1px solid var(--line);
@@ -27,34 +27,39 @@ a{color:var(--cyan)}
 .track:focus-visible{border-color:var(--cyan);box-shadow:0 0 0 2px rgba(0,229,255,.25)}
 .track svg{flex:0 0 auto;width:52px;height:46px}
 .track .ti{flex:1;min-width:0}
-.track .tt{font-size:12.5px;color:var(--ink);line-height:1.5;word-break:break-word}
-.track .ta{font-size:10.5px;color:var(--dim)}
-.track .tl{font-size:9.5px;margin-top:3px}
-.track .tl a{margin-right:10px}
-.badge{display:inline-block;font-size:8.5px;letter-spacing:.05em;border:1px solid var(--line);
+.track .tt{font-size:max(12.5px,var(--fmin,12px));color:var(--ink);line-height:1.5;word-break:break-word}
+.track .ta{font-size:max(10.5px,var(--fmin,12px));color:var(--dim)}
+.track .tl{font-size:max(9.5px,var(--fmin,12px));margin-top:3px}
+.track .tl a{margin-right:10px;display:inline-flex;align-items:center;min-height:44px}
+.badge{display:inline-block;font-size:max(8.5px,var(--fmin,12px));letter-spacing:.05em;border:1px solid var(--line);
  border-radius:3px;padding:0 5px;color:var(--faint)}
 .ru{color:var(--violet)}
 .design{border:1px dashed #3d3410;background:#141207;border-radius:9px;padding:11px 13px;
- font-size:10.5px;color:var(--gold);line-height:1.8;margin-top:10px}
+ font-size:max(10.5px,var(--fmin,12px));color:var(--gold);line-height:1.8;margin-top:10px}
 textarea{width:100%;min-height:90px;background:var(--well);color:var(--ink);border:1px solid var(--line);
- border-radius:7px;padding:9px;font:11px 'IBM Plex Mono',monospace;resize:vertical}
+ border-radius:7px;padding:9px;font:max(11px,var(--fmin,12px)) 'IBM Plex Mono',monospace;resize:vertical}
 button{background:#26123a;color:var(--violet);border:1px solid var(--line);border-radius:8px;
- padding:8px 14px;cursor:pointer;font:11.5px 'IBM Plex Mono',monospace;min-height:40px;margin-top:8px;margin-right:6px}
+ padding:8px 14px;cursor:pointer;font:max(11.5px,var(--fmin,12px)) 'IBM Plex Mono',monospace;min-height:44px;margin-top:8px;margin-right:6px}
 button:hover{background:var(--violet);color:#000}
 pre{background:var(--well);border:1px solid var(--line);border-radius:8px;padding:10px;margin-top:8px;
- font-size:9.5px;line-height:1.6;overflow-x:auto;color:var(--dim);white-space:pre-wrap;word-break:break-word}
-footer{max-width:900px;margin:22px auto 0;color:var(--faint);font-size:10px;text-align:center;line-height:2}
+ font-size:max(9.5px,var(--fmin,12px));line-height:1.6;overflow-x:auto;color:var(--dim);white-space:pre-wrap;word-break:break-word}
+footer{max-width:900px;margin:22px auto 0;color:var(--faint);font-size:max(10px,var(--fmin,12px));text-align:center;line-height:2}
 @media (prefers-reduced-motion: no-preference){
  .track svg polygon{transition:opacity .6s ease}
  .track:hover svg polygon,.track:focus-visible svg polygon{opacity:.75}
 }
+footer a{padding-block:14px} /* a 44 px tap target that leaves the line rhythm alone */
+/* Lower-half floor (2026-09-26, 390 px phone review): every small size on this page
+   reads max(its own size, --fmin) — 12 px in cypherpunk's dense mono, 14 px for new bee
+   and raver, so no register ever draws reading text a phone cannot hold. */
+body[data-reg="bee"],body[data-reg="raver"]{--fmin:14px}
 </style>
 </head>
 <body>
 <main>
 <header>
   <h1>🎧 <span data-i18n="bst.h1">the set I build to</span></h1>
-  <div style="font-size:11px;letter-spacing:.14em;margin-top:6px;color:var(--gold,#FFD700)" data-i18n="bst.quote">“10Ve the first ingredient” — the wOlf, 2026-08-22</div>
+  <div style="font-size:max(11px,var(--fmin,12px));letter-spacing:.14em;margin-top:6px;color:var(--gold,#FFD700)" data-i18n="bst.quote">“10Ve the first ingredient” — the wOlf, 2026-08-22</div>
   <div class="sub" data-reg="bee" data-i18n="bst.bee">What's in the founder's headphones while all of this gets made — his own playlist,
   <b style="color:var(--ink)">“for the wOlf”</b>, docked verbatim: EDM for the festival heart,
   Russian tracks for the second tongue of the hive, and everything else he actually plays. Every track links

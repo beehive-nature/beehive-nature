@@ -262,6 +262,39 @@ body[data-reg="cypherpunk"] h1{font-weight:600}
 body[data-reg="cypherpunk"] h1 .h1-arg{background:linear-gradient(92deg,#45c2dc,#86cc72);-webkit-background-clip:text;background-clip:text;color:transparent}
 body[data-reg="cypherpunk"] section{padding:12px}
 body[data-reg="cypherpunk"] h2{letter-spacing:.08em}
+/* ── THE LOWER HALF AT 390 (2026-09-26, footer audit) ── the rail matrix,
+   the receipts, the composer ladder, the summary tiles and the footer were
+   drawn at 8.5–11.5 px, much of it by script with inline sizes, and the
+   secondary words sat in --faint (4.4:1 on raver/cypherpunk black, lower on
+   paper). A register changes dress and density, never what can be read: the
+   floor is 12 px in every register (cypherpunk stays the dense one), New bee
+   and raver read their secondary labels at 14 px, and --faint text lifts to
+   --dim. Inline sizes from the renderers are met here, page-scoped. */
+main :is(.law,.badge,.chain .cd,.chain .stat,pre,.rd .k,.stamp,.keycard .kt,.keycard .kp,.keycard .kd,.chip .cc,.chip .cv,.chip .cx,.lcap,.lbadge,.lline,input.small),footer{font-size:12px}
+main :is(.chain .cd,.rd .k,.keycard .kd,.chip .cx,.lcap,.lbadge),footer{color:var(--dim)}
+/* the estate hues this page reads straight from tokens.css (amber, leaf,
+   cyan, gold, violet) are neon for the black ground; on New bee's paper they
+   fell to 1.1–2.1:1. Paper steps inside each hue's own ramp, bee only. */
+body[data-reg="bee"]{--amber:#8a4b08;--leaf:#326b39;--cyan:#176879;--gold:#855b0b;--violet:#65509a;--line:#e6dfd2}
+main [style*="font-size:8"],main [style*="font-size:9"],main [style*="font-size:10"],main [style*="font-size:11px"],main [style*="font-size:11.5px"]{font-size:12px!important}
+main :is([style*="font:9"],[style*="font:10"],[style*="font:11px"]){font-size:12px!important}
+main [style*="color:var(--faint)"]{color:var(--dim)!important}
+/* paper steps for the hand-coloured ladder labels and the two dark-dressed
+   launch buttons (hex inline on the dark ground; 1.1–2.5:1 on paper) */
+body[data-reg="bee"] .llabel[style*="#E9F2EC"]{color:var(--ink)!important}
+body[data-reg="bee"] .llabel[style*="#D655BB"]{color:#a8238c!important}
+body[data-reg="bee"] :is(.llabel,.lbadge)[style*="#6FA9E0"]{color:#29628f!important;border-color:#29628f!important}
+body[data-reg="bee"] .llabel[style*="#86CC72"],body[data-reg="bee"] .ldot[style*="#86CC72"]{color:#326b39!important}
+body[data-reg="bee"] #arw-go{background:#e2f0ee!important;color:#176879!important;border-color:#176879!important}
+body[data-reg="bee"] #fund-sec .fund-launch{background:#f3ead6;border-color:#855b0b;color:#855b0b}
+main summary{min-height:44px;display:flex;align-items:center;gap:6px;cursor:pointer}
+/* the ladder badges were nowrap: "CONFIRMED — read back from the rail" pushed the
+   layout viewport to 466 px on a phone. They wrap under their label now. */
+.lbadge{white-space:normal;display:inline-block;max-width:100%;margin:4px 0 0 10px}
+footer a{padding-block:12px}
+footer{padding-bottom:12px}
+body:not([data-reg="cypherpunk"]) main :is(.law,.chain .cd,.chain .stat,.rd .k,.keycard .kt,.keycard .kd,.chip .cc,.chip .cx,.lcap,.lbadge,.lline),body:not([data-reg="cypherpunk"]) footer{font-size:14px}
+body:not([data-reg="cypherpunk"]) main :is([style*="font-size:8"],[style*="font-size:9"],[style*="font-size:10"],[style*="font-size:11px"],[style*="font-size:11.5px"]){font-size:14px!important}
 </style>
 </head>
 <body data-bee-theme="custom">
@@ -885,7 +918,7 @@ document.body.setAttribute('data-reg',r);document.documentElement.setAttribute('
   <div class="row" style="align-items:center;flex-wrap:wrap">
     <input id="vc-key" placeholder="your meter key — e.g. bclau-paid-1" spellcheck="false" autocomplete="off" style="flex:2;min-width:200px">
     <button id="vc-go" class="gold" style="min-height:40px">look up</button>
-    <span style="font-size:10.5px;color:var(--faint)" id="vc-src">—</span>
+    <span style="font-size:10.5px;color:var(--faint)" id="vc-src"></span>
   </div>
 
   <div id="vc-panel" style="display:none;margin-top:12px">
@@ -1640,10 +1673,10 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
 <section>
   <h2>📊 <span data-i18n="wl.h.summary">SUMMARY</span></h2>
   <div class="readout">
-    <div class="rd"><div class="k">SOUL</div><div class="v" id="sum-soul" style="font-size:13px">—</div></div>
+    <div class="rd"><div class="k">SOUL</div><div class="v" id="sum-soul" style="font-size:13px">not yet</div></div>
     <div class="rd"><div class="k">CHAINS CONNECTED</div><div class="v" id="sum-chains">0</div></div>
     <div class="rd"><div class="k">KEYCHAIN</div><div class="v" id="sum-kc" style="font-size:12px;color:var(--amber)">not connected</div></div>
-    <div class="rd"><div class="k">VAULTA AUTHORITY</div><div class="v" id="sum-bridge" style="font-size:12px;color:var(--amber)">—</div></div>
+    <div class="rd"><div class="k">VAULTA AUTHORITY</div><div class="v" id="sum-bridge" style="font-size:12px;color:var(--amber)">not yet</div></div>
   </div>
 </section>
 
@@ -2627,7 +2660,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       an.setAttribute('opacity','1')}
     else{n.setAttribute('stroke','#5f6f61');c.setAttribute('fill','#5f6f61');
       arc.setAttribute('opacity','0');an.setAttribute('opacity','0')}
-    $('sum-bridge').textContent=ok?'bridged ✓':(MPRK?'needs bridge':'—');
+    $('sum-bridge').textContent=ok?'bridged ✓':(MPRK?'needs bridge':'not yet');
     $('sum-bridge').style.color=ok?'var(--leaf)':'var(--amber)';
   }
 
@@ -3241,7 +3274,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     $('bridge-sec').style.display='none';
     $('kc-stat').textContent='— keychain scrubbed from memory —';
     $('sum-kc').textContent='not connected';$('sum-kc').style.color='var(--amber)';
-    $('sum-bridge').textContent='—';$('sum-bridge').style.color='var(--amber)';
+    $('sum-bridge').textContent='not yet';$('sum-bridge').style.color='var(--amber)';
     $('ethg').setAttribute('opacity','.45');$('ethnode').setAttribute('stroke-dasharray','2 3');
     renderForge();
   };

@@ -33,6 +33,13 @@ p{color:var(--mut);font-size:.88rem;margin:.5rem 0}
 .means{border-left:3px solid var(--teal);padding-left:.8rem;font-size:.85rem;color:var(--ink)}
 .doctrine{border-left:3px solid var(--teal);padding-left:1rem;color:var(--mut);font-size:.88rem}
 footer{color:var(--mut);font-size:.78rem;margin-top:2rem;border-top:1px solid var(--line);padding-top:1rem}
+/* lower-half finish (2026-09-26, 390 px review): the footer reads at 14 px and
+   stays one flowing sentence; each link carries its own 44 px touch height so
+   the separators stay attached to the words they separate. New bee reads prose at 16 px. */
+footer{font-size:.875rem;line-height:1.6;padding-bottom:.5rem}
+footer a{display:inline-block;padding:11px 0}
+body[data-reg="bee"] :is(p,.doctrine,.law,.means){font-size:1rem}
+.kind{font-size:.875rem;padding:.15rem .7rem}.date{font-size:.875rem}
 </style></head><body><main>
 <nav><a href="../">⌂ hub</a><a href="index.html">🐝 open hardware guide</a><a class="here" href="security.html">🛡 security events</a><a href="build.html">🔧 become a producer</a><a href="lab.html">⬡ the lab</a></nav>
 <h1>Security events, read honestly</h1>

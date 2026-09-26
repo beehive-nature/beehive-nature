@@ -44,9 +44,43 @@ td.cl{color:var(--ink)}
 .cb b{color:var(--ink);font-weight:400}
 pre{background:#0a0f0b;border:1px solid var(--line);border-radius:8px;padding:10px;margin-top:8px;font-size:9.5px;line-height:1.6;overflow-x:auto;color:var(--dim)}
 details{margin-top:10px}
-summary{cursor:pointer;color:var(--violet);font-size:10.5px}
+main summary{cursor:pointer;color:var(--violet);font-size:10.5px}
 footer{max-width:880px;margin:22px auto 0;color:var(--dim);font-size:10px;text-align:center;line-height:1.8}
 .dock-start{font:1.1rem/1.7 system-ui;max-width:700px;margin:24px auto}.dock-start a{display:inline-block;padding:12px 18px;margin:8px;border:1px solid currentColor;border-radius:24px;color:inherit}body[data-reg="bee"] header h1,body[data-reg="raver"] header h1{font:700 clamp(2rem,5vw,3.5rem)/1.2 system-ui}body[data-reg="bee"]{--ink:#0c1412;--dim:#425f50;--gold:#6b5400;--violet:#643b89;background:#f6f7ef;font:16px/1.65 system-ui}body[data-reg="bee"] section,body[data-reg="bee"] .card,body[data-reg="bee"] .cb div{background:#fff}body[data-reg="bee"] .law,body[data-reg="bee"] p{font-size:15px}body[data-reg="raver"] header{padding:40px 20px;background:radial-gradient(ellipse at center,#422140,transparent)}
+/* lower half at 390 px (founder phone review, 2026-09-26): 12px+ in every register, 44px controls,
+   and New bee's light canvas carries light wells, banners and teal links (no cyan-on-paper, no ink-on-black) */
+section h2{font-size:12.5px;letter-spacing:.05em;line-height:1.5}
+.law{font-size:12.5px;line-height:1.75}
+.banner{font-size:12.5px}
+table{font-size:12px}
+.fine{font-size:12px;color:var(--dim);line-height:1.55}
+td.fine{font-size:12px}
+.card h3{font-size:13px}
+.cb div{font-size:12px;min-height:44px}
+pre{font-size:12px}
+main summary{font-size:12.5px}
+main details:not([data-reg-disclose]):not(#sources-panel)>summary{padding-block:12px}
+footer{font-size:12.5px;line-height:1.7;padding:0 8px}
+footer{line-height:2.1}
+footer a{padding-block:12px;text-underline-offset:3px}
+body[data-reg="bee"]{--cyan:#176879;--amber:#9f362c;--line:#e6dfd2;--field:#fff;--btn:#f3eaf6;--btn-gold:#f3efe2}
+body[data-reg="bee"] :is(.banner){background:#f3efe2;border-color:#d4c4a0;color:#6b5400}
+body[data-reg="bee"] :is(pre,.cb div){background:#efe9dd}
+body[data-reg="bee"] :is(.law,.banner){font:16px/1.7 system-ui,-apple-system,'Segoe UI',sans-serif}
+body[data-reg="bee"] :is(table,.fine,td.fine,.cb div,main summary,footer){font-family:system-ui,-apple-system,'Segoe UI',sans-serif;font-size:14px;letter-spacing:normal}
+body[data-reg="bee"] .card h3{font:600 16px/1.5 system-ui,-apple-system,'Segoe UI',sans-serif}
+body[data-reg="bee"] section h2{font:600 16px/1.4 system-ui,-apple-system,'Segoe UI',sans-serif;letter-spacing:normal}
+body[data-reg="raver"] :is(.law,.banner){font-size:14.5px}
+body[data-reg="raver"] :is(table,.fine,td.fine,.cb div,main summary,footer,section h2,.card h3){font-size:14px}
+#srctab td:last-child a{display:inline-flex;align-items:center;min-height:44px;text-underline-offset:3px}
+@media (max-width:520px){
+ /* the sources table reads as cards on a phone: the source across the full width, what it is for and its link beneath */
+ #srctab tr:first-child{display:none}
+ #srctab tr{display:grid;grid-template-columns:1fr auto;align-items:center;column-gap:12px;border-bottom:1px solid var(--line);padding:6px 0}
+ #srctab td{border-bottom:0}
+ #srctab td.cl{grid-column:1/-1;padding-bottom:0}
+ #srctab td:last-child{text-align:end;overflow-wrap:anywhere;max-width:11em}
+}
 </style>
 </head>
 <body data-reg="bee">
@@ -285,9 +319,9 @@ footer{max-width:880px;margin:22px auto 0;color:var(--dim);font-size:10px;text-a
           <label class="law">from&nbsp;</label><select id="ws-from"></select>
         </span>
         <span><label class="law">language code&nbsp;</label>
-          <input id="ws-code" placeholder="e.g. mi, chr, x-yourtongue" style="width:150px;background:#0a0f0b;color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:5px 8px;font:11px 'IBM Plex Mono',monospace"></span>
+          <input id="ws-code" placeholder="e.g. mi, chr, x-yourtongue" style="width:150px;background:var(--field,#0a0f0b);color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:8px 10px;min-height:44px;font:13px 'IBM Plex Mono',monospace"></span>
         <span><label class="law">native name&nbsp;</label>
-          <input id="ws-name" placeholder="how it names itself" style="width:170px;background:#0a0f0b;color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:5px 8px;font:11px 'IBM Plex Mono',monospace"></span>
+          <input id="ws-name" placeholder="how it names itself" style="width:170px;background:var(--field,#0a0f0b);color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:8px 10px;min-height:44px;font:13px 'IBM Plex Mono',monospace"></span>
       </div>
       <div class="law" style="margin-top:6px">no ISO code for your tongue? that is not a wall: use an
       <code>x-</code> tag — the dock accepts what the registries have not yet named. rtl? add
@@ -305,12 +339,12 @@ footer{max-width:880px;margin:22px auto 0;color:var(--dim);font-size:10px;text-a
         <label class="law"><input type="checkbox" id="ws-own"> I withdraw only my own contribution(s)</label><br>
         <label class="law"><input type="checkbox" id="ws-comm"> I act with my community's documented consent (attach its record in the PR)</label><br>
         <label class="law">reason (kept in history):&nbsp;</label>
-        <input id="ws-reason" style="width:min(420px,90%);background:#0a0f0b;color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:5px 8px;font:11px 'IBM Plex Mono',monospace">
+        <input id="ws-reason" style="width:min(420px,90%);background:var(--field,#0a0f0b);color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:8px 10px;min-height:44px;font:13px 'IBM Plex Mono',monospace">
       </div>
 
       <div style="margin-top:10px">
-        <button id="ws-compose" style="background:#26123a;color:var(--violet);border:1px solid var(--line);border-radius:8px;padding:8px 14px;cursor:pointer;font:11.5px 'IBM Plex Mono',monospace">compose the fragment</button>
-        <button id="ws-copy" style="display:none;background:#2a230a;color:var(--gold);border:1px solid var(--line);border-radius:8px;padding:8px 14px;cursor:pointer;font:11.5px 'IBM Plex Mono',monospace">📋 copy</button>
+        <button id="ws-compose" style="background:var(--btn,#26123a);color:var(--violet);border:1px solid var(--line);border-radius:8px;padding:10px 16px;min-height:44px;cursor:pointer;font:13.5px 'IBM Plex Mono',monospace">compose the fragment</button>
+        <button id="ws-copy" style="display:none;background:var(--btn-gold,#2a230a);color:var(--gold);border:1px solid var(--line);border-radius:8px;padding:10px 16px;min-height:44px;cursor:pointer;font:13.5px 'IBM Plex Mono',monospace">📋 copy</button>
       </div>
       <pre id="ws-out" style="display:none"></pre>
       <div class="law" id="ws-carry" style="display:none"><b>how it lands (pick either rail):</b> open a PR against
@@ -376,14 +410,14 @@ dk.innerHTML='<tr><th>language</th><th>ISO 639-3</th><th>dir</th><th>vitality (l
  DOCK.forEach(function(l){
  var t=VIT[l.v];
  var status=l.reg
-  ? '<span style="color:var(--gold)">'+l.reg+'</span><div style="font-size:9px;color:var(--dim)">vitality not asserted — register row, CANDIDATE grade</div>'
+  ? '<span style="color:var(--gold)">'+l.reg+'</span><div class="fine">vitality not asserted — register row, CANDIDATE grade</div>'
   : '<i style="background:'+t.c+'"></i>'+t.n;
  var rtl=l.dir==='rtl'?' dir="rtl"':'';
- dk.innerHTML+='<tr><td class="cl"'+rtl+'>'+l.end+'<div style="font-size:9px;color:var(--dim)">'+l.ex+'</div></td>'
+ dk.innerHTML+='<tr><td class="cl"'+rtl+'>'+l.end+'<div class="fine">'+l.ex+'</div></td>'
   +'<td><a href="https://iso639-3.sil.org/code/'+l.code+'">'+l.code+'</a></td>'
   +'<td'+rtl+'>'+l.dir+'</td>'
-  +'<td class="vit">'+status+'<div style="font-size:9px;color:var(--dim)">'+l.src+'</div></td>'
-  +'<td style="font-size:9px;color:var(--dim)">'+l.note+'</td></tr>';
+  +'<td class="vit">'+status+'<div class="fine">'+l.src+'</div></td>'
+  +'<td class="fine">'+l.note+'</td></tr>';
  });
 
 /* string corpus genesis — hub strings verbatim, en baseline, every other cell absent */
@@ -438,7 +472,7 @@ st.innerHTML='<tr><th>key</th>'+DOCK.map(function(l){return '<th>'+l.end+'</th>'
   if(idx===0){ r+='<td class="base">'+s.v+'</td>'; return; }
   var d=DRAFT[l.code]&&DRAFT[l.code][ki];
   var rtl=l.dir==='rtl'?' dir="rtl"':'';
-  if(d){ r+='<td class="base"'+rtl+'>'+d+'<div style="font-size:8.5px;color:var(--amber)">⚙ machine draft — label stays until a community attests</div></td>'; }
+  if(d){ r+='<td class="base"'+rtl+'>'+d+'<div class="fine" style="color:var(--amber)">⚙ machine draft — label stays until a community attests</div></td>'; }
   else { r+='<td class="absent">— absent · contribute</td>'; }
  });
  r+='</tr>';
@@ -519,7 +553,7 @@ fetch(R2+'lang-corpus.json?v=2').then(function(r){return r.json();}).then(functi
       +(wd?'🕊 withdrawn — history kept':'⚙ machine-draft, attestation open')+'</td></tr>';
   });
   var f=$('ws-from'); f.innerHTML=langs.map(function(c){return '<option>'+esc(c)+'</option>';}).join('');
-  f.style.cssText='background:#0a0f0b;color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:5px 8px;font:11px "IBM Plex Mono",monospace';
+  f.style.cssText='background:var(--field,#0a0f0b);color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:8px 10px;min-height:44px;font:13px "IBM Plex Mono",monospace';
 }).catch(function(){ $('ws-state').textContent='the corpus could not be fetched — a failed fetch is a failure, never an empty corpus. try again.'; });
 
 document.querySelectorAll('#workshop [data-verb]').forEach(function(el){
@@ -547,7 +581,7 @@ function renderStrings(prefill){
   KEYS.forEach(function(k){
     var en=C.strings[k].en, cur=prefill?(C.strings[k][prefill]||''):'';
     h+='<tr><td class="cl">'+esc(k)+'</td><td>'+esc(en)+'</td>'
-      +'<td><textarea data-k="'+esc(k)+'" style="width:100%;min-height:34px;background:#0a0f0b;color:var(--ink);border:1px solid var(--line);border-radius:5px;font:10px \'IBM Plex Mono\',monospace;padding:4px">'+esc(cur)+'</textarea></td></tr>';
+      +'<td><textarea data-k="'+esc(k)+'" style="width:100%;min-height:44px;background:var(--field,#0a0f0b);color:var(--ink);border:1px solid var(--line);border-radius:5px;font:12px/1.5 \'IBM Plex Mono\',monospace;padding:6px 8px">'+esc(cur)+'</textarea></td></tr>';
   });
   $('ws-strings').innerHTML=h+'</table>';
 }

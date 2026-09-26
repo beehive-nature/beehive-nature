@@ -27,6 +27,17 @@ body[data-experience="watch"] [data-view]{display:none}body[data-experience="wat
 @media(max-width:850px){.stage{grid-template-columns:1fr}.intro{align-items:start;flex-direction:column;gap:18px}.roomside{margin-top:0}.technical-body{grid-template-columns:1fr}.tile{aspect-ratio:auto;height:330px}.topbar-inner,.top-controls{gap:12px}.top-controls{width:100%;justify-content:space-between}.project-links{grid-template-columns:minmax(0,1fr)}.shell{padding-inline:18px}.screen-caption{inset:18px 18px auto}.screen-empty{inset:52px 20px 20px;gap:12px}.screen-empty h2{font-size:1.4rem}.screen-empty p{font-size:.9375rem}.play-mark{height:46px;width:46px}.topbar-inner [data-register-host]{flex:1 1 100%}.topbar-inner #bregctl{justify-content:start}.tile:has(#v[hidden]){min-height:max(330px,20rem)}}
 .privacy-map{margin-top:26px;border:1px solid var(--line);border-radius:14px;background:var(--panel)}.privacy-map summary{cursor:pointer;padding:18px 22px;font-size:1rem;font-weight:650}.privacy-intro{display:block;padding:0;margin-top:8px;font-weight:400;color:var(--muted);font-size:.9375rem}.privacy-body{padding:4px 22px 24px;min-width:0}.privacy-body h3{font-size:1rem;margin-bottom:10px}.privacy-grade{font-size:.75rem;letter-spacing:.05em;color:var(--muted);margin-bottom:16px}.privacy-route{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;list-style:none;padding:0;margin:16px 0 24px}.privacy-route li{padding:18px;border:1px solid var(--line);border-radius:10px;min-width:0;background:var(--bg2)}.privacy-route strong{display:block;font-size:1rem}.privacy-route span{display:block;margin-top:8px;font-size:.875rem;color:var(--muted)}.privacy-cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}.privacy-cards section{min-width:0;border-top:1px solid var(--line);padding-top:18px}.privacy-body p,.privacy-body li{font-size:.875rem;overflow-wrap:anywhere}.privacy-body code{font-size:.8125rem;overflow-wrap:anywhere}.privacy-limits{border-inline-start:3px solid var(--amber);padding:4px 0 4px 16px;margin-top:22px}.privacy-sources{display:flex;gap:20px;flex-wrap:wrap;margin-top:20px;font-size:.875rem}#privacy-context{color:var(--muted);margin-bottom:12px}@media(max-width:850px){.privacy-route,.privacy-cards{grid-template-columns:minmax(0,1fr)}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}@media(forced-colors:active){.tile{border:1px solid CanvasText}.primary{border:2px solid ButtonText}}
+
+/* the page end at 390 (2026-09-26 footer audit): the audit comb kept 11 px
+   labels squeezed four across (PENDING_ANCHOR broke mid-word); it sits two by
+   two on a phone at 12 px now. Home, the source links and "More communities"
+   were 22–30 px tall; each is a 44 px target now. */
+.cell .l,.cell .s{font-size:.75rem}
+@media(max-width:520px){.comb{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.foot{align-items:center}
+.foot a,.privacy-sources a{display:inline-flex;align-items:center;min-height:44px}
+.privacy-sources{row-gap:0}
+.foot+details>summary{min-height:44px;padding-block:10px;box-sizing:border-box;cursor:pointer}
 </style>
 </head>
 <body data-experience="watch" data-bee-theme="shared" data-reg="bee">

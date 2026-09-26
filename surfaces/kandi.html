@@ -124,6 +124,22 @@ button:disabled,input:disabled,textarea:disabled{opacity:.6;cursor:wait}
 .memory summary{min-height:44px;cursor:pointer;color:var(--ink)}
 .memory textarea{width:100%;min-height:88px;margin-block:12px;font-size:1rem}
 .field{flex:1;min-width:140px}.field label{display:block;margin-bottom:6px;font-size:1rem}.field input{width:100%}
+/* the page end at 390 px (2026-09-26 lower-half pass): the night views read at
+   14 px (cypherpunk 13 px mono), quiet text keeps 4.5:1, every footer link and
+   control is a 44 px target. Same words, same order, in every view. */
+body:is([data-reg="raver"],[data-reg="cypherpunk"]){--faint:#8a7fa0}
+body[data-reg="raver"] [style*="font-size:"]{font-size:.875rem!important;line-height:1.65!important}
+body[data-reg="cypherpunk"] [style*="font-size:"]{font-size:.8125rem!important;line-height:1.65!important}
+body[data-reg="raver"] :is(button.act,.limits,.hs .t,.kc .tag){font-size:.875rem}
+body[data-reg="cypherpunk"] :is(button.act,.limits,.hs .t,.kc .tag){font-size:.8125rem}
+body:not([data-reg="bee"]) button.act{min-height:44px}
+body:not([data-reg="bee"]) footer{font-size:.875rem;line-height:1.9}
+body[data-reg="cypherpunk"] footer{font-size:.8125rem}
+body[data-reg="bee"] footer{font-size:.875rem;line-height:1.9}
+footer a{display:inline-block;padding-block:12px;margin-block:-12px}
+[style*="letter-spacing:.06em"]+.law{margin-top:6px}
+body[data-reg="raver"] h2{font-size:1rem}
+body[data-reg="cypherpunk"] h2{font-size:.875rem}
 </style></head><body data-reg="bee" data-bee-theme="shared">
 <main>
 <div class="arrival" id="arrival"></div>
@@ -334,7 +350,7 @@ button:disabled,input:disabled,textarea:disabled{opacity:.6;cursor:wait}
   sees it reads the names in it · a checksum, not a signature · no outside request unless you tap ↻ ·
   <a href="plur.html">🪩 the mUseUm (Wing IV is this page's law)</a> ·
   <a href="hardware/build.html">🔧 the festival</a> ·
-  <a href="https://github.com/beehive-nature/beehive-nature/blob/main/surfaces/kandi.html" rel="noopener">view source</a> ·
+  <a href="https://github.com/beehive-nature/beehive-nature/blob/main/surfaces/kandi.html" target="_blank" rel="noopener noreferrer">view source ↗</a> ·
   <a href="index.html" data-i18n="law.hive">← the hive</a>
 </footer>
 <script>

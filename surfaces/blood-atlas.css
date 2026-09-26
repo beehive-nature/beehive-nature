@@ -55,7 +55,10 @@
 .atlas-row.atlas-sel { background: rgba(77, 143, 209, 0.16); border-radius: 6px; }
 .atlas-row.atlas-root .atlas-mark { font-weight: 700; }
 
-.atlas-label { fill: var(--atlas-ink); font-size: 11.5px; pointer-events: none; font-family: inherit; }
+/* names keep a readable size on screen as the camera zooms (the map convention): 12 px on screen
+   down to 0.75x zoom, never smaller than the authored 11.5 units, capped at 16 units so a zoomed-out
+   name never swamps its cell. --atlas-k is the camera scale, set by applyTransform(). */
+.atlas-label { fill: var(--atlas-ink); font-size: clamp(11.5px, calc(12px / var(--atlas-k, 1)), 16px); pointer-events: none; font-family: inherit; }
 .atlas-year { fill: var(--atlas-dim); font-size: 10px; pointer-events: none; }
 .atlas-link { fill: none; stroke: var(--atlas-line); stroke-width: 1.2; pointer-events: none; }
 
