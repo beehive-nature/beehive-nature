@@ -31,6 +31,7 @@ const PAGE = resolve(arg('page', join(SURF, 'bview.html')));
 const FIX = await readFile(resolve(arg('fixture', 'big30.mp4')));
 const OUT = resolve(arg('out', 'shots'));
 const LABEL = arg('label', 'shot');
+const REG = arg('reg', '');   // bee | raver | cypherpunk (register.js reads localStorage 'bregister')
 const AT = arg('at', '12,48').split(',').map(Number);
 const FRACTION = +arg('rate', '0.5');
 const UNTIL = +arg('until', String(Math.max(...AT) + 1));
@@ -77,6 +78,7 @@ await ctx.route('**/*', route => {
   if (url === DOOR + ADDR + '/stream') return route.fulfill({ status: 200, headers: { 'access-control-allow-origin': ORIGIN, 'content-type': 'application/octet-stream', 'content-length': String(FIX.length) }, body: FIX });
   return route.abort('blockedbyclient');
 });
+if (REG) await ctx.addInitScript(r => { try { localStorage.setItem('bregister', r); } catch {} }, REG);
 await ctx.addInitScript(([door, piece, gap]) => {
   window.__fed = 0;
   const real = window.fetch;
