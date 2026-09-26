@@ -115,7 +115,7 @@ That branch freezes wallet.html as the register reference and ships the token se
 
 | gate | result |
 |---|---|
-| `node e2e/wallet-registers.mjs` (golden dress contract harness + the three grammars + whole-wallet contrast, size and dash audits, history, links, stale reads) | **GREEN 90/90** (69 before review round 1, 83 after it; every other row below re-run green on the round-2 fixes) |
+| `node e2e/wallet-registers.mjs` (golden dress contract harness + the three grammars + whole-wallet contrast, size and dash audits, history, links, stale reads) | **GREEN 98/98** (69 before review round 1, 83 after it, 90 after round 2, 93 after round 3; every other row below re-run green on the task-depth build) |
 | wallet batteries: fund · vault · matrix · arweave · signer · adapter | 94 · 35 · 11 · 22 · 105 · 28, **0 failed** |
 | CI `node --test`: comprehension · orb-seat · bpay-policy-ownership · tour-bar-clearance | 9/9 · 4/4 · 2/2 · 4/4 (the first three were red on this branch before they were given the reader's real first step: a row tap or a deep link; no assertion loosened) |
 | CI browser gates: bPay phase A · phase B · bData · polish-i18n · engineflow · no-page-errors | 18/18 · 17/17 (phase B deep-linked, same rule) · 100/100 · 25/25 · 30/30 · exit 0 |
@@ -165,5 +165,42 @@ Round 1's blocker was confirmed fixed and nine of the sixteen findings were clos
 | N9 | browsing the console counted as work | Focus landing on a section (j/k, index) is not work. Gated. |
 | N10 | the audits' wording claimed more than they measure | They walk every visible **text node** (mixed-content parents included), and the claims say "at rest" and "CSS-generated content excluded". |
 | N11 | doc drift | §3 annotated. The keychain's copy no longer says "anywhere" (navigation does not count). The receipts are restated in §7. The USDC coin is money blue, not honey. |
+
+## 10 · fresh-eyes review, round 3: REQUEST CHANGES, and what changed
+
+Round 3 confirmed that most of round 2 holds. It found one more gate line certifying a state the page never produces, and four should-fixes, three of them regressions from round 2:
+
+| # | finding | fix |
+|---|---|---|
+| blocker | the "in flight" check **injected** `data-wl-soul` and "reading…"; the real page set neither until the round-trip ended | `readAll()`, the one entry point for every path (boot restore, the connect button, a soul switch), marks the soul and writes "reading…" **before** the reads start. The gate now drives the **real** path: a returning reader with every chain request left hanging. Nothing is injected. |
+| S1 | since round 2, "‹ wallet" after a reload called `history.back()` into an entry of a dead document: a **full page load that drops the tab-memory keychain** | The presenter records the stack index at boot and pops only entries **this document** pushed. Below them "‹ wallet" replaces to home within the page and clears the hash. Gated with a marker on `window` that must survive. |
+| S2 | on a same-document Back, `hashchange` (after `popstate`) re-routed the entry's own view | `hashchange` keeps any entry that carries its own view. The reviewer's exact path is gated: `#receipts-sec` → home → connect → home. |
+| S3 | the raver orb could paint in bee or cypherpunk before `register.js` (or without it) | `#wl-deck` joins the first-paint hide rule. Gated with `register.js` blocked: no other register's block paints. |
+| S4 | the contrast audit ignored ancestor opacity | The audit folds effective opacity (SVG `opacity` included) into the painted colour, skips fully transparent text, and measures the settled page. This exposed a pre-existing defect: bPay's captions double-dimmed to 2.75–4.2:1 in every register. They are fixed, and the ring's "4" moved out of its dimmed group. |
+| nits | three allowlisted phrases were really cross-task; "hero first" checked membership, not order; the swap blamed the keychain for a missing name | The three phrases are reworded without a direction, and the allowlist must carry **no stale entry**. Hero-first is checked by visual order. The swap names the missing name. |
+
+Left as they are, and said so: a `?compose=` URL re-lands on the composer on every reload of it (a deep link re-applies, by design). Switching to a different soul keeps the previous account's figures until the new reads land (the page's own pre-existing behaviour, now labelled "reading…").
+
+## 11 · the contract audit (dress removed): PASS at arrival, FAIL one tap in, and what changed
+
+A contract audit was posted on #237 at `4d3c108b2`. It applies the founder's pass/fail test: every colour, font, radius, shadow and animation forced to one value, then measured. It found the arrivals and the navigation genuinely different, and **inside every task, new bee and raver the same page with a different header** (same sections, same order, same controls, the same words to the character). The reviewer's round-1 finding #8 had said the same; this lane answered it then with an art lead-in, which changed the header and not the body. It is answered now at the body:
+
+| register | one tap into a task |
+|---|---|
+| **new bee** | the task's sections stacked, one question at a time. Each section keeps its plain guidance and its controls, and its **engineering** (the keychain's derivation text and ring, the forge, the RAM line, pay's lane prose and spend cap, the inscription laws, the receipt ladder and adapter states, the outbox law, the matrix body; marked `data-wl-tech` in the markup) folds behind its own **"show the details"**. Moved one tap away, never deleted. |
+| **raver** | the lit orb, the task's **PLUR line**, and the task's parts as **glyph cards** (a glyph, its word under it). **No section shows** until a card is picked. A card opens its **one** section, controls first: its heading, prose, notes and the ring's key fold behind **"the words"**. Another card swaps it. Deep links, cross-reference links and carried work open the right card. |
+| **cypherpunk** | unchanged: every section, every note open. |
+
+**Measured, the audit's own way, in the gate** (`e2e/wallet-registers.mjs` §4d, colour-independent):
+- In every task, raver shows **0 sections and one card per part**, and bee shows the task's sections.
+- For each section with engineering (keychain, forge, pay, inscriptions, composer, outbox, matrix), the three bodies strictly differ by visible text: cypherpunk > bee > raver. The per-section counts print in the gate line.
+- **No section** renders the same body in bee and raver, to the character.
+
+**The audit's smaller findings.**
+- Bee's intro is lowercase with no dash, and raver's intro is a PLUR line ("one soul, every chain. the lights show what you hold."). Both were redrafted in 28 tongues.
+- Raver hides the engineering kicker, and its chrome reads at 13px or more.
+- The heading separators and the dash-wrapped statuses this lane owns lose their dashes, and the badge loses its dash (redrafted).
+- Gold: sections' `var(--gold)` borders are overridden in all three registers (bee and raver since round 1, cypherpunk since round 3), and the fund coin is money blue since round 3. The audit read the source rule, which still exists underneath.
+- Dashes elsewhere in the shared copy (for example "unset — no limit", keyed headings like `wl.bpay.h`) remain, and are named here as open.
 
 **Not claimed:** no human (and no matriarch) has used these three grammars yet, and the gate proves only its named properties (DESIGN-CONSTRAINTS §13). No live chain was read. Balances in the receipts are injected fixtures (`12.3456 A`, `7.000 HIVE`), written into the sections' own nodes where a chain read would land.

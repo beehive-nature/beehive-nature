@@ -94,7 +94,7 @@ const arrival = page => page.evaluate(() => {
         rows: [...document.querySelectorAll('main .wlb-row')].filter(inFirst).length,
         art: Math.round([...document.querySelectorAll('main svg.wlr-art')].filter(inFirst).reduce((a, s) => a + area(s), 0)),
         index: [...document.querySelectorAll('#wl-cy-idx a')].filter(inFirst).length,
-        sections: [...document.querySelectorAll('main>section[data-wl-task]')].filter(inFirst).map(s => s.id),
+        sections: [...document.querySelectorAll('main>section[data-wl-task]')].filter(inFirst).sort((a, b) => a.getBoundingClientRect().top - b.getBoundingClientRect().top).map(s => s.id),
       };
     })(),
     mainWidth: Math.round(document.querySelector('main').getBoundingClientRect().width),
@@ -156,7 +156,7 @@ const k = r => arr[r].kinds;
 ok('on a phone the first screen holds a different KIND of thing: bee choices, raver a picture, cypherpunk the pipeline itself (hero balance first)',
   k('bee').rows >= 2 && k('bee').art === 0 && k('bee').sections.length === 0 &&
   k('raver').rows === 0 && k('raver').art > 30000 && k('raver').sections.length === 0 &&
-  k('cypherpunk').rows === 0 && k('cypherpunk').art === 0 && k('cypherpunk').sections.includes('bal-sec'),
+  k('cypherpunk').rows === 0 && k('cypherpunk').art === 0 && k('cypherpunk').sections[0] === 'bal-sec',
   REGS.map(r => r + ' ' + JSON.stringify(k(r))).join(' · '));
 
 // 4 · new bee: a navigation stack. A row pushes one task; back pops it.
@@ -238,11 +238,14 @@ ok('on a phone the first screen holds a different KIND of thing: bee choices, ra
   // a reload on a task keeps its place in the stack: "‹ wallet" still pops home
   await page.reload({ waitUntil: 'load' }); await page.waitForTimeout(500);
   const reloaded = await page.evaluate(() => ({ view: document.body.dataset.wlView, idx: history.state && history.state.wlIdx }));
-  // a Back into an entry the pre-reload document pushed is a full load: wait for the view, bounded
-  await page.click('#wl-bar [data-wl-go="home"]'); await page.waitForFunction(() => document.body && document.body.dataset.wlView === 'home', null, { timeout: 5000 }).catch(() => {});
-  ok('bee: a reload keeps the stack index; "‹ wallet" then pops home (no dead Back press)',
-    reloaded.view === 'key' && reloaded.idx === 1 && await page.evaluate(() => document.body.dataset.wlView) === 'home',
-    JSON.stringify(reloaded) + ' → ' + JSON.stringify(await page.evaluate(() => ({ view: document.body.dataset.wlView, state: history.state, len: history.length, url: location.pathname + location.hash }))));
+  // after a reload the entry below belongs to a document that no longer exists: "‹ wallet"
+  // must return home WITHIN this page (a Back there is a full load that drops the tab-memory keychain)
+  await page.evaluate(() => { window.__gateSameDocument = true; });
+  await page.click('#wl-bar [data-wl-go="home"]'); await page.waitForTimeout(600);
+  const after = await page.evaluate(() => ({ view: document.body.dataset.wlView, same: window.__gateSameDocument === true, hash: location.hash }));
+  ok('bee: after a reload, "‹ wallet" returns home within the page (never a reload that would drop the tab-memory keychain)',
+    reloaded.view === 'key' && reloaded.idx === 1 && after.view === 'home' && after.same && after.hash === '',
+    JSON.stringify(reloaded) + ' → ' + JSON.stringify(after));
   await ctx.close();
 }
 {
@@ -266,13 +269,10 @@ ok('on a phone the first screen holds a different KIND of thing: bee choices, ra
     ['The key in the config below is', 'within fund'],
     ['its Base address below is a bare', 'within fiat in'],
     ['data block below the fold', 'the chain matrix names its own source-code data block'],
-    ['phrases belong in the recovery lane above', 'bridge/vault paste ← keychain recovery, same task, before it'],
     ['no contexts yet — forge one below', 'within the key forge'],
     ['NOT YET on chain — bridge below', 'keychain → bridge, same task, after it'],
     ['use the recovery lane below', 'within the keychain'],
-    ['open the public link in the banner above', 'the origin banner heads main in every view'],
     ['create one here, or use recovery below', 'within the keychain'],
-    ['the Vaulta tx passkey lane below', 'keychain → account forge passkey, same task, after it'],
     ['(passkey above or recovery below)', 'within the keychain (the QR bridge)'],
     ['first (above)', 'account forge ← bridge, same task, before it'],
     ['(the 12-char test actor above)', 'within the composer'],
@@ -293,6 +293,81 @@ ok('on a phone the first screen holds a different KIND of thing: bee choices, ra
   const unreviewed = found.filter(f => !REVIEWED.some(([snip]) => f.text.includes(snip.trim())));
   ok(`every "above"/"below" a reader can see (${found.length}) is a reviewed within-task reference; across tasks a message names its target as a link`,
     unreviewed.length === 0 && found.length > 0, unreviewed.slice(0, 4).map(u => u.line + ': ' + u.text).join(' · '));
+  const stale = REVIEWED.filter(([snip]) => !found.some(f => f.text.includes(snip.trim())));
+  ok('the reviewed list carries no stale entry (an entry that matches nothing could quietly widen it)', stale.length === 0, stale.map(x => x[0]).join(' · '));
+}
+
+// 4b · the reviewer's exact S2 path: a deep link lands on a task; "‹ wallet"; the
+// card's link pushes; "‹ wallet" pops. The Back fires popstate THEN hashchange,
+// and the entry's own view (home) must win over its hash.
+{
+  const { ctx, page } = await open('bee', { path: '/wallet.html#receipts-sec' });
+  const landed = await page.evaluate(() => document.body.dataset.wlView);
+  await page.click('#wl-bar [data-wl-go="home"]'); await page.waitForTimeout(400);
+  await page.evaluate(() => { document.getElementById('v-bal').textContent = ''; }); await page.waitForTimeout(150);
+  await page.click('#wl-bee .wlb-connect'); await page.waitForTimeout(400);
+  const pushed = await page.evaluate(() => document.body.dataset.wlView);
+  await page.click('#wl-bar [data-wl-go="home"]'); await page.waitForTimeout(600);
+  const home = await page.evaluate(() => ({ view: document.body.dataset.wlView, hash: location.hash }));
+  ok('bee: a Back whose hash changes keeps the entry\'s own view (popstate, then hashchange, never re-routes it)',
+    landed === 'proof' && pushed === 'have' && home.view === 'home', `${landed} → home → ${pushed} → ${JSON.stringify(home)}`);
+  await ctx.close();
+}
+// 4c · S3: every register's own blocks hide themselves until their register is
+// known, even if register.js is late or missing (no raver orb painting in bee)
+{
+  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  await ctx.addInitScript(() => { try { localStorage.setItem('bregister', 'bee'); sessionStorage.setItem('wl.view', 'move'); } catch (e) {} });
+  await ctx.route(url => !url.href.startsWith(origin) || /register\.js/.test(url.href), r => r.abort());
+  const page = await ctx.newPage();
+  await page.goto(origin + '/wallet.html', { waitUntil: 'load' }); await page.waitForTimeout(600);
+  const leaked = await page.evaluate(() => ['wl-deck', 'wl-dock', 'wl-rave', 'wl-cy', 'wl-bee'].filter(id => document.getElementById(id).getClientRects().length));
+  ok('without register.js (late or missing), no other register\'s block paints in bee (no raver orb, dock or console)', leaked.length === 0, leaked.join(', '));
+  await ctx.close();
+}
+
+// 4d · AT TASK DEPTH (the dress-stripped audit): one tap in, bee and raver must
+// not be the same body under a different header. Per task: what each register
+// shows, and per section the three bodies measured against each other:
+// cypherpunk everything, bee its engineering folded, raver controls only.
+{
+  const TASKS = { have: ['connect-sec', 'bal-sec', 'summary-sec'], move: ['pay-sec', 'outbox-sec'], add: ['voucher-sec', 'fund-sec', 'peer-sec'],
+    keep: ['bpay-sec', 'insc-sec', 'arw-sec'], key: ['kc-sec', 'vault-sec', 'forge-sec', 'acct-sec'], proof: ['receipts-sec', 'composer-sec', 'matrix-sec'] };
+  const bodies = {};
+  for (const reg of REGS) {
+    const { ctx, page } = await open(reg);
+    bodies[reg] = {};
+    for (const [task, ids] of Object.entries(TASKS)) {
+      await page.evaluate(t => { document.body.setAttribute('data-wl-view', t); }, task);
+      await page.waitForTimeout(120);
+      const shownSecs = await page.evaluate(() => [...document.querySelectorAll('main>section[data-wl-task]')].filter(s => s.getClientRects().length).map(s => s.id));
+      const cardsShown = await page.evaluate(() => [...document.querySelectorAll('#wl-cards .wlr-card')].filter(c => c.getClientRects().length).length);
+      // each section's visible body, as that register renders it (raver: opened through its card)
+      const text = {};
+      for (const id of ids) {
+        text[id] = await page.evaluate(i => {
+          const s = document.getElementById(i);
+          if (document.body.dataset.reg === 'raver') { document.querySelectorAll('main>section').forEach(x => x.removeAttribute('data-wl-open')); s.setAttribute('data-wl-open', ''); }
+          const t = s.innerText.replace(/s+/g, ' ').trim();
+          if (document.body.dataset.reg === 'raver') s.removeAttribute('data-wl-open');
+          return t.length;
+        }, id);
+      }
+      bodies[reg][task] = { shownSecs, cardsShown, text };
+    }
+    await ctx.close();
+  }
+  const tasks = Object.keys(TASKS);
+  ok('one tap in, raver deals CARDS and shows no section, while bee shows the task’s sections: never the same page under a different header',
+    tasks.every(t => bodies.raver[t].shownSecs.length === 0 && bodies.raver[t].cardsShown === TASKS[t].length && bodies.bee[t].shownSecs.length >= 1 && bodies.bee[t].cardsShown === 0),
+    tasks.map(t => `${t}: bee ${bodies.bee[t].shownSecs.length} sections · raver ${bodies.raver[t].cardsShown} cards`).join(' · '));
+  const sec = (reg, id) => bodies[reg][Object.keys(TASKS).find(t => TASKS[t].includes(id))].text[id];
+  const folded = ['kc-sec', 'forge-sec', 'pay-sec', 'insc-sec', 'composer-sec', 'outbox-sec', 'matrix-sec'];
+  ok('each section with engineering reads as three different bodies: cypherpunk > bee (engineering folded) > raver (controls first)',
+    folded.every(id => sec('cypherpunk', id) > sec('bee', id) && sec('bee', id) > sec('raver', id)),
+    folded.map(id => `${id} ${sec('cypherpunk', id)}/${sec('bee', id)}/${sec('raver', id)}`).join(' · '));
+  const same = [].concat(...tasks.map(t => TASKS[t])).filter(id => sec('bee', id) === sec('raver', id));
+  ok('no section renders the SAME body in bee and raver (to the character)', same.length === 0, same.join(', ') || 'none identical');
 }
 
 // 5 · raver: a stage and a dock. A glyph swaps the deck in place; arrows and a swipe move along it.
@@ -308,12 +383,18 @@ ok('on a phone the first screen holds a different KIND of thing: bee choices, ra
   const deck = await page.evaluate(() => ({
     view: document.body.dataset.wlView,
     sections: [...document.querySelectorAll('main>section[data-wl-task]')].filter(s => s.getClientRects().length).map(s => s.id),
+    cards: [...document.querySelectorAll('#wl-cards .wlr-card')].filter(c => c.getClientRects().length).map(c => c.dataset.wlCardFor),
+    words: [...document.querySelectorAll('#wl-cards .wlr-card')].filter(c => c.getClientRects().length).every(c => c.querySelector('.w').textContent.trim() && c.querySelector('.g').textContent.trim()),
     stage: document.getElementById('wl-rave').getClientRects().length > 0,
     pressed: [...document.querySelectorAll('#wl-dock [aria-pressed="true"]')].map(b => b.dataset.wlGo),
-    history: history.state && history.state.wlView,
   }));
-  ok('raver: the "add" glyph swaps the deck in place (fund + fiat in + voucher; the stage steps aside)',
-    deck.view === 'add' && deck.sections.join() === 'voucher-sec,fund-sec,peer-sec' && !deck.stage && deck.pressed.join() === 'add', JSON.stringify(deck));
+  ok('raver: the "add" glyph deals its parts as glyph cards, each with its word, and no section yet (not bee’s form under a dock)',
+    deck.view === 'add' && deck.sections.length === 0 && deck.cards.join() === 'voucher-sec,fund-sec,peer-sec' && deck.words && !deck.stage && deck.pressed.join() === 'add', JSON.stringify(deck));
+  await page.click('#wl-cards [data-wl-card-for="fund-sec"]'); await page.waitForTimeout(500);
+  const card = await page.evaluate(() => ({ open: [...document.querySelectorAll('main>section[data-wl-task]')].filter(s => s.getClientRects().length).map(s => s.id), lit: document.querySelector('[data-wl-card-for="fund-sec"]').getAttribute('aria-pressed') }));
+  await page.click('#wl-cards [data-wl-card-for="voucher-sec"]'); await page.waitForTimeout(400);
+  const swap = await page.evaluate(() => [...document.querySelectorAll('main>section[data-wl-task]')].filter(s => s.getClientRects().length).map(s => s.id));
+  ok('raver: a card opens its ONE section; another card swaps it (one part at a time)', card.open.join() === 'fund-sec' && card.lit === 'true' && swap.join() === 'voucher-sec', JSON.stringify(card) + ' → ' + swap.join());
   // EVERY deck, on a phone: the first thing under the dock is art, never a section
   const leads = {};
   for (const go of ['have', 'move', 'add', 'keep', 'key', 'proof', 'all']) {
@@ -333,6 +414,7 @@ ok('on a phone the first screen holds a different KIND of thing: bee choices, ra
     return [...document.querySelectorAll('main>section[data-wl-task] button')].filter(b => b.getClientRects().length && getComputedStyle(b).backgroundColor === rgb).map(b => b.id || b.textContent.trim().slice(0, 20));
   });
   await page.click('#wl-dock [data-wl-go="move"]'); await page.waitForTimeout(600);
+  await page.click('#wl-cards [data-wl-card-for="pay-sec"]'); await page.waitForTimeout(500);
   const rf = await filled();
   ok('raver: the "move" deck opens with at most one filled action (not three magenta pills)', rf.length <= 1, rf.join(', ') || 'none filled at rest');
   await page.click('#wl-dock [data-wl-go="add"]'); await page.waitForTimeout(600);
@@ -454,17 +536,6 @@ ok('on a phone the first screen holds a different KIND of thing: bee choices, ra
         staleShown: [...document.querySelectorAll('#wl-rave li[data-wl-stat="ar-stat"] .wl-stale')].filter(e => e.getClientRects().length).length,
       }), 100));
     });
-    if (reg === 'bee') {
-      // a CONNECTED reader whose read is still in flight sees the read's own state, never "connect your name"
-      seen.bee.soul = await page.evaluate(() => {
-        document.getElementById('v-bal').textContent = ''; window.wlRead(document.getElementById('v-stat'), true);
-        document.getElementById('v-stat').textContent = 'reading…'; document.body.setAttribute('data-wl-soul', 'true');
-        return new Promise(r => setTimeout(() => {
-          const vis = sel => [...document.querySelectorAll(sel)].filter(e => e.getClientRects().length).map(e => e.textContent.trim());
-          r({ connect: vis('#wl-bee .wlb-connect'), stat: vis('#wl-bee .wlb-stat') });
-        }, 100));
-      });
-    }
     await ctx.close();
   }
   const all = REGS.flatMap(r => [seen[r].card, ...seen[r].bee, ...seen[r].raver, ...seen[r].cy]);
@@ -476,11 +547,29 @@ ok('on a phone the first screen holds a different KIND of thing: bee choices, ra
     REGS.map(r => r + ':' + seen[r].unread.words.join()).join(' · '));
   ok('a read that succeeds short of a fee ("live · short …", painted err) is NOT called failed: its rail stays lit, no stale line',
     REGS.every(r => seen[r].short.lit === 'true' && seen[r].short.staleShown === 0), REGS.map(r => r + ':' + JSON.stringify(seen[r].short)).join(' · '));
-  ok('bee: a connected reader whose read is in flight sees "reading…", never "connect your name"',
-    seen.bee.soul.connect.length === 0 && seen.bee.soul.stat.join() === 'reading…', JSON.stringify(seen.bee.soul));
   ok('a failed LATER read keeps its old figure but says so in every register, and its rail goes dark',
     REGS.every(r => seen[r].stale.figs.length === 1 && seen[r].stale.said.length === 1 && seen[r].stale.said[0].length > 5 && seen[r].stale.lit === 'false'),
     REGS.map(r => r + ':' + seen[r].stale.said.join()).join(' · '));
+}
+
+// 7a · a RETURNING reader, the real path: the page restores the saved soul and
+// starts the reads; every chain request hangs (never answered), so the reads
+// stay in flight. Nothing is injected: the card must say what the page is doing.
+{
+  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  await ctx.addInitScript(() => { try { localStorage.setItem('bregister', 'bee'); localStorage.setItem('bnr_soul', 'gatesoul'); } catch (e) {} });
+  await ctx.route(url => !url.href.startsWith(origin), () => { /* never answered: the read stays in flight */ });
+  const page = await ctx.newPage();
+  page.on('pageerror', e => pageErrors.push('bee (returning): ' + String(e)));
+  await page.goto(origin + '/wallet.html', { waitUntil: 'domcontentloaded' });
+  await page.waitForTimeout(1500);
+  const inflight = await page.evaluate(() => {
+    const vis = sel => [...document.querySelectorAll(sel)].filter(e => e.getClientRects().length).map(e => e.textContent.trim());
+    return { soul: document.body.dataset.wlSoul, connect: vis('#wl-bee .wlb-connect'), stat: vis('#wl-bee .wlb-stat'), fig: vis('#wl-bee .wlb-fig') };
+  });
+  ok('bee: a returning reader whose read is still in flight sees "reading…" (the page’s own state), never "connect your name"',
+    inflight.soul === 'true' && inflight.connect.length === 0 && inflight.stat.join() === 'reading…' && inflight.fig.length === 0, JSON.stringify(inflight));
+  await ctx.close();
 }
 
 // 7b · CONTRAST, measured on every visible text leaf of the whole wallet
@@ -498,31 +587,45 @@ ok('on a phone the first screen holds a different KIND of thing: bee choices, ra
     // too (CSS-generated content is not text and is not measured)
     const els = new Set(), walk = document.createTreeWalker(document.querySelector('main'), NodeFilter.SHOW_TEXT);
     while (walk.nextNode()) { const n = walk.currentNode, p = n.parentElement; if (n.textContent.trim() && p && p.closest('main>section[data-wl-task]')) els.add(p); }
+    // what is PAINTED: an element's own opacity times every ancestor's (SVG opacity attributes included)
+    const effOpacity = el => { let o = 1; for (let n = el; n && n.nodeType === 1; n = n.parentElement) o *= parseFloat(getComputedStyle(n).opacity); return o; };
     els.forEach(el => {
       if (!el.getClientRects().length) return;
-      const cs = getComputedStyle(el); if (cs.visibility === 'hidden' || parseFloat(cs.opacity) === 0) return;
+      const cs = getComputedStyle(el), alpha = effOpacity(el); if (cs.visibility === 'hidden' || alpha === 0) return;
       const own = [...el.childNodes].filter(n => n.nodeType === 3).map(n => n.textContent).join('').trim();
       const where = { t: own.slice(0, 30), sec: el.closest('section').id };
       if (own === '—' || own === '-') dash.push(where);
       if (parseFloat(cs.fontSize) < 14) small.push({ ...where, px: parseFloat(cs.fontSize) });
       if (el.closest('[aria-disabled="true"],:disabled')) return; // inactive controls are exempt (WCAG 1.4.3)
       // SVG text paints with FILL, never color: measure what is actually painted
-      const fg = parse(el instanceof SVGElement ? cs.fill : cs.color), bg = bgOf(el); if (!fg || !bg) return;
+      const fg0 = parse(el instanceof SVGElement ? cs.fill : cs.color), bg = bgOf(el); if (!fg0 || !bg) return;
+      const a = alpha * (fg0.a == null ? 1 : fg0.a), fg = { r: fg0.r * a + bg.r * (1 - a), g: fg0.g * a + bg.g * (1 - a), b: fg0.b * a + bg.b * (1 - a) };
       const L1 = lum(fg), L2 = lum(bg), ratio = (Math.max(L1, L2) + .05) / (Math.min(L1, L2) + .05);
       const min = parseFloat(cs.fontSize) >= 18.66 || (parseFloat(cs.fontSize) >= 14 && parseInt(cs.fontWeight, 10) >= 700) ? 3 : 4.5;
-      if (ratio < min) out.push({ ...where, ratio: Math.round(ratio * 100) / 100, pair: (el instanceof SVGElement ? cs.fill : cs.color) + ' on ' + `rgb(${bg.r}, ${bg.g}, ${bg.b})` });
+      if (ratio < min) out.push({ ...where, ratio: Math.round(ratio * 100) / 100, pair: (el instanceof SVGElement ? cs.fill : cs.color) + (alpha < 1 ? ' at opacity ' + Math.round(alpha * 100) / 100 : '') + ' on ' + `rgb(${bg.r}, ${bg.g}, ${bg.b})` });
     });
-    return { out, small, dash };
+    // honey = the gold token, b-value, and bee's stepped honey: never a border or a ground in a section
+    const HONEY = ['rgb(255, 215, 0)', 'rgb(232, 181, 75)', 'rgb(122, 82, 9)', 'rgb(133, 91, 11)'];
+    const honey = [...document.querySelectorAll('main>section[data-wl-task], main>section[data-wl-task] *')].filter(e => e.getClientRects().length).filter(e => {
+      const c = getComputedStyle(e);
+      return HONEY.includes(c.backgroundColor) || (parseFloat(c.borderTopWidth) > 0 && HONEY.includes(c.borderTopColor)) || /255, 215, 0|232, 181, 75/.test(c.backgroundImage);
+    }).map(e => (e.id || e.tagName.toLowerCase() + '.' + (e.getAttribute('class') || '')).slice(0, 30));
+    return { out, small, dash, honey };
   });
   const low = {}, audit = {};
   for (const reg of REGS) {
     const { ctx, page } = await open(reg);
     await page.evaluate(() => { document.body.setAttribute('data-wl-view', 'all'); });
     await page.waitForTimeout(700);
+    // measure the SETTLED page: every finite animation (the arrivals) run to its end
+    await page.evaluate(() => document.getAnimations().forEach(a => { try { a.finish(); } catch (e) { /* infinite ambient motion cannot finish */ } }));
     audit[reg] = await contrast(page);
     low[reg] = audit[reg].out;
     await ctx.close();
   }
+  // honey is the colour of b only: no section border or background paints it, in any register
+  ok('no visible section border or background paints honey (gold) in any register (the crest’s gold stays out of the interface)',
+    REGS.every(r => audit[r].honey.length === 0), REGS.map(r => r + ' ' + audit[r].honey.slice(0, 3).join(',')).join(' · '));
   ok('bee: no visible text node at rest in the whole wallet (every task open, notes folded) reads under the 14px label floor, SVG and script-set styles included', audit.bee.small.length === 0,
     audit.bee.small.slice(0, 4).map(l => `${l.sec} "${l.t}" ${l.px}px`).join(' · '));
   ok('no register shows a bare dash standing for a value in any visible text node at rest of the whole wallet (never 0, never a dash)', REGS.every(r => audit[r].dash.length === 0),

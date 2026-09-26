@@ -296,7 +296,7 @@ body[data-wl-view="home"] #wl-bar{display:none!important}
    their own homes, so there the title and their navigation come first. */
 :is(body[data-reg="bee"],body[data-reg="raver"]) main>.crumbs{order:-7}
 :is(body[data-reg="bee"],body[data-reg="raver"]) main>header{order:-6}
-#wl-bar,#wl-dock{order:-5} #wl-bee,#wl-rave,#wl-deck{order:-4}
+#wl-bar,#wl-dock{order:-5} #wl-bee,#wl-rave,#wl-deck{order:-4} #wl-lines,#wl-cards{order:-3}
 :is(body[data-reg="bee"],body[data-reg="raver"]) main>section:is(#bal-sec,#kc-sec){order:0}
 #wl-bee h2::before,#wl-bar h2::before{display:none}
 /* 44px is the floor for anything that takes a press, in every register — the
@@ -304,7 +304,7 @@ body[data-wl-view="home"] #wl-bar{display:none!important}
 body[data-reg] main :is(button,select){min-height:44px!important}
 body[data-reg] main section summary{min-height:44px;box-sizing:border-box}
 /* each register's own blocks paint with the register, before register.js mounts */
-#wl-bee,#wl-bar,#wl-dock,#wl-rave,#wl-cy{display:none}
+#wl-bee,#wl-bar,#wl-dock,#wl-rave,#wl-cy,#wl-deck,#wl-cards,#wl-lines{display:none}
 body[data-reg="bee"] #wl-bee,body[data-reg="raver"] #wl-rave,body[data-reg="cypherpunk"] #wl-cy{display:block}
 body[data-reg="bee"] #wl-bar,body[data-reg="raver"] #wl-dock{display:flex}
 [data-wl-card][data-read="true"] .wl-un,[data-wl-card]:not([data-read="true"]) .wl-fig{display:none}
@@ -426,6 +426,55 @@ body[data-reg] #fund-sec .fund-coin::after{color:#0c1412;font-size:14px}
 .wlr-caps .wl-stale{font-size:13px;color:#b7a8f7}
 .wlr-caps li[data-err="true"]{box-shadow:0 0 0 1px #b7a8f766}
 .cy-idx li[hidden]{display:none}
+
+/* ══ AT TASK DEPTH (the dress-stripped audit, 2026-09-26: "inside every task,
+   new bee and raver are the same page with a different header"). One tap in,
+   the three registers carry three different BODIES of the same sections:
+     cypherpunk  everything open (unchanged)
+     new bee     one question at a time: each section's engineering folds
+                 behind its own "show the details" (moved, never deleted)
+     raver       the task is glyph cards; a card opens its one section with
+                 its controls first, and its words fold behind "the words" */
+body[data-reg="bee"] main>section:not([data-wl-more]) :is([data-wl-tech],.ring-wrap>svg,.ring-key){display:none!important}
+body[data-reg="raver"] main>section:not([data-wl-more]) :is(h2,[data-wl-tech],.law:not([id]),#pay-law,p,.lcap,.ring-key,details[data-reg-disclose]){display:none!important}
+.wl-more{display:none}
+body[data-reg="bee"] main>section[data-wl-fold-bee] .wl-more,body[data-reg="raver"] main>section[data-wl-fold-raver] .wl-more{display:flex}
+.wl-more span{display:none}
+body[data-reg="bee"] main>section:not([data-wl-more]) .wl-more .m-bee,body[data-reg="bee"] main>section[data-wl-more] .wl-more .l-bee,
+body[data-reg="raver"] main>section:not([data-wl-more]) .wl-more .m-rv,body[data-reg="raver"] main>section[data-wl-more] .wl-more .l-rv{display:inline}
+body[data-reg] main>section .wl-more{align-items:center;gap:8px;min-height:44px;margin-top:14px;padding:8px 14px;border:1px dashed var(--line2);background:transparent;color:var(--reg-link);font:500 15px/1.3 var(--reg-font-body)}
+body[data-reg] main>section .wl-more:hover{background:var(--well);color:var(--reg-link-hover)}
+/* raver: a task's sections wait behind their cards; "all" is the whole long scroll */
+body[data-reg="raver"]:not([data-wl-view="home"]):not([data-wl-view="all"]) main>section[data-wl-task]:not([data-wl-open]){display:none!important}
+body[data-reg="raver"]:not([data-wl-view="home"]):not([data-wl-view="all"]) #wl-cards{display:grid}
+body[data-reg="raver"]:not([data-wl-view="home"]) #wl-lines{display:block}
+#wl-cards{grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:10px;margin:6px 0 14px}
+#wl-cards .wlr-card{display:none}
+body[data-reg="raver"][data-wl-view="have"] #wl-cards [data-wl-card-task="have"],body[data-reg="raver"][data-wl-view="move"] #wl-cards [data-wl-card-task="move"],
+body[data-reg="raver"][data-wl-view="add"] #wl-cards [data-wl-card-task="add"],body[data-reg="raver"][data-wl-view="keep"] #wl-cards [data-wl-card-task="keep"],
+body[data-reg="raver"][data-wl-view="key"] #wl-cards [data-wl-card-task="key"],body[data-reg="raver"][data-wl-view="proof"] #wl-cards [data-wl-card-task="proof"]{display:flex}
+#wl-cards .wlr-card[hidden]{display:none!important}
+body[data-reg="raver"] .wlr-card{flex-direction:column;align-items:center;justify-content:center;gap:6px;min-height:108px;padding:12px 6px;border:0;border-radius:26px;
+  background:radial-gradient(circle at 50% 32%,#171028,#0c1412 72%);box-shadow:0 0 0 1px #1e2b26;color:var(--ink);font:inherit;text-align:center}
+body[data-reg="raver"] .wlr-card:hover{background:radial-gradient(circle at 50% 32%,#2a1640,#0c1412 72%);color:var(--ink)}
+body[data-reg="raver"] .wlr-card:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
+body[data-reg="raver"] .wlr-card .g{font-size:36px;line-height:1;filter:drop-shadow(0 0 10px #9c6fd666)}
+body[data-reg="raver"] .wlr-card .w{font-size:14px;line-height:1.25;color:var(--dim)}
+body[data-reg="raver"] .wlr-card[aria-pressed="true"]{box-shadow:0 0 0 2px #d655bb,0 0 26px #d655bb66}
+body[data-reg="raver"] .wlr-card[aria-pressed="true"] .w{color:var(--ink);font-weight:700}
+#wl-lines{margin:6px 4px 4px;text-align:center;font-size:17px;line-height:1.45;color:var(--ink)}
+#wl-lines span{display:none}
+body[data-wl-view="have"] #wl-lines [data-wl-for="have"],body[data-wl-view="move"] #wl-lines [data-wl-for="move"],
+body[data-wl-view="add"] #wl-lines [data-wl-for="add"],body[data-wl-view="keep"] #wl-lines [data-wl-for="keep"],
+body[data-wl-view="key"] #wl-lines [data-wl-for="key"],body[data-wl-view="proof"] #wl-lines [data-wl-for="proof"],
+body[data-wl-view="all"] #wl-lines [data-wl-for="all"]{display:inline}
+/* raver speaks art: the engineering tagline stays in cypherpunk; the chrome reads at 13px or more */
+body[data-reg="raver"] .kicker{display:none}
+body[data-reg="raver"] .crumbs,body[data-reg="raver"] .crumbs .badge-live{font-size:13px;letter-spacing:.02em}
+/* the bPay panel dims its captions with inline opacity on top of an already
+   dim ink: 2.75-4.2:1, below AA in every register. The dim ink alone reads;
+   the extra fade goes (measured: the gate folds opacity into contrast) */
+body[data-reg] #bpay-sec :is(span,div,p,small,em,b)[style*="opacity"]{opacity:1!important}
 .wlr-art{display:block;width:100%;max-width:520px;height:auto;margin:0 auto}
 .wlr-orbit{fill:none;stroke:#9c6fd6;stroke-opacity:.45;stroke-width:1.2;stroke-dasharray:2 7;transform-origin:180px 150px;animation:wlr-drift 90s linear infinite}
 .wlr-soul{animation:wlr-breathe 5s ease-in-out infinite}
@@ -528,16 +577,13 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
 <main>
 <nav class="crumbs" aria-label="you are here">
   <a href="index.html" data-i18n="hub.name">beehive nature reserve</a><span class="sub">▸</span><span class="here" data-i18n="wl.crumb">the wallet</span>
-  <span class="badge-live"><i></i><span data-i18n="wl.badge">your keys stay in this tab only — gone when you close it</span></span>
+  <span class="badge-live"><i></i><span data-i18n="wl.badge">your keys stay in this tab only, gone when you close it</span></span>
 </nav>
 <header>
   <div class="kicker" data-i18n="wl.kicker">zero storage · zero custody · first-party, adapter-native</div>
   <h1><span aria-hidden="true">🗝</span> the BNR wallet <span class="h1-arg" data-i18n="wl.h1arg">— one soul, every chain</span></h1>
-  <p data-reg="bee" data-i18n="wl.reg.connect.bee">One identity, every chain. Your bzDiD is your wallet — connect it once
-  and see your balances across all your chains, sign transactions, and hold your keys.
-  Nothing leaves your browser.</p>
-  <p data-reg="raver" data-i18n="wl.reg.connect.raver">the multi-chain wallet — bzDiD soul connects, keyless reads show every
-  balance, derived keys sign. First-party, adapter-native, zero custody.</p>
+  <p data-reg="bee" data-i18n="wl.reg.connect.bee">one identity, every chain. your bzDiD is your wallet: connect it once to see your balances on all your chains, sign and hold your keys. nothing leaves your browser.</p>
+  <p data-reg="raver" data-i18n="wl.reg.connect.raver">one soul, every chain. the lights show what you hold.</p>
   <p data-reg="cypherpunk" data-i18n="wl.reg.connect.cypher">bzDiD masterPRK → near-infinite per-context derived keys
   (secp256k1 for Vaulta AND 0x/EVM, ed25519 for bzDiD rails) → client-side eosjs serialization +
   signed here → sent onward via a public door. Your keys stay in this tab's memory — nothing saved, nothing held for you.
@@ -583,6 +629,28 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
 </nav>
 <div id="wl-deck" data-reg="raver" aria-hidden="true">
   <div class="wld-orb"><span data-wl-for="move">💸</span><span data-wl-for="add">💳</span><span data-wl-for="keep">📡</span><span data-wl-for="key">🗝</span><span data-wl-for="proof">🗺</span><span data-wl-for="all">∞</span></div>
+</div>
+<p id="wl-lines" data-reg="raver"><span data-wl-for="have" data-i18n="wl.rv.line.have">every chain you hold, lit when it answers</span><span data-wl-for="move" data-i18n="wl.rv.line.move">send some, get paid, swap between chains</span><span data-wl-for="add" data-i18n="wl.rv.line.add">bring money in, three ways</span><span data-wl-for="keep" data-i18n="wl.rv.line.keep">pay once and your file stays</span><span data-wl-for="key" data-i18n="wl.rv.line.key">your keys live in this tab and only here</span><span data-wl-for="proof" data-i18n="wl.rv.line.proof">every bill and every step, out in the open</span><span data-wl-for="all" data-i18n="wl.rv.line.all">everything at once</span></p>
+<div id="wl-cards" data-reg="raver">
+  <button type="button" class="wlr-card" data-wl-card-for="connect-sec" data-wl-card-task="have" aria-pressed="false"><span class="g" aria-hidden="true">🔗</span><span class="w" data-i18n="wl.rv.s.connect-sec">your name</span></button>
+  <button type="button" class="wlr-card" data-wl-card-for="bal-sec" data-wl-card-task="have" aria-pressed="false"><span class="g" aria-hidden="true">⚡</span><span class="w" data-i18n="wl.rv.s.bal-sec">balances</span></button>
+  <button type="button" class="wlr-card" data-wl-card-for="summary-sec" data-wl-card-task="have" aria-pressed="false"><span class="g" aria-hidden="true">📊</span><span class="w" data-i18n="wl.rv.s.summary-sec">summary</span></button>
+  <button type="button" class="wlr-card" data-wl-card-for="pay-sec" data-wl-card-task="move" aria-pressed="false"><span class="g" aria-hidden="true">💸</span><span class="w" data-i18n="wl.rv.s.pay-sec">pay</span></button>
+  <button type="button" class="wlr-card" data-wl-card-for="outbox-sec" data-wl-card-task="move" aria-pressed="false"><span class="g" aria-hidden="true">📤</span><span class="w" data-i18n="wl.rv.s.outbox-sec">outbox</span></button>
+  <button type="button" class="wlr-card" data-wl-card-for="voucher-sec" data-wl-card-task="add" aria-pressed="false"><span class="g" aria-hidden="true">🎟</span><span class="w" data-i18n="wl.rv.s.voucher-sec">voucher</span></button>
+  <button type="button" class="wlr-card" data-wl-card-for="fund-sec" data-wl-card-task="add" aria-pressed="false"><span class="g" aria-hidden="true">💳</span><span class="w" data-i18n="wl.rv.s.fund-sec">card</span></button>
+  <button type="button" class="wlr-card" data-wl-card-for="peer-sec" data-wl-card-task="add" aria-pressed="false"><span class="g" aria-hidden="true">🏧</span><span class="w" data-i18n="wl.rv.s.peer-sec">fiat in</span></button>
+  <button type="button" class="wlr-card" data-wl-card-for="bpay-sec" data-wl-card-task="keep" aria-pressed="false"><span class="g" aria-hidden="true">🧾</span><span class="w" data-i18n="wl.rv.s.bpay-sec">keep a file</span></button>
+  <button type="button" class="wlr-card" data-wl-card-for="insc-sec" data-wl-card-task="keep" aria-pressed="false"><span class="g" aria-hidden="true">🎨</span><span class="w" data-i18n="wl.rv.s.insc-sec">garden</span></button>
+  <button type="button" class="wlr-card" data-wl-card-for="arw-sec" data-wl-card-task="keep" aria-pressed="false"><span class="g" aria-hidden="true">📡</span><span class="w" data-i18n="wl.rv.s.arw-sec">Arweave</span></button>
+  <button type="button" class="wlr-card" data-wl-card-for="kc-sec" data-wl-card-task="key" aria-pressed="false"><span class="g" aria-hidden="true">🗝</span><span class="w" data-i18n="wl.rv.s.kc-sec">keychain</span></button>
+  <button type="button" class="wlr-card" data-wl-card-for="vault-sec" data-wl-card-task="key" aria-pressed="false"><span class="g" aria-hidden="true">🔐</span><span class="w" data-i18n="wl.rv.s.vault-sec">vault</span></button>
+  <button type="button" class="wlr-card" data-wl-card-for="forge-sec" data-wl-card-task="key" aria-pressed="false"><span class="g" aria-hidden="true">♾</span><span class="w" data-i18n="wl.rv.s.forge-sec">key forge</span></button>
+  <button type="button" class="wlr-card" data-wl-card-for="bridge-sec" data-wl-card-task="key" aria-pressed="false"><span class="g" aria-hidden="true">🌉</span><span class="w" data-i18n="wl.rv.s.bridge-sec">bridge</span></button>
+  <button type="button" class="wlr-card" data-wl-card-for="acct-sec" data-wl-card-task="key" aria-pressed="false"><span class="g" aria-hidden="true">🏭</span><span class="w" data-i18n="wl.rv.s.acct-sec">new account</span></button>
+  <button type="button" class="wlr-card" data-wl-card-for="receipts-sec" data-wl-card-task="proof" aria-pressed="false"><span class="g" aria-hidden="true">🧾</span><span class="w" data-i18n="wl.rv.s.receipts-sec">receipts</span></button>
+  <button type="button" class="wlr-card" data-wl-card-for="composer-sec" data-wl-card-task="proof" aria-pressed="false"><span class="g" aria-hidden="true">✍</span><span class="w" data-i18n="wl.rv.s.composer-sec">composer</span></button>
+  <button type="button" class="wlr-card" data-wl-card-for="matrix-sec" data-wl-card-task="proof" aria-pressed="false"><span class="g" aria-hidden="true">🗺</span><span class="w" data-i18n="wl.rv.s.matrix-sec">every rail</span></button>
 </div>
 <div id="wl-rave" data-reg="raver">
   <!-- the art carries glyphs only; every word is in the captions below it -->
@@ -640,19 +708,19 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
 </aside>
 
 <section id="connect-sec" data-wl-task="have" style="border-color:var(--gold)">
-  <h2>🔗 connect — <span data-i18n="wl.h.connect">your bzDiD is the wallet</span></h2>
+  <h2>🔗 connect: <span data-i18n="wl.h.connect">your bzDiD is the wallet</span></h2>
   <div class="law">Connect your soul (your .b name or account). New here?
   <a href="./onboarding/">Create your bzDiD</a> — the held-hand ceremony takes 2 minutes.</div>
   <div class="row">
     <input id="wq" placeholder="your account or .b name" value="" spellcheck="false" style="font-size:16px;padding:12px 14px">
     <button id="wgo" style="font-size:14px;padding:12px 20px">connect</button>
   </div>
-  <div class="law" id="wstat" style="margin-top:8px;min-height:20px">— not connected —</div>
+  <div class="law" id="wstat" style="margin-top:8px;min-height:20px">not connected</div>
 </section>
 
 <section id="kc-sec" data-wl-task="key">
-  <h2>🗝 the keychain — <span data-i18n="wl.h.keychain">your bzDiD holds every key</span></h2>
-  <div class="law"><b>Automatic:</b> your first tap or keypress on a control of this page (moving between its parts does not count) connects the
+  <h2>🗝 the keychain: <span data-i18n="wl.h.keychain">your bzDiD holds every key</span></h2>
+  <div class="law" data-wl-tech><b>Automatic:</b> your first tap or keypress on a control of this page (moving between its parts does not count) connects the
   keychain by itself (the WebAuthn ceremony needs one touch of yours — browsers' law, not ours).
   The PRF ceremony re-derives your <b>masterPRK</b> in this tab's memory (never stored, never
   sent). From it we derive: the <b>ed25519 soul record key</b> (context <b>bnr.b</b>, same as
@@ -687,8 +755,8 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
       <!-- future chains node -->
       <g id="ethg" opacity=".45">
         <circle id="ethnode" cx="115" cy="201" r="8" fill="#0e1611" stroke="#00E5FF" stroke-width="1.4" stroke-dasharray="2 3"/>
-        <text x="115" y="222" text-anchor="middle" class="ring-n">4</text>
       </g>
+      <text x="115" y="222" text-anchor="middle" class="ring-n">4</text>
       <!-- bridge arc + anchor (turned on when bridged) -->
       <path id="bridgearc" class="bridge-arc" d="M 201 115 Q 235 178 178 196" fill="none"
         stroke="#5f6f61" stroke-width="1.2" opacity="0"/>
@@ -775,7 +843,7 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
 </section>
 
 <section id="vault-sec" data-wl-task="key" style="border-color:var(--cyan)">
-  <h2>🔐 the vault — <span data-i18n="wl.h.vault">one keypass, every secret</span></h2>
+  <h2>🔐 the vault: <span data-i18n="wl.h.vault">one keypass, every secret</span></h2>
   <details class="tnote" data-reg-disclose><summary data-i18n="wl.d.import">Bringing keys you already hold — formats, and how they get sealed</summary>
   <div class="law">The keys you already hold — <b>seed phrases</b> from any wallet
   (12 · 15 · 18 · 21 · 24 words) and <b>Vaulta ACTIVE private keys</b>
@@ -924,7 +992,7 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
 </section>
 
 <section id="forge-sec" data-wl-task="key">
-  <h2>♾ the key forge — <span data-i18n="wl.h.forge">near infinite keys, one soul</span></h2>
+  <h2>♾ the key forge: <span data-i18n="wl.h.forge">near infinite keys, one soul</span></h2>
   <details class="tnote" data-reg-disclose><summary data-i18n="wl.d.forge2">How each context gets its own key — derivation, on demand</summary>
   <div class="law">Every context derives its own key from your masterPRK: <b>vaulta:names</b> for
   Vaulta account keys, <b>evm:names</b> for 0x addresses, any adapter context you can name.
@@ -932,21 +1000,21 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
   every device. We persist <b>only the context list</b> (this browser), never a key; keys exist
   only while your keychain is connected. Tap a key to copy it.</div>
   </details>
-  <div class="chips" id="forge-chips">
+  <div class="chips" id="forge-chips" data-wl-tech>
     <div class="law">connect your keychain above to see your derived keys — or forge new ones below</div>
   </div>
-  <div class="row">
+  <div class="row" data-wl-tech>
     <input id="forge-ctx" class="small" placeholder="new context — e.g. vaulta:newaccount · evm:myname · anything:anything" spellcheck="false">
     <button id="forge-go" class="gold">⚒ FORGE KEY</button>
     <button id="forge-evm" style="font-size:11px">+ evm:<span id="forge-soulname">soul</span></button>
     <button id="forge-vaulta" style="font-size:11px">+ vaulta:<span id="fs2">soul</span></button>
     <button id="forge-nostr" style="font-size:11px">+ nostr:<span id="fs3">soul</span></button>
   </div>
-  <div class="law" id="forge-stat" style="margin-top:6px;min-height:20px">— the forge is unlimited; contexts are names, keys derive on demand —</div>
+  <div class="law" id="forge-stat" style="margin-top:6px;min-height:20px">the forge is unlimited; contexts are names, keys derive on demand</div>
 </section>
 
 <section id="bal-sec" data-wl-task="have">
-  <h2>⚡ balances — <span data-i18n="wl.h.balances">every chain, keyless, live</span></h2>
+  <h2>⚡ balances: <span data-i18n="wl.h.balances">every chain, keyless, live</span></h2>
   <div class="law">Read from public RPCs in your browser. Nothing stored, nothing sent.
   The chain is the source of truth.</div>
   <div class="chains" id="chains">
@@ -984,7 +1052,7 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
 </section>
 
 <section id="bridge-sec" data-wl-task="key" style="display:none;border-color:var(--gold)">
-  <h2>🌉 the bridge — one time, then never manual again</h2>
+  <h2>🌉 the bridge: one time, then never manual again</h2>
   <div class="law">Your bzDiD-derived K1 key is not on your account yet. Paste your existing
   <b>active</b> private key <b>once</b> — we build an updateauth that <b>adds</b> your bzDiD keys
   alongside every key already on your account (nothing removed, threshold 1: <b>the derived key
@@ -1006,7 +1074,7 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
 </section>
 
 <section id="acct-sec" data-wl-task="key" style="border-color:#2c4a5a">
-  <h2>🏭 the account forge — <span data-i18n="wl.h.acctforge">Vaulta accounts born from your bzDiD</span></h2>
+  <h2>🏭 the account forge: <span data-i18n="wl.h.acctforge">Vaulta accounts born from your bzDiD</span></h2>
   <details class="tnote" data-reg-disclose><summary data-i18n="wl.d.acct">How a new account is born — your bridged key signs it into being</summary>
   <div class="law">Your <b>bridged</b> account signs <b>newaccount</b>; the new account's owner and
   active keys derive from your bzDiD (contexts <b>vaulta:&#8203;name/owner</b> and
@@ -1021,25 +1089,25 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
   </div>
   <div class="row">
     <input id="ac-ram" class="small" type="number" value="8192" min="3072" step="1024" style="max-width:160px;flex:0 1 160px" title="RAM bytes the creator buys for the new account">
-    <div class="law" style="flex:2;min-width:220px" id="ac-cost">RAM cost: reading live market…</div>
+    <div class="law" style="flex:2;min-width:220px" id="ac-cost" data-wl-tech>RAM cost: reading live market…</div>
   </div>
   <div class="law" id="ac-stat" style="margin-top:6px;min-height:20px">— creator liquid: reading… —</div>
   <pre id="ac-out" style="display:none"></pre>
 </section>
 <section id="pay-sec" data-wl-task="move" style="border-color:#3a5a2c">
-  <h2>💸 pay — <span data-i18n="wl.h.pay">send · receive · swap</span></h2>
+  <h2>💸 pay: <span data-i18n="wl.h.pay">send · receive · swap</span></h2>
   <div class="row" style="margin-top:8px">
     <button id="pay-rx" class="gold">📥 receive</button>
     <button id="pay-tx" class="gold">📤 send</button>
     <button id="pay-sw" class="gold">🔁 swap</button>
   </div>
-  <div class="law" id="pay-law">receive needs nothing (addresses below are yours to hand out) ·
+  <div class="law" id="pay-law" data-wl-tech>receive needs nothing (addresses below are yours to hand out) ·
   send signs with your bzDiD keys exactly like every lane here · swap rides the chain's own market</div>
 
   <!-- ══ SPEND CAP — the owner's optional tool. Set it, forget it: the engine
        refuses to SIGN past it (a policy you wrote, enforced at your own key —
        never a human gate, never an approval step; unset = no limit). ══ -->
-  <div class="row" id="cap-row" style="margin-top:8px;align-items:center;flex-wrap:wrap">
+  <div class="row" id="cap-row" data-wl-tech style="margin-top:8px;align-items:center;flex-wrap:wrap">
     <span style="font-size:10.5px;color:var(--faint);flex:0 0 auto">spend cap · optional, owner's tool:</span>
     <span id="cap-view" style="font-size:10.5px;color:var(--cyan);flex:1 1 auto;min-width:120px">unset — no limit</span>
     <input id="cap-amt" class="small" type="number" min="0" step="0.0001" placeholder="amount/day" title="amount per rolling day, per unit" style="max-width:110px;flex:0 1 110px">
@@ -1171,7 +1239,7 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
     Token-for-token DEX swaps land on this lane next — same law, no third-party router in your face.</div>
   </div>
 
-  <div class="law" id="pay-stat" style="margin-top:6px;min-height:20px">— choose a lane above —</div>
+  <div class="law" id="pay-stat" style="margin-top:6px;min-height:20px">choose a lane above</div>
 </section>
 
 <!-- ══ bPAY — the preservation invoice (Phase A: render-only; the carried quote
@@ -1203,7 +1271,7 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
      redrawn by this page. ══ -->
 <section id="insc-sec" data-wl-task="keep" style="border-color:#3a2c55">
   <h2>🎨 <span data-i18n="wl.insc.h2">INSCRIPTIONS — your garden, drawn on-chain</span></h2>
-  <div class="law"><span data-i18n="wl.insc.law">ERC-20i: the art lives in the token, and its tier is your balance.</span> Drawn at
+  <div class="law" data-wl-tech><span data-i18n="wl.insc.law">ERC-20i: the art lives in the token, and its tier is your balance.</span> Drawn at
   <b>true tier</b> through the estate's one level-truth module — the same one the market and the museum
   use. Keyless, read-only, nothing signed.</div>
   <div class="row" style="margin-top:8px">
@@ -1212,7 +1280,7 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
   </div>
   <div class="law" id="insc-stat" style="margin-top:6px;min-height:20px">— connect your keychain, or type an address —</div>
   <div id="insc-grid" style="display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));margin-top:12px"></div>
-  <div class="law" style="margin-top:8px"><b>The level law, enforced not labelled:</b> every piece's tier is
+  <div class="law" data-wl-tech style="margin-top:8px"><b>The level law, enforced not labelled:</b> every piece's tier is
   checked against the collection's <b>own getMeta</b> at read time. A disagreement prints as a
   <b>GATE FAILURE</b> on the card, never smoothed into a number that looks fine.</div>
 </section>
@@ -1291,7 +1359,7 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
 
 <!-- ══ RECEIPTS — the public spend record, recomputed here (SPEC-SPEND-RECEIPT-1) ══ -->
 <section id="receipts-sec" data-wl-task="proof" style="border-color:var(--gold)">
-  <h2>🧾 the receipts — <span data-i18n="wl.h.receipts">every bill recomputed here</span></h2>
+  <h2>🧾 the receipts: <span data-i18n="wl.h.receipts">every bill recomputed here</span></h2>
   <details class="tnote" data-reg-disclose><summary data-i18n="wl.d.receipts">How this panel checks every bill — recomputed here, never trusted</summary>
   <p class="law"><a href="#voucher-sec">the voucher panel</a> reads <b>your</b> balance live from the estate oracle; this panel
   reads the estate's <b>public</b> spend-receipt record (SPEC-SPEND-RECEIPT-1, the same shape the b-meter
@@ -1332,7 +1400,7 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
   #cap-set,#cap-clear,#vc-go{min-height:44px}
   #vcomb .cell{min-height:44px}}
 </style>
-  <h2>💳 fund — <span data-i18n="wl.h.fund">buy USDC, land it on an address you hold</span></h2>
+  <h2>💳 fund: <span data-i18n="wl.h.fund">buy USDC, land it on an address you hold</span></h2>
   <details class="tnote" data-reg-disclose><summary data-i18n="wl.d.fiat">How the card checkout works — who holds what at each step</summary>
   <div class="law">The one lane this wallet cannot forge itself: licensed fiat. The buy runs on
   <b>Meld's hosted checkout</b> — it opens in its own tab; this page only builds the link.
@@ -1613,7 +1681,7 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
 
 <!-- ══ PEER FUNNEL — the first mile in: fiat → USDC on Peer's escrow, estate = bare to ══ -->
 <section id="peer-sec" data-wl-task="add" style="border-color:#2c4a3a">
-  <h2>🏧 fiat in — <span data-i18n="wl.h.fiat">the Peer funnel</span> (SPEC-PEER-FUNNEL-1)</h2>
+  <h2>🏧 fiat in: <span data-i18n="wl.h.fiat">the Peer funnel</span> (SPEC-PEER-FUNNEL-1)</h2>
   <details class="tnote" data-reg-disclose><summary data-i18n="wl.d.funnel">The fiat funnel’s role — the estate sells, it never operates</summary>
   <p class="law">the estate is a <b>seller, not an operator</b>: its Base address below is a bare
   <b>to</b> on Peer's live escrow (EscrowV2 + OrchestratorV3 on Base) — it signs nothing, grants
@@ -1752,7 +1820,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
 
 <!-- ══ ARWEAVE — publish & anchor (first-party signer · vault custody) ══ -->
 <section id="arw-sec" data-wl-task="keep" style="border-color:#4a3a1d">
-  <h2>📡 Arweave — <span data-i18n="wl.h.arweave">publish &amp; anchor, no middleman</span></h2>
+  <h2>📡 Arweave: <span data-i18n="wl.h.arweave">publish &amp; anchor, no middleman</span></h2>
   <details class="tnote" data-reg-disclose><summary data-i18n="wl.d.arweave">The Arweave lane — built and signed inside this page</summary>
   <div class="law">Another adapter on the wallet shell — balance, receive address, send, and
   one new capability: <b>PUBLISH</b>. The transaction is built and signed <b>in this page</b>
@@ -1901,7 +1969,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
 </section>
 
 <section id="composer-sec" data-wl-task="proof">
-  <h2>✍ composer — <span data-i18n="wl.h.composer">the BNR contract surface, no Unicove</span></h2>
+  <h2>✍ composer: <span data-i18n="wl.h.composer">the BNR contract surface, no Unicove</span></h2>
   <details class="tnote" data-reg-disclose><summary data-i18n="wl.d.composer">What the composer shows you before anything is signed</summary>
   <div class="law" id="sign-law">Give it contract + action and it fetches the live ABI, renders
   one field per argument, and <b>shows you exactly what you will sign</b> — action, authorization,
@@ -1911,7 +1979,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   dependency is dead — this is ours, on the adapter contract: the worker builds, the vault signs,
   the outbox persists, and nothing is called "sent" until the rail is read back.</div>
   </details>
-  <div class="ladder" id="receipt-ladder" aria-label="the receipt ladder — the order is law">
+  <div class="ladder" id="receipt-ladder" data-wl-tech aria-label="the receipt ladder — the order is law">
     <div class="lcap" data-i18n="wl.ld.cap">the receipt ladder — every state is a first-class visual · the order is law</div>
     <div class="lrow"><div class="ltrack"><span class="ldot">1</span><span class="ltail"></span></div>
       <div class="lbody"><span class="llabel" style="color:#E9F2EC" data-i18n="wl.ld.build">BUILD</span><span class="lbadge" data-i18n="wl.ld.done">done</span>
@@ -1929,7 +1997,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       <div class="lbody"><span class="llabel" style="color:#86CC72" data-i18n="wl.ld.confirm">CONFIRM</span><span class="lbadge" style="border-color:#86CC72;background:#86CC72;color:#06110C;font-weight:700" data-i18n="wl.ld.confirmed">CONFIRMED — read back from the rail</span>
       <div class="lline" data-i18n="wl.ld.confirm.l">a block read says so, or nothing does. the receipt names what was read — only the read-back earns the terminal look.</div></div></div>
   </div>
-  <div id="adapter-states" style="margin:8px 0;display:flex;gap:6px;flex-wrap:wrap"></div>
+  <div id="adapter-states" data-wl-tech style="margin:8px 0;display:flex;gap:6px;flex-wrap:wrap"></div>
   <div class="row">
     <input id="tx-contract" placeholder="contract" value="" spellcheck="false">
     <input id="tx-action" placeholder="action" value="" spellcheck="false">
@@ -1969,15 +2037,15 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
 </section>
 
 <section id="outbox-sec" data-wl-task="move">
-  <h2>📤 outbox — <span data-i18n="wl.h.outbox">signed bytes persist here BEFORE they submit</span></h2>
-  <div class="law">The order is law: <b>build → sign → persist → submit → confirm by reading the
+  <h2>📤 outbox: <span data-i18n="wl.h.outbox">signed bytes persist here BEFORE they submit</span></h2>
+  <div class="law" data-wl-tech>The order is law: <b>build → sign → persist → submit → confirm by reading the
   rail</b>. A retry resubmits the identical stored bytes — it never re-signs, never rebuilds.
   Nothing shows "sent" until a block read says so; the receipt names what was read.</div>
   <div id="outbox-list"></div>
 </section>
 
 <section id="matrix-sec" data-wl-task="proof">
-  <h2>🗺 chain matrix — <span data-i18n="wl.h.matrix">the sixteen rails, from data</span></h2>
+  <h2>🗺 chain matrix: <span data-i18n="wl.h.matrix">the sixteen rails, from data</span></h2>
   <details class="tnote" data-reg-disclose><summary data-i18n="wl.d.rails">Every rail, one row each — how it is read and signed</summary>
   <div class="law">Every rail the wallet will ever owe you, one row each: <b>how it's read</b>
   (first-party path first), <b>how it's signed</b> (custody tier), and <b>tonight's honest state</b>.
@@ -1986,7 +2054,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   gracefully, gaps say they are gaps.</div>
   </details>
   <div id="matrix-summary" style="display:flex;gap:8px;flex-wrap:wrap;margin:10px 0"></div>
-  <div id="matrix-body"></div>
+  <div id="matrix-body" data-wl-tech></div>
 </section>
 
 <section id="summary-sec" data-wl-task="have">
@@ -2096,7 +2164,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     var seed=null;
     if(raw.length===37&&raw[0]===0x80)seed=raw.slice(1,33);
     else if(raw.length===38&&raw[0]===0x80&&raw[33]===0x01)seed=raw.slice(1,33);
-    else throw new Error('not a WIF (decoded '+raw.length+' bytes) — paste the private key your wallet exported, not a public key or phrase (phrases belong in the recovery lane above)');
+    else throw new Error('not a WIF (decoded '+raw.length+' bytes) — paste the private key your wallet exported, not a public key or phrase (a phrase belongs in the keychain’s recovery lane)');
     var body=raw.slice(0,raw.length-4),chk=raw.slice(raw.length-4);
     var calc=BN.sha256(BN.sha256(body)).slice(0,4);
     for(var i2=0;i2<4;i2++)if(chk[i2]!==calc[i2])throw new Error('WIF checksum failed — typo in the key?');
@@ -3120,7 +3188,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     if(ev&&ev.target&&ev.target.closest&&ev.target.closest('#kc-rec,#kc-recgo,#kc-create,#kc-out,#br-wif,#br-go,#vault-sec'))return;
     // the three grammars (2026-09-26): moving through the wallet is not a request
     // to sign in: a bee row, the raver dock, the console index and its keys pass
-    if(ev&&ev.target&&ev.target.closest&&ev.target.closest('[data-wl-go],#wl-dock,#wl-cy'))return;
+    if(ev&&ev.target&&ev.target.closest&&ev.target.closest('[data-wl-go],#wl-dock,#wl-cy,#wl-cards,.wl-more'))return;
     if(ev&&ev.type==='keydown'&&document.body.getAttribute('data-reg')==='cypherpunk'&&/^[jkgo]$/.test(ev.key)&&!(ev.target&&/^(INPUT|TEXTAREA|SELECT)$/.test(ev.target.tagName)))return;
     if(autoTried||MPRK||!BZDIDKEY||!SOUL)return;
     autoTried=true;
@@ -3145,7 +3213,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     if(/invalid domain|NotAllowedError.*domain|not allowed for this origin/i.test(m)||BAD_ORIGIN){
       var homeMsg=(window.WALLET_PROFILE&&WALLET_PROFILE.canonical_home)||'';
       return 'passkeys CANNOT exist on this origin ('+location.hostname+' — WebAuthn needs a real domain, never an IP). You are on a local build server.'+
-        (homeMsg?' The wallet lives at '+homeMsg.replace(/^https?:\/\//,'')+' — open the public link in the banner above and every passkey lane works there.':' Open this wallet on its real domain and every passkey lane works there.');
+        (homeMsg?' The wallet lives at '+homeMsg.replace(/^https?:\/\//,'')+' — open the public link in the banner and every passkey lane works there.':' Open this wallet on its real domain and every passkey lane works there.');
     }
     if(/NotAllowed|No available|not.*found|pending|aborted|InvalidState|timed out|credential|excluded|problem signing/i.test(m)){
       // covers: user cancelled the picker, the QR cross-device dead end (the
@@ -3210,7 +3278,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       catch(e2){
         var m2=(e2&&e2.message)||String(e2||'');
         $('kc-stat').innerHTML='✗ <b style="color:var(--amber)">created but unusable</b> — '+(/no_prf/i.test(m2)
-          ?'that key lacks PRF (U2F-only or pre-FIDO2.1 firmware). Delete it, or keep it for the Vaulta tx passkey lane below — but it cannot hold a bzDiD.'
+          ?'that key lacks PRF (U2F-only or pre-FIDO2.1 firmware). Delete it, or keep it for signing Vaulta transactions with a passkey — but it cannot hold a bzDiD.'
           :m2);
         return;
       }
@@ -5134,7 +5202,8 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     swQuote(); };
   $('sw-amt').addEventListener('input',function(){ if($('sw-panel').style.display!=='none')swQuote() });
   $('sw-go').onclick=async function(){
-    if(!SOUL||!K1){wlSay($('sw-stat'),['connect ',{to:'kc-sec',t:'your keychain'},' first']);return}
+    if(!SOUL){wlSay($('sw-stat'),['connect ',{to:'connect-sec',t:'your name'},' first']);return}
+    if(!K1){wlSay($('sw-stat'),['connect ',{to:'kc-sec',t:'your keychain'},' first']);return}
     if(!BRIDGED){wlSay($('sw-stat'),['needs your bridged bzDiD key — run ',{to:'bridge-sec',t:'the bridge'},' first']);return}
     var n=parseInt($('sw-amt').value,10)||0;
     if(!(n>0)){$('sw-stat').textContent='enter bytes of RAM';return}
@@ -5199,6 +5268,9 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
 
   async function readAll(){
     if(!SOUL)return;
+    /* the soul is known and the reads are in flight: say so NOW, not after the round-trip */
+    document.body.setAttribute('data-wl-soul','true');
+    ['v-stat','h-stat'].forEach(function(id){var st=$(id);st.textContent='reading…';st.className='stat'});
     $('wstat').innerHTML='✓ connected as <b style="color:var(--leaf)">'+SOUL+'</b> — reading balances…';
     await Promise.all([readVaulta(SOUL), readHive(SOUL)]);
     $('wstat').innerHTML='✓ connected as <b style="color:var(--leaf)">'+SOUL+'</b> · balances live';
@@ -5808,6 +5880,44 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   var DOCK=['home','have','move','add','keep','key','proof','all'];
   var secs=[].slice.call(document.querySelectorAll('main>section[data-wl-task]'));
   function reg(){return body.getAttribute('data-reg')||'bee'}
+
+  /* ── at task depth: every section that folds something in bee or raver gets
+     ONE toggle (its words differ by register); nothing folded is ever deleted ── */
+  var FOLD_BEE='[data-wl-tech],.ring-wrap>svg,.ring-key';
+  var FOLD_RV='h2,[data-wl-tech],.law:not([id]),#pay-law,p,.lcap,.ring-key,details[data-reg-disclose]';
+  secs.forEach(function(s){
+    if(s.querySelector(FOLD_BEE))s.setAttribute('data-wl-fold-bee','');
+    if(s.querySelector(FOLD_RV))s.setAttribute('data-wl-fold-raver','');
+    if(!s.hasAttribute('data-wl-fold-bee')&&!s.hasAttribute('data-wl-fold-raver'))return;
+    var b=document.createElement('button');b.type='button';b.className='wl-more';b.setAttribute('aria-expanded','false');
+    [['m-bee','wl.bee.more','show the details'],['l-bee','wl.bee.less','hide the details'],['m-rv','wl.rv.more','the words'],['l-rv','wl.rv.less','fewer words']].forEach(function(x){
+      var sp=document.createElement('span');sp.className=x[0];sp.setAttribute('data-i18n',x[1]);sp.textContent=x[2];b.appendChild(sp);
+    });
+    b.addEventListener('click',function(){var on=!s.hasAttribute('data-wl-more');if(on)s.setAttribute('data-wl-more','');else s.removeAttribute('data-wl-more');b.setAttribute('aria-expanded',String(on))});
+    s.appendChild(b);
+  });
+  /* raver's cards: a task opens as its parts, one glyph each; a card opens its
+     ONE section (tap again to close); a part the page holds hidden has no card */
+  function paintCards(){
+    var v=view();
+    [].forEach.call(document.querySelectorAll('#wl-cards .wlr-card'),function(c){
+      var s=document.getElementById(c.getAttribute('data-wl-card-for'));
+      c.hidden=!s||s.style.display==='none';
+      c.setAttribute('aria-pressed',String(!!s&&s.hasAttribute('data-wl-open')));
+    });
+  }
+  function openSec(s,scroll){
+    secs.forEach(function(x){if(x!==s)x.removeAttribute('data-wl-open')});
+    if(s)s.setAttribute('data-wl-open','');
+    paintCards();
+    if(s&&scroll)requestAnimationFrame(function(){s.scrollIntoView({block:'start',behavior:reduced()?'auto':'smooth'});s.focus({preventScroll:true})});
+  }
+  document.addEventListener('click',function(e){
+    var c=e.target.closest&&e.target.closest('#wl-cards .wlr-card');if(!c)return;
+    var s=document.getElementById(c.getAttribute('data-wl-card-for'));
+    if(s&&s.hasAttribute('data-wl-open')){s.removeAttribute('data-wl-open');paintCards();return}
+    openSec(s,true);
+  });
   function view(){return body.getAttribute('data-wl-view')||'home'}
   function shown(el){return !!el&&el.getClientRects().length>0}
   function reduced(){return !!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches)}
@@ -5850,6 +5960,10 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
      (state.wlIdx), never in a counter, so Back, Forward and "‹ wallet" agree ── */
   var lastRow=null;
   function idx(){return (history.state&&history.state.wlIdx)||0}
+  /* entries at or below this index were pushed by an EARLIER document (before a
+     reload, or before the reader left and came back): Back into them is a full
+     page load that would drop the tab-memory keychain, so "‹ wallet" never goes there */
+  var bootIdx=idx();
   function paintDock(){
     var v=view(), dock=document.getElementById('wl-dock');
     [].forEach.call(document.querySelectorAll('#wl-dock [data-wl-go]'),function(b){
@@ -5864,7 +5978,8 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     var was=view();
     body.setAttribute('data-wl-view',v);
     try{sessionStorage.setItem('wl.view',v)}catch(e){}
-    paintDock();
+    if(was!==v)secs.forEach(function(x){x.removeAttribute('data-wl-open')});
+    paintDock();paintCards();
     if(how.push&&was!==v){try{history.pushState({wlView:v,wlIdx:idx()+1},'',how.url)}catch(e){}}
     else if(how.replace){try{history.replaceState({wlView:v,wlIdx:idx()},'',how.url)}catch(e){}}
     if(how.arrive)arrive(v);
@@ -5881,7 +5996,8 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     if(!b)return;
     var v=b.getAttribute('data-wl-go');
     if(reg()==='bee'){
-      if(v==='home'&&idx()>0){history.back();return}         /* the stack pops, it does not grow */
+      if(v==='home'&&idx()>bootIdx){history.back();return}   /* the stack pops, it does not grow */
+      if(v==='home'){setView('home',{replace:true,url:location.pathname+location.search,arrive:true});return}   /* home carries no hash */
       if(v!=='home')lastRow=v;
       setView(v,{push:v!=='home',replace:v==='home',arrive:true});
     } else setView(v,{replace:true,arrive:true});               /* raver is lateral */
@@ -5909,6 +6025,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     if(reg()!=='cypherpunk'&&view()!=='all'&&view()!==t){
       if(reg()==='bee'&&view()==='home')setView(t,{push:true,url:'#'+h});else setView(t,{replace:true,url:'#'+h});
     } else { try{history.replaceState(history.state,'','#'+h)}catch(x){} }
+    if(reg()==='raver')openSec(el.closest('main>section'),false);
     requestAnimationFrame(function(){
       if(!shown(el)){arrive(t);return}   /* the page holds the target hidden: land on its task, never on nothing */
       el.scrollIntoView({block:'start',behavior:(reduced()||reg()==='cypherpunk')?'auto':'smooth'});
@@ -5924,17 +6041,18 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     var el=null;try{el=document.getElementById(decodeURIComponent(h))}catch(e){}
     var t=taskOf(el);if(!t)return;
     if(keepView!==true&&reg()!=='cypherpunk'&&view()!=='all'&&view()!==t)setView(t,{replace:true});
+    if(reg()==='raver')openSec(el.closest('main>section'),false);
     requestAnimationFrame(function(){el.scrollIntoView({block:'start'})});
   }
-  window.addEventListener('hashchange',landHash);
+  window.addEventListener('hashchange',function(){landHash(!!(history.state&&history.state.wlView))});
 
   /* work survives a register switch. The toggle sits at the top of the page,
      so a reader always scrolls up to reach it: scroll position cannot say what
      they were doing. Where they last WORKED can: the section of the last field
      they focused or typed in becomes the bee/raver task, and a bee/raver task
      becomes cypherpunk's place. */
-  var workTask=null;
-  function noteWork(e){if(e.target&&e.target.matches&&e.target.matches('main>section'))return;var t=taskOf(e.target);if(t)workTask=t}
+  var workTask=null, workSec=null;
+  function noteWork(e){if(e.target&&e.target.matches&&e.target.matches('main>section'))return;var t=taskOf(e.target);if(t){workTask=t;workSec=e.target.closest('main>section')}}
   document.addEventListener('focusin',noteWork);
   document.addEventListener('input',noteWork);
   function current(){
@@ -5949,7 +6067,9 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     lastReg=r;
     if(from==='cypherpunk'){
       if(workTask)setView(workTask,{replace:true});
-    } else if(r==='cypherpunk'){
+    }
+    if(r==='raver'&&workSec&&workSec.getAttribute('data-wl-task')===view())openSec(workSec,false);
+    if(r==='cypherpunk'&&from!=='cypherpunk'){
       var v=view(), first=null;
       secs.some(function(s){if(s.getAttribute('data-wl-task')===v&&shown(s)){first=s;return true}});
       if(first)requestAnimationFrame(function(){first.scrollIntoView({block:'start'})});
@@ -5965,7 +6085,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       var n=(i<9?'0':'')+(i+1), h=s.querySelector('h2');
       if(h)h.setAttribute('data-wl-n',n);
       if(!s.hasAttribute('tabindex'))s.setAttribute('tabindex','-1');
-      var name=(h?h.textContent:s.id).replace(/\s+/g,' ').trim().replace(/^[^\p{L}\p{N}]+/u,'').split(' — ')[0];
+      var name=(h?h.textContent:s.id).replace(/\s+/g,' ').trim().replace(/^[^\p{L}\p{N}]+/u,'').split(/: | — /)[0];
       var li=document.createElement('li'), a=document.createElement('a');
       a.href='#'+s.id;
       var sn=document.createElement('span');sn.className='n';sn.textContent='§'+n;
@@ -5982,6 +6102,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     [].forEach.call(document.querySelectorAll('#wl-cy-idx li'),function(li){
       var s=document.getElementById(li.dataset.sec);li.hidden=!s||s.style.display==='none';
     });
+    paintCards();
   }
   secs.forEach(function(s){new MutationObserver(paintIndex).observe(s,{attributes:true,attributeFilter:['style']})});
   document.addEventListener('keydown',function(e){
