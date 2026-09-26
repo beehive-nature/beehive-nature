@@ -700,7 +700,11 @@ jobs:
       # (ant-sdk PR #243), so the page falls back to the {"data":"<base64>"} envelope and plays the
       # decoded Blob; an upgraded antd streams directly and the envelope is never fetched. Door down,
       # not a video, error and cut envelopes end on the failure row. The door is MOCKED; the real
-      # relay is touched zero times.
+      # relay is touched zero times. WHEN to play is by time, not bytes (2026-09-26, VP9 fixture
+      # fixtures/bview/ — this Chromium has no H.264): a door at half the bitrate gets an honest
+      # "ready to play in ~N s" and no play before the computed threshold, then no freeze; twice
+      # the bitrate plays early; a mid-play slowdown brings the countdown back and resumes by
+      # itself; mediaCapabilities smooth=false shows the plain warning row.
       - name: Watch from Autonomi — plays through today's door and an upgraded one (mocked door)
         if: always()
         working-directory: e2e

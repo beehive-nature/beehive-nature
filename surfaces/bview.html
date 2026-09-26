@@ -31,6 +31,7 @@ video{display:block;width:100%;max-height:70dvh;background:#000;border-radius:14
 progress{display:block;width:100%;height:10px;margin:8px 0 0;accent-color:var(--act)}
 .got{font:14px var(--mono);color:var(--dim);margin:4px 0 0}
 .addrline{font:13px var(--mono);color:var(--dim);overflow-wrap:anywhere}
+#s-wait,#s-rough{margin:8px 0 10px}
 body[data-reg="cypherpunk"] video{border-radius:3px}
 [hidden]{display:none!important}
 .tap{margin:8px 0 0;min-height:48px;width:100%;font:600 16px var(--body);color:var(--on);background:var(--act);border:0;border-radius:12px;cursor:pointer}
@@ -89,6 +90,8 @@ document.addEventListener('DOMContentLoaded',function(){
   <p class="say" id="s-slow" data-i18n="bview.slow" hidden>Fetching from the network. The first seconds can take a while.</p>
   <progress id="pg" max="1" value="0" aria-labelledby="s-slow" hidden></progress>
   <p class="got" id="got" translate="no" dir="ltr" aria-live="off" hidden></p>
+  <p class="say" id="s-wait" data-i18n="bview.wait" hidden>Ready to play in ~{s} s. The network sends this video slower than it plays, so a head start loads first.</p>
+  <p class="say" id="s-rough" data-i18n="bview.rough" hidden>This device may not play this video smoothly.</p>
   <p class="say" id="s-fail" data-i18n="bview.fail" hidden>The network door did not answer, or this file is not a video. Try again in a few minutes.</p>
   <section id="out" aria-live="polite" hidden>
     <video id="v" controls playsinline preload="auto"></video>
@@ -138,14 +141,27 @@ document.addEventListener('DOMContentLoaded',function(){
    2. /data/public/<addr> JSON {"data":"<base64>"}: decode as bytes
       arrive; same early-paint helper. Last resort when /stream stubs.
    x0x stays off the playback path (may coordinate only).
+   When to play is decided by TIME, not bytes (2026-09-26): once moov is
+   read, bitrate = mdat bytes / duration; playback starts (and resumes
+   after running dry) only when the rest of the media, at the measured
+   rate, lands before the playhead needs it. Until then the viewer sees
+   "ready to play in ~N s". No MSE: the playing Blob is swapped for a
+   bigger one shortly before it runs dry (a brief hiccup, not a freeze).
    Three-temp progressive disclosure (register.js / data-reg): New bee =
    calm paste->Open->video; Raver = softer pulse copy; Cypherpunk =
    Autonomi-class instrument sheet — honest client/door metrics only. */
 (() => {
   const DOOR = 'https://relay.skaists.dev/ant/v1/data/public/';
   const HEAD = '{"data":"', STREAM_PROBE = 450, BLOB_WAIT = 20000;
-  const EARLY_MDAT = 256 << 10, SEGMENT = 8 << 20, STUB_CL = 128 << 10, PLAY_MIN = 12 << 20;
-  const $ = id => document.getElementById(id), says = ['s-bad', 's-slow', 's-fail'];
+  const EARLY_MDAT = 256 << 10, STUB_CL = 128 << 10;
+  // Time-based start (replaces the fixed 12 MiB PLAY_MIN, ~1-2 s of 8K): go once the rest of the
+  // media, at the measured rate with SAFETY slack, lands MARGIN seconds before the playhead needs
+  // it, with AHEAD seconds already local past the playhead. While playing, a bigger Blob replaces
+  // the running one only when the playhead is within EXTEND_LEAD (+10%) of its end and the
+  // download holds EXTEND_GAIN more seconds (the 2 MiB refreshes of 2026-09-21 thrashed decode).
+  const SAFETY = 1.15, MARGIN = 2, AHEAD = 1, EXTEND_LEAD = 1.5, EXTEND_GAIN = 2;
+  const WAIT_EN = 'Ready to play in ~{s} s. The network sends this video slower than it plays, so a head start loads first.';
+  const $ = id => document.getElementById(id), says = ['s-bad', 's-slow', 's-wait', 's-fail'];
   const say = id => says.forEach(s => $(s).hidden = s !== id);
   const parse = raw => { const m = /^\s*(?:autonomi:\/\/)?([0-9a-f]{64})\s*$/i.exec(raw || ''); return m ? m[1].toLowerCase() : null; };
   const v = $('v'), pg = $('pg');
@@ -219,19 +235,28 @@ document.addEventListener('DOMContentLoaded',function(){
   if (tap) tap.addEventListener('click', () => { v.muted = false; v.volume = 1; v.play().then(() => { tap.hidden = true; }).catch(() => {}); });
 
   let job = 0, ctl = null, blobUrl = null, playing = 0;
-  v.addEventListener('error', () => { if (playing && playing === job && pg.hidden) say('s-fail'); });
-  // Early Blob carries full moov duration but short mdat -- Chrome races currentTime to the end.
-  // Hold a real playhead and clamp while the download bar is still up.
+  // The live download (one per job): its parts, the time plan read from moov, and where the
+  // playing Blob ends. Media-element events reach it here; a newer job replaces it.
+  let feed = null;
+  const newFeed = my => (feed = {
+    my, parts: [], bytes: 0, mime: '', early: false, me: 0, plan: null, planless: false,
+    preview: false, sounded: false, stalled: false, busy: false, done: false,
+    acc: null, folded: 0, accBytes: 0, paintedAt: 0, retryAt: 0,
+  });
+  // Early Blob carries full moov duration but short mdat: past its last byte Chrome errors out
+  // or races currentTime to the end. Hold a real playhead while the download bar is still up.
   let keepAt = 0;
-  const rateClock = { t0: 0, b0: 0 };
-  const resetRate = () => { rateClock.t0 = performance.now(); rateClock.b0 = 0; };
+  const rateClock = { t0: 0, b0: 0, f0: 0, fb: 0, bps: 0 };
+  const resetRate = () => { rateClock.t0 = performance.now(); rateClock.b0 = 0; rateClock.f0 = 0; rateClock.fb = 0; rateClock.bps = 0; };
   const showGot = (bytes) => {
     const el = $('got');
     if (!el) return;
+    if (!rateClock.f0) { rateClock.f0 = performance.now(); rateClock.fb = bytes; }
     const mb = bytes / 1048576;
     const dt = (performance.now() - rateClock.t0) / 1000;
     const db = bytes - rateClock.b0;
     const mbs = dt > 0.25 ? (db / 1048576) / dt : 0;
+    if (dt > 0.25) rateClock.bps = db / dt;   // the planning rate: this same window, without the display floor below
     metrics.bytes = bytes;
     metrics.rateMbs = mbs >= 0.05 ? mbs : metrics.rateMbs;
     el.textContent = mbs >= 0.05
@@ -241,8 +266,39 @@ document.addEventListener('DOMContentLoaded',function(){
     if (dt >= 1.5) { rateClock.t0 = performance.now(); rateClock.b0 = bytes; }
     paintNerd();
   };
+  // Delivery rate for planning, bytes/s: the live MB/s meter's window above (a slow door under
+  // 0.05 MB/s is still measured; the display floor would freeze the last fast value), never above
+  // the average since the first byte, so one fast burst cannot start a playback the door then
+  // fails to feed. 0 = not measured yet (under half a second of bytes).
+  const rateBps = () => {
+    const live = rateClock.bps, dt = (performance.now() - rateClock.f0) / 1000;
+    if (!(live > 0) || !rateClock.f0 || dt < 0.5) return 0;
+    return Math.min(live, (metrics.bytes - rateClock.fb) / dt);
+  };
+  // The running Blob ran dry before the download did (this Chromium: MEDIA_ERR_DECODE at the last
+  // byte; others race currentTime to the end). Hold the last real playhead and let steer() decide,
+  // by time, when to go on — the viewer sees "ready to play in ~N s", never a silent freeze.
+  // Once the last byte is in (done) only the stall is noted: finishBinary's full Blob resumes it.
+  const dry = () => {
+    const st = feed;
+    if (!st || st.my !== job || !st.plan || !st.sounded || st.busy || pg.hidden) return false;
+    st.stalled = true;
+    try { v.pause(); } catch {}
+    if (!st.done) steer(st);
+    return true;
+  };
+  v.addEventListener('error', () => { if (dry()) return; if (playing && playing === job && pg.hidden) say('s-fail'); });
   v.addEventListener('timeupdate', () => {
     if (playing !== job) return;
+    const st = feed, t = v.currentTime;
+    if (st && st.my === job && st.plan && !pg.hidden) {
+      if (st.busy || st.stalled) return;
+      // Past what the running Blob can hold = Chrome's end-of-data yank, never the viewer's playhead.
+      if (t > mediaAt(st.plan, st.paintedAt) + 1) { try { v.currentTime = keepAt; } catch {} dry(); return; }
+      if (t > 0.05) keepAt = t;
+      if (!st.done) steer(st);
+      return;
+    }
     if (!pg.hidden && v.buffered.length) {
       const end = v.buffered.end(v.buffered.length - 1);
       if (v.currentTime >= end - 0.2) {
@@ -256,8 +312,32 @@ document.addEventListener('DOMContentLoaded',function(){
   });
   v.addEventListener('ended', () => {
     if (playing !== job || pg.hidden) return;
+    const st = feed;
+    if (st && st.my === job && st.plan) {
+      if (st.paintedAt >= st.plan.m1) return;   // every media byte was in this Blob: a real end
+      try { v.currentTime = keepAt; } catch {}
+      dry();
+      return;
+    }
     try { v.pause(); if (keepAt > 0) v.currentTime = keepAt; } catch {}
   });
+  // The viewer pressed play themselves (on the first-frame preview, or during a wait): honour it.
+  v.addEventListener('play', () => {
+    const st = feed;
+    if (!st || st.my !== job || !st.preview || st.busy || st.done) return;
+    st.sounded = true;
+    if (!$('s-wait').hidden) say(null);
+    if (st.stalled) { st.stalled = false; extend(st, keepAt, true); }
+  });
+  // "Ready to play in ~N s": the number is live, the sentence is the corpus's (bview.wait, {s}).
+  let waitS = 0;
+  const paintWait = () => {
+    if (!waitS) return;
+    const t = window.BNRLanguage && typeof window.BNRLanguage.text === 'function' ? window.BNRLanguage.text('bview.wait', WAIT_EN) : WAIT_EN;
+    $('s-wait').textContent = t.replace('{s}', waitS);
+  };
+  const showWait = w => { waitS = Math.max(1, Math.ceil(w)); paintWait(); say('s-wait'); };
+  document.addEventListener('blang', paintWait);
   const b64 = typeof Uint8Array.fromBase64 === 'function' ? s => Uint8Array.fromBase64(s)
     : s => { const t = atob(s), u = new Uint8Array(t.length); for (let i = 0; i < t.length; i++) u[i] = t.charCodeAt(i); return u; };
   const kind = u => u.length < 8 ? '' : u[4] === 0x66 && u[5] === 0x74 && u[6] === 0x79 && u[7] === 0x70 ? 'video/mp4'
@@ -274,6 +354,102 @@ document.addEventListener('DOMContentLoaded',function(){
     }
     return 0;
   };
+  // ---- Just enough ISO-BMFF to plan playback by time: duration (mvhd), where the media bytes
+  // sit (the first mdat after moov), and codec / size / frame rate of the video track for
+  // mediaCapabilities. Nothing here throws into the page; odd files get no plan (null).
+  const u16 = (u, i) => u[i] << 8 | u[i + 1];
+  const u64 = (u, i) => u32(u, i) * 4294967296 + u32(u, i + 4);
+  const cc4 = (u, i) => String.fromCharCode(u[i], u[i + 1], u[i + 2], u[i + 3]);
+  function* boxes(u, s, e) {
+    while (s + 8 <= e) {
+      let sz = u32(u, s), h = 8;
+      if (sz === 1) { if (s + 16 > e) return; sz = u64(u, s + 8); h = 16; }
+      else if (sz === 0) sz = e - s;
+      if (sz < h || s + sz > e) return;
+      yield { t: cc4(u, s + 4), b: s + h, e: s + sz };
+      s += sz;
+    }
+  }
+  const kid = (u, box, t) => { if (box) for (const k of boxes(u, box.b, box.e)) if (k.t === t) return k; return null; };
+  // mvhd / mdhd: [timescale, duration] for version 0 or 1.
+  const clock = (u, box) => u[box.b] === 1 ? [u32(u, box.b + 20), u64(u, box.b + 24)] : [u32(u, box.b + 12), u32(u, box.b + 16)];
+  const hx = n => n.toString(16).toUpperCase().padStart(2, '0'), d2 = n => String(n).padStart(2, '0');
+  // RFC 6381 codec string from the sample entry's config box; the bare fourcc when there is none.
+  const codecOf = (u, entry) => {
+    let c = null;
+    for (const k of boxes(u, entry.b + 78, entry.e)) if (/^(avcC|hvcC|vpcC|av1C)$/.test(k.t)) { c = k; break; }
+    const t = entry.t, b = c && c.b;
+    if (!c) return t;
+    if (c.t === 'avcC') return t + '.' + hx(u[b + 1]) + hx(u[b + 2]) + hx(u[b + 3]);
+    if (c.t === 'vpcC') return t + '.' + d2(u[b + 4]) + '.' + d2(u[b + 5]) + '.' + d2(u[b + 6] >> 4);
+    if (c.t === 'av1C') { const p = u[b + 1], q = u[b + 2]; return t + '.' + (p >> 5) + '.' + d2(p & 31) + (q & 128 ? 'H' : 'M') + '.' + d2(q & 64 ? (q & 32 ? 12 : 10) : 8); }
+    const p = u[b + 1]; let f = u32(u, b + 2), r = 0;   // hvcC: compatibility flags are written bit-reversed
+    for (let i = 0; i < 32; i++) { r = r * 2 + (f & 1); f >>>= 1; }
+    const k = [...u.subarray(b + 6, b + 12)]; while (k.length && !k[k.length - 1]) k.pop();
+    return [t, ['', 'A', 'B', 'C'][p >> 6] + (p & 31), r.toString(16), (p & 32 ? 'H' : 'L') + u[b + 12], ...k.map(x => x.toString(16))].join('.');
+  };
+  // u holds the whole moov (ending at me) plus the header of what follows it.
+  const planOf = (u, me) => {
+    try {
+      let moov = null;
+      for (const k of boxes(u, 0, me)) if (k.t === 'moov') moov = k;
+      const mvhd = kid(u, moov, 'mvhd');
+      if (!mvhd) return null;
+      const [ts, du] = clock(u, mvhd);
+      const pl = { dur: ts ? du / ts : 0, m0: 0, m1: 0, codec: '', w: 0, h: 0, fps: 0 };
+      if (!(pl.dur > 0)) return null;
+      // Media span: the first mdat after moov (a faststart file). moof = fragmented: no plan.
+      for (let s = me; s + 16 <= u.length;) {
+        let sz = u32(u, s), h = 8; const t = cc4(u, s + 4);
+        if (sz === 1) { sz = u64(u, s + 8); h = 16; }
+        if (t === 'mdat') { if (sz > h) { pl.m0 = s + h; pl.m1 = s + sz; } break; }
+        if (t === 'moof' || sz < 8) break;
+        s += sz;
+      }
+      if (!(pl.m1 > pl.m0)) return null;
+      for (const trak of boxes(u, moov.b, moov.e)) {
+        if (trak.t !== 'trak') continue;
+        const mdia = kid(u, trak, 'mdia'), hdlr = kid(u, mdia, 'hdlr');
+        if (!hdlr || cc4(u, hdlr.b + 8) !== 'vide') continue;
+        const stbl = kid(u, kid(u, mdia, 'minf'), 'stbl'), stsd = kid(u, stbl, 'stsd');
+        const entry = stsd && boxes(u, stsd.b + 8, stsd.e).next().value;
+        if (!entry) break;
+        pl.codec = codecOf(u, entry); pl.w = u16(u, entry.b + 24); pl.h = u16(u, entry.b + 26);
+        const mdhd = kid(u, mdia, 'mdhd'), stsz = kid(u, stbl, 'stsz');
+        if (mdhd && stsz) { const [t2, d] = clock(u, mdhd); if (t2 && d) pl.fps = u32(u, stsz.b + 8) / (d / t2); }
+        break;
+      }
+      return pl;
+    } catch { return null; }
+  };
+  // Even-bitrate map between media bytes and seconds (a VBR file drifts; SAFETY + MARGIN and the
+  // run-dry path absorb it). mediaAt: seconds playable from the first n bytes; bytesAt: inverse.
+  const mediaAt = (pl, n) => pl.dur * Math.min(1, Math.max(0, (n - pl.m0) / (pl.m1 - pl.m0)));
+  const bytesAt = (pl, t) => pl.m0 + (pl.m1 - pl.m0) * Math.min(1, Math.max(0, t / pl.dur));
+  // Seconds to wait before playing from `at` without catching the download: the rest must land,
+  // at the measured rate, no later than the playhead needs it, and `ahead` seconds past `at` must
+  // already be local. 0 = go; null = rate not known yet.
+  const waitFor = (pl, bytes, at, ahead) => {
+    const left = pl.m1 - bytes;
+    if (left <= 0) return 0;
+    const r = rateBps();
+    if (!r) return null;
+    const dl = left / r;
+    return Math.min(dl, Math.max(0, (bytesAt(pl, at + ahead) - bytes) / r, dl - (pl.dur - at - MARGIN) / SAFETY));
+  };
+  // Ask the device as soon as moov names the codec: can it decode this size and rate smoothly?
+  // A plain row when it says no; silence when it cannot answer (no claim either way).
+  async function checkSmooth(pl, my) {
+    const mc = navigator.mediaCapabilities;
+    if (!pl.codec || !(pl.w > 0 && pl.h > 0 && pl.fps > 0) || !mc || typeof mc.decodingInfo !== 'function') return;
+    try {
+      const r = await mc.decodingInfo({ type: 'file', video: {
+        contentType: 'video/mp4; codecs="' + pl.codec + '"', width: pl.w, height: pl.h,
+        bitrate: Math.max(1, Math.round(8 * (pl.m1 - pl.m0) / pl.dur)), framerate: +pl.fps.toFixed(3),
+      } });
+      if (my === job && r && r.smooth === false) $('s-rough').hidden = false;
+    } catch {}
+  }
   let frameGen = 0;
   const paintSrc = (assign, ms) => {
     frameGen++;
@@ -306,26 +482,90 @@ document.addEventListener('DOMContentLoaded',function(){
       paintNerd();
     }
   };
-  // Shared early paint: contiguous snap once moov + EARLY_MDAT are in hand.
+  // One growing Blob per download: each fold references the previous Blob and copies only the
+  // parts that arrived since, so a swap never re-copies the whole file.
+  const snap = st => {
+    if (!st.acc || st.folded < st.parts.length) {
+      st.acc = new Blob(st.acc ? [st.acc, ...st.parts.slice(st.folded)] : st.parts, { type: st.mime });
+      st.folded = st.parts.length; st.accBytes = st.bytes;
+    }
+    return st.acc;
+  };
+  // Swap in everything downloaded so far and carry on from `at` (playing again if `go`).
+  async function extend(st, at, go) {
+    st.busy = true;
+    try {
+      const blob = snap(st), n = st.accBytes;
+      const ok = await paintBlob(blob, BLOB_WAIT);
+      if (st.my !== job) return false;
+      if (!ok) { st.retryAt = bytesAt(st.plan, mediaAt(st.plan, st.bytes) + EXTEND_GAIN); return false; }
+      st.paintedAt = n;
+      try { v.currentTime = at; } catch {}
+      keepAt = at;
+      if (go) { try { await v.play(); } catch {} }
+      return true;
+    } finally { st.busy = false; }
+  }
+  // Time-based playback, called per chunk and from the media element's own events: start, and
+  // resume after running dry, only once waitFor() says the download will stay ahead; while
+  // playing, extend the Blob shortly before the playhead reaches its end.
+  async function steer(st) {
+    const pl = st.plan, my = st.my;
+    if (my !== job || !pl || !st.preview || st.busy || st.done || st.bytes < st.retryAt) return;
+    if (!st.sounded || st.stalled) {
+      // A resume after running dry wants a longer run of local media, so a tail that drifts
+      // (VBR, interleave) cannot flicker play/stop/play.
+      const w = waitFor(pl, st.bytes, keepAt, st.stalled ? AHEAD + EXTEND_GAIN : AHEAD);
+      if (w === null) return;                  // no rate yet: the bar and MB counter speak
+      if (w > 0) { showWait(w); return; }
+      if (!(await extend(st, keepAt, st.sounded))) return;
+      st.stalled = false; waitS = 0;
+      if (!st.sounded) { st.sounded = true; playing = my; say(null); await goSound(my); }
+      else say(null);
+      return;
+    }
+    if (v.paused || st.paintedAt >= pl.m1) return;   // the viewer's own pause; or nothing left to add
+    // Near the (estimated, ~10% optimistic) end of the running Blob, swap once the download holds
+    // EXTEND_GAIN more seconds -- or, closer in, at least what is left to play of this Blob (0.5 s
+    // floor), so a download only just ahead is followed instead of running dry.
+    const edge = mediaAt(pl, st.paintedAt), left = edge - 0.1 * edge - v.currentTime;
+    if (left > EXTEND_LEAD) return;
+    if (st.bytes < pl.m1 && mediaAt(pl, st.bytes) - edge < Math.min(EXTEND_GAIN, Math.max(0.5, left))) return;
+    await extend(st, v.currentTime, true);
+  }
+  // Per chunk: find moov, read the time plan, paint the first frame, then steer() by time.
   async function flushEarlyPaint(parts, bytes, state, my) {
-    if (my !== job || bytes < 32) return;
-    const prefix = prefixOf(parts, bytes, Math.min(bytes, (512 << 10) + EARLY_MDAT));
-    const me = moovEnd(prefix);
-    if (me <= 0 || bytes < me + EARLY_MDAT) return;
-    state.mime = kind(prefix);
-    if (!state.mime) return;
+    state.parts = parts; state.bytes = bytes;
+    if (my !== job || bytes < 32 || state.busy || state.me < 0) return;
+    if (!state.me) {
+      const head = prefixOf(parts, bytes, Math.min(bytes, 1 << 20));
+      const me = moovEnd(head);
+      // Broken, or moov not in the first MiB (a moov-last upload): no early paint; the whole file
+      // plays when it has arrived (finishBinary).
+      if (me < 0 || (!me && bytes >= 1 << 20)) { state.me = -1; return; }
+      if (!me) return;
+      state.mime = kind(head);
+      state.me = state.mime ? me : -1;
+      if (!state.mime) return;
+    }
+    if (bytes < state.me + EARLY_MDAT) return;
+    if (!state.plan && !state.planless) {
+      state.plan = planOf(prefixOf(parts, bytes, state.me + EARLY_MDAT), state.me);
+      if (state.plan) checkSmooth(state.plan, my); else state.planless = true;
+    }
 
     // Phase A -- first frame only (paused at 0). Never autoplay a short-mdat Blob (moov duration yank).
     if (!state.preview) {
-      const snap = prefixOf(parts, bytes, bytes);
-      const ok = await paintBlob(new Blob([snap], { type: state.mime }), BLOB_WAIT);
+      state.busy = true;
+      let ok = false;
+      try { ok = await paintBlob(snap(state), BLOB_WAIT); } finally { state.busy = false; }
       if (!(my === job && ok && v.videoWidth > 0)) {
         if (my === job) { frameGen++; v.removeAttribute('src'); v.load(); }
         return;
       }
       state.preview = true;
       state.early = true;
-      state.paintedAt = bytes;
+      state.paintedAt = state.accBytes;
       try { v.pause(); v.currentTime = 0; } catch {}
       keepAt = 0;
       playing = my;
@@ -334,43 +574,48 @@ document.addEventListener('DOMContentLoaded',function(){
       return;
     }
 
-    // Phase B -- one playable Blob once enough mdat is local, then leave it alone until finishBinary.
-    if (state.sounded || bytes < PLAY_MIN) return;
-    const snap = prefixOf(parts, bytes, bytes);
-    const ok = await paintBlob(new Blob([snap], { type: state.mime }), BLOB_WAIT);
-    if (!(my === job && ok && v.videoWidth > 0)) return;
-    state.paintedAt = bytes;
-    state.sounded = true;
-    keepAt = 0;
-    try { v.currentTime = 0; } catch {}
-    playing = my; say(null);
-    await goSound(my);
+    // Phase B -- by time, not bytes. No plan (no duration, fragmented, odd layout): the first frame
+    // stays up and the whole file plays when it has arrived.
+    if (state.plan) await steer(state);
   }
   async function finishBinary(parts, bytes, state, my, a) {
+    state.done = true;
+    state.parts = parts; state.bytes = bytes;
     if (!state.mime) state.mime = kind(prefixOf(parts, bytes, Math.min(bytes, 64)));
     // Not a video -> false so the JSON envelope path can still try.
     // Valid video bytes from /stream -> true even if this Chromium cannot decode
     // (do not fall through and re-download the same file as base64).
     if (!state.mime) return false;
     if (my !== job) return true;
-    // Prefer a held playhead only if it is still in the early seconds -- end-skips are discarded.
-    let t0 = keepAt || 0;
-    if (t0 > 15) t0 = 0;
-    const full = new Blob(parts, { type: state.mime });
+    // A swap already in flight finishes first; two paints on one element cancel each other.
+    for (const until = performance.now() + BLOB_WAIT; state.busy && performance.now() < until;) await new Promise(r => setTimeout(r, 50));
+    if (my !== job) return true;
+    const full = snap(state);
     await cachePut(a, full);
     metrics.bytes = bytes;
     metrics.doneMs = metrics.t0 ? performance.now() - metrics.t0 : null;
     metrics.sha = await hashBlob(full);
     paintNerd();
+    if (my !== job) return true;   // a new address arrived while this one was hashed
+    // Resume where the viewer is NOW (hashing a large file takes seconds of playback). With a time
+    // plan keepAt only ever holds a playhead the running Blob could reach; without one, a playhead
+    // past 15 s is an end-of-data yank, discarded.
+    let t0 = keepAt || 0;
+    if (!state.plan && t0 > 15) t0 = 0;
     if (playing === my || state.preview) {
-      const ok = await paintBlob(full, BLOB_WAIT);
+      const resume = state.stalled || !v.paused;   // ran dry, or playing: go on; the viewer's own pause stays
+      state.busy = true;
+      let ok = false;
+      try { ok = await paintBlob(full, BLOB_WAIT); } finally { state.busy = false; }
+      if (my !== job) return true;
       if (ok) {
+        state.paintedAt = bytes; state.stalled = false;
         try { v.currentTime = t0; } catch {}
         keepAt = t0;
         playing = my; say(null);
         markFirstFrame();
         if (!state.sounded) { state.sounded = true; await goSound(my); }
-        else { try { await v.play(); } catch {} }
+        else if (resume) { try { await v.play(); } catch {} }
       } else say(null);
       return true;
     }
@@ -380,10 +625,9 @@ document.addEventListener('DOMContentLoaded',function(){
   }
   // Consume an already-open /stream body as binary progressive Blobs.
   async function readBinaryStream(rd, seed, total, signal, my, a) {
-    const parts = [];
-    let bytes = 0, held = 0;
-    if (seed && seed.length) { parts.push(seed); bytes = seed.length; held = seed.length; }
-    const state = { early: false, mime: '' };
+    const state = newFeed(my), parts = state.parts;
+    let bytes = 0;
+    if (seed && seed.length) { parts.push(seed); bytes = seed.length; }
     if (bytes && my === job) {
       showGot(bytes);
       if (total) pg.value = bytes / total;
@@ -395,8 +639,6 @@ document.addEventListener('DOMContentLoaded',function(){
       if (done) break;
       parts.push(value);
       bytes += value.length;
-      held += value.length;
-      if (held >= SEGMENT) held = 0;
       if (my === job) {
         if (total) pg.value = bytes / total;
         showGot(bytes);
@@ -470,8 +712,8 @@ document.addEventListener('DOMContentLoaded',function(){
     paintNerd();
     if (!r.ok || !r.body) throw new Error('door answered ' + r.status);
     const total = +r.headers.get('content-length') || 0, rd = r.body.getReader(), td = new TextDecoder();
-    let parts = [], held = 0, head = new Uint8Array(0), got = 0, bytes = 0, text = '', started = false, tail = null;
-    const state = { early: false, mime: '' };
+    const state = newFeed(my), parts = state.parts;
+    let head = new Uint8Array(0), got = 0, bytes = 0, text = '', started = false, tail = null;
     if (!total) pg.removeAttribute('value');
     for (;;) {
       const { done, value } = await rd.read();
@@ -495,8 +737,7 @@ document.addEventListener('DOMContentLoaded',function(){
           const h = new Uint8Array(Math.min(64, head.length + part.length));
           h.set(head); h.set(part.subarray(0, h.length - head.length), head.length); head = h;
         }
-        parts.push(part); held += part.length; bytes += part.length;
-        if (held >= SEGMENT) held = 0;
+        parts.push(part); bytes += part.length;
         if (my === job) showGot(bytes);
         await flushEarlyPaint(parts, bytes, state, my);
       }
@@ -516,6 +757,7 @@ document.addEventListener('DOMContentLoaded',function(){
     if (blobUrl) { URL.revokeObjectURL(blobUrl); blobUrl = null; }
     const busy = on => { pg.hidden = $('got').hidden = !on; };
     busy(false); pg.value = 0; $('got').textContent = ''; playing = 0; keepAt = 0; resetRate();
+    feed = null; waitS = 0; $('s-rough').hidden = true;
     resetMetrics(); paintNerd();
     if (!a) { $('out').hidden = true; v.removeAttribute('src'); v.load(); say('s-bad'); return; }
     metrics.addr = a; metrics.t0 = performance.now();
