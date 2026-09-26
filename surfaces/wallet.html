@@ -286,7 +286,8 @@ body[data-reg="cypherpunk"] h2{letter-spacing:.08em}
 :is(body[data-reg="bee"],body[data-reg="raver"]):not([data-wl-view="all"]):not([data-wl-view="keep"]) main>section[data-wl-task="keep"],
 :is(body[data-reg="bee"],body[data-reg="raver"]):not([data-wl-view="all"]):not([data-wl-view="key"]) main>section[data-wl-task="key"],
 :is(body[data-reg="bee"],body[data-reg="raver"]):not([data-wl-view="all"]):not([data-wl-view="proof"]) main>section[data-wl-task="proof"]{display:none!important}
-body:not([data-wl-view="home"]) :is(#wl-bee,#wl-rave){display:none!important}
+body:not([data-wl-view="home"]) #wl-bee,body:not([data-wl-view="home"]):not([data-wl-view="have"]) #wl-rave,
+body:is([data-wl-view="home"],[data-wl-view="have"]) #wl-deck{display:none!important}
 body[data-wl-view="home"] #wl-bar{display:none!important}
 :is(body[data-reg="bee"],body[data-reg="raver"]):not([data-wl-view="home"]) main>:is(.crumbs,header){display:none}
 /* the phone fold (form-kill law above) orders the pipeline: in cypherpunk, where
@@ -300,11 +301,14 @@ body[data-wl-view="home"] #wl-bar{display:none!important}
 /* 44px is the floor for anything that takes a press, in every register — the
    sections carried 33 inline controls cut to 26–34px */
 body[data-reg] main :is(button,select){min-height:44px!important}
+body[data-reg] main section summary{min-height:44px;box-sizing:border-box}
 /* each register's own blocks paint with the register, before register.js mounts */
 #wl-bee,#wl-bar,#wl-dock,#wl-rave,#wl-cy{display:none}
 body[data-reg="bee"] #wl-bee,body[data-reg="raver"] #wl-rave,body[data-reg="cypherpunk"] #wl-cy{display:block}
 body[data-reg="bee"] #wl-bar,body[data-reg="raver"] #wl-dock{display:flex}
 [data-wl-card][data-read="true"] .wl-un,[data-wl-card]:not([data-read="true"]) .wl-fig{display:none}
+.wl-stale{display:none} [data-wl-card][data-read="true"][data-err="true"] .wl-stale{display:block}
+[data-wl-card][data-err="true"] .wl-fig{opacity:.62}
 
 /* ── new bee: the matriarch's wallet. A home list, one task at a time, a
    clear way back. Reading text 16px, labels 14px, rows 64px. ── */
@@ -352,7 +356,14 @@ body[data-reg="bee"] main>section{font-size:16px;line-height:1.65;padding:22px 2
 body[data-reg="bee"] main>section>h2{font-size:21px;letter-spacing:-.005em;margin-bottom:12px}
 body[data-reg="bee"] main>section .law{font-size:16px;line-height:1.7}
 body[data-reg="bee"] main>section :is(.cd,.stat,.kd,.kp,.kt,.cc,.cv,.cx,.k,.lline,.lcap,.badge,.llabel,.lbadge,pre,small,label){font-size:14px}
-body[data-reg="bee"] main>section :is([style*="font-size:9"],[style*="font-size:10"],[style*="font-size:11"],[style*="font-size:12"],[style*="font-size:13"]){font-size:14px!important}
+body[data-reg="bee"] main>section :is([style*="font-size:9"],[style*="font-size:10"],[style*="font-size:11"],[style*="font-size:12"],[style*="font-size:13"],[style*="font-size: 9"],[style*="font-size: 10"],[style*="font-size: 11"],[style*="font-size: 12"],[style*="font-size: 13"]){font-size:14px!important}
+body[data-reg="bee"] #fund-sec .fund-launch{font-size:16px}
+body[data-reg="bee"] main section details>summary{font-size:14px}
+body[data-reg="bee"] #kc-sec svg text{font-size:14px}
+body[data-reg="bee"] #ch-vaulta .cn .badge{font-size:14px}
+body[data-reg="bee"] main>section button{font-size:14px!important}
+body[data-reg="bee"] main>section .ldot{font-size:14px}
+body[data-reg="bee"] .stat.ok{color:#2e6b1e} body[data-reg="bee"] .chain.connected{border-color:#2e6b1e}
 /* the sections' own inline colours were drawn for the black ground; on paper
    each hue steps darker inside its OWN ramp (a semantic colour is never
    repainted to another hue): amber, ai cyan, honey, leaf, sovereign violet */
@@ -373,8 +384,10 @@ body[data-reg="bee"] #fund-sec .fund-launch{background:var(--well);border-color:
 body[data-reg="bee"] main>section :is(input:not([type="checkbox"]):not([type="radio"]),select,textarea){background:var(--well)!important;color:var(--ink)!important;border-color:var(--line2)!important}
 /* one filled action per view: in bee the sections' many "gold" buttons stand
    outlined until pressed, so no task opens on a wall of primaries */
-body[data-reg="bee"] main>section button.gold{background:var(--panel);color:var(--reg-primary);border:1.5px solid var(--reg-primary)}
-body[data-reg="bee"] main>section button.gold:hover{background:var(--reg-primary);color:var(--reg-on-primary)}
+body[data-reg] main>section button.gold{background:transparent;color:var(--reg-primary);border:1.5px solid var(--reg-primary)}
+body[data-reg] main>section button.gold:hover{background:var(--reg-primary);color:var(--reg-on-primary)}
+/* the fund launcher is a press too: the 44px floor holds for links that act as buttons */
+body[data-reg] #fund-sec .fund-launch{min-height:44px;box-sizing:border-box}
 body[data-reg="bee"]:not([data-wl-view="home"]) main>section[data-wl-task]{animation:wl-push .26s ease-out both}
 @keyframes wl-push{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 
@@ -383,6 +396,31 @@ body[data-reg="bee"]:not([data-wl-view="home"]) main>section[data-wl-task]{anima
 body[data-reg="raver"] main{max-width:860px}
 body[data-reg="raver"] header p{font-size:15px;line-height:1.7}
 #wl-rave{margin:4px 0 8px}
+#wl-deck{place-items:center;margin:6px 0 2px}
+body[data-reg="raver"] #wl-deck{display:grid}
+.wld-orb{position:relative;display:grid;place-items:center;width:150px;height:150px;border-radius:50%;
+  background:radial-gradient(circle at 50% 40%,#d655bb55,#171028 62%,#06110c00 72%);box-shadow:0 0 0 1px #9c6fd633,0 0 60px #d655bb33;animation:wlr-arrive .52s cubic-bezier(.2,.8,.2,1) both}
+.wld-orb::before,.wld-orb::after{content:"";position:absolute;inset:-14px;border-radius:50%;border:1px dashed #9c6fd666;animation:wlr-drift 60s linear infinite}
+.wld-orb::after{inset:-30px;border-style:dotted;border-color:#45c2dc44;animation-duration:90s;animation-direction:reverse}
+.wld-orb span{display:none;font-size:62px;line-height:1;filter:drop-shadow(0 0 18px #d655bb)}
+body[data-wl-view="move"] .wld-orb [data-wl-for="move"],body[data-wl-view="add"] .wld-orb [data-wl-for="add"],
+body[data-wl-view="keep"] .wld-orb [data-wl-for="keep"],body[data-wl-view="key"] .wld-orb [data-wl-for="key"],
+body[data-wl-view="proof"] .wld-orb [data-wl-for="proof"],body[data-wl-view="all"] .wld-orb [data-wl-for="all"]{display:block}
+/* the keychain ring: numerals in the art, its words in a key beneath (no words
+   inside art); its decorative gold becomes sovereign (honey is b's colour only) */
+.ring-n{font:600 13px/1 var(--reg-font-body,ui-monospace,monospace);fill:var(--dim);text-anchor:middle}
+body[data-reg="bee"] .ring-n{font-size:14px}
+.ring-key{list-style:none;margin:6px 0 0;padding:0;display:grid;gap:2px;font:12px/1.5 ui-monospace,'Cascadia Mono',Consolas,monospace;color:var(--dim)}
+.ring-key b{display:inline-block;min-width:1.4em;color:var(--ink)}
+body[data-reg="bee"] .ring-key{font-size:14px}
+.ring-wrap>svg+.ring-key{flex:0 0 auto}
+#kc-sec svg [stroke="#FFD700"]{stroke:#9c6fd6} #kc-sec svg [fill="#FFD700"]{fill:#9c6fd6}
+body[data-reg="bee"] #kc-sec svg [stroke="#FFD700"]{stroke:#6e3fb8} body[data-reg="bee"] #kc-sec svg [fill="#FFD700"]{fill:#6e3fb8}
+.wlb-un a{display:inline-flex;align-items:center;min-height:44px;font-size:16px}
+.wlb-stale{font-size:14px;color:var(--dim);margin-top:4px}
+.wlr-caps .wl-stale{font-size:13px;color:#b7a8f7}
+.wlr-caps li[data-err="true"]{box-shadow:0 0 0 1px #b7a8f766}
+.cy-idx li[hidden]{display:none}
 .wlr-art{display:block;width:100%;max-width:520px;height:auto;margin:0 auto}
 .wlr-orbit{fill:none;stroke:#9c6fd6;stroke-opacity:.45;stroke-width:1.2;stroke-dasharray:2 7;transform-origin:180px 150px;animation:wlr-drift 90s linear infinite}
 .wlr-soul{animation:wlr-breathe 5s ease-in-out infinite}
@@ -466,8 +504,16 @@ body[data-reg="cypherpunk"] main>section>h2[data-wl-n]::after{content:"§" attr(
 (function(){var r='bee';try{var v=localStorage.getItem('bregister');if(v==='raver'||v==='cypherpunk')r=v;}catch(e){}
 document.body.setAttribute('data-reg',r);document.documentElement.setAttribute('data-bee-light',String(r==='bee'));
 var w='home';try{w=sessionStorage.getItem('wl.view')||'home';}catch(e){}
-if(/[?&]compose=/.test(location.search))w='proof';else if(location.hash.indexOf('#qr=')===0)w='key';
+/* the section-to-task map, stated here too so a #section deep link paints in its
+   own task at FIRST paint; the gate proves it equals the data-wl-task attributes */
+var T={'connect-sec':'have','kc-sec':'key','vault-sec':'key','forge-sec':'key','bal-sec':'have','bridge-sec':'key','acct-sec':'key','pay-sec':'move','bpay-sec':'keep','insc-sec':'keep','voucher-sec':'add','receipts-sec':'proof','fund-sec':'add','peer-sec':'add','arw-sec':'keep','composer-sec':'proof','outbox-sec':'move','matrix-sec':'proof','summary-sec':'have'};
+window.WL_TASK_OF=T;
+if(/[?&]compose=/.test(location.search))w='proof';else if(location.hash.indexOf('#qr=')===0)w='key';else if(T[location.hash.slice(1)])w=T[location.hash.slice(1)];
 document.body.setAttribute('data-wl-view',/^(home|all|have|move|add|keep|key|proof)$/.test(w)?w:'home');})();
+/* a message that sends the reader to another part of the wallet NAMES it as a
+   link, never by direction ("above", "below"): bee and raver show one task at a
+   time, so there is often nothing above or below. Built as DOM, never HTML. */
+window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(function(p){if(typeof p==='string')el.appendChild(document.createTextNode(p));else{var a=document.createElement('a');a.href='#'+p.to;a.textContent=p.t;el.appendChild(a);}});};
 </script>
 <main>
 <nav class="crumbs" aria-label="you are here">
@@ -492,10 +538,11 @@ document.body.setAttribute('data-wl-view',/^(home|all|have|move|add|keep|key|pro
      MIRROR of a section's own node (data-wl-src), never a second fetch: the
      numbers cannot differ between registers because there is only one of each. -->
 <div id="wl-bee" data-reg="bee">
-  <div class="wlb-card" data-wl-card>
+  <div class="wlb-card" data-wl-card data-wl-stat="v-stat">
     <div class="wlb-cap" data-i18n="wl.bee.fig">on Vaulta, your home chain</div>
     <div class="wlb-fig wl-fig" data-wl-src="v-bal" data-wl-value></div>
-    <div class="wlb-un wl-un"><b data-i18n="wl.bee.unread">not read yet</b><span data-wl-src="v-stat"></span></div>
+    <div class="wlb-un wl-un"><b data-i18n="wl.bee.unread">not read yet</b><a href="#connect-sec" data-i18n="wl.bee.connect">connect your name or account to read it</a></div>
+    <div class="wlb-stale wl-stale" data-i18n="wl.bee.stale">the last read failed, so this figure may be out of date</div>
   </div>
   <h2 class="wlb-q" data-i18n="wl.bee.ask">what would you like to do?</h2>
   <div class="wlb-list">
@@ -524,6 +571,9 @@ document.body.setAttribute('data-wl-view',/^(home|all|have|move|add|keep|key|pro
   <button type="button" data-wl-go="proof" aria-pressed="false"><span class="g" aria-hidden="true">🗺</span><span class="w" data-i18n="wl.rv.proof">proof</span></button>
   <button type="button" data-wl-go="all" aria-pressed="false"><span class="g" aria-hidden="true">∞</span><span class="w" data-i18n="wl.rv.all">all</span></button>
 </nav>
+<div id="wl-deck" data-reg="raver" aria-hidden="true">
+  <div class="wld-orb"><span data-wl-for="move">💸</span><span data-wl-for="add">💳</span><span data-wl-for="keep">📡</span><span data-wl-for="key">🗝</span><span data-wl-for="proof">🗺</span><span data-wl-for="all">∞</span></div>
+</div>
 <div id="wl-rave" data-reg="raver">
   <!-- the art carries glyphs only; every word is in the captions below it -->
   <svg class="wlr-art" viewBox="0 0 360 300" aria-hidden="true" focusable="false">
@@ -546,11 +596,11 @@ document.body.setAttribute('data-wl-view',/^(home|all|have|move|add|keep|key|pro
     <g class="wlr-node" data-wl-rail="ar-bal" transform="translate(56.4 119.1)"><circle r="21"/><text y="7" text-anchor="middle">🕸</text></g>
   </svg>
   <ul class="wlr-caps">
-    <li data-wl-card><span class="g" aria-hidden="true">⚓</span><b>Vaulta</b><span class="wl-fig" data-wl-src="v-bal" data-wl-value></span><span class="wl-un" data-i18n="wl.rv.wait">waiting</span></li>
-    <li data-wl-card><span class="g" aria-hidden="true">🐝</span><b>Hive</b><span class="wl-fig" data-wl-src="h-bal" data-wl-value></span><span class="wl-un" data-i18n="wl.rv.wait">waiting</span></li>
-    <li data-wl-card><span class="g" aria-hidden="true">🔵</span><b>Arbitrum</b><span class="wl-fig" data-wl-src="a-bal" data-wl-value></span><span class="wl-un" data-i18n="wl.rv.wait">waiting</span></li>
-    <li data-wl-card><span class="g" aria-hidden="true">🐜</span><b>Autonomi</b><span class="wl-fig" data-wl-src="ant-bal" data-wl-value></span><span class="wl-un" data-i18n="wl.rv.wait">waiting</span></li>
-    <li data-wl-card><span class="g" aria-hidden="true">🕸</span><b>Arweave</b><span class="wl-fig" data-wl-src="ar-bal" data-wl-value></span><span class="wl-un" data-i18n="wl.rv.wait">waiting</span></li>
+    <li data-wl-card data-wl-stat="v-stat"><span class="g" aria-hidden="true">⚓</span><b>Vaulta</b><span class="wl-fig" data-wl-src="v-bal" data-wl-value></span><span class="wl-un" data-i18n="wl.rv.wait">waiting</span><span class="wl-stale" data-i18n="wl.rv.stale">last read failed</span></li>
+    <li data-wl-card data-wl-stat="h-stat"><span class="g" aria-hidden="true">🐝</span><b>Hive</b><span class="wl-fig" data-wl-src="h-bal" data-wl-value></span><span class="wl-un" data-i18n="wl.rv.wait">waiting</span><span class="wl-stale" data-i18n="wl.rv.stale">last read failed</span></li>
+    <li data-wl-card data-wl-stat="a-stat"><span class="g" aria-hidden="true">🔵</span><b>Arbitrum</b><span class="wl-fig" data-wl-src="a-bal" data-wl-value></span><span class="wl-un" data-i18n="wl.rv.wait">waiting</span><span class="wl-stale" data-i18n="wl.rv.stale">last read failed</span></li>
+    <li data-wl-card data-wl-stat="ant-stat"><span class="g" aria-hidden="true">🐜</span><b>Autonomi</b><span class="wl-fig" data-wl-src="ant-bal" data-wl-value></span><span class="wl-un" data-i18n="wl.rv.wait">waiting</span><span class="wl-stale" data-i18n="wl.rv.stale">last read failed</span></li>
+    <li data-wl-card data-wl-stat="ar-stat"><span class="g" aria-hidden="true">🕸</span><b>Arweave</b><span class="wl-fig" data-wl-src="ar-bal" data-wl-value></span><span class="wl-un" data-i18n="wl.rv.wait">waiting</span><span class="wl-stale" data-i18n="wl.rv.stale">last read failed</span></li>
   </ul>
   <p class="wlr-hint" data-i18n="wl.rv.hint">lit means read. the glyphs above open each part of the wallet.</p>
 </div>
@@ -560,11 +610,11 @@ document.body.setAttribute('data-wl-view',/^(home|all|have|move|add|keep|key|pro
   <table class="cy-t">
     <thead><tr><th data-i18n="wl.cy.rail">rail</th><th data-i18n="wl.cy.value">value</th><th data-i18n="wl.cy.status">status</th></tr></thead>
     <tbody>
-      <tr data-wl-card><td>Vaulta</td><td><span class="wl-fig" data-wl-src="v-bal" data-wl-value></span><span class="wl-un" data-i18n="wl.cy.unread">not known yet</span></td><td data-wl-src="v-stat"></td></tr>
-      <tr data-wl-card><td>Hive</td><td><span class="wl-fig" data-wl-src="h-bal" data-wl-value></span><span class="wl-un" data-i18n="wl.cy.unread">not known yet</span></td><td data-wl-src="h-stat"></td></tr>
-      <tr data-wl-card><td>Arbitrum</td><td><span class="wl-fig" data-wl-src="a-bal" data-wl-value></span><span class="wl-un" data-i18n="wl.cy.unread">not known yet</span></td><td data-wl-src="a-stat"></td></tr>
-      <tr data-wl-card><td>Autonomi</td><td><span class="wl-fig" data-wl-src="ant-bal" data-wl-value></span><span class="wl-un" data-i18n="wl.cy.unread">not known yet</span></td><td data-wl-src="ant-stat"></td></tr>
-      <tr data-wl-card><td>Arweave</td><td><span class="wl-fig" data-wl-src="ar-bal" data-wl-value></span><span class="wl-un" data-i18n="wl.cy.unread">not known yet</span></td><td data-wl-src="ar-stat"></td></tr>
+      <tr data-wl-card data-wl-stat="v-stat"><td>Vaulta</td><td><span class="wl-fig" data-wl-src="v-bal" data-wl-value></span><span class="wl-un" data-i18n="wl.cy.unread">not known yet</span></td><td data-wl-src="v-stat"></td></tr>
+      <tr data-wl-card data-wl-stat="h-stat"><td>Hive</td><td><span class="wl-fig" data-wl-src="h-bal" data-wl-value></span><span class="wl-un" data-i18n="wl.cy.unread">not known yet</span></td><td data-wl-src="h-stat"></td></tr>
+      <tr data-wl-card data-wl-stat="a-stat"><td>Arbitrum</td><td><span class="wl-fig" data-wl-src="a-bal" data-wl-value></span><span class="wl-un" data-i18n="wl.cy.unread">not known yet</span></td><td data-wl-src="a-stat"></td></tr>
+      <tr data-wl-card data-wl-stat="ant-stat"><td>Autonomi</td><td><span class="wl-fig" data-wl-src="ant-bal" data-wl-value></span><span class="wl-un" data-i18n="wl.cy.unread">not known yet</span></td><td data-wl-src="ant-stat"></td></tr>
+      <tr data-wl-card data-wl-stat="ar-stat"><td>Arweave</td><td><span class="wl-fig" data-wl-src="ar-bal" data-wl-value></span><span class="wl-un" data-i18n="wl.cy.unread">not known yet</span></td><td data-wl-src="ar-stat"></td></tr>
     </tbody>
     <tbody>
       <tr data-wl-card><td data-i18n="wl.cy.soul">soul</td><td colspan="2"><span class="wl-fig" data-wl-src="sum-soul" data-wl-value></span><span class="wl-un" data-i18n="wl.cy.unread">not known yet</span></td></tr>
@@ -579,7 +629,7 @@ document.body.setAttribute('data-wl-view',/^(home|all|have|move|add|keep|key|pro
   <div class="cy-keys"><kbd>j</kbd> <kbd>k</kbd> <span data-i18n="wl.cy.k.jk">next or previous section</span> · <kbd>g</kbd> <span data-i18n="wl.cy.k.g">the index</span> · <kbd>o</kbd> <span data-i18n="wl.cy.k.o">fold or open every note</span></div>
 </aside>
 
-<section id="connect-sec" data-wl-task="key" style="border-color:var(--gold)">
+<section id="connect-sec" data-wl-task="have" style="border-color:var(--gold)">
   <h2>🔗 connect — <span data-i18n="wl.h.connect">your bzDiD is the wallet</span></h2>
   <div class="law">Connect your soul (your .b name or account). New here?
   <a href="./onboarding/">Create your bzDiD</a> — the held-hand ceremony takes 2 minutes.</div>
@@ -601,7 +651,7 @@ document.body.setAttribute('data-wl-view',/^(home|all|have|move|add|keep|key|pro
   more as you forge below. No passkey here, or it lacks PRF? Use your 24-word recovery phrase —
   same soul, same keys.</div>
   <div class="ring-wrap">
-    <svg width="230" height="230" viewBox="0 0 230 230" aria-label="keychain ring">
+    <svg width="230" height="230" viewBox="0 0 230 230" aria-hidden="true" focusable="false">
       <circle cx="115" cy="115" r="86" fill="none" stroke="#243026" stroke-width="1"/>
       <circle class="ring-orbit" cx="115" cy="115" r="86" fill="none" stroke="#FFD700" stroke-width="1.4"
         stroke-dasharray="3 9" opacity=".5"/>
@@ -610,34 +660,37 @@ document.body.setAttribute('data-wl-view',/^(home|all|have|move|add|keep|key|pro
       <g>
         <circle class="node-breathe" cx="115" cy="115" r="13" fill="none" stroke="#FFD700" stroke-width="1.2"/>
         <circle cx="115" cy="115" r="6" fill="#FFD700" opacity=".85"/>
-        <text x="115" y="143" text-anchor="middle" font-size="8.5" fill="#8a9a8a" font-family="IBM Plex Mono">masterPRK</text>
+        <text x="115" y="143" text-anchor="middle" class="ring-n">1</text>
       </g>
       <!-- ed25519 soul node -->
       <g>
         <circle cx="115" cy="29" r="8" fill="#0e1611" stroke="#c9a0ff" stroke-width="1.4"/>
         <circle cx="115" cy="29" r="3" fill="#c9a0ff"/>
-        <text x="115" y="14" text-anchor="middle" font-size="8" fill="#8a9a8a" font-family="IBM Plex Mono">soul · ed25519</text>
+        <text x="115" y="14" text-anchor="middle" class="ring-n">2</text>
       </g>
       <!-- K1 vaulta node -->
       <g>
         <circle id="k1node" class="node-breathe" cx="201" cy="115" r="8" fill="#0e1611" stroke="#5f6f61" stroke-width="1.4"/>
         <circle id="k1core" cx="201" cy="115" r="3" fill="#5f6f61"/>
-        <text x="201" y="100" text-anchor="middle" font-size="8" fill="#8a9a8a" font-family="IBM Plex Mono">vaulta · K1</text>
+        <text x="201" y="100" text-anchor="middle" class="ring-n">3</text>
       </g>
       <!-- future chains node -->
       <g id="ethg" opacity=".45">
         <circle id="ethnode" cx="115" cy="201" r="8" fill="#0e1611" stroke="#00E5FF" stroke-width="1.4" stroke-dasharray="2 3"/>
-        <text x="115" y="222" text-anchor="middle" font-size="8" fill="#8a9a8a" font-family="IBM Plex Mono">eth · next</text>
+        <text x="115" y="222" text-anchor="middle" class="ring-n">4</text>
       </g>
       <!-- bridge arc + anchor (turned on when bridged) -->
       <path id="bridgearc" class="bridge-arc" d="M 201 115 Q 235 178 178 196" fill="none"
         stroke="#5f6f61" stroke-width="1.2" opacity="0"/>
       <g id="anchornode" opacity="0">
         <text x="168" y="207" font-size="13" fill="#FFD700">⚓</text>
-        <text x="178" y="222" font-size="8" fill="#8a9a8a" font-family="IBM Plex Mono">chain authority</text>
+        <text x="190" y="222" text-anchor="middle" class="ring-n">5</text>
       </g>
       <circle id="sigpulse" class="sig-pulse" cx="201" cy="115" r="9" fill="none" stroke="#7ddf8f" stroke-width="2" opacity="0"/>
     </svg>
+    <ol class="ring-key" aria-label="the ring's key">
+      <li><b>1</b> masterPRK</li><li><b>2</b> soul · ed25519</li><li><b>3</b> vaulta · K1</li><li><b>4</b> eth · next</li><li><b>5</b> chain authority</li>
+    </ol>
     <div style="flex:1;min-width:250px">
       <div class="row" style="margin-top:0">
         <button id="kc-pass" class="gold">🗝 connect keychain (passkey)</button>
@@ -750,7 +803,7 @@ document.body.setAttribute('data-wl-view',/^(home|all|have|move|add|keep|key|pro
       <input id="vlt-newpass" type="password" placeholder="keypass" autocomplete="new-password" spellcheck="false">
       <input id="vlt-newpass2" type="password" placeholder="keypass again" autocomplete="new-password" spellcheck="false">
     </div>
-    <div class="law" id="vlt-strength" style="margin-top:4px;min-height:18px">— </div>
+    <div class="law" id="vlt-strength" style="margin-top:4px;min-height:18px"></div>
     <div class="row">
       <button id="vlt-create" class="green" style="flex:1">🔐 CREATE THE VAULT</button>
       <button id="vlt-importbtn" style="font-size:11px">import a vault file</button>
@@ -1172,7 +1225,7 @@ document.body.setAttribute('data-wl-view',/^(home|all|have|move|add|keep|key|pro
   <div class="row" style="align-items:center;flex-wrap:wrap">
     <input id="vc-key" placeholder="your meter key — e.g. bclau-paid-1" spellcheck="false" autocomplete="off" style="flex:2;min-width:200px">
     <button id="vc-go" class="gold" style="min-height:40px">look up</button>
-    <span style="font-size:10.5px;color:var(--faint)" id="vc-src">—</span>
+    <span style="font-size:10.5px;color:var(--faint)" id="vc-src"></span>
   </div>
 
   <div id="vc-panel" style="display:none;margin-top:12px">
@@ -1524,7 +1577,7 @@ document.body.setAttribute('data-wl-view',/^(home|all|have|move|add|keep|key|pro
                 note = '<b style="color:var(--amber)">' + a + ' could not be resolved right now.</b> ' +
                   'Either the name has no address record on Base\u2019s resolver (mainnet-ENS-only names ' +
                   'don\u2019t live there) or the public RPC is unreachable. Nothing was sent. Your raw 0x ' +
-                  'address is in \ud83d\udce5 receive above \u2014 paste that and the buy proceeds without resolution.';
+                  'address is in <a href="#pay-sec">\ud83d\udce5 receive</a> \u2014 paste that and the buy proceeds without resolution.';
               }
               paint();
             });
@@ -1746,7 +1799,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
           if (!e) {
             if (balEl) balEl.textContent = '';
             if (statEl) statEl.textContent = 'vault holds no arweave key';
-            paint('no arweave key in the vault — seal your JWK in THE VAULT above (paste it; the type is detected), then this panel wakes');
+            paint('no arweave key in the vault yet — seal your JWK in <a href="#vault-sec">the vault</a> (paste it; the type is detected), then this panel wakes', 'var(--ink)');
             return;
           }
           var addr = e.meta && e.meta.address;
@@ -1927,10 +1980,10 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
 <section id="summary-sec" data-wl-task="have">
   <h2>📊 <span data-i18n="wl.h.summary">SUMMARY</span></h2>
   <div class="readout">
-    <div class="rd"><div class="k">SOUL</div><div class="v" id="sum-soul" style="font-size:13px">—</div></div>
-    <div class="rd"><div class="k">CHAINS CONNECTED</div><div class="v" id="sum-chains">0</div></div>
-    <div class="rd"><div class="k">KEYCHAIN</div><div class="v" id="sum-kc" style="font-size:12px;color:var(--amber)">not connected</div></div>
-    <div class="rd"><div class="k">VAULTA AUTHORITY</div><div class="v" id="sum-bridge" style="font-size:12px;color:var(--amber)">—</div></div>
+    <div class="rd"><div class="k" data-i18n="wl.cy.soul">soul</div><div class="v" id="sum-soul" style="font-size:13px">not connected yet</div></div>
+    <div class="rd"><div class="k" data-i18n="wl.cy.chains">chains connected</div><div class="v" id="sum-chains">0</div></div>
+    <div class="rd"><div class="k" data-i18n="wl.cy.kc">keychain</div><div class="v" id="sum-kc" style="font-size:12px;color:var(--amber)">not connected</div></div>
+    <div class="rd"><div class="k" data-i18n="wl.cy.auth">Vaulta authority</div><div class="v" id="sum-bridge" style="font-size:12px;color:var(--amber)">not known yet</div></div>
   </div>
 </section>
 
@@ -2207,9 +2260,9 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       var el=document.createElement('div'); el.className='chip'; el.title='click to copy';
       el.innerHTML='<div class="cc">'+c+' <span style="color:var(--faint)">· '+d.kind+'</span></div>'+
         '<div class="cv">'+d.value+'</div>'+
-        '<div class="cx">'+(d.kind==='EVM 0x'?'arbitrum reads auto-connect below':'eosio public key')+'</div>';
+        '<div class="cx">'+(d.kind==='EVM 0x'?'arbitrum reads auto-connect in balances':'eosio public key')+'</div>';
       el.onclick=function(){
-        try{navigator.clipboard.writeText(d.value);el.querySelector('.cx').textContent='✓ copied';setTimeout(function(){el.querySelector('.cx').textContent=d.kind==='EVM 0x'?'arbitrum reads auto-connect below':'eosio public key'},1200)}catch(e){}
+        try{navigator.clipboard.writeText(d.value);el.querySelector('.cx').textContent='✓ copied';setTimeout(function(){el.querySelector('.cx').textContent=d.kind==='EVM 0x'?'arbitrum reads auto-connect in balances':'eosio public key'},1200)}catch(e){}
       };
       box.appendChild(el);
       if(c==='evm:'+SOUL&&d.kind==='EVM 0x'){
@@ -2914,7 +2967,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       an.setAttribute('opacity','1')}
     else{n.setAttribute('stroke','#5f6f61');c.setAttribute('fill','#5f6f61');
       arc.setAttribute('opacity','0');an.setAttribute('opacity','0')}
-    $('sum-bridge').textContent=ok?'bridged ✓':(MPRK?'needs bridge':'—');
+    $('sum-bridge').textContent=ok?'bridged ✓':(MPRK?'needs bridge':'not known yet');
     $('sum-bridge').style.color=ok?'var(--leaf)':'var(--amber)';
   }
 
@@ -3053,6 +3106,10 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     // looked for one. Same reasoning for the explicit disconnect, the recovery and
     // bridge inputs, and everything inside the vault.
     if(ev&&ev.target&&ev.target.closest&&ev.target.closest('#kc-rec,#kc-recgo,#kc-create,#kc-out,#br-wif,#br-go,#vault-sec'))return;
+    // the three grammars (2026-09-26): moving through the wallet is not a request
+    // to sign in: a bee row, the raver dock, the console index and its keys pass
+    if(ev&&ev.target&&ev.target.closest&&ev.target.closest('[data-wl-go],#wl-dock,#wl-cy'))return;
+    if(ev&&ev.type==='keydown'&&document.body.getAttribute('data-reg')==='cypherpunk'&&/^[jkgo]$/.test(ev.key)&&!(ev.target&&/^(INPUT|TEXTAREA|SELECT)$/.test(ev.target.tagName)))return;
     if(autoTried||MPRK||!BZDIDKEY||!SOUL)return;
     autoTried=true;
     window.removeEventListener('pointerdown',autoConnect);
@@ -3528,7 +3585,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     $('bridge-sec').style.display='none';
     $('kc-stat').textContent='— keychain scrubbed from memory —';
     $('sum-kc').textContent='not connected';$('sum-kc').style.color='var(--amber)';
-    $('sum-bridge').textContent='—';$('sum-bridge').style.color='var(--amber)';
+    $('sum-bridge').textContent='not known yet';$('sum-bridge').style.color='var(--amber)';
     $('ethg').setAttribute('opacity','.45');$('ethnode').setAttribute('stroke-dasharray','2 3');
     renderForge();
   };
@@ -4250,10 +4307,10 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       await walletAction(contract, action, data, [{ actor: actor, permission: 'active' }], { network: 'j4', wif: wif });
       return;
     }
-    if (!K1 || !SOUL) { out.textContent = 'connect your keychain first (the gold button above)'; return }
+    if (!K1 || !SOUL) { wlSay(out, ['connect ', { to: 'kc-sec', t: 'your keychain' }, ' first']); return }
     var waCred = loadWaCred();
     var useWa = $('tx-wa').checked && waCred;
-    if (!BRIDGED && !useWa) { out.textContent = 'your bzDiD key is not on ' + SOUL + '@active yet — run THE BRIDGE above first'; return }
+    if (!BRIDGED && !useWa) { wlSay(out, ['your bzDiD key is not on ' + SOUL + '@active yet — run ', { to: 'bridge-sec', t: 'the bridge' }, ' first']); return }
     var actor2 = data.registrant || data.owner || data.from || data.account || SOUL;
     await walletAction(contract, action, data, [{ actor: actor2, permission: 'active' }], { network: 'main' });
   };
@@ -4278,7 +4335,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       return null;
     }
     if (!opts.jwk || !opts.jwk.d) {
-      if (out) { out.style.display = 'block'; out.innerHTML = '<b style="color:var(--amber)">no signing JWK</b> — seal one in THE VAULT above, or run the demo lane which generates a runtime TEST key (unfunded — the gateway verdict will say so honestly).'; }
+      if (out) { out.style.display = 'block'; out.innerHTML = '<b style="color:var(--amber)">no signing JWK</b> — seal one in <a href="#vault-sec">the vault</a>, or run the demo lane which generates a runtime TEST key (unfunded — the gateway verdict will say so honestly).'; }
       return null;
     }
     var publicJwk = { kty: 'RSA', n: opts.jwk.n, e: opts.jwk.e || 'AQAB' };   // public parts ONLY cross the seam
@@ -4713,8 +4770,8 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   /* SEND · Vaulta A — the proven bridge/SIGN lane with eosio::transfer */
   function svRefresh(){
     var liq=(LAST_ACC&&LAST_ACC.core_liquid_balance)||null;
-    $('sv-stat').innerHTML='liquid: <b>'+(liq!==null?liq:'— read BALANCES above')+'</b>'+
-      (BRIDGED?' · bridge ✓ (K1 signs)':' · <b style="color:var(--amber)">not bridged — the bridge below adds your bzDiD key first</b>');
+    $('sv-stat').innerHTML='liquid: <b>'+(liq!==null?liq:'<a href="#bal-sec">not read yet</a>')+'</b>'+
+      (BRIDGED?' · bridge ✓ (K1 signs)':' · <b style="color:var(--amber)">not bridged — <a href="#bridge-sec">the bridge</a> adds your bzDiD key first</b>');
   }
   function validAcct(s){ return /^[a-z1-5]{1,12}$/.test(s||'')&&/[a-z]/.test(s||'') }
   /* ── SPEND CAP — the owner's optional tool, enforced at SIGN time. A per-unit
@@ -4796,7 +4853,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     if(!SOUL){payStat('connect your soul first');return}
     if(!validAcct(to)){$('sv-stat').textContent='recipient must be a Vaulta account: 1-12 chars a-z 1-5';return}
     if(!(amt>0)){$('sv-stat').textContent='amount must be > 0';return}
-    if(!K1||!BRIDGED){$('sv-stat').textContent='your bzDiD key is not on '+SOUL+'@active yet — run THE BRIDGE below first';return}
+    if(!K1||!BRIDGED){wlSay($('sv-stat'),['your bzDiD key is not on '+SOUL+'@active yet — run ',{to:'bridge-sec',t:'the bridge'},' first']);return}
     if(!capGate('A',amt))return;
     var q=amt.toFixed(4)+' A';
     $('sv-stat').textContent='1/4 serializing transfer…';
@@ -5064,7 +5121,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     swQuote(); };
   $('sw-amt').addEventListener('input',function(){ if($('sw-panel').style.display!=='none')swQuote() });
   $('sw-go').onclick=async function(){
-    if(!SOUL||!K1||!BRIDGED){$('sw-stat').textContent='needs your bridged bzDiD key — run THE BRIDGE below first';return}
+    if(!SOUL||!K1||!BRIDGED){wlSay($('sw-stat'),['needs your bridged bzDiD key — run ',{to:'bridge-sec',t:'the bridge'},' first']);return}
     var n=parseInt($('sw-amt').value,10)||0;
     if(!(n>0)){$('sw-stat').textContent='enter bytes of RAM';return}
     var swCapCost=null;
@@ -5262,7 +5319,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   function showStrength(){
     var v=$('vlt-newpass').value, s=V.keypassStrength(v);
     var col=s.bits<50?'var(--amber)':s.bits<70?'var(--gold)':'var(--leaf)';
-    $('vlt-strength').innerHTML=v?('strength: <b style="color:'+col+'">'+s.label+'</b> · ~'+s.bits+' bits'):'— ';
+    $('vlt-strength').innerHTML=v?('strength: <b style="color:'+col+'">'+s.label+'</b> · ~'+s.bits+' bits'):'';
   }
   $('vlt-newpass').oninput=showStrength;
 
@@ -5745,16 +5802,22 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
      empty or bare-dash value is UNREAD and its card says so in words
      (DESIGN-CONSTRAINTS §2), so no register can show a number the others do not. */
   function unread(t){return !t||t==='—'}
+  /* a balance and its stat line are one fact: a figure whose LAST read failed
+     (stat "err") stays on screen but is said to be possibly out of date, and
+     its rail on the stage does not light */
+  var STAT={'v-bal':'v-stat','h-bal':'h-stat','a-bal':'a-stat','ant-bal':'ant-stat','ar-bal':'ar-stat'};
+  function failed(id){var st=document.getElementById(STAT[id]||'');return !!st&&st.classList.contains('err')}
   var mirrors=[].slice.call(document.querySelectorAll('[data-wl-src]'));
   function sync(id){
-    var src=document.getElementById(id), t=src?src.textContent.trim():'', read=!unread(t);
+    var src=document.getElementById(id), t=src?src.textContent.trim():'', read=!unread(t), err=failed(id);
     mirrors.forEach(function(m){
       if(m.getAttribute('data-wl-src')!==id)return;
       if(!m.hasAttribute('data-wl-value')){m.textContent=t;return}
       m.textContent=read?t:'';
-      var card=m.closest('[data-wl-card]');if(card)card.setAttribute('data-read',String(read));
+      var card=m.closest('[data-wl-card]');
+      if(card){card.setAttribute('data-read',String(read));card.setAttribute('data-err',String(err))}
     });
-    [].forEach.call(document.querySelectorAll('[data-wl-rail="'+id+'"]'),function(n){n.setAttribute('data-lit',String(read))});
+    [].forEach.call(document.querySelectorAll('[data-wl-rail="'+id+'"]'),function(n){n.setAttribute('data-lit',String(read&&!err))});
   }
   var ids={};
   mirrors.forEach(function(m){ids[m.getAttribute('data-wl-src')]=1});
@@ -5763,14 +5826,22 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     var src=document.getElementById(id);if(!src)return;
     sync(id);
     new MutationObserver(function(){sync(id)}).observe(src,{childList:true,characterData:true,subtree:true});
+    var st=document.getElementById(STAT[id]||'');
+    if(st&&st!==src){
+      new MutationObserver(function(){sync(id)}).observe(st,{attributes:true,attributeFilter:['class'],childList:true,characterData:true,subtree:true});
+    }
   });
 
-  /* ── the view: home, one task, or all ── */
-  var depth=0, lastRow=null;
+  /* ── the view: home, one task, or all. The stack index lives IN history
+     (state.wlIdx), never in a counter, so Back, Forward and "‹ wallet" agree ── */
+  var lastRow=null;
+  function idx(){return (history.state&&history.state.wlIdx)||0}
   function paintDock(){
-    var v=view();
+    var v=view(), dock=document.getElementById('wl-dock');
     [].forEach.call(document.querySelectorAll('#wl-dock [data-wl-go]'),function(b){
       var on=b.getAttribute('data-wl-go')===v;b.setAttribute('aria-pressed',String(on));b.tabIndex=on?0:-1;
+      /* the lit glyph always sits in view on a narrow dock (horizontal only) */
+      if(on&&dock&&reg()==='raver'&&dock.scrollWidth>dock.clientWidth)dock.scrollTo({left:b.offsetLeft-(dock.clientWidth-b.offsetWidth)/2});
     });
   }
   function setView(v,how){
@@ -5780,9 +5851,10 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     body.setAttribute('data-wl-view',v);
     try{sessionStorage.setItem('wl.view',v)}catch(e){}
     paintDock();
-    if(how.push&&was!==v){try{history.pushState({wlView:v},'');depth++}catch(e){}}
-    else if(how.replace){try{history.replaceState({wlView:v},'')}catch(e){}}
+    if(how.push&&was!==v){try{history.pushState({wlView:v,wlIdx:idx()+1},'')}catch(e){}}
+    else if(how.replace){try{history.replaceState({wlView:v,wlIdx:idx()},'')}catch(e){}}
     if(how.arrive)arrive(v);
+    paintIndex();
   }
   function arrive(v){
     window.scrollTo(0,0);
@@ -5795,14 +5867,36 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     if(!b)return;
     var v=b.getAttribute('data-wl-go');
     if(reg()==='bee'){
-      if(v==='home'&&depth>0){history.back();return}         /* the stack pops, it does not grow */
+      if(v==='home'&&idx()>0){history.back();return}         /* the stack pops, it does not grow */
       if(v!=='home')lastRow=v;
       setView(v,{push:v!=='home',replace:v==='home',arrive:true});
     } else setView(v,{replace:true,arrive:true});               /* raver is lateral */
   });
   window.addEventListener('popstate',function(e){
-    if(depth>0)depth--;
-    setView((e.state&&e.state.wlView)||'home',{arrive:true});
+    /* a fragment navigation pops with no wallet state: that is a hash landing,
+       not a view change (hashchange handles it) */
+    if(!e.state||!e.state.wlView)return;
+    setView(e.state.wlView,{arrive:true});
+  });
+  /* a link to a part of the wallet (#bridge-sec, #vault-sec …) is routed here, so
+     it lands in its task in bee and raver, and a second tap on the same link
+     still lands (the browser fires nothing when the hash is unchanged) */
+  document.addEventListener('click',function(e){
+    var a=e.target.closest&&e.target.closest('a[href^="#"]');
+    if(!a||e.defaultPrevented||e.button!==0||e.metaKey||e.ctrlKey||e.shiftKey)return;
+    var h=a.getAttribute('href').slice(1);
+    if(!h||h.indexOf('qr=')===0)return;
+    var el=document.getElementById(h), t=taskOf(el);
+    if(!t)return;
+    e.preventDefault();
+    try{history.replaceState(history.state,'','#'+h)}catch(x){}
+    /* a cross-reference REPLACES the task, it never deepens the stack: "‹ wallet"
+       keeps meaning the wallet's home */
+    if(reg()!=='cypherpunk'&&view()!=='all'&&view()!==t)setView(t,{replace:true});
+    requestAnimationFrame(function(){
+      el.scrollIntoView({block:'start',behavior:(reduced()||reg()==='cypherpunk')?'auto':'smooth'});
+      var s=el.closest('main>section');if(s)s.focus({preventScroll:true});
+    });
   });
 
   /* a deep link lands in the task that holds its target, in every register */
@@ -5861,8 +5955,18 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       var st=document.createElement('span');st.className='t';st.textContent=name;
       var tg=document.createElement('span');tg.className='tag';tg.textContent=s.getAttribute('data-wl-task');
       a.appendChild(sn);a.appendChild(st);a.appendChild(tg);li.appendChild(a);ol.appendChild(li);
+      li.dataset.sec=s.id;
+    });
+    paintIndex();
+  }
+  /* a row never points at nothing: a section the page itself holds hidden (the
+     bridge, until it is needed) has no row until it shows */
+  function paintIndex(){
+    [].forEach.call(document.querySelectorAll('#wl-cy-idx li'),function(li){
+      var s=document.getElementById(li.dataset.sec);li.hidden=!s||s.style.display==='none';
     });
   }
+  secs.forEach(function(s){new MutationObserver(paintIndex).observe(s,{attributes:true,attributeFilter:['style']})});
   document.addEventListener('keydown',function(e){
     if(reg()!=='cypherpunk'||e.defaultPrevented||e.altKey||e.ctrlKey||e.metaKey)return;
     var t=e.target;
@@ -5872,13 +5976,13 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       var inSec=document.activeElement&&document.activeElement.closest&&document.activeElement.closest('main>section[data-wl-task]');
       var at=vis.indexOf(inSec||current());
       var next=vis[Math.max(0,Math.min(vis.length-1,at+(e.key==='j'?1:-1)))];
-      if(next){next.focus({preventScroll:true});next.scrollIntoView({block:'start',behavior:reduced()?'auto':'smooth'});e.preventDefault()}
+      if(next){next.focus({preventScroll:true});next.scrollIntoView({block:'start',behavior:'auto'});e.preventDefault()}
     } else if(e.key==='g'){
       var a=document.querySelector('#wl-cy-idx a');if(a){a.focus();e.preventDefault()}
     } else if(e.key==='o'){
       var ds=[].slice.call(document.querySelectorAll('details[data-reg-disclose]'));
       var open=!ds.every(function(d){return d.open});
-      ds.forEach(function(d){d.open=open;d.dataset.userTouched='1'});
+      ds.forEach(function(d){d.open=open});   /* a bulk key is not a reader's own tap: it never pins a note against the register's default */
       e.preventDefault();
     }
   });
@@ -5912,8 +6016,17 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   buildIndex();
   document.addEventListener('blang',buildIndex);
   paintDock();
-  try{history.replaceState({wlView:view()},'')}catch(e){}
+  try{history.replaceState({wlView:view(),wlIdx:0},'')}catch(e){}
   landHash();
+  /* a ?compose= link (bnames' walletAction) arrives for the composer itself:
+     it lands ON the composer, not at the top of its task */
+  if(/[?&]compose=/.test(location.search)){
+    var c=document.getElementById('composer-sec'), moved=false;
+    var land=function(){if(moved||!c)return;c.scrollIntoView({block:'start'});c.focus({preventScroll:true})};
+    ['wheel','touchstart','keydown'].forEach(function(t){window.addEventListener(t,function(){moved=true},{once:true,passive:true})});
+    if(document.readyState==='complete')land();else window.addEventListener('load',land,{once:true});
+    setTimeout(land,700);   /* once more after the receipts above it have rendered, unless the reader moved */
+  }
 })();
 </script>
 </body>

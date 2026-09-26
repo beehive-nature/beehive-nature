@@ -115,7 +115,7 @@ That branch freezes wallet.html as the register reference and ships the token se
 
 | gate | result |
 |---|---|
-| `node e2e/wallet-registers.mjs` (golden dress contract harness + the three grammars + contrast) | **GREEN 69/69** |
+| `node e2e/wallet-registers.mjs` (golden dress contract harness + the three grammars + whole-wallet contrast, size and dash audits, history, links, stale reads) | **GREEN 83/83** (69 before the round-1 review) |
 | wallet batteries: fund · vault · matrix · arweave · signer · adapter | 94 · 35 · 11 · 22 · 105 · 28, **0 failed** |
 | CI `node --test`: comprehension · orb-seat · bpay-policy-ownership · tour-bar-clearance | 9/9 · 4/4 · 2/2 · 4/4 (the first three were red on this branch before they were given the reader's real first step: a row tap or a deep link; no assertion loosened) |
 | CI browser gates: bPay phase A · phase B · bData · polish-i18n · engineflow · no-page-errors | 18/18 · 17/17 (phase B deep-linked, same rule) · 100/100 · 25/25 · 30/30 · exit 0 |
@@ -123,5 +123,28 @@ That branch freezes wallet.html as the register reference and ships the token se
 | CI front-door static suite | 377/377 |
 | `scripts/estate-check.mjs` · `e2e/estate-source.mjs` | PASS · 11/11 (45 new keys × 28 tongues, machine-drafted ⚙, casing-clean) |
 | screenshots | `e2e/shots-wallet-registers/`: contract arrivals `wallet-390-{reg}.png` (unread), read arrivals `wallet-390-{reg}-read.png`, desktop `wallet-1280-{reg}.png`, a bee task, a raver deck |
+
+## 8 · fresh-eyes review, round 1: REQUEST CHANGES, and what changed
+
+An independent read-only reviewer (it did not write this code) confirmed that the three registers are now materially distinct. It also found the gate printing two claims it did not measure, the same false-signal class this lane was opened to delete. Every finding was fixed:
+
+| # | finding | fix |
+|---|---|---|
+| 1 | **blocker:** the contrast audit read `color`, but SVG text paints with `fill`; the size check ran on one task only | The audit measures `fill` for SVG text. Size, contrast and the dash check now run over the **whole** wallet in every register. The keychain ring carries numerals only, with its words in a text key beneath (no words inside art). The last seven sub-14px leaves in bee (hero badge, the audit button, ladder numerals) and the 12.5px note summaries are lifted. |
+| 2 | "above"/"below" messages pointed at sections a one-task view doesn't show | Every cross-section message names its target as a **link** (`#bridge-sec`, `#vault-sec`, `#kc-sec`, `#bal-sec`, `#pay-sec`), built as DOM via `wlSay`, never as HTML. The presenter routes it into its task in every register. A static gate check forbids the old directional phrases. |
+| 3 | new bee's unread card said "waiting…" with no way in | **connect moved into "see what i have"** (you type your name to read your balances). The unread card says "not read yet" plus a link: "connect your name or account to read it". |
+| 4 | a failed later read left a stale figure passing as current | Each balance's mirror reads its stat line: on `stat err` the figure stays, dimmed, with "the last read failed, so this figure may be out of date" (bee) or "last read failed" (raver), and the rail goes dark. Gated in all three registers. |
+| 5 | bare "—" and caps in the summary and voucher | The summary labels are lowercase and keyed (same English as the console's keys). Unknowns are words ("not connected yet", "not known yet"); the voucher source and keypass meter show nothing rather than a dash. The gate's dash check now covers the whole wallet. |
+| 6 | raver decks filled every `.gold` button | The sections' `.gold` buttons stand **outlined in every register** until pressed; gated in bee's and raver's "move". |
+| 7 | fragment-link `popstate` (null state) reset the view; a depth counter broke after Forward | `popstate` without wallet state is ignored (the hash handler owns it). The stack index lives in `history.state.wlIdx`. Links are routed by the presenter and **replace** the task, so "‹ wallet" always means home. Back, Forward, then "‹ wallet" are gated. |
+| 8 | inside a deck, raver was bee in raver dress | Every raver deck opens on **art**: its glyph lit large in a glowing orb before any section. The "have" deck opens on the constellation itself. Gated: the orb leads the deck. |
+| 9 | `?compose=` landed above the composer | It lands **on** the composer, re-landing after the receipts above it render, unless the reader has already moved. Gated. |
+| 10 | `o` pinned every note permanently | A bulk key no longer pins; bee still folds after `o`. Gated. |
+| 11 | a dead index row for the hidden bridge | Index rows follow their section's own display (the bridge row appears when the page shows the bridge). Gated. |
+| 12 | the raver dock hid its last glyphs at 390px | The lit glyph is scrolled into view. Gated. |
+| 13 | `#section` links flashed home first | The first-paint script carries the section-to-task map. The gate proves the map equals the `data-wl-task` attributes, and that `#fund-sec` paints in "add" at **first** paint. |
+| 14 | auto-connect fired on navigation | Bee rows, the raver dock, the console and its `j`/`k`/`g`/`o` keys no longer start the passkey ceremony; the first press on a real control still does (the founder's auto-connect law). A sideways swipe still counts as a press, since it can't be told apart at pointerdown. |
+| 15 | three gate lines over-claimed | "structure vector" is replaced by **what kind of thing arrives** (bee rows, raver art area, cypherpunk index and tables). The cypherpunk console is checked to be in the first screen on desktop. The 44px floor covers summaries and link-buttons, and spend-audit's 20px receipt rows are lifted. |
+| 16 | leftovers | The fixture writes the stat a real read writes ("✓ live"). The `?` key map was **not built**: the key map is always visible in the console, so a toggle for it would hide nothing. The ring's decorative gold is sovereign purple (honey is b's colour only). The ru floor reset stands as documented in §6. |
 
 **Not claimed:** no human (and no matriarch) has used these three grammars yet, and the gate proves only its named properties (DESIGN-CONSTRAINTS §13). No live chain was read. Balances in the receipts are injected fixtures (`12.3456 A`, `7.000 HIVE`), written into the sections' own nodes where a chain read would land.
