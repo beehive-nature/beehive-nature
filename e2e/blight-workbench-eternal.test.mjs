@@ -44,13 +44,18 @@ async function open(reg, rpc = 'blocked') {
   const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
   await ctx.addInitScript(r => { try { localStorage.setItem('bregister', r); } catch {} }, reg);
   const calls = [];
-  await ctx.route('**/*', r => {
+  // a gate the test can close: while closed, a stubbed chain answer waits, so a transient state
+  // ("reading") is observed on purpose, never by the luck of a slow runner (CI 2026-09-26: the
+  // instant refusal landed between two reads of the page on one run)
+  const gate = { on: false, wait: null, open: null };
+  await ctx.route('**/*', async r => {
     const u = r.request().url();
     if (u.startsWith(ORIGIN)) return r.continue();
     if (r.request().method() === 'POST') {
       let body = null; try { body = JSON.parse(r.request().postData()); } catch {}
       calls.push({ u, body });
       if (body && rpc !== 'blocked' && !/%20|,/.test(u)) {
+        if (gate.on) await gate.wait;
         const one = q => rpc === 'draws' ? { jsonrpc: '2.0', id: q.id, result: ANSWER(q.params[0].data) } : { jsonrpc: '2.0', id: q.id, error: { code: 3, message: 'execution reverted' } };
         return r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(Array.isArray(body) ? body.map(one) : one(body)) });
       }
@@ -61,7 +66,7 @@ async function open(reg, rpc = 'blocked') {
   p.on('pageerror', e => errs.push(String(e)));
   await p.goto(`${ORIGIN}/${PAGE}`, { waitUntil: 'load' });
   await p.waitForFunction(() => window.__eternal && window.__eternal.data.tokens.length && document.body.dataset.reg, null, { timeout: 15000 });
-  return { ctx, p, errs, calls };
+  return { ctx, p, errs, calls, gate };
 }
 const shown = p => p.evaluate(() => ['.et-b', '.et-r', '.et-c'].filter(s => getComputedStyle(document.querySelector('#eternal>' + s)).display !== 'none'));
 const WANT = {
@@ -139,7 +144,7 @@ test('raver: a short hold does nothing; the full hold is the bench\'s own View, 
 });
 
 test('cypherpunk and bee: a refused read is said in all three; the bee action is the bench\'s own Scan', async () => {
-  const { ctx, p, errs, calls } = await open('cypherpunk', 'refuses');
+  const { ctx, p, errs, calls, gate } = await open('cypherpunk', 'refuses');
   await p.fill('#etWbCAddr', HOLDER);
   await p.selectOption('#etWbCCol', '2');
   assert.equal(await p.inputValue('#token'), await p.evaluate(() => TOKENS[2].addr), 'the bench\'s own select follows');
@@ -156,9 +161,16 @@ test('cypherpunk and bee: a refused read is said in all three; the bee action is
   await p.fill('#etWbBAddr', '');
   await p.click('#etWbBGo');
   assert.match(await p.textContent('#etWbBState'), /paste a wallet first/); assert.equal(calls.length, n);
+  gate.wait = new Promise(res => { gate.open = res; }); gate.on = true; // hold the chain's answer
   await p.fill('#etWbBAddr', HOLDER); await p.click('#etWbBGo');
-  await p.waitForFunction(() => [...document.querySelectorAll('#diag td')].some(td => td.textContent === 'scanning'), null, { timeout: 5000 });
-  assert.equal(await p.evaluate(() => window.__eternal.data.phase), 'reading');
+  // the bench says "scanning" first; the front's data layer re-reads that a moment later. With the answer
+  // held, "reading" lasts, so wait for the front itself rather than racing it
+  await p.waitForFunction(() => [...document.querySelectorAll('#diag td')].some(td => td.textContent === 'scanning') && window.__eternal.data.phase === 'reading', null, { timeout: 5000 });
   assert.match(await p.textContent('#etWbBState'), /looking…/);
+  gate.on = false; gate.open(); // let the answers land: the Scan settles, and the bee says what the bench's own sweep found
+  await p.waitForFunction(() => window.__eternal.data.phase !== 'reading', null, { timeout: 30000 });
+  const end = await p.evaluate(() => ({ phase: window.__eternal.data.phase, found: window.__eternal.data.found }));
+  assert.deepEqual(end, { phase: 'swept', found: 0 }, 'a Scan settles as the bench\'s own sweep (reverts are answers, not silence)');
+  assert.match(await p.textContent('#etWbBState'), /no pieces found for this wallet/);
   assert.equal(errs.length, 0, errs.join(' | ')); await ctx.close();
 });

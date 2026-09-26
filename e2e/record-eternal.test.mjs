@@ -138,16 +138,24 @@ test('raver: tap a moment on the reel; a short hold develops nothing, a full hol
   assert.equal(await p.$eval('#etRaverGo', a => [a.getAttribute('href'), a.target].join()), '#rec-2,', 'same-tab link to its entry');
   await p.focus('#etReel'); await p.keyboard.press('ArrowLeft');
   assert.equal(await p.evaluate(() => window.__eternal.raver.sel), 1);
+  // develop the OLDEST moment: its picture sits at the foot of the list, far past Chromium's lazy-load
+  // distance (1250-2500 px, by connection estimate). A near-top moment's picture can already have been
+  // fetched by the list below, and then a network check proves nothing (CI 2026-09-26).
+  const K = E.length - 1;
+  await p.keyboard.press('End');
+  assert.equal(await p.evaluate(() => window.__eternal.raver.sel), K, 'End reaches the oldest moment');
   await p.$eval('#etDevelop', e => e.scrollIntoView({ block: 'center' })); await p.waitForTimeout(150); // clear of the fixed tour bar await p.waitForTimeout(300);
+  const want0 = (E[K].i.find(s => s[1] === 'after') || E[K].i[0])[0];
+  assert.ok(!pngs.includes(want0), 'the list has not fetched the oldest picture, so the network check below means something');
   const n0 = pngs.length, b = await p.locator('#etDevelop').boundingBox();
   await p.mouse.move(b.x + b.width / 2, b.y + b.height / 2);
   await p.mouse.down(); await p.waitForTimeout(400); await p.mouse.up(); await p.waitForTimeout(300);
   assert.equal(await p.$eval('#etPhoto', f => f.hidden), true, 'a short hold develops nothing');
   assert.equal(await p.$eval('#etPhotoImg', i => i.getAttribute('src')), null);
-  assert.ok(!pngs.slice(n0).includes((E[1].i.find(s => s[1] === 'after') || E[1].i[0])[0]), 'nothing was asked for');
+  assert.ok(!pngs.slice(n0).includes((E[K].i.find(s => s[1] === 'after') || E[K].i[0])[0]), 'nothing was asked for');
   await p.mouse.down(); await p.waitForTimeout(1300); await p.mouse.up();
   await p.waitForFunction(() => document.getElementById('etPhotoImg').complete && document.getElementById('etPhotoImg').naturalWidth > 0, null, { timeout: 5000 });
-  const want = (E[1].i.find(s => s[1] === 'after') || E[1].i[0])[0];
+  const want = (E[K].i.find(s => s[1] === 'after') || E[K].i[0])[0];
   const ph = await p.evaluate(() => { const i = document.getElementById('etPhotoImg'); return { src: i.getAttribute('src'), w: i.naturalWidth, h: i.naturalHeight, fit: getComputedStyle(i).objectFit, cap: document.getElementById('etPhotoCap').textContent, hidden: document.getElementById('etPhoto').hidden }; });
   assert.equal(ph.hidden, false); assert.equal(ph.src, 'record/' + want);
   assert.deepEqual([ph.w, ph.h], DIMS[want], 'the file, at its own size');
