@@ -107,7 +107,7 @@
     if(sum !== line.amountAtto) return '<div style="color:var(--amber)">quote sum mismatch — refused</div>';
     var sha = a.sha256 || '';
     var h = '<div style="margin-top:14px;padding:10px;border:1px solid ' + (current?'#2c4a5a':'#1d4655') + ';border-radius:10px' + (current?'':';opacity:.8') + '">';
-    h += '<div style="font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:' + (current?'var(--cyan)':'var(--amber)') + '">' + (current
+    h += '<div style="font-size:11px;letter-spacing:.08em;color:' + (current?'var(--cyan)':'var(--amber)') + '">' + (current
       ? T('wl.bpay.quote.current','Current storage quote — caused by your choice')
       : T('wl.bpay.quote.ref','Reference quote (not chosen by you)')) + '</div>';
     if (current) h += '<div style="font-size:12px;margin-top:4px">' + T('wl.bpay.youchose','You chose') + ' <b>🌐 ' + T('wl.bpay.aud.public','Public') + '</b> — ' + esc(aud.access || p.access || '') + '</div>';

@@ -13,7 +13,7 @@
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta name="color-scheme" content="dark">
+<meta name="color-scheme" content="light dark">
 <link rel="stylesheet" href="tokens.css">
 <title>the BNR wallet — one soul, every chain</title>
   <link rel="icon" type="image/svg+xml" href="assets/house/house-seal-roundel.svg">
@@ -29,10 +29,10 @@
 *{margin:0;padding:0;box-sizing:border-box}
 body{background:var(--bg);color:var(--ink);font:13px/1.65 'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;padding:0 14px 90px}
 main{max-width:980px;margin:0 auto}
-.crumbs{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 0 9px;border-bottom:1px solid var(--line2);font-size:11px;letter-spacing:.12em;text-transform:uppercase}
+.crumbs{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 0 9px;border-bottom:1px solid var(--line2);font-size:11px;letter-spacing:.12em}
 .crumbs a{color:var(--dim)} .crumbs .here{color:var(--ink)} .crumbs .badge-live{margin-left:auto;display:inline-flex;align-items:center;gap:7px;color:var(--dim);font-size:10px;letter-spacing:.14em}
 .crumbs .badge-live i{width:8px;height:8px;border-radius:50%;background:#86CC72}
-.kicker{font-size:10px;letter-spacing:.34em;text-transform:uppercase;color:var(--faint);margin-top:22px}
+.kicker{font-size:10px;letter-spacing:.34em;color:var(--faint);margin-top:22px}
 header{margin-bottom:14px;padding-bottom:14px;position:relative}
 h1{font-size:clamp(30px,5.5vw,40px);font-weight:600;letter-spacing:-.01em;line-height:1.1;
   background:linear-gradient(92deg,#E9F2EC 55%,#86CC72);-webkit-background-clip:text;background-clip:text;color:transparent}
@@ -42,7 +42,7 @@ header p{color:var(--dim);font-size:11px;margin-top:8px;max-width:780px;margin-i
 section{background:var(--panel);border:1px solid var(--line2);border-radius:12px;padding:16px;margin-top:14px;position:relative}
 section::before{content:'';position:absolute;top:-1px;left:-1px;width:10px;height:10px;
  clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);background:#86CC72;opacity:.0}
-h2{font-size:13px;color:var(--ink);font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:9px;
+h2{font-size:13px;color:var(--ink);font-weight:700;letter-spacing:.08em;margin-bottom:9px;
  display:flex;align-items:center;gap:9px;flex-wrap:wrap}
 h2::before{content:'';width:10px;height:10px;flex:none;
  clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);background:#86CC72}
@@ -53,7 +53,7 @@ input{background:var(--well);color:var(--ink);border:1px solid var(--line2);bord
  padding:10px 12px;font:13px 'IBM Plex Mono',monospace;flex:1;min-width:180px}
 input.small{font-size:11px}
 button{background:var(--well);color:#86CC72;border:1px solid var(--line2);border-radius:8px;
- padding:10px 16px;cursor:pointer;font:12px 'IBM Plex Mono',monospace;min-height:40px}
+ padding:10px 16px;cursor:pointer;font:12px 'IBM Plex Mono',monospace;min-height:44px}
 button:hover{background:#86CC72;color:#06110C}
 button:disabled{opacity:.4;cursor:not-allowed}
 button.gold{background:#86CC72;color:#06110C;border-color:#86CC72}
@@ -73,7 +73,7 @@ button.green:hover{background:#86CC72;color:#06110C}
    10px uppercase caption, number 32px+ mobile-first (9.5vw on a phone),
    full-row on wide grids. CSS-only promotion of the live #v-bal read. */
 #ch-vaulta{grid-column:1/-1}
-#ch-vaulta .cn{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
+#ch-vaulta .cn{font-size:10px;letter-spacing:.14em;color:var(--dim)}
 #ch-vaulta .cn .badge{font-size:9px;margin-left:3px}
 #ch-vaulta .cb{font-size:clamp(34px,9.5vw,46px);line-height:1.15;color:var(--ink)}
 pre{background:var(--well);border:1px solid var(--line2);border-radius:8px;padding:11px 13px;font-size:9.5px;
@@ -110,7 +110,7 @@ pre b{color:var(--ink)}
 /* ── the receipt ladder (master design pass — copy lands word-for-word;
    the live lanes speak through the composer's own receipt line) ── */
 .ladder{margin:14px 0 4px}
-.lcap{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);margin-bottom:10px}
+.lcap{font-size:10px;letter-spacing:.14em;color:var(--faint);margin-bottom:10px}
 .lrow{display:flex;gap:14px;align-items:stretch}
 .ltrack{display:flex;flex-direction:column;align-items:center;width:26px;flex:none}
 .ldot{width:22px;height:24px;flex:none;display:flex;align-items:center;justify-content:center;
@@ -171,8 +171,100 @@ var WALLET_PROFILE = {
   }
 };
 </script>
+<style id="register-dress">
+/* ══ THE THREE REGISTERS — the wallet's three dresses (skaists design system,
+   ruled 2026-09-19; founder order 2026-09-25: THREE totally different UX/UIs
+   behind the one toggle). A register changes voice, density and dress — never
+   a number, a price, a limit, an address, or what a person may do. Token
+   values are the ruled sheet, columns bee / raver / cypherpunk.
+   bee: paper ground, ink, human purple, ONE magenta action; bee-serif titles
+        over bee-sans reading (16px, never smaller); soft corners; no glow.
+   raver: the black ground, you magenta, the purples as light; raver-display
+        over raver-body; pills everywhere; glow-sovereign is the one glow.
+   cypherpunk: the same black, mono top to bottom, ai teal for every action,
+        corners cut, dense — the pipeline is the interface. */
+:root{--reg-link:#86CC72;--reg-link-hover:#A9E29A}
+body[data-reg="bee"]{
+  --bg:#fbf7f0;--panel:#ffffff;--well:#efe9dd;--ink:#0c1412;--dim:#4a5f55;--faint:#6a736e;
+  --line2:#e6dfd2;
+  --sem-harm:#4a3aa8;--sem-solution:#2e6b1e;--sem-system:#4d759b;--sem-science:#0f6f82;
+  --sem-value:#7a5209; /* honey stepped darker INSIDE its own ramp for paper — honey never sits raw on a light ground (1.88:1) */
+  --reg-primary:#a8238c;--reg-on-primary:#ffffff;--reg-link:#6e3fb8;--reg-link-hover:#4f2a8c;
+  --reg-radius-card:20px;--reg-radius-btn:12px;--reg-glow:none;
+  --reg-font-body:system-ui,-apple-system,'Segoe UI',sans-serif;
+  --reg-font-title:Georgia,'Times New Roman',serif;
+  background:#fbf7f0;color:#0c1412;color-scheme:light;
+  font:16px/1.65 var(--reg-font-body);
+}
+body[data-reg="raver"]{
+  --bg:#06110c;--panel:#0c1412;--well:#0c1412;--ink:#e9f2ec;--dim:#8fa79c;--faint:#648176;
+  --line2:#1e2b26;
+  --sem-harm:#b7a8f7;--sem-solution:#86cc72;--sem-system:#6fa9e0;--sem-science:#45c2dc;
+  --sem-value:#e8b54b;
+  --reg-primary:#d655bb;--reg-on-primary:#06110c;--reg-link:#b79fe0;--reg-link-hover:#e4d6fa;
+  --reg-radius-card:28px;--reg-radius-btn:999px;
+  --reg-glow:0 0 42px #17102855,0 0 96px #17102822; /* glow-sovereign — raver's ONE glow */
+  --reg-font-body:system-ui,-apple-system,'Segoe UI',sans-serif;
+  --reg-font-title:system-ui,-apple-system,'Segoe UI',sans-serif;
+  background:#06110c;color:#e9f2ec;color-scheme:dark;
+  font:15px/1.7 var(--reg-font-body);
+}
+body[data-reg="cypherpunk"]{
+  --bg:#06110c;--panel:#0c1412;--well:#0c1412;--ink:#e9f2ec;--dim:#8fa79c;--faint:#648176;
+  --line2:#1e2b26;
+  --sem-harm:#b7a8f7;--sem-solution:#86cc72;--sem-system:#6fa9e0;--sem-science:#45c2dc;
+  --sem-value:#e8b54b;
+  --reg-primary:#45c2dc;--reg-on-primary:#06110c;--reg-link:#45c2dc;--reg-link-hover:#8eddee;
+  --reg-radius-card:4px;--reg-radius-btn:4px;--reg-glow:none;
+  --reg-font-body:ui-monospace,'Cascadia Mono',Consolas,Menlo,monospace;
+  --reg-font-title:ui-monospace,'Cascadia Mono',Consolas,Menlo,monospace;
+  background:#06110c;color:#e9f2ec;color-scheme:dark;
+  font:13px/1.5 var(--reg-font-body);
+}
+/* ── the dress, every register ── */
+body[data-reg] section{border-radius:var(--reg-radius-card);box-shadow:var(--reg-glow)}
+body[data-reg] button{border-radius:var(--reg-radius-btn);color:var(--reg-primary);font-family:var(--reg-font-body)}
+body[data-reg] button:hover{background:var(--reg-primary);color:var(--reg-on-primary)}
+body[data-reg] button.gold{background:var(--reg-primary);border-color:var(--reg-primary);color:var(--reg-on-primary)}
+body[data-reg] input,body[data-reg] select,body[data-reg] textarea{border-radius:var(--reg-radius-btn);font-family:var(--reg-font-body)}
+body[data-reg] a{color:var(--reg-link)}
+body[data-reg] a:hover{color:var(--reg-link-hover)}
+h2::before{background:var(--sem-solution)}
+.crumbs .badge-live i{background:var(--sem-solution)}
+/* new bee: serif titles over sans reading, generous, soft; reading text 16px */
+body[data-reg="bee"] h1{background:none;color:var(--ink);font-family:var(--reg-font-title);font-weight:700;letter-spacing:-.02em}
+body[data-reg="bee"] h1 .h1-arg{background:none;color:var(--dim)}
+body[data-reg="bee"] h2{font-family:var(--reg-font-title);font-size:17px;letter-spacing:.01em}
+body[data-reg="bee"] .law{font-size:14px;line-height:1.65}
+body[data-reg="bee"] #ch-vaulta .cn{font-size:14px;letter-spacing:.06em}
+body[data-reg="bee"] .crumbs,body[data-reg="bee"] .kicker,body[data-reg="bee"] .lcap{font-size:14px;letter-spacing:.06em}
+body[data-reg="bee"] header p{font-size:14px;line-height:1.7}
+body[data-reg="bee"] footer{font-size:14px}
+body[data-reg="bee"] input,body[data-reg="bee"] select,body[data-reg="bee"] textarea{font:16px/1.5 var(--reg-font-body)}
+body[data-reg="bee"] button{font:500 14px/1.4 var(--reg-font-body)}
+/* raver: display titles, you magenta as light, pills everywhere, the one glow */
+body[data-reg="raver"] h1{font-weight:800;letter-spacing:-.03em;color:transparent;
+ background:linear-gradient(92deg,#e9f2ec 45%,#d655bb 72%,#9c6fd6);-webkit-background-clip:text;background-clip:text}
+body[data-reg="raver"] h1 .h1-arg{background:linear-gradient(92deg,#d655bb,#9c6fd6);-webkit-background-clip:text;background-clip:text;color:transparent}
+body[data-reg="raver"] h2{font-weight:800;letter-spacing:.02em}
+body[data-reg="raver"] button{font:500 14px/1.4 var(--reg-font-body)}
+body[data-reg="raver"] .crumbs,body[data-reg="raver"] .kicker,body[data-reg="raver"] .lcap{letter-spacing:.1em}
+/* cypherpunk: mono top to bottom, dense; ai teal for every action */
+body[data-reg="cypherpunk"] h1{font-weight:600}
+body[data-reg="cypherpunk"] h1 .h1-arg{background:linear-gradient(92deg,#45c2dc,#86cc72);-webkit-background-clip:text;background-clip:text;color:transparent}
+body[data-reg="cypherpunk"] section{padding:12px}
+body[data-reg="cypherpunk"] h2{letter-spacing:.08em}
+</style>
 </head>
-<body>
+<body data-bee-theme="custom">
+<script>
+/* first paint in the reader's own register — register.js re-asserts on mount.
+   THE THREE REGISTERS (founder order 2026-09-25): bee / raver / cypherpunk are
+   three totally different UX/UIs behind the one toggle — the choice lands
+   BEFORE first paint, so no register ever flashes another's dress. */
+(function(){var r='bee';try{var v=localStorage.getItem('bregister');if(v==='raver'||v==='cypherpunk')r=v;}catch(e){}
+document.body.setAttribute('data-reg',r);document.documentElement.setAttribute('data-bee-light',String(r==='bee'));})();
+</script>
 <main>
 <nav class="crumbs" aria-label="you are here">
   <a href="index.html" data-i18n="hub.name">beehive nature reserve</a><span class="sub">▸</span><span class="here" data-i18n="wl.crumb">the wallet</span>
@@ -3779,7 +3871,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
           outboxPut(entry);
           say(c.phase === 'confirmed'
             ? 'CONFIRMED — read back from the rail: ' + (c.evidence && c.evidence.read) + (c.evidence && c.evidence.status ? ' · status ' + c.evidence.status : '') + ' · tx ' + entry.ref
-            : c.phase.toUpperCase() + ' — ' + JSON.stringify(c.evidence || {}),
+            : c.phase + ' — ' + JSON.stringify(c.evidence || {}),
             c.phase);
           return entry;
         }
@@ -4058,7 +4150,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     $('matrix-body').innerHTML = families.map(function (f) {
       var rows = CHAIN_MATRIX.filter(function (c) { return c.family === f });
       return '<div style="margin-bottom:10px">' +
-        '<div style="font-size:9.5px;color:var(--faint);letter-spacing:.09em;margin-bottom:5px">' + f.toUpperCase() + ' FAMILY — ' + rows.length + ' rail' + (rows.length === 1 ? '' : 's') + '</div>' +
+        '<div style="font-size:9.5px;color:var(--faint);letter-spacing:.09em;margin-bottom:5px">' + f + ' family — ' + rows.length + ' rail' + (rows.length === 1 ? '' : 's') + '</div>' +
         rows.map(function (c) {
           return '<div style="border:1px solid var(--line);border-radius:8px;padding:8px 10px;margin-bottom:5px;background:var(--well)">' +
             '<div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;align-items:baseline">' +
