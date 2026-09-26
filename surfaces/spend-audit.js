@@ -273,11 +273,11 @@
         cellChip(a.state, 18) + '<b style="color:var(--ink)">' + esc((r.operation && r.operation.kind) || 'spend') + '</b>' +
         '<span style="color:var(--dim)">' + esc((r.seller && r.seller.name) || '') + '</span>' +
         '<span style="color:var(--faint);font-size:10px">' + esc(r.occurred_at) + '</span>' +
-        '<span style="margin-left:auto;color:var(--gold)">' + a.owedA + '</span>' +
+        '<span style="margin-left:auto;color:var(--sa-figure,var(--gold))">' + a.owedA + '</span>' +
         '<span style="font-size:9px;letter-spacing:.12em;color:var(--dim);border:1px solid var(--line);border-radius:99px;padding:2px 8px">' + a.state + '</span>' +
         '</summary>' +
         '<div style="margin-top:7px">' + lineRowsHtml({ audit: a }) + checksHtml({ audit: a }) +
-        '<div style="font-size:10px;color:var(--ink);margin-top:5px">recomputed bill: <b style="color:var(--gold)">' + a.owedA + '</b> · state <b>' + a.state + '</b> · anchored: ' + (a.covered ? 'yes' : a.state === 'PENDING_ANCHOR' ? 'not yet — honey' : 'n/a') + '</div>' +
+        '<div style="font-size:10px;color:var(--ink);margin-top:5px">recomputed bill: <b style="color:var(--sa-figure,var(--gold))">' + a.owedA + '</b> · state <b>' + a.state + '</b> · anchored: ' + (a.covered ? 'yes' : a.state === 'PENDING_ANCHOR' ? 'not yet — honey' : 'n/a') + '</div>' +
         '</div></details>';
     }).join('');
 
@@ -310,8 +310,8 @@
     };
     el.innerHTML =
       '<div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap">' +
-      '<span style="font-size:26px;font-weight:600;color:var(--gold);font-variant-numeric:tabular-nums">' + fromS(tot) + ' A</span>' +
-      '<span style="font-size:10px;letter-spacing:.14em;color:var(--faint)">recomputed total — Σ quantity × rate, never the stored number</span></div>' +
+      '<span style="font-size:26px;font-weight:600;color:var(--sa-figure,var(--gold));font-variant-numeric:tabular-nums">' + fromS(tot) + ' A</span>' +
+      '<span data-wl-tech style="font-size:10px;letter-spacing:.14em;color:var(--faint)">recomputed total — Σ quantity × rate, never the stored number</span></div>' +
       '<div style="font-size:11.5px;color:var(--ink);margin-top:6px">' + T('sa.lead', 'Every bill re-checked here in your browser — open a receipt to see its proof.') + '</div>' +
       '<details class="tnote" data-reg-disclose style="margin-top:8px"><summary data-i18n="sa.d.comb">' + T('sa.d.comb', 'The receipts — one cell per bill, tap for its proof') + '</summary>' +
       '<div style="display:flex;gap:4px;flex-wrap:wrap;margin:10px 0 2px">' + cells + '</div>' +
@@ -322,16 +322,16 @@
       (opts.showPaste !== false ?
         '<div style="margin-top:10px"><textarea id="sa-paste" rows="3" placeholder="paste any spend receipt (SPEC-SPEND-RECEIPT-1 JSON) — a stranger can audit any session, keylessly"' +
         ' style="width:100%;box-sizing:border-box;background:var(--well);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:9px;font:11px \'IBM Plex Mono\',monospace"></textarea>' +
-        '<div style="display:flex;gap:8px;align-items:center;margin-top:6px"><button type="button" id="sa-paste-go" style="background:var(--well);color:var(--gold);border:1px solid var(--line);border-radius:8px;padding:8px 14px;cursor:pointer;font:11px \'IBM Plex Mono\',monospace;min-height:44px">audit it</button>' +
+        '<div style="display:flex;gap:8px;align-items:center;margin-top:6px"><button type="button" id="sa-paste-go" style="background:var(--well);color:var(--sa-figure,var(--gold));border:1px solid var(--line);border-radius:8px;padding:8px 14px;cursor:pointer;font:11px \'IBM Plex Mono\',monospace;min-height:44px">audit it</button>' +
         '<span id="sa-paste-out" style="font-size:10px;color:var(--dim)"></span></div></div>' : '') +
       '</details>' +
       '<details class="tnote" data-reg-disclose style="margin-top:6px"><summary data-i18n="sa.d.watch">' + T('sa.d.watch', 'Services and seller scores — from this record only') + '</summary>' +
       '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">' + svcs + '</div>' +
       '<div style="margin-top:8px">' + score + '</div>' +
       '</details>' +
-      '<div style="margin-top:10px;border:1px solid var(--line);border-left:3px solid var(--gold);border-radius:6px;padding:9px 11px;font-size:10px;color:var(--ink);background:var(--well)">' +
-      '<b style="color:var(--gold);letter-spacing:.18em">CARE</b> — this is topology and vocabulary, NEVER a security claim.</div>' +
-      '<div style="margin-top:7px;font-size:9.5px;color:var(--faint);line-height:1.8">' + esc((ledger._note && ledger._note[0]) || '') + '</div>';
+      '<div data-wl-tech style="margin-top:10px;border:1px solid var(--line);border-left:3px solid var(--sa-care-line,var(--gold));border-radius:6px;padding:9px 11px;font-size:10px;color:var(--ink);background:var(--well)">' +
+      '<b style="color:var(--sa-care,var(--gold));letter-spacing:.18em">CARE</b> — this is topology and vocabulary, NEVER a security claim.</div>' +
+      '<div data-wl-tech style="margin-top:7px;font-size:9.5px;color:var(--faint);line-height:1.8">' + esc((ledger._note && ledger._note[0]) || '') + '</div>';
     /* initial seat: this mounts after register.js's apply pass, so the open
        state is set here; later register switches ride the shared law, and a
        reader's own tap always wins (click-pinned in register.js) */

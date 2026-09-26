@@ -204,3 +204,23 @@ A contract audit was posted on #237 at `4d3c108b2`. It applies the founder's pas
 - Dashes elsewhere in the shared copy (for example "unset — no limit", keyed headings like `wl.bpay.h`) remain, and are named here as open.
 
 **Not claimed:** no human (and no matriarch) has used these three grammars yet, and the gate proves only its named properties (DESIGN-CONSTRAINTS §13). No live chain was read. Balances in the receipts are injected fixtures (`12.3456 A`, `7.000 HIVE`), written into the sections' own nodes where a chain read would land.
+
+## 12 · fresh-eyes review, round 4: REQUEST CHANGES, and what changed
+
+Round 4 re-ran on `79f9ff95` (main and #240 merged in, no conflicts). It confirmed the round-4 test on the real page: tapped with the dress stripped, all 18 sections read differently in bee and raver. The merge-delta check also passed on all five points: the wallet hunks, the corpus union (0 keys lost, 0 silent overwrites), the orb-seat test, bee's 16px `.law`, and #233's lower half. What it found, and what changed:
+
+| # | finding | fix |
+|---|---|---|
+| 1 | blocker: in raver, `?compose=` and `#qr=` landed on a set of cards with the target hidden | Both open their card in raver. The QR sheet re-lands after the content above it renders, the same pattern as the composer (in cypherpunk that content first pushed it 825px out of view). Gated in all three registers. |
+| 2 | blocker: "raver (controls first)" was printed and never measured. The forge, receipts and matrix cards opened with no controls | Raver folds words, never controls: a `[data-wl-tech]` block or a note that holds a control stays. The spend-cap label folds by id (`#cap-lbl`) and its controls stay. The gate now measures controls: every raver card whose section has controls opens with one showing. The receipts' note summary counts as that control, and the claim says so. |
+| 3 | bee's receipts engineering was not folded | spend-audit's caption, CARE block and ledger note carry `data-wl-tech`. `receipts-sec` joins the gate's folded list. A new row checks that no `[data-wl-tech]` block without a control shows at rest in bee or raver. |
+| 4 | the honey check read the top border only; text colour was unmeasured | All four borders are checked, plus a new row for text colour. The wallet feeds spend-audit its accents through `--sa-figure`, `--sa-care` and `--sa-care-line`; comb.html keeps its gold by fallback. Every gold text listed in the §4 inventory is ink, amber or cyan now, including states reached only after an action. The gate does not render those; the text-colour row says so. |
+| 5 | "one tap in" never tapped; `/s+/` regex; "to the character" compared lengths | §4d drives the reader's own taps: bee's row, raver's glyph, then each card. The words exclude control labels and anything inside a closed note (this Chromium keeps layout boxes for a closed note's content). Bodies are compared as strings. |
+| 6 | bee's "show the details" carried into raver, and pressing it counted as work | A register switch folds every section again, and the toggle is not work. Gated. |
+| 7 | raver's "audit it" read at 12px | Raver sets it to its 14px button type. |
+
+**A battery was red and the receipts had said green.** `e2e/wallet-arweave.mjs` failed from the #233 merge (`b63c00c1`) onward. It passed at `0eef8ce6` and on main. Its press on `#vault-sec` at (8, 8) landed under the sticky "real home" banner, which the page pins when served off the kit's home. The battery now scrolls the section clear of the banner before the same press. No assertion changed.
+
+**Receipts (this round):** wallet-registers **GREEN 105/105**. Wallet batteries: fund 94, vault 35, matrix 11, arweave 22, signer 105, adapter 28, 0 failed. CI gates: estate-check PASS; estate-source 11/11; static suite 377/377; bPay A 18/18; bPay B 17/17; bData 100/100; no-page-errors 113 surfaces with 0 errors; i18n selftest and ru floors PASS; polish 25/25; profile 53/53; orb-seat 5/5; tour-bar 4/4; bpay-policy 2/2; comprehension 9/9; engineflow 30/30; comb-eternal 8/8.
+
+**Still open, and why:** dashes used as punctuation in the shared copy. The review measured 157 distinct visible nodes across the three registers, from about 100 source sites. They include keyed strings (`wl.h1arg`, `wl.bpay.*`, `wl.ld.*`, `sa.d.*`, `wl.reg.connect.cypher`) that need a 28-tongue redraft. That is the next commit on this lane. It is copy, not grammar, and landing it in a separate commit keeps this one reviewable. The h1's gradient argument stays gold: it is heading art, not interface text.

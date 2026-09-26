@@ -256,6 +256,7 @@ body[data-reg="raver"] h1 .h1-arg{background:linear-gradient(92deg,#d655bb,#9c6f
 body[data-reg="raver"] h2{font-weight:800;letter-spacing:.02em}
 body[data-reg="raver"] #ch-vaulta .cb{font-size:clamp(38px,10.5vw,56px);text-shadow:0 0 26px #d655bb33} /* the figure carries the light */
 body[data-reg="raver"] button{font:500 14px/1.4 var(--reg-font-body)}
+body[data-reg="raver"] #sa-paste-go{font:500 14px/1.4 var(--reg-font-body)!important}
 body[data-reg="raver"] .crumbs,body[data-reg="raver"] .kicker,body[data-reg="raver"] .lcap{letter-spacing:.1em}
 /* cypherpunk: mono top to bottom, dense; ai teal for every action */
 body[data-reg="cypherpunk"] h1{font-weight:600}
@@ -286,7 +287,7 @@ body[data-reg="bee"] .llabel[style*="#D655BB"]{color:#a8238c!important}
 body[data-reg="bee"] :is(.llabel,.lbadge)[style*="#6FA9E0"]{color:#29628f!important;border-color:#29628f!important}
 body[data-reg="bee"] .llabel[style*="#86CC72"],body[data-reg="bee"] .ldot[style*="#86CC72"]{color:#326b39!important}
 body[data-reg="bee"] #arw-go{background:#e2f0ee!important;color:#176879!important;border-color:#176879!important}
-body[data-reg="bee"] #fund-sec .fund-launch{background:#f3ead6;border-color:#855b0b;color:#855b0b}
+body[data-reg="bee"] #fund-sec .fund-launch{background:var(--well);border-color:var(--line2);color:var(--ink)}
 main summary{min-height:44px;display:flex;align-items:center;gap:6px;cursor:pointer}
 /* the ladder badges were nowrap: "CONFIRMED — read back from the rail" pushed the
    layout viewport to 466 px on a phone. They wrap under their label now. */
@@ -471,7 +472,7 @@ body[data-reg] #fund-sec .fund-coin::after{color:#0c1412;font-size:14px}
      raver       the task is glyph cards; a card opens its one section with
                  its controls first, and its words fold behind "the words" */
 body[data-reg="bee"] main>section:not([data-wl-more]) :is([data-wl-tech],.ring-wrap>svg,.ring-key){display:none!important}
-body[data-reg="raver"] main>section:not([data-wl-more]) :is(h2,[data-wl-tech],.law:not([id]),#pay-law,p,.lcap,.ring-key,details[data-reg-disclose]){display:none!important}
+body[data-reg="raver"] main>section:not([data-wl-more]) :is(h2,[data-wl-tech]:not(:has(button,input,select,textarea)),.law:not([id]),#pay-law,#cap-lbl,p,.lcap,.ring-key,details[data-reg-disclose]:not(:has(button,input,select,textarea))){display:none!important}
 .wl-more{display:none}
 body[data-reg="bee"] main>section[data-wl-fold-bee] .wl-more,body[data-reg="raver"] main>section[data-wl-fold-raver] .wl-more{display:flex}
 .wl-more span{display:none}
@@ -1143,7 +1144,7 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
        refuses to SIGN past it (a policy you wrote, enforced at your own key —
        never a human gate, never an approval step; unset = no limit). ══ -->
   <div class="row" id="cap-row" data-wl-tech style="margin-top:8px;align-items:center;flex-wrap:wrap">
-    <span style="font-size:10.5px;color:var(--faint);flex:0 0 auto">spend cap · optional, owner's tool:</span>
+    <span id="cap-lbl" style="font-size:10.5px;color:var(--faint);flex:0 0 auto">spend cap · optional, owner's tool:</span>
     <span id="cap-view" style="font-size:10.5px;color:var(--cyan);flex:1 1 auto;min-width:120px">unset — no limit</span>
     <input id="cap-amt" class="small" type="number" min="0" step="0.0001" placeholder="amount/day" title="amount per rolling day, per unit" style="max-width:110px;flex:0 1 110px">
     <select id="cap-unit" title="unit — caps are per-unit, never price-converted" style="max-width:86px;flex:0 1 86px;background:var(--well);color:var(--ink);border:1px solid var(--line);border-radius:7px;padding:9px 8px;font:12px 'IBM Plex Mono',monospace">
@@ -1357,7 +1358,7 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
           <button class="gold vc-copy" style="min-height:32px;font-size:10px" data-copy="">copy</button></div>
         <div class="law" style="margin-top:6px"><span data-i18n="wl.vc.memo1">with this EXACT memo (the memo IS the binding —</span>
         <b style="color:var(--amber)"><span data-i18n="wl.vc.memo2">no memo, no credit, money lost</span></b><span data-i18n="wl.vc.memo3">):</span></div>
-        <div class="row" style="gap:6px"><code id="vc-a-memo" style="flex:1;word-break:break-all;color:var(--gold)">—</code>
+        <div class="row" style="gap:6px"><code id="vc-a-memo" style="flex:1;word-break:break-all;color:var(--ink)">—</code>
           <button class="gold vc-copy" style="min-height:32px;font-size:10px" data-copy="">copy memo</button></div>
       </div>
       <div style="flex:1;min-width:230px;border:1px solid var(--line);border-radius:9px;padding:10px">
@@ -1375,7 +1376,7 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
       <div style="display:flex;gap:18px;flex-wrap:wrap;font-size:11px;color:var(--dim)">
         <span>spent total: <b id="vc-spent" style="color:var(--ink)">0.0000 A</b></span>
         <span>topped up: <b id="vc-dep">0.0000 A</b></span>
-        <span>tithe in there: <b id="vc-tithe" style="color:var(--gold)">0.0000 A</b> <span data-i18n="wl.vc.tithe.note">(the estate's 10%, shown never buried)</span></span>
+        <span>tithe in there: <b id="vc-tithe" style="color:var(--ink)">0.0000 A</b> <span data-i18n="wl.vc.tithe.note">(the estate's 10%, shown never buried)</span></span>
       </div>
       <details style="margin-top:8px">
         <summary style="cursor:pointer;font-size:11px;color:var(--cyan)" data-i18n="wl.vc.itemized">itemized — every receipt, every line</summary>
@@ -1406,7 +1407,7 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
   record alone. private receipts never appear here — visibility is storage law (§3a): only rows marked
   public live in a public store. paste any receipt and the same auditor checks yours.</p>
   </details>
-  <div id="receiptsBody" style="margin-top:12px"></div>
+  <div id="receiptsBody" style="margin-top:12px;--sa-figure:var(--ink);--sa-care:var(--amber);--sa-care-line:var(--line2)"></div>
 </section>
 
 <!-- ══ FUND — Meld hosted checkout (no server of ours · public key only) ══ -->
@@ -1418,12 +1419,12 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
     #fund-sec .fund-coin::after{content:'$';position:absolute;inset:0;display:grid;place-items:center;
      font-size:13px;color:#3a2c00}
     @keyframes fund-glow{0%,100%{box-shadow:0 0 5px rgba(255,215,0,.18)}50%{box-shadow:0 0 16px rgba(255,215,0,.5)}}
-    #fund-sec .fund-launch{display:inline-block;background:#33270a;color:var(--gold);border:1px solid #4d3d12;
+    #fund-sec .fund-launch{display:inline-block;background:var(--well);color:var(--ink);border:1px solid var(--line2);
      border-radius:8px;padding:10px 18px;cursor:pointer;font:12px 'IBM Plex Mono',monospace;min-height:40px;
      text-decoration:none;line-height:1.65}
-    #fund-sec .fund-launch:hover{background:var(--gold);color:#000}
+    #fund-sec .fund-launch:hover{background:var(--reg-primary);color:var(--reg-on-primary)}
     #fund-sec .fund-launch[aria-disabled="true"]{opacity:.4;cursor:not-allowed}
-    #fund-sec .fund-launch[aria-disabled="true"]:hover{background:#33270a;color:var(--gold)}
+    #fund-sec .fund-launch[aria-disabled="true"]:hover{background:var(--well);color:var(--ink)}
     #fund-sec .fund-note{border:1px solid var(--amber);color:var(--amber);border-radius:8px;
      padding:9px 12px;font-size:10.5px;line-height:1.8;margin-top:10px}
     #fund-sec .fund-nojs{border:1px dashed var(--amber);color:var(--amber);border-radius:8px;
@@ -3264,10 +3265,10 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   if(BAD_ORIGIN){
     var KIT_HOME=(window.WALLET_PROFILE&&WALLET_PROFILE.canonical_home)||'';
     var b=document.createElement('div');
-    b.style.cssText='position:sticky;top:0;z-index:50;background:#4a3a1d;color:#FFD700;border:2px solid #FFD700;border-radius:10px;padding:12px 14px;margin:10px 0;font-size:13px;line-height:1.6';
+    b.style.cssText='position:sticky;top:0;z-index:50;background:var(--well);color:var(--amber);border:2px solid var(--amber);border-radius:10px;padding:12px 14px;margin:10px 0;font-size:13px;line-height:1.6';
     b.innerHTML='<b>⚠ THIS IS A LOCAL BUILD SERVER ('+location.hostname+') — passkeys cannot work here.</b><br>'+
       'WebAuthn requires a real domain, and an IP address is never one: every passkey ceremony on this origin will fail with "invalid domain".<br>'+
-      (KIT_HOME?'<b>The wallet\'s real home:</b> <a href="'+KIT_HOME+'" style="color:#FFD700;text-decoration:underline">'+KIT_HOME.replace(/^https?:\/\//,'')+'</a> — open that link, bookmark it, and every lane (passkeys, bridge, QR, devices, pay) works smooth.'
+      (KIT_HOME?'<b>The wallet\'s real home:</b> <a href="'+KIT_HOME+'" style="color:var(--amber);text-decoration:underline">'+KIT_HOME.replace(/^https?:\/\//,'')+'</a> — open that link, bookmark it, and every lane (passkeys, bridge, QR, devices, pay) works smooth.'
                :'<b>Open this wallet on its real domain</b> — the kit profile carries no canonical home, so this copy\'s home is wherever you deployed it.');
     var main=document.querySelector('main');
     if(main)main.insertBefore(b,main.firstChild);
@@ -4526,7 +4527,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
               var t = li.resource === 'tithe.founder';
               return '<tr style="border-top:1px solid var(--line)"><td style="padding:3px 6px 3px 0">' + esc(li.resource) + '</td>' +
                 '<td style="padding:3px 6px 3px 0;text-align:right">× ' + esc(li.quantity) + ' @ ' + esc(li.rate) + '</td>' +
-                '<td style="padding:3px 0;text-align:right;color:' + (t ? 'var(--gold)' : 'var(--ink)') + '"><b>' + esc(li.charged) + ' A</b>' +
+                '<td style="padding:3px 0;text-align:right;color:var(--ink)"><b>' + esc(li.charged) + ' A</b>' +
                 (t ? ' (the tithe)' : '') + '</td></tr>';
             }).join('') + '</table></div>';
         }).join('') : '<div style="color:var(--faint)">no metered charges yet — top up and the first receipt lands here</div>';
@@ -4711,7 +4712,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       ? '<div style="color:var(--amber);font-size:10.5px;margin-top:5px;line-height:1.6"><b>⚠ GATE FAILURE</b><br>'+
         'this page reads level <b>'+p.gate.ours+'</b>; the contract’s own getMeta says <b>'+p.gate.theirs+'</b>. '+
         'The number is not smoothed — the disagreement is the finding.</div>'
-      : '<div style="font-size:12px;color:var(--sem-value,#E8B54B);margin-top:5px;letter-spacing:.14em">'+
+      : '<div style="font-size:12px;color:var(--ink);margin-top:5px;letter-spacing:.14em">'+
         esc(LT.pips(p.lvl, LT.pipmax(p.col)))+' <span style="color:var(--dim);font-size:10px;letter-spacing:0">level '+p.lvl+
         (p.gate && p.gate.agree ? ' · getMeta agrees' : '')+'</span></div>';
     return '<div style="border:1px solid var(--line2);border-radius:12px;padding:10px;background:var(--well)">'+
@@ -5430,7 +5431,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     var n=parseInt($('vlt-genlen').value,10)||8;
     var g=V.generateKeypass(n);
     $('vlt-genout').style.display='block';
-    $('vlt-genout').innerHTML='<b style="color:var(--gold);font-size:13px">'+esc(g.phrase)+'</b>\n\n'+
+    $('vlt-genout').innerHTML='<b style="color:var(--ink);font-size:13px">'+esc(g.phrase)+'</b>\n\n'+
       g.words+' words · '+g.bits+' bits of entropy · drawn from the BIP-39 list with getRandomValues\n'+
       'WRITE THIS ON PAPER NOW. It has been filled into both fields below, but it is not stored\n'+
       'anywhere else and there is no way to recover it once this page is closed.';
@@ -5439,7 +5440,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   };
   function showStrength(){
     var v=$('vlt-newpass').value, s=V.keypassStrength(v);
-    var col=s.bits<50?'var(--amber)':s.bits<70?'var(--gold)':'var(--leaf)';
+    var col=s.bits<50?'var(--amber)':s.bits<70?'var(--cyan)':'var(--leaf)';
     $('vlt-strength').innerHTML=v?('strength: <b style="color:'+col+'">'+s.label+'</b> · ~'+s.bits+' bits'):'';
   }
   $('vlt-newpass').oninput=showStrength;
@@ -5579,9 +5580,9 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       w.value=r.secret;
       var sec=$('bridge-sec');
       if(sec&&sec.style.display==='none'){
-        say('key placed in the bridge field — connect your keychain above to use it','var(--gold)');
+        say('key placed in the bridge field — connect your keychain above to use it','var(--amber)');
       } else {
-        say('key placed in the bridge field below — it is scrubbed the moment you broadcast','var(--gold)');
+        say('key placed in the bridge field below — it is scrubbed the moment you broadcast','var(--amber)');
       }
       if(sec&&sec.scrollIntoView) sec.scrollIntoView({behavior:'smooth',block:'center'});
       return;
@@ -5599,7 +5600,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     cp.textContent='copy to clipboard'; cp.style.cssText='font-size:9px;padding:5px 9px;min-height:26px';
     cp.onclick=function(){
       navigator.clipboard.writeText(r.secret).then(function(){
-        say('copied — your clipboard now holds a private key. Paste it where you need it, then copy something else.','var(--gold)');
+        say('copied — your clipboard now holds a private key. Paste it where you need it, then copy something else.','var(--amber)');
       },function(){ say('clipboard refused — select the text above and copy it manually','var(--amber)') });
     };
     var hd=document.createElement('button');
@@ -5840,7 +5841,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       var icon=s.type==="passkey"?"👆":"🔑";
       var ev=s.evidence==="E3"
         ? "<span style=\"color:var(--leaf)\">E3 device-bound</span>"
-        : "<span style=\"color:var(--gold)\">E2 synced/software</span>";
+        : "<span style=\"color:var(--amber)\">E2 synced/software</span>";
       return "<div class=\"chip\" style=\"cursor:default\">"+
         "<div class=\"cc\">"+icon+" "+esc(s.label)+(s.current?" <span style=\"color:var(--leaf)\">\u2190 you are here</span>":"")+"</div>"+
         "<div class=\"cx\">"+ev+" \u00b7 "+esc(s.kdf||"")+"</div>"+
@@ -5901,7 +5902,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   prfNote();
 })();
 </script>
-<script src="spend-audit.js?v=2"></script>
+<script src="spend-audit.js?v=3"></script>
 <script>if (window.SpendAudit) SpendAudit.mountPanel(document.getElementById('receiptsBody'));</script>
 <script>
 /* ══ THE THREE GRAMMARS — the presenter. It moves the reader through the one
@@ -5919,7 +5920,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   /* ── at task depth: every section that folds something in bee or raver gets
      ONE toggle (its words differ by register); nothing folded is ever deleted ── */
   var FOLD_BEE='[data-wl-tech],.ring-wrap>svg,.ring-key';
-  var FOLD_RV='h2,[data-wl-tech],.law:not([id]),#pay-law,p,.lcap,.ring-key,details[data-reg-disclose]';
+  var FOLD_RV='h2,[data-wl-tech],.law:not([id]),#pay-law,#cap-lbl,p,.lcap,.ring-key,details[data-reg-disclose]';
   secs.forEach(function(s){
     if(s.querySelector(FOLD_BEE))s.setAttribute('data-wl-fold-bee','');
     if(s.querySelector(FOLD_RV))s.setAttribute('data-wl-fold-raver','');
@@ -6087,7 +6088,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
      they focused or typed in becomes the bee/raver task, and a bee/raver task
      becomes cypherpunk's place. */
   var workTask=null, workSec=null;
-  function noteWork(e){if(e.target&&e.target.matches&&e.target.matches('main>section'))return;var t=taskOf(e.target);if(t){workTask=t;workSec=e.target.closest('main>section')}}
+  function noteWork(e){if(e.target&&e.target.matches&&(e.target.matches('main>section')||e.target.closest('.wl-more')))return;var t=taskOf(e.target);if(t){workTask=t;workSec=e.target.closest('main>section')}}
   document.addEventListener('focusin',noteWork);
   document.addEventListener('input',noteWork);
   function current(){
@@ -6100,6 +6101,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     var r=(e.detail&&e.detail.reg)||reg(), from=lastReg;
     if(r===from)return;
     lastReg=r;
+    secs.forEach(function(s){s.removeAttribute('data-wl-more');var b=s.querySelector('.wl-more');if(b)b.setAttribute('aria-expanded','false')});
     if(from==='cypherpunk'){
       if(workTask)setView(workTask,{replace:true});
     }
@@ -6192,10 +6194,22 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   var ownState=!!(history.state&&history.state.wlView);   /* a Back/Forward/reload into an entry that knows its view */
   try{history.replaceState({wlView:view(),wlIdx:(history.state&&history.state.wlIdx)||0},'')}catch(e){}
   landHash(ownState);
+  /* a #qr= link (the desktop's QR) lands on the waiting sheet inside the keychain, in every register */
+  if(location.hash.indexOf('#qr=')===0){
+    var q=document.getElementById('qr-sec');
+    if(q&&q.style.display!=='none'){
+      if(reg()==='raver')openSec(q.closest('main>section'),false);
+      var qMoved=false, qLand=function(){if(!qMoved&&shown(q))q.scrollIntoView({block:'start'})};
+      ['wheel','touchstart','keydown'].forEach(function(t){window.addEventListener(t,function(){qMoved=true},{once:true,passive:true})});
+      requestAnimationFrame(qLand);
+      setTimeout(qLand,700);   /* once more after the sections above it have rendered, unless the reader moved */
+    }
+  }
   /* a ?compose= link (bnames' walletAction) arrives for the composer itself:
      it lands ON the composer, not at the top of its task */
   if(/[?&]compose=/.test(location.search)){
     var c=document.getElementById('composer-sec'), moved=false;
+    if(c&&reg()==='raver')openSec(c,false);
     var land=function(){if(moved||!c)return;c.scrollIntoView({block:'start'});c.focus({preventScroll:true})};
     ['wheel','touchstart','keydown'].forEach(function(t){window.addEventListener(t,function(){moved=true},{once:true,passive:true})});
     if(document.readyState==='complete')land();else window.addEventListener('load',land,{once:true});

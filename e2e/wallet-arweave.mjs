@@ -172,6 +172,9 @@ try {
       await V.create('test-keypass-words-here', 'test-keypass-words-here');
       await V.addEntry({ type: 'arweave', secret: JSON.stringify(jwk), label: 'flow', chain: 'arweave' });
     });
+    // served off the kit's home, the page pins a sticky "real home" banner at the top: press the
+    // vault section where a reader can reach it, clear of that banner, never under it
+    await page.evaluate(() => window.scrollBy(0, document.getElementById('vault-sec').getBoundingClientRect().top - 240));
     await page.locator('#vault-sec').click({ position: { x: 8, y: 8 } }); // wakes the panel's vault hook
     await page.waitForFunction(() => /short by/.test(document.getElementById('arw-stat').textContent), null, { timeout: 8000 });
     await page.waitForTimeout(600);
