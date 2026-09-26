@@ -9,121 +9,226 @@
 <link rel="preload" href="fonts/burti.woff2" as="font" type="font/woff2" crossorigin>
 <style>
 @font-face{font-family:burti;src:url(fonts/burti.woff2) format("woff2");font-display:swap}
-:root{--paper:#fbf7f0;--ink:#0c1412;--well:#efe9dd;--line:#e6dfd2;--dim:#4a5f55;--edge:#857d70;--link:#6e3fb8;--act:#a8238c;--on:#fff;--mono:ui-monospace,"Cascadia Mono",Menlo,Consolas,monospace;--body:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;--cream:#f7f3ea;--cream-ink:#1a1a1a;--cream-dim:#5a5a5a;--cream-line:#ddd6c8}
-body[data-reg="raver"]{--paper:#0d0b14;--ink:#f4eefc;--well:#17132a;--line:#2a2346;--dim:#b9aed6;--edge:#6a5f92;--link:#d655bb;--act:#d655bb;--on:#0d0b14}
-body[data-reg="cypherpunk"]{--paper:#0a0e10;--ink:#dfeaec;--well:#10171a;--line:#1f2b30;--dim:#9db3b9;--edge:#5b7178;--link:#45c2dc;--act:#45c2dc;--on:#0a0e10;--body:var(--mono)}
+/* THREE AUTHORED PRESENTATIONS (founder 2026-09-26: "three separate user experiences and
+   interfaces/graphics/design/information for three separate personas"). One engine, one set of
+   facts and actions (register canon 2026-08-28); each register composes its own page around it.
+   Tokens per the 2026-09-25 register dress (PR #232): bee paper + ink + ONE magenta action, serif
+   title, 20px cards / 12px controls, no glow; raver black + magenta, display 800, pills, one glow;
+   cypherpunk black + mono + teal actions, 4px corners, dense. No text-transform anywhere (casing
+   law); no dash for an unknown value. The address is written once: in the field. */
+:root{--mono:ui-monospace,"Cascadia Mono",Menlo,Consolas,monospace;--sans:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;--serif:Georgia,"Iowan Old Style","Times New Roman",serif}
+body{--bg:#fbf7f0;--ink:#0c1412;--dim:#4a5f55;--well:#fffdf8;--line:#e6dfd2;--edge:#857d70;--act:#a8238c;--on:#fff;--link:#6e3fb8;--card:20px;--ctl:12px;--font:var(--sans);--title:var(--serif)}
+body[data-reg="raver"]{--bg:#06110c;--ink:#f4eefc;--dim:#c9bde6;--well:#140f22;--line:#2d2447;--edge:#6a5f92;--act:#d655bb;--on:#06110c;--link:#d655bb;--card:28px;--ctl:999px;--glow:0 0 0 1px rgba(214,85,187,.45),0 0 28px rgba(156,111,214,.45)}
+body[data-reg="cypherpunk"]{--bg:#06110c;--ink:#dfeaec;--dim:#9db3b9;--well:#0b1714;--line:#1f2b30;--edge:#5b7178;--act:#45c2dc;--on:#06110c;--link:#45c2dc;--card:4px;--ctl:4px;--font:var(--mono);--title:var(--mono)}
 *{box-sizing:border-box;margin:0}
-body{background:var(--paper);color:var(--ink);font:16px/1.6 var(--body);min-height:100dvh;padding:20px 16px 72px}
-main{max-width:720px;margin:0 auto}
-.brand{font-family:burti,var(--mono);font-size:1.15rem;color:var(--ink);text-decoration:none;display:inline-flex;align-items:center;min-height:44px}
-h1{font-size:clamp(1.6rem,6vw,2.3rem);line-height:1.15;margin:.5rem 0 .4rem;font-weight:650;letter-spacing:-.01em}
-.lead{color:var(--dim);margin-bottom:1.2rem}
+[hidden]{display:none!important}
 [data-reg]:not(body){display:none}
 body[data-reg="bee"] [data-reg="bee"],body[data-reg="raver"] [data-reg="raver"],body[data-reg="cypherpunk"] [data-reg="cypherpunk"]{display:revert}
-form{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:1.4rem}
-label{flex:1 0 100%;font-size:.9rem;color:var(--dim)}
-input{flex:1 1 240px;min-width:0;min-height:48px;padding:0 14px;font:15px var(--mono);color:var(--ink);background:var(--well);border:1.5px solid var(--edge);border-radius:12px}
-button{min-height:48px;padding:0 22px;font:600 16px var(--body);color:var(--on);background:var(--act);border:0;border-radius:12px;cursor:pointer}
+.sr{position:absolute!important;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+body{background:var(--bg);color:var(--ink);font:16px/1.55 var(--font);min-height:100dvh;padding:8px 16px 88px}
+main{max-width:640px;margin:0 auto;display:flex;flex-direction:column}
+h1{font:600 clamp(2rem,9vw,2.6rem)/1.1 var(--title);margin:.4rem 0 .35rem;letter-spacing:-.01em}
+.voice{color:var(--dim);margin:0 0 1rem}
+form{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 1rem}
+label{flex:1 0 100%;color:var(--dim)}
+input{flex:1 1 200px;min-width:0;min-height:48px;padding:0 14px;font:15px var(--mono);color:var(--ink);background:var(--well);border:1.5px solid var(--edge);border-radius:var(--ctl)}
+button{min-height:48px;padding:0 22px;font:600 16px var(--font);color:var(--on);background:var(--act);border:0;border-radius:var(--ctl);cursor:pointer;transition:transform .14s ease}
+button:active{transform:scale(.97)}
 :is(input,button,a,summary):focus-visible{outline:2.5px solid var(--ink);outline-offset:2px}
-.say{padding:14px 16px;border:1.5px dashed var(--edge);border-radius:12px;color:var(--ink)}
-body[data-reg="cypherpunk"] :is(article,input,button,.say){border-radius:3px}
-video{display:block;width:100%;max-height:70dvh;background:#000;border-radius:14px;margin:6px 0 10px}
-progress{display:block;width:100%;height:10px;margin:8px 0 0;accent-color:var(--act)}
-.got{font:14px var(--mono);color:var(--dim);margin:4px 0 0}
-.addrline{font:13px var(--mono);color:var(--dim);overflow-wrap:anywhere}
-#s-wait,#s-rough{margin:8px 0 10px}
-body[data-reg="cypherpunk"] video{border-radius:3px}
-[hidden]{display:none!important}
-.tap{margin:8px 0 0;min-height:48px;width:100%;font:600 16px var(--body);color:var(--on);background:var(--act);border:0;border-radius:12px;cursor:pointer}
-
-/* Raver — softer pulse on the wait chrome */
-body[data-reg="raver"] .lead{font-size:1.05rem;letter-spacing:.01em}
-body[data-reg="raver"] progress{height:12px;border-radius:99px;overflow:hidden}
-@media(prefers-reduced-motion:no-preference){
-  body[data-reg="raver"] #s-slow:not([hidden]){animation:pulse 2.4s ease-in-out infinite}
-  @keyframes pulse{50%{opacity:.72}}
-}
-
-/* Cypherpunk gold — Autonomi "Your file" instrument sheet (cream card on phone) */
-.sheet{margin-top:12px;padding:16px 14px 14px;background:var(--cream);color:var(--cream-ink);border:1px solid var(--cream-line);border-radius:4px;font-family:var(--mono);font-size:12.5px;line-height:1.45}
-.sheet h2{font:650 1.05rem/1.2 system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--cream-ink);margin:0 0 12px;letter-spacing:-.01em}
-.nerd{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px 12px;margin:0}
+.say{padding:12px 14px;border:1.5px dashed var(--edge);border-radius:var(--ctl);margin:0 0 12px}
+#out{display:flex;flex-direction:column;gap:12px;margin:0 0 12px}
+.stage{position:relative;background:#000;border-radius:var(--card);overflow:hidden}
+video{display:block;width:100%;max-height:70dvh;background:#000}
+progress{display:block;width:100%;height:6px;appearance:none;border:0;background:rgba(127,127,127,.25);accent-color:var(--act)}
+progress::-webkit-progress-bar{background:rgba(127,127,127,.25)}progress::-webkit-progress-value{background:var(--act)}
+.got{display:none}
+.veil{position:absolute;inset:0;display:grid;place-items:center;align-content:center;gap:6px;pointer-events:none;background:rgba(6,17,12,.55);color:#fff;text-align:center}
+.ring{width:118px;height:118px;transform:rotate(-90deg)}
+.ring circle{fill:none;stroke-width:8}.ring .track{stroke:rgba(255,255,255,.25)}.ring .fill{stroke:var(--act);stroke-linecap:round;stroke-dasharray:327;stroke-dashoffset:327;transition:stroke-dashoffset .26s ease}
+.count{position:absolute;inset:0;display:grid;place-items:center;align-content:center}
+.count b{font:700 1.9rem/1 var(--font)}
+.tap{width:100%}
+details.facts>summary{cursor:pointer;color:var(--link);min-height:44px;display:flex;align-items:center}
+.sheet h2{font:600 1.15rem/1.2 var(--title);margin:0 0 12px}
+.nerd{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 14px}
 .nerd>div{min-width:0}
-.nerd dt{font:600 10px/1.2 system-ui,sans-serif;letter-spacing:.06em;text-transform:uppercase;color:var(--cream-dim);margin:0 0 2px}
-.nerd dd{margin:0;font:12.5px/1.35 var(--mono);color:var(--cream-ink);overflow-wrap:anywhere}
-.nerd dd.nm,.nerd .nm dd{color:var(--cream-dim);font-style:normal}
-.sheet .done{margin:14px 0 0;font:12px/1.4 system-ui,sans-serif;color:var(--cream-dim)}
-.sheet-sum{font:650 .9rem/1.3 system-ui,sans-serif;color:var(--link)}
-details.sheet-wrap{margin-top:12px;border:0}
-details.sheet-wrap>summary{color:var(--link)}
-body[data-reg="cypherpunk"] details.sheet-wrap>summary{display:none}
-body[data-reg="cypherpunk"] details.sheet-wrap{border:0}
-body[data-reg="bee"] .addrline{font-size:12px}
-body[data-reg="raver"] .addrline{opacity:.75}
-@media(max-width:420px){
-  .nerd{grid-template-columns:repeat(2,minmax(0,1fr))}
-  main{max-width:390px}
+.nerd dt{font:14px/1.3 var(--font);color:var(--dim)}
+.nerd dd{margin:2px 0 0;font:15px/1.35 var(--mono);overflow-wrap:anywhere}
+.nerd .nm dd{color:var(--dim)}
+.done{margin:12px 0 0;color:var(--dim);font-size:14px}
+.note{color:var(--dim);font-size:15px;margin:0 0 12px}
+
+/* ---- NEW BEE: a calm room. Serif title, one card holding the one question, one magenta
+   action, the video in a soft frame, the wait said once over the picture. No jargon, no
+   numbers but the countdown; the facts wait behind "details". */
+body[data-reg="bee"] form{background:var(--well);border:1px solid var(--line);border-radius:var(--card);padding:16px}
+body[data-reg="bee"] label{color:var(--ink);font-weight:600}
+body[data-reg="bee"] #s-wait{border:0;padding:0 4px;color:var(--dim)}
+body[data-reg="bee"] .stage{box-shadow:0 1px 0 var(--line),0 8px 24px rgba(12,20,18,.08)}
+body[data-reg="bee"] .sheet{padding:4px 0 0}
+
+/* ---- RAVER: the drop. Black ground, a full-bleed stage, a display title in light, one pill with
+   one glowing play, a countdown you can feel, and a flow meter that says in plain words how the
+   network keeps pace with the beat. Motion is slow (well under 3 Hz), pausable, still when the
+   reader asks for reduced motion and whenever the tab is hidden. */
+body[data-reg="raver"] h1{font:800 clamp(2.6rem,13vw,3.6rem)/1 var(--sans);background:linear-gradient(90deg,#d655bb,#9c6fd6 60%,#45c2dc);-webkit-background-clip:text;background-clip:text;color:transparent;margin-top:.6rem}
+body[data-reg="raver"] form{flex-wrap:nowrap;background:var(--well);border-radius:999px;padding:6px;box-shadow:var(--glow)}
+body[data-reg="raver"] form input{border:0;background:transparent}
+body[data-reg="raver"] form label{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+body[data-reg="raver"] form button{width:52px;padding:0;font-size:20px;flex:none}
+body[data-reg="raver"] .stage{margin:0 -16px;border-radius:0}
+body[data-reg="raver"] .veil{background:radial-gradient(circle at 50% 50%,rgba(20,15,34,.35),rgba(6,17,12,.85))}
+body[data-reg="raver"] .ring{width:150px;height:150px;filter:drop-shadow(0 0 10px rgba(214,85,187,.7))}
+body[data-reg="raver"] .count b{font:800 3.2rem/1 var(--sans)}
+body[data-reg="raver"] #s-wait{display:none}
+body[data-watching] :is(#art,#motion){display:none!important}
+.till{font:600 15px/1.2 var(--sans);opacity:.9}
+body[data-reg="raver"] progress{height:3px}
+.art{margin:0 -16px 16px;display:block}
+.art svg{display:block;width:100%;height:auto}
+.flow{display:flex;align-items:flex-end;gap:10px}
+.flow .bars{display:flex;align-items:flex-end;gap:4px;height:34px;flex:none}
+.flow .bars i{display:block;width:8px;border-radius:99px;background:#2d2447}
+.flow .bars i:nth-child(1){height:10px}.flow .bars i:nth-child(2){height:16px}.flow .bars i:nth-child(3){height:22px}.flow .bars i:nth-child(4){height:28px}.flow .bars i:nth-child(5){height:34px}
+.flow .bars i.on{background:linear-gradient(#d655bb,#9c6fd6);box-shadow:0 0 8px rgba(214,85,187,.6)}
+.flow p{color:var(--dim);font-size:15px}
+.motion{background:transparent;color:var(--dim);border:1px solid var(--line);min-height:44px;padding:0 16px;font-weight:400;align-self:flex-start;margin:0 0 14px}
+@media(prefers-reduced-motion:no-preference){
+  body[data-reg="raver"]:not([data-motion-paused]) .beat{animation:beat 1.6s ease-in-out infinite;transform-origin:50% 100%;transform-box:fill-box}
+  body[data-reg="raver"]:not([data-motion-paused]) .beat:nth-child(2n){animation-delay:.4s}
+  body[data-reg="raver"]:not([data-motion-paused]) .beat:nth-child(3n){animation-delay:.8s}
+  body[data-reg="raver"]:not([data-motion-paused]) .halo{animation:halo 3.2s ease-in-out infinite}
+  @keyframes beat{50%{transform:scaleY(.45)}}
+  @keyframes halo{50%{opacity:.35}}
 }
+body[data-tab-hidden] *{animation-play-state:paused!important}
+@media(prefers-reduced-motion:reduce){#motion{display:none!important}}
+
+/* ---- CYPHERPUNK: the instrument, complete at first paint. Mono top to bottom, teal actions,
+   4px corners. The file as a byte map, the start rule with its live numbers, the device's own
+   decodingInfo answer, a receipt log, and the your-file grid open — cite or silent. */
+body[data-reg="cypherpunk"]{font-size:14px}
+body[data-reg="cypherpunk"] h1{font:600 1.5rem/1.2 var(--mono)}
+body[data-reg="cypherpunk"] .voice{font-size:13px}
+body[data-reg="cypherpunk"] label{font-size:13px}
+body[data-reg="cypherpunk"] .say{border-style:solid;font-size:13px}
+body[data-reg="cypherpunk"] details.facts>summary{display:none}
+body[data-reg="cypherpunk"] .sheet,.pane{border:1px solid var(--line);border-radius:4px;padding:12px;background:var(--well)}
+body[data-reg="cypherpunk"] .nerd{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 12px}
+body[data-reg="cypherpunk"] .nerd dt{font:12.5px var(--mono)}
+body[data-reg="cypherpunk"] .nerd dd{font-size:13px}
+body[data-reg="cypherpunk"] progress,body[data-reg="cypherpunk"] .veil,body[data-reg="cypherpunk"] #s-wait{display:none!important}
+.pane{margin:0 0 12px}
+.pane h2{font:600 13px/1.3 var(--mono);color:var(--dim);margin:0 0 8px}
+.map svg{display:block;width:100%;height:46px}
+.map .legend{display:flex;flex-wrap:wrap;gap:4px 12px;margin:6px 0 0;font:12.5px var(--mono);color:var(--dim)}
+.map .legend i{display:inline-block;width:10px;height:10px;margin-right:4px;vertical-align:-1px;border-radius:2px}
+.kv{font:13px/1.5 var(--mono);overflow-wrap:anywhere}
+.log{list-style:none;padding:0;font:12.5px/1.5 var(--mono);color:var(--dim);max-height:220px;overflow:auto}
+.log b{color:var(--ink);font-weight:400}
+@media(min-width:760px){.nerd{grid-template-columns:repeat(3,minmax(0,1fr))}}
 </style>
 </head>
-<body data-experience="bview" data-bee-theme="shared">
+<body data-experience="bview" data-bee-theme="custom">
 <script>
 /* first paint in the reader's own register — register.js re-asserts on mount */
 (function(){var r='bee';try{var v=localStorage.getItem('bregister');if(v==='raver'||v==='cypherpunk')r=v;}catch(e){}
 document.body.setAttribute('data-reg',r);document.documentElement.setAttribute('data-bee-light',String(r==='bee'));
+try{if(localStorage.getItem('bnr.motion.paused')==='1')document.body.setAttribute('data-motion-paused','');}catch(e){}
 document.addEventListener('DOMContentLoaded',function(){
   document.querySelectorAll('details[data-reg-disclose]').forEach(function(d){if(!d.dataset.userTouched)d.open=(r==='cypherpunk');});
 });})();
 </script>
 <main>
-  <a class="brand" href="index.html" translate="no" dir="ltr">skaists.dev</a>
   <h1 data-i18n="bview.title">bViEw</h1>
-  <p class="lead" data-reg="bee" data-i18n="bview.lead">Paste an autonomi:// address. No app, no account.</p>
-  <p class="lead" data-reg="raver" data-i18n="bview.raverLead">Bring a public address. Feel the pulse as the picture arrives.</p>
-  <p class="lead" data-reg="cypherpunk" data-i18n="bview.cypherLead">Your file — honest client and door metrics only. Nothing invented.</p>
+  <p class="voice" data-reg="bee" data-i18n="bview.bee.lead">Watch a video someone shared with you.</p>
+  <p class="voice" data-reg="raver" data-i18n="bview.raverLead">Bring a public address. Feel the pulse as the picture arrives.</p>
+  <p class="voice" data-reg="cypherpunk" data-i18n="bview.cypherLead">Your file — honest client and door metrics only. Nothing invented.</p>
+  <figure class="art" data-reg="raver" id="art" aria-hidden="true">
+    <svg viewBox="0 0 390 150" preserveAspectRatio="xMidYMid slice">
+      <defs><linearGradient id="gv" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#9c6fd6"/><stop offset="1" stop-color="#d655bb"/></linearGradient>
+      <radialGradient id="gh"><stop offset="0" stop-color="#d655bb" stop-opacity=".55"/><stop offset="1" stop-color="#d655bb" stop-opacity="0"/></radialGradient></defs>
+      <rect width="390" height="150" fill="#06110c"/>
+      <circle class="halo" cx="195" cy="150" r="140" fill="url(#gh)"/>
+      <g fill="url(#gv)"><rect class="beat" x="31" y="70" width="10" height="80" rx="5"/><rect class="beat" x="55" y="40" width="10" height="110" rx="5"/><rect class="beat" x="79" y="85" width="10" height="65" rx="5"/><rect class="beat" x="103" y="25" width="10" height="125" rx="5"/><rect class="beat" x="127" y="60" width="10" height="90" rx="5"/><rect class="beat" x="151" y="10" width="10" height="140" rx="5"/><rect class="beat" x="175" y="45" width="10" height="105" rx="5"/><rect class="beat" x="199" y="5" width="10" height="145" rx="5"/><rect class="beat" x="223" y="50" width="10" height="100" rx="5"/><rect class="beat" x="247" y="20" width="10" height="130" rx="5"/><rect class="beat" x="271" y="75" width="10" height="75" rx="5"/><rect class="beat" x="295" y="35" width="10" height="115" rx="5"/><rect class="beat" x="319" y="90" width="10" height="60" rx="5"/><rect class="beat" x="343" y="55" width="10" height="95" rx="5"/></g>
+    </svg>
+  </figure>
+  <button type="button" class="motion" data-reg="raver" id="motion"><span data-i18n="bview.raver.pause" id="motion-pause">pause the motion</span><span data-i18n="bview.raver.resume" id="motion-play" hidden>let it move</span></button>
   <form id="f" autocomplete="off">
-    <label for="addr" data-i18n="bview.label">autonomi:// address</label>
+    <label for="addr"><span data-reg="bee" data-i18n="bview.bee.label">The link you were sent</span><span data-reg="raver" class="sr" data-i18n="bview.raver.label">public address</span><span data-reg="cypherpunk" data-i18n="bview.cy.label">address (64 hex)</span></label>
     <input id="addr" name="addr" inputmode="url" spellcheck="false" dir="ltr" translate="no" placeholder="autonomi://…">
-    <button type="submit" data-i18n="bview.go">Open</button>
+    <button type="submit" class="primary"><span data-reg="bee" data-i18n="bview.bee.go">watch</span><span data-reg="raver" aria-hidden="true">▶</span><span data-reg="raver" class="sr" data-i18n="bview.raver.go">play</span><span data-reg="cypherpunk" data-i18n="bview.cy.go">fetch</span></button>
   </form>
-  <p class="say" id="s-bad" data-i18n="bview.bad" hidden>That is not an autonomi:// address. It is 64 letters and numbers after autonomi://</p>
+  <p class="say" id="s-bad" data-i18n="bview.badOne" hidden>That is not a video address: after autonomi:// come 64 letters and numbers.</p>
   <p class="say" id="s-slow" data-i18n="bview.slow" hidden>Fetching from the network. The first seconds can take a while.</p>
-  <progress id="pg" max="1" value="0" aria-labelledby="s-slow" hidden></progress>
-  <p class="got" id="got" translate="no" dir="ltr" aria-live="off" hidden></p>
-  <p class="say" id="s-wait" data-i18n="bview.wait" hidden>Ready to play in ~{s} s. The network sends this video slower than it plays, so a head start loads first.</p>
-  <p class="say" id="s-rough" data-i18n="bview.rough" hidden>This device may not play this video smoothly.</p>
   <p class="say" id="s-fail" data-i18n="bview.fail" hidden>The network door did not answer, or this file is not a video. Try again in a few minutes.</p>
   <section id="out" aria-live="polite" hidden>
-    <video id="v" controls playsinline preload="auto"></video>
-    <button type="button" class="tap" id="tap" hidden>Tap to play with sound</button>
-    <p class="addrline" id="shown" translate="no" dir="ltr"></p>
-    <details class="sheet-wrap" data-reg-disclose id="sheet-wrap">
-      <summary class="sheet-sum" data-i18n="bview.sheet.sum">Your file — download sheet</summary>
-      <div class="sheet" id="sheet">
-        <h2 data-i18n="bview.sheet.title">Your file</h2>
-        <dl class="nerd" id="nerd">
-          <div><dt data-i18n="bview.n.address">Address</dt><dd id="n-addr" translate="no">—</dd></div>
-          <div><dt data-i18n="bview.n.size">Size</dt><dd id="n-size" translate="no">—</dd></div>
-          <div><dt data-i18n="bview.n.rate">Rate</dt><dd id="n-rate" translate="no">—</dd></div>
-          <div><dt data-i18n="bview.n.cl">Content-Length</dt><dd id="n-cl" translate="no">—</dd></div>
-          <div><dt data-i18n="bview.n.chunk">X-Ant-First-Chunk</dt><dd id="n-chunk" translate="no">—</dd></div>
-          <div><dt data-i18n="bview.n.ranges">Accept-Ranges</dt><dd id="n-ranges" translate="no">—</dd></div>
-          <div><dt data-i18n="bview.n.ttfb">TTFB</dt><dd id="n-ttfb" translate="no">—</dd></div>
-          <div><dt data-i18n="bview.n.ttff">Time to first frame</dt><dd id="n-ttff" translate="no">—</dd></div>
-          <div><dt data-i18n="bview.n.path">Path</dt><dd id="n-path" translate="no">—</dd></div>
-          <div><dt data-i18n="bview.n.sha">SHA-256</dt><dd id="n-sha" translate="no">—</dd></div>
-          <div class="nm"><dt data-i18n="bview.n.chunks">Chunks</dt><dd data-i18n="bview.notMeasured">not measured</dd></div>
-          <div class="nm"><dt data-i18n="bview.n.chunkReq">Chunk requests answered</dt><dd data-i18n="bview.notMeasured">not measured</dd></div>
-          <div class="nm"><dt data-i18n="bview.n.lookup">Lookup answers</dt><dd data-i18n="bview.notMeasured">not measured</dd></div>
-          <div class="nm"><dt data-i18n="bview.n.lookupTraffic">Lookup traffic</dt><dd data-i18n="bview.notMeasured">not measured</dd></div>
-        </dl>
-        <p class="done" id="n-done" hidden></p>
+    <div class="stage">
+      <video id="v" controls playsinline preload="auto"></video>
+      <div class="veil" id="veil" hidden>
+        <svg class="ring" viewBox="0 0 120 120"><circle class="track" cx="60" cy="60" r="52"/><circle class="fill" id="ring" cx="60" cy="60" r="52"/></svg>
+        <p class="count"><span><b id="count" translate="no" dir="ltr"></b><br><span class="till" data-reg="raver" data-i18n="bview.raver.till">till it plays</span></span></p>
       </div>
-    </details>
+      <progress id="pg" max="1" value="0" aria-labelledby="s-slow" hidden></progress>
+    </div>
+    <p class="got" id="got" translate="no" dir="ltr" aria-live="off" hidden></p>
+    <button type="button" class="tap" id="tap" data-i18n="bview.tap" hidden>tap to play with sound</button>
+    <p class="say" id="s-wait" hidden></p>
+    <p class="say" id="s-rough" data-i18n="bview.rough" hidden>This device may not play this video smoothly.</p>
+    <div class="flow" data-reg="raver" id="flow" hidden>
+      <span class="bars" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
+      <p id="flow-say"></p>
+    </div>
   </section>
-  <p class="lead" data-reg="bee" data-i18n="bview.note">Public files only. Anyone with the address can open it. This device keeps a copy so refresh does not re-fetch.</p>
-  <p class="lead" data-reg="raver" data-i18n="bview.raverNote">A public picture, shared by address. Your device keeps a copy — refresh stays warm.</p>
-  <p class="lead" data-reg="cypherpunk" data-i18n="bview.cypherNote">Cite-or-silent: only fields this client or the estate door actually returned. Autonomi network chunk/lookup stats are not measured here.</p>
+  <section id="inst" data-reg="cypherpunk">
+    <div class="pane map">
+      <h2 data-i18n="bview.cy.map">byte map</h2>
+      <svg id="map" viewBox="0 0 358 46" preserveAspectRatio="none" role="img" aria-labelledby="map-say">
+        <rect x="0" y="10" width="358" height="22" fill="#10201c"/>
+        <rect id="map-got" x="0" y="10" width="0" height="22" fill="#1f5b66"/>
+        <rect id="map-blob" x="0" y="10" width="0" height="22" fill="none" stroke="#45c2dc" stroke-width="2"/>
+        <rect id="map-head" x="0" y="10" width="0" height="22" fill="#9db3b9"/>
+        <line id="map-go" x1="0" x2="0" y1="4" y2="38" stroke="#d655bb" stroke-width="2" stroke-dasharray="3 2" visibility="hidden"/>
+        <line id="map-play" x1="0" x2="0" y1="2" y2="44" stroke="#dfeaec" stroke-width="2" visibility="hidden"/>
+      </svg>
+      <p class="legend"><span><i style="background:#9db3b9"></i>moov</span><span><i style="background:#1f5b66"></i>arrived</span><span><i style="border:2px solid #45c2dc"></i>in the playing blob</span><span><i style="background:#d655bb"></i>play allowed</span><span><i style="background:#dfeaec"></i>playhead</span></p>
+      <p class="kv" id="map-say" translate="no" dir="ltr"></p>
+    </div>
+    <div class="pane"><h2 data-i18n="bview.cy.rule">start rule</h2><p class="kv" id="rule" translate="no" dir="ltr">(mdat end − arrived) ÷ rate × 1.15 + 2 s ≤ duration − playhead</p></div>
+    <div class="pane"><h2 translate="no">decodingInfo</h2><p class="kv" id="dec" translate="no" dir="ltr"></p></div>
+    <div class="pane"><h2 data-i18n="bview.cy.log">receipts</h2><ol class="log" id="log" translate="no" dir="ltr"></ol></div>
+  </section>
+  <p class="note" data-reg="bee" data-i18n="bview.bee.note">Public video: anyone with the link can watch it. This device keeps a copy, so it opens at once next time.</p>
+  <p class="note" data-reg="raver" data-i18n="bview.raverNote">A public picture, shared by address. Your device keeps a copy — refresh stays warm.</p>
+  <details class="facts" data-reg-disclose id="sheet-wrap">
+    <summary><span data-reg="bee" data-i18n="bview.bee.sum">details</span><span data-reg="raver" data-i18n="bview.raver.sum">the numbers</span><span data-reg="cypherpunk" data-i18n="bview.sheet.sum">Your file — download sheet</span></summary>
+    <div class="sheet" id="sheet">
+      <h2 data-reg="cypherpunk" data-i18n="bview.sheet.title">your file</h2>
+      <dl class="nerd" id="nerd">
+        <div><dt data-i18n="bview.n.size">Size</dt><dd id="n-size" translate="no"></dd></div>
+        <div><dt data-i18n="bview.n.rate">Rate</dt><dd id="n-rate" translate="no"></dd></div>
+        <div><dt data-i18n="bview.n.duration">Length</dt><dd id="n-dur" translate="no"></dd></div>
+        <div><dt data-i18n="bview.n.bitrate">Bitrate</dt><dd id="n-bps" translate="no"></dd></div>
+        <div><dt data-i18n="bview.n.codec">Codec</dt><dd id="n-codec" translate="no"></dd></div>
+        <div><dt data-i18n="bview.n.frame">Picture</dt><dd id="n-frame" translate="no"></dd></div>
+        <div><dt data-i18n="bview.n.decoder">This device</dt><dd id="n-dec" translate="no"></dd></div>
+        <div><dt data-i18n="bview.n.blob">In the playing copy</dt><dd id="n-blob" translate="no"></dd></div>
+        <div><dt data-i18n="bview.n.cl">Content-Length</dt><dd id="n-cl" translate="no"></dd></div>
+        <div><dt data-i18n="bview.n.chunk">X-Ant-First-Chunk</dt><dd id="n-chunk" translate="no"></dd></div>
+        <div><dt data-i18n="bview.n.ranges">Accept-Ranges</dt><dd id="n-ranges" translate="no"></dd></div>
+        <div><dt data-i18n="bview.n.ttfb">TTFB</dt><dd id="n-ttfb" translate="no"></dd></div>
+        <div><dt data-i18n="bview.n.ttff">Time to first frame</dt><dd id="n-ttff" translate="no"></dd></div>
+        <div><dt data-i18n="bview.n.path">Path</dt><dd id="n-path" translate="no"></dd></div>
+        <div><dt data-i18n="bview.n.sha">SHA-256</dt><dd id="n-sha" translate="no"></dd></div>
+        <div class="nm"><dt data-i18n="bview.n.chunks">Chunks</dt><dd data-i18n="bview.notMeasured">not measured</dd></div>
+        <div class="nm"><dt data-i18n="bview.n.chunkReq">Chunk requests answered</dt><dd data-i18n="bview.notMeasured">not measured</dd></div>
+        <div class="nm"><dt data-i18n="bview.n.lookup">Lookup answers</dt><dd data-i18n="bview.notMeasured">not measured</dd></div>
+        <div class="nm"><dt data-i18n="bview.n.lookupTraffic">Lookup traffic</dt><dd data-i18n="bview.notMeasured">not measured</dd></div>
+      </dl>
+      <p class="done" id="n-done" hidden></p>
+      <p class="done" data-reg="cypherpunk" data-i18n="bview.cypherNote">Cite-or-silent: only fields this client or the estate door actually returned. Autonomi network chunk/lookup stats are not measured here.</p>
+    </div>
+  </details>
 </main>
 <script src="lang.js?v=42"></script>
 <script src="tour.js?v=42"></script>
@@ -162,13 +267,15 @@ document.addEventListener('DOMContentLoaded',function(){
   const SAFETY = 1.15, MARGIN = 2, AHEAD = 1, EXTEND_LEAD = 1.5, EXTEND_GAIN = 2;
   const WAIT_EN = 'Ready to play in ~{s} s. The network sends this video slower than it plays, so a head start loads first.';
   const $ = id => document.getElementById(id), says = ['s-bad', 's-slow', 's-wait', 's-fail'];
-  const say = id => says.forEach(s => $(s).hidden = s !== id);
+  const say = id => { says.forEach(s => $(s).hidden = s !== id); const vl = $('veil'); if (vl && id !== 's-wait') vl.hidden = true; };
   const parse = raw => { const m = /^\s*(?:autonomi:\/\/)?([0-9a-f]{64})\s*$/i.exec(raw || ''); return m ? m[1].toLowerCase() : null; };
   const v = $('v'), pg = $('pg');
   const tap = $('tap');
   const CACHE = 'ant-bview-v1';
   const cacheKey = a => 'ant-bview://' + a;
-  const dash = '\u2014';
+  // Language for dynamic text; an unknown value is said, never drawn as a dash (brand law).
+  const lang = (k, en) => window.BNRLanguage && typeof window.BNRLanguage.text === 'function' ? window.BNRLanguage.text(k, en) : en;
+  const notYet = () => lang('bview.notYet', 'not yet');
   const metrics = {
     addr: '', path: '', cl: null, acceptRanges: null, firstChunk: null,
     ttfbMs: null, ttffMs: null, bytes: 0, rateMbs: null, sha: null, t0: 0, doneMs: null
@@ -178,27 +285,45 @@ document.addEventListener('DOMContentLoaded',function(){
     metrics.firstChunk = null; metrics.ttfbMs = null; metrics.ttffMs = null;
     metrics.bytes = 0; metrics.rateMbs = null; metrics.sha = null; metrics.t0 = 0; metrics.doneMs = null;
   };
-  const fmtMs = ms => ms == null ? dash : (ms < 1000 ? Math.round(ms) + ' ms' : (ms / 1000).toFixed(2) + ' s');
-  const fmtMb = n => n == null ? dash : ((n / 1048576) >= 10 ? (n / 1048576).toFixed(0) : (n / 1048576).toFixed(1)) + ' MB';
+  const fmtMs = ms => ms == null ? notYet() : (ms < 1000 ? Math.round(ms) + ' ms' : (ms / 1000).toFixed(2) + ' s');
+  const fmtMb = n => n == null ? notYet() : ((n / 1048576) >= 10 ? (n / 1048576).toFixed(0) : (n / 1048576).toFixed(1)) + ' MB';
   const paintNerd = () => {
     const set = (id, t) => { const el = $(id); if (el) el.textContent = t; };
-    set('n-addr', metrics.addr ? 'autonomi://' + metrics.addr : dash);
-    set('n-size', metrics.bytes ? fmtMb(metrics.bytes) : dash);
-    set('n-rate', metrics.rateMbs != null && metrics.rateMbs >= 0.05 ? metrics.rateMbs.toFixed(1) + ' MB/s' : dash);
-    set('n-cl', metrics.cl != null && metrics.cl > 0 ? String(metrics.cl) + ' B' : dash);
-    set('n-chunk', metrics.firstChunk || dash);
-    set('n-ranges', metrics.acceptRanges || dash);
+    const ny = notYet(), pl = feed && feed.plan, d = metrics.dec;
+    set('n-size', metrics.bytes ? fmtMb(metrics.bytes) : ny);
+    set('n-rate', metrics.rateMbs != null && metrics.rateMbs >= 0.05 ? metrics.rateMbs.toFixed(1) + ' MB/s' : ny);
+    set('n-dur', pl ? pl.dur.toFixed(2) + ' s' : ny);
+    set('n-bps', pl ? (8 * (pl.m1 - pl.m0) / pl.dur / 1e6).toFixed(1) + ' Mb/s' : ny);
+    set('n-codec', pl && pl.codec || ny);
+    set('n-frame', pl && pl.w ? pl.w + '×' + pl.h + (pl.fps ? ' · ' + (+pl.fps.toFixed(2)) + ' fps' : '') : ny);
+    set('n-dec', d ? 'supported ' + d.supported + ' · smooth ' + d.smooth : ny);
+    if (!d) set('dec', ny);
+    set('n-blob', feed && feed.paintedAt ? fmtMb(feed.paintedAt) : ny);
+    set('n-cl', metrics.cl != null && metrics.cl > 0 ? String(metrics.cl) + ' B' : ny);
+    set('n-chunk', metrics.firstChunk || ny);
+    set('n-ranges', metrics.acceptRanges || ny);
     set('n-ttfb', fmtMs(metrics.ttfbMs));
     set('n-ttff', fmtMs(metrics.ttffMs));
-    set('n-path', metrics.path || dash);
-    set('n-sha', metrics.sha || dash);
+    set('n-path', metrics.path || ny);
+    set('n-sha', metrics.sha || ny);
     const done = $('n-done');
     if (done) {
       if (metrics.doneMs != null) {
         done.hidden = false;
-        done.textContent = 'Done in ' + (metrics.doneMs / 1000).toFixed(2) + ' s via the estate door';
+        done.textContent = lang('bview.done', 'done in {s} s via the estate door').replace('{s}', (metrics.doneMs / 1000).toFixed(2));
       } else { done.hidden = true; done.textContent = ''; }
     }
+  };
+  // Cypherpunk receipts: one line per thing that happened, stamped from Open. Never the address
+  // (it is in the field, once).
+  const note = msg => {
+    const ol = $('log');
+    if (!ol || !metrics.t0) return;
+    const li = document.createElement('li'), b = document.createElement('b');
+    b.textContent = '+' + ((performance.now() - metrics.t0) / 1000).toFixed(2) + ' ';
+    li.append(b, msg); ol.append(li);
+    while (ol.children.length > 40) ol.firstElementChild.remove();
+    ol.scrollTop = ol.scrollHeight;
   };
   const noteHeaders = (r) => {
     // content-length is CORS-safelisted; x-ant-first-chunk + accept-ranges need
@@ -264,7 +389,7 @@ document.addEventListener('DOMContentLoaded',function(){
       : (mb >= 10 ? mb.toFixed(0) : mb.toFixed(1)) + ' MB';
     // slide window so the rate stays honest
     if (dt >= 1.5) { rateClock.t0 = performance.now(); rateClock.b0 = bytes; }
-    paintNerd();
+    paintNerd(); paintFlow(); renderInst();
   };
   // Delivery rate for planning, bytes/s: the live MB/s meter's window above (a slow door under
   // 0.05 MB/s is still measured; the display floor would freeze the last fast value), never above
@@ -283,6 +408,7 @@ document.addEventListener('DOMContentLoaded',function(){
     const st = feed;
     if (!st || st.my !== job || !st.plan || !st.sounded || st.busy || pg.hidden) return false;
     st.stalled = true;
+    note('ran dry at ' + keepAt.toFixed(2) + ' s: holding until the rule allows');
     try { v.pause(); } catch {}
     if (!st.done) steer(st);
     return true;
@@ -296,6 +422,7 @@ document.addEventListener('DOMContentLoaded',function(){
       // Past what the running Blob can hold = Chrome's end-of-data yank, never the viewer's playhead.
       if (t > mediaAt(st.plan, st.paintedAt) + 1) { try { v.currentTime = keepAt; } catch {} dry(); return; }
       if (t > 0.05) keepAt = t;
+      renderInst();
       if (!st.done) steer(st);
       return;
     }
@@ -329,15 +456,29 @@ document.addEventListener('DOMContentLoaded',function(){
     if (!$('s-wait').hidden) say(null);
     if (st.stalled) { st.stalled = false; extend(st, keepAt, true); }
   });
-  // "Ready to play in ~N s": the number is live, the sentence is the corpus's (bview.wait, {s}).
-  let waitS = 0;
+  // The wait, said once per register: bee and raver carry the number on the picture (a ring that
+  // fills as the head start arrives); bee adds one plain sentence under it; raver's flow meter says
+  // why; cypherpunk reads it off the start rule. #s-wait[data-s] holds the seconds for everyone.
+  let waitS = 0, waitFrac = 0;
   const paintWait = () => {
+    const w = $('s-wait'), on = !!waitS && !w.hidden;
+    $('veil').hidden = !on;
     if (!waitS) return;
-    const t = window.BNRLanguage && typeof window.BNRLanguage.text === 'function' ? window.BNRLanguage.text('bview.wait', WAIT_EN) : WAIT_EN;
-    $('s-wait').textContent = t.replace('{s}', waitS);
+    w.dataset.s = waitS;
+    w.textContent = lang('bview.bee.wait', 'It starts by itself. The network sends this video slower than it plays, so a head start loads first.');
+    $('count').textContent = document.body.getAttribute('data-reg') === 'raver' ? String(waitS) : waitS + ' s';
+    $('ring').style.strokeDashoffset = String(327 * (1 - Math.min(1, Math.max(0, waitFrac))));
   };
-  const showWait = w => { waitS = Math.max(1, Math.ceil(w)); paintWait(); say('s-wait'); };
-  document.addEventListener('blang', paintWait);
+  const showWait = w => {
+    const first = !waitS;
+    waitS = Math.max(1, Math.ceil(w));
+    const r = rateBps(), n = feed ? feed.bytes : 0;
+    waitFrac = r ? n / (n + w * r) : 0;
+    if (first) note('hold ~' + waitS + ' s: the rest arrives slower than it plays');
+    say('s-wait'); paintWait(); renderInst();
+  };
+  document.addEventListener('blang', () => { paintWait(); paintNerd(); paintFlow(); });
+  document.addEventListener('bregister', () => { paintWait(); paintFlow(); renderInst(); });
   const b64 = typeof Uint8Array.fromBase64 === 'function' ? s => Uint8Array.fromBase64(s)
     : s => { const t = atob(s), u = new Uint8Array(t.length); for (let i = 0; i < t.length; i++) u[i] = t.charCodeAt(i); return u; };
   const kind = u => u.length < 8 ? '' : u[4] === 0x66 && u[5] === 0x74 && u[6] === 0x79 && u[7] === 0x70 ? 'video/mp4'
@@ -447,9 +588,64 @@ document.addEventListener('DOMContentLoaded',function(){
         contentType: 'video/mp4; codecs="' + pl.codec + '"', width: pl.w, height: pl.h,
         bitrate: Math.max(1, Math.round(8 * (pl.m1 - pl.m0) / pl.dur)), framerate: +pl.fps.toFixed(3),
       } });
-      if (my === job && r && r.smooth === false) $('s-rough').hidden = false;
+      if (my !== job || !r) return;
+      metrics.dec = { supported: r.supported, smooth: r.smooth, powerEfficient: r.powerEfficient };
+      const line = 'video/mp4; codecs="' + pl.codec + '" ' + pl.w + '×' + pl.h + ' ' + (+pl.fps.toFixed(2)) + ' fps ' + (8 * (pl.m1 - pl.m0) / pl.dur / 1e6).toFixed(1) + ' Mb/s → supported ' + r.supported + ' · smooth ' + r.smooth + ' · powerEfficient ' + r.powerEfficient;
+      $('dec').textContent = line; note('decodingInfo answered: smooth ' + r.smooth);
+      paintNerd();
+      if (r.smooth === false) $('s-rough').hidden = false;
     } catch {}
   }
+  // Raver: how the network keeps pace with the beat, as five bars and one literal sentence.
+  // ratio = delivery rate ÷ the video's own bitrate (1 = exactly as fast as it plays).
+  function paintFlow() {
+    const box = $('flow'), pl = feed && feed.plan, r = rateBps();
+    if (!box) return;
+    if (!pl || !r || (feed.sounded && !feed.stalled) || feed.done) { box.hidden = true; return; }
+    const x = r / ((pl.m1 - pl.m0) / pl.dur), lit = x >= 1.5 ? 5 : x >= 1 ? 4 : x >= 0.75 ? 3 : x >= 0.5 ? 2 : x > 0.2 ? 1 : 0;
+    box.querySelectorAll('.bars i').forEach((b, i) => b.classList.toggle('on', i < lit));
+    const k = x >= 1 ? ['bview.raver.flowOk', 'the network keeps up: it sends {x}× as fast as this plays.']
+                     : ['bview.raver.flowSlow', 'the network sends {x}× as fast as this plays, so it builds up first.'];
+    $('flow-say').textContent = lang(k[0], k[1]).replace('{x}', x.toFixed(x < 1 ? 2 : 1));
+    box.hidden = false;
+  }
+  // Cypherpunk: the file as a byte map, and the start rule with its live numbers.
+  function renderInst() {
+    const st = feed, pl = st && st.plan, W = 358;
+    const size = metrics.cl || (pl && pl.m1) || (st && st.bytes) || 0;
+    const x = n => size ? Math.max(0, Math.min(W, W * n / size)).toFixed(1) : '0';
+    const attr = (id, k, val) => { const el = $(id); if (el) el.setAttribute(k, val); };
+    attr('map-got', 'width', x(st ? st.bytes : 0));
+    attr('map-head', 'width', x(st && st.me > 0 ? st.me : 0));
+    attr('map-blob', 'width', x(st ? st.paintedAt : 0));
+    const go = pl && waitS && !(st.sounded && !st.stalled) ? st.bytes + waitS * rateBps() : 0;
+    attr('map-go', 'visibility', go ? 'visible' : 'hidden'); attr('map-go', 'x1', x(go)); attr('map-go', 'x2', x(go));
+    const ph = pl && st.sounded && v.currentTime > 0 ? bytesAt(pl, v.currentTime) : 0;
+    attr('map-play', 'visibility', ph ? 'visible' : 'hidden'); attr('map-play', 'x1', x(ph)); attr('map-play', 'x2', x(ph));
+    const say = $('map-say'), rule = $('rule');
+    if (!say || !rule) return;
+    if (!st) { say.textContent = notYet(); return; }
+    say.textContent = (st.me > 0 ? 'moov ' + (st.me / 1024).toFixed(1) + ' KB · ' : '') + (pl ? 'mdat ' + fmtMb(pl.m1 - pl.m0) + ' · ' : '')
+      + 'arrived ' + fmtMb(st.bytes) + (size ? ' of ' + fmtMb(size) : '') + ' · playing copy ' + (st.paintedAt ? fmtMb(st.paintedAt) : '0 MB')
+      + (pl && st.sounded ? ' · playhead ' + v.currentTime.toFixed(1) + ' s' : '');
+    const r = rateBps();
+    if (!pl || !r) { rule.textContent = '(mdat end − arrived) ÷ rate × ' + SAFETY + ' + ' + MARGIN + ' s ≤ duration − playhead'; return; }
+    const rest = Math.max(0, pl.m1 - st.bytes), need = rest / r * SAFETY + MARGIN, left = pl.dur - keepAt;
+    const verdict = st.done ? 'all arrived' : st.sounded && !st.stalled ? 'playing' : waitS && !st.sounded ? 'hold ~' + waitS + ' s' : st.stalled ? 'hold (ran dry)' : 'play';
+    rule.textContent = fmtMb(rest) + ' ÷ ' + (r / 1048576).toFixed(2) + ' MB/s × ' + SAFETY + ' + ' + MARGIN + ' s = ' + need.toFixed(1) + ' s '
+      + (need <= left ? '≤ ' : '> ') + left.toFixed(1) + ' s left → ' + verdict;
+  }
+  // Raver motion: slow, pausable, remembered estate-wide (bnr.motion.paused), still when hidden.
+  const motion = $('motion');
+  const paintMotion = () => { const p = document.body.hasAttribute('data-motion-paused'); $('motion-pause').hidden = p; $('motion-play').hidden = !p; };
+  if (motion) motion.addEventListener('click', () => {
+    const p = !document.body.hasAttribute('data-motion-paused');
+    document.body.toggleAttribute('data-motion-paused', p);
+    try { localStorage.setItem('bnr.motion.paused', p ? '1' : '0'); } catch {}
+    paintMotion();
+  });
+  paintMotion();
+  document.addEventListener('visibilitychange', () => document.body.toggleAttribute('data-tab-hidden', document.hidden));
   let frameGen = 0;
   const paintSrc = (assign, ms) => {
     frameGen++;
@@ -479,6 +675,7 @@ document.addEventListener('DOMContentLoaded',function(){
   const markFirstFrame = () => {
     if (metrics.ttffMs == null && metrics.t0) {
       metrics.ttffMs = performance.now() - metrics.t0;
+      note('first frame');
       paintNerd();
     }
   };
@@ -500,6 +697,8 @@ document.addEventListener('DOMContentLoaded',function(){
       if (st.my !== job) return false;
       if (!ok) { st.retryAt = bytesAt(st.plan, mediaAt(st.plan, st.bytes) + EXTEND_GAIN); return false; }
       st.paintedAt = n;
+      note((st.sounded ? 'swap' : 'start') + ' · playing copy ' + fmtMb(n) + ' (' + mediaAt(st.plan, n).toFixed(1) + ' s) from ' + at.toFixed(2) + ' s');
+      paintNerd();
       try { v.currentTime = at; } catch {}
       keepAt = at;
       if (go) { try { await v.play(); } catch {} }
@@ -519,7 +718,7 @@ document.addEventListener('DOMContentLoaded',function(){
       if (w === null) return;                  // no rate yet: the bar and MB counter speak
       if (w > 0) { showWait(w); return; }
       if (!(await extend(st, keepAt, st.sounded))) return;
-      st.stalled = false; waitS = 0;
+      st.stalled = false; waitS = 0; paintFlow(); renderInst();
       if (!st.sounded) { st.sounded = true; playing = my; say(null); await goSound(my); }
       else say(null);
       return;
@@ -551,7 +750,11 @@ document.addEventListener('DOMContentLoaded',function(){
     if (bytes < state.me + EARLY_MDAT) return;
     if (!state.plan && !state.planless) {
       state.plan = planOf(prefixOf(parts, bytes, state.me + EARLY_MDAT), state.me);
-      if (state.plan) checkSmooth(state.plan, my); else state.planless = true;
+      const pl = state.plan;
+      if (pl) note('moov read: ' + state.me + ' B, mdat ' + pl.m0 + '..' + pl.m1);
+      else note('no time plan (no duration, fragmented or moov-last): plays when the whole file is in');
+      if (pl) checkSmooth(pl, my); else state.planless = true;
+      paintNerd();
     }
 
     // Phase A -- first frame only (paused at 0). Never autoplay a short-mdat Blob (moov duration yank).
@@ -595,7 +798,8 @@ document.addEventListener('DOMContentLoaded',function(){
     metrics.bytes = bytes;
     metrics.doneMs = metrics.t0 ? performance.now() - metrics.t0 : null;
     metrics.sha = await hashBlob(full);
-    paintNerd();
+    note('all ' + fmtMb(bytes) + ' in · sha256 ' + (metrics.sha || 'unavailable'));
+    paintNerd(); renderInst();
     if (my !== job) return true;   // a new address arrived while this one was hashed
     // Resume where the viewer is NOW (hashing a large file takes seconds of playback). With a time
     // plan keepAt only ever holds a playhead the running Blob could reach; without one, a playhead
@@ -657,12 +861,14 @@ document.addEventListener('DOMContentLoaded',function(){
     if (my !== job || signal.aborted) return false;
     metrics.ttfbMs = performance.now() - tFetch;
     noteHeaders(r);
+    note('/stream ' + r.status + ' · Content-Length ' + (metrics.cl || 'none') + ' · Accept-Ranges ' + (metrics.acceptRanges || 'none') + ' · X-Ant-First-Chunk ' + (metrics.firstChunk || 'none'));
     if (!r.ok) { try { r.body && r.body.cancel(); } catch {} paintNerd(); return false; }
     const cl = +r.headers.get('content-length') || 0;
     // Known-broken antd 0.12.0 class: DataMap-sized CL (live repro was 4170).
     // Headers already arrived -- abort the body now, never burn a long wait.
     // Tiny complete files still play via the JSON envelope path below.
     if (cl > 0 && cl < STUB_CL) {
+      note('stub Content-Length ' + cl + ' B (antd 0.12.0 class): body cancelled, falling back to the JSON envelope');
       try { r.body && r.body.cancel(); } catch {}
       paintNerd();
       return false;
@@ -708,6 +914,7 @@ document.addEventListener('DOMContentLoaded',function(){
     const r = await fetch(DOOR + a, { signal });
     metrics.ttfbMs = performance.now() - tFetch;
     noteHeaders(r);
+    note('/data/public envelope ' + r.status + ' · Content-Length ' + (metrics.cl || 'none'));
     metrics.path = 'envelope';
     paintNerd();
     if (!r.ok || !r.body) throw new Error('door answered ' + r.status);
@@ -757,11 +964,13 @@ document.addEventListener('DOMContentLoaded',function(){
     if (blobUrl) { URL.revokeObjectURL(blobUrl); blobUrl = null; }
     const busy = on => { pg.hidden = $('got').hidden = !on; };
     busy(false); pg.value = 0; $('got').textContent = ''; playing = 0; keepAt = 0; resetRate();
-    feed = null; waitS = 0; $('s-rough').hidden = true;
+    feed = null; waitS = 0; $('s-rough').hidden = true; $('veil').hidden = true; $('flow').hidden = true;
+    delete $('s-wait').dataset.s; $('log').textContent = ''; $('dec').textContent = notYet(); metrics.dec = null;
     resetMetrics(); paintNerd();
-    if (!a) { $('out').hidden = true; v.removeAttribute('src'); v.load(); say('s-bad'); return; }
+    if (!a) { delete $('out').dataset.addr; document.body.removeAttribute('data-watching'); renderInst(); $('out').hidden = true; v.removeAttribute('src'); v.load(); say('s-bad'); return; }
     metrics.addr = a; metrics.t0 = performance.now();
-    $('shown').textContent = 'autonomi://' + a; $('out').hidden = false; say('s-slow'); if (tap) tap.hidden = true;
+    note('open · GET …/data/public/<address>/stream');
+    $('out').dataset.addr = 'autonomi://' + a; document.body.setAttribute('data-watching', ''); $('out').hidden = false; say('s-slow'); if (tap) tap.hidden = true;
     paintNerd();
     const hit = await cacheGet(a);
     if (hit && my === job) {
@@ -789,6 +998,7 @@ document.addEventListener('DOMContentLoaded',function(){
   }
   $('f').addEventListener('submit', e => { e.preventDefault(); const x = $('addr').value.trim(); if (!x) return; history.replaceState(null, '', '#' + x); view(x); });
   const fromHash = () => { const x = decodeURIComponent(location.hash.slice(1)); if (x) { $('addr').value = x; view(x); } };
+  paintNerd(); renderInst();
   addEventListener('hashchange', fromHash); fromHash();
 })();
 </script>
