@@ -39,6 +39,10 @@ test('mobile: the orb rides the fixed tour bar and the ANT card is visible', asy
   const orb = p.locator('#adOrb');
   assert.equal(await orb.evaluate(n => n.parentElement.id), 'tbar', 'orb seated in the tour bar');
   assert.equal(await orb.evaluate(n => getComputedStyle(n).position), 'static', 'not floating');
+  // new bee opens on its home list (the three grammars, 2026-09-26): the ANT
+  // card lives in "see what i have", one row away, which is the reader's path
+  await p.locator('#wl-bee [data-wl-go="have"]').click();
+  await p.waitForTimeout(400);
   await p.waitForSelector('#ch-autonomi', { timeout: 15000 }); /* the chain matrix renders from adapter reads */
   const ant = p.locator('#ch-autonomi');
   const antVisible = await ant.evaluate(n => {

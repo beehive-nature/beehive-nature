@@ -263,15 +263,197 @@ body[data-reg="cypherpunk"] h1 .h1-arg{background:linear-gradient(92deg,#45c2dc,
 body[data-reg="cypherpunk"] section{padding:12px}
 body[data-reg="cypherpunk"] h2{letter-spacing:.08em}
 </style>
+<style id="register-grammar">
+/* ══ THE THREE GRAMMARS (founder 2026-09-26, on the dress-only wallet: "made
+   all three same exact UX with just changes in the color of the button.
+   terrible."). The dress above says what a register LOOKS like; this sheet
+   says how a person MOVES through it. One DOM, one state: every section
+   exists once and lives in exactly one task (data-wl-task), so no register
+   can hold a capability another lacks. The matrix this implements:
+   docs/dispatches/2026-09-26-wallet-three-grammars.md
+     new bee     a navigation stack: a home list, push into one task, back
+     raver       a stage and a dock: lit rails; a glyph swaps the deck
+     cypherpunk  the pipeline at once: index rail, every note open, keys */
+
+/* honest states (DESIGN-CONSTRAINTS §2): an unread balance renders no figure;
+   its stat line already says why */
+.chain .cb:empty{display:none}
+
+/* ── one task at a time in bee and raver; cypherpunk ignores the task ── */
+:is(body[data-reg="bee"],body[data-reg="raver"]):not([data-wl-view="all"]):not([data-wl-view="have"]) main>section[data-wl-task="have"],
+:is(body[data-reg="bee"],body[data-reg="raver"]):not([data-wl-view="all"]):not([data-wl-view="move"]) main>section[data-wl-task="move"],
+:is(body[data-reg="bee"],body[data-reg="raver"]):not([data-wl-view="all"]):not([data-wl-view="add"]) main>section[data-wl-task="add"],
+:is(body[data-reg="bee"],body[data-reg="raver"]):not([data-wl-view="all"]):not([data-wl-view="keep"]) main>section[data-wl-task="keep"],
+:is(body[data-reg="bee"],body[data-reg="raver"]):not([data-wl-view="all"]):not([data-wl-view="key"]) main>section[data-wl-task="key"],
+:is(body[data-reg="bee"],body[data-reg="raver"]):not([data-wl-view="all"]):not([data-wl-view="proof"]) main>section[data-wl-task="proof"]{display:none!important}
+body:not([data-wl-view="home"]) :is(#wl-bee,#wl-rave){display:none!important}
+body[data-wl-view="home"] #wl-bar{display:none!important}
+:is(body[data-reg="bee"],body[data-reg="raver"]):not([data-wl-view="home"]) main>:is(.crumbs,header){display:none}
+/* the phone fold (form-kill law above) orders the pipeline: in cypherpunk, where
+   the pipeline IS the page, that law stands as ruled (hero balance, then the
+   ring, then the rest, the console among it). New bee and raver arrive on
+   their own homes, so there the title and their navigation come first. */
+:is(body[data-reg="bee"],body[data-reg="raver"]) main>.crumbs{order:-7}
+:is(body[data-reg="bee"],body[data-reg="raver"]) main>header{order:-6}
+#wl-bar,#wl-dock{order:-5} #wl-bee,#wl-rave{order:-4}
+#wl-bee h2::before,#wl-bar h2::before{display:none}
+/* 44px is the floor for anything that takes a press, in every register — the
+   sections carried 33 inline controls cut to 26–34px */
+body[data-reg] main :is(button,select){min-height:44px!important}
+/* each register's own blocks paint with the register, before register.js mounts */
+#wl-bee,#wl-bar,#wl-dock,#wl-rave,#wl-cy{display:none}
+body[data-reg="bee"] #wl-bee,body[data-reg="raver"] #wl-rave,body[data-reg="cypherpunk"] #wl-cy{display:block}
+body[data-reg="bee"] #wl-bar,body[data-reg="raver"] #wl-dock{display:flex}
+[data-wl-card][data-read="true"] .wl-un,[data-wl-card]:not([data-read="true"]) .wl-fig{display:none}
+
+/* ── new bee: the matriarch's wallet. A home list, one task at a time, a
+   clear way back. Reading text 16px, labels 14px, rows 64px. ── */
+body[data-reg="bee"] main{max-width:720px}
+/* the matriarch reads familiar words first: the engineering tagline moves to
+   raver and cypherpunk, the badge reads at the label floor */
+body[data-reg="bee"] .kicker{display:none}
+body[data-reg="bee"] header{padding-top:22px}
+body[data-reg="bee"] header p{font-size:16px}
+body[data-reg="bee"] .crumbs .badge-live{font-size:14px;letter-spacing:0}
+#wl-bee{margin-top:6px}
+.wlb-card{background:var(--panel);border-radius:20px;padding:22px 20px;box-shadow:0 0 0 1px var(--line2)}
+.wlb-cap{font-size:14px;color:var(--dim)}
+.wlb-fig{font:700 clamp(38px,11vw,56px)/1.1 var(--reg-font-title);color:var(--ink);margin-top:6px;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.wlb-un{font-size:16px;color:var(--dim);margin-top:6px;line-height:1.6}
+.wlb-un b{font:700 22px/1.3 var(--reg-font-title);color:var(--ink);display:block}
+#wl-bee .wlb-q{font:700 22px/1.3 var(--reg-font-title);letter-spacing:-.01em;margin:30px 4px 12px;display:block}
+.wlb-list{background:var(--panel);border-radius:20px;box-shadow:0 0 0 1px var(--line2);overflow:hidden}
+body[data-reg="bee"] .wlb-row{display:flex;align-items:center;gap:14px;width:100%;min-height:64px;padding:12px 18px;border:0;border-radius:0;
+  background:transparent;color:var(--ink);text-align:start;font:inherit;cursor:pointer}
+body[data-reg="bee"] .wlb-row+.wlb-row{border-top:1px solid var(--line2)}
+body[data-reg="bee"] .wlb-row:hover{background:var(--well);color:var(--ink)}
+body[data-reg="bee"] .wlb-row:focus-visible{outline:2px solid var(--ink);outline-offset:-5px}
+.wlb-i{font-size:24px;width:32px;text-align:center;flex:none}
+.wlb-t{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.wlb-t b{font:600 17px/1.35 var(--reg-font-body)}
+.wlb-t small{font-size:14px;color:var(--dim);line-height:1.5}
+.wlb-c{font-size:26px;line-height:1;color:var(--faint);flex:none}
+body[data-reg="bee"] .wlb-all{margin-top:14px;border-radius:20px;background:var(--panel);box-shadow:0 0 0 1px var(--line2)}
+.wlb-note{font-size:14px;color:var(--dim);margin:16px 4px 0;line-height:1.6}
+#wl-bar{position:sticky;top:0;z-index:6;align-items:center;gap:6px;margin:0 -10px;padding:8px 10px;
+  background:color-mix(in srgb,var(--bg) 94%,transparent);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border-bottom:1px solid var(--line2)}
+body[data-reg="bee"] .wlb-back{flex:none;min-height:44px;padding:8px 10px;border:0;background:transparent;color:var(--reg-link);font:500 17px/1 var(--reg-font-body)}
+body[data-reg="bee"] .wlb-back:hover{background:var(--well);color:var(--reg-link-hover)}
+#wl-bar .wlb-title{flex:1;min-width:0;margin:0;font:700 19px/1.3 var(--reg-font-title);letter-spacing:-.01em;display:block}
+#wl-bar [data-wl-for]{display:none}
+body[data-wl-view="have"] #wl-bar [data-wl-for="have"],body[data-wl-view="move"] #wl-bar [data-wl-for="move"],
+body[data-wl-view="add"] #wl-bar [data-wl-for="add"],body[data-wl-view="keep"] #wl-bar [data-wl-for="keep"],
+body[data-wl-view="key"] #wl-bar [data-wl-for="key"],body[data-wl-view="proof"] #wl-bar [data-wl-for="proof"],
+body[data-wl-view="all"] #wl-bar [data-wl-for="all"]{display:inline}
+/* bee reads at bee size: the sections were written as a 9–13px console; in
+   bee they read at 16px with 14px labels (DESIGN-CONSTRAINTS §13) and the
+   decorative honey borders step back to the line (honey is b's colour only) */
+body[data-reg="bee"] main>section{font-size:16px;line-height:1.65;padding:22px 20px;margin-top:18px;border-color:var(--line2)!important}
+body[data-reg="bee"] main>section>h2{font-size:21px;letter-spacing:-.005em;margin-bottom:12px}
+body[data-reg="bee"] main>section .law{font-size:16px;line-height:1.7}
+body[data-reg="bee"] main>section :is(.cd,.stat,.kd,.kp,.kt,.cc,.cv,.cx,.k,.lline,.lcap,.badge,.llabel,.lbadge,pre,small,label){font-size:14px}
+body[data-reg="bee"] main>section :is([style*="font-size:9"],[style*="font-size:10"],[style*="font-size:11"],[style*="font-size:12"],[style*="font-size:13"]){font-size:14px!important}
+/* the sections' own inline colours were drawn for the black ground; on paper
+   each hue steps darker inside its OWN ramp (a semantic colour is never
+   repainted to another hue): amber, ai cyan, honey, leaf, sovereign violet */
+body[data-reg="bee"]{--amber:#8a4b00;--cyan:#0f6f82;--gold:#7a5209;--leaf:#326b39;--violet:#6e3fb8;--line:#e6dfd2}
+/* one filled action per view: in bee the sections' many "gold" buttons stand
+   outlined until pressed, so no task opens on a wall of primaries */
+body[data-reg="bee"] main>section button.gold{background:var(--panel);color:var(--reg-primary);border:1.5px solid var(--reg-primary)}
+body[data-reg="bee"] main>section button.gold:hover{background:var(--reg-primary);color:var(--reg-on-primary)}
+body[data-reg="bee"]:not([data-wl-view="home"]) main>section[data-wl-task]{animation:wl-push .26s ease-out both}
+@keyframes wl-push{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+/* ── raver: the wallet as a light show. The stage is the arrival; the dock
+   swaps the deck; every glyph keeps its word under it. ── */
+body[data-reg="raver"] main{max-width:860px}
+body[data-reg="raver"] header p{font-size:15px;line-height:1.7}
+#wl-rave{margin:4px 0 8px}
+.wlr-art{display:block;width:100%;max-width:520px;height:auto;margin:0 auto}
+.wlr-orbit{fill:none;stroke:#9c6fd6;stroke-opacity:.45;stroke-width:1.2;stroke-dasharray:2 7;transform-origin:180px 150px;animation:wlr-drift 90s linear infinite}
+.wlr-soul{animation:wlr-breathe 5s ease-in-out infinite}
+.wlr-thread{stroke:#648176;stroke-width:1.3;stroke-dasharray:3 6;opacity:.7}
+.wlr-thread[data-lit="true"]{stroke:#45c2dc;stroke-dasharray:none;opacity:1}
+.wlr-node circle{fill:#0c1412;stroke:#648176;stroke-width:1.6;stroke-dasharray:4 4}
+.wlr-node[data-lit="true"] circle{stroke:#45c2dc;stroke-dasharray:none;filter:drop-shadow(0 0 9px #45c2dc)}
+.wlr-node text{font-size:20px}
+.wlr-node:not([data-lit="true"]) text{opacity:.5}
+@keyframes wlr-drift{to{transform:rotate(360deg)}}
+@keyframes wlr-breathe{0%,100%{opacity:.7}50%{opacity:1}}
+.wlr-caps{list-style:none;display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin:4px 0 0;padding:0}
+.wlr-caps li{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:96px;padding:10px 12px;border-radius:22px;background:#0c1412;box-shadow:0 0 0 1px #1e2b26}
+.wlr-caps li[data-read="true"]{box-shadow:0 0 0 1px #45c2dc66,0 0 18px #45c2dc22}
+.wlr-caps .g{font-size:22px;line-height:1.2}
+.wlr-caps b{font-size:14px;font-weight:700}
+.wlr-caps .wl-fig{font-size:15px;color:var(--ink);font-variant-numeric:tabular-nums;overflow-wrap:anywhere;text-align:center}
+.wlr-caps .wl-un{font-size:13px;color:var(--dim)}
+.wlr-hint{text-align:center;color:var(--dim);font-size:14px;margin:14px 0 0}
+#wl-dock{position:sticky;top:0;z-index:6;gap:4px;overflow-x:auto;scroll-snap-type:x proximity;padding:10px 6px;margin:0 -10px;
+  background:linear-gradient(#06110cf2,#06110cd9);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);scrollbar-width:none}
+#wl-dock::-webkit-scrollbar{display:none}
+body[data-reg="raver"] #wl-dock button{flex:1 0 auto;scroll-snap-align:center;display:flex;flex-direction:column;align-items:center;gap:5px;min-width:62px;min-height:74px;
+  padding:4px 2px;border:0;border-radius:18px;background:transparent;color:var(--ink);font:inherit}
+body[data-reg="raver"] #wl-dock button:hover{background:transparent;color:var(--ink)}
+body[data-reg="raver"] #wl-dock button:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
+#wl-dock .g{display:grid;place-items:center;width:50px;height:50px;border-radius:50%;background:#0c1412;box-shadow:0 0 0 1px #1e2b26;font-size:23px;
+  transition:box-shadow .26s ease,background-color .26s ease}
+#wl-dock .w{font-size:13px;line-height:1.2;color:var(--dim)}
+#wl-dock button[aria-pressed="true"] .g{background:radial-gradient(circle at 50% 38%,#d655bb66,#171028 72%);box-shadow:0 0 0 2px #d655bb,0 0 24px #d655bb88}
+#wl-dock button[aria-pressed="true"] .w{color:var(--ink);font-weight:700}
+body[data-reg="raver"] main>section{border-color:#2a1f3d!important}
+body[data-reg="raver"] main>section .law{font-size:14px}
+body[data-reg="raver"] main>section[data-wl-task]{animation:wlr-arrive .52s cubic-bezier(.2,.8,.2,1) both}
+@keyframes wlr-arrive{from{opacity:0;transform:translateY(18px) scale(.985)}to{opacity:1;transform:none}}
+
+/* ── cypherpunk: the pipeline is the interface. A console of live state
+   (mirrored from the sections, never fetched twice), an index of every
+   section, every note open, keys to move. ── */
+#wl-cy{font:12px/1.55 var(--reg-font-body);background:var(--panel);border:1px solid var(--line2);border-radius:4px;padding:10px 12px;margin-top:14px}
+.cy-h{display:flex;gap:8px;align-items:baseline;flex-wrap:wrap;color:var(--dim);margin:6px 0}
+.cy-h b{color:#45c2dc;font-weight:600}
+.cy-t{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;margin-bottom:8px}
+.cy-t th{text-align:start;color:var(--faint);font-weight:400;border-bottom:1px solid var(--line2);padding:3px 8px 3px 0}
+.cy-t td{padding:4px 8px 4px 0;border-bottom:1px dashed var(--line2);vertical-align:top;overflow-wrap:anywhere}
+.cy-t td:first-child{color:var(--ink);overflow-wrap:normal;padding-inline-end:12px}
+.cy-t .wl-un{color:var(--faint)}
+.cy-t tbody+tbody td{color:var(--dim)}
+.cy-idx{list-style:none;margin:0 0 8px;padding:0;display:grid;grid-template-columns:1fr}
+.cy-idx a{display:flex;gap:8px;align-items:center;min-height:44px;padding:2px 4px;border-bottom:1px dashed var(--line2);color:var(--ink);text-decoration:none}
+.cy-idx a:hover{color:#8eddee}
+.cy-idx a:focus-visible{outline:2px solid var(--ink);outline-offset:1px}
+.cy-idx .n{color:#45c2dc;flex:none}
+.cy-idx .t{flex:1;min-width:0;overflow-wrap:anywhere}
+.cy-idx .tag{color:var(--faint);flex:none}
+.cy-keys{color:var(--dim)}
+.cy-keys kbd{font:inherit;color:var(--ink);border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+body[data-reg="cypherpunk"] main>section[style*="--gold"]{border-color:var(--line2)!important}
+body[data-reg="cypherpunk"] main>section{scroll-margin-top:8px}
+body[data-reg="cypherpunk"] main>section:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
+body[data-reg="cypherpunk"] main>section>h2[data-wl-n]::after{content:"§" attr(data-wl-n);margin-inline-start:auto;color:var(--faint);font-weight:400;letter-spacing:0}
+@media (max-width:700px){.cy-idx{grid-template-columns:repeat(2,minmax(0,1fr));column-gap:10px}}
+@media (min-width:1100px){
+  body[data-reg="cypherpunk"] main{max-width:1320px;display:grid;grid-template-columns:340px minmax(0,1fr);column-gap:20px;align-items:start}
+  body[data-reg="cypherpunk"] main>*{grid-column:2}
+  body[data-reg="cypherpunk"] main>#wl-cy{grid-column:1;grid-row:1/span 40;position:sticky;top:8px;max-height:calc(100vh - 16px);overflow:auto}
+}
+@media (prefers-reduced-motion:reduce){
+  .wlr-orbit,.wlr-soul,main>section[data-wl-task]{animation:none!important}
+  #wl-dock .g{transition:none}
+}
+</style>
 </head>
 <body data-bee-theme="custom">
 <script>
-/* first paint in the reader's own register — register.js re-asserts on mount.
-   THE THREE REGISTERS (founder order 2026-09-25): bee / raver / cypherpunk are
-   three totally different UX/UIs behind the one toggle — the choice lands
-   BEFORE first paint, so no register ever flashes another's dress. */
+/* first paint in the reader's own register AND view — register.js re-asserts
+   the register on mount. The view (data-wl-view: home, one task, or all) is
+   how new bee and raver move through the wallet; cypherpunk ignores it. A deep
+   link lands in the task that holds its target, so no register ever flashes a
+   view the reader did not ask for. */
 (function(){var r='bee';try{var v=localStorage.getItem('bregister');if(v==='raver'||v==='cypherpunk')r=v;}catch(e){}
-document.body.setAttribute('data-reg',r);document.documentElement.setAttribute('data-bee-light',String(r==='bee'));})();
+document.body.setAttribute('data-reg',r);document.documentElement.setAttribute('data-bee-light',String(r==='bee'));
+var w='home';try{w=sessionStorage.getItem('wl.view')||'home';}catch(e){}
+if(/[?&]compose=/.test(location.search))w='proof';else if(location.hash.indexOf('#qr=')===0)w='key';
+document.body.setAttribute('data-wl-view',/^(home|all|have|move|add|keep|key|proof)$/.test(w)?w:'home');})();
 </script>
 <main>
 <nav class="crumbs" aria-label="you are here">
@@ -292,8 +474,99 @@ document.body.setAttribute('data-reg',r);document.documentElement.setAttribute('
   New accounts are forged bzDiD-native — no exports, no imports, no manual keys, ever.</p>
 </header>
 
-<section style="border-color:var(--gold)">
-  <h2>🔗 CONNECT — <span data-i18n="wl.h.connect">your bzDiD is the wallet</span></h2>
+<!-- ══ THE THREE GRAMMARS — each register's own way in. Every figure below is a
+     MIRROR of a section's own node (data-wl-src), never a second fetch: the
+     numbers cannot differ between registers because there is only one of each. -->
+<div id="wl-bee" data-reg="bee">
+  <div class="wlb-card" data-wl-card>
+    <div class="wlb-cap" data-i18n="wl.bee.fig">on Vaulta, your home chain</div>
+    <div class="wlb-fig wl-fig" data-wl-src="v-bal" data-wl-value></div>
+    <div class="wlb-un wl-un"><b data-i18n="wl.bee.unread">not read yet</b><span data-wl-src="v-stat"></span></div>
+  </div>
+  <h2 class="wlb-q" data-i18n="wl.bee.ask">what would you like to do?</h2>
+  <div class="wlb-list">
+    <button type="button" class="wlb-row" data-wl-go="have"><span class="wlb-i" aria-hidden="true">⚡</span><span class="wlb-t"><b data-i18n="wl.bee.have">see what i have</b><small data-i18n="wl.bee.have.s">every chain, read live in this browser</small></span><span class="wlb-c" aria-hidden="true">›</span></button>
+    <button type="button" class="wlb-row" data-wl-go="move"><span class="wlb-i" aria-hidden="true">💸</span><span class="wlb-t"><b data-i18n="wl.bee.move">pay or get paid</b><small data-i18n="wl.bee.move.s">send, receive or swap</small></span><span class="wlb-c" aria-hidden="true">›</span></button>
+    <button type="button" class="wlb-row" data-wl-go="add"><span class="wlb-i" aria-hidden="true">💳</span><span class="wlb-t"><b data-i18n="wl.bee.add">add money</b><small data-i18n="wl.bee.add.s">the ways to put money in</small></span><span class="wlb-c" aria-hidden="true">›</span></button>
+    <button type="button" class="wlb-row" data-wl-go="keep"><span class="wlb-i" aria-hidden="true">📡</span><span class="wlb-t"><b data-i18n="wl.bee.keep">keep something forever</b><small data-i18n="wl.bee.keep.s">pay once to store a file on a permanent network</small></span><span class="wlb-c" aria-hidden="true">›</span></button>
+    <button type="button" class="wlb-row" data-wl-go="key"><span class="wlb-i" aria-hidden="true">🗝</span><span class="wlb-t"><b data-i18n="wl.bee.key">my key and my safe</b><small data-i18n="wl.bee.key.s">your passkey, your recovery words, your sealed secrets</small></span><span class="wlb-c" aria-hidden="true">›</span></button>
+    <button type="button" class="wlb-row" data-wl-go="proof"><span class="wlb-i" aria-hidden="true">🗺</span><span class="wlb-t"><b data-i18n="wl.bee.proof">see how it works</b><small data-i18n="wl.bee.proof.s">every bill recomputed, every rail listed</small></span><span class="wlb-c" aria-hidden="true">›</span></button>
+  </div>
+  <button type="button" class="wlb-row wlb-all" data-wl-go="all"><span class="wlb-i" aria-hidden="true">☰</span><span class="wlb-t"><b data-i18n="wl.bee.all">show me everything</b><small data-i18n="wl.bee.all.s">every part of the wallet on one page</small></span><span class="wlb-c" aria-hidden="true">›</span></button>
+  <p class="wlb-note" data-i18n="wl.bee.note">looking is keyless. anything that sends or signs waits for its own button.</p>
+</div>
+<div id="wl-bar" data-reg="bee">
+  <button type="button" class="wlb-back" data-wl-go="home"><span aria-hidden="true">‹</span> <span data-i18n="wl.bee.back">wallet</span></button>
+  <h2 class="wlb-title" id="wl-bar-title" tabindex="-1"><span data-wl-for="have" data-i18n="wl.bee.have">see what i have</span><span data-wl-for="move" data-i18n="wl.bee.move">pay or get paid</span><span data-wl-for="add" data-i18n="wl.bee.add">add money</span><span data-wl-for="keep" data-i18n="wl.bee.keep">keep something forever</span><span data-wl-for="key" data-i18n="wl.bee.key">my key and my safe</span><span data-wl-for="proof" data-i18n="wl.bee.proof">see how it works</span><span data-wl-for="all" data-i18n="wl.bee.all">show me everything</span></h2>
+</div>
+
+<nav id="wl-dock" data-reg="raver" aria-label="wallet">
+  <button type="button" data-wl-go="home" aria-pressed="false"><span class="g" aria-hidden="true">✦</span><span class="w" data-i18n="wl.rv.stage">stage</span></button>
+  <button type="button" data-wl-go="have" aria-pressed="false"><span class="g" aria-hidden="true">⚡</span><span class="w" data-i18n="wl.rv.have">have</span></button>
+  <button type="button" data-wl-go="move" aria-pressed="false"><span class="g" aria-hidden="true">💸</span><span class="w" data-i18n="wl.rv.move">move</span></button>
+  <button type="button" data-wl-go="add" aria-pressed="false"><span class="g" aria-hidden="true">💳</span><span class="w" data-i18n="wl.rv.add">add</span></button>
+  <button type="button" data-wl-go="keep" aria-pressed="false"><span class="g" aria-hidden="true">📡</span><span class="w" data-i18n="wl.rv.keep">keep</span></button>
+  <button type="button" data-wl-go="key" aria-pressed="false"><span class="g" aria-hidden="true">🗝</span><span class="w" data-i18n="wl.rv.key">key</span></button>
+  <button type="button" data-wl-go="proof" aria-pressed="false"><span class="g" aria-hidden="true">🗺</span><span class="w" data-i18n="wl.rv.proof">proof</span></button>
+  <button type="button" data-wl-go="all" aria-pressed="false"><span class="g" aria-hidden="true">∞</span><span class="w" data-i18n="wl.rv.all">all</span></button>
+</nav>
+<div id="wl-rave" data-reg="raver">
+  <!-- the art carries glyphs only; every word is in the captions below it -->
+  <svg class="wlr-art" viewBox="0 0 360 300" aria-hidden="true" focusable="false">
+    <defs>
+      <radialGradient id="wlr-g-soul" cx="50%" cy="42%" r="60%"><stop offset="0" stop-color="#f6d3ee"/><stop offset=".42" stop-color="#d655bb"/><stop offset="1" stop-color="#6e3fb8"/></radialGradient>
+      <radialGradient id="wlr-g-halo" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#9c6fd6" stop-opacity=".42"/><stop offset=".55" stop-color="#171028" stop-opacity=".35"/><stop offset="1" stop-color="#06110c" stop-opacity="0"/></radialGradient>
+    </defs>
+    <circle cx="180" cy="150" r="148" fill="url(#wlr-g-halo)"/>
+    <ellipse class="wlr-orbit" cx="180" cy="150" rx="130" ry="100"/>
+    <line class="wlr-thread" data-wl-rail="v-bal" x1="180" y1="150" x2="180" y2="50"/>
+    <line class="wlr-thread" data-wl-rail="h-bal" x1="180" y1="150" x2="303.6" y2="119.1"/>
+    <line class="wlr-thread" data-wl-rail="a-bal" x1="180" y1="150" x2="256.4" y2="230.9"/>
+    <line class="wlr-thread" data-wl-rail="ant-bal" x1="180" y1="150" x2="103.6" y2="230.9"/>
+    <line class="wlr-thread" data-wl-rail="ar-bal" x1="180" y1="150" x2="56.4" y2="119.1"/>
+    <circle class="wlr-soul" cx="180" cy="150" r="27" fill="url(#wlr-g-soul)" style="filter:drop-shadow(0 0 16px #d655bb)"/>
+    <g class="wlr-node" data-wl-rail="v-bal" transform="translate(180 50)"><circle r="21"/><text y="7" text-anchor="middle">⚓</text></g>
+    <g class="wlr-node" data-wl-rail="h-bal" transform="translate(303.6 119.1)"><circle r="21"/><text y="7" text-anchor="middle">🐝</text></g>
+    <g class="wlr-node" data-wl-rail="a-bal" transform="translate(256.4 230.9)"><circle r="21"/><text y="7" text-anchor="middle">🔵</text></g>
+    <g class="wlr-node" data-wl-rail="ant-bal" transform="translate(103.6 230.9)"><circle r="21"/><text y="7" text-anchor="middle">🐜</text></g>
+    <g class="wlr-node" data-wl-rail="ar-bal" transform="translate(56.4 119.1)"><circle r="21"/><text y="7" text-anchor="middle">🕸</text></g>
+  </svg>
+  <ul class="wlr-caps">
+    <li data-wl-card><span class="g" aria-hidden="true">⚓</span><b>Vaulta</b><span class="wl-fig" data-wl-src="v-bal" data-wl-value></span><span class="wl-un" data-i18n="wl.rv.wait">waiting</span></li>
+    <li data-wl-card><span class="g" aria-hidden="true">🐝</span><b>Hive</b><span class="wl-fig" data-wl-src="h-bal" data-wl-value></span><span class="wl-un" data-i18n="wl.rv.wait">waiting</span></li>
+    <li data-wl-card><span class="g" aria-hidden="true">🔵</span><b>Arbitrum</b><span class="wl-fig" data-wl-src="a-bal" data-wl-value></span><span class="wl-un" data-i18n="wl.rv.wait">waiting</span></li>
+    <li data-wl-card><span class="g" aria-hidden="true">🐜</span><b>Autonomi</b><span class="wl-fig" data-wl-src="ant-bal" data-wl-value></span><span class="wl-un" data-i18n="wl.rv.wait">waiting</span></li>
+    <li data-wl-card><span class="g" aria-hidden="true">🕸</span><b>Arweave</b><span class="wl-fig" data-wl-src="ar-bal" data-wl-value></span><span class="wl-un" data-i18n="wl.rv.wait">waiting</span></li>
+  </ul>
+  <p class="wlr-hint" data-i18n="wl.rv.hint">lit means read. the glyphs above open each part of the wallet.</p>
+</div>
+
+<aside id="wl-cy" data-reg="cypherpunk" aria-labelledby="wl-cy-state">
+  <div class="cy-h" id="wl-cy-state"><b data-i18n="wl.cy.state">state</b><span data-i18n="wl.cy.state.s">mirrored from the sections below, never fetched twice</span></div>
+  <table class="cy-t">
+    <thead><tr><th data-i18n="wl.cy.rail">rail</th><th data-i18n="wl.cy.value">value</th><th data-i18n="wl.cy.status">status</th></tr></thead>
+    <tbody>
+      <tr data-wl-card><td>Vaulta</td><td><span class="wl-fig" data-wl-src="v-bal" data-wl-value></span><span class="wl-un" data-i18n="wl.cy.unread">not known yet</span></td><td data-wl-src="v-stat"></td></tr>
+      <tr data-wl-card><td>Hive</td><td><span class="wl-fig" data-wl-src="h-bal" data-wl-value></span><span class="wl-un" data-i18n="wl.cy.unread">not known yet</span></td><td data-wl-src="h-stat"></td></tr>
+      <tr data-wl-card><td>Arbitrum</td><td><span class="wl-fig" data-wl-src="a-bal" data-wl-value></span><span class="wl-un" data-i18n="wl.cy.unread">not known yet</span></td><td data-wl-src="a-stat"></td></tr>
+      <tr data-wl-card><td>Autonomi</td><td><span class="wl-fig" data-wl-src="ant-bal" data-wl-value></span><span class="wl-un" data-i18n="wl.cy.unread">not known yet</span></td><td data-wl-src="ant-stat"></td></tr>
+      <tr data-wl-card><td>Arweave</td><td><span class="wl-fig" data-wl-src="ar-bal" data-wl-value></span><span class="wl-un" data-i18n="wl.cy.unread">not known yet</span></td><td data-wl-src="ar-stat"></td></tr>
+    </tbody>
+    <tbody>
+      <tr data-wl-card><td data-i18n="wl.cy.soul">soul</td><td colspan="2"><span class="wl-fig" data-wl-src="sum-soul" data-wl-value></span><span class="wl-un" data-i18n="wl.cy.unread">not known yet</span></td></tr>
+      <tr><td data-i18n="wl.cy.kc">keychain</td><td colspan="2" data-wl-src="sum-kc"></td></tr>
+      <tr data-wl-card><td data-i18n="wl.cy.auth">Vaulta authority</td><td colspan="2"><span class="wl-fig" data-wl-src="sum-bridge" data-wl-value></span><span class="wl-un" data-i18n="wl.cy.unread">not known yet</span></td></tr>
+      <tr><td data-i18n="wl.cy.chains">chains connected</td><td colspan="2" data-wl-src="sum-chains"></td></tr>
+      <tr><td data-i18n="wl.cy.core">core</td><td colspan="2" data-wl-src="core-badge"></td></tr>
+    </tbody>
+  </table>
+  <div class="cy-h"><b data-i18n="wl.cy.index">index</b><span data-i18n="wl.cy.index.s">every section, in pipeline order</span></div>
+  <ol class="cy-idx" id="wl-cy-idx"></ol>
+  <div class="cy-keys"><kbd>j</kbd> <kbd>k</kbd> <span data-i18n="wl.cy.k.jk">next or previous section</span> · <kbd>g</kbd> <span data-i18n="wl.cy.k.g">the index</span> · <kbd>o</kbd> <span data-i18n="wl.cy.k.o">fold or open every note</span></div>
+</aside>
+
+<section id="connect-sec" data-wl-task="key" style="border-color:var(--gold)">
+  <h2>🔗 connect — <span data-i18n="wl.h.connect">your bzDiD is the wallet</span></h2>
   <div class="law">Connect your soul (your .b name or account). New here?
   <a href="./onboarding/">Create your bzDiD</a> — the held-hand ceremony takes 2 minutes.</div>
   <div class="row">
@@ -303,8 +576,8 @@ document.body.setAttribute('data-reg',r);document.documentElement.setAttribute('
   <div class="law" id="wstat" style="margin-top:8px;min-height:20px">— not connected —</div>
 </section>
 
-<section id="kc-sec">
-  <h2>🗝 THE KEYCHAIN — <span data-i18n="wl.h.keychain">your bzDiD holds every key</span></h2>
+<section id="kc-sec" data-wl-task="key">
+  <h2>🗝 the keychain — <span data-i18n="wl.h.keychain">your bzDiD holds every key</span></h2>
   <div class="law"><b>Automatic:</b> your first tap or keypress anywhere on this page connects the
   keychain by itself (the WebAuthn ceremony needs one touch of yours — browsers' law, not ours).
   The PRF ceremony re-derives your <b>masterPRK</b> in this tab's memory (never stored, never
@@ -424,8 +697,8 @@ document.body.setAttribute('data-reg',r);document.documentElement.setAttribute('
   </div>
 </section>
 
-<section id="vault-sec" style="border-color:var(--cyan)">
-  <h2>🔐 THE VAULT — <span data-i18n="wl.h.vault">one keypass, every secret</span></h2>
+<section id="vault-sec" data-wl-task="key" style="border-color:var(--cyan)">
+  <h2>🔐 the vault — <span data-i18n="wl.h.vault">one keypass, every secret</span></h2>
   <details class="tnote" data-reg-disclose><summary data-i18n="wl.d.import">Bringing keys you already hold — formats, and how they get sealed</summary>
   <div class="law">The keys you already hold — <b>seed phrases</b> from any wallet
   (12 · 15 · 18 · 21 · 24 words) and <b>Vaulta ACTIVE private keys</b>
@@ -573,8 +846,8 @@ document.body.setAttribute('data-reg',r);document.documentElement.setAttribute('
   <input type="file" id="vlt-file" accept=".json,.bnrvault,application/json" style="display:none">
 </section>
 
-<section id="forge-sec">
-  <h2>♾ THE KEY FORGE — <span data-i18n="wl.h.forge">near infinite keys, one soul</span></h2>
+<section id="forge-sec" data-wl-task="key">
+  <h2>♾ the key forge — <span data-i18n="wl.h.forge">near infinite keys, one soul</span></h2>
   <details class="tnote" data-reg-disclose><summary data-i18n="wl.d.forge2">How each context gets its own key — derivation, on demand</summary>
   <div class="law">Every context derives its own key from your masterPRK: <b>vaulta:names</b> for
   Vaulta account keys, <b>evm:names</b> for 0x addresses, any adapter context you can name.
@@ -595,46 +868,46 @@ document.body.setAttribute('data-reg',r);document.documentElement.setAttribute('
   <div class="law" id="forge-stat" style="margin-top:6px;min-height:20px">— the forge is unlimited; contexts are names, keys derive on demand —</div>
 </section>
 
-<section>
-  <h2>⚡ BALANCES — <span data-i18n="wl.h.balances">every chain, keyless, live</span></h2>
+<section id="bal-sec" data-wl-task="have">
+  <h2>⚡ balances — <span data-i18n="wl.h.balances">every chain, keyless, live</span></h2>
   <div class="law">Read from public RPCs in your browser. Nothing stored, nothing sent.
   The chain is the source of truth.</div>
   <div class="chains" id="chains">
     <div class="chain" id="ch-vaulta">
       <div class="cn hero-caption">⚓ Vaulta <span class="badge">A</span></div>
-      <div class="cb" id="v-bal" data-hero-number>—</div>
+      <div class="cb" id="v-bal" data-hero-number></div>
       <div class="cd" id="v-info">core balance + RAM + resources</div>
       <div class="stat" id="v-stat">waiting…</div>
     </div>
     <div class="chain" id="ch-hive">
       <div class="cn">🐝 Hive <span class="badge">HIVE/HP</span></div>
-      <div class="cb" id="h-bal">—</div>
+      <div class="cb" id="h-bal"></div>
       <div class="cd" id="h-info">liquid + Hive Power + HBD</div>
       <div class="stat" id="h-stat">waiting…</div>
     </div>
     <div class="chain" id="ch-arb">
       <div class="cn">🔵 Arbitrum <span class="badge">ETH</span></div>
-      <div class="cb" id="a-bal">—</div>
+      <div class="cb" id="a-bal"></div>
       <div class="cd" id="a-info">ETH of your derived bzDiD 0x address (evm:yourname)</div>
       <div class="stat" id="a-stat">connect keychain to derive</div>
     </div>
     <div class="chain" id="ch-autonomi">
       <div class="cn">🐜 Autonomi <span class="badge">ANT</span></div>
-      <div class="cb" id="ant-bal">—</div>
+      <div class="cb" id="ant-bal"></div>
       <div class="cd" id="ant-info">ANT on Arbitrum — of your derived 0x address</div>
       <div class="stat" id="ant-stat">connect keychain to derive</div>
     </div>
     <div class="chain" id="ch-arweave">
       <div class="cn">🕸 Arweave <span class="badge">AR</span></div>
-      <div class="cb" id="ar-bal">—</div>
+      <div class="cb" id="ar-bal"></div>
       <div class="cd" id="ar-info">of the vault-held JWK — the address is public metadata, reads stay keyless</div>
       <div class="stat" id="ar-stat">vault holds no arweave key</div>
     </div>
   </div>
 </section>
 
-<section id="bridge-sec" style="display:none;border-color:var(--gold)">
-  <h2>🌉 THE BRIDGE — one time, then never manual again</h2>
+<section id="bridge-sec" data-wl-task="key" style="display:none;border-color:var(--gold)">
+  <h2>🌉 the bridge — one time, then never manual again</h2>
   <div class="law">Your bzDiD-derived K1 key is not on your account yet. Paste your existing
   <b>active</b> private key <b>once</b> — we build an updateauth that <b>adds</b> your bzDiD keys
   alongside every key already on your account (nothing removed, threshold 1: <b>the derived key
@@ -655,8 +928,8 @@ document.body.setAttribute('data-reg',r);document.documentElement.setAttribute('
   <pre id="br-out" style="display:none"></pre>
 </section>
 
-<section id="acct-sec" style="border-color:#2c4a5a">
-  <h2>🏭 THE ACCOUNT FORGE — <span data-i18n="wl.h.acctforge">Vaulta accounts born from your bzDiD</span></h2>
+<section id="acct-sec" data-wl-task="key" style="border-color:#2c4a5a">
+  <h2>🏭 the account forge — <span data-i18n="wl.h.acctforge">Vaulta accounts born from your bzDiD</span></h2>
   <details class="tnote" data-reg-disclose><summary data-i18n="wl.d.acct">How a new account is born — your bridged key signs it into being</summary>
   <div class="law">Your <b>bridged</b> account signs <b>newaccount</b>; the new account's owner and
   active keys derive from your bzDiD (contexts <b>vaulta:&#8203;name/owner</b> and
@@ -676,8 +949,8 @@ document.body.setAttribute('data-reg',r);document.documentElement.setAttribute('
   <div class="law" id="ac-stat" style="margin-top:6px;min-height:20px">— creator liquid: reading… —</div>
   <pre id="ac-out" style="display:none"></pre>
 </section>
-<section id="pay-sec" style="border-color:#3a5a2c">
-  <h2>💸 PAY — <span data-i18n="wl.h.pay">send · receive · swap</span></h2>
+<section id="pay-sec" data-wl-task="move" style="border-color:#3a5a2c">
+  <h2>💸 pay — <span data-i18n="wl.h.pay">send · receive · swap</span></h2>
   <div class="row" style="margin-top:8px">
     <button id="pay-rx" class="gold">📥 receive</button>
     <button id="pay-tx" class="gold">📤 send</button>
@@ -830,7 +1103,7 @@ document.body.setAttribute('data-reg',r);document.documentElement.setAttribute('
      Phase C re-ruling). Policy rider 2026-09-17: the sharing choice is
      first-class BEFORE quote; this panel records the policy the quote actually
      bound — the founder's chooser gesture is chartered, never agent-inferred. ══ -->
-<section id="bpay-sec" style="border-color:#2c4a5a">
+<section id="bpay-sec" data-wl-task="keep" style="border-color:#2c4a5a">
   <h2>🧾 <span data-i18n="wl.bpay.h">bPay — the preservation invoice</span></h2>
   <details class="tnote" data-reg-disclose><summary data-i18n="wl.bpay.law">the chooser comes first — every figure is carried from a live, keyless network quote; this panel renders, it cannot spend</summary>
   <p class="law">the audience choice is yours, in the chooser, before any quote; selecting 🌐 Public and
@@ -851,7 +1124,7 @@ document.body.setAttribute('data-reg',r);document.documentElement.setAttribute('
      piece leads, the numbers stand beside it. Every SVG here is fetched from
      the collection's own contract at read time; nothing is cached, stored, or
      redrawn by this page. ══ -->
-<section id="insc-sec" style="border-color:#3a2c55">
+<section id="insc-sec" data-wl-task="keep" style="border-color:#3a2c55">
   <h2>🎨 <span data-i18n="wl.insc.h2">INSCRIPTIONS — your garden, drawn on-chain</span></h2>
   <div class="law"><span data-i18n="wl.insc.law">ERC-20i: the art lives in the token, and its tier is your balance.</span> Drawn at
   <b>true tier</b> through the estate's one level-truth module — the same one the market and the museum
@@ -868,7 +1141,7 @@ document.body.setAttribute('data-reg',r);document.documentElement.setAttribute('
 </section>
 
 <!-- ══ THE VOUCHER — prepaid compute, the money engine with a face ══ -->
-<section id="voucher-sec" style="border-color:#2c4a3a">
+<section id="voucher-sec" data-wl-task="add" style="border-color:#2c4a3a">
   <h2>🎟 <span data-i18n="wl.vh2">THE VOUCHER — prepay compute, metered fair</span></h2>
   <p data-reg="bee" data-i18n="wl.reg.voucher.bee">Prepay for compute work — models, vRAM, whatever the estate meters —
   and watch every last drop of it itemized here. Top up from either chain, spend at metered
@@ -940,8 +1213,8 @@ document.body.setAttribute('data-reg',r);document.documentElement.setAttribute('
 </section>
 
 <!-- ══ RECEIPTS — the public spend record, recomputed here (SPEC-SPEND-RECEIPT-1) ══ -->
-<section id="receipts-sec" style="border-color:var(--gold)">
-  <h2>🧾 THE RECEIPTS — <span data-i18n="wl.h.receipts">every bill recomputed here</span></h2>
+<section id="receipts-sec" data-wl-task="proof" style="border-color:var(--gold)">
+  <h2>🧾 the receipts — <span data-i18n="wl.h.receipts">every bill recomputed here</span></h2>
   <details class="tnote" data-reg-disclose><summary data-i18n="wl.d.receipts">How this panel checks every bill — recomputed here, never trusted</summary>
   <p class="law">the voucher panel above reads <b>your</b> balance live from the estate oracle; this panel
   reads the estate's <b>public</b> spend-receipt record (SPEC-SPEND-RECEIPT-1, the same shape the b-meter
@@ -957,7 +1230,7 @@ document.body.setAttribute('data-reg',r);document.documentElement.setAttribute('
 </section>
 
 <!-- ══ FUND — Meld hosted checkout (no server of ours · public key only) ══ -->
-<section id="fund-sec" style="border-color:#4a3a1d" data-meld-public-key="" data-meld-env="sandbox">
+<section id="fund-sec" data-wl-task="add" style="border-color:#4a3a1d" data-meld-public-key="" data-meld-env="sandbox">
   <style>
     #fund-sec .fund-coin{width:26px;height:26px;border-radius:50%;flex:0 0 auto;position:relative;
      background:radial-gradient(circle at 35% 30%,#ffeaa6,var(--gold) 62%,#6e5300);
@@ -982,7 +1255,7 @@ document.body.setAttribute('data-reg',r);document.documentElement.setAttribute('
   #cap-set,#cap-clear,#vc-go{min-height:44px}
   #vcomb .cell{min-height:44px}}
 </style>
-  <h2>💳 FUND — <span data-i18n="wl.h.fund">buy USDC, land it on an address you hold</span></h2>
+  <h2>💳 fund — <span data-i18n="wl.h.fund">buy USDC, land it on an address you hold</span></h2>
   <details class="tnote" data-reg-disclose><summary data-i18n="wl.d.fiat">How the card checkout works — who holds what at each step</summary>
   <div class="law">The one lane this wallet cannot forge itself: licensed fiat. The buy runs on
   <b>Meld's hosted checkout</b> — it opens in its own tab; this page only builds the link.
@@ -1262,8 +1535,8 @@ document.body.setAttribute('data-reg',r);document.documentElement.setAttribute('
 </section>
 
 <!-- ══ PEER FUNNEL — the first mile in: fiat → USDC on Peer's escrow, estate = bare to ══ -->
-<section id="peer-sec" style="border-color:#2c4a3a">
-  <h2>🏧 FIAT IN — <span data-i18n="wl.h.fiat">the Peer funnel</span> (SPEC-PEER-FUNNEL-1)</h2>
+<section id="peer-sec" data-wl-task="add" style="border-color:#2c4a3a">
+  <h2>🏧 fiat in — <span data-i18n="wl.h.fiat">the Peer funnel</span> (SPEC-PEER-FUNNEL-1)</h2>
   <details class="tnote" data-reg-disclose><summary data-i18n="wl.d.funnel">The fiat funnel’s role — the estate sells, it never operates</summary>
   <p class="law">the estate is a <b>seller, not an operator</b>: its Base address below is a bare
   <b>to</b> on Peer's live escrow (EscrowV2 + OrchestratorV3 on Base) — it signs nothing, grants
@@ -1401,8 +1674,8 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
 </section>
 
 <!-- ══ ARWEAVE — publish & anchor (first-party signer · vault custody) ══ -->
-<section id="arw-sec" style="border-color:#4a3a1d">
-  <h2>📡 ARWEAVE — <span data-i18n="wl.h.arweave">publish &amp; anchor, no middleman</span></h2>
+<section id="arw-sec" data-wl-task="keep" style="border-color:#4a3a1d">
+  <h2>📡 Arweave — <span data-i18n="wl.h.arweave">publish &amp; anchor, no middleman</span></h2>
   <details class="tnote" data-reg-disclose><summary data-i18n="wl.d.arweave">The Arweave lane — built and signed inside this page</summary>
   <div class="law">Another adapter on the wallet shell — balance, receive address, send, and
   one new capability: <b>PUBLISH</b>. The transaction is built and signed <b>in this page</b>
@@ -1457,7 +1730,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
           var e = arEntry();
           var balEl = document.getElementById('ar-bal'), statEl = document.getElementById('ar-stat');
           if (!e) {
-            if (balEl) balEl.textContent = '—';
+            if (balEl) balEl.textContent = '';
             if (statEl) statEl.textContent = 'vault holds no arweave key';
             paint('no arweave key in the vault — seal your JWK in THE VAULT above (paste it; the type is detected), then this panel wakes');
             return;
@@ -1548,8 +1821,8 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   </script>
 </section>
 
-<section>
-  <h2>✍ COMPOSER — <span data-i18n="wl.h.composer">the BNR contract surface, no Unicove</span></h2>
+<section id="composer-sec" data-wl-task="proof">
+  <h2>✍ composer — <span data-i18n="wl.h.composer">the BNR contract surface, no Unicove</span></h2>
   <details class="tnote" data-reg-disclose><summary data-i18n="wl.d.composer">What the composer shows you before anything is signed</summary>
   <div class="law" id="sign-law">Give it contract + action and it fetches the live ABI, renders
   one field per argument, and <b>shows you exactly what you will sign</b> — action, authorization,
@@ -1616,16 +1889,16 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   <pre id="tx-out" style="display:none"></pre>
 </section>
 
-<section>
-  <h2>📤 OUTBOX — <span data-i18n="wl.h.outbox">signed bytes persist here BEFORE they submit</span></h2>
+<section id="outbox-sec" data-wl-task="move">
+  <h2>📤 outbox — <span data-i18n="wl.h.outbox">signed bytes persist here BEFORE they submit</span></h2>
   <div class="law">The order is law: <b>build → sign → persist → submit → confirm by reading the
   rail</b>. A retry resubmits the identical stored bytes — it never re-signs, never rebuilds.
   Nothing shows "sent" until a block read says so; the receipt names what was read.</div>
   <div id="outbox-list"></div>
 </section>
 
-<section>
-  <h2>🗺 CHAIN MATRIX — <span data-i18n="wl.h.matrix">the sixteen rails, from data</span></h2>
+<section id="matrix-sec" data-wl-task="proof">
+  <h2>🗺 chain matrix — <span data-i18n="wl.h.matrix">the sixteen rails, from data</span></h2>
   <details class="tnote" data-reg-disclose><summary data-i18n="wl.d.rails">Every rail, one row each — how it is read and signed</summary>
   <div class="law">Every rail the wallet will ever owe you, one row each: <b>how it's read</b>
   (first-party path first), <b>how it's signed</b> (custody tier), and <b>tonight's honest state</b>.
@@ -1637,7 +1910,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   <div id="matrix-body"></div>
 </section>
 
-<section>
+<section id="summary-sec" data-wl-task="have">
   <h2>📊 <span data-i18n="wl.h.summary">SUMMARY</span></h2>
   <div class="readout">
     <div class="rd"><div class="k">SOUL</div><div class="v" id="sum-soul" style="font-size:13px">—</div></div>
@@ -5438,5 +5711,196 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
 </script>
 <script src="spend-audit.js?v=2"></script>
 <script>if (window.SpendAudit) SpendAudit.mountPanel(document.getElementById('receiptsBody'));</script>
+<script>
+/* ══ THE THREE GRAMMARS — the presenter. It moves the reader through the one
+   set of sections; it never reads a chain, holds a key, or writes a number.
+   docs/dispatches/2026-09-26-wallet-three-grammars.md
+     new bee     a navigation stack: rows push a task (a history entry), back pops it
+     raver       lateral: the dock and a sideways swipe swap the deck in place
+     cypherpunk  everything at once: an index, j/k between sections, o for notes */
+(function(){
+  var body=document.body, main=document.querySelector('main');
+  var DOCK=['home','have','move','add','keep','key','proof','all'];
+  var secs=[].slice.call(document.querySelectorAll('main>section[data-wl-task]'));
+  function reg(){return body.getAttribute('data-reg')||'bee'}
+  function view(){return body.getAttribute('data-wl-view')||'home'}
+  function shown(el){return !!el&&el.getClientRects().length>0}
+  function reduced(){return !!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches)}
+
+  /* ── mirrors: one fact, one node. A mirror copies its source's text; an
+     empty or bare-dash value is UNREAD and its card says so in words
+     (DESIGN-CONSTRAINTS §2), so no register can show a number the others do not. */
+  function unread(t){return !t||t==='—'}
+  var mirrors=[].slice.call(document.querySelectorAll('[data-wl-src]'));
+  function sync(id){
+    var src=document.getElementById(id), t=src?src.textContent.trim():'', read=!unread(t);
+    mirrors.forEach(function(m){
+      if(m.getAttribute('data-wl-src')!==id)return;
+      if(!m.hasAttribute('data-wl-value')){m.textContent=t;return}
+      m.textContent=read?t:'';
+      var card=m.closest('[data-wl-card]');if(card)card.setAttribute('data-read',String(read));
+    });
+    [].forEach.call(document.querySelectorAll('[data-wl-rail="'+id+'"]'),function(n){n.setAttribute('data-lit',String(read))});
+  }
+  var ids={};
+  mirrors.forEach(function(m){ids[m.getAttribute('data-wl-src')]=1});
+  [].forEach.call(document.querySelectorAll('[data-wl-rail]'),function(n){ids[n.getAttribute('data-wl-rail')]=1});
+  Object.keys(ids).forEach(function(id){
+    var src=document.getElementById(id);if(!src)return;
+    sync(id);
+    new MutationObserver(function(){sync(id)}).observe(src,{childList:true,characterData:true,subtree:true});
+  });
+
+  /* ── the view: home, one task, or all ── */
+  var depth=0, lastRow=null;
+  function paintDock(){
+    var v=view();
+    [].forEach.call(document.querySelectorAll('#wl-dock [data-wl-go]'),function(b){
+      var on=b.getAttribute('data-wl-go')===v;b.setAttribute('aria-pressed',String(on));b.tabIndex=on?0:-1;
+    });
+  }
+  function setView(v,how){
+    how=how||{};
+    if(DOCK.indexOf(v)<0)v='home';
+    var was=view();
+    body.setAttribute('data-wl-view',v);
+    try{sessionStorage.setItem('wl.view',v)}catch(e){}
+    paintDock();
+    if(how.push&&was!==v){try{history.pushState({wlView:v},'');depth++}catch(e){}}
+    else if(how.replace){try{history.replaceState({wlView:v},'')}catch(e){}}
+    if(how.arrive)arrive(v);
+  }
+  function arrive(v){
+    window.scrollTo(0,0);
+    if(reg()!=='bee')return;
+    if(v==='home'){var b=lastRow&&document.querySelector('#wl-bee [data-wl-go="'+lastRow+'"]');if(b)b.focus({preventScroll:true})}
+    else{var t=document.getElementById('wl-bar-title');if(t)t.focus({preventScroll:true})}
+  }
+  document.addEventListener('click',function(e){
+    var b=e.target.closest&&e.target.closest('[data-wl-go]');
+    if(!b)return;
+    var v=b.getAttribute('data-wl-go');
+    if(reg()==='bee'){
+      if(v==='home'&&depth>0){history.back();return}         /* the stack pops, it does not grow */
+      if(v!=='home')lastRow=v;
+      setView(v,{push:v!=='home',replace:v==='home',arrive:true});
+    } else setView(v,{replace:true,arrive:true});               /* raver is lateral */
+  });
+  window.addEventListener('popstate',function(e){
+    if(depth>0)depth--;
+    setView((e.state&&e.state.wlView)||'home',{arrive:true});
+  });
+
+  /* a deep link lands in the task that holds its target, in every register */
+  function taskOf(el){var s=el&&el.closest&&el.closest('main>section[data-wl-task]');return s?s.getAttribute('data-wl-task'):null}
+  function landHash(){
+    var h=location.hash.slice(1);
+    if(!h||h.indexOf('qr=')===0)return;
+    var el=null;try{el=document.getElementById(decodeURIComponent(h))}catch(e){}
+    var t=taskOf(el);if(!t)return;
+    if(reg()!=='cypherpunk'&&view()!=='all'&&view()!==t)setView(t,{replace:true});
+    requestAnimationFrame(function(){el.scrollIntoView({block:'start'})});
+  }
+  window.addEventListener('hashchange',landHash);
+
+  /* work survives a register switch. The toggle sits at the top of the page,
+     so a reader always scrolls up to reach it: scroll position cannot say what
+     they were doing. Where they last WORKED can: the section of the last field
+     they focused or typed in becomes the bee/raver task, and a bee/raver task
+     becomes cypherpunk's place. */
+  var workTask=null;
+  function noteWork(e){var t=taskOf(e.target);if(t)workTask=t}
+  document.addEventListener('focusin',noteWork);
+  document.addEventListener('input',noteWork);
+  function current(){
+    var best=null,bt=-Infinity;
+    secs.forEach(function(s){if(!shown(s))return;var t=s.getBoundingClientRect().top;if(t<=innerHeight*.35&&t>bt){bt=t;best=s}});
+    return best;
+  }
+  var lastReg=reg();
+  document.addEventListener('bregister',function(e){
+    var r=(e.detail&&e.detail.reg)||reg(), from=lastReg;
+    if(r===from)return;
+    lastReg=r;
+    if(from==='cypherpunk'){
+      if(workTask)setView(workTask,{replace:true});
+    } else if(r==='cypherpunk'){
+      var v=view(), first=null;
+      secs.some(function(s){if(s.getAttribute('data-wl-task')===v&&shown(s)){first=s;return true}});
+      if(first)requestAnimationFrame(function(){first.scrollIntoView({block:'start'})});
+    }
+    paintDock();
+  });
+
+  /* ── cypherpunk: the index and the keys ── */
+  function buildIndex(){
+    var ol=document.getElementById('wl-cy-idx');if(!ol)return;
+    ol.textContent='';
+    secs.forEach(function(s,i){
+      var n=(i<9?'0':'')+(i+1), h=s.querySelector('h2');
+      if(h)h.setAttribute('data-wl-n',n);
+      if(!s.hasAttribute('tabindex'))s.setAttribute('tabindex','-1');
+      var name=(h?h.textContent:s.id).replace(/\s+/g,' ').trim().replace(/^[^\p{L}\p{N}]+/u,'').split(' — ')[0];
+      var li=document.createElement('li'), a=document.createElement('a');
+      a.href='#'+s.id;
+      var sn=document.createElement('span');sn.className='n';sn.textContent='§'+n;
+      var st=document.createElement('span');st.className='t';st.textContent=name;
+      var tg=document.createElement('span');tg.className='tag';tg.textContent=s.getAttribute('data-wl-task');
+      a.appendChild(sn);a.appendChild(st);a.appendChild(tg);li.appendChild(a);ol.appendChild(li);
+    });
+  }
+  document.addEventListener('keydown',function(e){
+    if(reg()!=='cypherpunk'||e.defaultPrevented||e.altKey||e.ctrlKey||e.metaKey)return;
+    var t=e.target;
+    if(t&&(t.isContentEditable||/^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)))return;
+    if(e.key==='j'||e.key==='k'){
+      var vis=secs.filter(shown).sort(function(a,b){return a.getBoundingClientRect().top-b.getBoundingClientRect().top});
+      var inSec=document.activeElement&&document.activeElement.closest&&document.activeElement.closest('main>section[data-wl-task]');
+      var at=vis.indexOf(inSec||current());
+      var next=vis[Math.max(0,Math.min(vis.length-1,at+(e.key==='j'?1:-1)))];
+      if(next){next.focus({preventScroll:true});next.scrollIntoView({block:'start',behavior:reduced()?'auto':'smooth'});e.preventDefault()}
+    } else if(e.key==='g'){
+      var a=document.querySelector('#wl-cy-idx a');if(a){a.focus();e.preventDefault()}
+    } else if(e.key==='o'){
+      var ds=[].slice.call(document.querySelectorAll('details[data-reg-disclose]'));
+      var open=!ds.every(function(d){return d.open});
+      ds.forEach(function(d){d.open=open;d.dataset.userTouched='1'});
+      e.preventDefault();
+    }
+  });
+
+  /* ── raver: the dock is a toolbar (arrows move and select) and the deck
+     swipes sideways under a finger ── */
+  var dock=document.getElementById('wl-dock');
+  if(dock)dock.addEventListener('keydown',function(e){
+    if(['ArrowRight','ArrowLeft','Home','End'].indexOf(e.key)<0)return;
+    var bs=[].slice.call(dock.querySelectorAll('[data-wl-go]')), i=bs.indexOf(document.activeElement);
+    if(i<0)return;
+    var fwd=(e.key==='ArrowRight')!==(getComputedStyle(dock).direction==='rtl');
+    var j=e.key==='Home'?0:e.key==='End'?bs.length-1:(i+(fwd?1:-1)+bs.length)%bs.length;
+    bs[j].focus();bs[j].click();e.preventDefault();
+  });
+  var sx=0,sy=0,st=0;
+  main.addEventListener('touchstart',function(e){
+    if(reg()!=='raver'||e.touches.length!==1){st=0;return}
+    sx=e.touches[0].clientX;sy=e.touches[0].clientY;st=Date.now();
+  },{passive:true});
+  main.addEventListener('touchend',function(e){
+    if(!st||reg()!=='raver')return;
+    var p=e.changedTouches[0], dx=p.clientX-sx, dy=p.clientY-sy, dt=Date.now()-st;st=0;
+    if(dt>650||Math.abs(dx)<70||Math.abs(dy)>45)return;
+    if(e.target.closest&&e.target.closest('input,textarea,select,pre,table,#wl-dock,.chips,.chains,[contenteditable]'))return;
+    var fwd=(dx<0)!==(getComputedStyle(main).direction==='rtl'), i=DOCK.indexOf(view());
+    var j=Math.max(0,Math.min(DOCK.length-1,i+(fwd?1:-1)));
+    if(j!==i)setView(DOCK[j],{replace:true,arrive:true});
+  },{passive:true});
+
+  buildIndex();
+  document.addEventListener('blang',buildIndex);
+  paintDock();
+  try{history.replaceState({wlView:view()},'')}catch(e){}
+  landHash();
+})();
+</script>
 </body>
 </html>
