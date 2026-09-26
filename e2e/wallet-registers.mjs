@@ -743,16 +743,19 @@ ok('on a phone the first screen holds a different KIND of thing: bee choices, ra
     return t.replace(/\s+/g, ' ');
   }, sel);
   const has = (text, list) => list.filter(m => text.includes(m));
-  const res = {};
+  const resW = {};
+  for (const W of [390, 1280]) {
+  const res = resW[W] = {};
   for (const reg of REGS) {
-    const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
+    const ctx = await browser.newContext({ viewport: { width: W, height: W === 390 ? 844 : 900 } });
     await ctx.addInitScript(r => { try { localStorage.setItem('bregister', r); } catch (e) {} }, reg);
     await ctx.route(url => !url.href.startsWith(origin), r => /\/voucher\/v1\/voucher\//.test(r.request().url())
       ? r.fulfill({ status: 200, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: JSON.stringify(VOUCHER) }) : r.abort());
     const page = await ctx.newPage();
     page.on('pageerror', e => pageErrors.push(reg + ': ' + String(e)));
     await page.goto(origin + '/wallet.html', { waitUntil: 'load' });
-    await page.waitForSelector('#breg-cypherpunk'); await page.addStyleTag({ content: STRIP }); await page.waitForTimeout(400);
+    await page.waitForSelector('#breg-cypherpunk'); await page.waitForTimeout(400);
+    const strip = await page.addStyleTag({ content: STRIP }); await page.waitForTimeout(150);
     const r = res[reg] = {};
     // the footer at arrival, then one tap on its summary
     r.footer = await seen(page, 'footer');
@@ -768,20 +771,72 @@ ok('on a phone the first screen holds a different KIND of thing: bee choices, ra
       if (reg !== 'cypherpunk') { await page.click(`#${id} .wl-more`); await page.waitForTimeout(150); r[part + 'Tap'] = await seen(page, '#' + id); await page.click(`#${id} .wl-more`); await page.waitForTimeout(100); }
       if (reg === 'raver') { await page.click(`#wl-cards .wlr-card[data-wl-card-for="${id}"]`); await page.waitForTimeout(150); }
     }
+    // receipts: the add task one tap deep, stripped and in colour (to tell a real overlap from a strip artefact)
+    if (reg === 'raver') { await page.click('#wl-cards .wlr-card[data-wl-card-for="fund-sec"]'); await page.waitForTimeout(300); }
+    await page.evaluate(() => window.scrollTo(0, 0));
+    await page.screenshot({ path: join(here, 'shots-wallet-registers', `wallet-${W}-${reg}-add-stripped.png`) });
+    await page.evaluate(el => el.remove(), strip); await page.waitForTimeout(300);
+    await page.screenshot({ path: join(here, 'shots-wallet-registers', `wallet-${W}-${reg}-add-colour.png`) });
     await ctx.close();
   }
+  }
+  const res = { bee: {}, raver: {}, cypherpunk: {} };
+  for (const reg of REGS) for (const k of Object.keys(resW[390][reg])) res[reg][k] = resW[390][reg][k] + ' ¦ ' + (resW[1280][reg][k] || '');
   const parts = ['voucher', 'fund', 'footer'];
   const leak = (reg) => parts.flatMap(p => has(res[reg][p], ENG[p]).map(m => p + ':' + m));
-  ok('dress stripped, one tap in: bee and raver show NONE of the voucher, fund and footer engineering at rest (source host, rate citation, ledger internals, key names, sandbox host, crypto and build notes)',
+  ok('dress stripped, at 390 and 1280, one tap in: bee and raver show NONE of the voucher, fund and footer engineering at rest (source host, rate citation, ledger internals, key names, sandbox host, crypto and build notes)',
     leak('bee').length === 0 && leak('raver').length === 0, `bee ${leak('bee').join(', ') || 'none'} · raver ${leak('raver').join(', ') || 'none'}`);
-  const missing = reg => parts.flatMap(p => ENG[p].filter(m => !res[reg][p].includes(m)).map(m => p + ':' + m));
+  const missing = reg => parts.flatMap(p => ENG[p].filter(m => [390, 1280].some(W => !resW[W][reg][p].includes(m))).map(m => p + ':' + m));
   ok('cypherpunk shows every one of those engineering strings open, with no tap', missing('cypherpunk').length === 0, missing('cypherpunk').join(', ') || 'all open');
-  const far = reg => parts.flatMap(p => ENG[p].filter(m => !res[reg][p + 'Tap'].includes(m)).map(m => p + ':' + m));
+  const far = reg => parts.flatMap(p => ENG[p].filter(m => [390, 1280].some(W => !resW[W][reg][p + 'Tap'].includes(m))).map(m => p + ':' + m));
   ok('in bee and raver each one is ONE tap away (the section\'s own toggle, the footer\'s summary): moved, never deleted',
     far('bee').length === 0 && far('raver').length === 0, `bee ${far('bee').join(', ') || 'all reached'} · raver ${far('raver').join(', ') || 'all reached'}`);
-  const lost = reg => parts.flatMap(p => PLAIN[p].filter(m => !res[reg][p].includes(m)).map(m => p + ':' + m));
+  const lost = reg => parts.flatMap(p => PLAIN[p].filter(m => [390, 1280].some(W => !resW[W][reg][p].includes(m))).map(m => p + ':' + m));
   ok('the plain facts show at rest in every register: the voucher balance, the memo warning, the buy button, the checkout state, the footer\'s name and its way in',
     REGS.every(r => lost(r).length === 0), REGS.map(r => `${r} ${lost(r).join(', ') || 'all shown'}`).join(' · '));
+}
+
+// 4f · NEW BEE'S OPENING COPY, read as words: every section a bee task opens (its visible
+// heading and the intro under it) carries no capitals-as-shout, no dash, and none of the
+// machine words below. At 390 and 1280, dress stripped, one real row tap per task.
+{
+  const STRIP = '*,*::before,*::after{color:#000!important;background:#fff!important;font-family:Arial!important;border-radius:0!important;box-shadow:none!important;text-shadow:none!important;animation:none!important;transition:none!important;border-color:#000!important}';
+  // tickers and names a reader meets on any exchange are words, not shouting
+  const TICKERS = new Set(['USDC', 'ETH', 'ANT', 'HIVE', 'HBD', 'HP', 'AR', 'BTC', 'BCH', 'ZEC', 'XMR', 'BNR', 'EVM', 'QR']);
+  // the engine room's vocabulary: true, and belonging one tap deeper
+  const MACHINE = ['rpc', 'keyless', 'vram', 'spec-', 'bytes', 'persist', 'contract surface', 'unicove', 'abi', 'prf', 'jwk', 'wasm', 'oracle', 'hash-chained', 'derivation', 'endpoint', 'eosjs', 'sandbox', 'escrow', 'orchestrator', 'metadata', 'masterprk', 'funnel'];
+  const found = [];
+  const seenOpen = [];
+  for (const W of [390, 1280]) {
+    const { ctx, page } = await open('bee', { width: W, height: W === 390 ? 844 : 900 });
+    await page.addStyleTag({ content: STRIP });
+    for (const t of ['have', 'move', 'add', 'keep', 'key', 'proof']) {
+      await page.click(`#wl-bee [data-wl-go="${t}"]`); await page.waitForTimeout(350);
+      const opening = await page.evaluate(() => {
+        const vis = e => e.getClientRects().length > 0 && !e.closest('details:not([open])');
+        const CTL = 'button,a[href],input,select,textarea,summary';
+        return [...document.querySelectorAll('main>section[data-wl-task]')].filter(vis).map(s => {
+          const heads = [...s.querySelectorAll(':scope>h2')].filter(vis);
+          const last = heads[heads.length - 1];
+          let intro = last && last.nextElementSibling;
+          while (intro && (!vis(intro) || !intro.innerText.trim())) intro = intro.nextElementSibling;
+          const words = heads.map(h => h.innerText).join(' ') + (intro && !intro.matches(CTL) && !intro.querySelector(CTL) ? ' ' + intro.innerText : '');
+          return { id: s.id, words: words.replace(/\s+/g, ' ').trim() };
+        });
+      });
+      for (const o of opening) {
+        seenOpen.push(`${W}:${t}:${o.id}`);
+        const shout = (o.words.match(/\b[A-Z]{2,}(?:[-_][A-Z0-9]+)*\b/g) || []).filter(w => !TICKERS.has(w));
+        const dash = /[—–]/.test(o.words);
+        const low = o.words.toLowerCase(), machine = MACHINE.filter(m => low.includes(m));
+        if (shout.length || dash || machine.length) found.push(`${W} ${t}/${o.id}: ${[...shout, dash ? 'dash' : '', ...machine].filter(Boolean).join(',')} ‹${o.words.slice(0, 60)}›`);
+      }
+      await page.click('#wl-bar [data-wl-go="home"]'); await page.waitForTimeout(350);
+    }
+    await ctx.close();
+  }
+  ok('new bee\'s opening copy, dress stripped at 390 and 1280: every section a task opens reads with no capitals-as-shout, no dash and none of the machine words (heading and the intro under it)',
+    found.length === 0 && seenOpen.length >= 2 * 18, found.length ? found.slice(0, 5).join(' · ') : `${seenOpen.length} openings read clean`);
 }
 
 // 9b · bee's "show the details" is bee's: a register switch starts every section folded, and the toggle is not work

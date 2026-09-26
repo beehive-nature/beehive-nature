@@ -247,3 +247,33 @@ The founder's read of #242 at `bacc9b50`: round 4 was still open. Two findings r
 **Also corrected:** the corpus's `_meta.drafted` note from the dash commit named a model. It no longer does.
 
 wallet-registers **GREEN 109/109**, dress stripped. Batteries: fund 94 · vault 35 · matrix 11 · arweave 22 · signer 105 · adapter 28. CI gates: estate-check · estate-source 11/11 · static 377/377 · i18n selftest + ru floors · footer-audit 0 worse · no-page-errors 113/0 · polish 25/25 · bPay A 18/18 · B 17/17 · bData 100/100 · orb-seat 5/5 · tour-bar 4/4 · comprehension 9/9 · bpay-policy 2/2 · engineflow 30/30 · comb-eternal 8/8 · skaists-conformance · build-skaists check.
+
+### 12c · the closeout gates as the founder wrote them (comment on #242)
+
+The founder's bar: `F1 PASS · F2 PASS · color-free audit PASS · wallet gates GREEN`. F1 was wider than 12b answered. Bee's "add money" still opened on "THE VOUCHER: prepay compute, metered fair" and "fund: buy USDC, land it on an address you hold". A gate that counts characters cannot see that. So F1 now covers **every opening a bee task makes**, and the gate reads it as words.
+
+- **§4f, new bee's opening copy.** It runs at 390 and 1280 with the dress stripped, with one real row tap per task. For each visible section, it reads the visible heading and the intro under it. It fails on:
+  - a capital-as-shout, meaning any all-caps word that is not a ticker. The ticker list is stated in the gate: USDC, ETH, ANT, HIVE, HBD, HP, AR, BTC, BCH, ZEC, XMR, BNR, EVM, QR.
+  - any dash
+  - any machine word from a stated list: rpc, keyless, vram, spec-, bytes, persist, contract surface, unicove, abi, prf, jwk, wasm, oracle, hash-chained, derivation, endpoint, eosjs, sandbox, escrow, orchestrator, metadata, masterprk, funnel
+
+  Its first run failed on eight sections: balances, summary, outbox, voucher, fund, peer, inscriptions and composer. It also failed on the balance cards' descriptions (RAM, JWK, "public metadata", keyless) and on the outbox's empty line ("persists … BEFORE it is submitted").
+- **The fix is one pattern, moved and never deleted.** Each of those engineering headings carries `data-wl-tech`, and new bee gets its own plain heading in its place (`data-reg="bee"`, 8 keys `wl.bee.h.*` × 29 cells ⚙):
+  - what you hold, on every chain
+  - at a glance
+  - waiting to be sent
+  - prepay for compute
+  - buy USDC with a card
+  - money in, person to person
+  - your garden, drawn on the chain
+  - write an action and see it before you sign
+
+  Also folded in bee: the balances intro ("Read from public RPCs…"), bee's voucher paragraph (vRAM), and the balance cards' descriptions (`.chain .cd`). They sit behind the section's own "show the details". The outbox says "nothing is waiting to be sent" in bee (`wl.bee.outbox.empty`), and the precise line stays for cypherpunk. Raver and cypherpunk are unchanged: raver already folds every h2, and cypherpunk shows everything.
+- **§4e now runs at 390 and 1280.** Each width must hold on its own (a string found at one width does not excuse its absence at the other). It also banks colour and stripped receipts of the add task per register per width: `wallet-{390,1280}-{reg}-add-{colour,stripped}.png`. Read side by side, they show no overlap in either.
+
+**Receipts (this closeout):** wallet-registers **GREEN 110/110**. Batteries: fund 94 · vault 35 · matrix 11 · arweave 22 · signer 105 · adapter 28. CI gates: estate-check · estate-source 11/11 · static 377/377 · i18n selftest + ru floors · footer-audit 0 worse · no-page-errors 113/0 · polish 25/25 · profile 53/53 · bPay A 18/18 · B 17/17 · bData 100/100 · orb-seat 5/5 · tour-bar 4/4 · comprehension 9/9 · bpay-policy 2/2 · engineflow 30/30 · comb-eternal 8/8 · skaists-conformance · build-skaists check.
+
+**Still open and named, as the review allows:**
+- Dashes and capitals in keyed runtime copy reached only after an action: the voucher panel's `wl.vc.*` ("the memo IS the binding —", "A · Vaulta — gasless").
+- The keyed headings' casing in the corpus. Bee no longer shows those headings at rest; cypherpunk still does.
+- The stale "Phase A" label in 28 tongues.

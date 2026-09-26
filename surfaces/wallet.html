@@ -472,7 +472,7 @@ body[data-reg] #fund-sec .fund-coin::after{color:#0c1412;font-size:14px}
                  behind its own "show the details" (moved, never deleted)
      raver       the task is glyph cards; a card opens its one section with
                  its controls first, and its words fold behind "the words" */
-body[data-reg="bee"] main>section:not([data-wl-more]) :is([data-wl-tech],.ring-wrap>svg,.ring-key){display:none!important}
+body[data-reg="bee"] main>section:not([data-wl-more]) :is([data-wl-tech],.ring-wrap>svg,.ring-key,.chain .cd){display:none!important}
 body[data-reg="raver"] main>section:not([data-wl-more]) :is(h2,[data-wl-tech]:not(:has(button,input,select,textarea)),.law:not([id]),#pay-law,#cap-lbl,p,.lcap,.ring-key,details[data-reg-disclose]:not(:has(button,input,select,textarea))){display:none!important}
 .wl-more{display:none}
 body[data-reg="bee"] main>section[data-wl-fold-bee] .wl-more,body[data-reg="raver"] main>section[data-wl-fold-raver] .wl-more{display:flex}
@@ -1051,8 +1051,9 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
 </section>
 
 <section id="bal-sec" data-wl-task="have">
-  <h2>⚡ balances: <span data-i18n="wl.h.balances">every chain, keyless, live</span></h2>
-  <div class="law">Read from public RPCs in your browser. Nothing stored, nothing sent.
+  <h2 data-wl-tech>⚡ balances: <span data-i18n="wl.h.balances">every chain, keyless, live</span></h2>
+  <h2 data-reg="bee">⚡ <span data-i18n="wl.bee.h.bal">what you hold, on every chain</span></h2>
+  <div class="law" data-wl-tech>Read from public RPCs in your browser. Nothing stored, nothing sent.
   The chain is the source of truth.</div>
   <div class="chains" id="chains">
     <div class="chain" id="ch-vaulta">
@@ -1307,7 +1308,8 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
      the collection's own contract at read time; nothing is cached, stored, or
      redrawn by this page. ══ -->
 <section id="insc-sec" data-wl-task="keep" style="border-color:#3a2c55">
-  <h2>🎨 <span data-i18n="wl.insc.h2">INSCRIPTIONS: your garden, drawn on-chain</span></h2>
+  <h2 data-wl-tech>🎨 <span data-i18n="wl.insc.h2">INSCRIPTIONS: your garden, drawn on-chain</span></h2>
+  <h2 data-reg="bee">🎨 <span data-i18n="wl.bee.h.insc">your garden, drawn on the chain</span></h2>
   <div class="law" data-wl-tech><span data-i18n="wl.insc.law">ERC-20i: the art lives in the token, and its tier is your balance.</span> Drawn at
   <b>true tier</b> through the estate's one level-truth module, the same one the market and the museum
   use. Keyless, read-only, nothing signed.</div>
@@ -1324,8 +1326,9 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
 
 <!-- ══ THE VOUCHER — prepaid compute, the money engine with a face ══ -->
 <section id="voucher-sec" data-wl-task="add" style="border-color:#2c4a3a">
-  <h2>🎟 <span data-i18n="wl.vh2">THE VOUCHER: prepay compute, metered fair</span></h2>
-  <p data-reg="bee" data-i18n="wl.reg.voucher.bee">Prepay for compute work (models, vRAM, whatever the estate meters)
+  <h2 data-wl-tech>🎟 <span data-i18n="wl.vh2">THE VOUCHER: prepay compute, metered fair</span></h2>
+  <h2 data-reg="bee">🎟 <span data-i18n="wl.bee.h.voucher">prepay for compute</span></h2>
+  <p data-reg="bee" data-wl-tech data-i18n="wl.reg.voucher.bee">Prepay for compute work (models, vRAM, whatever the estate meters)
   and watch every last drop of it itemized here. Top up from either chain, spend at metered
   rates, and the estate's 10% tithe is always visible, never buried.</p>
   <p data-reg="raver" data-i18n="wl.reg.voucher.raver">Two rails in, one A balance, receipts with the tithe line: the same
@@ -1437,7 +1440,8 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
   #cap-set,#cap-clear,#vc-go{min-height:44px}
   #vcomb .cell{min-height:44px}}
 </style>
-  <h2>💳 fund: <span data-i18n="wl.h.fund">buy USDC, land it on an address you hold</span></h2>
+  <h2 data-wl-tech>💳 fund: <span data-i18n="wl.h.fund">buy USDC, land it on an address you hold</span></h2>
+  <h2 data-reg="bee">💳 <span data-i18n="wl.bee.h.fund">buy USDC with a card</span></h2>
   <details class="tnote" data-reg-disclose><summary data-i18n="wl.d.fiat">How the card checkout works: who holds what at each step</summary>
   <div class="law">The one lane this wallet cannot forge itself: licensed fiat. The buy runs on
   <b>Meld's hosted checkout</b>: it opens in its own tab; this page only builds the link.
@@ -1718,7 +1722,8 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
 
 <!-- ══ PEER FUNNEL — the first mile in: fiat → USDC on Peer's escrow, estate = bare to ══ -->
 <section id="peer-sec" data-wl-task="add" style="border-color:#2c4a3a">
-  <h2>🏧 fiat in: <span data-i18n="wl.h.fiat">the Peer funnel</span> (SPEC-PEER-FUNNEL-1)</h2>
+  <h2 data-wl-tech>🏧 fiat in: <span data-i18n="wl.h.fiat">the Peer funnel</span> (SPEC-PEER-FUNNEL-1)</h2>
+  <h2 data-reg="bee">🏧 <span data-i18n="wl.bee.h.peer">money in, person to person</span></h2>
   <details class="tnote" data-reg-disclose><summary data-i18n="wl.d.funnel">The fiat funnel’s role: the estate sells, it never operates</summary>
   <p class="law">the estate is a <b>seller, not an operator</b>: its Base address below is a bare
   <b>to</b> on Peer's live escrow (EscrowV2 + OrchestratorV3 on Base). it signs nothing, grants
@@ -2006,7 +2011,8 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
 </section>
 
 <section id="composer-sec" data-wl-task="proof">
-  <h2>✍ composer: <span data-i18n="wl.h.composer">the BNR contract surface, no Unicove</span></h2>
+  <h2 data-wl-tech>✍ composer: <span data-i18n="wl.h.composer">the BNR contract surface, no Unicove</span></h2>
+  <h2 data-reg="bee">✍ <span data-i18n="wl.bee.h.composer">write an action and see it before you sign</span></h2>
   <details class="tnote" data-reg-disclose><summary data-i18n="wl.d.composer">What the composer shows you before anything is signed</summary>
   <div class="law" id="sign-law">Give it contract + action and it fetches the live ABI, renders
   one field per argument, and <b>shows you exactly what you will sign</b> (action, authorization,
@@ -2074,7 +2080,8 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
 </section>
 
 <section id="outbox-sec" data-wl-task="move">
-  <h2>📤 outbox: <span data-i18n="wl.h.outbox">signed bytes persist here BEFORE they submit</span></h2>
+  <h2 data-wl-tech>📤 outbox: <span data-i18n="wl.h.outbox">signed bytes persist here BEFORE they submit</span></h2>
+  <h2 data-reg="bee">📤 <span data-i18n="wl.bee.h.outbox">waiting to be sent</span></h2>
   <div class="law" data-wl-tech>The order is law: <b>build → sign → persist → submit → confirm by reading the
   rail</b>. A retry resubmits the identical stored bytes. It never re-signs, never rebuilds.
   Nothing shows "sent" until a block read says so; the receipt names what was read.</div>
@@ -2095,7 +2102,8 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
 </section>
 
 <section id="summary-sec" data-wl-task="have">
-  <h2>📊 <span data-i18n="wl.h.summary">SUMMARY</span></h2>
+  <h2 data-wl-tech>📊 <span data-i18n="wl.h.summary">SUMMARY</span></h2>
+  <h2 data-reg="bee">📊 <span data-i18n="wl.bee.h.summary">at a glance</span></h2>
   <div class="readout">
     <div class="rd"><div class="k" data-i18n="wl.cy.soul">soul</div><div class="v" id="sum-soul" style="font-size:13px">not connected yet</div></div>
     <div class="rd"><div class="k" data-i18n="wl.cy.chains">chains connected</div><div class="v" id="sum-chains">0</div></div>
@@ -4234,7 +4242,10 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     var el = $('outbox-list');
     if (!el) return;
     var list = outboxRead().slice().reverse();
-    if (!list.length) { el.innerHTML = '<div style="font-size:10px;color:var(--faint)">empty: the first composed action persists here the moment it is signed, BEFORE it is submitted</div>'; return }
+    if (!list.length) { el.innerHTML = '<div style="font-size:10px;color:var(--faint)"><span data-wl-tech>empty: the first composed action persists here the moment it is signed, BEFORE it is submitted</span><span data-reg="bee" data-i18n="wl.bee.outbox.empty">nothing is waiting to be sent</span></div>';
+      var bx = el.querySelector('span[data-reg="bee"]');   /* rendered after the language pass: translate it once in place */
+      if (bx && window.BNRLanguage && BNRLanguage.text) bx.textContent = BNRLanguage.text('wl.bee.outbox.empty', bx.textContent);
+      return }
     el.innerHTML = list.map(function (e) {
       return '<div style="border:1px solid var(--line);border-radius:8px;padding:8px 10px;margin-bottom:6px;background:var(--well)">' +
         '<div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap">' +
@@ -5923,7 +5934,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
 
   /* ── at task depth: every section that folds something in bee or raver gets
      ONE toggle (its words differ by register); nothing folded is ever deleted ── */
-  var FOLD_BEE='[data-wl-tech],.ring-wrap>svg,.ring-key';
+  var FOLD_BEE='[data-wl-tech],.ring-wrap>svg,.ring-key,.chain .cd';
   var FOLD_RV='h2,[data-wl-tech],.law:not([id]),#pay-law,#cap-lbl,p,.lcap,.ring-key,details[data-reg-disclose]';
   secs.forEach(function(s){
     if(s.querySelector(FOLD_BEE))s.setAttribute('data-wl-fold-bee','');
