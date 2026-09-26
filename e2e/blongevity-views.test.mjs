@@ -149,7 +149,7 @@ test('language-first shell hosts register and language; cypher masthead cannot l
   assert.match(bar, /data-register-host/);
   assert.match(bar, /data-language-host/);
   assert.doesNotMatch(bar, FENCE);
-  assert.match(tour, /assetBase\+'register\.js\?v=10'/);
+  assert.match(tour, /assetBase\+'register\.js\?v=11'/);
   assert.match(tour, /assetBase\+'lang\.js\?v=26'/);
 });
 
@@ -159,7 +159,7 @@ test('beats and sources disclosure remember per view instead of resetting', () =
   assert.match(page, /function restoreVisibleFocus\(focus\)/);
   assert.match(page, /function applyReading\(event\)/);
   assert.match(page, /document\.addEventListener\('bregister',applyReading\)/);
-  assert.match(tour, /register\.js\?v=10/);
+  assert.match(tour, /register\.js\?v=11/);
   assert.match(register, /an authored theme can use data-bee-theme="custom"/);
 
   const all = [];
