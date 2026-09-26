@@ -23,7 +23,7 @@
    the estate palette and deliberately unused here: nothing on this page is a
    harm. DEPTH LADDER: --void ground · --panel slab · --tile door · --inset well. */
 *{margin:0;padding:0;box-sizing:border-box}
-html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:no-preference){html{scroll-behavior:smooth}}
 body{background:var(--void);color:var(--ink);font:14px/1.7 var(--mono);
   min-height:100vh;padding-bottom:96px;-webkit-text-size-adjust:100%;position:relative}
 a{text-decoration:none}
@@ -201,6 +201,40 @@ body:is([data-reg="raver"],[data-reg="cypherpunk"]) #start-here :is(.start-pictu
 body:is([data-reg="raver"],[data-reg="cypherpunk"]) #start-here .start-link:is(:hover,:focus-visible){background:var(--lift);border-color:var(--accent);outline-color:var(--accent)}
 #start-here .honesty p{font-size:1rem}
 #start-here .honesty>summary:focus-visible,details.density>summary:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+
+/* THE LOWER HALF AT 390 (2026-09-26, footer audit). New bee is dressed by
+   register.js; these rules only reach raver and cypherpunk, which were still
+   reading 9.5–11.5 px captions, forced capitals and --dimmer text under
+   4.5:1. Casing law: no text-transform anywhere on the door. Raver reads at
+   14–15 px; cypherpunk stays the dense register at a 12 px floor. Footer and
+   not-yet links become 44 px targets. */
+.eyebrow,.shead em,.shead .n,.origin .src,.act em,.notyet h2,footer{text-transform:none}
+body:not([data-reg="bee"]) :is(.shead em,.shead .n,.origin .src,.act em){letter-spacing:.04em;color:var(--dim)}
+body:not([data-reg="bee"]) .notyet h2{letter-spacing:0;line-height:1.5;font-size:12.5px}
+body:not([data-reg="bee"]) footer{letter-spacing:0;color:var(--dim);line-height:1.8;padding-bottom:8px}
+body:not([data-reg="bee"]) footer>div+div{margin-top:6px}
+body:not([data-reg="bee"]) footer a{min-height:44px;padding:0 6px;color:var(--ink)}
+body:not([data-reg="bee"]) footer a:hover{color:var(--gold)}
+body:not([data-reg="bee"]) .notyet a{min-height:44px}
+body:not([data-reg="bee"]) .notyet [style*="--dimmer"]{color:var(--dim)!important}
+body:not([data-reg="bee"]) .notyet li a{display:inline;padding:12px 2px;text-decoration:underline;text-underline-offset:3px}
+body:not([data-reg="bee"]) a.t.big s:not(.do){color:var(--dim)}
+body:not([data-reg="bee"]) :is(a.t s,a.t.big s.do,.intro,.notyet p,.notyet li){font-size:12.5px}
+body:not([data-reg="bee"]) :is(a.t u,.shead em,.shead .n,footer,footer a){font-size:12px}
+body:not([data-reg="bee"]) a.t.big s:not(.do){font-size:12px}
+body[data-reg="raver"] :is(a.t s,a.t.big s.do,.intro,.notyet p,.notyet li){font-size:15px;line-height:1.7}
+body[data-reg="raver"] :is(a.t u,.shead em,.shead .n,footer,footer a){font-size:14px;line-height:1.6}
+body[data-reg="raver"] a.t.big s:not(.do){font-size:14px}
+body[data-reg="raver"] div.notyet h2{font-size:15px}
+body[data-reg="raver"] footer a{padding:0 4px}
+.notyet li{padding-left:24px}
+@media (max-width:600px){footer{padding-left:14px;padding-right:14px}}
+footer a{min-height:44px}
+footer>div>a:first-child{margin-inline-start:-5px}
+body:not([data-reg="bee"]) footer>div>a:first-child{margin-inline-start:-6px}
+body[data-reg="raver"] footer>div>a:first-child{margin-inline-start:-4px}
+details.density>summary{gap:8px}
+body[data-reg="raver"] :is(a.t b,a.t.big b){font-size:16px}
 </style>
 </head>
 <body data-reg="bee">

@@ -53,6 +53,25 @@ a{color:var(--cyan)}
 footer{max-width:860px;margin:22px auto 0;color:var(--faint);font-size:10px;text-align:center;line-height:1.9;border-top:1px solid var(--line);padding-top:14px}
 @media (max-width:600px){body{padding:16px 10px 80px}section{padding:13px 12px}.entry{padding:12px 11px}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+/* lower-half finish (2026-09-26, 390 px phone review): the logbook was set in
+   9.5–11.5 px with forced capitals on the beat labels. Lifted to the register
+   floors (bee 16 px prose / 14 px labels, raver 14 px, cypherpunk 13 px, never
+   under 12 px), casing law restored (no text-transform anywhere), dates and the
+   footer moved off --faint (3.6:1) to --dim, and the § anchor is a 44 px target. */
+body{--fz-law:14px;--fz-lab:14px}
+body[data-reg="bee"]{--fz-law:16px;--fz-lab:14px}
+body[data-reg="cypherpunk"]{--fz-law:13px;--fz-lab:12px}
+.crumbs,.kicker,.herofig .cap{text-transform:none;letter-spacing:.04em}
+.law{font-size:var(--fz-law);line-height:1.75}
+.entry .edate{font-size:var(--fz-lab);color:var(--dim);letter-spacing:.02em}
+.entry .elink{font-size:var(--fz-lab);display:inline-flex;align-items:center;min-height:44px;padding:0 4px}
+.beat{margin-top:14px}
+.beat .bk{font-size:var(--fz-lab);text-transform:none;letter-spacing:.04em;margin-bottom:4px;font-weight:600}
+.beat .bv{font-size:var(--fz-law);line-height:1.75}
+.beat .bv code{font-size:.9em}
+footer{font-size:var(--fz-lab);color:var(--dim);line-height:1.7;padding:16px 4px 0}
+footer div+div{margin-top:6px}
+footer pre{font-size:max(12px,calc(var(--fz-lab) - 1px));line-height:1.65;margin-top:14px;text-align:left}
 </style>
 </head>
 <body>

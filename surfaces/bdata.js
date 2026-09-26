@@ -586,7 +586,7 @@
       ? tx('bd.stored.evidence', 'stored: receipt bdata-stored-bux-try-autonomi.json — purchased · uploaded · retrieved, each citing its source; identity pin: invoice bpay-invoice.json')
       : tx('bd.cyber.evidence', 'live quote receipt banked in-tree (docs/receipts/); no payment evidence yet — quote ≠ purchased ≠ uploaded ≠ retrieved'));
     h += '<div class="sect"><b>' + tx('bd.cyber.s.history', 'History') + '</b> — ' + tx('bd.cyber.hist', 'append-only policy editions; supersede, never rewrite');
-    if (!st.history.length) h += '<div class="hist">—</div>';
+    if (!st.history.length) h += '<div class="hist">' + tx('flow.st.notyet', 'not yet') + '</div>';
     st.history.forEach(function(e){ h += '<div class="hist" data-bdata-history="' + esc(e.kind || 'legacy') + '"><span class="mono">' + esc(utc(e.at)) + '</span> · ' + esc(histText(e)) + '</div>'; });
     h += '</div>';
     // the quote-service address: reachable BEFORE any gesture and in EVERY register —

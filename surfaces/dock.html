@@ -91,6 +91,38 @@ footer a{color:var(--dim)}
   .pstat.hero .n{font-size:31px}
   section{padding:13px 13px}
 }
+
+/* THE LOWER HALF AT 390 (2026-09-26, footer audit).
+   · The first repo card nested links inside its card link — invalid HTML, so
+     the parser closed the card early and "README, then STATUS.md…" fell out
+     of the card at 16 px. The card is now a block with the repo name as its
+     link; the three reading links stay links. Same words, same targets.
+   · .tag.gap inherited the .gap callout (block, amber rule, padding), so
+     "no repo LICENSE" drew as a full-width alarm box. It is a chip again.
+   · Casing law: no text-transform in the lower half (the hero captions up
+     top are untouched: the design-acceptance D4 shape). Floors: 12 px everywhere (cypherpunk is
+     the dense register), 14 px reading text in new bee and raver, 16 px
+     paragraphs in new bee. Colour dress stays this page's one dark dress.
+   · Inline links keep their line but take a 32 px+ tap area; the footer
+     index is a row of 44 px targets. Underline on hover, since a padded
+     link's bottom border would float under the line. */
+section h2{text-transform:none}
+section h2{font-size:12.5px;letter-spacing:.04em;font-weight:600}
+.dim,.art .d,.receipt,.gap,footer,.tag,header .lede{font-size:12px}
+code{font-size:max(12px,.95em)}
+.tag.gap{display:inline-block;background:none;border:1px solid var(--sem-harm);border-radius:99px;padding:0 8px;margin-top:0;line-height:1.7;color:var(--sem-harm)}
+.art .n{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+.art .n .tag{margin-left:0}
+.art .n>a{color:var(--ink-hi);display:inline-flex;align-items:center;min-height:44px}
+a{border-bottom:0}
+a:hover,a:focus{text-decoration:underline;text-underline-offset:3px}
+:is(section p,.gap,.receipt,.art .d,footer p) a{padding-block:9px}
+a.art:is(:hover,:focus){text-decoration:none}
+footer p:first-child a{display:inline-flex;align-items:center;min-height:44px;padding:0 6px}
+footer p+p{margin-top:6px}
+body:is([data-reg="bee"],[data-reg="raver"]) :is(.dim,.art .d,.receipt,.gap,footer,.tag,header .lede,section h2){font-size:14px}
+body:is([data-reg="bee"],[data-reg="raver"]) :is(.art .n,section p){font-size:14px}
+body[data-reg="bee"] :is(section p,section p.dim,.receipt,.gap,.art .d,header .lede){font-size:16px;line-height:1.75}
 </style>
 </head>
 <body>
@@ -140,7 +172,7 @@ cargo test -p chain-zano</code></pre>
 
 <section>
   <h2 class="system">the repos</h2>
-  <a class="art" href="https://github.com/beehive-nature/beehive-nature"><span class="n">beehive-nature/beehive-nature<span class="tag ok">AGPL-3.0-only</span></span><span class="d">The kernel workspace and the static surfaces. Start with <a href="https://github.com/beehive-nature/beehive-nature/blob/main/README.md">README</a>, then <a href="https://github.com/beehive-nature/beehive-nature/blob/main/STATUS.md">STATUS.md</a> — the ledger that never rounds up — then <a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/CONSTITUTION.md">the constitution</a>.</span></a>
+  <div class="art"><span class="n"><a href="https://github.com/beehive-nature/beehive-nature">beehive-nature/beehive-nature</a><span class="tag ok">AGPL-3.0-only</span></span><span class="d">The kernel workspace and the static surfaces. Start with <a href="https://github.com/beehive-nature/beehive-nature/blob/main/README.md">README</a>, then <a href="https://github.com/beehive-nature/beehive-nature/blob/main/STATUS.md">STATUS.md</a> — the ledger that never rounds up — then <a href="https://github.com/beehive-nature/beehive-nature/blob/main/docs/CONSTITUTION.md">the constitution</a>.</span></div>
   <a class="art" href="https://github.com/skaists/LOVErnment-DAO"><span class="n">skaists/LOVErnment-DAO<span class="tag ok">AGPL-3.0-only</span></span><span class="d">The first community built on the kernel. It consumes this repo as a <b>pinned dependency, never a fork</b> — <code>escrow-core</code> at tag <code>kernel-v0.1.0</code> — which is the property that makes the kernel a kernel rather than a template.</span></a>
   <a class="art" href="https://github.com/beehive-nature/b-domain"><span class="n">beehive-nature/b-domain<span class="tag gap">no repo LICENSE</span></span><span class="d">The <code>.b</code> name registry contract, deployed at <code>kingbeelovis</code> on Vaulta mainnet. See the licence gap named above.</span></a>
 </section>

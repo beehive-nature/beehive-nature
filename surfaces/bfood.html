@@ -203,6 +203,46 @@ body[data-reg="cypherpunk"] #sources-panel summary{cursor:pointer;min-height:44p
   border:1px solid var(--reg-line,var(--line))!important;font:inherit!important
 }
 .bfood-language #blangnote{white-space:normal!important;color:var(--reg-ink,var(--dim))!important;font:.75rem/1.4 inherit!important}
+/* lower half at 390 px — the instrument's reading floor (founder phone review, 2026-09-26):
+   12px+ everywhere incl. cypherpunk, the DIAAS rows fit the phone, 44px footer doors */
+h2{font-size:12.5px;letter-spacing:.05em;line-height:1.5}
+.law,p.fine{font-size:12.5px;line-height:1.8}
+#vtxt{font-size:12.5px}
+.fam h3{font-size:12px}.fam .cnt{font-size:12px}
+#key{font-size:12px}
+label{font-size:12px}
+input,select{font-size:13px}
+.dc .v s,.arb .big s{font-size:12px}
+.dc .l,.dc .w{font-size:12px}
+.food .fn{font-size:13px}.food .fsrc,.food .auto{font-size:12px}
+table{font-size:12px}
+th{font-size:12px;letter-spacing:.02em}
+.tag{font-size:12px;letter-spacing:.02em}
+.note td{font-size:12px}
+.arb .sm{font-size:12.5px}
+footer{color:var(--dim);font-size:12.5px;line-height:1.7}
+footer{line-height:2.1}
+footer a{padding-block:12px;text-underline-offset:3px}
+.dia{font-size:12px}
+.dia-row{display:flex;align-items:center;gap:9px;margin-bottom:5px}
+.dia-n{width:78px;flex:0 0 auto}
+.dia-t{flex:1;min-width:90px;position:relative;height:13px;background:var(--well);border-radius:2px}
+.dia-v{width:112px;flex:0 0 auto;text-align:right;font-variant-numeric:tabular-nums;color:var(--ink)}
+.dia-l{width:84px;flex:0 0 auto;color:var(--faint)}
+.dia-foot{color:var(--faint);margin-top:6px;line-height:1.7}
+@media (max-width:560px){
+ .dia-row{flex-wrap:wrap;gap:3px 9px;margin-bottom:10px}
+ .dia-n{flex:1 1 auto;width:auto}
+ .dia-v{width:auto}
+ .dia-l{width:6.5em;text-align:right}
+ .dia-t{order:3;flex:1 1 100%;min-width:0}
+}
+body[data-reg="bee"] :is(.law,p.fine,#vtxt,.arb .sm){font:16px/1.7 var(--bee-font)}
+body[data-reg="bee"] :is(table,th,.tag,.note td,footer,label,#key,.fam .cnt,.dc .l,.dc .w,.food .fsrc,.food .auto,.dia,.dia-foot){font-family:var(--bee-font);font-size:14px;letter-spacing:normal}
+body[data-reg="bee"] h2{font:600 16px/1.4 var(--bee-font);letter-spacing:normal}
+body[data-reg="raver"] :is(.law,p.fine,#vtxt,.arb .sm){font-size:14.5px}
+body[data-reg="raver"] :is(table,th,.tag,.note td,footer,h2,label,#key,.fam .cnt,.dc .l,.dc .w,.food .fsrc,.food .auto,.dia,.dia-foot){font-size:14px}
+#sources-panel .law{line-height:2.05}
 </style>
 </head>
 <body data-reg="bee" data-bee-theme="custom" data-bfood-beat="arrival">
@@ -379,7 +419,7 @@ body[data-reg="cypherpunk"] #sources-panel summary{cursor:pointer;min-height:44p
   <div class="two" style="margin-top:11px">
     <div class="card" style="border-left:3px solid var(--warn)">
       <h4 style="color:var(--warn)">THE MECHANISM — established biochemistry, not an outcome claim</h4>
-      <p style="font-size:10.5px;line-height:1.9">A ribosome reading an mRNA needs the exact amino
+      <p class="fine">A ribosome reading an mRNA needs the exact amino
       acid its codon calls for, at the moment it reads it. There is no substitution and no skipping.
       So the number of complete proteins a meal can build is capped by whichever indispensable amino
       acid runs out first <i>relative to need</i> — the <b>limiting amino acid</b>. And humans have
@@ -390,7 +430,7 @@ body[data-reg="cypherpunk"] #sources-panel summary{cursor:pointer;min-height:44p
     </div>
     <div class="card" style="border-left:3px solid var(--fill)">
       <h4 style="color:var(--fill)">AND THE BRAKE, which matters more than the finding</h4>
-      <p style="font-size:10.5px;line-height:1.9">The limiting amino acid is a property of
+      <p class="fine">The limiting amino acid is a property of
       <b>the whole day's amino acid supply</b>, not of any single food. The Academy of Nutrition and
       Dietetics, current position: <i>"The terms complete and incomplete are misleading in relation
       to plant protein. Protein from a variety of plant foods, eaten during the course of a day,
@@ -409,7 +449,7 @@ body[data-reg="cypherpunk"] #sources-panel summary{cursor:pointer;min-height:44p
   <div class="card" style="margin-top:11px;border-left:3px solid var(--fillfull)">
     <h4 style="color:var(--fillfull)">✓ AND THE HEXAGON REPRODUCES IT INDEPENDENTLY — which is the
     only reason you should believe either</h4>
-    <p style="font-size:10.5px;line-height:1.9">The claim above comes from published feeding
+    <p class="fine">The claim above comes from published feeding
     studies. The nine amino acid cells in section 2 come from somewhere else entirely: raw USDA
     composition, divided by requirements read out of the DRI report. <b>Two routes that share no
     data.</b> At the default basket they land on the same answer — <b>lysine is the lowest cell of
@@ -1036,23 +1076,23 @@ function render(){
   $('diaas').innerHTML='<div class="law" style="margin-bottom:7px"><b>DIAAS — digestible '
    +'indispensable amino acid score, and the amino acid that limits each protein.</b> '
    +'100 is the reference. The bar is the mean; the whisker is one standard deviation.</div>'
-   +'<div style="font-size:10px">'+D.map(function(d){
+   +'<div class="dia">'+D.map(function(d){
      var isHemp=d[0]==='hemp';
      var w=100*d[1]/DMAX, lo=d[2]?100*Math.max(0,d[1]-d[2])/DMAX:null, hi=d[2]?100*(d[1]+d[2])/DMAX:null;
-     return '<div style="display:flex;align-items:center;gap:9px;margin-bottom:5px">'
-      +'<div style="width:78px;flex:0 0 auto;color:'+(isHemp?'var(--fillfull)':'var(--dim)')+'">'
+     return '<div class="dia-row">'
+      +'<div class="dia-n" style="color:'+(isHemp?'var(--fillfull)':'var(--dim)')+'">'
         +(isHemp?'<b>'+d[0]+'</b>':d[0])+'</div>'
-      +'<div style="flex:1;min-width:90px;position:relative;height:13px;background:var(--well);border-radius:2px">'
+      +'<div class="dia-t">'
         +(lo!==null?'<span style="position:absolute;left:'+lo+'%;width:'+(hi-lo)+'%;top:5px;height:3px;background:var(--faint);border-radius:2px"></span>':'')
         +'<span style="position:absolute;left:0;width:'+w+'%;top:2px;height:9px;border-radius:2px;background:'
           +(isHemp?'var(--fillfull)':'var(--cellrim)')+'"></span>'
         +'<span style="position:absolute;left:'+(100*100/DMAX)+'%;top:-1px;bottom:-1px;width:1px;background:var(--warn)"></span>'
       +'</div>'
-      +'<div style="width:112px;flex:0 0 auto;text-align:right;font-variant-numeric:tabular-nums;color:var(--ink)">'
+      +'<div class="dia-v">'
         +d[1]+(d[2]?' <span style="color:var(--faint)">±'+d[2]+'</span>':' <span style="color:var(--faint)">no SD</span>')+'</div>'
-      +'<div style="width:74px;flex:0 0 auto;color:var(--faint);font-size:9px">'+d[3]+'</div>'
+      +'<div class="dia-l">'+d[3]+'</div>'
       +'</div>'; }).join('')
-   +'<div style="color:var(--faint);font-size:9px;margin-top:6px">the amber line is 100 — the '
+   +'<div class="dia-foot">the amber line is 100 — the '
    +'reference protein. Every cereal and seed above is limited by lysine; every legume by '
    +'methionine+cysteine. That is the whole mechanism of complementation, visible in one column.</div></div>';
 

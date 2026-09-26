@@ -58,6 +58,30 @@ button:hover{background:var(--violet);color:#000}
 .err{color:var(--amber)}
 footer{max-width:960px;margin:22px auto 0;color:var(--faint);font-size:10px;text-align:center;line-height:2}
 code{color:var(--ink)}
+/* lower half at 390 px — reading sizes, contrast, tap heights, no dash-as-value (founder phone review, 2026-09-26) */
+:root{--faint:#869686}
+h2{font-size:13px;letter-spacing:.04em;line-height:1.5}
+.law{font-size:13px;line-height:1.8}
+.design{font-size:13px}
+button{font-size:13.5px;min-height:44px;padding:10px 16px}
+input{font-size:14px;min-height:44px}
+.stat .val{word-break:normal;overflow-wrap:anywhere}
+.stat .val s{font-size:12px}
+.stat .lbl{font-size:12px;letter-spacing:.02em}
+.stat .src{font-size:12px}
+.stat .val.nm{font-size:16px}
+.bar{height:16px}.bar span{font-size:12px;line-height:16px}
+.cypre{font-size:12px}
+footer{color:var(--dim);font-size:13px;line-height:1.7;padding:0 8px}
+footer{line-height:2.1}
+footer a{padding-block:12px;text-underline-offset:3px}
+body[data-reg="bee"] .law{font:16px/1.7 system-ui,-apple-system,'Segoe UI',sans-serif}
+body[data-reg="bee"] .design{font:15px/1.7 system-ui,-apple-system,'Segoe UI',sans-serif}
+body[data-reg="bee"] h2{font:600 16px/1.4 system-ui,-apple-system,'Segoe UI',sans-serif;letter-spacing:normal}
+body[data-reg="bee"] :is(.stat .lbl,.stat .src,footer,button){font-family:system-ui,-apple-system,'Segoe UI',sans-serif;font-size:14px}
+body[data-reg="bee"] button{font-size:15px}
+body[data-reg="raver"] .law,body[data-reg="raver"] .design{font-size:14.5px}
+body[data-reg="raver"] :is(h2,.stat .lbl,.stat .src,footer,button){font-size:14px}
 </style>
 </head>
 <body>
@@ -198,13 +222,13 @@ code{color:var(--ink)}
   (The founder's first bench run paid for this sentence.)</div>
   <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
     <button id="tzconnect">🔌 connect the Trezor (loads Trezor's bridge)</button>
-    <select id="tznet" style="background:var(--well);color:var(--ink);border:1px solid var(--line);border-radius:7px;padding:8px;font:12px 'IBM Plex Mono',monospace">
+    <select id="tznet" style="background:var(--well);color:var(--ink);border:1px solid var(--line);border-radius:7px;padding:8px;font:13px 'IBM Plex Mono',monospace;max-width:100%;min-width:0;flex:1 1 100%;min-height:44px">
       <option value="421614">Arbitrum Sepolia — the AT-1 bench (no real funds)</option>
       <option value="42161">Arbitrum One — mainnet (AT-2, founder-gated)</option>
     </select>
   </div>
   <div class="grid2">
-    <div class="stat"><div class="val nm" id="tzaddr">—</div><div class="lbl">device address · m/44'/60'/0'/0/0</div><div class="src">shown by Connect after on-device confirmation; display only</div></div>
+    <div class="stat"><div class="val nm" id="tzaddr">not connected yet</div><div class="lbl">device address · m/44'/60'/0'/0/0</div><div class="src">shown by Connect after on-device confirmation; display only</div></div>
     <div class="stat"><div class="val nm" id="tzstate">not connected</div><div class="lbl">wing state</div><div class="src" id="tzsrc">the bridge loads only on your press</div></div>
   </div>
   <div class="law" style="margin-top:10px"><b>THE AT-1 BENCH — one signature, zero value, full
@@ -216,9 +240,9 @@ code{color:var(--ink)}
   <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
     <button id="tzbench">⚖ AT-1: sign the 0-value bench tx</button>
   </div>
-  <textarea id="tzprep" placeholder='AT-2 lane (gated): paste the antd prepare output (JSON with to/value/data) — the page decodes it into a human-readable summary BEFORE the device is touched, per the spec&#39;s harness law' style="width:100%;min-height:64px;background:var(--well);color:var(--ink);border:1px solid var(--line);border-radius:7px;padding:9px;font:10.5px 'IBM Plex Mono',monospace;margin-top:8px;resize:vertical"></textarea>
+  <textarea id="tzprep" placeholder='AT-2 lane (gated): paste the antd prepare output (JSON with to/value/data) — the page decodes it into a human-readable summary BEFORE the device is touched, per the spec&#39;s harness law' style="width:100%;min-height:64px;background:var(--well);color:var(--ink);border:1px solid var(--line);border-radius:7px;padding:9px;font:13px/1.5 'IBM Plex Mono',monospace;margin-top:8px;resize:vertical"></textarea>
   <div style="margin-top:6px"><button id="tzdecode">decode the prepare output (no signing)</button></div>
-  <pre id="tzout" style="display:none;background:var(--well);border:1px solid var(--line);border-radius:8px;padding:10px;margin-top:8px;font-size:9.5px;line-height:1.6;overflow-x:auto;color:var(--dim);white-space:pre-wrap;word-break:break-word"></pre>
+  <pre id="tzout" style="display:none;background:var(--well);border:1px solid var(--line);border-radius:8px;padding:10px;margin-top:8px;font-size:12px;line-height:1.6;overflow-x:auto;color:var(--dim);white-space:pre-wrap;word-break:break-word"></pre>
 </section>
 
 <section>
@@ -255,10 +279,10 @@ code{color:var(--ink)}
     <button id="vgo">read</button>
   </div>
   <div class="grid2">
-    <div class="stat v"><div class="val nm" id="vbal">—</div><div class="lbl">liquid balance</div><div class="src" id="vbalsrc">get_currency_balance</div></div>
-    <div class="stat v"><div class="val nm" id="vram">—</div><div class="lbl">RAM</div><div class="bar"><i id="vrambar" style="width:0%"></i><span id="vramtxt"></span></div><div class="src">used / quota</div></div>
-    <div class="stat v"><div class="val nm" id="vcpu">—</div><div class="lbl">CPU</div><div class="bar"><i id="vcpubar" style="width:0%"></i><span id="vcputxt"></span></div><div class="src">used / max, µs</div></div>
-    <div class="stat v"><div class="val nm" id="vnet">—</div><div class="lbl">NET</div><div class="bar"><i id="vnetbar" style="width:0%"></i><span id="vnettxt"></span></div><div class="src">used / max, bytes</div></div>
+    <div class="stat v"><div class="val nm" id="vbal">not read yet</div><div class="lbl">liquid balance</div><div class="src" id="vbalsrc">get_currency_balance</div></div>
+    <div class="stat v"><div class="val nm" id="vram">not read yet</div><div class="lbl">RAM</div><div class="bar"><i id="vrambar" style="width:0%"></i><span id="vramtxt"></span></div><div class="src">used / quota</div></div>
+    <div class="stat v"><div class="val nm" id="vcpu">not read yet</div><div class="lbl">CPU</div><div class="bar"><i id="vcpubar" style="width:0%"></i><span id="vcputxt"></span></div><div class="src">used / max, µs</div></div>
+    <div class="stat v"><div class="val nm" id="vnet">not read yet</div><div class="lbl">NET</div><div class="bar"><i id="vnetbar" style="width:0%"></i><span id="vnettxt"></span></div><div class="src">used / max, bytes</div></div>
   </div>
   <div class="law" style="margin-top:10px"><b>the DAO's doors:</b>
   <a href="dao-dashboard/">the governance dashboard</a> ·
@@ -483,9 +507,9 @@ async function readVaulta(acct){
   setBar('vrambar','vramtxt',a.ram_usage,a.ram_quota,(100*a.ram_usage/a.ram_quota).toFixed(1)+'%');
   var cu=a.cpu_limit||{}, nu=a.net_limit||{};
   $('vcpu').textContent=(cu.used||0)+' / '+(cu.max||0); $('vcpu').classList.remove('nm');
-  setBar('vcpubar','vcputxt',cu.used||0,cu.max||1,cu.max?((100*(cu.used||0)/cu.max).toFixed(1)+'%'):'—');
+  setBar('vcpubar','vcputxt',cu.used||0,cu.max||1,cu.max?((100*(cu.used||0)/cu.max).toFixed(1)+'%'):'no max');
   $('vnet').textContent=(nu.used||0)+' / '+(nu.max||0); $('vnet').classList.remove('nm');
-  setBar('vnetbar','vnettxt',nu.used||0,nu.max||1,nu.max?((100*(nu.used||0)/nu.max).toFixed(1)+'%'):'—');
+  setBar('vnetbar','vnettxt',nu.used||0,nu.max||1,nu.max?((100*(nu.used||0)/nu.max).toFixed(1)+'%'):'no max');
   /* liquid balance: the chain's core token first, legacy symbol second — what returns, renders; what doesn't, stays honest */
   var b1=await vpost('/v1/chain/get_currency_balance',{code:'core.vaulta',account:acct,symbol:'A'});
   var b2=(b1&&b1.length)?null:await vpost('/v1/chain/get_currency_balance',{code:'eosio.token',account:acct});

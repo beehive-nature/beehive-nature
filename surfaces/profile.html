@@ -107,7 +107,7 @@ body[data-reg="bee"] .door{font:500 1rem/1.4 var(--bee-font);border-radius:16px;
 body[data-reg="bee"] .door.primary{background:#a8238c;color:#fff;border-color:#0c1412}
 body[data-reg="bee"] #tbar{background:#fbf7f0!important;border-top-color:#e6dfd2!important}
 body[data-reg="bee"] #tbar a{color:#0c1412!important}
-body[data-reg="bee"] section,.house{background:#fff;border-color:var(--line)}
+body[data-reg="bee"] section,body[data-reg="bee"] .house{background:#fff;border-color:var(--line)}
 /* F4 (z1.a release patch): routine New bee labels read at ≥14px — house
    descriptions and holder metadata. Bee-scoped only; Cypherpunk keeps its
    compact instrument. */
@@ -297,6 +297,34 @@ body[data-reg="cypherpunk"] .claim-stamp{border-radius:2px}
 .spinerail li.saga .who{color:var(--violet)}
 .spinerail li.medieval .who{color:var(--gold)}
 @media(max-width:720px){.spinerail{max-height:260px}.fanwrap svg{max-width:420px}}
+/* THE LOWER HALF AT 390 (2026-09-26, footer audit). The house cards had
+   gone white in raver and cypherpunk (a bee-scoped rule's second selector was
+   unscoped: "body[data-reg=bee] section,.house"), leaving pale ink on white at
+   1.2:1 — fixed at the rule above. The rails band and the house instrument
+   ran 8.5–11 px with forced capitals, the capability tags floated over the
+   card titles (OVERLAP in cypherpunk), and the rail links were 13 px tall.
+   Casing law: no text-transform. Floor 12 px everywhere (cypherpunk keeps its
+   compact instrument); New bee and raver read at 14 px. */
+.note .nt,.hivedivider,.who,.htype,.genlabel,.cap .tag,.railcheck .rlab{text-transform:none;letter-spacing:.04em}
+.law,.listing .lrelay,.listing .chip,.listing .a-link,.note .nt,.note .nb,.hivedivider,.who,.seat-note,.htype,
+.holder .bio .bdesc,.holder .bio .bmeta,.badge,.genlabel,.email,footer,
+.caps .capintro,.cap p,.cap a,.cap .tag,.railcheck .rlab,.railcheck button,.rverdict,.rlaw{font-size:12px}
+.cap h3{font-size:13px;padding-right:0}
+.cap .tag{position:static;display:inline-block;margin-bottom:10px}
+.cap p+p{margin-top:6px}
+.cap a{padding-block:12px;border-bottom:0;text-decoration:underline dashed;text-underline-offset:3px}
+.railcheck button{min-height:44px}
+.listing .a-link{display:inline-flex;align-items:center;min-height:44px}
+.badge{padding:2px 8px;margin:2px 0 2px 6px}
+.holder .bio{min-width:0;flex:1}
+.holder .bio .wallet,.email{overflow-wrap:anywhere;word-break:normal}
+footer{padding-bottom:14px}
+footer a{display:inline-block;padding-block:12px;margin-block:-12px}
+body[data-reg="cypherpunk"] .name-history>summary,body[data-reg="cypherpunk"] details>summary{min-height:44px}
+body:not([data-reg="cypherpunk"]) :is(.law,.listing .lrelay,.note .nt,.note .nb,.hivedivider,.seat-note,.htype,.holder .bio .bmeta,.genlabel,.email,footer,.caps .capintro,.cap p,.cap a,.cap .tag,.railcheck .rlab,.railcheck button,.rverdict,.rlaw){font-size:14px}
+body:not([data-reg="cypherpunk"]) .cap h3{font-size:16px}
+body[data-reg="bee"] :is(.cap p,.caps .capintro){font-size:16px;line-height:1.7}
+body[data-reg="bee"] :is(.railcheck button,.railcheck input){font-family:var(--bee-font);font-size:1rem}
 </style>
 </head>
 <body data-reg="bee" data-bee-theme="custom" data-prof-beat="arrival" data-experience="profile">
@@ -830,7 +858,7 @@ body[data-reg="cypherpunk"] .claim-stamp{border-radius:2px}
       <p data-reg="cypherpunk">BIP-352 silent payments: not enabled for this profile. when enabled,
       this card displays a static sp1q bech32m address (B_scan ‖ B_spend — two public keys) and
       nothing else: no key material, no scanning, no indexer traffic, no receipt claims.</p>
-      <p style="font-size:10px;color:var(--dim);margin-top:6px">until the artist brings their own
+      <p style="color:var(--dim);margin-top:6px">until the artist brings their own
       address, this card shows none — this page never invents one, never holds keys, never scans,
       never confirms.</p>
     </div>

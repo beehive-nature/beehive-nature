@@ -33,30 +33,36 @@
   body{margin:0;background:var(--bg);color:var(--ink);padding:34px 20px 60px;
     font:14px/1.65 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;overflow-wrap:anywhere}
   .wrap{max-width:960px;margin:0 auto}
-  h1{font-size:19px;letter-spacing:.2em;text-transform:uppercase;margin:0 0 6px}
+  h1{font-size:20px;letter-spacing:.06em;margin:0 0 6px}
   h1 span{color:var(--accent)}
-  .lede{color:var(--dim);font-size:12.5px;max-width:720px;margin-bottom:18px}
+  .lede{color:#a3aea8;font-size:14px;max-width:720px;margin-bottom:18px}
   .door{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin:18px 0 6px}
   .door button{background:#12301a;color:var(--ok);border:1px solid var(--line);border-radius:8px;
-    padding:10px 20px;font:13px ui-monospace,monospace;cursor:pointer}
+    padding:10px 20px;min-height:44px;font:14px ui-monospace,monospace;cursor:pointer}
   .door button:hover{border-color:var(--ok)}
-  .door .hint{color:var(--dim);font-size:11.5px}
+  .door .hint{color:#a3aea8;font-size:14px;line-height:1.6}
   .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:14px;margin:20px 0}
   .card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px;
     text-decoration:none;color:var(--ink);display:block;position:relative;overflow:hidden}
   .card:hover{border-color:var(--c)}
   .card .bar{position:absolute;top:0;left:0;right:0;height:3px;background:var(--c)}
-  .card h2{margin:2px 0 6px;font-size:13.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--c)}
-  .card p{margin:0;color:var(--dim);font-size:11.5px;line-height:1.6}
-  .card .go{margin-top:10px;font-size:11px;color:var(--c)}
-  .phase{font-size:9.5px;letter-spacing:.14em;color:var(--bg);background:var(--c);
+  .card h2{margin:2px 0 6px;font-size:16px;letter-spacing:.04em;color:var(--c)}
+  .card p{margin:0;color:#a3aea8;font-size:14px;line-height:1.6}
+  .card .go{margin-top:12px;font-size:14px;color:var(--c)}
+  .phase{font-size:12px;letter-spacing:.04em;color:var(--bg);background:var(--c);
     display:inline-block;border-radius:4px;padding:1px 7px;margin-bottom:10px}
   .corner{margin-top:26px;padding:14px 16px;border:1px dashed var(--line);border-radius:10px;
-    color:var(--dim);font-size:11.5px}
-  .corner a{color:var(--cyan)}
+    color:#a3aea8;font-size:14px;line-height:1.65}
+  /* an inline link in prose: padded (not reflowed) to a taller tap target */
+  .corner a{color:var(--cyan);padding:10px 0}
   .quote{margin:22px 0;padding:12px 16px;border-left:2px solid var(--accent);border-radius:0 8px 8px 0;
-    background:#12121a;color:var(--ink);font-size:12.5px}
+    background:#12121a;color:var(--ink);font-size:14px}
   .quote b{color:var(--accent)}
+
+  /* LOWER HALF at 390px (2026-09-26): the hub chip is a 44px control floating
+     just above the tour bar (anchored on the bar's published --tbar-h), so the
+     page end reserves the bar plus the chip and nothing ever ends beneath either. */
+  body{padding-bottom:calc(var(--tbar-h,50px) + 24px)!important}
 </style>
 </head>
 <body><div class="wrap">
@@ -127,7 +133,7 @@
 
 <div class="corner">
   <b>the corner, as promised:</b> the deep water lives at
-  <a href="https://github.com/beehive-nature/beehive-nature">github.com/beehive-nature</a>
+  <a href="https://github.com/beehive-nature/beehive-nature" target="_blank" rel="noopener noreferrer">github.com/beehive-nature</a>
   — specs, receipts, corrections on the wall, every bug we ever caught kept on
   exhibit. The nerd stuff isn't hidden; it's just not in your way.
 </div>
@@ -156,7 +162,7 @@ if(window.ethereum){
   window.ethereum.on && window.ethereum.on('accountsChanged',a=>setWalletState(a&&a[0]||null));
 }
 </script>
-<div id="bnr-beta-badge" style="position:fixed;right:.6rem;bottom:calc(.6rem + 46px);z-index:9997;font:12px ui-monospace,monospace;opacity:.75"><a href="../" style="color:#39c5cf;text-decoration:none;border:1px solid #30363d;border-radius:99px;padding:.15rem .7rem;background:#161b22">⌂ hub</a></div>
+<div id="bnr-beta-badge" style="position:fixed;right:.6rem;bottom:calc(var(--tbar-h,50px) + 10px);z-index:9997;font:14px ui-monospace,monospace"><a href="../" style="display:inline-flex;align-items:center;min-height:44px;color:#39c5cf;text-decoration:none;border:1px solid #30363d;border-radius:99px;padding:0 16px;background:#161b22">⌂ hub</a></div>
 <script src="../tour.js?v=42"></script>
 </body>
 </html>

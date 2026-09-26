@@ -83,6 +83,39 @@ code{color:var(--ink)}
  .rib .cell polygon,.dial .needle{transition:none}
 }
 body.still .beam,body.still .spk,body.still #comb2 polygon{animation-play-state:paused}
+/* lower-half finish (2026-09-26, 390 px phone review). The page was set in
+   8–11.5 px micro type; this lifts every reading and label size to the register
+   floors (bee 16 px prose / 14 px labels, raver 14 px, cypherpunk 13 px dense but
+   readable, nothing under 12 px), moves dim-on-dark labels off --faint (3.4:1) to
+   --dim, and gives every control a 44 px touch height. Colour and voice unchanged. */
+body{--fz-law:14px;--fz-lab:14px;--fz-tag:12px}
+body[data-reg="bee"]{--fz-law:16px;--fz-lab:14px;--fz-tag:13px}
+body[data-reg="cypherpunk"]{--fz-law:13px;--fz-lab:12px;--fz-tag:12px}
+.sub{font-size:var(--fz-lab);line-height:1.7}
+section.beat::before{font-size:var(--fz-tag);letter-spacing:.12em;top:-10px}
+section.beat{margin-top:24px}
+h2{font-size:15px;letter-spacing:.04em;line-height:1.5}
+h2 .tag{display:inline-block;font-size:var(--fz-tag);letter-spacing:.08em;padding:0 7px;line-height:1.6}
+/* the DOOR/GATES tag shares the .door class with the door cards and inherited their
+   block box, padding and well fill: a stray empty tile beside the heading. Pin it back to a tag. */
+h2 .tag.door{display:inline-block;background:none;padding:0 7px;margin-top:0;min-height:0;border-radius:5px;border-color:var(--line)}
+.law{font-size:var(--fz-law);line-height:1.75}
+.door{min-height:44px}
+.door .t{font-size:15px}
+.door .d{font-size:var(--fz-lab);line-height:1.65}
+.rib .cell i{font-size:12px}
+.dial .lbl{font-size:var(--fz-lab)}
+.dial .src{font-size:12px;color:var(--dim)}
+button.act{font-size:15px;min-height:44px;padding:10px 16px}
+.raw{font-size:12px;color:var(--dim)}
+.pass input{font-size:16px;min-height:44px}
+.gate{padding:12px 14px}
+.gate .t{font-size:15px}
+.gate .d{font-size:var(--fz-law);color:var(--dim);line-height:1.65}
+.gate .gl{font-size:var(--fz-tag);letter-spacing:.06em;padding:2px 8px;margin-top:10px}
+.gate a{color:var(--cyan)}
+footer{font-size:var(--fz-lab);color:var(--dim);line-height:1.8;padding:0 14px}
+footer a{display:inline-block;padding:11px 0}
 </style></head><body>
 <main>
 <header>

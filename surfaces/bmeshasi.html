@@ -10,51 +10,61 @@
 <style>
 :root{--bg:#0d1410;--ink:#e2efdb;--cyan:#00E5FF;--gold:#FFD700;--violet:#c9a0ff;--dim:#8a9a8a;--line:#243026;--leaf:#7ddf8f;--amber:#ffb347;--open:#0092a6}
 *{margin:0;padding:0;box-sizing:border-box}
-body{background:var(--bg);color:var(--ink);font:13px/1.6 'IBM Plex Mono',monospace;min-height:100vh;padding:36px 16px 90px}
+body{background:var(--bg);color:var(--ink);font:max(13px,var(--fmin,12px))/1.6 'IBM Plex Mono',monospace;min-height:100vh;padding:36px 16px 90px}
 header{text-align:center;margin-bottom:12px;padding-bottom:14px;position:relative}
 header::after{content:'';position:absolute;left:50%;bottom:0;transform:translateX(-50%);width:min(560px,80%);height:2px;
  background:linear-gradient(90deg,transparent,var(--gold),var(--cyan),transparent);opacity:.55}
 h1{font-size:clamp(19px,4.5vw,27px);color:var(--gold);font-weight:400;letter-spacing:.04em;text-shadow:0 0 18px rgba(255,215,0,.2)}
-header p{color:var(--dim);font-size:11px;margin-top:8px;max-width:800px;margin-inline:auto;line-height:1.85}
+header p{color:var(--dim);font-size:max(11px,var(--fmin,12px));margin-top:8px;max-width:800px;margin-inline:auto;line-height:1.85}
 main{max-width:940px;margin:0 auto}
 section{background:#111a14;border:1px solid var(--line);border-radius:var(--r-lg,11px);padding:15px 16px;margin-top:16px}
-section h2{font-size:12px;color:var(--violet);font-weight:400;letter-spacing:.08em;margin-bottom:8px}
-.law{color:var(--dim);font-size:10px;line-height:1.75}.law b{color:var(--ink)}
+section h2{font-size:max(12px,var(--fmin,12px));color:var(--violet);font-weight:400;letter-spacing:.08em;margin-bottom:8px}
+.law{color:var(--dim);font-size:max(10px,var(--fmin,12px));line-height:1.75}.law b{color:var(--ink)}
 a{color:var(--cyan)}
-.ceiling{border:1px solid var(--amber);border-radius:8px;padding:8px 12px;margin-top:10px;font-size:10px;color:var(--amber);line-height:1.7}
+.ceiling{border:1px solid var(--amber);border-radius:8px;padding:8px 12px;margin-top:10px;font-size:max(10px,var(--fmin,12px));color:var(--amber);line-height:1.7}
 .cols{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px}
 @media(max-width:720px){.cols{grid-template-columns:1fr}}
-.col{border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:10.5px;line-height:1.75;color:var(--dim)}
-.col h3{font-size:10px;font-weight:400;letter-spacing:.08em;margin-bottom:6px}
+.col{border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:max(10.5px,var(--fmin,12px));line-height:1.75;color:var(--dim)}
+.col h3{font-size:max(10px,var(--fmin,12px));font-weight:400;letter-spacing:.08em;margin-bottom:6px}
 .col.yes h3{color:var(--leaf)} .col.no h3{color:var(--amber)}
 .col b{color:var(--ink)}
 .wf{display:flex;gap:6px;align-items:stretch;margin-top:10px;flex-wrap:wrap}
-.wf .step{flex:1;min-width:150px;border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:10px;line-height:1.6;color:var(--dim)}
-.wf .step b{display:block;font-size:11px;color:var(--ink)}
+.wf .step{flex:1;min-width:150px;border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:max(10px,var(--fmin,12px));line-height:1.6;color:var(--dim)}
+.wf .step b{display:block;font-size:max(11px,var(--fmin,12px));color:var(--ink)}
 .wf .step.first{border-color:var(--gold)} .wf .step.first b{color:var(--gold)}
 .wf .arrow{align-self:center;color:var(--dim);font-size:14px}
 .ctl{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-top:10px}
-.ctl label{display:block;font-size:9.5px;color:var(--dim);letter-spacing:.05em;margin-bottom:3px}
+.ctl label{display:block;font-size:max(9.5px,var(--fmin,12px));color:var(--dim);letter-spacing:.05em;margin-bottom:3px}
 .ctl input[type=range]{width:100%;accent-color:var(--gold)}
-.ctl .val{color:var(--leaf);font-size:10px}
+.ctl .val{color:var(--leaf);font-size:max(10px,var(--fmin,12px))}
 .readout{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-top:12px}
 .rd{background:#0a0f0b;border:1px solid var(--line);border-radius:8px;padding:10px 12px}
-.rd .k{font-size:9px;color:var(--dim);letter-spacing:.08em}
+.rd .k{font-size:max(9px,var(--fmin,12px));color:var(--dim);letter-spacing:.08em}
 .rd .v{font-size:17px;color:var(--leaf);margin-top:2px}
-.rd .s{font-size:9px;color:var(--dim);margin-top:3px;line-height:1.5}
+.rd .s{font-size:max(9px,var(--fmin,12px));color:var(--dim);margin-top:3px;line-height:1.5}
 .rd.hero .v{color:var(--gold);font-size:22px}
-.badge{display:inline-block;font-size:9px;letter-spacing:.1em;border:1px solid var(--line);border-radius:4px;padding:1px 6px;color:var(--gold)}
+.badge{display:inline-block;font-size:max(9px,var(--fmin,12px));letter-spacing:.1em;border:1px solid var(--line);border-radius:4px;padding:1px 6px;color:var(--gold)}
 .badge.leaf{color:var(--leaf)} .badge.amber{color:var(--amber)}
-table{width:100%;border-collapse:collapse;margin-top:8px;font-size:10.5px}
+table{width:100%;border-collapse:collapse;margin-top:8px;font-size:max(10.5px,var(--fmin,12px))}
 td,th{border-bottom:1px solid var(--line);padding:7px 8px;text-align:left;color:var(--dim);vertical-align:top}
-th{color:var(--violet);font-weight:400;font-size:9.5px} td.n{color:var(--ink)}
+th{color:var(--violet);font-weight:400;font-size:max(9.5px,var(--fmin,12px))} td.n{color:var(--ink)}
 .rc{background:#0a0f0b;border:1px solid var(--line);border-radius:var(--r-md,8px);padding:11px 13px;margin-top:9px}
-.rc .rt{font-size:12px;color:var(--ink);line-height:1.65}.rc .rt b{color:var(--leaf);font-weight:400}
-.rc .rd2{font-size:9.5px;color:var(--dim);margin-top:4px;line-height:1.7}
-.gate{border-left:2px solid var(--amber);padding:2px 0 2px 11px;margin-top:8px;font-size:11px;color:var(--ink);line-height:1.7}
-.gate .gw{color:var(--dim);font-size:9.5px}
-footer{max-width:940px;margin:22px auto 0;color:var(--dim);font-size:10px;text-align:center;line-height:1.8}
+.rc .rt{font-size:max(12px,var(--fmin,12px));color:var(--ink);line-height:1.65}.rc .rt b{color:var(--leaf);font-weight:400}
+.rc .rd2{font-size:max(9.5px,var(--fmin,12px));color:var(--dim);margin-top:4px;line-height:1.7}
+.gate{border-left:2px solid var(--amber);padding:2px 0 2px 11px;margin-top:8px;font-size:max(11px,var(--fmin,12px));color:var(--ink);line-height:1.7}
+.gate .gw{color:var(--dim);font-size:max(9.5px,var(--fmin,12px))}
+footer{max-width:940px;margin:22px auto 0;color:var(--dim);font-size:max(10px,var(--fmin,12px));text-align:center;line-height:1.8}
 @media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
+/* footer links are controls: a thumb-sized row, not text-height slivers */
+footer a{padding-block:14px} /* a 44 px tap target that leaves the line rhythm alone */
+/* on a phone the supply board scrolls sideways inside its card instead of running off the edge */
+@media (max-width:600px){section table{display:block;max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}}
+/* a dead read is a sentence, not a headline number: it drops to reading size */
+.readout .v.fail{font-size:max(15px,var(--fmin,12px))!important;line-height:1.55}
+/* Lower-half floor (2026-09-26, 390 px phone review): every small size on this page
+   reads max(its own size, --fmin) — 12 px in cypherpunk's dense mono, 14 px for new bee
+   and raver, so no register ever draws reading text a phone cannot hold. */
+body[data-reg="bee"],body[data-reg="raver"]{--fmin:14px}
 </style>
 </head>
 <body>
@@ -201,14 +211,14 @@ footer{max-width:940px;margin:22px auto 0;color:var(--dim);font-size:10px;text-a
     production</b> readiness on Vaulta · <b>witness operations</b> on Hive.</div>
   </div>
   <div class="readout" style="margin-top:12px">
-    <div class="rd"><div class="k">⚓ VAULTA PULSE · head block (live)</div><div class="v" id="vhead">—</div>
+    <div class="rd"><div class="k">⚓ VAULTA PULSE · head block (live)</div><div class="v" id="vhead">reading…</div>
       <div class="s" id="vmeta">get_info · three-host failover · the estate's proven lane</div></div>
-    <div class="rd"><div class="k">🐝 HIVE PULSE · head block (live)</div><div class="v" id="hhead">—</div>
+    <div class="rd"><div class="k">🐝 HIVE PULSE · head block (live)</div><div class="v" id="hhead">reading…</div>
       <div class="s" id="hmeta">condenser_api · api.hive.blog → api.deathwing.me</div></div>
-    <div class="rd"><div class="k">👑 CURRENT WITNESS (live)</div><div class="v" id="hwit" style="font-size:14px">—</div>
+    <div class="rd"><div class="k">👑 CURRENT WITNESS (live)</div><div class="v" id="hwit" style="font-size:14px">reading…</div>
       <div class="s">the seat the diverted flow would fund our own node to hold</div></div>
     <div class="rd"><div class="k">🫀 THIS PAGE'S HEARTBEAT</div><div class="v" id="beat">0:00</div>
-      <div class="s" id="beatmeta">session clock · reads <span id="rds">0</span> · last <span id="last">—</span> ·
+      <div class="s" id="beatmeta">session clock · reads <span id="rds">0</span> · last <span id="last">not yet</span> ·
       nothing stored, nothing sent — alive in YOUR browser only</div></div>
   </div>
   <div class="law" style="margin-top:8px">Honest-fail law, inherited from the bANTfarm: a dead read
@@ -332,8 +342,8 @@ footer{max-width:940px;margin:22px auto 0;color:var(--dim);font-size:10px;text-a
   var VH=['https://eos.api.eosnation.io','https://eos.greymass.com'];
   var HH=['https://api.hive.blog','https://api.deathwing.me'];
   var t0=Date.now(), reads=0, lastAt=null;
-  function ago(){ return lastAt? Math.round((Date.now()-lastAt)/1000)+'s ago' : '—'; }
-  function amber(id,on){ var el=$(id); if(el) el.style.color=on?'var(--amber)':''; }
+  function ago(){ return lastAt? Math.round((Date.now()-lastAt)/1000)+'s ago' : 'not yet'; }
+  function amber(id,on){ var el=$(id); if(el){ el.style.color=on?'var(--amber)':''; el.classList.toggle('fail',!!on); } }
   function beat(){ var s=Math.round((Date.now()-t0)/1000);
     $('beat').textContent=Math.floor(s/60)+':'+('0'+(s%60)).slice(-2);
     $('rds').textContent=reads; $('last').textContent=ago(); }
@@ -351,13 +361,13 @@ footer{max-width:940px;margin:22px auto 0;color:var(--dim);font-size:10px;text-a
     })();
     var hi=0;
     (function hNext(){
-      if(hi>=HH.length){ amber('hhead',true); $('hhead').textContent='couldn’t reach the chain from your network — the page is fine, the data isn’t loading'; return; }
+      if(hi>=HH.length){ amber('hhead',true); $('hhead').textContent='couldn’t reach the chain from your network — the page is fine, the data isn’t loading'; amber('hwit',true); $('hwit').textContent='not read — the chain is out of reach'; return; }
       fetch(HH[hi],{method:'POST',headers:{'Content-Type':'application/json'},
         body:JSON.stringify({jsonrpc:'2.0',method:'condenser_api.get_dynamic_global_properties',params:[],id:1})})
         .then(function(r){ if(!r.ok) throw 0; return r.json(); })
         .then(function(d){ var g=d.result||{}; amber('hhead',false); amber('hwit',false);
           $('hhead').textContent='#'+(g.head_block_number||0).toLocaleString('en-US');
-          $('hwit').textContent='@'+(g.current_witness||'—');
+          $('hwit').textContent=g.current_witness?'@'+g.current_witness:'not reported';
           $('hmeta').textContent='condenser_api · '+(HH[hi].replace('https://',''))+' · live in your browser';
           reads++; lastAt=Date.now(); })
         .catch(function(){ hi++; hNext(); });

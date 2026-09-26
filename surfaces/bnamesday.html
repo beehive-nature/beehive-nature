@@ -61,7 +61,7 @@ label{font-size:.875rem;color:var(--quiet);display:grid;gap:6px;min-width:0}p,h1
 .empty{padding:16px;border:1.5px dashed var(--edge);border-radius:12px;color:var(--quiet)}
 /* letters: identity never rides colour alone — a letter to leave out is dashed AND crossed */
 .lt{display:inline-grid;place-items:center;min-inline-size:2.2em;block-size:2.5em;margin:2px;border-radius:9px;border:2px solid var(--c,var(--edge));font-size:1.3rem;position:relative;background:color-mix(in srgb,var(--c,transparent) 12%,var(--card))}
-.lt.k{border-style:dashed;border-color:var(--guard)}.lt.k:after{content:"✕";position:absolute;inset:-9px -7px auto auto;font-size:.7rem;color:var(--guard);background:var(--card);border-radius:50%;padding:0 3px}
+.lt.k{border-style:dashed;border-color:var(--guard)}.lt.k:after{content:"✕";position:absolute;inset:-9px -7px auto auto;font-size:max(.7rem,var(--fmin,12px));color:var(--guard);background:var(--card);border-radius:50%;padding:0 3px}
 .lt.s{border-color:transparent;background:none;opacity:.55}
 .hss{display:grid;gap:6px;margin-top:12px}.hs{display:grid;grid-template-columns:minmax(0,9.5rem) minmax(0,1fr);gap:4px 12px;align-items:center;padding:8px 12px;border-radius:10px;background:var(--well);border-inline-start:4px solid var(--c)}
 .hs b{font-weight:650}.hs small{display:block;color:var(--quiet)}.hs .ls{font-size:1.25rem;letter-spacing:.14em;line-height:1.5}
@@ -104,7 +104,7 @@ details.b-more>div{padding-bottom:14px;display:grid;gap:10px}
 .r-hub{position:absolute;inset:23%;border-radius:50%;display:grid;place-content:center;justify-items:center;text-align:center;gap:2px;padding:6%;pointer-events:none;overflow:hidden}
 .r-hub>*{pointer-events:auto}.r-date{font-family:burti,system-ui,sans-serif;font-size:clamp(1.6rem,6vw,3rem);line-height:1;letter-spacing:.04em}.r-date i{color:var(--you);font-style:normal;color:var(--you)}
 .r-day{font-size:clamp(.8rem,2.4vw,1.05rem);color:var(--c)}.r-names{font-family:burti,system-ui,sans-serif;font-size:clamp(1rem,3.4vw,1.6rem);line-height:1.15;overflow-wrap:anywhere;margin-top:4px}
-.r-names mark{background:none;color:var(--you)}.r-more{font-size:.8125rem;color:var(--quiet)}
+.r-names mark{background:none;color:var(--you)}.r-more{font-size:max(.8125rem,var(--fmin,12px));color:var(--quiet)}
 .r-fam{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-top:4px}
 .spoke{stroke-linecap:round}.spoke.x{opacity:.34}
 @keyframes pulse{0%{opacity:.95;transform:scale(.6)}80%,100%{opacity:0;transform:scale(2.6)}}
@@ -127,19 +127,27 @@ details.b-more>div{padding-bottom:14px;display:grid;gap:10px}
 .c-grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:14px}
 .c-p{grid-column:span 12;border:1px solid var(--line);border-radius:6px;background:var(--card);padding:14px;min-width:0}
 @media(min-width:980px){.c-p.h{grid-column:span 6}.c-p.t{grid-column:span 4}.c-p.w{grid-column:span 8}}
-.c-p h2{font-size:.8125rem;font-weight:600;color:var(--accent);letter-spacing:.06em;margin-bottom:10px}.c-p h2 span{color:var(--quiet);font-weight:400}
+.c-p h2{font-size:max(.8125rem,var(--fmin,12px));font-weight:600;color:var(--accent);letter-spacing:.06em;margin-bottom:10px}.c-p h2 span{color:var(--quiet);font-weight:400}
 .c-p input,.c-p select,.c-p button,.c-p textarea{min-height:40px;padding:4px 10px;border-radius:4px;background:var(--well)}
 .c-p button.primary{background:var(--primary)}
 dl.kv{display:grid;grid-template-columns:max-content 1fr;gap:4px 14px;margin:0}dl.kv dt{color:var(--quiet)}dl.kv dd{margin:0;overflow-wrap:anywhere}
 .tw.all{max-block-size:none}.tw{overflow:auto;max-block-size:420px;border:1px solid var(--line);border-radius:4px}
-table{border-collapse:collapse;inline-size:100%;font-size:.8125rem}th,td{text-align:start;padding:4px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+table{border-collapse:collapse;inline-size:100%;font-size:max(.8125rem,var(--fmin,12px))}th,td{text-align:start;padding:4px 8px;border-bottom:1px solid var(--line);vertical-align:top}
 th{position:sticky;top:0;background:var(--lift);font-weight:600;white-space:nowrap}tbody tr[data-seat]{cursor:pointer}tbody tr[data-seat]:hover{background:var(--lift)}
 td.k{outline:1.5px dashed var(--guard);outline-offset:-3px}.thl{font-size:1.05rem;letter-spacing:.1em;font-family:system-ui,sans-serif}
-pre{margin:0;overflow:auto;max-inline-size:100%;padding:10px;border-radius:4px;background:var(--well);font:.8125rem/1.6 ui-monospace,monospace;white-space:pre-wrap;overflow-wrap:anywhere}
+pre{margin:0;overflow:auto;max-inline-size:100%;padding:10px;border-radius:4px;background:var(--well);font:max(.8125rem,var(--fmin,12px))/1.6 ui-monospace,monospace;white-space:pre-wrap;overflow-wrap:anywhere}
 .err{color:var(--guard)}#c-hist{inline-size:100%;block-size:96px;display:block}
 @media(max-width:850px){.c-p input,.c-p select,.c-p button,.c-p textarea{min-height:44px}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.pulse,.flame{animation:none}body{transition:none}}
 @media(forced-colors:active){.lt,.hs,.b-card,.c-p{border:1px solid CanvasText}button.primary{border:2px solid ButtonText}}
+/* table links (each opens a source in a new tab) are controls too: a thumb-height row */
+.tw td a{display:inline-block;min-height:44px;padding-block:12px}
+/* footer links are controls: a thumb-sized row, not text-height slivers */
+footer a{padding-block:14px} /* a 44 px tap target that leaves the line rhythm alone */
+/* Lower-half floor (2026-09-26, 390 px phone review): every small size on this page
+   reads max(its own size, --fmin) — 12 px in cypherpunk's dense mono, 14 px for new bee
+   and raver, so no register ever draws reading text a phone cannot hold. */
+body[data-reg="bee"],body[data-reg="raver"]{--fmin:14px}
 </style>
 </head>
 <body data-experience="bnamesday" data-bee-theme="custom" data-reg="bee">

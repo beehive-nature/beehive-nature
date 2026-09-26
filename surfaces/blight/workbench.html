@@ -54,6 +54,20 @@
 
 /* comprehension touch floor (2026-09-16): 44px canon on phones */
 @media(max-width:520px){button,select,input{min-height:44px}}
+/* ── the page's end, read on a phone (footer pass 2026-09-26) ────────────
+   casing law: no forced capitals; nothing under 12 px; the three notes sit
+   in one rhythm (same card, same gap); disclosure rows are 44 px; bee and
+   raver read at 14 px. */
+h1{text-transform:none;letter-spacing:.06em}
+.note{font-size:12.5px;line-height:1.65}
+.tag{font-size:12px;padding:2px 8px;margin:0 4px 6px 0}
+summary{font-size:13px}
+details:not(.tnote)>summary{padding:12px 0;line-height:20px}
+pre{font-size:12px}
+details.tnote{margin-top:14px}
+details.tnote>.note{margin-top:10px!important;max-width:760px;border:1px solid var(--line);border-radius:8px;padding:12px}
+body:not([data-reg="cypherpunk"]) .note,body:not([data-reg="cypherpunk"]) summary{font-size:14px}
+body:not([data-reg="cypherpunk"]) table{font-size:14px}
 </style>
 </head>
 <body>

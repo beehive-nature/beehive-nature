@@ -24,6 +24,16 @@ footer{max-width:720px;margin:20px auto 0;color:var(--dim);font-size:10px;text-a
 button{background:#26123a;color:#c9a0ff;border:1px solid var(--line);border-radius:8px;padding:9px 18px;cursor:pointer;font:12px 'IBM Plex Mono',monospace}
 button:hover{background:#c9a0ff;color:#000}
 #bar{text-align:center;margin-bottom:16px}
+/* ── the page's end, read on a phone (footer pass 2026-09-26) ────────────
+   nothing under 12 px; bee and raver read at 14 px */
+header p,#state{font-size:12px}
+.note{font-size:13px;line-height:1.7}
+.note .t,.note .from{font-size:12px}
+footer{font-size:12px;line-height:1.7;padding-top:14px;border-top:1px solid var(--line)}
+button{min-height:44px;font-size:13px}
+body:not([data-reg="cypherpunk"]) header p,body:not([data-reg="cypherpunk"]) #state,
+body:not([data-reg="cypherpunk"]) .note,body:not([data-reg="cypherpunk"]) footer{font-size:14px}
+body:not([data-reg="cypherpunk"]) .note .t,body:not([data-reg="cypherpunk"]) .note .from{font-size:13px}
 </style>
 </head>
 <body>
