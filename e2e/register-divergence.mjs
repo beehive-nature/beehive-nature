@@ -26,16 +26,51 @@
 //   node register-divergence.mjs                # every data-reg surface
 //   node register-divergence.mjs wallet.html …  # a subset
 //   node register-divergence.mjs --json out.json
+//
+// TOKEN FIDELITY (added 2026-09-26, second pass): the committed design sheet
+// docs/design/skaists/tokens.json names the type family and page ground of
+// each register. Two fidelity columns are measured against IT, and the
+// header prints the sheet's git blob + its own meta.ref/meta.synced so the
+// reader knows WHICH artifact was measured: the repository copy, synced
+// 2026-09-19 from main@f7465f4 — not the founder's original design-pass
+// bundle, whose equivalence to this copy is unproven until someone hashes
+// both. Fidelity is reported beside the structural verdict, never folded
+// into it: matching fonts and grounds does not make three experiences.
+//   FONT  share of visible text elements whose first-choice family is the
+//         register's own (bee: Instrument Sans/Serif; raver: Sora/Unbounded;
+//         cypherpunk: IBM Plex Mono), the house hand (burti), the sheet's
+//         zero-fetch `ui` stack (system-ui — sanctioned for live estate
+//         surfaces), or anything else.
+//   BG    body background equals the sheet's `bg` for that register.
 import { chromium } from 'playwright';
 import { createServer } from 'node:http';
 import { readFile, readdir, writeFile } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
+import { execSync } from 'node:child_process';
 import { join, extname, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(HERE, '..');
 const SURFACES = join(ROOT, 'surfaces');
+
+// ---- the design sheet, and its provenance ---------------------------------
+const TOKENS_PATH = 'docs/design/skaists/tokens.json';
+const TOKENS = JSON.parse(await readFile(join(ROOT, TOKENS_PATH), 'utf8'));
+let tokensBlob = 'untracked';
+try { tokensBlob = execSync(`git rev-parse HEAD:${TOKENS_PATH}`, { cwd: ROOT, stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim(); } catch {}
+const firstFamily = s => (s || '').split(',')[0].replace(/["']/g, '').trim().toLowerCase();
+const FAM = TOKENS.type.families;
+const groupFamily = name => { const g = TOKENS.type.groups.find(g => g.name === name); return g ? g.family : null; };
+const EXPECT = {
+  bee: new Set([firstFamily(FAM[groupFamily('new bee')]), firstFamily(FAM['bee-serif'])].filter(Boolean)),
+  raver: new Set([firstFamily(FAM[groupFamily('raver')]), firstFamily(FAM['raver-display'])].filter(Boolean)),
+  cypherpunk: new Set([firstFamily(FAM[groupFamily('cypherpunk')])].filter(Boolean)),
+};
+const HOUSE = new Set([firstFamily(FAM.house)]);
+const UI = new Set(['ui-sans-serif', 'system-ui', '-apple-system', 'segoe ui', 'roboto', 'helvetica', 'arial']);
+const bgToken = (TOKENS.color.tokens.find(t => t.name === 'bg') || {}).value || {};
+const hexToRgb = h => { const m = /^#?([0-9a-f]{6})$/i.exec(h || ''); if (!m) return null; const n = parseInt(m[1], 16); return `rgb(${n >> 16}, ${(n >> 8) & 255}, ${n & 255})`; };
 const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.mjs': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.webmanifest': 'application/manifest+json', '.png': 'image/png', '.jpg': 'image/jpeg', '.gif': 'image/gif', '.svg': 'image/svg+xml', '.webp': 'image/webp', '.woff2': 'font/woff2', '.woff': 'font/woff' };
 const server = createServer(async (req, res) => {
   try {
@@ -68,7 +103,7 @@ async function fingerprint(file, reg) {
   let loadError = null;
   try { await page.goto(`${base}/surfaces/${file}`, { waitUntil: 'load', timeout: 30000 }); } catch (e) { loadError = String(e.message).split('\n')[0]; }
   await page.waitForTimeout(700);
-  const fp = await page.evaluate(() => {
+  const fp = await page.evaluate(({ expect, house, ui }) => {
     const vis = el => { const r = el.getBoundingClientRect(); if (r.width === 0 && r.height === 0) return false; const cs = getComputedStyle(el); return cs.display !== 'none' && cs.visibility !== 'hidden' && cs.opacity !== '0'; };
     const all = [...document.body.querySelectorAll('*')].filter(el => !['SCRIPT', 'STYLE', 'TEMPLATE', 'NOSCRIPT'].includes(el.tagName) && vis(el));
     const headings = all.filter(el => /^H[1-4]$/.test(el.tagName)).map(el => el.tagName[1]).join('');
@@ -87,10 +122,19 @@ async function fingerprint(file, reg) {
     const sizes = textEls.map(el => parseFloat(getComputedStyle(el).fontSize)).sort((a, b) => a - b);
     const fams = {};
     for (const el of textEls) { const f = getComputedStyle(el).fontFamily.split(',')[0].replace(/["']/g, '').trim(); fams[f] = (fams[f] || 0) + 1; }
+    // token fidelity: which family each visible text element actually asks for first
+    const share = { reg: 0, house: 0, ui: 0, other: 0 };
+    for (const el of textEls) {
+      const f = getComputedStyle(el).fontFamily.split(',')[0].replace(/["']/g, '').trim().toLowerCase();
+      if (expect.includes(f)) share.reg++; else if (house.includes(f)) share.house++; else if (ui.includes(f)) share.ui++; else share.other++;
+    }
+    const pct = n => textEls.length ? Math.round(100 * n / textEls.length) : 0;
     const text = (document.body.innerText || '').replace(/\s+/g, ' ').trim();
     const h = document.documentElement.scrollHeight;
     return {
       reg: document.body.getAttribute('data-reg'), dress: document.body.getAttribute('data-reg-dress'),
+      bg: getComputedStyle(document.body).backgroundColor,
+      fontShare: { reg: pct(share.reg), house: pct(share.house), ui: pct(share.ui), other: pct(share.other) },
       headings, visible: all.length, tags, textChars: text.length, scrollHeight: h,
       density: h ? Math.round(text.length / h * 1000) : 0, kinds,
       medianFont: sizes.length ? sizes[Math.floor(sizes.length / 2)] : 0,
@@ -98,8 +142,9 @@ async function fingerprint(file, reg) {
       svgCanvas: all.filter(el => el.tagName === 'svg' || el.tagName === 'CANVAS').length,
       tableRows: all.filter(el => el.tagName === 'TR').length,
     };
-  });
+  }, { expect: [...EXPECT[reg]], house: [...HOUSE], ui: [...UI] });
   await ctx.close();
+  fp.bgMatchesTokens = hexToRgb(bgToken[reg]) === fp.bg;
   fp.arrHash = createHash('sha1').update(fp.tags).digest('hex').slice(0, 10);
   delete fp.tags;
   fp.loadError = loadError;
@@ -135,15 +180,19 @@ for (const r of results) counts[r.verdict] = (counts[r.verdict] || 0) + 1;
 const L = [];
 L.push(`# Register divergence — ${results.length} data-reg surfaces at 375×812, colour excluded`);
 L.push('');
+L.push(`Token fidelity measured against ${TOKENS_PATH} (git blob ${tokensBlob}; sheet meta.ref ${TOKENS.meta?.ref || '?'}, synced ${TOKENS.meta?.synced || '?'}). This is the repository copy of the sheet; its equivalence to the founder's original design-pass bundle is not established here. Expected first-choice families — bee: ${[...EXPECT.bee].join(' / ')}; raver: ${[...EXPECT.raver].join(' / ')}; cypherpunk: ${[...EXPECT.cypherpunk].join(' / ')}; house hand: ${[...HOUSE].join('')}; zero-fetch ui stack counted separately.`);
+L.push('');
 L.push(`Verdicts: ${Object.entries(counts).map(([k, v]) => `${k} ${v}`).join(', ')}. PASS = every register pair differs on ≥2 of HIER/ARR/DENS/GRAM. RECOLOR = at least one pair identical on all four. WEAK = a pair differs on one axis only. NO-REG = a register did not apply (body[data-reg] missing).`);
 L.push('');
-L.push('| surface | verdict | bee/raver same axes | bee/cypher same axes | raver/cypher same axes | density b/r/c (chars per 1000px) | visible els b/r/c | headings b/r/c | interactive (link,btn,input,sel,details open) b/r/c | median font px b/r/c | top font b / r / c | dress |');
-L.push('|---|---|---|---|---|---|---|---|---|---|---|---|');
+L.push('| surface | verdict | bee/raver same axes | bee/cypher same axes | raver/cypher same axes | density b/r/c (chars per 1000px) | visible els b/r/c | headings b/r/c | interactive (link,btn,input,sel,details open) b/r/c | median font px b/r/c | top font b / r / c | token font share reg/house/ui/other % b · r · c | bg = tokens b/r/c | dress |');
+L.push('|---|---|---|---|---|---|---|---|---|---|---|---|---|---|');
+const shareStr = s => `${s.reg}/${s.house}/${s.ui}/${s.other}`;
+const yn = b => b ? 'y' : 'n';
 const sameStr = p => Object.entries(p.same).filter(([, s]) => s).map(([k]) => k).join(' ') || '—';
 const gram = k => `${k.link},${k.button},${k.input},${k.select},${k.details}/${k.detailsOpen}`;
 for (const r of results) {
   const f = r.fps;
-  L.push(`| ${r.file} | ${r.verdict} | ${sameStr(r.pairs['bee/raver'])} | ${sameStr(r.pairs['bee/cypherpunk'])} | ${sameStr(r.pairs['raver/cypherpunk'])} | ${f.bee.density}/${f.raver.density}/${f.cypherpunk.density} | ${f.bee.visible}/${f.raver.visible}/${f.cypherpunk.visible} | ${f.bee.headings || '∅'}/${f.raver.headings || '∅'}/${f.cypherpunk.headings || '∅'} | ${gram(f.bee.kinds)} · ${gram(f.raver.kinds)} · ${gram(f.cypherpunk.kinds)} | ${f.bee.medianFont}/${f.raver.medianFont}/${f.cypherpunk.medianFont} | ${f.bee.fonts[0] || '—'} / ${f.raver.fonts[0] || '—'} / ${f.cypherpunk.fonts[0] || '—'} | ${f.bee.dress || '—'} |`);
+  L.push(`| ${r.file} | ${r.verdict} | ${sameStr(r.pairs['bee/raver'])} | ${sameStr(r.pairs['bee/cypherpunk'])} | ${sameStr(r.pairs['raver/cypherpunk'])} | ${f.bee.density}/${f.raver.density}/${f.cypherpunk.density} | ${f.bee.visible}/${f.raver.visible}/${f.cypherpunk.visible} | ${f.bee.headings || '∅'}/${f.raver.headings || '∅'}/${f.cypherpunk.headings || '∅'} | ${gram(f.bee.kinds)} · ${gram(f.raver.kinds)} · ${gram(f.cypherpunk.kinds)} | ${f.bee.medianFont}/${f.raver.medianFont}/${f.cypherpunk.medianFont} | ${f.bee.fonts[0] || '—'} / ${f.raver.fonts[0] || '—'} / ${f.cypherpunk.fonts[0] || '—'} | ${shareStr(f.bee.fontShare)} · ${shareStr(f.raver.fontShare)} · ${shareStr(f.cypherpunk.fontShare)} | ${yn(f.bee.bgMatchesTokens)}/${yn(f.raver.bgMatchesTokens)}/${yn(f.cypherpunk.bgMatchesTokens)} | ${f.bee.dress || '—'} |`);
 }
 process.stdout.write(L.join('\n') + '\n');
 if (jsonOut) await writeFile(jsonOut, JSON.stringify({ counts, results }, null, 2));
