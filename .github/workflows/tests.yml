@@ -403,9 +403,143 @@ jobs:
         run: sh scripts/secret-scan.sh --selftest
       # push-preflight selftest (#170 rider, 2026-09-20): P1-P11 guarded the
       # push path by hand only until today; CI never ran them at all.
-      - name: push-preflight selftest - P1-P11, every push
+      #
+      # THE SKIP CENSUS (#215, from bee-laborer's U1 mutation). One token in that
+      # file stopped P14c and P14d from running while the selftest still printed
+      # "selftest ok" and its arm-count floor still read 59 of 59 — the floor counts
+      # DECLARATIONS, so a skip is invisible to it, and nothing was deleted. The
+      # selftest REPORTS its skips rather than refusing on them, because the
+      # P12-P14 family genuinely cannot be built under Git for Windows and a gate
+      # that reds a correct box trains dismissal. ubuntu is where every one of those
+      # arms runs for real, and where the census is empty today — so the assertion
+      # that NOTHING was skipped belongs here and not in the script.
+      # It also catches the census line's own deletion, which neither the census nor
+      # the arm-count floor can catch for itself.
+      - name: push-preflight selftest - P1-P16, and an EMPTY skip census, every push
         if: always()
-        run: sh scripts/push-preflight.sh --selftest
+        run: |
+          set +e
+          sh scripts/push-preflight.sh --selftest > /tmp/preflight-selftest.out 2>&1
+          rc=$?
+          cat /tmp/preflight-selftest.out
+          if [ "$rc" != 0 ]; then echo "push-preflight --selftest FAILED, rc=$rc"; exit "$rc"; fi
+          # HALF ONE — the script's own census, read literally. Catches a NON-EMPTY census
+          # (an arm skipped), a DELETED census line, and a census that only prints when it
+          # has something to say. It cannot catch a skip branch that stopped reporting.
+          if ! grep -qF "SKIP CENSUS -> 0 arm(s) declared but not run: (none)" /tmp/preflight-selftest.out; then
+            echo "SKIP CENSUS is NOT empty on this runner, or the census line is gone."
+            echo "  Every P12-P16 arm is constructible here, so an arm that did not run is"
+            echo "  an arm guarding nothing — and the selftest can print 'ok' with two of"
+            echo "  its arms switched off. The census line above names which ones."
+            exit 1
+          fi
+          # HALF TWO — DERIVED here, from the script and from this run's output, so it does
+          # not take the script's word for anything. Catches the case half one cannot: a
+          # skip branch that stops recording itself, which would report an empty census
+          # while its arm sits out. A GATE MUST NOT BE ITS OWN WITNESS.
+          #
+          # EITHER QUOTE (bee-laborer's W4): requiring a double quote put an arm printed with
+          # single quotes outside this inventory AND outside the script's own arm-count floor at
+          # the same time — addable, never run, both counters reporting fine. COST NAMED: an arm
+          # printed from a VARIABLE is outside both and nothing here can see it.
+          grep -oE "[\"']  P[0-9]+[a-z]*" scripts/push-preflight.sh | sed -E "s/^[\"']  //" | sort -u > /tmp/pf-declared
+          # A SKIP NOTICE IS NOT ATTENDANCE (bee-laborer's W2/W3). The ran set was every line
+          # opening with an arm id, and a skip notice opens with the arm id too — so P14e and
+          # P14f could each be forced to skip AND have their one recording line deleted, and this
+          # step passed with "24 ids declared, all 24 present" while the arm sat out. Their own U4
+          # caught P14c/P14d only because that notice names two arms and the second is not at the
+          # start of the line. ATTENDANCE IS NOW READ FROM VERDICT LINES ONLY: an arm that judged
+          # something ends its line in "(correct)".
+          grep -E '^  P[0-9]+[a-z]*' /tmp/preflight-selftest.out > /tmp/pf-armlines
+          grep -E '\(correct\)$' /tmp/pf-armlines | grep -oE '^  P[0-9]+[a-z]*' | sed 's/^  //' | sort -u > /tmp/pf-ran
+          # THE TWO CHECKS BELOW ENFORCE THE MARKER rather than hoping for it. The script passed
+          # rc=0 above, so every arm line it printed is meant to be either a verdict or a notice
+          # that an arm could not be built; the first cut refused only the lines that are NEITHER,
+          # and the second refuses the lines that are BOTH. A discriminator whose mistakes are
+          # silent is the defect above wearing a new wording.
+          #
+          # WHAT THIS DOES *NOT* DO, stated because an earlier draft here claimed it did: these
+          # two checks are not a partition of the space and do not close it. Both key on text an
+          # author writes, so a wording nobody has written yet walks straight through, and
+          # bee-laborer's Z9 is that wording today — REWORD the skip notice so it carries no
+          # "NOT CONSTRUCTIBLE" at all and ends its first line in "(correct)", and P14e sits out
+          # with this step rc=0, the census at (none) and the inventory at 24 of 24. Their Z9CTRL,
+          # the same reworded notice without the marker, is red, which localises the green to the
+          # marker and nothing else. Measured in a clean POSIX clone at 93de30f2:
+          #   CONTROL0=0  Z7=1  Z1=1  Z6=1  Z9=0  Z9CTRL=1  Z12b=0  Z5a=1  Z5b=0
+          #
+          # THE BOUND THAT IS TRUE, STATED MECHANICALLY: AN ARM CANNOT SIT OUT UNLESS ITS OWN LINE
+          # CARRIES THE VERDICT MARKER. Deleting the recording and leaving the notice alone is red
+          # (Z1); skipping with the recording intact is red (Z7). Green costs the author that
+          # marker on a line which judged nothing — and the marker is author-written, which is the
+          # reach named above. An earlier draft put the cost as "a false sentence a reader can
+          # read"; bee-laborer's Z13 refutes it — a notice TRUE in every English clause, ending in
+          # "(correct)", sits P14e out at rc=0 with the census at (none) and 24 of 24. What is
+          # forged is the MACHINE TOKEN, not the sentence. A bound phrased as honesty invites the
+          # next seat to trust the prose and skip the token, so it is phrased as the mechanism.
+          #
+          # MEASURED AND REFUSED — a FLOOR on push-preflight's _skipped recording lines. Z1, Z6
+          # and Z9 share a first edit (one recording line deleted), so a floor on those 7 lines
+          # would kill the class at the common edit. Z12b refutes it: EMPTY the recording instead
+          # of deleting it and the count is still 7 — CONTROL0 7, Z1 6, Z12b 7 — while the arm
+          # sits out, rc=0. No floor is added. Keeping the canonical phrase and merely appending
+          # the marker IS caught, by the overlap check below; only the reworded form walks through.
+          #
+          # NEITHER KIND — a line that is neither a verdict nor a notice cannot be classified. ONLY THE FIRST LINE OF AN
+          # ARM IS AN ARM LINE: this file's own multi-line notices already indent their
+          # continuations past the two-space opening, which is why they are invisible here. That
+          # convention was unwritten, so bee-laborer's Z5a — an arm that RAN and added one line of
+          # context at two spaces — was refused with a message that named no remedy. The refusal
+          # stays; the sentence now says what to do, because a red nobody can act on is the
+          # always-red gate this file refuses elsewhere.
+          unclassified=$(grep -vE '\(correct\)$' /tmp/pf-armlines | grep -vF 'NOT CONSTRUCTIBLE' || true)
+          if [ -n "$unclassified" ]; then
+            echo "arm line(s) that are neither a verdict nor a NOT CONSTRUCTIBLE notice:"
+            echo "$unclassified"
+            echo "  A passing arm ends its line in '(correct)'; an arm that could not be built says"
+            echo "  NOT CONSTRUCTIBLE. Attendance is read from the first kind only, so a third kind"
+            echo "  cannot be classified and is refused instead of guessed at."
+            echo "  IF THIS IS A CONTINUATION of the line above it, indent it past the two spaces"
+            echo "  an arm line opens with — that is what the NOT CONSTRUCTIBLE notices already do,"
+            echo "  and a continuation is then not an arm line at all. If it IS an arm, give it a"
+            echo "  verdict marker so its attendance can be read."
+            exit 1
+          fi
+          # BOTH KINDS (bee-laborer's Z6). The marker was forgeable in the GREEN direction: a
+          # NOT CONSTRUCTIBLE notice whose line ALSO ends in "(correct)" was read as a verdict, so
+          # P14e could be forced to skip, its one recording line deleted, and the census, the arm
+          # floor, the inventory and the script's own "selftest ok" all stayed green while the arm
+          # sat out. Their Z7 is the control: the same skip with the notice unmodified is red, so the
+          # green was the marker and nothing else. ONE LINE CANNOT BE BOTH a judgement and an
+          # admission that nothing was judged, and the contradiction is refused rather than resolved
+          # in the permissive direction — which is the direction that does not go red.
+          contradiction=$(grep -E '\(correct\)$' /tmp/pf-armlines | grep -F 'NOT CONSTRUCTIBLE' || true)
+          if [ -n "$contradiction" ]; then
+            echo "arm line(s) claiming a verdict AND saying the arm could not be built:"
+            echo "$contradiction"
+            echo "  '(correct)' means this arm judged something; NOT CONSTRUCTIBLE means it never"
+            echo "  ran. Attendance is read from the first, so a line carrying both would grant an"
+            echo "  arm attendance it is in the same breath disclaiming. Drop whichever half is"
+            echo "  untrue — and if the arm really did run, the notice is what is wrong."
+            exit 1
+          fi
+          ndecl=$(wc -l < /tmp/pf-declared)
+          # non-vacuity: an empty declared set makes the comparison below pass while
+          # comparing nothing. 24 arm ids are declared today; 20 is a floor, not a pin.
+          if [ "$ndecl" -lt 20 ]; then
+            echo "only $ndecl arm ids found in push-preflight.sh — that is not a census, it is"
+            echo "  a pattern that stopped matching. Refusing to report a pass on it."
+            exit 1
+          fi
+          missing=$(comm -23 /tmp/pf-declared /tmp/pf-ran)
+          if [ -n "$missing" ]; then
+            echo "arm id(s) declared in push-preflight.sh but absent from this run:" $missing
+            echo "  Derived from the file and from the output above, not from the census line,"
+            echo "  so a skip branch that stopped reporting itself is caught here. An arm whose"
+            echo "  only line was a skip notice reads as absent, which is what it is."
+            exit 1
+          fi
+          echo "arm inventory: $ndecl ids declared, all $ndecl judged something in this run"
       # SPRINT CLOSING RECEIPT (founder order, 2026-08-25): the four-suite gap
       # was work that landed and gated nothing, and a report cannot tell a sprint
       # that shipped from one that stalled. This re-derives every sprint claim
