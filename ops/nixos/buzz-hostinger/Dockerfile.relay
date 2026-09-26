@@ -1,0 +1,11 @@
+# Reproduce the existing custom relay without changing its runtime/web image.
+# Build context: git archive of 088a677f88737aa42af4d6d790bd2dfe8373e835.
+FROM rust:1.95-bookworm@sha256:6258907abe69656e41cd992e0b705cdcfabcbbe3db374f92ed2d47121282d4a1 AS builder
+RUN apt-get update && apt-get install -y --no-install-recommends pkg-config libssl-dev ca-certificates git && rm -rf /var/lib/apt/lists/*
+WORKDIR /build
+COPY . .
+ENV CARGO_BUILD_JOBS=3
+RUN cargo build --release --locked -p buzz-relay --bin buzz-relay
+
+FROM ghcr.io/block/buzz:0.2.1@sha256:4e31b7c7abb7d00b6f513dc559e58d2b980416f1dc400aa01bcf762cf2989cfc
+COPY --from=builder /build/target/release/buzz-relay /usr/local/bin/buzz-relay

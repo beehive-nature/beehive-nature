@@ -1,0 +1,37 @@
+{
+  auto_https off
+}
+:8080 {
+  encode zstd gzip
+  @auxiliary path /compute/* /voucher/* /voice/* /ant/* /watch/* /live/* /model/*
+  handle @auxiliary {
+    respond "Auxiliary services are not enabled in this private restore test." 503
+  }
+  @door {
+    path /
+    header Accept text/html*
+  }
+  handle @door {
+    root * /srv/door
+    file_server
+  }
+  handle /join.json {
+    header Access-Control-Allow-Origin *
+    root * /srv/join
+    file_server
+  }
+  redir /join /join/ 301
+  handle_path /join/* {
+    root * /srv/join
+    try_files {path} /index.html
+    file_server
+  }
+  handle /pair* {
+    reverse_proxy pair-relay:5000
+  }
+  handle {
+    reverse_proxy relay:3000 {
+      header_up Host skaists.buzz
+    }
+  }
+}

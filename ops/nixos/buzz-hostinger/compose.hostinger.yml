@@ -1,0 +1,49 @@
+# Production overlay. Do not activate until the final consistent restore.
+services:
+  relay:
+    image: buzz-relay:skaists-088a677f
+    ports: !override
+      - "127.0.0.1:3300:3000"
+    volumes: !override
+      - buzz-git-data:/data/git
+    environment:
+      BUZZ_AUTO_MIGRATE: "false"
+    mem_limit: 4g
+    cpus: 2
+  pair-relay:
+    image: ghcr.io/block/buzz:0.2.1
+    mem_limit: 256m
+    cpus: 0.5
+  postgres:
+    mem_limit: 3g
+    cpus: 2
+  redis:
+    mem_limit: 1g
+    cpus: 1
+  minio:
+    image: buzz-storage:2025-09-07
+    mem_limit: 2g
+    cpus: 1
+  minio-init:
+    image: buzz-storage:2025-09-07
+  caddy:
+    image: caddy:2-rl
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile.hostinger:/etc/caddy/Caddyfile:ro
+      - ./door:/srv/door:ro
+      - ./join:/srv/join:ro
+      - ./hive:/srv/hive:ro
+      - ./certs:/certs:ro
+      - buzz-caddy-data:/data
+      - buzz-caddy-config:/config
+    networks:
+      - buzz-net
+    mem_limit: 512m
+    cpus: 1
+    restart: unless-stopped
+volumes:
+  buzz-caddy-data:
+  buzz-caddy-config:

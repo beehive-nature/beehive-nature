@@ -1,0 +1,87 @@
+# Core community moves here. Existing shared compute, voice, voucher and
+# experimental read services retain their Oracle origin during this migration.
+(oracle-service) {
+  reverse_proxy https://129.153.202.144 {
+    header_up Host {host}
+    transport http {
+      tls_server_name relay.skaists.dev
+    }
+  }
+}
+(skaists-app) {
+  encode zstd gzip
+  @shared path /compute/* /voucher/* /voice/*
+  handle @shared {
+    import oracle-service
+  }
+  @fallbackServices {
+    host relay.skaists.dev
+    path /ant/* /watch/* /live/* /ant-door.html /tokens.css
+  }
+  handle @fallbackServices {
+    import oracle-service
+  }
+  @modelRead {
+    host relay.skaists.dev
+    path /model/*
+    method GET
+  }
+  handle @modelRead {
+    import oracle-service
+  }
+  @door {
+    path /
+    header Accept text/html*
+  }
+  handle @door {
+    root * /srv/door
+    file_server
+  }
+  handle /join.json {
+    header Access-Control-Allow-Origin *
+    root * /srv/join
+    file_server
+  }
+  redir /join /join/ 301
+  handle_path /join/* {
+    root * /srv/join
+    try_files {path} /index.html
+    file_server
+  }
+  @publicFeed {
+    host relay.skaists.dev
+    path /hive/public/*
+  }
+  handle @publicFeed {
+    uri strip_prefix /hive/public
+    header Access-Control-Allow-Origin https://skaists.dev
+    header Content-Type application/json
+    root * /srv/hive/public
+    file_server
+  }
+  @hive {
+    host relay.skaists.dev
+    path /hive/*
+  }
+  handle @hive {
+    uri strip_prefix /hive
+    header Access-Control-Allow-Origin *
+    root * /srv/hive
+    file_server
+  }
+  handle /pair* {
+    reverse_proxy pair-relay:5000
+  }
+  handle {
+    reverse_proxy relay:3000 {
+      header_up Host skaists.buzz
+    }
+  }
+}
+skaists.buzz {
+  # Automatic HTTPS; existing certificates seeded into Caddy's managed storage.
+  import skaists-app
+}
+relay.skaists.dev {
+  import skaists-app
+}

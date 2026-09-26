@@ -1,0 +1,34 @@
+services:
+  caddy:
+    image: caddy:2-rl
+    ports:
+      - "127.0.0.1:3400:8080"
+    volumes:
+      - ./Caddyfile.stage:/etc/caddy/Caddyfile:ro
+      - ./door:/srv/door:ro
+      - ./join:/srv/join:ro
+    networks:
+      - buzz-net
+      - staging-front
+    mem_limit: 512m
+    cpus: 1
+    restart: unless-stopped
+  caddy-tls:
+    image: caddy:2-rl
+    ports:
+      - "127.0.0.1:34443:443"
+    volumes:
+      - ./Caddyfile.hostinger:/etc/caddy/Caddyfile:ro
+      - ./certs:/certs:ro
+      - ./door:/srv/door:ro
+      - ./join:/srv/join:ro
+      - ./hive:/srv/hive:ro
+    networks:
+      - buzz-net
+      - staging-front
+    mem_limit: 512m
+    cpus: 1
+    restart: unless-stopped
+networks:
+  staging-front:
+    driver: bridge
