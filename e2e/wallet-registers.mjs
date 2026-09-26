@@ -260,7 +260,7 @@ ok('on a phone the first screen holds a different KIND of thing: bee choices, ra
     ['paste it once below', 'within the keychain'],
     ['Any device in the list above', 'within the vault'],
     ['connect your keychain above to see your derived keys', 'key forge ← keychain, same task, before it'],
-    ['orge new ones below', 'within the key forge'],
+    ['rge new ones below', 'within the key forge'],
     ['(live price below)', 'within the account forge'],
     ['addresses below are yours to hand out', 'within pay'],
     ['Each address above falls out of the', 'within pay'],

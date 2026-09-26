@@ -116,7 +116,7 @@
 
     /* schema: closed enums */
     F('closed_enums', !!(r.line_items && r.line_items.every(function (l) { return RAILS[l.rail] && CLASSES[l.resource_class]; })),
-      'rail and resource_class are closed enums — unknown values are rejected, never coerced');
+      'rail and resource_class are closed enums: unknown values are rejected, never coerced');
 
     /* arithmetic: per line owed = quantity × rate; Σ = the bill */
     var owed = 0n, lines = [], rateMissing = false, basis = 0n;
@@ -128,7 +128,7 @@
         /* the tithe line: charged must equal basis × percent — founder law,
            audited. if the basis lines were unpriceable, the tithe cannot be
            checked either — it is INCONCLUSIVE with the rest of the bill */
-        if (rateMissing) { lines.push({ i: i, cls: 'tithe', qty: l.quantity, note: 'basis unpriceable — the tithe cannot be checked either' }); continue; }
+        if (rateMissing) { lines.push({ i: i, cls: 'tithe', qty: l.quantity, note: 'basis unpriceable: the tithe cannot be checked either' }); continue; }
         var want = basis * toS(String(l.tithe.percent)) / toS('100');
         var got = toS(l.charged.value);
         F('tithe_line', got === want, 'the tithe is a distinct line: charged ' + fromS(got == null ? 0n : got) + ' vs basis ' + fromS(basis) + ' × ' + l.tithe.percent + '%');
@@ -138,7 +138,7 @@
         var rv = toS(rate.value), q = BigInt(Math.trunc(l.quantity));
         var calc = rv * q, got2 = toS(l.charged.value);
         var ok = got2 !== null && calc === got2;
-        F('line_' + i + '_arithmetic', ok, l.quantity + ' × ' + fromS(rv) + ' = ' + fromS(calc) + ' — charged ' + (got2 == null ? '?' : fromS(got2)));
+        F('line_' + i + '_arithmetic', ok, l.quantity + ' × ' + fromS(rv) + ' = ' + fromS(calc) + ', charged ' + (got2 == null ? '?' : fromS(got2)));
         owed += got2 == null ? 0n : got2; basis += got2 == null ? 0n : got2;
         lines.push({ i: i, cls: l.resource_class, qty: l.quantity, rate: fromS(rv) + ' A/' + l.quantity_unit, calc: fromS(calc), charged: l.charged.value, ok: ok });
       }
@@ -150,7 +150,7 @@
        is INCONCLUSIVE, not a failed sum */
     if (!rateMissing && r.total_computed && r.total_computed.value != null) {
       var claimed = toS(r.total_computed.value);
-      F('total_matches_sum', claimed === owed, 'claimed ' + fromS(claimed == null ? 0n : claimed) + ' vs recomputed ' + fromS(owed) + ' — the total is COMPUTED, never stored');
+      F('total_matches_sum', claimed === owed, 'claimed ' + fromS(claimed == null ? 0n : claimed) + ' vs recomputed ' + fromS(owed) + '. the total is COMPUTED, never stored');
     }
 
     /* content hash: receipt_id = sha256(canonical receipt sans id) */
@@ -161,7 +161,7 @@
     if (r.provenance && r.provenance.prior_receipt_id) {
       var prior = (ledger.receipts || []).find(function (x) { return x.receipt_id === r.provenance.prior_receipt_id; });
       if (prior) F('forward_only', r.occurred_at >= prior.occurred_at,
-        'occurred_at ' + r.occurred_at + ' vs prior ' + prior.occurred_at + ' — bTiMeLiNe runs one way');
+        'occurred_at ' + r.occurred_at + ' vs prior ' + prior.occurred_at + '. bTiMeLiNe runs one way');
       else F('forward_only', false, 'prior_receipt_id not in the record');
     }
 
@@ -243,7 +243,7 @@
   function checksHtml(rec) {
     return rec.audit.checks.map(function (c) {
       return '<div style="font-size:10px;color:' + (c.ok ? 'var(--dim)' : 'var(--flag)') + ';padding:2px 0">' +
-        (c.ok ? '✓' : '✗') + ' <b style="color:var(--ink)">' + esc(c.name) + '</b>' + (c.note ? ' — ' + esc(c.note) : '') + '</div>';
+        (c.ok ? '✓' : '✗') + ' <b style="color:var(--ink)">' + esc(c.name) + '</b>' + (c.note ? ': ' + esc(c.note) : '') + '</div>';
     }).join('');
   }
 
@@ -277,7 +277,7 @@
         '<span style="font-size:9px;letter-spacing:.12em;color:var(--dim);border:1px solid var(--line);border-radius:99px;padding:2px 8px">' + a.state + '</span>' +
         '</summary>' +
         '<div style="margin-top:7px">' + lineRowsHtml({ audit: a }) + checksHtml({ audit: a }) +
-        '<div style="font-size:10px;color:var(--ink);margin-top:5px">recomputed bill: <b style="color:var(--sa-figure,var(--gold))">' + a.owedA + '</b> · state <b>' + a.state + '</b> · anchored: ' + (a.covered ? 'yes' : a.state === 'PENDING_ANCHOR' ? 'not yet — honey' : 'n/a') + '</div>' +
+        '<div style="font-size:10px;color:var(--ink);margin-top:5px">recomputed bill: <b style="color:var(--sa-figure,var(--gold))">' + a.owedA + '</b> · state <b>' + a.state + '</b> · anchored: ' + (a.covered ? 'yes' : a.state === 'PENDING_ANCHOR' ? 'not yet (honey)' : 'n/a') + '</div>' +
         '</div></details>';
     }).join('');
 
@@ -292,7 +292,7 @@
     var score = Object.keys(result.sellers).map(function (s) {
       var v = result.sellers[s], audited = v.passed + v.failed;
       return '<span style="font-size:10px;color:var(--dim)">' + esc(s) + ': <b style="color:' + (v.failed ? 'var(--flag)' : 'var(--leaf)') + '">' + v.passed + '/' + (audited || 0) + ' clean</b>' +
-        ' <span style="color:var(--faint)">(' + v.passed + ' passed · ' + v.failed + ' failed · ' + v.pending + ' pending · ' + v.inconclusive + ' inconclusive — from this record only)</span></span>';
+        ' <span style="color:var(--faint)">(' + v.passed + ' passed · ' + v.failed + ' failed · ' + v.pending + ' pending · ' + v.inconclusive + ' inconclusive, from this record only)</span></span>';
     }).join(' · ');
 
     /* THE COMPREHENSION LAW (founder order 2026-09-16) reaches the engine's
@@ -311,9 +311,9 @@
     el.innerHTML =
       '<div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap">' +
       '<span style="font-size:26px;font-weight:600;color:var(--sa-figure,var(--gold));font-variant-numeric:tabular-nums">' + fromS(tot) + ' A</span>' +
-      '<span data-wl-tech style="font-size:10px;letter-spacing:.14em;color:var(--faint)">recomputed total — Σ quantity × rate, never the stored number</span></div>' +
-      '<div style="font-size:11.5px;color:var(--ink);margin-top:6px">' + T('sa.lead', 'Every bill re-checked here in your browser — open a receipt to see its proof.') + '</div>' +
-      '<details class="tnote" data-reg-disclose style="margin-top:8px"><summary data-i18n="sa.d.comb">' + T('sa.d.comb', 'The receipts — one cell per bill, tap for its proof') + '</summary>' +
+      '<span data-wl-tech style="font-size:10px;letter-spacing:.14em;color:var(--faint)">recomputed total: Σ quantity × rate, never the stored number</span></div>' +
+      '<div style="font-size:11.5px;color:var(--ink);margin-top:6px">' + T('sa.lead', 'Every bill re-checked here in your browser. Open a receipt to see its proof.') + '</div>' +
+      '<details class="tnote" data-reg-disclose style="margin-top:8px"><summary data-i18n="sa.d.comb">' + T('sa.d.comb', 'The receipts: one cell per bill, tap for its proof') + '</summary>' +
       '<div style="display:flex;gap:4px;flex-wrap:wrap;margin:10px 0 2px">' + cells + '</div>' +
       '<div style="display:flex;gap:10px;flex-wrap:wrap;font-size:9.5px;color:var(--dim);letter-spacing:.06em">' +
       '<span>' + cellChip('PASSED', 13) + ' PASSED = capped</span><span>' + cellChip('PENDING_ANCHOR', 13) + ' PENDING_ANCHOR = honey</span>' +
@@ -325,12 +325,12 @@
         '<div style="display:flex;gap:8px;align-items:center;margin-top:6px"><button type="button" id="sa-paste-go" style="background:var(--well);color:var(--sa-figure,var(--gold));border:1px solid var(--line);border-radius:8px;padding:8px 14px;cursor:pointer;font:11px \'IBM Plex Mono\',monospace;min-height:44px">audit it</button>' +
         '<span id="sa-paste-out" style="font-size:10px;color:var(--dim)"></span></div></div>' : '') +
       '</details>' +
-      '<details class="tnote" data-reg-disclose style="margin-top:6px"><summary data-i18n="sa.d.watch">' + T('sa.d.watch', 'Services and seller scores — from this record only') + '</summary>' +
+      '<details class="tnote" data-reg-disclose style="margin-top:6px"><summary data-i18n="sa.d.watch">' + T('sa.d.watch', 'Services and seller scores: from this record only') + '</summary>' +
       '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">' + svcs + '</div>' +
       '<div style="margin-top:8px">' + score + '</div>' +
       '</details>' +
       '<div data-wl-tech style="margin-top:10px;border:1px solid var(--line);border-left:3px solid var(--sa-care-line,var(--gold));border-radius:6px;padding:9px 11px;font-size:10px;color:var(--ink);background:var(--well)">' +
-      '<b style="color:var(--sa-care,var(--gold));letter-spacing:.18em">CARE</b> — this is topology and vocabulary, NEVER a security claim.</div>' +
+      '<b style="color:var(--sa-care,var(--gold));letter-spacing:.18em">CARE</b>: this is topology and vocabulary, NEVER a security claim.</div>' +
       '<div data-wl-tech style="margin-top:7px;font-size:9.5px;color:var(--faint);line-height:1.8">' + esc((ledger._note && ledger._note[0]) || '') + '</div>';
     /* initial seat: this mounts after register.js's apply pass, so the open
        state is set here; later register switches ride the shared law, and a

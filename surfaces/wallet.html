@@ -15,7 +15,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta name="color-scheme" content="light dark">
 <link rel="stylesheet" href="tokens.css">
-<title>the BNR wallet — one soul, every chain</title>
+<title>the BNR wallet: one soul, every chain</title>
   <link rel="icon" type="image/svg+xml" href="assets/house/house-seal-roundel.svg">
 <style>
 /* SEMANTIC COLOUR — meanings picked FIRST, hues second (master design pass
@@ -617,13 +617,13 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
 </nav>
 <header>
   <div class="kicker" data-i18n="wl.kicker">zero storage · zero custody · first-party, adapter-native</div>
-  <h1><span aria-hidden="true">🗝</span> the BNR wallet <span class="h1-arg" data-i18n="wl.h1arg">— one soul, every chain</span></h1>
+  <h1><span aria-hidden="true">🗝</span> the BNR wallet<span class="h1-arg" data-i18n="wl.h1arg">: one soul, every chain</span></h1>
   <p data-reg="bee" data-i18n="wl.reg.connect.bee">one identity, every chain. your bzDiD is your wallet: connect it once to see your balances on all your chains, sign and hold your keys. nothing leaves your browser.</p>
   <p data-reg="raver" data-i18n="wl.reg.connect.raver">one soul, every chain. the lights show what you hold.</p>
   <p data-reg="cypherpunk" data-i18n="wl.reg.connect.cypher">bzDiD masterPRK → near-infinite per-context derived keys
   (secp256k1 for Vaulta AND 0x/EVM, ed25519 for bzDiD rails) → client-side eosjs serialization +
-  signed here → sent onward via a public door. Your keys stay in this tab's memory — nothing saved, nothing held for you.
-  New accounts are forged bzDiD-native — no exports, no imports, no manual keys, ever.</p>
+  signed here → sent onward via a public door. Your keys stay in this tab's memory: nothing saved, nothing held for you.
+  New accounts are forged bzDiD-native: no exports, no imports, no manual keys, ever.</p>
 </header>
 
 <!-- ══ THE THREE GRAMMARS — each register's own way in. Every figure below is a
@@ -746,7 +746,7 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
 <section id="connect-sec" data-wl-task="have" style="border-color:var(--gold)">
   <h2>🔗 connect: <span data-i18n="wl.h.connect">your bzDiD is the wallet</span></h2>
   <div class="law">Connect your soul (your .b name or account). New here?
-  <a href="./onboarding/">Create your bzDiD</a> — the held-hand ceremony takes 2 minutes.</div>
+  <a href="./onboarding/">Create your bzDiD</a>: the held-hand ceremony takes 2 minutes.</div>
   <div class="row">
     <input id="wq" placeholder="your account or .b name" value="" spellcheck="false" style="font-size:16px;padding:12px 14px">
     <button id="wgo" style="font-size:14px;padding:12px 20px">connect</button>
@@ -757,12 +757,12 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
 <section id="kc-sec" data-wl-task="key">
   <h2>🗝 the keychain: <span data-i18n="wl.h.keychain">your bzDiD holds every key</span></h2>
   <div class="law" data-wl-tech><b>Automatic:</b> your first tap or keypress on a control of this page (moving between its parts does not count) connects the
-  keychain by itself (the WebAuthn ceremony needs one touch of yours — browsers' law, not ours).
+  keychain by itself (the WebAuthn ceremony needs one touch of yours: browsers' law, not ours).
   The PRF ceremony re-derives your <b>masterPRK</b> in this tab's memory (never stored, never
   sent). From it we derive: the <b>ed25519 soul record key</b> (context <b>bnr.b</b>, same as
   onboarding), the <b>Vaulta K1 signing key</b> (context <b>vaulta:yourname</b>), your <b>0x/EVM</b>
-  and <b>nostr npub</b> rails (<a href="keys/addresses.html">your two addresses</a>) — and as many
-  more as you forge below. No passkey here, or it lacks PRF? Use your 24-word recovery phrase —
+  and <b>nostr npub</b> rails (<a href="keys/addresses.html">your two addresses</a>), and as many
+  more as you forge below. No passkey here, or it lacks PRF? Use your 24-word recovery phrase:
   same soul, same keys.</div>
   <div class="ring-wrap">
     <svg width="230" height="230" viewBox="0 0 230 230" aria-hidden="true" focusable="false">
@@ -830,34 +830,34 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
         Revoke de-syncs a device (its cached seal keeps working offline — honest limit; a full kill is the recovery-rotate
         lane). Sessions via the QR bridge never enter this list.</div>
         <div id="dm-body" style="margin-top:8px"></div>
-        <div class="law" id="dm-stat" style="margin-top:6px">— registry not loaded —</div>
+        <div class="law" id="dm-stat" style="margin-top:6px">registry not loaded</div>
       </div>
-      <details class="tnote" data-reg-disclose><summary data-i18n="wl.d.passkey">Which devices and keys can make your bzDiD — the full compatibility check</summary>
+      <details class="tnote" data-reg-disclose><summary data-i18n="wl.d.passkey">Which devices and keys can make your bzDiD: the full compatibility check</summary>
   <div class="law" style="margin-top:4px">The passkey must live in a <b>PRF-capable authenticator</b>:
       platform ones (Windows Hello, the Chrome profile, Google Password Manager, iCloud Keychain) work;
       most third-party managers (Bitwarden, 1Password &amp; friends) don't yet. <b>Create never takes a
       manager's word for it:</b> after the "confirmed" the wallet immediately re-touches the exact
-      passkey just made and demands a real PRF secret from it — if it can't, you're told plainly and
+      passkey just made and demands a real PRF secret from it: if it can't, you're told plainly and
       that dead passkey should be deleted (Chrome: ⋮ → Passwords and autofill → Passkeys). A software
       passkey confirming instantly is fine; PRF is proven by the touch, not the speed. Hardware keys
-      must be FIDO2.1-class with a PIN set and room for a resident credential — older U2F keys won't
+      must be FIDO2.1-class with a PIN set and room for a resident credential. Older U2F keys won't
       be offered. If Windows said "unrecognized" when you inserted your key, use the dedicated
-      <b>🔑 create on a hardware key</b> button — it routes through the browser's native USB lane
+      <b>🔑 create on a hardware key</b> button: it routes through the browser's native USB lane
       (no Windows passkey picker at all), which is the fix for exactly that error. Cross-device (the phone-camera QR) works only when the <b>phone's</b> provider has
-      PRF — on the phone set the default passkey provider to Google/iCloud, or simply open this wallet
+      PRF: on the phone set the default passkey provider to Google/iCloud, or simply open this wallet
       on the phone itself. After a successful create, this wallet re-touches that same passkey
-      automatically — no "which passkey?" picker ever again.
+      automatically: no "which passkey?" picker ever again.
       <b>Passkeys are origin-bound:</b> one made at another site (an Anchor/wallet passkey for your
-      account, say) can never connect here — it signs at its own site only. Your account's existing
+      account, say) can never connect here: it signs at its own site only. Your account's existing
       key still bridges you in: paste it once below.
-      <b>Already hold a bzDiD elsewhere? Don't create a second — import it with your recovery phrase
+      <b>Already hold a bzDiD elsewhere? Don't create a second. Import it with your recovery phrase
       instead (a new passkey = a new soul).</b></div>
   </details>
       <div class="row">
         <input id="kc-rec" class="small" type="password" placeholder="…or paste your 24-word recovery phrase / bdidrec code" spellcheck="false" autocomplete="off">
         <button id="kc-recgo">recover</button>
       </div>
-      <div class="law" id="kc-stat" style="margin-top:6px;min-height:20px">— keychain not connected —</div>
+      <div class="law" id="kc-stat" style="margin-top:6px;min-height:20px">keychain not connected</div>
       <div id="kc-cards" style="display:none;gap:10px;flex-wrap:wrap;margin-top:8px">
         <div class="keycard" style="flex:1 1 100%">
           <div class="kt">SOUL FINGERPRINT (ed25519 record · bnr.b)</div>
@@ -880,13 +880,13 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
 
 <section id="vault-sec" data-wl-task="key" style="border-color:var(--cyan)">
   <h2>🔐 the vault: <span data-i18n="wl.h.vault">one keypass, every secret</span></h2>
-  <details class="tnote" data-reg-disclose><summary data-i18n="wl.d.import">Bringing keys you already hold — formats, and how they get sealed</summary>
-  <div class="law">The keys you already hold — <b>seed phrases</b> from any wallet
+  <details class="tnote" data-reg-disclose><summary data-i18n="wl.d.import">Bringing keys you already hold: formats, and how they get sealed</summary>
+  <div class="law">The keys you already hold, <b>seed phrases</b> from any wallet
   (12 · 15 · 18 · 21 · 24 words) and <b>Vaulta ACTIVE private keys</b>
-  (5K… · L… · K… · PVT_K1_…) — sealed under a single <b>keypass</b> so you never handle
+  (5K… · L… · K… · PVT_K1_…), are sealed under a single <b>keypass</b> so you never handle
   them raw again. Sealed with <b>PBKDF2-SHA-256 ×600 000 → AES-256-GCM</b>, header
   authenticated, salt and IV fresh on every write. Only the ciphertext is stored; it is safe
-  to back up anywhere. Every phrase is <b>checksum-verified before it goes in</b> — a mistyped
+  to back up anywhere. Every phrase is <b>checksum-verified before it goes in</b>: a mistyped
   word is caught now, not on the day you need it.
   <br><b style="color:var(--amber)">Stated honestly:</b> this is <b>hot storage</b>. It ends the
   plaintext juggling; it does not turn a browser key into a cold one, and it cannot protect you
@@ -896,10 +896,10 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
 
   <!-- ── state A: no vault on this browser ─────────────────────────────── -->
   <div id="vlt-new" style="display:none">
-    <details class="tnote" data-reg-disclose><summary data-i18n="wl.d.keypass">Choosing your keypass — the one decision to take slowly</summary>
+    <details class="tnote" data-reg-disclose><summary data-i18n="wl.d.keypass">Choosing your keypass: the one decision to take slowly</summary>
   <div class="law" style="margin-top:12px;color:var(--ink)"><b>① Choose your keypass.</b>
     This is the only thing standing between anyone with this browser and every secret inside.
-    Generate one — eight words from the BIP-39 list is 88 bits of real entropy, which no one
+    Generate one: eight words from the BIP-39 list is 88 bits of real entropy, which no one
     is brute-forcing. Write it on paper. <b style="color:var(--amber)">There is no reset:</b>
     lose the keypass and the vault is unrecoverable by design.</div>
   </details>
@@ -969,7 +969,7 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
       <input id="vlt-chain" class="small" placeholder="chain (optional) — BTC · ETH · Vaulta · Zano" spellcheck="false">
       <input id="vlt-bip39pass" class="small" type="password" placeholder="25th-word passphrase (optional, seeds only)" autocomplete="off" spellcheck="false">
     </div>
-    <div class="law" id="vlt-check" style="margin-top:4px;min-height:18px">— nothing entered —</div>
+    <div class="law" id="vlt-check" style="margin-top:4px;min-height:18px">nothing entered</div>
     <div class="row">
       <button id="vlt-add" class="green" style="flex:1">＋ SEAL IT IN</button>
       <button id="vlt-clear" style="font-size:11px">clear</button>
@@ -1029,15 +1029,15 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
 
 <section id="forge-sec" data-wl-task="key">
   <h2>♾ the key forge: <span data-i18n="wl.h.forge">near infinite keys, one soul</span></h2>
-  <details class="tnote" data-reg-disclose><summary data-i18n="wl.d.forge2">How each context gets its own key — derivation, on demand</summary>
+  <details class="tnote" data-reg-disclose><summary data-i18n="wl.d.forge2">How each context gets its own key: derivation, on demand</summary>
   <div class="law">Every context derives its own key from your masterPRK: <b>vaulta:names</b> for
   Vaulta account keys, <b>evm:names</b> for 0x addresses, any adapter context you can name.
-  Derivation is instant, free, deterministic — the same context always yields the same key on
+  Derivation is instant, free, deterministic: the same context always yields the same key on
   every device. We persist <b>only the context list</b> (this browser), never a key; keys exist
   only while your keychain is connected. Tap a key to copy it.</div>
   </details>
   <div class="chips" id="forge-chips" data-wl-tech>
-    <div class="law">connect your keychain above to see your derived keys — or forge new ones below</div>
+    <div class="law">connect your keychain above to see your derived keys, or forge new ones below</div>
   </div>
   <div class="row" data-wl-tech>
     <input id="forge-ctx" class="small" placeholder="new context — e.g. vaulta:newaccount · evm:myname · anything:anything" spellcheck="false">
@@ -1075,13 +1075,13 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
     <div class="chain" id="ch-autonomi">
       <div class="cn">🐜 Autonomi <span class="badge">ANT</span></div>
       <div class="cb" id="ant-bal"></div>
-      <div class="cd" id="ant-info">ANT on Arbitrum — of your derived 0x address</div>
+      <div class="cd" id="ant-info">ANT on Arbitrum, of your derived 0x address</div>
       <div class="stat" id="ant-stat">connect keychain to derive</div>
     </div>
     <div class="chain" id="ch-arweave">
       <div class="cn">🕸 Arweave <span class="badge">AR</span></div>
       <div class="cb" id="ar-bal"></div>
-      <div class="cd" id="ar-info">of the vault-held JWK — the address is public metadata, reads stay keyless</div>
+      <div class="cd" id="ar-info">of the vault-held JWK: the address is public metadata, reads stay keyless</div>
       <div class="stat" id="ar-stat">vault holds no arweave key</div>
     </div>
   </div>
@@ -1105,16 +1105,16 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
     <input id="br-wif" class="small" type="password" placeholder="existing ACTIVE private key (5K… / L… / K… / PVT_K1_…)" autocomplete="off" spellcheck="false" style="flex:2">
     <button id="br-go" class="gold">BRIDGE MY bzDiD</button>
   </div>
-  <div class="law" id="br-stat" style="margin-top:6px;min-height:20px">— waiting for your existing key —</div>
+  <div class="law" id="br-stat" style="margin-top:6px;min-height:20px">waiting for your existing key</div>
   <pre id="br-out" style="display:none"></pre>
 </section>
 
 <section id="acct-sec" data-wl-task="key" style="border-color:#2c4a5a">
   <h2>🏭 the account forge: <span data-i18n="wl.h.acctforge">Vaulta accounts born from your bzDiD</span></h2>
-  <details class="tnote" data-reg-disclose><summary data-i18n="wl.d.acct">How a new account is born — your bridged key signs it into being</summary>
+  <details class="tnote" data-reg-disclose><summary data-i18n="wl.d.acct">How a new account is born: your bridged key signs it into being</summary>
   <div class="law">Your <b>bridged</b> account signs <b>newaccount</b>; the new account's owner and
   active keys derive from your bzDiD (contexts <b>vaulta:&#8203;name/owner</b> and
-  <b>vaulta:&#8203;name/active</b>) — no key is exported, written down, or imported, ever.
+  <b>vaulta:&#8203;name/active</b>). No key is exported, written down, or imported, ever.
   Vaulta economics, stated honestly: <b>broadcasting draws on staked CPU/NET, not liquid</b>
   (a 0.0000 liquid balance does not block transactions); the <b>RAM purchase draws from liquid</b>
   (live price below). Near infinite: every account born this way signs with your keychain.</div>
@@ -1127,7 +1127,7 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
     <input id="ac-ram" class="small" type="number" value="8192" min="3072" step="1024" style="max-width:160px;flex:0 1 160px" title="RAM bytes the creator buys for the new account">
     <div class="law" style="flex:2;min-width:220px" id="ac-cost" data-wl-tech>RAM cost: reading live market…</div>
   </div>
-  <div class="law" id="ac-stat" style="margin-top:6px;min-height:20px">— creator liquid: reading… —</div>
+  <div class="law" id="ac-stat" style="margin-top:6px;min-height:20px">creator liquid: reading…</div>
   <pre id="ac-out" style="display:none"></pre>
 </section>
 <section id="pay-sec" data-wl-task="move" style="border-color:#3a5a2c">
@@ -1145,7 +1145,7 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
        never a human gate, never an approval step; unset = no limit). ══ -->
   <div class="row" id="cap-row" data-wl-tech style="margin-top:8px;align-items:center;flex-wrap:wrap">
     <span id="cap-lbl" style="font-size:10.5px;color:var(--faint);flex:0 0 auto">spend cap · optional, owner's tool:</span>
-    <span id="cap-view" style="font-size:10.5px;color:var(--cyan);flex:1 1 auto;min-width:120px">unset — no limit</span>
+    <span id="cap-view" style="font-size:10.5px;color:var(--cyan);flex:1 1 auto;min-width:120px">unset: no limit</span>
     <input id="cap-amt" class="small" type="number" min="0" step="0.0001" placeholder="amount/day" title="amount per rolling day, per unit" style="max-width:110px;flex:0 1 110px">
     <select id="cap-unit" title="unit — caps are per-unit, never price-converted" style="max-width:86px;flex:0 1 86px;background:var(--well);color:var(--ink);border:1px solid var(--line);border-radius:7px;padding:9px 8px;font:12px 'IBM Plex Mono',monospace">
       <option value="A">A</option>
@@ -1285,17 +1285,17 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
      first-class BEFORE quote; this panel records the policy the quote actually
      bound — the founder's chooser gesture is chartered, never agent-inferred. ══ -->
 <section id="bpay-sec" data-wl-task="keep" style="border-color:#2c4a5a">
-  <h2>🧾 <span data-i18n="wl.bpay.h">bPay — the preservation invoice</span></h2>
-  <details class="tnote" data-reg-disclose><summary data-i18n="wl.bpay.law">the chooser comes first — every figure is carried from a live, keyless network quote; this panel renders, it cannot spend</summary>
+  <h2>🧾 <span data-i18n="wl.bpay.h">bPay: the preservation invoice</span></h2>
+  <details class="tnote" data-reg-disclose><summary data-i18n="wl.bpay.law">the chooser comes first: every figure is carried from a live, keyless network quote; this panel renders, it cannot spend</summary>
   <p class="law">the audience choice is yours, in the chooser, before any quote; selecting 🌐 Public and
-  asking for a fresh quote sends your resolved policy to the keyless bridge — no hidden network
+  asking for a fresh quote sends your resolved policy to the keyless bridge. no hidden network
   default gets promoted into a choice. 🔒 private audiences stay visibly unavailable until their
   paths are qualified. the view toggle (newbee / raver / cypherpunk) only changes what you can
-  inspect — never the audience, never your authority. no ANT figure is typed by anyone: the bridge
-  hashed the exact file and quoted every chunk; those quotes — each a <b>quote hash + amount</b>
-  pair — are the carried commitment (INVOICE-1 law: owed is <b>derived</b>, never asserted). native
+  inspect, never the audience, never your authority. no ANT figure is typed by anyone: the bridge
+  hashed the exact file and quoted every chunk; those quotes (each a <b>quote hash + amount</b>
+  pair) are the carried commitment (INVOICE-1 law: owed is <b>derived</b>, never asserted). native
   gas is a <b>separate</b> wallet-side obligation. when the authorization surface is earned, your own
-  button press — and only that — crosses the waiting state; no chat text, no terminal, no agent
+  button press, and only that, crosses the waiting state; no chat text, no terminal, no agent
   receipt substitutes for it.</p></details>
   <div id="bpay-card" class="law" style="margin-top:10px;min-height:24px;overflow-wrap:anywhere">…</div>
 </section>
@@ -1306,15 +1306,15 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
      the collection's own contract at read time; nothing is cached, stored, or
      redrawn by this page. ══ -->
 <section id="insc-sec" data-wl-task="keep" style="border-color:#3a2c55">
-  <h2>🎨 <span data-i18n="wl.insc.h2">INSCRIPTIONS — your garden, drawn on-chain</span></h2>
+  <h2>🎨 <span data-i18n="wl.insc.h2">INSCRIPTIONS: your garden, drawn on-chain</span></h2>
   <div class="law" data-wl-tech><span data-i18n="wl.insc.law">ERC-20i: the art lives in the token, and its tier is your balance.</span> Drawn at
-  <b>true tier</b> through the estate's one level-truth module — the same one the market and the museum
+  <b>true tier</b> through the estate's one level-truth module, the same one the market and the museum
   use. Keyless, read-only, nothing signed.</div>
   <div class="row" style="margin-top:8px">
     <input id="insc-addr" class="small" placeholder="0x… address or a .base.eth name — defaults to your connected soul" spellcheck="false" autocomplete="off" style="flex:2;min-width:220px;font-family:'IBM Plex Mono',monospace">
     <button id="insc-go" class="gold">🎨 <span data-i18n="wl.insc.go">draw the garden</span></button>
   </div>
-  <div class="law" id="insc-stat" style="margin-top:6px;min-height:20px">— connect your keychain, or type an address —</div>
+  <div class="law" id="insc-stat" style="margin-top:6px;min-height:20px">connect your keychain, or type an address</div>
   <div id="insc-grid" style="display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));margin-top:12px"></div>
   <div class="law" data-wl-tech style="margin-top:8px"><b>The level law, enforced not labelled:</b> every piece's tier is
   checked against the collection's <b>own getMeta</b> at read time. A disagreement prints as a
@@ -1323,11 +1323,11 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
 
 <!-- ══ THE VOUCHER — prepaid compute, the money engine with a face ══ -->
 <section id="voucher-sec" data-wl-task="add" style="border-color:#2c4a3a">
-  <h2>🎟 <span data-i18n="wl.vh2">THE VOUCHER — prepay compute, metered fair</span></h2>
-  <p data-reg="bee" data-i18n="wl.reg.voucher.bee">Prepay for compute work — models, vRAM, whatever the estate meters —
+  <h2>🎟 <span data-i18n="wl.vh2">THE VOUCHER: prepay compute, metered fair</span></h2>
+  <p data-reg="bee" data-i18n="wl.reg.voucher.bee">Prepay for compute work (models, vRAM, whatever the estate meters)
   and watch every last drop of it itemized here. Top up from either chain, spend at metered
   rates, and the estate's 10% tithe is always visible, never buried.</p>
-  <p data-reg="raver" data-i18n="wl.reg.voucher.raver">Two rails in, one A balance, receipts with the tithe line — the same
+  <p data-reg="raver" data-i18n="wl.reg.voucher.raver">Two rails in, one A balance, receipts with the tithe line: the same
   hash-chained ledger the till meters with, rendered live from the estate oracle
   (skaists.buzz). Refusals read as sentences, not codes.</p>
   <p data-reg="cypherpunk" data-i18n="wl.reg.voucher.cypher">voucher_escrow semantics, live: balances DERIVED from a
@@ -1396,15 +1396,15 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
 <!-- ══ RECEIPTS — the public spend record, recomputed here (SPEC-SPEND-RECEIPT-1) ══ -->
 <section id="receipts-sec" data-wl-task="proof" style="border-color:var(--gold)">
   <h2>🧾 the receipts: <span data-i18n="wl.h.receipts">every bill recomputed here</span></h2>
-  <details class="tnote" data-reg-disclose><summary data-i18n="wl.d.receipts">How this panel checks every bill — recomputed here, never trusted</summary>
+  <details class="tnote" data-reg-disclose><summary data-i18n="wl.d.receipts">How this panel checks every bill: recomputed here, never trusted</summary>
   <p class="law"><a href="#voucher-sec">the voucher panel</a> reads <b>your</b> balance live from the estate oracle; this panel
   reads the estate's <b>public</b> spend-receipt record (SPEC-SPEND-RECEIPT-1, the same shape the b-meter
-  writes) and recomputes every bill in-page — <b>price × burned = owed</b>, summed from the line items,
+  writes) and recomputes every bill in-page: <b>price × burned = owed</b>, summed from the line items,
   never from a stored total. each receipt's verdict is drawn as a comb cell:
   <b>PENDING_ANCHOR</b> = honey · <b>PASSED</b> = capped, sealed ⬡ · <b>FAILED</b> = the flag hue #c07f1c
-  (the validated failure colour — never a new red) · <b>INCONCLUSIVE</b> = nectar. verification carries
+  (the validated failure colour, never a new red) · <b>INCONCLUSIVE</b> = nectar. verification carries
   <b>no keys</b>: content hash, exact arithmetic and the forward-only chain are checked from the public
-  record alone. private receipts never appear here — visibility is storage law (§3a): only rows marked
+  record alone. private receipts never appear here. visibility is storage law (§3a): only rows marked
   public live in a public store. paste any receipt and the same auditor checks yours.</p>
   </details>
   <div id="receiptsBody" style="margin-top:12px;--sa-figure:var(--ink);--sa-care:var(--amber);--sa-care-line:var(--line2)"></div>
@@ -1437,19 +1437,19 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
   #vcomb .cell{min-height:44px}}
 </style>
   <h2>💳 fund: <span data-i18n="wl.h.fund">buy USDC, land it on an address you hold</span></h2>
-  <details class="tnote" data-reg-disclose><summary data-i18n="wl.d.fiat">How the card checkout works — who holds what at each step</summary>
+  <details class="tnote" data-reg-disclose><summary data-i18n="wl.d.fiat">How the card checkout works: who holds what at each step</summary>
   <div class="law">The one lane this wallet cannot forge itself: licensed fiat. The buy runs on
-  <b>Meld's hosted checkout</b> — it opens in its own tab; this page only builds the link.
+  <b>Meld's hosted checkout</b>: it opens in its own tab; this page only builds the link.
   <b>No server of ours:</b> no BNR endpoint sits in this lane; this wallet signs nothing and
   stores nothing. Your address rides in the checkout URL (the fiat rail's law) and Meld sees
   what any checkout sees. The key in the config below is <b>PUBLIC</b>
-  (a publishable Checkout key) — a secret key never touches a page, by Meld's law and ours.
+  (a publishable Checkout key): a secret key never touches a page, by Meld's law and ours.
   <b>Names welcome:</b> type a <b>.eth name</b> (Basename or ENS-style) and the button resolves
-  it to its raw 0x address on <b>Base's own resolver</b> before anything launches — a keyless
+  it to its raw 0x address on <b>Base's own resolver</b> before anything launches, by a keyless
   read from your browser to <b>public Base RPCs picked at random per lookup</b>, so no single
   operator profiles who funds what. Honest limit: whichever provider you land on <b>can see
-  the lookup</b> — your IP plus the name you asked about. <b>Pasting a raw 0x address skips
-  resolution entirely</b> — if you'd rather not be seen asking, that is a real choice.</div>
+  the lookup</b>: your IP plus the name you asked about. <b>Pasting a raw 0x address skips
+  resolution entirely</b>. If you'd rather not be seen asking, that is a real choice.</div>
   </details>
   <noscript><div class="fund-nojs">💳 funding needs JavaScript — this panel builds the checkout
   link in your browser, so with scripting off it stays right here, asleep. Everything else on
@@ -1462,7 +1462,7 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
         <option value="USDC_ETHEREUM">USDC · Ethereum</option>
       </select>
       <input id="fund-addr" class="small" placeholder="destination 0x address or .eth name — optional, locks the buy to it" spellcheck="false" autocomplete="off" style="flex:2;min-width:240px">
-      <a id="fund-go" class="fund-launch" href="#" aria-disabled="true" target="_blank" rel="noopener noreferrer">💳 buy USDC — opens Meld</a>
+      <a id="fund-go" class="fund-launch" href="#" aria-disabled="true" target="_blank" rel="noopener noreferrer">💳 buy USDC (opens Meld)</a>
     </div>
     <div class="law" id="fund-stat" style="margin-top:6px;min-height:20px">…</div>
   </div>
@@ -1628,11 +1628,11 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
           if (!keyOk) {
             go.setAttribute('aria-disabled', 'true');
             go.setAttribute('href', '#');
-            stat.innerHTML = '<b style="color:var(--amber)">\u26a0 funding not configured</b> — the public ' +
+            stat.innerHTML = '<b style="color:var(--amber)">\u26a0 funding not configured</b>: the public ' +
               'Meld Checkout key is not set on this deployment (BNR_MELD_PUBLIC_KEY / data-meld-public-key). ' +
               'The launch button stays asleep until it is; nothing else on this page is affected. ' +
               'Environment selected: <b>' + BNR_MELD_ENV + '</b>' +
-              (BNR_MELD_ENV === 'production' ? ' — real money' : ' — sb.meldcrypto.com, test rails') + '.';
+              (BNR_MELD_ENV === 'production' ? ' (real money)' : ' (sb.meldcrypto.com, test rails)') + '.';
             return;
           }
           var a = addr.value.trim();
@@ -1718,17 +1718,17 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
 <!-- ══ PEER FUNNEL — the first mile in: fiat → USDC on Peer's escrow, estate = bare to ══ -->
 <section id="peer-sec" data-wl-task="add" style="border-color:#2c4a3a">
   <h2>🏧 fiat in: <span data-i18n="wl.h.fiat">the Peer funnel</span> (SPEC-PEER-FUNNEL-1)</h2>
-  <details class="tnote" data-reg-disclose><summary data-i18n="wl.d.funnel">The fiat funnel’s role — the estate sells, it never operates</summary>
+  <details class="tnote" data-reg-disclose><summary data-i18n="wl.d.funnel">The fiat funnel’s role: the estate sells, it never operates</summary>
   <p class="law">the estate is a <b>seller, not an operator</b>: its Base address below is a bare
-  <b>to</b> on Peer's live escrow (EscrowV2 + OrchestratorV3 on Base) — it signs nothing, grants
+  <b>to</b> on Peer's live escrow (EscrowV2 + OrchestratorV3 on Base). it signs nothing, grants
   no allowance, runs no relayer. a customer's fiat (Venmo &amp; co.) settles as USDC straight
-  into it. the estate is <b>never the LP</b> — a third party holds the USDC and takes the fiat;
+  into it. the estate is <b>never the LP</b>: a third party holds the USDC and takes the fiat;
   if the estate played LP its own USDC would just come home (a fiat receipt, not new money).
-  the 10% tithe rides the customer's intent itself as one <b>referralFees</b> entry — paid
+  the 10% tithe rides the customer's intent itself as one <b>referralFees</b> entry, paid
   inside Peer's settlement before the balance lands, no second transaction; when no referral
   was attached, the split still happens as ONE estate-side exact-multi instruction (seller +
-  tithe in a single payment — the fallback, SPEC §receive). settlement finality is one vendor
-  signature until the estate's own witness set exists — priced as such, never hidden.</p>
+  tithe in a single payment: the fallback, SPEC §receive). settlement finality is one vendor
+  signature until the estate's own witness set exists, priced as such, never hidden.</p>
   </details>
   <div class="row" style="align-items:center;flex-wrap:wrap;gap:8px">
     <span class="law">receive address (bare <b>to</b>):</span>
@@ -1736,14 +1736,14 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
     <button class="gold" id="peer-copy" style="min-height:32px;font-size:10px">copy</button>
   </div>
   <div class="row" style="margin-top:10px;align-items:center;flex-wrap:wrap">
-    <button class="gold" id="peer-read" style="min-height:40px">read the funnel — settlements to this address</button>
-    <span class="law" id="peer-stat" style="flex:2;min-width:200px">the receive call is keyless: USDC Transfer logs from the orchestrator, public Base RPC picked at random — the page only reads.</span>
+    <button class="gold" id="peer-read" style="min-height:40px">read the funnel: settlements to this address</button>
+    <span class="law" id="peer-stat" style="flex:2;min-width:200px">the receive call is keyless: USDC Transfer logs from the orchestrator, public Base RPC picked at random. the page only reads.</span>
   </div>
   <div id="peer-rows" class="law" style="margin-top:10px"></div>
   <details style="margin-top:10px">
-    <summary style="cursor:pointer;font-size:11px;color:var(--cyan)">the intent shape — tithe attached at signal time</summary>
+    <summary style="cursor:pointer;font-size:11px;color:var(--cyan)">the intent shape: tithe attached at signal time</summary>
     <div class="law" style="margin-top:6px">the customer's <code>signalIntent</code> carries the split itself (≤10 referral
-    recipients, ≤50%, paid from the release before the net lands — <code>ReferralFeeLib</code>, read at source):
+    recipients, ≤50%, paid from the release before the net lands: <code>ReferralFeeLib</code>, read at source):
     <code style="display:block;margin-top:6px;white-space:pre-wrap">to:            0x89881F83…d7C6   ← the estate, bare recipient
 referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
                    basisPoints: 1000 } ]        ← the 10% law, one entry</code>
@@ -1857,13 +1857,13 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
 <!-- ══ ARWEAVE — publish & anchor (first-party signer · vault custody) ══ -->
 <section id="arw-sec" data-wl-task="keep" style="border-color:#4a3a1d">
   <h2>📡 Arweave: <span data-i18n="wl.h.arweave">publish &amp; anchor, no middleman</span></h2>
-  <details class="tnote" data-reg-disclose><summary data-i18n="wl.d.arweave">The Arweave lane — built and signed inside this page</summary>
-  <div class="law">Another adapter on the wallet shell — balance, receive address, send, and
+  <details class="tnote" data-reg-disclose><summary data-i18n="wl.d.arweave">The Arweave lane: built and signed inside this page</summary>
+  <div class="law">Another adapter on the wallet shell, with balance, receive address, send, and
   one new capability: <b>PUBLISH</b>. The transaction is built and signed <b>in this page</b>
   with WebCrypto (format-2 data tx, RSA-PSS-SHA256, proven byte-equivalent to arweave-js),
-  posted to <b>public gateways picked at random per call</b> — no single operator learns who
+  posted to <b>public gateways picked at random per call</b>, so no single operator learns who
   anchors what. <b>No bundler, no Turbo, no third-party UI</b> (founder ruling): we dropped
-  the free tier to keep the rail first-party. The JWK lives in <b>the vault</b> — sealed
+  the free tier to keep the rail first-party. The JWK lives in <b>the vault</b>, sealed
   under your keypass, structurally verified before sealing, revealed only into the signing
   call. Reads are keyless; the gateway sees what any Arweave read sees.</div>
   </details>
@@ -1913,7 +1913,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
           if (!e) {
             if (balEl) balEl.textContent = '';
             if (statEl) statEl.textContent = 'vault holds no arweave key';
-            paint('no arweave key in the vault yet — seal your JWK in <a href="#vault-sec">the vault</a> (paste it; the type is detected), then this panel wakes', 'var(--ink)');
+            paint('no arweave key in the vault yet: seal your JWK in <a href="#vault-sec">the vault</a> (paste it; the type is detected), then this panel wakes', 'var(--ink)');
             return;
           }
           var addr = e.meta && e.meta.address;
@@ -2008,30 +2008,30 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   <h2>✍ composer: <span data-i18n="wl.h.composer">the BNR contract surface, no Unicove</span></h2>
   <details class="tnote" data-reg-disclose><summary data-i18n="wl.d.composer">What the composer shows you before anything is signed</summary>
   <div class="law" id="sign-law">Give it contract + action and it fetches the live ABI, renders
-  one field per argument, and <b>shows you exactly what you will sign</b> — action, authorization,
-  parsed args, signer, endpoint — before anything broadcasts. ABI-driven: the six bnames actions
+  one field per argument, and <b>shows you exactly what you will sign</b> (action, authorization,
+  parsed args, signer, endpoint) before anything broadcasts. ABI-driven: the six bnames actions
   and anything after work the same way. Mainnet signs with your bridged bzDiD key, zero paste;
   the Jungle4 lane rehearses with a test key you paste (TESTNET-ONLY, memory-only). The Unicove
-  dependency is dead — this is ours, on the adapter contract: the worker builds, the vault signs,
+  dependency is dead. This is ours, on the adapter contract: the worker builds, the vault signs,
   the outbox persists, and nothing is called "sent" until the rail is read back.</div>
   </details>
   <div class="ladder" id="receipt-ladder" data-wl-tech aria-label="the receipt ladder — the order is law">
-    <div class="lcap" data-i18n="wl.ld.cap">the receipt ladder — every state is a first-class visual · the order is law</div>
+    <div class="lcap" data-i18n="wl.ld.cap">the receipt ladder: every state is a first-class visual · the order is law</div>
     <div class="lrow"><div class="ltrack"><span class="ldot">1</span><span class="ltail"></span></div>
       <div class="lbody"><span class="llabel" style="color:#E9F2EC" data-i18n="wl.ld.build">BUILD</span><span class="lbadge" data-i18n="wl.ld.done">done</span>
-      <div class="lline" data-i18n="wl.ld.build.l">the live ABI renders one field per argument — you see exactly what you will sign: action, authorization, parsed args, signer, endpoint.</div></div></div>
+      <div class="lline" data-i18n="wl.ld.build.l">the live ABI renders one field per argument. you see exactly what you will sign: action, authorization, parsed args, signer, endpoint.</div></div></div>
     <div class="lrow"><div class="ltrack"><span class="ldot">2</span><span class="ltail"></span></div>
       <div class="lbody"><span class="llabel" style="color:#D655BB" data-i18n="wl.ld.sign">SIGN</span><span class="lbadge" data-i18n="wl.ld.done">done</span>
-      <div class="lline" data-i18n="wl.ld.sign.l">your derived bzDiD key signs in tab memory — zero paste. the signature is yours, the bytes are final.</div></div></div>
+      <div class="lline" data-i18n="wl.ld.sign.l">your derived bzDiD key signs in tab memory: zero paste. the signature is yours, the bytes are final.</div></div></div>
     <div class="lrow"><div class="ltrack"><span class="ldot">3</span><span class="ltail"></span></div>
       <div class="lbody"><span class="llabel" style="color:#E9F2EC" data-i18n="wl.ld.persist">PERSIST</span><span class="lbadge" data-i18n="wl.ld.done">done</span>
-      <div class="lline" data-i18n="wl.ld.persist.l">the signed bytes land in the outbox BEFORE any network. persistence precedes submission — the order is law.</div></div></div>
+      <div class="lline" data-i18n="wl.ld.persist.l">the signed bytes land in the outbox BEFORE any network. persistence precedes submission: the order is law.</div></div></div>
     <div class="lrow"><div class="ltrack"><span class="ldot">…</span><span class="ltail"></span></div>
-      <div class="lbody"><span class="llabel" style="color:#6FA9E0" data-i18n="wl.ld.submit">SUBMIT</span><span class="lbadge" style="border-style:dashed;border-color:#6FA9E0;color:#6FA9E0" data-i18n="wl.ld.submitted">SUBMITTED — awaiting read-back, not done</span>
-      <div class="lline" data-i18n="wl.ld.submit.l">the stored bytes broadcast to the rail. a retry resubmits the identical bytes — it never re-signs, never rebuilds. submitted is NOT done.</div></div></div>
+      <div class="lbody"><span class="llabel" style="color:#6FA9E0" data-i18n="wl.ld.submit">SUBMIT</span><span class="lbadge" style="border-style:dashed;border-color:#6FA9E0;color:#6FA9E0" data-i18n="wl.ld.submitted">SUBMITTED: awaiting read-back, not done</span>
+      <div class="lline" data-i18n="wl.ld.submit.l">the stored bytes broadcast to the rail. a retry resubmits the identical bytes. it never re-signs, never rebuilds. submitted is NOT done.</div></div></div>
     <div class="lrow"><div class="ltrack"><span class="ldot" style="box-shadow:inset 0 0 0 1px #86CC72;color:#86CC72">✓</span></div>
-      <div class="lbody"><span class="llabel" style="color:#86CC72" data-i18n="wl.ld.confirm">CONFIRM</span><span class="lbadge" style="border-color:#86CC72;background:#86CC72;color:#06110C;font-weight:700" data-i18n="wl.ld.confirmed">CONFIRMED — read back from the rail</span>
-      <div class="lline" data-i18n="wl.ld.confirm.l">a block read says so, or nothing does. the receipt names what was read — only the read-back earns the terminal look.</div></div></div>
+      <div class="lbody"><span class="llabel" style="color:#86CC72" data-i18n="wl.ld.confirm">CONFIRM</span><span class="lbadge" style="border-color:#86CC72;background:#86CC72;color:#06110C;font-weight:700" data-i18n="wl.ld.confirmed">CONFIRMED: read back from the rail</span>
+      <div class="lline" data-i18n="wl.ld.confirm.l">a block read says so, or nothing does. the receipt names what was read. only the read-back earns the terminal look.</div></div></div>
   </div>
   <div id="adapter-states" data-wl-tech style="margin:8px 0;display:flex;gap:6px;flex-wrap:wrap"></div>
   <div class="row">
@@ -2061,7 +2061,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   <div class="row">
     <button id="tx-k" class="green" style="font-size:11px">⏱ preset: reserve k.b</button>
     <button id="tx-q" class="green" style="font-size:11px">⏱ preset: reserve q.b</button>
-    <button id="tx-go" class="green" style="flex:1">COMPOSE — build · sign · outbox · read the rail back</button>
+    <button id="tx-go" class="green" style="flex:1">COMPOSE: build · sign · outbox · read the rail back</button>
   </div>
   <div class="row" id="tx-wa-row" style="display:none">
     <label class="law" style="display:flex;align-items:center;gap:7px;cursor:pointer">
@@ -2075,17 +2075,17 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
 <section id="outbox-sec" data-wl-task="move">
   <h2>📤 outbox: <span data-i18n="wl.h.outbox">signed bytes persist here BEFORE they submit</span></h2>
   <div class="law" data-wl-tech>The order is law: <b>build → sign → persist → submit → confirm by reading the
-  rail</b>. A retry resubmits the identical stored bytes — it never re-signs, never rebuilds.
+  rail</b>. A retry resubmits the identical stored bytes. It never re-signs, never rebuilds.
   Nothing shows "sent" until a block read says so; the receipt names what was read.</div>
   <div id="outbox-list"></div>
 </section>
 
 <section id="matrix-sec" data-wl-task="proof">
   <h2>🗺 chain matrix: <span data-i18n="wl.h.matrix">the sixteen rails, from data</span></h2>
-  <details class="tnote" data-reg-disclose><summary data-i18n="wl.d.rails">Every rail, one row each — how it is read and signed</summary>
+  <details class="tnote" data-reg-disclose><summary data-i18n="wl.d.rails">Every rail, one row each: how it is read and signed</summary>
   <div class="law">Every rail the wallet will ever owe you, one row each: <b>how it's read</b>
   (first-party path first), <b>how it's signed</b> (custody tier), and <b>tonight's honest state</b>.
-  Rendered from the data block below the fold — never typed prose — and every count you see is
+  Rendered from the data block below the fold (never typed prose), and every count you see is
   computed from it at render. The doctrine: PROTOCOL paths may be core, SERVICE degrades
   gracefully, gaps say they are gaps.</div>
   </details>
@@ -4230,7 +4230,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     var el = $('outbox-list');
     if (!el) return;
     var list = outboxRead().slice().reverse();
-    if (!list.length) { el.innerHTML = '<div style="font-size:10px;color:var(--faint)">empty — the first composed action persists here the moment it is signed, BEFORE it is submitted</div>'; return }
+    if (!list.length) { el.innerHTML = '<div style="font-size:10px;color:var(--faint)">empty: the first composed action persists here the moment it is signed, BEFORE it is submitted</div>'; return }
     el.innerHTML = list.map(function (e) {
       return '<div style="border:1px solid var(--line);border-radius:8px;padding:8px 10px;margin-bottom:6px;background:var(--well)">' +
         '<div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap">' +
@@ -4588,21 +4588,21 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
      degrades, gaps are gaps. ═══════════════════════════════════════════ */
   var CHAIN_MATRIX = [
     { family: 'EVM', name: 'ETH', unit: 'ETH', read: 'public JSON-RPC eth_getBalance + balanceOf, Multicall3 batching', sign: 'Tier 1/2/3 · EIP-1559 · Permit2', state: 'PROVEN' },
-    { family: 'EVM', name: 'Arbitrum', unit: 'ETH · ANT', read: 'same + Arbiscan/Blockscout keyless — the derived bzDiD address reads live on this page', sign: 'Tier 1/2/3 · Permit2', state: 'LIVE' },
-    { family: 'EVM', name: 'Base', unit: 'ETH · USDC', read: 'same; mainnet.base.org keyless — MiDi lives here, and the derived bzDiD address now READS and SIGNS on chain 8453: ETH plus Circle-native USDC at its true 6 decimals', sign: 'Tier 1/2/3 · EIP-155 first-party signer · the spend cap is enforced INSIDE the signer, not by the button', state: 'LIVE' },
-    { family: 'EVM', name: 'exSAT', unit: 'BTC', read: 'EVM reads once the public RPC is verified — no canonical Uniswap, our own GPL v3; xBTC = 1:1 staked BTC', sign: 'Tier 1/2/3', state: 'VERIFY' },
+    { family: 'EVM', name: 'Arbitrum', unit: 'ETH · ANT', read: 'same + Arbiscan/Blockscout keyless: the derived bzDiD address reads live on this page', sign: 'Tier 1/2/3 · Permit2', state: 'LIVE' },
+    { family: 'EVM', name: 'Base', unit: 'ETH · USDC', read: 'same; mainnet.base.org keyless. MiDi lives here, and the derived bzDiD address now READS and SIGNS on chain 8453: ETH plus Circle-native USDC at its true 6 decimals', sign: 'Tier 1/2/3 · EIP-155 first-party signer · the spend cap is enforced INSIDE the signer, not by the button', state: 'LIVE' },
+    { family: 'EVM', name: 'exSAT', unit: 'BTC', read: 'EVM reads once the public RPC is verified: no canonical Uniswap, our own GPL v3; xBTC = 1:1 staked BTC', sign: 'Tier 1/2/3', state: 'VERIFY' },
     { family: 'EVM', name: 'Vaulta', unit: 'A', read: 'native EOS-line APIs through the adapter contract on this page', sign: 'bzDiD K1 or passkey · firmware ✓', state: 'LIVE' },
     { family: 'EVM', name: 'stables', unit: 'USDC & kin', read: 'ERC-20 reads on every EVM rail + SPL + HBD on Hive', sign: 'per family · token units, never fiat itemization', state: 'PROVEN' },
     { family: 'Bitcoin', name: 'BTC', unit: 'BTC', read: 'Esplora/Blockbook/Electrum UTXOs; mempool.space keyless; operator bitcoind for sovereignty', sign: 'firmware ✓ · silent payments receive (sp1q default posture) · a native-segwit P2WPKH receive address derives in this tab from the same soul, proven against the published BIP-173 and BIP-84 vectors; the spending path stays unwired', state: 'PROVEN' },
-    { family: 'Bitcoin', name: 'Lightning', unit: 'sats', read: 'BOLT-11 invoices AND BOLT-12 offers decode LOCALLY in this tab — amount, payment hash, expiry, issuer; no node contacted, nobody told what you are about to pay', sign: 'the sats cap speaks on the decoded amount; paying rides an NWC connection whose budget lives at the hub (1000 sat/day, live) and whose live leg is parked at a relay ACL — tools/ln-rail/README.md', state: 'VERIFY' },
-    { family: 'Independent', name: 'Solana', unit: 'SOL', read: 'public getBalance/getTokenAccountsByOwner (rate-limited) → operator RPC', sign: 'firmware ✓ · public RPC is SERVICE — degrade gracefully · a receive address derives in this tab from the same soul (ed25519 to base58); the spending path stays unwired', state: 'VERIFY' },
-    { family: 'Independent', name: 'Hive', unit: 'HIVE · HBD', read: 'condenser getAccounts → HIVE/HBD/HP/RC, keyless — reads live on this page', sign: 'active-key transfers · firmware ✓', state: 'LIVE' },
-    { family: 'Independent', name: 'Zano', unit: 'ZANO', read: 'native daemon/API — privacy chain, reads may be per-output', sign: 'firmware ✓', state: 'VERIFY' },
-    { family: 'Hard tail', name: 'Bitcoin Cash', unit: 'BCH', read: 'Electrum/Blockbook, cashaddr', sign: 'FIRMWARE GAP — BCH sighash differs from BTC', state: 'GAP' },
-    { family: 'Hard tail', name: 'Zcash', unit: 'ZEC', read: 't-addr via lightwalletd; UA/z-addr by VIEW KEY — same scanner shape as silent payments', sign: 'FIRMWARE GAP — shielded signing is local-heavy', state: 'GAP' },
-    { family: 'Hard tail', name: 'Monero', unit: 'XMR', read: 'view-only wallet rpc, private view key never leaves the client', sign: 'FIRMWARE GAP — cold files or Tier 1/2 software keys', state: 'GAP' },
-    { family: 'Hard tail', name: 'Autonomi', unit: 'ANT', read: 'antd/CLI wallet reads — REST routes unpublished upstream, verify against the live daemon, never guess', sign: 'keypair per tier', state: 'VERIFY' },
-    { family: 'Hard tail', name: 'Arweave', unit: 'AR', read: 'gateway GraphQL winston, multi-gateway rotation — never hard-code arweave.net', sign: 'native JWK Tier 1/2 · firmware ✓', state: 'VERIFY' }
+    { family: 'Bitcoin', name: 'Lightning', unit: 'sats', read: 'BOLT-11 invoices AND BOLT-12 offers decode LOCALLY in this tab: amount, payment hash, expiry, issuer; no node contacted, nobody told what you are about to pay', sign: 'the sats cap speaks on the decoded amount; paying rides an NWC connection whose budget lives at the hub (1000 sat/day, live) and whose live leg is parked at a relay ACL (tools/ln-rail/README.md)', state: 'VERIFY' },
+    { family: 'Independent', name: 'Solana', unit: 'SOL', read: 'public getBalance/getTokenAccountsByOwner (rate-limited) → operator RPC', sign: 'firmware ✓ · public RPC is SERVICE: degrade gracefully · a receive address derives in this tab from the same soul (ed25519 to base58); the spending path stays unwired', state: 'VERIFY' },
+    { family: 'Independent', name: 'Hive', unit: 'HIVE · HBD', read: 'condenser getAccounts → HIVE/HBD/HP/RC, keyless: reads live on this page', sign: 'active-key transfers · firmware ✓', state: 'LIVE' },
+    { family: 'Independent', name: 'Zano', unit: 'ZANO', read: 'native daemon/API: privacy chain, reads may be per-output', sign: 'firmware ✓', state: 'VERIFY' },
+    { family: 'Hard tail', name: 'Bitcoin Cash', unit: 'BCH', read: 'Electrum/Blockbook, cashaddr', sign: 'FIRMWARE GAP: BCH sighash differs from BTC', state: 'GAP' },
+    { family: 'Hard tail', name: 'Zcash', unit: 'ZEC', read: 't-addr via lightwalletd; UA/z-addr by VIEW KEY (same scanner shape as silent payments)', sign: 'FIRMWARE GAP: shielded signing is local-heavy', state: 'GAP' },
+    { family: 'Hard tail', name: 'Monero', unit: 'XMR', read: 'view-only wallet rpc, private view key never leaves the client', sign: 'FIRMWARE GAP: cold files or Tier 1/2 software keys', state: 'GAP' },
+    { family: 'Hard tail', name: 'Autonomi', unit: 'ANT', read: 'antd/CLI wallet reads: REST routes unpublished upstream, verify against the live daemon, never guess', sign: 'keypair per tier', state: 'VERIFY' },
+    { family: 'Hard tail', name: 'Arweave', unit: 'AR', read: 'gateway GraphQL winston, multi-gateway rotation, never hard-code arweave.net', sign: 'native JWK Tier 1/2 · firmware ✓', state: 'VERIFY' }
   ];
   (function renderMatrix() {
     var STATE_COLORS = { LIVE: 'var(--leaf)', PROVEN: 'var(--cyan)', VERIFY: 'var(--violet)', GAP: 'var(--amber)', STUDY: 'var(--dim)' };
@@ -4618,7 +4618,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     $('matrix-body').innerHTML = families.map(function (f) {
       var rows = CHAIN_MATRIX.filter(function (c) { return c.family === f });
       return '<div style="margin-bottom:10px">' +
-        '<div style="font-size:9.5px;color:var(--faint);letter-spacing:.09em;margin-bottom:5px">' + f + ' family — ' + rows.length + ' rail' + (rows.length === 1 ? '' : 's') + '</div>' +
+        '<div style="font-size:9.5px;color:var(--faint);letter-spacing:.09em;margin-bottom:5px">' + f + ' family: ' + rows.length + ' rail' + (rows.length === 1 ? '' : 's') + '</div>' +
         rows.map(function (c) {
           return '<div style="border:1px solid var(--line);border-radius:8px;padding:8px 10px;margin-bottom:5px;background:var(--well)">' +
             '<div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;align-items:baseline">' +
@@ -4905,7 +4905,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
     $('cap-view').innerHTML=units.length?units.map(function(u){
       var used=capUsed(u);
       return u+': <b>'+caps[u]+'</b>/day · '+used.toFixed(4)+' signed today'+(used>=caps[u]?' — <b style="color:var(--amber)">cap hit</b>':'');
-    }).join(' · '):'unset — no limit';
+    }).join(' · '):'unset: no limit';
   }
   /* ── capAssert IS THE CAP. It THROWS, and it is called from inside the
      signing primitives themselves — not from the buttons. That is the whole
@@ -5350,7 +5350,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
       CORE=c;
       var b=$('core-badge');
       if(c){
-        b.innerHTML='<span style="color:var(--leaf)">⚙ first-party Rust core armed</span> (bnr-keys.wasm — self-test passed)';
+        b.innerHTML='<span style="color:var(--leaf)">⚙ first-party Rust core armed</span> (bnr-keys.wasm, self-test passed)';
         if(MPRK){deriveK1();renderForge();checkBridge()}
       } else {
         b.innerHTML='<span style="color:var(--dim)">core: vendored eosjs lane (Rust core unavailable here)</span>';
@@ -5478,7 +5478,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   async function check(){
     var raw=$('vlt-secret').value, mine=++checkSeq;
     var el=$('vlt-check');
-    if(!raw.trim()){ el.textContent='— nothing entered —'; el.style.color='var(--dim)'; return null }
+    if(!raw.trim()){ el.textContent='nothing entered'; el.style.color='var(--dim)'; return null }
     var type=$('vlt-type').value, res;
     if(type==='note'){ el.textContent='plain note — stored as typed, not validated'; el.style.color='var(--dim)'; return {type:'note'} }
     if(type==='auto')      res=await V.detect(raw);
@@ -5509,7 +5509,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   function clearForm(){
     $('vlt-secret').value='';$('vlt-label').value='';$('vlt-chain').value='';
     $('vlt-bip39pass').value='';$('vlt-type').value='auto';
-    var c=$('vlt-check'); if(c){c.textContent='— nothing entered —';c.style.color='var(--dim)'}
+    var c=$('vlt-check'); if(c){c.textContent='nothing entered';c.style.color='var(--dim)'}
   }
   $('vlt-clear').onclick=clearForm;
 
@@ -5675,7 +5675,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
   window.__vaultRepaint=paint;
   paint();
   if(V.exists()) say('a sealed vault is held in this browser — unlock it to see inside','var(--dim)');
-  else say('no vault on this browser yet — create one, or import a vault file','var(--dim)');
+  else say('no vault on this browser yet: create one, or import a vault file','var(--dim)');
 })();
 </script>
 <script>
