@@ -764,6 +764,49 @@ jobs:
   # (≈200 browser cases + the meter at 3 registers × 31 pages) behind the gate, which pushed the node
   # job past its 20-min hang cap (run 36234571171: every step green, cancelled at the cap mid-battery).
   # The cap stays the cap; the batteries split instead, so each job keeps its own bound.
+  wallet:
+    # THE WALLET, IN ALL THREE REGISTERS (2026-09-27). Until this job, none of
+    # the wallet's browser suites ran in CI: the six pipeline batteries and the
+    # three-grammars gate were green only where a seat ran them by hand. A
+    # register never changes what a person may do, so every battery runs once
+    # per register (WALLET_REG, e2e/wallet-register-pin.mjs): cypherpunk with
+    # the pipeline open at once, new bee and raver in the reader's own
+    # "everything" view. Each step runs all six and fails at the end, so one red
+    # battery never hides the others.
+    timeout-minutes: 30
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22
+      - name: shared setup — install (exempt from always())
+        working-directory: e2e
+        run: |
+          npm ci
+          npx playwright --version
+          npx playwright install --with-deps chromium
+      - name: Wallet batteries in cypherpunk (fund, vault, matrix, arweave, signer, adapter)
+        if: always()
+        run: |
+          rc=0
+          for f in fund vault matrix arweave signer adapter; do WALLET_REG=cypherpunk node e2e/wallet-$f.mjs || rc=1; done
+          exit $rc
+      - name: Wallet batteries in new bee, the everything view (fund, vault, matrix, arweave, signer, adapter)
+        if: always()
+        run: |
+          rc=0
+          for f in fund vault matrix arweave signer adapter; do WALLET_REG=bee node e2e/wallet-$f.mjs || rc=1; done
+          exit $rc
+      - name: Wallet batteries in raver, the everything view (fund, vault, matrix, arweave, signer, adapter)
+        if: always()
+        run: |
+          rc=0
+          for f in fund vault matrix arweave signer adapter; do WALLET_REG=raver node e2e/wallet-$f.mjs || rc=1; done
+          exit $rc
+      - name: Wallet registers gate — three grammars, measured (dress contract, content, deep links, history)
+        if: always()
+        run: node e2e/wallet-registers.mjs
   eternal:
     timeout-minutes: 20
     runs-on: ubuntu-latest
