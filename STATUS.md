@@ -32,6 +32,16 @@ choice is deliberate:
 Counts follow the same rule: a number is stated as the command that produces
 it — currently `cargo test --workspace` → **179 passed; 1 ignored**.
 
+- `2026-09-27` — **Proof-lights docket amended to the offline path of #250.**
+  Founder review corrected the docket in two places. The Shields switch
+  removes only the Dynamic and Endpoint routes (`core/server/server.js`);
+  other services, such as github-license, still fetch, so "Shields fetches
+  nothing" was wrong. The public-Endpoint and self-hosted phases are
+  withdrawn in favour of: measure, validate evidence, derive, verify, render
+  locally, publish same-origin. Adds historical measurement versus live
+  status, and the git blob as locator versus a sha3-256 commitment. Records
+  the founder rulings: a dedicated CI-attestation key, no badge server,
+  text first. Dispatch: `docs/dispatches/2026-09-27-proof-lights-docket-amendment.md`.
 - `2026-09-27` — **Proof-lights docket: badges derived from signed state.**
   `dockets/PROOF_LIGHTS_shields_badges.md` makes status badges a projection of
   a signed, expiring, per-commit status document in which every claim names
