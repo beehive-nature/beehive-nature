@@ -43,9 +43,12 @@ the bootloader wipes it.
 ## 3. Auditor pairing (the ongoing E4 evidence)
 
 1. Install **Auditor** in the **owner** profile. That device is the *auditee*.
-2. Pair it with a second device that runs Auditor as the *auditor*. Scanning
-   the QR code pins the auditee's persistent attestation key on first use
-   (TOFU).
+2. Pair it with a **second phone** that runs Auditor as the *auditor*. This
+   is the permanent auditor (founder ruling, 2026-09-27), not a verifier
+   service on the oracle box. Scanning the QR code pins the auditee's
+   persistent attestation key on first use (TOFU). The auditor phone holds
+   the only record of that pinned key, so keep it physically separate from
+   the handset, and treat its loss as a re-pairing event.
 3. Turn on scheduled remote verification, the same shape as attestation.app,
    and re-attest before sensitive operations (T3 §2 cadence).
 4. The Beehive verifier treats the GrapheneOS verified-boot key as a
@@ -98,8 +101,9 @@ Rules that make the layout mean something:
 
 ## 6. Open questions for the founder
 
-1. Which second device is the permanent auditor: a second phone, or a
-   verifier service on the oracle box?
+1. ~~Which second device is the permanent auditor?~~ **Ruled 2026-09-27: a
+   second phone.** Remote verification through a Beehive verifier (T3 §2) is
+   still a separate, later lane.
 2. Does Profile 3 get sandboxed Play at all, or do lab builds have to work
    without it?
 3. Which Beehive apps are allowed at T4 on this handset on day one?
