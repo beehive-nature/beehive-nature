@@ -322,3 +322,22 @@ This is the copy a voucher lookup opens: the `wl.vc.*` keys and the runtime stri
 - The voucher's heading and cypherpunk intro (`wl.vh2` "THE VOUCHER", "DERIVED") belong to the next follow-up, heading capitals.
 - These cells are still untranslated English: `wl.vc.memo1` in fr, zh, th, lv, hi and tr; `wl.vc.itemized` in gd, tt and sa; `wl.vc.label.a` in gd, tt and sa; `wl.vc.usdc.nomemo` in gd, lv, tt and sa.
 - Translation defects outside punctuation remain: th nomemo "เคครดิต", tr "balı adresiniz", fi nomemo "tällää", hu nomemo "jóváírást jóváír".
+
+## 15 · follow-up 3: the keyed headings read as words (2026-09-27)
+
+The four keyed wallet headings still shouted in capitals, in English and in almost every tongue: `wl.vh2` ("THE VOUCHER: …"), `wl.insc.h2` ("INSCRIPTIONS: …"), `wl.h.summary` ("SUMMARY") and `wl.h.outbox` ("…persist here BEFORE they submit"). New bee has read its own plain headings since §12c. These keyed ones are what cypherpunk, and bee's engineering one tap deep, still show.
+
+- **4 keys, 73 cells changed.** Every shouted word is lowercased. Scripts without letter case needed nothing.
+  - German keeps its noun capitals: der Gutschein, Inschriften, Zusammenfassung, Bytes.
+  - Turkish gets its dotless ı (yazıtlar).
+  - The HTML fallbacks follow the English.
+- **Gate §4g (new).** No visible section heading shouts, in cypherpunk (every keyed heading open) or in bee's "everything" view. Tickers are excepted, and so are `SPEC-…` identifiers, which are the canonical names of spec documents (peer's `SPEC-PEER-FUNNEL-1`).
+  - Run against main, it fails on exactly `INSCRIPTIONS` and `THE VOUCHER`, so it is not vacuous.
+  - On this branch: wallet-registers 112/112.
+- **Left as they are, and why:** the receipt ladder's stage labels (`wl.ld.*`: BUILD, SIGN, PERSIST, SUBMIT, CONFIRM, SUBMITTED, CONFIRMED) and cypherpunk's own intro paragraphs (`wl.reg.voucher.cypher` "DERIVED", `wl.reg.connect.cypher` "AND"). In cypherpunk, capitals are a signal channel (a state, a verb of the pipeline). They are not decoration and not headings, so this follow-up does not touch them.
+
+**Carried from the #252 review (non-blocking, open and named):**
+- Three more translation defects in voucher copy: he "הממוא"/"הממואר" (memo misspelt, inconsistently), nb "denne eksakte memoet" (should be "dette"), de "auf dieser Rails".
+- §14's untranslated list should also name `wl.vc.label.usdc` in gd, tt and sa.
+- §4e's "fails on exactly those strings" holds for the strings visible in the panel. The empty-receipts line (inside a closed note), both "unreachable" messages and the placeholder are correct by inspection, not measured.
+- fr uses a plain space before ":", not a narrow no-break space. This is cosmetic.
