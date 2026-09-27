@@ -16,6 +16,10 @@
 //                        permanent property of the repository.
 //   CHECKED IN CI        `--check` re-renders every status document and fails if
 //                        the committed SVG differs: a hand-edited badge cannot ship.
+//   EVIDENCE IN GIT      the instrument output is committed as <name>.source.json and
+//                        the check verifies its git blob id equals the document's
+//                        source_blob, so revision -> output -> document -> SVG resolves
+//                        entirely inside the repository.
 //   NOT SIGNED YET       the status document carries a `signature` slot; it stays
 //                        null until the founder's key signs it. Unsigned is stated,
 //                        never implied.
@@ -96,7 +100,17 @@ if (mode === '--check') {
     try { have = await readFile(svgPath, 'utf8'); } catch {}
     const ok = have === want;
     const rev = /^[0-9a-f]{40}$/.test(doc.revision || '');
-    console.log(`${ok && rev ? 'PASS' : 'FAIL'} ${f}: "${doc.label} | ${doc.message}" ${ok ? 'svg == render(json)' : 'svg DIFFERS from render(json)'}${rev ? '' : ' · revision is not a full sha'}${doc.signature ? '' : ' · unsigned (stated)'}`);
+    // the evidence link: when the instrument output is committed beside the document as
+    // <name>.source.json, its git blob id must equal the document's source_blob — the chain
+    // repo revision -> instrument output -> status document -> SVG then resolves entirely in git.
+    let src = 'no source file committed';
+    try {
+      const bytes = await readFile(join(STATUS_DIR, f.replace(/\.json$/, '.source.json')));
+      const id = createHash('sha1').update(`blob ${bytes.length}\0`).update(bytes).digest('hex');
+      src = id === doc.source_blob ? 'source blob matches' : `SOURCE BLOB MISMATCH (${id.slice(0, 7)} != ${String(doc.source_blob).slice(0, 7)})`;
+      if (id !== doc.source_blob) fail++;
+    } catch {}
+    console.log(`${ok && rev ? 'PASS' : 'FAIL'} ${f}: "${doc.label} | ${doc.message}" ${ok ? 'svg == render(json)' : 'svg DIFFERS from render(json)'}${rev ? '' : ' · revision is not a full sha'} · ${src}${doc.signature ? '' : ' · unsigned (stated)'}`);
     if (!ok || !rev) fail++;
   }
   console.log(`proof lights: ${n - fail}/${n} badges are exactly what their status documents render`);
