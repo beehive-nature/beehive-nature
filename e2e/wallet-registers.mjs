@@ -768,6 +768,15 @@ ok('on a phone the first screen holds a different KIND of thing: bee choices, ra
       if (reg === 'raver') { await page.click(`#wl-cards .wlr-card[data-wl-card-for="${id}"]`); await page.waitForTimeout(300); }
       if (part === 'voucher') { await page.fill('#vc-key', 'gatekey'); await page.click('#vc-go'); await page.waitForFunction(() => document.getElementById('vc-panel').style.display === 'block', null, { timeout: 5000 }); }
       r[part] = await seen(page, '#' + id);
+      // the voucher panel a lookup opens, read as words: no dash, no capitals-as-shout
+      // (its heading is the keyed-heading casing follow-up, measured elsewhere)
+      // (a lone "—" is the page's empty-value placeholder, which is data, not punctuation)
+      if (part === 'voucher') r.voucherCopy = await page.evaluate(() => {
+        const ORACLE = '#vc-u-ref,#vc-a-dest,#vc-a-memo,#vc-u-dest,#vc-src,#vc-balance';   // values the oracle returns: data, not the wallet's copy
+        const s = document.getElementById('vc-panel'), w = document.createTreeWalker(s, NodeFilter.SHOW_TEXT); const out = []; let n;
+        while ((n = w.nextNode())) { const p = n.parentElement, t = n.textContent.trim(); if (!t || t === '—' || !p.getClientRects().length || p.closest('details:not([open])') || p.closest(ORACLE)) continue; out.push(t); }
+        return out;
+      });
       if (reg !== 'cypherpunk') { await page.click(`#${id} .wl-more`); await page.waitForTimeout(150); r[part + 'Tap'] = await seen(page, '#' + id); await page.click(`#${id} .wl-more`); await page.waitForTimeout(100); }
       if (reg === 'raver') { await page.click(`#wl-cards .wlr-card[data-wl-card-for="${id}"]`); await page.waitForTimeout(150); }
     }
@@ -792,6 +801,15 @@ ok('on a phone the first screen holds a different KIND of thing: bee choices, ra
   ok('in bee and raver each one is ONE tap away (the section\'s own toggle, the footer\'s summary): moved, never deleted',
     far('bee').length === 0 && far('raver').length === 0, `bee ${far('bee').join(', ') || 'all reached'} · raver ${far('raver').join(', ') || 'all reached'}`);
   const lost = reg => parts.flatMap(p => PLAIN[p].filter(m => [390, 1280].some(W => !resW[W][reg][p].includes(m))).map(m => p + ':' + m));
+  // tickers and names are words, not shouting
+  const VC_TICKERS = new Set(['USDC', 'ETH', 'ANT', 'HIVE', 'HBD', 'BTC', 'BNR', 'EVM', 'HTTP', 'A']);
+  const vcBad = [];
+  for (const W of [390, 1280]) for (const reg of REGS) for (const t of resW[W][reg].voucherCopy || []) {
+    const shout = (t.match(/\b[A-Z]{2,}\b/g) || []).filter(x => !VC_TICKERS.has(x));
+    if (/[—–]/.test(t) || shout.length) vcBad.push(`${W} ${reg}: ‹${t.slice(0, 50)}›`);
+  }
+  ok('the voucher panel a lookup opens reads as words in every register at 390 and 1280: no dash as punctuation, no capitals-as-shout (a lone "—" empty value and the oracle’s own values excepted)',
+    vcBad.length === 0 && REGS.every(r => (resW[390][r].voucherCopy || []).length > 0), vcBad.slice(0, 4).join(' · ') || 'clean');
   ok('the plain facts show at rest in every register: the voucher balance, the memo warning, the buy button, the checkout state, the footer\'s name and its way in',
     REGS.every(r => lost(r).length === 0), REGS.map(r => `${r} ${lost(r).join(', ') || 'all shown'}`).join(' · '));
 }

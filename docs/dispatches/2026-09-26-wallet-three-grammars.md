@@ -301,3 +301,24 @@ The founder's bar: `F1 PASS · F2 PASS · color-free audit PASS · wallet gates 
 | adapter | 28/28 | 28/28 | 28/28 |
 
 `lint-ci-shape`: 95/95 suite steps guarded.
+
+## 14 · follow-up 2: the voucher panel reads as words (2026-09-27)
+
+This is the copy a voucher lookup opens: the `wl.vc.*` keys and the runtime strings the voucher panel writes. It had dashes used as punctuation and capitals used as shouting ("with this EXACT memo (the memo IS the binding —", "A · Vaulta — gasless", "itemized — every receipt, every line", "no metered charges yet — top up…", "the oracle is unreachable — try again").
+
+- **Keys, 5 × 29 cells.** `memo1`, `usdc.nomemo`, `itemized`, `label.a` and `label.usdc`.
+  - A dash becomes a colon (`：` in zh and ja, French's spaced ` : `), or `·` in the two rail labels.
+  - A shouted word is lowercased in every tongue: ЭТОЙ ТОЧНОЙ, GENAUEN, IST, EXACTE, EKSAKTE, ÄR and so on.
+  - The memo warning keeps its weight through the bold "no memo, no credit, money lost", not through capitals.
+  - Four cells were rewritten by hand: tt (its "is" dash, rephrased), cs and fi (their grammar was broken), and hu (a typo, "memóMaga").
+  - Cells that were untranslated English follow the new English.
+- **Runtime strings in `wallet.html`.** The rate line, the empty receipts line, both "unreachable" messages, and the meter-key placeholder.
+- **Left as data:** a lone "—" that page logic sets for an empty value, and the "—" number placeholder in `wl.vc.usdc.rate`, which the oracle's rate replaces before the panel is ever shown.
+- **The gate (§4e).** After a real lookup against the fixture oracle, the panel's visible text must carry no dash and no capital-as-shout, in all three registers at 390 and 1280. A lone "—" empty value and the oracle's own values (addresses, memo, rate reference, source) are excepted.
+  - Run against main's old copy, the check fails on exactly the strings above, so it is not vacuous.
+  - On this branch it passes: wallet-registers 111/111.
+
+**Still open and named:**
+- The voucher's heading and cypherpunk intro (`wl.vh2` "THE VOUCHER", "DERIVED") belong to the next follow-up, heading capitals.
+- These cells are still untranslated English: `wl.vc.memo1` in fr, zh, th, lv, hi and tr; `wl.vc.itemized` in gd, tt and sa; `wl.vc.label.a` in gd, tt and sa; `wl.vc.usdc.nomemo` in gd, lv, tt and sa.
+- Translation defects outside punctuation remain: th nomemo "เคครดิต", tr "balı adresiniz", fi nomemo "tällää", hu nomemo "jóváírást jóváír".
