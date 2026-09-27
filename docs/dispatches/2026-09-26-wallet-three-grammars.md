@@ -332,7 +332,7 @@ The four keyed wallet headings still shouted in capitals, in English and in almo
   - Turkish gets its dotless ı (yazıtlar).
   - The HTML fallbacks follow the English.
 - **Gate §4g (new).** No visible section heading shouts, in cypherpunk (every keyed heading open) or in bee's "everything" view. Tickers are excepted, and so are `SPEC-…` identifiers, which are the canonical names of spec documents (peer's `SPEC-PEER-FUNNEL-1`).
-  - Run against main, it fails on exactly `INSCRIPTIONS` and `THE VOUCHER`, so it is not vacuous.
+  - Run against main, it fails on all four headings (`INSCRIPTIONS`, `THE VOUCHER`, `BEFORE`, `SUMMARY`), so it is not vacuous. (Corrected in §16: this line first said "exactly `INSCRIPTIONS` and `THE VOUCHER`".)
   - On this branch: wallet-registers 112/112.
 - **Left as they are, and why:** the receipt ladder's stage labels (`wl.ld.*`: BUILD, SIGN, PERSIST, SUBMIT, CONFIRM, SUBMITTED, CONFIRMED) and cypherpunk's own intro paragraphs (`wl.reg.voucher.cypher` "DERIVED", `wl.reg.connect.cypher` "AND"). In cypherpunk, capitals are a signal channel (a state, a verb of the pipeline). They are not decoration and not headings, so this follow-up does not touch them.
 
@@ -341,3 +341,30 @@ The four keyed wallet headings still shouted in capitals, in English and in almo
 - §14's untranslated list should also name `wl.vc.label.usdc` in gd, tt and sa.
 - §4e's "fails on exactly those strings" holds for the strings visible in the panel. The empty-receipts line (inside a closed note), both "unreachable" messages and the placeholder are correct by inspection, not measured.
 - fr uses a plain space before ":", not a narrow no-break space. This is cosmetic.
+
+## 16 · follow-up 4: the bPay law line follows its English (2026-09-27)
+
+The English of `wl.bpay.law` changed to "the chooser comes first: every figure is carried from a live, keyless network quote; this panel renders, it cannot spend". All 28 other tongues still opened with "Phase A:" (Фаза A, Fase A, 阶段 A, A fázis …), a label the page no longer shows. A reader in any tongue but English was told about a phase, not about the chooser.
+
+- **28 cells redrafted** to follow the current English: the choice (who can get this) comes first, the figures come from a live keyless quote, and the panel cannot spend.
+- **Defects fixed in the same cells:**
+  - fi had a stray underscore ("verkko_tarjouksesta").
+  - nb had the wrong gender ("en … nettverkstilbud") and the spelling "nøkkeløs".
+  - tt rendered "live" as a word that does not mean live, and put "only" in the wrong place.
+  - gd used "panuel"; it now uses "panail", the corpus's most common form.
+  - th rendered "live" as จริง ("real"); it now says เรียลไทม์.
+  - Smaller improvements in the same cells: ur spelling (لائیو), ru/uk now name the price quote (цены/ціни), zh 显示 instead of 渲染 ("render" in the graphics sense), de "zeigt nur an".
+- **Gate §4h (new).** It is a corpus check in `wallet-registers`. No `wl.bpay.law` cell may carry a standalone capital A, Latin or Cyrillic (the phase letter, in every script), and no cell may fall back to the English. Run against main it fails in all 28 tongues, so it is not vacuous.
+- **Corpus cache key** `lang-corpus.json?v=28 → v=29` in `surfaces/lang.js`. #252 and #254 changed the corpus without bumping it, so this bump also carries their cells to returning readers.
+
+**Carried from the #254 review (non-blocking, open and named):**
+- §15 misreported the main run as failing on "exactly" two headings. Measured, it fails on all four; §15 is corrected above. #254's commit message carries the same understatement and stays as history.
+- §4g only sees ASCII capitals, and only in English. A Cyrillic or accented shout in another tongue would pass it; the reviewer's corpus scan covers that gap for now.
+- lv `wl.h.summary` "kopsavējums" may be a mistranslation. The usual Latvian word is "kopsavilkums". It was unchanged apart from casing, and it wants a native check.
+- fr still uses a plain space before ":" (cosmetic, already named in §15).
+
+**Named by the #255 review (non-blocking, open):**
+- An unrelated cs cell elsewhere reads "Pole z živého ABI registru"; Czech wants "ze živého". This follow-up does not touch it.
+- da "levende" and fi "elävä" read as "living" rather than "live". The same choice runs through the rest of the corpus.
+- hi चुनाव, fa انتخاب, tr seçim, tt сайлау and hu választás can also mean "election". In context they are fine.
+- §4h catches a Latin or Cyrillic capital A and an exact English fallback. It would miss a phase label written another way (阶段一, a bare "Phase").
