@@ -277,3 +277,27 @@ The founder's bar: `F1 PASS · F2 PASS · color-free audit PASS · wallet gates 
 - Dashes and capitals in keyed runtime copy reached only after an action: the voucher panel's `wl.vc.*` ("the memo IS the binding —", "A · Vaulta — gasless").
 - The keyed headings' casing in the corpus. Bee no longer shows those headings at rest; cypherpunk still does.
 - The stale "Phase A" label in 28 tongues.
+
+## 13 · follow-up 1: the wallet's suites run in CI, in all three registers (2026-09-27)
+
+**The finding was larger than the follow-up said.** The merge review of #237 noted that the six pipeline batteries were pinned to cypherpunk, so CI "no longer" exercised the vault, signer and fund flows in bee or raver. In fact CI had never run any of them. `tests.yml` named none of the six batteries, nor `e2e/wallet-registers.mjs`, and no glob picked them up. Every wallet receipt in this dispatch was a hand run, and so was the "CI 12/12" on #237's merge head: that covered the other suites, not these. Nothing in the wallet was ever gated remotely.
+
+**What changed:**
+- **The pin.** `e2e/wallet-register-pin.mjs` is one shared pin, replacing five copies (and adding the matrix battery, which had no pin and silently ran in bee). `WALLET_REG` selects the register, and cypherpunk is the default, so a plain run behaves as before. `bee` and `raver` open the reader's own "everything" view: the bee row or raver glyph that the page remembers in `sessionStorage['wl.view']`. Notes stay folded, as a reader has them.
+- **The fund battery, two register-aware fixes.** Neither is loosened.
+  - "banner names environment": in bee and raver the environment is engineering, folded one tap away (§12b). The check now taps the section's toggle, then requires the same text.
+  - Section F's dress and fold laws are about one register each (bee's home fold, cypherpunk's pipeline fold). Their contexts now open through `newContextOwnRegister` and set that register explicitly, so the pin no longer overrides them.
+- **CI.** A new `wallet` job (30-minute cap, beside `node`, which already runs close to its 20-minute cap) runs the six batteries once per register, then the three-grammars gate. Each step runs all six and fails at the end.
+
+**Receipts (local, each read on its own line):**
+
+| battery | cypherpunk | new bee | raver |
+|---|---|---|---|
+| fund | 94/94 | 94/94 | 94/94 |
+| vault | 35/35 | 35/35 | 35/35 |
+| matrix | 11/11 | 11/11 | 11/11 |
+| arweave | 22/22 | 22/22 | 22/22 |
+| signer | 105/105 | 105/105 | 105/105 |
+| adapter | 28/28 | 28/28 | 28/28 |
+
+`lint-ci-shape`: 95/95 suite steps guarded.

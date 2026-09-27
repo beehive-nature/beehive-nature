@@ -9,6 +9,7 @@ import { readFile } from 'node:fs/promises';
 import { extname, join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright';
+import { pinRegister } from './wallet-register-pin.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(HERE, '..');
@@ -29,6 +30,7 @@ const ok = (name, cond, detail) => {
 };
 
 const browser = await chromium.launch({ args: ['--no-sandbox'] });
+pinRegister(browser);   // WALLET_REG (see wallet-register-pin.mjs)
 try {
   /* A · the sixteen, rendered from data, counts computed */
   console.log('A · sixteen rails from data:');
