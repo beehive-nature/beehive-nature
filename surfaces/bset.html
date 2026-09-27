@@ -1170,7 +1170,7 @@ render(SET);
     var segs=[['all',n],['ru',D.counted.ru],['uk',D.counted.uk],['other',D.counted.other]];
     $('etSeg').innerHTML=segs.map(function(s){return '<button type="button" data-f="'+s[0]+'" aria-pressed="'+(C.filter===s[0]?'true':'false')+'">'+s[0]+' '+s[1]+'</button>';}).join('');
     var list=D.tracks.filter(function(t){return C.filter==='all'||t.g===C.filter;}), shown=C.all?list:list.slice(0,10);
-    $('etRecords').innerHTML=shown.map(function(t){return '<tr><td class="n">'+t.n+'</td><td class="l">'+esc(t.lang)+'</td><td class="h">'+t.fnv+'</td><td class="t"><a href="'+esc(t.url)+'" target="_blank" rel="noopener noreferrer">'+esc(t.title)+'<small>'+esc(t.artist)+'</small></a></td></tr>';}).join('');
+    $('etRecords').innerHTML=shown.map(function(t){return '<tr><td class="n">'+t.n+'</td><td class="l">'+esc(t.lang)+'</td><td class="h">'+t.fnv+'</td><td class="t"><a href="'+esc(t.url)+'" target="_blank" rel="noopener noreferrer">'+esc(t.title)+'<small>'+esc(t.artist)+'</small><span class="et-sr"> '+esc(T('et.bset.newtab','(opens in a new tab)'))+'</span></a></td></tr>';}).join('');
     var more=$('etMore'); more.hidden=list.length<=10; more.setAttribute('aria-expanded',C.all?'true':'false');
     more.textContent=C.all?T('et.bset.c.fewer','show the first 10'):T('et.bset.c.all','show all {n}').replace('{n}',list.length);
     playLink($('etCySource'),D.playlist);

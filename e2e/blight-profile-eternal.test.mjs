@@ -132,6 +132,26 @@ test('bee: the button reads the page\'s own example; an unanswered chain ends ho
   assert.equal(errs.length, 0, 'no uncaught error when every host refuses: ' + errs.join(' | ')); await ctx.close();
 });
 
+test('a second address whose scan fails never inherits the first address\'s holdings, wall or picture', async () => {
+  const { ctx, p, errs } = await open('cypherpunk');
+  // the page as a successful first read leaves it: a held chip, a piece on the wall, the picture, the counters
+  await p.evaluate(() => {
+    document.getElementById('chips').innerHTML = '<span class="chip"><b>TRUFFI</b> · <span class="amt">1.5k</span> held</span>';
+    document.getElementById('wall').innerHTML = '<div class="piece in"><div class="art"><svg></svg></div><div class="lab"><b>TRUFFI</b> · <span>seed 7</span></div></div>';
+    document.getElementById('pfp').innerHTML = '<svg id="firstArt"></svg><div class="pfptag">profile picture · art they own</div>';
+    document.getElementById('st-tokens').textContent = '1'; document.getElementById('st-pieces').textContent = '1';
+  });
+  await p.fill('#addr', '0x1111111111111111111111111111111111111111'); await p.click('#go');
+  await until(p, 'failed'); await p.waitForTimeout(150);
+  const d = await p.evaluate(() => ({ D: window.__eternal.data, art: !!document.getElementById('firstArt'), cy: document.getElementById('etHoReceipt').textContent }));
+  assert.equal(d.D.short, '0x1111…1111');
+  assert.deepEqual(d.D.held, [], 'the first address\'s chips are not shown under the second');
+  assert.deepEqual(d.D.wall, [], 'nor its wall'); assert.equal(d.art, false, 'nor its picture');
+  assert.equal(d.D.tokens, 0); assert.equal(d.D.pieces, null);
+  assert.doesNotMatch(d.cy, /TRUFFI/);
+  assert.equal(errs.length, 0, errs.join(' | ')); await ctx.close();
+});
+
 test('raver, a chain that answers "nothing held": a short hold reads nothing, a full hold reads, and all three say so', async () => {
   const { ctx, p, errs, ext } = await open('raver', { chain: true });
   await p.locator('#etHoHold').scrollIntoViewIfNeeded();
