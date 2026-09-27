@@ -32,6 +32,15 @@ choice is deliberate:
 Counts follow the same rule: a number is stated as the command that produces
 it — currently `cargo test --workspace` → **179 passed; 1 ignored**.
 
+- `2026-09-27` — **`bnr-seal`: private storage envelope for signed receipts.**
+  Adds one mechanism: an allowlisted AEAD suite (XChaCha20-Poly1305, the same
+  crate x0x uses in `src/kv/encrypted.rs`) with a versioned header and an opaque
+  32-byte scope bound as associated data. It encrypts bytes that are already
+  signed and establishes no authority. Issuer, delegation, expiry and replay
+  stay with BNRoSe. `cargo test -p bnr-seal` → 14 passed. Two mutations were
+  caught: dropping the scope from the associated data, and a fixed nonce.
+  `cargo test --workspace --locked` → 1225 passed, 0 failed. Key custody and
+  rotation are not built. Dispatch: `docs/dispatches/2026-09-27-bnr-seal.md`.
 - `2026-09-06` — **Founder promotes Astra to lead; zCode review reconciled.**
   The ten-minute leash was delegated to Bash, not removed; review found the
   override ceiling too permissive and reduced both entry points to 600 seconds.

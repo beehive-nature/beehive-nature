@@ -1,0 +1,12 @@
+[package]
+name = "bnr-seal"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+description = "Private storage envelope for already-signed receipt bytes: one allowlisted AEAD suite (XChaCha20-Poly1305), versioned header, opaque scope bound as associated data"
+
+[dependencies]
+# The same AEAD crate and major version x0x uses for encrypted KV
+# (x0x/src/kv/encrypted.rs) — one construction across the estate, not a new one.
+chacha20poly1305 = { version = "0.10", default-features = false, features = ["alloc", "getrandom"] }
+zeroize = { workspace = true, features = ["alloc"] }
