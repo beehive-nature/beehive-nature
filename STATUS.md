@@ -32,6 +32,18 @@ choice is deliberate:
 Counts follow the same rule: a number is stated as the command that produces
 it — currently `cargo test --workspace` → **179 passed; 1 ignored**.
 
+- `2026-09-27` — **Proof-lights docket: badges derived from signed state.**
+  `dockets/PROOF_LIGHTS_shields_badges.md` makes status badges a projection of
+  a signed, expiring, per-commit status document in which every claim names
+  its source run. Built in three phases:
+  - P0: public Shields.io.
+  - P1: self-hosted Shields with Dynamic/Endpoint badges off. A verifier
+    checks the signature and expiry, then redirects to static badges. Source
+    shows a single switch disables both badge families.
+  - P2: claims derived from signed receipts.
+  Only machine-derived badges are allowed. Shields facts are pinned to
+  badges/shields@0a0ac0e. No code.
+  Dispatch: `docs/dispatches/2026-09-27-proof-lights-docket.md`.
 - `2026-09-27` — **Handset docket: Pixel 10a, GrapheneOS, three profiles.**
   `dockets/HANDSET_pixel10a_three_profile.md` sets up one phone to earn E4
   (relocked bootloader, Auditor pairing) and splits it into three profiles:
