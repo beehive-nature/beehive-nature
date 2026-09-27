@@ -59,6 +59,19 @@ function mockGateways(ctx, tally, txAnswer) {
 }
 
 const browser = await chromium.launch({ args: ['--no-sandbox'] });
+// THE THREE GRAMMARS (2026-09-26): new bee and raver open the wallet one task
+// at a time; this battery drives the PIPELINE, so its readers sit in
+// cypherpunk, where every section is open at once. A register never changes
+// what a person may do: e2e/wallet-registers.mjs proves every section is one
+// tap away in bee and raver, and the controls under test are the same nodes.
+{
+  const newContext = browser.newContext.bind(browser);
+  browser.newContext = async (opts) => {
+    const c = await newContext(opts);
+    await c.addInitScript(() => { try { localStorage.setItem('bregister', 'cypherpunk'); } catch (e) {} });
+    return c;
+  };
+}
 try {
   /* ── A · pinned serialization vectors (known-good; proven against the live
      node + arweave-js equivalence before pinning) ───────────────────────── */
@@ -159,6 +172,9 @@ try {
       await V.create('test-keypass-words-here', 'test-keypass-words-here');
       await V.addEntry({ type: 'arweave', secret: JSON.stringify(jwk), label: 'flow', chain: 'arweave' });
     });
+    // served off the kit's home, the page pins a sticky "real home" banner at the top: press the
+    // vault section where a reader can reach it, clear of that banner, never under it
+    await page.evaluate(() => window.scrollBy(0, document.getElementById('vault-sec').getBoundingClientRect().top - 240));
     await page.locator('#vault-sec').click({ position: { x: 8, y: 8 } }); // wakes the panel's vault hook
     await page.waitForFunction(() => /short by/.test(document.getElementById('arw-stat').textContent), null, { timeout: 8000 });
     await page.waitForTimeout(600);

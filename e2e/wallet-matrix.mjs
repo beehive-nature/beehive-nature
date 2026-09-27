@@ -43,8 +43,8 @@ try {
     ok('every chain name renders', namesOk, 'missing: ' + data.filter(c => !rendered.some(r => r.includes(c.name))).map(c => c.name).join(','));
     const families = await page.evaluate(() => Array.from(document.querySelectorAll('#matrix-body > div > div:first-child')).map(e => e.textContent));
     ok('four families sectioned (EVM · Bitcoin · Independent · Hard tail)',
-      families.length === 4 && /EVM family — 6 rails/.test(families[0]) && /Bitcoin family — 2 rails/.test(families[1]) &&
-      /Independent family — 3 rails/.test(families[2]) && /Hard tail family — 5 rails/.test(families[3]), families.join(' | ')); // the casing law: headers read as authored, no machine caps
+      families.length === 4 && /EVM family: 6 rails/.test(families[0]) && /Bitcoin family: 2 rails/.test(families[1]) &&
+      /Independent family: 3 rails/.test(families[2]) && /Hard tail family: 5 rails/.test(families[3]), families.join(' | ')); // the casing law: headers read as authored, no machine caps
     const pathCounts = await page.evaluate(() => ({
       read: (document.getElementById('matrix-body').innerText.match(/read /g) || []).length,
       sign: (document.getElementById('matrix-body').innerText.match(/sign /g) || []).length

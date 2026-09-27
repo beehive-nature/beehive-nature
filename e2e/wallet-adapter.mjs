@@ -132,6 +132,19 @@ const COMMIT_ARGS = { committer: 'banchor22222', epoch: '1000150', new_root: '0'
   prev_root: '0'.repeat(64), tree_size: '19', delta_id: '0'.repeat(64), forced_watermark: '1000150' };
 
 const browser = await chromium.launch({ args: ['--no-sandbox'] });
+// THE THREE GRAMMARS (2026-09-26): new bee and raver open the wallet one task
+// at a time; this battery drives the PIPELINE, so its readers sit in
+// cypherpunk, where every section is open at once. A register never changes
+// what a person may do: e2e/wallet-registers.mjs proves every section is one
+// tap away in bee and raver, and the controls under test are the same nodes.
+{
+  const newContext = browser.newContext.bind(browser);
+  browser.newContext = async (opts) => {
+    const c = await newContext(opts);
+    await c.addInitScript(() => { try { localStorage.setItem('bregister', 'cypherpunk'); } catch (e) {} });
+    return c;
+  };
+}
 try {
   /* ── 1 · describe + attach: two adapters, contract v1, vendored lane works
          inside the worker (the stack-law proof — present-but-inert is not ok) */
