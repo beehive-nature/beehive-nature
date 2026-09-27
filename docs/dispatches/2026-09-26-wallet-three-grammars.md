@@ -368,3 +368,20 @@ The English of `wl.bpay.law` changed to "the chooser comes first: every figure i
 - da "levende" and fi "elävä" read as "living" rather than "live". The same choice runs through the rest of the corpus.
 - hi चुनाव, fa انتخاب, tr seçim, tt сайлау and hu választás can also mean "election". In context they are fine.
 - §4h catches a Latin or Cyrillic capital A and an exact English fallback. It would miss a phase label written another way (阶段一, a bare "Phase").
+
+## 17 · follow-up 5: three ETERNAL fixes from the #248 review (2026-09-27)
+
+The Codex review of #248 found three defects in ETERNAL code that #241 shipped. They were outside #248's scope and were queued here. Each fix comes with a test that fails on main and passes on this branch.
+
+- **`surfaces/blight/profile.html`: a failed second scan no longer shows the first address's holdings.** `visit()` set the new shorthand and then returned early when every RPC host refused. That left the previous address's chips, wall, picture and counters under the new name, and the three fronts read all of these. The page now resets them to its first-paint state before every scan.
+  - Test: `blight-profile-eternal`, "a second address whose scan fails never inherits…".
+- **`surfaces/bqueenbee-live.html`: each reply is paired with its own question.** A non-ASCII question answers asynchronously, once the tongue corpus is read. If a newer question was asked before that answer landed, the fronts took "the last reply after the last question", which was the late one, and showed it as the newer question's answer.
+  - Every reply now carries its question's id (`data-qid`), and the fronts look it up by that id.
+  - Test: `bqueenbee-live-eternal`, "a reply is paired with its own question…". On main the card showed the Russian hemp answer under "Who are you?".
+  - Left as is: the chat itself still appends a late reply at the bottom. Only the fronts' pairing was wrong.
+- **`surfaces/bset.html`: every cypherpunk record link announces its new tab.** These are the YouTube links. They now use the same screen-reader notice (`et.bset.newtab`) as the rest of the page's external links.
+  - Test: `bset-eternal`, cypherpunk.
+
+**Carried from the #255 review (non-blocking, open and named):**
+- The `_meta.drafted` note for the bPay law line says "four cells had their own defects fixed". With the th sense fix, it is five.
+- §16 does not name nb "kun" → "bare" among the smaller improvements.
