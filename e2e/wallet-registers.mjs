@@ -857,6 +857,24 @@ ok('on a phone the first screen holds a different KIND of thing: bee choices, ra
     found.length === 0 && seenOpen.length >= 2 * 18, found.length ? found.slice(0, 5).join(' · ') : `${seenOpen.length} openings read clean`);
 }
 
+// 4g · THE HEADINGS READ AS WORDS: no visible section heading shouts in capitals, in
+// cypherpunk (every keyed heading open) and in new bee's "everything" view (its own
+// headings). Tickers and names a reader meets on any exchange are words, not shouting,
+// and so is a SPEC-… identifier: the canonical name of a spec document (docs/specs/).
+{
+  const TICKERS = new Set(['USDC', 'ETH', 'ANT', 'HIVE', 'HBD', 'HP', 'AR', 'BTC', 'BCH', 'ZEC', 'XMR', 'BNR', 'EVM', 'QR', 'A', 'RAM']);
+  const shouted = {};
+  for (const reg of ['cypherpunk', 'bee']) {
+    const { ctx, page } = await open(reg);
+    if (reg === 'bee') { await page.click('#wl-bee [data-wl-go="all"]'); await page.waitForTimeout(350); }
+    shouted[reg] = await page.evaluate(T => [...document.querySelectorAll('main>section[data-wl-task] h2')].filter(h => h.getClientRects().length)
+      .map(h => h.innerText.replace(/\s+/g, ' ').trim()).filter(t => (t.replace(/\bSPEC-[A-Z0-9-]+/g, '').match(/\b[A-Z]{2,}\b/g) || []).some(w => !T.includes(w))), [...TICKERS]);
+    await ctx.close();
+  }
+  ok('no visible section heading shouts in capitals, in cypherpunk (every keyed heading) or in new bee\'s everything view (tickers and SPEC-… document identifiers excepted)',
+    shouted.cypherpunk.length === 0 && shouted.bee.length === 0, `cypherpunk ${shouted.cypherpunk.join(' · ') || 'none'} · bee ${shouted.bee.join(' · ') || 'none'}`);
+}
+
 // 9b · bee's "show the details" is bee's: a register switch starts every section folded, and the toggle is not work
 {
   const { ctx, page } = await open('bee');
