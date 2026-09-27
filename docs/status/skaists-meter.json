@@ -1,9 +1,16 @@
 {
+ "schema": "proof-lights/status/2",
  "name": "skaists-meter",
  "label": "skaists meter",
  "instrument": "e2e/skaists-conformance.mjs",
  "ci_step": "Skaists — the standards meter (three-UI fronts score 100%)",
  "revision": "7d6808d87c6b78343e2471aa38581146f5aa6c03",
+ "measurement": {
+  "origin": "local",
+  "run_id": null,
+  "run_attempt": null
+ },
+ "measured_at": "2026-09-27T05:13:54.466Z",
  "surfaces": 107,
  "fronts": 321,
  "fronts_at_100": 321,
@@ -18,9 +25,9 @@
  },
  "message": "321/321 fronts 100% @7d6808d",
  "color": "brightgreen",
- "measured_at": "2026-09-27T05:13:54.466Z",
  "source_blob": "d9b3b654109cfb8e69b6b42893cccca90f8f4e23",
+ "source_digest": {"alg":"sha3-256","value":"a5324f58df6d01c9a21fc880a518b952b1dafd23a4576448bc838554cc1deec0","note":"PUBLIC-CONSTANT: sha3-256 of the committed public evidence file"},
  "renderer": "badge-maker 5.0.2",
  "signature": null,
- "law": "derived, not typed; bound to a revision; re-rendered and diffed in CI; unsigned until signed"
+ "law": "derived from committed evidence and re-derived in CI; bound to the revision measured; a historical measurement, not live status; unsigned until signed"
 }

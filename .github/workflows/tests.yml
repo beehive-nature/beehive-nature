@@ -841,3 +841,10 @@ jobs:
         if: always()
         working-directory: e2e
         run: node render-badges.mjs --check
+      # The gate's own negative probes (review of #250, 2026-09-27): deleted evidence, inflated counts
+      # with a matching SVG, a forty-zero revision, a bogus signature, non-JSON evidence, a SHA-1-only
+      # rebind, a duplicated row, a CI-origin claim — each passed the first gate and must now FAIL.
+      - name: Proof lights — the gate refuses every known forgery
+        if: always()
+        working-directory: e2e
+        run: node --test render-badges.test.mjs
