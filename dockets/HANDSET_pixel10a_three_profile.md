@@ -44,11 +44,13 @@ the bootloader wipes it.
 
 1. Install **Auditor** in the **owner** profile. That device is the *auditee*.
 2. Pair it with a **second phone** that runs Auditor as the *auditor*. This
-   is the permanent auditor (founder ruling, 2026-09-27), not a verifier
-   service on the oracle box. Scanning the QR code pins the auditee's
-   persistent attestation key on first use (TOFU). The auditor phone holds
-   the only record of that pinned key, so keep it physically separate from
-   the handset, and treat its loss as a re-pairing event.
+   is the permanent, mature configuration (founder ruling, 2026-09-27).
+   **Interim:** until that second physical GrapheneOS device is provisioned, a
+   verifier service may stand in, so deployment is not blocked (founder
+   amendment, same day). Scanning the QR code pins the auditee's persistent
+   attestation key on first use (TOFU). The auditor phone holds the only record
+   of that pinned key, so keep it physically separate from the handset, and
+   treat its loss as a re-pairing event.
 3. Turn on scheduled remote verification, the same shape as attestation.app,
    and re-attest before sensitive operations (T3 §2 cadence).
 4. The Beehive verifier treats the GrapheneOS verified-boot key as a
@@ -61,39 +63,76 @@ the device's standing tier. That is ladder behaviour and needs no change.
 
 | Profile | Name | Holds | Never holds |
 |---|---|---|---|
-| **Owner** | Sovereign core | Auditor (auditee); the Trezor, Arculus and Vaulta/Anchor companion tooling that *talks to* the E5 signer; bSAFE interface; Beehive identity apps at T4 | Sandboxed Google Play; experimental APKs; root keys (those stay on the signer) |
+| **Owner** | Sovereign core | Only the day-one T4 allowlist (§4a) | Sandboxed Google Play; experimental Buzz builds; development tooling; fund-moving private keys (root keys stay on the signer) |
 | **Profile 2** | Normal world | Sandboxed Google Play and the proprietary apps that need it (maps, ride-hailing and similar) | Wallet, identity or signer tooling |
-| **Profile 3** | Beehive/Buzz lab | Our own debug APKs, W@tch/bViEw builds, experimental wallet adapters, Nostr/Buzz clients, developer utilities | Production keys; any key that can move funds; Auditor |
+| **Profile 3** | Beehive/Buzz lab | Our own debug APKs, W@tch/bViEw builds, experimental wallet adapters, Nostr/Buzz clients, developer utilities | Sandboxed Google Play (initially); production keys; any key that can move funds; Auditor |
 
 Rules that make the layout mean something:
 
-- **Keep Google Play out of the owner profile.** Sandboxed Play is installed
-  per profile and only where needed: Profile 2, and Profile 3 only if a test
-  truly requires it.
+- **Keep Google Play out of the owner profile.** GrapheneOS does not need Play
+  as privileged system software, so there is no reason to put it in the
+  sovereign profile. Sandboxed Play is installed per profile and only where
+  needed: Profile 2 now. Profile 3 gets it only when a concrete Beehive test
+  requires Play services (founder ruling, 2026-09-27).
 - **Experimental code never shares a profile with signer tooling.** A lab
   build that turns out to be malicious or buggy should find nothing worth
   taking.
 - **End sessions for idle profiles.** Profile 3 is closed when testing
   finishes, so its data is at rest behind that profile's own credential.
-- **One-way direction.** Nothing is copied from Profile 3 into the owner
-  profile except artifacts whose origin has been checked (signed release
-  APKs), never debug builds.
+- **One-way direction.** Promotion from Profile 3 to the owner profile
+  requires a **signed release artifact**. A development build never crosses,
+  even one built locally by us (founder ruling, 2026-09-27).
 - **Profiles are separate spaces on one device, not a defence against the
   device owner.** The owner profile creates, deletes and ends the others. The
   boundary protects apps from each other, which is what this layout needs.
 
+## 4a. Day-one T4 allowlist (owner profile)
+
+Founder ruling, 2026-09-27. Keep it minimal:
+
+1. **Auditor** and the attestation tooling it needs.
+2. The **signer companion/interface** for the E5 hardware signer.
+3. **Mature** Beehive identity and receipt-verification surfaces the handset
+   role needs.
+
+Nothing else. In particular: no experimental Buzz builds, no development
+tooling, and no private key that can move funds.
+
+## 4b. Four evidence dimensions, never one flag
+
+The handset's standing is four **independent** properties, reported
+separately. Never collapse them into a single `trusted_handset` boolean:
+
+| Dimension | Evidence | Degrades when |
+|---|---|---|
+| Verified boot | locked bootloader, verified-boot key (§2) | unlocked, or the boot key changes |
+| Hardware memory tagging | MTE enabled for the OS and compatible apps | disabled, or an app runs outside it |
+| Auditor attestation | fresh attestation from the pinned key, OEM unlocking reported disabled (§3) | missed, stale, or pairing broken |
+| Profile isolation | owner profile holds only the §4a allowlist | Play or unapproved apps appear in owner |
+
+One degraded property lowers only the authority that depends on it. The whole
+handset is never declared simply "trusted" or "untrusted". This keeps the
+eventual T4-from-E4 evidence something BNRoSe can reason about item by item.
+Hardware memory tagging hardens the device, but it is still not attestation
+evidence and does not change a tier by itself (§5).
+
 ## 5. What this docket does not claim
 
-- The GrapheneOS and Pixel 10a facts behind this layout are **UNVERIFIED by
-  this seat**; grapheneos.org was unreachable from the build sandbox on
-  2026-09-27. They are carried from a founder-relayed note of 2026-09-26:
-  - the device codename `stallion`;
-  - production support, with a support window to 2033;
-  - the release numbers 2026091900 (Stable) and 2026092500 (Alpha);
-  - the reclaiming of storage stock Pixel OS reserves for AI models;
-  - the use of hardware memory tagging (MTE) by default.
-  Check them against the GrapheneOS releases and device pages before relying
-  on any one of them.
+- **Verified by the founder** against grapheneos.org (FAQ and releases pages)
+  on 2026-09-27. This seat could not reach the site from its build sandbox, so
+  the check is the founder's, not the seat's:
+  - Pixel 10a is `stallion`, with official production GrapheneOS support and a
+    Google minimum support window through March 2033;
+  - it has ARMv9 hardware memory tagging, which GrapheneOS enables by default
+    for the base OS and known-compatible user apps;
+  - installation requires relocking the bootloader, and Auditor distinguishes
+    a locked from an unlocked device;
+  - disabling OEM unlocking after install is recommended, and Auditor can
+    report whether it is disabled;
+  - the releases index lists **2026091900** as Pixel 10a Stable and Beta.
+    **2026092500 is not Stable**; it was an Alpha build when relayed.
+- **Still UNVERIFIED:** the reclaiming of storage that stock Pixel OS
+  reserves for AI models (relayed, not re-checked).
 - Hardware memory tagging makes certain memory-corruption exploits harder. It
   is not attestation evidence and changes no tier.
 - This docket builds no verifier code. Auditor pairing to a *Beehive* verifier
@@ -102,8 +141,10 @@ Rules that make the layout mean something:
 ## 6. Open questions for the founder
 
 1. ~~Which second device is the permanent auditor?~~ **Ruled 2026-09-27: a
-   second phone.** Remote verification through a Beehive verifier (T3 §2) is
-   still a separate, later lane.
-2. Does Profile 3 get sandboxed Play at all, or do lab builds have to work
-   without it?
-3. Which Beehive apps are allowed at T4 on this handset on day one?
+   second physical phone**, with a verifier service allowed in the interim
+   (§3). Remote verification through a Beehive verifier (T3 §2) is still a
+   separate, later lane.
+2. ~~Does Profile 3 get sandboxed Play?~~ **Ruled 2026-09-27: not
+   initially.** Added only when a concrete test requires Play services.
+3. ~~Which Beehive apps are allowed at T4 on day one?~~ **Ruled 2026-09-27:**
+   the §4a allowlist.
