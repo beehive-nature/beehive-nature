@@ -32,6 +32,14 @@ choice is deliberate:
 Counts follow the same rule: a number is stated as the command that produces
 it — currently `cargo test --workspace` → **179 passed; 1 ignored**.
 
+- `2026-09-27` — **Handset docket: Pixel 10a, GrapheneOS, three profiles.**
+  `dockets/HANDSET_pixel10a_three_profile.md` sets up one phone to earn E4
+  (relocked bootloader, Auditor pairing) and splits it into three profiles:
+  sovereign core, normal world with sandboxed Play, and a Beehive/Buzz lab.
+  Adds no tier. The phone stops at T4, and root keys stay on the E5 signer.
+  GrapheneOS and Pixel 10a release facts are marked UNVERIFIED (grapheneos.org
+  was unreachable from the sandbox). No code.
+  Dispatch: `docs/dispatches/2026-09-27-handset-docket.md`.
 - `2026-09-27` — **`bnr-seal`: private storage envelope for signed receipts.**
   Adds one mechanism: an allowlisted AEAD suite (XChaCha20-Poly1305, the same
   crate x0x uses in `src/kv/encrypted.rs`) with a versioned header and an opaque
