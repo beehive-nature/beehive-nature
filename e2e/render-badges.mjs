@@ -85,7 +85,7 @@ const mode = process.argv[2];
 if (mode === '--check') {
   let fail = 0, n = 0;
   let files = [];
-  try { files = (await readdir(STATUS_DIR)).filter(f => f.endsWith('.json')); } catch {}
+  try { files = (await readdir(STATUS_DIR)).filter(f => f.endsWith('.json') && !f.endsWith('.source.json')); } catch {}   // *.source.json is evidence, not a document
   if (!files.length) {
     // fail closed: a check that found nothing to check is not a pass (estate law, cf. secret-scan tree mode)
     console.error(`proof lights: REFUSING — no status documents under docs/status/. A check over zero badges is not a pass.`);
