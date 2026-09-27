@@ -1,0 +1,27 @@
+[package]
+name = "ant-writedoor"
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+description = "The estate's keyless Autonomi WRITE door: three routes (GET ceiling probe, POST prepare bytes-in, POST finalize tx-pairs) behind exact-origin CORS. Contract slice: the AntGateway trait + mock; ant-core wiring is its own reviewed slice. Loopback-bind only; Caddy fronts it on the box."
+
+[features]
+# ant-wiring: the real ant-core Client composition (Linux box). Off by
+# default until the wiring slice lands with its citations; without it the
+# binary runs the unwired gateway (every prepare refuses by name) or --mock.
+ant-wiring = []
+
+[dependencies]
+axum = "0.8"
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "net"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+thiserror = "2"
+hex = "0.4"
+async-trait = "0.1"
+
+[dev-dependencies]
+tower = { version = "0.5", features = ["util"] }
+http-body-util = "0.1"
+
+[workspace]

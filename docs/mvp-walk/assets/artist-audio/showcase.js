@@ -322,7 +322,7 @@
     details.forEach(function (d, i) {
       d.open = previous ? previous[i] : defaultOpen(reading, d.dataset.viewDisclosure);
     });
-    if (theme) theme.content = reading === 'bee' ? '#f6f7f2' : reading === 'raver' ? '#111018' : '#081610';
+    if (theme) theme.content = reading === 'bee' ? '#fbf7f0' : reading === 'raver' ? '#111018' : '#081610';
     lastReading = reading;
     restoreVisibleFocus(focus);
     applyBloom();

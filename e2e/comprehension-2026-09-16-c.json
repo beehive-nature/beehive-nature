@@ -1,0 +1,1372 @@
+{
+ "generated": "2026-09-16T20:32:43.443Z",
+ "rows": [
+  {
+   "page": "wallet.html",
+   "walls": [
+    {
+     "tag": "div",
+     "id": "",
+     "w": 76,
+     "j": 3,
+     "t": "THE PUBLIC SPEND-RECEIPT RECORD — rehearsal copy. The live meter (scripts/buzz-meter/meter"
+    }
+   ],
+   "jargonTotal": 3,
+   "touchSmall": [
+    {
+     "tag": "summary",
+     "id": "",
+     "t": "the intent shape — tithe a",
+     "h": 18,
+     "w": 344
+    },
+    {
+     "tag": "a-inline",
+     "t": "the hub",
+     "h": 12,
+     "w": 39
+    }
+   ],
+   "details": 24,
+   "sections": 18
+  },
+  {
+   "page": "b4b.html",
+   "walls": [],
+   "jargonTotal": 0,
+   "touchSmall": [
+    {
+     "tag": "a-inline",
+     "t": "the receipt",
+     "h": 11,
+     "w": 57
+    },
+    {
+     "tag": "a-inline",
+     "t": "the census",
+     "h": 11,
+     "w": 52
+    },
+    {
+     "tag": "a-inline",
+     "t": "the crate",
+     "h": 11,
+     "w": 47
+    },
+    {
+     "tag": "a-inline",
+     "t": "BiGen",
+     "h": 13,
+     "w": 29
+    },
+    {
+     "tag": "a-inline",
+     "t": "the repo",
+     "h": 12,
+     "w": 44
+    },
+    {
+     "tag": "a-inline",
+     "t": "docs/receipts",
+     "h": 12,
+     "w": 71
+    },
+    {
+     "tag": "a-inline",
+     "t": "source",
+     "h": 12,
+     "w": 33
+    }
+   ],
+   "details": 3,
+   "sections": 5
+  },
+  {
+   "page": "blight/index.html",
+   "walls": [],
+   "jargonTotal": 0,
+   "touchSmall": [
+    {
+     "tag": "button",
+     "id": "connect",
+     "t": "connect wallet",
+     "h": 37,
+     "w": 142
+    },
+    {
+     "tag": "a-inline",
+     "t": "github.com/beehive-nature",
+     "h": 14,
+     "w": 158
+    },
+    {
+     "tag": "a-inline",
+     "t": "⌂ hub",
+     "h": 21,
+     "w": 57
+    },
+    {
+     "tag": "a-inline",
+     "t": "◈museum",
+     "h": 13,
+     "w": 55
+    },
+    {
+     "tag": "a-inline",
+     "t": "◈explorer",
+     "h": 13,
+     "w": 69
+    },
+    {
+     "tag": "a-inline",
+     "t": "◈studio gate",
+     "h": 13,
+     "w": 88
+    },
+    {
+     "tag": "a-inline",
+     "t": "◈C-1 aid",
+     "h": 13,
+     "w": 62
+    },
+    {
+     "tag": "a-inline",
+     "t": "◈vaulta reader",
+     "h": 13,
+     "w": 102
+    }
+   ],
+   "details": 0,
+   "sections": 0
+  },
+  {
+   "page": "blight/workbench.html",
+   "walls": [],
+   "jargonTotal": 0,
+   "touchSmall": [
+    {
+     "tag": "summary",
+     "id": "",
+     "t": "raw SVG",
+     "h": 19,
+     "w": 320
+    },
+    {
+     "tag": "a-inline",
+     "t": "⌂ hub",
+     "h": 21,
+     "w": 57
+    },
+    {
+     "tag": "a-inline",
+     "t": "◈fLeeT",
+     "h": 16,
+     "w": 62
+    },
+    {
+     "tag": "a-inline",
+     "t": "◈museum",
+     "h": 16,
+     "w": 69
+    },
+    {
+     "tag": "a-inline",
+     "t": "◈explorer",
+     "h": 16,
+     "w": 82
+    },
+    {
+     "tag": "a-inline",
+     "t": "◈studio gate",
+     "h": 16,
+     "w": 101
+    },
+    {
+     "tag": "a-inline",
+     "t": "◈C-1 aid",
+     "h": 16,
+     "w": 75
+    },
+    {
+     "tag": "a-inline",
+     "t": "◈vaulta reader",
+     "h": 16,
+     "w": 115
+    }
+   ],
+   "details": 4,
+   "sections": 0
+  },
+  {
+   "page": "blight/gallery.html",
+   "walls": [],
+   "jargonTotal": 0,
+   "touchSmall": [],
+   "details": 2,
+   "sections": 1
+  },
+  {
+   "page": "blight/museum.html",
+   "walls": [
+    {
+     "tag": "div",
+     "id": "",
+     "w": 63,
+     "j": 2,
+     "t": "Hence the rehearsal gate: upload order is a deploy-day check\n  (evmcheck.py exists; the te"
+    },
+    {
+     "tag": "div",
+     "id": "",
+     "w": 62,
+     "j": 1,
+     "t": "So the ancestor is more on-chain than most people think in one sense — the text is\n  compl"
+    },
+    {
+     "tag": "div",
+     "id": "pw1408note",
+     "w": 60,
+     "j": 0,
+     "t": "The v2 deployment is larger by 1,408 bytes, and the verified\n  ABIs say precisely what tha"
+    },
+    {
+     "tag": "div",
+     "id": "",
+     "w": 58,
+     "j": 0,
+     "t": "The museum's lineage starts on Bitcoin (Counterparty, 2014) and its classes were\n  built w"
+    },
+    {
+     "tag": "div",
+     "id": "",
+     "w": 53,
+     "j": 1,
+     "t": "Size and stroke width are left free, and no renderer is committed on-chain — not even a\n  "
+    },
+    {
+     "tag": "div",
+     "id": "",
+     "w": 53,
+     "j": 0,
+     "t": "Corrections are part of the exhibit. \"Random art maker\" is backwards — Autoglyphs\n  takes "
+    }
+   ],
+   "jargonTotal": 4,
+   "touchSmall": [
+    {
+     "tag": "a-inline",
+     "t": "pepi.sh",
+     "h": 14,
+     "w": 44
+    },
+    {
+     "tag": "a-inline",
+     "t": "its marketplace",
+     "h": 14,
+     "w": 95
+    },
+    {
+     "tag": "a-inline",
+     "t": "pepi.sh",
+     "h": 14,
+     "w": 44
+    },
+    {
+     "tag": "a-inline",
+     "t": "inscriptions.market",
+     "h": 14,
+     "w": 120
+    },
+    {
+     "tag": "a-inline",
+     "t": "inscriptions.market",
+     "h": 14,
+     "w": 120
+    },
+    {
+     "tag": "a-inline",
+     "t": "receipt",
+     "h": 14,
+     "w": 44
+    },
+    {
+     "tag": "a-inline",
+     "t": "inscriptions.market",
+     "h": 14,
+     "w": 120
+    },
+    {
+     "tag": "a-inline",
+     "t": "Inscript",
+     "h": 14,
+     "w": 51
+    },
+    {
+     "tag": "a-inline",
+     "t": "inscriptions.market",
+     "h": 14,
+     "w": 120
+    },
+    {
+     "tag": "a-inline",
+     "t": "inscriptions.market",
+     "h": 14,
+     "w": 120
+    },
+    {
+     "tag": "a-inline",
+     "t": "inscriptions.market",
+     "h": 14,
+     "w": 120
+    },
+    {
+     "tag": "a-inline",
+     "t": "⌂ hub",
+     "h": 21,
+     "w": 57
+    }
+   ],
+   "details": 8,
+   "sections": 0
+  },
+  {
+   "page": "blight/market.html",
+   "walls": [],
+   "jargonTotal": 0,
+   "touchSmall": [
+    {
+     "tag": "a-inline",
+     "t": "⌂ hub",
+     "h": 21,
+     "w": 57
+    }
+   ],
+   "details": 0,
+   "sections": 1
+  },
+  {
+   "page": "blight/coop.html",
+   "walls": [],
+   "jargonTotal": 0,
+   "touchSmall": [
+    {
+     "tag": "a-inline",
+     "t": "⌂ hub",
+     "h": 21,
+     "w": 57
+    }
+   ],
+   "details": 0,
+   "sections": 0
+  },
+  {
+   "page": "blight/demo.html",
+   "walls": [],
+   "jargonTotal": 0,
+   "touchSmall": [
+    {
+     "tag": "a-inline",
+     "t": "⌂ hub",
+     "h": 21,
+     "w": 57
+    }
+   ],
+   "details": 0,
+   "sections": 0
+  },
+  {
+   "page": "blight/farmers.html",
+   "walls": [],
+   "jargonTotal": 0,
+   "touchSmall": [
+    {
+     "tag": "button",
+     "id": "",
+     "t": "🤝 open bAccord",
+     "h": 31,
+     "w": 160
+    },
+    {
+     "tag": "button",
+     "id": "",
+     "t": "view",
+     "h": 31,
+     "w": 160
+    },
+    {
+     "tag": "button",
+     "id": "",
+     "t": "🤝 open bAccord",
+     "h": 31,
+     "w": 160
+    },
+    {
+     "tag": "button",
+     "id": "",
+     "t": "view",
+     "h": 31,
+     "w": 160
+    },
+    {
+     "tag": "button",
+     "id": "",
+     "t": "🤝 open bAccord",
+     "h": 31,
+     "w": 160
+    },
+    {
+     "tag": "button",
+     "id": "",
+     "t": "view",
+     "h": 31,
+     "w": 160
+    },
+    {
+     "tag": "button",
+     "id": "",
+     "t": "🤝 open bAccord",
+     "h": 31,
+     "w": 160
+    },
+    {
+     "tag": "button",
+     "id": "",
+     "t": "view",
+     "h": 31,
+     "w": 160
+    },
+    {
+     "tag": "a-inline",
+     "t": "⌂ hub",
+     "h": 21,
+     "w": 57
+    }
+   ],
+   "details": 0,
+   "sections": 0
+  },
+  {
+   "page": "blight/hearth.html",
+   "walls": [],
+   "jargonTotal": 0,
+   "touchSmall": [
+    {
+     "tag": "button",
+     "id": "",
+     "t": "🍄 grow",
+     "h": 29,
+     "w": 71
+    },
+    {
+     "tag": "button",
+     "id": "",
+     "t": "🎵 play",
+     "h": 29,
+     "w": 71
+    },
+    {
+     "tag": "button",
+     "id": "",
+     "t": "👑 crown",
+     "h": 29,
+     "w": 77
+    },
+    {
+     "tag": "button",
+     "id": "",
+     "t": "🤝 deal",
+     "h": 29,
+     "w": 71
+    },
+    {
+     "tag": "input",
+     "id": "q",
+     "t": "",
+     "h": 41,
+     "w": 279
+    },
+    {
+     "tag": "button",
+     "id": "send",
+     "t": "send",
+     "h": 41,
+     "w": 71
+    },
+    {
+     "tag": "a-inline",
+     "t": "⌂ hub",
+     "h": 21,
+     "w": 57
+    }
+   ],
+   "details": 0,
+   "sections": 0
+  },
+  {
+   "page": "blight/pulse.html",
+   "walls": [],
+   "jargonTotal": 0,
+   "touchSmall": [
+    {
+     "tag": "button",
+     "id": "listen",
+     "t": "listen to the relay",
+     "h": 34,
+     "w": 163
+    },
+    {
+     "tag": "a-inline",
+     "t": "⌂ hub",
+     "h": 21,
+     "w": 57
+    }
+   ],
+   "details": 0,
+   "sections": 0
+  },
+  {
+   "page": "blight/inscription-explorer.html",
+   "walls": [],
+   "jargonTotal": 0,
+   "touchSmall": [
+    {
+     "tag": "input",
+     "id": "addr",
+     "t": "",
+     "h": 43,
+     "w": 312
+    },
+    {
+     "tag": "button",
+     "id": "",
+     "t": "enter",
+     "h": 43,
+     "w": 92
+    },
+    {
+     "tag": "button",
+     "id": "",
+     "t": "the founder's garden",
+     "h": 31,
+     "w": 173
+    },
+    {
+     "tag": "button",
+     "id": "",
+     "t": "bQueenBee's Lost Purse",
+     "h": 31,
+     "w": 187
+    },
+    {
+     "tag": "button",
+     "id": "vault",
+     "t": "a crown from the vault",
+     "h": 31,
+     "w": 187
+    },
+    {
+     "tag": "a-inline",
+     "t": "⌂ hub",
+     "h": 21,
+     "w": 57
+    }
+   ],
+   "details": 0,
+   "sections": 0
+  },
+  {
+   "page": "blight/vaulta-reader.html",
+   "walls": [
+    {
+     "tag": "div",
+     "id": "",
+     "w": 92,
+     "j": 0,
+     "t": "The ambiguity this API carries, stated rather than hidden: an empty table\n  and a nonexist"
+    }
+   ],
+   "jargonTotal": 0,
+   "touchSmall": [
+    {
+     "tag": "input",
+     "id": "code",
+     "t": "",
+     "h": 28,
+     "w": 153
+    },
+    {
+     "tag": "input",
+     "id": "scope",
+     "t": "",
+     "h": 28,
+     "w": 153
+    },
+    {
+     "tag": "input",
+     "id": "table",
+     "t": "",
+     "h": 28,
+     "w": 153
+    },
+    {
+     "tag": "input",
+     "id": "limit",
+     "t": "",
+     "h": 28,
+     "w": 153
+    },
+    {
+     "tag": "button",
+     "id": "go",
+     "t": "read rows",
+     "h": 32,
+     "w": 93
+    },
+    {
+     "tag": "input",
+     "id": "domid",
+     "t": "",
+     "h": 28,
+     "w": 166
+    },
+    {
+     "tag": "a-inline",
+     "t": "⌂ hub",
+     "h": 21,
+     "w": 57
+    },
+    {
+     "tag": "a-inline",
+     "t": "◈fLeeT",
+     "h": 13,
+     "w": 49
+    },
+    {
+     "tag": "a-inline",
+     "t": "◈museum",
+     "h": 13,
+     "w": 55
+    },
+    {
+     "tag": "a-inline",
+     "t": "◈explorer",
+     "h": 13,
+     "w": 69
+    },
+    {
+     "tag": "a-inline",
+     "t": "◈studio gate",
+     "h": 13,
+     "w": 88
+    },
+    {
+     "tag": "a-inline",
+     "t": "◈C-1 aid",
+     "h": 13,
+     "w": 62
+    }
+   ],
+   "details": 0,
+   "sections": 0
+  },
+  {
+   "page": "blight/c1-aid.html",
+   "walls": [
+    {
+     "tag": "div",
+     "id": "",
+     "w": 105,
+     "j": 0,
+     "t": "1 · The taxonomy itself — layers and variants per layer (the sliders above).\n  2 · The col"
+    },
+    {
+     "tag": "div",
+     "id": "",
+     "w": 65,
+     "j": 0,
+     "t": "Two numbers, both true: the uniform bound\n      (k²/2N, the spec §4 figure) and the weight"
+    },
+    {
+     "tag": "div",
+     "id": "",
+     "w": 62,
+     "j": 0,
+     "t": "Slide candidate taxonomies against the founder's bar — expected collisions\n  under 0.01 at"
+    }
+   ],
+   "jargonTotal": 0,
+   "touchSmall": [
+    {
+     "tag": "input",
+     "id": "",
+     "t": "",
+     "h": 22,
+     "w": 41
+    },
+    {
+     "tag": "input",
+     "id": "",
+     "t": "",
+     "h": 22,
+     "w": 34
+    },
+    {
+     "tag": "input",
+     "id": "",
+     "t": "",
+     "h": 22,
+     "w": 46
+    },
+    {
+     "tag": "input",
+     "id": "",
+     "t": "",
+     "h": 22,
+     "w": 41
+    },
+    {
+     "tag": "input",
+     "id": "",
+     "t": "",
+     "h": 22,
+     "w": 34
+    },
+    {
+     "tag": "input",
+     "id": "",
+     "t": "",
+     "h": 22,
+     "w": 46
+    },
+    {
+     "tag": "input",
+     "id": "",
+     "t": "",
+     "h": 22,
+     "w": 41
+    },
+    {
+     "tag": "input",
+     "id": "",
+     "t": "",
+     "h": 22,
+     "w": 34
+    },
+    {
+     "tag": "input",
+     "id": "",
+     "t": "",
+     "h": 22,
+     "w": 46
+    },
+    {
+     "tag": "input",
+     "id": "",
+     "t": "",
+     "h": 22,
+     "w": 41
+    },
+    {
+     "tag": "input",
+     "id": "",
+     "t": "",
+     "h": 22,
+     "w": 34
+    },
+    {
+     "tag": "input",
+     "id": "",
+     "t": "",
+     "h": 22,
+     "w": 46
+    }
+   ],
+   "details": 0,
+   "sections": 0
+  },
+  {
+   "page": "blight/compare.html",
+   "walls": [
+    {
+     "tag": "div",
+     "id": "srcs",
+     "w": 115,
+     "j": 5,
+     "t": "Sources. FUNGI: ToddStool/fungi Generator.sol:10-14 (cloned 2026-08-16) + boundary calls 2"
+    }
+   ],
+   "jargonTotal": 5,
+   "touchSmall": [
+    {
+     "tag": "select",
+     "id": "a",
+     "t": "PEPI v2PEPI v1FUNGI$FROGGI",
+     "h": 34,
+     "w": 100
+    },
+    {
+     "tag": "select",
+     "id": "b",
+     "t": "PEPI v2PEPI v1FUNGI$FROGGI",
+     "h": 34,
+     "w": 100
+    },
+    {
+     "tag": "button",
+     "id": "sw",
+     "t": "⇄ swap",
+     "h": 34,
+     "w": 77
+    },
+    {
+     "tag": "a-inline",
+     "t": "◈ fLeeT",
+     "h": 17,
+     "w": 45
+    },
+    {
+     "tag": "a-inline",
+     "t": "◈ museum",
+     "h": 17,
+     "w": 52
+    },
+    {
+     "tag": "a-inline",
+     "t": "◈ explorer",
+     "h": 17,
+     "w": 64
+    },
+    {
+     "tag": "a-inline",
+     "t": "⌂ hub",
+     "h": 21,
+     "w": 57
+    }
+   ],
+   "details": 0,
+   "sections": 0
+  },
+  {
+   "page": "blight/studio-gate.html",
+   "walls": [
+    {
+     "tag": "div",
+     "id": "",
+     "w": 55,
+     "j": 0,
+     "t": "Drop a trait-layer PNG. The verdict comes from crates/inscription-gate\n  compiled to WASM "
+    },
+    {
+     "tag": "div",
+     "id": "",
+     "w": 54,
+     "j": 0,
+     "t": "Decode-side checks live here, not in the WASM — they are properties of\n  the PNG before ce"
+    },
+    {
+     "tag": "div",
+     "id": "",
+     "w": 48,
+     "j": 0,
+     "t": "v2 wire: 0x02 version, palette count, first-seen RGB\n      triples, 5-byte rects (col,row,"
+    }
+   ],
+   "jargonTotal": 0,
+   "touchSmall": [
+    {
+     "tag": "input",
+     "id": "grid",
+     "t": "",
+     "h": 28,
+     "w": 151
+    },
+    {
+     "tag": "select",
+     "id": "orient",
+     "t": "flat-top (measured: fits ~",
+     "h": 30,
+     "w": 151
+    },
+    {
+     "tag": "input",
+     "id": "maxrects",
+     "t": "",
+     "h": 28,
+     "w": 151
+    },
+    {
+     "tag": "input",
+     "id": "maxhair",
+     "t": "",
+     "h": 28,
+     "w": 151
+    },
+    {
+     "tag": "input",
+     "id": "minmargin",
+     "t": "",
+     "h": 28,
+     "w": 151
+    },
+    {
+     "tag": "input",
+     "id": "substrate",
+     "t": "",
+     "h": 13,
+     "w": 7
+    },
+    {
+     "tag": "button",
+     "id": "dl",
+     "t": "download _hexrect_v2.hex",
+     "h": 32,
+     "w": 316
+    },
+    {
+     "tag": "a-inline",
+     "t": "⌂ hub",
+     "h": 21,
+     "w": 57
+    },
+    {
+     "tag": "a-inline",
+     "t": "◈fLeeT",
+     "h": 13,
+     "w": 49
+    },
+    {
+     "tag": "a-inline",
+     "t": "◈museum",
+     "h": 13,
+     "w": 55
+    },
+    {
+     "tag": "a-inline",
+     "t": "◈explorer",
+     "h": 13,
+     "w": 69
+    },
+    {
+     "tag": "a-inline",
+     "t": "◈C-1 aid",
+     "h": 13,
+     "w": 62
+    }
+   ],
+   "details": 0,
+   "sections": 0
+  },
+  {
+   "page": "blight/studio-music.html",
+   "walls": [],
+   "jargonTotal": 0,
+   "touchSmall": [
+    {
+     "tag": "button",
+     "id": "",
+     "t": "",
+     "h": 40,
+     "w": 40
+    },
+    {
+     "tag": "button",
+     "id": "",
+     "t": "",
+     "h": 40,
+     "w": 40
+    },
+    {
+     "tag": "button",
+     "id": "",
+     "t": "",
+     "h": 40,
+     "w": 40
+    },
+    {
+     "tag": "button",
+     "id": "",
+     "t": "",
+     "h": 40,
+     "w": 40
+    },
+    {
+     "tag": "button",
+     "id": "",
+     "t": "",
+     "h": 40,
+     "w": 40
+    },
+    {
+     "tag": "button",
+     "id": "",
+     "t": "",
+     "h": 40,
+     "w": 40
+    },
+    {
+     "tag": "button",
+     "id": "",
+     "t": "",
+     "h": 40,
+     "w": 40
+    },
+    {
+     "tag": "button",
+     "id": "",
+     "t": "",
+     "h": 40,
+     "w": 40
+    },
+    {
+     "tag": "button",
+     "id": "",
+     "t": "",
+     "h": 40,
+     "w": 40
+    },
+    {
+     "tag": "button",
+     "id": "",
+     "t": "",
+     "h": 40,
+     "w": 40
+    },
+    {
+     "tag": "button",
+     "id": "",
+     "t": "",
+     "h": 40,
+     "w": 40
+    },
+    {
+     "tag": "button",
+     "id": "",
+     "t": "",
+     "h": 40,
+     "w": 40
+    }
+   ],
+   "details": 6,
+   "sections": 1
+  },
+  {
+   "page": "blight/midi.html",
+   "walls": [
+    {
+     "tag": "p",
+     "id": "",
+     "w": 57,
+     "j": 0,
+     "t": "the swap popup builds the trade in this page and your wallet signs it — the page never see"
+    }
+   ],
+   "jargonTotal": 0,
+   "touchSmall": [
+    {
+     "tag": "a-inline",
+     "t": "◈ fLeeT",
+     "h": 15,
+     "w": 40
+    },
+    {
+     "tag": "a-inline",
+     "t": "◈ museum",
+     "h": 15,
+     "w": 56
+    },
+    {
+     "tag": "a-inline",
+     "t": "◈ catalog",
+     "h": 15,
+     "w": 50
+    },
+    {
+     "tag": "a-inline",
+     "t": "◈ gallery",
+     "h": 15,
+     "w": 47
+    },
+    {
+     "tag": "a-inline",
+     "t": "◈ explorer",
+     "h": 15,
+     "w": 54
+    },
+    {
+     "tag": "a-inline",
+     "t": "◈ bNRi",
+     "h": 15,
+     "w": 38
+    }
+   ],
+   "details": 7,
+   "sections": 3
+  },
+  {
+   "page": "blight/midivault.html",
+   "walls": [
+    {
+     "tag": "p",
+     "id": "",
+     "w": 106,
+     "j": 0,
+     "t": "provenance. one self-contained file · encryption is WebCrypto AES-GCM in your browser\n(per"
+    },
+    {
+     "tag": "p",
+     "id": "bmsg",
+     "w": 78,
+     "j": 0,
+     "t": "SIMULATED: addresses are content hashes in this page's store — the full flow works\n  (stor"
+    },
+    {
+     "tag": "p",
+     "id": "",
+     "w": 52,
+     "j": 1,
+     "t": "record a performance, store it on Autonomi, share it three ways — public (the\naddress is t"
+    }
+   ],
+   "jargonTotal": 1,
+   "touchSmall": [
+    {
+     "tag": "input",
+     "id": "artifact",
+     "t": "",
+     "h": 34,
+     "w": 262
+    },
+    {
+     "tag": "button",
+     "id": "read",
+     "t": "read it",
+     "h": 34,
+     "w": 64
+    },
+    {
+     "tag": "input",
+     "id": "name",
+     "t": "",
+     "h": 34,
+     "w": 232
+    },
+    {
+     "tag": "button",
+     "id": "renderwav",
+     "t": "render 8s WAV (the audio i",
+     "h": 34,
+     "w": 209
+    },
+    {
+     "tag": "button",
+     "id": "store",
+     "t": "STORE ON AUTONOMI",
+     "h": 36,
+     "w": 160
+    },
+    {
+     "tag": "input",
+     "id": "endpoint",
+     "t": "",
+     "h": 33,
+     "w": 233
+    },
+    {
+     "tag": "button",
+     "id": "probe",
+     "t": "probe antd",
+     "h": 36,
+     "w": 93
+    }
+   ],
+   "details": 0,
+   "sections": 3
+  },
+  {
+   "page": "record.html",
+   "walls": [
+    {
+     "tag": "p",
+     "id": "",
+     "w": 72,
+     "j": 0,
+     "t": "Every screenshot the estate kept of its own pages — the newest at the top, newest first, s"
+    }
+   ],
+   "jargonTotal": 0,
+   "touchSmall": [],
+   "details": 0,
+   "sections": 20
+  },
+  {
+   "page": "stack.html",
+   "walls": [
+    {
+     "tag": "div",
+     "id": "",
+     "w": 131,
+     "j": 0,
+     "t": "The precedent, verified at source 2026-08-29 (every\n  line below read from the project's o"
+    },
+    {
+     "tag": "div",
+     "id": "",
+     "w": 111,
+     "j": 1,
+     "t": "Why we license this way, in plain words: the part of this\n  estate that handles money — th"
+    },
+    {
+     "tag": "span",
+     "id": "",
+     "w": 86,
+     "j": 1,
+     "t": "carries large public and all private immutable data — priced per RECORD by node fullness, "
+    },
+    {
+     "tag": "div",
+     "id": "",
+     "w": 81,
+     "j": 2,
+     "t": "The honest parts, stated before anyone asks:\n  GitHub Pages currently serves these pages —"
+    },
+    {
+     "tag": "div",
+     "id": "",
+     "w": 79,
+     "j": 3,
+     "t": "A visitor asked the best possible question: \"there's a lot\n  going on — which part shows m"
+    },
+    {
+     "tag": "div",
+     "id": "",
+     "w": 66,
+     "j": 0,
+     "t": "Each row is from an endpoint-and-content sweep of the page's actual code on\n  the date sho"
+    },
+    {
+     "tag": "div",
+     "id": "",
+     "w": 56,
+     "j": 0,
+     "t": "every status on this board says what it means AND what it does not mean — a status board m"
+    }
+   ],
+   "jargonTotal": 7,
+   "touchSmall": [
+    {
+     "tag": "button",
+     "id": "reread",
+     "t": "re-read just now",
+     "h": 32,
+     "w": 120
+    },
+    {
+     "tag": "a-inline",
+     "t": "source",
+     "h": 12,
+     "w": 33
+    },
+    {
+     "tag": "a-inline",
+     "t": "SPEC-AUTONOMI-TREZOR-1",
+     "h": 13,
+     "w": 127
+    },
+    {
+     "tag": "a-inline",
+     "t": "gallery",
+     "h": 13,
+     "w": 40
+    },
+    {
+     "tag": "a-inline",
+     "t": "explorer",
+     "h": 13,
+     "w": 46
+    },
+    {
+     "tag": "a-inline",
+     "t": "market",
+     "h": 13,
+     "w": 35
+    },
+    {
+     "tag": "a-inline",
+     "t": "organ",
+     "h": 13,
+     "w": 29
+    },
+    {
+     "tag": "a-inline",
+     "t": "studio",
+     "h": 13,
+     "w": 35
+    },
+    {
+     "tag": "a-inline",
+     "t": "museum",
+     "h": 13,
+     "w": 35
+    },
+    {
+     "tag": "a-inline",
+     "t": "workbench",
+     "h": 13,
+     "w": 52
+    },
+    {
+     "tag": "a-inline",
+     "t": "reader",
+     "h": 13,
+     "w": 35
+    },
+    {
+     "tag": "a-inline",
+     "t": "catalog",
+     "h": 13,
+     "w": 40
+    }
+   ],
+   "details": 0,
+   "sections": 7
+  },
+  {
+   "page": "privacy-lens.html",
+   "walls": [
+    {
+     "tag": "div",
+     "id": "",
+     "w": 55,
+     "j": 0,
+     "t": "what M5 changes: when the payment statement governs\n    (SPEC-PRIVACY-1 §m5 — membership +"
+    },
+    {
+     "tag": "p",
+     "id": "",
+     "w": 54,
+     "j": 1,
+     "t": "one note contract, notelab11111, live on the public jungle4\n  rehearsal chain — read by tw"
+    }
+   ],
+   "jargonTotal": 1,
+   "touchSmall": [
+    {
+     "tag": "summary",
+     "id": "",
+     "t": "unfold anyway — nothing is",
+     "h": 17,
+     "w": 334
+    },
+    {
+     "tag": "a-inline",
+     "t": "SPEC-PRIVACY-1",
+     "h": 13,
+     "w": 81
+    }
+   ],
+   "details": 1,
+   "sections": 2
+  }
+ ]
+}

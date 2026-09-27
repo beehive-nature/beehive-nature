@@ -16,6 +16,12 @@ breaking each one has cost real hours; they are the minimum bar.
   claims. Report failures with their output; skipped steps get named.
 - The pre-commit hook blocks hex runs ≥48 chars; if a constant must appear,
   put a same-line `PUBLIC-CONSTANT` (or `TESTNET-ONLY`) marker.
+  Wire it after cloning: `sh scripts/install-hooks.sh` - one install covers every
+  checkout of the repo (common hooks dir). `e2e/hooks-installed.test.sh`
+  proves the wiring and fails when the hook is absent. Measured on this box
+  2026-09-20: hooks fire under Git-for-Windows (fire, block and delegate all
+  proven); WSL cannot resolve gitfile worktrees - git itself fatals there
+  before any hook runs - so commit from Git-for-Windows inside worktrees.
 
 ## Surfaces (the registration ritual — same commit, every beat)
 Adding or moving anything under `surfaces/` rides ONE commit with all of:

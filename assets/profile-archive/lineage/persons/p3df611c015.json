@@ -4,7 +4,7 @@
  "bnr": "bnr://skaists.dev/blood/p3df611c015",
  "identity": {
   "name": "Djoser Zezer, Zozer, Djeser 5th Pharaoh of the 3rd Dynasty",
-  "lifespan": "2647BC–2648BC",
+  "lifespan": "2648BC–2647BC",
   "gender": "MALE",
   "living": false
  },
@@ -15,10 +15,10 @@
   }
  ],
  "evidence": {
-  "era": "recorded",
+  "era": "saga",
   "support": "unsourced-entry",
   "basis": "era label from dates; support unsourced until sources are harvested",
-  "class": "recorded"
+  "class": "saga"
  },
  "research": {
   "status": "incomplete",

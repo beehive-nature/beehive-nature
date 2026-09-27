@@ -299,7 +299,7 @@ Full source-verified recon: [`docs/dispatches/2026-09-15-protocol-recon-opena2a-
 - **Reconciliation gate applies** as to every item; nothing here drives
   implementation.
 
-## 4 · OPEN-SOURCE E-CASH FAMILY — OPEN · recon receipted 2026-09-16, reuse-first class (research-only)
+## 4 · OPEN-SOURCE E-CASH FAMILY — **CLOSED 2026-09-16 (pre-build spec complete; broad recon closed by founder order — further motion = chartered builder + MMF-1)**
 
 *Received 2026-09-16, founder roll-forward order (Eddies workerb): "identify
 existing open implementations of the useful DBC ideas—offline bearer notes,
@@ -358,6 +358,87 @@ Reuse before invention; no Eddies dependency." Full source-verified recon:*
   (unsupported = anyone-can-spend); *locktime without refund = post-expiry
   anyone-can-spend*; NUT-10 bounds are per-Proof and redemption-time —
   never a substitute for issuance-time authority.
+- **CDK INTERFACE DEEP READ DONE 2026-09-16 (source at `main`) →**
+  [`docs/dispatches/2026-09-16-cdk-adapter-deepread.md`](../dispatches/2026-09-16-cdk-adapter-deepread.md):
+  **fail-closed chain = 4/5 in CDK** (authoring door
+  `TryFrom<SpendingConditions> for Secret` validate-first; enforcement
+  `Proof::verify_p2pk` + 18-variant error enum; discovery types
+  `MintInfo.nuts.nut10/11.supported`; NUT-07 state) — **the mandatory-refund
+  link and the NUT-06 gate are caller policy** (wrapper rules: locktime ⇒
+  refund_keys ⇒ num_sigs_refund ≥ 1; assert nut10+11+12 before
+  mint/spend/accept; re-validate RECEIVED secrets — wire path skips
+  `Conditions::new`). **NUT-24 ABSENT from CDK at `main`** (no nut24 module
+  despite README ✔ — X-Cashu codec would be adapter-owned). **Capability-drift
+  attack ANSWERED: client-side prevention is impossible against a mutable
+  mint** (NUT-06/07/DLEQ = detection only; `supported:true` is a claim, not a
+  proof) — the "never silently lose condition semantics" law survives only
+  as: version-pinned SELF-HOSTED mint (capability change = our redeploy) +
+  receipt-anchored capability snapshot (drift = detectable breach) + capped
+  exposure as backstop. **Smallest adapter defined, not built:** `cashu` +
+  `cdk-http-client` + one store + swappable self-hosted `cdk-mintd`, four
+  gates (issuance / redemption / X-Cashu codec / drift watch) at the
+  existing Door/FacilitatorSettle seam. Four laws banked (§5 of the
+  dispatch).
+- **SELF-HOSTED-MINT ASSAULT + SNAPSHOT CONTRACT DESIGNED 2026-09-16 →**
+  [`docs/dispatches/2026-09-16-mintd-assault-snapshot-contract.md`](../dispatches/2026-09-16-mintd-assault-snapshot-contract.md):
+  "self-hosted ⇒ capability changes only on redeploy" is **FALSE** — three
+  live mutation channels (binary; management-RPC/DB via
+  `reconcile_canonical_configuration`; config), plus a **remote-signatory
+  custody channel** whose v0.17 migration silently NULLS local
+  seed/mnemonic when a legacy signatory existed; runtime keyset rotation =
+  fake-wallet test scaffolding only. **CapabilitySnapshot v1 + drift-watch
+  state machine DESIGNED (nothing built):** receipt-anchored snapshot
+  (verbatim NUT-06 + MintVersion binary pin, keyset public-key hashes,
+  fees/limits, cap-policy hash) whose core is a **behavioral probe at
+  issuance** (mint a dust condition-carrying proof, wrong-witness swap,
+  EXPECT typed refusal — CD-4 executed live); drift classified
+  BENIGN/SEMANTIC/HARD/SILENT with fail-closed defaults; upgrade protocol
+  = **pin → probe → carry-or-drain** with the invariant `note semantics =
+  secret bytes × keyset keys (byte-equal) × enforcement (re-probe equal)`.
+  Honest concession: the contract makes drift DETECTED + ATTRIBUTED, not
+  prevented — prevention stays physical (deploy boundary, RPC access,
+  signatory continuity, capped exposure). **NUT-24 RESOLVED mechanically:**
+  commit 7246ea2e renamed nut24.rs → nut25.rs ("bolt12 is nut25") — X-Cashu
+  HTTP-402 was NEVER implemented in CDK; README ✔24 is stale pre-renumber
+  documentation.
+- **ADVERSARIAL TEST CONTRACT DESIGNED 2026-09-16 (CA-1..CA-7, red-first,
+  zero implementation) →**
+  [`docs/dispatches/2026-09-16-cashu-adversarial-contract.md`](../dispatches/2026-09-16-cashu-adversarial-contract.md):
+  the seven founder-named vectors (lying NUT-06 / enforcement vanishes /
+  keyset retirement / signatory change / RPC drift / unreachable mint /
+  snapshot-reality disagreement), each with setup→stimulus→expectation→
+  RED-when, in the estate's AV/D shape. **Reuse verdict: a future Cashu
+  adapter invents ZERO new state machines** — CA-2/3/6 run on AV-8's
+  original-obstruction/no-fresh-key law transposed to proofs (reconcile the
+  original PROOF, never re-blind to paper over drift) + flag-not-credit +
+  terminal-state; CA-4 reuses HumanGate with one named extension
+  (signing-lineage succession = RED-class); CA-5 reuses the fee-cap family
+  (fee drift = cap drift) + bounded exposure as the standing backstop;
+  CA-7 reuses the door's torn-journal corruption modes verbatim for the
+  snapshot store; CA-1 extends CD-4/D-4 to a LIVE counterparty (the
+  behavioral probe). Harness prerequisite named, not built: one
+  mutable-mint fixture (cdk-fake-wallet seed + lying/laxer-enforcement
+  stubs) = the FIRST build item if ever chartered, per the red-first
+  pipeline law (specs seat attacks → builder proves RED → CI arbitrates).
+- **MMF-1 FINAL PRE-BUILD SPEC + LANE CLOSED (2026-09-16) →**
+  [`docs/dispatches/2026-09-16-mmf1-fixture-spec.md`](../dispatches/2026-09-16-mmf1-fixture-spec.md):
+  the mutable-mint fixture specified so a builder makes ZERO architecture
+  decisions — one in-process binary, ephemeral ports, real e-cash crypto
+  (fake JUDGMENT only: `Enforcement::{Full, Lax(holes), None}` DELEGATES to
+  the real `verify_p2pk` or bypasses it), two planes (cashu wire + control),
+  `dump()/load()` state transfer for restart arms; controls C1–C8
+  (nut06-claims / enforcement / keysets incl. same-id key mutation /
+  two-seed signatory lineages / fees-limits / per-connection
+  drop-hang-garbage / per-Y NUT-07 overrides incl. Flaky / thirteen named
+  presets); the control→CA→AV/D map as the contract spine; fixture
+  self-tests F-1–F-5 (independence matrix, preset goldens, Full≡reference
+  conformance, round-trip, plane separation) as landable-or-not gates;
+  out-of-scope list to prevent drift. **Standing lane conclusions:** Cashu
+  = projection language + adapter seam; ZERO new recovery state machines;
+  declared≠enforced, drift = detected+attributed never silently prevented;
+  prevention stays physical (self-hosted pinned mint + human-gated
+  succession + capped exposure). Arc: c91c9051 → 1aa2cc49 → 4523c0b8 →
+  efbe56d9 → 4d199a23 → MMF-1.
 
 ---
 

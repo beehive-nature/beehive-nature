@@ -3,7 +3,13 @@
 //! LAWS (each tested in tests/acceptance.rs):
 //! - EXCLUSIVE-WRITER: every public mutation holds `File::lock` on
 //!   `<root>/.lock` across its entire read/check/write sequence (std lock:
-//!   flock/LockFileEx — kernel-released on process death).
+//!   flock/LockFileEx — kernel-released on process death). An
+//!   exclusively-opened instance (D-5) holds that lock for its process
+//!   lifetime — its mutations run UNDER that hold and serialize on the
+//!   instance's in-process mutex, because a second OS acquire on a fresh
+//!   handle would wait on our own lifetime hold (std file locks conflict
+//!   per open file description, same process included — the boot
+//!   self-deadlock of 2026-09-17, tests/boot_exclusive.rs).
 //! - TORN FAILS CLOSED: an unparseable reservation file refuses every
 //!   operation that must read it, naming the file. Never guess state.
 //! - EVIDENCE-GATED RECONCILE DOWN: a reservation's gas exposure
@@ -69,11 +75,28 @@ pub enum ReservationState {
     /// the on-chain 3009 nonce protects funds, not gas).
     Settling { reserved_gas_wei: u64 },
     /// Settled with on-chain evidence; exposure reconciled to actual.
+    /// `reorg_note` (AV-5) preserves prior evidence textually when a reorg
+    /// was flagged and later resolved — history is never erased.
     Settled {
         actual_amount: String,
         tx_hash: String,
         gas_actual_wei: u64,
         settled_unix: u64,
+        #[serde(default)]
+        reorg_note: Option<String>,
+    },
+    /// AV-5: a reorg changed HISTORY underneath a confirmed settlement.
+    /// The flag preserves the prior evidence verbatim and STOPS credit —
+    /// it decides NOTHING (no refund, no debit, no re-settlement).
+    /// Replay and expiry release are refused while flagged; the only exit
+    /// is human-gated resolution with NEW evidence (upto law holds).
+    ReorgFlagged {
+        actual_amount: String,
+        tx_hash: String,
+        gas_actual_wei: u64,
+        settled_unix: u64,
+        reorg_depth: u32,
+        flagged_unix: u64,
     },
     /// Settlement failed WITHOUT evidence — the reservation stays (law:
     /// no free without evidence); a later settle may retry the attempt.
@@ -93,6 +116,13 @@ pub struct Reservation {
     pub record_version: u32,
     pub leg: LegKey,
     pub state: ReservationState,
+    /// AV-6: lifetime count of this leg's no-evidence settle failures —
+    /// the retry-ceiling input. Leg-lifetime data, deliberately OUTSIDE
+    /// the state enum: at failure-record time the state is `Settling`
+    /// (begin_settle already transitioned), so a state-sourced counter
+    /// would reset every cycle. Serde-defaulted: pre-AV-6 records read 0.
+    #[serde(default)]
+    pub settle_attempts: u32,
     pub updated_unix: u64,
 }
 
@@ -100,11 +130,28 @@ pub struct Journal {
     root: PathBuf,
     /// Daily gas cap in wei (operations budget — the ops wallet class).
     pub daily_gas_cap_wei: u64,
+    /// AV-6 retry ceiling: the maximum number of no-evidence settle
+    /// attempts ONE leg may make before the door refuses further retries
+    /// LOUD (the corpus FeePlan names failure-charge + retry ceilings; the
+    /// number is config, the ceiling is law). Applies per leg — other legs
+    /// are unaffected.
+    pub max_settle_attempts_per_leg: u32,
     /// When opened exclusively (D-5), the instance holds the OS lock for
     /// its lifetime — kernel-released on process death, so a crashed
     /// opener can never strand the root.
     _held: Option<File>,
+    /// In-process mutation serialization for the exclusive shape: when
+    /// `_held` owns the OS lock process-lifetime, mutations cannot take a
+    /// second OS acquire (self-deadlock) and must not run unlocked either
+    /// — they serialize HERE instead (the EXCLUSIVE-WRITER law's
+    /// no-interleaved-read/check/write guarantee, held open file
+    /// description in place of a per-call one).
+    mutation_lock: std::sync::Mutex<()>,
 }
+
+/// Default per-leg retry ceiling (AV-6). The value is an operations
+/// choice; the CEILING itself is the law.
+pub const DEFAULT_MAX_SETTLE_ATTEMPTS_PER_LEG: u32 = 3;
 
 /// The typed on-chain verdict for an expiry release (D-4): a bare bool
 /// invited the lying-RPC contradiction attack — the journal now demands
@@ -148,10 +195,27 @@ impl HumanGate {
     }
 }
 
-struct LockGuard(File);
-impl Drop for LockGuard {
+/// The mutation authority (EXCLUSIVE-WRITER), in two shapes:
+/// - `Os`: a per-call OS lock on `.lock`, kernel-released — the only
+///   shape a non-exclusive instance ever uses.
+/// - `Held`: the OS lock ALREADY OWNED process-lifetime by this
+///   exclusive instance (D-5). A second OS acquire on a fresh handle
+///   would wait on our own hold — std file locks conflict per open file
+///   description, same process included — so the mutation instead
+///   serializes on the in-process mutex. The OS hold itself is never
+///   touched by this guard: it lives and dies with the instance.
+enum LockGuard<'a> {
+    Os(File),
+    /// RAII-only payload: held so the in-process mutex stays locked until
+    /// the guard drops, never read.
+    #[allow(dead_code)]
+    Held(std::sync::MutexGuard<'a, ()>),
+}
+impl Drop for LockGuard<'_> {
     fn drop(&mut self) {
-        let _ = self.0.unlock();
+        if let LockGuard::Os(f) = self {
+            let _ = f.unlock();
+        }
     }
 }
 
@@ -190,15 +254,25 @@ impl Journal {
         Ok(Journal {
             root: root.to_path_buf(),
             daily_gas_cap_wei,
+            max_settle_attempts_per_leg: DEFAULT_MAX_SETTLE_ATTEMPTS_PER_LEG,
             _held: None,
+            mutation_lock: std::sync::Mutex::new(()),
         })
+    }
+
+    /// AV-6: override the per-leg retry ceiling (operations config; the
+    /// ceiling itself is law).
+    pub fn with_max_settle_attempts(mut self, n: u32) -> Self {
+        self.max_settle_attempts_per_leg = n;
+        self
     }
 
     /// D-5 concurrent journal start: acquire the EXCLUSIVE OS lock and
     /// hold it for this instance's lifetime (try-lock — a second live
     /// opener is REFUSED by name, never blocks, never split-brains). The
     /// kernel releases the hold when the process dies — a crashed opener
-    /// cannot strand the root.
+    /// cannot strand the root. Mutations through this instance run UNDER
+    /// the hold (see `acquire_exclusive`), never by re-acquiring it.
     pub fn open_exclusive(root: &Path, daily_gas_cap_wei: u64) -> JResult<Self> {
         fs::create_dir_all(root)?;
         let lock = OpenOptions::new()
@@ -214,7 +288,9 @@ impl Journal {
         Ok(Journal {
             root: root.to_path_buf(),
             daily_gas_cap_wei,
+            max_settle_attempts_per_leg: DEFAULT_MAX_SETTLE_ATTEMPTS_PER_LEG,
             _held: Some(lock),
+            mutation_lock: std::sync::Mutex::new(()),
         })
     }
 
@@ -222,7 +298,27 @@ impl Journal {
         self.root.join(".lock")
     }
 
-    fn acquire_exclusive(&self) -> JResult<LockGuard> {
+    fn acquire_exclusive(&self) -> JResult<LockGuard<'_>> {
+        if self._held.is_some() {
+            // The boot law (2026-09-17, gesture-D F1): this instance
+            // already owns the exclusive OS lock on `.lock` for the
+            // process lifetime. Re-acquiring on a fresh handle would
+            // block against our own hold forever — recovery, reserve,
+            // settle, every mutation runs UNDER the authority already
+            // held, serialized in-process. Exclusivity is not weakened:
+            // no other opener can hold the OS lock while we live (D-5
+            // try-refusal), and no two mutations of this instance
+            // interleave (the mutex).
+            return Ok(LockGuard::Held(
+                self.mutation_lock
+                    .lock()
+                    // Poison-tolerant BY DESIGN to mirror OS-flock
+                    // semantics: the kernel has no poisoned state — a
+                    // thread that dies mid-mutation simply releases,
+                    // and record writes are atomic (tmp+rename).
+                    .unwrap_or_else(|e| e.into_inner()),
+            ));
+        }
         let f = OpenOptions::new()
             .create(true)
             .read(true)
@@ -230,7 +326,7 @@ impl Journal {
             .truncate(false)
             .open(self.lock_path())?;
         f.lock().map_err(JournalError::Io)?;
-        Ok(LockGuard(f))
+        Ok(LockGuard::Os(f))
     }
 
     fn leg_path(&self, leg: &LegKey) -> PathBuf {
@@ -315,6 +411,9 @@ impl Journal {
                 ReservationState::FailedKeep {
                     reserved_gas_wei, ..
                 } => total += reserved_gas_wei,
+                // AV-5: a reorg flag re-retains the ACTUAL gas as exposure
+                // (outcome undetermined — fail-closed for the budget).
+                ReservationState::ReorgFlagged { gas_actual_wei, .. } => total += gas_actual_wei,
                 _ => {}
             }
         }
@@ -380,6 +479,9 @@ impl Journal {
                     "authorization nonce is Unknown — human gate required before any new action"
                         .into(),
                 )),
+                ReservationState::ReorgFlagged { .. } => Err(JournalError::Law(
+                    "prior settlement is reorg-flagged — outcome undetermined; resolve before any new reservation (AV-5)".into(),
+                )),
                 ReservationState::ExpiredReleased { .. } => Err(JournalError::Law(
                     "authorization window expired and was released — cannot reserve".into(),
                 )),
@@ -415,6 +517,7 @@ impl Journal {
             record_version: RECORD_VERSION,
             leg: leg.clone(),
             state: ReservationState::Reserved { reserved_gas_wei },
+            settle_attempts: 0,
             updated_unix: now,
         })
     }
@@ -455,6 +558,11 @@ impl Journal {
             ReservationState::Settling { .. } => Err(JournalError::Law(
                 "settlement in flight -- exactly one executor; retry after completion".into(),
             )),
+            ReservationState::ReorgFlagged { reorg_depth, .. } => Err(JournalError::Law(
+                format!(
+                    "reorg-flagged (depth {reorg_depth}): history changed, outcome UNDETERMINED -- replay refused, evidence preserved; resolve with new evidence through the human gate (AV-5); the flag never decides refund, debit, or settlement"
+                ),
+            )),
             ReservationState::Unknown { .. } => Err(JournalError::Law(
                 "Unknown settlement -- never auto-retried; human gate required".into(),
             )),
@@ -464,12 +572,19 @@ impl Journal {
         }
     }
 
-    /// SETTLE with evidence — exposure reconciles DOWN to actual.
+    /// SETTLE with evidence — exposure reconciles DOWN to actual. A
+    /// ReorgFlagged leg refuses here: `resolve_reorg` is the only door out
+    /// of a reorg flag (AV-5).
     pub fn settle_with_evidence(&self, leg: &LegKey, ev: &SettleEvidence) -> JResult<()> {
         let _guard = self.acquire_exclusive()?;
         let mut rec = self
             .get(leg)?
             .ok_or_else(|| JournalError::Law("no reservation (fail-closed)".into()))?;
+        if matches!(rec.state, ReservationState::ReorgFlagged { .. }) {
+            return Err(JournalError::Law(
+                "reorg-flagged: settle_with_evidence refused — resolve_reorg is the only door out (AV-5)".into(),
+            ));
+        }
         let cap = rec
             .leg
             .amount_authorized
@@ -489,6 +604,7 @@ impl Journal {
             tx_hash: ev.tx_hash.clone(),
             gas_actual_wei: ev.gas_actual_wei,
             settled_unix: now_unix(),
+            reorg_note: None,
         };
         rec.updated_unix = now_unix();
         self.write(&rec)
@@ -518,6 +634,7 @@ impl Journal {
             } => reserved_gas_wei,
             _ => 0,
         };
+        rec.settle_attempts += 1;
         rec.state = ReservationState::FailedKeep {
             reason: reason.to_string(),
             reserved_gas_wei: retained,
@@ -601,6 +718,103 @@ impl Journal {
         self.write(&rec)
     }
 
+    /// AV-5: flag a settled leg for a chain reorg. HISTORY CHANGED — the
+    /// flag stops/flags credit and DECIDES NOTHING (no refund, no debit,
+    /// no re-settlement); prior evidence is preserved verbatim. Lawful
+    /// only from Settled (a leg without confirmed evidence has no history
+    /// to flag).
+    pub fn flag_reorg(&self, leg: &LegKey, reorg_depth: u32) -> JResult<()> {
+        let _guard = self.acquire_exclusive()?;
+        let mut rec = self
+            .get(leg)?
+            .ok_or_else(|| JournalError::Law("no reservation (fail-closed)".into()))?;
+        rec.state = match rec.state {
+            ReservationState::Settled {
+                actual_amount,
+                tx_hash,
+                gas_actual_wei,
+                settled_unix,
+                ..
+            } => ReservationState::ReorgFlagged {
+                actual_amount,
+                tx_hash,
+                gas_actual_wei,
+                settled_unix,
+                reorg_depth,
+                flagged_unix: now_unix(),
+            },
+            _ => {
+                return Err(JournalError::Law(
+                    "reorg flag requires a Settled leg — no confirmed evidence, no history to flag (AV-5)".into(),
+                ))
+            }
+        };
+        rec.updated_unix = now_unix();
+        self.write(&rec)
+    }
+
+    /// AV-5: human-gated resolution of a reorg flag with NEW on-chain
+    /// evidence. The gate is BOUNDED by the same upto law as every other
+    /// evidence door; the PRIOR evidence survives textually in
+    /// `reorg_note` (RV-1 family: history is never erased).
+    pub fn resolve_reorg(
+        &self,
+        leg: &LegKey,
+        _gate: HumanGate,
+        ev: &SettleEvidence,
+    ) -> JResult<()> {
+        let _guard = self.acquire_exclusive()?;
+        let mut rec = self
+            .get(leg)?
+            .ok_or_else(|| JournalError::Law("no reservation (fail-closed)".into()))?;
+        let (prior_amount, prior_tx, prior_gas, prior_settled, depth) = match rec.state {
+            ReservationState::ReorgFlagged {
+                actual_amount,
+                tx_hash,
+                gas_actual_wei,
+                settled_unix,
+                reorg_depth,
+                ..
+            } => (
+                actual_amount,
+                tx_hash,
+                gas_actual_wei,
+                settled_unix,
+                reorg_depth,
+            ),
+            _ => {
+                return Err(JournalError::Law(
+                    "resolve_reorg requires the ReorgFlagged state (AV-5)".into(),
+                ))
+            }
+        };
+        let cap = rec
+            .leg
+            .amount_authorized
+            .parse::<u128>()
+            .unwrap_or(u128::MAX);
+        let actual = ev
+            .actual_amount
+            .parse::<u128>()
+            .map_err(|_| JournalError::Law("actual_amount not numeric".into()))?;
+        if actual > cap {
+            return Err(JournalError::Law(format!(
+                "upto law violated through the reorg gate: actual {actual} > authorized {cap} — the gate records truth, not the impossible"
+            )));
+        }
+        rec.state = ReservationState::Settled {
+            actual_amount: ev.actual_amount.clone(),
+            tx_hash: ev.tx_hash.clone(),
+            gas_actual_wei: ev.gas_actual_wei,
+            settled_unix: now_unix(),
+            reorg_note: Some(format!(
+                "reorg depth {depth} resolved; prior evidence tx {prior_tx} amount {prior_amount} gas {prior_gas} settled_unix {prior_settled}"
+            )),
+        };
+        rec.updated_unix = now_unix();
+        self.write(&rec)
+    }
+
     /// Human-gated resolution of an Unknown settlement (watchpay law).
     /// The gate is BOUNDED by the same upto law as automated evidence:
     /// a human records truth, never an impossible over-authorization.
@@ -636,6 +850,7 @@ impl Journal {
             tx_hash: ev.tx_hash.clone(),
             gas_actual_wei: ev.gas_actual_wei,
             settled_unix: now_unix(),
+            reorg_note: None,
         };
         rec.updated_unix = now_unix();
         self.write(&rec)?;

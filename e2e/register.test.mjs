@@ -157,6 +157,10 @@ test('every current estate HTML has one resolvable shared loader; frozen art sta
        in one hop, and the destination's shell is the one that loads. Proven
        by e2e/zcode-music-check.mjs, which follows the redirect end to end. */
     if(p==='surfaces/jams.html')continue;
+    /* watch-ant.html is the same kind of shim, to bview.html (#197 rename,
+       2026-09-21): no shell, one hop, the destination's shell loads. No gate
+       follows this redirect yet. */
+    if(p==='surfaces/watch-ant.html')continue;
     const tags=[...read(p).matchAll(/<script\b[^>]*\bsrc=["']([^"']*\b(?:tour|register)\.js(?:\?[^"']*)?)["'][^>]*>/gi)];
     assert.equal(tags.length,1,p+' must load the shared shell once');
     const target=resolve(dirname(resolve(root,p)),tags[0][1].split('?')[0]);
@@ -171,7 +175,7 @@ test('tour language bootstrap waits for view labels, with a script-error fallbac
   const tour=read('surfaces/tour.js');
   assert.match(tour,/s\.onload=loadLanguage; s\.onerror=loadLanguage/);
   assert.match(tour,/else loadLanguage\(\)/);
-  assert.match(tour,/assetBase\+'register\.js\?v=10'/);
+  assert.match(tour,/assetBase\+'register\.js\?v=11'/);
   assert.match(tour,/assetBase\+'lang\.js\?v=26'/);
   assert.match(read('surfaces/lang.js'),/#bregbar,#bregctl/);
 });

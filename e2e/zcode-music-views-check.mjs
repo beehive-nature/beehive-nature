@@ -73,6 +73,12 @@ try {
       assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1),
         `${reg}@${viewport.width}: no horizontal overflow`);
       assert(await page.locator('.colorlaw:visible').count() === 1, `${reg}: the BNR color-law legend is visible`);
+      assert(await page.locator('.source-panel:visible').count() === 1, `${reg}: the source panel is visible`);
+      assert(await page.locator('#no-track:visible').count() === 1, `${reg}: the honest no-track state is visible`);
+      const notrackB = await contrastOf(page, '#no-track b');
+      assert(notrackB >= 4.5, `${reg}@${viewport.width}: no-track heading contrast ${notrackB.toFixed(2)} < 4.5`);
+      const playNote = await contrastOf(page, '#play-here');
+      assert(playNote >= 4.5, `${reg}@${viewport.width}: play-here disabled contrast ${playNote.toFixed(2)} < 4.5`);
       /* contrast — the texts a reader actually reads, AA for body text */
       const lead = await contrastOf(page, '.lead');
       assert(lead >= 4.5, `${reg}@${viewport.width}: lead contrast ${lead.toFixed(2)} < 4.5`);
@@ -114,7 +120,7 @@ try {
   await page.goto(`${base}/surfaces/music.html`);
   await page.locator('#breg-bee').click();
   await page.locator('#blangsel').selectOption('lv');
-  await page.getByText('Mierīga istaba. Mūzika jau skan.', { exact: true }).waitFor();
+  await page.getByText('Mierīga istaba. Šeit vēl nekas skan - klausīšanās veidi nedaudz zemāk.', { exact: true }).waitFor();
   await page.locator('#breg-raver').click();
   await page.getByText('Deju grīda ir tava.', { exact: true }).waitFor();
   assert((await page.locator('.colorlaw').innerText()).includes('violets = cilvēki'), 'raver/lv: color law renders in Latvian');

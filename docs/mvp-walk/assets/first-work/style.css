@@ -1,7 +1,7 @@
 :root{
   color-scheme:light;
-  --bg:#f6f7f2;--panel:#fff;--ink:#18362a;--dim:#435f4e;--line:#ccd7cf;
-  --accent:#326b39;--on:#fff;--wash:#edf2eb;
+  --bg:#fbf7f0;--panel:#fff;--ink:#0c1412;--dim:#4a5f55;--line:#e6dfd2;
+  --accent:#6e3fb8;--on:#fff;--wash:#efe9dd;
 }
 *{box-sizing:border-box}
 html,body{margin:0;background:var(--bg);color:var(--ink);font:1.1rem/1.65 system-ui,-apple-system,'Segoe UI',sans-serif}

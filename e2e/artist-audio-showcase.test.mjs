@@ -21,7 +21,7 @@ test('New bee is the default; shared register host and custom theme', () => {
   assert.match(page, /<body data-reg="bee" data-bee-theme="custom">/);
   assert.match(page, /data-register-host/);
   assert.match(page, /surfaces\/register\.js\?v=9/);
-  assert.match(page, /<meta name="theme-color" content="#f6f7f2">/);
+  assert.match(page, /<meta name="theme-color" content="#fbf7f0">/);
   assert.match(page, /data-view="bee"/);
   assert.match(page, /data-view="raver"/);
   assert.match(page, /data-view="cypherpunk"/);

@@ -80,7 +80,7 @@ function restoreVisibleFocus(focus){
     if(q.value||family.value||/^#(?:explore$|fam-|org-)/.test(location.hash))collection.open=true;
     restoreVisibleFocus(focus);
     const theme = document.querySelector('meta[name="theme-color"]');
-    if (theme) theme.content = reading === 'bee' ? '#f6f7f2' : '#06110c';
+    if (theme) theme.content = reading === 'bee' ? '#fbf7f0' : '#06110c';
     lastReading=reading;labelFamilies();
   }
   document.addEventListener('bregister',applyReading);

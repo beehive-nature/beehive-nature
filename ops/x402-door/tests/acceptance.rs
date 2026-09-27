@@ -510,16 +510,21 @@ fn law_no_evidence_failure_keeps_reservation() {
     let leg = extract_leg(&req).unwrap();
     d.verify(&leg, &req).unwrap();
     d.settle(&leg, &req).unwrap();
-    match d.journal.get(&leg).unwrap().unwrap().state {
+    let rec = d.journal.get(&leg).unwrap().unwrap();
+    match &rec.state {
         ReservationState::FailedKeep {
             reason,
             reserved_gas_wei,
         } => {
             assert!(reason.contains("reverted"));
-            assert_eq!(reserved_gas_wei, 1_000, "retained exposure carried");
+            assert_eq!(*reserved_gas_wei, 1_000, "retained exposure carried");
         }
         other => panic!("expected FailedKeep, got {other:?}"),
     }
+    assert_eq!(
+        rec.settle_attempts, 1,
+        "first no-evidence failure counts attempt 1"
+    );
     // Budget still carries the kept reservation (exposure counted).
     let open = d.journal.exposure_for_test(&leg.chain).unwrap();
     assert_eq!(open, 1_000);

@@ -43,11 +43,11 @@ function inline(html) {
 const startHere = extractById(social, 'start-here');
 
 test('New bee social door is one light room; the hex band and scanline hide', () => {
-  assert.match(social, /body\[data-reg="bee"\]\{[^}]*background:#f6f7f2/);
+  assert.match(social, /body\[data-reg="bee"\]\{[^}]*background:#fbf7f0/);
   assert.match(social, /body\[data-reg="bee"\] #start-here\{background:#fff/);
   assert.match(social, /body\[data-reg="bee"\] #veil,body\[data-reg="bee"\] #bandwrap\{display:none\}/);
-  assert.match(social, /body\[data-reg="bee"\] #tbar\{background:#f6f7f2!important/);
-  assert.match(social, /<meta name="theme-color" content="#f6f7f2">/);
+  assert.match(social, /body\[data-reg="bee"\] #tbar\{background:#fbf7f0!important/);
+  assert.match(social, /<meta name="theme-color" content="#fbf7f0">/);
 });
 
 test('raver keeps the hex band and restyles the arrival strip to the dark panel', () => {
@@ -133,7 +133,7 @@ test('manual honesty and catalogue choices survive a round-trip through other vi
   document.activeElement = document.body;
   const theme = element('meta');
   theme.attrs.name = 'theme-color';
-  theme.content = '#f6f7f2';
+  theme.content = '#fbf7f0';
   const honesty = element('details');
   honesty.dataset.viewDisclosure = 'honesty';
   honesty.id = 'honesty';

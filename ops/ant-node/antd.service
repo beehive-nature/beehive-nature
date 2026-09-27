@@ -1,0 +1,19 @@
+[Unit]
+Description=antd v0.12.1 arm64 - Autonomi REST/gRPC gateway behind the estate /ant read door (keyless public reads; Caddy fronts it, GET-only)
+Documentation=https://github.com/WithAutonomi/ant-sdk/releases/tag/v0.12.1
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=ubuntu
+# binary on box: /home/ubuntu/ant-lane/antd (sha256 95bad9ad70d47f1f811c1836d0270be3e2e3ed233c81542d7da5d0a7bfe66676 == v0.12.1 antd-linux-arm64, verified 2026-09-21; rollback copy ~/ant-lane/antd.v0.12.0) PUBLIC-CONSTANT: vendor release sha256
+# binds the docker bridge IP only - Caddy reaches it, the public cannot; gRPC stays loopback
+# no --cors: from v0.12.1 a bare --cors allows no origins; Caddy strips antd ACAO and stamps https://skaists.dev
+ExecStart=/home/ubuntu/ant-lane/antd --rest-addr 172.18.0.1:8082
+Environment=ANTD_LOG_LEVEL=info
+Restart=always
+RestartSec=5
+NoNewPrivileges=true
+
+[Install]
+WantedBy=multi-user.target

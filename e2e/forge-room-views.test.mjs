@@ -39,14 +39,14 @@ function coreOf(html) {
 
 test('New bee is a cream room with rem type, a calm lead, and 44px primary knobs', () => {
   assert.match(room, /<body data-reg="bee" data-bee-theme="custom">/);
-  assert.match(room, /<meta name="theme-color" content="#f6f7f2">/);
-  assert.match(room, /body\[data-reg=bee\]\{[^}]*background:#f6f7f2/);
+  assert.match(room, /<meta name="theme-color" content="#fbf7f0">/);
+  assert.match(room, /body\[data-reg=bee\]\{[^}]*background:#fbf7f0/);
   assert.match(room, /body\[data-reg=bee\]\{[^}]*font:1\.125rem/);
   assert.match(room, /Open a second tab\. Turn a knob\. Watch it move\./);
   assert.match(room, /<span data-view="bee" data-i18n="room.title">The two-tab room<\/span>/);
   assert.match(room, /body\[data-reg=bee\] input,body\[data-reg=bee\] button\{min-height:44px/);
   assert.match(room, /body\[data-reg=bee\] input\[type=range\]\{min-height:44px/);
-  assert.match(room, /body\[data-reg=bee\] #tbar\{background:#f6f7f2!important/);
+  assert.match(room, /body\[data-reg=bee\] #tbar\{background:#fbf7f0!important/);
   assert.match(extractById(room, 'pDensity'), /id="pDensity"/);
   assert.match(extractById(room, 'pHue'), /id="pHue"/);
   assert.match(extractById(room, 'pSym'), /id="pSym"/);
@@ -156,7 +156,7 @@ test('manual seed and tech choices survive a round-trip through other views', ()
   document.activeElement = document.body;
   const theme = element('meta');
   theme.attrs.name = 'theme-color';
-  theme.content = '#f6f7f2';
+  theme.content = '#fbf7f0';
   const seed = element('details');
   seed.dataset.viewDisclosure = 'seed';
   seed.id = 'seed-panel';

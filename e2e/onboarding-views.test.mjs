@@ -228,7 +228,7 @@ test('beats remember per view and Cypherpunk refuses a first-paint trim', () => 
   document.activeElement = document.body;
   const theme = element('meta');
   theme.attrs.name = 'theme-color';
-  theme.content = '#f6f7f2';
+  theme.content = '#fbf7f0';
   for (const id of ['first-bee','first-raver','layer-choice','layer-figure','instrument','stage','net']) {
     const n = element(id === 'stage' ? 'main' : 'div');
     n.attrs.id = id;

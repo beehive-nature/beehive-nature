@@ -31,7 +31,7 @@ function extractById(html, id) {
 
 test('New bee uses the shared light canvas; raver and cypherpunk keep this page\'s dark reading', () => {
   assert.match(page, /<body data-reg="bee" data-bee-theme="shared">/);
-  assert.match(page, /<meta name="theme-color" content="#f6f7f2">/);
+  assert.match(page, /<meta name="theme-color" content="#fbf7f0">/);
   assert.match(page, /body\[data-reg="bee"\]\[data-bee-theme="shared"\] #comet\{display:none\}/);
   assert.match(page, /data-reg="bee">String beads, name it/);
   assert.match(page, /data-reg="raver">make it\. name it\. do the handshake/);

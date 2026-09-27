@@ -53,6 +53,14 @@ if (a !== b) { console.error('counts block drifted from the registry itself:\n  
 /* the hub embeds the registry between markers — the embedded copy must equal
    the file, or the page renders stale numbers CI can't see */
 const page = readFileSync('surfaces/index.html', 'utf8');
+/* bui Slice 01 (queen order 1822fa54): the hub body bakes the STATE ROOT -
+   sha256 over the estate.json bytes as served - and the daily-art chain
+   derives from that digest. This row proves the baked attribute can never
+   drift from the registry file it summarizes. */
+import { createHash } from 'node:crypto';
+const rootAttr = page.match(/<body[^>]*\sdata-state-root="([0-9a-f]{64})"/);
+if (!rootAttr) fail('surfaces/index.html lost its data-state-root - run scripts/build-atlas.mjs');
+if (rootAttr[1] !== createHash('sha256').update(readFileSync('estate.json')).digest('hex')) fail('data-state-root drifted from estate.json - run scripts/build-atlas.mjs');
 const m = page.match(/<!--ESTATE-JSON-START-->([\s\S]*?)<!--ESTATE-JSON-END-->/);
 if (!m) fail('surfaces/index.html lost its ESTATE-JSON markers');
 const embedded = JSON.parse(m[1]);

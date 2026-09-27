@@ -732,3 +732,324 @@ typing). The WS reader slice is the natural carrier for LT-2/3/5.
 
 *Eighth roll, 2026-09-16. Pipeline law unchanged: builder proves RED, fixes GREEN, CI
 arbitrates; zArcheology designs tests only, zero production code, zero network.*
+
+---
+
+## NINTH ROLL — authorization-time capability binding ACROSS RECOVERY (2026-09-16)
+
+*Founder law for this roll, verbatim: "A recovered payment may learn **new evidence**, but it
+may never inherit **new capabilities** without a new authorization." Builds on SPEC MP (seventh
+roll): MP binds the manifest hash+version at authorization; this roll attacks every path that
+could smuggle a different binding back in through recovery. Targets: the durable journal
+persistence of the binding, the reconcile/evidence path (R11 law), the replacement path
+(AV-8.3), and adapter upgrades (ties to DEPLOYMENTS.md R2 identity pinning).*
+
+### SPEC RB — recovery preserves the signed binding (RED-first)
+
+| # | case | exact pass criterion | fail criterion |
+|---|---|---|---|
+| RB-0 | journal round-trip of the binding (mechanism) | the per-leg manifest hash+version is IN the durable record: write → drop handle → reopen → binding byte-equal; never recomputed from the live manifest | binding reconstructed from current state on reopen |
+| RB-1 | crash mid-leg; manifest upgraded to v2/h2 DURING downtime; restart recovers and continues the leg | recovered binding == h1 (asserted from the recovered record); capability lookups for that leg resolve against the BOUND manifest, not the live one; new legs see the typed DRIFT refusal (MP-2) | recovered leg silently carrying h2 |
+| RB-2 | UNKNOWN leg under h1; manifest drifts; settle-evidence arrives whose validity DIFFERS by manifest (h1 declares reorg-depth-12, h2 relaxes to depth-2; evidence at depth-6: passes h2, fails h1) | evidence validated under the BOUND h1 semantics → refused; acceptance via the live h2 = **capability inheritance through the evidence path** | depth-6 evidence accepted for an h1-bound leg |
+| RB-3 | adapter IMPLEMENTATION upgrade declaring the same manifest (code changed, manifest didn't — lying by omission) | manifest must bind implementation identity (crate/version digest or the DEPLOYMENTS.md row hash); CD-4 behavior probes re-run on upgrade catch the divergence | upgraded adapter passes under a stale manifest |
+| RB-4 | version-ONLY bump (v1→v1.1, semantically neutral, additive) | still a typed drift event for unopened legs; opened legs grandfather under v1 EXACTLY — no partial inheritance of "just the new optional stuff"; the version IS the binding | silent version migration |
+| RB-5 | bounded replacement after drift | the replacement carries the ORIGINAL h1 binding and validates under h1 semantics (fees, finality, ceilings); a replacement satisfying only h2 semantics = typed refusal; the lawful path to h2 is a NEW authorization | replacement constructed under live-manifest semantics |
+| RB-6 | lawful re-authorization (positive control) | post-drift, a NEW authorization binds h2: old leg reaches terminal-or-refunded, new leg executes under h2, both coexist without interference — recovery never traps a payer | re-authorization blocked or cross-bound |
+| RB-7 | negative controls | (a) re-binding recovery (journal + live manifest) DETECTED by RB-1; (b) evidence-path inheritance DETECTED by RB-2; (c) replacement inheritance DETECTED by RB-5 | harness blind on any axis |
+
+**RED expectations:** RB-0 (no binding type exists yet — MP-3's RED charters it, RB-0 pins its
+persistence), RB-2/RB-5 (evidence and replacement paths have no manifest-awareness today),
+RB-3 (nothing binds implementation identity). **Harness:** crash/restart via drop-and-reopen of
+the journal handle against a mutated on-disk manifest fixture (deterministic — no real SIGKILL
+needed for the binding question; AV-1 covers process-level crash separately); mutable-version
+manifest fixtures from the seventh roll; zero network; live NWC stays `#[ignore]` env-gated.
+
+*Single-writer discipline (founder order, 2026-09-16): no additional zArcheology writers on
+this artifact — existing sessions finish their rolls; future parallelism goes to DIFFERENT
+workerb lanes, not this file. — Ninth roll, 2026-09-16. Pipeline law unchanged: builder proves
+RED, fixes GREEN, CI arbitrates; zArcheology designs tests only.*
+
+---
+
+## TENTH ROLL — the authorization object itself (2026-09-16)
+
+*Founder law for this roll, verbatim: "the journal may preserve an authorization binding, but
+it may never create or strengthen one." RB closed recovery-time capability inheritance; this
+roll ensures the ORIGINAL authorization actually committed to those capabilities in the first
+place — the binding must be CRYPTOGRAPHICALLY inside the signed material, not copied into the
+journal afterward. Targets: the signed-authorization construction (watchpay `ValidatedPlan`
+sealing, bsigner member's-hand verification, `capAssert`), the canonical serializer (RS-3.3
+discipline), and the journal (RB-0's durable record — now demoted to PRESERVER, never
+source). Verification runs through the estate's existing signature verification (bsigner
+organ), never a bespoke re-check.*
+
+### SPEC AB — the binding is signature-authoritative (RED-first)
+
+| # | case | exact pass criterion | fail criterion |
+|---|---|---|---|
+| AB-0 | signed-scope proof (mechanism): authorization signed WITH per-leg manifest hash+version+implementation identity | verification re-derives the signed bytes from the leg INCLUDING the binding — strip the binding from the signed material and the signature FAILS; the journal record's binding is compared against the signed one, and the SIGNED one wins | verification reading the journal's binding as ground truth |
+| AB-1 | journal-insertion attack (the core invariant) | a journal record claiming a binding the signed authorization does NOT contain → verification fails, named; the journal PRESERVES, never CREATES | journal-authoritative binding accepted |
+| AB-2 | omission, both directions | auth signed WITHOUT a binding + journal later carrying one → refused (a leg cannot gain capabilities the signature never committed to); auth signed WITH a binding + journal dropping it → the leg REFUSES to execute unbound (an unbound leg cannot detect drift — no unbound leg executes at all) | either direction silently accepted |
+| AB-3 | leg swapping | auth signs leg A under h1, leg B under h2 (both individually lawful); journal swaps them (leg A carrying h2) | per-leg signature verification FAILS on the swapped assignment — each leg's signed material binds ITS OWN manifest | swap verifies |
+| AB-4 | manifest-hash substitution | same version string, different content (h1 vs h1′); and manifest content mutated while version kept | binding is by CONTENT HASH: substitution breaks the signature; stored manifest snapshots must hash to the bound value; live-manifest lookups resolve through the signed hash | version-string-only binding passes |
+| AB-5 | implementation-identity substitution | same manifest hash, DIFFERENT adapter implementation digest | implementation identity is INSIDE the signed scope (RB-3's pin made cryptographic); substitution breaks the signature. RED-note: if impl identity lives only in the journal today, this RED charters moving it into the signed material | undetectable swap |
+| AB-6 | mixed old/new bindings in ONE plan (the lawful RB-6 shape attacked) | plan with leg A under h1, leg B under h2 (post-drift re-authorization) | each leg verifies against ITS OWN binding — mixed bindings coexist lawfully; any plan-level "current manifest" homogenization applied to both legs = substitution, refused. Generalized: merging legs across two authorizations (A's leg under B's signature) FAILS per-leg verification | homogenized or cross-signed assignment verifies |
+| AB-7 | canonicalization of the signed material | field-order/whitespace variants of one authorization verify IDENTICALLY (same canonical form → same signature); ANY binding-field mutation changes it; canonical form pinned with cross-implementation vectors (corpus fixture law; RS-3.3) | ambiguous canonical form survives |
+| AB-8 | negative controls | journal-authoritative implementation DETECTED (AB-1); unbound-leg execution DETECTED (AB-2); cross-leg/cross-authorization assignment DETECTED (AB-3/AB-6) | harness blind on any axis |
+
+**RED expectations:** AB-0/AB-1/AB-5 are near-certain RED (no binding exists in any signed
+scope today — MP-3/RB charters the type, THIS roll forces it into the SIGNATURE); AB-4's
+snapshot-hash pin and AB-6's per-leg mixed verification follow. **Harness:** deterministic
+test signer from the estate's existing crypto (capability crate's real ed25519), canonical
+serializer fixtures, journal with tamper injection points; zero network; live NWC `#[ignore]`.
+
+*Tenth roll, 2026-09-16. Single-writer discipline stands. Pipeline law unchanged: builder
+proves RED, fixes GREEN, CI arbitrates; zArcheology designs tests only.*
+
+---
+
+## ELEVENTH ROLL — revocation without mutation (2026-09-16)
+
+*Founder law for this roll, verbatim: "revocation may reduce future authority; it may never
+rewrite historical authorization, erase settlement evidence, or manufacture a new
+authorization." Completes the AB side of the chain: MP (plan binds) → RB (recovery preserves)
+→ AB (signature commits) → RV (authority safely REDUCED without rewriting history). Estate
+ancestors: capAssert caps (exhaustion analog), Jungle4 linkauth/unlinkauth (bounded-authority
+revocation), the corpus's own contract shape — "pause new authority: stop new exposure,
+preserve qualified claims/exits"; "registered accepted obligations survive revocation and
+timeout" (SILENTPAY-V2 §6).*
+
+### SPEC RV — revocation is append-only, bound, and tri-state (RED-first)
+
+| # | case | exact pass criterion | fail criterion |
+|---|---|---|---|
+| RV-0 | the revocation object (mechanism) | revocation is a SEPARATE signed event bound to the authorization id (+ leg ids for partial revocation), stored APPEND-ONLY; the authorization's own journal record is byte-identical pre/post revocation | in-place status flip on the authorization record |
+| RV-1 | replay after revocation | settled-leg evidence replayed → idempotency routes to lookup, zero new effect (settlement evidence survives revocation); NEW spend attempt under the revoked authorization → typed refusal carrying the **authorized-and-revoked** distinction | settled history erased/unreplayable; or new spend accepted |
+| RV-2 | revocation during UNKNOWN | Unknown + revoke + settle-evidence → resolves Settled (EVIDENCE wins for historical work); + proof-of-non-settlement → Expired/Refunded; + NO evidence → stays Unknown under HumanGate — **revocation never auto-resolves an Unknown** (that would manufacture an outcome) | revoke forcing Unknown→failed (history rewrite) or auto-settle |
+| RV-3 | revocation during `Settling` | an already-STARTED settle runs to evidence (aborting mid-flight burns gas without record — worse); not-yet-started settles refuse; concurrent race (revocation vs Settling transition) has a deterministic winner with no double effect and no lost evidence, either order | mid-flight abort losing evidence; double effect |
+| RV-4 | replacement after revocation | bounded replacement under the revoked authorization → typed refusal (replacement is derived spending authority; revocation kills it); replacement under a NEW authorization → lawful (RB-6/AB-6 path), coexists | replacement executes under dead authority |
+| RV-5 | partial multirail revocation | (a) plan-level: unopened legs reduced, opened legs grandfather (RB/MP), their evidence preserved; (b) leg-level: revocation of leg A leaves leg B's record byte-identical — each revocation bound to its own leg identity | leg A's revocation touching B; plan revocation rewriting opened-leg history |
+| RV-6 | crash/restart with a revoked authorization | crash AFTER the revocation is recorded → revocation survives, authorization record still byte-identical, tri-state intact; crash BEFORE recording → NO phantom revocation on recovery — the journal may not manufacture authorizations OR revocations (a revocation is itself signed evidence) | phantom revocation; lost revocation |
+| RV-7 | the tri-state distinction (founder-required) | verification/recovery distinguishes **never-authorized** (AB invalid — no valid signature ever) / **authorized-and-active** (executes) / **authorized-and-revoked** (refuses new work, preserves history) — three fixtures, three distinct typed outcomes, surviving restart | revoked conflated with never-authorized (erases history) or with active (fails to reduce) |
+| RV-8 | exhaustion + supersession (the sibling reduction paths) | exhaustion: budget fully consumed behaves as natural revocation (ceiling math is the bound; replay routes to lookup; nothing rewritten); supersession: a new authorization carries an append-only supersession event referencing the old id — old becomes revoked-shaped, history preserved, new binding per AB | exhaustion or supersession implemented as deletion/rewrite |
+| RV-9 | negative controls | in-place mutation DETECTED (RV-0); revoked↔never-authorized conflation DETECTED (RV-7); Unknown auto-resolution DETECTED (RV-2); settle-evidence erasure DETECTED (RV-1) | harness blind on any axis |
+
+**RED expectations:** no revocation object exists anywhere today — RV-0 is the charter RED;
+the tri-state (RV-7) and Unknown-preservation (RV-2) follow. **Harness:** same fixtures as
+AB/RB (test signer, canonical serializer, tamper-injectable journal) + a revocation-event
+fixture builder; zero network; live NWC `#[ignore]`.
+
+*Eleventh roll, 2026-09-16. Single-writer discipline stands. Pipeline law unchanged: builder
+proves RED, fixes GREEN, CI arbitrates; zArcheology designs tests only.*
+
+---
+
+## TWELFTH ROLL — delegated authority (2026-09-16)
+
+*Founder law for this roll, verbatim: "a child authorization may only reduce its parent's
+authority; it may never amplify, reinterpret, refresh, or escape it." Completes the authority
+model: MP→RB→AB→RV govern ONE authorization; DG governs authority that begets narrower
+authority. Estate ancestors: the capability crate's exclusive allocation (UCAN-shaped) and the
+corpus Capability law — "a parent capability can allocate a budget to child capabilities only
+through an exclusive reservation/state update. Each child does not inherit the full unspent
+parent budget" (SILENTPAY-V2 §5); "Delegation allocates rather than duplicates budgets"
+(corpus AGENTS.md). RV's tri-state is PRESERVED THROUGHOUT: never-authorized /
+authorized-but-later-reduced / historically-qualified-before-reduction must stay distinct at
+every hop — collapsing them recreates exactly the history-rewriting RV eliminated.*
+
+### SPEC DG — the child is the intersection, never an extension (RED-first)
+
+| # | case | exact pass criterion | fail criterion |
+|---|---|---|---|
+| DG-0 | the delegation object (mechanism) | a child authorization is ITSELF a full AB-law signed authorization PLUS a cryptographic ancestry chain: the child's signature covers its own AB binding AND the parent authorization id + lineage proof; append-only; the parent's record byte-identical on delegation | in-place parent mutation; unsigned ancestry |
+| DG-1a | amount/fee ceilings | child ceiling ≤ parent REMAINING (exclusive reservation — allocation, not duplication); Σ children ≤ parent total | child exceeding, or siblings double-allocating |
+| DG-1b | expiry | child expiry ≤ parent expiry, always | child outliving parent |
+| DG-1c | rail capabilities | child's demanded capability set ⊆ parent's authorized set | child demanding what the parent lacks |
+| DG-1d | destinations/actions | child's allowed set ⊆ parent's | widening |
+| DG-1e | implementation binding | child's manifest hash+version+impl identity == the parent's — a child CANNOT re-bind a newer manifest (RB/AB composed); the only road to h2 is a new root authorization | child binding h2 under an h1 parent |
+| DG-1f | privacy scope | privacy only STRENGTHENS downward: a child may not weaken below the parent's privacy floor (a private parent cannot delegate a public child; public→private is lawful reduction) | privacy downgrade through delegation |
+| DG-2 | delegation after parent revocation/exhaustion | refused typed, carrying the parent's RV tri-state; after partial exhaustion only if parent-remaining ≥ child ask | delegation from dead/exhausted authority |
+| DG-3 | parent revocation while child UNKNOWN or `Settling` | RV-2/3 composed through the chain: child Unknown resolves by EVIDENCE (historically-qualified-before-reduction stands); child Settling runs to evidence; NO new child work; propagation terminates all descendants' future authority without rewriting settled evidence | revocation cascading as history rewrite; or failing to propagate |
+| DG-4 | child newer-manifest trap | (DG-1e's head-on case) child binding a manifest newer than the parent's → typed refusal naming the axis | capability refresh through delegation |
+| DG-5a | chain laundering A→B→C | C's effective authority = A ∩ B ∩ C computed from the SIGNED ANCESTRY at verification — a chain locally lawful at each hop but escaping the root (B re-declares broader than A gave, C narrows from B's inflation) FAILS against A | hop-local checks accepting a composed escape |
+| DG-5b | no budget reset at hops | cumulative consumption across the chain counts against the ROOT ceiling — B's spending never "refreshes" on delegating to C | refresh at hop |
+| DG-5c | no expiry reset | C's effective expiry = chain-min | expiry extension through hops |
+| DG-5d | revoking B mid-chain | B→C future authority terminates; C's already-qualified historical evidence survives byte-exact | C's settled history rewritten by B's revocation |
+| DG-6 | cross-rail delegation | an EVM-authorized parent cannot manufacture LN child authority (nor vice versa) merely because the unified trait supports both — rail is within the parent's authorized set (DG-1c specialized); negative control: a rail-widening child construction DETECTED | rail widening through the unified trait |
+| DG-7 | ancestry without an identity graph (R4) | verifying lineage requires ONLY the authorization-id chain — zero agent-identity data; receipts/logs carry no joinable persona graph across rails or hops (door law-6 hygiene at every level) | delegation becoming a wallet-global identity graph |
+| DG-8 | recovery laws continue | crash/restart: child obligations recover under their own AB/RB laws — evidence resolves already-open child obligations; recovery NEVER mints replacement child authority (the journal cannot fabricate a delegation event — DG-0's signed ancestry); Unknown child + revoked parent → RV-2 applies through the chain | recovery minting child authority |
+| DG-9 | tri-state preserved through delegation | every child-leg outcome distinguishes never-authorized (broken chain/signature) / authorized-then-reduced (self or ancestor revoked) / historically-qualified-before-reduction (evidence stands) — three fixtures × chain shape | any collapse between the three |
+| DG-10 | negative controls | amplification on ANY axis detected; hop-local-lawful chain-unlawful detected (the laundering detector); budget/expiry reset detected; rail-widening detected; identity-graph leakage detected | harness blind on any axis |
+
+**RED expectations:** no signed child-authorization with cryptographic ancestry exists in the
+unified types (the capability crate allocates but does not chain signed delegations) — DG-0 is
+the charter RED; DG-5a (chain-intersection verification) and DG-9 follow. **Harness:** the
+AB/RB fixture set extended with a chain builder (root→child→grandchild signers), per-axis
+violation fixtures, rail-pair (EVM root, LN child) — zero network; live NWC `#[ignore]`.
+
+*Twelfth roll, 2026-09-16. **FOUNDER STOP-DIRECTIVE RECORDED: after DG the abstract authority
+model PAUSES** — a builder consumes MP→RB→AB→RV→DG against the actual signed
+authorization/journal types before any further authority specification, or the spec outruns
+the implementation. Single-writer discipline stands. Pipeline law unchanged: builder proves
+RED, fixes GREEN, CI arbitrates; zArcheology designs tests only.*
+
+---
+
+## TWELFTH ROLL — delegated authority (2026-09-16)
+
+*Founder law for this roll, verbatim: "a child authorization may only reduce its parent's
+authority; it may never amplify, reinterpret, refresh, or escape it." Completes the authority
+model: MP/RB/AB/RV govern ONE authorization; DG governs authority that begets narrower
+authority. Estate ancestors: the capability crate's exclusive allocation (UCAN-shaped) and the
+corpus Capability law — "a parent capability can allocate a budget to child capabilities only
+through an exclusive reservation/state update. Each child does not inherit the full unspent
+parent budget" (SILENTPAY-V2 §5); "Delegation allocates rather than duplicates budgets"
+(corpus AGENTS.md). RV's tri-state is PRESERVED THROUGHOUT: never-authorized /
+authorized-but-later-reduced / historically-qualified-before-reduction stay distinct at every
+hop — collapsing them recreates exactly the history-rewriting RV eliminated.*
+
+### SPEC DG — the child is the intersection, never an extension (RED-first)
+
+| # | case | exact pass criterion | fail criterion |
+|---|---|---|---|
+| DG-0 | the delegation object (mechanism) | a child authorization is ITSELF a full AB-law signed authorization PLUS a cryptographic ancestry chain: the child's signature covers its own AB binding AND the parent authorization id + lineage proof; append-only; the parent's record byte-identical on delegation | in-place parent mutation; unsigned ancestry |
+| DG-1a | amount/fee ceilings | child ceiling <= parent REMAINING (exclusive reservation — allocation, not duplication); sum of children <= parent total | child exceeding, or siblings double-allocating |
+| DG-1b | expiry | child expiry <= parent expiry, always | child outliving parent |
+| DG-1c | rail capabilities | child's demanded capability set is a SUBSET of the parent's authorized set | child demanding what the parent lacks |
+| DG-1d | destinations/actions | child's allowed set is a subset of the parent's | widening |
+| DG-1e | implementation binding | child's manifest hash+version+impl identity EQUALS the parent's — a child CANNOT re-bind a newer manifest (RB/AB composed); the only road to a newer manifest is a new root authorization | child binding h2 under an h1 parent |
+| DG-1f | privacy scope | privacy only STRENGTHENS downward: a child may not weaken below the parent's privacy floor (a private parent cannot delegate a public child; public-to-private is lawful reduction) | privacy downgrade through delegation |
+| DG-2 | delegation after parent revocation/exhaustion | refused typed, carrying the parent's RV tri-state; after partial exhaustion only if parent-remaining covers the child ask | delegation from dead or exhausted authority |
+| DG-3 | parent revocation while child UNKNOWN or Settling | RV-2/3 composed through the chain: child Unknown resolves by EVIDENCE (historically-qualified-before-reduction stands); child Settling runs to evidence; NO new child work; propagation terminates all descendants' future authority without rewriting settled evidence | revocation cascading as history rewrite; or failing to propagate |
+| DG-4 | child newer-manifest trap | DG-1e head-on: child binding a manifest newer than the parent's is a typed refusal naming the axis | capability refresh through delegation |
+| DG-5a | chain laundering A->B->C | C's effective authority = A INTERSECT B INTERSECT C, computed from the SIGNED ANCESTRY at verification — a chain locally lawful at each hop but escaping the root (B re-declares broader than A gave, C narrows from B's inflation) FAILS against A | hop-local checks accepting a composed escape |
+| DG-5b | no budget reset at hops | cumulative consumption across the chain counts against the ROOT ceiling — B's spending never refreshes on delegating to C | refresh at hop |
+| DG-5c | no expiry reset | C's effective expiry = chain-minimum | expiry extension through hops |
+| DG-5d | revoking B mid-chain | B->C future authority terminates; C's already-qualified historical evidence survives byte-exact | C's settled history rewritten by B's revocation |
+| DG-6 | cross-rail delegation | an EVM-authorized parent cannot manufacture LN child authority (nor vice versa) merely because the unified trait supports both — the child's rail must sit inside the parent's authorized rail set; negative control: a rail-widening child construction DETECTED | rail widening through the unified trait |
+| DG-7 | ancestry without an identity graph (R4) | verifying lineage requires ONLY the authorization-id chain — zero agent-identity data; receipts/logs carry no joinable persona graph across rails or hops (door law-6 hygiene at every level) | delegation becoming a wallet-global identity graph |
+| DG-8 | recovery laws continue | crash/restart: child obligations recover under their own AB/RB laws — evidence resolves already-open child obligations; recovery NEVER mints replacement child authority (the journal cannot fabricate a delegation event — DG-0's signed ancestry); Unknown child + revoked parent -> RV-2 applies through the chain | recovery minting child authority |
+| DG-9 | tri-state preserved through delegation | every child-leg outcome distinguishes never-authorized (broken chain/signature) / authorized-then-reduced (self or ancestor revoked) / historically-qualified-before-reduction (evidence stands) — three fixtures across chain shapes | any collapse between the three |
+| DG-10 | negative controls | amplification on ANY axis detected; hop-local-lawful chain-unlawful detected (the laundering detector); budget/expiry reset detected; rail-widening detected; identity-graph leakage detected | harness blind on any axis |
+
+**RED expectations:** no signed child-authorization with cryptographic ancestry exists in the
+unified types (the capability crate allocates but does not chain signed delegations) — DG-0 is
+the charter RED; DG-5a (chain-intersection verification) and DG-9 follow. **Harness:** the
+AB/RB fixture set extended with a chain builder (root/child/grandchild signers), per-axis
+violation fixtures, rail pair (EVM root, LN child) — zero network; live NWC stays ignored and
+env-gated.
+
+*Twelfth roll, 2026-09-16. FOUNDER STOP-DIRECTIVE RECORDED: after DG the abstract authority
+model PAUSES — a builder consumes MP/RB/AB/RV/DG against the actual signed authorization and
+journal types before any further authority specification, or the spec outruns the
+implementation. Single-writer discipline stands. Pipeline law unchanged: builder proves RED,
+fixes GREEN, CI arbitrates; zArcheology designs tests only.*
+
+---
+
+## IMPLEMENTATION FEEDBACK @ 69c55be6 — MP/RB/AB reconciled against the implementation (2026-09-16; the promised return-trigger pass)
+
+*Method: source-read of `crates/bpay-rail/src/capability.rs` + `tests/capability_binding.rs` at
+`69c55be6` (9 named `#[test]` attacks + positive control — count verified in source), CI receipt
+run `35158917693` (tests, success, 6m07s, branch `codex/z2b-bpay-rail`). Classifications per
+founder taxonomy: CONFIRMED / WRONG / UNDERSPECIFIED / IMPLEMENTATION-CHOICE.*
+
+| inspected assumption | verdict | evidence |
+|---|---|---|
+| canonical manifest serialization + domain separation | **UNDERSPECIFIED — genuine gap, amend before RV** (F1 below) | `SignedAuthorization::canonical_bytes` = `auth_id ‖ per-leg (leg_id ‖ 0x00 ‖ manifest_hash ‖ 0x00 ‖ manifest_version ‖ 0x00 ‖ implementation_id)` — NO type/domain tag, and the SAME k256 BIP-340 key path signs nostr events for the NWC adapter |
+| canonical-form uniqueness (AB-7) | **UNDERSPECIFIED — genuine gap, amend before RV** (F2 below) | NUL-separator concatenation with NO length prefixes: fields containing 0x00 bytes can collide (leg_id/hash/version/impl are unconstrained Strings) — two DISTINCT bindings can serialize to IDENTICAL bytes |
+| content-hash vs version semantics | **CONFIRMED** | `content_hash() = keccak256(canonical_bytes)`; version explicitly "metadata — informational only" (capability.rs:142-145,163) |
+| implementation identity inside the signed commitment | **CONFIRMED** | `implementation_id` in BOTH the hashed manifest and the signed `LegBinding` (double-covered) |
+| per-leg, not plan-global, bindings | **CONFIRMED** | each leg binds its own manifest; attacks 3/8 green |
+| durable snapshot requirements | **CONFIRMED** | `JournalAuthRecord` preserves bindings + manifest snapshots; `bound_manifest()` resolves per-leg (capability.rs:318) |
+| evidence evaluated under the HISTORICAL bound manifest | **CONFIRMED** | `validate_evidence_under_binding()` (capability.rs:345); attacks 4/5 green (RB-2 named) |
+| replacement preserving the original binding | **CONFIRMED** | attack 7 green |
+| legitimate mixed-version plans | **CONFIRMED** | attack 8 green — mixed h1/h2 coexist, cross-verification fails |
+| crash/restart without consulting the live manifest | **CONFIRMED** | attack 6 — recovered binding byte-equal under drifted live manifest |
+| manifest axes set | **IMPLEMENTATION-CHOICE** (consistent with spec lineage) | axes = schema_version, rail, implementation_id, payment Exact/Upto, hold_mpp, replacement, response_read, finality InstantPreimage/ReorgDepth(N), failure_fees, send_enabled — CD's six axes + the sixth roll's response_read/send_enabled + LU-5's hold_mpp, as named enums |
+| signer = the NWC adapter's k256 BIP-340 path | **IMPLEMENTATION-CHOICE** (satisfies "no bespoke verifier") — but it is WHY F1 is urgent | same machinery as nostr event signing |
+| signed-object scope | **UNDERSPECIFIED for DG** (not needed by MP/RB/AB; required by DG) | the preimage carries capability IDENTITY only — no amounts/ceilings, no expiry, no destinations, no privacy floor |
+
+**F1 — domain tag amendment (AB-0/AB-7):** a stable type/domain tag belongs INSIDE the signed
+preimage before any further signed object types arrive: e.g. the fixed prefix
+`"bpay/authz/v1"` (and later `"bpay/revocation/v1"`, `"bpay/delegation/v1"`), so a capability
+authorization can never verify as — or be constructed from — a nostr event or any other estate
+signed object with compatible fields. Schema evolution rides the tag version, per Art. VI.
+
+**F2 — canonical encoding amendment (AB-7):** replace bare NUL-separator concatenation with
+length-prefixed fields (or constrain alphabets and enforce at construction) so distinct
+bindings cannot serialize identically; pin with cross-implementation vectors per the corpus
+fixture law.
+
+### RV/DG READINESS VERDICT
+
+- **RV: READY — after F1+F2 land (small, prelude-sized).** The concrete revocable types exist:
+  `SignedAuthorization {auth_id, leg_bindings, signature, signer_pubkey}` (the revocation event
+  binds `auth_id`, append-only), `JournalAuthRecord` (snapshots preserved, never synthesized),
+  and the `RailLedger` state machine (Unknown/Settling laws already R11-pinned). RV needs NO
+  new signed fields.
+- **DG: NOT READY.** DG-1's intersection needs a SIGNED PARENT SCOPE — child ceiling, expiry,
+  destinations, privacy floor must be inside the parent's signed bytes before any child can be
+  their intersection. Today's preimage carries capability identity only; DG would intersect
+  nothing. Builder order: F1+F2 → RV + full restart/recovery battery → scope-field extension →
+  DG + full ancestry/intersection battery → the lifecycle trace
+  (H1 signed → child reserved → UNKNOWN → parent revoked → evidence resolves the qualified
+  child → future refused → restart → identical history).
+
+*Feedback pass, 2026-09-16. Amendment-only as ordered — no new authority family. The freeze
+holds after this section; the builder consumes the verdict.*
+
+---
+
+## FEEDBACK CORRECTION + R20 CHARTER (founder reconciliation of the two reports, 2026-09-16)
+
+*The return report's "RV: READY" was overcalled — corrected at founder order, verified at
+source this pass: attack_6's "crash/restart" is an in-memory `auth.clone()` whose comment
+CLAIMS durability ("the binding is in the durable record, not in adapter memory") while
+performing zero disk I/O; the capability binding is not yet wired through the real RailLedger
+lifecycle. Declaring RV ready because the structs happen to exist was the exact trap.*
+
+**Corrected verdicts (supersede the readiness block above):**
+- **R19 cryptographic binding: GREEN** with F1/F2 defects identified.
+- **R19 durable historical binding: NOT YET PROVEN.**
+- **RV: specified and type-ready; implementation GATED BY R20.**
+- **DG: additionally blocked on signed scope fields.**
+
+**The authority chain now reads: R19 signed semantics proven -> R20 historical semantics
+proven -> only then RV: reduction.**
+
+### R20 BUILD CHARTER (builder; then STOP again — NO RV or DG in this build)
+
+- **F1:** domain-separated signed preimage (e.g. `bpay/authz/v1`). Founder nuance recorded:
+  not because BIP-340 and nostr signatures are interchangeable (they sign different message
+  constructions already) — the tag exists because OUR VERIFIER needs an unambiguous statement
+  of what kind and version of object the bytes represent; the tag makes that invariant
+  structural and future-proof.
+- **F2:** unambiguous canonical encoding — explicit length-prefixing preferred; byte-level
+  golden vectors pinned; ADVERSARIAL NUL-containing fields proving two distinct objects
+  cannot share a preimage.
+- **DURABILITY:** persist the EXACT signed authorization bytes, signature, manifest snapshot,
+  binding, hash, and implementation identity. Drop all process objects; reopen through a
+  fresh FILE-BACKED instance. Historical bytes — not reconstruction under current code — are
+  authoritative.
+- **LIFECYCLE:** wire the historical binding into the actual `RailLedger`; execute one real
+  golden trace: `H1 signed -> opened -> Unknown -> disk -> process state discarded -> H2
+  becomes live -> fresh reopen -> H2-only evidence REFUSED -> H1-valid evidence settles the
+  same PaymentHash -> a genuinely new authorization binds H2`. Add torn/cross-paired disk
+  cases and prove fail-closed behavior BEFORE execution.
+- **The ACTUAL production authorization organ:** use it. If it is not bsigner, NAME what it is
+  and why — do not blur "shared k256" into "bsigner."
+- **Preserve:** R18, LT-0, `MilliSatoshi`, `Paid(0) != AbsentBounded`, full NIP-44
+  conformance, live sends OFF.
+
+### DG DIRECTION (recorded, not built)
+
+Do NOT bolt delegation fields onto `LegBinding` merely because DG needs them. First define the
+signed **AUTHORITY SCOPE** as a coherent object — ceilings, expiry, permitted
+destinations/rails, privacy floor, and whatever other ALREADY-RATIFIED dimensions constrain
+authority — then attack that object independently (a future spec roll's target) before
+delegation computes intersections over it.
+
+*Correction pass, 2026-09-16. The authority-spec writer re-freezes here; the vending lane
+(ADVERSARIAL-VENDING-SPECS.md) remains this seat's active attack domain until the next return
+trigger (R20's report).*
