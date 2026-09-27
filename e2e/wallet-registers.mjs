@@ -877,12 +877,12 @@ ok('on a phone the first screen holds a different KIND of thing: bee choices, ra
 
 // 4h · THE bPAY LAW LINE FOLLOWS ITS ENGLISH: the English says "the chooser comes first";
 // every tongue once still said "Phase A", a label the page no longer carries. No cell may
-// keep a standalone Latin "A" (the phase letter in every script), and none may fall back
+// keep a standalone capital A, Latin or Cyrillic (the phase letter in every script), and none may fall back
 // to the English.
 {
   const corpus = JSON.parse(await readFile(join(SURFACES, 'lang-corpus.json'), 'utf8'));
   const row = corpus.strings['wl.bpay.law'];
-  const stale = Object.entries(row).filter(([l, v]) => l !== 'en' && (/(^|[^\p{L}])A([^\p{L}]|$)/u.test(v) || v === row.en)).map(([l]) => l);
+  const stale = Object.entries(row).filter(([l, v]) => l !== 'en' && (/(^|[^\p{L}])[AА]([^\p{L}]|$)/u.test(v) || v === row.en)).map(([l]) => l);
   ok('the bPay law line follows its English in every tongue: no stale "Phase A" label, no English fallback', Object.keys(row).length === 29 && stale.length === 0, stale.join(' ') || `${Object.keys(row).length} cells`);
 }
 

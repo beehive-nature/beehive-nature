@@ -352,7 +352,9 @@ The English of `wl.bpay.law` changed to "the chooser comes first: every figure i
   - nb had the wrong gender ("en … nettverkstilbud") and the spelling "nøkkeløs".
   - tt rendered "live" as a word that does not mean live, and put "only" in the wrong place.
   - gd used "panuel"; it now uses "panail", the corpus's most common form.
-- **Gate §4h (new).** It is a corpus check in `wallet-registers`. No `wl.bpay.law` cell may carry a standalone Latin "A" (the phase letter, in every script), and no cell may fall back to the English. Run against main it fails in all 28 tongues, so it is not vacuous.
+  - th rendered "live" as จริง ("real"); it now says เรียลไทม์.
+  - Smaller improvements in the same cells: ur spelling (لائیو), ru/uk now name the price quote (цены/ціни), zh 显示 instead of 渲染 ("render" in the graphics sense), de "zeigt nur an".
+- **Gate §4h (new).** It is a corpus check in `wallet-registers`. No `wl.bpay.law` cell may carry a standalone capital A, Latin or Cyrillic (the phase letter, in every script), and no cell may fall back to the English. Run against main it fails in all 28 tongues, so it is not vacuous.
 - **Corpus cache key** `lang-corpus.json?v=28 → v=29` in `surfaces/lang.js`. #252 and #254 changed the corpus without bumping it, so this bump also carries their cells to returning readers.
 
 **Carried from the #254 review (non-blocking, open and named):**
@@ -360,3 +362,9 @@ The English of `wl.bpay.law` changed to "the chooser comes first: every figure i
 - §4g only sees ASCII capitals, and only in English. A Cyrillic or accented shout in another tongue would pass it; the reviewer's corpus scan covers that gap for now.
 - lv `wl.h.summary` "kopsavējums" may be a mistranslation. The usual Latvian word is "kopsavilkums". It was unchanged apart from casing, and it wants a native check.
 - fr still uses a plain space before ":" (cosmetic, already named in §15).
+
+**Named by the #255 review (non-blocking, open):**
+- An unrelated cs cell elsewhere reads "Pole z živého ABI registru"; Czech wants "ze živého". This follow-up does not touch it.
+- da "levende" and fi "elävä" read as "living" rather than "live". The same choice runs through the rest of the corpus.
+- hi चुनाव, fa انتخاب, tr seçim, tt сайлау and hu választás can also mean "election". In context they are fine.
+- §4h catches a Latin or Cyrillic capital A and an exact English fallback. It would miss a phase label written another way (阶段一, a bare "Phase").
