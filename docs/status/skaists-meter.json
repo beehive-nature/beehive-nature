@@ -1,0 +1,26 @@
+{
+ "name": "skaists-meter",
+ "label": "skaists meter",
+ "instrument": "e2e/skaists-conformance.mjs",
+ "ci_step": "Skaists — the standards meter (three-UI fronts score 100%)",
+ "revision": "7d6808d87c6b78343e2471aa38581146f5aa6c03",
+ "surfaces": 107,
+ "fronts": 321,
+ "fronts_at_100": 321,
+ "min_score": 100,
+ "kind_min": {
+  "COLOUR": 100,
+  "TYPE": 100,
+  "RADIUS": 100,
+  "TARGET": 100,
+  "CONTRAST": 100,
+  "CASE": 100
+ },
+ "message": "321/321 fronts 100% @7d6808d",
+ "color": "brightgreen",
+ "measured_at": "2026-09-27T05:13:54.466Z",
+ "source_blob": "d9b3b654109cfb8e69b6b42893cccca90f8f4e23",
+ "renderer": "badge-maker 5.0.2",
+ "signature": null,
+ "law": "derived, not typed; bound to a revision; re-rendered and diffed in CI; unsigned until signed"
+}

@@ -9,6 +9,7 @@
 [![tests](https://github.com/beehive-nature/beehive-nature/actions/workflows/tests.yml/badge.svg)](https://github.com/beehive-nature/beehive-nature/actions/workflows/tests.yml)
 [![secret-scan](https://github.com/beehive-nature/beehive-nature/actions/workflows/secret-scan.yml/badge.svg)](https://github.com/beehive-nature/beehive-nature/actions/workflows/secret-scan.yml)
 [![license: AGPL-3.0-only](https://img.shields.io/badge/license-AGPL--3.0--only-blue)](./LICENSE)
+[![skaists meter](docs/status/skaists-meter.svg)](docs/status/skaists-meter.json)
 
 It lets two strangers complete a trade without trusting each other or a
 middleman: the payment waits in a Zano escrow that only a **Trezor** can
