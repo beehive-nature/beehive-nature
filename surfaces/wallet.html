@@ -1341,7 +1341,7 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
   that ledger via the estate oracle; the box owns the writes.</p>
 
   <div class="row" style="align-items:center;flex-wrap:wrap">
-    <input id="vc-key" placeholder="your meter key — e.g. bclau-paid-1" spellcheck="false" autocomplete="off" style="flex:2;min-width:200px">
+    <input id="vc-key" placeholder="your meter key, e.g. bclau-paid-1" spellcheck="false" autocomplete="off" style="flex:2;min-width:200px">
     <button id="vc-go" class="gold" style="min-height:40px">look up</button>
     <span style="font-size:10.5px;color:var(--faint)" id="vc-src" data-wl-tech></span>
   </div>
@@ -1356,23 +1356,23 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
     <!-- 2 · TOP UP, told exactly how -->
     <div class="row" style="margin-top:10px;flex-wrap:wrap">
       <div style="flex:1;min-width:230px;border:1px solid var(--line);border-radius:9px;padding:10px">
-        <div style="font-size:11px;color:var(--cyan)" data-i18n="wl.vc.label.a">A · Vaulta — gasless</div>
+        <div style="font-size:11px;color:var(--cyan)" data-i18n="wl.vc.label.a">A · Vaulta · gasless</div>
         <div class="law" style="margin-top:4px" data-i18n="wl.vc.a.send">send any amount of A to:</div>
         <div class="row" style="gap:6px"><code id="vc-a-dest" style="flex:1;word-break:break-all">—</code>
           <button class="gold vc-copy" style="min-height:32px;font-size:10px" data-copy="">copy</button></div>
-        <div class="law" id="vc-memo-law" style="margin-top:6px"><span data-i18n="wl.vc.memo1">with this EXACT memo (the memo IS the binding —</span>
+        <div class="law" id="vc-memo-law" style="margin-top:6px"><span data-i18n="wl.vc.memo1">with this exact memo (the memo is the binding:</span>
         <b style="color:var(--amber)"><span data-i18n="wl.vc.memo2">no memo, no credit, money lost</span></b><span data-i18n="wl.vc.memo3">):</span></div>
         <div class="row" style="gap:6px"><code id="vc-a-memo" style="flex:1;word-break:break-all;color:var(--ink)">—</code>
           <button class="gold vc-copy" style="min-height:32px;font-size:10px" data-copy="">copy memo</button></div>
       </div>
       <div style="flex:1;min-width:230px;border:1px solid var(--line);border-radius:9px;padding:10px">
-        <div style="font-size:11px;color:var(--cyan)" data-i18n="wl.vc.label.usdc">USDC · Base — tiny gas</div>
+        <div style="font-size:11px;color:var(--cyan)" data-i18n="wl.vc.label.usdc">USDC · Base · tiny gas</div>
         <div class="law" style="margin-top:4px" data-i18n="wl.vc.usdc.send">send USDC (Base) to:</div>
         <div class="row" style="gap:6px"><code id="vc-u-dest" style="flex:1;word-break:break-all">—</code>
           <button class="gold vc-copy" style="min-height:32px;font-size:10px" data-copy="">copy</button></div>
         <div class="law" id="vc-u-rate" style="margin-top:6px" data-i18n="wl.vc.usdc.rate">credited at — A per USDC (rate cited below)</div>
         <div class="law" id="vc-u-ref" style="color:var(--faint)" data-wl-tech>rate: —</div>
-        <div class="law" style="margin-top:4px;color:var(--faint)" data-i18n="wl.vc.usdc.nomemo">no memo needed on this rail — your bound address credits you</div>
+        <div class="law" style="margin-top:4px;color:var(--faint)" data-i18n="wl.vc.usdc.nomemo">no memo needed on this rail: your bound address credits you</div>
       </div>
     </div>
     <!-- 3 · SEE WHAT I SPENT — aggregate first, itemized one click down -->
@@ -1383,7 +1383,7 @@ window.wlSay=function(el,parts){if(!el)return;el.textContent='';parts.forEach(fu
         <span>tithe in there: <b id="vc-tithe" style="color:var(--ink)">0.0000 A</b> <span data-i18n="wl.vc.tithe.note">(the estate's 10%, shown never buried)</span></span>
       </div>
       <details style="margin-top:8px">
-        <summary style="cursor:pointer;font-size:11px;color:var(--cyan)" data-i18n="wl.vc.itemized">itemized — every receipt, every line</summary>
+        <summary style="cursor:pointer;font-size:11px;color:var(--cyan)" data-i18n="wl.vc.itemized">itemized: every receipt, every line</summary>
         <div id="vc-receipts" class="law" style="margin-top:6px">—</div>
       </details>
     </div>
@@ -4528,7 +4528,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
         $v('vc-a-dest').textContent = a.send_to || '—';
         $v('vc-a-memo').textContent = a.memo || key;
         $v('vc-u-dest').textContent = u.send_to || '—';
-        $v('vc-u-rate').textContent = 'credited at ' + u.rate_a_per_usdc + ' A per USDC — stated before you send';
+        $v('vc-u-rate').textContent = 'credited at ' + u.rate_a_per_usdc + ' A per USDC, stated before you send';
         $v('vc-u-ref').textContent = 'rate: ' + u.rate_ref;
         $v('vc-spent').textContent = d.spent_total + ' A';
         $v('vc-dep').textContent = d.deposited_total + ' A';
@@ -4545,13 +4545,13 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
                 '<td style="padding:3px 0;text-align:right;color:var(--ink)"><b>' + esc(li.charged) + ' A</b>' +
                 (t ? ' (the tithe)' : '') + '</td></tr>';
             }).join('') + '</table></div>';
-        }).join('') : '<div style="color:var(--faint)">no metered charges yet — top up and the first receipt lands here</div>';
+        }).join('') : '<div style="color:var(--faint)">no metered charges yet: top up and the first receipt lands here</div>';
         $v('vc-panel').style.display = 'block';
         $v('vc-src').textContent = 'source: ' + d.source;
         try { localStorage.setItem('bnr-vc-key', key) } catch(e) {}
       } catch(e) {
         $v('vc-src').textContent = '';
-        err('the estate oracle is unreachable right now — nothing is wrong with your voucher, try again in a moment');
+        err('the estate oracle is unreachable right now: nothing is wrong with your voucher, try again in a moment');
       }
     }
     $v('vc-go').onclick = function(){ var k = $v('vc-key').value.trim();
@@ -4578,7 +4578,7 @@ referralFees:  [ { recipient: 0x8fD7252A29FB759755E30A15E966932EaAD91b75,
         var d = await r.json();
         out.textContent = d.message || '—';
         out.style.color = d.ok ? 'var(--leaf)' : 'var(--amber)';
-      } catch(e) { out.textContent = 'the oracle is unreachable — try again in a moment'; out.style.color = 'var(--amber)' }
+      } catch(e) { out.textContent = 'the oracle is unreachable right now, try again in a moment'; out.style.color = 'var(--amber)' }
     };
     try { var saved = localStorage.getItem('bnr-vc-key');
       if (saved) { $v('vc-key').value = saved; load(saved) } } catch(e) {}
